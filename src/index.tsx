@@ -135,6 +135,7 @@ function MainApp() {
 
       {/* Hidden page templates */}
       <div id="page-templates" style="display:none">
+        <div id="tpl-dashboard"><DashboardPage /></div>
         <div id="tpl-clients"><ClientsPage /></div>
         <div id="tpl-policies"><PoliciesPage /></div>
         <div id="tpl-ai-agents"><AIAgentsPage /></div>
@@ -261,11 +262,12 @@ function TopBar() {
 function DashboardPage() {
   return (
     <div class="page dashboard-page">
+
       {/* Welcome Banner */}
       <div class="welcome-banner">
         <div class="welcome-text">
           <h2>Good morning, Sridhar! 👋</h2>
-          <p>You have <strong>18 pending actions</strong> and <strong>3 urgent items</strong> requiring attention today.</p>
+          <p>You have <strong>18 pending actions</strong> and <strong>3 urgent items</strong> requiring attention today. · <span class="date-chip">Friday, April 10, 2026</span></p>
         </div>
         <div class="welcome-actions">
           <button class="btn btn-primary" onclick="navigateTo('ai-agents')">
@@ -279,7 +281,7 @@ function DashboardPage() {
 
       {/* KPI Cards */}
       <div class="kpi-grid">
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="navigateTo('clients')" style="cursor:pointer">
           <div class="kpi-icon blue"><i class="fas fa-users"></i></div>
           <div class="kpi-data">
             <div class="kpi-value">247</div>
@@ -287,7 +289,7 @@ function DashboardPage() {
             <div class="kpi-trend up"><i class="fas fa-arrow-up"></i> +8 this month</div>
           </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="navigateTo('policies')" style="cursor:pointer">
           <div class="kpi-icon green"><i class="fas fa-file-contract"></i></div>
           <div class="kpi-data">
             <div class="kpi-value">1,842</div>
@@ -295,7 +297,7 @@ function DashboardPage() {
             <div class="kpi-trend up"><i class="fas fa-arrow-up"></i> +34 this month</div>
           </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="navigateTo('reports')" style="cursor:pointer">
           <div class="kpi-icon gold"><i class="fas fa-dollar-sign"></i></div>
           <div class="kpi-data">
             <div class="kpi-value">$487K</div>
@@ -303,7 +305,7 @@ function DashboardPage() {
             <div class="kpi-trend up"><i class="fas fa-arrow-up"></i> +12% MoM</div>
           </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="navigateTo('policies')" style="cursor:pointer">
           <div class="kpi-icon orange"><i class="fas fa-sync-alt"></i></div>
           <div class="kpi-data">
             <div class="kpi-value">23</div>
@@ -311,7 +313,7 @@ function DashboardPage() {
             <div class="kpi-trend warning"><i class="fas fa-exclamation-circle"></i> 5 urgent</div>
           </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="navigateTo('policies')" style="cursor:pointer">
           <div class="kpi-icon red"><i class="fas fa-clipboard-list"></i></div>
           <div class="kpi-data">
             <div class="kpi-value">7</div>
@@ -319,7 +321,7 @@ function DashboardPage() {
             <div class="kpi-trend neutral"><i class="fas fa-minus"></i> Avg 5-day resolution</div>
           </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="navigateTo('reports')" style="cursor:pointer">
           <div class="kpi-icon purple"><i class="fas fa-star"></i></div>
           <div class="kpi-data">
             <div class="kpi-value">94%</div>
@@ -329,9 +331,8 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Main Content Grid */}
+      {/* Row 1: Revenue Chart + Action Items */}
       <div class="dashboard-grid">
-        {/* Sales Performance Chart */}
         <div class="dash-card chart-card">
           <div class="card-header">
             <h3><i class="fas fa-chart-line"></i> Premium Revenue — 2026</h3>
@@ -345,7 +346,6 @@ function DashboardPage() {
           </div>
         </div>
 
-        {/* Activity Feed */}
         <div class="dash-card activity-card">
           <div class="card-header">
             <h3><i class="fas fa-bolt"></i> Action Items</h3>
@@ -380,7 +380,7 @@ function DashboardPage() {
               <div class="act-icon"><i class="fas fa-robot"></i></div>
               <div class="act-content">
                 <div class="act-title">AI Opportunity — Patricia Nguyen</div>
-                <div class="act-desc">Annuity upsell opportunity — $3,000 potential premium</div>
+                <div class="act-desc">Annuity upsell — $3,000 potential premium</div>
               </div>
               <span class="act-badge ai">AI Alert</span>
             </div>
@@ -396,12 +396,185 @@ function DashboardPage() {
               <div class="act-icon"><i class="fas fa-exclamation-circle"></i></div>
               <div class="act-content">
                 <div class="act-title">Estate Planning Alert — James Whitfield</div>
-                <div class="act-desc">AI detected estate planning review opportunity</div>
+                <div class="act-desc">AI detected estate planning opportunity</div>
               </div>
               <span class="act-badge ai">AI Insight</span>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Row 2: Goal Tracker + Commission Tracker + Lapse Risk */}
+      <div class="dash-row-3">
+
+        {/* Monthly Goal Tracker */}
+        <div class="dash-card goal-card">
+          <div class="card-header">
+            <h3><i class="fas fa-bullseye"></i> Monthly Goals — April 2026</h3>
+            <span class="goal-days-left">21 days left</span>
+          </div>
+          <div class="goal-list">
+            <div class="goal-item">
+              <div class="goal-meta">
+                <span class="goal-name">New Policies</span>
+                <span class="goal-val">34 <span class="goal-target">/ 45</span></span>
+              </div>
+              <div class="goal-bar-outer">
+                <div class="goal-bar-inner" style="width:75.5%"></div>
+              </div>
+              <div class="goal-footer"><span class="goal-pct">75%</span><span class="goal-gap">11 more needed</span></div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-meta">
+                <span class="goal-name">New Premium ($K)</span>
+                <span class="goal-val">$487K <span class="goal-target">/ $550K</span></span>
+              </div>
+              <div class="goal-bar-outer">
+                <div class="goal-bar-inner green" style="width:88.5%"></div>
+              </div>
+              <div class="goal-footer"><span class="goal-pct">88%</span><span class="goal-gap">$63K more needed</span></div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-meta">
+                <span class="goal-name">Client Retention</span>
+                <span class="goal-val">96% <span class="goal-target">/ 95%</span></span>
+              </div>
+              <div class="goal-bar-outer">
+                <div class="goal-bar-inner gold" style="width:100%"></div>
+              </div>
+              <div class="goal-footer"><span class="goal-pct achieved">✓ Goal Met!</span><span class="goal-gap">+1% above target</span></div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-meta">
+                <span class="goal-name">Cross-Sell Ratio</span>
+                <span class="goal-val">1.8 <span class="goal-target">/ 2.5</span></span>
+              </div>
+              <div class="goal-bar-outer">
+                <div class="goal-bar-inner orange" style="width:72%"></div>
+              </div>
+              <div class="goal-footer"><span class="goal-pct">72%</span><span class="goal-gap">0.7 avg products gap</span></div>
+            </div>
+            <div class="goal-item">
+              <div class="goal-meta">
+                <span class="goal-name">Renewals Completed</span>
+                <span class="goal-val">18 <span class="goal-target">/ 23</span></span>
+              </div>
+              <div class="goal-bar-outer">
+                <div class="goal-bar-inner purple" style="width:78%"></div>
+              </div>
+              <div class="goal-footer"><span class="goal-pct">78%</span><span class="goal-gap">5 renewals pending</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Commission Tracker */}
+        <div class="dash-card commission-card">
+          <div class="card-header">
+            <h3><i class="fas fa-wallet"></i> Commission Tracker</h3>
+            <span class="comm-ytd-badge">YTD 2026</span>
+          </div>
+          <div class="comm-summary">
+            <div class="comm-total">
+              <div class="comm-total-val">$42,180</div>
+              <div class="comm-total-lbl">Earned This Month</div>
+            </div>
+            <div class="comm-breakdown">
+              <div class="comm-row">
+                <span class="comm-type"><i class="fas fa-circle" style="color:#003087"></i> New Business</span>
+                <div class="comm-bar-outer"><div class="comm-bar" style="width:68%;background:#003087"></div></div>
+                <span class="comm-amt">$28,680</span>
+              </div>
+              <div class="comm-row">
+                <span class="comm-type"><i class="fas fa-circle" style="color:#059669"></i> Renewals</span>
+                <div class="comm-bar-outer"><div class="comm-bar" style="width:28%;background:#059669"></div></div>
+                <span class="comm-amt">$11,200</span>
+              </div>
+              <div class="comm-row">
+                <span class="comm-type"><i class="fas fa-circle" style="color:#d97706"></i> Trails / Overrides</span>
+                <div class="comm-bar-outer"><div class="comm-bar" style="width:6%;background:#d97706"></div></div>
+                <span class="comm-amt">$2,300</span>
+              </div>
+            </div>
+          </div>
+          <div class="comm-stats-row">
+            <div class="comm-stat">
+              <div class="cs-num">$187,420</div>
+              <div class="cs-lbl2">YTD Earned</div>
+            </div>
+            <div class="comm-stat">
+              <div class="cs-num">$240,000</div>
+              <div class="cs-lbl2">Annual Target</div>
+            </div>
+            <div class="comm-stat">
+              <div class="cs-num green-text">78%</div>
+              <div class="cs-lbl2">Target Progress</div>
+            </div>
+          </div>
+          <div class="comm-pending">
+            <i class="fas fa-clock"></i> <strong>$6,420 pending</strong> — 3 policies awaiting issuance
+          </div>
+        </div>
+
+        {/* Lapse Risk Monitor */}
+        <div class="dash-card lapse-card">
+          <div class="card-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Lapse Risk Monitor</h3>
+            <button class="btn-link" onclick="navigateTo('ai-agents')">AI Analysis →</button>
+          </div>
+          <div class="lapse-summary-bar">
+            <div class="lapse-seg high-risk">
+              <span class="lapse-count">4</span>
+              <span class="lapse-lbl">High Risk</span>
+            </div>
+            <div class="lapse-seg med-risk">
+              <span class="lapse-count">11</span>
+              <span class="lapse-lbl">Medium Risk</span>
+            </div>
+            <div class="lapse-seg low-risk">
+              <span class="lapse-count">232</span>
+              <span class="lapse-lbl">Low Risk</span>
+            </div>
+          </div>
+          <div class="lapse-list">
+            <div class="lapse-item high-lapse">
+              <div class="lapse-avatar">SW</div>
+              <div class="lapse-info">
+                <div class="lapse-name">Sandra Williams</div>
+                <div class="lapse-detail">Missed 2 payments · Policy P-100320</div>
+              </div>
+              <div class="lapse-risk-pill high-pill">High</div>
+            </div>
+            <div class="lapse-item high-lapse">
+              <div class="lapse-avatar">KP</div>
+              <div class="lapse-info">
+                <div class="lapse-name">Kevin Park</div>
+                <div class="lapse-detail">No response in 14 days · Pending app</div>
+              </div>
+              <div class="lapse-risk-pill high-pill">High</div>
+            </div>
+            <div class="lapse-item med-lapse">
+              <div class="lapse-avatar">DT</div>
+              <div class="lapse-info">
+                <div class="lapse-name">David Thompson</div>
+                <div class="lapse-detail">Grace period expires in 12 days</div>
+              </div>
+              <div class="lapse-risk-pill med-pill">Medium</div>
+            </div>
+            <div class="lapse-item med-lapse">
+              <div class="lapse-avatar">PN</div>
+              <div class="lapse-info">
+                <div class="lapse-name">Patricia Nguyen</div>
+                <div class="lapse-detail">EFT declined last cycle · Follow up</div>
+              </div>
+              <div class="lapse-risk-pill med-pill">Medium</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Row 3: Top Clients + Upcoming Appointments + Policy Mix */}
+      <div class="dash-row-bottom">
 
         {/* Top Clients */}
         <div class="dash-card clients-card">
@@ -423,36 +596,31 @@ function DashboardPage() {
               <tbody>
                 <tr>
                   <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
-                  <td>5</td>
-                  <td class="premium">$32,000</td>
+                  <td>5</td><td class="premium">$32,000</td>
                   <td><div class="score-bar"><div class="score-fill" style="width:98%"></div><span>98</span></div></td>
                   <td><span class="status-badge active">Active</span></td>
                 </tr>
                 <tr>
                   <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
-                  <td>4</td>
-                  <td class="premium">$21,000</td>
+                  <td>4</td><td class="premium">$21,000</td>
                   <td><div class="score-bar"><div class="score-fill" style="width:96%"></div><span>96</span></div></td>
                   <td><span class="status-badge active">Active</span></td>
                 </tr>
                 <tr>
                   <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
-                  <td>3</td>
-                  <td class="premium">$14,600</td>
+                  <td>3</td><td class="premium">$14,600</td>
                   <td><div class="score-bar"><div class="score-fill" style="width:91%"></div><span>91</span></div></td>
                   <td><span class="status-badge active">Active</span></td>
                 </tr>
                 <tr>
                   <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
-                  <td>3</td>
-                  <td class="premium">$12,400</td>
+                  <td>3</td><td class="premium">$12,400</td>
                   <td><div class="score-bar"><div class="score-fill" style="width:92%"></div><span>92</span></div></td>
                   <td><span class="status-badge active">Active</span></td>
                 </tr>
                 <tr>
                   <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
-                  <td>2</td>
-                  <td class="premium">$8,200</td>
+                  <td>2</td><td class="premium">$8,200</td>
                   <td><div class="score-bar"><div class="score-fill" style="width:71%"></div><span>71</span></div></td>
                   <td><span class="status-badge review">Review</span></td>
                 </tr>
@@ -461,7 +629,88 @@ function DashboardPage() {
           </div>
         </div>
 
-        {/* Product Distribution */}
+        {/* Upcoming Appointments */}
+        <div class="dash-card appt-card">
+          <div class="card-header">
+            <h3><i class="fas fa-calendar-check"></i> Today &amp; Upcoming</h3>
+            <button class="btn-link" onclick="navigateTo('calendar')">Full Calendar →</button>
+          </div>
+          <div class="appt-date-header">Today — April 10, 2026</div>
+          <div class="appt-list">
+            <div class="appt-item appt-now">
+              <div class="appt-time">
+                <span class="appt-hr">10:30</span>
+                <span class="appt-ampm">AM</span>
+              </div>
+              <div class="appt-bar appt-bar-red"></div>
+              <div class="appt-detail">
+                <div class="appt-title">Kevin Park — Urgent Follow-up Call</div>
+                <div class="appt-sub"><i class="fas fa-phone"></i> Phone · 30 min</div>
+              </div>
+              <span class="appt-now-chip">Now</span>
+            </div>
+            <div class="appt-item">
+              <div class="appt-time">
+                <span class="appt-hr">2:00</span>
+                <span class="appt-ampm">PM</span>
+              </div>
+              <div class="appt-bar appt-bar-blue"></div>
+              <div class="appt-detail">
+                <div class="appt-title">Robert Chen — Claim Status Update</div>
+                <div class="appt-sub"><i class="fas fa-video"></i> Video Call · 45 min</div>
+              </div>
+            </div>
+            <div class="appt-item">
+              <div class="appt-time">
+                <span class="appt-hr">4:30</span>
+                <span class="appt-ampm">PM</span>
+              </div>
+              <div class="appt-bar appt-bar-gold"></div>
+              <div class="appt-detail">
+                <div class="appt-title">New Prospect — Alex Rivera Intro</div>
+                <div class="appt-sub"><i class="fas fa-map-marker-alt"></i> In Person · 60 min</div>
+              </div>
+            </div>
+          </div>
+          <div class="appt-date-header" style="margin-top:10px">Upcoming</div>
+          <div class="appt-list">
+            <div class="appt-item">
+              <div class="appt-time">
+                <span class="appt-hr">Apr</span>
+                <span class="appt-ampm">15</span>
+              </div>
+              <div class="appt-bar appt-bar-purple"></div>
+              <div class="appt-detail">
+                <div class="appt-title">Linda Morrison — Annual Policy Review</div>
+                <div class="appt-sub"><i class="fas fa-building"></i> Office · 90 min</div>
+              </div>
+            </div>
+            <div class="appt-item">
+              <div class="appt-time">
+                <span class="appt-hr">Apr</span>
+                <span class="appt-ampm">17</span>
+              </div>
+              <div class="appt-bar appt-bar-green"></div>
+              <div class="appt-detail">
+                <div class="appt-title">New Client Intro — Nancy Foster</div>
+                <div class="appt-sub"><i class="fas fa-phone"></i> Phone · 30 min</div>
+              </div>
+            </div>
+            <div class="appt-item">
+              <div class="appt-time">
+                <span class="appt-hr">Apr</span>
+                <span class="appt-ampm">22</span>
+              </div>
+              <div class="appt-bar appt-bar-blue"></div>
+              <div class="appt-detail">
+                <div class="appt-title">Team Review — Roger Putnam</div>
+                <div class="appt-sub"><i class="fas fa-users"></i> Group · Q1 Results</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Policy Mix donut */}
         <div class="dash-card donut-card">
           <div class="card-header">
             <h3><i class="fas fa-chart-pie"></i> Policy Mix</h3>
@@ -476,7 +725,38 @@ function DashboardPage() {
             <div class="legend-item"><span class="dot purple"></span>VUL 12%</div>
             <div class="legend-item"><span class="dot red"></span>Other 10%</div>
           </div>
+          {/* Recent Comms */}
+          <div class="card-header" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--gray-100)">
+            <h3><i class="fas fa-comments"></i> Recent Communications</h3>
+          </div>
+          <div class="recent-comms">
+            <div class="comm-item">
+              <div class="comm-avatar ca-rc">RC</div>
+              <div class="comm-info">
+                <div class="comm-name">Robert Chen</div>
+                <div class="comm-msg">Re: Claim P-100310 — documents received</div>
+              </div>
+              <div class="comm-meta"><i class="fas fa-envelope"></i> 2h ago</div>
+            </div>
+            <div class="comm-item">
+              <div class="comm-avatar ca-lm">LM</div>
+              <div class="comm-info">
+                <div class="comm-name">Linda Morrison</div>
+                <div class="comm-msg">Confirmed Apr 15 annual review meeting</div>
+              </div>
+              <div class="comm-meta"><i class="fas fa-comment"></i> 5h ago</div>
+            </div>
+            <div class="comm-item">
+              <div class="comm-avatar ca-mg">MG</div>
+              <div class="comm-info">
+                <div class="comm-name">Maria Gonzalez</div>
+                <div class="comm-msg">Interested in estate planning discussion</div>
+              </div>
+              <div class="comm-meta"><i class="fas fa-phone"></i> Yesterday</div>
+            </div>
+          </div>
         </div>
+
       </div>
 
       {/* AI Highlights Banner */}
@@ -484,10 +764,11 @@ function DashboardPage() {
         <div class="ai-banner-icon"><i class="fas fa-robot"></i></div>
         <div class="ai-banner-content">
           <h4>AI Agent has 4 new insights for you</h4>
-          <p>Potential revenue opportunity of $31,200 identified · 3 clients flagged for cross-sell · 1 estate planning alert</p>
+          <p>Potential revenue opportunity of $31,200 identified · 3 clients flagged for cross-sell · 1 estate planning alert · 4 lapse risks detected</p>
         </div>
         <button class="btn btn-white">View AI Insights <i class="fas fa-arrow-right"></i></button>
       </div>
+
     </div>
   )
 }
@@ -1256,21 +1537,27 @@ function ReportsPage() {
               <button class="btn-tiny">All</button>
             </div>
           </div>
-          <canvas id="reportRevenueChart" style="height:280px"></canvas>
+          <div class="report-chart-wrap" style="position:relative;height:260px">
+            <canvas id="reportRevenueChart"></canvas>
+          </div>
         </div>
 
         <div class="report-card">
           <div class="card-header">
             <h3><i class="fas fa-chart-pie"></i> Product Distribution</h3>
           </div>
-          <canvas id="reportProductChart" style="height:220px"></canvas>
+          <div class="report-chart-wrap" style="position:relative;height:200px">
+            <canvas id="reportProductChart"></canvas>
+          </div>
         </div>
 
         <div class="report-card">
           <div class="card-header">
             <h3><i class="fas fa-users"></i> Client Segments</h3>
           </div>
-          <canvas id="reportSegmentChart" style="height:220px"></canvas>
+          <div class="report-chart-wrap" style="position:relative;height:200px">
+            <canvas id="reportSegmentChart"></canvas>
+          </div>
         </div>
 
         <div class="report-card wide-card">

@@ -3,7 +3,11 @@
    ============================================= */
 
 // ---- NAVIGATION ----
+let _currentPage = 'dashboard';
+
 function navigateTo(page) {
+  _currentPage = page;
+
   // Update active nav item
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const matchingNav = [...document.querySelectorAll('.nav-item')].find(el => {
@@ -12,7 +16,7 @@ function navigateTo(page) {
   });
   if (matchingNav) matchingNav.classList.add('active');
 
-  // Update page title
+  // Update page title & breadcrumb
   const titles = {
     dashboard: 'Dashboard',
     clients: 'Client Management',
@@ -35,28 +39,35 @@ function navigateTo(page) {
     calendar: 'Home / Calendar'
   };
 
-  document.getElementById('page-title').textContent = titles[page] || page;
-  document.getElementById('page-breadcrumb').textContent = breadcrumbs[page] || '';
+  const titleEl = document.getElementById('page-title');
+  const bcEl = document.getElementById('page-breadcrumb');
+  if (titleEl) titleEl.textContent = titles[page] || page;
+  if (bcEl) bcEl.textContent = breadcrumbs[page] || '';
 
-  // Load page content
+  // Load page content from template
   const templateId = `tpl-${page}`;
   const tpl = document.getElementById(templateId);
   const content = document.getElementById('page-content');
+  if (!content) return;
 
   if (tpl) {
-    content.innerHTML = tpl.innerHTML;
-    // Re-initialize charts if on specific pages
-    setTimeout(() => {
-      if (page === 'dashboard') initDashboardCharts();
-      if (page === 'reports') initReportCharts();
-    }, 100);
-  } else if (page === 'dashboard') {
-    // Dashboard is the default
-    const dashTpl = document.querySelector('.dashboard-page');
-    if (dashTpl) {
-      content.innerHTML = dashTpl.outerHTML;
+    // Clone the template node (deep clone preserves structure without live bindings)
+    const clone = tpl.cloneNode(true);
+    content.innerHTML = clone.innerHTML;
+
+    // Re-initialize charts after DOM settles
+    if (page === 'dashboard') {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          initDashboardCharts();
+          animateKPICards();
+        }, 80);
+      });
+    } else if (page === 'reports') {
+      requestAnimationFrame(() => {
+        setTimeout(() => initReportCharts(), 80);
+      });
     }
-    setTimeout(() => initDashboardCharts(), 100);
   }
 }
 
@@ -163,7 +174,8 @@ function initDashboardCharts() {
 // ---- REPORT CHARTS ----
 function initReportCharts() {
   const revEl = document.getElementById('reportRevenueChart');
-  if (revEl && !revEl._chartInstance) {
+  if (revEl) {
+    if (revEl._chartInstance) { revEl._chartInstance.destroy(); revEl._chartInstance = null; }
     revEl._chartInstance = new Chart(revEl, {
       type: 'bar',
       data: {
@@ -183,6 +195,7 @@ function initReportCharts() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         plugins: { legend: { display: true, position: 'top' } },
         scales: {
           x: { grid: { display: false } },
@@ -193,7 +206,8 @@ function initReportCharts() {
   }
 
   const prodEl = document.getElementById('reportProductChart');
-  if (prodEl && !prodEl._chartInstance) {
+  if (prodEl) {
+    if (prodEl._chartInstance) { prodEl._chartInstance.destroy(); prodEl._chartInstance = null; }
     prodEl._chartInstance = new Chart(prodEl, {
       type: 'doughnut',
       data: {
@@ -207,6 +221,7 @@ function initReportCharts() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         plugins: {
           legend: { display: true, position: 'right', labels: { font: { size: 10 } } }
         },
@@ -216,7 +231,8 @@ function initReportCharts() {
   }
 
   const segEl = document.getElementById('reportSegmentChart');
-  if (segEl && !segEl._chartInstance) {
+  if (segEl) {
+    if (segEl._chartInstance) { segEl._chartInstance.destroy(); segEl._chartInstance = null; }
     segEl._chartInstance = new Chart(segEl, {
       type: 'bar',
       data: {
@@ -231,6 +247,7 @@ function initReportCharts() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         plugins: { legend: { display: false } },
         scales: { x: { grid: { display: false } } },
         indexAxis: 'y'
@@ -509,9 +526,23 @@ if (globalSearch) {
   });
 }
 
+// ---- KPI ANIMATION ----
+function animateKPICards() {
+  document.querySelectorAll('.kpi-value').forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(12px)';
+    setTimeout(() => {
+      el.style.transition = 'all 0.45s ease';
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, i * 60 + 80);
+  });
+}
+
 // ---- INIT ----
 document.addEventListener('DOMContentLoaded', () => {
   initDashboardCharts();
+  animateKPICards();
 
   // Add click handler for quick quote calculate
   document.addEventListener('click', (e) => {
@@ -519,22 +550,5 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = document.getElementById('quote-result');
       if (result) result.style.display = 'block';
     }
-  });
-
-  // AI Banner dismiss / navigate
-  const aiBanner = document.querySelector('.ai-highlight-banner');
-  if (aiBanner) {
-    aiBanner.addEventListener('click', () => navigateTo('ai-agents'));
-  }
-
-  // Animate KPI numbers
-  document.querySelectorAll('.kpi-value').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(10px)';
-    setTimeout(() => {
-      el.style.transition = 'all 0.5s ease';
-      el.style.opacity = '1';
-      el.style.transform = 'translateY(0)';
-    }, Math.random() * 300 + 100);
   });
 });
