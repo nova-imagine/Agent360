@@ -1310,11 +1310,24 @@ function PoliciesPage() {
               <th>Issued</th>
               <th>Renewal</th>
               <th>Beneficiary</th>
+              <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {mockPolicies.map(p => (
+            {mockPolicies.map(p => {
+              const policyIDPStatus: Record<string,{badge:string,fill:string,cls:string,pct:number}> = {
+                'P-100291': {badge:'3/3 Docs',fill:'idp-fill-green',cls:'idp-complete',pct:100},
+                'P-100292': {badge:'3/3 Docs',fill:'idp-fill-green',cls:'idp-complete',pct:100},
+                'P-100293': {badge:'2/3 Docs',fill:'',cls:'idp-partial',pct:67},
+                'P-100301': {badge:'1/3 Docs',fill:'idp-fill-orange',cls:'idp-missing idp-urgent',pct:33},
+                'P-100302': {badge:'3/3 Docs',fill:'idp-fill-green',cls:'idp-complete',pct:100},
+                'P-100310': {badge:'2/4 Docs',fill:'',cls:'idp-partial',pct:50},
+                'P-100320': {badge:'1/2 Docs',fill:'idp-fill-orange',cls:'idp-missing idp-urgent',pct:50},
+                'P-100330': {badge:'3/3 Docs',fill:'idp-fill-green',cls:'idp-complete',pct:100},
+              };
+              const idp = policyIDPStatus[p.id] || {badge:'—',fill:'',cls:'idp-partial',pct:0};
+              return (
               <tr>
                 <td><span class="policy-id">{p.id}</span></td>
                 <td>
@@ -1330,6 +1343,7 @@ function PoliciesPage() {
                 <td class="text-muted">{p.issued}</td>
                 <td class={p.status === 'Review' ? 'text-orange' : 'text-muted'}>{p.renewal}</td>
                 <td class="text-muted">{p.beneficiary}</td>
+                <td><div class="idp-status-cell" onclick={`openIDPModal('${p.id}')`}><span class={`idp-badge ${idp.cls}`}><i class={`fas ${idp.cls.includes('complete') ? 'fa-check-circle' : idp.cls.includes('urgent') ? 'fa-exclamation-circle' : 'fa-file-import'}`}></i> {idp.badge}</span><div class="idp-scan-bar"><div class={`idp-scan-fill ${idp.fill}`} style={`width:${idp.pct}%`}></div></div></div></td>
                 <td>
                   <div class="action-btns">
                     <button class="btn-icon" title="View Details" onclick={`openPolicyModal('${p.id}','view')`}><i class="fas fa-eye"></i></button>
@@ -1338,7 +1352,7 @@ function PoliciesPage() {
                   </div>
                 </td>
               </tr>
-            ))}
+            );})}
           </tbody>
         </table>
       </div>
@@ -1530,6 +1544,79 @@ function ClaimsPage() {
         </div>
       </div>
 
+      {/* ── IDP Hub Panel ── */}
+      <div class="idp-hub-panel">
+        <div class="idp-hub-header">
+          <div class="idp-hub-title">
+            <div class="idp-hub-icon"><i class="fas fa-file-import"></i></div>
+            <div>
+              <div class="idp-hub-name">Intelligent Document Processing Hub</div>
+              <div class="idp-hub-sub">AI-powered auto-extraction · Last scan <span class="idp-scan-time">3 mins ago</span></div>
+            </div>
+          </div>
+          <div class="idp-hub-stats">
+            <div class="idp-stat"><div class="idp-stat-val green">5</div><div class="idp-stat-lbl">Docs Verified</div></div>
+            <div class="idp-stat"><div class="idp-stat-val orange">6</div><div class="idp-stat-lbl">Pending Upload</div></div>
+            <div class="idp-stat"><div class="idp-stat-val purple">4</div><div class="idp-stat-lbl">AI Extracting</div></div>
+            <div class="idp-stat"><div class="idp-stat-val blue">94%</div><div class="idp-stat-lbl">Accuracy Rate</div></div>
+          </div>
+          <div class="idp-hub-actions">
+            <div class="idp-drop-zone" id="idp-drop-zone" ondragover="event.preventDefault();this.classList.add('idp-drag-over')" ondragleave="this.classList.remove('idp-drag-over')" ondrop="handleIDPDrop(event)">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Drop documents here to scan</span>
+            </div>
+            <button class="btn btn-idp-scan" onclick="runIDPScan()"><i class="fas fa-search"></i> Run IDP Scan</button>
+          </div>
+        </div>
+        <div class="idp-queue" id="idp-queue">
+          <div class="idp-queue-item idp-qi-extracting">
+            <div class="idp-qi-icon"><i class="fas fa-file-pdf"></i></div>
+            <div class="idp-qi-info">
+              <div class="idp-qi-name">Death_Certificate_RC_2026.pdf</div>
+              <div class="idp-qi-meta">CLM-2026-0041 · Robert Chen · Uploaded 2026-04-09</div>
+            </div>
+            <div class="idp-qi-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting fields…</div>
+            <div class="idp-qi-confidence">—</div>
+          </div>
+          <div class="idp-queue-item idp-qi-verified">
+            <div class="idp-qi-icon"><i class="fas fa-file-medical"></i></div>
+            <div class="idp-qi-info">
+              <div class="idp-qi-name">Medical_Certificate_Cardiac.pdf</div>
+              <div class="idp-qi-meta">CLM-2026-0041 · Robert Chen · Uploaded 2026-04-09</div>
+            </div>
+            <div class="idp-qi-status verified"><i class="fas fa-check-circle"></i> Verified</div>
+            <div class="idp-qi-confidence">Confidence: <strong>98%</strong></div>
+          </div>
+          <div class="idp-queue-item idp-qi-pending">
+            <div class="idp-qi-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="idp-qi-info">
+              <div class="idp-qi-name">Terminal_Illness_Certification.pdf</div>
+              <div class="idp-qi-meta">CLM-2026-0028 · Maria Gonzalez · Awaiting oncologist</div>
+            </div>
+            <div class="idp-qi-status pending"><i class="fas fa-clock"></i> Awaiting Upload</div>
+            <div class="idp-qi-confidence">—</div>
+          </div>
+          <div class="idp-queue-item idp-qi-verified">
+            <div class="idp-qi-icon"><i class="fas fa-file-contract"></i></div>
+            <div class="idp-qi-info">
+              <div class="idp-qi-name">LTC_Eligibility_Cert_SW.pdf</div>
+              <div class="idp-qi-meta">CLM-2026-0038 · Sandra Williams · Uploaded 2026-04-01</div>
+            </div>
+            <div class="idp-qi-status verified"><i class="fas fa-check-circle"></i> Verified</div>
+            <div class="idp-qi-confidence">Confidence: <strong>99%</strong></div>
+          </div>
+          <div class="idp-queue-item idp-qi-extracting">
+            <div class="idp-qi-icon"><i class="fas fa-file-medical-alt"></i></div>
+            <div class="idp-qi-info">
+              <div class="idp-qi-name">APS_DrHernandez_MG.pdf</div>
+              <div class="idp-qi-meta">CLM-2026-0035 · Maria Gonzalez · Uploading…</div>
+            </div>
+            <div class="idp-qi-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting fields…</div>
+            <div class="idp-qi-confidence">—</div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Open / Active Claims ── */}
       <div class="claims-section-label">
         <i class="fas fa-folder-open"></i> Open &amp; Active Claims
@@ -1549,6 +1636,7 @@ function ClaimsPage() {
               <th>Status</th>
               <th>Priority</th>
               <th><i class="fas fa-shield-virus" style="color:#dc2626;margin-right:4px"></i>Fraud Score</th>
+              <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
               <th>Assigned To</th>
               <th>Actions</th>
             </tr>
@@ -1564,6 +1652,7 @@ function ClaimsPage() {
               <td><span class="claim-status-badge review">Under Review</span></td>
               <td><span class="priority-badge urgent">Urgent</span></td>
               <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0041')"><span class="fraud-score-num">42</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0041')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
@@ -1583,6 +1672,7 @@ function ClaimsPage() {
               <td><span class="claim-status-badge open">Open</span></td>
               <td><span class="priority-badge normal">Normal</span></td>
               <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0038')"><span class="fraud-score-num">12</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0038')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
               <td class="text-muted">LTC Team</td>
               <td>
                 <div class="action-btns">
@@ -1602,6 +1692,7 @@ function ClaimsPage() {
               <td><span class="claim-status-badge pending">Pending Docs</span></td>
               <td><span class="priority-badge normal">Normal</span></td>
               <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0035')"><span class="fraud-score-num">18</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0035')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
               <td class="text-muted">DI Unit</td>
               <td>
                 <div class="action-btns">
@@ -1621,6 +1712,7 @@ function ClaimsPage() {
               <td><span class="claim-status-badge review">Under Review</span></td>
               <td><span class="priority-badge normal">Normal</span></td>
               <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0033')"><span class="fraud-score-num">9</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0033')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
               <td class="text-muted">LTC Team</td>
               <td>
                 <div class="action-btns">
@@ -1640,6 +1732,7 @@ function ClaimsPage() {
               <td><span class="claim-status-badge open">Open</span></td>
               <td><span class="priority-badge low">Low</span></td>
               <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0031')"><span class="fraud-score-num">7</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0031')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
               <td class="text-muted">Agent Support</td>
               <td>
                 <div class="action-btns">
@@ -1659,6 +1752,7 @@ function ClaimsPage() {
               <td><span class="claim-status-badge pending">Pending Docs</span></td>
               <td><span class="priority-badge urgent">Urgent</span></td>
               <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0028')"><span class="fraud-score-num">38</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0028')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-orange" style="width:50%"></div></div></div></td>
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
@@ -1678,6 +1772,7 @@ function ClaimsPage() {
               <td><span class="claim-status-badge review">Under Review</span></td>
               <td><span class="priority-badge normal">Normal</span></td>
               <td><div class="fraud-score-cell flagged" onclick="openFraudDetailModal('CLM-2026-0025')"><span class="fraud-score-num">78</span><span class="fraud-score-lbl">Flagged</span><i class="fas fa-exclamation-triangle"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0025')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 1/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-red" style="width:25%"></div></div></div></td>
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
@@ -1875,6 +1970,25 @@ function ClaimsPage() {
             </div>
           </div>
           <div class="detail-modal-body" id="claim-modal-body"></div>
+        </div>
+      </div>
+
+      {/* ── IDP Document Modal ── */}
+      <div class="detail-modal-overlay" id="idp-modal-overlay" onclick="closeIDPModal()">
+        <div class="detail-modal idp-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header" id="idp-modal-header" style="border-bottom-color:#7c3aed">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><i class="fas fa-file-import"></i></span>
+              <div>
+                <h3 id="idp-modal-title">IDP — Document Status</h3>
+                <p id="idp-modal-subtitle" class="detail-modal-sub"></p>
+              </div>
+            </div>
+            <div class="detail-modal-header-actions">
+              <button class="detail-modal-close" onclick="closeIDPModal()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="detail-modal-body" id="idp-modal-body"></div>
         </div>
       </div>
 

@@ -1312,3 +1312,242 @@ function closeFraudReportModal() {
   if (overlay) overlay.style.display = 'none';
   document.body.style.overflow = '';
 }
+
+// ============================================================
+//  #2 IDP — Intelligent Document Processing
+// ============================================================
+
+const idpData = {
+  // ── Claims ──
+  'CLM-2026-0041': {
+    label: 'CLM-2026-0041 · Robert Chen · Death Benefit', type:'claim',
+    docs: [
+      { name:'Death Certificate (RC)', status:'extracting', confidence:null,  extracted:['Name: Robert Chen','DOD: 2026-04-08','Cause: Cardiac Event','Issuer: NYC DoH'] },
+      { name:'Medical Certificate — Cardiac', status:'verified',   confidence:98, extracted:['Physician: Dr. Alan Park MD','ICD-10: I21.9 Acute MI','Date of Death: 2026-04-08','Hospital: NYP'] },
+      { name:'Claimant Identity (Susan Chen)', status:'pending',    confidence:null, extracted:[] },
+      { name:'Bank Details for Payout',        status:'pending',    confidence:null, extracted:[] },
+    ]
+  },
+  'CLM-2026-0038': {
+    label: 'CLM-2026-0038 · Sandra Williams · Long-term Care', type:'claim',
+    docs: [
+      { name:'LTC Eligibility Certification', status:'verified',   confidence:99, extracted:['Trigger: 2 ADL impairments','Certifier: Dr. Kim MD','Date: 2026-04-01','Daily benefit: $200/day'] },
+      { name:'Care Provider License',         status:'verified',   confidence:97, extracted:['Provider: NYC Home Health','License #: HH-20918','Valid through: 2027-08-01'] },
+      { name:'Plan of Care Document',         status:'pending',    confidence:null, extracted:[] },
+      { name:'Monthly Care Summary',          status:'pending',    confidence:null, extracted:[] },
+    ]
+  },
+  'CLM-2026-0035': {
+    label: 'CLM-2026-0035 · Maria Gonzalez · Disability', type:'claim',
+    docs: [
+      { name:'Surgical Report — Back Surgery', status:'verified', confidence:96, extracted:['Procedure: L4-L5 discectomy','Surgeon: Dr. Hernandez','Date: 2026-03-10','Facility: NYU Langone'] },
+      { name:'Pre-disability Earnings Docs',   status:'verified', confidence:94, extracted:['Annual income: $84,000','Employer: Apex Corp','DOE: 2021-06-01','Verified payroll: ✓'] },
+      { name:'Attending Physician Statement',  status:'pending',  confidence:null, extracted:[] },
+      { name:'Employer Income Verification',   status:'pending',  confidence:null, extracted:[] },
+    ]
+  },
+  'CLM-2026-0033': {
+    label: 'CLM-2026-0033 · James Whitfield · Long-term Care', type:'claim',
+    docs: [
+      { name:'LTC Eligibility Certification', status:'verified', confidence:99, extracted:['ADLs impaired: 2/6','Certifier: Dr. Patel','Date: 2026-03-14'] },
+      { name:'Facility Admission Records',    status:'verified', confidence:98, extracted:['Facility: Garden State AL','Admission: 2026-03-12','Daily rate: $200'] },
+      { name:'ADL Assessment',                status:'verified', confidence:97, extracted:['Bathing: impaired','Dressing: impaired','Other 4: intact'] },
+      { name:'Facility License',              status:'verified', confidence:99, extracted:['License #: NJ-AL-4491','Valid through: 2027-01-01','State: NJ'] },
+    ]
+  },
+  'CLM-2026-0031': {
+    label: 'CLM-2026-0031 · Linda Morrison · Waiver of Premium', type:'claim',
+    docs: [
+      { name:'Disability Certification',      status:'verified', confidence:99, extracted:['Disability type: post-surgical','Certifier: Dr. Walsh','Duration: 60-90 days'] },
+      { name:'Surgical Report',               status:'verified', confidence:98, extracted:['Procedure: Hip replacement','Date: 2026-03-08','Recovery: 60-90 days'] },
+      { name:'Physician Recovery Estimate',   status:'verified', confidence:97, extracted:['Est. return: Jun 2026','Dr. Walsh MD','Full recovery expected'] },
+      { name:'Premium Waiver Application',    status:'verified', confidence:99, extracted:['Policy: P-100362','Premium: $9,600/yr','Coverage: 90 days'] },
+    ]
+  },
+  'CLM-2026-0028': {
+    label: 'CLM-2026-0028 · Maria Gonzalez · Accelerated Benefit', type:'claim',
+    docs: [
+      { name:'ADB Application Form',           status:'verified',   confidence:99, extracted:['Amount: $120,000','Policy: P-100340','Signed: 2026-03-05'] },
+      { name:'Medical Records (Partial)',       status:'extracting', confidence:null, extracted:['Oncologist: Dr. Rivera','Diagnosis: Stage IV — extracting…'] },
+      { name:'Terminal Illness Certification', status:'pending',    confidence:null, extracted:[] },
+      { name:'Life Expectancy Statement',      status:'pending',    confidence:null, extracted:[] },
+    ]
+  },
+  'CLM-2026-0025': {
+    label: 'CLM-2026-0025 · Kevin Park · Death Benefit', type:'claim',
+    docs: [
+      { name:'Death Certificate',              status:'verified',   confidence:98, extracted:['Name: Kevin Park','DOD: 2026-02-27','Issuer: NJ DoH'] },
+      { name:'Estate Documentation',           status:'pending',    confidence:null, extracted:[] },
+      { name:'Medical Records (UW review)',    status:'pending',    confidence:null, extracted:[] },
+      { name:'Contestability Review File',     status:'extracting', confidence:null, extracted:['Policy date: 2026-02-01','Extracting UW notes…'] },
+    ]
+  },
+  // ── Policies ──
+  'P-100291': {
+    label: 'P-100291 · James Whitfield · Whole Life', type:'policy',
+    docs: [
+      { name:'Original Policy Application',   status:'verified', confidence:99, extracted:['Issued: 2019-06-15','Underwriter: NYL UW Team','Face value: $500K'] },
+      { name:'Beneficiary Designation Form',  status:'verified', confidence:98, extracted:['Beneficiary: Emily Whitfield','Relationship: Spouse','Date: 2019-06-15'] },
+      { name:'Annual Review — 2025',          status:'verified', confidence:96, extracted:['Review date: 2025-06-12','Cash value: $43,800','No changes'] },
+    ]
+  },
+  'P-100292': {
+    label: 'P-100292 · James Whitfield · Term Life', type:'policy',
+    docs: [
+      { name:'Term Life Application',         status:'verified', confidence:99, extracted:['Term: 20-year','Face value: $750K','Issued: 2021-03-01'] },
+      { name:'Convertibility Rider Notice',   status:'verified', confidence:97, extracted:['Window: through 2031','No medical required','Conversion: whole life'] },
+      { name:'Annual Statement — 2025',       status:'verified', confidence:95, extracted:['In force','All premiums current','Next renewal: 2031-03-01'] },
+    ]
+  },
+  'P-100293': {
+    label: 'P-100293 · James Whitfield · Long-term Care', type:'policy',
+    docs: [
+      { name:'LTC Policy Application',        status:'verified', confidence:98, extracted:['Daily benefit: $200/day','Benefit period: 3 yrs','Elim. period: 90 days'] },
+      { name:'Inflation Protection Rider',    status:'verified', confidence:97, extracted:['Protection: 3% compound','Rider attached: 2022-11-10'] },
+      { name:'LTC Coverage Review 2025',      status:'pending',  confidence:null, extracted:[] },
+    ]
+  },
+  'P-100301': {
+    label: 'P-100301 · Patricia Nguyen · Universal Life', type:'policy',
+    docs: [
+      { name:'UL Policy Application',         status:'verified', confidence:98, extracted:['Face value: $400K','Issued: 2020-08-20','Type: Universal Life'] },
+      { name:'⚠️ Premium Funding Review',     status:'pending',  confidence:null, extracted:[] },
+      { name:'Overloan Protection Rider',     status:'pending',  confidence:null, extracted:[] },
+    ]
+  },
+  'P-100302': {
+    label: 'P-100302 · Patricia Nguyen · Variable Universal Life', type:'policy',
+    docs: [
+      { name:'VUL Application',               status:'verified', confidence:99, extracted:['Face: $300K','Sub-accounts: 30+','Issued: 2023-01-15'] },
+      { name:'Investment Allocation Form',    status:'verified', confidence:97, extracted:['60% equity / 40% fixed','DCA rider active','Signed: 2023-01-15'] },
+      { name:'2025 Sub-account Statement',    status:'verified', confidence:96, extracted:['Cash value: $14,890','YTD return: +8.3%','No allocation changes'] },
+    ]
+  },
+  'P-100310': {
+    label: 'P-100310 · Robert Chen · Whole Life (Claim Active)', type:'policy',
+    docs: [
+      { name:'Whole Life Application 2018',   status:'verified', confidence:99, extracted:['Face: $1M','Issued: 2018-04-12','Business continuation rider'] },
+      { name:'Claim CLM-2026-0041 Filed',     status:'extracting', confidence:null, extracted:['Claim date: 2026-04-09','Extracting adjuster notes…'] },
+      { name:'Claimant ID — Susan Chen',      status:'pending',  confidence:null, extracted:[] },
+      { name:'Bank Details for Payout',       status:'pending',  confidence:null, extracted:[] },
+    ]
+  },
+  'P-100320': {
+    label: 'P-100320 · Sandra Williams · Term Life (Renewal Alert)', type:'policy',
+    docs: [
+      { name:'Term Life Application 2016',    status:'verified', confidence:97, extracted:['Face: $350K','Term: 20-yr','Issued: 2016-09-30'] },
+      { name:'⚠️ Renewal Notice Sept 2026',   status:'pending',  confidence:null, extracted:[] },
+    ]
+  },
+  'P-100330': {
+    label: 'P-100330 · Linda Morrison · Whole Life (Flagship)', type:'policy',
+    docs: [
+      { name:'Flagship WL Application 2015',  status:'verified', confidence:99, extracted:['Face: $2M','Issued: 2015-12-01','Trust beneficiary'] },
+      { name:'Trust Beneficiary Designation', status:'verified', confidence:99, extracted:['Trust: Morrison Family Trust','Date: 2015-12-01','Estate attorney: Cooper & Assoc'] },
+      { name:'Annual Review 2026 (Apr 15)',   status:'verified', confidence:98, extracted:['Cash value: $168,400','Dividend: $6,200/yr','UMA review pending'] },
+    ]
+  },
+};
+
+function openIDPModal(id) {
+  const d = idpData[id];
+  if (!d) return;
+  const overlay = document.getElementById('idp-modal-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  document.getElementById('idp-modal-title').textContent = 'IDP — Document Status · ' + id;
+  document.getElementById('idp-modal-subtitle').textContent = d.label;
+
+  const totalDocs  = d.docs.length;
+  const verified   = d.docs.filter(doc => doc.status === 'verified').length;
+  const extracting = d.docs.filter(doc => doc.status === 'extracting').length;
+  const pending    = d.docs.filter(doc => doc.status === 'pending').length;
+  const pct        = Math.round(verified / totalDocs * 100);
+
+  const bodyEl = document.getElementById('idp-modal-body');
+  bodyEl.innerHTML = `
+    <div class="idp-modal-summary">
+      <div class="idp-ms-progress">
+        <div class="idp-ms-pct">${pct}%</div>
+        <div class="idp-ms-bar-wrap"><div class="idp-ms-bar" style="width:${pct}%;background:${pct===100?'#059669':pct>=50?'#7c3aed':'#d97706'}"></div></div>
+        <div class="idp-ms-label">Document Completeness</div>
+      </div>
+      <div class="idp-ms-stats">
+        <div class="idp-ms-stat green"><div class="idp-ms-val">${verified}</div><div class="idp-ms-lbl">Verified</div></div>
+        <div class="idp-ms-stat purple"><div class="idp-ms-val">${extracting}</div><div class="idp-ms-lbl">Extracting</div></div>
+        <div class="idp-ms-stat orange"><div class="idp-ms-val">${pending}</div><div class="idp-ms-lbl">Pending</div></div>
+        <div class="idp-ms-stat blue"><div class="idp-ms-val">${totalDocs}</div><div class="idp-ms-lbl">Total Docs</div></div>
+      </div>
+    </div>
+
+    <div class="idp-docs-list">
+      ${d.docs.map((doc, i) => {
+        const stIcon  = doc.status === 'verified' ? 'fa-check-circle' : doc.status === 'extracting' ? 'fa-cog fa-spin' : 'fa-clock';
+        const stColor = doc.status === 'verified' ? '#059669' : doc.status === 'extracting' ? '#7c3aed' : '#d97706';
+        const stLabel = doc.status === 'verified' ? 'Verified' : doc.status === 'extracting' ? 'AI Extracting…' : 'Pending Upload';
+        return `
+        <div class="idp-doc-card">
+          <div class="idp-doc-card-header">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="idp-doc-num">${i+1}</div>
+              <div>
+                <div class="idp-doc-name">${doc.name}</div>
+                ${doc.confidence ? `<div class="idp-doc-conf">AI Confidence: <strong>${doc.confidence}%</strong></div>` : ''}
+              </div>
+            </div>
+            <div class="idp-doc-status-pill" style="color:${stColor};background:${stColor}15;border:1px solid ${stColor}30">
+              <i class="fas ${stIcon}"></i> ${stLabel}
+            </div>
+          </div>
+          ${doc.extracted && doc.extracted.length > 0 ? `
+          <div class="idp-extracted-fields">
+            <div class="idp-ef-title"><i class="fas fa-magic"></i> Auto-extracted Fields</div>
+            <div class="idp-ef-grid">
+              ${doc.extracted.map(f => `<div class="idp-ef-item"><i class="fas fa-angle-right" style="color:#7c3aed;margin-right:4px"></i>${f}</div>`).join('')}
+            </div>
+          </div>` : doc.status === 'pending' ? `<div class="idp-pending-msg"><i class="fas fa-upload"></i> Awaiting document upload to begin extraction</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      ${pending > 0 ? `<button class="btn btn-primary" onclick="alert('Document request reminders sent for ${pending} missing document(s).')"><i class="fas fa-paper-plane"></i> Send ${pending} Doc Request${pending>1?'s':''}</button>` : ''}
+      <button class="btn btn-idp-scan" onclick="alert('IDP re-scan queued for ${id}. Results in ~30 seconds.')"><i class="fas fa-search"></i> Re-scan Documents</button>
+      <button class="btn btn-outline-sm" onclick="closeIDPModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  `;
+}
+
+function closeIDPModal() {
+  const overlay = document.getElementById('idp-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function handleIDPDrop(event) {
+  event.preventDefault();
+  const zone = document.getElementById('idp-drop-zone');
+  if (zone) zone.classList.remove('idp-drag-over');
+  const files = event.dataTransfer?.files;
+  if (files && files.length > 0) {
+    const names = Array.from(files).map(f => f.name).join(', ');
+    alert(`IDP received ${files.length} file(s): ${names}\n\nAI extraction started. Confidence results in ~10 seconds.`);
+  } else {
+    alert('IDP Hub: Drop PDF/image files here to auto-extract claim or policy fields.');
+  }
+}
+
+function runIDPScan() {
+  const btn = document.querySelector('.btn-idp-scan');
+  if (btn) { btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> Scanning…'; btn.disabled = true; }
+  const timeEl = document.querySelector('.idp-scan-time');
+  setTimeout(() => {
+    if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Scan Complete'; btn.disabled = false; }
+    if (timeEl) timeEl.textContent = 'just now';
+    setTimeout(() => {
+      if (btn) btn.innerHTML = '<i class="fas fa-search"></i> Run IDP Scan';
+    }, 2000);
+  }, 2200);
+}
