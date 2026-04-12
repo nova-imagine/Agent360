@@ -1475,6 +1475,61 @@ function ClaimsPage() {
         </div>
       </div>
 
+      {/* ── Fraud Detection Panel ── */}
+      <div class="fraud-detection-panel">
+        <div class="fdp-header">
+          <div class="fdp-title">
+            <div class="fdp-icon"><i class="fas fa-shield-virus"></i></div>
+            <div>
+              <div class="fdp-heading">AI Fraud Detection Engine</div>
+              <div class="fdp-sub">Continuously monitoring 11 active &amp; resolved claims · Last scan 2 mins ago</div>
+            </div>
+          </div>
+          <div class="fdp-stats">
+            <div class="fdp-stat">
+              <span class="fdp-stat-val green">8</span>
+              <span class="fdp-stat-lbl">Clear</span>
+            </div>
+            <div class="fdp-stat">
+              <span class="fdp-stat-val gold">2</span>
+              <span class="fdp-stat-lbl">Watch</span>
+            </div>
+            <div class="fdp-stat">
+              <span class="fdp-stat-val red">1</span>
+              <span class="fdp-stat-lbl">Flagged</span>
+            </div>
+            <div class="fdp-divider"></div>
+            <div class="fdp-stat">
+              <span class="fdp-stat-val blue">+32%</span>
+              <span class="fdp-stat-lbl">Detection Lift</span>
+            </div>
+          </div>
+          <button class="btn btn-ai fdp-btn" onclick="openFraudReportModal()">
+            <i class="fas fa-search-plus"></i> Full Fraud Report
+          </button>
+        </div>
+        <div class="fdp-flags">
+          <div class="fdp-flag flagged">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span class="fdp-flag-id">CLM-2026-0025</span>
+            <span class="fdp-flag-reason">Policy in Pending status at time of death · Coverage determination required · Medical records inconsistency</span>
+            <span class="fdp-flag-score">Risk: 78</span>
+          </div>
+          <div class="fdp-flag watch">
+            <i class="fas fa-eye"></i>
+            <span class="fdp-flag-id">CLM-2026-0041</span>
+            <span class="fdp-flag-reason">$1M claim · Claimant ID docs pending · High-value threshold monitoring active</span>
+            <span class="fdp-flag-score">Risk: 42</span>
+          </div>
+          <div class="fdp-flag watch">
+            <i class="fas fa-eye"></i>
+            <span class="fdp-flag-id">CLM-2026-0028</span>
+            <span class="fdp-flag-reason">Terminal certification pending from oncologist · ADB claim filed 30 days post-diagnosis</span>
+            <span class="fdp-flag-score">Risk: 38</span>
+          </div>
+        </div>
+      </div>
+
       {/* ── Open / Active Claims ── */}
       <div class="claims-section-label">
         <i class="fas fa-folder-open"></i> Open &amp; Active Claims
@@ -1493,6 +1548,7 @@ function ClaimsPage() {
               <th>Filed Date</th>
               <th>Status</th>
               <th>Priority</th>
+              <th><i class="fas fa-shield-virus" style="color:#dc2626;margin-right:4px"></i>Fraud Score</th>
               <th>Assigned To</th>
               <th>Actions</th>
             </tr>
@@ -1507,6 +1563,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-04-09</td>
               <td><span class="claim-status-badge review">Under Review</span></td>
               <td><span class="priority-badge urgent">Urgent</span></td>
+              <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0041')"><span class="fraud-score-num">42</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
@@ -1525,6 +1582,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-04-01</td>
               <td><span class="claim-status-badge open">Open</span></td>
               <td><span class="priority-badge normal">Normal</span></td>
+              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0038')"><span class="fraud-score-num">12</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
               <td class="text-muted">LTC Team</td>
               <td>
                 <div class="action-btns">
@@ -1543,6 +1601,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-03-22</td>
               <td><span class="claim-status-badge pending">Pending Docs</span></td>
               <td><span class="priority-badge normal">Normal</span></td>
+              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0035')"><span class="fraud-score-num">18</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
               <td class="text-muted">DI Unit</td>
               <td>
                 <div class="action-btns">
@@ -1561,6 +1620,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-03-15</td>
               <td><span class="claim-status-badge review">Under Review</span></td>
               <td><span class="priority-badge normal">Normal</span></td>
+              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0033')"><span class="fraud-score-num">9</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
               <td class="text-muted">LTC Team</td>
               <td>
                 <div class="action-btns">
@@ -1579,6 +1639,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-03-10</td>
               <td><span class="claim-status-badge open">Open</span></td>
               <td><span class="priority-badge low">Low</span></td>
+              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0031')"><span class="fraud-score-num">7</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
               <td class="text-muted">Agent Support</td>
               <td>
                 <div class="action-btns">
@@ -1597,6 +1658,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-03-05</td>
               <td><span class="claim-status-badge pending">Pending Docs</span></td>
               <td><span class="priority-badge urgent">Urgent</span></td>
+              <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0028')"><span class="fraud-score-num">38</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
@@ -1615,6 +1677,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-02-28</td>
               <td><span class="claim-status-badge review">Under Review</span></td>
               <td><span class="priority-badge normal">Normal</span></td>
+              <td><div class="fraud-score-cell flagged" onclick="openFraudDetailModal('CLM-2026-0025')"><span class="fraud-score-num">78</span><span class="fraud-score-lbl">Flagged</span><i class="fas fa-exclamation-triangle"></i></div></td>
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
@@ -1753,6 +1816,42 @@ function ClaimsPage() {
             <div class="ctype-value">Auto-follow-ups ready</div>
           </div>
           <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="navigateTo('ai-agents')">Run AI Triage</button>
+        </div>
+      </div>
+
+      {/* ── Fraud Detail Modal ── */}
+      <div class="detail-modal-overlay" id="fraud-modal-overlay" onclick="closeFraudModal()">
+        <div class="detail-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header fraud-modal-header" id="fraud-modal-header">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-shield-virus"></i></span>
+              <div>
+                <h3 id="fraud-modal-title">Fraud Risk Analysis</h3>
+                <p id="fraud-modal-subtitle" class="detail-modal-sub"></p>
+              </div>
+            </div>
+            <div class="detail-modal-header-actions">
+              <button class="detail-modal-close" onclick="closeFraudModal()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="detail-modal-body" id="fraud-modal-body"></div>
+        </div>
+      </div>
+
+      {/* ── Fraud Full Report Modal ── */}
+      <div class="detail-modal-overlay" id="fraud-report-overlay" onclick="closeFraudReportModal()">
+        <div class="detail-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header" style="border-bottom-color:#dc2626">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-search-plus"></i></span>
+              <div>
+                <h3>AI Fraud Detection — Full Report</h3>
+                <p class="detail-modal-sub">11 claims analysed · Generated Apr 10, 2026 02:47 AM</p>
+              </div>
+            </div>
+            <button class="detail-modal-close" onclick="closeFraudReportModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="detail-modal-body" id="fraud-report-body"></div>
         </div>
       </div>
 

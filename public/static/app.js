@@ -1102,3 +1102,213 @@ function renderClaimModal(claimId, tab) {
     `;
   }
 }
+
+// ============================================================
+//  #1 FRAUD DETECTION — modal data & functions
+// ============================================================
+
+const fraudData = {
+  'CLM-2026-0041': {
+    score: 42, level: 'watch', client: 'Robert Chen', type: 'Death Benefit', amount: '$1,000,000',
+    signals: [
+      { icon: 'fa-exclamation-circle', color: '#d97706', text: 'High-value claim ($1M) — automatic enhanced review threshold triggered' },
+      { icon: 'fa-id-card', color: '#d97706', text: 'Claimant identity documents (Susan Chen) not yet submitted — 1 day post-filing' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Policy in excellent standing since 2018 — 8 years continuous premiums paid' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Cause of death (cardiac event) consistent with policyholder age and medical history' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Death certificate received and verified through official registry' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Beneficiary (Susan Chen) identity matches policy records from 2018' },
+    ],
+    recommendation: 'WATCH — Proceed with standard expedited review. Missing identity documents from claimant are routine for day-1 filing. No suspicious patterns detected. Monitor document submission timeline.',
+    recColor: '#d97706'
+  },
+  'CLM-2026-0038': {
+    score: 12, level: 'clear', client: 'Sandra Williams', type: 'Long-term Care', amount: '$18,000',
+    signals: [
+      { icon: 'fa-check-circle', color: '#059669', text: 'LTC eligibility certification received and verified by licensed medical professional' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Care provider license confirmed active and in-state' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Policy active since 2016 — 10 years continuous coverage' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Claim amount ($200/day) matches stated daily benefit in policy terms' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Policyholder age (61) consistent with LTC claim demographics' },
+    ],
+    recommendation: 'CLEAR — No fraud indicators detected. Claim appears legitimate and well-documented. Proceed with standard LTC claims processing workflow.',
+    recColor: '#059669'
+  },
+  'CLM-2026-0035': {
+    score: 18, level: 'clear', client: 'Maria Gonzalez', type: 'Disability', amount: '$4,200/mo',
+    signals: [
+      { icon: 'fa-check-circle', color: '#059669', text: 'Surgical report received and verified — back surgery confirmed 2026-03-10' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Pre-disability earnings documentation matches employer payroll records' },
+      { icon: 'fa-exclamation-circle', color: '#d97706', text: 'Attending Physician Statement pending — minor delay (18 days) from Dr. Hernandez' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Claim amount (60% income replacement) matches policy benefit schedule' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'No prior disability claims filed in past 5 years' },
+    ],
+    recommendation: 'CLEAR — Minor document delay only. No fraud indicators. Physician statement delay is within normal range (30-day window). Proceed once APS received.',
+    recColor: '#059669'
+  },
+  'CLM-2026-0033': {
+    score: 9, level: 'clear', client: 'James Whitfield', type: 'Long-term Care', amount: '$9,600',
+    signals: [
+      { icon: 'fa-check-circle', color: '#059669', text: 'All required documents received — complete file with zero gaps' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'ADL assessment independently verified — 2 of 6 impairments confirmed (meets threshold)' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Facility admission records match LTC policy coverage terms' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Facility license current and in good standing with state registry' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Claim amount matches facility billing records exactly' },
+    ],
+    recommendation: 'CLEAR — Lowest risk score in active portfolio. Complete documentation, verified ADL threshold, legitimate facility. Approve without further review.',
+    recColor: '#059669'
+  },
+  'CLM-2026-0031': {
+    score: 7, level: 'clear', client: 'Linda Morrison', type: 'Waiver of Premium', amount: '$9,600/yr',
+    signals: [
+      { icon: 'fa-check-circle', color: '#059669', text: 'All four required documents received on day of filing' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Physician recovery estimate verified — elective surgery confirmed' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Premium amount ($9,600/yr) matches policy billing records exactly' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Linda Morrison is a top-tier client — 11 years in book, zero prior adverse claims' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Disability certification issued by independent physician (not treating doctor)' },
+    ],
+    recommendation: 'CLEAR — Lowest active risk score. Elite client, complete documentation, no anomalies. Standard approval workflow.',
+    recColor: '#059669'
+  },
+  'CLM-2026-0028': {
+    score: 38, level: 'watch', client: 'Maria Gonzalez', type: 'Accelerated Benefit', amount: '$120,000',
+    signals: [
+      { icon: 'fa-exclamation-circle', color: '#d97706', text: 'Terminal illness certification pending — 35 days since ADB application' },
+      { icon: 'fa-exclamation-circle', color: '#d97706', text: 'ADB claim filed 30 days post-diagnosis — slightly below typical 45-day window' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'ADB application form received and complete' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Partial medical records corroborate oncology diagnosis' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Claim amount (12% of face value) is within standard ADB access limit (25% max)' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'No prior ADB or accelerated benefit claims on any policy' },
+    ],
+    recommendation: 'WATCH — Compassionate case. Delays are due to oncologist office workflow, not claimant obstruction. Expedite terminal certification request. No fraud indicators — proceed with enhanced monitoring only.',
+    recColor: '#d97706'
+  },
+  'CLM-2026-0025': {
+    score: 78, level: 'flagged', client: 'Kevin Park', type: 'Death Benefit', amount: '$250,000',
+    signals: [
+      { icon: 'fa-times-circle', color: '#dc2626', text: '🚨 Policy was in PENDING status at time of death — coverage determination required before payout' },
+      { icon: 'fa-times-circle', color: '#dc2626', text: '🚨 Medical records still pending — underwriting review cannot confirm coverage was in-force' },
+      { icon: 'fa-exclamation-circle', color: '#d97706', text: 'Estate documentation pending — beneficiary relationship to policyholder unverified' },
+      { icon: 'fa-exclamation-circle', color: '#d97706', text: 'Policy age less than 90 days at time of death — heightened contestability scrutiny' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Death certificate received and verified through official registry' },
+      { icon: 'fa-check-circle', color: '#059669', text: 'Contestability 2-year window not applicable — policy too new for standard contestability' },
+    ],
+    recommendation: '⚠️ FLAGGED — Claim cannot be processed until: (1) medical records confirm coverage was in-force at underwriting, (2) estate documentation verified. Escalate to Senior Adjuster and Legal Review. Do not approve pending investigation.',
+    recColor: '#dc2626'
+  }
+};
+
+function openFraudDetailModal(claimId) {
+  const d = fraudData[claimId];
+  if (!d) return;
+  const overlay = document.getElementById('fraud-modal-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const titleEl = document.getElementById('fraud-modal-title');
+  const subEl   = document.getElementById('fraud-modal-subtitle');
+  const bodyEl  = document.getElementById('fraud-modal-body');
+  const hdrEl   = document.getElementById('fraud-modal-header');
+
+  titleEl.textContent = 'Fraud Risk Analysis — ' + claimId;
+  subEl.textContent   = d.client + ' · ' + d.type + ' · Score: ' + d.score + '/100';
+
+  const hdrColors = { clear:'#059669', watch:'#d97706', flagged:'#dc2626' };
+  if (hdrEl) hdrEl.style.borderBottomColor = hdrColors[d.level] || '#003087';
+
+  const levelLabels = { clear:'Clear', watch:'Watch', flagged:'Flagged' };
+  const levelColors = { clear:'background:#f0fdf4;color:#059669;border:1px solid #bbf7d0', watch:'background:#fffbeb;color:#d97706;border:1px solid #fde68a', flagged:'background:#fef2f2;color:#dc2626;border:1px solid #fecaca' };
+  const lc = levelColors[d.level] || '';
+
+  bodyEl.innerHTML = `
+    <div class="pm-ai-header" style="margin-bottom:18px">
+      <div class="pm-ai-score-ring" style="--score-color:${hdrColors[d.level]}">
+        <span class="pm-ai-score-num">${d.score}</span>
+        <span class="pm-ai-score-lbl">Risk Score</span>
+      </div>
+      <div class="pm-ai-summary">
+        <div class="pm-ai-risk-badge" style="${lc}">
+          <i class="fas fa-shield-virus"></i> ${levelLabels[d.level]} — ${d.client}
+        </div>
+        <h4>${d.type} · ${d.amount}</h4>
+        <p class="pm-ai-policy-ref"><i class="fas fa-file-medical-alt"></i> ${claimId} · AI Fraud Score: ${d.score}/100 · ${d.level.toUpperCase()}</p>
+      </div>
+    </div>
+    <div class="pm-section" style="margin-bottom:16px">
+      <div class="pm-section-title"><i class="fas fa-list-ul"></i> Fraud Signal Analysis</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${d.signals.map(s => `
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:7px;background:white;border:1px solid var(--gray-100)">
+            <i class="fas ${s.icon}" style="color:${s.color};margin-top:2px;flex-shrink:0"></i>
+            <span style="font-size:12.5px;color:var(--gray-700);line-height:1.45">${s.text}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="pm-next-action" style="background:${hdrColors[d.level]}10;border-color:${hdrColors[d.level]}30;color:${hdrColors[d.level]}">
+      <i class="fas fa-robot" style="font-size:15px;flex-shrink:0;margin-top:1px"></i>
+      <span><strong>AI Recommendation:</strong> ${d.recommendation}</span>
+    </div>
+    <div class="pm-ai-cta" style="margin-top:16px">
+      <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
+      <button class="btn btn-outline-sm" onclick="closeFraudModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  `;
+}
+
+function closeFraudModal() {
+  const overlay = document.getElementById('fraud-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function openFraudReportModal() {
+  const overlay = document.getElementById('fraud-report-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const allClaims = [
+    { id:'CLM-2026-0025', client:'Kevin Park',       type:'Death Benefit',      score:78, level:'flagged', reason:'Policy in Pending at death · Medical records missing · Estate unverified' },
+    { id:'CLM-2026-0041', client:'Robert Chen',      type:'Death Benefit',      score:42, level:'watch',   reason:'$1M high-value threshold · Claimant ID pending (day 1)' },
+    { id:'CLM-2026-0028', client:'Maria Gonzalez',   type:'Accelerated Benefit',score:38, level:'watch',   reason:'Terminal cert pending · ADB filed 30 days post-diagnosis' },
+    { id:'CLM-2026-0035', client:'Maria Gonzalez',   type:'Disability',         score:18, level:'clear',   reason:'APS delay only — no fraud indicators' },
+    { id:'CLM-2026-0038', client:'Sandra Williams',  type:'Long-term Care',     score:12, level:'clear',   reason:'All docs verified, provider confirmed' },
+    { id:'CLM-2026-0033', client:'James Whitfield',  type:'Long-term Care',     score: 9, level:'clear',   reason:'Complete file, ADL threshold met' },
+    { id:'CLM-2026-0031', client:'Linda Morrison',   type:'Waiver of Premium',  score: 7, level:'clear',   reason:'All docs filed same day, top client' },
+    { id:'CLM-2026-0022', client:'Linda Morrison',   type:'Death Benefit(Rider)',score:5, level:'clear',   reason:'Resolved · Paid 2026-02-17' },
+    { id:'CLM-2026-0019', client:'Robert Chen',      type:'Waiver of Premium',  score: 4, level:'clear',   reason:'Resolved · Approved 2026-01-24' },
+    { id:'CLM-2026-0015', client:'James Whitfield',  type:'Accelerated Benefit',score: 8, level:'clear',   reason:'Resolved · Paid 2026-01-15' },
+    { id:'CLM-2025-0198', client:'Sandra Williams',  type:'Disability',         score: 6, level:'clear',   reason:'Resolved · Paid 2025-12-08' },
+  ];
+
+  const bodyEl = document.getElementById('fraud-report-body');
+  bodyEl.innerHTML = `
+    <div class="fraud-report-summary">
+      <div class="frs-card flagged"><div class="frs-val">1</div><div class="frs-lbl">Flagged Claims</div></div>
+      <div class="frs-card watch"><div class="frs-val">2</div><div class="frs-lbl">Under Watch</div></div>
+      <div class="frs-card clear"><div class="frs-val">8</div><div class="frs-lbl">Clear</div></div>
+      <div class="frs-card blue"><div class="frs-val">+32%</div><div class="frs-lbl">Detection Lift vs Manual</div></div>
+    </div>
+    <div class="pm-section-title" style="margin-bottom:10px"><i class="fas fa-list-alt"></i> All Claims — Fraud Score Breakdown</div>
+    <div class="fraud-claim-rows">
+      ${allClaims.map(c => `
+        <div class="fcr-row fcr-${c.level}" onclick="closeFraudReportModal();setTimeout(()=>openFraudDetailModal('${c.id}'),200)" style="cursor:pointer">
+          <span class="fcr-score ${c.level}">${c.score}</span>
+          <span class="fcr-id">${c.id}</span>
+          <span class="fcr-client">${c.client}</span>
+          <span class="fcr-reasons">${c.type} · ${c.reason}</span>
+          <span class="fcr-badge ${c.level}">${c.level.charAt(0).toUpperCase()+c.level.slice(1)}</span>
+        </div>`).join('')}
+    </div>
+    <div class="pm-ai-cta" style="margin-top:18px">
+      <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> AI Deep Fraud Analysis</button>
+      <button class="btn btn-outline-sm" onclick="closeFraudReportModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  `;
+}
+
+function closeFraudReportModal() {
+  const overlay = document.getElementById('fraud-report-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
