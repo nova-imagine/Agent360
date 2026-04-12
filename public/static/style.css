@@ -2457,3 +2457,368 @@ body {
   background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1)) !important;
   border-left-color: #6366f1 !important;
 }
+
+/* ================================================================
+   CLIENT PRODUCT HOLDINGS PANEL
+   ================================================================ */
+.client-expand-icon {
+  font-size: 12px;
+  color: var(--gray-400);
+  transition: transform 0.25s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.client-products-panel {
+  border-top: 1px solid var(--gray-100);
+  margin-top: 4px;
+  padding-top: 10px;
+  animation: slideDown 0.2s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Domain section inside product panel */
+.cp-domain-section { margin-bottom: 10px; }
+
+.cp-domain-header {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 700;
+  padding: 5px 10px; border-radius: 6px;
+  margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.cp-count {
+  margin-left: auto;
+  background: rgba(0,0,0,0.12);
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 10px;
+}
+
+/* Individual product row */
+.cp-product-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 8px;
+  background: var(--gray-50); border: 1px solid var(--gray-100);
+  margin-bottom: 4px; transition: background 0.15s;
+}
+.cp-product-row:hover { background: white; box-shadow: var(--shadow-sm); }
+
+.cp-prod-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+
+.cp-prod-info { flex: 1; min-width: 0; }
+.cp-prod-name {
+  font-size: 12px; font-weight: 600; color: var(--gray-900);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cp-prod-type {
+  font-size: 10px; font-weight: 400; color: var(--gray-400);
+  margin-left: 5px; background: var(--gray-100); padding: 1px 5px; border-radius: 4px;
+}
+.cp-prod-meta { font-size: 10px; color: var(--gray-400); margin-top: 2px; }
+
+.cp-prod-vals { text-align: right; flex-shrink: 0; }
+.cp-val { font-size: 12px; font-weight: 700; color: var(--gray-900); }
+.cp-val-lbl { font-size: 10px; font-weight: 400; color: var(--gray-400); }
+.cp-sub { font-size: 10px; color: var(--gray-500); margin-top: 1px; }
+
+/* Status badges on product rows */
+.cp-status-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 20px; flex-shrink: 0;
+}
+.cp-status-badge.active  { background: var(--green-light); color: var(--green); }
+.cp-status-badge.review  { background: var(--orange-light); color: var(--orange); }
+.cp-status-badge.pending { background: var(--gold-light); color: var(--gold); }
+.cp-status-badge.prospect { background: #ede9fe; color: #7c3aed; }
+
+/* Gap notice (when no product in a domain) */
+.cp-gap-notice {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 8px; margin-bottom: 6px;
+  font-size: 12px; border: 1px dashed;
+}
+.inv-gap { background: #f0fdf4; border-color: #bbf7d0; color: #059669; }
+.ret-gap { background: #fffbeb; border-color: #fde68a; color: #b45309; }
+.adv-gap { background: #faf5ff; border-color: #ddd6fe; color: #7c3aed; }
+.cp-gap-notice span { flex: 1; }
+.cp-gap-btn {
+  font-size: 10px; font-weight: 600; padding: 4px 10px;
+  border-radius: 6px; border: 1px solid currentColor;
+  background: white; cursor: pointer; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.cp-gap-btn:hover { opacity: 0.85; }
+
+.cp-panel-footer {
+  display: flex; gap: 8px; padding-top: 10px;
+  margin-top: 8px; border-top: 1px solid var(--gray-100);
+}
+.cp-panel-footer .btn { font-size: 12px; padding: 7px 14px; }
+
+/* ================================================================
+   CLAIMS PAGE
+   ================================================================ */
+.claims-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px; margin-bottom: 22px;
+}
+
+.cls-stat {
+  background: white; border-radius: var(--radius);
+  border: 1px solid var(--gray-200); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.cls-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+.cls-open     .cls-icon { background: #fef2f2; color: #dc2626; }
+.cls-review   .cls-icon { background: #eff6ff; color: #003087; }
+.cls-pending  .cls-icon { background: #fffbeb; color: #d97706; }
+.cls-approved .cls-icon { background: #f0fdf4; color: #059669; }
+.cls-paid     .cls-icon { background: #f0fdf4; color: #059669; }
+.cls-avg      .cls-icon { background: #faf5ff; color: #7c3aed; }
+.cls-val { font-size: 22px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+.cls-lbl { font-size: 11px; color: var(--gray-500); margin-top: 3px; }
+
+/* Section label */
+.claims-section-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; color: var(--gray-700);
+  margin-bottom: 10px;
+}
+.claims-count-badge {
+  font-size: 11px; font-weight: 700; padding: 2px 9px;
+  border-radius: 20px; background: var(--red-light); color: var(--red);
+}
+.claims-count-badge.resolved { background: var(--green-light); color: var(--green); }
+
+/* Claims table */
+.claims-table-wrapper { margin-bottom: 10px; overflow-x: auto; }
+.claims-table { width: 100%; }
+.claim-row.urgent { background: #fff9f9; }
+
+.claim-id {
+  font-family: monospace; font-size: 12px;
+  color: var(--nyl-blue); font-weight: 600;
+}
+
+/* Claim type badges */
+.claim-type-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 9px;
+  border-radius: 20px; white-space: nowrap;
+}
+.claim-type-badge.death       { background: #fee2e2; color: #b91c1c; }
+.claim-type-badge.disability  { background: #fef3c7; color: #92400e; }
+.claim-type-badge.ltc         { background: #dbeafe; color: #1d4ed8; }
+.claim-type-badge.accelerated { background: #fce7f3; color: #9d174d; }
+.claim-type-badge.waiver      { background: #ede9fe; color: #6d28d9; }
+
+/* Claim status badges */
+.claim-status-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 9px;
+  border-radius: 20px; white-space: nowrap;
+}
+.claim-status-badge.open    { background: #fee2e2; color: var(--red); }
+.claim-status-badge.review  { background: #dbeafe; color: #1d4ed8; }
+.claim-status-badge.pending { background: #fef3c7; color: var(--gold); }
+.claim-status-badge.paid    { background: var(--green-light); color: var(--green); }
+.claim-status-badge.denied  { background: var(--gray-200); color: var(--gray-600); }
+
+/* Priority badges */
+.priority-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 20px; white-space: nowrap;
+}
+.priority-badge.urgent { background: #fee2e2; color: var(--red); }
+.priority-badge.normal { background: #dbeafe; color: #1d4ed8; }
+.priority-badge.low    { background: var(--gray-100); color: var(--gray-500); }
+
+/* Resolution days */
+.res-days { font-size: 12px; font-weight: 600; }
+.res-days.good { color: var(--green); }
+.res-days.slow { color: var(--orange); }
+
+/* Claims type summary grid */
+.claims-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-top: 24px;
+}
+.ctype-card {
+  background: white; border-radius: var(--radius);
+  border: 1px solid var(--gray-200); padding: 16px 18px;
+  display: flex; align-items: flex-start; gap: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.ctype-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.death-type       .ctype-icon { background: #fee2e2; color: #b91c1c; }
+.disability-type  .ctype-icon { background: #fef3c7; color: #92400e; }
+.ltc-type         .ctype-icon { background: #dbeafe; color: #1d4ed8; }
+.accelerated-type .ctype-icon { background: #fce7f3; color: #9d174d; }
+.waiver-type      .ctype-icon { background: #ede9fe; color: #6d28d9; }
+.ai-card          .ctype-icon { background: linear-gradient(135deg,#ede9fe,#ddd6fe); color: #7c3aed; }
+.ai-card { flex-direction: column; }
+.ai-card .ctype-icon { margin-bottom: 4px; }
+.ctype-body { flex: 1; }
+.ctype-name  { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 3px; }
+.ctype-count { font-size: 12px; color: var(--gray-500); }
+.ctype-value { font-size: 13px; font-weight: 600; color: var(--nyl-blue); margin-top: 3px; }
+
+/* Sidebar claims-nav */
+.claims-nav i { color: #dc2626 !important; }
+.claims-nav.active { background: rgba(220,38,38,0.08) !important; border-left-color: #dc2626 !important; }
+
+/* mini-avatar for KP */
+.mini-avatar.kp { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .claims-summary-strip { grid-template-columns: repeat(3, 1fr); }
+  .claims-type-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .claims-summary-strip { grid-template-columns: repeat(2, 1fr); }
+  .claims-type-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Sidebar Sub-Group (Claims under Policies) ── */
+.nav-sub-group {
+  position: relative;
+  padding-left: 0;
+}
+.nav-sub-group::before {
+  content: '';
+  position: absolute;
+  left: 28px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(0,48,135,0.2), transparent);
+}
+.nav-sub-item {
+  margin-left: 12px;
+  padding-left: 20px !important;
+  font-size: 12.5px !important;
+  border-left: 2px solid transparent;
+  position: relative;
+}
+.nav-sub-item::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 1px;
+  background: rgba(0,48,135,0.25);
+}
+.nav-sub-item i {
+  font-size: 12px !important;
+  width: 16px !important;
+}
+.nav-sub-item:hover {
+  background: rgba(220,38,38,0.06) !important;
+  border-left-color: #dc2626 !important;
+  padding-left: 20px !important;
+}
+.nav-sub-item.active {
+  background: rgba(220,38,38,0.1) !important;
+  border-left-color: #dc2626 !important;
+}
+.nav-sub-item.active span:first-of-type { color: #dc2626 !important; }
+
+/* ── Client Product-Type Filter Tabs ── */
+.client-product-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  flex-wrap: wrap;
+}
+.client-product-tabs::-webkit-scrollbar { height: 4px; }
+.client-product-tabs::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
+
+.cpt-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: white;
+  border: 2px solid var(--gray-100);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  min-width: 130px;
+  text-align: left;
+}
+.cpt-tab i {
+  font-size: 18px;
+  color: var(--gray-400);
+  width: 22px;
+  flex-shrink: 0;
+}
+.cpt-tab-content { display: flex; flex-direction: column; gap: 1px; }
+.cpt-count { font-size: 20px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+.cpt-label { font-size: 12px; font-weight: 600; color: var(--gray-700); }
+.cpt-sub   { font-size: 10px; color: var(--gray-400); }
+
+.cpt-tab:hover { border-color: var(--gray-300); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+
+/* Active state — default */
+.cpt-tab.active {
+  background: var(--nyl-blue);
+  border-color: var(--nyl-blue);
+  box-shadow: 0 4px 12px rgba(0,48,135,0.2);
+}
+.cpt-tab.active i, .cpt-tab.active .cpt-count, .cpt-tab.active .cpt-label, .cpt-tab.active .cpt-sub { color: white !important; }
+
+/* Domain-colored active states */
+.cpt-tab.ins-tab.active { background: #003087; border-color: #003087; }
+.cpt-tab.inv-tab.active { background: #059669; border-color: #059669; }
+.cpt-tab.ret-tab.active { background: #d97706; border-color: #d97706; }
+.cpt-tab.adv-tab.active { background: #7c3aed; border-color: #7c3aed; }
+.cpt-tab.gaps-tab.active { background: #dc2626; border-color: #dc2626; }
+
+/* Domain-colored icons on hover/inactive */
+.cpt-tab.ins-tab  i { color: #003087; }
+.cpt-tab.inv-tab  i { color: #059669; }
+.cpt-tab.ret-tab  i { color: #d97706; }
+.cpt-tab.adv-tab  i { color: #7c3aed; }
+.cpt-tab.gaps-tab i { color: #dc2626; }
+
+/* Domain accent border on inactive hover */
+.cpt-tab.ins-tab:hover  { border-color: #003087; }
+.cpt-tab.inv-tab:hover  { border-color: #059669; }
+.cpt-tab.ret-tab:hover  { border-color: #d97706; }
+.cpt-tab.adv-tab:hover  { border-color: #7c3aed; }
+.cpt-tab.gaps-tab:hover { border-color: #dc2626; }
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .client-product-tabs { flex-wrap: nowrap; }
+  .cpt-tab { min-width: 110px; padding: 10px 14px; }
+  .cpt-count { font-size: 18px; }
+}
+@media (max-width: 900px) {
+  .client-product-tabs { gap: 8px; }
+  .cpt-tab { min-width: 90px; padding: 8px 10px; gap: 7px; }
+  .cpt-tab i { font-size: 15px; }
+  .cpt-count { font-size: 16px; }
+}

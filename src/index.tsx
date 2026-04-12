@@ -77,6 +77,110 @@ const mockClients = [
   { id: 8, name: 'Linda Morrison', age: 56, email: 'linda.m@email.com', phone: '(718) 555-0108', policies: 5, premium: 32000, status: 'Active', segment: 'Premium', lastContact: '2026-04-09', city: 'Long Island', score: 98 },
 ]
 
+// Full product holdings per client across all 4 domains
+const clientProducts: Record<number, {
+  insurance: { id: string; product: string; type: string; premium: number; faceValue: string; status: string; since: string }[];
+  investments: { id: string; product: string; type: string; value: string; return: string; status: string; since: string }[];
+  retirement: { id: string; product: string; type: string; value: string; income: string; status: string; since: string }[];
+  advisory: { id: string; product: string; type: string; value: string; fee: string; status: string; since: string }[];
+}> = {
+  1: { // James Whitfield
+    insurance: [
+      { id: 'P-100291', product: 'Whole Life Insurance', type: 'Permanent', premium: 4800, faceValue: '$500K', status: 'Active', since: '2019' },
+      { id: 'P-100292', product: 'Term Life Insurance', type: '20-Year Term', premium: 3200, faceValue: '$750K', status: 'Active', since: '2021' },
+      { id: 'P-100293', product: 'Long-term Care Insurance', type: 'LTC', premium: 4400, faceValue: '$250K', status: 'Active', since: '2022' },
+    ],
+    investments: [],
+    retirement: [
+      { id: 'R-200112', product: 'Deferred Annuity', type: 'Fixed Deferred', value: '$0 (illustrating)', income: '~$2,800/mo at 65', status: 'Prospect', since: '2026' },
+    ],
+    advisory: [
+      { id: 'A-300091', product: 'Estate Planning', type: 'Will & Trust Review', value: 'In Progress', fee: 'Included', status: 'Active', since: '2025' },
+    ],
+  },
+  2: { // Patricia Nguyen
+    insurance: [
+      { id: 'P-100301', product: 'Universal Life Insurance', type: 'Permanent', premium: 3000, faceValue: '$400K', status: 'Active', since: '2020' },
+      { id: 'P-100302', product: 'Variable Universal Life', type: 'VUL', premium: 2800, faceValue: '$300K', status: 'Active', since: '2023' },
+    ],
+    investments: [],
+    retirement: [],
+    advisory: [],
+  },
+  3: { // Robert Chen
+    insurance: [
+      { id: 'P-100310', product: 'Whole Life Insurance', type: 'Permanent', premium: 6000, faceValue: '$1M', status: 'Active', since: '2018' },
+      { id: 'P-100311', product: 'Variable Universal Life', type: 'VUL', premium: 8400, faceValue: '$800K', status: 'Active', since: '2020' },
+    ],
+    investments: [
+      { id: 'I-400221', product: 'VUL Sub-accounts', type: 'Market-linked', value: '$180K AUM', return: '+11.2% YTD', status: 'Active', since: '2020' },
+    ],
+    retirement: [],
+    advisory: [
+      { id: 'A-300102', product: 'Business Services', type: 'Key-Person Life + Buy-Sell', value: '$500K coverage', fee: '$1,200/yr', status: 'Active', since: '2021' },
+      { id: 'A-300103', product: 'Executive Benefits', type: 'NQDC Plan', value: '$150K deferred', fee: '$800/yr', status: 'Active', since: '2022' },
+    ],
+  },
+  4: { // Sandra Williams
+    insurance: [
+      { id: 'P-100320', product: 'Term Life Insurance', type: '20-Year Term', premium: 2800, faceValue: '$350K', status: 'Review', since: '2016' },
+      { id: 'P-100321', product: 'Long-term Care Insurance', type: 'LTC', premium: 5400, faceValue: '$180K', status: 'Active', since: '2020' },
+    ],
+    investments: [],
+    retirement: [
+      { id: 'R-200198', product: 'Immediate Income Annuity', type: 'Fixed Immediate', value: '$120K premium', income: '$680/mo lifetime', status: 'Prospect', since: '2026' },
+    ],
+    advisory: [],
+  },
+  5: { // David Thompson
+    insurance: [
+      { id: 'P-100330', product: 'Term Life Insurance', type: '20-Year Term', premium: 2400, faceValue: '$300K', status: 'Active', since: '2023' },
+    ],
+    investments: [],
+    retirement: [],
+    advisory: [],
+  },
+  6: { // Maria Gonzalez
+    insurance: [
+      { id: 'P-100340', product: 'Universal Life Insurance', type: 'Permanent', premium: 5600, faceValue: '$600K', status: 'Active', since: '2017' },
+      { id: 'P-100341', product: 'Disability Insurance', type: 'Individual DI', premium: 3200, faceValue: '60% income', status: 'Active', since: '2021' },
+    ],
+    investments: [
+      { id: 'I-400301', product: 'Fixed Annuity', type: 'Fixed Deferred', value: '$95K AUM', return: '+4.8% guaranteed', status: 'Active', since: '2019' },
+    ],
+    retirement: [
+      { id: 'R-200211', product: 'Immediate Annuity', type: 'Fixed Immediate', value: '$95K', income: '$520/mo interest', status: 'Active', since: '2019' },
+    ],
+    advisory: [],
+  },
+  7: { // Kevin Park
+    insurance: [
+      { id: 'P-100350', product: 'Term Life Insurance', type: '20-Year Term', premium: 1800, faceValue: '$250K', status: 'Pending', since: '2026' },
+    ],
+    investments: [],
+    retirement: [],
+    advisory: [],
+  },
+  8: { // Linda Morrison
+    insurance: [
+      { id: 'P-100360', product: 'Whole Life Insurance', type: 'Permanent', premium: 12000, faceValue: '$2M', status: 'Active', since: '2015' },
+      { id: 'P-100361', product: 'Long-term Care Insurance', type: 'LTC', premium: 7200, faceValue: '$300K', status: 'Active', since: '2019' },
+      { id: 'P-100362', product: 'Variable Universal Life', type: 'VUL', premium: 9600, faceValue: '$1.5M', status: 'Active', since: '2021' },
+    ],
+    investments: [
+      { id: 'I-400401', product: 'Mutual Funds', type: 'MainStay Balanced', value: '$180K AUM', return: '+9.4% YTD', status: 'Active', since: '2018' },
+      { id: 'I-400402', product: 'ETF Portfolio', type: 'Core Equity ETFs', value: '$100K AUM', return: '+12.1% YTD', status: 'Active', since: '2022' },
+    ],
+    retirement: [
+      { id: 'R-200301', product: 'Deferred Annuity', type: 'Variable Deferred', value: '$280K AUM', income: 'Est. $3,200/mo at 65', status: 'Active', since: '2020' },
+    ],
+    advisory: [
+      { id: 'A-300201', product: 'Unified Managed Account', type: 'UMA — Discretionary', value: '$280K AUM', fee: '$2,800/yr (1%)', status: 'Active', since: '2022' },
+      { id: 'A-300202', product: 'Estate Planning', type: 'Trust + Will + POA', value: '$2M+ estate', fee: 'Included', status: 'Active', since: '2020' },
+    ],
+  },
+}
+
 const mockPolicies = [
   { id: 'P-100291', client: 'James Whitfield', type: 'Whole Life Insurance', premium: 4800, faceValue: 500000, status: 'Active', issued: '2019-06-15', renewal: '2026-06-15', beneficiary: 'Emily Whitfield' },
   { id: 'P-100292', client: 'James Whitfield', type: 'Term Life Insurance', premium: 3200, faceValue: 750000, status: 'Active', issued: '2021-03-01', renewal: '2031-03-01', beneficiary: 'Emily Whitfield' },
@@ -144,6 +248,7 @@ function MainApp() {
         <div id="tpl-dashboard"><DashboardPage /></div>
         <div id="tpl-clients"><ClientsPage /></div>
         <div id="tpl-policies"><PoliciesPage /></div>
+        <div id="tpl-claims"><ClaimsPage /></div>
         <div id="tpl-ai-agents"><AIAgentsPage /></div>
         <div id="tpl-sales"><SalesPage /></div>
         <div id="tpl-products"><ProductsPage /></div>
@@ -195,6 +300,13 @@ function Sidebar() {
           <span>Policies</span>
           <span class="nav-badge">1.8K</span>
         </a>
+        <div class="nav-sub-group">
+          <a class="nav-item nav-sub-item claims-nav" onclick="navigateTo('claims')" href="#">
+            <i class="fas fa-file-medical-alt"></i>
+            <span>Claims</span>
+            <span class="nav-badge alert">7</span>
+          </a>
+        </div>
         <a class="nav-item ai-nav" onclick="navigateTo('ai-agents')" href="#">
           <i class="fas fa-robot"></i>
           <span>AI Agents</span>
@@ -849,30 +961,58 @@ function ClientsPage() {
   return (
     <div class="page clients-page">
 
-      {/* Holistic book summary strip */}
-      <div class="clients-book-strip">
-        <div class="cbs-stat">
-          <div class="cbs-icon ins-bg"><i class="fas fa-shield-alt"></i></div>
-          <div class="cbs-body"><div class="cbs-val">247</div><div class="cbs-lbl">Total Clients</div></div>
-        </div>
-        <div class="cbs-stat">
-          <div class="cbs-icon inv-bg"><i class="fas fa-chart-line"></i></div>
-          <div class="cbs-body"><div class="cbs-val">62</div><div class="cbs-lbl">Investment Clients</div></div>
-        </div>
-        <div class="cbs-stat">
-          <div class="cbs-icon ret-bg"><i class="fas fa-umbrella-beach"></i></div>
-          <div class="cbs-body"><div class="cbs-val">38</div><div class="cbs-lbl">Retirement Clients</div></div>
-        </div>
-        <div class="cbs-stat">
-          <div class="cbs-icon adv-bg"><i class="fas fa-handshake"></i></div>
-          <div class="cbs-body"><div class="cbs-val">59</div><div class="cbs-lbl">Advisory Clients</div></div>
-        </div>
-        <div class="cbs-stat highlight">
-          <div class="cbs-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-exclamation-circle"></i></div>
-          <div class="cbs-body"><div class="cbs-val" style="color:#d97706">128</div><div class="cbs-lbl">Clients with Gaps</div></div>
-        </div>
+      {/* ── Product Type Filter Tabs ── */}
+      <div class="client-product-tabs">
+        <button class="cpt-tab active" onclick="filterClientsByProductTab('all', this)">
+          <i class="fas fa-users"></i>
+          <div class="cpt-tab-content">
+            <span class="cpt-count">247</span>
+            <span class="cpt-label">All Clients</span>
+          </div>
+        </button>
+        <button class="cpt-tab ins-tab" onclick="filterClientsByProductTab('insurance', this)">
+          <i class="fas fa-shield-alt"></i>
+          <div class="cpt-tab-content">
+            <span class="cpt-count">247</span>
+            <span class="cpt-label">Insurance</span>
+            <span class="cpt-sub">1,842 policies</span>
+          </div>
+        </button>
+        <button class="cpt-tab inv-tab" onclick="filterClientsByProductTab('investments', this)">
+          <i class="fas fa-chart-line"></i>
+          <div class="cpt-tab-content">
+            <span class="cpt-count">62</span>
+            <span class="cpt-label">Investments</span>
+            <span class="cpt-sub">$4.2M AUM</span>
+          </div>
+        </button>
+        <button class="cpt-tab ret-tab" onclick="filterClientsByProductTab('retirement', this)">
+          <i class="fas fa-umbrella-beach"></i>
+          <div class="cpt-tab-content">
+            <span class="cpt-count">38</span>
+            <span class="cpt-label">Retirement</span>
+            <span class="cpt-sub">$1.8M assets</span>
+          </div>
+        </button>
+        <button class="cpt-tab adv-tab" onclick="filterClientsByProductTab('advisory', this)">
+          <i class="fas fa-handshake"></i>
+          <div class="cpt-tab-content">
+            <span class="cpt-count">59</span>
+            <span class="cpt-label">Advisory</span>
+            <span class="cpt-sub">$2.1M managed</span>
+          </div>
+        </button>
+        <button class="cpt-tab gaps-tab" onclick="filterClientsByProductTab('gaps', this)">
+          <i class="fas fa-exclamation-circle"></i>
+          <div class="cpt-tab-content">
+            <span class="cpt-count">128</span>
+            <span class="cpt-label">Has Gaps</span>
+            <span class="cpt-sub">$31.2K potential</span>
+          </div>
+        </button>
       </div>
 
+      {/* ── Toolbar ── */}
       <div class="page-toolbar">
         <div class="toolbar-left">
           <div class="search-inline">
@@ -888,7 +1028,7 @@ function ClientsPage() {
           </select>
           <select class="filter-select" id="domain-filter" onchange="filterByDomain(this.value)">
             <option value="">All Services</option>
-            <option value="insurance">Insurance Only</option>
+            <option value="insurance">Has Insurance</option>
             <option value="investments">Has Investments</option>
             <option value="retirement">Has Retirement</option>
             <option value="advisory">Has Advisory</option>
@@ -911,26 +1051,29 @@ function ClientsPage() {
         </div>
       </div>
 
+      {/* ── Client Cards with Product Holdings ── */}
       <div class="clients-grid" id="clients-grid">
         {mockClients.map(client => {
           const dom = clientDomains[client.id] || { ins: true, inv: false, ret: false, adv: false, gaps: [] }
+          const prods = clientProducts[client.id] || { insurance: [], investments: [], retirement: [], advisory: [] }
+          const initials = client.name.split(' ').map((n:string) => n[0]).join('')
+          const avatarKey = initials.toLowerCase()
           return (
-            <div class={`client-card segment-${client.segment.replace(' ', '-').toLowerCase()}`} onclick={`openClientModal(${client.id})`}>
-              <div class="client-card-header">
-                <div class={`client-avatar-lg ca-${client.name.split(' ').map((n:string) => n[0]).join('').toLowerCase()}`}>
-                  {client.name.split(' ').map((n:string) => n[0]).join('')}
-                </div>
+            <div class={`client-card segment-${client.segment.replace(' ', '-').toLowerCase()}`}>
+
+              {/* ── Card Header ── */}
+              <div class="client-card-header" onclick={`toggleClientProducts(${client.id})`} style="cursor:pointer">
+                <div class={`client-avatar-lg ca-${avatarKey}`}>{initials}</div>
                 <div class="client-card-info">
                   <h4>{client.name}</h4>
                   <p>{client.city} · Age {client.age}</p>
                   <span class={`segment-tag seg-${client.segment.replace(' ', '-').toLowerCase()}`}>{client.segment}</span>
                 </div>
-                <div class="client-score-circle">
-                  <span>{client.score}</span>
-                </div>
+                <div class="client-score-circle"><span>{client.score}</span></div>
+                <i class="fas fa-chevron-down client-expand-icon" id={`expand-icon-${client.id}`}></i>
               </div>
 
-              {/* Domain coverage row */}
+              {/* ── Domain Coverage Pills ── */}
               <div class="client-domain-row">
                 <div class={`cdomain-pill ${dom.ins ? 'active-ins' : 'inactive'}`} title="Insurance">
                   <i class="fas fa-shield-alt"></i> Ins
@@ -944,13 +1087,14 @@ function ClientsPage() {
                 <div class={`cdomain-pill ${dom.adv ? 'active-adv' : 'inactive'}`} title="Advisory">
                   <i class="fas fa-handshake"></i> Adv
                 </div>
-                {dom.aum && <div class="cdomain-aum" title="Assets Under Management"><i class="fas fa-coins"></i> {dom.aum}</div>}
+                {dom.aum && <div class="cdomain-aum"><i class="fas fa-coins"></i> {dom.aum}</div>}
               </div>
 
+              {/* ── Key Stats ── */}
               <div class="client-card-stats">
                 <div class="cs-stat">
-                  <span class="cs-val">{client.policies}</span>
-                  <span class="cs-lbl">Policies</span>
+                  <span class="cs-val">{prods.insurance.length + prods.investments.length + prods.retirement.length + prods.advisory.length}</span>
+                  <span class="cs-lbl">Products</span>
                 </div>
                 <div class="cs-stat">
                   <span class="cs-val">${(client.premium/1000).toFixed(1)}K</span>
@@ -962,6 +1106,7 @@ function ClientsPage() {
                 </div>
               </div>
 
+              {/* ── Gaps Row ── */}
               {dom.gaps.length > 0 && (
                 <div class="client-gaps-row">
                   <i class="fas fa-exclamation-circle" style="color:#d97706;font-size:11px"></i>
@@ -969,11 +1114,135 @@ function ClientsPage() {
                 </div>
               )}
 
+              {/* ── Expandable Product Holdings ── */}
+              <div class="client-products-panel" id={`products-panel-${client.id}`} style="display:none">
+
+                {/* Insurance Products */}
+                {prods.insurance.length > 0 && (
+                  <div class="cp-domain-section">
+                    <div class="cp-domain-header ins-header">
+                      <i class="fas fa-shield-alt"></i> Insurance Products
+                      <span class="cp-count">{prods.insurance.length}</span>
+                    </div>
+                    {prods.insurance.map(p => (
+                      <div class="cp-product-row">
+                        <div class="cp-prod-icon ins-bg"><i class="fas fa-file-contract"></i></div>
+                        <div class="cp-prod-info">
+                          <div class="cp-prod-name">{p.product} <span class="cp-prod-type">{p.type}</span></div>
+                          <div class="cp-prod-meta">{p.id} · Since {p.since}</div>
+                        </div>
+                        <div class="cp-prod-vals">
+                          <div class="cp-val">${(p.premium/1000).toFixed(1)}K<span class="cp-val-lbl">/yr</span></div>
+                          <div class="cp-sub">{p.faceValue} face</div>
+                        </div>
+                        <span class={`cp-status-badge ${p.status.toLowerCase()}`}>{p.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Investment Products */}
+                {prods.investments.length > 0 ? (
+                  <div class="cp-domain-section">
+                    <div class="cp-domain-header inv-header">
+                      <i class="fas fa-chart-line"></i> Investment Products
+                      <span class="cp-count">{prods.investments.length}</span>
+                    </div>
+                    {prods.investments.map(p => (
+                      <div class="cp-product-row">
+                        <div class="cp-prod-icon inv-bg"><i class="fas fa-coins"></i></div>
+                        <div class="cp-prod-info">
+                          <div class="cp-prod-name">{p.product} <span class="cp-prod-type">{p.type}</span></div>
+                          <div class="cp-prod-meta">{p.id} · Since {p.since}</div>
+                        </div>
+                        <div class="cp-prod-vals">
+                          <div class="cp-val">{p.value}</div>
+                          <div class="cp-sub" style="color:#059669">{p.return}</div>
+                        </div>
+                        <span class={`cp-status-badge ${p.status.toLowerCase()}`}>{p.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div class="cp-gap-notice inv-gap">
+                    <i class="fas fa-chart-line"></i>
+                    <span>No Investment products · <strong>Opportunity</strong></span>
+                    <button class="cp-gap-btn" onclick={`navigateTo('products')`}>Explore Products</button>
+                  </div>
+                )}
+
+                {/* Retirement Products */}
+                {prods.retirement.length > 0 ? (
+                  <div class="cp-domain-section">
+                    <div class="cp-domain-header ret-header">
+                      <i class="fas fa-umbrella-beach"></i> Retirement Products
+                      <span class="cp-count">{prods.retirement.length}</span>
+                    </div>
+                    {prods.retirement.map(p => (
+                      <div class="cp-product-row">
+                        <div class="cp-prod-icon ret-bg"><i class="fas fa-umbrella-beach"></i></div>
+                        <div class="cp-prod-info">
+                          <div class="cp-prod-name">{p.product} <span class="cp-prod-type">{p.type}</span></div>
+                          <div class="cp-prod-meta">{p.id} · Since {p.since}</div>
+                        </div>
+                        <div class="cp-prod-vals">
+                          <div class="cp-val">{p.value}</div>
+                          <div class="cp-sub">{p.income}</div>
+                        </div>
+                        <span class={`cp-status-badge ${p.status.toLowerCase()}`}>{p.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div class="cp-gap-notice ret-gap">
+                    <i class="fas fa-umbrella-beach"></i>
+                    <span>No Retirement products · <strong>Opportunity</strong></span>
+                    <button class="cp-gap-btn" onclick={`navigateTo('products')`}>Explore Products</button>
+                  </div>
+                )}
+
+                {/* Advisory Products */}
+                {prods.advisory.length > 0 ? (
+                  <div class="cp-domain-section">
+                    <div class="cp-domain-header adv-header">
+                      <i class="fas fa-handshake"></i> Advisory Services
+                      <span class="cp-count">{prods.advisory.length}</span>
+                    </div>
+                    {prods.advisory.map(p => (
+                      <div class="cp-product-row">
+                        <div class="cp-prod-icon adv-bg"><i class="fas fa-landmark"></i></div>
+                        <div class="cp-prod-info">
+                          <div class="cp-prod-name">{p.product} <span class="cp-prod-type">{p.type}</span></div>
+                          <div class="cp-prod-meta">{p.id} · Since {p.since}</div>
+                        </div>
+                        <div class="cp-prod-vals">
+                          <div class="cp-val">{p.value}</div>
+                          <div class="cp-sub">{p.fee} fee</div>
+                        </div>
+                        <span class={`cp-status-badge ${p.status.toLowerCase()}`}>{p.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div class="cp-gap-notice adv-gap">
+                    <i class="fas fa-handshake"></i>
+                    <span>No Advisory services · <strong>Opportunity</strong></span>
+                    <button class="cp-gap-btn" onclick={`navigateTo('products')`}>Explore Products</button>
+                  </div>
+                )}
+
+                <div class="cp-panel-footer">
+                  <button class="btn btn-ai" onclick={`event.stopPropagation(); aiAnalyzeClient(${client.id})`}><i class="fas fa-robot"></i> AI Product Recommendation</button>
+                  <button class="btn btn-outline-sm" onclick="navigateTo('products')"><i class="fas fa-box-open"></i> Browse Products</button>
+                </div>
+              </div>
+
+              {/* ── Footer ── */}
               <div class="client-card-footer">
                 <span><i class="fas fa-clock"></i> {client.lastContact}</span>
-                <button class="btn-icon" title="Call"><i class="fas fa-phone"></i></button>
-                <button class="btn-icon" title="Email"><i class="fas fa-envelope"></i></button>
-                <button class="btn-icon ai-btn" title="AI Analysis" onclick="event.stopPropagation(); aiAnalyzeClient(this)"><i class="fas fa-robot"></i></button>
+                <button class="btn-icon" title="Call" onclick="event.stopPropagation()"><i class="fas fa-phone"></i></button>
+                <button class="btn-icon" title="Email" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i></button>
+                <button class="btn-icon ai-btn" title="AI Analysis" onclick={`event.stopPropagation(); aiAnalyzeClient(${client.id})`}><i class="fas fa-robot"></i></button>
               </div>
             </div>
           )
@@ -987,8 +1256,7 @@ function ClientsPage() {
             <h3 id="modal-client-name">Client Details</h3>
             <button class="modal-close" onclick="closeClientModal()"><i class="fas fa-times"></i></button>
           </div>
-          <div class="modal-body" id="modal-client-body">
-          </div>
+          <div class="modal-body" id="modal-client-body"></div>
         </div>
       </div>
     </div>
@@ -1106,6 +1374,364 @@ function PoliciesPage() {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ClaimsPage() {
+  return (
+    <div class="page claims-page">
+
+      {/* ── Claims Summary Strip ── */}
+      <div class="claims-summary-strip">
+        <div class="cls-stat cls-open">
+          <div class="cls-icon"><i class="fas fa-folder-open"></i></div>
+          <div class="cls-body"><div class="cls-val">7</div><div class="cls-lbl">Open Claims</div></div>
+        </div>
+        <div class="cls-stat cls-review">
+          <div class="cls-icon"><i class="fas fa-search"></i></div>
+          <div class="cls-body"><div class="cls-val">3</div><div class="cls-lbl">Under Review</div></div>
+        </div>
+        <div class="cls-stat cls-pending">
+          <div class="cls-icon"><i class="fas fa-hourglass-half"></i></div>
+          <div class="cls-body"><div class="cls-val">2</div><div class="cls-lbl">Pending Docs</div></div>
+        </div>
+        <div class="cls-stat cls-approved">
+          <div class="cls-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="cls-body"><div class="cls-val">14</div><div class="cls-lbl">Approved YTD</div></div>
+        </div>
+        <div class="cls-stat cls-paid">
+          <div class="cls-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div class="cls-body"><div class="cls-val">$284K</div><div class="cls-lbl">Paid Out YTD</div></div>
+        </div>
+        <div class="cls-stat cls-avg">
+          <div class="cls-icon"><i class="fas fa-clock"></i></div>
+          <div class="cls-body"><div class="cls-val">5.2d</div><div class="cls-lbl">Avg Resolution</div></div>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <div class="search-inline">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search claims, clients, policy IDs..." />
+          </div>
+          <select class="filter-select">
+            <option value="">All Types</option>
+            <option>Death Benefit</option>
+            <option>Disability</option>
+            <option>Long-term Care</option>
+            <option>Accelerated Benefit</option>
+            <option>Waiver of Premium</option>
+          </select>
+          <select class="filter-select">
+            <option value="">All Status</option>
+            <option>Open</option>
+            <option>Under Review</option>
+            <option>Pending Documentation</option>
+            <option>Approved</option>
+            <option>Paid</option>
+            <option>Denied</option>
+          </select>
+          <select class="filter-select">
+            <option value="">All Priority</option>
+            <option>Urgent</option>
+            <option>Normal</option>
+            <option>Low</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-ai" onclick="navigateTo('ai-agents')">
+            <i class="fas fa-robot"></i> AI Claims Analysis
+          </button>
+          <button class="btn btn-primary">
+            <i class="fas fa-plus"></i> File New Claim
+          </button>
+        </div>
+      </div>
+
+      {/* ── Open / Active Claims ── */}
+      <div class="claims-section-label">
+        <i class="fas fa-folder-open"></i> Open &amp; Active Claims
+        <span class="claims-count-badge">7</span>
+      </div>
+
+      <div class="claims-table-wrapper">
+        <table class="data-table claims-table">
+          <thead>
+            <tr>
+              <th>Claim ID</th>
+              <th>Client</th>
+              <th>Policy</th>
+              <th>Claim Type</th>
+              <th>Amount</th>
+              <th>Filed Date</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Assigned To</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="claim-row urgent">
+              <td><span class="claim-id">CLM-2026-0041</span></td>
+              <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
+              <td><span class="policy-id">P-100310</span></td>
+              <td><span class="claim-type-badge death">Death Benefit</span></td>
+              <td class="premium">$1,000,000</td>
+              <td class="text-muted">2026-04-09</td>
+              <td><span class="claim-status-badge review">Under Review</span></td>
+              <td><span class="priority-badge urgent">Urgent</span></td>
+              <td class="text-muted">Claims Dept.</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><span class="claim-id">CLM-2026-0038</span></td>
+              <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
+              <td><span class="policy-id">P-100321</span></td>
+              <td><span class="claim-type-badge ltc">Long-term Care</span></td>
+              <td class="premium">$18,000</td>
+              <td class="text-muted">2026-04-01</td>
+              <td><span class="claim-status-badge open">Open</span></td>
+              <td><span class="priority-badge normal">Normal</span></td>
+              <td class="text-muted">LTC Team</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><span class="claim-id">CLM-2026-0035</span></td>
+              <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
+              <td><span class="policy-id">P-100341</span></td>
+              <td><span class="claim-type-badge disability">Disability</span></td>
+              <td class="premium">$4,200/mo</td>
+              <td class="text-muted">2026-03-22</td>
+              <td><span class="claim-status-badge pending">Pending Docs</span></td>
+              <td><span class="priority-badge normal">Normal</span></td>
+              <td class="text-muted">DI Unit</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><span class="claim-id">CLM-2026-0033</span></td>
+              <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
+              <td><span class="policy-id">P-100293</span></td>
+              <td><span class="claim-type-badge ltc">Long-term Care</span></td>
+              <td class="premium">$9,600</td>
+              <td class="text-muted">2026-03-15</td>
+              <td><span class="claim-status-badge review">Under Review</span></td>
+              <td><span class="priority-badge normal">Normal</span></td>
+              <td class="text-muted">LTC Team</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><span class="claim-id">CLM-2026-0031</span></td>
+              <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
+              <td><span class="policy-id">P-100362</span></td>
+              <td><span class="claim-type-badge waiver">Waiver of Premium</span></td>
+              <td class="premium">$9,600/yr</td>
+              <td class="text-muted">2026-03-10</td>
+              <td><span class="claim-status-badge open">Open</span></td>
+              <td><span class="priority-badge low">Low</span></td>
+              <td class="text-muted">Agent Support</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><span class="claim-id">CLM-2026-0028</span></td>
+              <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
+              <td><span class="policy-id">P-100340</span></td>
+              <td><span class="claim-type-badge accelerated">Accelerated Benefit</span></td>
+              <td class="premium">$120,000</td>
+              <td class="text-muted">2026-03-05</td>
+              <td><span class="claim-status-badge pending">Pending Docs</span></td>
+              <td><span class="priority-badge urgent">Urgent</span></td>
+              <td class="text-muted">Claims Dept.</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><span class="claim-id">CLM-2026-0025</span></td>
+              <td><div class="client-cell"><div class="mini-avatar kp">KP</div><span>Kevin Park</span></div></td>
+              <td><span class="policy-id">P-100350</span></td>
+              <td><span class="claim-type-badge death">Death Benefit</span></td>
+              <td class="premium">$250,000</td>
+              <td class="text-muted">2026-02-28</td>
+              <td><span class="claim-status-badge review">Under Review</span></td>
+              <td><span class="priority-badge normal">Normal</span></td>
+              <td class="text-muted">Claims Dept.</td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── Recently Resolved Claims ── */}
+      <div class="claims-section-label" style="margin-top:28px">
+        <i class="fas fa-check-circle" style="color:#059669"></i> Recently Resolved Claims
+        <span class="claims-count-badge resolved">14 YTD</span>
+      </div>
+
+      <div class="claims-table-wrapper">
+        <table class="data-table claims-table">
+          <thead>
+            <tr>
+              <th>Claim ID</th>
+              <th>Client</th>
+              <th>Policy</th>
+              <th>Claim Type</th>
+              <th>Amount Paid</th>
+              <th>Filed</th>
+              <th>Resolved</th>
+              <th>Status</th>
+              <th>Resolution Days</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="claim-id">CLM-2026-0022</span></td>
+              <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
+              <td><span class="policy-id">P-100360</span></td>
+              <td><span class="claim-type-badge death">Death Benefit (Rider)</span></td>
+              <td class="premium">$50,000</td>
+              <td class="text-muted">2026-02-10</td>
+              <td class="text-muted">2026-02-17</td>
+              <td><span class="claim-status-badge paid">Paid</span></td>
+              <td><span class="res-days good">7 days</span></td>
+              <td><div class="action-btns"><button class="btn-icon" title="View"><i class="fas fa-eye"></i></button></div></td>
+            </tr>
+            <tr>
+              <td><span class="claim-id">CLM-2026-0019</span></td>
+              <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
+              <td><span class="policy-id">P-100311</span></td>
+              <td><span class="claim-type-badge waiver">Waiver of Premium</span></td>
+              <td class="premium">$8,400/yr</td>
+              <td class="text-muted">2026-01-20</td>
+              <td class="text-muted">2026-01-24</td>
+              <td><span class="claim-status-badge paid">Approved</span></td>
+              <td><span class="res-days good">4 days</span></td>
+              <td><div class="action-btns"><button class="btn-icon" title="View"><i class="fas fa-eye"></i></button></div></td>
+            </tr>
+            <tr>
+              <td><span class="claim-id">CLM-2026-0015</span></td>
+              <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
+              <td><span class="policy-id">P-100291</span></td>
+              <td><span class="claim-type-badge accelerated">Accelerated Benefit</span></td>
+              <td class="premium">$75,000</td>
+              <td class="text-muted">2026-01-08</td>
+              <td class="text-muted">2026-01-15</td>
+              <td><span class="claim-status-badge paid">Paid</span></td>
+              <td><span class="res-days good">7 days</span></td>
+              <td><div class="action-btns"><button class="btn-icon" title="View"><i class="fas fa-eye"></i></button></div></td>
+            </tr>
+            <tr>
+              <td><span class="claim-id">CLM-2025-0198</span></td>
+              <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
+              <td><span class="policy-id">P-100320</span></td>
+              <td><span class="claim-type-badge disability">Disability</span></td>
+              <td class="premium">$12,600</td>
+              <td class="text-muted">2025-12-01</td>
+              <td class="text-muted">2025-12-08</td>
+              <td><span class="claim-status-badge paid">Paid</span></td>
+              <td><span class="res-days good">7 days</span></td>
+              <td><div class="action-btns"><button class="btn-icon" title="View"><i class="fas fa-eye"></i></button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── Claims by Type Summary ── */}
+      <div class="claims-type-grid">
+        <div class="ctype-card death-type">
+          <div class="ctype-icon"><i class="fas fa-heart-broken"></i></div>
+          <div class="ctype-body">
+            <div class="ctype-name">Death Benefit</div>
+            <div class="ctype-count">2 open · 4 resolved</div>
+            <div class="ctype-value">$1.25M total</div>
+          </div>
+        </div>
+        <div class="ctype-card disability-type">
+          <div class="ctype-icon"><i class="fas fa-user-injured"></i></div>
+          <div class="ctype-body">
+            <div class="ctype-name">Disability</div>
+            <div class="ctype-count">1 open · 3 resolved</div>
+            <div class="ctype-value">$50K/yr total</div>
+          </div>
+        </div>
+        <div class="ctype-card ltc-type">
+          <div class="ctype-icon"><i class="fas fa-hospital"></i></div>
+          <div class="ctype-body">
+            <div class="ctype-name">Long-term Care</div>
+            <div class="ctype-count">2 open · 4 resolved</div>
+            <div class="ctype-value">$27.6K total</div>
+          </div>
+        </div>
+        <div class="ctype-card accelerated-type">
+          <div class="ctype-icon"><i class="fas fa-bolt"></i></div>
+          <div class="ctype-body">
+            <div class="ctype-name">Accelerated Benefit</div>
+            <div class="ctype-count">1 open · 2 resolved</div>
+            <div class="ctype-value">$195K total</div>
+          </div>
+        </div>
+        <div class="ctype-card waiver-type">
+          <div class="ctype-icon"><i class="fas fa-ban"></i></div>
+          <div class="ctype-body">
+            <div class="ctype-name">Waiver of Premium</div>
+            <div class="ctype-count">1 open · 1 resolved</div>
+            <div class="ctype-value">$18K/yr total</div>
+          </div>
+        </div>
+        <div class="ctype-card ai-card">
+          <div class="ctype-icon"><i class="fas fa-robot"></i></div>
+          <div class="ctype-body">
+            <div class="ctype-name">AI Claims Assistant</div>
+            <div class="ctype-count">3 pending doc requests</div>
+            <div class="ctype-value">Auto-follow-ups ready</div>
+          </div>
+          <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="navigateTo('ai-agents')">Run AI Triage</button>
+        </div>
+      </div>
+
     </div>
   )
 }

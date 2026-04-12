@@ -26,7 +26,8 @@ function navigateTo(page) {
     products: 'Product Portfolio',
     reports: 'Reports & Analytics',
     calendar: 'Calendar & Events',
-    'ai-insights': 'AI Insights'
+    'ai-insights': 'AI Insights',
+    claims: 'Claims Management'
   };
 
   const breadcrumbs = {
@@ -38,7 +39,8 @@ function navigateTo(page) {
     products: 'Home / Products',
     reports: 'Home / Reports',
     calendar: 'Home / Calendar',
-    'ai-insights': 'Home / Insights / AI Insights'
+    'ai-insights': 'Home / Insights / AI Insights',
+    claims: 'Home / Claims'
   };
 
   const titleEl = document.getElementById('page-title');
@@ -306,6 +308,18 @@ function initReportCharts() {
 }
 
 // ---- CLIENT FUNCTIONS ----
+// ---- TOGGLE CLIENT PRODUCT HOLDINGS PANEL ----
+function toggleClientProducts(clientId) {
+  const panel = document.getElementById(`products-panel-${clientId}`);
+  const icon  = document.getElementById(`expand-icon-${clientId}`);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (icon) {
+    icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+}
+
 function filterClients(query) {
   const q = query.toLowerCase();
   document.querySelectorAll('.client-card').forEach(card => {
@@ -358,6 +372,59 @@ function filterByDomain(domain) {
       card.style.display = 'block';
     }
   });
+}
+
+// Product-type tab filter for Clients page
+function filterClientsByProductTab(domain, tabEl) {
+  // Update active tab styling
+  document.querySelectorAll('.cpt-tab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+
+  // Filter cards
+  document.querySelectorAll('.client-card').forEach((card, idx) => {
+    const id = idx + 1;
+    const d = domainCoverage[id] || { ins: true, inv: false, ret: false, adv: false, gaps: true };
+    if (domain === 'all' || !domain) {
+      card.style.display = 'block';
+    } else if (domain === 'insurance') {
+      card.style.display = d.ins ? 'block' : 'none';
+    } else if (domain === 'investments') {
+      card.style.display = d.inv ? 'block' : 'none';
+    } else if (domain === 'retirement') {
+      card.style.display = d.ret ? 'block' : 'none';
+    } else if (domain === 'advisory') {
+      card.style.display = d.adv ? 'block' : 'none';
+    } else if (domain === 'gaps') {
+      card.style.display = d.gaps ? 'block' : 'none';
+    } else {
+      card.style.display = 'block';
+    }
+  });
+
+  // Also auto-expand product panels for filtered domain
+  if (domain !== 'all') {
+    document.querySelectorAll('.client-card').forEach((card, idx) => {
+      const id = idx + 1;
+      const d = domainCoverage[id] || {};
+      const isVisible = card.style.display !== 'none';
+      if (isVisible) {
+        const panel = document.getElementById(`products-panel-${id}`);
+        const icon  = document.getElementById(`expand-icon-${id}`);
+        if (panel && panel.style.display === 'none') {
+          panel.style.display = 'block';
+          if (icon) icon.style.transform = 'rotate(180deg)';
+        }
+      }
+    });
+  } else {
+    // Collapse all panels when "All" is selected
+    document.querySelectorAll('.client-products-panel').forEach(p => {
+      p.style.display = 'none';
+    });
+    document.querySelectorAll('.client-expand-icon').forEach(i => {
+      i.style.transform = 'rotate(0deg)';
+    });
+  }
 }
 
 const clientData = [
