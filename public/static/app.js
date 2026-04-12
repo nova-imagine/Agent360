@@ -141,18 +141,20 @@ function initDashboardCharts() {
     });
   }
 
-  const policyMixEl = document.getElementById('policyMixChart');
-  if (policyMixEl) {
-    if (policyMixEl._chartInstance) policyMixEl._chartInstance.destroy();
-    policyMixEl._chartInstance = new Chart(policyMixEl, {
+  // Book Composition donut (used in dashboard)
+  const bookCompEl = document.getElementById('bookCompositionChart');
+  if (bookCompEl) {
+    if (bookCompEl._chartInstance) bookCompEl._chartInstance.destroy();
+    bookCompEl._chartInstance = new Chart(bookCompEl, {
       type: 'doughnut',
       data: {
-        labels: ['Whole Life', 'Term Life', 'Universal Life', 'Variable UL', 'Other'],
+        labels: ['Insurance', 'Investments', 'Retirement', 'Advisory'],
         datasets: [{
-          data: [32, 28, 18, 12, 10],
-          backgroundColor: ['#003087', '#059669', '#d97706', '#7c3aed', '#dc2626'],
-          borderWidth: 0,
-          hoverOffset: 6
+          data: [38, 26, 22, 14],
+          backgroundColor: ['#003087', '#059669', '#d97706', '#7c3aed'],
+          borderWidth: 2,
+          borderColor: '#ffffff',
+          hoverOffset: 8
         }]
       },
       options: {
@@ -162,10 +164,11 @@ function initDashboardCharts() {
           legend: { display: false },
           tooltip: {
             backgroundColor: '#1a2744',
+            padding: 10,
             callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` }
           }
         },
-        cutout: '68%'
+        cutout: '65%'
       }
     });
   }
