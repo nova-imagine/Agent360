@@ -506,6 +506,19 @@ function aiAnalyzeClient(btn) {
   }
 }
 
+// ---- PRODUCTS TAB SWITCHING ----
+function switchProductTab(tab) {
+  // Update left nav items
+  document.querySelectorAll('.tab-nav-item').forEach(el => el.classList.remove('active'));
+  const activeNav = document.getElementById(`ptab-${tab}`);
+  if (activeNav) activeNav.classList.add('active');
+
+  // Update right panels
+  document.querySelectorAll('.ptab-panel').forEach(el => el.classList.remove('active'));
+  const activePanel = document.getElementById(`panel-${tab}`);
+  if (activePanel) activePanel.classList.add('active');
+}
+
 // ---- QUICK QUOTE ----
 function calculateQuote() {
   const result = document.getElementById('quote-result');

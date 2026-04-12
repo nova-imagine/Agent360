@@ -1387,139 +1387,841 @@ function SalesPage() {
 function ProductsPage() {
   return (
     <div class="page products-page">
-      <div class="products-intro">
-        <h2>New York Life Product Portfolio</h2>
-        <p>Comprehensive suite of insurance and financial products to serve your clients at every life stage</p>
+
+      {/* Page Header */}
+      <div class="products-page-header">
+        <div class="products-header-text">
+          <h2><i class="fas fa-box-open"></i> New York Life Product Portfolio</h2>
+          <p>Comprehensive suite of insurance, investment, retirement and advisory solutions — curated for every client life stage</p>
+        </div>
+        <button class="btn btn-ai" onclick="navigateTo('sales')">
+          <i class="fas fa-calculator"></i> Quick Quote
+        </button>
       </div>
 
-      <div class="product-category">
-        <div class="product-cat-header">
-          <i class="fas fa-shield-alt"></i>
-          <h3>Life Insurance Products</h3>
+      {/* Main Category Tabs (left nav + right content — NYL-style) */}
+      <div class="products-layout">
+
+        {/* Left Tab Nav */}
+        <div class="products-tab-nav">
+          <div class="tab-nav-item active" id="ptab-insurance" onclick="switchProductTab('insurance')">
+            <i class="fas fa-shield-alt"></i>
+            <span>Insurance</span>
+            <i class="fas fa-chevron-right tab-arrow"></i>
+          </div>
+          <div class="tab-nav-item" id="ptab-investments" onclick="switchProductTab('investments')">
+            <i class="fas fa-chart-line"></i>
+            <span>Investments</span>
+            <i class="fas fa-chevron-right tab-arrow"></i>
+          </div>
+          <div class="tab-nav-item" id="ptab-retirement" onclick="switchProductTab('retirement')">
+            <i class="fas fa-umbrella-beach"></i>
+            <span>Retirement</span>
+            <i class="fas fa-chevron-right tab-arrow"></i>
+          </div>
+          <div class="tab-nav-item" id="ptab-advisory" onclick="switchProductTab('advisory')">
+            <i class="fas fa-handshake"></i>
+            <span>Advisory Services</span>
+            <i class="fas fa-chevron-right tab-arrow"></i>
+          </div>
+
+          {/* Info Panel beneath tabs */}
+          <div class="tab-nav-info">
+            <div class="tab-info-title">Learn about your life insurance options</div>
+            <div class="tab-info-desc">We can help you create a temporary, long-term, or permanent life insurance solution that meets your needs and your budget</div>
+            <button class="tab-info-link" onclick="navigateTo('sales')">Life insurance <i class="fas fa-arrow-right"></i></button>
+          </div>
         </div>
-        <div class="product-cards-grid">
-          {[
-            { name: 'Term Life Insurance', desc: 'Temporary protection that can be converted to permanent coverage', icon: 'fa-hourglass-half', color: 'blue', features: ['Convertible to permanent', 'Level premiums', 'Renewable options', 'Death benefit'] },
-            { name: 'Whole Life Insurance', desc: 'Permanent policies with guaranteed death benefit and cash value that grows over time', icon: 'fa-infinity', color: 'green', features: ['Guaranteed death benefit', 'Cash value growth', 'Potential dividends', 'Lifetime coverage'] },
-            { name: 'Universal Life Insurance', desc: 'Long-term coverage that\'s highly customizable to your needs and budget', icon: 'fa-sliders-h', color: 'purple', features: ['Flexible premiums', 'Adjustable death benefit', 'Cash value component', 'Long-term coverage'] },
-            { name: 'Variable Universal Life', desc: 'Long-term coverage with the ability to invest your policy\'s cash value in the market', icon: 'fa-chart-line', color: 'gold', features: ['Market investment options', 'Flexible premiums', 'Potential for higher returns', 'Death benefit'] },
-            { name: 'Long-term Care Insurance', desc: 'Helps to pay for someone to help you with everyday tasks, if you ever need it', icon: 'fa-heartbeat', color: 'red', features: ['Daily living assistance', 'Nursing home coverage', 'Home care benefits', 'Inflation protection'] },
-            { name: 'Individual Disability Insurance', desc: 'Helps to replace a portion of lost income if sickness or injury prevent you from working', icon: 'fa-user-shield', color: 'orange', features: ['Income replacement', 'Own-occupation definition', 'Partial disability', 'Non-cancelable options'] },
-          ].map(p => (
-            <div class={`product-card pc-${p.color}`}>
-              <div class="pc-icon"><i class={`fas ${p.icon}`}></i></div>
-              <h4>{p.name}</h4>
-              <p>{p.desc}</p>
-              <ul class="pc-features">
-                {p.features.map(f => <li><i class="fas fa-check"></i> {f}</li>)}
-              </ul>
-              <div class="pc-actions">
-                <button class="btn btn-outline-sm">Learn More</button>
-                <button class="btn btn-primary-sm" onclick="navigateTo('sales')">Quote Now</button>
+
+        {/* Right Content Panels */}
+        <div class="products-tab-content">
+
+          {/* ========== INSURANCE ========== */}
+          <div class="ptab-panel active" id="panel-insurance">
+            <div class="ptab-panel-header">
+              <h3><i class="fas fa-shield-alt"></i> Insurance</h3>
+              <p>Protect your clients and their families with NYL's full suite of life and disability insurance products</p>
+            </div>
+
+            <div class="product-subsections">
+
+              {/* Term Life */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon blue"><i class="fas fa-hourglass-half"></i></div>
+                  <div>
+                    <h4>Term life insurance</h4>
+                    <p>Temporary protection, at a lower cost than other options, that can be converted to permanent</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Coverage Duration</div>
+                      <div class="pdc-val">10, 15, 20, or 30 years</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Face Amount</div>
+                      <div class="pdc-val">$100K – $10M+</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Convertibility</div>
+                      <div class="pdc-val">Convertible to Whole Life</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Avg Monthly Premium</div>
+                      <div class="pdc-val green-text">$25 – $80/mo</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Level premiums locked in for term duration</li>
+                    <li><i class="fas fa-check"></i> Renewable at end of term period</li>
+                    <li><i class="fas fa-check"></i> Conversion privilege — no medical exam required</li>
+                    <li><i class="fas fa-check"></i> Optional riders: waiver of premium, accidental death</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 3 clients aged 28–40 in your book have no term coverage — potential new business opportunity.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Whole Life */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon green"><i class="fas fa-infinity"></i></div>
+                  <div>
+                    <h4>Whole life insurance</h4>
+                    <p>Permanent policies with a guaranteed death benefit and guaranteed cash value that grows over time</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Coverage Duration</div>
+                      <div class="pdc-val">Lifetime (permanent)</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Cash Value</div>
+                      <div class="pdc-val">Guaranteed growth</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Dividends</div>
+                      <div class="pdc-val">Eligible (not guaranteed)</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Policy Loans</div>
+                      <div class="pdc-val green-text">Available anytime</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Guaranteed death benefit — never decreases</li>
+                    <li><i class="fas fa-check"></i> Cash value grows at guaranteed rate tax-deferred</li>
+                    <li><i class="fas fa-check"></i> Eligible for annual dividends (NYL paid for 170+ years)</li>
+                    <li><i class="fas fa-check"></i> Can borrow against cash value — no credit check</li>
+                    <li><i class="fas fa-check"></i> Paid-up additions rider to accelerate growth</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison's Whole Life policy (P-100330) is eligible for a paid-up additions rider — could add $18K in cash value over 10 years.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Universal Life */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon purple"><i class="fas fa-sliders-h"></i></div>
+                  <div>
+                    <h4>Universal life insurance</h4>
+                    <p>Long-term coverage that's highly customizable to your needs and budget</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Premium Flexibility</div>
+                      <div class="pdc-val">Adjustable</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Death Benefit</div>
+                      <div class="pdc-val">Adjustable</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Interest Crediting</div>
+                      <div class="pdc-val">Current rate + minimum</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Best Fit Age</div>
+                      <div class="pdc-val green-text">35 – 60 yrs</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Flexible premium payments — pay more or less as cash flow changes</li>
+                    <li><i class="fas fa-check"></i> Adjustable death benefit — increase or decrease coverage</li>
+                    <li><i class="fas fa-check"></i> Cash value earns interest at current declared rate</li>
+                    <li><i class="fas fa-check"></i> Guaranteed minimum interest rate floor</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Patricia Nguyen's UL policy (P-100301) has been underfunded for 2 quarters — consider a premium catch-up review.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Variable Universal Life */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon gold"><i class="fas fa-chart-line"></i></div>
+                  <div>
+                    <h4>Variable universal life insurance</h4>
+                    <p>Long-term coverage protection with the ability to invest your policy's cash value in the market</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Investment Options</div>
+                      <div class="pdc-val">30+ sub-accounts</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Market Risk</div>
+                      <div class="pdc-val orange-text">Client bears risk</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Upside Potential</div>
+                      <div class="pdc-val">Unlimited</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Min Death Benefit</div>
+                      <div class="pdc-val green-text">Guaranteed</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Invest cash value in stocks, bonds, and money market sub-accounts</li>
+                    <li><i class="fas fa-check"></i> Flexible premiums and adjustable death benefit</li>
+                    <li><i class="fas fa-check"></i> Tax-deferred investment growth</li>
+                    <li><i class="fas fa-check"></i> Minimum guaranteed death benefit floor</li>
+                    <li><i class="fas fa-check"></i> Access to cash value via loans and withdrawals</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Robert Chen (business owner, age 45) is a strong VUL candidate — risk-tolerant profile with $21K annual premium capacity.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Long-Term Care */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon red"><i class="fas fa-heartbeat"></i></div>
+                  <div>
+                    <h4>Long-term care insurance</h4>
+                    <p>Helps to pay for someone to help you with everyday tasks, if you ever need it</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Daily Benefit</div>
+                      <div class="pdc-val">$100 – $400/day</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Benefit Period</div>
+                      <div class="pdc-val">2 – 5 years (or lifetime)</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Elimination Period</div>
+                      <div class="pdc-val">30, 60, or 90 days</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Best Fit Age</div>
+                      <div class="pdc-val green-text">50 – 65 yrs</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Covers nursing home, assisted living, and home care</li>
+                    <li><i class="fas fa-check"></i> Inflation protection rider available (3% or 5% compound)</li>
+                    <li><i class="fas fa-check"></i> Shared care benefit for spouses / partners</li>
+                    <li><i class="fas fa-check"></i> Return of premium option if never used</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 4 clients aged 55+ in your book have no LTC coverage — combined gap premium potential of ~$12,000/year.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Individual Disability */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon orange"><i class="fas fa-user-shield"></i></div>
+                  <div>
+                    <h4>Individual disability insurance</h4>
+                    <p>Helps to replace lost income if sickness or injury prevent you from working</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Income Replacement</div>
+                      <div class="pdc-val">Up to 60–70% of income</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Benefit Period</div>
+                      <div class="pdc-val">2 yr, 5 yr, to age 65</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Definition</div>
+                      <div class="pdc-val">Own-occupation</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Non-cancelable</div>
+                      <div class="pdc-val green-text">Available</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Own-occupation definition — most favorable for professionals</li>
+                    <li><i class="fas fa-check"></i> Non-cancelable and guaranteed renewable options</li>
+                    <li><i class="fas fa-check"></i> Partial/residual disability benefit included</li>
+                    <li><i class="fas fa-check"></i> Future purchase option rider — increase coverage without underwriting</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> David Thompson (age 33) and Patricia Nguyen (age 38) have no disability coverage — high-priority gap opportunity.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* ========== INVESTMENTS ========== */}
+          <div class="ptab-panel" id="panel-investments">
+            <div class="ptab-panel-header">
+              <h3><i class="fas fa-chart-line"></i> Investments</h3>
+              <p>Grow your clients' wealth with professionally managed investment solutions tailored to their goals and risk tolerance</p>
+            </div>
+
+            <div class="product-subsections">
+
+              {/* Annuities */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon blue"><i class="fas fa-lock"></i></div>
+                  <div>
+                    <h4>Annuities</h4>
+                    <p>Stable, long-term options that eventually provide an income stream</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Types Available</div>
+                      <div class="pdc-val">Fixed & Variable</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Payment Mode</div>
+                      <div class="pdc-val">Single premium</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Death Benefit</div>
+                      <div class="pdc-val green-text">Included</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Principal Guarantee</div>
+                      <div class="pdc-val green-text">Fixed type only</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Guaranteed income stream for life (immediate or deferred)</li>
+                    <li><i class="fas fa-check"></i> Tax-deferred accumulation during growth phase</li>
+                    <li><i class="fas fa-check"></i> Variable annuities offer sub-account investment options</li>
+                    <li><i class="fas fa-check"></i> Death benefit passes to beneficiary outside of probate</li>
+                    <li><i class="fas fa-check"></i> Optional riders: enhanced death benefit, GLWB, GMIB</li>
+                  </ul>
+                  <div class="prod-comparison-mini">
+                    <div class="pcm-row header"><span>Feature</span><span>Fixed Annuity</span><span>Variable Annuity</span></div>
+                    <div class="pcm-row"><span>Market Risk</span><span class="check-sm"><i class="fas fa-times text-red"></i> None</span><span class="check-sm orange-text">Client bears</span></div>
+                    <div class="pcm-row"><span>Principal Guarantee</span><span class="check-sm"><i class="fas fa-check text-green"></i></span><span class="check-sm"><i class="fas fa-times text-red"></i></span></div>
+                    <div class="pcm-row"><span>Income Conversion</span><span class="check-sm"><i class="fas fa-check text-green"></i></span><span class="check-sm"><i class="fas fa-check text-green"></i></span></div>
+                    <div class="pcm-row"><span>Investment Options</span><span class="check-sm"><i class="fas fa-times text-red"></i></span><span class="check-sm"><i class="fas fa-check text-green"></i></span></div>
+                  </div>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> James Whitfield (age 52) approaching retirement — deferred annuity conversion could provide ~$180K in guaranteed income at 65.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mutual Funds */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon green"><i class="fas fa-coins"></i></div>
+                  <div>
+                    <h4>Mutual funds</h4>
+                    <p>Professionally managed investments with potential market gains</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Fund Families</div>
+                      <div class="pdc-val">MainStay Funds + 3rd Party</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Minimum Investment</div>
+                      <div class="pdc-val">$500 (IRA) / $1,000</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Liquidity</div>
+                      <div class="pdc-val green-text">Daily (T+1)</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Management</div>
+                      <div class="pdc-val">Active / Passive</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Access to MainStay Funds — NYL's proprietary fund family</li>
+                    <li><i class="fas fa-check"></i> Diversified across equity, fixed income, and blended strategies</li>
+                    <li><i class="fas fa-check"></i> Automatic rebalancing available</li>
+                    <li><i class="fas fa-check"></i> Systematic investment plan — dollar-cost averaging</li>
+                    <li><i class="fas fa-check"></i> Available in IRA, Roth IRA, and taxable accounts</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Maria Gonzalez (age 48) has investable assets — mutual fund program may be a natural transition before recommending an SMA.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Fund Lineup</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Explore</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ETFs */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon purple"><i class="fas fa-exchange-alt"></i></div>
+                  <div>
+                    <h4>Exchange traded funds (ETFs)</h4>
+                    <p>Bundled investments with low fees that you can quickly buy or sell</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Fee Structure</div>
+                      <div class="pdc-val">0.03% – 0.25% avg</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Trading</div>
+                      <div class="pdc-val">Intraday (like stocks)</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Tax Efficiency</div>
+                      <div class="pdc-val green-text">High</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Min Investment</div>
+                      <div class="pdc-val">1 share</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Ultra-low expense ratios vs. active mutual funds</li>
+                    <li><i class="fas fa-check"></i> Broad market exposure — S&P 500, total market, sector ETFs</li>
+                    <li><i class="fas fa-check"></i> High tax efficiency due to in-kind creation/redemption</li>
+                    <li><i class="fas fa-check"></i> Transparent holdings — published daily</li>
+                    <li><i class="fas fa-check"></i> Excellent for low-cost core portfolio building</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Younger clients (David Thompson, Kevin Park) are ideal ETF candidates — low-cost entry point to build long-term wealth habits.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">ETF Catalog</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Explore</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 529 Plans */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon gold"><i class="fas fa-graduation-cap"></i></div>
+                  <div>
+                    <h4>529 college savings plans</h4>
+                    <p>Investments designed to help you pay for college or other education expenses</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Tax Treatment</div>
+                      <div class="pdc-val">Tax-free growth + withdrawal</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Annual Gift Exclusion</div>
+                      <div class="pdc-val">$18,000 / $90K (5-yr)</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Contribution Limit</div>
+                      <div class="pdc-val">$400K+ (varies by state)</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Qualified Uses</div>
+                      <div class="pdc-val green-text">College + K-12 + Trade</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Earnings grow federal tax-free when used for qualified education</li>
+                    <li><i class="fas fa-check"></i> State income tax deduction available in most states</li>
+                    <li><i class="fas fa-check"></i> Superfunding: contribute 5 years of gifts upfront ($90,000)</li>
+                    <li><i class="fas fa-check"></i> Can be transferred to another family member</li>
+                    <li><i class="fas fa-check"></i> SECURE 2.0: unused funds can roll to Roth IRA (up to $35K)</li>
+                  </ul>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 8 clients in your book have children under 10 — 529 plan conversations could add $4,800+ in annual premium.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">529 Calculator</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Investment Comparison Table */}
+            <div class="comparison-section" style="margin-top:24px">
+              <h4 class="comparison-title"><i class="fas fa-table"></i> Compare Investment Options</h4>
+              <div class="table-wrapper">
+                <table class="comparison-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th><th>Payments</th><th>Death Benefit</th><th>Income Stream</th>
+                      <th>Market Investment</th><th>Principal Guarantee</th><th>Fees</th><th>Liquidity</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="product-name-cell">Fixed Annuities</td><td>Single premium</td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td></td></tr>
+                    <tr><td class="product-name-cell">Variable Annuities</td><td>Single premium</td><td class="check"><i class="fas fa-check-circle"></i></td><td class="check"><i class="fas fa-check-circle"></i></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td></tr>
+                    <tr><td class="product-name-cell">Mutual Funds</td><td>You choose</td><td></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td class="check"><i class="fas fa-check-circle"></i></td></tr>
+                    <tr><td class="product-name-cell">ETFs</td><td>You choose</td><td></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td class="check"><i class="fas fa-check-circle"></i></td></tr>
+                    <tr><td class="product-name-cell">529 Plans</td><td>You choose</td><td></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <div class="product-category">
-        <div class="product-cat-header">
-          <i class="fas fa-chart-bar"></i>
-          <h3>Financial & Investment Products</h3>
-        </div>
-        <div class="product-cards-grid four-col">
-          {[
-            { name: 'Fixed Annuities', desc: 'Stable, long-term retirement savings options that eventually provide an income stream', icon: 'fa-lock', color: 'blue' },
-            { name: 'Variable Annuities', desc: 'Single premium with death benefit, income conversion, and market investment capabilities', icon: 'fa-chart-line', color: 'green' },
-            { name: 'Mutual Funds', desc: 'Professionally managed investments with exposure in the market', icon: 'fa-coins', color: 'gold' },
-            { name: 'ETFs', desc: 'Passively managed, low-fee investments that mimic the overall market or a specific segment', icon: 'fa-exchange-alt', color: 'purple' },
-            { name: '529 College Savings Plans', desc: 'Investments designed to help you save for college or other education expenses', icon: 'fa-graduation-cap', color: 'blue' },
-            { name: 'Wealth Management', desc: 'Expertise and guidance to create an investment strategy for your future financial needs', icon: 'fa-gem', color: 'gold' },
-            { name: 'Estate Planning', desc: 'Guidance to protect your legacy including will, trust, POA, and tax strategies', icon: 'fa-landmark', color: 'purple' },
-            { name: 'Small Business Services', desc: 'Insurance planning and retirement for employees, executives, or business owners', icon: 'fa-building', color: 'orange' },
-          ].map(p => (
-            <div class={`product-card compact pc-${p.color}`}>
-              <div class="pc-icon"><i class={`fas ${p.icon}`}></i></div>
-              <h4>{p.name}</h4>
-              <p>{p.desc}</p>
-              <button class="btn btn-primary-sm" onclick="navigateTo('sales')">Explore</button>
+          {/* ========== RETIREMENT ========== */}
+          <div class="ptab-panel" id="panel-retirement">
+            <div class="ptab-panel-header">
+              <h3><i class="fas fa-umbrella-beach"></i> Retirement</h3>
+              <p>Help your clients build a secure retirement income strategy with guaranteed income solutions that last a lifetime</p>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Investment Comparison Table */}
-      <div class="comparison-section">
-        <h3><i class="fas fa-table"></i> Investment Options Comparison</h3>
-        <div class="table-wrapper">
-          <table class="comparison-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Payments</th>
-                <th>Death Benefit</th>
-                <th>Income Stream</th>
-                <th>Market Investment</th>
-                <th>Principal Guarantee</th>
-                <th>Fees & Expenses</th>
-                <th>Liquidity</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="product-name-cell"><a href="#">Fixed Annuities</a></td>
-                <td>Single premium</td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td></td>
-                <td></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr>
-                <td class="product-name-cell"><a href="#">Variable Annuities</a></td>
-                <td>Single premium</td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td></td>
-              </tr>
-              <tr>
-                <td class="product-name-cell"><a href="#">Mutual Funds</a></td>
-                <td>You choose</td>
-                <td></td>
-                <td></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-              </tr>
-              <tr>
-                <td class="product-name-cell"><a href="#">ETFs</a></td>
-                <td>You choose</td>
-                <td></td>
-                <td></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-              </tr>
-              <tr>
-                <td class="product-name-cell"><a href="#">529 Plans</a></td>
-                <td>You choose</td>
-                <td></td>
-                <td></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td></td>
-                <td class="check"><i class="fas fa-check-circle"></i></td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+            <div class="product-subsections">
+
+              {/* Immediate Income Annuities */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon blue"><i class="fas fa-play-circle"></i></div>
+                  <div>
+                    <h4>Immediate income annuities</h4>
+                    <p>Start to receive income now, for as long as you need it, with potential for additional earnings</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Income Start</div>
+                      <div class="pdc-val">Within 1–12 months</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Income Duration</div>
+                      <div class="pdc-val">Life / Joint Life / Period</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Payment Options</div>
+                      <div class="pdc-val">Monthly / Quarterly / Annual</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Best Fit Age</div>
+                      <div class="pdc-val green-text">65 – 80 yrs</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Guaranteed income payments that cannot be outlived</li>
+                    <li><i class="fas fa-check"></i> Joint-life option covers both spouses for life</li>
+                    <li><i class="fas fa-check"></i> Period certain option — minimum payment guarantee (e.g., 10 yrs)</li>
+                    <li><i class="fas fa-check"></i> Potential dividend participation for income increases</li>
+                    <li><i class="fas fa-check"></i> Backed by NYL's 178+ years of financial strength</li>
+                  </ul>
+                  <div class="prod-retire-highlight">
+                    <div class="rh-item">
+                      <i class="fas fa-shield-alt"></i>
+                      <div><strong>Guaranteed Income</strong><p>Payments for as long as you live — regardless of market conditions</p></div>
+                    </div>
+                    <div class="rh-item">
+                      <i class="fas fa-university"></i>
+                      <div><strong>Financial Reliability</strong><p>Backed by NYL's 178-year legacy and highest financial strength ratings</p></div>
+                    </div>
+                    <div class="rh-item">
+                      <i class="fas fa-hand-holding-usd"></i>
+                      <div><strong>Stretch Your Savings</strong><p>Potential annual dividends can increase your income over time</p></div>
+                    </div>
+                  </div>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison (age 56) and James Whitfield (age 52) are ideal immediate annuity candidates in 8–12 years — begin the conversation now.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Income Illustration</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Deferred Income Annuities */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon green"><i class="fas fa-hourglass-end"></i></div>
+                  <div>
+                    <h4>Deferred income annuities</h4>
+                    <p>Receive income for life and larger payouts by delaying them for at least a few years</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="prod-detail-grid">
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Deferral Period</div>
+                      <div class="pdc-val">2 – 40 years</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Income Boost</div>
+                      <div class="pdc-val green-text">Higher payout at start</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Purchase Age</div>
+                      <div class="pdc-val">40 – 70 yrs</div>
+                    </div>
+                    <div class="prod-detail-card">
+                      <div class="pdc-label">Payments</div>
+                      <div class="pdc-val">Single or periodic</div>
+                    </div>
+                  </div>
+                  <ul class="prod-feature-list">
+                    <li><i class="fas fa-check"></i> Lock in today's rates for future income — the longer you wait, the higher the payout</li>
+                    <li><i class="fas fa-check"></i> Excellent hedge against longevity risk for clients in their 40s–50s</li>
+                    <li><i class="fas fa-check"></i> Flexible start date — you choose when income begins</li>
+                    <li><i class="fas fa-check"></i> Survivor benefit — return of premium to beneficiary if client dies early</li>
+                    <li><i class="fas fa-check"></i> Can fund with rollovers from IRA, 401(k), or taxable savings</li>
+                  </ul>
+                  <div class="prod-retire-highlight">
+                    <div class="rh-item">
+                      <i class="fas fa-clock"></i>
+                      <div><strong>Personal Flexibility</strong><p>You select when income starts — as short as 2 years or up to 40 years out</p></div>
+                    </div>
+                    <div class="rh-item">
+                      <i class="fas fa-chart-bar"></i>
+                      <div><strong>Larger Payouts</strong><p>Delaying income payments means significantly larger guaranteed income amounts</p></div>
+                    </div>
+                  </div>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Patricia Nguyen (age 38) could lock in a deferred annuity now at today's rates — projected income starting at age 65 of ~$2,800/month.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Deferral Calculator</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Retirement Income Comparison */}
+            <div class="comparison-section" style="margin-top:24px">
+              <h4 class="comparison-title"><i class="fas fa-balance-scale"></i> Immediate vs. Deferred Income Annuities</h4>
+              <div class="retire-compare-grid">
+                <div class="rc-card blue-border">
+                  <div class="rc-title"><i class="fas fa-play-circle"></i> Immediate Income Annuity</div>
+                  <div class="rc-rows">
+                    <div class="rc-row"><span>Income Starts</span><strong>Within 1–12 months</strong></div>
+                    <div class="rc-row"><span>Best For</span><strong>Already retired or retiring soon</strong></div>
+                    <div class="rc-row"><span>Payout Level</span><strong>Moderate</strong></div>
+                    <div class="rc-row"><span>Flexibility</span><strong>Lower — locked in</strong></div>
+                    <div class="rc-row"><span>Longevity Risk</span><strong class="green-text">Fully covered</strong></div>
+                  </div>
+                </div>
+                <div class="rc-card green-border">
+                  <div class="rc-title"><i class="fas fa-hourglass-end"></i> Deferred Income Annuity</div>
+                  <div class="rc-rows">
+                    <div class="rc-row"><span>Income Starts</span><strong>2 – 40 years from now</strong></div>
+                    <div class="rc-row"><span>Best For</span><strong>Mid-career planners (40s–50s)</strong></div>
+                    <div class="rc-row"><span>Payout Level</span><strong class="green-text">Higher — worth the wait</strong></div>
+                    <div class="rc-row"><span>Flexibility</span><strong>Higher — choose start date</strong></div>
+                    <div class="rc-row"><span>Longevity Risk</span><strong class="green-text">Fully covered</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ========== ADVISORY SERVICES ========== */}
+          <div class="ptab-panel" id="panel-advisory">
+            <div class="ptab-panel-header">
+              <h3><i class="fas fa-handshake"></i> Advisory Services</h3>
+              <p>Expert guidance across wealth management, estate planning, and small business solutions — for your most complex client needs</p>
+            </div>
+
+            <div class="product-subsections">
+
+              {/* Wealth Management */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon gold"><i class="fas fa-gem"></i></div>
+                  <div>
+                    <h4>Wealth management</h4>
+                    <p>Expertise and guidance to create your investment strategy and help you plan for future financial needs</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="advisory-programs-grid">
+                    <div class="adv-program-card">
+                      <div class="adv-prog-icon"><i class="fas fa-tasks"></i></div>
+                      <div class="adv-prog-name">Fund Advisory Program</div>
+                      <div class="adv-prog-desc">Professionally managed model portfolios using mutual funds. Ongoing monitoring and automatic rebalancing.</div>
+                      <div class="adv-prog-min">Min: $25,000</div>
+                    </div>
+                    <div class="adv-program-card">
+                      <div class="adv-prog-icon"><i class="fas fa-layer-group"></i></div>
+                      <div class="adv-prog-name">Separately Managed Account (SMA)</div>
+                      <div class="adv-prog-desc">Direct ownership of individual securities managed by institutional money managers. Greater customization and tax efficiency.</div>
+                      <div class="adv-prog-min">Min: $100,000</div>
+                    </div>
+                    <div class="adv-program-card">
+                      <div class="adv-prog-icon"><i class="fas fa-user-tie"></i></div>
+                      <div class="adv-prog-name">Rep-Directed Program</div>
+                      <div class="adv-prog-desc">Your advisor builds and manages a customized portfolio based on your specific investment goals and preferences.</div>
+                      <div class="adv-prog-min">Min: $50,000</div>
+                    </div>
+                    <div class="adv-program-card">
+                      <div class="adv-prog-icon"><i class="fas fa-network-wired"></i></div>
+                      <div class="adv-prog-name">Unified Managed Account (UMA)</div>
+                      <div class="adv-prog-desc">Combines multiple investment strategies — mutual funds, ETFs, SMAs — in a single account for maximum diversification.</div>
+                      <div class="adv-prog-min">Min: $250,000</div>
+                    </div>
+                  </div>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison and Robert Chen are strong UMA candidates with estimated investable assets of $500K+. Schedule wealth management conversations.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Program Comparison</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> AI Client Match</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estate Planning */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon purple"><i class="fas fa-landmark"></i></div>
+                  <div>
+                    <h4>Estate planning</h4>
+                    <p>Guidance to help identify potential needs and set you up with an estate plan that can protect your legacy</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="estate-features-grid">
+                    <div class="estate-feature-card">
+                      <div class="ef-icon"><i class="fas fa-scroll"></i></div>
+                      <div class="ef-name">Last Will &amp; Testament</div>
+                      <div class="ef-desc">Directs distribution of assets, names guardians for minor children, and designates an executor</div>
+                    </div>
+                    <div class="estate-feature-card">
+                      <div class="ef-icon"><i class="fas fa-gavel"></i></div>
+                      <div class="ef-name">Power of Attorney</div>
+                      <div class="ef-desc">Authorizes a trusted person to make financial and legal decisions if you become incapacitated</div>
+                    </div>
+                    <div class="estate-feature-card">
+                      <div class="ef-icon"><i class="fas fa-balance-scale"></i></div>
+                      <div class="ef-name">Trusts</div>
+                      <div class="ef-desc">Revocable living trusts, irrevocable trusts, and special needs trusts to manage and protect assets</div>
+                    </div>
+                    <div class="estate-feature-card">
+                      <div class="ef-icon"><i class="fas fa-gift"></i></div>
+                      <div class="ef-name">Lifetime Gifts</div>
+                      <div class="ef-desc">Strategic gifting strategies to transfer wealth during life and reduce future estate tax exposure</div>
+                    </div>
+                    <div class="estate-feature-card">
+                      <div class="ef-icon"><i class="fas fa-percentage"></i></div>
+                      <div class="ef-name">Tax Strategies</div>
+                      <div class="ef-desc">Federal and state estate tax minimization, including ILIT, GRAT, and charitable giving strategies</div>
+                    </div>
+                    <div class="estate-feature-card">
+                      <div class="ef-icon"><i class="fas fa-star-of-life"></i></div>
+                      <div class="ef-name">Special Provisions</div>
+                      <div class="ef-desc">Provisions for beneficiaries with special needs, spendthrift clauses, and pet trusts</div>
+                    </div>
+                  </div>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 4 clients qualify for estate planning reviews: Linda Morrison ($2M+ policy), James Whitfield (multiple assets), Robert Chen (business owner), Maria Gonzalez (interest flagged).</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Estate Checklist</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Estate AI Review</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Small Business */}
+              <div class="prod-subsection">
+                <div class="prod-sub-header">
+                  <div class="prod-sub-icon orange"><i class="fas fa-building"></i></div>
+                  <div>
+                    <h4>Small business</h4>
+                    <p>Insurance for employees, executives, or business owners, plus many other options to help a small business thrive</p>
+                  </div>
+                </div>
+                <div class="prod-sub-details">
+                  <div class="biz-solutions-grid">
+                    <div class="biz-solution-card orange-border">
+                      <div class="biz-sol-header"><i class="fas fa-user-tie"></i> Business Owners</div>
+                      <ul>
+                        <li>Buy-sell agreement funding</li>
+                        <li>Key person life insurance</li>
+                        <li>Business succession planning</li>
+                        <li>Split-dollar arrangements</li>
+                        <li>Deferred compensation plans</li>
+                      </ul>
+                    </div>
+                    <div class="biz-solution-card blue-border">
+                      <div class="biz-sol-header"><i class="fas fa-crown"></i> Executive Benefits</div>
+                      <ul>
+                        <li>Non-qualified deferred compensation (NQDC)</li>
+                        <li>Supplemental executive retirement plans (SERP)</li>
+                        <li>Executive bonus (Section 162) plans</li>
+                        <li>Corporate-owned life insurance (COLI)</li>
+                        <li>Supplemental disability insurance</li>
+                      </ul>
+                    </div>
+                    <div class="biz-solution-card green-border">
+                      <div class="biz-sol-header"><i class="fas fa-users"></i> Employee Benefits</div>
+                      <ul>
+                        <li>Group life and disability insurance</li>
+                        <li>401(k) and retirement plan setup</li>
+                        <li>Voluntary benefits programs</li>
+                        <li>Pension and defined benefit plans</li>
+                        <li>Employee education and wellness plans</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Robert Chen (business owner) and James Whitfield have identified business planning needs — schedule a small business review to explore NQDC and key person coverage.</div>
+                  <div class="prod-sub-actions">
+                    <button class="btn btn-outline-sm">Business Solutions Guide</button>
+                    <button class="btn btn-primary-sm" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Business AI Audit</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>{/* end products-tab-content */}
+      </div>{/* end products-layout */}
     </div>
   )
 }
