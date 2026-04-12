@@ -1332,9 +1332,9 @@ function PoliciesPage() {
                 <td class="text-muted">{p.beneficiary}</td>
                 <td>
                   <div class="action-btns">
-                    <button class="btn-icon" title="View Details"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon" title="Edit Policy"><i class="fas fa-edit"></i></button>
-                    <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                    <button class="btn-icon" title="View Details" onclick={`openPolicyModal('${p.id}','view')`}><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Edit Policy"  onclick={`openPolicyModal('${p.id}','edit')`}><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon ai-btn" title="AI Analysis" onclick={`openPolicyModal('${p.id}','ai')`}><i class="fas fa-robot"></i></button>
                   </div>
                 </td>
               </tr>
@@ -1372,6 +1372,30 @@ function PoliciesPage() {
             <div class="sc-val">2026-06-15</div>
             <div class="sc-lbl">Next Renewal</div>
           </div>
+        </div>
+      </div>
+
+      {/* ── Policy Modal ── */}
+      <div class="detail-modal-overlay" id="policy-modal-overlay" onclick="closePolicyModal()">
+        <div class="detail-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header" id="policy-modal-header">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" id="policy-modal-icon"><i class="fas fa-file-contract"></i></span>
+              <div>
+                <h3 id="policy-modal-title">Policy Details</h3>
+                <p id="policy-modal-subtitle" class="detail-modal-sub"></p>
+              </div>
+            </div>
+            <div class="detail-modal-header-actions">
+              <div class="detail-modal-tabs" id="policy-modal-tabs">
+                <button class="dmt-tab active" onclick="switchPolicyTab('view',this)"><i class="fas fa-eye"></i> View</button>
+                <button class="dmt-tab" onclick="switchPolicyTab('edit',this)"><i class="fas fa-edit"></i> Edit</button>
+                <button class="dmt-tab ai-tab" onclick="switchPolicyTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
+              </div>
+              <button class="detail-modal-close" onclick="closePolicyModal()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="detail-modal-body" id="policy-modal-body"></div>
         </div>
       </div>
     </div>
@@ -1486,9 +1510,9 @@ function ClaimsPage() {
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0041','ai')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -1504,9 +1528,9 @@ function ClaimsPage() {
               <td class="text-muted">LTC Team</td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0038','ai')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -1522,9 +1546,9 @@ function ClaimsPage() {
               <td class="text-muted">DI Unit</td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0035','ai')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -1540,9 +1564,9 @@ function ClaimsPage() {
               <td class="text-muted">LTC Team</td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0033','ai')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -1558,9 +1582,9 @@ function ClaimsPage() {
               <td class="text-muted">Agent Support</td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0031','ai')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -1576,9 +1600,9 @@ function ClaimsPage() {
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0028','ai')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -1594,9 +1618,9 @@ function ClaimsPage() {
               <td class="text-muted">Claims Dept.</td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon" title="View Claim"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0025','ai')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -1637,7 +1661,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-02-17</td>
               <td><span class="claim-status-badge paid">Paid</span></td>
               <td><span class="res-days good">7 days</span></td>
-              <td><div class="action-btns"><button class="btn-icon" title="View"><i class="fas fa-eye"></i></button></div></td>
+              <td><div class="action-btns"><button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0022','view')"><i class="fas fa-eye"></i></button></div></td>
             </tr>
             <tr>
               <td><span class="claim-id">CLM-2026-0019</span></td>
@@ -1649,7 +1673,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-01-24</td>
               <td><span class="claim-status-badge paid">Approved</span></td>
               <td><span class="res-days good">4 days</span></td>
-              <td><div class="action-btns"><button class="btn-icon" title="View"><i class="fas fa-eye"></i></button></div></td>
+              <td><div class="action-btns"><button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0019','view')"><i class="fas fa-eye"></i></button></div></td>
             </tr>
             <tr>
               <td><span class="claim-id">CLM-2026-0015</span></td>
@@ -1661,7 +1685,7 @@ function ClaimsPage() {
               <td class="text-muted">2026-01-15</td>
               <td><span class="claim-status-badge paid">Paid</span></td>
               <td><span class="res-days good">7 days</span></td>
-              <td><div class="action-btns"><button class="btn-icon" title="View"><i class="fas fa-eye"></i></button></div></td>
+              <td><div class="action-btns"><button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0015','view')"><i class="fas fa-eye"></i></button></div></td>
             </tr>
             <tr>
               <td><span class="claim-id">CLM-2025-0198</span></td>
@@ -1673,7 +1697,7 @@ function ClaimsPage() {
               <td class="text-muted">2025-12-08</td>
               <td><span class="claim-status-badge paid">Paid</span></td>
               <td><span class="res-days good">7 days</span></td>
-              <td><div class="action-btns"><button class="btn-icon" title="View"><i class="fas fa-eye"></i></button></div></td>
+              <td><div class="action-btns"><button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0198','view')"><i class="fas fa-eye"></i></button></div></td>
             </tr>
           </tbody>
         </table>
@@ -1729,6 +1753,29 @@ function ClaimsPage() {
             <div class="ctype-value">Auto-follow-ups ready</div>
           </div>
           <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="navigateTo('ai-agents')">Run AI Triage</button>
+        </div>
+      </div>
+
+      {/* ── Claim Detail Modal ── */}
+      <div class="detail-modal-overlay" id="claim-modal-overlay" onclick="closeClaimModal()">
+        <div class="detail-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header claim-modal-header" id="claim-modal-header">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" id="claim-modal-icon"><i class="fas fa-file-medical-alt"></i></span>
+              <div>
+                <h3 id="claim-modal-title">Claim Details</h3>
+                <p id="claim-modal-subtitle" class="detail-modal-sub"></p>
+              </div>
+            </div>
+            <div class="detail-modal-header-actions">
+              <div class="detail-modal-tabs" id="claim-modal-tabs">
+                <button class="dmt-tab active" onclick="switchClaimTab('view',this)"><i class="fas fa-eye"></i> View Claim</button>
+                <button class="dmt-tab ai-tab" onclick="switchClaimTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
+              </div>
+              <button class="detail-modal-close" onclick="closeClaimModal()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="detail-modal-body" id="claim-modal-body"></div>
         </div>
       </div>
 
