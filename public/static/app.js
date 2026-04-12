@@ -1551,3 +1551,250 @@ function runIDPScan() {
     }, 2000);
   }, 2200);
 }
+
+// ============================================================
+//  #3 PROACTIVE AI ALERT CARD — toggle & modal
+// ============================================================
+
+function togglePACPanel(btn) {
+  const body = document.getElementById('pac-alerts-body');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  const icon = btn.querySelector('i');
+  if (icon) icon.className = isOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+  btn.title = isOpen ? 'Expand alerts' : 'Collapse alerts';
+}
+
+// ── PAC Modal data ──
+const pacAlertData = {
+  'obituary-kevin': {
+    type: 'death',
+    iconClass: 'fa-heart-broken',
+    headerColor: '#dc2626',
+    title: 'Death Detected — Kevin Park',
+    subtitle: 'Obituary match · Policy P-100350 · Action Required',
+    sections: [
+      {
+        icon: 'fa-search', title: 'AI Detection Summary',
+        content: `
+          <div class="pac-detail-grid">
+            <div class="pac-detail-item"><span class="pac-dl">Client</span><span class="pac-dv">Kevin Park · Age 29 · Jersey City, NJ</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Date of Death</span><span class="pac-dv bold red-text">2026-04-10 (confirmed)</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Detection Source</span><span class="pac-dv">Public obituary registry + NJ DoH cross-match</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Match Confidence</span><span class="pac-dv bold">97.4% — High confidence</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Policy</span><span class="pac-dv mono">P-100350 · Term Life · $250,000 face value</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Policy Status</span><span class="pac-dv"><span class="badge-inline pending">Pending (application stage)</span></span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Active Claim</span><span class="pac-dv mono">CLM-2026-0025 · Filed 2026-02-28 by estate</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Fraud Score</span><span class="pac-dv"><span class="badge-inline flagged">78 / 100 — Flagged</span></span></div>
+          </div>`
+      },
+      {
+        icon: 'fa-exclamation-triangle', title: 'Critical Issues Requiring Action',
+        content: `
+          <div class="pac-issue-list">
+            <div class="pac-issue critical"><i class="fas fa-times-circle"></i><div><strong>Coverage determination needed:</strong> Policy P-100350 was in Pending status at time of death. Claim cannot be processed until underwriting confirms whether coverage was in force.</div></div>
+            <div class="pac-issue critical"><i class="fas fa-times-circle"></i><div><strong>Medical records outstanding:</strong> Underwriting review requires medical records to confirm application status. Estate of Kevin Park must provide these.</div></div>
+            <div class="pac-issue warning"><i class="fas fa-exclamation-triangle"></i><div><strong>Estate representative unidentified:</strong> No estate contact on file. Beneficiary relationship to policyholder unverified. Need attorney or executor contact.</div></div>
+            <div class="pac-issue warning"><i class="fas fa-exclamation-triangle"></i><div><strong>Contestability edge case:</strong> Policy &lt;90 days old at death. Heightened scrutiny required per NYL claims protocol.</div></div>
+          </div>`
+      },
+      {
+        icon: 'fa-tasks', title: 'AI Recommended Action Plan',
+        content: `
+          <div class="pac-action-steps">
+            <div class="pac-step"><span class="pac-step-num">1</span><div><strong>Coordinate with underwriting team</strong> — confirm binding status of application as of 2026-02-01. Priority: today.</div></div>
+            <div class="pac-step"><span class="pac-step-num">2</span><div><strong>Contact NJ Probate Court</strong> — obtain estate administrator details to establish communication channel for document requests.</div></div>
+            <div class="pac-step"><span class="pac-step-num">3</span><div><strong>Send medical records request</strong> to estate representative via certified mail + email. Set 14-day response deadline.</div></div>
+            <div class="pac-step"><span class="pac-step-num">4</span><div><strong>Assign Senior Adjuster + Legal Counsel</strong> — escalate CLM-2026-0025 to senior review given Pending policy status at death.</div></div>
+            <div class="pac-step"><span class="pac-step-num">5</span><div><strong>Document all communications</strong> with estate — maintain audit trail for legal review and regulatory compliance.</div></div>
+          </div>`
+      }
+    ]
+  },
+
+  'lapse-patricia': {
+    type: 'lapse',
+    iconClass: 'fa-battery-quarter',
+    headerColor: '#d97706',
+    title: 'Policy Lapse Risk — Patricia Nguyen',
+    subtitle: 'Universal Life P-100301 · Under-funded 2 quarters · Action Required',
+    sections: [
+      {
+        icon: 'fa-chart-line', title: 'AI Cash Flow Analysis',
+        content: `
+          <div class="pac-detail-grid">
+            <div class="pac-detail-item"><span class="pac-dl">Client</span><span class="pac-dv">Patricia Nguyen · Age 38 · Brooklyn, NY</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Policy</span><span class="pac-dv mono">P-100301 · Universal Life · $400,000 face value</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Current Cash Value</span><span class="pac-dv bold orange-text">$21,400 (below minimum)</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Minimum Required</span><span class="pac-dv bold">$28,000 to sustain current coverage</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Quarters Under-funded</span><span class="pac-dv bold red-text">2 consecutive quarters</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">AI Lapse Prediction</span><span class="pac-dv bold red-text">~2026-06-20 (60–90 days) if no action</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Annual Premium Paid</span><span class="pac-dv">$3,000/yr (currently insufficient for cost of insurance)</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Re-qualification Risk</span><span class="pac-dv bold red-text">High — new medical UW required at age 38 if lapsed</span></div>
+          </div>`
+      },
+      {
+        icon: 'fa-exclamation-triangle', title: 'Why This Matters',
+        content: `
+          <div class="pac-issue-list">
+            <div class="pac-issue critical"><i class="fas fa-times-circle"></i><div><strong>Coverage loss risk:</strong> If policy lapses, Patricia loses $400K death benefit coverage. New policy at current age with comparable coverage would cost ~$1,800–$2,400 more per year.</div></div>
+            <div class="pac-issue critical"><i class="fas fa-times-circle"></i><div><strong>Medical re-qualification:</strong> Any new Universal Life policy requires full medical underwriting. Patricia's health status may have changed — coverage could be rated or declined.</div></div>
+            <div class="pac-issue warning"><i class="fas fa-exclamation-triangle"></i><div><strong>2 dependents identified:</strong> Client profile notes suggest Patricia has young children. Loss of life coverage during active parenting years is a significant family risk.</div></div>
+            <div class="pac-issue info"><i class="fas fa-info-circle"></i><div><strong>Retention opportunity:</strong> A premium catch-up of $1,800–$2,400 over 3 months is sufficient to restore policy health. Low effort, high impact retention action.</div></div>
+          </div>`
+      },
+      {
+        icon: 'fa-tasks', title: 'AI Recommended Action Plan',
+        content: `
+          <div class="pac-action-steps">
+            <div class="pac-step urgent"><span class="pac-step-num urgent">!</span><div><strong>⚡ Call Patricia Nguyen this week</strong> — explain lapse risk in plain terms. Frame as protecting her family's coverage, not a sales call.</div></div>
+            <div class="pac-step"><span class="pac-step-num">1</span><div><strong>Prepare premium catch-up illustration</strong> — show $600/month for 3 months restores policy to healthy status. Total: $1,800 one-time catch-up.</div></div>
+            <div class="pac-step"><span class="pac-step-num">2</span><div><strong>Discuss fixed premium restructuring</strong> — offer to convert to fixed-premium schedule to prevent future under-funding risk.</div></div>
+            <div class="pac-step"><span class="pac-step-num">3</span><div><strong>Consider policy loan repayment</strong> — if policy has any outstanding loans, these may be contributing to under-funding. Review with client.</div></div>
+            <div class="pac-step"><span class="pac-step-num">4</span><div><strong>Schedule follow-up in 2 weeks</strong> — confirm premium catch-up has been received and policy health is restored.</div></div>
+          </div>`
+      }
+    ]
+  },
+
+  'renewal-sandra': {
+    type: 'renewal',
+    iconClass: 'fa-hourglass-end',
+    headerColor: '#f59e0b',
+    title: 'Conversion Window Closing — Sandra Williams',
+    subtitle: 'Term Life P-100320 · Expires Sept 2026 · 150 days remaining',
+    sections: [
+      {
+        icon: 'fa-calendar-alt', title: 'Renewal & Conversion Timeline',
+        content: `
+          <div class="pac-detail-grid">
+            <div class="pac-detail-item"><span class="pac-dl">Client</span><span class="pac-dv">Sandra Williams · Age 61 · Queens, NY</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Policy</span><span class="pac-dv mono">P-100320 · 20-Year Term Life · $350,000</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Expiry Date</span><span class="pac-dv bold orange-text">2026-09-30 (150 days from today)</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Beneficiary</span><span class="pac-dv">Michael Williams (Spouse)</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Conversion Option</span><span class="pac-dv bold">Available without medical evidence until 2026-09-30</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Post-expiry Cost Impact</span><span class="pac-dv bold red-text">+$4,200–$6,800/yr more for equivalent coverage at age 62</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Current Status</span><span class="pac-dv"><span class="badge-inline review">Under Review</span></span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Annuity Opportunity</span><span class="pac-dv">Retirement income supplement (age 61) — annuity upsell potential</span></div>
+          </div>`
+      },
+      {
+        icon: 'fa-lightbulb', title: 'AI Opportunity Analysis',
+        content: `
+          <div class="pac-issue-list">
+            <div class="pac-issue info"><i class="fas fa-star" style="color:#d97706"></i><div><strong>Conversion to Whole Life:</strong> Lock in Sandra's current insurability at age 61. Whole Life $350K would cost ~$8,400/yr but builds cash value and provides lifetime coverage.</div></div>
+            <div class="pac-issue info"><i class="fas fa-star" style="color:#d97706"></i><div><strong>Conversion to Universal Life:</strong> More flexible premiums, lower initial cost ~$5,200/yr, adjustable death benefit as needs change in retirement.</div></div>
+            <div class="pac-issue info"><i class="fas fa-star" style="color:#059669"></i><div><strong>Retirement annuity pairing:</strong> Sandra at age 61 is an ideal annuity candidate. Guaranteed income starting at 65 pairs well with life conversion for comprehensive retirement planning.</div></div>
+            <div class="pac-issue warning"><i class="fas fa-exclamation-triangle"></i><div><strong>No action = coverage gap:</strong> If Sandra does not convert and policy expires, Michael Williams loses $350K protection. New coverage at age 62 will require full medical underwriting.</div></div>
+          </div>`
+      },
+      {
+        icon: 'fa-tasks', title: 'AI Recommended Action Plan',
+        content: `
+          <div class="pac-action-steps">
+            <div class="pac-step urgent"><span class="pac-step-num urgent">!</span><div><strong>⚡ Contact Sandra Williams within 7 days</strong> — frame the call as a courtesy renewal review. Do not lead with sales language.</div></div>
+            <div class="pac-step"><span class="pac-step-num">1</span><div><strong>Prepare WL vs UL conversion comparison</strong> — show side-by-side premiums, cash value projections, and coverage continuation options.</div></div>
+            <div class="pac-step"><span class="pac-step-num">2</span><div><strong>Prepare annuity income illustration</strong> — show guaranteed income starting age 65, paired with life coverage. Use current portfolio holdings as context.</div></div>
+            <div class="pac-step"><span class="pac-step-num">3</span><div><strong>Schedule in-person meeting</strong> — renewal + retirement planning review. Invite Michael Williams if possible for joint meeting.</div></div>
+            <div class="pac-step"><span class="pac-step-num">4</span><div><strong>Submit conversion application no later than 2026-08-31</strong> — one month buffer before expiry to allow processing time.</div></div>
+          </div>`
+      }
+    ]
+  },
+
+  'coverage-susan': {
+    type: 'coverage',
+    iconClass: 'fa-user-plus',
+    headerColor: '#003087',
+    title: 'New Coverage Opportunity — Susan Chen',
+    subtitle: 'Robert Chen estate · $1M claim pending · Post-resolution outreach',
+    sections: [
+      {
+        icon: 'fa-user-circle', title: 'Prospect Profile',
+        content: `
+          <div class="pac-detail-grid">
+            <div class="pac-detail-item"><span class="pac-dl">Prospect</span><span class="pac-dv">Susan Chen · Beneficiary of Robert Chen</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Est. Age</span><span class="pac-dv">~42 years old</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Relationship</span><span class="pac-dv">Spouse of Robert Chen (deceased 2026-04-08)</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Pending Payout</span><span class="pac-dv bold">$1,000,000 (CLM-2026-0041)</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Existing NYL Coverage</span><span class="pac-dv bold red-text">None identified in system</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Expected Payout Date</span><span class="pac-dv">Est. 2026-04-17 to 2026-04-19</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">Outreach Timing</span><span class="pac-dv bold">2–4 weeks post-resolution (allow grieving period)</span></div>
+            <div class="pac-detail-item"><span class="pac-dl">AI Prospect Score</span><span class="pac-dv bold" style="color:#059669">82/100 — High potential</span></div>
+          </div>`
+      },
+      {
+        icon: 'fa-lightbulb', title: 'AI-Identified Product Opportunities',
+        content: `
+          <div class="pac-issue-list">
+            <div class="pac-issue info"><i class="fas fa-star" style="color:#d97706"></i><div><strong>Life Insurance:</strong> Susan, est. age 42, likely has dependents. New Whole Life or Term policy to protect her family. Premium potential ~$4,800–$8,400/yr.</div></div>
+            <div class="pac-issue info"><i class="fas fa-star" style="color:#d97706"></i><div><strong>Investment Management:</strong> $1M lump sum creates an immediate need for wealth management. Fixed annuity, UMA, or diversified portfolio conversation. AUM fee opportunity: ~$8,000–$10,000/yr.</div></div>
+            <div class="pac-issue info"><i class="fas fa-star" style="color:#059669"></i><div><strong>Estate Planning:</strong> Robert Chen's estate requires trust review, will update, and beneficiary re-designation on all assets. Introduce estate planning attorney partner.</div></div>
+            <div class="pac-issue info"><i class="fas fa-star" style="color:#7c3aed"></i><div><strong>Retirement Income:</strong> If Susan continues working, annuity for retirement income starting age 60–65. Guaranteed income supplement to Social Security.</div></div>
+          </div>`
+      },
+      {
+        icon: 'fa-tasks', title: 'AI Recommended Outreach Plan',
+        content: `
+          <div class="pac-action-steps">
+            <div class="pac-step"><span class="pac-step-num">1</span><div><strong>Allow 2 weeks post-payout before outreach</strong> — show empathy first. Send a handwritten condolence note within 48 hours of payout confirmation.</div></div>
+            <div class="pac-step"><span class="pac-step-num">2</span><div><strong>Schedule a "Financial Transition Review"</strong> — frame as helping Susan navigate financial decisions after a major life event, not a sales call.</div></div>
+            <div class="pac-step"><span class="pac-step-num">3</span><div><strong>Prepare $1M payout deployment illustration</strong> — show options: safe annuity, diversified investment, life insurance, emergency fund, and estate planning allocation.</div></div>
+            <div class="pac-step"><span class="pac-step-num">4</span><div><strong>Involve estate planning attorney partner</strong> — offer a complimentary 30-minute estate review. This positions NYL as a trusted advisor, not just an insurer.</div></div>
+            <div class="pac-step"><span class="pac-step-num">5</span><div><strong>Calendar reminder: April 30, 2026</strong> — first outreach call to Susan Chen after appropriate grieving window.</div></div>
+          </div>`
+      }
+    ]
+  }
+};
+
+function openPACModal(alertId) {
+  const d = pacAlertData[alertId];
+  if (!d) return;
+  const overlay = document.getElementById('pac-modal-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const typeColors = { death: '#dc2626', lapse: '#d97706', renewal: '#f59e0b', coverage: '#003087' };
+  const typeGrads  = {
+    death:    'linear-gradient(135deg,#dc2626,#b91c1c)',
+    lapse:    'linear-gradient(135deg,#d97706,#b45309)',
+    renewal:  'linear-gradient(135deg,#f59e0b,#d97706)',
+    coverage: 'linear-gradient(135deg,#003087,#1e40af)'
+  };
+  const tc = typeColors[d.type] || '#003087';
+
+  const headerEl = document.getElementById('pac-modal-header');
+  const iconEl   = document.getElementById('pac-modal-icon');
+  const titleEl  = document.getElementById('pac-modal-title');
+  const subEl    = document.getElementById('pac-modal-subtitle');
+  const bodyEl   = document.getElementById('pac-modal-body');
+
+  if (headerEl) headerEl.style.borderBottomColor = tc;
+  if (iconEl)   iconEl.style.background = typeGrads[d.type] || typeGrads.coverage;
+  if (iconEl)   iconEl.innerHTML = `<i class="fas ${d.iconClass}"></i>`;
+  titleEl.textContent = d.title;
+  subEl.textContent   = d.subtitle;
+
+  bodyEl.innerHTML = d.sections.map(s => `
+    <div class="pac-modal-section">
+      <div class="pac-modal-section-title" style="color:${tc}">
+        <i class="fas ${s.icon}"></i> ${s.title}
+      </div>
+      <div class="pac-modal-section-body">${s.content}</div>
+    </div>
+  `).join('') + `
+    <div class="pac-modal-footer">
+      <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
+      <button class="btn btn-outline-sm" onclick="closePACModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  `;
+}
+
+function closePACModal() {
+  const overlay = document.getElementById('pac-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}

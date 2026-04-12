@@ -1489,6 +1489,120 @@ function ClaimsPage() {
         </div>
       </div>
 
+      {/* ── Proactive AI Alert Card ── */}
+      <div class="proactive-alert-card">
+        <div class="pac-header">
+          <div class="pac-header-left">
+            <div class="pac-icon"><i class="fas fa-brain"></i><span class="pac-pulse"></span></div>
+            <div>
+              <div class="pac-title">Proactive AI Detection Engine</div>
+              <div class="pac-sub">Monitoring obituaries, lapse signals, renewal windows &amp; coverage events · Updated <span class="pac-updated">just now</span></div>
+            </div>
+          </div>
+          <div class="pac-header-stats">
+            <div class="pac-hstat"><span class="pac-hstat-val red">1</span><span class="pac-hstat-lbl">Death Detected</span></div>
+            <div class="pac-hstat"><span class="pac-hstat-val orange">2</span><span class="pac-hstat-lbl">Lapse Risk</span></div>
+            <div class="pac-hstat"><span class="pac-hstat-val gold">1</span><span class="pac-hstat-lbl">Renewal Alert</span></div>
+            <div class="pac-hstat"><span class="pac-hstat-val blue">4</span><span class="pac-hstat-lbl">Total Alerts</span></div>
+          </div>
+          <button class="btn-pac-dismiss" onclick="togglePACPanel(this)" title="Collapse alerts"><i class="fas fa-chevron-up"></i></button>
+        </div>
+
+        <div class="pac-alerts-body" id="pac-alerts-body">
+
+          {/* Alert 1 — Obituary / Death Detected */}
+          <div class="pac-alert pac-alert-death" id="pac-alert-1">
+            <div class="pac-alert-type-icon death"><i class="fas fa-heart-broken"></i></div>
+            <div class="pac-alert-content">
+              <div class="pac-alert-badges">
+                <span class="pac-badge death"><i class="fas fa-exclamation-circle"></i> Death Detected</span>
+                <span class="pac-badge urgent">Urgent</span>
+                <span class="pac-badge new">New — 14 mins ago</span>
+              </div>
+              <div class="pac-alert-headline">Obituary Match — Kevin Park · Policy P-100350</div>
+              <div class="pac-alert-detail">AI cross-referenced public obituary data with client registry. Kevin Park (age 29, Jersey City) confirmed deceased 2026-04-10. Policy P-100350 (Term Life $250K) currently in <strong>Pending</strong> status — coverage determination required before claim processing. Estate contact not yet identified.</div>
+              <div class="pac-alert-meta">
+                <span><i class="fas fa-search"></i> Source: Public obituary registry · NJ DoH cross-match</span>
+                <span><i class="fas fa-file-contract"></i> Policy P-100350 · $250,000 Death Benefit</span>
+                <span><i class="fas fa-shield-virus"></i> Fraud Score: 78 / 100 — Flagged</span>
+              </div>
+            </div>
+            <div class="pac-alert-actions">
+              <button class="btn-pac-action primary" onclick="openPACModal('obituary-kevin')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
+              <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i> View Claim</button>
+            </div>
+          </div>
+
+          {/* Alert 2 — Policy Lapse Risk (UL under-funded) */}
+          <div class="pac-alert pac-alert-lapse" id="pac-alert-2">
+            <div class="pac-alert-type-icon lapse"><i class="fas fa-battery-quarter"></i></div>
+            <div class="pac-alert-content">
+              <div class="pac-alert-badges">
+                <span class="pac-badge lapse"><i class="fas fa-exclamation-triangle"></i> Lapse Risk</span>
+                <span class="pac-badge high">High Priority</span>
+                <span class="pac-badge new2">2 quarters under-funded</span>
+              </div>
+              <div class="pac-alert-headline">Policy Lapse Risk — Patricia Nguyen · P-100301 Universal Life</div>
+              <div class="pac-alert-detail">AI cash-flow model predicts policy lapse within <strong>60–90 days</strong> if premiums are not increased. P-100301 has been under-funded for 2 consecutive quarters. Current cash value $21,400 is below minimum threshold. Client age 38 — re-qualification after lapse would require new medical underwriting.</div>
+              <div class="pac-alert-meta">
+                <span><i class="fas fa-chart-line"></i> Cash value: $21,400 · Minimum required: $28,000</span>
+                <span><i class="fas fa-file-contract"></i> Policy P-100301 · $400K face value</span>
+                <span><i class="fas fa-calendar-times"></i> Predicted lapse: ~2026-06-20 if no action</span>
+              </div>
+            </div>
+            <div class="pac-alert-actions">
+              <button class="btn-pac-action primary" onclick="openPACModal('lapse-patricia')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
+              <button class="btn-pac-action secondary" onclick="openPolicyModal('P-100301','ai')"><i class="fas fa-robot"></i> AI Analysis</button>
+            </div>
+          </div>
+
+          {/* Alert 3 — Conversion Window Closing */}
+          <div class="pac-alert pac-alert-renewal" id="pac-alert-3">
+            <div class="pac-alert-type-icon renewal"><i class="fas fa-hourglass-end"></i></div>
+            <div class="pac-alert-content">
+              <div class="pac-alert-badges">
+                <span class="pac-badge renewal"><i class="fas fa-sync"></i> Renewal Window</span>
+                <span class="pac-badge urgent2">5 Months Left</span>
+              </div>
+              <div class="pac-alert-headline">Conversion Window Closing — Sandra Williams · P-100320 Term Life</div>
+              <div class="pac-alert-detail">Policy P-100320 (20-year term, $350K face value) expires <strong>September 2026 — 5 months away</strong>. Sandra Williams, age 61, can convert to permanent life without medical evidence only until renewal. After expiry, new underwriting at age 61 will significantly increase premiums or risk denial. AI recommends immediate outreach to schedule conversion discussion.</div>
+              <div class="pac-alert-meta">
+                <span><i class="fas fa-calendar-alt"></i> Renewal date: 2026-09-30 · 150 days remaining</span>
+                <span><i class="fas fa-file-contract"></i> Policy P-100320 · $350K · Beneficiary: Michael Williams</span>
+                <span><i class="fas fa-user-clock"></i> Client age 61 — conversion premium savings est. $4,200/yr if acted now</span>
+              </div>
+            </div>
+            <div class="pac-alert-actions">
+              <button class="btn-pac-action primary" onclick="openPACModal('renewal-sandra')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
+              <button class="btn-pac-action secondary" onclick="openPolicyModal('P-100320','ai')"><i class="fas fa-robot"></i> AI Analysis</button>
+            </div>
+          </div>
+
+          {/* Alert 4 — Proactive New Coverage */}
+          <div class="pac-alert pac-alert-coverage" id="pac-alert-4">
+            <div class="pac-alert-type-icon coverage"><i class="fas fa-user-plus"></i></div>
+            <div class="pac-alert-content">
+              <div class="pac-alert-badges">
+                <span class="pac-badge coverage"><i class="fas fa-shield-alt"></i> Coverage Gap</span>
+                <span class="pac-badge normal2">Opportunity</span>
+              </div>
+              <div class="pac-alert-headline">Surviving Family — New Coverage Opportunity · Robert Chen Estate</div>
+              <div class="pac-alert-detail">Following the active death benefit claim (CLM-2026-0041), AI identified that <strong>Susan Chen (beneficiary, est. age 42)</strong> has no existing NYL coverage. Upon claim resolution, proactively reach out with a new coverage needs analysis. Estate payout of $1M creates an ideal window for investment, insurance and estate planning conversations.</div>
+              <div class="pac-alert-meta">
+                <span><i class="fas fa-dollar-sign"></i> Expected payout: $1,000,000 to Susan Chen</span>
+                <span><i class="fas fa-lightbulb"></i> Opportunity: Whole Life + investment + estate planning</span>
+                <span><i class="fas fa-calendar-check"></i> Outreach timing: After claim resolves ~2026-04-17</span>
+              </div>
+            </div>
+            <div class="pac-alert-actions">
+              <button class="btn-pac-action primary" onclick="openPACModal('coverage-susan')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
+              <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       {/* ── Fraud Detection Panel ── */}
       <div class="fraud-detection-panel">
         <div class="fdp-header">
@@ -1989,6 +2103,25 @@ function ClaimsPage() {
             </div>
           </div>
           <div class="detail-modal-body" id="idp-modal-body"></div>
+        </div>
+      </div>
+
+      {/* ── Proactive Alert Action Modal ── */}
+      <div class="detail-modal-overlay" id="pac-modal-overlay" onclick="closePACModal()">
+        <div class="detail-modal pac-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header" id="pac-modal-header">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" id="pac-modal-icon"><i class="fas fa-brain"></i></span>
+              <div>
+                <h3 id="pac-modal-title">Proactive AI Alert</h3>
+                <p id="pac-modal-subtitle" class="detail-modal-sub"></p>
+              </div>
+            </div>
+            <div class="detail-modal-header-actions">
+              <button class="detail-modal-close" onclick="closePACModal()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="detail-modal-body" id="pac-modal-body"></div>
         </div>
       </div>
 
