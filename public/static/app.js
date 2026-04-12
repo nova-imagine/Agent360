@@ -181,25 +181,39 @@ function initReportCharts() {
       data: {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
         datasets: [{
-          label: 'Premium Revenue ($K)',
-          data: [380, 395, 410, 487, 465, 490],
-          backgroundColor: 'rgba(0, 48, 135, 0.8)',
-          borderRadius: 6,
+          label: 'Insurance ($K)',
+          data: [248, 258, 271, 312, 298, 320],
+          backgroundColor: 'rgba(0, 48, 135, 0.82)',
+          borderRadius: 4,
+          stack: 'revenue'
         }, {
-          label: 'New Policy Premium ($K)',
-          data: [45, 52, 61, 78, 67, 82],
-          backgroundColor: 'rgba(200, 151, 42, 0.8)',
-          borderRadius: 6,
+          label: 'Investments ($K)',
+          data: [62, 67, 72, 76, 80, 85],
+          backgroundColor: 'rgba(5, 150, 105, 0.82)',
+          borderRadius: 4,
+          stack: 'revenue'
+        }, {
+          label: 'Retirement ($K)',
+          data: [38, 40, 43, 46, 50, 53],
+          backgroundColor: 'rgba(217, 119, 6, 0.82)',
+          borderRadius: 4,
+          stack: 'revenue'
+        }, {
+          label: 'Advisory ($K)',
+          data: [32, 30, 34, 53, 37, 32],
+          backgroundColor: 'rgba(124, 58, 237, 0.82)',
+          borderRadius: 4,
+          stack: 'revenue'
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
-        plugins: { legend: { display: true, position: 'top' } },
+        plugins: { legend: { display: true, position: 'top', labels: { font: { size: 11 } } } },
         scales: {
-          x: { grid: { display: false } },
-          y: { ticks: { callback: val => `$${val}K` } }
+          x: { grid: { display: false }, stacked: true },
+          y: { stacked: true, ticks: { callback: val => `$${val}K` } }
         }
       }
     });
@@ -211,10 +225,10 @@ function initReportCharts() {
     prodEl._chartInstance = new Chart(prodEl, {
       type: 'doughnut',
       data: {
-        labels: ['Whole Life', 'Term Life', 'Universal Life', 'VUL', 'LTC', 'Disability'],
+        labels: ['Insurance', 'Investments', 'Retirement', 'Advisory'],
         datasets: [{
-          data: [32, 28, 18, 12, 6, 4],
-          backgroundColor: ['#003087', '#059669', '#d97706', '#7c3aed', '#dc2626', '#ea580c'],
+          data: [64, 18, 9, 9],
+          backgroundColor: ['#003087', '#059669', '#d97706', '#7c3aed'],
           borderWidth: 2
         }]
       },
@@ -223,9 +237,9 @@ function initReportCharts() {
         maintainAspectRatio: false,
         animation: false,
         plugins: {
-          legend: { display: true, position: 'right', labels: { font: { size: 10 } } }
+          legend: { display: false }
         },
-        cutout: '60%'
+        cutout: '62%'
       }
     });
   }
@@ -239,8 +253,8 @@ function initReportCharts() {
         labels: ['Premium', 'High Value', 'Mid Market', 'Emerging'],
         datasets: [{
           label: 'Clients',
-          data: [12, 68, 102, 65],
-          backgroundColor: ['#7c3aed', '#d97706', '#003087', '#059669'],
+          data: [18, 62, 94, 73],
+          backgroundColor: ['#7c3aed', '#003087', '#059669', '#d97706'],
           borderRadius: 6
         }]
       },
@@ -273,6 +287,40 @@ function filterBySegment(segment) {
     } else {
       const tag = card.querySelector('.segment-tag')?.textContent || '';
       card.style.display = tag.toLowerCase() === segment.toLowerCase() ? 'block' : 'none';
+    }
+  });
+}
+
+// Domain coverage data matching index.tsx clientDomains
+const domainCoverage = {
+  1: { ins: true,  inv: false, ret: true,  adv: true,  gaps: true  },
+  2: { ins: true,  inv: false, ret: false, adv: false, gaps: true  },
+  3: { ins: true,  inv: true,  ret: false, adv: true,  gaps: true  },
+  4: { ins: true,  inv: false, ret: false, adv: false, gaps: true  },
+  5: { ins: true,  inv: false, ret: false, adv: false, gaps: true  },
+  6: { ins: true,  inv: true,  ret: true,  adv: false, gaps: true  },
+  7: { ins: true,  inv: false, ret: false, adv: false, gaps: true  },
+  8: { ins: true,  inv: true,  ret: true,  adv: true,  gaps: false },
+};
+
+function filterByDomain(domain) {
+  document.querySelectorAll('.client-card').forEach((card, idx) => {
+    const id = idx + 1; // cards are rendered in order 1-8
+    const d = domainCoverage[id] || { ins: true, inv: false, ret: false, adv: false, gaps: true };
+    if (!domain) {
+      card.style.display = 'block';
+    } else if (domain === 'insurance') {
+      card.style.display = d.ins ? 'block' : 'none';
+    } else if (domain === 'investments') {
+      card.style.display = d.inv ? 'block' : 'none';
+    } else if (domain === 'retirement') {
+      card.style.display = d.ret ? 'block' : 'none';
+    } else if (domain === 'advisory') {
+      card.style.display = d.adv ? 'block' : 'none';
+    } else if (domain === 'gaps') {
+      card.style.display = d.gaps ? 'block' : 'none';
+    } else {
+      card.style.display = 'block';
     }
   });
 }
