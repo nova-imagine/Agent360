@@ -267,7 +267,7 @@ function TopBar() {
 
 function DashboardPage() {
   return (
-    <div class="page dashboard-page">
+    <div class="page dashboard-page" id="dashboard-page">
 
       {/* Welcome Banner */}
       <div class="welcome-banner">
