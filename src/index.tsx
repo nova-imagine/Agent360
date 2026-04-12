@@ -221,6 +221,11 @@ function Sidebar() {
           <i class="fas fa-chart-bar"></i>
           <span>Reports</span>
         </a>
+        <a class="nav-item ai-insights-nav" onclick="navigateTo('ai-insights')" href="#">
+          <i class="fas fa-brain"></i>
+          <span>AI Insights</span>
+          <span class="nav-badge ai-pulse">NEW</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">

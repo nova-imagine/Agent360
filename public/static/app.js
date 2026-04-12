@@ -25,7 +25,8 @@ function navigateTo(page) {
     sales: 'Sales Pipeline',
     products: 'Product Portfolio',
     reports: 'Reports & Analytics',
-    calendar: 'Calendar & Events'
+    calendar: 'Calendar & Events',
+    'ai-insights': 'AI Insights'
   };
 
   const breadcrumbs = {
@@ -36,7 +37,8 @@ function navigateTo(page) {
     sales: 'Home / Sales',
     products: 'Home / Products',
     reports: 'Home / Reports',
-    calendar: 'Home / Calendar'
+    calendar: 'Home / Calendar',
+    'ai-insights': 'Home / Insights / AI Insights'
   };
 
   const titleEl = document.getElementById('page-title');
@@ -44,11 +46,41 @@ function navigateTo(page) {
   if (titleEl) titleEl.textContent = titles[page] || page;
   if (bcEl) bcEl.textContent = breadcrumbs[page] || '';
 
+  const content = document.getElementById('page-content');
+  if (!content) return;
+
+  // ── AI Insights: render external app inside an iframe panel ──
+  if (page === 'ai-insights') {
+    content.innerHTML = `
+      <div class="ai-insights-shell">
+        <div class="ai-insights-topbar">
+          <div class="ai-insights-title">
+            <i class="fas fa-brain"></i>
+            <span>AI Insights — Powered by GenSpark</span>
+          </div>
+          <div class="ai-insights-actions">
+            <a href="https://toydxqyp.gensparkspace.com/" target="_blank" class="btn btn-outline-sm">
+              <i class="fas fa-external-link-alt"></i> Open in New Tab
+            </a>
+          </div>
+        </div>
+        <div class="ai-insights-frame-wrap">
+          <iframe
+            src="https://toydxqyp.gensparkspace.com/"
+            class="ai-insights-iframe"
+            title="AI Insights"
+            allowfullscreen
+            allow="clipboard-read; clipboard-write"
+          ></iframe>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   // Load page content from template
   const templateId = `tpl-${page}`;
   const tpl = document.getElementById(templateId);
-  const content = document.getElementById('page-content');
-  if (!content) return;
 
   if (tpl) {
     // Clone the template node (deep clone preserves structure without live bindings)
