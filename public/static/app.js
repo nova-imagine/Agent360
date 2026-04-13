@@ -9380,3 +9380,517 @@ function _sendAIScorecardShare() {
 }
 
 console.log('Phase 4 loaded — openProductDetail(13 products), moveDealStage (visual), exportAIScorecard, shareAIScorecard');
+
+// ============================================================
+//  PHASE 5 — Global Search · Report Drill-Down · Profile Menu
+//             Report Period Switcher · AI Score Detail Panel
+// ============================================================
+
+// ── 1. GLOBAL SEARCH ─────────────────────────────────────────
+const _searchIndex = [
+  // clients
+  { type:'client', label:'James Whitfield',   sub:'High Value · Insurance, Retirement, Advisory', action:()=>{ navigateTo('clients'); setTimeout(()=>openClientModal(1),300); } },
+  { type:'client', label:'Patricia Nguyen',   sub:'Mid Market · Insurance, Investments',           action:()=>{ navigateTo('clients'); setTimeout(()=>openClientModal(2),300); } },
+  { type:'client', label:'Robert Chen',       sub:'Premium · Insurance, Investments, Advisory',    action:()=>{ navigateTo('clients'); setTimeout(()=>openClientModal(3),300); } },
+  { type:'client', label:'Sandra Williams',   sub:'Mid Market · Insurance',                        action:()=>{ navigateTo('clients'); setTimeout(()=>openClientModal(4),300); } },
+  { type:'client', label:'Kevin Park',        sub:'Emerging · Insurance',                          action:()=>{ navigateTo('clients'); setTimeout(()=>openClientModal(5),300); } },
+  { type:'client', label:'Linda Morrison',    sub:'Premium · Insurance, Investments, Advisory',    action:()=>{ navigateTo('clients'); setTimeout(()=>openClientModal(6),300); } },
+  { type:'client', label:'David Thompson',    sub:'Mid Market · Insurance',                        action:()=>{ navigateTo('clients'); setTimeout(()=>openClientModal(7),300); } },
+  { type:'client', label:'Maria Gonzalez',    sub:'High Value · Insurance, Investments, Retirement',action:()=>{ navigateTo('clients'); setTimeout(()=>openClientModal(8),300); } },
+  // policies
+  { type:'policy', label:'P-100291 — James Whitfield',  sub:'Whole Life · $500K · Active',   action:()=>{ navigateTo('policies'); setTimeout(()=>openPolicyModal('P-100291'),300); } },
+  { type:'policy', label:'P-100301 — Patricia Nguyen',  sub:'Universal Life · $400K · Active',action:()=>{ navigateTo('policies'); setTimeout(()=>openPolicyModal('P-100301'),300); } },
+  { type:'policy', label:'P-100310 — Robert Chen',      sub:'Whole Life · $1M · Active',     action:()=>{ navigateTo('policies'); setTimeout(()=>openPolicyModal('P-100310'),300); } },
+  { type:'policy', label:'P-100320 — Sandra Williams',  sub:'Term Life · $350K · Review',    action:()=>{ navigateTo('policies'); setTimeout(()=>openPolicyModal('P-100320'),300); } },
+  { type:'policy', label:'P-100350 — Kevin Park',       sub:'Term Life · $250K · Pending',   action:()=>{ navigateTo('policies'); setTimeout(()=>openPolicyModal('P-100350'),300); } },
+  // claims
+  { type:'claim', label:'CLM-2026-0041 — Robert Chen', sub:'Death Benefit · $1M · In Review', action:()=>{ navigateTo('claims'); setTimeout(()=>openClaimModal('CLM-2026-0041'),300); } },
+  { type:'claim', label:'CLM-2026-0035 — Kevin Park',  sub:'Term Claim · $250K · Under Review',action:()=>{ navigateTo('claims'); setTimeout(()=>openClaimModal('CLM-2026-0035'),300); } },
+  // meetings
+  { type:'meeting', label:'Kevin Park — Policy Renewal (Apr 10)',   sub:'Phone Call · Urgent',   action:()=>{ navigateTo('calendar'); setTimeout(()=>openMeetingBrief('MTG-001'),300); } },
+  { type:'meeting', label:'Robert Chen — Claim Update (Apr 10)',     sub:'Video Call · High',     action:()=>{ navigateTo('calendar'); setTimeout(()=>openMeetingBrief('MTG-002'),300); } },
+  { type:'meeting', label:'Alex Rivera — Prospect Meeting (Apr 12)', sub:'In-Person · Normal',    action:()=>{ navigateTo('calendar'); setTimeout(()=>openMeetingBrief('MTG-003'),300); } },
+  // pages
+  { type:'page', label:'Dashboard',      sub:'Overview & KPIs',         action:()=>navigateTo('dashboard') },
+  { type:'page', label:'Clients',        sub:'Client book management',   action:()=>navigateTo('clients') },
+  { type:'page', label:'Policies',       sub:'Policy management',        action:()=>navigateTo('policies') },
+  { type:'page', label:'Claims',         sub:'Claims processing',        action:()=>navigateTo('claims') },
+  { type:'page', label:'Sales Pipeline', sub:'Kanban & deal tracking',   action:()=>navigateTo('sales') },
+  { type:'page', label:'Calendar',       sub:'Schedule & meetings',      action:()=>navigateTo('calendar') },
+  { type:'page', label:'Reports',        sub:'Revenue & performance',    action:()=>navigateTo('reports') },
+  { type:'page', label:'AI Insights',    sub:'AI Impact Scorecard',      action:()=>navigateTo('ai-insights') },
+  { type:'page', label:'Products',       sub:'NYL product portfolio',    action:()=>navigateTo('products') },
+  { type:'page', label:'AI Agents',      sub:'AI Agent Hub',             action:()=>navigateTo('ai-agents') },
+];
+
+const _searchIconMap = { client:'fa-user', policy:'fa-file-contract', claim:'fa-gavel', meeting:'fa-calendar-check', page:'fa-th-large' };
+const _searchColorMap = { client:'#003087', policy:'#059669', claim:'#dc2626', meeting:'#7c3aed', page:'#64748b' };
+
+function _buildSearchDropdown() {
+  let dd = document.getElementById('gs-dropdown');
+  if (!dd) {
+    dd = document.createElement('div');
+    dd.id = 'gs-dropdown';
+    dd.className = 'gs-dropdown';
+    dd.style.display = 'none';
+    document.querySelector('.search-box')?.appendChild(dd);
+  }
+  return dd;
+}
+
+function _runGlobalSearch(query) {
+  const q = query.trim().toLowerCase();
+  const dd = _buildSearchDropdown();
+  if (!q) { dd.style.display = 'none'; return; }
+
+  const hits = _searchIndex.filter(item =>
+    item.label.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if (!hits.length) {
+    dd.innerHTML = `<div class="gs-no-result">No results for "<em>${query}</em>"</div>`;
+    dd.style.display = 'block';
+    return;
+  }
+
+  dd.innerHTML = hits.map((h, i) => `
+    <div class="gs-item" data-idx="${i}" tabindex="0">
+      <span class="gs-icon" style="color:${_searchColorMap[h.type]}"><i class="fas ${_searchIconMap[h.type]}"></i></span>
+      <div class="gs-text">
+        <div class="gs-label">${h.label}</div>
+        <div class="gs-sub">${h.sub}</div>
+      </div>
+      <span class="gs-type-badge gs-type-${h.type}">${h.type}</span>
+    </div>
+  `).join('');
+  dd.style.display = 'block';
+
+  dd.querySelectorAll('.gs-item').forEach((el, i) => {
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      hits[i].action();
+      dd.style.display = 'none';
+      document.getElementById('global-search').value = '';
+    });
+  });
+}
+
+(function _initGlobalSearch() {
+  const inp = document.getElementById('global-search');
+  if (!inp) return;
+  inp.setAttribute('autocomplete', 'off');
+
+  inp.addEventListener('input', (e) => _runGlobalSearch(e.target.value));
+  inp.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const dd = document.getElementById('gs-dropdown');
+      if (dd) dd.style.display = 'none';
+      inp.value = '';
+    } else if (e.key === 'Enter') {
+      // first hit action
+      const dd = document.getElementById('gs-dropdown');
+      const first = dd?.querySelector('.gs-item');
+      if (first) first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    }
+  });
+  inp.addEventListener('focus', (e) => { if (e.target.value) _runGlobalSearch(e.target.value); });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-box')) {
+      const dd = document.getElementById('gs-dropdown');
+      if (dd) dd.style.display = 'none';
+    }
+  });
+})();
+
+
+// ── 2. PROFILE MENU ──────────────────────────────────────────
+function toggleProfileMenu() {
+  const dd = document.getElementById('profile-dropdown');
+  if (!dd) return;
+  if (dd.style.display === 'none' || !dd.style.display) {
+    dd.innerHTML = `
+      <div class="pm-header">
+        <div class="pm-avatar">SR</div>
+        <div>
+          <div class="pm-name">Sridhar R.</div>
+          <div class="pm-role">Senior Financial Advisor</div>
+          <div class="pm-office">New York · Manhattan Branch</div>
+        </div>
+      </div>
+      <div class="pm-kpis">
+        <div class="pm-kpi"><span class="pm-kv">247</span><span class="pm-kl">Clients</span></div>
+        <div class="pm-kpi"><span class="pm-kv">$4.2M</span><span class="pm-kl">AUM</span></div>
+        <div class="pm-kpi"><span class="pm-kv">96%</span><span class="pm-kl">Retention</span></div>
+      </div>
+      <div class="pm-menu">
+        <div class="pm-item" onclick="navigateTo('ai-insights');closeProfileMenu()"><i class="fas fa-chart-bar"></i> My Performance</div>
+        <div class="pm-item" onclick="navigateTo('reports');closeProfileMenu()"><i class="fas fa-file-alt"></i> Reports</div>
+        <div class="pm-item" onclick="navigateTo('calendar');closeProfileMenu()"><i class="fas fa-calendar"></i> My Calendar</div>
+        <hr class="pm-sep"/>
+        <div class="pm-item pm-settings" onclick="openProfileSettings()"><i class="fas fa-cog"></i> Settings</div>
+        <div class="pm-item pm-logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Log Out</div>
+      </div>
+    `;
+    dd.style.display = 'block';
+    setTimeout(() => document.addEventListener('click', _closeProfileOutside), 10);
+  } else {
+    closeProfileMenu();
+  }
+}
+function closeProfileMenu() {
+  const dd = document.getElementById('profile-dropdown');
+  if (dd) dd.style.display = 'none';
+  document.removeEventListener('click', _closeProfileOutside);
+}
+function _closeProfileOutside(e) {
+  if (!e.target.closest('#topbar-avatar') && !e.target.closest('#profile-dropdown')) {
+    closeProfileMenu();
+  }
+}
+function openProfileSettings() {
+  closeProfileMenu();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'profile-settings-overlay';
+  overlay.innerHTML = `
+    <div class="modal-box ps-modal" style="max-width:480px">
+      <div class="modal-header">
+        <h3><i class="fas fa-cog"></i> Profile Settings</h3>
+        <button class="modal-close" onclick="document.getElementById('profile-settings-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+        <div class="ps-section">
+          <div class="ps-section-title">Personal Info</div>
+          <div class="ps-row"><label>Name</label><input class="ps-input" value="Sridhar Ramalingam" readonly /></div>
+          <div class="ps-row"><label>Email</label><input class="ps-input" value="sridhar.r@newyorklife.com" readonly /></div>
+          <div class="ps-row"><label>Phone</label><input class="ps-input" value="+1 (212) 555-0142" /></div>
+          <div class="ps-row"><label>Branch</label><input class="ps-input" value="New York · Manhattan Branch" readonly /></div>
+        </div>
+        <div class="ps-section">
+          <div class="ps-section-title">Notification Preferences</div>
+          <label class="ps-toggle"><input type="checkbox" checked /> <span>Email alerts for urgent tasks</span></label>
+          <label class="ps-toggle"><input type="checkbox" checked /> <span>AI insight push notifications</span></label>
+          <label class="ps-toggle"><input type="checkbox" /> <span>Weekly performance digest</span></label>
+        </div>
+        <div class="ps-section">
+          <div class="ps-section-title">Appearance</div>
+          <label class="ps-toggle"><input type="checkbox" /> <span>Dark mode (coming soon)</span></label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="showToast('Settings saved','success');document.getElementById('profile-settings-overlay').remove()">Save Changes</button>
+        <button class="btn btn-outline" onclick="document.getElementById('profile-settings-overlay').remove()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+function handleLogout() {
+  closeProfileMenu();
+  showToast('You have been logged out of NOVA Agent 360. Redirecting…','info');
+}
+
+
+// ── 3. REPORT PERIOD SWITCHER ─────────────────────────────────
+const _revenueData = {
+  '6M':  { labels:['Jan','Feb','Mar','Apr','May','Jun'],
+            ins:[248,258,271,312,298,320], inv:[62,67,72,76,80,85],
+            ret:[38,40,43,46,50,53],       adv:[32,30,34,53,37,32] },
+  '12M': { labels:['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'],
+            ins:[198,212,224,238,245,252,248,258,271,312,298,320],
+            inv:[44,48,51,54,57,60,62,67,72,76,80,85],
+            ret:[28,30,31,33,35,37,38,40,43,46,50,53],
+            adv:[22,24,26,28,29,30,32,30,34,53,37,32] },
+  'All': { labels:['Q1\'24','Q2\'24','Q3\'24','Q4\'24','Q1\'25','Q2\'25','Q3\'25','Q4\'25','Q1\'26'],
+            ins:[620,675,710,745,780,810,840,875,931],
+            inv:[120,138,155,172,188,205,222,240,259],
+            ret:[75,82,88,95,102,110,118,126,139],
+            adv:[65,70,76,82,88,94,101,108,119] }
+};
+
+function setReportPeriod(period, btn) {
+  // update active button
+  document.querySelectorAll('.report-card .btn-tiny').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const d = _revenueData[period] || _revenueData['6M'];
+  const revEl = document.getElementById('reportRevenueChart');
+  if (!revEl || !revEl._chartInstance) return;
+  const ch = revEl._chartInstance;
+  ch.data.labels = d.labels;
+  ch.data.datasets[0].data = d.ins;
+  ch.data.datasets[1].data = d.inv;
+  ch.data.datasets[2].data = d.ret;
+  ch.data.datasets[3].data = d.adv;
+  ch.update('active');
+  showToast(`Revenue chart updated: ${period === 'All' ? 'All Time' : 'Last ' + period}`,'info');
+}
+
+
+// ── 4. REPORT DOMAIN DRILL-DOWN MODAL ────────────────────────
+const _reportDrillData = {
+  insurance: {
+    title:'Insurance Revenue Drill-Down', icon:'fa-shield-alt', color:'#003087',
+    kpis:[{label:'YTD Revenue',val:'$1.87M'},{label:'Q1 Revenue',val:'$312K'},{label:'vs Target',val:'87%'},{label:'Policies Active',val:'142'}],
+    breakdown:[
+      {label:'Whole Life Premiums',pct:38,val:'$709K',color:'#003087'},
+      {label:'Term Life Premiums',pct:28,val:'$524K',color:'#1d4ed8'},
+      {label:'Universal Life',pct:18,val:'$337K',color:'#2563eb'},
+      {label:'LTC Premiums',pct:10,val:'$187K',color:'#3b82f6'},
+      {label:'Disability',pct:6,val:'$112K',color:'#93c5fd'},
+    ],
+    actions:[
+      'Schedule renewal call with Sandra Williams (Term Life expiring Sept 2026)',
+      'Review under-funded UL policy for Patricia Nguyen — premium catch-up needed',
+      'Convert Kevin Park term policy to whole life (conversion window open)',
+      'Explore paid-up additions rider for James Whitfield Whole Life policy',
+    ]
+  },
+  investments: {
+    title:'Investment AUM Drill-Down', icon:'fa-chart-line', color:'#059669',
+    kpis:[{label:'Total AUM',val:'$4.2M'},{label:'Clients',val:'62'},{label:'Avg per Client',val:'$67.7K'},{label:'YTD Growth',val:'+14%'}],
+    breakdown:[
+      {label:'Mutual Funds',pct:42,val:'$1.76M',color:'#059669'},
+      {label:'ETF Portfolios',pct:28,val:'$1.18M',color:'#10b981'},
+      {label:'Annuities (VA)',pct:18,val:'$756K',color:'#34d399'},
+      {label:'UMA / Managed',pct:8,val:'$336K',color:'#6ee7b7'},
+      {label:'529 Plans',pct:4,val:'$168K',color:'#a7f3d0'},
+    ],
+    actions:[
+      'Present UMA opportunity to Linda Morrison ($280K consolidation potential)',
+      'Review Robert Chen portfolio — $180K at risk of underperformance',
+      'Open 529 plan for James Whitfield (two college-age dependents)',
+      'Rebalance Patricia Nguyen VUL sub-accounts: 60/40 allocation review',
+    ]
+  },
+  retirement: {
+    title:'Retirement Annuity Premium Drill-Down', icon:'fa-umbrella-beach', color:'#d97706',
+    kpis:[{label:'Annuity Premium',val:'$89K'},{label:'Clients',val:'38'},{label:'Deferred',val:'$54K'},{label:'Immediate',val:'$35K'}],
+    breakdown:[
+      {label:'Fixed Deferred Annuities',pct:45,val:'$40K',color:'#d97706'},
+      {label:'Immediate Annuities',pct:30,val:'$27K',color:'#f59e0b'},
+      {label:'Fixed Indexed Annuities',pct:15,val:'$13K',color:'#fbbf24'},
+      {label:'Variable Annuities',pct:10,val:'$9K',color:'#fcd34d'},
+    ],
+    actions:[
+      'Present immediate annuity to Linda Morrison & James Whitfield (income gap)',
+      'Propose deferred annuity to Patricia Nguyen (age 38, 20+ yr horizon)',
+      'Review Maria Gonzalez annuity income gap — $2,400/mo shortfall identified',
+      'Initiate retirement income illustration for James Whitfield at next meeting',
+    ]
+  },
+  advisory: {
+    title:'Advisory Revenue Drill-Down', icon:'fa-handshake', color:'#7c3aed',
+    kpis:[{label:'Advisory Revenue',val:'$86K'},{label:'Clients',val:'59'},{label:'Estate Plans',val:'14'},{label:'Biz Planning',val:'8'}],
+    breakdown:[
+      {label:'Estate Planning Fees',pct:38,val:'$32.7K',color:'#7c3aed'},
+      {label:'Wealth Management',pct:32,val:'$27.5K',color:'#8b5cf6'},
+      {label:'Business Planning',pct:18,val:'$15.5K',color:'#a78bfa'},
+      {label:'Trust & Legacy',pct:12,val:'$10.3K',color:'#c4b5fd'},
+    ],
+    actions:[
+      'Present estate plan to Linda Morrison, James Whitfield, Robert Chen, Maria Gonzalez',
+      'Propose buy-sell agreement for Robert Chen (Chen Holdings ~$4M valuation)',
+      'UMA proposal for Linda Morrison & Robert Chen — $280K+ combined AUM',
+      'Schedule business solutions meeting with Robert Chen & James Whitfield (NQDC)',
+    ]
+  }
+};
+
+function openReportDrillDown(domain) {
+  const d = _reportDrillData[domain];
+  if (!d) return;
+  const existing = document.getElementById('report-drill-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'report-drill-overlay';
+
+  const kpisHtml = d.kpis.map(k => `
+    <div class="rdd-kpi">
+      <div class="rdd-kv">${k.val}</div>
+      <div class="rdd-kl">${k.label}</div>
+    </div>`).join('');
+
+  const breakdownHtml = d.breakdown.map(b => `
+    <div class="rdd-break-row">
+      <span class="rdd-br-label">${b.label}</span>
+      <div class="rdd-bar-outer"><div class="rdd-bar-inner" style="width:${b.pct}%;background:${b.color}"></div></div>
+      <span class="rdd-br-pct">${b.pct}%</span>
+      <span class="rdd-br-val">${b.val}</span>
+    </div>`).join('');
+
+  const actionsHtml = d.actions.map(a => `
+    <div class="rdd-action-row"><i class="fas fa-arrow-right" style="color:${d.color};margin-right:8px;font-size:11px"></i>${a}</div>`).join('');
+
+  overlay.innerHTML = `
+    <div class="modal-box rdd-modal" style="max-width:660px">
+      <div class="modal-header" style="background:${d.color}20;border-bottom:3px solid ${d.color}30">
+        <h3 style="color:${d.color}"><i class="fas ${d.icon}" style="margin-right:8px"></i>${d.title}</h3>
+        <button class="modal-close" onclick="document.getElementById('report-drill-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+        <div class="rdd-kpi-row">${kpisHtml}</div>
+        <div class="rdd-section-label">Revenue Breakdown</div>
+        <div class="rdd-breakdown">${breakdownHtml}</div>
+        <div class="rdd-section-label" style="margin-top:16px">AI-Recommended Actions</div>
+        <div class="rdd-actions">${actionsHtml}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" style="background:${d.color};border-color:${d.color}" onclick="showToast('${d.title} exported as PDF','success');document.getElementById('report-drill-overlay').remove()">
+          <i class="fas fa-download"></i> Export Section
+        </button>
+        <button class="btn btn-outline" onclick="sendContextMessage('AI analysis and action plan for ${domain} domain revenue optimization')">
+          <i class="fas fa-robot"></i> Ask AI Agent
+        </button>
+        <button class="btn btn-outline" onclick="document.getElementById('report-drill-overlay').remove()">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+
+// ── 5. AI SCORE DETAIL PANEL ─────────────────────────────────
+const _aiScoreDetails = {
+  underwriting: {
+    title:'Insurance & Underwriting AI — Detail',
+    score:91, trend:'+15', color:'#003087',
+    trendData:[62,68,72,76,79,83,85,88,91],
+    trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    actions:[
+      { urgency:'high',  text:'Review under-funded UL policy: Patricia Nguyen — schedule premium catch-up call' },
+      { urgency:'high',  text:'Kevin Park estate claim — coordinate with adjuster Michael Torres' },
+      { urgency:'med',   text:'Sandra Williams term renewal — conversion window closing Sept 2026' },
+      { urgency:'med',   text:'18 APS cases avoided this month — document for manager review' },
+      { urgency:'low',   text:'Update STP ruleset for new product launch (Q2 2026)' },
+    ]
+  },
+  retention: {
+    title:'Retention Intelligence AI — Detail',
+    score:88, trend:'+23', color:'#d97706',
+    trendData:[55,61,66,70,73,76,80,84,88],
+    trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    actions:[
+      { urgency:'high',  text:'Patricia Nguyen UL policy: 2 consecutive under-funded quarters — urgent outreach' },
+      { urgency:'high',  text:'Sandra Williams Term Life renewal risk — $2,800/yr premium at risk' },
+      { urgency:'med',   text:'Kevin Park pending claim — maintain engagement to prevent book attrition' },
+      { urgency:'med',   text:'Monitor 12 clients in 60-90 day lapse window (full list in Retention module)' },
+      { urgency:'low',   text:'Send proactive check-in to David Thompson — no touchpoint in 90+ days' },
+    ]
+  },
+  claims: {
+    title:'Claims Automation AI — Detail',
+    score:85, trend:'+31', color:'#dc2626',
+    trendData:[42,50,56,62,67,71,75,80,85],
+    trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    actions:[
+      { urgency:'high',  text:'CLM-2026-0041 (Robert Chen $1M): missing identity docs from Susan Chen — follow up' },
+      { urgency:'high',  text:'CLM-2026-0035 (Kevin Park $250K): medical records pending — estate rep contact required' },
+      { urgency:'med',   text:'4 additional claims in triage queue — IDP extraction scheduled' },
+      { urgency:'low',   text:'Document gap detection accuracy: 91% — review 9% miss cases for model tuning' },
+    ]
+  },
+  alerts: {
+    title:'Proactive Alert Engine — Detail',
+    score:92, trend:'+19', color:'#7c3aed',
+    trendData:[60,66,71,74,78,82,85,89,92],
+    trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    actions:[
+      { urgency:'high',  text:'4 obituary detections in Q1 — all actioned within 24 hrs (excellent response rate)' },
+      { urgency:'high',  text:'22 alert-to-revenue conversions (52%) — document for Q2 performance review' },
+      { urgency:'med',   text:'5 NBA alerts outstanding — review in Sales Pipeline module' },
+      { urgency:'low',   text:'Target 60% alert action rate by Q2 (currently 78% — already exceeding target)' },
+    ]
+  },
+  investment: {
+    title:'Investment & Advisory AI — Detail',
+    score:76, trend:'+8', color:'#059669',
+    trendData:[52,55,57,60,62,65,68,72,76],
+    trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    actions:[
+      { urgency:'high',  text:'Linda Morrison UMA opportunity: $280K+ AUM consolidation — schedule proposal' },
+      { urgency:'high',  text:'Robert Chen portfolio gap: $180K at risk — rebalance discussion needed' },
+      { urgency:'med',   text:'Investment AI adoption: 25% — need 5 more clients to hit Q2 30% target' },
+      { urgency:'med',   text:'Patricia Nguyen VUL sub-account review — 60/40 allocation may need rebalancing' },
+      { urgency:'low',   text:'Open 529 plan conversation with James Whitfield — two college-age dependents' },
+    ]
+  },
+  meetings: {
+    title:'Meeting Intelligence AI — Detail',
+    score:83, trend:'+14', color:'#0891b2',
+    trendData:[54,59,63,67,70,73,76,79,83],
+    trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    actions:[
+      { urgency:'high',  text:'3 urgent follow-up actions outstanding from Q1 meeting summaries' },
+      { urgency:'high',  text:'Kevin Park post-meeting: coordinate with adjuster by Apr 15 deadline' },
+      { urgency:'med',   text:'Alex Rivera (prospect): send needs-analysis summary within 24 hrs of Apr 12 meeting' },
+      { urgency:'med',   text:'Meeting sentiment accuracy 87% — review 13% low-confidence cases' },
+      { urgency:'low',   text:'Goal: reduce meeting prep time from ~2 min to <90 sec with enhanced AI briefs' },
+    ]
+  }
+};
+
+function openAIScoreDetail(domain) {
+  const d = _aiScoreDetails[domain];
+  if (!d) return;
+  const ex = document.getElementById('ai-score-detail-overlay');
+  if (ex) ex.remove();
+
+  const urgLabel = { high:'🔴 Urgent', med:'🟡 Medium', low:'🟢 Low' };
+  const actHtml = d.actions.map(a => `
+    <div class="asd-action-row">
+      <span class="asd-urgency">${urgLabel[a.urgency]}</span>
+      <span class="asd-action-text">${a.text}</span>
+    </div>`).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'ai-score-detail-overlay';
+  overlay.innerHTML = `
+    <div class="modal-box asd-modal" style="max-width:640px">
+      <div class="modal-header" style="border-bottom:3px solid ${d.color}40">
+        <h3 style="color:${d.color}"><i class="fas fa-chart-bar" style="margin-right:8px"></i>${d.title}</h3>
+        <button class="modal-close" onclick="document.getElementById('ai-score-detail-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+        <div class="asd-score-row">
+          <div class="asd-score-circle" style="border-color:${d.color};color:${d.color}">${d.score}</div>
+          <div class="asd-score-meta">
+            <div class="asd-score-label">Current Score</div>
+            <div class="asd-score-trend" style="color:#059669">↑ ${d.trend} pts vs Q4 2025</div>
+            <div class="asd-score-desc">9-month rolling trend shown below</div>
+          </div>
+        </div>
+        <div class="asd-trend-section">
+          <div class="asd-trend-label">Score Trend (Aug 2025 – Apr 2026)</div>
+          <div class="asd-spark-wrap">
+            ${d.trendData.map((v,i)=>`
+              <div class="asd-spark-col">
+                <div class="asd-spark-bar" style="height:${Math.round(v*0.9)}px;background:${d.color}${i===d.trendData.length-1?'':'88'}" title="${d.trendLabels[i]}: ${v}"></div>
+                <div class="asd-spark-lbl">${d.trendLabels[i]}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="asd-actions-section">
+          <div class="asd-section-label">Recommended Actions (${d.actions.length})</div>
+          ${actHtml}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" style="background:${d.color};border-color:${d.color}" onclick="showToast('${d.title} detail exported','success');document.getElementById('ai-score-detail-overlay').remove()">
+          <i class="fas fa-download"></i> Export
+        </button>
+        <button class="btn btn-outline" onclick="sendContextMessage('Detailed analysis and improvement plan for ${domain} AI domain score improvement')">
+          <i class="fas fa-robot"></i> Ask AI Agent
+        </button>
+        <button class="btn btn-outline" onclick="document.getElementById('ai-score-detail-overlay').remove()">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+
+console.log('Phase 5 loaded — globalSearch(_searchIndex), toggleProfileMenu, setReportPeriod, openReportDrillDown, openAIScoreDetail');

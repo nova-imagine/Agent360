@@ -385,7 +385,8 @@ function TopBar() {
           <i class="fas fa-bell"></i>
           <span class="notif-count">5</span>
         </button>
-        <div class="topbar-avatar">SR</div>
+        <div class="topbar-avatar" id="topbar-avatar" onclick="toggleProfileMenu()" title="Sridhar R — click to open profile">SR</div>
+        <div id="profile-dropdown" class="profile-dropdown" style="display:none"></div>
       </div>
     </header>
   )
@@ -5979,7 +5980,7 @@ function ReportsPage() {
 
       {/* Domain KPI summary row */}
       <div class="report-domain-kpis">
-        <div class="rdkpi-card ins-theme">
+        <div class="rdkpi-card ins-theme" onclick="openReportDrillDown('insurance')" style="cursor:pointer" title="View Insurance detail">
           <div class="rdkpi-icon"><i class="fas fa-shield-alt"></i></div>
           <div class="rdkpi-body">
             <div class="rdkpi-label">Insurance Revenue</div>
@@ -5987,7 +5988,7 @@ function ReportsPage() {
             <div class="rdkpi-sub">YTD · $1.87M / $2.16M target <span class="rdkpi-delta up">+9%</span></div>
           </div>
         </div>
-        <div class="rdkpi-card inv-theme">
+        <div class="rdkpi-card inv-theme" onclick="openReportDrillDown('investments')" style="cursor:pointer" title="View Investments detail">
           <div class="rdkpi-icon"><i class="fas fa-chart-line"></i></div>
           <div class="rdkpi-body">
             <div class="rdkpi-label">Investment AUM</div>
@@ -5995,7 +5996,7 @@ function ReportsPage() {
             <div class="rdkpi-sub">62 clients · Avg $67.7K <span class="rdkpi-delta up">+14%</span></div>
           </div>
         </div>
-        <div class="rdkpi-card ret-theme">
+        <div class="rdkpi-card ret-theme" onclick="openReportDrillDown('retirement')" style="cursor:pointer" title="View Retirement detail">
           <div class="rdkpi-icon"><i class="fas fa-umbrella-beach"></i></div>
           <div class="rdkpi-body">
             <div class="rdkpi-label">Retirement Annuity Premium</div>
@@ -6003,7 +6004,7 @@ function ReportsPage() {
             <div class="rdkpi-sub">38 clients · Deferred + Immediate <span class="rdkpi-delta up">+22%</span></div>
           </div>
         </div>
-        <div class="rdkpi-card adv-theme">
+        <div class="rdkpi-card adv-theme" onclick="openReportDrillDown('advisory')" style="cursor:pointer" title="View Advisory detail">
           <div class="rdkpi-icon"><i class="fas fa-handshake"></i></div>
           <div class="rdkpi-body">
             <div class="rdkpi-label">Advisory Revenue</div>
@@ -6018,9 +6019,9 @@ function ReportsPage() {
           <div class="card-header">
             <h3><i class="fas fa-chart-line"></i> Total Revenue by Domain — YTD 2026</h3>
             <div class="card-actions">
-              <button class="btn-tiny active">6M</button>
-              <button class="btn-tiny">12M</button>
-              <button class="btn-tiny">All</button>
+              <button class="btn-tiny active" onclick="setReportPeriod('6M', this)">6M</button>
+              <button class="btn-tiny" onclick="setReportPeriod('12M', this)">12M</button>
+              <button class="btn-tiny" onclick="setReportPeriod('All', this)">All</button>
             </div>
           </div>
           <div class="report-chart-wrap" style="position:relative;height:260px">
@@ -6552,6 +6553,7 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 30-50% faster underwriting = ~$18K/yr in productivity gain. 18 APS avoided × $450 avg cost = <strong>$8,100 saved/mo</strong>.</span>
           </div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('underwriting')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Retention AI */}
@@ -6598,6 +6600,7 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 3 clients retained × avg $4,733 premium = <strong>$14,200 premium saved</strong>. Lifetime value protected: ~$142K over 10 yr avg.</span>
           </div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('retention')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Claims AI */}
@@ -6644,6 +6647,7 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> Auto-triage saves ~43 min/claim × 6 claims = <strong>4.3 hrs/mo</strong> reclaimed. IDP: eliminates manual data entry on ~30 docs/mo.</span>
           </div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('claims')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Proactive AI Alerts */}
@@ -6690,6 +6694,7 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 52% of 42 alerts actioned = 22 revenue events. At avg $1,400/event = <strong>~$30.8K incremental revenue</strong> from AI alerting.</span>
           </div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('alerts')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Investment AI */}
@@ -6736,6 +6741,7 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 9 cross-sell insights × avg $1,400 revenue each = <strong>$12,600 potential</strong>. UMA close: Linda Morrison $2,800/yr recurring fee.</span>
           </div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('investment')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Meeting AI */}
@@ -6782,6 +6788,7 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 8 meetings × 25 min saved = <strong>3.3 hrs/mo</strong> reclaimed for selling. Better prep → estimated +12% meeting conversion rate.</span>
           </div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('meetings')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
       </div>
