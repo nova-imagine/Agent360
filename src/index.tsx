@@ -765,7 +765,34 @@ function DashboardPage() {
                 <button class="ri-action-btn med" onclick="event.stopPropagation();openRetentionModal('ret-david')"><i class="fas fa-phone"></i> Call</button>
               </div>
             </div>
-            <button class="ri-view-all-btn" onclick="navigateTo('clients')"><i class="fas fa-shield-alt"></i> View All 15 At-Risk Clients →</button>
+            {/* ── Retention Forecast Mini-Strip ── */}
+            <div class="ri-forecast-strip">
+              <div class="ri-fc-card urgent">
+                <div class="ri-fc-icon"><i class="fas fa-battery-quarter"></i></div>
+                <div class="ri-fc-body">
+                  <div class="ri-fc-label">Patricia Nguyen</div>
+                  <div class="ri-fc-val red">Lapse in ~68d</div>
+                  <div class="ri-fc-bar-outer"><div class="ri-fc-bar red" style="width:87%"></div></div>
+                </div>
+              </div>
+              <div class="ri-fc-card high">
+                <div class="ri-fc-icon"><i class="fas fa-calendar-times"></i></div>
+                <div class="ri-fc-body">
+                  <div class="ri-fc-label">Sandra Williams</div>
+                  <div class="ri-fc-val orange">Term Expiry 153d</div>
+                  <div class="ri-fc-bar-outer"><div class="ri-fc-bar orange" style="width:79%"></div></div>
+                </div>
+              </div>
+              <div class="ri-fc-card med">
+                <div class="ri-fc-icon"><i class="fas fa-coins"></i></div>
+                <div class="ri-fc-body">
+                  <div class="ri-fc-label">James Whitfield</div>
+                  <div class="ri-fc-val purple">LTC Gap — Review</div>
+                  <div class="ri-fc-bar-outer"><div class="ri-fc-bar purple" style="width:48%"></div></div>
+                </div>
+              </div>
+            </div>
+            <button class="ri-view-all-btn" onclick="navigateTo('policies')"><i class="fas fa-heartbeat"></i> Lapse Prevention Dashboard →</button>
           </div>
         </div>
 
@@ -1735,6 +1762,42 @@ function PoliciesPage() {
         </div>
       </div>
 
+      {/* ── Retention Intelligence & Lapse Prevention Banner ── */}
+      <div class="ri-banner">
+        <div class="ri-banner-left">
+          <div class="ri-banner-icon">
+            <i class="fas fa-heartbeat"></i>
+            <span class="ri-pulse"></span>
+          </div>
+          <div class="ri-banner-text">
+            <div class="ri-banner-title">Retention Intelligence &amp; Lapse Prevention Engine <span class="ri-live-badge">LIVE</span></div>
+            <div class="ri-banner-sub">AI monitors cash values, renewal windows &amp; coverage gaps · predicts lapse 60–90 days early · generates personalised save scripts</div>
+          </div>
+        </div>
+        <div class="ri-banner-stats">
+          <div class="ri-bstat">
+            <span class="ri-bstat-val red">2</span>
+            <span class="ri-bstat-lbl">Urgent Lapses</span>
+          </div>
+          <div class="ri-bstat">
+            <span class="ri-bstat-val orange">4</span>
+            <span class="ri-bstat-lbl">High Risk</span>
+          </div>
+          <div class="ri-bstat">
+            <span class="ri-bstat-val gold">23</span>
+            <span class="ri-bstat-lbl">Renewals Due</span>
+          </div>
+          <div class="ri-bstat">
+            <span class="ri-bstat-val green">$62.6K</span>
+            <span class="ri-bstat-lbl">Premium at Risk</span>
+          </div>
+        </div>
+        <div class="ri-banner-actions">
+          <button class="ri-btn-lapse" onclick="openRetentionFullReport()"><i class="fas fa-exclamation-triangle"></i> Lapse Report</button>
+          <button class="ri-btn-renewal" onclick="openRenewalCenter()"><i class="fas fa-sync-alt"></i> Renewal Center</button>
+        </div>
+      </div>
+
       <div class="policies-table-wrapper">
         <table class="data-table" id="policies-table">
           <thead>
@@ -1750,6 +1813,7 @@ function PoliciesPage() {
               <th>Beneficiary</th>
               <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
               <th><i class="fas fa-brain" style="color:#7c3aed;margin-right:4px"></i>NLP Risk</th>
+              <th><i class="fas fa-heartbeat" style="color:#dc2626;margin-right:4px"></i>Lapse Risk</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -1777,6 +1841,17 @@ function PoliciesPage() {
                 'P-100330': {score:97,level:'Low',cls:'nlp-low',flag:'Flagship — all clauses clear'},
               };
               const nlp = nlpRiskMap[p.id] || {score:0,level:'—',cls:'',flag:'Not scanned'};
+              const lapseRiskMap: Record<string,{score:number,level:string,cls:string,trigger:string,retId:string}> = {
+                'P-100291': {score:22,level:'Low',   cls:'lapse-low',   trigger:'Paid-up status — stable',           retId:'ret-james'},
+                'P-100292': {score:18,level:'Low',   cls:'lapse-low',   trigger:'WL flagship — no risk',             retId:''},
+                'P-100293': {score:48,level:'Medium',cls:'lapse-med',   trigger:'LTC gap — coverage review',         retId:'ret-james'},
+                'P-100301': {score:87,level:'Urgent',cls:'lapse-urgent',trigger:'⚠ Under-funded lapse ~Jun 20',      retId:'ret-patricia'},
+                'P-100302': {score:24,level:'Low',   cls:'lapse-low',   trigger:'VUL — market risk only',            retId:''},
+                'P-100310': {score:35,level:'Low',   cls:'lapse-low',   trigger:'Contestability — monitor',          retId:''},
+                'P-100320': {score:79,level:'High',  cls:'lapse-high',  trigger:'⚠ Term expiry Sep 2026 — 153d',    retId:'ret-sandra'},
+                'P-100330': {score:14,level:'Low',   cls:'lapse-low',   trigger:'WL strong — $168K cash value',      retId:''},
+              };
+              const lapse = lapseRiskMap[p.id] || {score:0,level:'—',cls:'',trigger:'Not scored',retId:''};
               return (
               <tr>
                 <td><span class="policy-id">{p.id}</span></td>
@@ -1795,17 +1870,106 @@ function PoliciesPage() {
                 <td class="text-muted">{p.beneficiary}</td>
                 <td><div class="idp-status-cell" onclick={`openIDPModal('${p.id}')`}><span class={`idp-badge ${idp.cls}`}><i class={`fas ${idp.cls.includes('complete') ? 'fa-check-circle' : idp.cls.includes('urgent') ? 'fa-exclamation-circle' : 'fa-file-import'}`}></i> {idp.badge}</span><div class="idp-scan-bar"><div class={`idp-scan-fill ${idp.fill}`} style={`width:${idp.pct}%`}></div></div></div></td>
                 <td><div class={`nlp-risk-cell ${nlp.cls}`} onclick={`openNLPReview('${p.id}')`} title={nlp.flag}><span class="nlp-score">{nlp.score}</span><span class="nlp-level-badge">{nlp.level}</span><div class="nlp-flag-tip">{nlp.flag}</div></div></td>
+                <td><div class={`lapse-risk-cell ${lapse.cls}`} onclick={lapse.retId ? `openRetentionModal('${lapse.retId}')` : ''} title={lapse.trigger}><span class="lapse-score">{lapse.score}</span><span class="lapse-level-badge">{lapse.level}</span><div class="lapse-trigger-tip">{lapse.trigger}</div></div></td>
                 <td>
                   <div class="action-btns">
                     <button class="btn-icon" title="View Details" onclick={`openPolicyModal('${p.id}','view')`}><i class="fas fa-eye"></i></button>
                     <button class="btn-icon" title="Edit Policy"  onclick={`openPolicyModal('${p.id}','edit')`}><i class="fas fa-edit"></i></button>
                     <button class="btn-icon ai-btn" title="NLP Policy Review" onclick={`openNLPReview('${p.id}')`}><i class="fas fa-brain"></i></button>
+                    <button class={`btn-icon ${lapse.retId ? 'ri-btn-icon' : ''}`} title="Retention Analysis" onclick={lapse.retId ? `openRetentionModal('${lapse.retId}')` : ''}><i class="fas fa-heartbeat"></i></button>
                   </div>
                 </td>
               </tr>
             );})}
           </tbody>
         </table>
+      </div>
+
+      {/* ── Renewal Action Center ── */}
+      <div class="renewal-action-center" id="renewal-action-center">
+        <div class="rac-header">
+          <div class="rac-title-wrap">
+            <i class="fas fa-sync-alt"></i>
+            <div>
+              <div class="rac-title">Renewal Action Center <span class="rac-badge">23 Due in 90 Days</span></div>
+              <div class="rac-sub">AI-prioritised renewal queue · auto-drafts emails · tracks conversion window</div>
+            </div>
+          </div>
+          <div class="rac-header-right">
+            <button class="rac-run-btn" onclick="runRenewalCampaign()"><i class="fas fa-paper-plane"></i> Run Campaign</button>
+            <button class="rac-close-btn" onclick="toggleRenewalCenter()"><i class="fas fa-chevron-up"></i></button>
+          </div>
+        </div>
+        <div class="rac-kpi-strip">
+          <div class="rac-kpi"><span class="rac-kpi-val red">2</span><span class="rac-kpi-lbl">Urgent (≤30d)</span></div>
+          <div class="rac-kpi"><span class="rac-kpi-val orange">8</span><span class="rac-kpi-lbl">High (31–60d)</span></div>
+          <div class="rac-kpi"><span class="rac-kpi-val blue">13</span><span class="rac-kpi-lbl">Normal (61–90d)</span></div>
+          <div class="rac-kpi"><span class="rac-kpi-val green">65%</span><span class="rac-kpi-lbl">Email Open Rate</span></div>
+          <div class="rac-kpi"><span class="rac-kpi-val purple">15/23</span><span class="rac-kpi-lbl">Emails Sent</span></div>
+        </div>
+        <div class="rac-priority-list">
+          <div class="rac-item rac-urgent">
+            <div class="rac-priority-badge urgent">URGENT</div>
+            <div class="rac-client-info">
+              <div class="rac-client-name">Patricia Nguyen</div>
+              <div class="rac-policy-info">P-100301 · Universal Life · $5,800/yr</div>
+            </div>
+            <div class="rac-trigger-info">
+              <i class="fas fa-battery-quarter red-icon"></i>
+              <span>UL Under-funded — Lapse predicted Jun 20, 2026</span>
+            </div>
+            <div class="rac-days-badge urgent">Lapse in ~68d</div>
+            <button class="rac-action-btn urgent" onclick="openRetentionModal('ret-patricia')"><i class="fas fa-bolt"></i> Act Now</button>
+            <button class="rac-email-btn" onclick="draftRetentionEmail('patricia')"><i class="fas fa-envelope"></i> Draft Email</button>
+          </div>
+          <div class="rac-item rac-urgent">
+            <div class="rac-priority-badge urgent">URGENT</div>
+            <div class="rac-client-info">
+              <div class="rac-client-name">Sandra Williams</div>
+              <div class="rac-policy-info">P-100320 · Term Life 20-yr · $8,200/yr</div>
+            </div>
+            <div class="rac-trigger-info">
+              <i class="fas fa-calendar-times orange-icon"></i>
+              <span>Term expiry Sep 15, 2026 — conversion window closing</span>
+            </div>
+            <div class="rac-days-badge high">153 days</div>
+            <button class="rac-action-btn high" onclick="openRetentionModal('ret-sandra')"><i class="fas fa-bolt"></i> Act Now</button>
+            <button class="rac-email-btn" onclick="draftRetentionEmail('sandra')"><i class="fas fa-envelope"></i> Draft Email</button>
+          </div>
+          <div class="rac-item rac-med">
+            <div class="rac-priority-badge med">MED</div>
+            <div class="rac-client-info">
+              <div class="rac-client-name">James Whitfield</div>
+              <div class="rac-policy-info">P-100293 · Long-Term Care · $12,400/yr</div>
+            </div>
+            <div class="rac-trigger-info">
+              <i class="fas fa-coins purple-icon"></i>
+              <span>LTC coverage gap $180/day — review at renewal</span>
+            </div>
+            <div class="rac-days-badge med">Coverage Review</div>
+            <button class="rac-action-btn med" onclick="openRetentionModal('ret-james')"><i class="fas fa-eye"></i> Review</button>
+            <button class="rac-email-btn" onclick="draftRetentionEmail('james')"><i class="fas fa-envelope"></i> Draft Email</button>
+          </div>
+          <div class="rac-item rac-low">
+            <div class="rac-priority-badge low">LOW</div>
+            <div class="rac-client-info">
+              <div class="rac-client-name">David Thompson</div>
+              <div class="rac-policy-info">P-100380 · Term Life · $2,400/yr</div>
+            </div>
+            <div class="rac-trigger-info">
+              <i class="fas fa-shield-alt blue-icon"></i>
+              <span>Under-insured · no DI/retirement — upsell opportunity</span>
+            </div>
+            <div class="rac-days-badge low">30-Day Engage</div>
+            <button class="rac-action-btn low" onclick="openRetentionModal('ret-david')"><i class="fas fa-phone"></i> Engage</button>
+            <button class="rac-email-btn" onclick="draftRetentionEmail('david')"><i class="fas fa-envelope"></i> Draft Email</button>
+          </div>
+        </div>
+        <div class="rac-footer">
+          <button class="rac-footer-btn" onclick="sendQuickMessage('Show all 23 renewal cases ranked by urgency and premium at risk')"><i class="fas fa-robot"></i> AI Full Renewal Analysis</button>
+          <button class="rac-footer-btn" onclick="sendQuickMessage('Draft personalised renewal emails for all 23 clients due in 90 days')"><i class="fas fa-envelope-open-text"></i> Batch Draft Emails</button>
+          <button class="rac-footer-btn" onclick="navigateTo('clients')"><i class="fas fa-users"></i> View All At-Risk Clients</button>
+        </div>
       </div>
 
       {/* Policy Summary Cards */}
@@ -1857,11 +2021,53 @@ function PoliciesPage() {
                 <button class="dmt-tab" onclick="switchPolicyTab('edit',this)"><i class="fas fa-edit"></i> Edit</button>
                 <button class="dmt-tab ai-tab" onclick="switchPolicyTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
                 <button class="dmt-tab nlp-tab" onclick="switchPolicyTab('nlp',this)"><i class="fas fa-brain"></i> NLP Risk</button>
+                <button class="dmt-tab ri-tab" onclick="switchPolicyTab('retention',this)"><i class="fas fa-heartbeat"></i> Retention</button>
               </div>
               <button class="detail-modal-close" onclick="closePolicyModal()"><i class="fas fa-times"></i></button>
             </div>
           </div>
           <div class="detail-modal-body" id="policy-modal-body"></div>
+        </div>
+      </div>
+
+      {/* ── Retention Intelligence Full Report Modal ── */}
+      <div class="ri-overlay" id="ri-overlay" onclick="closeRetentionFullReport(event)">
+        <div class="ri-report-modal" onclick="event.stopPropagation()">
+          <div class="ri-report-header">
+            <div class="ri-report-title-wrap">
+              <div class="ri-report-icon"><i class="fas fa-heartbeat"></i></div>
+              <div>
+                <div class="ri-report-title">Retention Intelligence Full Report</div>
+                <div class="ri-report-sub" id="ri-report-sub">AI lapse predictions · renewal risk matrix · recommended actions</div>
+              </div>
+            </div>
+            <div class="ri-report-header-right">
+              <div class="ri-report-tabs">
+                <button class="ri-rtab active" onclick="switchRIReportTab('overview',this)"><i class="fas fa-chart-bar"></i> Overview</button>
+                <button class="ri-rtab" onclick="switchRIReportTab('clients',this)"><i class="fas fa-users"></i> At-Risk Clients</button>
+                <button class="ri-rtab" onclick="switchRIReportTab('forecast',this)"><i class="fas fa-chart-line"></i> Forecast</button>
+              </div>
+              <button class="ri-report-close" onclick="closeRetentionFullReport()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="ri-report-body" id="ri-report-body">
+            {/* JS-populated */}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Retention Email Draft Modal ── */}
+      <div class="ri-email-overlay" id="ri-email-overlay" onclick="closeRetentionEmailModal(event)">
+        <div class="ri-email-modal" onclick="event.stopPropagation()">
+          <div class="ri-email-header">
+            <div class="ri-email-icon"><i class="fas fa-envelope-open-text"></i></div>
+            <div>
+              <div class="ri-email-title">AI-Drafted Retention Email</div>
+              <div class="ri-email-sub" id="ri-email-sub"></div>
+            </div>
+            <button class="ri-report-close" onclick="closeRetentionEmailModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="ri-email-body" id="ri-email-body"></div>
         </div>
       </div>
 
@@ -2922,6 +3128,23 @@ function AIAgentsPage() {
             <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
+          <div class="agent-card ri-agent-card active-agent" onclick="selectAgent('retention')">
+            <div class="agent-card-icon ri-agent-icon"><i class="fas fa-heartbeat"></i></div>
+            <div class="agent-card-info">
+              <h4>Retention Intelligence Agent <span class="agent-new-badge">NEW</span></h4>
+              <p>Predicts policy lapses 60–90 days in advance, monitors cash-value thresholds, scores renewal risk, and auto-generates personalised save scripts</p>
+              <div class="agent-tags">
+                <span>Lapse Prediction</span><span>Renewal Risk</span><span>Save Scripts</span>
+              </div>
+              <div class="ri-agent-stats">
+                <span class="ri-ast red">2 Urgent</span>
+                <span class="ri-ast orange">$62.6K at Risk</span>
+                <span class="ri-ast green">23 Renewals</span>
+              </div>
+            </div>
+            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
+          </div>
+
           {/* Investments agents */}
           <div class="agent-domain-label inv-label"><i class="fas fa-chart-line"></i> Investments</div>
 
@@ -3126,6 +3349,18 @@ function AIAgentsPage() {
                 <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Show all 4 lapse-risk clients with risk scores and recommended actions')">All Lapse Risks</button>
                 <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('Which retention actions have the highest ROI — rank by premium at risk')">Highest ROI</button>
                 <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Draft a retention email for Sandra Williams about converting her term policy before expiry')">Draft: Sandra Email</button>
+              </div>
+            </div>
+
+            {/* Retention Intelligence */}
+            <div class="ctx-group ri-ctx-group">
+              <span class="ctx-group-label ri-ctx-label"><i class="fas fa-heartbeat"></i> Retention Intelligence</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-ri" onclick="openRetentionModal('ret-patricia')">Patricia Risk 87 ⚡</button>
+                <button class="ctx-btn ctx-ri" onclick="openRetentionModal('ret-sandra')">Sandra Renewal ⚡</button>
+                <button class="ctx-btn ctx-ri" onclick="sendQuickMessage('Run full retention intelligence scan — score all 247 clients for lapse risk, renewal risk, and coverage gaps')">Full RI Scan</button>
+                <button class="ctx-btn ctx-ri" onclick="sendQuickMessage('Generate personalised save scripts for all high-risk clients based on their trigger type')">Gen Save Scripts</button>
+                <button class="ctx-btn ctx-ri" onclick="openRetentionFullReport()">Lapse Report</button>
               </div>
             </div>
 

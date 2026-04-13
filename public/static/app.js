@@ -5597,3 +5597,409 @@ window.openClaimModal = function(claimId, tab) {
   renderClaimModal(_currentClaimId, _currentClaimTab);
 };
 
+
+// ================================================================
+//  TASK #14 — RETENTION INTELLIGENCE & LAPSE PREVENTION ENGINE
+// ================================================================
+
+// ── Hook retention tab into Policy Modal ──────────────────────
+const _origSwitchPolicyTabV2 = window.switchPolicyTab;
+window.switchPolicyTab = function(tab, tabEl) {
+  if (tab === 'retention') {
+    const policyId = window._currentPolicyModalId || null;
+    if (policyId) renderPolicyRetentionTab(policyId);
+    return;
+  }
+  if (typeof _origSwitchPolicyTabV2 === 'function') _origSwitchPolicyTabV2(tab, tabEl);
+};
+
+// ── Lapse risk map (matches index.tsx) ──────────────────────────
+const policyLapseMap = {
+  'P-100291': { score:22,  level:'Low',    retId:'',              trigger:'Paid-up status — stable cash value growth' },
+  'P-100292': { score:18,  level:'Low',    retId:'',              trigger:'WL flagship — no lapse risk detected' },
+  'P-100293': { score:48,  level:'Medium', retId:'ret-james',     trigger:'LTC coverage gap $180/day — review at renewal' },
+  'P-100301': { score:87,  level:'Urgent', retId:'ret-patricia',  trigger:'⚠ Under-funded UL — lapse predicted Jun 20, 2026' },
+  'P-100302': { score:24,  level:'Low',    retId:'',              trigger:'VUL — market risk only, no funding risk' },
+  'P-100310': { score:35,  level:'Low',    retId:'',              trigger:'Contestability window active — monitor' },
+  'P-100320': { score:79,  level:'High',   retId:'ret-sandra',    trigger:'⚠ Term expiry Sep 15, 2026 — 153 days remaining' },
+  'P-100330': { score:14,  level:'Low',    retId:'',              trigger:'WL strongest in book — $168K cash value' },
+};
+
+function renderPolicyRetentionTab(policyId) {
+  const bodyEl = document.getElementById('policy-modal-body');
+  if (!bodyEl) return;
+
+  const l = policyLapseMap[policyId];
+  const rd = l && l.retId ? retentionData[l.retId] : null;
+
+  if (!l) {
+    bodyEl.innerHTML = `<div style="padding:40px;text-align:center;color:#9ca3af"><i class="fas fa-heartbeat fa-2x" style="margin-bottom:12px"></i><br>Retention intelligence not available for this policy.</div>`;
+    return;
+  }
+
+  const riskColor = l.score >= 75 ? '#dc2626' : l.score >= 50 ? '#f59e0b' : '#059669';
+  const riskBg    = l.score >= 75 ? '#fef2f2' : l.score >= 50 ? '#fffbeb' : '#f0fdf4';
+  const riskLabel = l.level;
+
+  const signalsHtml = rd ? rd.signals.map(s => `
+    <div class="ri-signal-row">
+      <i class="fas ${s.icon}" style="color:${s.color};flex-shrink:0;margin-top:2px"></i>
+      <span>${s.text}</span>
+    </div>`).join('') : `<div class="ri-signal-row"><i class="fas fa-check-circle" style="color:#059669"></i><span>No significant lapse signals detected for this policy.</span></div>`;
+
+  const actionHtml = rd ? rd.actionPlan.steps.map(s => `
+    <div class="ri-action-step${s.urgent?' urgent':''}">
+      <span class="ri-step-num${s.urgent?' urgent':''}">${s.urgent?'!':s.num}</span>
+      <span>${s.text}</span>
+    </div>`).join('') : `<div class="ri-action-step"><span class="ri-step-num">1</span><span>Continue regular annual review — no immediate action required.</span></div>`;
+
+  const urgencyBanner = rd ? `<div class="ri-urgency-banner" style="background:${riskBg};color:${riskColor};border-left:4px solid ${riskColor}">${rd.actionPlan.urgency}</div>` : '';
+
+  bodyEl.innerHTML = `
+    <div class="ri-policy-tab">
+      <div class="ri-pt-header">
+        <div class="ri-pt-score-ring" style="border-color:${riskColor};background:${riskColor}15">
+          <span class="ri-pt-score-num" style="color:${riskColor}">${l.score}</span>
+          <span class="ri-pt-score-lbl">Lapse Risk</span>
+        </div>
+        <div class="ri-pt-summary">
+          <div class="ri-pt-risk-badge" style="background:${riskColor}20;color:${riskColor};border:1px solid ${riskColor}40">
+            <i class="fas fa-heartbeat"></i> ${riskLabel} Risk
+          </div>
+          <div class="ri-pt-trigger">${l.trigger}</div>
+          ${rd ? `<div class="ri-pt-client-info">${rd.client} · Age ${rd.age} · ${rd.policyType} · ${rd.premium}</div>` : ''}
+        </div>
+        <div class="ri-pt-actions">
+          ${rd ? `<button class="btn btn-ai" onclick="openRetentionModal('${l.retId}')"><i class="fas fa-bolt"></i> Full Retention Analysis</button>` : ''}
+          <button class="btn btn-outline-sm" onclick="openRenewalCenter()"><i class="fas fa-sync-alt"></i> Renewal Center</button>
+        </div>
+      </div>
+      <div class="ri-pt-body">
+        <div class="ri-pt-section">
+          <div class="ri-pt-section-title"><i class="fas fa-signal"></i> Retention Risk Signals</div>
+          <div class="ri-signals-list">${signalsHtml}</div>
+        </div>
+        <div class="ri-pt-section">
+          ${urgencyBanner}
+          <div class="ri-pt-section-title" style="margin-top:${rd?'12px':'0'}"><i class="fas fa-tasks"></i> AI Recommended Actions</div>
+          <div class="ri-action-steps">${actionHtml}</div>
+          ${rd ? `<div class="ri-retention-value"><i class="fas fa-dollar-sign"></i><span><strong>Estimated Retention Value:</strong> ${rd.actionPlan.estimatedRetentionValue}</span></div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Retention Full Report Modal ──────────────────────────────────
+let _currentRIReportTab = 'overview';
+
+function openRetentionFullReport() {
+  _currentRIReportTab = 'overview';
+  const overlay = document.getElementById('ri-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.querySelectorAll('#ri-overlay .ri-rtab').forEach((t,i) => t.classList.toggle('active', i===0));
+  renderRIReport('overview');
+}
+
+function closeRetentionFullReport(e) {
+  if (e && e.target !== document.getElementById('ri-overlay')) return;
+  const overlay = document.getElementById('ri-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function switchRIReportTab(tab, btn) {
+  _currentRIReportTab = tab;
+  document.querySelectorAll('#ri-overlay .ri-rtab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderRIReport(tab);
+}
+
+function renderRIReport(tab) {
+  const body = document.getElementById('ri-report-body');
+  if (!body) return;
+
+  if (tab === 'overview') {
+    body.innerHTML = `
+      <div class="ri-rpt-overview">
+        <div class="ri-rpt-kpi-strip">
+          <div class="ri-rpt-kpi red"><span class="ri-rpt-kval">2</span><span class="ri-rpt-klbl">Urgent Lapse Risk</span></div>
+          <div class="ri-rpt-kpi orange"><span class="ri-rpt-kval">4</span><span class="ri-rpt-klbl">High Risk</span></div>
+          <div class="ri-rpt-kpi gold"><span class="ri-rpt-kval">23</span><span class="ri-rpt-klbl">Renewals Due (90d)</span></div>
+          <div class="ri-rpt-kpi blue"><span class="ri-rpt-kval">$62.6K</span><span class="ri-rpt-klbl">Annual Premium at Risk</span></div>
+          <div class="ri-rpt-kpi green"><span class="ri-rpt-kval">94%</span><span class="ri-rpt-klbl">Retention Rate YTD</span></div>
+        </div>
+        <div class="ri-rpt-grid">
+          <div class="ri-rpt-section">
+            <div class="ri-rpt-section-title"><i class="fas fa-exclamation-triangle"></i> Urgent Lapse Risks</div>
+            <div class="ri-rpt-risk-table">
+              <div class="ri-rpt-risk-row header">
+                <span>Client</span><span>Policy</span><span>Trigger</span><span>Score</span><span>Days</span><span>Action</span>
+              </div>
+              ${[
+                {client:'Patricia Nguyen', policy:'P-100301', trigger:'UL Under-funded', score:87, days:'~68d', color:'#dc2626', retId:'ret-patricia'},
+                {client:'Sandra Williams', policy:'P-100320', trigger:'Term Expiry Sep-26', score:79, days:'153d', color:'#d97706', retId:'ret-sandra'},
+                {client:'Kevin Park',      policy:'P-100350', trigger:'Claim Pending', score:72, days:'Active', color:'#7c3aed', retId:'ret-kevin'},
+                {client:'David Thompson',  policy:'P-100380', trigger:'Under-insured', score:54, days:'30d', color:'#f59e0b', retId:'ret-david'},
+                {client:'James Whitfield', policy:'P-100293', trigger:'LTC Gap', score:48, days:'Renewal', color:'#8b5cf6', retId:'ret-james'},
+              ].map(r => `
+                <div class="ri-rpt-risk-row" onclick="openRetentionModal('${r.retId}')">
+                  <span class="ri-rpt-client">${r.client}</span>
+                  <span class="ri-rpt-policy">${r.policy}</span>
+                  <span class="ri-rpt-trigger">${r.trigger}</span>
+                  <span class="ri-rpt-score" style="color:${r.color};font-weight:700">${r.score}</span>
+                  <span class="ri-rpt-days" style="color:${r.color}">${r.days}</span>
+                  <span><button class="ri-rpt-act-btn" onclick="event.stopPropagation();openRetentionModal('${r.retId}')"><i class="fas fa-bolt"></i> Act</button></span>
+                </div>`).join('')}
+            </div>
+          </div>
+          <div class="ri-rpt-section">
+            <div class="ri-rpt-section-title"><i class="fas fa-chart-bar"></i> Risk Distribution</div>
+            <div class="ri-rpt-dist">
+              <div class="ri-rpt-dist-row"><span class="ri-rpt-dist-lbl">🔴 Urgent (75–100)</span><div class="ri-rpt-dist-bar-outer"><div class="ri-rpt-dist-bar" style="width:13%;background:#dc2626"></div></div><span>2 clients</span></div>
+              <div class="ri-rpt-dist-row"><span class="ri-rpt-dist-lbl">🟠 High (55–74)</span><div class="ri-rpt-dist-bar-outer"><div class="ri-rpt-dist-bar" style="width:27%;background:#d97706"></div></div><span>4 clients</span></div>
+              <div class="ri-rpt-dist-row"><span class="ri-rpt-dist-lbl">🟡 Medium (35–54)</span><div class="ri-rpt-dist-bar-outer"><div class="ri-rpt-dist-bar" style="width:73%;background:#f59e0b"></div></div><span>11 clients</span></div>
+              <div class="ri-rpt-dist-row"><span class="ri-rpt-dist-lbl">🟢 Low (0–34)</span><div class="ri-rpt-dist-bar-outer"><div class="ri-rpt-dist-bar" style="width:100%;background:#059669"></div></div><span>232 clients</span></div>
+            </div>
+            <div class="ri-rpt-section-title" style="margin-top:20px"><i class="fas fa-coins"></i> Premium at Risk by Trigger Type</div>
+            <div class="ri-rpt-dist">
+              <div class="ri-rpt-dist-row"><span class="ri-rpt-dist-lbl">UL Under-funding</span><div class="ri-rpt-dist-bar-outer"><div class="ri-rpt-dist-bar" style="width:56%;background:#dc2626"></div></div><span>$5.8K/yr</span></div>
+              <div class="ri-rpt-dist-row"><span class="ri-rpt-dist-lbl">Term Renewal</span><div class="ri-rpt-dist-bar-outer"><div class="ri-rpt-dist-bar" style="width:100%;background:#d97706"></div></div><span>$10.6K/yr</span></div>
+              <div class="ri-rpt-dist-row"><span class="ri-rpt-dist-lbl">Under-insured Drift</span><div class="ri-rpt-dist-bar-outer"><div class="ri-rpt-dist-bar" style="width:23%;background:#f59e0b"></div></div><span>$2.4K/yr</span></div>
+              <div class="ri-rpt-dist-row"><span class="ri-rpt-dist-lbl">Coverage Gap</span><div class="ri-rpt-dist-bar-outer"><div class="ri-rpt-dist-bar" style="width:100%;background:#8b5cf6"></div></div><span>$12.4K/yr</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="ri-rpt-footer-btns">
+          <button class="ri-rpt-fbtn" onclick="closeRetentionFullReport()"><i class="fas fa-times"></i> Close</button>
+          <button class="ri-rpt-fbtn primary" onclick="sendQuickMessage('Run full retention intelligence scan — score all 247 clients for lapse risk, renewal risk, and coverage gaps');closeRetentionFullReport()"><i class="fas fa-robot"></i> AI Full Scan</button>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'clients') {
+    const clients = [
+      {client:'Patricia Nguyen', age:38, policy:'P-100301', type:'Universal Life', premium:'$5,800/yr', score:87, level:'Urgent', color:'#dc2626', retId:'ret-patricia', trigger:'UL Under-funded'},
+      {client:'Sandra Williams', age:61, policy:'P-100320', type:'Term Life 20-yr', premium:'$8,200/yr', score:79, level:'High', color:'#d97706', retId:'ret-sandra', trigger:'Term Expiry Sep-26'},
+      {client:'Kevin Park',      age:29, policy:'P-100350', type:'Term Life', premium:'$1,800/yr', score:72, level:'High', color:'#d97706', retId:'ret-kevin', trigger:'Claim Pending'},
+      {client:'David Thompson',  age:33, policy:'P-100380', type:'Term Life', premium:'$2,400/yr', score:54, level:'Medium', color:'#f59e0b', retId:'ret-david', trigger:'Under-insured'},
+      {client:'James Whitfield', age:62, policy:'P-100293', type:'Long-Term Care', premium:'$12,400/yr', score:48, level:'Medium', color:'#8b5cf6', retId:'ret-james', trigger:'LTC Coverage Gap'},
+    ];
+    body.innerHTML = `
+      <div style="padding:20px 24px">
+        <div class="ri-rpt-section-title"><i class="fas fa-users"></i> At-Risk Client Profiles</div>
+        <div class="ri-client-cards">
+          ${clients.map(c => `
+            <div class="ri-client-card" onclick="closeRetentionFullReport();setTimeout(()=>openRetentionModal('${c.retId}'),100)">
+              <div class="ri-cc-header" style="border-left:4px solid ${c.color}">
+                <div class="ri-cc-avatar">${c.client.split(' ').map(n=>n[0]).join('')}</div>
+                <div>
+                  <div class="ri-cc-name">${c.client}</div>
+                  <div class="ri-cc-sub">Age ${c.age} · ${c.type}</div>
+                </div>
+                <div class="ri-cc-score" style="color:${c.color}">${c.score}</div>
+              </div>
+              <div class="ri-cc-body">
+                <div class="ri-cc-row"><span>Policy</span><span>${c.policy}</span></div>
+                <div class="ri-cc-row"><span>Premium at Risk</span><span style="font-weight:600">${c.premium}</span></div>
+                <div class="ri-cc-row"><span>Trigger</span><span style="color:${c.color}">${c.trigger}</span></div>
+                <div class="ri-cc-row"><span>Risk Level</span><span class="ri-cc-level" style="color:${c.color}">${c.level}</span></div>
+              </div>
+              <button class="ri-cc-btn" style="border-color:${c.color};color:${c.color}" onclick="event.stopPropagation();closeRetentionFullReport();setTimeout(()=>openRetentionModal('${c.retId}'),100)">
+                <i class="fas fa-bolt"></i> View Full Analysis
+              </button>
+            </div>`).join('')}
+        </div>
+      </div>
+    `;
+  } else if (tab === 'forecast') {
+    body.innerHTML = `
+      <div style="padding:20px 24px">
+        <div class="ri-rpt-section-title"><i class="fas fa-chart-line"></i> 90-Day Lapse Forecast</div>
+        <div class="ri-forecast-table">
+          <div class="ri-fc-row header">
+            <span>Client</span><span>Trigger Date</span><span>Lapse Probability</span><span>Premium at Risk</span><span>AI Recommendation</span>
+          </div>
+          <div class="ri-fc-row urgent">
+            <span>Patricia Nguyen</span><span class="red">Jun 20, 2026</span>
+            <div class="ri-fc-prob-bar"><div class="ri-fc-fill" style="width:87%;background:#dc2626"></div><span>87%</span></div>
+            <span>$5,800/yr</span><span>Call this week · Premium catch-up illustration</span>
+          </div>
+          <div class="ri-fc-row high">
+            <span>Sandra Williams</span><span class="orange">Sep 15, 2026</span>
+            <div class="ri-fc-prob-bar"><div class="ri-fc-fill" style="width:79%;background:#d97706"></div><span>79%</span></div>
+            <span>$8,200/yr</span><span>Schedule conversion review in 7 days</span>
+          </div>
+          <div class="ri-fc-row med">
+            <span>Kevin Park</span><span class="purple">Pending</span>
+            <div class="ri-fc-prob-bar"><div class="ri-fc-fill" style="width:72%;background:#7c3aed"></div><span>72%</span></div>
+            <span>$1,800/yr</span><span>Coordinate with Claims — legal review</span>
+          </div>
+          <div class="ri-fc-row med">
+            <span>David Thompson</span><span class="orange">30-day drift</span>
+            <div class="ri-fc-prob-bar"><div class="ri-fc-fill" style="width:54%;background:#f59e0b"></div><span>54%</span></div>
+            <span>$2,400/yr</span><span>Life stage review call — DI pitch</span>
+          </div>
+          <div class="ri-fc-row low">
+            <span>James Whitfield</span><span class="purple">Renewal</span>
+            <div class="ri-fc-prob-bar"><div class="ri-fc-fill" style="width:48%;background:#8b5cf6"></div><span>48%</span></div>
+            <span>$12,400/yr</span><span>Coverage gap review at next renewal</span>
+          </div>
+        </div>
+        <div class="ri-rpt-section-title" style="margin-top:24px"><i class="fas fa-dollar-sign"></i> Revenue Retention Opportunity</div>
+        <div class="ri-retention-value-strip">
+          <div class="ri-rv-card"><div class="ri-rv-val">$62,600</div><div class="ri-rv-lbl">Annual Premium at Risk</div></div>
+          <div class="ri-rv-card"><div class="ri-rv-val">$31.2K</div><div class="ri-rv-lbl">AI Revenue Unlocked (YTD)</div></div>
+          <div class="ri-rv-card green"><div class="ri-rv-val">$48K+</div><div class="ri-rv-lbl">Estimated Retention Value if All Saved</div></div>
+          <div class="ri-rv-card blue"><div class="ri-rv-val">23</div><div class="ri-rv-lbl">Renewals in AI Renewal Campaign</div></div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// ── Renewal Action Center toggle ─────────────────────────────────
+let _racOpen = false;
+function openRenewalCenter() {
+  _racOpen = true;
+  const el = document.getElementById('renewal-action-center');
+  if (el) { el.style.display = 'block'; el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+}
+function toggleRenewalCenter() {
+  const el = document.getElementById('renewal-action-center');
+  if (!el) return;
+  _racOpen = !_racOpen;
+  el.style.display = _racOpen ? 'block' : 'none';
+}
+function runRenewalCampaign() {
+  sendQuickMessage('Run the full renewal email campaign for all 23 clients due in 90 days — draft personalised emails for each, prioritised by lapse risk score');
+}
+
+// ── Retention Email Draft Modal ──────────────────────────────────
+const retentionEmailDrafts = {
+  'patricia': {
+    subject: 'Re: Your Policy P-100301 — Premium Health Check',
+    to: 'Patricia Nguyen <pnguyen@email.com>',
+    preview: `Dear Patricia,
+
+I hope this message finds you well. I'm reaching out regarding your Universal Life policy (P-100301), which I've been monitoring as part of our proactive client care programme.
+
+Our AI policy health system has flagged that your policy's cash value — currently at $21,400 — is approaching the minimum threshold required to sustain your current cost of insurance. To ensure your $500,000 coverage remains fully in force, I'd like to schedule a brief call this week to walk through some flexible premium options.
+
+Your choices include:
+• A modest premium catch-up of $600/month for 3 months
+• A one-time top-up of $1,800
+• A premium restructure to $2,400/yr flat
+
+None of these options require any new medical underwriting. This is simply about keeping your excellent policy — which you've maintained since 2022 — in peak health.
+
+Please let me know your availability this week for a 20-minute call.
+
+Warm regards,
+Your NYL Agent`
+  },
+  'sandra': {
+    subject: 'Your Term Policy — Important: Conversion Window Closing Sept 2026',
+    to: 'Sandra Williams <sandra.w@email.com>',
+    preview: `Dear Sandra,
+
+I'm writing to you today about something important regarding your 20-year term life policy (P-100320), which expires in September 2026 — just 153 days from now.
+
+As you approach your policy's renewal date, you have a valuable option available to you: the ability to convert to permanent coverage (Whole Life or Universal Life) without any new medical examination. This conversion right closes on September 15, 2026.
+
+Given your age and the significant coverage you have in place ($350,000 for Michael), I'd like to schedule a comprehensive review to walk through:
+• Your conversion options and what each costs at your current age
+• How Whole Life builds tax-advantaged cash value over time
+• How this decision fits your overall estate planning goals
+
+This is a time-sensitive decision — but it's also one of the most impactful financial moves available to you right now.
+
+Can we schedule 45 minutes this week or next? I'd love to include Michael in the conversation.
+
+Warm regards,
+Your NYL Agent`
+  },
+  'james': {
+    subject: 'James — LTC Coverage Review for 2026 Renewal',
+    to: 'James Whitfield <james.w@email.com>',
+    preview: `Dear James,
+
+As your LTC policy (P-100293) approaches its renewal, I wanted to share something I've been reviewing for you. Our AI benefit analysis has identified that your current daily benefit of $200/day was set in 2022 — but New York City's average long-term care cost has risen to $380/day in 2026.
+
+While your 3% inflation rider has been compounding, there's currently a $180/day gap between your benefit and actual facility costs in our area.
+
+At your upcoming renewal, I'd like to explore options to close this gap — including increasing your daily benefit to $280–$300/day, or extending your benefit period from 3 years to 5 years. I'll have illustrations ready showing both the cost and the long-term risk mitigation.
+
+Let's schedule your renewal review soon. Would April 28 work for you?
+
+Best regards,
+Your NYL Agent`
+  },
+  'david': {
+    subject: 'David — Protecting What Matters Most at 33',
+    to: 'David Thompson <david.t@email.com>',
+    preview: `Hi David,
+
+Thank you for our recent conversation about your Term Life policy — it was great catching up.
+
+I've been thinking about your financial picture, and I wanted to share something: as a 33-year-old with a great career ahead of you, your income is actually your most valuable asset. And right now, it's the one thing that isn't fully protected.
+
+Your $300K term policy is a great foundation. But I'd like to introduce you to two products that could make a real difference:
+
+1. Disability Insurance — if something happened and you couldn't work, how would your household expenses be covered? DI replaces up to 60% of your income.
+
+2. 529 College Savings Plan — if children are part of your future plans, now is the perfect time to start building education savings with tax-advantaged growth.
+
+I'd love to schedule a "life stage review" — a 30-minute conversation about where you are, where you're headed, and what kind of protection makes sense.
+
+When works best for you this month?
+
+All the best,
+Your NYL Agent`
+  }
+};
+
+function draftRetentionEmail(clientKey) {
+  const draft = retentionEmailDrafts[clientKey];
+  if (!draft) return;
+
+  const subEl = document.getElementById('ri-email-sub');
+  if (subEl) subEl.textContent = 'To: ' + draft.to;
+
+  const body = document.getElementById('ri-email-body');
+  if (body) {
+    body.innerHTML = `
+      <div class="ri-email-meta">
+        <div class="ri-email-meta-row"><span class="ri-em-lbl">To:</span><span class="ri-em-val">${draft.to}</span></div>
+        <div class="ri-email-meta-row"><span class="ri-em-lbl">Subject:</span><span class="ri-em-val bold">${draft.subject}</span></div>
+        <div class="ri-email-meta-row"><span class="ri-em-lbl">Generated by:</span><span class="ri-em-val ai-badge"><i class="fas fa-brain"></i> Retention Intelligence AI</span></div>
+      </div>
+      <div class="ri-email-body-text">${draft.preview.replace(/\n/g, '<br>')}</div>
+      <div class="ri-email-actions">
+        <button class="ri-ea-btn primary" onclick="closeRetentionEmailModal()"><i class="fas fa-paper-plane"></i> Send Email</button>
+        <button class="ri-ea-btn" onclick="closeRetentionEmailModal()"><i class="fas fa-edit"></i> Edit First</button>
+        <button class="ri-ea-btn" onclick="closeRetentionEmailModal()"><i class="fas fa-times"></i> Cancel</button>
+      </div>
+    `;
+  }
+
+  const overlay = document.getElementById('ri-email-overlay');
+  if (overlay) { overlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+
+function closeRetentionEmailModal(e) {
+  if (e && e.target !== document.getElementById('ri-email-overlay')) return;
+  const overlay = document.getElementById('ri-email-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ── Click-outside for RI overlay ──────────────────────────────────
+(function(){
+  const el = document.getElementById('ri-overlay');
+  if (el) el.addEventListener('click', function(e){ if(e.target===el) closeRetentionFullReport(e); });
+  const el2 = document.getElementById('ri-email-overlay');
+  if (el2) el2.addEventListener('click', function(e){ if(e.target===el2) closeRetentionEmailModal(e); });
+})();
+
