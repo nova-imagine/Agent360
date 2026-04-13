@@ -1777,13 +1777,45 @@ function ClientsPage() {
       </div>{/* end oc-overlay */}
 
       {/* Client Detail Modal */}
-      <div class="modal-overlay" id="client-modal" onclick="closeClientModal()">
-        <div class="modal-box" onclick="event.stopPropagation()">
-          <div class="modal-header">
-            <h3 id="modal-client-name">Client Details</h3>
-            <button class="modal-close" onclick="closeClientModal()"><i class="fas fa-times"></i></button>
+      {/* ── Client Detail Modal (Phase 2 — tabbed) ── */}
+      <div class="cm-overlay" id="client-modal" onclick="closeClientModal(event)">
+        <div class="cm-box" onclick="event.stopPropagation()">
+
+          {/* Header */}
+          <div class="cm-header" id="cm-header">
+            <div class="cm-header-left">
+              <div class="cm-avatar" id="cm-avatar">JW</div>
+              <div class="cm-header-info">
+                <div class="cm-name" id="cm-name">Client Name</div>
+                <div class="cm-meta" id="cm-meta">Segment · City · Age</div>
+              </div>
+              <span class="cm-score-badge" id="cm-score-badge">92</span>
+            </div>
+            <div class="cm-header-right">
+              <span class="cm-status-pill" id="cm-status-pill">Active</span>
+              <button class="cm-close-btn" onclick="closeClientModal()"><i class="fas fa-times"></i></button>
+            </div>
           </div>
-          <div class="modal-body" id="modal-client-body"></div>
+
+          {/* Tab bar */}
+          <div class="cm-tabs" id="cm-tabs">
+            <button class="cm-tab active" id="cm-tab-overview"  onclick="switchClientTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
+            <button class="cm-tab"         id="cm-tab-policies"  onclick="switchClientTab('policies',this)"><i class="fas fa-file-contract"></i> Policies</button>
+            <button class="cm-tab"         id="cm-tab-ai"        onclick="switchClientTab('ai',this)"><i class="fas fa-robot"></i> AI Insights</button>
+            <button class="cm-tab"         id="cm-tab-outreach"  onclick="switchClientTab('outreach',this)"><i class="fas fa-paper-plane"></i> Outreach</button>
+            <button class="cm-tab"         id="cm-tab-timeline"  onclick="switchClientTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
+          </div>
+
+          {/* Tab body */}
+          <div class="cm-body" id="cm-body"></div>
+
+          {/* Footer actions */}
+          <div class="cm-footer" id="cm-footer">
+            <button class="btn btn-primary" onclick="closeClientModal();navigateTo('policies')"><i class="fas fa-file-contract"></i> View Policies</button>
+            <button class="btn btn-outline" id="cm-btn-outreach" onclick="switchClientTab('outreach',document.getElementById('cm-tab-outreach'))"><i class="fas fa-paper-plane"></i> Outreach</button>
+            <button class="btn btn-outline" id="cm-btn-call"><i class="fas fa-phone"></i> Call</button>
+            <button class="btn btn-ai" onclick="closeClientModal();navigateTo('ai-agents')"><i class="fas fa-robot"></i> AI Analysis</button>
+          </div>
         </div>
       </div>
     </div>

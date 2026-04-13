@@ -420,68 +420,547 @@ const clientData = [
   { id: 8, name: 'Linda Morrison', age: 56, email: 'linda.m@email.com', phone: '(718) 555-0108', policies: 5, premium: 32000, status: 'Active', segment: 'Premium', lastContact: '2026-04-09', city: 'Long Island', score: 98 },
 ];
 
+// ============================================================
+// PHASE 2 — Full Tabbed Client Modal
+// ============================================================
+
+let _cmClientId = null;
+let _cmTab = 'overview';
+
+// ── Extended AI insight data per client ──────────────────────
+const cmAIData = {
+  1: {
+    score: 92, risk: 'Low', trend: 'up',
+    insights: [
+      { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'Annual review overdue — schedule within 2 weeks' },
+      { icon: 'fa-chart-line',           color: '#059669', text: 'Whole Life $500K cash value nearing conversion threshold' },
+      { icon: 'fa-landmark',             color: '#7c3aed', text: 'Estate planning: will & trust review recommended' },
+      { icon: 'fa-piggy-bank',           color: '#0891b2', text: 'Deferred annuity illustration ready — $2,800/mo at 65' },
+    ],
+    nba: 'Schedule annual review + present deferred annuity illustration',
+    revenue: '$31.2K potential uplift across 3 product gaps',
+    segment: 'High Value',
+  },
+  2: {
+    score: 87, risk: 'Medium', trend: 'stable',
+    insights: [
+      { icon: 'fa-exclamation-circle',   color: '#dc2626', text: '⚠ Disability insurance gap — no DI coverage identified' },
+      { icon: 'fa-chart-bar',            color: '#059669', text: 'Annuity upsell opportunity: $3,000/yr premium potential' },
+      { icon: 'fa-sync-alt',             color: '#0891b2', text: 'Next renewal in 16 months — proactive outreach advised' },
+      { icon: 'fa-heart',                color: '#7c3aed', text: 'VUL P-100302 performing well — review sub-account mix' },
+    ],
+    nba: 'Present Disability Income quote — $3,000/yr potential premium',
+    revenue: '$3,000/yr DI + annuity candidate',
+    segment: 'Mid Market',
+  },
+  3: {
+    score: 96, risk: 'Low', trend: 'up',
+    insights: [
+      { icon: 'fa-briefcase',            color: '#7c3aed', text: 'Business owner: NQDC + key-person gap review pending' },
+      { icon: 'fa-chart-line',           color: '#059669', text: 'VUL sub-accounts drifted 8% — rebalance recommended' },
+      { icon: 'fa-file-medical-alt',     color: '#f59e0b', text: 'Claim CLM-2026-0041 in review — expedite docs needed' },
+      { icon: 'fa-star',                 color: '#0891b2', text: 'Top referral potential — NPS 97, high satisfaction' },
+    ],
+    nba: 'Rebalance VUL sub-accounts + expedite claim CLM-2026-0041 docs',
+    revenue: '$2,000/yr advisory + claim resolution',
+    segment: 'High Value',
+  },
+  4: {
+    score: 71, risk: 'High', trend: 'down',
+    insights: [
+      { icon: 'fa-exclamation-circle',   color: '#dc2626', text: '⚠ Term P-100320 expires Sep 2026 — renewal critical' },
+      { icon: 'fa-heartbeat',            color: '#dc2626', text: 'Lapse risk score 79 — outreach urgently needed' },
+      { icon: 'fa-calendar',             color: '#f59e0b', text: 'Last contact 21 days ago — re-engage immediately' },
+      { icon: 'fa-piggy-bank',           color: '#0891b2', text: 'Near retirement: immediate annuity illustration ready' },
+    ],
+    nba: 'Call Sandra today — term renewal + lapse prevention outreach',
+    revenue: '$8,200/yr at risk if lapse; $680/mo annuity opportunity',
+    segment: 'Mid Market',
+  },
+  5: {
+    score: 78, risk: 'Low', trend: 'up',
+    insights: [
+      { icon: 'fa-baby',                 color: '#7c3aed', text: 'New parent — term life rider + disability recommended' },
+      { icon: 'fa-graduation-cap',       color: '#0891b2', text: '529 college savings plan: $1,200/yr opportunity' },
+      { icon: 'fa-chart-line',           color: '#059669', text: 'Good long-term prospect — nurture for 5-yr plan' },
+      { icon: 'fa-shield-alt',           color: '#f59e0b', text: 'Single policy — undercovered for family stage of life' },
+    ],
+    nba: 'Present term rider + 529 plan — family needs conversation',
+    revenue: '$1,200/yr 529 + disability rider',
+    segment: 'Emerging',
+  },
+  6: {
+    score: 91, risk: 'Low', trend: 'stable',
+    insights: [
+      { icon: 'fa-landmark',             color: '#7c3aed', text: 'Estate planning: trust review recommended' },
+      { icon: 'fa-chart-pie',            color: '#059669', text: 'Fixed annuity maturing — ladder strategy opportunity' },
+      { icon: 'fa-star',                 color: '#0891b2', text: 'High satisfaction (NPS 94) — prime referral candidate' },
+      { icon: 'fa-stethoscope',          color: '#f59e0b', text: 'DI claim CLM-2026-0035 pending — APS needed' },
+    ],
+    nba: 'Schedule estate review + present annuity ladder strategy',
+    revenue: '$13K+ advisory + annuity ladder',
+    segment: 'High Value',
+  },
+  7: {
+    score: 65, risk: 'Medium', trend: 'stable',
+    insights: [
+      { icon: 'fa-exclamation-circle',   color: '#dc2626', text: '⚠ Application pending — follow up on e-signature today' },
+      { icon: 'fa-shield-alt',           color: '#f59e0b', text: 'Single policy $250K — undercovered for risk profile' },
+      { icon: 'fa-chart-line',           color: '#059669', text: 'Young professional — high lifetime value prospect' },
+      { icon: 'fa-mobile-alt',           color: '#0891b2', text: 'Prefers digital channel — use e-app and text' },
+    ],
+    nba: 'Send e-signature reminder today — close Term Life $500K',
+    revenue: 'Close pending app $1,800/yr + future upsell',
+    segment: 'Emerging',
+  },
+  8: {
+    score: 98, risk: 'Low', trend: 'up',
+    insights: [
+      { icon: 'fa-crown',                color: '#d97706', text: 'Premium client — schedule annual review ASAP' },
+      { icon: 'fa-university',           color: '#7c3aed', text: 'UMA $280K AUM — Discretionary management active' },
+      { icon: 'fa-heartbeat',            color: '#f59e0b', text: 'LTC gap vs. $2M estate — long-term care review' },
+      { icon: 'fa-users',                color: '#059669', text: 'Trust beneficiary — estate complexity warrants specialist' },
+    ],
+    nba: 'Annual review + UMA performance debrief + LTC gap analysis',
+    revenue: '$32K/yr current; $5K+ additional advisory potential',
+    segment: 'Premium',
+  },
+};
+
+// ── Timeline per client ───────────────────────────────────────
+const cmTimeline = {
+  1: [
+    { date: 'Apr 10, 2026', icon: 'fa-robot',          color: '#7c3aed', event: 'AI flagged: Annual review overdue — action recommended' },
+    { date: 'Apr 05, 2026', icon: 'fa-phone',           color: '#0891b2', event: 'Phone call — discussed estate planning overview' },
+    { date: 'Mar 28, 2026', icon: 'fa-envelope',        color: '#059669', event: 'Email: LTC coverage gap summary sent' },
+    { date: 'Mar 01, 2026', icon: 'fa-file-contract',   color: '#003087', event: 'Policy P-100293 LTC — annual premium paid $4,400' },
+    { date: 'Jan 15, 2026', icon: 'fa-calendar',        color: '#f59e0b', event: 'Annual review meeting — all 3 policies reviewed' },
+  ],
+  2: [
+    { date: 'Apr 02, 2026', icon: 'fa-phone',           color: '#0891b2', event: 'Phone call — VUL performance review, positive' },
+    { date: 'Mar 20, 2026', icon: 'fa-robot',           color: '#7c3aed', event: 'AI flagged: Disability insurance gap identified' },
+    { date: 'Feb 15, 2026', icon: 'fa-envelope',        color: '#059669', event: 'Email: Annuity illustration sent — $3K/yr' },
+    { date: 'Jan 15, 2026', icon: 'fa-file-contract',   color: '#003087', event: 'Policy P-100302 VUL — premium paid $2,800' },
+  ],
+  3: [
+    { date: 'Apr 09, 2026', icon: 'fa-file-medical-alt',color: '#dc2626', event: 'Claim CLM-2026-0041 filed — under review, expedite' },
+    { date: 'Apr 08, 2026', icon: 'fa-phone',           color: '#0891b2', event: 'Phone call — discussed claim status and VUL rebalance' },
+    { date: 'Mar 15, 2026', icon: 'fa-robot',           color: '#7c3aed', event: 'AI: VUL sub-accounts drift detected — rebalance alert' },
+    { date: 'Feb 20, 2026', icon: 'fa-calendar',        color: '#f59e0b', event: 'Business review meeting — NQDC plan update' },
+    { date: 'Jan 10, 2026', icon: 'fa-file-contract',   color: '#003087', event: 'Policy P-100310 WL premium paid $6,000' },
+  ],
+  4: [
+    { date: 'Mar 20, 2026', icon: 'fa-phone',           color: '#0891b2', event: 'Last contact — policy review, no action taken' },
+    { date: 'Mar 10, 2026', icon: 'fa-robot',           color: '#7c3aed', event: 'AI: Lapse risk score 79 — urgent outreach triggered' },
+    { date: 'Feb 28, 2026', icon: 'fa-exclamation-circle', color: '#dc2626', event: 'Renewal notice sent — P-100320 expires Sep 2026' },
+    { date: 'Jan 20, 2026', icon: 'fa-envelope',        color: '#059669', event: 'Email: Retirement annuity illustration delivered' },
+  ],
+  5: [
+    { date: 'Apr 07, 2026', icon: 'fa-phone',           color: '#0891b2', event: 'Phone call — discussed newborn & coverage needs' },
+    { date: 'Mar 22, 2026', icon: 'fa-robot',           color: '#7c3aed', event: 'AI: New parent profile — 529 + DI rider flagged' },
+    { date: 'Mar 10, 2026', icon: 'fa-file-contract',   color: '#003087', event: 'Policy P-100330 Term — premium paid $2,400' },
+  ],
+  6: [
+    { date: 'Apr 06, 2026', icon: 'fa-phone',           color: '#0891b2', event: 'Phone call — DI claim update, positive experience' },
+    { date: 'Apr 01, 2026', icon: 'fa-file-medical-alt',color: '#f59e0b', event: 'Claim CLM-2026-0035 DI filed — APS pending' },
+    { date: 'Mar 15, 2026', icon: 'fa-robot',           color: '#7c3aed', event: 'AI: Annuity ladder strategy identified — $95K maturing' },
+    { date: 'Feb 10, 2026', icon: 'fa-calendar',        color: '#059669', event: 'Estate planning consultation scheduled' },
+  ],
+  7: [
+    { date: 'Apr 01, 2026', icon: 'fa-pen-fancy',       color: '#7c3aed', event: 'E-signature reminder sent — Term Life $500K pending' },
+    { date: 'Mar 25, 2026', icon: 'fa-file-contract',   color: '#003087', event: 'Application submitted — Term Life $500K, underwriting' },
+    { date: 'Mar 20, 2026', icon: 'fa-calendar',        color: '#0891b2', event: 'Discovery meeting — identified term life need' },
+  ],
+  8: [
+    { date: 'Apr 09, 2026', icon: 'fa-phone',           color: '#0891b2', event: 'Phone call — UMA quarterly performance review' },
+    { date: 'Apr 02, 2026', icon: 'fa-robot',           color: '#7c3aed', event: 'AI: LTC gap detected vs $2M estate — review flagged' },
+    { date: 'Mar 20, 2026', icon: 'fa-chart-line',      color: '#059669', event: 'UMA account rebalanced — +12.1% YTD confirmed' },
+    { date: 'Feb 15, 2026', icon: 'fa-calendar',        color: '#f59e0b', event: 'Annual review meeting — all 5 policies + UMA reviewed' },
+    { date: 'Jan 05, 2026', icon: 'fa-landmark',        color: '#7c3aed', event: 'Estate planning: trust amendment executed' },
+  ],
+};
+
+// ── Products per client (insurance + investments + retirement + advisory) ──
+// (mirrors index.tsx clientProducts — kept in sync)
+const cmProducts = {
+  1: {
+    insurance:   [{ id:'P-100291', name:'Whole Life $500K',           prem:4800,  status:'Active',  since:'2019' },
+                  { id:'P-100292', name:'Term Life $750K',            prem:3200,  status:'Active',  since:'2021' },
+                  { id:'P-100293', name:'Long-term Care $250K',       prem:4400,  status:'Active',  since:'2022' }],
+    investments: [],
+    retirement:  [{ id:'R-200112', name:'Deferred Annuity (illus.)',  val:'Prospect',     inc:'~$2,800/mo @ 65' }],
+    advisory:    [{ id:'A-300091', name:'Estate Planning',            val:'In Progress',  fee:'Included' }],
+  },
+  2: {
+    insurance:   [{ id:'P-100301', name:'Universal Life $400K',       prem:3000,  status:'Active',  since:'2020' },
+                  { id:'P-100302', name:'VUL $300K',                  prem:2800,  status:'Active',  since:'2023' }],
+    investments: [],
+    retirement:  [],
+    advisory:    [],
+  },
+  3: {
+    insurance:   [{ id:'P-100310', name:'Whole Life $1M',             prem:6000,  status:'Active',  since:'2018' },
+                  { id:'P-100311', name:'VUL $800K',                  prem:8400,  status:'Active',  since:'2020' }],
+    investments: [{ id:'I-400221', name:'VUL Sub-accounts',           val:'$180K AUM', ret:'+11.2% YTD' }],
+    retirement:  [],
+    advisory:    [{ id:'A-300102', name:'Business Services / Buy-Sell',val:'$500K coverage',fee:'$1,200/yr' },
+                  { id:'A-300103', name:'Executive Benefits NQDC',     val:'$150K deferred',fee:'$800/yr' }],
+  },
+  4: {
+    insurance:   [{ id:'P-100320', name:'Term Life $350K',            prem:2800,  status:'Review',  since:'2016' },
+                  { id:'P-100321', name:'Long-term Care $180K',       prem:5400,  status:'Active',  since:'2020' }],
+    investments: [],
+    retirement:  [{ id:'R-200198', name:'Immediate Annuity (illus.)', val:'$120K premium', inc:'$680/mo lifetime' }],
+    advisory:    [],
+  },
+  5: {
+    insurance:   [{ id:'P-100330', name:'Term Life $300K',            prem:2400,  status:'Active',  since:'2023' }],
+    investments: [],
+    retirement:  [],
+    advisory:    [],
+  },
+  6: {
+    insurance:   [{ id:'P-100340', name:'Universal Life $600K',       prem:5600,  status:'Active',  since:'2017' },
+                  { id:'P-100341', name:'Disability Insurance',        prem:3200,  status:'Active',  since:'2021' }],
+    investments: [{ id:'I-400301', name:'Fixed Annuity',              val:'$95K AUM',    ret:'+4.8% guaranteed' }],
+    retirement:  [{ id:'R-200211', name:'Immediate Annuity',          val:'$95K',        inc:'$520/mo interest' }],
+    advisory:    [],
+  },
+  7: {
+    insurance:   [{ id:'P-100350', name:'Term Life $250K',            prem:1800,  status:'Pending', since:'2026' }],
+    investments: [],
+    retirement:  [],
+    advisory:    [],
+  },
+  8: {
+    insurance:   [{ id:'P-100360', name:'Whole Life $2M',             prem:12000, status:'Active',  since:'2015' },
+                  { id:'P-100361', name:'Long-term Care $300K',       prem:7200,  status:'Active',  since:'2019' },
+                  { id:'P-100362', name:'VUL $1.5M',                  prem:9600,  status:'Active',  since:'2021' }],
+    investments: [{ id:'I-400401', name:'Mutual Funds MainStay',      val:'$180K AUM',   ret:'+9.4% YTD'  },
+                  { id:'I-400402', name:'ETF Portfolio Core Equity',  val:'$100K AUM',   ret:'+12.1% YTD' }],
+    retirement:  [{ id:'R-200301', name:'Variable Deferred Annuity',  val:'$280K AUM',   inc:'Est. $3,200/mo @ 65' }],
+    advisory:    [{ id:'A-300201', name:'UMA — Discretionary',        val:'$280K AUM',   fee:'$2,800/yr (1%)' },
+                  { id:'A-300202', name:'Estate Planning Trust+Will',  val:'$2M+ estate', fee:'Included' }],
+  },
+};
+
+// ── Open / close / switch ────────────────────────────────────
 function openClientModal(clientId) {
   const client = clientData.find(c => c.id === clientId);
   if (!client) return;
+  _cmClientId = clientId;
+  _cmTab = 'overview';
 
-  document.getElementById('modal-client-name').textContent = client.name;
+  // Populate header
+  const initials = client.name.split(' ').map(n => n[0]).join('');
+  const segColors = { Premium:'#d97706', 'High Value':'#003087', 'Mid Market':'#0891b2', Emerging:'#059669' };
+  const hdrEl = document.getElementById('cm-header');
+  if (hdrEl) hdrEl.style.borderBottom = `3px solid ${segColors[client.segment] || '#003087'}`;
 
-  const aiInsights = {
-    1: ['Estate planning review recommended', 'Whole Life cash value conversion opportunity', 'Annual review overdue by 2 weeks'],
-    2: ['Disability insurance gap identified', 'Annuity upsell: $3,000/yr potential', 'Next renewal in 16 months'],
-    3: ['Business owner: executive benefits gap', 'SMA or UMA wealth management candidate', 'Claim in progress — follow up needed'],
-    4: ['⚠️ Renewal due soon — urgent', 'Coverage gap in long-term care', 'Last contact was 21 days ago'],
-    5: ['New parent profile — term life rider suggested', '529 college savings plan opportunity', 'Consider disability insurance'],
-    6: ['Estate planning: Trust review suggested', 'Wealth management candidate', 'High satisfaction — ask for referrals'],
-    7: ['⚠️ Application pending — follow up immediately', 'Coverage level may be insufficient', 'Young professional — good long-term prospect'],
-    8: ['Annual review overdue', 'Long-term care gap identified', 'UMA account candidate (~$500K+ assets)', 'Refer to estate planning specialist'],
-  };
+  _setText('cm-avatar', initials);
+  _setText('cm-name', client.name);
+  _setText('cm-meta', `${client.segment} · ${client.city} · Age ${client.age}`);
+  _setText('cm-score-badge', client.score);
+  const scoreBadge = document.getElementById('cm-score-badge');
+  if (scoreBadge) scoreBadge.style.background = client.score >= 90 ? '#059669' : client.score >= 75 ? '#0891b2' : '#f59e0b';
 
-  const insights = aiInsights[clientId] || ['No insights available'];
+  const statusPill = document.getElementById('cm-status-pill');
+  if (statusPill) {
+    statusPill.textContent = client.status;
+    statusPill.className = 'cm-status-pill cm-status-' + client.status.toLowerCase();
+  }
 
-  document.getElementById('modal-client-body').innerHTML = `
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px">
-      <div>
-        <div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:10px">Contact Info</div>
-        <div style="display:flex;flex-direction:column;gap:8px;font-size:14px">
-          <div><i class="fas fa-envelope" style="width:18px;color:#003087"></i> ${client.email}</div>
-          <div><i class="fas fa-phone" style="width:18px;color:#003087"></i> ${client.phone}</div>
-          <div><i class="fas fa-map-marker-alt" style="width:18px;color:#003087"></i> ${client.city}</div>
-          <div><i class="fas fa-birthday-cake" style="width:18px;color:#003087"></i> Age ${client.age}</div>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:10px">Portfolio</div>
-        <div style="display:flex;flex-direction:column;gap:8px;font-size:14px">
-          <div><strong>${client.policies}</strong> Active Policies</div>
-          <div>Annual Premium: <strong style="color:#059669">$${client.premium.toLocaleString()}</strong></div>
-          <div>Segment: <strong>${client.segment}</strong></div>
-          <div>Client Score: <strong style="color:#003087">${client.score}/100</strong></div>
-        </div>
-      </div>
-    </div>
-    
-    <div style="background:linear-gradient(135deg,#667eea,#764ba2);border-radius:10px;padding:14px;margin-bottom:16px">
-      <div style="color:white;font-size:13px;font-weight:700;margin-bottom:10px"><i class="fas fa-robot"></i> AI Agent Insights</div>
-      <ul style="list-style:none;display:flex;flex-direction:column;gap:6px">
-        ${insights.map(i => `<li style="color:rgba(255,255,255,0.9);font-size:13px;display:flex;align-items:flex-start;gap:8px"><i class="fas fa-lightbulb" style="color:#fbbf24;margin-top:2px;flex-shrink:0"></i>${i}</li>`).join('')}
-      </ul>
-    </div>
-    
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="closeClientModal()"><i class="fas fa-file-contract"></i> View Policies</button>
-      <button class="btn btn-outline" onclick="closeClientModal()"><i class="fas fa-envelope"></i> Send Email</button>
-      <button class="btn btn-outline" onclick="closeClientModal()"><i class="fas fa-phone"></i> Call</button>
-      <button class="btn btn-ai" onclick="closeClientModal(); navigateTo('ai-agents')"><i class="fas fa-robot"></i> Full AI Analysis</button>
-    </div>
-  `;
+  // Footer call button
+  const callBtn = document.getElementById('cm-btn-call');
+  if (callBtn) callBtn.onclick = () => { window.location.href = 'tel:' + client.phone; };
 
+  // Reset tabs
+  document.querySelectorAll('.cm-tab').forEach(t => t.classList.remove('active'));
+  const firstTab = document.getElementById('cm-tab-overview');
+  if (firstTab) firstTab.classList.add('active');
+
+  // Render overview tab
+  _renderCMTab('overview', client);
+
+  // Show modal
   document.getElementById('client-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-function closeClientModal() {
+function closeClientModal(e) {
+  if (e && e.target !== document.getElementById('client-modal')) return;
   const modal = document.getElementById('client-modal');
   if (modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function switchClientTab(tab, tabEl) {
+  _cmTab = tab;
+  document.querySelectorAll('.cm-tab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+  const client = clientData.find(c => c.id === _cmClientId);
+  if (client) _renderCMTab(tab, client);
+}
+
+function _setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+// ── Tab renderers ─────────────────────────────────────────────
+function _renderCMTab(tab, client) {
+  const body = document.getElementById('cm-body');
+  if (!body) return;
+  switch(tab) {
+    case 'overview':  body.innerHTML = _cmOverview(client); break;
+    case 'policies':  body.innerHTML = _cmPolicies(client); break;
+    case 'ai':        body.innerHTML = _cmAI(client);       break;
+    case 'outreach':  body.innerHTML = _cmOutreach(client); break;
+    case 'timeline':  body.innerHTML = _cmTimeline(client); break;
+    default:          body.innerHTML = '';
+  }
+}
+
+function _cmOverview(client) {
+  const dc = domainCoverage[client.id] || {};
+  const products = cmProducts[client.id] || { insurance:[], investments:[], retirement:[], advisory:[] };
+  const totalPolicies = products.insurance.length + products.investments.length + products.retirement.length + products.advisory.length;
+  const gaps = [];
+  if (!products.investments.length) gaps.push('Investments');
+  if (!products.retirement.length)  gaps.push('Retirement');
+  if (!products.advisory.length)    gaps.push('Advisory');
+  if (products.insurance.length < 2) gaps.push('More Insurance');
+
+  return `
+    <div class="cm-overview-grid">
+      <div class="cm-info-card">
+        <div class="cm-card-title"><i class="fas fa-address-card"></i> Contact</div>
+        <div class="cm-info-row"><i class="fas fa-envelope"></i><span>${client.email}</span></div>
+        <div class="cm-info-row"><i class="fas fa-phone"></i><span>${client.phone}</span></div>
+        <div class="cm-info-row"><i class="fas fa-map-marker-alt"></i><span>${client.city}</span></div>
+        <div class="cm-info-row"><i class="fas fa-birthday-cake"></i><span>Age ${client.age}</span></div>
+        <div class="cm-info-row"><i class="fas fa-clock"></i><span>Last contact: ${client.lastContact}</span></div>
+      </div>
+      <div class="cm-info-card">
+        <div class="cm-card-title"><i class="fas fa-briefcase"></i> Portfolio Summary</div>
+        <div class="cm-kpi-row">
+          <div class="cm-kpi"><span class="cm-kpi-val">${products.insurance.length}</span><span class="cm-kpi-lbl">Insurance</span></div>
+          <div class="cm-kpi"><span class="cm-kpi-val">${products.investments.length}</span><span class="cm-kpi-lbl">Investments</span></div>
+          <div class="cm-kpi"><span class="cm-kpi-val">${products.retirement.length}</span><span class="cm-kpi-lbl">Retirement</span></div>
+          <div class="cm-kpi"><span class="cm-kpi-val">${products.advisory.length}</span><span class="cm-kpi-lbl">Advisory</span></div>
+        </div>
+        <div class="cm-info-row premium-row"><i class="fas fa-dollar-sign"></i><span>Annual Premium: <strong>$${client.premium.toLocaleString()}</strong></span></div>
+        <div class="cm-info-row"><i class="fas fa-layer-group"></i><span>${totalPolicies} total product${totalPolicies !== 1 ? 's' : ''}</span></div>
+      </div>
+    </div>
+    ${gaps.length ? `
+    <div class="cm-gaps-bar">
+      <div class="cm-gaps-label"><i class="fas fa-exclamation-circle" style="color:#f59e0b"></i> Coverage Gaps Identified</div>
+      <div class="cm-gaps-pills">${gaps.map(g => `<span class="cm-gap-pill">${g}</span>`).join('')}</div>
+    </div>` : ''}
+    <div class="cm-domain-strip">
+      ${['insurance','investments','retirement','advisory'].map(d => `
+        <div class="cm-domain-item ${dc[d.substring(0,3)] || dc[d] ? 'active' : 'inactive'}">
+          <i class="fas ${d==='insurance'?'fa-shield-alt':d==='investments'?'fa-chart-line':d==='retirement'?'fa-piggy-bank':'fa-handshake'}"></i>
+          <span>${d.charAt(0).toUpperCase()+d.slice(1)}</span>
+          ${dc[d.substring(0,3)] || dc[d] ? '<i class="fas fa-check-circle cm-domain-check"></i>' : '<i class="fas fa-times-circle cm-domain-x"></i>'}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function _cmPolicies(client) {
+  const products = cmProducts[client.id] || { insurance:[], investments:[], retirement:[], advisory:[] };
+  const sections = [
+    { label:'Insurance', icon:'fa-shield-alt', color:'#003087', items: products.insurance, type:'ins' },
+    { label:'Investments', icon:'fa-chart-line', color:'#059669', items: products.investments, type:'inv' },
+    { label:'Retirement', icon:'fa-piggy-bank', color:'#0891b2', items: products.retirement, type:'ret' },
+    { label:'Advisory', icon:'fa-handshake', color:'#7c3aed', items: products.advisory, type:'adv' },
+  ];
+  return sections.map(s => {
+    if (!s.items.length) return `
+      <div class="cm-policy-section empty">
+        <div class="cm-policy-section-head" style="color:${s.color}">
+          <i class="fas ${s.icon}"></i> ${s.label} <span class="cm-policy-count">0</span>
+        </div>
+        <div class="cm-policy-empty">No ${s.label.toLowerCase()} products — <button class="cm-link" onclick="switchClientTab('ai',document.getElementById('cm-tab-ai'))">view AI recommendation</button></div>
+      </div>`;
+    return `
+      <div class="cm-policy-section">
+        <div class="cm-policy-section-head" style="color:${s.color}">
+          <i class="fas ${s.icon}"></i> ${s.label} <span class="cm-policy-count">${s.items.length}</span>
+        </div>
+        ${s.items.map(item => `
+          <div class="cm-policy-row">
+            <div class="cm-policy-id">${item.id}</div>
+            <div class="cm-policy-name">${item.name}</div>
+            <div class="cm-policy-detail">
+              ${item.prem ? `<span class="cm-policy-prem">$${item.prem.toLocaleString()}/yr</span>` : ''}
+              ${item.val  ? `<span class="cm-policy-val">${item.val}</span>` : ''}
+              ${item.ret  ? `<span class="cm-policy-ret">${item.ret}</span>` : ''}
+              ${item.inc  ? `<span class="cm-policy-inc">${item.inc}</span>` : ''}
+              ${item.fee  ? `<span class="cm-policy-fee">${item.fee}</span>` : ''}
+            </div>
+            ${item.status ? `<span class="cm-policy-status ${item.status.toLowerCase()}">${item.status}</span>` : ''}
+            <button class="cm-policy-view-btn" onclick="closePolicyCMModal_openPolicy('${item.id}')"><i class="fas fa-eye"></i></button>
+          </div>`).join('')}
+      </div>`;
+  }).join('');
+}
+
+function _cmAI(client) {
+  const ai = cmAIData[client.id] || { score:0, risk:'—', trend:'stable', insights:[], nba:'', revenue:'' };
+  const trendIcon = ai.trend === 'up' ? 'fa-arrow-up' : ai.trend === 'down' ? 'fa-arrow-down' : 'fa-minus';
+  const trendColor = ai.trend === 'up' ? '#059669' : ai.trend === 'down' ? '#dc2626' : '#6b7280';
+  const riskColor = ai.risk === 'Low' ? '#059669' : ai.risk === 'Medium' ? '#f59e0b' : '#dc2626';
+  const scoreWidth = ai.score;
+  const scoreColor = ai.score >= 90 ? '#059669' : ai.score >= 75 ? '#0891b2' : ai.score >= 60 ? '#f59e0b' : '#dc2626';
+
+  return `
+    <div class="cm-ai-score-row">
+      <div class="cm-ai-score-card">
+        <div class="cm-ai-score-num" style="color:${scoreColor}">${ai.score}</div>
+        <div class="cm-ai-score-lbl">Client Score</div>
+        <div class="cm-ai-score-bar"><div class="cm-ai-score-fill" style="width:${scoreWidth}%;background:${scoreColor}"></div></div>
+      </div>
+      <div class="cm-ai-score-card">
+        <div class="cm-ai-score-num" style="color:${riskColor}">${ai.risk}</div>
+        <div class="cm-ai-score-lbl">Risk Level</div>
+      </div>
+      <div class="cm-ai-score-card">
+        <div class="cm-ai-score-num" style="color:${trendColor}"><i class="fas ${trendIcon}"></i></div>
+        <div class="cm-ai-score-lbl">Trend</div>
+      </div>
+    </div>
+
+    <div class="cm-ai-nba">
+      <div class="cm-ai-nba-label"><i class="fas fa-bolt" style="color:#f59e0b"></i> Next Best Action</div>
+      <div class="cm-ai-nba-text">${ai.nba}</div>
+      <div class="cm-ai-revenue"><i class="fas fa-dollar-sign" style="color:#059669"></i> ${ai.revenue}</div>
+    </div>
+
+    <div class="cm-ai-insights-list">
+      <div class="cm-ai-insights-title"><i class="fas fa-lightbulb"></i> AI Intelligence Signals</div>
+      ${ai.insights.map(ins => `
+        <div class="cm-ai-insight-row">
+          <div class="cm-ai-ins-icon" style="background:${ins.color}20;color:${ins.color}"><i class="fas ${ins.icon}"></i></div>
+          <div class="cm-ai-ins-text">${ins.text}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="cm-ai-actions">
+      <button class="btn btn-ai" onclick="closeClientModal();navigateTo('ai-agents')"><i class="fas fa-robot"></i> Full AI Analysis</button>
+      <button class="btn btn-outline" onclick="switchClientTab('outreach',document.getElementById('cm-tab-outreach'))"><i class="fas fa-paper-plane"></i> Launch Outreach</button>
+    </div>
+  `;
+}
+
+function _cmOutreach(client) {
+  const channels = [
+    { id:'email', icon:'fa-envelope',  label:'Email',  color:'#003087' },
+    { id:'sms',   icon:'fa-sms',       label:'SMS',    color:'#059669' },
+    { id:'call',  icon:'fa-phone',     label:'Call',   color:'#0891b2' },
+  ];
+  const ai = cmAIData[client.id] || {};
+  const templates = {
+    email: `Subject: Quick Follow-up — Your Financial Review\n\nDear ${client.name},\n\nI wanted to follow up on your portfolio. ${ai.nba || 'Your annual review is due and I have some important updates to share.'}.\n\nWould you have 20 minutes this week for a quick call?\n\nBest regards,\nSridhar R. | NYL Senior Agent`,
+    sms: `Hi ${client.name}, this is Sridhar from NYL. I have a quick update on your policy — can we connect briefly this week? Reply CALL to schedule.`,
+    call: `Call script for ${client.name}:\n\n1. Opener: "Hi ${client.name}, this is Sridhar from New York Life..."\n2. Purpose: "${ai.nba || 'Annual policy review'}"\n3. Value prop: "${ai.revenue || 'Important updates to your coverage'}"\n4. Ask: "Do you have 15 minutes now, or is [day] better?"\n5. Close: Schedule meeting or send calendar invite`,
+  };
+  let active = 'email';
+  return `
+    <div class="cm-outreach-tabs" id="cm-otabs">
+      ${channels.map(ch => `
+        <button class="cm-otab ${ch.id === active ? 'active' : ''}" onclick="switchCMOutreachTab('${ch.id}',this)" style="--otab-color:${ch.color}">
+          <i class="fas ${ch.icon}"></i> ${ch.label}
+        </button>`).join('')}
+    </div>
+    <div class="cm-outreach-body" id="cm-outreach-body">
+      <div class="cm-outreach-template-label">AI-generated message</div>
+      <textarea class="cm-outreach-textarea" id="cm-outreach-text">${templates[active]}</textarea>
+      <div class="cm-outreach-btns">
+        <button class="btn btn-ai" onclick="regenCMOutreach(${client.id})"><i class="fas fa-sync-alt"></i> Regenerate</button>
+        <button class="btn btn-primary" onclick="sendCMOutreach(${client.id})"><i class="fas fa-paper-plane"></i> Send</button>
+        <button class="btn btn-outline" onclick="scheduleCMOutreach(${client.id})"><i class="fas fa-calendar"></i> Schedule</button>
+      </div>
+    </div>
+    <div class="cm-outreach-history">
+      <div class="cm-out-hist-title"><i class="fas fa-history"></i> Recent Outreach</div>
+      <div class="cm-out-hist-row"><span class="cm-out-hist-date">Apr 05</span><span class="cm-out-hist-ch email">Email</span><span class="cm-out-hist-note">Annual review follow-up — opened</span></div>
+      <div class="cm-out-hist-row"><span class="cm-out-hist-date">Mar 28</span><span class="cm-out-hist-ch email">Email</span><span class="cm-out-hist-note">LTC coverage summary — opened</span></div>
+      <div class="cm-out-hist-row"><span class="cm-out-hist-date">Mar 10</span><span class="cm-out-hist-ch call">Call</span><span class="cm-out-hist-note">15 min call — positive, schedule review</span></div>
+    </div>
+  `;
+}
+
+function _cmTimeline(client) {
+  const events = cmTimeline[client.id] || [];
+  if (!events.length) return '<div class="cm-empty">No timeline events yet.</div>';
+  return `
+    <div class="cm-timeline">
+      ${events.map((ev, i) => `
+        <div class="cm-tl-item ${i === 0 ? 'latest' : ''}">
+          <div class="cm-tl-dot" style="background:${ev.color};border-color:${ev.color}20">
+            <i class="fas ${ev.icon}" style="color:${ev.color}"></i>
+          </div>
+          <div class="cm-tl-content">
+            <div class="cm-tl-event">${ev.event}</div>
+            <div class="cm-tl-date">${ev.date}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── Outreach tab switcher ─────────────────────────────────────
+const _cmOutreachTemplates = {
+  email: (client, ai) => `Subject: Quick Follow-up — Your Financial Review\n\nDear ${client.name},\n\nI wanted to follow up on your portfolio. ${ai.nba || 'Your annual review is due — I have important updates to share.'}.\n\nWould you have 20 minutes this week for a call?\n\nBest regards,\nSridhar R. | NYL Senior Agent`,
+  sms:   (client, ai) => `Hi ${client.name}, this is Sridhar from NYL. I have a quick update on your policy — can we connect briefly this week? Reply CALL to schedule.`,
+  call:  (client, ai) => `Call script for ${client.name}:\n\n1. "Hi ${client.name}, this is Sridhar from New York Life..."\n2. Purpose: "${ai.nba || 'Annual policy review'}"\n3. Value: "${ai.revenue || 'Important coverage updates'}"\n4. Ask: "Do you have 15 minutes now, or is [day] better?"\n5. Close: Schedule meeting or send calendar invite`,
+};
+
+function switchCMOutreachTab(ch, btn) {
+  document.querySelectorAll('.cm-otab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const client = clientData.find(c => c.id === _cmClientId);
+  const ai = cmAIData[_cmClientId] || {};
+  const ta = document.getElementById('cm-outreach-text');
+  if (ta && client) ta.value = _cmOutreachTemplates[ch](client, ai);
+}
+
+function regenCMOutreach(clientId) {
+  const ta = document.getElementById('cm-outreach-text');
+  if (!ta) return;
+  const ai = cmAIData[clientId] || {};
+  const client = clientData.find(c => c.id === clientId);
+  const activeTab = document.querySelector('.cm-otab.active')?.dataset?.ch || 'email';
+  if (client) ta.value = _cmOutreachTemplates[activeTab]?.(client, ai) || ta.value;
+  ta.style.background = '#fffbeb';
+  setTimeout(() => { ta.style.background = ''; }, 600);
+}
+
+function sendCMOutreach(clientId) {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = '<i class="fas fa-check-circle"></i> Message sent to client successfully.';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2800);
+}
+
+function scheduleCMOutreach(clientId) {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast';
+  toast.innerHTML = '<i class="fas fa-calendar-check"></i> Outreach scheduled for tomorrow 9 AM.';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2800);
+}
+
+function closePolicyCMModal_openPolicy(policyId) {
+  document.getElementById('client-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => openPolicyModal(policyId, 'view'), 150);
 }
 
 function aiClientInsights() {
