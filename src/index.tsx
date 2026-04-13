@@ -475,7 +475,10 @@ function TopBar() {
           <i class="fas fa-bell"></i>
           <span class="notif-count">5</span>
         </button>
-        <div class="topbar-avatar" id="topbar-avatar" onclick="toggleProfileMenu()" title="Sridhar R — click to open profile">SR</div>
+        <div class="topbar-avatar-wrap">
+          <div class="topbar-avatar" id="topbar-avatar" onclick="toggleProfileMenu()" title="Sridhar R — click to open profile">SR</div>
+          <div class="topbar-online-dot"></div>
+        </div>
         <div id="profile-dropdown" class="profile-dropdown" style="display:none"></div>
       </div>
     </header>
@@ -6600,7 +6603,7 @@ function AIImpactScorecardPage() {
       <div class="ais-domain-grid">
 
         {/* Insurance + Underwriting */}
-        <div class="ais-domain-card ais-ins">
+        <div class="ais-domain-card ais-ins ais-card-clickable" onclick="openAIScoreDetail('underwriting')" title="View Underwriting AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon ins-bg"><i class="fas fa-shield-alt"></i></div>
             <div>
@@ -6643,11 +6646,11 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 30-50% faster underwriting = ~$18K/yr in productivity gain. 18 APS avoided × $450 avg cost = <strong>$8,100 saved/mo</strong>.</span>
           </div>
-          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('underwriting')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('underwriting')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Retention AI */}
-        <div class="ais-domain-card ais-ret-card">
+        <div class="ais-domain-card ais-ret-card ais-card-clickable" onclick="openAIScoreDetail('retention')" title="View Retention AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon ret-bg"><i class="fas fa-heartbeat"></i></div>
             <div>
@@ -6690,11 +6693,11 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 3 clients retained × avg $4,733 premium = <strong>$14,200 premium saved</strong>. Lifetime value protected: ~$142K over 10 yr avg.</span>
           </div>
-          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('retention')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('retention')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Claims AI */}
-        <div class="ais-domain-card ais-clm">
+        <div class="ais-domain-card ais-clm ais-card-clickable" onclick="openAIScoreDetail('claims')" title="View Claims AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon clm-bg"><i class="fas fa-clipboard-check"></i></div>
             <div>
@@ -6737,11 +6740,11 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> Auto-triage saves ~43 min/claim × 6 claims = <strong>4.3 hrs/mo</strong> reclaimed. IDP: eliminates manual data entry on ~30 docs/mo.</span>
           </div>
-          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('claims')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('claims')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Proactive AI Alerts */}
-        <div class="ais-domain-card ais-alert">
+        <div class="ais-domain-card ais-alert ais-card-clickable" onclick="openAIScoreDetail('alerts')" title="View Alert Engine detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon alert-bg"><i class="fas fa-bell"></i></div>
             <div>
@@ -6784,11 +6787,11 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 52% of 42 alerts actioned = 22 revenue events. At avg $1,400/event = <strong>~$30.8K incremental revenue</strong> from AI alerting.</span>
           </div>
-          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('alerts')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('alerts')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Investment AI */}
-        <div class="ais-domain-card ais-inv">
+        <div class="ais-domain-card ais-inv ais-card-clickable" onclick="openAIScoreDetail('investment')" title="View Investment AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon inv-bg"><i class="fas fa-chart-line"></i></div>
             <div>
@@ -6831,11 +6834,11 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 9 cross-sell insights × avg $1,400 revenue each = <strong>$12,600 potential</strong>. UMA close: Linda Morrison $2,800/yr recurring fee.</span>
           </div>
-          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('investment')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('investment')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Meeting AI */}
-        <div class="ais-domain-card ais-mtg">
+        <div class="ais-domain-card ais-mtg ais-card-clickable" onclick="openAIScoreDetail('meetings')" title="View Meeting Intelligence detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon mtg-bg"><i class="fas fa-calendar-check"></i></div>
             <div>
@@ -6878,7 +6881,7 @@ function AIImpactScorecardPage() {
             <i class="fas fa-dollar-sign"></i>
             <span><strong>AI ROI:</strong> 8 meetings × 25 min saved = <strong>3.3 hrs/mo</strong> reclaimed for selling. Better prep → estimated +12% meeting conversion rate.</span>
           </div>
-          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="openAIScoreDetail('meetings')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('meetings')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
       </div>
