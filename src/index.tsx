@@ -244,6 +244,7 @@ function MainApp() {
       </div>
 
       {/* Hidden page templates */}
+      {/* Hidden page templates */}
       <div id="page-templates" style="display:none">
         <div id="tpl-dashboard"><DashboardPage /></div>
         <div id="tpl-clients"><ClientsPage /></div>
@@ -256,6 +257,94 @@ function MainApp() {
         <div id="tpl-reports"><ReportsPage /></div>
         <div id="tpl-calendar"><CalendarPage /></div>
         <div id="tpl-ai-insights"><AIImpactScorecardPage /></div>
+      </div>
+
+      {/* ── Cmd+K Spotlight Search Modal ── */}
+      <div id="spotlight-overlay" class="spotlight-overlay" onclick="closeSpotlight(event)">
+        <div class="spotlight-modal" id="spotlight-modal">
+          {/* Header */}
+          <div class="spotlight-header">
+            <i class="fas fa-search spotlight-search-icon"></i>
+            <input
+              type="text"
+              id="spotlight-input"
+              class="spotlight-input"
+              placeholder="Search clients, policies, claims, deals…"
+              oninput="runSpotlightSearch(this.value)"
+              onkeydown="spotlightKeyNav(event)"
+              autocomplete="off"
+            />
+            <button class="spotlight-clear" id="spotlight-clear" onclick="clearSpotlight()" style="display:none">
+              <i class="fas fa-times"></i>
+            </button>
+            <kbd class="spotlight-esc-key">Esc</kbd>
+          </div>
+
+          {/* Scope filter pills */}
+          <div class="spotlight-scopes">
+            <button class="sp-scope active" data-scope="all"    onclick="setSpotlightScope('all',this)">All</button>
+            <button class="sp-scope"        data-scope="clients" onclick="setSpotlightScope('clients',this)"><i class="fas fa-users"></i> Clients</button>
+            <button class="sp-scope"        data-scope="policies" onclick="setSpotlightScope('policies',this)"><i class="fas fa-file-contract"></i> Policies</button>
+            <button class="sp-scope"        data-scope="claims"  onclick="setSpotlightScope('claims',this)"><i class="fas fa-file-medical-alt"></i> Claims</button>
+            <button class="sp-scope"        data-scope="deals"   onclick="setSpotlightScope('deals',this)"><i class="fas fa-handshake"></i> Deals</button>
+          </div>
+
+          {/* Results area */}
+          <div class="spotlight-results" id="spotlight-results">
+            {/* Default state – quick actions */}
+            <div class="sp-section" id="sp-quick-actions">
+              <div class="sp-section-label">Quick Actions</div>
+              <div class="sp-row sp-action-row" onclick="navigateTo('clients'); closeSpotlight()">
+                <span class="sp-row-icon sp-icon-clients"><i class="fas fa-users"></i></span>
+                <span class="sp-row-label">View All Clients</span>
+                <span class="sp-row-meta">Clients page</span>
+              </div>
+              <div class="sp-row sp-action-row" onclick="navigateTo('policies'); closeSpotlight()">
+                <span class="sp-row-icon sp-icon-policies"><i class="fas fa-file-contract"></i></span>
+                <span class="sp-row-label">View All Policies</span>
+                <span class="sp-row-meta">Policies page</span>
+              </div>
+              <div class="sp-row sp-action-row" onclick="navigateTo('claims'); closeSpotlight()">
+                <span class="sp-row-icon sp-icon-claims"><i class="fas fa-file-medical-alt"></i></span>
+                <span class="sp-row-label">View All Claims</span>
+                <span class="sp-row-meta">Claims page</span>
+              </div>
+              <div class="sp-row sp-action-row" onclick="navigateTo('sales'); closeSpotlight()">
+                <span class="sp-row-icon sp-icon-deals"><i class="fas fa-handshake"></i></span>
+                <span class="sp-row-label">Sales Pipeline</span>
+                <span class="sp-row-meta">Sales page</span>
+              </div>
+              <div class="sp-row sp-action-row" onclick="navigateTo('calendar'); closeSpotlight()">
+                <span class="sp-row-icon sp-icon-cal"><i class="fas fa-calendar-alt"></i></span>
+                <span class="sp-row-label">Open Calendar</span>
+                <span class="sp-row-meta">Calendar page</span>
+              </div>
+              <div class="sp-row sp-action-row" onclick="openAddEventModal(); closeSpotlight()">
+                <span class="sp-row-icon sp-icon-cal"><i class="fas fa-calendar-plus"></i></span>
+                <span class="sp-row-label">Add Calendar Event</span>
+                <span class="sp-row-meta">Calendar</span>
+              </div>
+            </div>
+
+            {/* Live results (populated by JS) */}
+            <div id="sp-live-results" style="display:none"></div>
+
+            {/* Empty state */}
+            <div id="sp-empty" class="sp-empty" style="display:none">
+              <i class="fas fa-search-minus sp-empty-icon"></i>
+              <div class="sp-empty-text">No results found</div>
+              <div class="sp-empty-sub">Try a different name, ID, or keyword</div>
+            </div>
+          </div>
+
+          {/* Footer hint */}
+          <div class="spotlight-footer">
+            <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+            <span><kbd>↵</kbd> open</span>
+            <span><kbd>Esc</kbd> close</span>
+            <span class="sp-footer-count" id="sp-result-count"></span>
+          </div>
+        </div>
       </div>
     </>
   )
@@ -373,9 +462,10 @@ function TopBar() {
         </div>
       </div>
       <div class="topbar-right">
-        <div class="search-box">
+        <div class="search-box spotlight-trigger" onclick="openSpotlight()" title="Search (⌘K)">
           <i class="fas fa-search"></i>
-          <input type="text" placeholder="Search clients, policies..." id="global-search" />
+          <span class="search-placeholder-text">Search clients, policies…</span>
+          <kbd class="search-kbd">⌘K</kbd>
         </div>
         <button class="topbar-btn" title="AI Quick Actions" onclick="navigateTo('ai-agents')">
           <i class="fas fa-robot"></i>
@@ -1456,7 +1546,7 @@ function ClientsPage() {
             <option value="advisory">Has Advisory</option>
             <option value="gaps">Has Gaps</option>
           </select>
-          <select class="filter-select">
+          <select class="filter-select" id="client-status-filter" onchange="filterByStatus(this.value)">
             <option value="">All Status</option>
             <option value="Active">Active</option>
             <option value="Review">Review</option>

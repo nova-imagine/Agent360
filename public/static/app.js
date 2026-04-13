@@ -9894,3 +9894,479 @@ function openAIScoreDetail(domain) {
 
 
 console.log('Phase 5 loaded — globalSearch(_searchIndex), toggleProfileMenu, setReportPeriod, openReportDrillDown, openAIScoreDetail');
+
+// ============================================================
+//  PHASE 5 — Cmd+K Spotlight Search & Enhanced Filters
+// ============================================================
+
+/* ── Spotlight State ─────────────────────────────────────── */
+let _spScope       = 'all';   // 'all' | 'clients' | 'policies' | 'claims' | 'deals'
+let _spActiveIdx   = -1;      // keyboard-nav selected row index
+let _spResults     = [];      // flat array of result objects for keyboard nav
+
+/* ── Open / Close ─────────────────────────────────────────── */
+function openSpotlight() {
+  const overlay = document.getElementById('spotlight-overlay');
+  const input   = document.getElementById('spotlight-input');
+  if (!overlay) return;
+  overlay.classList.add('open');
+  document.body.classList.add('spotlight-open');
+  requestAnimationFrame(() => input && input.focus());
+  _spActiveIdx = -1;
+  _spResults   = [];
+  // Reset to quick-actions view
+  document.getElementById('sp-quick-actions').style.display = 'block';
+  document.getElementById('sp-live-results').style.display  = 'none';
+  document.getElementById('sp-empty').style.display         = 'none';
+  document.getElementById('sp-result-count').textContent    = '';
+}
+
+function closeSpotlight(e) {
+  if (e && e.target !== document.getElementById('spotlight-overlay')) return;
+  const overlay = document.getElementById('spotlight-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  document.body.classList.remove('spotlight-open');
+  const input = document.getElementById('spotlight-input');
+  if (input) input.value = '';
+  const clr = document.getElementById('spotlight-clear');
+  if (clr) clr.style.display = 'none';
+  _spActiveIdx = -1;
+  _spResults   = [];
+}
+
+function clearSpotlight() {
+  const input = document.getElementById('spotlight-input');
+  if (input) { input.value = ''; input.focus(); }
+  document.getElementById('spotlight-clear').style.display = 'none';
+  document.getElementById('sp-quick-actions').style.display = 'block';
+  document.getElementById('sp-live-results').style.display  = 'none';
+  document.getElementById('sp-empty').style.display         = 'none';
+  document.getElementById('sp-result-count').textContent    = '';
+  _spActiveIdx = -1;
+  _spResults   = [];
+}
+
+function setSpotlightScope(scope, btn) {
+  _spScope = scope;
+  document.querySelectorAll('.sp-scope').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const q = document.getElementById('spotlight-input')?.value || '';
+  if (q.trim()) runSpotlightSearch(q);
+}
+
+/* ── Core Search Engine ───────────────────────────────────── */
+function runSpotlightSearch(q) {
+  const clr = document.getElementById('spotlight-clear');
+  if (clr) clr.style.display = q ? 'flex' : 'none';
+
+  if (!q || q.trim().length < 1) {
+    document.getElementById('sp-quick-actions').style.display = 'block';
+    document.getElementById('sp-live-results').style.display  = 'none';
+    document.getElementById('sp-empty').style.display         = 'none';
+    document.getElementById('sp-result-count').textContent    = '';
+    _spResults = [];
+    return;
+  }
+
+  document.getElementById('sp-quick-actions').style.display = 'none';
+  const term = q.toLowerCase().trim();
+  const hits = [];
+
+  // ── Clients ──────────────────────────────────────────────
+  if (_spScope === 'all' || _spScope === 'clients') {
+    clientData.forEach(c => {
+      if (c.name.toLowerCase().includes(term) ||
+          c.email.toLowerCase().includes(term) ||
+          c.city.toLowerCase().includes(term) ||
+          c.segment.toLowerCase().includes(term)) {
+        hits.push({
+          type: 'client', id: c.id,
+          icon: 'fa-user', iconClass: 'sp-icon-clients',
+          label: c.name,
+          sub: `${c.segment} · ${c.city} · ${c.policies} polic${c.policies !== 1 ? 'ies' : 'y'} · $${c.premium.toLocaleString()}/yr`,
+          badge: c.status,
+          badgeClass: c.status === 'Active' ? 'sp-badge-active' : c.status === 'Review' ? 'sp-badge-review' : 'sp-badge-pending',
+          action: () => { openClientModal(c.id); closeSpotlight({}); }
+        });
+      }
+    });
+  }
+
+  // ── Policies ─────────────────────────────────────────────
+  if (_spScope === 'all' || _spScope === 'policies') {
+    Object.values(policyData).forEach(p => {
+      if (!p.client) return; // skip AI-insight entries keyed by same ID
+      if (p.id.toLowerCase().includes(term) ||
+          p.client.toLowerCase().includes(term) ||
+          p.type.toLowerCase().includes(term) ||
+          (p.beneficiary || '').toLowerCase().includes(term)) {
+        hits.push({
+          type: 'policy', id: p.id,
+          icon: 'fa-file-contract', iconClass: 'sp-icon-policies',
+          label: `${p.id} — ${p.client}`,
+          sub: `${p.type} · $${p.faceValue.toLocaleString()} face · $${p.premium.toLocaleString()}/yr`,
+          badge: p.status,
+          badgeClass: p.status === 'Active' ? 'sp-badge-active' : 'sp-badge-review',
+          action: () => { openPolicyModal(p.id); closeSpotlight({}); }
+        });
+      }
+    });
+  }
+
+  // ── Claims ───────────────────────────────────────────────
+  if (_spScope === 'all' || _spScope === 'claims') {
+    // claimData is the main claims object declared at line ~1625
+    const claimIds = Object.keys(claimData).filter(k => k.startsWith('CLM-'));
+    claimIds.forEach(k => {
+      const cl = claimData[k];
+      if (!cl.client) return;
+      if (cl.id.toLowerCase().includes(term) ||
+          cl.client.toLowerCase().includes(term) ||
+          cl.type.toLowerCase().includes(term) ||
+          (cl.claimant || '').toLowerCase().includes(term)) {
+        hits.push({
+          type: 'claim', id: cl.id,
+          icon: 'fa-file-medical-alt', iconClass: 'sp-icon-claims',
+          label: `${cl.id} — ${cl.client}`,
+          sub: `${cl.type} · ${cl.amount} · Filed ${cl.filedDate}`,
+          badge: cl.priority,
+          badgeClass: cl.priority === 'Urgent' ? 'sp-badge-urgent' : 'sp-badge-normal',
+          action: () => { openClaimModal(cl.id); closeSpotlight({}); }
+        });
+      }
+    });
+  }
+
+  // ── Deals ─────────────────────────────────────────────────
+  if (_spScope === 'all' || _spScope === 'deals') {
+    Object.entries(pipelineData).forEach(([k, d]) => {
+      if (d.client.toLowerCase().includes(term) ||
+          d.product.toLowerCase().includes(term) ||
+          k.toLowerCase().includes(term)) {
+        hits.push({
+          type: 'deal', id: k,
+          icon: 'fa-handshake', iconClass: 'sp-icon-deals',
+          label: `${k} — ${d.client}`,
+          sub: `${d.product} · ${d.stage} · ${d.value}`,
+          badge: `${d.probability} win`,
+          badgeClass: parseInt(d.probability) >= 75 ? 'sp-badge-active' : 'sp-badge-pending',
+          action: () => { openDealModal(k); closeSpotlight({}); }
+        });
+      }
+    });
+  }
+
+  _spResults = hits;
+  _spActiveIdx = -1;
+
+  const liveEl = document.getElementById('sp-live-results');
+  const emptyEl = document.getElementById('sp-empty');
+  const countEl = document.getElementById('sp-result-count');
+
+  if (hits.length === 0) {
+    liveEl.style.display = 'none';
+    emptyEl.style.display = 'flex';
+    countEl.textContent = '';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  countEl.textContent = `${hits.length} result${hits.length !== 1 ? 's' : ''}`;
+
+  // Group by type
+  const groups = { client: [], policy: [], claim: [], deal: [] };
+  const groupMeta = {
+    client:  { label: 'Clients',   icon: 'fa-users' },
+    policy:  { label: 'Policies',  icon: 'fa-file-contract' },
+    claim:   { label: 'Claims',    icon: 'fa-file-medical-alt' },
+    deal:    { label: 'Deals',     icon: 'fa-handshake' },
+  };
+  hits.forEach(h => groups[h.type].push(h));
+
+  let flatIdx = 0;
+  let html = '';
+  (['client','policy','claim','deal']).forEach(gtype => {
+    if (!groups[gtype].length) return;
+    html += `<div class="sp-section">
+      <div class="sp-section-label"><i class="fas ${groupMeta[gtype].icon}"></i> ${groupMeta[gtype].label} <span class="sp-section-count">${groups[gtype].length}</span></div>`;
+    groups[gtype].forEach(h => {
+      html += `<div class="sp-row" data-sp-idx="${flatIdx}" onclick="spActivateResult(${flatIdx})">
+        <span class="sp-row-icon ${h.iconClass}"><i class="fas ${h.icon}"></i></span>
+        <span class="sp-row-main">
+          <span class="sp-row-label">${_spHighlight(h.label, term)}</span>
+          <span class="sp-row-sub">${h.sub}</span>
+        </span>
+        <span class="sp-badge ${h.badgeClass}">${h.badge}</span>
+      </div>`;
+      flatIdx++;
+    });
+    html += '</div>';
+  });
+
+  liveEl.innerHTML = html;
+  liveEl.style.display = 'block';
+}
+
+function _spHighlight(text, term) {
+  if (!term) return text;
+  const re = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(re, '<mark class="sp-mark">$1</mark>');
+}
+
+function spActivateResult(idx) {
+  if (_spResults[idx]) _spResults[idx].action();
+}
+
+/* ── Keyboard Navigation ──────────────────────────────────── */
+function spotlightKeyNav(e) {
+  const rows = document.querySelectorAll('#sp-live-results .sp-row');
+  if (!rows.length) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _spActiveIdx = Math.min(_spActiveIdx + 1, rows.length - 1);
+    _spUpdateActiveRow(rows);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _spActiveIdx = Math.max(_spActiveIdx - 1, 0);
+    _spUpdateActiveRow(rows);
+  } else if (e.key === 'Enter') {
+    if (_spActiveIdx >= 0 && _spResults[_spActiveIdx]) {
+      _spResults[_spActiveIdx].action();
+    }
+  } else if (e.key === 'Escape') {
+    closeSpotlight({});  // force close without event check
+  }
+}
+
+function _spUpdateActiveRow(rows) {
+  rows.forEach((r, i) => {
+    r.classList.toggle('sp-row-active', i === _spActiveIdx);
+    if (i === _spActiveIdx) r.scrollIntoView({ block: 'nearest' });
+  });
+}
+
+/* ── Global Keyboard Shortcut (Cmd+K / Ctrl+K) ───────────── */
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    const overlay = document.getElementById('spotlight-overlay');
+    if (overlay && overlay.classList.contains('open')) {
+      closeSpotlight({});
+    } else {
+      openSpotlight();
+    }
+  }
+  if (e.key === 'Escape') {
+    const overlay = document.getElementById('spotlight-overlay');
+    if (overlay && overlay.classList.contains('open')) closeSpotlight({});
+  }
+});
+
+// ============================================================
+//  ENHANCED FILTERS (Phase 5)
+// ============================================================
+
+/* ── filterByStatus: client status dropdown ─────────────── */
+function filterByStatus(status) {
+  // Combine with any existing segment / domain filters that are active
+  const segment = (document.getElementById('domain-filter') ? '' : ''); // placeholder; real logic below
+  document.querySelectorAll('.client-card').forEach(card => {
+    if (!status) {
+      card.style.display = 'block';
+    } else {
+      const badge = card.querySelector('.status-pill, .client-status-badge, [class*="status"]')?.textContent?.trim() || '';
+      // Also check data-status attribute if set
+      const dataStatus = card.getAttribute('data-status') || '';
+      const match = badge.toLowerCase() === status.toLowerCase() ||
+                    dataStatus.toLowerCase() === status.toLowerCase();
+      card.style.display = match ? 'block' : 'none';
+    }
+  });
+  _applyClientCombinedFilters();
+}
+
+/* ── Combined multi-filter for Clients ─────────────────── */
+function _applyClientCombinedFilters() {
+  const q       = (document.getElementById('client-search')?.value || '').toLowerCase();
+  const segment = (document.getElementById('domain-filter')?.closest('.page-toolbar')
+                    ?.querySelector('select:nth-of-type(1)')?.value || '').toLowerCase();
+  const domain  = (document.getElementById('domain-filter')?.value || '').toLowerCase();
+  const status  = (document.getElementById('client-status-filter')?.value || '').toLowerCase();
+
+  document.querySelectorAll('.client-card').forEach((card, idx) => {
+    const id   = idx + 1;
+    const name = card.querySelector('h4')?.textContent.toLowerCase() || '';
+    const city = card.querySelector('p')?.textContent.toLowerCase() || '';
+    const segTag = card.querySelector('.segment-tag')?.textContent.toLowerCase() || '';
+    const statusTag = card.querySelector('.status-pill, [class*="status"]')?.textContent?.trim().toLowerCase() || '';
+    const d    = domainCoverage[id] || {};
+
+    const matchQ       = !q       || name.includes(q) || city.includes(q);
+    const matchSeg     = !segment || segTag === segment;
+    const matchDomain  = !domain  || (domain === 'insurance' && d.ins) || (domain === 'investments' && d.inv) ||
+                         (domain === 'retirement' && d.ret) || (domain === 'advisory' && d.adv) ||
+                         (domain === 'gaps' && d.gaps);
+    const matchStatus  = !status  || statusTag === status;
+
+    card.style.display = (matchQ && matchSeg && matchDomain && matchStatus) ? 'block' : 'none';
+  });
+}
+
+/* ── Upgraded filterPolicies: combines search + 2 dropdowns + no-results row ── */
+// Re-declares filterPolicies — hoisted function; this definition wins as it's later.
+function filterPolicies() {
+  const q      = (document.getElementById('policy-search')?.value || '').toLowerCase();
+  const type   = (document.getElementById('policy-type-filter')?.value || '').toLowerCase();
+  const status = (document.getElementById('policy-status-filter')?.value || '').toLowerCase();
+
+  const rows = document.querySelectorAll('#policies-table tbody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const text      = row.textContent.toLowerCase();
+    const rowType   = row.querySelector('.policy-type-badge')?.textContent.trim().toLowerCase() || '';
+    const rowStatus = row.querySelector('.status-badge')?.textContent.trim().toLowerCase() || '';
+
+    const matchQ      = !q      || text.includes(q);
+    const matchType   = !type   || rowType.includes(type);
+    const matchStatus = !status || rowStatus === status;
+
+    const show = matchQ && matchType && matchStatus;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  // Show/hide no-results row
+  const tbody = document.querySelector('#policies-table tbody');
+  if (tbody) {
+    let noRow = tbody.querySelector('.no-results-row');
+    if (visible === 0) {
+      if (!noRow) {
+        noRow = document.createElement('tr');
+        noRow.className = 'no-results-row';
+        noRow.innerHTML = `<td colspan="8" class="no-results-cell"><i class="fas fa-search"></i> No policies match your filters — <a href="#" onclick="clearPolicyFilters(); return false">clear filters</a></td>`;
+        tbody.appendChild(noRow);
+      }
+    } else if (noRow) {
+      noRow.remove();
+    }
+  }
+
+  // Update count
+  const badge = document.querySelector('.policies-page .page-toolbar .result-count');
+  if (badge) badge.textContent = visible + ' result' + (visible !== 1 ? 's' : '');
+
+  // Animate remaining rows
+  let delay = 0;
+  rows.forEach(row => {
+    if (row.style.display !== 'none') {
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(4px)';
+      setTimeout(() => {
+        row.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        row.style.opacity    = '1';
+        row.style.transform  = 'translateY(0)';
+      }, delay);
+      delay += 30;
+    }
+  });
+}
+
+function clearPolicyFilters() {
+  const ps = document.getElementById('policy-search');
+  const pt = document.getElementById('policy-type-filter');
+  const pst = document.getElementById('policy-status-filter');
+  if (ps) ps.value = '';
+  if (pt) pt.value = '';
+  if (pst) pst.value = '';
+  filterPolicies();
+}
+
+/* ── Upgraded filterClaims: all 4 inputs + active badge ─────*/
+// Re-declares filterClaims — this definition wins as it's later.
+function filterClaims() {
+  const q        = (document.getElementById('claim-search')?.value || '').toLowerCase();
+  const type     = (document.getElementById('claim-type-filter')?.value || '').toLowerCase();
+  const status   = (document.getElementById('claim-status-filter')?.value || '').toLowerCase();
+  const priority = (document.getElementById('claim-priority-filter')?.value || '').toLowerCase();
+
+  const rows = document.querySelectorAll('.claims-table tbody tr.claim-row');
+  let visible = 0;
+  rows.forEach(row => {
+    const text      = row.textContent.toLowerCase();
+    const rowType   = row.querySelector('.claim-type-badge')?.textContent.trim().toLowerCase() || '';
+    const rowStatus = row.querySelector('.claim-status-badge')?.textContent.trim().toLowerCase() || '';
+    const rowPrio   = row.querySelector('.priority-badge')?.textContent.trim().toLowerCase() || '';
+
+    const matchQ      = !q        || text.includes(q);
+    const matchType   = !type     || rowType.includes(type);
+    const matchStatus = !status   || rowStatus.includes(status);
+    const matchPrio   = !priority || rowPrio === priority;
+
+    const show = matchQ && matchType && matchStatus && matchPrio;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  // No-results row
+  const tbody = document.querySelector('.claims-table tbody');
+  if (tbody) {
+    let noRow = tbody.querySelector('.no-results-row');
+    if (visible === 0) {
+      if (!noRow) {
+        noRow = document.createElement('tr');
+        noRow.className = 'no-results-row';
+        noRow.innerHTML = `<td colspan="8" class="no-results-cell"><i class="fas fa-search"></i> No claims match your filters — <a href="#" onclick="clearClaimFilters(); return false">clear filters</a></td>`;
+        tbody.appendChild(noRow);
+      }
+    } else if (noRow) {
+      noRow.remove();
+    }
+  }
+
+  // Active filter badges in toolbar
+  _updateClaimFilterBadges(q, type, status, priority, visible);
+}
+
+function clearClaimFilters() {
+  ['claim-search','claim-type-filter','claim-status-filter','claim-priority-filter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  filterClaims();
+}
+
+function _updateClaimFilterBadges(q, type, status, priority, count) {
+  const toolbar = document.querySelector('.claims-page .page-toolbar .toolbar-left');
+  if (!toolbar) return;
+  let badge = toolbar.querySelector('.active-filter-badge');
+  const hasFilters = q || type || status || priority;
+  if (hasFilters) {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'active-filter-badge';
+      toolbar.appendChild(badge);
+    }
+    badge.innerHTML = `<i class="fas fa-filter"></i> ${count} claim${count !== 1 ? 's' : ''} &nbsp;<button onclick="clearClaimFilters()" class="afb-clear">✕ Clear</button>`;
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
+// Wire claim search input if it exists (in case oninput not firing on init)
+document.addEventListener('DOMContentLoaded', () => {
+  // Spotlight: also close on Escape at document level (fallback)
+  const claimSearch = document.getElementById('claim-search');
+  if (claimSearch) {
+    claimSearch.addEventListener('keydown', e => { if (e.key === 'Enter') filterClaims(); });
+  }
+
+  // Wire policy search Enter key
+  const policySearch = document.getElementById('policy-search');
+  if (policySearch) {
+    policySearch.addEventListener('keydown', e => { if (e.key === 'Enter') filterPolicies(); });
+  }
+});
+
+console.log('Phase 5 loaded — openSpotlight, closeSpotlight, runSpotlightSearch, setSpotlightScope, filterByStatus, filterPolicies(enhanced), filterClaims(enhanced), clearPolicyFilters, clearClaimFilters');
