@@ -255,6 +255,7 @@ function MainApp() {
         <div id="tpl-products"><ProductsPage /></div>
         <div id="tpl-reports"><ReportsPage /></div>
         <div id="tpl-calendar"><CalendarPage /></div>
+        <div id="tpl-ai-insights"><AIImpactScorecardPage /></div>
       </div>
     </>
   )
@@ -4565,6 +4566,532 @@ function CalendarPage() {
           <div class="meeting-modal-body" id="meeting-modal-body"></div>
 
           <div class="meeting-modal-footer" id="meeting-modal-footer"></div>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+// ============================================================
+// AI IMPACT SCORECARD PAGE  (#8)
+// ============================================================
+function AIImpactScorecardPage() {
+  return (
+    <div class="page ais-page">
+
+      {/* ── Hero Banner ── */}
+      <div class="ais-hero">
+        <div class="ais-hero-left">
+          <div class="ais-hero-icon"><i class="fas fa-robot"></i><span class="ai-pulse-ring"></span></div>
+          <div>
+            <h2>AI Impact Scorecard</h2>
+            <p>Measurable AI-driven outcomes across Insurance · Investments · Retirement · Advisory</p>
+          </div>
+        </div>
+        <div class="ais-hero-right">
+          <div class="ais-hero-kpi">
+            <span class="ais-hero-val">$31.2K</span>
+            <span class="ais-hero-lbl">AI Revenue Unlocked</span>
+          </div>
+          <div class="ais-hero-kpi">
+            <span class="ais-hero-val">94.6%</span>
+            <span class="ais-hero-lbl">AI Decision Accuracy</span>
+          </div>
+          <div class="ais-hero-kpi">
+            <span class="ais-hero-val">4.2 hrs</span>
+            <span class="ais-hero-lbl">Avg UW Decision (vs 8d)</span>
+          </div>
+          <div class="ais-hero-kpi">
+            <span class="ais-hero-val">247</span>
+            <span class="ais-hero-lbl">Clients AI-Monitored</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Overall AI Score ── */}
+      <div class="ais-overall-row">
+        <div class="ais-overall-card">
+          <div class="ais-overall-gauge">
+            <svg viewBox="0 0 120 70" class="ais-gauge-svg">
+              <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+              <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="url(#gaugeGrad)" stroke-width="10"
+                    stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="20"/>
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#1d4ed8"/>
+                  <stop offset="100%" stop-color="#7c3aed"/>
+                </linearGradient>
+              </defs>
+              <text x="60" y="60" text-anchor="middle" class="ais-gauge-val">87</text>
+            </svg>
+            <div class="ais-gauge-label">Overall AI Score</div>
+          </div>
+          <div class="ais-overall-desc">
+            <p>Your AI systems are performing at <strong>87/100</strong> — <span class="ais-trend-up">↑ 12 pts vs. Q4 2025</span>. Four domains are active. Key gains: underwriting STP (+18%), retention detection (+23%), and claims automation (+31%).</p>
+            <div class="ais-overall-chips">
+              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Underwriting STP: Excellent</span>
+              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Retention AI: Strong</span>
+              <span class="ais-chip amber"><i class="fas fa-exclamation-circle"></i> Investment AI: Growing</span>
+              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Claims AI: Strong</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Domain Scorecard Grid ── */}
+      <div class="ais-domain-grid">
+
+        {/* Insurance + Underwriting */}
+        <div class="ais-domain-card ais-ins">
+          <div class="ais-domain-header">
+            <div class="ais-domain-icon ins-bg"><i class="fas fa-shield-alt"></i></div>
+            <div>
+              <div class="ais-domain-title">Insurance & Underwriting AI</div>
+              <div class="ais-domain-score-row">
+                <span class="ais-domain-score">91</span>
+                <span class="ais-domain-score-lbl">/ 100</span>
+                <span class="ais-trend-up ais-score-delta">↑ +15 vs Q4</span>
+              </div>
+            </div>
+          </div>
+          <div class="ais-metric-list">
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">STP Rate</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ins-bar" style="width:73%"></div></div>
+              <span class="ais-metric-val">73% <span class="ais-trend-up">↑+18%</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Avg Decision Time</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ins-bar" style="width:88%"></div></div>
+              <span class="ais-metric-val">4.2 hrs <span class="ais-trend-up">vs 8 days</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">APS Avoided / Mo</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ins-bar" style="width:72%"></div></div>
+              <span class="ais-metric-val">18 cases <span class="ais-trend-up">↑+6</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">AI Accuracy</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ins-bar" style="width:94.6%"></div></div>
+              <span class="ais-metric-val">94.6% <span class="ais-trend-up">vs 89% manual</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Renewal Email Open Rate</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ins-bar" style="width:68%"></div></div>
+              <span class="ais-metric-val">68% <span class="ais-trend-up">↑+22%</span></span>
+            </div>
+          </div>
+          <div class="ais-roi-box ins-roi">
+            <i class="fas fa-dollar-sign"></i>
+            <span><strong>AI ROI:</strong> 30-50% faster underwriting = ~$18K/yr in productivity gain. 18 APS avoided × $450 avg cost = <strong>$8,100 saved/mo</strong>.</span>
+          </div>
+        </div>
+
+        {/* Retention AI */}
+        <div class="ais-domain-card ais-ret-card">
+          <div class="ais-domain-header">
+            <div class="ais-domain-icon ret-bg"><i class="fas fa-heartbeat"></i></div>
+            <div>
+              <div class="ais-domain-title">Retention Intelligence AI</div>
+              <div class="ais-domain-score-row">
+                <span class="ais-domain-score">88</span>
+                <span class="ais-domain-score-lbl">/ 100</span>
+                <span class="ais-trend-up ais-score-delta">↑ +23 vs Q4</span>
+              </div>
+            </div>
+          </div>
+          <div class="ais-metric-list">
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Lapse Risk Clients Detected</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">15 / 247 <span class="ais-trend-neutral">→ monitored</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Retention Actions Triggered</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-bar" style="width:80%"></div></div>
+              <span class="ais-metric-val">4 active <span class="ais-trend-up">↑+3 vs Q4</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Avg Lapse Prediction Lead Time</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-bar" style="width:75%"></div></div>
+              <span class="ais-metric-val">67 days <span class="ais-trend-up">+22d earlier</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">High-Risk Clients Saved (Q1)</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-bar" style="width:60%"></div></div>
+              <span class="ais-metric-val">3 of 5 <span class="ais-trend-up">↑60%</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Premium Retained via AI Alerts</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-bar" style="width:70%"></div></div>
+              <span class="ais-metric-val">$14,200 <span class="ais-trend-up">↑+$4.8K</span></span>
+            </div>
+          </div>
+          <div class="ais-roi-box ret-roi">
+            <i class="fas fa-dollar-sign"></i>
+            <span><strong>AI ROI:</strong> 3 clients retained × avg $4,733 premium = <strong>$14,200 premium saved</strong>. Lifetime value protected: ~$142K over 10 yr avg.</span>
+          </div>
+        </div>
+
+        {/* Claims AI */}
+        <div class="ais-domain-card ais-clm">
+          <div class="ais-domain-header">
+            <div class="ais-domain-icon clm-bg"><i class="fas fa-clipboard-check"></i></div>
+            <div>
+              <div class="ais-domain-title">Claims Automation AI</div>
+              <div class="ais-domain-score-row">
+                <span class="ais-domain-score">85</span>
+                <span class="ais-domain-score-lbl">/ 100</span>
+                <span class="ais-trend-up ais-score-delta">↑ +31 vs Q4</span>
+              </div>
+            </div>
+          </div>
+          <div class="ais-metric-list">
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Claims Auto-Triaged</span>
+              <div class="ais-bar-wrap"><div class="ais-bar clm-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">6 / 6 <span class="ais-trend-up">100%</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Avg Triage Time</span>
+              <div class="ais-bar-wrap"><div class="ais-bar clm-bar" style="width:82%"></div></div>
+              <span class="ais-metric-val">&lt; 2 min <span class="ais-trend-up">vs 45 min manual</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Document Gap Detection</span>
+              <div class="ais-bar-wrap"><div class="ais-bar clm-bar" style="width:91%"></div></div>
+              <span class="ais-metric-val">91% accuracy <span class="ais-trend-up">↑+11%</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Avg Claim Resolution Time</span>
+              <div class="ais-bar-wrap"><div class="ais-bar clm-bar" style="width:65%"></div></div>
+              <span class="ais-metric-val">7.2 days <span class="ais-trend-up">↓-3.8d</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">IDP Extraction Accuracy</span>
+              <div class="ais-bar-wrap"><div class="ais-bar clm-bar" style="width:97%"></div></div>
+              <span class="ais-metric-val">97.3% <span class="ais-trend-up">↑+8%</span></span>
+            </div>
+          </div>
+          <div class="ais-roi-box clm-roi">
+            <i class="fas fa-dollar-sign"></i>
+            <span><strong>AI ROI:</strong> Auto-triage saves ~43 min/claim × 6 claims = <strong>4.3 hrs/mo</strong> reclaimed. IDP: eliminates manual data entry on ~30 docs/mo.</span>
+          </div>
+        </div>
+
+        {/* Proactive AI Alerts */}
+        <div class="ais-domain-card ais-alert">
+          <div class="ais-domain-header">
+            <div class="ais-domain-icon alert-bg"><i class="fas fa-bell"></i></div>
+            <div>
+              <div class="ais-domain-title">Proactive Alert Engine</div>
+              <div class="ais-domain-score-row">
+                <span class="ais-domain-score">92</span>
+                <span class="ais-domain-score-lbl">/ 100</span>
+                <span class="ais-trend-up ais-score-delta">↑ +19 vs Q4</span>
+              </div>
+            </div>
+          </div>
+          <div class="ais-metric-list">
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Alerts Generated (Q1)</span>
+              <div class="ais-bar-wrap"><div class="ais-bar alert-bar" style="width:84%"></div></div>
+              <span class="ais-metric-val">42 alerts <span class="ais-trend-up">↑+18</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Agent Action Rate on Alerts</span>
+              <div class="ais-bar-wrap"><div class="ais-bar alert-bar" style="width:78%"></div></div>
+              <span class="ais-metric-val">78% acted <span class="ais-trend-up">↑+12%</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Alert → Revenue Conversion</span>
+              <div class="ais-bar-wrap"><div class="ais-bar alert-bar" style="width:52%"></div></div>
+              <span class="ais-metric-val">52% convert <span class="ais-trend-up">↑+9%</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Obituary / Death Detection</span>
+              <div class="ais-bar-wrap"><div class="ais-bar alert-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">4 detected <span class="ais-trend-neutral">→ all actioned</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Avg Alert Lead Time</span>
+              <div class="ais-bar-wrap"><div class="ais-bar alert-bar" style="width:80%"></div></div>
+              <span class="ais-metric-val">1.8 days <span class="ais-trend-up">before manual discovery</span></span>
+            </div>
+          </div>
+          <div class="ais-roi-box alert-roi">
+            <i class="fas fa-dollar-sign"></i>
+            <span><strong>AI ROI:</strong> 52% of 42 alerts actioned = 22 revenue events. At avg $1,400/event = <strong>~$30.8K incremental revenue</strong> from AI alerting.</span>
+          </div>
+        </div>
+
+        {/* Investment AI */}
+        <div class="ais-domain-card ais-inv">
+          <div class="ais-domain-header">
+            <div class="ais-domain-icon inv-bg"><i class="fas fa-chart-line"></i></div>
+            <div>
+              <div class="ais-domain-title">Investment & Advisory AI</div>
+              <div class="ais-domain-score-row">
+                <span class="ais-domain-score">76</span>
+                <span class="ais-domain-score-lbl">/ 100</span>
+                <span class="ais-trend-up ais-score-delta">↑ +8 vs Q4</span>
+              </div>
+            </div>
+          </div>
+          <div class="ais-metric-list">
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Portfolio Gap Detection Rate</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:89%"></div></div>
+              <span class="ais-metric-val">89% <span class="ais-trend-up">↑+14%</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Annuity Candidates Identified</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:80%"></div></div>
+              <span class="ais-metric-val">4 clients <span class="ais-trend-up">↑+2</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">UMA Opportunity Flagged</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:60%"></div></div>
+              <span class="ais-metric-val">$280K AUM <span class="ais-trend-up">$2,800/yr fee</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Cross-Sell Insights Generated</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:72%"></div></div>
+              <span class="ais-metric-val">9 insights <span class="ais-trend-up">across 247 clients</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Investment AI Adoption Rate</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:25%"></div></div>
+              <span class="ais-metric-val">25% clients <span class="ais-trend-up">↑+6% growing</span></span>
+            </div>
+          </div>
+          <div class="ais-roi-box inv-roi">
+            <i class="fas fa-dollar-sign"></i>
+            <span><strong>AI ROI:</strong> 9 cross-sell insights × avg $1,400 revenue each = <strong>$12,600 potential</strong>. UMA close: Linda Morrison $2,800/yr recurring fee.</span>
+          </div>
+        </div>
+
+        {/* Meeting AI */}
+        <div class="ais-domain-card ais-mtg">
+          <div class="ais-domain-header">
+            <div class="ais-domain-icon mtg-bg"><i class="fas fa-calendar-check"></i></div>
+            <div>
+              <div class="ais-domain-title">Meeting Intelligence AI</div>
+              <div class="ais-domain-score-row">
+                <span class="ais-domain-score">83</span>
+                <span class="ais-domain-score-lbl">/ 100</span>
+                <span class="ais-trend-up ais-score-delta">↑ New Feature</span>
+              </div>
+            </div>
+          </div>
+          <div class="ais-metric-list">
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Meetings with AI Brief</span>
+              <div class="ais-bar-wrap"><div class="ais-bar mtg-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">8 / 8 <span class="ais-trend-up">100% coverage</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Post-Meeting Summaries</span>
+              <div class="ais-bar-wrap"><div class="ais-bar mtg-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">3 / 3 <span class="ais-trend-up">auto-generated</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Follow-Up Actions Identified</span>
+              <div class="ais-bar-wrap"><div class="ais-bar mtg-bar" style="width:82%"></div></div>
+              <span class="ais-metric-val">11 actions <span class="ais-trend-up">3 urgent flagged</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Avg Brief Prep Time Saved</span>
+              <div class="ais-bar-wrap"><div class="ais-bar mtg-bar" style="width:90%"></div></div>
+              <span class="ais-metric-val">~25 min/mtg <span class="ais-trend-up">↓ vs manual</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">AI Sentiment Accuracy</span>
+              <div class="ais-bar-wrap"><div class="ais-bar mtg-bar" style="width:87%"></div></div>
+              <span class="ais-metric-val">87% match <span class="ais-trend-up">post-review</span></span>
+            </div>
+          </div>
+          <div class="ais-roi-box mtg-roi">
+            <i class="fas fa-dollar-sign"></i>
+            <span><strong>AI ROI:</strong> 8 meetings × 25 min saved = <strong>3.3 hrs/mo</strong> reclaimed for selling. Better prep → estimated +12% meeting conversion rate.</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── AI vs. Manual Comparison Table ── */}
+      <div class="ais-comparison-section">
+        <h3 class="ais-section-title"><i class="fas fa-balance-scale"></i> AI vs. Manual — Side-by-Side Impact</h3>
+        <div class="ais-comparison-table">
+          <div class="ais-cmp-header">
+            <span>Metric</span>
+            <span class="cmp-manual-hdr"><i class="fas fa-user"></i> Manual</span>
+            <span class="cmp-ai-hdr"><i class="fas fa-robot"></i> AI-Assisted</span>
+            <span class="cmp-gain-hdr">Improvement</span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>Underwriting Decision Time</span>
+            <span class="cmp-manual">8 days avg</span>
+            <span class="cmp-ai">4.2 hrs avg</span>
+            <span class="cmp-gain">↑ <strong>96% faster</strong></span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>Lapse Detection Lead Time</span>
+            <span class="cmp-manual">~7 days (missed 40%)</span>
+            <span class="cmp-ai">67 days ahead</span>
+            <span class="cmp-gain">↑ <strong>+22 days earlier</strong></span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>Claim Triage Time</span>
+            <span class="cmp-manual">45 min/claim</span>
+            <span class="cmp-ai">&lt; 2 min/claim</span>
+            <span class="cmp-gain">↑ <strong>95% faster</strong></span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>Document Extraction (IDP)</span>
+            <span class="cmp-manual">30 min/doc, 82% accuracy</span>
+            <span class="cmp-ai">&lt; 30 sec, 97.3% accuracy</span>
+            <span class="cmp-gain">↑ <strong>60× faster, +15% accuracy</strong></span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>Meeting Prep Time</span>
+            <span class="cmp-manual">25-40 min manual research</span>
+            <span class="cmp-ai">~2 min (auto-brief)</span>
+            <span class="cmp-gain">↑ <strong>93% faster</strong></span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>Cross-Sell Opportunity Detection</span>
+            <span class="cmp-manual">Ad-hoc, 2-3 insights/mo</span>
+            <span class="cmp-ai">9 insights, continuous</span>
+            <span class="cmp-gain">↑ <strong>3× more insights</strong></span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>Portfolio Gap Identification</span>
+            <span class="cmp-manual">Quarterly manual review</span>
+            <span class="cmp-ai">Real-time, 89% detection</span>
+            <span class="cmp-gain">↑ <strong>Continuous vs. quarterly</strong></span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>APS Required per Month</span>
+            <span class="cmp-manual">~30 APS orders</span>
+            <span class="cmp-ai">12 APS orders</span>
+            <span class="cmp-gain">↓ <strong>18 APS avoided ($8,100 saved)</strong></span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Total ROI Summary ── */}
+      <div class="ais-roi-summary">
+        <h3 class="ais-section-title"><i class="fas fa-trophy"></i> Total AI Business Impact — Q1 2026</h3>
+        <div class="ais-roi-grid">
+          <div class="ais-roi-card roi-revenue">
+            <div class="ais-roi-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="ais-roi-val">$31.2K</div>
+            <div class="ais-roi-title">AI-Driven Revenue Unlocked</div>
+            <div class="ais-roi-desc">From proactive alerts, cross-sell insights, retention saves, and UMA opportunity identification</div>
+          </div>
+          <div class="ais-roi-card roi-saved">
+            <div class="ais-roi-icon"><i class="fas fa-piggy-bank"></i></div>
+            <div class="ais-roi-val">$8,100</div>
+            <div class="ais-roi-title">Cost Savings / Month</div>
+            <div class="ais-roi-desc">18 APS orders avoided × $450 avg cost = $8,100/mo in underwriting cost reduction</div>
+          </div>
+          <div class="ais-roi-card roi-time">
+            <div class="ais-roi-icon"><i class="fas fa-clock"></i></div>
+            <div class="ais-roi-val">~41 hrs</div>
+            <div class="ais-roi-title">Agent Time Reclaimed / Month</div>
+            <div class="ais-roi-desc">UW (28 hrs) + Claims triage (4.3 hrs) + Meeting prep (3.3 hrs) + IDP (5.4 hrs)</div>
+          </div>
+          <div class="ais-roi-card roi-retained">
+            <div class="ais-roi-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="ais-roi-val">$14,200</div>
+            <div class="ais-roi-title">Premium Retained via AI</div>
+            <div class="ais-roi-desc">3 lapse-risk clients saved × avg $4,733 annual premium. LTV impact: ~$142K over 10 years</div>
+          </div>
+          <div class="ais-roi-card roi-nps">
+            <div class="ais-roi-icon"><i class="fas fa-star"></i></div>
+            <div class="ais-roi-val">+14 pts</div>
+            <div class="ais-roi-title">Client Satisfaction Gain</div>
+            <div class="ais-roi-desc">Faster claims (7.2 days), proactive alerts, and AI-assisted meeting preparation improve NPS</div>
+          </div>
+          <div class="ais-roi-card roi-pipeline">
+            <div class="ais-roi-icon"><i class="fas fa-funnel-dollar"></i></div>
+            <div class="ais-roi-val">+18%</div>
+            <div class="ais-roi-title">Pipeline Conversion Lift</div>
+            <div class="ais-roi-desc">AI-assisted UW, proactive outreach and meeting briefs improved pipeline conversion from 52% to 68%</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Adoption Timeline ── */}
+      <div class="ais-timeline-section">
+        <h3 class="ais-section-title"><i class="fas fa-road"></i> AI Feature Adoption — NYL Agent 360</h3>
+        <div class="ais-timeline">
+          <div class="ais-tl-item tl-done">
+            <div class="ais-tl-dot done-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q3 2025</div>
+              <div class="ais-tl-title">IDP Document Intelligence</div>
+              <div class="ais-tl-desc">AI-powered document extraction on claims and policies. 97.3% accuracy. 30 docs/mo automated.</div>
+            </div>
+          </div>
+          <div class="ais-tl-item tl-done">
+            <div class="ais-tl-dot done-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q4 2025</div>
+              <div class="ais-tl-title">Proactive Alert Engine</div>
+              <div class="ais-tl-desc">Death/obituary detection, renewal alerts, and lapse risk signals. 42 alerts generated Q1.</div>
+            </div>
+          </div>
+          <div class="ais-tl-item tl-done">
+            <div class="ais-tl-dot done-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q1 2026</div>
+              <div class="ais-tl-title">Underwriting STP Engine</div>
+              <div class="ais-tl-desc">AI straight-through processing: 73% STP rate, 4.2 hr avg decision time, 94.6% accuracy.</div>
+            </div>
+          </div>
+          <div class="ais-tl-item tl-done">
+            <div class="ais-tl-dot done-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q1 2026</div>
+              <div class="ais-tl-title">Retention Intelligence</div>
+              <div class="ais-tl-desc">ML lapse prediction 67 days ahead. 3 of 5 Q1 at-risk clients retained. $14.2K premium saved.</div>
+            </div>
+          </div>
+          <div class="ais-tl-item tl-done">
+            <div class="ais-tl-dot done-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q1 2026</div>
+              <div class="ais-tl-title">Pre-Meeting Brief & Post-Meeting Summary</div>
+              <div class="ais-tl-desc">AI-generated meeting briefs (client snapshot, AI alerts, talking points, documents). 25 min saved/meeting.</div>
+            </div>
+          </div>
+          <div class="ais-tl-item tl-done">
+            <div class="ais-tl-dot done-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q1 2026</div>
+              <div class="ais-tl-title">AI Agent Hub + Context Buttons</div>
+              <div class="ais-tl-desc">8 specialised AI agents across all 4 domains. 30 context buttons for instant deep-link queries.</div>
+            </div>
+          </div>
+          <div class="ais-tl-item tl-next">
+            <div class="ais-tl-dot next-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q2 2026</div>
+              <div class="ais-tl-title">AI Portfolio Optimizer</div>
+              <div class="ais-tl-desc">Automated rebalancing recommendations, FIA suitability scoring, and UMA candidate ranking across $4.2M AUM.</div>
+            </div>
+          </div>
+          <div class="ais-tl-item tl-next">
+            <div class="ais-tl-dot next-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q2 2026</div>
+              <div class="ais-tl-title">AI Voice Assistant</div>
+              <div class="ais-tl-desc">Hands-free AI querying via voice — client briefs, pipeline updates, and claim status on demand.</div>
+            </div>
+          </div>
         </div>
       </div>
 

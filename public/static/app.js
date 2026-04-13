@@ -53,34 +53,8 @@ function navigateTo(page) {
   const content = document.getElementById('page-content');
   if (!content) return;
 
-  // ── AI Insights: render external app inside an iframe panel ──
-  if (page === 'ai-insights') {
-    content.innerHTML = `
-      <div class="ai-insights-shell">
-        <div class="ai-insights-topbar">
-          <div class="ai-insights-title">
-            <i class="fas fa-brain"></i>
-            <span>AI Insights — Powered by GenSpark</span>
-          </div>
-          <div class="ai-insights-actions">
-            <a href="https://toydxqyp.gensparkspace.com/" target="_blank" class="btn btn-outline-sm">
-              <i class="fas fa-external-link-alt"></i> Open in New Tab
-            </a>
-          </div>
-        </div>
-        <div class="ai-insights-frame-wrap">
-          <iframe
-            src="https://toydxqyp.gensparkspace.com/"
-            class="ai-insights-iframe"
-            title="AI Insights"
-            allowfullscreen
-            allow="clipboard-read; clipboard-write"
-          ></iframe>
-        </div>
-      </div>
-    `;
-    return;
-  }
+  // ── AI Insights: use native JSX template (tpl-ai-insights) ──
+  // Fall through to template loading below
 
   // Load page content from template
   const templateId = `tpl-${page}`;
