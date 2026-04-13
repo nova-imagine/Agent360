@@ -381,7 +381,7 @@ function TopBar() {
           <i class="fas fa-robot"></i>
           <span class="ai-indicator"></span>
         </button>
-        <button class="topbar-btn notification-btn" title="Notifications">
+        <button class="topbar-btn notification-btn" title="Notifications" onclick="toggleNotifPanel()">
           <i class="fas fa-bell"></i>
           <span class="notif-count">5</span>
         </button>
@@ -1797,9 +1797,9 @@ function PoliciesPage() {
         <div class="toolbar-left">
           <div class="search-inline">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Search policies, clients..." />
+            <input type="text" id="policy-search" placeholder="Search policies, clients..." oninput="filterPolicies()" />
           </div>
-          <select class="filter-select">
+          <select class="filter-select" id="policy-type-filter" onchange="filterPolicies()">
             <option value="">All Types</option>
             <option>Whole Life Insurance</option>
             <option>Term Life Insurance</option>
@@ -1807,8 +1807,8 @@ function PoliciesPage() {
             <option>Variable Universal Life</option>
             <option>Long-term Care Insurance</option>
           </select>
-          <select class="filter-select">
-            <option>All Status</option>
+          <select class="filter-select" id="policy-status-filter" onchange="filterPolicies()">
+            <option value="">All Status</option>
             <option>Active</option>
             <option>Review</option>
             <option>Lapsed</option>
@@ -2236,9 +2236,9 @@ function ClaimsPage() {
         <div class="toolbar-left">
           <div class="search-inline">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Search claims, clients, policy IDs..." />
+            <input type="text" id="claim-search" placeholder="Search claims, clients, policy IDs..." oninput="filterClaims()" />
           </div>
-          <select class="filter-select">
+          <select class="filter-select" id="claim-type-filter" onchange="filterClaims()">
             <option value="">All Types</option>
             <option>Death Benefit</option>
             <option>Disability</option>
@@ -2246,7 +2246,7 @@ function ClaimsPage() {
             <option>Accelerated Benefit</option>
             <option>Waiver of Premium</option>
           </select>
-          <select class="filter-select">
+          <select class="filter-select" id="claim-status-filter" onchange="filterClaims()">
             <option value="">All Status</option>
             <option>Open</option>
             <option>Under Review</option>
@@ -2255,7 +2255,7 @@ function ClaimsPage() {
             <option>Paid</option>
             <option>Denied</option>
           </select>
-          <select class="filter-select">
+          <select class="filter-select" id="claim-priority-filter" onchange="filterClaims()">
             <option value="">All Priority</option>
             <option>Urgent</option>
             <option>Normal</option>
@@ -6156,10 +6156,10 @@ function ReportsPage() {
       </div>
 
       <div class="report-actions-row">
-        <button class="btn btn-primary"><i class="fas fa-download"></i> Export Full Report (PDF)</button>
-        <button class="btn btn-outline"><i class="fas fa-share"></i> Share with Manager</button>
-        <button class="btn btn-ai"><i class="fas fa-robot"></i> AI Report Summary</button>
-        <button class="btn btn-outline"><i class="fas fa-calendar"></i> Schedule Report</button>
+        <button class="btn btn-primary" onclick="exportReportPDF()"><i class="fas fa-download"></i> Export Full Report (PDF)</button>
+        <button class="btn btn-outline" onclick="shareReportWithManager()"><i class="fas fa-share"></i> Share with Manager</button>
+        <button class="btn btn-ai" onclick="openAIReportSummary()"><i class="fas fa-robot"></i> AI Report Summary</button>
+        <button class="btn btn-outline" onclick="scheduleReport()"><i class="fas fa-calendar"></i> Schedule Report</button>
       </div>
     </div>
   )

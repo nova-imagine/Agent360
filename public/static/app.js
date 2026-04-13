@@ -7729,6 +7729,11 @@ function openConversionForecast() {
   }, 100);
 }
 
+// Fix A: openConversionPredict → alias to openConversionForecast
+function openConversionPredict() {
+  openConversionForecast();
+}
+
 // Click-outside handlers for new modals
 document.addEventListener('DOMContentLoaded', function() {
   const daiOverlay = document.getElementById('deal-ai-modal-overlay');
@@ -7742,3 +7747,293 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('Sales AI #19 loaded — salesAIData(5 deals), openDealAIModal, switchDaiTab, openSalesAIReport, switchSairTab, openConversionForecast');
+
+// ============================================================
+// PHASE 1 FIXES — B, C, D, E
+// ============================================================
+
+// ── Fix B: filterPolicies ────────────────────────────────────
+function filterPolicies() {
+  const q      = (document.getElementById('policy-search')?.value || '').toLowerCase();
+  const type   = (document.getElementById('policy-type-filter')?.value || '').toLowerCase();
+  const status = (document.getElementById('policy-status-filter')?.value || '').toLowerCase();
+
+  const rows = document.querySelectorAll('#policies-table tbody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const rowType   = row.querySelector('.policy-type-badge')?.textContent.trim().toLowerCase() || '';
+    const rowStatus = row.querySelector('.status-badge')?.textContent.trim().toLowerCase() || '';
+
+    const matchQ      = !q      || text.includes(q);
+    const matchType   = !type   || rowType.includes(type);
+    const matchStatus = !status || rowStatus === status;
+
+    row.style.display = (matchQ && matchType && matchStatus) ? '' : 'none';
+    if (matchQ && matchType && matchStatus) visible++;
+  });
+
+  // Update count badge if present
+  const badge = document.querySelector('.policies-page .page-toolbar .result-count');
+  if (badge) badge.textContent = visible + ' result' + (visible !== 1 ? 's' : '');
+}
+
+// ── Fix C: filterClaims ──────────────────────────────────────
+function filterClaims() {
+  const q        = (document.getElementById('claim-search')?.value || '').toLowerCase();
+  const type     = (document.getElementById('claim-type-filter')?.value || '').toLowerCase();
+  const status   = (document.getElementById('claim-status-filter')?.value || '').toLowerCase();
+  const priority = (document.getElementById('claim-priority-filter')?.value || '').toLowerCase();
+
+  const rows = document.querySelectorAll('.claims-table tbody tr.claim-row');
+  let visible = 0;
+  rows.forEach(row => {
+    const text      = row.textContent.toLowerCase();
+    const rowType   = row.querySelector('.claim-type-badge')?.textContent.trim().toLowerCase() || '';
+    const rowStatus = row.querySelector('.claim-status-badge')?.textContent.trim().toLowerCase() || '';
+    const rowPrio   = row.querySelector('.priority-badge')?.textContent.trim().toLowerCase() || '';
+
+    const matchQ      = !q        || text.includes(q);
+    const matchType   = !type     || rowType.includes(type);
+    const matchStatus = !status   || rowStatus.includes(status);
+    const matchPrio   = !priority || rowPrio === priority;
+
+    row.style.display = (matchQ && matchType && matchStatus && matchPrio) ? '' : 'none';
+    if (matchQ && matchType && matchStatus && matchPrio) visible++;
+  });
+}
+
+// ── Fix D: Notification panel ────────────────────────────────
+const NOTIF_DATA = [
+  { id: 'n1', icon: 'fa-exclamation-circle', color: '#dc2626', label: 'Urgent',
+    title: 'Patricia Nguyen — Lapse Risk',
+    body: 'Policy P-100301 under-funded. Lapse projected Jun 20.',
+    time: '2 min ago', unread: true },
+  { id: 'n2', icon: 'fa-file-alt',           color: '#f59e0b', label: 'Claim',
+    title: 'Robert Chen Claim Update',
+    body: 'CLM-2026-0041 missing ID docs — expedite action required.',
+    time: '14 min ago', unread: true },
+  { id: 'n3', icon: 'fa-pen-fancy',           color: '#7c3aed', label: 'Signature',
+    title: 'Kevin Park — E-Sign Pending',
+    body: 'Term Life $500K e-signature reminder needed today.',
+    time: '1 hr ago', unread: true },
+  { id: 'n4', icon: 'fa-sync-alt',            color: '#0891b2', label: 'Renewal',
+    title: 'Sandra Williams Renewal Due',
+    body: 'Policy P-100320 renewal Sep 2026 — outreach recommended.',
+    time: '3 hr ago', unread: false },
+  { id: 'n5', icon: 'fa-calendar-check',      color: '#059669', label: 'Meeting',
+    title: 'Linda Morrison Annual Review',
+    body: 'Meeting Apr 15 — pre-brief ready for download.',
+    time: '5 hr ago', unread: false },
+];
+
+function buildNotifPanel() {
+  if (document.getElementById('notif-panel')) return; // already built
+
+  const panel = document.createElement('div');
+  panel.id = 'notif-panel';
+  panel.className = 'notif-panel';
+  panel.innerHTML = `
+    <div class="notif-panel-header">
+      <span class="notif-panel-title"><i class="fas fa-bell"></i> Notifications</span>
+      <button class="notif-mark-all" onclick="markAllNotifsRead()">Mark all read</button>
+      <button class="notif-close-btn" onclick="closeNotifPanel()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="notif-panel-body" id="notif-panel-body">
+      ${NOTIF_DATA.map(n => `
+        <div class="notif-item ${n.unread ? 'unread' : ''}" id="${n.id}" onclick="readNotif('${n.id}')">
+          <div class="notif-icon-wrap" style="background:${n.color}20;color:${n.color}">
+            <i class="fas ${n.icon}"></i>
+          </div>
+          <div class="notif-content">
+            <div class="notif-item-title">${n.title}</div>
+            <div class="notif-item-body">${n.body}</div>
+            <div class="notif-item-time">${n.time}</div>
+          </div>
+          ${n.unread ? '<span class="notif-dot"></span>' : ''}
+        </div>
+      `).join('')}
+    </div>
+    <div class="notif-panel-footer">
+      <button class="notif-view-all" onclick="closeNotifPanel()">View all activity →</button>
+    </div>
+  `;
+
+  document.body.appendChild(panel);
+
+  // Close on outside click
+  document.addEventListener('mousedown', function notifOutside(e) {
+    const btn = document.querySelector('.notification-btn');
+    if (!panel.contains(e.target) && !btn.contains(e.target)) {
+      closeNotifPanel();
+      document.removeEventListener('mousedown', notifOutside);
+    }
+  });
+}
+
+function toggleNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  if (!panel) {
+    buildNotifPanel();
+    requestAnimationFrame(() => {
+      document.getElementById('notif-panel').classList.add('open');
+    });
+  } else {
+    panel.classList.toggle('open');
+  }
+}
+
+function closeNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  if (panel) panel.classList.remove('open');
+}
+
+function readNotif(id) {
+  const item = document.getElementById(id);
+  if (item) {
+    item.classList.remove('unread');
+    const dot = item.querySelector('.notif-dot');
+    if (dot) dot.remove();
+    updateNotifBadge();
+  }
+}
+
+function markAllNotifsRead() {
+  document.querySelectorAll('.notif-item.unread').forEach(item => {
+    item.classList.remove('unread');
+    const dot = item.querySelector('.notif-dot');
+    if (dot) dot.remove();
+  });
+  updateNotifBadge();
+}
+
+function updateNotifBadge() {
+  const unread = document.querySelectorAll('.notif-item.unread').length;
+  const badge = document.querySelector('.notif-count');
+  if (badge) {
+    badge.textContent = unread;
+    badge.style.display = unread > 0 ? '' : 'none';
+  }
+}
+
+// Wire notification button on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  const notifBtn = document.querySelector('.notification-btn');
+  if (notifBtn) notifBtn.addEventListener('click', toggleNotifPanel);
+});
+
+// ── Fix E: Reports page action buttons ───────────────────────
+function exportReportPDF() {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast';
+  toast.innerHTML = '<i class="fas fa-download"></i> Generating PDF report… download will start shortly.';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3200);
+}
+
+function shareReportWithManager() {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = '<i class="fas fa-share"></i> Report shared with Manager. They will receive an email link.';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3200);
+}
+
+function openAIReportSummary() {
+  const overlay = document.createElement('div');
+  overlay.id = 'ai-report-summary-overlay';
+  overlay.className = 'phase1-modal-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="phase1-modal">
+      <div class="phase1-modal-header">
+        <span><i class="fas fa-robot" style="color:#7c3aed;margin-right:8px"></i>AI Report Summary</span>
+        <button onclick="document.getElementById('ai-report-summary-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="phase1-modal-body">
+        <div class="ai-summary-kpi-row">
+          <div class="ai-sum-kpi"><span class="ai-sum-val green">$312K</span><span class="ai-sum-lbl">Insurance Rev</span></div>
+          <div class="ai-sum-kpi"><span class="ai-sum-val blue">$4.2M</span><span class="ai-sum-lbl">AUM</span></div>
+          <div class="ai-sum-kpi"><span class="ai-sum-val purple">87/100</span><span class="ai-sum-lbl">AI Score</span></div>
+          <div class="ai-sum-kpi"><span class="ai-sum-val gold">78%</span><span class="ai-sum-lbl">Target Pace</span></div>
+        </div>
+        <div class="ai-summary-text">
+          <p><strong>Performance Overview (Q1 2026):</strong> Your book of business is tracking at <strong>$1.87M YTD</strong> against a $2.16M annual target — 78% pacing with strong momentum. Insurance revenue leads at $312K this quarter (+9% vs plan).</p>
+          <p><strong>Top Strengths:</strong> Advisory segment is your fastest-growing domain at +31% client growth. Retirement annuity premiums up 22% — a direct result of AI-driven income gap identification.</p>
+          <p><strong>Opportunities:</strong> Investment adoption rate at 25% leaves significant room — 185 existing clients have no investment products. Cross-selling to the top 10 could generate ~$18K additional annual premium.</p>
+          <p><strong>AI Impact:</strong> AI automation delivered $18K in productivity savings, retained $14.2K in at-risk premiums, and reduced claims resolution time by 3.8 days on average.</p>
+          <p><strong>Recommended Actions:</strong><br>
+          1. Prioritise Patricia Nguyen — annuity candidate ($3K/yr potential)<br>
+          2. Schedule James Whitfield retirement illustration<br>
+          3. Launch renewal campaign for 23 policies due Q2<br>
+          4. Run cross-sell outreach for top 20 single-product clients</p>
+        </div>
+      </div>
+      <div class="phase1-modal-footer">
+        <button class="btn btn-primary" onclick="exportReportPDF();document.getElementById('ai-report-summary-overlay').remove()">
+          <i class="fas fa-download"></i> Export Full Report
+        </button>
+        <button class="btn btn-outline" onclick="document.getElementById('ai-report-summary-overlay').remove()">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+
+function scheduleReport() {
+  const overlay = document.createElement('div');
+  overlay.id = 'schedule-report-overlay';
+  overlay.className = 'phase1-modal-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="phase1-modal small">
+      <div class="phase1-modal-header">
+        <span><i class="fas fa-calendar" style="color:#0891b2;margin-right:8px"></i>Schedule Report</span>
+        <button onclick="document.getElementById('schedule-report-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="phase1-modal-body">
+        <div class="schedule-form">
+          <label class="sched-label">Frequency</label>
+          <select class="sched-select">
+            <option>Weekly — every Monday</option>
+            <option>Bi-weekly</option>
+            <option>Monthly — 1st of month</option>
+            <option>Quarterly</option>
+          </select>
+          <label class="sched-label">Delivery</label>
+          <select class="sched-select">
+            <option>Email (PDF)</option>
+            <option>Email (Excel)</option>
+            <option>In-app notification</option>
+          </select>
+          <label class="sched-label">Recipients</label>
+          <input class="sched-input" type="text" value="sridhar.r@nyl.com, manager@nyl.com" />
+          <label class="sched-label">Next delivery</label>
+          <input class="sched-input" type="date" value="2026-04-20" />
+        </div>
+      </div>
+      <div class="phase1-modal-footer">
+        <button class="btn btn-primary" onclick="confirmScheduleReport()"><i class="fas fa-check"></i> Confirm Schedule</button>
+        <button class="btn btn-outline" onclick="document.getElementById('schedule-report-overlay').remove()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+
+function confirmScheduleReport() {
+  const overlay = document.getElementById('schedule-report-overlay');
+  if (overlay) overlay.remove();
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = '<i class="fas fa-calendar-check"></i> Report scheduled successfully. You will receive the first delivery on Apr 20.';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3500);
+}
+
+console.log('Phase 1 fixes loaded — openConversionPredict, filterPolicies, filterClaims, toggleNotifPanel, exportReportPDF, shareReportWithManager, openAIReportSummary, scheduleReport');
