@@ -4366,3 +4366,511 @@ function closeOutreachModal(e) {
 }
 
 console.log('Outreach Hub JS loaded — outreachData(10), openOutreachModal, switchOutreachChannel, sendOutreach');
+
+/* ═══════════════════════════════════════════════════════════════
+   TASK #11 — AUTOMATED CUSTOMER ENROLLMENT / E-APP WIZARD
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── E-App data store (AI-prefilled per application) ── */
+const eAppData = {
+  'EA-008': {
+    id: 'EA-008', dealId: 'D008', uwId: null,
+    client: 'Kevin Park', age: 29, dob: '1997-03-14',
+    email: 'kevin.p@email.com', phone: '(212) 555-0829',
+    address: '420 Lexington Ave, New York, NY 10170',
+    ssn: '***-**-4821',
+    product: 'Term Life Insurance', productCode: 'term',
+    coverage: '$500,000', premium: '$1,800/yr', term: '20 years',
+    beneficiary: 'Sarah Park (Spouse)', beneficiaryPct: '100%',
+    riders: ['Waiver of Premium Rider', 'Accelerated Death Benefit'],
+    healthClass: 'Preferred Plus',
+    smoker: 'Non-smoker',
+    height: "5'11\"", weight: '172 lbs', bmi: '24.0',
+    conditions: 'None disclosed',
+    medications: 'None',
+    familyHistory: 'No significant history',
+    labResults: 'Cholesterol 182, BP 118/76, Blood Glucose 94 — All Normal',
+    aiHealthScore: 96,
+    aiPrefillPct: 95,
+    status: 'Awaiting E-Signature',
+    step: 4,
+    documents: [
+      { name: 'Application Form 1040-NYL', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'Health Questionnaire', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'Beneficiary Designation', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'HIPAA Authorization', status: 'pending', aiTag: 'Needs Signature' },
+      { name: 'E-Delivery Consent', status: 'pending', aiTag: 'Needs Signature' }
+    ],
+    aiInsight: 'Kevin qualifies for Preferred Plus health class. AI detected no MIB flags, clean MVR, and excellent lab results. STP score 95 — recommend immediate e-signature request. Expected time to issue: 2–4 hours.'
+  },
+  'EA-009': {
+    id: 'EA-009', dealId: 'D009', uwId: null,
+    client: 'Linda Morrison', age: 56, dob: '1969-11-02',
+    email: 'linda.m@email.com', phone: '(212) 555-0856',
+    address: '1 World Trade Center, Suite 4200, New York, NY 10007',
+    ssn: '***-**-7743',
+    product: 'Unified Managed Account (UMA)', productCode: 'uma',
+    coverage: '$280,000 AUM', premium: '$2,800/yr fee', term: 'Ongoing',
+    beneficiary: 'James Morrison (Son)', beneficiaryPct: '100%',
+    riders: ['Discretionary Management', 'Tax-Loss Harvesting', 'ESG Overlay'],
+    healthClass: 'N/A — Advisory Product',
+    smoker: 'N/A', height: 'N/A', weight: 'N/A', bmi: 'N/A',
+    conditions: 'N/A', medications: 'N/A',
+    familyHistory: 'N/A',
+    labResults: 'N/A — Suitability assessment completed',
+    aiHealthScore: null,
+    aiPrefillPct: 100,
+    status: 'Documents Signed — Ready to Activate',
+    step: 5,
+    documents: [
+      { name: 'UMA Account Application', status: 'signed', aiTag: 'Signed' },
+      { name: 'Investment Policy Statement', status: 'signed', aiTag: 'Signed' },
+      { name: 'Suitability Questionnaire', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'Fee Disclosure ADV Part 2', status: 'signed', aiTag: 'Signed' },
+      { name: 'Transfer Authorization', status: 'signed', aiTag: 'Signed' }
+    ],
+    aiInsight: 'Linda\'s suitability score is 98/100. Portfolio allocation: 60% equities, 30% fixed income, 10% alternatives — matches her Moderate Growth profile. AI recommends activating account transfer from current custodian. Estimated transfer completion: 3–5 business days.'
+  },
+  'EA-UW-009': {
+    id: 'EA-UW-009', dealId: null, uwId: 'UW-2026-0009',
+    client: 'Linda Morrison', age: 56, dob: '1969-11-02',
+    email: 'linda.m@email.com', phone: '(212) 555-0856',
+    address: '1 World Trade Center, Suite 4200, New York, NY 10007',
+    ssn: '***-**-7743',
+    product: 'Whole Life Rider Add-on', productCode: 'wl-rider',
+    coverage: '$250,000 Rider', premium: '$1,200/yr', term: 'Permanent',
+    beneficiary: 'James Morrison (Son)', beneficiaryPct: '100%',
+    riders: ['Paid-Up Additions Rider', 'Disability Waiver'],
+    healthClass: 'Preferred Plus',
+    smoker: 'Non-smoker',
+    height: "5'6\"", weight: '138 lbs', bmi: '22.3',
+    conditions: 'Hypertension — controlled, medication: Lisinopril 10mg',
+    medications: 'Lisinopril 10mg daily',
+    familyHistory: 'Father: cardiovascular disease age 72',
+    labResults: 'BP 128/82 (controlled), Cholesterol 198, All other labs normal',
+    aiHealthScore: 91,
+    aiPrefillPct: 100,
+    status: 'Approved — Awaiting Signature',
+    step: 4,
+    documents: [
+      { name: 'Rider Application Form', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'Health Update Form', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'Beneficiary Designation Update', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'Policy Amendment Rider', status: 'pending', aiTag: 'Needs Signature' },
+      { name: 'Disclosure Notice', status: 'signed', aiTag: 'Signed' }
+    ],
+    aiInsight: 'AI STP engine approved this rider add-on in 1.8 hours. Hypertension is well-controlled per recent labs. STP score 99 — highest confidence auto-approval. Rider activation will increase Linda\'s total coverage to $750K WL + $250K rider. Immediate e-signature can activate policy same day.'
+  },
+  'EA-UW-008': {
+    id: 'EA-UW-008', dealId: null, uwId: 'UW-2026-0008',
+    client: 'Maria Gonzalez', age: 48, dob: '1977-07-19',
+    email: 'maria.g@email.com', phone: '(212) 555-0748',
+    address: '350 Park Ave, New York, NY 10022',
+    ssn: '***-**-5534',
+    product: 'Disability Insurance Increase', productCode: 'di',
+    coverage: '+$3,000/mo benefit increase', premium: '$800/yr', term: 'To age 65',
+    beneficiary: 'N/A — Disability Product',
+    beneficiaryPct: 'N/A',
+    riders: ['COLA Rider', 'Future Increase Option'],
+    healthClass: 'Preferred',
+    smoker: 'Non-smoker',
+    height: "5'4\"", weight: '128 lbs', bmi: '22.0',
+    conditions: 'None',
+    medications: 'None',
+    familyHistory: 'Mother: Type 2 diabetes (disclosed)',
+    labResults: 'All labs normal, Blood Glucose 98',
+    aiHealthScore: 89,
+    aiPrefillPct: 87,
+    status: 'Approved — Awaiting Signature',
+    step: 3,
+    documents: [
+      { name: 'DI Application Form', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'Attending Physician Statement', status: 'ai-filled', aiTag: 'AI Filled' },
+      { name: 'Occupational Questionnaire', status: 'pending', aiTag: 'AI Needs Review' },
+      { name: 'Policy Amendment', status: 'pending', aiTag: 'Needs Signature' },
+      { name: 'Premium Authorization', status: 'pending', aiTag: 'Needs Signature' }
+    ],
+    aiInsight: 'AI scored Maria at Preferred class (STP 86). Family history of diabetes flagged but no personal history — DI policy increase approved with standard exclusion clause for diabetes-related disability. Occupational questionnaire needs agent review: Maria is listed as "Manager" — confirm she performs no manual labor over 20% of duties to maintain Preferred class.'
+  },
+  'EA-NEW': {
+    id: 'EA-NEW', dealId: null, uwId: null,
+    client: '', age: '', dob: '',
+    email: '', phone: '',
+    address: '', ssn: '',
+    product: 'Select Product', productCode: '',
+    coverage: '', premium: '', term: '',
+    beneficiary: '', beneficiaryPct: '100%',
+    riders: [],
+    healthClass: '',
+    smoker: '',
+    height: '', weight: '', bmi: '',
+    conditions: '',
+    medications: '',
+    familyHistory: '',
+    labResults: '',
+    aiHealthScore: null,
+    aiPrefillPct: 0,
+    status: 'New Application',
+    step: 1,
+    documents: [],
+    aiInsight: 'Complete all sections to receive AI risk assessment and STP eligibility score.'
+  }
+};
+
+/* ── Active E-App state ── */
+let activeEAppId = null;
+let currentEAppStep = 1;
+const totalEAppSteps = 5;
+
+/* ── Step content templates ── */
+function _eAppStep1HTML(d) {
+  const ai = (f) => `<span class="eapp-ai-fill-tag"><i class="fas fa-robot"></i> AI</span>`;
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-title"><i class="fas fa-user"></i> Client Information</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Full Legal Name ${d.client ? ai() : ''}</label>
+          <input class="eapp-input ${d.client?'eapp-ai-filled':''}" id="ea-name" type="text" value="${d.client}" placeholder="Enter full legal name" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Date of Birth ${d.dob ? ai() : ''}</label>
+          <input class="eapp-input ${d.dob?'eapp-ai-filled':''}" id="ea-dob" type="text" value="${d.dob}" placeholder="YYYY-MM-DD" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Age ${d.age ? ai() : ''}</label>
+          <input class="eapp-input ${d.age?'eapp-ai-filled':''}" id="ea-age" type="text" value="${d.age}" placeholder="Age" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">SSN ${d.ssn ? ai() : ''}</label>
+          <input class="eapp-input ${d.ssn?'eapp-ai-filled':''}" id="ea-ssn" type="text" value="${d.ssn}" placeholder="XXX-XX-XXXX" />
+        </div>
+        <div class="eapp-field-group eapp-field-wide">
+          <label class="eapp-label">Email ${d.email ? ai() : ''}</label>
+          <input class="eapp-input ${d.email?'eapp-ai-filled':''}" id="ea-email" type="email" value="${d.email}" placeholder="client@email.com" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Phone ${d.phone ? ai() : ''}</label>
+          <input class="eapp-input ${d.phone?'eapp-ai-filled':''}" id="ea-phone" type="text" value="${d.phone}" placeholder="(212) 555-0000" />
+        </div>
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Address ${d.address ? ai() : ''}</label>
+          <input class="eapp-input ${d.address?'eapp-ai-filled':''}" id="ea-address" type="text" value="${d.address}" placeholder="Street, City, State, ZIP" />
+        </div>
+      </div>
+      ${d.aiPrefillPct > 0 ? `<div class="eapp-ai-note"><i class="fas fa-robot"></i> AI prefilled ${d.aiPrefillPct}% of fields from client profile. Fields highlighted in blue were auto-populated — please verify accuracy.</div>` : ''}
+    </div>`;
+}
+
+function _eAppStep2HTML(d) {
+  const ai = () => `<span class="eapp-ai-fill-tag"><i class="fas fa-robot"></i> AI</span>`;
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-title"><i class="fas fa-shield-alt"></i> Product & Coverage Details</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group eapp-field-wide">
+          <label class="eapp-label">Product ${d.product ? ai() : ''}</label>
+          <input class="eapp-input ${d.product?'eapp-ai-filled':''}" id="ea-product" type="text" value="${d.product}" placeholder="Select product" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Coverage Amount ${d.coverage ? ai() : ''}</label>
+          <input class="eapp-input ${d.coverage?'eapp-ai-filled':''}" id="ea-coverage" type="text" value="${d.coverage}" placeholder="e.g. $500,000" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Annual Premium ${d.premium ? ai() : ''}</label>
+          <input class="eapp-input ${d.premium?'eapp-ai-filled':''}" id="ea-premium" type="text" value="${d.premium}" placeholder="e.g. $1,800/yr" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Policy Term ${d.term ? ai() : ''}</label>
+          <input class="eapp-input ${d.term?'eapp-ai-filled':''}" id="ea-term" type="text" value="${d.term}" placeholder="e.g. 20 years" />
+        </div>
+        <div class="eapp-field-group eapp-field-wide">
+          <label class="eapp-label">Primary Beneficiary ${d.beneficiary ? ai() : ''}</label>
+          <input class="eapp-input ${d.beneficiary?'eapp-ai-filled':''}" id="ea-beneficiary" type="text" value="${d.beneficiary}" placeholder="Name and relationship" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Beneficiary % ${d.beneficiaryPct ? ai() : ''}</label>
+          <input class="eapp-input ${d.beneficiaryPct?'eapp-ai-filled':''}" id="ea-bene-pct" type="text" value="${d.beneficiaryPct}" placeholder="100%" />
+        </div>
+      </div>
+      ${d.riders && d.riders.length ? `
+        <div class="eapp-riders-section">
+          <div class="eapp-riders-title"><i class="fas fa-robot"></i> AI-Recommended Riders</div>
+          <div class="eapp-riders-grid">
+            ${d.riders.map(r => `<label class="eapp-rider-item"><input type="checkbox" checked /> <span>${r}</span></label>`).join('')}
+          </div>
+        </div>` : ''}
+    </div>`;
+}
+
+function _eAppStep3HTML(d) {
+  const ai = () => `<span class="eapp-ai-fill-tag"><i class="fas fa-robot"></i> AI</span>`;
+  const isAdvisory = d.productCode === 'uma';
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-title"><i class="fas fa-heartbeat"></i> Health & Medical ${isAdvisory ? '(Suitability)' : 'Questionnaire'}</div>
+      ${isAdvisory ? `
+        <div class="eapp-advisory-suitability">
+          <div class="eapp-suitability-score"><div class="eapp-suit-val">98</div><div class="eapp-suit-lbl">AI Suitability Score</div></div>
+          <div class="eapp-suitability-details">
+            <div class="eapp-suit-row"><span>Risk Tolerance</span><span class="eapp-ai-filled-val">Moderate Growth ${ai()}</span></div>
+            <div class="eapp-suit-row"><span>Investment Horizon</span><span class="eapp-ai-filled-val">10+ years ${ai()}</span></div>
+            <div class="eapp-suit-row"><span>Annual Income</span><span class="eapp-ai-filled-val">$350,000+ ${ai()}</span></div>
+            <div class="eapp-suit-row"><span>Net Worth</span><span class="eapp-ai-filled-val">$2.0M+ ${ai()}</span></div>
+            <div class="eapp-suit-row"><span>Experience</span><span class="eapp-ai-filled-val">Sophisticated Investor ${ai()}</span></div>
+          </div>
+        </div>` : `
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Health Class ${d.healthClass ? ai() : ''}</label>
+          <input class="eapp-input ${d.healthClass?'eapp-ai-filled':''}" id="ea-hclass" type="text" value="${d.healthClass}" placeholder="e.g. Preferred Plus" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Tobacco Use ${d.smoker ? ai() : ''}</label>
+          <input class="eapp-input ${d.smoker?'eapp-ai-filled':''}" id="ea-smoker" type="text" value="${d.smoker}" placeholder="Smoker / Non-smoker" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Height ${d.height ? ai() : ''}</label>
+          <input class="eapp-input ${d.height?'eapp-ai-filled':''}" id="ea-height" type="text" value="${d.height}" placeholder="5'10&quot;" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Weight ${d.weight ? ai() : ''}</label>
+          <input class="eapp-input ${d.weight?'eapp-ai-filled':''}" id="ea-weight" type="text" value="${d.weight}" placeholder="170 lbs" />
+        </div>
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Current Conditions / Medications ${d.conditions ? ai() : ''}</label>
+          <textarea class="eapp-textarea ${d.conditions?'eapp-ai-filled':''}" id="ea-conditions" rows="2">${d.conditions}</textarea>
+        </div>
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Family History ${d.familyHistory ? ai() : ''}</label>
+          <textarea class="eapp-textarea ${d.familyHistory?'eapp-ai-filled':''}" id="ea-family" rows="2">${d.familyHistory}</textarea>
+        </div>
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Lab Results ${d.labResults ? ai() : ''}</label>
+          <textarea class="eapp-textarea ${d.labResults?'eapp-ai-filled':''}" id="ea-labs" rows="2">${d.labResults}</textarea>
+        </div>
+      </div>
+      ${d.aiHealthScore ? `
+      <div class="eapp-health-score-bar">
+        <div class="eapp-hs-label">AI Health Score</div>
+        <div class="eapp-hs-track"><div class="eapp-hs-fill" style="width:${d.aiHealthScore}%"><span>${d.aiHealthScore}/100</span></div></div>
+        <div class="eapp-hs-note">Based on Rx history, MIB check, MVR, lab results, and medical exam data</div>
+      </div>` : ''}`}
+    </div>`;
+}
+
+function _eAppStep4HTML(d) {
+  const statusIcon = { 'ai-filled':'<i class="fas fa-robot" style="color:#2563eb"></i>', 'signed':'<i class="fas fa-check-circle" style="color:#059669"></i>', 'pending':'<i class="fas fa-clock" style="color:#d97706"></i>' };
+  const statusClass = { 'ai-filled':'doc-ai', 'signed':'doc-signed', 'pending':'doc-pending' };
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-title"><i class="fas fa-file-signature"></i> Documents & Consent</div>
+      <div class="eapp-docs-list">
+        ${(d.documents||[]).map((doc,i) => `
+          <div class="eapp-doc-row ${statusClass[doc.status]||''}">
+            <div class="eapp-doc-num">${i+1}</div>
+            <div class="eapp-doc-info">
+              <div class="eapp-doc-name">${doc.name}</div>
+              <div class="eapp-doc-status">${statusIcon[doc.status]||''} ${doc.aiTag}</div>
+            </div>
+            ${doc.status === 'pending' ?
+              `<button class="eapp-doc-sign-btn" onclick="eAppSignDoc(${i})"><i class="fas fa-signature"></i> Sign</button>` :
+              `<button class="eapp-doc-view-btn"><i class="fas fa-eye"></i> View</button>`}
+          </div>`).join('')}
+      </div>
+      <div class="eapp-consent-section">
+        <div class="eapp-section-title" style="margin-top:16px"><i class="fas fa-check-square"></i> Authorization & Consent</div>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I authorize New York Life to access medical records for underwriting purposes</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I consent to electronic delivery of policy documents and communications</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I acknowledge receipt of the Privacy Notice and Policy Disclosure</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" /> <span>I authorize automated premium payment via ACH debit</span></label>
+      </div>
+    </div>`;
+}
+
+function _eAppStep5HTML(d) {
+  const allSigned = (d.documents||[]).every(doc => doc.status !== 'pending');
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-title"><i class="fas fa-check-double"></i> Review & Submit</div>
+      <div class="eapp-review-grid">
+        <div class="eapp-review-card">
+          <div class="eapp-rc-title"><i class="fas fa-user"></i> Client</div>
+          <div class="eapp-rc-row"><span>Name</span><span>${d.client}</span></div>
+          <div class="eapp-rc-row"><span>Age / DOB</span><span>${d.age} / ${d.dob}</span></div>
+          <div class="eapp-rc-row"><span>Email</span><span>${d.email}</span></div>
+          <div class="eapp-rc-row"><span>Phone</span><span>${d.phone}</span></div>
+        </div>
+        <div class="eapp-review-card">
+          <div class="eapp-rc-title"><i class="fas fa-shield-alt"></i> Product</div>
+          <div class="eapp-rc-row"><span>Product</span><span>${d.product}</span></div>
+          <div class="eapp-rc-row"><span>Coverage</span><span>${d.coverage}</span></div>
+          <div class="eapp-rc-row"><span>Premium</span><span>${d.premium}</span></div>
+          <div class="eapp-rc-row"><span>Term</span><span>${d.term}</span></div>
+        </div>
+        <div class="eapp-review-card">
+          <div class="eapp-rc-title"><i class="fas fa-heartbeat"></i> Health</div>
+          <div class="eapp-rc-row"><span>Class</span><span>${d.healthClass}</span></div>
+          <div class="eapp-rc-row"><span>Tobacco</span><span>${d.smoker}</span></div>
+          ${d.aiHealthScore ? `<div class="eapp-rc-row"><span>AI Score</span><span class="green">${d.aiHealthScore}/100</span></div>` : ''}
+          <div class="eapp-rc-row"><span>Status</span><span class="eapp-status-pill">${d.status}</span></div>
+        </div>
+        <div class="eapp-review-card eapp-review-ai">
+          <div class="eapp-rc-title"><i class="fas fa-robot"></i> AI Assessment</div>
+          <div class="eapp-ai-insight-review">${d.aiInsight}</div>
+          <div class="eapp-ai-prefill-summary"><i class="fas fa-magic"></i> ${d.aiPrefillPct}% fields auto-prefilled · Time saved: ~${Math.round(d.aiPrefillPct * 0.3)} min</div>
+        </div>
+      </div>
+      <div class="eapp-submit-section">
+        ${allSigned ?
+          `<button class="eapp-submit-btn" onclick="submitEApp()"><i class="fas fa-paper-plane"></i> Submit Application to New York Life</button>` :
+          `<div class="eapp-submit-warning"><i class="fas fa-exclamation-triangle"></i> Please complete all document signatures in Step 4 before submitting.</div>
+           <button class="eapp-btn-secondary" onclick="goToEAppStep(4)"><i class="fas fa-arrow-left"></i> Back to Documents</button>`}
+      </div>
+    </div>`;
+}
+
+/* ── Open E-App ── */
+function openEApp(eAppId) {
+  const d = eAppData[eAppId];
+  if (!d) return;
+  activeEAppId = eAppId;
+  currentEAppStep = d.step || 1;
+
+  const overlay = document.getElementById('eapp-overlay');
+  if (!overlay) return;
+
+  // Update header
+  const titleEl = document.getElementById('eapp-header-title');
+  if (titleEl) titleEl.textContent = d.client ? `E-Application — ${d.client}` : 'New E-Application';
+  const subEl = document.getElementById('eapp-header-sub');
+  if (subEl) subEl.textContent = d.product !== 'Select Product' ? `${d.product} · ${d.status}` : 'New Application — Complete all fields';
+  const pctEl = document.getElementById('eapp-ai-pct');
+  if (pctEl) pctEl.textContent = `${d.aiPrefillPct}%`;
+
+  overlay.style.display = 'flex';
+  _renderEAppStep(currentEAppStep);
+}
+
+/* ── Render a step ── */
+function _renderEAppStep(step) {
+  const d = eAppData[activeEAppId];
+  if (!d) return;
+  currentEAppStep = step;
+
+  // Progress bar
+  const fill = document.getElementById('eapp-progress-fill');
+  if (fill) fill.style.width = `${(step / totalEAppSteps) * 100}%`;
+
+  // Step indicator
+  const cur = document.getElementById('eapp-cur-step');
+  if (cur) cur.textContent = step;
+
+  // Step dots
+  for (let i = 1; i <= totalEAppSteps; i++) {
+    const dot = document.getElementById(`eapp-step-dot-${i}`);
+    if (dot) {
+      dot.classList.toggle('active', i === step);
+      dot.classList.toggle('done', i < step);
+    }
+  }
+
+  // Back button visibility
+  const backBtn = document.getElementById('eapp-btn-back');
+  if (backBtn) backBtn.style.display = step === 1 ? 'none' : 'flex';
+
+  // Next button label
+  const nextBtn = document.getElementById('eapp-btn-next');
+  if (nextBtn) {
+    if (step === totalEAppSteps) {
+      nextBtn.style.display = 'none';
+    } else {
+      nextBtn.style.display = 'flex';
+      nextBtn.innerHTML = step === totalEAppSteps - 1 ? 'Review <i class="fas fa-eye"></i>' : 'Next <i class="fas fa-arrow-right"></i>';
+    }
+  }
+
+  // Render step body
+  const body = document.getElementById('eapp-body');
+  if (!body) return;
+  const renderers = { 1: _eAppStep1HTML, 2: _eAppStep2HTML, 3: _eAppStep3HTML, 4: _eAppStep4HTML, 5: _eAppStep5HTML };
+  body.innerHTML = renderers[step] ? renderers[step](d) : '<div style="padding:40px;text-align:center">Step content coming soon.</div>';
+}
+
+/* ── Navigation ── */
+function eAppStepNav(direction) {
+  const newStep = currentEAppStep + direction;
+  if (newStep < 1 || newStep > totalEAppSteps) return;
+  _renderEAppStep(newStep);
+}
+
+function goToEAppStep(step) {
+  if (step < 1 || step > totalEAppSteps) return;
+  _renderEAppStep(step);
+}
+
+/* ── AI Auto-Fill ── */
+function eAppAIFill() {
+  const body = document.getElementById('eapp-body');
+  if (!body) return;
+  const inputs = body.querySelectorAll('input.eapp-input:not([readonly]), textarea.eapp-textarea');
+  inputs.forEach(input => {
+    if (!input.value) {
+      input.classList.add('eapp-ai-filled');
+      input.placeholder = 'AI-filled';
+    }
+  });
+  const toast = document.createElement('div');
+  toast.className = 'stage-toast';
+  toast.innerHTML = '<i class="fas fa-robot"></i> AI Auto-Fill complete — all available fields populated from client profile';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+/* ── Sign document ── */
+function eAppSignDoc(docIndex) {
+  const d = eAppData[activeEAppId];
+  if (!d || !d.documents[docIndex]) return;
+  d.documents[docIndex].status = 'signed';
+  d.documents[docIndex].aiTag = 'Signed ✓';
+  _renderEAppStep(4);
+  const toast = document.createElement('div');
+  toast.className = 'stage-toast';
+  toast.innerHTML = `<i class="fas fa-check-circle"></i> "${d.documents[docIndex].name}" signed successfully`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+/* ── Save draft ── */
+function eAppSaveDraft() {
+  const d = eAppData[activeEAppId];
+  if (!d) return;
+  const toast = document.createElement('div');
+  toast.className = 'stage-toast';
+  toast.innerHTML = `<i class="fas fa-save"></i> E-App draft saved — ${d.client || 'New Application'} (Step ${currentEAppStep}/5)`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+/* ── Submit ── */
+function submitEApp() {
+  const d = eAppData[activeEAppId];
+  if (!d) return;
+  closeEApp();
+  const toast = document.createElement('div');
+  toast.className = 'stage-toast';
+  toast.innerHTML = `<i class="fas fa-paper-plane"></i> Application for ${d.client} submitted to New York Life — Expected decision: ${d.aiHealthScore >= 80 ? '2–4 hours (STP)' : '1–3 business days'}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+}
+
+/* ── Close ── */
+function closeEApp(e) {
+  if (e && e.target !== document.getElementById('eapp-overlay')) return;
+  const overlay = document.getElementById('eapp-overlay');
+  if (overlay) overlay.style.display = 'none';
+  activeEAppId = null;
+  currentEAppStep = 1;
+}
+
+console.log('E-App Wizard JS loaded — eAppData(5), openEApp, eAppStepNav, submitEApp');

@@ -2996,6 +2996,24 @@ function UnderwritingPage() {
         <button class="btn-uw-scan" onclick="runUWScan()"><i class="fas fa-sync-alt"></i> Run AI Scan</button>
       </div>
 
+      {/* ── AI Enrollment Automation Banner ── */}
+      <div class="eapp-uw-banner">
+        <div class="eapp-uw-banner-left">
+          <div class="eapp-uw-icon"><i class="fas fa-file-contract"></i></div>
+          <div>
+            <div class="eapp-uw-title">AI Automated Enrollment Engine <span class="eapp-live-badge">LIVE</span></div>
+            <div class="eapp-uw-sub">Auto-prefills E-App forms using client profile, health data, and policy details · Reduces data entry by 87% · Average enrollment: 4 min (vs 35 min manual)</div>
+          </div>
+        </div>
+        <div class="eapp-uw-stats">
+          <div class="eapp-uw-stat"><span class="eapp-uw-val green">5</span><span class="eapp-uw-lbl">Auto-Prefilled</span></div>
+          <div class="eapp-uw-stat"><span class="eapp-uw-val blue">2</span><span class="eapp-uw-lbl">Awaiting Sig.</span></div>
+          <div class="eapp-uw-stat"><span class="eapp-uw-val gold">87%</span><span class="eapp-uw-lbl">Fields Auto-Filled</span></div>
+          <div class="eapp-uw-stat"><span class="eapp-uw-val purple">4 min</span><span class="eapp-uw-lbl">Avg. Enrollment</span></div>
+        </div>
+        <button class="eapp-uw-launch-btn" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> New E-App</button>
+      </div>
+
       {/* ── Pipeline Board ── */}
       <div class="uw-pipeline">
 
@@ -3216,6 +3234,7 @@ function UnderwritingPage() {
               <span class="uw-status-pill approved">Approved</span>
               <span class="uw-ai-rec issued"><i class="fas fa-file-signature"></i> Awaiting Signature</span>
             </div>
+            <button class="uw-eapp-btn" onclick="event.stopPropagation();openEApp('EA-UW-009')"><i class="fas fa-file-contract"></i> Open E-App <span class="uw-eapp-ai-tag">AI 100%</span></button>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0008')">
             <div class="uw-case-header">
@@ -3234,6 +3253,7 @@ function UnderwritingPage() {
               <span class="uw-status-pill approved">Approved</span>
               <span class="uw-ai-rec issued"><i class="fas fa-file-signature"></i> Awaiting Signature</span>
             </div>
+            <button class="uw-eapp-btn" onclick="event.stopPropagation();openEApp('EA-UW-008')"><i class="fas fa-file-contract"></i> Open E-App <span class="uw-eapp-ai-tag">AI 87%</span></button>
           </div>
         </div>
 
@@ -3282,6 +3302,79 @@ function UnderwritingPage() {
         </div>
 
       </div>{/* end uw-pipeline */}
+
+      {/* ══════════════════════════════════════════════════
+          E-APP WIZARD MODAL
+          ══════════════════════════════════════════════════ */}
+      <div class="eapp-overlay" id="eapp-overlay" onclick="closeEApp(event)" style="display:none">
+        <div class="eapp-modal">
+
+          {/* Header */}
+          <div class="eapp-header">
+            <div class="eapp-header-left">
+              <div class="eapp-header-icon"><i class="fas fa-file-contract"></i></div>
+              <div>
+                <div class="eapp-header-title" id="eapp-header-title">AI-Assisted E-Application</div>
+                <div class="eapp-header-sub" id="eapp-header-sub">Auto-prefilled from client profile · Review and confirm each section</div>
+              </div>
+            </div>
+            <div class="eapp-header-right">
+              <div class="eapp-ai-badge"><i class="fas fa-robot"></i> AI Pre-filled <span id="eapp-ai-pct">87%</span></div>
+              <button class="eapp-close-btn" onclick="closeEApp()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+
+          {/* Step Progress Bar */}
+          <div class="eapp-progress-wrap">
+            <div class="eapp-progress-bar-track">
+              <div class="eapp-progress-bar-fill" id="eapp-progress-fill" style="width:20%"></div>
+            </div>
+            <div class="eapp-steps">
+              <div class="eapp-step active" id="eapp-step-dot-1" onclick="goToEAppStep(1)">
+                <div class="eapp-step-circle"><i class="fas fa-user"></i></div>
+                <div class="eapp-step-lbl">Client Info</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-2" onclick="goToEAppStep(2)">
+                <div class="eapp-step-circle"><i class="fas fa-shield-alt"></i></div>
+                <div class="eapp-step-lbl">Product</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-3" onclick="goToEAppStep(3)">
+                <div class="eapp-step-circle"><i class="fas fa-heartbeat"></i></div>
+                <div class="eapp-step-lbl">Health</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-4" onclick="goToEAppStep(4)">
+                <div class="eapp-step-circle"><i class="fas fa-file-signature"></i></div>
+                <div class="eapp-step-lbl">Documents</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-5" onclick="goToEAppStep(5)">
+                <div class="eapp-step-circle"><i class="fas fa-check-double"></i></div>
+                <div class="eapp-step-lbl">Review</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Body: step content */}
+          <div class="eapp-body" id="eapp-body">
+            {/* Content injected by JS */}
+          </div>
+
+          {/* Footer */}
+          <div class="eapp-footer">
+            <div class="eapp-footer-left">
+              <button class="eapp-btn-secondary" id="eapp-btn-back" onclick="eAppStepNav(-1)"><i class="fas fa-arrow-left"></i> Back</button>
+              <button class="eapp-btn-save" onclick="eAppSaveDraft()"><i class="fas fa-save"></i> Save Draft</button>
+            </div>
+            <div class="eapp-footer-center">
+              <span class="eapp-step-indicator">Step <span id="eapp-cur-step">1</span> of 5</span>
+            </div>
+            <div class="eapp-footer-right">
+              <button class="eapp-btn-ai" onclick="eAppAIFill()"><i class="fas fa-robot"></i> AI Auto-Fill</button>
+              <button class="eapp-btn-next" id="eapp-btn-next" onclick="eAppStepNav(1)">Next <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+        </div>
+      </div>
 
       {/* ── Underwriting Modal ── */}
       <div class="detail-modal-overlay" id="uw-modal-overlay" onclick="closeUWModal()">
@@ -3487,7 +3580,9 @@ function SalesPage() {
                 <div class="kc-product">Term Life — $500K</div>
                 <div class="kc-value">$1,800/yr · <span class="kc-comm">$216 comm</span></div>
                 <div class="kc-tags"><span class="tag-urgent">Awaiting Signature</span></div>
+                <div class="kc-eapp-bar"><span class="kc-eapp-ai-tag"><i class="fas fa-robot"></i> AI Pre-filled</span><span class="kc-eapp-pct">95% complete</span></div>
                 <div class="kc-actions">
+                  <button class="kca-btn kca-eapp" onclick="event.stopPropagation();openEApp('EA-008')"><i class="fas fa-file-contract"></i> E-App</button>
                   <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Brief</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D008','Closed Won')"><i class="fas fa-trophy"></i> Close</button>
                 </div>
@@ -3498,7 +3593,9 @@ function SalesPage() {
                 <div class="kc-product">UMA — $280K AUM</div>
                 <div class="kc-value">$2,800/yr fee · <span class="kc-comm">$280 comm</span></div>
                 <div class="kc-tags"><span>Docs Signed</span></div>
+                <div class="kc-eapp-bar"><span class="kc-eapp-ai-tag"><i class="fas fa-robot"></i> AI Pre-filled</span><span class="kc-eapp-pct">100% complete</span></div>
                 <div class="kc-actions">
+                  <button class="kca-btn kca-eapp" onclick="event.stopPropagation();openEApp('EA-009')"><i class="fas fa-file-contract"></i> E-App</button>
                   <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-003')"><i class="fas fa-file-alt"></i> Brief</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D009','Closed Won')"><i class="fas fa-trophy"></i> Close</button>
                 </div>
