@@ -3066,6 +3066,8 @@ function UnderwritingPage() {
 function SalesPage() {
   return (
     <div class="page sales-page">
+
+      {/* ── KPI Strip ── */}
       <div class="sales-header-cards">
         <div class="sales-kpi-card">
           <div class="skpi-icon"><i class="fas fa-funnel-dollar"></i></div>
@@ -3095,177 +3097,475 @@ function SalesPage() {
             <div class="skpi-lbl">Avg Sales Cycle</div>
           </div>
         </div>
-      </div>
-
-      {/* Pipeline Kanban */}
-      <div class="kanban-board">
-        <div class="kanban-col">
-          <div class="kanban-col-header prospect">
-            <span>Prospect</span>
-            <span class="col-count">8</span>
+        <div class="sales-kpi-card">
+          <div class="skpi-icon purple"><i class="fas fa-dollar-sign"></i></div>
+          <div class="skpi-data">
+            <div class="skpi-val">$42,180</div>
+            <div class="skpi-lbl">Commission MTD</div>
           </div>
-          <div class="kanban-card">
-            <div class="kc-client">Alex Rivera</div>
-            <div class="kc-product">Whole Life — $500K</div>
-            <div class="kc-value">$4,800/yr</div>
-            <div class="kc-tags"><span>High Priority</span><span>Referral</span></div>
-          </div>
-          <div class="kanban-card">
-            <div class="kc-client">Nancy Foster</div>
-            <div class="kc-product">Term Life — $1M</div>
-            <div class="kc-value">$3,200/yr</div>
-            <div class="kc-tags"><span>Online Inquiry</span></div>
-          </div>
-          <div class="kanban-card">
-            <div class="kc-client">John Kim</div>
-            <div class="kc-product">Disability Insurance</div>
-            <div class="kc-value">$2,100/yr</div>
-            <div class="kc-tags"><span>Warm Lead</span></div>
-          </div>
-          <button class="add-card-btn"><i class="fas fa-plus"></i> Add Prospect</button>
         </div>
-
-        <div class="kanban-col">
-          <div class="kanban-col-header quoted">
-            <span>Quoted</span>
-            <span class="col-count">6</span>
+        <div class="sales-kpi-card">
+          <div class="skpi-icon red"><i class="fas fa-trophy"></i></div>
+          <div class="skpi-data">
+            <div class="skpi-val">78%</div>
+            <div class="skpi-lbl">YTD Target ($187K / $240K)</div>
           </div>
-          <div class="kanban-card hot">
-            <div class="kc-hot-tag"><i class="fas fa-fire"></i> Hot</div>
-            <div class="kc-client">Michael Santos</div>
-            <div class="kc-product">Universal Life — $750K</div>
-            <div class="kc-value">$6,400/yr</div>
-            <div class="kc-tags"><span>Quote Sent</span><span>+AI Rec</span></div>
-          </div>
-          <div class="kanban-card">
-            <div class="kc-client">Julia Chen</div>
-            <div class="kc-product">Annuity — Deferred</div>
-            <div class="kc-value">$8,000/yr</div>
-            <div class="kc-tags"><span>Reviewing</span></div>
-          </div>
-          <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
-        </div>
-
-        <div class="kanban-col">
-          <div class="kanban-col-header underwriting">
-            <span>Underwriting</span>
-            <span class="col-count">4</span>
-          </div>
-          <div class="kanban-card">
-            <div class="kc-client">Thomas Wright</div>
-            <div class="kc-product">Whole Life — $1M</div>
-            <div class="kc-value">$9,600/yr</div>
-            <div class="kc-tags"><span>Medical Exam Done</span></div>
-          </div>
-          <div class="kanban-card">
-            <div class="kc-client">Grace Lee</div>
-            <div class="kc-product">VUL — $250K</div>
-            <div class="kc-value">$3,800/yr</div>
-            <div class="kc-tags"><span>In Review</span></div>
-          </div>
-          <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
-        </div>
-
-        <div class="kanban-col">
-          <div class="kanban-col-header approved">
-            <span>Approved</span>
-            <span class="col-count">3</span>
-          </div>
-          <div class="kanban-card">
-            <div class="kc-client">Kevin Park</div>
-            <div class="kc-product">Term Life — $500K</div>
-            <div class="kc-value">$1,800/yr</div>
-            <div class="kc-tags"><span>Awaiting Signature</span></div>
-          </div>
-          <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
-        </div>
-
-        <div class="kanban-col">
-          <div class="kanban-col-header closed">
-            <span>Closed Won</span>
-            <span class="col-count">34</span>
-          </div>
-          <div class="kanban-card won">
-            <div class="kc-client">David Thompson</div>
-            <div class="kc-product">Term Life — $500K</div>
-            <div class="kc-value">$2,400/yr</div>
-            <div class="kc-tags"><span>Apr 7 · Issued</span></div>
-          </div>
-          <div class="kanban-card won">
-            <div class="kc-client">Lisa Brown</div>
-            <div class="kc-product">Long-term Care</div>
-            <div class="kc-value">$5,200/yr</div>
-            <div class="kc-tags"><span>Apr 5 · Issued</span></div>
-          </div>
-          <div class="view-more-btn">+ 32 more this month</div>
         </div>
       </div>
 
-      {/* Quick Quote Tool */}
+      {/* ── Main body: Kanban + right sidebar ── */}
+      <div class="sales-body-layout">
+
+        {/* ── Pipeline Kanban ── */}
+        <div class="sales-kanban-wrap">
+          <div class="kanban-board">
+
+            {/* Prospect */}
+            <div class="kanban-col">
+              <div class="kanban-col-header prospect">
+                <span><i class="fas fa-binoculars"></i> Prospect</span>
+                <span class="col-count">8</span>
+              </div>
+              <div class="kanban-card" onclick="openDealModal('D001')">
+                <div class="kc-score-badge score-hi">AI 82</div>
+                <div class="kc-client">Alex Rivera</div>
+                <div class="kc-product">Whole Life — $500K</div>
+                <div class="kc-value">$4,800/yr · <span class="kc-comm">$576 comm</span></div>
+                <div class="kc-tags"><span class="tag-priority">High Priority</span><span>Referral</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Brief</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('AI analysis for Alex Rivera prospect — Whole Life $500K, close probability, next best action','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D001','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
+                </div>
+              </div>
+              <div class="kanban-card" onclick="openDealModal('D002')">
+                <div class="kc-score-badge score-mid">AI 61</div>
+                <div class="kc-client">Nancy Foster</div>
+                <div class="kc-product">Term Life — $1M</div>
+                <div class="kc-value">$3,200/yr · <span class="kc-comm">$384 comm</span></div>
+                <div class="kc-tags"><span>Online Inquiry</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Brief</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('Nancy Foster — Term Life $1M prospect, credit check pending, close strategy','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D002','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
+                </div>
+              </div>
+              <div class="kanban-card" onclick="openDealModal('D003')">
+                <div class="kc-score-badge score-lo">AI 44</div>
+                <div class="kc-client">John Kim</div>
+                <div class="kc-product">Disability Insurance</div>
+                <div class="kc-value">$2,100/yr · <span class="kc-comm">$252 comm</span></div>
+                <div class="kc-tags"><span>Warm Lead</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('John Kim DI prospect — diabetes flag, APS required, objection handling strategy','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D003','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
+                </div>
+              </div>
+              <button class="add-card-btn"><i class="fas fa-plus"></i> Add Prospect</button>
+            </div>
+
+            {/* Quoted */}
+            <div class="kanban-col">
+              <div class="kanban-col-header quoted">
+                <span><i class="fas fa-file-invoice-dollar"></i> Quoted</span>
+                <span class="col-count">6</span>
+              </div>
+              <div class="kanban-card hot" onclick="openDealModal('D004')">
+                <div class="kc-hot-tag"><i class="fas fa-fire"></i> Hot</div>
+                <div class="kc-score-badge score-hi">AI 91</div>
+                <div class="kc-client">Michael Santos</div>
+                <div class="kc-product">Universal Life — $750K</div>
+                <div class="kc-value">$6,400/yr · <span class="kc-comm">$896 comm</span></div>
+                <div class="kc-tags"><span>Quote Sent</span><span class="tag-ai">+AI Rec</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-brief" onclick="event.stopPropagation();sendContextMessage('Michael Santos UL $750K — labs pending, objection handling and close strategy','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D004','Underwriting')"><i class="fas fa-arrow-right"></i> Move</button>
+                </div>
+              </div>
+              <div class="kanban-card" onclick="openDealModal('D005')">
+                <div class="kc-score-badge score-mid">AI 73</div>
+                <div class="kc-client">Julia Chen</div>
+                <div class="kc-product">Deferred Annuity</div>
+                <div class="kc-value">$8,000/yr · <span class="kc-comm">$640 comm</span></div>
+                <div class="kc-tags"><span>Reviewing</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('Julia Chen deferred annuity quote — income projection, tax advantage talking points','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D005','Underwriting')"><i class="fas fa-arrow-right"></i> Move</button>
+                </div>
+              </div>
+              <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
+            </div>
+
+            {/* Underwriting */}
+            <div class="kanban-col">
+              <div class="kanban-col-header underwriting">
+                <span><i class="fas fa-stethoscope"></i> Underwriting</span>
+                <span class="col-count">4</span>
+              </div>
+              <div class="kanban-card" onclick="openDealModal('D006')">
+                <div class="kc-score-badge score-hi">AI 88</div>
+                <div class="kc-client">Thomas Wright</div>
+                <div class="kc-product">Whole Life — $1M</div>
+                <div class="kc-value">$9,600/yr · <span class="kc-comm">$1,152 comm</span></div>
+                <div class="kc-tags"><span>Medical Exam Done</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('Thomas Wright WL $1M underwriting status — medical exam done, expected decision timeline','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D006','Approved')"><i class="fas fa-arrow-right"></i> Move</button>
+                </div>
+              </div>
+              <div class="kanban-card" onclick="openDealModal('D007')">
+                <div class="kc-score-badge score-mid">AI 69</div>
+                <div class="kc-client">Grace Lee</div>
+                <div class="kc-product">VUL — $250K</div>
+                <div class="kc-value">$3,800/yr · <span class="kc-comm">$456 comm</span></div>
+                <div class="kc-tags"><span>In Review</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('Grace Lee VUL $250K underwriting — in review, APS status, next steps','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D007','Approved')"><i class="fas fa-arrow-right"></i> Move</button>
+                </div>
+              </div>
+              <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
+            </div>
+
+            {/* Approved */}
+            <div class="kanban-col">
+              <div class="kanban-col-header approved">
+                <span><i class="fas fa-check-circle"></i> Approved</span>
+                <span class="col-count">3</span>
+              </div>
+              <div class="kanban-card" onclick="openDealModal('D008')">
+                <div class="kc-score-badge score-hi">AI 95</div>
+                <div class="kc-client">Kevin Park</div>
+                <div class="kc-product">Term Life — $500K</div>
+                <div class="kc-value">$1,800/yr · <span class="kc-comm">$216 comm</span></div>
+                <div class="kc-tags"><span class="tag-urgent">Awaiting Signature</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Brief</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D008','Closed Won')"><i class="fas fa-trophy"></i> Close</button>
+                </div>
+              </div>
+              <div class="kanban-card" onclick="openDealModal('D009')">
+                <div class="kc-score-badge score-hi">AI 90</div>
+                <div class="kc-client">Linda Morrison</div>
+                <div class="kc-product">UMA — $280K AUM</div>
+                <div class="kc-value">$2,800/yr fee · <span class="kc-comm">$280 comm</span></div>
+                <div class="kc-tags"><span>Docs Signed</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-003')"><i class="fas fa-file-alt"></i> Brief</button>
+                  <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D009','Closed Won')"><i class="fas fa-trophy"></i> Close</button>
+                </div>
+              </div>
+              <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
+            </div>
+
+            {/* Closed Won */}
+            <div class="kanban-col">
+              <div class="kanban-col-header closed">
+                <span><i class="fas fa-trophy"></i> Closed Won</span>
+                <span class="col-count">34</span>
+              </div>
+              <div class="kanban-card won">
+                <div class="kc-client">David Thompson</div>
+                <div class="kc-product">Term Life — $500K</div>
+                <div class="kc-value">$2,400/yr · <span class="kc-comm">$288 comm</span></div>
+                <div class="kc-tags"><span>Apr 7 · Issued</span></div>
+              </div>
+              <div class="kanban-card won">
+                <div class="kc-client">Lisa Brown</div>
+                <div class="kc-product">Long-term Care</div>
+                <div class="kc-value">$5,200/yr · <span class="kc-comm">$624 comm</span></div>
+                <div class="kc-tags"><span>Apr 5 · Issued</span></div>
+              </div>
+              <div class="kanban-card won">
+                <div class="kc-client">Robert Chen</div>
+                <div class="kc-product">Whole Life — $1M</div>
+                <div class="kc-value">$12,400/yr · <span class="kc-comm">$1,488 comm</span></div>
+                <div class="kc-tags"><span>Apr 2 · Issued</span></div>
+              </div>
+              <div class="view-more-btn" onclick="openDealModal('closed-all')">+ 31 more this month →</div>
+            </div>
+
+          </div>{/* end kanban-board */}
+        </div>{/* end sales-kanban-wrap */}
+
+        {/* ── Right Sidebar: AI Pipeline Optimizer + Commission Tracker ── */}
+        <div class="sales-sidebar">
+
+          {/* AI Pipeline Optimizer */}
+          <div class="pipeline-ai-panel">
+            <div class="pai-header">
+              <div class="pai-title"><i class="fas fa-robot"></i> AI Pipeline Optimizer</div>
+              <span class="pai-badge">LIVE</span>
+            </div>
+            <div class="pai-subtitle">Top 5 deals ranked by AI close probability</div>
+            <div class="pai-list">
+
+              <div class="pai-item" onclick="openDealModal('D004')">
+                <div class="pai-rank">1</div>
+                <div class="pai-info">
+                  <div class="pai-client">Michael Santos</div>
+                  <div class="pai-product">Universal Life $750K</div>
+                  <div class="pai-action ai-action-green"><i class="fas fa-bolt"></i> Follow up on lab results — close window: 3 days</div>
+                </div>
+                <div class="pai-score pai-score-green">91%</div>
+              </div>
+
+              <div class="pai-item" onclick="openDealModal('D008')">
+                <div class="pai-rank">2</div>
+                <div class="pai-info">
+                  <div class="pai-client">Kevin Park</div>
+                  <div class="pai-product">Term Life $500K</div>
+                  <div class="pai-action ai-action-green"><i class="fas fa-signature"></i> E-signature pending — send reminder today</div>
+                </div>
+                <div class="pai-score pai-score-green">95%</div>
+              </div>
+
+              <div class="pai-item" onclick="openDealModal('D009')">
+                <div class="pai-rank">3</div>
+                <div class="pai-info">
+                  <div class="pai-client">Linda Morrison</div>
+                  <div class="pai-product">UMA $280K AUM</div>
+                  <div class="pai-action ai-action-green"><i class="fas fa-check"></i> Docs signed — initiate account transfer</div>
+                </div>
+                <div class="pai-score pai-score-green">90%</div>
+              </div>
+
+              <div class="pai-item" onclick="openDealModal('D006')">
+                <div class="pai-rank">4</div>
+                <div class="pai-info">
+                  <div class="pai-client">Thomas Wright</div>
+                  <div class="pai-product">Whole Life $1M</div>
+                  <div class="pai-action ai-action-amber"><i class="fas fa-hourglass-half"></i> UW decision expected Apr 16 — prepare e-delivery</div>
+                </div>
+                <div class="pai-score pai-score-amber">88%</div>
+              </div>
+
+              <div class="pai-item" onclick="openDealModal('D001')">
+                <div class="pai-rank">5</div>
+                <div class="pai-info">
+                  <div class="pai-client">Alex Rivera</div>
+                  <div class="pai-product">Whole Life $500K</div>
+                  <div class="pai-action ai-action-amber"><i class="fas fa-calendar-alt"></i> Meeting Apr 12 — send pre-brief now</div>
+                </div>
+                <div class="pai-score pai-score-amber">82%</div>
+              </div>
+
+            </div>
+            <button class="pai-ask-btn" onclick="sendContextMessage('AI Pipeline Optimizer — show all deals ranked by close probability with specific next actions for each','smart-advisor')">
+              <i class="fas fa-robot"></i> Full AI Pipeline Analysis
+            </button>
+          </div>
+
+          {/* Commission Tracker */}
+          <div class="comm-tracker">
+            <div class="comm-header">
+              <div class="comm-title"><i class="fas fa-dollar-sign"></i> Commission Tracker</div>
+              <span class="comm-period">2026</span>
+            </div>
+
+            {/* YTD Progress */}
+            <div class="comm-ytd-block">
+              <div class="comm-ytd-row">
+                <span class="comm-ytd-lbl">YTD Commission</span>
+                <span class="comm-ytd-val">$187,000</span>
+              </div>
+              <div class="comm-ytd-row">
+                <span class="comm-ytd-lbl">Annual Target</span>
+                <span class="comm-ytd-val comm-target">$240,000</span>
+              </div>
+              <div class="comm-progress-bar-wrap">
+                <div class="comm-progress-bar" style="width:77.9%">
+                  <span class="comm-progress-pct">78%</span>
+                </div>
+              </div>
+              <div class="comm-gap-note">$53,000 to target · <span class="comm-on-track">On Track ↑</span></div>
+            </div>
+
+            {/* Monthly bars */}
+            <div class="comm-monthly-chart">
+              <div class="comm-chart-title">Monthly Commission — 2026</div>
+              <div class="comm-bars">
+                <div class="comm-bar-group">
+                  <div class="comm-bar-fill" style="height:72%" title="Jan: $38.4K"></div>
+                  <div class="comm-bar-lbl">J</div>
+                </div>
+                <div class="comm-bar-group">
+                  <div class="comm-bar-fill" style="height:82%" title="Feb: $43.8K"></div>
+                  <div class="comm-bar-lbl">F</div>
+                </div>
+                <div class="comm-bar-group">
+                  <div class="comm-bar-fill" style="height:89%" title="Mar: $47.5K"></div>
+                  <div class="comm-bar-lbl">M</div>
+                </div>
+                <div class="comm-bar-group comm-bar-current">
+                  <div class="comm-bar-fill active" style="height:79%" title="Apr (MTD): $42.2K"></div>
+                  <div class="comm-bar-lbl">A</div>
+                </div>
+                <div class="comm-bar-group comm-bar-proj">
+                  <div class="comm-bar-fill projected" style="height:85%" title="May (proj): $45K"></div>
+                  <div class="comm-bar-lbl">M</div>
+                </div>
+                <div class="comm-bar-group comm-bar-proj">
+                  <div class="comm-bar-fill projected" style="height:80%" title="Jun (proj): $42.8K"></div>
+                  <div class="comm-bar-lbl">J</div>
+                </div>
+              </div>
+              <div class="comm-chart-legend">
+                <span class="cl-dot cl-actual"></span> Actual&nbsp;&nbsp;
+                <span class="cl-dot cl-current"></span> MTD&nbsp;&nbsp;
+                <span class="cl-dot cl-proj"></span> Projected
+              </div>
+            </div>
+
+            {/* Domain breakdown */}
+            <div class="comm-domain-breakdown">
+              <div class="comm-domain-title">By Domain</div>
+              <div class="comm-domain-row">
+                <span class="comm-domain-lbl ins-lbl"><i class="fas fa-shield-alt"></i> Insurance</span>
+                <div class="comm-domain-bar-wrap"><div class="comm-domain-bar ins-bar" style="width:64%"></div></div>
+                <span class="comm-domain-val">$119.7K</span>
+              </div>
+              <div class="comm-domain-row">
+                <span class="comm-domain-lbl inv-lbl"><i class="fas fa-chart-line"></i> Investments</span>
+                <div class="comm-domain-bar-wrap"><div class="comm-domain-bar inv-bar" style="width:18%"></div></div>
+                <span class="comm-domain-val">$33.7K</span>
+              </div>
+              <div class="comm-domain-row">
+                <span class="comm-domain-lbl ret-lbl"><i class="fas fa-umbrella-beach"></i> Retirement</span>
+                <div class="comm-domain-bar-wrap"><div class="comm-domain-bar ret-bar" style="width:9%"></div></div>
+                <span class="comm-domain-val">$16.8K</span>
+              </div>
+              <div class="comm-domain-row">
+                <span class="comm-domain-lbl adv-lbl"><i class="fas fa-handshake"></i> Advisory</span>
+                <div class="comm-domain-bar-wrap"><div class="comm-domain-bar adv-bar" style="width:9%"></div></div>
+                <span class="comm-domain-val">$16.8K</span>
+              </div>
+            </div>
+
+            {/* Top 5 closed deals */}
+            <div class="comm-top-deals">
+              <div class="comm-domain-title">Top Closed Deals — April</div>
+              <div class="comm-deal-row">
+                <span class="comm-deal-rank">1</span>
+                <span class="comm-deal-client">Robert Chen</span>
+                <span class="comm-deal-product">WL $1M</span>
+                <span class="comm-deal-val green">$1,488</span>
+              </div>
+              <div class="comm-deal-row">
+                <span class="comm-deal-rank">2</span>
+                <span class="comm-deal-client">Lisa Brown</span>
+                <span class="comm-deal-product">LTC</span>
+                <span class="comm-deal-val green">$624</span>
+              </div>
+              <div class="comm-deal-row">
+                <span class="comm-deal-rank">3</span>
+                <span class="comm-deal-client">David Thompson</span>
+                <span class="comm-deal-product">Term $500K</span>
+                <span class="comm-deal-val green">$288</span>
+              </div>
+              <div class="comm-deal-row">
+                <span class="comm-deal-rank">4</span>
+                <span class="comm-deal-client">Sandra Williams</span>
+                <span class="comm-deal-product">Term Renewal</span>
+                <span class="comm-deal-val green">$240</span>
+              </div>
+              <div class="comm-deal-row">
+                <span class="comm-deal-rank">5</span>
+                <span class="comm-deal-client">Patricia Nguyen</span>
+                <span class="comm-deal-product">UL Conversion</span>
+                <span class="comm-deal-val green">$210</span>
+              </div>
+            </div>
+
+          </div>{/* end comm-tracker */}
+
+        </div>{/* end sales-sidebar */}
+      </div>{/* end sales-body-layout */}
+
+      {/* ── Quick Quote Tool ── */}
       <div class="quick-quote-section">
         <h3><i class="fas fa-calculator"></i> Quick Quote Tool</h3>
         <div class="quote-form">
           <div class="quote-form-grid">
             <div class="form-group">
               <label>Client Name</label>
-              <input type="text" placeholder="Enter client name" class="form-input" />
+              <input type="text" id="qq-name" placeholder="Enter client name" class="form-input" />
             </div>
             <div class="form-group">
               <label>Age</label>
-              <input type="number" placeholder="Age" class="form-input" min="18" max="85" />
+              <input type="number" id="qq-age" placeholder="Age" class="form-input" min="18" max="85" value="42" />
             </div>
             <div class="form-group">
               <label>Product Type</label>
-              <select class="form-input">
-                <option>Whole Life Insurance</option>
-                <option>Term Life Insurance</option>
-                <option>Universal Life Insurance</option>
-                <option>Variable Universal Life</option>
-                <option>Long-term Care Insurance</option>
-                <option>Individual Disability Insurance</option>
-                <option>Fixed Annuity</option>
-                <option>Variable Annuity</option>
+              <select id="qq-product" class="form-input">
+                <option value="wl">Whole Life Insurance</option>
+                <option value="term" selected>Term Life Insurance</option>
+                <option value="ul">Universal Life Insurance</option>
+                <option value="vul">Variable Universal Life</option>
+                <option value="ltc">Long-term Care Insurance</option>
+                <option value="di">Individual Disability Insurance</option>
+                <option value="fa">Fixed Annuity</option>
+                <option value="va">Variable Annuity</option>
               </select>
             </div>
             <div class="form-group">
               <label>Coverage Amount</label>
-              <select class="form-input">
-                <option>$100,000</option>
-                <option>$250,000</option>
-                <option>$500,000</option>
-                <option selected>$1,000,000</option>
-                <option>$2,000,000</option>
-                <option>Custom</option>
+              <select id="qq-coverage" class="form-input">
+                <option value="100000">$100,000</option>
+                <option value="250000">$250,000</option>
+                <option value="500000" selected>$500,000</option>
+                <option value="1000000">$1,000,000</option>
+                <option value="2000000">$2,000,000</option>
               </select>
             </div>
             <div class="form-group">
               <label>Health Class</label>
-              <select class="form-input">
-                <option>Preferred Plus</option>
-                <option>Preferred</option>
-                <option selected>Standard Plus</option>
-                <option>Standard</option>
+              <select id="qq-health" class="form-input">
+                <option value="pp">Preferred Plus</option>
+                <option value="p" selected>Preferred</option>
+                <option value="sp">Standard Plus</option>
+                <option value="s">Standard</option>
               </select>
             </div>
             <div class="form-group">
               <label>Gender</label>
-              <select class="form-input">
-                <option>Male</option>
-                <option>Female</option>
+              <select id="qq-gender" class="form-input">
+                <option value="m">Male</option>
+                <option value="f">Female</option>
               </select>
             </div>
           </div>
           <div class="quote-actions">
-            <button class="btn btn-ai"><i class="fas fa-robot"></i> AI-Assisted Quote</button>
-            <button class="btn btn-primary"><i class="fas fa-calculator"></i> Calculate Premium</button>
+            <button class="btn btn-ai" onclick="runAIQuote()"><i class="fas fa-robot"></i> AI-Assisted Quote</button>
+            <button class="btn btn-primary" onclick="runQuoteCalc()"><i class="fas fa-calculator"></i> Calculate Premium</button>
           </div>
           <div class="quote-result" id="quote-result" style="display:none">
-            <div class="quote-result-header">Estimated Annual Premium</div>
-            <div class="quote-result-value">$6,840 — $8,120</div>
-            <div class="quote-result-note">Range based on final underwriting. AI suggests adding disability rider (+$480/yr) for comprehensive coverage.</div>
+            <div class="qr-grid">
+              <div class="qr-main">
+                <div class="quote-result-header">Estimated Annual Premium</div>
+                <div class="quote-result-value" id="qq-result-val">—</div>
+                <div class="quote-result-note" id="qq-result-note"></div>
+              </div>
+              <div class="qr-breakdown" id="qq-breakdown"></div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* ── Deal Detail Modal ── */}
+      <div class="deal-modal-overlay" id="deal-modal-overlay" onclick="closeDealModal(event)" style="display:none">
+        <div class="deal-modal">
+          <div class="deal-modal-header" id="deal-modal-header">
+            <div>
+              <div class="deal-modal-client" id="deal-modal-client">Client Name</div>
+              <div class="deal-modal-product" id="deal-modal-product">Product</div>
+            </div>
+            <button class="deal-modal-close" onclick="closeDealModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="deal-modal-body" id="deal-modal-body"></div>
+        </div>
+      </div>
+
     </div>
   )
 }

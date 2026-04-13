@@ -3516,3 +3516,242 @@ function closeMeetingModal(event) {
   if (overlay) overlay.style.display = 'none';
   document.body.style.overflow = '';
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   #9  SALES PIPELINE — pipelineData, Quote Calc, Deal Modal
+   ═══════════════════════════════════════════════════════════════ */
+
+const pipelineData = {
+  D001: {
+    client: 'Alex Rivera', product: 'Whole Life — $500K', stage: 'Prospect',
+    value: '$4,800/yr', commission: '$576', aiScore: 82, probability: '82%',
+    domain: 'ins', lastContact: 'Apr 12 · In-person meeting scheduled',
+    aiInsight: 'Alex is a strong WL candidate — referral from Michael Santos. Key objection: premium vs. term. Lead with cash value accumulation story. Annuity upsell potential noted.',
+    nextAction: 'Send pre-meeting brief; highlight living benefits rider',
+    timeline: [
+      { date: 'Apr 2', event: 'Referred by Michael Santos' },
+      { date: 'Apr 8', event: 'Phone intro — 20 min, high engagement' },
+      { date: 'Apr 12', event: 'In-person prospect meeting' }
+    ]
+  },
+  D002: {
+    client: 'Nancy Foster', product: 'Term Life — $1M', stage: 'Prospect',
+    value: '$3,200/yr', commission: '$384', aiScore: 61, probability: '61%',
+    domain: 'ins', lastContact: 'Apr 10 · Online inquiry',
+    aiInsight: 'Online inquiry from NYL website. Preferred health class pending credit check. Score 61 — moderate confidence. Increase to 75+ if credit clears. Recommend 20yr term + return-of-premium rider.',
+    nextAction: 'Schedule needs analysis call; confirm health history',
+    timeline: [
+      { date: 'Apr 10', event: 'Online inquiry submitted' },
+      { date: 'Apr 10', event: 'Auto-response sent; follow-up scheduled' }
+    ]
+  },
+  D003: {
+    client: 'John Kim', product: 'Disability Insurance', stage: 'Prospect',
+    value: '$2,100/yr', commission: '$252', aiScore: 44, probability: '44%',
+    domain: 'ins', lastContact: 'Apr 9 · Warm lead via referral',
+    aiInsight: 'Diabetes flag requires APS — delays expected. Prior DI claim may increase premium 15-25%. AI score 44 reflects UW complexity. Focus conversation on value of own-occ definition.',
+    nextAction: 'Prepare APS request; set expectation on timeline (3-4 weeks)',
+    timeline: [
+      { date: 'Apr 9', event: 'Referred by Kevin Park' },
+      { date: 'Apr 11', event: 'Initial call — needs analysis scheduled' }
+    ]
+  },
+  D004: {
+    client: 'Michael Santos', product: 'Universal Life — $750K', stage: 'Quoted',
+    value: '$6,400/yr', commission: '$896', aiScore: 91, probability: '91%',
+    domain: 'ins', lastContact: 'Apr 11 · Quote sent via email',
+    aiInsight: 'HOT deal — 91% close probability. Lab results pending (expected Apr 14). Client reviewed quote, asked about paid-up additions. AI recommends: call Apr 14 post-lab, reinforce retirement accumulation + guaranteed DB. No objections logged.',
+    nextAction: 'Call Apr 14 after lab results — confirm policy delivery timeline',
+    timeline: [
+      { date: 'Mar 28', event: 'Initial needs analysis' },
+      { date: 'Apr 5', event: 'Medical exam completed' },
+      { date: 'Apr 11', event: 'Quote delivered — $6,400/yr UL $750K' }
+    ]
+  },
+  D005: {
+    client: 'Julia Chen', product: 'Deferred Annuity', stage: 'Quoted',
+    value: '$8,000/yr', commission: '$640', aiScore: 73, probability: '73%',
+    domain: 'inv', lastContact: 'Apr 10 · Quote under review',
+    aiInsight: 'Deferred annuity for tax-advantaged retirement income. Julia is reviewing the illustration. Key talking points: tax deferral on growth, guaranteed income floor, step-up death benefit. Objection anticipated: liquidity. Address with 10% free withdrawal provision.',
+    nextAction: 'Follow up Apr 15 — offer income illustration with two scenarios',
+    timeline: [
+      { date: 'Apr 3', event: 'Retirement gap analysis completed' },
+      { date: 'Apr 10', event: 'Annuity illustration delivered' }
+    ]
+  },
+  D006: {
+    client: 'Thomas Wright', product: 'Whole Life — $1M', stage: 'Underwriting',
+    value: '$9,600/yr', commission: '$1,152', aiScore: 88, probability: '88%',
+    domain: 'ins', lastContact: 'Apr 9 · Medical exam completed',
+    aiInsight: 'Medical exam done — UW decision expected Apr 16. No major flags. AI STP score 88 — likely Preferred class. Prepare e-delivery package now so you can deliver same day as approval. Commission: $1,152 — top deal this month.',
+    nextAction: 'Prepare e-delivery package; alert client to expect decision Apr 16',
+    timeline: [
+      { date: 'Mar 20', event: 'Application submitted' },
+      { date: 'Apr 1', event: 'APS ordered — received Apr 7' },
+      { date: 'Apr 9', event: 'Medical exam completed' },
+      { date: 'Apr 16', event: 'Expected UW decision' }
+    ]
+  },
+  D007: {
+    client: 'Grace Lee', product: 'VUL — $250K', stage: 'Underwriting',
+    value: '$3,800/yr', commission: '$456', aiScore: 69, probability: '69%',
+    domain: 'ins', lastContact: 'Apr 8 · In UW review',
+    aiInsight: 'VUL case in UW review. APS received. AI score 69 — Standard Plus likely. Sub-account selection discussion needed post-approval. Client is risk-aware; recommend balanced allocation (55% equity / 45% fixed).',
+    nextAction: 'Check UW status; prepare sub-account selection worksheet',
+    timeline: [
+      { date: 'Mar 25', event: 'Application submitted' },
+      { date: 'Apr 3', event: 'APS requested' },
+      { date: 'Apr 8', event: 'APS received — in UW review' }
+    ]
+  },
+  D008: {
+    client: 'Kevin Park', product: 'Term Life — $500K', stage: 'Approved',
+    value: '$1,800/yr', commission: '$216', aiScore: 95, probability: '95%',
+    domain: 'ins', lastContact: 'Apr 13 · Awaiting e-signature',
+    aiInsight: 'APPROVED — Preferred Plus. E-signature pending. AI score 95. Send signature reminder TODAY. Policy delivery window: 2 days post-signature. Upsell opportunity: add $500K accidental death rider ($120/yr) at point of delivery.',
+    nextAction: 'Send DocuSign reminder immediately — deal at risk of going cold',
+    timeline: [
+      { date: 'Apr 1', event: 'Application submitted' },
+      { date: 'Apr 8', event: 'Approved — Preferred Plus' },
+      { date: 'Apr 13', event: 'E-signature request sent' }
+    ]
+  },
+  D009: {
+    client: 'Linda Morrison', product: 'UMA — $280K AUM', stage: 'Approved',
+    value: '$2,800/yr fee', commission: '$280', aiScore: 90, probability: '90%',
+    domain: 'adv', lastContact: 'Apr 13 · Docs signed, transfer pending',
+    aiInsight: 'UMA account docs signed. Account transfer from Fidelity pending (5-7 business days). AI score 90. After transfer: run full portfolio analysis, propose rebalancing, and schedule 90-day review. Estate plan + NQDC discussion next.',
+    nextAction: 'Initiate ACAT transfer form; schedule 90-day review call for May 15',
+    timeline: [
+      { date: 'Mar 15', event: 'Advisory review — UMA opportunity identified' },
+      { date: 'Apr 1', event: 'UMA proposal presented: $280K' },
+      { date: 'Apr 13', event: 'Account application signed' }
+    ]
+  }
+};
+
+/* ── Quote Calculator ── */
+const quoteRates = {
+  term:   { base: 0.0032, healthMult: { pp:0.80, p:1.00, sp:1.18, s:1.35 }, ageFactor: 0.038 },
+  wl:     { base: 0.012,  healthMult: { pp:0.82, p:1.00, sp:1.20, s:1.40 }, ageFactor: 0.042 },
+  ul:     { base: 0.0085, healthMult: { pp:0.81, p:1.00, sp:1.19, s:1.38 }, ageFactor: 0.040 },
+  vul:    { base: 0.0095, healthMult: { pp:0.83, p:1.00, sp:1.22, s:1.42 }, ageFactor: 0.041 },
+  ltc:    { base: 0.024,  healthMult: { pp:0.85, p:1.00, sp:1.25, s:1.50 }, ageFactor: 0.055 },
+  di:     { base: 0.018,  healthMult: { pp:0.83, p:1.00, sp:1.22, s:1.45 }, ageFactor: 0.044 },
+  fa:     { base: 0.006,  healthMult: { pp:1.00, p:1.00, sp:1.00, s:1.00 }, ageFactor: 0.010 },
+  va:     { base: 0.007,  healthMult: { pp:1.00, p:1.00, sp:1.00, s:1.00 }, ageFactor: 0.010 }
+};
+const productLabels = { term:'Term Life', wl:'Whole Life', ul:'Universal Life', vul:'Variable UL', ltc:'Long-term Care', di:'Disability Ins.', fa:'Fixed Annuity', va:'Variable Annuity' };
+const commissionRates = { term:0.12, wl:0.55, ul:0.14, vul:0.16, ltc:0.30, di:0.30, fa:0.08, va:0.07 };
+
+function runQuoteCalc() {
+  const age      = parseInt(document.getElementById('qq-age')?.value) || 42;
+  const product  = document.getElementById('qq-product')?.value || 'term';
+  const coverage = parseInt(document.getElementById('qq-coverage')?.value) || 500000;
+  const health   = document.getElementById('qq-health')?.value || 'p';
+  const gender   = document.getElementById('qq-gender')?.value || 'm';
+
+  const r = quoteRates[product];
+  const genderAdj = gender === 'f' ? 0.92 : 1.00;
+  const agePenalty = Math.max(0, (age - 35) * r.ageFactor);
+  const rawRate = (r.base + agePenalty) * r.healthMult[health] * genderAdj;
+  const annualLow  = Math.round(coverage * rawRate / 100) * 100;
+  const annualHigh = Math.round(annualLow * 1.12 / 100) * 100;
+  const commEst    = Math.round(annualLow * commissionRates[product]);
+
+  const fmt = n => '$' + n.toLocaleString();
+  document.getElementById('qq-result-val').textContent = `${fmt(annualLow)} — ${fmt(annualHigh)} / yr`;
+  document.getElementById('qq-result-note').innerHTML =
+    `Based on <strong>${productLabels[product]}</strong>, age <strong>${age}</strong>, ` +
+    `${health === 'pp' ? 'Preferred Plus' : health === 'p' ? 'Preferred' : health === 'sp' ? 'Standard Plus' : 'Standard'} health, ` +
+    `${coverage === 100000 ? '$100K' : coverage === 250000 ? '$250K' : coverage === 500000 ? '$500K' : coverage === 1000000 ? '$1M' : '$2M'} coverage. ` +
+    `Final rate subject to full underwriting.`;
+  const breakdownEl = document.getElementById('qq-breakdown');
+  if (breakdownEl) {
+    breakdownEl.innerHTML = `
+      <div class="qr-bd-row"><span>Base Rate</span><span>${(rawRate*100).toFixed(3)}%</span></div>
+      <div class="qr-bd-row"><span>Est. Commission</span><span class="green">${fmt(commEst)}</span></div>
+      <div class="qr-bd-row"><span>Monthly Premium</span><span>${fmt(Math.round(annualLow/12))} — ${fmt(Math.round(annualHigh/12))}</span></div>
+      <div class="qr-bd-row"><span>Commission Rate</span><span>${(commissionRates[product]*100).toFixed(0)}%</span></div>
+    `;
+  }
+  const resultEl = document.getElementById('quote-result');
+  if (resultEl) { resultEl.style.display = 'block'; resultEl.classList.add('qr-animate'); }
+}
+
+function runAIQuote() {
+  runQuoteCalc();
+  const product = productLabels[document.getElementById('qq-product')?.value || 'term'];
+  const age     = document.getElementById('qq-age')?.value || '42';
+  const name    = document.getElementById('qq-name')?.value || 'this prospect';
+  sendContextMessage(`AI Quote analysis for ${name} — ${product}, age ${age}. Show personalized recommendations, rider options, and competitive positioning.`, 'smart-advisor');
+}
+
+/* ── Deal Modal ── */
+function openDealModal(dealId) {
+  const d = pipelineData[dealId];
+  if (!d) return;
+  const overlay = document.getElementById('deal-modal-overlay');
+  const header  = document.getElementById('deal-modal-header');
+  const body    = document.getElementById('deal-modal-body');
+  if (!overlay || !body) return;
+
+  const domainColor = { ins:'#003087', inv:'#059669', ret:'#d97706', adv:'#7c3aed' };
+  const scoreColor  = d.aiScore >= 80 ? '#16a34a' : d.aiScore >= 60 ? '#d97706' : '#dc2626';
+  const stageColors = { Prospect:'#64748b', Quoted:'#2563eb', Underwriting:'#d97706', Approved:'#16a34a', 'Closed Won':'#003087' };
+
+  if (header) {
+    header.style.background = `linear-gradient(135deg, ${domainColor[d.domain]||'#003087'} 0%, #1e40af 100%)`;
+    document.getElementById('deal-modal-client').textContent  = d.client;
+    document.getElementById('deal-modal-product').textContent = d.product;
+  }
+
+  const timelineHTML = (d.timeline||[]).map(t =>
+    `<div class="dm-tl-row"><span class="dm-tl-date">${t.date}</span><span class="dm-tl-event">${t.event}</span></div>`
+  ).join('');
+
+  body.innerHTML = `
+    <div class="dm-meta-grid">
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Stage</span><span class="dm-stage-pill" style="background:${stageColors[d.stage]||'#64748b'}">${d.stage}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Annual Value</span><span class="dm-meta-val">${d.value}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Est. Commission</span><span class="dm-meta-val green">${d.commission}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">AI Close Probability</span><span class="dm-score-val" style="color:${scoreColor}">${d.probability} · Score ${d.aiScore}</span></div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-robot"></i> AI Insight</div>
+      <div class="dm-ai-insight">${d.aiInsight}</div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-bolt"></i> Recommended Next Action</div>
+      <div class="dm-next-action"><i class="fas fa-arrow-right"></i> ${d.nextAction}</div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-history"></i> Activity Timeline</div>
+      <div class="dm-timeline">${timelineHTML}</div>
+    </div>
+    <div class="dm-footer-actions">
+      <button class="btn btn-ai" onclick="sendContextMessage('Full AI analysis for ${d.client} — ${d.product}, stage ${d.stage}, close probability ${d.probability}. Next best action and objection handling.','smart-advisor')"><i class="fas fa-robot"></i> Ask AI Agent</button>
+      <button class="btn btn-primary" onclick="runQuoteCalc()"><i class="fas fa-calculator"></i> Quote</button>
+      <button class="btn btn-outline" onclick="closeDealModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  `;
+  overlay.style.display = 'flex';
+}
+
+function moveDealStage(dealId, newStage) {
+  if (pipelineData[dealId]) pipelineData[dealId].stage = newStage;
+  const stageLabels = { Prospect:'🔵 Moved to Prospect', Quoted:'📋 Moved to Quoted', Underwriting:'🔬 Moved to Underwriting', Approved:'✅ Moved to Approved', 'Closed Won':'🏆 Closed Won!' };
+  const msg = document.createElement('div');
+  msg.className = 'stage-toast';
+  msg.textContent = stageLabels[newStage] || `Moved to ${newStage}`;
+  document.body.appendChild(msg);
+  setTimeout(() => msg.remove(), 2800);
+}
+
+function closeDealModal(e) {
+  if (e && e.target !== document.getElementById('deal-modal-overlay')) return;
+  const overlay = document.getElementById('deal-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+console.log('Sales Pipeline JS loaded — pipelineData(9 deals), runQuoteCalc, openDealModal, moveDealStage');
