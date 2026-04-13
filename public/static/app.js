@@ -8929,3 +8929,454 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('Phase 3 loaded — calNavMonth, calFilterDomain, renderCalendar, openAddEventModal, saveCalEvent, calEventClick, deleteCalEvent, editCalEvent');
+
+/* ═══════════════════════════════════════════════════════════════
+   PHASE 4 — Products Detail Modal · Kanban Move Visual ·
+             AI Scorecard Export/Share
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── Product catalogue data ─────────────────────────────────────
+const _productCatalogue = {
+  'term-life': {
+    name: 'Term Life Insurance',
+    icon: 'fa-hourglass-half', color: '#1d4ed8',
+    tagline: 'Temporary protection at a lower cost — convertible to permanent',
+    specs: [
+      { label: 'Coverage Duration', value: '10, 15, 20 or 30 years' },
+      { label: 'Face Amount', value: '$100,000 – $10M+' },
+      { label: 'Premiums', value: 'Level (fixed) during term' },
+      { label: 'Cash Value', value: 'None' },
+      { label: 'Convertibility', value: 'Yes — no exam required' },
+      { label: 'Best Fit Age', value: '25 – 45 yrs' },
+    ],
+    features: ['Lowest-cost life insurance option','Guaranteed level premiums for entire term','Conversion privilege — upgrade to Whole Life without underwriting','Waiver-of-premium rider available','Accidental Death Benefit rider available','Renewable at end of term period'],
+    aiClients: ['David Thompson (age 33) — no coverage, DI gap also detected','Kevin Park (age 34) — pending Term Life $250K application','Nancy Foster (age 40) — new prospect, needs analysis scheduled Apr 17'],
+    aiTip: '3 clients aged 28–40 in your book have no term coverage. Combined potential: ~$6,000/yr in new premium.',
+  },
+  'whole-life': {
+    name: 'Whole Life Insurance',
+    icon: 'fa-infinity', color: '#16a34a',
+    tagline: 'Permanent protection with guaranteed cash value growth and dividends',
+    specs: [
+      { label: 'Coverage Duration', value: 'Lifetime (permanent)' },
+      { label: 'Face Amount', value: '$50,000 – $25M+' },
+      { label: 'Cash Value', value: 'Guaranteed growth' },
+      { label: 'Dividends', value: 'Eligible (not guaranteed)' },
+      { label: 'Policy Loans', value: 'Available anytime' },
+      { label: 'Best Fit Age', value: '30 – 60 yrs' },
+    ],
+    features: ['Guaranteed death benefit — never decreases','Cash value grows at guaranteed rate, tax-deferred','NYL has paid dividends for 170+ consecutive years','Borrow against cash value — no credit check','Paid-up additions rider to accelerate growth','Ideal for estate planning and wealth transfer'],
+    aiClients: ['Linda Morrison — P-100330 eligible for paid-up additions (+$18K CV over 10 yr)','James Whitfield — $2M WL, largest policy in book','Sandra Williams — P-100320 renewal due Sep 2026'],
+    aiTip: 'Linda Morrison\'s policy is eligible for a paid-up additions rider that could add $18K in cash value over 10 years.',
+  },
+  'universal-life': {
+    name: 'Universal Life Insurance',
+    icon: 'fa-sliders-h', color: '#7c3aed',
+    tagline: 'Long-term coverage with flexible premiums and adjustable death benefit',
+    specs: [
+      { label: 'Coverage Duration', value: 'Lifetime (permanent)' },
+      { label: 'Premium Flexibility', value: 'Adjustable within limits' },
+      { label: 'Death Benefit', value: 'Adjustable' },
+      { label: 'Interest Crediting', value: 'Current rate + minimum floor' },
+      { label: 'Cash Value', value: 'Accumulates tax-deferred' },
+      { label: 'Best Fit Age', value: '35 – 60 yrs' },
+    ],
+    features: ['Flexible premiums — pay more or less as cash flow changes','Adjustable death benefit amount','Cash value earns declared interest rate','Guaranteed minimum interest rate floor','Premium flexibility protects in hardship years','Can accelerate death benefit for chronic illness (ABR)'],
+    aiClients: ['Patricia Nguyen — P-100301 UL underfunded 2 quarters (lapse risk: URGENT)','James Whitfield — UL P-100291 performing well'],
+    aiTip: 'Patricia Nguyen\'s UL has been underfunded for 2 quarters. A premium catch-up review is urgent to prevent lapse.',
+  },
+  'vul': {
+    name: 'Variable Universal Life Insurance',
+    icon: 'fa-chart-line', color: '#d97706',
+    tagline: 'Permanent coverage with market-linked cash value investment potential',
+    specs: [
+      { label: 'Investment Options', value: '30+ sub-accounts' },
+      { label: 'Market Risk', value: 'Client bears risk' },
+      { label: 'Upside Potential', value: 'Unlimited (market-linked)' },
+      { label: 'Death Benefit', value: 'Guaranteed minimum' },
+      { label: 'Premium Flexibility', value: 'Adjustable' },
+      { label: 'Best Fit Age', value: '30 – 55, risk-tolerant' },
+    ],
+    features: ['Invest cash value in stocks, bonds, money market sub-accounts','Flexible premiums and adjustable death benefit','Tax-deferred investment growth inside policy','Minimum guaranteed death benefit floor','Dollar-cost averaging into sub-accounts','Access cash value via policy loans and withdrawals'],
+    aiClients: ['Robert Chen (age 45) — existing VUL P-100310, $21K/yr premium capacity','High-income tech/business professionals in book'],
+    aiTip: 'Robert Chen is a prime VUL candidate — risk-tolerant business owner with $21K annual premium capacity and estate planning needs.',
+  },
+  'ltc': {
+    name: 'Long-Term Care Insurance',
+    icon: 'fa-hands-helping', color: '#0891b2',
+    tagline: 'Protect assets and maintain independence when long-term care is needed',
+    specs: [
+      { label: 'Daily Benefit', value: '$100 – $400/day' },
+      { label: 'Benefit Period', value: '2, 3, 5 yrs or unlimited' },
+      { label: 'Elimination Period', value: '30, 60, 90 or 180 days' },
+      { label: 'Inflation Protection', value: '3% or 5% compound' },
+      { label: 'Care Settings', value: 'Home, assisted living, nursing home' },
+      { label: 'Best Fit Age', value: '50 – 65 yrs' },
+    ],
+    features: ['Home care, assisted living, adult day care, and nursing home coverage','Inflation protection rider: 3% or 5% compound','Shared care benefit for married couples','Return of premium option if policy never used','Hybrid LTC/Life products — death benefit if not used','Waiver of premium during benefit period'],
+    aiClients: ['Sandra Williams (age 58) — P-100320 has LTC rider','James Whitfield (age 52) — LTC P-100291 active','4 additional clients 55+ with no LTC coverage'],
+    aiTip: '4 clients aged 55+ have no LTC coverage. Combined gap premium potential ~$12,000/year.',
+  },
+  'disability': {
+    name: 'Individual Disability Insurance',
+    icon: 'fa-user-shield', color: '#dc2626',
+    tagline: 'Protect your clients\' most valuable asset — their income',
+    specs: [
+      { label: 'Benefit Amount', value: 'Up to 60–70% of income' },
+      { label: 'Benefit Period', value: '2 yr, 5 yr, to age 65' },
+      { label: 'Elimination Period', value: '30, 60, 90, 180, 365 days' },
+      { label: 'Definition', value: 'Own-occupation (best)' },
+      { label: 'Renewability', value: 'Non-cancelable, GR options' },
+      { label: 'Best Fit', value: 'Professionals, business owners' },
+    ],
+    features: ['Own-occupation definition of disability for professionals','Non-cancelable and guaranteed renewable options','Partial/residual disability benefit included','Future purchase option — increase coverage later without underwriting','Catastrophic disability benefit rider available','Business overhead expense coverage option'],
+    aiClients: ['David Thompson (age 33) — no DI coverage detected','Patricia Nguyen (age 38) — no DI coverage detected','Maria Gonzalez — CLM-2026-0035 active DI claim'],
+    aiTip: 'David Thompson and Patricia Nguyen have no disability coverage — high-priority gap with combined premium potential of ~$3,600/yr.',
+  },
+  'annuities': {
+    name: 'Annuities (Fixed & Fixed-Indexed)',
+    icon: 'fa-chart-area', color: '#7c3aed',
+    tagline: 'Guaranteed income for life — the foundation of a secure retirement',
+    specs: [
+      { label: 'Types', value: 'Fixed, FIA, SPIA, DIA' },
+      { label: 'Principal Guarantee', value: 'Yes (fixed/FIA)' },
+      { label: 'Crediting Rate', value: '3.8 – 5.2% (current)' },
+      { label: 'Income Options', value: 'Life only, joint, period certain' },
+      { label: 'Surrender Period', value: '5 – 10 years (varies)' },
+      { label: 'Best Fit Age', value: '45 – 70 yrs' },
+    ],
+    features: ['Guaranteed income you cannot outlive','Fixed annuities: guaranteed rates, no market risk','Fixed-indexed annuities: growth potential linked to index, no downside risk','Immediate annuity: income starts within 12 months','Deferred income annuity: lock in today\'s rates for future income','Tax-deferred growth with no annual contribution limit'],
+    aiClients: ['James Whitfield (age 52) — deferred annuity review scheduled Apr 18','Maria Gonzalez — income annuity interest flagged','Patricia Nguyen — FIA opportunity identified by retention AI'],
+    aiTip: 'James Whitfield\'s deferred annuity could provide ~$2,800/month at age 65. Begin illustration now.',
+  },
+  'mutual-funds': {
+    name: 'Mutual Funds',
+    icon: 'fa-coins', color: '#16a34a',
+    tagline: 'Professionally managed diversification for long-term wealth accumulation',
+    specs: [
+      { label: 'Fund Types', value: 'Equity, Bond, Balanced, Money Market' },
+      { label: 'Management', value: 'Active and passive options' },
+      { label: 'Minimum Investment', value: '$500 – $2,500 (varies)' },
+      { label: 'Account Types', value: 'IRA, Roth IRA, Taxable' },
+      { label: 'Expense Ratio', value: '0.10% – 1.25% (varies)' },
+      { label: 'Liquidity', value: 'Daily (NAV-based)' },
+    ],
+    features: ['Professional portfolio management','Instant diversification across hundreds of securities','Systematic investment plans — dollar-cost averaging','Available in IRA, Roth IRA, and taxable accounts','Automatic dividend reinvestment','Extensive fund lineup across all asset classes'],
+    aiClients: ['Maria Gonzalez (age 48) — investable assets identified, pre-SMA candidate','David Thompson — entry-level investor, mutual fund ideal starting point'],
+    aiTip: 'Maria Gonzalez is a natural mutual fund candidate as a transition before recommending an SMA.',
+  },
+  'etfs': {
+    name: 'Exchange Traded Funds (ETFs)',
+    icon: 'fa-exchange-alt', color: '#0891b2',
+    tagline: 'Low-cost, transparent, tax-efficient index investing',
+    specs: [
+      { label: 'Trading', value: 'Intraday on exchanges' },
+      { label: 'Expense Ratio', value: '0.03% – 0.50% avg' },
+      { label: 'Minimum', value: 'Price of 1 share' },
+      { label: 'Coverage', value: 'US, International, Sector' },
+      { label: 'Tax Efficiency', value: 'High (in-kind redemption)' },
+      { label: 'Transparency', value: 'Daily holdings published' },
+    ],
+    features: ['Ultra-low expense ratios vs. active mutual funds','Intraday liquidity — buy/sell like a stock','Tax efficiency due to in-kind creation/redemption mechanism','Broad market exposure: S&P 500, total market, sector ETFs','Transparent daily holdings disclosure','Excellent for core portfolio building at low cost'],
+    aiClients: ['David Thompson (age 33) — low-cost index building ideal','Kevin Park (age 34) — wealth accumulation stage'],
+    aiTip: 'Younger clients in accumulation phase benefit most from ETF core portfolios combined with term life protection.',
+  },
+  '529-plans': {
+    name: '529 College Savings Plans',
+    icon: 'fa-graduation-cap', color: '#7c3aed',
+    tagline: 'Tax-advantaged education savings for clients with children or grandchildren',
+    specs: [
+      { label: 'Contribution Limit', value: 'No annual limit (gift tax applies)' },
+      { label: 'Superfunding', value: '5-year election: up to $90,000' },
+      { label: 'Growth', value: 'Federal tax-free for qualified expenses' },
+      { label: 'State Deduction', value: 'Available in most states' },
+      { label: 'Roth Rollover', value: 'Up to $35,000 (SECURE 2.0)' },
+      { label: 'Beneficiary Change', value: 'Allowed to family members' },
+    ],
+    features: ['Earnings grow federal tax-free for qualified education expenses','State income tax deduction in most states','Superfunding: contribute 5 years of annual gifts upfront ($90K)','Unused funds: roll to Roth IRA up to $35K (SECURE 2.0)','Transfer to another family member if beneficiary changes plans','Covers K–12 private school tuition up to $10K/yr'],
+    aiClients: ['8 clients with children under 10 identified in book','Sandra Williams — children approaching college age'],
+    aiTip: '8 clients have children under age 10 — 529 conversations could add $4,800+ in annual contributions.',
+  },
+  'immediate-annuity': {
+    name: 'Immediate Income Annuity (SPIA)',
+    icon: 'fa-hand-holding-usd', color: '#d97706',
+    tagline: 'Convert a lump sum into guaranteed income starting within 12 months',
+    specs: [
+      { label: 'Income Start', value: '1 – 12 months after purchase' },
+      { label: 'Payout Options', value: 'Life only, joint, period certain' },
+      { label: 'Principal', value: 'Irrevocably exchanged' },
+      { label: 'Inflation Option', value: 'Fixed or CPI-linked increase' },
+      { label: 'Minimum Premium', value: '$25,000' },
+      { label: 'Best Fit Age', value: '65+ (at retirement)' },
+    ],
+    features: ['Guaranteed income you cannot outlive','Joint life option covers both spouses','Period-certain guarantee protects estate if early death','Competitive payout rates vs. CDs and bonds','Tax exclusion ratio for non-qualified annuities','Immediate peace of mind — no investment decisions needed'],
+    aiClients: ['Linda Morrison (age 56) — ideal candidate in 8–12 yrs','James Whitfield (age 52) — deferred approach recommended now'],
+    aiTip: 'Linda Morrison and James Whitfield are prime SPIA candidates. Begin income planning conversations now before rates shift.',
+  },
+  'deferred-annuity': {
+    name: 'Deferred Income Annuity (DIA)',
+    icon: 'fa-clock', color: '#059669',
+    tagline: 'Lock in today\'s rates for future guaranteed income — longevity insurance',
+    specs: [
+      { label: 'Income Start', value: '2 – 40 years deferred' },
+      { label: 'Rate Lock', value: 'Today\'s rates locked at purchase' },
+      { label: 'Premium', value: 'Single or flexible' },
+      { label: 'Return of Premium', value: 'Optional death benefit' },
+      { label: 'Joint Option', value: 'Available' },
+      { label: 'Best Fit Age', value: '35 – 60 yrs' },
+    ],
+    features: ['Lock in current interest rates for income starting years from now','Longevity protection — ensures income even into your 90s','Larger income payouts than SPIA (the longer you defer, the more)','Optional return-of-premium death benefit','Personal flexibility on income start date','Potential hedge against rising longevity risk'],
+    aiClients: ['Patricia Nguyen (age 38) — deferred annuity review scheduled; projected $2,800/mo at 65','James Whitfield — Apr 18 meeting: deferred annuity illustration ready'],
+    aiTip: 'Patricia Nguyen at age 38 can lock in a DIA now — projected income of ~$2,800/month starting at age 65.',
+  },
+  'wealth-mgmt': {
+    name: 'Wealth Management Programs',
+    icon: 'fa-gem', color: '#7c3aed',
+    tagline: 'Managed investment solutions for clients with $25K+ investable assets',
+    specs: [
+      { label: 'Fund Advisory (FAP)', value: 'Min: $25,000' },
+      { label: 'Rep-Directed', value: 'Min: $50,000' },
+      { label: 'SMA', value: 'Min: $100,000' },
+      { label: 'UMA', value: 'Min: $250,000' },
+      { label: 'Advisory Fee', value: '0.50% – 1.50% AUM/yr' },
+      { label: 'Rebalancing', value: 'Automatic (FAP/UMA)' },
+    ],
+    features: ['Fund Advisory Program: model portfolios, automatic rebalancing','Rep-Directed: custom portfolio built and managed by your advisor','SMA: direct security ownership, institutional managers, tax efficiency','UMA: combines mutual funds + ETFs + SMAs in one account','Annual performance reviews and tactical allocation shifts','Fiduciary-standard management across all programs'],
+    aiClients: ['Linda Morrison — UMA candidate, $500K+ investable assets ($2,800/yr fee potential)','Robert Chen — SMA/UMA candidate, $180K AUM + death benefit proceeds','Maria Gonzalez — Fund Advisory as entry point'],
+    aiTip: 'Linda Morrison and Robert Chen are strong UMA candidates. Combined advisory fee potential: ~$5,600/yr recurring.',
+  },
+  'estate-planning': {
+    name: 'Estate Planning Services',
+    icon: 'fa-landmark', color: '#4c1d95',
+    tagline: 'Protect, preserve and transfer wealth across generations',
+    specs: [
+      { label: 'Documents', value: 'Will, Trust, POA, HCPOA' },
+      { label: 'Trust Types', value: 'Revocable, Irrevocable, ILIT, GRAT' },
+      { label: 'Estate Tax', value: 'Federal + state minimization' },
+      { label: 'Business', value: 'Buy-sell, succession, NQDC' },
+      { label: 'Charitable', value: 'CRT, DAF, Lifetime Gifts' },
+      { label: 'Specialist', value: 'NYL estate planning attorneys network' },
+    ],
+    features: ['Last Will & Testament: asset distribution and guardian designation','Revocable Living Trust: probate avoidance and privacy','Irrevocable Life Insurance Trust (ILIT): removes life insurance from taxable estate','GRAT: transfer appreciating assets to heirs with minimal gift tax','Charitable Remainder Trust for philanthropic clients','Business succession planning: buy-sell agreement funding'],
+    aiClients: ['Linda Morrison — $2M+ policy, complex estate, trust review recommended','James Whitfield — multiple assets, will update recommended','Robert Chen — business owner, buy-sell agreement gap identified','Maria Gonzalez — estate planning interest flagged by AI'],
+    aiTip: '4 clients qualify for estate planning reviews. Estimated advisory revenue: ~$13,000/yr if all engaged.',
+  },
+  'small-business': {
+    name: 'Small Business Solutions',
+    icon: 'fa-building', color: '#d97706',
+    tagline: 'Comprehensive insurance and benefits solutions for business owners',
+    specs: [
+      { label: 'Key Person Life', value: '$250K – $5M+ coverage' },
+      { label: 'Buy-Sell Funding', value: 'Life and DI-funded agreements' },
+      { label: 'NQDC', value: 'Non-qualified deferred comp' },
+      { label: 'Group Benefits', value: 'Life, DI, Medical' },
+      { label: 'Executive Benefits', value: 'COLI, BOLI, Split-Dollar' },
+      { label: 'Succession', value: 'Business transfer planning' },
+    ],
+    features: ['Key person life insurance — protect against loss of essential employee','Buy-sell agreement funding: ensures smooth ownership transitions','Non-qualified deferred compensation (NQDC) plans for executives','Group life and disability insurance for employees','Employee voluntary benefits programs','Business overhead expense disability coverage'],
+    aiClients: ['Robert Chen — Chen Holdings (~$4M valuation), no buy-sell agreement gap identified','James Whitfield — business succession planning review recommended'],
+    aiTip: 'Robert Chen\'s business succession gap represents a key-person + buy-sell opportunity worth ~$8,400/yr in premium.',
+  },
+};
+
+// ── Open Product Detail Modal ──────────────────────────────────
+function openProductDetail(productId) {
+  const pd = _productCatalogue[productId];
+  if (!pd) {
+    // Fallback: send to AI agent
+    sendContextMessage(`Tell me about NYL ${productId} — key features, suitability, and which clients in my book should consider it`, 'advisor');
+    return;
+  }
+
+  const existing = document.getElementById('pd-overlay');
+  if (existing) existing.remove();
+
+  const specsHtml = pd.specs.map(s =>
+    `<div class="pd-spec-item"><span class="pd-spec-lbl">${s.label}</span><span class="pd-spec-val">${s.value}</span></div>`
+  ).join('');
+
+  const featHtml = pd.features.map(f =>
+    `<div class="pd-feat-row"><i class="fas fa-check-circle" style="color:#16a34a;min-width:16px"></i><span>${f}</span></div>`
+  ).join('');
+
+  const clientsHtml = pd.aiClients.map(c =>
+    `<div class="pd-client-row"><i class="fas fa-user" style="color:${pd.color};min-width:16px"></i><span>${c}</span></div>`
+  ).join('');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'pd-overlay';
+  overlay.className = 'phase1-modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+    <div class="phase1-modal pd-modal" style="width:640px;max-width:95vw">
+      <div class="phase1-modal-header" style="background:linear-gradient(135deg,${pd.color},${pd.color}cc)">
+        <span><i class="fas ${pd.icon}" style="margin-right:8px"></i>${pd.name}</span>
+        <button onclick="document.getElementById('pd-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="pd-tagline">${pd.tagline}</div>
+
+      <div class="phase1-modal-body pd-body">
+
+        <div class="pd-tabs">
+          <button class="pd-tab active" onclick="_switchPDTab(this,'pd-specs-panel')">
+            <i class="fas fa-table"></i> Specs
+          </button>
+          <button class="pd-tab" onclick="_switchPDTab(this,'pd-features-panel')">
+            <i class="fas fa-list-check"></i> Features
+          </button>
+          <button class="pd-tab" onclick="_switchPDTab(this,'pd-ai-panel')">
+            <i class="fas fa-robot"></i> AI Matches
+          </button>
+        </div>
+
+        <div id="pd-specs-panel" class="pd-tab-panel active">
+          <div class="pd-spec-grid">${specsHtml}</div>
+        </div>
+
+        <div id="pd-features-panel" class="pd-tab-panel">
+          <div class="pd-feat-list">${featHtml}</div>
+        </div>
+
+        <div id="pd-ai-panel" class="pd-tab-panel">
+          <div class="pd-ai-tip-box" style="border-left:4px solid ${pd.color}">
+            <i class="fas fa-robot" style="color:${pd.color}"></i>
+            <p>${pd.aiTip}</p>
+          </div>
+          <div class="pd-clients-section">
+            <div class="pd-section-lbl"><i class="fas fa-users"></i> Clients in Your Book</div>
+            <div class="pd-client-list">${clientsHtml}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase1-modal-footer">
+        <button class="btn btn-primary" onclick="document.getElementById('pd-overlay').remove();navigateTo('sales')">
+          <i class="fas fa-calculator"></i> Quote / Illustrate
+        </button>
+        <button class="btn btn-ai" onclick="document.getElementById('pd-overlay').remove();sendContextMessage('Show me which clients in my book are best suited for ${pd.name} — include revenue potential and recommended next actions','advisor')">
+          <i class="fas fa-robot"></i> AI Client Analysis
+        </button>
+        <button class="btn btn-outline" onclick="document.getElementById('pd-overlay').remove()">Close</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+
+function _switchPDTab(btn, panelId) {
+  const modal = btn.closest('.pd-modal');
+  modal.querySelectorAll('.pd-tab').forEach(t => t.classList.remove('active'));
+  modal.querySelectorAll('.pd-tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+// ── Enhanced moveDealStage with visual Kanban column flash ─────
+(function() {
+  const _origMove = window.moveDealStage;
+  window.moveDealStage = function(dealId, newStage) {
+    _origMove && _origMove(dealId, newStage);
+
+    // Flash the target column
+    const colId = `kcol-${newStage}`;
+    const col = document.getElementById(colId);
+    if (col) {
+      col.classList.add('kanban-col-flash');
+      setTimeout(() => col.classList.remove('kanban-col-flash'), 900);
+    }
+
+    // Show a richer stage-move toast
+    const stageConfig = {
+      Prospect:      { icon: 'fa-binoculars',         color: '#6366f1' },
+      Quoted:        { icon: 'fa-file-invoice-dollar', color: '#0891b2' },
+      Underwriting:  { icon: 'fa-stethoscope',         color: '#d97706' },
+      Approved:      { icon: 'fa-check-circle',        color: '#16a34a' },
+      'Closed Won':  { icon: 'fa-trophy',              color: '#d97706' },
+    };
+    const cfg = stageConfig[newStage] || { icon: 'fa-arrow-right', color: '#003087' };
+
+    // Remove existing stage toasts
+    document.querySelectorAll('.stage-toast').forEach(t => t.remove());
+
+    const toast = document.createElement('div');
+    toast.className = 'phase1-toast success stage-toast';
+    toast.style.cssText = `border-left: 4px solid ${cfg.color}`;
+    toast.innerHTML = `<i class="fas ${cfg.icon}" style="color:${cfg.color}"></i> Deal <strong>${dealId}</strong> moved to <strong>${newStage}</strong>`;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
+  };
+})();
+
+// ── AI Scorecard Export & Share ────────────────────────────────
+function exportAIScorecard() {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = `<i class="fas fa-download"></i> Generating <strong>AI Impact Scorecard PDF</strong> — Q1 2026 report ready in 2 seconds…`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+
+  setTimeout(() => {
+    toast.innerHTML = `<i class="fas fa-check-circle"></i> <strong>AI_Scorecard_Q1_2026.pdf</strong> downloaded (2.1 MB)`;
+  }, 2000);
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 5000);
+}
+
+function shareAIScorecard() {
+  const existing = document.getElementById('ais-share-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'ais-share-overlay';
+  overlay.className = 'phase1-modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+    <div class="phase1-modal small" style="width:420px">
+      <div class="phase1-modal-header" style="background:linear-gradient(135deg,#1e3a8a,#7c3aed)">
+        <span><i class="fas fa-share-alt" style="margin-right:8px"></i>Share AI Scorecard</span>
+        <button onclick="document.getElementById('ais-share-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="phase1-modal-body">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label class="sched-label">Recipient Name</label>
+          <input class="sched-input" id="ais-share-name" placeholder="e.g. Roger Putnam" value="Roger Putnam" />
+          <label class="sched-label">Email Address</label>
+          <input class="sched-input" id="ais-share-email" type="email" placeholder="manager@nyl.com" value="r.putnam@newyorklife.com" />
+          <label class="sched-label">Report Period</label>
+          <select class="sched-select">
+            <option selected>Q1 2026 (Jan – Mar)</option>
+            <option>Q4 2025 (Oct – Dec)</option>
+            <option>YTD 2026</option>
+          </select>
+          <label class="sched-label">Add Note (optional)</label>
+          <textarea class="cm-outreach-textarea" style="height:60px" placeholder="Q1 AI impact highlights…">Q1 2026 highlights: 87 AI Score, $31.2K revenue unlocked, $8.1K/mo savings. Calendar review Q2?</textarea>
+        </div>
+      </div>
+      <div class="phase1-modal-footer">
+        <button class="btn btn-primary" onclick="_sendAIScorecardShare()"><i class="fas fa-paper-plane"></i> Send Report</button>
+        <button class="btn btn-outline" onclick="document.getElementById('ais-share-overlay').remove()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+
+function _sendAIScorecardShare() {
+  const name  = document.getElementById('ais-share-name')?.value  || 'Manager';
+  const email = document.getElementById('ais-share-email')?.value || '';
+  document.getElementById('ais-share-overlay')?.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = `<i class="fas fa-check-circle"></i> AI Scorecard sent to <strong>${name}</strong>${email ? ' (' + email + ')' : ''}`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
+}
+
+console.log('Phase 4 loaded — openProductDetail(13 products), moveDealStage (visual), exportAIScorecard, shareAIScorecard');

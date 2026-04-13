@@ -520,7 +520,7 @@ function DashboardPage() {
             <span class="badge badge-red">18</span>
           </div>
           <div class="activity-list">
-            <div class="activity-item high">
+            <div class="activity-item high" onclick="openPolicyModal('P-100320')" style="cursor:pointer">
               <div class="act-icon ins-color"><i class="fas fa-sync-alt"></i></div>
               <div class="act-content">
                 <div class="act-title">Renewal Due — Sandra Williams</div>
@@ -528,7 +528,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge high">Urgent</span>
             </div>
-            <div class="activity-item high">
+            <div class="activity-item high" onclick="openClientModal(2)" style="cursor:pointer">
               <div class="act-icon inv-color"><i class="fas fa-coins"></i></div>
               <div class="act-content">
                 <div class="act-title">Annuity Review — Patricia Nguyen</div>
@@ -536,7 +536,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge ai">AI Alert</span>
             </div>
-            <div class="activity-item high">
+            <div class="activity-item high" onclick="openMeetingBrief('MTG-001')" style="cursor:pointer">
               <div class="act-icon ins-color"><i class="fas fa-phone"></i></div>
               <div class="act-content">
                 <div class="act-title">Follow-up — Kevin Park</div>
@@ -544,7 +544,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge high">Urgent</span>
             </div>
-            <div class="activity-item medium">
+            <div class="activity-item medium" onclick="openClientModal(1)" style="cursor:pointer">
               <div class="act-icon ret-color"><i class="fas fa-umbrella-beach"></i></div>
               <div class="act-content">
                 <div class="act-title">Retirement Planning — James Whitfield</div>
@@ -552,7 +552,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge ai">AI Insight</span>
             </div>
-            <div class="activity-item medium">
+            <div class="activity-item medium" onclick="openClientModal(1)" style="cursor:pointer">
               <div class="act-icon adv-color"><i class="fas fa-landmark"></i></div>
               <div class="act-content">
                 <div class="act-title">Estate Planning — James Whitfield</div>
@@ -560,7 +560,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge ai">AI Insight</span>
             </div>
-            <div class="activity-item medium">
+            <div class="activity-item medium" onclick="openClientModal(8)" style="cursor:pointer">
               <div class="act-icon adv-color"><i class="fas fa-gem"></i></div>
               <div class="act-content">
                 <div class="act-title">Wealth Management — Linda Morrison</div>
@@ -568,7 +568,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge medium">Scheduled</span>
             </div>
-            <div class="activity-item medium">
+            <div class="activity-item medium" onclick="openClaimModal('CLM-2026-0041')" style="cursor:pointer">
               <div class="act-icon ins-color"><i class="fas fa-file-alt"></i></div>
               <div class="act-content">
                 <div class="act-title">Claim Review — Robert Chen</div>
@@ -1112,7 +1112,7 @@ function DashboardPage() {
           <h4>AI Agent has 9 cross-domain insights ready</h4>
           <p>$31.2K revenue potential · 3 investment gaps · 4 retirement planning opportunities · 2 estate planning alerts · 4 lapse risks</p>
         </div>
-        <button class="btn btn-white">View All AI Insights <i class="fas fa-arrow-right"></i></button>
+        <button class="btn btn-white" onclick="navigateTo('ai-insights')">View All AI Insights <i class="fas fa-arrow-right"></i></button>
       </div>
 
       {/* ── Retention Intelligence Modal ── */}
@@ -4477,10 +4477,10 @@ function SalesPage() {
           <div class="kanban-board">
 
             {/* Prospect */}
-            <div class="kanban-col">
+            <div class="kanban-col" id="kcol-Prospect">
               <div class="kanban-col-header prospect">
                 <span><i class="fas fa-binoculars"></i> Prospect</span>
-                <span class="col-count">8</span>
+                <span class="col-count" id="kcount-Prospect">8</span>
               </div>
               <div class="kanban-card" onclick="openDealModal('D001')">
                 <div class="kc-top-row">
@@ -4545,10 +4545,10 @@ function SalesPage() {
             </div>
 
             {/* Quoted */}
-            <div class="kanban-col">
+            <div class="kanban-col" id="kcol-Quoted">
               <div class="kanban-col-header quoted">
                 <span><i class="fas fa-file-invoice-dollar"></i> Quoted</span>
-                <span class="col-count">6</span>
+                <span class="col-count" id="kcount-Quoted">6</span>
               </div>
               <div class="kanban-card hot" onclick="openDealModal('D004')">
                 <div class="kc-hot-tag"><i class="fas fa-fire"></i> Hot — Close in 3 days</div>
@@ -4593,10 +4593,10 @@ function SalesPage() {
             </div>
 
             {/* Underwriting */}
-            <div class="kanban-col">
+            <div class="kanban-col" id="kcol-Underwriting">
               <div class="kanban-col-header underwriting">
                 <span><i class="fas fa-stethoscope"></i> Underwriting</span>
-                <span class="col-count">4</span>
+                <span class="col-count" id="kcount-Underwriting">4</span>
               </div>
               <div class="kanban-card" onclick="openDealModal('D006')">
                 <div class="kc-top-row">
@@ -4640,10 +4640,10 @@ function SalesPage() {
             </div>
 
             {/* Approved */}
-            <div class="kanban-col">
+            <div class="kanban-col" id="kcol-Approved">
               <div class="kanban-col-header approved">
                 <span><i class="fas fa-check-circle"></i> Approved</span>
-                <span class="col-count">3</span>
+                <span class="col-count" id="kcount-Approved">3</span>
               </div>
               <div class="kanban-card hot" onclick="openDealModal('D008')">
                 <div class="kc-hot-tag"><i class="fas fa-signature"></i> E-Sig Pending — Act Today</div>
@@ -4692,10 +4692,10 @@ function SalesPage() {
             </div>
 
             {/* Closed Won */}
-            <div class="kanban-col">
+            <div class="kanban-col" id="kcol-Closed Won">
               <div class="kanban-col-header closed">
                 <span><i class="fas fa-trophy"></i> Closed Won</span>
-                <span class="col-count">34</span>
+                <span class="col-count" id="kcount-Closed Won">34</span>
               </div>
               <div class="kanban-card won">
                 <div class="kc-client">David Thompson</div>
@@ -5228,7 +5228,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 3 clients aged 28–40 in your book have no term coverage — potential new business opportunity.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('term-life')">Product Details</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
                   </div>
                 </div>
@@ -5271,7 +5271,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison's Whole Life policy (P-100330) is eligible for a paid-up additions rider — could add $18K in cash value over 10 years.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('whole-life')">Product Details</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
                   </div>
                 </div>
@@ -5313,7 +5313,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Patricia Nguyen's UL policy (P-100301) has been underfunded for 2 quarters — consider a premium catch-up review.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('universal-life')">Product Details</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
                   </div>
                 </div>
@@ -5356,7 +5356,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Robert Chen (business owner, age 45) is a strong VUL candidate — risk-tolerant profile with $21K annual premium capacity.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('vul')">Product Details</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
                   </div>
                 </div>
@@ -5398,7 +5398,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 4 clients aged 55+ in your book have no LTC coverage — combined gap premium potential of ~$12,000/year.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('ltc')">Product Details</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
                   </div>
                 </div>
@@ -5440,7 +5440,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> David Thompson (age 33) and Patricia Nguyen (age 38) have no disability coverage — high-priority gap opportunity.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('disability')">Product Details</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
                   </div>
                 </div>
@@ -5502,7 +5502,7 @@ function ProductsPage() {
                   </div>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> James Whitfield (age 52) approaching retirement — deferred annuity conversion could provide ~$180K in guaranteed income at 65.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Product Details</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('annuities')">Product Details</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
                   </div>
                 </div>
@@ -5545,7 +5545,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Maria Gonzalez (age 48) has investable assets — mutual fund program may be a natural transition before recommending an SMA.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Fund Lineup</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('mutual-funds')">Fund Lineup</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Explore</button>
                   </div>
                 </div>
@@ -5588,7 +5588,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Younger clients (David Thompson, Kevin Park) are ideal ETF candidates — low-cost entry point to build long-term wealth habits.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">ETF Catalog</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('etfs')">ETF Catalog</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Explore</button>
                   </div>
                 </div>
@@ -5631,7 +5631,7 @@ function ProductsPage() {
                   </ul>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 8 clients in your book have children under 10 — 529 plan conversations could add $4,800+ in annual premium.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">529 Calculator</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('529-plans')">529 Calculator</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
                   </div>
                 </div>
@@ -5722,7 +5722,7 @@ function ProductsPage() {
                   </div>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison (age 56) and James Whitfield (age 52) are ideal immediate annuity candidates in 8–12 years — begin the conversation now.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Income Illustration</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('immediate-annuity')">Income Illustration</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
                   </div>
                 </div>
@@ -5775,7 +5775,7 @@ function ProductsPage() {
                   </div>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Patricia Nguyen (age 38) could lock in a deferred annuity now at today's rates — projected income starting at age 65 of ~$2,800/month.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Deferral Calculator</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('deferred-annuity')">Deferral Calculator</button>
                     <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
                   </div>
                 </div>
@@ -5858,7 +5858,7 @@ function ProductsPage() {
                   </div>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison and Robert Chen are strong UMA candidates with estimated investable assets of $500K+. Schedule wealth management conversations.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Program Comparison</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('wealth-mgmt')">Program Comparison</button>
                     <button class="btn btn-primary-sm" onclick="sendContextMessage('Recommend the best products for each client based on their profile, gaps, and life stage','advisor')"><i class="fas fa-robot"></i> AI Client Match</button>
                   </div>
                 </div>
@@ -5908,7 +5908,7 @@ function ProductsPage() {
                   </div>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 4 clients qualify for estate planning reviews: Linda Morrison ($2M+ policy), James Whitfield (multiple assets), Robert Chen (business owner), Maria Gonzalez (interest flagged).</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Estate Checklist</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('estate-planning')">Estate Checklist</button>
                     <button class="btn btn-primary-sm" onclick="sendContextMessage('Review all 4 estate planning opportunities and generate prioritized action plan with revenue estimates','estate')"><i class="fas fa-robot"></i> Estate AI Review</button>
                   </div>
                 </div>
@@ -5958,7 +5958,7 @@ function ProductsPage() {
                   </div>
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Robert Chen (business owner) and James Whitfield have identified business planning needs — schedule a small business review to explore NQDC and key person coverage.</div>
                   <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm">Business Solutions Guide</button>
+                    <button class="btn btn-outline-sm" onclick="openProductDetail('small-business')">Business Solutions Guide</button>
                     <button class="btn btn-primary-sm" onclick="sendContextMessage('Audit all business owner clients for NQDC, key-person life, COLI and group benefits gaps','business')"><i class="fas fa-robot"></i> Business AI Audit</button>
                   </div>
                 </div>
@@ -6468,6 +6468,10 @@ function AIImpactScorecardPage() {
             <span class="ais-hero-val">247</span>
             <span class="ais-hero-lbl">Clients AI-Monitored</span>
           </div>
+        </div>
+        <div class="ais-hero-actions">
+          <button class="btn btn-primary ais-export-btn" onclick="exportAIScorecard()"><i class="fas fa-download"></i> Export Scorecard</button>
+          <button class="btn btn-outline ais-share-btn" onclick="shareAIScorecard()"><i class="fas fa-share-alt"></i> Share Report</button>
         </div>
       </div>
 

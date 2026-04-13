@@ -11142,3 +11142,222 @@ body {
 @media (max-width: 900px) {
   .cal-ev-popover { width: calc(100vw - 32px); left: 16px !important; }
 }
+
+/* ============================================================
+   PHASE 4 — Product Detail Modal · Kanban Flash · Scorecard
+   ============================================================ */
+
+/* ── Product Detail Modal ────────────────────────────────────── */
+.pd-modal {
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pd-tagline {
+  padding: 10px 24px;
+  font-size: 13px;
+  color: var(--gray-600);
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-100);
+  font-style: italic;
+}
+
+.pd-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Product Detail Tabs ─────────────────────────────────────── */
+.pd-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--gray-100);
+  background: #fff;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.pd-tab {
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-500);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.pd-tab:hover { color: var(--nyl-blue); }
+.pd-tab.active {
+  color: var(--nyl-blue);
+  border-bottom-color: var(--nyl-blue);
+  font-weight: 600;
+}
+
+.pd-tab-panel {
+  display: none;
+  padding: 16px 20px;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeIn 0.2s ease;
+}
+.pd-tab-panel.active { display: flex; }
+
+/* ── Specs grid ──────────────────────────────────────────────── */
+.pd-spec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pd-spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-100);
+}
+
+.pd-spec-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.pd-spec-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+/* ── Features list ───────────────────────────────────────────── */
+.pd-feat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pd-feat-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gray-700);
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+.pd-feat-row i { margin-top: 1px; }
+
+/* ── AI Matches panel ────────────────────────────────────────── */
+.pd-ai-tip-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--gray-700);
+  border-left: 4px solid var(--nyl-blue);
+}
+.pd-ai-tip-box i { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+.pd-ai-tip-box p { margin: 0; line-height: 1.5; }
+
+.pd-clients-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pd-section-lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pd-client-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pd-client-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gray-700);
+  padding: 7px 10px;
+  background: var(--gray-50);
+  border-radius: 6px;
+  border: 1px solid var(--gray-100);
+}
+
+/* ── Kanban column flash on move ──────────────────────────────── */
+@keyframes kanbanFlash {
+  0%   { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0); background: inherit; }
+  25%  { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.6); background: rgba(16, 185, 129, 0.06); }
+  75%  { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3); }
+  100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0); background: inherit; }
+}
+
+.kanban-col-flash {
+  animation: kanbanFlash 0.9s ease;
+  border-radius: var(--radius);
+}
+
+/* ── AI Scorecard hero action buttons ─────────────────────────── */
+.ais-hero-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.ais-export-btn {
+  font-size: 13px;
+  padding: 8px 16px;
+}
+
+.ais-share-btn {
+  font-size: 13px;
+  padding: 8px 16px;
+}
+
+/* ── Dashboard activity item hover ─────────────────────────────── */
+.activity-item[style*="cursor:pointer"]:hover {
+  background: var(--gray-50);
+  border-radius: 8px;
+  transform: translateX(2px);
+  transition: background 0.15s, transform 0.15s;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .pd-spec-grid { grid-template-columns: 1fr; }
+  .ais-hero-actions { margin-left: 0; width: 100%; }
+  .ais-hero { flex-wrap: wrap; }
+}
