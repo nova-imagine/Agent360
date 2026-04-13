@@ -8228,59 +8228,8 @@ document.addEventListener('DOMContentLoaded', function() {
 console.log('Sales AI #19 loaded — salesAIData(5 deals), openDealAIModal, switchDaiTab, openSalesAIReport, switchSairTab, openConversionForecast');
 
 // ============================================================
-// PHASE 1 FIXES — B, C, D, E
+// PHASE 1 FIXES — D, E  (B filterPolicies + C filterClaims moved to Phase 4/5 enhanced versions)
 // ============================================================
-
-// ── Fix B: filterPolicies ────────────────────────────────────
-function filterPolicies() {
-  const q      = (document.getElementById('policy-search')?.value || '').toLowerCase();
-  const type   = (document.getElementById('policy-type-filter')?.value || '').toLowerCase();
-  const status = (document.getElementById('policy-status-filter')?.value || '').toLowerCase();
-
-  const rows = document.querySelectorAll('#policies-table tbody tr');
-  let visible = 0;
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    const rowType   = row.querySelector('.policy-type-badge')?.textContent.trim().toLowerCase() || '';
-    const rowStatus = row.querySelector('.status-badge')?.textContent.trim().toLowerCase() || '';
-
-    const matchQ      = !q      || text.includes(q);
-    const matchType   = !type   || rowType.includes(type);
-    const matchStatus = !status || rowStatus === status;
-
-    row.style.display = (matchQ && matchType && matchStatus) ? '' : 'none';
-    if (matchQ && matchType && matchStatus) visible++;
-  });
-
-  // Update count badge if present
-  const badge = document.querySelector('.policies-page .page-toolbar .result-count');
-  if (badge) badge.textContent = visible + ' result' + (visible !== 1 ? 's' : '');
-}
-
-// ── Fix C: filterClaims ──────────────────────────────────────
-function filterClaims() {
-  const q        = (document.getElementById('claim-search')?.value || '').toLowerCase();
-  const type     = (document.getElementById('claim-type-filter')?.value || '').toLowerCase();
-  const status   = (document.getElementById('claim-status-filter')?.value || '').toLowerCase();
-  const priority = (document.getElementById('claim-priority-filter')?.value || '').toLowerCase();
-
-  const rows = document.querySelectorAll('.claims-table tbody tr.claim-row');
-  let visible = 0;
-  rows.forEach(row => {
-    const text      = row.textContent.toLowerCase();
-    const rowType   = row.querySelector('.claim-type-badge')?.textContent.trim().toLowerCase() || '';
-    const rowStatus = row.querySelector('.claim-status-badge')?.textContent.trim().toLowerCase() || '';
-    const rowPrio   = row.querySelector('.priority-badge')?.textContent.trim().toLowerCase() || '';
-
-    const matchQ      = !q        || text.includes(q);
-    const matchType   = !type     || rowType.includes(type);
-    const matchStatus = !status   || rowStatus.includes(status);
-    const matchPrio   = !priority || rowPrio === priority;
-
-    row.style.display = (matchQ && matchType && matchStatus && matchPrio) ? '' : 'none';
-    if (matchQ && matchType && matchStatus && matchPrio) visible++;
-  });
-}
 
 // ── Fix D: Notification panel ────────────────────────────────
 const NOTIF_DATA = [
@@ -10515,6 +10464,103 @@ function _closeProfileOutside(e) {
   }
 }
 
+/* ── openProfileSettings — Personal info + notification prefs ─
+   Opened from "Settings & Preferences" in the profile dropdown.
+   ─────────────────────────────────────────────────────────── */
+function openProfileSettings() {
+  closeProfileMenu();
+  document.getElementById('profile-settings-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'profile-settings-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+    <div class="modal-box ps-modal" style="max-width:480px">
+      <div class="modal-header">
+        <h3><i class="fas fa-cog" style="margin-right:8px;color:#003087"></i>Profile Settings</h3>
+        <button class="modal-close" onclick="document.getElementById('profile-settings-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+
+        <div class="ps-section">
+          <div class="ps-section-title">Personal Info</div>
+          <div class="ps-row"><label>Name</label><input class="ps-input" value="Sridhar Ramalingam" readonly /></div>
+          <div class="ps-row"><label>Email</label><input class="ps-input" value="sridhar.r@newyorklife.com" readonly /></div>
+          <div class="ps-row"><label>Phone</label><input class="ps-input" value="+1 (212) 555-0142" /></div>
+          <div class="ps-row"><label>Branch</label><input class="ps-input" value="New York · Manhattan Branch" readonly /></div>
+          <div class="ps-row"><label>Agent ID</label><input class="ps-input" value="NYL-SR-2847" readonly /></div>
+        </div>
+
+        <div class="ps-section">
+          <div class="ps-section-title">Notification Preferences</div>
+          <label class="ps-toggle"><input type="checkbox" checked /> <span>Email alerts for urgent tasks</span></label>
+          <label class="ps-toggle"><input type="checkbox" checked /> <span>AI insight push notifications</span></label>
+          <label class="ps-toggle"><input type="checkbox" /> <span>Weekly performance digest</span></label>
+          <label class="ps-toggle"><input type="checkbox" checked /> <span>Claim status updates</span></label>
+          <label class="ps-toggle"><input type="checkbox" /> <span>Pipeline deal reminders</span></label>
+        </div>
+
+        <div class="ps-section">
+          <div class="ps-section-title">Appearance</div>
+          <label class="ps-toggle"><input type="checkbox" /> <span>Dark mode <span style="color:#94a3b8;font-size:11px">(coming Q2 2026)</span></span></label>
+          <label class="ps-toggle"><input type="checkbox" checked /> <span>Compact sidebar</span></label>
+        </div>
+
+        <div class="ps-section">
+          <div class="ps-section-title">Advanced</div>
+          <button class="btn btn-outline" style="width:100%;margin-bottom:8px" onclick="openPreferences();document.getElementById('profile-settings-overlay').remove()">
+            <i class="fas fa-sliders-h"></i> Open Full Preferences Panel
+          </button>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="showToast('<i class=\\'fas fa-check-circle\\' style=\\'margin-right:6px;color:#059669\\'></i>Settings saved','success');document.getElementById('profile-settings-overlay').remove()">
+          Save Changes
+        </button>
+        <button class="btn btn-outline" onclick="document.getElementById('profile-settings-overlay').remove()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+/* ── handleLogout — sign-out confirmation ─────────────────── */
+function handleLogout() {
+  closeProfileMenu();
+  document.getElementById('logout-confirm-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'logout-confirm-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+    <div class="modal-box" style="max-width:380px;text-align:center">
+      <div class="modal-body" style="padding:32px 24px 20px">
+        <div style="font-size:36px;margin-bottom:16px">🔒</div>
+        <div style="font-size:17px;font-weight:700;color:#1e293b;margin-bottom:8px">Sign out of NOVA Agent 360?</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.6">
+          You are signed in as <strong>Sridhar Ramalingam</strong><br>
+          New York · Manhattan Branch
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:center;gap:12px">
+        <button class="btn btn-primary" style="background:#dc2626;border-color:#dc2626;min-width:120px"
+          onclick="document.getElementById('logout-confirm-overlay').remove();showToast('<i class=\\'fas fa-sign-out-alt\\' style=\\'margin-right:6px\\'></i>You have been signed out securely.','info')">
+          <i class="fas fa-sign-out-alt"></i> Sign Out
+        </button>
+        <button class="btn btn-outline" style="min-width:100px" onclick="document.getElementById('logout-confirm-overlay').remove()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
 /* ── 6. openPreferences — Advanced Preferences Modal ─────────
    Tabbed modal: Appearance · Notifications · Shortcuts
    ─────────────────────────────────────────────────────────── */
@@ -10656,13 +10702,21 @@ function switchPrefTab(tab, btn) {
   const body = document.getElementById('pref-body');
   if (!body) return;
 
+  // For the appearance tab, capture its HTML into _prefTabContent on first visit
+  // so subsequent visits can re-render it from the string (avoids detach/re-attach bug)
   if (tab === 'appearance') {
-    // Already rendered in DOM — keep it
-    const existing = document.getElementById('pref-tab-appearance');
-    if (existing) { body.innerHTML = ''; body.appendChild(existing); }
-    return;
+    if (!_prefTabContent.appearance) {
+      const existing = document.getElementById('pref-tab-appearance');
+      if (existing) _prefTabContent.appearance = existing.outerHTML;
+    }
   }
-  body.innerHTML = _prefTabContent[tab] || '<div style="padding:20px;color:#94a3b8">Coming soon.</div>';
+
+  const html = _prefTabContent[tab];
+  if (html) {
+    body.innerHTML = html;
+  } else {
+    body.innerHTML = '<div style="padding:24px;color:#94a3b8;text-align:center"><i class="fas fa-tools" style="font-size:22px;margin-bottom:8px;display:block"></i>Coming soon.</div>';
+  }
 }
 
 function selectPrefTheme(theme, el) {
@@ -10709,7 +10763,7 @@ function savePrefChanges() {
   });
 })();
 
-console.log('Phase 5+6 loaded — setReportPeriod(enhanced), exportReportPDF(modal), shareReportWithManager(modal), openAIScoreDetail(chart), toggleProfileMenu(enhanced), openPreferences, initKeyboardShortcuts(G+key nav)');
+console.log('Phase 5+6 loaded — setReportPeriod(enhanced), exportReportPDF(modal), shareReportWithManager(modal), openAIScoreDetail(chart), toggleProfileMenu(enhanced), openPreferences, openProfileSettings, handleLogout, scheduleReport, openAIReportSummary, initKeyboardShortcuts(G+key nav)');
 
 /* ── scheduleReport & openAIReportSummary (Phase 5+6 final) ─ */
 function scheduleReport() {

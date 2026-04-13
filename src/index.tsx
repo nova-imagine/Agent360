@@ -611,7 +611,7 @@ function DashboardPage() {
         <div class="dash-card activity-card">
           <div class="card-header">
             <h3><i class="fas fa-bolt"></i> Action Items</h3>
-            <span class="badge badge-red">18</span>
+            <span class="badge badge-red" onclick="navigateTo('clients')" style="cursor:pointer" title="View all clients">18</span>
           </div>
           <div class="activity-list">
             <div class="activity-item high" onclick="openPolicyModal('P-100320')" style="cursor:pointer">
@@ -670,6 +670,12 @@ function DashboardPage() {
               </div>
               <span class="act-badge medium">In Progress</span>
             </div>
+          </div>
+          <div class="activity-footer">
+            <button class="act-view-all-btn" onclick="navigateTo('clients')"><i class="fas fa-users"></i> All Clients</button>
+            <button class="act-view-all-btn" onclick="navigateTo('policies')"><i class="fas fa-file-contract"></i> Policies</button>
+            <button class="act-view-all-btn" onclick="navigateTo('claims')"><i class="fas fa-file-alt"></i> Claims</button>
+            <button class="act-view-all-btn" onclick="navigateTo('calendar')"><i class="fas fa-calendar"></i> Calendar</button>
           </div>
         </div>
       </div>

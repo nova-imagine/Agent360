@@ -12372,3 +12372,74 @@ body.spotlight-open { overflow: hidden; }
   box-shadow: 0 0 0 3px rgba(0,48,135,0.25);
   transform: scale(1.05);
 }
+
+/* ── Fix #3: .ais-card-clickable — visual affordance ─────────
+   Applied to every AI Scorecard domain card that opens a
+   drill-down modal on click. Combines with .ais-domain-card
+   hover rules already in place.
+   ─────────────────────────────────────────────────────────── */
+.ais-card-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+.ais-card-clickable:focus-visible {
+  outline: 2px solid #003087;
+  outline-offset: 2px;
+}
+/* "↗ Drill down" hint that appears on hover */
+.ais-card-clickable::before {
+  content: '↗ View Detail';
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #003087;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  padding: 2px 7px;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 0.18s, transform 0.18s;
+  pointer-events: none;
+  z-index: 2;
+}
+.ais-card-clickable:hover::before {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Fix #6: Dashboard activity card footer nav links ─────── */
+.activity-footer {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px 12px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafafa;
+  border-radius: 0 0 12px 12px;
+  flex-wrap: wrap;
+}
+.act-view-all-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.14s;
+}
+.act-view-all-btn i { font-size: 11px; }
+.act-view-all-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #003087;
+}
