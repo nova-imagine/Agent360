@@ -678,7 +678,7 @@ function DashboardPage() {
             <div class="comm-stat"><div class="cs-num">6</div><div class="cs-lbl2">Opportunities</div></div>
             <div class="comm-stat"><div class="cs-num" style="color:#7c3aed">3 Domains</div><div class="cs-lbl2">Inv/Ret/Adv</div></div>
           </div>
-          <button class="btn btn-ai" style="width:100%;margin-top:10px" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Full AI Opportunity Analysis</button>
+          <button class="btn btn-ai" style="width:100%;margin-top:10px" onclick="sendContextMessage('Show me all cross-sell and upsell opportunities across 247 clients — rank by revenue potential','advisor')"><i class="fas fa-robot"></i> Full AI Opportunity Analysis</button>
         </div>
 
         {/* Lapse Risk + Commission combined */}
@@ -719,7 +719,7 @@ function DashboardPage() {
             <div class="comm-stat"><div class="cs-num green-text">78%</div><div class="cs-lbl2">Progress</div></div>
           </div>
           <div style="padding-top:12px;margin-top:4px;border-top:1px solid var(--gray-100)">
-            <div class="card-header" style="padding:0;margin-bottom:8px"><h3><i class="fas fa-exclamation-triangle"></i> Lapse Risk Monitor</h3><button class="btn-link" onclick="navigateTo('ai-agents')">AI Analysis →</button></div>
+            <div class="card-header" style="padding:0;margin-bottom:8px"><h3><i class="fas fa-exclamation-triangle"></i> Lapse Risk Monitor</h3><button class="btn-link" onclick="sendContextMessage('Show all 4 lapse-risk clients with risk scores, triggers, and recommended retention actions','renewal')">AI Analysis →</button></div>
             <div class="lapse-summary-bar">
               <div class="lapse-seg high-risk"><span class="lapse-count">4</span><span class="lapse-lbl">High Risk</span></div>
               <div class="lapse-seg med-risk"><span class="lapse-count">11</span><span class="lapse-lbl">Medium Risk</span></div>
@@ -1149,7 +1149,7 @@ function ClientsPage() {
         </div>
         <div class="ri-panel-footer">
           <span style="font-size:11px;color:#6b7280">Showing 5 of 15 at-risk clients · AI monitors all 247 clients continuously</span>
-          <button class="btn btn-ai" style="font-size:11px;padding:6px 12px" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Full AI Retention Analysis</button>
+          <button class="btn btn-ai" style="font-size:11px;padding:6px 12px" onclick="sendContextMessage('Show all lapse-risk clients — retention action plan ranked by premium at risk and probability of lapse','renewal')"><i class="fas fa-robot"></i> Full AI Retention Analysis</button>
         </div>
       </div>
 
@@ -2177,7 +2177,7 @@ function ClaimsPage() {
             <div class="ctype-count">3 pending doc requests</div>
             <div class="ctype-value">Auto-follow-ups ready</div>
           </div>
-          <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="navigateTo('ai-agents')">Run AI Triage</button>
+          <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="sendContextMessage('Show all open claims and urgent actions needed — triage by priority and expected resolution','claims')">Run AI Triage</button>
         </div>
       </div>
 
@@ -2454,10 +2454,10 @@ function AIAgentsPage() {
         <div class="ai-chat-panel">
           <div class="chat-header">
             <div class="chat-agent-info">
-              <div class="chat-agent-icon"><i class="fas fa-robot"></i></div>
+              <div class="chat-agent-icon" id="chat-agent-icon-wrap"><i class="fas fa-robot"></i></div>
               <div>
                 <h4 id="chat-agent-name">Smart Advisor Agent</h4>
-                <p>Insurance · Investments · Retirement · Advisory</p>
+                <p id="chat-agent-sub">Insurance · Investments · Retirement · Advisory</p>
               </div>
             </div>
             <div class="chat-actions">
@@ -2492,6 +2492,83 @@ function AIAgentsPage() {
             </div>
           </div>
 
+          {/* ── Context Button Toolbar ── */}
+          <div class="ctx-btn-toolbar" id="ctx-btn-toolbar">
+
+            {/* Clients */}
+            <div class="ctx-group">
+              <span class="ctx-group-label"><i class="fas fa-users"></i> Clients</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Analyze Linda Morrison full portfolio — insurance, investments, estate')">Linda Morrison</button>
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Analyze James Whitfield retirement planning and LTC claim status')">James Whitfield</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('Analyze Robert Chen estate planning and $1M death benefit claim CLM-2026-0041')">Robert Chen</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('Analyze Maria Gonzalez ADB claim and annuity opportunity')">Maria Gonzalez</button>
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Show all high-value client opportunities across insurance, investments and advisory')">All High-Value</button>
+              </div>
+            </div>
+
+            {/* Pipeline */}
+            <div class="ctx-group">
+              <span class="ctx-group-label"><i class="fas fa-funnel-dollar"></i> Pipeline</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Show all active underwriting cases and STP scores')">UW Cases</button>
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Which underwriting cases can be auto-approved today?')">Auto-Approve Ready</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('Show full sales pipeline — value, conversion rate, and top opportunities')">Sales Pipeline</button>
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Which prospects are most likely to close this month?')">Close This Month</button>
+                <button class="ctx-btn ctx-adv" onclick="sendQuickMessage('Run AI scan on all pending underwriting cases and flag any APS requirements')">Run AI Scan</button>
+              </div>
+            </div>
+
+            {/* Meetings */}
+            <div class="ctx-group">
+              <span class="ctx-group-label"><i class="fas fa-calendar-alt"></i> Meetings</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Generate pre-meeting brief for Linda Morrison annual review on Apr 15')">Linda Apr 15</button>
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Generate pre-meeting brief for Sandra Williams policy renewal on Apr 28')">Sandra Apr 28</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('What are the key talking points for the Alex Rivera prospect meeting on Apr 12?')">Alex Apr 12</button>
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Summarize follow-up actions from the Maria Gonzalez annuity meeting on Apr 5')">Post: Maria Apr 5</button>
+                <button class="ctx-btn ctx-adv" onclick="sendQuickMessage('What follow-ups are outstanding from the Patricia Nguyen UL review meeting?')">Post: Patricia Apr 3</button>
+              </div>
+            </div>
+
+            {/* Claims */}
+            <div class="ctx-group">
+              <span class="ctx-group-label"><i class="fas fa-clipboard-check"></i> Claims</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-urgent" onclick="sendQuickMessage('Give me full status on Robert Chen $1M death benefit claim CLM-2026-0041 — what is needed to expedite?')">CLM-0041 Urgent</button>
+                <button class="ctx-btn ctx-urgent" onclick="sendQuickMessage('Maria Gonzalez ADB claim CLM-2026-0028 — how do I expedite the oncologist certification?')">ADB: Maria Urgent</button>
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Show all open claims and their current status')">All Open Claims</button>
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Which claims have pending documents and what actions are needed?')">Pending Docs</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('Draft a compassionate follow-up email to Susan Chen regarding the $1M death benefit claim')">Draft: Susan Chen</button>
+              </div>
+            </div>
+
+            {/* Retention */}
+            <div class="ctx-group">
+              <span class="ctx-group-label"><i class="fas fa-heartbeat"></i> Retention</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-urgent" onclick="sendQuickMessage('Patricia Nguyen UL lapse risk — what is the catch-up premium plan and timeline?')">Patricia Lapse</button>
+                <button class="ctx-btn ctx-urgent" onclick="sendQuickMessage('Sandra Williams term renewal — what is the conversion window and what should I present?')">Sandra Renewal</button>
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Show all 4 lapse-risk clients with risk scores and recommended actions')">All Lapse Risks</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('Which retention actions have the highest ROI — rank by premium at risk')">Highest ROI</button>
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Draft a retention email for Sandra Williams about converting her term policy before expiry')">Draft: Sandra Email</button>
+              </div>
+            </div>
+
+            {/* Reports */}
+            <div class="ctx-group">
+              <span class="ctx-group-label"><i class="fas fa-chart-bar"></i> Reports</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Summarize my dashboard for today — performance, alerts, and priority actions')">Today's Dashboard</button>
+                <button class="ctx-btn ctx-adv" onclick="sendQuickMessage('Show Q1 2026 performance summary — commissions, conversion rate, STP improvements')">Q1 Performance</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('What is my total revenue opportunity across all domains — rank by value')">Revenue Opportunity</button>
+                <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Generate a week-ahead action plan for April 14-18 2026')">Week Ahead Plan</button>
+                <button class="ctx-btn ctx-adv" onclick="sendQuickMessage('Which clients should I prioritize for outreach this week and why?')">Priority Outreach</button>
+              </div>
+            </div>
+
+          </div>
+
           <div class="chat-input-area">
             <div class="chat-input-row">
               <input
@@ -2505,10 +2582,11 @@ function AIAgentsPage() {
               </button>
             </div>
             <div class="chat-input-hints">
-              <span onclick="sendQuickMessage('Analyze Linda Morrison portfolio')"><i class="fas fa-user"></i> Client profile</span>
-              <span onclick="sendQuickMessage('Which clients need product recommendations?')"><i class="fas fa-box"></i> Product match</span>
-              <span onclick="sendQuickMessage('Show open claims status')"><i class="fas fa-file-alt"></i> Claims</span>
-              <span onclick="sendQuickMessage('Show investment opportunities and portfolio gaps')"><i class="fas fa-chart-line"></i> Investments</span>
+              <span onclick="sendQuickMessage('Show me all cross-sell opportunities across 247 clients')"><i class="fas fa-bolt"></i> Cross-sell</span>
+              <span onclick="sendQuickMessage('Which clients have the highest revenue potential right now?')"><i class="fas fa-dollar-sign"></i> Revenue</span>
+              <span onclick="sendQuickMessage('Show open claims status and any urgent actions needed')"><i class="fas fa-file-alt"></i> Claims</span>
+              <span onclick="sendQuickMessage('Show investment portfolio gaps and rebalancing opportunities')"><i class="fas fa-chart-line"></i> Investments</span>
+              <span onclick="sendQuickMessage('Generate a client communication for the top retention risk')"><i class="fas fa-envelope"></i> Draft Email</span>
             </div>
           </div>
         </div>
@@ -3919,7 +3997,7 @@ function ProductsPage() {
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison and Robert Chen are strong UMA candidates with estimated investable assets of $500K+. Schedule wealth management conversations.</div>
                   <div class="prod-sub-actions">
                     <button class="btn btn-outline-sm">Program Comparison</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> AI Client Match</button>
+                    <button class="btn btn-primary-sm" onclick="sendContextMessage('Recommend the best products for each client based on their profile, gaps, and life stage','advisor')"><i class="fas fa-robot"></i> AI Client Match</button>
                   </div>
                 </div>
               </div>
@@ -3969,7 +4047,7 @@ function ProductsPage() {
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 4 clients qualify for estate planning reviews: Linda Morrison ($2M+ policy), James Whitfield (multiple assets), Robert Chen (business owner), Maria Gonzalez (interest flagged).</div>
                   <div class="prod-sub-actions">
                     <button class="btn btn-outline-sm">Estate Checklist</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Estate AI Review</button>
+                    <button class="btn btn-primary-sm" onclick="sendContextMessage('Review all 4 estate planning opportunities and generate prioritized action plan with revenue estimates','estate')"><i class="fas fa-robot"></i> Estate AI Review</button>
                   </div>
                 </div>
               </div>
@@ -4019,7 +4097,7 @@ function ProductsPage() {
                   <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Robert Chen (business owner) and James Whitfield have identified business planning needs — schedule a small business review to explore NQDC and key person coverage.</div>
                   <div class="prod-sub-actions">
                     <button class="btn btn-outline-sm">Business Solutions Guide</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Business AI Audit</button>
+                    <button class="btn btn-primary-sm" onclick="sendContextMessage('Audit all business owner clients for NQDC, key-person life, COLI and group benefits gaps','business')"><i class="fas fa-robot"></i> Business AI Audit</button>
                   </div>
                 </div>
               </div>
@@ -4462,7 +4540,7 @@ function CalendarPage() {
             <div class="css-item adv-theme"><i class="fas fa-handshake"></i> <span>2</span> Advisory sessions</div>
           </div>
 
-          <button class="btn btn-ai full-width-btn" onclick="navigateTo('ai-agents')">
+          <button class="btn btn-ai full-width-btn" onclick="sendContextMessage('Review my upcoming calendar and suggest optimal meeting preparation priorities for this week','advisor')">
             <i class="fas fa-robot"></i> AI Schedule Optimizer
           </button>
         </div>

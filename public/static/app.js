@@ -524,21 +524,220 @@ function aiClientInsights() {
 // ---- AI CHAT ----
 let chatHistory = [];
 
+// Agent metadata: name, subtitle, icon, accent color, context buttons
+const agentMeta = {
+  advisor: {
+    name: 'Smart Advisor Agent',
+    sub: 'Insurance · Investments · Retirement · Advisory',
+    icon: 'fa-brain',
+    color: '#d97706',
+    ctxGroups: [
+      { label: 'Opportunities', icon: 'fa-bolt', btns: [
+        { cls: 'ctx-inv', label: 'All Cross-Sell', msg: 'Show me all cross-sell and upsell opportunities across 247 clients' },
+        { cls: 'ctx-ret', label: 'Revenue Map',   msg: 'What is my total revenue opportunity across all domains — rank by value' },
+        { cls: 'ctx-ins', label: 'Renewals Due',  msg: 'Which policies are up for renewal in the next 90 days?' },
+        { cls: 'ctx-adv', label: 'Estate Gaps',   msg: 'Show estate planning and advisory opportunities for top clients' },
+        { cls: 'ctx-inv', label: 'Investment Gaps', msg: 'Show investment portfolio gaps and rebalancing opportunities' }
+      ]},
+      { label: 'Reports', icon: 'fa-chart-bar', btns: [
+        { cls: 'ctx-ret', label: "Today's Summary", msg: 'Summarize my dashboard for today — performance, alerts, and priority actions' },
+        { cls: 'ctx-adv', label: 'Q1 Performance',  msg: 'Show Q1 2026 performance summary — commissions, conversion rate, STP improvements' },
+        { cls: 'ctx-ins', label: 'Week Ahead',      msg: 'Generate a week-ahead action plan for April 14-18 2026' },
+        { cls: 'ctx-inv', label: 'Priority Outreach', msg: 'Which clients should I prioritize for outreach this week and why?' }
+      ]}
+    ]
+  },
+  claims: {
+    name: 'Claims Automation Agent',
+    sub: 'Death Benefit · Disability · LTC · Waiver · Accelerated',
+    icon: 'fa-clipboard-check',
+    color: '#2563eb',
+    ctxGroups: [
+      { label: 'Active Claims', icon: 'fa-clipboard-list', btns: [
+        { cls: 'ctx-urgent', label: 'CLM-0041 Urgent', msg: 'Full status on Robert Chen $1M death benefit claim CLM-2026-0041 — what is needed to expedite?' },
+        { cls: 'ctx-urgent', label: 'ADB Maria Urgent', msg: 'Maria Gonzalez ADB claim CLM-2026-0028 — how do I expedite the oncologist certification?' },
+        { cls: 'ctx-ins',    label: 'All Open Claims',  msg: 'Show all open claims and their current status' },
+        { cls: 'ctx-ins',    label: 'Pending Docs',     msg: 'Which claims have pending documents and what actions are needed?' },
+        { cls: 'ctx-inv',    label: 'Disability Claims', msg: 'Show all disability insurance claims and expected payment timelines' }
+      ]},
+      { label: 'Draft', icon: 'fa-envelope', btns: [
+        { cls: 'ctx-inv', label: 'Email: Susan Chen',  msg: 'Draft a compassionate follow-up email to Susan Chen regarding the $1M death benefit claim' },
+        { cls: 'ctx-ins', label: 'Email: Kevin Estate', msg: 'Draft a follow-up email to Kevin Park estate regarding contestability review timeline' },
+        { cls: 'ctx-ret', label: 'Email: Maria ADB',   msg: 'Draft a supportive email to Maria Gonzalez about her accelerated death benefit claim status' }
+      ]}
+    ]
+  },
+  renewal: {
+    name: 'Renewal Automation Agent',
+    sub: 'Policy Renewals · Conversion · Retention Outreach',
+    icon: 'fa-sync-alt',
+    color: '#16a34a',
+    ctxGroups: [
+      { label: 'Renewals', icon: 'fa-calendar-times', btns: [
+        { cls: 'ctx-urgent', label: 'Sandra Williams',    msg: 'Sandra Williams term renewal — conversion window and what to present at Apr 28 meeting' },
+        { cls: 'ctx-ins',    label: 'All Renewals 90d',  msg: 'Show all policy renewals due in the next 90 days with premium at risk' },
+        { cls: 'ctx-inv',    label: 'Conversion Candidates', msg: 'Which term policies are candidates for conversion to permanent life?' },
+        { cls: 'ctx-ret',    label: 'Lapse Risk Queue',  msg: 'Show all 4 lapse-risk clients with risk scores and recommended retention actions' },
+        { cls: 'ctx-adv',    label: 'Patricia Nguyen',   msg: 'Patricia Nguyen UL lapse risk — catch-up premium plan and monitoring timeline' }
+      ]},
+      { label: 'Outreach', icon: 'fa-envelope-open-text', btns: [
+        { cls: 'ctx-ins', label: 'Draft: Sandra Renewal', msg: 'Draft a renewal conversion letter for Sandra Williams — emphasize no medical evidence required' },
+        { cls: 'ctx-ret', label: 'Draft: Patricia Lapse', msg: 'Draft a retention email for Patricia Nguyen about her Universal Life premium catch-up plan' },
+        { cls: 'ctx-inv', label: 'Renewal Campaign',      msg: 'What is the current status of the renewal email campaign — how many sent and remaining?' }
+      ]}
+    ]
+  },
+  portfolio: {
+    name: 'Portfolio Optimizer Agent',
+    sub: 'AUM · Rebalancing · Annuities · 529 Plans · ETFs',
+    icon: 'fa-coins',
+    color: '#0891b2',
+    ctxGroups: [
+      { label: 'Portfolio', icon: 'fa-chart-pie', btns: [
+        { cls: 'ctx-inv', label: 'All AUM Clients',    msg: 'Show all clients with investment AUM and identify rebalancing opportunities' },
+        { cls: 'ctx-inv', label: 'Linda Morrison UMA', msg: 'Linda Morrison $280K UMA opportunity — present proposal details and fee structure' },
+        { cls: 'ctx-inv', label: 'Portfolio Gaps',     msg: 'Show investment portfolio gaps across all clients — who is missing investment products?' },
+        { cls: 'ctx-ret', label: 'Annuity Candidates', msg: 'Which clients are the best candidates for fixed-indexed annuity products?' },
+        { cls: 'ctx-inv', label: 'Maria Gonzalez FIA', msg: 'Maria Gonzalez fixed-indexed annuity — $75K allocation, income at age 65 projection' }
+      ]},
+      { label: 'Analysis', icon: 'fa-calculator', btns: [
+        { cls: 'ctx-inv', label: '$4.2M AUM Report', msg: 'Show AUM performance report across all investment clients — growth, rebalancing needs, fee revenue' },
+        { cls: 'ctx-ret', label: '529 Opportunities', msg: 'Which clients with young children are candidates for 529 college savings plans?' },
+        { cls: 'ctx-adv', label: 'Robert Chen $180K', msg: 'Robert Chen $180K AUM — consolidation opportunity after death benefit claim resolution' }
+      ]}
+    ]
+  },
+  retirement: {
+    name: 'Retirement Planning Agent',
+    sub: 'Income Gap · Annuities · NQDC · Social Security',
+    icon: 'fa-piggy-bank',
+    color: '#7c3aed',
+    ctxGroups: [
+      { label: 'Retirement', icon: 'fa-umbrella-beach', btns: [
+        { cls: 'ctx-ret', label: 'James Whitfield',   msg: 'James Whitfield deferred annuity illustration — $85K lump sum, income at age 67' },
+        { cls: 'ctx-ret', label: 'Income Gap Clients', msg: 'Which clients need retirement income gap analysis — show top 5 by gap size' },
+        { cls: 'ctx-ret', label: 'Annuity Candidates', msg: 'Show all deferred and immediate annuity candidates across the book' },
+        { cls: 'ctx-inv', label: 'Maria FIA $75K',    msg: 'Maria Gonzalez FIA: $75K allocation, income starting age 65 — full projection' },
+        { cls: 'ctx-adv', label: 'NQDC Opportunities', msg: 'Which clients are candidates for NQDC (Non-Qualified Deferred Compensation) plans?' }
+      ]},
+      { label: 'Planning', icon: 'fa-calculator', btns: [
+        { cls: 'ctx-ret', label: 'SS + Annuity Model', msg: 'Model retirement income for James Whitfield: Social Security $3,200 + deferred annuity $1,100 at 67' },
+        { cls: 'ctx-ret', label: '4 Clients at Risk',  msg: 'Show the 4 clients closest to retirement with no annuity product — priority action plan' },
+        { cls: 'ctx-adv', label: 'James NQDC Plan',    msg: 'James Whitfield NQDC plan — executive income deferral strategy and employer coordination' }
+      ]}
+    ]
+  },
+  estate: {
+    name: 'Estate Planning Agent',
+    sub: 'Trust Review · Wealth Management · UMA · Succession',
+    icon: 'fa-landmark',
+    color: '#6d28d9',
+    ctxGroups: [
+      { label: 'Estate', icon: 'fa-file-contract', btns: [
+        { cls: 'ctx-adv', label: 'Linda Morrison Estate', msg: 'Linda Morrison estate plan — trust update, UMA $280K, WL P-100330 review for Apr 15 meeting' },
+        { cls: 'ctx-adv', label: 'Robert Chen Succession', msg: 'Robert Chen business succession — Chen Holdings $4M valuation, buy-sell agreement, NQDC plan' },
+        { cls: 'ctx-adv', label: 'All Estate Clients',    msg: 'Show all 4 estate planning opportunities with recommended actions and revenue potential' },
+        { cls: 'ctx-adv', label: 'UMA Candidates',        msg: 'Show all UMA (Unified Managed Account) candidates — who has $250K+ investable assets?' },
+        { cls: 'ctx-inv', label: 'Trust Reviews Due',     msg: 'Which clients have trust documents that need annual review or updating?' }
+      ]},
+      { label: 'Drafts', icon: 'fa-pen-fancy', btns: [
+        { cls: 'ctx-adv', label: 'UMA Proposal: Linda', msg: 'Draft a UMA proposal for Linda Morrison — $280K at 1% management fee, $2,800/yr' },
+        { cls: 'ctx-adv', label: 'Buy-Sell: Robert',   msg: 'Outline a buy-sell agreement structure for Chen Holdings funded by $2M key-person life insurance' }
+      ]}
+    ]
+  },
+  business: {
+    name: 'Business Services Agent',
+    sub: 'SMB Insurance · NQDC · COLI · Employee Benefits',
+    icon: 'fa-building',
+    color: '#ea580c',
+    ctxGroups: [
+      { label: 'Business', icon: 'fa-briefcase', btns: [
+        { cls: 'ctx-adv', label: 'Chen Holdings',    msg: 'Chen Holdings — key-person life $2M, buy-sell agreement, NQDC plan details' },
+        { cls: 'ctx-adv', label: 'James Whitfield NQDC', msg: 'James Whitfield employer NQDC plan — eligibility, contribution limits, tax deferral benefits' },
+        { cls: 'ctx-inv', label: 'COLI Candidates',  msg: 'Which business-owner clients are candidates for Corporate-Owned Life Insurance (COLI)?' },
+        { cls: 'ctx-adv', label: 'SMB Opportunities', msg: 'Show all small-business insurance opportunities — group benefits, key-person, NQDC' },
+        { cls: 'ctx-ins', label: 'Key-Person Life',  msg: 'Show all clients who need key-person life insurance — business valuation and coverage gaps' }
+      ]},
+      { label: 'Analysis', icon: 'fa-chart-bar', btns: [
+        { cls: 'ctx-adv', label: 'Exec Benefits Report', msg: 'Which executive clients have no NQDC or deferred compensation strategy in place?' },
+        { cls: 'ctx-ins', label: 'Group Benefits Gap',   msg: 'Which business-owner clients have employees who need group insurance benefits?' }
+      ]}
+    ]
+  },
+  compliance: {
+    name: 'Compliance & Reporting Agent',
+    sub: 'Regulatory · Audit · Risk · Suitability',
+    icon: 'fa-shield-alt',
+    color: '#dc2626',
+    ctxGroups: [
+      { label: 'Compliance', icon: 'fa-balance-scale', btns: [
+        { cls: 'ctx-urgent', label: 'Suitability Review', msg: 'Are there any suitability concerns across current product recommendations?' },
+        { cls: 'ctx-ins',    label: 'Audit Ready Docs',   msg: 'Which client files are missing documentation required for compliance audit?' },
+        { cls: 'ctx-inv',    label: 'Reg Reporting',      msg: 'Generate a regulatory reporting summary for Q1 2026' },
+        { cls: 'ctx-ret',    label: 'Risk Flags',         msg: 'Show all compliance risk flags across the book — prioritize by severity' },
+        { cls: 'ctx-adv',    label: 'Fiduciary Check',    msg: 'Perform a fiduciary suitability check on all advisory recommendations this quarter' }
+      ]},
+      { label: 'Reports', icon: 'fa-file-alt', btns: [
+        { cls: 'ctx-adv', label: 'Compliance Report', msg: 'Generate a full compliance report for Q1 2026 — flags, resolutions, and outstanding items' },
+        { cls: 'ctx-ins', label: 'E&O Risk Check',    msg: 'Are there any errors and omissions risk factors in the current book of business?' }
+      ]}
+    ]
+  }
+};
+
 function selectAgent(agentId) {
   document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active-agent'));
   event.currentTarget.classList.add('active-agent');
 
-  const names = {
-    advisor: 'Smart Advisor Agent',
-    claims: 'Claims Automation Agent',
-    renewal: 'Renewal Automation Agent',
-    estate: 'Estate Planning Agent',
-    business: 'Business Services Agent',
-    compliance: 'Compliance & Reporting Agent'
-  };
+  const meta = agentMeta[agentId];
+  if (!meta) return;
 
+  // Update chat header
   const nameEl = document.getElementById('chat-agent-name');
-  if (nameEl) nameEl.textContent = names[agentId] || 'AI Agent';
+  const subEl  = document.getElementById('chat-agent-sub');
+  if (nameEl) nameEl.textContent = meta.name;
+  if (subEl)  subEl.textContent  = meta.sub;
+
+  // Swap context button toolbar to agent-specific groups
+  const toolbar = document.getElementById('ctx-btn-toolbar');
+  if (toolbar && meta.ctxGroups) {
+    toolbar.innerHTML = meta.ctxGroups.map(grp => `
+      <div class="ctx-group">
+        <span class="ctx-group-label"><i class="fas ${grp.icon}"></i> ${grp.label}</span>
+        <div class="ctx-btns">
+          ${grp.btns.map(b => `
+            <button class="ctx-btn ${b.cls}" onclick="sendQuickMessage('${b.msg.replace(/'/g, "\\'")}')">
+              ${b.label}
+            </button>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  // Inject agent greeting message into chat
+  const messages = document.getElementById('chat-messages');
+  if (messages) {
+    const greetings = {
+      advisor:    `I've switched to <strong>${meta.name}</strong>. I'm monitoring your full book — insurance, investments, retirement, and advisory. Use the context buttons above or ask me anything.`,
+      claims:     `I've switched to <strong>${meta.name}</strong>. I have visibility across all 6 active claims. Two are urgent: CLM-2026-0041 ($1M, Robert Chen) and CLM-2026-0028 (ADB, Maria Gonzalez). How can I help?`,
+      renewal:    `I've switched to <strong>${meta.name}</strong>. I'm tracking 23 renewals due in 90 days. ⚡ Critical: Sandra Williams term expiry Sep 2026 and Patricia Nguyen UL lapse risk. What do you need?`,
+      portfolio:  `I've switched to <strong>${meta.name}</strong>. I'm monitoring $4.2M AUM across investment clients. Top opportunity: Linda Morrison $280K UMA ($2,800/yr fee). What would you like to analyze?`,
+      retirement: `I've switched to <strong>${meta.name}</strong>. I've identified 4 annuity candidates and 2 clients with significant income gaps. Top priority: James Whitfield deferred annuity ($85K → $1,100/mo at 67). How can I help?`,
+      estate:     `I've switched to <strong>${meta.name}</strong>. I see 4 estate planning opportunities. Top: Linda Morrison UMA + trust review on Apr 15, and Robert Chen business succession for Chen Holdings ($4M). Where would you like to start?`,
+      business:   `I've switched to <strong>${meta.name}</strong>. I've identified 3 business services opportunities: Chen Holdings succession, James Whitfield NQDC plan, and 2 COLI candidates. What do you need?`,
+      compliance: `I've switched to <strong>${meta.name}</strong>. Running compliance scan across the book. No critical flags at this time. Suitability review recommended for 2 advisory recommendations. How can I assist?`
+    };
+    const greeting = greetings[agentId] || `Switched to <strong>${meta.name}</strong>. How can I help?`;
+    const msgEl = document.createElement('div');
+    msgEl.className = 'chat-msg bot agent-switch-msg';
+    msgEl.innerHTML = `
+      <div class="msg-avatar" style="background:${meta.color}20;color:${meta.color}"><i class="fas ${meta.icon}"></i></div>
+      <div class="msg-bubble agent-switch-bubble" style="border-left:3px solid ${meta.color}20">
+        <p>${greeting}</p>
+      </div>`;
+    messages.appendChild(msgEl);
+    messages.scrollTop = messages.scrollHeight;
+  }
 }
 
 function handleChatKey(e) {
@@ -551,6 +750,21 @@ function sendQuickMessage(msg) {
     input.value = msg;
     sendChatMessage();
   }
+}
+
+// Deep-link from any page: navigate to AI Agents then fire a pre-loaded context message
+function sendContextMessage(msg, agentId) {
+  navigateTo('ai-agents');
+  setTimeout(() => {
+    // Optionally switch agent
+    if (agentId) {
+      const agentCard = document.querySelector(`.agent-card[onclick*="'${agentId}'"]`);
+      if (agentCard) agentCard.click();
+      setTimeout(() => sendQuickMessage(msg), 300);
+    } else {
+      sendQuickMessage(msg);
+    }
+  }, 400);
 }
 
 async function sendChatMessage() {
@@ -639,14 +853,39 @@ function clearChat() {
         <div class="msg-bubble">
           <p>Chat cleared. How can I assist you?</p>
           <div class="quick-suggestions">
-            <button onclick="sendQuickMessage('Show me upsell opportunities')">Upsell opportunities</button>
+            <button onclick="sendQuickMessage('Show me upsell opportunities')">All opportunities</button>
             <button onclick="sendQuickMessage('Which policies are up for renewal?')">Renewals due</button>
             <button onclick="sendQuickMessage('Summarize my dashboard for today')">Daily summary</button>
+            <button onclick="sendQuickMessage('Show all lapse-risk clients and retention actions')">Retention risks</button>
+            <button onclick="sendQuickMessage('Show open claims and urgent actions needed')">Open claims</button>
           </div>
         </div>
       </div>
     `;
   }
+  // Reset toolbar to default Smart Advisor context
+  const toolbar = document.getElementById('ctx-btn-toolbar');
+  const meta = agentMeta['advisor'];
+  if (toolbar && meta && meta.ctxGroups) {
+    toolbar.innerHTML = meta.ctxGroups.map(grp => `
+      <div class="ctx-group">
+        <span class="ctx-group-label"><i class="fas ${grp.icon}"></i> ${grp.label}</span>
+        <div class="ctx-btns">
+          ${grp.btns.map(b => `
+            <button class="ctx-btn ${b.cls}" onclick="sendQuickMessage('${b.msg.replace(/'/g, "\\'")}')">
+              ${b.label}
+            </button>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+  // Reset agent name
+  const nameEl = document.getElementById('chat-agent-name');
+  const subEl  = document.getElementById('chat-agent-sub');
+  if (nameEl) nameEl.textContent = 'Smart Advisor Agent';
+  if (subEl)  subEl.textContent  = 'Insurance · Investments · Retirement · Advisory';
+  document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active-agent'));
+  const advisorCard = document.querySelector('.agent-card[onclick*="\'advisor\'"]');
+  if (advisorCard) advisorCard.classList.add('active-agent');
 }
 
 function aiAnalyzeClient(btn) {
