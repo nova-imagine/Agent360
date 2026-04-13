@@ -251,6 +251,7 @@ function MainApp() {
         <div id="tpl-claims"><ClaimsPage /></div>
         <div id="tpl-ai-agents"><AIAgentsPage /></div>
         <div id="tpl-sales"><SalesPage /></div>
+        <div id="tpl-underwriting"><UnderwritingPage /></div>
         <div id="tpl-products"><ProductsPage /></div>
         <div id="tpl-reports"><ReportsPage /></div>
         <div id="tpl-calendar"><CalendarPage /></div>
@@ -318,6 +319,13 @@ function Sidebar() {
           <i class="fas fa-funnel-dollar"></i>
           <span>Sales Pipeline</span>
         </a>
+        <div class="nav-sub-group">
+          <a class="nav-sub-item" onclick="navigateTo('underwriting')" href="#">
+            <i class="fas fa-microscope"></i>
+            <span>Underwriting</span>
+            <span class="nav-badge" style="background:#f59e0b;color:white">4</span>
+          </a>
+        </div>
         <a class="nav-item" onclick="navigateTo('products')" href="#">
           <i class="fas fa-box-open"></i>
           <span>Products</span>
@@ -2443,6 +2451,390 @@ function AIAgentsPage() {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ============================================================
+//  UNDERWRITING PAGE  (#4)
+// ============================================================
+function UnderwritingPage() {
+  return (
+    <div class="page underwriting-page">
+
+      {/* ── KPI Strip ── */}
+      <div class="uw-kpi-strip">
+        <div class="uw-kpi">
+          <div class="uw-kpi-icon blue"><i class="fas fa-microscope"></i></div>
+          <div class="uw-kpi-data">
+            <div class="uw-kpi-val">4.2 hrs</div>
+            <div class="uw-kpi-lbl">Avg Decision Time</div>
+            <div class="uw-kpi-delta green"><i class="fas fa-arrow-down"></i> vs 8 days manual</div>
+          </div>
+        </div>
+        <div class="uw-kpi">
+          <div class="uw-kpi-icon green"><i class="fas fa-bolt"></i></div>
+          <div class="uw-kpi-data">
+            <div class="uw-kpi-val">73%</div>
+            <div class="uw-kpi-lbl">STP Rate</div>
+            <div class="uw-kpi-delta green"><i class="fas fa-arrow-up"></i> +18% vs last quarter</div>
+          </div>
+        </div>
+        <div class="uw-kpi">
+          <div class="uw-kpi-icon purple"><i class="fas fa-file-medical"></i></div>
+          <div class="uw-kpi-data">
+            <div class="uw-kpi-val">18</div>
+            <div class="uw-kpi-lbl">APS Avoided / Month</div>
+            <div class="uw-kpi-delta green"><i class="fas fa-arrow-up"></i> AI evidence substitution</div>
+          </div>
+        </div>
+        <div class="uw-kpi">
+          <div class="uw-kpi-icon gold"><i class="fas fa-layer-group"></i></div>
+          <div class="uw-kpi-data">
+            <div class="uw-kpi-val">11</div>
+            <div class="uw-kpi-lbl">Cases In Pipeline</div>
+            <div class="uw-kpi-delta orange"><i class="fas fa-dot-circle"></i> 4 need attention</div>
+          </div>
+        </div>
+        <div class="uw-kpi">
+          <div class="uw-kpi-icon teal"><i class="fas fa-shield-check"></i></div>
+          <div class="uw-kpi-data">
+            <div class="uw-kpi-val">94.6%</div>
+            <div class="uw-kpi-lbl">AI Accuracy</div>
+            <div class="uw-kpi-delta green"><i class="fas fa-robot"></i> vs 89% manual</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI STP Engine Banner ── */}
+      <div class="uw-stp-banner">
+        <div class="uw-stp-left">
+          <div class="uw-stp-icon"><i class="fas fa-robot"></i></div>
+          <div>
+            <div class="uw-stp-title">AI Straight-Through Processing Engine</div>
+            <div class="uw-stp-sub">Automatically scores applications using rx history, MIB, motor vehicle, credit, and lab data · No APS needed for scores ≥ 75</div>
+          </div>
+        </div>
+        <div class="uw-stp-stats">
+          <div class="uw-stp-stat"><span class="uw-stp-val green">5</span><span class="uw-stp-lbl">Auto-Approved</span></div>
+          <div class="uw-stp-stat"><span class="uw-stp-val gold">4</span><span class="uw-stp-lbl">Under Review</span></div>
+          <div class="uw-stp-stat"><span class="uw-stp-val orange">2</span><span class="uw-stp-lbl">APS Required</span></div>
+          <div class="uw-stp-stat"><span class="uw-stp-val blue">30–50%</span><span class="uw-stp-lbl">Faster vs Manual</span></div>
+        </div>
+        <button class="btn-uw-scan" onclick="runUWScan()"><i class="fas fa-sync-alt"></i> Run AI Scan</button>
+      </div>
+
+      {/* ── Pipeline Board ── */}
+      <div class="uw-pipeline">
+
+        {/* Stage 1: Application Received */}
+        <div class="uw-stage">
+          <div class="uw-stage-header received">
+            <span><i class="fas fa-inbox"></i> Application Received</span>
+            <span class="uw-stage-count">3</span>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0018')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Alex Rivera</div>
+              <div class="uw-stp-score stp-high">STP 88</div>
+            </div>
+            <div class="uw-case-product">Whole Life — $500K · $4,800/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Received Apr 10 · Age 34</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done" title="Rx History">Rx ✓</span>
+              <span class="uw-ev ev-done" title="MIB Check">MIB ✓</span>
+              <span class="uw-ev ev-done" title="Motor Vehicle">MVR ✓</span>
+              <span class="uw-ev ev-pending" title="Credit">Credit…</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill received">New</span>
+              <span class="uw-ai-rec auto"><i class="fas fa-bolt"></i> Auto-Approve Eligible</span>
+            </div>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0017')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Nancy Foster</div>
+              <div class="uw-stp-score stp-high">STP 82</div>
+            </div>
+            <div class="uw-case-product">Term Life — $1M · $3,200/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Received Apr 9 · Age 41</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-pending">MVR…</span>
+              <span class="uw-ev ev-pending">Credit…</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill received">New</span>
+              <span class="uw-ai-rec review"><i class="fas fa-search"></i> Review Pending</span>
+            </div>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0016')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">John Kim</div>
+              <div class="uw-stp-score stp-med">STP 61</div>
+            </div>
+            <div class="uw-case-product">Disability Ins. · $2,100/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Received Apr 8 · Age 38</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-flag">MIB ⚠</span>
+              <span class="uw-ev ev-pending">MVR…</span>
+              <span class="uw-ev ev-pending">Credit…</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill received">New</span>
+              <span class="uw-ai-rec aps"><i class="fas fa-file-medical"></i> APS Required</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stage 2: Evidence Gathering */}
+        <div class="uw-stage">
+          <div class="uw-stage-header evidence">
+            <span><i class="fas fa-search-plus"></i> Evidence Gathering</span>
+            <span class="uw-stage-count">3</span>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0015')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Michael Santos</div>
+              <div class="uw-stp-score stp-high">STP 79</div>
+            </div>
+            <div class="uw-case-product">Universal Life — $750K · $6,400/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Apr 5 · Age 47 · Hot Lead</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-pending">Lab…</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill evidence">In Progress</span>
+              <span class="uw-ai-rec auto"><i class="fas fa-bolt"></i> Near Auto-Approve</span>
+            </div>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0014')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Julia Chen</div>
+              <div class="uw-stp-score stp-low">STP 44</div>
+            </div>
+            <div class="uw-case-product">Annuity Deferred · $8,000/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Apr 3 · Age 58</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-flag">MIB ⚠</span>
+              <span class="uw-ev ev-flag">Lab ⚠</span>
+              <span class="uw-ev ev-pending">APS…</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill evidence">In Progress</span>
+              <span class="uw-ai-rec aps"><i class="fas fa-file-medical"></i> APS Required</span>
+            </div>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0013')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Rachel Adams</div>
+              <div class="uw-stp-score stp-high">STP 85</div>
+            </div>
+            <div class="uw-case-product">Whole Life — $300K · $3,600/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Apr 1 · Age 29</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-done">Credit ✓</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill evidence">In Progress</span>
+              <span class="uw-ai-rec auto"><i class="fas fa-bolt"></i> Auto-Approve Eligible</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stage 3: AI Review */}
+        <div class="uw-stage">
+          <div class="uw-stage-header ai-review">
+            <span><i class="fas fa-robot"></i> AI Review</span>
+            <span class="uw-stage-count">2</span>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0012')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Thomas Wright</div>
+              <div class="uw-stp-score stp-high">STP 91</div>
+            </div>
+            <div class="uw-case-product">Whole Life — $1M · $9,600/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 28 · Age 52 · Medical Exam Done</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-done">Lab ✓</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill ai-review">AI Scoring</span>
+              <span class="uw-ai-rec auto"><i class="fas fa-bolt"></i> STP Auto-Approve</span>
+            </div>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0011')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Grace Lee</div>
+              <div class="uw-stp-score stp-med">STP 67</div>
+            </div>
+            <div class="uw-case-product">VUL — $250K · $3,800/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 25 · Age 44</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-flag">Lab ⚠</span>
+              <span class="uw-ev ev-pending">APS…</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill ai-review">AI Scoring</span>
+              <span class="uw-ai-rec review"><i class="fas fa-search"></i> Manual Review Needed</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stage 4: Decision */}
+        <div class="uw-stage">
+          <div class="uw-stage-header decision">
+            <span><i class="fas fa-gavel"></i> Decision</span>
+            <span class="uw-stage-count">1</span>
+          </div>
+          <div class="uw-case-card urgent-case" onclick="openUWModal('UW-2026-0010')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">David Thompson</div>
+              <div class="uw-stp-score stp-high">STP 78</div>
+            </div>
+            <div class="uw-case-product">Term Life — $300K · $2,400/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 20 · Age 33 · Decision Due Today</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-done">Credit ✓</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill decision">Pending Decision</span>
+              <span class="uw-ai-rec auto"><i class="fas fa-bolt"></i> Approve Recommended</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stage 5: Approved */}
+        <div class="uw-stage">
+          <div class="uw-stage-header approved">
+            <span><i class="fas fa-check-circle"></i> Approved</span>
+            <span class="uw-stage-count">2</span>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0009')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Linda Morrison</div>
+              <div class="uw-stp-score stp-high">STP 99</div>
+            </div>
+            <div class="uw-case-product">WL Rider Add-on · $1,200/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 18 · Age 56 · STP Auto</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-done">Lab ✓</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill approved">Approved</span>
+              <span class="uw-ai-rec issued"><i class="fas fa-file-signature"></i> Awaiting Signature</span>
+            </div>
+          </div>
+          <div class="uw-case-card" onclick="openUWModal('UW-2026-0008')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Maria Gonzalez</div>
+              <div class="uw-stp-score stp-high">STP 86</div>
+            </div>
+            <div class="uw-case-product">DI Policy Increase · $800/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 15 · Age 48</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-done">Credit ✓</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill approved">Approved</span>
+              <span class="uw-ai-rec issued"><i class="fas fa-file-signature"></i> Awaiting Signature</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stage 6: Issued / Declined */}
+        <div class="uw-stage">
+          <div class="uw-stage-header issued">
+            <span><i class="fas fa-badge-check"></i> Issued</span>
+            <span class="uw-stage-count">2</span>
+          </div>
+          <div class="uw-case-card issued-card" onclick="openUWModal('UW-2026-0007')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">Robert Chen</div>
+              <div class="uw-stp-score stp-high">STP 96</div>
+            </div>
+            <div class="uw-case-product">VUL Add-on Rider · $1,800/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-check-circle" style="color:#059669"></i> Issued Apr 2 · 1.8 hrs total</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-done">Lab ✓</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill issued">Issued</span>
+              <span class="uw-ai-rec issued"><i class="fas fa-bolt"></i> STP — 1.8 hrs</span>
+            </div>
+          </div>
+          <div class="uw-case-card issued-card" onclick="openUWModal('UW-2026-0006')">
+            <div class="uw-case-header">
+              <div class="uw-case-client">James Whitfield</div>
+              <div class="uw-stp-score stp-high">STP 94</div>
+            </div>
+            <div class="uw-case-product">LTC Rider · $4,400/yr</div>
+            <div class="uw-case-meta"><i class="fas fa-check-circle" style="color:#059669"></i> Issued Mar 30 · 3.1 hrs total</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-done">MIB ✓</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-done">Lab ✓</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill issued">Issued</span>
+              <span class="uw-ai-rec issued"><i class="fas fa-bolt"></i> STP — 3.1 hrs</span>
+            </div>
+          </div>
+        </div>
+
+      </div>{/* end uw-pipeline */}
+
+      {/* ── Underwriting Modal ── */}
+      <div class="detail-modal-overlay" id="uw-modal-overlay" onclick="closeUWModal()">
+        <div class="detail-modal uw-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header" id="uw-modal-header">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" id="uw-modal-icon" style="background:linear-gradient(135deg,#003087,#1e40af)"><i class="fas fa-microscope"></i></span>
+              <div>
+                <h3 id="uw-modal-title">Underwriting Case</h3>
+                <p id="uw-modal-subtitle" class="detail-modal-sub"></p>
+              </div>
+            </div>
+            <div class="detail-modal-header-actions">
+              <div class="detail-modal-tabs" id="uw-modal-tabs">
+                <button class="dmt-tab active" onclick="switchUWTab('overview',this)"><i class="fas fa-file-alt"></i> Overview</button>
+                <button class="dmt-tab" onclick="switchUWTab('evidence',this)"><i class="fas fa-search-plus"></i> Evidence</button>
+                <button class="dmt-tab ai-tab" onclick="switchUWTab('ai',this)"><i class="fas fa-robot"></i> AI Score</button>
+              </div>
+              <button class="detail-modal-close" onclick="closeUWModal()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="detail-modal-body" id="uw-modal-body"></div>
+        </div>
+      </div>
+
     </div>
   )
 }

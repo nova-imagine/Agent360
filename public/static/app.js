@@ -27,7 +27,8 @@ function navigateTo(page) {
     reports: 'Reports & Analytics',
     calendar: 'Calendar & Events',
     'ai-insights': 'AI Insights',
-    claims: 'Claims Management'
+    claims: 'Claims Management',
+    underwriting: 'Underwriting Pipeline'
   };
 
   const breadcrumbs = {
@@ -40,7 +41,8 @@ function navigateTo(page) {
     reports: 'Home / Reports',
     calendar: 'Home / Calendar',
     'ai-insights': 'Home / Insights / AI Insights',
-    claims: 'Home / Claims'
+    claims: 'Home / Claims',
+    underwriting: 'Home / Sales / Underwriting'
   };
 
   const titleEl = document.getElementById('page-title');
@@ -1797,4 +1799,528 @@ function closePACModal() {
   const overlay = document.getElementById('pac-modal-overlay');
   if (overlay) overlay.style.display = 'none';
   document.body.style.overflow = '';
+}
+
+/* =============================================
+   UNDERWRITING PIPELINE — Data & Modal Logic
+   ============================================= */
+
+// ── UW Case Data ──
+const uwData = {
+  'UW-2026-0018': {
+    id: 'UW-2026-0018', client: 'Alex Rivera', age: 34, stage: 'Application Received',
+    product: 'Whole Life', faceValue: '$500,000', annualPremium: '$4,800/yr',
+    receivedDate: '2026-04-10', decisionDue: '2026-04-17', stpScore: 88,
+    riskClass: 'Preferred Plus', smoker: false, bmi: '22.4',
+    agent: 'James Richardson', underwriter: 'Auto-Assign pending',
+    evidence: [
+      { name: 'Rx History', status: 'done',    result: 'No significant Rx in past 5 years. Clean.' },
+      { name: 'MIB Check',  status: 'done',    result: 'No adverse records found.' },
+      { name: 'MVR',        status: 'done',    result: '1 minor speeding ticket (2023). Acceptable.' },
+      { name: 'Credit',     status: 'pending', result: 'Ordered — ETA 24 hrs.' },
+      { name: 'Lab',        status: 'na',      result: 'Not required — STP score ≥ 75.' }
+    ],
+    ai: {
+      headline: 'Auto-Approve Eligible — STP Score 88',
+      riskLevel: 'Low',
+      summary: 'Alex Rivera presents a low-risk profile. STP engine has cleared Rx, MIB, and MVR checks. Credit report pending but STP threshold (75) already met. No APS required.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Age 34 — preferred age band, excellent mortality profile.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'No Rx history findings. No chronic conditions.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'MIB clear — no prior declined applications or misrepresentation flags.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'BMI 22.4 — optimal range, no extra mortality loading.' },
+        { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'Credit check pending — required before final binding, but unlikely to impact decision.' }
+      ],
+      recommendation: '✅ APPROVE — Issue Preferred Plus once credit report received (ETA 24 hrs). Auto-binding eligible.',
+      nextSteps: ['Wait for credit report (ETA Apr 11)', 'Auto-bind at Preferred Plus once credit clears', 'Send policy docs for e-signature']
+    }
+  },
+  'UW-2026-0017': {
+    id: 'UW-2026-0017', client: 'Nancy Foster', age: 41, stage: 'Application Received',
+    product: 'Term Life', faceValue: '$1,000,000', annualPremium: '$3,200/yr',
+    receivedDate: '2026-04-09', decisionDue: '2026-04-16', stpScore: 82,
+    riskClass: 'Preferred', smoker: false, bmi: '24.1',
+    agent: 'James Richardson', underwriter: 'Sarah Kim (pending)',
+    evidence: [
+      { name: 'Rx History', status: 'done',    result: 'Lisinopril 10mg (HTN) — controlled, standard rate eligible.' },
+      { name: 'MIB Check',  status: 'done',    result: 'No adverse records.' },
+      { name: 'MVR',        status: 'pending', result: 'Ordered — ETA today.' },
+      { name: 'Credit',     status: 'pending', result: 'Ordered — ETA 24 hrs.' },
+      { name: 'Lab',        status: 'na',      result: 'Not required at this coverage level.' }
+    ],
+    ai: {
+      headline: 'Preferred Rate Eligible — Minor Rx Flag',
+      riskLevel: 'Low-Moderate',
+      summary: 'Nancy Foster qualifies for Preferred rates. Controlled hypertension with Lisinopril 10mg is within standard underwriting guidelines for her age. MVR and credit pending.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Hypertension well-controlled on single medication — standard rate eligible per NYL guidelines.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'MIB clear — no adverse history or prior declined applications.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'BMI 24.1 — within preferred range.' },
+        { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'MVR pending — single moving violation could adjust to Standard rate.' },
+        { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'Coverage amount $1M requires MVR + credit to finalize risk class.' }
+      ],
+      recommendation: '✅ APPROVE at Preferred — confirm upon MVR and credit clearance. Likely same-day binding.',
+      nextSteps: ['Await MVR report (today)', 'Confirm credit report (24 hrs)', 'Issue Preferred policy once evidence complete']
+    }
+  },
+  'UW-2026-0016': {
+    id: 'UW-2026-0016', client: 'John Kim', age: 38, stage: 'Application Received',
+    product: 'Disability Insurance', faceValue: 'N/A', annualPremium: '$2,100/yr',
+    receivedDate: '2026-04-08', decisionDue: '2026-04-18', stpScore: 61,
+    riskClass: 'Standard (pending)', smoker: false, bmi: '26.8',
+    agent: 'James Richardson', underwriter: 'Pending assignment',
+    evidence: [
+      { name: 'Rx History', status: 'done',    result: 'Metformin 500mg (Type 2 DM) — flagged for review.' },
+      { name: 'MIB Check',  status: 'flag',    result: '⚠ Prior DI claim 2021 (back injury). Requires review.' },
+      { name: 'MVR',        status: 'pending', result: 'Ordered — ETA 48 hrs.' },
+      { name: 'Credit',     status: 'pending', result: 'Ordered — ETA 24 hrs.' },
+      { name: 'APS',        status: 'pending', result: 'APS from primary care required for DM and prior DI claim.' }
+    ],
+    ai: {
+      headline: 'APS Required — MIB Flag + DM Rx History',
+      riskLevel: 'Moderate-High',
+      summary: 'John Kim has two underwriting flags: Type 2 DM on Metformin and a prior DI claim (2021 back injury) on MIB. APS needed from primary care provider before decision. STP score below auto-approve threshold.',
+      factors: [
+        { icon: 'fa-times-circle', color: '#dc2626', text: 'Type 2 DM on Metformin — DI policies require APS to assess control level (A1c needed).' },
+        { icon: 'fa-times-circle', color: '#dc2626', text: 'MIB flag: prior DI claim 2021 (back injury). Determine if resolved or chronic.' },
+        { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'BMI 26.8 — borderline overweight, may affect DI risk class.' },
+        { icon: 'fa-info-circle', color: '#3b82f6', text: 'Age 38 — DI coverage is appropriate and likely approvable if conditions well-controlled.' }
+      ],
+      recommendation: '⚠️ APS REQUIRED — Order APS from Dr. (primary care). Decision pending. Likely Standard or rated.',
+      nextSteps: ['Order APS from primary care physician', 'Review A1c and DM control history', 'Assess 2021 DI claim resolution status before decision']
+    }
+  },
+  'UW-2026-0015': {
+    id: 'UW-2026-0015', client: 'Michael Santos', age: 47, stage: 'Evidence Gathering',
+    product: 'Universal Life', faceValue: '$750,000', annualPremium: '$6,400/yr',
+    receivedDate: '2026-04-05', decisionDue: '2026-04-14', stpScore: 79,
+    riskClass: 'Preferred', smoker: false, bmi: '23.7',
+    agent: 'James Richardson', underwriter: 'David Park',
+    evidence: [
+      { name: 'Rx History', status: 'done',    result: 'Atorvastatin 20mg (cholesterol) — controlled.' },
+      { name: 'MIB Check',  status: 'done',    result: 'No adverse records.' },
+      { name: 'MVR',        status: 'done',    result: 'Clean driving record.' },
+      { name: 'Lab',        status: 'pending', result: 'Lab kit sent Apr 7 — results expected Apr 13.' },
+      { name: 'Credit',     status: 'done',    result: 'Credit score 780 — excellent.' }
+    ],
+    ai: {
+      headline: 'Near Auto-Approve — Lab Results Pending',
+      riskLevel: 'Low',
+      summary: 'Michael Santos is a strong Preferred candidate. All evidence cleared except lab (expected Apr 13). Cholesterol controlled on Atorvastatin. Once lab results confirm lipid panel within range, auto-approval is highly likely.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Cholesterol controlled on Atorvastatin — NYL standard for Preferred classification.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'MIB and MVR both clear — no adverse history.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Credit score 780 — excellent financial profile.' },
+        { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'Lab panel pending — if LDL > 160 may shift to Standard. Likely within range given Rx compliance.' }
+      ],
+      recommendation: '✅ APPROVE (Preferred) — pending lab confirmation. Issue once lipid panel received (Est. Apr 13).',
+      nextSteps: ['Await lab results (Est. Apr 13)', 'If LDL < 160 → auto-approve Preferred', 'If LDL 160–190 → Standard rate. Discuss with client.']
+    }
+  },
+  'UW-2026-0014': {
+    id: 'UW-2026-0014', client: 'Julia Chen', age: 58, stage: 'Evidence Gathering',
+    product: 'Annuity Deferred', faceValue: 'N/A', annualPremium: '$8,000/yr',
+    receivedDate: '2026-04-03', decisionDue: '2026-04-20', stpScore: 44,
+    riskClass: 'Pending review', smoker: false, bmi: '28.3',
+    agent: 'James Richardson', underwriter: 'Mary Johnson',
+    evidence: [
+      { name: 'Rx History', status: 'done',    result: 'Metoprolol (HTN), Pantoprazole (GERD) — under review.' },
+      { name: 'MIB Check',  status: 'flag',    result: '⚠ Cardiac event 2019 — needs full review.' },
+      { name: 'Lab',        status: 'flag',    result: '⚠ Labs from 2025: elevated BNP 320 pg/mL. APS needed.' },
+      { name: 'APS',        status: 'pending', result: 'APS from cardiologist ordered Apr 5 — ETA 2 weeks.' },
+      { name: 'Credit',     status: 'done',    result: 'Credit score 695 — acceptable.' }
+    ],
+    ai: {
+      headline: 'APS Required — Cardiac Event on MIB',
+      riskLevel: 'High',
+      summary: 'Julia Chen has a 2019 cardiac event flagged on MIB and elevated BNP on recent labs. Annuity products have lower mortality requirements, but this case requires cardiology APS to determine current heart function before any binding.',
+      factors: [
+        { icon: 'fa-times-circle', color: '#dc2626', text: '⚠ Cardiac event 2019 on MIB — type and severity unknown. Cardiologist APS required.' },
+        { icon: 'fa-times-circle', color: '#dc2626', text: 'Elevated BNP 320 pg/mL (normal < 100) — possible heart failure component. Must clarify.' },
+        { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'Two HTN/GERD medications — individually acceptable, combined with cardiac flag requires full review.' },
+        { icon: 'fa-info-circle', color: '#3b82f6', text: 'Annuity product has no death benefit — may still qualify if cardiac condition stable.' }
+      ],
+      recommendation: '⚠️ HOLD — APS from cardiologist required. Do not bind. Decision pending cardiac evaluation.',
+      nextSteps: ['Await cardiologist APS (ETA Apr 20)', 'Review BNP trends and cardiac function', 'If stable post-event → likely Standard or rated. If active cardiac issue → possible decline or exclusion.']
+    }
+  },
+  'UW-2026-0013': {
+    id: 'UW-2026-0013', client: 'Rachel Adams', age: 29, stage: 'Evidence Gathering',
+    product: 'Whole Life', faceValue: '$300,000', annualPremium: '$3,600/yr',
+    receivedDate: '2026-04-01', decisionDue: '2026-04-09', stpScore: 85,
+    riskClass: 'Preferred Plus', smoker: false, bmi: '21.2',
+    agent: 'James Richardson', underwriter: 'Auto-binding eligible',
+    evidence: [
+      { name: 'Rx History', status: 'done', result: 'No Rx history. Completely clean.' },
+      { name: 'MIB Check',  status: 'done', result: 'No records found.' },
+      { name: 'MVR',        status: 'done', result: 'Clean driving record.' },
+      { name: 'Credit',     status: 'done', result: 'Credit score 802 — excellent.' },
+      { name: 'Lab',        status: 'na',   result: 'Not required — age < 40, STP ≥ 75.' }
+    ],
+    ai: {
+      headline: 'Auto-Approve Eligible — All Evidence Clear',
+      riskLevel: 'Very Low',
+      summary: 'Rachel Adams is an ideal candidate for Preferred Plus. Age 29 with no Rx, clean MIB, MVR, and credit. All STP checks passed. This is a textbook auto-approve case.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Age 29 — lowest mortality risk band. No age loading.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'No Rx history whatsoever — excellent health profile.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'BMI 21.2 — optimal range, no extra loading.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Credit 802 and clean MVR — all secondary risk factors clear.' }
+      ],
+      recommendation: '✅ AUTO-APPROVE — Issue Preferred Plus immediately. No APS, no lab required.',
+      nextSteps: ['Auto-bind at Preferred Plus (no further review needed)', 'Send e-signature request', 'Schedule policy delivery call with client']
+    }
+  },
+  'UW-2026-0012': {
+    id: 'UW-2026-0012', client: 'Thomas Wright', age: 52, stage: 'AI Review',
+    product: 'Whole Life', faceValue: '$1,000,000', annualPremium: '$9,600/yr',
+    receivedDate: '2026-03-28', decisionDue: '2026-04-13', stpScore: 91,
+    riskClass: 'Preferred', smoker: false, bmi: '24.9',
+    agent: 'James Richardson', underwriter: 'AI Engine (Sarah Kim review)',
+    evidence: [
+      { name: 'Rx History', status: 'done', result: 'Atorvastatin 40mg — controlled cholesterol. Acceptable.' },
+      { name: 'MIB Check',  status: 'done', result: 'No adverse records.' },
+      { name: 'MVR',        status: 'done', result: 'Clean record.' },
+      { name: 'Lab',        status: 'done', result: 'Lab results received Apr 10: TC 185, LDL 98, HDL 62. Excellent.' },
+      { name: 'Medical Exam', status: 'done', result: 'Exam Apr 8: BP 122/78, EKG normal. All clear.' }
+    ],
+    ai: {
+      headline: 'STP Auto-Approve — Preferred | $1M Whole Life',
+      riskLevel: 'Low',
+      summary: 'Thomas Wright is a Preferred-class case at STP 91. All evidence received. Lab panel excellent (LDL 98, HDL 62). Medical exam normal. AI engine recommends auto-approval at Preferred rate. Human review by Sarah Kim in progress as standard protocol for $1M+ face value.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Lab panel excellent — LDL 98, HDL 62, TC 185. Well within Preferred ranges.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Medical exam: BP 122/78, normal EKG. No concerns.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Cholesterol controlled on Atorvastatin — acceptable for Preferred classification.' },
+        { icon: 'fa-info-circle', color: '#3b82f6', text: 'Human review required per protocol for face values ≥ $1M — standard procedure only.' }
+      ],
+      recommendation: '✅ APPROVE at Preferred — AI scoring complete. Awaiting final human sign-off (Sarah Kim) due to $1M+ face value protocol.',
+      nextSteps: ['Sarah Kim human review today', 'Issue Preferred policy upon approval', 'Agent to coordinate policy delivery with Thomas Wright']
+    }
+  },
+  'UW-2026-0011': {
+    id: 'UW-2026-0011', client: 'Grace Lee', age: 44, stage: 'AI Review',
+    product: 'Variable Universal Life', faceValue: '$250,000', annualPremium: '$3,800/yr',
+    receivedDate: '2026-03-25', decisionDue: '2026-04-12', stpScore: 67,
+    riskClass: 'Standard (likely)', smoker: false, bmi: '27.1',
+    agent: 'James Richardson', underwriter: 'Manual — David Park',
+    evidence: [
+      { name: 'Rx History', status: 'done', result: 'Sertraline 50mg (anxiety/depression) — requires review.' },
+      { name: 'MIB Check',  status: 'done', result: 'No adverse records.' },
+      { name: 'Lab',        status: 'flag', result: '⚠ ALT 68 U/L (normal < 56). Mild liver enzyme elevation.' },
+      { name: 'APS',        status: 'pending', result: 'APS from primary care ordered Mar 28 — due Apr 12.' },
+      { name: 'MVR',        status: 'done', result: 'Clean.' }
+    ],
+    ai: {
+      headline: 'Manual Review — Mild Lab Flag + SSRI',
+      riskLevel: 'Moderate',
+      summary: 'Grace Lee has two borderline flags: Sertraline 50mg (SSRI for anxiety) and mildly elevated ALT 68 U/L. Neither individually disqualifies coverage, but combined with BMI 27.1, manual review by an underwriter is warranted. Standard rate likely.',
+      factors: [
+        { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'Sertraline 50mg — depression/anxiety. Must review APS for severity, hospitalizations, or medication changes.' },
+        { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'ALT 68 U/L (elevated) — alcohol use, fatty liver, or medication effect? APS needed to clarify.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'MIB clear — no adverse insurance history.' },
+        { icon: 'fa-info-circle', color: '#3b82f6', text: 'Standard rate likely if APS confirms controlled conditions. Possible table rating if escalated.' }
+      ],
+      recommendation: '⚠️ MANUAL REVIEW — Await APS (Apr 12). Likely Standard rate. Table rating possible if findings escalated.',
+      nextSteps: ['Receive APS from primary care (Apr 12)', 'David Park to review SSRI history and ALT cause', 'Prepare Standard or Table 2 offer for agent']
+    }
+  },
+  'UW-2026-0010': {
+    id: 'UW-2026-0010', client: 'David Thompson', age: 33, stage: 'Decision',
+    product: 'Term Life', faceValue: '$300,000', annualPremium: '$2,400/yr',
+    receivedDate: '2026-03-20', decisionDue: '2026-04-13', stpScore: 78,
+    riskClass: 'Preferred Plus', smoker: false, bmi: '22.8',
+    agent: 'James Richardson', underwriter: 'Sarah Kim — DECISION TODAY',
+    evidence: [
+      { name: 'Rx History', status: 'done', result: 'No Rx history.' },
+      { name: 'MIB Check',  status: 'done', result: 'No adverse records.' },
+      { name: 'MVR',        status: 'done', result: 'Clean.' },
+      { name: 'Credit',     status: 'done', result: 'Credit score 755 — good.' },
+      { name: 'Lab',        status: 'na',   result: 'Not required.' }
+    ],
+    ai: {
+      headline: '⚡ DECISION DUE TODAY — Approve at Preferred Plus',
+      riskLevel: 'Very Low',
+      summary: 'David Thompson is fully cleared. All evidence received. No flags. STP score 78. Age 33 in excellent health. AI recommends immediate Preferred Plus approval. Decision is due today — no further review needed.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'All evidence received and cleared — Rx, MIB, MVR, credit all clean.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Age 33, no medications — ideal risk profile.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'BMI 22.8 — excellent range.' },
+        { icon: 'fa-exclamation-triangle', color: '#dc2626', text: '⚡ URGENT — Decision due today. Delay may result in policy lapse / client frustration.' }
+      ],
+      recommendation: '✅ APPROVE NOW — Preferred Plus, Term Life $300K. Decision due today. No blockers.',
+      nextSteps: ['⚡ Sarah Kim: approve immediately', 'Issue Preferred Plus policy today', 'Agent to contact David Thompson for e-signature (same day)']
+    }
+  },
+  'UW-2026-0009': {
+    id: 'UW-2026-0009', client: 'Linda Morrison', age: 56, stage: 'Approved',
+    product: 'Whole Life Rider Add-on', faceValue: 'N/A', annualPremium: '$1,200/yr',
+    receivedDate: '2026-03-18', decisionDue: '2026-03-28', stpScore: 99,
+    riskClass: 'Preferred Plus (existing)', smoker: false, bmi: '23.0',
+    agent: 'James Richardson', underwriter: 'Auto-approved via STP',
+    evidence: [
+      { name: 'Rx History', status: 'done', result: 'No new Rx since policy issue.' },
+      { name: 'MIB Check',  status: 'done', result: 'No new adverse records.' },
+      { name: 'Existing Policy Review', status: 'done', result: 'Policy P-100362 in good standing 6+ years.' },
+      { name: 'Signature',  status: 'pending', result: 'E-signature sent Mar 28 — awaiting client return.' }
+    ],
+    ai: {
+      headline: 'Auto-Approved — STP 99 | Awaiting E-Signature',
+      riskLevel: 'Very Low',
+      summary: 'Linda Morrison is an existing Preferred Plus client. Rider add-on requires no new underwriting — auto-approved by STP engine at score 99. Only pending item is e-signature return from client.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Existing Preferred Plus client in good standing — no new underwriting required.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'STP score 99 — highest confidence auto-approval.' },
+        { icon: 'fa-info-circle', color: '#3b82f6', text: 'E-signature sent Mar 28. Follow up with Linda if not returned within 5 business days.' }
+      ],
+      recommendation: '✅ APPROVED — Follow up on e-signature. Issue rider once signed.',
+      nextSteps: ['Follow up with Linda Morrison on e-signature (sent Mar 28)', 'Issue rider immediately upon signature', 'Update policy file P-100362 with rider addition']
+    }
+  },
+  'UW-2026-0008': {
+    id: 'UW-2026-0008', client: 'Maria Gonzalez', age: 48, stage: 'Approved',
+    product: 'DI Policy Increase', faceValue: 'N/A', annualPremium: '$800/yr',
+    receivedDate: '2026-03-15', decisionDue: '2026-03-25', stpScore: 86,
+    riskClass: 'Standard (DI)',  smoker: false, bmi: '25.6',
+    agent: 'James Richardson', underwriter: 'Auto-approved via STP',
+    evidence: [
+      { name: 'Rx History', status: 'done', result: 'Metformin 500mg (DM2) — stable, same as original policy.' },
+      { name: 'Occupation Review', status: 'done', result: 'Paralegal — Class 4A occupation. Acceptable.' },
+      { name: 'Income Verification', status: 'done', result: 'Income confirmed at $82K. Benefit increase justified.' },
+      { name: 'Signature',  status: 'pending', result: 'E-signature sent Mar 25 — awaiting client.' }
+    ],
+    ai: {
+      headline: 'Approved — DI Increase | Awaiting E-Signature',
+      riskLevel: 'Low',
+      summary: 'Maria Gonzalez\'s DI benefit increase approved. Consistent health profile (DM2 stable), income verified, occupation class confirmed. STP 86. Awaiting e-signature.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'DM2 controlled on Metformin — same profile as original DI policy. No change in risk class.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Income at $82K fully supports proposed benefit increase.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Occupation Class 4A (paralegal) — standard DI eligibility.' }
+      ],
+      recommendation: '✅ APPROVED — Issue DI increase upon e-signature. Follow up with Maria Gonzalez.',
+      nextSteps: ['Follow up on e-signature (sent Mar 25)', 'Issue DI policy increase upon signature', 'Note in client file: benefit now $X,XXX/mo']
+    }
+  },
+  'UW-2026-0007': {
+    id: 'UW-2026-0007', client: 'Robert Chen', age: 45, stage: 'Issued',
+    product: 'VUL Add-on Rider', faceValue: 'N/A', annualPremium: '$1,800/yr',
+    receivedDate: '2026-03-30', decisionDue: '2026-04-02', stpScore: 96,
+    riskClass: 'Preferred (existing)', smoker: false, bmi: '24.2',
+    agent: 'James Richardson', underwriter: 'Auto-issued via STP',
+    evidence: [
+      { name: 'Rx History', status: 'done', result: 'No new Rx.' },
+      { name: 'MIB Check',  status: 'done', result: 'No new adverse records.' },
+      { name: 'Policy Review', status: 'done', result: 'Policy in good standing.' },
+      { name: 'E-Signature', status: 'done', result: 'Signed digitally Apr 1.' }
+    ],
+    ai: {
+      headline: '✅ Issued — STP 96 | Total Decision Time 1.8 hrs',
+      riskLevel: 'Very Low',
+      summary: 'Robert Chen rider add-on issued in 1.8 hours total. STP engine processed all checks automatically. E-signature received digitally. This is an example of optimal AI-assisted underwriting speed.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'STP 96 — top-tier auto-approval score. Zero manual review required.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'All checks cleared within 1.8 hrs from application received to policy issued.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'E-signature received same day.' }
+      ],
+      recommendation: '✅ ISSUED — Policy active. No further action required.',
+      nextSteps: ['Policy document sent to client email', 'Update CRM with issued status', 'Schedule 6-month policy review']
+    }
+  },
+  'UW-2026-0006': {
+    id: 'UW-2026-0006', client: 'James Whitfield', age: 62, stage: 'Issued',
+    product: 'LTC Rider Add-on', faceValue: 'N/A', annualPremium: '$4,400/yr',
+    receivedDate: '2026-03-27', decisionDue: '2026-03-30', stpScore: 94,
+    riskClass: 'Standard LTC', smoker: false, bmi: '26.3',
+    agent: 'James Richardson', underwriter: 'David Park + AI co-review',
+    evidence: [
+      { name: 'Rx History', status: 'done', result: 'Amlodipine + Atorvastatin — stable hypertension and cholesterol.' },
+      { name: 'MIB Check',  status: 'done', result: 'No adverse records.' },
+      { name: 'Cognitive Screen', status: 'done', result: 'MMSE score 28/30 — within normal range.' },
+      { name: 'ADL Review', status: 'done', result: 'Full ADL independence confirmed.' },
+      { name: 'E-Signature', status: 'done', result: 'Signed Mar 29.' }
+    ],
+    ai: {
+      headline: '✅ Issued — LTC Rider | 3.1 hrs Total',
+      riskLevel: 'Low',
+      summary: 'James Whitfield LTC rider issued after standard LTC underwriting protocol. Cognitive screening (MMSE 28/30) and ADL independence confirmed. Hypertension and cholesterol controlled. Issued in 3.1 hrs with AI + human co-review.',
+      factors: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'MMSE 28/30 — cognitive function normal. LTC eligibility confirmed.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Full ADL independence — no prior disability or care facility history.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Hypertension and cholesterol controlled — acceptable for Standard LTC rate.' }
+      ],
+      recommendation: '✅ ISSUED — Standard LTC rate. Policy active. No further action.',
+      nextSteps: ['Policy documents delivered to James Whitfield', 'Update P-100293 LTC rider on record', 'Schedule annual LTC policy review']
+    }
+  }
+};
+
+// ── UW Modal State ──
+let _currentUWCase = null;
+let _currentUWTab = 'overview';
+
+// ── Open UW Modal ──
+function openUWModal(caseId) {
+  const c = uwData[caseId];
+  if (!c) return;
+  _currentUWCase = caseId;
+  _currentUWTab = 'overview';
+
+  // Header
+  const stageColors = {
+    'Application Received': 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+    'Evidence Gathering':   'linear-gradient(135deg,#8b5cf6,#6d28d9)',
+    'AI Review':            'linear-gradient(135deg,#059669,#047857)',
+    'Decision':             'linear-gradient(135deg,#f59e0b,#d97706)',
+    'Approved':             'linear-gradient(135deg,#10b981,#059669)',
+    'Issued':               'linear-gradient(135deg,#003087,#1e40af)'
+  };
+  const iconEl = document.getElementById('uw-modal-icon');
+  if (iconEl) iconEl.style.background = stageColors[c.stage] || 'linear-gradient(135deg,#003087,#1e40af)';
+
+  const titleEl = document.getElementById('uw-modal-title');
+  if (titleEl) titleEl.textContent = c.client + ' — ' + c.id;
+
+  const subEl = document.getElementById('uw-modal-subtitle');
+  if (subEl) subEl.textContent = c.product + ' · ' + (c.faceValue !== 'N/A' ? c.faceValue + ' · ' : '') + c.annualPremium + ' · Stage: ' + c.stage;
+
+  // Reset tabs
+  document.querySelectorAll('#uw-modal-tabs .dmt-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === 0);
+  });
+
+  // Render body
+  renderUWModal('overview');
+
+  // Show overlay
+  const overlay = document.getElementById('uw-modal-overlay');
+  if (overlay) { overlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+
+function closeUWModal() {
+  const overlay = document.getElementById('uw-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function switchUWTab(tab, btn) {
+  _currentUWTab = tab;
+  document.querySelectorAll('#uw-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderUWModal(tab);
+}
+
+function renderUWModal(tab) {
+  const body = document.getElementById('uw-modal-body');
+  if (!body || !_currentUWCase) return;
+  const c = uwData[_currentUWCase];
+  if (!c) return;
+
+  if (tab === 'overview') {
+    const stpClass = c.stpScore >= 80 ? 'stp-high' : c.stpScore >= 65 ? 'stp-med' : 'stp-low';
+    body.innerHTML = `
+      <div class="uw-modal-grid">
+        <div class="uw-modal-section">
+          <div class="uw-modal-section-title"><i class="fas fa-id-card"></i> Case Details</div>
+          <div class="uw-detail-grid">
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Case ID</span><span class="uw-detail-val">${c.id}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Client</span><span class="uw-detail-val">${c.client}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Age</span><span class="uw-detail-val">${c.age}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Product</span><span class="uw-detail-val">${c.product}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Face Value</span><span class="uw-detail-val">${c.faceValue}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Annual Premium</span><span class="uw-detail-val">${c.annualPremium}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Received</span><span class="uw-detail-val">${c.receivedDate}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Decision Due</span><span class="uw-detail-val">${c.decisionDue}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Stage</span><span class="uw-detail-val">${c.stage}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Risk Class</span><span class="uw-detail-val">${c.riskClass}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Agent</span><span class="uw-detail-val">${c.agent}</span></div>
+            <div class="uw-detail-item"><span class="uw-detail-lbl">Underwriter</span><span class="uw-detail-val">${c.underwriter}</span></div>
+          </div>
+        </div>
+        <div class="uw-modal-section">
+          <div class="uw-modal-section-title"><i class="fas fa-tachometer-alt"></i> STP Score</div>
+          <div class="uw-stp-gauge-wrap">
+            <div class="uw-stp-gauge-circle ${stpClass}">
+              <span class="uw-stp-gauge-val">${c.stpScore}</span>
+              <span class="uw-stp-gauge-lbl">STP Score</span>
+            </div>
+            <div class="uw-stp-gauge-legend">
+              <div class="uw-stp-leg-item"><span class="uw-stp-dot stp-high"></span>≥ 80 — Auto-Approve</div>
+              <div class="uw-stp-leg-item"><span class="uw-stp-dot stp-med"></span>65–79 — Review</div>
+              <div class="uw-stp-leg-item"><span class="uw-stp-dot stp-low"></span>< 65 — APS Required</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  else if (tab === 'evidence') {
+    const rows = c.evidence.map(ev => {
+      const cls = ev.status === 'done' ? 'ev-done' : ev.status === 'flag' ? 'ev-flag' : ev.status === 'na' ? 'ev-na' : 'ev-pending';
+      const icon = ev.status === 'done' ? 'fa-check-circle' : ev.status === 'flag' ? 'fa-exclamation-triangle' : ev.status === 'na' ? 'fa-minus-circle' : 'fa-hourglass-half';
+      return `
+        <div class="uw-ev-row ${cls}">
+          <div class="uw-ev-name"><i class="fas ${icon}"></i> ${ev.name}</div>
+          <div class="uw-ev-result">${ev.result}</div>
+        </div>`;
+    }).join('');
+    body.innerHTML = `
+      <div class="uw-modal-section" style="max-width:700px;margin:0 auto">
+        <div class="uw-modal-section-title"><i class="fas fa-search-plus"></i> Evidence Checklist</div>
+        <div class="uw-ev-list">${rows}</div>
+      </div>
+    `;
+  }
+
+  else if (tab === 'ai') {
+    const ai = c.ai;
+    const riskColors = { 'Very Low':'#059669','Low':'#10b981','Low-Moderate':'#84cc16','Moderate':'#f59e0b','Moderate-High':'#f97316','High':'#ef4444','Urgent':'#dc2626' };
+    const riskColor = riskColors[ai.riskLevel] || '#6b7280';
+    const factors = ai.factors.map(f => `
+      <div class="uw-ai-factor">
+        <i class="fas ${f.icon}" style="color:${f.color};flex-shrink:0"></i>
+        <span>${f.text}</span>
+      </div>`).join('');
+    const steps = ai.nextSteps.map((s, i) => `
+      <div class="uw-ai-step"><span class="uw-ai-step-num">${i + 1}</span><span>${s}</span></div>`).join('');
+    body.innerHTML = `
+      <div class="uw-ai-panel">
+        <div class="uw-ai-header">
+          <div class="uw-ai-headline">${ai.headline}</div>
+          <div class="uw-ai-risk-badge" style="background:${riskColor}20;color:${riskColor};border:1px solid ${riskColor}40">
+            Risk: ${ai.riskLevel}
+          </div>
+        </div>
+        <div class="uw-ai-summary">${ai.summary}</div>
+        <div class="uw-modal-section-title" style="margin-top:18px"><i class="fas fa-search"></i> Risk Factors</div>
+        <div class="uw-ai-factors">${factors}</div>
+        <div class="uw-modal-section-title" style="margin-top:18px"><i class="fas fa-gavel"></i> AI Recommendation</div>
+        <div class="uw-ai-recommendation">${ai.recommendation}</div>
+        <div class="uw-modal-section-title" style="margin-top:18px"><i class="fas fa-list-ol"></i> Next Steps</div>
+        <div class="uw-ai-steps">${steps}</div>
+      </div>
+    `;
+  }
+}
+
+// ── Run AI Scan ──
+function runUWScan() {
+  const btn = document.querySelector('.btn-uw-scan');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Scanning…';
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Scan Complete — 11 cases updated';
+    btn.disabled = false;
+    // Update last-scan timestamp if present
+    const ts = document.querySelector('.uw-stp-sub');
+    if (ts) {
+      const orig = ts.textContent;
+      ts.textContent = orig.replace(/·.*?$/, '· Last scan: just now');
+    }
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-sync-alt"></i> Run AI Scan';
+    }, 3000);
+  }, 2000);
 }
