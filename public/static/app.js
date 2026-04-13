@@ -8516,3 +8516,416 @@ function confirmScheduleReport() {
 }
 
 console.log('Phase 1 fixes loaded — openConversionPredict, filterPolicies, filterClaims, toggleNotifPanel, exportReportPDF, shareReportWithManager, openAIReportSummary, scheduleReport');
+
+// ============================================================
+// PHASE 3 — Calendar: Nav, Domain Filter, Add Event, Event Detail
+// ============================================================
+
+// ── Calendar state ────────────────────────────────────────────
+const CAL_STATE = {
+  year:   2026,
+  month:  3,          // 0-indexed → April = 3
+  filter: '',         // '' = all, 'ins','inv','ret','adv','urgent'
+};
+
+// Month names
+const CAL_MONTHS = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+
+// ── Seed event store (April 2026 + extras for adjacent months) ─
+const _calSeedEvents = [
+  // April 2026
+  { id:'EVT-005',  year:2026, month:3, day:5,  domain:'inv',    cls:'cal-ev-inv', title:'Maria G. — Annuity Review',        time:'10:00 AM', type:'Meeting',    client:'Maria Gonzalez',   notes:'Income annuity illustration ready. Discuss ladder strategy.' },
+  { id:'EVT-010a', year:2026, month:3, day:10, domain:'urgent', cls:'urgent',     title:'Kevin Park — Follow-up Call',       time:'9:00 AM',  type:'Call',       client:'Kevin Park',       notes:'Pending e-signature on Term Life $500K. Urgent — close window 2 days.' },
+  { id:'EVT-010b', year:2026, month:3, day:10, domain:'ins',    cls:'cal-ev-ins', title:'Robert Chen — Claim Update',        time:'2:00 PM',  type:'Call',       client:'Robert Chen',      notes:'CLM-2026-0041 status update. Expedite missing ID docs.' },
+  { id:'EVT-012',  year:2026, month:3, day:12, domain:'inv',    cls:'cal-ev-inv', title:'Alex Rivera — New Prospect',        time:'11:00 AM', type:'In Person',  client:'Alex Rivera',      notes:'Whole Life $500K + annuity interest. Pre-brief ready.' },
+  { id:'EVT-015',  year:2026, month:3, day:15, domain:'adv',    cls:'cal-ev-adv', title:'Linda Morrison — Annual Review',    time:'1:00 PM',  type:'In Person',  client:'Linda Morrison',   notes:'Estate + UMA + Insurance review. 90 min. Bring UMA performance report.' },
+  { id:'EVT-017',  year:2026, month:3, day:17, domain:'ins',    cls:'cal-ev-ins', title:'Nancy Foster — New Client',         time:'10:30 AM', type:'In Person',  client:'Nancy Foster',     notes:'New prospect — term life + disability needs analysis.' },
+  { id:'EVT-018',  year:2026, month:3, day:18, domain:'ret',    cls:'cal-ev-ret', title:'James Whitfield — Retirement Plan', time:'3:00 PM',  type:'Video',      client:'James Whitfield',  notes:'Deferred annuity illustration: $2,800/mo at 65. Review estate updates.' },
+  { id:'EVT-022',  year:2026, month:3, day:22, domain:'ins',    cls:'cal-ev-ins', title:'Team Q1 Performance Review',        time:'9:00 AM',  type:'Internal',   client:'Roger Putnam',     notes:'All-lines review with manager. Bring Q1 YTD report.' },
+  { id:'EVT-025',  year:2026, month:3, day:25, domain:'adv',    cls:'cal-ev-adv', title:'Robert Chen — Estate Planning',     time:'2:30 PM',  type:'In Person',  client:'Robert Chen',      notes:'Business succession + NQDC plan. Bring buy-sell agreement draft.' },
+  { id:'EVT-028',  year:2026, month:3, day:28, domain:'ins',    cls:'renewal',    title:'Sandra Williams — Policy Renewal',  time:'11:00 AM', type:'Meeting',    client:'Sandra Williams',  notes:'P-100320 Term renewal. Discuss conversion options and lapse risk.' },
+  // March 2026 (prev)
+  { id:'EVT-M03-05', year:2026, month:2, day:5,  domain:'inv',    cls:'cal-ev-inv', title:'Maria G. — Annuity Review (Pre)',   time:'10:00 AM', type:'Meeting',    client:'Maria Gonzalez',   notes:'Pre-discussion for April review.' },
+  { id:'EVT-M03-20', year:2026, month:2, day:20, domain:'ins',    cls:'cal-ev-ins', title:'Sandra Williams — Last Contact',    time:'2:00 PM',  type:'Call',       client:'Sandra Williams',  notes:'Policy review, renewal planning.' },
+  // May 2026 (next)
+  { id:'EVT-M05-02', year:2026, month:4, day:2,  domain:'ret',    cls:'cal-ev-ret', title:'James Whitfield — Annuity Follow',  time:'10:00 AM', type:'Call',       client:'James Whitfield',  notes:'Follow-up after April retirement illustration.' },
+  { id:'EVT-M05-08', year:2026, month:4, day:8,  domain:'adv',    cls:'cal-ev-adv', title:'Linda Morrison — UMA Rebalance',    time:'1:30 PM',  type:'Video',      client:'Linda Morrison',   notes:'Quarterly UMA performance + rebalancing review.' },
+  { id:'EVT-M05-15', year:2026, month:4, day:15, domain:'ins',    cls:'cal-ev-ins', title:'Patricia Nguyen — Lapse Review',    time:'11:00 AM', type:'Call',       client:'Patricia Nguyen',  notes:'P-100301 lapse risk — urgent premium funding discussion.' },
+];
+
+// Mutable event store (seed + user-added)
+let calEvents = [..._calSeedEvents];
+
+// ── Navigation ────────────────────────────────────────────────
+function calNavMonth(delta) {
+  CAL_STATE.month += delta;
+  if (CAL_STATE.month > 11) { CAL_STATE.month = 0;  CAL_STATE.year++; }
+  if (CAL_STATE.month < 0)  { CAL_STATE.month = 11; CAL_STATE.year--; }
+  renderCalendar();
+}
+
+function calFilterDomain(val) {
+  CAL_STATE.filter = val;
+  renderCalendar();
+}
+
+// ── Main calendar renderer ────────────────────────────────────
+function renderCalendar() {
+  const { year, month, filter } = CAL_STATE;
+
+  // Update month label
+  const label = document.getElementById('cal-month-label');
+  if (label) label.textContent = `${CAL_MONTHS[month]} ${year}`;
+
+  // Filter events for this month
+  const monthEvents = calEvents.filter(e =>
+    e.year === year && e.month === month &&
+    (!filter || e.domain === filter)
+  );
+
+  // Group by day
+  const byDay = {};
+  monthEvents.forEach(ev => {
+    if (!byDay[ev.day]) byDay[ev.day] = [];
+    byDay[ev.day].push(ev);
+  });
+
+  // Days in month, first weekday
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstWeekday = new Date(year, month, 1).getDay();
+
+  // Today
+  const now   = new Date();
+  const todayY = now.getFullYear();
+  const todayM = now.getMonth();
+  const todayD = now.getDate();
+  const isCurrentMonth = year === todayY && month === todayM;
+
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+
+  // Build cells
+  let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+    .map(d => `<div class="cal-day-header">${d}</div>`).join('');
+
+  // Leading blank cells
+  for (let i = 0; i < firstWeekday; i++) {
+    html += `<div class="cal-day cal-day-blank"></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday  = isCurrentMonth && d === todayD;
+    const evs      = byDay[d] || [];
+    const hasEv    = evs.length > 0;
+    const classes  = ['cal-day', isToday ? 'today' : '', hasEv ? 'has-events' : ''].filter(Boolean).join(' ');
+
+    const evHtml = evs.map(ev =>
+      `<div class="cal-event ${ev.cls}" data-evid="${ev.id}" onclick="calEventClick('${ev.id}',event)" title="${ev.title}">${ev.title}</div>`
+    ).join('');
+
+    const addDot = evs.length === 0
+      ? `<span class="cal-add-dot" onclick="calDayQuickAdd(${d},event)" title="Add event"><i class="fas fa-plus"></i></span>` : '';
+
+    html += `<div class="${classes}" onclick="calDayClick(${d},event)">
+      <span class="cal-day-num">${d}</span>
+      ${evHtml}
+      ${addDot}
+    </div>`;
+  }
+
+  grid.innerHTML = html;
+
+  // Update sidebar badge counts
+  _updateCalSidebarCounts(monthEvents);
+}
+
+function _updateCalSidebarCounts(monthEvents) {
+  const upBadge = document.querySelector('.upcoming-badge');
+  if (upBadge) upBadge.textContent = monthEvents.length;
+
+  // Update domain summary strip
+  const domains = { ins:0, inv:0, ret:0, adv:0 };
+  monthEvents.forEach(ev => { if (domains[ev.domain] !== undefined) domains[ev.domain]++; });
+  const items = document.querySelectorAll('.css-item');
+  const labels = ['ins','inv','ret','adv'];
+  items.forEach((el, i) => {
+    const span = el.querySelector('span');
+    if (span && labels[i]) span.textContent = domains[labels[i]];
+  });
+}
+
+// ── Day click — open quick-add if no events ───────────────────
+function calDayClick(day, e) {
+  // Only trigger if clicking the cell background, not an event chip
+  if (e && e.target.classList.contains('cal-event')) return;
+  if (e && e.target.closest('.cal-event')) return;
+}
+
+function calDayQuickAdd(day, e) {
+  e && e.stopPropagation();
+  openAddEventModal(day);
+}
+
+// ── Event click — detail popover ──────────────────────────────
+function calEventClick(evId, e) {
+  e && e.stopPropagation();
+  const ev = calEvents.find(x => x.id === evId);
+  if (!ev) return;
+
+  // Remove existing popover
+  const old = document.getElementById('cal-ev-popover');
+  if (old) old.remove();
+
+  const domainColors = { ins:'#003087', inv:'#059669', ret:'#0891b2', adv:'#7c3aed', urgent:'#dc2626' };
+  const typeIcons    = { Meeting:'fa-calendar-alt', Call:'fa-phone', 'In Person':'fa-users', Video:'fa-video', Internal:'fa-building' };
+  const color = domainColors[ev.domain] || '#003087';
+  const icon  = typeIcons[ev.type] || 'fa-calendar';
+  const domainName = { ins:'Insurance', inv:'Investments', ret:'Retirement', adv:'Advisory', urgent:'Urgent' }[ev.domain] || ev.domain;
+
+  const pop = document.createElement('div');
+  pop.id = 'cal-ev-popover';
+  pop.className = 'cal-ev-popover';
+  pop.style.cssText = `border-top: 3px solid ${color}`;
+  pop.innerHTML = `
+    <div class="cep-header">
+      <div class="cep-domain-pill" style="background:${color}20;color:${color}">
+        <i class="fas ${icon}"></i> ${domainName}
+      </div>
+      <button class="cep-close" onclick="document.getElementById('cal-ev-popover').remove()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cep-title">${ev.title}</div>
+    <div class="cep-meta">
+      <span><i class="fas fa-clock"></i> ${ev.time}</span>
+      <span><i class="fas fa-tag"></i> ${ev.type}</span>
+      <span><i class="fas fa-user"></i> ${ev.client}</span>
+    </div>
+    <div class="cep-notes">${ev.notes}</div>
+    <div class="cep-actions">
+      <button class="btn btn-primary cep-btn" onclick="document.getElementById('cal-ev-popover').remove(); openMeetingBrief('MTG-${evId.replace('EVT-','').replace('M03-','P0').replace('M05-','')}')">
+        <i class="fas fa-file-alt"></i> Meeting Brief
+      </button>
+      <button class="btn btn-outline cep-btn" onclick="editCalEvent('${evId}')">
+        <i class="fas fa-edit"></i> Edit
+      </button>
+      <button class="btn btn-outline cep-btn cep-del" onclick="deleteCalEvent('${evId}')">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(pop);
+
+  // Position near click
+  const rect = e.target.getBoundingClientRect();
+  const scrollY = window.scrollY;
+  let top  = rect.bottom + scrollY + 6;
+  let left = rect.left;
+  // Keep within viewport
+  if (left + 300 > window.innerWidth) left = window.innerWidth - 316;
+  if (left < 8) left = 8;
+  pop.style.top  = top + 'px';
+  pop.style.left = left + 'px';
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('mousedown', function popClose(ev2) {
+      if (!pop.contains(ev2.target)) {
+        pop.remove();
+        document.removeEventListener('mousedown', popClose);
+      }
+    });
+  }, 100);
+}
+
+// ── Delete event ──────────────────────────────────────────────
+function deleteCalEvent(evId) {
+  calEvents = calEvents.filter(e => e.id !== evId);
+  const pop = document.getElementById('cal-ev-popover');
+  if (pop) pop.remove();
+  renderCalendar();
+}
+
+// ── Add Event Modal ───────────────────────────────────────────
+function openAddEventModal(preDay) {
+  const existing = document.getElementById('cal-add-event-overlay');
+  if (existing) existing.remove();
+
+  const { year, month } = CAL_STATE;
+  const dayVal = preDay || '';
+  const maxDay = new Date(year, month + 1, 0).getDate();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'cal-add-event-overlay';
+  overlay.className = 'phase1-modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+    <div class="phase1-modal small" style="width:480px">
+      <div class="phase1-modal-header" style="background:linear-gradient(135deg,#003087,#0891b2)">
+        <span><i class="fas fa-calendar-plus" style="margin-right:8px"></i>Add Calendar Event</span>
+        <button onclick="document.getElementById('cal-add-event-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="phase1-modal-body">
+        <div class="cae-form">
+          <label class="sched-label">Event Title *</label>
+          <input class="sched-input" id="cae-title" type="text" placeholder="e.g. James Whitfield — Annual Review" />
+
+          <div class="cae-row">
+            <div class="cae-col">
+              <label class="sched-label">Day *</label>
+              <input class="sched-input" id="cae-day" type="number" min="1" max="${maxDay}" placeholder="Day (1-${maxDay})" value="${dayVal}" />
+            </div>
+            <div class="cae-col">
+              <label class="sched-label">Time</label>
+              <input class="sched-input" id="cae-time" type="time" value="10:00" />
+            </div>
+          </div>
+
+          <div class="cae-row">
+            <div class="cae-col">
+              <label class="sched-label">Domain</label>
+              <select class="sched-select" id="cae-domain">
+                <option value="ins">Insurance</option>
+                <option value="inv">Investments</option>
+                <option value="ret">Retirement</option>
+                <option value="adv">Advisory</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <div class="cae-col">
+              <label class="sched-label">Type</label>
+              <select class="sched-select" id="cae-type">
+                <option>Meeting</option>
+                <option>Call</option>
+                <option>In Person</option>
+                <option>Video</option>
+                <option>Internal</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="sched-label">Client / Contact</label>
+          <input class="sched-input" id="cae-client" type="text" placeholder="e.g. Linda Morrison" />
+
+          <label class="sched-label">Notes</label>
+          <textarea class="cm-outreach-textarea" id="cae-notes" style="height:72px" placeholder="Meeting agenda, talking points..."></textarea>
+        </div>
+        <div id="cae-error" style="color:#dc2626;font-size:12px;margin-top:6px;display:none"></div>
+      </div>
+      <div class="phase1-modal-footer">
+        <button class="btn btn-primary" onclick="saveCalEvent()"><i class="fas fa-check"></i> Save Event</button>
+        <button class="btn btn-outline" onclick="document.getElementById('cal-add-event-overlay').remove()">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+  setTimeout(() => { const t = document.getElementById('cae-title'); if (t) t.focus(); }, 200);
+}
+
+function saveCalEvent() {
+  const title  = document.getElementById('cae-title')?.value.trim();
+  const day    = parseInt(document.getElementById('cae-day')?.value, 10);
+  const timeRaw= document.getElementById('cae-time')?.value || '10:00';
+  const domain = document.getElementById('cae-domain')?.value || 'ins';
+  const type   = document.getElementById('cae-type')?.value || 'Meeting';
+  const client = document.getElementById('cae-client')?.value.trim() || '—';
+  const notes  = document.getElementById('cae-notes')?.value.trim() || '';
+  const errEl  = document.getElementById('cae-error');
+
+  const { year, month } = CAL_STATE;
+  const maxDay = new Date(year, month + 1, 0).getDate();
+
+  if (!title) { if (errEl) { errEl.textContent='Event title is required.'; errEl.style.display='block'; } return; }
+  if (!day || day < 1 || day > maxDay) { if (errEl) { errEl.textContent=`Day must be 1–${maxDay}.`; errEl.style.display='block'; } return; }
+  if (errEl) errEl.style.display = 'none';
+
+  // Format time to 12h
+  const [h, m] = timeRaw.split(':').map(Number);
+  const ampm  = h >= 12 ? 'PM' : 'AM';
+  const h12   = h % 12 || 12;
+  const timeStr = `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+
+  const domClsMap = { ins:'cal-ev-ins', inv:'cal-ev-inv', ret:'cal-ev-ret', adv:'cal-ev-adv', urgent:'urgent' };
+  const newEv = {
+    id: 'EVT-USR-' + Date.now(),
+    year, month, day,
+    domain, cls: domClsMap[domain] || 'cal-ev-ins',
+    title, time: timeStr, type, client, notes,
+  };
+
+  calEvents.push(newEv);
+  document.getElementById('cal-add-event-overlay').remove();
+  renderCalendar();
+
+  // Success toast
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = `<i class="fas fa-calendar-check"></i> Event "${title}" added to ${CAL_MONTHS[month]} ${day}.`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
+}
+
+// ── Edit event (re-opens add modal prefilled) ─────────────────
+function editCalEvent(evId) {
+  const ev = calEvents.find(x => x.id === evId);
+  if (!ev) return;
+  const pop = document.getElementById('cal-ev-popover');
+  if (pop) pop.remove();
+
+  openAddEventModal(ev.day);
+
+  // Prefill after modal renders
+  setTimeout(() => {
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    set('cae-title',  ev.title);
+    set('cae-day',    ev.day);
+    set('cae-domain', ev.domain);
+    set('cae-type',   ev.type);
+    set('cae-client', ev.client);
+    set('cae-notes',  ev.notes);
+    // Convert time back to HH:MM
+    const match = ev.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (match) {
+      let h = parseInt(match[1]);
+      const mins = match[2];
+      if (match[3].toUpperCase() === 'PM' && h < 12) h += 12;
+      if (match[3].toUpperCase() === 'AM' && h === 12) h = 0;
+      set('cae-time', `${String(h).padStart(2,'0')}:${mins}`);
+    }
+    // Change save button to update
+    const btn = document.querySelector('#cal-add-event-overlay .btn-primary');
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-save"></i> Update Event';
+      btn.onclick = () => {
+        calEvents = calEvents.filter(x => x.id !== evId);
+        saveCalEvent();
+      };
+    }
+  }, 150);
+}
+
+// ── Auto-init calendar when calendar page becomes active ──────
+(function() {
+  const origNavigateTo = window.navigateTo;
+  window.navigateTo = function(page) {
+    origNavigateTo(page);
+    if (page === 'calendar') {
+      setTimeout(renderCalendar, 80);
+    }
+  };
+})();
+
+// Also init on DOMContentLoaded if calendar tab is active
+document.addEventListener('DOMContentLoaded', function() {
+  // If currently on calendar page
+  const calGrid = document.getElementById('cal-grid');
+  if (calGrid && document.querySelector('.calendar-page')) {
+    renderCalendar();
+  }
+});
+
+console.log('Phase 3 loaded — calNavMonth, calFilterDomain, renderCalendar, openAddEventModal, saveCalEvent, calEventClick, deleteCalEvent, editCalEvent');

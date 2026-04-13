@@ -6213,21 +6213,22 @@ function CalendarPage() {
       <div class="calendar-layout">
         <div class="calendar-main">
           <div class="cal-header">
-            <button class="cal-nav"><i class="fas fa-chevron-left"></i></button>
-            <h3>April 2026</h3>
-            <button class="cal-nav"><i class="fas fa-chevron-right"></i></button>
+            <button class="cal-nav" id="cal-prev-btn" onclick="calNavMonth(-1)" title="Previous month"><i class="fas fa-chevron-left"></i></button>
+            <h3 id="cal-month-label">April 2026</h3>
+            <button class="cal-nav" id="cal-next-btn" onclick="calNavMonth(1)" title="Next month"><i class="fas fa-chevron-right"></i></button>
             <div class="cal-header-right">
-              <select class="filter-select cal-domain-filter" style="margin-right:8px">
+              <select class="filter-select cal-domain-filter" id="cal-domain-filter" onchange="calFilterDomain(this.value)" style="margin-right:8px">
                 <option value="">All Domains</option>
                 <option value="ins">Insurance</option>
                 <option value="inv">Investments</option>
                 <option value="ret">Retirement</option>
                 <option value="adv">Advisory</option>
+                <option value="urgent">Urgent</option>
               </select>
-              <button class="btn btn-primary cal-add-btn"><i class="fas fa-plus"></i> Add Event</button>
+              <button class="btn btn-primary cal-add-btn" onclick="openAddEventModal()"><i class="fas fa-plus"></i> Add Event</button>
             </div>
           </div>
-          <div class="cal-grid">
+          <div class="cal-grid" id="cal-grid">
             {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
               <div class="cal-day-header">{d}</div>
             ))}
@@ -6236,18 +6237,18 @@ function CalendarPage() {
               const hasEvent = [5, 10, 12, 15, 17, 18, 22, 25, 28].includes(day)
               const isToday = day === 10
               return (
-                <div class={`cal-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-events' : ''}`}>
+                <div class={`cal-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-events' : ''}`} onclick={`calDayClick(${day},event)`}>
                   <span class="cal-day-num">{day}</span>
-                  {day === 5  && <div class="cal-event cal-ev-inv">Maria G. — Annuity Review</div>}
-                  {day === 10 && <div class="cal-event urgent">Kevin Park Follow-up</div>}
-                  {day === 10 && <div class="cal-event cal-ev-ins">Robert Chen — Claim Update</div>}
-                  {day === 12 && <div class="cal-event cal-ev-inv">Alex Rivera — New Prospect</div>}
-                  {day === 15 && <div class="cal-event cal-ev-adv">Linda Morrison Annual Review</div>}
-                  {day === 17 && <div class="cal-event cal-ev-ins">Nancy Foster — New Client</div>}
-                  {day === 18 && <div class="cal-event cal-ev-ret">James Whitfield — Ret. Plan</div>}
-                  {day === 22 && <div class="cal-event cal-ev-ins">Team Q1 Review</div>}
-                  {day === 25 && <div class="cal-event cal-ev-adv">Robert Chen — Estate Plan</div>}
-                  {day === 28 && <div class="cal-event renewal">Sandra Williams Renewal</div>}
+                  {day === 5  && <div class="cal-event cal-ev-inv" data-evid="EVT-005" onclick="calEventClick('EVT-005',event)">Maria G. — Annuity Review</div>}
+                  {day === 10 && <div class="cal-event urgent" data-domain="urgent" data-evid="EVT-010a" onclick="calEventClick('EVT-010a',event)">Kevin Park Follow-up</div>}
+                  {day === 10 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-010b" onclick="calEventClick('EVT-010b',event)">Robert Chen — Claim Update</div>}
+                  {day === 12 && <div class="cal-event cal-ev-inv" data-domain="inv" data-evid="EVT-012" onclick="calEventClick('EVT-012',event)">Alex Rivera — New Prospect</div>}
+                  {day === 15 && <div class="cal-event cal-ev-adv" data-domain="adv" data-evid="EVT-015" onclick="calEventClick('EVT-015',event)">Linda Morrison Annual Review</div>}
+                  {day === 17 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-017" onclick="calEventClick('EVT-017',event)">Nancy Foster — New Client</div>}
+                  {day === 18 && <div class="cal-event cal-ev-ret" data-domain="ret" data-evid="EVT-018" onclick="calEventClick('EVT-018',event)">James Whitfield — Ret. Plan</div>}
+                  {day === 22 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-022" onclick="calEventClick('EVT-022',event)">Team Q1 Review</div>}
+                  {day === 25 && <div class="cal-event cal-ev-adv" data-domain="adv" data-evid="EVT-025" onclick="calEventClick('EVT-025',event)">Robert Chen — Estate Plan</div>}
+                  {day === 28 && <div class="cal-event renewal" data-domain="ins" data-evid="EVT-028" onclick="calEventClick('EVT-028',event)">Sandra Williams Renewal</div>}
                 </div>
               )
             })}
