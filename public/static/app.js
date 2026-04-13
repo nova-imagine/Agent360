@@ -398,10 +398,16 @@ function filterClientsByProductTab(domain, tabEl) {
       card.style.display = d.adv ? 'block' : 'none';
     } else if (domain === 'gaps') {
       card.style.display = d.gaps ? 'block' : 'none';
+    } else if (domain === 'lapse') {
+      card.style.display = card.getAttribute('data-lapse') ? 'block' : 'none';
     } else {
       card.style.display = 'block';
     }
   });
+
+  // Show/hide retention intelligence panel
+  const riPanel = document.getElementById('ri-clients-panel');
+  if (riPanel) riPanel.style.display = (domain === 'lapse') ? 'block' : 'none';
 
   // Also auto-expand product panels for filtered domain
   if (domain !== 'all') {
@@ -2323,4 +2329,351 @@ function runUWScan() {
       btn.innerHTML = '<i class="fas fa-sync-alt"></i> Run AI Scan';
     }, 3000);
   }, 2000);
+}
+
+/* =============================================
+   RETENTION INTELLIGENCE — Data & Modal Logic
+   ============================================= */
+
+const retentionData = {
+  'ret-patricia': {
+    id: 'ret-patricia', client: 'Patricia Nguyen', age: 38,
+    riskLevel: 'High', riskScore: 87,
+    policy: 'P-100301', policyType: 'Universal Life',
+    triggerType: 'lapse', triggerIcon: 'fa-battery-quarter',
+    triggerLabel: 'UL Under-funded — Predicted Lapse ~Jun 20, 2026',
+    lastContact: '2026-04-02', segment: 'Mid Market', premium: '$5,800/yr',
+    analysis: {
+      headline: '⚠️ Policy Lapse Risk — UL Under-funded 2 Consecutive Quarters',
+      riskColor: '#dc2626',
+      summary: 'Patricia Nguyen\'s Universal Life policy P-100301 has been under-funded for two consecutive quarters. AI cash-flow model predicts policy lapse within 60–90 days if premiums are not increased. Current cash value $21,400 is below minimum threshold to sustain cost of insurance at current load.',
+      metrics: [
+        { label: 'Cash Value (Current)', value: '$21,400', flag: true },
+        { label: 'Min Threshold', value: '$28,000', flag: false },
+        { label: 'Shortfall', value: '-$6,600', flag: true },
+        { label: 'Predicted Lapse', value: '~Jun 20, 2026', flag: true },
+        { label: 'Client Age', value: '38', flag: false },
+        { label: 'Re-qual Required', value: 'Yes — if lapses', flag: true },
+        { label: 'Catch-up Needed', value: '$1,800–$2,400', flag: false },
+        { label: 'Quarterly Premium', value: '$1,450', flag: false }
+      ]
+    },
+    signals: [
+      { icon: 'fa-battery-quarter', color: '#dc2626', text: 'Under-funded Q3 2025 — cash value dropped $4,200 below projection.' },
+      { icon: 'fa-battery-empty',   color: '#dc2626', text: 'Under-funded Q4 2025 (2nd consecutive quarter) — below minimum threshold now.' },
+      { icon: 'fa-exclamation-triangle', color: '#f59e0b', text: 'Client age 38 — if policy lapses, re-qualification requires new medical underwriting. Approved in 2022 at Preferred Plus.' },
+      { icon: 'fa-calendar-times',  color: '#dc2626', text: 'AI cash-flow model: if no action by May 1, policy lapse probability reaches 94% by June 20.' },
+      { icon: 'fa-phone-slash',     color: '#f59e0b', text: 'Last agent contact: Apr 2, 2026 (11 days ago). Policy issue not yet discussed.' },
+      { icon: 'fa-info-circle',     color: '#3b82f6', text: 'Retention value: $5,800/yr premium · $500K face value. High-value policy worth protecting.' }
+    ],
+    actionPlan: {
+      urgency: 'URGENT — Act within 14 days',
+      steps: [
+        { num: 1, urgent: true,  text: 'Call Patricia Nguyen this week — frame as "policy health check" not a collections call. Script: "I\'m reviewing your Universal Life policy and noticed we need to review the premium schedule to keep your coverage strong."' },
+        { num: 2, urgent: false, text: 'Prepare premium catch-up illustration: show 3 options — $600/month for 3 months, one lump-sum catch-up of $1,800, or restructure premium schedule to $2,400/yr flat.' },
+        { num: 3, urgent: false, text: 'Discuss policy restructuring: consider converting to a fixed-premium structure or reducing face value to make policy sustainable at current budget.' },
+        { num: 4, urgent: false, text: 'If no resolution by May 1: escalate to manager and send formal written notice to client. Document all contact attempts in CRM.' }
+      ],
+      estimatedRetentionValue: '$5,800/yr · $500K coverage preserved'
+    }
+  },
+
+  'ret-sandra': {
+    id: 'ret-sandra', client: 'Sandra Williams', age: 61,
+    riskLevel: 'High', riskScore: 79,
+    policy: 'P-100320', policyType: 'Term Life — 20-Year',
+    triggerType: 'renewal', triggerIcon: 'fa-calendar-times',
+    triggerLabel: 'Term Renewal Expiring Sep 2026 — 153 Days Left',
+    lastContact: '2026-03-20', segment: 'Mid Market', premium: '$8,200/yr',
+    analysis: {
+      headline: '⚡ URGENT — Term Policy Expires Sep 2026, Conversion Window Closing',
+      riskColor: '#d97706',
+      summary: 'Sandra Williams, age 61, has a 20-year term policy expiring September 2026 — 153 days away. Without action, $350K coverage lapses and re-qualification at age 61 requires new medical underwriting. Conversion option available without medical evidence until renewal date. This is a time-sensitive retention and upsell opportunity.',
+      metrics: [
+        { label: 'Policy Expiry', value: 'Sep 15, 2026', flag: true },
+        { label: 'Days Remaining', value: '153 days', flag: true },
+        { label: 'Face Value', value: '$350,000', flag: false },
+        { label: 'Current Premium', value: '$2,400/yr (term)', flag: false },
+        { label: 'Client Age', value: '61', flag: false },
+        { label: 'Conversion Eligible', value: 'Yes — until Sep 15', flag: false },
+        { label: 'New Coverage (if lapses)', value: 'Full medical UW required', flag: true },
+        { label: 'Beneficiary', value: 'Michael Williams (spouse)', flag: false }
+      ]
+    },
+    signals: [
+      { icon: 'fa-calendar-check', color: '#d97706', text: 'Term policy P-100320 issued Sep 2006 — 20-year term. Expiry: Sep 15, 2026.' },
+      { icon: 'fa-user-shield',    color: '#dc2626', text: 'Without conversion: Michael Williams (spouse/beneficiary) loses $350K life protection. Sandra is primary earner.' },
+      { icon: 'fa-heartbeat',      color: '#f59e0b', text: 'Age 61 at renewal — new term policy would require full medical UW. Likely rated or reduced face value.' },
+      { icon: 'fa-exchange-alt',   color: '#059669', text: 'Conversion window: Whole Life or Universal Life conversion without medical evidence is available until Sep 15, 2026.' },
+      { icon: 'fa-coins',          color: '#059669', text: 'Upsell opportunity: Whole Life premium ~$4,800–$6,200/yr adds cash value + permanent coverage for Sandra at 61.' },
+      { icon: 'fa-phone-slash',    color: '#f59e0b', text: 'Last contact: Mar 20, 2026 (24 days ago). Renewal not yet discussed.' }
+    ],
+    actionPlan: {
+      urgency: 'HIGH — Schedule call within 7 days',
+      steps: [
+        { num: 1, urgent: true,  text: 'Call Sandra Williams this week — frame as a "courtesy renewal review." Script: "Your term policy comes up in September and I want to walk you through your options before the window closes."' },
+        { num: 2, urgent: false, text: 'Prepare Whole Life vs. Universal Life conversion comparison: show premium cost, cash value build-up over 10 years, and permanent coverage benefit for Sandra\'s estate.' },
+        { num: 3, urgent: false, text: 'Schedule in-person renewal review meeting — include Michael Williams (beneficiary) if possible. This is a household financial planning conversation, not just an insurance call.' },
+        { num: 4, urgent: false, text: 'Explore annuity option: Sandra at 61 may be interested in an income annuity for retirement supplement. High cross-sell potential given age and income profile.' }
+      ],
+      estimatedRetentionValue: '$350K coverage preserved · $4,800–$6,200/yr new WL premium'
+    }
+  },
+
+  'ret-kevin': {
+    id: 'ret-kevin', client: 'Kevin Park', age: 29,
+    riskLevel: 'High', riskScore: 72,
+    policy: 'P-100350', policyType: 'Term Life — Pending',
+    triggerType: 'claim', triggerIcon: 'fa-user-clock',
+    triggerLabel: 'Death Claim — Policy Was in Pending Status',
+    lastContact: '2026-04-01', segment: 'Emerging', premium: '$1,800/yr',
+    analysis: {
+      headline: '🚨 Death Claim Filed — Policy Pending at Time of Death',
+      riskColor: '#dc2626',
+      summary: 'Kevin Park passed away. Death benefit claim CLM-2026-0025 filed by estate. Policy P-100350 was in Pending (underwriting review) status at time of death — coverage determination required. Estate is waiting. This is a critical retention and relationship management situation with Kevin\'s beneficiary network.',
+      metrics: [
+        { label: 'Claim ID', value: 'CLM-2026-0025', flag: false },
+        { label: 'Claim Amount', value: '$250,000', flag: false },
+        { label: 'Policy Status', value: 'PENDING at time of death', flag: true },
+        { label: 'Coverage Determination', value: 'In progress', flag: true },
+        { label: 'Medical Records', value: 'Pending', flag: true },
+        { label: 'Fraud Score', value: '78 — Flagged', flag: true },
+        { label: 'Death Date', value: '~Feb 2026', flag: false },
+        { label: 'Claimant', value: 'Estate of Kevin Park', flag: false }
+      ]
+    },
+    signals: [
+      { icon: 'fa-exclamation-circle', color: '#dc2626', text: 'Policy was in Pending status — coverage was not yet in force. Claim cannot be approved until underwriting confirms binding status.' },
+      { icon: 'fa-search',             color: '#f59e0b', text: 'Fraud score 78 (Flagged) — contestability review and medical records required before any payout.' },
+      { icon: 'fa-users',              color: '#3b82f6', text: 'Retention opportunity: Kevin\'s family and contacts are a prospect pool. Handle claim sensitively — referrals may follow if claim is resolved professionally.' },
+      { icon: 'fa-balance-scale',      color: '#dc2626', text: 'Legal risk: if coverage was in force and claim is delayed, estate may pursue legal action. Coordinate with legal and senior adjuster.' },
+      { icon: 'fa-heart',              color: '#059669', text: 'Post-resolution: Susan Chen (potential beneficiary contact) has zero NYL coverage — coverage gap outreach opportunity once claim resolves.' }
+    ],
+    actionPlan: {
+      urgency: 'URGENT — Coordinate with Claims & Legal',
+      steps: [
+        { num: 1, urgent: true,  text: 'Expedite medical records request — underwriting team needs records to confirm whether coverage was in force at time of death. Priority: this week.' },
+        { num: 2, urgent: true,  text: 'Coordinate with underwriting team — confirm binding status of application as of 2026-02-01. Involve senior adjuster and legal review given fraud score 78.' },
+        { num: 3, urgent: false, text: 'Communicate professionally with estate representative — acknowledge receipt of claim, provide realistic timeline (no promises on outcome). Document all contact.' },
+        { num: 4, urgent: false, text: 'Post-resolution outreach: If claim is resolved, reach out to Susan Chen (beneficiary/family contact) for a coverage gap discussion. High-value retention/acquisition opportunity.' }
+      ],
+      estimatedRetentionValue: 'Relationship preservation + Susan Chen coverage opportunity'
+    }
+  },
+
+  'ret-david': {
+    id: 'ret-david', client: 'David Thompson', age: 33,
+    riskLevel: 'Medium', riskScore: 54,
+    policy: 'P-100380', policyType: 'Term Life — Single Policy',
+    triggerType: 'underinsured', triggerIcon: 'fa-shield-alt',
+    triggerLabel: 'Single Policy · Under-insured at Age 33',
+    lastContact: '2026-04-07', segment: 'Emerging', premium: '$2,400/yr',
+    analysis: {
+      headline: 'Under-insured Risk — Single Term Policy at Age 33',
+      riskColor: '#f59e0b',
+      summary: 'David Thompson, age 33, has only one policy with NYL — a Term Life policy currently in Pending/Underwriting. He has no disability, no retirement, no investments, and no advisory products. His household coverage is minimal. The risk is gradual drift to a competitor who offers a more comprehensive product. AI models show 54% lapse/drift risk within 12 months without engagement.',
+      metrics: [
+        { label: 'Active Policies', value: '1 (Term Life)', flag: true },
+        { label: 'Annual Premium', value: '$2,400/yr', flag: false },
+        { label: 'Coverage Gaps', value: 'DI, Retirement, 529', flag: true },
+        { label: 'Client Age', value: '33', flag: false },
+        { label: 'Segment', value: 'Emerging', flag: false },
+        { label: 'Last Contact', value: 'Apr 7, 2026', flag: false },
+        { label: 'Relationship Depth', value: 'Low — 1 product', flag: true },
+        { label: 'Upsell Potential', value: 'High — 3+ products', flag: false }
+      ]
+    },
+    signals: [
+      { icon: 'fa-shield-alt',    color: '#f59e0b', text: 'Only 1 NYL product — minimal relationship depth. Single-product clients churn 3x more than multi-product clients.' },
+      { icon: 'fa-heartbeat',     color: '#dc2626', text: 'No disability insurance — David is 33, primary earner. DI is the most underutilized product in this age/income segment.' },
+      { icon: 'fa-piggy-bank',    color: '#f59e0b', text: 'No retirement products — 529 plan opportunity given life stage (likely has or planning children). Entry point for long-term relationship.' },
+      { icon: 'fa-chart-line',    color: '#3b82f6', text: 'New parent or young family profile — term rider and disability rider additions are natural at this life stage.' },
+      { icon: 'fa-calendar',      color: '#059669', text: 'Recent contact (Apr 7) — good engagement window. Strike while relationship is fresh.' }
+    ],
+    actionPlan: {
+      urgency: 'MEDIUM — Engage within 30 days',
+      steps: [
+        { num: 1, urgent: false, text: 'Schedule a "life stage review" call — frame as a comprehensive financial wellness check, not a sales call. Ask about family plans, career changes, and financial goals.' },
+        { num: 2, urgent: false, text: 'Lead with Disability Insurance — it\'s the most compelling product for a 33-year-old professional. The pitch: "Your income is your biggest asset. If you can\'t work, how does your family pay the mortgage?"' },
+        { num: 3, urgent: false, text: 'Introduce 529 College Savings Plan — if David has or plans to have children, this is an easy, emotionally resonant conversation.' },
+        { num: 4, urgent: false, text: 'Build the relationship before selling retirement products — retirement planning is more complex. Build trust on DI and 529 first, then introduce IRA or annuity when the relationship is deeper.' }
+      ],
+      estimatedRetentionValue: '$2,400/yr preserved + $4,000–$6,000/yr upsell potential'
+    }
+  },
+
+  'ret-james': {
+    id: 'ret-james', client: 'James Whitfield', age: 62,
+    riskLevel: 'Medium', riskScore: 48,
+    policy: 'P-100293', policyType: 'Long-Term Care — $200/day',
+    triggerType: 'coverage-gap', triggerIcon: 'fa-coins',
+    triggerLabel: 'LTC Coverage Gap — Daily Benefit Insufficient',
+    lastContact: '2026-04-05', segment: 'High Value', premium: '$12,400/yr',
+    analysis: {
+      headline: 'LTC Coverage Gap — Daily Benefit Below Current NYC Cost',
+      riskColor: '#8b5cf6',
+      summary: 'James Whitfield\'s Long-Term Care policy provides $200/day benefit, set in 2022. Current NYC LTC average cost is $380/day — a $180/day gap. While the 3% inflation rider partially offsets this over time, the current gap is material. The risk is that at claim time, James will be significantly under-covered, leading to dissatisfaction, complaint, and potential lapse of related policies.',
+      metrics: [
+        { label: 'Daily Benefit (Current)', value: '$200/day', flag: true },
+        { label: 'NYC LTC Avg Cost', value: '$380/day', flag: false },
+        { label: 'Coverage Gap', value: '$180/day', flag: true },
+        { label: 'Annual Gap', value: '~$65,700/yr', flag: true },
+        { label: 'Inflation Rider', value: '3% compound', flag: false },
+        { label: 'Benefit Period', value: '3 years', flag: false },
+        { label: 'Annual Premium', value: '$12,400/yr', flag: false },
+        { label: 'Client Age', value: '62 — review now', flag: false }
+      ]
+    },
+    signals: [
+      { icon: 'fa-coins',       color: '#8b5cf6', text: '$200/day benefit set in 2022. NYC average LTC cost: $380/day (2026). Gap will widen as LTC costs inflate faster than 3% rider.' },
+      { icon: 'fa-hospital',    color: '#dc2626', text: '3-year benefit period is below national average need (2.5 yrs, but 20% of LTC claims exceed 5 years). Coverage risk at tail end.' },
+      { icon: 'fa-user-md',     color: '#f59e0b', text: 'Age 62 — still within window to increase daily benefit without significant underwriting hurdle. At 65+, benefit increases become harder to obtain.' },
+      { icon: 'fa-shield-check', color: '#059669', text: 'High-value client ($12,400/yr total premium) — investing in coverage adequacy retains relationship and prevents claim-time dissatisfaction.' },
+      { icon: 'fa-calendar',    color: '#059669', text: 'Next renewal coming up — ideal time to have a coverage review conversation with James.' }
+    ],
+    actionPlan: {
+      urgency: 'MEDIUM — Address at next renewal',
+      steps: [
+        { num: 1, urgent: false, text: 'Request updated LTC cost analysis for New York — show James the actual cost trajectory vs. his benefit using AALTCI data and NYL LTC cost projections for 2030–2035.' },
+        { num: 2, urgent: false, text: 'Model a benefit increase from $200/day → $280–$300/day at the next renewal: show the premium increase vs. the risk mitigation. Include inflation rider compounding effect.' },
+        { num: 3, urgent: false, text: 'Discuss benefit period extension: 3 years → 5 years increases premium but significantly reduces tail risk for the family. Frame as protecting against the long-tail scenario.' },
+        { num: 4, urgent: false, text: 'Explore linked-benefit products: a combination life/LTC policy may offer better value for James at 62. Run a comparison illustration for his next review meeting.' }
+      ],
+      estimatedRetentionValue: '$12,400/yr preserved + coverage upgrade premium uplift'
+    }
+  }
+};
+
+// ── Retention Modal State ──
+let _currentRetCase = null;
+let _currentRetTab = 'analysis';
+
+function openRetentionModal(retId) {
+  const r = retentionData[retId];
+  if (!r) return;
+  _currentRetCase = retId;
+  _currentRetTab = 'analysis';
+
+  const iconColors = {
+    'lapse':        'linear-gradient(135deg,#dc2626,#b91c1c)',
+    'renewal':      'linear-gradient(135deg,#d97706,#b45309)',
+    'claim':        'linear-gradient(135deg,#7c3aed,#5b21b6)',
+    'underinsured': 'linear-gradient(135deg,#f59e0b,#d97706)',
+    'coverage-gap': 'linear-gradient(135deg,#8b5cf6,#6d28d9)'
+  };
+  const iconMap = {
+    'lapse': 'fa-battery-quarter', 'renewal': 'fa-calendar-times',
+    'claim': 'fa-user-clock', 'underinsured': 'fa-shield-alt', 'coverage-gap': 'fa-coins'
+  };
+
+  const iconEl = document.getElementById('retention-modal-icon');
+  if (iconEl) {
+    iconEl.style.background = iconColors[r.triggerType] || 'linear-gradient(135deg,#dc2626,#b91c1c)';
+    iconEl.innerHTML = `<i class="fas ${iconMap[r.triggerType] || 'fa-shield-alt'}"></i>`;
+  }
+
+  const titleEl = document.getElementById('retention-modal-title');
+  if (titleEl) titleEl.textContent = r.client + ' — Retention Intelligence';
+
+  const subEl = document.getElementById('retention-modal-subtitle');
+  if (subEl) subEl.textContent = r.triggerLabel + ' · ' + r.policyType;
+
+  document.querySelectorAll('#retention-modal-tabs .dmt-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === 0);
+  });
+
+  renderRetentionModal('analysis');
+
+  const overlay = document.getElementById('retention-modal-overlay');
+  if (overlay) { overlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+
+function closeRetentionModal() {
+  const overlay = document.getElementById('retention-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function switchRetentionTab(tab, btn) {
+  _currentRetTab = tab;
+  document.querySelectorAll('#retention-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderRetentionModal(tab);
+}
+
+function renderRetentionModal(tab) {
+  const body = document.getElementById('retention-modal-body');
+  if (!body || !_currentRetCase) return;
+  const r = retentionData[_currentRetCase];
+  if (!r) return;
+
+  if (tab === 'analysis') {
+    const a = r.analysis;
+    const metricRows = a.metrics.map(m => `
+      <div class="ret-metric-item${m.flag ? ' flagged' : ''}">
+        <span class="ret-metric-lbl">${m.label}</span>
+        <span class="ret-metric-val${m.flag ? ' flag' : ''}">${m.value}${m.flag ? ' <i class="fas fa-exclamation-circle"></i>' : ''}</span>
+      </div>`).join('');
+
+    const riskBar = r.riskScore;
+    const riskColor = r.riskScore >= 75 ? '#dc2626' : r.riskScore >= 55 ? '#f59e0b' : '#059669';
+
+    body.innerHTML = `
+      <div class="ret-modal-grid">
+        <div class="ret-modal-left">
+          <div class="ret-analysis-headline" style="border-left-color:${a.riskColor}">${a.headline}</div>
+          <div class="ret-analysis-summary">${a.summary}</div>
+          <div class="ret-metrics-grid">${metricRows}</div>
+        </div>
+        <div class="ret-modal-right">
+          <div class="ret-risk-gauge">
+            <div class="ret-risk-circle" style="border-color:${riskColor};background:${riskColor}15">
+              <span class="ret-risk-val" style="color:${riskColor}">${riskBar}</span>
+              <span class="ret-risk-lbl">Risk Score</span>
+            </div>
+            <div class="ret-risk-level" style="color:${riskColor}">${r.riskLevel} Risk</div>
+          </div>
+          <div class="ret-client-card-mini">
+            <div class="ret-client-row"><span class="ret-cl">Client</span><span class="ret-cv">${r.client}</span></div>
+            <div class="ret-client-row"><span class="ret-cl">Age</span><span class="ret-cv">${r.age}</span></div>
+            <div class="ret-client-row"><span class="ret-cl">Segment</span><span class="ret-cv">${r.segment}</span></div>
+            <div class="ret-client-row"><span class="ret-cl">Premium</span><span class="ret-cv">${r.premium}</span></div>
+            <div class="ret-client-row"><span class="ret-cl">Policy</span><span class="ret-cv">${r.policy}</span></div>
+            <div class="ret-client-row"><span class="ret-cl">Last Contact</span><span class="ret-cv">${r.lastContact}</span></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  else if (tab === 'signals') {
+    const sigs = r.signals.map(s => `
+      <div class="ret-signal-row">
+        <i class="fas ${s.icon}" style="color:${s.color};flex-shrink:0;margin-top:2px"></i>
+        <span>${s.text}</span>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="ret-modal-section" style="padding:20px 24px">
+        <div class="ret-section-title"><i class="fas fa-signal"></i> Retention Risk Signals</div>
+        <div class="ret-signals-list">${sigs}</div>
+      </div>`;
+  }
+
+  else if (tab === 'action') {
+    const ap = r.actionPlan;
+    const steps = ap.steps.map(s => `
+      <div class="ret-action-step${s.urgent ? ' urgent' : ''}">
+        <span class="ret-step-num${s.urgent ? ' urgent' : ''}">${s.urgent ? '!' : s.num}</span>
+        <span>${s.text}</span>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="ret-modal-section" style="padding:20px 24px">
+        <div class="ret-urgency-banner">${ap.urgency}</div>
+        <div class="ret-section-title" style="margin-top:16px"><i class="fas fa-list-ol"></i> AI Recommended Action Plan</div>
+        <div class="ret-action-steps">${steps}</div>
+        <div class="ret-retention-value">
+          <i class="fas fa-dollar-sign"></i>
+          <span><strong>Estimated Retention Value:</strong> ${ap.estimatedRetentionValue}</span>
+        </div>
+      </div>`;
+  }
 }

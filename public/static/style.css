@@ -4171,3 +4171,239 @@ body {
 .nav-sub-group {
   padding: 0; margin: 0;
 }
+
+/* =============================================
+   RETENTION INTELLIGENCE — Styles
+   ============================================= */
+
+/* ── Dashboard: Risk Rows ── */
+.ri-rows { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+
+.ri-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px; border-radius: 9px; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.15s;
+}
+.ri-row.ri-high { background: #fef2f2; border-color: #fecaca; }
+.ri-row.ri-med  { background: #fffbeb; border-color: #fde68a; }
+.ri-row:hover   { filter: brightness(0.97); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+.ri-risk-badge {
+  padding: 2px 6px; border-radius: 4px; font-size: 9px;
+  font-weight: 800; flex-shrink: 0; letter-spacing: 0.3px;
+}
+.ri-risk-badge.high { background: #fee2e2; color: #b91c1c; }
+.ri-risk-badge.med  { background: #fef3c7; color: #b45309; }
+
+.ri-info { flex: 1; min-width: 0; }
+.ri-name { font-size: 12px; font-weight: 700; color: #111827; }
+.ri-trigger { font-size: 10px; color: #6b7280; margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+.ri-trigger i { font-size: 10px; }
+
+.ri-score-wrap { text-align: center; flex-shrink: 0; }
+.ri-score { font-size: 16px; font-weight: 900; line-height: 1; }
+.ri-score.high { color: #dc2626; }
+.ri-score.med  { color: #d97706; }
+.ri-score-lbl  { font-size: 9px; color: #9ca3af; }
+
+.ri-action-btn {
+  padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700;
+  cursor: pointer; border: none; display: flex; align-items: center; gap: 4px;
+  background: #dc2626; color: #fff; flex-shrink: 0;
+}
+.ri-action-btn.med { background: #d97706; }
+.ri-action-btn:hover { opacity: 0.85; }
+
+.ri-view-all-btn {
+  width: 100%; margin-top: 8px; padding: 7px;
+  background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 7px;
+  font-size: 11px; font-weight: 600; color: #374151; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.15s;
+}
+.ri-view-all-btn:hover { background: #f3f4f6; }
+
+/* ── Clients Page: Lapse Tab ── */
+.cpt-tab.lapse-tab { border-color: transparent; }
+.cpt-tab.lapse-tab.active,
+.cpt-tab.lapse-tab:hover { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+.cpt-tab.lapse-tab .cpt-count { color: #dc2626; }
+
+/* ── Client Card Lapse Badge ── */
+.cc-lapse-badge {
+  padding: 3px 7px; border-radius: 6px; font-size: 9px;
+  font-weight: 800; flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+  letter-spacing: 0.3px;
+}
+.cc-lapse-badge.high { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+.cc-lapse-badge.med  { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+.retention-btn { color: #dc2626 !important; background: #fef2f2 !important; }
+.retention-btn:hover { background: #fee2e2 !important; }
+
+/* Highlight lapse-risk cards with a left border accent */
+.has-lapse-risk { border-left: 3px solid #fca5a5 !important; }
+
+/* ── Clients Page: Retention Intelligence Panel ── */
+.ri-clients-panel {
+  margin: 0; padding: 16px 24px;
+  background: linear-gradient(135deg, #fef2f2, #fff7ed);
+  border-bottom: 1px solid #fecaca;
+}
+.ri-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.ri-panel-title {
+  font-size: 13px; font-weight: 700; color: #dc2626;
+  display: flex; align-items: center; gap: 8px;
+}
+.ri-panel-stats { display: flex; align-items: center; gap: 14px; }
+.ri-pstat { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; color: #6b7280; }
+.ri-pstat.high { color: #dc2626; }
+.ri-pstat.med  { color: #d97706; }
+.ri-pstat i { font-size: 8px; }
+
+/* Retention table */
+.ri-panel-table { display: flex; flex-direction: column; gap: 0; border-radius: 10px; overflow: hidden; border: 1px solid #fecaca; }
+.ri-table-header {
+  display: grid; grid-template-columns: 1.4fr 0.9fr 1.6fr 1.4fr 0.7fr 1fr;
+  gap: 8px; padding: 8px 14px;
+  background: #fef2f2; font-size: 10px; font-weight: 700;
+  color: #9ca3af; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.ri-table-row {
+  display: grid; grid-template-columns: 1.4fr 0.9fr 1.6fr 1.4fr 0.7fr 1fr;
+  gap: 8px; padding: 10px 14px; align-items: center;
+  border-top: 1px solid #fecaca; cursor: pointer; transition: background 0.1s;
+}
+.ri-table-row.high { background: #fff; }
+.ri-table-row.med  { background: #fffdf0; }
+.ri-table-row:hover { background: #fef9f9; }
+
+.ri-tc-client { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: #111827; }
+.ri-level-badge { padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 800; }
+.ri-level-badge.high { background: #fee2e2; color: #b91c1c; }
+.ri-level-badge.med  { background: #fef3c7; color: #b45309; }
+.ri-tc-trigger { font-size: 11px; color: #374151; display: flex; align-items: center; gap: 5px; }
+.ri-tc-policy  { font-size: 10px; color: #6b7280; }
+.ri-tc-days { font-size: 11px; font-weight: 700; color: #6b7280; }
+.ri-tc-days.high { color: #dc2626; }
+
+.ri-tbl-btn {
+  padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 700;
+  cursor: pointer; border: none; background: #dc2626; color: #fff;
+  display: flex; align-items: center; gap: 4px; white-space: nowrap;
+}
+.ri-tbl-btn.med { background: #d97706; }
+.ri-tbl-btn:hover { opacity: 0.85; }
+
+.ri-panel-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 12px; flex-wrap: wrap;
+}
+
+/* ── Retention Modal ── */
+.retention-modal { max-width: 880px; width: 95%; }
+
+.ret-modal-grid {
+  display: grid; grid-template-columns: 1fr 260px; gap: 20px;
+  padding: 20px 24px;
+}
+@media (max-width: 680px) { .ret-modal-grid { grid-template-columns: 1fr; } }
+
+/* Left side */
+.ret-analysis-headline {
+  font-size: 15px; font-weight: 700; color: #111827;
+  padding: 12px 14px; border-left: 4px solid; border-radius: 0 8px 8px 0;
+  background: #f9fafb; margin-bottom: 12px;
+}
+.ret-analysis-summary {
+  font-size: 12px; color: #374151; line-height: 1.7;
+  margin-bottom: 14px; padding: 10px 12px;
+  background: #f0f9ff; border-radius: 8px; border-left: 3px solid #3b82f6;
+}
+.ret-metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.ret-metric-item {
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 7px 10px; background: #f9fafb;
+  border-radius: 7px; border: 1px solid #e5e7eb;
+}
+.ret-metric-item.flagged { background: #fef2f2; border-color: #fecaca; }
+.ret-metric-lbl { font-size: 10px; color: #9ca3af; font-weight: 500; }
+.ret-metric-val { font-size: 12px; color: #111827; font-weight: 700; }
+.ret-metric-val.flag { color: #dc2626; }
+.ret-metric-val i { font-size: 10px; margin-left: 3px; }
+
+/* Right side */
+.ret-modal-right { display: flex; flex-direction: column; gap: 14px; }
+.ret-risk-gauge {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 16px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;
+}
+.ret-risk-circle {
+  width: 90px; height: 90px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 4px solid;
+}
+.ret-risk-val  { font-size: 28px; font-weight: 900; line-height: 1; }
+.ret-risk-lbl  { font-size: 9px; color: #6b7280; font-weight: 600; text-transform: uppercase; }
+.ret-risk-level { font-size: 13px; font-weight: 700; }
+
+.ret-client-card-mini {
+  padding: 12px; background: #f9fafb; border-radius: 10px;
+  border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 6px;
+}
+.ret-client-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ret-cl { font-size: 10px; color: #9ca3af; font-weight: 500; }
+.ret-cv { font-size: 11px; color: #111827; font-weight: 600; }
+
+/* Signals tab */
+.ret-section-title {
+  font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.ret-section-title i { color: #003087; }
+.ret-signals-list { display: flex; flex-direction: column; gap: 8px; }
+.ret-signal-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; background: #f9fafb; border-radius: 8px;
+  font-size: 12px; color: #374151; line-height: 1.5;
+}
+
+/* Action Plan tab */
+.ret-urgency-banner {
+  padding: 10px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 800; text-align: center;
+  background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;
+}
+.ret-action-steps { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.ret-action-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; background: #f9fafb; border-radius: 8px;
+  font-size: 12px; color: #374151; line-height: 1.6;
+}
+.ret-action-step.urgent { background: #fff7ed; border-left: 3px solid #f59e0b; }
+.ret-step-num {
+  min-width: 22px; height: 22px; border-radius: 50%;
+  background: #003087; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.ret-step-num.urgent { background: #dc2626; }
+.ret-retention-value {
+  margin-top: 14px; padding: 12px 16px; background: #f0fdf4;
+  border-radius: 8px; border-left: 3px solid #059669;
+  font-size: 12px; color: #065f46; display: flex; align-items: center; gap: 8px;
+}
+.ret-modal-section { }
+
+/* ── Responsive ── */
+@media (max-width: 760px) {
+  .ri-table-header,
+  .ri-table-row { grid-template-columns: 1.2fr 0.8fr 1fr auto; }
+  .ri-table-header span:nth-child(3),
+  .ri-table-row > div:nth-child(3),
+  .ri-table-header span:nth-child(5),
+  .ri-table-row > div:nth-child(5) { display: none; }
+}

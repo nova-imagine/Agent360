@@ -725,6 +725,46 @@ function DashboardPage() {
               <div class="lapse-seg med-risk"><span class="lapse-count">11</span><span class="lapse-lbl">Medium Risk</span></div>
               <div class="lapse-seg low-risk"><span class="lapse-count">232</span><span class="lapse-lbl">Low Risk</span></div>
             </div>
+            {/* ── Retention Intelligence rows ── */}
+            <div class="ri-rows">
+              <div class="ri-row ri-high" onclick="openRetentionModal('ret-patricia')">
+                <div class="ri-risk-badge high">HIGH</div>
+                <div class="ri-info">
+                  <div class="ri-name">Patricia Nguyen</div>
+                  <div class="ri-trigger"><i class="fas fa-battery-quarter"></i> UL Under-funded · Lapse ~Jun 20</div>
+                </div>
+                <div class="ri-score-wrap"><div class="ri-score high">87</div><div class="ri-score-lbl">Risk</div></div>
+                <button class="ri-action-btn" onclick="event.stopPropagation();openRetentionModal('ret-patricia')"><i class="fas fa-bolt"></i> Act</button>
+              </div>
+              <div class="ri-row ri-high" onclick="openRetentionModal('ret-sandra')">
+                <div class="ri-risk-badge high">HIGH</div>
+                <div class="ri-info">
+                  <div class="ri-name">Sandra Williams</div>
+                  <div class="ri-trigger"><i class="fas fa-calendar-times"></i> Term Renewal · Sep 2026 · 153 days</div>
+                </div>
+                <div class="ri-score-wrap"><div class="ri-score high">79</div><div class="ri-score-lbl">Risk</div></div>
+                <button class="ri-action-btn" onclick="event.stopPropagation();openRetentionModal('ret-sandra')"><i class="fas fa-bolt"></i> Act</button>
+              </div>
+              <div class="ri-row ri-med" onclick="openRetentionModal('ret-kevin')">
+                <div class="ri-risk-badge med">MED</div>
+                <div class="ri-info">
+                  <div class="ri-name">Kevin Park</div>
+                  <div class="ri-trigger"><i class="fas fa-pause-circle"></i> Policy Pending · No contact 12 days</div>
+                </div>
+                <div class="ri-score-wrap"><div class="ri-score med">61</div><div class="ri-score-lbl">Risk</div></div>
+                <button class="ri-action-btn med" onclick="event.stopPropagation();openRetentionModal('ret-kevin')"><i class="fas fa-phone"></i> Call</button>
+              </div>
+              <div class="ri-row ri-med" onclick="openRetentionModal('ret-david')">
+                <div class="ri-risk-badge med">MED</div>
+                <div class="ri-info">
+                  <div class="ri-name">David Thompson</div>
+                  <div class="ri-trigger"><i class="fas fa-shield-alt"></i> Single policy · Under-insured · Age 33</div>
+                </div>
+                <div class="ri-score-wrap"><div class="ri-score med">54</div><div class="ri-score-lbl">Risk</div></div>
+                <button class="ri-action-btn med" onclick="event.stopPropagation();openRetentionModal('ret-david')"><i class="fas fa-phone"></i> Call</button>
+              </div>
+            </div>
+            <button class="ri-view-all-btn" onclick="navigateTo('clients')"><i class="fas fa-shield-alt"></i> View All 15 At-Risk Clients →</button>
           </div>
         </div>
 
@@ -949,6 +989,30 @@ function DashboardPage() {
         <button class="btn btn-white">View All AI Insights <i class="fas fa-arrow-right"></i></button>
       </div>
 
+      {/* ── Retention Intelligence Modal ── */}
+      <div class="detail-modal-overlay" id="retention-modal-overlay" onclick="closeRetentionModal()">
+        <div class="detail-modal retention-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header" id="retention-modal-header">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" id="retention-modal-icon" style="background:linear-gradient(135deg,#dc2626,#b91c1c)"><i class="fas fa-shield-alt"></i></span>
+              <div>
+                <h3 id="retention-modal-title">Retention Intelligence</h3>
+                <p id="retention-modal-subtitle" class="detail-modal-sub"></p>
+              </div>
+            </div>
+            <div class="detail-modal-header-actions">
+              <div class="detail-modal-tabs" id="retention-modal-tabs">
+                <button class="dmt-tab active" onclick="switchRetentionTab('analysis',this)"><i class="fas fa-chart-bar"></i> Risk Analysis</button>
+                <button class="dmt-tab" onclick="switchRetentionTab('signals',this)"><i class="fas fa-signal"></i> Signals</button>
+                <button class="dmt-tab ai-tab" onclick="switchRetentionTab('action',this)"><i class="fas fa-robot"></i> AI Action Plan</button>
+              </div>
+              <button class="detail-modal-close" onclick="closeRetentionModal()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="detail-modal-body" id="retention-modal-body"></div>
+        </div>
+      </div>
+
     </div>
   )
 }
@@ -1018,6 +1082,75 @@ function ClientsPage() {
             <span class="cpt-sub">$31.2K potential</span>
           </div>
         </button>
+        <button class="cpt-tab lapse-tab" onclick="filterClientsByProductTab('lapse', this)">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div class="cpt-tab-content">
+            <span class="cpt-count">15</span>
+            <span class="cpt-label">Lapse Risk</span>
+            <span class="cpt-sub">4 high · 11 med</span>
+          </div>
+        </button>
+      </div>
+
+      {/* ── Retention Intelligence Panel (shown when lapse tab active) ── */}
+      <div class="ri-clients-panel" id="ri-clients-panel" style="display:none">
+        <div class="ri-panel-header">
+          <div class="ri-panel-title"><i class="fas fa-shield-alt"></i> Retention Intelligence — 15 At-Risk Clients</div>
+          <div class="ri-panel-stats">
+            <span class="ri-pstat high"><i class="fas fa-circle"></i> 4 High Risk</span>
+            <span class="ri-pstat med"><i class="fas fa-circle"></i> 11 Medium Risk</span>
+            <span class="ri-pstat">AI Last Scan: 2 min ago</span>
+          </div>
+        </div>
+        <div class="ri-panel-table">
+          <div class="ri-table-header">
+            <span>Client</span><span>Risk Level</span><span>Primary Trigger</span><span>Policy</span><span>Days Left</span><span>Action</span>
+          </div>
+          <div class="ri-table-row high" onclick="openRetentionModal('ret-patricia')">
+            <div class="ri-tc-client"><div class="mini-avatar pn">PN</div>Patricia Nguyen</div>
+            <div><span class="ri-level-badge high">HIGH · 87</span></div>
+            <div class="ri-tc-trigger"><i class="fas fa-battery-quarter"></i> UL Under-funded (2 qtrs)</div>
+            <div class="ri-tc-policy">P-100301 · Universal Life</div>
+            <div class="ri-tc-days high">~68 days</div>
+            <button class="ri-tbl-btn" onclick="event.stopPropagation();openRetentionModal('ret-patricia')"><i class="fas fa-bolt"></i> Take Action</button>
+          </div>
+          <div class="ri-table-row high" onclick="openRetentionModal('ret-sandra')">
+            <div class="ri-tc-client"><div class="mini-avatar sw">SW</div>Sandra Williams</div>
+            <div><span class="ri-level-badge high">HIGH · 79</span></div>
+            <div class="ri-tc-trigger"><i class="fas fa-calendar-times"></i> Term Renewal Expiring</div>
+            <div class="ri-tc-policy">P-100320 · Term Life $350K</div>
+            <div class="ri-tc-days high">153 days</div>
+            <button class="ri-tbl-btn" onclick="event.stopPropagation();openRetentionModal('ret-sandra')"><i class="fas fa-bolt"></i> Take Action</button>
+          </div>
+          <div class="ri-table-row high" onclick="openRetentionModal('ret-kevin')">
+            <div class="ri-tc-client"><div class="mini-avatar kp">KP</div>Kevin Park</div>
+            <div><span class="ri-level-badge high">HIGH · 72</span></div>
+            <div class="ri-tc-trigger"><i class="fas fa-user-clock"></i> Death Claim — Policy Pending</div>
+            <div class="ri-tc-policy">P-100350 · Term Life $250K</div>
+            <div class="ri-tc-days high">Urgent</div>
+            <button class="ri-tbl-btn" onclick="event.stopPropagation();openRetentionModal('ret-kevin')"><i class="fas fa-bolt"></i> Take Action</button>
+          </div>
+          <div class="ri-table-row med" onclick="openRetentionModal('ret-david')">
+            <div class="ri-tc-client"><div class="mini-avatar dt">DT</div>David Thompson</div>
+            <div><span class="ri-level-badge med">MED · 54</span></div>
+            <div class="ri-tc-trigger"><i class="fas fa-shield-alt"></i> Single Policy · Under-insured</div>
+            <div class="ri-tc-policy">P-100380 · Term Life $300K</div>
+            <div class="ri-tc-days">—</div>
+            <button class="ri-tbl-btn med" onclick="event.stopPropagation();openRetentionModal('ret-david')"><i class="fas fa-phone"></i> Contact</button>
+          </div>
+          <div class="ri-table-row med" onclick="openRetentionModal('ret-james')">
+            <div class="ri-tc-client"><div class="mini-avatar jw">JW</div>James Whitfield</div>
+            <div><span class="ri-level-badge med">MED · 48</span></div>
+            <div class="ri-tc-trigger"><i class="fas fa-coins"></i> LTC Gap — Daily Benefit Insufficient</div>
+            <div class="ri-tc-policy">P-100293 · LTC $200/day</div>
+            <div class="ri-tc-days">Next renewal</div>
+            <button class="ri-tbl-btn med" onclick="event.stopPropagation();openRetentionModal('ret-james')"><i class="fas fa-phone"></i> Contact</button>
+          </div>
+        </div>
+        <div class="ri-panel-footer">
+          <span style="font-size:11px;color:#6b7280">Showing 5 of 15 at-risk clients · AI monitors all 247 clients continuously</span>
+          <button class="btn btn-ai" style="font-size:11px;padding:6px 12px" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Full AI Retention Analysis</button>
+        </div>
       </div>
 
       {/* ── Toolbar ── */}
@@ -1066,8 +1199,16 @@ function ClientsPage() {
           const prods = clientProducts[client.id] || { insurance: [], investments: [], retirement: [], advisory: [] }
           const initials = client.name.split(' ').map((n:string) => n[0]).join('')
           const avatarKey = initials.toLowerCase()
+          const lapseRiskMap: Record<number,{level:string,score:number,retId:string}> = {
+            2: { level:'high', score:87, retId:'ret-patricia' },
+            4: { level:'high', score:79, retId:'ret-sandra'  },
+            7: { level:'high', score:72, retId:'ret-kevin'   },
+            5: { level:'med',  score:54, retId:'ret-david'   },
+            1: { level:'med',  score:48, retId:'ret-james'   },
+          }
+          const lapseInfo = lapseRiskMap[client.id]
           return (
-            <div class={`client-card segment-${client.segment.replace(' ', '-').toLowerCase()}`}>
+            <div class={`client-card segment-${client.segment.replace(' ', '-').toLowerCase()}${lapseInfo ? ' has-lapse-risk' : ''}`} data-lapse={lapseInfo ? lapseInfo.level : ''}>
 
               {/* ── Card Header ── */}
               <div class="client-card-header" onclick={`toggleClientProducts(${client.id})`} style="cursor:pointer">
@@ -1077,6 +1218,7 @@ function ClientsPage() {
                   <p>{client.city} · Age {client.age}</p>
                   <span class={`segment-tag seg-${client.segment.replace(' ', '-').toLowerCase()}`}>{client.segment}</span>
                 </div>
+                {lapseInfo && <div class={`cc-lapse-badge ${lapseInfo.level}`} title="Lapse Risk"><i class="fas fa-exclamation-triangle"></i> {lapseInfo.level === 'high' ? 'HIGH' : 'MED'} {lapseInfo.score}</div>}
                 <div class="client-score-circle"><span>{client.score}</span></div>
                 <i class="fas fa-chevron-down client-expand-icon" id={`expand-icon-${client.id}`}></i>
               </div>
@@ -1250,7 +1392,10 @@ function ClientsPage() {
                 <span><i class="fas fa-clock"></i> {client.lastContact}</span>
                 <button class="btn-icon" title="Call" onclick="event.stopPropagation()"><i class="fas fa-phone"></i></button>
                 <button class="btn-icon" title="Email" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i></button>
-                <button class="btn-icon ai-btn" title="AI Analysis" onclick={`event.stopPropagation(); aiAnalyzeClient(${client.id})`}><i class="fas fa-robot"></i></button>
+                {lapseInfo
+                  ? <button class="btn-icon retention-btn" title="Retention Action" onclick={`event.stopPropagation(); openRetentionModal('${lapseInfo.retId}')`}><i class="fas fa-shield-alt"></i></button>
+                  : <button class="btn-icon ai-btn" title="AI Analysis" onclick={`event.stopPropagation(); aiAnalyzeClient(${client.id})`}><i class="fas fa-robot"></i></button>
+                }
               </div>
             </div>
           )
