@@ -3755,3 +3755,614 @@ function closeDealModal(e) {
 }
 
 console.log('Sales Pipeline JS loaded — pipelineData(9 deals), runQuoteCalc, openDealModal, moveDealStage');
+
+/* ═══════════════════════════════════════════════════════════════
+   #10  HYPERPERSONALIZED OUTREACH HUB
+   ═══════════════════════════════════════════════════════════════ */
+
+const outreachData = {
+  'OR-001': {
+    client: 'Patricia Nguyen', email: 'patricia.n@email.com', phone: '(212) 555-0102',
+    segment: 'Mid Market', city: 'Brooklyn', age: 38,
+    triggerType: 'lapse', triggerLabel: 'Lapse Risk · 94% probability by June 20',
+    outreachType: 'Retention Save', priority: 'urgent', revPotential: '$5,800/yr',
+    policies: 'UL $400K (P-100301) + VUL $300K (P-100302)', premium: '$5,800/yr',
+    aiRationale: 'Patricia\'s Universal Life policy is projected to lapse with 94% probability by June 20 if premium payments aren\'t increased by $180-220/mo. She has not contacted the office in 42 days — unusually long gap. AI detected 3 missed payment signals. Immediate outreach is critical to save $5,800/yr in premium.',
+    goal: 'Retain both UL + VUL policies. Offer payment restructuring or premium holiday. Do NOT mention lapse risk bluntly — frame as a "policy review" and "premium optimization" call.',
+    tone: 'warm',
+    emailSubject: 'A quick note about your NYL policy, Patricia',
+    messages: {
+      email: `Dear Patricia,
+
+I hope this message finds you well. I wanted to reach out personally because I've been reviewing your portfolio and noticed an opportunity to optimize your policy structure that could save you money while keeping your coverage strong.
+
+Your Universal Life policy (P-100301) has been performing well, but I'd love to schedule a brief 15-minute call to walk through some premium flexibility options that many of my clients in similar situations have found very helpful.
+
+Life changes — and NYL has options that can flex with you. I'd hate for you to miss out on the protection you've built for your family over the years.
+
+Would Thursday or Friday this week work for a quick call? I'm here to make sure your coverage continues to work for you.
+
+Warm regards,
+[Agent Name]
+NYL Agent · (212) 555-0000`,
+      sms: `Hi Patricia, it's [Agent Name] from NYL. I've been reviewing your policy and have some options to share that could help — quick 10-min call this week? Reply YES and I'll send you a calendar link.`,
+      call: `CALL SCRIPT — Patricia Nguyen (Retention)
+
+Opening: "Hi Patricia, this is [Agent Name] from New York Life. I was reviewing my client portfolios this week and wanted to reach out personally because I spotted a few opportunities to optimize your coverage while potentially reducing your out-of-pocket costs."
+
+Key Points:
+• Premium flexibility options available on her UL policy
+• Policy review — "making sure your coverage still fits your life"
+• Do NOT mention lapse — frame as proactive service
+
+Objection — "I'm busy": "Totally understand — even 10 minutes could save you hundreds this year. Would a quick call tomorrow morning work?"
+
+Close: Schedule call or in-person meeting.`
+    }
+  },
+
+  'OR-002': {
+    client: 'Sandra Williams', email: 'sandra.w@email.com', phone: '(718) 555-0104',
+    segment: 'Mid Market', city: 'Queens', age: 61,
+    triggerType: 'renewal', triggerLabel: 'Term expiring in 153 days · Conversion window',
+    outreachType: 'Conversion Upsell', priority: 'urgent', revPotential: '$8,200/yr',
+    policies: 'Term $350K expiring 2026 (P-100320) + LTC $180K (P-100321)', premium: '$8,200/yr',
+    aiRationale: 'Sandra\'s 20-year term policy (P-100320, face value $350K) expires in 153 days. She is 61 — beyond the standard term re-issue age — making conversion to Whole Life or Universal Life the best option. Revenue potential: $8,200/yr if converted. Estimated commission: $1,000+. Conversion window closes at policy expiry.',
+    goal: 'Convert term to permanent coverage before expiry. Lead with the "coverage gap" risk she faces at 61 without permanent insurance. Secondary pitch: Immediate Income Annuity for retirement income.',
+    tone: 'urgent',
+    emailSubject: 'Important: Your term policy expires in 5 months — let\'s talk options',
+    messages: {
+      email: `Dear Sandra,
+
+I'm writing with some important news about your New York Life policy (P-100320).
+
+Your 20-year term life insurance policy is scheduled to expire in approximately 153 days. At 61, with your family depending on your coverage, this is a time-sensitive decision that I don't want you to miss.
+
+The good news: You have guaranteed conversion rights to permanent life insurance — no new medical exam required. This means you can lock in lifetime coverage regardless of any health changes since 2006.
+
+Here's why this matters:
+✓ Permanent coverage for life — no more renewal risk
+✓ Cash value that builds tax-deferred
+✓ No medical underwriting required — guaranteed issue
+
+I'd love to prepare a personalized illustration showing you exactly what conversion would look like for your budget. Can we schedule 20 minutes this week?
+
+Please don't let this window close — once the policy lapses, you lose these guaranteed rights permanently.
+
+Best regards,
+[Agent Name]
+NYL Agent · (718) 555-0000`,
+      sms: `Sandra, this is [Agent Name] from NYL. Your term policy expires in 153 days — at 61, this is critical to address. You have guaranteed conversion rights with no medical exam. Can we talk this week? Reply YES for a callback.`,
+      call: `CALL SCRIPT — Sandra Williams (Term Conversion)
+
+Opening: "Sandra, I'm calling about your term policy that expires in about 5 months. I want to make sure you're aware of your options before that window closes."
+
+Key Points:
+• Guaranteed conversion — no medical exam
+• At age 61, reissuing a new term is expensive or unavailable
+• Permanent coverage locks in her current insurability
+• Potential annuity income discussion (secondary)
+
+Urgency: Conversion rights expire WITH the policy.
+
+Close: Offer to send illustration, schedule follow-up.`
+    }
+  },
+
+  'OR-003': {
+    client: 'Kevin Park', email: 'kevin.p@email.com', phone: '(212) 555-0107',
+    segment: 'Emerging', city: 'Jersey City', age: 29,
+    triggerType: 'lifecycle', triggerLabel: 'E-Signature pending 2 days',
+    outreachType: 'Close Deal', priority: 'urgent', revPotential: '$1,800/yr',
+    policies: 'Term $500K pending (P-100350)', premium: '$1,800/yr',
+    aiRationale: 'Kevin\'s Term Life application is APPROVED (Preferred Plus) and e-signature has been pending for 2 days. AI close probability: 95%. Every day of delay risks deal going cold. Short, direct SMS outreach is the highest-converting channel for his age (29) and tech profile.',
+    goal: 'Get e-signature completed today. Remove friction — offer DocuSign link directly. Keep message short and action-focused.',
+    tone: 'urgent',
+    emailSubject: 'Action needed: Your NYL policy is approved and ready to sign',
+    messages: {
+      email: `Hi Kevin,
+
+Great news — your New York Life Term Life Insurance policy has been approved at Preferred Plus rates!
+
+Your policy is all set and ready for your electronic signature. This takes less than 2 minutes.
+
+👉 Sign here: [DocuSign Link]
+
+Once signed, your $500,000 in coverage activates immediately — protecting your family starting today.
+
+Let me know if you have any questions. I'm here to help!
+
+[Agent Name]
+NYL Agent`,
+      sms: `Kevin — your NYL $500K policy is APPROVED! Just needs your e-signature (2 min). Sign here: [link]. Coverage starts the moment you sign. Any questions? Call me: [Agent Name]`,
+      call: `CALL SCRIPT — Kevin Park (E-Signature Close)
+
+Opening: "Hi Kevin, [Agent Name] from NYL. Quick call — your Term Life policy just got approved at our best Preferred Plus rate. I just need your e-signature and you're covered."
+
+Key Points:
+• Policy is fully approved — no delays
+• Coverage $500K starts immediately upon signature
+• Takes 2 minutes via DocuSign
+
+Objection — "I'll do it later": "I completely understand — want me to text you the link right now while we're on the phone?"
+
+Close: Send DocuSign link via text immediately.`
+    }
+  },
+
+  'OR-004': {
+    client: 'Linda Morrison', email: 'linda.m@email.com', phone: '(718) 555-0108',
+    segment: 'Premium', city: 'Long Island', age: 56,
+    triggerType: 'portfolio', triggerLabel: 'UMA Transfer + Estate Review due',
+    outreachType: 'Cross-Sell', priority: 'high', revPotential: '$2,800/yr fee',
+    policies: 'WL $2M + LTC $300K + VUL $1.5M + UMA $280K + Estate Plan', premium: '$32,000/yr',
+    aiRationale: 'Linda is the #1 client by portfolio value ($812K). UMA account transfer from Fidelity is in progress. Estate plan review is due — attorney contact (David Kaufman) is on file. NQDC plan opportunity flagged. Cross-sell probability: 90%. This is the most valuable client relationship in the book.',
+    goal: 'Confirm UMA transfer timeline, schedule estate review, introduce NQDC concept. Tone: white-glove, consultative — she expects premium service.',
+    tone: 'professional',
+    emailSubject: 'Your portfolio update + upcoming estate review — Linda',
+    messages: {
+      email: `Dear Linda,
+
+I hope you're well. I wanted to reach out with a brief update on a few items across your portfolio.
+
+Your Unified Managed Account transfer is progressing smoothly and should be fully complete within the next 5-7 business days. Once settled, I'll have a comprehensive portfolio analysis ready — including updated sub-account allocations and a Q2 rebalancing proposal.
+
+I also wanted to flag that your annual estate plan review is coming due. I've already coordinated with David Kaufman's office to schedule a joint review call — would the week of April 21 work for you?
+
+Finally, given your executive compensation structure, I'd like to introduce a new planning concept at our next meeting that some of my clients in similar positions have found highly valuable. I think it could meaningfully impact your long-term tax position.
+
+As always, thank you for the trust you place in me and NYL. I look forward to our continued work together.
+
+Best regards,
+[Agent Name]
+NYL Senior Agent · (718) 555-0000`,
+      sms: `Linda, [Agent Name] here. Your UMA transfer is on track (5-7 days). I'll send a full update by end of week. Also coordinating your estate review — does week of Apr 21 work? Thanks!`,
+      call: `CALL SCRIPT — Linda Morrison (Premium Client)
+
+Opening: "Linda, [Agent Name] from NYL. Just calling to personally update you on your portfolio and talk through a couple of planning items."
+
+Key Points:
+• UMA transfer progress — reassure timeline
+• Estate review scheduling — David Kaufman coordination
+• NQDC planning concept introduction (keep high-level)
+
+Tone: Consultative, unhurried, white-glove service.
+
+Close: Confirm estate review date, send calendar invite.`
+    }
+  },
+
+  'OR-005': {
+    client: 'Robert Chen', email: 'robert.c@email.com', phone: '(212) 555-0103',
+    segment: 'High Value', city: 'Manhattan', age: 45,
+    triggerType: 'portfolio', triggerLabel: 'Estate Plan + NQDC Review Due',
+    outreachType: 'Advisory', priority: 'high', revPotential: '$2,000/yr',
+    policies: 'WL $1M + VUL $800K + Business Services + NQDC', premium: '$21,000/yr',
+    aiRationale: 'Robert has a complex business owner profile — Key-Person Life, Buy-Sell agreement, NQDC plan. Annual review is overdue. Business succession planning is the primary opportunity. Cross-sell: additional buy-sell funding + split-dollar arrangement potential.',
+    goal: 'Schedule annual business review. Lead with business succession — buy-sell adequacy ($500K vs. current valuation). Introduce split-dollar opportunity.',
+    tone: 'professional',
+    emailSubject: 'Annual Business Insurance Review — Robert Chen',
+    messages: {
+      email: `Dear Robert,
+
+As your business continues to grow, I wanted to schedule our annual review to make sure your business protection structure keeps pace.
+
+A few areas I'd like to cover:
+
+1. Buy-Sell Agreement Funding — We should verify that your $500K Key-Person policy still adequately reflects your business valuation. Businesses like yours often see significant value increases year-over-year.
+
+2. NQDC Plan Update — Your deferred compensation balance ($150K) warrants a review of investment sub-account allocations and distribution planning.
+
+3. New Opportunity — I'd like to introduce a split-dollar arrangement that several of my business-owner clients have used to fund buy-sell agreements more tax-efficiently.
+
+Would a lunch meeting work for you — perhaps the week of April 21? I can bring the updated illustrations.
+
+Best regards,
+[Agent Name]
+NYL Agent`,
+      sms: `Robert, [Agent Name] here. Time for your annual business review — buy-sell adequacy + NQDC update. New planning idea to share too. Lunch week of Apr 21? Let me know.`,
+      call: `CALL SCRIPT — Robert Chen (Business Review)
+
+Opening: "Robert, [Agent Name]. I wanted to schedule our annual business insurance review — your buy-sell agreement needs a valuation check and I have a new planning idea I think you'll find very interesting."
+
+Key Points:
+• Buy-sell funding adequacy vs. current business value
+• NQDC allocation review
+• Split-dollar arrangement introduction
+
+Close: Schedule lunch meeting for week of Apr 21.`
+    }
+  },
+
+  'OR-006': {
+    client: 'James Whitfield', email: 'james.w@email.com', phone: '(212) 555-0101',
+    segment: 'High Value', city: 'New York', age: 52,
+    triggerType: 'lifecycle', triggerLabel: 'Retirement income gap $8,500/mo identified',
+    outreachType: 'Retirement Planning', priority: 'mid', revPotential: '$4,800/yr',
+    policies: 'WL $500K + Term $750K + LTC $250K + Estate Plan', premium: '$12,400/yr',
+    aiRationale: 'James had a retirement planning session (Apr 18). Income gap identified: $8,500/mo needed vs. $3,200/mo projected. Deferred annuity + NQDC are the recommended instruments. He is highly engaged. Follow-up with illustration within 48 hours of meeting — highest conversion probability.',
+    goal: 'Send deferred annuity illustration post-meeting. Personalize with his specific numbers ($8,500 target, age 67 retirement). Create urgency around illustration timing.',
+    tone: 'professional',
+    emailSubject: 'Your retirement income illustration — as promised, James',
+    messages: {
+      email: `Dear James,
+
+Thank you for the excellent meeting on April 18 — I always enjoy our planning conversations.
+
+As promised, I'm attaching your personalized retirement income illustration based on the goals we discussed:
+
+• Target income at age 67: $8,500/month
+• Projected Social Security: $3,200/month
+• Income gap to fill: $5,300/month
+
+The deferred annuity scenario I've modeled shows that a $6,400/yr contribution starting this year would generate approximately $2,900/mo in guaranteed lifetime income — significantly closing your gap.
+
+I've also included a NQDC plan scenario given your current income level, which could provide additional tax-advantaged accumulation.
+
+I'd love to walk through these numbers with you in detail. Would a 30-minute call next week work?
+
+Best regards,
+[Agent Name]
+NYL Agent`,
+      sms: `James, [Agent Name] here. Just sent your retirement illustration to your email — the deferred annuity numbers look great. Quick call next week to walk through it? Let me know!`,
+      call: `CALL SCRIPT — James Whitfield (Retirement Follow-up)
+
+Opening: "James, [Agent Name]. I'm calling to follow up on our retirement planning meeting — I have your personalized illustration ready and the numbers are actually very encouraging."
+
+Key Points:
+• Income gap: $5,300/mo to fill
+• Deferred annuity: $6,400/yr → $2,900/mo at 67
+• NQDC plan as supplementary accumulation vehicle
+
+Close: Schedule illustration walkthrough call.`
+    }
+  },
+
+  'OR-007': {
+    client: 'Maria Gonzalez', email: 'maria.g@email.com', phone: '(917) 555-0106',
+    segment: 'High Value', city: 'New York', age: 48,
+    triggerType: 'gap', triggerLabel: 'No Advisory Services — gap detected',
+    outreachType: 'Cross-Sell', priority: 'mid', revPotential: '$2,400/yr',
+    policies: 'UL $600K + DI + Fixed Annuity + Immediate Annuity', premium: '$14,600/yr',
+    aiRationale: 'Maria has strong insurance and annuity holdings but zero advisory services despite a $95K investment portfolio. She is 48 — prime age for estate planning. Cross-sell probability: 74%. Estate planning + wealth management introduction would round out her profile and add $2,400/yr in advisory fees.',
+    goal: 'Introduce estate planning and investment advisory services. Frame as "completing her financial picture." Offer a complimentary financial review as entry point.',
+    tone: 'warm',
+    emailSubject: 'Complimentary Financial Review — Maria, you\'re missing one piece',
+    messages: {
+      email: `Dear Maria,
+
+I've been reviewing your overall financial picture, and I'm genuinely impressed by the foundation you've built — your insurance and annuity portfolio is comprehensive and well-structured.
+
+There's one area I think could make a meaningful difference: estate planning. At 48, with your assets and income, having a formal estate plan — will, trust, and power of attorney — can protect everything you've worked for and ensure it passes to your family exactly as you intend.
+
+I'd love to offer you a complimentary 45-minute Estate Planning Review — no obligation. We'll look at your current situation and I'll show you exactly what a plan would cover and what it would cost.
+
+Would the week of April 21 work for you?
+
+Best regards,
+[Agent Name]
+NYL Agent`,
+      sms: `Hi Maria, [Agent Name] from NYL. I've been thinking about your portfolio — have you considered estate planning? At 48, it could be the most important financial move you make. Free review this month — interested?`,
+      call: `CALL SCRIPT — Maria Gonzalez (Estate Planning Cross-Sell)
+
+Opening: "Maria, [Agent Name]. I've been reviewing your portfolio and you're doing really well — but I noticed one area we haven't covered that I think would be very valuable for you."
+
+Key Points:
+• Estate planning — will, trust, POA
+• At 48, ideal time to establish formal structure
+• Free complimentary review as entry point
+• Natural progression: estate plan → wealth management
+
+Close: Schedule complimentary estate planning review.`
+    }
+  },
+
+  'OR-008': {
+    client: 'David Thompson', email: 'david.t@email.com', phone: '(646) 555-0105',
+    segment: 'Emerging', city: 'Bronx', age: 33,
+    triggerType: 'gap', triggerLabel: 'No Investments or Retirement products',
+    outreachType: 'Upsell', priority: 'mid', revPotential: '$1,200/yr',
+    policies: 'Term $300K only (P-100330)', premium: '$2,400/yr',
+    aiRationale: 'David is 33 — young, single policy holder. No investments, no retirement products. Life-stage opportunity: introduce IRA + investment account while he is in accumulation phase. Low revenue today but high lifetime value potential. SMS is highest-response channel for his demographic.',
+    goal: 'Introduce investment and retirement accounts. Lead with compound growth story and "starting early" message. Keep it simple and benefit-focused.',
+    tone: 'warm',
+    emailSubject: 'David, a quick financial tip for your 30s',
+    messages: {
+      email: `Hi David,
+
+Hope all is well! I was thinking about you this week — you've done a great job getting your life insurance in place early. That's a smart move that a lot of people your age overlook.
+
+I wanted to share something that could make an even bigger impact on your financial future: starting an investment account and IRA in your 30s.
+
+The math is compelling:
+• $200/month starting at age 33 → ~$380,000 by age 65 (7% avg return)
+• Same amount starting at 43 → ~$180,000
+
+That 10-year head start could be worth $200,000 — just by starting now.
+
+I'd love to spend 20 minutes showing you some simple, low-cost options that fit your budget. Would next week work?
+
+[Agent Name]
+NYL Agent`,
+      sms: `Hey David, [Agent Name] from NYL. Quick question — are you investing for retirement yet? Starting at 33 vs 43 can mean $200K more by retirement. 20-min chat? Happy to show you some easy options.`,
+      call: `CALL SCRIPT — David Thompson (Investment Upsell)
+
+Opening: "David, [Agent Name] here. You're doing great with your term policy — I wanted to share a quick financial opportunity that makes a lot of sense for someone your age."
+
+Key Points:
+• Investment + IRA — compound growth story
+• Starting at 33 vs. 43 — $200K difference example
+• Simple, low-cost options available
+
+Close: Schedule 20-minute investment intro call or virtual meeting.`
+    }
+  },
+
+  'OR-009': {
+    client: 'Alex Rivera', email: 'alex.r@email.com', phone: '(212) 555-0190',
+    segment: 'Prospect', city: 'New York', age: 31,
+    triggerType: 'lifecycle', triggerLabel: 'Meeting Apr 12 — pre-brief ready',
+    outreachType: 'Meeting Prep', priority: 'low', revPotential: '$4,800/yr',
+    policies: 'WL $500K prospect', premium: 'Prospect',
+    aiRationale: 'Alex has a meeting scheduled Apr 12 for Whole Life $500K. Pre-meeting brief is ready (MTG-001). A personalized pre-meeting email confirms the meeting, sets expectations, and warms the conversation — increasing first-meeting close probability by ~18%.',
+    goal: 'Confirm meeting, send agenda, build rapport before the in-person. Keep message brief and excited — first impression is everything.',
+    tone: 'warm',
+    emailSubject: 'Looking forward to our meeting on April 12, Alex!',
+    messages: {
+      email: `Hi Alex,
+
+Just a quick note to confirm our meeting on April 12 — I'm really looking forward to it!
+
+I've put together a personalized overview of what we'll cover:
+
+✓ Your current coverage needs and income protection goals
+✓ Whole Life Insurance — how it works as both protection AND a financial asset
+✓ Cash value growth and living benefits you can access during your lifetime
+✓ A customized illustration based on your age and goals
+
+I'll have everything prepared so we can make the most of our time together. Please don't hesitate to reach out beforehand if you have any questions or want to share anything that might help me personalize the conversation.
+
+See you on April 12!
+
+[Agent Name]
+NYL Agent`,
+      sms: `Hi Alex! [Agent Name] here — just confirming our meeting on April 12. Have some great info prepared for you on Whole Life and what it could mean for your financial picture. See you then! 👋`,
+      call: `CALL SCRIPT — Alex Rivera (Meeting Confirmation)
+
+Opening: "Hi Alex, [Agent Name] from NYL. Just calling to confirm our meeting on April 12 and make sure we're all set."
+
+Key Points:
+• Meeting confirmation + logistics
+• Quick preview of agenda (protection + cash value)
+• Any questions or information to share beforehand?
+
+Close: Confirm time/location, send calendar invite.`
+    }
+  },
+
+  'OR-010': {
+    client: 'Michael Santos', email: 'michael.s@email.com', phone: '(646) 555-0120',
+    segment: 'Prospect', city: 'New York', age: 38,
+    triggerType: 'portfolio', triggerLabel: 'Lab results expected Apr 14',
+    outreachType: 'Close Deal', priority: 'low', revPotential: '$6,400/yr',
+    policies: 'UL $750K quoted', premium: 'Prospect — $896 commission',
+    aiRationale: 'Michael\'s HOT deal (AI score 91%). Lab results expected Apr 14. Proactive outreach the same day as results available maximizes close probability. Email to keep him warm + ready to sign immediately after results confirmed.',
+    goal: 'Keep Michael engaged and ready to move fast when lab results confirm approval. Build excitement around the coverage. Prepare him for next step (policy delivery).',
+    tone: 'professional',
+    emailSubject: 'Quick update on your NYL application, Michael',
+    messages: {
+      email: `Hi Michael,
+
+I wanted to reach out with a quick update on your Universal Life application.
+
+Your medical exam results are expected back shortly (likely by April 14), and everything looks very promising based on what we've seen so far.
+
+As a reminder, here's what your $750,000 Universal Life policy will do for you:
+✓ Lifetime protection for your family — guaranteed
+✓ Cash value that grows tax-deferred
+✓ Paid-up additions you can access for retirement or emergencies
+✓ Flexible premiums that adapt to your financial situation
+
+The moment we receive confirmation, I'll reach out immediately so we can finalize your coverage without any delays. You're very close to having this in place!
+
+In the meantime, please don't hesitate to reach out with any questions.
+
+Best,
+[Agent Name]
+NYL Agent`,
+      sms: `Hi Michael, [Agent Name] here. Lab results expected Apr 14 — everything looks great! I'll call you the moment we get confirmation. Your $750K UL policy is almost yours! 🎉`,
+      call: `CALL SCRIPT — Michael Santos (Lab Results Follow-up)
+
+Opening: "Michael, [Agent Name]. Lab results just came back — I'm calling to give you the update and walk through next steps."
+
+Key Points:
+• Confirm approval and health class
+• Review policy delivery process (e-delivery same day if possible)
+• Reiterate key benefits — lifetime protection, cash value
+• Disability rider upsell opportunity (+$480/yr)
+
+Close: Confirm e-delivery signature date.`
+    }
+  }
+};
+
+/* ── Active outreach state ── */
+let activeOutreachId = null;
+let activeOutreachChannel = 'email';
+
+/* ── Toggle Outreach Hub ── */
+function toggleOutreachHub() {
+  const body = document.getElementById('oh-body');
+  const chevron = document.getElementById('oh-chevron');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (chevron) chevron.className = isOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+}
+
+/* ── Open modal from queue row ── */
+function openOutreachModal(outreachId) {
+  const d = outreachData[outreachId];
+  if (!d) return;
+  activeOutreachId = outreachId;
+  activeOutreachChannel = 'email';
+  _renderOutreachModal(d);
+}
+
+/* ── Open modal from client card (find matching outreach entry) ── */
+function openOutreachModalForClient(clientId) {
+  const clientNames = { 1:'James Whitfield', 2:'Patricia Nguyen', 3:'Robert Chen', 4:'Sandra Williams', 5:'David Thompson', 6:'Maria Gonzalez', 7:'Kevin Park', 8:'Linda Morrison' };
+  const name = clientNames[clientId];
+  const entry = Object.entries(outreachData).find(([,d]) => d.client === name);
+  if (entry) {
+    openOutreachModal(entry[0]);
+  } else {
+    // Generate a generic outreach for this client
+    const cl = { 1:{n:'James Whitfield',e:'james.w@email.com',seg:'High Value'}, 2:{n:'Patricia Nguyen',e:'patricia.n@email.com',seg:'Mid Market'}, 3:{n:'Robert Chen',e:'robert.c@email.com',seg:'High Value'}, 4:{n:'Sandra Williams',e:'sandra.w@email.com',seg:'Mid Market'}, 5:{n:'David Thompson',e:'david.t@email.com',seg:'Emerging'}, 6:{n:'Maria Gonzalez',e:'maria.g@email.com',seg:'High Value'}, 7:{n:'Kevin Park',e:'kevin.p@email.com',seg:'Emerging'}, 8:{n:'Linda Morrison',e:'linda.m@email.com',seg:'Premium'} }[clientId];
+    if (!cl) return;
+    const tempData = {
+      client: cl.n, email: cl.e, segment: cl.seg,
+      triggerLabel: 'General outreach', outreachType: 'Follow-up', priority: 'mid', revPotential: 'TBD',
+      policies: 'See client profile', premium: 'See client profile',
+      aiRationale: `AI-generated outreach for ${cl.n}. Review client profile for specific opportunities and customize accordingly.`,
+      goal: 'Build relationship, identify current needs, offer value.', tone: 'warm',
+      emailSubject: `Checking in — ${cl.n.split(' ')[0]}, let's connect`,
+      messages: {
+        email: `Dear ${cl.n.split(' ')[0]},\n\nI hope you're doing well! I wanted to reach out personally to see how things are going and make sure your coverage is still meeting your needs.\n\nLife changes quickly, and I'd love to schedule a brief 15-minute check-in to make sure everything is optimized for your current situation.\n\nWould this week or next work for a quick call?\n\nBest regards,\n[Agent Name]\nNYL Agent`,
+        sms: `Hi ${cl.n.split(' ')[0]}, [Agent Name] from NYL. Quick check-in — how are things? Want to make sure your coverage is still working for you. 15-min call this week?`,
+        call: `CALL SCRIPT — ${cl.n}\n\nOpening: "Hi ${cl.n.split(' ')[0]}, [Agent Name] from NYL. Just calling for a quick check-in — wanted to make sure everything is going well and your coverage is still a good fit."\n\nKey Points:\n• Life changes check — new family, income changes, property?\n• Review current coverage adequacy\n• Any service issues to address?\n\nClose: Schedule annual review if appropriate.`
+      }
+    };
+    activeOutreachId = `temp-${clientId}`;
+    outreachData[`temp-${clientId}`] = tempData;
+    activeOutreachChannel = 'email';
+    _renderOutreachModal(tempData);
+  }
+}
+
+function _renderOutreachModal(d) {
+  const overlay = document.getElementById('oc-overlay');
+  if (!overlay) return;
+
+  // Header
+  const priorityColors = { urgent:'#dc2626', high:'#d97706', mid:'#2563eb', low:'#64748b' };
+  const headerEl = document.getElementById('oc-header');
+  if (headerEl) headerEl.style.background = `linear-gradient(135deg, ${priorityColors[d.priority]||'#003087'} 0%, #1e3a8a 100%)`;
+  const titleEl = document.getElementById('oc-header-title');
+  if (titleEl) titleEl.textContent = `AI Outreach — ${d.client}`;
+  const subEl = document.getElementById('oc-header-sub');
+  if (subEl) subEl.textContent = `${d.outreachType} · ${d.triggerLabel}`;
+
+  // Fields
+  const toEl = document.getElementById('oc-to');
+  if (toEl) toEl.value = `${d.client} <${d.email}>`;
+  const subjEl = document.getElementById('oc-subject');
+  if (subjEl) subjEl.value = d.emailSubject || '';
+  const bodyEl = document.getElementById('oc-body');
+  if (bodyEl) bodyEl.value = d.messages[activeOutreachChannel] || '';
+
+  // Context panel
+  const ctxClientEl = document.getElementById('oc-ctx-client');
+  if (ctxClientEl) ctxClientEl.innerHTML = `
+    <div class="oc-ctx-row"><span>Segment</span><span>${d.segment}</span></div>
+    <div class="oc-ctx-row"><span>Policies</span><span>${d.policies}</span></div>
+    <div class="oc-ctx-row"><span>Premium</span><span>${d.premium}</span></div>
+    <div class="oc-ctx-row"><span>Rev. Potential</span><span class="green">${d.revPotential}</span></div>
+    <div class="oc-ctx-row"><span>Trigger</span><span>${d.triggerLabel}</span></div>
+  `;
+  const ctxAiEl = document.getElementById('oc-ctx-ai');
+  if (ctxAiEl) ctxAiEl.textContent = d.aiRationale;
+  const ctxGoalEl = document.getElementById('oc-ctx-goal');
+  if (ctxGoalEl) ctxGoalEl.innerHTML = `<strong>Goal:</strong> ${d.goal}`;
+
+  // Tone selector
+  const toneEl = document.getElementById('oc-tone');
+  if (toneEl) toneEl.value = d.tone || 'professional';
+
+  // Channel tabs
+  _setActiveChannelTab('email');
+  overlay.style.display = 'flex';
+}
+
+function switchOutreachChannel(channel) {
+  activeOutreachChannel = channel;
+  const d = outreachData[activeOutreachId];
+  if (!d) return;
+
+  const bodyEl = document.getElementById('oc-body');
+  if (bodyEl) bodyEl.value = d.messages[channel] || '';
+
+  const subjectRow = document.getElementById('oc-subject-row');
+  if (subjectRow) subjectRow.style.display = channel === 'email' ? 'flex' : 'none';
+
+  _setActiveChannelTab(channel);
+}
+
+function _setActiveChannelTab(channel) {
+  ['email','sms','call'].forEach(ch => {
+    const tab = document.getElementById(`tab-${ch}`);
+    if (tab) tab.classList.toggle('active', ch === channel);
+  });
+}
+
+function insertToken(token) {
+  const ta = document.getElementById('oc-body');
+  if (!ta) return;
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  ta.value = ta.value.substring(0, start) + token + ta.value.substring(end);
+  ta.selectionStart = ta.selectionEnd = start + token.length;
+  ta.focus();
+}
+
+function regenOutreachMessage() {
+  const d = outreachData[activeOutreachId];
+  if (!d) return;
+  const tone = document.getElementById('oc-tone')?.value || 'professional';
+  // Simulate regeneration with tone prefix
+  const tonePrefix = { professional:'', warm:'Hi there! ', urgent:'⚠️ URGENT: ', educational:'Did you know? ' };
+  const bodyEl = document.getElementById('oc-body');
+  if (bodyEl) {
+    const base = d.messages[activeOutreachChannel] || '';
+    bodyEl.value = (tonePrefix[tone] || '') + base;
+    bodyEl.classList.add('oc-regen-flash');
+    setTimeout(() => bodyEl.classList.remove('oc-regen-flash'), 600);
+  }
+}
+
+function sendOutreach() {
+  const d = outreachData[activeOutreachId];
+  if (!d) return;
+  const channel = activeOutreachChannel;
+  closeOutreachModal();
+  const toast = document.createElement('div');
+  toast.className = 'stage-toast';
+  toast.innerHTML = `<i class="fas fa-check-circle"></i> ${channel === 'email' ? '📧' : channel === 'sms' ? '💬' : '📞'} ${channel.charAt(0).toUpperCase()+channel.slice(1)} sent to ${d.client}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function scheduleOutreach() {
+  const d = outreachData[activeOutreachId];
+  if (!d) return;
+  closeOutreachModal();
+  const toast = document.createElement('div');
+  toast.className = 'stage-toast';
+  toast.innerHTML = `<i class="fas fa-calendar-check"></i> Outreach to ${d.client} scheduled for tomorrow 9 AM`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function askAIOutreach() {
+  const d = outreachData[activeOutreachId];
+  if (!d) return;
+  closeOutreachModal();
+  sendContextMessage(`AI Outreach Strategy for ${d.client} — ${d.outreachType}: ${d.triggerLabel}. Generate optimized ${activeOutreachChannel} message, suggest best send time, and rank this against other outreach priorities.`, 'smart-advisor');
+}
+
+function closeOutreachModal(e) {
+  if (e && e.target !== document.getElementById('oc-overlay')) return;
+  const overlay = document.getElementById('oc-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+console.log('Outreach Hub JS loaded — outreachData(10), openOutreachModal, switchOutreachChannel, sendOutreach');

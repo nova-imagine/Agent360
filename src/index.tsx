@@ -1154,6 +1154,160 @@ function ClientsPage() {
         </div>
       </div>
 
+      {/* ── Outreach Hub Panel ── */}
+      <div class="outreach-hub" id="outreach-hub">
+        <div class="oh-header">
+          <div class="oh-header-left">
+            <div class="oh-icon"><i class="fas fa-paper-plane"></i><span class="ai-pulse-ring"></span></div>
+            <div>
+              <div class="oh-title">AI Outreach Hub <span class="oh-live-badge">LIVE</span></div>
+              <div class="oh-subtitle">AI-ranked queue · 10 clients prioritized by revenue opportunity, lapse risk &amp; life events</div>
+            </div>
+          </div>
+          <div class="oh-header-right">
+            <div class="oh-stat"><span class="oh-stat-val">10</span><span class="oh-stat-lbl">In Queue</span></div>
+            <div class="oh-stat"><span class="oh-stat-val green">3</span><span class="oh-stat-lbl">Urgent</span></div>
+            <div class="oh-stat"><span class="oh-stat-val amber">4</span><span class="oh-stat-lbl">This Week</span></div>
+            <div class="oh-stat"><span class="oh-stat-val">$41.2K</span><span class="oh-stat-lbl">Revenue Potential</span></div>
+            <button class="oh-collapse-btn" onclick="toggleOutreachHub()"><i class="fas fa-chevron-up" id="oh-chevron"></i></button>
+          </div>
+        </div>
+
+        <div class="oh-body" id="oh-body">
+          <div class="oh-table">
+            <div class="oh-table-header">
+              <span>Priority</span>
+              <span>Client</span>
+              <span>Trigger</span>
+              <span>Outreach Type</span>
+              <span>Channel</span>
+              <span>Revenue Potential</span>
+              <span>Action</span>
+            </div>
+
+            {/* Row 1 */}
+            <div class="oh-row oh-urgent" onclick="openOutreachModal('OR-001')">
+              <div class="oh-priority"><span class="oh-rank urgent">1</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar pn">PN</div><div><div class="oh-cname">Patricia Nguyen</div><div class="oh-csub">Mid Market · UL + VUL</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge lapse"><i class="fas fa-exclamation-triangle"></i> Lapse Risk · 94% probability</span></div>
+              <div><span class="oh-type-badge retention">Retention Save</span></div>
+              <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+              <div class="oh-rev green">$5,800/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-001')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 2 */}
+            <div class="oh-row oh-urgent" onclick="openOutreachModal('OR-002')">
+              <div class="oh-priority"><span class="oh-rank urgent">2</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar sw">SW</div><div><div class="oh-cname">Sandra Williams</div><div class="oh-csub">Mid Market · Term expiring 153d</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge renewal"><i class="fas fa-calendar-alt"></i> Term Renewal · 153 days</span></div>
+              <div><span class="oh-type-badge upsell">Conversion Upsell</span></div>
+              <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email + SMS</span></div>
+              <div class="oh-rev green">$8,200/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-002')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 3 */}
+            <div class="oh-row oh-urgent" onclick="openOutreachModal('OR-003')">
+              <div class="oh-priority"><span class="oh-rank urgent">3</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar kp">KP</div><div><div class="oh-cname">Kevin Park</div><div class="oh-csub">Emerging · Term pending</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge lifecycle"><i class="fas fa-signature"></i> E-Signature Pending · 2 days</span></div>
+              <div><span class="oh-type-badge close">Close Deal</span></div>
+              <div><span class="oh-channel sms"><i class="fas fa-sms"></i> SMS</span></div>
+              <div class="oh-rev green">$1,800/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-003')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 4 */}
+            <div class="oh-row" onclick="openOutreachModal('OR-004')">
+              <div class="oh-priority"><span class="oh-rank high">4</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar lm">LM</div><div><div class="oh-cname">Linda Morrison</div><div class="oh-csub">Premium · $812K portfolio</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge portfolio"><i class="fas fa-chart-line"></i> UMA Transfer + Estate Review</span></div>
+              <div><span class="oh-type-badge cross-sell">Cross-Sell</span></div>
+              <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+              <div class="oh-rev green">$2,800/yr fee</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-004')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 5 */}
+            <div class="oh-row" onclick="openOutreachModal('OR-005')">
+              <div class="oh-priority"><span class="oh-rank high">5</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar rc">RC</div><div><div class="oh-cname">Robert Chen</div><div class="oh-csub">High Value · Business owner</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge portfolio"><i class="fas fa-briefcase"></i> Estate Plan + NQDC Review Due</span></div>
+              <div><span class="oh-type-badge advisory">Advisory</span></div>
+              <div><span class="oh-channel call"><i class="fas fa-phone"></i> Call</span></div>
+              <div class="oh-rev green">$2,000/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-005')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 6 */}
+            <div class="oh-row" onclick="openOutreachModal('OR-006')">
+              <div class="oh-priority"><span class="oh-rank mid">6</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar jw">JW</div><div><div class="oh-cname">James Whitfield</div><div class="oh-csub">High Value · Retirement gap</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge lifecycle"><i class="fas fa-umbrella-beach"></i> Retirement Income Gap $8,500/mo</span></div>
+              <div><span class="oh-type-badge retirement">Retirement</span></div>
+              <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+              <div class="oh-rev green">$4,800/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-006')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 7 */}
+            <div class="oh-row" onclick="openOutreachModal('OR-007')">
+              <div class="oh-priority"><span class="oh-rank mid">7</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar mg">MG</div><div><div class="oh-cname">Maria Gonzalez</div><div class="oh-csub">High Value · No Advisory</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge gap"><i class="fas fa-exclamation-circle"></i> No Advisory Services — Gap Detected</span></div>
+              <div><span class="oh-type-badge cross-sell">Cross-Sell</span></div>
+              <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+              <div class="oh-rev green">$2,400/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-007')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 8 */}
+            <div class="oh-row" onclick="openOutreachModal('OR-008')">
+              <div class="oh-priority"><span class="oh-rank mid">8</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar dt">DT</div><div><div class="oh-cname">David Thompson</div><div class="oh-csub">Emerging · Single policy only</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge gap"><i class="fas fa-plus-circle"></i> No Investments or Retirement</span></div>
+              <div><span class="oh-type-badge upsell">Upsell</span></div>
+              <div><span class="oh-channel sms"><i class="fas fa-sms"></i> SMS</span></div>
+              <div class="oh-rev amber">$1,200/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-008')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 9 */}
+            <div class="oh-row" onclick="openOutreachModal('OR-009')">
+              <div class="oh-priority"><span class="oh-rank low">9</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar rc">RC</div><div><div class="oh-cname">Alex Rivera</div><div class="oh-csub">Prospect · WL $500K</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge lifecycle"><i class="fas fa-calendar-check"></i> Meeting Apr 12 — Pre-brief ready</span></div>
+              <div><span class="oh-type-badge close">Meeting Prep</span></div>
+              <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+              <div class="oh-rev amber">$4,800/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-009')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+            {/* Row 10 */}
+            <div class="oh-row" onclick="openOutreachModal('OR-010')">
+              <div class="oh-priority"><span class="oh-rank low">10</span></div>
+              <div class="oh-client-cell"><div class="mini-avatar ms">MS</div><div><div class="oh-cname">Michael Santos</div><div class="oh-csub">Prospect · UL $750K hot deal</div></div></div>
+              <div class="oh-trigger"><span class="oh-trigger-badge portfolio"><i class="fas fa-fire"></i> Lab Results Apr 14 — Follow-up</span></div>
+              <div><span class="oh-type-badge close">Close Deal</span></div>
+              <div><span class="oh-channel call"><i class="fas fa-phone"></i> Call + Email</span></div>
+              <div class="oh-rev amber">$6,400/yr</div>
+              <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-010')"><i class="fas fa-robot"></i> Generate</button></div>
+            </div>
+
+          </div>{/* end oh-table */}
+
+          <div class="oh-footer">
+            <button class="oh-ai-btn" onclick="sendContextMessage('AI Outreach Optimizer — show all 10 prioritized clients with personalized outreach strategy, timing, and revenue impact for each','smart-advisor')">
+              <i class="fas fa-robot"></i> Full AI Outreach Strategy
+            </button>
+            <button class="oh-ai-btn oh-ai-btn-secondary" onclick="sendContextMessage('Generate bulk outreach campaign for all lapse-risk clients — Patricia Nguyen, Sandra Williams, Kevin Park — with urgency messaging','renewal')">
+              <i class="fas fa-broadcast-tower"></i> Bulk Lapse Risk Campaign
+            </button>
+          </div>
+        </div>{/* end oh-body */}
+      </div>{/* end outreach-hub */}
+
       {/* ── Toolbar ── */}
       <div class="page-toolbar">
         <div class="toolbar-left">
@@ -1393,6 +1547,7 @@ function ClientsPage() {
                 <span><i class="fas fa-clock"></i> {client.lastContact}</span>
                 <button class="btn-icon" title="Call" onclick="event.stopPropagation()"><i class="fas fa-phone"></i></button>
                 <button class="btn-icon" title="Email" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i></button>
+                <button class="btn-icon outreach-btn" title="Generate AI Outreach Message" onclick={`event.stopPropagation(); openOutreachModalForClient(${client.id})`}><i class="fas fa-paper-plane"></i></button>
                 {lapseInfo
                   ? <button class="btn-icon retention-btn" title="Retention Action" onclick={`event.stopPropagation(); openRetentionModal('${lapseInfo.retId}')`}><i class="fas fa-shield-alt"></i></button>
                   : <button class="btn-icon ai-btn" title="AI Analysis" onclick={`event.stopPropagation(); aiAnalyzeClient(${client.id})`}><i class="fas fa-robot"></i></button>
@@ -1402,6 +1557,99 @@ function ClientsPage() {
           )
         })}
       </div>
+
+      {/* ── Outreach Composer Modal ── */}
+      <div class="oc-overlay" id="oc-overlay" onclick="closeOutreachModal(event)" style="display:none">
+        <div class="oc-modal">
+
+          {/* Header */}
+          <div class="oc-header" id="oc-header">
+            <div class="oc-header-left">
+              <div class="oc-header-icon"><i class="fas fa-paper-plane"></i></div>
+              <div>
+                <div class="oc-header-title" id="oc-header-title">AI Outreach Composer</div>
+                <div class="oc-header-sub" id="oc-header-sub">Hyperpersonalized message · AI-generated</div>
+              </div>
+            </div>
+            <button class="oc-close-btn" onclick="closeOutreachModal()"><i class="fas fa-times"></i></button>
+          </div>
+
+          {/* Channel Tabs */}
+          <div class="oc-channel-tabs">
+            <button class="oc-ch-tab active" id="tab-email" onclick="switchOutreachChannel('email')"><i class="fas fa-envelope"></i> Email</button>
+            <button class="oc-ch-tab" id="tab-sms" onclick="switchOutreachChannel('sms')"><i class="fas fa-sms"></i> SMS</button>
+            <button class="oc-ch-tab" id="tab-call" onclick="switchOutreachChannel('call')"><i class="fas fa-phone"></i> Call Script</button>
+          </div>
+
+          {/* Body — two columns: message + context */}
+          <div class="oc-body">
+
+            {/* Left: Message Composer */}
+            <div class="oc-composer">
+              <div class="oc-field-row">
+                <label class="oc-label">To</label>
+                <input class="oc-input" id="oc-to" type="text" readonly />
+              </div>
+              <div class="oc-field-row" id="oc-subject-row">
+                <label class="oc-label">Subject</label>
+                <input class="oc-input" id="oc-subject" type="text" />
+              </div>
+              <div class="oc-field-row">
+                <label class="oc-label">Message <span class="oc-ai-tag"><i class="fas fa-robot"></i> AI-drafted</span></label>
+                <textarea class="oc-textarea" id="oc-body" rows={12}></textarea>
+              </div>
+              <div class="oc-token-bar">
+                <span class="oc-token-lbl">Insert token:</span>
+                <button class="oc-token" onclick="insertToken('[Client Name]')">[Client Name]</button>
+                <button class="oc-token" onclick="insertToken('[Agent Name]')">[Agent Name]</button>
+                <button class="oc-token" onclick="insertToken('[Policy #]')">[Policy #]</button>
+                <button class="oc-token" onclick="insertToken('[Product]')">[Product]</button>
+                <button class="oc-token" onclick="insertToken('[Premium]')">[Premium]</button>
+                <button class="oc-token" onclick="insertToken('[Date]')">[Date]</button>
+              </div>
+            </div>
+
+            {/* Right: Context Panel */}
+            <div class="oc-context">
+              <div class="oc-ctx-section">
+                <div class="oc-ctx-title"><i class="fas fa-user"></i> Client Context</div>
+                <div class="oc-ctx-body" id="oc-ctx-client"></div>
+              </div>
+              <div class="oc-ctx-section">
+                <div class="oc-ctx-title"><i class="fas fa-robot"></i> AI Rationale</div>
+                <div class="oc-ctx-body oc-ctx-ai" id="oc-ctx-ai"></div>
+              </div>
+              <div class="oc-ctx-section">
+                <div class="oc-ctx-title"><i class="fas fa-bullseye"></i> Goal &amp; Tone</div>
+                <div class="oc-ctx-body" id="oc-ctx-goal"></div>
+              </div>
+              <div class="oc-regen-section">
+                <button class="oc-regen-btn" onclick="regenOutreachMessage()"><i class="fas fa-sync-alt"></i> Regenerate</button>
+                <select class="oc-tone-select" id="oc-tone" onchange="regenOutreachMessage()">
+                  <option value="professional">Professional</option>
+                  <option value="warm">Warm &amp; Personal</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="educational">Educational</option>
+                </select>
+              </div>
+            </div>
+
+          </div>{/* end oc-body */}
+
+          {/* Footer Actions */}
+          <div class="oc-footer">
+            <div class="oc-footer-left">
+              <button class="oc-btn-secondary" onclick="closeOutreachModal()"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+            <div class="oc-footer-right">
+              <button class="oc-btn-schedule" onclick="scheduleOutreach()"><i class="fas fa-calendar-alt"></i> Schedule</button>
+              <button class="oc-btn-ai" onclick="askAIOutreach()"><i class="fas fa-robot"></i> Ask AI Agent</button>
+              <button class="oc-btn-send" onclick="sendOutreach()"><i class="fas fa-paper-plane"></i> Send Now</button>
+            </div>
+          </div>
+
+        </div>{/* end oc-modal */}
+      </div>{/* end oc-overlay */}
 
       {/* Client Detail Modal */}
       <div class="modal-overlay" id="client-modal" onclick="closeClientModal()">
