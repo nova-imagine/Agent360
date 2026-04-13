@@ -968,6 +968,7 @@ let _currentPolicyTab = 'view';
 
 function openPolicyModal(policyId, tab) {
   _currentPolicyId = policyId;
+  window._currentPolicyModalId = policyId; // expose for NLP tab
   _currentPolicyTab = tab || 'view';
   const overlay = document.getElementById('policy-modal-overlay');
   if (!overlay) return;
@@ -975,7 +976,7 @@ function openPolicyModal(policyId, tab) {
   document.body.style.overflow = 'hidden';
   // Set active tab
   document.querySelectorAll('#policy-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
-  const tabMap = { view: 0, edit: 1, ai: 2 };
+  const tabMap = { view: 0, edit: 1, ai: 2, nlp: 3 };
   const tabs = document.querySelectorAll('#policy-modal-tabs .dmt-tab');
   if (tabs[tabMap[_currentPolicyTab]]) tabs[tabMap[_currentPolicyTab]].classList.add('active');
   renderPolicyModal(_currentPolicyId, _currentPolicyTab);
@@ -4874,3 +4875,376 @@ function closeEApp(e) {
 }
 
 console.log('E-App Wizard JS loaded — eAppData(5), openEApp, eAppStepNav, submitEApp');
+
+// ================================================================
+//  NLP POLICY REVIEW & RISK EXPERT  (Task #12)
+// ================================================================
+
+// ── NLP Data Store ──────────────────────────────────────────────
+const nlpPolicyData = {
+  'P-100291': {
+    id:'P-100291', client:'James Whitfield', type:'Whole Life Insurance',
+    faceValue:'$500,000', premium:'$4,800/yr', issued:'2019-06-15', renewal:'2026-06-15',
+    score:94, level:'Low', levelClass:'nlp-low', scoreClass:'score-low', shIconClass:'low',
+    headline:'Strong Whole Life Policy — Cash Value Optimization Opportunity',
+    plainSummary:`<strong>James Whitfield</strong> holds a <span class="nlp-plain-highlight">Whole Life</span> policy (P-100291) issued in 2019 with a <strong>$500,000 death benefit</strong>. The policy is in excellent standing with a cash value of <strong>$48,200</strong> and growing at ~12.4% annually. All contractual clauses are standard and clearly written — NLP detected <span class="nlp-plain-highlight">no exclusions</span> that would limit a death benefit payout under normal circumstances.<br><br>One opportunity: the <strong>Paid-Up Additions rider</strong> could redirect dividends ($2,140/yr) to purchase additional paid-up insurance, potentially adding ~$18K of death benefit over 10 years at no additional premium. Recommend reviewing this at the June 2026 annual review.`,
+    keyFacts:[
+      {lbl:'NLP Risk Score',val:'94 / 100'},
+      {lbl:'Risk Level',val:'Low'},
+      {lbl:'Exclusions Found',val:'None'},
+      {lbl:'Clauses Analyzed',val:'14 of 14'},
+      {lbl:'Ambiguities Detected',val:'0'},
+      {lbl:'Next Review',val:'Jun 2026'},
+    ],
+    actions:[
+      {cls:'normal-action',icon:'fa-check-circle',text:'Schedule Q2 2026 paid-up additions review — potential +$18K death benefit at no extra premium'},
+      {cls:'normal-action',icon:'fa-check-circle',text:'Introduce estate planning integration — trust or will beneficiary alignment'},
+      {cls:'normal-action',icon:'fa-check-circle',text:'Cross-sell: Disability income policy gap — no DI coverage on file'},
+    ],
+    clauses:[
+      {type:'clause-ok',icon:'fa-check-circle',title:'Death Benefit Trigger',badge:'Clear',text:'Clause §4.1 — Benefit payable on insured\'s death while policy is in force. Standard language, no unusual exclusions.',plain:'Plain English: If James dies while this policy is active, the full $500,000 is paid to his beneficiary with no restrictions beyond standard exclusions.'},
+      {type:'clause-ok',icon:'fa-check-circle',title:'Premium Payment & Grace Period',badge:'Clear',text:'Clause §3.2 — Annual premium $4,800. 31-day grace period applies. Policy enters lapse only after grace period with no payment.',plain:'Plain English: If a premium is missed, there\'s a 31-day window to pay before coverage is threatened. Cash value provides a buffer.'},
+      {type:'clause-ok',icon:'fa-check-circle',title:'Cash Value & Dividend Participation',badge:'Clear',text:'Clause §7.1 — Participating policy. Annual dividends not guaranteed but based on NYL experience.',plain:'Plain English: This policy can earn dividends. The $2,140/yr estimated dividend can be taken as cash, used to pay premiums, or reinvested in the policy.'},
+      {type:'clause-warn',icon:'fa-exclamation-circle',title:'Paid-Up Additions Rider',badge:'Opportunity',text:'Rider §A-3 — Allows dividends to purchase additional paid-up insurance. Currently not maximized.',plain:'Plain English: James could be using his dividends to buy more insurance automatically — this feature is available but not currently activated.'},
+      {type:'clause-ok',icon:'fa-check-circle',title:'Contestability Clause',badge:'Clear',text:'Clause §5.1 — 2-year contestability window from issue (2019). This window has passed — policy is incontestable.',plain:'Plain English: Because this policy is over 2 years old, NYL cannot contest the death benefit claim on the grounds of misrepresentation in the application.'},
+    ],
+    riskFlags:[
+      {cls:'rf-low',icon:'fa-check-circle',title:'No Lapse Risk',badge:'Clear',text:'Policy has sustained premium payments for 7 consecutive years. Cash value at $48,200 provides multi-year buffer even if premiums are missed.',rec:'✅ No action required. Monitor annually.'},
+      {cls:'rf-low',icon:'fa-shield-alt',title:'Contestability Cleared',badge:'Clear',text:'2-year contestability window expired June 2021. All material facts reviewed and accepted.',rec:'✅ Policy is fully incontestable. Claim payout is legally protected.'},
+      {cls:'rf-med',icon:'fa-user-slash',title:'No Disability Income Coverage',badge:'Gap Detected',text:'Client has no disability income policy on file. If James becomes unable to work, there is no income replacement coverage beyond the waiver of premium rider.',rec:'⚡ Recommend: Present Individual DI quote at next meeting. Cross-sell opportunity ~$1,200–$1,800/yr premium.'},
+    ],
+    benchmark:[
+      {label:'Premium Competitiveness',pct:78,cls:'b-ok',mine:'$4,800/yr',industry:'$4,200–$5,400/yr',tag:'inline',tagLabel:'In Range'},
+      {label:'Cash Value Growth',pct:90,cls:'b-great',mine:'12.4% since issue',industry:'8–14% typical',tag:'above',tagLabel:'Above Avg'},
+      {label:'Death Benefit / Income Ratio',pct:85,cls:'b-ok',mine:'~3x estimated income',industry:'5–10x recommended',tag:'below',tagLabel:'Below Recommended'},
+      {label:'Clause Clarity Score',pct:94,cls:'b-great',mine:'94/100',industry:'75–85 typical',tag:'above',tagLabel:'Above Avg'},
+    ]
+  },
+  'P-100320': {
+    id:'P-100320', client:'Sandra Williams', type:'Term Life Insurance',
+    faceValue:'$350,000', premium:'$2,800/yr', issued:'2016-09-30', renewal:'2026-09-30',
+    score:44, level:'High', levelClass:'nlp-high', scoreClass:'score-high', shIconClass:'high',
+    headline:'⚠️ URGENT — Renewal Exclusion Detected — Conversion Window Closing',
+    plainSummary:`<strong>Sandra Williams</strong> (age 61) holds a <strong>20-year term policy</strong> (P-100320) expiring <span class="nlp-plain-highlight">September 30, 2026 — only 5 months away</span>. NLP analysis of the policy document has detected a <strong>critical exclusion</strong>: after age 60, any renewal or re-issuance requires full medical underwriting. Sandra is already 61 — if this policy lapses, re-qualification for comparable coverage will be extremely difficult and expensive.<br><br>However, the policy contains a <strong>conversion provision</strong> (Rider §C-1) that allows conversion to permanent coverage without medical evidence before the renewal date. This window closes September 30, 2026. Immediate action is required to present Sandra with whole life or universal life conversion options.`,
+    keyFacts:[
+      {lbl:'NLP Risk Score',val:'44 / 100'},
+      {lbl:'Risk Level',val:'HIGH'},
+      {lbl:'Critical Clauses',val:'2 Flagged'},
+      {lbl:'Conversion Window',val:'Closes Sep 2026'},
+      {lbl:'Months Remaining',val:'5 months'},
+      {lbl:'Exclusion Type',val:'Age-based renewal'},
+    ],
+    actions:[
+      {cls:'urgent-action',icon:'fa-exclamation-triangle',text:'⚡ URGENT: Call Sandra Williams this week — conversion window closes Sep 30, 2026'},
+      {cls:'urgent-action',icon:'fa-exclamation-triangle',text:'⚡ Prepare Whole Life vs UL conversion illustrations — present options at meeting'},
+      {cls:'normal-action',icon:'fa-check-circle',text:'Schedule in-person renewal review — discuss estate and retirement planning needs'},
+      {cls:'normal-action',icon:'fa-check-circle',text:'Cross-sell: Annuity options for retirement income supplement (Sandra, age 61)'},
+    ],
+    clauses:[
+      {type:'clause-urgent',icon:'fa-exclamation-circle',title:'Age-Based Renewal Exclusion',badge:'⚠ Critical',text:'Clause §6.4 — "Upon policy renewal, insured age 60+ is subject to full evidence of insurability requirements including medical examination, APS, and current underwriting guidelines."',plain:'⚠ Plain English: After age 60, Sandra CANNOT simply renew this policy. She would need a new medical exam and could be rated or declined due to her current health.'},
+      {type:'clause-urgent',icon:'fa-exclamation-circle',title:'Conversion Privilege (Rider §C-1)',badge:'Time-Sensitive',text:'Rider §C-1 — "Policyholder may convert to permanent coverage without evidence of insurability before policy expiry date, subject to current permanent product premium rates."',plain:'⚠ Plain English: Sandra CAN convert to a whole life or UL policy before Sep 30, 2026 without a medical exam — but only if action is taken BEFORE the term expires.'},
+      {type:'clause-ok',icon:'fa-check-circle',title:'Death Benefit — Current Coverage',badge:'Clear',text:'Clause §4.1 — $350,000 death benefit payable while policy is active. Standard language, no unusual exclusions for current coverage period.',plain:'Plain English: Until September 30, 2026, Sandra\'s $350,000 benefit is fully protected.'},
+      {type:'clause-warn',icon:'fa-exclamation-circle',title:'Beneficiary Designation',badge:'Review',text:'Current beneficiary: Michael Williams (spouse). Recommend confirming beneficiary is current and trust/estate alignment is in place given Sandra\'s age.',plain:'Plain English: The beneficiary should be reviewed — at age 61 with estate planning needs, a trust may be more appropriate than an individual beneficiary.'},
+    ],
+    riskFlags:[
+      {cls:'rf-urgent',icon:'fa-times-circle',title:'Renewal Exclusion — Age 61 Barrier',badge:'Critical',text:'Policy §6.4 explicitly excludes standard renewal for insured over age 60. Sandra is currently 61. If policy expires without conversion or renewal action, coverage terminates permanently.',rec:'⚡ IMMEDIATE ACTION: Initiate conversion conversation. Prepare WL and UL illustrations. Meeting should occur within 30 days.'},
+      {cls:'rf-high',icon:'fa-clock',title:'5-Month Conversion Window',badge:'Urgent',text:'Conversion Rider §C-1 window closes September 30, 2026. After this date, no conversion option is available without medical evidence.',rec:'⚡ Schedule meeting within next 2 weeks. Bring conversion illustrations and permanent policy options.'},
+      {cls:'rf-med',icon:'fa-user-times',title:'Re-Qualification Risk After Lapse',badge:'High Risk',text:'Sandra, age 61, has an LTC claim in 2026 and prior disability claim (2025). Re-qualification after a lapse would likely result in rated or declined coverage.',rec:'Proactively discuss: conversion to whole life locks in insurability regardless of future health changes.'},
+    ],
+    benchmark:[
+      {label:'Conversion Action Lead Time',pct:20,cls:'b-risk',mine:'5 months remaining',industry:'12–18 months recommended',tag:'below',tagLabel:'Critical — Act Now'},
+      {label:'Coverage vs Net Worth',pct:45,cls:'b-warn',mine:'$350K vs est. $800K assets',industry:'Matching or higher recommended',tag:'below',tagLabel:'Under-insured'},
+      {label:'Clause Risk Score',pct:44,cls:'b-risk',mine:'44/100',industry:'70–90 typical',tag:'below',tagLabel:'Below Benchmark'},
+    ]
+  },
+  'P-100301': {
+    id:'P-100301', client:'Patricia Nguyen', type:'Universal Life Insurance',
+    faceValue:'$400,000', premium:'$3,000/yr', issued:'2020-08-20', renewal:'2026-08-20',
+    score:38, level:'Urgent', levelClass:'nlp-urgent', scoreClass:'score-urgent', shIconClass:'urgent',
+    headline:'⚠️ CRITICAL — Universal Life Under-Funded — Lapse Risk Clause Active',
+    plainSummary:`<strong>Patricia Nguyen</strong>'s Universal Life policy (P-100301) is in immediate danger of lapse. NLP analysis detected a <strong>minimum cash value clause</strong> (§7.3) that triggers an automatic policy lapse if cash value falls below <span class="nlp-plain-highlight">$18,000 for 30+ consecutive days</span>. Current cash value is <strong>$21,400</strong> — only <strong>$3,400 above the trigger threshold</strong>.<br><br>The AI cash-flow model predicts the minimum threshold will be breached within <strong>60–90 days</strong> at the current underfunded rate. Patricia is age 38 — if this policy lapses, re-qualification requires new medical underwriting. Immediate premium catch-up of <strong>$1,800–$2,400 over 3 months</strong> is required.`,
+    keyFacts:[
+      {lbl:'NLP Risk Score',val:'38 / 100'},
+      {lbl:'Risk Level',val:'URGENT'},
+      {lbl:'Lapse Risk',val:'60–90 days'},
+      {lbl:'Cash Value',val:'$21,400'},
+      {lbl:'Minimum Threshold',val:'$18,000'},
+      {lbl:'Buffer Remaining',val:'$3,400'},
+    ],
+    actions:[
+      {cls:'urgent-action',icon:'fa-exclamation-triangle',text:'⚡ URGENT: Call Patricia Nguyen this week — lapse risk within 60–90 days'},
+      {cls:'urgent-action',icon:'fa-exclamation-triangle',text:'⚡ Present premium catch-up illustration: $600–$800/mo for 3 months to restore policy health'},
+      {cls:'normal-action',icon:'fa-check-circle',text:'Discuss policy restructuring — consider converting to fixed premium UL structure'},
+      {cls:'normal-action',icon:'fa-check-circle',text:'Review beneficiary and estate planning needs — she is age 38 with young family'},
+    ],
+    clauses:[
+      {type:'clause-urgent',icon:'fa-battery-quarter',title:'Minimum Cash Value Lapse Trigger (§7.3)',badge:'⚠ Active Risk',text:'Clause §7.3 — "Policy shall lapse automatically if Account Value falls below the Minimum Required Reserve of $18,000 for thirty (30) or more consecutive calendar days."',plain:'⚠ Plain English: If Patricia\'s policy account value drops below $18,000 for a month straight, coverage ends automatically. She\'s only $3,400 above this threshold right now.'},
+      {type:'clause-risk',icon:'fa-exclamation-circle',title:'Flexible Premium — Underfunding Risk',badge:'Risk',text:'Clause §3.1 — Universal Life allows flexible premium payments. However, insufficient premiums increase the risk of policy lapse when cost of insurance charges exceed account value growth.',plain:'⚠ Plain English: The flexible premium structure means missed or reduced payments are silently eroding the policy. If the account runs dry, coverage disappears.'},
+      {type:'clause-warn',icon:'fa-clock',title:'Re-Qualification After Lapse',badge:'Warning',text:'Clause §9.2 — Reinstatement after lapse requires a new application, medical evidence, and underwriting approval within 3 years of lapse date.',plain:'Warning: If this policy lapses, Patricia would need to pass a new medical exam to get coverage back. At age 38, this is still possible but not guaranteed — and premium rates will be higher.'},
+      {type:'clause-ok',icon:'fa-check-circle',title:'Death Benefit Guarantee',badge:'Clear (if funded)',text:'Clause §4.1 — $400,000 death benefit payable while policy is in force and Account Value is above minimum reserve.',plain:'Plain English: As long as the account stays funded above minimum, the $400,000 benefit is guaranteed. The goal is to keep the policy funded.'},
+    ],
+    riskFlags:[
+      {cls:'rf-urgent',icon:'fa-battery-quarter',title:'Lapse Trigger Within 60–90 Days',badge:'Critical',text:'AI cash-flow model: at current underfunded rate, cash value will breach §7.3 minimum ($18,000) by approximately mid-June 2026. Patricia has been under-funded for 2 consecutive quarters.',rec:'⚡ IMMEDIATE: Call this week. Prepare premium catch-up illustration. $600–$800/mo for 3 months restores policy health.'},
+      {cls:'rf-high',icon:'fa-times-circle',title:'Re-Qualification Risk',badge:'High Risk',text:'Patricia is age 38. If policy lapses, new medical underwriting is required. Any change in health between now and re-application could result in rated or declined coverage.',rec:'⚡ Emphasize to client: preserving this policy avoids the need for new medical evidence. Any new application carries risk.'},
+      {cls:'rf-med',icon:'fa-coins',title:'Premium Shortfall Pattern',badge:'Warning',text:'2 consecutive quarters of underfunding suggest a budget issue or client disengagement. Premium of $3,000/yr ($250/mo) may need restructuring.',rec:'Discuss: monthly EFT auto-payment to prevent recurrence. Consider policy restructure to lower required premium.'},
+    ],
+    benchmark:[
+      {label:'Cash Value vs Minimum Threshold',pct:19,cls:'b-risk',mine:'$3,400 buffer (19%)',industry:'>$15,000 buffer recommended',tag:'below',tagLabel:'Critical — Danger Zone'},
+      {label:'Policy Health Score',pct:38,cls:'b-risk',mine:'38/100',industry:'75+ recommended',tag:'below',tagLabel:'Urgent Action Required'},
+      {label:'Premium Adequacy',pct:35,cls:'b-risk',mine:'Under-funded 2 qtrs',industry:'Fully funded',tag:'below',tagLabel:'Critical'},
+    ]
+  },
+  'P-100330': {
+    id:'P-100330', client:'Linda Morrison', type:'Whole Life Insurance',
+    faceValue:'$2,000,000', premium:'$12,000/yr', issued:'2015-12-01', renewal:'2030-12-01',
+    score:97, level:'Low', levelClass:'nlp-low', scoreClass:'score-low', shIconClass:'low',
+    headline:'Flagship Policy — All Clauses Clear — Estate Coordination Opportunity',
+    plainSummary:`<strong>Linda Morrison</strong> holds the flagship policy (P-100330) — a <span class="nlp-plain-highlight">$2,000,000 Whole Life</span> issued in 2015. NLP analysis reviewed all 19 clauses and found <strong>zero exclusions, zero ambiguities, and zero lapse risks</strong>. This is a model policy. Cash value stands at <strong>$168,400</strong> with estimated dividends of $6,200/yr.<br><br>The beneficiary is listed as <em>Trust</em> — this should be verified with Linda's estate planning attorney to confirm the trust document is current and aligned with the $2M benefit. Additionally, Linda's April 15, 2026 annual review should include a UMA discussion — her investable assets are estimated at $500K+.`,
+    keyFacts:[
+      {lbl:'NLP Risk Score',val:'97 / 100'},
+      {lbl:'Risk Level',val:'Low'},
+      {lbl:'Exclusions Found',val:'None'},
+      {lbl:'Clauses Analyzed',val:'19 of 19'},
+      {lbl:'Cash Value',val:'$168,400'},
+      {lbl:'Annual Dividend',val:'$6,200 (est.)'},
+    ],
+    actions:[
+      {cls:'normal-action',icon:'fa-check-circle',text:'Verify trust beneficiary alignment with estate planning attorney before Apr 15 review'},
+      {cls:'normal-action',icon:'fa-check-circle',text:'Annual review Apr 15 — present UMA and estate coordination agenda'},
+      {cls:'normal-action',icon:'fa-check-circle',text:'Dividend optimization: confirm $6,200/yr dividend election is optimally directed'},
+    ],
+    clauses:[
+      {type:'clause-ok',icon:'fa-check-circle',title:'Death Benefit — Trust Beneficiary',badge:'Clear',text:'Clause §4.1 — $2,000,000 death benefit payable to named trust beneficiary. Clear language with no conditions beyond standard exclusions.',plain:'Plain English: The full $2M benefit goes to Linda\'s trust when she passes. No ambiguity or contested language found.'},
+      {type:'clause-ok',icon:'fa-check-circle',title:'Premium Payment — Paid-Up Status',badge:'Clear',text:'Clause §3.1 — Annual premium $12,000. Policy has significant paid-up value built over 11 years.',plain:'Plain English: Linda has paid into this policy for 11 years. Even if she stopped paying, the accumulated cash value would sustain coverage for many years.'},
+      {type:'clause-ok',icon:'fa-check-circle',title:'Dividend Participation',badge:'Clear',text:'Clause §7.1 — Participating policy. $6,200/yr estimated dividend. Currently directed to paid-up additions.',plain:'Plain English: Linda earns dividends that are automatically reinvested to grow her death benefit. This is the optimal election for wealth accumulation.'},
+      {type:'clause-warn',icon:'fa-exclamation-circle',title:'Trust Beneficiary Verification',badge:'Review Recommended',text:'Beneficiary listed as "Trust" — trust document reference should be verified against current estate plan.',plain:'Recommendation: Confirm trust document is current and aligned with the $2M policy. Estate plans change — verify at each annual review.'},
+    ],
+    riskFlags:[
+      {cls:'rf-low',icon:'fa-check-circle',title:'No Lapse Risk',badge:'Excellent',text:'Policy has 11 years of sustained premiums. Cash value $168,400 provides a 14-year premium reserve.',rec:'✅ No action required. Annual review only.'},
+      {cls:'rf-low',icon:'fa-shield-alt',title:'Contestability Cleared',badge:'Clear',text:'2-year contestability window expired 2017. Policy is fully incontestable.',rec:'✅ Protected. No legal challenge to death benefit is possible.'},
+      {cls:'rf-med',icon:'fa-file-contract',title:'Trust Document Alignment',badge:'Review',text:'The trust beneficiary designation should be confirmed against the current estate plan document.',rec:'Verify at Apr 15 annual review. Coordinate with estate attorney if needed.'},
+    ],
+    benchmark:[
+      {label:'Policy Health Score',pct:97,cls:'b-great',mine:'97/100',industry:'75–90 typical',tag:'above',tagLabel:'Excellent'},
+      {label:'Cash Value Growth',pct:92,cls:'b-great',mine:'$168,400 (11 yrs)',industry:'$120K–$180K range',tag:'above',tagLabel:'Above Avg'},
+      {label:'Clause Clarity Score',pct:97,cls:'b-great',mine:'97/100',industry:'75–85 typical',tag:'above',tagLabel:'Excellent'},
+      {label:'Dividend Optimization',pct:85,cls:'b-ok',mine:'Paid-up additions',industry:'Paid-up additions preferred',tag:'inline',tagLabel:'Optimal'},
+    ]
+  }
+};
+
+const nlpPortfolioData = [
+  {id:'P-100330',client:'Linda Morrison',type:'Whole Life $2M',score:97,cls:'nlp-low',flag:'Flagship — all 19 clauses clear'},
+  {id:'P-100291',client:'James Whitfield',type:'Whole Life $500K',score:94,cls:'nlp-low',flag:'Clean — no exclusions flagged'},
+  {id:'P-100292',client:'Sandra Williams',type:'Term Life $750K',score:88,cls:'nlp-low',flag:'Term conversion clause clear'},
+  {id:'P-100302',client:'Patricia Nguyen',type:'Variable UL $300K',score:81,cls:'nlp-low',flag:'VUL market risk disclosed'},
+  {id:'P-100310',client:'Robert Chen',type:'Whole Life $1M',score:76,cls:'nlp-med',flag:'Contestability window active'},
+  {id:'P-100293',client:'James Whitfield',type:'LTC $9,600/yr',score:72,cls:'nlp-med',flag:'LTC trigger ambiguity detected'},
+  {id:'P-100320',client:'Sandra Williams',type:'Term Life $350K',score:44,cls:'nlp-high',flag:'⚠ Renewal exclusion — age 61+'},
+  {id:'P-100301',client:'Patricia Nguyen',type:'Universal Life $400K',score:38,cls:'nlp-urgent',flag:'⚠ Under-funding lapse clause'},
+];
+
+let _nlpCurrentPolicy = null;
+let _nlpCurrentTab    = 'summary';
+
+function openNLPReview(policyId) {
+  const overlay = document.getElementById('nlp-overlay');
+  if (!overlay) return;
+  _nlpCurrentPolicy = policyId;
+  _nlpCurrentTab    = 'summary';
+
+  // Update subtitle
+  const sub = document.getElementById('nlp-modal-sub');
+  if (policyId === 'all' || policyId === 'risk') {
+    if (sub) sub.textContent = 'Full Portfolio NLP Scan — 8 policies analyzed · 2 urgent · 3 flagged';
+  } else {
+    const d = nlpPolicyData[policyId];
+    if (d && sub) sub.textContent = d.id + ' · ' + d.client + ' · ' + d.type;
+  }
+
+  // Set tab active
+  document.querySelectorAll('.nlp-mtab').forEach(t => t.classList.remove('active'));
+  const firstTab = document.querySelector('.nlp-mtab');
+  if (firstTab) firstTab.classList.add('active');
+
+  // Render content
+  _nlpRenderTab('summary', policyId);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeNLPReview(e) {
+  if (e && e.target !== document.getElementById('nlp-overlay')) return;
+  const overlay = document.getElementById('nlp-overlay');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Also close via button
+(function(){ const el=document.getElementById('nlp-overlay'); if(el){ el.addEventListener('click',function(e){ if(e.target===el) closeNLPReview(e); }); }})();
+
+function switchNLPTab(tab, btn) {
+  _nlpCurrentTab = tab;
+  document.querySelectorAll('.nlp-mtab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  _nlpRenderTab(tab, _nlpCurrentPolicy);
+}
+
+function _nlpRenderTab(tab, policyId) {
+  const body = document.getElementById('nlp-modal-body');
+  if (!body) return;
+
+  if (policyId === 'all' || policyId === 'risk') {
+    body.innerHTML = _nlpBuildPortfolioView();
+    return;
+  }
+
+  const d = nlpPolicyData[policyId];
+  if (!d) { body.innerHTML = `<div style="padding:40px;text-align:center;color:#9ca3af"><i class="fas fa-brain fa-2x" style="margin-bottom:12px"></i><br>NLP analysis not available for this policy.</div>`; return; }
+
+  const strip = `<div class="nlp-policy-strip">
+    <div class="nlp-ps-item"><div class="nlp-ps-lbl">Policy</div><div class="nlp-ps-val">${d.id}</div></div>
+    <div class="nlp-ps-item"><div class="nlp-ps-lbl">Client</div><div class="nlp-ps-val">${d.client}</div></div>
+    <div class="nlp-ps-item"><div class="nlp-ps-lbl">Type</div><div class="nlp-ps-val">${d.type}</div></div>
+    <div class="nlp-ps-item"><div class="nlp-ps-lbl">Face Value</div><div class="nlp-ps-val">${d.faceValue}</div></div>
+    <div class="nlp-ps-item"><div class="nlp-ps-lbl">NLP Score</div><div class="nlp-ps-val risk-${d.level.toLowerCase()}">${d.score}/100</div></div>
+    <div class="nlp-ps-item"><div class="nlp-ps-lbl">Risk Level</div><div class="nlp-ps-val risk-${d.level.toLowerCase()}">${d.level}</div></div>
+  </div>`;
+
+  let content = '';
+  if (tab === 'summary')  content = _nlpBuildSummary(d);
+  if (tab === 'clauses')  content = _nlpBuildClauses(d);
+  if (tab === 'risk')     content = _nlpBuildRisk(d);
+  if (tab === 'compare')  content = _nlpBuildBenchmark(d);
+
+  body.innerHTML = strip + content;
+}
+
+function _nlpBuildSummary(d) {
+  const kfHtml = d.keyFacts.map(f => `<div class="nlp-kf-card"><div class="nlp-kf-lbl">${f.lbl}</div><div class="nlp-kf-val">${f.val}</div></div>`).join('');
+  const actHtml = d.actions.map(a => `<li class="${a.cls}"><i class="fas ${a.icon}"></i><span>${a.text}</span></li>`).join('');
+  return `<div class="nlp-summary-wrap">
+    <div class="nlp-summary-headline">
+      <div class="nlp-sh-icon ${d.shIconClass}"><i class="fas fa-brain"></i></div>
+      <div class="nlp-sh-text"><h3>${d.headline}</h3><p>NLP Score ${d.score}/100 · ${d.clauses ? d.clauses.length : '—'} clauses analyzed · ${d.level} risk</p></div>
+    </div>
+    <div class="nlp-plain-card">${d.plainSummary}</div>
+    <div class="nlp-key-facts">${kfHtml}</div>
+    <div class="nlp-action-items">
+      <h4><i class="fas fa-tasks" style="color:#7c3aed"></i> Recommended Actions</h4>
+      <ul class="nlp-action-list">${actHtml}</ul>
+    </div>
+    <div class="nlp-action-btn-row">
+      <button class="nlp-ab nlp-ab-primary" onclick="switchNLPTab('clauses',document.querySelectorAll('.nlp-mtab')[1])"><i class="fas fa-list-ul"></i> View All Clauses</button>
+      <button class="nlp-ab nlp-ab-outline" onclick="switchNLPTab('risk',document.querySelectorAll('.nlp-mtab')[2])"><i class="fas fa-exclamation-triangle"></i> Risk Detail</button>
+      <button class="nlp-ab nlp-ab-secondary" onclick="sendQuickMessage('NLP Policy Review for ${d.client}: ${d.headline}'); closeNLPReview(); navigateTo('ai-agents');"><i class="fas fa-robot"></i> Ask AI Agent</button>
+    </div>
+  </div>`;
+}
+
+function _nlpBuildClauses(d) {
+  const clauseHtml = (d.clauses || []).map(c => `
+    <div class="nlp-clause ${c.type}">
+      <div class="nlp-clause-header">
+        <div class="nlp-clause-icon"><i class="fas ${c.icon}"></i></div>
+        <div class="nlp-clause-title">${c.title}</div>
+        <span class="nlp-clause-badge">${c.badge}</span>
+      </div>
+      <div class="nlp-clause-text">${c.text}</div>
+      <div class="nlp-clause-plain"><i class="fas fa-comment-dots" style="margin-right:5px;opacity:.6"></i>${c.plain}</div>
+    </div>`).join('');
+  return `<div class="nlp-clauses-wrap">
+    <div class="nlp-clause-filter">
+      <button class="nlp-cf-btn all active">All Clauses</button>
+      <button class="nlp-cf-btn risk"><i class="fas fa-exclamation-circle"></i> Risk</button>
+      <button class="nlp-cf-btn exclusion"><i class="fas fa-ban"></i> Exclusions</button>
+      <button class="nlp-cf-btn ok"><i class="fas fa-check-circle"></i> Clear</button>
+    </div>
+    <div class="nlp-clause-list">${clauseHtml}</div>
+  </div>`;
+}
+
+function _nlpBuildRisk(d) {
+  const scoreLabel = d.level === 'Low' ? 'Excellent Health' : d.level === 'Medium' ? 'Needs Attention' : d.level === 'High' ? 'High Risk — Action Required' : 'Critical — Immediate Action';
+  const flagHtml = (d.riskFlags || []).map(f => `
+    <div class="nlp-rf ${f.cls}">
+      <div class="nlp-rf-icon"><i class="fas ${f.icon}"></i></div>
+      <div class="nlp-rf-body">
+        <div class="nlp-rf-title">${f.title} <span class="nlp-rf-badge">${f.badge}</span></div>
+        <div class="nlp-rf-text">${f.text}</div>
+        <div class="nlp-rf-rec">${f.rec}</div>
+      </div>
+    </div>`).join('');
+  return `<div class="nlp-risk-wrap">
+    <div class="nlp-risk-score-card">
+      <div class="nlp-rsc-score ${d.scoreClass}">${d.score}</div>
+      <div><div class="nlp-rsc-label">NLP Risk Score</div></div>
+      <div class="nlp-rsc-divider"></div>
+      <div class="nlp-rsc-details">
+        <div class="nlp-rsc-headline">${d.headline}</div>
+        <div class="nlp-rsc-sub">${scoreLabel} · ${(d.riskFlags||[]).length} risk flags · ${(d.clauses||[]).length} clauses analyzed</div>
+      </div>
+    </div>
+    <div class="nlp-risk-flags">${flagHtml}</div>
+  </div>`;
+}
+
+function _nlpBuildBenchmark(d) {
+  const barHtml = (d.benchmark || []).map(b => `
+    <div class="nlp-bench-card">
+      <div class="nlp-bench-card-label">${b.label}</div>
+      <div class="nlp-bench-bar-wrap"><div class="nlp-bench-bar ${b.cls}" style="width:${b.pct}%"></div></div>
+      <div class="nlp-bench-vals"><span><strong>${b.mine}</strong></span><span>${b.pct}%</span></div>
+    </div>`).join('');
+  const tableRows = (d.benchmark || []).map(b => `
+    <tr>
+      <td>${b.label}</td>
+      <td>${b.mine}</td>
+      <td>${b.industry}</td>
+      <td><span class="nlp-bench-tag ${b.tag}">${b.tagLabel}</span></td>
+    </tr>`).join('');
+  return `<div class="nlp-bench-wrap">
+    <div class="nlp-bench-title"><i class="fas fa-balance-scale" style="color:#7c3aed"></i> Industry Benchmark Comparison — ${d.client} · ${d.id}</div>
+    <div class="nlp-bench-grid">${barHtml}</div>
+    <table class="nlp-bench-table">
+      <thead><tr><th>Metric</th><th>This Policy</th><th>Industry Benchmark</th><th>Assessment</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+  </div>`;
+}
+
+function _nlpBuildPortfolioView() {
+  const kpis = `<div class="nlp-portfolio-kpis">
+    <div class="nlp-pkpi"><div class="nlp-pkpi-icon red"><i class="fas fa-exclamation-circle"></i></div><div><div class="nlp-pkpi-val">2</div><div class="nlp-pkpi-lbl">Urgent Risks</div></div></div>
+    <div class="nlp-pkpi"><div class="nlp-pkpi-icon orange"><i class="fas fa-flag"></i></div><div><div class="nlp-pkpi-val">3</div><div class="nlp-pkpi-lbl">Clauses Flagged</div></div></div>
+    <div class="nlp-pkpi"><div class="nlp-pkpi-icon blue"><i class="fas fa-file-contract"></i></div><div><div class="nlp-pkpi-val">8</div><div class="nlp-pkpi-lbl">Policies Scanned</div></div></div>
+    <div class="nlp-pkpi"><div class="nlp-pkpi-icon green"><i class="fas fa-check-shield"></i></div><div><div class="nlp-pkpi-val">94%</div><div class="nlp-pkpi-lbl">NLP Accuracy</div></div></div>
+  </div>`;
+  const rows = nlpPortfolioData.map(p => `
+    <div class="nlp-portfolio-row ${p.cls}" onclick="openNLPReview('${p.id}')">
+      <span class="nlp-pr-id">${p.id}</span>
+      <span class="nlp-pr-client">${p.client}</span>
+      <span class="nlp-pr-type">${p.type}</span>
+      <span class="nlp-pr-score">${p.score}</span>
+      <span class="nlp-pr-flag">${p.flag}</span>
+      <i class="fas fa-chevron-right nlp-pr-arrow"></i>
+    </div>`).join('');
+  return `<div class="nlp-portfolio-header">
+    <h3>Full Portfolio NLP Scan</h3>
+    <p>All 8 policies analyzed — sorted by risk score (lowest = most urgent)</p>
+    ${kpis}
+  </div>
+  <div class="nlp-portfolio-list">${rows}</div>`;
+}
+
+// ── Hook into policy modal NLP tab ──────────────────────────────
+const _origSwitchPolicyTab = window.switchPolicyTab;
+window.switchPolicyTab = function(tab, tabEl) {
+  if (tab === 'nlp') {
+    // Get current policy from the modal
+    const policyId = window._currentPolicyModalId || null;
+    if (policyId) openNLPReview(policyId);
+    return;
+  }
+  if (typeof _origSwitchPolicyTab === 'function') _origSwitchPolicyTab(tab, tabEl);
+};

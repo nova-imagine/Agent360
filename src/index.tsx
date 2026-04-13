@@ -1690,12 +1690,48 @@ function PoliciesPage() {
           </select>
         </div>
         <div class="toolbar-right">
-          <button class="btn btn-ai" onclick="navigateTo('ai-agents')">
-            <i class="fas fa-robot"></i> AI Policy Review
+          <button class="btn btn-ai" onclick="openNLPReview('all')">
+            <i class="fas fa-brain"></i> NLP Policy Scan
           </button>
           <button class="btn btn-primary">
             <i class="fas fa-plus"></i> New Policy
           </button>
+        </div>
+      </div>
+
+      {/* ── NLP Policy Review & Risk Expert Banner ── */}
+      <div class="nlp-banner">
+        <div class="nlp-banner-left">
+          <div class="nlp-banner-icon">
+            <i class="fas fa-brain"></i>
+            <span class="nlp-pulse"></span>
+          </div>
+          <div class="nlp-banner-text">
+            <div class="nlp-banner-title">NLP Policy Review &amp; Risk Expert <span class="nlp-live-badge">LIVE</span></div>
+            <div class="nlp-banner-sub">AI reads every policy clause · flags exclusions, ambiguities &amp; regulatory risks · plain-language summaries</div>
+          </div>
+        </div>
+        <div class="nlp-banner-stats">
+          <div class="nlp-stat">
+            <span class="nlp-stat-val red">2</span>
+            <span class="nlp-stat-lbl">Urgent Risks</span>
+          </div>
+          <div class="nlp-stat">
+            <span class="nlp-stat-val orange">3</span>
+            <span class="nlp-stat-lbl">Clauses Flagged</span>
+          </div>
+          <div class="nlp-stat">
+            <span class="nlp-stat-val blue">8</span>
+            <span class="nlp-stat-lbl">Policies Scanned</span>
+          </div>
+          <div class="nlp-stat">
+            <span class="nlp-stat-val green">94%</span>
+            <span class="nlp-stat-lbl">NLP Accuracy</span>
+          </div>
+        </div>
+        <div class="nlp-banner-actions">
+          <button class="nlp-btn-scan" onclick="openNLPReview('all')"><i class="fas fa-search-plus"></i> Full Portfolio Scan</button>
+          <button class="nlp-btn-risk" onclick="openNLPReview('risk')"><i class="fas fa-exclamation-triangle"></i> Risk Report</button>
         </div>
       </div>
 
@@ -1713,6 +1749,7 @@ function PoliciesPage() {
               <th>Renewal</th>
               <th>Beneficiary</th>
               <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
+              <th><i class="fas fa-brain" style="color:#7c3aed;margin-right:4px"></i>NLP Risk</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -1729,6 +1766,17 @@ function PoliciesPage() {
                 'P-100330': {badge:'3/3 Docs',fill:'idp-fill-green',cls:'idp-complete',pct:100},
               };
               const idp = policyIDPStatus[p.id] || {badge:'—',fill:'',cls:'idp-partial',pct:0};
+              const nlpRiskMap: Record<string,{score:number,level:string,cls:string,flag:string}> = {
+                'P-100291': {score:94,level:'Low',cls:'nlp-low',flag:'Clean — no exclusions flagged'},
+                'P-100292': {score:88,level:'Low',cls:'nlp-low',flag:'Term conversion clause clear'},
+                'P-100293': {score:72,level:'Medium',cls:'nlp-med',flag:'LTC trigger ambiguity detected'},
+                'P-100301': {score:38,level:'Urgent',cls:'nlp-urgent',flag:'⚠ Under-funding lapse clause'},
+                'P-100302': {score:81,level:'Low',cls:'nlp-low',flag:'VUL market risk disclosed'},
+                'P-100310': {score:76,level:'Medium',cls:'nlp-med',flag:'Contestability window active'},
+                'P-100320': {score:44,level:'High',cls:'nlp-high',flag:'⚠ Renewal exclusion — age 61+'},
+                'P-100330': {score:97,level:'Low',cls:'nlp-low',flag:'Flagship — all clauses clear'},
+              };
+              const nlp = nlpRiskMap[p.id] || {score:0,level:'—',cls:'',flag:'Not scanned'};
               return (
               <tr>
                 <td><span class="policy-id">{p.id}</span></td>
@@ -1746,11 +1794,12 @@ function PoliciesPage() {
                 <td class={p.status === 'Review' ? 'text-orange' : 'text-muted'}>{p.renewal}</td>
                 <td class="text-muted">{p.beneficiary}</td>
                 <td><div class="idp-status-cell" onclick={`openIDPModal('${p.id}')`}><span class={`idp-badge ${idp.cls}`}><i class={`fas ${idp.cls.includes('complete') ? 'fa-check-circle' : idp.cls.includes('urgent') ? 'fa-exclamation-circle' : 'fa-file-import'}`}></i> {idp.badge}</span><div class="idp-scan-bar"><div class={`idp-scan-fill ${idp.fill}`} style={`width:${idp.pct}%`}></div></div></div></td>
+                <td><div class={`nlp-risk-cell ${nlp.cls}`} onclick={`openNLPReview('${p.id}')`} title={nlp.flag}><span class="nlp-score">{nlp.score}</span><span class="nlp-level-badge">{nlp.level}</span><div class="nlp-flag-tip">{nlp.flag}</div></div></td>
                 <td>
                   <div class="action-btns">
                     <button class="btn-icon" title="View Details" onclick={`openPolicyModal('${p.id}','view')`}><i class="fas fa-eye"></i></button>
                     <button class="btn-icon" title="Edit Policy"  onclick={`openPolicyModal('${p.id}','edit')`}><i class="fas fa-edit"></i></button>
-                    <button class="btn-icon ai-btn" title="AI Analysis" onclick={`openPolicyModal('${p.id}','ai')`}><i class="fas fa-robot"></i></button>
+                    <button class="btn-icon ai-btn" title="NLP Policy Review" onclick={`openNLPReview('${p.id}')`}><i class="fas fa-brain"></i></button>
                   </div>
                 </td>
               </tr>
@@ -1807,11 +1856,39 @@ function PoliciesPage() {
                 <button class="dmt-tab active" onclick="switchPolicyTab('view',this)"><i class="fas fa-eye"></i> View</button>
                 <button class="dmt-tab" onclick="switchPolicyTab('edit',this)"><i class="fas fa-edit"></i> Edit</button>
                 <button class="dmt-tab ai-tab" onclick="switchPolicyTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
+                <button class="dmt-tab nlp-tab" onclick="switchPolicyTab('nlp',this)"><i class="fas fa-brain"></i> NLP Risk</button>
               </div>
               <button class="detail-modal-close" onclick="closePolicyModal()"><i class="fas fa-times"></i></button>
             </div>
           </div>
           <div class="detail-modal-body" id="policy-modal-body"></div>
+        </div>
+      </div>
+
+      {/* ── NLP Policy Review & Risk Expert Modal ── */}
+      <div class="nlp-overlay" id="nlp-overlay" onclick="closeNLPReview(event)">
+        <div class="nlp-modal" onclick="event.stopPropagation()">
+          <div class="nlp-modal-header">
+            <div class="nlp-modal-title-wrap">
+              <div class="nlp-modal-icon"><i class="fas fa-brain"></i></div>
+              <div>
+                <div class="nlp-modal-title">NLP Policy Review &amp; Risk Expert</div>
+                <div class="nlp-modal-sub" id="nlp-modal-sub">AI-powered clause analysis · risk flags · plain-language summary</div>
+              </div>
+            </div>
+            <div class="nlp-modal-header-right">
+              <div class="nlp-modal-tabs">
+                <button class="nlp-mtab active" onclick="switchNLPTab('summary',this)"><i class="fas fa-align-left"></i> Plain Summary</button>
+                <button class="nlp-mtab" onclick="switchNLPTab('clauses',this)"><i class="fas fa-list-ul"></i> Clause Analysis</button>
+                <button class="nlp-mtab" onclick="switchNLPTab('risk',this)"><i class="fas fa-exclamation-triangle"></i> Risk Flags</button>
+                <button class="nlp-mtab" onclick="switchNLPTab('compare',this)"><i class="fas fa-balance-scale"></i> Benchmark</button>
+              </div>
+              <button class="nlp-close-btn" onclick="closeNLPReview()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="nlp-modal-body" id="nlp-modal-body">
+            {/* JS-populated */}
+          </div>
         </div>
       </div>
     </div>
@@ -2697,6 +2774,26 @@ function AIAgentsPage() {
             </div>
             <div class="agent-status standby"><i class="fas fa-circle"></i> Standby</div>
           </div>
+
+          {/* NLP Policy Risk Expert — NEW */}
+          <div class="agent-domain-label nlp-label"><i class="fas fa-brain"></i> NLP Policy Intelligence</div>
+
+          <div class="agent-card nlp-agent-card active-agent" onclick="openNLPReview('all')">
+            <div class="agent-card-icon nlp-purple"><i class="fas fa-brain"></i></div>
+            <div class="agent-card-info">
+              <h4>NLP Policy Risk Expert <span class="agent-new-badge">NEW</span></h4>
+              <p>Reads every policy clause with NLP — flags exclusions, ambiguities, regulatory risks, and lapse triggers. Generates plain-language client summaries and benchmarks against industry standards.</p>
+              <div class="agent-tags">
+                <span>Clause Analysis</span><span>Risk Flags</span><span>Plain Language</span><span>Benchmark</span>
+              </div>
+              <div class="nlp-agent-stats">
+                <span class="nlp-as-chip red"><i class="fas fa-exclamation-circle"></i> 2 Urgent</span>
+                <span class="nlp-as-chip orange"><i class="fas fa-flag"></i> 3 Flagged</span>
+                <span class="nlp-as-chip blue"><i class="fas fa-file-contract"></i> 8 Scanned</span>
+              </div>
+            </div>
+            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
+          </div>
         </div>
 
         {/* Chat Interface */}
@@ -2813,6 +2910,18 @@ function AIAgentsPage() {
                 <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('What is my total revenue opportunity across all domains — rank by value')">Revenue Opportunity</button>
                 <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Generate a week-ahead action plan for April 14-18 2026')">Week Ahead Plan</button>
                 <button class="ctx-btn ctx-adv" onclick="sendQuickMessage('Which clients should I prioritize for outreach this week and why?')">Priority Outreach</button>
+              </div>
+            </div>
+
+            {/* NLP Policy Review */}
+            <div class="ctx-group">
+              <span class="ctx-group-label nlp-ctx-label"><i class="fas fa-brain"></i> NLP Policy Review</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-nlp" onclick="openNLPReview('P-100301')">Patricia — UL Risk ⚠</button>
+                <button class="ctx-btn ctx-nlp" onclick="openNLPReview('P-100320')">Sandra — Term Renewal ⚠</button>
+                <button class="ctx-btn ctx-nlp" onclick="openNLPReview('P-100330')">Linda — Flagship WL</button>
+                <button class="ctx-btn ctx-nlp" onclick="openNLPReview('P-100291')">James — Whole Life</button>
+                <button class="ctx-btn ctx-nlp" onclick="openNLPReview('all')">Full Portfolio Scan</button>
               </div>
             </div>
 
