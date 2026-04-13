@@ -1968,6 +1968,44 @@ function ClaimsPage() {
         </div>
       </div>
 
+      {/* ── AI Claims Intelligence Banner ── */}
+      <div class="ci-banner" id="ci-banner">
+        <div class="ci-banner-left">
+          <div class="ci-banner-icon"><i class="fas fa-brain"></i><span class="ci-pulse"></span></div>
+          <div class="ci-banner-text">
+            <div class="ci-banner-title">AI Claims Intelligence <span class="ci-live-badge">● LIVE</span></div>
+            <div class="ci-banner-sub">ML fraud detection · NLP doc extraction · Predictive resolution · Real-time triage</div>
+          </div>
+        </div>
+        <div class="ci-kpis">
+          <div class="ci-kpi ci-kpi-red">
+            <div class="ci-kpi-val">1</div>
+            <div class="ci-kpi-lbl">Fraud Flagged</div>
+          </div>
+          <div class="ci-kpi ci-kpi-orange">
+            <div class="ci-kpi-val">2</div>
+            <div class="ci-kpi-lbl">Watch List</div>
+          </div>
+          <div class="ci-kpi ci-kpi-blue">
+            <div class="ci-kpi-val">94%</div>
+            <div class="ci-kpi-lbl">NLP Accuracy</div>
+          </div>
+          <div class="ci-kpi ci-kpi-green">
+            <div class="ci-kpi-val">5.2d</div>
+            <div class="ci-kpi-lbl">Avg Resolution</div>
+          </div>
+          <div class="ci-kpi ci-kpi-purple">
+            <div class="ci-kpi-val">+32%</div>
+            <div class="ci-kpi-lbl">Detection Lift</div>
+          </div>
+        </div>
+        <div class="ci-banner-actions">
+          <button class="btn-ci-action primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Intelligence Report</button>
+          <button class="btn-ci-action secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
+          <button class="btn-ci-action secondary" onclick="sendContextMessage('Run full claims triage — prioritize by fraud risk, resolution urgency and document completeness','claims')"><i class="fas fa-robot"></i> AI Triage</button>
+        </div>
+      </div>
+
       {/* ── Proactive AI Alert Card ── */}
       <div class="proactive-alert-card">
         <div class="pac-header">
@@ -2115,23 +2153,64 @@ function ClaimsPage() {
             <i class="fas fa-search-plus"></i> Full Fraud Report
           </button>
         </div>
+        {/* ML Risk Matrix */}
+        <div class="fdp-risk-matrix">
+          <div class="fdp-matrix-col">
+            <div class="fdp-matrix-label">Claim Timing</div>
+            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill red" style="width:72%"></div></div>
+            <div class="fdp-matrix-val red">High</div>
+          </div>
+          <div class="fdp-matrix-col">
+            <div class="fdp-matrix-label">Doc Completeness</div>
+            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill orange" style="width:55%"></div></div>
+            <div class="fdp-matrix-val orange">Med</div>
+          </div>
+          <div class="fdp-matrix-col">
+            <div class="fdp-matrix-label">Policy History</div>
+            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill green" style="width:90%"></div></div>
+            <div class="fdp-matrix-val green">Low</div>
+          </div>
+          <div class="fdp-matrix-col">
+            <div class="fdp-matrix-label">Beneficiary Match</div>
+            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill orange" style="width:60%"></div></div>
+            <div class="fdp-matrix-val orange">Med</div>
+          </div>
+          <div class="fdp-matrix-col">
+            <div class="fdp-matrix-label">Claim Amount</div>
+            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill red" style="width:80%"></div></div>
+            <div class="fdp-matrix-val red">High</div>
+          </div>
+        </div>
         <div class="fdp-flags">
-          <div class="fdp-flag flagged">
+          <div class="fdp-flag flagged" onclick="openFraudDetailModal('CLM-2026-0025')">
             <i class="fas fa-exclamation-triangle"></i>
             <span class="fdp-flag-id">CLM-2026-0025</span>
-            <span class="fdp-flag-reason">Policy in Pending status at time of death · Coverage determination required · Medical records inconsistency</span>
+            <span class="fdp-flag-reason">Policy in Pending status at time of death · Coverage determination required · Medical records inconsistency · ML: 3 anomalies detected</span>
+            <div class="fdp-flag-signals">
+              <span class="fdp-signal red">Timing</span>
+              <span class="fdp-signal red">Coverage Gap</span>
+              <span class="fdp-signal orange">Doc Delay</span>
+            </div>
             <span class="fdp-flag-score">Risk: 78</span>
           </div>
-          <div class="fdp-flag watch">
+          <div class="fdp-flag watch" onclick="openFraudDetailModal('CLM-2026-0041')">
             <i class="fas fa-eye"></i>
             <span class="fdp-flag-id">CLM-2026-0041</span>
-            <span class="fdp-flag-reason">$1M claim · Claimant ID docs pending · High-value threshold monitoring active</span>
+            <span class="fdp-flag-reason">$1M claim · Claimant ID docs pending · High-value threshold monitoring active · ML: enhanced review protocol</span>
+            <div class="fdp-flag-signals">
+              <span class="fdp-signal orange">High Value</span>
+              <span class="fdp-signal orange">ID Pending</span>
+            </div>
             <span class="fdp-flag-score">Risk: 42</span>
           </div>
-          <div class="fdp-flag watch">
+          <div class="fdp-flag watch" onclick="openFraudDetailModal('CLM-2026-0028')">
             <i class="fas fa-eye"></i>
             <span class="fdp-flag-id">CLM-2026-0028</span>
-            <span class="fdp-flag-reason">Terminal certification pending from oncologist · ADB claim filed 30 days post-diagnosis</span>
+            <span class="fdp-flag-reason">Terminal certification pending · ADB claim filed 30 days post-diagnosis · NLP: document language inconsistency detected</span>
+            <div class="fdp-flag-signals">
+              <span class="fdp-signal orange">Cert Delay</span>
+              <span class="fdp-signal yellow">NLP Flag</span>
+            </div>
             <span class="fdp-flag-score">Risk: 38</span>
           </div>
         </div>
@@ -2230,7 +2309,8 @@ function ClaimsPage() {
               <th>Priority</th>
               <th><i class="fas fa-shield-virus" style="color:#dc2626;margin-right:4px"></i>Fraud Score</th>
               <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
-              <th>Assigned To</th>
+              <th><i class="fas fa-brain" style="color:#0ea5e9;margin-right:4px"></i>AI Triage</th>
+              <th><i class="fas fa-hourglass-half" style="color:#d97706;margin-right:4px"></i>Resolution</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -2247,11 +2327,13 @@ function ClaimsPage() {
               <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0041')"><span class="fraud-score-num">42</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
               <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0041')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
               <td class="text-muted">Claims Dept.</td>
+              <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0041','ci')"><span class="ci-triage-label">⚡ Expedite</span><span class="ci-triage-sub">Missing ID docs</span></div></td>
+              <td><div class="ci-res-timer urgent"><i class="fas fa-hourglass-half"></i><span class="ci-res-days">1d left</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:85%"></div></div></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0041','ai')"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -2267,11 +2349,13 @@ function ClaimsPage() {
               <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0038')"><span class="fraud-score-num">12</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
               <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0038')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
               <td class="text-muted">LTC Team</td>
+              <td><div class="ci-triage-cell normal" onclick="openClaimModal('CLM-2026-0038','ci')"><span class="ci-triage-label">📋 Doc Request</span><span class="ci-triage-sub">Plan of care pending</span></div></td>
+              <td><div class="ci-res-timer normal"><i class="fas fa-clock"></i><span class="ci-res-days">8d est.</span><div class="ci-res-bar"><div class="ci-res-fill normal" style="width:45%"></div></div></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0038','ai')"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0038','ci')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -2287,11 +2371,13 @@ function ClaimsPage() {
               <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0035')"><span class="fraud-score-num">18</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
               <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0035')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
               <td class="text-muted">DI Unit</td>
+              <td><div class="ci-triage-cell watch" onclick="openClaimModal('CLM-2026-0035','ci')"><span class="ci-triage-label">🩺 APS Needed</span><span class="ci-triage-sub">Physician stmt pending</span></div></td>
+              <td><div class="ci-res-timer watch"><i class="fas fa-clock"></i><span class="ci-res-days">21d est.</span><div class="ci-res-bar"><div class="ci-res-fill watch" style="width:30%"></div></div></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0035','ai')"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0035','ci')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -2307,11 +2393,13 @@ function ClaimsPage() {
               <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0033')"><span class="fraud-score-num">9</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
               <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0033')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
               <td class="text-muted">LTC Team</td>
+              <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0033','ci')"><span class="ci-triage-label">✅ On Track</span><span class="ci-triage-sub">Approval imminent</span></div></td>
+              <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">3d est.</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:80%"></div></div></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0033','ai')"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -2327,11 +2415,13 @@ function ClaimsPage() {
               <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0031')"><span class="fraud-score-num">7</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
               <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0031')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
               <td class="text-muted">Agent Support</td>
+              <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0031','ci')"><span class="ci-triage-label">✅ Waiver Active</span><span class="ci-triage-sub">Monitor recovery</span></div></td>
+              <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">Open</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:60%"></div></div></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0031','ai')"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0031','ci')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -2347,11 +2437,13 @@ function ClaimsPage() {
               <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0028')"><span class="fraud-score-num">38</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
               <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0028')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-orange" style="width:50%"></div></div></div></td>
               <td class="text-muted">Claims Dept.</td>
+              <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0028','ci')"><span class="ci-triage-label">⚡ Compassionate</span><span class="ci-triage-sub">Terminal — expedite</span></div></td>
+              <td><div class="ci-res-timer urgent"><i class="fas fa-fire"></i><span class="ci-res-days">9d est.</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:70%"></div></div></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0028','ai')"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0028','ci')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -2367,11 +2459,13 @@ function ClaimsPage() {
               <td><div class="fraud-score-cell flagged" onclick="openFraudDetailModal('CLM-2026-0025')"><span class="fraud-score-num">78</span><span class="fraud-score-lbl">Flagged</span><i class="fas fa-exclamation-triangle"></i></div></td>
               <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0025')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 1/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-red" style="width:25%"></div></div></div></td>
               <td class="text-muted">Claims Dept.</td>
+              <td><div class="ci-triage-cell flagged" onclick="openClaimModal('CLM-2026-0025','ci')"><span class="ci-triage-label">🚨 Fraud Review</span><span class="ci-triage-sub">Coverage pending</span></div></td>
+              <td><div class="ci-res-timer flagged"><i class="fas fa-exclamation-triangle"></i><span class="ci-res-days">Hold</span><div class="ci-res-bar"><div class="ci-res-fill flagged" style="width:15%"></div></div></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0025','ai')"><i class="fas fa-robot"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i></button>
                 </div>
               </td>
             </tr>
@@ -2454,6 +2548,54 @@ function ClaimsPage() {
         </table>
       </div>
 
+      {/* ── Smart Doc Request Automation Panel ── */}
+      <div class="smart-doc-panel">
+        <div class="sdp-header">
+          <div class="sdp-title-area">
+            <div class="sdp-icon"><i class="fas fa-paper-plane"></i></div>
+            <div>
+              <div class="sdp-title">Smart Doc Request Automation</div>
+              <div class="sdp-sub">AI drafts and sends personalized document reminder emails · Last run: 4 mins ago</div>
+            </div>
+          </div>
+          <div class="sdp-stats">
+            <div class="sdp-stat"><span class="sdp-stat-val orange">3</span><span class="sdp-stat-lbl">Pending Requests</span></div>
+            <div class="sdp-stat"><span class="sdp-stat-val green">8</span><span class="sdp-stat-lbl">Sent This Week</span></div>
+            <div class="sdp-stat"><span class="sdp-stat-val blue">67%</span><span class="sdp-stat-lbl">Response Rate</span></div>
+          </div>
+          <button class="btn btn-ai sdp-run-btn" onclick="runSmartDocRequests()"><i class="fas fa-paper-plane"></i> Send All Reminders</button>
+        </div>
+        <div class="sdp-queue">
+          <div class="sdp-item sdp-urgent">
+            <div class="sdp-item-icon"><i class="fas fa-file-signature"></i></div>
+            <div class="sdp-item-content">
+              <div class="sdp-item-title">Identity Documents — Susan Chen (Beneficiary)</div>
+              <div class="sdp-item-meta">CLM-2026-0041 · Robert Chen · Death Benefit $1M · Overdue 1 day</div>
+              <div class="sdp-item-draft">"Dear Susan Chen, to process your $1,000,000 death benefit claim, we need your government-issued photo ID and bank account details. These are the final steps before we can release your payment…"</div>
+            </div>
+            <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0041','Susan Chen')"><i class="fas fa-paper-plane"></i> Send</button>
+          </div>
+          <div class="sdp-item sdp-urgent">
+            <div class="sdp-item-icon"><i class="fas fa-file-medical"></i></div>
+            <div class="sdp-item-content">
+              <div class="sdp-item-title">Terminal Illness Certification — Dr. Hernandez Office</div>
+              <div class="sdp-item-meta">CLM-2026-0028 · Maria Gonzalez · ADB $120,000 · 9 days pending</div>
+              <div class="sdp-item-draft">"Dear Dr. Hernandez's Office, we are processing a compassionate accelerated benefit claim for Maria Gonzalez. We respectfully request expedited completion of the terminal illness certification form…"</div>
+            </div>
+            <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Send</button>
+          </div>
+          <div class="sdp-item sdp-normal">
+            <div class="sdp-item-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="sdp-item-content">
+              <div class="sdp-item-title">Attending Physician Statement — Dr. Hernandez</div>
+              <div class="sdp-item-meta">CLM-2026-0035 · Maria Gonzalez · Disability $4,200/mo · 22 days pending</div>
+              <div class="sdp-item-draft">"Dear Dr. Hernandez, we are processing a disability insurance claim for your patient Maria Gonzalez. Please complete the Attending Physician Statement to allow us to begin benefit payments…"</div>
+            </div>
+            <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send</button>
+          </div>
+        </div>
+      </div>
+
       {/* ── Claims by Type Summary ── */}
       <div class="claims-type-grid">
         <div class="ctype-card death-type">
@@ -2504,6 +2646,62 @@ function ClaimsPage() {
             <div class="ctype-value">Auto-follow-ups ready</div>
           </div>
           <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="sendContextMessage('Show all open claims and urgent actions needed — triage by priority and expected resolution','claims')">Run AI Triage</button>
+        </div>
+      </div>
+
+      {/* ── Claims Intelligence Full Report Modal ── */}
+      <div class="detail-modal-overlay" id="ci-review-overlay" onclick="closeCIReviewModal()">
+        <div class="detail-modal ci-review-modal" onclick="event.stopPropagation()">
+          <div class="detail-modal-header" style="border-bottom-color:#0ea5e9">
+            <div class="detail-modal-title">
+              <span class="detail-modal-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)"><i class="fas fa-brain"></i></span>
+              <div>
+                <h3>Claims Intelligence Report</h3>
+                <p class="detail-modal-sub">ML Fraud · NLP Analysis · Predictive Resolution · Smart Triage · Generated Apr 13, 2026</p>
+              </div>
+            </div>
+            <button class="detail-modal-close" onclick="closeCIReviewModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="detail-modal-body" id="ci-review-body">
+            <div class="ci-report-grid">
+              <div class="ci-report-section">
+                <div class="ci-report-section-title"><i class="fas fa-shield-virus"></i> Fraud Risk Summary</div>
+                <div class="ci-report-fraud-list">
+                  <div class="ci-report-fraud-item flagged"><span class="ci-rflag red">78 FLAGGED</span><span class="ci-rfid">CLM-2026-0025</span><span class="ci-rfname">Kevin Park</span><span class="ci-rfreason">Policy pending at death · Coverage gap · 3 ML anomalies</span></div>
+                  <div class="ci-report-fraud-item watch"><span class="ci-rflag orange">42 WATCH</span><span class="ci-rfid">CLM-2026-0041</span><span class="ci-rfname">Robert Chen</span><span class="ci-rfreason">High-value $1M · ID docs pending · Enhanced review</span></div>
+                  <div class="ci-report-fraud-item watch"><span class="ci-rflag orange">38 WATCH</span><span class="ci-rfid">CLM-2026-0028</span><span class="ci-rfname">Maria Gonzalez</span><span class="ci-rfreason">Terminal cert pending · NLP inconsistency</span></div>
+                  <div class="ci-report-fraud-item clear"><span class="ci-rflag green">18 CLEAR</span><span class="ci-rfid">CLM-2026-0035</span><span class="ci-rfname">Maria Gonzalez</span><span class="ci-rfreason">Disability — no signals detected</span></div>
+                  <div class="ci-report-fraud-item clear"><span class="ci-rflag green">12 CLEAR</span><span class="ci-rfid">CLM-2026-0038</span><span class="ci-rfname">Sandra Williams</span><span class="ci-rfreason">LTC — all clear</span></div>
+                  <div class="ci-report-fraud-item clear"><span class="ci-rflag green">9 CLEAR</span><span class="ci-rfid">CLM-2026-0033</span><span class="ci-rfname">James Whitfield</span><span class="ci-rfreason">LTC — file complete</span></div>
+                  <div class="ci-report-fraud-item clear"><span class="ci-rflag green">7 CLEAR</span><span class="ci-rfid">CLM-2026-0031</span><span class="ci-rfname">Linda Morrison</span><span class="ci-rfreason">Premium waiver — no signals</span></div>
+                </div>
+              </div>
+              <div class="ci-report-section">
+                <div class="ci-report-section-title"><i class="fas fa-hourglass-half"></i> Predictive Resolution Timeline</div>
+                <div class="ci-res-timeline-list">
+                  <div class="ci-rtl-item urgent"><span class="ci-rtl-id">CLM-2026-0041</span><span class="ci-rtl-client">Robert Chen</span><div class="ci-rtl-bar-wrap"><div class="ci-rtl-bar urgent" style="width:85%"></div></div><span class="ci-rtl-eta">~1d</span></div>
+                  <div class="ci-rtl-item ok"><span class="ci-rtl-id">CLM-2026-0033</span><span class="ci-rtl-client">James Whitfield</span><div class="ci-rtl-bar-wrap"><div class="ci-rtl-bar ok" style="width:80%"></div></div><span class="ci-rtl-eta">~3d</span></div>
+                  <div class="ci-rtl-item normal"><span class="ci-rtl-id">CLM-2026-0038</span><span class="ci-rtl-client">Sandra Williams</span><div class="ci-rtl-bar-wrap"><div class="ci-rtl-bar normal" style="width:45%"></div></div><span class="ci-rtl-eta">~8d</span></div>
+                  <div class="ci-rtl-item urgent"><span class="ci-rtl-id">CLM-2026-0028</span><span class="ci-rtl-client">Maria Gonzalez</span><div class="ci-rtl-bar-wrap"><div class="ci-rtl-bar urgent" style="width:70%"></div></div><span class="ci-rtl-eta">~9d</span></div>
+                  <div class="ci-rtl-item watch"><span class="ci-rtl-id">CLM-2026-0035</span><span class="ci-rtl-client">Maria Gonzalez</span><div class="ci-rtl-bar-wrap"><div class="ci-rtl-bar watch" style="width:30%"></div></div><span class="ci-rtl-eta">~21d</span></div>
+                  <div class="ci-rtl-item flagged"><span class="ci-rtl-id">CLM-2026-0025</span><span class="ci-rtl-client">Kevin Park</span><div class="ci-rtl-bar-wrap"><div class="ci-rtl-bar flagged" style="width:15%"></div></div><span class="ci-rtl-eta">HOLD</span></div>
+                </div>
+              </div>
+              <div class="ci-report-section ci-report-full-width">
+                <div class="ci-report-section-title"><i class="fas fa-file-alt"></i> NLP Document Analysis</div>
+                <div class="ci-nlp-findings">
+                  <div class="ci-nlp-item"><span class="ci-nlp-badge red">Inconsistency</span><span class="ci-nlp-text">CLM-2026-0028: Terminal illness certification — date discrepancy between diagnosis report (2025-12-10) and oncologist referral (2026-01-15). Requires clarification before payout.</span></div>
+                  <div class="ci-nlp-item"><span class="ci-nlp-badge orange">Missing Field</span><span class="ci-nlp-text">CLM-2026-0035: APS form — employer verification section left blank. Auto-reminder drafted and ready to send.</span></div>
+                  <div class="ci-nlp-item"><span class="ci-nlp-badge green">Verified</span><span class="ci-nlp-text">CLM-2026-0033: All 4 documents NLP-verified. LTC eligibility certification matches policy terms. Ready for approval.</span></div>
+                  <div class="ci-nlp-item"><span class="ci-nlp-badge green">Verified</span><span class="ci-nlp-text">CLM-2026-0041: Death certificate verified against public registry. Cause of death consistent with medical history. Identity docs pending from beneficiary.</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ci-report-actions">
+              <button class="btn btn-ai" onclick="sendContextMessage('Full claims intelligence debrief — fraud, NLP findings, resolution forecast for all open claims','claims')"><i class="fas fa-robot"></i> Ask AI Agent</button>
+              <button class="btn btn-outline-sm" onclick="closeCIReviewModal()"><i class="fas fa-times"></i> Close</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2558,6 +2756,7 @@ function ClaimsPage() {
               <div class="detail-modal-tabs" id="claim-modal-tabs">
                 <button class="dmt-tab active" onclick="switchClaimTab('view',this)"><i class="fas fa-eye"></i> View Claim</button>
                 <button class="dmt-tab ai-tab" onclick="switchClaimTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
+                <button class="dmt-tab ci-tab" onclick="switchClaimTab('ci',this)"><i class="fas fa-brain"></i> Intelligence</button>
               </div>
               <button class="detail-modal-close" onclick="closeClaimModal()"><i class="fas fa-times"></i></button>
             </div>
@@ -2689,6 +2888,23 @@ function AIAgentsPage() {
               <p>Processes claims, requests missing documents, and provides real-time claim status updates</p>
               <div class="agent-tags">
                 <span>Claims Processing</span><span>Document Request</span>
+              </div>
+            </div>
+            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
+          </div>
+
+          <div class="agent-card ci-agent-card" onclick="selectAgent('claims-intelligence')">
+            <div class="agent-card-icon ci-agent-icon"><i class="fas fa-brain"></i></div>
+            <div class="agent-card-info">
+              <h4>Claims Intelligence Agent <span class="agent-new-badge">NEW</span></h4>
+              <p>ML fraud detection, NLP document analysis, predictive resolution timers and smart doc request automation</p>
+              <div class="agent-tags">
+                <span>Fraud Detection</span><span>NLP Analysis</span><span>Smart Triage</span>
+              </div>
+              <div class="ci-agent-stats">
+                <span class="ci-ast red">1 Flagged</span>
+                <span class="ci-ast orange">2 Watch</span>
+                <span class="ci-ast blue">94% NLP</span>
               </div>
             </div>
             <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
@@ -2886,6 +3102,18 @@ function AIAgentsPage() {
                 <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Show all open claims and their current status')">All Open Claims</button>
                 <button class="ctx-btn ctx-ins" onclick="sendQuickMessage('Which claims have pending documents and what actions are needed?')">Pending Docs</button>
                 <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('Draft a compassionate follow-up email to Susan Chen regarding the $1M death benefit claim')">Draft: Susan Chen</button>
+              </div>
+            </div>
+
+            {/* Claims Intelligence */}
+            <div class="ctx-group ci-ctx-group">
+              <span class="ctx-group-label ci-ctx-label"><i class="fas fa-brain"></i> Claims Intelligence</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-fraud" onclick="sendQuickMessage('Run full fraud analysis on all open claims — rank by risk score with ML signal breakdown')">Fraud Analysis</button>
+                <button class="ctx-btn ctx-fraud" onclick="sendQuickMessage('CLM-2026-0025 Kevin Park — what are the fraud indicators and what investigation steps are needed?')">CLM-0025 Fraud</button>
+                <button class="ctx-btn ctx-ci" onclick="sendQuickMessage('Predict resolution timelines for all 7 open claims based on document completeness and claim type')">Predict Resolution</button>
+                <button class="ctx-btn ctx-ci" onclick="sendQuickMessage('Which claims should I send automated document reminders to today? Draft the messages.')">Smart Doc Reminders</button>
+                <button class="ctx-btn ctx-ci" onclick="sendQuickMessage('NLP document analysis — flag any inconsistencies in claim documents across all open claims')">NLP Doc Analysis</button>
               </div>
             </div>
 

@@ -5248,3 +5248,352 @@ window.switchPolicyTab = function(tab, tabEl) {
   }
   if (typeof _origSwitchPolicyTab === 'function') _origSwitchPolicyTab(tab, tabEl);
 };
+
+// ================================================================
+//  TASK #13 — CLAIMS INTELLIGENCE & FRAUD DETECTION
+// ================================================================
+
+// ── Per-claim intelligence data ──
+const claimIntelligenceData = {
+  'CLM-2026-0041': {
+    fraudScore: 42, fraudLevel: 'watch',
+    headline: 'High-Value $1M Claim — Enhanced Review Active',
+    triageLabel: '⚡ Expedite', triageSub: 'Missing ID docs',
+    eta: '~1 day',
+    fraudDesc: 'High-value threshold ($1M) triggered enhanced review. Policy history clean (8 years). Claimant identity docs pending — routine for large claims. Cause of death independently verified through official death registry.',
+    fraudSignals: [
+      { level:'watch', text:'$1M threshold — auto-enhanced review protocol activated' },
+      { level:'clear', text:'Policy in excellent standing since 2018 — 8 years premiums paid' },
+      { level:'clear', text:'Death certificate verified against public registry' },
+      { level:'watch', text:'Beneficiary identity documents (Susan Chen) not yet submitted' },
+    ],
+    nlp: 'Death certificate NLP-verified. Cause of death (cardiac event) consistent with age and medical history. Beneficiary name matches policy designation. Identity documents outstanding — standard delay for large claims.',
+    resFactors: [
+      { label: 'Document completeness', val: '50% (2/4 docs)' },
+      { label: 'Verification status', val: 'Death cert verified' },
+      { label: 'Predicted payout', val: '2026-04-17 to 2026-04-19' },
+      { label: 'Blocking item', val: 'Susan Chen ID + bank details' },
+    ],
+    actions: [
+      '⚡ Call Susan Chen today — request photo ID and bank account details',
+      'Mark claim as priority in claims system',
+      'Prepare compassionate follow-up script for beneficiary support',
+      'Identify if Susan Chen needs new coverage after payout (~$1M estate)',
+    ],
+  },
+  'CLM-2026-0038': {
+    fraudScore: 12, fraudLevel: 'clear',
+    headline: 'LTC Monthly Claim — Plan of Care Needed',
+    triageLabel: '📋 Doc Request', triageSub: 'Plan of care pending',
+    eta: '~8 days',
+    fraudDesc: 'No fraud indicators detected. LTC claim is standard. Policy history excellent. All medical eligibility criteria satisfied. Routine document follow-up only.',
+    fraudSignals: [
+      { level:'clear', text:'Policy in force since 2018 — continuous premiums' },
+      { level:'clear', text:'LTC eligibility certification NLP-verified' },
+      { level:'clear', text:'No claim history inconsistencies detected' },
+    ],
+    nlp: 'LTC eligibility certificate NLP-verified at 99% confidence. ADL assessment consistent with claim type. Plan of care document outstanding — auto-reminder drafted and ready to send to home health agency.',
+    resFactors: [
+      { label: 'Document completeness', val: '50% (2/4 docs)' },
+      { label: 'Blocking item', val: 'Plan of Care from home health agency' },
+      { label: 'First payment ETA', val: '2026-04-20' },
+      { label: 'Monthly recurring', val: '$1,500/month (200/day × 7.5)' },
+    ],
+    actions: [
+      'Send plan-of-care reminder to home health agency',
+      'Set up recurring monthly claim schedule once approved',
+      'Review NYC LTC costs vs benefit at next annual review',
+      'Consider annuity income supplement for any benefit gap',
+    ],
+  },
+  'CLM-2026-0035': {
+    fraudScore: 18, fraudLevel: 'clear',
+    headline: 'Disability — APS from Dr. Hernandez Blocking Progress',
+    triageLabel: '🩺 APS Needed', triageSub: 'Physician stmt pending',
+    eta: '~21 days',
+    fraudDesc: 'No fraud indicators. Standard disability claim. Back surgery on 2026-03-10 consistent with claim. Employer income verification also pending — routine.',
+    fraudSignals: [
+      { level:'clear', text:'Claim type consistent with documented medical event' },
+      { level:'clear', text:'Employment history verified — no gaps or inconsistencies' },
+      { level:'watch', text:'APS not yet received — 22 days pending (flagged for follow-up)' },
+    ],
+    nlp: 'APS form partially extracted by NLP. Diagnosis code and surgery date confirmed. Employer verification section blank — auto-reminder queued. 90-day elimination period calculated: benefits begin ~2026-06-10.',
+    resFactors: [
+      { label: 'Document completeness', val: '50% (2/4 docs)' },
+      { label: 'Blocking item', val: 'APS from Dr. Hernandez' },
+      { label: 'Elimination period ends', val: '2026-06-10' },
+      { label: 'Monthly benefit', val: '$4,200 (60% income replacement)' },
+    ],
+    actions: [
+      'Call Dr. Hernandez office directly to expedite APS',
+      'Send employer income verification reminder to Maria',
+      'Confirm elimination period end date (~June 10, 2026)',
+      'Review coverage adequacy — 60% income may be insufficient long-term',
+    ],
+  },
+  'CLM-2026-0033': {
+    fraudScore: 9, fraudLevel: 'clear',
+    headline: 'LTC File Complete — Approval Imminent',
+    triageLabel: '✅ On Track', triageSub: 'Approval imminent',
+    eta: '~3 days',
+    fraudDesc: 'All documents received and NLP-verified. ADL threshold met (2 of 6 ADLs). Facility admission confirmed. No fraud indicators. Approval expected within 5 business days.',
+    fraudSignals: [
+      { level:'clear', text:'All 4 documents received and NLP-verified at 100%' },
+      { level:'clear', text:'ADL assessment consistent with LTC eligibility requirements' },
+      { level:'clear', text:'Facility admission confirmed by care home' },
+    ],
+    nlp: 'All documents NLP-verified: facility admission, ADL assessment, LTC eligibility certification, and physician statement all match policy terms. No inconsistencies detected. Ready for approval.',
+    resFactors: [
+      { label: 'Document completeness', val: '100% (4/4 docs) ✅' },
+      { label: 'Approval expected', val: '2026-04-15' },
+      { label: 'First payment ETA', val: '2026-04-18' },
+      { label: 'Daily benefit', val: '$800/day (LTC benefit)' },
+    ],
+    actions: [
+      'No urgent action needed — monitor for approval by 2026-04-15',
+      'Notify James Whitfield of expected approval timeline',
+      'Review benefit adequacy vs NYC assisted living costs at renewal',
+    ],
+  },
+  'CLM-2026-0031': {
+    fraudScore: 7, fraudLevel: 'clear',
+    headline: 'Premium Waiver Active — Monitor Recovery Timeline',
+    triageLabel: '✅ Waiver Active', triageSub: 'Monitor recovery',
+    eta: 'Open',
+    fraudDesc: 'No fraud indicators. Waiver of premium is a standard benefit triggered by disability. Physician recovery estimate of June 2026 is consistent with condition. All documents verified.',
+    fraudSignals: [
+      { level:'clear', text:'All documents verified — complete file' },
+      { level:'clear', text:'Physician statement consistent with disability claim type' },
+      { level:'clear', text:'Premium waiver benefit confirmed in policy terms' },
+    ],
+    nlp: 'All 4 documents NLP-verified. Physician disability statement consistent with claim. Premium waiver approved through ~June 2026. Auto-reminder scheduled for reinstatement in May.',
+    resFactors: [
+      { label: 'Waiver active until', val: '~June 2026' },
+      { label: 'Annual premium waived', val: '$9,600/yr ($2,400/quarter)' },
+      { label: 'Recovery estimate', val: 'June 2026 per physician' },
+      { label: 'Reinstatement reminder', val: 'May 2026 scheduled' },
+    ],
+    actions: [
+      'Schedule premium reinstatement reminder for June 2026',
+      'Confirm Linda Morrison recovery status in May',
+      'Annual review April 15 — include waiver update in agenda',
+    ],
+  },
+  'CLM-2026-0028': {
+    fraudScore: 38, fraudLevel: 'watch',
+    headline: '⚡ URGENT — Compassionate ADB Case: Terminal Certification Pending',
+    triageLabel: '⚡ Compassionate', triageSub: 'Terminal — expedite',
+    eta: '~9 days',
+    fraudDesc: 'Watch status — not indicative of fraud. ADB for terminal illness requires expedited compassionate handling. Terminal certification pending from oncologist. NLP detected minor date discrepancy between diagnosis report and referral — requires clarification before payout.',
+    fraudSignals: [
+      { level:'watch', text:'ADB claim filed 30 days post-diagnosis — within normal range but noted' },
+      { level:'watch', text:'NLP: date discrepancy — diagnosis 2025-12-10 vs referral 2026-01-15' },
+      { level:'clear', text:'Policy in excellent standing — premiums current' },
+      { level:'clear', text:'Oncologist identity verified through medical registry' },
+    ],
+    nlp: 'Terminal illness certification pending from oncologist. NLP analysis: date discrepancy between diagnosis date in patient summary (2025-12-10) and oncologist referral form (2026-01-15). Requires a single clarifying note from Dr. Hernandez before payout can proceed.',
+    resFactors: [
+      { label: 'Document completeness', val: '50% (2/4 docs)' },
+      { label: 'Blocking item', val: 'Terminal illness certification' },
+      { label: 'NLP flag', val: 'Date discrepancy — clarification needed' },
+      { label: 'Payout ETA', val: '~9 days after certification received' },
+    ],
+    actions: [
+      '⚡ Call Dr. Hernandez office immediately — request expedited terminal certification',
+      'Request brief clarification note re: diagnosis date discrepancy',
+      'Assign senior adjuster for compassionate handling',
+      'Prepare payout wire instructions in advance',
+      'Schedule compassionate support follow-up call with Maria Gonzalez',
+    ],
+  },
+  'CLM-2026-0025': {
+    fraudScore: 78, fraudLevel: 'flagged',
+    headline: '🚨 Flagged — Policy in Pending Status at Time of Death',
+    triageLabel: '🚨 Fraud Review', triageSub: 'Coverage pending',
+    eta: 'HOLD',
+    fraudDesc: 'FLAGGED: Policy P-100350 was in Pending (not yet In-Force) status at date of death. Coverage determination is required before any payout can proceed. Three ML anomalies detected. Urgent coordination with underwriting team required.',
+    fraudSignals: [
+      { level:'flagged', text:'Policy was in Pending status at time of death — coverage not yet in force' },
+      { level:'flagged', text:'Medical records inconsistency — submitted records do not match underwriting application' },
+      { level:'flagged', text:'Contestability review: new policy — 2-year incontestability period does not apply' },
+      { level:'watch', text:'Only 1 of 4 documents received — investigation ongoing' },
+    ],
+    nlp: 'Policy application NLP-analyzed against submitted medical records. Inconsistency detected: application declared no pre-existing conditions; submitted medical records reference a prior condition. Underwriting must make binding determination before claim can be processed.',
+    resFactors: [
+      { label: 'Document completeness', val: '25% (1/4 docs)' },
+      { label: 'Status', val: 'HOLD — coverage determination needed' },
+      { label: 'ML anomalies detected', val: '3 signals flagged' },
+      { label: 'Estimated resolution', val: 'Unknown pending investigation' },
+    ],
+    actions: [
+      '⚡ Expedite medical records request from estate representatives',
+      'Coordinate with underwriting team for binding coverage determination',
+      'Document all communications with estate representatives',
+      'If coverage confirmed in force: process $250K death benefit',
+      'If coverage not in force: prepare denial letter per legal review',
+    ],
+  },
+};
+
+// ── CI Review Modal ──
+function openCIReviewModal() {
+  const overlay = document.getElementById('ci-review-overlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeCIReviewModal() {
+  const overlay = document.getElementById('ci-review-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ── Smart Doc Request ──
+function runSmartDocRequests() {
+  const btn = event.currentTarget;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> All 3 Sent!';
+    btn.style.background = 'linear-gradient(135deg, #059669, #047857)';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 3000);
+  }, 1800);
+}
+
+function sendDocRequest(claimId, recipient) {
+  const btn = event.currentTarget;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Sent!';
+    btn.style.background = 'linear-gradient(135deg, #059669, #047857)';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 2500);
+  }, 1200);
+}
+
+// ── Claims Intelligence Tab Renderer (extends renderClaimModal) ──
+// Patch switchClaimTab to support 'ci'
+const _origSwitchClaimTab = window.switchClaimTab;
+window.switchClaimTab = function(tab, tabEl) {
+  _currentClaimTab = tab;
+  document.querySelectorAll('#claim-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+  renderClaimModal(_currentClaimId, tab);
+};
+
+// Extend renderClaimModal to support 'ci' tab
+const _origRenderClaimModal = window.renderClaimModal;
+window.renderClaimModal = function(claimId, tab) {
+  if (tab !== 'ci') {
+    _origRenderClaimModal(claimId, tab);
+    return;
+  }
+  const c = claimData[claimId];
+  const ci = claimIntelligenceData[claimId];
+  if (!c || !ci) {
+    _origRenderClaimModal(claimId, 'ai');
+    return;
+  }
+
+  const bodyEl = document.getElementById('claim-modal-body');
+  const titleEl = document.getElementById('claim-modal-title');
+  const subEl = document.getElementById('claim-modal-subtitle');
+  const hdrEl = document.getElementById('claim-modal-header');
+
+  titleEl.textContent = c.id + ' — Intelligence Report';
+  subEl.textContent = c.client + ' · ' + c.type + ' · ' + ci.triageLabel;
+  if (hdrEl) hdrEl.style.borderBottomColor = '#0ea5e9';
+
+  const fraudLevelColors = { clear:'#059669', watch:'#d97706', flagged:'#dc2626' };
+  const fColor = fraudLevelColors[ci.fraudLevel] || '#0ea5e9';
+
+  const signalHTML = ci.fraudSignals.map(s => {
+    const iconMap = { clear:'fa-check-circle', watch:'fa-eye', flagged:'fa-exclamation-triangle' };
+    const colorMap = { clear:'#059669', watch:'#d97706', flagged:'#dc2626' };
+    return `<div class="ci-panel-point"><i class="fas ${iconMap[s.level]||'fa-info-circle'}" style="color:${colorMap[s.level]||'#64748b'}"></i><span>${s.text}</span></div>`;
+  }).join('');
+
+  const actionsHTML = ci.actions.map((a, i) =>
+    `<div class="ci-panel-step"><span class="ci-panel-step-num">${i+1}</span><span>${a}</span></div>`
+  ).join('');
+
+  const resHTML = ci.resFactors.map(r =>
+    `<div class="ci-res-forecast-row"><span class="ci-res-forecast-label">${r.label}</span><span class="ci-res-forecast-val">${r.val}</span></div>`
+  ).join('');
+
+  bodyEl.innerHTML = `
+    <div class="ci-panel">
+      <div class="ci-panel-header">
+        <div class="ci-panel-score-ring">
+          <span class="ci-panel-score-num" style="color:${fColor}">${ci.fraudScore}</span>
+          <span class="ci-panel-score-lbl" style="color:${fColor}">${ci.fraudLevel.toUpperCase()}</span>
+        </div>
+        <div class="ci-panel-info">
+          <div class="ci-panel-badge"><i class="fas fa-brain"></i> AI Claims Intelligence</div>
+          <div class="ci-panel-headline">${ci.headline}</div>
+          <div class="ci-panel-ref"><i class="fas fa-file-medical-alt"></i> ${c.id} · ${c.client} · ${c.type} · ETA: ${ci.eta}</div>
+        </div>
+      </div>
+      <div class="ci-panel-grid">
+        <div class="ci-panel-section">
+          <div class="ci-panel-section-title"><i class="fas fa-shield-virus"></i> Fraud Risk Analysis</div>
+          <div class="ci-panel-fraud-ring">
+            <div class="ci-fraud-score-circle ${ci.fraudLevel}">
+              <span class="ci-fsc-num">${ci.fraudScore}</span>
+              <span class="ci-fsc-lbl">${ci.fraudLevel}</span>
+            </div>
+            <div class="ci-fraud-desc">${ci.fraudDesc}</div>
+          </div>
+          ${signalHTML}
+        </div>
+        <div class="ci-panel-section">
+          <div class="ci-panel-section-title"><i class="fas fa-hourglass-half"></i> Resolution Forecast</div>
+          <div class="ci-res-forecast">
+            <div class="ci-res-forecast-title">Predictive Timeline Factors</div>
+            ${resHTML}
+          </div>
+          <div class="ci-panel-section-title" style="margin-top:14px"><i class="fas fa-file-alt"></i> NLP Document Analysis</div>
+          <div style="font-size:12px;color:#475569;line-height:1.6;background:#f0f9ff;padding:10px;border-radius:8px;border:1px solid #bae6fd">${ci.nlp}</div>
+        </div>
+      </div>
+      <div class="ci-panel-section" style="margin-top:16px">
+        <div class="ci-panel-section-title"><i class="fas fa-tasks"></i> Intelligence-Driven Actions</div>
+        ${actionsHTML}
+      </div>
+      <div class="ci-panel-cta">
+        <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
+        <button class="btn btn-outline-sm" onclick="switchClaimTab('view', document.querySelectorAll('#claim-modal-tabs .dmt-tab')[0])"><i class="fas fa-eye"></i> Back to Claim</button>
+      </div>
+    </div>
+  `;
+};
+
+// Update tabMap for claim modal to include 'ci' at index 2
+const _origOpenClaimModal = window.openClaimModal;
+window.openClaimModal = function(claimId, tab) {
+  _currentClaimId = claimId;
+  _currentClaimTab = tab || 'view';
+  const overlay = document.getElementById('claim-modal-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.querySelectorAll('#claim-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
+  const tabMap = { view: 0, ai: 1, ci: 2 };
+  const tabs = document.querySelectorAll('#claim-modal-tabs .dmt-tab');
+  const idx = tabMap[_currentClaimTab];
+  if (tabs[idx !== undefined ? idx : 0]) tabs[idx !== undefined ? idx : 0].classList.add('active');
+  renderClaimModal(_currentClaimId, _currentClaimTab);
+};
+
