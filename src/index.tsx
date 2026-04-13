@@ -3145,6 +3145,24 @@ function AIAgentsPage() {
             <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
+          {/* Underwriting Intelligence Agent — NEW */}
+          <div class="agent-card uwi-agent-card active-agent" onclick="selectAgent('underwriting-intelligence')">
+            <div class="agent-card-icon uwi-agent-icon"><i class="fas fa-brain"></i></div>
+            <div class="agent-card-info">
+              <h4>Underwriting Intelligence Agent <span class="agent-new-badge">NEW</span></h4>
+              <p>ML-powered STP scoring, NLP medical-record analysis, APS avoidance engine — auto-approves low-risk cases and eliminates 73% of unnecessary APS orders</p>
+              <div class="agent-tags">
+                <span>STP Scoring</span><span>APS Avoidance</span><span>Risk Analysis</span><span>NLP Records</span>
+              </div>
+              <div class="uwi-agent-stats">
+                <span class="uwi-ast green"><i class="fas fa-bolt"></i> 5 Auto-Approved</span>
+                <span class="uwi-ast orange"><i class="fas fa-file-medical"></i> 18 APS Avoided</span>
+                <span class="uwi-ast blue"><i class="fas fa-bullseye"></i> 94.6% Accuracy</span>
+              </div>
+            </div>
+            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
+          </div>
+
           {/* Investments agents */}
           <div class="agent-domain-label inv-label"><i class="fas fa-chart-line"></i> Investments</div>
 
@@ -3361,6 +3379,18 @@ function AIAgentsPage() {
                 <button class="ctx-btn ctx-ri" onclick="sendQuickMessage('Run full retention intelligence scan — score all 247 clients for lapse risk, renewal risk, and coverage gaps')">Full RI Scan</button>
                 <button class="ctx-btn ctx-ri" onclick="sendQuickMessage('Generate personalised save scripts for all high-risk clients based on their trigger type')">Gen Save Scripts</button>
                 <button class="ctx-btn ctx-ri" onclick="openRetentionFullReport()">Lapse Report</button>
+              </div>
+            </div>
+
+            {/* UW Intelligence */}
+            <div class="ctx-group uwi-ctx-group">
+              <span class="ctx-group-label uwi-ctx-label"><i class="fas fa-brain"></i> UW Intelligence</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-uwi" onclick="openUWModal('UW-2026-0018')">Alex Rivera STP 88 ⚡</button>
+                <button class="ctx-btn ctx-uwi" onclick="openUWModal('UW-2026-0012')">Thomas Wright STP 91 ✅</button>
+                <button class="ctx-btn ctx-uwi" onclick="sendQuickMessage('Which underwriting cases qualify for auto-approval today? Provide STP scores and next steps.')">Auto-Approve Today</button>
+                <button class="ctx-btn ctx-uwi" onclick="openAPSAvoidance()">APS Engine</button>
+                <button class="ctx-btn ctx-uwi" onclick="openUWIReport()">UW Intel Report</button>
               </div>
             </div>
 
@@ -3584,6 +3614,48 @@ function UnderwritingPage() {
           <div class="eapp-uw-stat"><span class="eapp-uw-val purple">4 min</span><span class="eapp-uw-lbl">Avg. Enrollment</span></div>
         </div>
         <button class="eapp-uw-launch-btn" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> New E-App</button>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          AI UNDERWRITING INTELLIGENCE BANNER  (Task #15a)
+          ══════════════════════════════════════════════════ */}
+      <div class="uwi-banner">
+        <div class="uwi-banner-left">
+          <div class="uwi-banner-icon">
+            <i class="fas fa-brain"></i>
+            <span class="uwi-live-badge">LIVE</span>
+          </div>
+          <div class="uwi-banner-info">
+            <div class="uwi-banner-title">AI Underwriting Intelligence Engine <span class="uwi-pulse-dot"></span></div>
+            <div class="uwi-banner-sub">ML risk scoring · NLP medical record analysis · APS avoidance engine · STP optimization · 94.6% accuracy vs 89% manual</div>
+          </div>
+        </div>
+        <div class="uwi-banner-chips">
+          <div class="uwi-chip green">
+            <i class="fas fa-bolt"></i>
+            <span class="uwi-chip-val">5</span>
+            <span class="uwi-chip-lbl">Auto-Approved</span>
+          </div>
+          <div class="uwi-chip orange">
+            <i class="fas fa-file-medical"></i>
+            <span class="uwi-chip-val">18</span>
+            <span class="uwi-chip-lbl">APS Avoided</span>
+          </div>
+          <div class="uwi-chip blue">
+            <i class="fas fa-tachometer-alt"></i>
+            <span class="uwi-chip-val">94.6%</span>
+            <span class="uwi-chip-lbl">AI Accuracy</span>
+          </div>
+          <div class="uwi-chip purple">
+            <i class="fas fa-clock"></i>
+            <span class="uwi-chip-val">4.2 hrs</span>
+            <span class="uwi-chip-lbl">Avg Decision</span>
+          </div>
+        </div>
+        <div class="uwi-banner-actions">
+          <button class="uwi-btn-primary" onclick="openUWIReport()"><i class="fas fa-chart-bar"></i> UW Intel Report</button>
+          <button class="uwi-btn-secondary" onclick="openAPSAvoidance()"><i class="fas fa-file-medical-alt"></i> APS Engine</button>
+        </div>
       </div>
 
       {/* ── Pipeline Board ── */}
@@ -3876,6 +3948,90 @@ function UnderwritingPage() {
       </div>{/* end uw-pipeline */}
 
       {/* ══════════════════════════════════════════════════
+          APS AVOIDANCE ENGINE PANEL  (Task #15d)
+          ══════════════════════════════════════════════════ */}
+      <div class="aps-avoidance-panel" id="aps-avoidance-panel" style="display:none">
+        <div class="aps-panel-header">
+          <div class="aps-panel-title-group">
+            <div class="aps-panel-icon"><i class="fas fa-file-medical-alt"></i></div>
+            <div>
+              <div class="aps-panel-title">APS Avoidance Engine <span class="aps-live-badge">LIVE</span></div>
+              <div class="aps-panel-sub">AI substitutes lab + MIB + Rx evidence to eliminate unnecessary APS orders · Saves avg. 14 days per case · $320 per APS avoided</div>
+            </div>
+          </div>
+          <button class="aps-panel-close" onclick="closeAPSAvoidance()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="aps-kpi-strip">
+          <div class="aps-kpi-card green"><div class="aps-kpi-val">18</div><div class="aps-kpi-lbl">APS Avoided This Month</div></div>
+          <div class="aps-kpi-card blue"><div class="aps-kpi-val">$5,760</div><div class="aps-kpi-lbl">Cost Savings (@ $320/APS)</div></div>
+          <div class="aps-kpi-card purple"><div class="aps-kpi-val">14 days</div><div class="aps-kpi-lbl">Avg. Time Saved / Case</div></div>
+          <div class="aps-kpi-card gold"><div class="aps-kpi-val">94.6%</div><div class="aps-kpi-lbl">Avoidance Accuracy</div></div>
+        </div>
+        <div class="aps-cases-title"><i class="fas fa-check-circle"></i> Recently APS-Eliminated Cases</div>
+        <div class="aps-cases-list">
+          <div class="aps-case-row">
+            <div class="aps-case-client"><div class="aps-case-avatar">AR</div><div><div class="aps-case-name">Alex Rivera</div><div class="aps-case-prod">Whole Life $500K · STP 88</div></div></div>
+            <div class="aps-case-evidence"><span class="aps-ev-tag">Rx Clear</span><span class="aps-ev-tag">MIB Clear</span><span class="aps-ev-tag">BMI 22.4</span></div>
+            <div class="aps-case-outcome"><span class="aps-outcome-badge green">APS Eliminated</span><span class="aps-outcome-note">Auto-Approve eligible · saves 14 days</span></div>
+          </div>
+          <div class="aps-case-row">
+            <div class="aps-case-client"><div class="aps-case-avatar">MS</div><div><div class="aps-case-name">Michael Santos</div><div class="aps-case-prod">Universal Life $750K · STP 79</div></div></div>
+            <div class="aps-case-evidence"><span class="aps-ev-tag">Rx Reviewed</span><span class="aps-ev-tag">MIB Clear</span><span class="aps-ev-tag">Lab Pending</span></div>
+            <div class="aps-case-outcome"><span class="aps-outcome-badge green">APS Eliminated</span><span class="aps-outcome-note">Lab substituted for APS · Near auto-approve</span></div>
+          </div>
+          <div class="aps-case-row">
+            <div class="aps-case-client"><div class="aps-case-avatar">RA</div><div><div class="aps-case-name">Rachel Adams</div><div class="aps-case-prod">Whole Life $300K · STP 85</div></div></div>
+            <div class="aps-case-evidence"><span class="aps-ev-tag">All Clear</span><span class="aps-ev-tag">Age 29</span><span class="aps-ev-tag">No Flags</span></div>
+            <div class="aps-case-outcome"><span class="aps-outcome-badge green">APS Eliminated</span><span class="aps-outcome-note">Full evidence clean · Auto-approve ready</span></div>
+          </div>
+          <div class="aps-case-row">
+            <div class="aps-case-client"><div class="aps-case-avatar">TW</div><div><div class="aps-case-name">Thomas Wright</div><div class="aps-case-prod">Whole Life $1M · STP 91</div></div></div>
+            <div class="aps-case-evidence"><span class="aps-ev-tag">Rx Clear</span><span class="aps-ev-tag">Lab Done</span><span class="aps-ev-tag">All Clear</span></div>
+            <div class="aps-case-outcome"><span class="aps-outcome-badge green">APS Eliminated</span><span class="aps-outcome-note">Medical exam + labs fully substituted · STP 91</span></div>
+          </div>
+          <div class="aps-case-row aps-row-flag">
+            <div class="aps-case-client"><div class="aps-case-avatar">JK</div><div><div class="aps-case-name">John Kim</div><div class="aps-case-prod">Disability Ins. · STP 61</div></div></div>
+            <div class="aps-case-evidence"><span class="aps-ev-tag ev-flag">MIB Flag</span><span class="aps-ev-tag ev-flag">DM Rx</span><span class="aps-ev-tag ev-flag">Prior DI Claim</span></div>
+            <div class="aps-case-outcome"><span class="aps-outcome-badge orange">APS Required</span><span class="aps-outcome-note">Evidence gaps cannot be substituted · Manual review</span></div>
+          </div>
+          <div class="aps-case-row aps-row-flag">
+            <div class="aps-case-client"><div class="aps-case-avatar">JC</div><div><div class="aps-case-name">Julia Chen</div><div class="aps-case-prod">Annuity Deferred · STP 44</div></div></div>
+            <div class="aps-case-evidence"><span class="aps-ev-tag ev-flag">MIB Flag</span><span class="aps-ev-tag ev-flag">Lab Flag</span><span class="aps-ev-tag ev-flag">Age 58</span></div>
+            <div class="aps-case-outcome"><span class="aps-outcome-badge orange">APS Required</span><span class="aps-outcome-note">Multiple flags at age 58 · Full medical review needed</span></div>
+          </div>
+        </div>
+        <div class="aps-panel-footer">
+          <button class="aps-footer-btn" onclick="runUWScan()"><i class="fas fa-sync-alt"></i> Re-run APS Analysis</button>
+          <button class="aps-footer-btn primary" onclick="openUWIReport()"><i class="fas fa-chart-bar"></i> Full UW Intelligence Report</button>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          UW INTELLIGENCE FULL REPORT MODAL  (Task #15)
+          ══════════════════════════════════════════════════ */}
+      <div class="uwi-report-overlay" id="uwi-report-overlay" onclick="closeUWIReport()" style="display:none">
+        <div class="uwi-report-modal" onclick="event.stopPropagation()">
+          <div class="uwi-report-header">
+            <div class="uwi-report-header-left">
+              <div class="uwi-report-icon"><i class="fas fa-brain"></i></div>
+              <div>
+                <div class="uwi-report-title">AI Underwriting Intelligence Report</div>
+                <div class="uwi-report-sub">Real-time · 11 active cases · Last scan: just now · 94.6% accuracy</div>
+              </div>
+            </div>
+            <button class="uwi-report-close" onclick="closeUWIReport()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="uwi-report-tabs" id="uwi-report-tabs">
+            <button class="uwi-rtab active" onclick="switchUWIReportTab('overview',this)"><i class="fas fa-tachometer-alt"></i> Overview</button>
+            <button class="uwi-rtab" onclick="switchUWIReportTab('pipeline',this)"><i class="fas fa-layer-group"></i> Pipeline</button>
+            <button class="uwi-rtab" onclick="switchUWIReportTab('aps',this)"><i class="fas fa-file-medical-alt"></i> APS Avoidance</button>
+            <button class="uwi-rtab" onclick="switchUWIReportTab('accuracy',this)"><i class="fas fa-bullseye"></i> Accuracy</button>
+          </div>
+          <div class="uwi-report-body" id="uwi-report-body"></div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
           E-APP WIZARD MODAL
           ══════════════════════════════════════════════════ */}
       <div class="eapp-overlay" id="eapp-overlay" onclick="closeEApp(event)" style="display:none">
@@ -3964,6 +4120,7 @@ function UnderwritingPage() {
                 <button class="dmt-tab active" onclick="switchUWTab('overview',this)"><i class="fas fa-file-alt"></i> Overview</button>
                 <button class="dmt-tab" onclick="switchUWTab('evidence',this)"><i class="fas fa-search-plus"></i> Evidence</button>
                 <button class="dmt-tab ai-tab" onclick="switchUWTab('ai',this)"><i class="fas fa-robot"></i> AI Score</button>
+                <button class="dmt-tab uwi-tab" onclick="switchUWTab('intelligence',this)"><i class="fas fa-brain"></i> UW Intel</button>
               </div>
               <button class="detail-modal-close" onclick="closeUWModal()"><i class="fas fa-times"></i></button>
             </div>

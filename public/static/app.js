@@ -6003,3 +6003,447 @@ function closeRetentionEmailModal(e) {
   if (el2) el2.addEventListener('click', function(e){ if(e.target===el2) closeRetentionEmailModal(e); });
 })();
 
+
+/* =====================================================================
+   TASK #15 — AI UNDERWRITING INTELLIGENCE & STP OPTIMIZATION
+   ===================================================================== */
+
+/* ── UW Intelligence tab in Case Detail Modal ── */
+(function(){
+  // Map each case to its UW intelligence analysis
+  const uwiIntelData = {
+    'UW-2026-0018': {
+      stpClass: 'stp-high', recClass: 'auto', recLabel: '⚡ Auto-Approve Eligible',
+      recNote: 'STP score 88 — all key evidence clear. Pending credit report only. Expected binding within 24 hrs.',
+      signals: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Age 34 · Preferred Plus age band — excellent mortality profile' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Rx History: No significant medications in past 5 years — clean slate' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'MIB: No adverse records, no prior declined applications' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'BMI 22.4 — optimal range, no extra mortality loading required' },
+        { icon: 'fa-exclamation-triangle', color: '#d97706', text: 'Credit pending — unlikely to change decision, ETA 24 hrs' }
+      ],
+      nextSteps: ['Wait for credit report clearance (ETA Apr 11)', 'Auto-bind at Preferred Plus rate', 'Send E-App for e-signature', 'Issue policy within 24 hrs of credit clearance'],
+      apsStatus: 'Eliminated — STP score ≥ 75, no medical flags', timeSaved: '14 days'
+    },
+    'UW-2026-0017': {
+      stpClass: 'stp-high', recClass: 'review', recLabel: '🔍 Review Pending',
+      recNote: 'STP 82 — Preferred rate eligible. MVR and credit pending. Controlled hypertension acceptable per NYL guidelines.',
+      signals: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Controlled hypertension (Lisinopril 10mg) — standard eligible per NYL guidelines' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'MIB clear — no prior declined applications or adverse history' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'BMI 24.1 — Preferred range' },
+        { icon: 'fa-exclamation-triangle', color: '#d97706', text: 'MVR pending — single violation could adjust to Standard (not disqualifying)' },
+        { icon: 'fa-exclamation-triangle', color: '#d97706', text: '$1M face value requires full evidence completion before binding' }
+      ],
+      nextSteps: ['Await MVR (expected today)', 'Confirm credit report (24 hrs)', 'Finalize Preferred rate', 'Issue same day once evidence complete'],
+      apsStatus: 'Eliminated — HTN well-controlled, no APS required', timeSaved: '14 days'
+    },
+    'UW-2026-0016': {
+      stpClass: 'stp-low', recClass: 'aps', recLabel: '⚠ APS Required',
+      recNote: 'STP 61 — MIB flag and DM Rx history require physician statement. Prior DI claim (2021) needs medical context.',
+      signals: [
+        { icon: 'fa-exclamation-triangle', color: '#dc2626', text: 'Metformin (Type 2 DM) — flagged for APS review, DM affects DI eligibility' },
+        { icon: 'fa-exclamation-triangle', color: '#dc2626', text: 'MIB flag: Prior DI claim 2021 (back injury) — requires context and medical records' },
+        { icon: 'fa-exclamation-triangle', color: '#d97706', text: 'BMI 26.8 — borderline for DI preferred classification' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Rx checked — only DM medication, no other significant history' },
+        { icon: 'fa-minus-circle', color: '#9ca3af', text: 'MVR and credit pending — order placed' }
+      ],
+      nextSteps: ['Order APS from primary care physician', 'Request medical records for 2021 DI claim', 'Await MVR and credit reports', 'Manual underwriting review required'],
+      apsStatus: 'Required — MIB flag + DM Rx cannot be substituted', timeSaved: 'N/A'
+    },
+    'UW-2026-0015': {
+      stpClass: 'stp-high', recClass: 'auto', recLabel: '⚡ Near Auto-Approve',
+      recNote: 'STP 79 — one lab result pending. Once labs clear, auto-approve threshold likely met. APS eliminated via lab substitution.',
+      signals: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Rx, MIB, MVR all clear — no adverse findings' },
+        { icon: 'fa-clock', color: '#d97706', text: 'Lab results pending — ETA 48 hrs. All other evidence clean.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Age 47 — UL $750K within standard mortality table without APS' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Hot lead — agent reports strong client motivation to bind quickly' }
+      ],
+      nextSteps: ['Expedite lab order (client requested)', 'Pre-clear for auto-approve pending labs', 'Target same-week binding', 'Prepare E-App for signature upon lab clearance'],
+      apsStatus: 'Eliminated — Lab substituted for APS per NYL guidelines', timeSaved: '14 days'
+    },
+    'UW-2026-0014': {
+      stpClass: 'stp-low', recClass: 'aps', recLabel: '⚠ APS Required',
+      recNote: 'STP 44 — multiple flags at age 58 for annuity. MIB flag + lab abnormality require full medical review.',
+      signals: [
+        { icon: 'fa-exclamation-triangle', color: '#dc2626', text: 'MIB flag — undisclosed prior condition suspected. Full APS required.' },
+        { icon: 'fa-exclamation-triangle', color: '#dc2626', text: 'Lab abnormality — elevated liver enzymes flagged. Requires physician review.' },
+        { icon: 'fa-exclamation-triangle', color: '#d97706', text: 'Age 58 — multiple flags at this age require conservative UW approach' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Rx clean — no significant prescription drug history' }
+      ],
+      nextSteps: ['Order APS from primary care and specialist', 'Clarify MIB flag with applicant', 'Lab follow-up required from ordering physician', 'Full manual UW review — 15–21 day timeline'],
+      apsStatus: 'Required — Multiple flags at age 58, cannot substitute', timeSaved: 'N/A'
+    },
+    'UW-2026-0013': {
+      stpClass: 'stp-high', recClass: 'auto', recLabel: '⚡ Auto-Approve Eligible',
+      recNote: 'STP 85 — all evidence complete and clean. Age 29, no flags. Ready for immediate auto-approval.',
+      signals: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'All 4 evidence items complete and clear — Rx, MIB, MVR, Credit' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Age 29 — Preferred Plus age band, excellent mortality profile' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'No prior claims, no adverse MIB history, clean MVR' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Whole Life $300K — within auto-approve face value limits for age 29' }
+      ],
+      nextSteps: ['Auto-approve — all conditions met', 'Generate E-App for e-signature immediately', 'Target same-day binding', 'Client notification via agent portal'],
+      apsStatus: 'Eliminated — All evidence clean at age 29', timeSaved: '14 days'
+    },
+    'UW-2026-0012': {
+      stpClass: 'stp-high', recClass: 'auto', recLabel: '⚡ STP Auto-Approve',
+      recNote: 'STP 91 — top-tier score. Medical exam and all labs complete. $1M WL — highest-value auto-approval in current pipeline.',
+      signals: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Medical exam completed — all vitals within Preferred Plus range' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Labs complete and clean — cholesterol, glucose, liver enzymes all normal' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'No Rx, no MIB flags, clean MVR — ideal low-risk profile' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Age 52 — appropriate for $1M WL without APS given clean medical exam' }
+      ],
+      nextSteps: ['Final UW sign-off — AI recommends immediate approval', 'Generate E-App now', 'Notify agent for signature coordination', 'Issue $1M WL policy — highest-value STP in Q2 2026'],
+      apsStatus: 'Eliminated — Medical exam + labs substitute fully', timeSaved: '14 days'
+    },
+    'UW-2026-0011': {
+      stpClass: 'stp-med', recClass: 'review', recLabel: '🔍 Manual Review Needed',
+      recNote: 'STP 67 — lab abnormality requires APS for VUL. Manual UW review needed before decision.',
+      signals: [
+        { icon: 'fa-exclamation-triangle', color: '#dc2626', text: 'Lab flag — abnormal result requires physician APS to clarify' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Rx and MIB clean — no prior adverse history' },
+        { icon: 'fa-exclamation-triangle', color: '#d97706', text: 'VUL $250K — lab flag at this product level requires manual review' },
+        { icon: 'fa-clock', color: '#d97706', text: 'APS ordered — ETA 7–14 days depending on physician response' }
+      ],
+      nextSteps: ['Await APS from physician (7–14 days)', 'Manual UW review once APS received', 'Explore standard rate eligibility if lab explained', 'Keep client informed of timeline'],
+      apsStatus: 'Required — Lab flag cannot be substituted for VUL', timeSaved: 'N/A'
+    },
+    'UW-2026-0010': {
+      stpClass: 'stp-high', recClass: 'auto', recLabel: '✅ Approve Recommended',
+      recNote: 'STP 78 — all evidence complete. AI recommends immediate approval. Decision due today — urgent.',
+      signals: [
+        { icon: 'fa-exclamation-circle', color: '#dc2626', text: 'Decision due TODAY — urgent. Delay risks client frustration.' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'All evidence complete — Rx, MIB, MVR, Credit all clear' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Age 33, Term $300K — low-risk profile, standard rate eligible' },
+        { icon: 'fa-bolt', color: '#2563eb', text: 'STP 78 — above review threshold, AI recommends approval' }
+      ],
+      nextSteps: ['Issue approval TODAY — all conditions met', 'Generate E-App immediately', 'Agent notification for urgent signature coordination', 'Bind policy before end of business Apr 13'],
+      apsStatus: 'Eliminated — All evidence complete, no medical flags', timeSaved: '14 days'
+    },
+    'UW-2026-0009': {
+      stpClass: 'stp-high', recClass: 'issued', recLabel: '✅ Approved — Awaiting Sig.',
+      recNote: 'STP 99 — highest score in portfolio. WL Rider Add-on for existing top client. AI 100% confidence.',
+      signals: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Existing client (Linda Morrison) — full medical history on file, all clean' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Rider add-on only — reduced underwriting scope, all evidence satisfied' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'STP 99 — maximum AI confidence score' },
+        { icon: 'fa-file-signature', color: '#2563eb', text: 'E-App generated (EA-UW-009) — awaiting client e-signature' }
+      ],
+      nextSteps: ['Follow up with Linda on E-App signature (EA-UW-009)', 'Expected issue within 24 hrs of signature', 'Update CRM with new rider details'],
+      apsStatus: 'Eliminated — Existing client, rider only', timeSaved: '14 days'
+    },
+    'UW-2026-0008': {
+      stpClass: 'stp-high', recClass: 'issued', recLabel: '✅ Approved — Awaiting Sig.',
+      recNote: 'STP 86 — AI 87% confidence. DI policy increase for existing client. Clean evidence.',
+      signals: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'Existing client — medical history verified, all evidence clean' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'DI increase within existing coverage limits — reduced UW scope' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'All 4 evidence items complete (Rx, MIB, MVR, Credit)' },
+        { icon: 'fa-file-signature', color: '#2563eb', text: 'E-App generated (EA-UW-008) — pending Maria e-signature' }
+      ],
+      nextSteps: ['Follow up with Maria on E-App signature (EA-UW-008)', 'Coordinate with claim team re: open ADB claim', 'Issue DI increase upon signature'],
+      apsStatus: 'Eliminated — Existing client, DI increase only', timeSaved: '14 days'
+    },
+    'UW-2026-0007': {
+      stpClass: 'stp-high', recClass: 'issued', recLabel: '✅ Issued — STP 1.8 hrs',
+      recNote: 'STP 96 — issued in 1.8 hrs. Fastest STP case in Q2 2026. Robert Chen VUL rider add-on.',
+      signals: [
+        { icon: 'fa-trophy', color: '#d97706', text: 'Fastest STP case Q2 2026 — issued in 1.8 hrs (vs 8-day manual average)' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'All evidence complete and clean — fully automated processing' },
+        { icon: 'fa-bolt', color: '#2563eb', text: 'STP 96 — near-perfect score, no manual intervention required' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'Policy active — $1,800/yr VUL rider successfully issued Apr 2' }
+      ],
+      nextSteps: ['No action required — policy issued Apr 2', 'Update client record with new rider details', 'Schedule annual review with Robert Chen'],
+      apsStatus: 'Eliminated — STP 96, all evidence clean', timeSaved: '14 days'
+    },
+    'UW-2026-0006': {
+      stpClass: 'stp-high', recClass: 'issued', recLabel: '✅ Issued — STP 3.1 hrs',
+      recNote: 'STP 94 — issued in 3.1 hrs. James Whitfield LTC Rider. All evidence complete, clean APS-free processing.',
+      signals: [
+        { icon: 'fa-check-circle', color: '#059669', text: 'LTC Rider issued Mar 30 — $4,400/yr, STP 94' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'All labs, Rx, MIB, MVR complete and clean' },
+        { icon: 'fa-bolt', color: '#2563eb', text: '3.1 hrs end-to-end vs 8-day manual baseline — 98% time reduction' },
+        { icon: 'fa-check-circle', color: '#059669', text: 'No APS required — full evidence substitution successful' }
+      ],
+      nextSteps: ['No action required — policy issued Mar 30', 'Update James Whitfield record with LTC rider', 'Consider additional coverage review at next annual meeting'],
+      apsStatus: 'Eliminated — All labs substituted APS successfully', timeSaved: '14 days'
+    }
+  };
+
+  // Hook into the UW modal tab switching to handle 'intelligence' tab
+  const _origSwitchUWTab = window.switchUWTab;
+  window.switchUWTab = function(tab, btn) {
+    if (tab === 'intelligence') {
+      document.querySelectorAll('#uw-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderUWIntelligenceTab();
+      return;
+    }
+    if (_origSwitchUWTab) _origSwitchUWTab(tab, btn);
+  };
+
+  window.renderUWIntelligenceTab = function() {
+    const body = document.getElementById('uw-modal-body');
+    if (!body || !window._currentUWCase) return;
+    const c = uwData[window._currentUWCase];
+    const intel = uwiIntelData[window._currentUWCase];
+    if (!c || !intel) {
+      body.innerHTML = '<div style="padding:30px;text-align:center;color:#94a3b8"><i class="fas fa-brain" style="font-size:32px;margin-bottom:10px"></i><br>Intelligence analysis not available for this case</div>';
+      return;
+    }
+
+    const stpClass = intel.stpClass;
+    const signals = intel.signals.map(s => `
+      <div class="uw-intel-signal-row">
+        <i class="fas ${s.icon}" style="color:${s.color}"></i>
+        <span>${s.text}</span>
+      </div>`).join('');
+
+    const evPills = c.evidence.map(ev => {
+      const cls = ev.status === 'done' ? 'done' : ev.status === 'flag' ? 'flag' : ev.status === 'na' ? 'na' : 'pending';
+      const icon = ev.status === 'done' ? 'fa-check-circle' : ev.status === 'flag' ? 'fa-exclamation-triangle' : ev.status === 'na' ? 'fa-minus-circle' : 'fa-hourglass-half';
+      return `<div class="uw-intel-ev-pill ${cls}"><i class="fas ${icon}"></i> ${ev.name}</div>`;
+    }).join('');
+
+    const steps = intel.nextSteps.map((s, i) => `
+      <div class="uw-intel-step">
+        <span class="uw-intel-step-num">${i + 1}</span>
+        <span>${s}</span>
+      </div>`).join('');
+
+    body.innerHTML = `
+      <div class="uw-intel-panel">
+        <div class="uw-intel-top">
+          <div class="uw-intel-card">
+            <div class="uw-intel-card-title"><i class="fas fa-tachometer-alt"></i> STP Intelligence Score</div>
+            <div class="uw-intel-stp-gauge">
+              <div class="uw-intel-stp-circle ${stpClass}">
+                <span class="uw-intel-stp-val">${c.stpScore}</span>
+                <span class="uw-intel-stp-lbl">STP</span>
+              </div>
+              <div class="uw-intel-stp-info">
+                <div class="uw-intel-stp-rec ${intel.recClass}">${intel.recLabel}</div>
+                <div class="uw-intel-stp-note">${intel.recNote}</div>
+              </div>
+            </div>
+          </div>
+          <div class="uw-intel-card">
+            <div class="uw-intel-card-title"><i class="fas fa-file-medical"></i> APS Avoidance Status</div>
+            <div style="font-size:13px;color:#374151;line-height:1.5;margin-bottom:8px">${intel.apsStatus}</div>
+            ${intel.timeSaved !== 'N/A'
+              ? `<div style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;color:#15803d;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700">
+                  <i class="fas fa-clock"></i> ${intel.timeSaved} saved vs manual APS</div>`
+              : `<div style="display:inline-flex;align-items:center;gap:6px;background:#ffedd5;color:#c2410c;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700">
+                  <i class="fas fa-exclamation-circle"></i> APS Required — Cannot Substitute</div>`}
+          </div>
+        </div>
+        <div class="uw-intel-evidence-section">
+          <div class="uw-intel-section-title"><i class="fas fa-search-plus"></i> Evidence Intelligence Summary</div>
+          <div class="uw-intel-ev-grid">${evPills}</div>
+        </div>
+        <div class="uw-intel-evidence-section">
+          <div class="uw-intel-section-title"><i class="fas fa-signal"></i> AI Risk Signals</div>
+          <div class="uw-intel-signals">${signals}</div>
+        </div>
+        <div class="uw-intel-action-plan">
+          <div class="uw-intel-section-title"><i class="fas fa-list-ol"></i> AI Action Plan</div>
+          <div class="uw-intel-action-banner ${intel.recClass}">
+            <i class="fas fa-robot"></i> AI Recommendation: ${intel.recLabel}
+          </div>
+          <div class="uw-intel-steps">${steps}</div>
+        </div>
+      </div>
+    `;
+  };
+})();
+
+/* ── APS Avoidance Panel toggle ── */
+function openAPSAvoidance() {
+  const panel = document.getElementById('aps-avoidance-panel');
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') {
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+function closeAPSAvoidance() {
+  const panel = document.getElementById('aps-avoidance-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+/* ── UW Intelligence Full Report Modal ── */
+function openUWIReport() {
+  const overlay = document.getElementById('uwi-report-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  renderUWIReport('overview');
+}
+function closeUWIReport() {
+  const overlay = document.getElementById('uwi-report-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function switchUWIReportTab(tab, btn) {
+  document.querySelectorAll('#uwi-report-tabs .uwi-rtab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderUWIReport(tab);
+}
+
+function renderUWIReport(tab) {
+  const body = document.getElementById('uwi-report-body');
+  if (!body) return;
+
+  if (tab === 'overview') {
+    body.innerHTML = `
+      <div class="uwi-rpt-kpi-grid">
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val green">5</div><div class="uwi-rpt-kpi-lbl">Auto-Approved (MTD)</div><div class="uwi-rpt-kpi-delta"><i class="fas fa-arrow-up"></i> +2 vs last month</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val blue">73%</div><div class="uwi-rpt-kpi-lbl">STP Rate</div><div class="uwi-rpt-kpi-delta"><i class="fas fa-arrow-up"></i> +18% QoQ</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val purple">18</div><div class="uwi-rpt-kpi-lbl">APS Avoided / Month</div><div class="uwi-rpt-kpi-delta"><i class="fas fa-dollar-sign"></i> $5,760 saved</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val gold">4.2 hrs</div><div class="uwi-rpt-kpi-lbl">Avg Decision Time</div><div class="uwi-rpt-kpi-delta"><i class="fas fa-arrow-down"></i> vs 8 days manual</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val green">94.6%</div><div class="uwi-rpt-kpi-lbl">AI Accuracy</div><div class="uwi-rpt-kpi-delta"><i class="fas fa-robot"></i> vs 89% manual</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val red">2</div><div class="uwi-rpt-kpi-lbl">APS Required</div><div class="uwi-rpt-kpi-delta"><i class="fas fa-info-circle"></i> John Kim, Julia Chen</div></div>
+      </div>
+      <div class="uwi-rpt-section-title"><i class="fas fa-chart-bar"></i> STP Distribution</div>
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px;background:#dcfce7;border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:26px;font-weight:800;color:#059669">7</div>
+          <div style="font-size:12px;color:#15803d;font-weight:600">Auto-Approve (STP ≥ 80)</div>
+        </div>
+        <div style="flex:1;min-width:140px;background:#fef9c3;border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:26px;font-weight:800;color:#d97706">2</div>
+          <div style="font-size:12px;color:#92400e;font-weight:600">Review (65–79)</div>
+        </div>
+        <div style="flex:1;min-width:140px;background:#fee2e2;border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:26px;font-weight:800;color:#dc2626">2</div>
+          <div style="font-size:12px;color:#991b1b;font-weight:600">APS Required (< 65)</div>
+        </div>
+      </div>
+      <div class="uwi-rpt-section-title"><i class="fas fa-trophy"></i> Top STP Wins This Quarter</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0">
+          <div><strong>Robert Chen — VUL Rider</strong><div style="font-size:12px;color:#64748b">STP 96 · Issued in 1.8 hrs · $1,800/yr</div></div>
+          <span style="background:#dcfce7;color:#15803d;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:700">⚡ 1.8 hrs</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0">
+          <div><strong>James Whitfield — LTC Rider</strong><div style="font-size:12px;color:#64748b">STP 94 · Issued in 3.1 hrs · $4,400/yr</div></div>
+          <span style="background:#dcfce7;color:#15803d;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:700">⚡ 3.1 hrs</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0">
+          <div><strong>Linda Morrison — WL Rider Add-on</strong><div style="font-size:12px;color:#64748b">STP 99 · AI 100% confidence · $1,200/yr</div></div>
+          <span style="background:#dcfce7;color:#15803d;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:700">⚡ Auto</span>
+        </div>
+      </div>
+    `;
+  }
+
+  else if (tab === 'pipeline') {
+    const cases = [
+      { id: 'UW-2026-0018', client: 'Alex Rivera',    product: 'Whole Life $500K',  stp: 88,  stage: 'Received',  rec: 'auto',   recLbl: 'Auto-Approve' },
+      { id: 'UW-2026-0017', client: 'Nancy Foster',   product: 'Term Life $1M',     stp: 82,  stage: 'Received',  rec: 'review', recLbl: 'Review' },
+      { id: 'UW-2026-0016', client: 'John Kim',       product: 'Disability Ins.',   stp: 61,  stage: 'Received',  rec: 'aps',    recLbl: 'APS Required' },
+      { id: 'UW-2026-0015', client: 'Michael Santos', product: 'Universal Life $750K', stp: 79, stage: 'Evidence', rec: 'auto',  recLbl: 'Near Auto' },
+      { id: 'UW-2026-0014', client: 'Julia Chen',     product: 'Annuity Deferred',  stp: 44,  stage: 'Evidence',  rec: 'aps',    recLbl: 'APS Required' },
+      { id: 'UW-2026-0013', client: 'Rachel Adams',   product: 'Whole Life $300K',  stp: 85,  stage: 'Evidence',  rec: 'auto',   recLbl: 'Auto-Approve' },
+      { id: 'UW-2026-0012', client: 'Thomas Wright',  product: 'Whole Life $1M',    stp: 91,  stage: 'AI Review', rec: 'auto',   recLbl: 'Auto-Approve' },
+      { id: 'UW-2026-0011', client: 'Grace Lee',      product: 'VUL $250K',         stp: 67,  stage: 'AI Review', rec: 'review', recLbl: 'Manual Review' },
+      { id: 'UW-2026-0010', client: 'David Thompson', product: 'Term Life $300K',   stp: 78,  stage: 'Decision',  rec: 'auto',   recLbl: 'Approve Now' },
+      { id: 'UW-2026-0009', client: 'Linda Morrison', product: 'WL Rider Add-on',   stp: 99,  stage: 'Approved',  rec: 'issued', recLbl: 'Awaiting Sig.' },
+      { id: 'UW-2026-0008', client: 'Maria Gonzalez', product: 'DI Policy Increase', stp: 86, stage: 'Approved',  rec: 'issued', recLbl: 'Awaiting Sig.' }
+    ];
+    const rows = cases.map(c => {
+      const cls = c.stp >= 80 ? 'high' : c.stp >= 65 ? 'med' : 'low';
+      return `<tr>
+        <td><strong>${c.id}</strong></td>
+        <td>${c.client}</td>
+        <td style="color:#64748b">${c.product}</td>
+        <td><span class="uwi-rpt-stp-chip ${cls}">${c.stp}</span></td>
+        <td style="color:#64748b">${c.stage}</td>
+        <td><span class="uwi-rpt-stp-chip ${c.rec === 'auto' ? 'high' : c.rec === 'review' ? 'med' : c.rec === 'issued' ? 'high' : 'low'}">${c.recLbl}</span></td>
+        <td><button style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer" onclick="openUWModal('${c.id}')">View</button></td>
+      </tr>`;
+    }).join('');
+    body.innerHTML = `
+      <div class="uwi-rpt-section-title"><i class="fas fa-layer-group"></i> Full Pipeline — 11 Active Cases</div>
+      <table class="uwi-rpt-table">
+        <thead><tr><th>Case ID</th><th>Client</th><th>Product</th><th>STP</th><th>Stage</th><th>AI Recommendation</th><th>Action</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  else if (tab === 'aps') {
+    body.innerHTML = `
+      <div class="uwi-rpt-section-title"><i class="fas fa-file-medical-alt"></i> APS Avoidance Performance</div>
+      <div class="uwi-rpt-kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val green">18</div><div class="uwi-rpt-kpi-lbl">APS Avoided MTD</div><div class="uwi-rpt-kpi-delta">+4 vs last month</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val blue">$5,760</div><div class="uwi-rpt-kpi-lbl">Cost Saved</div><div class="uwi-rpt-kpi-delta">@ $320 per APS</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val purple">14 days</div><div class="uwi-rpt-kpi-lbl">Avg Time Saved</div><div class="uwi-rpt-kpi-delta">Per eliminated APS</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val gold">2</div><div class="uwi-rpt-kpi-lbl">APS Still Required</div><div class="uwi-rpt-kpi-delta">John Kim, Julia Chen</div></div>
+      </div>
+      <div class="uwi-rpt-section-title" style="margin-top:10px"><i class="fas fa-info-circle"></i> APS Required Cases — Next Steps</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+        <div style="padding:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px">
+          <div style="font-weight:700;color:#92400e;margin-bottom:4px"><i class="fas fa-user"></i> John Kim — Disability Ins. (STP 61)</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:8px">MIB flag + Type 2 DM Rx + Prior DI claim 2021 — 3 concurrent flags prevent APS substitution</div>
+          <div style="font-size:12px;color:#374151"><strong>Action:</strong> APS ordered from primary care. ETA 7–10 business days. Manual UW review to follow.</div>
+        </div>
+        <div style="padding:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px">
+          <div style="font-weight:700;color:#92400e;margin-bottom:4px"><i class="fas fa-user"></i> Julia Chen — Annuity Deferred (STP 44)</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:8px">MIB flag + Lab abnormality at age 58 — conservative UW approach required for deferred annuity</div>
+          <div style="font-size:12px;color:#374151"><strong>Action:</strong> APS from primary care + specialist. Full manual review. 15–21 day timeline.</div>
+        </div>
+      </div>
+      <div class="uwi-rpt-section-title"><i class="fas fa-check-circle"></i> Substitution Methods Used</div>
+      <table class="uwi-rpt-table">
+        <thead><tr><th>Substitution</th><th>Cases</th><th>Success Rate</th><th>APS Eliminated</th></tr></thead>
+        <tbody>
+          <tr><td>Lab Results + Rx History</td><td>8</td><td>100%</td><td>8 APS removed</td></tr>
+          <tr><td>MIB Clear + Medical Exam</td><td>5</td><td>100%</td><td>5 APS removed</td></tr>
+          <tr><td>MVR + Credit (low-face-value)</td><td>3</td><td>100%</td><td>3 APS removed</td></tr>
+          <tr><td>Existing Client History</td><td>2</td><td>100%</td><td>2 APS removed</td></tr>
+        </tbody>
+      </table>
+    `;
+  }
+
+  else if (tab === 'accuracy') {
+    body.innerHTML = `
+      <div class="uwi-rpt-section-title"><i class="fas fa-bullseye"></i> AI Accuracy & Performance Metrics</div>
+      <div class="uwi-rpt-kpi-grid">
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val green">94.6%</div><div class="uwi-rpt-kpi-lbl">Overall AI Accuracy</div><div class="uwi-rpt-kpi-delta">vs 89% manual baseline</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val blue">0.8%</div><div class="uwi-rpt-kpi-lbl">False Positive Rate</div><div class="uwi-rpt-kpi-delta">Auto-approve later declined</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val purple">1.2%</div><div class="uwi-rpt-kpi-lbl">False Negative Rate</div><div class="uwi-rpt-kpi-delta">APS recommended unnecessarily</div></div>
+        <div class="uwi-rpt-kpi"><div class="uwi-rpt-kpi-val gold">30–50%</div><div class="uwi-rpt-kpi-lbl">Faster Processing</div><div class="uwi-rpt-kpi-delta">vs manual underwriting</div></div>
+      </div>
+      <div class="uwi-rpt-section-title" style="margin-top:10px"><i class="fas fa-chart-line"></i> Accuracy by Evidence Type</div>
+      <table class="uwi-rpt-table">
+        <thead><tr><th>Evidence Type</th><th>AI Accuracy</th><th>Manual Accuracy</th><th>Improvement</th></tr></thead>
+        <tbody>
+          <tr><td>Rx History Analysis</td><td><span class="uwi-rpt-stp-chip high">97.2%</span></td><td>91.4%</td><td style="color:#059669">+5.8%</td></tr>
+          <tr><td>MIB Record Review</td><td><span class="uwi-rpt-stp-chip high">95.8%</span></td><td>88.2%</td><td style="color:#059669">+7.6%</td></tr>
+          <tr><td>Lab Result Interpretation</td><td><span class="uwi-rpt-stp-chip high">93.4%</span></td><td>87.6%</td><td style="color:#059669">+5.8%</td></tr>
+          <tr><td>MVR + Credit Scoring</td><td><span class="uwi-rpt-stp-chip high">96.1%</span></td><td>90.3%</td><td style="color:#059669">+5.8%</td></tr>
+          <tr><td>APS Avoidance Decision</td><td><span class="uwi-rpt-stp-chip med">91.7%</span></td><td>84.2%</td><td style="color:#059669">+7.5%</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:16px;padding:14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:13px;color:#374151">
+        <strong><i class="fas fa-robot"></i> AI Model Notes:</strong><br>
+        The UW Intelligence Engine uses a gradient-boosted ML model trained on 14,200 NYL underwriting cases (2018–2025). 
+        NLP medical-record analysis uses clinical BERT fine-tuned on insurance-specific terminology. 
+        APS avoidance decisions are validated against NYL guidelines v23.1. 
+        Next model refresh scheduled Q3 2026.
+      </div>
+    `;
+  }
+}
+
+// ── Click-outside handler for UWI report overlay ──
+(function(){
+  const el = document.getElementById('uwi-report-overlay');
+  if (el) el.addEventListener('click', function(e){ if(e.target === el) closeUWIReport(); });
+})();
+
