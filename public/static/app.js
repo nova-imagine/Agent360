@@ -2677,3 +2677,629 @@ function renderRetentionModal(tab) {
       </div>`;
   }
 }
+
+// ============================================================
+// #6 — PRE-MEETING BRIEF & POST-MEETING SUMMARY
+// ============================================================
+
+const meetingData = {
+
+  // ── UPCOMING MEETINGS ──────────────────────────────────
+  'MTG-001': {
+    type: 'pre',
+    client: 'Kevin Park',
+    initials: 'KP',
+    date: 'Apr 10, 2026',
+    time: '10:00 AM',
+    duration: '30 min',
+    format: 'Phone Call',
+    domain: 'ins',
+    domainLabel: 'Insurance',
+    urgency: 'urgent',
+    title: 'Kevin Park — Follow-up Call',
+    subtitle: 'Pending Application · Urgent',
+    objective: 'Follow up on pending Term Life application (P-100350). Obtain outstanding medical records; clarify contestability timeline with estate.',
+    clientSnapshot: {
+      age: 34, segment: 'Emerging', policies: 1, premium: '$2,800/yr',
+      lastContact: '2026-04-03', score: 78,
+      notes: 'Kevin passed away — death benefit claim CLM-2026-0025 filed by estate. Policy was in Pending/Underwriting status. Coverage determination critical.'
+    },
+    aiAlerts: [
+      { icon: 'fa-exclamation-circle', color: '#dc2626', text: '⚡ URGENT: $250K death benefit claim under contestability review.' },
+      { icon: 'fa-file-medical', color: '#d97706', text: 'Medical records pending — must obtain to confirm coverage status.' },
+      { icon: 'fa-users', color: '#2563eb', text: 'Estate representative: contact Susan Park (sister) — (646) 555-0198.' }
+    ],
+    talkingPoints: [
+      'Confirm estate attorney contact for documentation coordination',
+      'Explain contestability process and 2-year window status',
+      'Provide timeline estimate: expected determination Apr 20',
+      'Offer compassionate case expedite request to Claims Dept.',
+      'Discuss any outstanding medical records from Dr. James Hart (PCP)'
+    ],
+    documents: ['Death Certificate ✅', 'Policy P-100350 Application ✅', 'Medical Records (PCP) ⏳', 'Estate Documentation ⏳'],
+    prepNotes: 'Sensitively handle — claimant is the estate. Coordinate with adjuster Michael Torres (Claims). Do NOT discuss policy lapse risk with estate.'
+  },
+
+  'MTG-002': {
+    type: 'pre',
+    client: 'Robert Chen',
+    initials: 'RC',
+    date: 'Apr 10, 2026',
+    time: '2:00 PM',
+    duration: '45 min',
+    format: 'Video Call',
+    domain: 'ins',
+    domainLabel: 'Insurance',
+    urgency: 'high',
+    title: 'Robert Chen — Claim Status Update',
+    subtitle: 'Death Benefit Claim · $1,000,000 · Video · 45 min',
+    objective: 'Provide claim status update on CLM-2026-0041. Coordinate with beneficiary Susan Chen on outstanding documents. Discuss payout timeline and estate planning needs.',
+    clientSnapshot: {
+      age: 45, segment: 'High Value', policies: 4, premium: '$21,000/yr',
+      lastContact: '2026-04-08', score: 96,
+      notes: 'Top-tier client, 4 policies. Death benefit $1M under review. Business succession plan needed for Chen Holdings. Estate attorney coordination required.'
+    },
+    aiAlerts: [
+      { icon: 'fa-exclamation-circle', color: '#dc2626', text: '$1M death benefit — expedite identity docs from beneficiary Susan Chen.' },
+      { icon: 'fa-briefcase', color: '#7c3aed', text: 'Business succession gap: Chen Holdings (~$4M valuation) has no buy-sell agreement.' },
+      { icon: 'fa-chart-line', color: '#2563eb', text: 'Investment portfolio $180K AUM — beneficiary may want to consolidate with NYL.' }
+    ],
+    talkingPoints: [
+      'Status: medical certificate verified, identity docs and bank details pending from Susan',
+      'Expected payout timeline: Apr 17–19 once documents complete',
+      'Introduce NYL estate planning services to Susan Chen (beneficiary)',
+      'Discuss Chen Holdings succession — NQDC plan and buy-sell agreement',
+      'Present wealth management options for $180K AUM + death benefit proceeds'
+    ],
+    documents: ['Death Certificate ✅', 'Medical Certificate ✅', 'Claimant Identity Docs ⏳', 'Bank Payout Details ⏳'],
+    prepNotes: 'Approach with empathy. Susan Chen is the beneficiary — new relationship opportunity. Have NYL estate-planning brochure ready. Adjuster: Michael Torres.'
+  },
+
+  'MTG-003': {
+    type: 'pre',
+    client: 'Alex Rivera',
+    initials: 'AR',
+    date: 'Apr 12, 2026',
+    time: '11:00 AM',
+    duration: '60 min',
+    format: 'In Person',
+    domain: 'inv',
+    domainLabel: 'Investments',
+    urgency: 'normal',
+    title: 'Alex Rivera — New Prospect Introduction',
+    subtitle: 'Annuity + Whole Life Interest · In Person · 60 min',
+    objective: 'First in-person meeting with prospect Alex Rivera. Perform full needs analysis. Present Whole Life $500K and fixed-indexed annuity illustrations.',
+    clientSnapshot: {
+      age: 32, segment: 'Emerging', policies: 0, premium: '$0',
+      lastContact: 'None (new)', score: 0,
+      notes: 'Referred by Linda Morrison. Software engineer, high income, no existing NYL coverage. Expressed interest in WL cash value and income annuity for retirement planning.'
+    },
+    aiAlerts: [
+      { icon: 'fa-star', color: '#d97706', text: 'Referred by top client Linda Morrison — high-quality lead, handle with care.' },
+      { icon: 'fa-dollar-sign', color: '#16a34a', text: 'High income profile — potential $4,800/yr+ premium capacity (WL + annuity).' },
+      { icon: 'fa-shield-alt', color: '#2563eb', text: 'No current coverage — ideal full-spectrum onboarding opportunity (Ins + Inv + Ret).' }
+    ],
+    talkingPoints: [
+      'Needs discovery: income, dependents, risk tolerance, retirement timeline',
+      'Present Whole Life $500K illustration — cash value growth, living benefits',
+      'Show Fixed-Indexed Annuity income projection for age 65+',
+      'Discuss disability income gap — engineer with no DI coverage',
+      'Set expectation for follow-up application timeline (STP pipeline ready)'
+    ],
+    documents: ['WL $500K illustration (prepared)', 'FIA income projection (prepared)', 'NYL product overview brochure', 'Needs analysis worksheet'],
+    prepNotes: 'Alex is data-driven — bring charts and numbers. Emphasize tax-advantaged growth of WL cash value and annuity deferral. Do not rush to close — build trust first meeting.'
+  },
+
+  'MTG-004': {
+    type: 'pre',
+    client: 'Linda Morrison',
+    initials: 'LM',
+    date: 'Apr 15, 2026',
+    time: '10:00 AM',
+    duration: '90 min',
+    format: 'In Person',
+    domain: 'adv',
+    domainLabel: 'Advisory',
+    urgency: 'normal',
+    title: 'Linda Morrison — Annual Review',
+    subtitle: 'Estate + UMA + Insurance · In Person · 90 min',
+    objective: 'Annual holistic review: update estate plan, present UMA opportunity ($280K), review WL policy performance, and confirm waiver-of-premium claim resolution.',
+    clientSnapshot: {
+      age: 58, segment: 'Premium', policies: 5, premium: '$34,200/yr',
+      lastContact: '2026-04-02', score: 98,
+      notes: 'Top client. $280K investable assets — UMA candidate ($2,800/yr fee). VUL + WL flagship ($2M). Waiver-of-premium claim approved 90 days. Estate attorney: David Kaufman.'
+    },
+    aiAlerts: [
+      { icon: 'fa-chart-pie', color: '#7c3aed', text: '$280K+ AUM — UMA proposal ready. Fee opportunity: $2,800/yr.' },
+      { icon: 'fa-file-contract', color: '#2563eb', text: 'Estate plan: coordinate trust update with David Kaufman at this meeting.' },
+      { icon: 'fa-umbrella', color: '#16a34a', text: 'WL P-100330: cash value $168,400, Paid-Up Additions +$6,200/yr. In excellent standing.' }
+    ],
+    talkingPoints: [
+      'WL P-100330 performance review: cash value $168,400, dividend additions +$6,200',
+      'Present UMA proposal: $280K at 1% management fee = $2,800/yr',
+      'Estate update: confirm trust beneficiary designations with David Kaufman',
+      'Waiver-of-premium status: approved through June 10 — premium reinstatement plan',
+      'LTC rider adequacy: review daily benefit vs. current facility costs in New York'
+    ],
+    documents: ['UMA proposal — $280K (prepared)', 'WL annual statement P-100330', 'Trust review checklist', 'LTC benefit analysis', 'Waiver-of-premium approval letter'],
+    prepNotes: 'Linda is the #1 client by portfolio value ($812K). Bring estate attorney contact card for David Kaufman. This meeting is revenue-critical — UMA close is the primary goal.'
+  },
+
+  'MTG-005': {
+    type: 'pre',
+    client: 'James Whitfield',
+    initials: 'JW',
+    date: 'Apr 18, 2026',
+    time: '3:00 PM',
+    duration: '60 min',
+    format: 'In Person',
+    domain: 'ret',
+    domainLabel: 'Retirement',
+    urgency: 'normal',
+    title: 'James Whitfield — Retirement Planning',
+    subtitle: 'Deferred Annuity Illustration · In Person · 60 min',
+    objective: 'Present deferred annuity illustration for James\'s retirement income strategy. Review LTC claim status and discuss premium funding optimization.',
+    clientSnapshot: {
+      age: 52, segment: 'High Value', policies: 3, premium: '$12,400/yr',
+      lastContact: '2026-04-05', score: 92,
+      notes: 'LTC claim CLM-2026-0033 approved — ADL threshold met, payment expected Apr 18. Deferred annuity: ideal for bridge income age 65–72. Executive benefits gap identified.'
+    },
+    aiAlerts: [
+      { icon: 'fa-calendar-check', color: '#16a34a', text: 'LTC claim CLM-2026-0033 expected approval today — excellent timing to reassure client.' },
+      { icon: 'fa-umbrella-beach', color: '#7c3aed', text: 'Deferred annuity at $85K lump sum → $1,100/mo income at age 67 (illustrated).' },
+      { icon: 'fa-briefcase', color: '#d97706', text: 'Executive benefits gap: no NQDC, no key-person life insurance for employer.' }
+    ],
+    talkingPoints: [
+      'LTC claim update: approval expected Apr 18, first payment Apr 18 ($9,600)',
+      'Present deferred annuity illustration: $85K → $1,100/mo income at 67',
+      'Discuss contribution strategy: lump sum vs. annual premium funding',
+      'Introduce NQDC (Non-Qualified Deferred Compensation) for executive income deferral',
+      'Review existing policies — any coverage gaps or beneficiary updates needed'
+    ],
+    documents: ['Deferred annuity illustration ($85K)', 'NQDC plan overview', 'LTC claim approval letter (pending)', 'Policy review summary'],
+    prepNotes: 'James responds well to projected income numbers — show the annuity growth table. Mention NQDC as a tax-deferral strategy for his executive income. He is open to comprehensive planning.'
+  },
+
+  'MTG-006': {
+    type: 'pre',
+    client: 'Team — Roger Putnam',
+    initials: 'TP',
+    date: 'Apr 22, 2026',
+    time: '9:00 AM',
+    duration: '120 min',
+    format: 'In Person',
+    domain: 'ins',
+    domainLabel: 'Insurance',
+    urgency: 'normal',
+    title: 'Team Q1 Performance Review',
+    subtitle: 'All Lines · Roger Putnam (Sales Director) · 120 min',
+    objective: 'Q1 2026 performance debrief with Regional Director Roger Putnam. Present pipeline metrics, YTD results, and Q2 strategy.',
+    clientSnapshot: {
+      age: null, segment: 'Internal', policies: null, premium: null,
+      lastContact: 'Q4 2025 Review', score: null,
+      notes: 'Regional Director review. YTD: $187K commissions (78% of $240K target). Pipeline: $284K pending. Retention: 4 lapse risks identified.'
+    },
+    aiAlerts: [
+      { icon: 'fa-trophy', color: '#16a34a', text: 'YTD commissions $187K — 78% of $240K annual target. On track.' },
+      { icon: 'fa-exclamation-triangle', color: '#d97706', text: '4 lapse-risk clients flagged — present retention action plan to Roger.' },
+      { icon: 'fa-chart-bar', color: '#2563eb', text: 'Pipeline conversion rate 68% — highlight AI-assisted underwriting STP improvements.' }
+    ],
+    talkingPoints: [
+      'Q1 commissions: $42,180 (MTD) vs. $38,500 target — exceeded by 9.5%',
+      'Pipeline: $284K pending, 11 UW cases, 68% conversion rate',
+      'STP rate 73% — AI underwriting reduced avg decision time from 8 days to 4.2 hrs',
+      'Retention risks: 4 clients flagged (Patricia, Sandra, Kevin, David) — mitigation plans active',
+      'Q2 strategy: Linda Morrison UMA close ($2,800/yr), Alex Rivera full onboarding, James deferred annuity'
+    ],
+    documents: ['Q1 performance report', 'YTD commission breakdown', 'Pipeline summary', 'Retention risk report', 'Q2 opportunity map'],
+    prepNotes: 'Roger appreciates data-driven presentations. Lead with the STP improvement story — it\'s a strong differentiator. Be ready to discuss the 4 lapse-risk clients and your specific action plans.'
+  },
+
+  'MTG-007': {
+    type: 'pre',
+    client: 'Robert Chen',
+    initials: 'RC',
+    date: 'Apr 25, 2026',
+    time: '11:00 AM',
+    duration: '90 min',
+    format: 'In Person',
+    domain: 'adv',
+    domainLabel: 'Advisory',
+    urgency: 'normal',
+    title: 'Robert Chen — Estate Planning',
+    subtitle: 'Business Succession + NQDC · In Person · 90 min',
+    objective: 'Deep-dive estate planning session for Chen Holdings. Present business succession buy-sell agreement, NQDC plan, and beneficiary update for existing policies.',
+    clientSnapshot: {
+      age: 45, segment: 'High Value', policies: 4, premium: '$21,000/yr',
+      lastContact: '2026-04-10 (Claim call)', score: 96,
+      notes: 'Death benefit claim CLM-2026-0041 in process ($1M). Chen Holdings ~$4M valuation. No buy-sell agreement. NQDC opportunity identified. Referred estate attorney contact.'
+    },
+    aiAlerts: [
+      { icon: 'fa-building', color: '#7c3aed', text: 'Chen Holdings $4M valuation — buy-sell agreement would require $2M+ key-person life.' },
+      { icon: 'fa-file-invoice-dollar', color: '#2563eb', text: 'NQDC plan: defer $80K+/yr in executive compensation — significant tax advantage.' },
+      { icon: 'fa-heart', color: '#dc2626', text: 'Note: Robert Chen passed away — this meeting is with business partner / estate. Adjust approach.' }
+    ],
+    talkingPoints: [
+      'Business succession: present buy-sell agreement structure funded by life insurance',
+      'Key-person life insurance: $2M for Chen Holdings continuity',
+      'NQDC plan: executive income deferral for remaining business partners',
+      'Estate update: confirm beneficiary on all 4 existing policies',
+      'Investment portfolio: $180K AUM consolidation opportunity with NYL'
+    ],
+    documents: ['Business valuation summary (Chen Holdings)', 'Buy-sell agreement template', 'NQDC plan overview', 'Beneficiary update forms', 'Investment consolidation proposal'],
+    prepNotes: 'This meeting is post-claim — approach sensitively. Business partners may want to discuss coverage needs now that Robert has passed. Focus on protecting the business and the estate.'
+  },
+
+  'MTG-008': {
+    type: 'pre',
+    client: 'Sandra Williams',
+    initials: 'SW',
+    date: 'Apr 28, 2026',
+    time: '2:00 PM',
+    duration: '60 min',
+    format: 'In Person',
+    domain: 'ins',
+    domainLabel: 'Insurance',
+    urgency: 'renewal',
+    title: 'Sandra Williams — Policy Renewal',
+    subtitle: 'P-100320 Term Renewal · In Person · 60 min',
+    objective: 'Critical renewal meeting for 20-year Term Life P-100320 expiring Sep 2026. Present conversion options (WL/UL) and retention strategy.',
+    clientSnapshot: {
+      age: 61, segment: 'Mid Market', policies: 2, premium: '$8,200/yr',
+      lastContact: '2026-03-20', score: 71,
+      notes: 'HIGH retention risk. Term $350K expires Sep 2026 — 5 months. Conversion window closing. Re-qualification at 61 requires new medical underwriting. Spouse Michael Williams is co-beneficiary.'
+    },
+    aiAlerts: [
+      { icon: 'fa-exclamation-triangle', color: '#dc2626', text: '⚡ URGENT: Conversion deadline Sep 15, 2026 — 5 months. Act now or coverage lapses.' },
+      { icon: 'fa-exchange-alt', color: '#d97706', text: 'Conversion option: no medical evidence required. WL $350K est. $4,200/yr premium.' },
+      { icon: 'fa-home', color: '#2563eb', text: 'Household planning opportunity: invite Michael Williams — joint meeting recommended.' }
+    ],
+    talkingPoints: [
+      '⚡ Explain urgency: Sep 2026 expiry, no medical evidence needed for conversion now',
+      'Present WL vs. UL conversion comparison ($350K face value)',
+      'Estimated WL premium at age 61: $4,200–$5,100/yr vs. lapsing coverage',
+      'Estate value: $350K WL provides lasting protection + cash value for Michael',
+      'Invite Michael Williams to the meeting — joint household decision'
+    ],
+    documents: ['WL conversion illustration ($350K at 61)', 'UL conversion illustration', 'Term renewal notice P-100320', 'Conversion deadline letter'],
+    prepNotes: 'Sandra has a moderate relationship score (71). Approach renewal as a protection conversation, not a sales pitch. Stress that conversion avoids medical evidence — key advantage at age 61.'
+  },
+
+  // ── PAST MEETINGS (Post-Meeting Summary) ────────────────
+  'MTG-P01': {
+    type: 'post',
+    client: 'Maria Gonzalez',
+    initials: 'MG',
+    date: 'Apr 5, 2026',
+    time: '1:00 PM',
+    duration: '45 min',
+    format: 'Video Call',
+    domain: 'inv',
+    domainLabel: 'Investments',
+    urgency: 'normal',
+    title: 'Maria Gonzalez — Annuity Review',
+    subtitle: 'Income Annuity Discussion · Video · 45 min',
+    aiSummary: 'Productive meeting. Maria expressed strong interest in a fixed-indexed annuity for retirement income starting age 65. Reviewed accelerated death benefit claim CLM-2026-0028 status — oncologist documentation still pending. Maria is emotionally managing terminal illness diagnosis; meeting tone was compassionate. Key outcome: schedule illustration presentation and coordinate with oncologist on ADB claim.',
+    outcomes: [
+      { status: 'done', text: 'Reviewed ADB claim CLM-2026-0028 status — pending terminal illness certification from oncologist.' },
+      { status: 'done', text: 'Presented fixed-indexed annuity concept — Maria expressed strong interest in $50K–$75K allocation.' },
+      { status: 'done', text: 'Discussed Disability Insurance claim CLM-2026-0035 — physician statement still pending from Dr. Hernandez.' },
+      { status: 'pending', text: 'Follow up with oncologist office (Dr. Reyes) re: terminal illness certification for ADB claim.' },
+      { status: 'pending', text: 'Prepare fixed-indexed annuity illustration for $50K–$75K allocation, income starting age 65.' }
+    ],
+    followUps: [
+      { icon: 'fa-phone', urgency: 'urgent', text: 'Contact oncologist Dr. Reyes: (212) 555-0220 — ADB claim certification. By Apr 10.' },
+      { icon: 'fa-file-alt', urgency: 'normal', text: 'Prepare FIA income illustration ($75K, age 65) for next meeting.' },
+      { icon: 'fa-calendar-plus', urgency: 'normal', text: 'Schedule follow-up meeting: week of Apr 21 — present FIA illustration.' }
+    ],
+    sentiment: 'positive',
+    sentimentNote: 'Client is emotionally resilient. Appreciative of agent support during claim process. High engagement on annuity discussion.',
+    nextMeeting: 'Week of Apr 21, 2026'
+  },
+
+  'MTG-P02': {
+    type: 'post',
+    client: 'Patricia Nguyen',
+    initials: 'PN',
+    date: 'Apr 3, 2026',
+    time: '10:30 AM',
+    duration: '30 min',
+    format: 'Phone Call',
+    domain: 'ins',
+    domainLabel: 'Insurance',
+    urgency: 'normal',
+    title: 'Patricia Nguyen — UL Premium Funding Review',
+    subtitle: 'Premium Funding Strategy · Phone · 30 min',
+    aiSummary: 'Critical retention call. Patricia confirmed she has been under-funding the Universal Life policy P-100301 for 2 consecutive quarters due to budget constraints (new mortgage). She was unaware of the lapse risk. AI cash-flow model was explained — she agreed to a 3-month catch-up plan of $1,800–$2,400 to restore policy health. Agreed to set up automatic payment. Lapse probability reduced from 94% to <20% if plan followed.',
+    outcomes: [
+      { status: 'done', text: 'Explained lapse risk: AI model predicts 94% lapse probability by June 20 without action.' },
+      { status: 'done', text: 'Presented 3-month catch-up plan: $600–$800/mo additional premium to restore health.' },
+      { status: 'done', text: 'Patricia agreed to catch-up plan and auto-payment setup.' },
+      { status: 'pending', text: 'Confirm auto-payment setup for $800/mo additional premium for 3 months (starts Apr 15).' },
+      { status: 'pending', text: 'Monitor policy funding status — check May 1 cash value against minimum threshold.' }
+    ],
+    followUps: [
+      { icon: 'fa-credit-card', urgency: 'urgent', text: 'Confirm auto-payment $800/mo starting Apr 15 — call Patricia to confirm setup. By Apr 12.' },
+      { icon: 'fa-chart-line', urgency: 'normal', text: 'Review cash value on May 1 — confirm recovery trajectory above minimum threshold.' },
+      { icon: 'fa-envelope', urgency: 'normal', text: 'Send policy health letter confirming catch-up plan details and new projected standing.' }
+    ],
+    sentiment: 'concerned',
+    sentimentNote: 'Patricia was initially alarmed by the lapse risk but responded positively to the catch-up plan. Expressed gratitude for proactive outreach.',
+    nextMeeting: 'May 1, 2026 (monitoring call)'
+  },
+
+  'MTG-P03': {
+    type: 'post',
+    client: 'James Whitfield',
+    initials: 'JW',
+    date: 'Apr 1, 2026',
+    time: '2:00 PM',
+    duration: '60 min',
+    format: 'In Person',
+    domain: 'ret',
+    domainLabel: 'Retirement',
+    urgency: 'normal',
+    title: 'James Whitfield — Initial Retirement Consult',
+    subtitle: 'Needs Analysis · In Person · 60 min',
+    aiSummary: 'Highly productive initial retirement planning consult. James is 52, targeting retirement at 67. Current policies: 3 (WL + LTC + Term). LTC claim CLM-2026-0033 is in process. Significant retirement income gap identified: estimated $8,500/mo needed vs. $3,200/mo projected from Social Security. Deferred annuity and NQDC plan are the recommended instruments. James is highly engaged and open to comprehensive planning.',
+    outcomes: [
+      { status: 'done', text: 'Completed full retirement needs analysis: $8,500/mo target income at age 67.' },
+      { status: 'done', text: 'Identified $5,300/mo income gap — recommended deferred annuity + NQDC.' },
+      { status: 'done', text: 'Reviewed LTC claim CLM-2026-0033 — ADL threshold met, approval expected Apr 15.' },
+      { status: 'pending', text: 'Prepare deferred annuity illustration: $85K lump sum → $1,100/mo income at 67.' },
+      { status: 'pending', text: 'Coordinate NQDC plan introduction with James\'s employer HR (Apr 18 meeting).' }
+    ],
+    followUps: [
+      { icon: 'fa-file-alt', urgency: 'normal', text: 'Prepare deferred annuity illustration ($85K, income at 67) — for Apr 18 meeting.' },
+      { icon: 'fa-briefcase', urgency: 'normal', text: 'Contact James\'s employer HR re: NQDC plan eligibility — by Apr 16.' },
+      { icon: 'fa-calendar-check', urgency: 'normal', text: 'Apr 18 meeting confirmed — retirement planning + LTC claim update + annuity illustration.' }
+    ],
+    sentiment: 'very_positive',
+    sentimentNote: 'James is highly engaged and analytical. Very open to comprehensive planning. Excellent long-term client development opportunity.',
+    nextMeeting: 'Apr 18, 2026 (confirmed)'
+  }
+};
+
+// ── OPEN MEETING BRIEF / POST-MEETING MODAL ─────────────────
+function openMeetingBrief(mtgId) {
+  const mtg = meetingData[mtgId];
+  if (!mtg) return;
+
+  const overlay = document.getElementById('meeting-modal-overlay');
+  if (!overlay) return;
+
+  // Store current meeting ID
+  overlay.dataset.currentMtg = mtgId;
+
+  // Set header
+  const iconEl = document.getElementById('mmh-icon');
+  const titleEl = document.getElementById('mmh-title');
+  const metaEl = document.getElementById('mmh-meta');
+  const headerEl = document.getElementById('meeting-modal-header');
+
+  if (mtg.type === 'pre') {
+    iconEl.innerHTML = '<i class="fas fa-file-alt"></i>';
+    titleEl.textContent = 'Pre-Meeting Brief';
+    headerEl.className = 'meeting-modal-header mmh-pre';
+  } else {
+    iconEl.innerHTML = '<i class="fas fa-clipboard-check"></i>';
+    titleEl.textContent = 'Post-Meeting Summary';
+    headerEl.className = 'meeting-modal-header mmh-post';
+  }
+
+  const formatIcon = mtg.format === 'Video Call' ? 'fa-video' :
+                     mtg.format === 'Phone Call' ? 'fa-phone' : 'fa-map-marker-alt';
+  metaEl.innerHTML = `<span class="mmh-client-name">${mtg.client}</span>
+    <span class="mmh-sep">·</span>
+    <i class="fas ${formatIcon}"></i> ${mtg.format}
+    <span class="mmh-sep">·</span>
+    <i class="fas fa-clock"></i> ${mtg.duration}
+    <span class="mmh-sep">·</span>
+    <span class="act-domain-pill ${mtg.domain} mmh-domain-pill">${mtg.domainLabel}</span>
+    ${mtg.urgency === 'urgent' ? '<span class="urgency-pill urgent-pill">URGENT</span>' : ''}
+    ${mtg.urgency === 'renewal' ? '<span class="urgency-pill renewal-pill">RENEWAL</span>' : ''}`;
+
+  // Build tabs
+  const tabsEl = document.getElementById('meeting-modal-tabs');
+  if (mtg.type === 'pre') {
+    tabsEl.innerHTML = `
+      <button class="mmtab active" onclick="switchMeetingTab('${mtgId}','brief')">
+        <i class="fas fa-user-tie"></i> Client Brief
+      </button>
+      <button class="mmtab" onclick="switchMeetingTab('${mtgId}','agenda')">
+        <i class="fas fa-list-ul"></i> Agenda & Talking Points
+      </button>
+      <button class="mmtab" onclick="switchMeetingTab('${mtgId}','docs')">
+        <i class="fas fa-folder-open"></i> Documents
+      </button>`;
+  } else {
+    tabsEl.innerHTML = `
+      <button class="mmtab active" onclick="switchMeetingTab('${mtgId}','summary')">
+        <i class="fas fa-robot"></i> AI Summary
+      </button>
+      <button class="mmtab" onclick="switchMeetingTab('${mtgId}','outcomes')">
+        <i class="fas fa-tasks"></i> Outcomes
+      </button>
+      <button class="mmtab" onclick="switchMeetingTab('${mtgId}','followup')">
+        <i class="fas fa-forward"></i> Follow-Ups
+      </button>`;
+  }
+
+  // Render initial tab
+  const firstTab = mtg.type === 'pre' ? 'brief' : 'summary';
+  renderMeetingTab(mtgId, firstTab);
+
+  // Footer
+  const footerEl = document.getElementById('meeting-modal-footer');
+  if (mtg.type === 'pre') {
+    footerEl.innerHTML = `
+      <button class="btn btn-secondary" onclick="closeMeetingModal()"><i class="fas fa-times"></i> Close</button>
+      <button class="btn btn-ai" onclick="sendQuickMessage('Pre-meeting brief for ${mtg.client} on ${mtg.date}')">
+        <i class="fas fa-robot"></i> Ask AI About This Meeting
+      </button>
+      <button class="btn btn-primary" onclick="closeMeetingModal()"><i class="fas fa-check"></i> Ready for Meeting</button>`;
+  } else {
+    footerEl.innerHTML = `
+      <button class="btn btn-secondary" onclick="closeMeetingModal()"><i class="fas fa-times"></i> Close</button>
+      <button class="btn btn-ai" onclick="sendQuickMessage('Follow-up actions for ${mtg.client} meeting on ${mtg.date}')">
+        <i class="fas fa-robot"></i> AI Action Suggestions
+      </button>
+      <button class="btn btn-primary" onclick="closeMeetingModal()"><i class="fas fa-calendar-plus"></i> Schedule Follow-up</button>`;
+  }
+
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+// ── SWITCH TAB ──────────────────────────────────────────────
+function switchMeetingTab(mtgId, tab) {
+  // Update active tab button
+  document.querySelectorAll('#meeting-modal-tabs .mmtab').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('onclick').includes(`'${tab}'`)) {
+      btn.classList.add('active');
+    }
+  });
+  renderMeetingTab(mtgId, tab);
+}
+
+// ── RENDER TAB CONTENT ───────────────────────────────────────
+function renderMeetingTab(mtgId, tab) {
+  const mtg = meetingData[mtgId];
+  const body = document.getElementById('meeting-modal-body');
+
+  if (tab === 'brief') {
+    // PRE-MEETING: Client Brief tab
+    const cs = mtg.clientSnapshot;
+    const alertsHtml = (mtg.aiAlerts || []).map(a => `
+      <div class="pmb-alert-row">
+        <i class="fas ${a.icon}" style="color:${a.color};min-width:18px"></i>
+        <span>${a.text}</span>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="pmb-tab-content">
+        <div class="pmb-section-label"><i class="fas fa-calendar-day"></i> Meeting Details</div>
+        <div class="pmb-detail-grid">
+          <div class="pmb-detail-item"><span class="pmb-detail-lbl">Date</span><span class="pmb-detail-val">${mtg.date}</span></div>
+          <div class="pmb-detail-item"><span class="pmb-detail-lbl">Time</span><span class="pmb-detail-val">${mtg.time}</span></div>
+          <div class="pmb-detail-item"><span class="pmb-detail-lbl">Duration</span><span class="pmb-detail-val">${mtg.duration}</span></div>
+          <div class="pmb-detail-item"><span class="pmb-detail-lbl">Format</span><span class="pmb-detail-val">${mtg.format}</span></div>
+        </div>
+        <div class="pmb-objective-box">
+          <div class="pmb-section-label"><i class="fas fa-bullseye"></i> Meeting Objective</div>
+          <p>${mtg.objective}</p>
+        </div>
+        ${cs.age ? `
+        <div class="pmb-section-label"><i class="fas fa-user"></i> Client Snapshot</div>
+        <div class="pmb-client-grid">
+          <div class="pmb-cg-item"><span class="pmb-detail-lbl">Age</span><span class="pmb-detail-val">${cs.age}</span></div>
+          <div class="pmb-cg-item"><span class="pmb-detail-lbl">Segment</span><span class="pmb-detail-val">${cs.segment}</span></div>
+          <div class="pmb-cg-item"><span class="pmb-detail-lbl">Policies</span><span class="pmb-detail-val">${cs.policies}</span></div>
+          <div class="pmb-cg-item"><span class="pmb-detail-lbl">Premium</span><span class="pmb-detail-val">${cs.premium}</span></div>
+        </div>
+        <div class="pmb-client-notes">${cs.notes}</div>` : ''}
+        <div class="pmb-section-label"><i class="fas fa-robot"></i> AI Alerts</div>
+        <div class="pmb-alerts-box">${alertsHtml}</div>
+        ${mtg.prepNotes ? `
+        <div class="pmb-prep-box">
+          <div class="pmb-section-label"><i class="fas fa-sticky-note"></i> Agent Prep Notes</div>
+          <p class="pmb-prep-text">${mtg.prepNotes}</p>
+        </div>` : ''}
+      </div>`;
+
+  } else if (tab === 'agenda') {
+    // PRE-MEETING: Agenda & Talking Points tab
+    const pointsHtml = (mtg.talkingPoints || []).map((p, i) => `
+      <div class="pmb-tp-row">
+        <span class="pmb-tp-num">${i + 1}</span>
+        <span class="pmb-tp-text">${p}</span>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="pmb-tab-content">
+        <div class="pmb-section-label"><i class="fas fa-list-ul"></i> Talking Points</div>
+        <div class="pmb-tp-list">${pointsHtml}</div>
+      </div>`;
+
+  } else if (tab === 'docs') {
+    // PRE-MEETING: Documents tab
+    const docsHtml = (mtg.documents || []).map(d => {
+      const isDone = d.includes('✅');
+      const isPending = d.includes('⏳');
+      return `<div class="pmb-doc-row ${isDone ? 'doc-ready' : isPending ? 'doc-pending' : 'doc-prepare'}">
+        <i class="fas ${isDone ? 'fa-check-circle' : isPending ? 'fa-hourglass-half' : 'fa-file-alt'}" 
+           style="color:${isDone ? '#16a34a' : isPending ? '#d97706' : '#6366f1'}"></i>
+        <span>${d}</span>
+      </div>`;
+    }).join('');
+    body.innerHTML = `
+      <div class="pmb-tab-content">
+        <div class="pmb-section-label"><i class="fas fa-folder-open"></i> Documents & Materials</div>
+        <div class="pmb-docs-list">${docsHtml}</div>
+      </div>`;
+
+  } else if (tab === 'summary') {
+    // POST-MEETING: AI Summary tab
+    const sentimentColor = mtg.sentiment === 'very_positive' ? '#16a34a' :
+                           mtg.sentiment === 'positive' ? '#2563eb' :
+                           mtg.sentiment === 'concerned' ? '#d97706' : '#6b7280';
+    const sentimentLabel = mtg.sentiment === 'very_positive' ? 'Very Positive' :
+                           mtg.sentiment === 'positive' ? 'Positive' :
+                           mtg.sentiment === 'concerned' ? 'Concerned' : 'Neutral';
+    body.innerHTML = `
+      <div class="pmb-tab-content">
+        <div class="pmb-ai-summary-box">
+          <div class="pmb-ai-header"><i class="fas fa-robot"></i> AI Meeting Summary</div>
+          <p class="pmb-ai-text">${mtg.aiSummary}</p>
+        </div>
+        <div class="pmb-sentiment-row">
+          <div class="pmb-section-label"><i class="fas fa-smile"></i> Client Sentiment</div>
+          <div class="pmb-sentiment-badge" style="background:${sentimentColor}20;color:${sentimentColor};border:1px solid ${sentimentColor}40">
+            ${sentimentLabel}
+          </div>
+          <p class="pmb-sentiment-note">${mtg.sentimentNote}</p>
+        </div>
+        <div class="pmb-detail-grid" style="margin-top:12px">
+          <div class="pmb-detail-item"><span class="pmb-detail-lbl">Date</span><span class="pmb-detail-val">${mtg.date}</span></div>
+          <div class="pmb-detail-item"><span class="pmb-detail-lbl">Duration</span><span class="pmb-detail-val">${mtg.duration}</span></div>
+          <div class="pmb-detail-item"><span class="pmb-detail-lbl">Format</span><span class="pmb-detail-val">${mtg.format}</span></div>
+          <div class="pmb-detail-item"><span class="pmb-detail-lbl">Next Meeting</span><span class="pmb-detail-val">${mtg.nextMeeting || 'TBD'}</span></div>
+        </div>
+      </div>`;
+
+  } else if (tab === 'outcomes') {
+    // POST-MEETING: Outcomes tab
+    const outcomesHtml = (mtg.outcomes || []).map(o => `
+      <div class="pmb-outcome-row ${o.status === 'done' ? 'outcome-done' : 'outcome-pending'}">
+        <i class="fas ${o.status === 'done' ? 'fa-check-circle' : 'fa-clock'}"
+           style="color:${o.status === 'done' ? '#16a34a' : '#d97706'};min-width:18px"></i>
+        <span>${o.text}</span>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="pmb-tab-content">
+        <div class="pmb-section-label"><i class="fas fa-tasks"></i> Meeting Outcomes</div>
+        <div class="pmb-outcomes-list">${outcomesHtml}</div>
+      </div>`;
+
+  } else if (tab === 'followup') {
+    // POST-MEETING: Follow-ups tab
+    const fuHtml = (mtg.followUps || []).map(fu => `
+      <div class="pmb-fu-row ${fu.urgency === 'urgent' ? 'fu-urgent' : ''}">
+        <i class="fas ${fu.icon}" style="color:${fu.urgency === 'urgent' ? '#dc2626' : '#6366f1'};min-width:18px"></i>
+        <span>${fu.text}</span>
+        ${fu.urgency === 'urgent' ? '<span class="fu-urgent-tag">URGENT</span>' : ''}
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="pmb-tab-content">
+        <div class="pmb-section-label"><i class="fas fa-forward"></i> Required Follow-Up Actions</div>
+        <div class="pmb-fu-list">${fuHtml}</div>
+      </div>`;
+  }
+}
+
+// ── CLOSE MODAL ──────────────────────────────────────────────
+function closeMeetingModal(event) {
+  if (event && event.target !== document.getElementById('meeting-modal-overlay')) return;
+  const overlay = document.getElementById('meeting-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}

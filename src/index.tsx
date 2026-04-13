@@ -4314,7 +4314,12 @@ function CalendarPage() {
           </div>
         </div>
         <div class="calendar-sidebar">
-          <h4>Upcoming Events</h4>
+
+          {/* --- UPCOMING MEETINGS --- */}
+          <div class="cal-sidebar-section-header">
+            <h4><i class="fas fa-calendar-alt"></i> Upcoming Meetings</h4>
+            <span class="cal-section-badge upcoming-badge">8</span>
+          </div>
           <div class="upcoming-list">
 
             <div class="upcoming-event urgent-event">
@@ -4322,6 +4327,9 @@ function CalendarPage() {
               <div class="ue-info">
                 <div class="ue-title">Kevin Park — Follow-up Call</div>
                 <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> Pending application · Urgent</div>
+                <div class="ue-actions">
+                  <button class="btn-pmb urgent-pmb" onclick="openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
               </div>
             </div>
 
@@ -4330,6 +4338,9 @@ function CalendarPage() {
               <div class="ue-info">
                 <div class="ue-title">Robert Chen — Claim Status</div>
                 <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> Video · 45 min</div>
+                <div class="ue-actions">
+                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-002')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
               </div>
             </div>
 
@@ -4338,6 +4349,9 @@ function CalendarPage() {
               <div class="ue-info">
                 <div class="ue-title">Alex Rivera — Prospect Intro</div>
                 <div class="ue-desc"><span class="act-domain-pill inv">Investments</span> Annuity + WL interest · In Person</div>
+                <div class="ue-actions">
+                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-003')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
               </div>
             </div>
 
@@ -4346,6 +4360,9 @@ function CalendarPage() {
               <div class="ue-info">
                 <div class="ue-title">Linda Morrison — Annual Review</div>
                 <div class="ue-desc"><span class="act-domain-pill adv">Advisory</span> Estate + UMA + Insurance · 90 min</div>
+                <div class="ue-actions">
+                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-004')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
               </div>
             </div>
 
@@ -4354,6 +4371,9 @@ function CalendarPage() {
               <div class="ue-info">
                 <div class="ue-title">James Whitfield — Retirement Plan</div>
                 <div class="ue-desc"><span class="act-domain-pill ret">Retirement</span> Deferred annuity illustration</div>
+                <div class="ue-actions">
+                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
               </div>
             </div>
 
@@ -4362,6 +4382,9 @@ function CalendarPage() {
               <div class="ue-info">
                 <div class="ue-title">Team Q1 Performance Review</div>
                 <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> All lines · Roger Putnam</div>
+                <div class="ue-actions">
+                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-006')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
               </div>
             </div>
 
@@ -4370,6 +4393,9 @@ function CalendarPage() {
               <div class="ue-info">
                 <div class="ue-title">Robert Chen — Estate Planning</div>
                 <div class="ue-desc"><span class="act-domain-pill adv">Advisory</span> Business succession + NQDC</div>
+                <div class="ue-actions">
+                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-007')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
               </div>
             </div>
 
@@ -4378,6 +4404,51 @@ function CalendarPage() {
               <div class="ue-info">
                 <div class="ue-title">Sandra Williams — Policy Renewal</div>
                 <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> P-100320 · Review meeting</div>
+                <div class="ue-actions">
+                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-008')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* --- RECENT MEETINGS (Post-Meeting Summary) --- */}
+          <div class="cal-sidebar-section-header" style="margin-top:16px">
+            <h4><i class="fas fa-clipboard-check"></i> Recent Meetings</h4>
+            <span class="cal-section-badge past-badge">3</span>
+          </div>
+          <div class="upcoming-list past-meetings-list">
+
+            <div class="upcoming-event past-event">
+              <div class="ue-date"><span class="ue-d">05</span><span class="ue-m">Apr</span></div>
+              <div class="ue-info">
+                <div class="ue-title">Maria G. — Annuity Review</div>
+                <div class="ue-desc"><span class="act-domain-pill inv">Investments</span> Income annuity discussion</div>
+                <div class="ue-actions">
+                  <button class="btn-pms" onclick="openMeetingBrief('MTG-P01')"><i class="fas fa-clipboard-list"></i> Post-Meeting Summary</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="upcoming-event past-event">
+              <div class="ue-date"><span class="ue-d">03</span><span class="ue-m">Apr</span></div>
+              <div class="ue-info">
+                <div class="ue-title">Patricia Nguyen — UL Review</div>
+                <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> Premium funding strategy</div>
+                <div class="ue-actions">
+                  <button class="btn-pms" onclick="openMeetingBrief('MTG-P02')"><i class="fas fa-clipboard-list"></i> Post-Meeting Summary</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="upcoming-event past-event">
+              <div class="ue-date"><span class="ue-d">01</span><span class="ue-m">Apr</span></div>
+              <div class="ue-info">
+                <div class="ue-title">James Whitfield — Initial Consult</div>
+                <div class="ue-desc"><span class="act-domain-pill ret">Retirement</span> Needs analysis</div>
+                <div class="ue-actions">
+                  <button class="btn-pms" onclick="openMeetingBrief('MTG-P03')"><i class="fas fa-clipboard-list"></i> Post-Meeting Summary</button>
+                </div>
               </div>
             </div>
 
@@ -4396,6 +4467,29 @@ function CalendarPage() {
           </button>
         </div>
       </div>
+
+      {/* ===== MEETING BRIEF / POST-MEETING MODAL ===== */}
+      <div id="meeting-modal-overlay" class="meeting-modal-overlay" onclick="closeMeetingModal(event)" style="display:none">
+        <div class="meeting-modal" onclick="event.stopPropagation()">
+          <div class="meeting-modal-header" id="meeting-modal-header">
+            <div class="mmh-left">
+              <div class="mmh-icon" id="mmh-icon"><i class="fas fa-file-alt"></i></div>
+              <div>
+                <div class="mmh-title" id="mmh-title">Meeting Brief</div>
+                <div class="mmh-meta" id="mmh-meta">Loading…</div>
+              </div>
+            </div>
+            <button class="modal-close" onclick="closeMeetingModal()"><i class="fas fa-times"></i></button>
+          </div>
+
+          <div class="meeting-modal-tabs" id="meeting-modal-tabs"></div>
+
+          <div class="meeting-modal-body" id="meeting-modal-body"></div>
+
+          <div class="meeting-modal-footer" id="meeting-modal-footer"></div>
+        </div>
+      </div>
+
     </div>
   )
 }
