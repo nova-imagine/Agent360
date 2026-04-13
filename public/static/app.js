@@ -7040,3 +7040,705 @@ document.addEventListener('DOMContentLoaded', function() {
   const prOverlay = document.getElementById('pricing-report-overlay');
   if (prOverlay) prOverlay.addEventListener('click', function(e) { if (e.target === prOverlay) closePricingReport(); });
 });
+
+// ============================================================
+// TASK #19 — Sales Pipeline AI
+// openDealAIModal, closeDealAIModal, switchDaiTab
+// openSalesAIReport, closeSalesAIReport, switchSairTab
+// openConversionForecast, salesAIData
+// ============================================================
+
+const salesAIData = {
+  D001: {
+    id: 'D001', client: 'Alex Rivera', product: 'Whole Life — $500K', stage: 'Prospect',
+    annualValue: '$4,200/yr', commission: '$504', winScore: 82, priority: '#5',
+    closeWindow: '14d', stageColor: 'amber',
+    ringColor: '#f59e0b', ringDash: '173 214',
+    convProb: 82, convLabel: 'Likely Close',
+    factors: {
+      positive: [
+        { label: 'Qualified lead — referral from Robert Chen', pts: '+22' },
+        { label: 'Budget confirmed: $350+/mo', pts: '+18' },
+        { label: 'Meeting booked Apr 12 — high intent', pts: '+15' },
+        { label: 'Age 34 — strong WL candidate', pts: '+12' },
+      ],
+      negative: [
+        { label: 'No prior policy — first-time buyer hesitation', pts: '-8' },
+        { label: 'Still evaluating 2 competitors', pts: '-12' },
+      ],
+      neutral: [
+        { label: 'Spouse not yet involved in decision', pts: '-5' },
+      ]
+    },
+    nba: [
+      { priority: 'critical', title: 'Send Pre-Meeting Brief — Apr 12 at 10am', desc: 'Prepare a personalized WL illustration at $4,200/yr with 20-year cash value projection. Include a comparison to term with conversion benefit. Send via email 24 hours before meeting.', actions: ['Send Brief', 'Open E-App'] },
+      { priority: 'high', title: 'Loop In Robert Chen as Referral Anchor', desc: 'Robert Chen referred Alex Rivera. A quick text to Robert reinforcing the relationship ("Alex and I are meeting tomorrow") can increase trust and conversion probability by ~11%.', actions: ['Text Robert', 'AI Draft'] },
+      { priority: 'medium', title: 'Prepare WL vs Term Comparison Slide', desc: 'AI analysis shows Alex Rivera compared WL to Term Life on 3 occasions. Prepare a side-by-side showing 30-year total cost difference and permanent vs. temporary protection.', actions: ['Generate Slide', 'Ask AI'] },
+    ],
+    convScenarios: [
+      { icon: '🎯', label: 'Best Case', desc: 'April 12 meeting closes — same-day signature', pct: '82%', level: 'high' },
+      { icon: '📋', label: 'Base Case', desc: 'Follow-up needed after meeting — close Apr 19', pct: '68%', level: 'medium' },
+      { icon: '⏳', label: 'Stall Risk', desc: 'Prospect delays for family discussion', pct: '32%', level: 'low' },
+    ],
+    timeline: [
+      { date: 'Mar 28', title: 'Referral Received', desc: 'Robert Chen introduced Alex Rivera via email', dot: 'done' },
+      { date: 'Apr 3', title: 'Discovery Call', desc: '30-min call — budget confirmed, WL interest confirmed', dot: 'done' },
+      { date: 'Apr 7', title: 'WL Illustration Sent', desc: 'AI-generated illustration for $500K WL at Preferred rate', dot: 'done' },
+      { date: 'Apr 12', title: 'In-person Meeting', desc: 'Product presentation + e-app start expected', dot: 'current' },
+      { date: 'Apr 15', title: 'Application Submission', desc: 'Target: submit e-app immediately after meeting', dot: 'future' },
+      { date: 'Apr 28', title: 'UW Decision Expected', desc: 'Preferred Plus likely — clean health profile', dot: 'future' },
+    ],
+    forecast: {
+      headline: '🎯 82% Close Probability — Priority Prospect',
+      rows: [
+        { label: 'Expected Close Date', val: 'Apr 15–19, 2026' },
+        { label: 'Projected Revenue', val: '$4,200/yr' },
+        { label: 'Commission', val: '$504 (first yr)' },
+        { label: 'UW Class Estimate', val: 'Preferred Plus' },
+        { label: 'AI Confidence', val: '91.2%' },
+      ],
+      risks: [
+        { icon: '⚠️', text: 'Competitor proposal from Prudential still on table', impact: 'medium' },
+        { icon: '👥', text: 'Spouse involvement could add 7-day decision lag', impact: 'low' },
+      ]
+    }
+  },
+  D004: {
+    id: 'D004', client: 'Michael Santos', product: 'Universal Life — $750K', stage: 'Quoted',
+    annualValue: '$6,800/yr', commission: '$816', winScore: 91, priority: '#2',
+    closeWindow: '3d', stageColor: 'green',
+    ringColor: '#22c55e', ringDash: '193 214',
+    convProb: 91, convLabel: 'High Probability',
+    factors: {
+      positive: [
+        { label: 'Lab results received — all clear', pts: '+25' },
+        { label: 'Quote accepted in principle — verbal OK', pts: '+22' },
+        { label: 'Budget pre-qualified $550+/mo', pts: '+18' },
+        { label: 'Business owner — estate planning driver', pts: '+15' },
+      ],
+      negative: [
+        { label: 'Waiting on attorney review of beneficiary clause', pts: '-10' },
+      ],
+      neutral: [
+        { label: 'Minor cholesterol flag — Preferred still likely', pts: '-5' },
+      ]
+    },
+    nba: [
+      { priority: 'critical', title: 'Call to Close — Lab Results Are Clear', desc: 'All lab work returned clean. Attorney review of beneficiary clause is the last open item. Call Michael today, confirm attorney\'s timeline, and offer to have NYL\'s estate planning team provide a 15-min briefing to expedite.', actions: ['Call Now', 'Email Attorney'] },
+      { priority: 'high', title: 'Prepare E-App — Pre-fill 95%', desc: 'AI has 95% of e-app pre-filled from prior data. Send DocuSign link immediately after closing call. Include UL product summary and benefit illustration at $750K.', actions: ['Open E-App', 'Send DocuSign'] },
+      { priority: 'medium', title: 'Add Accidental Death Rider — $750K AD Rider', desc: 'Santos profile indicates high travel frequency. AI recommendation: propose $750K AD rider at $62/mo — high acceptance probability for business travelers.', actions: ['Add Rider', 'AI Upsell Brief'] },
+    ],
+    convScenarios: [
+      { icon: '⚡', label: 'Same-Week Close', desc: 'Call today → e-app tonight → UW submit Thu', pct: '91%', level: 'high' },
+      { icon: '📋', label: 'Next-Week Close', desc: 'Attorney review delays to Apr 17', pct: '78%', level: 'medium' },
+      { icon: '🔄', label: 'Stall Scenario', desc: 'Attorney requests policy restructure', pct: '24%', level: 'low' },
+    ],
+    timeline: [
+      { date: 'Mar 15', title: 'Initial Meeting', desc: 'Estate planning review — UL identified as solution', dot: 'done' },
+      { date: 'Mar 22', title: 'Quote Delivered', desc: '$750K UL at $6,800/yr — Preferred class estimate', dot: 'done' },
+      { date: 'Apr 1', title: 'Lab Work Ordered', desc: 'Full APS-alternative lab panel — NY Life paramed', dot: 'done' },
+      { date: 'Apr 8', title: 'Lab Results Received', desc: 'All clear — minor cholesterol flagged (Preferred still OK)', dot: 'done' },
+      { date: 'Apr 13', title: 'Close Call — TODAY', desc: 'Confirm attorney timeline, push for e-app signature', dot: 'current' },
+      { date: 'Apr 18', title: 'UW Submission Target', desc: 'Submit to underwriting — 7-10 day decision window', dot: 'future' },
+    ],
+    forecast: {
+      headline: '⚡ 91% Win — Close This Week',
+      rows: [
+        { label: 'Expected Close Date', val: 'Apr 13–17, 2026' },
+        { label: 'Annual Revenue', val: '$6,800/yr' },
+        { label: 'Commission (Y1)', val: '$816' },
+        { label: 'UW Class Estimate', val: 'Preferred' },
+        { label: 'Close Window', val: '3 days' },
+      ],
+      risks: [
+        { icon: '⚖️', text: 'Attorney beneficiary review may add 3–5 day lag', impact: 'medium' },
+        { icon: '📋', text: 'Minor cholesterol flag — confirm Preferred classification', impact: 'low' },
+      ]
+    }
+  },
+  D008: {
+    id: 'D008', client: 'Kevin Park', product: 'Term Life — $500K', stage: 'Approved',
+    annualValue: '$1,800/yr', commission: '$216', winScore: 95, priority: '#1',
+    closeWindow: '2d', stageColor: 'green',
+    ringColor: '#22c55e', ringDash: '202 214',
+    convProb: 95, convLabel: 'Close Today',
+    factors: {
+      positive: [
+        { label: 'Approved Preferred Plus — best class', pts: '+28' },
+        { label: 'E-App 95% complete — DocuSign sent', pts: '+25' },
+        { label: 'Verbal confirmation from client', pts: '+20' },
+        { label: 'No outstanding open items', pts: '+18' },
+      ],
+      negative: [
+        { label: 'E-signature delay (2 days since sent)', pts: '-8' },
+      ],
+      neutral: [
+        { label: 'Minor follow-up required', pts: '-2' },
+      ]
+    },
+    nba: [
+      { priority: 'critical', title: 'Resend DocuSign — 2-Day Close Window', desc: 'Kevin Park\'s e-signature has been pending for 2 days. Approved Preferred Plus. Resend DocuSign with a 48-hour expiry. Text message reminder has 3x higher response rate than email at this stage.', actions: ['Resend DocuSign', 'Text Reminder'] },
+      { priority: 'high', title: 'Propose $500K AD Rider — $120/yr Upsell', desc: 'Kevin Park is 29, active lifestyle. Accidental death rider at $120/yr — AI recommends offering after signature to avoid decision fatigue before close. Commission: +$14/yr.', actions: ['Add to E-App', 'AI Pitch Brief'] },
+      { priority: 'medium', title: 'Schedule 90-Day Policy Review', desc: 'After issue, schedule a 90-day review call to introduce whole life conversion options. 29-year-old term buyer is 68% likely to convert within 3 years based on book analysis.', actions: ['Schedule Review', 'Set Reminder'] },
+    ],
+    convScenarios: [
+      { icon: '✅', label: 'Sign Today', desc: 'DocuSign reminder → signature within hours', pct: '95%', level: 'high' },
+      { icon: '📋', label: 'Sign Tomorrow', desc: 'Slight delay — policy issued Apr 15', pct: '88%', level: 'high' },
+      { icon: '⚠️', label: 'Cancellation Risk', desc: 'Client goes dark — unlikely given verbal confirmation', pct: '5%', level: 'low' },
+    ],
+    timeline: [
+      { date: 'Apr 1', title: 'Application Submitted', desc: 'E-app completed — 95% AI pre-filled', dot: 'done' },
+      { date: 'Apr 3', title: 'Lab Work Ordered', desc: 'Paramed exam scheduled — age 29 no APS needed', dot: 'done' },
+      { date: 'Apr 7', title: 'Lab Results Received', desc: 'All clear — Preferred Plus confirmed', dot: 'done' },
+      { date: 'Apr 8', title: 'UW Decision: APPROVED', desc: 'Preferred Plus — best rate class, no exclusions', dot: 'done' },
+      { date: 'Apr 11', title: 'DocuSign Sent', desc: 'E-delivery and e-signature request sent', dot: 'done' },
+      { date: 'Apr 13', title: 'E-Signature Pending', desc: 'Resend reminder — 2-day window to close', dot: 'current' },
+    ],
+    forecast: {
+      headline: '✅ 95% Win — Act Today to Issue',
+      rows: [
+        { label: 'Expected Issue Date', val: 'Apr 13–15, 2026' },
+        { label: 'Annual Premium', val: '$1,800/yr' },
+        { label: 'Commission (Y1)', val: '$216' },
+        { label: 'UW Class', val: 'Preferred Plus ★' },
+        { label: 'Upsell Potential', val: '+$120/yr (AD Rider)' },
+      ],
+      risks: [
+        { icon: '⏱️', text: 'DocuSign expiry — resend today', impact: 'high' },
+        { icon: '📱', text: 'No response to email — switch to text/call', impact: 'medium' },
+      ]
+    }
+  },
+  D009: {
+    id: 'D009', client: 'Linda Morrison', product: 'UMA — $280K AUM', stage: 'Approved',
+    annualValue: '$2,800/yr fee', commission: '$280', winScore: 90, priority: '#3',
+    closeWindow: '5d', stageColor: 'green',
+    ringColor: '#22c55e', ringDash: '191 214',
+    convProb: 90, convLabel: 'Near Close',
+    factors: {
+      positive: [
+        { label: 'Documents signed — all paperwork complete', pts: '+26' },
+        { label: 'ACAT transfer initiated', pts: '+22' },
+        { label: 'Strong relationship — 12-year client', pts: '+20' },
+        { label: '$280K AUM confirmed and ready to transfer', pts: '+18' },
+      ],
+      negative: [
+        { label: 'ACAT transfer 5-7 business day window', pts: '-8' },
+      ],
+      neutral: [
+        { label: 'Custody change (Fidelity → NYL) — standard friction', pts: '-4' },
+      ]
+    },
+    nba: [
+      { priority: 'critical', title: 'Initiate ACAT Transfer — Day 1 of 5-7 Window', desc: 'All documents signed. Initiate the ACAT transfer form today. Fidelity typically processes in 5–7 business days. Confirm transfer tracking number and send Linda a status update email.', actions: ['Submit ACAT', 'Email Linda'] },
+      { priority: 'high', title: 'Schedule 90-Day Portfolio Review — May 15', desc: 'After transfer completes, schedule a 90-day UMA performance review for May 15. Prepare a proposed asset allocation model: 60% equity, 30% fixed income, 10% alternatives based on Linda\'s risk profile.', actions: ['Schedule May 15', 'Prep Model'] },
+      { priority: 'medium', title: 'Propose Estate Planning Review', desc: 'Linda Morrison has $812K total book value including WL, investments, and retirement. AI recommends a holistic estate planning session — high probability of adding NQDC plan or trust services.', actions: ['Estate Proposal', 'AI Brief'] },
+    ],
+    convScenarios: [
+      { icon: '📦', label: 'Transfer Complete', desc: 'ACAT done Apr 18 — account live, fee starts', pct: '90%', level: 'high' },
+      { icon: '📋', label: 'Minor Delay', desc: 'Fidelity processing delay — 2 extra days', pct: '82%', level: 'high' },
+      { icon: '⚠️', label: 'Transfer Issue', desc: 'ACAT rejection — unlikely, re-submit same day', pct: '8%', level: 'low' },
+    ],
+    timeline: [
+      { date: 'Mar 28', title: 'Annual Review Meeting', desc: 'Identified $280K Fidelity account for consolidation', dot: 'done' },
+      { date: 'Apr 2', title: 'UMA Proposal Delivered', desc: 'NYL UMA model — 60/30/10 allocation, 1% mgmt fee', dot: 'done' },
+      { date: 'Apr 8', title: 'Docs Signed', desc: 'All NYL investment account paperwork completed', dot: 'done' },
+      { date: 'Apr 13', title: 'ACAT Initiation — TODAY', desc: 'Submit ACAT transfer form — 5-7 business days', dot: 'current' },
+      { date: 'Apr 18', title: 'Transfer Expected', desc: 'Fidelity completes outbound transfer to NYL', dot: 'future' },
+      { date: 'May 15', title: '90-Day Review', desc: 'Portfolio review + estate planning discussion', dot: 'future' },
+    ],
+    forecast: {
+      headline: '📦 90% Win — ACAT In Progress',
+      rows: [
+        { label: 'Transfer Complete Date', val: 'Apr 18–20, 2026' },
+        { label: 'Annual Management Fee', val: '$2,800/yr' },
+        { label: 'Commission (Y1)', val: '$280' },
+        { label: 'AUM Confirmed', val: '$280,000' },
+        { label: 'Upsell Potential', val: 'Estate Plan + NQDC' },
+      ],
+      risks: [
+        { icon: '🏦', text: 'Fidelity ACAT processing may take 7+ days', impact: 'low' },
+        { icon: '📋', text: 'Estate planning discussion timing', impact: 'low' },
+      ]
+    }
+  },
+  D006: {
+    id: 'D006', client: 'Thomas Wright', product: 'Whole Life — $1M', stage: 'Underwriting',
+    annualValue: '$9,600/yr', commission: '$1,152', winScore: 88, priority: '#4',
+    closeWindow: '5d', stageColor: 'amber',
+    ringColor: '#f59e0b', ringDash: '187 214',
+    convProb: 88, convLabel: 'High Confidence',
+    factors: {
+      positive: [
+        { label: 'Medical exam done — clean results', pts: '+24' },
+        { label: 'High motivation — estate planning for 3 kids', pts: '+20' },
+        { label: 'UW decision expected Apr 16 (3 days)', pts: '+18' },
+        { label: '$1M WL — strong long-term value client', pts: '+16' },
+      ],
+      negative: [
+        { label: 'Pending UW decision — risk of Standard (not Preferred)', pts: '-9' },
+      ],
+      neutral: [
+        { label: 'Possible rate adjustment if Standard issued', pts: '-5' },
+      ]
+    },
+    nba: [
+      { priority: 'high', title: 'Prepare E-Delivery Kit — Expected Apr 16', desc: 'UW decision expected April 16. Prepare the full e-delivery kit now: policy illustration at Preferred class, beneficiary confirmation, payment setup, and cover letter. Have it ready to send within 1 hour of decision.', actions: ['Build Kit', 'Preview E-Delivery'] },
+      { priority: 'high', title: 'Set UW Status Tracking Reminder for Apr 16', desc: 'Set an automated status check for April 16 at 9am. If decision comes back Standard (not Preferred), prepare a rate adjustment conversation guide showing the revised premium and long-term value.', actions: ['Set Reminder', 'Rate-Adjust Script'] },
+      { priority: 'medium', title: 'Discuss LTCI Rider — Estate Planning Bundle', desc: 'Thomas Wright has 3 dependents and is 44 years old. AI recommends proposing a Long-term Care rider at policy issuance — 34% of WL $1M buyers in this profile accept LTC riders.', actions: ['Rider Proposal', 'AI Brief'] },
+    ],
+    convScenarios: [
+      { icon: '✅', label: 'Preferred Approved Apr 16', desc: 'Issue at original quote — immediate e-delivery', pct: '88%', level: 'high' },
+      { icon: '📋', label: 'Standard Issued', desc: 'Rate adjustment needed — close likely Apr 21', pct: '72%', level: 'medium' },
+      { icon: '⚠️', label: 'Postponed/Declined', desc: 'Unlikely — clean exam, minor risk factors only', pct: '8%', level: 'low' },
+    ],
+    timeline: [
+      { date: 'Mar 20', title: 'Initial Meeting', desc: 'Estate planning consultation — $1M WL recommended', dot: 'done' },
+      { date: 'Mar 25', title: 'Application Submitted', desc: 'E-app complete — AI pre-filled 91%', dot: 'done' },
+      { date: 'Apr 3', title: 'Medical Exam Done', desc: 'NYL paramed — all results clean', dot: 'done' },
+      { date: 'Apr 8', title: 'APS Received', desc: 'Primary care records reviewed — no flags', dot: 'done' },
+      { date: 'Apr 16', title: 'UW Decision Expected', desc: 'Preferred Plus or Preferred — prepare e-delivery kit', dot: 'current' },
+      { date: 'Apr 18', title: 'Target Policy Issue', desc: 'E-delivery → signature → issued same day', dot: 'future' },
+    ],
+    forecast: {
+      headline: '🎯 88% Win — UW Decision Apr 16',
+      rows: [
+        { label: 'Expected Decision Date', val: 'Apr 16, 2026' },
+        { label: 'Annual Premium', val: '$9,600/yr' },
+        { label: 'Commission (Y1)', val: '$1,152' },
+        { label: 'UW Class Estimate', val: 'Preferred' },
+        { label: 'Upsell Potential', val: 'LTC Rider +$180/yr' },
+      ],
+      risks: [
+        { icon: '📋', text: 'Standard class vs Preferred — rate adjustment scenario', impact: 'medium' },
+        { icon: '⏱️', text: 'UW delay beyond Apr 16 possible', impact: 'low' },
+      ]
+    }
+  }
+};
+
+// Fallback for deals without full data
+function getSalesAIDeal(dealId) {
+  return salesAIData[dealId] || {
+    id: dealId, client: 'Client', product: 'Product', stage: 'Active',
+    annualValue: '—', commission: '—', winScore: 70, priority: '—',
+    closeWindow: '—', stageColor: 'amber',
+    ringColor: '#f59e0b', ringDash: '149 214',
+    convProb: 70, convLabel: 'In Progress',
+    factors: { positive: [], negative: [], neutral: [] },
+    nba: [],
+    convScenarios: [],
+    timeline: [],
+    forecast: { headline: 'Analysis in progress', rows: [], risks: [] }
+  };
+}
+
+function openDealAIModal(dealId) {
+  const d = getSalesAIDeal(dealId);
+  const overlay = document.getElementById('deal-ai-modal-overlay');
+  if (!overlay) return;
+
+  // Populate header
+  document.getElementById('dai-client-name').textContent = d.client;
+  document.getElementById('dai-product-line').textContent = d.product;
+  document.getElementById('dai-ring-val').textContent = d.winScore + '%';
+  document.getElementById('dai-conv-val').textContent = d.convProb + '%';
+  document.getElementById('dai-days-val').textContent = d.closeWindow;
+  document.getElementById('dai-comm-val').textContent = d.commission;
+  document.getElementById('dai-priority-val').textContent = d.priority;
+
+  // Stage badge color
+  const stageBadge = document.getElementById('dai-stage-badge');
+  stageBadge.textContent = d.stage;
+  stageBadge.style.background = d.stageColor === 'green' ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)';
+  stageBadge.style.color = d.stageColor === 'green' ? '#4ade80' : '#fbbf24';
+  stageBadge.style.borderColor = d.stageColor === 'green' ? 'rgba(34,197,94,0.4)' : 'rgba(245,158,11,0.4)';
+
+  // Ring arc
+  const arc = document.getElementById('dai-ring-arc');
+  if (arc) {
+    arc.setAttribute('stroke', d.ringColor);
+    arc.setAttribute('stroke-dasharray', d.ringDash);
+  }
+
+  // Activate first tab
+  document.querySelectorAll('.dai-tab').forEach(t => t.classList.remove('active'));
+  const firstTab = document.getElementById('dai-tab-overview');
+  if (firstTab) firstTab.classList.add('active');
+  renderDaiTab('overview', d);
+
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDealAIModal(e) {
+  if (e && e.target !== document.getElementById('deal-ai-modal-overlay')) return;
+  document.getElementById('deal-ai-modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function switchDaiTab(tab, btn) {
+  document.querySelectorAll('.dai-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  // Get current deal from header
+  const clientName = document.getElementById('dai-client-name').textContent;
+  const dealId = Object.keys(salesAIData).find(id => salesAIData[id].client === clientName) || 'D008';
+  renderDaiTab(tab, getSalesAIDeal(dealId));
+}
+
+function renderDaiTab(tab, d) {
+  const body = document.getElementById('dai-body');
+  if (!body) return;
+
+  if (tab === 'overview') {
+    // Win Score breakdown
+    const posHtml = (d.factors.positive || []).map(f => `
+      <div class="dai-factor-row">
+        <div class="dai-factor-label">${f.label}</div>
+        <div class="dai-factor-bar-wrap"><div class="dai-factor-bar positive" style="width:${Math.min(100, parseInt(f.pts)*2.5)}%"></div></div>
+        <div class="dai-factor-pts pos">${f.pts}</div>
+      </div>`).join('');
+    const negHtml = (d.factors.negative || []).map(f => `
+      <div class="dai-factor-row">
+        <div class="dai-factor-label">${f.label}</div>
+        <div class="dai-factor-bar-wrap"><div class="dai-factor-bar negative" style="width:${Math.min(100, Math.abs(parseInt(f.pts))*4)}%"></div></div>
+        <div class="dai-factor-pts neg">${f.pts}</div>
+      </div>`).join('');
+    const neuHtml = (d.factors.neutral || []).map(f => `
+      <div class="dai-factor-row">
+        <div class="dai-factor-label">${f.label}</div>
+        <div class="dai-factor-bar-wrap"><div class="dai-factor-bar neutral" style="width:${Math.min(100, Math.abs(parseInt(f.pts))*6)}%"></div></div>
+        <div class="dai-factor-pts neu">${f.pts}</div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="dai-score-grid">
+        <div class="dai-score-card">
+          <div class="dai-score-card-title">✅ Positive Factors</div>
+          ${posHtml || '<div style="color:#94a3b8;font-size:13px">No positive factors recorded</div>'}
+        </div>
+        <div class="dai-score-card">
+          <div class="dai-score-card-title">⚠️ Risk / Negative Factors</div>
+          ${negHtml}
+          ${neuHtml}
+        </div>
+      </div>
+      <div class="dai-total-score-row">
+        <div class="dai-total-lbl"><i class="fas fa-brain"></i> AI Win Probability Score</div>
+        <div class="dai-total-val">${d.winScore}%</div>
+      </div>
+      <div style="margin-top:14px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;">
+        <div class="dai-score-card-title" style="margin-bottom:10px">📊 Benchmarks vs. Book Average</div>
+        <div class="dai-factor-row">
+          <div class="dai-factor-label">This Deal</div>
+          <div class="dai-factor-bar-wrap"><div class="dai-factor-bar positive" style="width:${d.winScore}%"></div></div>
+          <div class="dai-factor-pts pos">${d.winScore}%</div>
+        </div>
+        <div class="dai-factor-row">
+          <div class="dai-factor-label">Book Average</div>
+          <div class="dai-factor-bar-wrap"><div class="dai-factor-bar neutral" style="width:68%"></div></div>
+          <div class="dai-factor-pts neu">68%</div>
+        </div>
+        <div class="dai-factor-row">
+          <div class="dai-factor-label">Top Quartile</div>
+          <div class="dai-factor-bar-wrap"><div class="dai-factor-bar positive" style="width:88%"></div></div>
+          <div class="dai-factor-pts pos">88%</div>
+        </div>
+      </div>`;
+
+  } else if (tab === 'nba') {
+    const actionsHtml = (d.nba || []).map(a => `
+      <div class="dai-nba-action-item ${a.priority}">
+        <div class="dai-nba-action-top">
+          <span class="dai-nba-priority-badge ${a.priority}">${a.priority.toUpperCase()}</span>
+          <div class="dai-nba-action-title">${a.title}</div>
+        </div>
+        <div class="dai-nba-action-desc">${a.desc}</div>
+        <div class="dai-nba-action-btns">
+          ${(a.actions || []).map((act, i) => `<button class="dai-nba-btn ${i===0?'primary':'secondary'}" onclick="sendContextMessage('${act} for ${d.client} — deal ${d.id}','smart-advisor')"><i class="fas fa-${i===0?'bolt':'comment-alt'}"></i> ${act}</button>`).join('')}
+        </div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="dai-nba-header">
+        <div class="dai-nba-icon">⚡</div>
+        <div>
+          <div class="dai-nba-urgency-label">AI Next-Best-Action Engine — ${d.client}</div>
+          <div class="dai-nba-urgency-val">Close window: ${d.closeWindow} · ${d.convLabel}</div>
+        </div>
+      </div>
+      <div class="dai-nba-action-list">${actionsHtml || '<div style="color:#94a3b8;font-size:13px;padding:12px">No actions required at this stage</div>'}</div>`;
+
+  } else if (tab === 'conv') {
+    const scenariosHtml = (d.convScenarios || []).map(s => `
+      <div class="dai-conv-scenario">
+        <div class="dai-conv-scenario-icon">${s.icon}</div>
+        <div class="dai-conv-scenario-info">
+          <div class="dai-conv-scenario-label">${s.label}</div>
+          <div class="dai-conv-scenario-desc">${s.desc}</div>
+        </div>
+        <div class="dai-conv-scenario-pct ${s.level}">${s.pct}</div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="dai-conv-summary">
+        <div class="dai-conv-kpi"><div class="dai-conv-kpi-val green">${d.winScore}%</div><div class="dai-conv-kpi-lbl">Win Probability</div></div>
+        <div class="dai-conv-kpi"><div class="dai-conv-kpi-val blue">${d.closeWindow}</div><div class="dai-conv-kpi-lbl">Close Window</div></div>
+        <div class="dai-conv-kpi"><div class="dai-conv-kpi-val amber">${d.annualValue}</div><div class="dai-conv-kpi-lbl">Annual Value</div></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px"><i class="fas fa-funnel-dollar"></i> Conversion Scenarios</div>
+      <div class="dai-conv-scenarios">${scenariosHtml}</div>`;
+
+  } else if (tab === 'timeline') {
+    const tlHtml = (d.timeline || []).map(t => `
+      <div class="dai-timeline-item">
+        <div class="dai-timeline-dot ${t.dot}"></div>
+        <div class="dai-timeline-date">${t.date}</div>
+        <div class="dai-timeline-title">${t.title}</div>
+        <div class="dai-timeline-desc">${t.desc}</div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div style="font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px"><i class="fas fa-history"></i> Deal Timeline — ${d.client}</div>
+      <div class="dai-timeline">${tlHtml}</div>`;
+
+  } else if (tab === 'forecast') {
+    const rowsHtml = (d.forecast.rows || []).map(r => `
+      <div class="dai-forecast-row"><div class="dai-forecast-row-lbl">${r.label}</div><div class="dai-forecast-row-val">${r.val}</div></div>`).join('');
+    const risksHtml = (d.forecast.risks || []).map(r => `
+      <div class="dai-risk-item">
+        <div class="dai-risk-icon">${r.icon}</div>
+        <div class="dai-risk-text">${r.text}</div>
+        <div class="dai-risk-impact ${r.impact}">${r.impact.toUpperCase()}</div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="dai-forecast-card">
+        <div class="dai-forecast-headline">${d.forecast.headline}</div>
+        ${rowsHtml}
+      </div>
+      <div style="font-size:12px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:.05em;margin:16px 0 10px"><i class="fas fa-exclamation-triangle"></i> Risk Factors</div>
+      <div class="dai-risk-list">${risksHtml || '<div style="color:#22c55e;font-size:13px;padding:8px">No significant risks identified</div>'}</div>`;
+  }
+}
+
+// ── Sales AI Report Modal ──
+function openSalesAIReport() {
+  const overlay = document.getElementById('sales-ai-report-overlay');
+  if (!overlay) return;
+  document.querySelectorAll('.sair-tab').forEach(t => t.classList.remove('active'));
+  const firstTab = document.getElementById('sair-tab-overview');
+  if (firstTab) firstTab.classList.add('active');
+  renderSairTab('overview');
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSalesAIReport(e) {
+  if (e && e.target !== document.getElementById('sales-ai-report-overlay')) return;
+  document.getElementById('sales-ai-report-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function switchSairTab(tab, btn) {
+  document.querySelectorAll('.sair-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderSairTab(tab);
+}
+
+function renderSairTab(tab) {
+  const body = document.getElementById('sair-body');
+  if (!body) return;
+
+  if (tab === 'overview') {
+    body.innerHTML = `
+      <div class="sair-overview-grid">
+        <div class="sair-kpi-card">
+          <div class="sair-kpi-icon">💰</div>
+          <div class="sair-kpi-val green">$284K</div>
+          <div class="sair-kpi-lbl">Pipeline Value</div>
+          <div class="sair-kpi-delta">↑ +18% vs last month</div>
+        </div>
+        <div class="sair-kpi-card">
+          <div class="sair-kpi-icon">🎯</div>
+          <div class="sair-kpi-val blue">91.2%</div>
+          <div class="sair-kpi-lbl">AI Accuracy</div>
+          <div class="sair-kpi-delta">↑ +2.1% vs manual</div>
+        </div>
+        <div class="sair-kpi-card">
+          <div class="sair-kpi-icon">⚡</div>
+          <div class="sair-kpi-val gold">3</div>
+          <div class="sair-kpi-lbl">Close-Ready Deals</div>
+          <div class="sair-kpi-delta">Kevin, Santos, Linda</div>
+        </div>
+        <div class="sair-kpi-card">
+          <div class="sair-kpi-icon">📈</div>
+          <div class="sair-kpi-val purple">$47.2K</div>
+          <div class="sair-kpi-lbl">Projected Close (Apr)</div>
+          <div class="sair-kpi-delta">↑ On track for target</div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-filter" style="color:#6366f1;margin-right:6px"></i> Pipeline Stage Distribution</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${[
+            { stage:'Prospect', count:8, pct:100, color:'#6366f1', conv:'22% avg conv.' },
+            { stage:'Quoted', count:6, pct:75, color:'#0ea5e9', conv:'41% avg conv.' },
+            { stage:'Underwriting', count:4, pct:50, color:'#f59e0b', conv:'74% avg conv.' },
+            { stage:'Approved', count:3, pct:38, color:'#22c55e', conv:'90% avg conv.' },
+          ].map(s => `
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:90px;font-size:12px;color:#64748b">${s.stage}</div>
+              <div style="flex:1;height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden">
+                <div style="width:${s.pct}%;height:100%;background:${s.color};border-radius:5px"></div>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:#1e293b;min-width:16px">${s.count}</div>
+              <div style="font-size:11px;color:#94a3b8;min-width:90px">${s.conv}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;border-radius:12px;padding:16px 20px">
+        <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:10px"><i class="fas fa-robot" style="margin-right:6px"></i> AI Pipeline Intelligence Summary</div>
+        <div style="font-size:13px;color:#14532d;line-height:1.7">
+          Your pipeline is performing at <strong>91.2% AI accuracy</strong> — above the 89% manual benchmark. 
+          3 deals are close-ready: Kevin Park (e-sig pending, 2-day window), Michael Santos (call to close today), and Linda Morrison (ACAT in progress). 
+          Thomas Wright's UW decision on April 16 will add a $9,600/yr deal. 
+          AI projects <strong>$47,200 in April closes</strong>, putting you on track to hit the $240K annual target at 78% with 3 months remaining.
+        </div>
+      </div>`;
+
+  } else if (tab === 'winscores') {
+    const deals = [
+      { id:'D008', rank:1, client:'Kevin Park', stage:'Approved', product:'Term Life $500K', score:95, close:'2d', nba:'Resend DocuSign today' },
+      { id:'D004', rank:2, client:'Michael Santos', stage:'Quoted', product:'Universal Life $750K', score:91, close:'3d', nba:'Call to close — lab clear' },
+      { id:'D009', rank:3, client:'Linda Morrison', stage:'Approved', product:'UMA $280K AUM', score:90, close:'5d', nba:'Initiate ACAT transfer' },
+      { id:'D006', rank:4, client:'Thomas Wright', stage:'Underwriting', product:'Whole Life $1M', score:88, close:'5d', nba:'Prep e-delivery kit' },
+      { id:'D001', rank:5, client:'Alex Rivera', stage:'Prospect', product:'Whole Life $500K', score:82, close:'14d', nba:'Send pre-meeting brief' },
+      { id:'D005', rank:6, client:'Julia Chen', stage:'Quoted', product:'Deferred Annuity', score:73, close:'21d', nba:'Follow up post-quote' },
+      { id:'D007', rank:7, client:'Grace Lee', stage:'Underwriting', product:'VUL $250K', score:69, close:'14d', nba:'Chase APS — delay risk' },
+      { id:'D002', rank:8, client:'Nancy Foster', stage:'Prospect', product:'Term Life $1M', score:61, close:'30d', nba:'Health class verification' },
+      { id:'D003', rank:9, client:'John Kim', stage:'Prospect', product:'Disability Insurance', score:44, close:'60d', nba:'Re-engage with new proposal' },
+    ];
+    const tier = s => s >= 80 ? 'high' : s >= 60 ? 'medium' : 'low';
+    const rowsHtml = deals.map(d => `
+      <tr onclick="closeSalesAIReport();openDealAIModal('${d.id}')" style="cursor:pointer">
+        <td><strong>${d.rank}</strong></td>
+        <td><strong>${d.client}</strong></td>
+        <td style="font-size:12px;color:#64748b">${d.product}</td>
+        <td><span style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd">${d.stage}</span></td>
+        <td>
+          <div class="sair-win-score-cell">
+            <div class="sair-win-bar-wrap"><div class="sair-win-bar ${tier(d.score)}" style="width:${d.score}%"></div></div>
+            <span class="sair-win-pct ${tier(d.score)}">${d.score}%</span>
+          </div>
+        </td>
+        <td style="font-size:12px;color:#64748b">${d.close}</td>
+        <td style="font-size:12px;color:#374151"><i class="fas fa-bolt" style="color:#6366f1;margin-right:5px"></i>${d.nba}</td>
+      </tr>`).join('');
+    body.innerHTML = `
+      <div style="margin-bottom:14px;font-size:13px;color:#64748b">All 9 active deals ranked by AI win probability · Click any row to open AI Deal Intelligence</div>
+      <div style="overflow-x:auto">
+        <table class="sair-wins-table">
+          <thead><tr><th>#</th><th>Client</th><th>Product</th><th>Stage</th><th>Win Score</th><th>Window</th><th>Top NBA</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>`;
+
+  } else if (tab === 'nba') {
+    const nbas = [
+      { rank:1, client:'Kevin Park', stage:'Approved', product:'Term Life $500K · $216 comm', score:95, cls:'high', action:'Resend DocuSign NOW — 2-day window before approval expires. Text message has 3x response rate.', dealId:'D008' },
+      { rank:2, client:'Michael Santos', stage:'Quoted', product:'Universal Life $750K · $816 comm', score:91, cls:'high', action:'Call Michael today — lab results clear, attorney review timeline to confirm. Push for same-week e-app.', dealId:'D004' },
+      { rank:3, client:'Linda Morrison', stage:'Approved', product:'UMA $280K AUM · $280/yr', score:90, cls:'high', action:'Submit ACAT transfer form today — 5-7 day window. Confirm tracking number and update client.', dealId:'D009' },
+      { rank:4, client:'Thomas Wright', stage:'Underwriting', product:'Whole Life $1M · $1,152 comm', score:88, cls:'medium', action:'Build e-delivery kit now for Apr 16 UW decision. Include Preferred class illustration and LTC rider option.', dealId:'D006' },
+      { rank:5, client:'Alex Rivera', stage:'Prospect', product:'Whole Life $500K · $504 comm', score:82, cls:'medium', action:'Send pre-meeting brief tonight for Apr 12 meeting. Include WL illustration, cash value projection, term comparison.', dealId:'D001' },
+    ];
+    body.innerHTML = `
+      <div style="margin-bottom:16px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:12px;padding:14px 18px">
+        <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:4px"><i class="fas fa-bolt" style="margin-right:6px"></i> AI Next-Best-Action Engine — Top 5 Priority Actions</div>
+        <div style="font-size:12px;color:#4338ca">Actions ranked by expected revenue impact and close probability. Act on #1 and #2 today.</div>
+      </div>
+      <div class="sair-nba-grid">
+        ${nbas.map(n => `
+          <div class="sair-nba-card">
+            <div class="sair-nba-rank">${n.rank}</div>
+            <div class="sair-nba-info">
+              <div class="sair-nba-client-row">
+                <div class="sair-nba-client">${n.client}</div>
+                <div class="sair-nba-stage">${n.stage}</div>
+              </div>
+              <div class="sair-nba-product">${n.product}</div>
+              <div class="sair-nba-action"><i class="fas fa-arrow-right" style="color:#6366f1;margin-top:2px;flex-shrink:0"></i>${n.action}</div>
+            </div>
+            <div class="sair-nba-score">
+              <div class="sair-nba-score-val ${n.cls}">${n.score}%</div>
+              <div class="sair-nba-score-lbl">win</div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+
+  } else if (tab === 'forecast') {
+    body.innerHTML = `
+      <div class="sair-forecast-grid">
+        <div class="sair-forecast-section">
+          <div class="sair-forecast-section-title"><i class="fas fa-chart-line"></i> April 2026 Close Forecast</div>
+          ${[
+            { lbl:'Kevin Park — Term $500K', pct:95, val:'$216' },
+            { lbl:'Michael Santos — UL $750K', pct:91, val:'$816' },
+            { lbl:'Linda Morrison — UMA $280K', pct:90, val:'$280' },
+            { lbl:'Thomas Wright — WL $1M', pct:88, val:'$1,152' },
+            { lbl:'Alex Rivera — WL $500K', pct:82, val:'$504' },
+          ].map(r => `
+            <div class="sair-forecast-bar-row">
+              <div class="sair-forecast-bar-lbl">${r.lbl}</div>
+              <div class="sair-forecast-bar-wrap"><div class="sair-forecast-bar-fill" style="width:${r.pct}%;background:${r.pct>=88?'#22c55e':'#f59e0b'}"></div></div>
+              <div class="sair-forecast-bar-val">${r.val}</div>
+            </div>`).join('')}
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between">
+            <span style="font-size:13px;font-weight:700;color:#1e293b">Projected April Total</span>
+            <span style="font-size:16px;font-weight:800;color:#16a34a">$47,200</span>
+          </div>
+        </div>
+        <div class="sair-forecast-section">
+          <div class="sair-forecast-section-title"><i class="fas fa-calendar-alt"></i> 90-Day Pipeline Outlook</div>
+          ${[
+            { lbl:'April (close-ready deals)', pct:85, val:'$47.2K' },
+            { lbl:'May (projected + new)', pct:70, val:'$38.4K' },
+            { lbl:'June (forecast)', pct:60, val:'$33.0K' },
+          ].map(r => `
+            <div class="sair-forecast-bar-row">
+              <div class="sair-forecast-bar-lbl">${r.lbl}</div>
+              <div class="sair-forecast-bar-wrap"><div class="sair-forecast-bar-fill" style="width:${r.pct}%;background:#6366f1"></div></div>
+              <div class="sair-forecast-bar-val">${r.val}</div>
+            </div>`).join('')}
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid #e2e8f0">
+            <div style="font-size:12px;color:#64748b;margin-bottom:6px">Annual Target Progress</div>
+            <div style="height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden;margin-bottom:6px">
+              <div style="width:78%;height:100%;background:linear-gradient(90deg,#6366f1,#22c55e);border-radius:5px"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px">
+              <span style="color:#16a34a;font-weight:700">$187K earned (78%)</span>
+              <span style="color:#94a3b8">$240K target</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+}
+
+// Alias for conversion forecast shortcut
+function openConversionForecast() {
+  openSalesAIReport();
+  setTimeout(() => {
+    const tab = document.getElementById('sair-tab-forecast');
+    if (tab) { switchSairTab('forecast', tab); }
+  }, 100);
+}
+
+// Click-outside handlers for new modals
+document.addEventListener('DOMContentLoaded', function() {
+  const daiOverlay = document.getElementById('deal-ai-modal-overlay');
+  if (daiOverlay) daiOverlay.addEventListener('click', function(e) {
+    if (e.target === daiOverlay) closeDealAIModal(e);
+  });
+  const sairOverlay = document.getElementById('sales-ai-report-overlay');
+  if (sairOverlay) sairOverlay.addEventListener('click', function(e) {
+    if (e.target === sairOverlay) closeSalesAIReport(e);
+  });
+});
+
+console.log('Sales AI #19 loaded — salesAIData(5 deals), openDealAIModal, switchDaiTab, openSalesAIReport, switchSairTab, openConversionForecast');

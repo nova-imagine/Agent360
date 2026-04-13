@@ -3501,6 +3501,18 @@ function AIAgentsPage() {
               </div>
             </div>
 
+            {/* Sales AI Intelligence */}
+            <div class="ctx-group sales-ai-ctx-group">
+              <span class="ctx-group-label sales-ai-ctx-label"><i class="fas fa-funnel-dollar"></i> Sales AI</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-sai" onclick="openDealAIModal('D008')">Kevin Park 95% ⚡</button>
+                <button class="ctx-btn ctx-sai" onclick="openDealAIModal('D004')">Santos UL 91% 🔥</button>
+                <button class="ctx-btn ctx-sai" onclick="openSalesAIReport()">AI Win Report</button>
+                <button class="ctx-btn ctx-sai" onclick="openConversionForecast()">Conv. Forecast</button>
+                <button class="ctx-btn ctx-sai" onclick="sendContextMessage('Run NBA engine — give me ranked next-best-actions for all 9 deals with urgency flags','smart-advisor')">NBA Engine</button>
+              </div>
+            </div>
+
             {/* Reports */}
             <div class="ctx-group">
               <span class="ctx-group-label"><i class="fas fa-chart-bar"></i> Reports</span>
@@ -4312,6 +4324,31 @@ function SalesPage() {
   return (
     <div class="page sales-page">
 
+      {/* ── AI Sales Intelligence Banner ── */}
+      <div class="sales-ai-banner">
+        <div class="sai-banner-left">
+          <div class="sai-banner-icon"><i class="fas fa-brain"></i></div>
+          <div class="sai-banner-info">
+            <div class="sai-banner-title">
+              AI Sales Intelligence Engine
+              <span class="sai-live-badge"><span class="sai-live-dot"></span>LIVE</span>
+            </div>
+            <div class="sai-banner-subtitle">Win-probability scoring · Next-best-action engine · Conversion prediction · Pipeline forecasting · NBA auto-triggers</div>
+          </div>
+        </div>
+        <div class="sai-banner-chips">
+          <div class="sai-chip"><span class="sai-chip-val">9</span><span class="sai-chip-lbl">Active Deals</span></div>
+          <div class="sai-chip green"><span class="sai-chip-val">$284K</span><span class="sai-chip-lbl">Pipeline Value</span></div>
+          <div class="sai-chip gold"><span class="sai-chip-val">68%</span><span class="sai-chip-lbl">Conv. Rate</span></div>
+          <div class="sai-chip blue"><span class="sai-chip-val">3</span><span class="sai-chip-lbl">Close Ready</span></div>
+          <div class="sai-chip purple"><span class="sai-chip-val">91.2%</span><span class="sai-chip-lbl">AI Accuracy</span></div>
+        </div>
+        <div class="sai-banner-actions">
+          <button class="sai-btn sai-btn-primary" onclick="openSalesAIReport()"><i class="fas fa-chart-line"></i> AI Win Report</button>
+          <button class="sai-btn sai-btn-secondary" onclick="openConversionForecast()"><i class="fas fa-funnel-dollar"></i> Forecast</button>
+        </div>
+      </div>
+
       {/* ── KPI Strip ── */}
       <div class="sales-header-cards">
         <div class="sales-kpi-card">
@@ -4358,6 +4395,48 @@ function SalesPage() {
         </div>
       </div>
 
+      {/* ══════════════════════════════════════════════════
+          AI SALES INTELLIGENCE BANNER  (Task #19a)
+          ══════════════════════════════════════════════════ */}
+      <div class="sai-banner">
+        <div class="sai-banner-left">
+          <div class="sai-banner-icon">
+            <i class="fas fa-brain"></i>
+            <span class="sai-live-badge">LIVE</span>
+          </div>
+          <div class="sai-banner-info">
+            <div class="sai-banner-title">AI Sales Pipeline Intelligence <span class="sai-pulse-dot"></span></div>
+            <div class="sai-banner-sub">Win-probability ML scoring · Next-best-action engine · Conversion prediction · Close-window alerts · 9 deals tracked</div>
+          </div>
+        </div>
+        <div class="sai-banner-chips">
+          <div class="sai-chip green">
+            <i class="fas fa-trophy"></i>
+            <span class="sai-chip-val">$284K</span>
+            <span class="sai-chip-lbl">Pipeline Value</span>
+          </div>
+          <div class="sai-chip blue">
+            <i class="fas fa-bullseye"></i>
+            <span class="sai-chip-val">73%</span>
+            <span class="sai-chip-lbl">Avg Win Prob</span>
+          </div>
+          <div class="sai-chip orange">
+            <i class="fas fa-fire"></i>
+            <span class="sai-chip-val">3</span>
+            <span class="sai-chip-lbl">Close This Week</span>
+          </div>
+          <div class="sai-chip purple">
+            <i class="fas fa-bolt"></i>
+            <span class="sai-chip-val">5</span>
+            <span class="sai-chip-lbl">NBA Alerts</span>
+          </div>
+        </div>
+        <div class="sai-banner-actions">
+          <button class="sai-btn-primary" onclick="openSalesAIReport()"><i class="fas fa-chart-bar"></i> AI Win Report</button>
+          <button class="sai-btn-secondary" onclick="openConversionPredict()"><i class="fas fa-chart-line"></i> Conversion Forecast</button>
+        </div>
+      </div>
+
       {/* ── Main body: Kanban + right sidebar ── */}
       <div class="sales-body-layout">
 
@@ -4372,37 +4451,61 @@ function SalesPage() {
                 <span class="col-count">8</span>
               </div>
               <div class="kanban-card" onclick="openDealModal('D001')">
-                <div class="kc-score-badge score-hi">AI 82</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge green" title="Win Probability 82%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#16a34a" stroke-width="3" stroke-dasharray="75 25" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">82</span>
+                  </div>
+                  <div class="kc-win-label green">82% Win</div>
+                  <span class="kc-conv-badge green">↑ High</span>
+                </div>
                 <div class="kc-client">Alex Rivera</div>
                 <div class="kc-product">Whole Life — $500K</div>
                 <div class="kc-value">$4,800/yr · <span class="kc-comm">$576 comm</span></div>
+                <div class="kc-nba-pill orange"><i class="fas fa-calendar-alt"></i> Schedule Apr 12 pre-brief now</div>
                 <div class="kc-tags"><span class="tag-priority">High Priority</span><span>Referral</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Brief</button>
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('AI analysis for Alex Rivera prospect — Whole Life $500K, close probability, next best action','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D001')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D001','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
               <div class="kanban-card" onclick="openDealModal('D002')">
-                <div class="kc-score-badge score-mid">AI 61</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge amber" title="Win Probability 61%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="57 43" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">61</span>
+                  </div>
+                  <div class="kc-win-label amber">61% Win</div>
+                  <span class="kc-conv-badge amber">→ Mid</span>
+                </div>
                 <div class="kc-client">Nancy Foster</div>
                 <div class="kc-product">Term Life — $1M</div>
                 <div class="kc-value">$3,200/yr · <span class="kc-comm">$384 comm</span></div>
+                <div class="kc-nba-pill blue"><i class="fas fa-file-alt"></i> Share Term vs WL comparison doc</div>
                 <div class="kc-tags"><span>Online Inquiry</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Brief</button>
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('Nancy Foster — Term Life $1M prospect, credit check pending, close strategy','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D002')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D002','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
               <div class="kanban-card" onclick="openDealModal('D003')">
-                <div class="kc-score-badge score-lo">AI 44</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge red" title="Win Probability 44%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#dc2626" stroke-width="3" stroke-dasharray="41 59" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">44</span>
+                  </div>
+                  <div class="kc-win-label red">44% Win</div>
+                  <span class="kc-conv-badge red">↓ At Risk</span>
+                </div>
                 <div class="kc-client">John Kim</div>
                 <div class="kc-product">Disability Insurance</div>
                 <div class="kc-value">$2,100/yr · <span class="kc-comm">$252 comm</span></div>
+                <div class="kc-nba-pill red"><i class="fas fa-exclamation-triangle"></i> Address APS delay — send empathy script</div>
                 <div class="kc-tags"><span>Warm Lead</span></div>
                 <div class="kc-actions">
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('John Kim DI prospect — diabetes flag, APS required, objection handling strategy','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D003')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D003','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
@@ -4416,25 +4519,41 @@ function SalesPage() {
                 <span class="col-count">6</span>
               </div>
               <div class="kanban-card hot" onclick="openDealModal('D004')">
-                <div class="kc-hot-tag"><i class="fas fa-fire"></i> Hot</div>
-                <div class="kc-score-badge score-hi">AI 91</div>
+                <div class="kc-hot-tag"><i class="fas fa-fire"></i> Hot — Close in 3 days</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge green" title="Win Probability 91%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#16a34a" stroke-width="3" stroke-dasharray="86 14" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">91</span>
+                  </div>
+                  <div class="kc-win-label green">91% Win</div>
+                  <span class="kc-conv-badge green">⚡ Urgent</span>
+                </div>
                 <div class="kc-client">Michael Santos</div>
                 <div class="kc-product">Universal Life — $750K</div>
                 <div class="kc-value">$6,400/yr · <span class="kc-comm">$896 comm</span></div>
+                <div class="kc-nba-pill green"><i class="fas fa-phone"></i> Call today — lab results in, close window 3 days</div>
                 <div class="kc-tags"><span>Quote Sent</span><span class="tag-ai">+AI Rec</span></div>
                 <div class="kc-actions">
-                  <button class="kca-btn kca-brief" onclick="event.stopPropagation();sendContextMessage('Michael Santos UL $750K — labs pending, objection handling and close strategy','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D004')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D004','Underwriting')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
               <div class="kanban-card" onclick="openDealModal('D005')">
-                <div class="kc-score-badge score-mid">AI 73</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge amber" title="Win Probability 73%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="69 31" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">73</span>
+                  </div>
+                  <div class="kc-win-label amber">73% Win</div>
+                  <span class="kc-conv-badge amber">→ Watch</span>
+                </div>
                 <div class="kc-client">Julia Chen</div>
                 <div class="kc-product">Deferred Annuity</div>
                 <div class="kc-value">$8,000/yr · <span class="kc-comm">$640 comm</span></div>
+                <div class="kc-nba-pill orange"><i class="fas fa-percentage"></i> Share Fed rate hike impact — annuity 6.1% now</div>
                 <div class="kc-tags"><span>Reviewing</span></div>
                 <div class="kc-actions">
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('Julia Chen deferred annuity quote — income projection, tax advantage talking points','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D005')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D005','Underwriting')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
@@ -4448,24 +4567,40 @@ function SalesPage() {
                 <span class="col-count">4</span>
               </div>
               <div class="kanban-card" onclick="openDealModal('D006')">
-                <div class="kc-score-badge score-hi">AI 88</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge green" title="Win Probability 88%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#16a34a" stroke-width="3" stroke-dasharray="83 17" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">88</span>
+                  </div>
+                  <div class="kc-win-label green">88% Win</div>
+                  <span class="kc-conv-badge green">↑ On Track</span>
+                </div>
                 <div class="kc-client">Thomas Wright</div>
                 <div class="kc-product">Whole Life — $1M</div>
                 <div class="kc-value">$9,600/yr · <span class="kc-comm">$1,152 comm</span></div>
+                <div class="kc-nba-pill blue"><i class="fas fa-hourglass-half"></i> UW decision Apr 16 — prepare e-delivery kit</div>
                 <div class="kc-tags"><span>Medical Exam Done</span></div>
                 <div class="kc-actions">
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('Thomas Wright WL $1M underwriting status — medical exam done, expected decision timeline','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D006')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D006','Approved')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
               <div class="kanban-card" onclick="openDealModal('D007')">
-                <div class="kc-score-badge score-mid">AI 69</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge amber" title="Win Probability 69%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="65 35" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">69</span>
+                  </div>
+                  <div class="kc-win-label amber">69% Win</div>
+                  <span class="kc-conv-badge amber">→ Monitor</span>
+                </div>
                 <div class="kc-client">Grace Lee</div>
                 <div class="kc-product">VUL — $250K</div>
                 <div class="kc-value">$3,800/yr · <span class="kc-comm">$456 comm</span></div>
+                <div class="kc-nba-pill orange"><i class="fas fa-stethoscope"></i> Chase APS — delay risk, call doctor's office</div>
                 <div class="kc-tags"><span>In Review</span></div>
                 <div class="kc-actions">
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();sendContextMessage('Grace Lee VUL $250K underwriting — in review, APS status, next steps','smart-advisor')"><i class="fas fa-robot"></i> AI</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D007')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D007','Approved')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
@@ -4478,29 +4613,46 @@ function SalesPage() {
                 <span><i class="fas fa-check-circle"></i> Approved</span>
                 <span class="col-count">3</span>
               </div>
-              <div class="kanban-card" onclick="openDealModal('D008')">
-                <div class="kc-score-badge score-hi">AI 95</div>
+              <div class="kanban-card hot" onclick="openDealModal('D008')">
+                <div class="kc-hot-tag"><i class="fas fa-signature"></i> E-Sig Pending — Act Today</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge green" title="Win Probability 95%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#16a34a" stroke-width="3" stroke-dasharray="90 10" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">95</span>
+                  </div>
+                  <div class="kc-win-label green">95% Win</div>
+                  <span class="kc-conv-badge green">⚡ Close Now</span>
+                </div>
                 <div class="kc-client">Kevin Park</div>
                 <div class="kc-product">Term Life — $500K</div>
                 <div class="kc-value">$1,800/yr · <span class="kc-comm">$216 comm</span></div>
+                <div class="kc-nba-pill green"><i class="fas fa-paper-plane"></i> Resend DocuSign reminder — 2-day close window</div>
                 <div class="kc-tags"><span class="tag-urgent">Awaiting Signature</span></div>
                 <div class="kc-eapp-bar"><span class="kc-eapp-ai-tag"><i class="fas fa-robot"></i> AI Pre-filled</span><span class="kc-eapp-pct">95% complete</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-eapp" onclick="event.stopPropagation();openEApp('EA-008')"><i class="fas fa-file-contract"></i> E-App</button>
-                  <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Brief</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D008')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D008','Closed Won')"><i class="fas fa-trophy"></i> Close</button>
                 </div>
               </div>
               <div class="kanban-card" onclick="openDealModal('D009')">
-                <div class="kc-score-badge score-hi">AI 90</div>
+                <div class="kc-top-row">
+                  <div class="kc-win-gauge green" title="Win Probability 90%">
+                    <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#16a34a" stroke-width="3" stroke-dasharray="85 15" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
+                    <span class="kc-gauge-val">90</span>
+                  </div>
+                  <div class="kc-win-label green">90% Win</div>
+                  <span class="kc-conv-badge green">↑ Near Close</span>
+                </div>
                 <div class="kc-client">Linda Morrison</div>
                 <div class="kc-product">UMA — $280K AUM</div>
                 <div class="kc-value">$2,800/yr fee · <span class="kc-comm">$280 comm</span></div>
+                <div class="kc-nba-pill blue"><i class="fas fa-exchange-alt"></i> Initiate ACAT transfer — schedule May 15 review</div>
                 <div class="kc-tags"><span>Docs Signed</span></div>
                 <div class="kc-eapp-bar"><span class="kc-eapp-ai-tag"><i class="fas fa-robot"></i> AI Pre-filled</span><span class="kc-eapp-pct">100% complete</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-eapp" onclick="event.stopPropagation();openEApp('EA-009')"><i class="fas fa-file-contract"></i> E-App</button>
-                  <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-003')"><i class="fas fa-file-alt"></i> Brief</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D009')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D009','Closed Won')"><i class="fas fa-trophy"></i> Close</button>
                 </div>
               </div>
@@ -4540,69 +4692,133 @@ function SalesPage() {
         {/* ── Right Sidebar: AI Pipeline Optimizer + Commission Tracker ── */}
         <div class="sales-sidebar">
 
-          {/* AI Pipeline Optimizer */}
-          <div class="pipeline-ai-panel">
+          {/* AI Win Engine Panel */}
+          <div class="pipeline-ai-panel ai-win-engine">
             <div class="pai-header">
-              <div class="pai-title"><i class="fas fa-robot"></i> AI Pipeline Optimizer</div>
+              <div class="pai-title"><i class="fas fa-brain"></i> AI Win Engine</div>
               <span class="pai-badge">LIVE</span>
             </div>
-            <div class="pai-subtitle">Top 5 deals ranked by AI close probability</div>
+            <div class="pai-subtitle">9 deals · ranked by close probability · NBA auto-triggered</div>
+
+            {/* Conversion Funnel Mini */}
+            <div class="awe-funnel">
+              <div class="awe-funnel-title"><i class="fas fa-filter"></i> Conversion Funnel</div>
+              <div class="awe-funnel-stages">
+                <div class="awe-funnel-stage">
+                  <div class="awe-funnel-bar" style="width:100%;background:#6366f1"></div>
+                  <div class="awe-funnel-lbl">Prospect <span>8</span></div>
+                </div>
+                <div class="awe-funnel-stage">
+                  <div class="awe-funnel-bar" style="width:75%;background:#0ea5e9"></div>
+                  <div class="awe-funnel-lbl">Quoted <span>6</span></div>
+                </div>
+                <div class="awe-funnel-stage">
+                  <div class="awe-funnel-bar" style="width:50%;background:#f59e0b"></div>
+                  <div class="awe-funnel-lbl">UW <span>4</span></div>
+                </div>
+                <div class="awe-funnel-stage">
+                  <div class="awe-funnel-bar" style="width:38%;background:#22c55e"></div>
+                  <div class="awe-funnel-lbl">Approved <span>3</span></div>
+                </div>
+              </div>
+              <div class="awe-funnel-conv">AI-predicted close rate: <strong>68%</strong> · +4% vs last month</div>
+            </div>
+
+            {/* Top Deals */}
+            <div class="awe-section-lbl"><i class="fas fa-trophy"></i> Top Deals by Win Probability</div>
             <div class="pai-list">
 
-              <div class="pai-item" onclick="openDealModal('D004')">
-                <div class="pai-rank">1</div>
-                <div class="pai-info">
-                  <div class="pai-client">Michael Santos</div>
-                  <div class="pai-product">Universal Life $750K</div>
-                  <div class="pai-action ai-action-green"><i class="fas fa-bolt"></i> Follow up on lab results — close window: 3 days</div>
-                </div>
-                <div class="pai-score pai-score-green">91%</div>
-              </div>
-
-              <div class="pai-item" onclick="openDealModal('D008')">
-                <div class="pai-rank">2</div>
+              <div class="pai-item awe-item" onclick="openDealAIModal('D008')">
+                <div class="pai-rank awe-rank-1">1</div>
                 <div class="pai-info">
                   <div class="pai-client">Kevin Park</div>
                   <div class="pai-product">Term Life $500K</div>
-                  <div class="pai-action ai-action-green"><i class="fas fa-signature"></i> E-signature pending — send reminder today</div>
+                  <div class="pai-action ai-action-green"><i class="fas fa-signature"></i> <strong>NOW:</strong> Resend DocuSign — closes in 2 days</div>
                 </div>
-                <div class="pai-score pai-score-green">95%</div>
+                <div class="pai-score pai-score-green awe-score">
+                  <div class="awe-score-val">95%</div>
+                  <div class="awe-score-lbl">win</div>
+                </div>
               </div>
 
-              <div class="pai-item" onclick="openDealModal('D009')">
-                <div class="pai-rank">3</div>
+              <div class="pai-item awe-item" onclick="openDealAIModal('D004')">
+                <div class="pai-rank awe-rank-2">2</div>
+                <div class="pai-info">
+                  <div class="pai-client">Michael Santos</div>
+                  <div class="pai-product">Universal Life $750K</div>
+                  <div class="pai-action ai-action-green"><i class="fas fa-flask"></i> Lab results in — call to close</div>
+                </div>
+                <div class="pai-score pai-score-green awe-score">
+                  <div class="awe-score-val">91%</div>
+                  <div class="awe-score-lbl">win</div>
+                </div>
+              </div>
+
+              <div class="pai-item awe-item" onclick="openDealAIModal('D009')">
+                <div class="pai-rank awe-rank-3">3</div>
                 <div class="pai-info">
                   <div class="pai-client">Linda Morrison</div>
                   <div class="pai-product">UMA $280K AUM</div>
-                  <div class="pai-action ai-action-green"><i class="fas fa-check"></i> Docs signed — initiate account transfer</div>
+                  <div class="pai-action ai-action-green"><i class="fas fa-exchange-alt"></i> Initiate ACAT — 5-day transfer</div>
                 </div>
-                <div class="pai-score pai-score-green">90%</div>
+                <div class="pai-score pai-score-green awe-score">
+                  <div class="awe-score-val">90%</div>
+                  <div class="awe-score-lbl">win</div>
+                </div>
               </div>
 
-              <div class="pai-item" onclick="openDealModal('D006')">
+              <div class="pai-item awe-item" onclick="openDealAIModal('D006')">
                 <div class="pai-rank">4</div>
                 <div class="pai-info">
                   <div class="pai-client">Thomas Wright</div>
                   <div class="pai-product">Whole Life $1M</div>
-                  <div class="pai-action ai-action-amber"><i class="fas fa-hourglass-half"></i> UW decision expected Apr 16 — prepare e-delivery</div>
+                  <div class="pai-action ai-action-amber"><i class="fas fa-hourglass-half"></i> UW decision Apr 16 — prep e-delivery</div>
                 </div>
-                <div class="pai-score pai-score-amber">88%</div>
+                <div class="pai-score pai-score-amber awe-score">
+                  <div class="awe-score-val">88%</div>
+                  <div class="awe-score-lbl">win</div>
+                </div>
               </div>
 
-              <div class="pai-item" onclick="openDealModal('D001')">
+              <div class="pai-item awe-item" onclick="openDealAIModal('D001')">
                 <div class="pai-rank">5</div>
                 <div class="pai-info">
                   <div class="pai-client">Alex Rivera</div>
                   <div class="pai-product">Whole Life $500K</div>
-                  <div class="pai-action ai-action-amber"><i class="fas fa-calendar-alt"></i> Meeting Apr 12 — send pre-brief now</div>
+                  <div class="pai-action ai-action-amber"><i class="fas fa-calendar-alt"></i> Meeting Apr 12 — send pre-brief</div>
                 </div>
-                <div class="pai-score pai-score-amber">82%</div>
+                <div class="pai-score pai-score-amber awe-score">
+                  <div class="awe-score-val">82%</div>
+                  <div class="awe-score-lbl">win</div>
+                </div>
               </div>
 
             </div>
-            <button class="pai-ask-btn" onclick="sendContextMessage('AI Pipeline Optimizer — show all deals ranked by close probability with specific next actions for each','smart-advisor')">
-              <i class="fas fa-robot"></i> Full AI Pipeline Analysis
-            </button>
+
+            {/* AI Forecast Strip */}
+            <div class="awe-forecast-strip">
+              <div class="awe-forecast-item">
+                <div class="awe-forecast-val green">$47.2K</div>
+                <div class="awe-forecast-lbl">Projected Close</div>
+              </div>
+              <div class="awe-forecast-item">
+                <div class="awe-forecast-val blue">Apr 30</div>
+                <div class="awe-forecast-lbl">Target Date</div>
+              </div>
+              <div class="awe-forecast-item">
+                <div class="awe-forecast-val gold">3 deals</div>
+                <div class="awe-forecast-lbl">Close-Ready</div>
+              </div>
+            </div>
+
+            <div class="awe-btn-row">
+              <button class="pai-ask-btn" onclick="openSalesAIReport()">
+                <i class="fas fa-brain"></i> Full AI Win Analysis
+              </button>
+              <button class="pai-ask-btn pai-ask-btn-outline" onclick="sendContextMessage('Sales pipeline AI — give me conversion prediction and next best actions for all 9 active deals ranked by priority','smart-advisor')">
+                <i class="fas fa-robot"></i> Ask AI Advisor
+              </button>
+            </div>
           </div>
 
           {/* Commission Tracker */}
@@ -4812,6 +5028,70 @@ function SalesPage() {
             <button class="deal-modal-close" onclick="closeDealModal()"><i class="fas fa-times"></i></button>
           </div>
           <div class="deal-modal-body" id="deal-modal-body"></div>
+        </div>
+      </div>
+
+      {/* ── AI Deal Intelligence Modal ── */}
+      <div class="deal-ai-modal-overlay" id="deal-ai-modal-overlay" onclick="closeDealAIModal(event)" style="display:none">
+        <div class="deal-ai-modal">
+          <div class="deal-ai-modal-header" id="dai-header">
+            <div class="dai-header-left">
+              <div class="dai-win-ring" id="dai-win-ring">
+                <svg viewBox="0 0 80 80" class="dai-ring-svg">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="6"/>
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="#22c55e" stroke-width="6" id="dai-ring-arc" stroke-dasharray="180 214" stroke-dashoffset="55" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+                </svg>
+                <span class="dai-ring-val" id="dai-ring-val">95%</span>
+              </div>
+              <div class="dai-header-info">
+                <div class="dai-client-name" id="dai-client-name">Kevin Park</div>
+                <div class="dai-product-line" id="dai-product-line">Term Life · $500K</div>
+                <div class="dai-stage-badge" id="dai-stage-badge"><i class="fas fa-check-circle"></i> Approved</div>
+              </div>
+            </div>
+            <div class="dai-header-right">
+              <div class="dai-kpi-row">
+                <div class="dai-kpi"><div class="dai-kpi-val green" id="dai-conv-val">95%</div><div class="dai-kpi-lbl">Close Prob.</div></div>
+                <div class="dai-kpi"><div class="dai-kpi-val blue" id="dai-days-val">2d</div><div class="dai-kpi-lbl">Close Window</div></div>
+                <div class="dai-kpi"><div class="dai-kpi-val gold" id="dai-comm-val">$216</div><div class="dai-kpi-lbl">Commission</div></div>
+                <div class="dai-kpi"><div class="dai-kpi-val purple" id="dai-priority-val">#1</div><div class="dai-kpi-lbl">AI Priority</div></div>
+              </div>
+            </div>
+            <button class="dai-close-btn" onclick="closeDealAIModal()"><i class="fas fa-times"></i></button>
+          </div>
+
+          {/* Tabs */}
+          <div class="dai-tabs">
+            <button class="dai-tab active" id="dai-tab-overview" onclick="switchDaiTab('overview',this)"><i class="fas fa-chart-bar"></i> Win Score</button>
+            <button class="dai-tab" id="dai-tab-nba" onclick="switchDaiTab('nba',this)"><i class="fas fa-bolt"></i> Next-Best-Action</button>
+            <button class="dai-tab" id="dai-tab-conv" onclick="switchDaiTab('conv',this)"><i class="fas fa-funnel-dollar"></i> Conversion</button>
+            <button class="dai-tab" id="dai-tab-timeline" onclick="switchDaiTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
+            <button class="dai-tab" id="dai-tab-forecast" onclick="switchDaiTab('forecast',this)"><i class="fas fa-crystal-ball"></i> Forecast</button>
+          </div>
+          <div class="dai-body" id="dai-body"></div>
+        </div>
+      </div>
+
+      {/* ── Sales AI Report Modal ── */}
+      <div class="sales-ai-report-overlay" id="sales-ai-report-overlay" onclick="closeSalesAIReport(event)" style="display:none">
+        <div class="sales-ai-report-modal">
+          <div class="sair-header">
+            <div class="sair-header-left">
+              <i class="fas fa-brain sair-icon"></i>
+              <div>
+                <div class="sair-title">AI Sales Intelligence Report</div>
+                <div class="sair-subtitle">Real-time · 9 active deals · Generated Apr 13, 2026 · 91.2% accuracy</div>
+              </div>
+            </div>
+            <button class="sair-close" onclick="closeSalesAIReport()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="sair-tabs">
+            <button class="sair-tab active" id="sair-tab-overview" onclick="switchSairTab('overview',this)"><i class="fas fa-chart-pie"></i> Overview</button>
+            <button class="sair-tab" id="sair-tab-winscores" onclick="switchSairTab('winscores',this)"><i class="fas fa-trophy"></i> Win Scores</button>
+            <button class="sair-tab" id="sair-tab-nba" onclick="switchSairTab('nba',this)"><i class="fas fa-bolt"></i> NBA Actions</button>
+            <button class="sair-tab" id="sair-tab-forecast" onclick="switchSairTab('forecast',this)"><i class="fas fa-chart-line"></i> Forecast</button>
+          </div>
+          <div class="sair-body" id="sair-body"></div>
         </div>
       </div>
 
