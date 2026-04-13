@@ -1007,6 +1007,104 @@ function DashboardPage() {
 
       </div>
 
+      {/* ══════════════════════════════════════════════════
+          MARKET & NEWS IMPACT MONITOR  (Task #18)
+          ══════════════════════════════════════════════════ */}
+      <div class="market-monitor-panel" id="market-monitor-panel">
+        <div class="mmp-header">
+          <div class="mmp-header-left">
+            <div class="mmp-icon"><i class="fas fa-satellite-dish"></i><span class="mmp-live-dot"></span></div>
+            <div>
+              <div class="mmp-title">Market &amp; News Impact Monitor <span class="mmp-live-badge">LIVE</span></div>
+              <div class="mmp-sub">Real-time sentiment · Rate changes · Disaster alerts · Book-of-business impact scoring</div>
+            </div>
+          </div>
+          <div class="mmp-header-right">
+            <div class="mmp-alert-count"><i class="fas fa-bell"></i> 3 active alerts</div>
+            <button class="mmp-expand-btn" onclick="openMarketMonitor()"><i class="fas fa-expand-alt"></i> Full View</button>
+          </div>
+        </div>
+        <div class="mmp-alerts-row">
+          <div class="mmp-alert critical" onclick="openMarketMonitor('rate')">
+            <div class="mmp-alert-icon"><i class="fas fa-percentage"></i></div>
+            <div class="mmp-alert-content">
+              <div class="mmp-alert-title">Fed Rate Hike +0.25% — Apr 9, 2026</div>
+              <div class="mmp-alert-detail">Annuity pricing favorable ↑ · 38 clients affected · $4.2M AUM rebalance opportunity</div>
+            </div>
+            <div class="mmp-alert-badge critical">HIGH IMPACT</div>
+          </div>
+          <div class="mmp-alert warning" onclick="openMarketMonitor('weather')">
+            <div class="mmp-alert-icon"><i class="fas fa-cloud-rain"></i></div>
+            <div class="mmp-alert-content">
+              <div class="mmp-alert-title">Northeast Storm Event — Catastrophic Flooding Risk</div>
+              <div class="mmp-alert-detail">4 client properties in affected zone · Check LTC &amp; disability riders · Claims spike likely</div>
+            </div>
+            <div class="mmp-alert-badge warning">WATCH</div>
+          </div>
+          <div class="mmp-alert info" onclick="openMarketMonitor('market')">
+            <div class="mmp-alert-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="mmp-alert-content">
+              <div class="mmp-alert-title">S&amp;P 500 +2.3% WTD — Equity markets rally</div>
+              <div class="mmp-alert-detail">VUL sub-account performance up · 3 portfolio rebalance clients · Investment review opportunity</div>
+            </div>
+            <div class="mmp-alert-badge info">OPPORTUNITY</div>
+          </div>
+        </div>
+        <div class="mmp-sentiment-row">
+          <div class="mmp-sent-card">
+            <div class="mmp-sent-label">Insurance Sentiment</div>
+            <div class="mmp-sent-bar-wrap">
+              <div class="mmp-sent-bar" style="width:72%;background:linear-gradient(90deg,#10b981,#059669)"></div>
+            </div>
+            <div class="mmp-sent-score positive">72 / 100 — Positive</div>
+          </div>
+          <div class="mmp-sent-card">
+            <div class="mmp-sent-label">Market Volatility Index</div>
+            <div class="mmp-sent-bar-wrap">
+              <div class="mmp-sent-bar" style="width:38%;background:linear-gradient(90deg,#f59e0b,#d97706)"></div>
+            </div>
+            <div class="mmp-sent-score moderate">38 / 100 — Moderate</div>
+          </div>
+          <div class="mmp-sent-card">
+            <div class="mmp-sent-label">Claims Risk Index</div>
+            <div class="mmp-sent-bar-wrap">
+              <div class="mmp-sent-bar" style="width:54%;background:linear-gradient(90deg,#f97316,#ea580c)"></div>
+            </div>
+            <div class="mmp-sent-score elevated">54 / 100 — Elevated</div>
+          </div>
+          <div class="mmp-sent-card">
+            <div class="mmp-sent-label">Renewal Opportunity</div>
+            <div class="mmp-sent-bar-wrap">
+              <div class="mmp-sent-bar" style="width:81%;background:linear-gradient(90deg,#3b82f6,#1d4ed8)"></div>
+            </div>
+            <div class="mmp-sent-score positive">81 / 100 — Strong</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Market Monitor Full Modal ── */}
+      <div class="market-modal-overlay" id="market-modal-overlay" onclick="closeMarketMonitor()" style="display:none">
+        <div class="market-modal" onclick="event.stopPropagation()">
+          <div class="market-modal-header">
+            <div class="market-modal-header-left">
+              <div class="market-modal-icon"><i class="fas fa-satellite-dish"></i></div>
+              <div>
+                <div class="market-modal-title">Market &amp; News Impact Monitor</div>
+                <div class="market-modal-sub">Real-time intelligence · Book-of-business impact · AI sentiment analysis · Apr 10, 2026</div>
+              </div>
+            </div>
+            <button class="market-modal-close" onclick="closeMarketMonitor()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="market-modal-tabs" id="market-modal-tabs">
+            <button class="mmt-tab active" onclick="switchMarketTab('alerts',this)"><i class="fas fa-bell"></i> Active Alerts</button>
+            <button class="mmt-tab" onclick="switchMarketTab('rates',this)"><i class="fas fa-percentage"></i> Rate Impact</button>
+            <button class="mmt-tab" onclick="switchMarketTab('news',this)"><i class="fas fa-newspaper"></i> News Feed</button>
+            <button class="mmt-tab" onclick="switchMarketTab('book',this)"><i class="fas fa-book"></i> Book Impact</button>
+          </div>
+          <div class="market-modal-body" id="market-modal-body"></div>
+        </div>
+      </div>
+
       {/* ── AI HOLISTIC INSIGHTS BANNER ── */}
       <div class="ai-highlight-banner" onclick="navigateTo('ai-agents')">
         <div class="ai-banner-icon"><i class="fas fa-robot"></i></div>
@@ -2517,6 +2615,7 @@ function ClaimsPage() {
               <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
               <th><i class="fas fa-brain" style="color:#0ea5e9;margin-right:4px"></i>AI Triage</th>
               <th><i class="fas fa-hourglass-half" style="color:#d97706;margin-right:4px"></i>Resolution</th>
+              <th><i class="fas fa-gavel" style="color:#7c3aed;margin-right:4px"></i>Liability</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -2535,6 +2634,7 @@ function ClaimsPage() {
               <td class="text-muted">Claims Dept.</td>
               <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0041','ci')"><span class="ci-triage-label">⚡ Expedite</span><span class="ci-triage-sub">Missing ID docs</span></div></td>
               <td><div class="ci-res-timer urgent"><i class="fas fa-hourglass-half"></i><span class="ci-res-days">1d left</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:85%"></div></div></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0041','liability')"><div class="liab-score-wrap high"><span class="liab-score">72%</span></div><span class="liab-flag high">High</span><span class="litig-risk high"><i class="fas fa-gavel"></i> Litig.</span></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
@@ -2557,6 +2657,7 @@ function ClaimsPage() {
               <td class="text-muted">LTC Team</td>
               <td><div class="ci-triage-cell normal" onclick="openClaimModal('CLM-2026-0038','ci')"><span class="ci-triage-label">📋 Doc Request</span><span class="ci-triage-sub">Plan of care pending</span></div></td>
               <td><div class="ci-res-timer normal"><i class="fas fa-clock"></i><span class="ci-res-days">8d est.</span><div class="ci-res-bar"><div class="ci-res-fill normal" style="width:45%"></div></div></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0038','liability')"><div class="liab-score-wrap low"><span class="liab-score">18%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
@@ -2579,6 +2680,7 @@ function ClaimsPage() {
               <td class="text-muted">DI Unit</td>
               <td><div class="ci-triage-cell watch" onclick="openClaimModal('CLM-2026-0035','ci')"><span class="ci-triage-label">🩺 APS Needed</span><span class="ci-triage-sub">Physician stmt pending</span></div></td>
               <td><div class="ci-res-timer watch"><i class="fas fa-clock"></i><span class="ci-res-days">21d est.</span><div class="ci-res-bar"><div class="ci-res-fill watch" style="width:30%"></div></div></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0035','liability')"><div class="liab-score-wrap med"><span class="liab-score">41%</span></div><span class="liab-flag med">Medium</span><span class="litig-risk med"><i class="fas fa-exclamation"></i> Watch</span></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
@@ -2601,6 +2703,7 @@ function ClaimsPage() {
               <td class="text-muted">LTC Team</td>
               <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0033','ci')"><span class="ci-triage-label">✅ On Track</span><span class="ci-triage-sub">Approval imminent</span></div></td>
               <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">3d est.</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:80%"></div></div></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0033','liability')"><div class="liab-score-wrap low"><span class="liab-score">12%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
@@ -2623,6 +2726,7 @@ function ClaimsPage() {
               <td class="text-muted">Agent Support</td>
               <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0031','ci')"><span class="ci-triage-label">✅ Waiver Active</span><span class="ci-triage-sub">Monitor recovery</span></div></td>
               <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">Open</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:60%"></div></div></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0031','liability')"><div class="liab-score-wrap low"><span class="liab-score">8%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
@@ -2645,6 +2749,7 @@ function ClaimsPage() {
               <td class="text-muted">Claims Dept.</td>
               <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0028','ci')"><span class="ci-triage-label">⚡ Compassionate</span><span class="ci-triage-sub">Terminal — expedite</span></div></td>
               <td><div class="ci-res-timer urgent"><i class="fas fa-fire"></i><span class="ci-res-days">9d est.</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:70%"></div></div></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0028','liability')"><div class="liab-score-wrap med"><span class="liab-score">29%</span></div><span class="liab-flag med">Medium</span><span class="litig-risk med"><i class="fas fa-exclamation"></i> Watch</span></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
@@ -2667,6 +2772,7 @@ function ClaimsPage() {
               <td class="text-muted">Claims Dept.</td>
               <td><div class="ci-triage-cell flagged" onclick="openClaimModal('CLM-2026-0025','ci')"><span class="ci-triage-label">🚨 Fraud Review</span><span class="ci-triage-sub">Coverage pending</span></div></td>
               <td><div class="ci-res-timer flagged"><i class="fas fa-exclamation-triangle"></i><span class="ci-res-days">Hold</span><div class="ci-res-bar"><div class="ci-res-fill flagged" style="width:15%"></div></div></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0025','liability')"><div class="liab-score-wrap critical"><span class="liab-score">88%</span></div><span class="liab-flag critical">Critical</span><span class="litig-risk critical"><i class="fas fa-gavel"></i> Litig. Risk</span></div></td>
               <td>
                 <div class="action-btns">
                   <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
@@ -2963,6 +3069,7 @@ function ClaimsPage() {
                 <button class="dmt-tab active" onclick="switchClaimTab('view',this)"><i class="fas fa-eye"></i> View Claim</button>
                 <button class="dmt-tab ai-tab" onclick="switchClaimTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
                 <button class="dmt-tab ci-tab" onclick="switchClaimTab('ci',this)"><i class="fas fa-brain"></i> Intelligence</button>
+                <button class="dmt-tab liability-tab" onclick="switchClaimTab('liability',this)"><i class="fas fa-gavel"></i> Liability</button>
               </div>
               <button class="detail-modal-close" onclick="closeClaimModal()"><i class="fas fa-times"></i></button>
             </div>
@@ -3658,6 +3765,48 @@ function UnderwritingPage() {
         </div>
       </div>
 
+      {/* ══════════════════════════════════════════════════
+          REAL-TIME PRICING ANALYSIS BANNER  (Task #16a)
+          ══════════════════════════════════════════════════ */}
+      <div class="pricing-analysis-banner">
+        <div class="pab-left">
+          <div class="pab-icon">
+            <i class="fas fa-chart-line"></i>
+            <span class="pab-live-badge">LIVE</span>
+          </div>
+          <div class="pab-info">
+            <div class="pab-title">AI Pricing Intelligence &amp; Risk Narrative Engine <span class="pab-pulse"></span></div>
+            <div class="pab-sub">Real-time benchmark pricing · AI-generated risk narratives · Competitor rate comparison · Rating class optimization · Market-adjusted premium scoring</div>
+          </div>
+        </div>
+        <div class="pab-chips">
+          <div class="pab-chip green">
+            <i class="fas fa-percentage"></i>
+            <span class="pab-chip-val">3.1%</span>
+            <span class="pab-chip-lbl">Avg Savings Found</span>
+          </div>
+          <div class="pab-chip blue">
+            <i class="fas fa-trophy"></i>
+            <span class="pab-chip-val">NYL #1</span>
+            <span class="pab-chip-lbl">Value Score</span>
+          </div>
+          <div class="pab-chip orange">
+            <i class="fas fa-file-alt"></i>
+            <span class="pab-chip-val">11</span>
+            <span class="pab-chip-lbl">Reports Ready</span>
+          </div>
+          <div class="pab-chip purple">
+            <i class="fas fa-robot"></i>
+            <span class="pab-chip-val">AI-Written</span>
+            <span class="pab-chip-lbl">Narratives</span>
+          </div>
+        </div>
+        <div class="pab-actions">
+          <button class="pab-btn-primary" onclick="openPricingReport()"><i class="fas fa-chart-bar"></i> Pricing Report</button>
+          <button class="pab-btn-secondary" onclick="openBenchmarkModal()"><i class="fas fa-balance-scale"></i> Benchmarks</button>
+        </div>
+      </div>
+
       {/* ── Pipeline Board ── */}
       <div class="uw-pipeline">
 
@@ -4007,6 +4156,31 @@ function UnderwritingPage() {
       </div>
 
       {/* ══════════════════════════════════════════════════
+          PRICING ANALYSIS REPORT MODAL  (Task #16b)
+          ══════════════════════════════════════════════════ */}
+      <div class="pricing-report-overlay" id="pricing-report-overlay" onclick="closePricingReport()" style="display:none">
+        <div class="pricing-report-modal" onclick="event.stopPropagation()">
+          <div class="pricing-report-header">
+            <div class="pricing-report-header-left">
+              <div class="pricing-report-icon"><i class="fas fa-chart-line"></i></div>
+              <div>
+                <div class="pricing-report-title">AI Pricing Analysis &amp; Risk Narrative Report</div>
+                <div class="pricing-report-sub">Real-time benchmarks · 11 cases analyzed · Market-adjusted · Generated Apr 10, 2026</div>
+              </div>
+            </div>
+            <button class="pricing-report-close" onclick="closePricingReport()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="pricing-report-tabs" id="pricing-report-tabs">
+            <button class="pr-rtab active" onclick="switchPricingReportTab('overview',this)"><i class="fas fa-tachometer-alt"></i> Overview</button>
+            <button class="pr-rtab" onclick="switchPricingReportTab('benchmark',this)"><i class="fas fa-balance-scale"></i> Benchmarks</button>
+            <button class="pr-rtab" onclick="switchPricingReportTab('narratives',this)"><i class="fas fa-file-alt"></i> AI Narratives</button>
+            <button class="pr-rtab" onclick="switchPricingReportTab('optimization',this)"><i class="fas fa-sliders-h"></i> Optimization</button>
+          </div>
+          <div class="pricing-report-body" id="pricing-report-body"></div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
           UW INTELLIGENCE FULL REPORT MODAL  (Task #15)
           ══════════════════════════════════════════════════ */}
       <div class="uwi-report-overlay" id="uwi-report-overlay" onclick="closeUWIReport()" style="display:none">
@@ -4121,6 +4295,7 @@ function UnderwritingPage() {
                 <button class="dmt-tab" onclick="switchUWTab('evidence',this)"><i class="fas fa-search-plus"></i> Evidence</button>
                 <button class="dmt-tab ai-tab" onclick="switchUWTab('ai',this)"><i class="fas fa-robot"></i> AI Score</button>
                 <button class="dmt-tab uwi-tab" onclick="switchUWTab('intelligence',this)"><i class="fas fa-brain"></i> UW Intel</button>
+                <button class="dmt-tab pricing-tab" onclick="switchUWTab('pricing',this)"><i class="fas fa-tag"></i> Pricing Report</button>
               </div>
               <button class="detail-modal-close" onclick="closeUWModal()"><i class="fas fa-times"></i></button>
             </div>

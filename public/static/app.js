@@ -6447,3 +6447,596 @@ function renderUWIReport(tab) {
   if (el) el.addEventListener('click', function(e){ if(e.target === el) closeUWIReport(); });
 })();
 
+
+// ═══════════════════════════════════════════════════════════════════
+// TASK #17 — LIABILITY DETERMINATION & LITIGATION RISK FLAG
+// ═══════════════════════════════════════════════════════════════════
+
+const liabilityData = {
+  'CLM-2026-0041': {
+    client: 'Robert Chen', policy: 'P-100310', type: 'Death Benefit',
+    amount: '$1,000,000', filed: '2026-04-09',
+    liabilityScore: 72, liabilityClass: 'high', liabilityLabel: 'High Liability',
+    litigationRisk: 68, litigationClass: 'high',
+    litigationDesc: 'High litigation probability. Estate attorney already retained. Dispute over beneficiary designation change filed 14 days prior to death.',
+    factors: [
+      { type: 'negative', icon: 'fa-exclamation-triangle', text: 'Beneficiary change filed 14 days pre-death — contestability period applies', weight: '+28 pts' },
+      { type: 'negative', icon: 'fa-user-times', text: 'Estate attorney retained by primary beneficiary — formal dispute signaled', weight: '+18 pts' },
+      { type: 'negative', icon: 'fa-file-medical', text: 'Death benefit > $500K triggers enhanced review protocol', weight: '+12 pts' },
+      { type: 'neutral',  icon: 'fa-search', text: 'Policy in force 4 years — past incontestability threshold for original terms', weight: '0 pts' },
+      { type: 'positive', icon: 'fa-shield-alt', text: 'Premium payments current — no lapse or reinstatement issues', weight: '-6 pts' }
+    ],
+    settlement: { recommended: '$800,000 – $950,000', probability: '74%', timeline: '6–9 months', authority: 'VP Claims Required' },
+    aiSummary: 'AI analysis indicates high liability exposure primarily driven by the beneficiary change contestability issue. The 14-day window before death significantly elevates litigation probability. Recommend proactive outreach to retained estate attorney for early settlement discussion. All documentation is complete. Legal review should be initiated within 48 hours.',
+    earlySettleTrigger: true
+  },
+  'CLM-2026-0038': {
+    client: 'Nancy Foster', policy: 'P-100320', type: 'Disability Income',
+    amount: '$4,200/mo', filed: '2026-04-05',
+    liabilityScore: 18, liabilityClass: 'low', liabilityLabel: 'Low Liability',
+    litigationRisk: 12, litigationClass: 'low',
+    litigationDesc: 'Low litigation risk. Straightforward disability claim with verified medical documentation. No contestability issues identified.',
+    factors: [
+      { type: 'positive', icon: 'fa-check-circle', text: 'Attending Physician Statement received and verified — disability confirmed', weight: '-20 pts' },
+      { type: 'positive', icon: 'fa-calendar-check', text: 'Elimination period satisfied (180 days) — benefit period begins Apr 2026', weight: '-15 pts' },
+      { type: 'positive', icon: 'fa-file-contract', text: 'Policy 6 years in force — no incontestability risk', weight: '-10 pts' },
+      { type: 'neutral',  icon: 'fa-stethoscope', text: 'Occupation Class 2 — moderate risk category, standard terms apply', weight: '0 pts' },
+      { type: 'negative', icon: 'fa-clock', text: 'Claimant requested benefit review at 12-month mark — note for file', weight: '+5 pts' }
+    ],
+    settlement: { recommended: 'Standard benefit — no settlement needed', probability: '4%', timeline: 'N/A', authority: 'Claims Examiner' },
+    aiSummary: 'Low-risk disability claim. All required evidence received and verified. Recommend routine processing at standard benefit amount. No legal review required. Set calendar reminder for 12-month benefit review per claimant request.',
+    earlySettleTrigger: false
+  },
+  'CLM-2026-0035': {
+    client: 'James Whitfield', policy: 'P-100295', type: 'Long-Term Care',
+    amount: '$6,800/mo', filed: '2026-03-28',
+    liabilityScore: 41, liabilityClass: 'med', liabilityLabel: 'Medium Liability',
+    litigationRisk: 33, litigationClass: 'med',
+    litigationDesc: 'Moderate litigation risk. Dispute over care-facility qualification under policy definition. Claimant attorney sent inquiry letter.',
+    factors: [
+      { type: 'negative', icon: 'fa-hospital', text: 'Facility not on approved provider list — claim under definition review', weight: '+22 pts' },
+      { type: 'negative', icon: 'fa-envelope-open-text', text: 'Attorney inquiry letter received — dispute possible if claim denied', weight: '+14 pts' },
+      { type: 'neutral',  icon: 'fa-file-medical-alt', text: 'APS confirms ADL deficiencies (3 of 6) — meets policy threshold', weight: '+5 pts' },
+      { type: 'positive', icon: 'fa-shield-alt', text: 'Claimant has not yet escalated to formal dispute', weight: '-8 pts' },
+      { type: 'positive', icon: 'fa-handshake', text: 'Agent relationship strong — proactive communication possible', weight: '-5 pts' }
+    ],
+    settlement: { recommended: '$38,000 – $55,000 retroactive', probability: '38%', timeline: '2–4 months', authority: 'Claims Manager' },
+    aiSummary: 'Medium-risk LTC claim with facility definition dispute. Recommend proactive communication with claimant representative before formal denial. Consider facility waiver review given confirmed ADL deficiencies. Early resolution preferred to avoid escalation.',
+    earlySettleTrigger: false
+  },
+  'CLM-2026-0033': {
+    client: 'Maria Gonzalez', policy: 'P-100298', type: 'Critical Illness',
+    amount: '$50,000', filed: '2026-03-20',
+    liabilityScore: 12, liabilityClass: 'low', liabilityLabel: 'Low Liability',
+    litigationRisk: 8, litigationClass: 'low',
+    litigationDesc: 'Very low litigation risk. Clean critical illness claim with confirmed diagnosis and all documentation received.',
+    factors: [
+      { type: 'positive', icon: 'fa-check-circle', text: 'Oncology report confirms Stage II breast cancer — CI trigger met', weight: '-18 pts' },
+      { type: 'positive', icon: 'fa-file-medical', text: 'All required documentation received within 30 days', weight: '-12 pts' },
+      { type: 'positive', icon: 'fa-calendar-check', text: 'Survival period (30 days) confirmed', weight: '-10 pts' },
+      { type: 'neutral',  icon: 'fa-search', text: 'Pre-existing condition review: DX date after 2-year exclusion window — clear', weight: '0 pts' }
+    ],
+    settlement: { recommended: 'Full benefit — $50,000 lump sum', probability: '2%', timeline: 'N/A', authority: 'Claims Examiner' },
+    aiSummary: 'Clean critical illness claim. All documentation verified, diagnosis confirmed, survival period met, no pre-existing condition conflict. Recommend immediate approval and payment. No further review required.',
+    earlySettleTrigger: false
+  },
+  'CLM-2026-0031': {
+    client: 'Patricia Nguyen', policy: 'P-100301', type: 'Waiver of Premium',
+    amount: '$8,600/yr', filed: '2026-03-15',
+    liabilityScore: 8, liabilityClass: 'low', liabilityLabel: 'Low Liability',
+    litigationRisk: 5, litigationClass: 'low',
+    litigationDesc: 'Very low litigation risk. Standard waiver of premium claim with verified disability documentation.',
+    factors: [
+      { type: 'positive', icon: 'fa-check-circle', text: 'Disability verified by attending physician and independent review', weight: '-15 pts' },
+      { type: 'positive', icon: 'fa-shield-alt', text: 'Policy 5 years in force — no contestability concern', weight: '-10 pts' },
+      { type: 'positive', icon: 'fa-clock', text: 'Waiting period (6 months) satisfied per policy terms', weight: '-8 pts' }
+    ],
+    settlement: { recommended: 'Waiver approved — standard processing', probability: '2%', timeline: 'N/A', authority: 'Claims Examiner' },
+    aiSummary: 'Routine waiver of premium claim. All eligibility criteria met. Recommend approval and retroactive waiver from disability onset date. No legal concerns.',
+    earlySettleTrigger: false
+  },
+  'CLM-2026-0028': {
+    client: 'David Park', policy: 'P-100288', type: 'Accidental Death',
+    amount: '$500,000', filed: '2026-03-05',
+    liabilityScore: 29, liabilityClass: 'med', liabilityLabel: 'Medium Liability',
+    litigationRisk: 24, litigationClass: 'med',
+    litigationDesc: 'Moderate risk. Accidental death classification under review — toxicology report indicates alcohol involvement.',
+    factors: [
+      { type: 'negative', icon: 'fa-flask', text: 'Toxicology: BAC 0.09% — borderline intoxication exclusion review required', weight: '+18 pts' },
+      { type: 'negative', icon: 'fa-car-crash', text: 'Accident circumstances under police investigation — final report pending', weight: '+12 pts' },
+      { type: 'positive', icon: 'fa-file-contract', text: 'AD&D rider clearly defined — exclusion threshold review in progress', weight: '-8 pts' },
+      { type: 'neutral',  icon: 'fa-user-friends', text: 'Beneficiary cooperative — no formal dispute raised', weight: '0 pts' }
+    ],
+    settlement: { recommended: '$400,000 – $500,000 (pending final review)', probability: '28%', timeline: '1–3 months', authority: 'Claims Manager' },
+    aiSummary: 'Medium-risk accidental death claim pending toxicology and police investigation outcomes. BAC level is borderline for intoxication exclusion clause. Recommend holding payment pending final police report. Proactive communication with beneficiary advised.',
+    earlySettleTrigger: false
+  },
+  'CLM-2026-0025': {
+    client: 'Kevin Park', policy: 'P-100350', type: 'Death Benefit',
+    amount: '$250,000', filed: '2026-04-10',
+    liabilityScore: 88, liabilityClass: 'critical', liabilityLabel: 'Critical Liability',
+    litigationRisk: 82, litigationClass: 'critical',
+    litigationDesc: 'CRITICAL — Obituary match on pending policy. Death confirmed 2026-04-10. Policy in Pending status with no insurable interest investigation complete. Fraud score 78/100.',
+    factors: [
+      { type: 'negative', icon: 'fa-skull-crossbones', text: 'Death confirmed during PENDING policy — coverage determination required', weight: '+35 pts' },
+      { type: 'negative', icon: 'fa-user-secret', text: 'Fraud score 78/100 — suspicious timing of application vs death date', weight: '+25 pts' },
+      { type: 'negative', icon: 'fa-search', text: 'No insurable interest investigation completed pre-death', weight: '+15 pts' },
+      { type: 'negative', icon: 'fa-file-alt', text: 'Estate attorney contact not yet identified — estate unknown', weight: '+8 pts' },
+      { type: 'neutral',  icon: 'fa-balance-scale', text: 'NJ DoH cross-match confirms identity — death is verified', weight: '0 pts' }
+    ],
+    settlement: { recommended: 'HOLD — Legal review required before any determination', probability: '85%', timeline: 'Unknown', authority: 'General Counsel Required' },
+    aiSummary: 'CRITICAL: Death occurred during policy pending period. This case requires immediate General Counsel review before any coverage determination. High fraud score combined with pending status creates significant liability exposure. Do NOT communicate any coverage decision to estate contacts without legal clearance.',
+    earlySettleTrigger: true
+  }
+};
+
+// Extend the existing switchClaimTab / renderClaimModal for 'liability' tab
+(function() {
+  const _origSwitch = window.switchClaimTab;
+  const _origRender = window.renderClaimModal;
+
+  window.switchClaimTab = function(tab, tabEl) {
+    if (tab === 'liability') {
+      document.querySelectorAll('#claim-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
+      if (tabEl) tabEl.classList.add('active');
+      window._currentClaimTab = 'liability';
+      renderClaimModal(window._currentClaimId, 'liability');
+    } else {
+      _origSwitch(tab, tabEl);
+    }
+  };
+
+  window.renderClaimModal = function(claimId, tab) {
+    if (tab === 'liability') {
+      const body = document.getElementById('claim-modal-body');
+      if (!body) return;
+      const ld = liabilityData[claimId];
+      if (!ld) {
+        body.innerHTML = '<div style="padding:20px;color:#64748b">No liability data available for this claim.</div>';
+        return;
+      }
+      const litigPanelClass = ld.liabilityScore >= 70 ? '' : (ld.liabilityScore >= 40 ? 'med' : 'low');
+      const factorsHtml = ld.factors.map(f => `
+        <div class="liab-factor-item ${f.type}">
+          <i class="fas ${f.icon} liab-factor-icon"></i>
+          <div>
+            <div class="liab-factor-text">${f.text}</div>
+            <div class="liab-factor-weight">${f.weight}</div>
+          </div>
+        </div>`).join('');
+      const earlySettleHtml = ld.earlySettleTrigger ? `
+        <div class="liab-settlement-box" style="border-color:#dc2626;background:linear-gradient(135deg,#fef2f2,#fee2e2)">
+          <div class="liab-settlement-title" style="color:#991b1b"><i class="fas fa-bolt"></i> ⚡ EARLY SETTLEMENT TRIGGER ACTIVE</div>
+          <div class="liab-settlement-row"><span>Recommended Settlement Range</span><span class="liab-settlement-val">${ld.settlement.recommended}</span></div>
+          <div class="liab-settlement-row"><span>Litigation Probability</span><span class="liab-settlement-val">${ld.settlement.probability}</span></div>
+          <div class="liab-settlement-row"><span>Estimated Timeline</span><span class="liab-settlement-val">${ld.settlement.timeline}</span></div>
+          <div class="liab-settlement-row"><span>Authorization Required</span><span class="liab-settlement-val" style="color:#dc2626;font-weight:700">${ld.settlement.authority}</span></div>
+        </div>` : `
+        <div class="liab-settlement-box">
+          <div class="liab-settlement-title"><i class="fas fa-balance-scale"></i> Settlement Assessment</div>
+          <div class="liab-settlement-row"><span>Settlement Recommended</span><span class="liab-settlement-val">${ld.settlement.recommended}</span></div>
+          <div class="liab-settlement-row"><span>Litigation Probability</span><span class="liab-settlement-val">${ld.settlement.probability}</span></div>
+          <div class="liab-settlement-row"><span>Authorization</span><span class="liab-settlement-val">${ld.settlement.authority}</span></div>
+        </div>`;
+
+      body.innerHTML = `
+        <div class="liab-panel">
+          <div class="liab-header-bar">
+            <div class="liab-header-icon"><i class="fas fa-gavel"></i></div>
+            <div class="liab-header-info">
+              <div class="liab-header-title">AI Liability Determination — ${ld.client}</div>
+              <div class="liab-header-sub">${ld.policy} · ${ld.type} · ${ld.amount} · Filed ${ld.filed}</div>
+            </div>
+            <div class="liab-score-circle ${ld.liabilityClass}">
+              <div class="liab-circle-val">${ld.liabilityScore}%</div>
+              <div class="liab-circle-lbl">Liability</div>
+              <div class="liab-circle-flag">${ld.liabilityLabel.split(' ')[0]}</div>
+            </div>
+          </div>
+
+          <div class="liab-kpi-strip">
+            <div class="liab-kpi"><div class="liab-kpi-val" style="color:${ld.liabilityScore>=70?'#dc2626':ld.liabilityScore>=40?'#d97706':'#16a34a'}">${ld.liabilityScore}%</div><div class="liab-kpi-lbl">Liability Score</div></div>
+            <div class="liab-kpi"><div class="liab-kpi-val" style="color:${ld.litigationRisk>=60?'#dc2626':ld.litigationRisk>=30?'#d97706':'#16a34a'}">${ld.litigationRisk}%</div><div class="liab-kpi-lbl">Litigation Risk</div></div>
+            <div class="liab-kpi"><div class="liab-kpi-val">${ld.settlement.timeline}</div><div class="liab-kpi-lbl">Est. Timeline</div></div>
+            <div class="liab-kpi"><div class="liab-kpi-val" style="font-size:11px">${ld.settlement.authority}</div><div class="liab-kpi-lbl">Authority</div></div>
+          </div>
+
+          <div class="liab-section-title"><i class="fas fa-list-ul"></i> Liability Factors (${ld.factors.length} analyzed)</div>
+          <div class="liab-factors-list">${factorsHtml}</div>
+
+          <div class="litig-risk-panel ${litigPanelClass}">
+            <div class="litig-risk-title"><i class="fas fa-gavel"></i> Litigation Risk Assessment</div>
+            <div class="litig-risk-score-bar">
+              <div class="litig-bar-outer"><div class="litig-bar-fill" style="width:${ld.litigationRisk}%"></div></div>
+              <div class="litig-pct">${ld.litigationRisk}%</div>
+            </div>
+            <div class="litig-risk-desc">${ld.litigationDesc}</div>
+          </div>
+
+          ${earlySettleHtml}
+
+          <div class="liab-ai-box">
+            <div class="liab-ai-title"><i class="fas fa-robot"></i> AI Recommendation</div>
+            <div class="liab-ai-text">${ld.aiSummary}</div>
+          </div>
+
+          <div class="liab-action-row">
+            <button class="liab-btn-primary" onclick="sendContextMessage('Generate full liability analysis for claim ${claimId} — ${ld.client}','claims')"><i class="fas fa-file-alt"></i> Full Report</button>
+            ${ld.earlySettleTrigger ? `<button class="liab-btn-secondary" onclick="sendContextMessage('Initiate early settlement discussion for claim ${claimId}','claims')"><i class="fas fa-handshake"></i> Start Settlement</button>` : ''}
+            <button class="liab-btn-secondary" onclick="sendContextMessage('Escalate claim ${claimId} for legal review','claims')"><i class="fas fa-balance-scale"></i> Legal Review</button>
+          </div>
+        </div>`;
+    } else {
+      _origRender(claimId, tab);
+    }
+  };
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// TASK #16 — REAL-TIME PRICING ANALYSIS & AI RISK NARRATIVE REPORT
+// ═══════════════════════════════════════════════════════════════════
+
+const pricingData = {
+  overview: {
+    kpis: [
+      { val: '3.1%', lbl: 'Avg Premium Savings', delta: '↑ vs manual review' },
+      { val: 'NYL #1', lbl: 'Value Score Rank', delta: 'vs 8 competitors' },
+      { val: '11', lbl: 'Reports Generated', delta: 'All cases analyzed' },
+      { val: '94.6%', lbl: 'AI Accuracy', delta: 'vs 89% manual' }
+    ]
+  },
+  benchmarks: [
+    { client: 'Alex Rivera',    product: 'WL $500K',    nyl: '$4,800', metlife: '$5,100', prudential: '$5,340', northwestern: '$5,020', verdict: 'NYL Best', verdictClass: 'pr-best' },
+    { client: 'Nancy Foster',   product: 'Term $1M',    nyl: '$3,200', metlife: '$3,450', prudential: '$3,290', northwestern: '$3,580', verdict: 'NYL Best', verdictClass: 'pr-best' },
+    { client: 'John Kim',       product: 'DI $2.1K/mo', nyl: '$2,800', metlife: '$2,650', prudential: '$2,900', northwestern: '$2,740', verdict: 'MetLife Lower', verdictClass: 'pr-mid' },
+    { client: 'Michael Santos', product: 'UL $750K',    nyl: '$6,200', metlife: '$6,500', prudential: '$6,350', northwestern: '$6,100', verdict: 'NWM -1.6%', verdictClass: 'pr-mid' },
+    { client: 'Julia Chen',     product: 'Annuity $8K', nyl: '$8,400', metlife: '$8,100', prudential: '$8,600', northwestern: '$8,250', verdict: 'MetLife Lower', verdictClass: 'pr-mid' },
+    { client: 'Thomas Wright',  product: 'WL $1M',      nyl: '$9,800', metlife: '$10,400', prudential: '$10,200', northwestern: '$10,100', verdict: 'NYL Best', verdictClass: 'pr-best' }
+  ],
+  narratives: [
+    {
+      initials: 'AR', name: 'Alex Rivera', product: 'Whole Life $500K', riskClass: 'Preferred Plus', riskPill: 'preferred',
+      text: 'Alex Rivera presents an exceptionally clean risk profile for a 34-year-old male applicant. BMI 22.4, non-smoker, no chronic conditions, and a single minor MVR event represent minimal underwriting concern. The STP score of 88 reflects near-optimal insurability. Recommended rating class is Preferred Plus. NYL\'s premium of $4,800/year is the most competitive in the market, offering a 5.9% savings versus the median competitor rate of $5,115. Upon credit clearance, auto-approval is advised. Long-term policy value for NYL is significant: 30-year NPV estimated at $142K.'
+    },
+    {
+      initials: 'NF', name: 'Nancy Foster', product: 'Term Life $1M', riskClass: 'Preferred', riskPill: 'preferred',
+      text: 'Nancy Foster is a 41-year-old female applicant with controlled hypertension managed by Lisinopril. Blood pressure readings are within acceptable range for Preferred classification. The Rx flag introduces a minor underwriting consideration; however, MIB is clear and no adverse lifestyle factors are present. STP score of 82 indicates strong auto-approve eligibility post-MVR receipt. NYL\'s $3,200/year rate is the most competitive among top-tier carriers, representing $285/year savings versus next-best competitor. Preferred rate class is recommended upon completion of outstanding evidence.'
+    },
+    {
+      initials: 'JK', name: 'John Kim', product: 'Disability Insurance $2.1K/mo', riskClass: 'Standard (Pending)', riskPill: 'standard',
+      text: 'John Kim presents a more complex risk profile due to Type 2 Diabetes managed by Metformin and a prior DI claim flagged in MIB. The combination of metabolic condition and prior claim history requires APS review before final classification. Standard rating class is anticipated pending APS outcomes. The competitive analysis shows MetLife offers a marginally lower premium ($2,650/year vs NYL $2,800), primarily because MetLife applies a more lenient DM1 rating table. NYL\'s value proposition here lies in superior claims-paying history and DI benefit features. If APS confirms stable glycemic control (A1C < 7.5%), Preferred Standard classification may be achievable.'
+    }
+  ],
+  optimization: [
+    { icon: 'fa-arrow-up', title: 'Upgrade Alex Rivera to Preferred Plus', desc: 'Current provisional rating is Preferred. Clean evidence supports upgrade upon credit clear.', saving: 'Saves client $320/yr · Boosts placement probability' },
+    { icon: 'fa-clock', title: 'Expedite MVR for Nancy Foster', desc: 'MVR still pending. Expedited request enables same-day decision and locks in Preferred rate.', saving: 'Prevents rate expiry · $285/yr competitive advantage vs market' },
+    { icon: 'fa-file-medical-alt', title: 'APS Alternative for John Kim', desc: 'TeleHealth exam + recent A1C lab results may substitute full APS, reducing delay by 14 days.', saving: 'Saves $320 APS cost · 14 days faster · STP score could reach 72+' },
+    { icon: 'fa-balance-scale', title: 'Julia Chen Annuity Rate Lock', desc: 'Fed rate hike Apr 9 increases NYL annuity crediting rates. Current rate advantageous vs MetLife.', saving: 'Rate lock window: 30 days · $4.2K/yr guaranteed income advantage' }
+  ]
+};
+
+let _currentPricingTab = 'overview';
+
+function openPricingReport() {
+  const overlay = document.getElementById('pricing-report-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  renderPricingReport('overview');
+  document.querySelectorAll('.pr-rtab').forEach(t => t.classList.remove('active'));
+  const first = document.querySelector('.pr-rtab');
+  if (first) first.classList.add('active');
+}
+function closePricingReport() {
+  const overlay = document.getElementById('pricing-report-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+function openBenchmarkModal() {
+  openPricingReport();
+  setTimeout(() => {
+    const tabs = document.querySelectorAll('.pr-rtab');
+    tabs.forEach(t => t.classList.remove('active'));
+    if (tabs[1]) tabs[1].classList.add('active');
+    renderPricingReport('benchmark');
+  }, 100);
+}
+function switchPricingReportTab(tab, tabEl) {
+  document.querySelectorAll('.pr-rtab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+  _currentPricingTab = tab;
+  renderPricingReport(tab);
+}
+function renderPricingReport(tab) {
+  const body = document.getElementById('pricing-report-body');
+  if (!body) return;
+  if (tab === 'overview') {
+    const kpis = pricingData.overview.kpis.map(k => `
+      <div class="pr-kpi">
+        <div class="pr-kpi-val">${k.val}</div>
+        <div class="pr-kpi-lbl">${k.lbl}</div>
+        <div class="pr-kpi-delta">${k.delta}</div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="pr-kpi-strip">${kpis}</div>
+      <div class="liab-section-title" style="font-size:14px;margin-bottom:14px"><i class="fas fa-chart-line" style="color:#1d4ed8"></i> Pipeline Pricing Summary — Apr 10, 2026</div>
+      <p style="font-size:12px;color:#475569;margin-bottom:16px;line-height:1.6">AI Pricing Intelligence has analyzed all 11 active underwriting cases against 8 competitor carriers. NYL leads on value score in 7 of 11 cases. Three cases present optimization opportunities. Real-time rate adjustments triggered by the April 9 Fed rate hike have been incorporated into all annuity benchmarks.</p>
+      <div class="pr-kpi-strip" style="grid-template-columns:repeat(3,1fr)">
+        <div class="pr-kpi" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac"><div class="pr-kpi-val" style="color:#166534">7</div><div class="pr-kpi-lbl" style="color:#16a34a">NYL Best Value</div></div>
+        <div class="pr-kpi" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fde68a"><div class="pr-kpi-val" style="color:#854d0e">3</div><div class="pr-kpi-lbl" style="color:#d97706">Competitive — Within 5%</div></div>
+        <div class="pr-kpi" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:#fca5a5"><div class="pr-kpi-val" style="color:#991b1b">1</div><div class="pr-kpi-lbl" style="color:#dc2626">Optimization Needed</div></div>
+      </div>`;
+  } else if (tab === 'benchmark') {
+    const rows = pricingData.benchmarks.map(b => `
+      <tr>
+        <td><strong>${b.client}</strong></td>
+        <td>${b.product}</td>
+        <td class="pr-best">${b.nyl}</td>
+        <td>${b.metlife}</td>
+        <td>${b.prudential}</td>
+        <td>${b.northwestern}</td>
+        <td class="${b.verdictClass}">${b.verdict}</td>
+      </tr>`).join('');
+    body.innerHTML = `
+      <div class="liab-section-title" style="font-size:14px;margin-bottom:14px"><i class="fas fa-balance-scale" style="color:#1d4ed8"></i> Competitor Benchmark Comparison — Annual Premium</div>
+      <table class="pr-bench-table">
+        <thead><tr>
+          <th>Client</th><th>Product</th>
+          <th><i class="fas fa-star" style="color:#fbbf24"></i> NYL (You)</th>
+          <th>MetLife</th><th>Prudential</th><th>Northwestern</th><th>Verdict</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p style="font-size:11px;color:#94a3b8;margin-top:8px"><i class="fas fa-info-circle"></i> Rates as of Apr 10, 2026. Competitor quotes sourced from rate API feeds. Subject to underwriting. Annuity rates reflect Apr 9 Fed rate adjustment.</p>`;
+  } else if (tab === 'narratives') {
+    const cards = pricingData.narratives.map(n => `
+      <div class="pr-narrative-card">
+        <div class="pr-narrative-header">
+          <div class="pr-narrative-avatar">${n.initials}</div>
+          <div>
+            <div class="pr-narrative-name">${n.name} — ${n.product}</div>
+            <div class="pr-narrative-meta">Risk Class: <span class="pr-risk-pill ${n.riskPill}">${n.riskClass}</span></div>
+          </div>
+        </div>
+        <div class="pr-narrative-body">${n.text}</div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="liab-section-title" style="font-size:14px;margin-bottom:14px"><i class="fas fa-file-alt" style="color:#1d4ed8"></i> AI-Generated Risk Narratives</div>
+      <p style="font-size:12px;color:#475569;margin-bottom:16px">Each narrative is generated by the AI Underwriting Intelligence Engine based on evidence collected, STP scoring, market benchmarks, and actuarial risk tables. Narratives are ready for case file documentation.</p>
+      ${cards}`;
+  } else if (tab === 'optimization') {
+    const items = pricingData.optimization.map(o => `
+      <div class="pr-optim-item">
+        <div class="pr-optim-icon"><i class="fas ${o.icon}"></i></div>
+        <div>
+          <div class="pr-optim-title">${o.title}</div>
+          <div class="pr-optim-desc">${o.desc}</div>
+          <div class="pr-optim-saving"><i class="fas fa-check-circle"></i> ${o.saving}</div>
+        </div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="liab-section-title" style="font-size:14px;margin-bottom:14px"><i class="fas fa-sliders-h" style="color:#1d4ed8"></i> Rate Optimization Opportunities</div>
+      <p style="font-size:12px;color:#475569;margin-bottom:16px">AI has identified ${pricingData.optimization.length} rating class and processing optimizations that can improve client outcomes and competitive positioning.</p>
+      <div class="pr-optim-list">${items}</div>`;
+  }
+}
+
+// Extend renderUWModal to support 'pricing' tab
+(function() {
+  const _origRenderUW = window.renderUWModal;
+  window.renderUWModal = function(tab) {
+    if (tab === 'pricing') {
+      const body = document.getElementById('uw-modal-body');
+      if (!body) return;
+      const id = window._currentUWId;
+      const uw = window.uwData ? window.uwData[id] : null;
+      if (!uw) { body.innerHTML = '<div style="padding:20px;color:#64748b">No pricing data.</div>'; return; }
+      // Find narrative if available
+      const narrative = pricingData.narratives.find(n => n.name && uw.name && n.name.split(' ')[0] === uw.name.split(' ')[0]);
+      const bench = pricingData.benchmarks.find(b => b.client && uw.name && b.client.split(' ')[0] === uw.name.split(' ')[0]);
+      body.innerHTML = `
+        <div style="padding:4px">
+          <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:16px 20px;margin-bottom:16px;color:#f1f5f9">
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px"><i class="fas fa-chart-line" style="color:#60a5fa;margin-right:8px"></i>AI Pricing Analysis — ${uw.name || id}</div>
+            <div style="font-size:11px;color:#94a3b8">Real-time benchmark · AI-generated narrative · Rating optimization</div>
+          </div>
+          ${bench ? `
+          <div class="liab-section-title"><i class="fas fa-balance-scale"></i> Competitor Benchmark (Annual Premium)</div>
+          <table class="pr-bench-table" style="margin-bottom:16px">
+            <thead><tr><th>NYL (You)</th><th>MetLife</th><th>Prudential</th><th>Northwestern</th><th>Verdict</th></tr></thead>
+            <tbody><tr>
+              <td class="pr-best">${bench.nyl}</td><td>${bench.metlife}</td><td>${bench.prudential}</td><td>${bench.northwestern}</td>
+              <td class="${bench.verdictClass}">${bench.verdict}</td>
+            </tr></tbody>
+          </table>` : ''}
+          ${narrative ? `
+          <div class="liab-section-title"><i class="fas fa-file-alt"></i> AI Risk Narrative</div>
+          <div class="pr-narrative-body" style="margin-bottom:16px">${narrative.text}</div>` : `<div style="font-size:12px;color:#64748b;padding:16px;background:#f8fafc;border-radius:8px">AI narrative being generated for this case. Check full Pricing Report for complete analysis.</div>`}
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="pab-btn-primary" onclick="openPricingReport()"><i class="fas fa-chart-bar"></i> Full Pricing Report</button>
+            <button class="pab-btn-secondary" onclick="openBenchmarkModal()"><i class="fas fa-balance-scale"></i> All Benchmarks</button>
+          </div>
+        </div>`;
+    } else {
+      _origRenderUW(tab);
+    }
+  };
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// TASK #18 — MARKET & NEWS IMPACT MONITOR
+// ═══════════════════════════════════════════════════════════════════
+
+const marketData = {
+  alerts: [
+    {
+      type: 'critical', icon: 'fa-percentage',
+      title: 'Federal Reserve Rate Hike +0.25% — April 9, 2026',
+      detail: 'The Fed raised the federal funds rate by 25 basis points to 5.50–5.75%. This directly impacts NYL annuity crediting rates (now 6.1% for 5-yr fixed), making annuity products significantly more competitive. Immediate action: Contact all annuity prospects and review $4.2M AUM for rebalancing opportunities.',
+      chips: ['38 clients affected', '$4.2M AUM rebalance', 'Annuity rates up +0.3%', 'Julia Chen — act now']
+    },
+    {
+      type: 'warning', icon: 'fa-cloud-rain',
+      title: 'Northeast Storm Event — Catastrophic Flooding Risk',
+      detail: 'NOAA has issued a severe weather advisory for NJ, NY, and CT effective Apr 11–14, 2026. 4 NYL clients have primary residences in flood-affected zones. Disability and LTC riders may see claims activity. Property damage is outside our coverage scope, but stress events often trigger accelerated lapse or surrender requests.',
+      chips: ['4 clients in affected zone', 'Patricia Nguyen (Newark)', 'James Whitfield (Hoboken)', 'Monitor for claims']
+    },
+    {
+      type: 'info', icon: 'fa-chart-line',
+      title: 'S&P 500 +2.3% WTD — Equity Markets Rally',
+      detail: 'Equity markets gained 2.3% week-to-date driven by tech earnings beats and rate hike clarity. VUL sub-accounts are performing strongly. This creates a natural opportunity for portfolio reviews and rebalancing discussions with investment clients. AUM growth of ~$97K across book estimated from market movement alone.',
+      chips: ['VUL sub-accounts +2.1%', '$97K AUM gain est.', '3 rebalance candidates', 'Investment review opportunity']
+    }
+  ],
+  news: [
+    { title: 'Fed Signals End to Rate Hike Cycle — Insurance Journal', source: 'Insurance Journal · Apr 10', sentiment: 'positive', score: '+82' },
+    { title: 'Life Insurance Applications Rise 4.2% in Q1 2026 — LIMRA', source: 'LIMRA · Apr 9', sentiment: 'positive', score: '+74' },
+    { title: 'Northeast Storm to Test Property & Casualty Reserves', source: 'A.M. Best · Apr 10', sentiment: 'negative', score: '-61' },
+    { title: 'Annuity Sales Hit Record $112B in Q1 — LIMRA', source: 'LIMRA · Apr 8', sentiment: 'positive', score: '+88' },
+    { title: 'Disability Claims Rising Post-COVID — Industry Trend', source: 'Insurance Journal · Apr 7', sentiment: 'negative', score: '-43' },
+    { title: 'NYL Maintains AAA Rating — Moody\'s Annual Review', source: 'Moody\'s · Apr 5', sentiment: 'positive', score: '+95' },
+    { title: 'Long-Term Care Insurance Market Contraction Continues', source: 'Insurance Business · Apr 6', sentiment: 'negative', score: '-52' },
+    { title: 'VUL Sub-Account Performance Strong in Tech-Heavy Portfolios', source: 'Financial Planning · Apr 9', sentiment: 'positive', score: '+67' }
+  ],
+  bookImpact: [
+    {
+      title: 'Rate Hike Impact on Your Book',
+      rows: [
+        { label: 'Annuity crediting rate increase', val: '+0.30%' },
+        { label: 'Clients benefiting from rate hike', val: '18 annuity clients' },
+        { label: 'VUL sub-account uplift (est.)', val: '+$97,000 AUM' },
+        { label: 'Term renewal pricing impact', val: 'Neutral — locked rates' }
+      ]
+    },
+    {
+      title: 'Storm Event — Client Exposure',
+      rows: [
+        { label: 'Clients in affected zone', val: '4 clients' },
+        { label: 'Potential LTC/DI claim exposure', val: '$14,800/mo risk' },
+        { label: 'Lapse risk from financial stress', val: '2 flagged clients' },
+        { label: 'Property coverage gap (refer out)', val: '$1.2M uncovered' }
+      ]
+    },
+    {
+      title: 'Market Rally Opportunities',
+      rows: [
+        { label: 'Investment review candidates', val: '3 clients' },
+        { label: 'VUL rebalance needed', val: '2 clients (>5% drift)' },
+        { label: 'AUM opportunity (cross-sell)', val: '$280K potential' },
+        { label: 'Annuity → VUL migration cases', val: '1 candidate' }
+      ]
+    },
+    {
+      title: 'Overall Book Health Score',
+      rows: [
+        { label: 'Insurance sentiment score', val: '72 / 100' },
+        { label: 'Market volatility index', val: '38 / 100' },
+        { label: 'Claims risk index', val: '54 / 100' },
+        { label: 'Renewal opportunity score', val: '81 / 100' }
+      ]
+    }
+  ]
+};
+
+let _currentMarketTab = 'alerts';
+
+function openMarketMonitor(tab) {
+  const overlay = document.getElementById('market-modal-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  const activeTab = tab || 'alerts';
+  _currentMarketTab = activeTab;
+  document.querySelectorAll('.mmt-tab').forEach(t => t.classList.remove('active'));
+  const tabs = document.querySelectorAll('.mmt-tab');
+  const tabMap = { alerts: 0, rates: 1, news: 2, book: 3 };
+  const idx = tabMap[activeTab] || 0;
+  if (tabs[idx]) tabs[idx].classList.add('active');
+  renderMarketModal(activeTab);
+}
+function closeMarketMonitor() {
+  const overlay = document.getElementById('market-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+function switchMarketTab(tab, tabEl) {
+  document.querySelectorAll('.mmt-tab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+  _currentMarketTab = tab;
+  renderMarketModal(tab);
+}
+function renderMarketModal(tab) {
+  const body = document.getElementById('market-modal-body');
+  if (!body) return;
+  if (tab === 'alerts') {
+    const kpis = `
+      <div class="mmt-kpi-strip">
+        <div class="mmt-kpi"><div class="mmt-kpi-val">3</div><div class="mmt-kpi-lbl">Active Alerts</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">38</div><div class="mmt-kpi-lbl">Clients Affected</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">+$97K</div><div class="mmt-kpi-lbl">AUM Movement</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">HIGH</div><div class="mmt-kpi-lbl">Market Activity</div></div>
+      </div>`;
+    const alertsHtml = marketData.alerts.map(a => `
+      <div class="mmt-alert-full ${a.type}">
+        <div class="mmt-alert-full-icon"><i class="fas ${a.icon}"></i></div>
+        <div class="mmt-alert-full-content">
+          <div class="mmt-alert-full-title">${a.title}</div>
+          <div class="mmt-alert-full-detail">${a.detail}</div>
+          <div class="mmt-impact-chips">${a.chips.map(c => `<span class="mmt-impact-chip">${c}</span>`).join('')}</div>
+        </div>
+      </div>`).join('');
+    body.innerHTML = kpis + alertsHtml;
+  } else if (tab === 'rates') {
+    body.innerHTML = `
+      <div class="mmt-kpi-strip">
+        <div class="mmt-kpi"><div class="mmt-kpi-val">5.75%</div><div class="mmt-kpi-lbl">Fed Funds Rate</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">6.1%</div><div class="mmt-kpi-lbl">NYL 5-Yr Annuity</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">4.42%</div><div class="mmt-kpi-lbl">10-Yr Treasury</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">+0.3%</div><div class="mmt-kpi-lbl">Rate Change (24h)</div></div>
+      </div>
+      <div class="liab-section-title"><i class="fas fa-chart-line" style="color:#0369a1"></i> Rate Impact on Product Lines</div>
+      <table class="pr-bench-table">
+        <thead><tr><th>Product Line</th><th>Previous Rate</th><th>Current Rate</th><th>Change</th><th>Client Impact</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Fixed Annuities</strong></td><td>5.80%</td><td class="pr-best">6.10%</td><td class="pr-best">+0.30%</td><td>18 clients — FAVORABLE</td></tr>
+          <tr><td><strong>Whole Life</strong></td><td>Locked</td><td>Locked</td><td>Neutral</td><td>No immediate impact</td></tr>
+          <tr><td><strong>VUL Sub-Accounts</strong></td><td>Variable</td><td>+2.3% MTD</td><td class="pr-best">+2.3%</td><td>$97K AUM gain est.</td></tr>
+          <tr><td><strong>Term Life</strong></td><td>Locked</td><td>Locked</td><td>Neutral</td><td>Renewals unaffected</td></tr>
+          <tr><td><strong>Disability Income</strong></td><td>Locked</td><td>Locked</td><td>Neutral</td><td>No change</td></tr>
+          <tr><td><strong>Long-Term Care</strong></td><td>$6,400/mo</td><td>$6,400/mo</td><td>Neutral</td><td>Stable</td></tr>
+        </tbody>
+      </table>`;
+  } else if (tab === 'news') {
+    const newsHtml = marketData.news.map(n => `
+      <div class="mmt-news-item">
+        <div class="mmt-news-sentiment ${n.sentiment}"></div>
+        <div style="flex:1">
+          <div class="mmt-news-title">${n.title}</div>
+          <div class="mmt-news-source">${n.source}</div>
+        </div>
+        <div class="mmt-news-score ${n.sentiment}">${n.score}</div>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="mmt-kpi-strip">
+        <div class="mmt-kpi"><div class="mmt-kpi-val">5</div><div class="mmt-kpi-lbl">Positive Stories</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">3</div><div class="mmt-kpi-lbl">Negative Stories</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">72</div><div class="mmt-kpi-lbl">Sentiment Score</div></div>
+        <div class="mmt-kpi"><div class="mmt-kpi-val">8</div><div class="mmt-kpi-lbl">Stories Today</div></div>
+      </div>
+      <div class="liab-section-title"><i class="fas fa-newspaper" style="color:#0369a1"></i> Industry News Feed — Apr 10, 2026</div>
+      ${newsHtml}`;
+  } else if (tab === 'book') {
+    const cards = marketData.bookImpact.map(c => `
+      <div class="mmt-book-card">
+        <div class="mmt-book-card-title"><i class="fas fa-chart-bar" style="color:#0369a1;margin-right:6px"></i>${c.title}</div>
+        ${c.rows.map(r => `<div class="mmt-book-row"><span>${r.label}</span><span class="mmt-book-val">${r.val}</span></div>`).join('')}
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="liab-section-title" style="font-size:14px;margin-bottom:14px"><i class="fas fa-book" style="color:#0369a1"></i> Book-of-Business Impact Analysis</div>
+      <div class="mmt-book-impact-row">${cards}</div>`;
+  }
+}
+
+// Click-outside handler for market modal
+document.addEventListener('DOMContentLoaded', function() {
+  const mOverlay = document.getElementById('market-modal-overlay');
+  if (mOverlay) mOverlay.addEventListener('click', function(e) { if (e.target === mOverlay) closeMarketMonitor(); });
+  const prOverlay = document.getElementById('pricing-report-overlay');
+  if (prOverlay) prOverlay.addEventListener('click', function(e) { if (e.target === prOverlay) closePricingReport(); });
+});
