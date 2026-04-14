@@ -501,6 +501,26 @@ function DashboardPage() {
         </div>
       </div>
 
+      {/* ── AI DAILY BRIEFING STRIP ── */}
+      <div class="ai-briefing-strip">
+        <div class="aib-label"><i class="fas fa-robot"></i> AI Daily Brief <span class="aib-time">7:02 AM</span></div>
+        <div class="aib-items">
+          <div class="aib-item urgent" onclick="openClientModal(2)" style="cursor:pointer">
+            <i class="fas fa-exclamation-circle"></i>
+            <span><strong>Patricia Nguyen</strong> — UL policy under-funded, lapse risk in ~68 days. Schedule call today.</span>
+          </div>
+          <div class="aib-item opportunity" onclick="navigateTo('products')" style="cursor:pointer">
+            <i class="fas fa-bolt"></i>
+            <span><strong>Fed rate +0.25%</strong> — Annuity pricing now favorable for 38 clients. Reach out before window closes.</span>
+          </div>
+          <div class="aib-item insight" onclick="openClientModal(1)" style="cursor:pointer">
+            <i class="fas fa-lightbulb"></i>
+            <span><strong>James Whitfield (52)</strong> — Retirement planning window: income annuity conversation aligns with life-stage. High close probability.</span>
+          </div>
+        </div>
+        <button class="aib-dismiss" onclick="this.closest('.ai-briefing-strip').style.display='none'" title="Dismiss"><i class="fas fa-times"></i></button>
+      </div>
+
       {/* ── HOLISTIC BOOK SNAPSHOT STRIP ── */}
       <div class="book-snapshot-strip">
         <div class="bss-card bss-insurance" onclick="navigateTo('policies')" style="cursor:pointer">
@@ -1101,6 +1121,37 @@ function DashboardPage() {
                 <div class="comm-msg">Interested in income annuity discussion</div>
               </div>
               <div class="comm-meta"><i class="fas fa-phone"></i> Yesterday</div>
+            </div>
+          </div>
+
+          {/* ── Today's Quick Wins ── */}
+          <div class="card-header" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-100)">
+            <h3><i class="fas fa-trophy"></i> Today's Quick Wins</h3>
+            <span style="font-size:11px;color:var(--green);font-weight:700">2 of 5 done</span>
+          </div>
+          <div class="quick-wins-list">
+            <div class="qw-item done">
+              <span class="qw-check done"><i class="fas fa-check"></i></span>
+              <span class="qw-text">Sent renewal quote to Sandra Williams</span>
+            </div>
+            <div class="qw-item done">
+              <span class="qw-check done"><i class="fas fa-check"></i></span>
+              <span class="qw-text">Reviewed Robert Chen claim documents</span>
+            </div>
+            <div class="qw-item" onclick="openClientModal(2)" style="cursor:pointer">
+              <span class="qw-check"><i class="fas fa-circle"></i></span>
+              <span class="qw-text">Call Patricia Nguyen re: UL policy funding</span>
+              <span class="qw-badge urgent">Urgent</span>
+            </div>
+            <div class="qw-item" onclick="openMeetingBrief('MTG-001')" style="cursor:pointer">
+              <span class="qw-check"><i class="fas fa-circle"></i></span>
+              <span class="qw-text">Prepare Kevin Park follow-up brief</span>
+              <span class="qw-badge">Today</span>
+            </div>
+            <div class="qw-item" onclick="navigateTo('products')" style="cursor:pointer">
+              <span class="qw-check"><i class="fas fa-circle"></i></span>
+              <span class="qw-text">Review annuity rate change impact (38 clients)</span>
+              <span class="qw-badge">AI Rec</span>
             </div>
           </div>
         </div>

@@ -463,19 +463,21 @@ body {
   display: grid;
   grid-template-columns: 2fr 1.2fr;
   gap: 20px;
-  margin-bottom: 24px;
-  align-items: start;
+  margin-bottom: 20px;
+  align-items: stretch;
 }
 
 /* dashboard-grid contains only chart-card + activity-card */
-.chart-card { min-width: 0; }
-.activity-card { min-width: 0; }
+.chart-card { min-width: 0; display: flex; flex-direction: column; }
+.chart-card .chart-container { flex: 1; }
+.activity-card { min-width: 0; display: flex; flex-direction: column; }
+.activity-card .activity-list { flex: 1; }
 
-.chart-container { position: relative; height: 240px; }
+.chart-container { position: relative; height: 260px; min-height: 220px; }
 .donut-container { height: 180px; }
 
 /* Activity List */
-.activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 460px; overflow-y: auto; }
+.activity-list { display: flex; flex-direction: column; gap: 8px; max-height: none; overflow-y: auto; }
 
 .activity-item {
   display: flex;
@@ -676,8 +678,9 @@ body {
   grid-template-columns: 1.2fr 1fr 1fr;
   gap: 20px;
   margin-bottom: 20px;
-  align-items: start;
+  align-items: stretch;
 }
+.dash-row-3 > .dash-card { display: flex; flex-direction: column; }
 
 /* 3-col row for clients/appointments/donut */
 .dash-row-bottom {
@@ -685,8 +688,9 @@ body {
   grid-template-columns: 1.4fr 1fr 1fr;
   gap: 20px;
   margin-bottom: 20px;
-  align-items: start;
+  align-items: stretch;
 }
+.dash-row-bottom > .dash-card { display: flex; flex-direction: column; }
 
 /* ---- Goal Tracker ---- */
 .goal-card .card-header { margin-bottom: 14px; }
@@ -805,17 +809,19 @@ body {
 /* responsive for new rows */
 @media (max-width: 1400px) {
   .book-snapshot-strip { grid-template-columns: repeat(2, 1fr); }
-  .dash-row-3 { grid-template-columns: 1fr 1fr; }
-  .dash-row-bottom { grid-template-columns: 1fr 1fr; }
+  .dash-row-3 { grid-template-columns: 1fr 1fr; align-items: start; }
+  .dash-row-bottom { grid-template-columns: 1fr 1fr; align-items: start; }
+  .dash-row-3 > .dash-card, .dash-row-bottom > .dash-card { display: block; }
   .lapse-card { grid-column: 1 / 3; }
   .dashboard-grid { grid-template-columns: 1.5fr 1fr; }
 }
 @media (max-width: 900px) {
   .book-snapshot-strip { grid-template-columns: repeat(2, 1fr); }
-  .dash-row-3 { grid-template-columns: 1fr; }
-  .dash-row-bottom { grid-template-columns: 1fr; }
+  .dash-row-3 { grid-template-columns: 1fr; align-items: start; }
+  .dash-row-bottom { grid-template-columns: 1fr; align-items: start; }
   .lapse-card { grid-column: auto; }
-  .dashboard-grid { grid-template-columns: 1fr; }
+  .dashboard-grid { grid-template-columns: 1fr; align-items: start; }
+  .chart-card, .activity-card { display: block; }
 }
 
 /* ============ CLIENTS PAGE ============ */
@@ -12442,4 +12448,151 @@ body.spotlight-open { overflow: hidden; }
   background: #eff6ff;
   border-color: #93c5fd;
   color: #003087;
+}
+
+/* ── AI Daily Briefing Strip ── */
+.ai-briefing-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(49,46,129,0.25);
+  position: relative;
+}
+
+.aib-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.aib-label i { color: #a78bfa; font-size: 13px; }
+.aib-time {
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.aib-items {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
+  flex-wrap: nowrap;
+}
+
+.aib-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 8px 12px;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.45;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.2s;
+  cursor: default;
+}
+.aib-item:hover { background: rgba(255,255,255,0.13); }
+.aib-item i { flex-shrink: 0; margin-top: 2px; font-size: 13px; }
+.aib-item strong { color: white; }
+
+.aib-item.urgent i { color: #f87171; }
+.aib-item.opportunity i { color: #fbbf24; }
+.aib-item.insight i { color: #34d399; }
+
+.aib-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.35);
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+.aib-dismiss:hover { color: white; background: rgba(255,255,255,0.1); }
+
+/* ── Quick Wins List ── */
+.quick-wins-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qw-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+  font-size: 12px;
+  color: var(--gray-700);
+  transition: all 0.15s;
+}
+.qw-item:hover { background: white; box-shadow: var(--shadow-sm); }
+.qw-item.done { opacity: 0.55; }
+.qw-item.done .qw-text { text-decoration: line-through; color: var(--gray-400); }
+
+.qw-check {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  background: var(--gray-200);
+  color: var(--gray-400);
+}
+.qw-check.done {
+  background: var(--green-light);
+  color: var(--green);
+}
+.qw-item.done .qw-check { background: var(--green-light); color: var(--green); }
+
+.qw-text { flex: 1; line-height: 1.35; }
+
+.qw-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: var(--gold-light);
+  color: var(--gold);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.qw-badge.urgent {
+  background: var(--red-light);
+  color: var(--red);
+}
+
+/* Responsive: hide middle aib-item on narrow screens */
+@media (max-width: 1100px) {
+  .aib-items .aib-item:nth-child(2) { display: none; }
+}
+@media (max-width: 800px) {
+  .aib-items { flex-direction: column; }
+  .aib-items .aib-item:nth-child(2) { display: flex; }
+  .ai-briefing-strip { flex-direction: column; align-items: flex-start; }
 }
