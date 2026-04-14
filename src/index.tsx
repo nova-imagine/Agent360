@@ -12,13 +12,13 @@ app.use(
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>NYL Agent 360 | New York Life</title>
-          <link rel="stylesheet" href="/static/style.css" />
+          <link rel="stylesheet" href="/static/style.css?v=360b" />
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         </head>
         <body>
           {children}
-          <script src="/static/app.js"></script>
+          <script src="/static/app.js?v=360b"></script>
         </body>
       </html>
     )

@@ -10548,7 +10548,7 @@ body {
 .cm-box {
   background: #fff;
   border-radius: 16px;
-  width: 720px;
+  width: 860px;
   max-width: 96vw;
   max-height: 90vh;
   display: flex;
@@ -10633,24 +10633,31 @@ body {
 /* ── Tab bar ─────────────────────────────────────────────────── */
 .cm-tabs {
   display: flex;
+  flex-wrap: nowrap;
   background: #f1f5f9;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
   overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
+.cm-tabs::-webkit-scrollbar { height: 3px; }
+.cm-tabs::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 .cm-tab {
   background: none;
   border: none;
   border-bottom: 3px solid transparent;
-  padding: 11px 18px;
-  font-size: 13px;
+  padding: 10px 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: color .15s, border-color .15s, background .15s;
 }
 .cm-tab:hover { color: #003087; background: #e8eef8; }
@@ -10659,7 +10666,7 @@ body {
   border-bottom-color: #003087;
   background: #fff;
 }
-.cm-tab i { font-size: 12px; }
+.cm-tab i { font-size: 11px; }
 
 /* ── Tab body ────────────────────────────────────────────────── */
 .cm-body {
@@ -11122,10 +11129,8 @@ body {
 .cm-cs-act     { background: transparent; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px; cursor: pointer; color: #003087; font-size: 12px; }
 .cm-cs-act:hover { background: #eff6ff; }
 
-/* ── Wider modal for 9 tabs ──────────────────────────────────── */
-.cm-box { max-width: 840px; }
-.cm-tabs { overflow-x: auto; scrollbar-width: none; }
-.cm-tabs::-webkit-scrollbar { display: none; }
+/* ── 9-tab modal adjustments ─────────────────────────────────── */
+/* width already set to 860px in .cm-box above */
 
 /* ── Footer ──────────────────────────────────────────────────── */
 .cm-footer {
