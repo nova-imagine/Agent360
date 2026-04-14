@@ -1871,7 +1871,7 @@ function openPolicyModal(policyId, tab) {
   document.body.style.overflow = 'hidden';
   // Set active tab
   document.querySelectorAll('#policy-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
-  const tabMap = { view: 0, edit: 1, ai: 2, nlp: 3 };
+  const tabMap = { view: 0, edit: 1, ai: 2, nlp: 3, retention: 4, documents: 5, timeline: 6 };
   const tabs = document.querySelectorAll('#policy-modal-tabs .dmt-tab');
   if (tabs[tabMap[_currentPolicyTab]]) tabs[tabMap[_currentPolicyTab]].classList.add('active');
   renderPolicyModal(_currentPolicyId, _currentPolicyTab);
@@ -2023,6 +2023,151 @@ function renderPolicyModal(policyId, tab) {
         <div class="pm-ai-cta">
           <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
           <button class="btn btn-outline-sm" onclick="switchPolicyTab('edit', document.querySelectorAll('#policy-modal-tabs .dmt-tab')[1])"><i class="fas fa-edit"></i> Edit Policy</button>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'documents') {
+    const policyDocs = {
+      'P-100291': [
+        {name:'Policy Contract — Whole Life $500K', type:'contract', date:'2019-06-15', status:'verified', size:'2.4 MB'},
+        {name:'Annual Statement 2025', type:'statement', date:'2026-01-15', status:'verified', size:'380 KB'},
+        {name:'Paid-Up Additions Rider Certificate', type:'rider', date:'2019-06-15', status:'verified', size:'210 KB'},
+        {name:'Dividend Notice 2026 — $2,140', type:'dividend', date:'2026-03-01', status:'new', size:'95 KB'},
+        {name:'Beneficiary Change Form 2023', type:'form', date:'2023-04-10', status:'verified', size:'140 KB'},
+      ],
+      'P-100301': [
+        {name:'Policy Contract — Universal Life $400K', type:'contract', date:'2020-08-20', status:'verified', size:'2.1 MB'},
+        {name:'Under-Funding Notice (Q1 2026)', type:'alert', date:'2026-01-20', status:'urgent', size:'120 KB'},
+        {name:'Premium Catch-Up Illustration', type:'illustration', date:'2026-03-10', status:'pending', size:'650 KB'},
+      ],
+      'P-100310': [
+        {name:'Policy Contract — Whole Life $1M', type:'contract', date:'2018-04-12', status:'verified', size:'3.1 MB'},
+        {name:'Annual Statement 2025', type:'statement', date:'2026-01-15', status:'verified', size:'410 KB'},
+        {name:'Death Benefit Claim CLM-2026-0041', type:'claim', date:'2026-04-09', status:'pending', size:'890 KB'},
+        {name:'Medical Certificate (Claim)', type:'claim', date:'2026-04-09', status:'verified', size:'320 KB'},
+      ],
+      'P-100320': [
+        {name:'Policy Contract — Term Life 20yr', type:'contract', date:'2016-09-30', status:'verified', size:'1.8 MB'},
+        {name:'Renewal Notice Sep 2026', type:'renewal', date:'2026-03-15', status:'urgent', size:'180 KB'},
+        {name:'Conversion Illustration — Whole Life', type:'illustration', date:'2026-04-01', status:'new', size:'720 KB'},
+      ],
+      'P-100330': [
+        {name:'Policy Contract — WL $2M Flagship', type:'contract', date:'2015-12-01', status:'verified', size:'3.8 MB'},
+        {name:'Annual Statement 2025', type:'statement', date:'2026-01-15', status:'verified', size:'520 KB'},
+        {name:'Trust Beneficiary Agreement', type:'legal', date:'2022-06-20', status:'verified', size:'1.2 MB'},
+        {name:'LTC Rider Certificate', type:'rider', date:'2015-12-01', status:'verified', size:'290 KB'},
+        {name:'Dividend Notice 2026 — $6,200', type:'dividend', date:'2026-03-01', status:'new', size:'110 KB'},
+        {name:'UMA Illustration Draft', type:'illustration', date:'2026-04-08', status:'new', size:'840 KB'},
+      ],
+    };
+    const docTypeIcons = {contract:'fa-file-contract',statement:'fa-chart-bar',rider:'fa-plus-circle',dividend:'fa-coins',form:'fa-file-alt',alert:'fa-exclamation-triangle',illustration:'fa-calculator',claim:'fa-file-medical',renewal:'fa-sync-alt',legal:'fa-balance-scale'};
+    const docStatusStyles = {verified:'background:#d1fae5;color:#059669',urgent:'background:#fee2e2;color:#dc2626',pending:'background:#fef3c7;color:#d97706',new:'background:#dbeafe;color:#2563eb'};
+    const docs = policyDocs[policyId] || [{name:'No documents on file.',type:'form',date:'—',status:'pending',size:'—'}];
+    const totalDocs = docs.length;
+    const verifiedCount = docs.filter(d=>d.status==='verified').length;
+    const urgentCount = docs.filter(d=>d.status==='urgent').length;
+    bodyEl.innerHTML = `
+      <div class="pm-docs-panel">
+        <div class="pm-docs-kpi-strip">
+          <div class="pm-docs-kpi"><span class="pm-docs-kpi-val">${totalDocs}</span><span class="pm-docs-kpi-lbl">Total Documents</span></div>
+          <div class="pm-docs-kpi"><span class="pm-docs-kpi-val green">${verifiedCount}</span><span class="pm-docs-kpi-lbl">Verified</span></div>
+          <div class="pm-docs-kpi"><span class="pm-docs-kpi-val ${urgentCount>0?'red':'gray'}">${urgentCount}</span><span class="pm-docs-kpi-lbl">Need Action</span></div>
+          <div class="pm-docs-kpi"><span class="pm-docs-kpi-val blue">${Math.round(verifiedCount/totalDocs*100)}%</span><span class="pm-docs-kpi-lbl">Doc Complete</span></div>
+        </div>
+        <div class="pm-docs-list-full">
+          ${docs.map(d=>`
+            <div class="pm-doc-row pm-doc-${d.status}">
+              <div class="pm-doc-type-icon"><i class="fas ${docTypeIcons[d.type]||'fa-file'}"></i></div>
+              <div class="pm-doc-info">
+                <div class="pm-doc-name">${d.name}</div>
+                <div class="pm-doc-meta">${d.date} · ${d.size}</div>
+              </div>
+              <span class="pm-doc-status-badge" style="${docStatusStyles[d.status]||''}">${d.status.charAt(0).toUpperCase()+d.status.slice(1)}</span>
+              <div class="pm-doc-actions">
+                <button class="pm-doc-btn" title="View document" onclick="uploadDocToast()"><i class="fas fa-eye"></i></button>
+                <button class="pm-doc-btn" title="Download" onclick="uploadDocToast()"><i class="fas fa-download"></i></button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="pm-docs-upload-bar">
+          <button class="pm-docs-upload-btn" onclick="uploadDocToast()"><i class="fas fa-cloud-upload-alt"></i> Upload Document</button>
+          <button class="pm-docs-request-btn" onclick="draftRetentionEmail('${p.client.split(' ')[0].toLowerCase()}')"><i class="fas fa-envelope"></i> Request Missing Docs</button>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'timeline') {
+    const policyTimelines = {
+      'P-100291': [
+        {date:'Apr 9, 2026',event:'Agent call — annual review discussion',icon:'fa-phone',cls:'tl-call'},
+        {date:'Mar 1, 2026',event:'Dividend credited: $2,140 (2026)',icon:'fa-coins',cls:'tl-dividend'},
+        {date:'Jan 10, 2026',event:'Annual statement sent to policyholder',icon:'fa-envelope',cls:'tl-email'},
+        {date:'Jun 15, 2025',event:'Premium payment received — on time',icon:'fa-check-circle',cls:'tl-payment'},
+        {date:'Apr 20, 2025',event:'AI flag: Paid-Up Additions rider review due',icon:'fa-robot',cls:'tl-ai'},
+        {date:'Jun 15, 2024',event:'Annual policy review completed',icon:'fa-clipboard-check',cls:'tl-review'},
+        {date:'Jun 15, 2019',event:'Policy issued — Whole Life $500K',icon:'fa-file-contract',cls:'tl-issued'},
+      ],
+      'P-100301': [
+        {date:'Apr 10, 2026',event:'⚡ URGENT: Under-funding alert triggered — 2nd consecutive quarter',icon:'fa-exclamation-triangle',cls:'tl-urgent'},
+        {date:'Mar 12, 2026',event:'Premium catch-up illustration sent to client',icon:'fa-calculator',cls:'tl-email'},
+        {date:'Jan 20, 2026',event:'First under-funding notice issued by system',icon:'fa-bell',cls:'tl-alert'},
+        {date:'Aug 20, 2025',event:'Annual premium payment received',icon:'fa-check-circle',cls:'tl-payment'},
+        {date:'Jun 5, 2025',event:'Policy review call — cash value growth noted',icon:'fa-phone',cls:'tl-call'},
+        {date:'Aug 20, 2020',event:'Policy issued — Universal Life $400K',icon:'fa-file-contract',cls:'tl-issued'},
+      ],
+      'P-100320': [
+        {date:'Apr 10, 2026',event:'⚡ URGENT: Renewal notice — conversion window closes Sep 2026',icon:'fa-exclamation-triangle',cls:'tl-urgent'},
+        {date:'Apr 1, 2026',event:'Conversion illustration (WL/UL) prepared and sent',icon:'fa-calculator',cls:'tl-email'},
+        {date:'Mar 15, 2026',event:'Renewal reminder sent — 6 months to expiry',icon:'fa-sync-alt',cls:'tl-renewal'},
+        {date:'Sep 30, 2025',event:'Premium payment received — Year 9 of 20-year term',icon:'fa-check-circle',cls:'tl-payment'},
+        {date:'Apr 12, 2025',event:'Annual review — term expiry discussed',icon:'fa-clipboard-check',cls:'tl-review'},
+        {date:'Sep 30, 2016',event:'Policy issued — Term Life 20yr $350K',icon:'fa-file-contract',cls:'tl-issued'},
+      ],
+      'P-100330': [
+        {date:'Apr 9, 2026',event:'Meeting prep for annual review Apr 15 — UMA + estate',icon:'fa-calendar-check',cls:'tl-meeting'},
+        {date:'Mar 1, 2026',event:'Dividend credited: $6,200 (2026)',icon:'fa-coins',cls:'tl-dividend'},
+        {date:'Jan 15, 2026',event:'Annual statement sent to trust beneficiary',icon:'fa-envelope',cls:'tl-email'},
+        {date:'Dec 1, 2025',event:'Annual premium — $12,000 received on time',icon:'fa-check-circle',cls:'tl-payment'},
+        {date:'Apr 10, 2025',event:'Annual review — estate attorney coordination',icon:'fa-clipboard-check',cls:'tl-review'},
+        {date:'Feb 2, 2025',event:'AI flag: UMA opportunity identified ($280K+ investable)',icon:'fa-robot',cls:'tl-ai'},
+        {date:'Dec 1, 2015',event:'Flagship policy issued — WL $2M',icon:'fa-file-contract',cls:'tl-issued'},
+      ],
+    };
+    const tlTypeStyles = {
+      'tl-urgent':'background:#fee2e2;color:#dc2626;border-color:#fca5a5',
+      'tl-call':'background:#eff6ff;color:#2563eb;border-color:#bfdbfe',
+      'tl-email':'background:#f0fdf4;color:#059669;border-color:#bbf7d0',
+      'tl-payment':'background:#f0fdf4;color:#059669;border-color:#bbf7d0',
+      'tl-review':'background:#eff6ff;color:#2563eb;border-color:#bfdbfe',
+      'tl-ai':'background:#f3e8ff;color:#7c3aed;border-color:#d8b4fe',
+      'tl-dividend':'background:#fefce8;color:#d97706;border-color:#fde68a',
+      'tl-issued':'background:#f1f5f9;color:#475569;border-color:#cbd5e1',
+      'tl-renewal':'background:#fff7ed;color:#d97706;border-color:#fed7aa',
+      'tl-alert':'background:#fff7ed;color:#ea580c;border-color:#fdba74',
+      'tl-meeting':'background:#eff6ff;color:#2563eb;border-color:#bfdbfe',
+    };
+    const tlDotColors = {'tl-urgent':'#dc2626','tl-call':'#2563eb','tl-email':'#059669','tl-payment':'#059669','tl-review':'#2563eb','tl-ai':'#7c3aed','tl-dividend':'#d97706','tl-issued':'#64748b','tl-renewal':'#d97706','tl-alert':'#ea580c','tl-meeting':'#2563eb'};
+    const events = policyTimelines[policyId] || [{date:'No events on record.',event:'No timeline data.',icon:'fa-circle',cls:'tl-issued'}];
+    bodyEl.innerHTML = `
+      <div class="pm-timeline-panel">
+        <div class="pm-tl-header"><i class="fas fa-stream"></i> Policy Activity Timeline <span class="pm-tl-count">${events.length} events</span></div>
+        <div class="pm-tl-full">
+          ${events.map((e,i)=>`
+            <div class="pm-tl-entry ${i===events.length-1?'pm-tl-last':''}">
+              <div class="pm-tl-entry-dot" style="background:${tlDotColors[e.cls]||'#94a3b8'}">
+                <i class="fas ${e.icon}" style="font-size:9px;color:#fff"></i>
+              </div>
+              <div class="pm-tl-entry-line" style="${i===events.length-1?'display:none':'border-color:'+tlDotColors[e.cls]+'40'}"></div>
+              <div class="pm-tl-entry-content">
+                <div class="pm-tl-entry-date">${e.date}</div>
+                <div class="pm-tl-entry-event" style="color:${(tlDotColors[e.cls]||'#475569')}">${e.event}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="pm-tl-footer">
+          <button class="pm-tl-add-btn" onclick="uploadDocToast()"><i class="fas fa-plus-circle"></i> Log Activity</button>
+          <button class="pm-tl-export-btn" onclick="uploadDocToast()"><i class="fas fa-download"></i> Export History</button>
         </div>
       </div>
     `;

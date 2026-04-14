@@ -12,13 +12,13 @@ app.use(
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>NYL Agent 360 | New York Life</title>
-          <link rel="stylesheet" href="/static/style.css?v=360c" />
+          <link rel="stylesheet" href="/static/style.css?v=360d" />
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         </head>
         <body>
           {children}
-          <script src="/static/app.js?v=360c"></script>
+          <script src="/static/app.js?v=360d"></script>
         </body>
       </html>
     )
@@ -2157,6 +2157,135 @@ function ClientsPage() {
 function PoliciesPage() {
   return (
     <div class="page policies-page">
+
+      {/* ── Policy KPI Dashboard Bar ── */}
+      <div class="policy-kpi-bar">
+        <div class="pkpi-card pkpi-blue" onclick="filterPolicies()">
+          <div class="pkpi-icon"><i class="fas fa-file-contract"></i></div>
+          <div class="pkpi-data">
+            <div class="pkpi-val">1,842</div>
+            <div class="pkpi-lbl">Total Policies</div>
+            <div class="pkpi-sub">+14 this month</div>
+          </div>
+        </div>
+        <div class="pkpi-card pkpi-green">
+          <div class="pkpi-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div class="pkpi-data">
+            <div class="pkpi-val">$487K</div>
+            <div class="pkpi-lbl">Monthly Premium</div>
+            <div class="pkpi-sub pkpi-up"><i class="fas fa-arrow-up"></i> +12% MoM</div>
+          </div>
+        </div>
+        <div class="pkpi-card pkpi-navy">
+          <div class="pkpi-icon"><i class="fas fa-shield-alt"></i></div>
+          <div class="pkpi-data">
+            <div class="pkpi-val">$412M</div>
+            <div class="pkpi-lbl">Total Face Value</div>
+            <div class="pkpi-sub">Across all clients</div>
+          </div>
+        </div>
+        <div class="pkpi-card pkpi-orange" onclick="openRenewalCenter()">
+          <div class="pkpi-icon"><i class="fas fa-sync-alt"></i></div>
+          <div class="pkpi-data">
+            <div class="pkpi-val">23</div>
+            <div class="pkpi-lbl">Renewals Due (90d)</div>
+            <div class="pkpi-sub pkpi-warn">2 urgent — act now</div>
+          </div>
+        </div>
+        <div class="pkpi-card pkpi-red" onclick="openRetentionFullReport()">
+          <div class="pkpi-icon"><i class="fas fa-heartbeat"></i></div>
+          <div class="pkpi-data">
+            <div class="pkpi-val">15</div>
+            <div class="pkpi-lbl">Lapse Risk</div>
+            <div class="pkpi-sub pkpi-warn">4 high · 11 medium</div>
+          </div>
+        </div>
+        <div class="pkpi-card pkpi-purple" onclick="openNLPReview('all')">
+          <div class="pkpi-icon"><i class="fas fa-brain"></i></div>
+          <div class="pkpi-data">
+            <div class="pkpi-val">94%</div>
+            <div class="pkpi-lbl">NLP Accuracy</div>
+            <div class="pkpi-sub">2 urgent risks</div>
+          </div>
+        </div>
+        <div class="pkpi-card pkpi-teal">
+          <div class="pkpi-icon"><i class="fas fa-piggy-bank"></i></div>
+          <div class="pkpi-data">
+            <div class="pkpi-val">$312K</div>
+            <div class="pkpi-lbl">Cash Value (Total)</div>
+            <div class="pkpi-sub">Across whole life</div>
+          </div>
+        </div>
+        <div class="pkpi-card pkpi-gold">
+          <div class="pkpi-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="pkpi-data">
+            <div class="pkpi-val">$31.2K</div>
+            <div class="pkpi-lbl">Upsell Potential</div>
+            <div class="pkpi-sub pkpi-up"><i class="fas fa-star"></i> 6 opportunities</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Portfolio Health Strip ── */}
+      <div class="portfolio-health-strip">
+        <div class="phs-header">
+          <div class="phs-title"><i class="fas fa-chart-pie"></i> Portfolio Composition &amp; Health</div>
+          <div class="phs-subtitle">Policy type mix by count and annual premium · as of Apr 2026</div>
+        </div>
+        <div class="phs-bands">
+          <div class="phs-band phs-wl">
+            <div class="phs-band-header">
+              <i class="fas fa-shield-alt"></i>
+              <span>Whole Life</span>
+            </div>
+            <div class="phs-band-val">847</div>
+            <div class="phs-band-bar"><div class="phs-bar-fill phs-fill-wl" style="width:46%"></div></div>
+            <div class="phs-band-sub">$218K/mo · 46%</div>
+          </div>
+          <div class="phs-band phs-tl">
+            <div class="phs-band-header">
+              <i class="fas fa-clock"></i>
+              <span>Term Life</span>
+            </div>
+            <div class="phs-band-val">523</div>
+            <div class="phs-band-bar"><div class="phs-bar-fill phs-fill-tl" style="width:28%"></div></div>
+            <div class="phs-band-sub">$136K/mo · 28%</div>
+          </div>
+          <div class="phs-band phs-ul">
+            <div class="phs-band-header">
+              <i class="fas fa-infinity"></i>
+              <span>Universal Life</span>
+            </div>
+            <div class="phs-band-val">312</div>
+            <div class="phs-band-bar"><div class="phs-bar-fill phs-fill-ul" style="width:17%"></div></div>
+            <div class="phs-band-sub">$83K/mo · 17%</div>
+          </div>
+          <div class="phs-band phs-ltc">
+            <div class="phs-band-header">
+              <i class="fas fa-heartbeat"></i>
+              <span>LTC / Other</span>
+            </div>
+            <div class="phs-band-val">160</div>
+            <div class="phs-band-bar"><div class="phs-bar-fill phs-fill-ltc" style="width:9%"></div></div>
+            <div class="phs-band-sub">$49K/mo · 9%</div>
+          </div>
+          <div class="phs-divider"></div>
+          <div class="phs-health-panel">
+            <div class="phs-hp-title">Portfolio Health</div>
+            <div class="phs-hp-row"><span class="phs-dot green"></span><span>Active</span><strong>93%</strong></div>
+            <div class="phs-hp-row"><span class="phs-dot orange"></span><span>Review</span><strong>4%</strong></div>
+            <div class="phs-hp-row"><span class="phs-dot red"></span><span>Lapsed</span><strong>3%</strong></div>
+            <div class="phs-hp-score">Retention Rate <span class="phs-hp-score-val">93%</span></div>
+          </div>
+          <div class="phs-action-panel">
+            <div class="phs-hp-title">Quick Actions</div>
+            <button class="phs-act-btn" onclick="openNLPReview('all')"><i class="fas fa-brain"></i> NLP Scan All</button>
+            <button class="phs-act-btn" onclick="openRetentionFullReport()"><i class="fas fa-heartbeat"></i> Lapse Report</button>
+            <button class="phs-act-btn" onclick="sendQuickMessage('Show portfolio premium trend for last 12 months')"><i class="fas fa-chart-line"></i> Premium Trend</button>
+          </div>
+        </div>
+      </div>
+
       <div class="page-toolbar">
         <div class="toolbar-left">
           <div class="search-inline">
@@ -2269,10 +2398,12 @@ function PoliciesPage() {
               <th>Type</th>
               <th>Face Value</th>
               <th>Annual Premium</th>
+              <th><i class="fas fa-credit-card" style="color:#0891b2;margin-right:4px"></i>Pay Mode</th>
               <th>Status</th>
               <th>Issued</th>
               <th>Renewal</th>
               <th>Beneficiary</th>
+              <th><i class="fas fa-phone-alt" style="color:#059669;margin-right:4px"></i>Last Contact</th>
               <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
               <th><i class="fas fa-brain" style="color:#7c3aed;margin-right:4px"></i>NLP Risk</th>
               <th><i class="fas fa-heartbeat" style="color:#dc2626;margin-right:4px"></i>Lapse Risk</th>
@@ -2314,6 +2445,28 @@ function PoliciesPage() {
                 'P-100330': {score:14,level:'Low',   cls:'lapse-low',   trigger:'WL strong — $168K cash value',      retId:''},
               };
               const lapse = lapseRiskMap[p.id] || {score:0,level:'—',cls:'',trigger:'Not scored',retId:''};
+              const payModeMap: Record<string,{label:string,icon:string,cls:string}> = {
+                'P-100291':{label:'Annual',  icon:'fa-calendar-check', cls:'pay-annual'},
+                'P-100292':{label:'Monthly', icon:'fa-redo',           cls:'pay-monthly'},
+                'P-100293':{label:'Annual',  icon:'fa-calendar-check', cls:'pay-annual'},
+                'P-100301':{label:'Monthly', icon:'fa-redo',           cls:'pay-monthly pay-warn'},
+                'P-100302':{label:'Quarterly',icon:'fa-calendar',      cls:'pay-quarterly'},
+                'P-100310':{label:'Annual',  icon:'fa-calendar-check', cls:'pay-annual'},
+                'P-100320':{label:'Semi-Ann',icon:'fa-calendar-alt',   cls:'pay-semi'},
+                'P-100330':{label:'Annual',  icon:'fa-calendar-check', cls:'pay-annual'},
+              };
+              const lastContactMap: Record<string,{date:string,type:string,cls:string}> = {
+                'P-100291':{date:'Apr 9',  type:'Call',  cls:'lc-call'},
+                'P-100292':{date:'Mar 22', type:'Email', cls:'lc-email'},
+                'P-100293':{date:'Apr 2',  type:'Meeting',cls:'lc-meeting'},
+                'P-100301':{date:'Apr 10', type:'Urgent',cls:'lc-urgent'},
+                'P-100302':{date:'Mar 15', type:'Email', cls:'lc-email'},
+                'P-100310':{date:'Apr 9',  type:'Claim', cls:'lc-claim'},
+                'P-100320':{date:'Apr 10', type:'Urgent',cls:'lc-urgent'},
+                'P-100330':{date:'Apr 9',  type:'Meeting',cls:'lc-meeting'},
+              };
+              const pm = payModeMap[p.id] || {label:'—',icon:'fa-question',cls:''};
+              const lc = lastContactMap[p.id] || {date:'—',type:'—',cls:''};
               return (
               <tr>
                 <td><span class="policy-id">{p.id}</span></td>
@@ -2326,10 +2479,12 @@ function PoliciesPage() {
                 <td><span class="policy-type-badge">{p.type}</span></td>
                 <td class="text-right">${(p.faceValue/1000).toFixed(0)}K</td>
                 <td class="text-right premium">${p.premium.toLocaleString()}</td>
+                <td><span class={`pay-mode-badge ${pm.cls}`}><i class={`fas ${pm.icon}`}></i> {pm.label}</span></td>
                 <td><span class={`status-badge ${p.status.toLowerCase()}`}>{p.status}</span></td>
                 <td class="text-muted">{p.issued}</td>
                 <td class={p.status === 'Review' ? 'text-orange' : 'text-muted'}>{p.renewal}</td>
                 <td class="text-muted">{p.beneficiary}</td>
+                <td><span class={`last-contact-badge ${lc.cls}`}>{lc.date} · {lc.type}</span></td>
                 <td><div class="idp-status-cell" onclick={`openIDPModal('${p.id}')`}><span class={`idp-badge ${idp.cls}`}><i class={`fas ${idp.cls.includes('complete') ? 'fa-check-circle' : idp.cls.includes('urgent') ? 'fa-exclamation-circle' : 'fa-file-import'}`}></i> {idp.badge}</span><div class="idp-scan-bar"><div class={`idp-scan-fill ${idp.fill}`} style={`width:${idp.pct}%`}></div></div></div></td>
                 <td><div class={`nlp-risk-cell ${nlp.cls}`} onclick={`openNLPReview('${p.id}')`} title={nlp.flag}><span class="nlp-score">{nlp.score}</span><span class="nlp-level-badge">{nlp.level}</span><div class="nlp-flag-tip">{nlp.flag}</div></div></td>
                 <td><div class={`lapse-risk-cell ${lapse.cls}`} onclick={lapse.retId ? `openRetentionModal('${lapse.retId}')` : ''} title={lapse.trigger}><span class="lapse-score">{lapse.score}</span><span class="lapse-level-badge">{lapse.level}</span><div class="lapse-trigger-tip">{lapse.trigger}</div></div></td>
@@ -2434,34 +2589,75 @@ function PoliciesPage() {
         </div>
       </div>
 
-      {/* Policy Summary Cards */}
-      <div class="policy-summary-grid">
-        <div class="summary-card">
-          <div class="sc-icon blue"><i class="fas fa-shield-alt"></i></div>
-          <div class="sc-data">
-            <div class="sc-val">$5.55M</div>
-            <div class="sc-lbl">Total Face Value</div>
+      {/* ── Coverage Gap & Opportunity Radar ── */}
+      <div class="coverage-gap-radar">
+        <div class="cgr-header">
+          <div class="cgr-title-wrap">
+            <i class="fas fa-crosshairs"></i>
+            <div>
+              <div class="cgr-title">Coverage Gap &amp; Opportunity Radar <span class="cgr-ai-badge">AI-Powered</span></div>
+              <div class="cgr-sub">AI identifies missing coverage, upsell &amp; cross-sell opportunities across your full book · real-time</div>
+            </div>
           </div>
+          <button class="cgr-run-btn" onclick="sendQuickMessage('Run a full coverage gap analysis across all clients and identify top 10 upsell opportunities')"><i class="fas fa-robot"></i> Run Full Analysis</button>
         </div>
-        <div class="summary-card">
-          <div class="sc-icon green"><i class="fas fa-dollar-sign"></i></div>
-          <div class="sc-data">
-            <div class="sc-val">$62,600</div>
-            <div class="sc-lbl">Annual Premium (Shown)</div>
+        <div class="cgr-grid">
+          <div class="cgr-gap-card cgr-gap-di">
+            <div class="cgr-gap-icon"><i class="fas fa-user-shield"></i></div>
+            <div class="cgr-gap-data">
+              <div class="cgr-gap-count">47</div>
+              <div class="cgr-gap-label">No Disability Insurance</div>
+              <div class="cgr-gap-clients">David Thompson, Patricia Nguyen +45</div>
+              <div class="cgr-gap-revenue">~$9.4K/yr potential</div>
+            </div>
+            <button class="cgr-act-btn" onclick="sendQuickMessage('List all clients without disability insurance and draft outreach messages')"><i class="fas fa-bolt"></i> Outreach</button>
           </div>
-        </div>
-        <div class="summary-card">
-          <div class="sc-icon orange"><i class="fas fa-sync"></i></div>
-          <div class="sc-data">
-            <div class="sc-val">1 Policy</div>
-            <div class="sc-lbl">Pending Review</div>
+          <div class="cgr-gap-card cgr-gap-ltc">
+            <div class="cgr-gap-icon"><i class="fas fa-hospital"></i></div>
+            <div class="cgr-gap-data">
+              <div class="cgr-gap-count">63</div>
+              <div class="cgr-gap-label">LTC Coverage Gap</div>
+              <div class="cgr-gap-clients">James Whitfield ($180/day gap) +62</div>
+              <div class="cgr-gap-revenue">~$7.8K/yr potential</div>
+            </div>
+            <button class="cgr-act-btn" onclick="sendQuickMessage('Identify clients with LTC coverage gaps and create tailored upgrade proposals')"><i class="fas fa-bolt"></i> Outreach</button>
           </div>
-        </div>
-        <div class="summary-card">
-          <div class="sc-icon purple"><i class="fas fa-calendar-check"></i></div>
-          <div class="sc-data">
-            <div class="sc-val">2026-06-15</div>
-            <div class="sc-lbl">Next Renewal</div>
+          <div class="cgr-gap-card cgr-gap-ret">
+            <div class="cgr-gap-icon"><i class="fas fa-umbrella-beach"></i></div>
+            <div class="cgr-gap-data">
+              <div class="cgr-gap-count">38</div>
+              <div class="cgr-gap-label">Retirement Income Gap</div>
+              <div class="cgr-gap-clients">Sandra Williams, James Whitfield +36</div>
+              <div class="cgr-gap-revenue">~$8.9K/yr potential</div>
+            </div>
+            <button class="cgr-act-btn" onclick="sendQuickMessage('Which clients need retirement income planning and annuity illustrations?')"><i class="fas fa-bolt"></i> Outreach</button>
+          </div>
+          <div class="cgr-gap-card cgr-gap-est">
+            <div class="cgr-gap-icon"><i class="fas fa-landmark"></i></div>
+            <div class="cgr-gap-data">
+              <div class="cgr-gap-count">12</div>
+              <div class="cgr-gap-label">No Estate Plan</div>
+              <div class="cgr-gap-clients">Linda Morrison, Robert Chen +10</div>
+              <div class="cgr-gap-revenue">~$5.1K/yr potential</div>
+            </div>
+            <button class="cgr-act-btn" onclick="sendQuickMessage('List clients needing estate planning consultations and key talking points')"><i class="fas fa-bolt"></i> Outreach</button>
+          </div>
+          <div class="cgr-gap-card cgr-gap-cnv">
+            <div class="cgr-gap-icon"><i class="fas fa-exchange-alt"></i></div>
+            <div class="cgr-gap-data">
+              <div class="cgr-gap-count">8</div>
+              <div class="cgr-gap-label">Term→Perm Conversion</div>
+              <div class="cgr-gap-clients">Sandra Williams (urgent), James W.</div>
+              <div class="cgr-gap-revenue">~$14.2K/yr if converted</div>
+            </div>
+            <button class="cgr-act-btn urgent" onclick="openRetentionFullReport()"><i class="fas fa-fire"></i> Urgent</button>
+          </div>
+          <div class="cgr-total-card">
+            <div class="cgr-total-icon"><i class="fas fa-trophy"></i></div>
+            <div class="cgr-total-val">$31.2K</div>
+            <div class="cgr-total-lbl">Total Opportunity /yr</div>
+            <div class="cgr-total-sub">Across 6 gap categories</div>
+            <button class="cgr-total-btn" onclick="sendQuickMessage('Give me a comprehensive action plan to capture all identified coverage gap opportunities')"><i class="fas fa-robot"></i> Full AI Action Plan</button>
           </div>
         </div>
       </div>
@@ -2479,11 +2675,13 @@ function PoliciesPage() {
             </div>
             <div class="detail-modal-header-actions">
               <div class="detail-modal-tabs" id="policy-modal-tabs">
-                <button class="dmt-tab active" onclick="switchPolicyTab('view',this)"><i class="fas fa-eye"></i> View</button>
+                <button class="dmt-tab active" onclick="switchPolicyTab('view',this)"><i class="fas fa-eye"></i> Overview</button>
                 <button class="dmt-tab" onclick="switchPolicyTab('edit',this)"><i class="fas fa-edit"></i> Edit</button>
                 <button class="dmt-tab ai-tab" onclick="switchPolicyTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
                 <button class="dmt-tab nlp-tab" onclick="switchPolicyTab('nlp',this)"><i class="fas fa-brain"></i> NLP Risk</button>
                 <button class="dmt-tab ri-tab" onclick="switchPolicyTab('retention',this)"><i class="fas fa-heartbeat"></i> Retention</button>
+                <button class="dmt-tab" onclick="switchPolicyTab('documents',this)"><i class="fas fa-folder-open"></i> Documents</button>
+                <button class="dmt-tab" onclick="switchPolicyTab('timeline',this)"><i class="fas fa-stream"></i> Timeline</button>
               </div>
               <button class="detail-modal-close" onclick="closePolicyModal()"><i class="fas fa-times"></i></button>
             </div>
