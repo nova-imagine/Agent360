@@ -2327,6 +2327,18 @@ function renderClaimModal(claimId, tab) {
           </div>
         </div>
       </div>
+      <div class="pm-comm-log-section">
+        <div class="pm-section-title" style="padding:0 0 8px 0"><i class="fas fa-comments"></i> Communication &amp; Outreach Log <button class="btn btn-outline-sm" style="float:right;font-size:11px" onclick="switchClaimTab('comms',document.querySelectorAll('#claim-modal-tabs .dmt-tab')[6])"><i class="fas fa-external-link-alt"></i> Full Log</button></div>
+        <div class="pm-comm-mini-log">
+          <div class="pm-comm-entry outbound overdue"><span class="pm-comm-icon email"><i class="fas fa-envelope"></i></span><div class="pm-comm-body"><div class="pm-comm-subject">Identity Document Request — ${c.claimant}</div><div class="pm-comm-meta">2026-04-13 · Outbound email · <span style="color:#dc2626">No response · Overdue</span></div></div></div>
+          <div class="pm-comm-entry outbound pending"><span class="pm-comm-icon call"><i class="fas fa-phone"></i></span><div class="pm-comm-body"><div class="pm-comm-subject">Initial outreach call to ${c.claimant}</div><div class="pm-comm-meta">2026-04-12 · Outbound call · Voicemail left</div></div></div>
+          <div class="pm-comm-entry inbound done"><span class="pm-comm-icon doc"><i class="fas fa-file-medical"></i></span><div class="pm-comm-body"><div class="pm-comm-subject">Medical certificate received from provider</div><div class="pm-comm-meta">2026-04-10 · Inbound · AI verified (98% confidence)</div></div></div>
+        </div>
+        <div class="pm-comm-log-footer">
+          <button class="btn btn-primary" style="font-size:12px" onclick="alert('Drafting new outreach…')"><i class="fas fa-plus"></i> New Communication</button>
+          <button class="btn btn-outline-sm" style="font-size:12px" onclick="sendDocRequest('${claimId}','${c.claimant}')"><i class="fas fa-paper-plane"></i> Send Doc Reminder</button>
+        </div>
+      </div>
     `;
   } else if (tab === 'ai') {
     const riskColor = { Low:'#059669', Normal:'#003087', High:'#d97706', Urgent:'#dc2626' };
@@ -11450,3 +11462,807 @@ function openAIReportSummary() {
   document.body.appendChild(overlay);
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Claim Modal — Extra Tabs: Documents, Communications, Beneficiary
+// ─────────────────────────────────────────────────────────────────────────────
+(function() {
+  const _prevSwitch = window.switchClaimTab;
+  const _prevRender = window.renderClaimModal;
+
+  window.switchClaimTab = function(tab, tabEl) {
+    const tabs = ['docs','comms','bene'];
+    if (tabs.includes(tab)) {
+      document.querySelectorAll('#claim-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
+      if (tabEl) tabEl.classList.add('active');
+      window._currentClaimTab = tab;
+      renderClaimModal(window._currentClaimId, tab);
+    } else {
+      _prevSwitch(tab, tabEl);
+    }
+  };
+
+  window.renderClaimModal = function(claimId, tab) {
+    if (tab === 'docs') {
+      renderClaimDocsTab(claimId);
+    } else if (tab === 'comms') {
+      renderClaimCommsTab(claimId);
+    } else if (tab === 'bene') {
+      renderClaimBeneTab(claimId);
+    } else {
+      _prevRender(claimId, tab);
+    }
+  };
+
+  // ── Documents Tab ──────────────────────────────────────────────────────────
+  function renderClaimDocsTab(claimId) {
+    const body = document.getElementById('claim-modal-body');
+    if (!body) return;
+    const cl = (window.claimData || {})[claimId] || {};
+    const docs = cl.requiredDocs || [
+      { name: 'Death Certificate', status: 'verified', confidence: 98, uploaded: '2026-04-09', by: 'Susan Chen' },
+      { name: 'Medical Certificate', status: 'verified', confidence: 97, uploaded: '2026-04-09', by: 'Robert Chen Estate' },
+      { name: 'Claimant ID (Government-issued)', status: 'pending', confidence: null, uploaded: null, by: null },
+      { name: 'Bank Account Verification', status: 'pending', confidence: null, uploaded: null, by: null }
+    ];
+
+    const docRows = docs.map((d, i) => {
+      const isDone = d.status === 'verified';
+      const isExtract = d.status === 'extracting';
+      const statusBadge = isDone
+        ? `<span class="cm-doc-status verified"><i class="fas fa-check-circle"></i> Verified</span>`
+        : isExtract
+          ? `<span class="cm-doc-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting…</span>`
+          : `<span class="cm-doc-status pending"><i class="fas fa-clock"></i> Pending Upload</span>`;
+      const conf = isDone ? `<span class="cm-doc-conf">${d.confidence}% AI confidence</span>` : '';
+      const upInfo = d.uploaded
+        ? `<div class="cm-doc-meta">Uploaded ${d.uploaded} · ${d.by}</div>`
+        : `<div class="cm-doc-meta cm-doc-meta-missing">Not yet received</div>`;
+      const action = isDone
+        ? `<button class="cm-doc-btn view" onclick="alert('Viewing ${d.name}')"><i class="fas fa-eye"></i> View</button>`
+        : `<button class="cm-doc-btn upload" onclick="alert('Uploading ${d.name}')"><i class="fas fa-upload"></i> Upload</button>
+           <button class="cm-doc-btn request" onclick="alert('Requesting ${d.name}')"><i class="fas fa-paper-plane"></i> Request</button>`;
+      return `
+        <div class="cm-doc-row ${isDone ? 'cm-doc-done' : 'cm-doc-missing'}">
+          <div class="cm-doc-num">${i + 1}</div>
+          <div class="cm-doc-icon"><i class="fas ${isDone ? 'fa-file-check' : 'fa-file-upload'}"></i></div>
+          <div class="cm-doc-info">
+            <div class="cm-doc-name">${d.name}</div>
+            ${upInfo}
+          </div>
+          <div class="cm-doc-right">
+            ${statusBadge}
+            ${conf}
+            <div class="cm-doc-actions">${action}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const verified = docs.filter(d => d.status === 'verified').length;
+    const pct = Math.round((verified / docs.length) * 100);
+    body.innerHTML = `
+      <div class="cm-docs-panel">
+        <div class="cm-docs-kpi-strip">
+          <div class="cm-docs-kpi green"><div class="cm-docs-kpi-val">${verified}</div><div class="cm-docs-kpi-lbl">Verified</div></div>
+          <div class="cm-docs-kpi orange"><div class="cm-docs-kpi-val">${docs.length - verified}</div><div class="cm-docs-kpi-lbl">Pending</div></div>
+          <div class="cm-docs-kpi blue"><div class="cm-docs-kpi-val">${pct}%</div><div class="cm-docs-kpi-lbl">Complete</div></div>
+          <div class="cm-docs-kpi purple"><div class="cm-docs-kpi-val">94%</div><div class="cm-docs-kpi-lbl">NLP Accuracy</div></div>
+        </div>
+        <div class="cm-docs-progress-bar"><div class="cm-docs-progress-fill" style="width:${pct}%"></div></div>
+        <div class="cm-docs-list">${docRows}</div>
+        <div class="cm-docs-footer">
+          <button class="btn btn-primary" onclick="alert('Running IDP scan…')"><i class="fas fa-search"></i> Run IDP Scan</button>
+          <button class="btn btn-ai" onclick="alert('Requesting all missing docs…')"><i class="fas fa-paper-plane"></i> Request All Missing</button>
+          <button class="btn btn-outline-sm" onclick="openIDPModal('${claimId}')"><i class="fas fa-external-link-alt"></i> Full IDP View</button>
+        </div>
+      </div>`;
+  }
+
+  // ── Communications Tab ─────────────────────────────────────────────────────
+  function renderClaimCommsTab(claimId) {
+    const body = document.getElementById('claim-modal-body');
+    if (!body) return;
+
+    const commsData = {
+      'CLM-2026-0041': [
+        { date: '2026-04-13', type: 'email', dir: 'out', contact: 'Susan Chen', subject: 'Identity Document Request — Claim CLM-2026-0041', outcome: 'Sent · No response yet', status: 'overdue' },
+        { date: '2026-04-12', type: 'call', dir: 'out', contact: 'Susan Chen', subject: 'Initial beneficiary outreach call', outcome: 'Voicemail left · Follow-up scheduled', status: 'pending' },
+        { date: '2026-04-10', type: 'email', dir: 'in', contact: 'Dr. Martinez Office', subject: 'Medical Certificate submitted', outcome: 'Received · Verified by AI (98%)', status: 'done' },
+        { date: '2026-04-09', type: 'system', dir: 'in', contact: 'AI System', subject: 'Claim filed — automated triage assigned Urgent', outcome: 'High-value flag set · Fraud watch activated', status: 'info' },
+      ],
+      'CLM-2026-0028': [
+        { date: '2026-04-13', type: 'email', dir: 'out', contact: 'Dr. Hernandez Office', subject: 'Terminal Illness Certification Request (2nd reminder)', outcome: 'Sent · No response yet', status: 'overdue' },
+        { date: '2026-04-08', type: 'call', dir: 'out', contact: 'Maria Gonzalez', subject: 'Compassionate claim status call', outcome: 'Spoke with client · Acknowledged cert delay', status: 'done' },
+        { date: '2026-04-04', type: 'email', dir: 'out', contact: 'Dr. Hernandez Office', subject: 'Terminal Illness Certification Request (1st notice)', outcome: 'Sent · Read receipt confirmed', status: 'done' },
+        { date: '2026-03-05', type: 'system', dir: 'in', contact: 'AI System', subject: 'Claim filed — compassionate fast-track activated', outcome: 'Expedite flag set · Special SLA applied', status: 'info' },
+      ]
+    };
+
+    const entries = commsData[claimId] || [
+      { date: '2026-04-10', type: 'system', dir: 'in', contact: 'AI System', subject: 'Claim filed — triage assigned', outcome: 'Automated processing initiated', status: 'info' }
+    ];
+
+    const typeIcon = { email: 'fa-envelope', call: 'fa-phone', letter: 'fa-letter', system: 'fa-robot' };
+    const dirLabel = { out: 'Outbound', in: 'Inbound' };
+    const statusCls = { overdue: 'comm-overdue', pending: 'comm-pending', done: 'comm-done', info: 'comm-info' };
+
+    const rows = entries.map(e => `
+      <div class="comm-row ${statusCls[e.status] || ''}">
+        <div class="comm-type-icon ${e.type}"><i class="fas ${typeIcon[e.type] || 'fa-comment'}"></i></div>
+        <div class="comm-info">
+          <div class="comm-subject">${e.subject}</div>
+          <div class="comm-meta"><span class="comm-date">${e.date}</span> · <span class="comm-dir">${dirLabel[e.dir]}</span> · <span class="comm-contact"><i class="fas fa-user"></i> ${e.contact}</span></div>
+          <div class="comm-outcome">${e.outcome}</div>
+        </div>
+        <div class="comm-actions">
+          <button class="comm-btn" onclick="alert('Following up on: ${e.subject}')"><i class="fas fa-reply"></i> Follow Up</button>
+        </div>
+      </div>`).join('');
+
+    body.innerHTML = `
+      <div class="cm-comms-panel">
+        <div class="cm-comms-header">
+          <div class="cm-comms-stats">
+            <span class="comm-stat"><i class="fas fa-paper-plane"></i> ${entries.filter(e=>e.dir==='out').length} Outbound</span>
+            <span class="comm-stat"><i class="fas fa-inbox"></i> ${entries.filter(e=>e.dir==='in').length} Inbound</span>
+            <span class="comm-stat overdue"><i class="fas fa-exclamation-circle"></i> ${entries.filter(e=>e.status==='overdue').length} Overdue</span>
+          </div>
+          <button class="btn btn-ai" onclick="alert('Drafting new communication…')"><i class="fas fa-plus"></i> New Communication</button>
+        </div>
+        <div class="cm-comms-log">${rows}</div>
+        <div class="cm-comms-footer">
+          <button class="btn btn-primary" onclick="sendDocRequest('${claimId}','beneficiary')"><i class="fas fa-paper-plane"></i> Send Doc Reminder</button>
+          <button class="btn btn-outline-sm" onclick="alert('Exporting communication log…')"><i class="fas fa-download"></i> Export Log</button>
+        </div>
+      </div>`;
+  }
+
+  // ── Beneficiary Tab ────────────────────────────────────────────────────────
+  function renderClaimBeneTab(claimId) {
+    const body = document.getElementById('claim-modal-body');
+    if (!body) return;
+
+    const beneData = {
+      'CLM-2026-0041': {
+        name: 'Susan Chen', relationship: 'Spouse', age: 42,
+        email: 'susan.chen@email.com', phone: '(201) 555-0182', address: '88 Maple Ave, Jersey City, NJ 07302',
+        kycStatus: 'pending', kycBadge: 'kyc-pending', kycLabel: 'KYC Pending',
+        amlStatus: 'clear', amlBadge: 'aml-clear', amlLabel: 'AML Clear',
+        paymentStatus: 'pending', paymentBadge: 'pay-pending', paymentLabel: 'Bank Details Pending',
+        verifiedId: false, verifiedAddr: true, bankSetup: false,
+        payout: '$1,000,000', payoutETA: '~2026-04-16 (pending ID docs)',
+        notes: 'Beneficiary contacted via phone on 2026-04-12 (voicemail). Second email sent 2026-04-13 requesting government-issued ID and bank details. Susan is the sole beneficiary per policy P-100310.'
+      },
+      'CLM-2026-0028': {
+        name: 'Carlos Gonzalez', relationship: 'Son (POA)', age: 24,
+        email: 'carlos.gonzalez@email.com', phone: '(973) 555-0149', address: '14 Elm Street, Newark, NJ 07101',
+        kycStatus: 'verified', kycBadge: 'kyc-verified', kycLabel: 'KYC Verified',
+        amlStatus: 'clear', amlBadge: 'aml-clear', amlLabel: 'AML Clear',
+        paymentStatus: 'verified', paymentBadge: 'pay-verified', paymentLabel: 'Bank Details Verified',
+        verifiedId: true, verifiedAddr: true, bankSetup: true,
+        payout: '$120,000', payoutETA: '~2026-04-19 (pending terminal cert)',
+        notes: 'Carlos holds POA for Maria Gonzalez. Identity verified on 2026-03-20. Bank account confirmed. Payment ready to release pending terminal illness certification from Dr. Hernandez.'
+      }
+    };
+
+    const b = beneData[claimId] || {
+      name: 'Beneficiary on File', relationship: 'See policy document', age: '—',
+      email: '—', phone: '—', address: '—',
+      kycStatus: 'unknown', kycBadge: 'kyc-pending', kycLabel: 'KYC Not Started',
+      amlStatus: 'unknown', amlBadge: 'aml-pending', amlLabel: 'AML Not Run',
+      paymentStatus: 'pending', paymentBadge: 'pay-pending', paymentLabel: 'Bank Details Pending',
+      verifiedId: false, verifiedAddr: false, bankSetup: false,
+      payout: 'Per policy', payoutETA: 'Pending verification',
+      notes: 'No beneficiary record found in system. Please retrieve from policy document.'
+    };
+
+    const check = v => v ? `<i class="fas fa-check-circle" style="color:#059669"></i>` : `<i class="fas fa-times-circle" style="color:#dc2626"></i>`;
+
+    body.innerHTML = `
+      <div class="cm-bene-panel">
+        <div class="cm-bene-hero">
+          <div class="mini-avatar ${b.name.split(' ').map(w=>w[0]).join('').toLowerCase()}" style="width:56px;height:56px;font-size:18px;border-radius:50%">${b.name.split(' ').map(w=>w[0]).join('')}</div>
+          <div class="cm-bene-hero-info">
+            <div class="cm-bene-name">${b.name}</div>
+            <div class="cm-bene-rel">${b.relationship} · Age ${b.age}</div>
+            <div class="cm-bene-contacts">
+              <span><i class="fas fa-envelope"></i> ${b.email}</span>
+              <span><i class="fas fa-phone"></i> ${b.phone}</span>
+              <span><i class="fas fa-map-marker-alt"></i> ${b.address}</span>
+            </div>
+          </div>
+          <div class="cm-bene-badges">
+            <span class="bene-badge ${b.kycBadge}">${b.kycLabel}</span>
+            <span class="bene-badge ${b.amlBadge}">${b.amlLabel}</span>
+            <span class="bene-badge ${b.paymentBadge}">${b.paymentLabel}</span>
+          </div>
+        </div>
+        <div class="cm-bene-checklist">
+          <div class="cm-bene-check-title">Verification Checklist</div>
+          <div class="cm-bene-checks">
+            <div class="cm-bene-check-item">${check(b.verifiedId)} <span>Government-issued ID</span></div>
+            <div class="cm-bene-check-item">${check(b.verifiedAddr)} <span>Address Verified</span></div>
+            <div class="cm-bene-check-item">${check(b.bankSetup)} <span>Bank Account Setup</span></div>
+            <div class="cm-bene-check-item">${check(b.amlStatus === 'clear')} <span>AML Check Passed</span></div>
+          </div>
+        </div>
+        <div class="cm-bene-payout">
+          <div class="cm-bene-payout-row">
+            <span class="cm-bene-payout-lbl">Expected Payout</span>
+            <span class="cm-bene-payout-val">${b.payout}</span>
+          </div>
+          <div class="cm-bene-payout-row">
+            <span class="cm-bene-payout-lbl">Estimated Release</span>
+            <span class="cm-bene-payout-eta">${b.payoutETA}</span>
+          </div>
+        </div>
+        <div class="cm-bene-notes">
+          <div class="cm-bene-notes-title"><i class="fas fa-sticky-note"></i> Beneficiary Notes</div>
+          <div class="cm-bene-notes-body">${b.notes}</div>
+        </div>
+        <div class="cm-bene-actions">
+          <button class="btn btn-primary" onclick="alert('Contacting ${b.name}…')"><i class="fas fa-phone"></i> Call Beneficiary</button>
+          <button class="btn btn-ai" onclick="alert('Drafting email to ${b.name}…')"><i class="fas fa-envelope"></i> Draft Email</button>
+          <button class="btn btn-outline-sm" onclick="alert('Running KYC/AML check…')"><i class="fas fa-shield-alt"></i> Run KYC / AML</button>
+          <button class="btn btn-outline-sm" onclick="alert('Setting up payment for ${b.name}…')"><i class="fas fa-university"></i> Setup Payment</button>
+        </div>
+      </div>`;
+  }
+
+})();
+
+// ── Appeal & Re-open Modal ──────────────────────────────────────────────────
+function openAppealModal(claimId) {
+  const existing = document.getElementById('appeal-modal-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'detail-modal-overlay';
+  overlay.id = 'appeal-modal-overlay';
+  overlay.onclick = () => overlay.remove();
+  overlay.innerHTML = `
+    <div class="detail-modal" onclick="event.stopPropagation()" style="max-width:560px">
+      <div class="detail-modal-header" style="border-bottom-color:#dc2626">
+        <div class="detail-modal-title">
+          <span class="detail-modal-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-balance-scale"></i></span>
+          <div><h3>File Appeal — ${claimId}</h3><p class="detail-modal-sub">Appeal a denied claim · 60-day appeal window</p></div>
+        </div>
+        <button class="detail-modal-close" onclick="document.getElementById('appeal-modal-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="detail-modal-body" style="padding:20px">
+        <div class="appeal-info-bar"><i class="fas fa-exclamation-circle"></i> Denial reason: <strong>Pre-existing condition exclusion</strong> · Appeal deadline: 2026-02-02 (20 days remaining)</div>
+        <div class="appeal-form">
+          <div class="appeal-field"><label>Appeal Grounds</label>
+            <select class="filter-select" style="width:100%;margin-top:4px">
+              <option>Medical Evidence — New physician report contradicts exclusion</option>
+              <option>Policy Misapplication — Exclusion does not apply to this claim type</option>
+              <option>Procedural Error — Incorrect underwriting assessment</option>
+              <option>New Documentation — Additional supporting evidence</option>
+            </select>
+          </div>
+          <div class="appeal-field" style="margin-top:12px"><label>Supporting Notes</label>
+            <textarea class="appeal-textarea" rows="4" placeholder="Describe the grounds for appeal and any supporting evidence…" style="width:100%;margin-top:4px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;resize:vertical"></textarea>
+          </div>
+          <div class="appeal-field" style="margin-top:12px"><label>Supporting Document</label>
+            <div class="idp-drop-zone" style="margin-top:4px"><i class="fas fa-upload"></i><span>Attach supporting documentation</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-primary" onclick="alert('Appeal for ${claimId} submitted successfully. Reference: APP-2026-'+Math.floor(Math.random()*1000));document.getElementById('appeal-modal-overlay').remove()"><i class="fas fa-paper-plane"></i> Submit Appeal</button>
+          <button class="btn btn-ai" onclick="alert('AI drafting appeal letter…')"><i class="fas fa-robot"></i> AI Draft Letter</button>
+          <button class="btn btn-outline-sm" onclick="document.getElementById('appeal-modal-overlay').remove()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.style.display = 'flex';
+}
+
+function openReopenModal(claimId) {
+  const existing = document.getElementById('reopen-modal-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'detail-modal-overlay';
+  overlay.id = 'reopen-modal-overlay';
+  overlay.onclick = () => overlay.remove();
+  overlay.innerHTML = `
+    <div class="detail-modal" onclick="event.stopPropagation()" style="max-width:480px">
+      <div class="detail-modal-header" style="border-bottom-color:#d97706">
+        <div class="detail-modal-title">
+          <span class="detail-modal-icon" style="background:#fffbeb;color:#d97706"><i class="fas fa-redo"></i></span>
+          <div><h3>Re-open Claim — ${claimId}</h3><p class="detail-modal-sub">Reactivate a resolved claim for further processing</p></div>
+        </div>
+        <button class="detail-modal-close" onclick="document.getElementById('reopen-modal-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="detail-modal-body" style="padding:20px">
+        <div class="appeal-field"><label>Reason for Re-opening</label>
+          <select class="filter-select" style="width:100%;margin-top:4px">
+            <option>Additional documents received after resolution</option>
+            <option>Claimant disputes resolution amount</option>
+            <option>New medical evidence available</option>
+            <option>Administrative correction required</option>
+            <option>Regulatory request</option>
+          </select>
+        </div>
+        <div class="appeal-field" style="margin-top:12px"><label>Notes</label>
+          <textarea class="appeal-textarea" rows="3" placeholder="Describe why this claim needs to be re-opened…" style="width:100%;margin-top:4px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;resize:vertical"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-primary" onclick="alert('Claim ${claimId} re-opened successfully. Assigned to adjuster queue.');document.getElementById('reopen-modal-overlay').remove()"><i class="fas fa-redo"></i> Re-open Claim</button>
+          <button class="btn btn-outline-sm" onclick="document.getElementById('reopen-modal-overlay').remove()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.style.display = 'flex';
+}
+
+// ── Batch Claims Table Actions ──────────────────────────────────────────────
+function toggleAllClaims(masterCb) {
+  document.querySelectorAll('.claim-row-checkbox').forEach(cb => cb.checked = masterCb.checked);
+  updateBatchButtons();
+}
+
+function updateBatchButtons() {
+  const checked = document.querySelectorAll('.claim-row-checkbox:checked').length;
+  const sendBtn = document.getElementById('batch-send-btn');
+  const assignBtn = document.getElementById('batch-assign-btn');
+  if (sendBtn) sendBtn.disabled = checked === 0;
+  if (assignBtn) assignBtn.disabled = checked === 0;
+}
+
+function batchSendDocReminders() {
+  const checked = document.querySelectorAll('.claim-row-checkbox:checked').length;
+  alert(`Sending AI-drafted doc reminder emails for ${checked} selected claim(s)…\nEmails queued and will be sent in the next 2 minutes.`);
+}
+
+function batchAssignAdjuster() {
+  const checked = document.querySelectorAll('.claim-row-checkbox:checked').length;
+  alert(`Assign Adjuster — ${checked} claim(s) selected.\n\nAvailable adjusters:\n• Chris Davis (Claims Dept.) — 3 active claims\n• Lisa Torres (LTC Team) — 2 active claims\n• David Reyes (DI Unit) — 1 active claim\n• Amy Santos (Agent Support) — 1 active claim\n\nSelect adjuster from the dropdown (UI placeholder).`);
+}
+
+function batchExportClaims() {
+  alert('Exporting claims table as PDF/Excel…\nFile will download shortly.');
+}
+
+// ── KPI click helper stubs ──────────────────────────────────────────────────
+function filterClaimsByStatus(s) { alert('Filtering claims by status: ' + s); }
+function filterClaimsBySLA() { alert('Showing SLA at-risk claims (CLM-2026-0041, CLM-2026-0028)'); }
+function filterClaimsByExposure() { alert('Sorting by open exposure — highest first'); }
+function filterClaimsByDocStatus() { alert('Filtering claims with incomplete docs'); }
+function showClaimsResolutionChart() { alert('Claims resolution trend chart — opening full analytics panel'); }
+function showPayoutTurnaroundPanel() { alert('Payout turnaround detail panel'); }
+
+// ── Workbench collapse ──────────────────────────────────────────────────────
+function toggleWorkbench(btn) {
+  const cards = document.getElementById('cwb-cards');
+  if (!cards) return;
+  const collapsed = cards.style.display === 'none';
+  cards.style.display = collapsed ? 'flex' : 'none';
+  btn.innerHTML = collapsed ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>';
+}
+
+// ── Claims Performance Analytics Panel toggle ───────────────────────────────
+function toggleCPAPanel() {
+  const body = document.getElementById('cpa-body');
+  const btn = document.getElementById('cpa-collapse-btn');
+  if (!body) return;
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  if (btn) btn.innerHTML = collapsed ? '<i class="fas fa-chevron-down"></i>' : '<i class="fas fa-chevron-up"></i>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SALES PIPELINE ENHANCEMENTS
+// ═══════════════════════════════════════════════════════════════
+
+// ── KPI bar helpers ──────────────────────────────────────────
+function filterPipelineByStatus(s) { alert('Filtering pipeline by: ' + s); }
+function filterPipelineByRisk(s)   { alert('Showing at-risk deals (win score < 50)'); }
+function showConversionDetails()   { alert('Conversion Rate: 68% (+4% vs last month)\n\nBreakdown:\n• Referral leads: 74% conv.\n• Online leads: 61% conv.\n• Warm leads: 44% conv.'); }
+function showStageCycleDetails()   { alert('Avg Sales Cycle: 12.4 days\n\n• Prospect→Quoted: 3.2d\n• Quoted→UW: 4.8d\n• UW→Approved: 12.1d ⚠ (bottleneck)\n• Approved→Won: 2.4d'); }
+function showCommissionDetails()   { alert('Commission MTD: $42,180\n\n• Insurance: $27,100\n• Investments: $8,200\n• Advisory: $6,880'); }
+function showQuotaDetails()        { alert('YTD Quota: $187,000 / $240,000 (78%)\n\nAI Projection: $241,000 by Dec 31\n→ On track to exceed target by 0.4%'); }
+function showUpsellPanel()         { alert('AI-Identified Upsell Potential: $31,200/yr\n\n• Alex Rivera — Deferred Annuity ($280K assets)\n• Michael Santos — AD&D Rider (+$120/yr)\n• Linda Morrison — NQDC + Estate Plan'); }
+
+// ── Stale alert strip ────────────────────────────────────────
+function dismissStaleStrip() {
+  const s = document.getElementById('stale-alert-strip');
+  if (s) { s.style.opacity = '0'; s.style.transition = 'opacity 0.4s'; setTimeout(() => s.style.display = 'none', 400); }
+}
+
+// ── Pipeline Toolbar: search / filter / sort / view ──────────
+function filterPipelineDeals() {
+  const q      = (document.getElementById('pipeline-search')?.value || '').toLowerCase();
+  const stage  = document.getElementById('ptb-stage-filter')?.value  || '';
+  const domain = document.getElementById('ptb-domain-filter')?.value || '';
+  const cards  = document.querySelectorAll('.kanban-card');
+  cards.forEach(card => {
+    const text   = card.textContent.toLowerCase();
+    const col    = card.closest('.kanban-col');
+    const colId  = col ? col.id.replace('kcol-', '') : '';
+    const domVal = pipelineData
+      ? Object.values(pipelineData).find(d => card.textContent.includes(d.client))?.domain || ''
+      : '';
+    const matchQ = !q     || text.includes(q);
+    const matchS = !stage || colId === stage;
+    const matchD = !domain || domVal === domain;
+    card.style.display = (matchQ && matchS && matchD) ? '' : 'none';
+  });
+}
+
+function sortPipelineDeals() {
+  const sortBy = document.getElementById('ptb-sort')?.value || 'win';
+  const board  = document.querySelector('.kanban-board');
+  if (!board) return;
+  const cols = ['Prospect','Quoted','Underwriting','Approved'];
+  cols.forEach(colName => {
+    const col = document.getElementById('kcol-' + colName);
+    if (!col) return;
+    const cards = Array.from(col.querySelectorAll('.kanban-card'));
+    cards.sort((a, b) => {
+      const aId = Object.keys(pipelineData).find(k => a.textContent.includes(pipelineData[k].client));
+      const bId = Object.keys(pipelineData).find(k => b.textContent.includes(pipelineData[k].client));
+      if (!aId || !bId) return 0;
+      const aD = pipelineData[aId]; const bD = pipelineData[bId];
+      if (sortBy === 'win')   return bD.aiScore - aD.aiScore;
+      if (sortBy === 'value') return parseInt(bD.value) - parseInt(aD.value);
+      if (sortBy === 'comm')  return parseInt(bD.commission.replace(/\D/g,'')) - parseInt(aD.commission.replace(/\D/g,''));
+      return 0;
+    });
+    const addBtn = col.querySelector('.add-card-btn');
+    cards.forEach(c => col.insertBefore(c, addBtn));
+  });
+}
+
+function setPipelineView(view, btn) {
+  // Update button state
+  document.querySelectorAll('.ptb-view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Toggle views
+  const kanban  = document.getElementById('pipeline-kanban-view');
+  const listV   = document.getElementById('pipeline-list-view');
+  const focusV  = document.getElementById('pipeline-focus-view');
+  const staleS  = document.getElementById('stale-alert-strip');
+  if (kanban)  kanban.style.display  = view === 'kanban' ? '' : 'none';
+  if (listV)   listV.style.display   = view === 'list'   ? '' : 'none';
+  if (focusV)  focusV.style.display  = view === 'focus'  ? '' : 'none';
+  if (staleS)  staleS.style.display  = view === 'kanban' ? '' : 'none';
+  if (view === 'list')  renderPipelineListView();
+  if (view === 'focus') renderPipelineFocusView();
+}
+
+function renderPipelineListView() {
+  const tbody = document.getElementById('pipeline-list-tbody');
+  if (!tbody || !pipelineData) return;
+  const sourceLabels = { referral:'Referral', online:'Online Inquiry', warm:'Warm Lead', cold:'Cold Outreach', adv:'Advisory', inv:'Investments', ins:'Insurance', ret:'Retirement' };
+  const daysMap = { D001:6, D002:3, D003:15, D004:2, D005:11, D006:5, D007:19, D008:5, D009:1 };
+  tbody.innerHTML = Object.entries(pipelineData).map(([id, d]) => {
+    const days = daysMap[id] || 5;
+    const daysClass = days > 14 ? 'stale' : days > 9 ? 'warn' : 'normal';
+    const src = d.domain === 'ins' ? 'Referral' : d.domain === 'inv' ? 'Online' : d.domain === 'adv' ? 'Outreach' : 'Referral';
+    return `<tr>
+      <td><div class="kc-client" style="font-weight:600">${d.client}</div></td>
+      <td>${d.product}</td>
+      <td><span class="claim-status-badge open">${d.stage}</span></td>
+      <td class="premium">${d.value}</td>
+      <td class="premium" style="color:#059669">${d.commission}</td>
+      <td><div class="fraud-score-cell ${d.aiScore>=80?'clear':d.aiScore>=60?'watch':'flagged'}" style="cursor:default"><span class="fraud-score-num">${d.aiScore}</span><span class="fraud-score-lbl">${d.aiScore>=80?'High':d.aiScore>=60?'Mid':'Risk'}</span></div></td>
+      <td><span class="kc-days-badge ${daysClass}">${days}d</span></td>
+      <td><span class="kc-source-tag referral" style="font-size:11px">${src}</span></td>
+      <td style="font-size:11px;color:#475569;max-width:160px">${d.nextAction}</td>
+      <td><div class="action-btns"><button class="btn-icon" onclick="openDealModal('${id}')"><i class="fas fa-eye"></i></button><button class="btn-icon ai-btn" onclick="openDealAIModal('${id}')"><i class="fas fa-brain"></i></button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPipelineFocusView() {
+  const container = document.getElementById('pfv-cards');
+  if (!container || !pipelineData) return;
+  const top3 = Object.entries(pipelineData)
+    .filter(([,d]) => d.stage !== 'Closed Won')
+    .sort((a,b) => b[1].aiScore - a[1].aiScore)
+    .slice(0,3);
+  container.innerHTML = top3.map(([id, d], i) => `
+    <div class="pfv-card">
+      <div class="pfv-rank">#${i+1}</div>
+      <div class="pfv-win-ring">
+        <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="6"/>
+        <circle cx="40" cy="40" r="34" fill="none" stroke="#22c55e" stroke-width="6"
+          stroke-dasharray="${Math.round(d.aiScore * 2.14)} 214" stroke-dashoffset="55" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg>
+        <span class="pfv-ring-val">${d.aiScore}%</span>
+      </div>
+      <div class="pfv-info">
+        <div class="pfv-client">${d.client}</div>
+        <div class="pfv-product">${d.product}</div>
+        <div class="pfv-value">${d.value} · <span style="color:#059669">${d.commission}</span></div>
+        <div class="pfv-stage">${d.stage}</div>
+        <div class="kc-nba-pill green" style="margin-top:8px"><i class="fas fa-bolt"></i> ${d.nextAction}</div>
+      </div>
+      <div class="pfv-actions">
+        <button class="kca-btn kca-ai" onclick="openDealAIModal('${id}')"><i class="fas fa-brain"></i> AI Intel</button>
+        <button class="kca-btn kca-brief" onclick="openDealModal('${id}')"><i class="fas fa-eye"></i> View</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Activity Log toggle ──────────────────────────────────────
+function toggleActivityLog() {
+  const body = document.getElementById('alp-body');
+  const btn  = document.getElementById('alp-collapse-btn');
+  if (!body) return;
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  if (btn) btn.innerHTML = collapsed ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>';
+}
+
+// ── Deal Modal Tabs ──────────────────────────────────────────
+function switchDealTab(tab, btn) {
+  document.querySelectorAll('#deal-modal-tabs .dmt-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const body    = document.getElementById('deal-modal-body');
+  const dealId  = body?.dataset?.dealId;
+  const d       = dealId && pipelineData[dealId] ? pipelineData[dealId] : {};
+  if (tab === 'overview') {
+    // Re-render the standard renderDealModal content
+    if (dealId) renderDealModal(dealId);
+  } else if (tab === 'activity') {
+    body.innerHTML = renderDealActivityTab(dealId, d);
+  } else if (tab === 'docs') {
+    body.innerHTML = renderDealDocsTab(dealId, d);
+  } else if (tab === 'upsell') {
+    body.innerHTML = renderDealUpsellTab(dealId, d);
+  } else if (tab === 'competitive') {
+    body.innerHTML = renderDealCompetitiveTab(dealId, d);
+  }
+}
+
+function renderDealActivityTab(id, d) {
+  const entries = [
+    { icon:'fa-phone', type:'call', title:`Call — ${d.client}`, sub:'20-min discovery call — strong interest noted, no major objections', meta:'Apr 11 · 10:00 AM', outcome:'positive' },
+    { icon:'fa-envelope', type:'email', title:`Quote Email — ${d.client}`, sub:'Full illustration emailed with product comparison PDF', meta:'Apr 10 · 2:15 PM', outcome:'pending' },
+    { icon:'fa-file-alt', type:'doc', title:'Meeting Brief Shared', sub:'Pre-meeting brief: key talking points + client profile summary', meta:'Apr 9 · 4:00 PM', outcome:'neutral' },
+    { icon:'fa-bolt', type:'nba', title:'NBA Auto-Triggered', sub:'AI detected close window — nudge email queued for Apr 14', meta:'Apr 9 · system', outcome:'pending' }
+  ];
+  return `<div style="padding:16px 20px">
+    <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-history" style="margin-right:6px;color:#003087"></i> Activity Timeline</div>
+    ${entries.map(e=>`<div class="alp-entry alp-${e.type}" style="margin-bottom:10px">
+      <div class="alp-entry-icon ${e.type}"><i class="fas ${e.icon}"></i></div>
+      <div class="alp-entry-body">
+        <div class="alp-entry-title">${e.title}</div>
+        <div class="alp-entry-sub">${e.sub}</div>
+        <div class="alp-entry-meta">${e.meta} · <span class="alp-outcome ${e.outcome}">${e.outcome === 'positive' ? 'Positive' : e.outcome === 'pending' ? 'Pending' : 'Informational'}</span></div>
+      </div></div>`).join('')}
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-outline-sm" onclick="alert('Log a new activity for ${d.client}')"><i class="fas fa-plus"></i> Log Activity</button>
+      <button class="btn btn-ai" onclick="sendContextMessage('Summarise all activity and outreach for deal ${id} — ${d.client} — and suggest my next move','smart-advisor')"><i class="fas fa-robot"></i> AI Summary</button>
+    </div></div>`;
+}
+
+function renderDealDocsTab(id, d) {
+  const docs = [
+    { name:'Quote Illustration', status:'sent', date:'Apr 10' },
+    { name:'Product Comparison PDF', status:'sent', date:'Apr 10' },
+    { name:'Application Form', status: d.stage === 'Approved' ? 'signed' : 'pending', date: d.stage === 'Approved' ? 'Apr 8' : '—' },
+    { name:'Medical Exam Report', status: ['Underwriting','Approved'].includes(d.stage) ? 'received' : 'pending', date: ['Underwriting','Approved'].includes(d.stage) ? 'Apr 9' : '—' },
+  ];
+  const iconMap = { sent:'fa-paper-plane', received:'fa-check-circle', signed:'fa-signature', pending:'fa-clock' };
+  const colorMap = { sent:'#0ea5e9', received:'#059669', signed:'#7c3aed', pending:'#d97706' };
+  return `<div style="padding:16px 20px">
+    <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-folder-open" style="margin-right:6px;color:#7c3aed"></i> Document Checklist</div>
+    ${docs.map(doc=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid #f1f5f9;border-radius:8px;margin-bottom:8px;background:#fafafa">
+      <div style="display:flex;align-items:center;gap:10px">
+        <i class="fas ${iconMap[doc.status]}" style="color:${colorMap[doc.status]};font-size:14px;width:16px"></i>
+        <div><div style="font-size:13px;font-weight:600;color:#1e293b">${doc.name}</div><div style="font-size:11px;color:#94a3b8">${doc.date}</div></div>
+      </div>
+      <span style="font-size:11px;font-weight:600;background:${doc.status==='sent'?'#f0f9ff':doc.status==='signed'?'#faf5ff':doc.status==='received'?'#f0fdf4':'#fffbeb'};color:${colorMap[doc.status]};border-radius:6px;padding:3px 10px">${doc.status.toUpperCase()}</span>
+    </div>`).join('')}
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-outline-sm"><i class="fas fa-upload"></i> Upload Doc</button>
+      <button class="btn btn-ai" onclick="alert('AI will draft a document request email for ${d.client}')"><i class="fas fa-robot"></i> AI Doc Request</button>
+    </div></div>`;
+}
+
+function renderDealUpsellTab(id, d) {
+  const upsells = {
+    D001: [{ name:'Deferred Annuity', value:'$8,000/yr', comm:'$640', why:'$280K investable assets identified — tax-advantaged growth opportunity' },
+           { name:'Disability Insurance', value:'$2,400/yr', comm:'$360', why:'No current DI coverage — income protection gap noted' }],
+    D004: [{ name:'AD&D Rider', value:'+$120/yr', comm:'+$14', why:'Add at point of UL policy delivery — minimal cost, high perceived value' },
+           { name:'Long-term Care Rider', value:'+$480/yr', comm:'+$58', why:'Age 38, married — LTC rider now vs. standalone policy later' }],
+    D009: [{ name:'NQDC Plan', value:'$15,000/yr', comm:'$1,500', why:'High net worth — deferred comp reduces taxable income, estate planning synergy' },
+           { name:'Estate Planning Review', value:'One-time', comm:'Advisory fee', why:'$4M assets, no buy-sell agreement — critical gap for wealth transfer' }],
+  };
+  const ops = upsells[id] || [{ name:'Premium Protection Bundle', value:'$1,200/yr', comm:'$180', why:'AI-identified based on client profile and life stage' }];
+  return `<div style="padding:16px 20px">
+    <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:4px"><i class="fas fa-lightbulb" style="margin-right:6px;color:#f59e0b"></i> AI-Identified Upsell Opportunities</div>
+    <div style="font-size:11px;color:#64748b;margin-bottom:14px">Based on client profile, life stage, and existing coverage gaps</div>
+    ${ops.map(op=>`<div style="border:1px solid #fde68a;border-radius:10px;padding:12px 14px;background:#fffbeb;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div style="font-size:13px;font-weight:700;color:#92400e">${op.name}</div>
+        <div style="text-align:right"><div style="font-size:13px;font-weight:700;color:#059669">${op.value}</div><div style="font-size:10px;color:#64748b">${op.comm} comm</div></div>
+      </div>
+      <div style="font-size:12px;color:#78350f"><i class="fas fa-robot" style="margin-right:4px"></i>${op.why}</div>
+      <button class="btn btn-outline-sm" style="margin-top:8px;font-size:11px" onclick="alert('Preparing upsell pitch for ${op.name}...')"><i class="fas fa-paper-plane"></i> Pitch Now</button>
+    </div>`).join('')}
+    <button class="btn btn-ai" onclick="sendContextMessage('Generate a comprehensive upsell strategy for ${d.client} — identify all coverage gaps and cross-sell opportunities','smart-advisor')"><i class="fas fa-robot"></i> Full AI Upsell Analysis</button>
+  </div>`;
+}
+
+function renderDealCompetitiveTab(id, d) {
+  return `<div style="padding:16px 20px">
+    <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-chess" style="margin-right:6px;color:#7c3aed"></i> Competitive Intel &amp; Objection Scripts</div>
+    <div style="background:#faf5ff;border:1px solid #ddd6fe;border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:8px"><i class="fas fa-shield-alt"></i> NYL Differentiators for ${d.product.split('—')[0].trim()}</div>
+      <ul style="margin:0;padding-left:16px;font-size:12px;color:#374151;line-height:1.7">
+        <li>Mutual company — no shareholder pressure, profits returned to policyholders</li>
+        <li>A++ AM Best rating — strongest financial strength in industry</li>
+        <li>170+ year track record — never missed a dividend payment</li>
+        <li>Living benefits rider available — access death benefit while living</li>
+      </ul>
+    </div>
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#0ea5e9;margin-bottom:8px"><i class="fas fa-comments"></i> Common Objections &amp; Scripts</div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:12px;font-weight:600;color:#dc2626">❝ "The premium is too high"</div>
+        <div style="font-size:11px;color:#374151;margin-top:4px;padding-left:12px">Script: "I understand — let me show you the cash value growth. In 10 years, you'll have built ${d.commission.includes('1,152') ? '$120K' : '$60K'} in accessible equity. It's not just insurance, it's a financial asset."</div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:12px;font-weight:600;color:#dc2626">❝ "I need to think about it"</div>
+        <div style="font-size:11px;color:#374151;margin-top:4px;padding-left:12px">Script: "Of course — what's the main thing you'd want to be certain of before moving forward? I can address that right now so you feel completely confident."</div>
+      </div>
+    </div>
+    <button class="btn btn-ai" onclick="sendContextMessage('Give me competitive talking points and objection handling scripts for ${d.product} against online competitors — tailor for ${d.client}','smart-advisor')"><i class="fas fa-robot"></i> AI Competitive Brief</button>
+  </div>`;
+}
+
+// ── Patch openDealModal to set tab data & populate header KPIs ──
+const _origOpenDealModal = window.openDealModal;
+window.openDealModal = function(dealId) {
+  _origOpenDealModal(dealId);
+  // Tag body with dealId for tab switching
+  const body = document.getElementById('deal-modal-body');
+  if (body) body.dataset.dealId = dealId;
+  // Reset tabs to Overview active
+  document.querySelectorAll('#deal-modal-tabs .dmt-tab').forEach((b,i) => b.classList.toggle('active', i===0));
+  // Populate header KPIs
+  const d = pipelineData[dealId];
+  if (d) {
+    const winEl   = document.getElementById('dm-win-val');
+    const stageEl = document.getElementById('dm-stage-val');
+    const commEl  = document.getElementById('dm-comm-val');
+    if (winEl)   winEl.textContent   = d.aiScore + '%';
+    if (stageEl) stageEl.textContent = d.stage;
+    if (commEl)  commEl.textContent  = d.commission;
+  }
+};
+
+// Store for renderDealModal reference (used by switchDealTab overview)
+function renderDealModal(dealId) {
+  const body = document.getElementById('deal-modal-body');
+  if (!body) return;
+  const d = pipelineData[dealId];
+  if (!d) { body.innerHTML = '<div style="padding:20px">Deal not found.</div>'; return; }
+  body.dataset.dealId = dealId;
+  // Rebuild the standard overview content (mirrors original openDealModal body)
+  body.innerHTML = `<div style="padding:18px 20px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:#f8fafc;border-radius:8px;padding:12px">
+        <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px">AI INSIGHT</div>
+        <div style="font-size:12px;color:#1e293b;line-height:1.5">${d.aiInsight}</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:12px">
+        <div style="font-size:11px;color:#059669;font-weight:600;margin-bottom:4px">NEXT ACTION</div>
+        <div style="font-size:12px;color:#1e293b;line-height:1.5">${d.nextAction}</div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px">TIMELINE</div>
+    ${(d.timeline || []).map(t => `<div style="display:flex;gap:12px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #f1f5f9">
+      <div style="font-size:11px;color:#64748b;white-space:nowrap;min-width:50px">${t.date}</div>
+      <div style="font-size:12px;color:#374151">${t.event}</div></div>`).join('')}
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-ai" onclick="openDealAIModal('${dealId}')"><i class="fas fa-brain"></i> Full AI Analysis</button>
+      <button class="btn btn-outline-sm" onclick="moveDealStage('${dealId}','${d.stage === 'Prospect' ? 'Quoted' : d.stage === 'Quoted' ? 'Underwriting' : d.stage === 'Underwriting' ? 'Approved' : 'Closed Won'}')"><i class="fas fa-arrow-right"></i> Move Stage</button>
+    </div>
+  </div>`;
+}
+
+// ── Quick-Add Deal Modal ────────────────────────────────────
+function openAddDealModal(defaultStage) {
+  const overlay = document.getElementById('add-deal-overlay');
+  if (overlay) { overlay.style.display = 'flex'; }
+  if (defaultStage) {
+    const stageSelect = document.getElementById('ad-stage');
+    if (stageSelect) stageSelect.value = defaultStage;
+  }
+}
+function closeAddDealModal(e) {
+  if (e && e.target !== document.getElementById('add-deal-overlay')) return;
+  const overlay = document.getElementById('add-deal-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+function submitNewDeal() {
+  const client = document.getElementById('ad-client')?.value?.trim();
+  if (!client) { alert('Please enter a client name.'); return; }
+  const product    = document.getElementById('ad-product')?.value  || 'Whole Life Insurance';
+  const stage      = document.getElementById('ad-stage')?.value    || 'Prospect';
+  const amount     = document.getElementById('ad-amount')?.value   || '—';
+  const source     = document.getElementById('ad-source')?.value   || 'referral';
+  const closeDate  = document.getElementById('ad-close-date')?.value || '';
+  const notes      = document.getElementById('ad-notes')?.value    || '';
+  // Add to pipelineData
+  const newId = 'D' + (Object.keys(pipelineData).length + 100);
+  pipelineData[newId] = {
+    client, product, stage, value: amount, commission: '—', aiScore: 50, probability: '50%',
+    domain: 'ins', lastContact: 'Just added',
+    aiInsight: notes || 'New deal added manually — AI scoring in progress.',
+    nextAction: 'Complete needs analysis and schedule first meeting.',
+    timeline: [{ date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}), event: `Deal created — Stage: ${stage}` }]
+  };
+  // Add card to kanban column
+  const col = document.getElementById('kcol-' + stage);
+  if (col) {
+    const addBtn = col.querySelector('.add-card-btn');
+    const card = document.createElement('div');
+    card.className = 'kanban-card new-card';
+    card.onclick = () => openDealModal(newId);
+    card.innerHTML = `<div class="kc-top-row">
+      <div class="kc-win-label amber">50% Win</div>
+      <span class="kc-conv-badge amber">→ New</span>
+      <span class="kc-days-badge normal">0d</span>
+    </div>
+    <div class="kc-client">${client}</div>
+    <div class="kc-product">${product}</div>
+    <div class="kc-value">${amount}</div>
+    <div class="kc-nba-pill blue"><i class="fas fa-star"></i> New — run needs analysis</div>
+    <div class="kc-tags"><span class="kc-source-tag ${source}"><i class="fas fa-${source==='referral'?'user-friends':source==='online'?'globe':'fire-alt'}"></i> ${source.charAt(0).toUpperCase()+source.slice(1)}</span></div>
+    <div class="kc-actions">
+      <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('${newId}')"><i class="fas fa-brain"></i> AI Intel</button>
+    </div>`;
+    col.insertBefore(card, addBtn);
+    // Animate in
+    requestAnimationFrame(() => { card.style.opacity='0'; card.style.transform='translateY(-10px)'; requestAnimationFrame(() => { card.style.transition='all 0.3s'; card.style.opacity='1'; card.style.transform='none'; }); });
+  }
+  closeAddDealModal();
+  // Clear form
+  ['ad-client','ad-amount','ad-notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  alert(`✅ ${client} added to ${stage} stage!`);
+}
+
+// ── Drag-and-drop visual feedback ───────────────────────────
+(function initDragDrop() {
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add drag handles to kanban cards
+    document.querySelectorAll('.kanban-card:not(.won):not(.lost-card)').forEach(card => {
+      card.setAttribute('draggable', 'true');
+      card.addEventListener('dragstart', e => {
+        e.dataTransfer.effectAllowed = 'move';
+        card.classList.add('kc-dragging');
+        e.dataTransfer.setData('text/plain', card.closest('.kanban-col')?.id || '');
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('kc-dragging');
+        document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('kc-drop-target'));
+      });
+    });
+    // Drop zones on columns
+    document.querySelectorAll('.kanban-col').forEach(col => {
+      col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('kc-drop-target'); });
+      col.addEventListener('dragleave', () => col.classList.remove('kc-drop-target'));
+      col.addEventListener('drop', e => {
+        e.preventDefault();
+        col.classList.remove('kc-drop-target');
+        const dragging = document.querySelector('.kc-dragging');
+        if (dragging) {
+          const addBtn = col.querySelector('.add-card-btn');
+          col.insertBefore(dragging, addBtn);
+          const newStage = col.id.replace('kcol-', '');
+          const clientName = dragging.querySelector('.kc-client')?.textContent;
+          const dealId = Object.keys(pipelineData).find(k => pipelineData[k].client === clientName);
+          if (dealId) moveDealStage(dealId, newStage);
+        }
+      });
+    });
+  });
+})();
+
+console.log('Sales Pipeline Enhancements loaded — toolbar, stale alerts, velocity, lead source, quota gauge, activity log, deal tabs, add-deal modal, drag-drop');

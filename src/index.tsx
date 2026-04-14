@@ -2765,31 +2765,87 @@ function ClaimsPage() {
   return (
     <div class="page claims-page">
 
-      {/* ── Claims Summary Strip ── */}
-      <div class="claims-summary-strip">
-        <div class="cls-stat cls-open">
-          <div class="cls-icon"><i class="fas fa-folder-open"></i></div>
-          <div class="cls-body"><div class="cls-val">7</div><div class="cls-lbl">Open Claims</div></div>
+      {/* ── Claims KPI Dashboard Bar ── */}
+      <div class="claim-kpi-bar">
+        <div class="ckpi-card ckpi-open" onclick="filterClaimsByStatus('open')">
+          <div class="ckpi-icon"><i class="fas fa-folder-open"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">7</div>
+            <div class="ckpi-lbl">Open Claims</div>
+            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +2 this week</div>
+          </div>
         </div>
-        <div class="cls-stat cls-review">
-          <div class="cls-icon"><i class="fas fa-search"></i></div>
-          <div class="cls-body"><div class="cls-val">3</div><div class="cls-lbl">Under Review</div></div>
+        <div class="ckpi-card ckpi-review" onclick="filterClaimsByStatus('review')">
+          <div class="ckpi-icon"><i class="fas fa-search"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">3</div>
+            <div class="ckpi-lbl">Under Review</div>
+            <div class="ckpi-trend neutral"><i class="fas fa-minus"></i> Steady</div>
+          </div>
         </div>
-        <div class="cls-stat cls-pending">
-          <div class="cls-icon"><i class="fas fa-hourglass-half"></i></div>
-          <div class="cls-body"><div class="cls-val">2</div><div class="cls-lbl">Pending Docs</div></div>
+        <div class="ckpi-card ckpi-pending" onclick="filterClaimsByStatus('pending')">
+          <div class="ckpi-icon"><i class="fas fa-hourglass-half"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">2</div>
+            <div class="ckpi-lbl">Pending Docs</div>
+            <div class="ckpi-trend warn"><i class="fas fa-exclamation-triangle"></i> 1 overdue</div>
+          </div>
         </div>
-        <div class="cls-stat cls-approved">
-          <div class="cls-icon"><i class="fas fa-check-circle"></i></div>
-          <div class="cls-body"><div class="cls-val">14</div><div class="cls-lbl">Approved YTD</div></div>
+        <div class="ckpi-card ckpi-sla" onclick="filterClaimsBySLA()">
+          <div class="ckpi-icon"><i class="fas fa-stopwatch"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">2</div>
+            <div class="ckpi-lbl">SLA At Risk</div>
+            <div class="ckpi-trend warn"><i class="fas fa-exclamation-circle"></i> Act today</div>
+          </div>
         </div>
-        <div class="cls-stat cls-paid">
-          <div class="cls-icon"><i class="fas fa-dollar-sign"></i></div>
-          <div class="cls-body"><div class="cls-val">$284K</div><div class="cls-lbl">Paid Out YTD</div></div>
+        <div class="ckpi-card ckpi-exposure" onclick="filterClaimsByExposure()">
+          <div class="ckpi-icon"><i class="fas fa-coins"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">$1.41M</div>
+            <div class="ckpi-lbl">Open Exposure</div>
+            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +$1M (new death)</div>
+          </div>
         </div>
-        <div class="cls-stat cls-avg">
-          <div class="cls-icon"><i class="fas fa-clock"></i></div>
-          <div class="cls-body"><div class="cls-val">5.2d</div><div class="cls-lbl">Avg Resolution</div></div>
+        <div class="ckpi-card ckpi-approved" onclick="filterClaimsByStatus('approved')">
+          <div class="ckpi-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">14</div>
+            <div class="ckpi-lbl">Approved YTD</div>
+            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +4 vs last yr</div>
+          </div>
+        </div>
+        <div class="ckpi-card ckpi-paid" onclick="filterClaimsByStatus('paid')">
+          <div class="ckpi-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">$284K</div>
+            <div class="ckpi-lbl">Paid Out YTD</div>
+            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> On track</div>
+          </div>
+        </div>
+        <div class="ckpi-card ckpi-avg" onclick="showClaimsResolutionChart()">
+          <div class="ckpi-icon"><i class="fas fa-clock"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">5.2d</div>
+            <div class="ckpi-lbl">Avg Resolution</div>
+            <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.8d vs target</div>
+          </div>
+        </div>
+        <div class="ckpi-card ckpi-docs" onclick="filterClaimsByDocStatus()">
+          <div class="ckpi-icon"><i class="fas fa-file-check"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">61%</div>
+            <div class="ckpi-lbl">Doc Completion</div>
+            <div class="ckpi-trend warn"><i class="fas fa-arrow-down"></i> Below 80% target</div>
+          </div>
+        </div>
+        <div class="ckpi-card ckpi-payout" onclick="showPayoutTurnaroundPanel()">
+          <div class="ckpi-icon"><i class="fas fa-bolt"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">3.1d</div>
+            <div class="ckpi-lbl">Avg Payout Turnaround</div>
+            <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.4d MoM</div>
+          </div>
         </div>
       </div>
 
@@ -2834,6 +2890,98 @@ function ClaimsPage() {
         </div>
       </div>
 
+      {/* ── Claims Workbench / Priority Triage Queue ── */}
+      <div class="claims-workbench" id="claims-workbench">
+        <div class="cwb-header">
+          <div class="cwb-header-left">
+            <div class="cwb-icon"><i class="fas fa-tasks"></i></div>
+            <div>
+              <div class="cwb-title">Claims Workbench <span class="cwb-badge">4 Require Action</span></div>
+              <div class="cwb-sub">AI-prioritised queue — work from left to right · Updated just now</div>
+            </div>
+          </div>
+          <button class="cwb-collapse-btn" onclick="toggleWorkbench(this)" title="Collapse workbench"><i class="fas fa-chevron-up"></i></button>
+        </div>
+        <div class="cwb-cards" id="cwb-cards">
+
+          {/* Card 1 — SLA breach imminent */}
+          <div class="cwb-card cwb-urgent">
+            <div class="cwb-card-top">
+              <span class="cwb-priority-dot urgent"></span>
+              <span class="cwb-claim-id">CLM-2026-0041</span>
+              <span class="cwb-sla-badge breach"><i class="fas fa-fire"></i> SLA: 1d left</span>
+            </div>
+            <div class="cwb-client"><div class="mini-avatar rc" style="width:24px;height:24px;font-size:9px">RC</div><span>Robert Chen</span></div>
+            <div class="cwb-reason"><i class="fas fa-exclamation-triangle"></i> Missing ID docs — $1M death benefit on hold</div>
+            <div class="cwb-card-actions">
+              <button class="cwb-action-btn primary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-upload"></i> Upload Docs</button>
+              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i> AI</button>
+            </div>
+          </div>
+
+          {/* Card 2 — Fraud hold */}
+          <div class="cwb-card cwb-fraud">
+            <div class="cwb-card-top">
+              <span class="cwb-priority-dot flagged"></span>
+              <span class="cwb-claim-id">CLM-2026-0025</span>
+              <span class="cwb-sla-badge fraud"><i class="fas fa-shield-virus"></i> Fraud Hold</span>
+            </div>
+            <div class="cwb-client"><div class="mini-avatar kp" style="width:24px;height:24px;font-size:9px">KP</div><span>Kevin Park</span></div>
+            <div class="cwb-reason"><i class="fas fa-ban"></i> Risk score 78 — coverage determination required</div>
+            <div class="cwb-card-actions">
+              <button class="cwb-action-btn primary" onclick="openFraudDetailModal('CLM-2026-0025')"><i class="fas fa-search-plus"></i> Review</button>
+              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i> AI</button>
+            </div>
+          </div>
+
+          {/* Card 3 — Compassionate / urgent ADB */}
+          <div class="cwb-card cwb-compassionate">
+            <div class="cwb-card-top">
+              <span class="cwb-priority-dot urgent"></span>
+              <span class="cwb-claim-id">CLM-2026-0028</span>
+              <span class="cwb-sla-badge compassionate"><i class="fas fa-heart"></i> Compassionate</span>
+            </div>
+            <div class="cwb-client"><div class="mini-avatar mg" style="width:24px;height:24px;font-size:9px">MG</div><span>Maria Gonzalez</span></div>
+            <div class="cwb-reason"><i class="fas fa-file-medical"></i> Terminal cert pending — ADB $120K expedite</div>
+            <div class="cwb-card-actions">
+              <button class="cwb-action-btn primary" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Chase Docs</button>
+              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i> View</button>
+            </div>
+          </div>
+
+          {/* Card 4 — Doc pending but near approval */}
+          <div class="cwb-card cwb-normal">
+            <div class="cwb-card-top">
+              <span class="cwb-priority-dot normal"></span>
+              <span class="cwb-claim-id">CLM-2026-0035</span>
+              <span class="cwb-sla-badge watch"><i class="fas fa-clock"></i> 21d SLA</span>
+            </div>
+            <div class="cwb-client"><div class="mini-avatar mg" style="width:24px;height:24px;font-size:9px">MG</div><span>Maria Gonzalez</span></div>
+            <div class="cwb-reason"><i class="fas fa-stethoscope"></i> APS from physician needed — disability $4.2K/mo</div>
+            <div class="cwb-card-actions">
+              <button class="cwb-action-btn primary" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send Reminder</button>
+              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i> View</button>
+            </div>
+          </div>
+
+          {/* Card 5 — On track / informational */}
+          <div class="cwb-card cwb-ok">
+            <div class="cwb-card-top">
+              <span class="cwb-priority-dot ok"></span>
+              <span class="cwb-claim-id">CLM-2026-0033</span>
+              <span class="cwb-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span>
+            </div>
+            <div class="cwb-client"><div class="mini-avatar jw" style="width:24px;height:24px;font-size:9px">JW</div><span>James Whitfield</span></div>
+            <div class="cwb-reason"><i class="fas fa-thumbs-up"></i> All docs in — approval imminent (~3 days)</div>
+            <div class="cwb-card-actions">
+              <button class="cwb-action-btn primary" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review &amp; Approve</button>
+              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i> AI</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       {/* ── AI Claims Intelligence Banner ── */}
       <div class="ci-banner" id="ci-banner">
         <div class="ci-banner-left">
@@ -2864,6 +3012,10 @@ function ClaimsPage() {
             <div class="ci-kpi-val">+32%</div>
             <div class="ci-kpi-lbl">Detection Lift</div>
           </div>
+          <div class="ci-kpi ci-kpi-red ci-kpi-sla">
+            <div class="ci-kpi-val">2</div>
+            <div class="ci-kpi-lbl">SLA At Risk</div>
+          </div>
         </div>
         <div class="ci-banner-actions">
           <button class="btn-ci-action primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Intelligence Report</button>
@@ -2886,7 +3038,8 @@ function ClaimsPage() {
             <div class="pac-hstat"><span class="pac-hstat-val red">1</span><span class="pac-hstat-lbl">Death Detected</span></div>
             <div class="pac-hstat"><span class="pac-hstat-val orange">2</span><span class="pac-hstat-lbl">Lapse Risk</span></div>
             <div class="pac-hstat"><span class="pac-hstat-val gold">1</span><span class="pac-hstat-lbl">Renewal Alert</span></div>
-            <div class="pac-hstat"><span class="pac-hstat-val blue">4</span><span class="pac-hstat-lbl">Total Alerts</span></div>
+            <div class="pac-hstat"><span class="pac-hstat-val red">2</span><span class="pac-hstat-lbl">SLA At Risk</span></div>
+            <div class="pac-hstat"><span class="pac-hstat-val blue">5</span><span class="pac-hstat-lbl">Total Alerts</span></div>
           </div>
           <button class="btn-pac-dismiss" onclick="togglePACPanel(this)" title="Collapse alerts"><i class="fas fa-chevron-up"></i></button>
         </div>
@@ -2961,6 +3114,29 @@ function ClaimsPage() {
             </div>
           </div>
 
+          {/* Alert 4b — SLA Compliance Risk */}
+          <div class="pac-alert pac-alert-sla" id="pac-alert-sla">
+            <div class="pac-alert-type-icon sla"><i class="fas fa-stopwatch"></i></div>
+            <div class="pac-alert-content">
+              <div class="pac-alert-badges">
+                <span class="pac-badge sla"><i class="fas fa-balance-scale"></i> SLA Breach Risk</span>
+                <span class="pac-badge urgent">2 Claims</span>
+                <span class="pac-badge new">Regulatory Deadline</span>
+              </div>
+              <div class="pac-alert-headline">State SLA Deadline — CLM-2026-0041 expires tomorrow · CLM-2026-0028 expires in 5 days</div>
+              <div class="pac-alert-detail">New York State Insurance Law §3420 requires death benefit claims to be resolved within 30 days of notice. <strong>CLM-2026-0041 (Robert Chen, $1M)</strong> has 1 day remaining. Compassionate SLA applies to <strong>CLM-2026-0028 (Maria Gonzalez, $120K)</strong> — expedite immediately to avoid regulatory breach and potential fines of up to $5,000 per violation.</div>
+              <div class="pac-alert-meta">
+                <span><i class="fas fa-balance-scale"></i> NY Ins. Law §3420 · 30-day resolution requirement</span>
+                <span><i class="fas fa-exclamation-circle"></i> 2 claims in breach window · Total exposure $1.12M</span>
+                <span><i class="fas fa-calendar-times"></i> CLM-2026-0041: Apr 14 · CLM-2026-0028: Apr 19</span>
+              </div>
+            </div>
+            <div class="pac-alert-actions">
+              <button class="btn-pac-action primary" onclick="filterClaimsBySLA()"><i class="fas fa-stopwatch"></i> View SLA Queue</button>
+              <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
+            </div>
+          </div>
+
           {/* Alert 4 — Proactive New Coverage */}
           <div class="pac-alert pac-alert-coverage" id="pac-alert-4">
             <div class="pac-alert-type-icon coverage"><i class="fas fa-user-plus"></i></div>
@@ -2985,6 +3161,236 @@ function ClaimsPage() {
 
         </div>
       </div>
+
+      {/* ── Open / Active Claims ── */}
+      <div class="claims-section-header">
+        <div class="claims-section-label-row">
+          <div class="claims-section-label">
+            <i class="fas fa-folder-open"></i> Open &amp; Active Claims
+            <span class="claims-count-badge">7</span>
+          </div>
+          <div class="claims-batch-toolbar">
+            <label class="batch-select-all"><input type="checkbox" id="select-all-claims" onchange="toggleAllClaims(this)" /> Select All</label>
+            <button class="btn-batch" id="batch-send-btn" disabled onclick="batchSendDocReminders()"><i class="fas fa-paper-plane"></i> Send Reminders</button>
+            <button class="btn-batch" id="batch-assign-btn" disabled onclick="batchAssignAdjuster()"><i class="fas fa-user-tag"></i> Assign Adjuster</button>
+            <button class="btn-batch" id="batch-export-btn" onclick="batchExportClaims()"><i class="fas fa-file-export"></i> Export</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="claims-table-wrapper">
+        <table class="data-table claims-table">
+          <thead>
+            <tr>
+              <th style="width:36px"><input type="checkbox" id="th-checkbox" /></th>
+              <th>Claim ID</th>
+              <th>Client</th>
+              <th>Policy</th>
+              <th>Claim Type</th>
+              <th>Amount</th>
+              <th>Filed Date</th>
+              <th><i class="fas fa-calendar-day" style="color:#64748b;margin-right:4px"></i>Days Open</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th><i class="fas fa-user-tie" style="color:#64748b;margin-right:4px"></i>Adjuster / Team</th>
+              <th><i class="fas fa-shield-virus" style="color:#dc2626;margin-right:4px"></i>Fraud Score</th>
+              <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
+              <th><i class="fas fa-brain" style="color:#0ea5e9;margin-right:4px"></i>AI Triage</th>
+              <th><i class="fas fa-hourglass-half" style="color:#d97706;margin-right:4px"></i>Resolution</th>
+              <th><i class="fas fa-stopwatch" style="color:#dc2626;margin-right:4px"></i>SLA Status</th>
+              <th><i class="fas fa-gavel" style="color:#7c3aed;margin-right:4px"></i>Liability</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="claim-row urgent">
+              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+              <td><span class="claim-id">CLM-2026-0041</span></td>
+              <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
+              <td><span class="policy-id">P-100310</span></td>
+              <td><span class="claim-type-badge death">Death Benefit</span></td>
+              <td class="premium">$1,000,000</td>
+              <td class="text-muted">2026-04-09</td>
+              <td><span class="days-open-badge urgent">5d</span></td>
+              <td><span class="claim-status-badge review">Under Review</span></td>
+              <td><span class="priority-badge urgent">Urgent</span></td>
+              <td><div class="adjuster-cell"><div class="adj-avatar cd">CD</div><div class="adj-info"><div class="adj-name">Chris Davis</div><div class="adj-team team-claims">Claims Dept.</div></div></div></td>
+              <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0041')"><span class="fraud-score-num">42</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0041')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+              <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0041','ci')"><span class="ci-triage-label">⚡ Expedite</span><span class="ci-triage-sub">Missing ID docs</span></div></td>
+              <td><div class="ci-res-timer urgent"><i class="fas fa-hourglass-half"></i><span class="ci-res-days">1d left</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:85%"></div></div></div></td>
+              <td><div class="sla-cell sla-breach"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-breach" style="width:95%"></div></div><span class="sla-label breach"><i class="fas fa-fire"></i> 1d left</span><span class="sla-deadline">State SLA: Apr 14</span></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0041','liability')"><div class="liab-score-wrap high"><span class="liab-score">72%</span></div><span class="liab-flag high">High</span><span class="litig-risk high"><i class="fas fa-gavel"></i> Litig.</span></div></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+              <td><span class="claim-id">CLM-2026-0038</span></td>
+              <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
+              <td><span class="policy-id">P-100321</span></td>
+              <td><span class="claim-type-badge ltc">Long-term Care</span></td>
+              <td class="premium">$18,000</td>
+              <td class="text-muted">2026-04-01</td>
+              <td><span class="days-open-badge normal">13d</span></td>
+              <td><span class="claim-status-badge open">Open</span></td>
+              <td><span class="priority-badge normal">Normal</span></td>
+              <td><div class="adjuster-cell"><div class="adj-avatar lt">LT</div><div class="adj-info"><div class="adj-name">Lisa Torres</div><div class="adj-team team-ltc">LTC Team</div></div></div></td>
+              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0038')"><span class="fraud-score-num">12</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0038')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+              <td><div class="ci-triage-cell normal" onclick="openClaimModal('CLM-2026-0038','ci')"><span class="ci-triage-label">📋 Doc Request</span><span class="ci-triage-sub">Plan of care pending</span></div></td>
+              <td><div class="ci-res-timer normal"><i class="fas fa-clock"></i><span class="ci-res-days">8d est.</span><div class="ci-res-bar"><div class="ci-res-fill normal" style="width:45%"></div></div></div></td>
+              <td><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:38%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 22d left</span><span class="sla-deadline">State SLA: May 1</span></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0038','liability')"><div class="liab-score-wrap low"><span class="liab-score">18%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0038','ci')"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+              <td><span class="claim-id">CLM-2026-0035</span></td>
+              <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
+              <td><span class="policy-id">P-100341</span></td>
+              <td><span class="claim-type-badge disability">Disability</span></td>
+              <td class="premium">$4,200/mo</td>
+              <td class="text-muted">2026-03-22</td>
+              <td><span class="days-open-badge warn">23d</span></td>
+              <td><span class="claim-status-badge pending">Pending Docs</span></td>
+              <td><span class="priority-badge normal">Normal</span></td>
+              <td><div class="adjuster-cell"><div class="adj-avatar dr">DR</div><div class="adj-info"><div class="adj-name">David Reyes</div><div class="adj-team team-di">DI Unit</div></div></div></td>
+              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0035')"><span class="fraud-score-num">18</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0035')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+              <td><div class="ci-triage-cell watch" onclick="openClaimModal('CLM-2026-0035','ci')"><span class="ci-triage-label">🩺 APS Needed</span><span class="ci-triage-sub">Physician stmt pending</span></div></td>
+              <td><div class="ci-res-timer watch"><i class="fas fa-clock"></i><span class="ci-res-days">21d est.</span><div class="ci-res-bar"><div class="ci-res-fill watch" style="width:30%"></div></div></div></td>
+              <td><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:55%"></div></div><span class="sla-label warn"><i class="fas fa-exclamation-triangle"></i> 9d left</span><span class="sla-deadline">State SLA: Apr 22</span></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0035','liability')"><div class="liab-score-wrap med"><span class="liab-score">41%</span></div><span class="liab-flag med">Medium</span><span class="litig-risk med"><i class="fas fa-exclamation"></i> Watch</span></div></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0035','ci')"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+              <td><span class="claim-id">CLM-2026-0033</span></td>
+              <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
+              <td><span class="policy-id">P-100293</span></td>
+              <td><span class="claim-type-badge ltc">Long-term Care</span></td>
+              <td class="premium">$9,600</td>
+              <td class="text-muted">2026-03-15</td>
+              <td><span class="days-open-badge normal">30d</span></td>
+              <td><span class="claim-status-badge review">Under Review</span></td>
+              <td><span class="priority-badge normal">Normal</span></td>
+              <td><div class="adjuster-cell"><div class="adj-avatar lt">LT</div><div class="adj-info"><div class="adj-name">Lisa Torres</div><div class="adj-team team-ltc">LTC Team</div></div></div></td>
+              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0033')"><span class="fraud-score-num">9</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0033')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+              <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0033','ci')"><span class="ci-triage-label">✅ On Track</span><span class="ci-triage-sub">Approval imminent</span></div></td>
+              <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">3d est.</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:80%"></div></div></div></td>
+              <td><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:28%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 17d left</span><span class="sla-deadline">State SLA: Apr 30</span></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0033','liability')"><div class="liab-score-wrap low"><span class="liab-score">12%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+              <td><span class="claim-id">CLM-2026-0031</span></td>
+              <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
+              <td><span class="policy-id">P-100362</span></td>
+              <td><span class="claim-type-badge waiver">Waiver of Premium</span></td>
+              <td class="premium">$9,600/yr</td>
+              <td class="text-muted">2026-03-10</td>
+              <td><span class="days-open-badge normal">35d</span></td>
+              <td><span class="claim-status-badge open">Open</span></td>
+              <td><span class="priority-badge low">Low</span></td>
+              <td><div class="adjuster-cell"><div class="adj-avatar as">AS</div><div class="adj-info"><div class="adj-name">Amy Santos</div><div class="adj-team team-support">Agent Support</div></div></div></td>
+              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0031')"><span class="fraud-score-num">7</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0031')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+              <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0031','ci')"><span class="ci-triage-label">✅ Waiver Active</span><span class="ci-triage-sub">Monitor recovery</span></div></td>
+              <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">Open</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:60%"></div></div></div></td>
+              <td><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:20%"></div></div><span class="sla-label ok"><i class="fas fa-infinity"></i> Ongoing</span><span class="sla-deadline">Waiver · No SLA</span></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0031','liability')"><div class="liab-score-wrap low"><span class="liab-score">8%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0031','ci')"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row compassionate-row">
+              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+              <td><span class="claim-id">CLM-2026-0028</span></td>
+              <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
+              <td><span class="policy-id">P-100340</span></td>
+              <td><span class="claim-type-badge accelerated">Accelerated Benefit</span></td>
+              <td class="premium">$120,000</td>
+              <td class="text-muted">2026-03-05</td>
+              <td><span class="days-open-badge warn">40d</span></td>
+              <td><span class="claim-status-badge pending">Pending Docs</span></td>
+              <td><span class="priority-badge urgent">Urgent <span class="compassionate-tag"><i class="fas fa-heart"></i> Compassionate</span></span></td>
+              <td><div class="adjuster-cell"><div class="adj-avatar cd">CD</div><div class="adj-info"><div class="adj-name">Chris Davis</div><div class="adj-team team-claims">Claims Dept.</div></div></div></td>
+              <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0028')"><span class="fraud-score-num">38</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0028')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-orange" style="width:50%"></div></div></div></td>
+              <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0028','ci')"><span class="ci-triage-label">⚡ Compassionate</span><span class="ci-triage-sub">Terminal — expedite</span></div></td>
+              <td><div class="ci-res-timer urgent"><i class="fas fa-fire"></i><span class="ci-res-days">9d est.</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:70%"></div></div></div></td>
+              <td><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:68%"></div></div><span class="sla-label warn"><i class="fas fa-heart"></i> 5d left</span><span class="sla-deadline">Compassionate SLA: Apr 19</span></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0028','liability')"><div class="liab-score-wrap med"><span class="liab-score">29%</span></div><span class="liab-flag med">Medium</span><span class="litig-risk med"><i class="fas fa-exclamation"></i> Watch</span></div></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0028','ci')"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="claim-row">
+              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+              <td><span class="claim-id">CLM-2026-0025</span></td>
+              <td><div class="client-cell"><div class="mini-avatar kp">KP</div><span>Kevin Park</span></div></td>
+              <td><span class="policy-id">P-100350</span></td>
+              <td><span class="claim-type-badge death">Death Benefit</span></td>
+              <td class="premium">$250,000</td>
+              <td class="text-muted">2026-02-28</td>
+              <td><span class="days-open-badge warn">45d</span></td>
+              <td><span class="claim-status-badge review">Under Review</span></td>
+              <td><span class="priority-badge normal">Normal</span></td>
+              <td><div class="adjuster-cell"><div class="adj-avatar cd">CD</div><div class="adj-info"><div class="adj-name">Chris Davis</div><div class="adj-team team-claims">Claims Dept.</div></div></div></td>
+              <td><div class="fraud-score-cell flagged" onclick="openFraudDetailModal('CLM-2026-0025')"><span class="fraud-score-num">78</span><span class="fraud-score-lbl">Flagged</span><i class="fas fa-exclamation-triangle"></i></div></td>
+              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0025')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 1/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-red" style="width:25%"></div></div></div></td>
+              <td><div class="ci-triage-cell flagged" onclick="openClaimModal('CLM-2026-0025','ci')"><span class="ci-triage-label">🚨 Fraud Review</span><span class="ci-triage-sub">Coverage pending</span></div></td>
+              <td><div class="ci-res-timer flagged"><i class="fas fa-exclamation-triangle"></i><span class="ci-res-days">Hold</span><div class="ci-res-bar"><div class="ci-res-fill flagged" style="width:15%"></div></div></div></td>
+              <td><div class="sla-cell sla-hold"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-hold" style="width:100%"></div></div><span class="sla-label hold"><i class="fas fa-ban"></i> On Hold</span><span class="sla-deadline">Fraud review · Paused</span></div></td>
+              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0025','liability')"><div class="liab-score-wrap critical"><span class="liab-score">88%</span></div><span class="liab-flag critical">Critical</span><span class="litig-risk critical"><i class="fas fa-gavel"></i> Litig. Risk</span></div></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
+                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── Fraud + IDP side-by-side grid ── */}
+      <div class="fraud-idp-grid">
 
       {/* ── Fraud Detection Panel ── */}
       <div class="fraud-detection-panel">
@@ -3083,7 +3489,7 @@ function ClaimsPage() {
       </div>
 
       {/* ── IDP Hub Panel ── */}
-      <div class="idp-hub-panel">
+      <div class="idp-hub-panel idp-hub-panel-grid">
         <div class="idp-hub-header">
           <div class="idp-hub-title">
             <div class="idp-hub-icon"><i class="fas fa-file-import"></i></div>
@@ -3155,202 +3561,14 @@ function ClaimsPage() {
         </div>
       </div>
 
-      {/* ── Open / Active Claims ── */}
-      <div class="claims-section-label">
-        <i class="fas fa-folder-open"></i> Open &amp; Active Claims
-        <span class="claims-count-badge">7</span>
-      </div>
+      </div>{/* ── end fraud-idp-grid ── */}
 
-      <div class="claims-table-wrapper">
-        <table class="data-table claims-table">
-          <thead>
-            <tr>
-              <th>Claim ID</th>
-              <th>Client</th>
-              <th>Policy</th>
-              <th>Claim Type</th>
-              <th>Amount</th>
-              <th>Filed Date</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th><i class="fas fa-shield-virus" style="color:#dc2626;margin-right:4px"></i>Fraud Score</th>
-              <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
-              <th><i class="fas fa-brain" style="color:#0ea5e9;margin-right:4px"></i>AI Triage</th>
-              <th><i class="fas fa-hourglass-half" style="color:#d97706;margin-right:4px"></i>Resolution</th>
-              <th><i class="fas fa-gavel" style="color:#7c3aed;margin-right:4px"></i>Liability</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="claim-row urgent">
-              <td><span class="claim-id">CLM-2026-0041</span></td>
-              <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
-              <td><span class="policy-id">P-100310</span></td>
-              <td><span class="claim-type-badge death">Death Benefit</span></td>
-              <td class="premium">$1,000,000</td>
-              <td class="text-muted">2026-04-09</td>
-              <td><span class="claim-status-badge review">Under Review</span></td>
-              <td><span class="priority-badge urgent">Urgent</span></td>
-              <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0041')"><span class="fraud-score-num">42</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0041')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
-              <td class="text-muted">Claims Dept.</td>
-              <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0041','ci')"><span class="ci-triage-label">⚡ Expedite</span><span class="ci-triage-sub">Missing ID docs</span></div></td>
-              <td><div class="ci-res-timer urgent"><i class="fas fa-hourglass-half"></i><span class="ci-res-days">1d left</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:85%"></div></div></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0041','liability')"><div class="liab-score-wrap high"><span class="liab-score">72%</span></div><span class="liab-flag high">High</span><span class="litig-risk high"><i class="fas fa-gavel"></i> Litig.</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i></button>
-                </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><span class="claim-id">CLM-2026-0038</span></td>
-              <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
-              <td><span class="policy-id">P-100321</span></td>
-              <td><span class="claim-type-badge ltc">Long-term Care</span></td>
-              <td class="premium">$18,000</td>
-              <td class="text-muted">2026-04-01</td>
-              <td><span class="claim-status-badge open">Open</span></td>
-              <td><span class="priority-badge normal">Normal</span></td>
-              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0038')"><span class="fraud-score-num">12</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0038')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
-              <td class="text-muted">LTC Team</td>
-              <td><div class="ci-triage-cell normal" onclick="openClaimModal('CLM-2026-0038','ci')"><span class="ci-triage-label">📋 Doc Request</span><span class="ci-triage-sub">Plan of care pending</span></div></td>
-              <td><div class="ci-res-timer normal"><i class="fas fa-clock"></i><span class="ci-res-days">8d est.</span><div class="ci-res-bar"><div class="ci-res-fill normal" style="width:45%"></div></div></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0038','liability')"><div class="liab-score-wrap low"><span class="liab-score">18%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0038','ci')"><i class="fas fa-robot"></i></button>
-                </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><span class="claim-id">CLM-2026-0035</span></td>
-              <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
-              <td><span class="policy-id">P-100341</span></td>
-              <td><span class="claim-type-badge disability">Disability</span></td>
-              <td class="premium">$4,200/mo</td>
-              <td class="text-muted">2026-03-22</td>
-              <td><span class="claim-status-badge pending">Pending Docs</span></td>
-              <td><span class="priority-badge normal">Normal</span></td>
-              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0035')"><span class="fraud-score-num">18</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0035')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
-              <td class="text-muted">DI Unit</td>
-              <td><div class="ci-triage-cell watch" onclick="openClaimModal('CLM-2026-0035','ci')"><span class="ci-triage-label">🩺 APS Needed</span><span class="ci-triage-sub">Physician stmt pending</span></div></td>
-              <td><div class="ci-res-timer watch"><i class="fas fa-clock"></i><span class="ci-res-days">21d est.</span><div class="ci-res-bar"><div class="ci-res-fill watch" style="width:30%"></div></div></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0035','liability')"><div class="liab-score-wrap med"><span class="liab-score">41%</span></div><span class="liab-flag med">Medium</span><span class="litig-risk med"><i class="fas fa-exclamation"></i> Watch</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0035','ci')"><i class="fas fa-robot"></i></button>
-                </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><span class="claim-id">CLM-2026-0033</span></td>
-              <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
-              <td><span class="policy-id">P-100293</span></td>
-              <td><span class="claim-type-badge ltc">Long-term Care</span></td>
-              <td class="premium">$9,600</td>
-              <td class="text-muted">2026-03-15</td>
-              <td><span class="claim-status-badge review">Under Review</span></td>
-              <td><span class="priority-badge normal">Normal</span></td>
-              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0033')"><span class="fraud-score-num">9</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0033')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
-              <td class="text-muted">LTC Team</td>
-              <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0033','ci')"><span class="ci-triage-label">✅ On Track</span><span class="ci-triage-sub">Approval imminent</span></div></td>
-              <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">3d est.</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:80%"></div></div></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0033','liability')"><div class="liab-score-wrap low"><span class="liab-score">12%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i></button>
-                </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><span class="claim-id">CLM-2026-0031</span></td>
-              <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
-              <td><span class="policy-id">P-100362</span></td>
-              <td><span class="claim-type-badge waiver">Waiver of Premium</span></td>
-              <td class="premium">$9,600/yr</td>
-              <td class="text-muted">2026-03-10</td>
-              <td><span class="claim-status-badge open">Open</span></td>
-              <td><span class="priority-badge low">Low</span></td>
-              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0031')"><span class="fraud-score-num">7</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0031')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
-              <td class="text-muted">Agent Support</td>
-              <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0031','ci')"><span class="ci-triage-label">✅ Waiver Active</span><span class="ci-triage-sub">Monitor recovery</span></div></td>
-              <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">Open</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:60%"></div></div></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0031','liability')"><div class="liab-score-wrap low"><span class="liab-score">8%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0031','ci')"><i class="fas fa-robot"></i></button>
-                </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><span class="claim-id">CLM-2026-0028</span></td>
-              <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
-              <td><span class="policy-id">P-100340</span></td>
-              <td><span class="claim-type-badge accelerated">Accelerated Benefit</span></td>
-              <td class="premium">$120,000</td>
-              <td class="text-muted">2026-03-05</td>
-              <td><span class="claim-status-badge pending">Pending Docs</span></td>
-              <td><span class="priority-badge urgent">Urgent</span></td>
-              <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0028')"><span class="fraud-score-num">38</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0028')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-orange" style="width:50%"></div></div></div></td>
-              <td class="text-muted">Claims Dept.</td>
-              <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0028','ci')"><span class="ci-triage-label">⚡ Compassionate</span><span class="ci-triage-sub">Terminal — expedite</span></div></td>
-              <td><div class="ci-res-timer urgent"><i class="fas fa-fire"></i><span class="ci-res-days">9d est.</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:70%"></div></div></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0028','liability')"><div class="liab-score-wrap med"><span class="liab-score">29%</span></div><span class="liab-flag med">Medium</span><span class="litig-risk med"><i class="fas fa-exclamation"></i> Watch</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0028','ci')"><i class="fas fa-robot"></i></button>
-                </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><span class="claim-id">CLM-2026-0025</span></td>
-              <td><div class="client-cell"><div class="mini-avatar kp">KP</div><span>Kevin Park</span></div></td>
-              <td><span class="policy-id">P-100350</span></td>
-              <td><span class="claim-type-badge death">Death Benefit</span></td>
-              <td class="premium">$250,000</td>
-              <td class="text-muted">2026-02-28</td>
-              <td><span class="claim-status-badge review">Under Review</span></td>
-              <td><span class="priority-badge normal">Normal</span></td>
-              <td><div class="fraud-score-cell flagged" onclick="openFraudDetailModal('CLM-2026-0025')"><span class="fraud-score-num">78</span><span class="fraud-score-lbl">Flagged</span><i class="fas fa-exclamation-triangle"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0025')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 1/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-red" style="width:25%"></div></div></div></td>
-              <td class="text-muted">Claims Dept.</td>
-              <td><div class="ci-triage-cell flagged" onclick="openClaimModal('CLM-2026-0025','ci')"><span class="ci-triage-label">🚨 Fraud Review</span><span class="ci-triage-sub">Coverage pending</span></div></td>
-              <td><div class="ci-res-timer flagged"><i class="fas fa-exclamation-triangle"></i><span class="ci-res-days">Hold</span><div class="ci-res-bar"><div class="ci-res-fill flagged" style="width:15%"></div></div></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0025','liability')"><div class="liab-score-wrap critical"><span class="liab-score">88%</span></div><span class="liab-flag critical">Critical</span><span class="litig-risk critical"><i class="fas fa-gavel"></i> Litig. Risk</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i></button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
       {/* ── Recently Resolved Claims ── */}
       <div class="claims-section-label" style="margin-top:28px">
         <i class="fas fa-check-circle" style="color:#059669"></i> Recently Resolved Claims
         <span class="claims-count-badge resolved">14 YTD</span>
+        <span class="claims-denied-badge"><i class="fas fa-times-circle"></i> 1 Denied · Appeal window open</span>
       </div>
 
       <div class="claims-table-wrapper">
@@ -3366,6 +3584,8 @@ function ClaimsPage() {
               <th>Resolved</th>
               <th>Status</th>
               <th>Resolution Days</th>
+              <th><i class="fas fa-tag" style="color:#64748b;margin-right:4px"></i>Resolution Category</th>
+              <th><i class="fas fa-times-circle" style="color:#dc2626;margin-right:4px"></i>Denial Reason</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -3380,7 +3600,12 @@ function ClaimsPage() {
               <td class="text-muted">2026-02-17</td>
               <td><span class="claim-status-badge paid">Paid</span></td>
               <td><span class="res-days good">7 days</span></td>
-              <td><div class="action-btns"><button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0022','view')"><i class="fas fa-eye"></i></button></div></td>
+              <td><span class="res-category fast-track"><i class="fas fa-bolt"></i> Fast-Track</span></td>
+              <td><span class="denial-reason none">—</span></td>
+              <td><div class="action-btns">
+                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0022','view')"><i class="fas fa-eye"></i></button>
+                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0022')"><i class="fas fa-redo"></i></button>
+              </div></td>
             </tr>
             <tr>
               <td><span class="claim-id">CLM-2026-0019</span></td>
@@ -3392,7 +3617,12 @@ function ClaimsPage() {
               <td class="text-muted">2026-01-24</td>
               <td><span class="claim-status-badge paid">Approved</span></td>
               <td><span class="res-days good">4 days</span></td>
-              <td><div class="action-btns"><button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0019','view')"><i class="fas fa-eye"></i></button></div></td>
+              <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
+              <td><span class="denial-reason none">—</span></td>
+              <td><div class="action-btns">
+                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0019','view')"><i class="fas fa-eye"></i></button>
+                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0019')"><i class="fas fa-redo"></i></button>
+              </div></td>
             </tr>
             <tr>
               <td><span class="claim-id">CLM-2026-0015</span></td>
@@ -3404,7 +3634,30 @@ function ClaimsPage() {
               <td class="text-muted">2026-01-15</td>
               <td><span class="claim-status-badge paid">Paid</span></td>
               <td><span class="res-days good">7 days</span></td>
-              <td><div class="action-btns"><button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0015','view')"><i class="fas fa-eye"></i></button></div></td>
+              <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
+              <td><span class="denial-reason none">—</span></td>
+              <td><div class="action-btns">
+                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0015','view')"><i class="fas fa-eye"></i></button>
+                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0015')"><i class="fas fa-redo"></i></button>
+              </div></td>
+            </tr>
+            <tr class="claim-row-denied">
+              <td><span class="claim-id">CLM-2025-0201</span></td>
+              <td><div class="client-cell"><div class="mini-avatar dk">DK</div><span>Daniel Kim</span></div></td>
+              <td><span class="policy-id">P-100371</span></td>
+              <td><span class="claim-type-badge disability">Disability</span></td>
+              <td class="premium text-muted">$0</td>
+              <td class="text-muted">2025-11-15</td>
+              <td class="text-muted">2025-12-02</td>
+              <td><span class="claim-status-badge denied">Denied</span></td>
+              <td><span class="res-days slow">17 days</span></td>
+              <td><span class="res-category escalated"><i class="fas fa-arrow-up"></i> Escalated</span></td>
+              <td><span class="denial-reason active" title="Pre-existing condition exclusion — disability pre-dates policy by 8 months">Pre-existing Condition</span></td>
+              <td><div class="action-btns">
+                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0201','view')"><i class="fas fa-eye"></i></button>
+                <button class="btn-icon appeal-btn" title="File Appeal" onclick="openAppealModal('CLM-2025-0201')"><i class="fas fa-balance-scale"></i></button>
+                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2025-0201')"><i class="fas fa-redo"></i></button>
+              </div></td>
             </tr>
             <tr>
               <td><span class="claim-id">CLM-2025-0198</span></td>
@@ -3416,7 +3669,12 @@ function ClaimsPage() {
               <td class="text-muted">2025-12-08</td>
               <td><span class="claim-status-badge paid">Paid</span></td>
               <td><span class="res-days good">7 days</span></td>
-              <td><div class="action-btns"><button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0198','view')"><i class="fas fa-eye"></i></button></div></td>
+              <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
+              <td><span class="denial-reason none">—</span></td>
+              <td><div class="action-btns">
+                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0198','view')"><i class="fas fa-eye"></i></button>
+                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2025-0198')"><i class="fas fa-redo"></i></button>
+              </div></td>
             </tr>
           </tbody>
         </table>
@@ -3466,6 +3724,73 @@ function ClaimsPage() {
               <div class="sdp-item-draft">"Dear Dr. Hernandez, we are processing a disability insurance claim for your patient Maria Gonzalez. Please complete the Attending Physician Statement to allow us to begin benefit payments…"</div>
             </div>
             <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send</button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Claims Performance Analytics Panel ── */}
+      <div class="cpa-panel" id="cpa-panel">
+        <div class="cpa-header" onclick="toggleCPAPanel()">
+          <div class="cpa-header-left">
+            <div class="cpa-icon"><i class="fas fa-chart-line"></i></div>
+            <div>
+              <div class="cpa-title">My Claims Performance <span class="cpa-period">Q2 2026 (Apr 1 – Apr 13)</span></div>
+              <div class="cpa-sub">Personal productivity metrics · AI-powered benchmarking against team averages</div>
+            </div>
+          </div>
+          <button class="cpa-collapse-btn" id="cpa-collapse-btn" title="Toggle panel"><i class="fas fa-chevron-down"></i></button>
+        </div>
+        <div class="cpa-body" id="cpa-body">
+          <div class="cpa-kpi-row">
+            <div class="cpa-kpi green">
+              <div class="cpa-kpi-val">7</div>
+              <div class="cpa-kpi-lbl">Claims Active</div>
+              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 5.2</div>
+            </div>
+            <div class="cpa-kpi green">
+              <div class="cpa-kpi-val">4</div>
+              <div class="cpa-kpi-lbl">Closed This Month</div>
+              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 3.8</div>
+            </div>
+            <div class="cpa-kpi blue">
+              <div class="cpa-kpi-val">5.2d</div>
+              <div class="cpa-kpi-lbl">Avg Resolution Time</div>
+              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 6.1d</div>
+            </div>
+            <div class="cpa-kpi blue">
+              <div class="cpa-kpi-val">3.1d</div>
+              <div class="cpa-kpi-lbl">Avg Payout Turnaround</div>
+              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 3.8d</div>
+            </div>
+            <div class="cpa-kpi orange">
+              <div class="cpa-kpi-val">67%</div>
+              <div class="cpa-kpi-lbl">Doc Request Response Rate</div>
+              <div class="cpa-kpi-bench"><i class="fas fa-arrow-down" style="color:#dc2626"></i> Below 75% target</div>
+            </div>
+            <div class="cpa-kpi green">
+              <div class="cpa-kpi-val">93%</div>
+              <div class="cpa-kpi-lbl">SLA Compliance Rate</div>
+              <div class="cpa-kpi-bench"><i class="fas fa-check" style="color:#059669"></i> Above 90% target</div>
+            </div>
+            <div class="cpa-kpi red">
+              <div class="cpa-kpi-val">1</div>
+              <div class="cpa-kpi-lbl">SLA Breaches YTD</div>
+              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 2.1</div>
+            </div>
+            <div class="cpa-kpi purple">
+              <div class="cpa-kpi-val">94%</div>
+              <div class="cpa-kpi-lbl">AI Triage Accuracy</div>
+              <div class="cpa-kpi-bench"><i class="fas fa-robot" style="color:#7c3aed"></i> AI-assisted</div>
+            </div>
+          </div>
+          <div class="cpa-insights">
+            <div class="cpa-insight good"><i class="fas fa-star"></i> <strong>Strength:</strong> Your resolution time (5.2d) is 15% faster than team average — keep it up.</div>
+            <div class="cpa-insight warn"><i class="fas fa-exclamation-triangle"></i> <strong>Opportunity:</strong> Doc request response rate (67%) is below the 75% target — send reminders sooner after filing.</div>
+            <div class="cpa-insight info"><i class="fas fa-robot"></i> <strong>AI Tip:</strong> Enabling auto-send reminders at 48h intervals could lift response rate to ~82% based on portfolio patterns.</div>
+          </div>
+          <div class="cpa-footer">
+            <button class="btn btn-ai" onclick="sendContextMessage('Show my claims performance for Q2 2026 — resolution times, SLA compliance, doc response rates and recommendations','claims')"><i class="fas fa-robot"></i> Full AI Performance Analysis</button>
+            <button class="btn btn-outline-sm" onclick="alert('Exporting performance report…')"><i class="fas fa-download"></i> Export Report</button>
           </div>
         </div>
       </div>
@@ -3632,6 +3957,9 @@ function ClaimsPage() {
                 <button class="dmt-tab ai-tab" onclick="switchClaimTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
                 <button class="dmt-tab ci-tab" onclick="switchClaimTab('ci',this)"><i class="fas fa-brain"></i> Intelligence</button>
                 <button class="dmt-tab liability-tab" onclick="switchClaimTab('liability',this)"><i class="fas fa-gavel"></i> Liability</button>
+                <button class="dmt-tab docs-tab" onclick="switchClaimTab('docs',this)"><i class="fas fa-file-import"></i> Documents</button>
+                <button class="dmt-tab comms-tab" onclick="switchClaimTab('comms',this)"><i class="fas fa-comments"></i> Communications</button>
+                <button class="dmt-tab bene-tab" onclick="switchClaimTab('bene',this)"><i class="fas fa-users"></i> Beneficiary</button>
               </div>
               <button class="detail-modal-close" onclick="closeClaimModal()"><i class="fas fa-times"></i></button>
             </div>
@@ -4886,80 +5214,91 @@ function SalesPage() {
   return (
     <div class="page sales-page">
 
-      {/* ── AI Sales Intelligence Banner ── */}
-      <div class="sales-ai-banner">
-        <div class="sai-banner-left">
-          <div class="sai-banner-icon"><i class="fas fa-brain"></i></div>
-          <div class="sai-banner-info">
-            <div class="sai-banner-title">
-              AI Sales Intelligence Engine
-              <span class="sai-live-badge"><span class="sai-live-dot"></span>LIVE</span>
-            </div>
-            <div class="sai-banner-subtitle">Win-probability scoring · Next-best-action engine · Conversion prediction · Pipeline forecasting · NBA auto-triggers</div>
+      {/* ── KPI Bar (10 cards, enriched with trends) ── */}
+      <div class="sales-kpi-bar">
+        <div class="skpi-card skpi-blue" onclick="filterPipelineByStatus('all')">
+          <div class="skpi-card-icon"><i class="fas fa-funnel-dollar"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">$284K</div>
+            <div class="skpi-card-lbl">Pipeline Value</div>
+            <div class="skpi-card-trend up"><i class="fas fa-arrow-up"></i> +$47K vs last month</div>
           </div>
         </div>
-        <div class="sai-banner-chips">
-          <div class="sai-chip"><span class="sai-chip-val">9</span><span class="sai-chip-lbl">Active Deals</span></div>
-          <div class="sai-chip green"><span class="sai-chip-val">$284K</span><span class="sai-chip-lbl">Pipeline Value</span></div>
-          <div class="sai-chip gold"><span class="sai-chip-val">68%</span><span class="sai-chip-lbl">Conv. Rate</span></div>
-          <div class="sai-chip blue"><span class="sai-chip-val">3</span><span class="sai-chip-lbl">Close Ready</span></div>
-          <div class="sai-chip purple"><span class="sai-chip-val">91.2%</span><span class="sai-chip-lbl">AI Accuracy</span></div>
+        <div class="skpi-card skpi-green" onclick="filterPipelineByStatus('won')">
+          <div class="skpi-card-icon"><i class="fas fa-handshake"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">34</div>
+            <div class="skpi-card-lbl">Closed This Month</div>
+            <div class="skpi-card-trend up"><i class="fas fa-arrow-up"></i> +6 vs last month</div>
+          </div>
         </div>
-        <div class="sai-banner-actions">
-          <button class="sai-btn sai-btn-primary" onclick="openSalesAIReport()"><i class="fas fa-chart-line"></i> AI Win Report</button>
-          <button class="sai-btn sai-btn-secondary" onclick="openConversionForecast()"><i class="fas fa-funnel-dollar"></i> Forecast</button>
+        <div class="skpi-card skpi-gold" onclick="showConversionDetails()">
+          <div class="skpi-card-icon"><i class="fas fa-percentage"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">68%</div>
+            <div class="skpi-card-lbl">Conversion Rate</div>
+            <div class="skpi-card-trend up"><i class="fas fa-arrow-up"></i> +4% vs last month</div>
+          </div>
+        </div>
+        <div class="skpi-card skpi-teal" onclick="showStageCycleDetails()">
+          <div class="skpi-card-icon"><i class="fas fa-clock"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">12.4d</div>
+            <div class="skpi-card-lbl">Avg Sales Cycle</div>
+            <div class="skpi-card-trend good"><i class="fas fa-arrow-down"></i> −1.2d vs target</div>
+          </div>
+        </div>
+        <div class="skpi-card skpi-purple" onclick="showCommissionDetails()">
+          <div class="skpi-card-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">$42.2K</div>
+            <div class="skpi-card-lbl">Commission MTD</div>
+            <div class="skpi-card-trend up"><i class="fas fa-arrow-up"></i> On track</div>
+          </div>
+        </div>
+        <div class="skpi-card skpi-navy" onclick="showQuotaDetails()">
+          <div class="skpi-card-icon"><i class="fas fa-trophy"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">78%</div>
+            <div class="skpi-card-lbl">YTD Quota ($187K / $240K)</div>
+            <div class="skpi-card-trend up"><i class="fas fa-check"></i> On Track</div>
+          </div>
+        </div>
+        <div class="skpi-card skpi-orange" onclick="showStageCycleDetails()">
+          <div class="skpi-card-icon"><i class="fas fa-hourglass-half"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">8.3d</div>
+            <div class="skpi-card-lbl">Avg Days in Stage</div>
+            <div class="skpi-card-trend warn"><i class="fas fa-exclamation-triangle"></i> 2 deals stale</div>
+          </div>
+        </div>
+        <div class="skpi-card skpi-red" onclick="filterPipelineByRisk('at-risk')">
+          <div class="skpi-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">2</div>
+            <div class="skpi-card-lbl">At-Risk Deals</div>
+            <div class="skpi-card-trend warn"><i class="fas fa-arrow-down"></i> Score &lt; 50</div>
+          </div>
+        </div>
+        <div class="skpi-card skpi-emerald" onclick="showUpsellPanel()">
+          <div class="skpi-card-icon"><i class="fas fa-lightbulb"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">$31.2K</div>
+            <div class="skpi-card-lbl">Upsell Potential</div>
+            <div class="skpi-card-trend up"><i class="fas fa-robot"></i> AI-identified</div>
+          </div>
+        </div>
+        <div class="skpi-card skpi-slate" onclick="filterPipelineByStatus('lost')">
+          <div class="skpi-card-icon"><i class="fas fa-times-circle"></i></div>
+          <div class="skpi-card-body">
+            <div class="skpi-card-val">3</div>
+            <div class="skpi-card-lbl">Closed Lost MTD</div>
+            <div class="skpi-card-trend neutral"><i class="fas fa-minus"></i> Steady</div>
+          </div>
         </div>
       </div>
 
-      {/* ── KPI Strip ── */}
-      <div class="sales-header-cards">
-        <div class="sales-kpi-card">
-          <div class="skpi-icon"><i class="fas fa-funnel-dollar"></i></div>
-          <div class="skpi-data">
-            <div class="skpi-val">$284,000</div>
-            <div class="skpi-lbl">Pipeline Value</div>
-          </div>
-        </div>
-        <div class="sales-kpi-card">
-          <div class="skpi-icon green"><i class="fas fa-handshake"></i></div>
-          <div class="skpi-data">
-            <div class="skpi-val">34</div>
-            <div class="skpi-lbl">Closed This Month</div>
-          </div>
-        </div>
-        <div class="sales-kpi-card">
-          <div class="skpi-icon gold"><i class="fas fa-percentage"></i></div>
-          <div class="skpi-data">
-            <div class="skpi-val">68%</div>
-            <div class="skpi-lbl">Conversion Rate</div>
-          </div>
-        </div>
-        <div class="sales-kpi-card">
-          <div class="skpi-icon blue"><i class="fas fa-clock"></i></div>
-          <div class="skpi-data">
-            <div class="skpi-val">12.4 days</div>
-            <div class="skpi-lbl">Avg Sales Cycle</div>
-          </div>
-        </div>
-        <div class="sales-kpi-card">
-          <div class="skpi-icon purple"><i class="fas fa-dollar-sign"></i></div>
-          <div class="skpi-data">
-            <div class="skpi-val">$42,180</div>
-            <div class="skpi-lbl">Commission MTD</div>
-          </div>
-        </div>
-        <div class="sales-kpi-card">
-          <div class="skpi-icon red"><i class="fas fa-trophy"></i></div>
-          <div class="skpi-data">
-            <div class="skpi-val">78%</div>
-            <div class="skpi-lbl">YTD Target ($187K / $240K)</div>
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════
-          AI SALES INTELLIGENCE BANNER  (Task #19a)
-          ══════════════════════════════════════════════════ */}
+      {/* ── (consolidated) AI Sales Intelligence Banner ── */}
       <div class="sai-banner">
         <div class="sai-banner-left">
           <div class="sai-banner-icon">
@@ -4999,18 +5338,140 @@ function SalesPage() {
         </div>
       </div>
 
+      {/* ── Pipeline Toolbar ── */}
+      <div class="pipeline-toolbar">
+        <div class="ptb-left">
+          <div class="ptb-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="pipeline-search" placeholder="Search deals, clients, products…" oninput="filterPipelineDeals()" />
+          </div>
+          <select class="ptb-select" id="ptb-stage-filter" onchange="filterPipelineDeals()">
+            <option value="">All Stages</option>
+            <option value="Prospect">Prospect</option>
+            <option value="Quoted">Quoted</option>
+            <option value="Underwriting">Underwriting</option>
+            <option value="Approved">Approved</option>
+            <option value="Closed Won">Closed Won</option>
+            <option value="Closed Lost">Closed Lost</option>
+          </select>
+          <select class="ptb-select" id="ptb-domain-filter" onchange="filterPipelineDeals()">
+            <option value="">All Domains</option>
+            <option value="ins">Insurance</option>
+            <option value="inv">Investments</option>
+            <option value="ret">Retirement</option>
+            <option value="adv">Advisory</option>
+          </select>
+          <select class="ptb-select" id="ptb-sort" onchange="sortPipelineDeals()">
+            <option value="win">Sort: Win %</option>
+            <option value="value">Sort: Deal Value</option>
+            <option value="days">Sort: Days in Stage</option>
+            <option value="comm">Sort: Commission</option>
+          </select>
+        </div>
+        <div class="ptb-right">
+          <div class="ptb-view-toggle" id="ptb-view-toggle">
+            <button class="ptb-view-btn active" id="ptb-btn-kanban" onclick="setPipelineView('kanban',this)" title="Kanban Board"><i class="fas fa-th-large"></i> Kanban</button>
+            <button class="ptb-view-btn" id="ptb-btn-list" onclick="setPipelineView('list',this)" title="List / Table"><i class="fas fa-list"></i> List</button>
+            <button class="ptb-view-btn" id="ptb-btn-focus" onclick="setPipelineView('focus',this)" title="Focus: Top 3 Deals"><i class="fas fa-crosshairs"></i> Focus</button>
+          </div>
+          <button class="ptb-add-btn" onclick="openAddDealModal()"><i class="fas fa-plus"></i> New Deal</button>
+        </div>
+      </div>
+
+      {/* ── Pipeline List View (hidden by default) ── */}
+      <div id="pipeline-list-view" style="display:none" class="pipeline-list-view">
+        <table class="data-table pipeline-table">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Product</th>
+              <th>Stage</th>
+              <th>Value/yr</th>
+              <th>Commission</th>
+              <th>Win %</th>
+              <th>Days in Stage</th>
+              <th>Lead Source</th>
+              <th>Next Action</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pipeline-list-tbody"></tbody>
+        </table>
+      </div>
+
+      {/* ── Pipeline Focus View (hidden by default) ── */}
+      <div id="pipeline-focus-view" style="display:none" class="pipeline-focus-view">
+        <div class="pfv-header"><i class="fas fa-crosshairs"></i> Focus Mode — Top 3 Priority Deals <span class="pfv-sub">Ranked by AI Win Score</span></div>
+        <div class="pfv-cards" id="pfv-cards"></div>
+      </div>
+
       {/* ── Main body: Kanban + right sidebar ── */}
       <div class="sales-body-layout">
 
+        {/* ── Stale Deal Alert Strip ── */}
+        <div class="stale-alert-strip" id="stale-alert-strip">
+          <div class="sas-header">
+            <div class="sas-header-left">
+              <i class="fas fa-exclamation-triangle sas-icon"></i>
+              <div>
+                <div class="sas-title">Stale Deal Alerts <span class="sas-badge">2 Deals Idle &gt;10 days</span></div>
+                <div class="sas-sub">Deals with no stage movement — act now to prevent going cold</div>
+              </div>
+            </div>
+            <button class="sas-dismiss-btn" onclick="dismissStaleStrip()" title="Dismiss"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="sas-cards">
+            <div class="sas-card sas-card-red">
+              <div class="sas-card-top">
+                <span class="sas-claim-id">D003</span>
+                <span class="sas-age-badge stale"><i class="fas fa-hourglass-end"></i> 15d in Prospect</span>
+              </div>
+              <div class="sas-client"><div class="mini-avatar jk" style="width:22px;height:22px;font-size:9px">JK</div><span>John Kim</span></div>
+              <div class="sas-reason"><i class="fas fa-stethoscope"></i> APS delay stalling deal — score dropped to 44%</div>
+              <div class="sas-actions">
+                <button class="sas-action-btn primary" onclick="openDealAIModal('D003')"><i class="fas fa-brain"></i> AI Intel</button>
+                <button class="sas-action-btn ghost" onclick="openDealModal('D003')"><i class="fas fa-eye"></i> View</button>
+              </div>
+            </div>
+            <div class="sas-card sas-card-amber">
+              <div class="sas-card-top">
+                <span class="sas-claim-id">D005</span>
+                <span class="sas-age-badge warn"><i class="fas fa-clock"></i> 11d in Quoted</span>
+              </div>
+              <div class="sas-client"><div class="mini-avatar jc" style="width:22px;height:22px;font-size:9px">JC</div><span>Julia Chen</span></div>
+              <div class="sas-reason"><i class="fas fa-percentage"></i> Annuity quote under review — no response in 11 days</div>
+              <div class="sas-actions">
+                <button class="sas-action-btn primary" onclick="openDealAIModal('D005')"><i class="fas fa-paper-plane"></i> Follow Up</button>
+                <button class="sas-action-btn ghost" onclick="openDealModal('D005')"><i class="fas fa-eye"></i> View</button>
+              </div>
+            </div>
+            <div class="sas-card sas-card-info">
+              <div class="sas-card-top">
+                <span class="sas-claim-id">D007</span>
+                <span class="sas-age-badge info"><i class="fas fa-clock"></i> 19d in UW</span>
+              </div>
+              <div class="sas-client"><div class="mini-avatar gl" style="width:22px;height:22px;font-size:9px">GL</div><span>Grace Lee</span></div>
+              <div class="sas-reason"><i class="fas fa-file-medical"></i> UW review prolonged — APS received, awaiting decision</div>
+              <div class="sas-actions">
+                <button class="sas-action-btn primary" onclick="openDealModal('D007')"><i class="fas fa-phone"></i> Chase UW</button>
+                <button class="sas-action-btn ghost" onclick="openDealAIModal('D007')"><i class="fas fa-robot"></i> AI</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ── Pipeline Kanban ── */}
-        <div class="sales-kanban-wrap">
+        <div class="sales-kanban-wrap" id="pipeline-kanban-view">
           <div class="kanban-board">
 
             {/* Prospect */}
             <div class="kanban-col" id="kcol-Prospect">
               <div class="kanban-col-header prospect">
                 <span><i class="fas fa-binoculars"></i> Prospect</span>
-                <span class="col-count" id="kcount-Prospect">8</span>
+                <div class="kcol-meta">
+                  <span class="col-count" id="kcount-Prospect">3</span>
+                  <span class="col-value" id="kval-Prospect">$10.1K/yr</span>
+                </div>
               </div>
               <div class="kanban-card" onclick="openDealModal('D001')">
                 <div class="kc-top-row">
@@ -5020,12 +5481,14 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label green">82% Win</div>
                   <span class="kc-conv-badge green">↑ High</span>
+                  <span class="kc-days-badge normal" title="Days in this stage">6d</span>
                 </div>
                 <div class="kc-client">Alex Rivera</div>
                 <div class="kc-product">Whole Life — $500K</div>
                 <div class="kc-value">$4,800/yr · <span class="kc-comm">$576 comm</span></div>
                 <div class="kc-nba-pill orange"><i class="fas fa-calendar-alt"></i> Schedule Apr 12 pre-brief now</div>
-                <div class="kc-tags"><span class="tag-priority">High Priority</span><span>Referral</span></div>
+                <div class="kc-upsell-flag"><i class="fas fa-lightbulb"></i> Upsell: Deferred Annuity — $280K investable assets</div>
+                <div class="kc-tags"><span class="tag-priority">High Priority</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Brief</button>
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D001')"><i class="fas fa-brain"></i> AI Intel</button>
@@ -5040,19 +5503,21 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label amber">61% Win</div>
                   <span class="kc-conv-badge amber">→ Mid</span>
+                  <span class="kc-days-badge normal" title="Days in this stage">3d</span>
                 </div>
                 <div class="kc-client">Nancy Foster</div>
                 <div class="kc-product">Term Life — $1M</div>
                 <div class="kc-value">$3,200/yr · <span class="kc-comm">$384 comm</span></div>
                 <div class="kc-nba-pill blue"><i class="fas fa-file-alt"></i> Share Term vs WL comparison doc</div>
-                <div class="kc-tags"><span>Online Inquiry</span></div>
+                <div class="kc-tags"><span class="kc-source-tag online"><i class="fas fa-globe"></i> Online Inquiry</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Brief</button>
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D002')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D002','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
-              <div class="kanban-card" onclick="openDealModal('D003')">
+              <div class="kanban-card stale-card" onclick="openDealModal('D003')">
+                <div class="kc-stale-banner"><i class="fas fa-hourglass-end"></i> Stale — No movement in 15 days</div>
                 <div class="kc-top-row">
                   <div class="kc-win-gauge red" title="Win Probability 44%">
                     <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#dc2626" stroke-width="3" stroke-dasharray="41 59" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
@@ -5060,25 +5525,29 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label red">44% Win</div>
                   <span class="kc-conv-badge red">↓ At Risk</span>
+                  <span class="kc-days-badge stale" title="Days in this stage — stale">15d</span>
                 </div>
                 <div class="kc-client">John Kim</div>
                 <div class="kc-product">Disability Insurance</div>
                 <div class="kc-value">$2,100/yr · <span class="kc-comm">$252 comm</span></div>
                 <div class="kc-nba-pill red"><i class="fas fa-exclamation-triangle"></i> Address APS delay — send empathy script</div>
-                <div class="kc-tags"><span>Warm Lead</span></div>
+                <div class="kc-tags"><span class="kc-source-tag warm"><i class="fas fa-fire-alt"></i> Warm Lead</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D003')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D003','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
-              <button class="add-card-btn"><i class="fas fa-plus"></i> Add Prospect</button>
+              <button class="add-card-btn" onclick="openAddDealModal('Prospect')"><i class="fas fa-plus"></i> Add Prospect</button>
             </div>
 
             {/* Quoted */}
             <div class="kanban-col" id="kcol-Quoted">
               <div class="kanban-col-header quoted">
                 <span><i class="fas fa-file-invoice-dollar"></i> Quoted</span>
-                <span class="col-count" id="kcount-Quoted">6</span>
+                <div class="kcol-meta">
+                  <span class="col-count" id="kcount-Quoted">2</span>
+                  <span class="col-value" id="kval-Quoted">$14.4K/yr</span>
+                </div>
               </div>
               <div class="kanban-card hot" onclick="openDealModal('D004')">
                 <div class="kc-hot-tag"><i class="fas fa-fire"></i> Hot — Close in 3 days</div>
@@ -5089,18 +5558,21 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label green">91% Win</div>
                   <span class="kc-conv-badge green">⚡ Urgent</span>
+                  <span class="kc-days-badge normal" title="Days in Quoted">2d</span>
                 </div>
                 <div class="kc-client">Michael Santos</div>
                 <div class="kc-product">Universal Life — $750K</div>
                 <div class="kc-value">$6,400/yr · <span class="kc-comm">$896 comm</span></div>
                 <div class="kc-nba-pill green"><i class="fas fa-phone"></i> Call today — lab results in, close window 3 days</div>
-                <div class="kc-tags"><span>Quote Sent</span><span class="tag-ai">+AI Rec</span></div>
+                <div class="kc-upsell-flag"><i class="fas fa-lightbulb"></i> Upsell: Add $500K accidental death rider (+$120/yr) at close</div>
+                <div class="kc-tags"><span>Quote Sent</span><span class="tag-ai">+AI Rec</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D004')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D004','Underwriting')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
-              <div class="kanban-card" onclick="openDealModal('D005')">
+              <div class="kanban-card stale-card" onclick="openDealModal('D005')">
+                <div class="kc-stale-banner"><i class="fas fa-clock"></i> Idle — No response in 11 days</div>
                 <div class="kc-top-row">
                   <div class="kc-win-gauge amber" title="Win Probability 73%">
                     <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="69 31" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
@@ -5108,25 +5580,29 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label amber">73% Win</div>
                   <span class="kc-conv-badge amber">→ Watch</span>
+                  <span class="kc-days-badge stale" title="Days in Quoted — stale">11d</span>
                 </div>
                 <div class="kc-client">Julia Chen</div>
                 <div class="kc-product">Deferred Annuity</div>
                 <div class="kc-value">$8,000/yr · <span class="kc-comm">$640 comm</span></div>
                 <div class="kc-nba-pill orange"><i class="fas fa-percentage"></i> Share Fed rate hike impact — annuity 6.1% now</div>
-                <div class="kc-tags"><span>Reviewing</span></div>
+                <div class="kc-tags"><span class="kc-source-tag online"><i class="fas fa-globe"></i> Online Inquiry</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D005')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D005','Underwriting')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
-              <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
+              <button class="add-card-btn" onclick="openAddDealModal('Quoted')"><i class="fas fa-plus"></i> Add</button>
             </div>
 
             {/* Underwriting */}
             <div class="kanban-col" id="kcol-Underwriting">
               <div class="kanban-col-header underwriting">
                 <span><i class="fas fa-stethoscope"></i> Underwriting</span>
-                <span class="col-count" id="kcount-Underwriting">4</span>
+                <div class="kcol-meta">
+                  <span class="col-count" id="kcount-Underwriting">2</span>
+                  <span class="col-value" id="kval-Underwriting">$13.4K/yr</span>
+                </div>
               </div>
               <div class="kanban-card" onclick="openDealModal('D006')">
                 <div class="kc-top-row">
@@ -5136,18 +5612,20 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label green">88% Win</div>
                   <span class="kc-conv-badge green">↑ On Track</span>
+                  <span class="kc-days-badge normal" title="Days in UW">5d</span>
                 </div>
                 <div class="kc-client">Thomas Wright</div>
                 <div class="kc-product">Whole Life — $1M</div>
                 <div class="kc-value">$9,600/yr · <span class="kc-comm">$1,152 comm</span></div>
                 <div class="kc-nba-pill blue"><i class="fas fa-hourglass-half"></i> UW decision Apr 16 — prepare e-delivery kit</div>
-                <div class="kc-tags"><span>Medical Exam Done</span></div>
+                <div class="kc-tags"><span>Medical Exam Done</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D006')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D006','Approved')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
-              <div class="kanban-card" onclick="openDealModal('D007')">
+              <div class="kanban-card stale-card" onclick="openDealModal('D007')">
+                <div class="kc-stale-banner"><i class="fas fa-hourglass-half"></i> UW prolonged — 19 days awaiting decision</div>
                 <div class="kc-top-row">
                   <div class="kc-win-gauge amber" title="Win Probability 69%">
                     <svg viewBox="0 0 36 36" class="kc-gauge-svg"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="65 35" stroke-dashoffset="25" transform="rotate(-90 18 18)"/></svg>
@@ -5155,25 +5633,29 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label amber">69% Win</div>
                   <span class="kc-conv-badge amber">→ Monitor</span>
+                  <span class="kc-days-badge stale" title="Days in UW — stale">19d</span>
                 </div>
                 <div class="kc-client">Grace Lee</div>
                 <div class="kc-product">VUL — $250K</div>
                 <div class="kc-value">$3,800/yr · <span class="kc-comm">$456 comm</span></div>
                 <div class="kc-nba-pill orange"><i class="fas fa-stethoscope"></i> Chase APS — delay risk, call doctor's office</div>
-                <div class="kc-tags"><span>In Review</span></div>
+                <div class="kc-tags"><span class="kc-source-tag warm"><i class="fas fa-fire-alt"></i> Warm Lead</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D007')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D007','Approved')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
               </div>
-              <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
+              <button class="add-card-btn" onclick="openAddDealModal('Underwriting')"><i class="fas fa-plus"></i> Add</button>
             </div>
 
             {/* Approved */}
             <div class="kanban-col" id="kcol-Approved">
               <div class="kanban-col-header approved">
                 <span><i class="fas fa-check-circle"></i> Approved</span>
-                <span class="col-count" id="kcount-Approved">3</span>
+                <div class="kcol-meta">
+                  <span class="col-count" id="kcount-Approved">2</span>
+                  <span class="col-value" id="kval-Approved">$4.6K/yr</span>
+                </div>
               </div>
               <div class="kanban-card hot" onclick="openDealModal('D008')">
                 <div class="kc-hot-tag"><i class="fas fa-signature"></i> E-Sig Pending — Act Today</div>
@@ -5184,12 +5666,13 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label green">95% Win</div>
                   <span class="kc-conv-badge green">⚡ Close Now</span>
+                  <span class="kc-days-badge normal" title="Days in Approved">5d</span>
                 </div>
                 <div class="kc-client">Kevin Park</div>
                 <div class="kc-product">Term Life — $500K</div>
                 <div class="kc-value">$1,800/yr · <span class="kc-comm">$216 comm</span></div>
                 <div class="kc-nba-pill green"><i class="fas fa-paper-plane"></i> Resend DocuSign reminder — 2-day close window</div>
-                <div class="kc-tags"><span class="tag-urgent">Awaiting Signature</span></div>
+                <div class="kc-tags"><span class="tag-urgent">Awaiting Signature</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
                 <div class="kc-eapp-bar"><span class="kc-eapp-ai-tag"><i class="fas fa-robot"></i> AI Pre-filled</span><span class="kc-eapp-pct">95% complete</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-eapp" onclick="event.stopPropagation();openEApp('EA-008')"><i class="fas fa-file-contract"></i> E-App</button>
@@ -5205,12 +5688,14 @@ function SalesPage() {
                   </div>
                   <div class="kc-win-label green">90% Win</div>
                   <span class="kc-conv-badge green">↑ Near Close</span>
+                  <span class="kc-days-badge normal" title="Days in Approved">1d</span>
                 </div>
                 <div class="kc-client">Linda Morrison</div>
                 <div class="kc-product">UMA — $280K AUM</div>
                 <div class="kc-value">$2,800/yr fee · <span class="kc-comm">$280 comm</span></div>
                 <div class="kc-nba-pill blue"><i class="fas fa-exchange-alt"></i> Initiate ACAT transfer — schedule May 15 review</div>
-                <div class="kc-tags"><span>Docs Signed</span></div>
+                <div class="kc-upsell-flag"><i class="fas fa-lightbulb"></i> Upsell: NQDC plan + estate-planning review — high net worth profile</div>
+                <div class="kc-tags"><span>Docs Signed</span><span class="kc-source-tag cold"><i class="fas fa-phone-alt"></i> Outreach</span></div>
                 <div class="kc-eapp-bar"><span class="kc-eapp-ai-tag"><i class="fas fa-robot"></i> AI Pre-filled</span><span class="kc-eapp-pct">100% complete</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-eapp" onclick="event.stopPropagation();openEApp('EA-009')"><i class="fas fa-file-contract"></i> E-App</button>
@@ -5218,34 +5703,93 @@ function SalesPage() {
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D009','Closed Won')"><i class="fas fa-trophy"></i> Close</button>
                 </div>
               </div>
-              <button class="add-card-btn"><i class="fas fa-plus"></i> Add</button>
+              <button class="add-card-btn" onclick="openAddDealModal('Approved')"><i class="fas fa-plus"></i> Add</button>
             </div>
 
             {/* Closed Won */}
             <div class="kanban-col" id="kcol-Closed Won">
               <div class="kanban-col-header closed">
                 <span><i class="fas fa-trophy"></i> Closed Won</span>
-                <span class="col-count" id="kcount-Closed Won">34</span>
+                <div class="kcol-meta">
+                  <span class="col-count" id="kcount-Closed Won">34</span>
+                  <span class="col-value col-value-won" id="kval-Closed Won">$171K/yr</span>
+                </div>
               </div>
               <div class="kanban-card won">
-                <div class="kc-client">David Thompson</div>
-                <div class="kc-product">Term Life — $500K</div>
-                <div class="kc-value">$2,400/yr · <span class="kc-comm">$288 comm</span></div>
-                <div class="kc-tags"><span>Apr 7 · Issued</span></div>
+                <div class="kc-won-row">
+                  <div class="kc-won-check"><i class="fas fa-check-circle"></i></div>
+                  <div class="kc-won-info">
+                    <div class="kc-client">David Thompson</div>
+                    <div class="kc-product">Term Life — $500K</div>
+                    <div class="kc-value">$2,400/yr · <span class="kc-comm">$288 comm</span></div>
+                  </div>
+                </div>
+                <div class="kc-tags"><span class="kc-won-date">Apr 7 · Issued</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
               </div>
               <div class="kanban-card won">
-                <div class="kc-client">Lisa Brown</div>
-                <div class="kc-product">Long-term Care</div>
-                <div class="kc-value">$5,200/yr · <span class="kc-comm">$624 comm</span></div>
-                <div class="kc-tags"><span>Apr 5 · Issued</span></div>
+                <div class="kc-won-row">
+                  <div class="kc-won-check"><i class="fas fa-check-circle"></i></div>
+                  <div class="kc-won-info">
+                    <div class="kc-client">Lisa Brown</div>
+                    <div class="kc-product">Long-term Care</div>
+                    <div class="kc-value">$5,200/yr · <span class="kc-comm">$624 comm</span></div>
+                  </div>
+                </div>
+                <div class="kc-tags"><span class="kc-won-date">Apr 5 · Issued</span><span class="kc-source-tag online"><i class="fas fa-globe"></i> Online</span></div>
               </div>
               <div class="kanban-card won">
-                <div class="kc-client">Robert Chen</div>
-                <div class="kc-product">Whole Life — $1M</div>
-                <div class="kc-value">$12,400/yr · <span class="kc-comm">$1,488 comm</span></div>
-                <div class="kc-tags"><span>Apr 2 · Issued</span></div>
+                <div class="kc-won-row">
+                  <div class="kc-won-check"><i class="fas fa-check-circle"></i></div>
+                  <div class="kc-won-info">
+                    <div class="kc-client">Robert Chen</div>
+                    <div class="kc-product">Whole Life — $1M</div>
+                    <div class="kc-value">$12,400/yr · <span class="kc-comm">$1,488 comm</span></div>
+                  </div>
+                </div>
+                <div class="kc-tags"><span class="kc-won-date">Apr 2 · Issued</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
               </div>
               <div class="view-more-btn" onclick="openDealModal('closed-all')">+ 31 more this month →</div>
+            </div>
+
+            {/* Closed Lost */}
+            <div class="kanban-col kcol-lost" id="kcol-Closed Lost">
+              <div class="kanban-col-header lost">
+                <span><i class="fas fa-times-circle"></i> Closed Lost</span>
+                <div class="kcol-meta">
+                  <span class="col-count col-count-lost" id="kcount-Closed Lost">3</span>
+                  <span class="col-value col-value-lost" id="kval-Closed Lost">$9.1K/yr</span>
+                </div>
+              </div>
+              <div class="kanban-card lost-card">
+                <div class="kc-lost-reason"><i class="fas fa-ban"></i> Lost — Chose competitor</div>
+                <div class="kc-client">Mark Henderson</div>
+                <div class="kc-product">Term Life — $250K</div>
+                <div class="kc-value">$1,800/yr · <span class="kc-comm text-muted">$0 comm</span></div>
+                <div class="kc-tags"><span class="kc-won-date text-muted">Apr 10 · Lost</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();alert('AI Loss Analysis: Mark chose a lower-cost online term policy. Recommend re-engagement in 6 months with living benefits story.')"><i class="fas fa-robot"></i> Loss Analysis</button>
+                </div>
+              </div>
+              <div class="kanban-card lost-card">
+                <div class="kc-lost-reason"><i class="fas fa-clock"></i> Lost — Budget objection</div>
+                <div class="kc-client">Patricia Nguyen</div>
+                <div class="kc-product">Disability Insurance</div>
+                <div class="kc-value">$3,600/yr · <span class="kc-comm text-muted">$0 comm</span></div>
+                <div class="kc-tags"><span class="kc-won-date text-muted">Apr 8 · Lost</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();alert('AI Loss Analysis: Budget objection — DI premium cited as too high. Suggest revisiting with shorter elimination period or partial benefit option.')"><i class="fas fa-robot"></i> Loss Analysis</button>
+                </div>
+              </div>
+              <div class="kanban-card lost-card">
+                <div class="kc-lost-reason"><i class="fas fa-user-times"></i> Lost — Unresponsive</div>
+                <div class="kc-client">James Okafor</div>
+                <div class="kc-product">Whole Life — $300K</div>
+                <div class="kc-value">$3,700/yr · <span class="kc-comm text-muted">$0 comm</span></div>
+                <div class="kc-tags"><span class="kc-won-date text-muted">Apr 3 · Closed</span></div>
+                <div class="kc-actions">
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();alert('AI Loss Analysis: 3 follow-ups sent with no response. Schedule a re-engagement nurture email in 90 days.')"><i class="fas fa-robot"></i> Loss Analysis</button>
+                </div>
+              </div>
             </div>
 
           </div>{/* end kanban-board */}
@@ -5383,6 +5927,77 @@ function SalesPage() {
             </div>
           </div>
 
+          {/* ── Pipeline Velocity Widget ── */}
+          <div class="pipeline-velocity-panel">
+            <div class="pvp-header">
+              <div class="pvp-title"><i class="fas fa-tachometer-alt"></i> Pipeline Velocity</div>
+              <span class="pvp-badge">Avg 12.4d end-to-end</span>
+            </div>
+            <div class="pvp-sub">Average days per stage — highlights where deals stall</div>
+            <div class="pvp-stages">
+              <div class="pvp-stage">
+                <div class="pvp-stage-label">Prospect</div>
+                <div class="pvp-bar-wrap">
+                  <div class="pvp-bar-fill pvp-ok" style="width:48%"></div>
+                </div>
+                <div class="pvp-stage-days">3.2d</div>
+              </div>
+              <div class="pvp-stage">
+                <div class="pvp-stage-label">Quoted</div>
+                <div class="pvp-bar-wrap">
+                  <div class="pvp-bar-fill pvp-warn" style="width:72%"></div>
+                </div>
+                <div class="pvp-stage-days pvp-days-warn">4.8d ⚠</div>
+              </div>
+              <div class="pvp-stage">
+                <div class="pvp-stage-label">Underwriting</div>
+                <div class="pvp-bar-wrap">
+                  <div class="pvp-bar-fill pvp-danger" style="width:100%"></div>
+                </div>
+                <div class="pvp-stage-days pvp-days-danger">12.1d 🔴</div>
+              </div>
+              <div class="pvp-stage">
+                <div class="pvp-stage-label">Approved</div>
+                <div class="pvp-bar-wrap">
+                  <div class="pvp-bar-fill pvp-ok" style="width:36%"></div>
+                </div>
+                <div class="pvp-stage-days">2.4d</div>
+              </div>
+            </div>
+            <div class="pvp-insight"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Underwriting is your biggest bottleneck — 12.1d avg vs. 6d target. Chase APS earlier to cut cycle time.</div>
+            <button class="pvp-btn" onclick="sendContextMessage('Analyze my pipeline velocity — where are deals stalling and what can I do to speed up each stage?','smart-advisor')"><i class="fas fa-robot"></i> AI Velocity Tips</button>
+          </div>
+
+          {/* ── Lead Source Breakdown Panel ── */}
+          <div class="lead-source-panel">
+            <div class="lsp-header">
+              <div class="lsp-title"><i class="fas fa-filter"></i> Lead Source Breakdown</div>
+            </div>
+            <div class="lsp-rows">
+              <div class="lsp-row">
+                <div class="lsp-source-label"><span class="lsp-dot referral"></span> Referral</div>
+                <div class="lsp-bar-wrap"><div class="lsp-bar lsp-referral" style="width:55%"></div></div>
+                <div class="lsp-meta"><span class="lsp-count">5 deals</span><span class="lsp-conv referral-conv">74% conv.</span></div>
+              </div>
+              <div class="lsp-row">
+                <div class="lsp-source-label"><span class="lsp-dot online"></span> Online Inquiry</div>
+                <div class="lsp-bar-wrap"><div class="lsp-bar lsp-online" style="width:30%"></div></div>
+                <div class="lsp-meta"><span class="lsp-count">2 deals</span><span class="lsp-conv online-conv">61% conv.</span></div>
+              </div>
+              <div class="lsp-row">
+                <div class="lsp-source-label"><span class="lsp-dot warm"></span> Warm Lead</div>
+                <div class="lsp-bar-wrap"><div class="lsp-bar lsp-warm" style="width:22%"></div></div>
+                <div class="lsp-meta"><span class="lsp-count">1 deal</span><span class="lsp-conv warm-conv">44% conv.</span></div>
+              </div>
+              <div class="lsp-row">
+                <div class="lsp-source-label"><span class="lsp-dot cold"></span> Cold Outreach</div>
+                <div class="lsp-bar-wrap"><div class="lsp-bar lsp-cold" style="width:15%"></div></div>
+                <div class="lsp-meta"><span class="lsp-count">1 deal</span><span class="lsp-conv cold-conv">90% conv.</span></div>
+              </div>
+            </div>
+            <div class="lsp-insight"><i class="fas fa-lightbulb"></i> Referrals generate 55% of pipeline with 74% conversion — prioritise referral asks at every close.</div>
+          </div>
+
           {/* Commission Tracker */}
           <div class="comm-tracker">
             <div class="comm-header">
@@ -5391,6 +6006,32 @@ function SalesPage() {
             </div>
 
             {/* YTD Progress */}
+            {/* Quota Attainment Radial Gauge */}
+            <div class="quota-gauge-wrap">
+              <svg viewBox="0 0 120 70" class="quota-gauge-svg">
+                {/* Background arc */}
+                <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+                {/* Fill arc — 78% = 0.78 * 180 = 140.4deg of the semicircle */}
+                <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="url(#quotaGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="140 180" />
+                <defs>
+                  <linearGradient id="quotaGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#003087"/>
+                    <stop offset="100%" stop-color="#22c55e"/>
+                  </linearGradient>
+                </defs>
+                <text x="60" y="60" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a">78%</text>
+              </svg>
+              <div class="quota-gauge-labels">
+                <span class="qgl-left">$0</span>
+                <div class="qgl-center">
+                  <div class="qgl-ytd">$187K YTD</div>
+                  <div class="qgl-target">Target: $240K</div>
+                </div>
+                <span class="qgl-right">$240K</span>
+              </div>
+              <div class="quota-proj-note"><i class="fas fa-robot"></i> AI Projection: <strong>$241K</strong> by Dec 31 — on track to exceed target by <strong>0.4%</strong></div>
+            </div>
+
             <div class="comm-ytd-block">
               <div class="comm-ytd-row">
                 <span class="comm-ytd-lbl">YTD Commission</span>
@@ -5509,6 +6150,119 @@ function SalesPage() {
         </div>{/* end sales-sidebar */}
       </div>{/* end sales-body-layout */}
 
+      {/* ── Activity Log / Follow-up Tracker ── */}
+      <div class="activity-log-panel" id="activity-log-panel">
+        <div class="alp-header" onclick="toggleActivityLog()">
+          <div class="alp-header-left">
+            <div class="alp-icon"><i class="fas fa-history"></i></div>
+            <div>
+              <div class="alp-title">Activity Log &amp; Follow-up Tracker <span class="alp-badge">12 activities · 4 follow-ups due</span></div>
+              <div class="alp-sub">All deal touchpoints across calls, emails, docs, and NBA completions · Updated just now</div>
+            </div>
+          </div>
+          <button class="alp-collapse-btn" id="alp-collapse-btn" title="Toggle"><i class="fas fa-chevron-down"></i></button>
+        </div>
+        <div class="alp-body" id="alp-body">
+          <div class="alp-layout">
+            {/* Left: recent activity feed */}
+            <div class="alp-feed">
+              <div class="alp-feed-title"><i class="fas fa-stream"></i> Recent Activity</div>
+              <div class="alp-entry alp-call">
+                <div class="alp-entry-icon call"><i class="fas fa-phone"></i></div>
+                <div class="alp-entry-body">
+                  <div class="alp-entry-title">Call — Michael Santos (D004)</div>
+                  <div class="alp-entry-sub">Discussed UL $750K quote · Lab results confirmed · Client ready to proceed</div>
+                  <div class="alp-entry-meta">Today · 10:32 AM · <span class="alp-outcome win">Positive — Close expected in 3d</span></div>
+                </div>
+              </div>
+              <div class="alp-entry alp-email">
+                <div class="alp-entry-icon email"><i class="fas fa-envelope"></i></div>
+                <div class="alp-entry-body">
+                  <div class="alp-entry-title">Email Sent — Kevin Park (D008)</div>
+                  <div class="alp-entry-sub">DocuSign reminder sent — Term $500K approval awaiting e-signature</div>
+                  <div class="alp-entry-meta">Today · 9:15 AM · <span class="alp-outcome pending">Pending response</span></div>
+                </div>
+              </div>
+              <div class="alp-entry alp-doc">
+                <div class="alp-entry-icon doc"><i class="fas fa-file-alt"></i></div>
+                <div class="alp-entry-body">
+                  <div class="alp-entry-title">Meeting Brief Sent — Alex Rivera (D001)</div>
+                  <div class="alp-entry-sub">Pre-meeting brief emailed: WL $500K cash value story + living benefits</div>
+                  <div class="alp-entry-meta">Apr 11 · 3:44 PM · <span class="alp-outcome neutral">Meeting Apr 12</span></div>
+                </div>
+              </div>
+              <div class="alp-entry alp-nba">
+                <div class="alp-entry-icon nba"><i class="fas fa-bolt"></i></div>
+                <div class="alp-entry-body">
+                  <div class="alp-entry-title">NBA Completed — Julia Chen (D005)</div>
+                  <div class="alp-entry-sub">Fed rate hike comparison doc shared via secure portal</div>
+                  <div class="alp-entry-meta">Apr 10 · 2:10 PM · <span class="alp-outcome pending">No response in 3d — follow up</span></div>
+                </div>
+              </div>
+              <div class="alp-entry alp-call">
+                <div class="alp-entry-icon call"><i class="fas fa-phone-slash"></i></div>
+                <div class="alp-entry-body">
+                  <div class="alp-entry-title">Call Missed — Grace Lee (D007)</div>
+                  <div class="alp-entry-sub">No answer — left voicemail re: UW status update</div>
+                  <div class="alp-entry-meta">Apr 9 · 11:00 AM · <span class="alp-outcome warn">Retry tomorrow</span></div>
+                </div>
+              </div>
+              <div class="alp-entry alp-email">
+                <div class="alp-entry-icon email"><i class="fas fa-envelope"></i></div>
+                <div class="alp-entry-body">
+                  <div class="alp-entry-title">Email Sent — John Kim (D003)</div>
+                  <div class="alp-entry-sub">Empathy script sent re: APS delay — offered DI illustration update</div>
+                  <div class="alp-entry-meta">Apr 9 · 9:30 AM · <span class="alp-outcome warn">No reply — stale</span></div>
+                </div>
+              </div>
+            </div>
+            {/* Right: follow-up due list */}
+            <div class="alp-followups">
+              <div class="alp-feed-title"><i class="fas fa-tasks"></i> Follow-ups Due</div>
+              <div class="alp-fu-item alp-fu-today">
+                <div class="alp-fu-when">Today</div>
+                <div class="alp-fu-deal">D008 — Kevin Park</div>
+                <div class="alp-fu-task">Chase DocuSign · Term $500K · 2-day close window</div>
+                <div class="alp-fu-actions">
+                  <button class="alp-fu-btn primary" onclick="openDealModal('D008')"><i class="fas fa-signature"></i> View E-App</button>
+                  <button class="alp-fu-btn ghost" onclick="openDealAIModal('D008')"><i class="fas fa-robot"></i> AI</button>
+                </div>
+              </div>
+              <div class="alp-fu-item alp-fu-today">
+                <div class="alp-fu-when">Today</div>
+                <div class="alp-fu-deal">D004 — Michael Santos</div>
+                <div class="alp-fu-task">Call to close · Lab results in · UL $750K</div>
+                <div class="alp-fu-actions">
+                  <button class="alp-fu-btn primary" onclick="openDealModal('D004')"><i class="fas fa-phone"></i> Call</button>
+                  <button class="alp-fu-btn ghost" onclick="openDealAIModal('D004')"><i class="fas fa-robot"></i> AI</button>
+                </div>
+              </div>
+              <div class="alp-fu-item alp-fu-tomorrow">
+                <div class="alp-fu-when">Apr 15</div>
+                <div class="alp-fu-deal">D005 — Julia Chen</div>
+                <div class="alp-fu-task">Follow-up on annuity quote · 11d idle</div>
+                <div class="alp-fu-actions">
+                  <button class="alp-fu-btn primary" onclick="openDealAIModal('D005')"><i class="fas fa-paper-plane"></i> Send</button>
+                </div>
+              </div>
+              <div class="alp-fu-item alp-fu-overdue">
+                <div class="alp-fu-when overdue">Overdue</div>
+                <div class="alp-fu-deal">D003 — John Kim</div>
+                <div class="alp-fu-task">3rd follow-up · APS empathy script · Stale 15d</div>
+                <div class="alp-fu-actions">
+                  <button class="alp-fu-btn primary" onclick="openDealAIModal('D003')"><i class="fas fa-brain"></i> AI Script</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="alp-footer">
+            <button class="btn btn-ai" onclick="sendContextMessage('Review my sales activity log — summarise outreach efforts, identify gaps, and suggest the most impactful follow-ups for today','smart-advisor')"><i class="fas fa-robot"></i> AI Activity Summary</button>
+            <button class="btn btn-outline-sm" onclick="alert('Exporting activity log…')"><i class="fas fa-download"></i> Export Log</button>
+            <button class="btn btn-outline-sm" onclick="alert('Logging new activity…')"><i class="fas fa-plus"></i> Log Activity</button>
+          </div>
+        </div>
+      </div>
+
       {/* ── Quick Quote Tool ── */}
       <div class="quick-quote-section">
         <h3><i class="fas fa-calculator"></i> Quick Quote Tool</h3>
@@ -5581,15 +6335,94 @@ function SalesPage() {
 
       {/* ── Deal Detail Modal ── */}
       <div class="deal-modal-overlay" id="deal-modal-overlay" onclick="closeDealModal(event)" style="display:none">
-        <div class="deal-modal">
+        <div class="deal-modal deal-modal-tabbed">
           <div class="deal-modal-header" id="deal-modal-header">
-            <div>
+            <div class="deal-modal-header-info">
               <div class="deal-modal-client" id="deal-modal-client">Client Name</div>
               <div class="deal-modal-product" id="deal-modal-product">Product</div>
             </div>
+            <div class="deal-modal-kpi-row" id="deal-modal-kpi-row">
+              <div class="dm-kpi"><div class="dm-kpi-val green" id="dm-win-val">—%</div><div class="dm-kpi-lbl">Win Prob.</div></div>
+              <div class="dm-kpi"><div class="dm-kpi-val blue" id="dm-stage-val">—</div><div class="dm-kpi-lbl">Stage</div></div>
+              <div class="dm-kpi"><div class="dm-kpi-val gold" id="dm-comm-val">—</div><div class="dm-kpi-lbl">Commission</div></div>
+            </div>
             <button class="deal-modal-close" onclick="closeDealModal()"><i class="fas fa-times"></i></button>
           </div>
+          <div class="deal-modal-tabs" id="deal-modal-tabs">
+            <button class="dmt-tab active" onclick="switchDealTab('overview',this)"><i class="fas fa-chart-bar"></i> Overview</button>
+            <button class="dmt-tab" onclick="switchDealTab('activity',this)"><i class="fas fa-history"></i> Activity</button>
+            <button class="dmt-tab" onclick="switchDealTab('docs',this)"><i class="fas fa-file-alt"></i> Documents</button>
+            <button class="dmt-tab" onclick="switchDealTab('upsell',this)"><i class="fas fa-lightbulb"></i> Upsell</button>
+            <button class="dmt-tab" onclick="switchDealTab('competitive',this)"><i class="fas fa-chess"></i> Competitive</button>
+          </div>
           <div class="deal-modal-body" id="deal-modal-body"></div>
+        </div>
+      </div>
+
+      {/* ── Quick-Add Deal Modal ── */}
+      <div class="add-deal-overlay" id="add-deal-overlay" onclick="closeAddDealModal(event)" style="display:none">
+        <div class="add-deal-modal" onclick="event.stopPropagation()">
+          <div class="add-deal-header">
+            <div><div class="add-deal-title"><i class="fas fa-plus-circle"></i> New Deal</div><div class="add-deal-sub">Add a prospect to the pipeline</div></div>
+            <button class="deal-modal-close" onclick="closeAddDealModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="add-deal-body">
+            <div class="add-deal-grid">
+              <div class="adg-field">
+                <label>Client Name <span class="req">*</span></label>
+                <input type="text" id="ad-client" class="form-input" placeholder="Full name" />
+              </div>
+              <div class="adg-field">
+                <label>Product</label>
+                <select id="ad-product" class="form-input">
+                  <option>Whole Life Insurance</option>
+                  <option>Term Life Insurance</option>
+                  <option>Universal Life Insurance</option>
+                  <option>Variable UL (VUL)</option>
+                  <option>Disability Insurance</option>
+                  <option>Long-term Care</option>
+                  <option>Fixed Annuity</option>
+                  <option>Variable Annuity</option>
+                  <option>UMA / Investment Account</option>
+                </select>
+              </div>
+              <div class="adg-field">
+                <label>Coverage / Amount</label>
+                <input type="text" id="ad-amount" class="form-input" placeholder="e.g. $500K or $8,000/yr" />
+              </div>
+              <div class="adg-field">
+                <label>Stage</label>
+                <select id="ad-stage" class="form-input">
+                  <option>Prospect</option>
+                  <option>Quoted</option>
+                  <option>Underwriting</option>
+                  <option>Approved</option>
+                </select>
+              </div>
+              <div class="adg-field">
+                <label>Lead Source</label>
+                <select id="ad-source" class="form-input">
+                  <option value="referral">Referral</option>
+                  <option value="online">Online Inquiry</option>
+                  <option value="warm">Warm Lead</option>
+                  <option value="cold">Cold Outreach</option>
+                  <option value="walkin">Walk-in</option>
+                </select>
+              </div>
+              <div class="adg-field">
+                <label>Est. Close Date</label>
+                <input type="date" id="ad-close-date" class="form-input" />
+              </div>
+              <div class="adg-field adg-full">
+                <label>Notes</label>
+                <textarea id="ad-notes" class="form-input" rows="3" placeholder="Key context, objections, referrer name…"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="add-deal-footer">
+            <button class="btn btn-primary" onclick="submitNewDeal()"><i class="fas fa-plus"></i> Add to Pipeline</button>
+            <button class="btn btn-outline-sm" onclick="closeAddDealModal()">Cancel</button>
+          </div>
         </div>
       </div>
 
