@@ -5378,38 +5378,8 @@ function SalesPage() {
         </div>
       </div>
 
-      {/* ── Pipeline List View (hidden by default) ── */}
-      <div id="pipeline-list-view" style="display:none" class="pipeline-list-view">
-        <table class="data-table pipeline-table">
-          <thead>
-            <tr>
-              <th>Client</th>
-              <th>Product</th>
-              <th>Stage</th>
-              <th>Value/yr</th>
-              <th>Commission</th>
-              <th>Win %</th>
-              <th>Days in Stage</th>
-              <th>Lead Source</th>
-              <th>Next Action</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="pipeline-list-tbody"></tbody>
-        </table>
-      </div>
-
-      {/* ── Pipeline Focus View (hidden by default) ── */}
-      <div id="pipeline-focus-view" style="display:none" class="pipeline-focus-view">
-        <div class="pfv-header"><i class="fas fa-crosshairs"></i> Focus Mode — Top 3 Priority Deals <span class="pfv-sub">Ranked by AI Win Score</span></div>
-        <div class="pfv-cards" id="pfv-cards"></div>
-      </div>
-
-      {/* ── Main body: Kanban + right sidebar ── */}
-      <div class="sales-body-layout">
-
-        {/* ── Stale Deal Alert Strip ── */}
-        <div class="stale-alert-strip" id="stale-alert-strip">
+      {/* ── Stale Deal Alert Strip — full-width, outside grid ── */}
+      <div class="stale-alert-strip" id="stale-alert-strip">
           <div class="sas-header">
             <div class="sas-header-left">
               <i class="fas fa-exclamation-triangle sas-icon"></i>
@@ -5460,8 +5430,41 @@ function SalesPage() {
           </div>
         </div>
 
-        {/* ── Pipeline Kanban ── */}
-        <div class="sales-kanban-wrap" id="pipeline-kanban-view">
+      {/* ── Main body: Kanban + right sidebar ── */}
+      <div class="sales-body-layout">
+
+        {/* ── Main column: list/focus views + kanban ── */}
+        <div class="sales-main-col">
+
+          {/* ── Pipeline List View (hidden by default) ── */}
+          <div id="pipeline-list-view" style="display:none" class="pipeline-list-view">
+            <table class="data-table pipeline-table">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Product</th>
+                  <th>Stage</th>
+                  <th>Value/yr</th>
+                  <th>Commission</th>
+                  <th>Win %</th>
+                  <th>Days in Stage</th>
+                  <th>Lead Source</th>
+                  <th>Next Action</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pipeline-list-tbody"></tbody>
+            </table>
+          </div>
+
+          {/* ── Pipeline Focus View (hidden by default) ── */}
+          <div id="pipeline-focus-view" style="display:none" class="pipeline-focus-view">
+            <div class="pfv-header"><i class="fas fa-crosshairs"></i> Focus Mode — Top 3 Priority Deals <span class="pfv-sub">Ranked by AI Win Score</span></div>
+            <div class="pfv-cards" id="pfv-cards"></div>
+          </div>
+
+          {/* ── Pipeline Kanban ── */}
+          <div class="sales-kanban-wrap" id="pipeline-kanban-view">
           <div class="kanban-board">
 
             {/* Prospect */}
@@ -5794,6 +5797,7 @@ function SalesPage() {
 
           </div>{/* end kanban-board */}
         </div>{/* end sales-kanban-wrap */}
+        </div>{/* end sales-main-col */}
 
         {/* ── Right Sidebar: AI Pipeline Optimizer + Commission Tracker ── */}
         <div class="sales-sidebar">
