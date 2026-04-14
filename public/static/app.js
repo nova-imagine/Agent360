@@ -308,12 +308,12 @@ function initReportCharts() {
 function toggleClientProducts(clientId) {
   const panel = document.getElementById(`products-panel-${clientId}`);
   const icon  = document.getElementById(`expand-icon-${clientId}`);
+  const btn   = icon ? icon.closest('.cc-expand-btn') : null;
   if (!panel) return;
   const isOpen = panel.style.display !== 'none';
   panel.style.display = isOpen ? 'none' : 'block';
-  if (icon) {
-    icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-  }
+  if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  if (btn)  btn.classList.toggle('open', !isOpen);
 }
 
 function filterClients(query) {

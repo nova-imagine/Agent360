@@ -12,13 +12,13 @@ app.use(
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>NYL Agent 360 | New York Life</title>
-          <link rel="stylesheet" href="/static/style.css?v=360b" />
+          <link rel="stylesheet" href="/static/style.css?v=360c" />
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         </head>
         <body>
           {children}
-          <script src="/static/app.js?v=360b"></script>
+          <script src="/static/app.js?v=360c"></script>
         </body>
       </html>
     )
@@ -1813,8 +1813,8 @@ function ClientsPage() {
           return (
             <div class={`client-card segment-${client.segment.replace(' ', '-').toLowerCase()}${lapseInfo ? ' has-lapse-risk' : ''}`} data-lapse={lapseInfo ? lapseInfo.level : ''}>
 
-              {/* ── Card Header ── */}
-              <div class="client-card-header" onclick={`toggleClientProducts(${client.id})`} style="cursor:pointer">
+              {/* ── Card Header ── opens 9-tab Client 360 modal ── */}
+              <div class="client-card-header" onclick={`openClientModal(${client.id})`} style="cursor:pointer" title="Open Client 360 Profile">
                 <div class={`client-avatar-lg ca-${avatarKey}`}>{initials}</div>
                 <div class="client-card-info">
                   <h4>{client.name}</h4>
@@ -1823,7 +1823,9 @@ function ClientsPage() {
                 </div>
                 {lapseInfo && <div class={`cc-lapse-badge ${lapseInfo.level}`} title="Lapse Risk"><i class="fas fa-exclamation-triangle"></i> {lapseInfo.level === 'high' ? 'HIGH' : 'MED'} {lapseInfo.score}</div>}
                 <div class="client-score-circle"><span>{client.score}</span></div>
-                <i class="fas fa-chevron-down client-expand-icon" id={`expand-icon-${client.id}`}></i>
+                <button class="cc-expand-btn" onclick={`event.stopPropagation(); toggleClientProducts(${client.id})`} title="Quick product view">
+                  <i class="fas fa-chevron-down" id={`expand-icon-${client.id}`}></i>
+                </button>
               </div>
 
               {/* ── Domain Coverage Pills ── */}
@@ -1992,13 +1994,15 @@ function ClientsPage() {
 
               {/* ── Footer ── */}
               <div class="client-card-footer">
-                <span><i class="fas fa-clock"></i> {client.lastContact}</span>
+                <button class="cc-profile-btn" onclick={`event.stopPropagation(); openClientModal(${client.id})`} title="Open Client 360 Profile">
+                  <i class="fas fa-id-card"></i> View Profile
+                </button>
                 <button class="btn-icon" title="Call" onclick="event.stopPropagation()"><i class="fas fa-phone"></i></button>
                 <button class="btn-icon" title="Email" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i></button>
                 <button class="btn-icon outreach-btn" title="Generate AI Outreach Message" onclick={`event.stopPropagation(); openOutreachModalForClient(${client.id})`}><i class="fas fa-paper-plane"></i></button>
                 {lapseInfo
                   ? <button class="btn-icon retention-btn" title="Retention Action" onclick={`event.stopPropagation(); openRetentionModal('${lapseInfo.retId}')`}><i class="fas fa-shield-alt"></i></button>
-                  : <button class="btn-icon ai-btn" title="AI Analysis" onclick={`event.stopPropagation(); aiAnalyzeClient(${client.id})`}><i class="fas fa-robot"></i></button>
+                  : <button class="btn-icon ai-btn" title="AI Insights" onclick={`event.stopPropagation(); openClientModal(${client.id}); setTimeout(()=>switchClientTab('ai',document.getElementById('cm-tab-ai')),300)`}><i class="fas fa-robot"></i></button>
                 }
               </div>
             </div>

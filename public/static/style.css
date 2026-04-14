@@ -901,7 +901,8 @@ body {
 .client-card.segment-emerging::before { background: linear-gradient(90deg, var(--green), #34d399); }
 .client-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 
-.client-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.client-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; transition: background .15s; border-radius: 8px; padding: 4px; margin: -4px -4px 12px -4px; }
+.client-card-header:hover { background: #f0f6ff; }
 
 .client-avatar-lg {
   width: 48px; height: 48px;
@@ -968,6 +969,45 @@ body {
 }
 .client-card-footer span { font-size: 11px; color: var(--gray-400); flex: 1; }
 .client-card-footer span i { margin-right: 3px; }
+
+/* View Profile button inside card footer */
+.cc-profile-btn {
+  background: #003087;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  justify-content: center;
+  transition: background .15s;
+}
+.cc-profile-btn:hover { background: #1e4dc9; }
+
+/* Expand toggle button (chevron) — separate from the main card click */
+.cc-expand-btn {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--gray-400);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: background .15s, transform .2s;
+  margin-left: auto;
+}
+.cc-expand-btn:hover { background: #f1f5f9; color: #374151; }
+.cc-expand-btn.open { transform: rotate(180deg); }
 
 /* ============ MODAL ============ */
 .modal-overlay {
@@ -2484,8 +2524,6 @@ body {
   font-size: 12px;
   color: var(--gray-400);
   transition: transform 0.25s ease;
-  margin-left: auto;
-  flex-shrink: 0;
 }
 
 .client-products-panel {
