@@ -12266,3 +12266,60 @@ function submitNewDeal() {
 })();
 
 console.log('Sales Pipeline Enhancements loaded — toolbar, stale alerts, velocity, lead source, quota gauge, activity log, deal tabs, add-deal modal, drag-drop');
+
+/* ═══════════════════════════════════════════════════════════════
+   UNDERWRITING PAGE — Toolbar Functions
+   ═══════════════════════════════════════════════════════════════ */
+function filterUWCases(query) {
+  const q = (query || '').toLowerCase();
+  document.querySelectorAll('.uw-case-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+function filterUWByStage(stage) {
+  const stageMap = {
+    'Application Received': 'uw-stage-received',
+    'Evidence Gathering':   'uw-stage-evidence',
+    'AI Review':            'uw-stage-ai-review',
+    'Decision':             'uw-stage-decision',
+    'Approved':             'uw-stage-approved',
+    'Issued':               'uw-stage-issued',
+    'Declined':             'uw-stage-declined'
+  };
+  document.querySelectorAll('.uw-stage').forEach(s => s.style.opacity = '1');
+  if (stage && stageMap[stage]) {
+    document.querySelectorAll('.uw-stage').forEach(s => s.style.opacity = '0.3');
+    const target = document.getElementById(stageMap[stage]);
+    if (target) target.style.opacity = '1';
+  }
+}
+
+function filterUWBySTP(level) {
+  document.querySelectorAll('.uw-case-card').forEach(card => {
+    if (!level) { card.style.display = ''; return; }
+    const scoreEl = card.querySelector('.uw-stp-score');
+    if (!scoreEl) { card.style.display = ''; return; }
+    const score = parseInt(scoreEl.textContent.replace('STP','').trim()) || 0;
+    let show = true;
+    if (level === 'high' && score < 80) show = false;
+    if (level === 'med'  && (score < 60 || score >= 80)) show = false;
+    if (level === 'low'  && score >= 60) show = false;
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+function sortUWCases(method) {
+  // Visual-only sort hint — full sort would require re-rendering
+  if (!method) return;
+  const msg = {
+    'stp-desc': 'Sorted by STP Score (highest first)',
+    'stp-asc':  'Sorted by STP Score (lowest first)',
+    'days-desc':'Sorted by Days in Stage (most first)',
+    'urgent':   'Urgent cases highlighted'
+  }[method] || 'Sorted';
+  runUWScan(); // re-run scan when sort changes
+}
+
+console.log('Underwriting Toolbar functions loaded');

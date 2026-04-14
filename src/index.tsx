@@ -413,7 +413,7 @@ function Sidebar() {
           <a class="nav-sub-item" onclick="navigateTo('underwriting')" href="#">
             <i class="fas fa-microscope"></i>
             <span>Underwriting</span>
-            <span class="nav-badge" style="background:#f59e0b;color:white">4</span>
+            <span class="nav-badge" style="background:#0891b2;color:white">4</span>
           </a>
         </div>
         <a class="nav-item" onclick="navigateTo('products')" href="#">
@@ -4545,7 +4545,7 @@ function UnderwritingPage() {
   return (
     <div class="page underwriting-page">
 
-      {/* ── KPI Strip ── */}
+      {/* ── Expanded KPI Strip (7 cards) ── */}
       <div class="uw-kpi-strip">
         <div class="uw-kpi">
           <div class="uw-kpi-icon blue"><i class="fas fa-microscope"></i></div>
@@ -4564,7 +4564,7 @@ function UnderwritingPage() {
           </div>
         </div>
         <div class="uw-kpi">
-          <div class="uw-kpi-icon purple"><i class="fas fa-file-medical"></i></div>
+          <div class="uw-kpi-icon cyan"><i class="fas fa-file-medical"></i></div>
           <div class="uw-kpi-data">
             <div class="uw-kpi-val">18</div>
             <div class="uw-kpi-lbl">APS Avoided / Month</div>
@@ -4580,12 +4580,65 @@ function UnderwritingPage() {
           </div>
         </div>
         <div class="uw-kpi">
-          <div class="uw-kpi-icon teal"><i class="fas fa-shield-check"></i></div>
+          <div class="uw-kpi-icon teal"><i class="fas fa-shield-alt"></i></div>
           <div class="uw-kpi-data">
             <div class="uw-kpi-val">94.6%</div>
             <div class="uw-kpi-lbl">AI Accuracy</div>
             <div class="uw-kpi-delta green"><i class="fas fa-robot"></i> vs 89% manual</div>
           </div>
+        </div>
+        <div class="uw-kpi">
+          <div class="uw-kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="uw-kpi-data">
+            <div class="uw-kpi-val">2</div>
+            <div class="uw-kpi-lbl">Stale &gt;14 Days</div>
+            <div class="uw-kpi-delta orange"><i class="fas fa-clock"></i> Julia Chen · John Kim</div>
+          </div>
+        </div>
+        <div class="uw-kpi">
+          <div class="uw-kpi-icon emerald"><i class="fas fa-dollar-sign"></i></div>
+          <div class="uw-kpi-data">
+            <div class="uw-kpi-val">$5,760</div>
+            <div class="uw-kpi-lbl">APS Cost Saved MTD</div>
+            <div class="uw-kpi-delta green"><i class="fas fa-arrow-up"></i> 18 × $320 avoided</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div class="uw-toolbar">
+        <div class="uw-tb-left">
+          <div class="uw-tb-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search cases, clients, products…" oninput="filterUWCases(this.value)" />
+          </div>
+          <select class="uw-tb-select" onchange="filterUWByStage(this.value)">
+            <option value="">All Stages</option>
+            <option>Application Received</option>
+            <option>Evidence Gathering</option>
+            <option>AI Review</option>
+            <option>Decision</option>
+            <option>Approved</option>
+            <option>Issued</option>
+            <option>Declined</option>
+          </select>
+          <select class="uw-tb-select" onchange="filterUWBySTP(this.value)">
+            <option value="">All STP Scores</option>
+            <option value="high">High ≥ 80</option>
+            <option value="med">Medium 60–79</option>
+            <option value="low">Low &lt; 60</option>
+          </select>
+          <select class="uw-tb-select" onchange="sortUWCases(this.value)">
+            <option value="">Sort: Newest</option>
+            <option value="stp-desc">STP Score ↓</option>
+            <option value="stp-asc">STP Score ↑</option>
+            <option value="days-desc">Days in Stage ↓</option>
+            <option value="urgent">Urgent First</option>
+          </select>
+        </div>
+        <div class="uw-tb-right">
+          <button class="uw-tb-btn ghost" onclick="runUWScan()"><i class="fas fa-sync-alt"></i> AI Scan</button>
+          <button class="uw-tb-btn primary" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> New Case</button>
         </div>
       </div>
 
@@ -4620,14 +4673,12 @@ function UnderwritingPage() {
           <div class="eapp-uw-stat"><span class="eapp-uw-val green">5</span><span class="eapp-uw-lbl">Auto-Prefilled</span></div>
           <div class="eapp-uw-stat"><span class="eapp-uw-val blue">2</span><span class="eapp-uw-lbl">Awaiting Sig.</span></div>
           <div class="eapp-uw-stat"><span class="eapp-uw-val gold">87%</span><span class="eapp-uw-lbl">Fields Auto-Filled</span></div>
-          <div class="eapp-uw-stat"><span class="eapp-uw-val purple">4 min</span><span class="eapp-uw-lbl">Avg. Enrollment</span></div>
+          <div class="eapp-uw-stat"><span class="eapp-uw-val cyan">4 min</span><span class="eapp-uw-lbl">Avg. Enrollment</span></div>
         </div>
         <button class="eapp-uw-launch-btn" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> New E-App</button>
       </div>
 
-      {/* ══════════════════════════════════════════════════
-          AI UNDERWRITING INTELLIGENCE BANNER  (Task #15a)
-          ══════════════════════════════════════════════════ */}
+      {/* ── AI UW Intelligence Banner ── */}
       <div class="uwi-banner">
         <div class="uwi-banner-left">
           <div class="uwi-banner-icon">
@@ -4640,26 +4691,10 @@ function UnderwritingPage() {
           </div>
         </div>
         <div class="uwi-banner-chips">
-          <div class="uwi-chip green">
-            <i class="fas fa-bolt"></i>
-            <span class="uwi-chip-val">5</span>
-            <span class="uwi-chip-lbl">Auto-Approved</span>
-          </div>
-          <div class="uwi-chip orange">
-            <i class="fas fa-file-medical"></i>
-            <span class="uwi-chip-val">18</span>
-            <span class="uwi-chip-lbl">APS Avoided</span>
-          </div>
-          <div class="uwi-chip blue">
-            <i class="fas fa-tachometer-alt"></i>
-            <span class="uwi-chip-val">94.6%</span>
-            <span class="uwi-chip-lbl">AI Accuracy</span>
-          </div>
-          <div class="uwi-chip purple">
-            <i class="fas fa-clock"></i>
-            <span class="uwi-chip-val">4.2 hrs</span>
-            <span class="uwi-chip-lbl">Avg Decision</span>
-          </div>
+          <div class="uwi-chip green"><i class="fas fa-bolt"></i><span class="uwi-chip-val">5</span><span class="uwi-chip-lbl">Auto-Approved</span></div>
+          <div class="uwi-chip orange"><i class="fas fa-file-medical"></i><span class="uwi-chip-val">18</span><span class="uwi-chip-lbl">APS Avoided</span></div>
+          <div class="uwi-chip blue"><i class="fas fa-tachometer-alt"></i><span class="uwi-chip-val">94.6%</span><span class="uwi-chip-lbl">AI Accuracy</span></div>
+          <div class="uwi-chip cyan"><i class="fas fa-clock"></i><span class="uwi-chip-val">4.2 hrs</span><span class="uwi-chip-lbl">Avg Decision</span></div>
         </div>
         <div class="uwi-banner-actions">
           <button class="uwi-btn-primary" onclick="openUWIReport()"><i class="fas fa-chart-bar"></i> UW Intel Report</button>
@@ -4667,41 +4702,20 @@ function UnderwritingPage() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════
-          REAL-TIME PRICING ANALYSIS BANNER  (Task #16a)
-          ══════════════════════════════════════════════════ */}
+      {/* ── Pricing Intelligence Banner ── */}
       <div class="pricing-analysis-banner">
         <div class="pab-left">
-          <div class="pab-icon">
-            <i class="fas fa-chart-line"></i>
-            <span class="pab-live-badge">LIVE</span>
-          </div>
+          <div class="pab-icon"><i class="fas fa-chart-line"></i><span class="pab-live-badge">LIVE</span></div>
           <div class="pab-info">
             <div class="pab-title">AI Pricing Intelligence &amp; Risk Narrative Engine <span class="pab-pulse"></span></div>
             <div class="pab-sub">Real-time benchmark pricing · AI-generated risk narratives · Competitor rate comparison · Rating class optimization · Market-adjusted premium scoring</div>
           </div>
         </div>
         <div class="pab-chips">
-          <div class="pab-chip green">
-            <i class="fas fa-percentage"></i>
-            <span class="pab-chip-val">3.1%</span>
-            <span class="pab-chip-lbl">Avg Savings Found</span>
-          </div>
-          <div class="pab-chip blue">
-            <i class="fas fa-trophy"></i>
-            <span class="pab-chip-val">NYL #1</span>
-            <span class="pab-chip-lbl">Value Score</span>
-          </div>
-          <div class="pab-chip orange">
-            <i class="fas fa-file-alt"></i>
-            <span class="pab-chip-val">11</span>
-            <span class="pab-chip-lbl">Reports Ready</span>
-          </div>
-          <div class="pab-chip purple">
-            <i class="fas fa-robot"></i>
-            <span class="pab-chip-val">AI-Written</span>
-            <span class="pab-chip-lbl">Narratives</span>
-          </div>
+          <div class="pab-chip green"><i class="fas fa-percentage"></i><span class="pab-chip-val">3.1%</span><span class="pab-chip-lbl">Avg Savings Found</span></div>
+          <div class="pab-chip blue"><i class="fas fa-trophy"></i><span class="pab-chip-val">NYL #1</span><span class="pab-chip-lbl">Value Score</span></div>
+          <div class="pab-chip orange"><i class="fas fa-file-alt"></i><span class="pab-chip-val">11</span><span class="pab-chip-lbl">Reports Ready</span></div>
+          <div class="pab-chip cyan"><i class="fas fa-robot"></i><span class="pab-chip-val">AI-Written</span><span class="pab-chip-lbl">Narratives</span></div>
         </div>
         <div class="pab-actions">
           <button class="pab-btn-primary" onclick="openPricingReport()"><i class="fas fa-chart-bar"></i> Pricing Report</button>
@@ -4710,21 +4724,25 @@ function UnderwritingPage() {
       </div>
 
       {/* ── Pipeline Board ── */}
-      <div class="uw-pipeline">
+      <div class="uw-pipeline" id="uw-pipeline-board">
 
         {/* Stage 1: Application Received */}
-        <div class="uw-stage">
+        <div class="uw-stage" id="uw-stage-received">
           <div class="uw-stage-header received">
-            <span><i class="fas fa-inbox"></i> Application Received</span>
-            <span class="uw-stage-count">3</span>
+            <div class="uw-stage-hd-left"><i class="fas fa-inbox"></i> Application Received</div>
+            <div class="uw-stage-hd-right"><span class="uw-stage-count">3</span><span class="uw-stage-val">$10.1K/yr</span></div>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0018')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge ok"><i class="fas fa-clock"></i> 4d</span>
+              <span class="uw-risk-tag low">Low Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Alex Rivera</div>
               <div class="uw-stp-score stp-high">STP 88</div>
             </div>
             <div class="uw-case-product">Whole Life — $500K · $4,800/yr</div>
-            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Received Apr 10 · Age 34</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Apr 10 · Age 34 · Referral</div>
             <div class="uw-evidence-bar">
               <span class="uw-ev ev-done" title="Rx History">Rx ✓</span>
               <span class="uw-ev ev-done" title="MIB Check">MIB ✓</span>
@@ -4737,12 +4755,16 @@ function UnderwritingPage() {
             </div>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0017')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge ok"><i class="fas fa-clock"></i> 5d</span>
+              <span class="uw-risk-tag med">Moderate Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Nancy Foster</div>
               <div class="uw-stp-score stp-high">STP 82</div>
             </div>
             <div class="uw-case-product">Term Life — $1M · $3,200/yr</div>
-            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Received Apr 9 · Age 41</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Apr 9 · Age 41</div>
             <div class="uw-evidence-bar">
               <span class="uw-ev ev-done">Rx ✓</span>
               <span class="uw-ev ev-done">MIB ✓</span>
@@ -4755,12 +4777,16 @@ function UnderwritingPage() {
             </div>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0016')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge warn"><i class="fas fa-clock"></i> 6d</span>
+              <span class="uw-risk-tag high">High Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">John Kim</div>
               <div class="uw-stp-score stp-med">STP 61</div>
             </div>
             <div class="uw-case-product">Disability Ins. · $2,100/yr</div>
-            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Received Apr 8 · Age 38</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Apr 8 · Age 38 · MIB Flag</div>
             <div class="uw-evidence-bar">
               <span class="uw-ev ev-done">Rx ✓</span>
               <span class="uw-ev ev-flag">MIB ⚠</span>
@@ -4775,12 +4801,16 @@ function UnderwritingPage() {
         </div>
 
         {/* Stage 2: Evidence Gathering */}
-        <div class="uw-stage">
+        <div class="uw-stage" id="uw-stage-evidence">
           <div class="uw-stage-header evidence">
-            <span><i class="fas fa-search-plus"></i> Evidence Gathering</span>
-            <span class="uw-stage-count">3</span>
+            <div class="uw-stage-hd-left"><i class="fas fa-search-plus"></i> Evidence Gathering</div>
+            <div class="uw-stage-hd-right"><span class="uw-stage-count">3</span><span class="uw-stage-val">$18.0K/yr</span></div>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0015')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge ok"><i class="fas fa-clock"></i> 9d</span>
+              <span class="uw-risk-tag low">Low Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Michael Santos</div>
               <div class="uw-stp-score stp-high">STP 79</div>
@@ -4798,13 +4828,17 @@ function UnderwritingPage() {
               <span class="uw-ai-rec auto"><i class="fas fa-bolt"></i> Near Auto-Approve</span>
             </div>
           </div>
-          <div class="uw-case-card" onclick="openUWModal('UW-2026-0014')">
+          <div class="uw-case-card stale-uw-card" onclick="openUWModal('UW-2026-0014')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge stale"><i class="fas fa-clock"></i> 11d 🔴</span>
+              <span class="uw-risk-tag high">High Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Julia Chen</div>
               <div class="uw-stp-score stp-low">STP 44</div>
             </div>
             <div class="uw-case-product">Annuity Deferred · $8,000/yr</div>
-            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Apr 3 · Age 58</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Apr 3 · Age 58 · APS Pending</div>
             <div class="uw-evidence-bar">
               <span class="uw-ev ev-done">Rx ✓</span>
               <span class="uw-ev ev-flag">MIB ⚠</span>
@@ -4817,6 +4851,10 @@ function UnderwritingPage() {
             </div>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0013')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge ok"><i class="fas fa-clock"></i> 13d</span>
+              <span class="uw-risk-tag low">Low Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Rachel Adams</div>
               <div class="uw-stp-score stp-high">STP 85</div>
@@ -4837,18 +4875,22 @@ function UnderwritingPage() {
         </div>
 
         {/* Stage 3: AI Review */}
-        <div class="uw-stage">
+        <div class="uw-stage" id="uw-stage-ai-review">
           <div class="uw-stage-header ai-review">
-            <span><i class="fas fa-robot"></i> AI Review</span>
-            <span class="uw-stage-count">2</span>
+            <div class="uw-stage-hd-left"><i class="fas fa-robot"></i> AI Review</div>
+            <div class="uw-stage-hd-right"><span class="uw-stage-count">2</span><span class="uw-stage-val">$13.4K/yr</span></div>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0012')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge ok"><i class="fas fa-clock"></i> 17d</span>
+              <span class="uw-risk-tag low">Low Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Thomas Wright</div>
               <div class="uw-stp-score stp-high">STP 91</div>
             </div>
             <div class="uw-case-product">Whole Life — $1M · $9,600/yr</div>
-            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 28 · Age 52 · Medical Exam Done</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 28 · Age 52 · Exam Done</div>
             <div class="uw-evidence-bar">
               <span class="uw-ev ev-done">Rx ✓</span>
               <span class="uw-ev ev-done">MIB ✓</span>
@@ -4861,6 +4903,10 @@ function UnderwritingPage() {
             </div>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0011')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge warn"><i class="fas fa-clock"></i> 20d</span>
+              <span class="uw-risk-tag med">Moderate Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Grace Lee</div>
               <div class="uw-stp-score stp-med">STP 67</div>
@@ -4881,18 +4927,23 @@ function UnderwritingPage() {
         </div>
 
         {/* Stage 4: Decision */}
-        <div class="uw-stage">
+        <div class="uw-stage" id="uw-stage-decision">
           <div class="uw-stage-header decision">
-            <span><i class="fas fa-gavel"></i> Decision</span>
-            <span class="uw-stage-count">1</span>
+            <div class="uw-stage-hd-left"><i class="fas fa-gavel"></i> Decision</div>
+            <div class="uw-stage-hd-right"><span class="uw-stage-count">1</span><span class="uw-stage-val">$2.4K/yr</span></div>
           </div>
-          <div class="uw-case-card urgent-case" onclick="openUWModal('UW-2026-0010')">
+          <div class="uw-case-card urgent-case decision-urgent" onclick="openUWModal('UW-2026-0010')">
+            <div class="uw-urgent-ring"><i class="fas fa-bell"></i> Due Today — Awaiting Decision</div>
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge stale"><i class="fas fa-clock"></i> 25d 🔴</span>
+              <span class="uw-risk-tag low">Low Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">David Thompson</div>
               <div class="uw-stp-score stp-high">STP 78</div>
             </div>
             <div class="uw-case-product">Term Life — $300K · $2,400/yr</div>
-            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 20 · Age 33 · Decision Due Today</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 20 · Age 33 · All Evidence Clear</div>
             <div class="uw-evidence-bar">
               <span class="uw-ev ev-done">Rx ✓</span>
               <span class="uw-ev ev-done">MIB ✓</span>
@@ -4907,12 +4958,16 @@ function UnderwritingPage() {
         </div>
 
         {/* Stage 5: Approved */}
-        <div class="uw-stage">
+        <div class="uw-stage" id="uw-stage-approved">
           <div class="uw-stage-header approved">
-            <span><i class="fas fa-check-circle"></i> Approved</span>
-            <span class="uw-stage-count">2</span>
+            <div class="uw-stage-hd-left"><i class="fas fa-check-circle"></i> Approved</div>
+            <div class="uw-stage-hd-right"><span class="uw-stage-count">2</span><span class="uw-stage-val">$2.0K/yr</span></div>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0009')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge ok"><i class="fas fa-clock"></i> 27d</span>
+              <span class="uw-risk-tag low">Low Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Linda Morrison</div>
               <div class="uw-stp-score stp-high">STP 99</div>
@@ -4932,6 +4987,10 @@ function UnderwritingPage() {
             <button class="uw-eapp-btn" onclick="event.stopPropagation();openEApp('EA-UW-009')"><i class="fas fa-file-contract"></i> Open E-App <span class="uw-eapp-ai-tag">AI 100%</span></button>
           </div>
           <div class="uw-case-card" onclick="openUWModal('UW-2026-0008')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge ok"><i class="fas fa-clock"></i> 30d</span>
+              <span class="uw-risk-tag low">Low Risk</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Maria Gonzalez</div>
               <div class="uw-stp-score stp-high">STP 86</div>
@@ -4952,19 +5011,23 @@ function UnderwritingPage() {
           </div>
         </div>
 
-        {/* Stage 6: Issued / Declined */}
-        <div class="uw-stage">
+        {/* Stage 6: Issued */}
+        <div class="uw-stage" id="uw-stage-issued">
           <div class="uw-stage-header issued">
-            <span><i class="fas fa-badge-check"></i> Issued</span>
-            <span class="uw-stage-count">2</span>
+            <div class="uw-stage-hd-left"><i class="fas fa-check-double"></i> Issued</div>
+            <div class="uw-stage-hd-right"><span class="uw-stage-count">2</span><span class="uw-stage-val">$6.2K/yr</span></div>
           </div>
           <div class="uw-case-card issued-card" onclick="openUWModal('UW-2026-0007')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge issued-badge"><i class="fas fa-check-circle"></i> 1.8 hrs</span>
+              <span class="uw-risk-tag issued-risk">STP Issued</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">Robert Chen</div>
               <div class="uw-stp-score stp-high">STP 96</div>
             </div>
             <div class="uw-case-product">VUL Add-on Rider · $1,800/yr</div>
-            <div class="uw-case-meta"><i class="fas fa-check-circle" style="color:#059669"></i> Issued Apr 2 · 1.8 hrs total</div>
+            <div class="uw-case-meta"><i class="fas fa-check-circle" style="color:#059669"></i> Issued Apr 2 · record time</div>
             <div class="uw-evidence-bar">
               <span class="uw-ev ev-done">Rx ✓</span>
               <span class="uw-ev ev-done">MIB ✓</span>
@@ -4977,12 +5040,16 @@ function UnderwritingPage() {
             </div>
           </div>
           <div class="uw-case-card issued-card" onclick="openUWModal('UW-2026-0006')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge issued-badge"><i class="fas fa-check-circle"></i> 3.1 hrs</span>
+              <span class="uw-risk-tag issued-risk">STP Issued</span>
+            </div>
             <div class="uw-case-header">
               <div class="uw-case-client">James Whitfield</div>
               <div class="uw-stp-score stp-high">STP 94</div>
             </div>
             <div class="uw-case-product">LTC Rider · $4,400/yr</div>
-            <div class="uw-case-meta"><i class="fas fa-check-circle" style="color:#059669"></i> Issued Mar 30 · 3.1 hrs total</div>
+            <div class="uw-case-meta"><i class="fas fa-check-circle" style="color:#059669"></i> Issued Mar 30 · STP speed</div>
             <div class="uw-evidence-bar">
               <span class="uw-ev ev-done">Rx ✓</span>
               <span class="uw-ev ev-done">MIB ✓</span>
@@ -4996,7 +5063,213 @@ function UnderwritingPage() {
           </div>
         </div>
 
+        {/* Stage 7: Declined / Rated */}
+        <div class="uw-stage" id="uw-stage-declined">
+          <div class="uw-stage-header declined">
+            <div class="uw-stage-hd-left"><i class="fas fa-times-circle"></i> Declined / Rated</div>
+            <div class="uw-stage-hd-right"><span class="uw-stage-count">2</span><span class="uw-stage-val">—</span></div>
+          </div>
+          <div class="uw-case-card declined-card" onclick="openUWModal('UW-2026-0005')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge stale"><i class="fas fa-times"></i> Declined</span>
+              <span class="uw-risk-tag high">High Risk</span>
+            </div>
+            <div class="uw-case-header">
+              <div class="uw-case-client">Steve Palmer</div>
+              <div class="uw-stp-score stp-low">STP 28</div>
+            </div>
+            <div class="uw-case-product">Whole Life — $1M · Age 66</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 10 · Multiple flags</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-flag">Rx ⚠</span>
+              <span class="uw-ev ev-flag">MIB ⚠</span>
+              <span class="uw-ev ev-flag">Lab ⚠</span>
+              <span class="uw-ev ev-flag">DM Flag</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill declined">Declined</span>
+              <span class="uw-ai-rec declined-rec"><i class="fas fa-times-circle"></i> AI: Decline · STP 28</span>
+            </div>
+          </div>
+          <div class="uw-case-card rated-card" onclick="openUWModal('UW-2026-0004')">
+            <div class="uw-case-top-row">
+              <span class="uw-days-badge warn"><i class="fas fa-star-half-alt"></i> Rated +20%</span>
+              <span class="uw-risk-tag med">Moderate Risk</span>
+            </div>
+            <div class="uw-case-header">
+              <div class="uw-case-client">Carol Bennett</div>
+              <div class="uw-stp-score stp-med">STP 55</div>
+            </div>
+            <div class="uw-case-product">Term Life — $500K · $2,800/yr base</div>
+            <div class="uw-case-meta"><i class="fas fa-calendar"></i> Mar 22 · Age 51 · HTN Rx</div>
+            <div class="uw-evidence-bar">
+              <span class="uw-ev ev-done">Rx ✓</span>
+              <span class="uw-ev ev-flag">MIB ⚠</span>
+              <span class="uw-ev ev-done">MVR ✓</span>
+              <span class="uw-ev ev-done">Lab ✓</span>
+            </div>
+            <div class="uw-case-footer">
+              <span class="uw-status-pill rated">Table Rated</span>
+              <span class="uw-ai-rec rated-rec"><i class="fas fa-star-half-alt"></i> Table 2 Recommended</span>
+            </div>
+          </div>
+        </div>
+
       </div>{/* end uw-pipeline */}
+
+      {/* ── Below-Pipeline Analytics Grid ── */}
+      <div class="uw-analytics-grid">
+
+        {/* STP Funnel Panel */}
+        <div class="uw-analytics-panel">
+          <div class="uwap-header">
+            <div class="uwap-title"><i class="fas fa-filter"></i> STP Funnel — This Month</div>
+            <span class="uwap-badge cyan">Live</span>
+          </div>
+          <div class="uw-funnel-stages">
+            <div class="uw-funnel-row">
+              <div class="uw-funnel-lbl">Applications In</div>
+              <div class="uw-funnel-bar-wrap"><div class="uw-funnel-bar" style="width:100%;background:#0e7490"></div></div>
+              <div class="uw-funnel-val">11</div>
+            </div>
+            <div class="uw-funnel-row">
+              <div class="uw-funnel-lbl">Evidence Complete</div>
+              <div class="uw-funnel-bar-wrap"><div class="uw-funnel-bar" style="width:73%;background:#0891b2"></div></div>
+              <div class="uw-funnel-val">8</div>
+            </div>
+            <div class="uw-funnel-row">
+              <div class="uw-funnel-lbl">AI Scored ≥ 75</div>
+              <div class="uw-funnel-bar-wrap"><div class="uw-funnel-bar" style="width:64%;background:#06b6d4"></div></div>
+              <div class="uw-funnel-val">7</div>
+            </div>
+            <div class="uw-funnel-row">
+              <div class="uw-funnel-lbl">STP Auto-Approved</div>
+              <div class="uw-funnel-bar-wrap"><div class="uw-funnel-bar" style="width:45%;background:#22d3ee"></div></div>
+              <div class="uw-funnel-val green-val">5 ✓</div>
+            </div>
+            <div class="uw-funnel-row">
+              <div class="uw-funnel-lbl">Manual Review</div>
+              <div class="uw-funnel-bar-wrap"><div class="uw-funnel-bar" style="width:18%;background:#f59e0b"></div></div>
+              <div class="uw-funnel-val orange-val">2</div>
+            </div>
+            <div class="uw-funnel-row">
+              <div class="uw-funnel-lbl">APS Required</div>
+              <div class="uw-funnel-bar-wrap"><div class="uw-funnel-bar" style="width:18%;background:#ef4444"></div></div>
+              <div class="uw-funnel-val red-val">2</div>
+            </div>
+          </div>
+          <div class="uw-funnel-insight"><i class="fas fa-robot"></i> <strong>AI:</strong> 73% STP rate (+18% vs last quarter). Chase Julia Chen &amp; John Kim APS to unblock pipeline.</div>
+        </div>
+
+        {/* Risk Triage Panel */}
+        <div class="uw-analytics-panel">
+          <div class="uwap-header">
+            <div class="uwap-title"><i class="fas fa-shield-alt"></i> Risk Triage Matrix</div>
+            <span class="uwap-badge orange">4 Flags</span>
+          </div>
+          <div class="uw-risk-matrix">
+            <div class="uw-risk-row risk-high">
+              <div class="uw-risk-label"><span class="uw-risk-dot red"></span> High Risk</div>
+              <div class="uw-risk-cases">
+                <div class="uw-risk-case">John Kim <span class="uw-risk-reason">MIB + DM Rx</span></div>
+                <div class="uw-risk-case">Julia Chen <span class="uw-risk-reason">MIB + Lab flags · Age 58</span></div>
+                <div class="uw-risk-case">Steve Palmer <span class="uw-risk-reason">Multiple flags · Declined</span></div>
+              </div>
+            </div>
+            <div class="uw-risk-row risk-med">
+              <div class="uw-risk-label"><span class="uw-risk-dot amber"></span> Moderate Risk</div>
+              <div class="uw-risk-cases">
+                <div class="uw-risk-case">Nancy Foster <span class="uw-risk-reason">MVR pending · Age 41</span></div>
+                <div class="uw-risk-case">Grace Lee <span class="uw-risk-reason">Lab flag · APS needed</span></div>
+                <div class="uw-risk-case">Carol Bennett <span class="uw-risk-reason">HTN Rx · Table rated</span></div>
+              </div>
+            </div>
+            <div class="uw-risk-row risk-low">
+              <div class="uw-risk-label"><span class="uw-risk-dot green"></span> Low Risk / STP</div>
+              <div class="uw-risk-cases">
+                <div class="uw-risk-case">Alex Rivera · Rachel Adams · Thomas Wright</div>
+                <div class="uw-risk-case">Linda Morrison · Robert Chen · James Whitfield</div>
+              </div>
+            </div>
+          </div>
+          <button class="uw-triage-btn" onclick="openUWIReport()"><i class="fas fa-chart-bar"></i> Full Risk Report</button>
+        </div>
+
+        {/* Performance Stats Panel */}
+        <div class="uw-analytics-panel">
+          <div class="uwap-header">
+            <div class="uwap-title"><i class="fas fa-tachometer-alt"></i> UW Performance — April</div>
+            <span class="uwap-badge green">On Track</span>
+          </div>
+          <div class="uw-perf-stats">
+            <div class="uw-perf-row">
+              <div class="uw-perf-lbl">Avg Decision Time</div>
+              <div class="uw-perf-bar-wrap"><div class="uw-perf-bar green-bar" style="width:90%"></div></div>
+              <div class="uw-perf-val">4.2 hrs <span class="uw-perf-target">target 6 hrs ✓</span></div>
+            </div>
+            <div class="uw-perf-row">
+              <div class="uw-perf-lbl">STP Rate</div>
+              <div class="uw-perf-bar-wrap"><div class="uw-perf-bar cyan-bar" style="width:73%"></div></div>
+              <div class="uw-perf-val">73% <span class="uw-perf-target">target 65% ✓</span></div>
+            </div>
+            <div class="uw-perf-row">
+              <div class="uw-perf-lbl">AI Accuracy</div>
+              <div class="uw-perf-bar-wrap"><div class="uw-perf-bar green-bar" style="width:94.6%"></div></div>
+              <div class="uw-perf-val">94.6% <span class="uw-perf-target">target 90% ✓</span></div>
+            </div>
+            <div class="uw-perf-row">
+              <div class="uw-perf-lbl">APS Avoided</div>
+              <div class="uw-perf-bar-wrap"><div class="uw-perf-bar cyan-bar" style="width:82%"></div></div>
+              <div class="uw-perf-val">18 <span class="uw-perf-target">target 15 ✓</span></div>
+            </div>
+            <div class="uw-perf-row">
+              <div class="uw-perf-lbl">Cases Closed</div>
+              <div class="uw-perf-bar-wrap"><div class="uw-perf-bar amber-bar" style="width:55%"></div></div>
+              <div class="uw-perf-val">6 / 11 <span class="uw-perf-target">target 10</span></div>
+            </div>
+          </div>
+          <div class="uw-perf-ai-note"><i class="fas fa-robot"></i> <strong>AI Coach:</strong> Decision time 30% below target. Increase close rate by chasing 4 pending cases.</div>
+        </div>
+
+        {/* Stale Cases Alert Panel */}
+        <div class="uw-analytics-panel">
+          <div class="uwap-header">
+            <div class="uwap-title"><i class="fas fa-exclamation-triangle"></i> Stale Case Alerts</div>
+            <span class="uwap-badge red">2 Idle</span>
+          </div>
+          <div class="uw-stale-list">
+            <div class="uw-stale-item">
+              <div class="uw-stale-avatar">JC</div>
+              <div class="uw-stale-info">
+                <div class="uw-stale-name">Julia Chen</div>
+                <div class="uw-stale-prod">Annuity Deferred · STP 44</div>
+                <div class="uw-stale-reason"><i class="fas fa-clock"></i> 11 days idle · APS not received</div>
+              </div>
+              <button class="uw-stale-btn" onclick="openUWModal('UW-2026-0014')"><i class="fas fa-bolt"></i> Chase</button>
+            </div>
+            <div class="uw-stale-item">
+              <div class="uw-stale-avatar">JK</div>
+              <div class="uw-stale-info">
+                <div class="uw-stale-name">John Kim</div>
+                <div class="uw-stale-prod">Disability Ins. · STP 61</div>
+                <div class="uw-stale-reason"><i class="fas fa-clock"></i> 6 days · MVR &amp; Credit pending</div>
+              </div>
+              <button class="uw-stale-btn" onclick="openUWModal('UW-2026-0016')"><i class="fas fa-bolt"></i> Chase</button>
+            </div>
+            <div class="uw-stale-item">
+              <div class="uw-stale-avatar">DT</div>
+              <div class="uw-stale-info">
+                <div class="uw-stale-name">David Thompson</div>
+                <div class="uw-stale-prod">Term Life $300K · Decision Due</div>
+                <div class="uw-stale-reason"><i class="fas fa-exclamation-circle"></i> 25 days · Decision overdue today</div>
+              </div>
+              <button class="uw-stale-btn urgent" onclick="openUWModal('UW-2026-0010')"><i class="fas fa-gavel"></i> Decide</button>
+            </div>
+          </div>
+          <button class="uw-stale-scan-btn" onclick="runUWScan()"><i class="fas fa-sync-alt"></i> Re-scan All Cases</button>
+        </div>
+
+      </div>{/* end uw-analytics-grid */}
 
       {/* ══════════════════════════════════════════════════
           APS AVOIDANCE ENGINE PANEL  (Task #15d)
