@@ -1507,6 +1507,40 @@ function ClientsPage() {
         </button>
       </div>
 
+      {/* ── Client 360 Segment Insights Bar ── */}
+      <div class="seg-insights-bar" id="seg-insights-bar">
+        <div class="seg-insight-card premium">
+          <div class="seg-ic-header"><i class="fas fa-crown"></i> Premium</div>
+          <div class="seg-ic-count">12 clients</div>
+          <div class="seg-ic-val">$248K premium</div>
+          <div class="seg-ic-trend up"><i class="fas fa-arrow-up"></i> +3 this quarter</div>
+        </div>
+        <div class="seg-insight-card high-value">
+          <div class="seg-ic-header"><i class="fas fa-star"></i> High Value</div>
+          <div class="seg-ic-count">48 clients</div>
+          <div class="seg-ic-val">$189K premium</div>
+          <div class="seg-ic-trend up"><i class="fas fa-arrow-up"></i> 2 upgrades pending</div>
+        </div>
+        <div class="seg-insight-card mid-market">
+          <div class="seg-ic-header"><i class="fas fa-users"></i> Mid Market</div>
+          <div class="seg-ic-count">124 clients</div>
+          <div class="seg-ic-val">$108K premium</div>
+          <div class="seg-ic-trend stable"><i class="fas fa-minus"></i> Stable</div>
+        </div>
+        <div class="seg-insight-card emerging">
+          <div class="seg-ic-header"><i class="fas fa-seedling"></i> Emerging</div>
+          <div class="seg-ic-count">63 clients</div>
+          <div class="seg-ic-val">$29K premium</div>
+          <div class="seg-ic-trend up"><i class="fas fa-arrow-up"></i> +8 new this quarter</div>
+        </div>
+        <div class="seg-insight-card ai-opps">
+          <div class="seg-ic-header"><i class="fas fa-robot"></i> AI Opportunities</div>
+          <div class="seg-ic-count">$31.2K/yr</div>
+          <div class="seg-ic-val">6 cross-sell targets</div>
+          <div class="seg-ic-trend"><i class="fas fa-bullseye"></i> Act now</div>
+        </div>
+      </div>
+
       {/* ── Retention Intelligence Panel (shown when lapse tab active) ── */}
       <div class="ri-clients-panel" id="ri-clients-panel" style="display:none">
         <div class="ri-panel-header">
@@ -2090,8 +2124,12 @@ function ClientsPage() {
           <div class="cm-tabs" id="cm-tabs">
             <button class="cm-tab active" id="cm-tab-overview"  onclick="switchClientTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
             <button class="cm-tab"         id="cm-tab-policies"  onclick="switchClientTab('policies',this)"><i class="fas fa-file-contract"></i> Policies</button>
+            <button class="cm-tab"         id="cm-tab-financial" onclick="switchClientTab('financial',this)"><i class="fas fa-chart-pie"></i> Financial Health</button>
+            <button class="cm-tab"         id="cm-tab-goals"     onclick="switchClientTab('goals',this)"><i class="fas fa-bullseye"></i> Goals</button>
             <button class="cm-tab"         id="cm-tab-ai"        onclick="switchClientTab('ai',this)"><i class="fas fa-robot"></i> AI Insights</button>
             <button class="cm-tab"         id="cm-tab-outreach"  onclick="switchClientTab('outreach',this)"><i class="fas fa-paper-plane"></i> Outreach</button>
+            <button class="cm-tab"         id="cm-tab-documents" onclick="switchClientTab('documents',this)"><i class="fas fa-folder-open"></i> Documents</button>
+            <button class="cm-tab"         id="cm-tab-referrals" onclick="switchClientTab('referrals',this)"><i class="fas fa-users"></i> Referrals</button>
             <button class="cm-tab"         id="cm-tab-timeline"  onclick="switchClientTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
           </div>
 
@@ -2103,6 +2141,7 @@ function ClientsPage() {
             <button class="btn btn-primary" onclick="closeClientModal();navigateTo('policies')"><i class="fas fa-file-contract"></i> View Policies</button>
             <button class="btn btn-outline" id="cm-btn-outreach" onclick="switchClientTab('outreach',document.getElementById('cm-tab-outreach'))"><i class="fas fa-paper-plane"></i> Outreach</button>
             <button class="btn btn-outline" id="cm-btn-call"><i class="fas fa-phone"></i> Call</button>
+            <button class="btn btn-outline" id="cm-btn-meeting" onclick="scheduleCMeMeeting(_cmClientId)"><i class="fas fa-calendar-plus"></i> Schedule</button>
             <button class="btn btn-ai" onclick="closeClientModal();navigateTo('ai-agents')"><i class="fas fa-robot"></i> AI Analysis</button>
           </div>
         </div>

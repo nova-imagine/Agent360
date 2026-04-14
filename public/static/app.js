@@ -732,18 +732,35 @@ function _renderCMTab(tab, client) {
   const body = document.getElementById('cm-body');
   if (!body) return;
   switch(tab) {
-    case 'overview':  body.innerHTML = _cmOverview(client); break;
-    case 'policies':  body.innerHTML = _cmPolicies(client); break;
-    case 'ai':        body.innerHTML = _cmAI(client);       break;
-    case 'outreach':  body.innerHTML = _cmOutreach(client); break;
-    case 'timeline':  body.innerHTML = _cmTimeline(client); break;
-    default:          body.innerHTML = '';
+    case 'overview':   body.innerHTML = _cmOverview(client);   break;
+    case 'policies':   body.innerHTML = _cmPolicies(client);   break;
+    case 'financial':  body.innerHTML = _cmFinancial(client);  break;
+    case 'goals':      body.innerHTML = _cmGoals(client);      break;
+    case 'ai':         body.innerHTML = _cmAI(client);         break;
+    case 'outreach':   body.innerHTML = _cmOutreach(client);   break;
+    case 'documents':  body.innerHTML = _cmDocuments(client);  break;
+    case 'referrals':  body.innerHTML = _cmReferrals(client);  break;
+    case 'timeline':   body.innerHTML = _cmTimeline(client);   break;
+    default:           body.innerHTML = '';
   }
 }
+
+// ── Extended client profile data ──────────────────────────────
+const cmProfileExt = {
+  1: { household: 'Married, 2 children (16, 19)', occupation: 'Corporate Attorney', income: '$320K/yr', netWorth: '$2.1M', lifeStage: 'Peak Earner', nps: 92, nextMeeting: 'Apr 18, 2026 — Retirement Plan Review', preferredChannel: 'Phone', preferredTime: 'Mornings', referredBy: 'Linda Morrison', referrals: 2 },
+  2: { household: 'Married, 1 child (4)', occupation: 'Nurse Practitioner', income: '$112K/yr', netWorth: '$340K', lifeStage: 'Young Family', nps: 78, nextMeeting: 'Apr 14, 2026 — DI Insurance Review', preferredChannel: 'Email', preferredTime: 'Evenings', referredBy: 'Direct', referrals: 0 },
+  3: { household: 'Married, no children', occupation: 'Business Owner (Tech)', income: '$580K/yr', netWorth: '$4.2M', lifeStage: 'Wealth Accumulation', nps: 97, nextMeeting: 'Apr 21, 2026 — Claim Update + VUL Rebalance', preferredChannel: 'In-person', preferredTime: 'Afternoons', referredBy: 'Direct', referrals: 3 },
+  4: { household: 'Widowed, 1 child (adult)', occupation: 'Retired Teacher', income: '$68K/yr', netWorth: '$490K', lifeStage: 'Pre-Retirement', nps: 61, nextMeeting: 'Apr 16, 2026 — Policy Renewal Discussion', preferredChannel: 'Phone', preferredTime: 'Afternoons', referredBy: 'Direct', referrals: 0 },
+  5: { household: 'Married, 1 child (newborn)', occupation: 'Software Engineer', income: '$145K/yr', netWorth: '$185K', lifeStage: 'Young Family', nps: 82, nextMeeting: 'Apr 17, 2026 — 529 + Rider Discussion', preferredChannel: 'Text/App', preferredTime: 'Evenings', referredBy: 'Maria Gonzalez', referrals: 0 },
+  6: { household: 'Divorced, 2 children (adult)', occupation: 'Hospital Administrator', income: '$210K/yr', netWorth: '$1.3M', lifeStage: 'Pre-Retirement', nps: 94, nextMeeting: 'Apr 15, 2026 — Estate + UMA Annual Review', preferredChannel: 'In-person', preferredTime: 'Mornings', referredBy: 'Robert Chen', referrals: 2 },
+  7: { household: 'Single', occupation: 'UX Designer', income: '$98K/yr', netWorth: '$95K', lifeStage: 'Early Career', nps: 76, nextMeeting: 'Apr 17, 2026 — Application Follow-up', preferredChannel: 'Text/App', preferredTime: 'Evenings', referredBy: 'David Thompson', referrals: 0 },
+  8: { household: 'Married, 3 children (adult)', occupation: 'Retired CFO', income: '$290K/yr', netWorth: '$5.8M', lifeStage: 'Wealth Preservation', nps: 98, nextMeeting: 'Apr 15, 2026 — Annual Review + LTC Gap', preferredChannel: 'In-person', preferredTime: 'Mornings', referredBy: 'Direct', referrals: 4 },
+};
 
 function _cmOverview(client) {
   const dc = domainCoverage[client.id] || {};
   const products = cmProducts[client.id] || { insurance:[], investments:[], retirement:[], advisory:[] };
+  const profile = cmProfileExt[client.id] || {};
   const totalPolicies = products.insurance.length + products.investments.length + products.retirement.length + products.advisory.length;
   const gaps = [];
   if (!products.investments.length) gaps.push('Investments');
@@ -751,28 +768,63 @@ function _cmOverview(client) {
   if (!products.advisory.length)    gaps.push('Advisory');
   if (products.insurance.length < 2) gaps.push('More Insurance');
 
+  const npsColor = (profile.nps||0) >= 90 ? '#059669' : (profile.nps||0) >= 70 ? '#0891b2' : '#f59e0b';
+  const lifeStageIcon = {'Peak Earner':'fa-briefcase','Young Family':'fa-baby','Wealth Accumulation':'fa-chart-line','Pre-Retirement':'fa-clock','Wealth Preservation':'fa-shield-alt','Early Career':'fa-seedling'}[profile.lifeStage] || 'fa-user';
+
   return `
     <div class="cm-overview-grid">
       <div class="cm-info-card">
-        <div class="cm-card-title"><i class="fas fa-address-card"></i> Contact</div>
+        <div class="cm-card-title"><i class="fas fa-address-card"></i> Contact &amp; Profile</div>
         <div class="cm-info-row"><i class="fas fa-envelope"></i><span>${client.email}</span></div>
         <div class="cm-info-row"><i class="fas fa-phone"></i><span>${client.phone}</span></div>
         <div class="cm-info-row"><i class="fas fa-map-marker-alt"></i><span>${client.city}</span></div>
-        <div class="cm-info-row"><i class="fas fa-birthday-cake"></i><span>Age ${client.age}</span></div>
+        <div class="cm-info-row"><i class="fas fa-birthday-cake"></i><span>Age ${client.age} · ${profile.occupation||'—'}</span></div>
+        <div class="cm-info-row"><i class="fas fa-home"></i><span>${profile.household||'—'}</span></div>
         <div class="cm-info-row"><i class="fas fa-clock"></i><span>Last contact: ${client.lastContact}</span></div>
+        <div class="cm-info-row"><i class="fas fa-comment-dots" style="color:#7c3aed"></i><span>Prefers: <strong>${profile.preferredChannel||'—'}</strong> · ${profile.preferredTime||''}</span></div>
       </div>
       <div class="cm-info-card">
         <div class="cm-card-title"><i class="fas fa-briefcase"></i> Portfolio Summary</div>
         <div class="cm-kpi-row">
           <div class="cm-kpi"><span class="cm-kpi-val">${products.insurance.length}</span><span class="cm-kpi-lbl">Insurance</span></div>
-          <div class="cm-kpi"><span class="cm-kpi-val">${products.investments.length}</span><span class="cm-kpi-lbl">Investments</span></div>
-          <div class="cm-kpi"><span class="cm-kpi-val">${products.retirement.length}</span><span class="cm-kpi-lbl">Retirement</span></div>
+          <div class="cm-kpi"><span class="cm-kpi-val">${products.investments.length}</span><span class="cm-kpi-lbl">Invest.</span></div>
+          <div class="cm-kpi"><span class="cm-kpi-val">${products.retirement.length}</span><span class="cm-kpi-lbl">Retire.</span></div>
           <div class="cm-kpi"><span class="cm-kpi-val">${products.advisory.length}</span><span class="cm-kpi-lbl">Advisory</span></div>
         </div>
         <div class="cm-info-row premium-row"><i class="fas fa-dollar-sign"></i><span>Annual Premium: <strong>$${client.premium.toLocaleString()}</strong></span></div>
-        <div class="cm-info-row"><i class="fas fa-layer-group"></i><span>${totalPolicies} total product${totalPolicies !== 1 ? 's' : ''}</span></div>
+        <div class="cm-info-row"><i class="fas fa-layer-group"></i><span>${totalPolicies} total product${totalPolicies !== 1 ? 's' : ''} · Net Worth: <strong>${profile.netWorth||'—'}</strong></span></div>
+        <div class="cm-info-row"><i class="fas fa-wallet"></i><span>Household Income: <strong>${profile.income||'—'}</strong></span></div>
       </div>
     </div>
+
+    <div class="cm-overview-strip">
+      <div class="cm-ov-metric">
+        <div class="cm-ov-metric-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas ${lifeStageIcon}"></i></div>
+        <div class="cm-ov-metric-info"><div class="cm-ov-metric-val">${profile.lifeStage||'—'}</div><div class="cm-ov-metric-lbl">Life Stage</div></div>
+      </div>
+      <div class="cm-ov-metric">
+        <div class="cm-ov-metric-icon" style="background:${npsColor}20;color:${npsColor}"><i class="fas fa-star"></i></div>
+        <div class="cm-ov-metric-info"><div class="cm-ov-metric-val" style="color:${npsColor}">${profile.nps||'—'}</div><div class="cm-ov-metric-lbl">NPS Score</div></div>
+      </div>
+      <div class="cm-ov-metric">
+        <div class="cm-ov-metric-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-users"></i></div>
+        <div class="cm-ov-metric-info"><div class="cm-ov-metric-val">${profile.referrals||0}</div><div class="cm-ov-metric-lbl">Referrals Given</div></div>
+      </div>
+      <div class="cm-ov-metric">
+        <div class="cm-ov-metric-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-user-plus"></i></div>
+        <div class="cm-ov-metric-info"><div class="cm-ov-metric-val">${profile.referredBy||'Direct'}</div><div class="cm-ov-metric-lbl">Referred By</div></div>
+      </div>
+    </div>
+
+    <div class="cm-next-meeting-bar">
+      <i class="fas fa-calendar-check" style="color:#003087"></i>
+      <div class="cm-nm-info">
+        <span class="cm-nm-label">Next Meeting</span>
+        <span class="cm-nm-val">${profile.nextMeeting||'Not scheduled — click Schedule below'}</span>
+      </div>
+      <button class="cm-nm-btn" onclick="scheduleCMeMeeting(${client.id})"><i class="fas fa-plus"></i> Reschedule</button>
+    </div>
+
     ${gaps.length ? `
     <div class="cm-gaps-bar">
       <div class="cm-gaps-label"><i class="fas fa-exclamation-circle" style="color:#f59e0b"></i> Coverage Gaps Identified</div>
@@ -829,6 +881,322 @@ function _cmPolicies(client) {
   }).join('');
 }
 
+// ── Financial Health data per client ──────────────────────────
+const cmFinancialData = {
+  1: { netWorth:2100000, assets:[{label:'Real Estate',val:950000},{label:'Retirement Accounts',val:680000},{label:'Brokerage',val:320000},{label:'Cash/Savings',val:150000}], liabilities:[{label:'Mortgage',val:-320000},{label:'Other Debt',val:-50000}], coverageRatio:78, premiumToIncome:4, deathBenefit:1250000, ltcCoverage:250000, disabilityGap:true, emergencyFund:'6 months', taxBracket:'35%', estateValue:'$2.1M', willStatus:'Outdated (2019)', trustStatus:'Active' },
+  2: { netWorth:340000, assets:[{label:'Home Equity',val:120000},{label:'401(k)',val:85000},{label:'Savings',val:45000},{label:'VUL Cash Value',val:28000}], liabilities:[{label:'Mortgage',val:-180000},{label:'Student Loans',val:-38000}], coverageRatio:42, premiumToIncome:5, deathBenefit:700000, ltcCoverage:0, disabilityGap:true, emergencyFund:'2 months', taxBracket:'24%', estateValue:'$340K', willStatus:'None', trustStatus:'None' },
+  3: { netWorth:4200000, assets:[{label:'Business Equity',val:2100000},{label:'Brokerage/VUL',val:980000},{label:'Real Estate',val:750000},{label:'Cash',val:370000}], liabilities:[{label:'Business Debt',val:-380000},{label:'Mortgage',val:-220000}], coverageRatio:91, premiumToIncome:2.5, deathBenefit:1800000, ltcCoverage:0, disabilityGap:false, emergencyFund:'12 months', taxBracket:'37%', estateValue:'$4.2M', willStatus:'Current', trustStatus:'Active' },
+  4: { netWorth:490000, assets:[{label:'Home',val:380000},{label:'Pension/SS',val:210000},{label:'Savings',val:62000}], liabilities:[{label:'Mortgage',val:-162000}], coverageRatio:58, premiumToIncome:12, deathBenefit:530000, ltcCoverage:180000, disabilityGap:false, emergencyFund:'8 months', taxBracket:'22%', estateValue:'$490K', willStatus:'Current', trustStatus:'None' },
+  5: { netWorth:185000, assets:[{label:'Home Equity',val:65000},{label:'401(k)',val:48000},{label:'Savings',val:32000},{label:'Term CV',val:0}], liabilities:[{label:'Mortgage',val:-220000},{label:'Auto Loan',val:-18000},{label:'Student Loans',val:-52000}], coverageRatio:35, premiumToIncome:1.6, deathBenefit:300000, ltcCoverage:0, disabilityGap:true, emergencyFund:'1 month', taxBracket:'22%', estateValue:'$185K', willStatus:'None', trustStatus:'None' },
+  6: { netWorth:1300000, assets:[{label:'Real Estate',val:650000},{label:'Annuities',val:280000},{label:'Investments',val:190000},{label:'Cash',val:180000}], liabilities:[{label:'Mortgage',val:-210000},{label:'Other',val:-30000}], coverageRatio:82, premiumToIncome:4.2, deathBenefit:600000, ltcCoverage:0, disabilityGap:false, emergencyFund:'10 months', taxBracket:'32%', estateValue:'$1.3M', willStatus:'Current', trustStatus:'None' },
+  7: { netWorth:95000, assets:[{label:'Savings',val:52000},{label:'Roth IRA',val:28000},{label:'401(k)',val:15000}], liabilities:[{label:'Student Loans',val:-68000},{label:'Auto',val:-12000}], coverageRatio:28, premiumToIncome:1.8, deathBenefit:250000, ltcCoverage:0, disabilityGap:true, emergencyFund:'3 months', taxBracket:'22%', estateValue:'$95K', willStatus:'None', trustStatus:'None' },
+  8: { netWorth:5800000, assets:[{label:'Investment Portfolio',val:2200000},{label:'Real Estate',val:1800000},{label:'Annuities/UMA',val:1100000},{label:'Cash/Alt',val:700000}], liabilities:[{label:'Mortgage',val:-180000},{label:'Other',val:-20000}], coverageRatio:95, premiumToIncome:9.9, deathBenefit:3500000, ltcCoverage:300000, disabilityGap:false, emergencyFund:'24+ months', taxBracket:'37%', estateValue:'$5.8M', willStatus:'Current', trustStatus:'Active (2 Trusts)' },
+};
+
+function _cmFinancial(client) {
+  const fd = cmFinancialData[client.id] || {};
+  const totalAssets = (fd.assets||[]).reduce((a,x)=>a+x.val,0);
+  const totalLiab   = Math.abs((fd.liabilities||[]).reduce((a,x)=>a+x.val,0));
+  const nw = fd.netWorth || 0;
+  const crColor = (fd.coverageRatio||0) >= 80 ? '#059669' : (fd.coverageRatio||0) >= 55 ? '#f59e0b' : '#dc2626';
+  const crLabel = (fd.coverageRatio||0) >= 80 ? 'Well Covered' : (fd.coverageRatio||0) >= 55 ? 'Partially Covered' : 'Under-covered';
+
+  const assetBars = (fd.assets||[]).map(a => {
+    const pct = totalAssets > 0 ? Math.round(a.val/totalAssets*100) : 0;
+    return `<div class="cm-fin-bar-row">
+      <div class="cm-fin-bar-lbl">${a.label}</div>
+      <div class="cm-fin-bar-track"><div class="cm-fin-bar-fill" style="width:${pct}%;background:#003087"></div></div>
+      <div class="cm-fin-bar-val">$${(a.val/1000).toFixed(0)}K <span class="cm-fin-pct">${pct}%</span></div>
+    </div>`;
+  }).join('');
+
+  const liabBars = (fd.liabilities||[]).map(l => {
+    const pct = totalLiab > 0 ? Math.round(Math.abs(l.val)/totalLiab*100) : 0;
+    return `<div class="cm-fin-bar-row">
+      <div class="cm-fin-bar-lbl">${l.label}</div>
+      <div class="cm-fin-bar-track"><div class="cm-fin-bar-fill" style="width:${pct}%;background:#dc2626"></div></div>
+      <div class="cm-fin-bar-val" style="color:#dc2626">-$${(Math.abs(l.val)/1000).toFixed(0)}K <span class="cm-fin-pct">${pct}%</span></div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="cm-fin-kpi-row">
+      <div class="cm-fin-kpi-card"><div class="cm-fin-kpi-val">$${nw >= 1000000 ? (nw/1000000).toFixed(1)+'M' : (nw/1000).toFixed(0)+'K'}</div><div class="cm-fin-kpi-lbl">Est. Net Worth</div></div>
+      <div class="cm-fin-kpi-card"><div class="cm-fin-kpi-val" style="color:${crColor}">${fd.coverageRatio||0}%</div><div class="cm-fin-kpi-lbl">Coverage Ratio</div><div class="cm-fin-kpi-sub" style="color:${crColor}">${crLabel}</div></div>
+      <div class="cm-fin-kpi-card"><div class="cm-fin-kpi-val">$${(fd.deathBenefit||0) >= 1000000 ? ((fd.deathBenefit||0)/1000000).toFixed(1)+'M' : ((fd.deathBenefit||0)/1000).toFixed(0)+'K'}</div><div class="cm-fin-kpi-lbl">Total Death Benefit</div></div>
+      <div class="cm-fin-kpi-card"><div class="cm-fin-kpi-val">${fd.premiumToIncome||0}%</div><div class="cm-fin-kpi-lbl">Premium / Income</div></div>
+    </div>
+
+    <div class="cm-fin-grid">
+      <div class="cm-fin-section">
+        <div class="cm-fin-section-title"><i class="fas fa-arrow-up" style="color:#059669"></i> Assets — $${(totalAssets/1000).toFixed(0)}K</div>
+        ${assetBars}
+      </div>
+      <div class="cm-fin-section">
+        <div class="cm-fin-section-title"><i class="fas fa-arrow-down" style="color:#dc2626"></i> Liabilities — -$${(totalLiab/1000).toFixed(0)}K</div>
+        ${liabBars}
+      </div>
+    </div>
+
+    <div class="cm-fin-estate-row">
+      <div class="cm-fin-estate-card"><i class="fas fa-file-alt" style="color:#003087"></i><div><div class="cm-fin-el">Will</div><div class="cm-fin-ev ${fd.willStatus&&fd.willStatus.includes('None')?'red':fd.willStatus&&fd.willStatus.includes('Outdated')?'orange':'green'}">${fd.willStatus||'Unknown'}</div></div></div>
+      <div class="cm-fin-estate-card"><i class="fas fa-landmark" style="color:#7c3aed"></i><div><div class="cm-fin-el">Trust</div><div class="cm-fin-ev ${!fd.trustStatus||fd.trustStatus==='None'?'red':'green'}">${fd.trustStatus||'None'}</div></div></div>
+      <div class="cm-fin-estate-card"><i class="fas fa-umbrella" style="color:#0891b2"></i><div><div class="cm-fin-el">LTC Coverage</div><div class="cm-fin-ev ${!fd.ltcCoverage?'red':'green'}">${fd.ltcCoverage?'$'+(fd.ltcCoverage/1000).toFixed(0)+'K':'None ⚠'}</div></div></div>
+      <div class="cm-fin-estate-card"><i class="fas fa-wheelchair" style="color:#f59e0b"></i><div><div class="cm-fin-el">Disability Gap</div><div class="cm-fin-ev ${fd.disabilityGap?'red':'green'}">${fd.disabilityGap?'Gap Identified ⚠':'Covered ✓'}</div></div></div>
+      <div class="cm-fin-estate-card"><i class="fas fa-piggy-bank" style="color:#059669"></i><div><div class="cm-fin-el">Emergency Fund</div><div class="cm-fin-ev">${fd.emergencyFund||'—'}</div></div></div>
+      <div class="cm-fin-estate-card"><i class="fas fa-receipt" style="color:#6b7280"></i><div><div class="cm-fin-el">Tax Bracket</div><div class="cm-fin-ev">${fd.taxBracket||'—'}</div></div></div>
+    </div>
+
+    <div class="cm-fin-coverage-bar">
+      <div class="cm-fin-cov-label"><i class="fas fa-shield-alt" style="color:${crColor}"></i> Overall Protection Coverage: <strong style="color:${crColor}">${fd.coverageRatio||0}%</strong></div>
+      <div class="cm-fin-cov-track"><div class="cm-fin-cov-fill" style="width:${fd.coverageRatio||0}%;background:${crColor}"></div></div>
+      <div class="cm-fin-cov-hint">Ideal target: 85%+ · ${(fd.coverageRatio||0) < 85 ? `Gap: ${85-(fd.coverageRatio||0)}% — review opportunities in AI Insights tab` : 'Client is well protected'}</div>
+    </div>
+  `;
+}
+
+// ── Goals & Milestones data ──────────────────────────────────
+const cmGoalsData = {
+  1: { lifeStage:'Peak Earner', goals:[{icon:'fa-graduation-cap',label:'Fund College (2 kids)',prog:85,target:'$320K',current:'$272K',due:'2027'},{icon:'fa-beach',label:'Early Retirement at 58',prog:62,target:'$3M',current:'$1.86M',due:'2032'},{icon:'fa-home',label:'Vacation Home',prog:40,target:'$600K',current:'$240K',due:'2028'},{icon:'fa-landmark',label:'Estate Plan Completion',prog:70,target:'Finalize',current:'In Progress',due:'2026'}], milestones:[{icon:'fa-birthday-cake',label:'Child turns 19',date:'Aug 2026',type:'family'},{icon:'fa-graduation-cap',label:'College funding deadline',date:'Sep 2027',type:'financial'},{icon:'fa-medal',label:'Policy Anniversary WL $500K',date:'Nov 2026',type:'policy'}] },
+  2: { lifeStage:'Young Family', goals:[{icon:'fa-shield-alt',label:'Full Family Protection',prog:55,target:'$1M coverage',current:'$700K',due:'2026'},{icon:'fa-graduation-cap',label:'529 College Plan',prog:0,target:'$150K by 2040',current:'Not started',due:'2040'},{icon:'fa-home',label:'Pay Off Student Loans',prog:38,target:'$62K',current:'$38K paid',due:'2029'},{icon:'fa-heartbeat',label:'Disability Protection',prog:20,target:'60% income',current:'No DI coverage',due:'2026'}], milestones:[{icon:'fa-baby',label:"Child's 1st birthday",date:'Jun 2026',type:'family'},{icon:'fa-file-contract',label:'Policy P-100301 Review',date:'May 2026',type:'policy'},{icon:'fa-dollar-sign',label:'Student loan milestone',date:'Dec 2026',type:'financial'}] },
+  3: { lifeStage:'Wealth Accumulation', goals:[{icon:'fa-building',label:'Business Exit Strategy',prog:45,target:'$5M valuation',current:'$2.5M est.',due:'2030'},{icon:'fa-chart-line',label:'Investment Portfolio $10M',prog:42,target:'$10M AUM',current:'$4.2M',due:'2034'},{icon:'fa-landmark',label:'Legacy Fund Setup',prog:20,target:'Family Foundation',current:'Preliminary',due:'2028'},{icon:'fa-umbrella',label:'Key-Person Coverage',prog:60,target:'$2M keyman',current:'In review',due:'2026'}], milestones:[{icon:'fa-medal',label:'Policy P-100310 Anniversary',date:'Jun 2026',type:'policy'},{icon:'fa-briefcase',label:'Business valuation review',date:'Jul 2026',type:'financial'},{icon:'fa-file-alt',label:'NQDC vesting event',date:'Jan 2027',type:'financial'}] },
+  4: { lifeStage:'Pre-Retirement', goals:[{icon:'fa-beach',label:'Retire at 65 (4 yrs)',prog:72,target:'$800K saved',current:'$576K',due:'2030'},{icon:'fa-heartbeat',label:'Healthcare Coverage Gap',prog:30,target:'Medigap + LTC',current:'Partial LTC',due:'2026'},{icon:'fa-home',label:'Downsize Home',prog:15,target:'Sell, buy condo',current:'Planning stage',due:'2029'},{icon:'fa-file-alt',label:'Estate Documents',prog:80,target:'Will + POA',current:'Will done',due:'2026'}], milestones:[{icon:'fa-exclamation-triangle',label:'Term P-100320 EXPIRES',date:'Sep 2026',type:'urgent'},{icon:'fa-birthday-cake',label:'Birthday / Medicare eligible',date:'Mar 2027',type:'family'},{icon:'fa-piggy-bank',label:'SS eligibility start',date:'2028',type:'financial'}] },
+  5: { lifeStage:'Young Family', goals:[{icon:'fa-shield-alt',label:'Increase Life Coverage',prog:40,target:'$750K',current:'$300K',due:'2026'},{icon:'fa-graduation-cap',label:'Start 529 Plan',prog:0,target:'$100K by 2042',current:'Not started',due:'2042'},{icon:'fa-heartbeat',label:'Disability Insurance',prog:0,target:'60% income DI',current:'Not started',due:'2026'},{icon:'fa-home',label:'Build Emergency Fund',prog:25,target:'6 months',current:'1 month',due:'2027'}], milestones:[{icon:'fa-baby',label:'New baby — immediate needs',date:'Now',type:'urgent'},{icon:'fa-pen-fancy',label:'Pending e-signature deadline',date:'Apr 15, 2026',type:'urgent'},{icon:'fa-birthday-cake',label:"Child's 1st birthday",date:'Jun 2026',type:'family'}] },
+  6: { lifeStage:'Pre-Retirement', goals:[{icon:'fa-beach',label:'Retire at 62 (14 mo)',prog:88,target:'$1.5M income assets',current:'$1.32M',due:'2027'},{icon:'fa-landmark',label:'Estate Planning Complete',prog:65,target:'Trust + Will',current:'Will done',due:'2026'},{icon:'fa-chart-pie',label:'Annuity Ladder Strategy',prog:30,target:'$95K ladder',current:'In discussion',due:'2026'},{icon:'fa-umbrella',label:'LTC Planning',prog:10,target:'$300K coverage',current:'No LTC policy',due:'2026'}], milestones:[{icon:'fa-calendar-check',label:'Annual review meeting',date:'Apr 15, 2026',type:'meeting'},{icon:'fa-file-medical-alt',label:'Claim CLM-2026-0035 resolve',date:'May 2026',type:'policy'},{icon:'fa-piggy-bank',label:'Annuity maturity date',date:'Oct 2026',type:'financial'}] },
+  7: { lifeStage:'Early Career', goals:[{icon:'fa-shield-alt',label:'Close Term Life $500K',prog:80,target:'$500K Term',current:'Pending signature',due:'2026'},{icon:'fa-piggy-bank',label:'Max Roth IRA',prog:40,target:'$7K/yr',current:'$2.8K contributed',due:'Dec 2026'},{icon:'fa-home',label:'Save for Home Down Payment',prog:22,target:'$80K',current:'$17K saved',due:'2028'},{icon:'fa-graduation-cap',label:'Pay Off Student Loans',prog:18,target:'$68K',current:'$12K paid',due:'2030'}], milestones:[{icon:'fa-pen-fancy',label:'E-signature deadline',date:'Apr 15, 2026',type:'urgent'},{icon:'fa-birthday-cake',label:'30th Birthday',date:'Aug 2026',type:'family'},{icon:'fa-medal',label:'1-year policy anniversary',date:'2027',type:'policy'}] },
+  8: { lifeStage:'Wealth Preservation', goals:[{icon:'fa-landmark',label:'Legacy & Estate',prog:90,target:'Trust + 2 trusts active',current:'Complete',due:'Done'},{icon:'fa-umbrella',label:'LTC Coverage Gap',prog:35,target:'$600K LTC',current:'$300K policy',due:'2026'},{icon:'fa-chart-line',label:'UMA Growth Target',prog:78,target:'$350K AUM',current:'$280K',due:'2027'},{icon:'fa-star',label:'Referral Program',prog:80,target:'5 referrals/yr',current:'4 given',due:'Dec 2026'}], milestones:[{icon:'fa-calendar-check',label:'Annual review',date:'Apr 15, 2026',type:'meeting'},{icon:'fa-medal',label:'Policy P-100360 Anniversary',date:'Jun 2026',type:'policy'},{icon:'fa-landmark',label:'Trust review — attorney',date:'Sep 2026',type:'financial'}] },
+};
+
+function _cmGoals(client) {
+  const gd = cmGoalsData[client.id] || { goals:[], milestones:[] };
+  const lifeStageColors = {'Peak Earner':'#003087','Young Family':'#059669','Wealth Accumulation':'#7c3aed','Pre-Retirement':'#0891b2','Wealth Preservation':'#d97706','Early Career':'#10b981'};
+  const lsc = lifeStageColors[gd.lifeStage] || '#003087';
+
+  const goalsHtml = gd.goals.map(g => {
+    const pc = parseInt(g.prog);
+    const barColor = pc >= 80 ? '#059669' : pc >= 50 ? '#0891b2' : pc >= 25 ? '#f59e0b' : '#dc2626';
+    return `<div class="cm-goal-row">
+      <div class="cm-goal-icon" style="background:${barColor}20;color:${barColor}"><i class="fas ${g.icon}"></i></div>
+      <div class="cm-goal-info">
+        <div class="cm-goal-label">${g.label}</div>
+        <div class="cm-goal-sub">${g.current} of ${g.target} · Due: ${g.due}</div>
+        <div class="cm-goal-track"><div class="cm-goal-fill" style="width:${pc}%;background:${barColor}"></div></div>
+      </div>
+      <div class="cm-goal-pct" style="color:${barColor}">${pc}%</div>
+    </div>`;
+  }).join('');
+
+  const milestoneTypes = { urgent:'#dc2626', family:'#7c3aed', financial:'#059669', policy:'#003087', meeting:'#0891b2' };
+  const milestonesHtml = gd.milestones.map(m => `
+    <div class="cm-milestone-row">
+      <div class="cm-ms-dot" style="background:${milestoneTypes[m.type]||'#6b7280'}20;color:${milestoneTypes[m.type]||'#6b7280'}"><i class="fas ${m.icon}"></i></div>
+      <div class="cm-ms-info"><div class="cm-ms-label">${m.label}</div><div class="cm-ms-date">${m.date}</div></div>
+      <span class="cm-ms-badge" style="background:${milestoneTypes[m.type]||'#6b7280'}20;color:${milestoneTypes[m.type]||'#6b7280'}">${m.type}</span>
+    </div>`).join('');
+
+  return `
+    <div class="cm-life-stage-banner" style="background:${lsc}15;border-left:4px solid ${lsc}">
+      <i class="fas fa-map-signs" style="color:${lsc};font-size:18px"></i>
+      <div><div class="cm-ls-label">Life Stage</div><div class="cm-ls-val" style="color:${lsc}">${gd.lifeStage||'—'}</div></div>
+      <div class="cm-ls-hint">Goals and milestones are tailored to this life stage</div>
+    </div>
+
+    <div class="cm-goals-section-title"><i class="fas fa-bullseye" style="color:#003087"></i> Financial Goals (${gd.goals.length})</div>
+    <div class="cm-goals-list">${goalsHtml}</div>
+
+    <div class="cm-goals-section-title" style="margin-top:18px"><i class="fas fa-flag" style="color:#d97706"></i> Upcoming Milestones</div>
+    <div class="cm-milestones-list">${milestonesHtml}</div>
+  `;
+}
+
+// ── Documents tab data ───────────────────────────────────────
+const cmDocsData = {
+  1: [
+    { id:'DOC-001', name:'Whole Life Policy P-100291', type:'Policy', format:'PDF', size:'2.4 MB', date:'Nov 2019', status:'current', category:'insurance' },
+    { id:'DOC-002', name:'Term Life Policy P-100292', type:'Policy', format:'PDF', size:'1.8 MB', date:'Mar 2021', status:'current', category:'insurance' },
+    { id:'DOC-003', name:'LTC Policy P-100293', type:'Policy', format:'PDF', size:'3.1 MB', date:'Jun 2022', status:'current', category:'insurance' },
+    { id:'DOC-004', name:'Deferred Annuity Illustration', type:'Illustration', format:'PDF', size:'1.2 MB', date:'Feb 2026', status:'current', category:'retirement' },
+    { id:'DOC-005', name:'Estate Plan Documents 2019', type:'Legal', format:'PDF', size:'5.6 MB', date:'Jan 2019', status:'review', category:'advisory' },
+    { id:'DOC-006', name:'Annual Review Presentation 2026', type:'Review', format:'PPTX', size:'3.8 MB', date:'Jan 2026', status:'current', category:'review' },
+  ],
+  2: [
+    { id:'DOC-011', name:'Universal Life P-100301', type:'Policy', format:'PDF', size:'2.1 MB', date:'Apr 2020', status:'current', category:'insurance' },
+    { id:'DOC-012', name:'VUL P-100302 Policy Doc', type:'Policy', format:'PDF', size:'2.8 MB', date:'Sep 2023', status:'current', category:'insurance' },
+    { id:'DOC-013', name:'DI Insurance Illustration', type:'Illustration', format:'PDF', size:'0.9 MB', date:'Mar 2026', status:'current', category:'insurance' },
+    { id:'DOC-014', name:'Annuity Quote Mar 2026', type:'Quote', format:'PDF', size:'0.7 MB', date:'Mar 2026', status:'current', category:'retirement' },
+  ],
+  3: [
+    { id:'DOC-021', name:'Whole Life P-100310 Policy', type:'Policy', format:'PDF', size:'2.6 MB', date:'Jun 2018', status:'current', category:'insurance' },
+    { id:'DOC-022', name:'VUL P-100311 Policy', type:'Policy', format:'PDF', size:'3.2 MB', date:'Jan 2020', status:'current', category:'insurance' },
+    { id:'DOC-023', name:'Buy-Sell Agreement A-300102', type:'Legal', format:'PDF', size:'4.4 MB', date:'Mar 2020', status:'current', category:'advisory' },
+    { id:'DOC-024', name:'NQDC Plan Document A-300103', type:'Legal', format:'PDF', size:'2.9 MB', date:'Jan 2020', status:'current', category:'advisory' },
+    { id:'DOC-025', name:'VUL Sub-account Report Q1 2026', type:'Statement', format:'PDF', size:'1.1 MB', date:'Apr 2026', status:'current', category:'investments' },
+    { id:'DOC-026', name:'Claim CLM-2026-0041 Filed', type:'Claim', format:'PDF', size:'0.8 MB', date:'Apr 2026', status:'pending', category:'claims' },
+  ],
+  4: [
+    { id:'DOC-031', name:'Term Life P-100320 — EXPIRES SEP 2026', type:'Policy', format:'PDF', size:'1.6 MB', date:'Jun 2016', status:'urgent', category:'insurance' },
+    { id:'DOC-032', name:'LTC Policy P-100321', type:'Policy', format:'PDF', size:'2.8 MB', date:'Feb 2020', status:'current', category:'insurance' },
+    { id:'DOC-033', name:'Immediate Annuity Illustration', type:'Illustration', format:'PDF', size:'0.8 MB', date:'Jan 2026', status:'current', category:'retirement' },
+    { id:'DOC-034', name:'Renewal Notice P-100320', type:'Notice', format:'PDF', size:'0.4 MB', date:'Feb 2026', status:'urgent', category:'insurance' },
+  ],
+  5: [
+    { id:'DOC-041', name:'Term Life P-100350 — Pending', type:'Policy', format:'PDF', size:'1.4 MB', date:'Mar 2026', status:'pending', category:'insurance' },
+    { id:'DOC-042', name:'529 Plan Illustration', type:'Illustration', format:'PDF', size:'0.6 MB', date:'Apr 2026', status:'current', category:'retirement' },
+    { id:'DOC-043', name:'DI Insurance Illustration', type:'Illustration', format:'PDF', size:'0.7 MB', date:'Apr 2026', status:'current', category:'insurance' },
+  ],
+  6: [
+    { id:'DOC-051', name:'UL Policy P-100340', type:'Policy', format:'PDF', size:'2.3 MB', date:'Jan 2017', status:'current', category:'insurance' },
+    { id:'DOC-052', name:'DI Policy P-100341', type:'Policy', format:'PDF', size:'2.1 MB', date:'May 2021', status:'current', category:'insurance' },
+    { id:'DOC-053', name:'Fixed Annuity Statement', type:'Statement', format:'PDF', size:'0.9 MB', date:'Q1 2026', status:'current', category:'investments' },
+    { id:'DOC-054', name:'Estate Planning Will', type:'Legal', format:'PDF', size:'3.8 MB', date:'2022', status:'current', category:'advisory' },
+    { id:'DOC-055', name:'Claim CLM-2026-0035 — APS Pending', type:'Claim', format:'PDF', size:'0.5 MB', date:'Apr 2026', status:'pending', category:'claims' },
+    { id:'DOC-056', name:'Annuity Ladder Proposal', type:'Illustration', format:'PDF', size:'1.1 MB', date:'Apr 2026', status:'current', category:'retirement' },
+  ],
+  7: [
+    { id:'DOC-061', name:'Term App P-100350 — E-Signature Pending', type:'Application', format:'PDF', size:'1.2 MB', date:'Mar 2026', status:'urgent', category:'insurance' },
+  ],
+  8: [
+    { id:'DOC-071', name:'WL Policy P-100360', type:'Policy', format:'PDF', size:'3.4 MB', date:'Jun 2015', status:'current', category:'insurance' },
+    { id:'DOC-072', name:'LTC Policy P-100361', type:'Policy', format:'PDF', size:'2.7 MB', date:'Mar 2019', status:'current', category:'insurance' },
+    { id:'DOC-073', name:'VUL Policy P-100362', type:'Policy', format:'PDF', size:'3.1 MB', date:'Aug 2021', status:'current', category:'insurance' },
+    { id:'DOC-074', name:'UMA Agreement A-300201', type:'Agreement', format:'PDF', size:'2.2 MB', date:'2021', status:'current', category:'advisory' },
+    { id:'DOC-075', name:'Trust Documents — 2 Trusts', type:'Legal', format:'PDF', size:'8.1 MB', date:'Jan 2026', status:'current', category:'advisory' },
+    { id:'DOC-076', name:'UMA Q1 2026 Performance Report', type:'Statement', format:'PDF', size:'1.4 MB', date:'Apr 2026', status:'current', category:'investments' },
+    { id:'DOC-077', name:'Annual Review Deck 2026', type:'Review', format:'PPTX', size:'4.2 MB', date:'Feb 2026', status:'current', category:'review' },
+  ],
+};
+
+const docCatColors = { insurance:'#003087', investments:'#059669', retirement:'#0891b2', advisory:'#7c3aed', claims:'#dc2626', review:'#d97706' };
+const docTypeIcons = { Policy:'fa-file-contract', Statement:'fa-chart-bar', Legal:'fa-gavel', Illustration:'fa-lightbulb', Quote:'fa-tag', Claim:'fa-file-medical-alt', Application:'fa-pen-fancy', Agreement:'fa-handshake', Notice:'fa-bell', Review:'fa-presentation' };
+
+function _cmDocuments(client) {
+  const docs = cmDocsData[client.id] || [];
+  const urgentDocs = docs.filter(d => d.status === 'urgent' || d.status === 'pending');
+
+  const docRows = docs.map(d => {
+    const sc = d.status === 'urgent' ? '#dc2626' : d.status === 'pending' ? '#f59e0b' : '#059669';
+    const sl = d.status === 'urgent' ? 'Urgent' : d.status === 'pending' ? 'Pending' : 'Current';
+    const ic = docTypeIcons[d.type] || 'fa-file';
+    const cc = docCatColors[d.category] || '#6b7280';
+    return `<div class="cm-doc-row">
+      <div class="cm-doc-icon" style="background:${cc}15;color:${cc}"><i class="fas ${ic}"></i></div>
+      <div class="cm-doc-info">
+        <div class="cm-doc-name">${d.name}</div>
+        <div class="cm-doc-meta">${d.type} · ${d.format} · ${d.size} · ${d.date}</div>
+      </div>
+      <span class="cm-doc-status" style="background:${sc}15;color:${sc}">${sl}</span>
+      <div class="cm-doc-actions">
+        <button class="cm-doc-btn" title="View"><i class="fas fa-eye"></i></button>
+        <button class="cm-doc-btn" title="Download"><i class="fas fa-download"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="cm-docs-header">
+      <div class="cm-docs-stats">
+        <span class="cm-docs-count"><i class="fas fa-folder"></i> ${docs.length} Documents</span>
+        ${urgentDocs.length ? `<span class="cm-docs-urgent"><i class="fas fa-exclamation-circle"></i> ${urgentDocs.length} Need Attention</span>` : ''}
+      </div>
+      <button class="btn btn-outline" style="font-size:12px;padding:6px 12px" onclick="uploadDocToast()"><i class="fas fa-upload"></i> Upload</button>
+    </div>
+    <div class="cm-docs-list">${docRows || '<div class="cm-empty">No documents on file yet.</div>'}</div>
+  `;
+}
+
+// ── Referrals tab data ───────────────────────────────────────
+const cmReferralsData = {
+  1: { givenTo:[{name:'Linda Morrison', product:'Estate Planning', date:'Jan 2025', status:'Converted'},{name:'David Thompson', product:'Term Life', date:'Aug 2025', status:'Converted'}], receivedFrom:{name:'Linda Morrison', date:'2019'}, potentialRefs:[{name:'Business Partner (John M.)',reason:'Fellow attorney, estate gap'},{name:'College Friend',reason:'Life insurance prospect'}] },
+  2: { givenTo:[], receivedFrom:{name:'Direct / NYL website', date:'2020'}, potentialRefs:[{name:'Spouse Coworker',reason:'Young family, insurance needs'},{name:'Sister',reason:'No life insurance identified'}] },
+  3: { givenTo:[{name:'Linda Morrison', product:'VUL Investment', date:'Mar 2024', status:'Converted'},{name:'Maria Gonzalez', product:'Business Advisory', date:'Oct 2024', status:'In Progress'},{name:'Alex Rivera', product:'Term Life', date:'Feb 2026', status:'In Progress'}], receivedFrom:{name:'Direct / NYL website', date:'2018'}, potentialRefs:[{name:'Business Partner',reason:'Key-person insurance need'},{name:'Board Member (CFO)',reason:'Executive benefits gap'},{name:'Attorney colleague',reason:'Estate planning prospect'}] },
+  4: { givenTo:[], receivedFrom:{name:'Direct', date:'2016'}, potentialRefs:[{name:'Church group member',reason:'Pre-retirement planning'}] },
+  5: { givenTo:[], receivedFrom:{name:'Maria Gonzalez', date:'2023'}, potentialRefs:[{name:'Spouse',reason:'Disability insurance'},{name:'Work colleague',reason:'Young family, similar profile'}] },
+  6: { givenTo:[{name:'Kevin Park', product:'Term Life', date:'Jan 2025', status:'In Progress'},{name:'Alex Rivera', product:'Investments', date:'Nov 2025', status:'In Progress'}], receivedFrom:{name:'Robert Chen', date:'2017'}, potentialRefs:[{name:'Sister',reason:'Pre-retirement planning'},{name:'Neighbor',reason:'Estate planning interest'}] },
+  7: { givenTo:[], receivedFrom:{name:'David Thompson', date:'2026'}, potentialRefs:[{name:'Roommate',reason:'Young professional, no coverage'},{name:'Work friend',reason:'Tech worker, similar profile'}] },
+  8: { givenTo:[{name:'James Whitfield', product:'Estate Planning', date:'Jan 2019', status:'Converted'},{name:'Robert Chen', product:'Business Advisory', date:'Jun 2020', status:'Converted'},{name:'Sandra Williams', product:'Annuity', date:'Apr 2023', status:'In Progress'},{name:'Maria Gonzalez', product:'Advisory Services', date:'Sep 2024', status:'Converted'}], receivedFrom:{name:'Direct', date:'2015'}, potentialRefs:[{name:'Golf club member (Attorney)',reason:'Estate planning gap'},{name:'Neighbor (Doctor)',reason:'High-income, coverage review'},{name:'Former colleague (Exec)',reason:'NQDC plan opportunity'}] },
+};
+
+function _cmReferrals(client) {
+  const rd = cmReferralsData[client.id] || { givenTo:[], potentialRefs:[] };
+  const sc = {'Converted':'#059669','In Progress':'#0891b2','Pending':'#f59e0b'};
+
+  const givenHtml = rd.givenTo.length ? rd.givenTo.map(r => `
+    <div class="cm-ref-row">
+      <div class="cm-ref-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-user-plus"></i></div>
+      <div class="cm-ref-info"><div class="cm-ref-name">${r.name}</div><div class="cm-ref-meta">${r.product} · ${r.date}</div></div>
+      <span class="cm-ref-status" style="background:${sc[r.status]||'#6b7280'}20;color:${sc[r.status]||'#6b7280'}">${r.status}</span>
+    </div>`).join('') : '<div class="cm-ref-empty">No referrals given yet — discuss referral program at next meeting.</div>';
+
+  const potHtml = (rd.potentialRefs||[]).map(r => `
+    <div class="cm-ref-row potential">
+      <div class="cm-ref-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-lightbulb"></i></div>
+      <div class="cm-ref-info"><div class="cm-ref-name">${r.name}</div><div class="cm-ref-meta">${r.reason}</div></div>
+      <button class="cm-ref-ask-btn" onclick="cmAskReferral('${r.name.replace(/'/g,"\\'")}',${client.id})"><i class="fas fa-paper-plane"></i> Ask</button>
+    </div>`).join('');
+
+  return `
+    <div class="cm-ref-header">
+      <div class="cm-ref-stats">
+        <div class="cm-ref-stat"><span class="cm-ref-stat-val">${rd.givenTo.length}</span><span class="cm-ref-stat-lbl">Referrals Given</span></div>
+        <div class="cm-ref-stat"><span class="cm-ref-stat-val">${rd.givenTo.filter(r=>r.status==='Converted').length}</span><span class="cm-ref-stat-lbl">Converted</span></div>
+        <div class="cm-ref-stat"><span class="cm-ref-stat-val" style="color:#d97706">${(rd.potentialRefs||[]).length}</span><span class="cm-ref-stat-lbl">AI Prospects</span></div>
+      </div>
+    </div>
+
+    <div class="cm-ref-source">
+      <i class="fas fa-user-check" style="color:#003087"></i>
+      <span>Referred by: <strong>${(rd.receivedFrom||{}).name||'—'}</strong> · ${(rd.receivedFrom||{}).date||''}</span>
+    </div>
+
+    <div class="cm-goals-section-title"><i class="fas fa-share-alt" style="color:#059669"></i> Referrals Given (${rd.givenTo.length})</div>
+    <div class="cm-ref-list">${givenHtml}</div>
+
+    <div class="cm-goals-section-title" style="margin-top:16px"><i class="fas fa-robot" style="color:#d97706"></i> AI-Identified Referral Opportunities (${(rd.potentialRefs||[]).length})</div>
+    <div class="cm-ref-list">${potHtml || '<div class="cm-ref-empty">No AI prospects identified yet.</div>'}</div>
+  `;
+}
+
+function cmAskReferral(name, clientId) {
+  const client = clientData.find(c => c.id === clientId);
+  const ta = document.getElementById('cm-outreach-text');
+  switchClientTab('outreach', document.getElementById('cm-tab-outreach'));
+  setTimeout(() => {
+    const ta2 = document.getElementById('cm-outreach-text');
+    if (ta2 && client) ta2.value = `Dear ${client.name},\n\nI hope you're doing well! I noticed that ${name} might benefit from a financial review.\n\nWould you feel comfortable making an introduction? A 15-minute call could make a significant difference for them.\n\nThank you for your continued trust!\n\nBest,\nSridhar R. | NYL Senior Agent`;
+  }, 200);
+}
+
+function scheduleCMeMeeting(clientId) {
+  const client = clientData.find(c => c.id === clientId);
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast';
+  toast.innerHTML = `<i class="fas fa-calendar-plus"></i> Meeting request sent to ${client ? client.name : 'client'}.`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2800);
+}
+
+function uploadDocToast() {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast';
+  toast.innerHTML = '<i class="fas fa-upload"></i> Document upload feature — coming soon.';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2800);
+}
+
+// ── AI cross-sell matrix data ────────────────────────────────
+const cmCrossSell = {
+  1: [{ product:'Deferred Annuity', domain:'Retirement', value:'$33.6K/yr', priority:'High', readiness:82 },{ product:'Estate Trust Completion', domain:'Advisory', value:'$5K fee', priority:'High', readiness:75 },{ product:'LTC Upgrade', domain:'Insurance', value:'$2.4K/yr', priority:'Medium', readiness:60 }],
+  2: [{ product:'Disability Income Insurance', domain:'Insurance', value:'$3K/yr', priority:'Urgent', readiness:90 },{ product:'Fixed Annuity', domain:'Retirement', value:'$2.4K/yr', priority:'High', readiness:68 },{ product:'Mutual Fund', domain:'Investments', value:'$1.5K/yr', priority:'Medium', readiness:45 }],
+  3: [{ product:'LTC Insurance', domain:'Insurance', value:'$6K/yr', priority:'High', readiness:72 },{ product:'NQDC Expansion', domain:'Advisory', value:'$4K/yr', priority:'High', readiness:80 },{ product:'529 Plan', domain:'Retirement', value:'$2K/yr', priority:'Medium', readiness:55 }],
+  4: [{ product:'Immediate Annuity', domain:'Retirement', value:'$8.1K/yr', priority:'Urgent', readiness:88 },{ product:'Medicare Supplement', domain:'Insurance', value:'$3.6K/yr', priority:'High', readiness:70 },{ product:'Estate Planning', domain:'Advisory', value:'$2K fee', priority:'Medium', readiness:50 }],
+  5: [{ product:'Term Life Upgrade $750K', domain:'Insurance', value:'$2.4K/yr', priority:'Urgent', readiness:85 },{ product:'529 College Plan', domain:'Retirement', value:'$1.2K/yr', priority:'High', readiness:78 },{ product:'Disability Income', domain:'Insurance', value:'$2K/yr', priority:'High', readiness:72 }],
+  6: [{ product:'LTC Insurance $300K', domain:'Insurance', value:'$6K/yr', priority:'High', readiness:76 },{ product:'Annuity Ladder', domain:'Retirement', value:'$4.8K/yr', priority:'High', readiness:82 },{ product:'Trust & Estate', domain:'Advisory', value:'$3K fee', priority:'Medium', readiness:65 }],
+  7: [{ product:'Term Life $500K Close', domain:'Insurance', value:'$1.8K/yr', priority:'Urgent', readiness:95 },{ product:'Disability Income', domain:'Insurance', value:'$2K/yr', priority:'High', readiness:65 },{ product:'Roth IRA / Investments', domain:'Investments', value:'$1.2K/yr', priority:'Medium', readiness:48 }],
+  8: [{ product:'LTC Coverage Gap $300K', domain:'Insurance', value:'$6K/yr', priority:'High', readiness:80 },{ product:'UMA Expansion', domain:'Advisory', value:'$3K/yr AUM', priority:'Medium', readiness:70 },{ product:'Charitable Trust', domain:'Advisory', value:'Legacy value', priority:'Medium', readiness:55 }],
+};
+
 function _cmAI(client) {
   const ai = cmAIData[client.id] || { score:0, risk:'—', trend:'stable', insights:[], nba:'', revenue:'' };
   const trendIcon = ai.trend === 'up' ? 'fa-arrow-up' : ai.trend === 'down' ? 'fa-arrow-down' : 'fa-minus';
@@ -836,6 +1204,27 @@ function _cmAI(client) {
   const riskColor = ai.risk === 'Low' ? '#059669' : ai.risk === 'Medium' ? '#f59e0b' : '#dc2626';
   const scoreWidth = ai.score;
   const scoreColor = ai.score >= 90 ? '#059669' : ai.score >= 75 ? '#0891b2' : ai.score >= 60 ? '#f59e0b' : '#dc2626';
+  const cs = cmCrossSell[client.id] || [];
+  const fd = cmFinancialData[client.id] || {};
+  const crColor = (fd.coverageRatio||0) >= 80 ? '#059669' : (fd.coverageRatio||0) >= 55 ? '#f59e0b' : '#dc2626';
+  const prioColors = { Urgent:'#dc2626', High:'#f59e0b', Medium:'#0891b2', Low:'#059669' };
+
+  const crossSellHtml = cs.map(c => {
+    const pc = c.readiness;
+    const bc = pc >= 80 ? '#059669' : pc >= 60 ? '#0891b2' : '#f59e0b';
+    return `<div class="cm-cs-row">
+      <div class="cm-cs-info">
+        <div class="cm-cs-product">${c.product}</div>
+        <div class="cm-cs-meta">${c.domain} · ${c.value}</div>
+        <div class="cm-cs-bar"><div class="cm-cs-fill" style="width:${pc}%;background:${bc}"></div></div>
+      </div>
+      <div class="cm-cs-right">
+        <span class="cm-cs-prio" style="background:${prioColors[c.priority]||'#6b7280'}20;color:${prioColors[c.priority]||'#6b7280'}">${c.priority}</span>
+        <div class="cm-cs-ready">${pc}% ready</div>
+        <button class="cm-cs-act" onclick="switchClientTab('outreach',document.getElementById('cm-tab-outreach'))"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>`;
+  }).join('');
 
   return `
     <div class="cm-ai-score-row">
@@ -846,11 +1235,15 @@ function _cmAI(client) {
       </div>
       <div class="cm-ai-score-card">
         <div class="cm-ai-score-num" style="color:${riskColor}">${ai.risk}</div>
-        <div class="cm-ai-score-lbl">Risk Level</div>
+        <div class="cm-ai-score-lbl">Lapse Risk</div>
       </div>
       <div class="cm-ai-score-card">
         <div class="cm-ai-score-num" style="color:${trendColor}"><i class="fas ${trendIcon}"></i></div>
         <div class="cm-ai-score-lbl">Trend</div>
+      </div>
+      <div class="cm-ai-score-card">
+        <div class="cm-ai-score-num" style="color:${crColor}">${fd.coverageRatio||'—'}%</div>
+        <div class="cm-ai-score-lbl">Coverage</div>
       </div>
     </div>
 
@@ -868,6 +1261,9 @@ function _cmAI(client) {
           <div class="cm-ai-ins-text">${ins.text}</div>
         </div>`).join('')}
     </div>
+
+    <div class="cm-ai-insights-title" style="margin-top:14px"><i class="fas fa-crosshairs" style="color:#003087"></i> Cross-Sell &amp; Upsell Opportunities</div>
+    <div class="cm-cs-list">${crossSellHtml || '<div class="cm-empty">No opportunities identified.</div>'}</div>
 
     <div class="cm-ai-actions">
       <button class="btn btn-ai" onclick="closeClientModal();navigateTo('ai-agents')"><i class="fas fa-robot"></i> Full AI Analysis</button>
