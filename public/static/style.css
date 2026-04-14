@@ -1467,12 +1467,10 @@ body {
 
 .kanban-col {
   min-width: 200px;
-  width: 200px;
   flex: 1 1 200px;
   background: var(--gray-100);
   border-radius: var(--radius);
   padding: 10px;
-  flex-shrink: 0;
   scroll-snap-align: start;
 }
 
@@ -5517,14 +5515,11 @@ body {
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Layout ── */
+/* Full-width: no sidebar grid — Kanban uses entire width */
 .sales-body-layout {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 16px;
+  display: block;
   margin-top: 0;
-  align-items: start;
 }
-@media (max-width: 1100px) { .sales-body-layout { grid-template-columns: 1fr; } }
 
 /* Main column holds list-view, focus-view, and kanban — all stacked */
 .sales-main-col {
@@ -5532,19 +5527,32 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  width: 100%;
 }
 
-.sales-kanban-wrap { overflow-x: auto; min-width: 0; }
+.sales-kanban-wrap { overflow-x: auto; min-width: 0; width: 100%; }
 
-/* Sidebar sticks to top while scrolling */
+/* ── Below-Kanban Intelligence Grid ── */
+/* 4 panels side-by-side; wraps to 2×2 on medium screens */
+.sales-intel-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+  align-items: start;
+}
+@media (max-width: 1300px) {
+  .sales-intel-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 700px) {
+  .sales-intel-grid { grid-template-columns: 1fr; }
+}
+
+/* The old sidebar class — now just a card panel in the intel grid */
 .sales-sidebar {
-  display: flex; flex-direction: column; gap: 14px; min-width: 0;
-  position: sticky; top: 64px; max-height: calc(100vh - 80px);
-  overflow-y: auto; padding-right: 2px;
+  display: contents; /* children flow directly into grid */
 }
-/* Hide sidebar scrollbar visually */
-.sales-sidebar::-webkit-scrollbar { width: 4px; }
-.sales-sidebar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+.sales-sidebar::-webkit-scrollbar { display: none; }
 
 /* ── KPI Strip extra colors ── */
 .skpi-icon.purple { background: linear-gradient(135deg,#7c3aed,#a855f7); }
@@ -14348,7 +14356,7 @@ body.spotlight-open { overflow: hidden; }
   .pipeline-toolbar { flex-direction: column; align-items: stretch; }
   .ptb-left, .ptb-right { width: 100%; }
   .stale-alert-strip { padding: 8px 10px; }
-  .sales-body-layout { grid-template-columns: 1fr; }
+  .sales-intel-grid { grid-template-columns: 1fr; }
   .alp-layout { grid-template-columns: 1fr; }
   .add-deal-grid { grid-template-columns: 1fr; }
 }

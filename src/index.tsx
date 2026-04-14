@@ -5430,11 +5430,8 @@ function SalesPage() {
           </div>
         </div>
 
-      {/* ── Main body: Kanban + right sidebar ── */}
-      <div class="sales-body-layout">
-
-        {/* ── Main column: list/focus views + kanban ── */}
-        <div class="sales-main-col">
+      {/* ── Main body: full-width Kanban ── */}
+      <div class="sales-main-col">
 
           {/* ── Pipeline List View (hidden by default) ── */}
           <div id="pipeline-list-view" style="display:none" class="pipeline-list-view">
@@ -5797,10 +5794,10 @@ function SalesPage() {
 
           </div>{/* end kanban-board */}
         </div>{/* end sales-kanban-wrap */}
-        </div>{/* end sales-main-col */}
+      </div>{/* end sales-main-col */}
 
-        {/* ── Right Sidebar: AI Pipeline Optimizer + Commission Tracker ── */}
-        <div class="sales-sidebar">
+      {/* ── Below-Kanban Intelligence Grid ── */}
+      <div class="sales-intel-grid">
 
           {/* AI Win Engine Panel */}
           <div class="pipeline-ai-panel ai-win-engine">
@@ -6151,8 +6148,7 @@ function SalesPage() {
 
           </div>{/* end comm-tracker */}
 
-        </div>{/* end sales-sidebar */}
-      </div>{/* end sales-body-layout */}
+      </div>{/* end sales-intel-grid */}
 
       {/* ── Activity Log / Follow-up Tracker ── */}
       <div class="activity-log-panel" id="activity-log-panel">
