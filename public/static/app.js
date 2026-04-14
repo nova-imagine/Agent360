@@ -102,48 +102,68 @@ function initDashboardCharts() {
   if (revenueEl) {
     if (revenueEl._chartInstance) revenueEl._chartInstance.destroy();
     revenueEl._chartInstance = new Chart(revenueEl, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         datasets: [{
-          label: 'Premium Revenue ($K)',
-          data: [380, 395, 410, 487, 465, 490, 510, 498, 520, 535, 560, 590],
-          borderColor: '#003087',
-          backgroundColor: 'rgba(0, 48, 135, 0.08)',
-          borderWidth: 2.5,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#003087',
-          pointRadius: 4,
-          pointHoverRadius: 6
+          label: 'Insurance ($K)',
+          data: [248, 258, 271, 312, 298, 320, 335, 318, 342, 358, 372, 390],
+          backgroundColor: 'rgba(0,48,135,0.85)',
+          borderRadius: 3,
+          stack: 'revenue'
+        }, {
+          label: 'Investments ($K)',
+          data: [62, 67, 72, 76, 80, 85, 90, 88, 95, 102, 108, 115],
+          backgroundColor: 'rgba(5,150,105,0.85)',
+          borderRadius: 3,
+          stack: 'revenue'
+        }, {
+          label: 'Retirement ($K)',
+          data: [38, 40, 43, 46, 50, 53, 57, 55, 60, 64, 68, 72],
+          backgroundColor: 'rgba(217,119,6,0.85)',
+          borderRadius: 3,
+          stack: 'revenue'
+        }, {
+          label: 'Advisory ($K)',
+          data: [32, 30, 34, 53, 37, 42, 46, 44, 48, 52, 55, 60],
+          backgroundColor: 'rgba(124,58,237,0.85)',
+          borderRadius: 3,
+          stack: 'revenue'
         }, {
           label: 'Target ($K)',
-          data: [400, 410, 420, 440, 460, 475, 490, 505, 520, 535, 550, 570],
+          type: 'line',
+          data: [400, 410, 420, 490, 475, 510, 535, 515, 555, 585, 610, 645],
           borderColor: '#c8972a',
           backgroundColor: 'transparent',
           borderWidth: 2,
           borderDash: [5, 5],
           tension: 0.4,
-          pointRadius: 0
+          pointRadius: 0,
+          stack: undefined
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, position: 'top' },
+          legend: {
+            display: true,
+            position: 'top',
+            labels: { boxWidth: 12, font: { size: 11 }, padding: 12 }
+          },
           tooltip: {
             backgroundColor: '#1a2744',
             padding: 12,
             callbacks: {
-              label: ctx => ` $${ctx.parsed.y}K`
+              label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y}K`
             }
           }
         },
         scales: {
-          x: { grid: { display: false } },
+          x: { grid: { display: false }, stacked: true },
           y: {
             grid: { color: 'rgba(0,0,0,0.04)' },
+            stacked: true,
             ticks: { callback: val => `$${val}K` }
           }
         }

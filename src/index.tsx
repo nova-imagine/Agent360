@@ -700,8 +700,8 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* ── ROW 2: Book Composition + Opportunity Radar + Commission ── */}
-      <div class="dash-row-3">
+      {/* ── ROW 2: Book Composition + Opportunity Radar (2-col) ── */}
+      <div class="dash-row-2col">
 
         {/* Book Composition Donut */}
         <div class="dash-card goal-card">
@@ -713,10 +713,10 @@ function DashboardPage() {
             <canvas id="bookCompositionChart"></canvas>
           </div>
           <div class="donut-legend" style="margin-top:10px">
-            <div class="legend-item"><span class="dot blue"></span>Insurance 38% · $312K</div>
+            <div class="legend-item"><span class="dot blue"></span>Insurance 38% · $312K premium</div>
             <div class="legend-item"><span class="dot green"></span>Investments 26% · $4.2M AUM</div>
-            <div class="legend-item"><span class="dot gold"></span>Retirement 22% · $1.8M</div>
-            <div class="legend-item"><span class="dot purple"></span>Advisory 14% · $2.1M</div>
+            <div class="legend-item"><span class="dot gold"></span>Retirement 22% · $1.8M assets</div>
+            <div class="legend-item"><span class="dot purple"></span>Advisory 14% · $2.1M managed</div>
           </div>
           <div class="goal-list" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100)">
             <div class="goal-item">
@@ -793,22 +793,35 @@ function DashboardPage() {
               </div>
               <div class="opp-value">$2K/yr</div>
             </div>
+            <div class="opp-item">
+              <div class="opp-domain-icon ret-bg"><i class="fas fa-piggy-bank"></i></div>
+              <div class="opp-info">
+                <div class="opp-title">401(k) Rollover — Alex Rivera</div>
+                <div class="opp-meta"><span class="act-domain-pill ret">Retirement</span> Prospect · prior employer plan · $85K</div>
+              </div>
+              <div class="opp-value">$4K/yr</div>
+            </div>
           </div>
           <div class="comm-stats-row" style="margin-top:12px">
-            <div class="comm-stat"><div class="cs-num green-text">$31.2K</div><div class="cs-lbl2">Total Potential</div></div>
-            <div class="comm-stat"><div class="cs-num">6</div><div class="cs-lbl2">Opportunities</div></div>
-            <div class="comm-stat"><div class="cs-num" style="color:#7c3aed">3 Domains</div><div class="cs-lbl2">Inv/Ret/Adv</div></div>
+            <div class="comm-stat"><div class="cs-num green-text">$35.2K</div><div class="cs-lbl2">Total Potential</div></div>
+            <div class="comm-stat"><div class="cs-num">7</div><div class="cs-lbl2">Opportunities</div></div>
+            <div class="comm-stat"><div class="cs-num" style="color:#7c3aed">4 Domains</div><div class="cs-lbl2">All Lines</div></div>
           </div>
           <button class="btn btn-ai" style="width:100%;margin-top:10px" onclick="sendContextMessage('Show me all cross-sell and upsell opportunities across 247 clients — rank by revenue potential','advisor')"><i class="fas fa-robot"></i> Full AI Opportunity Analysis</button>
         </div>
 
-        {/* Lapse Risk + Commission combined */}
-        <div class="dash-card lapse-card">
+      </div>
+
+      {/* ── ROW 3: Commission Tracker + Lapse Risk Monitor (2-col, equal weight) ── */}
+      <div class="dash-row-2col">
+
+        {/* Commission Tracker — standalone card */}
+        <div class="dash-card">
           <div class="card-header">
             <h3><i class="fas fa-wallet"></i> Commission Tracker</h3>
             <span class="comm-ytd-badge">YTD 2026</span>
           </div>
-          <div class="comm-total" style="text-align:center;margin-bottom:12px">
+          <div class="comm-total" style="text-align:center;margin-bottom:14px">
             <div class="comm-total-val">$42,180</div>
             <div class="comm-total-lbl">Earned This Month</div>
           </div>
@@ -839,215 +852,291 @@ function DashboardPage() {
             <div class="comm-stat"><div class="cs-num">$240K</div><div class="cs-lbl2">Annual Target</div></div>
             <div class="comm-stat"><div class="cs-num green-text">78%</div><div class="cs-lbl2">Progress</div></div>
           </div>
-          <div style="padding-top:12px;margin-top:4px;border-top:1px solid var(--gray-100)">
-            <div class="card-header" style="padding:0;margin-bottom:8px"><h3><i class="fas fa-exclamation-triangle"></i> Lapse Risk Monitor</h3><button class="btn-link" onclick="sendContextMessage('Show all 4 lapse-risk clients with risk scores, triggers, and recommended retention actions','renewal')">AI Analysis →</button></div>
-            <div class="lapse-summary-bar">
-              <div class="lapse-seg high-risk"><span class="lapse-count">4</span><span class="lapse-lbl">High Risk</span></div>
-              <div class="lapse-seg med-risk"><span class="lapse-count">11</span><span class="lapse-lbl">Medium Risk</span></div>
-              <div class="lapse-seg low-risk"><span class="lapse-count">232</span><span class="lapse-lbl">Low Risk</span></div>
-            </div>
-            {/* ── Retention Intelligence rows ── */}
-            <div class="ri-rows">
-              <div class="ri-row ri-high" onclick="openRetentionModal('ret-patricia')">
-                <div class="ri-risk-badge high">HIGH</div>
-                <div class="ri-info">
-                  <div class="ri-name">Patricia Nguyen</div>
-                  <div class="ri-trigger"><i class="fas fa-battery-quarter"></i> UL Under-funded · Lapse ~Jun 20</div>
-                </div>
-                <div class="ri-score-wrap"><div class="ri-score high">87</div><div class="ri-score-lbl">Risk</div></div>
-                <button class="ri-action-btn" onclick="event.stopPropagation();openRetentionModal('ret-patricia')"><i class="fas fa-bolt"></i> Act</button>
-              </div>
-              <div class="ri-row ri-high" onclick="openRetentionModal('ret-sandra')">
-                <div class="ri-risk-badge high">HIGH</div>
-                <div class="ri-info">
-                  <div class="ri-name">Sandra Williams</div>
-                  <div class="ri-trigger"><i class="fas fa-calendar-times"></i> Term Renewal · Sep 2026 · 153 days</div>
-                </div>
-                <div class="ri-score-wrap"><div class="ri-score high">79</div><div class="ri-score-lbl">Risk</div></div>
-                <button class="ri-action-btn" onclick="event.stopPropagation();openRetentionModal('ret-sandra')"><i class="fas fa-bolt"></i> Act</button>
-              </div>
-              <div class="ri-row ri-med" onclick="openRetentionModal('ret-kevin')">
-                <div class="ri-risk-badge med">MED</div>
-                <div class="ri-info">
-                  <div class="ri-name">Kevin Park</div>
-                  <div class="ri-trigger"><i class="fas fa-pause-circle"></i> Policy Pending · No contact 12 days</div>
-                </div>
-                <div class="ri-score-wrap"><div class="ri-score med">61</div><div class="ri-score-lbl">Risk</div></div>
-                <button class="ri-action-btn med" onclick="event.stopPropagation();openRetentionModal('ret-kevin')"><i class="fas fa-phone"></i> Call</button>
-              </div>
-              <div class="ri-row ri-med" onclick="openRetentionModal('ret-david')">
-                <div class="ri-risk-badge med">MED</div>
-                <div class="ri-info">
-                  <div class="ri-name">David Thompson</div>
-                  <div class="ri-trigger"><i class="fas fa-shield-alt"></i> Single policy · Under-insured · Age 33</div>
-                </div>
-                <div class="ri-score-wrap"><div class="ri-score med">54</div><div class="ri-score-lbl">Risk</div></div>
-                <button class="ri-action-btn med" onclick="event.stopPropagation();openRetentionModal('ret-david')"><i class="fas fa-phone"></i> Call</button>
-              </div>
-            </div>
-            {/* ── Retention Forecast Mini-Strip ── */}
-            <div class="ri-forecast-strip">
-              <div class="ri-fc-card urgent">
-                <div class="ri-fc-icon"><i class="fas fa-battery-quarter"></i></div>
-                <div class="ri-fc-body">
-                  <div class="ri-fc-label">Patricia Nguyen</div>
-                  <div class="ri-fc-val red">Lapse in ~68d</div>
-                  <div class="ri-fc-bar-outer"><div class="ri-fc-bar red" style="width:87%"></div></div>
-                </div>
-              </div>
-              <div class="ri-fc-card high">
-                <div class="ri-fc-icon"><i class="fas fa-calendar-times"></i></div>
-                <div class="ri-fc-body">
-                  <div class="ri-fc-label">Sandra Williams</div>
-                  <div class="ri-fc-val orange">Term Expiry 153d</div>
-                  <div class="ri-fc-bar-outer"><div class="ri-fc-bar orange" style="width:79%"></div></div>
-                </div>
-              </div>
-              <div class="ri-fc-card med">
-                <div class="ri-fc-icon"><i class="fas fa-coins"></i></div>
-                <div class="ri-fc-body">
-                  <div class="ri-fc-label">James Whitfield</div>
-                  <div class="ri-fc-val purple">LTC Gap — Review</div>
-                  <div class="ri-fc-bar-outer"><div class="ri-fc-bar purple" style="width:48%"></div></div>
-                </div>
-              </div>
-            </div>
-            <button class="ri-view-all-btn" onclick="navigateTo('policies')"><i class="fas fa-heartbeat"></i> Lapse Prevention Dashboard →</button>
+          <div class="comm-pending" style="margin-top:12px"><i class="fas fa-clock"></i> <strong>$8,400</strong> pending in underwriting · expected by Apr 20</div>
+        </div>
+
+        {/* Lapse Risk Monitor — standalone card */}
+        <div class="dash-card">
+          <div class="card-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Lapse Risk Monitor</h3>
+            <button class="btn-link" onclick="sendContextMessage('Show all 4 lapse-risk clients with risk scores, triggers, and recommended retention actions','renewal')">AI Analysis →</button>
           </div>
+          <div class="lapse-summary-bar">
+            <div class="lapse-seg high-risk"><span class="lapse-count">4</span><span class="lapse-lbl">High Risk</span></div>
+            <div class="lapse-seg med-risk"><span class="lapse-count">11</span><span class="lapse-lbl">Medium Risk</span></div>
+            <div class="lapse-seg low-risk"><span class="lapse-count">232</span><span class="lapse-lbl">Low Risk</span></div>
+          </div>
+          <div class="ri-rows">
+            <div class="ri-row ri-high" onclick="openRetentionModal('ret-patricia')">
+              <div class="ri-risk-badge high">HIGH</div>
+              <div class="ri-info">
+                <div class="ri-name">Patricia Nguyen</div>
+                <div class="ri-trigger"><i class="fas fa-battery-quarter"></i> UL Under-funded · Lapse ~Jun 20</div>
+              </div>
+              <div class="ri-score-wrap"><div class="ri-score high">87</div><div class="ri-score-lbl">Risk</div></div>
+              <button class="ri-action-btn" onclick="event.stopPropagation();openRetentionModal('ret-patricia')"><i class="fas fa-bolt"></i> Act</button>
+            </div>
+            <div class="ri-row ri-high" onclick="openRetentionModal('ret-sandra')">
+              <div class="ri-risk-badge high">HIGH</div>
+              <div class="ri-info">
+                <div class="ri-name">Sandra Williams</div>
+                <div class="ri-trigger"><i class="fas fa-calendar-times"></i> Term Renewal · Sep 2026 · 153 days</div>
+              </div>
+              <div class="ri-score-wrap"><div class="ri-score high">79</div><div class="ri-score-lbl">Risk</div></div>
+              <button class="ri-action-btn" onclick="event.stopPropagation();openRetentionModal('ret-sandra')"><i class="fas fa-bolt"></i> Act</button>
+            </div>
+            <div class="ri-row ri-med" onclick="openRetentionModal('ret-kevin')">
+              <div class="ri-risk-badge med">MED</div>
+              <div class="ri-info">
+                <div class="ri-name">Kevin Park</div>
+                <div class="ri-trigger"><i class="fas fa-pause-circle"></i> Policy Pending · No contact 12 days</div>
+              </div>
+              <div class="ri-score-wrap"><div class="ri-score med">61</div><div class="ri-score-lbl">Risk</div></div>
+              <button class="ri-action-btn med" onclick="event.stopPropagation();openRetentionModal('ret-kevin')"><i class="fas fa-phone"></i> Call</button>
+            </div>
+            <div class="ri-row ri-med" onclick="openRetentionModal('ret-david')">
+              <div class="ri-risk-badge med">MED</div>
+              <div class="ri-info">
+                <div class="ri-name">David Thompson</div>
+                <div class="ri-trigger"><i class="fas fa-shield-alt"></i> Single policy · Under-insured · Age 33</div>
+              </div>
+              <div class="ri-score-wrap"><div class="ri-score med">54</div><div class="ri-score-lbl">Risk</div></div>
+              <button class="ri-action-btn med" onclick="event.stopPropagation();openRetentionModal('ret-david')"><i class="fas fa-phone"></i> Call</button>
+            </div>
+          </div>
+          <div class="ri-forecast-strip" style="margin-top:12px">
+            <div class="ri-fc-card urgent">
+              <div class="ri-fc-icon"><i class="fas fa-battery-quarter"></i></div>
+              <div class="ri-fc-body">
+                <div class="ri-fc-label">Patricia Nguyen</div>
+                <div class="ri-fc-val red">Lapse in ~68d</div>
+                <div class="ri-fc-bar-outer"><div class="ri-fc-bar red" style="width:87%"></div></div>
+              </div>
+            </div>
+            <div class="ri-fc-card high">
+              <div class="ri-fc-icon"><i class="fas fa-calendar-times"></i></div>
+              <div class="ri-fc-body">
+                <div class="ri-fc-label">Sandra Williams</div>
+                <div class="ri-fc-val orange">Term Expiry 153d</div>
+                <div class="ri-fc-bar-outer"><div class="ri-fc-bar orange" style="width:79%"></div></div>
+              </div>
+            </div>
+            <div class="ri-fc-card med">
+              <div class="ri-fc-icon"><i class="fas fa-coins"></i></div>
+              <div class="ri-fc-body">
+                <div class="ri-fc-label">James Whitfield</div>
+                <div class="ri-fc-val purple">LTC Gap — Review</div>
+                <div class="ri-fc-bar-outer"><div class="ri-fc-bar purple" style="width:48%"></div></div>
+              </div>
+            </div>
+          </div>
+          <button class="ri-view-all-btn" onclick="navigateTo('policies')"><i class="fas fa-heartbeat"></i> Lapse Prevention Dashboard →</button>
         </div>
 
       </div>
 
-      {/* ── ROW 3: Top Clients (holistic view) + Appointments + Book Activity ── */}
-      <div class="dash-row-bottom">
-
-        {/* Top Clients — Holistic */}
-        <div class="dash-card clients-card">
-          <div class="card-header">
-            <h3><i class="fas fa-crown"></i> Top Clients — Full Book View</h3>
-            <button class="btn-link" onclick="navigateTo('clients')">View All →</button>
-          </div>
-          <div class="client-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Insurance</th>
-                  <th>Investments</th>
-                  <th>Retirement</th>
-                  <th>Advisory</th>
-                  <th>Total Value</th>
-                  <th>Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
-                  <td><span class="domain-dot ins-dot" title="Whole Life · $32K"></span></td>
-                  <td><span class="domain-dot inv-dot" title="Mutual Funds · $280K AUM"></span></td>
-                  <td><span class="domain-dot ret-dot" title="Deferred Annuity"></span></td>
-                  <td><span class="domain-dot adv-dot" title="Estate Planning + UMA"></span></td>
-                  <td class="premium">$812K</td>
-                  <td><div class="score-bar"><div class="score-fill" style="width:98%"></div><span>98</span></div></td>
-                </tr>
-                <tr>
-                  <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
-                  <td><span class="domain-dot ins-dot" title="Whole Life · $21K"></span></td>
-                  <td><span class="domain-dot inv-dot" title="VUL sub-accounts · $180K"></span></td>
-                  <td><span class="domain-empty" title="No retirement product yet">—</span></td>
-                  <td><span class="domain-dot adv-dot" title="Business Services · Key Person"></span></td>
-                  <td class="premium">$421K</td>
-                  <td><div class="score-bar"><div class="score-fill" style="width:96%"></div><span>96</span></div></td>
-                </tr>
-                <tr>
-                  <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
-                  <td><span class="domain-dot ins-dot" title="UL · $14.6K"></span></td>
-                  <td><span class="domain-dot inv-dot" title="Annuities · $95K"></span></td>
-                  <td><span class="domain-dot ret-dot" title="Immediate Annuity interest"></span></td>
-                  <td><span class="domain-empty" title="Estate planning gap">—</span></td>
-                  <td class="premium">$209K</td>
-                  <td><div class="score-bar"><div class="score-fill" style="width:91%"></div><span>91</span></div></td>
-                </tr>
-                <tr>
-                  <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
-                  <td><span class="domain-dot ins-dot" title="WL + Term + LTC · $12.4K"></span></td>
-                  <td><span class="domain-empty" title="No investment product">—</span></td>
-                  <td><span class="domain-dot ret-dot" title="Deferred annuity candidate"></span></td>
-                  <td><span class="domain-dot adv-dot" title="Estate planning in progress"></span></td>
-                  <td class="premium">$162K</td>
-                  <td><div class="score-bar"><div class="score-fill" style="width:92%"></div><span>92</span></div></td>
-                </tr>
-                <tr>
-                  <td><div class="client-cell"><div class="mini-avatar pn">PN</div><span>Patricia Nguyen</span></div></td>
-                  <td><span class="domain-dot ins-dot" title="UL + VUL · $5.8K"></span></td>
-                  <td><span class="domain-empty" title="Annuity opportunity pending">—</span></td>
-                  <td><span class="domain-empty" title="No retirement yet">—</span></td>
-                  <td><span class="domain-empty" title="No advisory">—</span></td>
-                  <td class="premium text-orange">$58K <span style="font-size:10px;color:#d97706">⚠ gaps</span></td>
-                  <td><div class="score-bar"><div class="score-fill" style="width:87%"></div><span>87</span></div></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="client-table-legend">
-            <span><span class="domain-dot ins-dot"></span> Insurance</span>
-            <span><span class="domain-dot inv-dot"></span> Investments</span>
-            <span><span class="domain-dot ret-dot"></span> Retirement</span>
-            <span><span class="domain-dot adv-dot"></span> Advisory</span>
-            <span><span class="domain-empty">—</span> Gap / Opportunity</span>
-          </div>
+      {/* ── ROW 4: Top Clients (full width table) ── */}
+      <div class="dash-card clients-card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3><i class="fas fa-crown"></i> Top Clients — Full Book View</h3>
+          <button class="btn-link" onclick="navigateTo('clients')">View All 247 →</button>
         </div>
+        <div class="client-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Insurance</th>
+                <th>Investments</th>
+                <th>Retirement</th>
+                <th>Advisory</th>
+                <th>Total Value</th>
+                <th>Score</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="openClientModal(8)" style="cursor:pointer">
+                <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
+                <td><span class="domain-dot ins-dot" title="Whole Life · $32K premium"></span></td>
+                <td><span class="domain-dot inv-dot" title="Mutual Funds · $280K AUM"></span></td>
+                <td><span class="domain-dot ret-dot" title="Deferred Annuity · $145K"></span></td>
+                <td><span class="domain-dot adv-dot" title="Estate Planning + UMA · $387K managed"></span></td>
+                <td class="premium">$812K</td>
+                <td><div class="score-bar"><div class="score-fill" style="width:98%"></div><span>98</span></div></td>
+                <td><span class="status-badge active">Active</span></td>
+              </tr>
+              <tr onclick="openClientModal(9)" style="cursor:pointer">
+                <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
+                <td><span class="domain-dot ins-dot" title="Whole Life · $21K premium"></span></td>
+                <td><span class="domain-dot inv-dot" title="VUL sub-accounts · $180K"></span></td>
+                <td><span class="domain-empty" title="Retirement gap — annuity candidate">—</span></td>
+                <td><span class="domain-dot adv-dot" title="Business Services · Key Person"></span></td>
+                <td class="premium">$421K</td>
+                <td><div class="score-bar"><div class="score-fill" style="width:96%"></div><span>96</span></div></td>
+                <td><span class="status-badge active">Active</span></td>
+              </tr>
+              <tr onclick="openClientModal(10)" style="cursor:pointer">
+                <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
+                <td><span class="domain-dot ins-dot" title="UL · $14.6K premium"></span></td>
+                <td><span class="domain-dot inv-dot" title="Annuities · $95K AUM"></span></td>
+                <td><span class="domain-dot ret-dot" title="Immediate Annuity · $72K"></span></td>
+                <td><span class="domain-empty" title="Estate planning gap identified">—</span></td>
+                <td class="premium">$209K</td>
+                <td><div class="score-bar"><div class="score-fill" style="width:91%"></div><span>91</span></div></td>
+                <td><span class="status-badge active">Active</span></td>
+              </tr>
+              <tr onclick="openClientModal(1)" style="cursor:pointer">
+                <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
+                <td><span class="domain-dot ins-dot" title="WL + Term + LTC · $12.4K"></span></td>
+                <td><span class="domain-empty" title="No investment product yet">—</span></td>
+                <td><span class="domain-dot ret-dot" title="Deferred annuity candidate · age 52"></span></td>
+                <td><span class="domain-dot adv-dot" title="Estate planning in progress"></span></td>
+                <td class="premium">$162K</td>
+                <td><div class="score-bar"><div class="score-fill" style="width:92%"></div><span>92</span></div></td>
+                <td><span class="status-badge review">Review</span></td>
+              </tr>
+              <tr onclick="openClientModal(2)" style="cursor:pointer">
+                <td><div class="client-cell"><div class="mini-avatar pn">PN</div><span>Patricia Nguyen</span></div></td>
+                <td><span class="domain-dot ins-dot" title="UL + VUL · $5.8K · under-funded risk"></span></td>
+                <td><span class="domain-empty" title="Annuity opportunity pending">—</span></td>
+                <td><span class="domain-empty" title="No retirement yet">—</span></td>
+                <td><span class="domain-empty" title="No advisory services">—</span></td>
+                <td class="premium text-orange">$58K <span style="font-size:10px;color:#d97706">⚠ gaps</span></td>
+                <td><div class="score-bar"><div class="score-fill" style="width:87%"></div><span>87</span></div></td>
+                <td><span class="status-badge pending">At Risk</span></td>
+              </tr>
+              <tr onclick="openClientModal(3)" style="cursor:pointer">
+                <td><div class="client-cell"><div class="mini-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">DT</div><span>David Thompson</span></div></td>
+                <td><span class="domain-dot ins-dot" title="Term Life · $3.2K premium"></span></td>
+                <td><span class="domain-dot inv-dot" title="529 Plan candidate · $12K start"></span></td>
+                <td><span class="domain-empty" title="No retirement yet · age 33">—</span></td>
+                <td><span class="domain-empty" title="No advisory">—</span></td>
+                <td class="premium">$48K</td>
+                <td><div class="score-bar"><div class="score-fill" style="width:74%"></div><span>74</span></div></td>
+                <td><span class="status-badge active">Active</span></td>
+              </tr>
+              <tr onclick="openClientModal(4)" style="cursor:pointer">
+                <td><div class="client-cell"><div class="mini-avatar" style="background:linear-gradient(135deg,#be185d,#ec4899)">SW</div><span>Sandra Williams</span></div></td>
+                <td><span class="domain-dot ins-dot" title="Term Life · $8.4K · renewal Sep 2026"></span></td>
+                <td><span class="domain-empty" title="No investment product">—</span></td>
+                <td><span class="domain-empty" title="No retirement plan">—</span></td>
+                <td><span class="domain-empty" title="No advisory">—</span></td>
+                <td class="premium text-orange">$84K <span style="font-size:10px;color:#d97706">⚠ renew</span></td>
+                <td><div class="score-bar"><div class="score-fill" style="width:79%"></div><span>79</span></div></td>
+                <td><span class="status-badge pending">Renewal</span></td>
+              </tr>
+              <tr onclick="navigateTo('clients')" style="cursor:pointer">
+                <td><div class="client-cell"><div class="mini-avatar" style="background:linear-gradient(135deg,#047857,#10b981)">AR</div><span>Alex Rivera</span></div></td>
+                <td><span class="domain-empty" title="No policy yet — prospect"></span></td>
+                <td><span class="domain-dot inv-dot" title="401k rollover · $85K"></span></td>
+                <td><span class="domain-dot ret-dot" title="Rollover IRA candidate"></span></td>
+                <td><span class="domain-empty" title="No advisory">—</span></td>
+                <td class="premium">$95K</td>
+                <td><div class="score-bar"><div class="score-fill" style="width:68%"></div><span>68</span></div></td>
+                <td><span class="status-badge review">Prospect</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="client-table-legend">
+          <span><span class="domain-dot ins-dot"></span> Insurance</span>
+          <span><span class="domain-dot inv-dot"></span> Investments</span>
+          <span><span class="domain-dot ret-dot"></span> Retirement</span>
+          <span><span class="domain-dot adv-dot"></span> Advisory</span>
+          <span><span class="domain-empty">—</span> Gap / Opportunity</span>
+        </div>
+      </div>
 
-        {/* Upcoming Appointments */}
+      {/* ── ROW 5: Today & Upcoming + Monthly Goals (2-col) ── */}
+      <div class="dash-row-2col" style="margin-bottom:20px">
+
+        {/* Upcoming Appointments — expanded */}
         <div class="dash-card appt-card">
           <div class="card-header">
             <h3><i class="fas fa-calendar-check"></i> Today &amp; Upcoming</h3>
             <button class="btn-link" onclick="navigateTo('calendar')">Full Calendar →</button>
           </div>
-          <div class="appt-date-header">Today — April 10, 2026</div>
+          <div class="appt-date-header">Today — Friday, April 10, 2026</div>
           <div class="appt-list">
             <div class="appt-item appt-now">
               <div class="appt-time"><span class="appt-hr">10:30</span><span class="appt-ampm">AM</span></div>
               <div class="appt-bar appt-bar-red"></div>
               <div class="appt-detail">
-                <div class="appt-title">Kevin Park — Follow-up Call</div>
-                <div class="appt-sub"><span class="act-domain-pill ins">Insurance</span> Phone · 30 min</div>
+                <div class="appt-title">Kevin Park — Policy Follow-up Call</div>
+                <div class="appt-sub"><span class="act-domain-pill ins">Insurance</span> Phone · 30 min · Pending app response</div>
               </div>
               <span class="appt-now-chip">Now</span>
+            </div>
+            <div class="appt-item">
+              <div class="appt-time"><span class="appt-hr">12:00</span><span class="appt-ampm">PM</span></div>
+              <div class="appt-bar appt-bar-gold"></div>
+              <div class="appt-detail">
+                <div class="appt-title">Patricia Nguyen — UL Policy Review</div>
+                <div class="appt-sub"><span class="act-domain-pill ins">Insurance</span> Phone · 20 min · Funding gap urgent</div>
+              </div>
+              <span class="appt-now-chip" style="background:#d97706">Urgent</span>
             </div>
             <div class="appt-item">
               <div class="appt-time"><span class="appt-hr">2:00</span><span class="appt-ampm">PM</span></div>
               <div class="appt-bar appt-bar-blue"></div>
               <div class="appt-detail">
-                <div class="appt-title">Robert Chen — Claim Update</div>
-                <div class="appt-sub"><span class="act-domain-pill ins">Insurance</span> Video · 45 min</div>
+                <div class="appt-title">Robert Chen — Claim Status Update</div>
+                <div class="appt-sub"><span class="act-domain-pill ins">Insurance</span> Video · 45 min · CLM-2026-0041</div>
               </div>
             </div>
             <div class="appt-item">
               <div class="appt-time"><span class="appt-hr">4:30</span><span class="appt-ampm">PM</span></div>
-              <div class="appt-bar appt-bar-gold"></div>
+              <div class="appt-bar appt-bar-green"></div>
               <div class="appt-detail">
-                <div class="appt-title">Alex Rivera — New Prospect</div>
-                <div class="appt-sub"><span class="act-domain-pill inv">Investments</span> In Person · 60 min</div>
+                <div class="appt-title">Alex Rivera — New Prospect Meeting</div>
+                <div class="appt-sub"><span class="act-domain-pill inv">Investments</span> In Person · 60 min · 401k rollover $85K</div>
               </div>
             </div>
           </div>
-          <div class="appt-date-header" style="margin-top:10px">Upcoming</div>
+          <div class="appt-date-header" style="margin-top:12px">This Week</div>
+          <div class="appt-list">
+            <div class="appt-item">
+              <div class="appt-time"><span class="appt-hr">Apr</span><span class="appt-ampm">11</span></div>
+              <div class="appt-bar appt-bar-purple"></div>
+              <div class="appt-detail">
+                <div class="appt-title">Sandra Williams — Renewal Quote Review</div>
+                <div class="appt-sub"><span class="act-domain-pill ins">Insurance</span> Phone · 30 min · Term expiry Sep 2026</div>
+              </div>
+            </div>
+            <div class="appt-item">
+              <div class="appt-time"><span class="appt-hr">Apr</span><span class="appt-ampm">12</span></div>
+              <div class="appt-bar appt-bar-gold"></div>
+              <div class="appt-detail">
+                <div class="appt-title">Maria Gonzalez — Annuity Illustration</div>
+                <div class="appt-sub"><span class="act-domain-pill ret">Retirement</span> Video · 45 min · Income annuity options</div>
+              </div>
+            </div>
+          </div>
+          <div class="appt-date-header" style="margin-top:12px">Upcoming</div>
           <div class="appt-list">
             <div class="appt-item">
               <div class="appt-time"><span class="appt-hr">Apr</span><span class="appt-ampm">15</span></div>
               <div class="appt-bar appt-bar-purple"></div>
               <div class="appt-detail">
                 <div class="appt-title">Linda Morrison — Annual Review</div>
-                <div class="appt-sub"><span class="act-domain-pill adv">Advisory</span> UMA + Estate · 90 min</div>
+                <div class="appt-sub"><span class="act-domain-pill adv">Advisory</span> UMA + Estate planning · 90 min</div>
               </div>
             </div>
             <div class="appt-item">
               <div class="appt-time"><span class="appt-hr">Apr</span><span class="appt-ampm">18</span></div>
               <div class="appt-bar appt-bar-green"></div>
               <div class="appt-detail">
-                <div class="appt-title">James Whitfield — Retirement Plan</div>
-                <div class="appt-sub"><span class="act-domain-pill ret">Retirement</span> Deferred annuity illustration</div>
+                <div class="appt-title">James Whitfield — Retirement Planning</div>
+                <div class="appt-sub"><span class="act-domain-pill ret">Retirement</span> Deferred annuity illustration · 60 min</div>
+              </div>
+            </div>
+            <div class="appt-item">
+              <div class="appt-time"><span class="appt-hr">Apr</span><span class="appt-ampm">20</span></div>
+              <div class="appt-bar appt-bar-blue"></div>
+              <div class="appt-detail">
+                <div class="appt-title">David Thompson — 529 Plan Introduction</div>
+                <div class="appt-sub"><span class="act-domain-pill inv">Investments</span> In Person · 30 min · College savings</div>
               </div>
             </div>
             <div class="appt-item">
@@ -1055,13 +1144,13 @@ function DashboardPage() {
               <div class="appt-bar appt-bar-blue"></div>
               <div class="appt-detail">
                 <div class="appt-title">Team Review — Roger Putnam</div>
-                <div class="appt-sub"><span class="act-domain-pill ins">Insurance</span> Q1 Results · All lines</div>
+                <div class="appt-sub"><span class="act-domain-pill ins">Insurance</span> Q1 Results · All product lines · 90 min</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Book Activity + Recent Comms */}
+        {/* Monthly Goals — standalone card */}
         <div class="dash-card donut-card">
           <div class="card-header">
             <h3><i class="fas fa-chart-bar"></i> Monthly Goals</h3>
@@ -1093,16 +1182,31 @@ function DashboardPage() {
               <div class="goal-bar-outer"><div class="goal-bar-inner orange" style="width:72%"></div></div>
               <div class="goal-footer"><span class="goal-pct">72%</span><span class="goal-gap">Cross-sell gap</span></div>
             </div>
+            <div class="goal-item">
+              <div class="goal-meta"><span class="goal-name"><i class="fas fa-calendar-check" style="color:#0891b2;width:14px;margin-right:4px"></i>New Appointments</span><span class="goal-val">14<span class="goal-target"> / 20</span></span></div>
+              <div class="goal-bar-outer"><div class="goal-bar-inner" style="width:70%;background:#0891b2"></div></div>
+              <div class="goal-footer"><span class="goal-pct" style="color:#0891b2">70%</span><span class="goal-gap">6 more needed</span></div>
+            </div>
           </div>
-          <div class="card-header" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-100)">
+        </div>
+
+      </div>
+
+      {/* ── ROW 6: Recent Communications + Today's Quick Wins (2-col) ── */}
+      <div class="dash-row-2col" style="margin-bottom:20px">
+
+        {/* Recent Communications — standalone card */}
+        <div class="dash-card">
+          <div class="card-header">
             <h3><i class="fas fa-comments"></i> Recent Communications</h3>
+            <button class="btn-link" onclick="navigateTo('clients')">View All →</button>
           </div>
           <div class="recent-comms">
             <div class="comm-item">
               <div class="comm-avatar ca-rc">RC</div>
               <div class="comm-info">
                 <div class="comm-name">Robert Chen</div>
-                <div class="comm-msg">Re: Claim P-100310 — docs received</div>
+                <div class="comm-msg">Re: Claim P-100310 — documents received and uploaded</div>
               </div>
               <div class="comm-meta"><i class="fas fa-envelope"></i> 2h ago</div>
             </div>
@@ -1110,7 +1214,7 @@ function DashboardPage() {
               <div class="comm-avatar ca-lm">LM</div>
               <div class="comm-info">
                 <div class="comm-name">Linda Morrison</div>
-                <div class="comm-msg">Confirmed Apr 15 estate + UMA review</div>
+                <div class="comm-msg">Confirmed Apr 15 estate + UMA review appointment</div>
               </div>
               <div class="comm-meta"><i class="fas fa-comment"></i> 5h ago</div>
             </div>
@@ -1118,16 +1222,50 @@ function DashboardPage() {
               <div class="comm-avatar ca-mg">MG</div>
               <div class="comm-info">
                 <div class="comm-name">Maria Gonzalez</div>
-                <div class="comm-msg">Interested in income annuity discussion</div>
+                <div class="comm-msg">Interested in income annuity discussion — please send illustration</div>
               </div>
               <div class="comm-meta"><i class="fas fa-phone"></i> Yesterday</div>
             </div>
+            <div class="comm-item">
+              <div class="comm-avatar" style="background:linear-gradient(135deg,#be185d,#ec4899)">SW</div>
+              <div class="comm-info">
+                <div class="comm-name">Sandra Williams</div>
+                <div class="comm-msg">Received renewal quote — reviewing options with husband</div>
+              </div>
+              <div class="comm-meta"><i class="fas fa-envelope"></i> Yesterday</div>
+            </div>
+            <div class="comm-item">
+              <div class="comm-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">JW</div>
+              <div class="comm-info">
+                <div class="comm-name">James Whitfield</div>
+                <div class="comm-msg">Confirmed Apr 18 retirement planning meeting</div>
+              </div>
+              <div class="comm-meta"><i class="fas fa-comment"></i> 2d ago</div>
+            </div>
+            <div class="comm-item">
+              <div class="comm-avatar" style="background:linear-gradient(135deg,#047857,#10b981)">AR</div>
+              <div class="comm-info">
+                <div class="comm-name">Alex Rivera</div>
+                <div class="comm-msg">Excited about the 401k rollover meeting — bringing statements</div>
+              </div>
+              <div class="comm-meta"><i class="fas fa-envelope"></i> 2d ago</div>
+            </div>
+            <div class="comm-item">
+              <div class="comm-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">KP</div>
+              <div class="comm-info">
+                <div class="comm-name">Kevin Park</div>
+                <div class="comm-msg">Left voicemail — will call back after 10am today</div>
+              </div>
+              <div class="comm-meta"><i class="fas fa-phone"></i> 3d ago</div>
+            </div>
           </div>
+        </div>
 
-          {/* ── Today's Quick Wins ── */}
-          <div class="card-header" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-100)">
+        {/* Today's Quick Wins — standalone card */}
+        <div class="dash-card">
+          <div class="card-header">
             <h3><i class="fas fa-trophy"></i> Today's Quick Wins</h3>
-            <span style="font-size:11px;color:var(--green);font-weight:700">2 of 5 done</span>
+            <span style="font-size:11px;color:var(--green);font-weight:700;background:var(--green-light);padding:3px 10px;border-radius:20px">2 of 5 done</span>
           </div>
           <div class="quick-wins-list">
             <div class="qw-item done">
@@ -1136,16 +1274,16 @@ function DashboardPage() {
             </div>
             <div class="qw-item done">
               <span class="qw-check done"><i class="fas fa-check"></i></span>
-              <span class="qw-text">Reviewed Robert Chen claim documents</span>
+              <span class="qw-text">Reviewed Robert Chen claim P-100310 documents</span>
             </div>
             <div class="qw-item" onclick="openClientModal(2)" style="cursor:pointer">
               <span class="qw-check"><i class="fas fa-circle"></i></span>
-              <span class="qw-text">Call Patricia Nguyen re: UL policy funding</span>
+              <span class="qw-text">Call Patricia Nguyen re: UL policy funding gap</span>
               <span class="qw-badge urgent">Urgent</span>
             </div>
             <div class="qw-item" onclick="openMeetingBrief('MTG-001')" style="cursor:pointer">
               <span class="qw-check"><i class="fas fa-circle"></i></span>
-              <span class="qw-text">Prepare Kevin Park follow-up brief</span>
+              <span class="qw-text">Prepare Kevin Park follow-up call brief</span>
               <span class="qw-badge">Today</span>
             </div>
             <div class="qw-item" onclick="navigateTo('products')" style="cursor:pointer">
