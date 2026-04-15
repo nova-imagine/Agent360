@@ -360,7 +360,8 @@ function Sidebar() {
           <i class="fas fa-shield-alt"></i>
         </div>
         <div class="brand-text">
-          <span class="brand-name"><span class="brand-nova">NOVA</span> <span class="brand-analytics">ANALYTICS</span></span>
+          <span class="brand-nova">NOVA</span>
+          <span class="brand-analytics">ANALYTICS</span>
           <span class="brand-tagline">Agent 360</span>
         </div>
         <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
@@ -4011,242 +4012,322 @@ function ClaimsPage() {
 function AIAgentsPage() {
   return (
     <div class="page ai-agents-page">
-      <div class="ai-page-header">
-        <div class="ai-header-icon">
-          <i class="fas fa-robot"></i>
-          <span class="ai-pulse-ring"></span>
+
+      {/* ── Hero Header ── */}
+      <div class="aah-hero">
+        <div class="aah-hero-left">
+          <div class="aah-hero-icon">
+            <i class="fas fa-robot"></i>
+            <span class="aah-pulse-ring"></span>
+          </div>
+          <div class="aah-hero-text">
+            <h2 class="aah-hero-title">NOVA <span class="aah-hero-ai">AI Agent Hub</span></h2>
+            <p class="aah-hero-sub">Holistic Agentic AI — Insurance · Investments · Retirement · Advisory</p>
+          </div>
         </div>
-        <div class="ai-header-text">
-          <h2>NYL AI Agent Hub</h2>
-          <p>Holistic Agentic AI — Insurance · Investments · Retirement · Advisory Services</p>
+        <div class="aah-hero-kpis">
+          <div class="aah-kpi">
+            <div class="aah-kpi-val">8</div>
+            <div class="aah-kpi-lbl">Active Agents</div>
+          </div>
+          <div class="aah-kpi-divider"></div>
+          <div class="aah-kpi">
+            <div class="aah-kpi-val">247</div>
+            <div class="aah-kpi-lbl">Clients Monitored</div>
+          </div>
+          <div class="aah-kpi-divider"></div>
+          <div class="aah-kpi">
+            <div class="aah-kpi-val">42</div>
+            <div class="aah-kpi-lbl">Alerts Today</div>
+          </div>
+          <div class="aah-kpi-divider"></div>
+          <div class="aah-kpi">
+            <div class="aah-kpi-val">$31.2K</div>
+            <div class="aah-kpi-lbl">AI Revenue</div>
+          </div>
         </div>
-        <div class="ai-status-indicator">
-          <span class="ai-online-dot"></span>
-          <span>AI Online · GPT-4 Turbo</span>
+        <div class="aah-hero-status">
+          <span class="aah-online-dot"></span>
+          <span class="aah-online-label">AI Online · GPT-4 Turbo</span>
+          <button class="aah-settings-btn" onclick="switchSettingsTab('ai',null);navigateTo('settings')"><i class="fas fa-sliders-h"></i></button>
         </div>
       </div>
 
-      {/* Domain Insight Strip */}
-      <div class="ai-domain-strip">
-        <div class="ai-ds-card ins-theme">
-          <div class="ai-ds-icon"><i class="fas fa-shield-alt"></i></div>
-          <div class="ai-ds-body">
-            <div class="ai-ds-label">Insurance Insights</div>
-            <div class="ai-ds-val">23 renewals · 7 claims · 4 lapse risks</div>
+      {/* ── Domain Insight Strip ── */}
+      <div class="aah-domain-strip">
+        <div class="aah-ds-card aah-ins">
+          <div class="aah-ds-top">
+            <div class="aah-ds-icon" style="background:#dbeafe;color:#003087"><i class="fas fa-shield-alt"></i></div>
+            <div class="aah-ds-head">
+              <div class="aah-ds-label">Insurance</div>
+              <div class="aah-ds-score"><span class="aah-score-dot green"></span>91/100</div>
+            </div>
           </div>
-          <button class="btn-ds" onclick="sendQuickMessage('Show me insurance renewal and lapse risks')">Ask AI</button>
+          <div class="aah-ds-metrics">
+            <span><i class="fas fa-sync-alt"></i> 23 renewals</span>
+            <span><i class="fas fa-file-medical-alt"></i> 7 claims</span>
+            <span class="aah-ds-alert"><i class="fas fa-exclamation-triangle"></i> 4 lapse risks</span>
+          </div>
+          <button class="aah-ds-btn" onclick="sendQuickMessage('Show me insurance renewal and lapse risks')"><i class="fas fa-robot"></i> Ask AI</button>
         </div>
-        <div class="ai-ds-card inv-theme">
-          <div class="ai-ds-icon"><i class="fas fa-chart-line"></i></div>
-          <div class="ai-ds-body">
-            <div class="ai-ds-label">Investment Insights</div>
-            <div class="ai-ds-val">$4.2M AUM · 3 portfolio gaps · 2 rebalances due</div>
+        <div class="aah-ds-card aah-inv">
+          <div class="aah-ds-top">
+            <div class="aah-ds-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-chart-line"></i></div>
+            <div class="aah-ds-head">
+              <div class="aah-ds-label">Investments</div>
+              <div class="aah-ds-score"><span class="aah-score-dot green"></span>76/100</div>
+            </div>
           </div>
-          <button class="btn-ds" onclick="sendQuickMessage('Show investment opportunities and portfolio gaps')">Ask AI</button>
+          <div class="aah-ds-metrics">
+            <span><i class="fas fa-coins"></i> $4.2M AUM</span>
+            <span><i class="fas fa-chart-pie"></i> 3 gaps</span>
+            <span class="aah-ds-alert"><i class="fas fa-balance-scale"></i> 2 rebalances</span>
+          </div>
+          <button class="aah-ds-btn" onclick="sendQuickMessage('Show investment opportunities and portfolio gaps')"><i class="fas fa-robot"></i> Ask AI</button>
         </div>
-        <div class="ai-ds-card ret-theme">
-          <div class="ai-ds-icon"><i class="fas fa-umbrella-beach"></i></div>
-          <div class="ai-ds-body">
-            <div class="ai-ds-label">Retirement Insights</div>
-            <div class="ai-ds-val">4 annuity candidates · 2 income gap clients</div>
+        <div class="aah-ds-card aah-ret">
+          <div class="aah-ds-top">
+            <div class="aah-ds-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-umbrella-beach"></i></div>
+            <div class="aah-ds-head">
+              <div class="aah-ds-label">Retirement</div>
+              <div class="aah-ds-score"><span class="aah-score-dot amber"></span>82/100</div>
+            </div>
           </div>
-          <button class="btn-ds" onclick="sendQuickMessage('Which clients need retirement planning?')">Ask AI</button>
+          <div class="aah-ds-metrics">
+            <span><i class="fas fa-piggy-bank"></i> 4 annuity</span>
+            <span><i class="fas fa-user-clock"></i> 2 income gaps</span>
+            <span><i class="fas fa-chart-area"></i> 6 near-retire</span>
+          </div>
+          <button class="aah-ds-btn" onclick="sendQuickMessage('Which clients need retirement planning?')"><i class="fas fa-robot"></i> Ask AI</button>
         </div>
-        <div class="ai-ds-card adv-theme">
-          <div class="ai-ds-icon"><i class="fas fa-handshake"></i></div>
-          <div class="ai-ds-body">
-            <div class="ai-ds-label">Advisory Insights</div>
-            <div class="ai-ds-val">4 estate planning · 2 UMA candidates · 3 biz reviews</div>
+        <div class="aah-ds-card aah-adv">
+          <div class="aah-ds-top">
+            <div class="aah-ds-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-handshake"></i></div>
+            <div class="aah-ds-head">
+              <div class="aah-ds-label">Advisory</div>
+              <div class="aah-ds-score"><span class="aah-score-dot purple"></span>79/100</div>
+            </div>
           </div>
-          <button class="btn-ds" onclick="sendQuickMessage('Show estate planning and advisory opportunities')">Ask AI</button>
+          <div class="aah-ds-metrics">
+            <span><i class="fas fa-landmark"></i> 4 estate</span>
+            <span><i class="fas fa-building"></i> 2 UMA</span>
+            <span><i class="fas fa-briefcase"></i> 3 biz reviews</span>
+          </div>
+          <button class="aah-ds-btn" onclick="sendQuickMessage('Show estate planning and advisory opportunities')"><i class="fas fa-robot"></i> Ask AI</button>
         </div>
       </div>
 
       <div class="ai-layout">
-        {/* Agent Cards */}
-        <div class="ai-agents-panel">
-          <h3 class="panel-title">Available AI Agents</h3>
+        {/* ── Agent Cards Panel ── */}
+        <div class="aah-agents-panel">
 
-          {/* Insurance agents */}
-          <div class="agent-domain-label"><i class="fas fa-shield-alt"></i> Insurance</div>
-
-          <div class="agent-card active-agent" onclick="selectAgent('advisor')">
-            <div class="agent-card-icon gold"><i class="fas fa-brain"></i></div>
-            <div class="agent-card-info">
-              <h4>Smart Advisor Agent</h4>
-              <p>Analyzes your entire book — insurance, investments, retirement and advisory — to surface the highest-value opportunities</p>
-              <div class="agent-tags">
-                <span>All Domains</span><span>Cross-sell</span><span>Upsell</span>
-              </div>
+          {/* Panel header */}
+          <div class="aah-panel-header">
+            <div class="aah-panel-title"><i class="fas fa-robot"></i> AI Agents</div>
+            <div class="aah-panel-meta">
+              <span class="aah-panel-badge active">8 Active</span>
+              <span class="aah-panel-badge standby">3 Standby</span>
+              <button class="aah-run-all-btn" onclick="sendQuickMessage('Run all agents — give me a consolidated summary of top actions across insurance, investments, retirement and advisory')"><i class="fas fa-bolt"></i> Run All</button>
             </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
-          <div class="agent-card" onclick="selectAgent('claims')">
-            <div class="agent-card-icon blue"><i class="fas fa-clipboard-check"></i></div>
-            <div class="agent-card-info">
-              <h4>Claims Automation Agent</h4>
-              <p>Processes claims, requests missing documents, and provides real-time claim status updates</p>
-              <div class="agent-tags">
-                <span>Claims Processing</span><span>Document Request</span>
+          {/* ── Insurance ── */}
+          <div class="aah-domain-label aah-dl-ins"><i class="fas fa-shield-alt"></i> Insurance &amp; Underwriting</div>
+
+          <div class="aah-agent-card aah-featured" onclick="selectAgent('advisor')">
+            <div class="aah-agent-icon aah-icon-gold"><i class="fas fa-brain"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Smart Advisor Agent</h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
               </div>
+              <p class="aah-agent-desc">Analyzes your entire book — insurance, investments, retirement and advisory — to surface the highest-value opportunities</p>
+              <div class="aah-agent-tags"><span>All Domains</span><span>Cross-sell</span><span>Upsell</span></div>
             </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
-          <div class="agent-card ci-agent-card" onclick="selectAgent('claims-intelligence')">
-            <div class="agent-card-icon ci-agent-icon"><i class="fas fa-brain"></i></div>
-            <div class="agent-card-info">
-              <h4>Claims Intelligence Agent <span class="agent-new-badge">NEW</span></h4>
-              <p>ML fraud detection, NLP document analysis, predictive resolution timers and smart doc request automation</p>
-              <div class="agent-tags">
-                <span>Fraud Detection</span><span>NLP Analysis</span><span>Smart Triage</span>
+          <div class="aah-agent-card" onclick="selectAgent('renewal')">
+            <div class="aah-agent-icon aah-icon-green"><i class="fas fa-sync-alt"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Renewal Automation Agent</h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
               </div>
-              <div class="ci-agent-stats">
-                <span class="ci-ast red">1 Flagged</span>
-                <span class="ci-ast orange">2 Watch</span>
-                <span class="ci-ast blue">94% NLP</span>
-              </div>
-            </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
-          </div>
-
-          <div class="agent-card" onclick="selectAgent('renewal')">
-            <div class="agent-card-icon green"><i class="fas fa-sync-alt"></i></div>
-            <div class="agent-card-info">
-              <h4>Renewal Automation Agent</h4>
-              <p>Monitors policy renewals, sends proactive outreach, and prepares renewal packages automatically</p>
-              <div class="agent-tags">
-                <span>Renewal Tracking</span><span>Auto-Outreach</span>
+              <p class="aah-agent-desc">Monitors policy renewals, sends proactive outreach, and prepares renewal packages automatically</p>
+              <div class="aah-agent-tags"><span>Renewal Tracking</span><span>Auto-Outreach</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat green"><i class="fas fa-check"></i> 15/23 sent</span>
+                <span class="aah-stat amber"><i class="fas fa-clock"></i> 8 pending</span>
               </div>
             </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
-          <div class="agent-card ri-agent-card active-agent" onclick="selectAgent('retention')">
-            <div class="agent-card-icon ri-agent-icon"><i class="fas fa-heartbeat"></i></div>
-            <div class="agent-card-info">
-              <h4>Retention Intelligence Agent <span class="agent-new-badge">NEW</span></h4>
-              <p>Predicts policy lapses 60–90 days in advance, monitors cash-value thresholds, scores renewal risk, and auto-generates personalised save scripts</p>
-              <div class="agent-tags">
-                <span>Lapse Prediction</span><span>Renewal Risk</span><span>Save Scripts</span>
+          <div class="aah-agent-card aah-highlighted" onclick="selectAgent('retention')">
+            <div class="aah-agent-icon aah-icon-red"><i class="fas fa-heartbeat"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Retention Intelligence Agent <span class="aah-new-badge">NEW</span></h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
               </div>
-              <div class="ri-agent-stats">
-                <span class="ri-ast red">2 Urgent</span>
-                <span class="ri-ast orange">$62.6K at Risk</span>
-                <span class="ri-ast green">23 Renewals</span>
+              <p class="aah-agent-desc">Predicts policy lapses 60–90 days in advance, monitors cash-value thresholds, scores renewal risk, and auto-generates personalised save scripts</p>
+              <div class="aah-agent-tags"><span>Lapse Prediction</span><span>Renewal Risk</span><span>Save Scripts</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat red"><i class="fas fa-exclamation-circle"></i> 2 Urgent</span>
+                <span class="aah-stat amber"><i class="fas fa-dollar-sign"></i> $62.6K at Risk</span>
+                <span class="aah-stat green"><i class="fas fa-redo"></i> 23 Renewals</span>
               </div>
             </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
-          {/* Underwriting Intelligence Agent — NEW */}
-          <div class="agent-card uwi-agent-card active-agent" onclick="selectAgent('underwriting-intelligence')">
-            <div class="agent-card-icon uwi-agent-icon"><i class="fas fa-brain"></i></div>
-            <div class="agent-card-info">
-              <h4>Underwriting Intelligence Agent <span class="agent-new-badge">NEW</span></h4>
-              <p>ML-powered STP scoring, NLP medical-record analysis, APS avoidance engine — auto-approves low-risk cases and eliminates 73% of unnecessary APS orders</p>
-              <div class="agent-tags">
-                <span>STP Scoring</span><span>APS Avoidance</span><span>Risk Analysis</span><span>NLP Records</span>
+          <div class="aah-agent-card aah-highlighted" onclick="selectAgent('underwriting-intelligence')">
+            <div class="aah-agent-icon aah-icon-blue"><i class="fas fa-microscope"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Underwriting Intelligence Agent <span class="aah-new-badge">NEW</span></h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
               </div>
-              <div class="uwi-agent-stats">
-                <span class="uwi-ast green"><i class="fas fa-bolt"></i> 5 Auto-Approved</span>
-                <span class="uwi-ast orange"><i class="fas fa-file-medical"></i> 18 APS Avoided</span>
-                <span class="uwi-ast blue"><i class="fas fa-bullseye"></i> 94.6% Accuracy</span>
+              <p class="aah-agent-desc">ML-powered STP scoring, NLP medical-record analysis, APS avoidance engine — auto-approves low-risk cases and eliminates 73% of unnecessary APS orders</p>
+              <div class="aah-agent-tags"><span>STP Scoring</span><span>APS Avoidance</span><span>NLP Records</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat green"><i class="fas fa-bolt"></i> 5 Auto-Approved</span>
+                <span class="aah-stat amber"><i class="fas fa-file-medical"></i> 18 APS Avoided</span>
+                <span class="aah-stat blue"><i class="fas fa-bullseye"></i> 94.6% Acc.</span>
               </div>
             </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
-          {/* Investments agents */}
-          <div class="agent-domain-label inv-label"><i class="fas fa-chart-line"></i> Investments</div>
-
-          <div class="agent-card" onclick="selectAgent('portfolio')">
-            <div class="agent-card-icon inv-green"><i class="fas fa-coins"></i></div>
-            <div class="agent-card-info">
-              <h4>Portfolio Optimizer Agent</h4>
-              <p>Monitors AUM, identifies rebalancing opportunities, recommends annuities, mutual funds, ETFs and 529 plans</p>
-              <div class="agent-tags">
-                <span>AUM Monitoring</span><span>Rebalancing</span><span>529</span>
+          <div class="aah-agent-card aah-highlighted" onclick="selectAgent('claims')">
+            <div class="aah-agent-icon aah-icon-cyan"><i class="fas fa-clipboard-check"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Claims Automation Agent</h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
+              </div>
+              <p class="aah-agent-desc">Processes claims, requests missing documents, auto-triages in &lt;2 min and provides real-time claim status updates</p>
+              <div class="aah-agent-tags"><span>Claims Processing</span><span>Document Request</span><span>Auto-Triage</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat red"><i class="fas fa-fire"></i> 2 Urgent</span>
+                <span class="aah-stat blue"><i class="fas fa-file-alt"></i> 7 Open</span>
+                <span class="aah-stat green"><i class="fas fa-check-circle"></i> 6/6 Triaged</span>
               </div>
             </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
-          {/* Retirement agents */}
-          <div class="agent-domain-label ret-label"><i class="fas fa-umbrella-beach"></i> Retirement</div>
-
-          <div class="agent-card" onclick="selectAgent('retirement')">
-            <div class="agent-card-icon ret-gold"><i class="fas fa-piggy-bank"></i></div>
-            <div class="agent-card-info">
-              <h4>Retirement Planning Agent</h4>
-              <p>Identifies clients approaching retirement, calculates income gaps, and recommends immediate or deferred annuities</p>
-              <div class="agent-tags">
-                <span>Income Gap</span><span>Annuities</span><span>Projections</span>
+          <div class="aah-agent-card" onclick="selectAgent('claims-intelligence')">
+            <div class="aah-agent-icon aah-icon-purple"><i class="fas fa-brain"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Claims Intelligence Agent <span class="aah-new-badge">NEW</span></h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
+              </div>
+              <p class="aah-agent-desc">ML fraud detection, NLP document analysis, predictive resolution timers and smart doc request automation</p>
+              <div class="aah-agent-tags"><span>Fraud Detection</span><span>NLP Analysis</span><span>Smart Triage</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat red"><i class="fas fa-exclamation-circle"></i> 1 Flagged</span>
+                <span class="aah-stat amber"><i class="fas fa-eye"></i> 2 Watch</span>
+                <span class="aah-stat blue"><i class="fas fa-brain"></i> 94% NLP</span>
               </div>
             </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
           </div>
 
-          {/* Advisory agents */}
-          <div class="agent-domain-label adv-label"><i class="fas fa-handshake"></i> Advisory</div>
+          {/* ── Investments ── */}
+          <div class="aah-domain-label aah-dl-inv"><i class="fas fa-chart-line"></i> Investments &amp; Advisory</div>
 
-          <div class="agent-card" onclick="selectAgent('estate')">
-            <div class="agent-card-icon purple"><i class="fas fa-landmark"></i></div>
-            <div class="agent-card-info">
-              <h4>Estate Planning Agent</h4>
-              <p>Identifies estate planning needs, generates client-ready briefs, and coordinates trust and wealth reviews</p>
-              <div class="agent-tags">
-                <span>Estate Analysis</span><span>Trust Review</span><span>UMA</span>
+          <div class="aah-agent-card" onclick="selectAgent('portfolio')">
+            <div class="aah-agent-icon aah-icon-emerald"><i class="fas fa-coins"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Portfolio Optimizer Agent</h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
+              </div>
+              <p class="aah-agent-desc">Monitors AUM, identifies rebalancing opportunities, recommends annuities, mutual funds, ETFs and 529 plans</p>
+              <div class="aah-agent-tags"><span>AUM Monitoring</span><span>Rebalancing</span><span>529</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat green"><i class="fas fa-coins"></i> $4.2M AUM</span>
+                <span class="aah-stat amber"><i class="fas fa-balance-scale"></i> 2 Rebalances</span>
               </div>
             </div>
-            <div class="agent-status standby"><i class="fas fa-circle"></i> Standby</div>
           </div>
 
-          <div class="agent-card" onclick="selectAgent('business')">
-            <div class="agent-card-icon orange"><i class="fas fa-building"></i></div>
-            <div class="agent-card-info">
-              <h4>Business Services Agent</h4>
-              <p>Handles small business insurance, executive benefits, NQDC, COLI, and employee benefits design</p>
-              <div class="agent-tags">
-                <span>SMB Insurance</span><span>NQDC</span><span>COLI</span>
+          <div class="aah-agent-card" onclick="selectAgent('estate')">
+            <div class="aah-agent-icon aah-icon-violet"><i class="fas fa-landmark"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Estate Planning Agent</h4>
+                <span class="aah-agent-status standby"><i class="fas fa-circle"></i> Standby</span>
+              </div>
+              <p class="aah-agent-desc">Identifies estate planning needs, generates client-ready briefs, and coordinates trust and wealth reviews</p>
+              <div class="aah-agent-tags"><span>Estate Analysis</span><span>Trust Review</span><span>UMA</span></div>
+            </div>
+          </div>
+
+          <div class="aah-agent-card" onclick="selectAgent('business')">
+            <div class="aah-agent-icon aah-icon-orange"><i class="fas fa-building"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Business Services Agent</h4>
+                <span class="aah-agent-status standby"><i class="fas fa-circle"></i> Standby</span>
+              </div>
+              <p class="aah-agent-desc">Handles small business insurance, executive benefits, NQDC, COLI, and employee benefits design</p>
+              <div class="aah-agent-tags"><span>SMB Insurance</span><span>NQDC</span><span>COLI</span></div>
+            </div>
+          </div>
+
+          {/* ── Retirement ── */}
+          <div class="aah-domain-label aah-dl-ret"><i class="fas fa-umbrella-beach"></i> Retirement</div>
+
+          <div class="aah-agent-card" onclick="selectAgent('retirement')">
+            <div class="aah-agent-icon aah-icon-amber"><i class="fas fa-piggy-bank"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Retirement Planning Agent</h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
+              </div>
+              <p class="aah-agent-desc">Identifies clients approaching retirement, calculates income gaps, and recommends immediate or deferred annuities</p>
+              <div class="aah-agent-tags"><span>Income Gap</span><span>Annuities</span><span>Projections</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat amber"><i class="fas fa-user-clock"></i> 4 Candidates</span>
+                <span class="aah-stat red"><i class="fas fa-exclamation"></i> 2 Income Gaps</span>
               </div>
             </div>
-            <div class="agent-status standby"><i class="fas fa-circle"></i> Standby</div>
           </div>
 
-          <div class="agent-card" onclick="selectAgent('compliance')">
-            <div class="agent-card-icon red"><i class="fas fa-shield-alt"></i></div>
-            <div class="agent-card-info">
-              <h4>Compliance & Reporting Agent</h4>
-              <p>Automates regulatory reporting, flags compliance risks across all product lines, and generates audit-ready docs</p>
-              <div class="agent-tags">
-                <span>Regulatory</span><span>Audit</span><span>Risk</span>
+          {/* ── Compliance ── */}
+          <div class="aah-domain-label aah-dl-cmp"><i class="fas fa-shield-alt"></i> Compliance</div>
+
+          <div class="aah-agent-card" onclick="selectAgent('compliance')">
+            <div class="aah-agent-icon aah-icon-slate"><i class="fas fa-gavel"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Compliance &amp; Reporting Agent</h4>
+                <span class="aah-agent-status standby"><i class="fas fa-circle"></i> Standby</span>
+              </div>
+              <p class="aah-agent-desc">Automates regulatory reporting, flags compliance risks across all product lines, and generates audit-ready docs</p>
+              <div class="aah-agent-tags"><span>Regulatory</span><span>Audit</span><span>Risk</span></div>
+            </div>
+          </div>
+
+          {/* ── NLP Policy Intelligence ── */}
+          <div class="aah-domain-label aah-dl-nlp"><i class="fas fa-brain"></i> NLP Policy Intelligence</div>
+
+          <div class="aah-agent-card aah-highlighted" onclick="openNLPReview('all')">
+            <div class="aah-agent-icon aah-icon-nlp"><i class="fas fa-brain"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">NLP Policy Risk Expert <span class="aah-new-badge">NEW</span></h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
+              </div>
+              <p class="aah-agent-desc">Reads every policy clause with NLP — flags exclusions, ambiguities, regulatory risks, and lapse triggers. Generates plain-language client summaries.</p>
+              <div class="aah-agent-tags"><span>Clause Analysis</span><span>Risk Flags</span><span>Plain Language</span><span>Benchmark</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat red"><i class="fas fa-exclamation-circle"></i> 2 Urgent</span>
+                <span class="aah-stat amber"><i class="fas fa-flag"></i> 3 Flagged</span>
+                <span class="aah-stat blue"><i class="fas fa-file-contract"></i> 8 Scanned</span>
               </div>
             </div>
-            <div class="agent-status standby"><i class="fas fa-circle"></i> Standby</div>
           </div>
 
-          {/* NLP Policy Risk Expert — NEW */}
-          <div class="agent-domain-label nlp-label"><i class="fas fa-brain"></i> NLP Policy Intelligence</div>
-
-          <div class="agent-card nlp-agent-card active-agent" onclick="openNLPReview('all')">
-            <div class="agent-card-icon nlp-purple"><i class="fas fa-brain"></i></div>
-            <div class="agent-card-info">
-              <h4>NLP Policy Risk Expert <span class="agent-new-badge">NEW</span></h4>
-              <p>Reads every policy clause with NLP — flags exclusions, ambiguities, regulatory risks, and lapse triggers. Generates plain-language client summaries and benchmarks against industry standards.</p>
-              <div class="agent-tags">
-                <span>Clause Analysis</span><span>Risk Flags</span><span>Plain Language</span><span>Benchmark</span>
-              </div>
-              <div class="nlp-agent-stats">
-                <span class="nlp-as-chip red"><i class="fas fa-exclamation-circle"></i> 2 Urgent</span>
-                <span class="nlp-as-chip orange"><i class="fas fa-flag"></i> 3 Flagged</span>
-                <span class="nlp-as-chip blue"><i class="fas fa-file-contract"></i> 8 Scanned</span>
-              </div>
-            </div>
-            <div class="agent-status active"><i class="fas fa-circle"></i> Active</div>
-          </div>
-        </div>
+        </div>{/* /aah-agents-panel */}
 
         {/* Chat Interface */}
         <div class="ai-chat-panel">
@@ -4267,7 +4348,7 @@ function AIAgentsPage() {
             <div class="chat-msg bot">
               <div class="msg-avatar"><i class="fas fa-robot"></i></div>
               <div class="msg-bubble">
-                <p>Hello Sridhar! I'm your <strong>NYL Smart Advisor AI Agent</strong>. I've analyzed your complete book of business across all four service domains.</p>
+                <p>Hello Sridhar! I'm your <strong>NOVA Smart Advisor AI Agent</strong>. I've analyzed your complete book of business across all four service domains.</p>
                 <p>Here's what I can do for you today:</p>
                 <ul>
                   <li>🛡️ <strong>Insurance:</strong> Renewals, claims, lapse risk, new coverage gaps</li>
@@ -4461,8 +4542,12 @@ function AIAgentsPage() {
             <h4>Renewal Email Campaign</h4>
             <p>Auto-sending personalized renewal reminders to 23 clients due in 90 days</p>
             <div class="wf-progress">
-              <div class="wf-progress-bar" style="width: 65%"></div>
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" style="width:65%"></div></div>
               <span>15/23 sent</span>
+            </div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" onclick="sendQuickMessage('Run the full renewal email campaign for all 23 clients — draft and send personalised emails')"><i class="fas fa-play"></i> Run Now</button>
+              <button class="wf-btn secondary" onclick="sendQuickMessage('Show renewal campaign status — who has been contacted and who is pending')"><i class="fas fa-eye"></i> View</button>
             </div>
           </div>
           <div class="workflow-card running">
@@ -4472,8 +4557,12 @@ function AIAgentsPage() {
             <h4>Portfolio Health Monitor</h4>
             <p>Continuously monitoring 1,842 policies for lapse risk, coverage gaps, and opportunities</p>
             <div class="wf-progress">
-              <div class="wf-progress-bar" style="width: 100%"></div>
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" style="width:100%"></div></div>
               <span>Always On</span>
+            </div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" onclick="sendQuickMessage('Show full portfolio health report — lapse risks, coverage gaps, and top opportunities across all 1,842 policies')"><i class="fas fa-file-alt"></i> Report</button>
+              <button class="wf-btn secondary" onclick="sendQuickMessage('What are the top 5 portfolio alerts today?')"><i class="fas fa-bell"></i> Alerts</button>
             </div>
           </div>
           <div class="workflow-card running">
@@ -4483,8 +4572,12 @@ function AIAgentsPage() {
             <h4>AUM Rebalancing Monitor</h4>
             <p>Tracks drift in $4.2M AUM across 62 investment clients; flags rebalancing needs</p>
             <div class="wf-progress">
-              <div class="wf-progress-bar" style="width: 100%;background:#059669"></div>
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" style="width:100%;background:#059669"></div></div>
               <span>2 rebalances pending</span>
+            </div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" onclick="sendQuickMessage('Show all investment rebalancing opportunities — which clients need action and what should I recommend?')"><i class="fas fa-balance-scale"></i> Rebalance</button>
+              <button class="wf-btn secondary" onclick="sendQuickMessage('Show AUM summary across all 62 investment clients')"><i class="fas fa-coins"></i> AUM</button>
             </div>
           </div>
           <div class="workflow-card running">
@@ -4494,8 +4587,12 @@ function AIAgentsPage() {
             <h4>Retirement Income Gap Scan</h4>
             <p>Analyzes clients aged 50+ for retirement income shortfalls and annuity suitability</p>
             <div class="wf-progress">
-              <div class="wf-progress-bar" style="width:100%;background:#d97706"></div>
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" style="width:100%;background:#d97706"></div></div>
               <span>4 candidates found</span>
+            </div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" onclick="sendQuickMessage('Show all 4 retirement income gap candidates — income shortfall amounts and annuity recommendations')"><i class="fas fa-piggy-bank"></i> Details</button>
+              <button class="wf-btn secondary" onclick="sendQuickMessage('Which clients are closest to retirement and have the largest income gaps?')"><i class="fas fa-user-clock"></i> Priority</button>
             </div>
           </div>
           <div class="workflow-card paused">
@@ -4504,7 +4601,11 @@ function AIAgentsPage() {
             <div class="wf-icon"><i class="fas fa-birthday-cake"></i></div>
             <h4>Life Events Trigger</h4>
             <p>Detects life events (marriage, birth, retirement) and suggests appropriate coverage updates</p>
-            <div class="wf-stats">3 events detected this month</div>
+            <div class="wf-stats"><i class="fas fa-info-circle"></i> 3 events detected this month</div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" onclick="sendQuickMessage('Resume life events trigger — show the 3 life events detected this month and recommended coverage updates')"><i class="fas fa-play"></i> Resume</button>
+              <button class="wf-btn secondary" onclick="sendQuickMessage('What life events were detected this month and what coverage changes are recommended?')"><i class="fas fa-eye"></i> Events</button>
+            </div>
           </div>
           <div class="workflow-card paused">
             <div class="wf-domain-tag adv-tag"><i class="fas fa-handshake"></i> Advisory</div>
@@ -4512,7 +4613,11 @@ function AIAgentsPage() {
             <div class="wf-icon"><i class="fas fa-landmark"></i></div>
             <h4>Estate Planning Trigger</h4>
             <p>Flags clients with $1M+ total assets or business ownership for estate planning review</p>
-            <div class="wf-stats">4 clients qualified</div>
+            <div class="wf-stats"><i class="fas fa-info-circle"></i> 4 clients qualified</div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" onclick="sendQuickMessage('Resume estate planning trigger — show all 4 qualified clients and generate estate planning briefs')"><i class="fas fa-play"></i> Resume</button>
+              <button class="wf-btn secondary" onclick="sendQuickMessage('Show the 4 estate planning qualified clients with asset values and recommended actions')"><i class="fas fa-users"></i> Clients</button>
+            </div>
           </div>
           <div class="workflow-card idle">
             <div class="wf-domain-tag ins-tag"><i class="fas fa-shield-alt"></i> Insurance</div>
@@ -4520,7 +4625,11 @@ function AIAgentsPage() {
             <div class="wf-icon"><i class="fas fa-file-signature"></i></div>
             <h4>Claims Triage Automation</h4>
             <p>Routes incoming claims to appropriate teams and requests required documentation automatically</p>
-            <div class="wf-stats">7 open claims tracked</div>
+            <div class="wf-stats"><i class="fas fa-info-circle"></i> 7 open claims tracked</div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" onclick="sendQuickMessage('Activate claims triage automation — run triage on all 7 open claims and generate action list')"><i class="fas fa-play"></i> Activate</button>
+              <button class="wf-btn secondary" onclick="sendQuickMessage('Show all 7 open claims with current status and pending document requests')"><i class="fas fa-clipboard-list"></i> Claims</button>
+            </div>
           </div>
           <div class="workflow-card idle">
             <div class="wf-domain-tag adv-tag"><i class="fas fa-handshake"></i> Advisory</div>
@@ -4528,7 +4637,11 @@ function AIAgentsPage() {
             <div class="wf-icon"><i class="fas fa-briefcase"></i></div>
             <h4>Business Client Review</h4>
             <p>Scans business-owner clients for NQDC, COLI, key-person and group benefits gaps</p>
-            <div class="wf-stats">2 business clients eligible</div>
+            <div class="wf-stats"><i class="fas fa-info-circle"></i> 2 business clients eligible</div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" onclick="sendQuickMessage('Run business client review — analyze NQDC, COLI, and key-person gaps for all eligible business-owner clients')"><i class="fas fa-play"></i> Activate</button>
+              <button class="wf-btn secondary" onclick="sendQuickMessage('Which business-owner clients have NQDC or COLI opportunities?')"><i class="fas fa-building"></i> Clients</button>
+            </div>
           </div>
         </div>
       </div>

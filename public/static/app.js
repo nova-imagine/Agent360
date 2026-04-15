@@ -1560,8 +1560,13 @@ const agentMeta = {
 };
 
 function selectAgent(agentId) {
-  document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active-agent'));
-  event.currentTarget.classList.add('active-agent');
+  // Support both old .agent-card and new .aah-agent-card class names
+  document.querySelectorAll('.agent-card, .aah-agent-card').forEach(c => {
+    c.classList.remove('active-agent', 'aah-active-agent');
+  });
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('active-agent', 'aah-active-agent');
+  }
 
   const meta = agentMeta[agentId];
   if (!meta) return;
@@ -1756,9 +1761,11 @@ function clearChat() {
   const subEl  = document.getElementById('chat-agent-sub');
   if (nameEl) nameEl.textContent = 'Smart Advisor Agent';
   if (subEl)  subEl.textContent  = 'Insurance · Investments · Retirement · Advisory';
-  document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active-agent'));
-  const advisorCard = document.querySelector('.agent-card[onclick*="\'advisor\'"]');
-  if (advisorCard) advisorCard.classList.add('active-agent');
+  document.querySelectorAll('.agent-card, .aah-agent-card').forEach(c => {
+    c.classList.remove('active-agent', 'aah-active-agent');
+  });
+  const advisorCard = document.querySelector('.aah-agent-card[onclick*="\'advisor\'"], .agent-card[onclick*="\'advisor\'"]');
+  if (advisorCard) advisorCard.classList.add('active-agent', 'aah-active-agent');
 }
 
 function aiAnalyzeClient(btn) {
