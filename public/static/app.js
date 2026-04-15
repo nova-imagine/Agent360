@@ -12725,3 +12725,199 @@ function refreshProductOpportunities() {
 }
 
 console.log('Products page functions loaded — openQuickQuoteModal, openProductSearch, refreshProductOpportunities');
+
+// ============================================================
+// ── AI INSIGHTS (AIImpactScorecardPage) ENHANCEMENTS ────────
+// ============================================================
+
+/* ── filterAIDomain — show/hide domain cards ─────────────────
+   Reads data-domain attr on each .ais-domain-card and
+   toggles visibility to match the selected domain.
+   ─────────────────────────────────────────────────────────── */
+function filterAIDomain(domain, btn) {
+  // Update active button
+  document.querySelectorAll('.ais-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const cards = document.querySelectorAll('#aisDomainGrid .ais-domain-card');
+  cards.forEach(card => {
+    if (domain === 'all') {
+      card.style.display = '';
+    } else {
+      const d = card.getAttribute('data-domain') || '';
+      card.style.display = d === domain ? '' : 'none';
+    }
+  });
+
+  // Also filter activity feed
+  const items = document.querySelectorAll('.ais-activity-item');
+  const tagMap = {
+    underwriting: 'ins', retention: 'ret', claims: 'clm',
+    alerts: 'ins', investment: 'inv', meetings: 'mtg'
+  };
+  items.forEach(item => {
+    if (domain === 'all') { item.style.display = ''; return; }
+    const tag = item.querySelector('.ais-activity-tag');
+    const cls = tagMap[domain] || '';
+    item.style.display = (tag && tag.classList.contains(cls)) ? '' : 'none';
+  });
+
+  if (domain !== 'all') {
+    showToast(`Showing ${domain.charAt(0).toUpperCase()+domain.slice(1)} AI metrics`, 'info');
+  }
+}
+
+/* ── refreshAIInsights — animate the live banner & show toast  */
+function refreshAIInsights() {
+  // Spin the refresh button icon
+  const btns = document.querySelectorAll('.ais-live-refresh, .ais-page-actions .ais-btn-sm');
+  btns.forEach(b => {
+    const icon = b.querySelector('i.fa-sync-alt');
+    if (icon) { icon.classList.add('fa-spin'); setTimeout(() => icon.classList.remove('fa-spin'), 1500); }
+  });
+
+  // Animate the live items
+  document.querySelectorAll('.ais-live-item').forEach((el, i) => {
+    setTimeout(() => {
+      el.style.opacity = '0.4';
+      setTimeout(() => { el.style.opacity = '1'; }, 400);
+    }, i * 150);
+  });
+
+  setTimeout(() => {
+    showToast('AI Insights refreshed — all signals up to date as of Apr 15, 9:42 AM', 'success');
+  }, 1600);
+}
+
+/* ── openAIFeedback — rate / provide feedback on AI accuracy  */
+function openAIFeedback() {
+  document.getElementById('ais-feedback-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'ais-feedback-overlay';
+  overlay.className = 'phase1-modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+    <div class="phase1-modal" style="width:460px;max-width:95vw">
+      <div class="phase1-modal-header" style="background:linear-gradient(135deg,#1e3a8a,#7c3aed)">
+        <span><i class="fas fa-comment-alt" style="margin-right:8px"></i>Rate AI Accuracy & Feedback</span>
+        <button onclick="document.getElementById('ais-feedback-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="phase1-modal-body" style="padding:20px">
+        <p style="font-size:13px;color:#475569;margin:0 0 16px">Help us improve AI recommendations by rating the quality of recent AI insights.</p>
+
+        <label class="sched-label">AI Domain</label>
+        <select class="sched-select" style="margin-bottom:12px">
+          <option>Overall AI Scorecard</option>
+          <option>Insurance & Underwriting AI</option>
+          <option>Retention Intelligence AI</option>
+          <option>Claims Automation AI</option>
+          <option>Proactive Alert Engine</option>
+          <option>Investment & Advisory AI</option>
+          <option>Meeting Intelligence AI</option>
+        </select>
+
+        <label class="sched-label">Accuracy Rating</label>
+        <div class="ais-star-rating" id="aisFeedbackStars" style="display:flex;gap:6px;margin-bottom:12px">
+          ${[1,2,3,4,5].map(n => `<i class="fas fa-star ais-star" data-val="${n}" onclick="rateAIStar(${n})" style="font-size:22px;cursor:pointer;color:${n<=4?'#f59e0b':'#e2e8f0'}"></i>`).join('')}
+        </div>
+
+        <label class="sched-label">What was most helpful?</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+          ${['Lapse Detection','Underwriting STP','Alert Prioritisation','Cross-Sell Insights','Meeting Briefs','Claims Triage'].map(t =>
+            `<span class="ais-fb-pill" onclick="this.classList.toggle('active')" style="cursor:pointer;padding:4px 10px;border-radius:12px;font-size:11px;border:1px solid #e2e8f0;background:#f8fafc;color:#334155">${t}</span>`
+          ).join('')}
+        </div>
+
+        <label class="sched-label">Additional Comments (optional)</label>
+        <textarea class="cm-outreach-textarea" style="height:70px" placeholder="e.g. Patricia Nguyen alert was spot-on. Investment AI could be more specific on timing…"></textarea>
+      </div>
+      <div class="phase1-modal-footer">
+        <button class="btn btn-primary" onclick="_submitAIFeedback()"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
+        <button class="btn btn-outline" onclick="document.getElementById('ais-feedback-overlay').remove()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+
+function rateAIStar(val) {
+  document.querySelectorAll('.ais-star').forEach(s => {
+    s.style.color = parseInt(s.dataset.val) <= val ? '#f59e0b' : '#e2e8f0';
+  });
+}
+
+function _submitAIFeedback() {
+  document.getElementById('ais-feedback-overlay')?.remove();
+  showToast('Thank you! AI feedback submitted — your input helps improve recommendations.', 'success');
+}
+
+/* ── initAIScoreCharts — draw the overall trend sparkline ────
+   Called on navigation to ai-insights page.
+   ─────────────────────────────────────────────────────────── */
+function initAIScoreCharts() {
+  const canvas = document.getElementById('aisOverallTrendChart');
+  if (!canvas) return;
+  if (canvas._chartInstance) { canvas._chartInstance.destroy(); }
+
+  const ctx = canvas.getContext('2d');
+  canvas._chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+      datasets: [{
+        label: 'AI Score',
+        data: [52, 58, 63, 68, 72, 76, 80, 84, 87],
+        borderColor: '#1d4ed8',
+        backgroundColor: 'rgba(29,78,216,0.08)',
+        pointBackgroundColor: '#1d4ed8',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.4,
+        fill: true
+      },{
+        label: 'NYL Avg',
+        data: [48, 52, 55, 58, 60, 62, 65, 68, 74],
+        borderColor: '#94a3b8',
+        borderDash: [4,3],
+        pointRadius: 0,
+        tension: 0.4,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '/100'
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8' } },
+        y: {
+          min: 40, max: 100,
+          grid: { color: '#f1f5f9' },
+          ticks: { font: { size: 10 }, color: '#94a3b8', stepSize: 10 }
+        }
+      }
+    }
+  });
+}
+
+/* ── Hook into navigateTo so charts init on ai-insights load ─ */
+(function patchNavForAIS() {
+  const _origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    _origNav && _origNav(page);
+    if (page === 'ai-insights') {
+      setTimeout(initAIScoreCharts, 120);
+    }
+  };
+})();
+
+console.log('AI Insights enhancements loaded — filterAIDomain, refreshAIInsights, openAIFeedback, initAIScoreCharts, rateAIStar');

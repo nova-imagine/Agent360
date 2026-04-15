@@ -9415,36 +9415,136 @@ function AIImpactScorecardPage() {
   return (
     <div class="page ais-page">
 
-      {/* ── Hero Banner ── */}
-      <div class="ais-hero">
-        <div class="ais-hero-left">
-          <div class="ais-hero-icon"><i class="fas fa-robot"></i><span class="ai-pulse-ring"></span></div>
+      {/* ── Page Header ── */}
+      <div class="ais-page-header">
+        <div class="ais-page-header-left">
+          <div class="ais-page-icon"><i class="fas fa-robot"></i><span class="ai-pulse-ring"></span></div>
           <div>
-            <h2>AI Impact Scorecard</h2>
-            <p>Measurable AI-driven outcomes across Insurance · Investments · Retirement · Advisory</p>
+            <h2 class="ais-page-title">AI Impact Scorecard</h2>
+            <p class="ais-page-sub">Measurable AI-driven outcomes across Insurance · Investments · Retirement · Advisory · Q1 2026</p>
           </div>
         </div>
-        <div class="ais-hero-right">
-          <div class="ais-hero-kpi">
-            <span class="ais-hero-val">$31.2K</span>
-            <span class="ais-hero-lbl">AI Revenue Unlocked</span>
-          </div>
-          <div class="ais-hero-kpi">
-            <span class="ais-hero-val">94.6%</span>
-            <span class="ais-hero-lbl">AI Decision Accuracy</span>
-          </div>
-          <div class="ais-hero-kpi">
-            <span class="ais-hero-val">4.2 hrs</span>
-            <span class="ais-hero-lbl">Avg UW Decision (vs 8d)</span>
-          </div>
-          <div class="ais-hero-kpi">
-            <span class="ais-hero-val">247</span>
-            <span class="ais-hero-lbl">Clients AI-Monitored</span>
+        <div class="ais-page-actions">
+          <button class="btn btn-outline ais-btn-sm" onclick="openAIFeedback()"><i class="fas fa-comment-alt"></i> Feedback</button>
+          <button class="btn btn-outline ais-btn-sm" onclick="refreshAIInsights()"><i class="fas fa-sync-alt"></i> Refresh</button>
+          <button class="btn btn-outline ais-btn-sm" onclick="shareAIScorecard()"><i class="fas fa-share-alt"></i> Share</button>
+          <button class="btn btn-primary ais-btn-sm" onclick="exportAIScorecard()"><i class="fas fa-download"></i> Export PDF</button>
+        </div>
+      </div>
+
+      {/* ── KPI Strip ── */}
+      <div class="ais-kpi-strip">
+        <div class="ais-kpi-card">
+          <div class="ais-kpi-icon blue"><i class="fas fa-dollar-sign"></i></div>
+          <div class="ais-kpi-body">
+            <div class="ais-kpi-val">$31.2K</div>
+            <div class="ais-kpi-lbl">AI Revenue Unlocked</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +$8.4K vs Q4</div>
           </div>
         </div>
-        <div class="ais-hero-actions">
-          <button class="btn btn-primary ais-export-btn" onclick="exportAIScorecard()"><i class="fas fa-download"></i> Export Scorecard</button>
-          <button class="btn btn-outline ais-share-btn" onclick="shareAIScorecard()"><i class="fas fa-share-alt"></i> Share Report</button>
+        <div class="ais-kpi-card">
+          <div class="ais-kpi-icon emerald"><i class="fas fa-bullseye"></i></div>
+          <div class="ais-kpi-body">
+            <div class="ais-kpi-val">94.6%</div>
+            <div class="ais-kpi-lbl">AI Decision Accuracy</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +5.6% vs manual</div>
+          </div>
+        </div>
+        <div class="ais-kpi-card">
+          <div class="ais-kpi-icon purple"><i class="fas fa-clock"></i></div>
+          <div class="ais-kpi-body">
+            <div class="ais-kpi-val">~41 hrs</div>
+            <div class="ais-kpi-lbl">Agent Time Saved/Mo</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +12 hrs vs Q4</div>
+          </div>
+        </div>
+        <div class="ais-kpi-card">
+          <div class="ais-kpi-icon teal"><i class="fas fa-users"></i></div>
+          <div class="ais-kpi-body">
+            <div class="ais-kpi-val">247</div>
+            <div class="ais-kpi-lbl">Clients AI-Monitored</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +31 new this quarter</div>
+          </div>
+        </div>
+        <div class="ais-kpi-card">
+          <div class="ais-kpi-icon amber"><i class="fas fa-shield-alt"></i></div>
+          <div class="ais-kpi-body">
+            <div class="ais-kpi-val">$14.2K</div>
+            <div class="ais-kpi-lbl">Premium Retained</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> 3 clients saved</div>
+          </div>
+        </div>
+        <div class="ais-kpi-card">
+          <div class="ais-kpi-icon red"><i class="fas fa-star"></i></div>
+          <div class="ais-kpi-body">
+            <div class="ais-kpi-val">87 / 100</div>
+            <div class="ais-kpi-lbl">Overall AI Score</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +12 pts vs Q4</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Live Intelligence Banner ── */}
+      <div class="ais-live-banner">
+        <div class="ais-live-banner-left">
+          <span class="ais-live-badge"><i class="fas fa-circle"></i> LIVE</span>
+          <span class="ais-live-title"><i class="fas fa-brain"></i> AI Priority Actions — 4 items require your attention today</span>
+        </div>
+        <button class="ais-live-refresh" onclick="refreshAIInsights()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <div class="ais-live-actions">
+        <div class="ais-live-item urgent">
+          <div class="ais-live-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="ais-live-body">
+            <div class="ais-live-action-title">Urgent — Patricia Nguyen UL Policy</div>
+            <div class="ais-live-action-sub">2 consecutive under-funded quarters detected · $3,200 premium gap · Lapse risk: HIGH</div>
+          </div>
+          <button class="ais-live-btn" onclick="sendContextMessage('AI analysis for Patricia Nguyen UL policy underfunding')">Act Now</button>
+        </div>
+        <div class="ais-live-item high">
+          <div class="ais-live-icon"><i class="fas fa-bell"></i></div>
+          <div class="ais-live-body">
+            <div class="ais-live-action-title">High — Linda Morrison UMA Opportunity</div>
+            <div class="ais-live-action-sub">$280K+ AUM consolidation identified · $2,800/yr recurring fee · Schedule proposal</div>
+          </div>
+          <button class="ais-live-btn" onclick="sendContextMessage('Investment proposal for Linda Morrison UMA opportunity')">Schedule</button>
+        </div>
+        <div class="ais-live-item high">
+          <div class="ais-live-icon"><i class="fas fa-clipboard-check"></i></div>
+          <div class="ais-live-body">
+            <div class="ais-live-action-title">High — CLM-2026-0041 Document Gap</div>
+            <div class="ais-live-action-sub">Robert Chen estate claim · Missing identity docs from Susan Chen · Follow up required</div>
+          </div>
+          <button class="ais-live-btn" onclick="sendContextMessage('Claims follow up for CLM-2026-0041 Robert Chen')">Follow Up</button>
+        </div>
+        <div class="ais-live-item normal">
+          <div class="ais-live-icon"><i class="fas fa-calendar-check"></i></div>
+          <div class="ais-live-body">
+            <div class="ais-live-action-title">Opportunity — Sandra Williams Renewal Window</div>
+            <div class="ais-live-action-sub">Term-to-perm conversion closing Sept 2026 · $2,800/yr at risk · Start conversation now</div>
+          </div>
+          <button class="ais-live-btn" onclick="sendContextMessage('Renewal strategy for Sandra Williams term conversion')">Prepare</button>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div class="ais-toolbar">
+        <div class="ais-toolbar-left">
+          <span class="ais-toolbar-label"><i class="fas fa-filter"></i> Domain:</span>
+          <div class="ais-domain-filters" id="aisDomainFilters">
+            <button class="ais-filter-btn active" onclick="filterAIDomain('all',this)">All</button>
+            <button class="ais-filter-btn" onclick="filterAIDomain('underwriting',this)">Underwriting</button>
+            <button class="ais-filter-btn" onclick="filterAIDomain('retention',this)">Retention</button>
+            <button class="ais-filter-btn" onclick="filterAIDomain('claims',this)">Claims</button>
+            <button class="ais-filter-btn" onclick="filterAIDomain('alerts',this)">Alerts</button>
+            <button class="ais-filter-btn" onclick="filterAIDomain('investment',this)">Investment</button>
+            <button class="ais-filter-btn" onclick="filterAIDomain('meetings',this)">Meetings</button>
+          </div>
+        </div>
+        <div class="ais-toolbar-right">
+          <span class="ais-toolbar-timestamp"><i class="fas fa-clock"></i> Last synced: Apr 15, 2026 · 9:42 AM</span>
+          <button class="btn btn-outline ais-btn-sm" onclick="openAIScoreDetail('underwriting')"><i class="fas fa-chart-bar"></i> Deep Dive</button>
+          <button class="btn btn-outline ais-btn-sm" onclick="sendContextMessage('AI domain improvement recommendations across all domains')"><i class="fas fa-magic"></i> Ask AI</button>
         </div>
       </div>
 
@@ -9467,22 +9567,52 @@ function AIImpactScorecardPage() {
             <div class="ais-gauge-label">Overall AI Score</div>
           </div>
           <div class="ais-overall-desc">
-            <p>Your AI systems are performing at <strong>87/100</strong> — <span class="ais-trend-up">↑ 12 pts vs. Q4 2025</span>. Four domains are active. Key gains: underwriting STP (+18%), retention detection (+23%), and claims automation (+31%).</p>
+            <p>Your AI systems are performing at <strong>87/100</strong> — <span class="ais-trend-up">↑ 12 pts vs. Q4 2025</span>. Six domains active. Key gains: underwriting STP (+18%), retention detection (+23%), claims automation (+31%).</p>
             <div class="ais-overall-chips">
               <span class="ais-chip green"><i class="fas fa-check-circle"></i> Underwriting STP: Excellent</span>
               <span class="ais-chip green"><i class="fas fa-check-circle"></i> Retention AI: Strong</span>
               <span class="ais-chip amber"><i class="fas fa-exclamation-circle"></i> Investment AI: Growing</span>
               <span class="ais-chip green"><i class="fas fa-check-circle"></i> Claims AI: Strong</span>
+              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Alert Engine: Excellent</span>
+              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Meeting AI: Strong</span>
             </div>
+          </div>
+          <div class="ais-overall-benchmarks">
+            <div class="ais-bench-row">
+              <span class="ais-bench-lbl">NYL Top Agent Avg</span>
+              <div class="ais-bench-bar-wrap"><div class="ais-bench-bar" style="width:74%"></div></div>
+              <span class="ais-bench-val">74 / 100</span>
+            </div>
+            <div class="ais-bench-row">
+              <span class="ais-bench-lbl">Your Score</span>
+              <div class="ais-bench-bar-wrap"><div class="ais-bench-bar your-bench" style="width:87%"></div></div>
+              <span class="ais-bench-val ais-trend-up">87 / 100 ↑</span>
+            </div>
+            <div class="ais-bench-row">
+              <span class="ais-bench-lbl">Q2 2026 Target</span>
+              <div class="ais-bench-bar-wrap"><div class="ais-bench-bar target-bench" style="width:92%"></div></div>
+              <span class="ais-bench-val" style="color:#94a3b8">92 / 100</span>
+            </div>
+          </div>
+        </div>
+        <div class="ais-score-trend-card">
+          <div class="ais-score-trend-header">
+            <span class="ais-score-trend-title"><i class="fas fa-chart-line"></i> AI Score Trend — 9 Months</span>
+            <span class="ais-trend-up" style="font-size:11px">+35 pts since Aug 2025</span>
+          </div>
+          <canvas id="aisOverallTrendChart" height="120"></canvas>
+          <div class="ais-trend-months">
+            <span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+            <span>Jan</span><span>Feb</span><span>Mar</span><span class="ais-trend-now">Apr</span>
           </div>
         </div>
       </div>
 
       {/* ── Domain Scorecard Grid ── */}
-      <div class="ais-domain-grid">
+      <div class="ais-domain-grid" id="aisDomainGrid">
 
         {/* Insurance + Underwriting */}
-        <div class="ais-domain-card ais-ins ais-card-clickable" onclick="openAIScoreDetail('underwriting')" title="View Underwriting AI detail">
+        <div class="ais-domain-card ais-ins ais-card-clickable" data-domain="underwriting" onclick="openAIScoreDetail('underwriting')" title="View Underwriting AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon ins-bg"><i class="fas fa-shield-alt"></i></div>
             <div>
@@ -9529,7 +9659,7 @@ function AIImpactScorecardPage() {
         </div>
 
         {/* Retention AI */}
-        <div class="ais-domain-card ais-ret-card ais-card-clickable" onclick="openAIScoreDetail('retention')" title="View Retention AI detail">
+        <div class="ais-domain-card ais-ret-card ais-card-clickable" data-domain="retention" onclick="openAIScoreDetail('retention')" title="View Retention AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon ret-bg"><i class="fas fa-heartbeat"></i></div>
             <div>
@@ -9576,7 +9706,7 @@ function AIImpactScorecardPage() {
         </div>
 
         {/* Claims AI */}
-        <div class="ais-domain-card ais-clm ais-card-clickable" onclick="openAIScoreDetail('claims')" title="View Claims AI detail">
+        <div class="ais-domain-card ais-clm ais-card-clickable" data-domain="claims" onclick="openAIScoreDetail('claims')" title="View Claims AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon clm-bg"><i class="fas fa-clipboard-check"></i></div>
             <div>
@@ -9623,7 +9753,7 @@ function AIImpactScorecardPage() {
         </div>
 
         {/* Proactive AI Alerts */}
-        <div class="ais-domain-card ais-alert ais-card-clickable" onclick="openAIScoreDetail('alerts')" title="View Alert Engine detail">
+        <div class="ais-domain-card ais-alert ais-card-clickable" data-domain="alerts" onclick="openAIScoreDetail('alerts')" title="View Alert Engine detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon alert-bg"><i class="fas fa-bell"></i></div>
             <div>
@@ -9670,7 +9800,7 @@ function AIImpactScorecardPage() {
         </div>
 
         {/* Investment AI */}
-        <div class="ais-domain-card ais-inv ais-card-clickable" onclick="openAIScoreDetail('investment')" title="View Investment AI detail">
+        <div class="ais-domain-card ais-inv ais-card-clickable" data-domain="investment" onclick="openAIScoreDetail('investment')" title="View Investment AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon inv-bg"><i class="fas fa-chart-line"></i></div>
             <div>
@@ -9717,7 +9847,7 @@ function AIImpactScorecardPage() {
         </div>
 
         {/* Meeting AI */}
-        <div class="ais-domain-card ais-mtg ais-card-clickable" onclick="openAIScoreDetail('meetings')" title="View Meeting Intelligence detail">
+        <div class="ais-domain-card ais-mtg ais-card-clickable" data-domain="meetings" onclick="openAIScoreDetail('meetings')" title="View Meeting Intelligence detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon mtg-bg"><i class="fas fa-calendar-check"></i></div>
             <div>
@@ -9761,6 +9891,127 @@ function AIImpactScorecardPage() {
             <span><strong>AI ROI:</strong> 8 meetings × 25 min saved = <strong>3.3 hrs/mo</strong> reclaimed for selling. Better prep → estimated +12% meeting conversion rate.</span>
           </div>
           <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('meetings')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+        </div>
+
+      </div>
+
+      {/* ── AI Activity Feed + Recommendations ── */}
+      <div class="ais-bottom-row">
+
+        {/* Activity Feed */}
+        <div class="ais-activity-feed-card">
+          <div class="ais-section-header">
+            <span class="ais-section-title-sm"><i class="fas fa-stream"></i> Recent AI Activity</span>
+            <span class="ais-activity-count">12 events today</span>
+          </div>
+          <div class="ais-activity-list">
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot blue"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>Underwriting STP</strong> — Robert Chen application approved in 3.8 hrs</div>
+                <div class="ais-activity-time">Today, 8:14 AM</div>
+              </div>
+              <span class="ais-activity-tag ins">Insurance</span>
+            </div>
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot amber"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>Lapse Alert</strong> — Patricia Nguyen flagged HIGH risk · 2nd consecutive quarter underfunded</div>
+                <div class="ais-activity-time">Today, 7:52 AM</div>
+              </div>
+              <span class="ais-activity-tag ret">Retention</span>
+            </div>
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot green"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>IDP Extraction</strong> — 4 docs processed from CLM-2026-0041, 97.3% accuracy</div>
+                <div class="ais-activity-time">Today, 7:31 AM</div>
+              </div>
+              <span class="ais-activity-tag clm">Claims</span>
+            </div>
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot purple"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>Portfolio Gap</strong> — Linda Morrison UMA opportunity $280K identified</div>
+                <div class="ais-activity-time">Yesterday, 4:05 PM</div>
+              </div>
+              <span class="ais-activity-tag inv">Investment</span>
+            </div>
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot teal"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>Meeting Brief</strong> — Auto-generated for Kevin Park (Apr 15, 10:00 AM)</div>
+                <div class="ais-activity-time">Yesterday, 3:30 PM</div>
+              </div>
+              <span class="ais-activity-tag mtg">Meeting</span>
+            </div>
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot amber"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>Renewal Alert</strong> — Sandra Williams term policy renewal window · 5 months remaining</div>
+                <div class="ais-activity-time">Yesterday, 11:18 AM</div>
+              </div>
+              <span class="ais-activity-tag ins">Insurance</span>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Recommendations Panel */}
+        <div class="ais-reco-card">
+          <div class="ais-section-header">
+            <span class="ais-section-title-sm"><i class="fas fa-magic"></i> AI-Recommended Actions</span>
+            <span class="ais-reco-count">9 open</span>
+          </div>
+          <div class="ais-reco-list">
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority urgent">URGENT</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">Call Patricia Nguyen — Premium Gap</div>
+                <div class="ais-reco-sub">UL policy · 2 underfunded quarters · Est. $3,200 catch-up</div>
+              </div>
+              <button class="ais-reco-btn" onclick="sendContextMessage('Retention outreach for Patricia Nguyen UL policy')"><i class="fas fa-phone"></i></button>
+            </div>
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority high">HIGH</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">Schedule UMA Proposal — Linda Morrison</div>
+                <div class="ais-reco-sub">$280K consolidation · $2,800/yr recurring fee opportunity</div>
+              </div>
+              <button class="ais-reco-btn" onclick="sendContextMessage('UMA proposal preparation for Linda Morrison')"><i class="fas fa-calendar-plus"></i></button>
+            </div>
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority high">HIGH</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">Follow Up — CLM-2026-0041 Docs</div>
+                <div class="ais-reco-sub">Robert Chen estate · Missing ID docs from Susan Chen</div>
+              </div>
+              <button class="ais-reco-btn" onclick="sendContextMessage('Claims document follow up CLM-2026-0041')"><i class="fas fa-file-alt"></i></button>
+            </div>
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority med">MED</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">Start Sandra Williams Renewal Conversation</div>
+                <div class="ais-reco-sub">Term-to-perm · Window closes Sept 2026 · $2,800/yr at risk</div>
+              </div>
+              <button class="ais-reco-btn" onclick="sendContextMessage('Renewal strategy for Sandra Williams')"><i class="fas fa-envelope"></i></button>
+            </div>
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority med">MED</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">Review 12 Clients in 60-90 Day Lapse Window</div>
+                <div class="ais-reco-sub">AI-detected risk cohort · Avg $3,400 annual premium each</div>
+              </div>
+              <button class="ais-reco-btn" onclick="sendContextMessage('Lapse risk client cohort review 60-90 day window')"><i class="fas fa-list-check"></i></button>
+            </div>
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority low">LOW</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">David Thompson — 90+ Day No Touchpoint</div>
+                <div class="ais-reco-sub">Advisory client · Schedule proactive check-in call</div>
+              </div>
+              <button class="ais-reco-btn" onclick="sendContextMessage('Proactive outreach David Thompson 90 day check-in')"><i class="fas fa-user-check"></i></button>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -9937,6 +10188,19 @@ function AIImpactScorecardPage() {
               <div class="ais-tl-desc">Hands-free AI querying via voice — client briefs, pipeline updates, and claim status on demand.</div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ── Sticky Action Bar ── */}
+      <div class="ais-action-bar">
+        <div class="ais-action-bar-left">
+          <i class="fas fa-robot" style="color:#1d4ed8"></i>
+          <span class="ais-action-info">AI Scorecard · Q1 2026 · Last updated Apr 15, 9:42 AM</span>
+        </div>
+        <div class="ais-action-bar-right">
+          <button class="btn btn-outline ais-btn-sm" onclick="openAIFeedback()"><i class="fas fa-thumbs-up"></i> Rate AI</button>
+          <button class="btn btn-outline ais-btn-sm" onclick="shareAIScorecard()"><i class="fas fa-share-alt"></i> Share</button>
+          <button class="btn btn-primary ais-btn-sm" onclick="exportAIScorecard()"><i class="fas fa-file-pdf"></i> Export PDF</button>
         </div>
       </div>
 
