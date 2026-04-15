@@ -8480,31 +8480,171 @@ function CalendarPage() {
   return (
     <div class="page calendar-page">
 
-      {/* Domain legend strip */}
-      <div class="cal-legend-strip">
-        <span class="cal-legend-item"><span class="cal-leg-dot ins-dot"></span> Insurance</span>
-        <span class="cal-legend-item"><span class="cal-leg-dot inv-dot"></span> Investments</span>
-        <span class="cal-legend-item"><span class="cal-leg-dot ret-dot"></span> Retirement</span>
-        <span class="cal-legend-item"><span class="cal-leg-dot adv-dot"></span> Advisory</span>
-        <span class="cal-legend-item"><span class="cal-leg-dot urgent-dot"></span> Urgent</span>
+      {/* ── Page Header ── */}
+      <div class="cal-page-header">
+        <div class="cal-page-header-left">
+          <h2><i class="fas fa-calendar-alt"></i> Calendar &amp; Schedule</h2>
+          <p>AI-prepared meetings · Smart scheduling · Full activity history</p>
+        </div>
+        <div class="cal-page-header-right">
+          <button class="btn btn-outline" onclick="switchCalView('week')" id="cal-view-week"><i class="fas fa-bars"></i> Week</button>
+          <button class="btn btn-outline" onclick="switchCalView('agenda')" id="cal-view-agenda"><i class="fas fa-list"></i> Agenda</button>
+          <button class="btn btn-outline" onclick="switchCalView('month')" id="cal-view-month" style="background:#003087;color:white;border-color:#003087"><i class="fas fa-calendar"></i> Month</button>
+          <button class="btn btn-primary" onclick="openAddEventModal()"><i class="fas fa-plus"></i> Add Event</button>
+        </div>
       </div>
 
+      {/* ── KPI Strip ── */}
+      <div class="cal-kpi-strip">
+        <div class="cal-kpi-card">
+          <div class="cal-kpi-icon blue"><i class="fas fa-calendar-check"></i></div>
+          <div class="cal-kpi-body">
+            <div class="cal-kpi-val">11</div>
+            <div class="cal-kpi-lbl">Meetings This Month</div>
+            <div class="cal-kpi-delta green"><i class="fas fa-arrow-up"></i> +3 vs last month</div>
+          </div>
+        </div>
+        <div class="cal-kpi-card">
+          <div class="cal-kpi-icon red"><i class="fas fa-bolt"></i></div>
+          <div class="cal-kpi-body">
+            <div class="cal-kpi-val">2</div>
+            <div class="cal-kpi-lbl">Today's Meetings</div>
+            <div class="cal-kpi-delta orange">Next: 2:00 PM</div>
+          </div>
+        </div>
+        <div class="cal-kpi-card">
+          <div class="cal-kpi-icon amber"><i class="fas fa-clock"></i></div>
+          <div class="cal-kpi-body">
+            <div class="cal-kpi-val">4</div>
+            <div class="cal-kpi-lbl">Follow-ups Due</div>
+            <div class="cal-kpi-delta orange">2 overdue</div>
+          </div>
+        </div>
+        <div class="cal-kpi-card">
+          <div class="cal-kpi-icon emerald"><i class="fas fa-robot"></i></div>
+          <div class="cal-kpi-body">
+            <div class="cal-kpi-val">8</div>
+            <div class="cal-kpi-lbl">AI Briefs Ready</div>
+            <div class="cal-kpi-delta green">All upcoming prepped</div>
+          </div>
+        </div>
+        <div class="cal-kpi-card">
+          <div class="cal-kpi-icon purple"><i class="fas fa-handshake"></i></div>
+          <div class="cal-kpi-body">
+            <div class="cal-kpi-val">87%</div>
+            <div class="cal-kpi-lbl">Meeting Prep Score</div>
+            <div class="cal-kpi-delta green">Above target</div>
+          </div>
+        </div>
+        <div class="cal-kpi-card">
+          <div class="cal-kpi-icon teal"><i class="fas fa-check-circle"></i></div>
+          <div class="cal-kpi-body">
+            <div class="cal-kpi-val">3</div>
+            <div class="cal-kpi-lbl">Completed This Week</div>
+            <div class="cal-kpi-delta green">100% with notes</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Schedule Optimizer Panel ── */}
+      <div class="cal-ai-optimizer">
+        <div class="cal-ai-opt-header">
+          <div class="cal-ai-opt-title">
+            <i class="fas fa-brain"></i> AI Schedule Intelligence
+            <span class="cal-ai-live-badge">LIVE</span>
+          </div>
+          <div class="cal-ai-opt-sub">Analysing your week · Priority-ranked preparation · Conflict detection · Optimal scheduling</div>
+          <button class="cal-ai-opt-refresh" onclick="refreshCalAI()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div class="cal-ai-insights">
+          <div class="cal-ai-insight priority-urgent">
+            <div class="cai-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="cai-body">
+              <div class="cai-title">Kevin Park call today — application 14 days stale</div>
+              <div class="cai-detail">Pending application (Whole Life $500K) has been in review for 14 days. Client flagged as at-risk. Prepare: application status, next steps, objection-handling notes.</div>
+            </div>
+            <div class="cai-action">
+              <span class="cai-priority red">Urgent</span>
+              <button class="cai-btn" onclick="openMeetingBrief('MTG-001')">Brief <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+          <div class="cal-ai-insight priority-high">
+            <div class="cai-icon"><i class="fas fa-gem"></i></div>
+            <div class="cai-body">
+              <div class="cai-title">Linda Morrison Apr 15 — highest-value meeting this month</div>
+              <div class="cai-detail">Annual review: $2M WL policy + UMA opportunity ($500K investable assets) + estate plan trigger. 90-min meeting — AI brief prepared with 6 talking points.</div>
+            </div>
+            <div class="cai-action">
+              <span class="cai-priority amber">High</span>
+              <button class="cai-btn" onclick="openMeetingBrief('MTG-004')">Brief <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+          <div class="cal-ai-insight priority-normal">
+            <div class="cai-icon"><i class="fas fa-calendar-plus"></i></div>
+            <div class="cai-body">
+              <div class="cai-title">Schedule gap — Apr 19–21 free (3 business days)</div>
+              <div class="cai-detail">Ideal window for: Nancy Foster DI follow-up · David Thompson term review · Patricia Nguyen UL premium catch-up. AI suggests scheduling before month-end.</div>
+            </div>
+            <div class="cai-action">
+              <span class="cai-priority blue">Opportunity</span>
+              <button class="cai-btn" onclick="openAddEventModal()">Schedule <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+          <div class="cal-ai-insight priority-normal">
+            <div class="cai-icon"><i class="fas fa-sync-alt"></i></div>
+            <div class="cai-body">
+              <div class="cai-title">Sandra Williams renewal Apr 28 — renewal package ready</div>
+              <div class="cai-detail">P-100320 auto-renewal in 153 days. Prepare renewal quote, coverage review checklist, and upgrade options (LTC rider availability at age 52).</div>
+            </div>
+            <div class="cai-action">
+              <span class="cai-priority teal">Renewal</span>
+              <button class="cai-btn" onclick="openMeetingBrief('MTG-008')">Brief <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Legend + Filter row ── */}
+      <div class="cal-toolbar-row">
+        <div class="cal-legend-strip">
+          <span class="cal-legend-item"><span class="cal-leg-dot ins-dot"></span> Insurance</span>
+          <span class="cal-legend-item"><span class="cal-leg-dot inv-dot"></span> Investments</span>
+          <span class="cal-legend-item"><span class="cal-leg-dot ret-dot"></span> Retirement</span>
+          <span class="cal-legend-item"><span class="cal-leg-dot adv-dot"></span> Advisory</span>
+          <span class="cal-legend-item"><span class="cal-leg-dot urgent-dot"></span> Urgent</span>
+          <span class="cal-legend-item"><span class="cal-leg-dot renewal-dot"></span> Renewal</span>
+        </div>
+        <div class="cal-toolbar-filters">
+          <select class="filter-select cal-domain-filter" id="cal-domain-filter" onchange="calFilterDomain(this.value)">
+            <option value="">All Domains</option>
+            <option value="ins">Insurance</option>
+            <option value="inv">Investments</option>
+            <option value="ret">Retirement</option>
+            <option value="adv">Advisory</option>
+            <option value="urgent">Urgent</option>
+          </select>
+          <select class="filter-select" id="cal-type-filter" onchange="calFilterType(this.value)">
+            <option value="">All Types</option>
+            <option value="meeting">Client Meeting</option>
+            <option value="review">Annual Review</option>
+            <option value="renewal">Renewal</option>
+            <option value="followup">Follow-up</option>
+            <option value="internal">Internal</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ── Main Layout ── */}
       <div class="calendar-layout">
-        <div class="calendar-main">
+
+        {/* ── MONTH VIEW (default) ── */}
+        <div class="calendar-main" id="cal-view-month-panel">
           <div class="cal-header">
             <button class="cal-nav" id="cal-prev-btn" onclick="calNavMonth(-1)" title="Previous month"><i class="fas fa-chevron-left"></i></button>
             <h3 id="cal-month-label">April 2026</h3>
             <button class="cal-nav" id="cal-next-btn" onclick="calNavMonth(1)" title="Next month"><i class="fas fa-chevron-right"></i></button>
             <div class="cal-header-right">
-              <select class="filter-select cal-domain-filter" id="cal-domain-filter" onchange="calFilterDomain(this.value)" style="margin-right:8px">
-                <option value="">All Domains</option>
-                <option value="ins">Insurance</option>
-                <option value="inv">Investments</option>
-                <option value="ret">Retirement</option>
-                <option value="adv">Advisory</option>
-                <option value="urgent">Urgent</option>
-              </select>
-              <button class="btn btn-primary cal-add-btn" onclick="openAddEventModal()"><i class="fas fa-plus"></i> Add Event</button>
+              <button class="cal-today-btn" onclick="calGoToday()">Today</button>
             </div>
           </div>
           <div class="cal-grid" id="cal-grid">
@@ -8514,72 +8654,202 @@ function CalendarPage() {
             {[...Array(30)].map((_, i) => {
               const day = i + 1
               const hasEvent = [5, 10, 12, 15, 17, 18, 22, 25, 28].includes(day)
-              const isToday = day === 10
+              const isToday = day === 15
               return (
                 <div class={`cal-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-events' : ''}`} onclick={`calDayClick(${day},event)`}>
                   <span class="cal-day-num">{day}</span>
-                  {day === 5  && <div class="cal-event cal-ev-inv" data-evid="EVT-005" onclick="calEventClick('EVT-005',event)">Maria G. — Annuity Review</div>}
-                  {day === 10 && <div class="cal-event urgent" data-domain="urgent" data-evid="EVT-010a" onclick="calEventClick('EVT-010a',event)">Kevin Park Follow-up</div>}
-                  {day === 10 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-010b" onclick="calEventClick('EVT-010b',event)">Robert Chen — Claim Update</div>}
-                  {day === 12 && <div class="cal-event cal-ev-inv" data-domain="inv" data-evid="EVT-012" onclick="calEventClick('EVT-012',event)">Alex Rivera — New Prospect</div>}
-                  {day === 15 && <div class="cal-event cal-ev-adv" data-domain="adv" data-evid="EVT-015" onclick="calEventClick('EVT-015',event)">Linda Morrison Annual Review</div>}
-                  {day === 17 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-017" onclick="calEventClick('EVT-017',event)">Nancy Foster — New Client</div>}
-                  {day === 18 && <div class="cal-event cal-ev-ret" data-domain="ret" data-evid="EVT-018" onclick="calEventClick('EVT-018',event)">James Whitfield — Ret. Plan</div>}
-                  {day === 22 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-022" onclick="calEventClick('EVT-022',event)">Team Q1 Review</div>}
-                  {day === 25 && <div class="cal-event cal-ev-adv" data-domain="adv" data-evid="EVT-025" onclick="calEventClick('EVT-025',event)">Robert Chen — Estate Plan</div>}
-                  {day === 28 && <div class="cal-event renewal" data-domain="ins" data-evid="EVT-028" onclick="calEventClick('EVT-028',event)">Sandra Williams Renewal</div>}
+                  {day === 5  && <div class="cal-event cal-ev-inv" data-evid="EVT-005" onclick="calEventClick('EVT-005',event)"><i class="fas fa-circle ev-dot"></i>Maria G. — Annuity Review</div>}
+                  {day === 10 && <div class="cal-event urgent" data-domain="urgent" data-evid="EVT-010a" onclick="calEventClick('EVT-010a',event)"><i class="fas fa-circle ev-dot"></i>Kevin Park Follow-up</div>}
+                  {day === 10 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-010b" onclick="calEventClick('EVT-010b',event)"><i class="fas fa-circle ev-dot"></i>Robert Chen — Claim</div>}
+                  {day === 12 && <div class="cal-event cal-ev-inv" data-domain="inv" data-evid="EVT-012" onclick="calEventClick('EVT-012',event)"><i class="fas fa-circle ev-dot"></i>Alex Rivera — Prospect</div>}
+                  {day === 15 && <div class="cal-event cal-ev-adv" data-domain="adv" data-evid="EVT-015" onclick="calEventClick('EVT-015',event)"><i class="fas fa-circle ev-dot"></i>Linda Morrison Review</div>}
+                  {day === 17 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-017" onclick="calEventClick('EVT-017',event)"><i class="fas fa-circle ev-dot"></i>Nancy Foster — New Client</div>}
+                  {day === 18 && <div class="cal-event cal-ev-ret" data-domain="ret" data-evid="EVT-018" onclick="calEventClick('EVT-018',event)"><i class="fas fa-circle ev-dot"></i>James Whitfield — Ret.</div>}
+                  {day === 22 && <div class="cal-event cal-ev-ins" data-domain="ins" data-evid="EVT-022" onclick="calEventClick('EVT-022',event)"><i class="fas fa-circle ev-dot"></i>Team Q1 Review</div>}
+                  {day === 25 && <div class="cal-event cal-ev-adv" data-domain="adv" data-evid="EVT-025" onclick="calEventClick('EVT-025',event)"><i class="fas fa-circle ev-dot"></i>Robert Chen — Estate</div>}
+                  {day === 28 && <div class="cal-event renewal" data-domain="ins" data-evid="EVT-028" onclick="calEventClick('EVT-028',event)"><i class="fas fa-circle ev-dot"></i>Sandra Williams Renewal</div>}
                 </div>
               )
             })}
           </div>
         </div>
+
+        {/* ── WEEK VIEW (hidden by default) ── */}
+        <div class="calendar-main cal-week-view" id="cal-view-week-panel" style="display:none">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calNavWeek(-1)"><i class="fas fa-chevron-left"></i></button>
+            <h3 id="cal-week-label">Apr 13 – 19, 2026</h3>
+            <button class="cal-nav" onclick="calNavWeek(1)"><i class="fas fa-chevron-right"></i></button>
+            <div class="cal-header-right">
+              <button class="cal-today-btn" onclick="calGoToday()">Today</button>
+            </div>
+          </div>
+          <div class="cal-week-grid" id="cal-week-grid">
+            <div class="cwg-time-col">
+              {['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM'].map(t => (
+                <div class="cwg-time-slot">{t}</div>
+              ))}
+            </div>
+            {[
+              {day:'Mon', date:'13', evs:[]},
+              {day:'Tue', date:'14', evs:[]},
+              {day:'Wed', date:'15', evs:[{time:'9AM',dur:2,title:'Linda Morrison Annual Review',cls:'cal-ev-adv',id:'EVT-015'}]},
+              {day:'Thu', date:'16', evs:[]},
+              {day:'Fri', date:'17', evs:[{time:'11AM',dur:1,title:'Nancy Foster — New Client',cls:'cal-ev-ins',id:'EVT-017'}]},
+              {day:'Sat', date:'18', evs:[{time:'2PM',dur:1,title:'James Whitfield — Ret. Plan',cls:'cal-ev-ret',id:'EVT-018'}]},
+              {day:'Sun', date:'19', evs:[]}
+            ].map(col => (
+              <div class="cwg-day-col">
+                <div class={`cwg-day-header ${col.date==='15'?'cwg-today':''}`}>
+                  <span class="cwg-day-name">{col.day}</span>
+                  <span class="cwg-day-date">{col.date}</span>
+                </div>
+                <div class="cwg-day-slots">
+                  {col.evs.map(ev => (
+                    <div class={`cwg-event ${ev.cls}`} style={`top:${({'8AM':0,'9AM':44,'10AM':88,'11AM':132,'12PM':176,'1PM':220,'2PM':264,'3PM':308,'4PM':352}[ev.time]||0)}px;height:${ev.dur*42}px`} onclick={`openMeetingBrief('${ev.id.replace('EVT-','MTG-0')}')`}>
+                      <div class="cwg-ev-title">{ev.title}</div>
+                      <div class="cwg-ev-time">{ev.time}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── AGENDA VIEW (hidden by default) ── */}
+        <div class="calendar-main" id="cal-view-agenda-panel" style="display:none">
+          <div class="cal-header">
+            <h3><i class="fas fa-list"></i> Agenda — April 2026</h3>
+          </div>
+          <div class="cal-agenda-list">
+            <div class="cal-agenda-day-header">Today · Apr 15, 2026</div>
+            <div class="cal-agenda-item urgent-agenda" onclick="openMeetingBrief('MTG-004')">
+              <div class="cag-time"><span class="cag-t">9:00</span><span class="cag-ap">AM</span></div>
+              <div class="cag-bar adv-bar"></div>
+              <div class="cag-body">
+                <div class="cag-title">Linda Morrison — Annual Review</div>
+                <div class="cag-meta"><span class="act-domain-pill adv">Advisory</span> 90 min · In Person · Estate + UMA + Insurance</div>
+                <div class="cag-prep"><i class="fas fa-robot"></i> AI Brief ready · 6 talking points · High-value meeting</div>
+              </div>
+              <button class="cag-brief-btn" onclick="event.stopPropagation();openMeetingBrief('MTG-004')"><i class="fas fa-file-alt"></i> Brief</button>
+            </div>
+
+            <div class="cal-agenda-day-header">Apr 17 · Friday</div>
+            <div class="cal-agenda-item" onclick="openMeetingBrief('MTG-005')">
+              <div class="cag-time"><span class="cag-t">11:00</span><span class="cag-ap">AM</span></div>
+              <div class="cag-bar ins-bar"></div>
+              <div class="cag-body">
+                <div class="cag-title">Nancy Foster — New Client Onboarding</div>
+                <div class="cag-meta"><span class="act-domain-pill ins">Insurance</span> 60 min · Video · Term Life + WL discussion</div>
+                <div class="cag-prep"><i class="fas fa-robot"></i> AI Brief ready · New prospect profile prepared</div>
+              </div>
+              <button class="cag-brief-btn" onclick="event.stopPropagation();openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Brief</button>
+            </div>
+
+            <div class="cal-agenda-day-header">Apr 18 · Saturday</div>
+            <div class="cal-agenda-item" onclick="openMeetingBrief('MTG-005')">
+              <div class="cag-time"><span class="cag-t">2:00</span><span class="cag-ap">PM</span></div>
+              <div class="cag-bar ret-bar"></div>
+              <div class="cag-body">
+                <div class="cag-title">James Whitfield — Retirement Plan Review</div>
+                <div class="cag-meta"><span class="act-domain-pill ret">Retirement</span> 60 min · Phone · Deferred annuity illustration</div>
+                <div class="cag-prep"><i class="fas fa-robot"></i> AI Brief ready · Annuity illustration generated</div>
+              </div>
+              <button class="cag-brief-btn" onclick="event.stopPropagation();openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Brief</button>
+            </div>
+
+            <div class="cal-agenda-day-header">Apr 22 · Wednesday</div>
+            <div class="cal-agenda-item" onclick="openMeetingBrief('MTG-006')">
+              <div class="cag-time"><span class="cag-t">10:00</span><span class="cag-ap">AM</span></div>
+              <div class="cag-bar ins-bar"></div>
+              <div class="cag-body">
+                <div class="cag-title">Team Q1 Performance Review</div>
+                <div class="cag-meta"><span class="act-domain-pill ins">Insurance</span> 120 min · In Person · Roger Putnam · All lines</div>
+                <div class="cag-prep"><i class="fas fa-robot"></i> AI Summary prepared · Q1 scorecard ready</div>
+              </div>
+              <button class="cag-brief-btn" onclick="event.stopPropagation();openMeetingBrief('MTG-006')"><i class="fas fa-file-alt"></i> Brief</button>
+            </div>
+
+            <div class="cal-agenda-day-header">Apr 25 · Saturday</div>
+            <div class="cal-agenda-item" onclick="openMeetingBrief('MTG-007')">
+              <div class="cag-time"><span class="cag-t">3:00</span><span class="cag-ap">PM</span></div>
+              <div class="cag-bar adv-bar"></div>
+              <div class="cag-body">
+                <div class="cag-title">Robert Chen — Estate Planning</div>
+                <div class="cag-meta"><span class="act-domain-pill adv">Advisory</span> 90 min · In Person · Business succession + NQDC</div>
+                <div class="cag-prep"><i class="fas fa-robot"></i> AI Brief ready · Business owner analysis prepared</div>
+              </div>
+              <button class="cag-brief-btn" onclick="event.stopPropagation();openMeetingBrief('MTG-007')"><i class="fas fa-file-alt"></i> Brief</button>
+            </div>
+
+            <div class="cal-agenda-day-header">Apr 28 · Tuesday</div>
+            <div class="cal-agenda-item renewal-agenda" onclick="openMeetingBrief('MTG-008')">
+              <div class="cag-time"><span class="cag-t">1:00</span><span class="cag-ap">PM</span></div>
+              <div class="cag-bar renewal-bar"></div>
+              <div class="cag-body">
+                <div class="cag-title">Sandra Williams — Policy Renewal</div>
+                <div class="cag-meta"><span class="act-domain-pill ins">Insurance</span> 45 min · Phone · P-100320 review</div>
+                <div class="cag-prep"><i class="fas fa-robot"></i> AI Brief ready · Renewal package + upgrade options prepared</div>
+              </div>
+              <button class="cag-brief-btn" onclick="event.stopPropagation();openMeetingBrief('MTG-008')"><i class="fas fa-file-alt"></i> Brief</button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── SIDEBAR ── */}
         <div class="calendar-sidebar">
 
+          {/* Today's Schedule */}
+          <div class="cal-today-card">
+            <div class="cal-today-header">
+              <i class="fas fa-sun"></i>
+              <span>Today — Apr 15, 2026</span>
+              <span class="cal-today-count">2 meetings</span>
+            </div>
+            <div class="cal-today-meetings">
+              <div class="ctm-row">
+                <div class="ctm-time">9:00 AM</div>
+                <div class="ctm-bar adv-bar"></div>
+                <div class="ctm-body">
+                  <div class="ctm-title">Linda Morrison</div>
+                  <div class="ctm-sub">Annual Review · 90 min</div>
+                </div>
+                <div class="ctm-prep ready" title="AI Brief ready"><i class="fas fa-robot"></i></div>
+              </div>
+              <div class="ctm-row">
+                <div class="ctm-time">2:00 PM</div>
+                <div class="ctm-bar ins-bar"></div>
+                <div class="ctm-body">
+                  <div class="ctm-title">Team Q1 Prep</div>
+                  <div class="ctm-sub">Internal · 30 min</div>
+                </div>
+                <div class="ctm-prep ready" title="Notes ready"><i class="fas fa-check-circle"></i></div>
+              </div>
+            </div>
+          </div>
+
           {/* --- UPCOMING MEETINGS --- */}
-          <div class="cal-sidebar-section-header">
+          <div class="cal-sidebar-section-header" style="margin-top:14px">
             <h4><i class="fas fa-calendar-alt"></i> Upcoming Meetings</h4>
             <span class="cal-section-badge upcoming-badge">8</span>
           </div>
           <div class="upcoming-list">
 
             <div class="upcoming-event urgent-event">
-              <div class="ue-date"><span class="ue-d">10</span><span class="ue-m">Apr</span></div>
-              <div class="ue-info">
-                <div class="ue-title">Kevin Park — Follow-up Call</div>
-                <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> Pending application · Urgent</div>
-                <div class="ue-actions">
-                  <button class="btn-pmb urgent-pmb" onclick="openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="upcoming-event">
-              <div class="ue-date"><span class="ue-d">10</span><span class="ue-m">Apr</span></div>
-              <div class="ue-info">
-                <div class="ue-title">Robert Chen — Claim Status</div>
-                <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> Video · 45 min</div>
-                <div class="ue-actions">
-                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-002')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="upcoming-event">
-              <div class="ue-date"><span class="ue-d">12</span><span class="ue-m">Apr</span></div>
-              <div class="ue-info">
-                <div class="ue-title">Alex Rivera — Prospect Intro</div>
-                <div class="ue-desc"><span class="act-domain-pill inv">Investments</span> Annuity + WL interest · In Person</div>
-                <div class="ue-actions">
-                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-003')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="upcoming-event">
               <div class="ue-date"><span class="ue-d">15</span><span class="ue-m">Apr</span></div>
               <div class="ue-info">
                 <div class="ue-title">Linda Morrison — Annual Review</div>
-                <div class="ue-desc"><span class="act-domain-pill adv">Advisory</span> Estate + UMA + Insurance · 90 min</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill adv">Advisory</span>
+                  <span class="ue-type-tag"><i class="fas fa-users"></i> In Person</span>
+                  <span class="ue-duration">90 min</span>
+                </div>
+                <div class="ue-prep-bar">
+                  <span class="ue-prep-label">AI Prep</span>
+                  <div class="ue-prep-track"><div class="ue-prep-fill" style="width:92%"></div></div>
+                  <span class="ue-prep-pct">92%</span>
+                </div>
                 <div class="ue-actions">
                   <button class="btn-pmb" onclick="openMeetingBrief('MTG-004')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
                 </div>
@@ -8587,10 +8857,39 @@ function CalendarPage() {
             </div>
 
             <div class="upcoming-event">
+              <div class="ue-date"><span class="ue-d">17</span><span class="ue-m">Apr</span></div>
+              <div class="ue-info">
+                <div class="ue-title">Nancy Foster — New Client</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill ins">Insurance</span>
+                  <span class="ue-type-tag"><i class="fas fa-video"></i> Video</span>
+                  <span class="ue-duration">60 min</span>
+                </div>
+                <div class="ue-prep-bar">
+                  <span class="ue-prep-label">AI Prep</span>
+                  <div class="ue-prep-track"><div class="ue-prep-fill" style="width:78%"></div></div>
+                  <span class="ue-prep-pct">78%</span>
+                </div>
+                <div class="ue-actions">
+                  <button class="btn-pmb" onclick="openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="upcoming-event">
               <div class="ue-date"><span class="ue-d">18</span><span class="ue-m">Apr</span></div>
               <div class="ue-info">
-                <div class="ue-title">James Whitfield — Retirement Plan</div>
-                <div class="ue-desc"><span class="act-domain-pill ret">Retirement</span> Deferred annuity illustration</div>
+                <div class="ue-title">James Whitfield — Ret. Plan</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill ret">Retirement</span>
+                  <span class="ue-type-tag"><i class="fas fa-phone"></i> Phone</span>
+                  <span class="ue-duration">60 min</span>
+                </div>
+                <div class="ue-prep-bar">
+                  <span class="ue-prep-label">AI Prep</span>
+                  <div class="ue-prep-track"><div class="ue-prep-fill" style="width:85%"></div></div>
+                  <span class="ue-prep-pct">85%</span>
+                </div>
                 <div class="ue-actions">
                   <button class="btn-pmb" onclick="openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
                 </div>
@@ -8601,7 +8900,11 @@ function CalendarPage() {
               <div class="ue-date"><span class="ue-d">22</span><span class="ue-m">Apr</span></div>
               <div class="ue-info">
                 <div class="ue-title">Team Q1 Performance Review</div>
-                <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> All lines · Roger Putnam</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill ins">Insurance</span>
+                  <span class="ue-type-tag"><i class="fas fa-users"></i> In Person</span>
+                  <span class="ue-duration">120 min</span>
+                </div>
                 <div class="ue-actions">
                   <button class="btn-pmb" onclick="openMeetingBrief('MTG-006')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
                 </div>
@@ -8612,7 +8915,11 @@ function CalendarPage() {
               <div class="ue-date"><span class="ue-d">25</span><span class="ue-m">Apr</span></div>
               <div class="ue-info">
                 <div class="ue-title">Robert Chen — Estate Planning</div>
-                <div class="ue-desc"><span class="act-domain-pill adv">Advisory</span> Business succession + NQDC</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill adv">Advisory</span>
+                  <span class="ue-type-tag"><i class="fas fa-users"></i> In Person</span>
+                  <span class="ue-duration">90 min</span>
+                </div>
                 <div class="ue-actions">
                   <button class="btn-pmb" onclick="openMeetingBrief('MTG-007')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
                 </div>
@@ -8623,7 +8930,11 @@ function CalendarPage() {
               <div class="ue-date"><span class="ue-d">28</span><span class="ue-m">Apr</span></div>
               <div class="ue-info">
                 <div class="ue-title">Sandra Williams — Policy Renewal</div>
-                <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> P-100320 · Review meeting</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill ins">Insurance</span>
+                  <span class="ue-type-tag"><i class="fas fa-phone"></i> Phone</span>
+                  <span class="ue-duration">45 min</span>
+                </div>
                 <div class="ue-actions">
                   <button class="btn-pmb" onclick="openMeetingBrief('MTG-008')"><i class="fas fa-file-alt"></i> Pre-Meeting Brief</button>
                 </div>
@@ -8632,18 +8943,21 @@ function CalendarPage() {
 
           </div>
 
-          {/* --- RECENT MEETINGS (Post-Meeting Summary) --- */}
-          <div class="cal-sidebar-section-header" style="margin-top:16px">
+          {/* --- RECENT MEETINGS --- */}
+          <div class="cal-sidebar-section-header" style="margin-top:14px">
             <h4><i class="fas fa-clipboard-check"></i> Recent Meetings</h4>
             <span class="cal-section-badge past-badge">3</span>
           </div>
           <div class="upcoming-list past-meetings-list">
 
             <div class="upcoming-event past-event">
-              <div class="ue-date"><span class="ue-d">05</span><span class="ue-m">Apr</span></div>
+              <div class="ue-date"><span class="ue-d">12</span><span class="ue-m">Apr</span></div>
               <div class="ue-info">
-                <div class="ue-title">Maria G. — Annuity Review</div>
-                <div class="ue-desc"><span class="act-domain-pill inv">Investments</span> Income annuity discussion</div>
+                <div class="ue-title">Alex Rivera — Prospect Intro</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill inv">Investments</span>
+                  <span class="ue-outcome-tag success"><i class="fas fa-check"></i> Positive</span>
+                </div>
                 <div class="ue-actions">
                   <button class="btn-pms" onclick="openMeetingBrief('MTG-P01')"><i class="fas fa-clipboard-list"></i> Post-Meeting Summary</button>
                 </div>
@@ -8651,10 +8965,13 @@ function CalendarPage() {
             </div>
 
             <div class="upcoming-event past-event">
-              <div class="ue-date"><span class="ue-d">03</span><span class="ue-m">Apr</span></div>
+              <div class="ue-date"><span class="ue-d">10</span><span class="ue-m">Apr</span></div>
               <div class="ue-info">
-                <div class="ue-title">Patricia Nguyen — UL Review</div>
-                <div class="ue-desc"><span class="act-domain-pill ins">Insurance</span> Premium funding strategy</div>
+                <div class="ue-title">Kevin Park — Follow-up Call</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill ins">Insurance</span>
+                  <span class="ue-outcome-tag pending"><i class="fas fa-clock"></i> Pending</span>
+                </div>
                 <div class="ue-actions">
                   <button class="btn-pms" onclick="openMeetingBrief('MTG-P02')"><i class="fas fa-clipboard-list"></i> Post-Meeting Summary</button>
                 </div>
@@ -8662,10 +8979,13 @@ function CalendarPage() {
             </div>
 
             <div class="upcoming-event past-event">
-              <div class="ue-date"><span class="ue-d">01</span><span class="ue-m">Apr</span></div>
+              <div class="ue-date"><span class="ue-d">05</span><span class="ue-m">Apr</span></div>
               <div class="ue-info">
-                <div class="ue-title">James Whitfield — Initial Consult</div>
-                <div class="ue-desc"><span class="act-domain-pill ret">Retirement</span> Needs analysis</div>
+                <div class="ue-title">Maria G. — Annuity Review</div>
+                <div class="ue-meta-row">
+                  <span class="act-domain-pill inv">Investments</span>
+                  <span class="ue-outcome-tag success"><i class="fas fa-check"></i> Positive</span>
+                </div>
                 <div class="ue-actions">
                   <button class="btn-pms" onclick="openMeetingBrief('MTG-P03')"><i class="fas fa-clipboard-list"></i> Post-Meeting Summary</button>
                 </div>
@@ -8674,17 +8994,48 @@ function CalendarPage() {
 
           </div>
 
-          {/* Mini domain summary */}
+          {/* Domain summary */}
           <div class="cal-sidebar-summary">
-            <div class="css-item ins-theme"><i class="fas fa-shield-alt"></i> <span>5</span> Insurance events</div>
-            <div class="css-item inv-theme"><i class="fas fa-chart-line"></i> <span>2</span> Investment meetings</div>
-            <div class="css-item ret-theme"><i class="fas fa-umbrella-beach"></i> <span>1</span> Retirement review</div>
-            <div class="css-item adv-theme"><i class="fas fa-handshake"></i> <span>2</span> Advisory sessions</div>
+            <div class="css-item ins-theme"><i class="fas fa-shield-alt"></i> <span>5</span> Insurance</div>
+            <div class="css-item inv-theme"><i class="fas fa-chart-line"></i> <span>2</span> Investments</div>
+            <div class="css-item ret-theme"><i class="fas fa-umbrella-beach"></i> <span>1</span> Retirement</div>
+            <div class="css-item adv-theme"><i class="fas fa-handshake"></i> <span>2</span> Advisory</div>
           </div>
 
-          <button class="btn btn-ai full-width-btn" onclick="sendContextMessage('Review my upcoming calendar and suggest optimal meeting preparation priorities for this week','advisor')">
+          <button class="btn btn-ai full-width-btn" style="margin-top:10px" onclick="sendContextMessage('Review my upcoming calendar and suggest optimal meeting preparation priorities, identify any scheduling gaps, and recommend which clients need outreach this week','advisor')">
             <i class="fas fa-robot"></i> AI Schedule Optimizer
           </button>
+        </div>
+      </div>
+
+      {/* ── Activity Heatmap & Cadence Strip ── */}
+      <div class="cal-activity-strip">
+        <div class="cal-activity-header">
+          <div class="cal-activity-title"><i class="fas fa-chart-bar"></i> Meeting Cadence — Last 12 Weeks</div>
+          <div class="cal-activity-legend">
+            <span class="cal-heat-leg low">1–2</span>
+            <span class="cal-heat-leg med">3–4</span>
+            <span class="cal-heat-leg high">5+</span>
+          </div>
+        </div>
+        <div class="cal-heatmap">
+          {[
+            {w:'Jan W3',n:2},{w:'Jan W4',n:3},{w:'Feb W1',n:1},{w:'Feb W2',n:4},
+            {w:'Feb W3',n:3},{w:'Feb W4',n:2},{w:'Mar W1',n:5},{w:'Mar W2',n:4},
+            {w:'Mar W3',n:3},{w:'Mar W4',n:6},{w:'Apr W1',n:4},{w:'Apr W2',n:3}
+          ].map(w => (
+            <div class="cal-heat-col">
+              <div class={`cal-heat-cell ${w.n>=5?'heat-high':w.n>=3?'heat-med':'heat-low'}`} title={`${w.w}: ${w.n} meetings`}></div>
+              <div class="cal-heat-label">{w.w.split(' ')[1]}</div>
+            </div>
+          ))}
+        </div>
+        <div class="cal-cadence-stats">
+          <div class="cal-cadence-stat"><span class="ccs-val">3.5</span><span class="ccs-lbl">Avg meetings/week</span></div>
+          <div class="cal-cadence-stat"><span class="ccs-val">6</span><span class="ccs-lbl">Peak (Mar W4)</span></div>
+          <div class="cal-cadence-stat"><span class="ccs-val">14</span><span class="ccs-lbl">New prospects met</span></div>
+          <div class="cal-cadence-stat"><span class="ccs-val">87%</span><span class="ccs-lbl">Show rate</span></div>
+          <div class="cal-cadence-stat"><span class="ccs-val green-text">+22%</span><span class="ccs-lbl">vs Q4 2025</span></div>
         </div>
       </div>
 

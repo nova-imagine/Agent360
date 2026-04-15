@@ -8978,16 +8978,18 @@ function calFilterDomain(val) {
 
 // ── Main calendar renderer ────────────────────────────────────
 function renderCalendar() {
-  const { year, month, filter } = CAL_STATE;
+  const { year, month, filter, typeFilter } = CAL_STATE;
 
   // Update month label
   const label = document.getElementById('cal-month-label');
   if (label) label.textContent = `${CAL_MONTHS[month]} ${year}`;
 
-  // Filter events for this month
+  // Filter events for this month (domain + type)
+  const typeMap = { meeting:'Meeting', review:'Meeting', renewal:'Meeting', followup:'Call', internal:'Internal' };
   const monthEvents = calEvents.filter(e =>
     e.year === year && e.month === month &&
-    (!filter || e.domain === filter)
+    (!filter || e.domain === filter) &&
+    (!typeFilter || (typeMap[typeFilter] ? e.type === typeMap[typeFilter] : true))
   );
 
   // Group by day
@@ -9314,6 +9316,182 @@ function editCalEvent(evId) {
   }, 150);
 }
 
+// ── View Switcher ─────────────────────────────────────────────
+const CAL_VIEWS = { month: null, week: null, agenda: null };
+
+function switchCalView(view) {
+  // Panel visibility
+  const panels = { month:'cal-view-month-panel', week:'cal-view-week-panel', agenda:'cal-view-agenda-panel' };
+  Object.keys(panels).forEach(v => {
+    const el = document.getElementById(panels[v]);
+    if (el) el.style.display = (v === view) ? '' : 'none';
+  });
+
+  // Button active state
+  const btns = { month:'cal-view-month', week:'cal-view-week', agenda:'cal-view-agenda' };
+  Object.keys(btns).forEach(v => {
+    const btn = document.getElementById(btns[v]);
+    if (!btn) return;
+    if (v === view) {
+      btn.style.background = '#003087';
+      btn.style.color = 'white';
+      btn.style.borderColor = '#003087';
+    } else {
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }
+  });
+
+  CAL_VIEWS.current = view;
+
+  // Re-render month or week when switching to them
+  if (view === 'month') renderCalendar();
+  if (view === 'week')  renderWeekView();
+}
+
+// ── Today button ──────────────────────────────────────────────
+function calGoToday() {
+  const now = new Date();
+  CAL_STATE.year  = now.getFullYear();
+  CAL_STATE.month = now.getMonth();
+  renderCalendar();
+  // Also update week view if active
+  const weekPanel = document.getElementById('cal-view-week-panel');
+  if (weekPanel && weekPanel.style.display !== 'none') renderWeekView();
+}
+
+// ── Week View State & Renderer ────────────────────────────────
+const CAL_WEEK_STATE = { weekStart: null };  // null = current week
+
+function _getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function renderWeekView() {
+  const labelEl = document.getElementById('cal-week-label');
+  const gridEl  = document.getElementById('cal-week-grid');
+  if (!gridEl) return;
+
+  // Determine week start (default to the current month's first Monday-ish)
+  if (!CAL_WEEK_STATE.weekStart) {
+    // Default: week containing the 15th of displayed month
+    CAL_WEEK_STATE.weekStart = _getWeekStart(new Date(CAL_STATE.year, CAL_STATE.month, 15));
+  }
+
+  const ws = CAL_WEEK_STATE.weekStart;
+  const we = new Date(ws); we.setDate(we.getDate() + 6);
+
+  // Label e.g. "Apr 13 – 19, 2026"
+  const fmt = d => `${CAL_MONTHS[d.getMonth()].slice(0,3)} ${d.getDate()}`;
+  if (labelEl) labelEl.textContent = `${fmt(ws)} – ${fmt(we)}, ${we.getFullYear()}`;
+
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+
+  // Time slots 8AM–5PM
+  const timeSlots = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM'];
+  const timeToTop = { '8:00':0,'9:00':44,'10:00':88,'11:00':132,'12:00':176,'13:00':220,'14:00':264,'15:00':308,'16:00':352,'17:00':396 };
+
+  let html = `<div class="cwg-time-col">${timeSlots.map(t => `<div class="cwg-time-slot">${t}</div>`).join('')}</div>`;
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(ws); d.setDate(ws.getDate() + i);
+    const dStr = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const isToday = dStr === todayStr;
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    // Find events for this day
+    const dayEvs = calEvents.filter(ev =>
+      ev.year === d.getFullYear() && ev.month === d.getMonth() && ev.day === d.getDate()
+    );
+
+    const domainColors = { ins:'#003087', inv:'#059669', ret:'#0891b2', adv:'#7c3aed', urgent:'#dc2626' };
+
+    const evHtml = dayEvs.map(ev => {
+      // Parse time to get top position
+      const match = (ev.time || '10:00 AM').match(/(\d+):(\d+)\s*(AM|PM)/i);
+      let topPx = 88; // default 10AM
+      if (match) {
+        let h = parseInt(match[1]);
+        if (match[3].toUpperCase() === 'PM' && h < 12) h += 12;
+        if (match[3].toUpperCase() === 'AM' && h === 12) h = 0;
+        const key = `${h}:00`;
+        topPx = timeToTop[key] !== undefined ? timeToTop[key] : (h - 8) * 44;
+      }
+      const color = domainColors[ev.domain] || '#003087';
+      return `<div class="cwg-event ${ev.cls}" style="top:${topPx}px;height:40px;border-left:3px solid ${color}" 
+                onclick="calEventClick('${ev.id}',event)" title="${ev.title}">
+                <div class="cwg-ev-title">${ev.title}</div>
+                <div class="cwg-ev-time">${ev.time}</div>
+              </div>`;
+    }).join('');
+
+    html += `<div class="cwg-day-col">
+      <div class="cwg-day-header ${isToday ? 'cwg-today' : ''}">
+        <span class="cwg-day-name">${dayNames[d.getDay()]}</span>
+        <span class="cwg-day-date">${d.getDate()}</span>
+      </div>
+      <div class="cwg-day-slots">${evHtml}</div>
+    </div>`;
+  }
+
+  gridEl.innerHTML = html;
+}
+
+function calNavWeek(delta) {
+  if (!CAL_WEEK_STATE.weekStart) {
+    CAL_WEEK_STATE.weekStart = _getWeekStart(new Date(CAL_STATE.year, CAL_STATE.month, 15));
+  }
+  CAL_WEEK_STATE.weekStart.setDate(CAL_WEEK_STATE.weekStart.getDate() + delta * 7);
+  renderWeekView();
+}
+
+// ── Type filter ───────────────────────────────────────────────
+function calFilterType(val) {
+  CAL_STATE.typeFilter = val;
+  renderCalendar();
+}
+
+// ── AI Refresh ────────────────────────────────────────────────
+function refreshCalAI() {
+  const insights = document.querySelector('.cal-ai-insights');
+  if (!insights) return;
+
+  // Visual refresh animation
+  insights.style.opacity = '0.4';
+  const refreshBtn = document.querySelector('.cal-ai-opt-refresh');
+  if (refreshBtn) {
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analysing…';
+    refreshBtn.disabled = true;
+  }
+
+  setTimeout(() => {
+    insights.style.opacity = '1';
+    if (refreshBtn) {
+      refreshBtn.innerHTML = '<i class="fas fa-check"></i> Updated';
+      refreshBtn.style.color = '#059669';
+      setTimeout(() => {
+        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+        refreshBtn.style.color = '';
+        refreshBtn.disabled = false;
+      }, 2000);
+    }
+
+    // Show toast
+    const toast = document.createElement('div');
+    toast.className = 'phase1-toast success';
+    toast.innerHTML = '<i class="fas fa-brain"></i> AI Schedule Intelligence refreshed — 4 insights updated.';
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3200);
+  }, 1400);
+}
+
 // ── Auto-init calendar when calendar page becomes active ──────
 (function() {
   const origNavigateTo = window.navigateTo;
@@ -9334,7 +9512,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-console.log('Phase 3 loaded — calNavMonth, calFilterDomain, renderCalendar, openAddEventModal, saveCalEvent, calEventClick, deleteCalEvent, editCalEvent');
+console.log('Phase 3 loaded — calNavMonth, calFilterDomain, renderCalendar, openAddEventModal, saveCalEvent, calEventClick, deleteCalEvent, editCalEvent, switchCalView, calGoToday, calNavWeek, calFilterType, refreshCalAI');
 
 /* ═══════════════════════════════════════════════════════════════
    PHASE 4 — Products Detail Modal · Kanban Move Visual ·
