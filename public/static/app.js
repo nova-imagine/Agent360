@@ -28,7 +28,9 @@ function navigateTo(page) {
     calendar: 'Calendar & Events',
     'ai-insights': 'AI Insights',
     claims: 'Claims Management',
-    underwriting: 'Underwriting Pipeline'
+    underwriting: 'Underwriting Pipeline',
+    settings: 'Settings',
+    help: 'Help & Support'
   };
 
   const breadcrumbs = {
@@ -42,7 +44,9 @@ function navigateTo(page) {
     calendar: 'Home / Calendar',
     'ai-insights': 'Home / Insights / AI Insights',
     claims: 'Home / Claims',
-    underwriting: 'Home / Sales / Underwriting'
+    underwriting: 'Home / Sales / Underwriting',
+    settings: 'Home / Settings',
+    help: 'Home / Help & Support'
   };
 
   const titleEl = document.getElementById('page-title');
@@ -12921,3 +12925,196 @@ function initAIScoreCharts() {
 })();
 
 console.log('AI Insights enhancements loaded — filterAIDomain, refreshAIInsights, openAIFeedback, initAIScoreCharts, rateAIStar');
+
+/* ════════════════════════════════════════════════════════════════
+   SETTINGS PAGE — JS Functions
+   ════════════════════════════════════════════════════════════════ */
+
+function switchSettingsTab(tab, btn) {
+  // Deactivate all tabs and panels
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.stab-panel').forEach(p => p.classList.remove('active'));
+  // Activate selected
+  if (btn) btn.classList.add('active');
+  const panel = document.getElementById('stab-' + tab);
+  if (panel) panel.classList.add('active');
+}
+
+function settingsSaveAll() {
+  showToast('Settings saved successfully', 'success');
+}
+
+function settingsDiscardChanges() {
+  showToast('Changes discarded', 'info');
+}
+
+function settingsToggleToken() {
+  const inp = document.getElementById('set-api-token');
+  if (!inp) return;
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function settingsRegenToken() {
+  const inp = document.getElementById('set-api-token');
+  if (inp) inp.value = 'nyl_sk_live_' + Math.random().toString(36).substr(2, 20);
+  showToast('API token regenerated — copy it now, it won\'t be shown again', 'success');
+}
+
+function settingsSetTheme(theme, el) {
+  document.querySelectorAll('.stg-theme-card').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  showToast('Theme set to ' + theme + ' (full dark mode coming Q2 2026)', 'info');
+}
+
+function settingsSetAccent(color, el) {
+  document.querySelectorAll('.stg-color-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.documentElement.style.setProperty('--accent', color);
+  showToast('Accent color updated', 'success');
+}
+
+function settingsFontSize(size) {
+  const px = size.match(/\d+/)?.[0] || '14';
+  document.documentElement.style.fontSize = px + 'px';
+  showToast('Font size set to ' + px + 'px', 'info');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HELP PAGE — JS Functions
+   ════════════════════════════════════════════════════════════════ */
+
+const _helpArticles = {
+  'getting-started': { title: 'Getting Started with NYL Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore the Client Management section to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The AI Agents tab gives you context-aware AI for any client or deal.' },
+  'ai-guide': { title: 'AI Features Guide', body: 'NYL Agent 360 includes 6 AI domains: Underwriting STP (73% auto-approval), Retention Intelligence (67-day lapse prediction), Claims Automation (IDP document processing), Proactive Alert Engine (obituary + NBA detection), Investment Advisory AI, and Meeting Intelligence. View your AI Scorecard in AI Insights.' },
+  'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Pipeline · G+A: AI Agents · G+R: Reports · G+I: AI Insights · ⌘K: Spotlight Search · Esc: Close modal · ?: Show this help panel' },
+  'video-tutorials': { title: 'Video Tutorials', body: 'Video walkthroughs are available on the NYL internal portal. Topics include: Setting up your client profile, Using AI agents for underwriting, Understanding your AI Scorecard, and Configuring notifications. Contact support for access.' },
+  'release-notes': { title: 'Q1 2026 Release Notes', body: 'New: AI Insights Dashboard with 6 domain scores · View Trend & Actions drill-down modals · Settings & Help pages · Improved: STP rate 73% (+12pts) · Retention lapse prediction 67 days ahead · Claims triage <2 min · Fixed: Modal overlay bug, AI Score Trend chart infinite scroll' },
+  'uw-guide': { title: 'Underwriting Pipeline Guide', body: 'The Underwriting STP Engine auto-approves applications scoring below the risk threshold. Applications above threshold route to manual review with AI-generated risk summaries. APS orders are avoided where AI confidence is high — saving $450/case. Current STP rate: 73% (18 APS cases avoided/month).' },
+  'retention-guide': { title: 'Retention Intelligence Best Practices', body: 'When a client appears in the Lapse Risk list, act within 48 hours. AI recommends: 1) Personal outreach call, 2) Policy review meeting, 3) Flexible payment options. Clients contacted within the 67-day window have a 60% retention rate vs 23% without AI-guided outreach.' },
+  'claims-guide': { title: 'Claims Automation — IDP & Triage', body: 'The IDP (Intelligent Document Processing) engine extracts data from claims documents in <30 seconds with 97.3% accuracy. Claims are auto-triaged within 2 minutes. If a document gap is detected, the system flags the specific missing items and drafts a request letter automatically.' },
+  'reports-guide': { title: 'Reports & Analytics — Data Glossary', body: 'STP Rate: % of UW applications auto-approved. Lapse Risk Score: 0–100 AI risk index. AI Score: Composite AI utilization + ROI index. Revenue Unlocked: Direct revenue attributable to AI recommendations. APS Avoided: Applications where AI replaced physical exam. Decision Accuracy: AI vs manual accuracy comparison.' },
+};
+
+const _helpFaqKb = [
+  { q: 'lapse prediction retention ai', a: 'lapse' },
+  { q: 'stp straight through processing underwriting', a: 'underwriting' },
+  { q: 'add client new', a: 'clients' },
+  { q: 'export pdf report excel', a: 'reports' },
+  { q: 'ai score 0 100 scorecard', a: 'ai-insights' },
+  { q: 'cmd k search spotlight shortcut keyboard', a: 'keyboard' },
+  { q: 'data security privacy encryption', a: 'security' },
+];
+
+function helpSearch(query) {
+  const q = (query || '').toLowerCase().trim();
+  const resultsEl = document.getElementById('help-search-results');
+  if (!resultsEl) return;
+  if (!q) { resultsEl.style.display = 'none'; return; }
+
+  // Search articles
+  const matches = Object.entries(_helpArticles).filter(([key, art]) =>
+    art.title.toLowerCase().includes(q) || art.body.toLowerCase().includes(q) || key.includes(q)
+  );
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div class="help-no-results"><i class="fas fa-search"></i> No results for "<strong>' + query + '</strong>". Try contacting support.</div>';
+  } else {
+    resultsEl.innerHTML = matches.map(([key, art]) =>
+      '<div class="help-search-result-row" onclick="helpOpenArticle(\'' + key + '\')">' +
+        '<i class="fas fa-file-alt" style="color:#003087;margin-right:8px"></i>' +
+        '<div><strong>' + art.title + '</strong><span>' + art.body.substring(0, 80) + '…</span></div>' +
+        '<i class="fas fa-chevron-right" style="color:#94a3b8;margin-left:auto"></i>' +
+      '</div>'
+    ).join('');
+  }
+  resultsEl.style.display = 'block';
+}
+
+function helpOpenArticle(key) {
+  const art = _helpArticles[key];
+  if (!art) { showToast('Article not found', 'error'); return; }
+
+  document.getElementById('help-search-results') && (document.getElementById('help-search-results').style.display = 'none');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.id = 'help-article-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="modal-box" style="max-width:580px">
+      <div class="modal-header">
+        <h3><i class="fas fa-book-open" style="color:#003087;margin-right:8px"></i>${art.title}</h3>
+        <button class="modal-close" onclick="document.getElementById('help-article-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:24px;line-height:1.7;color:#374151">
+        <p>${art.body}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="showToast('Marked as helpful — thank you!','success');document.getElementById('help-article-overlay').remove()"><i class="fas fa-thumbs-up"></i> Helpful</button>
+        <button class="btn btn-outline" onclick="helpOpenTicket();document.getElementById('help-article-overlay').remove()"><i class="fas fa-ticket-alt"></i> Still need help?</button>
+        <button class="btn btn-primary" onclick="document.getElementById('help-article-overlay').remove()">Close</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('help-article-overlay')?.remove();
+  document.body.appendChild(overlay);
+}
+
+function helpToggleFaq(el) {
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.help-faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+
+function helpOpenTicket() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.id = 'help-ticket-overlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="modal-box" style="max-width:480px">
+      <div class="modal-header">
+        <h3><i class="fas fa-ticket-alt" style="color:#003087;margin-right:8px"></i>Open a Support Ticket</h3>
+        <button class="modal-close" onclick="document.getElementById('help-ticket-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;display:flex;flex-direction:column;gap:14px">
+        <div class="stg-field">
+          <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Subject</label>
+          <input type="text" class="stg-input" placeholder="Brief description of your issue" style="width:100%"/>
+        </div>
+        <div class="stg-field">
+          <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Category</label>
+          <select class="stg-input" style="width:100%">
+            <option>Technical Issue</option>
+            <option>Feature Request</option>
+            <option>Data / Reporting</option>
+            <option>AI / Machine Learning</option>
+            <option>Account &amp; Billing</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="stg-field">
+          <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Priority</label>
+          <select class="stg-input" style="width:100%">
+            <option>Low — General question</option>
+            <option selected>Medium — Affecting workflow</option>
+            <option>High — Blocking work</option>
+            <option>Critical — Production down</option>
+          </select>
+        </div>
+        <div class="stg-field">
+          <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Description</label>
+          <textarea class="stg-input stg-textarea" placeholder="Please describe your issue in detail…" style="width:100%;height:100px;resize:vertical"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="document.getElementById('help-ticket-overlay').remove()">Cancel</button>
+        <button class="btn btn-primary" onclick="showToast('Ticket submitted — we will respond within 4 hrs','success');document.getElementById('help-ticket-overlay').remove()"><i class="fas fa-paper-plane"></i> Submit Ticket</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('help-ticket-overlay')?.remove();
+  document.body.appendChild(overlay);
+}
+
+console.log('Settings & Help page functions loaded — switchSettingsTab, settingsSaveAll, helpSearch, helpOpenArticle, helpToggleFaq, helpOpenTicket');

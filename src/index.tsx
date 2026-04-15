@@ -257,6 +257,8 @@ function MainApp() {
         <div id="tpl-reports"><ReportsPage /></div>
         <div id="tpl-calendar"><CalendarPage /></div>
         <div id="tpl-ai-insights"><AIImpactScorecardPage /></div>
+        <div id="tpl-settings"><SettingsPage /></div>
+        <div id="tpl-help"><HelpPage /></div>
       </div>
 
       {/* ── Cmd+K Spotlight Search Modal ── */}
@@ -439,11 +441,11 @@ function Sidebar() {
       </nav>
 
       <div class="sidebar-footer">
-        <a href="#" class="nav-item small">
+        <a href="#" class="nav-item small" onclick="navigateTo('settings');return false;">
           <i class="fas fa-cog"></i>
           <span>Settings</span>
         </a>
-        <a href="#" class="nav-item small">
+        <a href="#" class="nav-item small" onclick="navigateTo('help');return false;">
           <i class="fas fa-question-circle"></i>
           <span>Help</span>
         </a>
@@ -10201,6 +10203,624 @@ function AIImpactScorecardPage() {
           <button class="btn btn-outline ais-btn-sm" onclick="openAIFeedback()"><i class="fas fa-thumbs-up"></i> Rate AI</button>
           <button class="btn btn-outline ais-btn-sm" onclick="shareAIScorecard()"><i class="fas fa-share-alt"></i> Share</button>
           <button class="btn btn-primary ais-btn-sm" onclick="exportAIScorecard()"><i class="fas fa-file-pdf"></i> Export PDF</button>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SETTINGS PAGE
+   ════════════════════════════════════════════════════════════════ */
+function SettingsPage() {
+  return (
+    <div class="settings-page">
+
+      {/* ── Page Header ── */}
+      <div class="settings-header">
+        <div class="settings-header-left">
+          <div class="settings-header-icon"><i class="fas fa-cog"></i></div>
+          <div>
+            <h2 class="settings-header-title">Settings</h2>
+            <p class="settings-header-sub">Manage your account, preferences, and integrations</p>
+          </div>
+        </div>
+        <div class="settings-header-actions">
+          <button class="btn btn-outline" onclick="settingsDiscardChanges()"><i class="fas fa-undo"></i> Discard</button>
+          <button class="btn btn-primary" onclick="settingsSaveAll()"><i class="fas fa-save"></i> Save Changes</button>
+        </div>
+      </div>
+
+      {/* ── Layout: Tabs + Content ── */}
+      <div class="settings-layout">
+
+        {/* Vertical tab nav */}
+        <nav class="settings-nav" id="settings-nav">
+          <button class="stab active" data-tab="profile" onclick="switchSettingsTab('profile',this)">
+            <i class="fas fa-user-circle"></i> Profile
+          </button>
+          <button class="stab" data-tab="notifications" onclick="switchSettingsTab('notifications',this)">
+            <i class="fas fa-bell"></i> Notifications
+          </button>
+          <button class="stab" data-tab="ai" onclick="switchSettingsTab('ai',this)">
+            <i class="fas fa-robot"></i> AI Preferences
+          </button>
+          <button class="stab" data-tab="integrations" onclick="switchSettingsTab('integrations',this)">
+            <i class="fas fa-plug"></i> Integrations
+          </button>
+          <button class="stab" data-tab="security" onclick="switchSettingsTab('security',this)">
+            <i class="fas fa-shield-alt"></i> Security
+          </button>
+          <button class="stab" data-tab="appearance" onclick="switchSettingsTab('appearance',this)">
+            <i class="fas fa-palette"></i> Appearance
+          </button>
+        </nav>
+
+        {/* ── Tab Panels ── */}
+        <div class="settings-content" id="settings-content">
+
+          {/* ─── PROFILE ─── */}
+          <div class="stab-panel active" id="stab-profile">
+            <div class="settings-section-title"><i class="fas fa-user-circle"></i> Profile & Contact</div>
+
+            <div class="settings-avatar-row">
+              <div class="settings-avatar">SR</div>
+              <div>
+                <div class="settings-avatar-name">Sridhar Ramalingam</div>
+                <div class="settings-avatar-role">Senior Financial Advisor · Manhattan, NY</div>
+                <button class="btn btn-outline stn-sm" onclick="showToast('Photo upload coming soon','info')"><i class="fas fa-camera"></i> Change Photo</button>
+              </div>
+            </div>
+
+            <div class="settings-grid-2">
+              <div class="stg-field">
+                <label>First Name</label>
+                <input type="text" class="stg-input" value="Sridhar" id="set-first-name"/>
+              </div>
+              <div class="stg-field">
+                <label>Last Name</label>
+                <input type="text" class="stg-input" value="Ramalingam" id="set-last-name"/>
+              </div>
+              <div class="stg-field">
+                <label>Email Address</label>
+                <input type="email" class="stg-input" value="sridhar.ramalingam@nyl.com" id="set-email"/>
+              </div>
+              <div class="stg-field">
+                <label>Phone</label>
+                <input type="tel" class="stg-input" value="+1 (212) 555-0193" id="set-phone"/>
+              </div>
+              <div class="stg-field">
+                <label>Office Location</label>
+                <input type="text" class="stg-input" value="Manhattan · 51 Madison Ave" id="set-office"/>
+              </div>
+              <div class="stg-field">
+                <label>Agent ID</label>
+                <input type="text" class="stg-input" value="NYL-SR-2019-0047" readonly style="background:#f1f5f9;color:#64748b;cursor:not-allowed"/>
+              </div>
+              <div class="stg-field stg-full">
+                <label>Bio / Professional Summary</label>
+                <textarea class="stg-input stg-textarea" id="set-bio">Senior Financial Advisor with 12+ years at New York Life. Specializing in life insurance, retirement planning, and investment advisory for high-net-worth clients in the Greater New York area.</textarea>
+              </div>
+            </div>
+
+            <div class="settings-section-title" style="margin-top:24px"><i class="fas fa-certificate"></i> Licenses &amp; Credentials</div>
+            <div class="stg-license-list">
+              <div class="stg-license-row">
+                <div class="stg-lic-badge active">Active</div>
+                <div class="stg-lic-info"><strong>Series 6</strong> — Investment Company &amp; Variable Contracts<span class="stg-lic-exp">Exp: Mar 2027</span></div>
+              </div>
+              <div class="stg-license-row">
+                <div class="stg-lic-badge active">Active</div>
+                <div class="stg-lic-info"><strong>Series 63</strong> — Uniform Securities Agent State Law<span class="stg-lic-exp">Exp: Mar 2027</span></div>
+              </div>
+              <div class="stg-license-row">
+                <div class="stg-lic-badge active">Active</div>
+                <div class="stg-lic-info"><strong>NYS Life &amp; Health License</strong> — NY-LH-0047392<span class="stg-lic-exp">Exp: Jun 2026</span></div>
+              </div>
+              <div class="stg-license-row">
+                <div class="stg-lic-badge warn">Renew Soon</div>
+                <div class="stg-lic-info"><strong>CFP® Certification</strong> — Certified Financial Planner<span class="stg-lic-exp">Exp: Aug 2025</span></div>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── NOTIFICATIONS ─── */}
+          <div class="stab-panel" id="stab-notifications">
+            <div class="settings-section-title"><i class="fas fa-bell"></i> Notification Preferences</div>
+            <p class="stg-sub">Choose how and when you receive updates from NYL Agent 360.</p>
+
+            <div class="stg-notif-group">
+              <div class="stg-notif-header">Email Notifications</div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Lapse Risk Alerts</strong><span>When AI detects a client at high lapse risk</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="nt-lapse" checked/><label for="nt-lapse"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Policy Renewal Reminders</strong><span>30 / 60 / 90 days before expiry</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="nt-renewal" checked/><label for="nt-renewal"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Claim Status Updates</strong><span>When a claim moves to a new stage</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="nt-claims" checked/><label for="nt-claims"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Weekly AI Performance Report</strong><span>Summary of AI score trends every Monday</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="nt-weekly"/><label for="nt-weekly"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>New Client Assignments</strong><span>When a client is added to your book</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="nt-newclient" checked/><label for="nt-newclient"></label></div>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">In-App Notifications</div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>AI Proactive Alerts</strong><span>Obituary detections, birthday alerts, NBA signals</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="nt-ai-alerts" checked/><label for="nt-ai-alerts"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Deal Stage Changes</strong><span>When a deal moves through the pipeline</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="nt-deals" checked/><label for="nt-deals"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Calendar Event Reminders</strong><span>15 min before scheduled meetings</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="nt-cal" checked/><label for="nt-cal"></label></div>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">Quiet Hours</div>
+              <div class="settings-grid-2">
+                <div class="stg-field">
+                  <label>Do Not Disturb From</label>
+                  <input type="time" class="stg-input" value="20:00"/>
+                </div>
+                <div class="stg-field">
+                  <label>Do Not Disturb Until</label>
+                  <input type="time" class="stg-input" value="08:00"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── AI PREFERENCES ─── */}
+          <div class="stab-panel" id="stab-ai">
+            <div class="settings-section-title"><i class="fas fa-robot"></i> AI Preferences</div>
+            <p class="stg-sub">Control how AI Agents behave and which insights are surfaced for you.</p>
+
+            <div class="stg-notif-group">
+              <div class="stg-notif-header">AI Features</div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Proactive Alert Engine</strong><span>Life-event detection, obituaries, NBA signals</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="ai-alerts" checked/><label for="ai-alerts"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Pre-Meeting AI Brief</strong><span>Auto-generate client brief 1 hr before meetings</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="ai-brief" checked/><label for="ai-brief"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Post-Meeting Summary</strong><span>Auto-draft follow-up notes after calendar events</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="ai-summary" checked/><label for="ai-summary"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Underwriting STP Engine</strong><span>Straight-through processing for low-risk applications</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="ai-stp" checked/><label for="ai-stp"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Cross-Sell Recommendations</strong><span>AI surfaces portfolio gap opportunities per client</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="ai-xsell" checked/><label for="ai-xsell"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Lapse Prediction Model</strong><span>67-day advance warning for at-risk clients</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="ai-lapse" checked/><label for="ai-lapse"></label></div>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">AI Response Style</div>
+              <div class="stg-radio-group">
+                <label class="stg-radio"><input type="radio" name="ai-style" value="concise" checked/> <span><strong>Concise</strong> — Short summaries and bullet points</span></label>
+                <label class="stg-radio"><input type="radio" name="ai-style" value="detailed"/> <span><strong>Detailed</strong> — Full explanations with supporting data</span></label>
+                <label class="stg-radio"><input type="radio" name="ai-style" value="executive"/> <span><strong>Executive</strong> — Key decision points only, no filler</span></label>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">AI Insight Frequency</div>
+              <div class="settings-grid-2">
+                <div class="stg-field">
+                  <label>Alert Sensitivity</label>
+                  <select class="stg-input">
+                    <option>High — Surface all signals</option>
+                    <option selected>Medium — Balanced</option>
+                    <option>Low — Critical only</option>
+                  </select>
+                </div>
+                <div class="stg-field">
+                  <label>Report Auto-Refresh</label>
+                  <select class="stg-input">
+                    <option>Every hour</option>
+                    <option selected>Every 4 hours</option>
+                    <option>Daily</option>
+                    <option>Manual only</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── INTEGRATIONS ─── */}
+          <div class="stab-panel" id="stab-integrations">
+            <div class="settings-section-title"><i class="fas fa-plug"></i> Integrations &amp; Connected Apps</div>
+            <p class="stg-sub">Manage connections to external platforms and data sources.</p>
+
+            <div class="stg-integration-list">
+              <div class="stg-int-row connected">
+                <div class="stg-int-icon" style="background:#e0f2fe;color:#0369a1"><i class="fas fa-envelope"></i></div>
+                <div class="stg-int-info"><strong>Microsoft Outlook</strong><span>Calendar sync, email threading, meeting invites</span></div>
+                <div class="stg-int-status connected">Connected</div>
+                <button class="btn btn-outline stn-sm" onclick="showToast('Outlook settings opened','info')">Manage</button>
+              </div>
+              <div class="stg-int-row connected">
+                <div class="stg-int-icon" style="background:#dcfce7;color:#15803d"><i class="fas fa-file-alt"></i></div>
+                <div class="stg-int-info"><strong>DocuSign</strong><span>E-signature for applications and client agreements</span></div>
+                <div class="stg-int-status connected">Connected</div>
+                <button class="btn btn-outline stn-sm" onclick="showToast('DocuSign settings opened','info')">Manage</button>
+              </div>
+              <div class="stg-int-row connected">
+                <div class="stg-int-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-star"></i></div>
+                <div class="stg-int-info"><strong>Salesforce CRM</strong><span>Bi-directional client and pipeline sync</span></div>
+                <div class="stg-int-status connected">Connected</div>
+                <button class="btn btn-outline stn-sm" onclick="showToast('Salesforce settings opened','info')">Manage</button>
+              </div>
+              <div class="stg-int-row">
+                <div class="stg-int-icon" style="background:#f5f3ff;color:#6d28d9"><i class="fas fa-video"></i></div>
+                <div class="stg-int-info"><strong>Zoom</strong><span>Auto-generate meeting links for client appointments</span></div>
+                <div class="stg-int-status">Not connected</div>
+                <button class="btn btn-primary stn-sm" onclick="showToast('Zoom OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+              </div>
+              <div class="stg-int-row">
+                <div class="stg-int-icon" style="background:#fff1f2;color:#e11d48"><i class="fab fa-google"></i></div>
+                <div class="stg-int-info"><strong>Google Workspace</strong><span>Gmail, Google Calendar, Google Drive sync</span></div>
+                <div class="stg-int-status">Not connected</div>
+                <button class="btn btn-primary stn-sm" onclick="showToast('Google OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+              </div>
+              <div class="stg-int-row">
+                <div class="stg-int-icon" style="background:#eff6ff;color:#1d4ed8"><i class="fab fa-linkedin"></i></div>
+                <div class="stg-int-info"><strong>LinkedIn Sales Navigator</strong><span>Prospect intelligence and social selling insights</span></div>
+                <div class="stg-int-status">Not connected</div>
+                <button class="btn btn-primary stn-sm" onclick="showToast('LinkedIn OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+              </div>
+            </div>
+
+            <div class="settings-section-title" style="margin-top:24px"><i class="fas fa-key"></i> API &amp; Webhooks</div>
+            <div class="stg-field">
+              <label>Personal API Token</label>
+              <div class="stg-api-row">
+                <input type="password" class="stg-input" value="nyl_sk_live_•••••••••••••••••" id="set-api-token" readonly style="flex:1;font-family:monospace"/>
+                <button class="btn btn-outline stn-sm" onclick="settingsToggleToken()"><i class="fas fa-eye"></i></button>
+                <button class="btn btn-outline stn-sm" onclick="settingsRegenToken()"><i class="fas fa-sync"></i> Regen</button>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── SECURITY ─── */}
+          <div class="stab-panel" id="stab-security">
+            <div class="settings-section-title"><i class="fas fa-shield-alt"></i> Security &amp; Access</div>
+
+            <div class="stg-notif-group">
+              <div class="stg-notif-header">Authentication</div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Two-Factor Authentication (2FA)</strong><span>Require TOTP code on every login</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="sec-2fa" checked/><label for="sec-2fa"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Biometric Login</strong><span>Use Face ID or fingerprint where available</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="sec-bio"/><label for="sec-bio"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Session Timeout</strong><span>Auto-lock after 30 minutes of inactivity</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="sec-timeout" checked/><label for="sec-timeout"></label></div>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">Change Password</div>
+              <div class="settings-grid-2">
+                <div class="stg-field stg-full">
+                  <label>Current Password</label>
+                  <input type="password" class="stg-input" placeholder="Enter current password"/>
+                </div>
+                <div class="stg-field">
+                  <label>New Password</label>
+                  <input type="password" class="stg-input" placeholder="Min 12 characters"/>
+                </div>
+                <div class="stg-field">
+                  <label>Confirm New Password</label>
+                  <input type="password" class="stg-input" placeholder="Repeat new password"/>
+                </div>
+              </div>
+              <button class="btn btn-primary stn-sm" style="margin-top:12px" onclick="showToast('Password updated successfully','success')"><i class="fas fa-lock"></i> Update Password</button>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">Active Sessions</div>
+              <div class="stg-session-row">
+                <i class="fas fa-laptop" style="color:#003087"></i>
+                <div class="stg-session-info"><strong>MacBook Pro · Chrome 124</strong><span class="stg-session-loc">New York, NY · Current session</span></div>
+                <span class="stg-session-badge current">Current</span>
+              </div>
+              <div class="stg-session-row">
+                <i class="fas fa-mobile-alt" style="color:#64748b"></i>
+                <div class="stg-session-info"><strong>iPhone 15 · Safari</strong><span class="stg-session-loc">New York, NY · 2 hrs ago</span></div>
+                <button class="btn btn-outline stn-sm" onclick="showToast('Session revoked','success')">Revoke</button>
+              </div>
+              <div class="stg-session-row">
+                <i class="fas fa-desktop" style="color:#64748b"></i>
+                <div class="stg-session-info"><strong>Windows PC · Edge 122</strong><span class="stg-session-loc">White Plains, NY · Yesterday</span></div>
+                <button class="btn btn-outline stn-sm" onclick="showToast('Session revoked','success')">Revoke</button>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── APPEARANCE ─── */}
+          <div class="stab-panel" id="stab-appearance">
+            <div class="settings-section-title"><i class="fas fa-palette"></i> Appearance</div>
+            <p class="stg-sub">Customize the look and feel of NYL Agent 360.</p>
+
+            <div class="stg-notif-group">
+              <div class="stg-notif-header">Theme</div>
+              <div class="stg-theme-grid">
+                <div class="stg-theme-card active" onclick="settingsSetTheme('light',this)">
+                  <div class="stg-theme-preview light-preview"></div>
+                  <span>Light</span>
+                  <i class="fas fa-check stg-theme-check"></i>
+                </div>
+                <div class="stg-theme-card" onclick="settingsSetTheme('dark',this)">
+                  <div class="stg-theme-preview dark-preview"></div>
+                  <span>Dark</span>
+                  <i class="fas fa-check stg-theme-check"></i>
+                </div>
+                <div class="stg-theme-card" onclick="settingsSetTheme('system',this)">
+                  <div class="stg-theme-preview system-preview"></div>
+                  <span>System</span>
+                  <i class="fas fa-check stg-theme-check"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">Accent Color</div>
+              <div class="stg-color-row">
+                <button class="stg-color-btn active" style="background:#003087" title="NYL Navy" onclick="settingsSetAccent('#003087',this)"></button>
+                <button class="stg-color-btn" style="background:#0ea5e9" title="Sky Blue" onclick="settingsSetAccent('#0ea5e9',this)"></button>
+                <button class="stg-color-btn" style="background:#6d28d9" title="Violet" onclick="settingsSetAccent('#6d28d9',this)"></button>
+                <button class="stg-color-btn" style="background:#059669" title="Emerald" onclick="settingsSetAccent('#059669',this)"></button>
+                <button class="stg-color-btn" style="background:#dc2626" title="Red" onclick="settingsSetAccent('#dc2626',this)"></button>
+                <button class="stg-color-btn" style="background:#d97706" title="Amber" onclick="settingsSetAccent('#d97706',this)"></button>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">Display</div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Compact Sidebar</strong><span>Collapse nav labels to icon-only mode</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="app-compact"/><label for="app-compact"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Animations</strong><span>Page transitions and micro-animations</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="app-anim" checked/><label for="app-anim"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Dense Tables</strong><span>Reduce row height in data tables</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="app-dense"/><label for="app-dense"></label></div>
+              </div>
+              <div class="settings-grid-2" style="margin-top:12px">
+                <div class="stg-field">
+                  <label>Font Size</label>
+                  <select class="stg-input" onchange="settingsFontSize(this.value)">
+                    <option>Small (13px)</option>
+                    <option selected>Medium (14px)</option>
+                    <option>Large (16px)</option>
+                  </select>
+                </div>
+                <div class="stg-field">
+                  <label>Dashboard Default View</label>
+                  <select class="stg-input">
+                    <option selected>Full Dashboard</option>
+                    <option>AI Insights First</option>
+                    <option>Client List</option>
+                    <option>Sales Pipeline</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>{/* /settings-content */}
+      </div>{/* /settings-layout */}
+    </div>
+  )
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HELP PAGE
+   ════════════════════════════════════════════════════════════════ */
+function HelpPage() {
+  return (
+    <div class="help-page">
+
+      {/* ── Hero Search ── */}
+      <div class="help-hero">
+        <div class="help-hero-icon"><i class="fas fa-life-ring"></i></div>
+        <h2 class="help-hero-title">How can we help you?</h2>
+        <p class="help-hero-sub">Search our knowledge base or browse topics below</p>
+        <div class="help-search-bar">
+          <i class="fas fa-search help-search-icon"></i>
+          <input type="text" class="help-search-input" id="help-search-input" placeholder="Search articles, guides, shortcuts…" oninput="helpSearch(this.value)" onkeydown="if(event.key==='Enter')helpSearch(this.value)"/>
+          <button class="help-search-btn" onclick="helpSearch(document.getElementById('help-search-input').value)">Search</button>
+        </div>
+        <div class="help-search-results" id="help-search-results" style="display:none"></div>
+      </div>
+
+      {/* ── Quick Action Cards ── */}
+      <div class="help-quick-grid">
+        <div class="help-quick-card" onclick="helpOpenArticle('getting-started')">
+          <div class="help-quick-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-rocket"></i></div>
+          <div class="help-quick-label">Getting Started</div>
+          <div class="help-quick-desc">New to NYL Agent 360? Start here</div>
+        </div>
+        <div class="help-quick-card" onclick="helpOpenArticle('ai-guide')">
+          <div class="help-quick-icon" style="background:#f5f3ff;color:#6d28d9"><i class="fas fa-robot"></i></div>
+          <div class="help-quick-label">AI Features Guide</div>
+          <div class="help-quick-desc">Learn how to use AI Agents and Insights</div>
+        </div>
+        <div class="help-quick-card" onclick="helpOpenArticle('keyboard')">
+          <div class="help-quick-icon" style="background:#dcfce7;color:#15803d"><i class="fas fa-keyboard"></i></div>
+          <div class="help-quick-label">Keyboard Shortcuts</div>
+          <div class="help-quick-desc">Speed up your workflow with shortcuts</div>
+        </div>
+        <div class="help-quick-card" onclick="helpOpenArticle('video-tutorials')">
+          <div class="help-quick-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-play-circle"></i></div>
+          <div class="help-quick-label">Video Tutorials</div>
+          <div class="help-quick-desc">Step-by-step walkthroughs</div>
+        </div>
+        <div class="help-quick-card" onclick="helpOpenArticle('release-notes')">
+          <div class="help-quick-icon" style="background:#fff1f2;color:#e11d48"><i class="fas fa-star"></i></div>
+          <div class="help-quick-label">What's New</div>
+          <div class="help-quick-desc">Latest features and release notes</div>
+        </div>
+        <div class="help-quick-card" onclick="helpOpenTicket()">
+          <div class="help-quick-icon" style="background:#f0fdf4;color:#059669"><i class="fas fa-headset"></i></div>
+          <div class="help-quick-label">Contact Support</div>
+          <div class="help-quick-desc">Open a ticket or live chat</div>
+        </div>
+      </div>
+
+      {/* ── Main content: FAQ + Articles ── */}
+      <div class="help-main-grid">
+
+        {/* FAQ */}
+        <div class="help-faq-col">
+          <div class="help-section-title"><i class="fas fa-question-circle"></i> Frequently Asked Questions</div>
+
+          <div class="help-faq-list" id="help-faq-list">
+            <div class="help-faq-item" onclick="helpToggleFaq(this)">
+              <div class="help-faq-q"><i class="fas fa-chevron-right help-faq-arrow"></i> How does the Lapse Prediction AI work?</div>
+              <div class="help-faq-a">Our Retention Intelligence AI analyzes 47 behavioral signals — payment history, engagement frequency, policy age, and life events — to predict lapse risk up to 67 days in advance. Clients above the threshold appear in the Retention module with recommended outreach actions.</div>
+            </div>
+            <div class="help-faq-item" onclick="helpToggleFaq(this)">
+              <div class="help-faq-q"><i class="fas fa-chevron-right help-faq-arrow"></i> What is the STP (Straight-Through Processing) rate?</div>
+              <div class="help-faq-a">STP Rate measures the percentage of underwriting applications that AI approves automatically without manual review. A 73% STP rate means 73 out of every 100 applications are processed in under 4.2 hours with no human intervention, compared to the 8-day manual average.</div>
+            </div>
+            <div class="help-faq-item" onclick="helpToggleFaq(this)">
+              <div class="help-faq-q"><i class="fas fa-chevron-right help-faq-arrow"></i> How do I add a new client?</div>
+              <div class="help-faq-a">Navigate to <strong>Client Management</strong> and click the <strong>+ Add Client</strong> button in the top-right. Fill in the contact details, assign a risk profile, and link any existing policies. The AI will immediately begin building a profile and surface relevant cross-sell opportunities.</div>
+            </div>
+            <div class="help-faq-item" onclick="helpToggleFaq(this)">
+              <div class="help-faq-q"><i class="fas fa-chevron-right help-faq-arrow"></i> Can I export reports to PDF or Excel?</div>
+              <div class="help-faq-a">Yes. On any report page, click the <strong>Export PDF</strong> button in the top-right. For data exports, use the <strong>Share</strong> button which offers CSV and Excel formats. The AI Scorecard can also be exported as a branded PDF from the AI Insights page.</div>
+            </div>
+            <div class="help-faq-item" onclick="helpToggleFaq(this)">
+              <div class="help-faq-q"><i class="fas fa-chevron-right help-faq-arrow"></i> What does the AI Score (0–100) represent?</div>
+              <div class="help-faq-a">The AI Score is a composite index measuring AI utilization, accuracy, and ROI impact across six domains: Underwriting, Retention, Claims, Alerts, Investment, and Meetings. A score of 87 (your current score) places you in the top 15% of NYL advisors nationally. The score is updated daily.</div>
+            </div>
+            <div class="help-faq-item" onclick="helpToggleFaq(this)">
+              <div class="help-faq-q"><i class="fas fa-chevron-right help-faq-arrow"></i> How do I use the Cmd+K search?</div>
+              <div class="help-faq-a">Press <kbd>⌘K</kbd> (Mac) or <kbd>Ctrl+K</kbd> (Windows) to open the Spotlight Search from anywhere in the app. You can search clients by name, policies by number, deals by stage, or use natural language like "show me high-risk clients" or "open James Whitfield".</div>
+            </div>
+            <div class="help-faq-item" onclick="helpToggleFaq(this)">
+              <div class="help-faq-q"><i class="fas fa-chevron-right help-faq-arrow"></i> How is my data protected?</div>
+              <div class="help-faq-a">All data is encrypted at rest (AES-256) and in transit (TLS 1.3). NYL Agent 360 is SOC 2 Type II certified and fully compliant with FINRA, SEC, and NAIC regulations. Client PII is never used to train external AI models. You can review active sessions and revoke access in Settings → Security.</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Articles & Resources */}
+        <div class="help-articles-col">
+          <div class="help-section-title"><i class="fas fa-book-open"></i> Knowledge Base</div>
+
+          <div class="help-article-group">
+            <div class="help-article-group-title">📋 Guides &amp; How-Tos</div>
+            <div class="help-article-row" onclick="helpOpenArticle('uw-guide')">
+              <i class="fas fa-file-alt help-art-icon"></i>
+              <div class="help-art-info"><strong>Underwriting Pipeline — Complete Guide</strong><span>STP rules, manual review triggers, APS workflow</span></div>
+              <i class="fas fa-chevron-right help-art-chevron"></i>
+            </div>
+            <div class="help-article-row" onclick="helpOpenArticle('retention-guide')">
+              <i class="fas fa-file-alt help-art-icon"></i>
+              <div class="help-art-info"><strong>Retention Intelligence — Best Practices</strong><span>Acting on lapse risk alerts to maximize retention</span></div>
+              <i class="fas fa-chevron-right help-art-chevron"></i>
+            </div>
+            <div class="help-article-row" onclick="helpOpenArticle('claims-guide')">
+              <i class="fas fa-file-alt help-art-icon"></i>
+              <div class="help-art-info"><strong>Claims Automation — IDP &amp; Triage</strong><span>Document processing, gap detection, escalation</span></div>
+              <i class="fas fa-chevron-right help-art-chevron"></i>
+            </div>
+            <div class="help-article-row" onclick="helpOpenArticle('reports-guide')">
+              <i class="fas fa-file-alt help-art-icon"></i>
+              <div class="help-art-info"><strong>Reports &amp; Analytics — Data Glossary</strong><span>Every metric defined and explained</span></div>
+              <i class="fas fa-chevron-right help-art-chevron"></i>
+            </div>
+          </div>
+
+          <div class="help-article-group" style="margin-top:16px">
+            <div class="help-article-group-title">⌨️ Keyboard Shortcuts</div>
+            <div class="help-shortcuts-grid">
+              <div class="help-shortcut-row"><kbd>G D</kbd><span>Go to Dashboard</span></div>
+              <div class="help-shortcut-row"><kbd>G C</kbd><span>Go to Clients</span></div>
+              <div class="help-shortcut-row"><kbd>G P</kbd><span>Go to Pipeline</span></div>
+              <div class="help-shortcut-row"><kbd>G A</kbd><span>Go to AI Agents</span></div>
+              <div class="help-shortcut-row"><kbd>⌘K</kbd><span>Spotlight Search</span></div>
+              <div class="help-shortcut-row"><kbd>Esc</kbd><span>Close any modal</span></div>
+              <div class="help-shortcut-row"><kbd>G R</kbd><span>Go to Reports</span></div>
+              <div class="help-shortcut-row"><kbd>G I</kbd><span>Go to AI Insights</span></div>
+            </div>
+          </div>
+
+          <div class="help-article-group" style="margin-top:16px">
+            <div class="help-article-group-title">🔔 What's New — Q1 2026</div>
+            <div class="help-release-list">
+              <div class="help-release-row">
+                <span class="help-release-tag new">New</span>
+                <div class="help-release-info"><strong>AI Insights Dashboard</strong> — Full AI scorecard with 6 domain scores and trend charts</div>
+              </div>
+              <div class="help-release-row">
+                <span class="help-release-tag new">New</span>
+                <div class="help-release-info"><strong>View Trend &amp; Actions</strong> — Drill-down modals with 9-month score trends and prioritized actions</div>
+              </div>
+              <div class="help-release-row">
+                <span class="help-release-tag improved">Improved</span>
+                <div class="help-release-info"><strong>Underwriting STP Engine</strong> — 73% straight-through rate (up from 61% in Q4 2025)</div>
+              </div>
+              <div class="help-release-row">
+                <span class="help-release-tag improved">Improved</span>
+                <div class="help-release-info"><strong>Retention Intelligence</strong> — Lapse prediction now 67 days ahead (was 45 days)</div>
+              </div>
+              <div class="help-release-row">
+                <span class="help-release-tag fixed">Fixed</span>
+                <div class="help-release-info"><strong>Claims Triage</strong> — Document gap detection accuracy improved to 91%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Contact Support Banner ── */}
+      <div class="help-contact-banner">
+        <div class="help-contact-left">
+          <i class="fas fa-headset help-contact-icon"></i>
+          <div>
+            <div class="help-contact-title">Still need help?</div>
+            <div class="help-contact-sub">Our support team is available Mon–Fri, 8 AM – 8 PM ET</div>
+          </div>
+        </div>
+        <div class="help-contact-actions">
+          <button class="btn btn-outline" onclick="helpOpenTicket()"><i class="fas fa-ticket-alt"></i> Open Ticket</button>
+          <button class="btn btn-outline" onclick="showToast('Connecting to live chat…','info')"><i class="fas fa-comments"></i> Live Chat</button>
+          <button class="btn btn-primary" onclick="showToast('Calling support: 1-800-NYL-HELP','info')"><i class="fas fa-phone"></i> Call Support</button>
         </div>
       </div>
 
