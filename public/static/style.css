@@ -1043,6 +1043,12 @@ body {
 .modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--gray-400); }
 .modal-close:hover { color: var(--gray-900); }
 .modal-body { padding: 24px; }
+.modal-footer {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 14px 22px; border-top: 1px solid #e2e8f0;
+  background: #f8fafc; border-radius: 0 0 12px 12px;
+  position: sticky; bottom: 0;
+}
 
 /* ============ POLICIES PAGE ============ */
 .policies-table-wrapper {
@@ -11855,6 +11861,55 @@ body {
 }
 .asd-urgency { font-size: 11px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
 .asd-action-text { color: #374151; line-height: 1.5; }
+
+/* ── ASD v2 Modal (openAIScoreDetail upgrade) ─────────────── */
+.asd-modal-v2 { max-height: 85vh; overflow-y: auto; }
+.asd-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  padding: 18px 22px; background: #f8fafc;
+  border-radius: 12px 12px 0 0;
+}
+.asd-header-left { display: flex; align-items: center; gap: 14px; flex: 1; }
+.asd-hdr-score {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; flex-shrink: 0;
+}
+.asd-hdr-trend {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; margin-top: 3px;
+}
+.asd-chart-section {
+  background: #f8fafc; border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 14px;
+}
+.asd-chart-label {
+  font-size: 11px; font-weight: 700; color: #64748b;
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.asd-actions-section { margin-top: 0; }
+.asd-section-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; font-weight: 700; color: #1e293b;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.asd-act-count {
+  font-size: 11px; font-weight: 500; color: #64748b;
+  text-transform: none; letter-spacing: 0;
+}
+.asd-action-list { display: flex; flex-direction: column; gap: 6px; }
+.asd-row-high { border-left: 3px solid #dc2626; }
+.asd-row-med  { border-left: 3px solid #d97706; }
+.asd-row-low  { border-left: 3px solid #16a34a; }
+.asd-urgency-pill {
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.asd-u-high { background: #fee2e2; color: #dc2626; }
+.asd-u-med  { background: #fef3c7; color: #d97706; }
+.asd-u-low  { background: #dcfce7; color: #16a34a; }
 
 
 /* ============================================================

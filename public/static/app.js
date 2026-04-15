@@ -10645,7 +10645,7 @@ function openReportDrillDown(domain) {
   document.getElementById('report-drill-overlay')?.remove();
 
   const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.id = 'report-drill-overlay';
 
   const kpisHtml = d.kpis.map(k => `
@@ -10838,7 +10838,7 @@ function exportReportPDF() {
 
   const overlay = document.createElement('div');
   overlay.id = 'export-report-overlay';
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML = `
@@ -10941,7 +10941,7 @@ function shareReportWithManager() {
 
   const overlay = document.createElement('div');
   overlay.id = 'share-report-overlay';
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML = `
@@ -11010,7 +11010,7 @@ function openAIScoreDetail(domain) {
     </div>`).join('');
 
   const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.id = 'ai-score-detail-overlay';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
@@ -11229,7 +11229,7 @@ function openProfileSettings() {
 
   const overlay = document.createElement('div');
   overlay.id = 'profile-settings-overlay';
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML = `
@@ -11290,7 +11290,7 @@ function handleLogout() {
 
   const overlay = document.createElement('div');
   overlay.id = 'logout-confirm-overlay';
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML = `
@@ -11326,7 +11326,7 @@ function openPreferences() {
 
   const overlay = document.createElement('div');
   overlay.id = 'preferences-overlay';
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML = `
@@ -11528,7 +11528,7 @@ function scheduleReport() {
 
   const overlay = document.createElement('div');
   overlay.id = 'schedule-report-overlay';
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML = `
@@ -11594,7 +11594,7 @@ function openAIReportSummary() {
 
   const overlay = document.createElement('div');
   overlay.id = 'ai-report-summary-overlay';
-  overlay.className = 'modal-overlay';
+  overlay.className = 'modal-overlay open';
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML = `
