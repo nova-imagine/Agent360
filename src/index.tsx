@@ -9551,30 +9551,32 @@ function AIImpactScorecardPage() {
       {/* ── Overall AI Score ── */}
       <div class="ais-overall-row">
         <div class="ais-overall-card">
-          <div class="ais-overall-gauge">
-            <svg viewBox="0 0 120 70" class="ais-gauge-svg">
-              <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
-              <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="url(#gaugeGrad)" stroke-width="10"
-                    stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="20"/>
-              <defs>
-                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#1d4ed8"/>
-                  <stop offset="100%" stop-color="#7c3aed"/>
-                </linearGradient>
-              </defs>
-              <text x="60" y="60" text-anchor="middle" class="ais-gauge-val">87</text>
-            </svg>
-            <div class="ais-gauge-label">Overall AI Score</div>
-          </div>
-          <div class="ais-overall-desc">
-            <p>Your AI systems are performing at <strong>87/100</strong> — <span class="ais-trend-up">↑ 12 pts vs. Q4 2025</span>. Six domains active. Key gains: underwriting STP (+18%), retention detection (+23%), claims automation (+31%).</p>
-            <div class="ais-overall-chips">
-              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Underwriting STP: Excellent</span>
-              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Retention AI: Strong</span>
-              <span class="ais-chip amber"><i class="fas fa-exclamation-circle"></i> Investment AI: Growing</span>
-              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Claims AI: Strong</span>
-              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Alert Engine: Excellent</span>
-              <span class="ais-chip green"><i class="fas fa-check-circle"></i> Meeting AI: Strong</span>
+          <div class="ais-overall-inner">
+            <div class="ais-overall-gauge">
+              <svg viewBox="0 0 120 70" class="ais-gauge-svg">
+                <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+                <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="url(#gaugeGrad)" stroke-width="10"
+                      stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="20"/>
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#1d4ed8"/>
+                    <stop offset="100%" stop-color="#7c3aed"/>
+                  </linearGradient>
+                </defs>
+                <text x="60" y="60" text-anchor="middle" class="ais-gauge-val">87</text>
+              </svg>
+              <div class="ais-gauge-label">Overall AI Score</div>
+            </div>
+            <div class="ais-overall-desc">
+              <p>Your AI systems are at <strong>87/100</strong> — <span class="ais-trend-up">↑ 12 pts vs. Q4 2025</span>. Six domains active. Key gains: underwriting STP (+18%), retention (+23%), claims (+31%).</p>
+              <div class="ais-overall-chips">
+                <span class="ais-chip green"><i class="fas fa-check-circle"></i> Underwriting: Excellent</span>
+                <span class="ais-chip green"><i class="fas fa-check-circle"></i> Retention AI: Strong</span>
+                <span class="ais-chip amber"><i class="fas fa-exclamation-circle"></i> Investment AI: Growing</span>
+                <span class="ais-chip green"><i class="fas fa-check-circle"></i> Claims AI: Strong</span>
+                <span class="ais-chip green"><i class="fas fa-check-circle"></i> Alerts: Excellent</span>
+                <span class="ais-chip green"><i class="fas fa-check-circle"></i> Meeting AI: Strong</span>
+              </div>
             </div>
           </div>
           <div class="ais-overall-benchmarks">
