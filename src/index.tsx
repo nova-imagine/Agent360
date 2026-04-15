@@ -399,12 +399,6 @@ function Sidebar() {
           <span>Claims</span>
           <span class="nav-badge alert">7</span>
         </a>
-        <a class="nav-item ai-nav" onclick="navigateTo('ai-agents')" href="#">
-          <i class="fas fa-robot"></i>
-          <span>AI Agents</span>
-          <span class="nav-badge ai-pulse">AI</span>
-        </a>
-
         <div class="nav-section-label">SALES</div>
         <a class="nav-item" onclick="navigateTo('sales')" href="#">
           <i class="fas fa-funnel-dollar"></i>
@@ -434,6 +428,11 @@ function Sidebar() {
           <i class="fas fa-brain"></i>
           <span>AI Insights</span>
           <span class="nav-badge ai-pulse">NEW</span>
+        </a>
+        <a class="nav-item ai-nav" onclick="navigateTo('ai-agents')" href="#">
+          <i class="fas fa-robot"></i>
+          <span>AI Agents</span>
+          <span class="nav-badge ai-pulse">AI</span>
         </a>
       </nav>
 
