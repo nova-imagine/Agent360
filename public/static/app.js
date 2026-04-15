@@ -1397,6 +1397,9 @@ function aiClientInsights() {
 // ---- AI CHAT ----
 let chatHistory = [];
 
+// Track currently-active agent for chat responses
+let _activeAgentId = 'advisor';
+
 // Agent metadata: name, subtitle, icon, accent color, context buttons
 const agentMeta = {
   advisor: {
@@ -1556,26 +1559,112 @@ const agentMeta = {
         { cls: 'ctx-ins', label: 'E&O Risk Check',    msg: 'Are there any errors and omissions risk factors in the current book of business?' }
       ]}
     ]
+  },
+  retention: {
+    name: 'Retention Intelligence Agent',
+    sub: 'Lapse Prediction · Renewal Risk · Save Scripts',
+    icon: 'fa-heartbeat',
+    color: '#dc2626',
+    ctxGroups: [
+      { label: 'Lapse Risk', icon: 'fa-exclamation-triangle', btns: [
+        { cls: 'ctx-urgent', label: 'Patricia — Risk 87', msg: 'Patricia Nguyen UL lapse risk score 87 — what is the catch-up premium plan and timeline?' },
+        { cls: 'ctx-urgent', label: 'Sandra — Renewal ⚡', msg: 'Sandra Williams term renewal — conversion window, options to present at Apr 28 meeting' },
+        { cls: 'ctx-ins',    label: 'All Lapse Risks',    msg: 'Show all 4 lapse-risk clients with risk scores and recommended save actions' },
+        { cls: 'ctx-inv',    label: 'Highest ROI Actions', msg: 'Which retention actions have the highest ROI — rank by premium at risk' },
+        { cls: 'ctx-ret',    label: 'Full RI Scan',        msg: 'Run full retention intelligence scan — score all 247 clients for lapse risk and renewal risk' }
+      ]},
+      { label: 'Save Scripts', icon: 'fa-envelope-open-text', btns: [
+        { cls: 'ctx-ins', label: 'Draft: Patricia Email', msg: 'Draft a retention email for Patricia Nguyen about her Universal Life premium catch-up plan' },
+        { cls: 'ctx-ins', label: 'Draft: Sandra Email',   msg: 'Draft a retention email for Sandra Williams about converting her term policy before expiry' },
+        { cls: 'ctx-ret', label: 'Gen All Save Scripts',  msg: 'Generate personalised save scripts for all high-risk clients based on their trigger type' }
+      ]}
+    ]
+  },
+  'underwriting-intelligence': {
+    name: 'Underwriting Intelligence Agent',
+    sub: 'STP Scoring · APS Avoidance · NLP Records',
+    icon: 'fa-microscope',
+    color: '#2563eb',
+    ctxGroups: [
+      { label: 'UW Cases', icon: 'fa-clipboard-list', btns: [
+        { cls: 'ctx-uwi', label: 'Alex Rivera STP 88', msg: 'Alex Rivera underwriting case UW-2026-0018 — STP score 88, what is needed for auto-approval?' },
+        { cls: 'ctx-uwi', label: 'Thomas Wright STP 91', msg: 'Thomas Wright underwriting case UW-2026-0012 — STP score 91, confirm auto-approval eligibility' },
+        { cls: 'ctx-uwi', label: 'Auto-Approve Today',  msg: 'Which underwriting cases qualify for auto-approval today? Provide STP scores and next steps.' },
+        { cls: 'ctx-ins', label: 'All Active Cases',    msg: 'Show all active underwriting cases with STP scores and decision status' },
+        { cls: 'ctx-uwi', label: 'APS Avoidance',       msg: 'Which pending cases can avoid APS orders using NLP medical record analysis?' }
+      ]},
+      { label: 'Intelligence', icon: 'fa-brain', btns: [
+        { cls: 'ctx-uwi', label: 'UW Intel Report',  msg: 'Generate underwriting intelligence report — STP rate, APS avoidance, accuracy metrics for Q1 2026' },
+        { cls: 'ctx-ins', label: 'NLP Records Scan', msg: 'Run NLP scan on all pending medical records — flag any conditions requiring manual review' }
+      ]}
+    ]
+  },
+  'claims-intelligence': {
+    name: 'Claims Intelligence Agent',
+    sub: 'Fraud Detection · NLP Analysis · Smart Triage',
+    icon: 'fa-brain',
+    color: '#7c3aed',
+    ctxGroups: [
+      { label: 'Fraud & Risk', icon: 'fa-search', btns: [
+        { cls: 'ctx-fraud', label: 'Fraud Analysis All',   msg: 'Run full fraud analysis on all open claims — rank by risk score with ML signal breakdown' },
+        { cls: 'ctx-fraud', label: 'CLM-0025 Kevin Park',  msg: 'CLM-2026-0025 Kevin Park — what are the fraud indicators and what investigation steps are needed?' },
+        { cls: 'ctx-ci',    label: 'Predict Resolutions',  msg: 'Predict resolution timelines for all 7 open claims based on document completeness and claim type' },
+        { cls: 'ctx-ci',    label: 'NLP Doc Analysis',     msg: 'NLP document analysis — flag any inconsistencies in claim documents across all open claims' },
+        { cls: 'ctx-ci',    label: 'Smart Doc Reminders',  msg: 'Which claims should I send automated document reminders to today? Draft the messages.' }
+      ]},
+      { label: 'Intelligence', icon: 'fa-chart-bar', btns: [
+        { cls: 'ctx-ci', label: 'CI Summary Report', msg: 'Generate claims intelligence summary — fraud flags, NLP accuracy, resolution predictions for Q1 2026' },
+        { cls: 'ctx-ci', label: 'Triage Queue',      msg: 'Show claims triage queue — rank all open claims by urgency, fraud risk, and document completeness' }
+      ]}
+    ]
+  },
+  nlp: {
+    name: 'NLP Policy Risk Expert',
+    sub: 'Clause Analysis · Risk Flags · Plain Language · Benchmark',
+    icon: 'fa-file-contract',
+    color: '#7c3aed',
+    ctxGroups: [
+      { label: 'Policy Review', icon: 'fa-search', btns: [
+        { cls: 'ctx-nlp', label: 'Patricia — UL Risk ⚠',   msg: 'NLP Policy Review for Patricia Nguyen P-100301: Universal Life — flag exclusions and lapse triggers' },
+        { cls: 'ctx-nlp', label: 'Sandra — Term Renewal ⚠', msg: 'NLP Policy Review for Sandra Williams P-100320: Term Life — conversion options and expiry risks' },
+        { cls: 'ctx-nlp', label: 'Linda — Flagship WL',     msg: 'NLP Policy Review for Linda Morrison P-100330: Whole Life $2M — coverage analysis and beneficiary review' },
+        { cls: 'ctx-nlp', label: 'James — Whole Life',      msg: 'NLP Policy Review for James Whitfield P-100291: Whole Life — identify any ambiguous clauses or risk flags' },
+        { cls: 'ctx-nlp', label: 'Full Portfolio Scan',     msg: 'Run full NLP policy scan across all 1,842 policies — flag exclusions, ambiguities, and lapse triggers' }
+      ]},
+      { label: 'Summaries', icon: 'fa-language', btns: [
+        { cls: 'ctx-nlp', label: 'Plain Language: Patricia', msg: 'Generate a plain-language client summary of Patricia Nguyen UL policy P-100301 for her review' },
+        { cls: 'ctx-nlp', label: 'Risk Report All',          msg: 'Generate NLP risk report across all flagged policies — 2 urgent, 3 flagged, plain language summaries' }
+      ]}
+    ]
   }
 };
 
-function selectAgent(agentId) {
-  // Support both old .agent-card and new .aah-agent-card class names
-  document.querySelectorAll('.agent-card, .aah-agent-card').forEach(c => {
+function selectAgent(agentId, el) {
+  _activeAgentId = agentId; // track for chat responses
+  // Highlight the clicked card — accept explicit element or fall back to event
+  const clickedEl = el || (event && (event.currentTarget || event.target));
+  document.querySelectorAll('.aah-agent-card, .agent-card').forEach(c => {
     c.classList.remove('active-agent', 'aah-active-agent');
   });
-  if (event && event.currentTarget) {
-    event.currentTarget.classList.add('active-agent', 'aah-active-agent');
+  if (clickedEl) {
+    const card = clickedEl.closest('.aah-agent-card') || clickedEl.closest('.agent-card') || clickedEl;
+    card.classList.add('active-agent', 'aah-active-agent');
   }
 
   const meta = agentMeta[agentId];
   if (!meta) return;
 
-  // Update chat header
-  const nameEl = document.getElementById('chat-agent-name');
-  const subEl  = document.getElementById('chat-agent-sub');
+  // Update chat header — name, subtitle AND icon/color
+  const nameEl    = document.getElementById('chat-agent-name');
+  const subEl     = document.getElementById('chat-agent-sub');
+  const iconWrap  = document.getElementById('chat-agent-icon-wrap');
   if (nameEl) nameEl.textContent = meta.name;
   if (subEl)  subEl.textContent  = meta.sub;
+  if (iconWrap) {
+    iconWrap.innerHTML = `<i class="fas ${meta.icon}"></i>`;
+    iconWrap.style.background = meta.color + '30';
+    iconWrap.style.color      = meta.color;
+  }
 
   // Swap context button toolbar to agent-specific groups
   const toolbar = document.getElementById('ctx-btn-toolbar');
@@ -1596,21 +1685,25 @@ function selectAgent(agentId) {
   const messages = document.getElementById('chat-messages');
   if (messages) {
     const greetings = {
-      advisor:    `I've switched to <strong>${meta.name}</strong>. I'm monitoring your full book — insurance, investments, retirement, and advisory. Use the context buttons above or ask me anything.`,
-      claims:     `I've switched to <strong>${meta.name}</strong>. I have visibility across all 6 active claims. Two are urgent: CLM-2026-0041 ($1M, Robert Chen) and CLM-2026-0028 (ADB, Maria Gonzalez). How can I help?`,
-      renewal:    `I've switched to <strong>${meta.name}</strong>. I'm tracking 23 renewals due in 90 days. ⚡ Critical: Sandra Williams term expiry Sep 2026 and Patricia Nguyen UL lapse risk. What do you need?`,
-      portfolio:  `I've switched to <strong>${meta.name}</strong>. I'm monitoring $4.2M AUM across investment clients. Top opportunity: Linda Morrison $280K UMA ($2,800/yr fee). What would you like to analyze?`,
-      retirement: `I've switched to <strong>${meta.name}</strong>. I've identified 4 annuity candidates and 2 clients with significant income gaps. Top priority: James Whitfield deferred annuity ($85K → $1,100/mo at 67). How can I help?`,
-      estate:     `I've switched to <strong>${meta.name}</strong>. I see 4 estate planning opportunities. Top: Linda Morrison UMA + trust review on Apr 15, and Robert Chen business succession for Chen Holdings ($4M). Where would you like to start?`,
-      business:   `I've switched to <strong>${meta.name}</strong>. I've identified 3 business services opportunities: Chen Holdings succession, James Whitfield NQDC plan, and 2 COLI candidates. What do you need?`,
-      compliance: `I've switched to <strong>${meta.name}</strong>. Running compliance scan across the book. No critical flags at this time. Suitability review recommended for 2 advisory recommendations. How can I assist?`
+      advisor:                  `✅ Switched to <strong>${meta.name}</strong>. I'm monitoring your full book — insurance, investments, retirement, and advisory. Use the context buttons or ask me anything.`,
+      claims:                   `✅ Switched to <strong>${meta.name}</strong>. I have visibility across all 7 open claims. Two are urgent: <strong>CLM-2026-0041</strong> ($1M death benefit, Robert Chen) and <strong>CLM-2026-0028</strong> (ADB, Maria Gonzalez). How can I help?`,
+      renewal:                  `✅ Switched to <strong>${meta.name}</strong>. I'm tracking <strong>23 renewals</strong> due in 90 days. ⚡ Critical: Sandra Williams term expiry Sep 2026 and Patricia Nguyen UL lapse risk (score 87). What do you need?`,
+      portfolio:                `✅ Switched to <strong>${meta.name}</strong>. I'm monitoring <strong>$4.2M AUM</strong> across 62 investment clients. Top opportunity: Linda Morrison $280K UMA ($2,800/yr fee). What would you like to analyze?`,
+      retirement:               `✅ Switched to <strong>${meta.name}</strong>. I've identified <strong>4 annuity candidates</strong> and 2 clients with income gaps. Top priority: James Whitfield deferred annuity ($85K → $1,100/mo at 67). How can I help?`,
+      estate:                   `✅ Switched to <strong>${meta.name}</strong>. I see <strong>4 estate planning opportunities</strong>. Top: Linda Morrison UMA + trust review (Apr 15) and Robert Chen business succession — Chen Holdings $4M valuation.`,
+      business:                 `✅ Switched to <strong>${meta.name}</strong>. I've identified 3 business services opportunities: Chen Holdings succession, James Whitfield NQDC plan, and 2 COLI candidates. What do you need?`,
+      compliance:               `✅ Switched to <strong>${meta.name}</strong>. Compliance scan complete — no critical flags. Suitability review recommended for 2 advisory recommendations. Fiduciary check ready on request.`,
+      retention:                `✅ Switched to <strong>${meta.name}</strong>. ⚡ <strong>2 urgent</strong> lapse risks: Patricia Nguyen UL (risk score 87, $14.4K/yr) and Sandra Williams term renewal (Sep 2026, $3.2K/yr). Total <strong>$62.6K</strong> at risk across 4 clients.`,
+      'underwriting-intelligence': `✅ Switched to <strong>${meta.name}</strong>. <strong>5 cases auto-approved</strong> today (STP ≥ 75). <strong>18 APS orders avoided</strong> this month ($5,760 saved). Top case: Alex Rivera STP 88 — ready for auto-approval.`,
+      'claims-intelligence':    `✅ Switched to <strong>${meta.name}</strong>. ML fraud scan complete — <strong>1 flagged</strong> (CLM-2026-0025, Kevin Park, risk score 74), 2 on watch. NLP document analysis at 94% accuracy. Triage queue ready.`,
+      nlp:                      `✅ Switched to <strong>${meta.name}</strong>. <strong>2 urgent</strong> policy flags: Patricia Nguyen UL (lapse trigger clause) and Sandra Williams Term (conversion deadline risk). <strong>8 policies scanned</strong> — 3 flagged for review.`
     };
-    const greeting = greetings[agentId] || `Switched to <strong>${meta.name}</strong>. How can I help?`;
+    const greeting = greetings[agentId] || `✅ Switched to <strong>${meta.name}</strong>. How can I help?`;
     const msgEl = document.createElement('div');
     msgEl.className = 'chat-msg bot agent-switch-msg';
     msgEl.innerHTML = `
-      <div class="msg-avatar" style="background:${meta.color}20;color:${meta.color}"><i class="fas ${meta.icon}"></i></div>
-      <div class="msg-bubble agent-switch-bubble" style="border-left:3px solid ${meta.color}20">
+      <div class="msg-avatar" style="background:${meta.color}25;color:${meta.color}"><i class="fas ${meta.icon}"></i></div>
+      <div class="msg-bubble agent-switch-bubble" style="border-left:3px solid ${meta.color}">
         <p>${greeting}</p>
       </div>`;
     messages.appendChild(msgEl);
@@ -1634,15 +1727,22 @@ function sendQuickMessage(msg) {
 function sendContextMessage(msg, agentId) {
   navigateTo('ai-agents');
   setTimeout(() => {
-    // Optionally switch agent
     if (agentId) {
-      const agentCard = document.querySelector(`.agent-card[onclick*="'${agentId}'"]`);
-      if (agentCard) agentCard.click();
-      setTimeout(() => sendQuickMessage(msg), 300);
+      // Find card by onclick attribute — support both class names
+      const agentCard = document.querySelector(`.aah-agent-card[onclick*="'${agentId}'"]`)
+                     || document.querySelector(`.agent-card[onclick*="'${agentId}'"]`);
+      if (agentCard) {
+        agentCard.click();
+        setTimeout(() => sendQuickMessage(msg), 350);
+      } else {
+        // Directly call selectAgent if card not found
+        selectAgent(agentId, null);
+        setTimeout(() => sendQuickMessage(msg), 350);
+      }
     } else {
       sendQuickMessage(msg);
     }
-  }, 400);
+  }, 450);
 }
 
 async function sendChatMessage() {
@@ -1652,6 +1752,15 @@ async function sendChatMessage() {
 
   const query = input.value.trim();
   if (!query) return;
+
+  // Determine current agent icon/color
+  const activeCard = document.querySelector('.aah-agent-card.aah-active-agent');
+  if (activeCard) {
+    const onclick = activeCard.getAttribute('onclick') || '';
+    const m = onclick.match(/selectAgent\('([^']+)'\)/);
+    if (m) _activeAgentId = m[1];
+  }
+  const curMeta = agentMeta[_activeAgentId] || agentMeta['advisor'];
 
   // Add user message
   const userMsg = document.createElement('div');
@@ -1663,11 +1772,11 @@ async function sendChatMessage() {
   messages.appendChild(userMsg);
   input.value = '';
 
-  // Add thinking indicator
+  // Add thinking indicator (uses current agent color)
   const thinkingEl = document.createElement('div');
   thinkingEl.className = 'chat-msg bot';
   thinkingEl.innerHTML = `
-    <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+    <div class="msg-avatar" style="background:${curMeta.color}25;color:${curMeta.color}"><i class="fas ${curMeta.icon}"></i></div>
     <div class="msg-bubble">
       <div class="thinking"><span></span><span></span><span></span></div>
     </div>
@@ -1680,18 +1789,18 @@ async function sendChatMessage() {
     const response = await fetch('/api/ai-agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query, agentId: _activeAgentId })
     });
     const data = await response.json();
 
     // Remove thinking
     messages.removeChild(thinkingEl);
 
-    // Add bot response
+    // Add bot response (uses current agent color)
     const botMsg = document.createElement('div');
     botMsg.className = 'chat-msg bot';
     botMsg.innerHTML = `
-      <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+      <div class="msg-avatar" style="background:${curMeta.color}25;color:${curMeta.color}"><i class="fas ${curMeta.icon}"></i></div>
       <div class="msg-bubble">${formatAIResponse(data.response)}</div>
     `;
     messages.appendChild(botMsg);
@@ -1701,8 +1810,8 @@ async function sendChatMessage() {
     const errMsg = document.createElement('div');
     errMsg.className = 'chat-msg bot';
     errMsg.innerHTML = `
-      <div class="msg-avatar"><i class="fas fa-robot"></i></div>
-      <div class="msg-bubble">⚠️ Connection issue. Please try again.</div>
+      <div class="msg-avatar" style="background:#fee2e2;color:#dc2626"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="msg-bubble">⚠️ Unable to reach NOVA AI. Please check your connection and try again.</div>
     `;
     messages.appendChild(errMsg);
   }
@@ -1723,19 +1832,20 @@ function escapeHtml(text) {
 }
 
 function clearChat() {
+  _activeAgentId = 'advisor';
   const messages = document.getElementById('chat-messages');
   if (messages) {
     messages.innerHTML = `
       <div class="chat-msg bot">
-        <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+        <div class="msg-avatar" style="background:#fef3c7;color:#d97706"><i class="fas fa-brain"></i></div>
         <div class="msg-bubble">
-          <p>Chat cleared. How can I assist you?</p>
+          <p>New conversation started. How can I assist you today?</p>
           <div class="quick-suggestions">
-            <button onclick="sendQuickMessage('Show me upsell opportunities')">All opportunities</button>
-            <button onclick="sendQuickMessage('Which policies are up for renewal?')">Renewals due</button>
-            <button onclick="sendQuickMessage('Summarize my dashboard for today')">Daily summary</button>
-            <button onclick="sendQuickMessage('Show all lapse-risk clients and retention actions')">Retention risks</button>
-            <button onclick="sendQuickMessage('Show open claims and urgent actions needed')">Open claims</button>
+            <button onclick="sendQuickMessage('Show me all upsell and cross-sell opportunities')">🎯 All opportunities</button>
+            <button onclick="sendQuickMessage('Which policies are up for renewal in the next 90 days?')">🔄 Renewals due</button>
+            <button onclick="sendQuickMessage('Summarize my dashboard for today — performance, alerts, and priority actions')">📊 Daily summary</button>
+            <button onclick="sendQuickMessage('Show all lapse-risk clients and retention actions')">⚡ Retention risks</button>
+            <button onclick="sendQuickMessage('Show all 7 open claims with urgent actions needed')">📋 Open claims</button>
           </div>
         </div>
       </div>
@@ -1756,11 +1866,18 @@ function clearChat() {
         </div>
       </div>`).join('');
   }
-  // Reset agent name
-  const nameEl = document.getElementById('chat-agent-name');
-  const subEl  = document.getElementById('chat-agent-sub');
-  if (nameEl) nameEl.textContent = 'Smart Advisor Agent';
-  if (subEl)  subEl.textContent  = 'Insurance · Investments · Retirement · Advisory';
+  // Reset chat header icon and name
+  const nameEl   = document.getElementById('chat-agent-name');
+  const subEl    = document.getElementById('chat-agent-sub');
+  const iconWrap = document.getElementById('chat-agent-icon-wrap');
+  if (nameEl)   nameEl.textContent  = 'Smart Advisor Agent';
+  if (subEl)    subEl.textContent   = 'Insurance · Investments · Retirement · Advisory';
+  if (iconWrap) {
+    iconWrap.innerHTML  = '<i class="fas fa-brain"></i>';
+    iconWrap.style.background = '#fef3c7';
+    iconWrap.style.color      = '#d97706';
+  }
+  // Reset agent card highlight
   document.querySelectorAll('.agent-card, .aah-agent-card').forEach(c => {
     c.classList.remove('active-agent', 'aah-active-agent');
   });

@@ -4298,7 +4298,7 @@ function AIAgentsPage() {
           {/* ── NLP Policy Intelligence ── */}
           <div class="aah-domain-label aah-dl-nlp"><i class="fas fa-brain"></i> NLP Policy Intelligence</div>
 
-          <div class="aah-agent-card aah-highlighted" onclick="openNLPReview('all')">
+          <div class="aah-agent-card aah-highlighted" onclick="selectAgent('nlp')">
             <div class="aah-agent-icon aah-icon-nlp"><i class="fas fa-brain"></i></div>
             <div class="aah-agent-body">
               <div class="aah-agent-header-row">
@@ -4328,32 +4328,24 @@ function AIAgentsPage() {
               </div>
             </div>
             <div class="chat-actions">
-              <button class="btn-tiny" onclick="clearChat()"><i class="fas fa-trash"></i> Clear</button>
+              <button class="btn-tiny" onclick="clearChat()"><i class="fas fa-redo-alt"></i> New Chat</button>
             </div>
           </div>
 
           <div class="chat-messages" id="chat-messages">
             <div class="chat-msg bot">
-              <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+              <div class="msg-avatar" style="background:#fef3c7;color:#d97706"><i class="fas fa-brain"></i></div>
               <div class="msg-bubble">
-                <p>Hello Sridhar! I'm your <strong>NOVA Smart Advisor AI Agent</strong>. I've analyzed your complete book of business across all four service domains.</p>
-                <p>Here's what I can do for you today:</p>
-                <ul>
-                  <li>🛡️ <strong>Insurance:</strong> Renewals, claims, lapse risk, new coverage gaps</li>
-                  <li>📈 <strong>Investments:</strong> AUM opportunities, portfolio rebalancing, annuity candidates</li>
-                  <li>🏖️ <strong>Retirement:</strong> Income gap analysis, deferred/immediate annuity candidates</li>
-                  <li>🤝 <strong>Advisory:</strong> Estate planning, wealth management, business services</li>
-                  <li>📊 Cross-domain performance reports and commission tracking</li>
-                  <li>✉️ Draft personalized multi-product client communications</li>
-                </ul>
-                <p>What would you like to explore?</p>
+                <p>Hello! I'm your <strong>NOVA Smart Advisor AI Agent</strong> — analyzing your complete book of business across all four domains.</p>
+                <p><strong>Today's Snapshot:</strong> 8 active agents · 42 alerts · $31.2K AI revenue opportunity · 247 clients monitored</p>
+                <p>Select an agent on the left to focus, or ask me anything:</p>
                 <div class="quick-suggestions">
-                  <button onclick="sendQuickMessage('Show me upsell opportunities')">All opportunities</button>
-                  <button onclick="sendQuickMessage('Which policies are up for renewal?')">Renewals due</button>
-                  <button onclick="sendQuickMessage('Which clients need retirement planning?')">Retirement gaps</button>
-                  <button onclick="sendQuickMessage('Show estate planning opportunities')">Estate planning</button>
-                  <button onclick="sendQuickMessage('Show investment opportunities and portfolio gaps')">Investment gaps</button>
-                  <button onclick="sendQuickMessage('Summarize my dashboard for today')">Daily summary</button>
+                  <button onclick="sendQuickMessage('Show me all upsell and cross-sell opportunities')">🎯 All opportunities</button>
+                  <button onclick="sendQuickMessage('Which policies are up for renewal in the next 90 days?')">🔄 Renewals due</button>
+                  <button onclick="sendQuickMessage('Which clients need retirement planning?')">🏖️ Retirement gaps</button>
+                  <button onclick="sendQuickMessage('Show estate planning opportunities')">🏛️ Estate planning</button>
+                  <button onclick="sendQuickMessage('Show investment portfolio gaps and rebalancing opportunities')">📈 Investment gaps</button>
+                  <button onclick="sendQuickMessage('Summarize my dashboard for today — performance, alerts, and priority actions')">📊 Daily summary</button>
                 </div>
               </div>
             </div>
@@ -4521,7 +4513,16 @@ function AIAgentsPage() {
 
       {/* Automation Workflows — holistic */}
       <div class="automation-section">
-        <h3><i class="fas fa-magic"></i> Active Automation Workflows — All Domains</h3>
+        <div class="automation-section-header">
+          <div class="automation-section-title"><i class="fas fa-magic"></i> Active Automation Workflows — All Domains</div>
+          <button class="aah-run-all-btn" onclick="sendQuickMessage('Run all automation workflows — give me a consolidated status update and any actions needed')"><i class="fas fa-bolt"></i> Run All Workflows</button>
+        </div>
+        <div class="wf-summary-bar">
+          <div class="wf-summary-chip running-chip"><div class="chip-dot"></div><span class="chip-count">3</span><span>Running</span></div>
+          <div class="wf-summary-chip paused-chip"><div class="chip-dot"></div><span class="chip-count">2</span><span>Paused</span></div>
+          <div class="wf-summary-chip idle-chip"><div class="chip-dot"></div><span class="chip-count">2</span><span>Idle</span></div>
+          <div style="margin-left:auto;font-size:11px;color:#64748b;">Last synced: <strong style="color:#1e293b">2 min ago</strong></div>
+        </div>
         <div class="workflow-grid">
           <div class="workflow-card running">
             <div class="wf-domain-tag ins-tag"><i class="fas fa-shield-alt"></i> Insurance</div>

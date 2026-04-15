@@ -17768,3 +17768,284 @@ kbd {
 }
 .aah-run-all-btn:hover { transform: scale(1.04); box-shadow: 0 2px 8px rgba(0,48,135,0.3); }
 .aah-run-all-btn i { font-size: 9px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AI AGENTS HUB — COMPREHENSIVE POLISH  (appended improvements)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Override ai-layout for better proportions ── */
+.ai-layout {
+  grid-template-columns: 380px 1fr !important;
+  align-items: start !important;
+}
+
+/* ── Agents Panel — fixed scrollable height ── */
+.aah-agents-panel {
+  max-height: calc(100vh - 320px);
+  min-height: 480px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  background: #fff;
+}
+.aah-agents-panel::-webkit-scrollbar { width: 5px; }
+.aah-agents-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* ── Panel header improvements ── */
+.aah-panel-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: linear-gradient(135deg, #001a4d, #003087);
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 13px 13px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.aah-panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.aah-panel-title i { color: #60c8f5 !important; }
+.aah-panel-meta { display: flex; gap: 6px; align-items: center; }
+.aah-panel-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+}
+.aah-panel-badge.active  { background: rgba(34,197,94,0.25); color: #86efac; }
+.aah-panel-badge.standby { background: rgba(245,158,11,0.25); color: #fde68a; }
+
+/* ── Agent card — active state with left accent bar ── */
+.aah-agent-card.aah-active-agent {
+  border-color: #003087 !important;
+  background: linear-gradient(135deg, #eff6ff, #f8fbff) !important;
+  box-shadow: 0 0 0 2px rgba(0,48,135,0.12), 0 4px 14px rgba(0,48,135,0.12) !important;
+  transform: translateX(3px) !important;
+}
+.aah-agent-card.aah-active-agent::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #003087;
+  border-radius: 3px 0 0 3px;
+}
+/* Make agent cards relative for ::before positioning */
+.aah-agent-card { position: relative; }
+
+/* ── Agent status badge improvements ── */
+.aah-agent-status {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+  display: flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.aah-agent-status.active  {
+  background: #dcfce7; color: #166534;
+  animation: status-pulse 3s ease-in-out infinite;
+}
+.aah-agent-status.standby { background: #fef9c3; color: #713f12; }
+@keyframes status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  50% { box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+}
+
+/* ── Chat panel — better height management ── */
+.ai-chat-panel {
+  max-height: calc(100vh - 320px);
+  min-height: 480px;
+}
+.chat-messages {
+  min-height: 200px !important;
+  max-height: none !important;
+  flex: 1;
+}
+
+/* ── Chat header — show agent icon color ── */
+#chat-agent-icon-wrap {
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ── Improved message bubbles ── */
+.msg-bubble {
+  border-radius: 4px 12px 12px 12px !important;
+}
+.chat-msg.user .msg-bubble {
+  border-radius: 12px 4px 12px 12px !important;
+}
+
+/* ── Agent switch message ── */
+.agent-switch-msg .msg-bubble {
+  background: linear-gradient(135deg, #f0f7ff, #fafcff) !important;
+  border-color: #bfdbfe !important;
+  border-left: 3px solid #003087 !important;
+  font-size: 12px !important;
+}
+
+/* ── Context toolbar improvements ── */
+.ctx-btn-toolbar {
+  max-height: 140px !important;
+}
+.ctx-group-label {
+  font-size: 10px; font-weight: 700; color: #64748b;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 2px 3px;
+}
+.ctx-group-label i { font-size: 9px; color: #94a3b8; }
+
+/* ── Chat input improvements ── */
+.chat-input-hints span {
+  font-size: 10px !important;
+  padding: 3px 9px !important;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.chat-input-hints span:hover {
+  background: #dbeafe; border-color: #93c5fd; color: #1d4ed8;
+}
+.chat-input-hints span i { font-size: 9px; }
+.chat-input-hints {
+  display: flex; flex-wrap: wrap; gap: 5px; padding: 0 2px;
+}
+
+/* ── Workflow section improvements ── */
+.automation-section > h3 {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.automation-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.automation-section-title {
+  font-size: 15px; font-weight: 700; color: #1e293b;
+  display: flex; align-items: center; gap: 8px;
+}
+.automation-section-title i { color: #7c3aed; }
+.wf-summary-bar {
+  display: flex; gap: 12px; margin-bottom: 14px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f8fafc, #f0f7ff);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+.wf-summary-chip {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600;
+}
+.wf-summary-chip .chip-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.wf-summary-chip.running-chip .chip-dot { background: #22c55e; }
+.wf-summary-chip.paused-chip  .chip-dot { background: #f59e0b; }
+.wf-summary-chip.idle-chip    .chip-dot { background: #94a3b8; }
+.wf-summary-chip .chip-count { font-size: 14px; font-weight: 800; color: #1e293b; }
+
+/* ── Workflow grid — 3 cols on wide, 2 on medium ── */
+.workflow-grid {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+@media (max-width: 1400px) {
+  .workflow-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 1100px) {
+  .workflow-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 700px) {
+  .workflow-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── Workflow card improvements ── */
+.workflow-card {
+  border-radius: 12px !important;
+}
+.workflow-card.running {
+  border-left: 3px solid #22c55e !important;
+  background: linear-gradient(135deg, #f0fdf4, #fff) !important;
+}
+.workflow-card.paused {
+  border-left: 3px solid #f59e0b !important;
+  background: linear-gradient(135deg, #fffbeb, #fff) !important;
+}
+.workflow-card.idle {
+  border-left: 3px solid #94a3b8 !important;
+}
+
+/* ── Domain insight strip improvements ── */
+.aah-domain-strip {
+  gap: 12px !important;
+}
+.aah-ds-card {
+  padding: 14px 16px !important;
+  transition: all 0.2s !important;
+}
+.aah-ds-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+  font-weight: 600;
+  border-radius: 8px !important;
+  display: flex; align-items: center; justify-content: center; gap: 5px !important;
+}
+
+/* ── Hero improvements ── */
+.aah-hero {
+  margin-bottom: 18px !important;
+  padding: 18px 22px !important;
+}
+.aah-kpi-val { font-size: 20px !important; }
+
+/* ── NEW badge animation ── */
+.aah-new-badge {
+  animation: badge-shimmer 3s ease-in-out infinite;
+}
+@keyframes badge-shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ── Thinking indicator (used in JS) ── */
+.thinking {
+  display: flex; gap: 4px; align-items: center; padding: 4px 0;
+}
+.thinking span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #94a3b8;
+  display: inline-block;
+  animation: thinking-anim 1.3s ease-in-out infinite;
+}
+.thinking span:nth-child(2) { animation-delay: 0.15s; }
+.thinking span:nth-child(3) { animation-delay: 0.30s; }
+@keyframes thinking-anim {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Quick suggestions in welcome message ── */
+.quick-suggestions button:hover {
+  background: #dbeafe !important;
+  border-color: #93c5fd !important;
+  color: #1d4ed8 !important;
+}
+
