@@ -419,10 +419,10 @@ function Sidebar() {
           <span class="nav-badge alert">3</span>
         </a>
 
-        <div class="nav-section-label">INSIGHTS</div>
+        <div class="nav-section-label">ANALYTICS</div>
         <a class="nav-item" onclick="navigateTo('reports')" href="#">
           <i class="fas fa-chart-bar"></i>
-          <span>Reports</span>
+          <span>Business Intelligence</span>
         </a>
         <a class="nav-item ai-insights-nav" onclick="navigateTo('ai-insights')" href="#">
           <i class="fas fa-brain"></i>
