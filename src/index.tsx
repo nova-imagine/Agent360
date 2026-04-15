@@ -364,9 +364,7 @@ function Sidebar() {
           <span class="brand-analytics">ANALYTICS</span>
           <span class="brand-tagline">Agent 360</span>
         </div>
-        <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
-          <i class="fas fa-bars"></i>
-        </button>
+
       </div>
 
       <div class="agent-profile">
