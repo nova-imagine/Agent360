@@ -367,15 +367,6 @@ function Sidebar() {
 
       </div>
 
-      <div class="agent-profile">
-        <div class="agent-avatar">SR</div>
-        <div class="agent-info">
-          <div class="agent-name">Sridhar R.</div>
-          <div class="agent-level">Senior Agent</div>
-          <div class="agent-badge"><i class="fas fa-star"></i> Top Producer</div>
-        </div>
-      </div>
-
       <nav class="sidebar-nav">
         <div class="nav-section-label">MAIN</div>
         <a class="nav-item active" onclick="navigateTo('dashboard')" href="#">
