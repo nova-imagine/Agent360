@@ -11,7 +11,7 @@ app.use(
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>NYL Agent 360 | New York Life</title>
+          <title>NOVA Analytics Agent 360 | New York Life</title>
           <link rel="stylesheet" href="/static/style.css?v=360d" />
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -360,7 +360,7 @@ function Sidebar() {
           <i class="fas fa-shield-alt"></i>
         </div>
         <div class="brand-text">
-          <span class="brand-name">NYL</span>
+          <span class="brand-name"><span class="brand-nova">NOVA</span> <span class="brand-analytics">ANALYTICS</span></span>
           <span class="brand-tagline">Agent 360</span>
         </div>
         <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
@@ -10124,7 +10124,7 @@ function AIImpactScorecardPage() {
 
       {/* ── AI Adoption Timeline ── */}
       <div class="ais-timeline-section">
-        <h3 class="ais-section-title"><i class="fas fa-road"></i> AI Feature Adoption — NYL Agent 360</h3>
+        <h3 class="ais-section-title"><i class="fas fa-road"></i> AI Feature Adoption — NOVA Analytics Agent 360</h3>
         <div class="ais-timeline">
           <div class="ais-tl-item tl-done">
             <div class="ais-tl-dot done-dot"></div>
@@ -10328,7 +10328,7 @@ function SettingsPage() {
           {/* ─── NOTIFICATIONS ─── */}
           <div class="stab-panel" id="stab-notifications">
             <div class="settings-section-title"><i class="fas fa-bell"></i> Notification Preferences</div>
-            <p class="stg-sub">Choose how and when you receive updates from NYL Agent 360.</p>
+            <p class="stg-sub">Choose how and when you receive updates from NOVA Analytics Agent 360.</p>
 
             <div class="stg-notif-group">
               <div class="stg-notif-header">Email Notifications</div>
@@ -10568,7 +10568,7 @@ function SettingsPage() {
           {/* ─── APPEARANCE ─── */}
           <div class="stab-panel" id="stab-appearance">
             <div class="settings-section-title"><i class="fas fa-palette"></i> Appearance</div>
-            <p class="stg-sub">Customize the look and feel of NYL Agent 360.</p>
+            <p class="stg-sub">Customize the look and feel of NOVA Analytics Agent 360.</p>
 
             <div class="stg-notif-group">
               <div class="stg-notif-header">Theme</div>
@@ -10670,7 +10670,7 @@ function HelpPage() {
         <div class="help-quick-card" onclick="helpOpenArticle('getting-started')">
           <div class="help-quick-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-rocket"></i></div>
           <div class="help-quick-label">Getting Started</div>
-          <div class="help-quick-desc">New to NYL Agent 360? Start here</div>
+          <div class="help-quick-desc">New to NOVA Analytics Agent 360? Start here</div>
         </div>
         <div class="help-quick-card" onclick="helpOpenArticle('ai-guide')">
           <div class="help-quick-icon" style="background:#f5f3ff;color:#6d28d9"><i class="fas fa-robot"></i></div>
@@ -10733,7 +10733,7 @@ function HelpPage() {
             </div>
             <div class="help-faq-item" onclick="helpToggleFaq(this)">
               <div class="help-faq-q"><i class="fas fa-chevron-right help-faq-arrow"></i> How is my data protected?</div>
-              <div class="help-faq-a">All data is encrypted at rest (AES-256) and in transit (TLS 1.3). NYL Agent 360 is SOC 2 Type II certified and fully compliant with FINRA, SEC, and NAIC regulations. Client PII is never used to train external AI models. You can review active sessions and revoke access in Settings → Security.</div>
+              <div class="help-faq-a">All data is encrypted at rest (AES-256) and in transit (TLS 1.3). NOVA Analytics Agent 360 is SOC 2 Type II certified and fully compliant with FINRA, SEC, and NAIC regulations. Client PII is never used to train external AI models. You can review active sessions and revoke access in Settings → Security.</div>
             </div>
           </div>
         </div>

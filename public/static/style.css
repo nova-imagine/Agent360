@@ -102,9 +102,29 @@ body {
   flex-shrink: 0;
 }
 
-.brand-text { flex: 1; }
-.brand-name { display: block; color: white; font-size: 18px; font-weight: 800; letter-spacing: 1px; }
-.brand-tagline { display: block; color: var(--nyl-gold); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+.brand-text { flex: 1; min-width: 0; }
+.brand-name {
+  display: block;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.brand-nova {
+  color: #60c8f5;          /* light blue */
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+.brand-analytics {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  opacity: 0.85;
+}
+.brand-tagline { display: block; color: var(--nyl-gold); font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; margin-top: 1px; }
 
 .sidebar-toggle {
   background: none; border: none; color: rgba(255,255,255,0.5);

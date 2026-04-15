@@ -1,5 +1,5 @@
 /* =============================================
-   NYL AGENT 360 — Frontend JavaScript
+   NOVA ANALYTICS AGENT 360 — Frontend JavaScript
    ============================================= */
 
 // ---- NAVIGATION ----
@@ -12984,7 +12984,7 @@ function settingsFontSize(size) {
    ════════════════════════════════════════════════════════════════ */
 
 const _helpArticles = {
-  'getting-started': { title: 'Getting Started with NYL Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore the Client Management section to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The AI Agents tab gives you context-aware AI for any client or deal.' },
+  'getting-started': { title: 'Getting Started with NOVA Analytics Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore the Client Management section to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The AI Agents tab gives you context-aware AI for any client or deal.' },
   'ai-guide': { title: 'AI Features Guide', body: 'NYL Agent 360 includes 6 AI domains: Underwriting STP (73% auto-approval), Retention Intelligence (67-day lapse prediction), Claims Automation (IDP document processing), Proactive Alert Engine (obituary + NBA detection), Investment Advisory AI, and Meeting Intelligence. View your AI Scorecard in AI Insights.' },
   'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Pipeline · G+A: AI Agents · G+R: Reports · G+I: AI Insights · ⌘K: Spotlight Search · Esc: Close modal · ?: Show this help panel' },
   'video-tutorials': { title: 'Video Tutorials', body: 'Video walkthroughs are available on the NYL internal portal. Topics include: Setting up your client profile, Using AI agents for underwriting, Understanding your AI Scorecard, and Configuring notifications. Contact support for access.' },
