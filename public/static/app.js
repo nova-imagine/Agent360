@@ -1885,6 +1885,314 @@ function clearChat() {
   if (advisorCard) advisorCard.classList.add('active-agent', 'aah-active-agent');
 }
 
+// ════════════════════════════════════════════════════════════
+//  WORKFLOW EXECUTION ENGINE
+// ════════════════════════════════════════════════════════════
+
+// Per-workflow configuration: steps, summary, card state updates
+const workflowConfig = {
+  'renewal-campaign': {
+    name: 'Renewal Email Campaign',
+    icon: 'fa-envelope-open-text',
+    color: '#003087',
+    domain: 'Insurance',
+    steps: [
+      { label: 'Loading 23 renewal clients from book of business…',        ms: 700  },
+      { label: 'Fetching policy data: premium, expiry dates, terms…',      ms: 900  },
+      { label: 'Scoring renewal urgency — risk scoring each client…',      ms: 800  },
+      { label: 'Drafting 8 personalised renewal emails (AI-generated)…',   ms: 1100 },
+      { label: 'Scheduling send queue: 5 immediate, 3 tomorrow AM…',       ms: 700  },
+      { label: 'Updating CRM with outreach status and next follow-up…',    ms: 600  },
+    ],
+    finalLabel: '23/23 sent',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show full renewal email campaign results — who was contacted, email subjects, and next steps for each client',
+    summary: `✅ **Renewal Email Campaign — Completed**\n\n📧 **8 emails sent** this run · 15 previously sent · **23/23 total**\n\n**Emails sent today:**\n• Sandra Williams (P-100320) — "Important: Your Term Policy Renewal — Options Available"\n• Patricia Nguyen (P-100301) — "Urgent: Avoid a Coverage Gap — Act Before May 15"\n• David Thompson (P-100308) — "Your Policy Comes Up for Renewal — Let's Review Together"\n• Kevin Park (P-100315) — "Good News: Your Renewal Options Are Ready"\n• James Whitfield (P-100291) — "Your Whole Life Policy Annual Review — April 2026"\n• Maria Gonzalez (P-100302) — "Renewal Reminder — We're Here to Help"\n• Robert Chen (P-100310) — "Policy Update — Review Your Coverage for 2026–27"\n• Linda Morrison (P-100330) — "Annual Premium Review — Exclusive Client Update"\n\n📊 **Campaign Status**: 100% complete · 3 high-priority follow-ups scheduled\n\nWould you like to review any of these emails or track responses?`
+  },
+  'portfolio-monitor': {
+    name: 'Portfolio Health Monitor',
+    icon: 'fa-chart-line',
+    color: '#003087',
+    domain: 'Insurance',
+    steps: [
+      { label: 'Scanning 1,842 policies across all product lines…',          ms: 800  },
+      { label: 'Running lapse-risk model on active policies…',               ms: 1000 },
+      { label: 'Detecting coverage gaps vs. client life-stage profiles…',    ms: 900  },
+      { label: 'Cross-referencing renewal windows and premium statuses…',    ms: 700  },
+      { label: 'Identifying upsell and cross-sell triggers…',                ms: 800  },
+      { label: 'Generating health report with prioritized action list…',     ms: 600  },
+    ],
+    finalLabel: 'Scan complete',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show full portfolio health report — lapse risks, coverage gaps, and top opportunities across all 1,842 policies',
+    summary: `✅ **Portfolio Health Monitor — Full Scan Complete**\n\n📋 **1,842 policies scanned** · Scan took 3.2 seconds\n\n⚠️ **Lapse Risks Detected (4 clients):**\n• Patricia Nguyen — UL P-100301, risk score 87, $14,400/yr at risk\n• Sandra Williams — Term P-100320, expiry Sep 2026, $3,200/yr at risk\n• David Thompson — Term P-100308, sub-standard premium, $2,800/yr at risk\n• Kevin Park — WL P-100315, 90-day catch-up window, $4,800/yr at risk\n\n🔍 **Coverage Gaps (3 clients):**\n• Patricia Nguyen — No disability coverage (age 38, single income)\n• David Thompson — No LTC rider (new parent, high dependency risk)\n• James Whitfield — No annuity or income bridge product\n\n💡 **Top Opportunities:**\n• Linda Morrison — LTC rider on WL P-100330 (+$4,200/yr)\n• Robert Chen — Group life and key-person insurance gap\n• Maria Gonzalez — Annuity ladder opportunity post-ADB claim\n\n**Total premium at risk**: $25,200 · **Upsell potential**: $18,400/yr`
+  },
+  'aum-rebalancing': {
+    name: 'AUM Rebalancing Monitor',
+    icon: 'fa-balance-scale',
+    color: '#059669',
+    domain: 'Investments',
+    steps: [
+      { label: 'Loading $4.2M AUM across 62 investment clients…',           ms: 700  },
+      { label: 'Fetching current sub-account allocations and benchmarks…',  ms: 900  },
+      { label: 'Calculating portfolio drift vs. target allocation…',         ms: 1000 },
+      { label: 'Running rebalancing suitability scoring…',                   ms: 800  },
+      { label: 'Flagging clients exceeding 5% drift threshold…',             ms: 600  },
+      { label: 'Generating rebalancing proposals and client summaries…',     ms: 700  },
+    ],
+    finalLabel: 'Proposals ready',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show all investment rebalancing opportunities — which clients need action and what should I recommend?',
+    summary: `✅ **AUM Rebalancing Monitor — Analysis Complete**\n\n💰 **$4.2M AUM monitored** across 62 clients · +14% YTD growth\n\n⚖️ **Rebalancing Required (2 clients):**\n\n**1. Robert Chen — $180K VUL Sub-Accounts**\n• Current: 68% equity / 32% fixed (Target: 60/40)\n• Drift: +8% equity — action recommended\n• Proposed: Move $14,400 from Growth Fund → Bond Index\n• Revenue impact: $180 service fee\n\n**2. Maria Gonzalez — $75K Fixed Annuity Maturity**\n• Annuity maturing June 15, 2026\n• Option A: Rollover to FIA with 6.2% cap rate\n• Option B: Income annuity — $620/month starting age 65\n• Revenue impact: $3,750 new commission\n\n📊 **Portfolio Performance Summary:**\n• Top performer: Linda Morrison UMA (+18.4% YTD)\n• Attention needed: Kevin Park variable account (-2.1% YTD, sector drift)\n• 529 plans: 4 active, all on-track for target college dates\n\n**Total rebalancing revenue opportunity**: $3,930`
+  },
+  'retirement-gap': {
+    name: 'Retirement Income Gap Scan',
+    icon: 'fa-piggy-bank',
+    color: '#d97706',
+    domain: 'Retirement',
+    steps: [
+      { label: 'Filtering clients aged 50+ from book of business…',           ms: 600  },
+      { label: 'Loading Social Security benefit estimates per client…',        ms: 900  },
+      { label: 'Modelling projected retirement income vs. living expenses…',   ms: 1100 },
+      { label: 'Calculating monthly income gaps at target retirement age…',    ms: 900  },
+      { label: 'Scoring annuity suitability and product fit…',                 ms: 700  },
+      { label: 'Generating income illustrations and recommendations…',         ms: 600  },
+    ],
+    finalLabel: '4 gaps identified',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show all 4 retirement income gap candidates — income shortfall amounts and annuity recommendations',
+    summary: `✅ **Retirement Income Gap Scan — Complete**\n\n👴 **38 clients aged 50+ analysed** · 4 income gaps identified\n\n📉 **Income Gap Clients (Priority Order):**\n\n**1. James Whitfield (52) — Gap: $2,100/month**\n• SS Estimate: $3,200/mo · Projected expenses: $5,300/mo\n• Recommended: Deferred annuity $85K → $1,100/mo at age 67\n• Product fit: NYL Lifetime Income Annuity (score: 96/100)\n• Action: Illustration ready — schedule meeting\n\n**2. Sandra Williams (61) — Gap: $1,800/month**\n• SS Estimate: $2,400/mo · Projected expenses: $4,200/mo\n• Recommended: Immediate income annuity $120K → $1,400/mo\n• Action: Near-term priority — retirement in 4 years\n\n**3. Linda Morrison (56) — Gap: $1,400/month**\n• SS Estimate: $2,800/mo · Projected expenses: $4,200/mo\n• Recommended: FIA $150K + UMA income strategy\n• Action: Present at April 15 annual review\n\n**4. Maria Gonzalez (48) — Gap: $900/month**\n• SS Estimate: $2,100/mo · Projected expenses: $3,000/mo\n• Recommended: FIA $75K → $620/mo starting age 65\n• Action: Follow up from April 5 meeting\n\n**Total annuity premium opportunity**: $430,000 · **Est. commission**: $19,350`
+  },
+  'life-events': {
+    name: 'Life Events Trigger',
+    icon: 'fa-birthday-cake',
+    color: '#003087',
+    domain: 'Insurance',
+    steps: [
+      { label: 'Scanning CRM and public records for life event signals…',     ms: 800  },
+      { label: 'Matching events to client profiles and policies…',             ms: 900  },
+      { label: 'Assessing coverage impact for each detected event…',          ms: 800  },
+      { label: 'Scoring urgency and product fit for each event…',             ms: 700  },
+      { label: 'Drafting personalised outreach for each event type…',         ms: 900  },
+      { label: 'Queuing notifications and updating workflow status…',          ms: 500  },
+    ],
+    finalLabel: '3 events actioned',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Resume life events trigger — show the 3 life events detected this month and recommended coverage updates',
+    summary: `✅ **Life Events Trigger — Resumed & Actioned**\n\n🎉 **3 life events detected** and processed this month\n\n**Event 1 — New Baby (David Thompson)**\n• Event: Birth of first child (Mar 28, 2026)\n• Current coverage: Term Life $300K, no LTC, no disability\n• Recommended: Increase term to $600K + add child rider + disability insurance\n• Outreach drafted: "Congratulations on your new arrival! Let's make sure your family is protected."\n• Revenue potential: +$4,200/yr\n\n**Event 2 — Marriage (Kevin Park)**\n• Event: Married April 2, 2026 (LinkedIn signal)\n• Current coverage: Term Life $250K (beneficiary = parents)\n• Recommended: Update beneficiary + joint life policy review + UL upgrade\n• Outreach drafted: "Congratulations! A quick beneficiary update and coverage review is a great wedding gift to yourselves."\n• Revenue potential: +$3,800/yr\n\n**Event 3 — Home Purchase (Nancy Foster — Prospect)**\n• Event: Mortgage filed March 31, 2026 (public records)\n• No existing policies\n• Recommended: Mortgage protection term life + home insurance referral\n• Outreach drafted: "Congratulations on your new home! Let's protect your investment."\n• Revenue potential: +$2,400/yr\n\n**Workflow status**: Active · Next scan: 24 hours · Total revenue opportunity: **$10,400/yr**`
+  },
+  'estate-trigger': {
+    name: 'Estate Planning Trigger',
+    icon: 'fa-landmark',
+    color: '#6d28d9',
+    domain: 'Advisory',
+    steps: [
+      { label: 'Scanning book for clients with $1M+ total asset exposure…',  ms: 700  },
+      { label: 'Identifying business-owner clients for succession review…',   ms: 800  },
+      { label: 'Checking trust documents and beneficiary recency…',           ms: 900  },
+      { label: 'Calculating estate tax exposure and coverage gaps…',           ms: 1000 },
+      { label: 'Generating estate planning briefs for each client…',          ms: 900  },
+      { label: 'Scheduling review meetings and updating CRM…',                ms: 500  },
+    ],
+    finalLabel: '4 briefs generated',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show all 4 estate planning qualified clients with asset values and generate estate planning briefs',
+    summary: `✅ **Estate Planning Trigger — Resumed**\n\n🏛️ **4 clients qualified** for estate planning review\n\n**1. Linda Morrison — Estate Value: ~$3.2M**\n• WL policies: $2M death benefit · Investable assets: $500K+\n• Trust status: Last updated 2019 — review overdue\n• Recommended: Trust update + UMA $280K + beneficiary review\n• Meeting: April 15 annual review — estate agenda included\n• Revenue: UMA fee $2,800/yr + potential LTC rider\n\n**2. Robert Chen — Business Estate: ~$4M (Chen Holdings)**\n• Business valuation: $4M · Personal policies: $1M WL\n• Gap: No buy-sell agreement, no business succession plan\n• Recommended: Buy-sell funded by $2M key-person life + NQDC plan\n• Next step: Schedule business succession meeting\n• Revenue: $18,000 new premium + $5,000 NQDC contribution\n\n**3. James Whitfield — Estate Value: ~$1.8M**\n• WL death benefit: $1.2M · Real estate + 401k: ~$600K\n• Gap: Will last reviewed 2017, no POA on file\n• Recommended: Will refresh + NQDC + deferred annuity\n• Revenue: Advisory fee + $12K annuity premium\n\n**4. Linda Chen (Prospect) — Referred Estate ~$1.1M**\n• Referred by Robert Chen · No existing policies\n• Recommended: Initial estate planning consultation + WL policy\n• Revenue: $8,000+ new premium\n\n**Total advisory revenue potential**: $45,800`
+  },
+  'claims-triage': {
+    name: 'Claims Triage Automation',
+    icon: 'fa-file-signature',
+    color: '#2563eb',
+    domain: 'Insurance',
+    steps: [
+      { label: 'Loading 7 open claims from claims management system…',       ms: 600  },
+      { label: 'Classifying claims by type: death benefit, disability, LTC…', ms: 800  },
+      { label: 'Scoring urgency: document completeness and time-in-queue…',  ms: 900  },
+      { label: 'Routing urgent claims to priority review queue…',             ms: 700  },
+      { label: 'Generating automated document request messages…',             ms: 900  },
+      { label: 'Updating claim statuses and notifying assigned teams…',       ms: 600  },
+    ],
+    finalLabel: '7/7 triaged',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show full claims triage results — all 7 open claims with triage decisions, pending documents, and next actions',
+    summary: `✅ **Claims Triage Automation — Complete**\n\n📋 **7 open claims triaged** · 2 urgent escalated\n\n🔴 **Urgent (Priority 1 — Immediate Action):**\n\n**CLM-2026-0041 — Robert Chen · $1M Death Benefit**\n• Days in queue: 6 · Documents pending: Death certificate (certified copy)\n• Triage: Escalated to Senior Claims Manager\n• Action: Automated request sent to Susan Chen (beneficiary)\n• Estimated resolution: 5–7 business days once docs received\n\n**CLM-2026-0028 — Maria Gonzalez · ADB (Accelerated Death Benefit)**\n• Days in queue: 4 · Documents pending: Oncologist certification (Form AB-12)\n• Triage: Medical review team assigned\n• Action: Direct outreach to Dr. Patel's office drafted\n• Estimated resolution: 3–5 business days\n\n🟡 **Standard (Priority 2 — Action This Week):**\n• CLM-2026-0033 James Whitfield — LTC, awaiting care provider invoice (3 days)\n• CLM-2026-0029 David Thompson — Disability, employer verification pending (2 days)\n• CLM-2026-0025 Kevin Park — Contestability review, 60-day window (24 days)\n\n⚪ **Monitoring (Priority 3):**\n• CLM-2026-0019 Linda Morrison — Waiver of premium, approved, disbursement pending\n• CLM-2026-0014 Patricia Nguyen — Term waiver, documentation complete\n\n**Workflow now Active** · Auto-monitoring enabled every 4 hours`
+  },
+  'biz-review': {
+    name: 'Business Client Review',
+    icon: 'fa-briefcase',
+    color: '#ea580c',
+    domain: 'Advisory',
+    steps: [
+      { label: 'Identifying business-owner clients in book of business…',    ms: 600  },
+      { label: 'Fetching business entity data and employee headcount…',       ms: 800  },
+      { label: 'Assessing NQDC and deferred compensation eligibility…',       ms: 900  },
+      { label: 'Scoring COLI and key-person insurance gaps…',                 ms: 800  },
+      { label: 'Calculating group benefits coverage gaps…',                   ms: 700  },
+      { label: 'Generating business insurance proposals and briefs…',         ms: 700  },
+    ],
+    finalLabel: '2 proposals ready',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show business client review results — NQDC, COLI and key-person gaps for all eligible business-owner clients',
+    summary: `✅ **Business Client Review — Complete**\n\n🏢 **2 business-owner clients identified** · Proposals generated\n\n**1. Robert Chen — Chen Holdings (Technology Consulting)**\n• Business valuation: $4M · Employees: 12 · Revenue: $2.1M/yr\n\n   📋 **Key-Person Life Insurance Gap**\n   • Robert Chen (owner): No key-person life in place\n   • Recommended: $2M 20-yr Term or WL key-person policy\n   • Est. premium: $8,400/yr · Protects business on loss of owner\n\n   📋 **NQDC Plan Opportunity**\n   • Robert currently has no deferred compensation plan\n   • Recommended: NQDC plan — defer up to $200K/yr pre-tax\n   • Benefit: Retire with $2M+ tax-deferred at age 65\n\n   📋 **COLI Opportunity**\n   • 5 key employees earning $120K+\n   • Recommended: Corporate-Owned Life Insurance ($500K × 5)\n   • Tax advantage: Death benefit grows tax-deferred on balance sheet\n   • Est. premium: $12,000/yr\n\n**2. James Whitfield — Executive (High-Income W2)**\n• Income: $380K/yr · Employer: Whitfield Capital Partners\n\n   📋 **Executive NQDC Plan**\n   • Employer offers NQDC — James not enrolled\n   • Recommended: Enroll, defer $80K/yr for 10 years\n   • Retirement income at 67: +$14,400/yr additional income\n\n   📋 **Section 162 Executive Bonus Plan**\n   • Employer funds bonus to purchase WL policy for James\n   • Recommended: $500K WL policy funded via executive bonus\n   • Est. annual bonus: $18,000\n\n**Total business services revenue**: $38,400/yr new premium`
+  }
+};
+
+// Current workflow message (set when modal opens, used by "Open in Chat")
+let _currentWfMsg = '';
+
+function runWorkflow(wfId) {
+  const cfg = workflowConfig[wfId];
+  if (!cfg) return;
+  _currentWfMsg = cfg.chatMsg;
+
+  // Show modal
+  const overlay = document.getElementById('wf-modal-overlay');
+  const modal   = document.getElementById('wf-modal');
+  if (!overlay) return;
+
+  // Configure modal header
+  document.getElementById('wf-modal-icon').innerHTML  = `<i class="fas ${cfg.icon}"></i>`;
+  document.getElementById('wf-modal-icon').style.background = cfg.color + '20';
+  document.getElementById('wf-modal-icon').style.color      = cfg.color;
+  document.getElementById('wf-modal-title').textContent = cfg.name;
+  document.getElementById('wf-modal-sub').textContent   = `${cfg.domain} · Executing automation steps…`;
+  document.getElementById('wf-modal-progress-bar').style.background = cfg.color;
+  document.getElementById('wf-modal-progress-bar').style.width = '0%';
+  document.getElementById('wf-modal-steps').innerHTML = '';
+  document.getElementById('wf-modal-result').style.display = 'none';
+  document.getElementById('wf-modal-header').style.borderBottomColor = cfg.color + '30';
+
+  overlay.classList.add('open');
+
+  // Animate steps sequentially
+  const steps = cfg.steps;
+  const totalMs = steps.reduce((s, st) => s + st.ms, 0);
+  let elapsed = 0;
+  let stepIdx = 0;
+
+  function runStep() {
+    if (stepIdx >= steps.length) {
+      // All steps done — show result
+      finishWorkflow(wfId, cfg);
+      return;
+    }
+    const step = steps[stepIdx];
+    elapsed += step.ms;
+    const pct = Math.round((elapsed / totalMs) * 92); // cap at 92% while loading
+
+    // Add step row
+    const stepEl = document.createElement('div');
+    stepEl.className = 'wf-step running';
+    stepEl.innerHTML = `
+      <div class="wf-step-dot" style="border-color:${cfg.color}"></div>
+      <span class="wf-step-label">${step.label}</span>
+      <span class="wf-step-spinner"><i class="fas fa-circle-notch fa-spin" style="color:${cfg.color}"></i></span>`;
+    document.getElementById('wf-modal-steps').appendChild(stepEl);
+    document.getElementById('wf-modal-steps').scrollTop = 9999;
+
+    // Animate progress bar
+    document.getElementById('wf-modal-progress-bar').style.width = pct + '%';
+
+    setTimeout(() => {
+      // Mark step done
+      stepEl.className = 'wf-step done';
+      stepEl.querySelector('.wf-step-spinner').innerHTML = `<i class="fas fa-check-circle" style="color:${cfg.color}"></i>`;
+      stepEl.querySelector('.wf-step-dot').style.background = cfg.color;
+      stepIdx++;
+      setTimeout(runStep, 180);
+    }, step.ms);
+  }
+
+  runStep();
+}
+
+function finishWorkflow(wfId, cfg) {
+  // Progress to 100%
+  document.getElementById('wf-modal-progress-bar').style.width = '100%';
+  document.getElementById('wf-modal-sub').textContent = `${cfg.domain} · Completed successfully`;
+  document.getElementById('wf-modal-icon').innerHTML = `<i class="fas fa-check-circle"></i>`;
+  document.getElementById('wf-modal-icon').style.color = cfg.color;
+
+  // Update the card on the page
+  const card   = document.getElementById(`wf-card-${wfId}`);
+  const status = document.getElementById(`wf-status-${wfId}`);
+  const bar    = document.getElementById(`wf-bar-${wfId}`);
+  const lbl    = document.getElementById(`wf-lbl-${wfId}`);
+  const runBtn = document.getElementById(`wf-run-${wfId}`);
+
+  if (card) {
+    card.className = card.className.replace(/\b(paused|idle)\b/g, 'running');
+  }
+  if (status) {
+    status.className = 'wf-status';
+    status.innerHTML = `<span class="pulse-dot"></span> Running`;
+    status.style.color = '#22c55e';
+  }
+  if (bar)    { bar.style.width = cfg.finalPct + '%'; bar.style.background = cfg.color; }
+  if (lbl)    { lbl.innerHTML = `<i class="fas fa-check-circle" style="color:${cfg.color}"></i> ${cfg.finalLabel}`; }
+  if (runBtn) { runBtn.innerHTML = `<i class="fas fa-redo"></i> Re-run`; }
+
+  // Show result panel
+  setTimeout(() => {
+    const resultBody = document.getElementById('wf-modal-result-body');
+    if (resultBody) {
+      // Convert markdown-like summary to HTML
+      resultBody.innerHTML = cfg.summary
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>')
+        .replace(/• /g, '&bull; ');
+    }
+    document.getElementById('wf-modal-result').style.display = 'block';
+  }, 400);
+
+  // Update summary bar counts
+  updateWfSummaryBar();
+}
+
+function updateWfSummaryBar() {
+  const running = document.querySelectorAll('.workflow-card.running').length;
+  const paused  = document.querySelectorAll('.workflow-card.paused').length;
+  const idle    = document.querySelectorAll('.workflow-card.idle').length;
+  const rc = document.querySelector('.wf-summary-chip.running-chip .chip-count');
+  const pc = document.querySelector('.wf-summary-chip.paused-chip .chip-count');
+  const ic = document.querySelector('.wf-summary-chip.idle-chip .chip-count');
+  if (rc) rc.textContent = running;
+  if (pc) pc.textContent = paused;
+  if (ic) ic.textContent = idle;
+}
+
+function viewWorkflow(wfId) {
+  // Navigate to AI Agents and send the view query
+  const cfg = workflowConfig[wfId];
+  if (!cfg) return;
+  navigateTo('ai-agents');
+  setTimeout(() => sendQuickMessage(cfg.chatMsg), 400);
+}
+
+function openWfInChat() {
+  closeWfModal();
+  navigateTo('ai-agents');
+  setTimeout(() => sendQuickMessage(_currentWfMsg), 400);
+}
+
+function closeWfModal(e) {
+  // If called from overlay click, only close when clicking the backdrop itself
+  if (e && e.currentTarget && e.currentTarget.id === 'wf-modal-overlay') {
+    if (e.target !== e.currentTarget) return; // click was on modal, not backdrop
+  }
+  const overlay = document.getElementById('wf-modal-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
 function aiAnalyzeClient(btn) {
   const card = btn.closest('.client-card');
   const name = card?.querySelector('h4')?.textContent;

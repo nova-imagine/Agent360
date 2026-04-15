@@ -203,9 +203,47 @@ const mockActivities = [
 
 function generateAIResponse(query: string): string {
   const q = query.toLowerCase()
+
+  // ── Workflow-specific rich responses ──────────────────────────────────────
+
+  if (q.includes('renewal email campaign') && (q.includes('results') || q.includes('contacted') || q.includes('next steps'))) {
+    return "📧 **Renewal Email Campaign — Run Complete**\n\n**8 emails sent** this run · 15 previously sent · **23/23 clients reached**\n\n**Today's sends:**\n• Sandra Williams — \"Your Term Policy Renewal Options\"\n• Patricia Nguyen — \"Urgent: Avoid a Coverage Gap\"\n• David Thompson — \"Your Policy Renewal — Let's Review\"\n• Kevin Park — \"Your Renewal Options Are Ready\"\n• James Whitfield — \"Whole Life Annual Review\"\n• Maria Gonzalez — \"Renewal Reminder\"\n• Robert Chen — \"Coverage Review for 2026–27\"\n• Linda Morrison — \"Annual Premium Review\"\n\n**3 high-priority follow-ups scheduled this week:**\n• Sandra Williams (Apr 28 meeting confirmed)\n• Patricia Nguyen (May 1 call scheduled)\n• Kevin Park (Apr 18 call requested)\n\n📊 Open rate tracking will be available in 24 hours. Would you like to review or personalise any of these emails?"
+  }
+
+  if (q.includes('portfolio health report') || (q.includes('portfolio') && q.includes('1,842'))) {
+    return "📊 **Portfolio Health Monitor — Full Scan Results**\n\n**1,842 policies scanned** in 3.2 seconds\n\n⚠️ **Lapse Risks (4 clients · $25,200/yr at risk):**\n• **Patricia Nguyen** — UL P-100301, risk score 87, catch-up needed by May 15\n• **Sandra Williams** — Term P-100320, expiry Sep 2026, conversion window open\n• **David Thompson** — Term P-100308, sub-standard, review overdue\n• **Kevin Park** — WL P-100315, 90-day window, action needed\n\n🔍 **Coverage Gaps (3 clients):**\n• Patricia Nguyen — No disability coverage\n• David Thompson — No LTC rider (new parent)\n• James Whitfield — No annuity or income bridge\n\n💡 **Top Upsell Opportunities:**\n• Linda Morrison — LTC rider (+$4,200/yr)\n• Robert Chen — Key-person + group life gap\n• Maria Gonzalez — Annuity ladder post-ADB claim\n\nTotal **upsell potential: $18,400/yr** · Shall I draft outreach for each?"
+  }
+
+  if ((q.includes('rebalanc') && q.includes('investment')) || (q.includes('aum') && q.includes('rebalanc'))) {
+    return "⚖️ **AUM Rebalancing Monitor — Analysis Complete**\n\n**$4.2M AUM** across 62 clients · +14% YTD\n\n**Rebalancing Required (2 clients):**\n\n**Robert Chen — $180K VUL**\n• Drift: +8% equity vs. 60/40 target\n• Action: Move $14,400 from Growth → Bond Index\n• Revenue: $180 rebalancing fee\n\n**Maria Gonzalez — $75K Annuity Maturing June 15**\n• Option A: FIA rollover at 6.2% cap rate\n• Option B: Income annuity → $620/month at age 65\n• Revenue: $3,750 new commission\n\n**Portfolio highlights:**\n• Linda Morrison UMA: +18.4% YTD (top performer)\n• Kevin Park variable: -2.1% YTD — sector review recommended\n• 4 active 529 plans: all on-track\n\n**Total rebalancing revenue: $3,930** · Ready to generate client proposals?"
+  }
+
+  if (q.includes('retirement income gap') || (q.includes('income gap') && q.includes('4 candidate'))) {
+    return "🏖️ **Retirement Income Gap Scan — 4 Clients Identified**\n\n**Gap 1 — James Whitfield (52) · $2,100/month shortfall**\n• SS: $3,200 · Expenses: $5,300/mo\n• ✅ Deferred annuity: $85K → $1,100/mo at 67\n• Illustration ready — schedule meeting\n\n**Gap 2 — Sandra Williams (61) · $1,800/month shortfall**\n• SS: $2,400 · Expenses: $4,200/mo\n• ✅ Immediate annuity: $120K → $1,400/mo\n• Near-retirement priority — act this month\n\n**Gap 3 — Linda Morrison (56) · $1,400/month shortfall**\n• SS: $2,800 · Expenses: $4,200/mo\n• ✅ FIA $150K + UMA income strategy\n• Present at April 15 annual review\n\n**Gap 4 — Maria Gonzalez (48) · $900/month shortfall**\n• SS: $2,100 · Expenses: $3,000/mo\n• ✅ FIA $75K → $620/mo at age 65\n\n**Total annuity opportunity: $430,000 · Est. commission: $19,350**\nShall I generate illustrated income projections for each client?"
+  }
+
+  if (q.includes('life events') || (q.includes('life event') && q.includes('detected'))) {
+    return "🎉 **Life Events Trigger — 3 Events Actioned**\n\n**Event 1 — David Thompson · New Baby (Mar 28)**\n• Gap: No LTC, no disability coverage\n• Action: Increase term $300K→$600K + child rider + DI policy\n• Email drafted: 'Congratulations on your new arrival!'\n• Revenue: +$4,200/yr\n\n**Event 2 — Kevin Park · Marriage (Apr 2)**\n• Gap: Beneficiary update needed, no joint life review\n• Action: Beneficiary change + joint life policy + UL upgrade\n• Email drafted: 'Congratulations! A quick review protects both of you.'\n• Revenue: +$3,800/yr\n\n**Event 3 — Nancy Foster (Prospect) · Home Purchase (Mar 31)**\n• Public record: mortgage filed\n• Action: Mortgage protection term + home insurance referral\n• Email drafted: 'Congratulations on your new home!'\n• Revenue: +$2,400/yr\n\n**Total opportunity: $10,400/yr** · Workflow now Active · Next scan in 24 hours"
+  }
+
+  if (q.includes('estate planning') && (q.includes('qualified') || q.includes('briefs') || q.includes('trigger'))) {
+    return "🏛️ **Estate Planning Trigger — 4 Clients Qualified**\n\n**1. Linda Morrison — Estate ~$3.2M**\n• WL: $2M death benefit · Investable: $500K+\n• Trust last updated: 2019 — overdue for review\n• Action: Trust update + UMA $280K + beneficiary review\n• Meeting: April 15 (estate agenda included) · Revenue: $2,800/yr fee\n\n**2. Robert Chen — Business Estate ~$4M**\n• No buy-sell agreement, no succession plan\n• Action: $2M key-person life + NQDC + buy-sell agreement\n• Revenue: $18,000 new premium + advisory fee\n\n**3. James Whitfield — Estate ~$1.8M**\n• Will last reviewed: 2017 — no POA on file\n• Action: Will refresh + NQDC enrolment + deferred annuity\n• Revenue: $12,000 annuity + advisory fee\n\n**4. Linda Chen (Prospect) — Estate ~$1.1M**\n• Referral from Robert Chen · No existing policies\n• Action: Initial estate consultation + WL proposal · Revenue: $8,000+\n\n**Total advisory revenue potential: $45,800** · Shall I schedule consultations?"
+  }
+
+  if (q.includes('claims triage') || (q.includes('triage') && q.includes('7 open'))) {
+    return "📋 **Claims Triage Automation — 7 Claims Processed**\n\n🔴 **Urgent — Immediate Action:**\n• **CLM-2026-0041** Robert Chen $1M death benefit · Doc pending: certified death cert · Escalated to Sr. Claims Manager · ETA: 5–7 days\n• **CLM-2026-0028** Maria Gonzalez ADB · Doc pending: oncologist cert Form AB-12 · Medical review assigned · ETA: 3–5 days\n\n🟡 **Standard — Action This Week:**\n• CLM-2026-0033 James Whitfield LTC — care provider invoice pending (3 days)\n• CLM-2026-0029 David Thompson Disability — employer verification pending (2 days)\n• CLM-2026-0025 Kevin Park — contestability review (24 days remaining)\n\n⚪ **Monitoring:**\n• CLM-2026-0019 Linda Morrison — waiver approved, disbursement pending\n• CLM-2026-0014 Patricia Nguyen — documentation complete, final review\n\n**Workflow Active** · Auto-monitoring every 4 hours · 3 document requests sent automatically"
+  }
+
+  if (q.includes('business client review') || (q.includes('nqdc') && q.includes('coli') && q.includes('key-person'))) {
+    return "🏢 **Business Client Review — 2 Clients · Proposals Ready**\n\n**Robert Chen — Chen Holdings ($4M valuation)**\n• Key-person life gap: $2M WL or term recommended → $8,400/yr\n• NQDC plan: Defer up to $200K/yr · Retire with $2M+ tax-deferred\n• COLI: 5 key employees $500K each → $12,000/yr premium\n• **Total Chen revenue: $20,400/yr**\n\n**James Whitfield — Executive ($380K income)**\n• NQDC enrolment: Defer $80K/yr → $14,400/yr retirement income at 67\n• Section 162 Bonus Plan: $500K WL policy funded by employer bonus ($18K/yr)\n• **Total Whitfield revenue: $18,000/yr**\n\n📄 **3 proposals generated and ready to send:**\n1. Chen Holdings Key-Person + COLI Proposal\n2. Chen Holdings NQDC Plan Overview\n3. Whitfield Executive Benefits Package\n\n**Total business services revenue: $38,400/yr** · Ready to schedule meetings?"
+  }
+
+  if (q.includes('all automation workflows') || (q.includes('run all') && q.includes('workflow'))) {
+    return "⚡ **All Automation Workflows — Consolidated Status**\n\n✅ **Running (4):**\n• Renewal Email Campaign — 15/23 sent, 8 pending\n• Portfolio Health Monitor — 1,842 policies, 4 lapse risks flagged\n• AUM Rebalancing Monitor — $4.2M, 2 rebalances pending\n• Retirement Income Gap Scan — 4 candidates identified\n\n⏸️ **Paused (2) — Action Needed:**\n• Life Events Trigger — 3 events detected, resume to process\n• Estate Planning Trigger — 4 qualified clients, briefs ready to generate\n\n⏹️ **Idle (2) — Available to Activate:**\n• Claims Triage Automation — 7 open claims awaiting triage\n• Business Client Review — 2 business owners, proposals pending\n\n💰 **Total Revenue Opportunity Across All Workflows: $89,340/yr**\n\nWould you like me to resume the paused workflows or activate the idle ones?"
+  }
+
+  // ── Standard responses ─────────────────────────────────────────────────────
   if (q.includes('renewal') || q.includes('renew')) {
-    return "📋 **Renewal Analysis**: I found 23 policies due for renewal in the next 90 days. High priority: Sandra Williams (P-100320, expires Sep 2026), James Whitfield (P-100291, expires Jun 2026). I recommend scheduling proactive outreach 90 days before renewal. Would you like me to draft personalized emails for these clients?"
-  } else if (q.includes('upsell') || q.includes('cross-sell') || q.includes('opportunity')) {
     return "💡 **Upsell Opportunities Identified**: Based on client profiles and life stage analysis:\n\n• **Patricia Nguyen (38)** — Prime candidate for disability insurance (no current coverage)\n• **David Thompson (33)** — New parent profile; recommend adding term life rider\n• **James Whitfield (52)** — Approaching retirement; annuity conversion opportunity (~$180K potential premium)\n• **Robert Chen (45)** — Business owner profile; small business services and executive benefits gap\n\nTotal potential premium uplift: **$31,200/year**"
   } else if (q.includes('claim') || q.includes('claims')) {
     return "📂 **Claims Summary**: You currently have 7 open claims. Robert Chen's claim (P-100310) is in review — submitted Apr 9, estimated resolution in 5-7 business days. 3 claims are pending documentation from clients. Would you like me to send automated document request reminders?"
@@ -259,6 +297,33 @@ function MainApp() {
         <div id="tpl-ai-insights"><AIImpactScorecardPage /></div>
         <div id="tpl-settings"><SettingsPage /></div>
         <div id="tpl-help"><HelpPage /></div>
+      </div>
+
+      {/* ── Workflow Execution Modal ── */}
+      <div id="wf-modal-overlay" class="wf-modal-overlay" onclick="closeWfModal(event)">
+        <div class="wf-modal" id="wf-modal">
+          <div class="wf-modal-header" id="wf-modal-header">
+            <div class="wf-modal-title-row">
+              <div class="wf-modal-icon" id="wf-modal-icon"><i class="fas fa-cog fa-spin"></i></div>
+              <div>
+                <div class="wf-modal-title" id="wf-modal-title">Running Workflow...</div>
+                <div class="wf-modal-sub" id="wf-modal-sub">Executing automation steps</div>
+              </div>
+            </div>
+            <button class="wf-modal-close" onclick="closeWfModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="wf-modal-progress-wrap">
+            <div class="wf-modal-progress-bar" id="wf-modal-progress-bar" style="width:0%"></div>
+          </div>
+          <div class="wf-modal-steps" id="wf-modal-steps"></div>
+          <div class="wf-modal-result" id="wf-modal-result" style="display:none">
+            <div class="wf-modal-result-body" id="wf-modal-result-body"></div>
+            <div class="wf-modal-footer">
+              <button class="wf-modal-btn primary" onclick="openWfInChat()"><i class="fas fa-comment-alt"></i> Open in Chat</button>
+              <button class="wf-modal-btn secondary" onclick="closeWfModal()"><i class="fas fa-times"></i> Close</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ── Cmd+K Spotlight Search Modal ── */}
@@ -4524,112 +4589,112 @@ function AIAgentsPage() {
           <div style="margin-left:auto;font-size:11px;color:#64748b;">Last synced: <strong style="color:#1e293b">2 min ago</strong></div>
         </div>
         <div class="workflow-grid">
-          <div class="workflow-card running">
+          <div class="workflow-card running" id="wf-card-renewal-campaign">
             <div class="wf-domain-tag ins-tag"><i class="fas fa-shield-alt"></i> Insurance</div>
-            <div class="wf-status"><span class="pulse-dot"></span> Running</div>
+            <div class="wf-status" id="wf-status-renewal-campaign"><span class="pulse-dot"></span> Running</div>
             <div class="wf-icon"><i class="fas fa-envelope-open-text"></i></div>
             <h4>Renewal Email Campaign</h4>
             <p>Auto-sending personalized renewal reminders to 23 clients due in 90 days</p>
             <div class="wf-progress">
-              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" style="width:65%"></div></div>
-              <span>15/23 sent</span>
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" id="wf-bar-renewal-campaign" style="width:65%"></div></div>
+              <span id="wf-lbl-renewal-campaign">15/23 sent</span>
             </div>
             <div class="wf-actions">
-              <button class="wf-btn primary" onclick="sendQuickMessage('Run the full renewal email campaign for all 23 clients — draft and send personalised emails')"><i class="fas fa-play"></i> Run Now</button>
-              <button class="wf-btn secondary" onclick="sendQuickMessage('Show renewal campaign status — who has been contacted and who is pending')"><i class="fas fa-eye"></i> View</button>
+              <button class="wf-btn primary" id="wf-run-renewal-campaign" onclick="runWorkflow('renewal-campaign')"><i class="fas fa-play"></i> Run Now</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('renewal-campaign')"><i class="fas fa-eye"></i> View</button>
             </div>
           </div>
-          <div class="workflow-card running">
+          <div class="workflow-card running" id="wf-card-portfolio-monitor">
             <div class="wf-domain-tag ins-tag"><i class="fas fa-shield-alt"></i> Insurance</div>
-            <div class="wf-status"><span class="pulse-dot"></span> Running</div>
+            <div class="wf-status" id="wf-status-portfolio-monitor"><span class="pulse-dot"></span> Running</div>
             <div class="wf-icon"><i class="fas fa-chart-line"></i></div>
             <h4>Portfolio Health Monitor</h4>
             <p>Continuously monitoring 1,842 policies for lapse risk, coverage gaps, and opportunities</p>
             <div class="wf-progress">
-              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" style="width:100%"></div></div>
-              <span>Always On</span>
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" id="wf-bar-portfolio-monitor" style="width:100%"></div></div>
+              <span id="wf-lbl-portfolio-monitor">Always On</span>
             </div>
             <div class="wf-actions">
-              <button class="wf-btn primary" onclick="sendQuickMessage('Show full portfolio health report — lapse risks, coverage gaps, and top opportunities across all 1,842 policies')"><i class="fas fa-file-alt"></i> Report</button>
-              <button class="wf-btn secondary" onclick="sendQuickMessage('What are the top 5 portfolio alerts today?')"><i class="fas fa-bell"></i> Alerts</button>
+              <button class="wf-btn primary" id="wf-run-portfolio-monitor" onclick="runWorkflow('portfolio-monitor')"><i class="fas fa-file-alt"></i> Report</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('portfolio-monitor')"><i class="fas fa-bell"></i> Alerts</button>
             </div>
           </div>
-          <div class="workflow-card running">
+          <div class="workflow-card running" id="wf-card-aum-rebalancing">
             <div class="wf-domain-tag inv-tag"><i class="fas fa-chart-line"></i> Investments</div>
-            <div class="wf-status"><span class="pulse-dot"></span> Running</div>
+            <div class="wf-status" id="wf-status-aum-rebalancing"><span class="pulse-dot"></span> Running</div>
             <div class="wf-icon"><i class="fas fa-balance-scale"></i></div>
             <h4>AUM Rebalancing Monitor</h4>
             <p>Tracks drift in $4.2M AUM across 62 investment clients; flags rebalancing needs</p>
             <div class="wf-progress">
-              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" style="width:100%;background:#059669"></div></div>
-              <span>2 rebalances pending</span>
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" id="wf-bar-aum-rebalancing" style="width:100%;background:#059669"></div></div>
+              <span id="wf-lbl-aum-rebalancing">2 rebalances pending</span>
             </div>
             <div class="wf-actions">
-              <button class="wf-btn primary" onclick="sendQuickMessage('Show all investment rebalancing opportunities — which clients need action and what should I recommend?')"><i class="fas fa-balance-scale"></i> Rebalance</button>
-              <button class="wf-btn secondary" onclick="sendQuickMessage('Show AUM summary across all 62 investment clients')"><i class="fas fa-coins"></i> AUM</button>
+              <button class="wf-btn primary" id="wf-run-aum-rebalancing" onclick="runWorkflow('aum-rebalancing')"><i class="fas fa-balance-scale"></i> Rebalance</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('aum-rebalancing')"><i class="fas fa-coins"></i> AUM</button>
             </div>
           </div>
-          <div class="workflow-card running">
+          <div class="workflow-card running" id="wf-card-retirement-gap">
             <div class="wf-domain-tag ret-tag"><i class="fas fa-umbrella-beach"></i> Retirement</div>
-            <div class="wf-status"><span class="pulse-dot"></span> Running</div>
+            <div class="wf-status" id="wf-status-retirement-gap"><span class="pulse-dot"></span> Running</div>
             <div class="wf-icon"><i class="fas fa-piggy-bank"></i></div>
             <h4>Retirement Income Gap Scan</h4>
             <p>Analyzes clients aged 50+ for retirement income shortfalls and annuity suitability</p>
             <div class="wf-progress">
-              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" style="width:100%;background:#d97706"></div></div>
-              <span>4 candidates found</span>
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" id="wf-bar-retirement-gap" style="width:100%;background:#d97706"></div></div>
+              <span id="wf-lbl-retirement-gap">4 candidates found</span>
             </div>
             <div class="wf-actions">
-              <button class="wf-btn primary" onclick="sendQuickMessage('Show all 4 retirement income gap candidates — income shortfall amounts and annuity recommendations')"><i class="fas fa-piggy-bank"></i> Details</button>
-              <button class="wf-btn secondary" onclick="sendQuickMessage('Which clients are closest to retirement and have the largest income gaps?')"><i class="fas fa-user-clock"></i> Priority</button>
+              <button class="wf-btn primary" id="wf-run-retirement-gap" onclick="runWorkflow('retirement-gap')"><i class="fas fa-piggy-bank"></i> Details</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('retirement-gap')"><i class="fas fa-user-clock"></i> Priority</button>
             </div>
           </div>
-          <div class="workflow-card paused">
+          <div class="workflow-card paused" id="wf-card-life-events">
             <div class="wf-domain-tag ins-tag"><i class="fas fa-shield-alt"></i> Insurance</div>
-            <div class="wf-status paused">Paused</div>
+            <div class="wf-status paused" id="wf-status-life-events">Paused</div>
             <div class="wf-icon"><i class="fas fa-birthday-cake"></i></div>
             <h4>Life Events Trigger</h4>
             <p>Detects life events (marriage, birth, retirement) and suggests appropriate coverage updates</p>
-            <div class="wf-stats"><i class="fas fa-info-circle"></i> 3 events detected this month</div>
+            <div class="wf-stats" id="wf-lbl-life-events"><i class="fas fa-info-circle"></i> 3 events detected this month</div>
             <div class="wf-actions">
-              <button class="wf-btn primary" onclick="sendQuickMessage('Resume life events trigger — show the 3 life events detected this month and recommended coverage updates')"><i class="fas fa-play"></i> Resume</button>
-              <button class="wf-btn secondary" onclick="sendQuickMessage('What life events were detected this month and what coverage changes are recommended?')"><i class="fas fa-eye"></i> Events</button>
+              <button class="wf-btn primary" id="wf-run-life-events" onclick="runWorkflow('life-events')"><i class="fas fa-play"></i> Resume</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('life-events')"><i class="fas fa-eye"></i> Events</button>
             </div>
           </div>
-          <div class="workflow-card paused">
+          <div class="workflow-card paused" id="wf-card-estate-trigger">
             <div class="wf-domain-tag adv-tag"><i class="fas fa-handshake"></i> Advisory</div>
-            <div class="wf-status paused">Paused</div>
+            <div class="wf-status paused" id="wf-status-estate-trigger">Paused</div>
             <div class="wf-icon"><i class="fas fa-landmark"></i></div>
             <h4>Estate Planning Trigger</h4>
             <p>Flags clients with $1M+ total assets or business ownership for estate planning review</p>
-            <div class="wf-stats"><i class="fas fa-info-circle"></i> 4 clients qualified</div>
+            <div class="wf-stats" id="wf-lbl-estate-trigger"><i class="fas fa-info-circle"></i> 4 clients qualified</div>
             <div class="wf-actions">
-              <button class="wf-btn primary" onclick="sendQuickMessage('Resume estate planning trigger — show all 4 qualified clients and generate estate planning briefs')"><i class="fas fa-play"></i> Resume</button>
-              <button class="wf-btn secondary" onclick="sendQuickMessage('Show the 4 estate planning qualified clients with asset values and recommended actions')"><i class="fas fa-users"></i> Clients</button>
+              <button class="wf-btn primary" id="wf-run-estate-trigger" onclick="runWorkflow('estate-trigger')"><i class="fas fa-play"></i> Resume</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('estate-trigger')"><i class="fas fa-users"></i> Clients</button>
             </div>
           </div>
-          <div class="workflow-card idle">
+          <div class="workflow-card idle" id="wf-card-claims-triage">
             <div class="wf-domain-tag ins-tag"><i class="fas fa-shield-alt"></i> Insurance</div>
-            <div class="wf-status idle">Idle</div>
+            <div class="wf-status idle" id="wf-status-claims-triage">Idle</div>
             <div class="wf-icon"><i class="fas fa-file-signature"></i></div>
             <h4>Claims Triage Automation</h4>
             <p>Routes incoming claims to appropriate teams and requests required documentation automatically</p>
-            <div class="wf-stats"><i class="fas fa-info-circle"></i> 7 open claims tracked</div>
+            <div class="wf-stats" id="wf-lbl-claims-triage"><i class="fas fa-info-circle"></i> 7 open claims tracked</div>
             <div class="wf-actions">
-              <button class="wf-btn primary" onclick="sendQuickMessage('Activate claims triage automation — run triage on all 7 open claims and generate action list')"><i class="fas fa-play"></i> Activate</button>
-              <button class="wf-btn secondary" onclick="sendQuickMessage('Show all 7 open claims with current status and pending document requests')"><i class="fas fa-clipboard-list"></i> Claims</button>
+              <button class="wf-btn primary" id="wf-run-claims-triage" onclick="runWorkflow('claims-triage')"><i class="fas fa-play"></i> Activate</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('claims-triage')"><i class="fas fa-clipboard-list"></i> Claims</button>
             </div>
           </div>
-          <div class="workflow-card idle">
+          <div class="workflow-card idle" id="wf-card-biz-review">
             <div class="wf-domain-tag adv-tag"><i class="fas fa-handshake"></i> Advisory</div>
-            <div class="wf-status idle">Idle</div>
+            <div class="wf-status idle" id="wf-status-biz-review">Idle</div>
             <div class="wf-icon"><i class="fas fa-briefcase"></i></div>
             <h4>Business Client Review</h4>
             <p>Scans business-owner clients for NQDC, COLI, key-person and group benefits gaps</p>
-            <div class="wf-stats"><i class="fas fa-info-circle"></i> 2 business clients eligible</div>
+            <div class="wf-stats" id="wf-lbl-biz-review"><i class="fas fa-info-circle"></i> 2 business clients eligible</div>
             <div class="wf-actions">
-              <button class="wf-btn primary" onclick="sendQuickMessage('Run business client review — analyze NQDC, COLI, and key-person gaps for all eligible business-owner clients')"><i class="fas fa-play"></i> Activate</button>
-              <button class="wf-btn secondary" onclick="sendQuickMessage('Which business-owner clients have NQDC or COLI opportunities?')"><i class="fas fa-building"></i> Clients</button>
+              <button class="wf-btn primary" id="wf-run-biz-review" onclick="runWorkflow('biz-review')"><i class="fas fa-play"></i> Activate</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('biz-review')"><i class="fas fa-building"></i> Clients</button>
             </div>
           </div>
         </div>
