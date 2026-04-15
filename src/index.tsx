@@ -393,13 +393,11 @@ function Sidebar() {
           <span>Policies</span>
           <span class="nav-badge">1.8K</span>
         </a>
-        <div class="nav-sub-group">
-          <a class="nav-item nav-sub-item claims-nav" onclick="navigateTo('claims')" href="#">
-            <i class="fas fa-file-medical-alt"></i>
-            <span>Claims</span>
-            <span class="nav-badge alert">7</span>
-          </a>
-        </div>
+        <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
+          <i class="fas fa-file-medical-alt"></i>
+          <span>Claims</span>
+          <span class="nav-badge alert">7</span>
+        </a>
         <a class="nav-item ai-nav" onclick="navigateTo('ai-agents')" href="#">
           <i class="fas fa-robot"></i>
           <span>AI Agents</span>
@@ -411,13 +409,11 @@ function Sidebar() {
           <i class="fas fa-funnel-dollar"></i>
           <span>Sales Pipeline</span>
         </a>
-        <div class="nav-sub-group">
-          <a class="nav-sub-item" onclick="navigateTo('underwriting')" href="#">
-            <i class="fas fa-microscope"></i>
-            <span>Underwriting</span>
-            <span class="nav-badge" style="background:#0891b2;color:white">4</span>
-          </a>
-        </div>
+        <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
+          <i class="fas fa-microscope"></i>
+          <span>Underwriting</span>
+          <span class="nav-badge" style="background:#0891b2;color:white">4</span>
+        </a>
         <a class="nav-item" onclick="navigateTo('products')" href="#">
           <i class="fas fa-box-open"></i>
           <span>Products</span>
