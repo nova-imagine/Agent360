@@ -9602,10 +9602,8 @@ function AIImpactScorecardPage() {
             <span class="ais-score-trend-title"><i class="fas fa-chart-line"></i> AI Score Trend — 9 Months</span>
             <span class="ais-trend-up" style="font-size:11px">+35 pts since Aug 2025</span>
           </div>
-          <canvas id="aisOverallTrendChart" height="120"></canvas>
-          <div class="ais-trend-months">
-            <span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
-            <span>Jan</span><span>Feb</span><span>Mar</span><span class="ais-trend-now">Apr</span>
+          <div class="ais-chart-wrap">
+            <canvas id="aisOverallTrendChart"></canvas>
           </div>
         </div>
       </div>
