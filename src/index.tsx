@@ -8256,7 +8256,88 @@ function ReportsPage() {
   return (
     <div class="page reports-page">
 
-      {/* Domain KPI summary row */}
+      {/* ── Page Header ── */}
+      <div class="rpt-page-header">
+        <div class="rpt-page-header-left">
+          <h2><i class="fas fa-chart-bar"></i> Reports &amp; Analytics</h2>
+          <p>Full-book performance · AI-powered insights · Multi-domain scorecard · Commission tracking</p>
+        </div>
+        <div class="rpt-page-header-right">
+          <button class="btn btn-outline" onclick="exportReportPDF()"><i class="fas fa-download"></i> Export</button>
+          <button class="btn btn-outline" onclick="shareReportWithManager()"><i class="fas fa-share-alt"></i> Share</button>
+          <button class="btn btn-outline" onclick="scheduleReport()"><i class="fas fa-clock"></i> Schedule</button>
+          <button class="btn btn-ai" onclick="openAIReportSummary()"><i class="fas fa-robot"></i> AI Summary</button>
+        </div>
+      </div>
+
+      {/* ── KPI Strip ── */}
+      <div class="rpt-kpi-strip">
+        <div class="rpt-kpi-card" onclick="openReportDrillDown('insurance')" style="cursor:pointer">
+          <div class="rpt-kpi-icon blue"><i class="fas fa-dollar-sign"></i></div>
+          <div class="rpt-kpi-body">
+            <div class="rpt-kpi-val">$487K</div>
+            <div class="rpt-kpi-lbl">Monthly Revenue</div>
+            <div class="rpt-kpi-delta up"><i class="fas fa-arrow-up"></i> +12% MoM</div>
+          </div>
+        </div>
+        <div class="rpt-kpi-card" onclick="openReportDrillDown('insurance')" style="cursor:pointer">
+          <div class="rpt-kpi-icon emerald"><i class="fas fa-layer-group"></i></div>
+          <div class="rpt-kpi-body">
+            <div class="rpt-kpi-val">$8.1M</div>
+            <div class="rpt-kpi-lbl">Total AUM + Premiums</div>
+            <div class="rpt-kpi-delta up"><i class="fas fa-arrow-up"></i> +8% QoQ</div>
+          </div>
+        </div>
+        <div class="rpt-kpi-card">
+          <div class="rpt-kpi-icon amber"><i class="fas fa-trophy"></i></div>
+          <div class="rpt-kpi-body">
+            <div class="rpt-kpi-val">78%</div>
+            <div class="rpt-kpi-lbl">Commission vs Target</div>
+            <div class="rpt-kpi-delta up">$187K / $240K</div>
+          </div>
+        </div>
+        <div class="rpt-kpi-card">
+          <div class="rpt-kpi-icon purple"><i class="fas fa-users"></i></div>
+          <div class="rpt-kpi-body">
+            <div class="rpt-kpi-val">247</div>
+            <div class="rpt-kpi-lbl">Total Clients</div>
+            <div class="rpt-kpi-delta up"><i class="fas fa-arrow-up"></i> +8 this month</div>
+          </div>
+        </div>
+        <div class="rpt-kpi-card">
+          <div class="rpt-kpi-icon teal"><i class="fas fa-star"></i></div>
+          <div class="rpt-kpi-body">
+            <div class="rpt-kpi-val">94%</div>
+            <div class="rpt-kpi-lbl">Client Satisfaction</div>
+            <div class="rpt-kpi-delta up"><i class="fas fa-arrow-up"></i> +2% QoQ</div>
+          </div>
+        </div>
+        <div class="rpt-kpi-card">
+          <div class="rpt-kpi-icon red"><i class="fas fa-robot"></i></div>
+          <div class="rpt-kpi-body">
+            <div class="rpt-kpi-val">87/100</div>
+            <div class="rpt-kpi-lbl">AI Score</div>
+            <div class="rpt-kpi-delta up"><i class="fas fa-arrow-up"></i> +12 pts vs Q4</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Insight Banner ── */}
+      <div class="rpt-ai-banner">
+        <div class="rpt-ai-banner-left">
+          <div class="rpt-ai-banner-icon"><i class="fas fa-brain"></i><span class="rpt-ai-live">LIVE</span></div>
+          <div class="rpt-ai-banner-text">
+            <div class="rpt-ai-banner-title">AI Report Intelligence — April 2026</div>
+            <div class="rpt-ai-banner-sub">Your book is on track at <strong>78% of annual target</strong>. Advisory growing fastest at +31%. Top action: cross-sell investments to 62 single-product Insurance clients — estimated <strong>+$18K/yr</strong> opportunity.</div>
+          </div>
+        </div>
+        <div class="rpt-ai-banner-actions">
+          <button class="rpt-ai-banner-btn" onclick="openAIReportSummary()"><i class="fas fa-file-alt"></i> Full AI Summary</button>
+          <button class="rpt-ai-banner-dismiss" onclick="this.closest('.rpt-ai-banner').style.display='none'" title="Dismiss"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+
+      {/* ── Domain KPI Cards ── */}
       <div class="report-domain-kpis">
         <div class="rdkpi-card ins-theme" onclick="openReportDrillDown('insurance')" style="cursor:pointer" title="View Insurance detail">
           <div class="rdkpi-icon"><i class="fas fa-shield-alt"></i></div>
@@ -8265,6 +8346,7 @@ function ReportsPage() {
             <div class="rdkpi-val">$312K</div>
             <div class="rdkpi-sub">YTD · $1.87M / $2.16M target <span class="rdkpi-delta up">+9%</span></div>
           </div>
+          <div class="rdkpi-drill-hint"><i class="fas fa-chevron-right"></i></div>
         </div>
         <div class="rdkpi-card inv-theme" onclick="openReportDrillDown('investments')" style="cursor:pointer" title="View Investments detail">
           <div class="rdkpi-icon"><i class="fas fa-chart-line"></i></div>
@@ -8273,6 +8355,7 @@ function ReportsPage() {
             <div class="rdkpi-val">$4.2M</div>
             <div class="rdkpi-sub">62 clients · Avg $67.7K <span class="rdkpi-delta up">+14%</span></div>
           </div>
+          <div class="rdkpi-drill-hint"><i class="fas fa-chevron-right"></i></div>
         </div>
         <div class="rdkpi-card ret-theme" onclick="openReportDrillDown('retirement')" style="cursor:pointer" title="View Retirement detail">
           <div class="rdkpi-icon"><i class="fas fa-umbrella-beach"></i></div>
@@ -8281,6 +8364,7 @@ function ReportsPage() {
             <div class="rdkpi-val">$89K</div>
             <div class="rdkpi-sub">38 clients · Deferred + Immediate <span class="rdkpi-delta up">+22%</span></div>
           </div>
+          <div class="rdkpi-drill-hint"><i class="fas fa-chevron-right"></i></div>
         </div>
         <div class="rdkpi-card adv-theme" onclick="openReportDrillDown('advisory')" style="cursor:pointer" title="View Advisory detail">
           <div class="rdkpi-icon"><i class="fas fa-handshake"></i></div>
@@ -8289,24 +8373,55 @@ function ReportsPage() {
             <div class="rdkpi-val">$86K</div>
             <div class="rdkpi-sub">59 clients · Estate + WM + Biz <span class="rdkpi-delta up">+31%</span></div>
           </div>
+          <div class="rdkpi-drill-hint"><i class="fas fa-chevron-right"></i></div>
         </div>
       </div>
 
+      {/* ── Report Toolbar ── */}
+      <div class="rpt-toolbar">
+        <div class="rpt-toolbar-left">
+          <div class="rpt-period-group">
+            <button class="rpt-period-btn active" id="rptbtn-6M" onclick="setReportPeriod('6M',this)">6M</button>
+            <button class="rpt-period-btn" id="rptbtn-12M" onclick="setReportPeriod('12M',this)">12M</button>
+            <button class="rpt-period-btn" id="rptbtn-All" onclick="setReportPeriod('All',this)">All Time</button>
+          </div>
+          <select class="filter-select rpt-domain-filter" id="rpt-domain-filter" onchange="filterReportByDomain(this.value)">
+            <option value="">All Domains</option>
+            <option value="ins">Insurance</option>
+            <option value="inv">Investments</option>
+            <option value="ret">Retirement</option>
+            <option value="adv">Advisory</option>
+          </select>
+        </div>
+        <div class="rpt-toolbar-right">
+          <span class="rpt-last-updated"><i class="fas fa-sync-alt"></i> Updated: Apr 15, 2026 · 7:02 AM</span>
+        </div>
+      </div>
+
+      {/* ── Main Charts Row ── */}
       <div class="reports-grid">
+
+        {/* Revenue trend — main wide chart */}
         <div class="report-card main-chart">
           <div class="card-header">
-            <h3><i class="fas fa-chart-line"></i> Total Revenue by Domain — YTD 2026</h3>
+            <h3 id="rpt-rev-heading"><i class="fas fa-chart-area"></i> Revenue by Domain — Jan–Jun 2026</h3>
             <div class="card-actions">
-              <button class="btn-tiny active" onclick="setReportPeriod('6M', this)">6M</button>
-              <button class="btn-tiny" onclick="setReportPeriod('12M', this)">12M</button>
-              <button class="btn-tiny" onclick="setReportPeriod('All', this)">All</button>
+              <button class="rpt-chart-tab active" id="rct-bar" onclick="switchRevenueChartType('bar',this)"><i class="fas fa-chart-bar"></i></button>
+              <button class="rpt-chart-tab" id="rct-line" onclick="switchRevenueChartType('line',this)"><i class="fas fa-chart-line"></i></button>
             </div>
           </div>
           <div class="report-chart-wrap" style="position:relative;height:260px">
             <canvas id="reportRevenueChart"></canvas>
           </div>
+          <div class="rpt-rev-legend">
+            <span><span class="rcl-dot" style="background:#003087"></span> Insurance</span>
+            <span><span class="rcl-dot" style="background:#059669"></span> Investments</span>
+            <span><span class="rcl-dot" style="background:#d97706"></span> Retirement</span>
+            <span><span class="rcl-dot" style="background:#7c3aed"></span> Advisory</span>
+          </div>
         </div>
 
+        {/* Book Mix donut */}
         <div class="report-card">
           <div class="card-header">
             <h3><i class="fas fa-chart-pie"></i> Book Mix by Domain</h3>
@@ -8322,6 +8437,7 @@ function ReportsPage() {
           </div>
         </div>
 
+        {/* Client Segments */}
         <div class="report-card">
           <div class="card-header">
             <h3><i class="fas fa-users"></i> Client Segments</h3>
@@ -8337,10 +8453,111 @@ function ReportsPage() {
           </div>
         </div>
 
-        {/* Holistic Performance Scorecard */}
+        {/* ── Commission Tracker Card ── */}
+        <div class="report-card rpt-commission-card">
+          <div class="card-header">
+            <h3><i class="fas fa-wallet"></i> Commission Tracker — YTD 2026</h3>
+            <span class="rpt-badge-teal">78% of target</span>
+          </div>
+          <div class="rpt-comm-gauge-row">
+            <div class="rpt-comm-total">
+              <div class="rpt-comm-earned">$187K</div>
+              <div class="rpt-comm-label">Earned YTD</div>
+            </div>
+            <div class="rpt-comm-gauge-wrap">
+              <div class="rpt-comm-bar-track">
+                <div class="rpt-comm-bar-fill" style="width:78%"></div>
+                <div class="rpt-comm-bar-marker" style="left:78%"><span>78%</span></div>
+              </div>
+              <div class="rpt-comm-targets">
+                <span>$0</span><span>Target: $240K</span>
+              </div>
+            </div>
+          </div>
+          <div class="rpt-comm-breakdown">
+            <div class="rpt-comm-row">
+              <span class="rpt-comm-domain"><i class="fas fa-circle" style="color:#003087"></i> Insurance</span>
+              <div class="rpt-comm-bar-mini-track"><div class="rpt-comm-bar-mini" style="width:55%;background:#003087"></div></div>
+              <span class="rpt-comm-amt">$103K</span>
+              <span class="rpt-comm-pct">55%</span>
+            </div>
+            <div class="rpt-comm-row">
+              <span class="rpt-comm-domain"><i class="fas fa-circle" style="color:#059669"></i> Investments</span>
+              <div class="rpt-comm-bar-mini-track"><div class="rpt-comm-bar-mini" style="width:28%;background:#059669"></div></div>
+              <span class="rpt-comm-amt">$52K</span>
+              <span class="rpt-comm-pct">28%</span>
+            </div>
+            <div class="rpt-comm-row">
+              <span class="rpt-comm-domain"><i class="fas fa-circle" style="color:#d97706"></i> Retirement</span>
+              <div class="rpt-comm-bar-mini-track"><div class="rpt-comm-bar-mini" style="width:10%;background:#d97706"></div></div>
+              <span class="rpt-comm-amt">$19K</span>
+              <span class="rpt-comm-pct">10%</span>
+            </div>
+            <div class="rpt-comm-row">
+              <span class="rpt-comm-domain"><i class="fas fa-circle" style="color:#7c3aed"></i> Advisory</span>
+              <div class="rpt-comm-bar-mini-track"><div class="rpt-comm-bar-mini" style="width:7%;background:#7c3aed"></div></div>
+              <span class="rpt-comm-amt">$13K</span>
+              <span class="rpt-comm-pct">7%</span>
+            </div>
+          </div>
+          <div class="rpt-comm-pending"><i class="fas fa-hourglass-half"></i> <strong>$8,400</strong> pending in underwriting · est. Apr 20</div>
+        </div>
+
+        {/* ── Goal Progress Card ── */}
+        <div class="report-card rpt-goals-card">
+          <div class="card-header">
+            <h3><i class="fas fa-bullseye"></i> Annual Goals Progress</h3>
+            <span class="rpt-badge-blue">2026 YTD</span>
+          </div>
+          <div class="rpt-goals-list">
+            <div class="rpt-goal-item">
+              <div class="rpt-goal-meta">
+                <span class="rpt-goal-name"><i class="fas fa-shield-alt" style="color:#003087"></i> Insurance Premium</span>
+                <span class="rpt-goal-val">87% <span class="rpt-goal-target">of $2.16M</span></span>
+              </div>
+              <div class="rpt-goal-bar-outer"><div class="rpt-goal-bar-inner ins-fill" style="width:87%"></div></div>
+              <div class="rpt-goal-footer"><span class="rpt-goal-earned">$1.87M earned</span><span class="rpt-goal-delta up">+9% vs plan</span></div>
+            </div>
+            <div class="rpt-goal-item">
+              <div class="rpt-goal-meta">
+                <span class="rpt-goal-name"><i class="fas fa-chart-line" style="color:#059669"></i> Investment AUM</span>
+                <span class="rpt-goal-val">84% <span class="rpt-goal-target">of $5M</span></span>
+              </div>
+              <div class="rpt-goal-bar-outer"><div class="rpt-goal-bar-inner inv-fill" style="width:84%"></div></div>
+              <div class="rpt-goal-footer"><span class="rpt-goal-earned">$4.2M AUM</span><span class="rpt-goal-delta up">+14% vs plan</span></div>
+            </div>
+            <div class="rpt-goal-item">
+              <div class="rpt-goal-meta">
+                <span class="rpt-goal-name"><i class="fas fa-umbrella-beach" style="color:#d97706"></i> Retirement Premium</span>
+                <span class="rpt-goal-val">84% <span class="rpt-goal-target">of $106K</span></span>
+              </div>
+              <div class="rpt-goal-bar-outer"><div class="rpt-goal-bar-inner ret-fill" style="width:84%"></div></div>
+              <div class="rpt-goal-footer"><span class="rpt-goal-earned">$89K earned</span><span class="rpt-goal-delta up">+22% vs plan</span></div>
+            </div>
+            <div class="rpt-goal-item">
+              <div class="rpt-goal-meta">
+                <span class="rpt-goal-name"><i class="fas fa-handshake" style="color:#7c3aed"></i> Advisory Revenue</span>
+                <span class="rpt-goal-val">74% <span class="rpt-goal-target">of $116K</span></span>
+              </div>
+              <div class="rpt-goal-bar-outer"><div class="rpt-goal-bar-inner adv-fill" style="width:74%"></div></div>
+              <div class="rpt-goal-footer"><span class="rpt-goal-earned">$86K earned</span><span class="rpt-goal-delta up">+31% vs plan</span></div>
+            </div>
+            <div class="rpt-goal-item">
+              <div class="rpt-goal-meta">
+                <span class="rpt-goal-name"><i class="fas fa-users" style="color:#0891b2"></i> New Clients</span>
+                <span class="rpt-goal-val">83% <span class="rpt-goal-target">of 30 target</span></span>
+              </div>
+              <div class="rpt-goal-bar-outer"><div class="rpt-goal-bar-inner teal-fill" style="width:83%"></div></div>
+              <div class="rpt-goal-footer"><span class="rpt-goal-earned">25 added YTD</span><span class="rpt-goal-delta up">+18% vs last yr</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Holistic Performance Scorecard ── */}
         <div class="report-card wide-card">
           <div class="card-header">
             <h3><i class="fas fa-trophy"></i> Holistic Performance Scorecard — All Domains</h3>
+            <button class="btn-link" onclick="openAIReportSummary()">AI Analysis →</button>
           </div>
           <div class="scorecard-domain-tabs">
             <div class="sdt-section">
@@ -8354,7 +8571,7 @@ function ReportsPage() {
                 <div class="score-item">
                   <div class="score-label">Policy Renewal Rate</div>
                   <div class="score-bar-outer"><div class="score-bar-inner green" style="width:89%"></div></div>
-                  <div class="score-pct">89% <span class="score-delta neutral">0%</span></div>
+                  <div class="score-pct">89% <span class="score-delta neutral">stable</span></div>
                 </div>
                 <div class="score-item">
                   <div class="score-label">Claims Resolved (30d)</div>
@@ -8406,6 +8623,16 @@ function ReportsPage() {
                   <div class="score-bar-outer"><div class="score-bar-inner" style="width:58%;background:#d97706"></div></div>
                   <div class="score-pct">58% <span class="score-delta up">+18%</span></div>
                 </div>
+                <div class="score-item">
+                  <div class="score-label">Annuity Premium / Target</div>
+                  <div class="score-bar-outer"><div class="score-bar-inner" style="width:84%;background:#d97706"></div></div>
+                  <div class="score-pct">84% <span class="score-delta up">+6%</span></div>
+                </div>
+                <div class="score-item">
+                  <div class="score-label">IRA Rollovers Captured</div>
+                  <div class="score-bar-outer"><div class="score-bar-inner" style="width:62%;background:#d97706"></div></div>
+                  <div class="score-pct">62% <span class="score-delta up">+12%</span></div>
+                </div>
               </div>
             </div>
             <div class="sdt-section">
@@ -8421,15 +8648,25 @@ function ReportsPage() {
                   <div class="score-bar-outer"><div class="score-bar-inner" style="width:80%;background:#7c3aed"></div></div>
                   <div class="score-pct">80% <span class="score-delta up">+15%</span></div>
                 </div>
+                <div class="score-item">
+                  <div class="score-label">UMA Accounts Opened</div>
+                  <div class="score-bar-outer"><div class="score-bar-inner" style="width:65%;background:#7c3aed"></div></div>
+                  <div class="score-pct">65% <span class="score-delta up">+20%</span></div>
+                </div>
+                <div class="score-item">
+                  <div class="score-label">Business Succession Plans</div>
+                  <div class="score-bar-outer"><div class="score-bar-inner" style="width:50%;background:#7c3aed"></div></div>
+                  <div class="score-pct">50% <span class="score-delta up">+8%</span></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Cross-domain scorecard */}
+        {/* ── Cross-Domain + AI Metrics ── */}
         <div class="report-card wide-card">
           <div class="card-header">
-            <h3><i class="fas fa-layer-group"></i> Cross-Domain Metrics</h3>
+            <h3><i class="fas fa-layer-group"></i> Cross-Domain &amp; AI Performance Metrics</h3>
           </div>
           <div class="scorecard-grid">
             <div class="score-item">
@@ -8462,16 +8699,122 @@ function ReportsPage() {
               <div class="score-bar-outer"><div class="score-bar-inner green" style="width:71%"></div></div>
               <div class="score-pct">71% <span class="score-delta up">+18%</span></div>
             </div>
+            <div class="score-item">
+              <div class="score-label">Underwriting STP Rate</div>
+              <div class="score-bar-outer"><div class="score-bar-inner" style="width:82%;background:#0891b2"></div></div>
+              <div class="score-pct">82% <span class="score-delta up">+18%</span></div>
+            </div>
+            <div class="score-item">
+              <div class="score-label">AI Decision Accuracy</div>
+              <div class="score-bar-outer"><div class="score-bar-inner green" style="width:95%"></div></div>
+              <div class="score-pct">94.6% <span class="score-delta up">+3%</span></div>
+            </div>
+            <div class="score-item">
+              <div class="score-label">Meeting Prep Coverage</div>
+              <div class="score-bar-outer"><div class="score-bar-inner" style="width:87%;background:#7c3aed"></div></div>
+              <div class="score-pct">87% <span class="score-delta up">AI-prepared</span></div>
+            </div>
           </div>
+        </div>
+
+        {/* ── Top AI Opportunities Table ── */}
+        <div class="report-card wide-card">
+          <div class="card-header">
+            <h3><i class="fas fa-bolt"></i> Top AI-Identified Revenue Opportunities</h3>
+            <span class="rpt-badge-purple">$35.2K potential</span>
+          </div>
+          <div class="rpt-opp-table-wrap">
+            <table class="rpt-opp-table">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Opportunity</th>
+                  <th>Domain</th>
+                  <th>Est. Value</th>
+                  <th>Confidence</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="rpt-opp-row" onclick="openReportDrillDown('investments')">
+                  <td><div class="rpt-opp-client"><div class="rpt-opp-avatar" style="background:#f0fdf4;color:#059669">PG</div>Patricia Nguyen</div></td>
+                  <td>Deferred Annuity Conversion</td>
+                  <td><span class="act-domain-pill inv">Investments</span></td>
+                  <td class="rpt-opp-val">$3K/yr</td>
+                  <td><div class="rpt-conf-bar"><div class="rpt-conf-fill" style="width:91%;background:#059669"></div></div><span class="rpt-conf-pct">91%</span></td>
+                  <td><span class="rpt-status-pill urgent">Urgent</span></td>
+                  <td><button class="rpt-act-btn" onclick="event.stopPropagation();navigateTo('clients')"><i class="fas fa-arrow-right"></i></button></td>
+                </tr>
+                <tr class="rpt-opp-row" onclick="openReportDrillDown('retirement')">
+                  <td><div class="rpt-opp-client"><div class="rpt-opp-avatar" style="background:#fffbeb;color:#d97706">JW</div>James Whitfield</div></td>
+                  <td>Income Annuity at Retirement</td>
+                  <td><span class="act-domain-pill ret">Retirement</span></td>
+                  <td class="rpt-opp-val">$12K/yr</td>
+                  <td><div class="rpt-conf-bar"><div class="rpt-conf-fill" style="width:85%;background:#d97706"></div></div><span class="rpt-conf-pct">85%</span></td>
+                  <td><span class="rpt-status-pill high">High</span></td>
+                  <td><button class="rpt-act-btn" onclick="event.stopPropagation();navigateTo('clients')"><i class="fas fa-arrow-right"></i></button></td>
+                </tr>
+                <tr class="rpt-opp-row" onclick="openReportDrillDown('advisory')">
+                  <td><div class="rpt-opp-client"><div class="rpt-opp-avatar" style="background:#faf5ff;color:#7c3aed">LM</div>Linda Morrison</div></td>
+                  <td>UMA Account — $500K+ assets</td>
+                  <td><span class="act-domain-pill adv">Advisory</span></td>
+                  <td class="rpt-opp-val">$5K/yr</td>
+                  <td><div class="rpt-conf-bar"><div class="rpt-conf-fill" style="width:88%;background:#7c3aed"></div></div><span class="rpt-conf-pct">88%</span></td>
+                  <td><span class="rpt-status-pill high">High</span></td>
+                  <td><button class="rpt-act-btn" onclick="event.stopPropagation();navigateTo('clients')"><i class="fas fa-arrow-right"></i></button></td>
+                </tr>
+                <tr class="rpt-opp-row" onclick="openReportDrillDown('advisory')">
+                  <td><div class="rpt-opp-client"><div class="rpt-opp-avatar" style="background:#eff6ff;color:#003087">RC</div>Robert Chen</div></td>
+                  <td>Business Succession + NQDC</td>
+                  <td><span class="act-domain-pill adv">Advisory</span></td>
+                  <td class="rpt-opp-val">$8K/yr</td>
+                  <td><div class="rpt-conf-bar"><div class="rpt-conf-fill" style="width:79%;background:#7c3aed"></div></div><span class="rpt-conf-pct">79%</span></td>
+                  <td><span class="rpt-status-pill med">Medium</span></td>
+                  <td><button class="rpt-act-btn" onclick="event.stopPropagation();navigateTo('clients')"><i class="fas fa-arrow-right"></i></button></td>
+                </tr>
+                <tr class="rpt-opp-row" onclick="openReportDrillDown('investments')">
+                  <td><div class="rpt-opp-client"><div class="rpt-opp-avatar" style="background:#f0fdf4;color:#059669">AR</div>Alex Rivera</div></td>
+                  <td>401(k) Rollover — $85K prior plan</td>
+                  <td><span class="act-domain-pill ret">Retirement</span></td>
+                  <td class="rpt-opp-val">$4K/yr</td>
+                  <td><div class="rpt-conf-bar"><div class="rpt-conf-fill" style="width:74%;background:#d97706"></div></div><span class="rpt-conf-pct">74%</span></td>
+                  <td><span class="rpt-status-pill med">Medium</span></td>
+                  <td><button class="rpt-act-btn" onclick="event.stopPropagation();navigateTo('clients')"><i class="fas fa-arrow-right"></i></button></td>
+                </tr>
+                <tr class="rpt-opp-row" onclick="openReportDrillDown('insurance')">
+                  <td><div class="rpt-opp-client"><div class="rpt-opp-avatar" style="background:#eff6ff;color:#003087">DT</div>David Thompson</div></td>
+                  <td>Disability Insurance — no coverage</td>
+                  <td><span class="act-domain-pill ins">Insurance</span></td>
+                  <td class="rpt-opp-val">$2K/yr</td>
+                  <td><div class="rpt-conf-bar"><div class="rpt-conf-fill" style="width:82%;background:#003087"></div></div><span class="rpt-conf-pct">82%</span></td>
+                  <td><span class="rpt-status-pill med">Medium</span></td>
+                  <td><button class="rpt-act-btn" onclick="event.stopPropagation();navigateTo('clients')"><i class="fas fa-arrow-right"></i></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rpt-opp-footer">
+            <span><i class="fas fa-robot" style="color:#7c3aed"></i> AI-identified · Updated daily · 7 total opportunities · <strong>$35.2K</strong> combined potential</span>
+            <button class="btn btn-ai" style="font-size:11px;padding:6px 12px" onclick="sendContextMessage('Show me all cross-sell and upsell opportunities across my 247 clients ranked by revenue potential and close probability','advisor')"><i class="fas fa-robot"></i> Full AI Opportunity Analysis</button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── Action Bar ── */}
+      <div class="rpt-action-bar">
+        <div class="rpt-action-bar-left">
+          <span class="rpt-action-info"><i class="fas fa-info-circle"></i> YTD 2026 · 247 clients · All 4 domains · Last updated Apr 15, 2026</span>
+        </div>
+        <div class="rpt-action-bar-right">
+          <button class="btn btn-primary" onclick="exportReportPDF()"><i class="fas fa-download"></i> Export Full Report</button>
+          <button class="btn btn-outline" onclick="shareReportWithManager()"><i class="fas fa-share-alt"></i> Share with Manager</button>
+          <button class="btn btn-ai" onclick="openAIReportSummary()"><i class="fas fa-robot"></i> AI Report Summary</button>
+          <button class="btn btn-outline" onclick="scheduleReport()"><i class="fas fa-calendar-alt"></i> Schedule</button>
         </div>
       </div>
 
-      <div class="report-actions-row">
-        <button class="btn btn-primary" onclick="exportReportPDF()"><i class="fas fa-download"></i> Export Full Report (PDF)</button>
-        <button class="btn btn-outline" onclick="shareReportWithManager()"><i class="fas fa-share"></i> Share with Manager</button>
-        <button class="btn btn-ai" onclick="openAIReportSummary()"><i class="fas fa-robot"></i> AI Report Summary</button>
-        <button class="btn btn-outline" onclick="scheduleReport()"><i class="fas fa-calendar"></i> Schedule Report</button>
-      </div>
     </div>
   )
 }

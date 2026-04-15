@@ -10795,8 +10795,13 @@ const _revenueData = {
    actual date range, and smooth Chart.js animation.
    ─────────────────────────────────────────────────────────── */
 function setReportPeriod(period, btn) {
+  // Deactivate old-style tiny buttons and new toolbar buttons
   document.querySelectorAll('.report-card .btn-tiny').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.rpt-period-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  // Also activate matching toolbar button by id
+  const tbBtn = document.getElementById('rptbtn-' + period);
+  if (tbBtn) tbBtn.classList.add('active');
 
   const d = _revenueData[period] || _revenueData['6M'];
   const revEl = document.getElementById('reportRevenueChart');
@@ -10811,11 +10816,11 @@ function setReportPeriod(period, btn) {
   ch.options.animation     = { duration: 420, easing: 'easeInOutQuart' };
   ch.update();
 
-  // Update card heading
-  const heading = revEl.closest('.report-card')?.querySelector('h3');
+  // Update card heading (both old h3 and new #rpt-rev-heading)
+  const heading = document.getElementById('rpt-rev-heading') || revEl.closest('.report-card')?.querySelector('h3');
   if (heading) {
     const rangeLabel = { '6M':'Jan – Jun 2026', '12M':'Jul 2025 – Jun 2026', 'All':'All Time (2024 – 2026)' };
-    heading.innerHTML = `<i class="fas fa-chart-bar"></i> Total Revenue by Domain — ${rangeLabel[period] || period}`;
+    heading.innerHTML = `<i class="fas fa-chart-area"></i> Revenue by Domain — ${rangeLabel[period] || period}`;
   }
 
   const labels = { '6M':'Last 6 months', '12M':'Last 12 months', 'All':'All time (3 years)' };
@@ -11640,6 +11645,113 @@ function openAIReportSummary() {
   document.body.appendChild(overlay);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   REPORTS PAGE — New JS Functions
+   filterReportByDomain · switchRevenueChartType · enhanced init
+   ═══════════════════════════════════════════════════════════════ */
+
+// _revenueData is defined earlier (line ~10776) — no redeclaration needed
+
+// ── Domain filter ─────────────────────────────────────────────
+function filterReportByDomain(val) {
+  const revEl = document.getElementById('reportRevenueChart');
+  if (!revEl || !revEl._chartInstance) return;
+  const ch = revEl._chartInstance;
+
+  // Domain index: 0=ins, 1=inv, 2=ret, 3=adv
+  const domainMap = { ins:0, inv:1, ret:2, adv:3 };
+  ch.data.datasets.forEach((ds, i) => {
+    if (!val) {
+      ds.hidden = false;
+    } else {
+      ds.hidden = domainMap[val] !== i;
+    }
+  });
+  ch.update();
+
+  // Update heading
+  const heading = document.getElementById('rpt-rev-heading');
+  const domainNames = { ins:'Insurance', inv:'Investments', ret:'Retirement', adv:'Advisory' };
+  if (heading) {
+    const period = document.querySelector('.rpt-period-btn.active')?.textContent || '6M';
+    const domainStr = val ? ` — ${domainNames[val]}` : ' — All Domains';
+    heading.innerHTML = `<i class="fas fa-chart-area"></i> Revenue by Domain${domainStr}`;
+  }
+
+  const msg = val ? `Filtered to ${domainNames[val]}` : 'Showing all domains';
+  showToast(msg, 'info');
+}
+
+// ── Chart type switcher (bar / line) ─────────────────────────
+function switchRevenueChartType(type, btn) {
+  document.querySelectorAll('.rpt-chart-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const revEl = document.getElementById('reportRevenueChart');
+  if (!revEl || !revEl._chartInstance) return;
+  const ch = revEl._chartInstance;
+
+  ch.config.type = type;
+
+  if (type === 'line') {
+    ch.data.datasets.forEach(ds => {
+      ds.type = 'line';
+      ds.fill = false;
+      ds.tension = 0.4;
+      ds.borderWidth = 2.5;
+      ds.pointRadius = 4;
+      ds.borderColor = ds.backgroundColor;
+      delete ds.stack;
+    });
+    ch.options.scales.x.stacked = false;
+    ch.options.scales.y.stacked = false;
+  } else {
+    ch.data.datasets.forEach((ds, i) => {
+      ds.type = 'bar';
+      ds.stack = 'revenue';
+      ds.borderRadius = 4;
+      delete ds.fill;
+      delete ds.tension;
+      delete ds.borderWidth;
+      delete ds.pointRadius;
+      delete ds.borderColor;
+    });
+    ch.options.scales.x.stacked = true;
+    ch.options.scales.y.stacked = true;
+  }
+
+  ch.options.animation = { duration: 380, easing: 'easeInOutQuart' };
+  ch.update();
+}
+
+// ── Reports page auto-init on navigate ───────────────────────
+(function() {
+  const _origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    _origNav(page);
+    if (page === 'reports') {
+      setTimeout(() => {
+        initReportCharts();
+        // Animate goal bars
+        document.querySelectorAll('.rpt-goal-bar-inner').forEach(bar => {
+          const w = bar.style.width;
+          bar.style.width = '0%';
+          requestAnimationFrame(() => { setTimeout(() => bar.style.width = w, 80); });
+        });
+        // Animate commission bar
+        const commFill = document.querySelector('.rpt-comm-bar-fill');
+        if (commFill) {
+          const w = commFill.style.width;
+          commFill.style.width = '0%';
+          setTimeout(() => commFill.style.width = w, 100);
+        }
+      }, 80);
+    }
+  };
+})();
+
+console.log('Reports page JS loaded — filterReportByDomain, switchRevenueChartType');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Claim Modal — Extra Tabs: Documents, Communications, Beneficiary
