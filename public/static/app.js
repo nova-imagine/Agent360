@@ -12323,3 +12323,115 @@ function sortUWCases(method) {
 }
 
 console.log('Underwriting Toolbar functions loaded');
+
+// ===================================================
+// PRODUCTS PAGE — ENHANCED FUNCTIONALITY
+// ===================================================
+
+function openQuickQuoteModal() {
+  const modal = document.getElementById('quick-quote-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.getElementById('qq-result').style.display = 'none';
+  }
+}
+
+function closeQuickQuoteModal() {
+  const modal = document.getElementById('quick-quote-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function updateQuoteFields() {
+  // Could dynamically update form fields based on product selection
+  const product = document.getElementById('qq-product')?.value;
+  const amountField = document.getElementById('qq-amount');
+  if (!amountField) return;
+  const placeholders = {
+    'term-life': '$500,000',
+    'whole-life': '$250,000',
+    'ul': '$350,000',
+    'vul': '$500,000',
+    'ltc': '$200/day benefit',
+    'disability': '60% of income',
+    'annuity-fixed': '$100,000 premium',
+    'annuity-deferred': '$100,000 premium',
+    'mutual-funds': '$25,000 investment',
+    'etf': '$10,000 investment',
+    '529': '$18,000/year'
+  };
+  amountField.placeholder = placeholders[product] || 'e.g. $500,000';
+}
+
+function runQuickQuote() {
+  const client = document.getElementById('qq-client')?.value;
+  const product = document.getElementById('qq-product')?.value;
+  const amount = document.getElementById('qq-amount')?.value;
+  const age = document.getElementById('qq-age')?.value;
+  const health = document.getElementById('qq-health')?.value;
+  const gender = document.getElementById('qq-gender')?.value;
+
+  if (!product) {
+    alert('Please select a product to quote.');
+    return;
+  }
+
+  // Generate illustrative quote values
+  const quotes = {
+    'term-life':       { val1: '$47/mo', lbl1: '20-yr Term Premium', val2: '$500K', lbl2: 'Death Benefit', val3: '7 days', lbl3: 'UW Estimate' },
+    'whole-life':      { val1: '$312/mo', lbl1: 'Monthly Premium', val2: '$250K', lbl2: 'Death Benefit', val3: '$4.2K', lbl3: 'Year-1 Cash Value' },
+    'ul':              { val1: '$280/mo', lbl1: 'Target Premium', val2: '$350K', lbl2: 'Death Benefit', val3: '3.5%', lbl3: 'Current Interest Rate' },
+    'vul':             { val1: '$420/mo', lbl1: 'Target Premium', val2: '$500K', lbl2: 'Min Death Benefit', val3: '30+', lbl3: 'Sub-Account Options' },
+    'ltc':             { val1: '$185/mo', lbl1: 'Monthly Premium', val2: '$6K/mo', lbl2: 'Max Monthly Benefit', val3: '90 days', lbl3: 'Elimination Period' },
+    'disability':      { val1: '$142/mo', lbl1: 'Monthly Premium', val2: '$5K/mo', lbl2: 'Monthly Benefit', val3: 'Own-Occ', lbl3: 'Definition' },
+    'annuity-fixed':   { val1: '$523/mo', lbl1: 'Income at 65', val2: '$100K', lbl2: 'Premium', val3: '4.2%', lbl3: 'Current Rate' },
+    'annuity-deferred':{ val1: '$2,800/mo', lbl1: 'Income at 65', val2: '27 yrs', lbl2: 'Deferral Period', val3: '100%', lbl3: 'Principal Protected' },
+    'mutual-funds':    { val1: '$25K', lbl1: 'Minimum Investment', val2: '0.65%', lbl2: 'Avg Expense Ratio', val3: 'Daily', lbl3: 'Liquidity' },
+    'etf':             { val1: '1 share', lbl1: 'Min Investment', val2: '0.08%', lbl2: 'Avg Expense Ratio', val3: 'Intraday', lbl3: 'Liquidity' },
+    '529':             { val1: '$18K/yr', lbl1: 'Annual Gift Limit', val2: 'Tax-Free', lbl2: 'Qualified Withdrawals', val3: '$400K+', lbl3: 'Contribution Limit' }
+  };
+
+  const q = quotes[product];
+  if (!q) { alert('Please select a valid product.'); return; }
+
+  const grid = document.getElementById('qq-result-grid');
+  if (grid) {
+    grid.innerHTML = `
+      <div class="qq-result-item"><div class="qq-result-val">${q.val1}</div><div class="qq-result-lbl">${q.lbl1}</div></div>
+      <div class="qq-result-item"><div class="qq-result-val">${q.val2}</div><div class="qq-result-lbl">${q.lbl2}</div></div>
+      <div class="qq-result-item"><div class="qq-result-val">${q.val3}</div><div class="qq-result-lbl">${q.lbl3}</div></div>
+    `;
+  }
+
+  const result = document.getElementById('qq-result');
+  if (result) result.style.display = 'block';
+}
+
+function openProductSearch() {
+  const modal = document.getElementById('product-search-modal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeProductSearch() {
+  const modal = document.getElementById('product-search-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function togglePsPill(el, group) {
+  const container = document.getElementById('ps-' + group);
+  if (!container) return;
+  container.querySelectorAll('.ps-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  // Could filter results here
+}
+
+function refreshProductOpportunities() {
+  const btn = document.querySelector('.prod-ai-refresh');
+  if (btn) {
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing…';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+    }, 1800);
+  }
+}
+
+console.log('Products page functions loaded — openQuickQuoteModal, openProductSearch, refreshProductOpportunities');

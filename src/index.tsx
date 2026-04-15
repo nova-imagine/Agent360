@@ -6777,9 +6777,198 @@ function ProductsPage() {
           <h2><i class="fas fa-box-open"></i> New York Life Product Portfolio</h2>
           <p>Comprehensive suite of insurance, investment, retirement and advisory solutions — curated for every client life stage</p>
         </div>
-        <button class="btn btn-ai" onclick="navigateTo('sales')">
-          <i class="fas fa-calculator"></i> Quick Quote
-        </button>
+        <div class="prod-header-actions">
+          <button class="btn btn-outline" onclick="openProductSearch()">
+            <i class="fas fa-search"></i> Find Product
+          </button>
+          <button class="btn btn-ai" onclick="openQuickQuoteModal()">
+            <i class="fas fa-calculator"></i> Quick Quote
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Strip */}
+      <div class="prod-kpi-strip">
+        <div class="prod-kpi-card">
+          <div class="prod-kpi-icon blue"><i class="fas fa-shield-alt"></i></div>
+          <div class="prod-kpi-body">
+            <div class="prod-kpi-val">6</div>
+            <div class="prod-kpi-lbl">Insurance Products</div>
+            <div class="prod-kpi-delta green">$312K YTD premium</div>
+          </div>
+        </div>
+        <div class="prod-kpi-card">
+          <div class="prod-kpi-icon emerald"><i class="fas fa-chart-line"></i></div>
+          <div class="prod-kpi-body">
+            <div class="prod-kpi-val">4</div>
+            <div class="prod-kpi-lbl">Investment Products</div>
+            <div class="prod-kpi-delta green">$4.2M AUM</div>
+          </div>
+        </div>
+        <div class="prod-kpi-card">
+          <div class="prod-kpi-icon gold"><i class="fas fa-umbrella-beach"></i></div>
+          <div class="prod-kpi-body">
+            <div class="prod-kpi-val">2</div>
+            <div class="prod-kpi-lbl">Retirement Products</div>
+            <div class="prod-kpi-delta green">$89K annuity premium</div>
+          </div>
+        </div>
+        <div class="prod-kpi-card">
+          <div class="prod-kpi-icon purple"><i class="fas fa-handshake"></i></div>
+          <div class="prod-kpi-body">
+            <div class="prod-kpi-val">3</div>
+            <div class="prod-kpi-lbl">Advisory Services</div>
+            <div class="prod-kpi-delta green">$86K advisory revenue</div>
+          </div>
+        </div>
+        <div class="prod-kpi-card highlight-card">
+          <div class="prod-kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="prod-kpi-body">
+            <div class="prod-kpi-val">18</div>
+            <div class="prod-kpi-lbl">Coverage Gaps Detected</div>
+            <div class="prod-kpi-delta orange">~$42K opportunity</div>
+          </div>
+        </div>
+        <div class="prod-kpi-card">
+          <div class="prod-kpi-icon teal"><i class="fas fa-robot"></i></div>
+          <div class="prod-kpi-body">
+            <div class="prod-kpi-val">11</div>
+            <div class="prod-kpi-lbl">AI Product Matches</div>
+            <div class="prod-kpi-delta green">Ready to pitch</div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Opportunity Engine */}
+      <div class="prod-ai-engine">
+        <div class="prod-ai-engine-header">
+          <div class="prod-ai-engine-title">
+            <i class="fas fa-brain"></i>
+            AI Product Opportunity Engine
+            <span class="prod-ai-badge">LIVE</span>
+          </div>
+          <div class="prod-ai-engine-sub">Ranked by revenue potential · Analyzes gaps, life stage, risk profile, and existing coverage across your book</div>
+          <button class="prod-ai-refresh" onclick="refreshProductOpportunities()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div class="prod-opp-list">
+          <div class="prod-opp-item priority-high">
+            <div class="prod-opp-rank">1</div>
+            <div class="prod-opp-icon"><i class="fas fa-heartbeat"></i></div>
+            <div class="prod-opp-body">
+              <div class="prod-opp-client">4 clients · LTC Insurance Gap</div>
+              <div class="prod-opp-detail">Clients 55+ with no long-term care coverage — inflation rider urgently needed</div>
+              <div class="prod-opp-tags">
+                <span class="prod-opp-tag red">High Priority</span>
+                <span class="prod-opp-tag">Age 55+</span>
+                <span class="prod-opp-tag">No LTC</span>
+              </div>
+            </div>
+            <div class="prod-opp-val">
+              <div class="prod-opp-premium">~$12K/yr</div>
+              <div class="prod-opp-product">LTC Insurance</div>
+              <button class="prod-opp-btn" onclick="switchProductTab('insurance');setTimeout(()=>document.getElementById('ltc-section')?.scrollIntoView({behavior:'smooth'}),300)">View Product</button>
+            </div>
+          </div>
+          <div class="prod-opp-item priority-high">
+            <div class="prod-opp-rank">2</div>
+            <div class="prod-opp-icon"><i class="fas fa-user-shield"></i></div>
+            <div class="prod-opp-body">
+              <div class="prod-opp-client">David Thompson (33) · Patricia Nguyen (38)</div>
+              <div class="prod-opp-detail">No disability coverage — high-income earners with 100% income at risk</div>
+              <div class="prod-opp-tags">
+                <span class="prod-opp-tag red">High Priority</span>
+                <span class="prod-opp-tag">No DI</span>
+                <span class="prod-opp-tag">High Income</span>
+              </div>
+            </div>
+            <div class="prod-opp-val">
+              <div class="prod-opp-premium">~$8.4K/yr</div>
+              <div class="prod-opp-product">Disability Ins.</div>
+              <button class="prod-opp-btn" onclick="switchProductTab('insurance')">View Product</button>
+            </div>
+          </div>
+          <div class="prod-opp-item priority-med">
+            <div class="prod-opp-rank">3</div>
+            <div class="prod-opp-icon"><i class="fas fa-hourglass-end"></i></div>
+            <div class="prod-opp-body">
+              <div class="prod-opp-client">Patricia Nguyen (38) · Deferred Annuity</div>
+              <div class="prod-opp-detail">Lock in today's rates — projected $2,800/mo income starting age 65</div>
+              <div class="prod-opp-tags">
+                <span class="prod-opp-tag amber">Medium Priority</span>
+                <span class="prod-opp-tag">Retirement Planning</span>
+              </div>
+            </div>
+            <div class="prod-opp-val">
+              <div class="prod-opp-premium">~$6K/yr</div>
+              <div class="prod-opp-product">Deferred Annuity</div>
+              <button class="prod-opp-btn" onclick="switchProductTab('retirement')">View Product</button>
+            </div>
+          </div>
+          <div class="prod-opp-item priority-med">
+            <div class="prod-opp-rank">4</div>
+            <div class="prod-opp-icon"><i class="fas fa-gem"></i></div>
+            <div class="prod-opp-body">
+              <div class="prod-opp-client">Linda Morrison · Robert Chen · UMA Wealth Mgmt</div>
+              <div class="prod-opp-detail">Estimated investable assets $500K+ — ideal for Unified Managed Account</div>
+              <div class="prod-opp-tags">
+                <span class="prod-opp-tag amber">Medium Priority</span>
+                <span class="prod-opp-tag">HNW</span>
+                <span class="prod-opp-tag">Advisory</span>
+              </div>
+            </div>
+            <div class="prod-opp-val">
+              <div class="prod-opp-premium">~$5K/yr fee</div>
+              <div class="prod-opp-product">Advisory / UMA</div>
+              <button class="prod-opp-btn" onclick="switchProductTab('advisory')">View Product</button>
+            </div>
+          </div>
+          <div class="prod-opp-item priority-low">
+            <div class="prod-opp-rank">5</div>
+            <div class="prod-opp-icon"><i class="fas fa-graduation-cap"></i></div>
+            <div class="prod-opp-body">
+              <div class="prod-opp-client">8 clients · 529 College Savings</div>
+              <div class="prod-opp-detail">Clients with children under 10 — tax-free education savings opportunity</div>
+              <div class="prod-opp-tags">
+                <span class="prod-opp-tag">Low Priority</span>
+                <span class="prod-opp-tag">529 Plan</span>
+                <span class="prod-opp-tag">Children U10</span>
+              </div>
+            </div>
+            <div class="prod-opp-val">
+              <div class="prod-opp-premium">~$4.8K/yr</div>
+              <div class="prod-opp-product">529 Plan</div>
+              <button class="prod-opp-btn" onclick="switchProductTab('investments')">View Product</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Coverage Gap Alert Strip */}
+      <div class="prod-gap-strip">
+        <div class="prod-gap-strip-title"><i class="fas fa-exclamation-circle"></i> Book Coverage Gaps — Action Required</div>
+        <div class="prod-gap-pills">
+          <div class="prod-gap-pill red" onclick="switchProductTab('insurance')">
+            <span class="pgp-count">4</span>
+            <span class="pgp-label">No LTC</span>
+          </div>
+          <div class="prod-gap-pill red" onclick="switchProductTab('insurance')">
+            <span class="pgp-count">2</span>
+            <span class="pgp-label">No Disability</span>
+          </div>
+          <div class="prod-gap-pill amber" onclick="switchProductTab('insurance')">
+            <span class="pgp-count">3</span>
+            <span class="pgp-label">No Term Life</span>
+          </div>
+          <div class="prod-gap-pill amber" onclick="switchProductTab('retirement')">
+            <span class="pgp-count">5</span>
+            <span class="pgp-label">No Retirement Plan</span>
+          </div>
+          <div class="prod-gap-pill blue" onclick="switchProductTab('investments')">
+            <span class="pgp-count">4</span>
+            <span class="pgp-label">Investment Gap</span>
+          </div>
+        </div>
+        <button class="prod-gap-action" onclick="openProductSearch()"><i class="fas fa-search"></i> Find Matches</button>
       </div>
 
       {/* Main Category Tabs (left nav + right content — NYL-style) */}
@@ -6790,29 +6979,35 @@ function ProductsPage() {
           <div class="tab-nav-item active" id="ptab-insurance" onclick="switchProductTab('insurance')">
             <i class="fas fa-shield-alt"></i>
             <span>Insurance</span>
+            <span class="tab-nav-count">6</span>
             <i class="fas fa-chevron-right tab-arrow"></i>
           </div>
           <div class="tab-nav-item" id="ptab-investments" onclick="switchProductTab('investments')">
             <i class="fas fa-chart-line"></i>
             <span>Investments</span>
+            <span class="tab-nav-count">4</span>
             <i class="fas fa-chevron-right tab-arrow"></i>
           </div>
           <div class="tab-nav-item" id="ptab-retirement" onclick="switchProductTab('retirement')">
             <i class="fas fa-umbrella-beach"></i>
             <span>Retirement</span>
+            <span class="tab-nav-count">2</span>
             <i class="fas fa-chevron-right tab-arrow"></i>
           </div>
           <div class="tab-nav-item" id="ptab-advisory" onclick="switchProductTab('advisory')">
             <i class="fas fa-handshake"></i>
             <span>Advisory Services</span>
+            <span class="tab-nav-count">3</span>
             <i class="fas fa-chevron-right tab-arrow"></i>
           </div>
 
           {/* Info Panel beneath tabs */}
           <div class="tab-nav-info">
-            <div class="tab-info-title">Learn about your life insurance options</div>
-            <div class="tab-info-desc">We can help you create a temporary, long-term, or permanent life insurance solution that meets your needs and your budget</div>
-            <button class="tab-info-link" onclick="navigateTo('sales')">Life insurance <i class="fas fa-arrow-right"></i></button>
+            <div class="tab-info-icon"><i class="fas fa-robot"></i></div>
+            <div class="tab-info-title">AI Product Matching</div>
+            <div class="tab-info-desc">11 clients have been matched to products based on their life stage, gaps, and risk profile</div>
+            <button class="tab-info-link" onclick="openQuickQuoteModal()"><i class="fas fa-calculator"></i> Quick Quote <i class="fas fa-arrow-right"></i></button>
+            <button class="tab-info-link" style="margin-top:6px" onclick="sendContextMessage('Recommend the best products for each client based on their profile, gaps, and life stage','advisor')"><i class="fas fa-robot"></i> AI Recommendations <i class="fas fa-arrow-right"></i></button>
           </div>
         </div>
 
@@ -6822,19 +7017,30 @@ function ProductsPage() {
           {/* ========== INSURANCE ========== */}
           <div class="ptab-panel active" id="panel-insurance">
             <div class="ptab-panel-header">
-              <h3><i class="fas fa-shield-alt"></i> Insurance</h3>
-              <p>Protect your clients and their families with NYL's full suite of life and disability insurance products</p>
+              <div class="ptab-header-left">
+                <h3><i class="fas fa-shield-alt"></i> Insurance</h3>
+                <p>Protect your clients and their families with NYL's full suite of life and disability insurance products</p>
+              </div>
+              <div class="ptab-header-stats">
+                <div class="ptab-stat"><span class="ptab-stat-val">6</span><span class="ptab-stat-lbl">Products</span></div>
+                <div class="ptab-stat"><span class="ptab-stat-val green-text">$312K</span><span class="ptab-stat-lbl">YTD Premium</span></div>
+                <div class="ptab-stat"><span class="ptab-stat-val red-text">6</span><span class="ptab-stat-lbl">Gap Clients</span></div>
+              </div>
             </div>
 
             <div class="product-subsections">
 
               {/* Term Life */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="term-life-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon blue"><i class="fas fa-hourglass-half"></i></div>
                   <div>
-                    <h4>Term life insurance</h4>
+                    <h4>Term life insurance <span class="prod-prospect-badge">3 prospects</span></h4>
                     <p>Temporary protection, at a lower cost than other options, that can be converted to permanent</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill blue">Most Affordable</span>
+                    <span class="prod-meta-pill">Age 25–50</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -6871,12 +7077,16 @@ function ProductsPage() {
               </div>
 
               {/* Whole Life */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="whole-life-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon green"><i class="fas fa-infinity"></i></div>
                   <div>
-                    <h4>Whole life insurance</h4>
+                    <h4>Whole life insurance <span class="prod-prospect-badge">5 active policies</span></h4>
                     <p>Permanent policies with a guaranteed death benefit and guaranteed cash value that grows over time</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill green">Most Popular</span>
+                    <span class="prod-meta-pill">Dividends Eligible</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -6914,12 +7124,16 @@ function ProductsPage() {
               </div>
 
               {/* Universal Life */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="ul-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon purple"><i class="fas fa-sliders-h"></i></div>
                   <div>
-                    <h4>Universal life insurance</h4>
+                    <h4>Universal life insurance <span class="prod-prospect-badge amber">1 underfunded</span></h4>
                     <p>Long-term coverage that's highly customizable to your needs and budget</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill purple">Flexible Premiums</span>
+                    <span class="prod-meta-pill">Age 35–60</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -6956,12 +7170,16 @@ function ProductsPage() {
               </div>
 
               {/* Variable Universal Life */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="vul-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon gold"><i class="fas fa-chart-line"></i></div>
                   <div>
-                    <h4>Variable universal life insurance</h4>
+                    <h4>Variable universal life insurance <span class="prod-prospect-badge">1 strong match</span></h4>
                     <p>Long-term coverage protection with the ability to invest your policy's cash value in the market</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill gold">Market Growth</span>
+                    <span class="prod-meta-pill">Risk Tolerant</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -6999,12 +7217,16 @@ function ProductsPage() {
               </div>
 
               {/* Long-Term Care */}
-              <div class="prod-subsection">
+              <div class="prod-subsection priority-highlight" id="ltc-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon red"><i class="fas fa-heartbeat"></i></div>
                   <div>
-                    <h4>Long-term care insurance</h4>
+                    <h4>Long-term care insurance <span class="prod-prospect-badge red">4 urgent gaps</span></h4>
                     <p>Helps to pay for someone to help you with everyday tasks, if you ever need it</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill red">Urgent Opportunity</span>
+                    <span class="prod-meta-pill">Age 50–65</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7041,12 +7263,16 @@ function ProductsPage() {
               </div>
 
               {/* Individual Disability */}
-              <div class="prod-subsection">
+              <div class="prod-subsection priority-highlight" id="di-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon orange"><i class="fas fa-user-shield"></i></div>
                   <div>
-                    <h4>Individual disability insurance</h4>
+                    <h4>Individual disability insurance <span class="prod-prospect-badge red">2 urgent gaps</span></h4>
                     <p>Helps to replace lost income if sickness or injury prevent you from working</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill red">High Priority</span>
+                    <span class="prod-meta-pill">Own-Occupation</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7088,19 +7314,30 @@ function ProductsPage() {
           {/* ========== INVESTMENTS ========== */}
           <div class="ptab-panel" id="panel-investments">
             <div class="ptab-panel-header">
-              <h3><i class="fas fa-chart-line"></i> Investments</h3>
-              <p>Grow your clients' wealth with professionally managed investment solutions tailored to their goals and risk tolerance</p>
+              <div class="ptab-header-left">
+                <h3><i class="fas fa-chart-line"></i> Investments</h3>
+                <p>Grow your clients' wealth with professionally managed investment solutions tailored to their goals and risk tolerance</p>
+              </div>
+              <div class="ptab-header-stats">
+                <div class="ptab-stat"><span class="ptab-stat-val">4</span><span class="ptab-stat-lbl">Products</span></div>
+                <div class="ptab-stat"><span class="ptab-stat-val green-text">$4.2M</span><span class="ptab-stat-lbl">AUM</span></div>
+                <div class="ptab-stat"><span class="ptab-stat-val amber-text">4</span><span class="ptab-stat-lbl">Inv. Gaps</span></div>
+              </div>
             </div>
 
             <div class="product-subsections">
 
               {/* Annuities */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="annuities-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon blue"><i class="fas fa-lock"></i></div>
                   <div>
-                    <h4>Annuities</h4>
+                    <h4>Annuities <span class="prod-prospect-badge">1 strong match</span></h4>
                     <p>Stable, long-term options that eventually provide an income stream</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill blue">Guaranteed Income</span>
+                    <span class="prod-meta-pill">Fixed &amp; Variable</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7145,12 +7382,16 @@ function ProductsPage() {
               </div>
 
               {/* Mutual Funds */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="mf-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon green"><i class="fas fa-coins"></i></div>
                   <div>
-                    <h4>Mutual funds</h4>
+                    <h4>Mutual funds <span class="prod-prospect-badge">1 prospect</span></h4>
                     <p>Professionally managed investments with potential market gains</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill green">MainStay Funds</span>
+                    <span class="prod-meta-pill">Active &amp; Passive</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7188,12 +7429,16 @@ function ProductsPage() {
               </div>
 
               {/* ETFs */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="etf-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon purple"><i class="fas fa-exchange-alt"></i></div>
                   <div>
-                    <h4>Exchange traded funds (ETFs)</h4>
+                    <h4>Exchange traded funds (ETFs) <span class="prod-prospect-badge">2 prospects</span></h4>
                     <p>Bundled investments with low fees that you can quickly buy or sell</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill purple">Ultra-Low Fees</span>
+                    <span class="prod-meta-pill">Tax Efficient</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7231,12 +7476,16 @@ function ProductsPage() {
               </div>
 
               {/* 529 Plans */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="529-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon gold"><i class="fas fa-graduation-cap"></i></div>
                   <div>
-                    <h4>529 college savings plans</h4>
+                    <h4>529 college savings plans <span class="prod-prospect-badge amber">8 prospects</span></h4>
                     <p>Investments designed to help you pay for college or other education expenses</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill gold">Tax-Free Growth</span>
+                    <span class="prod-meta-pill">SECURE 2.0</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7301,19 +7550,30 @@ function ProductsPage() {
           {/* ========== RETIREMENT ========== */}
           <div class="ptab-panel" id="panel-retirement">
             <div class="ptab-panel-header">
-              <h3><i class="fas fa-umbrella-beach"></i> Retirement</h3>
-              <p>Help your clients build a secure retirement income strategy with guaranteed income solutions that last a lifetime</p>
+              <div class="ptab-header-left">
+                <h3><i class="fas fa-umbrella-beach"></i> Retirement</h3>
+                <p>Help your clients build a secure retirement income strategy with guaranteed income solutions that last a lifetime</p>
+              </div>
+              <div class="ptab-header-stats">
+                <div class="ptab-stat"><span class="ptab-stat-val">2</span><span class="ptab-stat-lbl">Products</span></div>
+                <div class="ptab-stat"><span class="ptab-stat-val green-text">$89K</span><span class="ptab-stat-lbl">YTD Premium</span></div>
+                <div class="ptab-stat"><span class="ptab-stat-val amber-text">5</span><span class="ptab-stat-lbl">No Ret. Plan</span></div>
+              </div>
             </div>
 
             <div class="product-subsections">
 
               {/* Immediate Income Annuities */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="immediate-annuity-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon blue"><i class="fas fa-play-circle"></i></div>
                   <div>
-                    <h4>Immediate income annuities</h4>
+                    <h4>Immediate income annuities <span class="prod-prospect-badge">2 candidates</span></h4>
                     <p>Start to receive income now, for as long as you need it, with potential for additional earnings</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill blue">Income For Life</span>
+                    <span class="prod-meta-pill">Age 65–80</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7365,12 +7625,16 @@ function ProductsPage() {
               </div>
 
               {/* Deferred Income Annuities */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="deferred-annuity-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon green"><i class="fas fa-hourglass-end"></i></div>
                   <div>
-                    <h4>Deferred income annuities</h4>
+                    <h4>Deferred income annuities <span class="prod-prospect-badge">1 strong match</span></h4>
                     <p>Receive income for life and larger payouts by delaying them for at least a few years</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill green">Higher Payout</span>
+                    <span class="prod-meta-pill">Age 40–70</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7450,19 +7714,30 @@ function ProductsPage() {
           {/* ========== ADVISORY SERVICES ========== */}
           <div class="ptab-panel" id="panel-advisory">
             <div class="ptab-panel-header">
-              <h3><i class="fas fa-handshake"></i> Advisory Services</h3>
-              <p>Expert guidance across wealth management, estate planning, and small business solutions — for your most complex client needs</p>
+              <div class="ptab-header-left">
+                <h3><i class="fas fa-handshake"></i> Advisory Services</h3>
+                <p>Expert guidance across wealth management, estate planning, and small business solutions — for your most complex client needs</p>
+              </div>
+              <div class="ptab-header-stats">
+                <div class="ptab-stat"><span class="ptab-stat-val">3</span><span class="ptab-stat-lbl">Services</span></div>
+                <div class="ptab-stat"><span class="ptab-stat-val green-text">$86K</span><span class="ptab-stat-lbl">Revenue</span></div>
+                <div class="ptab-stat"><span class="ptab-stat-val">4</span><span class="ptab-stat-lbl">Eligible Clients</span></div>
+              </div>
             </div>
 
             <div class="product-subsections">
 
               {/* Wealth Management */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="wealth-mgmt-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon gold"><i class="fas fa-gem"></i></div>
                   <div>
-                    <h4>Wealth management</h4>
+                    <h4>Wealth management <span class="prod-prospect-badge">2 HNW candidates</span></h4>
                     <p>Expertise and guidance to create your investment strategy and help you plan for future financial needs</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill gold">HNW Clients</span>
+                    <span class="prod-meta-pill">Min $25K–$250K</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7501,12 +7776,16 @@ function ProductsPage() {
               </div>
 
               {/* Estate Planning */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="estate-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon purple"><i class="fas fa-landmark"></i></div>
                   <div>
-                    <h4>Estate planning</h4>
+                    <h4>Estate planning <span class="prod-prospect-badge amber">4 reviews needed</span></h4>
                     <p>Guidance to help identify potential needs and set you up with an estate plan that can protect your legacy</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill purple">Legacy Protection</span>
+                    <span class="prod-meta-pill">$2M+ Policies</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7551,12 +7830,16 @@ function ProductsPage() {
               </div>
 
               {/* Small Business */}
-              <div class="prod-subsection">
+              <div class="prod-subsection" id="biz-section">
                 <div class="prod-sub-header">
                   <div class="prod-sub-icon orange"><i class="fas fa-building"></i></div>
                   <div>
-                    <h4>Small business</h4>
+                    <h4>Small business solutions <span class="prod-prospect-badge">2 business owners</span></h4>
                     <p>Insurance for employees, executives, or business owners, plus many other options to help a small business thrive</p>
+                  </div>
+                  <div class="prod-sub-meta">
+                    <span class="prod-meta-pill orange">Business Owners</span>
+                    <span class="prod-meta-pill">NQDC · COLI</span>
                   </div>
                 </div>
                 <div class="prod-sub-details">
@@ -7605,6 +7888,366 @@ function ProductsPage() {
 
         </div>{/* end products-tab-content */}
       </div>{/* end products-layout */}
+
+      {/* Product Performance Analytics Grid */}
+      <div class="prod-analytics-grid">
+
+        {/* Premium by Product Category */}
+        <div class="prod-analytics-card">
+          <div class="prod-analytics-header">
+            <div class="prod-analytics-title"><i class="fas fa-chart-bar"></i> Premium by Product — YTD 2026</div>
+            <span class="prod-analytics-badge">Live</span>
+          </div>
+          <div class="prod-perf-bars">
+            <div class="prod-perf-row">
+              <div class="prod-perf-label">Whole Life</div>
+              <div class="prod-perf-bar-wrap">
+                <div class="prod-perf-bar-fill" style="width:72%;background:linear-gradient(90deg,#059669,#10b981)"></div>
+              </div>
+              <div class="prod-perf-val">$224K</div>
+            </div>
+            <div class="prod-perf-row">
+              <div class="prod-perf-label">Term Life</div>
+              <div class="prod-perf-bar-wrap">
+                <div class="prod-perf-bar-fill" style="width:28%;background:linear-gradient(90deg,#0030870,#3b5ccc)"></div>
+              </div>
+              <div class="prod-perf-val">$88K</div>
+            </div>
+            <div class="prod-perf-row">
+              <div class="prod-perf-label">Deferred Annuity</div>
+              <div class="prod-perf-bar-wrap">
+                <div class="prod-perf-bar-fill" style="width:29%;background:linear-gradient(90deg,#d97706,#f59e0b)"></div>
+              </div>
+              <div class="prod-perf-val">$89K</div>
+            </div>
+            <div class="prod-perf-row">
+              <div class="prod-perf-label">VUL</div>
+              <div class="prod-perf-bar-wrap">
+                <div class="prod-perf-bar-fill" style="width:18%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
+              </div>
+              <div class="prod-perf-val">$57K</div>
+            </div>
+            <div class="prod-perf-row">
+              <div class="prod-perf-label">Disability Ins.</div>
+              <div class="prod-perf-bar-wrap">
+                <div class="prod-perf-bar-fill" style="width:11%;background:linear-gradient(90deg,#ea580c,#fb923c)"></div>
+              </div>
+              <div class="prod-perf-val">$35K</div>
+            </div>
+            <div class="prod-perf-row">
+              <div class="prod-perf-label">Universal Life</div>
+              <div class="prod-perf-bar-wrap">
+                <div class="prod-perf-bar-fill" style="width:8%;background:linear-gradient(90deg,#0891b2,#22d3ee)"></div>
+              </div>
+              <div class="prod-perf-val">$24K</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Pipeline by Product */}
+        <div class="prod-analytics-card">
+          <div class="prod-analytics-header">
+            <div class="prod-analytics-title"><i class="fas fa-funnel-dollar"></i> Active Pipeline by Product</div>
+            <button class="prod-analytics-link" onclick="navigateTo('sales')">View Pipeline</button>
+          </div>
+          <div class="prod-pipeline-list">
+            <div class="prod-pipeline-row">
+              <div class="prod-pipeline-icon blue"><i class="fas fa-infinity"></i></div>
+              <div class="prod-pipeline-body">
+                <div class="prod-pipeline-name">Whole Life</div>
+                <div class="prod-pipeline-sub">5 deals · Avg $1.2M face amount</div>
+              </div>
+              <div class="prod-pipeline-val">$38K</div>
+            </div>
+            <div class="prod-pipeline-row">
+              <div class="prod-pipeline-icon gold"><i class="fas fa-chart-line"></i></div>
+              <div class="prod-pipeline-body">
+                <div class="prod-pipeline-name">VUL</div>
+                <div class="prod-pipeline-sub">2 deals · Robert Chen + 1 other</div>
+              </div>
+              <div class="prod-pipeline-val">$21K</div>
+            </div>
+            <div class="prod-pipeline-row">
+              <div class="prod-pipeline-icon emerald"><i class="fas fa-hourglass-end"></i></div>
+              <div class="prod-pipeline-body">
+                <div class="prod-pipeline-name">Deferred Annuity</div>
+                <div class="prod-pipeline-sub">2 deals · Patricia Nguyen + 1</div>
+              </div>
+              <div class="prod-pipeline-val">$9.6K</div>
+            </div>
+            <div class="prod-pipeline-row">
+              <div class="prod-pipeline-icon red"><i class="fas fa-heartbeat"></i></div>
+              <div class="prod-pipeline-body">
+                <div class="prod-pipeline-name">LTC Insurance</div>
+                <div class="prod-pipeline-sub">1 deal · Linda Morrison</div>
+              </div>
+              <div class="prod-pipeline-val">$4.8K</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Client-Product Fit Matrix */}
+        <div class="prod-analytics-card">
+          <div class="prod-analytics-header">
+            <div class="prod-analytics-title"><i class="fas fa-th"></i> Client–Product Fit Matrix</div>
+            <button class="prod-analytics-link" onclick="navigateTo('clients')">View Clients</button>
+          </div>
+          <div class="prod-fit-matrix">
+            <div class="pfm-header">
+              <div class="pfm-client"></div>
+              <div class="pfm-col">WL</div>
+              <div class="pfm-col">TL</div>
+              <div class="pfm-col">VUL</div>
+              <div class="pfm-col">LTC</div>
+              <div class="pfm-col">DI</div>
+              <div class="pfm-col">Ann.</div>
+            </div>
+            <div class="pfm-row">
+              <div class="pfm-client">L. Morrison</div>
+              <div class="pfm-cell has"><i class="fas fa-check"></i></div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell gap"><i class="fas fa-exclamation"></i></div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
+            </div>
+            <div class="pfm-row">
+              <div class="pfm-client">R. Chen</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+            </div>
+            <div class="pfm-row">
+              <div class="pfm-client">D. Thompson</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell gap"><i class="fas fa-exclamation"></i></div>
+              <div class="pfm-cell none">—</div>
+            </div>
+            <div class="pfm-row">
+              <div class="pfm-client">P. Nguyen</div>
+              <div class="pfm-cell has"><i class="fas fa-check"></i></div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell gap"><i class="fas fa-exclamation"></i></div>
+              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
+            </div>
+            <div class="pfm-row">
+              <div class="pfm-client">J. Whitfield</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell gap"><i class="fas fa-exclamation"></i></div>
+              <div class="pfm-cell none">—</div>
+              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
+            </div>
+          </div>
+          <div class="pfm-legend">
+            <span class="pfm-leg has"><i class="fas fa-check"></i> Has Policy</span>
+            <span class="pfm-leg match"><i class="fas fa-star"></i> AI Match</span>
+            <span class="pfm-leg gap"><i class="fas fa-exclamation"></i> Gap</span>
+          </div>
+        </div>
+
+        {/* Recent Quotes */}
+        <div class="prod-analytics-card">
+          <div class="prod-analytics-header">
+            <div class="prod-analytics-title"><i class="fas fa-receipt"></i> Recent Quotes &amp; Illustrations</div>
+            <button class="prod-analytics-link" onclick="openQuickQuoteModal()">New Quote</button>
+          </div>
+          <div class="prod-quotes-list">
+            <div class="prod-quote-row">
+              <div class="prod-quote-icon emerald"><i class="fas fa-infinity"></i></div>
+              <div class="prod-quote-body">
+                <div class="prod-quote-name">Whole Life · Maria Gonzalez</div>
+                <div class="prod-quote-sub">$300K face · Quoted Apr 10</div>
+              </div>
+              <div class="prod-quote-status in-progress">In Pipeline</div>
+            </div>
+            <div class="prod-quote-row">
+              <div class="prod-quote-icon gold"><i class="fas fa-chart-line"></i></div>
+              <div class="prod-quote-body">
+                <div class="prod-quote-name">VUL · Robert Chen</div>
+                <div class="prod-quote-sub">$750K face · Quoted Apr 8</div>
+              </div>
+              <div class="prod-quote-status uw">In UW</div>
+            </div>
+            <div class="prod-quote-row">
+              <div class="prod-quote-icon blue"><i class="fas fa-hourglass-end"></i></div>
+              <div class="prod-quote-body">
+                <div class="prod-quote-name">Deferred Annuity · P. Nguyen</div>
+                <div class="prod-quote-sub">$6K/yr · Illustrated Apr 5</div>
+              </div>
+              <div class="prod-quote-status proposal">Proposal Sent</div>
+            </div>
+            <div class="prod-quote-row">
+              <div class="prod-quote-icon red"><i class="fas fa-heartbeat"></i></div>
+              <div class="prod-quote-body">
+                <div class="prod-quote-name">LTC · Linda Morrison</div>
+                <div class="prod-quote-sub">$200/day benefit · Quoted Apr 3</div>
+              </div>
+              <div class="prod-quote-status approved">Approved</div>
+            </div>
+          </div>
+        </div>
+
+      </div>{/* end prod-analytics-grid */}
+
+      {/* Quick Quote Modal */}
+      <div class="modal-overlay" id="quick-quote-modal" style="display:none" onclick="if(event.target===this)closeQuickQuoteModal()">
+        <div class="modal-box prod-quote-modal">
+          <div class="modal-header">
+            <h3><i class="fas fa-calculator"></i> Quick Quote / Illustration</h3>
+            <button class="modal-close" onclick="closeQuickQuoteModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="qq-form-grid">
+              <div class="qq-field">
+                <label>Client</label>
+                <select id="qq-client">
+                  <option value="">Select client…</option>
+                  <option>Linda Morrison</option>
+                  <option>Robert Chen</option>
+                  <option>David Thompson</option>
+                  <option>Patricia Nguyen</option>
+                  <option>James Whitfield</option>
+                  <option>Maria Gonzalez</option>
+                </select>
+              </div>
+              <div class="qq-field">
+                <label>Product</label>
+                <select id="qq-product" onchange="updateQuoteFields()">
+                  <option value="">Select product…</option>
+                  <option value="term-life">Term Life Insurance</option>
+                  <option value="whole-life">Whole Life Insurance</option>
+                  <option value="ul">Universal Life</option>
+                  <option value="vul">Variable Universal Life</option>
+                  <option value="ltc">Long-Term Care</option>
+                  <option value="disability">Disability Insurance</option>
+                  <option value="annuity-fixed">Fixed Annuity</option>
+                  <option value="annuity-deferred">Deferred Annuity</option>
+                  <option value="mutual-funds">Mutual Funds</option>
+                  <option value="etf">ETFs</option>
+                  <option value="529">529 College Savings</option>
+                </select>
+              </div>
+              <div class="qq-field">
+                <label>Face Amount / Investment</label>
+                <input type="text" id="qq-amount" placeholder="e.g. $500,000" />
+              </div>
+              <div class="qq-field">
+                <label>Client Age</label>
+                <input type="number" id="qq-age" placeholder="e.g. 45" min="18" max="85" />
+              </div>
+              <div class="qq-field">
+                <label>Health Class</label>
+                <select id="qq-health">
+                  <option>Preferred Plus</option>
+                  <option>Preferred</option>
+                  <option>Standard Plus</option>
+                  <option>Standard</option>
+                  <option>Substandard</option>
+                </select>
+              </div>
+              <div class="qq-field">
+                <label>Gender</label>
+                <select id="qq-gender">
+                  <option>Male</option>
+                  <option>Female</option>
+                </select>
+              </div>
+            </div>
+            <div class="qq-result" id="qq-result" style="display:none">
+              <div class="qq-result-header"><i class="fas fa-check-circle"></i> Estimated Quote</div>
+              <div class="qq-result-grid" id="qq-result-grid"></div>
+              <div class="qq-result-disclaimer">* Estimates only. Actual premiums subject to underwriting approval and final application.</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeQuickQuoteModal()">Cancel</button>
+            <button class="btn btn-ai" onclick="runQuickQuote()"><i class="fas fa-calculator"></i> Generate Quote</button>
+            <button class="btn btn-primary" onclick="navigateTo('sales')"><i class="fas fa-paper-plane"></i> Open in Sales Pipeline</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Search Modal */}
+      <div class="modal-overlay" id="product-search-modal" style="display:none" onclick="if(event.target===this)closeProductSearch()">
+        <div class="modal-box prod-search-modal">
+          <div class="modal-header">
+            <h3><i class="fas fa-search"></i> Find the Right Product</h3>
+            <button class="modal-close" onclick="closeProductSearch()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="ps-filters">
+              <div class="ps-filter-group">
+                <label>Client Age Range</label>
+                <div class="ps-pills" id="ps-age">
+                  <span class="ps-pill active" onclick="togglePsPill(this,'age')">All Ages</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'age')">25–40</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'age')">40–55</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'age')">55–70</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'age')">70+</span>
+                </div>
+              </div>
+              <div class="ps-filter-group">
+                <label>Goal / Need</label>
+                <div class="ps-pills" id="ps-goal">
+                  <span class="ps-pill active" onclick="togglePsPill(this,'goal')">All Goals</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Protection</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Growth</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Income</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Legacy</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Education</span>
+                </div>
+              </div>
+              <div class="ps-filter-group">
+                <label>Risk Tolerance</label>
+                <div class="ps-pills" id="ps-risk">
+                  <span class="ps-pill active" onclick="togglePsPill(this,'risk')">Any</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'risk')">Conservative</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'risk')">Moderate</span>
+                  <span class="ps-pill" onclick="togglePsPill(this,'risk')">Aggressive</span>
+                </div>
+              </div>
+            </div>
+            <div class="ps-results" id="ps-results">
+              <div class="ps-result-item" onclick="switchProductTab('insurance');closeProductSearch()">
+                <div class="ps-result-icon blue"><i class="fas fa-shield-alt"></i></div>
+                <div class="ps-result-body"><div class="ps-result-name">Term Life Insurance</div><div class="ps-result-tags"><span>Age 25–50</span><span>Protection</span><span>Affordable</span></div></div>
+                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+              <div class="ps-result-item" onclick="switchProductTab('insurance');closeProductSearch()">
+                <div class="ps-result-icon green"><i class="fas fa-infinity"></i></div>
+                <div class="ps-result-body"><div class="ps-result-name">Whole Life Insurance</div><div class="ps-result-tags"><span>Permanent</span><span>Cash Value</span><span>Dividends</span></div></div>
+                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+              <div class="ps-result-item" onclick="switchProductTab('insurance');closeProductSearch()">
+                <div class="ps-result-icon red"><i class="fas fa-heartbeat"></i></div>
+                <div class="ps-result-body"><div class="ps-result-name">Long-Term Care Insurance</div><div class="ps-result-tags"><span>Age 50–65</span><span>Care Coverage</span><span>Urgent</span></div></div>
+                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+              <div class="ps-result-item" onclick="switchProductTab('retirement');closeProductSearch()">
+                <div class="ps-result-icon gold"><i class="fas fa-umbrella-beach"></i></div>
+                <div class="ps-result-body"><div class="ps-result-name">Deferred Income Annuity</div><div class="ps-result-tags"><span>Age 40–70</span><span>Income</span><span>Retirement</span></div></div>
+                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+              <div class="ps-result-item" onclick="switchProductTab('advisory');closeProductSearch()">
+                <div class="ps-result-icon purple"><i class="fas fa-gem"></i></div>
+                <div class="ps-result-body"><div class="ps-result-name">Wealth Management / UMA</div><div class="ps-result-tags"><span>HNW $250K+</span><span>Advisory</span><span>Legacy</span></div></div>
+                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   )
 }
