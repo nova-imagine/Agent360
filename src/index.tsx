@@ -1820,14 +1820,6 @@ function ClientsPage() {
 
           </div>{/* end oh-table */}
 
-          <div class="oh-footer">
-            <button class="oh-ai-btn" onclick="sendContextMessage('AI Outreach Optimizer — show all 10 prioritized clients with personalized outreach strategy, timing, and revenue impact for each','smart-advisor')">
-              <i class="fas fa-robot"></i> Full AI Outreach Strategy
-            </button>
-            <button class="oh-ai-btn oh-ai-btn-secondary" onclick="sendContextMessage('Generate bulk outreach campaign for all lapse-risk clients — Patricia Nguyen, Sandra Williams, Kevin Park — with urgency messaging','renewal')">
-              <i class="fas fa-broadcast-tower"></i> Bulk Lapse Risk Campaign
-            </button>
-          </div>
         </div>{/* end oh-body */}
       </div>{/* end outreach-hub */}
 
@@ -1864,7 +1856,7 @@ function ClientsPage() {
           <button class="btn btn-ai" onclick="aiClientInsights()">
             <i class="fas fa-robot"></i> AI Insights
           </button>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" onclick="openAddClientModal()">
             <i class="fas fa-plus"></i> Add Client
           </button>
         </div>
@@ -2083,6 +2075,222 @@ function ClientsPage() {
             </div>
           )
         })}
+      </div>
+
+      {/* ── Add Client Modal ── */}
+      <div class="acm-overlay" id="acm-overlay" onclick="closeAddClientModal(event)" style="display:none">
+        <div class="acm-modal" onclick="event.stopPropagation()">
+          <div class="acm-header">
+            <div class="acm-header-left">
+              <div class="acm-icon"><i class="fas fa-user-plus"></i></div>
+              <div>
+                <div class="acm-title">Add New Client</div>
+                <div class="acm-sub">New York Life · Agent 360 · Pre-filled with smart defaults</div>
+              </div>
+            </div>
+            <button class="acm-close" onclick="closeAddClientModal()"><i class="fas fa-times"></i></button>
+          </div>
+
+          <div class="acm-ai-banner">
+            <i class="fas fa-robot"></i>
+            <span><strong>AI Pre-fill Active</strong> — Smart defaults populated based on your book profile. Review and adjust as needed.</span>
+          </div>
+
+          <div class="acm-body">
+
+            {/* Left column */}
+            <div class="acm-col">
+              <div class="acm-section-title"><i class="fas fa-id-card"></i> Personal Information</div>
+
+              <div class="acm-field-row two-col">
+                <div class="acm-field">
+                  <label class="acm-label">First Name <span class="acm-req">*</span></label>
+                  <input class="acm-input" id="acm-fname" type="text" placeholder="First name" />
+                </div>
+                <div class="acm-field">
+                  <label class="acm-label">Last Name <span class="acm-req">*</span></label>
+                  <input class="acm-input" id="acm-lname" type="text" placeholder="Last name" />
+                </div>
+              </div>
+
+              <div class="acm-field-row two-col">
+                <div class="acm-field">
+                  <label class="acm-label">Age</label>
+                  <input class="acm-input" id="acm-age" type="number" placeholder="Age" />
+                </div>
+                <div class="acm-field">
+                  <label class="acm-label">Date of Birth</label>
+                  <input class="acm-input" id="acm-dob" type="text" placeholder="MM/DD/YYYY" />
+                </div>
+              </div>
+
+              <div class="acm-field-row">
+                <div class="acm-field">
+                  <label class="acm-label">Email Address <span class="acm-req">*</span></label>
+                  <input class="acm-input" id="acm-email" type="email" placeholder="email@example.com" />
+                </div>
+              </div>
+
+              <div class="acm-field-row two-col">
+                <div class="acm-field">
+                  <label class="acm-label">Phone</label>
+                  <input class="acm-input" id="acm-phone" type="text" placeholder="(212) 555-0000" />
+                </div>
+                <div class="acm-field">
+                  <label class="acm-label">City</label>
+                  <input class="acm-input" id="acm-city" type="text" placeholder="City" />
+                </div>
+              </div>
+
+              <div class="acm-field-row two-col">
+                <div class="acm-field">
+                  <label class="acm-label">Occupation</label>
+                  <input class="acm-input" id="acm-occupation" type="text" placeholder="e.g. Business Owner" />
+                </div>
+                <div class="acm-field">
+                  <label class="acm-label">Annual Income</label>
+                  <select class="acm-select" id="acm-income">
+                    <option value="under-50k">Under $50K</option>
+                    <option value="50k-100k">$50K – $100K</option>
+                    <option value="100k-200k" selected>$100K – $200K</option>
+                    <option value="200k-500k">$200K – $500K</option>
+                    <option value="500k-plus">$500K+</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="acm-section-title" style="margin-top:18px"><i class="fas fa-tag"></i> Client Classification</div>
+
+              <div class="acm-field-row two-col">
+                <div class="acm-field">
+                  <label class="acm-label">Segment</label>
+                  <select class="acm-select" id="acm-segment">
+                    <option value="Emerging">Emerging</option>
+                    <option value="Mid Market" selected>Mid Market</option>
+                    <option value="High Value">High Value</option>
+                    <option value="Premium">Premium</option>
+                  </select>
+                </div>
+                <div class="acm-field">
+                  <label class="acm-label">Status</label>
+                  <select class="acm-select" id="acm-status">
+                    <option value="Active" selected>Active</option>
+                    <option value="Prospect">Prospect</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Review">Review</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="acm-field-row">
+                <div class="acm-field">
+                  <label class="acm-label">Lead Source</label>
+                  <select class="acm-select" id="acm-source">
+                    <option value="referral" selected>Referral</option>
+                    <option value="networking">Networking Event</option>
+                    <option value="digital">Digital / Online</option>
+                    <option value="cold-call">Cold Outreach</option>
+                    <option value="existing-client">Existing Client</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Right column */}
+            <div class="acm-col">
+              <div class="acm-section-title"><i class="fas fa-layer-group"></i> Initial Product Interest</div>
+
+              <div class="acm-product-checks">
+                <label class="acm-check-row">
+                  <input type="checkbox" id="acm-chk-ins" checked /> 
+                  <span class="acm-check-icon ins-bg"><i class="fas fa-shield-alt"></i></span>
+                  <span class="acm-check-label">Life Insurance</span>
+                  <span class="acm-check-sub">Term · Whole Life · UL</span>
+                </label>
+                <label class="acm-check-row">
+                  <input type="checkbox" id="acm-chk-inv" /> 
+                  <span class="acm-check-icon inv-bg"><i class="fas fa-chart-line"></i></span>
+                  <span class="acm-check-label">Investments</span>
+                  <span class="acm-check-sub">Annuities · Mutual Funds · ETFs</span>
+                </label>
+                <label class="acm-check-row">
+                  <input type="checkbox" id="acm-chk-ret" /> 
+                  <span class="acm-check-icon ret-bg"><i class="fas fa-umbrella-beach"></i></span>
+                  <span class="acm-check-label">Retirement Planning</span>
+                  <span class="acm-check-sub">IRA · 401(k) Rollover · Annuities</span>
+                </label>
+                <label class="acm-check-row">
+                  <input type="checkbox" id="acm-chk-adv" /> 
+                  <span class="acm-check-icon adv-bg"><i class="fas fa-handshake"></i></span>
+                  <span class="acm-check-label">Advisory Services</span>
+                  <span class="acm-check-sub">Estate · Wealth · Business Planning</span>
+                </label>
+              </div>
+
+              <div class="acm-section-title" style="margin-top:18px"><i class="fas fa-robot"></i> AI Profile Signals</div>
+
+              <div class="acm-ai-signals">
+                <div class="acm-signal">
+                  <i class="fas fa-lightbulb" style="color:#d97706"></i>
+                  <span>Life stage assessment will be auto-generated after save</span>
+                </div>
+                <div class="acm-signal">
+                  <i class="fas fa-crosshairs" style="color:#059669"></i>
+                  <span>Cross-sell opportunities identified based on age &amp; income</span>
+                </div>
+                <div class="acm-signal">
+                  <i class="fas fa-chart-bar" style="color:#7c3aed"></i>
+                  <span>AI score calculated from profile completeness &amp; risk factors</span>
+                </div>
+              </div>
+
+              <div class="acm-section-title" style="margin-top:18px"><i class="fas fa-calendar-check"></i> First Appointment</div>
+
+              <div class="acm-field-row two-col">
+                <div class="acm-field">
+                  <label class="acm-label">Preferred Date</label>
+                  <input class="acm-input" id="acm-appt-date" type="text" placeholder="MM/DD/YYYY" />
+                </div>
+                <div class="acm-field">
+                  <label class="acm-label">Preferred Time</label>
+                  <select class="acm-select" id="acm-appt-time">
+                    <option value="9am">9:00 AM</option>
+                    <option value="10am">10:00 AM</option>
+                    <option value="11am" selected>11:00 AM</option>
+                    <option value="1pm">1:00 PM</option>
+                    <option value="2pm">2:00 PM</option>
+                    <option value="3pm">3:00 PM</option>
+                    <option value="4pm">4:00 PM</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="acm-field-row">
+                <div class="acm-field">
+                  <label class="acm-label">Meeting Type</label>
+                  <select class="acm-select" id="acm-appt-type">
+                    <option value="phone" selected>Phone Call</option>
+                    <option value="video">Video Call</option>
+                    <option value="in-person">In-Person</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="acm-field-row">
+                <div class="acm-field">
+                  <label class="acm-label">Notes</label>
+                  <textarea class="acm-textarea" id="acm-notes" rows={3} placeholder="Any additional context, referral details, or special needs…"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="acm-footer">
+            <button class="btn btn-outline" onclick="closeAddClientModal()">Cancel</button>
+            <button class="btn btn-ai" onclick="aiPreFillClient()"><i class="fas fa-robot"></i> AI Auto-Fill</button>
+            <button class="btn btn-primary" onclick="saveNewClient()"><i class="fas fa-user-plus"></i> Add Client</button>
+          </div>
+        </div>
       </div>
 
       {/* ── Outreach Composer Modal ── */}

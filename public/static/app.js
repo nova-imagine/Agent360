@@ -325,17 +325,17 @@ function filterClients(query) {
   document.querySelectorAll('.client-card').forEach(card => {
     const name = card.querySelector('h4')?.textContent.toLowerCase() || '';
     const city = card.querySelector('p')?.textContent.toLowerCase() || '';
-    card.style.display = (!q || name.includes(q) || city.includes(q)) ? 'block' : 'none';
+    card.style.display = (!q || name.includes(q) || city.includes(q)) ? '' : 'none';
   });
 }
 
 function filterBySegment(segment) {
   document.querySelectorAll('.client-card').forEach(card => {
     if (!segment) {
-      card.style.display = 'block';
+      card.style.display = '';
     } else {
       const tag = card.querySelector('.segment-tag')?.textContent || '';
-      card.style.display = tag.toLowerCase() === segment.toLowerCase() ? 'block' : 'none';
+      card.style.display = tag.toLowerCase() === segment.toLowerCase() ? '' : 'none';
     }
   });
 }
@@ -357,19 +357,19 @@ function filterByDomain(domain) {
     const id = idx + 1; // cards are rendered in order 1-8
     const d = domainCoverage[id] || { ins: true, inv: false, ret: false, adv: false, gaps: true };
     if (!domain) {
-      card.style.display = 'block';
+      card.style.display = '';
     } else if (domain === 'insurance') {
-      card.style.display = d.ins ? 'block' : 'none';
+      card.style.display = d.ins ? '' : 'none';
     } else if (domain === 'investments') {
-      card.style.display = d.inv ? 'block' : 'none';
+      card.style.display = d.inv ? '' : 'none';
     } else if (domain === 'retirement') {
-      card.style.display = d.ret ? 'block' : 'none';
+      card.style.display = d.ret ? '' : 'none';
     } else if (domain === 'advisory') {
-      card.style.display = d.adv ? 'block' : 'none';
+      card.style.display = d.adv ? '' : 'none';
     } else if (domain === 'gaps') {
-      card.style.display = d.gaps ? 'block' : 'none';
+      card.style.display = d.gaps ? '' : 'none';
     } else {
-      card.style.display = 'block';
+      card.style.display = '';
     }
   });
 }
@@ -385,21 +385,21 @@ function filterClientsByProductTab(domain, tabEl) {
     const id = idx + 1;
     const d = domainCoverage[id] || { ins: true, inv: false, ret: false, adv: false, gaps: true };
     if (domain === 'all' || !domain) {
-      card.style.display = 'block';
+      card.style.display = '';
     } else if (domain === 'insurance') {
-      card.style.display = d.ins ? 'block' : 'none';
+      card.style.display = d.ins ? '' : 'none';
     } else if (domain === 'investments') {
-      card.style.display = d.inv ? 'block' : 'none';
+      card.style.display = d.inv ? '' : 'none';
     } else if (domain === 'retirement') {
-      card.style.display = d.ret ? 'block' : 'none';
+      card.style.display = d.ret ? '' : 'none';
     } else if (domain === 'advisory') {
-      card.style.display = d.adv ? 'block' : 'none';
+      card.style.display = d.adv ? '' : 'none';
     } else if (domain === 'gaps') {
-      card.style.display = d.gaps ? 'block' : 'none';
+      card.style.display = d.gaps ? '' : 'none';
     } else if (domain === 'lapse') {
-      card.style.display = card.getAttribute('data-lapse') ? 'block' : 'none';
+      card.style.display = card.getAttribute('data-lapse') ? '' : 'none';
     } else {
-      card.style.display = 'block';
+      card.style.display = '';
     }
   });
 
@@ -10803,14 +10803,14 @@ function filterByStatus(status) {
   const segment = (document.getElementById('domain-filter') ? '' : ''); // placeholder; real logic below
   document.querySelectorAll('.client-card').forEach(card => {
     if (!status) {
-      card.style.display = 'block';
+      card.style.display = '';
     } else {
       const badge = card.querySelector('.status-pill, .client-status-badge, [class*="status"]')?.textContent?.trim() || '';
       // Also check data-status attribute if set
       const dataStatus = card.getAttribute('data-status') || '';
       const match = badge.toLowerCase() === status.toLowerCase() ||
                     dataStatus.toLowerCase() === status.toLowerCase();
-      card.style.display = match ? 'block' : 'none';
+      card.style.display = match ? '' : 'none';
     }
   });
   _applyClientCombinedFilters();
@@ -10839,7 +10839,7 @@ function _applyClientCombinedFilters() {
                          (domain === 'gaps' && d.gaps);
     const matchStatus  = !status  || statusTag === status;
 
-    card.style.display = (matchQ && matchSeg && matchDomain && matchStatus) ? 'block' : 'none';
+    card.style.display = (matchQ && matchSeg && matchDomain && matchStatus) ? '' : 'none';
   });
 }
 
@@ -14463,3 +14463,241 @@ function openGoalModal(goalId) {
 }
 
 console.log('Dashboard interactivity loaded — openAIBriefAction, openOpportunityModal, openCommModal, openQuickWinModal, openCommissionModal, openGoalModal');
+
+// ============================================================
+// ADD CLIENT MODAL — openAddClientModal, closeAddClientModal,
+//                   aiPreFillClient, saveNewClient
+// ============================================================
+
+// Pool of realistic default values for pre-filling
+const acmDefaults = [
+  { fname:'Michael', lname:'Torres',   age:41, dob:'03/14/1985', email:'michael.t@email.com',   phone:'(212) 555-0210', city:'Manhattan',    occupation:'Senior Manager',    income:'100k-200k', segment:'High Value', source:'referral',    notes:'Referred by James Whitfield. Interested in life insurance review and retirement planning.' },
+  { fname:'Jennifer', lname:'Walsh',   age:36, dob:'07/22/1989', email:'jennifer.w@email.com',  phone:'(646) 555-0311', city:'Brooklyn',     occupation:'Healthcare Director', income:'100k-200k', segment:'Mid Market', source:'networking',  notes:'Met at NYL financial seminar. Young family — looking for term life and college savings plan.' },
+  { fname:'Thomas',  lname:'Okafor',  age:55, dob:'01/09/1971', email:'thomas.o@email.com',    phone:'(718) 555-0412', city:'Queens',       occupation:'Business Owner',    income:'200k-500k', segment:'Premium',    source:'referral',    notes:'Business succession planning and estate review needed. Key-person insurance candidate.' },
+  { fname:'Sarah',   lname:'Kim',     age:29, dob:'11/05/1996', email:'sarah.k@email.com',     phone:'(917) 555-0513', city:'Hoboken',      occupation:'Software Engineer', income:'100k-200k', segment:'Emerging',   source:'digital',     notes:'First-time insurance buyer. Tech professional with strong savings potential.' },
+  { fname:'Carlos',  lname:'Rivera',  age:48, dob:'05/30/1977', email:'carlos.r@email.com',    phone:'(212) 555-0614', city:'New York',     occupation:'Executive VP',      income:'500k-plus', segment:'Premium',    source:'referral',    notes:'Referred by Linda Morrison. High net worth — needs UMA, estate planning, and LTC review.' },
+];
+
+let acmCurrentDefault = 0;
+
+function openAddClientModal() {
+  const overlay = document.getElementById('acm-overlay');
+  if (!overlay) return;
+
+  // Rotate through defaults so each open shows a different pre-fill
+  const d = acmDefaults[acmCurrentDefault % acmDefaults.length];
+  acmCurrentDefault++;
+
+  // Pre-fill all fields with the selected default
+  _acmFill(d);
+
+  // Pre-fill appointment date = next business day
+  const apptDate = _nextBusinessDay();
+  const apptEl = document.getElementById('acm-appt-date');
+  if (apptEl) apptEl.value = apptDate;
+
+  overlay.style.display = 'flex';
+  setTimeout(() => { const f = document.getElementById('acm-fname'); if(f) f.focus(); }, 100);
+}
+
+function _nextBusinessDay() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  return (d.getMonth()+1).toString().padStart(2,'0') + '/' + d.getDate().toString().padStart(2,'0') + '/' + d.getFullYear();
+}
+
+function _acmFill(d) {
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  set('acm-fname',      d.fname);
+  set('acm-lname',      d.lname);
+  set('acm-age',        d.age);
+  set('acm-dob',        d.dob);
+  set('acm-email',      d.email);
+  set('acm-phone',      d.phone);
+  set('acm-city',       d.city);
+  set('acm-occupation', d.occupation);
+  set('acm-income',     d.income);
+  set('acm-segment',    d.segment);
+  set('acm-source',     d.source);
+  set('acm-notes',      d.notes);
+
+  // Smart checkbox pre-fills based on segment & age
+  const insEl = document.getElementById('acm-chk-ins');
+  const invEl = document.getElementById('acm-chk-inv');
+  const retEl = document.getElementById('acm-chk-ret');
+  const advEl = document.getElementById('acm-chk-adv');
+  if (insEl) insEl.checked = true;
+  if (invEl) invEl.checked = d.income === '200k-500k' || d.income === '500k-plus' || d.age >= 40;
+  if (retEl) retEl.checked = d.age >= 38;
+  if (advEl) advEl.checked = d.segment === 'Premium' || d.income === '500k-plus';
+}
+
+function closeAddClientModal(e) {
+  if (e && e.target !== document.getElementById('acm-overlay')) return;
+  const overlay = document.getElementById('acm-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function aiPreFillClient() {
+  // Cycle to next default profile and re-fill
+  const d = acmDefaults[acmCurrentDefault % acmDefaults.length];
+  acmCurrentDefault++;
+  _acmFill(d);
+
+  // Also set appointment
+  const apptEl = document.getElementById('acm-appt-date');
+  if (apptEl) apptEl.value = _nextBusinessDay();
+
+  // Show brief feedback
+  const btn = document.querySelector('.acm-footer .btn-ai');
+  if (btn) {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Profile Filled!';
+    btn.style.background = '#059669';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 1800);
+  }
+}
+
+function saveNewClient() {
+  const fname = (document.getElementById('acm-fname')?.value || '').trim();
+  const lname = (document.getElementById('acm-lname')?.value || '').trim();
+  const email = (document.getElementById('acm-email')?.value || '').trim();
+
+  if (!fname || !lname) {
+    // Shake the name fields
+    ['acm-fname','acm-lname'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.value.trim()) {
+        el.style.borderColor = '#dc2626';
+        el.style.boxShadow = '0 0 0 3px rgba(220,38,38,0.12)';
+        setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 2000);
+      }
+    });
+    return;
+  }
+
+  const age      = parseInt(document.getElementById('acm-age')?.value) || 35;
+  const city     = document.getElementById('acm-city')?.value.trim() || 'New York';
+  const phone    = document.getElementById('acm-phone')?.value.trim() || '(212) 555-0000';
+  const segment  = document.getElementById('acm-segment')?.value || 'Mid Market';
+  const status   = document.getElementById('acm-status')?.value || 'Active';
+  const notes    = document.getElementById('acm-notes')?.value.trim() || '';
+
+  // Determine AI score based on segment & age
+  const scoreMap = { 'Premium': 88, 'High Value': 79, 'Mid Market': 68, 'Emerging': 55 };
+  const baseScore = scoreMap[segment] || 65;
+  const aiScore = Math.min(99, baseScore + Math.floor(Math.random() * 8));
+
+  // Build initials and new client id
+  const initials = (fname[0] + lname[0]).toUpperCase();
+  const newId = 9 + acmCurrentDefault; // beyond existing 8
+
+  // Build the new card HTML and prepend to client grid
+  const grid = document.getElementById('clients-grid');
+  if (grid) {
+    const segClass = segment.toLowerCase().replace(/ /g, '-');
+    const statusDot = status.toLowerCase();
+    const today = new Date().toISOString().split('T')[0];
+
+    const card = document.createElement('div');
+    card.className = `client-card segment-${segClass} acm-new-card`;
+    card.setAttribute('data-lapse', '');
+    card.style.cssText = 'border: 2px solid #003087; animation: acmCardIn 0.4s ease;';
+    card.innerHTML = `
+      <style>@keyframes acmCardIn { from { opacity:0; transform:translateY(-12px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }</style>
+      <div class="client-card-header" onclick="openAddClientNewProfileModal('${fname} ${lname}', ${newId})" style="cursor:pointer" title="Open Client Profile">
+        <div class="client-avatar-lg" style="background:linear-gradient(135deg,#003087,#0056d6)">${initials}</div>
+        <div class="client-card-info">
+          <h4>${fname} ${lname}</h4>
+          <p>${city} · Age ${age}</p>
+          <span class="segment-tag seg-${segClass}">${segment}</span>
+        </div>
+        <div class="client-score-circle"><span>${aiScore}</span></div>
+        <div style="position:absolute;top:8px;right:8px;background:#003087;color:white;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:0.4px">NEW</div>
+      </div>
+      <div class="client-domain-row">
+        <div class="cdomain-pill ${document.getElementById('acm-chk-ins')?.checked ? 'active-ins' : 'inactive'}" title="Insurance"><i class="fas fa-shield-alt"></i> Ins</div>
+        <div class="cdomain-pill ${document.getElementById('acm-chk-inv')?.checked ? 'active-inv' : 'inactive'}" title="Investments"><i class="fas fa-chart-line"></i> Inv</div>
+        <div class="cdomain-pill ${document.getElementById('acm-chk-ret')?.checked ? 'active-ret' : 'inactive'}" title="Retirement"><i class="fas fa-umbrella-beach"></i> Ret</div>
+        <div class="cdomain-pill ${document.getElementById('acm-chk-adv')?.checked ? 'active-adv' : 'inactive'}" title="Advisory"><i class="fas fa-handshake"></i> Adv</div>
+      </div>
+      <div class="client-card-stats">
+        <div class="cs-stat"><span class="cs-val">0</span><span class="cs-lbl">Products</span></div>
+        <div class="cs-stat"><span class="cs-val">—</span><span class="cs-lbl">Ins Premium</span></div>
+        <div class="cs-stat"><span class="status-dot ${statusDot}"></span><span class="cs-lbl">${status}</span></div>
+      </div>
+      <div class="client-card-footer">
+        <button class="cc-profile-btn" onclick="event.stopPropagation();openAddClientNewProfileModal('${fname} ${lname}', ${newId})">
+          <i class="fas fa-id-card"></i> View Profile
+        </button>
+        <button class="btn-icon" title="Call" onclick="event.stopPropagation()"><i class="fas fa-phone"></i></button>
+        <button class="btn-icon" title="Email" onclick="event.stopPropagation()"><i class="fas fa-envelope"></i></button>
+      </div>`;
+
+    // Insert as first card
+    grid.insertBefore(card, grid.firstChild);
+  }
+
+  // Close modal
+  const overlay = document.getElementById('acm-overlay');
+  if (overlay) overlay.style.display = 'none';
+
+  // Show success toast
+  const toast = document.createElement('div');
+  toast.className = 'acm-toast';
+  toast.innerHTML = `<i class="fas fa-check-circle"></i> ${fname} ${lname} added to your book · AI profile being built…`;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = '0.4s'; }, 3000);
+  setTimeout(() => toast.remove(), 3500);
+
+  // Also flash the "AI briefing" strip with a notification
+  const strip = document.querySelector('.ai-briefing-strip');
+  if (strip && strip.style.display !== 'none') {
+    const items = strip.querySelector('.aib-items');
+    if (items) {
+      const newItem = document.createElement('div');
+      newItem.className = 'aib-item insight';
+      newItem.style.cssText = 'animation: acmCardIn 0.4s ease;';
+      newItem.innerHTML = `<i class="fas fa-user-plus"></i><span><strong>${fname} ${lname}</strong> added — AI building initial profile and cross-sell analysis.</span><span class="aib-action-chip ins"><i class="fas fa-arrow-right"></i> View</span>`;
+      items.appendChild(newItem);
+    }
+  }
+}
+
+// Placeholder for newly added client profile (not in the main 8)
+function openAddClientNewProfileModal(name, id) {
+  openDashboardModal({
+    icon: 'fas fa-user',
+    iconBg: 'linear-gradient(135deg,#003087,#0056d6)',
+    title: name + ' — New Client Profile',
+    sub: 'Profile being built · AI analysis in progress',
+    body: `
+      <div class="dgm-alert-banner blue"><i class="fas fa-robot"></i> AI is building a full profile for ${name} — initial insights available below</div>
+      <div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val blue">New</div><div class="dgm-stat-lbl">Status</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val green">Active</div><div class="dgm-stat-lbl">Client</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">0</div><div class="dgm-stat-lbl">Policies</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val purple">Pending</div><div class="dgm-stat-lbl">AI Score</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Next Steps</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item urgent"><i class="fas fa-calendar"></i><div><strong>Schedule first appointment</strong> — confirm date and send calendar invite</div></div>
+        <div class="dgm-action-item"><i class="fas fa-file-alt"></i><div><strong>Run needs analysis</strong> — life stage, income, dependents, existing coverage</div></div>
+        <div class="dgm-action-item"><i class="fas fa-envelope"></i><div><strong>Send welcome email</strong> — AI-drafted introduction and agenda available</div></div>
+        <div class="dgm-action-item"><i class="fas fa-shield-alt"></i><div><strong>Quote term life insurance</strong> — most likely first product based on profile</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-info-circle"></i> Profile Setup Checklist</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Contact Details</span><span style="color:#059669">✓ Complete</span></div>
+        <div class="dgm-detail-row"><span>Needs Assessment</span><span style="color:#d97706">Pending — first meeting</span></div>
+        <div class="dgm-detail-row"><span>Risk Profile</span><span style="color:#d97706">Pending — questionnaire</span></div>
+        <div class="dgm-detail-row"><span>First Policy</span><span style="color:#94a3b8">Not yet — quote in progress</span></div>
+      </div>`,
+    footer: `<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('calendar')"><i class="fas fa-calendar"></i> Schedule Meeting</button>
+             <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Build a complete onboarding plan for new client ${name} — needs analysis, product recommendations, and outreach timeline','advisor')"><i class="fas fa-robot"></i> AI Onboarding Plan</button>
+             <button class="btn btn-outline" onclick="closeDashboardModal()"><i class="fas fa-times"></i> Close</button>`
+  });
+}
+
+console.log('Add Client modal loaded — openAddClientModal, closeAddClientModal, aiPreFillClient, saveNewClient');
