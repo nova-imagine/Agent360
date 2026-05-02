@@ -13550,3 +13550,916 @@ function helpOpenTicket() {
 }
 
 console.log('Settings & Help page functions loaded — switchSettingsTab, settingsSaveAll, helpSearch, helpOpenArticle, helpToggleFaq, helpOpenTicket');
+
+// ============================================================
+// DASHBOARD INTERACTIVITY — All new actionable functions
+// ============================================================
+
+// ── Generic Dashboard Modal helpers ──────────────────────────
+function closeDashboardModal() {
+  const el = document.getElementById('dashboard-generic-modal-overlay');
+  if (el) el.style.display = 'none';
+}
+function openDashboardModal({ icon, iconBg, title, sub, body, footer }) {
+  const el = document.getElementById('dashboard-generic-modal-overlay');
+  if (!el) return;
+  document.getElementById('dgm-icon').innerHTML = `<i class="${icon}"></i>`;
+  document.getElementById('dgm-icon').style.background = iconBg || 'linear-gradient(135deg,#3b82f6,#1d4ed8)';
+  document.getElementById('dgm-title').textContent = title;
+  document.getElementById('dgm-sub').textContent = sub || '';
+  document.getElementById('dgm-body').innerHTML = body;
+  document.getElementById('dgm-footer').innerHTML = footer || '';
+  el.style.display = 'flex';
+}
+
+// ── 2. AI Daily Brief actions ─────────────────────────────────
+function openAIBriefAction(id) {
+  const actions = {
+    'lapse-patricia': {
+      icon: 'fas fa-exclamation-circle', iconBg: 'linear-gradient(135deg,#dc2626,#b91c1c)',
+      title: 'Lapse Risk Alert — Patricia Nguyen',
+      sub: 'AI detected critical funding gap · Action required today',
+      body: `
+        <div class="dgm-alert-banner red"><i class="fas fa-exclamation-triangle"></i> UL policy under-funded — lapse risk in approximately 68 days</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val red">87/100</div><div class="dgm-stat-lbl">Risk Score</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$5,800/yr</div><div class="dgm-stat-lbl">Premium at Risk</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val orange">~68 days</div><div class="dgm-stat-lbl">Until Lapse</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">Jun 20</div><div class="dgm-stat-lbl">Estimated Date</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Actions</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item urgent"><i class="fas fa-phone"></i><div><strong>Call Patricia today</strong> — discuss UL funding options and premium adjustment</div></div>
+          <div class="dgm-action-item"><i class="fas fa-envelope"></i><div><strong>Send retention email</strong> — AI-drafted message ready to send</div></div>
+          <div class="dgm-action-item"><i class="fas fa-file-alt"></i><div><strong>Prepare policy illustration</strong> — reduced paid-up / extended term options</div></div>
+          <div class="dgm-action-item"><i class="fas fa-calendar"></i><div><strong>Schedule in-person review</strong> — comprehensive coverage assessment</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-info-circle"></i> Policy Details</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Policy</span><span>P-100301 · Universal Life</span></div>
+          <div class="dgm-detail-row"><span>Face Value</span><span>$400,000</span></div>
+          <div class="dgm-detail-row"><span>Current Premium</span><span>$5,800/yr</span></div>
+          <div class="dgm-detail-row"><span>Trigger</span><span>Cash value depletion risk</span></div>
+          <div class="dgm-detail-row"><span>Last Contact</span><span>Apr 2, 2026 (8 days ago)</span></div>
+        </div>`,
+      footer: `<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(2)"><i class="fas fa-user"></i> Open Patricia's Profile</button>
+               <button class="btn btn-ai" onclick="closeDashboardModal();openRetentionModal('ret-patricia')"><i class="fas fa-bolt"></i> Retention Action Plan</button>
+               <button class="btn btn-outline" onclick="closeDashboardModal();sendContextMessage('Draft retention email for Patricia Nguyen — UL policy funding gap with urgency','renewal')"><i class="fas fa-envelope"></i> Draft Email</button>`
+    },
+    'fed-rate': {
+      icon: 'fas fa-percentage', iconBg: 'linear-gradient(135deg,#059669,#047857)',
+      title: 'Fed Rate +0.25% — Annuity Opportunity',
+      sub: '38 clients affected · Act before pricing window closes',
+      body: `
+        <div class="dgm-alert-banner green"><i class="fas fa-bolt"></i> Annuity pricing now favorable — Fed rate hike creates limited-time window</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val green">+0.25%</div><div class="dgm-stat-lbl">Rate Change</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">38</div><div class="dgm-stat-lbl">Clients Affected</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$4.2M</div><div class="dgm-stat-lbl">AUM Opportunity</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val orange">~2 weeks</div><div class="dgm-stat-lbl">Window</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-users"></i> Top Clients to Contact</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-user"></i><div><strong>James Whitfield</strong> — Deferred annuity candidate · $12K/yr opportunity · Age 52</div></div>
+          <div class="dgm-action-item"><i class="fas fa-user"></i><div><strong>Patricia Nguyen</strong> — Deferred annuity · $3K/yr · Lock in rates now</div></div>
+          <div class="dgm-action-item"><i class="fas fa-user"></i><div><strong>Maria Gonzalez</strong> — Income annuity illustration requested · $95K AUM</div></div>
+          <div class="dgm-action-item"><i class="fas fa-users"></i><div><strong>35 additional clients</strong> — AI identified based on age, AUM and risk profile</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-chart-line"></i> Rate Impact Summary</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>New Annuity Rate</span><span>4.85% (was 4.60%)</span></div>
+          <div class="dgm-detail-row"><span>Avg Payout Increase</span><span>+$120/mo per $100K</span></div>
+          <div class="dgm-detail-row"><span>Total Pipeline</span><span>$430K annuity potential</span></div>
+          <div class="dgm-detail-row"><span>Est. Commission</span><span>$19,350</span></div>
+        </div>`,
+      footer: `<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('Show all 38 clients affected by Fed rate change — ranked by annuity opportunity and urgency','advisor')"><i class="fas fa-robot"></i> AI Full Analysis</button>
+               <button class="btn btn-outline" onclick="closeDashboardModal();navigateTo('products')"><i class="fas fa-chart-line"></i> View Products</button>`
+    },
+    'annuity-james': {
+      icon: 'fas fa-lightbulb', iconBg: 'linear-gradient(135deg,#7c3aed,#5b21b6)',
+      title: 'Retirement Planning — James Whitfield',
+      sub: 'Income annuity opportunity · High close probability',
+      body: `
+        <div class="dgm-alert-banner purple"><i class="fas fa-lightbulb"></i> Retirement planning window: income annuity conversation aligns with life-stage</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val">52</div><div class="dgm-stat-lbl">Age</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">$12K/yr</div><div class="dgm-stat-lbl">Opportunity</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">~13 yrs</div><div class="dgm-stat-lbl">To Retirement</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">92/100</div><div class="dgm-stat-lbl">Client Score</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Insights</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-umbrella-beach"></i><div><strong>Deferred annuity illustration ready</strong> — $2,800/mo income at age 65</div></div>
+          <div class="dgm-action-item"><i class="fas fa-landmark"></i><div><strong>Estate planning in progress</strong> — trust review + will update recommended</div></div>
+          <div class="dgm-action-item"><i class="fas fa-chart-line"></i><div><strong>No investment product yet</strong> — prime candidate for managed portfolio</div></div>
+          <div class="dgm-action-item"><i class="fas fa-calendar"></i><div><strong>Meeting scheduled Apr 18</strong> — deferred annuity illustration session</div></div>
+        </div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Current Policies</span><span>WL + Term + LTC · $12.4K/yr</span></div>
+          <div class="dgm-detail-row"><span>Total Value</span><span>$162K</span></div>
+          <div class="dgm-detail-row"><span>Next Best Action</span><span>Present deferred annuity illustration</span></div>
+          <div class="dgm-detail-row"><span>Revenue Potential</span><span>$31.2K across 3 product gaps</span></div>
+        </div>`,
+      footer: `<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(1)"><i class="fas fa-user"></i> Open James's Profile</button>
+               <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Generate deferred annuity illustration for James Whitfield age 52 — retirement income at 65','advisor')"><i class="fas fa-robot"></i> Generate Illustration</button>
+               <button class="btn btn-outline" onclick="closeDashboardModal();openMeetingBrief('MTG-001')"><i class="fas fa-calendar"></i> View Meeting Brief</button>`
+    }
+  };
+  const d = actions[id];
+  if (!d) return;
+  openDashboardModal(d);
+}
+
+// ── 4. Opportunity Radar actions ──────────────────────────────
+function openOpportunityModal(id) {
+  const opps = {
+    'annuity-patricia': {
+      icon:'fas fa-lock', iconBg:'linear-gradient(135deg,#059669,#047857)',
+      title:'Annuity Conversion — Patricia Nguyen', sub:'Deferred annuity · $3K/yr opportunity',
+      body:`<div class="dgm-alert-banner green"><i class="fas fa-bolt"></i> Fed rate hike makes this a time-sensitive opportunity — lock in now</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val green">$3K/yr</div><div class="dgm-stat-lbl">New Premium</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">38</div><div class="dgm-stat-lbl">Client Age</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">87%</div><div class="dgm-stat-lbl">Close Prob.</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val orange">Act Soon</div><div class="dgm-stat-lbl">Urgency</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-info-circle"></i> Opportunity Details</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Product</span><span>Deferred Fixed Annuity</span></div>
+          <div class="dgm-detail-row"><span>Proposed Premium</span><span>$3,000/yr ($250/mo)</span></div>
+          <div class="dgm-detail-row"><span>Trigger</span><span>Fed rate +0.25% — improved pricing</span></div>
+          <div class="dgm-detail-row"><span>Client Profile</span><span>Age 38 · Mid Market · UL existing</span></div>
+          <div class="dgm-detail-row"><span>AI Confidence</span><span>High — rate window + age fit</span></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(2)"><i class="fas fa-user"></i> Open Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Generate deferred annuity quote for Patricia Nguyen — current rate environment','advisor')"><i class="fas fa-robot"></i> Generate Quote</button>`
+    },
+    'annuity-james': {
+      icon:'fas fa-umbrella-beach', iconBg:'linear-gradient(135deg,#d97706,#b45309)',
+      title:'Income Annuity — James Whitfield', sub:'Retirement planning · $12K/yr opportunity',
+      body:`<div class="dgm-alert-banner gold"><i class="fas fa-umbrella-beach"></i> Prime retirement planning window — age 52, 13 years to target retirement</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val gold">$12K/yr</div><div class="dgm-stat-lbl">Opportunity</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">52</div><div class="dgm-stat-lbl">Client Age</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">~13 yrs</div><div class="dgm-stat-lbl">To Retirement</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">High</div><div class="dgm-stat-lbl">Priority</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-info-circle"></i> Opportunity Details</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Product</span><span>Deferred Income Annuity (DIA)</span></div>
+          <div class="dgm-detail-row"><span>Projected Income</span><span>$2,800/mo at age 65</span></div>
+          <div class="dgm-detail-row"><span>Annual Premium</span><span>$12,000/yr</span></div>
+          <div class="dgm-detail-row"><span>Meeting</span><span>Scheduled Apr 18 — illustration ready</span></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(1)"><i class="fas fa-user"></i> Open Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Present income annuity illustration for James Whitfield — $2,800/mo at 65','advisor')"><i class="fas fa-robot"></i> View Illustration</button>`
+    },
+    'uma-linda': {
+      icon:'fas fa-network-wired', iconBg:'linear-gradient(135deg,#7c3aed,#5b21b6)',
+      title:'UMA Account — Linda Morrison', sub:'Advisory · $5K/yr management fee',
+      body:`<div class="dgm-alert-banner purple"><i class="fas fa-network-wired"></i> Top client — $500K+ eligible assets for Unified Managed Account setup</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val purple">$5K/yr</div><div class="dgm-stat-lbl">Advisory Fee</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$500K+</div><div class="dgm-stat-lbl">Eligible Assets</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">98/100</div><div class="dgm-stat-lbl">Client Score</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">Apr 15</div><div class="dgm-stat-lbl">Meeting</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-info-circle"></i> Opportunity Details</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Product</span><span>Unified Managed Account (UMA)</span></div>
+          <div class="dgm-detail-row"><span>Assets Under Consideration</span><span>$280K current AUM</span></div>
+          <div class="dgm-detail-row"><span>Annual Fee (1%)</span><span>$5,000/yr</span></div>
+          <div class="dgm-detail-row"><span>Meeting</span><span>Annual review Apr 15 — UMA + Estate</span></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(8)"><i class="fas fa-user"></i> Open Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Prepare UMA proposal for Linda Morrison — $500K+ eligible assets, fee structure and benefits','advisor')"><i class="fas fa-robot"></i> Prepare Proposal</button>`
+    },
+    'estate-robert': {
+      icon:'fas fa-landmark', iconBg:'linear-gradient(135deg,#7c3aed,#5b21b6)',
+      title:'Estate Review — Robert Chen', sub:'Advisory · $8K/yr · Business succession planning',
+      body:`<div class="dgm-alert-banner purple"><i class="fas fa-landmark"></i> Business owner with succession gap — NQDC and key-person review needed</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val purple">$8K/yr</div><div class="dgm-stat-lbl">Opportunity</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">45</div><div class="dgm-stat-lbl">Client Age</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">96/100</div><div class="dgm-stat-lbl">Score</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val orange">High</div><div class="dgm-stat-lbl">Priority</div></div>
+        </div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Products Needed</span><span>Estate plan · NQDC · Succession</span></div>
+          <div class="dgm-detail-row"><span>Business Profile</span><span>Owner · $421K total value</span></div>
+          <div class="dgm-detail-row"><span>Existing Coverage</span><span>WL + VUL + Business Services</span></div>
+          <div class="dgm-detail-row"><span>Open Claim</span><span>CLM-2026-0041 — expedite docs</span></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(9)"><i class="fas fa-user"></i> Open Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Estate and succession planning analysis for Robert Chen — NQDC gap and key-person insurance','advisor')"><i class="fas fa-robot"></i> AI Analysis</button>`
+    },
+    '529-david': {
+      icon:'fas fa-graduation-cap', iconBg:'linear-gradient(135deg,#0891b2,#0e7490)',
+      title:'529 Plan — David Thompson', sub:'Investments · $1.2K/yr · College savings',
+      body:`<div class="dgm-alert-banner blue"><i class="fas fa-baby"></i> New parent — ideal time to start college savings conversation</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val blue">$1.2K/yr</div><div class="dgm-stat-lbl">Est. Premium</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">33</div><div class="dgm-stat-lbl">Client Age</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">18 yrs</div><div class="dgm-stat-lbl">Growth Window</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">Apr 20</div><div class="dgm-stat-lbl">Meeting</div></div>
+        </div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Product</span><span>529 College Savings Plan</span></div>
+          <div class="dgm-detail-row"><span>Initial Contribution</span><span>$12,000 suggested</span></div>
+          <div class="dgm-detail-row"><span>Annual Premium</span><span>$1,200/yr ongoing</span></div>
+          <div class="dgm-detail-row"><span>Trigger</span><span>Life event — new baby detected</span></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(5)"><i class="fas fa-user"></i> Open Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('529 plan proposal for David Thompson — new parent, 18-year growth window','advisor')"><i class="fas fa-robot"></i> Draft Proposal</button>`
+    },
+    'disability-patricia': {
+      icon:'fas fa-user-shield', iconBg:'linear-gradient(135deg,#dc2626,#b91c1c)',
+      title:'Disability Insurance — Patricia Nguyen', sub:'Insurance · $2K/yr · No DI coverage',
+      body:`<div class="dgm-alert-banner red"><i class="fas fa-exclamation-triangle"></i> No disability coverage — significant protection gap at age 38</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val red">$2K/yr</div><div class="dgm-stat-lbl">Opportunity</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">38</div><div class="dgm-stat-lbl">Client Age</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$0</div><div class="dgm-stat-lbl">DI Coverage</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val orange">Gap</div><div class="dgm-stat-lbl">Status</div></div>
+        </div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Product</span><span>Individual Disability Income (IDI)</span></div>
+          <div class="dgm-detail-row"><span>Proposed Benefit</span><span>$5,000/mo income protection</span></div>
+          <div class="dgm-detail-row"><span>Annual Premium</span><span>~$2,000/yr</span></div>
+          <div class="dgm-detail-row"><span>Note</span><span>Pair with UL funding conversation</span></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(2)"><i class="fas fa-user"></i> Open Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Generate disability income quote for Patricia Nguyen — age 38, no existing DI coverage','renewal')"><i class="fas fa-robot"></i> Generate Quote</button>`
+    },
+    '401k-alex': {
+      icon:'fas fa-piggy-bank', iconBg:'linear-gradient(135deg,#047857,#065f46)',
+      title:'401(k) Rollover — Alex Rivera', sub:'Retirement · $4K/yr · $85K prospect',
+      body:`<div class="dgm-alert-banner green"><i class="fas fa-handshake"></i> Prospect meeting today — bring rollover IRA comparison and fee analysis</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val green">$4K/yr</div><div class="dgm-stat-lbl">Opportunity</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$85K</div><div class="dgm-stat-lbl">Rollover Amt</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">4:30 PM</div><div class="dgm-stat-lbl">Meeting Today</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">Prospect</div><div class="dgm-stat-lbl">Status</div></div>
+        </div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Product</span><span>Rollover IRA + Managed Portfolio</span></div>
+          <div class="dgm-detail-row"><span>Source</span><span>Prior employer 401(k) — $85K</span></div>
+          <div class="dgm-detail-row"><span>Annual Mgmt Fee</span><span>~$4,000/yr (projected)</span></div>
+          <div class="dgm-detail-row"><span>Client Note</span><span>Bringing statements to meeting today</span></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('clients')"><i class="fas fa-user"></i> View Alex's Record</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Prepare 401k rollover analysis for Alex Rivera — $85K prior employer plan, rollover IRA options','advisor')"><i class="fas fa-robot"></i> Prepare Analysis</button>`
+    }
+  };
+  const d = opps[id];
+  if (!d) return;
+  openDashboardModal(d);
+}
+
+// ── 6. Recent Communications modal ───────────────────────────
+function openCommModal(id) {
+  const comms = {
+    'rc-claim': {
+      icon:'fas fa-envelope', iconBg:'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+      title:'Robert Chen — Claim Document Update', sub:'Email · 2 hours ago · CLM-2026-0041',
+      body:`<div class="dgm-comm-thread">
+        <div class="dgm-msg received">
+          <div class="dgm-msg-avatar rc-bg">RC</div>
+          <div class="dgm-msg-body">
+            <div class="dgm-msg-name">Robert Chen <span class="dgm-msg-time">Today, 8:14 AM</span></div>
+            <div class="dgm-msg-text">Hi, I wanted to let you know that I've uploaded all the required documents for my claim CLM-2026-0041. I've included the death certificate, beneficiary forms, and the medical records you requested. Please let me know if anything else is needed. Thank you.</div>
+          </div>
+        </div>
+        <div class="dgm-msg sent">
+          <div class="dgm-msg-body right">
+            <div class="dgm-msg-name right">You <span class="dgm-msg-time">Today, 8:32 AM</span></div>
+            <div class="dgm-msg-text sent-bubble">Thank you Robert, I can see all the documents have been received. I'll expedite the review with our adjuster today and aim to have an update for you by end of week.</div>
+          </div>
+          <div class="dgm-msg-avatar you-bg">You</div>
+        </div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-clipboard-list"></i> Claim Context</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Claim ID</span><span>CLM-2026-0041</span></div>
+        <div class="dgm-detail-row"><span>Type</span><span>Death Benefit — $1M face value</span></div>
+        <div class="dgm-detail-row"><span>Status</span><span><span style="color:#f59e0b;font-weight:700">In Review</span></span></div>
+        <div class="dgm-detail-row"><span>Docs Received</span><span>Death cert · Beneficiary · Medical</span></div>
+        <div class="dgm-detail-row"><span>SLA</span><span><span style="color:#dc2626;font-weight:700">At Risk — adjuster needed today</span></span></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClaimModal('CLM-2026-0041')"><i class="fas fa-file-alt"></i> Open Claim</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();openClientModal(3)"><i class="fas fa-user"></i> Robert's Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('What is the status of CLM-2026-0041 for Robert Chen and what are the next steps to expedite?','renewal')"><i class="fas fa-robot"></i> Ask AI</button>`
+    },
+    'lm-appt': {
+      icon:'fas fa-comment', iconBg:'linear-gradient(135deg,#7c3aed,#5b21b6)',
+      title:'Linda Morrison — Appointment Confirmed', sub:'SMS · 5 hours ago · Apr 15 meeting',
+      body:`<div class="dgm-comm-thread">
+        <div class="dgm-msg received">
+          <div class="dgm-msg-avatar lm-bg">LM</div>
+          <div class="dgm-msg-body">
+            <div class="dgm-msg-name">Linda Morrison <span class="dgm-msg-time">Today, 5:20 AM</span></div>
+            <div class="dgm-msg-text">Hi! Just confirming our appointment on April 15th at 2pm. Looking forward to the estate planning and UMA review. Should I bring anything specific? 😊</div>
+          </div>
+        </div>
+        <div class="dgm-msg sent">
+          <div class="dgm-msg-body right">
+            <div class="dgm-msg-name right">You <span class="dgm-msg-time">Today, 7:15 AM</span></div>
+            <div class="dgm-msg-text sent-bubble">Hi Linda! Perfect — confirmed for Apr 15 at 2pm. Please bring your recent brokerage statements and any estate documents you'd like to review. I'll have the UMA proposal ready. See you then!</div>
+          </div>
+          <div class="dgm-msg-avatar you-bg">You</div>
+        </div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-calendar"></i> Meeting Details</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Date & Time</span><span>Apr 15, 2026 — 2:00 PM</span></div>
+        <div class="dgm-detail-row"><span>Duration</span><span>90 minutes</span></div>
+        <div class="dgm-detail-row"><span>Topics</span><span>UMA proposal · Estate planning review</span></div>
+        <div class="dgm-detail-row"><span>Prep</span><span>UMA proposal + estate doc review</span></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(8)"><i class="fas fa-user"></i> Linda's Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Generate pre-meeting brief for Linda Morrison Apr 15 — UMA proposal and estate planning review','advisor')"><i class="fas fa-robot"></i> Meeting Brief</button>`
+    },
+    'mg-annuity': {
+      icon:'fas fa-phone', iconBg:'linear-gradient(135deg,#d97706,#b45309)',
+      title:'Maria Gonzalez — Annuity Interest', sub:'Phone call · Yesterday · Income annuity request',
+      body:`<div class="dgm-comm-thread">
+        <div class="dgm-msg received">
+          <div class="dgm-msg-avatar mg-bg">MG</div>
+          <div class="dgm-msg-body">
+            <div class="dgm-msg-name">Maria Gonzalez <span class="dgm-msg-time">Yesterday, 2:45 PM</span></div>
+            <div class="dgm-msg-text">I was thinking about what you mentioned about income annuities and I'm quite interested now. Could you send me an illustration showing what my options would be? I have about $95K in my current annuity and would like to see what income I could get monthly.</div>
+          </div>
+        </div>
+      </div>
+      <div class="dgm-alert-banner gold"><i class="fas fa-bolt"></i> Action needed — send annuity illustration before scheduled Apr 12 meeting</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Current AUM</span><span>$95K in existing annuity</span></div>
+        <div class="dgm-detail-row"><span>Interest</span><span>Income annuity — monthly income</span></div>
+        <div class="dgm-detail-row"><span>Meeting</span><span>Apr 12 — Video · 45 min</span></div>
+        <div class="dgm-detail-row"><span>Action</span><span>Send illustration before Apr 12</span></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(6)"><i class="fas fa-user"></i> Maria's Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Generate income annuity illustration for Maria Gonzalez — $95K existing, monthly income options','advisor')"><i class="fas fa-robot"></i> Generate Illustration</button>`
+    },
+    'sw-renewal': {
+      icon:'fas fa-envelope', iconBg:'linear-gradient(135deg,#be185d,#9d174d)',
+      title:'Sandra Williams — Renewal Quote Review', sub:'Email · Yesterday · Term renewal decision',
+      body:`<div class="dgm-comm-thread">
+        <div class="dgm-msg received">
+          <div class="dgm-msg-avatar sw-bg">SW</div>
+          <div class="dgm-msg-body">
+            <div class="dgm-msg-name">Sandra Williams <span class="dgm-msg-time">Yesterday, 4:10 PM</span></div>
+            <div class="dgm-msg-text">Hi, we received the renewal quote. My husband and I are reviewing the options. The premium increase is a bit of a concern — is there any way to reduce the cost while keeping the coverage? We'll have a decision by end of this week hopefully.</div>
+          </div>
+        </div>
+        <div class="dgm-msg sent">
+          <div class="dgm-msg-body right">
+            <div class="dgm-msg-name right">You <span class="dgm-msg-time">Yesterday, 5:30 PM</span></div>
+            <div class="dgm-msg-text sent-bubble">Hi Sandra, completely understand the concern. There are a few options I can walk through — including converting to a permanent policy or adjusting the benefit amount. I have some alternatives ready. Let's connect on Apr 11 as planned and I'll walk you through the options.</div>
+          </div>
+          <div class="dgm-msg-avatar you-bg">You</div>
+        </div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-exclamation-triangle"></i> Risk Alert</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Policy</span><span>P-100320 · Term Life · $350K</span></div>
+        <div class="dgm-detail-row"><span>Expiry</span><span>Sep 2026 · 153 days remaining</span></div>
+        <div class="dgm-detail-row"><span>Lapse Risk</span><span><span style="color:#dc2626;font-weight:700">79/100 — High</span></span></div>
+        <div class="dgm-detail-row"><span>Next Step</span><span>Apr 11 call — alternatives ready</span></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(4)"><i class="fas fa-user"></i> Sandra's Profile</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();openPolicyModal('P-100320')"><i class="fas fa-file-contract"></i> View Policy</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();openRetentionModal('ret-sandra')"><i class="fas fa-bolt"></i> Retention Plan</button>`
+    },
+    'jw-meeting': {
+      icon:'fas fa-comment', iconBg:'linear-gradient(135deg,#7c3aed,#5b21b6)',
+      title:'James Whitfield — Meeting Confirmed', sub:'SMS · 2 days ago · Apr 18 retirement planning',
+      body:`<div class="dgm-comm-thread">
+        <div class="dgm-msg received">
+          <div class="dgm-msg-avatar jw-bg">JW</div>
+          <div class="dgm-msg-body">
+            <div class="dgm-msg-name">James Whitfield <span class="dgm-msg-time">Apr 8, 3:22 PM</span></div>
+            <div class="dgm-msg-text">Confirmed for April 18th. Looking forward to the retirement planning discussion. I've been thinking a lot about whether I'm on track to retire at 65. Excited to see the annuity options.</div>
+          </div>
+        </div>
+      </div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Meeting</span><span>Apr 18 · Deferred annuity illustration</span></div>
+        <div class="dgm-detail-row"><span>Duration</span><span>60 minutes</span></div>
+        <div class="dgm-detail-row"><span>Topics</span><span>Retirement income · DIA · Estate update</span></div>
+        <div class="dgm-detail-row"><span>Opportunity</span><span>$12K/yr income annuity</span></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(1)"><i class="fas fa-user"></i> James's Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Generate pre-meeting brief for James Whitfield Apr 18 — deferred income annuity illustration','advisor')"><i class="fas fa-robot"></i> Meeting Brief</button>`
+    },
+    'ar-prospect': {
+      icon:'fas fa-envelope', iconBg:'linear-gradient(135deg,#047857,#065f46)',
+      title:'Alex Rivera — Prospect Engagement', sub:'Email · 2 days ago · 4:30 PM meeting today',
+      body:`<div class="dgm-comm-thread">
+        <div class="dgm-msg received">
+          <div class="dgm-msg-avatar ar-bg">AR</div>
+          <div class="dgm-msg-body">
+            <div class="dgm-msg-name">Alex Rivera <span class="dgm-msg-time">Apr 8, 11:05 AM</span></div>
+            <div class="dgm-msg-text">Really excited about our meeting on Friday! I've pulled together all my statements from my old 401k — about $85,000. I want to understand all my options and whether rolling it over makes sense. See you at 4:30!</div>
+          </div>
+        </div>
+      </div>
+      <div class="dgm-alert-banner green"><i class="fas fa-calendar-check"></i> Meeting TODAY at 4:30 PM — prospect bringing $85K 401(k) statements</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Meeting</span><span>Today, 4:30 PM · In Person · 60 min</span></div>
+        <div class="dgm-detail-row"><span>Opportunity</span><span>$85K 401(k) rollover → IRA</span></div>
+        <div class="dgm-detail-row"><span>Status</span><span>Prospect — high potential</span></div>
+        <div class="dgm-detail-row"><span>Prep Needed</span><span>Rollover IRA comparison + fee analysis</span></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openMeetingBrief('MTG-003')"><i class="fas fa-calendar"></i> Meeting Brief</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Prepare 401k rollover analysis for Alex Rivera — $85K, rollover IRA vs keep in plan','advisor')"><i class="fas fa-robot"></i> Prepare Materials</button>`
+    },
+    'kp-voicemail': {
+      icon:'fas fa-phone', iconBg:'linear-gradient(135deg,#0891b2,#0e7490)',
+      title:'Kevin Park — Voicemail Received', sub:'Phone · 3 days ago · Pending call back',
+      body:`<div class="dgm-comm-thread">
+        <div class="dgm-msg received">
+          <div class="dgm-msg-avatar kp-bg">KP</div>
+          <div class="dgm-msg-body">
+            <div class="dgm-msg-name">Kevin Park — Voicemail <span class="dgm-msg-time">Apr 7, 9:48 AM</span></div>
+            <div class="dgm-msg-text">"Hi, this is Kevin. Sorry I missed your call. I've been tied up this week but I'm still interested in finishing the application process. I'll try to call you back after 10am today. Thanks."</div>
+          </div>
+        </div>
+      </div>
+      <div class="dgm-alert-banner red"><i class="fas fa-exclamation-circle"></i> URGENT — 10:30 AM call scheduled TODAY. Policy application pending 12+ days.</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Call</span><span>Today 10:30 AM — URGENT (Now)</span></div>
+        <div class="dgm-detail-row"><span>Status</span><span><span style="color:#dc2626;font-weight:700">Pending application — 12 days no contact</span></span></div>
+        <div class="dgm-detail-row"><span>Policy</span><span>P-100350 · Term Life · $250K · Pending</span></div>
+        <div class="dgm-detail-row"><span>Lapse Risk</span><span>61/100 — Medium</span></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openMeetingBrief('MTG-001')"><i class="fas fa-calendar"></i> Meeting Brief</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();openClientModal(7)"><i class="fas fa-user"></i> Kevin's Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Kevin Park policy follow-up — pending application P-100350, draft follow-up call script','renewal')"><i class="fas fa-robot"></i> Call Script</button>`
+    }
+  };
+  const d = comms[id];
+  if (!d) return;
+  openDashboardModal(d);
+}
+
+// ── 7. Today's Quick Wins actions ─────────────────────────────
+function openQuickWinModal(id) {
+  const qw = {
+    'qw-sandra-renewal': {
+      icon:'fas fa-check-circle', iconBg:'linear-gradient(135deg,#059669,#047857)',
+      title:'Renewal Quote Sent — Sandra Williams ✓', sub:'Completed · Apr 10, 2026',
+      body:`<div class="dgm-alert-banner green"><i class="fas fa-check-circle"></i> Task completed — renewal quote sent successfully</div>
+        <div class="dgm-section-title"><i class="fas fa-info-circle"></i> Activity Summary</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Action Taken</span><span>Sent renewal quote via email</span></div>
+          <div class="dgm-detail-row"><span>Policy</span><span>P-100320 · Term Life · $350K</span></div>
+          <div class="dgm-detail-row"><span>Completed</span><span>Today, 7:45 AM</span></div>
+          <div class="dgm-detail-row"><span>Quote Amount</span><span>$8,400/yr · 10-yr term renewal</span></div>
+          <div class="dgm-detail-row"><span>Next Step</span><span>Apr 11 call — Sandra reviewing with husband</span></div>
+          <div class="dgm-detail-row"><span>Response</span><span>Received — cost concern flagged</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Next Recommendations</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-phone"></i><div>Prepare alternative quote options for Apr 11 call</div></div>
+          <div class="dgm-action-item"><i class="fas fa-file-alt"></i><div>Have term-to-permanent conversion illustration ready</div></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(4)"><i class="fas fa-user"></i> Sandra's Profile</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();openPolicyModal('P-100320')"><i class="fas fa-file-contract"></i> View Policy</button>`
+    },
+    'qw-robert-claim': {
+      icon:'fas fa-check-circle', iconBg:'linear-gradient(135deg,#059669,#047857)',
+      title:'Claim Documents Reviewed — Robert Chen ✓', sub:'Completed · Apr 10, 2026',
+      body:`<div class="dgm-alert-banner green"><i class="fas fa-check-circle"></i> All documents received and reviewed — expediting adjuster review</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Claim</span><span>CLM-2026-0041</span></div>
+          <div class="dgm-detail-row"><span>Documents</span><span>Death cert ✓ · Beneficiary ✓ · Medical ✓</span></div>
+          <div class="dgm-detail-row"><span>Completed</span><span>Today, 8:32 AM</span></div>
+          <div class="dgm-detail-row"><span>Next Step</span><span>Adjuster review — expected by end of week</span></div>
+          <div class="dgm-detail-row"><span>SLA Status</span><span><span style="color:#f59e0b;font-weight:700">At Risk — expedite adjuster</span></span></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClaimModal('CLM-2026-0041')"><i class="fas fa-file-alt"></i> Open Claim</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();openClientModal(3)"><i class="fas fa-user"></i> Robert's Profile</button>`
+    },
+    'qw-patricia-call': {
+      icon:'fas fa-phone', iconBg:'linear-gradient(135deg,#dc2626,#b91c1c)',
+      title:'Call Patricia Nguyen — URGENT', sub:'Pending · UL policy funding gap · Lapse in ~68 days',
+      body:`<div class="dgm-alert-banner red"><i class="fas fa-exclamation-triangle"></i> URGENT — UL policy under-funded, lapse risk in 68 days. Call today.</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val red">87/100</div><div class="dgm-stat-lbl">Risk Score</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$5,800</div><div class="dgm-stat-lbl">Premium/yr</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val orange">~68d</div><div class="dgm-stat-lbl">Until Lapse</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">12 PM</div><div class="dgm-stat-lbl">Scheduled</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Call Script Highlights</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item urgent"><i class="fas fa-bolt"></i><div><strong>Lead with urgency</strong> — "Patricia, we need to address your UL policy before June 20"</div></div>
+          <div class="dgm-action-item"><i class="fas fa-dollar-sign"></i><div><strong>Present funding options</strong> — reduced paid-up or premium catch-up schedule</div></div>
+          <div class="dgm-action-item"><i class="fas fa-user-shield"></i><div><strong>Disability gap</strong> — also present DI quote ($2K/yr) while on the call</div></div>
+          <div class="dgm-action-item"><i class="fas fa-calendar"></i><div><strong>Schedule follow-up</strong> — in-person review within 2 weeks</div></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(2)"><i class="fas fa-user"></i> Open Patricia's Profile</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();openRetentionModal('ret-patricia')"><i class="fas fa-bolt"></i> Full Retention Plan</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();sendContextMessage('Generate call script for Patricia Nguyen — UL policy funding gap, retention and disability cross-sell','renewal')"><i class="fas fa-robot"></i> AI Call Script</button>`
+    },
+    'qw-kevin-brief': {
+      icon:'fas fa-clipboard-list', iconBg:'linear-gradient(135deg,#0891b2,#0e7490)',
+      title:'Kevin Park — Follow-up Call Brief', sub:'Pending · 10:30 AM call today · Application response',
+      body:`<div class="dgm-alert-banner blue"><i class="fas fa-phone"></i> Call is SCHEDULED NOW — 10:30 AM meeting is active</div>
+        <div class="dgm-section-title"><i class="fas fa-clipboard-list"></i> Pre-Call Brief</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Client</span><span>Kevin Park · Age 29 · Jersey City</span></div>
+          <div class="dgm-detail-row"><span>Policy</span><span>P-100350 · Term Life · $250K · Pending</span></div>
+          <div class="dgm-detail-row"><span>Issue</span><span>Application pending — no response 12 days</span></div>
+          <div class="dgm-detail-row"><span>Premium</span><span>$1,800/yr</span></div>
+          <div class="dgm-detail-row"><span>Lapse Risk</span><span>61/100 — Medium</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> Talking Points</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-check"></i><div>Confirm Kevin is still interested and ready to proceed</div></div>
+          <div class="dgm-action-item"><i class="fas fa-file-alt"></i><div>Identify any blockers on the pending application</div></div>
+          <div class="dgm-action-item"><i class="fas fa-lightbulb"></i><div>Emerging client — good long-term relationship opportunity</div></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();openMeetingBrief('MTG-001')"><i class="fas fa-calendar"></i> Full Meeting Brief</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();openClientModal(7)"><i class="fas fa-user"></i> Kevin's Profile</button>`
+    },
+    'qw-annuity-review': {
+      icon:'fas fa-percentage', iconBg:'linear-gradient(135deg,#059669,#047857)',
+      title:'Annuity Rate Change — 38 Clients to Review', sub:'AI Recommendation · Fed rate +0.25%',
+      body:`<div class="dgm-alert-banner green"><i class="fas fa-bolt"></i> Fed rate hike creates time-sensitive annuity pricing opportunity</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val green">38</div><div class="dgm-stat-lbl">Clients</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$430K</div><div class="dgm-stat-lbl">Total Opportunity</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$19.3K</div><div class="dgm-stat-lbl">Est. Commission</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val orange">~2 wks</div><div class="dgm-stat-lbl">Window</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-users"></i> Priority Clients</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-star"></i><div><strong>James Whitfield</strong> — Income annuity · $12K/yr · Meeting Apr 18</div></div>
+          <div class="dgm-action-item"><i class="fas fa-star"></i><div><strong>Patricia Nguyen</strong> — Deferred annuity · $3K/yr · Call today</div></div>
+          <div class="dgm-action-item"><i class="fas fa-star"></i><div><strong>Maria Gonzalez</strong> — Income annuity illustration requested · Apr 12 meeting</div></div>
+          <div class="dgm-action-item"><i class="fas fa-users"></i><div><strong>35 more clients</strong> — AI-ranked by conversion probability</div></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('Show all 38 clients affected by Fed rate change with annuity opportunity ranked by premium and close probability','advisor')"><i class="fas fa-robot"></i> Full AI Analysis</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();navigateTo('products')"><i class="fas fa-chart-line"></i> View Products</button>`
+    }
+  };
+  const d = qw[id];
+  if (!d) return;
+  openDashboardModal(d);
+}
+
+// ── 8. Commission Tracker modal ───────────────────────────────
+function openCommissionModal(section) {
+  const data = {
+    monthly: {
+      icon:'fas fa-wallet', iconBg:'linear-gradient(135deg,#003087,#0050b3)',
+      title:'Commission Detail — April 2026', sub:'Total earned this month: $42,180',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val">$42,180</div><div class="dgm-stat-lbl">This Month</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">$187K</div><div class="dgm-stat-lbl">YTD Earned</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val green">78%</div><div class="dgm-stat-lbl">Target Progress</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">$8,400</div><div class="dgm-stat-lbl">Pending</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-chart-bar"></i> Monthly Breakdown by Domain</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span><i class="fas fa-circle" style="color:#003087"></i> Insurance</span><span>$23,200 (55%)</span></div>
+        <div class="dgm-detail-row"><span><i class="fas fa-circle" style="color:#059669"></i> Investments</span><span>$10,100 (24%)</span></div>
+        <div class="dgm-detail-row"><span><i class="fas fa-circle" style="color:#d97706"></i> Retirement</span><span>$5,480 (13%)</span></div>
+        <div class="dgm-detail-row"><span><i class="fas fa-circle" style="color:#7c3aed"></i> Advisory</span><span>$3,400 (8%)</span></div>
+        <div class="dgm-detail-row" style="font-weight:700;border-top:2px solid #e5e7eb;margin-top:4px;padding-top:8px"><span>Total</span><span>$42,180</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-clock"></i> Pending Commissions</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-file-contract"></i><div><strong>Patricia Nguyen — DI application</strong> · $600 pending · underwriting</div></div>
+        <div class="dgm-action-item"><i class="fas fa-file-contract"></i><div><strong>Kevin Park — Term policy P-100350</strong> · $540 pending · application in progress</div></div>
+        <div class="dgm-action-item"><i class="fas fa-coins"></i><div><strong>Maria Gonzalez — Annuity illustration</strong> · $7,260 expected upon close</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('reports')"><i class="fas fa-chart-bar"></i> Full Commission Report</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Show my commission pipeline and top revenue opportunities for this month','advisor')"><i class="fas fa-robot"></i> AI Revenue Analysis</button>`
+    },
+    insurance: {
+      icon:'fas fa-shield-alt', iconBg:'linear-gradient(135deg,#003087,#0050b3)',
+      title:'Insurance Commissions — April 2026', sub:'$23,200 earned · 55% of total',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val">$23,200</div><div class="dgm-stat-lbl">This Month</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">1,842</div><div class="dgm-stat-lbl">Policies</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">23</div><div class="dgm-stat-lbl">Renewals Due</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">5 Urgent</div><div class="dgm-stat-lbl">Renewals</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-list"></i> Top Insurance Commission Sources</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Linda Morrison — WL</span><span>$6,400/mo</span></div>
+        <div class="dgm-detail-row"><span>Robert Chen — WL + VUL</span><span>$4,200/mo</span></div>
+        <div class="dgm-detail-row"><span>Maria Gonzalez — UL</span><span>$2,920/mo</span></div>
+        <div class="dgm-detail-row"><span>James Whitfield — WL + Term + LTC</span><span>$2,480/mo</span></div>
+        <div class="dgm-detail-row"><span>Sandra Williams — Term (at risk)</span><span>$1,640/mo</span></div>
+        <div class="dgm-detail-row"><span>All other clients (242)</span><span>$5,560/mo</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-exclamation-triangle"></i> At-Risk Revenue</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item urgent"><i class="fas fa-bolt"></i><div><strong>Patricia Nguyen</strong> — $5,800/yr at risk · UL lapse in 68 days</div></div>
+        <div class="dgm-action-item"><i class="fas fa-sync-alt"></i><div><strong>Sandra Williams</strong> — $8,200/yr renewal due Sep 2026</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('policies')"><i class="fas fa-file-contract"></i> View All Policies</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Show insurance commission breakdown and at-risk policies ranked by revenue impact','renewal')"><i class="fas fa-robot"></i> AI Analysis</button>`
+    },
+    investments: {
+      icon:'fas fa-chart-line', iconBg:'linear-gradient(135deg,#059669,#047857)',
+      title:'Investment Commissions — April 2026', sub:'$10,100 earned · 24% of total',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val green">$10,100</div><div class="dgm-stat-lbl">This Month</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">$4.2M</div><div class="dgm-stat-lbl">AUM</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">62</div><div class="dgm-stat-lbl">Inv. Clients</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">3 Gaps</div><div class="dgm-stat-lbl">Rebalance</div></div>
+      </div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Linda Morrison — UMA/Mutual Funds</span><span>$2,800/mo</span></div>
+        <div class="dgm-detail-row"><span>Robert Chen — VUL sub-accounts</span><span>$1,800/mo</span></div>
+        <div class="dgm-detail-row"><span>Maria Gonzalez — Annuities</span><span>$950/mo</span></div>
+        <div class="dgm-detail-row"><span>All other inv. clients (59)</span><span>$4,550/mo</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-bolt"></i> Pipeline Opportunities</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-lock"></i><div><strong>Patricia Nguyen</strong> — Annuity conversion · $3K/yr new</div></div>
+        <div class="dgm-action-item"><i class="fas fa-graduation-cap"></i><div><strong>David Thompson</strong> — 529 plan · $1.2K/yr new</div></div>
+        <div class="dgm-action-item"><i class="fas fa-piggy-bank"></i><div><strong>Alex Rivera</strong> — 401k rollover · $4K/yr potential</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('products')"><i class="fas fa-chart-line"></i> Investment Products</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Show investment commission pipeline and AUM growth opportunities across all 62 clients','advisor')"><i class="fas fa-robot"></i> AI Analysis</button>`
+    },
+    retirement: {
+      icon:'fas fa-umbrella-beach', iconBg:'linear-gradient(135deg,#d97706,#b45309)',
+      title:'Retirement Commissions — April 2026', sub:'$5,480 earned · 13% of total',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val gold">$5,480</div><div class="dgm-stat-lbl">This Month</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">$1.8M</div><div class="dgm-stat-lbl">Assets</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">38</div><div class="dgm-stat-lbl">Clients</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">4 Gaps</div><div class="dgm-stat-lbl">Identified</div></div>
+      </div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Linda Morrison — Deferred Annuity</span><span>$1,450/mo</span></div>
+        <div class="dgm-detail-row"><span>Maria Gonzalez — Immediate Annuity</span><span>$1,200/mo</span></div>
+        <div class="dgm-detail-row"><span>James Whitfield — Annuity candidate</span><span>$580/mo</span></div>
+        <div class="dgm-detail-row"><span>All other retirement clients (35)</span><span>$2,250/mo</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-crosshairs"></i> AI Retirement Pipeline</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-umbrella-beach"></i><div><strong>4 retirement income gap clients</strong> — $430K total annuity opportunity</div></div>
+        <div class="dgm-action-item"><i class="fas fa-users"></i><div><strong>6 near-retirement clients</strong> (within 5 years) — comprehensive plan needed</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('Show retirement income gap analysis for all 38 clients — ranked by annuity opportunity and urgency','advisor')"><i class="fas fa-robot"></i> Retirement Pipeline</button>`
+    },
+    advisory: {
+      icon:'fas fa-handshake', iconBg:'linear-gradient(135deg,#7c3aed,#5b21b6)',
+      title:'Advisory Commissions — April 2026', sub:'$3,400 earned · 8% of total',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val purple">$3,400</div><div class="dgm-stat-lbl">This Month</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">$2.1M</div><div class="dgm-stat-lbl">Managed</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">59</div><div class="dgm-stat-lbl">Clients</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val green">$5K+</div><div class="dgm-stat-lbl">UMA Pipeline</div></div>
+      </div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Linda Morrison — Estate + Advisory</span><span>$1,600/mo</span></div>
+        <div class="dgm-detail-row"><span>Robert Chen — Business Services</span><span>$850/mo</span></div>
+        <div class="dgm-detail-row"><span>James Whitfield — Estate in progress</span><span>$420/mo</span></div>
+        <div class="dgm-detail-row"><span>All other advisory clients (56)</span><span>$530/mo</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-arrow-up"></i> Growth Opportunities</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-network-wired"></i><div><strong>Linda Morrison UMA</strong> — $5K/yr advisory fee · Apr 15 meeting</div></div>
+        <div class="dgm-action-item"><i class="fas fa-landmark"></i><div><strong>Robert Chen Estate</strong> — $8K/yr succession + NQDC planning</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('Show advisory services pipeline and wealth management opportunities across 59 clients','advisor')"><i class="fas fa-robot"></i> Advisory Pipeline</button>`
+    },
+    ytd: {
+      icon:'fas fa-calendar-alt', iconBg:'linear-gradient(135deg,#003087,#0050b3)',
+      title:'YTD Commission Detail — 2026', sub:'$187,000 earned year-to-date',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val">$187K</div><div class="dgm-stat-lbl">YTD Earned</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">$240K</div><div class="dgm-stat-lbl">Annual Target</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val green">78%</div><div class="dgm-stat-lbl">Progress</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">$53K</div><div class="dgm-stat-lbl">Remaining</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-chart-line"></i> Monthly Trend (Jan–Apr 2026)</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>January</span><span>$38,200</span></div>
+        <div class="dgm-detail-row"><span>February</span><span>$41,100</span></div>
+        <div class="dgm-detail-row"><span>March</span><span>$45,520</span></div>
+        <div class="dgm-detail-row"><span>April (MTD)</span><span>$42,180 (in progress)</span></div>
+        <div class="dgm-detail-row" style="font-weight:700;border-top:2px solid #e5e7eb;margin-top:4px;padding-top:8px"><span>YTD Total</span><span>$167,000 + $42,180 MTD</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-bolt"></i> To Hit Annual Target</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-target"></i><div><strong>$53,000 needed</strong> across remaining 8.5 months — ~$6,200/mo avg needed</div></div>
+        <div class="dgm-action-item"><i class="fas fa-chart-line"></i><div><strong>Current pace: $45K/mo avg</strong> — on track to exceed target by ~$128K</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('reports')"><i class="fas fa-chart-bar"></i> Full Annual Report</button>`
+    },
+    target: {
+      icon:'fas fa-bullseye', iconBg:'linear-gradient(135deg,#003087,#0050b3)',
+      title:'Annual Commission Target — 2026', sub:'$240,000 target · 78% complete',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val">$240K</div><div class="dgm-stat-lbl">Annual Target</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val green">$187K</div><div class="dgm-stat-lbl">Achieved</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">$53K</div><div class="dgm-stat-lbl">Remaining</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">8.5 mo</div><div class="dgm-stat-lbl">Left in Year</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-chart-pie"></i> Target by Domain</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Insurance Target</span><span>$132K · achieved $103K (78%)</span></div>
+        <div class="dgm-detail-row"><span>Investments Target</span><span>$58K · achieved $48K (83%)</span></div>
+        <div class="dgm-detail-row"><span>Retirement Target</span><span>$31K · achieved $22K (71%)</span></div>
+        <div class="dgm-detail-row"><span>Advisory Target</span><span>$19K · achieved $14K (74%)</span></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('What actions should I prioritize to hit my $240K annual commission target?','advisor')"><i class="fas fa-robot"></i> AI Roadmap</button>
+              <button class="btn btn-outline" onclick="closeDashboardModal();navigateTo('reports')"><i class="fas fa-chart-bar"></i> Reports</button>`
+    },
+    progress: {
+      icon:'fas fa-trophy', iconBg:'linear-gradient(135deg,#059669,#047857)',
+      title:'Commission Progress — 78% of Annual Target', sub:'On pace to exceed $240K target',
+      body:`<div class="dgm-alert-banner green"><i class="fas fa-trophy"></i> On pace to exceed annual target — projected $315K at current run rate</div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val green">78%</div><div class="dgm-stat-lbl">Completed</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$315K</div><div class="dgm-stat-lbl">Projected YE</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">+$75K</div><div class="dgm-stat-lbl">Above Target</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val purple">+31% YoY</div><div class="dgm-stat-lbl">vs 2025</div></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-bolt"></i> Accelerators in Pipeline</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-lock"></i><div><strong>Annuity pipeline</strong> — $430K in play · $19.3K potential commission</div></div>
+          <div class="dgm-action-item"><i class="fas fa-network-wired"></i><div><strong>Linda Morrison UMA</strong> — $5K/yr advisory fee upon close</div></div>
+          <div class="dgm-action-item"><i class="fas fa-landmark"></i><div><strong>Robert Chen estate plan</strong> — $8K/yr upon engagement</div></div>
+          <div class="dgm-action-item"><i class="fas fa-piggy-bank"></i><div><strong>Alex Rivera 401k rollover</strong> — $4K/yr · meeting today</div></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('Show my top commission accelerators — what actions will most quickly increase my revenue this month?','advisor')"><i class="fas fa-robot"></i> AI Accelerators</button>`
+    },
+    pending: {
+      icon:'fas fa-clock', iconBg:'linear-gradient(135deg,#d97706,#b45309)',
+      title:'Pending Commissions — $8,400', sub:'Expected by Apr 20 · In underwriting',
+      body:`<div class="dgm-alert-banner gold"><i class="fas fa-clock"></i> $8,400 in pending commissions — expected release by April 20, 2026</div>
+        <div class="dgm-section-title"><i class="fas fa-list"></i> Pending Commission Detail</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span>Kevin Park — Term P-100350</span><span>$540 · Underwriting review</span></div>
+          <div class="dgm-detail-row"><span>Patricia Nguyen — DI application</span><span>$600 · Pending approval</span></div>
+          <div class="dgm-detail-row"><span>New client — policy in process</span><span>$1,260 · Application submitted</span></div>
+          <div class="dgm-detail-row"><span>Renewal book — batch processing</span><span>$6,000 · Processing Apr 20</span></div>
+          <div class="dgm-detail-row" style="font-weight:700;border-top:2px solid #e5e7eb;margin-top:4px;padding-top:8px"><span>Total Pending</span><span>$8,400</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-exclamation-circle"></i> Actions to Accelerate</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item urgent"><i class="fas fa-bolt"></i><div>Call Kevin Park today — close pending application to release $540</div></div>
+          <div class="dgm-action-item"><i class="fas fa-file-alt"></i><div>Follow up on Patricia DI application — docs may be needed</div></div>
+        </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('policies')"><i class="fas fa-file-contract"></i> View Pending Policies</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('What steps can I take today to accelerate my $8,400 in pending commissions?','advisor')"><i class="fas fa-robot"></i> Ask AI</button>`
+    }
+  };
+  const d = data[section];
+  if (!d) return;
+  openDashboardModal(d);
+}
+
+// ── 9. Monthly Goals modal ─────────────────────────────────────
+function openGoalModal(goalId) {
+  const goals = {
+    'insurance-premium': {
+      icon:'fas fa-shield-alt', iconBg:'linear-gradient(135deg,#003087,#0050b3)',
+      title:'Insurance Premium Goal — April 2026', sub:'$312K of $360K · 87% · $48K gap',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val">$312K</div><div class="dgm-stat-lbl">Current</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">$360K</div><div class="dgm-stat-lbl">Target</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">$48K</div><div class="dgm-stat-lbl">Gap</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">21 days</div><div class="dgm-stat-lbl">Remaining</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-chart-bar"></i> Progress by Client Segment</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Premium Clients (12)</span><span>$132K · on target</span></div>
+        <div class="dgm-detail-row"><span>High Value (48)</span><span>$98K · +3% MoM</span></div>
+        <div class="dgm-detail-row"><span>Mid Market (124)</span><span>$56K · stable</span></div>
+        <div class="dgm-detail-row"><span>Emerging (63)</span><span>$26K · +8% new clients</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-bolt"></i> Actions to Close $48K Gap</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item urgent"><i class="fas fa-sync-alt"></i><div><strong>Sandra Williams renewal</strong> — $8,400/yr · Sep 2026 · Act now</div></div>
+        <div class="dgm-action-item"><i class="fas fa-user-shield"></i><div><strong>Patricia Nguyen DI</strong> — $2,000/yr · quote ready to send</div></div>
+        <div class="dgm-action-item"><i class="fas fa-users"></i><div><strong>23 renewals pipeline</strong> — $312K total · 15/23 in progress</div></div>
+        <div class="dgm-action-item"><i class="fas fa-robot"></i><div><strong>AI recommends</strong> — focus on 5 urgent renewal clients this week</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('policies')"><i class="fas fa-file-contract"></i> View Renewals</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('What insurance policies can I convert or renew this month to close the $48K premium gap?','renewal')"><i class="fas fa-robot"></i> AI Action Plan</button>`
+    },
+    'investment-aum': {
+      icon:'fas fa-chart-line', iconBg:'linear-gradient(135deg,#059669,#047857)',
+      title:'Investment AUM Goal — April 2026', sub:'$4.2M of $5M · 84% · $800K gap',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val green">$4.2M</div><div class="dgm-stat-lbl">Current AUM</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">$5M</div><div class="dgm-stat-lbl">Target</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">$800K</div><div class="dgm-stat-lbl">Gap</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">62 clients</div><div class="dgm-stat-lbl">Inv. Clients</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-bolt"></i> AUM Growth Opportunities</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-network-wired"></i><div><strong>Linda Morrison UMA</strong> — $280K additional · Apr 15 meeting</div></div>
+        <div class="dgm-action-item"><i class="fas fa-piggy-bank"></i><div><strong>Alex Rivera 401k rollover</strong> — $85K · meeting today</div></div>
+        <div class="dgm-action-item"><i class="fas fa-chart-bar"></i><div><strong>VUL rebalances (2 clients)</strong> — $180K in sub-accounts</div></div>
+        <div class="dgm-action-item"><i class="fas fa-lock"></i><div><strong>Annuity pipeline (4 clients)</strong> — $430K potential new AUM</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('products')"><i class="fas fa-chart-line"></i> Investment Products</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('What investment opportunities should I prioritize to close the $800K AUM gap this month?','advisor')"><i class="fas fa-robot"></i> AI Roadmap</button>`
+    },
+    'retirement-clients': {
+      icon:'fas fa-umbrella-beach', iconBg:'linear-gradient(135deg,#d97706,#b45309)',
+      title:'Retirement Clients Goal — April 2026', sub:'38 of 45 · 84% · 7 more needed',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val gold">38</div><div class="dgm-stat-lbl">Current</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">45</div><div class="dgm-stat-lbl">Target</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">7</div><div class="dgm-stat-lbl">Needed</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">21 days</div><div class="dgm-stat-lbl">Remaining</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-users"></i> Conversion Candidates (AI Identified)</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-user"></i><div><strong>James Whitfield</strong> — Age 52 · Deferred annuity · Apr 18 meeting</div></div>
+        <div class="dgm-action-item"><i class="fas fa-user"></i><div><strong>Patricia Nguyen</strong> — Age 38 · Annuity candidate · Call today</div></div>
+        <div class="dgm-action-item"><i class="fas fa-user"></i><div><strong>Robert Chen</strong> — Age 45 · No retirement product · High value</div></div>
+        <div class="dgm-action-item"><i class="fas fa-users"></i><div><strong>4 more AI-identified clients</strong> — age 45–58 · pre-retirement window</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('Show all clients who should be converted to retirement products this month — age and profile analysis','advisor')"><i class="fas fa-robot"></i> AI Candidate List</button>`
+    },
+    'advisory-clients': {
+      icon:'fas fa-handshake', iconBg:'linear-gradient(135deg,#7c3aed,#5b21b6)',
+      title:'Advisory Clients Goal — April 2026', sub:'59 of 80 · 74% · 21 more needed',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val purple">59</div><div class="dgm-stat-lbl">Current</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">80</div><div class="dgm-stat-lbl">Target</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">21</div><div class="dgm-stat-lbl">Needed</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">$2.1M</div><div class="dgm-stat-lbl">Managed</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-bolt"></i> Advisory Upsell Candidates</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-network-wired"></i><div><strong>Linda Morrison</strong> — UMA proposal ready · Apr 15 meeting · $5K/yr</div></div>
+        <div class="dgm-action-item"><i class="fas fa-landmark"></i><div><strong>Robert Chen</strong> — Estate + succession · $8K/yr · Business owner</div></div>
+        <div class="dgm-action-item"><i class="fas fa-gem"></i><div><strong>19 High Value clients</strong> — no advisory product yet · AI-ranked</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('Which clients should I prioritize for advisory services conversion this month?','advisor')"><i class="fas fa-robot"></i> AI Priority List</button>`
+    },
+    'multi-product': {
+      icon:'fas fa-layer-group', iconBg:'linear-gradient(135deg,#dc2626,#b91c1c)',
+      title:'Multi-Product Penetration — April 2026', sub:'1.8 avg of 2.5 target · 72% · Cross-sell gap',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val red">1.8</div><div class="dgm-stat-lbl">Current Avg</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">2.5</div><div class="dgm-stat-lbl">Target</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">0.7</div><div class="dgm-stat-lbl">Gap</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">128</div><div class="dgm-stat-lbl">Single-Product</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-chart-pie"></i> Product Penetration Breakdown</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>4 Products (all domains)</span><span>24 clients (10%)</span></div>
+        <div class="dgm-detail-row"><span>3 Products</span><span>51 clients (21%)</span></div>
+        <div class="dgm-detail-row"><span>2 Products</span><span>44 clients (18%)</span></div>
+        <div class="dgm-detail-row"><span>1 Product only</span><span>128 clients (52%) — opportunity</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Cross-Sell Targets</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-bolt"></i><div><strong>Patricia Nguyen</strong> — Add DI + annuity (currently 1 product)</div></div>
+        <div class="dgm-action-item"><i class="fas fa-bolt"></i><div><strong>Sandra Williams</strong> — Add retirement + investment (currently 1 product)</div></div>
+        <div class="dgm-action-item"><i class="fas fa-bolt"></i><div><strong>Kevin Park</strong> — Add 529 + DI after policy clears (currently 1 product)</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();sendContextMessage('Show all single-product clients ranked by cross-sell opportunity and revenue potential','advisor')"><i class="fas fa-robot"></i> Cross-Sell Analysis</button>`
+    },
+    'new-appointments': {
+      icon:'fas fa-calendar-check', iconBg:'linear-gradient(135deg,#0891b2,#0e7490)',
+      title:'New Appointments Goal — April 2026', sub:'14 of 20 · 70% · 6 more needed',
+      body:`<div class="dgm-stat-row">
+        <div class="dgm-stat"><div class="dgm-stat-val blue">14</div><div class="dgm-stat-lbl">Booked</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">20</div><div class="dgm-stat-lbl">Target</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val orange">6</div><div class="dgm-stat-lbl">Needed</div></div>
+        <div class="dgm-stat"><div class="dgm-stat-val">21 days</div><div class="dgm-stat-lbl">Remaining</div></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-calendar-alt"></i> Confirmed Appointments (14)</div>
+      <div class="dgm-detail-grid">
+        <div class="dgm-detail-row"><span>Kevin Park — Apr 10</span><span>Policy follow-up · 10:30 AM today</span></div>
+        <div class="dgm-detail-row"><span>Patricia Nguyen — Apr 10</span><span>UL policy review · 12:00 PM today</span></div>
+        <div class="dgm-detail-row"><span>Robert Chen — Apr 10</span><span>Claim update · 2:00 PM today</span></div>
+        <div class="dgm-detail-row"><span>Alex Rivera — Apr 10</span><span>Prospect meeting · 4:30 PM today</span></div>
+        <div class="dgm-detail-row"><span>Sandra Williams — Apr 11</span><span>Renewal quote review</span></div>
+        <div class="dgm-detail-row"><span>Maria Gonzalez — Apr 12</span><span>Annuity illustration</span></div>
+        <div class="dgm-detail-row"><span>Linda Morrison — Apr 15</span><span>Annual review — UMA + Estate</span></div>
+        <div class="dgm-detail-row"><span>James Whitfield — Apr 18</span><span>Retirement planning</span></div>
+        <div class="dgm-detail-row"><span>+ 6 more scheduled</span><span>Apr 18–30</span></div>
+      </div>
+      <div class="dgm-section-title"><i class="fas fa-robot"></i> Outreach to Book 6 More</div>
+      <div class="dgm-action-list">
+        <div class="dgm-action-item"><i class="fas fa-user-plus"></i><div><strong>David Thompson</strong> — 529 intro · Apr 20 confirmed · +1</div></div>
+        <div class="dgm-action-item"><i class="fas fa-user-plus"></i><div><strong>5 pipeline clients</strong> — AI ready to draft outreach for remaining spots</div></div>
+      </div>`,
+      footer:`<button class="btn btn-primary" onclick="closeDashboardModal();navigateTo('calendar')"><i class="fas fa-calendar"></i> View Calendar</button>
+              <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Which clients should I reach out to schedule the 6 remaining appointments this month?','advisor')"><i class="fas fa-robot"></i> AI Outreach List</button>`
+    }
+  };
+  const d = goals[goalId];
+  if (!d) return;
+  openDashboardModal(d);
+}
+
+console.log('Dashboard interactivity loaded — openAIBriefAction, openOpportunityModal, openCommModal, openQuickWinModal, openCommissionModal, openGoalModal');

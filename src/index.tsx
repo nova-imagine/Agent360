@@ -549,7 +549,7 @@ function DashboardPage() {
         </div>
         <div class="welcome-actions">
           <button class="btn btn-primary" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Ask AI Agent</button>
-          <button class="btn btn-outline" onclick="navigateTo('clients')"><i class="fas fa-plus"></i> New Client</button>
+
         </div>
       </div>
 
@@ -557,17 +557,20 @@ function DashboardPage() {
       <div class="ai-briefing-strip">
         <div class="aib-label"><i class="fas fa-robot"></i> AI Daily Brief <span class="aib-time">7:02 AM</span></div>
         <div class="aib-items">
-          <div class="aib-item urgent" onclick="openClientModal(2)" style="cursor:pointer">
+          <div class="aib-item urgent" onclick="openAIBriefAction('lapse-patricia')" style="cursor:pointer" title="Click to act on this alert">
             <i class="fas fa-exclamation-circle"></i>
             <span><strong>Patricia Nguyen</strong> — UL policy under-funded, lapse risk in ~68 days. Schedule call today.</span>
+            <span class="aib-action-chip"><i class="fas fa-bolt"></i> Act Now</span>
           </div>
-          <div class="aib-item opportunity" onclick="navigateTo('products')" style="cursor:pointer">
+          <div class="aib-item opportunity" onclick="openAIBriefAction('fed-rate')" style="cursor:pointer" title="Click to review annuity rate opportunity">
             <i class="fas fa-bolt"></i>
             <span><strong>Fed rate +0.25%</strong> — Annuity pricing now favorable for 38 clients. Reach out before window closes.</span>
+            <span class="aib-action-chip opp"><i class="fas fa-arrow-right"></i> Review</span>
           </div>
-          <div class="aib-item insight" onclick="openClientModal(1)" style="cursor:pointer">
+          <div class="aib-item insight" onclick="openAIBriefAction('annuity-james')" style="cursor:pointer" title="Click to view retirement opportunity">
             <i class="fas fa-lightbulb"></i>
             <span><strong>James Whitfield (52)</strong> — Retirement planning window: income annuity conversation aligns with life-stage. High close probability.</span>
+            <span class="aib-action-chip ins"><i class="fas fa-arrow-right"></i> Review</span>
           </div>
         </div>
         <button class="aib-dismiss" onclick="this.closest('.ai-briefing-strip').style.display='none'" title="Dismiss"><i class="fas fa-times"></i></button>
@@ -797,7 +800,7 @@ function DashboardPage() {
             <span class="comm-ytd-badge">AI Detected</span>
           </div>
           <div class="opp-list">
-            <div class="opp-item">
+            <div class="opp-item" onclick="openOpportunityModal('annuity-patricia')" style="cursor:pointer" title="Click to view opportunity details">
               <div class="opp-domain-icon inv-bg"><i class="fas fa-lock"></i></div>
               <div class="opp-info">
                 <div class="opp-title">Annuity Conversion — Patricia Nguyen</div>
@@ -805,7 +808,7 @@ function DashboardPage() {
               </div>
               <div class="opp-value">$3K/yr</div>
             </div>
-            <div class="opp-item">
+            <div class="opp-item" onclick="openOpportunityModal('annuity-james')" style="cursor:pointer" title="Click to view opportunity details">
               <div class="opp-domain-icon ret-bg"><i class="fas fa-umbrella-beach"></i></div>
               <div class="opp-info">
                 <div class="opp-title">Income Annuity — James Whitfield</div>
@@ -813,7 +816,7 @@ function DashboardPage() {
               </div>
               <div class="opp-value">$12K/yr</div>
             </div>
-            <div class="opp-item">
+            <div class="opp-item" onclick="openOpportunityModal('uma-linda')" style="cursor:pointer" title="Click to view opportunity details">
               <div class="opp-domain-icon adv-bg"><i class="fas fa-network-wired"></i></div>
               <div class="opp-info">
                 <div class="opp-title">UMA Account — Linda Morrison</div>
@@ -821,7 +824,7 @@ function DashboardPage() {
               </div>
               <div class="opp-value">$5K/yr</div>
             </div>
-            <div class="opp-item">
+            <div class="opp-item" onclick="openOpportunityModal('estate-robert')" style="cursor:pointer" title="Click to view opportunity details">
               <div class="opp-domain-icon adv-bg"><i class="fas fa-landmark"></i></div>
               <div class="opp-info">
                 <div class="opp-title">Estate Review — Robert Chen</div>
@@ -829,7 +832,7 @@ function DashboardPage() {
               </div>
               <div class="opp-value">$8K/yr</div>
             </div>
-            <div class="opp-item">
+            <div class="opp-item" onclick="openOpportunityModal('529-david')" style="cursor:pointer" title="Click to view opportunity details">
               <div class="opp-domain-icon inv-bg"><i class="fas fa-graduation-cap"></i></div>
               <div class="opp-info">
                 <div class="opp-title">529 Plan — David Thompson</div>
@@ -837,7 +840,7 @@ function DashboardPage() {
               </div>
               <div class="opp-value">$1.2K/yr</div>
             </div>
-            <div class="opp-item">
+            <div class="opp-item" onclick="openOpportunityModal('disability-patricia')" style="cursor:pointer" title="Click to view opportunity details">
               <div class="opp-domain-icon ins-bg"><i class="fas fa-user-shield"></i></div>
               <div class="opp-info">
                 <div class="opp-title">Disability Insurance — Patricia Nguyen</div>
@@ -845,7 +848,7 @@ function DashboardPage() {
               </div>
               <div class="opp-value">$2K/yr</div>
             </div>
-            <div class="opp-item">
+            <div class="opp-item" onclick="openOpportunityModal('401k-alex')" style="cursor:pointer" title="Click to view opportunity details">
               <div class="opp-domain-icon ret-bg"><i class="fas fa-piggy-bank"></i></div>
               <div class="opp-info">
                 <div class="opp-title">401(k) Rollover — Alex Rivera</div>
@@ -873,38 +876,38 @@ function DashboardPage() {
             <h3><i class="fas fa-wallet"></i> Commission Tracker</h3>
             <span class="comm-ytd-badge">YTD 2026</span>
           </div>
-          <div class="comm-total" style="text-align:center;margin-bottom:14px">
+          <div class="comm-total" onclick="openCommissionModal('monthly')" style="text-align:center;margin-bottom:14px;cursor:pointer" title="Click for monthly breakdown">
             <div class="comm-total-val">$42,180</div>
-            <div class="comm-total-lbl">Earned This Month</div>
+            <div class="comm-total-lbl">Earned This Month <i class="fas fa-external-link-alt" style="font-size:10px;margin-left:4px;opacity:0.6"></i></div>
           </div>
           <div class="comm-breakdown">
-            <div class="comm-row">
+            <div class="comm-row" onclick="openCommissionModal('insurance')" style="cursor:pointer" title="Click to see Insurance commissions detail">
               <span class="comm-type"><i class="fas fa-circle" style="color:#003087"></i> Insurance</span>
               <div class="comm-bar-outer"><div class="comm-bar" style="width:55%;background:#003087"></div></div>
               <span class="comm-amt">$23,200</span>
             </div>
-            <div class="comm-row">
+            <div class="comm-row" onclick="openCommissionModal('investments')" style="cursor:pointer" title="Click to see Investment commissions detail">
               <span class="comm-type"><i class="fas fa-circle" style="color:#059669"></i> Investments</span>
               <div class="comm-bar-outer"><div class="comm-bar" style="width:24%;background:#059669"></div></div>
               <span class="comm-amt">$10,100</span>
             </div>
-            <div class="comm-row">
+            <div class="comm-row" onclick="openCommissionModal('retirement')" style="cursor:pointer" title="Click to see Retirement commissions detail">
               <span class="comm-type"><i class="fas fa-circle" style="color:#d97706"></i> Retirement</span>
               <div class="comm-bar-outer"><div class="comm-bar" style="width:13%;background:#d97706"></div></div>
               <span class="comm-amt">$5,480</span>
             </div>
-            <div class="comm-row">
+            <div class="comm-row" onclick="openCommissionModal('advisory')" style="cursor:pointer" title="Click to see Advisory commissions detail">
               <span class="comm-type"><i class="fas fa-circle" style="color:#7c3aed"></i> Advisory</span>
               <div class="comm-bar-outer"><div class="comm-bar" style="width:8%;background:#7c3aed"></div></div>
               <span class="comm-amt">$3,400</span>
             </div>
           </div>
           <div class="comm-stats-row" style="margin-top:12px">
-            <div class="comm-stat"><div class="cs-num">$187K</div><div class="cs-lbl2">YTD Earned</div></div>
-            <div class="comm-stat"><div class="cs-num">$240K</div><div class="cs-lbl2">Annual Target</div></div>
-            <div class="comm-stat"><div class="cs-num green-text">78%</div><div class="cs-lbl2">Progress</div></div>
+            <div class="comm-stat" onclick="openCommissionModal('ytd')" style="cursor:pointer" title="Click for YTD detail"><div class="cs-num">$187K</div><div class="cs-lbl2">YTD Earned</div></div>
+            <div class="comm-stat" onclick="openCommissionModal('target')" style="cursor:pointer" title="Click for target detail"><div class="cs-num">$240K</div><div class="cs-lbl2">Annual Target</div></div>
+            <div class="comm-stat" onclick="openCommissionModal('progress')" style="cursor:pointer" title="Click for progress detail"><div class="cs-num green-text">78%</div><div class="cs-lbl2">Progress</div></div>
           </div>
-          <div class="comm-pending" style="margin-top:12px"><i class="fas fa-clock"></i> <strong>$8,400</strong> pending in underwriting · expected by Apr 20</div>
+          <div class="comm-pending" onclick="openCommissionModal('pending')" style="margin-top:12px;cursor:pointer" title="Click to see pending commissions"><i class="fas fa-clock"></i> <strong>$8,400</strong> pending in underwriting · expected by Apr 20 <i class="fas fa-chevron-right" style="font-size:10px;opacity:0.5;margin-left:4px"></i></div>
         </div>
 
         {/* Lapse Risk Monitor — standalone card */}
@@ -1209,32 +1212,32 @@ function DashboardPage() {
             <span class="goal-days-left">21 days left</span>
           </div>
           <div class="goal-list">
-            <div class="goal-item">
+            <div class="goal-item" onclick="openGoalModal('insurance-premium')" style="cursor:pointer" title="Click for Insurance Premium details">
               <div class="goal-meta"><span class="goal-name"><i class="fas fa-shield-alt" style="color:#003087;width:14px;margin-right:4px"></i>Insurance Premium</span><span class="goal-val">$312K<span class="goal-target"> / $360K</span></span></div>
               <div class="goal-bar-outer"><div class="goal-bar-inner" style="width:87%"></div></div>
               <div class="goal-footer"><span class="goal-pct">87%</span><span class="goal-gap">$48K to target</span></div>
             </div>
-            <div class="goal-item">
+            <div class="goal-item" onclick="openGoalModal('investment-aum')" style="cursor:pointer" title="Click for Investment AUM details">
               <div class="goal-meta"><span class="goal-name"><i class="fas fa-chart-line" style="color:#059669;width:14px;margin-right:4px"></i>Investment AUM</span><span class="goal-val">$4.2M<span class="goal-target"> / $5M</span></span></div>
               <div class="goal-bar-outer"><div class="goal-bar-inner green" style="width:84%"></div></div>
               <div class="goal-footer"><span class="goal-pct">84%</span><span class="goal-gap">$800K to target</span></div>
             </div>
-            <div class="goal-item">
+            <div class="goal-item" onclick="openGoalModal('retirement-clients')" style="cursor:pointer" title="Click for Retirement Clients details">
               <div class="goal-meta"><span class="goal-name"><i class="fas fa-umbrella-beach" style="color:#d97706;width:14px;margin-right:4px"></i>Retirement Clients</span><span class="goal-val">38<span class="goal-target"> / 45</span></span></div>
               <div class="goal-bar-outer"><div class="goal-bar-inner gold" style="width:84%"></div></div>
               <div class="goal-footer"><span class="goal-pct">84%</span><span class="goal-gap">7 more needed</span></div>
             </div>
-            <div class="goal-item">
+            <div class="goal-item" onclick="openGoalModal('advisory-clients')" style="cursor:pointer" title="Click for Advisory Clients details">
               <div class="goal-meta"><span class="goal-name"><i class="fas fa-handshake" style="color:#7c3aed;width:14px;margin-right:4px"></i>Advisory Clients</span><span class="goal-val">59<span class="goal-target"> / 80</span></span></div>
               <div class="goal-bar-outer"><div class="goal-bar-inner purple" style="width:74%"></div></div>
               <div class="goal-footer"><span class="goal-pct">74%</span><span class="goal-gap">21 more needed</span></div>
             </div>
-            <div class="goal-item">
+            <div class="goal-item" onclick="openGoalModal('multi-product')" style="cursor:pointer" title="Click for Multi-Product details">
               <div class="goal-meta"><span class="goal-name"><i class="fas fa-layer-group" style="color:#dc2626;width:14px;margin-right:4px"></i>Multi-Product Clients</span><span class="goal-val">1.8<span class="goal-target"> / 2.5 avg</span></span></div>
               <div class="goal-bar-outer"><div class="goal-bar-inner orange" style="width:72%"></div></div>
               <div class="goal-footer"><span class="goal-pct">72%</span><span class="goal-gap">Cross-sell gap</span></div>
             </div>
-            <div class="goal-item">
+            <div class="goal-item" onclick="openGoalModal('new-appointments')" style="cursor:pointer" title="Click for Appointments details">
               <div class="goal-meta"><span class="goal-name"><i class="fas fa-calendar-check" style="color:#0891b2;width:14px;margin-right:4px"></i>New Appointments</span><span class="goal-val">14<span class="goal-target"> / 20</span></span></div>
               <div class="goal-bar-outer"><div class="goal-bar-inner" style="width:70%;background:#0891b2"></div></div>
               <div class="goal-footer"><span class="goal-pct" style="color:#0891b2">70%</span><span class="goal-gap">6 more needed</span></div>
@@ -1254,61 +1257,61 @@ function DashboardPage() {
             <button class="btn-link" onclick="navigateTo('clients')">View All →</button>
           </div>
           <div class="recent-comms">
-            <div class="comm-item">
+            <div class="comm-item" onclick="openCommModal('rc-claim')" style="cursor:pointer" title="Click to view full thread">
               <div class="comm-avatar ca-rc">RC</div>
               <div class="comm-info">
                 <div class="comm-name">Robert Chen</div>
                 <div class="comm-msg">Re: Claim P-100310 — documents received and uploaded</div>
               </div>
-              <div class="comm-meta"><i class="fas fa-envelope"></i> 2h ago</div>
+              <div class="comm-meta"><i class="fas fa-envelope"></i> 2h ago <i class="fas fa-chevron-right comm-arrow"></i></div>
             </div>
-            <div class="comm-item">
+            <div class="comm-item" onclick="openCommModal('lm-appt')" style="cursor:pointer" title="Click to view full thread">
               <div class="comm-avatar ca-lm">LM</div>
               <div class="comm-info">
                 <div class="comm-name">Linda Morrison</div>
                 <div class="comm-msg">Confirmed Apr 15 estate + UMA review appointment</div>
               </div>
-              <div class="comm-meta"><i class="fas fa-comment"></i> 5h ago</div>
+              <div class="comm-meta"><i class="fas fa-comment"></i> 5h ago <i class="fas fa-chevron-right comm-arrow"></i></div>
             </div>
-            <div class="comm-item">
+            <div class="comm-item" onclick="openCommModal('mg-annuity')" style="cursor:pointer" title="Click to view full thread">
               <div class="comm-avatar ca-mg">MG</div>
               <div class="comm-info">
                 <div class="comm-name">Maria Gonzalez</div>
                 <div class="comm-msg">Interested in income annuity discussion — please send illustration</div>
               </div>
-              <div class="comm-meta"><i class="fas fa-phone"></i> Yesterday</div>
+              <div class="comm-meta"><i class="fas fa-phone"></i> Yesterday <i class="fas fa-chevron-right comm-arrow"></i></div>
             </div>
-            <div class="comm-item">
+            <div class="comm-item" onclick="openCommModal('sw-renewal')" style="cursor:pointer" title="Click to view full thread">
               <div class="comm-avatar" style="background:linear-gradient(135deg,#be185d,#ec4899)">SW</div>
               <div class="comm-info">
                 <div class="comm-name">Sandra Williams</div>
                 <div class="comm-msg">Received renewal quote — reviewing options with husband</div>
               </div>
-              <div class="comm-meta"><i class="fas fa-envelope"></i> Yesterday</div>
+              <div class="comm-meta"><i class="fas fa-envelope"></i> Yesterday <i class="fas fa-chevron-right comm-arrow"></i></div>
             </div>
-            <div class="comm-item">
+            <div class="comm-item" onclick="openCommModal('jw-meeting')" style="cursor:pointer" title="Click to view full thread">
               <div class="comm-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">JW</div>
               <div class="comm-info">
                 <div class="comm-name">James Whitfield</div>
                 <div class="comm-msg">Confirmed Apr 18 retirement planning meeting</div>
               </div>
-              <div class="comm-meta"><i class="fas fa-comment"></i> 2d ago</div>
+              <div class="comm-meta"><i class="fas fa-comment"></i> 2d ago <i class="fas fa-chevron-right comm-arrow"></i></div>
             </div>
-            <div class="comm-item">
+            <div class="comm-item" onclick="openCommModal('ar-prospect')" style="cursor:pointer" title="Click to view full thread">
               <div class="comm-avatar" style="background:linear-gradient(135deg,#047857,#10b981)">AR</div>
               <div class="comm-info">
                 <div class="comm-name">Alex Rivera</div>
                 <div class="comm-msg">Excited about the 401k rollover meeting — bringing statements</div>
               </div>
-              <div class="comm-meta"><i class="fas fa-envelope"></i> 2d ago</div>
+              <div class="comm-meta"><i class="fas fa-envelope"></i> 2d ago <i class="fas fa-chevron-right comm-arrow"></i></div>
             </div>
-            <div class="comm-item">
+            <div class="comm-item" onclick="openCommModal('kp-voicemail')" style="cursor:pointer" title="Click to view full thread">
               <div class="comm-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">KP</div>
               <div class="comm-info">
                 <div class="comm-name">Kevin Park</div>
                 <div class="comm-msg">Left voicemail — will call back after 10am today</div>
               </div>
-              <div class="comm-meta"><i class="fas fa-phone"></i> 3d ago</div>
+              <div class="comm-meta"><i class="fas fa-phone"></i> 3d ago <i class="fas fa-chevron-right comm-arrow"></i></div>
             </div>
           </div>
         </div>
@@ -1320,25 +1323,27 @@ function DashboardPage() {
             <span style="font-size:11px;color:var(--green);font-weight:700;background:var(--green-light);padding:3px 10px;border-radius:20px">2 of 5 done</span>
           </div>
           <div class="quick-wins-list">
-            <div class="qw-item done">
+            <div class="qw-item done" onclick="openQuickWinModal('qw-sandra-renewal')" style="cursor:pointer" title="Click to view details">
               <span class="qw-check done"><i class="fas fa-check"></i></span>
               <span class="qw-text">Sent renewal quote to Sandra Williams</span>
+              <span class="qw-badge done-badge">Done</span>
             </div>
-            <div class="qw-item done">
+            <div class="qw-item done" onclick="openQuickWinModal('qw-robert-claim')" style="cursor:pointer" title="Click to view details">
               <span class="qw-check done"><i class="fas fa-check"></i></span>
               <span class="qw-text">Reviewed Robert Chen claim P-100310 documents</span>
+              <span class="qw-badge done-badge">Done</span>
             </div>
-            <div class="qw-item" onclick="openClientModal(2)" style="cursor:pointer">
+            <div class="qw-item" onclick="openQuickWinModal('qw-patricia-call')" style="cursor:pointer">
               <span class="qw-check"><i class="fas fa-circle"></i></span>
               <span class="qw-text">Call Patricia Nguyen re: UL policy funding gap</span>
               <span class="qw-badge urgent">Urgent</span>
             </div>
-            <div class="qw-item" onclick="openMeetingBrief('MTG-001')" style="cursor:pointer">
+            <div class="qw-item" onclick="openQuickWinModal('qw-kevin-brief')" style="cursor:pointer">
               <span class="qw-check"><i class="fas fa-circle"></i></span>
               <span class="qw-text">Prepare Kevin Park follow-up call brief</span>
               <span class="qw-badge">Today</span>
             </div>
-            <div class="qw-item" onclick="navigateTo('products')" style="cursor:pointer">
+            <div class="qw-item" onclick="openQuickWinModal('qw-annuity-review')" style="cursor:pointer">
               <span class="qw-check"><i class="fas fa-circle"></i></span>
               <span class="qw-text">Review annuity rate change impact (38 clients)</span>
               <span class="qw-badge">AI Rec</span>
@@ -1454,6 +1459,24 @@ function DashboardPage() {
           <p>$31.2K revenue potential · 3 investment gaps · 4 retirement planning opportunities · 2 estate planning alerts · 4 lapse risks</p>
         </div>
         <button class="btn btn-white" onclick="navigateTo('ai-insights')">View All AI Insights <i class="fas fa-arrow-right"></i></button>
+      </div>
+
+      {/* ── Generic Dashboard Modals Container ── */}
+      <div id="dashboard-generic-modal-overlay" class="dgm-overlay" onclick="closeDashboardModal()" style="display:none">
+        <div class="dgm-modal" onclick="event.stopPropagation()">
+          <div class="dgm-header" id="dgm-header">
+            <div class="dgm-header-left">
+              <div class="dgm-icon" id="dgm-icon"><i class="fas fa-info-circle"></i></div>
+              <div>
+                <div class="dgm-title" id="dgm-title">Detail</div>
+                <div class="dgm-sub" id="dgm-sub"></div>
+              </div>
+            </div>
+            <button class="dgm-close" onclick="closeDashboardModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="dgm-body" id="dgm-body"></div>
+          <div class="dgm-footer" id="dgm-footer"></div>
+        </div>
       </div>
 
       {/* ── Retention Intelligence Modal ── */}
