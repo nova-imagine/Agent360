@@ -286,6 +286,7 @@ function MainApp() {
       <div id="page-templates" style="display:none">
         <div id="tpl-dashboard"><DashboardPage /></div>
         <div id="tpl-clients"><ClientsPage /></div>
+        <div id="tpl-prospects"><ProspectsPage /></div>
         <div id="tpl-policies"><PoliciesPage /></div>
         <div id="tpl-claims"><ClaimsPage /></div>
         <div id="tpl-ai-agents"><AIAgentsPage /></div>
@@ -442,6 +443,11 @@ function Sidebar() {
           <i class="fas fa-users"></i>
           <span>Clients</span>
           <span class="nav-badge">247</span>
+        </a>
+        <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
+          <i class="fas fa-user-clock"></i>
+          <span>Prospects</span>
+          <span class="nav-badge" style="background:#f59e0b;color:#fff">14</span>
         </a>
         <a class="nav-item" onclick="navigateTo('policies')" href="#">
           <i class="fas fa-file-contract"></i>
@@ -2433,6 +2439,539 @@ function ClientsPage() {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ProspectsPage() {
+  return (
+    <div class="page prospects-page">
+
+      {/* ── Header ── */}
+      <div class="prospects-header">
+        <div class="ph-left">
+          <h2 class="ph-title"><i class="fas fa-user-clock"></i> Prospects Pipeline</h2>
+          <p class="ph-sub">14 active prospects · AI-scored · 3rd-party data enriched · $284K pipeline value</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-ai" onclick="openProspectAIAnalysis()"><i class="fas fa-robot"></i> AI Prospect Score All</button>
+          <button class="btn btn-primary" onclick="openAddProspectModal()"><i class="fas fa-plus"></i> Add Prospect</button>
+        </div>
+      </div>
+
+      {/* ── KPI Strip ── */}
+      <div class="prosp-kpi-strip">
+        <div class="prosp-kpi" onclick="filterProspects('all')" style="cursor:pointer">
+          <div class="prosp-kpi-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-users"></i></div>
+          <div class="prosp-kpi-body"><div class="prosp-kpi-val">14</div><div class="prosp-kpi-lbl">Total Prospects</div></div>
+        </div>
+        <div class="prosp-kpi" onclick="filterProspects('hot')" style="cursor:pointer">
+          <div class="prosp-kpi-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-fire"></i></div>
+          <div class="prosp-kpi-body"><div class="prosp-kpi-val">5</div><div class="prosp-kpi-lbl">Hot (Score 80+)</div></div>
+        </div>
+        <div class="prosp-kpi" onclick="filterProspects('contacted')" style="cursor:pointer">
+          <div class="prosp-kpi-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-phone-alt"></i></div>
+          <div class="prosp-kpi-body"><div class="prosp-kpi-val">9</div><div class="prosp-kpi-lbl">Contacted</div></div>
+        </div>
+        <div class="prosp-kpi" onclick="filterProspects('new')" style="cursor:pointer">
+          <div class="prosp-kpi-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-user-plus"></i></div>
+          <div class="prosp-kpi-body"><div class="prosp-kpi-val">3</div><div class="prosp-kpi-lbl">New This Week</div></div>
+        </div>
+        <div class="prosp-kpi">
+          <div class="prosp-kpi-icon" style="background:#fff7ed;color:#ea580c"><i class="fas fa-dollar-sign"></i></div>
+          <div class="prosp-kpi-body"><div class="prosp-kpi-val">$284K</div><div class="prosp-kpi-lbl">Pipeline Value</div></div>
+        </div>
+        <div class="prosp-kpi">
+          <div class="prosp-kpi-icon" style="background:#fdf2f8;color:#9d174d"><i class="fas fa-chart-line"></i></div>
+          <div class="prosp-kpi-body"><div class="prosp-kpi-val">68%</div><div class="prosp-kpi-lbl">Avg Close Prob</div></div>
+        </div>
+      </div>
+
+      {/* ── AI Intel Banner ── */}
+      <div class="prosp-ai-banner">
+        <div class="prosp-ai-banner-left">
+          <i class="fas fa-brain prosp-ai-icon"></i>
+          <div>
+            <div class="prosp-ai-title">AI Prospect Intelligence <span class="prosp-ai-live">LIVE</span></div>
+            <div class="prosp-ai-sub">3rd-party enrichment active: Wealth Data · Business Registry · Credit Signals · Social Footprint · Life Events · Public Records</div>
+          </div>
+        </div>
+        <div class="prosp-ai-chips">
+          <span class="prosp-ai-chip red"><i class="fas fa-exclamation-circle"></i> 2 Need Immediate Action</span>
+          <span class="prosp-ai-chip amber"><i class="fas fa-clock"></i> 4 Meetings This Week</span>
+          <span class="prosp-ai-chip green"><i class="fas fa-trophy"></i> 3 Ready to Convert</span>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div class="prosp-toolbar">
+        <div class="prosp-tb-left">
+          <div class="prosp-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="prospect-search" placeholder="Search prospects..." oninput="filterProspectCards()" />
+          </div>
+          <select class="prosp-select" id="prosp-stage-filter" onchange="filterProspectCards()">
+            <option value="">All Stages</option>
+            <option value="New Lead">New Lead</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Qualified">Qualified</option>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Meeting Scheduled">Meeting Scheduled</option>
+            <option value="Negotiating">Negotiating</option>
+          </select>
+          <select class="prosp-select" id="prosp-product-filter" onchange="filterProspectCards()">
+            <option value="">All Products</option>
+            <option value="Whole Life">Whole Life</option>
+            <option value="Term Life">Term Life</option>
+            <option value="Universal Life">Universal Life</option>
+            <option value="Annuity">Annuity</option>
+            <option value="Disability">Disability</option>
+            <option value="Advisory">Advisory</option>
+            <option value="529 Plan">529 Plan</option>
+          </select>
+          <select class="prosp-select" id="prosp-score-filter" onchange="filterProspectCards()">
+            <option value="">All Scores</option>
+            <option value="hot">Hot (80+)</option>
+            <option value="warm">Warm (50–79)</option>
+            <option value="cold">Cold (&lt;50)</option>
+          </select>
+        </div>
+        <div class="prosp-tb-right">
+          <span class="prosp-count-lbl" id="prosp-count-lbl">Showing 14 prospects</span>
+        </div>
+      </div>
+
+      {/* ── Prospect Cards Grid ── */}
+      <div class="prosp-grid" id="prosp-grid">
+
+        {/* P001 — Alex Rivera (Hot) */}
+        <div class="prosp-card" data-id="P001" data-stage="Meeting Scheduled" data-product="Whole Life" data-score="82" onclick="openProspectModal('P001')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-ar">AR</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Alex Rivera</div>
+              <div class="prosp-role">Executive · Age 34 · Manhattan</div>
+            </div>
+            <div class="prosp-score-badge hot">82</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill meeting">Meeting Scheduled</span>
+            <span class="prosp-days-lbl"><i class="fas fa-calendar-alt"></i> Apr 12</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Whole Life $500K</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $340K Net Worth</span>
+            <span class="prosp-tp-chip" title="Credit Signal"><i class="fas fa-star"></i> 760 Credit</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$4,200/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P001')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P002 — Nancy Foster (Warm) */}
+        <div class="prosp-card" data-id="P002" data-stage="Proposal Sent" data-product="Term Life" data-score="61" onclick="openProspectModal('P002')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-nf">NF</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Nancy Foster</div>
+              <div class="prosp-role">Healthcare Director · Age 41 · Brooklyn</div>
+            </div>
+            <div class="prosp-score-badge warm">61</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill proposal">Proposal Sent</span>
+            <span class="prosp-days-lbl"><i class="fas fa-clock"></i> 11d ago</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Term Life $1M</span>
+            <span class="prosp-prod-chip ins">LTC Rider</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $620K Net Worth</span>
+            <span class="prosp-tp-chip" title="Life Event"><i class="fas fa-home"></i> New Home Mar 31</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$3,600/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P002')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P003 — John Kim (Cold - Stale) */}
+        <div class="prosp-card prosp-card-stale" data-id="P003" data-stage="Contacted" data-product="Disability" data-score="44" onclick="openProspectModal('P003')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-jk">JK</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">John Kim</div>
+              <div class="prosp-role">Tech Engineer · Age 38 · Jersey City</div>
+            </div>
+            <div class="prosp-score-badge cold">44</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill contacted">Contacted</span>
+            <span class="prosp-days-lbl stale"><i class="fas fa-exclamation-triangle"></i> 15d stale</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Disability $8K/mo</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Credit Signal"><i class="fas fa-star"></i> 690 Credit</span>
+            <span class="prosp-tp-chip" title="Income Data"><i class="fas fa-briefcase"></i> $185K Income</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$2,400/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P003')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P004 — Michael Santos (Hot) */}
+        <div class="prosp-card" data-id="P004" data-stage="Negotiating" data-product="Universal Life" data-score="91" onclick="openProspectModal('P004')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-ms">MS</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Michael Santos</div>
+              <div class="prosp-role">Business Owner · Age 47 · Queens</div>
+            </div>
+            <div class="prosp-score-badge hot">91</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill negotiating">Negotiating</span>
+            <span class="prosp-days-lbl"><i class="fas fa-fire"></i> Close 3d</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Universal Life $750K</span>
+            <span class="prosp-prod-chip adv">NQDC Plan</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-building"></i> LLC Est. $2.4M</span>
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $1.8M Net Worth</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$6,800/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P004')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P005 — Julia Chen (Warm) */}
+        <div class="prosp-card" data-id="P005" data-stage="Proposal Sent" data-product="Annuity" data-score="58" onclick="openProspectModal('P005')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-jc">JC</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Julia Chen</div>
+              <div class="prosp-role">Retired Professor · Age 58 · Hoboken</div>
+            </div>
+            <div class="prosp-score-badge warm">58</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill proposal">Proposal Sent</span>
+            <span class="prosp-days-lbl stale"><i class="fas fa-clock"></i> 11d no reply</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ret">Fixed Annuity $120K</span>
+            <span class="prosp-prod-chip ret">Income Annuity</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $890K Net Worth</span>
+            <span class="prosp-tp-chip" title="Pension Data"><i class="fas fa-umbrella-beach"></i> Pension $4.2K/mo</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$9,600/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P005')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P006 — Grace Lee (Warm) */}
+        <div class="prosp-card" data-id="P006" data-stage="Qualified" data-product="Whole Life" data-score="73" onclick="openProspectModal('P006')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-gl">GL</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Grace Lee</div>
+              <div class="prosp-role">Physician · Age 44 · Westchester</div>
+            </div>
+            <div class="prosp-score-badge warm">73</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill qualified">Qualified</span>
+            <span class="prosp-days-lbl"><i class="fas fa-stethoscope"></i> UW In Progress</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Whole Life $1M</span>
+            <span class="prosp-prod-chip adv">Estate Planning</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Income Data"><i class="fas fa-briefcase"></i> $390K Income</span>
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $2.1M Net Worth</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$14,400/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P006')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P007 — Rachel Adams (New Lead) */}
+        <div class="prosp-card prosp-card-new" data-id="P007" data-stage="New Lead" data-product="Term Life" data-score="55" onclick="openProspectModal('P007')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-ra">RA</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Rachel Adams</div>
+              <div class="prosp-role">Software Engineer · Age 29 · Hoboken</div>
+            </div>
+            <div class="prosp-score-badge warm">55</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill new-lead">New Lead</span>
+            <span class="prosp-days-lbl new"><i class="fas fa-star"></i> Added Apr 9</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Term Life $500K</span>
+            <span class="prosp-prod-chip inv">529 Plan</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Life Event"><i class="fas fa-baby"></i> New Baby Mar 2026</span>
+            <span class="prosp-tp-chip" title="Credit Signal"><i class="fas fa-star"></i> 730 Credit</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$2,800/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P007')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P008 — Thomas Wright (Hot) */}
+        <div class="prosp-card" data-id="P008" data-stage="Meeting Scheduled" data-product="Universal Life" data-score="84" onclick="openProspectModal('P008')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-tw">TW</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Thomas Wright</div>
+              <div class="prosp-role">CFO · Age 52 · Manhattan</div>
+            </div>
+            <div class="prosp-score-badge hot">84</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill meeting">Meeting Scheduled</span>
+            <span class="prosp-days-lbl"><i class="fas fa-calendar-alt"></i> Apr 15</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">UL $1M</span>
+            <span class="prosp-prod-chip ret">Income Annuity</span>
+            <span class="prosp-prod-chip adv">Estate Review</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $3.8M Net Worth</span>
+            <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-building"></i> C-Suite Executive</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$18,000/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P008')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P009 — Linda Chen (Warm) */}
+        <div class="prosp-card" data-id="P009" data-stage="Contacted" data-product="Advisory" data-score="67" onclick="openProspectModal('P009')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-lc">LC</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Linda Chen</div>
+              <div class="prosp-role">Attorney · Age 45 · Upper West Side</div>
+            </div>
+            <div class="prosp-score-badge warm">67</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill contacted">Contacted</span>
+            <span class="prosp-days-lbl"><i class="fas fa-user"></i> Referred by R. Chen</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip adv">Estate Planning</span>
+            <span class="prosp-prod-chip ins">Whole Life $500K</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $1.1M Net Worth</span>
+            <span class="prosp-tp-chip" title="Public Records"><i class="fas fa-gavel"></i> Trust Filed 2024</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$8,200/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P009')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P010 — Marcus Johnson (Hot) */}
+        <div class="prosp-card" data-id="P010" data-stage="Qualified" data-product="Whole Life" data-score="88" onclick="openProspectModal('P010')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-mj">MJ</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Marcus Johnson</div>
+              <div class="prosp-role">Entrepreneur · Age 39 · Fort Lee, NJ</div>
+            </div>
+            <div class="prosp-score-badge hot">88</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill qualified">Qualified</span>
+            <span class="prosp-days-lbl"><i class="fas fa-bolt"></i> Ready to Close</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Whole Life $750K</span>
+            <span class="prosp-prod-chip inv">Mutual Funds</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-building"></i> 2 LLCs Active</span>
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $2.6M Net Worth</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$9,000/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P010')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P011 — Priya Patel (New Lead) */}
+        <div class="prosp-card prosp-card-new" data-id="P011" data-stage="New Lead" data-product="Disability" data-score="51" onclick="openProspectModal('P011')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-pp">PP</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Priya Patel</div>
+              <div class="prosp-role">Dentist · Age 33 · Parsippany, NJ</div>
+            </div>
+            <div class="prosp-score-badge warm">51</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill new-lead">New Lead</span>
+            <span class="prosp-days-lbl new"><i class="fas fa-star"></i> Added Apr 10</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Disability $12K/mo</span>
+            <span class="prosp-prod-chip inv">SEP-IRA</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-tooth"></i> Solo Practice Est. $480K</span>
+            <span class="prosp-tp-chip" title="Credit Signal"><i class="fas fa-star"></i> 780 Credit</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$4,800/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P011')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P012 — Derek Walton (Warm) */}
+        <div class="prosp-card" data-id="P012" data-stage="Contacted" data-product="Annuity" data-score="63" onclick="openProspectModal('P012')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-dw">DW</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Derek Walton</div>
+              <div class="prosp-role">VP Finance · Age 55 · Staten Island</div>
+            </div>
+            <div class="prosp-score-badge warm">63</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill contacted">Contacted</span>
+            <span class="prosp-days-lbl"><i class="fas fa-clock"></i> Follow-up Due</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ret">Deferred Annuity</span>
+            <span class="prosp-prod-chip ins">LTC Insurance</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Pension Data"><i class="fas fa-umbrella-beach"></i> 401(k) $580K</span>
+            <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $1.5M Net Worth</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$7,200/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P012')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P013 — Sophia Reyes (Hot) */}
+        <div class="prosp-card" data-id="P013" data-stage="Meeting Scheduled" data-product="529 Plan" data-score="80" onclick="openProspectModal('P013')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-sr">SR</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">Sophia Reyes</div>
+              <div class="prosp-role">Marketing Director · Age 36 · Bronx</div>
+            </div>
+            <div class="prosp-score-badge hot">80</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill meeting">Meeting Scheduled</span>
+            <span class="prosp-days-lbl"><i class="fas fa-calendar-alt"></i> Apr 14</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip inv">529 Plan</span>
+            <span class="prosp-prod-chip ins">Term Life $600K</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Life Event"><i class="fas fa-graduation-cap"></i> Child Age 2</span>
+            <span class="prosp-tp-chip" title="Income Data"><i class="fas fa-briefcase"></i> $165K Income</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$3,400/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P013')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+        {/* P014 — James Okafor (New Lead) */}
+        <div class="prosp-card prosp-card-new" data-id="P014" data-stage="New Lead" data-product="Whole Life" data-score="48" onclick="openProspectModal('P014')" style="cursor:pointer">
+          <div class="prosp-card-top">
+            <div class="prosp-avatar prosp-av-jo">JO</div>
+            <div class="prosp-card-meta">
+              <div class="prosp-name">James Okafor</div>
+              <div class="prosp-role">Real Estate Developer · Age 48 · Newark, NJ</div>
+            </div>
+            <div class="prosp-score-badge cold">48</div>
+          </div>
+          <div class="prosp-stage-row">
+            <span class="prosp-stage-pill new-lead">New Lead</span>
+            <span class="prosp-days-lbl new"><i class="fas fa-star"></i> Added Apr 8</span>
+          </div>
+          <div class="prosp-product-interest">
+            <span class="prosp-prod-chip ins">Whole Life $1M</span>
+            <span class="prosp-prod-chip adv">Business Succession</span>
+          </div>
+          <div class="prosp-third-party-row">
+            <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-building"></i> 3 Properties $4.2M</span>
+            <span class="prosp-tp-chip" title="Public Records"><i class="fas fa-file-alt"></i> LLC Filing Apr 2026</span>
+          </div>
+          <div class="prosp-card-footer">
+            <span class="prosp-value">$12,000/yr</span>
+            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P014')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+          </div>
+        </div>
+
+      </div>{/* end prosp-grid */}
+
+      {/* ── Prospect Detail Modal ── */}
+      <div class="prosp-modal-overlay" id="prosp-modal-overlay" onclick="closeProspectModal(event)" style="display:none">
+        <div class="prosp-modal" id="prosp-modal" onclick="event.stopPropagation()">
+          <button class="prosp-modal-close" onclick="closeProspectModal()"><i class="fas fa-times"></i></button>
+          <div class="prosp-modal-header" id="prosp-modal-header"></div>
+          <div class="prosp-modal-tabs" id="prosp-modal-tabs">
+            <button class="pmt active" data-tab="overview" onclick="switchProspectTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
+            <button class="pmt" data-tab="thirdparty" onclick="switchProspectTab('thirdparty',this)"><i class="fas fa-database"></i> 3rd-Party Intel</button>
+            <button class="pmt" data-tab="products" onclick="switchProspectTab('products',this)"><i class="fas fa-box-open"></i> Product Fit</button>
+            <button class="pmt" data-tab="ai" onclick="switchProspectTab('ai',this)"><i class="fas fa-robot"></i> AI Strategy</button>
+            <button class="pmt" data-tab="timeline" onclick="switchProspectTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
+          </div>
+          <div class="prosp-modal-body" id="prosp-modal-body"></div>
+          <div class="prosp-modal-footer" id="prosp-modal-footer"></div>
+        </div>
+      </div>
+
+      {/* ── Convert to Client Modal ── */}
+      <div class="prosp-convert-overlay" id="prosp-convert-overlay" style="display:none">
+        <div class="prosp-convert-modal">
+          <div class="pcm-header">
+            <i class="fas fa-funnel-dollar pcm-icon"></i>
+            <div>
+              <div class="pcm-title">Move to Sales Pipeline</div>
+              <div class="pcm-sub" id="pcm-sub">This will create a new deal in the Sales Pipeline at Prospect stage and begin the conversion journey.</div>
+            </div>
+          </div>
+          <div class="pcm-body" id="pcm-body"></div>
+          <div class="pcm-footer">
+            <button class="btn btn-outline" onclick="document.getElementById('prosp-convert-overlay').style.display='none'">Cancel</button>
+            <button class="btn btn-primary" id="pcm-confirm-btn" onclick="confirmProspectConversion()"><i class="fas fa-funnel-dollar"></i> Confirm — Move to Pipeline</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   )
 }

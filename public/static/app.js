@@ -16265,7 +16265,7 @@ function openProspectModal(id) {
   footer.innerHTML = `
     <button class="btn btn-outline" onclick="closeProspectModal()"><i class="fas fa-times"></i> Close</button>
     <button class="btn btn-ai" onclick="sendContextMessage('Give me a complete AI sales strategy for prospect ${p.name} — stage ${p.stage}, product interest: ${p.products.join(', ')}, score ${p.score}. Include next best action, talking points, and objection handling.','advisor')"><i class="fas fa-robot"></i> AI Strategy</button>
-    <button class="btn btn-primary" onclick="closeProspectModal();convertProspectToClient('${id}')"><i class="fas fa-user-check"></i> Convert to Client</button>`;
+    <button class="btn btn-primary" onclick="closeProspectModal();convertProspectToClient('${id}')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>`;
 
   renderProspectTab('overview', p);
   overlay.style.display = 'flex';
@@ -16506,11 +16506,11 @@ function convertProspectToClient(id) {
       </div>
     </div>
     <div class="pcm-actions-section">
-      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Add to Active Client Book (248 clients)</div>
-      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Create Deal in Sales Pipeline → Prospect Stage</div>
-      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Generate Add Client pre-filled form (AI 95% fill)</div>
-      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Schedule onboarding discovery call</div>
-      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Send welcome email with product illustrations</div>
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Create new deal in Sales Pipeline at <strong>Prospect</strong> stage</div>
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> AI pre-fills deal card with product interest &amp; estimated value</div>
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Assign next-best-action and set follow-up reminder</div>
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Send prospect intro email with product illustrations</div>
+      <div class="pcm-action-check"><i class="fas fa-info-circle" style="color:#f59e0b"></i> Prospect remains here until deal closes — then promoted to Client</div>
     </div>`;
 
   overlay.style.display = 'flex';
@@ -16529,14 +16529,14 @@ function confirmProspectConversion() {
   toast.className = 'prosp-success-toast';
   toast.innerHTML = `
     <div class="pst-inner">
-      <i class="fas fa-user-check pst-icon"></i>
+      <i class="fas fa-funnel-dollar pst-icon"></i>
       <div>
-        <div class="pst-title">${p.name} converted to Client!</div>
-        <div class="pst-sub">Deal added to Sales Pipeline · Client book now 248 · Welcome email sent</div>
+        <div class="pst-title">${p.name} moved to Sales Pipeline!</div>
+        <div class="pst-sub">Deal created at Prospect stage · Follow-up reminder set · Intro email sent</div>
       </div>
       <div class="pst-actions">
-        <button class="pst-btn" onclick="navigateTo('clients')">View Clients</button>
-        <button class="pst-btn pst-btn-outline" onclick="navigateTo('sales')">View Pipeline</button>
+        <button class="pst-btn" onclick="navigateTo('sales')">View Pipeline</button>
+        <button class="pst-btn pst-btn-outline" onclick="navigateTo('clients')">Clients</button>
       </div>
       <button class="pst-close" onclick="this.closest('.prosp-success-toast').remove()"><i class="fas fa-times"></i></button>
     </div>`;
@@ -16572,62 +16572,430 @@ function openProspectAIAnalysis() {
 }
 
 function openAddProspectModal() {
-  openDashboardModal({
-    icon: 'fa-user-plus',
-    iconBg: '#003087',
-    title: 'Add New Prospect',
-    sub: 'Manually add a prospect or import from 3rd-party data',
-    body: `
-      <div class="pm-add-form">
-        <div class="dgm-alert-banner green"><i class="fas fa-robot"></i> <strong>AI Pre-fill Active:</strong> Enter name or email — AI will search 3rd-party databases and pre-fill available data automatically.</div>
-        <div class="pm-form-row">
-          <div class="pm-form-group">
-            <label class="pm-form-label">First Name *</label>
-            <input class="pm-form-input" type="text" id="ap-fname" placeholder="First name" />
-          </div>
-          <div class="pm-form-group">
-            <label class="pm-form-label">Last Name *</label>
-            <input class="pm-form-input" type="text" id="ap-lname" placeholder="Last name" />
+  // Remove any existing modal
+  const existing = document.getElementById('add-prospect-modal-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'add-prospect-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9200;display:flex;align-items:center;justify-content:center;padding:16px;';
+  overlay.innerHTML = `
+    <div id="add-prospect-modal" style="background:#fff;border-radius:18px;width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.28);overflow:hidden;animation:prospModalIn 0.25s ease">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#003087,#0057c8);padding:20px 24px;display:flex;align-items:center;gap:14px;flex-shrink:0">
+        <i class="fas fa-user-plus" style="font-size:1.6rem;color:#93c5fd"></i>
+        <div style="flex:1">
+          <div style="font-size:1.05rem;font-weight:800;color:#fff">Add New Prospect</div>
+          <div style="font-size:0.78rem;color:#93c5fd;margin-top:2px">Fill in details below — AI will enrich with 3rd-party data on save</div>
+        </div>
+        <button onclick="document.getElementById('add-prospect-modal-overlay').remove()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:32px;height:32px;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- AI Banner -->
+      <div id="ap-ai-banner" style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:10px 24px;display:flex;align-items:center;gap:8px;font-size:0.8rem;color:#92400e;flex-shrink:0">
+        <i class="fas fa-robot" style="color:#d97706"></i>
+        <strong>AI Pre-fill Active:</strong>&nbsp;Enter a name or email and click <em>AI Enrich</em> — AI will search wealth, credit, and life-event databases automatically.
+      </div>
+
+      <!-- Body -->
+      <div style="flex:1;overflow-y:auto;padding:20px 24px">
+
+        <!-- Step indicator -->
+        <div style="display:flex;gap:0;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0">
+          <div id="ap-step-1" style="flex:1;padding:8px 12px;background:#003087;color:#fff;font-size:0.75rem;font-weight:700;text-align:center"><i class="fas fa-user"></i> Contact Info</div>
+          <div id="ap-step-2" style="flex:1;padding:8px 12px;background:#f1f5f9;color:#94a3b8;font-size:0.75rem;font-weight:700;text-align:center"><i class="fas fa-box-open"></i> Product Interest</div>
+          <div id="ap-step-3" style="flex:1;padding:8px 12px;background:#f1f5f9;color:#94a3b8;font-size:0.75rem;font-weight:700;text-align:center"><i class="fas fa-database"></i> 3rd-Party Enrich</div>
+        </div>
+
+        <!-- Step 1: Contact Info -->
+        <div id="ap-panel-1">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div>
+              <label class="pm-form-label">First Name <span style="color:#ef4444">*</span></label>
+              <input class="pm-form-input" id="ap-fname" type="text" placeholder="First name" style="width:100%" />
+            </div>
+            <div>
+              <label class="pm-form-label">Last Name <span style="color:#ef4444">*</span></label>
+              <input class="pm-form-input" id="ap-lname" type="text" placeholder="Last name" style="width:100%" />
+            </div>
+            <div>
+              <label class="pm-form-label">Email</label>
+              <input class="pm-form-input" id="ap-email" type="email" placeholder="email@domain.com" style="width:100%" />
+            </div>
+            <div>
+              <label class="pm-form-label">Phone</label>
+              <input class="pm-form-input" id="ap-phone" type="text" placeholder="(xxx) xxx-xxxx" style="width:100%" />
+            </div>
+            <div>
+              <label class="pm-form-label">Age</label>
+              <input class="pm-form-input" id="ap-age" type="number" placeholder="e.g. 38" style="width:100%" />
+            </div>
+            <div>
+              <label class="pm-form-label">City / Location</label>
+              <input class="pm-form-input" id="ap-city" type="text" placeholder="e.g. Manhattan, NY" style="width:100%" />
+            </div>
+            <div style="grid-column:1/-1">
+              <label class="pm-form-label">Occupation / Role</label>
+              <input class="pm-form-input" id="ap-occ" type="text" placeholder="e.g. Business Owner, Attorney, Physician" style="width:100%" />
+            </div>
           </div>
         </div>
-        <div class="pm-form-row">
-          <div class="pm-form-group">
-            <label class="pm-form-label">Email</label>
-            <input class="pm-form-input" type="email" id="ap-email" placeholder="email@domain.com" />
-          </div>
-          <div class="pm-form-group">
-            <label class="pm-form-label">Phone</label>
-            <input class="pm-form-input" type="text" id="ap-phone" placeholder="(xxx) xxx-xxxx" />
+
+        <!-- Step 2: Product Interest (hidden initially) -->
+        <div id="ap-panel-2" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div>
+              <label class="pm-form-label">Primary Product Interest <span style="color:#ef4444">*</span></label>
+              <select class="pm-form-input" id="ap-product" style="width:100%">
+                <option value="">— Select product —</option>
+                <option>Whole Life Insurance</option>
+                <option>Term Life Insurance</option>
+                <option>Universal Life Insurance</option>
+                <option>Variable Universal Life</option>
+                <option>Fixed Annuity</option>
+                <option>Income Annuity</option>
+                <option>Deferred Annuity</option>
+                <option>Disability Insurance</option>
+                <option>Long-Term Care Insurance</option>
+                <option>529 College Savings Plan</option>
+                <option>SEP-IRA / Retirement Plan</option>
+                <option>Estate Planning Advisory</option>
+                <option>Business Succession Planning</option>
+                <option>Investment Advisory (UMA)</option>
+              </select>
+            </div>
+            <div>
+              <label class="pm-form-label">Estimated Coverage / Value</label>
+              <input class="pm-form-input" id="ap-coverage" type="text" placeholder="e.g. $500K, $1M, $250K AUM" style="width:100%" />
+            </div>
+            <div>
+              <label class="pm-form-label">Lead Source <span style="color:#ef4444">*</span></label>
+              <select class="pm-form-input" id="ap-source" style="width:100%">
+                <option value="">— Select source —</option>
+                <option>Client Referral</option>
+                <option>LinkedIn Outreach</option>
+                <option>Seminar / Event</option>
+                <option>Inbound / Website</option>
+                <option>Cold Outreach</option>
+                <option>Public Records / AI Scan</option>
+                <option>Social Media</option>
+                <option>Networking</option>
+              </select>
+            </div>
+            <div>
+              <label class="pm-form-label">Referred By (if applicable)</label>
+              <input class="pm-form-input" id="ap-refby" type="text" placeholder="e.g. Robert Chen" style="width:100%" />
+            </div>
+            <div>
+              <label class="pm-form-label">Estimated Annual Income</label>
+              <input class="pm-form-input" id="ap-income" type="text" placeholder="e.g. $180,000" style="width:100%" />
+            </div>
+            <div>
+              <label class="pm-form-label">Estimated Net Worth</label>
+              <input class="pm-form-input" id="ap-networth" type="text" placeholder="e.g. $1.2M" style="width:100%" />
+            </div>
+            <div style="grid-column:1/-1">
+              <label class="pm-form-label">Initial Notes</label>
+              <textarea class="pm-form-input" id="ap-notes" rows="3" placeholder="How you met, key context, pain points, urgency level, any life events observed…" style="width:100%;resize:vertical"></textarea>
+            </div>
           </div>
         </div>
-        <div class="pm-form-row">
-          <div class="pm-form-group">
-            <label class="pm-form-label">Product Interest</label>
-            <select class="pm-form-input">
-              <option>Whole Life</option><option>Term Life</option><option>Universal Life</option>
-              <option>Annuity</option><option>Disability</option><option>Advisory</option><option>529 Plan</option>
-            </select>
-          </div>
-          <div class="pm-form-group">
-            <label class="pm-form-label">Lead Source</label>
-            <select class="pm-form-input">
-              <option>Referral</option><option>LinkedIn</option><option>Seminar</option>
-              <option>Inbound</option><option>Cold Outreach</option><option>Public Record</option>
-            </select>
-          </div>
+
+        <!-- Step 3: AI Enrich preview (hidden initially) -->
+        <div id="ap-panel-3" style="display:none">
+          <div id="ap-enrich-content"></div>
         </div>
-        <div class="pm-form-row">
-          <div class="pm-form-group" style="flex:1">
-            <label class="pm-form-label">Notes</label>
-            <textarea class="pm-form-input" rows="2" placeholder="Initial context, how you met, etc."></textarea>
-          </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-top:1px solid #e2e8f0;background:#f8fafc;flex-shrink:0">
+        <button id="ap-btn-back" onclick="apStep('back')" style="display:none;" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</button>
+        <div style="display:flex;gap:10px;margin-left:auto">
+          <button class="btn btn-outline" onclick="document.getElementById('add-prospect-modal-overlay').remove()">Cancel</button>
+          <button id="ap-btn-next" class="btn btn-primary" onclick="apStep('next')">Next: Product Interest <i class="fas fa-arrow-right"></i></button>
         </div>
-      </div>`,
-    footer: `
-      <button class="btn btn-outline" onclick="closeDashboardModal()">Cancel</button>
-      <button class="btn btn-ai" onclick="closeDashboardModal();showToast('AI enriching prospect data from 3rd-party sources...')"><i class="fas fa-robot"></i> AI Enrich & Add</button>
-      <button class="btn btn-primary" onclick="closeDashboardModal();showToast('Prospect added to pipeline!')"><i class="fas fa-plus"></i> Add Prospect</button>`
+      </div>
+
+    </div>`;
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  document.getElementById('ap-fname')?.focus();
+}
+
+// ── Add Prospect step navigation ─────────────────────────────────────────────
+let _apCurrentStep = 1;
+
+function apStep(dir) {
+  const fname = document.getElementById('ap-fname')?.value.trim();
+  const lname = document.getElementById('ap-lname')?.value.trim();
+
+  if (dir === 'next') {
+    if (_apCurrentStep === 1) {
+      if (!fname || !lname) {
+        // Shake the name fields
+        ['ap-fname','ap-lname'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && !el.value.trim()) {
+            el.style.borderColor = '#ef4444';
+            el.style.animation = 'none';
+            setTimeout(() => { el.style.borderColor = ''; }, 2000);
+          }
+        });
+        showToast('Please enter at least a first and last name.');
+        return;
+      }
+      _apCurrentStep = 2;
+      apShowStep(2);
+    } else if (_apCurrentStep === 2) {
+      const product = document.getElementById('ap-product')?.value;
+      const source  = document.getElementById('ap-source')?.value;
+      if (!product || !source) {
+        showToast('Please select a product interest and lead source.');
+        return;
+      }
+      _apCurrentStep = 3;
+      apShowStep(3);
+      apRunEnrich(fname, lname);
+    } else if (_apCurrentStep === 3) {
+      apSaveProspect();
+    }
+  } else {
+    _apCurrentStep = Math.max(1, _apCurrentStep - 1);
+    apShowStep(_apCurrentStep);
+  }
+}
+
+function apShowStep(step) {
+  [1,2,3].forEach(n => {
+    const panel = document.getElementById(`ap-panel-${n}`);
+    const stepEl = document.getElementById(`ap-step-${n}`);
+    if (!panel || !stepEl) return;
+    const active = n === step;
+    const done   = n < step;
+    panel.style.display = active ? '' : 'none';
+    stepEl.style.background = active ? '#003087' : done ? '#dcfce7' : '#f1f5f9';
+    stepEl.style.color       = active ? '#fff'    : done ? '#16a34a' : '#94a3b8';
   });
+
+  const backBtn = document.getElementById('ap-btn-back');
+  const nextBtn = document.getElementById('ap-btn-next');
+  if (backBtn) backBtn.style.display = step > 1 ? '' : 'none';
+  if (nextBtn) {
+    if (step === 3) {
+      nextBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Prospect';
+    } else {
+      nextBtn.innerHTML = step === 2 ? 'Next: AI Enrich <i class="fas fa-arrow-right"></i>' : 'Next: Product Interest <i class="fas fa-arrow-right"></i>';
+    }
+  }
+}
+
+function apRunEnrich(fname, lname) {
+  const container = document.getElementById('ap-enrich-content');
+  if (!container) return;
+  container.innerHTML = `
+    <div style="text-align:center;padding:32px 16px">
+      <i class="fas fa-database" style="font-size:2rem;color:#003087;animation:livePulse 1s infinite"></i>
+      <div style="margin-top:12px;font-weight:700;color:#1e293b">Searching 3rd-party databases…</div>
+      <div style="font-size:0.78rem;color:#64748b;margin-top:4px">Wealth Intelligence · Credit Signals · Public Records · Life Events · Business Registry</div>
+      <div id="ap-enrich-progress" style="margin-top:16px;display:flex;flex-direction:column;gap:6px;text-align:left;max-width:340px;margin-inline:auto"></div>
+    </div>`;
+
+  const steps = [
+    { icon: 'fa-gem',          color: '#7c3aed', text: 'Querying Wealth Intelligence (Experian WealthEngine)…' },
+    { icon: 'fa-star',         color: '#f59e0b', text: 'Pulling Credit Signals (soft pull, no inquiry)…'       },
+    { icon: 'fa-building',     color: '#0891b2', text: 'Searching Business Registry (Dun & Bradstreet)…'      },
+    { icon: 'fa-calendar-alt', color: '#059669', text: 'Scanning Life Event Monitors (LinkedIn + Public Records)…' },
+    { icon: 'fa-robot',        color: '#003087', text: 'AI scoring prospect — calculating conversion probability…' },
+  ];
+
+  const prog = document.getElementById('ap-enrich-progress');
+  let i = 0;
+  const ticker = setInterval(() => {
+    if (!prog) { clearInterval(ticker); return; }
+    if (i < steps.length) {
+      const s = steps[i];
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.78rem;color:#374151;animation:toastIn 0.3s ease';
+      row.innerHTML = `<i class="fas ${s.icon}" style="color:${s.color};width:14px"></i> ${s.text}`;
+      prog.appendChild(row);
+      i++;
+    } else {
+      clearInterval(ticker);
+      // Generate simulated enrichment result
+      const income    = document.getElementById('ap-income')?.value    || _apRandPick(['$120,000','$165,000','$210,000','$285,000','$380,000']);
+      const netWorth  = document.getElementById('ap-networth')?.value  || _apRandPick(['$380K','$620K','$940K','$1.4M','$2.1M']);
+      const credit    = _apRandPick([698, 724, 751, 768, 790, 812]);
+      const age       = document.getElementById('ap-age')?.value       || _apRandPick([31,36,42,47,53]);
+      const product   = document.getElementById('ap-product')?.value   || 'Whole Life Insurance';
+      const aiScore   = Math.floor(Math.random() * 30) + 52; // 52–81
+      const scoreColor = aiScore >= 80 ? '#22c55e' : aiScore >= 60 ? '#f59e0b' : '#ef4444';
+      const scoreLabel = aiScore >= 80 ? '🔥 Hot' : aiScore >= 60 ? '📊 Warm' : '❄️ Cold';
+      const lifeEvents = _apPickLifeEvents();
+
+      container.innerHTML = `
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+          <i class="fas fa-check-circle" style="color:#16a34a;font-size:1.2rem"></i>
+          <div>
+            <div style="font-weight:700;color:#15803d">AI Enrichment Complete</div>
+            <div style="font-size:0.76rem;color:#64748b">Data found across 4 sources. Review below and adjust before saving.</div>
+          </div>
+          <div style="margin-left:auto;background:${scoreColor}18;color:${scoreColor};border:1px solid ${scoreColor}40;border-radius:20px;padding:4px 14px;font-size:0.85rem;font-weight:800">${aiScore} ${scoreLabel}</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px">
+            <div style="font-size:0.72rem;font-weight:700;color:#7c3aed;margin-bottom:8px"><i class="fas fa-gem"></i> WEALTH INTELLIGENCE</div>
+            <div style="font-size:0.78rem;color:#374151"><span style="color:#64748b">Est. Income:</span> <strong>${income}</strong></div>
+            <div style="font-size:0.78rem;color:#374151;margin-top:4px"><span style="color:#64748b">Net Worth:</span> <strong>${netWorth}</strong></div>
+            <div style="font-size:0.72rem;color:#94a3b8;margin-top:6px;font-style:italic">Source: Experian WealthEngine</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px">
+            <div style="font-size:0.72rem;font-weight:700;color:#f59e0b;margin-bottom:8px"><i class="fas fa-star"></i> CREDIT SIGNALS</div>
+            <div style="font-size:1.4rem;font-weight:800;color:${credit>=750?'#22c55e':credit>=700?'#f59e0b':'#ef4444'}">${credit}</div>
+            <div style="font-size:0.72rem;color:#64748b">${credit>=750?'Excellent':'Good'} — soft pull only</div>
+            <div style="font-size:0.72rem;color:#94a3b8;margin-top:6px;font-style:italic">Source: Equifax PreScreen</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px">
+            <div style="font-size:0.72rem;font-weight:700;color:#0891b2;margin-bottom:8px"><i class="fas fa-calendar-alt"></i> LIFE EVENTS</div>
+            ${lifeEvents.map(e=>`<div style="font-size:0.78rem;color:#374151;margin-bottom:3px"><i class="fas ${e.icon}" style="color:${e.color};width:14px"></i> ${e.text}</div>`).join('')}
+            <div style="font-size:0.72rem;color:#94a3b8;margin-top:6px;font-style:italic">Source: LinkedIn · Public Records</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px">
+            <div style="font-size:0.72rem;font-weight:700;color:#003087;margin-bottom:8px"><i class="fas fa-robot"></i> AI RECOMMENDATION</div>
+            <div style="font-size:0.78rem;color:#374151">Lead Score: <strong style="color:${scoreColor}">${aiScore}/100</strong></div>
+            <div style="font-size:0.78rem;color:#374151;margin-top:4px">Best Product: <strong>${product}</strong></div>
+            <div style="font-size:0.78rem;color:#374151;margin-top:4px">Priority: <strong>${aiScore>=70?'High — contact within 48h':'Medium — nurture sequence'}</strong></div>
+            <div style="font-size:0.72rem;color:#94a3b8;margin-top:6px;font-style:italic">Source: NOVA AI Engine</div>
+          </div>
+        </div>
+
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#92400e">
+          <i class="fas fa-info-circle"></i> Review the enriched data above. Click <strong>Add Prospect</strong> to save and add to your pipeline.
+        </div>`;
+    }
+  }, 520);
+}
+
+function _apRandPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function _apPickLifeEvents() {
+  const pool = [
+    { icon: 'fa-home',           color: '#0891b2', text: 'Recent home purchase (public record)'          },
+    { icon: 'fa-baby',           color: '#7c3aed', text: 'New child / expanding family (LinkedIn)'       },
+    { icon: 'fa-briefcase',      color: '#059669', text: 'New job / promotion detected (LinkedIn)'       },
+    { icon: 'fa-graduation-cap', color: '#d97706', text: 'College-age child — 529 window open'           },
+    { icon: 'fa-ring',           color: '#e11d48', text: 'Recent marriage (public records)'              },
+    { icon: 'fa-building',       color: '#0891b2', text: 'New LLC filing (business registry)'            },
+    { icon: 'fa-umbrella-beach', color: '#d97706', text: 'Approaching retirement age (AI flag)'         },
+    { icon: 'fa-file-alt',       color: '#64748b', text: 'Trust filing detected (county records)'        },
+  ];
+  // Pick 2 random events
+  const shuffled = pool.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 2);
+}
+
+function apSaveProspect() {
+  const fname   = document.getElementById('ap-fname')?.value.trim();
+  const lname   = document.getElementById('ap-lname')?.value.trim();
+  const email   = document.getElementById('ap-email')?.value.trim()  || '—';
+  const phone   = document.getElementById('ap-phone')?.value.trim()  || '—';
+  const age     = document.getElementById('ap-age')?.value.trim()    || '—';
+  const city    = document.getElementById('ap-city')?.value.trim()   || 'New York';
+  const occ     = document.getElementById('ap-occ')?.value.trim()    || 'Professional';
+  const product = document.getElementById('ap-product')?.value       || 'Whole Life Insurance';
+  const source  = document.getElementById('ap-source')?.value        || 'Referral';
+  const refBy   = document.getElementById('ap-refby')?.value.trim()  || '';
+  const notes   = document.getElementById('ap-notes')?.value.trim()  || '';
+  const income  = document.getElementById('ap-income')?.value.trim() || '$120,000';
+  const nw      = document.getElementById('ap-networth')?.value.trim() || '$400K';
+
+  if (!fname || !lname) { showToast('First and last name are required.'); return; }
+
+  const initials = (fname[0] + lname[0]).toUpperCase();
+  const fullName = `${fname} ${lname}`;
+  const aiScore  = Math.floor(Math.random() * 25) + 50; // 50–74 for new leads
+  const scoreClass = aiScore >= 80 ? 'hot' : aiScore >= 50 ? 'warm' : 'cold';
+
+  // Build and inject new card into the grid
+  const grid = document.getElementById('prosp-grid');
+  if (grid) {
+    const newId = `P${String(Date.now()).slice(-4)}`;
+    const card  = document.createElement('div');
+    card.className = 'prosp-card prosp-card-new';
+    card.dataset.id      = newId;
+    card.dataset.stage   = 'New Lead';
+    card.dataset.product = product.split(' ')[0];
+    card.dataset.score   = String(aiScore);
+    card.style.cursor    = 'pointer';
+    card.style.opacity   = '0';
+    card.style.transform = 'scale(0.9)';
+    card.style.transition = 'all 0.4s ease';
+    card.innerHTML = `
+      <div class="prosp-card-top">
+        <div class="prosp-avatar" style="background:linear-gradient(135deg,#003087,#0057c8)">${initials}</div>
+        <div class="prosp-card-meta">
+          <div class="prosp-name">${fullName}</div>
+          <div class="prosp-role">${occ} · ${city}</div>
+        </div>
+        <div class="prosp-score-badge ${scoreClass}">${aiScore}</div>
+      </div>
+      <div class="prosp-stage-row">
+        <span class="prosp-stage-pill new-lead">New Lead</span>
+        <span class="prosp-days-lbl new"><i class="fas fa-star"></i> Just Added</span>
+      </div>
+      <div class="prosp-product-interest">
+        <span class="prosp-prod-chip ins">${product}</span>
+      </div>
+      <div class="prosp-third-party-row">
+        <span class="prosp-tp-chip" title="Income Data"><i class="fas fa-briefcase"></i> ${income} Income</span>
+        <span class="prosp-tp-chip" title="Net Worth"><i class="fas fa-gem"></i> ${nw} NW</span>
+      </div>
+      <div class="prosp-card-footer">
+        <span class="prosp-value">${refBy ? 'Ref: ' + refBy : source}</span>
+        <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('${newId}')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+      </div>`;
+
+    card.onclick = () => {
+      // Show a lightweight quick-view for new prospects not yet in prospectData
+      showToast(`${fullName} — ${product} · ${city} · AI Score: ${aiScore}`);
+    };
+
+    grid.prepend(card);
+    requestAnimationFrame(() => {
+      card.style.opacity   = '1';
+      card.style.transform = 'scale(1)';
+    });
+
+    // Update count label
+    const lbl = document.getElementById('prosp-count-lbl');
+    if (lbl) {
+      const cur = parseInt(lbl.textContent) || 14;
+      lbl.textContent = `Showing ${cur + 1} prospects`;
+    }
+  }
+
+  // Close modal
+  document.getElementById('add-prospect-modal-overlay')?.remove();
+
+  // Success toast
+  const t = document.createElement('div');
+  t.className = 'prosp-success-toast';
+  t.innerHTML = `
+    <div class="pst-inner">
+      <i class="fas fa-user-plus pst-icon"></i>
+      <div>
+        <div class="pst-title">${fullName} added to Prospects!</div>
+        <div class="pst-sub">New Lead · ${product} · AI Score ${aiScore} · ${source}${notes ? ' — "' + notes.slice(0,40) + (notes.length>40?'…':'') + '"' : ''}</div>
+      </div>
+      <button class="pst-close" onclick="this.closest('.prosp-success-toast').remove()"><i class="fas fa-times"></i></button>
+    </div>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 6000);
+
+  _apCurrentStep = 1;
 }
 
 function showToast(msg) {
