@@ -14701,3 +14701,257 @@ function openAddClientNewProfileModal(name, id) {
 }
 
 console.log('Add Client modal loaded — openAddClientModal, closeAddClientModal, aiPreFillClient, saveNewClient');
+
+// ============================================================
+// ACTION ITEM MODAL — openActionItemModal(id)
+// Opens a rich detail modal for each Dashboard Action Item
+// ============================================================
+
+function openActionItemModal(id) {
+  const items = {
+
+    'renewal-sandra': {
+      icon: 'fa-sync-alt', iconBg: 'linear-gradient(135deg,#be185d,#ec4899)',
+      title: 'Policy Renewal Due — Sandra Williams',
+      sub: 'Insurance · Urgent · Policy P-100320 expires Sep 30, 2026',
+      body: `
+        <div class="dgm-alert-banner red"><i class="fas fa-exclamation-circle"></i> <strong>153 days to renewal deadline.</strong> Term policy expires Sep 30, 2026 — action required now.</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span class="dgm-dl">Client</span><span class="dgm-dv">Sandra Williams · Age 61 · Queens, NY</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Policy</span><span class="dgm-dv">P-100320 · 20-Year Term Life Insurance</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Face Value</span><span class="dgm-dv">$350,000</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Current Premium</span><span class="dgm-dv">$2,800/yr · due Sep 2026</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Beneficiary</span><span class="dgm-dv">Michael Williams</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Issue Date</span><span class="dgm-dv">Sep 30, 2016 (10 years in-force)</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Lapse Risk Score</span><span class="dgm-dv" style="color:#dc2626;font-weight:700">79 / 100 — HIGH</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Last Contact</span><span class="dgm-dv">Mar 20, 2026 (21 days ago)</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Actions</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item urgent"><i class="fas fa-phone" style="color:#dc2626"></i> Call Sandra today — present renewal quote + Whole Life conversion option</div>
+          <div class="dgm-action-item"><i class="fas fa-envelope" style="color:#003087"></i> Send renewal quote email with comparison: Term renewal vs WL conversion</div>
+          <div class="dgm-action-item"><i class="fas fa-file-alt" style="color:#7c3aed"></i> Prepare LTC + retirement income illustration (age 61 — near retirement)</div>
+          <div class="dgm-action-item"><i class="fas fa-calendar" style="color:#059669"></i> Book Apr 11 renewal quote review call (already on calendar)</div>
+        </div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val red">153d</div><div class="dgm-stat-lbl">Days to Expiry</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$8.4K</div><div class="dgm-stat-lbl">Premium at Risk</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">+$5.6K</div><div class="dgm-stat-lbl">WL Upsell Potential</div></div>
+        </div>`,
+      footer: `
+        <button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(4)"><i class="fas fa-user"></i> Open Sandra's Profile</button>
+        <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Draft a renewal quote email for Sandra Williams, Policy P-100320, Term Life $350K expiring Sep 2026. Include Whole Life conversion option and LTC comparison.','advisor')"><i class="fas fa-robot"></i> Draft Renewal Email</button>
+        <button class="btn btn-outline" onclick="closeDashboardModal();openPolicyModal('P-100320')"><i class="fas fa-file-contract"></i> View Policy</button>`
+    },
+
+    'annuity-patricia': {
+      icon: 'fa-coins', iconBg: 'linear-gradient(135deg,#059669,#10b981)',
+      title: 'Annuity Review — Patricia Nguyen',
+      sub: 'Investments · AI Alert · Deferred annuity illustration ready',
+      body: `
+        <div class="dgm-alert-banner gold"><i class="fas fa-robot"></i> <strong>AI Alert:</strong> Fed rate +0.25% creates optimal annuity lock-in window — act within 2 weeks.</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span class="dgm-dl">Client</span><span class="dgm-dv">Patricia Nguyen · Age 38 · Brooklyn, NY</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Segment</span><span class="dgm-dv">Mid Market · Client Score 87/100</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Opportunity</span><span class="dgm-dv">Deferred Annuity — lock in favorable rates post-Fed hike</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Projected Premium</span><span class="dgm-dv">$3,000/yr · 10-year deferral period</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Est. Income at 50</span><span class="dgm-dv">~$1,200/mo guaranteed lifetime income</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Current Coverage Gap</span><span class="dgm-dv">No retirement or investment products · UL under-funded</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">UL Lapse Risk</span><span class="dgm-dv" style="color:#dc2626;font-weight:700">Score 87 — Lapse ~Jun 20, 2026</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Meeting</span><span class="dgm-dv">Today 12:00 PM — UL Policy Review (Urgent)</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Actions</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item urgent"><i class="fas fa-exclamation-circle" style="color:#dc2626"></i> Call Patricia at 12:00 PM — UL funding gap is critical, lapse in ~68 days</div>
+          <div class="dgm-action-item"><i class="fas fa-chart-bar" style="color:#059669"></i> Present deferred annuity illustration at today's policy review meeting</div>
+          <div class="dgm-action-item"><i class="fas fa-user-shield" style="color:#7c3aed"></i> Prepare Disability Income quote — $2,000/yr opportunity, no DI coverage</div>
+          <div class="dgm-action-item"><i class="fas fa-robot" style="color:#003087"></i> Run AI retention analysis to address UL under-funding before lapse date</div>
+        </div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val red">68d</div><div class="dgm-stat-lbl">UL Lapse Risk</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">$3K/yr</div><div class="dgm-stat-lbl">Annuity Opportunity</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val" style="color:#7c3aed">$2K/yr</div><div class="dgm-stat-lbl">DI Opportunity</div></div>
+        </div>`,
+      footer: `
+        <button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(2)"><i class="fas fa-user"></i> Open Patricia's Profile</button>
+        <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Generate a deferred annuity illustration for Patricia Nguyen, age 38, $3,000/yr premium, 10-year deferral. Also flag UL under-funding lapse risk for immediate action.','advisor')"><i class="fas fa-robot"></i> Generate Illustration</button>
+        <button class="btn btn-outline" onclick="closeDashboardModal();openAIBriefAction('lapse-patricia')"><i class="fas fa-shield-alt"></i> Lapse Risk Detail</button>`
+    },
+
+    'followup-kevin': {
+      icon: 'fa-phone', iconBg: 'linear-gradient(135deg,#0891b2,#06b6d4)',
+      title: 'Follow-up — Kevin Park',
+      sub: 'Insurance · Urgent · Pending application needs response',
+      body: `
+        <div class="dgm-alert-banner red"><i class="fas fa-exclamation-circle"></i> <strong>Application pending 12 days.</strong> No response from Kevin Park — risk of abandonment.</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span class="dgm-dl">Client</span><span class="dgm-dv">Kevin Park · Age 29 · Jersey City, NJ</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Segment</span><span class="dgm-dv">Emerging · Client Score 65/100</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Application</span><span class="dgm-dv">Term Life Insurance · 20-Year · $250K face value</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Policy #</span><span class="dgm-dv">P-100350 (Pending)</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Annual Premium</span><span class="dgm-dv">$1,800/yr</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Application Status</span><span class="dgm-dv" style="color:#f59e0b;font-weight:700">Pending — awaiting client response · 12 days</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Today's Meeting</span><span class="dgm-dv">10:30 AM — Policy Follow-up Call (Now)</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Last Contact</span><span class="dgm-dv">Apr 1, 2026 (9 days ago)</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Actions</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item urgent"><i class="fas fa-phone" style="color:#dc2626"></i> Call Kevin NOW — application pending 12 days, abandonment risk rising</div>
+          <div class="dgm-action-item"><i class="fas fa-envelope" style="color:#003087"></i> Send application status reminder email with easy DocuSign link</div>
+          <div class="dgm-action-item"><i class="fas fa-sms" style="color:#059669"></i> Send SMS nudge — "Kevin, your $250K life insurance app is ready to finalize"</div>
+          <div class="dgm-action-item"><i class="fas fa-graduation-cap" style="color:#7c3aed"></i> Upsell: Add 529 plan to conversation ($1,200/yr — young family stage)</div>
+        </div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val red">12d</div><div class="dgm-stat-lbl">App Pending</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$1.8K/yr</div><div class="dgm-stat-lbl">Premium at Stake</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">$540</div><div class="dgm-stat-lbl">Commission</div></div>
+        </div>`,
+      footer: `
+        <button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(7)"><i class="fas fa-user"></i> Open Kevin's Profile</button>
+        <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Prepare a follow-up brief for Kevin Park — Term Life $250K application pending 12 days. Include key talking points, objection handling, and a 529 plan upsell script for age 29 client.','smart-advisor')"><i class="fas fa-robot"></i> Prepare Call Brief</button>
+        <button class="btn btn-outline" onclick="closeDashboardModal();openMeetingBrief('MTG-001')"><i class="fas fa-calendar"></i> Meeting Brief</button>`
+    },
+
+    'retirement-james': {
+      icon: 'fa-umbrella-beach', iconBg: 'linear-gradient(135deg,#d97706,#f59e0b)',
+      title: 'Retirement Planning — James Whitfield',
+      sub: 'Retirement · AI Insight · Income annuity conversation at age 52',
+      body: `
+        <div class="dgm-alert-banner blue"><i class="fas fa-lightbulb"></i> <strong>AI Insight:</strong> Age 52 is the ideal income annuity entry point — 13-year growth window before retirement. High close probability.</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span class="dgm-dl">Client</span><span class="dgm-dv">James Whitfield · Age 52 · New York, NY</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Segment</span><span class="dgm-dv">High Value · Client Score 92/100</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Retirement Goal</span><span class="dgm-dv">Age 65 · ~13-year accumulation window</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Opportunity</span><span class="dgm-dv">Deferred Income Annuity — lock in today's favorable rates</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Projected Premium</span><span class="dgm-dv">$12,000/yr · 13-year deferral</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Est. Income at 65</span><span class="dgm-dv">~$2,800/mo guaranteed lifetime income</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Current Products</span><span class="dgm-dv">WL $500K + Term $750K + LTC $250K · No retirement product yet</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Meeting</span><span class="dgm-dv">Apr 18 — Retirement Planning (60 min, Video)</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Actions</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-chart-bar" style="color:#d97706"></i> Prepare deferred annuity illustration before Apr 18 meeting</div>
+          <div class="dgm-action-item"><i class="fas fa-balance-scale" style="color:#059669"></i> Run scenario comparison: Deferred Annuity vs IRA vs 401(k) continuation</div>
+          <div class="dgm-action-item"><i class="fas fa-landmark" style="color:#7c3aed"></i> Coordinate with estate planning — trust + annuity beneficiary alignment</div>
+          <div class="dgm-action-item"><i class="fas fa-piggy-bank" style="color:#003087"></i> Present Whole Life cash value as retirement income supplement (~$85K CV)</div>
+        </div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val" style="color:#d97706">$12K/yr</div><div class="dgm-stat-lbl">Annuity Premium</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">$2,800/mo</div><div class="dgm-stat-lbl">Est. at Age 65</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">Apr 18</div><div class="dgm-stat-lbl">Next Meeting</div></div>
+        </div>`,
+      footer: `
+        <button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(1)"><i class="fas fa-user"></i> Open James's Profile</button>
+        <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Generate a deferred annuity illustration for James Whitfield, age 52, $12,000/yr premium, targeting retirement at 65. Show income comparison vs other retirement vehicles.','advisor')"><i class="fas fa-robot"></i> Generate Illustration</button>
+        <button class="btn btn-outline" onclick="closeDashboardModal();openMeetingBrief('MTG-005')"><i class="fas fa-calendar"></i> Apr 18 Meeting Brief</button>`
+    },
+
+    'estate-james': {
+      icon: 'fa-landmark', iconBg: 'linear-gradient(135deg,#7c3aed,#a855f7)',
+      title: 'Estate Planning — James Whitfield',
+      sub: 'Advisory · AI Insight · Trust review + will update recommended',
+      body: `
+        <div class="dgm-alert-banner purple"><i class="fas fa-lightbulb"></i> <strong>AI Insight:</strong> Estate plan last updated 2020. Major life changes since — recommend comprehensive review before Apr 18 meeting.</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span class="dgm-dl">Client</span><span class="dgm-dv">James Whitfield · Age 52 · New York, NY</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Segment</span><span class="dgm-dv">High Value · Client Score 92/100</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Estate Value</span><span class="dgm-dv">~$1.25M (WL cash value + policies + assets)</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Advisory Product</span><span class="dgm-dv">A-300091 · Will & Trust Review (In Progress since 2025)</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Advisory Fee</span><span class="dgm-dv">Included in premium relationship</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Key Gaps Identified</span><span class="dgm-dv">Beneficiary alignment · Trust update · POA review</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Life Insurance</span><span class="dgm-dv">WL $500K (Emily Whitfield) · Term $750K · LTC $250K</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Next Step</span><span class="dgm-dv">Estate attorney coordination required — target Q2 2026</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Actions</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-file-signature" style="color:#7c3aed"></i> Review trust document — confirm beneficiary names match all policy records</div>
+          <div class="dgm-action-item"><i class="fas fa-user-tie" style="color:#003087"></i> Coordinate with estate attorney — schedule review for May 2026</div>
+          <div class="dgm-action-item"><i class="fas fa-shield-alt" style="color:#059669"></i> Add deferred annuity to estate plan — $12K/yr, annuity trust beneficiary</div>
+          <div class="dgm-action-item"><i class="fas fa-file-contract" style="color:#d97706"></i> Update POA and healthcare directive — overdue per AI review</div>
+        </div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val" style="color:#7c3aed">$1.25M</div><div class="dgm-stat-lbl">Estate Value</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">3 Gaps</div><div class="dgm-stat-lbl">Documents Needed</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">Q2 2026</div><div class="dgm-stat-lbl">Target Completion</div></div>
+        </div>`,
+      footer: `
+        <button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(1)"><i class="fas fa-user"></i> Open James's Profile</button>
+        <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Run an estate planning analysis for James Whitfield — review trust, beneficiary alignment across all 3 policies, POA, and coordinate with deferred annuity retirement plan.','advisor')"><i class="fas fa-robot"></i> Run Estate Analysis</button>
+        <button class="btn btn-outline" onclick="closeDashboardModal()"><i class="fas fa-times"></i> Close</button>`
+    },
+
+    'wealth-linda': {
+      icon: 'fa-gem', iconBg: 'linear-gradient(135deg,#c026d3,#e879f9)',
+      title: 'Wealth Management — Linda Morrison',
+      sub: 'Advisory · Scheduled · UMA account candidate — $500K+ assets',
+      body: `
+        <div class="dgm-alert-banner green"><i class="fas fa-chart-line"></i> <strong>Top client opportunity:</strong> Linda is a Premium segment client (Score 98) with $812K total value. UMA expansion could add $5K/yr advisory fee.</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span class="dgm-dl">Client</span><span class="dgm-dv">Linda Morrison · Age 56 · Long Island, NY</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Segment</span><span class="dgm-dv">Premium · Client Score 98/100 · Top Client</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Total Relationship Value</span><span class="dgm-dv" style="color:#059669;font-weight:700">$812,000</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Current UMA</span><span class="dgm-dv">A-300201 · $280K AUM · 1% fee · $2,800/yr</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Expansion Opportunity</span><span class="dgm-dv">Add $200K+ from Mutual Funds + ETF portfolio to UMA wrap</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Additional Fee Potential</span><span class="dgm-dv">$5,000/yr (from $500K total managed)</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Investment Holdings</span><span class="dgm-dv">Mutual Funds $180K (+9.4%) · ETF $100K (+12.1%) · Def. Annuity $280K</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Annual Review</span><span class="dgm-dv">Apr 15, 2026 (90 min) — Estate + UMA focus</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Actions</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-network-wired" style="color:#c026d3"></i> Prepare UMA expansion proposal — consolidate $480K across Mutual Funds, ETF, annuity</div>
+          <div class="dgm-action-item"><i class="fas fa-landmark" style="color:#7c3aed"></i> Coordinate estate trust update — $2M+ estate, coordinate with A-300202</div>
+          <div class="dgm-action-item"><i class="fas fa-chart-pie" style="color:#059669"></i> Present portfolio rebalancing strategy — ETF +12.1%, consider taking profits</div>
+          <div class="dgm-action-item"><i class="fas fa-star" style="color:#d97706"></i> Request referrals — NPS top score, highest relationship value in book</div>
+        </div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val" style="color:#c026d3">$812K</div><div class="dgm-stat-lbl">Relationship Value</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">$5K/yr</div><div class="dgm-stat-lbl">UMA Fee Potential</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">Apr 15</div><div class="dgm-stat-lbl">Annual Review</div></div>
+        </div>`,
+      footer: `
+        <button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(8)"><i class="fas fa-user"></i> Open Linda's Profile</button>
+        <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Prepare a UMA expansion proposal for Linda Morrison — consolidate $480K across Mutual Funds, ETF portfolio, and Deferred Annuity into a Unified Managed Account. Include fee comparison and performance summary.','advisor')"><i class="fas fa-robot"></i> Prepare UMA Proposal</button>
+        <button class="btn btn-outline" onclick="closeDashboardModal();openMeetingBrief('MTG-006')"><i class="fas fa-calendar"></i> Apr 15 Meeting Brief</button>`
+    },
+
+    'claim-robert': {
+      icon: 'fa-file-medical-alt', iconBg: 'linear-gradient(135deg,#d97706,#f59e0b)',
+      title: 'Claim Review — Robert Chen',
+      sub: 'Insurance · In Progress · Claim CLM-2026-0041 awaiting adjuster',
+      body: `
+        <div class="dgm-alert-banner gold"><i class="fas fa-clock"></i> <strong>Claim in review 8 days.</strong> Adjuster review pending — upload supplemental documents to expedite.</div>
+        <div class="dgm-detail-grid">
+          <div class="dgm-detail-row"><span class="dgm-dl">Client</span><span class="dgm-dv">Robert Chen · Age 45 · Manhattan, NY</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Segment</span><span class="dgm-dv">High Value · Client Score 96/100</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Claim ID</span><span class="dgm-dv">CLM-2026-0041</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Policy</span><span class="dgm-dv">P-100310 · Whole Life Insurance · $1M face value</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Claim Type</span><span class="dgm-dv">Medical / Disability Claim</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Filed</span><span class="dgm-dv">Apr 2, 2026 · 8 days in review</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Status</span><span class="dgm-dv" style="color:#f59e0b;font-weight:700">Awaiting Adjuster · Documents uploaded Apr 8</span></div>
+          <div class="dgm-detail-row"><span class="dgm-dl">Video Meeting</span><span class="dgm-dv">Today 2:00 PM — Claim Status Update (45 min)</span></div>
+        </div>
+        <div class="dgm-section-title"><i class="fas fa-robot"></i> AI Recommended Actions</div>
+        <div class="dgm-action-list">
+          <div class="dgm-action-item"><i class="fas fa-video" style="color:#d97706"></i> Join 2:00 PM video call — update Robert on claim status and timeline</div>
+          <div class="dgm-action-item"><i class="fas fa-file-upload" style="color:#003087"></i> Upload supplemental documentation to expedite adjuster review</div>
+          <div class="dgm-action-item"><i class="fas fa-phone" style="color:#059669"></i> Contact adjuster directly — target resolution within 5-day SLA</div>
+          <div class="dgm-action-item"><i class="fas fa-briefcase" style="color:#7c3aed"></i> Review business continuation plan — NQDC + key-person coverage during claim</div>
+        </div>
+        <div class="dgm-stat-row">
+          <div class="dgm-stat"><div class="dgm-stat-val" style="color:#d97706">8 Days</div><div class="dgm-stat-lbl">Claim Age</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val">$1M</div><div class="dgm-stat-lbl">Policy Face Value</div></div>
+          <div class="dgm-stat"><div class="dgm-stat-val green">2:00 PM</div><div class="dgm-stat-lbl">Today's Meeting</div></div>
+        </div>`,
+      footer: `
+        <button class="btn btn-primary" onclick="closeDashboardModal();openClientModal(3)"><i class="fas fa-user"></i> Open Robert's Profile</button>
+        <button class="btn btn-ai" onclick="closeDashboardModal();sendContextMessage('Prepare a claim status update brief for Robert Chen — Claim CLM-2026-0041, Policy P-100310 Whole Life $1M. Include timeline, next steps, and business continuation coverage review.','advisor')"><i class="fas fa-robot"></i> Prepare Claim Brief</button>
+        <button class="btn btn-outline" onclick="closeDashboardModal();openClaimModal('CLM-2026-0041')"><i class="fas fa-file-alt"></i> View Claim Details</button>`
+    }
+  };
+
+  const d = items[id];
+  if (!d) return;
+  openDashboardModal({ icon: d.icon, iconBg: d.iconBg, title: d.title, sub: d.sub, body: d.body, footer: d.footer });
+}
+
+console.log('Action Item modals loaded — openActionItemModal() ready for all 7 dashboard action items');

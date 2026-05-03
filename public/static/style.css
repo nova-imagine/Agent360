@@ -18828,3 +18828,7 @@ kbd {
   .acm-modal { max-height: 95vh; border-radius: 12px 12px 0 0; }
   .acm-footer { flex-wrap: wrap; }
 }
+
+/* ── Action Item Modal — detail label/value pairs ── */
+.dgm-dl { color: #64748b; font-weight: 500; min-width: 140px; flex-shrink: 0; }
+.dgm-dv { color: #1e293b; font-weight: 600; text-align: right; flex: 1; }

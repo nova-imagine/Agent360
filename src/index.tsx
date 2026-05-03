@@ -689,7 +689,7 @@ function DashboardPage() {
             <span class="badge badge-red" onclick="navigateTo('clients')" style="cursor:pointer" title="View all clients">18</span>
           </div>
           <div class="activity-list">
-            <div class="activity-item high" onclick="openPolicyModal('P-100320')" style="cursor:pointer">
+            <div class="activity-item high" onclick="openActionItemModal('renewal-sandra')" style="cursor:pointer">
               <div class="act-icon ins-color"><i class="fas fa-sync-alt"></i></div>
               <div class="act-content">
                 <div class="act-title">Renewal Due — Sandra Williams</div>
@@ -697,7 +697,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge high">Urgent</span>
             </div>
-            <div class="activity-item high" onclick="openClientModal(2)" style="cursor:pointer">
+            <div class="activity-item high" onclick="openActionItemModal('annuity-patricia')" style="cursor:pointer">
               <div class="act-icon inv-color"><i class="fas fa-coins"></i></div>
               <div class="act-content">
                 <div class="act-title">Annuity Review — Patricia Nguyen</div>
@@ -705,7 +705,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge ai">AI Alert</span>
             </div>
-            <div class="activity-item high" onclick="openMeetingBrief('MTG-001')" style="cursor:pointer">
+            <div class="activity-item high" onclick="openActionItemModal('followup-kevin')" style="cursor:pointer">
               <div class="act-icon ins-color"><i class="fas fa-phone"></i></div>
               <div class="act-content">
                 <div class="act-title">Follow-up — Kevin Park</div>
@@ -713,7 +713,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge high">Urgent</span>
             </div>
-            <div class="activity-item medium" onclick="openClientModal(1)" style="cursor:pointer">
+            <div class="activity-item medium" onclick="openActionItemModal('retirement-james')" style="cursor:pointer">
               <div class="act-icon ret-color"><i class="fas fa-umbrella-beach"></i></div>
               <div class="act-content">
                 <div class="act-title">Retirement Planning — James Whitfield</div>
@@ -721,7 +721,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge ai">AI Insight</span>
             </div>
-            <div class="activity-item medium" onclick="openClientModal(1)" style="cursor:pointer">
+            <div class="activity-item medium" onclick="openActionItemModal('estate-james')" style="cursor:pointer">
               <div class="act-icon adv-color"><i class="fas fa-landmark"></i></div>
               <div class="act-content">
                 <div class="act-title">Estate Planning — James Whitfield</div>
@@ -729,7 +729,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge ai">AI Insight</span>
             </div>
-            <div class="activity-item medium" onclick="openClientModal(8)" style="cursor:pointer">
+            <div class="activity-item medium" onclick="openActionItemModal('wealth-linda')" style="cursor:pointer">
               <div class="act-icon adv-color"><i class="fas fa-gem"></i></div>
               <div class="act-content">
                 <div class="act-title">Wealth Management — Linda Morrison</div>
@@ -737,7 +737,7 @@ function DashboardPage() {
               </div>
               <span class="act-badge medium">Scheduled</span>
             </div>
-            <div class="activity-item medium" onclick="openClaimModal('CLM-2026-0041')" style="cursor:pointer">
+            <div class="activity-item medium" onclick="openActionItemModal('claim-robert')" style="cursor:pointer">
               <div class="act-icon ins-color"><i class="fas fa-file-alt"></i></div>
               <div class="act-content">
                 <div class="act-title">Claim Review — Robert Chen</div>
@@ -1021,7 +1021,7 @@ function DashboardPage() {
                 <td><div class="score-bar"><div class="score-fill" style="width:98%"></div><span>98</span></div></td>
                 <td><span class="status-badge active">Active</span></td>
               </tr>
-              <tr onclick="openClientModal(9)" style="cursor:pointer">
+              <tr onclick="openClientModal(3)" style="cursor:pointer">
                 <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
                 <td><span class="domain-dot ins-dot" title="Whole Life · $21K premium"></span></td>
                 <td><span class="domain-dot inv-dot" title="VUL sub-accounts · $180K"></span></td>
@@ -1031,7 +1031,7 @@ function DashboardPage() {
                 <td><div class="score-bar"><div class="score-fill" style="width:96%"></div><span>96</span></div></td>
                 <td><span class="status-badge active">Active</span></td>
               </tr>
-              <tr onclick="openClientModal(10)" style="cursor:pointer">
+              <tr onclick="openClientModal(6)" style="cursor:pointer">
                 <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
                 <td><span class="domain-dot ins-dot" title="UL · $14.6K premium"></span></td>
                 <td><span class="domain-dot inv-dot" title="Annuities · $95K AUM"></span></td>
@@ -1061,7 +1061,7 @@ function DashboardPage() {
                 <td><div class="score-bar"><div class="score-fill" style="width:87%"></div><span>87</span></div></td>
                 <td><span class="status-badge pending">At Risk</span></td>
               </tr>
-              <tr onclick="openClientModal(3)" style="cursor:pointer">
+              <tr onclick="openClientModal(5)" style="cursor:pointer">
                 <td><div class="client-cell"><div class="mini-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">DT</div><span>David Thompson</span></div></td>
                 <td><span class="domain-dot ins-dot" title="Term Life · $3.2K premium"></span></td>
                 <td><span class="domain-dot inv-dot" title="529 Plan candidate · $12K start"></span></td>
@@ -1071,7 +1071,7 @@ function DashboardPage() {
                 <td><div class="score-bar"><div class="score-fill" style="width:74%"></div><span>74</span></div></td>
                 <td><span class="status-badge active">Active</span></td>
               </tr>
-              <tr onclick="openClientModal(4)" style="cursor:pointer">
+              <tr onclick="openClientModal(4)" style="cursor:pointer" title="Sandra Williams — Renewal Due">
                 <td><div class="client-cell"><div class="mini-avatar" style="background:linear-gradient(135deg,#be185d,#ec4899)">SW</div><span>Sandra Williams</span></div></td>
                 <td><span class="domain-dot ins-dot" title="Term Life · $8.4K · renewal Sep 2026"></span></td>
                 <td><span class="domain-empty" title="No investment product">—</span></td>
