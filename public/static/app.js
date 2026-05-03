@@ -20,6 +20,7 @@ function navigateTo(page) {
   const titles = {
     dashboard: 'Dashboard',
     clients: 'Client Management',
+    prospects: 'Prospects Pipeline',
     policies: 'Policy Management',
     'ai-agents': 'AI Agent Hub',
     sales: 'Sales Pipeline',
@@ -36,6 +37,7 @@ function navigateTo(page) {
   const breadcrumbs = {
     dashboard: 'Home / Dashboard',
     clients: 'Home / Clients',
+    prospects: 'Home / Clients / Prospects',
     policies: 'Home / Policies',
     'ai-agents': 'Home / AI Agents',
     sales: 'Home / Sales',
@@ -14955,3 +14957,1685 @@ function openActionItemModal(id) {
 }
 
 console.log('Action Item modals loaded — openActionItemModal() ready for all 7 dashboard action items');
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROSPECTS MODULE — Data, Modal, 3rd-Party Intel, Convert-to-Client
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Prospect Master Data ──────────────────────────────────────────────────
+const prospectData = {
+  P001: {
+    id: 'P001', name: 'Alex Rivera', initials: 'AR', age: 34, city: 'Manhattan, NY',
+    occupation: 'Account Executive — Deloitte', income: '$148,000/yr',
+    email: 'alex.r@email.com', phone: '(917) 555-0134', stage: 'Meeting Scheduled',
+    stageColor: 'meeting', score: 82, scoreLabel: 'Hot',
+    source: 'Referral — Robert Chen', sourceDate: 'Mar 28, 2026',
+    nextAction: 'In-person meeting Apr 12 at 10 AM', daysInStage: 6,
+    products: ['Whole Life $500K'],
+    annualValue: '$4,200/yr', commission: '$504',
+    pipelineDealId: 'D001',
+    // 3rd-Party Data
+    thirdParty: {
+      wealth: {
+        provider: 'Dun & Bradstreet Wealth Signals',
+        netWorth: '$340,000',
+        investableAssets: '$95,000',
+        homeEquity: '$180,000',
+        stockPortfolio: '$42,000',
+        savingsEstimate: '$58,000',
+        wealthTier: 'Mass Affluent',
+        wealthTrend: 'Growing +18% YoY',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'Equifax Credit Insights (Soft Pull)',
+        score: 760,
+        scoreRange: 'Very Good (740–799)',
+        trend: 'Stable',
+        debtToIncome: '28%',
+        openAccounts: 7,
+        missedPayments: 0,
+        creditUtilization: '14%',
+        note: 'No derogatory marks · Clean file'
+      },
+      lifestyle: {
+        provider: 'Experian ConsumerView',
+        lifeStage: 'Young Professional',
+        householdType: 'Single, Renting',
+        vehicles: '1 (2022 Toyota Camry)',
+        travelFrequency: '4–6 trips/yr',
+        digitalSavvy: 'High',
+        estimatedSpend: '$68K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-user-tie', color: '#003087', event: 'Promoted to Senior AE — Jan 2026', source: 'LinkedIn' },
+        { icon: 'fa-map-marker-alt', color: '#059669', event: 'Moved to Manhattan — Oct 2025', source: 'Address Change Record' },
+        { icon: 'fa-users', color: '#7c3aed', event: 'Referenced by Robert Chen — Referral', source: 'Agent Note' }
+      ],
+      socialFootprint: {
+        linkedin: 'Active — 1,200 connections',
+        engagement: 'High',
+        topics: ['Finance', 'Tech', 'NYC Living'],
+        mutualConnections: ['Robert Chen', 'Patricia Nguyen']
+      }
+    },
+    productFit: [
+      { product: 'Whole Life — $500K', domain: 'ins', fit: 94, reason: 'Age 34, income $148K, referral source, budget confirmed $350+/mo. Ideal WL entry point.', priority: 'Primary', revenue: '$4,200/yr', commission: '$504' },
+      { product: 'Disability Insurance — $7K/mo', domain: 'ins', fit: 78, reason: 'Single income earner, no DI coverage detected, high income-dependent lifestyle.', priority: 'Upsell', revenue: '$2,100/yr', commission: '$252' },
+      { product: '529 College Plan', domain: 'inv', fit: 42, reason: 'No children yet — future opportunity, flag for 3-year follow-up.', priority: 'Future', revenue: '$1,200/yr', commission: '$96' }
+    ],
+    aiStrategy: {
+      headline: '🎯 82% Close Probability — Meeting Apr 12',
+      summary: 'Alex Rivera is a qualified, high-intent prospect referred by a top client. Budget confirmed, meeting booked. AI recommends a WL illustration-first approach with a cash-value growth story.',
+      nba: [
+        { priority: 'critical', icon: 'fa-paper-plane', title: 'Send Pre-Meeting Brief Tonight', desc: 'AI-drafted brief with WL $500K illustration at $350/mo, 20-yr cash value projection, and competitive comparison vs. term. Send via email by 9 PM.' },
+        { priority: 'high', icon: 'fa-phone', title: 'Call Robert Chen — Referral Anchor', desc: 'A 2-min call to Robert Chen saying "meeting is set for tomorrow" increases Alex\'s trust and close probability by ~11% based on referral data.' },
+        { priority: 'medium', icon: 'fa-chart-bar', title: 'Prepare DI Upsell Brief', desc: 'Alex has zero disability coverage. After WL close, DI is the natural next product. Prepare a $7K/mo DI quote to present at close.' }
+      ],
+      risks: [
+        { icon: '⚠️', text: 'Competitor proposal from Prudential detected via social mention', impact: 'Medium' },
+        { icon: '👥', text: 'Spouse not involved — decision may require a second meeting', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '🎯', label: 'Best Case', desc: 'Sign e-app Apr 12 at meeting', pct: '82%', level: 'high' },
+        { icon: '📋', label: 'Base Case', desc: 'Close Apr 15–19 after follow-up', pct: '64%', level: 'medium' },
+        { icon: '⏳', label: 'Stall Risk', desc: 'Family discussion delay — 30 days', pct: '18%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 28', title: 'Referral Received', desc: 'Robert Chen introduced Alex via email', status: 'done' },
+      { date: 'Apr 3', title: 'Discovery Call (30 min)', desc: 'Budget $350+/mo confirmed · WL interest strong', status: 'done' },
+      { date: 'Apr 7', title: 'WL Illustration Sent', desc: 'AI-generated $500K WL at Preferred rate', status: 'done' },
+      { date: 'Apr 12', title: 'In-Person Meeting — TODAY', desc: 'Product presentation + e-app target', status: 'current' },
+      { date: 'Apr 15', title: 'E-App Submission Target', desc: 'Submit to UW — Preferred Plus likely', status: 'future' }
+    ]
+  },
+
+  P002: {
+    id: 'P002', name: 'Nancy Foster', initials: 'NF', age: 41, city: 'Brooklyn, NY',
+    occupation: 'Healthcare Director — NYU Langone', income: '$195,000/yr',
+    email: 'nancy.f@email.com', phone: '(718) 555-0198', stage: 'Proposal Sent',
+    stageColor: 'proposal', score: 61, scoreLabel: 'Warm',
+    source: 'Public Record — Mortgage Filing', sourceDate: 'Mar 31, 2026',
+    nextAction: 'Follow-up call — 11 days since proposal sent', daysInStage: 11,
+    products: ['Term Life $1M', 'LTC Rider'],
+    annualValue: '$3,600/yr', commission: '$432',
+    pipelineDealId: 'D002',
+    thirdParty: {
+      wealth: {
+        provider: 'CoreLogic Mortgage & Property Data',
+        netWorth: '$620,000',
+        homeEquity: '$210,000',
+        mortgageBalance: '$530,000 (new purchase Mar 2026)',
+        investableAssets: '$180,000',
+        wealthTier: 'Mass Affluent',
+        wealthTrend: 'Stable — New Mortgage Liability',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'TransUnion TrueRisk',
+        score: 718,
+        scoreRange: 'Good (670–739)',
+        trend: 'Slight Dip (new mortgage)',
+        debtToIncome: '41%',
+        openAccounts: 9,
+        missedPayments: 0,
+        creditUtilization: '22%',
+        note: 'New mortgage accounts for DTI increase — otherwise clean'
+      },
+      lifestyle: {
+        provider: 'LexisNexis Consumer Data',
+        lifeStage: 'Established Family',
+        householdType: 'Married, 2 Children (14, 11)',
+        vehicles: '2 (SUV + Sedan)',
+        travelFrequency: '2–3 trips/yr',
+        digitalSavvy: 'Medium',
+        estimatedSpend: '$92K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-home', color: '#059669', event: 'Purchased $740K home — Brooklyn, Mar 31 2026', source: 'County Deed Registry' },
+        { icon: 'fa-briefcase', color: '#003087', event: 'Promoted to Healthcare Director — Feb 2026', source: 'LinkedIn' },
+        { icon: 'fa-heartbeat', color: '#e11d48', event: 'No life insurance on new mortgage detected', source: 'AI Gap Analysis' }
+      ],
+      socialFootprint: {
+        linkedin: 'Active — 890 connections',
+        engagement: 'Medium',
+        topics: ['Healthcare', 'Leadership', 'Real Estate'],
+        mutualConnections: ['James Whitfield (indirect)']
+      }
+    },
+    productFit: [
+      { product: 'Term Life — $1M (Mortgage Protection)', domain: 'ins', fit: 89, reason: 'New $530K mortgage, 2 dependents, $195K income — classic mortgage protection need. AI detects zero life coverage on new property.', priority: 'Primary', revenue: '$2,800/yr', commission: '$336' },
+      { product: 'LTC Rider (Accelerated Benefit)', domain: 'ins', fit: 74, reason: 'Age 41, healthcare professional, understands LTC risk. Rider adds minimal premium for significant benefit.', priority: 'Bundle', revenue: '$800/yr', commission: '$96' },
+      { product: 'Disability — $9K/mo', domain: 'ins', fit: 68, reason: 'New $530K mortgage dependent on director-level income. DI protects mortgage payments.', priority: 'Upsell', revenue: '$2,400/yr', commission: '$288' }
+    ],
+    aiStrategy: {
+      headline: '🏠 Mortgage Trigger — Follow Up Today',
+      summary: 'AI detected Nancy\'s home purchase via public mortgage registry. Proposal sent 11 days ago with no response. A warm follow-up tied to mortgage protection urgency is recommended.',
+      nba: [
+        { priority: 'critical', icon: 'fa-phone', title: 'Warm Follow-Up Call — Mortgage Angle', desc: '"Nancy, just checking in on the proposal — your new home congratulations are in order! With a $530K mortgage, the term coverage we discussed would protect your family\'s home. 10 minutes?"' },
+        { priority: 'high', icon: 'fa-envelope', title: 'Re-send Proposal with Mortgage Summary', desc: 'Re-issue proposal with a one-pager showing monthly mortgage vs. term premium ($2,800/yr ÷ $530K mortgage = 0.5% cost for 100% protection story).' },
+        { priority: 'medium', icon: 'fa-robot', title: 'AI: Generate Mortgage Protection Story', desc: 'Ask AI to draft a personalized story showing what happens to 2 kids and $530K mortgage if primary earner is uninsured.' }
+      ],
+      risks: [
+        { icon: '⏳', text: '11 days since proposal — response rate drops 40% after 14 days', impact: 'High' },
+        { icon: '💰', text: 'New mortgage DTI 41% — budget sensitivity may delay decision', impact: 'Medium' }
+      ],
+      closeScenarios: [
+        { icon: '📞', label: 'Call This Week', desc: 'Follow-up call converts within 5 days', pct: '61%', level: 'medium' },
+        { icon: '📋', label: 'Revised Proposal', desc: 'Adjusted premium closes in 2 weeks', pct: '48%', level: 'medium' },
+        { icon: '❄️', label: 'Goes Cold', desc: 'No response — re-engage in 60 days', pct: '24%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 31', title: 'AI Alert — Mortgage Filing', desc: 'Public record detected: $530K mortgage, Brooklyn', status: 'done' },
+      { date: 'Apr 1', title: 'Initial Outreach', desc: 'Congratulations email + term life introduction', status: 'done' },
+      { date: 'Apr 4', title: 'Discovery Call', desc: 'Confirmed interest — 2 dependents, no current coverage', status: 'done' },
+      { date: 'Apr 6', title: 'Proposal Sent', desc: 'Term $1M + LTC rider — $3,600/yr illustrated', status: 'done' },
+      { date: 'Apr 13', title: 'Follow-Up Due — OVERDUE', desc: '11 days with no response — action needed', status: 'current' }
+    ]
+  },
+
+  P003: {
+    id: 'P003', name: 'John Kim', initials: 'JK', age: 38, city: 'Jersey City, NJ',
+    occupation: 'Software Engineer — Google', income: '$220,000/yr',
+    email: 'john.k@email.com', phone: '(201) 555-0176', stage: 'Contacted',
+    stageColor: 'contacted', score: 44, scoreLabel: 'Cold',
+    source: 'LinkedIn Outreach', sourceDate: 'Mar 20, 2026',
+    nextAction: 'Re-engage — 15 days stale, APS delay', daysInStage: 15,
+    products: ['Disability Insurance $8K/mo'],
+    annualValue: '$2,400/yr', commission: '$288',
+    pipelineDealId: 'D003',
+    thirdParty: {
+      wealth: {
+        provider: 'Equifax Wealth Insight',
+        netWorth: '$410,000',
+        investableAssets: '$145,000',
+        employer401k: '$98,000 (Google ESPP + 401k)',
+        homeEquity: '$0 (Renter)',
+        wealthTier: 'Emerging Affluent',
+        wealthTrend: 'High Growth — ESPP vesting Q2 2026',
+        dataFreshness: 'Updated Mar 2026'
+      },
+      credit: {
+        provider: 'Equifax Credit Insights',
+        score: 690,
+        scoreRange: 'Good (670–739)',
+        trend: 'Improving',
+        debtToIncome: '19%',
+        openAccounts: 5,
+        missedPayments: 0,
+        creditUtilization: '9%',
+        note: 'Low utilization, minimal debt — strong financial discipline'
+      },
+      lifestyle: {
+        provider: 'Experian ConsumerView',
+        lifeStage: 'Single Professional',
+        householdType: 'Single, Renting',
+        vehicles: '0 (Urban commuter)',
+        travelFrequency: '6–8 trips/yr',
+        digitalSavvy: 'Very High (Tech Worker)',
+        estimatedSpend: '$74K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-laptop-code', color: '#003087', event: 'Joined Google as Staff Engineer — Sep 2024', source: 'LinkedIn' },
+        { icon: 'fa-chart-line', color: '#059669', event: 'ESPP Vesting Event $42K — Q1 2026', source: 'SEC Form 4 Filing' },
+        { icon: 'fa-user-shield', color: '#7c3aed', event: 'No disability insurance detected — AI Gap Alert', source: 'AI Analysis' }
+      ],
+      socialFootprint: {
+        linkedin: 'Active — 620 connections',
+        engagement: 'Low (Private profile)',
+        topics: ['Engineering', 'AI/ML', 'Startups'],
+        mutualConnections: []
+      }
+    },
+    productFit: [
+      { product: 'Disability — $8K/mo (Own-Occ)', domain: 'ins', fit: 86, reason: 'High-income tech worker ($220K), no DI coverage, career-specific own-occupation definition critical for software engineer.', priority: 'Primary', revenue: '$2,400/yr', commission: '$288' },
+      { product: 'Whole Life — $500K', domain: 'ins', fit: 55, reason: 'Age 38, single, accumulation phase — WL as tax-advantaged savings vehicle.', priority: 'Secondary', revenue: '$4,200/yr', commission: '$504' },
+      { product: 'Roth IRA / Annuity', domain: 'ret', fit: 62, reason: 'ESPP cash looking for tax-advantaged home — annuity or Roth conversion strategy.', priority: 'Future', revenue: '$3,600/yr', commission: '$288' }
+    ],
+    aiStrategy: {
+      headline: '❄️ Re-Engage — APS Delay Stalling Deal',
+      summary: 'John Kim is a high-income tech worker with zero disability coverage — ideal DI candidate. Deal stalled 15 days due to APS delay. AI recommends a new angle using ESPP financial windfall as urgency trigger.',
+      nba: [
+        { priority: 'critical', icon: 'fa-sync', title: 'Re-Engage with New Angle — ESPP Windfall', desc: '"John, I noticed your Google ESPP vested $42K in Q1. Many engineers use this moment to close their disability coverage gap — it\'s the #1 uninsured risk for high-income tech workers. Can we revisit?"' },
+        { priority: 'high', icon: 'fa-stethoscope', title: 'Simplify APS — Paramed Alternative', desc: 'Standard APS taking too long. Offer simplified-issue DI with paramed exam instead. Reduces wait time from 30 days to 5 days.' },
+        { priority: 'medium', icon: 'fa-envelope', title: 'Send Tech Worker DI Case Study', desc: 'AI-curated case study: Staff engineer, age 36, no DI, suffers RSI — career income $2.4M lost. Makes DI personal and real for tech audience.' }
+      ],
+      risks: [
+        { icon: '⏳', text: '15 days stale — drop to Cold score (44). Re-engage or mark lost.', impact: 'High' },
+        { icon: '🏥', text: 'APS delay demotivated prospect — switch to simplified issue', impact: 'High' }
+      ],
+      closeScenarios: [
+        { icon: '🔄', label: 'New Angle Works', desc: 'ESPP trigger + simplified-issue closes in 10 days', pct: '44%', level: 'low' },
+        { icon: '📋', label: 'Slow Build', desc: 'Re-qualify, new proposal in 3 weeks', pct: '30%', level: 'low' },
+        { icon: '❌', label: 'Lost Deal', desc: 'No engagement — remove after 30 more days', pct: '26%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 20', title: 'LinkedIn Outreach', desc: 'Cold outreach — DI gap for tech workers message', status: 'done' },
+      { date: 'Mar 24', title: 'Response Received', desc: 'Positive reply — "I\'ve been meaning to look at DI"', status: 'done' },
+      { date: 'Mar 27', title: 'Discovery Call', desc: 'Confirmed zero DI, income $220K, interested', status: 'done' },
+      { date: 'Mar 29', title: 'APS Ordered', desc: 'Full medical records requested — delay began', status: 'done' },
+      { date: 'Apr 13', title: 'RE-ENGAGE REQUIRED', desc: '15 days stale — contact today or deal goes cold', status: 'current' }
+    ]
+  },
+
+  P004: {
+    id: 'P004', name: 'Michael Santos', initials: 'MS', age: 47, city: 'Flushing, Queens, NY',
+    occupation: 'Owner — Santos Tech Solutions LLC', income: '$580,000/yr',
+    email: 'michael.s@email.com', phone: '(718) 555-0247', stage: 'Negotiating',
+    stageColor: 'negotiating', score: 91, scoreLabel: 'Hot',
+    source: 'Referral — Linda Morrison', sourceDate: 'Mar 15, 2026',
+    nextAction: 'Close call TODAY — attorney beneficiary review complete', daysInStage: 3,
+    products: ['Universal Life $750K', 'NQDC Plan'],
+    annualValue: '$6,800/yr', commission: '$816',
+    pipelineDealId: 'D004',
+    thirdParty: {
+      wealth: {
+        provider: 'Dun & Bradstreet Business Credit',
+        netWorth: '$1,800,000',
+        businessValuation: '$2,400,000 (Santos Tech Solutions LLC)',
+        investableAssets: '$640,000',
+        businessRevenue: '$1.2M/yr (filed 2024)',
+        employees: '14',
+        wealthTier: 'High Net Worth',
+        wealthTrend: 'Strong Growth +22% YoY',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'Equifax Business Credit + Personal',
+        score: 782,
+        scoreRange: 'Excellent (780+)',
+        trend: 'Stable — Excellent',
+        debtToIncome: '22%',
+        openAccounts: 12,
+        missedPayments: 0,
+        creditUtilization: '11%',
+        note: 'Business + personal both excellent — top-tier underwriting expected'
+      },
+      lifestyle: {
+        provider: 'InfoUSA Business Owner Data',
+        lifeStage: 'Wealth Accumulation — Business Owner',
+        householdType: 'Married, 2 Children (21, 18)',
+        vehicles: '3 (BMW 7 Series, Tesla Model X, Business Van)',
+        businessInsurance: 'Commercial GL only — No Key-Person Life',
+        travelFrequency: '8–10 trips/yr (business)',
+        estimatedSpend: '$210K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-building', color: '#003087', event: 'LLC Revenue +22% YoY — $1.2M filed 2024', source: 'D&B Business Registry' },
+        { icon: 'fa-user-tie', color: '#059669', event: 'Hired 4 new employees — Jan 2026', source: 'LinkedIn Company Page' },
+        { icon: 'fa-gavel', color: '#7c3aed', event: 'New business bank loan $200K — Mar 2026', source: 'Public Credit Filing' },
+        { icon: 'fa-exclamation-triangle', color: '#e11d48', event: 'No Key-Person Life detected — AI Risk Alert', source: 'AI Gap Analysis' }
+      ],
+      socialFootprint: {
+        linkedin: 'Very Active — 2,100 connections',
+        engagement: 'High (Posts weekly)',
+        topics: ['Entrepreneurship', 'Tech', 'Business Growth'],
+        mutualConnections: ['Linda Morrison', 'Robert Chen']
+      }
+    },
+    productFit: [
+      { product: 'Universal Life — $750K', domain: 'ins', fit: 96, reason: 'Business owner, HNW, estate planning driver. UL provides permanent coverage + cash value for succession planning. Attorney already engaged.', priority: 'Primary', revenue: '$6,800/yr', commission: '$816' },
+      { product: 'NQDC Executive Benefit Plan', domain: 'adv', fit: 89, reason: '$580K income, LLC structure. NQDC defers income, reduces current tax burden, retains key employees. Immediate value.', priority: 'Bundle', revenue: '$4,000/yr fee', commission: '$480' },
+      { product: 'Key-Person Life — $2M', domain: 'ins', fit: 91, reason: 'Zero key-person coverage detected. Business $2.4M valuation with 14 employees — $200K business loan increases risk exposure.', priority: 'Upsell', revenue: '$12,000/yr', commission: '$1,440' }
+    ],
+    aiStrategy: {
+      headline: '⚡ 91% Win — Call to Close TODAY',
+      summary: 'All conditions aligned: lab results clear, verbal OK received, attorney beneficiary review complete. Michael Santos is the #2 priority deal. Call within 2 hours to confirm close and send e-app.',
+      nba: [
+        { priority: 'critical', icon: 'fa-phone', title: 'Call Michael NOW — 2 Hour Window', desc: 'Labs clear. Attorney confirmed beneficiary clause is fine. "Michael, everything is green — can we get DocuSign done today? I have e-app pre-filled and ready to send."' },
+        { priority: 'critical', icon: 'fa-file-signature', title: 'Send E-App (95% Pre-filled)', desc: 'AI has 95% of UL e-app pre-filled from prior data. Send DocuSign immediately after closing call. UW submission same day.' },
+        { priority: 'high', icon: 'fa-building', title: 'Introduce Key-Person Life Concept', desc: 'AFTER closing UL — introduce $2M key-person concept. "Business is growing fast — what protects it if something happens to you?" Opens a $12K/yr deal.' }
+      ],
+      risks: [
+        { icon: '⚖️', text: 'Attorney may request minor beneficiary restructure', impact: 'Low' },
+        { icon: '💊', text: 'Minor cholesterol flag — Preferred (not Preferred Plus) likely', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '⚡', label: 'Close Today', desc: 'Call → DocuSign today → UW submit tomorrow', pct: '91%', level: 'high' },
+        { icon: '📋', label: 'Close This Week', desc: 'Attorney review adds 2 day delay', pct: '78%', level: 'medium' },
+        { icon: '🔄', label: 'Restructure Needed', desc: 'Attorney requests policy changes — 2 week delay', pct: '18%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 15', title: 'Referral from Linda Morrison', desc: 'Estate planning review identified UL need', status: 'done' },
+      { date: 'Mar 22', title: 'Quote Delivered', desc: '$750K UL at $6,800/yr — Preferred estimate', status: 'done' },
+      { date: 'Apr 1', title: 'Lab Work Ordered', desc: 'Full paramed panel — age 47', status: 'done' },
+      { date: 'Apr 8', title: 'Lab Results — CLEAR', desc: 'Minor cholesterol flag — Preferred still OK', status: 'done' },
+      { date: 'Apr 12', title: 'Attorney Review Complete', desc: 'Beneficiary clause confirmed — ready to close', status: 'current' },
+      { date: 'Apr 13', title: 'CLOSE TODAY', desc: 'Call + e-app + DocuSign', status: 'future' }
+    ]
+  },
+
+  P005: {
+    id: 'P005', name: 'Julia Chen', initials: 'JC', age: 58, city: 'Hoboken, NJ',
+    occupation: 'Retired Professor — Columbia University', income: '$78,000/yr (Pension)',
+    email: 'julia.c@email.com', phone: '(201) 555-0315', stage: 'Proposal Sent',
+    stageColor: 'proposal', score: 58, scoreLabel: 'Warm',
+    source: 'Seminar — NYL Retirement Workshop', sourceDate: 'Mar 18, 2026',
+    nextAction: 'Follow-up — 11 days no reply, interest confirmed at seminar', daysInStage: 11,
+    products: ['Fixed Annuity $120K', 'Income Annuity'],
+    annualValue: '$9,600/yr', commission: '$768',
+    pipelineDealId: 'D005',
+    thirdParty: {
+      wealth: {
+        provider: 'Dun & Bradstreet Wealth Signals',
+        netWorth: '$890,000',
+        investableAssets: '$420,000',
+        pensionValue: '$4,200/mo Columbia Pension',
+        cdAndSavings: '$180,000',
+        homeEquity: '$290,000',
+        wealthTier: 'Mass Affluent',
+        wealthTrend: 'Stable — Retired, living on pension',
+        dataFreshness: 'Updated Mar 2026'
+      },
+      credit: {
+        provider: 'TransUnion Senior Consumer Data',
+        score: 744,
+        scoreRange: 'Very Good',
+        trend: 'Stable',
+        debtToIncome: '12%',
+        openAccounts: 4,
+        missedPayments: 0,
+        creditUtilization: '5%',
+        note: 'Very low utilization, minimal debt — low financial stress'
+      },
+      lifestyle: {
+        provider: 'AARP LifeStage Data Partnership',
+        lifeStage: 'Early Retirement',
+        householdType: 'Divorced, Independent',
+        vehicles: '1 (2019 Honda Accord)',
+        travelFrequency: '3–4 trips/yr',
+        digitalSavvy: 'Medium',
+        estimatedSpend: '$52K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-graduation-cap', color: '#003087', event: 'Retired from Columbia — Jan 2026', source: 'LinkedIn' },
+        { icon: 'fa-piggy-bank', color: '#059669', event: '$180K CD maturing May 2026 — Reinvestment window', source: 'FDIC Public Data' },
+        { icon: 'fa-umbrella-beach', color: '#d97706', event: 'Attended NYL Retirement Workshop — Mar 18', source: 'Agent Note' }
+      ],
+      socialFootprint: {
+        linkedin: 'Inactive (Retired)',
+        engagement: 'Low',
+        topics: ['Education', 'Retirement', 'Travel'],
+        mutualConnections: []
+      }
+    },
+    productFit: [
+      { product: 'Fixed Annuity — $120K Premium', domain: 'ret', fit: 92, reason: '$180K CD maturing May 2026. AI recommends fixed annuity to replace CD with higher guaranteed rate + tax deferral. Lock in current favorable rates.', priority: 'Primary', revenue: '$9,600/yr', commission: '$768' },
+      { product: 'Income Annuity — Lifetime', domain: 'ret', fit: 85, reason: 'Age 58, pension income $4.2K/mo. Additional income annuity ladder supplements retirement income to $6K/mo total.', priority: 'Bundle', revenue: '$7,200/yr', commission: '$576' },
+      { product: 'LTC Insurance', domain: 'ins', fit: 71, reason: 'Age 58, divorced, no LTC coverage detected — significant risk for aging solo.', priority: 'Upsell', revenue: '$3,200/yr', commission: '$384' }
+    ],
+    aiStrategy: {
+      headline: '💰 CD Maturing May 2026 — Urgency Window',
+      summary: 'Julia Chen\'s $180K CD matures in May. This is the #1 urgency trigger — she needs to decide on reinvestment before then. Fixed annuity offers higher guaranteed rate than CD renewal.',
+      nba: [
+        { priority: 'critical', icon: 'fa-phone', title: 'Call — CD Maturity Urgency', desc: '"Julia, your Columbia CD matures in May. Fixed annuity rates are at a 15-year high right now — this window won\'t last. Can we lock in your rate this week?"' },
+        { priority: 'high', icon: 'fa-chart-bar', title: 'Send CD vs. Annuity Rate Comparison', desc: 'AI-prepared one-pager: Current CD renewal rate 4.1% vs. NYL Fixed Annuity 5.2% — shows $13,200 more over 5 years.' },
+        { priority: 'medium', icon: 'fa-robot', title: 'AI: Retirement Income Gap Analysis', desc: 'Run full retirement income gap analysis — shows how annuity ladder supplements pension to reach $6K/mo comfort level.' }
+      ],
+      risks: [
+        { icon: '⏳', text: 'CD maturity creates decision pressure — but may also cause analysis paralysis', impact: 'Medium' },
+        { icon: '💻', text: 'Low digital engagement — prefer phone/in-person over email', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '📞', label: 'CD Urgency Works', desc: 'Rate comparison closes within 2 weeks', pct: '58%', level: 'medium' },
+        { icon: '🤝', label: 'In-Person Meeting', desc: 'Face-to-face closes at meeting', pct: '72%', level: 'medium' },
+        { icon: '❄️', label: 'Misses Window', desc: 'CD renews without annuity — re-engage in 5 years', pct: '22%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 18', title: 'Seminar — NYL Retirement Workshop', desc: 'Julia attended, expressed annuity interest', status: 'done' },
+      { date: 'Mar 21', title: 'Follow-Up Call', desc: 'Discovery — CD maturing May, $420K investable', status: 'done' },
+      { date: 'Apr 2', title: 'Proposal Sent', desc: 'Fixed annuity $120K + income annuity illustration', status: 'done' },
+      { date: 'Apr 13', title: 'FOLLOW-UP OVERDUE', desc: '11 days, no reply — call today (CD urgency)', status: 'current' }
+    ]
+  },
+
+  P006: {
+    id: 'P006', name: 'Grace Lee', initials: 'GL', age: 44, city: 'White Plains, Westchester, NY',
+    occupation: 'Physician — Westchester Medical Center', income: '$390,000/yr',
+    email: 'grace.l@email.com', phone: '(914) 555-0442', stage: 'Qualified',
+    stageColor: 'qualified', score: 73, scoreLabel: 'Warm',
+    source: 'Physician Financial Planning Event', sourceDate: 'Mar 10, 2026',
+    nextAction: 'UW decision expected — medical records in review', daysInStage: 19,
+    products: ['Whole Life $1M', 'Estate Planning'],
+    annualValue: '$14,400/yr', commission: '$1,728',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'AMA (American Medical Assoc.) Financial Data',
+        netWorth: '$2,100,000',
+        investableAssets: '$840,000',
+        medMalLiability: 'Covered (hospital)',
+        studentLoans: '$0 (paid off 2022)',
+        homeValue: '$1,200,000 (Westchester)',
+        wealthTier: 'High Net Worth',
+        wealthTrend: 'High Growth — Peak earning years',
+        dataFreshness: 'Updated Mar 2026'
+      },
+      credit: {
+        provider: 'Equifax Physician Credit Profile',
+        score: 811,
+        scoreRange: 'Exceptional (800+)',
+        trend: 'Stable — Excellent',
+        debtToIncome: '18%',
+        openAccounts: 8,
+        missedPayments: 0,
+        creditUtilization: '7%',
+        note: 'Top-tier financial profile — premium underwriting expected'
+      },
+      lifestyle: {
+        provider: 'Experian Physician ConsumerView',
+        lifeStage: 'Peak Earner — Professional',
+        householdType: 'Married, 2 Children (15, 12)',
+        vehicles: '2 (Mercedes GLE, Toyota Sienna)',
+        malpracticeInsurance: '$2M covered by hospital',
+        travelFrequency: '4–5 trips/yr',
+        estimatedSpend: '$140K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-stethoscope', color: '#003087', event: 'Promoted to Department Head — Feb 2026', source: 'Hospital Announcement' },
+        { icon: 'fa-home', color: '#059669', event: 'Home Refinanced $400K — New Equity Access', source: 'County Mortgage Filing' },
+        { icon: 'fa-graduation-cap', color: '#7c3aed', event: 'Child starting college 2027 — Education funding gap', source: 'AI Life Stage Model' }
+      ],
+      socialFootprint: {
+        linkedin: 'Moderate — 1,450 connections',
+        engagement: 'Moderate (Healthcare posts)',
+        topics: ['Medicine', 'Leadership', 'Family'],
+        mutualConnections: []
+      }
+    },
+    productFit: [
+      { product: 'Whole Life — $1M', domain: 'ins', fit: 94, reason: 'Physician, $390K income, $2.1M net worth, age 44 — WL provides permanent protection, cash value for retirement supplement, estate liquidity.', priority: 'Primary', revenue: '$14,400/yr', commission: '$1,728' },
+      { product: 'Estate Planning Services', domain: 'adv', fit: 88, reason: '$2.1M net worth approaching estate tax threshold. No trust structure detected. Estate planning critical to protect family and minimize taxes.', priority: 'Bundle', revenue: '$3,500 fee', commission: '$420' },
+      { product: 'Disability — $15K/mo (Own-Occ)', domain: 'ins', fit: 91, reason: 'Own-occupation DI for physicians is essential. Hospital malpractice covered but income DI gap detected ($390K income unprotected).', priority: 'Upsell', revenue: '$6,200/yr', commission: '$744' }
+    ],
+    aiStrategy: {
+      headline: '🏥 Physician Profile — Premium Prospect, Chase UW',
+      summary: 'Grace Lee is a high-value HNW physician with a near-perfect financial profile. Deal is in UW review for 19 days. AI recommends chasing UW decision proactively and preparing estate planning agenda for close meeting.',
+      nba: [
+        { priority: 'critical', icon: 'fa-phone', title: 'Chase UW Decision — 19 Days In Review', desc: 'Call UW team to expedite decision. Physician profile — APS from hospital should be straightforward. Ask for priority lane review.' },
+        { priority: 'high', icon: 'fa-landmark', title: 'Prepare Estate Planning Package', desc: 'AI detected $2.1M net worth approaching estate tax threshold. Prepare estate planning brief for meeting — trust, WL, beneficiary alignment all in one meeting.' },
+        { priority: 'medium', icon: 'fa-user-shield', title: 'Introduce Physician DI — $15K/mo Own-Occ', desc: 'After WL close, DI own-occupation is the most important product for physicians. Prepare a "What if you can\'t practice?" scenario illustration.' }
+      ],
+      risks: [
+        { icon: '⏳', text: 'Extended UW review (19d) may frustrate prospect — proactive communication needed', impact: 'Medium' },
+        { icon: '🏥', text: 'Hospital group benefits may create competitive DI offering', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '✅', label: 'UW Approved', desc: 'Decision this week → close meeting → $14.4K deal', pct: '73%', level: 'medium' },
+        { icon: '📋', label: 'Minor Amendments', desc: 'UW requests additional info — 7 more days', pct: '52%', level: 'medium' },
+        { icon: '⚠️', label: 'Medical Issue Found', desc: 'Rating or exclusion — re-structure deal', pct: '15%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 10', title: 'Physician Event — Met Grace', desc: 'NYL financial planning seminar for physicians', status: 'done' },
+      { date: 'Mar 14', title: 'Discovery Meeting', desc: '$1M WL need confirmed — estate planning interest', status: 'done' },
+      { date: 'Mar 20', title: 'Application Submitted', desc: 'Full UW app + lab panel ordered', status: 'done' },
+      { date: 'Mar 25', title: 'APS Requested', desc: 'Hospital medical records requested', status: 'done' },
+      { date: 'Apr 3', title: 'APS Received', desc: 'Records in — UW review started', status: 'done' },
+      { date: 'Apr 13', title: 'UW DECISION PENDING', desc: '10 days in review — chase today', status: 'current' }
+    ]
+  },
+
+  P007: {
+    id: 'P007', name: 'Rachel Adams', initials: 'RA', age: 29, city: 'Hoboken, NJ',
+    occupation: 'Software Engineer — Stripe', income: '$165,000/yr',
+    email: 'rachel.a@email.com', phone: '(201) 555-0729', stage: 'New Lead',
+    stageColor: 'new-lead', score: 55, scoreLabel: 'Warm',
+    source: 'Life Event — New Baby Alert', sourceDate: 'Apr 9, 2026',
+    nextAction: 'First outreach — introduce via new baby congratulations', daysInStage: 1,
+    products: ['Term Life $500K', '529 College Plan'],
+    annualValue: '$2,800/yr', commission: '$336',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'Experian Life Event Triggers',
+        netWorth: '$185,000',
+        investableAssets: '$48,000',
+        employer401k: '$32,000 (Stripe)',
+        homeEquity: '$0 (Renter)',
+        stripeEquity: 'RSUs — unvested est. $120K',
+        wealthTier: 'Emerging Affluent',
+        wealthTrend: 'High Growth — RSU vesting upcoming',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'TransUnion New Parent Data',
+        score: 730,
+        scoreRange: 'Very Good',
+        trend: 'Stable',
+        debtToIncome: '24%',
+        openAccounts: 6,
+        missedPayments: 0,
+        creditUtilization: '18%',
+        note: 'New baby expenses may increase spend temporarily'
+      },
+      lifestyle: {
+        provider: 'Experian Life Event Triggers + ConsumerView',
+        lifeStage: 'New Parent',
+        householdType: 'Married, 1 Child (newborn Mar 2026)',
+        vehicles: '1 (2023 Honda CR-V — new purchase Feb 2026)',
+        babyRegistry: 'Detected — BabyList.com Mar 2026',
+        digitalSavvy: 'Very High (Tech Worker)',
+        estimatedSpend: '$88K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-baby', color: '#e11d48', event: 'Baby born — Mar 2026 (Public birth notice)', source: 'Vital Records Alert' },
+        { icon: 'fa-car', color: '#059669', event: 'New vehicle purchase — Honda CR-V Feb 2026', source: 'DMV Data' },
+        { icon: 'fa-code', color: '#003087', event: 'Stripe RSU Vesting — $40K Q2 2026', source: 'SEC Filing Monitor' }
+      ],
+      socialFootprint: {
+        linkedin: 'Active — 580 connections',
+        engagement: 'Medium (Recent baby posts)',
+        topics: ['Tech', 'Parenting', 'Personal Finance'],
+        mutualConnections: ['David Thompson (indirect)']
+      }
+    },
+    productFit: [
+      { product: 'Term Life — $500K', domain: 'ins', fit: 88, reason: 'New baby, married, single income temporarily (mat leave) — classic new parent term need. Mortgage protection + child protection.', priority: 'Primary', revenue: '$1,600/yr', commission: '$192' },
+      { product: '529 College Plan', domain: 'inv', fit: 92, reason: 'Newborn baby — 18-year college savings window starts now. $100/mo becomes $60K+ by age 18 at historical rates.', priority: 'Bundle', revenue: '$1,200/yr', commission: '$96' },
+      { product: 'Disability — $7K/mo', domain: 'ins', fit: 75, reason: 'Tech worker, no DI detected, high income household now depends on her income with new child.', priority: 'Upsell', revenue: '$2,100/yr', commission: '$252' }
+    ],
+    aiStrategy: {
+      headline: '👶 New Parent Lead — Warm Outreach Today',
+      summary: 'Rachel Adams triggered a new-baby life event alert. New parents are the highest-intent insurance buyers. First outreach within 72 hours of birth has 3x higher response rate. Congratulations + protection story.',
+      nba: [
+        { priority: 'critical', icon: 'fa-envelope', title: 'Send Congratulations + Protection Brief', desc: '"Congratulations on your new arrival! As a new parent myself, I know this changes everything — including making sure your family is protected. 10 minutes this week?"' },
+        { priority: 'high', icon: 'fa-graduation-cap', title: '529 Urgency — Every Month Counts', desc: 'Show compound growth chart: $100/mo starting today = $62K at 18. Starting 1 year later = $52K. $10K difference for one year of delay is a powerful visual.' },
+        { priority: 'medium', icon: 'fa-chart-line', title: 'Flag RSU Vesting for Investment Conversation', desc: 'Stripe RSUs vesting Q2 2026 (~$40K). Prime opportunity for tax-advantaged investment conversation (529 lump sum or annuity).' }
+      ],
+      risks: [
+        { icon: '🍼', text: 'New parent — very busy, low bandwidth. Keep messaging brief and empathetic.', impact: 'Medium' },
+        { icon: '💰', text: 'Maternity leave may reduce current income — budget sensitivity', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '👶', label: 'New Parent Urgency', desc: 'Warm outreach → close term + 529 in 2 weeks', pct: '55%', level: 'medium' },
+        { icon: '📋', label: 'Discovery First', desc: 'Qualify at discovery call, close next month', pct: '68%', level: 'medium' },
+        { icon: '⏳', label: 'Busy New Parent', desc: 'Delays for 3 months — re-engage at 3-month checkup', pct: '27%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 2026', title: 'Baby Born', desc: 'Vital records alert triggered — new parent signal', status: 'done' },
+      { date: 'Apr 9', title: 'Added to Prospects', desc: 'AI identified + enriched with 3rd-party data', status: 'done' },
+      { date: 'Apr 13', title: 'FIRST OUTREACH — TODAY', desc: 'Congratulations email + protection brief', status: 'current' }
+    ]
+  },
+
+  P008: {
+    id: 'P008', name: 'Thomas Wright', initials: 'TW', age: 52, city: 'Park Avenue, Manhattan, NY',
+    occupation: 'CFO — FinTech Corp (Public Company)', income: '$820,000/yr',
+    email: 'thomas.w@email.com', phone: '(212) 555-0852', stage: 'Meeting Scheduled',
+    stageColor: 'meeting', score: 84, scoreLabel: 'Hot',
+    source: 'LinkedIn — HNWI Prospect Campaign', sourceDate: 'Mar 25, 2026',
+    nextAction: 'Meeting Apr 15 at 2 PM — comprehensive estate + protection review', daysInStage: 5,
+    products: ['Universal Life $1M', 'Income Annuity', 'Estate Review'],
+    annualValue: '$18,000/yr', commission: '$2,160',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'Bloomberg Executive Compensation Data',
+        netWorth: '$3,800,000',
+        investableAssets: '$1,600,000',
+        stockOptions: 'Vested: est. $480K (public company)',
+        homeValue: '$2,800,000 (Park Ave)',
+        companyEquity: '$480K+ unvested RSUs',
+        wealthTier: 'High Net Worth',
+        wealthTrend: 'Strong Growth — Stock options vesting 2026–2027',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'Equifax C-Suite Credit Profile',
+        score: 798,
+        scoreRange: 'Excellent',
+        trend: 'Stable — Excellent',
+        debtToIncome: '15%',
+        openAccounts: 11,
+        missedPayments: 0,
+        creditUtilization: '8%',
+        note: 'C-suite financial profile — premium terms expected'
+      },
+      lifestyle: {
+        provider: 'Dun & Bradstreet Executive Data',
+        lifeStage: 'Peak Earning — C-Suite Executive',
+        householdType: 'Married, 3 Children (25, 22, 19)',
+        vehicles: '3 (BMW 7 Series, Mercedes S-Class, Tesla)',
+        clubMemberships: 'NY Athletic Club, Harvard Club',
+        travelFrequency: '12–15 trips/yr (business + personal)',
+        estimatedSpend: '$280K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-chart-line', color: '#003087', event: 'Company IPO — Stock options $480K vesting 2026', source: 'SEC Form 4' },
+        { icon: 'fa-graduation-cap', color: '#059669', event: 'Youngest child starting college — Sep 2026', source: 'AI Life Stage Model' },
+        { icon: 'fa-landmark', color: '#7c3aed', event: 'Trust last updated 2018 — estate review overdue', source: 'County Records' },
+        { icon: 'fa-exclamation-triangle', color: '#e11d48', event: 'No life insurance above $250K detected — critical gap', source: 'AI Gap Analysis' }
+      ],
+      socialFootprint: {
+        linkedin: 'Very Active — 3,200 connections (C-suite network)',
+        engagement: 'High (Finance thought leadership)',
+        topics: ['FinTech', 'Leadership', 'Investment', 'Executive Benefits'],
+        mutualConnections: ['Linda Morrison', 'Robert Chen (indirect)']
+      }
+    },
+    productFit: [
+      { product: 'Universal Life — $1M', domain: 'ins', fit: 93, reason: 'CFO, $820K income, $3.8M net worth, estate planning needed, minimal life coverage detected. UL provides permanent protection + tax-deferred cash value aligned with executive compensation.', priority: 'Primary', revenue: '$18,000/yr', commission: '$2,160' },
+      { product: 'Income Annuity — Deferred $200K', domain: 'ret', fit: 86, reason: 'Stock options vesting in 2026 — tax-advantaged vehicle to absorb windfall. Deferred income annuity at age 65 supplements retirement.', priority: 'Bundle', revenue: '$16,000 premium', commission: '$1,280' },
+      { product: 'Estate Planning + Trust Review', domain: 'adv', fit: 91, reason: '$3.8M estate approaching federal threshold. Trust last updated 2018 — 8 years overdue. Beneficiary misalignment risk high.', priority: 'Bundle', revenue: '$5,000 fee', commission: '$600' }
+    ],
+    aiStrategy: {
+      headline: '💼 C-Suite Meeting Apr 15 — Comprehensive Review',
+      summary: 'Thomas Wright is the highest-value prospect in the pipeline at $18K/yr. Meeting is scheduled for Apr 15. AI recommends a full estate + protection + retirement trifecta approach with stock option windfall strategy.',
+      nba: [
+        { priority: 'critical', icon: 'fa-file-alt', title: 'Prepare C-Suite Pre-Meeting Brief', desc: 'AI-curated executive brief: estate gap analysis, $480K stock option windfall strategy, UL $1M illustration with cash value comparison to term. Send 48 hrs before meeting.' },
+        { priority: 'high', icon: 'fa-landmark', title: 'Estate Planning Lead-In', desc: '"Your trust was last updated in 2018. With $3.8M in assets and stock options vesting — you have a 2026 window to restructure efficiently." This is the strongest door-opener.' },
+        { priority: 'medium', icon: 'fa-piggy-bank', title: 'IPO Windfall — Annuity Tax Angle', desc: 'Stock options create a $480K taxable event. Annuity can absorb up to $100K tax-deferred. AI can model the tax savings scenario for the meeting.' }
+      ],
+      risks: [
+        { icon: '⏱️', text: 'C-suite schedule changes frequently — confirm 24 hrs before', impact: 'Medium' },
+        { icon: '🏢', text: 'Company legal may restrict financial products discussion (pre-IPO agreements)', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '🎯', label: 'Meeting Closes', desc: 'Estate urgency → same-day e-app commitment', pct: '84%', level: 'high' },
+        { icon: '📋', label: 'Second Meeting Needed', desc: 'Estate attorney needs to review — 2 weeks', pct: '65%', level: 'medium' },
+        { icon: '⏳', label: 'Company Legal Delay', desc: 'Pre-IPO restrictions add 30-day delay', pct: '12%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 25', title: 'LinkedIn Outreach (HNWI Campaign)', desc: 'Connected + engaged — estate planning intro', status: 'done' },
+      { date: 'Apr 2', title: 'Discovery Call', desc: '$3.8M estate, stock options, minimal life coverage confirmed', status: 'done' },
+      { date: 'Apr 8', title: 'Meeting Confirmed', desc: 'Apr 15 at 2 PM — Park Ave office', status: 'done' },
+      { date: 'Apr 15', title: 'MEETING — 2 PM', desc: 'Full estate + protection + retirement review', status: 'future' }
+    ]
+  },
+
+  P009: {
+    id: 'P009', name: 'Linda Chen', initials: 'LC', age: 45, city: 'Upper West Side, Manhattan, NY',
+    occupation: 'Partner — Chen & Associates Law Firm', income: '$310,000/yr',
+    email: 'linda.c@email.com', phone: '(212) 555-0945', stage: 'Contacted',
+    stageColor: 'contacted', score: 67, scoreLabel: 'Warm',
+    source: 'Referral — Robert Chen (client)', sourceDate: 'Apr 5, 2026',
+    nextAction: 'Discovery call — warm referral, high trust, schedule this week', daysInStage: 8,
+    products: ['Estate Planning', 'Whole Life $500K'],
+    annualValue: '$8,200/yr', commission: '$984',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'Dun & Bradstreet Attorney Wealth Data',
+        netWorth: '$1,100,000',
+        investableAssets: '$380,000',
+        lawFirmValue: '$620,000 (partnership share est.)',
+        homeEquity: '$310,000',
+        wealthTier: 'High Net Worth',
+        wealthTrend: 'Growing — Partnership income increasing',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'TransUnion Professional Credit',
+        score: 774,
+        scoreRange: 'Very Good',
+        trend: 'Stable',
+        debtToIncome: '20%',
+        openAccounts: 7,
+        missedPayments: 0,
+        creditUtilization: '12%',
+        note: 'Law firm partnership — business and personal both clean'
+      },
+      lifestyle: {
+        provider: 'Experian Professional ConsumerView',
+        lifeStage: 'Established Professional',
+        householdType: 'Divorced, 2 Children (Adult)',
+        vehicles: '1 (2022 Audi Q7)',
+        legalBar: 'NY State Bar — Active',
+        digitalSavvy: 'High',
+        estimatedSpend: '$98K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-gavel', color: '#003087', event: 'Established Revocable Trust — Jun 2024', source: 'NY County Surrogate Court' },
+        { icon: 'fa-building', color: '#059669', event: 'Law firm revenue +18% — 2025 tax filing', source: 'D&B Business Monitor' },
+        { icon: 'fa-user-friends', color: '#7c3aed', event: 'Referred by Robert Chen (Premium Client)', source: 'Agent Referral System' }
+      ],
+      socialFootprint: {
+        linkedin: 'Active — 1,840 connections (Legal network)',
+        engagement: 'Moderate',
+        topics: ['Law', 'Business', 'Estate Planning'],
+        mutualConnections: ['Robert Chen', 'James Whitfield (indirect)']
+      }
+    },
+    productFit: [
+      { product: 'Estate Planning Services', domain: 'adv', fit: 90, reason: 'Attorney with $1.1M net worth, trust filed 2024 but may need updates. Law partner — professional review of own estate is high priority.', priority: 'Primary', revenue: '$3,500 fee', commission: '$420' },
+      { product: 'Whole Life — $500K', domain: 'ins', fit: 82, reason: 'Age 45, divorced, law partner — WL provides estate liquidity, tax-free death benefit, cash value for firm succession.', priority: 'Bundle', revenue: '$4,700/yr', commission: '$564' },
+      { product: 'Disability — $12K/mo (Own-Occ Attorney)', domain: 'ins', fit: 78, reason: 'Own-occupation DI for attorneys is critical. If Linda cannot practice, law firm income disappears. No DI detected.', priority: 'Upsell', revenue: '$4,800/yr', commission: '$576' }
+    ],
+    aiStrategy: {
+      headline: '⚖️ Attorney Referral — High Trust Prospect',
+      summary: 'Linda Chen was referred by premium client Robert Chen. Referral prospects close at 2.4x the rate of cold leads. Schedule discovery call this week while referral is warm.',
+      nba: [
+        { priority: 'critical', icon: 'fa-phone', title: 'Call Linda This Week — Referral Warm Window', desc: '"Linda, Robert Chen mentioned you might be thinking about your estate and financial planning. He speaks very highly of you — I\'d love to offer the same comprehensive review I did for him."' },
+        { priority: 'high', icon: 'fa-landmark', title: 'Lead with Estate Planning (She Knows Trusts)', desc: 'Linda is an attorney — she understands trusts and estates better than most clients. Lead with "peer-level" estate discussion rather than insurance pitch.' },
+        { priority: 'medium', icon: 'fa-user-shield', title: 'Own-Occ DI for Attorneys is Unique', desc: 'Attorney own-occupation DI is specialized — "If you can\'t practice law specifically, you\'re covered." This is a differentiator that resonates with legal professionals.' }
+      ],
+      risks: [
+        { icon: '⚖️', text: 'Attorney may be highly analytical — expect detailed questions and due diligence', impact: 'Low' },
+        { icon: '🤝', text: 'Must not over-leverage Robert Chen\'s name — maintain professionalism', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '🤝', label: 'Referral Converts', desc: 'Discovery this week → close in 3 weeks', pct: '67%', level: 'medium' },
+        { icon: '📋', label: 'Multi-Stage Close', desc: 'Estate first, then WL + DI over 2 months', pct: '78%', level: 'medium' },
+        { icon: '⏳', label: 'Slow Attorney Review', desc: 'Due diligence extends to 60 days', pct: '18%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Apr 5', title: 'Referral Received — Robert Chen', desc: 'Robert introduced Linda via email — warm referral', status: 'done' },
+      { date: 'Apr 7', title: 'Introduction Email Sent', desc: 'Personalized intro + estate planning framing', status: 'done' },
+      { date: 'Apr 13', title: 'SCHEDULE DISCOVERY CALL', desc: 'Call Linda to book discovery meeting', status: 'current' }
+    ]
+  },
+
+  P010: {
+    id: 'P010', name: 'Marcus Johnson', initials: 'MJ', age: 39, city: 'Fort Lee, NJ',
+    occupation: 'Founder — MJ Digital Media (2 LLCs)', income: '$420,000/yr',
+    email: 'marcus.j@email.com', phone: '(201) 555-1039', stage: 'Qualified',
+    stageColor: 'qualified', score: 88, scoreLabel: 'Hot',
+    source: 'Inbound — NYL Website + LinkedIn Ad', sourceDate: 'Mar 22, 2026',
+    nextAction: 'E-app ready — confirm product mix and submit', daysInStage: 4,
+    products: ['Whole Life $750K', 'Mutual Funds'],
+    annualValue: '$9,000/yr', commission: '$1,080',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'Dun & Bradstreet Business Credit',
+        netWorth: '$2,600,000',
+        businessValue1: 'MJ Digital Media LLC — est. $1.4M',
+        businessValue2: 'MJ Real Estate Holdings LLC — est. $800K',
+        investableAssets: '$520,000',
+        homeEquity: '$280,000',
+        wealthTier: 'High Net Worth',
+        wealthTrend: 'High Growth — 2 businesses expanding',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'Dun & Bradstreet Business + Equifax Personal',
+        score: 771,
+        scoreRange: 'Very Good',
+        trend: 'Stable — Strong business credit',
+        debtToIncome: '26%',
+        businessLoan: '$180K outstanding (commercial)',
+        openAccounts: 14,
+        missedPayments: 0,
+        creditUtilization: '16%',
+        note: 'Strong business + personal profile — premium class expected'
+      },
+      lifestyle: {
+        provider: 'InfoUSA Multi-Business Owner Data',
+        lifeStage: 'Wealth Accumulation — Entrepreneur',
+        householdType: 'Married, 2 Children (8, 5)',
+        vehicles: '2 (Escalade, BMW 5 Series)',
+        businessInsurance: 'Commercial GL — No Key Person, No Buy-Sell',
+        digitalSavvy: 'Very High (Digital Media)',
+        estimatedSpend: '$175K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-building', color: '#003087', event: 'MJ Real Estate LLC registered — Jan 2026', source: 'NJ Business Registry' },
+        { icon: 'fa-chart-line', color: '#059669', event: 'Digital Media revenue +35% YoY 2025', source: 'D&B Business Monitor' },
+        { icon: 'fa-baby', color: '#e11d48', event: 'Child starting school Sep 2026 — education costs increasing', source: 'AI Life Stage Model' }
+      ],
+      socialFootprint: {
+        linkedin: 'Very Active — 4,100 connections',
+        engagement: 'High (Entrepreneur posts)',
+        topics: ['Entrepreneurship', 'Real Estate', 'Digital Marketing'],
+        mutualConnections: []
+      }
+    },
+    productFit: [
+      { product: 'Whole Life — $750K', domain: 'ins', fit: 93, reason: 'Entrepreneur, 2 LLCs, $2.6M net worth, age 39. WL provides permanent protection + business succession liquidity + tax-deferred cash value.', priority: 'Primary', revenue: '$9,000/yr', commission: '$1,080' },
+      { product: 'Key-Person Life — $1.5M (Both Businesses)', domain: 'ins', fit: 90, reason: 'Zero key-person coverage across 2 LLCs detected. Commercial loan $180K outstanding. $1.5M key-person protects both businesses.', priority: 'Upsell', revenue: '$8,500/yr', commission: '$1,020' },
+      { product: 'Mutual Funds / ETF Portfolio', domain: 'inv', fit: 75, reason: '$520K investable assets — mutual funds for diversification beyond WL cash value.', priority: 'Bundle', revenue: '$3,200/yr fee', commission: '$384' }
+    ],
+    aiStrategy: {
+      headline: '🏢 Entrepreneur — 88% Score, Ready to Close',
+      summary: 'Marcus Johnson came inbound from LinkedIn ad. Two LLCs, high income, $2.6M net worth. Deal is qualified and ready. AI recommends closing WL this week and introducing key-person concept at same meeting.',
+      nba: [
+        { priority: 'critical', icon: 'fa-file-signature', title: 'Submit E-App — Deal is Qualified and Ready', desc: 'All qualification criteria met. Send e-app today: WL $750K, $9K/yr, Preferred estimate. Marcus is a high-intent inbound lead — move fast before he shops competitors.' },
+        { priority: 'high', icon: 'fa-building', title: 'Introduce Key-Person — Zero Coverage on 2 LLCs', desc: '"Marcus, with two businesses and a $180K loan — if something happened to you, what protects the businesses? Key-person life is the answer." Opens $8.5K/yr deal.' },
+        { priority: 'medium', icon: 'fa-chart-line', title: 'Mutual Fund Portfolio Review', desc: '$520K in investable assets with unknown allocation. Offer a no-cost portfolio review — entry to managed advisory relationship.' }
+      ],
+      risks: [
+        { icon: '⚡', text: 'Inbound lead — may be shopping multiple carriers simultaneously', impact: 'Medium' },
+        { icon: '💼', text: 'Entrepreneur with multiple entities — beneficiary structure may be complex', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '⚡', label: 'Same-Week Close', desc: 'E-app today → UW submit by end of week', pct: '88%', level: 'high' },
+        { icon: '📋', label: 'Next-Week Close', desc: 'Minor product mix discussion needed', pct: '75%', level: 'medium' },
+        { icon: '🔄', label: 'Competitive Delay', desc: 'Shopping other carriers — 2-week delay', pct: '22%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 22', title: 'Inbound Lead — LinkedIn Ad', desc: 'Marcus submitted inquiry form — high interest', status: 'done' },
+      { date: 'Mar 25', title: 'Discovery Call', desc: '2 LLCs, $2.6M NW, $750K WL interest confirmed', status: 'done' },
+      { date: 'Apr 5', title: 'Full Qualification', desc: 'Budget confirmed $750+/mo · e-app discussion started', status: 'done' },
+      { date: 'Apr 9', title: 'E-App Prepared (AI Pre-filled 92%)', desc: 'Ready to submit — waiting on beneficiary structure', status: 'done' },
+      { date: 'Apr 13', title: 'SUBMIT E-APP TODAY', desc: 'Confirm beneficiary + submit to UW', status: 'current' }
+    ]
+  },
+
+  P011: {
+    id: 'P011', name: 'Priya Patel', initials: 'PP', age: 33, city: 'Parsippany, NJ',
+    occupation: 'Dentist — Solo Practice', income: '$285,000/yr',
+    email: 'priya.p@email.com', phone: '(973) 555-1133', stage: 'New Lead',
+    stageColor: 'new-lead', score: 51, scoreLabel: 'Warm',
+    source: 'ADA (American Dental Assoc.) Partnership List', sourceDate: 'Apr 10, 2026',
+    nextAction: 'First outreach — dental professional DI focus', daysInStage: 0,
+    products: ['Disability Insurance $12K/mo', 'SEP-IRA'],
+    annualValue: '$4,800/yr', commission: '$576',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'ADA Financial Data + D&B',
+        netWorth: '$410,000',
+        practiceValue: 'Solo Practice est. $480,000',
+        studentLoans: '$88,000 remaining (dental school)',
+        investableAssets: '$85,000',
+        wealthTier: 'Emerging Affluent',
+        wealthTrend: 'Growing — Practice revenue increasing 15% YoY',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'TransUnion Healthcare Professional',
+        score: 780,
+        scoreRange: 'Excellent',
+        trend: 'Improving (loans being paid)',
+        debtToIncome: '34%',
+        openAccounts: 8,
+        missedPayments: 0,
+        creditUtilization: '11%',
+        note: 'Student loan balance reducing — strong trajectory'
+      },
+      lifestyle: {
+        provider: 'ADA Member Demographics',
+        lifeStage: 'Young Professional — Solo Practice',
+        householdType: 'Single (engaged — ring purchase Mar 2026)',
+        vehicles: '1 (2023 Tesla Model 3)',
+        practiceEquipment: '$180K financed (dental equipment loan)',
+        digitalSavvy: 'High',
+        estimatedSpend: '$72K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-ring', color: '#e11d48', event: 'Engagement detected — ring purchase Mar 2026', source: 'Credit Card Transaction Signal' },
+        { icon: 'fa-tooth', color: '#059669', event: 'Practice revenue +15% YoY — 2025 filing', source: 'D&B Business Monitor' },
+        { icon: 'fa-graduation-cap', color: '#003087', event: 'Student loans $88K — refinancing opportunity', source: 'Credit Signal' }
+      ],
+      socialFootprint: {
+        linkedin: 'Active — 340 connections',
+        engagement: 'Moderate (Dental professional posts)',
+        topics: ['Dentistry', 'Small Business', 'Wellness'],
+        mutualConnections: []
+      }
+    },
+    productFit: [
+      { product: 'Disability — $12K/mo (Own-Occ Dentist)', domain: 'ins', fit: 96, reason: 'Solo dentist — if hands are injured, income stops entirely. Own-occupation dental DI is the #1 most critical product for this profile. No DI detected.', priority: 'Primary', revenue: '$4,800/yr', commission: '$576' },
+      { product: 'SEP-IRA (Self-Employed Retirement)', domain: 'ret', fit: 88, reason: 'Solo practice, self-employed — SEP-IRA allows up to $69K/yr contributions. Significant tax advantage for $285K income with no employer retirement plan.', priority: 'Bundle', revenue: '$3,200/yr', commission: '$256' },
+      { product: 'Term Life — $750K', domain: 'ins', fit: 72, reason: 'Engaged, dental school loans $88K, practice loan $180K — marriage is imminent trigger for life coverage need.', priority: 'Future', revenue: '$1,800/yr', commission: '$216' }
+    ],
+    aiStrategy: {
+      headline: '🦷 Dentist DI Lead — High-Value New Profile',
+      summary: 'Priya Patel is a solo dentist — the textbook DI prospect. 96% product fit score. Own-occupation dental DI is a specialized, high-premium product with virtually no competition angle. First outreach today.',
+      nba: [
+        { priority: 'critical', icon: 'fa-envelope', title: 'ADA Member Outreach — Dentist-Specific Messaging', desc: '"Dr. Patel, as a fellow financial professional serving dental professionals, I specialize in own-occupation DI for dentists. 15 minutes to discuss protecting your practice income?"' },
+        { priority: 'high', icon: 'fa-piggy-bank', title: 'SEP-IRA Tax Angle — High Impact', desc: '"As a solo practitioner with $285K income, a SEP-IRA lets you shelter up to $69K/yr. That\'s $69K off your taxable income this year — immediate value conversation."' },
+        { priority: 'medium', icon: 'fa-ring', title: 'Engagement Trigger — Pre-Marriage Coverage Gap', desc: 'Engagement detected — engagement conversations naturally lead to life and financial planning discussions. "Congratulations on your engagement — great time to think about joint financial protection."' }
+      ],
+      risks: [
+        { icon: '🦷', text: 'High student + practice debt may create budget sensitivity', impact: 'Medium' },
+        { icon: '📱', text: 'New lead — needs nurturing before close', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '🦷', label: 'DI Closes First', desc: 'Dentist DI — high urgency, closes in 3–4 weeks', pct: '51%', level: 'medium' },
+        { icon: '💰', label: 'SEP-IRA Bundle', desc: 'Tax savings + DI bundle closes together', pct: '62%', level: 'medium' },
+        { icon: '⏳', label: 'Slow Qualification', desc: 'Budget concerns delay — close in 60 days', pct: '28%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Apr 10', title: 'Added from ADA List', desc: 'AI-enriched profile created — DI gap detected', status: 'done' },
+      { date: 'Apr 13', title: 'FIRST OUTREACH TODAY', desc: 'ADA member intro email + dentist DI angle', status: 'current' }
+    ]
+  },
+
+  P012: {
+    id: 'P012', name: 'Derek Walton', initials: 'DW', age: 55, city: 'Staten Island, NY',
+    occupation: 'VP Finance — Mid-Market Insurance Co.', income: '$240,000/yr',
+    email: 'derek.w@email.com', phone: '(718) 555-1255', stage: 'Contacted',
+    stageColor: 'contacted', score: 63, scoreLabel: 'Warm',
+    source: 'NYL Retirement Seminar', sourceDate: 'Mar 28, 2026',
+    nextAction: 'Follow-up call — retirement urgency, 401k rollover window', daysInStage: 8,
+    products: ['Deferred Annuity', 'LTC Insurance'],
+    annualValue: '$7,200/yr', commission: '$864',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'Dun & Bradstreet + FINRA Data',
+        netWorth: '$1,500,000',
+        employer401k: '$580,000',
+        investableAssets: '$390,000',
+        homeEquity: '$420,000',
+        pension: 'No pension — 401k only',
+        wealthTier: 'Mass Affluent',
+        wealthTrend: 'Stable — Approaching retirement',
+        dataFreshness: 'Updated Mar 2026'
+      },
+      credit: {
+        provider: 'Equifax Pre-Retirement Profile',
+        score: 748,
+        scoreRange: 'Very Good',
+        trend: 'Stable',
+        debtToIncome: '22%',
+        openAccounts: 9,
+        missedPayments: 0,
+        creditUtilization: '10%',
+        note: 'Excellent pre-retirement credit profile'
+      },
+      lifestyle: {
+        provider: 'AARP + Experian Senior ConsumerView',
+        lifeStage: 'Pre-Retirement (10 yr window)',
+        householdType: 'Married, 2 Children (Adult)',
+        vehicles: '2 (Ford F-150, Honda Odyssey)',
+        travelFrequency: '3–4 trips/yr',
+        plannedRetirementAge: '65 (2036)',
+        estimatedSpend: '$105K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-umbrella-beach', color: '#d97706', event: '401(k) approaching $600K — rollover decision upcoming', source: 'FINRA Public Filing' },
+        { icon: 'fa-heartbeat', color: '#e11d48', event: 'Spouse diagnosed — LTC coverage now critical', source: 'AI Risk Model' },
+        { icon: 'fa-piggy-bank', color: '#059669', event: 'Company pension eliminated — annuity gap created', source: 'Company Benefit Change Alert' }
+      ],
+      socialFootprint: {
+        linkedin: 'Active — 760 connections',
+        engagement: 'Low-Medium',
+        topics: ['Finance', 'Retirement Planning', 'Insurance'],
+        mutualConnections: []
+      }
+    },
+    productFit: [
+      { product: 'Deferred Annuity — $120K Premium', domain: 'ret', fit: 91, reason: 'Age 55, no pension, 401k $580K. Fixed deferred annuity creates guaranteed income floor at retirement. Company pension elimination creates immediate urgency.', priority: 'Primary', revenue: '$9,600/yr', commission: '$768' },
+      { product: 'LTC Insurance — Shared Care', domain: 'ins', fit: 88, reason: 'Age 55, spouse health event detected, no LTC coverage. Shared care policy covers both spouses — AI risk model flags this as critical.', priority: 'Critical Upsell', revenue: '$4,800/yr', commission: '$576' },
+      { product: '401(k) Rollover Strategy', domain: 'ret', fit: 85, reason: '$580K 401k approaching rollover decision. IRA rollover + annuity ladder strategy — comprehensive retirement income plan.', priority: 'Bundle', revenue: 'Advisory fee + annuity', commission: '$1,200' }
+    ],
+    aiStrategy: {
+      headline: '🏦 Retirement & LTC Double Opportunity',
+      summary: 'Derek Walton is a pre-retirement prospect with multiple triggers: company pension eliminated, spouse health event (LTC urgency), and $580K 401k rollover decision upcoming. Strong follow-up urgency.',
+      nba: [
+        { priority: 'critical', icon: 'fa-phone', title: 'Follow-Up — Pension Elimination + LTC Urgency', desc: '"Derek, your company just eliminated the pension — which is actually a planning opportunity. And with the 401k rollover decision coming up, this is the right time to create a guaranteed income floor."' },
+        { priority: 'high', icon: 'fa-heartbeat', title: 'LTC Conversation — Spouse Health Event', desc: 'AI detected a spouse health event in public records. This is an extremely sensitive but critical conversation: "Have you thought about what happens if one of you needs long-term care?"' },
+        { priority: 'medium', icon: 'fa-piggy-bank', title: '401k Rollover Planning Session', desc: 'Book a 60-minute retirement income planning session. Map out: current 401k $580K + annuity + Social Security = retirement income picture. Strong close driver.' }
+      ],
+      risks: [
+        { icon: '💔', text: 'Spouse health event is sensitive — approach LTC carefully and empathetically', impact: 'Medium' },
+        { icon: '⏳', text: 'Pre-retirement prospect — decision timeline may be longer', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '🏦', label: 'Pension Gap Closes', desc: 'Follow-up → retirement income planning → close annuity', pct: '63%', level: 'medium' },
+        { icon: '❤️', label: 'LTC Urgency Closes', desc: 'Spouse health event creates LTC urgency close', pct: '55%', level: 'medium' },
+        { icon: '⏳', label: '401k Wait', desc: 'Waits until active rollover event — 6 months', pct: '32%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Mar 28', title: 'NYL Retirement Seminar', desc: 'Derek attended — expressed rollover + income interest', status: 'done' },
+      { date: 'Apr 2', title: 'Initial Follow-Up Email', desc: 'Sent retirement income planning overview', status: 'done' },
+      { date: 'Apr 5', title: 'Pension Elimination News', desc: 'AI detected company benefit change — urgency increased', status: 'done' },
+      { date: 'Apr 13', title: 'FOLLOW-UP CALL DUE', desc: 'Pension urgency + LTC conversation', status: 'current' }
+    ]
+  },
+
+  P013: {
+    id: 'P013', name: 'Sophia Reyes', initials: 'SR', age: 36, city: 'Riverdale, Bronx, NY',
+    occupation: 'Marketing Director — NBCUniversal', income: '$165,000/yr',
+    email: 'sophia.r@email.com', phone: '(718) 555-1336', stage: 'Meeting Scheduled',
+    stageColor: 'meeting', score: 80, scoreLabel: 'Hot',
+    source: 'Facebook Ad — 529 College Savings Campaign', sourceDate: 'Apr 3, 2026',
+    nextAction: 'Meeting Apr 14 at 12 PM — 529 + term life family protection', daysInStage: 3,
+    products: ['529 College Plan', 'Term Life $600K'],
+    annualValue: '$3,400/yr', commission: '$408',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'Experian ConsumerView + Facebook Data Signal',
+        netWorth: '$285,000',
+        investableAssets: '$62,000',
+        homeEquity: '$95,000',
+        childSavings: '$0 — No 529 or education savings detected',
+        wealthTier: 'Emerging Affluent',
+        wealthTrend: 'Growing — Dual income household',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'Equifax Young Family Profile',
+        score: 714,
+        scoreRange: 'Good',
+        trend: 'Improving',
+        debtToIncome: '31%',
+        openAccounts: 7,
+        missedPayments: 0,
+        creditUtilization: '21%',
+        note: 'Young family — mortgage + daycare expenses visible'
+      },
+      lifestyle: {
+        provider: 'Experian Family ConsumerView',
+        lifeStage: 'Young Family',
+        householdType: 'Married, 1 Child (Age 2)',
+        vehicles: '2 (Honda CR-V, Toyota Camry)',
+        childcareExpense: 'Daycare $2,800/mo detected',
+        digitalSavvy: 'Very High (Media Industry)',
+        estimatedSpend: '$95K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-graduation-cap', color: '#003087', event: 'Child Age 2 — College 2042 — 16yr savings window', source: 'AI Life Stage Model' },
+        { icon: 'fa-baby', color: '#e11d48', event: 'Second child — pregnancy signal detected Apr 2026', source: 'Social Signal (Facebook)' },
+        { icon: 'fa-home', color: '#059669', event: 'Mortgage refinanced — $45K cash-out Apr 2026', source: 'County Mortgage Filing' }
+      ],
+      socialFootprint: {
+        linkedin: 'Very Active — 2,100 connections',
+        engagement: 'High (Media + parenting content)',
+        topics: ['Marketing', 'Parenting', 'Education', 'Personal Finance'],
+        mutualConnections: []
+      }
+    },
+    productFit: [
+      { product: '529 College Plan — $200/mo', domain: 'inv', fit: 95, reason: 'Child age 2, no education savings detected, second child likely. 16-year savings runway. $200/mo = $70K by age 18. High urgency — every month matters.', priority: 'Primary', revenue: '$2,400/yr', commission: '$192' },
+      { product: 'Term Life — $600K (Both Spouses)', domain: 'ins', fit: 86, reason: 'Young family, mortgage, daycare, second child expected — classic dual-income family protection need. No life coverage detected.', priority: 'Bundle', revenue: '$1,800/yr each', commission: '$216' },
+      { product: 'Disability — $7K/mo', domain: 'ins', fit: 70, reason: 'Media director — if income stops, mortgage + daycare + college savings all at risk. DI protects family cash flow.', priority: 'Upsell', revenue: '$2,100/yr', commission: '$252' }
+    ],
+    aiStrategy: {
+      headline: '🎓 Meeting Apr 14 — 529 + Family Protection',
+      summary: 'Sophia Reyes came inbound on 529 campaign. Meeting scheduled Apr 14. AI detected second child likely — double the education savings urgency. Lead with 529 then pivot to term life for complete family protection.',
+      nba: [
+        { priority: 'critical', icon: 'fa-file-alt', title: 'Prepare 529 Compound Growth Visual', desc: 'Bring a personalized chart: $200/mo starting today (age 2) = $70K at 18 vs. starting next year = $60K. 10K difference for 1 year of delay. Plus: second child doubles the need.' },
+        { priority: 'high', icon: 'fa-shield-alt', title: 'Introduce Family Protection Bundle', desc: '"Once we set up the 529, let\'s make sure the income that funds it is protected — term life is surprisingly affordable for healthy 36-year-olds."' },
+        { priority: 'medium', icon: 'fa-baby', title: 'Second Child Signal — Double 529 Opportunity', desc: 'AI detected pregnancy signal via social data. Sensitively reference: "Are you thinking about growing your family further? We can set up a second 529 today at no extra cost." Doubles AUM.' }
+      ],
+      risks: [
+        { icon: '💰', text: 'Daycare $2,800/mo + mortgage = tight budget — price sensitivity', impact: 'Medium' },
+        { icon: '🍼', text: 'Pregnancy signal is unconfirmed — handle sensitively', impact: 'Low' }
+      ],
+      closeScenarios: [
+        { icon: '🎓', label: '529 Closes Same Day', desc: 'Meeting → e-app for 529 → term follow-up next week', pct: '80%', level: 'high' },
+        { icon: '🛡️', label: 'Full Bundle Closes', desc: '529 + term life close at same meeting', pct: '62%', level: 'medium' },
+        { icon: '⏳', label: 'Budget Concern', desc: 'Budget discussion delays — close in 2 weeks', pct: '18%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Apr 3', title: 'Inbound — Facebook 529 Ad', desc: 'Sophia clicked ad, submitted contact form', status: 'done' },
+      { date: 'Apr 7', title: 'Discovery Call', desc: 'Child age 2, no savings, interested in 529 + life coverage', status: 'done' },
+      { date: 'Apr 9', title: 'Meeting Confirmed', desc: 'Apr 14 at 12 PM — lunch meeting at her office', status: 'done' },
+      { date: 'Apr 14', title: 'MEETING TOMORROW', desc: '529 compound growth visual + term bundle', status: 'future' }
+    ]
+  },
+
+  P014: {
+    id: 'P014', name: 'James Okafor', initials: 'JO', age: 48, city: 'Newark, NJ',
+    occupation: 'Real Estate Developer — Okafor Properties LLC', income: '$380,000/yr',
+    email: 'james.o@email.com', phone: '(973) 555-1448', stage: 'New Lead',
+    stageColor: 'new-lead', score: 48, scoreLabel: 'Cold',
+    source: 'AI Public Records Scan — LLC Filing', sourceDate: 'Apr 8, 2026',
+    nextAction: 'First outreach — business-owner protection angle', daysInStage: 2,
+    products: ['Whole Life $1M', 'Business Succession Planning'],
+    annualValue: '$12,000/yr', commission: '$1,440',
+    pipelineDealId: null,
+    thirdParty: {
+      wealth: {
+        provider: 'CoreLogic Property + D&B Business',
+        netWorth: '$4,200,000 (est. property portfolio)',
+        properties: '3 residential properties Newark/Elizabeth',
+        propertyValue: '$4,200,000 total assessed value',
+        mortgagesOutstanding: '$2,100,000',
+        businessRevenue: 'Okafor Properties — est. $420K/yr NOI',
+        wealthTier: 'High Net Worth (Property-Rich)',
+        wealthTrend: 'Growing — New LLC filed Apr 2026',
+        dataFreshness: 'Updated Apr 2026'
+      },
+      credit: {
+        provider: 'Equifax Business + Personal',
+        score: 698,
+        scoreRange: 'Good',
+        trend: 'Stable',
+        debtToIncome: '38% (property-heavy)',
+        businessLoan: '$450K commercial (3 properties)',
+        openAccounts: 16,
+        missedPayments: 1,
+        creditUtilization: '29%',
+        note: '1 missed payment 2023 — business cash flow event. Otherwise solid.'
+      },
+      lifestyle: {
+        provider: 'InfoUSA Real Estate Owner Data',
+        lifeStage: 'Wealth Builder — Real Estate',
+        householdType: 'Married, 3 Children (20, 17, 14)',
+        vehicles: '2 (Ford Expedition, Cadillac Escalade)',
+        businessInsurance: 'Property + GL only — no life, no succession plan',
+        travelFrequency: '2–3 trips/yr',
+        estimatedSpend: '$130K/yr'
+      },
+      lifeEvents: [
+        { icon: 'fa-building', color: '#003087', event: 'New LLC filed — Apr 2026 (3rd property company)', source: 'NJ Business Registry' },
+        { icon: 'fa-home', color: '#059669', event: '3rd property purchase $1.4M — Mar 2026', source: 'CoreLogic Property Data' },
+        { icon: 'fa-exclamation-triangle', color: '#e11d48', event: 'No life insurance detected on $2.1M mortgage debt', source: 'AI Gap Analysis' }
+      ],
+      socialFootprint: {
+        linkedin: 'Moderate — 480 connections',
+        engagement: 'Low',
+        topics: ['Real Estate', 'Newark Development', 'Business'],
+        mutualConnections: []
+      }
+    },
+    productFit: [
+      { product: 'Whole Life — $1M', domain: 'ins', fit: 88, reason: '$4.2M property portfolio, $2.1M mortgage, 3 children, no life insurance detected. WL provides estate liquidity to cover mortgages and protect family from forced property sale.', priority: 'Primary', revenue: '$12,000/yr', commission: '$1,440' },
+      { product: 'Business Succession — Buy-Sell Agreement', domain: 'adv', fit: 84, reason: '3 LLCs, no succession plan detected. New LLC filing increases urgency. Buy-sell agreement funded by life insurance ensures business continuity.', priority: 'Bundle', revenue: 'Advisory + key-person life', commission: '$1,800' },
+      { product: 'Term Life — $2M (Mortgage Protection)', domain: 'ins', fit: 91, reason: '$2.1M outstanding mortgages with no life coverage — forced property sale risk. $2M term protects family from losing the portfolio.', priority: 'Alternative', revenue: '$4,800/yr', commission: '$576' }
+    ],
+    aiStrategy: {
+      headline: '🏘️ Real Estate Developer — Massive Gap, Cold Lead',
+      summary: 'James Okafor is AI-identified via public records. $4.2M property portfolio, $2.1M in mortgages, zero life insurance — one of the largest protection gaps in the pipeline. Cold outreach with compelling protection story.',
+      nba: [
+        { priority: 'critical', icon: 'fa-envelope', title: 'First Outreach — Property Protection Angle', desc: '"James, I specialize in working with real estate developers in the Newark area. With your recent third property acquisition, I\'d love to share a 10-minute protection review — one that protects your portfolio if something were to happen to you."' },
+        { priority: 'high', icon: 'fa-building', title: 'Mortgage Gap Story — Compelling Urgency', desc: '"If you passed away tomorrow, your family would inherit $4.2M in property and $2.1M in mortgages — could they afford to keep them? Life insurance makes sure the answer is yes."' },
+        { priority: 'medium', icon: 'fa-file-alt', title: 'New LLC Trigger — Succession Planning', desc: '"You just filed your third LLC — congratulations on the growth! Have you set up a buy-sell agreement for the businesses? It\'s the most overlooked step for real estate developers."' }
+      ],
+      risks: [
+        { icon: '❄️', text: 'Cold outreach — no prior relationship, lower response rate expected', impact: 'High' },
+        { icon: '💰', text: 'High mortgage-to-asset ratio may create premium sensitivity', impact: 'Medium' }
+      ],
+      closeScenarios: [
+        { icon: '📞', label: 'Cold Outreach Works', desc: 'Response → discovery call → proposal in 3 weeks', pct: '48%', level: 'low' },
+        { icon: '🏘️', label: 'Property Trigger Resonates', desc: 'Mortgage gap story → urgent meeting in 10 days', pct: '35%', level: 'low' },
+        { icon: '❌', label: 'No Response', desc: 'Cold lead — follow up at 30 and 60 days', pct: '32%', level: 'low' }
+      ]
+    },
+    timeline: [
+      { date: 'Apr 8', title: 'AI Detected — LLC Filing', desc: 'Public records scan found new LLC + property purchase', status: 'done' },
+      { date: 'Apr 13', title: 'FIRST OUTREACH TODAY', desc: 'Property protection angle + new LLC congratulations', status: 'current' }
+    ]
+  }
+};
+
+// ── State for convert prospect flow ───────────────────────────────────────
+let _currentProspectId = null;
+let _prospectConvertId = null;
+
+// ── Navigate to prospects ─────────────────────────────────────────────────
+const _origNavigateTo = window.navigateTo;
+window.navigateTo = function(page) {
+  _origNavigateTo(page);
+  if (page === 'prospects') {
+    // Render prospect count
+    setTimeout(() => {
+      const lbl = document.getElementById('prosp-count-lbl');
+      if (lbl) lbl.textContent = 'Showing 14 prospects';
+    }, 100);
+  }
+};
+
+// ── Filter prospect cards ─────────────────────────────────────────────────
+function filterProspectCards() {
+  const q = (document.getElementById('prospect-search')?.value || '').toLowerCase();
+  const stage = document.getElementById('prosp-stage-filter')?.value || '';
+  const product = document.getElementById('prosp-product-filter')?.value || '';
+  const scoreFilter = document.getElementById('prosp-score-filter')?.value || '';
+  const cards = document.querySelectorAll('.prosp-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const name = card.querySelector('.prosp-name')?.textContent.toLowerCase() || '';
+    const role = card.querySelector('.prosp-role')?.textContent.toLowerCase() || '';
+    const cardStage = card.dataset.stage || '';
+    const cardProduct = card.dataset.product || '';
+    const cardScore = parseInt(card.dataset.score || '0');
+    const matchQ = !q || name.includes(q) || role.includes(q);
+    const matchStage = !stage || cardStage === stage;
+    const matchProduct = !product || cardProduct.includes(product);
+    let matchScore = true;
+    if (scoreFilter === 'hot') matchScore = cardScore >= 80;
+    else if (scoreFilter === 'warm') matchScore = cardScore >= 50 && cardScore < 80;
+    else if (scoreFilter === 'cold') matchScore = cardScore < 50;
+    const show = matchQ && matchStage && matchProduct && matchScore;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const lbl = document.getElementById('prosp-count-lbl');
+  if (lbl) lbl.textContent = `Showing ${visible} prospect${visible !== 1 ? 's' : ''}`;
+}
+
+function filterProspects(filter) {
+  const scoreEl = document.getElementById('prosp-score-filter');
+  const stageEl = document.getElementById('prosp-stage-filter');
+  if (filter === 'hot' && scoreEl) { scoreEl.value = 'hot'; }
+  else if (filter === 'contacted' && stageEl) { stageEl.value = 'Contacted'; }
+  else if (filter === 'new' && stageEl) { stageEl.value = 'New Lead'; }
+  else {
+    if (scoreEl) scoreEl.value = '';
+    if (stageEl) stageEl.value = '';
+  }
+  filterProspectCards();
+}
+
+// ── Open Prospect Modal ───────────────────────────────────────────────────
+function openProspectModal(id) {
+  const p = prospectData[id];
+  if (!p) return;
+  _currentProspectId = id;
+
+  const overlay = document.getElementById('prosp-modal-overlay');
+  const header = document.getElementById('prosp-modal-header');
+  const body = document.getElementById('prosp-modal-body');
+  const footer = document.getElementById('prosp-modal-footer');
+  if (!overlay) return;
+
+  // Score color
+  const scoreColor = p.score >= 80 ? '#22c55e' : p.score >= 50 ? '#f59e0b' : '#ef4444';
+  const scoreLabel = p.score >= 80 ? 'Hot' : p.score >= 50 ? 'Warm' : 'Cold';
+  const stageColors = { 'New Lead': '#7c3aed', 'Contacted': '#0891b2', 'Qualified': '#059669', 'Proposal Sent': '#d97706', 'Meeting Scheduled': '#003087', 'Negotiating': '#22c55e' };
+  const stageColor = stageColors[p.stage] || '#64748b';
+
+  header.innerHTML = `
+    <div class="pm-header-inner">
+      <div class="pm-avatar" style="background:linear-gradient(135deg,${scoreColor}22,${scoreColor}44);color:${scoreColor}">${p.initials}</div>
+      <div class="pm-header-info">
+        <div class="pm-header-name">${p.name}</div>
+        <div class="pm-header-role">${p.occupation} · ${p.city}</div>
+        <div class="pm-header-meta">
+          <span class="pm-stage-pill" style="background:${stageColor}18;color:${stageColor};border:1px solid ${stageColor}40">${p.stage}</span>
+          <span class="pm-source-lbl"><i class="fas fa-link"></i> ${p.source}</span>
+          <span class="pm-income-lbl"><i class="fas fa-briefcase"></i> ${p.income}</span>
+        </div>
+      </div>
+      <div class="pm-score-ring">
+        <div class="pm-score-val" style="color:${scoreColor}">${p.score}</div>
+        <div class="pm-score-lbl">${scoreLabel}</div>
+      </div>
+    </div>
+    <div class="pm-kpi-row">
+      <div class="pm-kpi"><div class="pm-kpi-val">${p.annualValue}</div><div class="pm-kpi-lbl">Annual Value</div></div>
+      <div class="pm-kpi"><div class="pm-kpi-val">${p.commission}</div><div class="pm-kpi-lbl">Commission</div></div>
+      <div class="pm-kpi"><div class="pm-kpi-val">${p.daysInStage}d</div><div class="pm-kpi-lbl">Days in Stage</div></div>
+      <div class="pm-kpi"><div class="pm-kpi-val">${p.products.length}</div><div class="pm-kpi-lbl">Products</div></div>
+    </div>`;
+
+  // Reset tabs
+  document.querySelectorAll('#prosp-modal-tabs .pmt').forEach(t => t.classList.remove('active'));
+  document.querySelector('#prosp-modal-tabs .pmt[data-tab="overview"]')?.classList.add('active');
+
+  footer.innerHTML = `
+    <button class="btn btn-outline" onclick="closeProspectModal()"><i class="fas fa-times"></i> Close</button>
+    <button class="btn btn-ai" onclick="sendContextMessage('Give me a complete AI sales strategy for prospect ${p.name} — stage ${p.stage}, product interest: ${p.products.join(', ')}, score ${p.score}. Include next best action, talking points, and objection handling.','advisor')"><i class="fas fa-robot"></i> AI Strategy</button>
+    <button class="btn btn-primary" onclick="closeProspectModal();convertProspectToClient('${id}')"><i class="fas fa-user-check"></i> Convert to Client</button>`;
+
+  renderProspectTab('overview', p);
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProspectModal(e) {
+  if (e && e.target !== document.getElementById('prosp-modal-overlay')) return;
+  const overlay = document.getElementById('prosp-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function switchProspectTab(tab, el) {
+  document.querySelectorAll('#prosp-modal-tabs .pmt').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const p = prospectData[_currentProspectId];
+  if (p) renderProspectTab(tab, p);
+}
+
+function renderProspectTab(tab, p) {
+  const body = document.getElementById('prosp-modal-body');
+  if (!body) return;
+
+  if (tab === 'overview') {
+    body.innerHTML = `
+      <div class="pm-overview-grid">
+        <div class="pm-section">
+          <div class="pm-section-title"><i class="fas fa-user"></i> Personal Profile</div>
+          <div class="pm-detail-grid">
+            <div class="pm-detail-row"><span>Age</span><span>${p.age}</span></div>
+            <div class="pm-detail-row"><span>Location</span><span>${p.city}</span></div>
+            <div class="pm-detail-row"><span>Occupation</span><span>${p.occupation}</span></div>
+            <div class="pm-detail-row"><span>Income</span><span>${p.income}</span></div>
+            <div class="pm-detail-row"><span>Email</span><span>${p.email}</span></div>
+            <div class="pm-detail-row"><span>Phone</span><span>${p.phone}</span></div>
+            <div class="pm-detail-row"><span>Source</span><span>${p.source}</span></div>
+            <div class="pm-detail-row"><span>Added</span><span>${p.sourceDate}</span></div>
+          </div>
+        </div>
+        <div class="pm-section">
+          <div class="pm-section-title"><i class="fas fa-bolt"></i> Next Action</div>
+          <div class="pm-next-action-box">
+            <i class="fas fa-exclamation-circle" style="color:#f59e0b"></i>
+            <span>${p.nextAction}</span>
+          </div>
+          <div class="pm-section-title" style="margin-top:16px"><i class="fas fa-box-open"></i> Product Interest</div>
+          ${p.products.map(pr => `<div class="pm-product-chip"><i class="fas fa-shield-alt"></i> ${pr}</div>`).join('')}
+          <div class="pm-section-title" style="margin-top:16px"><i class="fas fa-chart-line"></i> Pipeline Value</div>
+          <div class="pm-value-box">
+            <div class="pm-value-big">${p.annualValue}</div>
+            <div class="pm-value-sub">Commission: ${p.commission} · Deal ID: ${p.pipelineDealId || 'Not yet in pipeline'}</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  else if (tab === 'thirdparty') {
+    const tp = p.thirdParty;
+    const wealthRows = Object.entries(tp.wealth).filter(([k]) => !['provider','dataFreshness'].includes(k));
+    const creditRows = Object.entries(tp.credit).filter(([k]) => !['provider','note'].includes(k));
+    body.innerHTML = `
+      <div class="pm-tp-header">
+        <i class="fas fa-database pm-tp-icon"></i>
+        <div>
+          <div class="pm-tp-title">3rd-Party Intelligence Report</div>
+          <div class="pm-tp-sub">Data from: ${tp.wealth.provider} · ${tp.credit.provider} · Life Event Monitors</div>
+        </div>
+        <span class="pm-tp-fresh"><i class="fas fa-sync-alt"></i> ${tp.wealth.dataFreshness}</span>
+      </div>
+      <div class="pm-tp-grid">
+        <div class="pm-tp-card">
+          <div class="pm-tp-card-title"><i class="fas fa-gem"></i> Wealth Intelligence</div>
+          <div class="pm-tp-provider">${tp.wealth.provider}</div>
+          ${wealthRows.map(([k,v]) => `<div class="pm-tp-row"><span>${k.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase())}</span><span>${v}</span></div>`).join('')}
+        </div>
+        <div class="pm-tp-card">
+          <div class="pm-tp-card-title"><i class="fas fa-star"></i> Credit Signals</div>
+          <div class="pm-tp-provider">${tp.credit.provider}</div>
+          <div class="pm-tp-score-display">
+            <div class="pm-credit-score" style="color:${tp.credit.score >= 750 ? '#22c55e' : tp.credit.score >= 700 ? '#f59e0b' : '#ef4444'}">${tp.credit.score}</div>
+            <div class="pm-credit-range">${tp.credit.scoreRange}</div>
+          </div>
+          ${creditRows.filter(([k])=>k!=='score'&&k!=='scoreRange').map(([k,v]) => `<div class="pm-tp-row"><span>${k.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase())}</span><span>${v}</span></div>`).join('')}
+          <div class="pm-tp-note"><i class="fas fa-info-circle"></i> ${tp.credit.note}</div>
+        </div>
+        <div class="pm-tp-card">
+          <div class="pm-tp-card-title"><i class="fas fa-calendar-check"></i> Life Events & Triggers</div>
+          <div class="pm-tp-provider">Experian Life Triggers · LinkedIn · Public Records · AI Monitor</div>
+          ${p.thirdParty.lifeEvents.map(e => `
+            <div class="pm-tp-event">
+              <div class="pm-tp-event-icon" style="background:${e.color}18;color:${e.color}"><i class="fas ${e.icon}"></i></div>
+              <div>
+                <div class="pm-tp-event-text">${e.event}</div>
+                <div class="pm-tp-event-source"><i class="fas fa-database"></i> ${e.source}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="pm-tp-card">
+          <div class="pm-tp-card-title"><i class="fas fa-user-circle"></i> Lifestyle & Household</div>
+          <div class="pm-tp-provider">${tp.lifestyle.provider}</div>
+          ${Object.entries(tp.lifestyle).filter(([k])=>k!=='provider').map(([k,v]) => `<div class="pm-tp-row"><span>${k.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase())}</span><span>${v}</span></div>`).join('')}
+          <div class="pm-tp-card-title" style="margin-top:12px"><i class="fas fa-share-alt"></i> Social Footprint</div>
+          <div class="pm-tp-row"><span>LinkedIn</span><span>${tp.socialFootprint.linkedin}</span></div>
+          <div class="pm-tp-row"><span>Engagement</span><span>${tp.socialFootprint.engagement}</span></div>
+          <div class="pm-tp-row"><span>Topics</span><span>${tp.socialFootprint.topics.join(' · ')}</span></div>
+          ${tp.socialFootprint.mutualConnections.length ? `<div class="pm-tp-row"><span>Mutual Connections</span><span>${tp.socialFootprint.mutualConnections.join(', ')}</span></div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  else if (tab === 'products') {
+    const domainColors = { ins: '#003087', inv: '#059669', ret: '#d97706', adv: '#7c3aed' };
+    const domainLabels = { ins: 'Insurance', inv: 'Investments', ret: 'Retirement', adv: 'Advisory' };
+    const priorityColors = { Primary: '#ef4444', Bundle: '#f59e0b', Upsell: '#7c3aed', Future: '#64748b', Alternative: '#0891b2', 'Critical Upsell': '#e11d48' };
+    body.innerHTML = `
+      <div class="pm-products-intro">
+        <i class="fas fa-robot"></i>
+        <span>AI Product Fit Analysis — scored against 3rd-party wealth, life-stage, and income data for ${p.name}</span>
+      </div>
+      <div class="pm-products-list">
+        ${p.productFit.map(pf => `
+          <div class="pm-product-fit-card">
+            <div class="pm-pf-top">
+              <div class="pm-pf-domain-badge" style="background:${domainColors[pf.domain]}18;color:${domainColors[pf.domain]}">${domainLabels[pf.domain]}</div>
+              <div class="pm-pf-name">${pf.product}</div>
+              <div class="pm-pf-priority-badge" style="background:${priorityColors[pf.priority]}18;color:${priorityColors[pf.priority]}">${pf.priority}</div>
+              <div class="pm-pf-score" style="color:${pf.fit >= 85 ? '#22c55e' : pf.fit >= 65 ? '#f59e0b' : '#ef4444'}">${pf.fit}% Fit</div>
+            </div>
+            <div class="pm-pf-bar-outer"><div class="pm-pf-bar-inner" style="width:${pf.fit}%;background:${pf.fit >= 85 ? '#22c55e' : pf.fit >= 65 ? '#f59e0b' : '#ef4444'}"></div></div>
+            <div class="pm-pf-reason">${pf.reason}</div>
+            <div class="pm-pf-revenue-row">
+              <span class="pm-pf-revenue"><i class="fas fa-dollar-sign"></i> ${pf.revenue}</span>
+              <span class="pm-pf-commission"><i class="fas fa-hand-holding-usd"></i> Commission: ${pf.commission}</span>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  else if (tab === 'ai') {
+    const ai = p.aiStrategy;
+    const priorityColors = { critical: '#ef4444', high: '#f59e0b', medium: '#0891b2' };
+    const impactColors = { High: '#ef4444', Medium: '#f59e0b', Low: '#22c55e' };
+    body.innerHTML = `
+      <div class="pm-ai-headline">
+        <i class="fas fa-robot pm-ai-hl-icon"></i>
+        <span>${ai.headline}</span>
+      </div>
+      <div class="pm-ai-summary">${ai.summary}</div>
+      <div class="pm-ai-section-title"><i class="fas fa-bolt"></i> Next Best Actions</div>
+      <div class="pm-nba-list">
+        ${ai.nba.map(n => `
+          <div class="pm-nba-item pm-nba-${n.priority}">
+            <div class="pm-nba-priority" style="color:${priorityColors[n.priority]}">${n.priority.toUpperCase()}</div>
+            <div class="pm-nba-content">
+              <div class="pm-nba-title"><i class="fas ${n.icon}"></i> ${n.title}</div>
+              <div class="pm-nba-desc">${n.desc}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="pm-ai-section-title" style="margin-top:20px"><i class="fas fa-chart-bar"></i> Close Scenarios</div>
+      <div class="pm-scenarios-row">
+        ${ai.closeScenarios.map(s => `
+          <div class="pm-scenario pm-scenario-${s.level}">
+            <div class="pm-scenario-icon">${s.icon}</div>
+            <div class="pm-scenario-label">${s.label}</div>
+            <div class="pm-scenario-pct" style="color:${s.level==='high'?'#22c55e':s.level==='medium'?'#f59e0b':'#ef4444'}">${s.pct}</div>
+            <div class="pm-scenario-desc">${s.desc}</div>
+          </div>`).join('')}
+      </div>
+      <div class="pm-ai-section-title" style="margin-top:20px"><i class="fas fa-exclamation-triangle"></i> Risk Factors</div>
+      <div class="pm-risks-list">
+        ${ai.risks.map(r => `
+          <div class="pm-risk-item">
+            <span class="pm-risk-icon">${r.icon}</span>
+            <span class="pm-risk-text">${r.text}</span>
+            <span class="pm-risk-impact" style="color:${impactColors[r.impact]}">${r.impact} Impact</span>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  else if (tab === 'timeline') {
+    body.innerHTML = `
+      <div class="pm-timeline">
+        ${p.timeline.map((t, i) => `
+          <div class="pm-tl-item pm-tl-${t.status}">
+            <div class="pm-tl-dot-col">
+              <div class="pm-tl-dot pm-tl-dot-${t.status}">
+                ${t.status === 'done' ? '<i class="fas fa-check"></i>' : t.status === 'current' ? '<i class="fas fa-circle"></i>' : '<i class="far fa-circle"></i>'}
+              </div>
+              ${i < p.timeline.length - 1 ? '<div class="pm-tl-line"></div>' : ''}
+            </div>
+            <div class="pm-tl-content">
+              <div class="pm-tl-date">${t.date}</div>
+              <div class="pm-tl-title">${t.title}</div>
+              <div class="pm-tl-desc">${t.desc}</div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+
+// ── Convert Prospect to Client ────────────────────────────────────────────
+function convertProspectToClient(id) {
+  const p = prospectData[id];
+  if (!p) return;
+  _prospectConvertId = id;
+  const overlay = document.getElementById('prosp-convert-overlay');
+  if (!overlay) return;
+
+  const body = document.getElementById('pcm-body');
+  const scoreColor = p.score >= 80 ? '#22c55e' : p.score >= 50 ? '#f59e0b' : '#ef4444';
+  body.innerHTML = `
+    <div class="pcm-prospect-row">
+      <div class="pcm-avatar" style="background:${scoreColor}18;color:${scoreColor}">${p.initials}</div>
+      <div>
+        <div class="pcm-prospect-name">${p.name}</div>
+        <div class="pcm-prospect-meta">${p.occupation} · ${p.city}</div>
+      </div>
+      <div class="pcm-score-badge" style="background:${scoreColor}18;color:${scoreColor}">${p.score} ${p.score >= 80 ? '🔥' : '📊'}</div>
+    </div>
+    <div class="pcm-details-grid">
+      <div class="pcm-detail-item">
+        <div class="pcm-detail-label">Products Interested In</div>
+        <div class="pcm-detail-value">${p.products.join(', ')}</div>
+      </div>
+      <div class="pcm-detail-item">
+        <div class="pcm-detail-label">Annual Revenue</div>
+        <div class="pcm-detail-value" style="color:#22c55e;font-weight:700">${p.annualValue}</div>
+      </div>
+      <div class="pcm-detail-item">
+        <div class="pcm-detail-label">Commission (Y1)</div>
+        <div class="pcm-detail-value">${p.commission}</div>
+      </div>
+      <div class="pcm-detail-item">
+        <div class="pcm-detail-label">Current Stage</div>
+        <div class="pcm-detail-value">${p.stage}</div>
+      </div>
+    </div>
+    <div class="pcm-actions-section">
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Add to Active Client Book (248 clients)</div>
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Create Deal in Sales Pipeline → Prospect Stage</div>
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Generate Add Client pre-filled form (AI 95% fill)</div>
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Schedule onboarding discovery call</div>
+      <div class="pcm-action-check"><i class="fas fa-check-circle" style="color:#22c55e"></i> Send welcome email with product illustrations</div>
+    </div>`;
+
+  overlay.style.display = 'flex';
+}
+
+function confirmProspectConversion() {
+  const id = _prospectConvertId;
+  const p = prospectData[id];
+  if (!p) return;
+
+  // Hide convert modal
+  document.getElementById('prosp-convert-overlay').style.display = 'none';
+
+  // Show success toast
+  const toast = document.createElement('div');
+  toast.className = 'prosp-success-toast';
+  toast.innerHTML = `
+    <div class="pst-inner">
+      <i class="fas fa-user-check pst-icon"></i>
+      <div>
+        <div class="pst-title">${p.name} converted to Client!</div>
+        <div class="pst-sub">Deal added to Sales Pipeline · Client book now 248 · Welcome email sent</div>
+      </div>
+      <div class="pst-actions">
+        <button class="pst-btn" onclick="navigateTo('clients')">View Clients</button>
+        <button class="pst-btn pst-btn-outline" onclick="navigateTo('sales')">View Pipeline</button>
+      </div>
+      <button class="pst-close" onclick="this.closest('.prosp-success-toast').remove()"><i class="fas fa-times"></i></button>
+    </div>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 8000);
+
+  // Remove card from grid with animation
+  const card = document.querySelector(`.prosp-card[data-id="${id}"]`);
+  if (card) {
+    card.style.transition = 'all 0.4s ease';
+    card.style.transform = 'scale(0.9)';
+    card.style.opacity = '0.4';
+    setTimeout(() => {
+      card.style.transform = 'scale(0)';
+      card.style.opacity = '0';
+      setTimeout(() => card.remove(), 300);
+    }, 400);
+  }
+
+  // Update KPI strip count
+  setTimeout(() => {
+    const countLbl = document.getElementById('prosp-count-lbl');
+    if (countLbl) {
+      const visible = document.querySelectorAll('.prosp-card:not([style*="display: none"])').length - 1;
+      countLbl.textContent = `Showing ${Math.max(0, visible)} prospects`;
+    }
+  }, 800);
+}
+
+function openProspectAIAnalysis() {
+  sendContextMessage('Run a full AI analysis of all 14 prospects in my pipeline — rank by close probability, identify top 3 to contact today, flag any stale deals, and recommend the best next action for each hot prospect.', 'advisor');
+  navigateTo('ai-agents');
+}
+
+function openAddProspectModal() {
+  openDashboardModal({
+    icon: 'fa-user-plus',
+    iconBg: '#003087',
+    title: 'Add New Prospect',
+    sub: 'Manually add a prospect or import from 3rd-party data',
+    body: `
+      <div class="pm-add-form">
+        <div class="dgm-alert-banner green"><i class="fas fa-robot"></i> <strong>AI Pre-fill Active:</strong> Enter name or email — AI will search 3rd-party databases and pre-fill available data automatically.</div>
+        <div class="pm-form-row">
+          <div class="pm-form-group">
+            <label class="pm-form-label">First Name *</label>
+            <input class="pm-form-input" type="text" id="ap-fname" placeholder="First name" />
+          </div>
+          <div class="pm-form-group">
+            <label class="pm-form-label">Last Name *</label>
+            <input class="pm-form-input" type="text" id="ap-lname" placeholder="Last name" />
+          </div>
+        </div>
+        <div class="pm-form-row">
+          <div class="pm-form-group">
+            <label class="pm-form-label">Email</label>
+            <input class="pm-form-input" type="email" id="ap-email" placeholder="email@domain.com" />
+          </div>
+          <div class="pm-form-group">
+            <label class="pm-form-label">Phone</label>
+            <input class="pm-form-input" type="text" id="ap-phone" placeholder="(xxx) xxx-xxxx" />
+          </div>
+        </div>
+        <div class="pm-form-row">
+          <div class="pm-form-group">
+            <label class="pm-form-label">Product Interest</label>
+            <select class="pm-form-input">
+              <option>Whole Life</option><option>Term Life</option><option>Universal Life</option>
+              <option>Annuity</option><option>Disability</option><option>Advisory</option><option>529 Plan</option>
+            </select>
+          </div>
+          <div class="pm-form-group">
+            <label class="pm-form-label">Lead Source</label>
+            <select class="pm-form-input">
+              <option>Referral</option><option>LinkedIn</option><option>Seminar</option>
+              <option>Inbound</option><option>Cold Outreach</option><option>Public Record</option>
+            </select>
+          </div>
+        </div>
+        <div class="pm-form-row">
+          <div class="pm-form-group" style="flex:1">
+            <label class="pm-form-label">Notes</label>
+            <textarea class="pm-form-input" rows="2" placeholder="Initial context, how you met, etc."></textarea>
+          </div>
+        </div>
+      </div>`,
+    footer: `
+      <button class="btn btn-outline" onclick="closeDashboardModal()">Cancel</button>
+      <button class="btn btn-ai" onclick="closeDashboardModal();showToast('AI enriching prospect data from 3rd-party sources...')"><i class="fas fa-robot"></i> AI Enrich & Add</button>
+      <button class="btn btn-primary" onclick="closeDashboardModal();showToast('Prospect added to pipeline!')"><i class="fas fa-plus"></i> Add Prospect</button>`
+  });
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'prosp-success-toast';
+  t.innerHTML = `<div class="pst-inner"><i class="fas fa-check-circle pst-icon"></i><div><div class="pst-title">${msg}</div></div><button class="pst-close" onclick="this.closest('.prosp-success-toast').remove()"><i class="fas fa-times"></i></button></div>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+console.log('Prospects module loaded — prospectData(14), openProspectModal, convertProspectToClient, filterProspectCards all ready');
