@@ -7953,6 +7953,1323 @@ function runRenewalCampaign() {
   sendQuickMessage('Run the full renewal email campaign for all 23 clients due in 90 days — draft personalised emails for each, prioritised by lapse risk score');
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   POLICIES — NEW POLICY MODAL (4-step wizard)
+   ═══════════════════════════════════════════════════════════════ */
+let _npCurrentStep = 1;
+let _npFormData = {};
+
+function openNewPolicyModal() {
+  _npCurrentStep = 1;
+  _npFormData = {};
+  const overlay = document.getElementById('np-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  npRenderStep(1);
+}
+function closeNewPolicyModal(e) {
+  if (e && e.target !== document.getElementById('np-overlay')) return;
+  const overlay = document.getElementById('np-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function npRenderStep(step) {
+  _npCurrentStep = step;
+  // Update progress dots
+  for (let i = 1; i <= 4; i++) {
+    const s = document.getElementById('np-step-' + i);
+    if (!s) continue;
+    s.className = 'np-step' + (i < step ? ' done' : i === step ? ' active' : '');
+    if (i < step) s.querySelector('.np-step-num').innerHTML = '<i class="fas fa-check"></i>';
+    else s.querySelector('.np-step-num').textContent = i;
+  }
+  const subtitles = ['Step 1 of 4 — Client & Policy Basics', 'Step 2 of 4 — Coverage & Premiums', 'Step 3 of 4 — Underwriting & Health', 'Step 4 of 4 — Review & Submit'];
+  const subEl = document.getElementById('np-subtitle');
+  if (subEl) subEl.textContent = subtitles[step - 1];
+  // Show/hide nav buttons
+  const backBtn   = document.getElementById('np-btn-back');
+  const nextBtn   = document.getElementById('np-btn-next');
+  const submitBtn = document.getElementById('np-btn-submit');
+  if (backBtn)   backBtn.style.display   = step > 1 ? 'inline-flex' : 'none';
+  if (nextBtn)   nextBtn.style.display   = step < 4 ? 'inline-flex' : 'none';
+  if (submitBtn) submitBtn.style.display = step === 4 ? 'inline-flex' : 'none';
+  const body = document.getElementById('np-body');
+  if (!body) return;
+  if (step === 1) {
+    body.innerHTML = `
+      <div class="np-section-title"><i class="fas fa-user"></i> Client Information</div>
+      <div class="np-ai-banner"><i class="fas fa-robot"></i> <strong>AI Pre-fill available</strong> — click "AI Pre-fill" to auto-populate from client records &amp; 3rd-party data</div>
+      <div class="np-form-grid">
+        <div class="np-field">
+          <label class="np-label">Client Name <span class="np-req">*</span></label>
+          <input class="np-input" id="np-client-name" type="text" placeholder="Search existing client or enter name…" value="${_npFormData.clientName||''}" oninput="npAutofill(this.value)" list="np-client-list"/>
+          <datalist id="np-client-list">
+            <option value="James Whitfield"/>
+            <option value="Patricia Nguyen"/>
+            <option value="Sandra Williams"/>
+            <option value="David Thompson"/>
+            <option value="Robert Chen"/>
+            <option value="Linda Morrison"/>
+            <option value="Kevin Park"/>
+            <option value="Maria Gonzalez"/>
+          </datalist>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Policy Number <span class="np-req">*</span></label>
+          <input class="np-input" id="np-policy-num" type="text" placeholder="Auto-generated" value="${_npFormData.policyNum||'P-100'+(Math.floor(Math.random()*900)+400)}" readonly style="background:#f8fafc;color:#64748b"/>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Date of Birth <span class="np-req">*</span></label>
+          <input class="np-input" id="np-dob" type="date" value="${_npFormData.dob||''}"/>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Gender</label>
+          <select class="np-select" id="np-gender">
+            <option value="male" ${(_npFormData.gender||'male')==='male'?'selected':''}>Male</option>
+            <option value="female" ${(_npFormData.gender||'')==='female'?'selected':''}>Female</option>
+            <option value="other">Other / Prefer not to say</option>
+          </select>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Email Address</label>
+          <input class="np-input" id="np-email" type="email" placeholder="client@email.com" value="${_npFormData.email||''}"/>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Phone Number</label>
+          <input class="np-input" id="np-phone" type="tel" placeholder="(212) 555-0000" value="${_npFormData.phone||''}"/>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Address</label>
+          <input class="np-input" id="np-address" type="text" placeholder="123 Main St, New York, NY 10001" value="${_npFormData.address||''}"/>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Relationship to Agent</label>
+          <select class="np-select" id="np-relationship">
+            <option>Existing Client</option>
+            <option>Referral</option>
+            <option>New Prospect</option>
+            <option>Walk-in</option>
+          </select>
+        </div>
+      </div>
+      <div class="np-section-title" style="margin-top:20px"><i class="fas fa-file-contract"></i> Policy Type</div>
+      <div class="np-product-grid">
+        ${[
+          {id:'wl',  icon:'fa-shield-alt',  label:'Whole Life',       sub:'Permanent · cash value'},
+          {id:'tl',  icon:'fa-clock',        label:'Term Life',        sub:'10/20/30 yr term'},
+          {id:'ul',  icon:'fa-infinity',     label:'Universal Life',   sub:'Flexible premiums'},
+          {id:'vul', icon:'fa-chart-line',   label:'Variable UL',      sub:'Market-linked'},
+          {id:'ltc', icon:'fa-heartbeat',    label:'Long-term Care',   sub:'Care facility coverage'},
+          {id:'di',  icon:'fa-user-shield',  label:'Disability Ins.',  sub:'Income replacement'},
+          {id:'ann', icon:'fa-umbrella-beach',label:'Annuity',         sub:'Retirement income'},
+          {id:'529', icon:'fa-graduation-cap',label:'529 Plan',        sub:'Education savings'},
+        ].map(p => `
+          <div class="np-product-tile ${(_npFormData.productType||'wl')===p.id?'selected':''}" onclick="npSelectProduct('${p.id}',this)">
+            <i class="fas ${p.icon}"></i>
+            <div class="np-product-label">${p.label}</div>
+            <div class="np-product-sub">${p.sub}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else if (step === 2) {
+    const productLabels = {wl:'Whole Life Insurance',tl:'Term Life Insurance',ul:'Universal Life Insurance',vul:'Variable Universal Life',ltc:'Long-term Care Insurance',di:'Disability Insurance',ann:'Annuity',529:'529 Education Plan'};
+    const pType = _npFormData.productType || 'wl';
+    body.innerHTML = `
+      <div class="np-section-title"><i class="fas fa-dollar-sign"></i> Coverage &amp; Premium Details</div>
+      <div class="np-selected-product-banner">
+        <i class="fas fa-check-circle"></i> Selected: <strong>${productLabels[pType]||'Whole Life Insurance'}</strong>
+        <span class="np-change-link" onclick="npRenderStep(1)">Change</span>
+      </div>
+      <div class="np-form-grid">
+        ${pType !== 'ann' && pType !== '529' ? `
+        <div class="np-field">
+          <label class="np-label">Face Value / Coverage Amount <span class="np-req">*</span></label>
+          <select class="np-select" id="np-face-value" onchange="npCalcPremium()">
+            <option value="100000" ${(_npFormData.faceValue||'')=='100000'?'selected':''}>$100,000</option>
+            <option value="250000" ${(_npFormData.faceValue||'')=='250000'?'selected':''}>$250,000</option>
+            <option value="500000" ${(_npFormData.faceValue||'500000')=='500000'?'selected':''}>$500,000</option>
+            <option value="750000" ${(_npFormData.faceValue||'')=='750000'?'selected':''}>$750,000</option>
+            <option value="1000000" ${(_npFormData.faceValue||'')=='1000000'?'selected':''}>$1,000,000</option>
+            <option value="2000000">$2,000,000</option>
+          </select>
+        </div>` : `
+        <div class="np-field">
+          <label class="np-label">${pType==='ann'?'Premium / Deposit Amount':'Annual Contribution'} <span class="np-req">*</span></label>
+          <select class="np-select" id="np-face-value" onchange="npCalcPremium()">
+            <option value="50000">$50,000</option>
+            <option value="100000" selected>$100,000</option>
+            <option value="250000">$250,000</option>
+            <option value="500000">$500,000</option>
+          </select>
+        </div>`}
+        ${pType === 'tl' ? `
+        <div class="np-field">
+          <label class="np-label">Term Length <span class="np-req">*</span></label>
+          <select class="np-select" id="np-term">
+            <option>10 Year</option>
+            <option selected>20 Year</option>
+            <option>30 Year</option>
+          </select>
+        </div>` : ''}
+        <div class="np-field">
+          <label class="np-label">Health Classification</label>
+          <select class="np-select" id="np-health" onchange="npCalcPremium()">
+            <option value="pp">Preferred Plus</option>
+            <option value="p" selected>Preferred</option>
+            <option value="sp">Standard Plus</option>
+            <option value="s">Standard</option>
+            <option value="sub">Substandard / Rated</option>
+          </select>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Payment Mode</label>
+          <select class="np-select" id="np-pay-mode" onchange="npCalcPremium()">
+            <option>Annual</option>
+            <option>Semi-Annual</option>
+            <option>Quarterly</option>
+            <option>Monthly</option>
+          </select>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Issue Date <span class="np-req">*</span></label>
+          <input class="np-input" id="np-issue-date" type="date" value="${_npFormData.issueDate||new Date().toISOString().split('T')[0]}"/>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Primary Beneficiary <span class="np-req">*</span></label>
+          <input class="np-input" id="np-beneficiary" type="text" placeholder="Full name &amp; relationship" value="${_npFormData.beneficiary||''}"/>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Contingent Beneficiary</label>
+          <input class="np-input" id="np-cont-beneficiary" type="text" placeholder="Full name &amp; relationship (optional)" value="${_npFormData.contBeneficiary||''}"/>
+        </div>
+      </div>
+      <div class="np-riders-section">
+        <div class="np-section-title" style="margin-top:16px"><i class="fas fa-plus-circle"></i> Riders &amp; Add-ons</div>
+        <div class="np-riders-grid">
+          ${[
+            {id:'waiver', label:'Waiver of Premium', cost:'+$12/mo', desc:'Waives premiums if disabled'},
+            {id:'adb',    label:'Accidental Death Benefit', cost:'+$8/mo', desc:'2× payout on accidental death'},
+            {id:'rop',    label:'Return of Premium', cost:'+$18/mo', desc:'Get all premiums back if no claim'},
+            {id:'ltcr',   label:'LTC Rider', cost:'+$24/mo', desc:'Access death benefit for LTC'},
+            {id:'chi',    label:'Child Insurance Rider', cost:'+$6/mo', desc:'Coverage for all children'},
+            {id:'gir',    label:'Guaranteed Insurability', cost:'+$10/mo', desc:'Add coverage without new UW'},
+          ].map(r => `
+            <div class="np-rider-card">
+              <div class="np-rider-left">
+                <input type="checkbox" class="np-rider-chk" id="rider-${r.id}" onchange="npCalcPremium()"/>
+                <div>
+                  <div class="np-rider-name">${r.label}</div>
+                  <div class="np-rider-desc">${r.desc}</div>
+                </div>
+              </div>
+              <div class="np-rider-cost">${r.cost}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="np-premium-calc-box" id="np-premium-box">
+        <div class="np-pcb-title"><i class="fas fa-calculator"></i> Estimated Premium</div>
+        <div class="np-pcb-vals">
+          <div class="np-pcb-item"><span>Annual Premium</span><span class="np-pcb-val" id="np-calc-annual">—</span></div>
+          <div class="np-pcb-item"><span>Monthly Premium</span><span class="np-pcb-val" id="np-calc-monthly">—</span></div>
+          <div class="np-pcb-item"><span>Est. Commission</span><span class="np-pcb-val green" id="np-calc-comm">—</span></div>
+        </div>
+        <button class="np-calc-btn" onclick="npCalcPremium()"><i class="fas fa-sync-alt"></i> Recalculate</button>
+      </div>
+    `;
+    npCalcPremium();
+  } else if (step === 3) {
+    body.innerHTML = `
+      <div class="np-section-title"><i class="fas fa-stethoscope"></i> Underwriting &amp; Health Information</div>
+      <div class="np-ai-banner green"><i class="fas fa-robot"></i> <strong>AI Underwriting Pre-screen</strong> — AI will flag any issues before submission to reduce delays</div>
+      <div class="np-form-grid">
+        <div class="np-field np-field-full">
+          <label class="np-label">Height &amp; Weight</label>
+          <div style="display:flex;gap:12px">
+            <input class="np-input" id="np-height" type="text" placeholder='Height (e.g. 5&apos;10")' style="flex:1"/>
+            <input class="np-input" id="np-weight" type="text" placeholder="Weight (lbs)" style="flex:1"/>
+          </div>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Tobacco / Nicotine Use</label>
+          <select class="np-select" id="np-tobacco">
+            <option>Non-Tobacco — 5+ years</option>
+            <option>Non-Tobacco — 2–5 years</option>
+            <option>Occasional — &lt;2 years</option>
+            <option>Current Smoker</option>
+          </select>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Annual Income</label>
+          <select class="np-select" id="np-income">
+            <option>Under $50K</option>
+            <option>$50K – $100K</option>
+            <option selected>$100K – $250K</option>
+            <option>$250K – $500K</option>
+            <option>$500K+</option>
+          </select>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Net Worth</label>
+          <select class="np-select" id="np-net-worth">
+            <option>Under $100K</option>
+            <option>$100K – $500K</option>
+            <option selected>$500K – $1M</option>
+            <option>$1M – $5M</option>
+            <option>$5M+</option>
+          </select>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Occupation</label>
+          <input class="np-input" id="np-occupation" type="text" placeholder="e.g. Software Engineer, Attorney…"/>
+        </div>
+        <div class="np-field">
+          <label class="np-label">Lead Source</label>
+          <select class="np-select" id="np-lead-source">
+            <option>Referral</option>
+            <option>LinkedIn / Social</option>
+            <option>Seminar / Event</option>
+            <option>Inbound Inquiry</option>
+            <option>Cold Outreach</option>
+            <option>Existing Client – Cross-sell</option>
+          </select>
+        </div>
+      </div>
+      <div class="np-section-title" style="margin-top:20px"><i class="fas fa-notes-medical"></i> Health Questions</div>
+      <div class="np-health-qs">
+        ${[
+          'Has the applicant been diagnosed with heart disease, cancer, stroke, or diabetes in the last 5 years?',
+          'Has the applicant had any major surgery or hospitalisation in the last 3 years?',
+          'Is the applicant currently taking any prescription medications?',
+          'Has any life insurance application been declined, rated, or modified?',
+          'Does the applicant engage in high-risk activities (skydiving, racing, scuba diving)?',
+          'Has the applicant used tobacco or nicotine products in the last 5 years?',
+        ].map((q, i) => `
+          <div class="np-hq-row">
+            <div class="np-hq-text">${i+1}. ${q}</div>
+            <div class="np-hq-answers">
+              <label class="np-hq-opt"><input type="radio" name="np-hq-${i}" value="no" checked/> No</label>
+              <label class="np-hq-opt"><input type="radio" name="np-hq-${i}" value="yes"/> Yes</label>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="np-uw-ai-panel">
+        <div class="np-uw-ai-title"><i class="fas fa-robot"></i> AI Pre-screen Result</div>
+        <div class="np-uw-ai-body">
+          <div class="np-uw-ai-score"><span class="np-uw-score-badge green">STP Score: 88</span> <span class="np-uw-score-lbl">Straight-Through Processing likely</span></div>
+          <div class="np-uw-ai-items">
+            <div class="np-uw-ai-item ok"><i class="fas fa-check"></i> No major health flags detected</div>
+            <div class="np-uw-ai-item ok"><i class="fas fa-check"></i> Income-to-coverage ratio within guidelines</div>
+            <div class="np-uw-ai-item ok"><i class="fas fa-check"></i> Age and product selection compatible</div>
+            <div class="np-uw-ai-item warn"><i class="fas fa-exclamation-triangle"></i> Medical exam recommended for face values over $1M</div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (step === 4) {
+    const pn = document.getElementById('np-policy-num')?.value || _npFormData.policyNum || 'P-100412';
+    const cl = document.getElementById('np-client-name')?.value || _npFormData.clientName || '(Client)';
+    const typeMap = {wl:'Whole Life Insurance',tl:'Term Life Insurance',ul:'Universal Life Insurance',vul:'Variable Universal Life',ltc:'Long-term Care Insurance',di:'Disability Insurance',ann:'Annuity',529:'529 Education Plan'};
+    const pt = _npFormData.productType || 'wl';
+    body.innerHTML = `
+      <div class="np-section-title"><i class="fas fa-clipboard-check"></i> Review &amp; Submit</div>
+      <div class="np-review-grid">
+        <div class="np-review-card">
+          <div class="np-review-card-title"><i class="fas fa-user"></i> Client</div>
+          <div class="np-review-row"><span>Name</span><strong>${cl}</strong></div>
+          <div class="np-review-row"><span>Policy #</span><strong>${pn}</strong></div>
+          <div class="np-review-row"><span>Product</span><strong>${typeMap[pt]}</strong></div>
+          <div class="np-review-row"><span>Status</span><strong class="np-status-new">New Application</strong></div>
+        </div>
+        <div class="np-review-card">
+          <div class="np-review-card-title"><i class="fas fa-dollar-sign"></i> Premium Summary</div>
+          <div class="np-review-row"><span>Face Value</span><strong id="np-rev-face">$500,000</strong></div>
+          <div class="np-review-row"><span>Annual Premium</span><strong id="np-rev-annual">$6,000</strong></div>
+          <div class="np-review-row"><span>Monthly</span><strong id="np-rev-monthly">$516</strong></div>
+          <div class="np-review-row"><span>Est. Commission</span><strong class="green" id="np-rev-comm">$720</strong></div>
+        </div>
+        <div class="np-review-card">
+          <div class="np-review-card-title"><i class="fas fa-stethoscope"></i> Underwriting</div>
+          <div class="np-review-row"><span>Health Class</span><strong>Preferred</strong></div>
+          <div class="np-review-row"><span>AI STP Score</span><strong class="green">88 / 100</strong></div>
+          <div class="np-review-row"><span>Medical Exam</span><strong>Not Required</strong></div>
+          <div class="np-review-row"><span>Expected Issue</span><strong>3–5 business days</strong></div>
+        </div>
+        <div class="np-review-card">
+          <div class="np-review-card-title"><i class="fas fa-tasks"></i> Next Steps</div>
+          <div class="np-next-step-item"><i class="fas fa-file-signature green"></i> E-App will be auto-generated</div>
+          <div class="np-next-step-item"><i class="fas fa-envelope green"></i> Welcome email sent to client</div>
+          <div class="np-next-step-item"><i class="fas fa-brain green"></i> AI underwriting pre-screen complete</div>
+          <div class="np-next-step-item"><i class="fas fa-calendar-check green"></i> Added to Sales Pipeline — Underwriting</div>
+        </div>
+      </div>
+      <div class="np-submit-note"><i class="fas fa-info-circle"></i> By submitting, this policy application will be created in the system, an e-application generated, and the deal added to your Sales Pipeline under Underwriting.</div>
+    `;
+  }
+}
+function npSelectProduct(id, el) {
+  _npFormData.productType = id;
+  document.querySelectorAll('.np-product-tile').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function npNextStep() {
+  // Capture current step data
+  if (_npCurrentStep === 1) {
+    _npFormData.clientName  = document.getElementById('np-client-name')?.value;
+    _npFormData.policyNum   = document.getElementById('np-policy-num')?.value;
+    _npFormData.dob         = document.getElementById('np-dob')?.value;
+    _npFormData.gender      = document.getElementById('np-gender')?.value;
+    _npFormData.email       = document.getElementById('np-email')?.value;
+    _npFormData.phone       = document.getElementById('np-phone')?.value;
+    if (!_npFormData.clientName) { npShowError('Client name is required.'); return; }
+    if (!_npFormData.productType) _npFormData.productType = 'wl';
+  }
+  if (_npCurrentStep === 2) {
+    _npFormData.faceValue   = document.getElementById('np-face-value')?.value;
+    _npFormData.health      = document.getElementById('np-health')?.value;
+    _npFormData.payMode     = document.getElementById('np-pay-mode')?.value;
+    _npFormData.issueDate   = document.getElementById('np-issue-date')?.value;
+    _npFormData.beneficiary = document.getElementById('np-beneficiary')?.value;
+    if (!_npFormData.beneficiary) { npShowError('Primary beneficiary is required.'); return; }
+  }
+  if (_npCurrentStep < 4) npRenderStep(_npCurrentStep + 1);
+}
+function npPrevStep() {
+  if (_npCurrentStep > 1) npRenderStep(_npCurrentStep - 1);
+}
+function npShowError(msg) {
+  let e = document.getElementById('np-error-toast');
+  if (!e) { e = document.createElement('div'); e.id = 'np-error-toast'; e.className = 'np-error-toast'; document.getElementById('np-modal')?.appendChild(e) || document.body.appendChild(e); }
+  e.textContent = msg; e.style.display = 'block';
+  setTimeout(() => { e.style.display = 'none'; }, 3000);
+}
+function npCalcPremium() {
+  const fv      = parseInt(document.getElementById('np-face-value')?.value || 500000);
+  const health  = document.getElementById('np-health')?.value || 'p';
+  const pType   = _npFormData.productType || 'wl';
+  const rates   = { wl:0.012, tl:0.0032, ul:0.0085, vul:0.0095, ltc:0.024, di:0.018, ann:0.006, 529:0.005 };
+  const commR   = { wl:0.55, tl:0.12, ul:0.14, vul:0.16, ltc:0.30, di:0.30, ann:0.08, 529:0.05 };
+  const hMult   = { pp:0.82, p:1.00, sp:1.18, s:1.35, sub:1.60 };
+  // Count checked riders
+  let riderExtra = 0;
+  ['waiver','adb','rop','ltcr','chi','gir'].forEach(r => {
+    const chk = document.getElementById('rider-' + r);
+    if (chk?.checked) riderExtra += { waiver:144, adb:96, rop:216, ltcr:288, chi:72, gir:120 }[r] || 0;
+  });
+  const annual  = Math.round((fv * rates[pType] * (hMult[health]||1)) / 100) * 100 + riderExtra;
+  const monthly = Math.round(annual / 11.5);
+  const comm    = Math.round(annual * (commR[pType] || 0.12));
+  const fmt = n => '$' + n.toLocaleString();
+  const aEl = document.getElementById('np-calc-annual');  if (aEl) aEl.textContent = fmt(annual) + '/yr';
+  const mEl = document.getElementById('np-calc-monthly'); if (mEl) mEl.textContent = fmt(monthly) + '/mo';
+  const cEl = document.getElementById('np-calc-comm');    if (cEl) cEl.textContent = fmt(comm);
+  _npFormData.annualPremium = annual; _npFormData.commission = comm;
+}
+function npAIEnrich() {
+  const nameEl = document.getElementById('np-client-name');
+  if (nameEl && !nameEl.value) nameEl.value = 'James Whitfield';
+  const dobEl  = document.getElementById('np-dob');      if (dobEl  && !dobEl.value)  dobEl.value  = '1972-03-15';
+  const emailEl = document.getElementById('np-email');   if (emailEl && !emailEl.value) emailEl.value = 'james.w@whitfield-llc.com';
+  const phoneEl = document.getElementById('np-phone');   if (phoneEl && !phoneEl.value) phoneEl.value = '(212) 555-0291';
+  const addrEl  = document.getElementById('np-address'); if (addrEl && !addrEl.value) addrEl.value = '88 Park Avenue, New York, NY 10016';
+  showNPAIToast('AI enriched from client records, WealthEngine & public records');
+}
+function showNPAIToast(msg) {
+  const t = document.createElement('div'); t.className = 'np-ai-toast';
+  t.innerHTML = `<i class="fas fa-robot"></i> ${msg}`; document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+function npSubmitPolicy() {
+  const btn = document.getElementById('np-btn-submit');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…'; }
+  setTimeout(() => {
+    const overlay = document.getElementById('np-overlay');
+    const body    = document.getElementById('np-body');
+    const pn = _npFormData.policyNum || 'P-100412';
+    const cl = _npFormData.clientName || 'Client';
+    if (body) body.innerHTML = `
+      <div class="np-success-screen">
+        <div class="np-success-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="np-success-title">Policy Application Submitted!</div>
+        <div class="np-success-sub">Policy <strong>${pn}</strong> for <strong>${cl}</strong> has been created successfully.</div>
+        <div class="np-success-actions">
+          <div class="np-success-action"><i class="fas fa-file-contract green"></i> E-Application generated &amp; sent</div>
+          <div class="np-success-action"><i class="fas fa-envelope green"></i> Welcome email dispatched</div>
+          <div class="np-success-action"><i class="fas fa-funnel-dollar green"></i> Added to Sales Pipeline — Underwriting</div>
+          <div class="np-success-action"><i class="fas fa-robot green"></i> AI underwriting pre-screen score: 88/100</div>
+        </div>
+        <div class="np-success-btns">
+          <button class="btn btn-primary" onclick="closeNewPolicyModal();navigateTo('sales')"><i class="fas fa-external-link-alt"></i> View in Pipeline</button>
+          <button class="btn btn-outline" onclick="closeNewPolicyModal()"><i class="fas fa-times"></i> Close</button>
+        </div>
+      </div>
+    `;
+    const footer = document.querySelector('.np-footer');
+    if (footer) footer.style.display = 'none';
+    const prog   = document.querySelector('.np-progress-bar');
+    if (prog) prog.style.display = 'none';
+  }, 1800);
+}
+function npAutofill(val) {
+  // Could trigger suggestions, for now just track
+  _npFormData.clientName = val;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POLICIES — RUN CAMPAIGN MODAL
+   ═══════════════════════════════════════════════════════════════ */
+function openRunCampaignModal() {
+  const overlay = document.getElementById('rc-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  rcRenderConfig();
+}
+function closeRunCampaignModal(e) {
+  if (e && e.target !== document.getElementById('rc-overlay')) return;
+  const overlay = document.getElementById('rc-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function rcRenderConfig() {
+  const body = document.getElementById('rc-body');
+  if (!body) return;
+  const clients = [
+    { name:'Patricia Nguyen', policy:'P-100301 · Universal Life', reason:'UL Under-funded — Lapse Jun 20', priority:'urgent', premium:'$5,800/yr', email:'pnguyen@email.com' },
+    { name:'Sandra Williams', policy:'P-100320 · Term Life 20-yr', reason:'Expiry Sep 2026 — conversion window', priority:'urgent', premium:'$8,200/yr', email:'sandra.w@email.com' },
+    { name:'James Whitfield', policy:'P-100293 · Long-Term Care', reason:'LTC gap $180/day at renewal', priority:'high', premium:'$12,400/yr', email:'james.w@email.com' },
+    { name:'David Thompson', policy:'P-100380 · Term Life', reason:'Under-insured — no DI/retirement', priority:'medium', premium:'$2,400/yr', email:'david.t@email.com' },
+    { name:'Robert Chen', policy:'P-100310 · Whole Life $1M', reason:'Key-person + group life gap', priority:'medium', premium:'$14,800/yr', email:'rchen@chengroup.com' },
+    { name:'Linda Morrison', policy:'P-100330 · Whole Life', reason:'LTC rider opportunity', priority:'medium', premium:'$9,600/yr', email:'linda.m@email.com' },
+    { name:'Kevin Park', policy:'P-100350 · Term Life', reason:'90-day conversion window open', priority:'medium', premium:'$1,800/yr', email:'kpark@email.com' },
+    { name:'Maria Gonzalez', policy:'P-100308 · Whole Life', reason:'Annuity upsell — post-claim', priority:'low', premium:'$4,200/yr', email:'mgonzalez@email.com' },
+  ];
+  const colorMap = { urgent:'#dc2626', high:'#d97706', medium:'#2563eb', low:'#64748b' };
+  body.innerHTML = `
+    <div class="rc-config-section">
+      <div class="rc-config-kpi-row">
+        <div class="rc-kpi-card"><div class="rc-kpi-val red">2</div><div class="rc-kpi-lbl">Urgent</div></div>
+        <div class="rc-kpi-card"><div class="rc-kpi-val orange">1</div><div class="rc-kpi-lbl">High</div></div>
+        <div class="rc-kpi-card"><div class="rc-kpi-val blue">4</div><div class="rc-kpi-lbl">Medium</div></div>
+        <div class="rc-kpi-card"><div class="rc-kpi-val grey">1</div><div class="rc-kpi-lbl">Low</div></div>
+        <div class="rc-kpi-card"><div class="rc-kpi-val green">$58.4K</div><div class="rc-kpi-lbl">Premium at Risk</div></div>
+        <div class="rc-kpi-card"><div class="rc-kpi-val purple">65%</div><div class="rc-kpi-lbl">Avg Open Rate</div></div>
+      </div>
+      <div class="rc-options-row">
+        <div class="rc-option-group">
+          <label class="rc-opt-label">Channel</label>
+          <div class="rc-channel-pills">
+            <span class="rc-cpill active" onclick="rcTogglePill(this)"><i class="fas fa-envelope"></i> Email</span>
+            <span class="rc-cpill" onclick="rcTogglePill(this)"><i class="fas fa-sms"></i> SMS</span>
+            <span class="rc-cpill" onclick="rcTogglePill(this)"><i class="fas fa-phone"></i> Call List</span>
+          </div>
+        </div>
+        <div class="rc-option-group">
+          <label class="rc-opt-label">Tone</label>
+          <select class="rc-select" id="rc-tone">
+            <option>Professional &amp; Warm</option>
+            <option>Urgent</option>
+            <option>Consultative</option>
+            <option>Friendly Reminder</option>
+          </select>
+        </div>
+        <div class="rc-option-group">
+          <label class="rc-opt-label">Send Time</label>
+          <select class="rc-select" id="rc-send-time">
+            <option>Send Now</option>
+            <option>Today 10:00 AM</option>
+            <option>Today 2:00 PM</option>
+            <option>Tomorrow 9:00 AM</option>
+            <option>Best Time AI-Predicted</option>
+          </select>
+        </div>
+      </div>
+      <div class="rc-client-list">
+        <div class="rc-cl-header">
+          <span>Client Queue (8 selected)</span>
+          <label class="rc-select-all"><input type="checkbox" checked onchange="rcToggleAll(this)"/> Select All</label>
+        </div>
+        ${clients.map((c,i) => `
+          <div class="rc-cl-item">
+            <input type="checkbox" class="rc-cl-chk" checked id="rc-chk-${i}"/>
+            <div class="rc-cl-avatar" style="background:${colorMap[c.priority]}">${c.name.split(' ').map(n=>n[0]).join('')}</div>
+            <div class="rc-cl-info">
+              <div class="rc-cl-name">${c.name}</div>
+              <div class="rc-cl-policy">${c.policy}</div>
+              <div class="rc-cl-reason">${c.reason}</div>
+            </div>
+            <div class="rc-cl-meta">
+              <span class="rc-priority-badge ${c.priority}">${c.priority.toUpperCase()}</span>
+              <span class="rc-cl-premium">${c.premium}</span>
+            </div>
+            <button class="rc-preview-btn" onclick="rcPreviewEmail('${c.name.replace(/'/g,"\\'")}','${c.reason.replace(/'/g,"\\'")}')"><i class="fas fa-eye"></i> Preview</button>
+          </div>
+        `).join('')}
+      </div>
+      <div class="rc-footer-btns">
+        <button class="rc-cancel-btn" onclick="closeRunCampaignModal()"><i class="fas fa-times"></i> Cancel</button>
+        <button class="rc-launch-btn" onclick="rcLaunchCampaign()"><i class="fas fa-paper-plane"></i> Launch Campaign</button>
+      </div>
+    </div>
+  `;
+}
+function rcTogglePill(el) {
+  el.classList.toggle('active');
+}
+function rcToggleAll(chk) {
+  document.querySelectorAll('.rc-cl-chk').forEach(c => c.checked = chk.checked);
+}
+function rcPreviewEmail(name, reason) {
+  const overlay = document.getElementById('rc-overlay');
+  const body    = document.getElementById('rc-body');
+  if (!body) return;
+  const previewHtml = `
+    <div class="rc-preview-panel">
+      <button class="rc-back-btn" onclick="rcRenderConfig()"><i class="fas fa-arrow-left"></i> Back to Queue</button>
+      <div class="rc-email-preview">
+        <div class="rc-ep-header">
+          <div class="rc-ep-field"><strong>To:</strong> ${name} &lt;${name.toLowerCase().replace(' ','.')}@email.com&gt;</div>
+          <div class="rc-ep-field"><strong>Subject:</strong> Important: Your Policy Requires Attention — ${reason.split('—')[0].trim()}</div>
+          <div class="rc-ep-field"><strong>From:</strong> Your NYL Agent &lt;agent@nylagent.com&gt;</div>
+        </div>
+        <div class="rc-ep-body">
+          <p>Dear ${name.split(' ')[0]},</p>
+          <p>I hope you're doing well. I'm reaching out today regarding an important update related to your policy.</p>
+          <p>Our AI-powered portfolio monitoring system has flagged the following: <strong>${reason}</strong>.</p>
+          <p>I'd love to schedule a brief 20-minute call to walk you through your options — there are several flexible solutions available, and I want to ensure your coverage remains exactly where it needs to be for you and your family.</p>
+          <p>Please reply to this email or call me directly at (212) 555-0100 to set up a convenient time.</p>
+          <p>As always, I'm here to make sure your financial protection is working as hard as you are.</p>
+          <p>Warm regards,<br/><strong>Your NYL Agent</strong><br/>New York Life Insurance<br/>(212) 555-0100</p>
+        </div>
+        <div class="rc-ep-actions">
+          <button class="rc-ep-edit-btn"><i class="fas fa-edit"></i> Edit Draft</button>
+          <button class="rc-ep-approve-btn" onclick="rcRenderConfig()"><i class="fas fa-check"></i> Approve &amp; Return</button>
+        </div>
+      </div>
+    </div>
+  `;
+  body.innerHTML = previewHtml;
+}
+function rcLaunchCampaign() {
+  const checked = document.querySelectorAll('.rc-cl-chk:checked').length;
+  const body    = document.getElementById('rc-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="rc-launching-screen">
+      <div class="rc-launch-icon"><i class="fas fa-paper-plane"></i></div>
+      <div class="rc-launch-title">Launching Campaign…</div>
+      <div class="rc-launch-progress-wrap">
+        <div class="rc-launch-bar"><div class="rc-launch-fill" id="rc-launch-fill"></div></div>
+        <div class="rc-launch-pct" id="rc-launch-pct">0%</div>
+      </div>
+      <div class="rc-launch-log" id="rc-launch-log"></div>
+    </div>
+  `;
+  const clients = ['Patricia Nguyen','Sandra Williams','James Whitfield','David Thompson','Robert Chen','Linda Morrison','Kevin Park','Maria Gonzalez'];
+  let i = 0;
+  const logEl = document.getElementById('rc-launch-log');
+  const fillEl = document.getElementById('rc-launch-fill');
+  const pctEl  = document.getElementById('rc-launch-pct');
+  function sendNext() {
+    if (i >= clients.length) {
+      setTimeout(() => {
+        body.innerHTML = `
+          <div class="rc-success-screen">
+            <div class="rc-success-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="rc-success-title">Campaign Launched Successfully!</div>
+            <div class="rc-success-stats">
+              <div class="rc-ss-item"><span class="rc-ss-val green">${clients.length}</span><span class="rc-ss-lbl">Emails Sent</span></div>
+              <div class="rc-ss-item"><span class="rc-ss-val blue">2</span><span class="rc-ss-lbl">Urgent First</span></div>
+              <div class="rc-ss-item"><span class="rc-ss-val purple">65%</span><span class="rc-ss-lbl">Avg Open Rate</span></div>
+              <div class="rc-ss-item"><span class="rc-ss-val orange">3</span><span class="rc-ss-lbl">Replies Expected</span></div>
+            </div>
+            <div class="rc-success-note">Tracking is active. You'll receive open-rate notifications in 24 hours. 3 follow-up calls have been auto-scheduled for high-priority clients.</div>
+            <button class="btn btn-primary" onclick="closeRunCampaignModal()" style="margin-top:20px"><i class="fas fa-check"></i> Done</button>
+          </div>
+        `;
+      }, 600);
+      return;
+    }
+    const pct = Math.round(((i+1)/clients.length)*100);
+    if (logEl) logEl.innerHTML += `<div class="rc-log-line"><i class="fas fa-check green"></i> Sent to <strong>${clients[i]}</strong> — personalised renewal email dispatched</div>`;
+    if (logEl) logEl.scrollTop = logEl.scrollHeight;
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (pctEl)  pctEl.textContent = pct + '%';
+    i++;
+    setTimeout(sendNext, 320);
+  }
+  setTimeout(sendNext, 400);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POLICIES — COVERAGE GAP ANALYSIS MODAL
+   ═══════════════════════════════════════════════════════════════ */
+function openCoverageGapAnalysisModal() {
+  const overlay = document.getElementById('cga-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  cgaRenderScanning();
+}
+function closeCoverageGapAnalysisModal(e) {
+  if (e && e.target !== document.getElementById('cga-overlay')) return;
+  const overlay = document.getElementById('cga-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function switchCGATab(tab, el) {
+  document.querySelectorAll('.cga-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const body = document.getElementById('cga-body');
+  if (tab === 'overview') cgaRenderOverview();
+  else if (tab === 'clients') cgaRenderClients();
+  else if (tab === 'plan') cgaRenderActionPlan();
+}
+function cgaRenderScanning() {
+  const body = document.getElementById('cga-body');
+  if (!body) return;
+  const sources = ['Portfolio database (1,842 policies)','Client demographics & life events','WealthEngine wealth data','Dun & Bradstreet business registry','Experian credit signals','Product eligibility matrix','Regulatory compliance flags'];
+  body.innerHTML = `
+    <div class="cga-scan-screen">
+      <div class="cga-scan-icon"><i class="fas fa-crosshairs fa-spin"></i></div>
+      <div class="cga-scan-title">AI Running Full Coverage Gap Analysis…</div>
+      <div class="cga-scan-sources" id="cga-scan-sources"></div>
+      <div class="cga-scan-bar-wrap"><div class="cga-scan-bar"><div class="cga-scan-fill" id="cga-scan-fill"></div></div><span class="cga-scan-pct" id="cga-scan-pct">0%</span></div>
+    </div>
+  `;
+  const srcEl  = document.getElementById('cga-scan-sources');
+  const fillEl = document.getElementById('cga-scan-fill');
+  const pctEl  = document.getElementById('cga-scan-pct');
+  let i = 0;
+  function scanNext() {
+    if (i >= sources.length) {
+      setTimeout(() => { cgaRenderOverview(); }, 500);
+      return;
+    }
+    if (srcEl) srcEl.innerHTML += `<div class="cga-src-line"><i class="fas fa-check-circle green"></i> Scanning: <em>${sources[i]}</em></div>`;
+    if (srcEl) srcEl.scrollTop = srcEl.scrollHeight;
+    const pct = Math.round(((i+1)/sources.length)*100);
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (pctEl)  pctEl.textContent  = pct + '%';
+    i++;
+    setTimeout(scanNext, 280);
+  }
+  setTimeout(scanNext, 300);
+}
+function cgaRenderOverview() {
+  const body = document.getElementById('cga-body');
+  if (!body) return;
+  const gaps = [
+    { id:'di',  icon:'fa-user-shield',  label:'No Disability Insurance',  count:47, revenue:'$9.4K/yr',  color:'#2563eb', pct:75, top:'David Thompson, Patricia Nguyen +45', risk:'High — income unprotected', product:'Disability Insurance' },
+    { id:'ltc', icon:'fa-hospital',     label:'LTC Coverage Gap',          count:63, revenue:'$7.8K/yr',  color:'#7c3aed', pct:88, top:'James Whitfield ($180/day gap) +62', risk:'High — care cost inflation', product:'LTC Rider / Policy' },
+    { id:'ret', icon:'fa-umbrella-beach',label:'Retirement Income Gap',    count:38, revenue:'$8.9K/yr',  color:'#d97706', pct:52, top:'Sandra Williams, James Whitfield +36', risk:'Med — income shortfall', product:'Fixed / Deferred Annuity' },
+    { id:'est', icon:'fa-landmark',     label:'No Estate Plan',            count:12, revenue:'$5.1K/yr',  color:'#059669', pct:34, top:'Linda Morrison, Robert Chen +10', risk:'Med — estate risk', product:'Advisory / Trust' },
+    { id:'cnv', icon:'fa-exchange-alt', label:'Term→Perm Conversion',      count:8,  revenue:'$14.2K/yr', color:'#dc2626', pct:62, top:'Sandra Williams (urgent), James W.', risk:'Urgent — window closing', product:'Whole / Universal Life' },
+    { id:'key', icon:'fa-briefcase',    label:'Business / Key-Person Gap', count:5,  revenue:'$6.1K/yr',  color:'#0891b2', pct:28, top:'Robert Chen, James Whitfield +3', risk:'High — no buy-sell coverage', product:'Key-Person Life / NQDC' },
+  ];
+  body.innerHTML = `
+    <div class="cga-overview">
+      <div class="cga-ov-kpi-row">
+        <div class="cga-ov-kpi"><div class="cga-ov-kpi-val blue">173</div><div class="cga-ov-kpi-lbl">Clients with Gaps</div></div>
+        <div class="cga-ov-kpi"><div class="cga-ov-kpi-val green">$31.2K</div><div class="cga-ov-kpi-lbl">Opportunity /yr</div></div>
+        <div class="cga-ov-kpi"><div class="cga-ov-kpi-val red">3</div><div class="cga-ov-kpi-lbl">Urgent Actions</div></div>
+        <div class="cga-ov-kpi"><div class="cga-ov-kpi-val purple">6</div><div class="cga-ov-kpi-lbl">Gap Categories</div></div>
+        <div class="cga-ov-kpi"><div class="cga-ov-kpi-val orange">1,842</div><div class="cga-ov-kpi-lbl">Policies Scanned</div></div>
+      </div>
+      <div class="cga-gap-cards">
+        ${gaps.map(g => `
+          <div class="cga-gap-row">
+            <div class="cga-gap-icon-wrap" style="background:${g.color}20;color:${g.color}"><i class="fas ${g.icon}"></i></div>
+            <div class="cga-gap-info">
+              <div class="cga-gap-name">${g.label}</div>
+              <div class="cga-gap-clients">${g.top}</div>
+              <div class="cga-gap-prod">Product fit: <strong>${g.product}</strong></div>
+            </div>
+            <div class="cga-gap-bar-col">
+              <div class="cga-gap-mini-bar"><div class="cga-gap-mini-fill" style="width:${g.pct}%;background:${g.color}"></div></div>
+              <div class="cga-gap-pct">${g.pct}% of eligible clients</div>
+            </div>
+            <div class="cga-gap-metrics">
+              <div class="cga-gap-count-lbl"><strong style="color:${g.color}">${g.count}</strong> clients</div>
+              <div class="cga-gap-rev">${g.revenue}</div>
+              <div class="cga-gap-risk">${g.risk}</div>
+            </div>
+            <div class="cga-gap-actions">
+              <button class="cga-outreach-btn" onclick="closeCoverageGapAnalysisModal();openGapOutreachModal('${g.id}')"><i class="fas fa-paper-plane"></i> Outreach</button>
+              <button class="cga-view-btn" onclick="switchCGATab('clients',document.getElementById('cga-tab-clients'))"><i class="fas fa-users"></i> View</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="cga-total-bar">
+        <div class="cga-total-left"><i class="fas fa-trophy"></i> Total Identified Opportunity</div>
+        <div class="cga-total-right"><strong class="cga-total-val">$31.2K / year</strong> across <strong>173 clients</strong> · 6 gap categories</div>
+      </div>
+    </div>
+  `;
+}
+function cgaRenderClients() {
+  const body = document.getElementById('cga-body');
+  if (!body) return;
+  const clients = [
+    { name:'Sandra Williams', gaps:['Term→Perm Conversion','Retirement Gap'], urgency:'URGENT', revenue:'$14.2K/yr', policies:'P-100320', city:'Manhattan' },
+    { name:'Patricia Nguyen', gaps:['No Disability Insurance','LTC Gap'], urgency:'HIGH', revenue:'$7.4K/yr', policies:'P-100301, P-100302', city:'Brooklyn' },
+    { name:'James Whitfield', gaps:['LTC Coverage Gap','Retirement Gap','No Estate Plan'], urgency:'HIGH', revenue:'$9.2K/yr', policies:'P-100291, P-100293', city:'Manhattan' },
+    { name:'David Thompson', gaps:['No Disability Insurance'], urgency:'MEDIUM', revenue:'$2,400/yr', policies:'P-100380', city:'Queens' },
+    { name:'Robert Chen', gaps:['Business / Key-Person Gap','No Estate Plan'], urgency:'MEDIUM', revenue:'$6.1K/yr', policies:'P-100310', city:'Manhattan' },
+    { name:'Linda Morrison', gaps:['No Estate Plan','LTC Gap'], urgency:'MEDIUM', revenue:'$4.8K/yr', policies:'P-100330', city:'New Jersey' },
+    { name:'Kevin Park', gaps:['Term→Perm Conversion'], urgency:'MEDIUM', revenue:'$3.2K/yr', policies:'P-100350', city:'Manhattan' },
+    { name:'Maria Gonzalez', gaps:['Retirement Income Gap'], urgency:'LOW', revenue:'$2.1K/yr', policies:'P-100308', city:'The Bronx' },
+  ];
+  const urgencyColor = { URGENT:'#dc2626', HIGH:'#d97706', MEDIUM:'#2563eb', LOW:'#64748b' };
+  body.innerHTML = `
+    <div class="cga-client-list">
+      <div class="cga-cl-search-row">
+        <input class="np-input" placeholder="Search clients…" style="max-width:300px;margin-bottom:0" oninput="cgaFilterClients(this.value)"/>
+        <span class="cga-cl-count">Showing ${clients.length} clients with coverage gaps</span>
+      </div>
+      <table class="cga-cl-table">
+        <thead><tr><th>Client</th><th>Coverage Gaps</th><th>Priority</th><th>Revenue Potential</th><th>Policies</th><th>Action</th></tr></thead>
+        <tbody>
+          ${clients.map(c => `
+            <tr class="cga-cl-row">
+              <td>
+                <div class="cga-cl-name-cell">
+                  <div class="cga-cl-avatar">${c.name.split(' ').map(n=>n[0]).join('')}</div>
+                  <div><div class="cga-cl-name">${c.name}</div><div class="cga-cl-city">${c.city}</div></div>
+                </div>
+              </td>
+              <td><div class="cga-cl-gaps">${c.gaps.map(g=>`<span class="cga-gap-chip">${g}</span>`).join('')}</div></td>
+              <td><span class="cga-urgency-badge" style="background:${urgencyColor[c.urgency]}20;color:${urgencyColor[c.urgency]};border:1px solid ${urgencyColor[c.urgency]}40">${c.urgency}</span></td>
+              <td><strong class="green">${c.revenue}</strong></td>
+              <td class="text-muted" style="font-size:12px">${c.policies}</td>
+              <td><button class="cga-outreach-btn" style="font-size:12px;padding:5px 10px" onclick="openGapOutreachModal('di');closeCoverageGapAnalysisModal()"><i class="fas fa-paper-plane"></i> Outreach</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+function cgaRenderActionPlan() {
+  const body = document.getElementById('cga-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="cga-action-plan">
+      <div class="cga-ap-intro"><i class="fas fa-robot"></i> <strong>AI-Generated 30-Day Action Plan</strong> — ranked by revenue impact and client urgency</div>
+      <div class="cga-ap-week">
+        <div class="cga-ap-week-title"><i class="fas fa-calendar-week"></i> Week 1 — Urgent Actions (Apr 14–18)</div>
+        <div class="cga-ap-item urgent">
+          <div class="cga-ap-rank">1</div>
+          <div class="cga-ap-info">
+            <div class="cga-ap-name">Sandra Williams — Term→Perm Conversion</div>
+            <div class="cga-ap-desc">Conversion window closes Sep 15, 2026. Schedule WL/UL illustration meeting. Estimated new premium: $14,200/yr. Commission: $1,704.</div>
+          </div>
+          <div class="cga-ap-rev">$14.2K/yr</div>
+          <button class="cga-outreach-btn" onclick="openGapOutreachModal('cnv');closeCoverageGapAnalysisModal()"><i class="fas fa-paper-plane"></i> Outreach</button>
+        </div>
+        <div class="cga-ap-item urgent">
+          <div class="cga-ap-rank">2</div>
+          <div class="cga-ap-info">
+            <div class="cga-ap-name">Patricia Nguyen — Disability Insurance</div>
+            <div class="cga-ap-desc">No DI coverage. Income: $180K/yr unprotected. Recommend $8K/mo benefit, own-occ, 90-day elimination. Revenue potential: $3,200/yr.</div>
+          </div>
+          <div class="cga-ap-rev">$3.2K/yr</div>
+          <button class="cga-outreach-btn" onclick="openGapOutreachModal('di');closeCoverageGapAnalysisModal()"><i class="fas fa-paper-plane"></i> Outreach</button>
+        </div>
+      </div>
+      <div class="cga-ap-week">
+        <div class="cga-ap-week-title"><i class="fas fa-calendar-week"></i> Week 2–3 — High Priority (Apr 21–May 2)</div>
+        <div class="cga-ap-item high">
+          <div class="cga-ap-rank">3</div>
+          <div class="cga-ap-info">
+            <div class="cga-ap-name">James Whitfield — LTC Upgrade + Estate Plan</div>
+            <div class="cga-ap-desc">LTC gap $180/day; no estate plan despite $3.8M net worth. Schedule comprehensive review — LTC upgrade + trust/POA + annuity ladder.</div>
+          </div>
+          <div class="cga-ap-rev">$9.2K/yr</div>
+          <button class="cga-outreach-btn" onclick="openGapOutreachModal('ltc');closeCoverageGapAnalysisModal()"><i class="fas fa-paper-plane"></i> Outreach</button>
+        </div>
+        <div class="cga-ap-item high">
+          <div class="cga-ap-rank">4</div>
+          <div class="cga-ap-info">
+            <div class="cga-ap-name">Robert Chen — Key-Person Insurance + Group Benefits</div>
+            <div class="cga-ap-desc">Business owner with $2.6M net worth — no buy-sell agreement, no key-person coverage. High exposure to business continuity risk.</div>
+          </div>
+          <div class="cga-ap-rev">$6.1K/yr</div>
+          <button class="cga-outreach-btn" onclick="openGapOutreachModal('key');closeCoverageGapAnalysisModal()"><i class="fas fa-paper-plane"></i> Outreach</button>
+        </div>
+      </div>
+      <div class="cga-ap-week">
+        <div class="cga-ap-week-title"><i class="fas fa-calendar-week"></i> Week 4 — Medium Priority (May 5–9)</div>
+        <div class="cga-ap-item medium">
+          <div class="cga-ap-rank">5</div>
+          <div class="cga-ap-info">
+            <div class="cga-ap-name">David Thompson — Disability + Retirement Planning</div>
+            <div class="cga-ap-desc">Age 33, no DI, no retirement savings plan. Best entry: disability + 529 plan for new parent. Life stage review call recommended.</div>
+          </div>
+          <div class="cga-ap-rev">$2.4K/yr</div>
+          <button class="cga-outreach-btn" onclick="openGapOutreachModal('di');closeCoverageGapAnalysisModal()"><i class="fas fa-paper-plane"></i> Outreach</button>
+        </div>
+        <div class="cga-ap-item medium">
+          <div class="cga-ap-rank">6</div>
+          <div class="cga-ap-info">
+            <div class="cga-ap-name">Linda Morrison + Maria Gonzalez — LTC &amp; Annuity</div>
+            <div class="cga-ap-desc">Linda: LTC rider add-on ($4,200/yr). Maria: deferred annuity following recent ADB claim — tax-advantaged income bridge opportunity.</div>
+          </div>
+          <div class="cga-ap-rev">$6.3K/yr</div>
+          <button class="cga-outreach-btn" onclick="openGapOutreachModal('ret');closeCoverageGapAnalysisModal()"><i class="fas fa-paper-plane"></i> Outreach</button>
+        </div>
+      </div>
+      <div class="cga-ap-total-bar">
+        <i class="fas fa-trophy"></i> 30-Day Total Revenue Potential: <strong>$31.2K/yr</strong> · Est. Commission: <strong>$4,850</strong>
+      </div>
+    </div>
+  `;
+}
+function cgaFilterClients(val) {
+  const rows = document.querySelectorAll('.cga-cl-row');
+  rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(val.toLowerCase()) ? '' : 'none'; });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POLICIES — GAP OUTREACH MODAL
+   ═══════════════════════════════════════════════════════════════ */
+let _goCurrentType = 'di';
+let _goCurrentChannel = 'email';
+const _goGapData = {
+  di: {
+    title: 'Disability Insurance Outreach',
+    subtitle: '47 clients without disability coverage — $9.4K/yr potential',
+    icon: 'fa-user-shield',
+    color: '#2563eb',
+    clients: ['David Thompson','Patricia Nguyen','Kevin Park'],
+    product: 'Disability Insurance',
+    emailSubject: 'Protecting Your Most Valuable Asset — Your Income',
+    emailBody: `Dear [Client Name],
+
+I'm reaching out today about something that's easy to overlook, but critically important: protecting your income.
+
+Your home, your family's lifestyle, and your financial goals all depend on your ability to earn a living. But what would happen if an illness or injury prevented you from working?
+
+Our records show you don't currently have a disability insurance policy in place. I'd like to share how a customised Disability Income plan can:
+• Replace up to 60–70% of your income if you're unable to work
+• Use an "own-occupation" definition — you're covered if you can't do your specific job
+• Protect against both short and long-term disabilities
+
+A 45-year-old professional earning $100,000/year who becomes disabled at age 50 stands to lose over $1.5M in income before retirement. Disability insurance is surprisingly affordable — often less than $200/month for robust coverage.
+
+I'd love to schedule a 20-minute call to walk you through a personalised illustration.
+
+Warm regards,
+Your NYL Agent`,
+    smsBody: `Hi [First Name], this is [Agent]. Quick note — our AI flagged that you don't have disability coverage. Your income is your #1 asset! Can we talk this week? Happy to run a free illustration. Reply YES and I'll call you. 📞`,
+    callScript: `OPENING: "Hi [Client Name], this is [Your Name] from New York Life. I'm calling because our portfolio monitoring flagged something important about your coverage that I wanted to bring to your attention personally."
+
+KEY POINTS:
+1. Mention they have strong life insurance but no income protection
+2. "What would happen to your mortgage / family if you couldn't work for 6 months?"
+3. Introduce DI — emphasise own-occupation definition
+4. Offer a free no-obligation illustration
+
+OBJECTION HANDLING:
+• "It won't happen to me" → "1 in 4 working Americans will experience a disability before retirement"
+• "It's too expensive" → "Most professionals pay less than 1% of income for coverage"
+• "I have sick leave / SSDI" → "SSDI takes 6 months+, average benefit is only $1,400/mo"
+
+CLOSE: "Would Tuesday or Thursday work for a 20-minute call to go over a personalised illustration?"`
+  },
+  ltc: {
+    title: 'Long-Term Care Coverage Outreach',
+    subtitle: '63 clients with LTC coverage gaps — $7.8K/yr potential',
+    icon: 'fa-hospital',
+    color: '#7c3aed',
+    clients: ['James Whitfield','Linda Morrison','Patricia Nguyen'],
+    product: 'LTC Insurance / Rider',
+    emailSubject: 'Your Long-Term Care Coverage — There\'s a Gap We Should Address',
+    emailBody: `Dear [Client Name],
+
+As part of my quarterly portfolio review, I've been looking carefully at our clients' long-term care situations — and I want to share something important with you.
+
+The average cost of a nursing home in New York is now $380/day (2026). Your current plan may not fully cover this level of care, leaving a meaningful gap in your protection.
+
+Options to close the gap include:
+• Adding an LTC rider to your existing life policy (often most cost-effective)
+• Increasing your daily benefit amount at renewal
+• A standalone hybrid life + LTC policy that builds cash value
+
+Clients who address this at your age (rather than waiting until it's urgently needed) typically save 35–50% in premiums and qualify for better health classes.
+
+Can we schedule a 30-minute review call this week? I'll have a personalised analysis ready.
+
+Best regards,
+Your NYL Agent`,
+    smsBody: `Hi [First Name], [Agent] here. LTC costs in NY are now $380/day — our analysis shows a potential gap in your coverage. 2-min call this week? I'll share solutions. Reply to book a time. 🏥`,
+    callScript: `OPENING: "Hi [Client Name], [Agent Name] calling. I've just completed your quarterly portfolio review and I wanted to share something I found regarding your long-term care protection."
+
+KEY POINTS:
+1. Share the $380/day NYC LTC cost statistic
+2. Reference their specific gap (e.g., James: $180/day gap based on current benefit)
+3. Highlight 3 options: rider add-on, benefit increase, hybrid policy
+4. Emphasise the health advantage of acting now vs. waiting
+
+OBJECTION HANDLING:
+• "I'm healthy now, don't need it" → "That's exactly why now is the best time — you qualify for the best rates"
+• "Medicare will cover it" → "Medicare covers only short-term skilled nursing — not custodial care"
+• "My family will take care of me" → "The average family caregiver loses $325,000 in lifetime earnings"
+
+CLOSE: "I'd like to prepare a side-by-side comparison of your options. Can I send that over before our call?"`
+  },
+  ret: {
+    title: 'Retirement Income Gap Outreach',
+    subtitle: '38 clients with retirement income gaps — $8.9K/yr potential',
+    icon: 'fa-umbrella-beach',
+    color: '#d97706',
+    clients: ['Sandra Williams','James Whitfield','Maria Gonzalez'],
+    product: 'Fixed / Deferred Annuity',
+    emailSubject: 'Your Retirement Income — Let\'s Close the Gap',
+    emailBody: `Dear [Client Name],
+
+Retirement planning has changed dramatically over the past few years — interest rates, inflation, and longer life expectancies have all shifted the equation. As I've been reviewing your portfolio, I've identified an opportunity to strengthen your retirement income foundation.
+
+Based on your current savings and projected Social Security benefits, there may be a meaningful gap between your expected income in retirement and your target lifestyle expenses.
+
+A Fixed Deferred Annuity can help by:
+• Guaranteeing a monthly income you can't outlive
+• Providing tax-deferred growth during the accumulation phase
+• Currently offering 5.8–6.1% crediting rates (historically strong)
+• Protecting a portion of your savings from market volatility
+
+Many of my clients in similar situations have found that allocating 20–30% of liquid assets to a guaranteed income annuity provides significant peace of mind — and changes how they feel about retirement.
+
+Let's schedule a retirement income analysis session. I'll bring illustrations for 2–3 options tailored to your situation.
+
+Warm regards,
+Your NYL Agent`,
+    smsBody: `Hi [First Name], [Agent] here. Annuity rates hit 6.1% this week — great time to lock in guaranteed retirement income. 20-min call this week to review your options? Reply YES. 🏖️`,
+    callScript: `OPENING: "Hi [Client], it's [Agent]. I'm calling because I've completed your retirement income analysis and I have some genuinely exciting options to share with you."
+
+KEY POINTS:
+1. Highlight current annuity rates (6.1% — best in a decade)
+2. Calculate their specific income gap based on known data
+3. Show how a lump-sum annuity creates guaranteed monthly income
+4. Discuss tax-deferred growth vs. taxable savings account
+
+OBJECTION HANDLING:
+• "I don't want to lock up my money" → "10% free withdrawal annually; also discuss income riders"
+• "My 401k is enough" → "Diversify income streams — annuity fills the guaranteed floor"
+• "Low interest rates" → "Current rates are the highest in 15 years — window may be closing"
+
+CLOSE: "Can I send over a personalised illustration showing your guaranteed monthly income at 65, 70, and 75?"`
+  },
+  est: {
+    title: 'Estate Planning Outreach',
+    subtitle: '12 clients without estate plans — $5.1K/yr potential',
+    icon: 'fa-landmark',
+    color: '#059669',
+    clients: ['Linda Morrison','Robert Chen','James Whitfield'],
+    product: 'Advisory / Trust Planning',
+    emailSubject: 'Estate Planning Review — Protecting Your Legacy',
+    emailBody: `Dear [Client Name],
+
+Building wealth is one achievement. Protecting it for the people you love is another — and it requires intentional planning.
+
+As I've reviewed your portfolio, I noticed that your current plan may not fully address some important estate planning considerations. Given your level of assets, having the right structures in place can make a significant difference — both for your family and for tax efficiency.
+
+Key areas we should review together:
+• Beneficiary designation alignment across all accounts and policies
+• Will and trust structure (or lack thereof)
+• Power of Attorney and healthcare directive
+• Estate tax exposure (Federal threshold: $13.6M per person; NY: $6.94M)
+• Business succession if applicable
+
+Many clients are surprised to find that their life insurance policies alone carry enough value to warrant trust planning — and the cost of getting it right is a fraction of what can be lost without it.
+
+I work with a network of estate planning attorneys and can facilitate a coordinated review at no charge to you. Would you be available for a 45-minute session this month?
+
+Warm regards,
+Your NYL Agent`,
+    smsBody: `Hi [First Name], [Agent] here. Quick estate planning check-in — have you reviewed your beneficiaries lately? Life changes fast! 30-min complimentary review available. Reply YES to book. ⚖️`,
+    callScript: `OPENING: "Hi [Client], it's [Agent]. I wanted to reach out because as I've been reviewing your portfolio, I noticed something that could have significant implications for your family — and I didn't want to just send an email about it."
+
+KEY POINTS:
+1. Reference their specific net worth / asset level — make it feel personal
+2. Highlight the NY estate tax threshold ($6.94M) if applicable
+3. Discuss life insurance and beneficiary alignment
+4. Offer coordinated attorney introduction
+
+OBJECTION HANDLING:
+• "I already have a will" → "When was it last reviewed? Major life changes require updates"
+• "My assets aren't that large" → "Even $500K in life insurance needs proper beneficiary structure"
+• "I'll do it later" → "A health event or unexpected death without planning can cost families enormously"
+
+CLOSE: "I'd like to set up a complimentary 45-minute estate review — I can bring in an attorney if you'd like. What week works for you?"`
+  },
+  cnv: {
+    title: 'Term-to-Permanent Conversion Outreach',
+    subtitle: '8 clients with conversion opportunities — $14.2K/yr potential',
+    icon: 'fa-exchange-alt',
+    color: '#dc2626',
+    clients: ['Sandra Williams','James Whitfield','Kevin Park'],
+    product: 'Whole Life / Universal Life',
+    emailSubject: 'Your Term Policy Conversion Window — Act Before It Closes',
+    emailBody: `Dear [Client Name],
+
+I'm writing with a time-sensitive message about your term life policy. Your conversion right — the ability to convert to permanent coverage without a medical exam — is approaching an important deadline.
+
+This is one of the most valuable rights embedded in your policy, and once the conversion window closes, it's gone permanently. Given how your health may change over time, this is a right you may not be able to exercise in the future.
+
+Here's what conversion means for you:
+• Lock in permanent coverage (Whole Life or Universal Life) with no new medical underwriting
+• Build tax-advantaged cash value that grows over time
+• Guarantee insurability for life — regardless of future health changes
+• Create a financial asset you can borrow against or pass on
+
+Whole Life conversion rates for your age bracket are at historically favourable levels right now. I'd like to prepare a personalised illustration showing exactly what your converted policy would look like — annual premium, cash value projections, and death benefit comparison.
+
+Can we schedule 30 minutes this week? This is genuinely time-sensitive.
+
+Warm regards,
+Your NYL Agent`,
+    smsBody: `URGENT: Hi [First Name], [Agent] here. Your term policy conversion window is closing — this is time-sensitive. You can convert without a medical exam. 20-min call this week? Reply YES. ⏰`,
+    callScript: `OPENING: "Hi [Client], [Agent] here. I'm calling with something genuinely time-sensitive about your term life policy. Do you have 5 minutes? I don't want you to miss this window."
+
+KEY POINTS:
+1. Explain the conversion right — no medical exam required (this is critical)
+2. Create urgency around the deadline — show the specific date
+3. Compare term vs. permanent: "Term is great protection; WL is protection + investment"
+4. Show projected cash value at age 65 from a WL illustration
+
+OBJECTION HANDLING:
+• "Term was cheaper — WL is too expensive" → "Compare 10-year cost to cash value built; also net premium concept"
+• "I'll just get a new policy later" → "You can't guarantee your health; conversion locks in today's insurability"
+• "I don't need the cash value" → "It's an emergency fund, college funding, retirement supplement — flexible"
+
+CLOSE: "I can have a personalised illustration for you by tomorrow. What's a good time for a follow-up call to walk through it together?"`
+  },
+  key: {
+    title: 'Business / Key-Person Insurance Outreach',
+    subtitle: '5 clients with business coverage gaps — $6.1K/yr potential',
+    icon: 'fa-briefcase',
+    color: '#0891b2',
+    clients: ['Robert Chen','James Whitfield','Thomas Wright'],
+    product: 'Key-Person Life / NQDC / Buy-Sell',
+    emailSubject: 'Protecting Your Business — Key-Person Coverage Review',
+    emailBody: `Dear [Client Name],
+
+As a business owner, you've built something significant. But I want to ask you a frank question: what would happen to your business if you — or a key employee — were suddenly unable to work?
+
+Many business owners focus on personal insurance but overlook the critical business continuity risks. Our portfolio review indicates you may not have key-person insurance or a funded buy-sell agreement in place.
+
+Here's what we should review together:
+• Key-Person Life Insurance — protects your business from the loss of essential talent
+• Buy-Sell Agreement Funding — ensures business continuity in the event of death or disability
+• Non-Qualified Deferred Compensation (NQDC) — retain top talent with executive benefits
+• Group Life & Benefits — attract and retain key employees cost-effectively
+
+The SBA reports that 70% of businesses that lose a key person fail within one year without proper planning. This is one of the most important conversations we can have.
+
+I'd like to schedule a Business Continuity Review — 45 minutes, no cost, comprehensive analysis. Would this week work?
+
+Warm regards,
+Your NYL Agent`,
+    smsBody: `Hi [First Name], [Agent] here. Quick business protection check — do you have key-person coverage? It protects your business if anything happens to you. 30-min business review this week? Reply YES. 💼`,
+    callScript: `OPENING: "Hi [Client], [Agent] calling. I'm reaching out specifically about your business — I've been looking at your portfolio and there's a gap that I think is worth 10 minutes of your time to understand."
+
+KEY POINTS:
+1. Ask about key employees and business structure
+2. Introduce key-person insurance concept — "bank would require it for an SBA loan"
+3. Discuss buy-sell agreement — "what happens to your equity if something happens?"
+4. Reference NQDC for talent retention
+
+OBJECTION HANDLING:
+• "My business partners handle this" → "Have you reviewed the buy-sell agreement recently? Is it funded?"
+• "I have personal life insurance" → "Key-person insurance is a business asset — different purpose, different tax treatment"
+• "Not a priority right now" → "This is exactly the kind of risk that shows up when you least expect it"
+
+CLOSE: "I work with business owners at your scale regularly. Can I bring a business continuity specialist to a 45-minute session this week?"`
+  }
+};
+function openGapOutreachModal(gapType) {
+  _goCurrentType    = gapType || 'di';
+  _goCurrentChannel = 'email';
+  const overlay = document.getElementById('go-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // Update header
+  const g = _goGapData[_goCurrentType];
+  if (!g) return;
+  const iconEl = document.getElementById('go-icon');
+  const titleEl = document.getElementById('go-title');
+  const subEl   = document.getElementById('go-subtitle');
+  if (iconEl) { iconEl.style.background = g.color + '20'; iconEl.style.color = g.color; iconEl.innerHTML = `<i class="fas ${g.icon}"></i>`; }
+  if (titleEl) titleEl.textContent = g.title;
+  if (subEl)   subEl.textContent   = g.subtitle;
+  // Reset channel tabs
+  document.querySelectorAll('.go-ch-tab').forEach(t => t.classList.remove('active'));
+  const emailTab = document.getElementById('go-tab-email');
+  if (emailTab) emailTab.classList.add('active');
+  goRenderContent();
+}
+function closeGapOutreachModal(e) {
+  if (e && e.target !== document.getElementById('go-overlay')) return;
+  const overlay = document.getElementById('go-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function switchGOChannel(channel, el) {
+  _goCurrentChannel = channel;
+  document.querySelectorAll('.go-ch-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  goRenderContent();
+}
+function goRenderContent() {
+  const body = document.getElementById('go-body');
+  if (!body) return;
+  const g = _goGapData[_goCurrentType];
+  if (!g) return;
+  const tone = document.getElementById('go-tone')?.value || 'professional';
+  if (_goCurrentChannel === 'email') {
+    body.innerHTML = `
+      <div class="go-split">
+        <div class="go-client-panel">
+          <div class="go-cp-title"><i class="fas fa-users"></i> Target Clients (${g.clients.length} sample)</div>
+          ${g.clients.map((c,i) => `
+            <div class="go-client-row">
+              <input type="checkbox" class="go-chk" checked id="go-chk-${i}"/>
+              <div class="go-cl-avatar">${c.split(' ').map(n=>n[0]).join('')}</div>
+              <div class="go-cl-name">${c}</div>
+              <span class="go-cl-product">${g.product}</span>
+            </div>
+          `).join('')}
+          <div class="go-cp-more">+ ${g.subtitle.split(' ')[0]} total clients in segment</div>
+          <div class="go-cp-stats">
+            <div class="go-cp-stat"><span>Open Rate</span><strong>65%</strong></div>
+            <div class="go-cp-stat"><span>Avg Reply</span><strong>2.3 days</strong></div>
+            <div class="go-cp-stat"><span>Revenue</span><strong class="green">${g.subtitle.split('—')[1]?.trim()||'$7K/yr potential'}</strong></div>
+          </div>
+        </div>
+        <div class="go-compose-panel">
+          <div class="go-compose-header">
+            <div class="go-compose-field"><strong>To:</strong> <span class="go-compose-to">${g.clients[0]} &lt;${g.clients[0].toLowerCase().replace(' ','.')}@email.com&gt; <em class="go-compose-more">+ ${parseInt(g.subtitle)||47} more</em></span></div>
+            <div class="go-compose-field"><strong>Subject:</strong> <input class="go-subject-input" value="${g.emailSubject}" style="flex:1;border:none;background:transparent;font-weight:600;color:#1e293b"/></div>
+          </div>
+          <textarea class="go-compose-body" id="go-compose-body">${g.emailBody}</textarea>
+          <div class="go-compose-ai-bar">
+            <span class="go-ai-badge"><i class="fas fa-robot"></i> AI-drafted · Tone: ${tone}</span>
+            <button class="go-personalise-btn" onclick="goPersonaliseMessage()"><i class="fas fa-magic"></i> Personalise with 3rd-party data</button>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (_goCurrentChannel === 'sms') {
+    body.innerHTML = `
+      <div class="go-split">
+        <div class="go-client-panel">
+          <div class="go-cp-title"><i class="fas fa-users"></i> Target Clients</div>
+          ${g.clients.map((c,i) => `
+            <div class="go-client-row">
+              <input type="checkbox" class="go-chk" checked/>
+              <div class="go-cl-avatar">${c.split(' ').map(n=>n[0]).join('')}</div>
+              <div class="go-cl-name">${c}</div>
+            </div>
+          `).join('')}
+          <div class="go-cp-stats">
+            <div class="go-cp-stat"><span>SMS Open Rate</span><strong>98%</strong></div>
+            <div class="go-cp-stat"><span>Reply Rate</span><strong>35%</strong></div>
+          </div>
+        </div>
+        <div class="go-compose-panel">
+          <div class="go-sms-preview">
+            <div class="go-sms-bubble-wrap">
+              <div class="go-sms-from">Agent (212) 555-0100</div>
+              <div class="go-sms-bubble">${g.smsBody}</div>
+              <div class="go-sms-chars" id="go-sms-chars">${g.smsBody.length}/160 chars</div>
+            </div>
+          </div>
+          <textarea class="go-sms-edit" id="go-sms-body" maxlength="160" oninput="document.getElementById('go-sms-chars').textContent=this.value.length+'/160 chars'">${g.smsBody}</textarea>
+          <div class="go-compose-ai-bar"><span class="go-ai-badge"><i class="fas fa-robot"></i> AI-drafted SMS · Compliance reviewed</span></div>
+        </div>
+      </div>
+    `;
+  } else if (_goCurrentChannel === 'call') {
+    body.innerHTML = `
+      <div class="go-call-panel">
+        <div class="go-call-header-bar">
+          <div class="go-call-title"><i class="fas fa-phone"></i> AI Call Script — ${g.product}</div>
+          <div class="go-call-clients">
+            ${g.clients.map(c => `<span class="go-call-chip">${c}</span>`).join('')}
+          </div>
+        </div>
+        <div class="go-call-script">
+          <pre class="go-script-pre">${g.callScript}</pre>
+        </div>
+        <div class="go-call-tips">
+          <div class="go-call-tip-title"><i class="fas fa-lightbulb"></i> AI Coaching Tips</div>
+          <div class="go-tip"><i class="fas fa-check green"></i> Call Tuesday–Thursday 10am–noon for best answer rates</div>
+          <div class="go-tip"><i class="fas fa-check green"></i> Reference their specific policy details to show you've done your homework</div>
+          <div class="go-tip"><i class="fas fa-check green"></i> Keep opening to 30 seconds — earn the right to continue</div>
+          <div class="go-tip"><i class="fas fa-check green"></i> Always end with a specific next step, not an open-ended question</div>
+        </div>
+      </div>
+    `;
+  }
+}
+function regenGOMessage() {
+  goRenderContent();
+  const body = document.getElementById('go-compose-body') || document.getElementById('go-sms-body');
+  if (body) { body.style.opacity = '0.5'; setTimeout(() => body.style.opacity = '1', 600); }
+}
+function goPersonaliseMessage() {
+  const bodyEl = document.getElementById('go-compose-body');
+  if (!bodyEl) return;
+  const g = _goGapData[_goCurrentType];
+  let txt = bodyEl.value;
+  txt = txt.replace('[Client Name]', g?.clients[0] || 'Patricia');
+  txt = txt.replace('[First Name]', (g?.clients[0]||'Patricia').split(' ')[0]);
+  bodyEl.value = txt;
+  showPoliciesGOToast('Personalised with client data from WealthEngine & CRM records');
+}
+function scheduleGOOutreach() {
+  showPoliciesGOToast('Outreach scheduled for tomorrow 10:00 AM — AI optimal send time selected');
+  setTimeout(() => closeGapOutreachModal(), 1800);
+}
+function sendGOOutreach() {
+  const g = _goGapData[_goCurrentType];
+  const body = document.getElementById('go-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="go-sending-screen">
+      <div class="go-send-anim"><i class="fas fa-paper-plane"></i></div>
+      <div class="go-send-title">Sending ${_goCurrentChannel === 'email' ? 'Emails' : _goCurrentChannel === 'sms' ? 'SMS Messages' : 'Call List'} …</div>
+      <div class="go-send-clients">
+        ${(g?.clients||[]).map((c,i) => `<div class="go-send-item" id="go-send-item-${i}"><i class="fas fa-clock go-send-icon"></i> ${c}</div>`).join('')}
+      </div>
+    </div>
+  `;
+  (g?.clients||[]).forEach((c,i) => {
+    setTimeout(() => {
+      const el = document.getElementById('go-send-item-' + i);
+      if (el) { el.innerHTML = `<i class="fas fa-check-circle go-sent-icon"></i> ${c} — sent`; el.classList.add('go-sent'); }
+    }, (i+1) * 500);
+  });
+  setTimeout(() => {
+    showPoliciesGOToast(`${_goCurrentChannel === 'email' ? 'Emails' : 'Messages'} sent to ${g?.clients?.length||3} clients! Tracking active.`);
+    setTimeout(() => closeGapOutreachModal(), 1500);
+  }, (g?.clients?.length||3) * 500 + 800);
+}
+function showPoliciesGOToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'prosp-toast'; t.style.cssText = 'position:fixed;bottom:30px;right:30px;z-index:99999;background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px;animation:acmToastIn .3s ease';
+  t.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+console.log('Policies module loaded — openNewPolicyModal, openRunCampaignModal, openCoverageGapAnalysisModal, openGapOutreachModal');
+
 // ── Retention Email Draft Modal ──────────────────────────────────
 const retentionEmailDrafts = {
   'patricia': {

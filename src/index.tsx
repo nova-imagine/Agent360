@@ -3133,7 +3133,7 @@ function PoliciesPage() {
           <button class="btn btn-ai" onclick="openNLPReview('all')">
             <i class="fas fa-brain"></i> NLP Policy Scan
           </button>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" onclick="openNewPolicyModal()">
             <i class="fas fa-plus"></i> New Policy
           </button>
         </div>
@@ -3335,7 +3335,7 @@ function PoliciesPage() {
             </div>
           </div>
           <div class="rac-header-right">
-            <button class="rac-run-btn" onclick="runRenewalCampaign()"><i class="fas fa-paper-plane"></i> Run Campaign</button>
+            <button class="rac-run-btn" onclick="openRunCampaignModal()"><i class="fas fa-paper-plane"></i> Run Campaign</button>
             <button class="rac-close-btn" onclick="toggleRenewalCenter()"><i class="fas fa-chevron-up"></i></button>
           </div>
         </div>
@@ -3421,7 +3421,7 @@ function PoliciesPage() {
               <div class="cgr-sub">AI identifies missing coverage, upsell &amp; cross-sell opportunities across your full book · real-time</div>
             </div>
           </div>
-          <button class="cgr-run-btn" onclick="sendQuickMessage('Run a full coverage gap analysis across all clients and identify top 10 upsell opportunities')"><i class="fas fa-robot"></i> Run Full Analysis</button>
+          <button class="cgr-run-btn" onclick="openCoverageGapAnalysisModal()"><i class="fas fa-robot"></i> Run Full Analysis</button>
         </div>
         <div class="cgr-grid">
           <div class="cgr-gap-card cgr-gap-di">
@@ -3432,7 +3432,7 @@ function PoliciesPage() {
               <div class="cgr-gap-clients">David Thompson, Patricia Nguyen +45</div>
               <div class="cgr-gap-revenue">~$9.4K/yr potential</div>
             </div>
-            <button class="cgr-act-btn" onclick="sendQuickMessage('List all clients without disability insurance and draft outreach messages')"><i class="fas fa-bolt"></i> Outreach</button>
+            <button class="cgr-act-btn" onclick="openGapOutreachModal('di')"><i class="fas fa-bolt"></i> Outreach</button>
           </div>
           <div class="cgr-gap-card cgr-gap-ltc">
             <div class="cgr-gap-icon"><i class="fas fa-hospital"></i></div>
@@ -3442,7 +3442,7 @@ function PoliciesPage() {
               <div class="cgr-gap-clients">James Whitfield ($180/day gap) +62</div>
               <div class="cgr-gap-revenue">~$7.8K/yr potential</div>
             </div>
-            <button class="cgr-act-btn" onclick="sendQuickMessage('Identify clients with LTC coverage gaps and create tailored upgrade proposals')"><i class="fas fa-bolt"></i> Outreach</button>
+            <button class="cgr-act-btn" onclick="openGapOutreachModal('ltc')"><i class="fas fa-bolt"></i> Outreach</button>
           </div>
           <div class="cgr-gap-card cgr-gap-ret">
             <div class="cgr-gap-icon"><i class="fas fa-umbrella-beach"></i></div>
@@ -3452,7 +3452,7 @@ function PoliciesPage() {
               <div class="cgr-gap-clients">Sandra Williams, James Whitfield +36</div>
               <div class="cgr-gap-revenue">~$8.9K/yr potential</div>
             </div>
-            <button class="cgr-act-btn" onclick="sendQuickMessage('Which clients need retirement income planning and annuity illustrations?')"><i class="fas fa-bolt"></i> Outreach</button>
+            <button class="cgr-act-btn" onclick="openGapOutreachModal('ret')"><i class="fas fa-bolt"></i> Outreach</button>
           </div>
           <div class="cgr-gap-card cgr-gap-est">
             <div class="cgr-gap-icon"><i class="fas fa-landmark"></i></div>
@@ -3462,7 +3462,7 @@ function PoliciesPage() {
               <div class="cgr-gap-clients">Linda Morrison, Robert Chen +10</div>
               <div class="cgr-gap-revenue">~$5.1K/yr potential</div>
             </div>
-            <button class="cgr-act-btn" onclick="sendQuickMessage('List clients needing estate planning consultations and key talking points')"><i class="fas fa-bolt"></i> Outreach</button>
+            <button class="cgr-act-btn" onclick="openGapOutreachModal('est')"><i class="fas fa-bolt"></i> Outreach</button>
           </div>
           <div class="cgr-gap-card cgr-gap-cnv">
             <div class="cgr-gap-icon"><i class="fas fa-exchange-alt"></i></div>
@@ -3579,6 +3579,129 @@ function PoliciesPage() {
           </div>
         </div>
       </div>
+
+      {/* ── New Policy Modal ── */}
+      <div class="np-overlay" id="np-overlay" onclick="closeNewPolicyModal(event)">
+        <div class="np-modal" onclick="event.stopPropagation()">
+          <div class="np-header">
+            <div class="np-header-left">
+              <div class="np-header-icon"><i class="fas fa-file-medical-alt"></i></div>
+              <div>
+                <div class="np-title">Create New Policy</div>
+                <div class="np-subtitle" id="np-subtitle">Step 1 of 4 — Client &amp; Policy Basics</div>
+              </div>
+            </div>
+            <button class="np-close-btn" onclick="closeNewPolicyModal()"><i class="fas fa-times"></i></button>
+          </div>
+          {/* Step Progress Bar */}
+          <div class="np-progress-bar">
+            <div class="np-step active" id="np-step-1"><div class="np-step-num">1</div><div class="np-step-lbl">Client Info</div></div>
+            <div class="np-step-line"></div>
+            <div class="np-step" id="np-step-2"><div class="np-step-num">2</div><div class="np-step-lbl">Policy Details</div></div>
+            <div class="np-step-line"></div>
+            <div class="np-step" id="np-step-3"><div class="np-step-num">3</div><div class="np-step-lbl">Underwriting</div></div>
+            <div class="np-step-line"></div>
+            <div class="np-step" id="np-step-4"><div class="np-step-num">4</div><div class="np-step-lbl">Review &amp; Submit</div></div>
+          </div>
+          <div class="np-body" id="np-body">
+            {/* JS-populated */}
+          </div>
+          <div class="np-footer">
+            <button class="np-btn-cancel" onclick="closeNewPolicyModal()"><i class="fas fa-times"></i> Cancel</button>
+            <div class="np-footer-right">
+              <button class="np-btn-back" id="np-btn-back" onclick="npPrevStep()" style="display:none"><i class="fas fa-arrow-left"></i> Back</button>
+              <button class="np-btn-ai" onclick="npAIEnrich()"><i class="fas fa-robot"></i> AI Pre-fill</button>
+              <button class="np-btn-next" id="np-btn-next" onclick="npNextStep()">Next <i class="fas fa-arrow-right"></i></button>
+              <button class="np-btn-submit" id="np-btn-submit" onclick="npSubmitPolicy()" style="display:none"><i class="fas fa-check"></i> Submit Policy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Run Campaign Modal ── */}
+      <div class="rc-overlay" id="rc-overlay" onclick="closeRunCampaignModal(event)">
+        <div class="rc-modal" onclick="event.stopPropagation()">
+          <div class="rc-header">
+            <div class="rc-header-left">
+              <div class="rc-header-icon"><i class="fas fa-paper-plane"></i></div>
+              <div>
+                <div class="rc-title">Renewal Email Campaign</div>
+                <div class="rc-subtitle">AI-drafted · personalised · 23 clients</div>
+              </div>
+            </div>
+            <button class="rc-close-btn" onclick="closeRunCampaignModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="rc-body" id="rc-body">
+            {/* JS-populated */}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Coverage Gap Full Analysis Modal ── */}
+      <div class="cga-overlay" id="cga-overlay" onclick="closeCoverageGapAnalysisModal(event)">
+        <div class="cga-modal" onclick="event.stopPropagation()">
+          <div class="cga-header">
+            <div class="cga-header-left">
+              <div class="cga-header-icon"><i class="fas fa-crosshairs"></i></div>
+              <div>
+                <div class="cga-title">Coverage Gap &amp; Opportunity Full Analysis</div>
+                <div class="cga-subtitle">AI-Powered · 1,842 policies scanned · real-time</div>
+              </div>
+            </div>
+            <div class="cga-header-tabs">
+              <button class="cga-tab active" id="cga-tab-overview" onclick="switchCGATab('overview',this)"><i class="fas fa-chart-bar"></i> Overview</button>
+              <button class="cga-tab" id="cga-tab-clients" onclick="switchCGATab('clients',this)"><i class="fas fa-users"></i> Client List</button>
+              <button class="cga-tab" id="cga-tab-plan" onclick="switchCGATab('plan',this)"><i class="fas fa-tasks"></i> Action Plan</button>
+            </div>
+            <button class="cga-close-btn" onclick="closeCoverageGapAnalysisModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="cga-body" id="cga-body">
+            {/* JS-populated */}
+          </div>
+          <div class="cga-footer">
+            <button class="cga-btn-ai" onclick="sendQuickMessage('Generate a prioritised action plan for all 6 coverage gap categories — include client names, products, and estimated revenue');closeCoverageGapAnalysisModal()"><i class="fas fa-robot"></i> Full AI Action Plan</button>
+            <button class="cga-btn-close" onclick="closeCoverageGapAnalysisModal()"><i class="fas fa-times"></i> Close</button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Gap Outreach Composer Modal ── */}
+      <div class="go-overlay" id="go-overlay" onclick="closeGapOutreachModal(event)">
+        <div class="go-modal" onclick="event.stopPropagation()">
+          <div class="go-header">
+            <div class="go-header-left">
+              <div class="go-header-icon" id="go-icon"><i class="fas fa-paper-plane"></i></div>
+              <div>
+                <div class="go-title" id="go-title">Outreach Campaign</div>
+                <div class="go-subtitle" id="go-subtitle">AI-drafted personalised messages</div>
+              </div>
+            </div>
+            <div class="go-channel-tabs">
+              <button class="go-ch-tab active" id="go-tab-email" onclick="switchGOChannel('email',this)"><i class="fas fa-envelope"></i> Email</button>
+              <button class="go-ch-tab" id="go-tab-sms" onclick="switchGOChannel('sms',this)"><i class="fas fa-sms"></i> SMS</button>
+              <button class="go-ch-tab" id="go-tab-call" onclick="switchGOChannel('call',this)"><i class="fas fa-phone"></i> Call Script</button>
+            </div>
+            <button class="go-close-btn" onclick="closeGapOutreachModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="go-body" id="go-body">
+            {/* JS-populated */}
+          </div>
+          <div class="go-footer">
+            <button class="go-btn-regen" onclick="regenGOMessage()"><i class="fas fa-sync-alt"></i> Regenerate</button>
+            <select class="go-tone-select" id="go-tone" onchange="regenGOMessage()">
+              <option value="professional">Professional</option>
+              <option value="warm">Warm &amp; Personal</option>
+              <option value="urgent">Urgent</option>
+              <option value="consultative">Consultative</option>
+            </select>
+            <div class="go-footer-right">
+              <button class="go-btn-schedule" onclick="scheduleGOOutreach()"><i class="fas fa-calendar-alt"></i> Schedule</button>
+              <button class="go-btn-send" onclick="sendGOOutreach()"><i class="fas fa-paper-plane"></i> Send All Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   )
 }
