@@ -6699,6 +6699,7 @@ function SalesPage() {
                 <div class="kc-tags"><span class="tag-priority">High Priority</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-001')"><i class="fas fa-file-alt"></i> Brief</button>
+                  <button class="kca-btn kca-quote" onclick="event.stopPropagation();openQuoteModal('D001')"><i class="fas fa-file-invoice-dollar"></i> Quote</button>
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D001')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D001','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
@@ -6720,6 +6721,7 @@ function SalesPage() {
                 <div class="kc-tags"><span class="kc-source-tag online"><i class="fas fa-globe"></i> Online Inquiry</span></div>
                 <div class="kc-actions">
                   <button class="kca-btn kca-brief" onclick="event.stopPropagation();openMeetingBrief('MTG-005')"><i class="fas fa-file-alt"></i> Brief</button>
+                  <button class="kca-btn kca-quote" onclick="event.stopPropagation();openQuoteModal('D002')"><i class="fas fa-file-invoice-dollar"></i> Quote</button>
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D002')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D002','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
@@ -6741,6 +6743,7 @@ function SalesPage() {
                 <div class="kc-nba-pill red"><i class="fas fa-exclamation-triangle"></i> Address APS delay — send empathy script</div>
                 <div class="kc-tags"><span class="kc-source-tag warm"><i class="fas fa-fire-alt"></i> Warm Lead</span></div>
                 <div class="kc-actions">
+                  <button class="kca-btn kca-quote" onclick="event.stopPropagation();openQuoteModal('D003')"><i class="fas fa-file-invoice-dollar"></i> Quote</button>
                   <button class="kca-btn kca-ai" onclick="event.stopPropagation();openDealAIModal('D003')"><i class="fas fa-brain"></i> AI Intel</button>
                   <button class="kca-btn kca-move" onclick="event.stopPropagation();moveDealStage('D003','Quoted')"><i class="fas fa-arrow-right"></i> Move</button>
                 </div>
@@ -6923,7 +6926,7 @@ function SalesPage() {
                   <span class="col-value col-value-won" id="kval-Closed Won">$171K/yr</span>
                 </div>
               </div>
-              <div class="kanban-card won">
+              <div class="kanban-card won" onclick="openClosedWonModal('CW-001')" style="cursor:pointer" title="Click to view deal details">
                 <div class="kc-won-row">
                   <div class="kc-won-check"><i class="fas fa-check-circle"></i></div>
                   <div class="kc-won-info">
@@ -6933,8 +6936,9 @@ function SalesPage() {
                   </div>
                 </div>
                 <div class="kc-tags"><span class="kc-won-date">Apr 7 · Issued</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
+                <div class="kc-won-hint"><i class="fas fa-mouse-pointer"></i> Click for deal details &amp; upsell plan</div>
               </div>
-              <div class="kanban-card won">
+              <div class="kanban-card won" onclick="openClosedWonModal('CW-002')" style="cursor:pointer" title="Click to view deal details">
                 <div class="kc-won-row">
                   <div class="kc-won-check"><i class="fas fa-check-circle"></i></div>
                   <div class="kc-won-info">
@@ -6944,8 +6948,9 @@ function SalesPage() {
                   </div>
                 </div>
                 <div class="kc-tags"><span class="kc-won-date">Apr 5 · Issued</span><span class="kc-source-tag online"><i class="fas fa-globe"></i> Online</span></div>
+                <div class="kc-won-hint"><i class="fas fa-mouse-pointer"></i> Click for deal details &amp; upsell plan</div>
               </div>
-              <div class="kanban-card won">
+              <div class="kanban-card won" onclick="openClosedWonModal('CW-003')" style="cursor:pointer" title="Click to view deal details">
                 <div class="kc-won-row">
                   <div class="kc-won-check"><i class="fas fa-check-circle"></i></div>
                   <div class="kc-won-info">
@@ -6955,6 +6960,7 @@ function SalesPage() {
                   </div>
                 </div>
                 <div class="kc-tags"><span class="kc-won-date">Apr 2 · Issued</span><span class="kc-source-tag referral"><i class="fas fa-user-friends"></i> Referral</span></div>
+                <div class="kc-won-hint"><i class="fas fa-mouse-pointer"></i> Click for deal details &amp; upsell plan</div>
               </div>
               <div class="view-more-btn" onclick="openDealModal('closed-all')">+ 31 more this month →</div>
             </div>
@@ -6968,34 +6974,34 @@ function SalesPage() {
                   <span class="col-value col-value-lost" id="kval-Closed Lost">$9.1K/yr</span>
                 </div>
               </div>
-              <div class="kanban-card lost-card">
+              <div class="kanban-card lost-card" onclick="openClosedLostModal('CL-001')" style="cursor:pointer" title="Click for loss analysis">
                 <div class="kc-lost-reason"><i class="fas fa-ban"></i> Lost — Chose competitor</div>
                 <div class="kc-client">Mark Henderson</div>
                 <div class="kc-product">Term Life — $250K</div>
                 <div class="kc-value">$1,800/yr · <span class="kc-comm text-muted">$0 comm</span></div>
                 <div class="kc-tags"><span class="kc-won-date text-muted">Apr 10 · Lost</span></div>
                 <div class="kc-actions">
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();alert('AI Loss Analysis: Mark chose a lower-cost online term policy. Recommend re-engagement in 6 months with living benefits story.')"><i class="fas fa-robot"></i> Loss Analysis</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openClosedLostModal('CL-001')"><i class="fas fa-robot"></i> Loss Analysis</button>
                 </div>
               </div>
-              <div class="kanban-card lost-card">
+              <div class="kanban-card lost-card" onclick="openClosedLostModal('CL-002')" style="cursor:pointer" title="Click for loss analysis">
                 <div class="kc-lost-reason"><i class="fas fa-clock"></i> Lost — Budget objection</div>
                 <div class="kc-client">Patricia Nguyen</div>
                 <div class="kc-product">Disability Insurance</div>
                 <div class="kc-value">$3,600/yr · <span class="kc-comm text-muted">$0 comm</span></div>
                 <div class="kc-tags"><span class="kc-won-date text-muted">Apr 8 · Lost</span></div>
                 <div class="kc-actions">
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();alert('AI Loss Analysis: Budget objection — DI premium cited as too high. Suggest revisiting with shorter elimination period or partial benefit option.')"><i class="fas fa-robot"></i> Loss Analysis</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openClosedLostModal('CL-002')"><i class="fas fa-robot"></i> Loss Analysis</button>
                 </div>
               </div>
-              <div class="kanban-card lost-card">
+              <div class="kanban-card lost-card" onclick="openClosedLostModal('CL-003')" style="cursor:pointer" title="Click for loss analysis">
                 <div class="kc-lost-reason"><i class="fas fa-user-times"></i> Lost — Unresponsive</div>
                 <div class="kc-client">James Okafor</div>
                 <div class="kc-product">Whole Life — $300K</div>
                 <div class="kc-value">$3,700/yr · <span class="kc-comm text-muted">$0 comm</span></div>
                 <div class="kc-tags"><span class="kc-won-date text-muted">Apr 3 · Closed</span></div>
                 <div class="kc-actions">
-                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();alert('AI Loss Analysis: 3 follow-ups sent with no response. Schedule a re-engagement nurture email in 90 days.')"><i class="fas fa-robot"></i> Loss Analysis</button>
+                  <button class="kca-btn kca-ai" onclick="event.stopPropagation();openClosedLostModal('CL-003')"><i class="fas fa-robot"></i> Loss Analysis</button>
                 </div>
               </div>
             </div>
@@ -7564,6 +7570,130 @@ function SalesPage() {
             <button class="dmt-tab" onclick="switchDealTab('competitive',this)"><i class="fas fa-chess"></i> Competitive</button>
           </div>
           <div class="deal-modal-body" id="deal-modal-body"></div>
+        </div>
+      </div>
+
+      {/* ── Quote Generation Modal ── */}
+      <div class="quote-gen-overlay" id="quote-gen-overlay" onclick="if(event.target===this)closeQuoteModal()" style="display:none">
+        <div class="quote-gen-modal" onclick="event.stopPropagation()">
+          <div class="qg-header">
+            <div class="qg-header-left">
+              <div class="qg-header-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+              <div>
+                <div class="qg-header-title">Quote Generation Engine</div>
+                <div class="qg-header-sub" id="qg-step-title">Step 1 of 3 — Client &amp; Health Profile</div>
+              </div>
+            </div>
+            <div class="qg-step-tracker">
+              <div class="qg-step-dot active" title="Client Profile"><span>1</span></div>
+              <div class="qg-step-line"></div>
+              <div class="qg-step-dot" title="Product Config"><span>2</span></div>
+              <div class="qg-step-line"></div>
+              <div class="qg-step-dot" title="Quote Results"><span>3</span></div>
+            </div>
+            <button class="deal-modal-close" onclick="closeQuoteModal()"><i class="fas fa-times"></i></button>
+          </div>
+
+          {/* Step 1 — Client & Health */}
+          <div class="qg-step-body" id="qg-step-1">
+            <div class="qg-ai-banner"><i class="fas fa-robot"></i> AI pre-filled from 3rd-party data — WealthEngine, Experian, LinkedIn. Review &amp; confirm.</div>
+            <div class="qg-form-grid">
+              <div class="qg-field">
+                <label>Client / Prospect Name</label>
+                <input type="text" id="qg-name" class="form-input" placeholder="Full name" />
+              </div>
+              <div class="qg-field">
+                <label>Age</label>
+                <input type="number" id="qg-age" class="form-input" min="18" max="85" placeholder="42" />
+              </div>
+              <div class="qg-field">
+                <label>Gender</label>
+                <select id="qg-gender" class="form-input">
+                  <option value="m">Male</option>
+                  <option value="f">Female</option>
+                </select>
+              </div>
+              <div class="qg-field">
+                <label>Health Classification</label>
+                <select id="qg-health" class="form-input">
+                  <option value="pp">Preferred Plus (Best)</option>
+                  <option value="p" selected>Preferred</option>
+                  <option value="sp">Standard Plus</option>
+                  <option value="s">Standard</option>
+                </select>
+              </div>
+              <div class="qg-field">
+                <label>Annual Income <span class="qg-data-src"><i class="fas fa-database"></i> Experian</span></label>
+                <input type="text" id="qg-income" class="form-input" placeholder="e.g. 150,000" />
+              </div>
+              <div class="qg-field">
+                <label>Estimated Net Worth <span class="qg-data-src"><i class="fas fa-database"></i> WealthEngine</span></label>
+                <input type="text" id="qg-networth" class="form-input" placeholder="e.g. 500,000" />
+              </div>
+            </div>
+            <div class="qg-health-guide">
+              <div class="qg-hg-title"><i class="fas fa-info-circle"></i> Health Class Quick Guide</div>
+              <div class="qg-hg-items">
+                <div class="qg-hg-item green"><strong>Preferred Plus</strong> — Excellent health, no major conditions, BMI 18–28, non-smoker</div>
+                <div class="qg-hg-item blue"><strong>Preferred</strong> — Good health, minor controlled conditions, BMI 18–32</div>
+                <div class="qg-hg-item amber"><strong>Standard Plus</strong> — Controlled BP/cholesterol, family history, BMI up to 35</div>
+                <div class="qg-hg-item red"><strong>Standard</strong> — Managed chronic conditions, higher BMI, other risk factors</div>
+              </div>
+            </div>
+            <div class="qg-footer">
+              <button class="btn btn-outline" onclick="closeQuoteModal()"><i class="fas fa-times"></i> Cancel</button>
+              <button class="btn btn-primary" onclick="qgNext()">Next — Product Config <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          {/* Step 2 — Product Configuration */}
+          <div class="qg-step-body" id="qg-step-2" style="display:none">
+            <div class="qg-product-select-row">
+              <label>Select Insurance Product</label>
+              <select id="qg-product" class="form-input" onchange="_updateQuoteProductUI()">
+                <option value="term">Term Life Insurance</option>
+                <option value="wl">Whole Life Insurance</option>
+                <option value="ul">Universal Life Insurance</option>
+                <option value="vul">Variable Universal Life</option>
+                <option value="ltc">Long-Term Care Insurance</option>
+                <option value="di">Disability Income Insurance</option>
+                <option value="fa">Fixed Annuity</option>
+                <option value="va">Variable Annuity</option>
+              </select>
+              <div class="qg-product-badge" id="qg-product-badge" style="background:#003087"><i class="fas fa-shield-alt"></i> Term Life Insurance</div>
+            </div>
+            <div class="qg-form-grid">
+              <div class="qg-field">
+                <label>Coverage / Benefit Amount</label>
+                <select id="qg-coverage" class="form-input"></select>
+              </div>
+              <div class="qg-field" id="qg-term-row" style="display:flex">
+                <label>Term Length (years)</label>
+                <select id="qg-term" class="form-input">
+                  <option value="10">10 Years</option>
+                  <option value="15">15 Years</option>
+                  <option value="20" selected>20 Years</option>
+                  <option value="25">25 Years</option>
+                  <option value="30">30 Years</option>
+                </select>
+              </div>
+            </div>
+            <div class="qg-riders-section">
+              <div class="qg-riders-title"><i class="fas fa-plus-circle"></i> Optional Riders &amp; Add-ons</div>
+              <div class="qg-rider-list" id="qg-rider-list"></div>
+            </div>
+            <div class="qg-footer">
+              <button class="btn btn-outline" onclick="qgBack()"><i class="fas fa-arrow-left"></i> Back</button>
+              <button class="btn btn-success" onclick="qgNext()"><i class="fas fa-calculator"></i> Generate Quote</button>
+            </div>
+          </div>
+
+          {/* Step 3 — Quote Results */}
+          <div class="qg-step-body" id="qg-step-3" style="display:none">
+            <div id="qg-results-body">
+              <div class="qg-generating"><i class="fas fa-spinner fa-spin"></i> Generating quote…</div>
+            </div>
+          </div>
         </div>
       </div>
 

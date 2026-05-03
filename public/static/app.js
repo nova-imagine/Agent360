@@ -5201,6 +5201,19 @@ function openDealModal(dealId) {
     `<div class="dm-tl-row"><span class="dm-tl-date">${t.date}</span><span class="dm-tl-event">${t.event}</span></div>`
   ).join('');
 
+  // Determine footer buttons based on stage
+  const isProspect    = d.stage === 'Prospect';
+  const isClosedWon   = d.stage === 'Closed Won';
+  const isClosedLost  = d.stage === 'Closed Lost';
+  const quoteBtn      = isProspect
+    ? `<button class="btn btn-success" onclick="openQuoteModal('${dealId}')"><i class="fas fa-file-invoice-dollar"></i> Generate Quote</button>`
+    : '';
+  const moveNextBtn   = (!isClosedWon && !isClosedLost) ? (() => {
+    const nextStage = d.stage === 'Prospect' ? 'Quoted' : d.stage === 'Quoted' ? 'Underwriting' : d.stage === 'Underwriting' ? 'Approved' : 'Closed Won';
+    const icon      = d.stage === 'Approved' ? 'fa-trophy' : 'fa-arrow-right';
+    return `<button class="btn btn-outline" onclick="moveDealStage('${dealId}','${nextStage}');closeDealModal()"><i class="fas ${icon}"></i> Move to ${nextStage}</button>`;
+  })() : '';
+
   body.innerHTML = `
     <div class="dm-meta-grid">
       <div class="dm-meta-item"><span class="dm-meta-lbl">Stage</span><span class="dm-stage-pill" style="background:${stageColors[d.stage]||'#64748b'}">${d.stage}</span></div>
@@ -5222,7 +5235,8 @@ function openDealModal(dealId) {
     </div>
     <div class="dm-footer-actions">
       <button class="btn btn-ai" onclick="sendContextMessage('Full AI analysis for ${d.client} — ${d.product}, stage ${d.stage}, close probability ${d.probability}. Next best action and objection handling.','smart-advisor')"><i class="fas fa-robot"></i> Ask AI Agent</button>
-      <button class="btn btn-primary" onclick="runQuoteCalc()"><i class="fas fa-calculator"></i> Quote</button>
+      ${quoteBtn}
+      ${moveNextBtn}
       <button class="btn btn-outline" onclick="closeDealModal()"><i class="fas fa-times"></i> Close</button>
     </div>
   `;
@@ -5243,6 +5257,579 @@ function closeDealModal(e) {
   if (e && e.target !== document.getElementById('deal-modal-overlay')) return;
   const overlay = document.getElementById('deal-modal-overlay');
   if (overlay) overlay.style.display = 'none';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   QUOTE GENERATION MODAL — full multi-product simulation
+   ══════════════════════════════════════════════════════════════ */
+
+const quoteProductConfig = {
+  term: {
+    label: 'Term Life Insurance', icon: 'fa-shield-alt', color: '#003087',
+    coverageOptions: [250000,500000,750000,1000000,1500000,2000000],
+    termOptions: [10,15,20,25,30],
+    riders: ['Waiver of Premium','Accelerated Death Benefit','Child Rider ($15K)','Return of Premium','Accidental Death Rider','Disability Income Rider'],
+    baseRate: 0.0032, ageFactor: 0.038,
+    healthMult: { pp:0.80, p:1.00, sp:1.18, s:1.35 },
+    commRate: 0.12,
+    illustration: ['Level premium guaranteed for selected term','Death benefit paid income-tax-free','Convertible to permanent coverage before age 70','No medical exam for coverage under $500K (age < 45)']
+  },
+  wl: {
+    label: 'Whole Life Insurance', icon: 'fa-infinity', color: '#1e40af',
+    coverageOptions: [100000,250000,500000,750000,1000000,2000000],
+    termOptions: null,
+    riders: ['Paid-Up Additions (PUA) Rider','Waiver of Premium','Long-Term Care Rider','Accelerated Death Benefit','Guaranteed Insurability Rider','Accidental Death Benefit'],
+    baseRate: 0.012, ageFactor: 0.042,
+    healthMult: { pp:0.82, p:1.00, sp:1.20, s:1.40 },
+    commRate: 0.55,
+    illustration: ['Guaranteed death benefit — lifetime coverage','Cash value grows tax-deferred at ~4–5% annually','Policy loans available — no credit check, tax-free','Participating policy: eligible for annual dividends']
+  },
+  ul: {
+    label: 'Universal Life Insurance', icon: 'fa-sliders-h', color: '#7c3aed',
+    coverageOptions: [250000,500000,750000,1000000,2000000],
+    termOptions: null,
+    riders: ['No-Lapse Guarantee','Secondary Guarantee','Long-Term Care Rider','Overloan Protection','Waiver of Cost of Insurance','Accelerated Chronic Illness Rider'],
+    baseRate: 0.0085, ageFactor: 0.040,
+    healthMult: { pp:0.81, p:1.00, sp:1.19, s:1.38 },
+    commRate: 0.14,
+    illustration: ['Flexible premium payments — adjust within limits','Adjustable death benefit (Option A or B)','Current credited rate: 5.2% (min guarantee 2%)','Cash value accumulation with index-linked upside potential']
+  },
+  vul: {
+    label: 'Variable Universal Life', icon: 'fa-chart-line', color: '#059669',
+    coverageOptions: [250000,500000,1000000,2000000],
+    termOptions: null,
+    riders: ['Guaranteed Minimum Death Benefit','Guaranteed Minimum Accumulation Rider','Overloan Protection','Waiver of Premium','Accidental Death Benefit'],
+    baseRate: 0.0095, ageFactor: 0.041,
+    healthMult: { pp:0.83, p:1.00, sp:1.22, s:1.42 },
+    commRate: 0.16,
+    illustration: ['Sub-account performance linked to market indices','30+ investment options including fixed account','Potential for higher cash value growth vs. fixed products','Death benefit adjusts with sub-account performance']
+  },
+  ltc: {
+    label: 'Long-Term Care Insurance', icon: 'fa-heartbeat', color: '#dc2626',
+    coverageOptions: [100,150,200,250,300,400],
+    termOptions: null,
+    riders: ['Inflation Protection (3% compound)','Shared Care Rider','Return of Premium','Waiver of Premium','International Coverage','Spouse Discount'],
+    baseRate: 0.024, ageFactor: 0.055,
+    healthMult: { pp:0.85, p:1.00, sp:1.25, s:1.50 },
+    commRate: 0.30,
+    coverageUnit: '$/day',
+    illustration: ['Covers home care, assisted living, memory care, nursing home','Elimination period: 30, 60, or 90 days (90-day most cost-effective)','Benefit period: 2, 3, 5 years or lifetime','Tax-qualified plan — premiums may be deductible (age-based limit)']
+  },
+  di: {
+    label: 'Disability Income Insurance', icon: 'fa-user-injured', color: '#d97706',
+    coverageOptions: [3000,5000,8000,10000,12000,15000],
+    termOptions: null,
+    riders: ['Cost of Living Adjustment (COLA)','Future Increase Option (FIO)','Catastrophic Disability Rider','Own-Occupation Definition','Residual Disability Rider','Student Loan Rider'],
+    baseRate: 0.018, ageFactor: 0.044,
+    healthMult: { pp:0.83, p:1.00, sp:1.22, s:1.45 },
+    commRate: 0.30,
+    coverageUnit: '/mo benefit',
+    illustration: ['Own-occupation definition — highest protection standard','Elimination period: 60, 90, or 180 days','Benefit period: 2, 5, 10 years or to age 65/67','60–80% of gross income replacement up to benefit maximum']
+  },
+  fa: {
+    label: 'Fixed Annuity', icon: 'fa-piggy-bank', color: '#0284c7',
+    coverageOptions: [25000,50000,100000,150000,200000,500000],
+    termOptions: null,
+    riders: ['Enhanced Death Benefit','Income Rider (GLWB)','Return of Premium','Long-Term Care Doubler','Nursing Home Waiver'],
+    baseRate: 0.006, ageFactor: 0.010,
+    healthMult: { pp:1.00, p:1.00, sp:1.00, s:1.00 },
+    commRate: 0.08,
+    coverageUnit: 'premium',
+    illustration: ['Guaranteed credited rate: 5.85% for 5-year MYGA','Tax-deferred growth — no annual 1099 until withdrawal','10% free withdrawal annually after year 1','Guaranteed death benefit = account value to beneficiary']
+  },
+  va: {
+    label: 'Variable Annuity', icon: 'fa-chart-area', color: '#7c3aed',
+    coverageOptions: [25000,50000,100000,200000,500000],
+    termOptions: null,
+    riders: ['Guaranteed Lifetime Withdrawal Benefit (GLWB)','Enhanced Death Benefit (Step-Up)','Return of Premium Death Benefit','Earnings-Sensitive Death Benefit'],
+    baseRate: 0.007, ageFactor: 0.010,
+    healthMult: { pp:1.00, p:1.00, sp:1.00, s:1.00 },
+    commRate: 0.07,
+    coverageUnit: 'premium',
+    illustration: ['30+ sub-accounts including S&P500, bond, international funds','GLWB rider provides guaranteed income regardless of market performance','Step-up death benefit resets annually to highest account value','Tax-deferred growth; exchanges from other annuities via 1035 exchange']
+  }
+};
+
+// Rich prospect data for quote pre-population
+const prospectQuoteData = {
+  D001: { name:'Alex Rivera', age:34, gender:'m', health:'p', product:'wl', coverage:500000, income:120000, netWorth:340000, credit:760 },
+  D002: { name:'Nancy Foster', age:41, gender:'f', health:'p', product:'term', coverage:1000000, income:185000, netWorth:620000, credit:720 },
+  D003: { name:'John Kim', age:38, gender:'m', health:'sp', product:'di', coverage:8000, income:185000, netWorth:0, credit:690 },
+  D004: { name:'Michael Santos', age:47, gender:'m', health:'pp', product:'ul', coverage:750000, income:320000, netWorth:1800000, credit:810 },
+  D005: { name:'Julia Chen', age:58, gender:'f', health:'p', product:'fa', coverage:120000, income:95000, netWorth:890000, credit:740 },
+  D006: { name:'Thomas Wright', age:52, gender:'m', health:'pp', product:'wl', coverage:1000000, income:500000, netWorth:3800000, credit:820 },
+  D007: { name:'Grace Lee', age:44, gender:'f', health:'sp', product:'vul', coverage:250000, income:210000, netWorth:620000, credit:710 },
+  D008: { name:'Kevin Park', age:33, gender:'m', health:'pp', product:'term', coverage:500000, income:145000, netWorth:280000, credit:790 },
+  D009: { name:'Linda Morrison', age:56, gender:'f', health:'p', product:'fa', coverage:280000, income:180000, netWorth:1200000, credit:760 }
+};
+
+let _currentQuoteDealId = null;
+let _selectedQuoteRiders = new Set();
+
+function openQuoteModal(dealId) {
+  _currentQuoteDealId = dealId;
+  _selectedQuoteRiders = new Set();
+  const overlay = document.getElementById('quote-gen-overlay');
+  if (!overlay) return;
+
+  // Pre-populate from prospect data
+  const pd = prospectQuoteData[dealId] || {};
+  const d  = pipelineData[dealId] || {};
+
+  // Reset to step 1
+  _showQuoteStep(1);
+
+  // Fill fields
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
+  setVal('qg-name', pd.name || d.client || '');
+  setVal('qg-age', pd.age || 42);
+  setVal('qg-gender', pd.gender || 'm');
+  setVal('qg-health', pd.health || 'p');
+  setVal('qg-product', pd.product || 'term');
+  setVal('qg-income', pd.income ? pd.income.toLocaleString() : '');
+  setVal('qg-networth', pd.netWorth ? pd.netWorth.toLocaleString() : '');
+
+  // Trigger coverage update for selected product
+  _updateQuoteProductUI();
+
+  overlay.style.display = 'flex';
+}
+
+function closeQuoteModal() {
+  const overlay = document.getElementById('quote-gen-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function _showQuoteStep(n) {
+  [1,2,3].forEach(i => {
+    const s = document.getElementById('qg-step-' + i);
+    if (s) s.style.display = i === n ? 'block' : 'none';
+  });
+  // Update step indicators
+  document.querySelectorAll('.qg-step-dot').forEach((d, i) => {
+    d.classList.toggle('active', i < n);
+    d.classList.toggle('done', i < n - 1);
+  });
+  const titles = ['Client & Health Profile', 'Product Configuration', 'Quote Results & Illustrations'];
+  const el = document.getElementById('qg-step-title');
+  if (el) el.textContent = `Step ${n} of 3 — ${titles[n-1]}`;
+}
+
+function _updateQuoteProductUI() {
+  const prod = document.getElementById('qg-product')?.value || 'term';
+  const cfg  = quoteProductConfig[prod];
+  if (!cfg) return;
+
+  // Update coverage options
+  const covSel = document.getElementById('qg-coverage');
+  if (covSel) {
+    const unit = cfg.coverageUnit || '';
+    covSel.innerHTML = cfg.coverageOptions.map(v => {
+      const label = cfg.coverageUnit === '$/day' ? `$${v}/day` :
+                    cfg.coverageUnit === '/mo benefit' ? `$${v.toLocaleString()}/mo` :
+                    cfg.coverageUnit === 'premium' ? `$${v.toLocaleString()} premium` :
+                    `$${v >= 1000000 ? (v/1000000)+'M' : (v/1000)+'K'}`;
+      return `<option value="${v}">${label}</option>`;
+    }).join('');
+    // Pre-select prospect's coverage
+    const pd = prospectQuoteData[_currentQuoteDealId] || {};
+    if (pd.coverage) covSel.value = pd.coverage;
+  }
+
+  // Show/hide term options
+  const termRow = document.getElementById('qg-term-row');
+  if (termRow) termRow.style.display = cfg.termOptions ? 'flex' : 'none';
+
+  // Update riders list
+  const riderList = document.getElementById('qg-rider-list');
+  if (riderList) {
+    _selectedQuoteRiders = new Set();
+    riderList.innerHTML = cfg.riders.map((r, i) => `
+      <label class="qg-rider-item">
+        <input type="checkbox" value="${r}" onchange="_toggleRider(this)" ${i < 2 ? 'checked' : ''} />
+        <span class="qg-rider-name">${r}</span>
+        <span class="qg-rider-cost">+$${(Math.random()*15+5).toFixed(0)}/mo</span>
+      </label>`).join('');
+    // Auto-check first 2
+    cfg.riders.slice(0,2).forEach(r => _selectedQuoteRiders.add(r));
+  }
+
+  // Update product badge
+  const badge = document.getElementById('qg-product-badge');
+  if (badge) {
+    badge.innerHTML = `<i class="fas ${cfg.icon}"></i> ${cfg.label}`;
+    badge.style.background = cfg.color;
+  }
+}
+
+function _toggleRider(cb) {
+  if (cb.checked) _selectedQuoteRiders.add(cb.value);
+  else _selectedQuoteRiders.delete(cb.value);
+}
+
+function qgNext() {
+  const current = [1,2,3].find(i => document.getElementById('qg-step-'+i)?.style.display !== 'none') || 1;
+  if (current === 2) { _runFullQuote(); }
+  _showQuoteStep(Math.min(3, current + 1));
+}
+
+function qgBack() {
+  const current = [1,2,3].find(i => document.getElementById('qg-step-'+i)?.style.display !== 'none') || 2;
+  _showQuoteStep(Math.max(1, current - 1));
+}
+
+function _runFullQuote() {
+  const age      = parseInt(document.getElementById('qg-age')?.value) || 42;
+  const prod     = document.getElementById('qg-product')?.value || 'term';
+  const coverage = parseFloat(document.getElementById('qg-coverage')?.value) || 500000;
+  const health   = document.getElementById('qg-health')?.value || 'p';
+  const gender   = document.getElementById('qg-gender')?.value || 'm';
+  const name     = document.getElementById('qg-name')?.value || 'Client';
+  const income   = parseFloat((document.getElementById('qg-income')?.value || '0').replace(/,/g,'')) || 0;
+  const netWorth = parseFloat((document.getElementById('qg-networth')?.value || '0').replace(/,/g,'')) || 0;
+  const cfg      = quoteProductConfig[prod];
+  if (!cfg) return;
+
+  const genderAdj  = gender === 'f' ? 0.92 : 1.00;
+  const agePenalty = Math.max(0, (age - 35) * cfg.ageFactor);
+  const rawRate    = (cfg.baseRate + agePenalty) * cfg.healthMult[health] * genderAdj;
+  const annualBase = (prod === 'ltc') ? coverage * rawRate * 365 :
+                     (prod === 'di')  ? coverage * rawRate * 12  :
+                     (prod === 'fa' || prod === 'va') ? coverage * rawRate :
+                     Math.round(coverage * rawRate / 100) * 100;
+  const annualLow  = Math.round(annualBase / 100) * 100;
+  const annualHigh = Math.round(annualLow * 1.12 / 100) * 100;
+  const commEst    = Math.round(annualLow * cfg.commRate);
+  const riderCost  = _selectedQuoteRiders.size * (Math.random() * 120 + 80);
+  const totalAnnual= Math.round((annualLow + riderCost) / 10) * 10;
+
+  const healthLabels = { pp:'Preferred Plus', p:'Preferred', sp:'Standard Plus', s:'Standard' };
+  const fmt = n => '$' + n.toLocaleString();
+
+  // Cash value projection (for perm products)
+  const cvData = (prod === 'wl' || prod === 'ul' || prod === 'vul') ? [5,10,20].map(yr => ({
+    yr, cv: Math.round(annualLow * yr * (prod==='wl'?0.42:prod==='ul'?0.38:0.35) / 100) * 100,
+    db: coverage + (prod==='ul'?Math.round(annualLow*yr*0.10/100)*100:0)
+  })) : null;
+
+  // Render results into step 3
+  const resultEl = document.getElementById('qg-results-body');
+  if (!resultEl) return;
+
+  const healthScore = health === 'pp' ? 98 : health === 'p' ? 88 : health === 'sp' ? 74 : 60;
+  const approvalLikelihood = Math.min(99, healthScore - Math.max(0,(age-50)*0.5));
+
+  resultEl.innerHTML = `
+    <div class="qg-result-hero">
+      <div class="qg-result-product-badge" style="background:${cfg.color}"><i class="fas ${cfg.icon}"></i> ${cfg.label}</div>
+      <div class="qg-result-premium-block">
+        <div class="qg-premium-range">${fmt(annualLow)} — ${fmt(annualHigh)}<span>/yr</span></div>
+        <div class="qg-premium-sub">or ${fmt(Math.round(annualLow/12))} — ${fmt(Math.round(annualHigh/12))}/mo · ${healthLabels[health]} class</div>
+      </div>
+      <div class="qg-result-kpis">
+        <div class="qg-rkpi"><div class="qg-rkpi-val green">${fmt(commEst)}</div><div class="qg-rkpi-lbl">Est. Commission</div></div>
+        <div class="qg-rkpi"><div class="qg-rkpi-val blue">${(cfg.commRate*100).toFixed(0)}%</div><div class="qg-rkpi-lbl">Comm Rate</div></div>
+        <div class="qg-rkpi"><div class="qg-rkpi-val ${approvalLikelihood>=85?'green':approvalLikelihood>=70?'amber':'red'}">${Math.round(approvalLikelihood)}%</div><div class="qg-rkpi-lbl">Approval Likelihood</div></div>
+        <div class="qg-rkpi"><div class="qg-rkpi-val gold">${fmt(totalAnnual)}</div><div class="qg-rkpi-lbl">Total w/ Riders</div></div>
+      </div>
+    </div>
+
+    <div class="qg-result-grid">
+      <div class="qg-result-section">
+        <div class="qg-rs-title"><i class="fas fa-list-ul"></i> Quote Summary</div>
+        <div class="qg-rs-row"><span>Client</span><strong>${name}</strong></div>
+        <div class="qg-rs-row"><span>Age / Gender</span><strong>${age} / ${gender === 'm' ? 'Male' : 'Female'}</strong></div>
+        <div class="qg-rs-row"><span>Health Class</span><strong>${healthLabels[health]}</strong></div>
+        <div class="qg-rs-row"><span>Product</span><strong>${cfg.label}</strong></div>
+        <div class="qg-rs-row"><span>${prod==='ltc'?'Daily Benefit':prod==='di'?'Monthly Benefit':prod==='fa'||prod==='va'?'Premium Amount':'Death Benefit'}</span><strong>${prod==='ltc'?fmt(coverage)+'/day':prod==='di'?fmt(coverage)+'/mo':prod==='fa'||prod==='va'?fmt(coverage)+' premium':fmt(coverage)}</strong></div>
+        ${cfg.termOptions ? `<div class="qg-rs-row"><span>Term</span><strong>${document.getElementById('qg-term')?.value||20} years</strong></div>` : ''}
+        <div class="qg-rs-row"><span>Riders Selected</span><strong>${_selectedQuoteRiders.size > 0 ? [..._selectedQuoteRiders].join(', ') : 'None'}</strong></div>
+        ${income > 0 ? `<div class="qg-rs-row"><span>Annual Income</span><strong>${fmt(income)}</strong></div>` : ''}
+        ${netWorth > 0 ? `<div class="qg-rs-row"><span>Net Worth</span><strong>${fmt(netWorth)}</strong></div>` : ''}
+      </div>
+
+      <div class="qg-result-section">
+        <div class="qg-rs-title"><i class="fas fa-info-circle"></i> Product Illustration</div>
+        ${cfg.illustration.map(pt => `<div class="qg-illus-point"><i class="fas fa-check-circle"></i>${pt}</div>`).join('')}
+        ${cvData ? `
+        <div class="qg-cv-table">
+          <div class="qg-cv-header"><span>Year</span><span>Cash Value</span><span>Death Benefit</span></div>
+          ${cvData.map(r => `<div class="qg-cv-row"><span>Yr ${r.yr}</span><span class="green">${fmt(r.cv)}</span><span>${fmt(r.db)}</span></div>`).join('')}
+        </div>` : ''}
+      </div>
+    </div>
+
+    <div class="qg-result-section qg-ai-rec">
+      <div class="qg-rs-title"><i class="fas fa-robot"></i> AI Recommendation</div>
+      <div class="qg-ai-rec-body">
+        ${_buildAIQuoteRec(name, prod, cfg, annualLow, commEst, age, health, income, netWorth, coverage)}
+      </div>
+    </div>
+
+    <div class="qg-result-actions">
+      <button class="btn btn-primary" onclick="_sendQuoteToProspect('${_currentQuoteDealId}')"><i class="fas fa-paper-plane"></i> Send Quote to Prospect</button>
+      <button class="btn btn-ai" onclick="sendContextMessage('Full competitive analysis and objection handling for ${name} — ${cfg.label} quote at ${fmt(annualLow)}/yr. Client age ${age}, ${healthLabels[health]} health class.','smart-advisor')"><i class="fas fa-brain"></i> AI Competitive Brief</button>
+      <button class="btn btn-outline" onclick="qgBack()"><i class="fas fa-redo"></i> Revise Quote</button>
+    </div>
+  `;
+}
+
+function _buildAIQuoteRec(name, prod, cfg, annual, comm, age, health, income, netWorth, coverage) {
+  const firstName = name.split(' ')[0];
+  const recs = {
+    term: `${firstName} at age ${age} is in the ideal window for term life — locking in ${health === 'pp' || health === 'p' ? 'preferred rates' : 'competitive rates'} now before any health changes. Lead with the income replacement story: this policy protects ${income > 0 ? Math.round(income/parseInt(annual)*10)+'x income' : 'family financial security'} for the term period. Objection anticipated: "Why not just invest the difference?" Counter with: certainty of death benefit vs. investment risk, especially for young families. Strong upsell candidate for WL conversion before age 55.`,
+    wl: `${firstName}'s ${netWorth > 500000 ? 'high net worth profile ($'+netWorth.toLocaleString()+') makes WL ideal for estate planning and tax-free wealth transfer.' : 'financial profile supports a whole life strategy for long-term cash value accumulation.'} Emphasize the guaranteed 4–5% cash value growth and dividend participation. At age ${age}, projected cash value at retirement (~65) is approximately $${Math.round(coverage * 0.38 / 1000) * 1000 + Math.round(annual * (65 - age) * 0.42)}.toLocaleString(). The living benefits make this a "personal bank" story — not just insurance. Commission of $${comm.toLocaleString()} makes this your highest-value case.`,
+    ul: `Universal Life gives ${firstName} the flexibility to vary premiums as income fluctuates — ideal for ${income > 250000 ? 'high-income earners with variable cash flow' : 'professionals seeking premium flexibility'}. Current credited rate of 5.2% outperforms most fixed alternatives. Key talking point: the no-lapse guarantee rider locks in the death benefit regardless of credited rate performance. NQDC (deferred comp) pairing opportunity — flag for follow-up.`,
+    di: `Disability is ${firstName}'s most underinsured risk. At age ${age} with ${income > 0 ? '$'+income.toLocaleString()+'/yr income' : 'a professional income'}, a 90-day disability could result in $${Math.round((income||120000)/4).toLocaleString()}+ in lost income before long-term benefits begin. Own-occupation definition is non-negotiable for professional clients. The COLA rider (+3%/yr) is especially important for younger clients — a disability at age ${age} could mean 20+ years of benefits. Close probability increases significantly if framed as income protection vs. insurance.`,
+    ltc: `${firstName} is in the optimal age range for LTC planning. Premiums are ${age < 55 ? '40-60% lower than applying at age 60+' : 'still favorable vs. waiting'}. The hybrid LTC/Life approach may also be worth showing — premium return guarantee resonates with clients concerned about "using it or losing it." Projected LTC costs in ${age < 55 ? 25 : 15} years: $${Math.round((180000 + (age < 55 ? 25 : 15) * 8000) / 1000) * 1000}+/yr for skilled nursing. This quote covers a meaningful portion of that risk.`,
+    fa: `Fixed annuity at today's 5.85% MYGA rate is highly competitive vs. CDs and bonds for ${firstName}'s ${netWorth > 0 ? '$'+netWorth.toLocaleString()+' net worth portfolio' : 'retirement assets'}. Key differentiators: tax deferral on growth, guaranteed rate for the full term, 10% free withdrawal flexibility. For the $${coverage.toLocaleString()} premium: projected account value at maturity = $${Math.round(coverage * Math.pow(1.0585, document.getElementById('qg-term')?.value || 5) / 100) * 100}. Low objection profile — position as a "safe bucket" alongside market investments.`,
+    vul: `Variable annuity suits ${firstName}'s risk tolerance for market-linked growth with downside protection via the GLWB rider. At a 7% assumed growth rate, the $${coverage.toLocaleString()} premium could generate $${Math.round(coverage * 0.055).toLocaleString()}/yr in guaranteed lifetime income starting at age 65. Pair with the enhanced death benefit step-up for comprehensive protection. Note: M&E charges (~1.2%/yr) reduce net returns — model both scenarios in the illustration.`,
+    default: `${firstName} is well-positioned for this product given their age and health classification. Focus on the immediate protection benefit and long-term value. Commission of $${comm.toLocaleString()} reflects strong revenue potential. Schedule a follow-up within 48 hours of sending the quote to capitalize on engagement momentum.`
+  };
+  return `<p>${recs[prod] || recs.default}</p>
+    <div class="qg-ai-tags">
+      <span class="qg-ai-tag blue"><i class="fas fa-bullseye"></i> Close Probability: ${health==='pp'||health==='p'?'High (75-90%)':'Moderate (55-70%)'}</span>
+      <span class="qg-ai-tag green"><i class="fas fa-dollar-sign"></i> Yr-1 Commission: $${comm.toLocaleString()}</span>
+      <span class="qg-ai-tag orange"><i class="fas fa-clock"></i> Optimal Follow-up: 24–48 hrs</span>
+    </div>`;
+}
+
+function _sendQuoteToProspect(dealId) {
+  const d = pipelineData[dealId];
+  const name = d ? d.client : 'Prospect';
+  // Move to Quoted stage
+  if (d) { d.stage = 'Quoted'; if (d.timeline) d.timeline.push({ date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}), event: 'Quote generated and sent' }); }
+  closeQuoteModal();
+  // Show success toast
+  const t = document.createElement('div');
+  t.className = 'stage-toast';
+  t.innerHTML = `<i class="fas fa-paper-plane"></i> Quote sent to ${name} — moved to Quoted stage`;
+  t.style.cssText = 'background:#003087;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;position:fixed;bottom:28px;right:24px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CLOSED WON / CLOSED LOST DEAL MODALS
+   ══════════════════════════════════════════════════════════════ */
+
+const closedWonData = {
+  'CW-001': {
+    client: 'David Thompson', product: 'Term Life — $500K', value: '$2,400/yr', commission: '$288',
+    closedDate: 'Apr 7, 2026', source: 'Referral', healthClass: 'Preferred Plus',
+    policyNum: 'NYL-TL-2026-0407', domain: 'ins',
+    timeline: [
+      { date: 'Mar 10', event: 'Referred by Alex Rivera — new parent, needs coverage' },
+      { date: 'Mar 15', event: 'Needs analysis call — 45 min, strong engagement' },
+      { date: 'Mar 22', event: 'Quote delivered — 20yr Term Life $500K at $2,400/yr' },
+      { date: 'Mar 28', event: 'Medical exam completed — Preferred Plus class' },
+      { date: 'Apr 5', event: 'Approved — UW decision Preferred Plus' },
+      { date: 'Apr 7', event: 'Policy issued — DocuSign completed, premium collected' }
+    ],
+    upsellOpp: 'Review in 24 months for Whole Life conversion. Child rider add-on (+$180/yr) — 2 children under 5.',
+    aiNote: 'David is a new parent and referred by an existing client — high LTV potential. Ideal candidate for WL conversion before age 40 to lock in rates. Follow up Q3 2026 for disability income gap review.',
+    satisfaction: 5
+  },
+  'CW-002': {
+    client: 'Lisa Brown', product: 'Long-Term Care Insurance', value: '$5,200/yr', commission: '$624',
+    closedDate: 'Apr 5, 2026', source: 'Online Inquiry', healthClass: 'Preferred',
+    policyNum: 'NYL-LTC-2026-0405', domain: 'ins',
+    timeline: [
+      { date: 'Feb 20', event: 'Online inquiry — searched "LTC insurance for parents"' },
+      { date: 'Feb 24', event: 'Intro call — LTC education session, high interest' },
+      { date: 'Mar 5', event: 'Illustration delivered — 3 benefit period scenarios' },
+      { date: 'Mar 18', event: 'Application submitted — health history reviewed' },
+      { date: 'Apr 2', event: 'Approved — Preferred class, $200/day benefit, 5-yr period' },
+      { date: 'Apr 5', event: 'Policy issued — inflation protection rider included' }
+    ],
+    upsellOpp: 'Spouse coverage — Lisa\'s husband (age 57) does not have LTC. Shared care rider discussion in next review.',
+    aiNote: 'Lisa was researching care for aging parents but converted to personal coverage — excellent needs-based sale. Shared care rider with spouse is a high-probability upsell ($3,800/yr additional). Refer to estate attorney in network.',
+    satisfaction: 5
+  },
+  'CW-003': {
+    client: 'Robert Chen', product: 'Whole Life — $1M', value: '$12,400/yr', commission: '$1,488',
+    closedDate: 'Apr 2, 2026', source: 'Referral', healthClass: 'Preferred Plus',
+    policyNum: 'NYL-WL-2026-0402', domain: 'ins',
+    timeline: [
+      { date: 'Jan 15', event: 'Referred by Thomas Wright (business partner)' },
+      { date: 'Jan 22', event: 'Discovery meeting — business owner, estate planning needs' },
+      { date: 'Feb 3', event: 'Needs analysis — $4.5M estate, buy-sell agreement needed' },
+      { date: 'Feb 15', event: 'Illustration delivered — WL $1M + PUA rider' },
+      { date: 'Mar 5', event: 'Medical exam + blood panel — no issues' },
+      { date: 'Mar 25', event: 'Approved — Preferred Plus, UW straight-through' },
+      { date: 'Apr 2', event: 'Policy issued — largest single policy this quarter' }
+    ],
+    upsellOpp: 'Key Person Insurance for business partner + buy-sell funding ($2M additional). Annuity for retained earnings ($350K deferred). NQDC plan design Q3.',
+    aiNote: 'Robert\'s case was driven by estate equalization needs — $1M WL is phase 1. Phase 2 (key person + buy-sell) represents $18,000–$22,000/yr in additional premium. Highest commission case this month. Flag for Q3 business planning review.',
+    satisfaction: 5
+  }
+};
+
+const closedLostData = {
+  'CL-001': {
+    client: 'Mark Henderson', product: 'Term Life — $250K', value: '$1,800/yr', lostDate: 'Apr 10, 2026',
+    lostReason: 'Chose competitor — lower online premium', competitorName: 'SelectQuote / Ladder',
+    domain: 'ins',
+    timeline: [
+      { date: 'Mar 5', event: 'Online lead — price shopping multiple carriers' },
+      { date: 'Mar 10', event: 'Quote delivered — $1,800/yr, 20yr Term' },
+      { date: 'Mar 18', event: 'Follow-up call — client comparing online quotes' },
+      { date: 'Apr 3', event: 'Final follow-up — client went with online provider at $1,420/yr' },
+      { date: 'Apr 10', event: 'Lost — closed' }
+    ],
+    lossAnalysis: 'Price-driven loss — Mark is a transactional buyer focused purely on premium. Online carriers can undercut by 15-25% by bypassing full underwriting. Our advantage (living benefits, conversion option, full UW guarantee) was not compelling enough at his age (31).',
+    reEngagementPlan: 'Nurture campaign — re-engage in 18 months when 5-year term renewal approaches. At age 33+, our Preferred Plus rate will be competitive. Flag for automated follow-up Oct 2027.',
+    preventionLesson: 'Lead with living benefits story earlier — price comparison stalls when value is established first. Create a "Term vs Online Term" one-pager for similar prospects.'
+  },
+  'CL-002': {
+    client: 'Patricia Nguyen', product: 'Disability Insurance', value: '$3,600/yr', lostDate: 'Apr 8, 2026',
+    lostReason: 'Budget objection — monthly premium too high', competitorName: 'N/A (no purchase)',
+    domain: 'ins',
+    timeline: [
+      { date: 'Feb 28', event: 'Needs analysis — identified $8K/mo DI gap' },
+      { date: 'Mar 8', event: 'Quote delivered — $3,600/yr, own-occ, 90-day EP, to age 65' },
+      { date: 'Mar 20', event: 'Follow-up — premium objection raised, offered shorter EP' },
+      { date: 'Apr 1', event: 'Revised quote — 180-day EP at $2,800/yr, still declined' },
+      { date: 'Apr 8', event: 'Lost — client not purchasing at this time' }
+    ],
+    lossAnalysis: 'Genuine budget constraint — Patricia is juggling UL premium and a new mortgage. She acknowledged the need but could not commit cash flow. Not a product objection — timing issue.',
+    reEngagementPlan: 'Re-engage Q4 2026 after mortgage stabilizes. Patricia is still an active client (UL policy) — address DI gap at next annual review. Consider group DI through her employer as bridge solution.',
+    preventionLesson: 'Introduce DI earlier in the relationship — before UL + mortgage creates cash flow competition. Build DI into initial needs analysis as a required baseline.'
+  },
+  'CL-003': {
+    client: 'James Okafor', product: 'Whole Life — $300K', value: '$3,700/yr', lostDate: 'Apr 3, 2026',
+    lostReason: 'Unresponsive — no contact after 3 follow-ups', competitorName: 'Unknown',
+    domain: 'ins',
+    timeline: [
+      { date: 'Mar 1', event: 'Initial contact — referred by Linda Chen' },
+      { date: 'Mar 8', event: 'Needs analysis call — positive conversation, sent materials' },
+      { date: 'Mar 18', event: 'Follow-up #1 — no response' },
+      { date: 'Mar 25', event: 'Follow-up #2 (email + text) — no response' },
+      { date: 'Apr 1', event: 'Final follow-up — voicemail, no callback' },
+      { date: 'Apr 3', event: 'Closed Lost — ghosted' }
+    ],
+    lossAnalysis: 'Classic ghost scenario — James was engaged in the initial meeting but went dark after receiving the quote. Possible causes: spouse veto, competing financial priority, or found another advisor. LLC filing (Apr 2026) may have created distraction.',
+    reEngagementPlan: 'Schedule 90-day nurture email — reference his LLC filing and pivot to business succession planning angle. This framing may re-open the conversation as a business need vs. personal insurance.',
+    preventionLesson: 'Set firm next-step commitment at end of needs analysis — calendar an appointment vs. leaving it open. "I\'ll send you the materials and you can decide" is too soft for complex WL cases.'
+  }
+};
+
+function openClosedWonModal(id) {
+  const d = closedWonData[id];
+  if (!d) return;
+  const overlay = document.getElementById('deal-modal-overlay');
+  const header  = document.getElementById('deal-modal-header');
+  const body    = document.getElementById('deal-modal-body');
+  if (!overlay || !body) return;
+
+  if (header) {
+    header.style.background = 'linear-gradient(135deg, #003087 0%, #1e40af 100%)';
+    document.getElementById('deal-modal-client').textContent  = d.client;
+    document.getElementById('deal-modal-product').textContent = d.product;
+  }
+  const winEl   = document.getElementById('dm-win-val');
+  const stageEl = document.getElementById('dm-stage-val');
+  const commEl  = document.getElementById('dm-comm-val');
+  if (winEl)   winEl.textContent   = '100%';
+  if (stageEl) stageEl.textContent = 'Closed Won';
+  if (commEl)  commEl.textContent  = d.commission;
+
+  const tlHTML = d.timeline.map(t =>
+    `<div class="dm-tl-row"><span class="dm-tl-date">${t.date}</span><span class="dm-tl-event">${t.event}</span></div>`
+  ).join('');
+  const stars = '★'.repeat(d.satisfaction) + '☆'.repeat(5 - d.satisfaction);
+
+  body.innerHTML = `
+    <div class="dm-meta-grid">
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Status</span><span class="dm-stage-pill" style="background:#003087">✅ Closed Won</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Annual Premium</span><span class="dm-meta-val">${d.value}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Commission</span><span class="dm-meta-val green">${d.commission}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Issued</span><span class="dm-meta-val">${d.closedDate}</span></div>
+    </div>
+    <div class="dm-meta-grid" style="margin-top:8px">
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Policy #</span><span class="dm-meta-val blue">${d.policyNum}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Health Class</span><span class="dm-meta-val green">${d.healthClass}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Lead Source</span><span class="dm-meta-val">${d.source}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Client Satisfaction</span><span class="dm-meta-val gold" style="font-size:16px">${stars}</span></div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-history"></i> Complete Deal Timeline</div>
+      <div class="dm-timeline">${tlHTML}</div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-lightbulb"></i> Upsell Opportunities</div>
+      <div class="dm-ai-insight" style="background:#f0fdf4;border-left:3px solid #16a34a">${d.upsellOpp}</div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-robot"></i> AI Relationship Notes</div>
+      <div class="dm-ai-insight">${d.aiNote}</div>
+    </div>
+    <div class="dm-footer-actions">
+      <button class="btn btn-primary" onclick="sendContextMessage('Generate upsell strategy for ${d.client} — current policy ${d.product}, closed ${d.closedDate}. Identify next best product and timing.','smart-advisor')"><i class="fas fa-lightbulb"></i> AI Upsell Plan</button>
+      <button class="btn btn-outline" onclick="sendContextMessage('Draft a thank-you and onboarding email for ${d.client} — policy ${d.policyNum} issued ${d.closedDate}.','smart-advisor')"><i class="fas fa-envelope"></i> Draft Follow-up</button>
+      <button class="btn btn-outline" onclick="closeDealModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  `;
+  overlay.style.display = 'flex';
+}
+
+function openClosedLostModal(id) {
+  const d = closedLostData[id];
+  if (!d) return;
+  const overlay = document.getElementById('deal-modal-overlay');
+  const header  = document.getElementById('deal-modal-header');
+  const body    = document.getElementById('deal-modal-body');
+  if (!overlay || !body) return;
+
+  if (header) {
+    header.style.background = 'linear-gradient(135deg, #64748b 0%, #475569 100%)';
+    document.getElementById('deal-modal-client').textContent  = d.client;
+    document.getElementById('deal-modal-product').textContent = d.product;
+  }
+  const winEl   = document.getElementById('dm-win-val');
+  const stageEl = document.getElementById('dm-stage-val');
+  const commEl  = document.getElementById('dm-comm-val');
+  if (winEl)   { winEl.textContent = '0%'; winEl.className = 'dm-kpi-val red'; }
+  if (stageEl) stageEl.textContent = 'Closed Lost';
+  if (commEl)  { commEl.textContent = '$0'; commEl.className = 'dm-kpi-val'; }
+
+  const tlHTML = d.timeline.map(t =>
+    `<div class="dm-tl-row"><span class="dm-tl-date">${t.date}</span><span class="dm-tl-event">${t.event}</span></div>`
+  ).join('');
+
+  body.innerHTML = `
+    <div class="dm-meta-grid">
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Status</span><span class="dm-stage-pill" style="background:#64748b">❌ Closed Lost</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Lost Revenue</span><span class="dm-meta-val" style="color:#dc2626">${d.value}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Date Lost</span><span class="dm-meta-val">${d.lostDate}</span></div>
+      <div class="dm-meta-item"><span class="dm-meta-lbl">Lost To</span><span class="dm-meta-val">${d.competitorName}</span></div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-exclamation-triangle" style="color:#dc2626"></i> Loss Reason</div>
+      <div class="dm-ai-insight" style="background:#fef2f2;border-left:3px solid #dc2626;color:#7f1d1d">${d.lostReason}</div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-history"></i> Deal Timeline</div>
+      <div class="dm-timeline">${tlHTML}</div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-microscope"></i> AI Loss Analysis</div>
+      <div class="dm-ai-insight">${d.lossAnalysis}</div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-redo"></i> Re-Engagement Plan</div>
+      <div class="dm-ai-insight" style="background:#eff6ff;border-left:3px solid #2563eb">${d.reEngagementPlan}</div>
+    </div>
+    <div class="dm-section">
+      <div class="dm-section-title"><i class="fas fa-graduation-cap"></i> Prevention Lesson</div>
+      <div class="dm-ai-insight" style="background:#fefce8;border-left:3px solid #d97706;color:#713f12">${d.preventionLesson}</div>
+    </div>
+    <div class="dm-footer-actions">
+      <button class="btn btn-primary" onclick="sendContextMessage('Re-engagement strategy for ${d.client} — lost ${d.lostDate} due to: ${d.lostReason}. Optimal re-approach timing and messaging.','smart-advisor')"><i class="fas fa-redo"></i> AI Re-Engage Plan</button>
+      <button class="btn btn-outline" onclick="closeDealModal()"><i class="fas fa-times"></i> Close</button>
+    </div>
+  `;
+  overlay.style.display = 'flex';
 }
 
 console.log('Sales Pipeline JS loaded — pipelineData(9 deals), runQuoteCalc, openDealModal, moveDealStage');
