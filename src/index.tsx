@@ -2424,6 +2424,9 @@ function ClientsPage() {
             <button class="cm-tab"         id="cm-tab-documents" onclick="switchClientTab('documents',this)"><i class="fas fa-folder-open"></i> Documents</button>
             <button class="cm-tab"         id="cm-tab-referrals" onclick="switchClientTab('referrals',this)"><i class="fas fa-users"></i> Referrals</button>
             <button class="cm-tab"         id="cm-tab-timeline"  onclick="switchClientTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
+            <button class="cm-tab cm-tab-intel"    id="cm-tab-intel"     onclick="switchClientTab('intel',this)"><i class="fas fa-satellite-dish"></i> 3rd-Party Intel</button>
+            <button class="cm-tab cm-tab-planning" id="cm-tab-planning"  onclick="switchClientTab('planning',this)"><i class="fas fa-drafting-compass"></i> Financial Plan</button>
+            <button class="cm-tab cm-tab-illust"   id="cm-tab-illust"    onclick="switchClientTab('illust',this)"><i class="fas fa-chart-area"></i> Illustrations</button>
           </div>
 
           {/* Tab body */}

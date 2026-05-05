@@ -747,6 +747,9 @@ function _renderCMTab(tab, client) {
     case 'documents':  body.innerHTML = _cmDocuments(client);  break;
     case 'referrals':  body.innerHTML = _cmReferrals(client);  break;
     case 'timeline':   body.innerHTML = _cmTimeline(client);   break;
+    case 'intel':      body.innerHTML = _cmIntel(client);      break;
+    case 'planning':   body.innerHTML = _cmPlanning(client);   break;
+    case 'illust':     body.innerHTML = _cmIllustrations(client); break;
     default:           body.innerHTML = '';
   }
 }
@@ -1394,6 +1397,709 @@ function aiClientInsights() {
       sendChatMessage();
     }
   }, 500);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ── 3RD-PARTY INTELLIGENCE DATA ──────────────────────────────
+// ══════════════════════════════════════════════════════════════
+const cmIntelData = {
+  1: {
+    demographics: { age:52, maritalStatus:'Married', dependents:'2 (Alex 19, Mia 16)', education:'JD — Georgetown Law', ethnicity:'—', language:'English', homeOwnership:'Owner', yearsAtAddress:14, vehiclesOwned:2, creditScore:812, creditTier:'Exceptional', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['LinkedIn (active)','Twitter'], onlineShopping:'High', loyaltyPrograms:['American Express Centurion','Marriott Bonvoy Titanium'], travelFrequency:'8–10 trips/yr (intl)', charitableGiving:'$28K/yr (education + legal aid)', hobbies:['Golf','Sailing','Art Collection'], autoRenewalTendency:'High', responseChannel:'Phone (preferred)', avgResponseTime:'<4 hrs' },
+    banking: { primaryBank:'JPMorgan Private Bank', checking:[{acct:'Chase Premier Platinum Checking',est_bal:'$85K avg'}], savings:[{acct:'Chase High-Yield Savings',est_bal:'$240K'},{acct:'Marcus by Goldman Sachs',est_bal:'$95K'}], cds:[{acct:'Chase CD 18-mo',rate:'4.95%',maturity:'Oct 2026',est_val:'$150K'}], otherProducts:['Amex Centurion Card','Chase Private Client mortgage','Fidelity brokerage (external)'] },
+    realEstate: { primaryHome:{address:'4820 Chevy Chase Blvd, MD',estimatedValue:'$1.85M',purchaseYear:2010,purchasePrice:'$1.1M',mortgage:{lender:'Chase Private Client',balance:'$420K',rate:'3.25% fixed',monthlyPayment:'$2,860',maturity:'2040'},equity:'$1.43M',propertyTax:'$22K/yr'}, secondHome:{address:'Bethany Beach, DE',estimatedValue:'$650K',mortgage:null,equity:'$650K'} },
+    investments: { retirement:[{type:'401(k)',provider:'Fidelity',balance:'$680K',allocation:'70% equity / 30% bond',employer:'Whitfield & Assoc. LLP'},{type:'Roth IRA',provider:'Fidelity',balance:'$92K',allocation:'100% equity'}], taxable:[{type:'Brokerage',provider:'Fidelity',balance:'$420K',allocation:'Growth tilt'},{type:'529 Plans (×2)',provider:'Maryland College Plan',balance:'$272K total'}], pension:{status:'Vested — Whitfield & Assoc. Est. $3,200/mo at 65'}, socialSecurity:{estimatedAt62:'$3,400/mo',estimatedAtFRA:'$4,100/mo'} },
+    dataSource:'Experian · LexisNexis · ATTOM Data · Yodlee (aggregated) · LinkedIn',
+    lastRefreshed:'Apr 10, 2026'
+  },
+  2: {
+    demographics: { age:34, maritalStatus:'Married', dependents:'1 (newborn — Jun 2025)', education:'MSN — University of Maryland', ethnicity:'—', language:'English / Tagalog', homeOwnership:'Owner (2 yrs)', yearsAtAddress:2, vehiclesOwned:1, creditScore:714, creditTier:'Good', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['Facebook','Instagram'], onlineShopping:'Medium', loyaltyPrograms:['Target RedCard','Amazon Prime'], travelFrequency:'1–2 trips/yr (domestic)', charitableGiving:'$1.2K/yr', hobbies:['Parenting blogs','Fitness','Cooking'], autoRenewalTendency:'Medium', responseChannel:'Email', avgResponseTime:'12–24 hrs' },
+    banking: { primaryBank:'Bank of America', checking:[{acct:'BofA Advantage Plus Checking',est_bal:'$8K avg'}], savings:[{acct:'BofA Savings',est_bal:'$22K'},{acct:'Ally Online Savings',est_bal:'$18K'}], cds:[], otherProducts:['BofA Visa Signature','Student loan (Navient $62K)'] },
+    realEstate: { primaryHome:{address:'9 Maple Ct, Silver Spring MD',estimatedValue:'$385K',purchaseYear:2023,purchasePrice:'$360K',mortgage:{lender:'Bank of America',balance:'$318K',rate:'6.75% fixed',monthlyPayment:'$2,064',maturity:'2053'},equity:'$67K',propertyTax:'$4.1K/yr'}, secondHome:null },
+    investments: { retirement:[{type:'403(b)',provider:'TIAA',balance:'$48K',allocation:'Target Date 2055',employer:'MedStar Health'},{type:'Roth IRA',provider:'Betterment',balance:'$12K',allocation:'90% equity'}], taxable:[], pension:null, socialSecurity:{estimatedAt62:'$1,800/mo',estimatedAtFRA:'$2,200/mo'} },
+    dataSource:'Experian · ATTOM Data · TIAA Plan Sponsor',
+    lastRefreshed:'Apr 8, 2026'
+  },
+  3: {
+    demographics: { age:45, maritalStatus:'Married (no children)', dependents:'None', education:'MBA — Wharton', ethnicity:'—', language:'English / Mandarin', homeOwnership:'Owner', yearsAtAddress:7, vehiclesOwned:3, creditScore:841, creditTier:'Exceptional', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['LinkedIn (heavy)','Twitter/X'], onlineShopping:'High', loyaltyPrograms:['Chase Sapphire Reserve','Delta Diamond Medallion','Ritz-Carlton Rewards'], travelFrequency:'20+ trips/yr', charitableGiving:'$75K/yr (tech education)', hobbies:['Cycling','Wine collecting','Venture investing'], autoRenewalTendency:'High', responseChannel:'In-person', avgResponseTime:'Same day' },
+    banking: { primaryBank:'Goldman Sachs Private Wealth', checking:[{acct:'Goldman Private Checking',est_bal:'$320K avg'}], savings:[{acct:'Goldman Marcus HYSA',est_bal:'$800K'},{acct:'Schwab Investor Checking',est_bal:'$150K'}], cds:[{acct:'Brokered CDs (ladder)',rate:'5.10% avg',maturity:'Rolling 6–18 mo',est_val:'$400K'}], otherProducts:['Amex Business Platinum','Goldman Sachs credit facility $2M','Schwab brokerage'] },
+    realEstate: { primaryHome:{address:'7700 Georgetown Pike, McLean VA',estimatedValue:'$3.2M',purchaseYear:2017,purchasePrice:'$2.4M',mortgage:{lender:'Goldman Sachs',balance:'$580K',rate:'2.875% fixed',monthlyPayment:'$2,400',maturity:'2032'},equity:'$2.62M',propertyTax:'$31K/yr'}, secondHome:{address:'Jackson Hole WY',estimatedValue:'$2.1M',mortgage:null,equity:'$2.1M'} },
+    investments: { retirement:[{type:'SEP-IRA',provider:'Schwab',balance:'$820K',allocation:'80% equity / 20% alt'},{type:'Backdoor Roth IRA',provider:'Schwab',balance:'$85K',allocation:'100% equity'}], taxable:[{type:'Brokerage (Schwab)',provider:'Schwab',balance:'$1.8M',allocation:'Growth + alternatives'},{type:'Private Equity stake',provider:'Various VCs',balance:'$620K est.',allocation:'PE / Venture'}], pension:null, socialSecurity:{estimatedAt62:'$2,800/mo',estimatedAtFRA:'$3,600/mo'} },
+    dataSource:'Experian · ATTOM Data · Goldman PW · LinkedIn',
+    lastRefreshed:'Apr 11, 2026'
+  },
+  4: {
+    demographics: { age:61, maritalStatus:'Widowed', dependents:'1 (adult son — independent)', education:'BA Education — Towson Univ.', ethnicity:'—', language:'English', homeOwnership:'Owner', yearsAtAddress:28, vehiclesOwned:1, creditScore:748, creditTier:'Very Good', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['Facebook'], onlineShopping:'Low', loyaltyPrograms:['AAA','AARP'], travelFrequency:'1–2 trips/yr (domestic)', charitableGiving:'$2.4K/yr (local church)', hobbies:['Gardening','Reading','Bingo'], autoRenewalTendency:'High', responseChannel:'Phone', avgResponseTime:'24–48 hrs' },
+    banking: { primaryBank:'M&T Bank', checking:[{acct:'M&T MyChoice Premium Checking',est_bal:'$12K avg'}], savings:[{acct:'M&T Savings',est_bal:'$45K'}], cds:[{acct:'M&T 12-mo CD',rate:'4.60%',maturity:'Aug 2026',est_val:'$30K'}], otherProducts:['AARP Visa (Chase)','No outstanding loans'] },
+    realEstate: { primaryHome:{address:'318 Elm St, Towson MD',estimatedValue:'$320K',purchaseYear:1997,purchasePrice:'$148K',mortgage:{lender:'Paid off',balance:'$0',rate:'N/A',monthlyPayment:'$0',maturity:'Paid off 2022'},equity:'$320K',propertyTax:'$3.8K/yr'}, secondHome:null },
+    investments: { retirement:[{type:'403(b)',provider:'TIAA',balance:'$348K',allocation:'Target Date 2027',employer:'Baltimore County Schools'},{type:'Traditional IRA',provider:'Vanguard',balance:'$128K',allocation:'60% bond / 40% equity'}], taxable:[], pension:{status:'BCPS Pension — est. $2,100/mo at 65'}, socialSecurity:{estimatedAt62:'$1,450/mo (taking early)',estimatedAtFRA:'$1,980/mo'} },
+    dataSource:'Experian · ATTOM Data · TIAA · SSA estimate',
+    lastRefreshed:'Apr 7, 2026'
+  },
+  5: {
+    demographics: { age:31, maritalStatus:'Married', dependents:'1 (infant — born Jun 2025)', education:'BS Computer Science — VA Tech', ethnicity:'—', language:'English', homeOwnership:'Renter', yearsAtAddress:1, vehiclesOwned:2, creditScore:731, creditTier:'Good', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['Twitter/X','Reddit','LinkedIn'], onlineShopping:'Very High', loyaltyPrograms:['Amazon Prime','Chase Sapphire Preferred'], travelFrequency:'2–3 trips/yr', charitableGiving:'$600/yr', hobbies:['Video gaming','Hiking','Woodworking'], autoRenewalTendency:'Low (digital native)', responseChannel:'Text/App', avgResponseTime:'<1 hr' },
+    banking: { primaryBank:'Chase', checking:[{acct:'Chase Total Checking',est_bal:'$6K avg'}], savings:[{acct:'Ally Online HYSA',est_bal:'$28K'},{acct:'Chase Savings (emergency)',est_bal:'$5K'}], cds:[], otherProducts:['Chase Sapphire Preferred','Tesla Auto Loan ($34K remaining)','Student loan $0 — paid off'] },
+    realEstate: { primaryHome:null, secondHome:null, note:'Renting — 2BR in Arlington VA. Estimated rent $2,800/mo. No real estate owned.' },
+    investments: { retirement:[{type:'401(k)',provider:'Fidelity',balance:'$78K',allocation:'Target Date 2055 (auto)',employer:'Deloitte Digital'},{type:'Roth IRA',provider:'Robinhood',balance:'$18K',allocation:'Tech heavy'}], taxable:[{type:'Robinhood brokerage',provider:'Robinhood',balance:'$12K',allocation:'Tech/meme stocks'}], pension:null, socialSecurity:{estimatedAt62:'$1,900/mo',estimatedAtFRA:'$2,400/mo'} },
+    dataSource:'Experian · Yodlee · Robinhood (aggregated)',
+    lastRefreshed:'Apr 9, 2026'
+  },
+  6: {
+    demographics: { age:58, maritalStatus:'Divorced', dependents:'2 (adult children — independent)', education:'MBA — Johns Hopkins', ethnicity:'—', language:'English', homeOwnership:'Owner', yearsAtAddress:12, vehiclesOwned:2, creditScore:796, creditTier:'Very Good', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['LinkedIn','Facebook'], onlineShopping:'Medium', loyaltyPrograms:['Marriott Bonvoy Gold','Southwest Rapid Rewards'], travelFrequency:'4–6 trips/yr', charitableGiving:'$12K/yr (hospital foundation)', hobbies:['Yoga','Wine tasting','Cooking'], autoRenewalTendency:'High', responseChannel:'In-person', avgResponseTime:'<6 hrs' },
+    banking: { primaryBank:'Wells Fargo Private Banking', checking:[{acct:'WF Prime Checking',est_bal:'$42K avg'}], savings:[{acct:'WF Platinum Savings',est_bal:'$185K'},{acct:'Schwab HYSA',est_bal:'$95K'}], cds:[{acct:'WF 24-mo CD',rate:'4.75%',maturity:'Mar 2027',est_val:'$120K'}], otherProducts:['Amex Gold','WF jumbo mortgage'] },
+    realEstate: { primaryHome:{address:'1204 Roland Ave, Baltimore MD',estimatedValue:'$780K',purchaseYear:2012,purchasePrice:'$520K',mortgage:{lender:'Wells Fargo',balance:'$210K',rate:'3.50% fixed',monthlyPayment:'$2,332',maturity:'2037'},equity:'$570K',propertyTax:'$9.2K/yr'}, secondHome:{address:'Ocean City MD condo',estimatedValue:'$340K',mortgage:{lender:'WF',balance:'$80K',rate:'4.25%',monthlyPayment:'$580',maturity:'2038'},equity:'$260K'} },
+    investments: { retirement:[{type:'403(b)',provider:'Vanguard',balance:'$620K',allocation:'65% equity / 35% bond',employer:'JHHS'},{type:'Roth IRA',provider:'Vanguard',balance:'$68K',allocation:'80% equity'}], taxable:[{type:'Brokerage',provider:'Schwab',balance:'$190K',allocation:'Balanced'}], pension:{status:'JHHS Pension — est. $4,800/mo at 65'}, socialSecurity:{estimatedAt62:'$2,200/mo',estimatedAtFRA:'$2,900/mo'} },
+    dataSource:'Experian · ATTOM Data · Vanguard plan data',
+    lastRefreshed:'Apr 10, 2026'
+  },
+  7: {
+    demographics: { age:29, maritalStatus:'Single', dependents:'None', education:'BFA — RISD', ethnicity:'—', language:'English', homeOwnership:'Renter', yearsAtAddress:2, vehiclesOwned:0, creditScore:672, creditTier:'Fair / Building', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['Instagram (creator)','TikTok','Pinterest'], onlineShopping:'High', loyaltyPrograms:['Target RedCard','Delta SkyMiles Blue'], travelFrequency:'2–3 trips/yr', charitableGiving:'$0', hobbies:['Design','Photography','Cooking','Travel'], autoRenewalTendency:'Low', responseChannel:'Text/App', avgResponseTime:'30 min' },
+    banking: { primaryBank:'Capital One', checking:[{acct:'Capital One 360 Checking',est_bal:'$3.2K avg'}], savings:[{acct:'Capital One 360 Performance Savings',est_bal:'$14K'}], cds:[], otherProducts:['Capital One Quicksilver card','Student loans (Navient) $68K balance'] },
+    realEstate: { primaryHome:null, secondHome:null, note:'Renting — studio in DC U Street corridor. Est. rent $1,950/mo.' },
+    investments: { retirement:[{type:'Roth IRA',provider:'Betterment',balance:'$28K',allocation:'90% stocks'},{type:'401(k)',provider:'Fidelity',balance:'$15K',allocation:'Target Date 2055',employer:'IDEO'}], taxable:[], pension:null, socialSecurity:{estimatedAt62:'$1,400/mo',estimatedAtFRA:'$1,750/mo'} },
+    dataSource:'Experian · Capital One (aggregated) · Betterment',
+    lastRefreshed:'Apr 9, 2026'
+  },
+  8: {
+    demographics: { age:67, maritalStatus:'Married', dependents:'3 (adult children — independent)', education:'MBA — University of Chicago', ethnicity:'—', language:'English', homeOwnership:'Owner', yearsAtAddress:22, vehiclesOwned:3, creditScore:835, creditTier:'Exceptional', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['LinkedIn (passive)'], onlineShopping:'Low', loyaltyPrograms:['Ritz-Carlton','Delta Diamond','Hertz Presidents Circle'], travelFrequency:'6–8 trips/yr (international)', charitableGiving:'$95K/yr (university endowment)', hobbies:['Golf','Fishing','Family travel','Board service'], autoRenewalTendency:'Very High', responseChannel:'In-person', avgResponseTime:'Next business day' },
+    banking: { primaryBank:'Citi Private Bank', checking:[{acct:'Citi Private Bank Checking',est_bal:'$480K avg'}], savings:[{acct:'Citi HYSA',est_bal:'$1.1M'},{acct:'Goldman Marcus',est_bal:'$600K'}], cds:[{acct:'Brokered CD ladder',rate:'5.05% avg',maturity:'Rolling 6–24 mo',est_val:'$900K'}], otherProducts:['Citi Chairman card','Citi Lombard loan $500K','Raymond James advisory account'] },
+    realEstate: { primaryHome:{address:'3300 N Street NW, Georgetown DC',estimatedValue:'$4.8M',purchaseYear:2002,purchasePrice:'$2.1M',mortgage:{lender:'Paid off',balance:'$0',rate:'N/A',monthlyPayment:'$0',maturity:'Paid 2020'},equity:'$4.8M',propertyTax:'$46K/yr'}, secondHome:{address:'Naples FL',estimatedValue:'$2.2M',mortgage:null,equity:'$2.2M'}, thirdHome:{address:'Montecito CA',estimatedValue:'$3.1M',mortgage:{lender:'Citi',balance:'$180K',rate:'2.50%',monthlyPayment:'$800',maturity:'2028'},equity:'$2.92M'} },
+    investments: { retirement:[{type:'401(k) rollover IRA',provider:'Raymond James',balance:'$1.8M',allocation:'Conservative growth'},{type:'Roth IRA',provider:'Raymond James',balance:'$195K',allocation:'Dividend focus'}], taxable:[{type:'UMA (Unified Managed Account)',provider:'NYL Investments',balance:'$280K',allocation:'Balanced — actively managed'},{type:'Brokerage (RJ)',provider:'Raymond James',balance:'$680K',allocation:'Income/dividend'},{type:'Private equity / alternatives',provider:'Various',balance:'$420K est.',allocation:'PE/HF'}], pension:{status:'Retired CFO pension — $8,400/mo (lifetime)'}, socialSecurity:{estimatedAtFRA:'$3,800/mo (currently drawing $3,200/mo)','note':'Started at 65 (reduced)'} },
+    dataSource:'Experian · ATTOM Data · Citi Private Bank · Raymond James',
+    lastRefreshed:'Apr 11, 2026'
+  },
+};
+
+function _cmIntel(client) {
+  const d = cmIntelData[client.id];
+  if (!d) return '<div class="cm-empty">No third-party intelligence available for this client.</div>';
+
+  const dem = d.demographics;
+  const beh = d.behavioral;
+  const bk  = d.banking;
+  const re  = d.realEstate;
+  const inv = d.investments;
+
+  // ── Demographics block ──
+  const demRows = [
+    ['Age / Marital', `${dem.age} · ${dem.maritalStatus}`],
+    ['Dependents', dem.dependents],
+    ['Education', dem.education],
+    ['Languages', dem.language],
+    ['Home Ownership', dem.homeOwnership + (dem.yearsAtAddress ? ` · ${dem.yearsAtAddress} yrs at address` : '')],
+    ['Vehicles Owned', dem.vehiclesOwned],
+    ['Credit Score', `<span class="intel-score-pill ${dem.creditScore>=800?'exc':dem.creditScore>=740?'vg':dem.creditScore>=670?'good':'fair'}">${dem.creditScore} — ${dem.creditTier}</span>`],
+  ].map(([l,v]) => `<div class="intel-row"><span class="intel-lbl">${l}</span><span class="intel-val">${v}</span></div>`).join('');
+
+  // ── Behavioral block ──
+  const behRows = [
+    ['Social Media', (beh.socialMedia||[]).join(', ')],
+    ['Online Shopping', beh.onlineShopping],
+    ['Loyalty Programs', (beh.loyaltyPrograms||[]).join(' · ')],
+    ['Travel Frequency', beh.travelFrequency],
+    ['Charitable Giving', beh.charitableGiving],
+    ['Hobbies / Interests', (beh.hobbies||[]).join(', ')],
+    ['Pref. Channel', beh.responseChannel + ' · avg resp. ' + beh.avgResponseTime],
+    ['Auto-Renew Tendency', beh.autoRenewalTendency],
+  ].map(([l,v]) => `<div class="intel-row"><span class="intel-lbl">${l}</span><span class="intel-val">${v}</span></div>`).join('');
+
+  // ── Banking block ──
+  const bkProducts = [
+    ...(bk.checking||[]).map(x=>`<div class="intel-bank-card"><i class="fas fa-university intel-bank-icon"></i><div class="intel-bank-body"><div class="intel-bank-type">Checking</div><div class="intel-bank-name">${x.acct}</div><div class="intel-bank-bal">Est. Balance: <strong>${x.est_bal}</strong></div></div></div>`),
+    ...(bk.savings||[]).map(x=>`<div class="intel-bank-card"><i class="fas fa-piggy-bank intel-bank-icon" style="color:#059669"></i><div class="intel-bank-body"><div class="intel-bank-type">Savings</div><div class="intel-bank-name">${x.acct}</div><div class="intel-bank-bal">Est. Balance: <strong>${x.est_bal}</strong></div></div></div>`),
+    ...(bk.cds||[]).map(x=>`<div class="intel-bank-card"><i class="fas fa-lock intel-bank-icon" style="color:#7c3aed"></i><div class="intel-bank-body"><div class="intel-bank-type">Certificate of Deposit</div><div class="intel-bank-name">${x.acct}</div><div class="intel-bank-bal">Est. Value: <strong>${x.est_val}</strong> · Rate: ${x.rate} · Matures: ${x.maturity}</div></div></div>`),
+  ].join('') || '<div class="cm-empty-sm">No banking data available.</div>';
+
+  const bkOther = (bk.otherProducts||[]).map(p=>`<span class="intel-tag">${p}</span>`).join('');
+
+  // ── Real Estate block ──
+  const reProps = [];
+  if (re.primaryHome) {
+    const m = re.primaryHome.mortgage;
+    reProps.push(`
+      <div class="intel-re-card">
+        <div class="intel-re-badge primary">Primary Home</div>
+        <div class="intel-re-address"><i class="fas fa-home"></i> ${re.primaryHome.address}</div>
+        <div class="intel-re-kpis">
+          <div class="intel-re-kpi"><div class="intel-re-kv">$${(re.primaryHome.estimatedValue/1000).toFixed(0)}K</div><div class="intel-re-kl">Est. Value</div></div>
+          <div class="intel-re-kpi"><div class="intel-re-kv">$${(re.primaryHome.equity/1000).toFixed(0)}K</div><div class="intel-re-kl">Equity</div></div>
+          <div class="intel-re-kpi"><div class="intel-re-kv">${re.primaryHome.purchaseYear}</div><div class="intel-re-kl">Purchase Yr</div></div>
+          <div class="intel-re-kpi"><div class="intel-re-kv">$${(re.primaryHome.propertyTax/1000).toFixed(1)}K/yr</div><div class="intel-re-kl">Property Tax</div></div>
+        </div>
+        ${m && m.balance>0 ? `<div class="intel-re-mortgage"><i class="fas fa-file-invoice-dollar" style="color:#dc2626"></i> <strong>Mortgage:</strong> ${m.lender} · $${(m.balance/1000).toFixed(0)}K balance · ${m.rate} · $${m.monthlyPayment}/mo · matures ${m.maturity}</div>` : `<div class="intel-re-mortgage paid"><i class="fas fa-check-circle" style="color:#059669"></i> Mortgage paid off</div>`}
+      </div>`);
+  }
+  if (re.secondHome) {
+    const s = re.secondHome; const m = s.mortgage;
+    reProps.push(`
+      <div class="intel-re-card">
+        <div class="intel-re-badge secondary">Second Home</div>
+        <div class="intel-re-address"><i class="fas fa-home"></i> ${s.address}</div>
+        <div class="intel-re-kpis">
+          <div class="intel-re-kpi"><div class="intel-re-kv">$${(s.estimatedValue/1000).toFixed(0)}K</div><div class="intel-re-kl">Est. Value</div></div>
+          <div class="intel-re-kpi"><div class="intel-re-kv">$${(s.equity/1000).toFixed(0)}K</div><div class="intel-re-kl">Equity</div></div>
+        </div>
+        ${m && m.balance>0 ? `<div class="intel-re-mortgage"><i class="fas fa-file-invoice-dollar" style="color:#dc2626"></i> <strong>Mortgage:</strong> ${m.lender} · $${(m.balance/1000).toFixed(0)}K · ${m.rate}</div>` : `<div class="intel-re-mortgage paid"><i class="fas fa-check-circle" style="color:#059669"></i> No mortgage</div>`}
+      </div>`);
+  }
+  if (d.realEstate.thirdHome) {
+    const t = d.realEstate.thirdHome; const m = t.mortgage;
+    reProps.push(`
+      <div class="intel-re-card">
+        <div class="intel-re-badge tertiary">Third Home</div>
+        <div class="intel-re-address"><i class="fas fa-home"></i> ${t.address}</div>
+        <div class="intel-re-kpis">
+          <div class="intel-re-kpi"><div class="intel-re-kv">$${(t.estimatedValue/1000).toFixed(0)}K</div><div class="intel-re-kl">Est. Value</div></div>
+          <div class="intel-re-kpi"><div class="intel-re-kv">$${(t.equity/1000).toFixed(0)}K</div><div class="intel-re-kl">Equity</div></div>
+        </div>
+        ${m && m.balance>0 ? `<div class="intel-re-mortgage"><i class="fas fa-file-invoice-dollar" style="color:#dc2626"></i> ${m.lender} · $${(m.balance/1000).toFixed(0)}K · ${m.rate}</div>` : `<div class="intel-re-mortgage paid"><i class="fas fa-check-circle" style="color:#059669"></i> No mortgage</div>`}
+      </div>`);
+  }
+  if (re.note) reProps.push(`<div class="intel-re-note"><i class="fas fa-info-circle"></i> ${re.note}</div>`);
+
+  // ── Investments block ──
+  const retCards = (inv.retirement||[]).map(r => `
+    <div class="intel-inv-card ret">
+      <div class="intel-inv-type-badge"><i class="fas fa-piggy-bank"></i> ${r.type}</div>
+      <div class="intel-inv-provider">${r.provider}${r.employer?' · '+r.employer:''}</div>
+      <div class="intel-inv-bal">$${r.balance && typeof r.balance==='string'?r.balance:(r.balance/1000).toFixed(0)+'K'}</div>
+      <div class="intel-inv-alloc">${r.allocation}</div>
+    </div>`).join('');
+
+  const taxCards = (inv.taxable||[]).map(t => `
+    <div class="intel-inv-card tax">
+      <div class="intel-inv-type-badge" style="background:#f0fdf4;color:#059669"><i class="fas fa-chart-line"></i> ${t.type}</div>
+      <div class="intel-inv-provider">${t.provider}</div>
+      <div class="intel-inv-bal">${t.balance && typeof t.balance==='string'?t.balance:'$'+(t.balance/1000).toFixed(0)+'K'}</div>
+      <div class="intel-inv-alloc">${t.allocation}</div>
+    </div>`).join('');
+
+  const pensionHtml = inv.pension ? `<div class="intel-pension-row"><i class="fas fa-building" style="color:#7c3aed"></i> <strong>Pension:</strong> ${inv.pension.status}</div>` : '';
+  const ssHtml = inv.socialSecurity ? `<div class="intel-pension-row"><i class="fas fa-flag-usa" style="color:#0891b2"></i> <strong>Social Security:</strong> ${Object.entries(inv.socialSecurity).filter(([k])=>k!=='note').map(([k,v])=>`${k}: ${v}`).join(' · ')}</div>` : '';
+
+  return `
+    <div class="intel-container">
+
+      <!-- Data freshness banner -->
+      <div class="intel-freshness-bar">
+        <i class="fas fa-satellite-dish"></i>
+        <span>3rd-Party Data Enriched via <strong>${d.dataSource}</strong></span>
+        <span class="intel-refresh-badge">Refreshed ${d.lastRefreshed}</span>
+        <button class="intel-refresh-btn" onclick="cmIntelRefresh(${client.id})"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+
+      <!-- Two-column top: Demographics + Behavioral -->
+      <div class="intel-two-col">
+        <div class="intel-section">
+          <div class="intel-section-hdr"><i class="fas fa-id-card"></i> Demographics</div>
+          ${demRows}
+        </div>
+        <div class="intel-section">
+          <div class="intel-section-hdr"><i class="fas fa-brain"></i> Behavioral Profile</div>
+          ${behRows}
+        </div>
+      </div>
+
+      <!-- Banking Products -->
+      <div class="intel-section intel-section-full">
+        <div class="intel-section-hdr"><i class="fas fa-university"></i> External Banking &amp; Products
+          <span class="intel-section-sub">Primary bank: <strong>${bk.primaryBank}</strong></span>
+        </div>
+        <div class="intel-bank-grid">${bkProducts}</div>
+        ${bkOther ? `<div class="intel-other-products"><span class="intel-other-lbl">Other Products:</span> ${bkOther}</div>` : ''}
+      </div>
+
+      <!-- Real Estate -->
+      <div class="intel-section intel-section-full">
+        <div class="intel-section-hdr"><i class="fas fa-home"></i> Real Estate Holdings</div>
+        <div class="intel-re-grid">${reProps.join('') || '<div class="cm-empty-sm">No real estate data.</div>'}</div>
+      </div>
+
+      <!-- Outside Investments -->
+      <div class="intel-section intel-section-full">
+        <div class="intel-section-hdr"><i class="fas fa-chart-line"></i> Outside Investments &amp; Retirement Accounts</div>
+        ${retCards ? `<div class="intel-inv-row-lbl"><i class="fas fa-piggy-bank"></i> Retirement Accounts</div><div class="intel-inv-grid">${retCards}</div>` : ''}
+        ${taxCards ? `<div class="intel-inv-row-lbl" style="margin-top:12px"><i class="fas fa-chart-bar"></i> Taxable / Brokerage</div><div class="intel-inv-grid">${taxCards}</div>` : ''}
+        ${pensionHtml}${ssHtml}
+      </div>
+
+      <!-- Agent Insight callout -->
+      <div class="intel-agent-callout">
+        <i class="fas fa-robot"></i>
+        <div class="intel-agent-text">
+          <strong>NOVA Agent Insight:</strong> Based on 3rd-party data, ${client.name} has <strong>$${_cmIntelGap(d)}</strong> in external assets not captured in NYL products. This represents a consolidation and cross-sell opportunity.
+          <button class="intel-ai-btn" onclick="switchClientTab('planning', document.getElementById('cm-tab-planning'))"><i class="fas fa-drafting-compass"></i> View Financial Plan</button>
+        </div>
+      </div>
+
+    </div>`;
+}
+
+function _cmIntelGap(d) {
+  let total = 0;
+  (d.investments.retirement||[]).forEach(r => { if (typeof r.balance==='number') total += r.balance; });
+  (d.investments.taxable||[]).forEach(t => { if (typeof t.balance==='number') total += t.balance; });
+  (d.banking.cds||[]).forEach(c => { if (c.est_val) total += parseFloat(c.est_val.replace(/[$K,M]/g,'')) * (c.est_val.includes('M')?1000000:c.est_val.includes('K')?1000:1); });
+  if (total >= 1000000) return (total/1000000).toFixed(1) + 'M';
+  if (total >= 1000) return (total/1000).toFixed(0) + 'K';
+  return total.toFixed(0);
+}
+
+function cmIntelRefresh(clientId) {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast';
+  toast.innerHTML = '<i class="fas fa-satellite-dish"></i> Re-fetching 3rd-party data… will complete in 2–3 min.';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ── FINANCIAL PLANNING DATA ───────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+const cmPlanningData = {
+  1: {
+    lifeStage:'Peak Earner — Pre-Retirement', riskTolerance:'Moderate-Aggressive', planningHorizon:'13 yrs to target retirement (65)',
+    needsAnalysis: [
+      { category:'Life / Estate Protection', priority:'High', need:'$2.1M net worth needs full legacy protection. Current death benefit $1.5M — gap ~$600K.', gap:true },
+      { category:'Long-Term Care', priority:'High', need:'No LTC coverage. At age 52, prime time to lock in rates. Est. 10-yr risk = $600K+.', gap:true },
+      { category:'Disability Income', priority:'Medium', need:'Covered via employer STD/LTD at 60% — adequate. Confirm group policy terms.', gap:false },
+      { category:'Retirement Income', priority:'High', need:'On track ($2.1M assets). Gap: tax diversification — Roth conversion opportunity.', gap:false },
+      { category:'College Funding', priority:'Medium', need:'529 at $272K for 2 kids — 85% funded. Minor top-up needed for Mia (3 yrs).', gap:false },
+      { category:'Estate / Legacy', priority:'High', need:'Will current but no trust. Estate $2.1M exceeds state threshold. Irrevocable Life Insurance Trust (ILIT) needed.', gap:true },
+    ],
+    suitability: { riskProfile:'Moderate-Aggressive', timeHorizon:'13 years', liquidityNeeds:'Low (high income, stable cash flow)', taxSituation:'37% bracket — tax-efficiency critical', investorExperience:'Sophisticated', regulatoryNotes:'FINRA Reg BI — best interest documentation required. Suitability score: 87/100 ✓', productRestrictions:'None' },
+    proposedProducts: [
+      { id:'pp-1-1', product:'Whole Life $500K (additional)', type:'wl', premium:'$12,400/yr', commission:'$6,820', rationale:'Closes $600K death benefit gap; tax-free cash value grows alongside estate.', suitScore:92, linked:true },
+      { id:'pp-1-2', product:'LTC Partnership Policy — $300K benefit', type:'ltc', premium:'$5,800/yr', commission:'$1,740', rationale:'Locks in preferred rates at 52. Partnership policy protects Medicaid assets.', suitScore:88, linked:true },
+      { id:'pp-1-3', product:'ILIT-funded Survivorship Life $1M', type:'wl', premium:'$8,600/yr', commission:'$4,730', rationale:'Estate tax mitigation — passes $1M outside taxable estate.', suitScore:85, linked:false },
+      { id:'pp-1-4', product:'Roth IRA Conversion Bridge (Variable Annuity)', type:'va', premium:'Lump sum $150K', commission:'$10,500', rationale:'Tax bracket optimization — convert pre-tax IRA in lower-income years.', suitScore:78, linked:true },
+    ]
+  },
+  2: {
+    lifeStage:'Young Family — Protection Priority', riskTolerance:'Moderate', planningHorizon:'25+ yrs to retirement',
+    needsAnalysis: [
+      { category:'Life Protection', priority:'Critical', need:'Sole income earner with infant. Current coverage $300K — needs $750K+ for full family income replacement.', gap:true },
+      { category:'Disability Income', priority:'Critical', need:'No personal DI. Employer provides only 60-day STD. Nurse Practitioner — physical role risk.', gap:true },
+      { category:'Long-Term Care', priority:'Low', need:'Age 34 — too early for LTC. Revisit at 45–50.', gap:false },
+      { category:'Education Funding', priority:'High', need:'No 529 plan started. Child age 0 — 18 yrs to fund. Target $120K. Compound early.', gap:true },
+      { category:'Emergency Fund', priority:'High', need:'Only 3 months saved. Should be 6 months minimum ($28K target).', gap:true },
+      { category:'Retirement', priority:'Medium', need:'403(b) + Roth IRA on track for early career. Increase contributions when DI and life gaps closed.', gap:false },
+    ],
+    suitability: { riskProfile:'Moderate', timeHorizon:'25+ years', liquidityNeeds:'Medium (student loans, mortgage)', taxSituation:'22% bracket — Roth contributions optimal', investorExperience:'Limited', regulatoryNotes:'FINRA Reg BI compliant. Suitability score: 81/100 ✓', productRestrictions:'Budget-sensitive — prioritize essential protection first' },
+    proposedProducts: [
+      { id:'pp-2-1', product:'Term Life 20-yr $750K', type:'term', premium:'$540/yr', commission:'$65', rationale:'Closes critical life gap at low cost. Covers mortgage + income replacement to 2045.', suitScore:96, linked:true },
+      { id:'pp-2-2', product:'Disability Income — $5,000/mo benefit', type:'di', premium:'$2,100/yr', commission:'$630', rationale:'Critical gap — no personal DI. Protects $112K income if unable to work.', suitScore:94, linked:true },
+      { id:'pp-2-3', product:'529 College Savings Plan', type:'529', premium:'$200/mo contribution', commission:'$144', rationale:'Start at birth for maximum compounding. Target $120K by 2042.', suitScore:90, linked:false },
+    ]
+  },
+  3: {
+    lifeStage:'Wealth Accumulation — Business Owner', riskTolerance:'Aggressive', planningHorizon:'20 yrs to legacy',
+    needsAnalysis: [
+      { category:'Key-Person Insurance', priority:'Critical', need:'Business valued $5M est. No key-person coverage. Agent is irreplaceable IP.', gap:true },
+      { category:'Buy-Sell Agreement Funding', priority:'High', need:'50% owner — no buy-sell funded. Partner exit would be illiquid.', gap:true },
+      { category:'Executive Benefits / NQDC', priority:'High', need:'High income ($580K) — maxed 401(k). NQDC or COLI can defer additional income.', gap:true },
+      { category:'Life / Estate', priority:'Medium', need:'$4.2M estate — current DB $2M. Sufficient for now. Review if estate grows past $7M.', gap:false },
+      { category:'Long-Term Care', priority:'Medium', need:'Age 45 — good time for LTC hybrid. Business can pay premium (deductible).', gap:true },
+      { category:'Disability', priority:'Medium', need:'Covered via group policy. But as business owner, personal own-occ DI recommended.', gap:false },
+    ],
+    suitability: { riskProfile:'Aggressive', timeHorizon:'20 years', liquidityNeeds:'Low', taxSituation:'37% bracket — maximizing tax deferral is priority', investorExperience:'Expert', regulatoryNotes:'FINRA Reg BI + business entity review required. Suitability score: 91/100 ✓', productRestrictions:'None — high-net-worth sophisticated investor' },
+    proposedProducts: [
+      { id:'pp-3-1', product:'Key-Person Term Life $3M', type:'term', premium:'$4,200/yr', commission:'$504', rationale:'Business-owned. Protects against loss of key revenue driver. Tax deductible.', suitScore:95, linked:true },
+      { id:'pp-3-2', product:'Buy-Sell Whole Life $2.5M', type:'wl', premium:'$18,600/yr', commission:'$10,230', rationale:'Cross-purchase arrangement funds partner buyout. Cash value accessible.', suitScore:88, linked:true },
+      { id:'pp-3-3', product:'COLI / Executive Variable UL $2M', type:'vul', premium:'$25,000/yr', commission:'$4,000', rationale:'Corporate-owned life insurance for NQDC deferral. Tax-deferred growth.', suitScore:84, linked:true },
+      { id:'pp-3-4', product:'LTC Hybrid (Asset-Based) $400K', type:'ltc', premium:'$18,000 lump sum', commission:'$5,400', rationale:'Asset-based LTC — return of premium if unused. Business-paid = deductible.', suitScore:80, linked:false },
+    ]
+  },
+  4: {
+    lifeStage:'Pre-Retirement — Income Protection', riskTolerance:'Conservative', planningHorizon:'4 yrs to retirement',
+    needsAnalysis: [
+      { category:'Term Policy Expiring', priority:'Critical', need:'Term P-100320 expires Sep 2026. Needs permanent coverage review or conversion.', gap:true },
+      { category:'Long-Term Care', priority:'High', need:'Partial LTC coverage. Age 61 — window closing. Est. need $200K+.', gap:true },
+      { category:'Retirement Income Gap', priority:'Medium', need:'Pension + SS = $4,080/mo. Needs ~$5,200/mo. Gap: $1,120/mo. Annuity can fill.', gap:true },
+      { category:'Medicare Supplement', priority:'High', need:'Medicare eligible in 4 yrs. Medigap plan needed. No current provision.', gap:true },
+      { category:'Estate Documents', priority:'Low', need:'Will done. POA outstanding. Minor gap.', gap:false },
+      { category:'Disability', priority:'Low', need:'Near retirement — DI not cost-effective. Focus on income in retirement.', gap:false },
+    ],
+    suitability: { riskProfile:'Conservative', timeHorizon:'4 yrs active, 20+ yrs distribution', liquidityNeeds:'Medium — fixed income in retirement', taxSituation:'22% bracket — consider Roth conversions before RMDs', investorExperience:'Moderate', regulatoryNotes:'FINRA Reg BI — conservative suitability review. Score: 79/100 ✓', productRestrictions:'Budget-constrained — prioritize by urgency' },
+    proposedProducts: [
+      { id:'pp-4-1', product:'Term Conversion — Whole Life $100K', type:'wl', premium:'$2,800/yr', commission:'$1,540', rationale:'Convert expiring term before Sep 2026. No new underwriting required.', suitScore:91, linked:true },
+      { id:'pp-4-2', product:'Fixed Annuity — SPIA $120K deposit', type:'fa', premium:'$120K single premium', commission:'$9,600', rationale:'Fills $1,120/mo retirement income gap. Guaranteed income for life.', suitScore:87, linked:true },
+      { id:'pp-4-3', product:'LTC Rider on WL policy', type:'ltc', premium:'Included in WL', commission:'N/A', rationale:'Bundle LTC rider on new WL policy — cost-effective for budget constraints.', suitScore:84, linked:false },
+    ]
+  },
+  5: {
+    lifeStage:'Young Family — New Parent', riskTolerance:'Moderate', planningHorizon:'30+ yrs',
+    needsAnalysis: [
+      { category:'Life Protection', priority:'Critical', need:'New baby. Current Term $300K insufficient. Needs $750K for dual-income family protection.', gap:true },
+      { category:'Disability Income', priority:'High', need:'Software engineer — low physical risk but income is critical. No personal DI.', gap:true },
+      { category:'Education Funding', priority:'High', need:'No 529. Child age 0 — 18-yr runway. Start immediately for compounding.', gap:true },
+      { category:'Emergency Fund', priority:'High', need:'Only 1 month saved. Immediate risk with new baby expenses. Target 6 months ($36K).', gap:true },
+      { category:'Retirement', priority:'Medium', need:'401(k) at $78K + Roth $18K — good start. Continue max contributions.', gap:false },
+    ],
+    suitability: { riskProfile:'Moderate', timeHorizon:'30+ years', liquidityNeeds:'High (new baby costs, renting)', taxSituation:'22% bracket — Roth contributions best', investorExperience:'Moderate (tech-savvy)', regulatoryNotes:'FINRA Reg BI compliant. Score: 83/100 ✓', productRestrictions:'Digital-first delivery preferred' },
+    proposedProducts: [
+      { id:'pp-5-1', product:'Term Life 30-yr $750K', type:'term', premium:'$480/yr', commission:'$58', rationale:'Maximum coverage at lowest cost. 30-yr covers until child is independent.', suitScore:97, linked:true },
+      { id:'pp-5-2', product:'Disability Income — $6,500/mo benefit', type:'di', premium:'$2,400/yr', commission:'$720', rationale:'Protects $145K salary. Own-occupation definition critical for tech role.', suitScore:92, linked:true },
+      { id:'pp-5-3', product:'Whole Life — Juvenile $50K (child policy)', type:'wl', premium:'$420/yr', commission:'$231', rationale:'Guarantees insurability for child. Cash value starts compounding at age 0.', suitScore:82, linked:false },
+    ]
+  },
+  6: {
+    lifeStage:'Pre-Retirement — Estate Focus', riskTolerance:'Moderate-Conservative', planningHorizon:'2 yrs to retirement',
+    needsAnalysis: [
+      { category:'Long-Term Care', priority:'Critical', need:'No LTC policy. At 58, last good window. Est. need $600K lifetime.', gap:true },
+      { category:'Annuity Income Strategy', priority:'High', need:'Pension + SS = $7,700/mo. Lifestyle needs $9,500/mo. Gap: $1,800/mo. Annuity ladder needed.', gap:true },
+      { category:'Estate Planning', priority:'High', need:'Will done. No trust. $1.3M estate — state estate tax risk. Trust recommended.', gap:true },
+      { category:'Life Insurance Review', priority:'Medium', need:'$600K DB — adequate. Consider reducing premium post-retirement.', gap:false },
+      { category:'Medicare Supplement', priority:'High', need:'Retiring in 2 yrs. Medigap Plan G recommended.', gap:true },
+    ],
+    suitability: { riskProfile:'Moderate-Conservative', timeHorizon:'2 yrs active, 25+ yrs distribution', liquidityNeeds:'Medium', taxSituation:'32% bracket now → 22% in retirement', investorExperience:'Experienced', regulatoryNotes:'FINRA Reg BI — retirement income focus. Score: 85/100 ✓', productRestrictions:'Avoid illiquid products with >7-yr surrender' },
+    proposedProducts: [
+      { id:'pp-6-1', product:'LTC Partnership Policy $300K', type:'ltc', premium:'$6,200/yr', commission:'$1,860', rationale:'Critical gap — last optimal age for preferred rates. Partnership protects Medicaid.', suitScore:93, linked:true },
+      { id:'pp-6-2', product:'Fixed Index Annuity $200K', type:'fa', premium:'$200K lump sum', commission:'$14,000', rationale:'Provides $1,800+/mo guaranteed income. Fills retirement income gap.', suitScore:87, linked:true },
+      { id:'pp-6-3', product:'Survivorship Universal Life $500K', type:'ul', premium:'$4,100/yr', commission:'$574', rationale:'Estate planning — passes $500K outside estate. Lower premium than term.', suitScore:79, linked:false },
+    ]
+  },
+  7: {
+    lifeStage:'Early Career — Foundation Building', riskTolerance:'Aggressive', planningHorizon:'35+ yrs',
+    needsAnalysis: [
+      { category:'Life Insurance', priority:'High', need:'Single — primary need is income replacement and student loan coverage. $500K term pending.', gap:true },
+      { category:'Disability Income', priority:'Medium', need:'Creative professional — moderate risk. No personal DI. Employer provides basic coverage.', gap:false },
+      { category:'Retirement', priority:'Medium', need:'Roth IRA + 401(k) solid start. Max Roth annually. Time is the biggest asset.', gap:false },
+      { category:'Emergency Fund', priority:'High', need:'Only $14K saved — about 3 months. Need 6 months ($24K target) given student debt.', gap:true },
+      { category:'Student Loan Protection', priority:'Medium', need:'$68K loans. Term life ensures loans don\'t pass to estate. Already covered by pending term.', gap:false },
+    ],
+    suitability: { riskProfile:'Aggressive', timeHorizon:'35+ years', liquidityNeeds:'High (student loans, rent)', taxSituation:'22% bracket — maximize Roth', investorExperience:'Beginner-Intermediate', regulatoryNotes:'FINRA Reg BI. Score: 77/100 ✓ — budget constraints noted', productRestrictions:'Avoid complex products; focus on simple term + Roth' },
+    proposedProducts: [
+      { id:'pp-7-1', product:'Term Life 20-yr $500K (pending e-sign)', type:'term', premium:'$360/yr', commission:'$43', rationale:'Low-cost maximum protection. Covers student loans + income for beneficiaries.', suitScore:95, linked:true },
+      { id:'pp-7-2', product:'Whole Life $25K — Cash Value Starter', type:'wl', premium:'$480/yr', commission:'$264', rationale:'Builds guaranteed cash value. Locks in age-29 rates. Future policy loan flexibility.', suitScore:72, linked:false },
+    ]
+  },
+  8: {
+    lifeStage:'Wealth Preservation — Legacy Focus', riskTolerance:'Conservative-Moderate', planningHorizon:'20+ yrs (estate horizon)',
+    needsAnalysis: [
+      { category:'LTC Coverage Gap', priority:'High', need:'$300K LTC policy — needs $600K. At 67, claim probability rises sharply.', gap:true },
+      { category:'Estate Tax Optimization', priority:'High', need:'$5.8M estate — above federal exemption risk horizon. ILIT + charitable giving strategy.', gap:true },
+      { category:'Annuity / Income', priority:'Low', need:'Pension $8,400/mo + SS $3,200/mo = $11,600/mo. Well-funded. No gap.', gap:false },
+      { category:'Life Insurance Review', priority:'Medium', need:'$3.5M DB — consider irrevocable trust to remove from taxable estate.', gap:true },
+      { category:'Charitable Legacy', priority:'High', need:'$95K/yr giving — no structured giving vehicle. CRT or DAF recommended.', gap:true },
+    ],
+    suitability: { riskProfile:'Conservative-Moderate', timeHorizon:'20+ years (estate)', liquidityNeeds:'Low', taxSituation:'37% bracket — estate and charitable optimization critical', investorExperience:'Expert (retired CFO)', regulatoryNotes:'FINRA Reg BI + estate planning coordination required. Score: 94/100 ✓', productRestrictions:'No surrender charges >5 yrs' },
+    proposedProducts: [
+      { id:'pp-8-1', product:'LTC Enhancement Rider $300K add-on', type:'ltc', premium:'$8,400/yr', commission:'$2,520', rationale:'Doubles LTC coverage to $600K. Existing carrier — simplified underwriting.', suitScore:93, linked:true },
+      { id:'pp-8-2', product:'Survivorship Whole Life $2M (ILIT)', type:'wl', premium:'$22,000/yr', commission:'$12,100', rationale:'ILIT-owned — removes $2M from taxable estate. Children are beneficiaries.', suitScore:89, linked:true },
+      { id:'pp-8-3', product:'Charitable Remainder Trust + COLI', type:'wl', premium:'Trust-funded', commission:'$15,000+', rationale:'Structured giving — CRT funds charitable legacy, COLI replaces asset for heirs.', suitScore:82, linked:false },
+    ]
+  },
+};
+
+function _cmPlanning(client) {
+  const pd = cmPlanningData[client.id];
+  if (!pd) return '<div class="cm-empty">No financial plan data available.</div>';
+
+  const prioColors = { Critical:'#dc2626', High:'#f59e0b', Medium:'#0891b2', Low:'#6b7280' };
+  const prioIcons  = { Critical:'fa-exclamation-triangle', High:'fa-arrow-up', Medium:'fa-minus', Low:'fa-arrow-down' };
+
+  const gapCount = pd.needsAnalysis.filter(n => n.gap).length;
+  const totalOpp = pd.proposedProducts.reduce((s, p) => {
+    const match = p.premium.match(/[\d,.]+/);
+    return s + (match ? parseFloat(match[0].replace(/,/g,'')) : 0);
+  }, 0);
+  const totalComm = pd.proposedProducts.reduce((s, p) => {
+    const match = p.commission.match(/[\d,.]+/);
+    return s + (match ? parseFloat(match[0].replace(/,/g,'')) : 0);
+  }, 0);
+
+  const needsRows = pd.needsAnalysis.map(n => `
+    <div class="plan-need-card ${n.gap ? 'gap' : 'ok'}">
+      <div class="plan-need-header">
+        <span class="plan-prio-badge" style="background:${prioColors[n.priority]}20;color:${prioColors[n.priority]};border:1px solid ${prioColors[n.priority]}40">
+          <i class="fas ${prioIcons[n.priority]}"></i> ${n.priority}
+        </span>
+        <span class="plan-need-cat">${n.category}</span>
+        ${n.gap ? '<span class="plan-gap-flag"><i class="fas fa-exclamation-circle"></i> Gap</span>' : '<span class="plan-ok-flag"><i class="fas fa-check-circle"></i> Covered</span>'}
+      </div>
+      <div class="plan-need-text">${n.need}</div>
+    </div>`).join('');
+
+  const suitRows = [
+    ['Risk Profile', pd.suitability.riskProfile],
+    ['Time Horizon', pd.suitability.timeHorizon],
+    ['Liquidity Needs', pd.suitability.liquidityNeeds],
+    ['Tax Situation', pd.suitability.taxSituation],
+    ['Investor Experience', pd.suitability.investorExperience],
+    ['Product Restrictions', pd.suitability.productRestrictions],
+    ['Regulatory Notes', `<span class="plan-reg-note">${pd.suitability.regulatoryNotes}</span>`],
+  ].map(([l,v])=>`<div class="intel-row"><span class="intel-lbl">${l}</span><span class="intel-val">${v}</span></div>`).join('');
+
+  const productCards = pd.proposedProducts.map(p => `
+    <div class="plan-product-card" id="${p.id}">
+      <div class="plan-prod-header">
+        <div class="plan-prod-name"><i class="fas fa-file-invoice-dollar" style="color:#003087"></i> ${p.product}</div>
+        <div class="plan-suit-score" style="background:${p.suitScore>=90?'#d1fae5':p.suitScore>=80?'#fef3c7':'#fee2e2'};color:${p.suitScore>=90?'#065f46':p.suitScore>=80?'#92400e':'#991b1b'}">
+          Suitability ${p.suitScore}/100
+        </div>
+      </div>
+      <div class="plan-prod-meta">
+        <span><i class="fas fa-tag"></i> Premium: <strong>${p.premium}</strong></span>
+        <span><i class="fas fa-dollar-sign"></i> Commission: <strong>${p.commission}</strong></span>
+      </div>
+      <div class="plan-prod-rationale">${p.rationale}</div>
+      <div class="plan-prod-actions">
+        ${p.linked ? `<button class="plan-illust-btn" onclick="switchClientTab('illust',document.getElementById('cm-tab-illust'));setTimeout(()=>cmHighlightIllust('${p.id}'),300)"><i class="fas fa-chart-area"></i> View Illustration</button>` : ''}
+        <button class="plan-quote-btn" onclick="cmPlanLaunchQuote('${p.type}','${client.id}','${p.product}')"><i class="fas fa-file-invoice-dollar"></i> Generate Quote</button>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="plan-container">
+
+      <!-- KPI bar -->
+      <div class="plan-kpi-bar">
+        <div class="plan-kpi"><div class="plan-kpi-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-drafting-compass"></i></div><div><div class="plan-kpi-val">${pd.lifeStage}</div><div class="plan-kpi-lbl">Life Stage</div></div></div>
+        <div class="plan-kpi"><div class="plan-kpi-icon" style="background:${gapCount>3?'#fef2f2':gapCount>1?'#fef3c7':'#ecfdf5'};color:${gapCount>3?'#dc2626':gapCount>1?'#f59e0b':'#059669'}"><i class="fas fa-exclamation-circle"></i></div><div><div class="plan-kpi-val">${gapCount}</div><div class="plan-kpi-lbl">Coverage Gaps</div></div></div>
+        <div class="plan-kpi"><div class="plan-kpi-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-dollar-sign"></i></div><div><div class="plan-kpi-val">${pd.proposedProducts.length}</div><div class="plan-kpi-lbl">Proposed Products</div></div></div>
+        <div class="plan-kpi"><div class="plan-kpi-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-shield-alt"></i></div><div><div class="plan-kpi-val">${pd.suitability.riskProfile}</div><div class="plan-kpi-lbl">Risk Profile</div></div></div>
+        <div class="plan-kpi"><div class="plan-kpi-icon" style="background:#fff7ed;color:#ea580c"><i class="fas fa-hand-holding-usd"></i></div><div><div class="plan-kpi-val">$${(totalComm/1000).toFixed(1)}K</div><div class="plan-kpi-lbl">Est. Commission</div></div></div>
+      </div>
+
+      <!-- Needs Analysis -->
+      <div class="plan-section">
+        <div class="plan-section-hdr"><i class="fas fa-search-dollar"></i> Needs Analysis — ${pd.needsAnalysis.length} Categories Reviewed</div>
+        <div class="plan-needs-grid">${needsRows}</div>
+      </div>
+
+      <!-- Suitability -->
+      <div class="plan-section">
+        <div class="plan-section-hdr"><i class="fas fa-balance-scale"></i> Suitability Assessment
+          <span class="plan-reg-badge"><i class="fas fa-check-circle"></i> FINRA Reg BI Compliant</span>
+        </div>
+        <div class="plan-suit-grid">${suitRows}</div>
+      </div>
+
+      <!-- Proposed Products -->
+      <div class="plan-section">
+        <div class="plan-section-hdr"><i class="fas fa-lightbulb"></i> Proposed Products &amp; Recommendations</div>
+        <div class="plan-products-grid">${productCards}</div>
+      </div>
+
+      <!-- AI Planning note -->
+      <div class="intel-agent-callout" style="background:linear-gradient(135deg,#eff6ff,#f5f3ff)">
+        <i class="fas fa-robot" style="color:#003087"></i>
+        <div class="intel-agent-text">
+          <strong>NOVA Financial Planning Engine:</strong> Plan generated using ${pd.needsAnalysis.length} need categories, ${pd.suitability.riskProfile} risk profile, and ${pd.suitability.timeHorizon} horizon. All proposed products scored for suitability per FINRA Reg BI standards.
+          <button class="intel-ai-btn" onclick="cmExportPlan(${client.id})"><i class="fas fa-file-pdf"></i> Export Plan PDF</button>
+        </div>
+      </div>
+
+    </div>`;
+}
+
+function cmPlanLaunchQuote(productType, clientId, productName) {
+  const prod = { wl:'wl', term:'term', ul:'ul', vul:'vul', ltc:'ltc', di:'di', fa:'fa', va:'va' }[productType] || 'term';
+  closeClientModal();
+  setTimeout(() => {
+    const client = clientData.find(c => c.id === parseInt(clientId));
+    if (!client) return;
+    // Pre-fill prospect quote data
+    if (!window.prospectQuoteData) window.prospectQuoteData = {};
+    const ext = cmProfileExt[parseInt(clientId)] || {};
+    const incomeNum = parseFloat((ext.income||'$100K/yr').replace(/[$K,M\/yr]/g,'')) * (ext.income&&ext.income.includes('M')?1000000:1000);
+    const nwNum    = parseFloat((ext.netWorth||'$100K').replace(/[$K,M]/g,'')) * (ext.netWorth&&ext.netWorth.includes('M')?1000000:1000);
+    window.prospectQuoteData['CL-'+clientId] = {
+      name: client.name, age: client.age, gender: client.gender||'m',
+      health: 'p', product: prod, coverage: 500000, income: incomeNum, netWorth: nwNum, credit: 740
+    };
+    if (typeof openQuoteModal === 'function') openQuoteModal('CL-'+clientId);
+  }, 300);
+}
+
+function cmExportPlan(clientId) {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = '<i class="fas fa-check-circle"></i> Financial Plan PDF generated and sent to client email.';
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ── ILLUSTRATIONS DATA ────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+const cmIllustData = {
+  1: [
+    { id:'pp-1-1', title:'Whole Life $500K Illustration', type:'wl', product:'Whole Life Insurance', faceAmount:'$500,000', annualPremium:'$12,400', paymentMode:'Annual', client:'James Whitfield', age:52, health:'Preferred', projection:[ {yr:5,premium:62000,csv:28400,db:528400,netCV:14200},{yr:10,premium:124000,csv:78600,db:578600,netCV:54600},{yr:15,premium:186000,csv:148900,db:648900,netCV:124900},{yr:20,premium:248000,csv:238200,db:738200,netCV:214200},{yr:25,premium:310000,csv:352000,db:852000,netCV:328000},{yr:30,premium:372000,csv:498000,db:998000,netCV:474000} ], riders:['Waiver of Premium','Long-Term Care Rider (linked)'], status:'Draft', lastUpdated:'Apr 10, 2026' },
+    { id:'pp-1-2', title:'LTC Partnership Policy Illustration', type:'ltc', product:'Long-Term Care Insurance', faceAmount:'$300,000 benefit pool', annualPremium:'$5,800', paymentMode:'Annual', client:'James Whitfield', age:52, health:'Preferred', projection:[ {yr:5,premium:29000,csv:0,db:300000,netCV:0},{yr:10,premium:58000,csv:0,db:300000,netCV:0} ], riders:['Inflation Protection 3% compound','Shared Care option'], status:'Draft', lastUpdated:'Apr 10, 2026' },
+    { id:'pp-1-4', title:'Variable Annuity Illustration (Roth Conversion)', type:'va', product:'Variable Annuity', faceAmount:'$150,000 premium', annualPremium:'$150,000 (lump sum)', paymentMode:'Single Premium', client:'James Whitfield', age:52, health:'N/A', projection:[ {yr:5,premium:150000,csv:189000,db:189000,netCV:189000},{yr:10,premium:150000,csv:261000,db:261000,netCV:261000},{yr:15,premium:150000,csv:360000,db:360000,netCV:360000},{yr:20,premium:150000,csv:497000,db:497000,netCV:497000} ], riders:['Guaranteed Minimum Withdrawal Benefit','Death Benefit guarantee'], status:'Reviewed', lastUpdated:'Apr 11, 2026' },
+  ],
+  2: [
+    { id:'pp-2-1', title:'Term Life 20-yr $750K Illustration', type:'term', product:'Term Life Insurance', faceAmount:'$750,000', annualPremium:'$540', paymentMode:'Annual', client:'Patricia Nguyen', age:34, health:'Preferred Plus', projection:[ {yr:5,premium:2700,csv:0,db:750000,netCV:0},{yr:10,premium:5400,csv:0,db:750000,netCV:0},{yr:20,premium:10800,csv:0,db:750000,netCV:0} ], riders:['Convertibility option (to age 65)','Waiver of Premium'], status:'Draft', lastUpdated:'Apr 8, 2026' },
+    { id:'pp-2-2', title:'Disability Income $5,000/mo Illustration', type:'di', product:'Disability Income Insurance', faceAmount:'$5,000/mo benefit', annualPremium:'$2,100', paymentMode:'Annual', client:'Patricia Nguyen', age:34, health:'Preferred', projection:[ {yr:5,premium:10500,csv:0,db:60000,netCV:0},{yr:10,premium:21000,csv:0,db:60000,netCV:0},{yr:30,premium:63000,csv:0,db:60000,netCV:0} ], riders:['Own-Occupation definition','COLA Rider 3%','Future Increase Option'], status:'New', lastUpdated:'Apr 8, 2026' },
+  ],
+  3: [
+    { id:'pp-3-1', title:'Key-Person Term $3M Illustration', type:'term', product:'Term Life Insurance (Business)', faceAmount:'$3,000,000', annualPremium:'$4,200', paymentMode:'Annual', client:'Robert Chen', age:45, health:'Preferred', projection:[ {yr:5,premium:21000,csv:0,db:3000000,netCV:0},{yr:10,premium:42000,csv:0,db:3000000,netCV:0},{yr:20,premium:84000,csv:0,db:3000000,netCV:0} ], riders:['Return of Premium at end of term'], status:'Draft', lastUpdated:'Apr 11, 2026' },
+    { id:'pp-3-2', title:'Buy-Sell Whole Life $2.5M Illustration', type:'wl', product:'Whole Life Insurance', faceAmount:'$2,500,000', annualPremium:'$18,600', paymentMode:'Annual', client:'Robert Chen', age:45, health:'Preferred', projection:[ {yr:5,premium:93000,csv:118500,db:2618500,netCV:80000},{yr:10,premium:186000,csv:310000,db:2810000,netCV:230000},{yr:20,premium:372000,csv:780000,db:3280000,netCV:700000},{yr:30,premium:558000,csv:1480000,db:3980000,netCV:1400000} ], riders:['Paid-Up Additions Rider','Waiver of Premium'], status:'In Review', lastUpdated:'Apr 11, 2026' },
+    { id:'pp-3-3', title:'Executive VUL $2M COLI Illustration', type:'vul', product:'Variable Universal Life', faceAmount:'$2,000,000', annualPremium:'$25,000', paymentMode:'Annual', client:'Robert Chen', age:45, health:'Preferred Plus', projection:[ {yr:5,premium:125000,csv:108000,db:2108000,netCV:95000},{yr:10,premium:250000,csv:282000,db:2282000,netCV:260000},{yr:20,premium:500000,csv:740000,db:2740000,netCV:710000} ], riders:['Guaranteed Minimum Death Benefit','NQDC integration'], status:'Draft', lastUpdated:'Apr 11, 2026' },
+  ],
+  4: [
+    { id:'pp-4-1', title:'WL Term Conversion $100K Illustration', type:'wl', product:'Whole Life Insurance', faceAmount:'$100,000', annualPremium:'$2,800', paymentMode:'Annual', client:'Dorothy Wilson', age:61, health:'Standard Plus', projection:[ {yr:5,premium:14000,csv:8200,db:108200,netCV:5000},{yr:10,premium:28000,csv:22400,db:122400,netCV:18000},{yr:20,premium:56000,csv:56800,db:156800,netCV:52000} ], riders:['LTC Acceleration Rider','Waiver of Premium (to 65)'], status:'Draft', lastUpdated:'Apr 7, 2026' },
+    { id:'pp-4-2', title:'SPIA Fixed Annuity $120K Illustration', type:'fa', product:'Fixed Annuity (SPIA)', faceAmount:'$120,000 deposit', annualPremium:'$120,000 (single)', paymentMode:'Single Premium', client:'Dorothy Wilson', age:61, health:'N/A', projection:[ {yr:1,premium:120000,csv:120000,db:120000,netCV:1340*12},{yr:5,premium:120000,csv:120000,db:120000,netCV:1340*12},{yr:10,premium:120000,csv:120000,db:120000,netCV:1340*12} ], annuityIncome:'$1,340/mo guaranteed for life', riders:['Joint & Survivor 100%','Cash refund option'], status:'Quoted', lastUpdated:'Apr 9, 2026' },
+  ],
+  5: [
+    { id:'pp-5-1', title:'Term Life 30-yr $750K Illustration', type:'term', product:'Term Life Insurance', faceAmount:'$750,000', annualPremium:'$480', paymentMode:'Annual', client:'Kevin Park', age:31, health:'Preferred Plus', projection:[ {yr:5,premium:2400,csv:0,db:750000,netCV:0},{yr:10,premium:4800,csv:0,db:750000,netCV:0},{yr:30,premium:14400,csv:0,db:750000,netCV:0} ], riders:['Convertibility','Child Term Rider $25K'], status:'Pending Signature', lastUpdated:'Apr 9, 2026' },
+    { id:'pp-5-2', title:'Disability Income $6,500/mo Illustration', type:'di', product:'Disability Income Insurance', faceAmount:'$6,500/mo benefit', annualPremium:'$2,400', paymentMode:'Annual', client:'Kevin Park', age:31, health:'Preferred Plus', projection:[ {yr:5,premium:12000,csv:0,db:78000,netCV:0},{yr:10,premium:24000,csv:0,db:78000,netCV:0} ], riders:['Own-Occupation (tech)','COLA 3%','Future Increase Option to $10K'], status:'Draft', lastUpdated:'Apr 9, 2026' },
+  ],
+  6: [
+    { id:'pp-6-1', title:'LTC Partnership Policy $300K Illustration', type:'ltc', product:'Long-Term Care Insurance', faceAmount:'$300,000 benefit pool', annualPremium:'$6,200', paymentMode:'Annual', client:'Linda Morrison', age:58, health:'Preferred', projection:[ {yr:5,premium:31000,csv:0,db:300000,netCV:0},{yr:10,premium:62000,csv:0,db:348000,netCV:0} ], riders:['3% Compound Inflation','Shared Care','Return of Premium Death Benefit'], status:'Draft', lastUpdated:'Apr 10, 2026' },
+    { id:'pp-6-2', title:'Fixed Index Annuity $200K Illustration', type:'fa', product:'Fixed Index Annuity', faceAmount:'$200,000 premium', annualPremium:'$200,000 (single)', paymentMode:'Single Premium', client:'Linda Morrison', age:58, health:'N/A', projection:[ {yr:5,premium:200000,csv:226000,db:226000,netCV:226000},{yr:10,premium:200000,csv:270000,db:270000,netCV:270000},{yr:20,premium:200000,csv:388000,db:388000,netCV:388000} ], annuityIncome:'$1,840/mo (income rider at age 62)', riders:['Income Rider 6% rollup','Enhanced Death Benefit'], status:'In Review', lastUpdated:'Apr 10, 2026' },
+  ],
+  7: [
+    { id:'pp-7-1', title:'Term Life 20-yr $500K Illustration', type:'term', product:'Term Life Insurance', faceAmount:'$500,000', annualPremium:'$360', paymentMode:'Annual', client:'Maria Gonzalez', age:29, health:'Preferred Plus', projection:[ {yr:5,premium:1800,csv:0,db:500000,netCV:0},{yr:10,premium:3600,csv:0,db:500000,netCV:0},{yr:20,premium:7200,csv:0,db:500000,netCV:0} ], riders:['Convertibility to age 60','Waiver of Premium'], status:'Pending Signature', lastUpdated:'Apr 9, 2026' },
+  ],
+  8: [
+    { id:'pp-8-1', title:'LTC Enhancement $300K Add-on Illustration', type:'ltc', product:'LTC Rider Enhancement', faceAmount:'$300K additional benefit', annualPremium:'$8,400', paymentMode:'Annual', client:'Maria Gonzalez (Thomas)', age:67, health:'Standard', projection:[ {yr:5,premium:42000,csv:0,db:600000,netCV:0},{yr:10,premium:84000,csv:0,db:600000,netCV:0} ], riders:['Inflation protection 3%','Shared Care (spouse)'], status:'Draft', lastUpdated:'Apr 11, 2026' },
+    { id:'pp-8-2', title:'Survivorship WL $2M ILIT Illustration', type:'wl', product:'Survivorship Whole Life', faceAmount:'$2,000,000', annualPremium:'$22,000', paymentMode:'Annual', client:'Thomas & Maria Gonzalez', age:67, health:'Standard/Standard Plus', projection:[ {yr:5,premium:110000,csv:82000,db:2082000,netCV:62000},{yr:10,premium:220000,csv:224000,db:2224000,netCV:200000},{yr:20,premium:440000,csv:620000,db:2620000,netCV:594000} ], riders:['Paid-Up Additions','Estate liquidity — ILIT trust-owned'], status:'In Review', lastUpdated:'Apr 11, 2026' },
+  ],
+};
+
+function _cmIllustrations(client) {
+  const illus = cmIllustData[client.id] || [];
+  if (!illus.length) return '<div class="cm-empty">No illustrations on file for this client. Go to <strong>Financial Plan</strong> tab to propose products and generate illustrations.</div>';
+
+  const typeColors = { wl:'#003087', term:'#0891b2', ul:'#7c3aed', vul:'#dc2626', ltc:'#d97706', di:'#059669', fa:'#ea580c', va:'#6366f1' };
+  const typeLabels = { wl:'Whole Life', term:'Term Life', ul:'Universal Life', vul:'Variable UL', ltc:'Long-Term Care', di:'Disability Income', fa:'Fixed Annuity', va:'Variable Annuity' };
+  const statusColors = { 'Draft':'#6b7280', 'New':'#0891b2', 'In Review':'#f59e0b', 'Reviewed':'#059669', 'Quoted':'#003087', 'Pending Signature':'#dc2626' };
+
+  const cards = illus.map(il => {
+    const col = typeColors[il.type] || '#003087';
+    const projRows = il.projection.slice(0,4).map(p => `
+      <tr>
+        <td>Yr ${p.yr}</td>
+        <td>$${(p.premium/1000).toFixed(1)}K</td>
+        <td style="color:#059669">$${(p.csv/1000).toFixed(1)}K</td>
+        <td style="color:#003087">$${(p.db/1000000).toFixed(3).replace(/\.?0+$/,'')}M</td>
+      </tr>`).join('');
+
+    return `
+      <div class="illust-card" id="illust-${il.id}">
+        <div class="illust-card-header" style="border-left:4px solid ${col}">
+          <div class="illust-card-left">
+            <div class="illust-type-badge" style="background:${col}15;color:${col}">${typeLabels[il.type]||il.type.toUpperCase()}</div>
+            <div class="illust-title">${il.title}</div>
+            <div class="illust-meta">${il.client} · Age ${il.age} · ${il.health}</div>
+          </div>
+          <div class="illust-card-right">
+            <div class="illust-status-badge" style="background:${statusColors[il.status]||'#6b7280'}15;color:${statusColors[il.status]||'#6b7280'}">${il.status}</div>
+            <div class="illust-updated">Updated ${il.lastUpdated}</div>
+          </div>
+        </div>
+
+        <div class="illust-kpi-row">
+          <div class="illust-kpi"><div class="illust-kv">${il.faceAmount}</div><div class="illust-kl">Face / Benefit</div></div>
+          <div class="illust-kpi"><div class="illust-kv">${il.annualPremium}</div><div class="illust-kl">Annual Premium</div></div>
+          <div class="illust-kpi"><div class="illust-kv">${il.paymentMode}</div><div class="illust-kl">Payment Mode</div></div>
+          ${il.annuityIncome ? `<div class="illust-kpi"><div class="illust-kv" style="color:#059669">${il.annuityIncome}</div><div class="illust-kl">Guaranteed Income</div></div>` : ''}
+        </div>
+
+        ${il.projection && il.projection[0].csv > 0 ? `
+        <div class="illust-proj-section">
+          <div class="illust-proj-title"><i class="fas fa-chart-area"></i> Projected Values</div>
+          <table class="illust-proj-table">
+            <thead><tr><th>Year</th><th>Cumulative Premium</th><th>Cash Surrender Value</th><th>Death Benefit</th></tr></thead>
+            <tbody>${projRows}</tbody>
+          </table>
+        </div>` : ''}
+
+        ${il.annuityIncome ? `
+        <div class="illust-annuity-income">
+          <i class="fas fa-check-circle" style="color:#059669"></i>
+          <strong>Guaranteed Income:</strong> ${il.annuityIncome} — fills retirement income gap identified in Financial Plan.
+        </div>` : ''}
+
+        <div class="illust-riders">
+          <span class="illust-riders-lbl"><i class="fas fa-plus-circle" style="color:#003087"></i> Riders / Options:</span>
+          ${(il.riders||[]).map(r=>`<span class="intel-tag">${r}</span>`).join('')}
+        </div>
+
+        <div class="illust-actions">
+          <button class="plan-quote-btn" onclick="cmIllustToQuote('${il.type}','${client.id}','${il.title}')">
+            <i class="fas fa-file-invoice-dollar"></i> Convert to Quote
+          </button>
+          <button class="plan-illust-btn" onclick="cmIllustDownload('${il.id}','${il.title}')">
+            <i class="fas fa-download"></i> Download PDF
+          </button>
+          <button class="plan-illust-btn" onclick="cmIllustEmail('${client.id}','${il.title}')">
+            <i class="fas fa-envelope"></i> Email to Client
+          </button>
+          <button class="plan-illust-btn" onclick="switchClientTab('planning',document.getElementById('cm-tab-planning'))">
+            <i class="fas fa-drafting-compass"></i> Back to Plan
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="illust-container">
+
+      <div class="illust-header-bar">
+        <div class="illust-count"><i class="fas fa-chart-area" style="color:#003087"></i> <strong>${illus.length}</strong> illustration${illus.length>1?'s':''} on file for ${client.name}</div>
+        <button class="btn btn-primary" style="font-size:0.78rem;padding:6px 14px" onclick="cmNewIllustration(${client.id})"><i class="fas fa-plus"></i> New Illustration</button>
+      </div>
+
+      ${cards}
+
+    </div>`;
+}
+
+function cmHighlightIllust(productId) {
+  const el = document.getElementById('illust-' + productId);
+  if (!el) return;
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+  el.style.boxShadow = '0 0 0 3px #003087, 0 8px 32px rgba(0,48,135,.18)';
+  setTimeout(() => { el.style.boxShadow = ''; }, 2500);
+}
+
+function cmIllustToQuote(productType, clientId, title) {
+  cmPlanLaunchQuote(productType, clientId, title);
+}
+
+function cmIllustDownload(illustId, title) {
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = `<i class="fas fa-download"></i> Downloading "${title}" illustration PDF…`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2800);
+}
+
+function cmIllustEmail(clientId, title) {
+  const client = clientData.find(c => c.id === parseInt(clientId));
+  const toast = document.createElement('div');
+  toast.className = 'phase1-toast success';
+  toast.innerHTML = `<i class="fas fa-check-circle"></i> Illustration "${title}" emailed to ${client ? client.email||client.name : 'client'}.`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 2800);
+}
+
+function cmNewIllustration(clientId) {
+  closeClientModal();
+  setTimeout(() => {
+    const client = clientData.find(c => c.id === clientId);
+    if (client && typeof openQuoteModal === 'function') {
+      if (!window.prospectQuoteData) window.prospectQuoteData = {};
+      const ext = cmProfileExt[clientId] || {};
+      window.prospectQuoteData['CL-'+clientId] = { name: client.name, age: client.age, gender: client.gender||'m', health: 'p', product: 'wl', coverage: 500000, income: 100000, netWorth: 200000, credit: 740 };
+      openQuoteModal('CL-'+clientId);
+    }
+  }, 300);
 }
 
 // ---- AI CHAT ----
