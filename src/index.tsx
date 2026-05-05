@@ -2946,11 +2946,17 @@ function ProspectsPage() {
           <button class="prosp-modal-close" onclick="closeProspectModal()"><i class="fas fa-times"></i></button>
           <div class="prosp-modal-header" id="prosp-modal-header"></div>
           <div class="prosp-modal-tabs" id="prosp-modal-tabs">
-            <button class="pmt active" data-tab="overview" onclick="switchProspectTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
-            <button class="pmt" data-tab="thirdparty" onclick="switchProspectTab('thirdparty',this)"><i class="fas fa-database"></i> 3rd-Party Intel</button>
-            <button class="pmt" data-tab="products" onclick="switchProspectTab('products',this)"><i class="fas fa-box-open"></i> Product Fit</button>
-            <button class="pmt" data-tab="ai" onclick="switchProspectTab('ai',this)"><i class="fas fa-robot"></i> AI Strategy</button>
-            <button class="pmt" data-tab="timeline" onclick="switchProspectTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
+            <button class="pmt active" data-tab="overview"   onclick="switchProspectTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
+            <button class="pmt" data-tab="thirdparty"         onclick="switchProspectTab('thirdparty',this)"><i class="fas fa-satellite-dish"></i> 3rd-Party Intel</button>
+            <button class="pmt" data-tab="financial"          onclick="switchProspectTab('financial',this)"><i class="fas fa-chart-pie"></i> Financial Health</button>
+            <button class="pmt" data-tab="goals"              onclick="switchProspectTab('goals',this)"><i class="fas fa-bullseye"></i> Goals</button>
+            <button class="pmt" data-tab="products"           onclick="switchProspectTab('products',this)"><i class="fas fa-box-open"></i> Product Fit</button>
+            <button class="pmt" data-tab="planning"           onclick="switchProspectTab('planning',this)"><i class="fas fa-drafting-compass"></i> Financial Plan</button>
+            <button class="pmt" data-tab="illust"             onclick="switchProspectTab('illust',this)"><i class="fas fa-chart-area"></i> Illustrations</button>
+            <button class="pmt" data-tab="outreach"           onclick="switchProspectTab('outreach',this)"><i class="fas fa-paper-plane"></i> Outreach</button>
+            <button class="pmt" data-tab="documents"          onclick="switchProspectTab('documents',this)"><i class="fas fa-folder-open"></i> Documents</button>
+            <button class="pmt" data-tab="ai"                 onclick="switchProspectTab('ai',this)"><i class="fas fa-robot"></i> AI Strategy</button>
+            <button class="pmt" data-tab="timeline"           onclick="switchProspectTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
           </div>
           <div class="prosp-modal-body" id="prosp-modal-body"></div>
           <div class="prosp-modal-footer" id="prosp-modal-footer"></div>
