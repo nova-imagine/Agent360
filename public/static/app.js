@@ -19541,7 +19541,7 @@ function openProspectModal(id) {
   footer.innerHTML = `
     <button class="btn btn-outline" onclick="closeProspectModal()"><i class="fas fa-times"></i> Close</button>
     <button class="btn btn-ai" onclick="sendContextMessage('Give me a complete AI sales strategy for prospect ${p.name} — stage ${p.stage}, product interest: ${p.products.join(', ')}, score ${p.score}. Include next best action, talking points, and objection handling.','advisor')"><i class="fas fa-robot"></i> AI Strategy</button>
-    <button class="btn btn-primary" onclick="closeProspectModal();convertProspectToClient('${id}')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>`;
+    <button class="btn btn-primary" onclick="closeProspectModal();moveLeadToOpportunity('${id}')"><i class="fas fa-bolt"></i> Move to Opportunities</button>`;
 
   renderProspectTab('overview', p);
   overlay.style.display = 'flex';
@@ -20238,7 +20238,7 @@ function apSaveProspect() {
       </div>
       <div class="prosp-card-footer">
         <span class="prosp-value">${refBy ? 'Ref: ' + refBy : source}</span>
-        <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('${newId}')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+        <button class="prosp-convert-btn" onclick="event.stopPropagation();moveLeadToOpportunity('${newId}')"><i class="fas fa-bolt"></i> Move to Opportunities</button>
       </div>`;
 
     card.onclick = () => {
@@ -20290,3 +20290,557 @@ function showToast(msg) {
 }
 
 console.log('Prospects module loaded — prospectData(14), openProspectModal, convertProspectToClient, filterProspectCards all ready');
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OPPORTUNITIES MODULE
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Default seeded Opportunities data ────────────────────────────────────
+const opportunitiesData = {
+  OPP001: {
+    id: 'OPP001', initials: 'AR', name: 'Alex Rivera', occupation: 'Account Executive, Deloitte',
+    city: 'Manhattan', age: 34, income: '$148K/yr', score: 82, stage: 'Meeting Scheduled',
+    daysInStage: 6, annualValue: '$4,200', commission: '$504', email: 'alex.r@email.com',
+    phone: '(917) 555-0134', source: 'Referral — Robert Chen',
+    products: ['Whole Life $500K', 'Disability Income $7K/mo'],
+    nextAction: 'In-person meeting Apr 12 at 10 AM — e-app target',
+    movedFromLead: true, leadId: 'P001',
+    notes: 'Hot lead from referral. WL illustration sent. High close probability.',
+    netWorth: '$340K', creditScore: 760, stage_color: '#003087',
+    history: [
+      { date: 'Mar 28, 2026', event: 'Referral received from Robert Chen' },
+      { date: 'Apr 3, 2026',  event: 'Discovery call — budget $350+/mo confirmed' },
+      { date: 'Apr 7, 2026',  event: 'WL $500K illustration sent via email' },
+      { date: 'Apr 12, 2026', event: 'In-person meeting scheduled — e-app target' },
+    ]
+  },
+  OPP002: {
+    id: 'OPP002', initials: 'MS', name: 'Michael Santos', occupation: 'Owner, Santos Tech Solutions',
+    city: 'Queens', age: 47, income: '$580K/yr', score: 91, stage: 'Verbal Commit',
+    daysInStage: 2, annualValue: '$6,800', commission: '$816', email: 'msantos@santech.com',
+    phone: '(718) 555-0247', source: 'Referral — Linda Morrison',
+    products: ['Universal Life $750K', 'Key-Person Term $2M'],
+    nextAction: 'Send pre-filled e-app today — close TODAY',
+    movedFromLead: true, leadId: 'P004',
+    notes: '91% close probability. E-app pending signature. Business owner, HNW.',
+    netWorth: '$1.8M', creditScore: 782, stage_color: '#22c55e',
+    history: [
+      { date: 'Apr 5, 2026',  event: 'Initial meeting — business planning interest' },
+      { date: 'Apr 9, 2026',  event: 'UL $750K illustration reviewed' },
+      { date: 'Apr 11, 2026', event: 'Verbal commitment received — e-app in prep' },
+      { date: 'Apr 13, 2026', event: 'E-app pending final signature' },
+    ]
+  },
+  OPP003: {
+    id: 'OPP003', initials: 'RK', name: 'Rachel Kim', occupation: 'Owner, Kim Consulting',
+    city: 'Hoboken', age: 44, income: '$340K/yr', score: 87, stage: 'App Submitted',
+    daysInStage: 3, annualValue: '$9,200', commission: '$1,104', email: 'rkim@kimconsult.com',
+    phone: '(201) 555-0312', source: 'Referral — Patricia Nguyen',
+    products: ['Universal Life $1M', 'Key-Person Term $1.5M'],
+    nextAction: 'UW decision expected Apr 18 — follow up daily',
+    movedFromLead: true, leadId: 'P008',
+    notes: 'App submitted. UW in progress. Business owner, excellent health.',
+    netWorth: '$1.2M', creditScore: 774, stage_color: '#7c3aed',
+    history: [
+      { date: 'Apr 1, 2026',  event: 'Discovery meeting — business succession planning' },
+      { date: 'Apr 7, 2026',  event: 'UL $1M + Key-Person illustrations reviewed' },
+      { date: 'Apr 10, 2026', event: 'Application submitted — UW initiated' },
+      { date: 'Apr 15, 2026', event: 'APS request sent to physician' },
+    ]
+  },
+  OPP004: {
+    id: 'OPP004', initials: 'WC', name: 'William Chen', occupation: 'Retired Executive, Former SVP',
+    city: 'Upper West Side', age: 62, income: '$220K/yr (pension+investments)',
+    score: 85, stage: 'Proposal Sent', daysInStage: 4, annualValue: '$15,600',
+    commission: '$3,336', email: 'wchen@email.com', phone: '(212) 555-0462',
+    source: 'Client Referral — James Whitfield',
+    products: ['LTC Partnership Policy $400K', 'Survivorship UL $1M (ILIT)'],
+    nextAction: 'Advisory proposal meeting Apr 17 — review full estate plan',
+    movedFromLead: true, leadId: 'P009',
+    notes: 'HNW retiree. $2.8M portfolio. Estate planning + LTC window closing.',
+    netWorth: '$2.8M', creditScore: 811, stage_color: '#d97706',
+    history: [
+      { date: 'Apr 3, 2026',  event: 'Referral from James Whitfield — estate needs' },
+      { date: 'Apr 9, 2026',  event: 'LTC + Survivorship UL illustrations prepared' },
+      { date: 'Apr 11, 2026', event: 'Full proposal package emailed' },
+      { date: 'Apr 17, 2026', event: 'Advisory meeting scheduled' },
+    ]
+  },
+  OPP005: {
+    id: 'OPP005', initials: 'NF', name: 'Nancy Foster', occupation: 'Healthcare Director, NYU Langone',
+    city: 'Brooklyn', age: 41, income: '$195K/yr', score: 68, stage: 'Negotiating',
+    daysInStage: 11, annualValue: '$3,600', commission: '$432', email: 'nancy.f@email.com',
+    phone: '(718) 555-0198', source: 'AI Trigger — Mortgage Filing',
+    products: ['Term Life 20-yr $1M', 'LTC Rider'],
+    nextAction: 'Warm follow-up call — resend proposal with mortgage protection story',
+    movedFromLead: true, leadId: 'P002',
+    notes: 'New $530K mortgage trigger. DTI 41% — budget conscious. Re-engage needed.',
+    netWorth: '$620K', creditScore: 718, stage_color: '#dc2626',
+    history: [
+      { date: 'Mar 31, 2026', event: 'Mortgage filing detected — AI trigger' },
+      { date: 'Apr 4, 2026',  event: 'Initial outreach call — interest confirmed' },
+      { date: 'Apr 6, 2026',  event: 'Proposal sent — Term $1M + LTC rider' },
+      { date: 'Apr 13, 2026', event: 'Follow-up overdue — re-engage today' },
+    ]
+  },
+};
+
+let _oppCount = Object.keys(opportunitiesData).length;
+let _currentOppId = null;
+let _oppConvertId = null;
+
+// ── Navigate to Opportunities ─────────────────────────────────────────────
+(function() {
+  const _prevNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    _prevNav(page);
+    if (page === 'opportunities') {
+      setTimeout(() => {
+        renderOppCards();
+        updateOppKPIs();
+      }, 80);
+    }
+  };
+})();
+
+// ── Render all opportunity cards ──────────────────────────────────────────
+function renderOppCards() {
+  const grid = document.getElementById('opp-cards-grid');
+  if (!grid) return;
+  const stageFilter = document.getElementById('opp-stage-filter')?.value || '';
+  const scoreFilter = document.getElementById('opp-score-filter')?.value || '';
+  const q = (document.getElementById('opp-search')?.value || '').toLowerCase();
+
+  const all = Object.values(opportunitiesData);
+  const filtered = all.filter(o => {
+    const matchQ = !q || o.name.toLowerCase().includes(q) || o.occupation.toLowerCase().includes(q);
+    const matchStage = !stageFilter || o.stage === stageFilter;
+    const matchScore = !scoreFilter ||
+      (scoreFilter === 'hot' && o.score >= 80) ||
+      (scoreFilter === 'warm' && o.score >= 50 && o.score < 80);
+    return matchQ && matchStage && matchScore;
+  });
+
+  grid.innerHTML = filtered.length ? filtered.map(o => buildOppCard(o)).join('') : '<div class="opp-empty"><i class="fas fa-bolt"></i><p>No opportunities match your filters.</p></div>';
+
+  const lbl = document.getElementById('opp-count-lbl');
+  if (lbl) lbl.textContent = `Showing ${filtered.length} opportunit${filtered.length !== 1 ? 'ies' : 'y'}`;
+}
+
+function buildOppCard(o) {
+  const scoreClass = o.score >= 80 ? 'opp-score-hot' : o.score >= 50 ? 'opp-score-warm' : 'opp-score-cold';
+  const stageColors = {
+    'Proposal Sent':'#d97706','Meeting Scheduled':'#003087','Negotiating':'#dc2626',
+    'Verbal Commit':'#22c55e','App Submitted':'#7c3aed'
+  };
+  const sc = stageColors[o.stage] || '#64748b';
+  const prods = o.products.map(p => `<span class="opp-prod-chip">${p}</span>`).join('');
+  return `
+    <div class="opp-card" data-id="${o.id}" data-stage="${o.stage}" data-score="${o.score}" onclick="openOppModal('${o.id}')">
+      <div class="opp-card-top">
+        <div class="opp-avatar">${o.initials}</div>
+        <div class="opp-card-meta">
+          <div class="opp-name">${o.name}</div>
+          <div class="opp-role">${o.occupation} · ${o.city}</div>
+        </div>
+        <div class="opp-score-badge ${scoreClass}">${o.score}</div>
+      </div>
+      <div class="opp-stage-row">
+        <span class="opp-stage-pill" style="background:${sc}18;color:${sc};border:1px solid ${sc}40">${o.stage}</span>
+        <span class="opp-days-lbl">${o.daysInStage}d in stage</span>
+      </div>
+      <div class="opp-products-row">${prods}</div>
+      <div class="opp-financial-row">
+        <span class="opp-fin-chip"><i class="fas fa-dollar-sign"></i> ${o.annualValue}/yr</span>
+        <span class="opp-fin-chip"><i class="fas fa-hand-holding-usd"></i> ${o.commission} commission</span>
+      </div>
+      <div class="opp-card-footer">
+        <span class="opp-next-action"><i class="fas fa-bolt" style="color:#7c3aed"></i> ${o.nextAction.slice(0,52)}${o.nextAction.length>52?'…':''}</span>
+        <button class="opp-move-client-btn" onclick="event.stopPropagation();openOppToClientModal('${o.id}')"><i class="fas fa-user-check"></i> Move to Clients</button>
+      </div>
+    </div>`;
+}
+
+function filterOppCards() { renderOppCards(); }
+
+function updateOppKPIs() {
+  const all = Object.values(opportunitiesData);
+  const total = all.length;
+  const hot = all.filter(o => o.score >= 80).length;
+  const pipeline = all.reduce((s,o) => {
+    const n = parseFloat((o.annualValue||'0').replace(/[^0-9.]/g,'')) * ((o.annualValue||'').includes('K') ? 1000 : 1);
+    return s + n;
+  }, 0);
+  const comm = all.reduce((s,o) => {
+    const n = parseFloat((o.commission||'0').replace(/[^0-9.]/g,''));
+    return s + n;
+  }, 0);
+  const closing = all.filter(o => ['Verbal Commit','App Submitted'].includes(o.stage)).length;
+
+  const fmt = n => n >= 1000 ? '$' + (n/1000).toFixed(1) + 'K' : '$' + n;
+
+  const setEl = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  setEl('opp-kpi-total', total);
+  setEl('opp-kpi-hot', hot);
+  setEl('opp-kpi-value', fmt(pipeline));
+  setEl('opp-kpi-comm', fmt(comm));
+  setEl('opp-kpi-closing', closing);
+
+  // Update nav badge
+  const badge = document.getElementById('opp-nav-badge');
+  if (badge) badge.textContent = total;
+}
+
+// ── Open Opportunity Modal ────────────────────────────────────────────────
+function openOppModal(id) {
+  const o = opportunitiesData[id];
+  if (!o) return;
+  _currentOppId = id;
+
+  // Remove existing
+  const existing = document.getElementById('opp-modal-overlay');
+  if (existing) existing.remove();
+
+  const stageColors = {
+    'Proposal Sent':'#d97706','Meeting Scheduled':'#003087','Negotiating':'#dc2626',
+    'Verbal Commit':'#22c55e','App Submitted':'#7c3aed'
+  };
+  const sc = stageColors[o.stage] || '#64748b';
+  const scoreColor = o.score >= 80 ? '#22c55e' : o.score >= 50 ? '#f59e0b' : '#dc2626';
+  const histRows = o.history.map(h => `
+    <div class="opp-hist-item">
+      <div class="opp-hist-dot"></div>
+      <div class="opp-hist-body"><div class="opp-hist-event">${h.event}</div><div class="opp-hist-date">${h.date}</div></div>
+    </div>`).join('');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'opp-modal-overlay';
+  overlay.className = 'opp-modal-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) closeOppModal(); };
+  overlay.innerHTML = `
+    <div class="opp-modal">
+      <button class="opp-modal-close" onclick="closeOppModal()"><i class="fas fa-times"></i></button>
+
+      <!-- Header -->
+      <div class="opp-modal-header">
+        <div class="opp-modal-avatar" style="background:linear-gradient(135deg,${scoreColor}22,${scoreColor}44);color:${scoreColor}">${o.initials}</div>
+        <div class="opp-modal-info">
+          <div class="opp-modal-name">${o.name}</div>
+          <div class="opp-modal-role">${o.occupation} · ${o.city} · Age ${o.age}</div>
+          <div class="opp-modal-badges">
+            <span class="opp-stage-pill" style="background:${sc}18;color:${sc};border:1px solid ${sc}40">${o.stage}</span>
+            <span class="opp-source-badge"><i class="fas fa-link"></i> ${o.source}</span>
+            <span class="opp-income-badge"><i class="fas fa-briefcase"></i> ${o.income}</span>
+          </div>
+        </div>
+        <div class="opp-modal-score" style="color:${scoreColor}">
+          <div class="opp-modal-score-val">${o.score}</div>
+          <div class="opp-modal-score-lbl">${o.score>=80?'Hot 🔥':'Warm 📊'}</div>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="opp-modal-kpis">
+        <div class="opp-mkpi"><div class="opp-mkpi-val">${o.annualValue}</div><div class="opp-mkpi-lbl">Annual Value</div></div>
+        <div class="opp-mkpi"><div class="opp-mkpi-val">${o.commission}</div><div class="opp-mkpi-lbl">Commission (Y1)</div></div>
+        <div class="opp-mkpi"><div class="opp-mkpi-val">${o.daysInStage}d</div><div class="opp-mkpi-lbl">Days in Stage</div></div>
+        <div class="opp-mkpi"><div class="opp-mkpi-val">${o.products.length}</div><div class="opp-mkpi-lbl">Products</div></div>
+        <div class="opp-mkpi"><div class="opp-mkpi-val">${o.netWorth}</div><div class="opp-mkpi-lbl">Net Worth</div></div>
+        <div class="opp-mkpi"><div class="opp-mkpi-val" style="color:${o.creditScore>=750?'#22c55e':o.creditScore>=700?'#f59e0b':'#dc2626'}">${o.creditScore}</div><div class="opp-mkpi-lbl">Credit Score</div></div>
+      </div>
+
+      <!-- Body -->
+      <div class="opp-modal-body">
+        <!-- Products -->
+        <div class="opp-section">
+          <div class="opp-section-title"><i class="fas fa-box-open" style="color:#003087"></i> Products of Interest</div>
+          <div class="opp-products-list">${o.products.map(p=>`<span class="opp-prod-pill"><i class="fas fa-file-invoice-dollar"></i> ${p}</span>`).join('')}</div>
+        </div>
+
+        <!-- Next Action -->
+        <div class="opp-section">
+          <div class="opp-section-title"><i class="fas fa-bolt" style="color:#7c3aed"></i> Next Action</div>
+          <div class="opp-next-action-box"><i class="fas fa-arrow-right" style="color:#7c3aed"></i> ${o.nextAction}</div>
+        </div>
+
+        <!-- Notes -->
+        <div class="opp-section">
+          <div class="opp-section-title"><i class="fas fa-sticky-note" style="color:#d97706"></i> Notes</div>
+          <div class="opp-notes-box">${o.notes}</div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="opp-section">
+          <div class="opp-section-title"><i class="fas fa-history" style="color:#0891b2"></i> Activity Timeline</div>
+          <div class="opp-timeline">${histRows}</div>
+        </div>
+
+        <!-- Contact -->
+        <div class="opp-section">
+          <div class="opp-section-title"><i class="fas fa-address-card" style="color:#059669"></i> Contact</div>
+          <div class="opp-contact-row">
+            <span><i class="fas fa-envelope" style="color:#003087"></i> ${o.email}</span>
+            <span><i class="fas fa-phone" style="color:#059669"></i> ${o.phone}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="opp-modal-footer">
+        <button class="btn btn-outline" onclick="closeOppModal()"><i class="fas fa-times"></i> Close</button>
+        <button class="btn btn-ai" onclick="closeOppModal();sendContextMessage('Give me a complete AI close strategy for opportunity ${o.name} — stage ${o.stage}, products: ${o.products.join(', ')}, score ${o.score}. Include objection handling and close script.','advisor');navigateTo('ai-agents')"><i class="fas fa-robot"></i> AI Close Strategy</button>
+        <button class="btn" style="background:#f59e0b;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px" onclick="closeOppModal();navigateTo('prospects')"><i class="fas fa-arrow-left"></i> Back to Leads</button>
+        <button class="btn btn-primary" onclick="closeOppModal();openOppToClientModal('${id}')"><i class="fas fa-user-check"></i> Move to Clients</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOppModal() {
+  const overlay = document.getElementById('opp-modal-overlay');
+  if (overlay) overlay.remove();
+  document.body.style.overflow = '';
+}
+
+// ── Move Lead → Opportunity (replaces "Move to Sales Pipeline") ───────────
+function moveLeadToOpportunity(leadId) {
+  const p = (typeof prospectData !== 'undefined') ? prospectData[leadId] : null;
+  if (!p) return;
+
+  const existing = document.getElementById('lead-to-opp-overlay');
+  if (existing) existing.remove();
+
+  const scoreColor = p.score >= 80 ? '#22c55e' : p.score >= 50 ? '#f59e0b' : '#dc2626';
+  const overlay = document.createElement('div');
+  overlay.id = 'lead-to-opp-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9300;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:520px;box-shadow:0 24px 80px rgba(0,0,0,0.28);overflow:hidden;animation:prospModalIn 0.25s ease">
+      <div style="background:linear-gradient(135deg,#7c3aed,#5b21b6);padding:20px 24px;display:flex;align-items:center;gap:14px">
+        <i class="fas fa-bolt" style="font-size:1.6rem;color:#c4b5fd"></i>
+        <div>
+          <div style="font-size:1.05rem;font-weight:700;color:#fff">Move to Opportunities</div>
+          <div style="font-size:0.8rem;color:#c4b5fd;margin-top:2px">This lead is qualified — create an Opportunity record</div>
+        </div>
+      </div>
+      <div style="padding:20px 24px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#f8f5ff;border-radius:10px;margin-bottom:16px">
+          <div style="width:42px;height:42px;border-radius:50%;background:${scoreColor}18;color:${scoreColor};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem">${p.initials}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;color:#1e293b">${p.name}</div>
+            <div style="font-size:0.78rem;color:#64748b">${p.occupation} · ${p.city}</div>
+          </div>
+          <div style="background:${scoreColor}18;color:${scoreColor};font-weight:700;padding:4px 10px;border-radius:6px;font-size:0.85rem">${p.score} ${p.score>=80?'🔥':'📊'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#334155"><i class="fas fa-check-circle" style="color:#22c55e;width:16px"></i> Create Opportunity record with full lead history</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#334155"><i class="fas fa-check-circle" style="color:#22c55e;width:16px"></i> Carry over products, 3rd-party data &amp; financial plan</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#334155"><i class="fas fa-check-circle" style="color:#22c55e;width:16px"></i> Assign to Opportunities pipeline for close tracking</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#334155"><i class="fas fa-check-circle" style="color:#22c55e;width:16px"></i> Set follow-up reminder &amp; send intro email</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#f59e0b"><i class="fas fa-info-circle" style="color:#f59e0b;width:16px"></i> Lead removed from Leads list after confirmation</div>
+        </div>
+      </div>
+      <div style="padding:16px 24px;border-top:1px solid #e2e8f0;display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="document.getElementById('lead-to-opp-overlay').remove()">Cancel</button>
+        <button class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed" onclick="confirmLeadToOpportunity('${leadId}')"><i class="fas fa-bolt"></i> Confirm — Move to Opportunities</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function confirmLeadToOpportunity(leadId) {
+  const p = (typeof prospectData !== 'undefined') ? prospectData[leadId] : null;
+  document.getElementById('lead-to-opp-overlay')?.remove();
+
+  if (p) {
+    // Build new opportunity from lead data
+    const newId = 'OPP' + String(Date.now()).slice(-5);
+    const stageMap = {
+      'New Lead':'Proposal Sent','Contacted':'Proposal Sent','Qualified':'Proposal Sent',
+      'Proposal Sent':'Proposal Sent','Meeting Scheduled':'Meeting Scheduled','Negotiating':'Negotiating'
+    };
+    opportunitiesData[newId] = {
+      id: newId, initials: p.initials, name: p.name, occupation: p.occupation,
+      city: p.city, age: p.age, income: p.income, score: p.score,
+      stage: stageMap[p.stage] || 'Proposal Sent', daysInStage: 0,
+      annualValue: p.annualValue, commission: p.commission,
+      email: p.email || 'N/A', phone: p.phone || 'N/A',
+      source: p.source, products: p.products,
+      nextAction: p.nextAction || 'Review proposal and schedule follow-up',
+      movedFromLead: true, leadId: leadId,
+      notes: `Moved from Leads. Stage was: ${p.stage}. ${p.aiStrategy?.summary||''}`.trim(),
+      netWorth: p.thirdParty?.wealth?.netWorth || '—',
+      creditScore: p.thirdParty?.credit?.score || 700,
+      history: [
+        { date: 'Today', event: `Moved from Leads — was at stage "${p.stage}"` },
+        ...(p.timeline||[]).slice(0,3).map(t => ({ date: t.date, event: t.title + (t.desc?' — '+t.desc.slice(0,60):'') }))
+      ]
+    };
+    _oppCount++;
+
+    // Update nav badge
+    const badge = document.getElementById('opp-nav-badge');
+    if (badge) badge.textContent = Object.keys(opportunitiesData).length;
+  }
+
+  // Remove lead card from grid with animation
+  closeProspectModal && closeProspectModal();
+  const card = document.querySelector(`.prosp-card[data-id="${leadId}"]`);
+  if (card) {
+    card.style.transition = 'all 0.4s ease';
+    card.style.transform = 'scale(0.9)';
+    card.style.opacity = '0.4';
+    setTimeout(() => {
+      card.style.transform = 'scale(0)';
+      card.style.opacity = '0';
+      setTimeout(() => card.remove(), 300);
+    }, 400);
+  }
+
+  // Update count label
+  setTimeout(() => {
+    const countLbl = document.getElementById('opp-count-lbl');
+    if (countLbl) {
+      const visible = document.querySelectorAll('.prosp-card').length;
+      countLbl.textContent = `Showing ${Math.max(0, visible)} leads`;
+    }
+    // Update leads nav badge
+    const leadsBadge = document.querySelector('.prospects-nav .nav-badge');
+    if (leadsBadge) {
+      const cur = parseInt(leadsBadge.textContent)||0;
+      leadsBadge.textContent = Math.max(0, cur-1);
+    }
+  }, 800);
+
+  // Success toast
+  const name = p ? p.name : 'Lead';
+  const toast = document.createElement('div');
+  toast.className = 'prosp-success-toast';
+  toast.innerHTML = `
+    <div class="pst-inner">
+      <i class="fas fa-bolt pst-icon" style="color:#7c3aed"></i>
+      <div>
+        <div class="pst-title">${name} moved to Opportunities!</div>
+        <div class="pst-sub">Opportunity created · Follow-up reminder set · Intro email queued</div>
+      </div>
+      <div class="pst-actions">
+        <button class="pst-btn" onclick="navigateTo('opportunities')">View Opportunities</button>
+        <button class="pst-btn pst-btn-outline" onclick="this.closest('.prosp-success-toast').remove()">Dismiss</button>
+      </div>
+      <button class="pst-close" onclick="this.closest('.prosp-success-toast').remove()"><i class="fas fa-times"></i></button>
+    </div>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 8000);
+}
+
+// ── Move Opportunity → Clients ────────────────────────────────────────────
+function openOppToClientModal(id) {
+  const o = opportunitiesData[id];
+  if (!o) return;
+  _oppConvertId = id;
+
+  const existing = document.getElementById('opp-to-client-overlay');
+  if (existing) existing.remove();
+
+  const scoreColor = o.score >= 80 ? '#22c55e' : o.score >= 50 ? '#f59e0b' : '#dc2626';
+  const overlay = document.createElement('div');
+  overlay.id = 'opp-to-client-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9300;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:520px;box-shadow:0 24px 80px rgba(0,0,0,0.28);overflow:hidden;animation:prospModalIn 0.25s ease">
+      <div style="background:linear-gradient(135deg,#003087,#0057c8);padding:20px 24px;display:flex;align-items:center;gap:14px">
+        <i class="fas fa-user-check" style="font-size:1.6rem;color:#93c5fd"></i>
+        <div>
+          <div style="font-size:1.05rem;font-weight:700;color:#fff">Move to Clients</div>
+          <div style="font-size:0.8rem;color:#bfdbfe;margin-top:2px">Convert this Opportunity into an active Client</div>
+        </div>
+      </div>
+      <div style="padding:20px 24px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#eff6ff;border-radius:10px;margin-bottom:16px">
+          <div style="width:42px;height:42px;border-radius:50%;background:${scoreColor}18;color:${scoreColor};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem">${o.initials}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;color:#1e293b">${o.name}</div>
+            <div style="font-size:0.78rem;color:#64748b">${o.occupation} · ${o.city}</div>
+          </div>
+          <div style="background:${scoreColor}18;color:${scoreColor};font-weight:700;padding:4px 10px;border-radius:6px;font-size:0.85rem">${o.annualValue}/yr</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#334155"><i class="fas fa-check-circle" style="color:#22c55e;width:16px"></i> Create new Client profile with full history</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#334155"><i class="fas fa-check-circle" style="color:#22c55e;width:16px"></i> Link financial plan, illustrations &amp; products</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#334155"><i class="fas fa-check-circle" style="color:#22c55e;width:16px"></i> Set onboarding tasks &amp; welcome email</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#334155"><i class="fas fa-check-circle" style="color:#22c55e;width:16px"></i> Increment client count &amp; revenue metrics</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#f59e0b"><i class="fas fa-info-circle" style="color:#f59e0b;width:16px"></i> Opportunity removed from pipeline after conversion</div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-size:0.82rem;color:#065f46">
+          <i class="fas fa-dollar-sign" style="margin-right:6px"></i>
+          <strong>Revenue on close:</strong> ${o.annualValue}/yr annual premium · ${o.commission} first-year commission
+        </div>
+      </div>
+      <div style="padding:16px 24px;border-top:1px solid #e2e8f0;display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="document.getElementById('opp-to-client-overlay').remove()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmOppToClient('${id}')"><i class="fas fa-user-check"></i> Confirm — Move to Clients</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function confirmOppToClient(id) {
+  const o = opportunitiesData[id];
+  document.getElementById('opp-to-client-overlay')?.remove();
+  closeOppModal();
+
+  if (o) {
+    // Remove from opportunities
+    delete opportunitiesData[id];
+
+    // Refresh cards if on opportunities page
+    setTimeout(() => {
+      renderOppCards();
+      updateOppKPIs();
+    }, 500);
+
+    // Update nav badge
+    const badge = document.getElementById('opp-nav-badge');
+    if (badge) badge.textContent = Object.keys(opportunitiesData).length;
+  }
+
+  // Success toast
+  const name = o ? o.name : 'Opportunity';
+  const toast = document.createElement('div');
+  toast.className = 'prosp-success-toast';
+  toast.innerHTML = `
+    <div class="pst-inner">
+      <i class="fas fa-user-check pst-icon" style="color:#003087"></i>
+      <div>
+        <div class="pst-title">${name} is now a Client!</div>
+        <div class="pst-sub">Client profile created · Onboarding tasks set · Welcome email sent</div>
+      </div>
+      <div class="pst-actions">
+        <button class="pst-btn" onclick="navigateTo('clients')">View Clients</button>
+        <button class="pst-btn pst-btn-outline" onclick="this.closest('.prosp-success-toast').remove()">Dismiss</button>
+      </div>
+      <button class="pst-close" onclick="this.closest('.prosp-success-toast').remove()"><i class="fas fa-times"></i></button>
+    </div>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 8000);
+}
+
+// ── Add Opportunity modal (quick) ─────────────────────────────────────────
+function openAddOppModal() {
+  showToast('Use "Add Lead" in Leads, or move an existing Lead to Opportunities.');
+}
+
+// ── AI Analysis ───────────────────────────────────────────────────────────
+function oppAIAnalysis() {
+  const all = Object.values(opportunitiesData);
+  const names = all.slice(0,3).map(o=>o.name).join(', ');
+  sendContextMessage && sendContextMessage(
+    `Run AI close analysis for my top opportunities: ${names}. Rank by close probability, suggest next best actions, and flag any at-risk deals.`,
+    'advisor'
+  );
+  navigateTo('ai-agents');
+}
+
+console.log('Opportunities module loaded — opportunitiesData(' + Object.keys(opportunitiesData).length + '), openOppModal, moveLeadToOpportunity, confirmLeadToOpportunity, openOppToClientModal, confirmOppToClient all ready');

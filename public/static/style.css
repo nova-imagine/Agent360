@@ -20277,3 +20277,131 @@ kbd {
 
 /* cm-empty-sm */
 .cm-empty-sm { font-size: 0.78rem; color: #94a3b8; padding: 8px 0; font-style: italic; }
+
+/* ═══════════════════════════════════════════════════════════════
+   OPPORTUNITIES PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Page layout */
+.opportunities-page { padding: 24px; max-width: 1400px; }
+
+/* Header */
+.opp-page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.opp-header-left {}
+.opp-page-title { font-size: 1.45rem; font-weight: 800; color: #1e293b; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+.opp-page-title i { color: #7c3aed; }
+.opp-page-sub { font-size: 0.82rem; color: #64748b; margin: 0; }
+.opp-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* KPI Strip */
+.opp-kpi-strip { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.opp-kpi { background: #fff; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.07); border: 1px solid #e2e8f0; flex: 1; min-width: 160px; }
+.opp-kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.opp-kpi-body {}
+.opp-kpi-val { font-size: 1.4rem; font-weight: 800; color: #1e293b; line-height: 1; }
+.opp-kpi-lbl { font-size: 0.72rem; color: #64748b; margin-top: 3px; font-weight: 500; }
+
+/* Toolbar */
+.opp-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.opp-tb-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.opp-search { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 12px; min-width: 220px; }
+.opp-search i { color: #94a3b8; font-size: 0.82rem; }
+.opp-search input { border: none; outline: none; font-size: 0.83rem; color: #334155; background: transparent; width: 100%; }
+.opp-select { border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 12px; font-size: 0.82rem; color: #334155; background: #fff; cursor: pointer; }
+.opp-count-lbl { font-size: 0.8rem; color: #64748b; font-weight: 500; white-space: nowrap; }
+
+/* Cards grid */
+.opp-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
+
+/* Individual card */
+.opp-card { background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.opp-card:hover { border-color: #7c3aed40; box-shadow: 0 6px 24px rgba(124,58,237,0.12); transform: translateY(-2px); }
+
+.opp-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.opp-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg,#7c3aed22,#7c3aed44); color: #7c3aed; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
+.opp-card-meta { flex: 1; min-width: 0; }
+.opp-name { font-size: 0.92rem; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.opp-role { font-size: 0.73rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Score badge */
+.opp-score-badge { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.78rem; flex-shrink: 0; }
+.opp-score-hot { background: #dcfce7; color: #15803d; }
+.opp-score-warm { background: #fef3c7; color: #92400e; }
+.opp-score-cold { background: #fee2e2; color: #991b1b; }
+
+/* Stage & days row */
+.opp-stage-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.opp-stage-pill { font-size: 0.71rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.opp-days-lbl { font-size: 0.7rem; color: #94a3b8; margin-left: auto; }
+
+/* Products row */
+.opp-products-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+.opp-prod-chip { background: #eff6ff; color: #003087; font-size: 0.67rem; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+
+/* Financial row */
+.opp-financial-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.opp-fin-chip { background: #f1f5f9; color: #475569; font-size: 0.72rem; font-weight: 600; padding: 4px 9px; border-radius: 6px; display: flex; align-items: center; gap: 5px; }
+.opp-fin-chip i { color: #7c3aed; }
+
+/* Card footer */
+.opp-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+.opp-next-action { font-size: 0.7rem; color: #475569; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.opp-move-client-btn { background: #003087; color: #fff; border: none; border-radius: 7px; padding: 6px 12px; font-size: 0.71rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: background 0.15s; flex-shrink: 0; }
+.opp-move-client-btn:hover { background: #0057c8; }
+
+/* Empty state */
+.opp-empty { text-align: center; padding: 60px 20px; color: #94a3b8; }
+.opp-empty i { font-size: 2.5rem; display: block; margin-bottom: 12px; color: #c4b5fd; }
+.opp-empty p { font-size: 0.88rem; }
+
+/* ── Opportunity Modal ── */
+.opp-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 9200; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.opp-modal { background: #fff; border-radius: 18px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.28); animation: prospModalIn 0.25s ease; position: relative; }
+.opp-modal-close { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.25); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; z-index: 10; }
+.opp-modal-close:hover { background: rgba(255,255,255,0.4); }
+
+/* Modal header */
+.opp-modal-header { background: linear-gradient(135deg, #7c3aed, #5b21b6); padding: 20px 24px; display: flex; align-items: center; gap: 16px; border-radius: 18px 18px 0 0; }
+.opp-modal-avatar { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
+.opp-modal-info { flex: 1; min-width: 0; }
+.opp-modal-name { font-size: 1.1rem; font-weight: 800; color: #fff; }
+.opp-modal-role { font-size: 0.78rem; color: #c4b5fd; margin-top: 2px; }
+.opp-modal-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.opp-source-badge, .opp-income-badge { background: rgba(255,255,255,0.18); color: #fff; font-size: 0.7rem; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 5px; }
+.opp-modal-score { text-align: center; flex-shrink: 0; }
+.opp-modal-score-val { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+.opp-modal-score-lbl { font-size: 0.68rem; font-weight: 700; margin-top: 2px; }
+
+/* Modal KPIs */
+.opp-modal-kpis { display: flex; border-bottom: 1px solid #e2e8f0; }
+.opp-mkpi { flex: 1; text-align: center; padding: 12px 8px; border-right: 1px solid #e2e8f0; }
+.opp-mkpi:last-child { border-right: none; }
+.opp-mkpi-val { font-size: 0.88rem; font-weight: 800; color: #1e293b; }
+.opp-mkpi-lbl { font-size: 0.64rem; color: #94a3b8; margin-top: 3px; font-weight: 500; }
+
+/* Modal body sections */
+.opp-modal-body { padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+.opp-section {}
+.opp-section-title { font-size: 0.78rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 7px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+.opp-products-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.opp-prod-pill { background: #eff6ff; color: #003087; font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
+.opp-next-action-box { background: #f5f3ff; border-left: 3px solid #7c3aed; padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 0.82rem; color: #3b0764; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.opp-notes-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-size: 0.8rem; color: #475569; line-height: 1.5; }
+.opp-contact-row { display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.82rem; color: #334155; }
+.opp-contact-row span { display: flex; align-items: center; gap: 7px; }
+
+/* Timeline in modal */
+.opp-timeline { display: flex; flex-direction: column; gap: 0; }
+.opp-hist-item { display: flex; gap: 12px; padding: 8px 0; position: relative; }
+.opp-hist-item:not(:last-child)::before { content: ''; position: absolute; left: 5px; top: 20px; bottom: -8px; width: 2px; background: #e2e8f0; }
+.opp-hist-dot { width: 12px; height: 12px; border-radius: 50%; background: #7c3aed; flex-shrink: 0; margin-top: 3px; }
+.opp-hist-body {}
+.opp-hist-event { font-size: 0.8rem; color: #334155; font-weight: 500; }
+.opp-hist-date { font-size: 0.7rem; color: #94a3b8; margin-top: 2px; }
+
+/* Modal footer */
+.opp-modal-footer { padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; background: #fafafa; border-radius: 0 0 18px 18px; }
+
+/* Prospect card — update convert button to bolt style */
+.prosp-convert-btn { background: #7c3aed; }
+.prosp-convert-btn:hover { background: #6d28d9; }

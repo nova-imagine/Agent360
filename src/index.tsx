@@ -287,6 +287,7 @@ function MainApp() {
         <div id="tpl-dashboard"><DashboardPage /></div>
         <div id="tpl-clients"><ClientsPage /></div>
         <div id="tpl-prospects"><ProspectsPage /></div>
+        <div id="tpl-opportunities"><OpportunitiesPage /></div>
         <div id="tpl-policies"><PoliciesPage /></div>
         <div id="tpl-claims"><ClaimsPage /></div>
         <div id="tpl-ai-agents"><AIAgentsPage /></div>
@@ -459,6 +460,11 @@ function Sidebar() {
           <i class="fas fa-user-clock"></i>
           <span>Leads</span>
           <span class="nav-badge" style="background:#f59e0b;color:#fff">14</span>
+        </a>
+        <a class="nav-item opportunities-nav" onclick="navigateTo('opportunities')" href="#">
+          <i class="fas fa-bolt"></i>
+          <span>Opportunities</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff" id="opp-nav-badge">5</span>
         </a>
         <a class="nav-item" onclick="navigateTo('sales')" href="#">
           <i class="fas fa-funnel-dollar"></i>
@@ -2980,6 +2986,81 @@ function ProspectsPage() {
             <button class="btn btn-primary" id="pcm-confirm-btn" onclick="confirmProspectConversion()"><i class="fas fa-funnel-dollar"></i> Confirm — Move to Pipeline</button>
           </div>
         </div>
+      </div>
+
+    </div>
+  )
+}
+
+function OpportunitiesPage() {
+  return (
+    <div class="page opportunities-page">
+
+      {/* ── Header ── */}
+      <div class="opp-page-header">
+        <div class="opp-header-left">
+          <h2 class="opp-page-title"><i class="fas fa-bolt"></i> Opportunities</h2>
+          <p class="opp-page-sub">Qualified leads ready to close · AI-scored · linked to Financial Plans &amp; Illustrations</p>
+        </div>
+        <div class="opp-header-actions">
+          <button class="btn btn-ai" onclick="oppAIAnalysis()"><i class="fas fa-robot"></i> AI Score All</button>
+          <button class="btn btn-primary" onclick="openAddOppModal()"><i class="fas fa-plus"></i> Add Opportunity</button>
+        </div>
+      </div>
+
+      {/* ── KPI Strip ── */}
+      <div class="opp-kpi-strip" id="opp-kpi-strip">
+        <div class="opp-kpi">
+          <div class="opp-kpi-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-bolt"></i></div>
+          <div class="opp-kpi-body"><div class="opp-kpi-val" id="opp-kpi-total">5</div><div class="opp-kpi-lbl">Total Opportunities</div></div>
+        </div>
+        <div class="opp-kpi">
+          <div class="opp-kpi-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-fire"></i></div>
+          <div class="opp-kpi-body"><div class="opp-kpi-val" id="opp-kpi-hot">3</div><div class="opp-kpi-lbl">Hot (Score 80+)</div></div>
+        </div>
+        <div class="opp-kpi">
+          <div class="opp-kpi-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-dollar-sign"></i></div>
+          <div class="opp-kpi-body"><div class="opp-kpi-val" id="opp-kpi-value">$142K</div><div class="opp-kpi-lbl">Pipeline Value</div></div>
+        </div>
+        <div class="opp-kpi">
+          <div class="opp-kpi-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-hand-holding-usd"></i></div>
+          <div class="opp-kpi-body"><div class="opp-kpi-val" id="opp-kpi-comm">$17.1K</div><div class="opp-kpi-lbl">Est. Commission</div></div>
+        </div>
+        <div class="opp-kpi">
+          <div class="opp-kpi-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-clock"></i></div>
+          <div class="opp-kpi-body"><div class="opp-kpi-val" id="opp-kpi-closing">2</div><div class="opp-kpi-lbl">Closing This Week</div></div>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div class="opp-toolbar">
+        <div class="opp-tb-left">
+          <div class="opp-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="opp-search" placeholder="Search opportunities..." oninput="filterOppCards()" />
+          </div>
+          <select class="opp-select" id="opp-stage-filter" onchange="filterOppCards()">
+            <option value="">All Stages</option>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Meeting Scheduled">Meeting Scheduled</option>
+            <option value="Negotiating">Negotiating</option>
+            <option value="Verbal Commit">Verbal Commit</option>
+            <option value="App Submitted">App Submitted</option>
+          </select>
+          <select class="opp-select" id="opp-score-filter" onchange="filterOppCards()">
+            <option value="">All Scores</option>
+            <option value="hot">Hot (80+)</option>
+            <option value="warm">Warm (50-79)</option>
+          </select>
+        </div>
+        <div class="opp-tb-right">
+          <span class="opp-count-lbl" id="opp-count-lbl">Showing 5 opportunities</span>
+        </div>
+      </div>
+
+      {/* ── Opportunity Cards Grid ── */}
+      <div class="opp-cards-grid" id="opp-cards-grid">
+        {/* Cards rendered by JS */}
       </div>
 
     </div>
