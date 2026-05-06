@@ -450,11 +450,6 @@ function Sidebar() {
           <span>Policies</span>
           <span class="nav-badge">1.8K</span>
         </a>
-        <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
-          <i class="fas fa-file-medical-alt"></i>
-          <span>Claims</span>
-          <span class="nav-badge alert">7</span>
-        </a>
         <div class="nav-section-label">SALES</div>
         <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
           <i class="fas fa-user-clock"></i>
@@ -480,6 +475,11 @@ function Sidebar() {
           <span class="nav-badge alert">3</span>
         </a>
         <div class="nav-section-label">SERVICE</div>
+        <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
+          <i class="fas fa-file-medical-alt"></i>
+          <span>Claims</span>
+          <span class="nav-badge alert">7</span>
+        </a>
         <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
           <i class="fas fa-microscope"></i>
           <span>Underwriting</span>
