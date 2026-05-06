@@ -444,11 +444,6 @@ function Sidebar() {
           <span>Clients</span>
           <span class="nav-badge">247</span>
         </a>
-        <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
-          <i class="fas fa-user-clock"></i>
-          <span>Prospects</span>
-          <span class="nav-badge" style="background:#f59e0b;color:#fff">14</span>
-        </a>
         <a class="nav-item" onclick="navigateTo('policies')" href="#">
           <i class="fas fa-file-contract"></i>
           <span>Policies</span>
@@ -460,14 +455,14 @@ function Sidebar() {
           <span class="nav-badge alert">7</span>
         </a>
         <div class="nav-section-label">SALES</div>
+        <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
+          <i class="fas fa-user-clock"></i>
+          <span>Leads</span>
+          <span class="nav-badge" style="background:#f59e0b;color:#fff">14</span>
+        </a>
         <a class="nav-item" onclick="navigateTo('sales')" href="#">
           <i class="fas fa-funnel-dollar"></i>
           <span>Sales Pipeline</span>
-        </a>
-        <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
-          <i class="fas fa-microscope"></i>
-          <span>Underwriting</span>
-          <span class="nav-badge" style="background:#0891b2;color:white">4</span>
         </a>
         <a class="nav-item" onclick="navigateTo('products')" href="#">
           <i class="fas fa-box-open"></i>
@@ -477,6 +472,12 @@ function Sidebar() {
           <i class="fas fa-calendar-alt"></i>
           <span>Calendar</span>
           <span class="nav-badge alert">3</span>
+        </a>
+        <div class="nav-section-label">SERVICE</div>
+        <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
+          <i class="fas fa-microscope"></i>
+          <span>Underwriting</span>
+          <span class="nav-badge" style="background:#0891b2;color:white">4</span>
         </a>
 
         <div class="nav-section-label">ANALYTICS</div>
@@ -2453,12 +2454,12 @@ function ProspectsPage() {
       {/* ── Header ── */}
       <div class="prospects-header">
         <div class="ph-left">
-          <h2 class="ph-title"><i class="fas fa-user-clock"></i> Prospects Pipeline</h2>
-          <p class="ph-sub">14 active prospects · AI-scored · 3rd-party data enriched · $284K pipeline value</p>
+          <h2 class="ph-title"><i class="fas fa-user-clock"></i> Leads Pipeline</h2>
+          <p class="ph-sub">14 active leads · AI-scored · 3rd-party data enriched · $284K pipeline value</p>
         </div>
         <div class="ph-actions">
-          <button class="btn btn-ai" onclick="openProspectAIAnalysis()"><i class="fas fa-robot"></i> AI Prospect Score All</button>
-          <button class="btn btn-primary" onclick="openAddProspectModal()"><i class="fas fa-plus"></i> Add Prospect</button>
+          <button class="btn btn-ai" onclick="openProspectAIAnalysis()"><i class="fas fa-robot"></i> AI Lead Score All</button>
+          <button class="btn btn-primary" onclick="openAddProspectModal()"><i class="fas fa-plus"></i> Add Lead</button>
         </div>
       </div>
 
@@ -2466,7 +2467,7 @@ function ProspectsPage() {
       <div class="prosp-kpi-strip">
         <div class="prosp-kpi" onclick="filterProspects('all')" style="cursor:pointer">
           <div class="prosp-kpi-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-users"></i></div>
-          <div class="prosp-kpi-body"><div class="prosp-kpi-val">14</div><div class="prosp-kpi-lbl">Total Prospects</div></div>
+          <div class="prosp-kpi-body"><div class="prosp-kpi-val">14</div><div class="prosp-kpi-lbl">Total Leads</div></div>
         </div>
         <div class="prosp-kpi" onclick="filterProspects('hot')" style="cursor:pointer">
           <div class="prosp-kpi-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-fire"></i></div>
@@ -2511,7 +2512,7 @@ function ProspectsPage() {
         <div class="prosp-tb-left">
           <div class="prosp-search">
             <i class="fas fa-search"></i>
-            <input type="text" id="prospect-search" placeholder="Search prospects..." oninput="filterProspectCards()" />
+            <input type="text" id="prospect-search" placeholder="Search leads..." oninput="filterProspectCards()" />
           </div>
           <select class="prosp-select" id="prosp-stage-filter" onchange="filterProspectCards()">
             <option value="">All Stages</option>
@@ -2540,7 +2541,7 @@ function ProspectsPage() {
           </select>
         </div>
         <div class="prosp-tb-right">
-          <span class="prosp-count-lbl" id="prosp-count-lbl">Showing 14 prospects</span>
+          <span class="prosp-count-lbl" id="prosp-count-lbl">Showing 14 leads</span>
         </div>
       </div>
 
@@ -10573,7 +10574,7 @@ function CalendarPage() {
         <div class="cal-cadence-stats">
           <div class="cal-cadence-stat"><span class="ccs-val">3.5</span><span class="ccs-lbl">Avg meetings/week</span></div>
           <div class="cal-cadence-stat"><span class="ccs-val">6</span><span class="ccs-lbl">Peak (Mar W4)</span></div>
-          <div class="cal-cadence-stat"><span class="ccs-val">14</span><span class="ccs-lbl">New prospects met</span></div>
+          <div class="cal-cadence-stat"><span class="ccs-val">14</span><span class="ccs-lbl">New leads met</span></div>
           <div class="cal-cadence-stat"><span class="ccs-val">87%</span><span class="ccs-lbl">Show rate</span></div>
           <div class="cal-cadence-stat"><span class="ccs-val green-text">+22%</span><span class="ccs-lbl">vs Q4 2025</span></div>
         </div>

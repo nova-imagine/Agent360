@@ -20,7 +20,7 @@ function navigateTo(page) {
   const titles = {
     dashboard: 'Dashboard',
     clients: 'Client Management',
-    prospects: 'Prospects Pipeline',
+    prospects: 'Leads Pipeline',
     policies: 'Policy Management',
     'ai-agents': 'AI Agent Hub',
     sales: 'Sales Pipeline',
@@ -19445,7 +19445,7 @@ window.navigateTo = function(page) {
     // Render prospect count
     setTimeout(() => {
       const lbl = document.getElementById('prosp-count-lbl');
-      if (lbl) lbl.textContent = 'Showing 14 prospects';
+      if (lbl) lbl.textContent = 'Showing 14 leads';
     }, 100);
   }
 };
