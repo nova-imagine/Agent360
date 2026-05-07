@@ -286,6 +286,8 @@ function MainApp() {
       <div id="page-templates" style="display:none">
         <div id="tpl-dashboard"><DashboardPage /></div>
         <div id="tpl-clients"><ClientsPage /></div>
+        <div id="tpl-campaigns"><CampaignsPage /></div>
+        <div id="tpl-upsell"><UpsellTrackPage /></div>
         <div id="tpl-prospects"><ProspectsPage /></div>
         <div id="tpl-opportunities"><OpportunitiesPage /></div>
         <div id="tpl-policies"><PoliciesPage /></div>
@@ -298,6 +300,8 @@ function MainApp() {
         <div id="tpl-calendar"><CalendarPage /></div>
         <div id="tpl-ai-insights"><AIImpactScorecardPage /></div>
         <div id="tpl-settings"><SettingsPage /></div>
+        <div id="tpl-alerts"><PolicyAlertsPage /></div>
+        <div id="tpl-pipeline-view"><PipelineViewPage /></div>
         <div id="tpl-help"><HelpPage /></div>
       </div>
 
@@ -380,8 +384,8 @@ function MainApp() {
               </div>
               <div class="sp-row sp-action-row" onclick="navigateTo('sales'); closeSpotlight()">
                 <span class="sp-row-icon sp-icon-deals"><i class="fas fa-handshake"></i></span>
-                <span class="sp-row-label">Sales Pipeline</span>
-                <span class="sp-row-meta">Sales page</span>
+                <span class="sp-row-label">Journey Pipeline</span>
+                <span class="sp-row-meta">Journey Pipeline page</span>
               </div>
               <div class="sp-row sp-action-row" onclick="navigateTo('calendar'); closeSpotlight()">
                 <span class="sp-row-icon sp-icon-cal"><i class="fas fa-calendar-alt"></i></span>
@@ -451,6 +455,11 @@ function Sidebar() {
           <span class="nav-badge">1.8K</span>
         </a>
         <div class="nav-section-label">SALES</div>
+        <a class="nav-item campaigns-nav" onclick="navigateTo('campaigns')" href="#">
+          <i class="fas fa-bullhorn"></i>
+          <span>Campaigns</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
+        </a>
         <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
           <i class="fas fa-user-clock"></i>
           <span>Leads</span>
@@ -461,10 +470,17 @@ function Sidebar() {
           <span>Opportunities</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff" id="opp-nav-badge">5</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('sales')" href="#">
-          <i class="fas fa-funnel-dollar"></i>
-          <span>Sales Pipeline</span>
+        <a class="nav-item upsell-nav" onclick="navigateTo('upsell')" href="#">
+          <i class="fas fa-arrow-trend-up"></i>
+          <span>Upsell Track</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">8</span>
         </a>
+
+        <a class="nav-item pipeline-view-nav" id="pipeline-view-nav" onclick="navigateTo('pipeline-view')" href="#">
+          <i class="fas fa-route"></i>
+          <span>Journey Pipeline</span>
+        </a>
+
         <a class="nav-item" onclick="navigateTo('products')" href="#">
           <i class="fas fa-box-open"></i>
           <span>Products</span>
@@ -475,6 +491,11 @@ function Sidebar() {
           <span class="nav-badge alert">3</span>
         </a>
         <div class="nav-section-label">SERVICE</div>
+        <a class="nav-item alerts-nav" onclick="navigateTo('alerts')" href="#">
+          <i class="fas fa-bell"></i>
+          <span>Policy Alerts</span>
+          <span class="nav-badge alert" id="alerts-nav-badge">4</span>
+        </a>
         <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
           <i class="fas fa-file-medical-alt"></i>
           <span>Claims</span>
@@ -2453,6 +2474,1171 @@ function ClientsPage() {
   )
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CAMPAIGNS PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+function CampaignsPage() {
+  return (
+    <div class="page campaigns-page">
+
+      {/* ── Header ── */}
+      <div class="camp-header">
+        <div class="camp-header-left">
+          <h2 class="camp-title"><i class="fas fa-bullhorn"></i> AI-Powered Campaigns</h2>
+          <p class="camp-sub">6 active campaigns · 142 leads generated · $1.24M pipeline value · Revenue Generation engine</p>
+        </div>
+        <div class="camp-header-actions">
+          <button class="btn btn-ai" onclick="openCampAIWizard()"><i class="fas fa-robot"></i> AI Campaign Wizard</button>
+          <button class="btn btn-primary" onclick="openNewCampaignModal()"><i class="fas fa-plus"></i> New Campaign</button>
+        </div>
+      </div>
+
+      {/* ── KPI Strip ── */}
+      <div class="camp-kpi-strip">
+        <div class="camp-kpi">
+          <div class="camp-kpi-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-bullhorn"></i></div>
+          <div class="camp-kpi-body"><div class="camp-kpi-val">6</div><div class="camp-kpi-lbl">Active Campaigns</div></div>
+        </div>
+        <div class="camp-kpi">
+          <div class="camp-kpi-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-user-plus"></i></div>
+          <div class="camp-kpi-body"><div class="camp-kpi-val">142</div><div class="camp-kpi-lbl">Leads Generated</div></div>
+        </div>
+        <div class="camp-kpi">
+          <div class="camp-kpi-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-bolt"></i></div>
+          <div class="camp-kpi-body"><div class="camp-kpi-val">38</div><div class="camp-kpi-lbl">Opportunities Created</div></div>
+        </div>
+        <div class="camp-kpi">
+          <div class="camp-kpi-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-handshake"></i></div>
+          <div class="camp-kpi-body"><div class="camp-kpi-val">11</div><div class="camp-kpi-lbl">Clients Converted</div></div>
+        </div>
+        <div class="camp-kpi">
+          <div class="camp-kpi-icon" style="background:#fff7ed;color:#ea580c"><i class="fas fa-dollar-sign"></i></div>
+          <div class="camp-kpi-body"><div class="camp-kpi-val">$1.24M</div><div class="camp-kpi-lbl">Pipeline Value</div></div>
+        </div>
+        <div class="camp-kpi">
+          <div class="camp-kpi-icon" style="background:#fdf2f8;color:#9d174d"><i class="fas fa-percentage"></i></div>
+          <div class="camp-kpi-body"><div class="camp-kpi-val">7.7%</div><div class="camp-kpi-lbl">Avg Conversion Rate</div></div>
+        </div>
+      </div>
+
+      {/* ── AI Intelligence Banner ── */}
+      <div class="camp-ai-banner">
+        <div class="camp-ai-banner-left">
+          <i class="fas fa-brain camp-ai-icon"></i>
+          <div>
+            <div class="camp-ai-title">AI Campaign Intelligence <span class="camp-ai-badge">LIVE</span></div>
+            <div class="camp-ai-desc">Hyperpersonalized outreach · Customer 360 profiling · Predictive lead scoring · Auto-generated campaign briefs</div>
+          </div>
+        </div>
+        <div class="camp-ai-banner-right">
+          <div class="camp-ai-insight"><i class="fas fa-fire" style="color:#f59e0b"></i> <strong>Whole Life Campaign</strong> is outperforming — 24% conversion vs 8% avg. Scale budget by 2×?</div>
+          <div class="camp-ai-insight"><i class="fas fa-lightbulb" style="color:#0891b2"></i> <strong>47 existing clients</strong> match the Retirement Annuity upsell profile — launch targeted campaign?</div>
+          <button class="camp-ai-act-btn" onclick="openCampAIWizard()"><i class="fas fa-magic"></i> Run AI Analysis</button>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div class="camp-toolbar">
+        <div class="camp-tb-left">
+          <div class="camp-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="camp-search" placeholder="Search campaigns..." oninput="filterCampaigns()" />
+          </div>
+          <select class="camp-select" id="camp-type-filter" onchange="filterCampaigns()">
+            <option value="">All Types</option>
+            <option value="Life Insurance">Life Insurance</option>
+            <option value="Retirement">Retirement</option>
+            <option value="Investments">Investments</option>
+            <option value="Wealth Management">Wealth Management</option>
+            <option value="LTC">LTC</option>
+          </select>
+          <select class="camp-select" id="camp-status-filter" onchange="filterCampaigns()">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Paused">Paused</option>
+            <option value="Completed">Completed</option>
+            <option value="Draft">Draft</option>
+          </select>
+        </div>
+        <div class="camp-tb-right">
+          <button class="camp-view-btn active" id="camp-view-cards" onclick="setCampView('cards',this)"><i class="fas fa-th-large"></i></button>
+          <button class="camp-view-btn" id="camp-view-table" onclick="setCampView('table',this)"><i class="fas fa-list"></i></button>
+        </div>
+      </div>
+
+      {/* ── Campaign Funnel Summary ── */}
+      <div class="camp-funnel-bar">
+        <div class="camp-funnel-step">
+          <div class="camp-funnel-num" style="color:#0891b2">6</div>
+          <div class="camp-funnel-lbl">Campaigns</div>
+        </div>
+        <div class="camp-funnel-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="camp-funnel-step">
+          <div class="camp-funnel-num" style="color:#f59e0b">142</div>
+          <div class="camp-funnel-lbl">Leads</div>
+        </div>
+        <div class="camp-funnel-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="camp-funnel-step">
+          <div class="camp-funnel-num" style="color:#7c3aed">38</div>
+          <div class="camp-funnel-lbl">Opportunities</div>
+        </div>
+        <div class="camp-funnel-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="camp-funnel-step">
+          <div class="camp-funnel-num" style="color:#059669">11</div>
+          <div class="camp-funnel-lbl">Clients</div>
+        </div>
+        <div class="camp-funnel-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="camp-funnel-step">
+          <div class="camp-funnel-num" style="color:#9d174d">4</div>
+          <div class="camp-funnel-lbl">Upsold</div>
+        </div>
+      </div>
+
+      {/* ── Campaign Cards Grid ── */}
+      <div class="camp-grid" id="camp-grid">
+
+        {/* Campaign 1: Whole Life */}
+        <div class="camp-card" data-type="Life Insurance" data-status="Active" onclick="openCampaignDetail('C001')">
+          <div class="camp-card-header">
+            <div class="camp-card-icon" style="background:linear-gradient(135deg,#003087,#0055c8)">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="camp-card-meta">
+              <div class="camp-card-name">Whole Life Protection Campaign</div>
+              <div class="camp-card-type">Life Insurance · AI-Powered</div>
+            </div>
+            <span class="camp-status-badge active">Active</span>
+          </div>
+          <div class="camp-card-ai-insight">
+            <i class="fas fa-robot"></i> AI: Target 35–55yr professionals with dependents. Emphasis on cash value + living benefits.
+          </div>
+          <div class="camp-card-stats">
+            <div class="camp-stat"><div class="camp-stat-val">34</div><div class="camp-stat-lbl">Leads</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">12</div><div class="camp-stat-lbl">Opps</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">4</div><div class="camp-stat-lbl">Clients</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">24%</div><div class="camp-stat-lbl">Conv. Rate</div></div>
+          </div>
+          <div class="camp-card-progress">
+            <div class="camp-progress-label"><span>Progress to goal</span><span>68/100 leads</span></div>
+            <div class="camp-progress-bar"><div class="camp-progress-fill" style="width:68%;background:#003087"></div></div>
+          </div>
+          <div class="camp-card-footer">
+            <span class="camp-channel"><i class="fas fa-envelope"></i> Email</span>
+            <span class="camp-channel"><i class="fas fa-phone"></i> Outbound</span>
+            <span class="camp-channel"><i class="fas fa-share-alt"></i> Social</span>
+            <span class="camp-budget">Budget: $4,200</span>
+          </div>
+          <div class="camp-card-actions">
+            <button class="camp-btn-sm primary" onclick="event.stopPropagation();viewCampLeads('C001')"><i class="fas fa-users"></i> View Leads</button>
+            <button class="camp-btn-sm secondary" onclick="event.stopPropagation();openCampaignDetail('C001')"><i class="fas fa-chart-line"></i> Analytics</button>
+          </div>
+        </div>
+
+        {/* Campaign 2: Term Life */}
+        <div class="camp-card" data-type="Life Insurance" data-status="Active" onclick="openCampaignDetail('C002')">
+          <div class="camp-card-header">
+            <div class="camp-card-icon" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">
+              <i class="fas fa-umbrella"></i>
+            </div>
+            <div class="camp-card-meta">
+              <div class="camp-card-name">Term Life — Young Families</div>
+              <div class="camp-card-type">Life Insurance · AI-Powered</div>
+            </div>
+            <span class="camp-status-badge active">Active</span>
+          </div>
+          <div class="camp-card-ai-insight">
+            <i class="fas fa-robot"></i> AI: Target 28–40yr new parents. Lead with affordability + mortgage protection angle.
+          </div>
+          <div class="camp-card-stats">
+            <div class="camp-stat"><div class="camp-stat-val">28</div><div class="camp-stat-lbl">Leads</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">7</div><div class="camp-stat-lbl">Opps</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">2</div><div class="camp-stat-lbl">Clients</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">7.1%</div><div class="camp-stat-lbl">Conv. Rate</div></div>
+          </div>
+          <div class="camp-card-progress">
+            <div class="camp-progress-label"><span>Progress to goal</span><span>28/75 leads</span></div>
+            <div class="camp-progress-bar"><div class="camp-progress-fill" style="width:37%;background:#0891b2"></div></div>
+          </div>
+          <div class="camp-card-footer">
+            <span class="camp-channel"><i class="fas fa-envelope"></i> Email</span>
+            <span class="camp-channel"><i class="fas fa-mobile-alt"></i> SMS</span>
+            <span class="camp-budget">Budget: $2,800</span>
+          </div>
+          <div class="camp-card-actions">
+            <button class="camp-btn-sm primary" onclick="event.stopPropagation();viewCampLeads('C002')"><i class="fas fa-users"></i> View Leads</button>
+            <button class="camp-btn-sm secondary" onclick="event.stopPropagation();openCampaignDetail('C002')"><i class="fas fa-chart-line"></i> Analytics</button>
+          </div>
+        </div>
+
+        {/* Campaign 3: Retirement Annuity */}
+        <div class="camp-card" data-type="Retirement" data-status="Active" onclick="openCampaignDetail('C003')">
+          <div class="camp-card-header">
+            <div class="camp-card-icon" style="background:linear-gradient(135deg,#059669,#10b981)">
+              <i class="fas fa-piggy-bank"></i>
+            </div>
+            <div class="camp-card-meta">
+              <div class="camp-card-name">Retirement Income — Annuity</div>
+              <div class="camp-card-type">Retirement · Upsell Campaign</div>
+            </div>
+            <span class="camp-status-badge active">Active</span>
+          </div>
+          <div class="camp-card-ai-insight">
+            <i class="fas fa-robot"></i> AI: Existing clients 50–65yr with no annuity product. Cross-sell from life policies.
+          </div>
+          <div class="camp-card-stats">
+            <div class="camp-stat"><div class="camp-stat-val">31</div><div class="camp-stat-lbl">Leads</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">9</div><div class="camp-stat-lbl">Opps</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">3</div><div class="camp-stat-lbl">Clients</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">9.7%</div><div class="camp-stat-lbl">Conv. Rate</div></div>
+          </div>
+          <div class="camp-card-progress">
+            <div class="camp-progress-label"><span>Progress to goal</span><span>31/50 leads</span></div>
+            <div class="camp-progress-bar"><div class="camp-progress-fill" style="width:62%;background:#059669"></div></div>
+          </div>
+          <div class="camp-card-footer">
+            <span class="camp-channel"><i class="fas fa-calendar"></i> Seminar</span>
+            <span class="camp-channel"><i class="fas fa-envelope"></i> Email</span>
+            <span class="camp-budget">Budget: $5,500</span>
+          </div>
+          <div class="camp-card-actions">
+            <button class="camp-btn-sm primary" onclick="event.stopPropagation();viewCampLeads('C003')"><i class="fas fa-users"></i> View Leads</button>
+            <button class="camp-btn-sm secondary" onclick="event.stopPropagation();openCampaignDetail('C003')"><i class="fas fa-chart-line"></i> Analytics</button>
+          </div>
+        </div>
+
+        {/* Campaign 4: Wealth Management */}
+        <div class="camp-card" data-type="Wealth Management" data-status="Active" onclick="openCampaignDetail('C004')">
+          <div class="camp-card-header">
+            <div class="camp-card-icon" style="background:linear-gradient(135deg,#7c3aed,#9f67fa)">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="camp-card-meta">
+              <div class="camp-card-name">Wealth Management — HNW Segment</div>
+              <div class="camp-card-type">Wealth Management · Premium</div>
+            </div>
+            <span class="camp-status-badge active">Active</span>
+          </div>
+          <div class="camp-card-ai-insight">
+            <i class="fas fa-robot"></i> AI: HNW clients $500K+ AUM potential. Lead with UMA + estate planning bundled offer.
+          </div>
+          <div class="camp-card-stats">
+            <div class="camp-stat"><div class="camp-stat-val">19</div><div class="camp-stat-lbl">Leads</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">6</div><div class="camp-stat-lbl">Opps</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">2</div><div class="camp-stat-lbl">Clients</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">10.5%</div><div class="camp-stat-lbl">Conv. Rate</div></div>
+          </div>
+          <div class="camp-card-progress">
+            <div class="camp-progress-label"><span>Progress to goal</span><span>19/40 leads</span></div>
+            <div class="camp-progress-bar"><div class="camp-progress-fill" style="width:48%;background:#7c3aed"></div></div>
+          </div>
+          <div class="camp-card-footer">
+            <span class="camp-channel"><i class="fas fa-handshake"></i> Referral</span>
+            <span class="camp-channel"><i class="fas fa-calendar"></i> Event</span>
+            <span class="camp-budget">Budget: $8,000</span>
+          </div>
+          <div class="camp-card-actions">
+            <button class="camp-btn-sm primary" onclick="event.stopPropagation();viewCampLeads('C004')"><i class="fas fa-users"></i> View Leads</button>
+            <button class="camp-btn-sm secondary" onclick="event.stopPropagation();openCampaignDetail('C004')"><i class="fas fa-chart-line"></i> Analytics</button>
+          </div>
+        </div>
+
+        {/* Campaign 5: LTC */}
+        <div class="camp-card" data-type="LTC" data-status="Paused" onclick="openCampaignDetail('C005')">
+          <div class="camp-card-header">
+            <div class="camp-card-icon" style="background:linear-gradient(135deg,#ea580c,#f97316)">
+              <i class="fas fa-heartbeat"></i>
+            </div>
+            <div class="camp-card-meta">
+              <div class="camp-card-name">Long-Term Care Awareness</div>
+              <div class="camp-card-type">LTC · Education Campaign</div>
+            </div>
+            <span class="camp-status-badge paused">Paused</span>
+          </div>
+          <div class="camp-card-ai-insight">
+            <i class="fas fa-robot"></i> AI: Clients 55–70yr without LTC coverage. Pair with Medicare awareness messaging.
+          </div>
+          <div class="camp-card-stats">
+            <div class="camp-stat"><div class="camp-stat-val">18</div><div class="camp-stat-lbl">Leads</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">3</div><div class="camp-stat-lbl">Opps</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">0</div><div class="camp-stat-lbl">Clients</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">0%</div><div class="camp-stat-lbl">Conv. Rate</div></div>
+          </div>
+          <div class="camp-card-progress">
+            <div class="camp-progress-label"><span>Progress to goal</span><span>18/60 leads</span></div>
+            <div class="camp-progress-bar"><div class="camp-progress-fill" style="width:30%;background:#ea580c"></div></div>
+          </div>
+          <div class="camp-card-footer">
+            <span class="camp-channel"><i class="fas fa-envelope"></i> Email</span>
+            <span class="camp-channel"><i class="fas fa-newspaper"></i> Content</span>
+            <span class="camp-budget">Budget: $3,100</span>
+          </div>
+          <div class="camp-card-actions">
+            <button class="camp-btn-sm primary" onclick="event.stopPropagation();viewCampLeads('C005')"><i class="fas fa-users"></i> View Leads</button>
+            <button class="camp-btn-sm warning" onclick="event.stopPropagation();resumeCampaign('C005')"><i class="fas fa-play"></i> Resume</button>
+          </div>
+        </div>
+
+        {/* Campaign 6: Investments */}
+        <div class="camp-card" data-type="Investments" data-status="Active" onclick="openCampaignDetail('C006')">
+          <div class="camp-card-header">
+            <div class="camp-card-icon" style="background:linear-gradient(135deg,#0e7490,#0891b2)">
+              <i class="fas fa-chart-pie"></i>
+            </div>
+            <div class="camp-card-meta">
+              <div class="camp-card-name">Investment Portfolio — Mid-Market</div>
+              <div class="camp-card-type">Investments · Growth Campaign</div>
+            </div>
+            <span class="camp-status-badge active">Active</span>
+          </div>
+          <div class="camp-card-ai-insight">
+            <i class="fas fa-robot"></i> AI: Clients with idle savings over $50K. Introduce MainStay Funds + VUL sub-accounts.
+          </div>
+          <div class="camp-card-stats">
+            <div class="camp-stat"><div class="camp-stat-val">12</div><div class="camp-stat-lbl">Leads</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">4</div><div class="camp-stat-lbl">Opps</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">0</div><div class="camp-stat-lbl">Clients</div></div>
+            <div class="camp-stat"><div class="camp-stat-val">0%</div><div class="camp-stat-lbl">Conv. Rate</div></div>
+          </div>
+          <div class="camp-card-progress">
+            <div class="camp-progress-label"><span>Progress to goal</span><span>12/50 leads</span></div>
+            <div class="camp-progress-bar"><div class="camp-progress-fill" style="width:24%;background:#0891b2"></div></div>
+          </div>
+          <div class="camp-card-footer">
+            <span class="camp-channel"><i class="fas fa-laptop"></i> Webinar</span>
+            <span class="camp-channel"><i class="fas fa-envelope"></i> Email</span>
+            <span class="camp-budget">Budget: $3,600</span>
+          </div>
+          <div class="camp-card-actions">
+            <button class="camp-btn-sm primary" onclick="event.stopPropagation();viewCampLeads('C006')"><i class="fas fa-users"></i> View Leads</button>
+            <button class="camp-btn-sm secondary" onclick="event.stopPropagation();openCampaignDetail('C006')"><i class="fas fa-chart-line"></i> Analytics</button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── Campaign Detail Modal ── */}
+      <div class="camp-modal-overlay" id="camp-detail-overlay" onclick="closeCampaignDetail(event)">
+        <div class="camp-modal" id="camp-detail-modal">
+          <div class="camp-modal-header">
+            <div class="camp-modal-title" id="camp-modal-title">Campaign Analytics</div>
+            <button class="camp-modal-close" onclick="closeCampaignDetail()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="camp-modal-body" id="camp-modal-body">
+            {/* Filled dynamically */}
+          </div>
+        </div>
+      </div>
+
+      {/* ── New Campaign Modal ── */}
+      <div class="camp-modal-overlay" id="camp-new-overlay" onclick="closeNewCampaignModal(event)">
+        <div class="camp-modal camp-new-modal">
+          <div class="camp-modal-header">
+            <div class="camp-modal-title"><i class="fas fa-plus-circle"></i> Create New Campaign</div>
+            <button class="camp-modal-close" onclick="closeNewCampaignModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="camp-modal-body">
+            <div class="camp-form-grid">
+              <div class="camp-form-group camp-span2">
+                <label class="camp-label">Campaign Name</label>
+                <input type="text" class="camp-input" placeholder="e.g. Q3 Whole Life Drive" id="new-camp-name" />
+              </div>
+              <div class="camp-form-group">
+                <label class="camp-label">Product Type</label>
+                <select class="camp-input" id="new-camp-type">
+                  <option>Life Insurance</option>
+                  <option>Retirement</option>
+                  <option>Investments</option>
+                  <option>Wealth Management</option>
+                  <option>LTC</option>
+                </select>
+              </div>
+              <div class="camp-form-group">
+                <label class="camp-label">Target Segment</label>
+                <select class="camp-input" id="new-camp-segment">
+                  <option>Young Families (28–40)</option>
+                  <option>Mid-Career (40–55)</option>
+                  <option>Pre-Retirement (55–65)</option>
+                  <option>HNW Clients</option>
+                  <option>Existing Clients (Upsell)</option>
+                </select>
+              </div>
+              <div class="camp-form-group">
+                <label class="camp-label">Channels</label>
+                <select class="camp-input" id="new-camp-channel">
+                  <option>Email + Outbound</option>
+                  <option>Email + SMS</option>
+                  <option>Seminar + Email</option>
+                  <option>Referral + Event</option>
+                  <option>Webinar + Email</option>
+                </select>
+              </div>
+              <div class="camp-form-group">
+                <label class="camp-label">Budget ($)</label>
+                <input type="number" class="camp-input" placeholder="5000" id="new-camp-budget" />
+              </div>
+              <div class="camp-form-group camp-span2">
+                <label class="camp-label">AI Campaign Goal</label>
+                <textarea class="camp-input camp-textarea" rows="3" placeholder="Describe your campaign objective — AI will generate targeting criteria, messaging, and lead scoring rules..." id="new-camp-goal"></textarea>
+              </div>
+            </div>
+            <div class="camp-ai-suggest-box" id="camp-ai-suggest">
+              <i class="fas fa-robot"></i>
+              <span>Fill in the fields above and click <strong>Generate AI Brief</strong> to get targeting recommendations, messaging strategy, and lead scoring criteria.</span>
+            </div>
+            <div class="camp-modal-footer">
+              <button class="btn btn-ai" onclick="generateCampaignAIBrief()"><i class="fas fa-magic"></i> Generate AI Brief</button>
+              <button class="btn btn-primary" onclick="saveNewCampaign()"><i class="fas fa-save"></i> Launch Campaign</button>
+              <button class="btn btn-ghost" onclick="closeNewCampaignModal()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  UPSELL TRACK PAGE
+// ═══════════════════════════════════════════════════════════════
+
+function PolicyAlertsPage() {
+  return (
+    <div class="page alerts-page">
+
+      {/* ── Header ── */}
+      <div class="alerts-header">
+        <div class="alerts-header-left">
+          <h2 class="alerts-title"><i class="fas fa-bell"></i> Policy Alerts</h2>
+          <p class="alerts-sub">AI-monitored renewal deadlines · lapse risk scores · at-risk client flags</p>
+        </div>
+        <div class="alerts-header-actions">
+          <button class="btn btn-ai" onclick="runAlertScan()"><i class="fas fa-robot"></i> AI Scan</button>
+          <button class="btn btn-outline" onclick="exportAlertList()"><i class="fas fa-download"></i> Export</button>
+        </div>
+      </div>
+
+      {/* ── KPI Strip ── */}
+      <div class="alerts-kpi-strip">
+        <div class="al-kpi al-kpi-red">
+          <div class="al-kpi-icon"><i class="fas fa-fire"></i></div>
+          <div><div class="al-kpi-val" id="akpi-urgent">4</div><div class="al-kpi-lbl">Urgent Alerts</div></div>
+        </div>
+        <div class="al-kpi al-kpi-orange">
+          <div class="al-kpi-icon"><i class="fas fa-sync-alt"></i></div>
+          <div><div class="al-kpi-val">23</div><div class="al-kpi-lbl">Renewals Due (90d)</div></div>
+        </div>
+        <div class="al-kpi al-kpi-purple">
+          <div class="al-kpi-icon"><i class="fas fa-heartbeat"></i></div>
+          <div><div class="al-kpi-val">15</div><div class="al-kpi-lbl">Lapse Risk Clients</div></div>
+        </div>
+        <div class="al-kpi al-kpi-blue">
+          <div class="al-kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div><div class="al-kpi-val">$84K</div><div class="al-kpi-lbl">Premium at Risk</div></div>
+        </div>
+        <div class="al-kpi al-kpi-green">
+          <div class="al-kpi-icon"><i class="fas fa-shield-alt"></i></div>
+          <div><div class="al-kpi-val">89%</div><div class="al-kpi-lbl">Retention Rate</div></div>
+        </div>
+      </div>
+
+      {/* ── AI Banner ── */}
+      <div class="alerts-ai-banner">
+        <div class="aab-icon"><i class="fas fa-brain"></i></div>
+        <div class="aab-text">
+          <span class="aab-hi">AI Risk Engine:</span> Patricia Nguyen's UL policy is under-funded — lapse predicted
+          <strong>Jun 20, 2026</strong>. Sandra Williams' Term renewal window closes <strong>Sep 2026</strong>.
+          <strong>2 clients need action within 7 days.</strong>
+        </div>
+        <button class="aab-cta" onclick="runAlertScan()"><i class="fas fa-bolt"></i> Act Now</button>
+      </div>
+
+      {/* ── Filter Tabs ── */}
+      <div class="alerts-tab-bar">
+        <button class="al-tab active" onclick="setAlertTab(this,'all')">
+          All <span class="al-tab-count">12</span>
+        </button>
+        <button class="al-tab" onclick="setAlertTab(this,'renewal')">
+          <i class="fas fa-sync-alt"></i> Renewals <span class="al-tab-count">5</span>
+        </button>
+        <button class="al-tab" onclick="setAlertTab(this,'lapse')">
+          <i class="fas fa-heartbeat"></i> Lapse Risk <span class="al-tab-count">4</span>
+        </button>
+        <button class="al-tab" onclick="setAlertTab(this,'at-risk')">
+          <i class="fas fa-exclamation-triangle"></i> At-Risk <span class="al-tab-count">3</span>
+        </button>
+        <button class="al-tab" onclick="setAlertTab(this,'coverage')">
+          <i class="fas fa-shield-alt"></i> Coverage Gaps <span class="al-tab-count">0</span>
+        </button>
+      </div>
+
+      {/* ── Two-Column Body ── */}
+      <div class="alerts-body">
+
+        {/* Left: Alert List */}
+        <div class="alerts-list-col">
+          <div class="alerts-list" id="alerts-list">
+            <div class="al-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading alerts…</div>
+          </div>
+        </div>
+
+        {/* Right: Detail Panel */}
+        <div class="alerts-detail-col">
+          <div class="alerts-detail-empty" id="alerts-detail-empty">
+            <i class="fas fa-bell-slash"></i>
+            <p>Select an alert to view details and AI recommendations</p>
+          </div>
+          <div id="alerts-detail-panel" style="display:none"></div>
+        </div>
+
+      </div>
+
+      {/* ── Renewal Timeline ── */}
+      <div class="renewal-timeline-section">
+        <div class="rts-header">
+          <span class="rts-title"><i class="fas fa-calendar-alt"></i> 90-Day Renewal Timeline</span>
+          <div class="rts-legend">
+            <span><span class="rts-leg-dot urgent"></span> Urgent (&le;30d)</span>
+            <span><span class="rts-leg-dot high"></span> High (31–60d)</span>
+            <span><span class="rts-leg-dot normal"></span> Normal (61–90d)</span>
+          </div>
+        </div>
+        <div class="rts-track" id="rts-track"></div>
+      </div>
+
+    </div>
+  )
+}
+
+
+function PipelineViewPage() {
+  return (
+    <div class="page pipeline-view-page">
+
+      {/* ── Header ── */}
+      <div class="pv-header">
+        <div class="pv-header-left">
+          <h2 class="pv-title"><i class="fas fa-route"></i> Client Journey Pipeline</h2>
+          <p class="pv-sub">Full lifecycle view · Lead → Opportunity → Client → Upsell · Includes Sales KPIs, quota tracking & forecasting</p>
+        </div>
+        <div class="pv-header-actions">
+          <button class="pv-view-btn active" id="pvv-kanban" onclick="switchPVView('kanban',this)"><i class="fas fa-columns"></i> Kanban</button>
+          <button class="pv-view-btn" id="pvv-sales" onclick="switchPVView('sales',this)"><i class="fas fa-chart-bar"></i> Sales KPIs</button>
+          <select class="pv-filter-select" id="pv-filter-seg" onchange="filterPipelineView()">
+            <option value="all">All Segments</option>
+            <option value="Premium">Premium</option>
+            <option value="High Value">High Value</option>
+            <option value="Mid Market">Mid Market</option>
+            <option value="Emerging">Emerging</option>
+          </select>
+          <button class="btn btn-ai" onclick="runPipelineAI()"><i class="fas fa-robot"></i> AI Insights</button>
+          <button class="btn btn-outline" onclick="openAddDealModal()"><i class="fas fa-plus"></i> Add Deal</button>
+        </div>
+      </div>
+
+      {/* ── Funnel KPI Bar ── */}
+      <div class="pv-funnel-kpis">
+        <div class="pvf-stage" onclick="filterPipelineView('leads')">
+          <div class="pvf-num">14</div>
+          <div class="pvf-lbl"><i class="fas fa-user-clock"></i> Leads</div>
+          <div class="pvf-sub">$1.24M pipeline</div>
+          <div class="pvf-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+        <div class="pvf-stage" onclick="filterPipelineView('opps')">
+          <div class="pvf-num">5</div>
+          <div class="pvf-lbl"><i class="fas fa-bolt"></i> Opportunities</div>
+          <div class="pvf-sub">$21.5K est. value</div>
+          <div class="pvf-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+        <div class="pvf-stage" onclick="filterPipelineView('clients')">
+          <div class="pvf-num">8</div>
+          <div class="pvf-lbl"><i class="fas fa-users"></i> Active Clients</div>
+          <div class="pvf-sub">$63.4K/yr premium</div>
+          <div class="pvf-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+        <div class="pvf-stage" onclick="filterPipelineView('upsell')">
+          <div class="pvf-num">8</div>
+          <div class="pvf-lbl"><i class="fas fa-arrow-trend-up"></i> Upsell Ready</div>
+          <div class="pvf-sub">$2.84M opportunity</div>
+        </div>
+      </div>
+
+      {/* ── Conversion Rate Bar ── */}
+      <div class="pv-conv-bar">
+        <div class="pv-conv-item">
+          <span class="pv-conv-label">Lead → Opp</span>
+          <div class="pv-conv-track"><div class="pv-conv-fill" style="width:36%"></div></div>
+          <span class="pv-conv-pct">36%</span>
+        </div>
+        <div class="pv-conv-item">
+          <span class="pv-conv-label">Opp → Client</span>
+          <div class="pv-conv-track"><div class="pv-conv-fill" style="width:62%"></div></div>
+          <span class="pv-conv-pct">62%</span>
+        </div>
+        <div class="pv-conv-item">
+          <span class="pv-conv-label">Client → Upsell</span>
+          <div class="pv-conv-track"><div class="pv-conv-fill" style="width:100%"></div></div>
+          <span class="pv-conv-pct">100%</span>
+        </div>
+        <div class="pv-conv-item">
+          <span class="pv-conv-label">Avg Days / Stage</span>
+          <div class="pv-conv-track"><div class="pv-conv-fill amber" style="width:55%"></div></div>
+          <span class="pv-conv-pct">18d</span>
+        </div>
+      </div>
+
+      {/* ── KANBAN VIEW ── */}
+      <div id="pv-view-kanban">
+        {/* Stale deal alert */}
+        <div class="pv-stale-alert">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>2 stale deals</strong> have had no activity for &gt;10 days — D003 (15d idle, score dropped to 44%), D007 (12d idle)
+          <button class="pv-stale-btn" onclick="showToast('Stale deal outreach queued','info')">Review Now</button>
+        </div>
+
+        <div class="pv-kanban" id="pv-kanban">
+          <div class="pvk-col pvk-leads">
+            <div class="pvk-col-header">
+              <div class="pvk-col-title"><i class="fas fa-user-clock"></i> Leads</div>
+              <span class="pvk-col-badge lead">14</span>
+            </div>
+            <div class="pvk-cards" id="pvk-leads"></div>
+          </div>
+          <div class="pvk-col pvk-opps">
+            <div class="pvk-col-header">
+              <div class="pvk-col-title"><i class="fas fa-bolt"></i> Opportunities</div>
+              <span class="pvk-col-badge opp">5</span>
+            </div>
+            <div class="pvk-cards" id="pvk-opps"></div>
+          </div>
+          <div class="pvk-col pvk-clients">
+            <div class="pvk-col-header">
+              <div class="pvk-col-title"><i class="fas fa-users"></i> Active Clients</div>
+              <span class="pvk-col-badge client">8</span>
+            </div>
+            <div class="pvk-cards" id="pvk-clients"></div>
+          </div>
+          <div class="pvk-col pvk-upsell">
+            <div class="pvk-col-header">
+              <div class="pvk-col-title"><i class="fas fa-arrow-trend-up"></i> Upsell Ready</div>
+              <span class="pvk-col-badge upsell">8</span>
+            </div>
+            <div class="pvk-cards" id="pvk-upsell"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── SALES KPIs VIEW ── */}
+      <div id="pv-view-sales" style="display:none">
+
+        {/* Sales KPI Cards */}
+        <div class="skpi-grid">
+          <div class="skpi-card skpi-blue">
+            <div class="skpi-icon"><i class="fas fa-funnel-dollar"></i></div>
+            <div class="skpi-body">
+              <div class="skpi-val">$284K</div>
+              <div class="skpi-lbl">Pipeline Value</div>
+              <div class="skpi-trend up"><i class="fas fa-arrow-up"></i> +$47K vs last month</div>
+            </div>
+          </div>
+          <div class="skpi-card skpi-green">
+            <div class="skpi-icon"><i class="fas fa-handshake"></i></div>
+            <div class="skpi-body">
+              <div class="skpi-val">34</div>
+              <div class="skpi-lbl">Closed This Month</div>
+              <div class="skpi-trend up"><i class="fas fa-arrow-up"></i> +6 vs last month</div>
+            </div>
+          </div>
+          <div class="skpi-card skpi-gold">
+            <div class="skpi-icon"><i class="fas fa-percentage"></i></div>
+            <div class="skpi-body">
+              <div class="skpi-val">68%</div>
+              <div class="skpi-lbl">Conversion Rate</div>
+              <div class="skpi-trend up"><i class="fas fa-arrow-up"></i> +4% vs last month</div>
+            </div>
+          </div>
+          <div class="skpi-card skpi-teal">
+            <div class="skpi-icon"><i class="fas fa-clock"></i></div>
+            <div class="skpi-body">
+              <div class="skpi-val">12.4d</div>
+              <div class="skpi-lbl">Avg Sales Cycle</div>
+              <div class="skpi-trend good"><i class="fas fa-arrow-down"></i> −1.2d vs target</div>
+            </div>
+          </div>
+          <div class="skpi-card skpi-purple">
+            <div class="skpi-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="skpi-body">
+              <div class="skpi-val">$42.2K</div>
+              <div class="skpi-lbl">Commission MTD</div>
+              <div class="skpi-trend up"><i class="fas fa-arrow-up"></i> On track</div>
+            </div>
+          </div>
+          <div class="skpi-card skpi-navy">
+            <div class="skpi-icon"><i class="fas fa-trophy"></i></div>
+            <div class="skpi-body">
+              <div class="skpi-val">78%</div>
+              <div class="skpi-lbl">YTD Quota</div>
+              <div class="skpi-trend up"><i class="fas fa-check"></i> $187K / $240K</div>
+            </div>
+          </div>
+          <div class="skpi-card skpi-orange">
+            <div class="skpi-icon"><i class="fas fa-hourglass-half"></i></div>
+            <div class="skpi-body">
+              <div class="skpi-val">9</div>
+              <div class="skpi-lbl">Deals in Negotiation</div>
+              <div class="skpi-trend warn"><i class="fas fa-exclamation-triangle"></i> 3 stalling</div>
+            </div>
+          </div>
+          <div class="skpi-card skpi-rose">
+            <div class="skpi-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="skpi-body">
+              <div class="skpi-val">$52K</div>
+              <div class="skpi-lbl">30-Day Forecast</div>
+              <div class="skpi-trend up"><i class="fas fa-arrow-up"></i> High confidence</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quota Progress */}
+        <div class="pv-sales-row">
+          <div class="pv-quota-panel">
+            <div class="pv-quota-header">
+              <span class="pv-panel-title"><i class="fas fa-trophy"></i> Quota Tracker</span>
+              <span class="pv-quota-pct">78%</span>
+            </div>
+            <div class="pv-quota-track">
+              <div class="pv-quota-fill" style="width:78%"></div>
+            </div>
+            <div class="pv-quota-labels">
+              <span>$0</span><span style="color:#003087;font-weight:700">$187K achieved</span><span>$240K goal</span>
+            </div>
+            <div class="pv-quota-breakdown">
+              <div class="pv-qb-item"><span>Q1</span><div class="pv-qb-bar"><div style="width:100%;background:#22c55e"></div></div><span class="green">✓ $61K</span></div>
+              <div class="pv-qb-item"><span>Q2</span><div class="pv-qb-bar"><div style="width:72%;background:#f59e0b"></div></div><span>$43K / $60K</span></div>
+            </div>
+          </div>
+
+          <div class="pv-velocity-panel">
+            <div class="pv-panel-title"><i class="fas fa-tachometer-alt"></i> Deal Velocity</div>
+            <div class="pv-velocity-grid">
+              <div class="pv-vel-item"><div class="pv-vel-val">12.4d</div><div class="pv-vel-lbl">Avg Cycle</div></div>
+              <div class="pv-vel-item"><div class="pv-vel-val green">−1.2d</div><div class="pv-vel-lbl">vs Last Month</div></div>
+              <div class="pv-vel-item"><div class="pv-vel-val">3.2</div><div class="pv-vel-lbl">Deals/Week</div></div>
+              <div class="pv-vel-item"><div class="pv-vel-val orange">9d</div><div class="pv-vel-lbl">Avg First Contact</div></div>
+            </div>
+            <div class="pv-panel-title" style="margin-top:14px"><i class="fas fa-chart-pie"></i> Lead Source Mix</div>
+            <div class="pv-source-list">
+              <div class="pv-src-row"><span>Referrals</span><div class="pv-src-bar"><div style="width:52%;background:#003087"></div></div><span>52%</span></div>
+              <div class="pv-src-row"><span>Digital</span><div class="pv-src-bar"><div style="width:28%;background:#4f46e5"></div></div><span>28%</span></div>
+              <div class="pv-src-row"><span>Events</span><div class="pv-src-bar"><div style="width:12%;background:#0891b2"></div></div><span>12%</span></div>
+              <div class="pv-src-row"><span>Other</span><div class="pv-src-bar"><div style="width:8%;background:#94a3b8"></div></div><span>8%</span></div>
+            </div>
+          </div>
+
+          <div class="pv-forecast-panel">
+            <div class="pv-panel-title"><i class="fas fa-chart-line"></i> AI Revenue Forecast</div>
+            <div class="pv-forecast-months">
+              <div class="pv-fm-bar-wrap">
+                <div class="pv-fm-bar" style="height:70%;background:#003087"></div>
+                <span class="pv-fm-lbl">Apr<br/>$42K</span>
+              </div>
+              <div class="pv-fm-bar-wrap">
+                <div class="pv-fm-bar" style="height:87%;background:#1e40af"></div>
+                <span class="pv-fm-lbl">May<br/>$52K</span>
+              </div>
+              <div class="pv-fm-bar-wrap">
+                <div class="pv-fm-bar" style="height:60%;background:#94a3b8;opacity:.6"></div>
+                <span class="pv-fm-lbl">Jun<br/>~$36K</span>
+              </div>
+            </div>
+            <div class="pv-forecast-ai-note">
+              <i class="fas fa-robot"></i> High confidence: Michael Santos ($6.4K) and Alex Rivera ($4.2K) likely to close by May 15.
+            </div>
+          </div>
+        </div>
+
+        {/* Activity Log */}
+        <div class="pv-activity-panel">
+          <div class="pv-panel-title"><i class="fas fa-history"></i> Recent Activity</div>
+          <div class="pv-activity-list">
+            <div class="pv-act-row"><span class="pv-act-dot green"></span><span class="pv-act-time">Today 2:14pm</span><span class="pv-act-text">Michael Santos — verbal commit received · closing paperwork sent</span></div>
+            <div class="pv-act-row"><span class="pv-act-dot blue"></span><span class="pv-act-time">Today 10:30am</span><span class="pv-act-text">Alex Rivera — pre-meeting brief sent · meeting confirmed Apr 18</span></div>
+            <div class="pv-act-row"><span class="pv-act-dot orange"></span><span class="pv-act-time">Yesterday</span><span class="pv-act-text">John Kim — APS request submitted · underwriting review pending</span></div>
+            <div class="pv-act-row"><span class="pv-act-dot red"></span><span class="pv-act-time">Apr 10</span><span class="pv-act-text">D003 stale alert triggered — 15 days no activity, AI score dropped to 44%</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── Journey Detail Modal ── */}
+      <div id="pv-journey-overlay" style="display:none" onclick="closePVModal(event)">
+        <div class="pv-journey-modal">
+          <div class="pvj-header" id="pvj-header"></div>
+          <div class="pvj-body" id="pvj-body"></div>
+          <div class="pvj-footer">
+            <button class="btn btn-outline pvj-close-btn" onclick="closePVModal()">Close</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+
+function UpsellTrackPage() {
+  return (
+    <div class="page upsell-page">
+
+      {/* ── Header ── */}
+      <div class="upsell-header">
+        <div class="upsell-header-left">
+          <h2 class="upsell-title"><i class="fas fa-arrow-trend-up"></i> Upsell Track</h2>
+          <p class="upsell-sub">AI-flagged clients ready for retirement · investment · wealth management upsell · Based on policy tenure &amp; life stage signals</p>
+        </div>
+        <div class="upsell-header-actions">
+          <button class="btn btn-ai" onclick="runUpsellAIScan()"><i class="fas fa-robot"></i> AI Scan All</button>
+          <button class="btn btn-outline" onclick="exportUpsellList()"><i class="fas fa-download"></i> Export List</button>
+        </div>
+      </div>
+
+      {/* ── KPI Strip ── */}
+      <div class="upsell-kpi-strip">
+        <div class="upsell-kpi"><div class="upsell-kpi-val" id="ukpi-total">8</div><div class="upsell-kpi-lbl">Flagged Clients</div></div>
+        <div class="upsell-kpi upsell-kpi-ret"><div class="upsell-kpi-val">5</div><div class="upsell-kpi-lbl"><i class="fas fa-umbrella"></i> Retirement</div></div>
+        <div class="upsell-kpi upsell-kpi-inv"><div class="upsell-kpi-val">4</div><div class="upsell-kpi-lbl"><i class="fas fa-chart-pie"></i> Investments</div></div>
+        <div class="upsell-kpi upsell-kpi-wlth"><div class="upsell-kpi-val">3</div><div class="upsell-kpi-lbl"><i class="fas fa-gem"></i> Wealth Mgmt</div></div>
+        <div class="upsell-kpi upsell-kpi-val2"><div class="upsell-kpi-val">$2.84M</div><div class="upsell-kpi-lbl">Est. Upsell Value</div></div>
+        <div class="upsell-kpi upsell-kpi-comm"><div class="upsell-kpi-val">$141K</div><div class="upsell-kpi-lbl">Est. Commission</div></div>
+      </div>
+
+      {/* ── AI Insight Banner ── */}
+      <div class="upsell-ai-banner">
+        <div class="upsell-ai-icon"><i class="fas fa-brain"></i></div>
+        <div class="upsell-ai-text">
+          <strong>AI Upsell Intelligence:</strong> 3 clients (Linda Morrison, Robert Chen, James Whitfield) show High-Priority signals — policy tenure &gt;5 yrs + no retirement product + AUM growth potential. 
+          Recommended outreach window: <span class="upsell-ai-highlight">Next 30 days</span> before Q3 review season.
+        </div>
+        <button class="upsell-ai-cta" onclick="openUpsellBriefModal('all')"><i class="fas fa-paper-plane"></i> Generate Outreach</button>
+      </div>
+
+      {/* ── Filter Bar ── */}
+      <div class="upsell-filter-bar">
+        <div class="upsell-search-wrap">
+          <i class="fas fa-search upsell-search-icon"></i>
+          <input class="upsell-search" id="upsell-search" type="text" placeholder="Search clients…" oninput="filterUpsellCards()" />
+        </div>
+        <div class="upsell-filter-pills">
+          <button class="upsell-pill active" data-filter="all"    onclick="setUpsellFilter(this,'all')">All (8)</button>
+          <button class="upsell-pill"         data-filter="retirement" onclick="setUpsellFilter(this,'retirement')"><i class="fas fa-umbrella"></i> Retirement</button>
+          <button class="upsell-pill"         data-filter="investment" onclick="setUpsellFilter(this,'investment')"><i class="fas fa-chart-pie"></i> Investment</button>
+          <button class="upsell-pill"         data-filter="wealth"     onclick="setUpsellFilter(this,'wealth')"><i class="fas fa-gem"></i> Wealth Mgmt</button>
+          <button class="upsell-pill"         data-filter="high"       onclick="setUpsellFilter(this,'high')"><i class="fas fa-fire"></i> High Priority</button>
+        </div>
+        <div class="upsell-sort-wrap">
+          <select class="upsell-sort-sel" onchange="sortUpsellCards(this.value)">
+            <option value="priority">Sort: AI Priority</option>
+            <option value="value">Est. Value</option>
+            <option value="tenure">Policy Tenure</option>
+            <option value="score">Client Score</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ── Client Cards Grid ── */}
+      <div class="upsell-grid" id="upsell-grid">
+
+        {/* ── C1: Linda Morrison — Premium, 10yr tenure ── */}
+        <div class="upsell-card" data-id="UC001" data-priority="high" data-tracks="retirement,investment,wealth" onclick="openUpsellModal('UC001')">
+          <div class="upsell-card-header">
+            <div class="upsell-avatar upsell-av-lm" style="background:linear-gradient(135deg,#003087,#0057c8)">LM</div>
+            <div class="upsell-card-info">
+              <div class="upsell-client-name">Linda Morrison</div>
+              <div class="upsell-client-meta">Age 56 · Premium · Long Island</div>
+            </div>
+            <div class="upsell-priority-badge high"><i class="fas fa-fire"></i> High</div>
+          </div>
+          <div class="upsell-tenure-bar">
+            <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
+            <div class="upsell-tenure-track"><div class="upsell-tenure-fill" style="width:100%"></div></div>
+            <span class="upsell-tenure-yrs">10 yrs</span>
+          </div>
+          <div class="upsell-existing-products">
+            <span class="upsell-prod-chip ins">Whole Life $2M</span>
+            <span class="upsell-prod-chip ins">LTC $300K</span>
+            <span class="upsell-prod-chip ins">VUL $1.5M</span>
+            <span class="upsell-prod-chip inv">Mutual Funds</span>
+            <span class="upsell-prod-chip ret">Def. Annuity</span>
+          </div>
+          <div class="upsell-tracks-row">
+            <div class="upsell-track-item ret"><i class="fas fa-umbrella"></i><span>Retirement</span><span class="upsell-track-status gap">Enhance</span></div>
+            <div class="upsell-track-item inv"><i class="fas fa-chart-pie"></i><span>Investment</span><span class="upsell-track-status gap">Grow AUM</span></div>
+            <div class="upsell-track-item wlth"><i class="fas fa-gem"></i><span>Wealth Mgmt</span><span class="upsell-track-status gap">UMA+</span></div>
+          </div>
+          <div class="upsell-card-footer">
+            <div class="upsell-value-est"><span class="upsell-val-num">$820K</span><span class="upsell-val-lbl">Est. Upsell Value</span></div>
+            <button class="upsell-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('UC001')"><i class="fas fa-paper-plane"></i> Brief</button>
+          </div>
+        </div>
+
+        {/* ── C2: Robert Chen — High Value, 7yr tenure ── */}
+        <div class="upsell-card" data-id="UC002" data-priority="high" data-tracks="retirement,investment" onclick="openUpsellModal('UC002')">
+          <div class="upsell-card-header">
+            <div class="upsell-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">RC</div>
+            <div class="upsell-card-info">
+              <div class="upsell-client-name">Robert Chen</div>
+              <div class="upsell-client-meta">Age 45 · High Value · Manhattan</div>
+            </div>
+            <div class="upsell-priority-badge high"><i class="fas fa-fire"></i> High</div>
+          </div>
+          <div class="upsell-tenure-bar">
+            <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
+            <div class="upsell-tenure-track"><div class="upsell-tenure-fill" style="width:70%"></div></div>
+            <span class="upsell-tenure-yrs">7 yrs</span>
+          </div>
+          <div class="upsell-existing-products">
+            <span class="upsell-prod-chip ins">Whole Life $1M</span>
+            <span class="upsell-prod-chip ins">VUL $800K</span>
+            <span class="upsell-prod-chip inv">VUL Sub-accounts</span>
+          </div>
+          <div class="upsell-tracks-row">
+            <div class="upsell-track-item ret"><i class="fas fa-umbrella"></i><span>Retirement</span><span class="upsell-track-status missing">Not Started</span></div>
+            <div class="upsell-track-item inv"><i class="fas fa-chart-pie"></i><span>Investment</span><span class="upsell-track-status gap">Expand</span></div>
+            <div class="upsell-track-item wlth-na"><i class="fas fa-gem"></i><span>Wealth Mgmt</span><span class="upsell-track-status present">Active</span></div>
+          </div>
+          <div class="upsell-card-footer">
+            <div class="upsell-value-est"><span class="upsell-val-num">$650K</span><span class="upsell-val-lbl">Est. Upsell Value</span></div>
+            <button class="upsell-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('UC002')"><i class="fas fa-paper-plane"></i> Brief</button>
+          </div>
+        </div>
+
+        {/* ── C3: James Whitfield — High Value, 7yr tenure ── */}
+        <div class="upsell-card" data-id="UC003" data-priority="high" data-tracks="retirement,investment,wealth" onclick="openUpsellModal('UC003')">
+          <div class="upsell-card-header">
+            <div class="upsell-avatar" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">JW</div>
+            <div class="upsell-card-info">
+              <div class="upsell-client-name">James Whitfield</div>
+              <div class="upsell-client-meta">Age 52 · High Value · New York</div>
+            </div>
+            <div class="upsell-priority-badge high"><i class="fas fa-fire"></i> High</div>
+          </div>
+          <div class="upsell-tenure-bar">
+            <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
+            <div class="upsell-tenure-track"><div class="upsell-tenure-fill" style="width:70%"></div></div>
+            <span class="upsell-tenure-yrs">7 yrs</span>
+          </div>
+          <div class="upsell-existing-products">
+            <span class="upsell-prod-chip ins">Whole Life $500K</span>
+            <span class="upsell-prod-chip ins">Term Life $750K</span>
+            <span class="upsell-prod-chip ins">LTC $250K</span>
+            <span class="upsell-prod-chip ret">Def. Annuity (prospect)</span>
+          </div>
+          <div class="upsell-tracks-row">
+            <div class="upsell-track-item ret"><i class="fas fa-umbrella"></i><span>Retirement</span><span class="upsell-track-status gap">Confirm</span></div>
+            <div class="upsell-track-item inv"><i class="fas fa-chart-pie"></i><span>Investment</span><span class="upsell-track-status missing">Not Started</span></div>
+            <div class="upsell-track-item wlth"><i class="fas fa-gem"></i><span>Wealth Mgmt</span><span class="upsell-track-status gap">Estate+</span></div>
+          </div>
+          <div class="upsell-card-footer">
+            <div class="upsell-value-est"><span class="upsell-val-num">$480K</span><span class="upsell-val-lbl">Est. Upsell Value</span></div>
+            <button class="upsell-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('UC003')"><i class="fas fa-paper-plane"></i> Brief</button>
+          </div>
+        </div>
+
+        {/* ── C4: Maria Gonzalez — High Value, 9yr tenure ── */}
+        <div class="upsell-card" data-id="UC004" data-priority="medium" data-tracks="investment,wealth" onclick="openUpsellModal('UC004')">
+          <div class="upsell-card-header">
+            <div class="upsell-avatar" style="background:linear-gradient(135deg,#059669,#34d399)">MG</div>
+            <div class="upsell-card-info">
+              <div class="upsell-client-name">Maria Gonzalez</div>
+              <div class="upsell-client-meta">Age 48 · High Value · New York</div>
+            </div>
+            <div class="upsell-priority-badge medium"><i class="fas fa-bolt"></i> Medium</div>
+          </div>
+          <div class="upsell-tenure-bar">
+            <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
+            <div class="upsell-tenure-track"><div class="upsell-tenure-fill" style="width:90%"></div></div>
+            <span class="upsell-tenure-yrs">9 yrs</span>
+          </div>
+          <div class="upsell-existing-products">
+            <span class="upsell-prod-chip ins">Universal Life $600K</span>
+            <span class="upsell-prod-chip ins">Disability</span>
+            <span class="upsell-prod-chip inv">Fixed Annuity</span>
+            <span class="upsell-prod-chip ret">Immediate Annuity</span>
+          </div>
+          <div class="upsell-tracks-row">
+            <div class="upsell-track-item ret-na"><i class="fas fa-umbrella"></i><span>Retirement</span><span class="upsell-track-status present">Active</span></div>
+            <div class="upsell-track-item inv"><i class="fas fa-chart-pie"></i><span>Investment</span><span class="upsell-track-status gap">Diversify</span></div>
+            <div class="upsell-track-item wlth"><i class="fas fa-gem"></i><span>Wealth Mgmt</span><span class="upsell-track-status missing">Not Started</span></div>
+          </div>
+          <div class="upsell-card-footer">
+            <div class="upsell-value-est"><span class="upsell-val-num">$320K</span><span class="upsell-val-lbl">Est. Upsell Value</span></div>
+            <button class="upsell-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('UC004')"><i class="fas fa-paper-plane"></i> Brief</button>
+          </div>
+        </div>
+
+        {/* ── C5: Patricia Nguyen — Mid Market, 6yr tenure ── */}
+        <div class="upsell-card" data-id="UC005" data-priority="medium" data-tracks="retirement,investment" onclick="openUpsellModal('UC005')">
+          <div class="upsell-card-header">
+            <div class="upsell-avatar" style="background:linear-gradient(135deg,#d97706,#fbbf24)">PN</div>
+            <div class="upsell-card-info">
+              <div class="upsell-client-name">Patricia Nguyen</div>
+              <div class="upsell-client-meta">Age 38 · Mid Market · Brooklyn</div>
+            </div>
+            <div class="upsell-priority-badge medium"><i class="fas fa-bolt"></i> Medium</div>
+          </div>
+          <div class="upsell-tenure-bar">
+            <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
+            <div class="upsell-tenure-track"><div class="upsell-tenure-fill" style="width:60%"></div></div>
+            <span class="upsell-tenure-yrs">6 yrs</span>
+          </div>
+          <div class="upsell-existing-products">
+            <span class="upsell-prod-chip ins">Universal Life $400K</span>
+            <span class="upsell-prod-chip ins">VUL $300K</span>
+          </div>
+          <div class="upsell-tracks-row">
+            <div class="upsell-track-item ret"><i class="fas fa-umbrella"></i><span>Retirement</span><span class="upsell-track-status missing">Not Started</span></div>
+            <div class="upsell-track-item inv"><i class="fas fa-chart-pie"></i><span>Investment</span><span class="upsell-track-status missing">Not Started</span></div>
+            <div class="upsell-track-item wlth-na"><i class="fas fa-gem"></i><span>Wealth Mgmt</span><span class="upsell-track-status na">N/A</span></div>
+          </div>
+          <div class="upsell-card-footer">
+            <div class="upsell-value-est"><span class="upsell-val-num">$240K</span><span class="upsell-val-lbl">Est. Upsell Value</span></div>
+            <button class="upsell-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('UC005')"><i class="fas fa-paper-plane"></i> Brief</button>
+          </div>
+        </div>
+
+        {/* ── C6: Sandra Williams — Mid Market, 10yr tenure ── */}
+        <div class="upsell-card" data-id="UC006" data-priority="medium" data-tracks="retirement,investment" onclick="openUpsellModal('UC006')">
+          <div class="upsell-card-header">
+            <div class="upsell-avatar" style="background:linear-gradient(135deg,#be185d,#f472b6)">SW</div>
+            <div class="upsell-card-info">
+              <div class="upsell-client-name">Sandra Williams</div>
+              <div class="upsell-client-meta">Age 61 · Mid Market · Queens</div>
+            </div>
+            <div class="upsell-priority-badge medium"><i class="fas fa-bolt"></i> Medium</div>
+          </div>
+          <div class="upsell-tenure-bar">
+            <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
+            <div class="upsell-tenure-track"><div class="upsell-tenure-fill" style="width:100%"></div></div>
+            <span class="upsell-tenure-yrs">10 yrs</span>
+          </div>
+          <div class="upsell-existing-products">
+            <span class="upsell-prod-chip ins">Term Life $350K</span>
+            <span class="upsell-prod-chip ins">LTC $180K</span>
+            <span class="upsell-prod-chip ret">Income Annuity (prospect)</span>
+          </div>
+          <div class="upsell-tracks-row">
+            <div class="upsell-track-item ret"><i class="fas fa-umbrella"></i><span>Retirement</span><span class="upsell-track-status gap">Confirm</span></div>
+            <div class="upsell-track-item inv"><i class="fas fa-chart-pie"></i><span>Investment</span><span class="upsell-track-status missing">Not Started</span></div>
+            <div class="upsell-track-item wlth-na"><i class="fas fa-gem"></i><span>Wealth Mgmt</span><span class="upsell-track-status na">N/A</span></div>
+          </div>
+          <div class="upsell-card-footer">
+            <div class="upsell-value-est"><span class="upsell-val-num">$200K</span><span class="upsell-val-lbl">Est. Upsell Value</span></div>
+            <button class="upsell-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('UC006')"><i class="fas fa-paper-plane"></i> Brief</button>
+          </div>
+        </div>
+
+        {/* ── C7: David Thompson — Emerging, 3yr tenure ── */}
+        <div class="upsell-card" data-id="UC007" data-priority="low" data-tracks="retirement" onclick="openUpsellModal('UC007')">
+          <div class="upsell-card-header">
+            <div class="upsell-avatar" style="background:linear-gradient(135deg,#64748b,#94a3b8)">DT</div>
+            <div class="upsell-card-info">
+              <div class="upsell-client-name">David Thompson</div>
+              <div class="upsell-client-meta">Age 33 · Emerging · Bronx</div>
+            </div>
+            <div class="upsell-priority-badge low"><i class="fas fa-seedling"></i> Watch</div>
+          </div>
+          <div class="upsell-tenure-bar">
+            <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
+            <div class="upsell-tenure-track"><div class="upsell-tenure-fill" style="width:30%"></div></div>
+            <span class="upsell-tenure-yrs">3 yrs</span>
+          </div>
+          <div class="upsell-existing-products">
+            <span class="upsell-prod-chip ins">Term Life $300K</span>
+          </div>
+          <div class="upsell-tracks-row">
+            <div class="upsell-track-item ret"><i class="fas fa-umbrella"></i><span>Retirement</span><span class="upsell-track-status missing">Not Started</span></div>
+            <div class="upsell-track-item inv-na"><i class="fas fa-chart-pie"></i><span>Investment</span><span class="upsell-track-status na">Future</span></div>
+            <div class="upsell-track-item wlth-na"><i class="fas fa-gem"></i><span>Wealth Mgmt</span><span class="upsell-track-status na">Future</span></div>
+          </div>
+          <div class="upsell-card-footer">
+            <div class="upsell-value-est"><span class="upsell-val-num">$80K</span><span class="upsell-val-lbl">Est. Upsell Value</span></div>
+            <button class="upsell-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('UC007')"><i class="fas fa-paper-plane"></i> Brief</button>
+          </div>
+        </div>
+
+        {/* ── C8: Kevin Park — Emerging, new client ── */}
+        <div class="upsell-card" data-id="UC008" data-priority="low" data-tracks="retirement" onclick="openUpsellModal('UC008')">
+          <div class="upsell-card-header">
+            <div class="upsell-avatar" style="background:linear-gradient(135deg,#0f766e,#2dd4bf)">KP</div>
+            <div class="upsell-card-info">
+              <div class="upsell-client-name">Kevin Park</div>
+              <div class="upsell-client-meta">Age 29 · Emerging · Jersey City</div>
+            </div>
+            <div class="upsell-priority-badge low"><i class="fas fa-seedling"></i> Watch</div>
+          </div>
+          <div class="upsell-tenure-bar">
+            <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
+            <div class="upsell-tenure-track"><div class="upsell-tenure-fill" style="width:10%"></div></div>
+            <span class="upsell-tenure-yrs">&lt; 1 yr</span>
+          </div>
+          <div class="upsell-existing-products">
+            <span class="upsell-prod-chip ins-pend">Term Life $250K (Pending)</span>
+          </div>
+          <div class="upsell-tracks-row">
+            <div class="upsell-track-item ret"><i class="fas fa-umbrella"></i><span>Retirement</span><span class="upsell-track-status missing">Not Started</span></div>
+            <div class="upsell-track-item inv-na"><i class="fas fa-chart-pie"></i><span>Investment</span><span class="upsell-track-status na">Future</span></div>
+            <div class="upsell-track-item wlth-na"><i class="fas fa-gem"></i><span>Wealth Mgmt</span><span class="upsell-track-status na">Future</span></div>
+          </div>
+          <div class="upsell-card-footer">
+            <div class="upsell-value-est"><span class="upsell-val-num">$50K</span><span class="upsell-val-lbl">Est. Upsell Value</span></div>
+            <button class="upsell-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('UC008')"><i class="fas fa-paper-plane"></i> Brief</button>
+          </div>
+        </div>
+
+      </div>{/* end upsell-grid */}
+
+      {/* ── Upsell Detail Modal ── */}
+      <div class="upsell-modal-overlay" id="upsell-modal-overlay" style="display:none" onclick="if(event.target===this)closeUpsellModal()">
+        <div class="upsell-modal" id="upsell-modal">
+          <div class="upsell-modal-header" id="upsell-modal-header">
+            <button class="upsell-modal-close" onclick="closeUpsellModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="upsell-modal-tabs" id="upsell-modal-tabs">
+            <button class="upsell-tab active" onclick="switchUpsellTab('overview')">Overview</button>
+            <button class="upsell-tab" onclick="switchUpsellTab('retirement')"><i class="fas fa-umbrella"></i> Retirement</button>
+            <button class="upsell-tab" onclick="switchUpsellTab('investment')"><i class="fas fa-chart-pie"></i> Investment</button>
+            <button class="upsell-tab" onclick="switchUpsellTab('wealth')"><i class="fas fa-gem"></i> Wealth</button>
+            <button class="upsell-tab" onclick="switchUpsellTab('ai-brief')"><i class="fas fa-robot"></i> AI Brief</button>
+          </div>
+          <div class="upsell-modal-body" id="upsell-modal-body"></div>
+          <div class="upsell-modal-footer" id="upsell-modal-footer">
+            <button class="btn btn-outline" onclick="closeUpsellModal()">Close</button>
+            <button class="btn btn-ai" onclick="openUpsellBriefModal(_currentUpsellId)"><i class="fas fa-paper-plane"></i> Generate Outreach Brief</button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Brief / Outreach Modal ── */}
+      <div class="upsell-brief-overlay" id="upsell-brief-overlay" style="display:none" onclick="if(event.target===this)closeUpsellBriefModal()">
+        <div class="upsell-brief-modal" id="upsell-brief-modal">
+          <div class="upsell-brief-header">
+            <h3><i class="fas fa-robot"></i> AI Upsell Outreach Brief</h3>
+            <button class="upsell-modal-close" onclick="closeUpsellBriefModal()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="upsell-brief-body" id="upsell-brief-body"></div>
+          <div class="upsell-brief-footer">
+            <button class="btn btn-outline" onclick="closeUpsellBriefModal()">Close</button>
+            <button class="btn btn-secondary" onclick="copyUpsellBrief()"><i class="fas fa-copy"></i> Copy Brief</button>
+            <button class="btn btn-primary" onclick="scheduleUpsellMeeting()"><i class="fas fa-calendar-plus"></i> Schedule Meeting</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
 function ProspectsPage() {
   return (
     <div class="page prospects-page">
@@ -2575,6 +3761,9 @@ function ProspectsPage() {
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $340K Net Worth</span>
             <span class="prosp-tp-chip" title="Credit Signal"><i class="fas fa-star"></i> 760 Credit</span>
           </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#6b728018;color:#6b7280;border:1px solid #6b728040"><i class="fas fa-user-friends"></i> Organic — Referral</span>
+          </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$4,200/yr</span>
             <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P001')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
@@ -2603,6 +3792,9 @@ function ProspectsPage() {
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $620K Net Worth</span>
             <span class="prosp-tp-chip" title="Life Event"><i class="fas fa-home"></i> New Home Mar 31</span>
           </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#f59e0b18;color:#f59e0b;border:1px solid #f59e0b40"><i class="fas fa-shield-alt"></i> Term Life — Young Families</span>
+          </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$3,600/yr</span>
             <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P002')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
@@ -2629,6 +3821,9 @@ function ProspectsPage() {
           <div class="prosp-third-party-row">
             <span class="prosp-tp-chip" title="Credit Signal"><i class="fas fa-star"></i> 690 Credit</span>
             <span class="prosp-tp-chip" title="Income Data"><i class="fas fa-briefcase"></i> $185K Income</span>
+          </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#00308718;color:#003087;border:1px solid #00308740"><i class="fas fa-heart"></i> Whole Life Protection</span>
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$2,400/yr</span>
@@ -2658,6 +3853,9 @@ function ProspectsPage() {
             <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-building"></i> LLC Est. $2.4M</span>
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $1.8M Net Worth</span>
           </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#6b728018;color:#6b7280;border:1px solid #6b728040"><i class="fas fa-user-friends"></i> Organic — Referral</span>
+          </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$6,800/yr</span>
             <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P004')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
@@ -2685,6 +3883,9 @@ function ProspectsPage() {
           <div class="prosp-third-party-row">
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $890K Net Worth</span>
             <span class="prosp-tp-chip" title="Pension Data"><i class="fas fa-umbrella-beach"></i> Pension $4.2K/mo</span>
+          </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#7c3aed18;color:#7c3aed;border:1px solid #7c3aed40"><i class="fas fa-chart-line"></i> Retirement Income — Annuity</span>
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$9,600/yr</span>
@@ -2714,6 +3915,9 @@ function ProspectsPage() {
             <span class="prosp-tp-chip" title="Income Data"><i class="fas fa-briefcase"></i> $390K Income</span>
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $2.1M Net Worth</span>
           </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#0d948818;color:#0d9488;border:1px solid #0d948840"><i class="fas fa-gem"></i> Wealth Management — HNW</span>
+          </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$14,400/yr</span>
             <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P006')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
@@ -2741,6 +3945,9 @@ function ProspectsPage() {
           <div class="prosp-third-party-row">
             <span class="prosp-tp-chip" title="Life Event"><i class="fas fa-baby"></i> New Baby Mar 2026</span>
             <span class="prosp-tp-chip" title="Credit Signal"><i class="fas fa-star"></i> 730 Credit</span>
+          </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#f59e0b18;color:#f59e0b;border:1px solid #f59e0b40"><i class="fas fa-shield-alt"></i> Term Life — Young Families</span>
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$2,800/yr</span>
@@ -2771,6 +3978,9 @@ function ProspectsPage() {
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $3.8M Net Worth</span>
             <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-building"></i> C-Suite Executive</span>
           </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#0d948818;color:#0d9488;border:1px solid #0d948840"><i class="fas fa-gem"></i> Wealth Management — HNW</span>
+          </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$18,000/yr</span>
             <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P008')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
@@ -2798,6 +4008,9 @@ function ProspectsPage() {
           <div class="prosp-third-party-row">
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $1.1M Net Worth</span>
             <span class="prosp-tp-chip" title="Public Records"><i class="fas fa-gavel"></i> Trust Filed 2024</span>
+          </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#6b728018;color:#6b7280;border:1px solid #6b728040"><i class="fas fa-user-friends"></i> Organic — Referral</span>
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$8,200/yr</span>
@@ -2827,6 +4040,9 @@ function ProspectsPage() {
             <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-building"></i> 2 LLCs Active</span>
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $2.6M Net Worth</span>
           </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#00308718;color:#003087;border:1px solid #00308740"><i class="fas fa-heart"></i> Whole Life Protection</span>
+          </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$9,000/yr</span>
             <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P010')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
@@ -2854,6 +4070,9 @@ function ProspectsPage() {
           <div class="prosp-third-party-row">
             <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-tooth"></i> Solo Practice Est. $480K</span>
             <span class="prosp-tp-chip" title="Credit Signal"><i class="fas fa-star"></i> 780 Credit</span>
+          </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#00308718;color:#003087;border:1px solid #00308740"><i class="fas fa-heart"></i> Whole Life Protection</span>
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$4,800/yr</span>
@@ -2883,6 +4102,9 @@ function ProspectsPage() {
             <span class="prosp-tp-chip" title="Pension Data"><i class="fas fa-umbrella-beach"></i> 401(k) $580K</span>
             <span class="prosp-tp-chip" title="Wealth Data"><i class="fas fa-gem"></i> $1.5M Net Worth</span>
           </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#7c3aed18;color:#7c3aed;border:1px solid #7c3aed40"><i class="fas fa-chart-line"></i> Retirement Income — Annuity</span>
+          </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$7,200/yr</span>
             <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P012')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
@@ -2911,6 +4133,9 @@ function ProspectsPage() {
             <span class="prosp-tp-chip" title="Life Event"><i class="fas fa-graduation-cap"></i> Child Age 2</span>
             <span class="prosp-tp-chip" title="Income Data"><i class="fas fa-briefcase"></i> $165K Income</span>
           </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#10b98118;color:#10b981;border:1px solid #10b98140"><i class="fas fa-seedling"></i> Investment Portfolio — Mid-Market</span>
+          </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$3,400/yr</span>
             <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P013')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
@@ -2938,6 +4163,9 @@ function ProspectsPage() {
           <div class="prosp-third-party-row">
             <span class="prosp-tp-chip" title="Business Data"><i class="fas fa-building"></i> 3 Properties $4.2M</span>
             <span class="prosp-tp-chip" title="Public Records"><i class="fas fa-file-alt"></i> LLC Filing Apr 2026</span>
+          </div>
+                    <div class="prosp-camp-source-row">
+            <span class="prosp-camp-tag" style="background:#0d948818;color:#0d9488;border:1px solid #0d948840"><i class="fas fa-gem"></i> Wealth Management — HNW</span>
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$12,000/yr</span>
@@ -8048,1480 +9276,140 @@ function SalesPage() {
 
 function ProductsPage() {
   return (
-    <div class="page products-page">
+    <div class="page products-page pi-page">
 
-      {/* Page Header */}
-      <div class="products-page-header">
-        <div class="products-header-text">
-          <h2><i class="fas fa-box-open"></i> New York Life Product Portfolio</h2>
-          <p>Comprehensive suite of insurance, investment, retirement and advisory solutions — curated for every client life stage</p>
-        </div>
-        <div class="prod-header-actions">
-          <button class="btn btn-outline" onclick="openProductSearch()">
-            <i class="fas fa-search"></i> Find Product
-          </button>
-          <button class="btn btn-ai" onclick="openQuickQuoteModal()">
-            <i class="fas fa-calculator"></i> Quick Quote
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Strip */}
-      <div class="prod-kpi-strip">
-        <div class="prod-kpi-card">
-          <div class="prod-kpi-icon blue"><i class="fas fa-shield-alt"></i></div>
-          <div class="prod-kpi-body">
-            <div class="prod-kpi-val">6</div>
-            <div class="prod-kpi-lbl">Insurance Products</div>
-            <div class="prod-kpi-delta green">$312K YTD premium</div>
+      {/* ── Header ── */}
+      <div class="pi-header">
+        <div class="pi-header-left">
+          <div class="pi-header-icon"><i class="fas fa-flask"></i></div>
+          <div>
+            <h2 class="pi-title">Product Intelligence Hub</h2>
+            <p class="pi-sub">AI-powered product research · client suitability matching · propensity scoring · personalised recommendations</p>
           </div>
         </div>
-        <div class="prod-kpi-card">
-          <div class="prod-kpi-icon emerald"><i class="fas fa-chart-line"></i></div>
-          <div class="prod-kpi-body">
-            <div class="prod-kpi-val">4</div>
-            <div class="prod-kpi-lbl">Investment Products</div>
-            <div class="prod-kpi-delta green">$4.2M AUM</div>
-          </div>
-        </div>
-        <div class="prod-kpi-card">
-          <div class="prod-kpi-icon gold"><i class="fas fa-umbrella-beach"></i></div>
-          <div class="prod-kpi-body">
-            <div class="prod-kpi-val">2</div>
-            <div class="prod-kpi-lbl">Retirement Products</div>
-            <div class="prod-kpi-delta green">$89K annuity premium</div>
-          </div>
-        </div>
-        <div class="prod-kpi-card">
-          <div class="prod-kpi-icon purple"><i class="fas fa-handshake"></i></div>
-          <div class="prod-kpi-body">
-            <div class="prod-kpi-val">3</div>
-            <div class="prod-kpi-lbl">Advisory Services</div>
-            <div class="prod-kpi-delta green">$86K advisory revenue</div>
-          </div>
-        </div>
-        <div class="prod-kpi-card highlight-card">
-          <div class="prod-kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
-          <div class="prod-kpi-body">
-            <div class="prod-kpi-val">18</div>
-            <div class="prod-kpi-lbl">Coverage Gaps Detected</div>
-            <div class="prod-kpi-delta orange">~$42K opportunity</div>
-          </div>
-        </div>
-        <div class="prod-kpi-card">
-          <div class="prod-kpi-icon teal"><i class="fas fa-robot"></i></div>
-          <div class="prod-kpi-body">
-            <div class="prod-kpi-val">11</div>
-            <div class="prod-kpi-lbl">AI Product Matches</div>
-            <div class="prod-kpi-delta green">Ready to pitch</div>
-          </div>
+        <div class="pi-header-actions">
+          <button class="btn btn-outline" onclick="openProductSearch()"><i class="fas fa-search"></i> Research Product</button>
+          <button class="btn btn-ai" onclick="runProductPropensity()"><i class="fas fa-robot"></i> Run AI Propensity</button>
+          <button class="btn btn-outline" onclick="openQuickQuoteModal()"><i class="fas fa-calculator"></i> Quick Quote</button>
         </div>
       </div>
 
-      {/* AI Opportunity Engine */}
-      <div class="prod-ai-engine">
-        <div class="prod-ai-engine-header">
-          <div class="prod-ai-engine-title">
-            <i class="fas fa-brain"></i>
-            AI Product Opportunity Engine
-            <span class="prod-ai-badge">LIVE</span>
-          </div>
-          <div class="prod-ai-engine-sub">Ranked by revenue potential · Analyzes gaps, life stage, risk profile, and existing coverage across your book</div>
-          <button class="prod-ai-refresh" onclick="refreshProductOpportunities()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      {/* ── KPI Strip ── */}
+      <div class="pi-kpi-strip">
+        <div class="pi-kpi-tile">
+          <div class="pi-kpi-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-robot"></i></div>
+          <div class="pi-kpi-val">24</div>
+          <div class="pi-kpi-lbl">AI Recommendations</div>
+          <div class="pi-kpi-delta up">+6 this week</div>
         </div>
-        <div class="prod-opp-list">
-          <div class="prod-opp-item priority-high">
-            <div class="prod-opp-rank">1</div>
-            <div class="prod-opp-icon"><i class="fas fa-heartbeat"></i></div>
-            <div class="prod-opp-body">
-              <div class="prod-opp-client">4 clients · LTC Insurance Gap</div>
-              <div class="prod-opp-detail">Clients 55+ with no long-term care coverage — inflation rider urgently needed</div>
-              <div class="prod-opp-tags">
-                <span class="prod-opp-tag red">High Priority</span>
-                <span class="prod-opp-tag">Age 55+</span>
-                <span class="prod-opp-tag">No LTC</span>
-              </div>
-            </div>
-            <div class="prod-opp-val">
-              <div class="prod-opp-premium">~$12K/yr</div>
-              <div class="prod-opp-product">LTC Insurance</div>
-              <button class="prod-opp-btn" onclick="switchProductTab('insurance');setTimeout(()=>document.getElementById('ltc-section')?.scrollIntoView({behavior:'smooth'}),300)">View Product</button>
-            </div>
-          </div>
-          <div class="prod-opp-item priority-high">
-            <div class="prod-opp-rank">2</div>
-            <div class="prod-opp-icon"><i class="fas fa-user-shield"></i></div>
-            <div class="prod-opp-body">
-              <div class="prod-opp-client">David Thompson (33) · Patricia Nguyen (38)</div>
-              <div class="prod-opp-detail">No disability coverage — high-income earners with 100% income at risk</div>
-              <div class="prod-opp-tags">
-                <span class="prod-opp-tag red">High Priority</span>
-                <span class="prod-opp-tag">No DI</span>
-                <span class="prod-opp-tag">High Income</span>
-              </div>
-            </div>
-            <div class="prod-opp-val">
-              <div class="prod-opp-premium">~$8.4K/yr</div>
-              <div class="prod-opp-product">Disability Ins.</div>
-              <button class="prod-opp-btn" onclick="switchProductTab('insurance')">View Product</button>
-            </div>
-          </div>
-          <div class="prod-opp-item priority-med">
-            <div class="prod-opp-rank">3</div>
-            <div class="prod-opp-icon"><i class="fas fa-hourglass-end"></i></div>
-            <div class="prod-opp-body">
-              <div class="prod-opp-client">Patricia Nguyen (38) · Deferred Annuity</div>
-              <div class="prod-opp-detail">Lock in today's rates — projected $2,800/mo income starting age 65</div>
-              <div class="prod-opp-tags">
-                <span class="prod-opp-tag amber">Medium Priority</span>
-                <span class="prod-opp-tag">Retirement Planning</span>
-              </div>
-            </div>
-            <div class="prod-opp-val">
-              <div class="prod-opp-premium">~$6K/yr</div>
-              <div class="prod-opp-product">Deferred Annuity</div>
-              <button class="prod-opp-btn" onclick="switchProductTab('retirement')">View Product</button>
-            </div>
-          </div>
-          <div class="prod-opp-item priority-med">
-            <div class="prod-opp-rank">4</div>
-            <div class="prod-opp-icon"><i class="fas fa-gem"></i></div>
-            <div class="prod-opp-body">
-              <div class="prod-opp-client">Linda Morrison · Robert Chen · UMA Wealth Mgmt</div>
-              <div class="prod-opp-detail">Estimated investable assets $500K+ — ideal for Unified Managed Account</div>
-              <div class="prod-opp-tags">
-                <span class="prod-opp-tag amber">Medium Priority</span>
-                <span class="prod-opp-tag">HNW</span>
-                <span class="prod-opp-tag">Advisory</span>
-              </div>
-            </div>
-            <div class="prod-opp-val">
-              <div class="prod-opp-premium">~$5K/yr fee</div>
-              <div class="prod-opp-product">Advisory / UMA</div>
-              <button class="prod-opp-btn" onclick="switchProductTab('advisory')">View Product</button>
-            </div>
-          </div>
-          <div class="prod-opp-item priority-low">
-            <div class="prod-opp-rank">5</div>
-            <div class="prod-opp-icon"><i class="fas fa-graduation-cap"></i></div>
-            <div class="prod-opp-body">
-              <div class="prod-opp-client">8 clients · 529 College Savings</div>
-              <div class="prod-opp-detail">Clients with children under 10 — tax-free education savings opportunity</div>
-              <div class="prod-opp-tags">
-                <span class="prod-opp-tag">Low Priority</span>
-                <span class="prod-opp-tag">529 Plan</span>
-                <span class="prod-opp-tag">Children U10</span>
-              </div>
-            </div>
-            <div class="prod-opp-val">
-              <div class="prod-opp-premium">~$4.8K/yr</div>
-              <div class="prod-opp-product">529 Plan</div>
-              <button class="prod-opp-btn" onclick="switchProductTab('investments')">View Product</button>
-            </div>
-          </div>
+        <div class="pi-kpi-tile">
+          <div class="pi-kpi-icon" style="background:#d1fae5;color:#065f46"><i class="fas fa-bullseye"></i></div>
+          <div class="pi-kpi-val">91%</div>
+          <div class="pi-kpi-lbl">Match Accuracy</div>
+          <div class="pi-kpi-delta up">AI propensity model</div>
+        </div>
+        <div class="pi-kpi-tile">
+          <div class="pi-kpi-icon" style="background:#fef3c7;color:#92400e"><i class="fas fa-fire"></i></div>
+          <div class="pi-kpi-val">8</div>
+          <div class="pi-kpi-lbl">Hot Matches</div>
+          <div class="pi-kpi-delta up">Score ≥85</div>
+        </div>
+        <div class="pi-kpi-tile">
+          <div class="pi-kpi-icon" style="background:#f3e8ff;color:#5b21b6"><i class="fas fa-shield-alt"></i></div>
+          <div class="pi-kpi-val">13</div>
+          <div class="pi-kpi-lbl">Active Products</div>
+          <div class="pi-kpi-delta neutral">NYL portfolio</div>
+        </div>
+        <div class="pi-kpi-tile">
+          <div class="pi-kpi-icon" style="background:#fce7f3;color:#9d174d"><i class="fas fa-dollar-sign"></i></div>
+          <div class="pi-kpi-val">$4.6M</div>
+          <div class="pi-kpi-lbl">Pipeline from Recs</div>
+          <div class="pi-kpi-delta up">+$840K vs last month</div>
         </div>
       </div>
 
-      {/* Coverage Gap Alert Strip */}
-      <div class="prod-gap-strip">
-        <div class="prod-gap-strip-title"><i class="fas fa-exclamation-circle"></i> Book Coverage Gaps — Action Required</div>
-        <div class="prod-gap-pills">
-          <div class="prod-gap-pill red" onclick="switchProductTab('insurance')">
-            <span class="pgp-count">4</span>
-            <span class="pgp-label">No LTC</span>
+      {/* ── Main 3-column layout ── */}
+      <div class="pi-main">
+
+        {/* ── LEFT: Product Catalog ── */}
+        <div class="pi-catalog-col">
+          <div class="pi-col-header">
+            <span class="pi-col-title"><i class="fas fa-layer-group"></i> Product Catalog</span>
+            <div class="pi-catalog-filters">
+              <button class="pi-cat-btn active" onclick="filterPIProducts('all',this)">All</button>
+              <button class="pi-cat-btn" onclick="filterPIProducts('insurance',this)">Insurance</button>
+              <button class="pi-cat-btn" onclick="filterPIProducts('retirement',this)">Retirement</button>
+              <button class="pi-cat-btn" onclick="filterPIProducts('investment',this)">Investment</button>
+              <button class="pi-cat-btn" onclick="filterPIProducts('wealth',this)">Wealth</button>
+            </div>
           </div>
-          <div class="prod-gap-pill red" onclick="switchProductTab('insurance')">
-            <span class="pgp-count">2</span>
-            <span class="pgp-label">No Disability</span>
-          </div>
-          <div class="prod-gap-pill amber" onclick="switchProductTab('insurance')">
-            <span class="pgp-count">3</span>
-            <span class="pgp-label">No Term Life</span>
-          </div>
-          <div class="prod-gap-pill amber" onclick="switchProductTab('retirement')">
-            <span class="pgp-count">5</span>
-            <span class="pgp-label">No Retirement Plan</span>
-          </div>
-          <div class="prod-gap-pill blue" onclick="switchProductTab('investments')">
-            <span class="pgp-count">4</span>
-            <span class="pgp-label">Investment Gap</span>
+          <div class="pi-product-list" id="pi-product-list">
+            {/* rendered by renderPIProducts() */}
           </div>
         </div>
-        <button class="prod-gap-action" onclick="openProductSearch()"><i class="fas fa-search"></i> Find Matches</button>
+
+        {/* ── CENTRE: AI Recommendations ── */}
+        <div class="pi-recs-col">
+          <div class="pi-col-header">
+            <span class="pi-col-title"><i class="fas fa-robot"></i> AI Recommendations</span>
+            <select class="pi-rec-sort" onchange="sortPIRecs(this.value)">
+              <option value="score">By Score</option>
+              <option value="value">By Value</option>
+              <option value="segment">By Segment</option>
+            </select>
+          </div>
+
+          {/* AI Insight Banner */}
+          <div class="pi-ai-banner">
+            <div class="pi-ai-banner-icon"><i class="fas fa-brain"></i></div>
+            <div class="pi-ai-banner-body">
+              <strong>Propensity Model ran at 9:00 AM today.</strong> 3 high-confidence matches identified:
+              Robert Chen (Annuity, score 96) · Patricia Nguyen (UL top-up, score 91) · James Whitfield (ETF Core, score 88).
+            </div>
+            <button class="pi-ai-banner-cta" onclick="runProductPropensity()">Refresh</button>
+          </div>
+
+          {/* Recommendation Cards */}
+          <div class="pi-rec-list" id="pi-rec-list">
+            {/* rendered by renderPIRecs() */}
+          </div>
+        </div>
+
+        {/* ── RIGHT: Product Detail / Suitability ── */}
+        <div class="pi-detail-col" id="pi-detail-col">
+          <div class="pi-detail-empty" id="pi-detail-empty">
+            <div class="pi-detail-empty-icon"><i class="fas fa-flask"></i></div>
+            <p>Select a product or recommendation to view suitability analysis, features, and client match details</p>
+          </div>
+          <div id="pi-detail-panel" style="display:none">
+            {/* rendered dynamically */}
+          </div>
+        </div>
+
       </div>
 
-      {/* Main Category Tabs (left nav + right content — NYL-style) */}
-      <div class="products-layout">
-
-        {/* Left Tab Nav */}
-        <div class="products-tab-nav">
-          <div class="tab-nav-item active" id="ptab-insurance" onclick="switchProductTab('insurance')">
-            <i class="fas fa-shield-alt"></i>
-            <span>Insurance</span>
-            <span class="tab-nav-count">6</span>
-            <i class="fas fa-chevron-right tab-arrow"></i>
-          </div>
-          <div class="tab-nav-item" id="ptab-investments" onclick="switchProductTab('investments')">
-            <i class="fas fa-chart-line"></i>
-            <span>Investments</span>
-            <span class="tab-nav-count">4</span>
-            <i class="fas fa-chevron-right tab-arrow"></i>
-          </div>
-          <div class="tab-nav-item" id="ptab-retirement" onclick="switchProductTab('retirement')">
-            <i class="fas fa-umbrella-beach"></i>
-            <span>Retirement</span>
-            <span class="tab-nav-count">2</span>
-            <i class="fas fa-chevron-right tab-arrow"></i>
-          </div>
-          <div class="tab-nav-item" id="ptab-advisory" onclick="switchProductTab('advisory')">
-            <i class="fas fa-handshake"></i>
-            <span>Advisory Services</span>
-            <span class="tab-nav-count">3</span>
-            <i class="fas fa-chevron-right tab-arrow"></i>
-          </div>
-
-          {/* Info Panel beneath tabs */}
-          <div class="tab-nav-info">
-            <div class="tab-info-icon"><i class="fas fa-robot"></i></div>
-            <div class="tab-info-title">AI Product Matching</div>
-            <div class="tab-info-desc">11 clients have been matched to products based on their life stage, gaps, and risk profile</div>
-            <button class="tab-info-link" onclick="openQuickQuoteModal()"><i class="fas fa-calculator"></i> Quick Quote <i class="fas fa-arrow-right"></i></button>
-            <button class="tab-info-link" style="margin-top:6px" onclick="sendContextMessage('Recommend the best products for each client based on their profile, gaps, and life stage','advisor')"><i class="fas fa-robot"></i> AI Recommendations <i class="fas fa-arrow-right"></i></button>
-          </div>
+      {/* ── Bottom: Propensity Matrix ── */}
+      <div class="pi-matrix-section">
+        <div class="pi-matrix-header">
+          <span class="pi-col-title"><i class="fas fa-th"></i> Client × Product Propensity Matrix</span>
+          <span class="pi-matrix-sub">AI scores (0–100) showing likelihood of successful placement per client per product category</span>
         </div>
-
-        {/* Right Content Panels */}
-        <div class="products-tab-content">
-
-          {/* ========== INSURANCE ========== */}
-          <div class="ptab-panel active" id="panel-insurance">
-            <div class="ptab-panel-header">
-              <div class="ptab-header-left">
-                <h3><i class="fas fa-shield-alt"></i> Insurance</h3>
-                <p>Protect your clients and their families with NYL's full suite of life and disability insurance products</p>
-              </div>
-              <div class="ptab-header-stats">
-                <div class="ptab-stat"><span class="ptab-stat-val">6</span><span class="ptab-stat-lbl">Products</span></div>
-                <div class="ptab-stat"><span class="ptab-stat-val green-text">$312K</span><span class="ptab-stat-lbl">YTD Premium</span></div>
-                <div class="ptab-stat"><span class="ptab-stat-val red-text">6</span><span class="ptab-stat-lbl">Gap Clients</span></div>
-              </div>
-            </div>
-
-            <div class="product-subsections">
-
-              {/* Term Life */}
-              <div class="prod-subsection" id="term-life-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon blue"><i class="fas fa-hourglass-half"></i></div>
-                  <div>
-                    <h4>Term life insurance <span class="prod-prospect-badge">3 prospects</span></h4>
-                    <p>Temporary protection, at a lower cost than other options, that can be converted to permanent</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill blue">Most Affordable</span>
-                    <span class="prod-meta-pill">Age 25–50</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Coverage Duration</div>
-                      <div class="pdc-val">10, 15, 20, or 30 years</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Face Amount</div>
-                      <div class="pdc-val">$100K – $10M+</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Convertibility</div>
-                      <div class="pdc-val">Convertible to Whole Life</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Avg Monthly Premium</div>
-                      <div class="pdc-val green-text">$25 – $80/mo</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Level premiums locked in for term duration</li>
-                    <li><i class="fas fa-check"></i> Renewable at end of term period</li>
-                    <li><i class="fas fa-check"></i> Conversion privilege — no medical exam required</li>
-                    <li><i class="fas fa-check"></i> Optional riders: waiver of premium, accidental death</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 3 clients aged 28–40 in your book have no term coverage — potential new business opportunity.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('term-life')">Product Details</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Whole Life */}
-              <div class="prod-subsection" id="whole-life-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon green"><i class="fas fa-infinity"></i></div>
-                  <div>
-                    <h4>Whole life insurance <span class="prod-prospect-badge">5 active policies</span></h4>
-                    <p>Permanent policies with a guaranteed death benefit and guaranteed cash value that grows over time</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill green">Most Popular</span>
-                    <span class="prod-meta-pill">Dividends Eligible</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Coverage Duration</div>
-                      <div class="pdc-val">Lifetime (permanent)</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Cash Value</div>
-                      <div class="pdc-val">Guaranteed growth</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Dividends</div>
-                      <div class="pdc-val">Eligible (not guaranteed)</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Policy Loans</div>
-                      <div class="pdc-val green-text">Available anytime</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Guaranteed death benefit — never decreases</li>
-                    <li><i class="fas fa-check"></i> Cash value grows at guaranteed rate tax-deferred</li>
-                    <li><i class="fas fa-check"></i> Eligible for annual dividends (NYL paid for 170+ years)</li>
-                    <li><i class="fas fa-check"></i> Can borrow against cash value — no credit check</li>
-                    <li><i class="fas fa-check"></i> Paid-up additions rider to accelerate growth</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison's Whole Life policy (P-100330) is eligible for a paid-up additions rider — could add $18K in cash value over 10 years.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('whole-life')">Product Details</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Universal Life */}
-              <div class="prod-subsection" id="ul-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon purple"><i class="fas fa-sliders-h"></i></div>
-                  <div>
-                    <h4>Universal life insurance <span class="prod-prospect-badge amber">1 underfunded</span></h4>
-                    <p>Long-term coverage that's highly customizable to your needs and budget</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill purple">Flexible Premiums</span>
-                    <span class="prod-meta-pill">Age 35–60</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Premium Flexibility</div>
-                      <div class="pdc-val">Adjustable</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Death Benefit</div>
-                      <div class="pdc-val">Adjustable</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Interest Crediting</div>
-                      <div class="pdc-val">Current rate + minimum</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Best Fit Age</div>
-                      <div class="pdc-val green-text">35 – 60 yrs</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Flexible premium payments — pay more or less as cash flow changes</li>
-                    <li><i class="fas fa-check"></i> Adjustable death benefit — increase or decrease coverage</li>
-                    <li><i class="fas fa-check"></i> Cash value earns interest at current declared rate</li>
-                    <li><i class="fas fa-check"></i> Guaranteed minimum interest rate floor</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Patricia Nguyen's UL policy (P-100301) has been underfunded for 2 quarters — consider a premium catch-up review.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('universal-life')">Product Details</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Variable Universal Life */}
-              <div class="prod-subsection" id="vul-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon gold"><i class="fas fa-chart-line"></i></div>
-                  <div>
-                    <h4>Variable universal life insurance <span class="prod-prospect-badge">1 strong match</span></h4>
-                    <p>Long-term coverage protection with the ability to invest your policy's cash value in the market</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill gold">Market Growth</span>
-                    <span class="prod-meta-pill">Risk Tolerant</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Investment Options</div>
-                      <div class="pdc-val">30+ sub-accounts</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Market Risk</div>
-                      <div class="pdc-val orange-text">Client bears risk</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Upside Potential</div>
-                      <div class="pdc-val">Unlimited</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Min Death Benefit</div>
-                      <div class="pdc-val green-text">Guaranteed</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Invest cash value in stocks, bonds, and money market sub-accounts</li>
-                    <li><i class="fas fa-check"></i> Flexible premiums and adjustable death benefit</li>
-                    <li><i class="fas fa-check"></i> Tax-deferred investment growth</li>
-                    <li><i class="fas fa-check"></i> Minimum guaranteed death benefit floor</li>
-                    <li><i class="fas fa-check"></i> Access to cash value via loans and withdrawals</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Robert Chen (business owner, age 45) is a strong VUL candidate — risk-tolerant profile with $21K annual premium capacity.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('vul')">Product Details</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Long-Term Care */}
-              <div class="prod-subsection priority-highlight" id="ltc-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon red"><i class="fas fa-heartbeat"></i></div>
-                  <div>
-                    <h4>Long-term care insurance <span class="prod-prospect-badge red">4 urgent gaps</span></h4>
-                    <p>Helps to pay for someone to help you with everyday tasks, if you ever need it</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill red">Urgent Opportunity</span>
-                    <span class="prod-meta-pill">Age 50–65</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Daily Benefit</div>
-                      <div class="pdc-val">$100 – $400/day</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Benefit Period</div>
-                      <div class="pdc-val">2 – 5 years (or lifetime)</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Elimination Period</div>
-                      <div class="pdc-val">30, 60, or 90 days</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Best Fit Age</div>
-                      <div class="pdc-val green-text">50 – 65 yrs</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Covers nursing home, assisted living, and home care</li>
-                    <li><i class="fas fa-check"></i> Inflation protection rider available (3% or 5% compound)</li>
-                    <li><i class="fas fa-check"></i> Shared care benefit for spouses / partners</li>
-                    <li><i class="fas fa-check"></i> Return of premium option if never used</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 4 clients aged 55+ in your book have no LTC coverage — combined gap premium potential of ~$12,000/year.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('ltc')">Product Details</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Individual Disability */}
-              <div class="prod-subsection priority-highlight" id="di-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon orange"><i class="fas fa-user-shield"></i></div>
-                  <div>
-                    <h4>Individual disability insurance <span class="prod-prospect-badge red">2 urgent gaps</span></h4>
-                    <p>Helps to replace lost income if sickness or injury prevent you from working</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill red">High Priority</span>
-                    <span class="prod-meta-pill">Own-Occupation</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Income Replacement</div>
-                      <div class="pdc-val">Up to 60–70% of income</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Benefit Period</div>
-                      <div class="pdc-val">2 yr, 5 yr, to age 65</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Definition</div>
-                      <div class="pdc-val">Own-occupation</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Non-cancelable</div>
-                      <div class="pdc-val green-text">Available</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Own-occupation definition — most favorable for professionals</li>
-                    <li><i class="fas fa-check"></i> Non-cancelable and guaranteed renewable options</li>
-                    <li><i class="fas fa-check"></i> Partial/residual disability benefit included</li>
-                    <li><i class="fas fa-check"></i> Future purchase option rider — increase coverage without underwriting</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> David Thompson (age 33) and Patricia Nguyen (age 38) have no disability coverage — high-priority gap opportunity.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('disability')">Product Details</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* ========== INVESTMENTS ========== */}
-          <div class="ptab-panel" id="panel-investments">
-            <div class="ptab-panel-header">
-              <div class="ptab-header-left">
-                <h3><i class="fas fa-chart-line"></i> Investments</h3>
-                <p>Grow your clients' wealth with professionally managed investment solutions tailored to their goals and risk tolerance</p>
-              </div>
-              <div class="ptab-header-stats">
-                <div class="ptab-stat"><span class="ptab-stat-val">4</span><span class="ptab-stat-lbl">Products</span></div>
-                <div class="ptab-stat"><span class="ptab-stat-val green-text">$4.2M</span><span class="ptab-stat-lbl">AUM</span></div>
-                <div class="ptab-stat"><span class="ptab-stat-val amber-text">4</span><span class="ptab-stat-lbl">Inv. Gaps</span></div>
-              </div>
-            </div>
-
-            <div class="product-subsections">
-
-              {/* Annuities */}
-              <div class="prod-subsection" id="annuities-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon blue"><i class="fas fa-lock"></i></div>
-                  <div>
-                    <h4>Annuities <span class="prod-prospect-badge">1 strong match</span></h4>
-                    <p>Stable, long-term options that eventually provide an income stream</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill blue">Guaranteed Income</span>
-                    <span class="prod-meta-pill">Fixed &amp; Variable</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Types Available</div>
-                      <div class="pdc-val">Fixed & Variable</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Payment Mode</div>
-                      <div class="pdc-val">Single premium</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Death Benefit</div>
-                      <div class="pdc-val green-text">Included</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Principal Guarantee</div>
-                      <div class="pdc-val green-text">Fixed type only</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Guaranteed income stream for life (immediate or deferred)</li>
-                    <li><i class="fas fa-check"></i> Tax-deferred accumulation during growth phase</li>
-                    <li><i class="fas fa-check"></i> Variable annuities offer sub-account investment options</li>
-                    <li><i class="fas fa-check"></i> Death benefit passes to beneficiary outside of probate</li>
-                    <li><i class="fas fa-check"></i> Optional riders: enhanced death benefit, GLWB, GMIB</li>
-                  </ul>
-                  <div class="prod-comparison-mini">
-                    <div class="pcm-row header"><span>Feature</span><span>Fixed Annuity</span><span>Variable Annuity</span></div>
-                    <div class="pcm-row"><span>Market Risk</span><span class="check-sm"><i class="fas fa-times text-red"></i> None</span><span class="check-sm orange-text">Client bears</span></div>
-                    <div class="pcm-row"><span>Principal Guarantee</span><span class="check-sm"><i class="fas fa-check text-green"></i></span><span class="check-sm"><i class="fas fa-times text-red"></i></span></div>
-                    <div class="pcm-row"><span>Income Conversion</span><span class="check-sm"><i class="fas fa-check text-green"></i></span><span class="check-sm"><i class="fas fa-check text-green"></i></span></div>
-                    <div class="pcm-row"><span>Investment Options</span><span class="check-sm"><i class="fas fa-times text-red"></i></span><span class="check-sm"><i class="fas fa-check text-green"></i></span></div>
-                  </div>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> James Whitfield (age 52) approaching retirement — deferred annuity conversion could provide ~$180K in guaranteed income at 65.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('annuities')">Product Details</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mutual Funds */}
-              <div class="prod-subsection" id="mf-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon green"><i class="fas fa-coins"></i></div>
-                  <div>
-                    <h4>Mutual funds <span class="prod-prospect-badge">1 prospect</span></h4>
-                    <p>Professionally managed investments with potential market gains</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill green">MainStay Funds</span>
-                    <span class="prod-meta-pill">Active &amp; Passive</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Fund Families</div>
-                      <div class="pdc-val">MainStay Funds + 3rd Party</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Minimum Investment</div>
-                      <div class="pdc-val">$500 (IRA) / $1,000</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Liquidity</div>
-                      <div class="pdc-val green-text">Daily (T+1)</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Management</div>
-                      <div class="pdc-val">Active / Passive</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Access to MainStay Funds — NYL's proprietary fund family</li>
-                    <li><i class="fas fa-check"></i> Diversified across equity, fixed income, and blended strategies</li>
-                    <li><i class="fas fa-check"></i> Automatic rebalancing available</li>
-                    <li><i class="fas fa-check"></i> Systematic investment plan — dollar-cost averaging</li>
-                    <li><i class="fas fa-check"></i> Available in IRA, Roth IRA, and taxable accounts</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Maria Gonzalez (age 48) has investable assets — mutual fund program may be a natural transition before recommending an SMA.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('mutual-funds')">Fund Lineup</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Explore</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* ETFs */}
-              <div class="prod-subsection" id="etf-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon purple"><i class="fas fa-exchange-alt"></i></div>
-                  <div>
-                    <h4>Exchange traded funds (ETFs) <span class="prod-prospect-badge">2 prospects</span></h4>
-                    <p>Bundled investments with low fees that you can quickly buy or sell</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill purple">Ultra-Low Fees</span>
-                    <span class="prod-meta-pill">Tax Efficient</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Fee Structure</div>
-                      <div class="pdc-val">0.03% – 0.25% avg</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Trading</div>
-                      <div class="pdc-val">Intraday (like stocks)</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Tax Efficiency</div>
-                      <div class="pdc-val green-text">High</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Min Investment</div>
-                      <div class="pdc-val">1 share</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Ultra-low expense ratios vs. active mutual funds</li>
-                    <li><i class="fas fa-check"></i> Broad market exposure — S&P 500, total market, sector ETFs</li>
-                    <li><i class="fas fa-check"></i> High tax efficiency due to in-kind creation/redemption</li>
-                    <li><i class="fas fa-check"></i> Transparent holdings — published daily</li>
-                    <li><i class="fas fa-check"></i> Excellent for low-cost core portfolio building</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Younger clients (David Thompson, Kevin Park) are ideal ETF candidates — low-cost entry point to build long-term wealth habits.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('etfs')">ETF Catalog</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Explore</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* 529 Plans */}
-              <div class="prod-subsection" id="529-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon gold"><i class="fas fa-graduation-cap"></i></div>
-                  <div>
-                    <h4>529 college savings plans <span class="prod-prospect-badge amber">8 prospects</span></h4>
-                    <p>Investments designed to help you pay for college or other education expenses</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill gold">Tax-Free Growth</span>
-                    <span class="prod-meta-pill">SECURE 2.0</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Tax Treatment</div>
-                      <div class="pdc-val">Tax-free growth + withdrawal</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Annual Gift Exclusion</div>
-                      <div class="pdc-val">$18,000 / $90K (5-yr)</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Contribution Limit</div>
-                      <div class="pdc-val">$400K+ (varies by state)</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Qualified Uses</div>
-                      <div class="pdc-val green-text">College + K-12 + Trade</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Earnings grow federal tax-free when used for qualified education</li>
-                    <li><i class="fas fa-check"></i> State income tax deduction available in most states</li>
-                    <li><i class="fas fa-check"></i> Superfunding: contribute 5 years of gifts upfront ($90,000)</li>
-                    <li><i class="fas fa-check"></i> Can be transferred to another family member</li>
-                    <li><i class="fas fa-check"></i> SECURE 2.0: unused funds can roll to Roth IRA (up to $35K)</li>
-                  </ul>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 8 clients in your book have children under 10 — 529 plan conversations could add $4,800+ in annual premium.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('529-plans')">529 Calculator</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Investment Comparison Table */}
-            <div class="comparison-section" style="margin-top:24px">
-              <h4 class="comparison-title"><i class="fas fa-table"></i> Compare Investment Options</h4>
-              <div class="table-wrapper">
-                <table class="comparison-table">
-                  <thead>
-                    <tr>
-                      <th>Product</th><th>Payments</th><th>Death Benefit</th><th>Income Stream</th>
-                      <th>Market Investment</th><th>Principal Guarantee</th><th>Fees</th><th>Liquidity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td class="product-name-cell">Fixed Annuities</td><td>Single premium</td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td></td></tr>
-                    <tr><td class="product-name-cell">Variable Annuities</td><td>Single premium</td><td class="check"><i class="fas fa-check-circle"></i></td><td class="check"><i class="fas fa-check-circle"></i></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td></tr>
-                    <tr><td class="product-name-cell">Mutual Funds</td><td>You choose</td><td></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td class="check"><i class="fas fa-check-circle"></i></td></tr>
-                    <tr><td class="product-name-cell">ETFs</td><td>You choose</td><td></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td class="check"><i class="fas fa-check-circle"></i></td></tr>
-                    <tr><td class="product-name-cell">529 Plans</td><td>You choose</td><td></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td><td class="check"><i class="fas fa-check-circle"></i></td><td></td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* ========== RETIREMENT ========== */}
-          <div class="ptab-panel" id="panel-retirement">
-            <div class="ptab-panel-header">
-              <div class="ptab-header-left">
-                <h3><i class="fas fa-umbrella-beach"></i> Retirement</h3>
-                <p>Help your clients build a secure retirement income strategy with guaranteed income solutions that last a lifetime</p>
-              </div>
-              <div class="ptab-header-stats">
-                <div class="ptab-stat"><span class="ptab-stat-val">2</span><span class="ptab-stat-lbl">Products</span></div>
-                <div class="ptab-stat"><span class="ptab-stat-val green-text">$89K</span><span class="ptab-stat-lbl">YTD Premium</span></div>
-                <div class="ptab-stat"><span class="ptab-stat-val amber-text">5</span><span class="ptab-stat-lbl">No Ret. Plan</span></div>
-              </div>
-            </div>
-
-            <div class="product-subsections">
-
-              {/* Immediate Income Annuities */}
-              <div class="prod-subsection" id="immediate-annuity-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon blue"><i class="fas fa-play-circle"></i></div>
-                  <div>
-                    <h4>Immediate income annuities <span class="prod-prospect-badge">2 candidates</span></h4>
-                    <p>Start to receive income now, for as long as you need it, with potential for additional earnings</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill blue">Income For Life</span>
-                    <span class="prod-meta-pill">Age 65–80</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Income Start</div>
-                      <div class="pdc-val">Within 1–12 months</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Income Duration</div>
-                      <div class="pdc-val">Life / Joint Life / Period</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Payment Options</div>
-                      <div class="pdc-val">Monthly / Quarterly / Annual</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Best Fit Age</div>
-                      <div class="pdc-val green-text">65 – 80 yrs</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Guaranteed income payments that cannot be outlived</li>
-                    <li><i class="fas fa-check"></i> Joint-life option covers both spouses for life</li>
-                    <li><i class="fas fa-check"></i> Period certain option — minimum payment guarantee (e.g., 10 yrs)</li>
-                    <li><i class="fas fa-check"></i> Potential dividend participation for income increases</li>
-                    <li><i class="fas fa-check"></i> Backed by NYL's 178+ years of financial strength</li>
-                  </ul>
-                  <div class="prod-retire-highlight">
-                    <div class="rh-item">
-                      <i class="fas fa-shield-alt"></i>
-                      <div><strong>Guaranteed Income</strong><p>Payments for as long as you live — regardless of market conditions</p></div>
-                    </div>
-                    <div class="rh-item">
-                      <i class="fas fa-university"></i>
-                      <div><strong>Financial Reliability</strong><p>Backed by NYL's 178-year legacy and highest financial strength ratings</p></div>
-                    </div>
-                    <div class="rh-item">
-                      <i class="fas fa-hand-holding-usd"></i>
-                      <div><strong>Stretch Your Savings</strong><p>Potential annual dividends can increase your income over time</p></div>
-                    </div>
-                  </div>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison (age 56) and James Whitfield (age 52) are ideal immediate annuity candidates in 8–12 years — begin the conversation now.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('immediate-annuity')">Income Illustration</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Quote Now</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Deferred Income Annuities */}
-              <div class="prod-subsection" id="deferred-annuity-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon green"><i class="fas fa-hourglass-end"></i></div>
-                  <div>
-                    <h4>Deferred income annuities <span class="prod-prospect-badge">1 strong match</span></h4>
-                    <p>Receive income for life and larger payouts by delaying them for at least a few years</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill green">Higher Payout</span>
-                    <span class="prod-meta-pill">Age 40–70</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="prod-detail-grid">
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Deferral Period</div>
-                      <div class="pdc-val">2 – 40 years</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Income Boost</div>
-                      <div class="pdc-val green-text">Higher payout at start</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Purchase Age</div>
-                      <div class="pdc-val">40 – 70 yrs</div>
-                    </div>
-                    <div class="prod-detail-card">
-                      <div class="pdc-label">Payments</div>
-                      <div class="pdc-val">Single or periodic</div>
-                    </div>
-                  </div>
-                  <ul class="prod-feature-list">
-                    <li><i class="fas fa-check"></i> Lock in today's rates for future income — the longer you wait, the higher the payout</li>
-                    <li><i class="fas fa-check"></i> Excellent hedge against longevity risk for clients in their 40s–50s</li>
-                    <li><i class="fas fa-check"></i> Flexible start date — you choose when income begins</li>
-                    <li><i class="fas fa-check"></i> Survivor benefit — return of premium to beneficiary if client dies early</li>
-                    <li><i class="fas fa-check"></i> Can fund with rollovers from IRA, 401(k), or taxable savings</li>
-                  </ul>
-                  <div class="prod-retire-highlight">
-                    <div class="rh-item">
-                      <i class="fas fa-clock"></i>
-                      <div><strong>Personal Flexibility</strong><p>You select when income starts — as short as 2 years or up to 40 years out</p></div>
-                    </div>
-                    <div class="rh-item">
-                      <i class="fas fa-chart-bar"></i>
-                      <div><strong>Larger Payouts</strong><p>Delaying income payments means significantly larger guaranteed income amounts</p></div>
-                    </div>
-                  </div>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Patricia Nguyen (age 38) could lock in a deferred annuity now at today's rates — projected income starting at age 65 of ~$2,800/month.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('deferred-annuity')">Deferral Calculator</button>
-                    <button class="btn btn-primary-sm" onclick="navigateTo('sales')"><i class="fas fa-calculator"></i> Illustrate</button>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Retirement Income Comparison */}
-            <div class="comparison-section" style="margin-top:24px">
-              <h4 class="comparison-title"><i class="fas fa-balance-scale"></i> Immediate vs. Deferred Income Annuities</h4>
-              <div class="retire-compare-grid">
-                <div class="rc-card blue-border">
-                  <div class="rc-title"><i class="fas fa-play-circle"></i> Immediate Income Annuity</div>
-                  <div class="rc-rows">
-                    <div class="rc-row"><span>Income Starts</span><strong>Within 1–12 months</strong></div>
-                    <div class="rc-row"><span>Best For</span><strong>Already retired or retiring soon</strong></div>
-                    <div class="rc-row"><span>Payout Level</span><strong>Moderate</strong></div>
-                    <div class="rc-row"><span>Flexibility</span><strong>Lower — locked in</strong></div>
-                    <div class="rc-row"><span>Longevity Risk</span><strong class="green-text">Fully covered</strong></div>
-                  </div>
-                </div>
-                <div class="rc-card green-border">
-                  <div class="rc-title"><i class="fas fa-hourglass-end"></i> Deferred Income Annuity</div>
-                  <div class="rc-rows">
-                    <div class="rc-row"><span>Income Starts</span><strong>2 – 40 years from now</strong></div>
-                    <div class="rc-row"><span>Best For</span><strong>Mid-career planners (40s–50s)</strong></div>
-                    <div class="rc-row"><span>Payout Level</span><strong class="green-text">Higher — worth the wait</strong></div>
-                    <div class="rc-row"><span>Flexibility</span><strong>Higher — choose start date</strong></div>
-                    <div class="rc-row"><span>Longevity Risk</span><strong class="green-text">Fully covered</strong></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ========== ADVISORY SERVICES ========== */}
-          <div class="ptab-panel" id="panel-advisory">
-            <div class="ptab-panel-header">
-              <div class="ptab-header-left">
-                <h3><i class="fas fa-handshake"></i> Advisory Services</h3>
-                <p>Expert guidance across wealth management, estate planning, and small business solutions — for your most complex client needs</p>
-              </div>
-              <div class="ptab-header-stats">
-                <div class="ptab-stat"><span class="ptab-stat-val">3</span><span class="ptab-stat-lbl">Services</span></div>
-                <div class="ptab-stat"><span class="ptab-stat-val green-text">$86K</span><span class="ptab-stat-lbl">Revenue</span></div>
-                <div class="ptab-stat"><span class="ptab-stat-val">4</span><span class="ptab-stat-lbl">Eligible Clients</span></div>
-              </div>
-            </div>
-
-            <div class="product-subsections">
-
-              {/* Wealth Management */}
-              <div class="prod-subsection" id="wealth-mgmt-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon gold"><i class="fas fa-gem"></i></div>
-                  <div>
-                    <h4>Wealth management <span class="prod-prospect-badge">2 HNW candidates</span></h4>
-                    <p>Expertise and guidance to create your investment strategy and help you plan for future financial needs</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill gold">HNW Clients</span>
-                    <span class="prod-meta-pill">Min $25K–$250K</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="advisory-programs-grid">
-                    <div class="adv-program-card">
-                      <div class="adv-prog-icon"><i class="fas fa-tasks"></i></div>
-                      <div class="adv-prog-name">Fund Advisory Program</div>
-                      <div class="adv-prog-desc">Professionally managed model portfolios using mutual funds. Ongoing monitoring and automatic rebalancing.</div>
-                      <div class="adv-prog-min">Min: $25,000</div>
-                    </div>
-                    <div class="adv-program-card">
-                      <div class="adv-prog-icon"><i class="fas fa-layer-group"></i></div>
-                      <div class="adv-prog-name">Separately Managed Account (SMA)</div>
-                      <div class="adv-prog-desc">Direct ownership of individual securities managed by institutional money managers. Greater customization and tax efficiency.</div>
-                      <div class="adv-prog-min">Min: $100,000</div>
-                    </div>
-                    <div class="adv-program-card">
-                      <div class="adv-prog-icon"><i class="fas fa-user-tie"></i></div>
-                      <div class="adv-prog-name">Rep-Directed Program</div>
-                      <div class="adv-prog-desc">Your advisor builds and manages a customized portfolio based on your specific investment goals and preferences.</div>
-                      <div class="adv-prog-min">Min: $50,000</div>
-                    </div>
-                    <div class="adv-program-card">
-                      <div class="adv-prog-icon"><i class="fas fa-network-wired"></i></div>
-                      <div class="adv-prog-name">Unified Managed Account (UMA)</div>
-                      <div class="adv-prog-desc">Combines multiple investment strategies — mutual funds, ETFs, SMAs — in a single account for maximum diversification.</div>
-                      <div class="adv-prog-min">Min: $250,000</div>
-                    </div>
-                  </div>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Linda Morrison and Robert Chen are strong UMA candidates with estimated investable assets of $500K+. Schedule wealth management conversations.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('wealth-mgmt')">Program Comparison</button>
-                    <button class="btn btn-primary-sm" onclick="sendContextMessage('Recommend the best products for each client based on their profile, gaps, and life stage','advisor')"><i class="fas fa-robot"></i> AI Client Match</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Estate Planning */}
-              <div class="prod-subsection" id="estate-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon purple"><i class="fas fa-landmark"></i></div>
-                  <div>
-                    <h4>Estate planning <span class="prod-prospect-badge amber">4 reviews needed</span></h4>
-                    <p>Guidance to help identify potential needs and set you up with an estate plan that can protect your legacy</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill purple">Legacy Protection</span>
-                    <span class="prod-meta-pill">$2M+ Policies</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="estate-features-grid">
-                    <div class="estate-feature-card">
-                      <div class="ef-icon"><i class="fas fa-scroll"></i></div>
-                      <div class="ef-name">Last Will &amp; Testament</div>
-                      <div class="ef-desc">Directs distribution of assets, names guardians for minor children, and designates an executor</div>
-                    </div>
-                    <div class="estate-feature-card">
-                      <div class="ef-icon"><i class="fas fa-gavel"></i></div>
-                      <div class="ef-name">Power of Attorney</div>
-                      <div class="ef-desc">Authorizes a trusted person to make financial and legal decisions if you become incapacitated</div>
-                    </div>
-                    <div class="estate-feature-card">
-                      <div class="ef-icon"><i class="fas fa-balance-scale"></i></div>
-                      <div class="ef-name">Trusts</div>
-                      <div class="ef-desc">Revocable living trusts, irrevocable trusts, and special needs trusts to manage and protect assets</div>
-                    </div>
-                    <div class="estate-feature-card">
-                      <div class="ef-icon"><i class="fas fa-gift"></i></div>
-                      <div class="ef-name">Lifetime Gifts</div>
-                      <div class="ef-desc">Strategic gifting strategies to transfer wealth during life and reduce future estate tax exposure</div>
-                    </div>
-                    <div class="estate-feature-card">
-                      <div class="ef-icon"><i class="fas fa-percentage"></i></div>
-                      <div class="ef-name">Tax Strategies</div>
-                      <div class="ef-desc">Federal and state estate tax minimization, including ILIT, GRAT, and charitable giving strategies</div>
-                    </div>
-                    <div class="estate-feature-card">
-                      <div class="ef-icon"><i class="fas fa-star-of-life"></i></div>
-                      <div class="ef-name">Special Provisions</div>
-                      <div class="ef-desc">Provisions for beneficiaries with special needs, spendthrift clauses, and pet trusts</div>
-                    </div>
-                  </div>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> 4 clients qualify for estate planning reviews: Linda Morrison ($2M+ policy), James Whitfield (multiple assets), Robert Chen (business owner), Maria Gonzalez (interest flagged).</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('estate-planning')">Estate Checklist</button>
-                    <button class="btn btn-primary-sm" onclick="sendContextMessage('Review all 4 estate planning opportunities and generate prioritized action plan with revenue estimates','estate')"><i class="fas fa-robot"></i> Estate AI Review</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Small Business */}
-              <div class="prod-subsection" id="biz-section">
-                <div class="prod-sub-header">
-                  <div class="prod-sub-icon orange"><i class="fas fa-building"></i></div>
-                  <div>
-                    <h4>Small business solutions <span class="prod-prospect-badge">2 business owners</span></h4>
-                    <p>Insurance for employees, executives, or business owners, plus many other options to help a small business thrive</p>
-                  </div>
-                  <div class="prod-sub-meta">
-                    <span class="prod-meta-pill orange">Business Owners</span>
-                    <span class="prod-meta-pill">NQDC · COLI</span>
-                  </div>
-                </div>
-                <div class="prod-sub-details">
-                  <div class="biz-solutions-grid">
-                    <div class="biz-solution-card orange-border">
-                      <div class="biz-sol-header"><i class="fas fa-user-tie"></i> Business Owners</div>
-                      <ul>
-                        <li>Buy-sell agreement funding</li>
-                        <li>Key person life insurance</li>
-                        <li>Business succession planning</li>
-                        <li>Split-dollar arrangements</li>
-                        <li>Deferred compensation plans</li>
-                      </ul>
-                    </div>
-                    <div class="biz-solution-card blue-border">
-                      <div class="biz-sol-header"><i class="fas fa-crown"></i> Executive Benefits</div>
-                      <ul>
-                        <li>Non-qualified deferred compensation (NQDC)</li>
-                        <li>Supplemental executive retirement plans (SERP)</li>
-                        <li>Executive bonus (Section 162) plans</li>
-                        <li>Corporate-owned life insurance (COLI)</li>
-                        <li>Supplemental disability insurance</li>
-                      </ul>
-                    </div>
-                    <div class="biz-solution-card green-border">
-                      <div class="biz-sol-header"><i class="fas fa-users"></i> Employee Benefits</div>
-                      <ul>
-                        <li>Group life and disability insurance</li>
-                        <li>401(k) and retirement plan setup</li>
-                        <li>Voluntary benefits programs</li>
-                        <li>Pension and defined benefit plans</li>
-                        <li>Employee education and wellness plans</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div class="prod-ai-tip"><i class="fas fa-robot"></i> <strong>AI Insight:</strong> Robert Chen (business owner) and James Whitfield have identified business planning needs — schedule a small business review to explore NQDC and key person coverage.</div>
-                  <div class="prod-sub-actions">
-                    <button class="btn btn-outline-sm" onclick="openProductDetail('small-business')">Business Solutions Guide</button>
-                    <button class="btn btn-primary-sm" onclick="sendContextMessage('Audit all business owner clients for NQDC, key-person life, COLI and group benefits gaps','business')"><i class="fas fa-robot"></i> Business AI Audit</button>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>{/* end products-tab-content */}
-      </div>{/* end products-layout */}
-
-      {/* Product Performance Analytics Grid */}
-      <div class="prod-analytics-grid">
-
-        {/* Premium by Product Category */}
-        <div class="prod-analytics-card">
-          <div class="prod-analytics-header">
-            <div class="prod-analytics-title"><i class="fas fa-chart-bar"></i> Premium by Product — YTD 2026</div>
-            <span class="prod-analytics-badge">Live</span>
-          </div>
-          <div class="prod-perf-bars">
-            <div class="prod-perf-row">
-              <div class="prod-perf-label">Whole Life</div>
-              <div class="prod-perf-bar-wrap">
-                <div class="prod-perf-bar-fill" style="width:72%;background:linear-gradient(90deg,#059669,#10b981)"></div>
-              </div>
-              <div class="prod-perf-val">$224K</div>
-            </div>
-            <div class="prod-perf-row">
-              <div class="prod-perf-label">Term Life</div>
-              <div class="prod-perf-bar-wrap">
-                <div class="prod-perf-bar-fill" style="width:28%;background:linear-gradient(90deg,#0030870,#3b5ccc)"></div>
-              </div>
-              <div class="prod-perf-val">$88K</div>
-            </div>
-            <div class="prod-perf-row">
-              <div class="prod-perf-label">Deferred Annuity</div>
-              <div class="prod-perf-bar-wrap">
-                <div class="prod-perf-bar-fill" style="width:29%;background:linear-gradient(90deg,#d97706,#f59e0b)"></div>
-              </div>
-              <div class="prod-perf-val">$89K</div>
-            </div>
-            <div class="prod-perf-row">
-              <div class="prod-perf-label">VUL</div>
-              <div class="prod-perf-bar-wrap">
-                <div class="prod-perf-bar-fill" style="width:18%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
-              </div>
-              <div class="prod-perf-val">$57K</div>
-            </div>
-            <div class="prod-perf-row">
-              <div class="prod-perf-label">Disability Ins.</div>
-              <div class="prod-perf-bar-wrap">
-                <div class="prod-perf-bar-fill" style="width:11%;background:linear-gradient(90deg,#ea580c,#fb923c)"></div>
-              </div>
-              <div class="prod-perf-val">$35K</div>
-            </div>
-            <div class="prod-perf-row">
-              <div class="prod-perf-label">Universal Life</div>
-              <div class="prod-perf-bar-wrap">
-                <div class="prod-perf-bar-fill" style="width:8%;background:linear-gradient(90deg,#0891b2,#22d3ee)"></div>
-              </div>
-              <div class="prod-perf-val">$24K</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Pipeline by Product */}
-        <div class="prod-analytics-card">
-          <div class="prod-analytics-header">
-            <div class="prod-analytics-title"><i class="fas fa-funnel-dollar"></i> Active Pipeline by Product</div>
-            <button class="prod-analytics-link" onclick="navigateTo('sales')">View Pipeline</button>
-          </div>
-          <div class="prod-pipeline-list">
-            <div class="prod-pipeline-row">
-              <div class="prod-pipeline-icon blue"><i class="fas fa-infinity"></i></div>
-              <div class="prod-pipeline-body">
-                <div class="prod-pipeline-name">Whole Life</div>
-                <div class="prod-pipeline-sub">5 deals · Avg $1.2M face amount</div>
-              </div>
-              <div class="prod-pipeline-val">$38K</div>
-            </div>
-            <div class="prod-pipeline-row">
-              <div class="prod-pipeline-icon gold"><i class="fas fa-chart-line"></i></div>
-              <div class="prod-pipeline-body">
-                <div class="prod-pipeline-name">VUL</div>
-                <div class="prod-pipeline-sub">2 deals · Robert Chen + 1 other</div>
-              </div>
-              <div class="prod-pipeline-val">$21K</div>
-            </div>
-            <div class="prod-pipeline-row">
-              <div class="prod-pipeline-icon emerald"><i class="fas fa-hourglass-end"></i></div>
-              <div class="prod-pipeline-body">
-                <div class="prod-pipeline-name">Deferred Annuity</div>
-                <div class="prod-pipeline-sub">2 deals · Patricia Nguyen + 1</div>
-              </div>
-              <div class="prod-pipeline-val">$9.6K</div>
-            </div>
-            <div class="prod-pipeline-row">
-              <div class="prod-pipeline-icon red"><i class="fas fa-heartbeat"></i></div>
-              <div class="prod-pipeline-body">
-                <div class="prod-pipeline-name">LTC Insurance</div>
-                <div class="prod-pipeline-sub">1 deal · Linda Morrison</div>
-              </div>
-              <div class="prod-pipeline-val">$4.8K</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Client-Product Fit Matrix */}
-        <div class="prod-analytics-card">
-          <div class="prod-analytics-header">
-            <div class="prod-analytics-title"><i class="fas fa-th"></i> Client–Product Fit Matrix</div>
-            <button class="prod-analytics-link" onclick="navigateTo('clients')">View Clients</button>
-          </div>
-          <div class="prod-fit-matrix">
-            <div class="pfm-header">
-              <div class="pfm-client"></div>
-              <div class="pfm-col">WL</div>
-              <div class="pfm-col">TL</div>
-              <div class="pfm-col">VUL</div>
-              <div class="pfm-col">LTC</div>
-              <div class="pfm-col">DI</div>
-              <div class="pfm-col">Ann.</div>
-            </div>
-            <div class="pfm-row">
-              <div class="pfm-client">L. Morrison</div>
-              <div class="pfm-cell has"><i class="fas fa-check"></i></div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell gap"><i class="fas fa-exclamation"></i></div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
-            </div>
-            <div class="pfm-row">
-              <div class="pfm-client">R. Chen</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-            </div>
-            <div class="pfm-row">
-              <div class="pfm-client">D. Thompson</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell gap"><i class="fas fa-exclamation"></i></div>
-              <div class="pfm-cell none">—</div>
-            </div>
-            <div class="pfm-row">
-              <div class="pfm-client">P. Nguyen</div>
-              <div class="pfm-cell has"><i class="fas fa-check"></i></div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell gap"><i class="fas fa-exclamation"></i></div>
-              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
-            </div>
-            <div class="pfm-row">
-              <div class="pfm-client">J. Whitfield</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell gap"><i class="fas fa-exclamation"></i></div>
-              <div class="pfm-cell none">—</div>
-              <div class="pfm-cell match"><i class="fas fa-star"></i></div>
-            </div>
-          </div>
-          <div class="pfm-legend">
-            <span class="pfm-leg has"><i class="fas fa-check"></i> Has Policy</span>
-            <span class="pfm-leg match"><i class="fas fa-star"></i> AI Match</span>
-            <span class="pfm-leg gap"><i class="fas fa-exclamation"></i> Gap</span>
-          </div>
-        </div>
-
-        {/* Recent Quotes */}
-        <div class="prod-analytics-card">
-          <div class="prod-analytics-header">
-            <div class="prod-analytics-title"><i class="fas fa-receipt"></i> Recent Quotes &amp; Illustrations</div>
-            <button class="prod-analytics-link" onclick="openQuickQuoteModal()">New Quote</button>
-          </div>
-          <div class="prod-quotes-list">
-            <div class="prod-quote-row">
-              <div class="prod-quote-icon emerald"><i class="fas fa-infinity"></i></div>
-              <div class="prod-quote-body">
-                <div class="prod-quote-name">Whole Life · Maria Gonzalez</div>
-                <div class="prod-quote-sub">$300K face · Quoted Apr 10</div>
-              </div>
-              <div class="prod-quote-status in-progress">In Pipeline</div>
-            </div>
-            <div class="prod-quote-row">
-              <div class="prod-quote-icon gold"><i class="fas fa-chart-line"></i></div>
-              <div class="prod-quote-body">
-                <div class="prod-quote-name">VUL · Robert Chen</div>
-                <div class="prod-quote-sub">$750K face · Quoted Apr 8</div>
-              </div>
-              <div class="prod-quote-status uw">In UW</div>
-            </div>
-            <div class="prod-quote-row">
-              <div class="prod-quote-icon blue"><i class="fas fa-hourglass-end"></i></div>
-              <div class="prod-quote-body">
-                <div class="prod-quote-name">Deferred Annuity · P. Nguyen</div>
-                <div class="prod-quote-sub">$6K/yr · Illustrated Apr 5</div>
-              </div>
-              <div class="prod-quote-status proposal">Proposal Sent</div>
-            </div>
-            <div class="prod-quote-row">
-              <div class="prod-quote-icon red"><i class="fas fa-heartbeat"></i></div>
-              <div class="prod-quote-body">
-                <div class="prod-quote-name">LTC · Linda Morrison</div>
-                <div class="prod-quote-sub">$200/day benefit · Quoted Apr 3</div>
-              </div>
-              <div class="prod-quote-status approved">Approved</div>
-            </div>
-          </div>
-        </div>
-
-      </div>{/* end prod-analytics-grid */}
-
-      {/* Quick Quote Modal */}
-      <div class="modal-overlay" id="quick-quote-modal" style="display:none" onclick="if(event.target===this)closeQuickQuoteModal()">
-        <div class="modal-box prod-quote-modal">
-          <div class="modal-header">
-            <h3><i class="fas fa-calculator"></i> Quick Quote / Illustration</h3>
-            <button class="modal-close" onclick="closeQuickQuoteModal()"><i class="fas fa-times"></i></button>
-          </div>
-          <div class="modal-body">
-            <div class="qq-form-grid">
-              <div class="qq-field">
-                <label>Client</label>
-                <select id="qq-client">
-                  <option value="">Select client…</option>
-                  <option>Linda Morrison</option>
-                  <option>Robert Chen</option>
-                  <option>David Thompson</option>
-                  <option>Patricia Nguyen</option>
-                  <option>James Whitfield</option>
-                  <option>Maria Gonzalez</option>
-                </select>
-              </div>
-              <div class="qq-field">
-                <label>Product</label>
-                <select id="qq-product" onchange="updateQuoteFields()">
-                  <option value="">Select product…</option>
-                  <option value="term-life">Term Life Insurance</option>
-                  <option value="whole-life">Whole Life Insurance</option>
-                  <option value="ul">Universal Life</option>
-                  <option value="vul">Variable Universal Life</option>
-                  <option value="ltc">Long-Term Care</option>
-                  <option value="disability">Disability Insurance</option>
-                  <option value="annuity-fixed">Fixed Annuity</option>
-                  <option value="annuity-deferred">Deferred Annuity</option>
-                  <option value="mutual-funds">Mutual Funds</option>
-                  <option value="etf">ETFs</option>
-                  <option value="529">529 College Savings</option>
-                </select>
-              </div>
-              <div class="qq-field">
-                <label>Face Amount / Investment</label>
-                <input type="text" id="qq-amount" placeholder="e.g. $500,000" />
-              </div>
-              <div class="qq-field">
-                <label>Client Age</label>
-                <input type="number" id="qq-age" placeholder="e.g. 45" min="18" max="85" />
-              </div>
-              <div class="qq-field">
-                <label>Health Class</label>
-                <select id="qq-health">
-                  <option>Preferred Plus</option>
-                  <option>Preferred</option>
-                  <option>Standard Plus</option>
-                  <option>Standard</option>
-                  <option>Substandard</option>
-                </select>
-              </div>
-              <div class="qq-field">
-                <label>Gender</label>
-                <select id="qq-gender">
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-              </div>
-            </div>
-            <div class="qq-result" id="qq-result" style="display:none">
-              <div class="qq-result-header"><i class="fas fa-check-circle"></i> Estimated Quote</div>
-              <div class="qq-result-grid" id="qq-result-grid"></div>
-              <div class="qq-result-disclaimer">* Estimates only. Actual premiums subject to underwriting approval and final application.</div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeQuickQuoteModal()">Cancel</button>
-            <button class="btn btn-ai" onclick="runQuickQuote()"><i class="fas fa-calculator"></i> Generate Quote</button>
-            <button class="btn btn-primary" onclick="navigateTo('sales')"><i class="fas fa-paper-plane"></i> Open in Sales Pipeline</button>
-          </div>
+        <div class="pi-matrix-wrap" id="pi-matrix-wrap">
+          {/* rendered by renderPIMatrix() */}
         </div>
       </div>
 
-      {/* Product Search Modal */}
-      <div class="modal-overlay" id="product-search-modal" style="display:none" onclick="if(event.target===this)closeProductSearch()">
-        <div class="modal-box prod-search-modal">
-          <div class="modal-header">
-            <h3><i class="fas fa-search"></i> Find the Right Product</h3>
-            <button class="modal-close" onclick="closeProductSearch()"><i class="fas fa-times"></i></button>
+      {/* Quick Quote Modal (carried forward) */}
+      <div id="quick-quote-modal" style="display:none" onclick="closeQuickQuoteModal(event)">
+        <div class="qq-modal">
+          <div class="qq-header">
+            <span><i class="fas fa-calculator"></i> Quick Quote</span>
+            <button onclick="closeQuickQuoteModal()" class="qq-close">✕</button>
           </div>
-          <div class="modal-body">
-            <div class="ps-filters">
-              <div class="ps-filter-group">
-                <label>Client Age Range</label>
-                <div class="ps-pills" id="ps-age">
-                  <span class="ps-pill active" onclick="togglePsPill(this,'age')">All Ages</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'age')">25–40</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'age')">40–55</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'age')">55–70</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'age')">70+</span>
-                </div>
-              </div>
-              <div class="ps-filter-group">
-                <label>Goal / Need</label>
-                <div class="ps-pills" id="ps-goal">
-                  <span class="ps-pill active" onclick="togglePsPill(this,'goal')">All Goals</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Protection</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Growth</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Income</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Legacy</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'goal')">Education</span>
-                </div>
-              </div>
-              <div class="ps-filter-group">
-                <label>Risk Tolerance</label>
-                <div class="ps-pills" id="ps-risk">
-                  <span class="ps-pill active" onclick="togglePsPill(this,'risk')">Any</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'risk')">Conservative</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'risk')">Moderate</span>
-                  <span class="ps-pill" onclick="togglePsPill(this,'risk')">Aggressive</span>
-                </div>
-              </div>
-            </div>
-            <div class="ps-results" id="ps-results">
-              <div class="ps-result-item" onclick="switchProductTab('insurance');closeProductSearch()">
-                <div class="ps-result-icon blue"><i class="fas fa-shield-alt"></i></div>
-                <div class="ps-result-body"><div class="ps-result-name">Term Life Insurance</div><div class="ps-result-tags"><span>Age 25–50</span><span>Protection</span><span>Affordable</span></div></div>
-                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
-              </div>
-              <div class="ps-result-item" onclick="switchProductTab('insurance');closeProductSearch()">
-                <div class="ps-result-icon green"><i class="fas fa-infinity"></i></div>
-                <div class="ps-result-body"><div class="ps-result-name">Whole Life Insurance</div><div class="ps-result-tags"><span>Permanent</span><span>Cash Value</span><span>Dividends</span></div></div>
-                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
-              </div>
-              <div class="ps-result-item" onclick="switchProductTab('insurance');closeProductSearch()">
-                <div class="ps-result-icon red"><i class="fas fa-heartbeat"></i></div>
-                <div class="ps-result-body"><div class="ps-result-name">Long-Term Care Insurance</div><div class="ps-result-tags"><span>Age 50–65</span><span>Care Coverage</span><span>Urgent</span></div></div>
-                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
-              </div>
-              <div class="ps-result-item" onclick="switchProductTab('retirement');closeProductSearch()">
-                <div class="ps-result-icon gold"><i class="fas fa-umbrella-beach"></i></div>
-                <div class="ps-result-body"><div class="ps-result-name">Deferred Income Annuity</div><div class="ps-result-tags"><span>Age 40–70</span><span>Income</span><span>Retirement</span></div></div>
-                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
-              </div>
-              <div class="ps-result-item" onclick="switchProductTab('advisory');closeProductSearch()">
-                <div class="ps-result-icon purple"><i class="fas fa-gem"></i></div>
-                <div class="ps-result-body"><div class="ps-result-name">Wealth Management / UMA</div><div class="ps-result-tags"><span>HNW $250K+</span><span>Advisory</span><span>Legacy</span></div></div>
-                <div class="ps-result-arrow"><i class="fas fa-arrow-right"></i></div>
-              </div>
+          <div class="qq-body" id="qq-body">
+            <div style="padding:20px;color:#64748b;text-align:center">
+              <i class="fas fa-circle-notch fa-spin" style="font-size:24px;margin-bottom:10px"></i><br/>
+              Loading quick quote tool…
             </div>
           </div>
         </div>
@@ -9530,6 +9418,7 @@ function ProductsPage() {
     </div>
   )
 }
+
 
 function ReportsPage() {
   return (
@@ -10178,52 +10067,492 @@ function CalendarPage() {
           <div class="cal-ai-opt-sub">Analysing your week · Priority-ranked preparation · Conflict detection · Optimal scheduling</div>
           <button class="cal-ai-opt-refresh" onclick="refreshCalAI()"><i class="fas fa-sync-alt"></i> Refresh</button>
         </div>
-        <div class="cal-ai-insights">
-          <div class="cal-ai-insight priority-urgent">
-            <div class="cai-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="cai-body">
-              <div class="cai-title">Kevin Park call today — application 14 days stale</div>
-              <div class="cai-detail">Pending application (Whole Life $500K) has been in review for 14 days. Client flagged as at-risk. Prepare: application status, next steps, objection-handling notes.</div>
+
+        {/* ── Feature Tabs ── */}
+        <div class="cal-ai-tabs">
+          <button class="cal-ai-tab active" id="tab-ai-insights" onclick="switchCalAITab('insights')"><i class="fas fa-lightbulb"></i> Insights</button>
+          <button class="cal-ai-tab" id="tab-ai-annual" onclick="switchCalAITab('annual')"><i class="fas fa-calendar-check"></i> Annual Review</button>
+          <button class="cal-ai-tab" id="tab-ai-life-events" onclick="switchCalAITab('life-events')"><i class="fas fa-heartbeat"></i> Life Events</button>
+          <button class="cal-ai-tab" id="tab-ai-ltc" onclick="switchCalAITab('ltc')"><i class="fas fa-hand-holding-medical"></i> LTC &amp; Medicare</button>
+          <button class="cal-ai-tab" id="tab-ai-drift" onclick="switchCalAITab('drift')"><i class="fas fa-chart-line"></i> Portfolio Drift</button>
+        </div>
+
+        {/* ── Tab: Insights (default) ── */}
+        <div class="cal-ai-tab-panel" id="cal-ai-panel-insights">
+          <div class="cal-ai-insights">
+            <div class="cal-ai-insight priority-urgent">
+              <div class="cai-icon"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="cai-body">
+                <div class="cai-title">Kevin Park call today — application 14 days stale</div>
+                <div class="cai-detail">Pending application (Whole Life $500K) has been in review for 14 days. Client flagged as at-risk. Prepare: application status, next steps, objection-handling notes.</div>
+              </div>
+              <div class="cai-action">
+                <span class="cai-priority red">Urgent</span>
+                <button class="cai-btn" onclick="openMeetingBrief('MTG-001')">Brief <i class="fas fa-arrow-right"></i></button>
+              </div>
             </div>
-            <div class="cai-action">
-              <span class="cai-priority red">Urgent</span>
-              <button class="cai-btn" onclick="openMeetingBrief('MTG-001')">Brief <i class="fas fa-arrow-right"></i></button>
+            <div class="cal-ai-insight priority-high">
+              <div class="cai-icon"><i class="fas fa-gem"></i></div>
+              <div class="cai-body">
+                <div class="cai-title">Linda Morrison Apr 15 — highest-value meeting this month</div>
+                <div class="cai-detail">Annual review: $2M WL policy + UMA opportunity ($500K investable assets) + estate plan trigger. 90-min meeting — AI brief prepared with 6 talking points.</div>
+              </div>
+              <div class="cai-action">
+                <span class="cai-priority amber">High</span>
+                <button class="cai-btn" onclick="openMeetingBrief('MTG-004')">Brief <i class="fas fa-arrow-right"></i></button>
+              </div>
             </div>
-          </div>
-          <div class="cal-ai-insight priority-high">
-            <div class="cai-icon"><i class="fas fa-gem"></i></div>
-            <div class="cai-body">
-              <div class="cai-title">Linda Morrison Apr 15 — highest-value meeting this month</div>
-              <div class="cai-detail">Annual review: $2M WL policy + UMA opportunity ($500K investable assets) + estate plan trigger. 90-min meeting — AI brief prepared with 6 talking points.</div>
+            <div class="cal-ai-insight priority-normal">
+              <div class="cai-icon"><i class="fas fa-calendar-plus"></i></div>
+              <div class="cai-body">
+                <div class="cai-title">Schedule gap — Apr 19–21 free (3 business days)</div>
+                <div class="cai-detail">Ideal window for: Nancy Foster DI follow-up · David Thompson term review · Patricia Nguyen UL premium catch-up. AI suggests scheduling before month-end.</div>
+              </div>
+              <div class="cai-action">
+                <span class="cai-priority blue">Opportunity</span>
+                <button class="cai-btn" onclick="openAddEventModal()">Schedule <i class="fas fa-arrow-right"></i></button>
+              </div>
             </div>
-            <div class="cai-action">
-              <span class="cai-priority amber">High</span>
-              <button class="cai-btn" onclick="openMeetingBrief('MTG-004')">Brief <i class="fas fa-arrow-right"></i></button>
-            </div>
-          </div>
-          <div class="cal-ai-insight priority-normal">
-            <div class="cai-icon"><i class="fas fa-calendar-plus"></i></div>
-            <div class="cai-body">
-              <div class="cai-title">Schedule gap — Apr 19–21 free (3 business days)</div>
-              <div class="cai-detail">Ideal window for: Nancy Foster DI follow-up · David Thompson term review · Patricia Nguyen UL premium catch-up. AI suggests scheduling before month-end.</div>
-            </div>
-            <div class="cai-action">
-              <span class="cai-priority blue">Opportunity</span>
-              <button class="cai-btn" onclick="openAddEventModal()">Schedule <i class="fas fa-arrow-right"></i></button>
-            </div>
-          </div>
-          <div class="cal-ai-insight priority-normal">
-            <div class="cai-icon"><i class="fas fa-sync-alt"></i></div>
-            <div class="cai-body">
-              <div class="cai-title">Sandra Williams renewal Apr 28 — renewal package ready</div>
-              <div class="cai-detail">P-100320 auto-renewal in 153 days. Prepare renewal quote, coverage review checklist, and upgrade options (LTC rider availability at age 52).</div>
-            </div>
-            <div class="cai-action">
-              <span class="cai-priority teal">Renewal</span>
-              <button class="cai-btn" onclick="openMeetingBrief('MTG-008')">Brief <i class="fas fa-arrow-right"></i></button>
+            <div class="cal-ai-insight priority-normal">
+              <div class="cai-icon"><i class="fas fa-sync-alt"></i></div>
+              <div class="cai-body">
+                <div class="cai-title">Sandra Williams renewal Apr 28 — renewal package ready</div>
+                <div class="cai-detail">P-100320 auto-renewal in 153 days. Prepare renewal quote, coverage review checklist, and upgrade options (LTC rider availability at age 52).</div>
+              </div>
+              <div class="cai-action">
+                <span class="cai-priority teal">Renewal</span>
+                <button class="cai-btn" onclick="openMeetingBrief('MTG-008')">Brief <i class="fas fa-arrow-right"></i></button>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* ── Tab: Annual Review Scheduler & AI Prep ── */}
+        <div class="cal-ai-tab-panel" id="cal-ai-panel-annual" style="display:none">
+          <div class="cal-ai-feature-header">
+            <div class="cal-ai-feat-title"><i class="fas fa-calendar-check"></i> Annual Review Scheduler &amp; AI Prep</div>
+            <div class="cal-ai-feat-sub">AI auto-identifies clients due for review, generates agendas, coverage-gap analysis, and talking points</div>
+            <div class="cal-ai-feat-stats">
+              <span class="feat-stat-pill green"><i class="fas fa-check-circle"></i> 3 Scheduled</span>
+              <span class="feat-stat-pill amber"><i class="fas fa-clock"></i> 7 Due This Month</span>
+              <span class="feat-stat-pill red"><i class="fas fa-exclamation-circle"></i> 2 Overdue</span>
+              <span class="feat-stat-pill blue"><i class="fas fa-robot"></i> AI Briefs Ready: 5</span>
+            </div>
+          </div>
+          <div class="cal-ai-ar-list">
+            <div class="cal-ar-row priority-urgent">
+              <div class="cal-ar-client">
+                <div class="cal-ar-avatar">LM</div>
+                <div class="cal-ar-info">
+                  <div class="cal-ar-name">Linda Morrison</div>
+                  <div class="cal-ar-meta">Last review: Apr 2025 · <span class="overdue-tag">371 days ago</span></div>
+                </div>
+              </div>
+              <div class="cal-ar-policies">
+                <span class="ar-policy-tag">WL $2M</span>
+                <span class="ar-policy-tag">UMA $500K</span>
+                <span class="ar-policy-tag">Estate Plan</span>
+              </div>
+              <div class="cal-ar-ai-score">
+                <div class="ar-score-label">AI Priority</div>
+                <div class="ar-score-bar"><div class="ar-score-fill" style="width:96%"></div></div>
+                <div class="ar-score-val">96</div>
+              </div>
+              <div class="cal-ar-actions">
+                <span class="ar-status-badge scheduled">Apr 15</span>
+                <button class="cai-btn" onclick="openAnnualReviewBrief('LM')">AI Brief <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+            <div class="cal-ar-row priority-high">
+              <div class="cal-ar-client">
+                <div class="cal-ar-avatar">JW</div>
+                <div class="cal-ar-info">
+                  <div class="cal-ar-name">James Whitfield</div>
+                  <div class="cal-ar-meta">Last review: Mar 2025 · <span class="overdue-tag">400 days ago</span></div>
+                </div>
+              </div>
+              <div class="cal-ar-policies">
+                <span class="ar-policy-tag">Term $750K</span>
+                <span class="ar-policy-tag">Annuity $430K</span>
+                <span class="ar-policy-tag">IRA Gap</span>
+              </div>
+              <div class="cal-ar-ai-score">
+                <div class="ar-score-label">AI Priority</div>
+                <div class="ar-score-bar"><div class="ar-score-fill" style="width:88%"></div></div>
+                <div class="ar-score-val">88</div>
+              </div>
+              <div class="cal-ar-actions">
+                <span class="ar-status-badge overdue">Overdue</span>
+                <button class="cai-btn" onclick="openAnnualReviewBrief('JW')">AI Brief <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+            <div class="cal-ar-row priority-high">
+              <div class="cal-ar-client">
+                <div class="cal-ar-avatar">RC</div>
+                <div class="cal-ar-info">
+                  <div class="cal-ar-name">Robert Chen</div>
+                  <div class="cal-ar-meta">Last review: Jun 2025 · 305 days ago</div>
+                </div>
+              </div>
+              <div class="cal-ar-policies">
+                <span class="ar-policy-tag">VUL $1M</span>
+                <span class="ar-policy-tag">Claim Active</span>
+                <span class="ar-policy-tag">Estate Plan</span>
+              </div>
+              <div class="cal-ar-ai-score">
+                <div class="ar-score-label">AI Priority</div>
+                <div class="ar-score-bar"><div class="ar-score-fill" style="width:82%"></div></div>
+                <div class="ar-score-val">82</div>
+              </div>
+              <div class="cal-ar-actions">
+                <span class="ar-status-badge pending">Due Apr 25</span>
+                <button class="cai-btn" onclick="openAnnualReviewBrief('RC')">AI Brief <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+            <div class="cal-ar-row priority-normal">
+              <div class="cal-ar-client">
+                <div class="cal-ar-avatar">SW</div>
+                <div class="cal-ar-info">
+                  <div class="cal-ar-name">Sandra Williams</div>
+                  <div class="cal-ar-meta">Last review: May 2025 · 340 days ago</div>
+                </div>
+              </div>
+              <div class="cal-ar-policies">
+                <span class="ar-policy-tag">WL $500K</span>
+                <span class="ar-policy-tag">Renewal Due</span>
+              </div>
+              <div class="cal-ar-ai-score">
+                <div class="ar-score-label">AI Priority</div>
+                <div class="ar-score-bar"><div class="ar-score-fill" style="width:74%"></div></div>
+                <div class="ar-score-val">74</div>
+              </div>
+              <div class="cal-ar-actions">
+                <span class="ar-status-badge scheduled">Apr 28</span>
+                <button class="cai-btn" onclick="openAnnualReviewBrief('SW')">AI Brief <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="cal-ar-footer">
+            <button class="cal-ai-action-btn" onclick="scheduleAllAnnualReviews()"><i class="fas fa-magic"></i> AI Schedule All Overdue</button>
+            <button class="cal-ai-action-btn secondary" onclick="exportAnnualReviewReport()"><i class="fas fa-file-export"></i> Export Report</button>
+          </div>
+        </div>
+
+        {/* ── Tab: Life Event Trigger Engine ── */}
+        <div class="cal-ai-tab-panel" id="cal-ai-panel-life-events" style="display:none">
+          <div class="cal-ai-feature-header">
+            <div class="cal-ai-feat-title"><i class="fas fa-heartbeat"></i> Life Event Trigger Engine</div>
+            <div class="cal-ai-feat-sub">Real-time detection of life events from 3rd-party data — auto-triggers personalized outreach &amp; product recommendations</div>
+            <div class="cal-ai-feat-stats">
+              <span class="feat-stat-pill amber"><i class="fas fa-bell"></i> 3 New Events</span>
+              <span class="feat-stat-pill green"><i class="fas fa-paper-plane"></i> 5 Outreach Sent</span>
+              <span class="feat-stat-pill blue"><i class="fas fa-robot"></i> AI Drafts Ready: 3</span>
+            </div>
+          </div>
+          <div class="cal-ai-le-list">
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon marriage"><i class="fas fa-ring"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Patricia Nguyen</div>
+                <div class="le-event-type">Marriage / Name Change Detected</div>
+                <div class="le-event-source">Source: Public Records · Detected: 2 days ago</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Beneficiary Update</span>
+                <span class="le-rec-tag">Spouse Coverage</span>
+                <span class="le-rec-tag">Joint Annuity</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge new">New</span>
+                <button class="cai-btn" onclick="openLifeEventOutreach('PN', 'marriage')">Draft Outreach <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon baby"><i class="fas fa-baby"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">David Thompson</div>
+                <div class="le-event-type">New Child / Birth Record Detected</div>
+                <div class="le-event-source">Source: Vital Records · Detected: 5 days ago</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Term Life Rider</span>
+                <span class="le-rec-tag">529 Education Plan</span>
+                <span class="le-rec-tag">DI Coverage Review</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge new">New</span>
+                <button class="cai-btn" onclick="openLifeEventOutreach('DT', 'newchild')">Draft Outreach <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon retirement"><i class="fas fa-umbrella-beach"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Maria Gonzalez</div>
+                <div class="le-event-type">Approaching Retirement Age (62)</div>
+                <div class="le-event-source">Source: DOB on File · Age milestone in 4 months</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Social Security Brief</span>
+                <span class="le-rec-tag">Medicare Enrollment</span>
+                <span class="le-rec-tag">RMD Planning</span>
+                <span class="le-rec-tag">Income Annuity</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge upcoming">Upcoming</span>
+                <button class="cai-btn" onclick="openLifeEventOutreach('MG', 'retirement')">Draft Outreach <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+            <div class="cal-le-row le-sent">
+              <div class="le-event-icon home"><i class="fas fa-home"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">James Whitfield</div>
+                <div class="le-event-type">Home Purchase Detected</div>
+                <div class="le-event-source">Source: Property Records · Detected: 12 days ago</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Umbrella Policy</span>
+                <span class="le-rec-tag">Mortgage Protection</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge sent">Outreach Sent</span>
+                <button class="cai-btn secondary" onclick="viewLifeEventLog('JW', 'home')">View Log <i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="cal-ar-footer">
+            <button class="cal-ai-action-btn" onclick="scanAllLifeEvents()"><i class="fas fa-satellite-dish"></i> Scan All Clients Now</button>
+            <button class="cal-ai-action-btn secondary" onclick="openLifeEventSettings()"><i class="fas fa-cog"></i> Trigger Settings</button>
+          </div>
+        </div>
+
+        {/* ── Tab: LTC & Medicare Planning ── */}
+        <div class="cal-ai-tab-panel" id="cal-ai-panel-ltc" style="display:none">
+          <div class="cal-ai-feature-header">
+            <div class="cal-ai-feat-title"><i class="fas fa-hand-holding-medical"></i> LTC &amp; Medicare Planning Center</div>
+            <div class="cal-ai-feat-sub">AI identifies clients approaching Medicare eligibility, LTC need windows, and hybrid product opportunities</div>
+            <div class="cal-ai-feat-stats">
+              <span class="feat-stat-pill red"><i class="fas fa-exclamation-circle"></i> 2 Medicare Urgent</span>
+              <span class="feat-stat-pill amber"><i class="fas fa-shield-alt"></i> 4 LTC Candidates</span>
+              <span class="feat-stat-pill blue"><i class="fas fa-exchange-alt"></i> 2 Hybrid Opportunities</span>
+            </div>
+          </div>
+          <div class="cal-ai-ltc-grid">
+            <div class="cal-ltc-card urgent">
+              <div class="ltc-card-header">
+                <div class="ltc-avatar">MG</div>
+                <div class="ltc-client-info">
+                  <div class="ltc-client-name">Maria Gonzalez</div>
+                  <div class="ltc-client-age">Age 61 · Medicare eligible in 4 months</div>
+                </div>
+                <span class="ltc-urgency-badge red">Action Required</span>
+              </div>
+              <div class="ltc-timeline">
+                <div class="ltc-timeline-item done"><i class="fas fa-check-circle"></i> Initial Medicare consultation scheduled</div>
+                <div class="ltc-timeline-item active"><i class="fas fa-circle"></i> Part A &amp; B enrollment window opens Jul 2026</div>
+                <div class="ltc-timeline-item upcoming"><i class="fas fa-clock"></i> Medigap / Part D comparison — due May 15</div>
+                <div class="ltc-timeline-item upcoming"><i class="fas fa-clock"></i> LTC hybrid product review — recommended age 62</div>
+              </div>
+              <div class="ltc-products">
+                <span class="ltc-product-tag">Medicare Supplement Plan G</span>
+                <span class="ltc-product-tag">Part D Rx</span>
+                <span class="ltc-product-tag">Hybrid LTC/Life</span>
+              </div>
+              <div class="ltc-card-actions">
+                <button class="cai-btn" onclick="openLtcPlanningModal('MG')">Full Plan <i class="fas fa-arrow-right"></i></button>
+                <button class="cai-btn secondary" onclick="openMeetingBrief('LTC-MG')">Brief <i class="fas fa-file-alt"></i></button>
+              </div>
+            </div>
+            <div class="cal-ltc-card high">
+              <div class="ltc-card-header">
+                <div class="ltc-avatar">SW</div>
+                <div class="ltc-client-info">
+                  <div class="ltc-client-name">Sandra Williams</div>
+                  <div class="ltc-client-age">Age 52 · LTC planning window open now</div>
+                </div>
+                <span class="ltc-urgency-badge amber">High Value</span>
+              </div>
+              <div class="ltc-timeline">
+                <div class="ltc-timeline-item done"><i class="fas fa-check-circle"></i> WL policy includes LTC rider option</div>
+                <div class="ltc-timeline-item active"><i class="fas fa-circle"></i> Hybrid LTC product analysis ready</div>
+                <div class="ltc-timeline-item upcoming"><i class="fas fa-clock"></i> Renewal meeting Apr 28 — ideal LTC conversation</div>
+              </div>
+              <div class="ltc-products">
+                <span class="ltc-product-tag">LTC Rider Add-on</span>
+                <span class="ltc-product-tag">Hybrid Life/LTC</span>
+                <span class="ltc-product-tag">Annuity w/ LTC</span>
+              </div>
+              <div class="ltc-card-actions">
+                <button class="cai-btn" onclick="openLtcPlanningModal('SW')">Full Plan <i class="fas fa-arrow-right"></i></button>
+                <button class="cai-btn secondary" onclick="openMeetingBrief('LTC-SW')">Brief <i class="fas fa-file-alt"></i></button>
+              </div>
+            </div>
+            <div class="cal-ltc-card normal">
+              <div class="ltc-card-header">
+                <div class="ltc-avatar">LM</div>
+                <div class="ltc-client-info">
+                  <div class="ltc-client-name">Linda Morrison</div>
+                  <div class="ltc-client-age">Age 58 · LTC gap in current portfolio</div>
+                </div>
+                <span class="ltc-urgency-badge blue">Opportunity</span>
+              </div>
+              <div class="ltc-timeline">
+                <div class="ltc-timeline-item done"><i class="fas fa-check-circle"></i> WL $2M — no LTC coverage</div>
+                <div class="ltc-timeline-item active"><i class="fas fa-circle"></i> AI gap analysis complete — $3,200/mo LTC exposure</div>
+                <div class="ltc-timeline-item upcoming"><i class="fas fa-clock"></i> Annual review Apr 15 — include LTC in agenda</div>
+              </div>
+              <div class="ltc-products">
+                <span class="ltc-product-tag">Standalone LTC Policy</span>
+                <span class="ltc-product-tag">Asset-Based LTC</span>
+              </div>
+              <div class="ltc-card-actions">
+                <button class="cai-btn" onclick="openLtcPlanningModal('LM')">Full Plan <i class="fas fa-arrow-right"></i></button>
+                <button class="cai-btn secondary" onclick="openMeetingBrief('LTC-LM')">Brief <i class="fas fa-file-alt"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="cal-ar-footer">
+            <button class="cal-ai-action-btn" onclick="runLtcScan()"><i class="fas fa-search-plus"></i> Scan All Clients for LTC Gaps</button>
+            <button class="cal-ai-action-btn secondary" onclick="exportLtcReport()"><i class="fas fa-file-export"></i> Export LTC Report</button>
+          </div>
+        </div>
+
+        {/* ── Tab: Portfolio Drift Monitor ── */}
+        <div class="cal-ai-tab-panel" id="cal-ai-panel-drift" style="display:none">
+          <div class="cal-ai-feature-header">
+            <div class="cal-ai-feat-title"><i class="fas fa-chart-line"></i> Portfolio Drift Monitor</div>
+            <div class="cal-ai-feat-sub">Real-time allocation drift detection · AI rebalancing proposals · Automated client alerts</div>
+            <div class="cal-ai-feat-stats">
+              <span class="feat-stat-pill red"><i class="fas fa-exclamation-triangle"></i> 2 Critical Drift</span>
+              <span class="feat-stat-pill amber"><i class="fas fa-exclamation-circle"></i> 3 Moderate Drift</span>
+              <span class="feat-stat-pill green"><i class="fas fa-check-circle"></i> 5 On Target</span>
+              <span class="feat-stat-pill blue"><i class="fas fa-dollar-sign"></i> Total AUM: $4.2M</span>
+            </div>
+          </div>
+          <div class="cal-ai-drift-list">
+            <div class="cal-drift-row drift-critical">
+              <div class="drift-client-col">
+                <div class="cal-ar-avatar">RC</div>
+                <div>
+                  <div class="drift-client-name">Robert Chen</div>
+                  <div class="drift-aum">AUM: $890K · VUL + Investment</div>
+                </div>
+              </div>
+              <div class="drift-bars-col">
+                <div class="drift-bar-row">
+                  <span class="drift-asset-lbl">Equities</span>
+                  <div class="drift-bar-wrap">
+                    <div class="drift-bar-target" style="width:60%"></div>
+                    <div class="drift-bar-actual drift-over" style="width:73%"></div>
+                  </div>
+                  <span class="drift-pct red">+13% <i class="fas fa-arrow-up"></i></span>
+                </div>
+                <div class="drift-bar-row">
+                  <span class="drift-asset-lbl">Fixed Inc.</span>
+                  <div class="drift-bar-wrap">
+                    <div class="drift-bar-target" style="width:30%"></div>
+                    <div class="drift-bar-actual drift-under" style="width:19%"></div>
+                  </div>
+                  <span class="drift-pct amber">-11% <i class="fas fa-arrow-down"></i></span>
+                </div>
+              </div>
+              <div class="drift-action-col">
+                <span class="drift-badge critical">8% Drift</span>
+                <button class="cai-btn" onclick="openDriftRebalance('RC')">Rebalance <i class="fas fa-balance-scale"></i></button>
+              </div>
+            </div>
+            <div class="cal-drift-row drift-critical">
+              <div class="drift-client-col">
+                <div class="cal-ar-avatar">MG</div>
+                <div>
+                  <div class="drift-client-name">Maria Gonzalez</div>
+                  <div class="drift-aum">AUM: $340K · Annuity + IRA</div>
+                </div>
+              </div>
+              <div class="drift-bars-col">
+                <div class="drift-bar-row">
+                  <span class="drift-asset-lbl">Growth</span>
+                  <div class="drift-bar-wrap">
+                    <div class="drift-bar-target" style="width:40%"></div>
+                    <div class="drift-bar-actual drift-over" style="width:55%"></div>
+                  </div>
+                  <span class="drift-pct red">+15% <i class="fas fa-arrow-up"></i></span>
+                </div>
+                <div class="drift-bar-row">
+                  <span class="drift-asset-lbl">Income</span>
+                  <div class="drift-bar-wrap">
+                    <div class="drift-bar-target" style="width:50%"></div>
+                    <div class="drift-bar-actual drift-under" style="width:36%"></div>
+                  </div>
+                  <span class="drift-pct amber">-14% <i class="fas fa-arrow-down"></i></span>
+                </div>
+              </div>
+              <div class="drift-action-col">
+                <span class="drift-badge critical">7% Drift</span>
+                <button class="cai-btn" onclick="openDriftRebalance('MG')">Rebalance <i class="fas fa-balance-scale"></i></button>
+              </div>
+            </div>
+            <div class="cal-drift-row drift-moderate">
+              <div class="drift-client-col">
+                <div class="cal-ar-avatar">LM</div>
+                <div>
+                  <div class="drift-client-name">Linda Morrison</div>
+                  <div class="drift-aum">AUM: $500K · UMA + WL</div>
+                </div>
+              </div>
+              <div class="drift-bars-col">
+                <div class="drift-bar-row">
+                  <span class="drift-asset-lbl">Equities</span>
+                  <div class="drift-bar-wrap">
+                    <div class="drift-bar-target" style="width:55%"></div>
+                    <div class="drift-bar-actual drift-over" style="width:60%"></div>
+                  </div>
+                  <span class="drift-pct amber">+5% <i class="fas fa-arrow-up"></i></span>
+                </div>
+                <div class="drift-bar-row">
+                  <span class="drift-asset-lbl">Alts</span>
+                  <div class="drift-bar-wrap">
+                    <div class="drift-bar-target" style="width:15%"></div>
+                    <div class="drift-bar-actual drift-under" style="width:10%"></div>
+                  </div>
+                  <span class="drift-pct amber">-5% <i class="fas fa-arrow-down"></i></span>
+                </div>
+              </div>
+              <div class="drift-action-col">
+                <span class="drift-badge moderate">4% Drift</span>
+                <button class="cai-btn secondary" onclick="openDriftRebalance('LM')">Review <i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="cal-drift-row drift-ok">
+              <div class="drift-client-col">
+                <div class="cal-ar-avatar">JW</div>
+                <div>
+                  <div class="drift-client-name">James Whitfield</div>
+                  <div class="drift-aum">AUM: $430K · Annuity + IRA</div>
+                </div>
+              </div>
+              <div class="drift-bars-col">
+                <div class="drift-bar-row">
+                  <span class="drift-asset-lbl">Balanced</span>
+                  <div class="drift-bar-wrap">
+                    <div class="drift-bar-target" style="width:50%"></div>
+                    <div class="drift-bar-actual drift-ok" style="width:51%"></div>
+                  </div>
+                  <span class="drift-pct green">+1% <i class="fas fa-check"></i></span>
+                </div>
+              </div>
+              <div class="drift-action-col">
+                <span class="drift-badge ok">On Target</span>
+                <button class="cai-btn secondary" onclick="openDriftRebalance('JW')">View <i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="cal-ar-footer">
+            <button class="cal-ai-action-btn" onclick="runDriftScanAll()"><i class="fas fa-sync-alt"></i> Scan All Portfolios</button>
+            <button class="cal-ai-action-btn secondary" onclick="autoRebalanceAll()"><i class="fas fa-magic"></i> AI Auto-Rebalance Proposals</button>
+            <button class="cal-ai-action-btn secondary" onclick="exportDriftReport()"><i class="fas fa-file-export"></i> Export Report</button>
+          </div>
+        </div>
+
       </div>
 
       {/* ── Legend + Filter row ── */}

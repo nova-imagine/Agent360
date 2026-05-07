@@ -23,8 +23,12 @@ function navigateTo(page) {
     prospects: 'Leads Pipeline',
     policies: 'Policy Management',
     'ai-agents': 'AI Agent Hub',
+    campaigns: 'Campaigns',
+    upsell: 'Upsell Track',
+    alerts: 'Policy Alerts',
+    'pipeline-view': 'Client Journey Pipeline',
     sales: 'Sales Pipeline',
-    products: 'Product Portfolio',
+    products: 'Product Intelligence Hub',
     reports: 'Reports & Analytics',
     calendar: 'Calendar & Events',
     'ai-insights': 'AI Insights',
@@ -40,6 +44,10 @@ function navigateTo(page) {
     prospects: 'Home / Clients / Prospects',
     policies: 'Home / Policies',
     'ai-agents': 'Home / AI Agents',
+    campaigns: 'Home / Sales / Campaigns',
+    upsell: 'Home / Sales / Upsell Track',
+    alerts: 'Home / Service / Policy Alerts',
+    'pipeline-view': 'Home / Sales / Journey Pipeline',
     sales: 'Home / Sales',
     products: 'Home / Products',
     reports: 'Home / Reports',
@@ -83,6 +91,14 @@ function navigateTo(page) {
       requestAnimationFrame(() => {
         setTimeout(() => initReportCharts(), 80);
       });
+    } else if (page === 'upsell') {
+      initUpsellPage();
+    } else if (page === 'alerts') {
+      initAlertsPage();
+    } else if (page === 'pipeline-view') {
+      initPipelineViewPage();
+    } else if (page === 'products') {
+      requestAnimationFrame(() => setTimeout(() => initProductsPage(), 80));
     }
   }
 }
@@ -12562,6 +12578,925 @@ document.addEventListener('DOMContentLoaded', function() {
 
 console.log('Phase 3 loaded — calNavMonth, calFilterDomain, renderCalendar, openAddEventModal, saveCalEvent, calEventClick, deleteCalEvent, editCalEvent, switchCalView, calGoToday, calNavWeek, calFilterType, refreshCalAI');
 
+
+/* ═══════════════════════════════════════════════════════════════
+   CAMPAIGNS MODULE — Data, Functions, Modals
+   Campaign → Lead → Opportunity → Client → Upsell
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── Campaign Data Store ────────────────────────────────────────
+const campaignsData = {
+  C001: {
+    id: 'C001', name: 'Whole Life Protection Campaign', type: 'Life Insurance',
+    status: 'Active', segment: 'Mid-Career (35–55)', budget: 4200, spent: 2940,
+    startDate: 'Mar 1, 2026', endDate: 'Jun 30, 2026',
+    channels: ['Email', 'Outbound Calls', 'Social Media'],
+    leads: 34, opps: 12, clients: 4, convRate: '24%', pipelineValue: '$412K',
+    aiScore: 94, color: '#003087',
+    aiInsight: 'Top performer at 3× avg conversion. Recommend scaling budget by $2K for May push.',
+    aiTargeting: 'Professionals 35–55, dual income, dependents, homeowners. AI-matched 89 prospects in CRM.',
+    leadIds: ['L001','L002','L003','L004','L005'],
+    weeklyLeads: [4, 6, 8, 5, 7, 4],
+    monthlyConv: [0, 1, 1, 2]
+  },
+  C002: {
+    id: 'C002', name: 'Term Life — Young Families', type: 'Life Insurance',
+    status: 'Active', segment: 'Young Families (28–40)', budget: 2800, spent: 1120,
+    startDate: 'Apr 1, 2026', endDate: 'Jul 31, 2026',
+    channels: ['Email', 'SMS'],
+    leads: 28, opps: 7, clients: 2, convRate: '7.1%', pipelineValue: '$168K',
+    aiScore: 78, color: '#0891b2',
+    aiInsight: 'Good lead volume, lower conversion. AI recommends adding live webinar touchpoint to lift close rate.',
+    aiTargeting: 'Ages 28–40, recently married or new parent, mortgage holders. AI-matched 134 prospects.',
+    leadIds: ['L006','L007','L008'],
+    weeklyLeads: [5, 8, 6, 4, 3, 2],
+    monthlyConv: [0, 0, 1, 1]
+  },
+  C003: {
+    id: 'C003', name: 'Retirement Income — Annuity', type: 'Retirement',
+    status: 'Active', segment: 'Pre-Retirement (50–65)', budget: 5500, spent: 3300,
+    startDate: 'Feb 15, 2026', endDate: 'May 31, 2026',
+    channels: ['Seminar', 'Email', 'In-person'],
+    leads: 31, opps: 9, clients: 3, convRate: '9.7%', pipelineValue: '$387K',
+    aiScore: 86, color: '#059669',
+    aiInsight: 'Seminar channel generating 4× more qualified leads vs email alone. Scale seminar budget.',
+    aiTargeting: 'Existing clients 50–65 with WL/UL policies but no annuity product. AI-identified 47 clients.',
+    leadIds: ['L009','L010','L011'],
+    weeklyLeads: [3, 5, 7, 6, 5, 5],
+    monthlyConv: [1, 0, 1, 1]
+  },
+  C004: {
+    id: 'C004', name: 'Wealth Management — HNW Segment', type: 'Wealth Management',
+    status: 'Active', segment: 'HNW Clients ($500K+ AUM)', budget: 8000, spent: 4800,
+    startDate: 'Jan 15, 2026', endDate: 'Jun 30, 2026',
+    channels: ['Referral Program', 'Private Event', 'Direct Outreach'],
+    leads: 19, opps: 6, clients: 2, convRate: '10.5%', pipelineValue: '$192K',
+    aiScore: 82, color: '#7c3aed',
+    aiInsight: 'Referral channel has 2× close rate vs direct. Incentivize existing HNW clients for referrals.',
+    aiTargeting: 'Net worth $1M+, business owners or executives, existing policyholders. AI-matched 28 prospects.',
+    leadIds: ['L012','L013'],
+    weeklyLeads: [2, 3, 4, 3, 4, 3],
+    monthlyConv: [0, 1, 0, 1]
+  },
+  C005: {
+    id: 'C005', name: 'Long-Term Care Awareness', type: 'LTC',
+    status: 'Paused', segment: 'Pre-Retirement (55–70)', budget: 3100, spent: 930,
+    startDate: 'Mar 15, 2026', endDate: 'Aug 31, 2026',
+    channels: ['Email', 'Content Marketing'],
+    leads: 18, opps: 3, clients: 0, convRate: '0%', pipelineValue: '$54K',
+    aiScore: 58, color: '#ea580c',
+    aiInsight: 'Low conversion — AI suggests pairing with Medicare education webinar to improve engagement.',
+    aiTargeting: 'Clients 55–70 without LTC coverage. AI-identified 62 clients eligible for outreach.',
+    leadIds: ['L014','L015'],
+    weeklyLeads: [3, 4, 5, 3, 2, 1],
+    monthlyConv: [0, 0, 0, 0]
+  },
+  C006: {
+    id: 'C006', name: 'Investment Portfolio — Mid-Market', type: 'Investments',
+    status: 'Active', segment: 'Mid-Market (40–55)', budget: 3600, spent: 900,
+    startDate: 'Apr 15, 2026', endDate: 'Jul 31, 2026',
+    channels: ['Webinar', 'Email'],
+    leads: 12, opps: 4, clients: 0, convRate: '0%', pipelineValue: '$27K',
+    aiScore: 70, color: '#0891b2',
+    aiInsight: 'Early stage — first webinar had 34 attendees with 12 leads captured. Second webinar scheduled May 8.',
+    aiTargeting: 'Clients with $50K+ idle savings, low investment product penetration. AI-matched 78 prospects.',
+    leadIds: [],
+    weeklyLeads: [0, 0, 4, 5, 3, 0],
+    monthlyConv: [0, 0, 0, 0]
+  }
+};
+
+// Leads linked to campaigns
+const campaignLeadsData = {
+  L001: { name: 'Alex Rivera', score: 82, source: 'C001', status: 'Opportunity', product: 'Whole Life $500K', lastContact: 'Apr 12', phone: '(212) 555-0201' },
+  L002: { name: 'Nancy Foster', score: 91, source: 'C001', status: 'Contacted', product: 'Whole Life $750K', lastContact: 'Apr 10', phone: '(212) 555-0202' },
+  L003: { name: 'Brian Torres', score: 74, source: 'C001', status: 'New', product: 'Whole Life $300K', lastContact: 'Apr 14', phone: '(646) 555-0203' },
+  L004: { name: 'Stephanie Lee', score: 88, source: 'C001', status: 'Opportunity', product: 'Whole Life $500K', lastContact: 'Apr 9', phone: '(718) 555-0204' },
+  L005: { name: 'Marcus Webb', score: 66, source: 'C001', status: 'New', product: 'Whole Life $250K', lastContact: 'Apr 15', phone: '(917) 555-0205' },
+  L006: { name: 'Jessica Patel', score: 79, source: 'C002', status: 'Contacted', product: 'Term Life $500K', lastContact: 'Apr 11', phone: '(212) 555-0206' },
+  L007: { name: 'Daniel Kim', score: 85, source: 'C002', status: 'Opportunity', product: 'Term Life $750K', lastContact: 'Apr 8', phone: '(646) 555-0207' },
+  L008: { name: 'Rachel Moore', score: 71, source: 'C002', status: 'New', product: 'Term Life $300K', lastContact: 'Apr 13', phone: '(718) 555-0208' },
+  L009: { name: 'Thomas Grant', score: 87, source: 'C003', status: 'Opportunity', product: 'Deferred Annuity', lastContact: 'Apr 7', phone: '(212) 555-0209' },
+  L010: { name: 'Carol Bennett', score: 93, source: 'C003', status: 'Opportunity', product: 'Immediate Annuity', lastContact: 'Apr 5', phone: '(917) 555-0210' },
+  L011: { name: 'Frank Russo', score: 76, source: 'C003', status: 'Contacted', product: 'Deferred Annuity', lastContact: 'Apr 12', phone: '(718) 555-0211' },
+  L012: { name: 'Diana Walsh', score: 95, source: 'C004', status: 'Opportunity', product: 'Wealth Management UMA', lastContact: 'Apr 6', phone: '(212) 555-0212' },
+  L013: { name: 'Henry Okafor', score: 89, source: 'C004', status: 'Contacted', product: 'Estate Planning Bundle', lastContact: 'Apr 10', phone: '(646) 555-0213' },
+  L014: { name: 'Paula Simmons', score: 62, source: 'C005', status: 'New', product: 'LTC Insurance', lastContact: 'Apr 3', phone: '(718) 555-0214' },
+  L015: { name: 'George Huang', score: 68, source: 'C005', status: 'Contacted', product: 'LTC Insurance', lastContact: 'Apr 9', phone: '(917) 555-0215' }
+};
+
+// ── Filter Campaigns ───────────────────────────────────────────
+function filterCampaigns() {
+  const search = (document.getElementById('camp-search')?.value || '').toLowerCase();
+  const typeFilter = document.getElementById('camp-type-filter')?.value || '';
+  const statusFilter = document.getElementById('camp-status-filter')?.value || '';
+  const cards = document.querySelectorAll('.camp-card');
+  cards.forEach(card => {
+    const type = card.getAttribute('data-type') || '';
+    const status = card.getAttribute('data-status') || '';
+    const name = card.querySelector('.camp-card-name')?.textContent?.toLowerCase() || '';
+    const matchSearch = !search || name.includes(search);
+    const matchType = !typeFilter || type === typeFilter;
+    const matchStatus = !statusFilter || status === statusFilter;
+    card.style.display = (matchSearch && matchType && matchStatus) ? '' : 'none';
+  });
+}
+
+// ── Toggle Card/Table View ─────────────────────────────────────
+function setCampView(view, btn) {
+  document.querySelectorAll('.camp-view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = document.getElementById('camp-grid');
+  if (!grid) return;
+  if (view === 'table') {
+    grid.classList.add('camp-grid-table');
+  } else {
+    grid.classList.remove('camp-grid-table');
+  }
+}
+
+// ── Open Campaign Detail Modal ─────────────────────────────────
+function openCampaignDetail(campId) {
+  const camp = campaignsData[campId];
+  if (!camp) return;
+  const overlay = document.getElementById('camp-detail-overlay');
+  const title = document.getElementById('camp-modal-title');
+  const body = document.getElementById('camp-modal-body');
+  if (!overlay || !title || !body) return;
+
+  title.innerHTML = `<span style="color:${camp.color}"><i class="fas fa-bullhorn"></i></span> ${camp.name}`;
+
+  const leadsHtml = (camp.leadIds || []).slice(0, 5).map(lid => {
+    const lead = campaignLeadsData[lid];
+    if (!lead) return '';
+    const scoreColor = lead.score >= 80 ? '#059669' : lead.score >= 65 ? '#d97706' : '#dc2626';
+    const statusColor = { 'Opportunity': '#7c3aed', 'Contacted': '#0891b2', 'New': '#6b7280' }[lead.status] || '#6b7280';
+    return `
+      <div class="camp-lead-row">
+        <div class="camp-lead-avatar">${lead.name.split(' ').map(n=>n[0]).join('')}</div>
+        <div class="camp-lead-info">
+          <div class="camp-lead-name">${lead.name}</div>
+          <div class="camp-lead-product">${lead.product}</div>
+        </div>
+        <span class="camp-lead-score" style="background:${scoreColor}">${lead.score}</span>
+        <span class="camp-lead-status" style="background:${statusColor}20;color:${statusColor}">${lead.status}</span>
+        <span class="camp-lead-date">${lead.lastContact}</span>
+        <button class="camp-btn-xs" onclick="navigateTo('prospects')"><i class="fas fa-arrow-right"></i></button>
+      </div>`;
+  }).join('');
+
+  const budgetPct = Math.round((camp.spent / camp.budget) * 100);
+
+  body.innerHTML = `
+    <div class="camp-detail-grid">
+      <!-- Left: KPIs + Funnel -->
+      <div class="camp-detail-left">
+        <div class="camp-detail-section">
+          <div class="camp-detail-section-title">Campaign Performance</div>
+          <div class="camp-detail-kpis">
+            <div class="camp-det-kpi"><div class="camp-det-val">${camp.leads}</div><div class="camp-det-lbl">Leads</div></div>
+            <div class="camp-det-kpi"><div class="camp-det-val">${camp.opps}</div><div class="camp-det-lbl">Opps</div></div>
+            <div class="camp-det-kpi"><div class="camp-det-val">${camp.clients}</div><div class="camp-det-lbl">Clients</div></div>
+            <div class="camp-det-kpi"><div class="camp-det-val">${camp.convRate}</div><div class="camp-det-lbl">Conv. Rate</div></div>
+          </div>
+        </div>
+        <div class="camp-detail-section">
+          <div class="camp-detail-section-title">Budget Utilisation</div>
+          <div class="camp-budget-row">
+            <span>$${camp.spent.toLocaleString()} spent of $${camp.budget.toLocaleString()}</span>
+            <span>${budgetPct}%</span>
+          </div>
+          <div class="camp-budget-bar"><div class="camp-budget-fill" style="width:${budgetPct}%;background:${camp.color}"></div></div>
+        </div>
+        <div class="camp-detail-section">
+          <div class="camp-detail-section-title">Funnel</div>
+          <div class="camp-detail-funnel">
+            <div class="camp-detail-funnel-step" style="border-color:#0891b2">
+              <div class="camp-detail-funnel-n" style="color:#0891b2">1</div>
+              <div>Campaign Active</div>
+            </div>
+            <div class="camp-detail-funnel-arr">↓</div>
+            <div class="camp-detail-funnel-step" style="border-color:#f59e0b">
+              <div class="camp-detail-funnel-n" style="color:#f59e0b">${camp.leads}</div>
+              <div>Leads Generated</div>
+            </div>
+            <div class="camp-detail-funnel-arr">↓</div>
+            <div class="camp-detail-funnel-step" style="border-color:#7c3aed">
+              <div class="camp-detail-funnel-n" style="color:#7c3aed">${camp.opps}</div>
+              <div>Opportunities</div>
+            </div>
+            <div class="camp-detail-funnel-arr">↓</div>
+            <div class="camp-detail-funnel-step" style="border-color:#059669">
+              <div class="camp-detail-funnel-n" style="color:#059669">${camp.clients}</div>
+              <div>Clients Won</div>
+            </div>
+          </div>
+        </div>
+        <div class="camp-detail-section camp-detail-ai-box">
+          <div class="camp-detail-section-title"><i class="fas fa-robot"></i> AI Intelligence</div>
+          <div class="camp-detail-ai-insight">${camp.aiInsight}</div>
+          <div class="camp-detail-ai-target" style="margin-top:8px"><strong>Targeting:</strong> ${camp.aiTargeting}</div>
+        </div>
+      </div>
+      <!-- Right: Info + Leads -->
+      <div class="camp-detail-right">
+        <div class="camp-detail-section">
+          <div class="camp-detail-section-title">Campaign Details</div>
+          <div class="camp-detail-info-grid">
+            <div class="camp-info-row"><span class="camp-info-lbl">Type</span><span class="camp-info-val">${camp.type}</span></div>
+            <div class="camp-info-row"><span class="camp-info-lbl">Status</span><span class="camp-info-val camp-status-${camp.status.toLowerCase()}">${camp.status}</span></div>
+            <div class="camp-info-row"><span class="camp-info-lbl">Segment</span><span class="camp-info-val">${camp.segment}</span></div>
+            <div class="camp-info-row"><span class="camp-info-lbl">Channels</span><span class="camp-info-val">${camp.channels.join(', ')}</span></div>
+            <div class="camp-info-row"><span class="camp-info-lbl">Start Date</span><span class="camp-info-val">${camp.startDate}</span></div>
+            <div class="camp-info-row"><span class="camp-info-lbl">End Date</span><span class="camp-info-val">${camp.endDate}</span></div>
+            <div class="camp-info-row"><span class="camp-info-lbl">Pipeline Value</span><span class="camp-info-val" style="color:#059669;font-weight:600">${camp.pipelineValue}</span></div>
+            <div class="camp-info-row"><span class="camp-info-lbl">AI Score</span><span class="camp-info-val"><span class="camp-ai-score-badge">${camp.aiScore}/100</span></span></div>
+          </div>
+        </div>
+        <div class="camp-detail-section">
+          <div class="camp-detail-section-title">Recent Leads <button class="camp-see-all" onclick="navigateTo('prospects');closeCampaignDetail()">See All →</button></div>
+          <div class="camp-leads-list">${leadsHtml || '<div style="color:#9ca3af;padding:12px 0">No leads yet</div>'}</div>
+        </div>
+        <div class="camp-detail-footer">
+          <button class="btn btn-primary" onclick="closeCampaignDetail();navigateTo('prospects')"><i class="fas fa-users"></i> View All Leads</button>
+          <button class="btn btn-ai" onclick="runCampaignAI('${campId}')"><i class="fas fa-robot"></i> AI Optimize</button>
+          ${camp.status === 'Paused' ?
+            `<button class="btn btn-success" onclick="resumeCampaign('${campId}')"><i class="fas fa-play"></i> Resume</button>` :
+            `<button class="btn btn-ghost" onclick="pauseCampaign('${campId}')"><i class="fas fa-pause"></i> Pause</button>`
+          }
+        </div>
+      </div>
+    </div>`;
+
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCampaignDetail(e) {
+  if (e && e.target !== document.getElementById('camp-detail-overlay')) return;
+  const overlay = document.getElementById('camp-detail-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ── View Campaign Leads (navigate to Leads page) ───────────────
+function viewCampLeads(campId) {
+  const camp = campaignsData[campId];
+  if (!camp) return;
+  showToast(`<i class="fas fa-users"></i> Showing leads for <strong>${camp.name}</strong>`);
+  navigateTo('prospects');
+}
+
+// ── Pause / Resume Campaign ────────────────────────────────────
+function pauseCampaign(campId) {
+  const camp = campaignsData[campId];
+  if (!camp) return;
+  camp.status = 'Paused';
+  showToast(`<i class="fas fa-pause-circle"></i> Campaign <strong>${camp.name}</strong> paused`);
+  closeCampaignDetail();
+}
+
+function resumeCampaign(campId) {
+  const camp = campaignsData[campId];
+  if (!camp) return;
+  camp.status = 'Active';
+  showToast(`<i class="fas fa-play-circle" style="color:#059669"></i> Campaign <strong>${camp.name}</strong> resumed`);
+  closeCampaignDetail();
+}
+
+// ── AI Campaign Wizard ─────────────────────────────────────────
+function openCampAIWizard() {
+  showToast('<i class="fas fa-brain"></i> AI Campaign Wizard analysing your portfolio for high-impact campaign opportunities…');
+  setTimeout(() => {
+    showToast('<i class="fas fa-lightbulb" style="color:#f59e0b"></i> <strong>3 new campaign opportunities identified</strong> — 47 clients eligible for Annuity upsell, 28 prospects match Wealth Management profile');
+  }, 2200);
+}
+
+function runCampaignAI(campId) {
+  const camp = campaignsData[campId];
+  if (!camp) return;
+  showToast(`<i class="fas fa-robot"></i> Running AI optimisation for <strong>${camp.name}</strong>…`);
+  setTimeout(() => {
+    showToast(`<i class="fas fa-check-circle" style="color:#059669"></i> AI recommendation ready — ${camp.aiInsight}`);
+  }, 1800);
+}
+
+// ── New Campaign Modal ─────────────────────────────────────────
+function openNewCampaignModal() {
+  const overlay = document.getElementById('camp-new-overlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeNewCampaignModal(e) {
+  if (e && e.target !== document.getElementById('camp-new-overlay')) return;
+  const overlay = document.getElementById('camp-new-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function generateCampaignAIBrief() {
+  const name = document.getElementById('new-camp-name')?.value || 'your campaign';
+  const type = document.getElementById('new-camp-type')?.value || 'Life Insurance';
+  const segment = document.getElementById('new-camp-segment')?.value || '';
+  const suggestBox = document.getElementById('camp-ai-suggest');
+  if (!suggestBox) return;
+  suggestBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Generating AI brief…</span>';
+  setTimeout(() => {
+    const briefs = {
+      'Life Insurance': `<strong>AI Brief — ${name}:</strong> Target ${segment}. Lead messaging: financial security + legacy planning. Key objection handler: cost vs. term. Recommended touchpoints: email x3 → phone call → in-person meeting. Predicted close probability: <span style="color:#059669">78%</span>. Estimated leads: 40–60 over 90 days.`,
+      'Retirement': `<strong>AI Brief — ${name}:</strong> Target ${segment}. Message: guaranteed income in retirement, inflation protection. Seminar + 1:1 meeting recommended. Upsell from existing life policyholders. Predicted close probability: <span style="color:#059669">71%</span>. Estimated leads: 25–40 over 60 days.`,
+      'Investments': `<strong>AI Brief — ${name}:</strong> Target ${segment}. Message: market-linked growth with NYL stability. Webinar → follow-up email → needs analysis call. Predicted close probability: <span style="color:#d97706">64%</span>. Estimated leads: 30–50 over 90 days.`,
+      'Wealth Management': `<strong>AI Brief — ${name}:</strong> Target ${segment}. White-glove referral model. Lead with estate planning value prop + UMA performance data. Predicted close probability: <span style="color:#059669">82%</span>. Estimated leads: 15–25 over 120 days.`,
+      'LTC': `<strong>AI Brief — ${name}:</strong> Target ${segment}. Education-first approach — Medicare awareness + LTC gap analysis. Predicted close probability: <span style="color:#d97706">58%</span>. Pair with Medicare seminar for 2× engagement lift. Estimated leads: 20–35 over 90 days.`
+    };
+    suggestBox.innerHTML = `<i class="fas fa-check-circle" style="color:#059669"></i> <span>${briefs[type] || briefs['Life Insurance']}</span>`;
+  }, 1600);
+}
+
+function saveNewCampaign() {
+  const name = document.getElementById('new-camp-name')?.value;
+  if (!name) { showToast('<i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> Please enter a campaign name'); return; }
+  closeNewCampaignModal();
+  showToast(`<i class="fas fa-bullhorn" style="color:#0891b2"></i> Campaign <strong>${name}</strong> launched successfully!`);
+}
+
+console.log('Campaigns module loaded — filterCampaigns, openCampaignDetail, openNewCampaignModal, openCampAIWizard all ready');
+
+
+/* ═══════════════════════════════════════════════════════════════
+   AI SCHEDULE INTELLIGENCE — Extended Feature Modules
+   1. Annual Review Scheduler & AI Prep
+   2. Life Event Trigger Engine
+   3. LTC & Medicare Planning Center
+   4. Portfolio Drift Monitor
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── Tab Switcher ──────────────────────────────────────────────────────────
+function switchCalAITab(tabName) {
+  // Deactivate all tabs and hide all panels
+  document.querySelectorAll('.cal-ai-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cal-ai-tab-panel').forEach(p => { p.style.display = 'none'; });
+
+  // Activate selected tab and panel
+  const tabBtn = document.getElementById('tab-ai-' + tabName);
+  const panel  = document.getElementById('cal-ai-panel-' + tabName);
+  if (tabBtn)  tabBtn.classList.add('active');
+  if (panel)   panel.style.display = 'block';
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 1. ANNUAL REVIEW SCHEDULER & AI PREP
+// ══════════════════════════════════════════════════════════════════════════
+
+const annualReviewData = {
+  LM: {
+    name: 'Linda Morrison', age: 58, avatar: 'LM',
+    lastReview: 'Apr 2025', daysSince: 371, priority: 96,
+    policies: ['WL $2M', 'UMA $500K', 'Estate Plan'],
+    nextMeeting: 'Apr 15, 2026',
+    talkingPoints: [
+      'WL policy performance vs. target — cash value $187K (+14% YTD)',
+      'UMA rebalancing needed: equity overweight +5% vs. target',
+      'Estate plan update — trust beneficiary review due (2+ yrs)',
+      'LTC gap identified: $3,200/mo exposure with zero coverage',
+      'RMD planning: IRA begins at age 73 (15 years) — start Roth conversion strategy now',
+      'Cross-sell: Umbrella policy ($5M coverage) — net-worth triggers threshold'
+    ],
+    coverageGaps: ['LTC Coverage (0% covered)', 'Umbrella Policy', 'Long-term Disability'],
+    revenueOpportunity: '$18,400/yr',
+    status: 'scheduled'
+  },
+  JW: {
+    name: 'James Whitfield', age: 64, avatar: 'JW',
+    lastReview: 'Mar 2025', daysSince: 400, priority: 88,
+    policies: ['Term $750K', 'Annuity $430K', 'IRA Gap'],
+    nextMeeting: 'Unscheduled',
+    talkingPoints: [
+      'Term life conversion window closing — age 65 deadline in 12 months',
+      'Annuity income gap: $2,100/mo shortfall vs. retirement income need',
+      'Social Security timing: delay to age 70 adds $680/mo — review tradeoffs',
+      'Medicare enrollment opening in 4 months — plan comparison ready',
+      'RMD from IRA begins age 73 — 9 years away; Roth conversion window open now',
+      'Business succession plan incomplete — key-person policy review needed'
+    ],
+    coverageGaps: ['Income Annuity Gap', 'LTC Coverage', 'Medicare Supplement'],
+    revenueOpportunity: '$22,000/yr',
+    status: 'overdue'
+  },
+  RC: {
+    name: 'Robert Chen', age: 52, avatar: 'RC',
+    lastReview: 'Jun 2025', daysSince: 305, priority: 82,
+    policies: ['VUL $1M', 'Claim Active', 'Estate Plan'],
+    nextMeeting: 'Apr 25, 2026',
+    talkingPoints: [
+      'Active claim CLM-2026-0041: $1M death benefit — status update required',
+      'VUL portfolio drift: equities overweight +13% — rebalancing recommended',
+      'Estate plan: 3 beneficiaries need updated trust documents',
+      'Business owner: COLI policy review — key person coverage for 3 partners',
+      'Disability income gap: $4,800/mo uncovered if claim-related disability continues',
+      'Tax planning: capital gains harvesting opportunity in Q2'
+    ],
+    coverageGaps: ['Disability Income Gap', 'COLI Review', 'Buy-Sell Agreement'],
+    revenueOpportunity: '$15,200/yr',
+    status: 'pending'
+  },
+  SW: {
+    name: 'Sandra Williams', age: 52, avatar: 'SW',
+    lastReview: 'May 2025', daysSince: 340, priority: 74,
+    policies: ['WL $500K', 'Renewal Due'],
+    nextMeeting: 'Apr 28, 2026',
+    talkingPoints: [
+      'WL renewal P-100320 — auto-renewal in 153 days; review coverage adequacy',
+      'LTC rider availability: age 52 is ideal window before premium increases',
+      'Income protection: DI coverage analysis — $3,600/mo gap identified',
+      'Spouse coverage: beneficiary designation last updated 2022',
+      'Education funding: 529 plan for 2 dependents still open',
+      'Investment allocation: transition WL cash value to UMA when threshold reached'
+    ],
+    coverageGaps: ['LTC Coverage', 'Disability Income', '529 Education Plan'],
+    revenueOpportunity: '$9,800/yr',
+    status: 'scheduled'
+  }
+};
+
+function openAnnualReviewBrief(clientCode) {
+  const data = annualReviewData[clientCode];
+  if (!data) return showToast('Review brief not available.');
+
+  const statusColor = { scheduled: '#059669', overdue: '#dc2626', pending: '#d97706' };
+  const color = statusColor[data.status] || '#6b7280';
+
+  const modal = document.createElement('div');
+  modal.className = 'ar-brief-modal-overlay';
+  modal.innerHTML = `
+    <div class="ar-brief-modal">
+      <div class="ar-brief-header">
+        <div class="ar-brief-avatar">${data.avatar}</div>
+        <div class="ar-brief-client-info">
+          <div class="ar-brief-name">${data.name}</div>
+          <div class="ar-brief-meta">Age ${data.age} · Last Review: ${data.lastReview} (${data.daysSince} days ago)</div>
+          <div class="ar-brief-meeting">Next Meeting: <strong>${data.nextMeeting}</strong></div>
+        </div>
+        <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          <span class="ar-brief-status" style="background:${color}20;color:${color};border:1px solid ${color}40;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase">${data.status}</span>
+          <span style="font-size:13px;color:#6b7280">Revenue Opp: <strong style="color:#059669">${data.revenueOpportunity}</strong></span>
+        </div>
+        <button class="ar-brief-close" onclick="this.closest('.ar-brief-modal-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ar-brief-body">
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-robot"></i> AI Talking Points <span class="ar-tp-count">${data.talkingPoints.length} prepared</span></div>
+          <div class="ar-brief-tp-list">
+            ${data.talkingPoints.map((tp,i) => `
+              <div class="ar-tp-item">
+                <span class="ar-tp-num">${i+1}</span>
+                <span class="ar-tp-text">${tp}</span>
+                <button class="ar-tp-copy" onclick="copyToClipboard('${tp.replace(/'/g,"\\'")}')"><i class="fas fa-copy"></i></button>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-exclamation-circle" style="color:#dc2626"></i> Coverage Gaps Identified</div>
+          <div class="ar-brief-gaps">
+            ${data.coverageGaps.map(g => `<span class="ar-gap-tag">${g}</span>`).join('')}
+          </div>
+        </div>
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-shield-alt"></i> Current Policies</div>
+          <div class="ar-brief-gaps">
+            ${data.policies.map(p => `<span class="ar-policy-badge">${p}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="ar-brief-footer">
+        <button class="cal-ai-action-btn" onclick="scheduleAnnualReview('${clientCode}')"><i class="fas fa-calendar-plus"></i> Schedule Review</button>
+        <button class="cal-ai-action-btn secondary" onclick="sendAnnualReviewEmail('${clientCode}')"><i class="fas fa-paper-plane"></i> Send AI Outreach</button>
+        <button class="cal-ai-action-btn secondary" onclick="exportBrief('${clientCode}')"><i class="fas fa-file-pdf"></i> Export PDF Brief</button>
+        <button class="cal-ai-action-btn secondary" onclick="this.closest('.ar-brief-modal-overlay').remove()"><i class="fas fa-times"></i> Close</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('show'));
+}
+
+function scheduleAnnualReview(clientCode) {
+  const data = annualReviewData[clientCode];
+  if (!data) return;
+  showToast(`<i class="fas fa-calendar-check"></i> Annual review for ${data.name} added to calendar.`);
+  document.querySelector('.ar-brief-modal-overlay')?.remove();
+}
+
+function sendAnnualReviewEmail(clientCode) {
+  const data = annualReviewData[clientCode];
+  if (!data) return;
+  showToast(`<i class="fas fa-paper-plane"></i> AI-drafted outreach sent to ${data.name}.`);
+}
+
+function exportBrief(clientCode) {
+  const data = annualReviewData[clientCode];
+  if (!data) return;
+  showToast(`<i class="fas fa-file-pdf"></i> Exporting PDF brief for ${data.name}…`);
+}
+
+function scheduleAllAnnualReviews() {
+  showToast('<i class="fas fa-magic"></i> AI scheduled 2 overdue annual reviews — check Calendar.');
+  setTimeout(() => { switchCalAITab('insights'); }, 2000);
+}
+
+function exportAnnualReviewReport() {
+  showToast('<i class="fas fa-file-export"></i> Annual Review Report exported to PDF.');
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard?.writeText(text).then(() => {
+    showToast('<i class="fas fa-check"></i> Copied to clipboard.');
+  }).catch(() => showToast('Copy not supported in this browser.'));
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 2. LIFE EVENT TRIGGER ENGINE
+// ══════════════════════════════════════════════════════════════════════════
+
+const lifeEventDrafts = {
+  PN_marriage: {
+    subject: 'Congratulations on Your Recent Marriage, Patricia!',
+    body: `Hi Patricia,\n\nCongratulations on your recent marriage — what an exciting milestone!\n\nAs your financial advisor, I want to make sure your coverage reflects your new family situation. A few things we should review together:\n\n• Beneficiary designations on your current policies\n• Spouse life insurance needs\n• Joint annuity options for retirement income planning\n\nI'd love to schedule a quick 30-minute call at your convenience. Would next week work?\n\nWarm regards,\n[Advisor Name]`
+  },
+  DT_newchild: {
+    subject: 'Congratulations on Your New Arrival, David!',
+    body: `Hi David,\n\nCongratulations on your newest family member — what wonderful news!\n\nAs your family grows, so do your protection needs. I'd like to discuss:\n\n• Adding a term life rider to maximize your family's protection\n• Opening a 529 Education Savings Plan (significant tax advantages)\n• Reviewing your disability income coverage — your family depends on your income\n\nLet's schedule a brief call this week. I have a few slots available.\n\nBest regards,\n[Advisor Name]`
+  },
+  MG_retirement: {
+    subject: 'Important: Your Medicare Enrollment Window is Opening Soon',
+    body: `Hi Maria,\n\nAs you approach age 62, I want to make sure you're fully prepared for the important financial decisions ahead.\n\nTopics I'd like to cover with you:\n\n• Medicare Part A & B enrollment timeline (your window opens in 4 months)\n• Social Security optimization — when to start maximizing your benefit\n• Required Minimum Distribution planning for your IRA accounts\n• Income annuity options to address your retirement income gap\n\nI have a comprehensive retirement readiness analysis ready for your review. Can we schedule 60 minutes soon?\n\nBest regards,\n[Advisor Name]`
+  }
+};
+
+function openLifeEventOutreach(clientCode, eventType) {
+  const key = clientCode + '_' + eventType;
+  const draft = lifeEventDrafts[key];
+  const clientNames = { PN:'Patricia Nguyen', DT:'David Thompson', MG:'Maria Gonzalez', JW:'James Whitfield' };
+  const clientName = clientNames[clientCode] || 'Client';
+
+  const modal = document.createElement('div');
+  modal.className = 'ar-brief-modal-overlay';
+  modal.innerHTML = `
+    <div class="ar-brief-modal le-outreach-modal">
+      <div class="ar-brief-header">
+        <div class="le-modal-icon ${eventType}"><i class="fas ${eventType==='marriage'?'fa-ring':eventType==='newchild'?'fa-baby':eventType==='retirement'?'fa-umbrella-beach':'fa-home'}"></i></div>
+        <div class="ar-brief-client-info">
+          <div class="ar-brief-name">${clientName}</div>
+          <div class="ar-brief-meta">AI-Generated Outreach · Life Event: ${eventType.replace('newchild','New Child').replace(/^\w/,c=>c.toUpperCase())}</div>
+        </div>
+        <button class="ar-brief-close" onclick="this.closest('.ar-brief-modal-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ar-brief-body">
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-envelope"></i> AI-Drafted Email</div>
+          ${draft ? `
+          <div class="le-email-draft">
+            <div class="le-email-subject"><strong>Subject:</strong> ${draft.subject}</div>
+            <textarea class="le-email-body" rows="12">${draft.body}</textarea>
+          </div>` : `<p style="color:#6b7280;padding:16px">No draft available for this event type.</p>`}
+        </div>
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-lightbulb"></i> Recommended Products</div>
+          <div class="ar-brief-gaps">
+            ${eventType==='marriage' ? '<span class="ar-gap-tag">Beneficiary Update</span><span class="ar-gap-tag">Spouse Life Insurance</span><span class="ar-gap-tag">Joint Annuity</span>'
+              : eventType==='newchild' ? '<span class="ar-gap-tag">Term Life Rider</span><span class="ar-gap-tag">529 Education Plan</span><span class="ar-gap-tag">DI Coverage Review</span>'
+              : eventType==='retirement' ? '<span class="ar-gap-tag">Medicare Supplement</span><span class="ar-gap-tag">Income Annuity</span><span class="ar-gap-tag">RMD Planning</span>'
+              : '<span class="ar-gap-tag">Umbrella Policy</span><span class="ar-gap-tag">Mortgage Protection</span>'}
+          </div>
+        </div>
+      </div>
+      <div class="ar-brief-footer">
+        <button class="cal-ai-action-btn" onclick="sendLifeEventEmail('${clientCode}','${eventType}',this)"><i class="fas fa-paper-plane"></i> Send Email</button>
+        <button class="cal-ai-action-btn secondary" onclick="scheduleLifeEventMeeting('${clientCode}')"><i class="fas fa-calendar-plus"></i> Schedule Meeting</button>
+        <button class="cal-ai-action-btn secondary" onclick="this.closest('.ar-brief-modal-overlay').remove()"><i class="fas fa-times"></i> Close</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('show'));
+}
+
+function sendLifeEventEmail(clientCode, eventType, btn) {
+  const clientNames = { PN:'Patricia Nguyen', DT:'David Thompson', MG:'Maria Gonzalez', JW:'James Whitfield' };
+  if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Sent!'; btn.style.background='#059669'; btn.disabled=true; }
+  showToast(`<i class="fas fa-paper-plane"></i> Outreach sent to ${clientNames[clientCode] || 'client'}.`);
+  setTimeout(() => { document.querySelector('.ar-brief-modal-overlay')?.remove(); }, 1200);
+}
+
+function scheduleLifeEventMeeting(clientCode) {
+  const clientNames = { PN:'Patricia Nguyen', DT:'David Thompson', MG:'Maria Gonzalez', JW:'James Whitfield' };
+  showToast(`<i class="fas fa-calendar-check"></i> Meeting request sent to ${clientNames[clientCode] || 'client'}.`);
+  document.querySelector('.ar-brief-modal-overlay')?.remove();
+}
+
+function viewLifeEventLog(clientCode, eventType) {
+  showToast(`<i class="fas fa-eye"></i> Loading life event log for ${clientCode}…`);
+}
+
+function scanAllLifeEvents() {
+  const btn = document.querySelector('[onclick="scanAllLifeEvents()"]');
+  if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning…'; btn.disabled = true; }
+  setTimeout(() => {
+    if (btn) { btn.innerHTML = '<i class="fas fa-satellite-dish"></i> Scan All Clients Now'; btn.disabled = false; }
+    showToast('<i class="fas fa-satellite-dish"></i> Life event scan complete — 3 new events detected across 247 clients.');
+  }, 2200);
+}
+
+function openLifeEventSettings() {
+  showToast('<i class="fas fa-cog"></i> Life Event Trigger settings — feature coming soon.');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 3. LTC & MEDICARE PLANNING CENTER
+// ══════════════════════════════════════════════════════════════════════════
+
+const ltcPlanningData = {
+  MG: {
+    name: 'Maria Gonzalez', age: 61, avatar: 'MG',
+    urgency: 'critical',
+    medicareEnrollment: 'Jul 2026 (4 months)',
+    ltcExposure: '$3,800/mo',
+    recommendedProducts: [
+      { name: 'Medicare Supplement Plan G', premium: '$187/mo', benefit: 'Covers 80% of Medicare gaps', fit: 98 },
+      { name: 'Part D Prescription Drug', premium: '$42/mo', benefit: 'Formulary includes 12 current Rx', fit: 95 },
+      { name: 'Hybrid Life/LTC Policy', premium: '$310/mo', benefit: '$3,600/mo LTC benefit, 3-yr benefit period', fit: 87 }
+    ],
+    timeline: [
+      { done: true,  label: 'Initial Medicare consultation scheduled' },
+      { done: false, active: true,  label: 'Part A & B enrollment window opens Jul 2026' },
+      { done: false, label: 'Medigap / Part D comparison — due May 15' },
+      { done: false, label: 'LTC hybrid product review — recommended age 62' }
+    ]
+  },
+  SW: {
+    name: 'Sandra Williams', age: 52, avatar: 'SW',
+    urgency: 'high',
+    medicareEnrollment: 'In ~10 years (age 65)',
+    ltcExposure: '$4,200/mo',
+    recommendedProducts: [
+      { name: 'LTC Rider on WL Policy', premium: '+$89/mo to existing WL', benefit: '$2,400/mo LTC, life benefit preserved', fit: 96 },
+      { name: 'Hybrid Life/LTC', premium: '$380/mo', benefit: '$4,000/mo LTC, 4-yr benefit period', fit: 90 },
+      { name: 'Annuity with LTC Rider', premium: '$1,200/mo (premium funding)', benefit: 'Tax-advantaged LTC + accumulation', fit: 78 }
+    ],
+    timeline: [
+      { done: true,  label: 'WL policy includes LTC rider option confirmed' },
+      { done: false, active: true,  label: 'Hybrid LTC product analysis ready — review at Apr 28 meeting' },
+      { done: false, label: 'Renewal meeting Apr 28 — ideal LTC conversation window' }
+    ]
+  },
+  LM: {
+    name: 'Linda Morrison', age: 58, avatar: 'LM',
+    urgency: 'opportunity',
+    medicareEnrollment: 'In ~7 years (age 65)',
+    ltcExposure: '$3,200/mo (zero coverage)',
+    recommendedProducts: [
+      { name: 'Standalone LTC Policy', premium: '$420/mo', benefit: '$3,500/mo benefit, 5-yr benefit period', fit: 92 },
+      { name: 'Asset-Based LTC', premium: 'Single premium $95K', benefit: 'LTC + death benefit, return of premium', fit: 88 }
+    ],
+    timeline: [
+      { done: true,  label: 'WL $2M analyzed — no LTC coverage in portfolio' },
+      { done: false, active: true,  label: 'AI gap analysis complete — $3,200/mo LTC exposure' },
+      { done: false, label: 'Annual review Apr 15 — include LTC in agenda' }
+    ]
+  }
+};
+
+function openLtcPlanningModal(clientCode) {
+  const data = ltcPlanningData[clientCode];
+  if (!data) return showToast('LTC planning data not available.');
+
+  const urgencyColors = { critical:'#dc2626', high:'#d97706', opportunity:'#2563eb' };
+  const urgencyLabels = { critical:'Action Required', high:'High Value', opportunity:'Opportunity' };
+  const color = urgencyColors[data.urgency] || '#6b7280';
+
+  const modal = document.createElement('div');
+  modal.className = 'ar-brief-modal-overlay';
+  modal.innerHTML = `
+    <div class="ar-brief-modal ltc-plan-modal">
+      <div class="ar-brief-header">
+        <div class="ltc-modal-avatar">${data.avatar}</div>
+        <div class="ar-brief-client-info">
+          <div class="ar-brief-name">${data.name}</div>
+          <div class="ar-brief-meta">Age ${data.age} · LTC Exposure: <strong style="color:#dc2626">${data.ltcExposure}</strong></div>
+          <div class="ar-brief-meta">Medicare Enrollment: ${data.medicareEnrollment}</div>
+        </div>
+        <span class="ar-brief-status" style="background:${color}20;color:${color};border:1px solid ${color}40;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;margin-left:auto">${urgencyLabels[data.urgency]}</span>
+        <button class="ar-brief-close" onclick="this.closest('.ar-brief-modal-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ar-brief-body">
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-list-ol"></i> Planning Timeline</div>
+          <div class="ltc-modal-timeline">
+            ${data.timeline.map(t => `
+              <div class="ltc-tl-row ${t.done?'done':t.active?'active':'upcoming'}">
+                <i class="fas ${t.done?'fa-check-circle':t.active?'fa-circle':'fa-clock'}"></i>
+                <span>${t.label}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-shield-alt"></i> AI-Recommended Products</div>
+          <div class="ltc-products-grid">
+            ${data.recommendedProducts.map(p => `
+              <div class="ltc-product-card">
+                <div class="ltc-prod-name">${p.name}</div>
+                <div class="ltc-prod-premium"><i class="fas fa-tag"></i> ${p.premium}</div>
+                <div class="ltc-prod-benefit">${p.benefit}</div>
+                <div class="ltc-prod-fit-row">
+                  <span>AI Fit Score</span>
+                  <div class="ltc-fit-bar"><div class="ltc-fit-fill" style="width:${p.fit}%"></div></div>
+                  <strong>${p.fit}</strong>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="ar-brief-footer">
+        <button class="cal-ai-action-btn" onclick="scheduleLtcMeeting('${clientCode}')"><i class="fas fa-calendar-plus"></i> Schedule LTC Meeting</button>
+        <button class="cal-ai-action-btn secondary" onclick="sendLtcProposal('${clientCode}')"><i class="fas fa-paper-plane"></i> Send Proposal</button>
+        <button class="cal-ai-action-btn secondary" onclick="this.closest('.ar-brief-modal-overlay').remove()"><i class="fas fa-times"></i> Close</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('show'));
+}
+
+function scheduleLtcMeeting(clientCode) {
+  const data = ltcPlanningData[clientCode];
+  showToast(`<i class="fas fa-calendar-check"></i> LTC planning meeting scheduled for ${data?.name || clientCode}.`);
+  document.querySelector('.ar-brief-modal-overlay')?.remove();
+}
+
+function sendLtcProposal(clientCode) {
+  const data = ltcPlanningData[clientCode];
+  showToast(`<i class="fas fa-paper-plane"></i> LTC proposal sent to ${data?.name || clientCode}.`);
+  document.querySelector('.ar-brief-modal-overlay')?.remove();
+}
+
+function runLtcScan() {
+  const btn = document.querySelector('[onclick="runLtcScan()"]');
+  if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning…'; btn.disabled = true; }
+  setTimeout(() => {
+    if (btn) { btn.innerHTML = '<i class="fas fa-search-plus"></i> Scan All Clients for LTC Gaps'; btn.disabled = false; }
+    showToast('<i class="fas fa-shield-alt"></i> LTC gap scan complete — 4 clients identified across 247 total.');
+  }, 2000);
+}
+
+function exportLtcReport() {
+  showToast('<i class="fas fa-file-export"></i> LTC & Medicare Planning Report exported.');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 4. PORTFOLIO DRIFT MONITOR
+// ══════════════════════════════════════════════════════════════════════════
+
+const driftData = {
+  RC: {
+    name: 'Robert Chen', aum: '$890K', avatar: 'RC',
+    driftPct: 8, driftLevel: 'critical',
+    allocations: [
+      { asset: 'Equities',      target: 60, actual: 73, drift: +13 },
+      { asset: 'Fixed Income',  target: 30, actual: 19, drift: -11 },
+      { asset: 'Alternatives',  target:  5, actual:  5, drift:   0 },
+      { asset: 'Cash',          target:  5, actual:  3, drift:  -2 }
+    ],
+    proposal: 'Sell $115,700 equities → buy $98,100 Fixed Income + $17,600 cash. Tax impact: estimated $4,200 short-term CG.',
+    urgency: 'Rebalance within 30 days to stay within IPS guidelines.'
+  },
+  MG: {
+    name: 'Maria Gonzalez', aum: '$340K', avatar: 'MG',
+    driftPct: 7, driftLevel: 'critical',
+    allocations: [
+      { asset: 'Growth Funds',  target: 40, actual: 55, drift: +15 },
+      { asset: 'Income Funds',  target: 50, actual: 36, drift: -14 },
+      { asset: 'Cash',          target: 10, actual:  9, drift:  -1 }
+    ],
+    proposal: 'Sell $51,000 growth → buy $47,600 income funds. Approach: gradual over 2 months to manage sequence-of-returns risk.',
+    urgency: 'Approaching retirement — income allocation critical for RMD readiness.'
+  },
+  LM: {
+    name: 'Linda Morrison', aum: '$500K', avatar: 'LM',
+    driftPct: 4, driftLevel: 'moderate',
+    allocations: [
+      { asset: 'Equities',     target: 55, actual: 60, drift: +5 },
+      { asset: 'Fixed Income', target: 30, actual: 30, drift:  0 },
+      { asset: 'Alternatives', target: 15, actual: 10, drift: -5 }
+    ],
+    proposal: 'Sell $25,000 equities → buy $25,000 alternatives (REIT/commodities). Low urgency — monitor quarterly.',
+    urgency: 'Within acceptable range but approaching upper threshold on equities.'
+  },
+  JW: {
+    name: 'James Whitfield', aum: '$430K', avatar: 'JW',
+    driftPct: 1, driftLevel: 'ok',
+    allocations: [
+      { asset: 'Balanced',     target: 50, actual: 51, drift: +1 },
+      { asset: 'Fixed Income', target: 40, actual: 40, drift:  0 },
+      { asset: 'Cash',         target: 10, actual:  9, drift: -1 }
+    ],
+    proposal: 'No action required. Portfolio within +/-3% drift tolerance. Next review: Jul 2026.',
+    urgency: 'On target — no rebalancing needed at this time.'
+  }
+};
+
+function openDriftRebalance(clientCode) {
+  const data = driftData[clientCode];
+  if (!data) return showToast('Drift data not available.');
+
+  const levelColors = { critical:'#dc2626', moderate:'#d97706', ok:'#059669' };
+  const levelLabels = { critical:`${data.driftPct}% Drift — Critical`, moderate:`${data.driftPct}% Drift — Moderate`, ok:'On Target' };
+  const color = levelColors[data.driftLevel] || '#6b7280';
+
+  const modal = document.createElement('div');
+  modal.className = 'ar-brief-modal-overlay';
+  modal.innerHTML = `
+    <div class="ar-brief-modal drift-modal">
+      <div class="ar-brief-header">
+        <div class="cal-ar-avatar">${data.avatar}</div>
+        <div class="ar-brief-client-info">
+          <div class="ar-brief-name">${data.name}</div>
+          <div class="ar-brief-meta">AUM: <strong>${data.aum}</strong></div>
+          <div class="ar-brief-meta" style="color:${color};font-weight:600">${levelLabels[data.driftLevel]}</div>
+        </div>
+        <button class="ar-brief-close" onclick="this.closest('.ar-brief-modal-overlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ar-brief-body">
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-chart-pie"></i> Allocation Analysis</div>
+          <div class="drift-modal-table">
+            <div class="drift-mt-header">
+              <span>Asset Class</span><span>Target</span><span>Actual</span><span>Drift</span>
+            </div>
+            ${data.allocations.map(a => `
+              <div class="drift-mt-row ${a.drift>5?'over':a.drift<-5?'under':'ok'}">
+                <span>${a.asset}</span>
+                <span>${a.target}%</span>
+                <span>${a.actual}%</span>
+                <span style="color:${a.drift>0?'#dc2626':a.drift<0?'#d97706':'#059669'};font-weight:700">
+                  ${a.drift>0?'+':''}${a.drift}%
+                  <i class="fas ${a.drift>0?'fa-arrow-up':a.drift<0?'fa-arrow-down':'fa-check'}"></i>
+                </span>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="ar-brief-section">
+          <div class="ar-brief-section-title"><i class="fas fa-robot"></i> AI Rebalancing Proposal</div>
+          <div class="drift-proposal-box">${data.proposal}</div>
+          <div class="drift-urgency-box" style="background:${color}10;border-left:3px solid ${color};padding:10px 14px;margin-top:10px;border-radius:0 6px 6px 0;font-size:13px;color:#374151">
+            <i class="fas fa-info-circle" style="color:${color}"></i> ${data.urgency}
+          </div>
+        </div>
+      </div>
+      <div class="ar-brief-footer">
+        ${data.driftLevel !== 'ok' ? `
+        <button class="cal-ai-action-btn" onclick="executeRebalance('${clientCode}',this)"><i class="fas fa-balance-scale"></i> Execute Rebalance</button>
+        <button class="cal-ai-action-btn secondary" onclick="sendDriftAlert('${clientCode}')"><i class="fas fa-bell"></i> Alert Client</button>` : ''}
+        <button class="cal-ai-action-btn secondary" onclick="exportDriftReport('${clientCode}')"><i class="fas fa-file-export"></i> Export</button>
+        <button class="cal-ai-action-btn secondary" onclick="this.closest('.ar-brief-modal-overlay').remove()"><i class="fas fa-times"></i> Close</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('show'));
+}
+
+function executeRebalance(clientCode, btn) {
+  const data = driftData[clientCode];
+  if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…'; btn.disabled = true; }
+  setTimeout(() => {
+    showToast(`<i class="fas fa-balance-scale"></i> Rebalance order submitted for ${data?.name || clientCode}. Confirmation sent.`);
+    document.querySelector('.ar-brief-modal-overlay')?.remove();
+  }, 1800);
+}
+
+function sendDriftAlert(clientCode) {
+  const data = driftData[clientCode];
+  showToast(`<i class="fas fa-bell"></i> Portfolio drift alert sent to ${data?.name || clientCode}.`);
+}
+
+function runDriftScanAll() {
+  const btn = document.querySelector('[onclick="runDriftScanAll()"]');
+  if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning…'; btn.disabled = true; }
+  setTimeout(() => {
+    if (btn) { btn.innerHTML = '<i class="fas fa-sync-alt"></i> Scan All Portfolios'; btn.disabled = false; }
+    showToast('<i class="fas fa-chart-line"></i> Drift scan complete — 2 critical, 3 moderate drift portfolios identified.');
+  }, 2000);
+}
+
+function autoRebalanceAll() {
+  showToast('<i class="fas fa-magic"></i> AI rebalancing proposals generated for 5 portfolios with drift >3%.');
+}
+
+function exportDriftReport(clientCode) {
+  showToast('<i class="fas fa-file-export"></i> Portfolio Drift Report exported.');
+}
+
+console.log('AI Schedule Intelligence modules loaded — switchCalAITab, openAnnualReviewBrief, openLifeEventOutreach, openLtcPlanningModal, openDriftRebalance all ready');
+
 /* ═══════════════════════════════════════════════════════════════
    PHASE 4 — Products Detail Modal · Kanban Move Visual ·
              AI Scorecard Export/Share
@@ -17584,6 +18519,10 @@ const prospectData = {
     products: ['Whole Life $500K'],
     annualValue: '$4,200/yr', commission: '$504',
     pipelineDealId: 'D001',
+    campaignId: null,
+    campaignName: 'Organic — Referral',
+    campaignType: 'referral',
+    campaignColor: '#6b7280',
     // 3rd-Party Data
     thirdParty: {
       wealth: {
@@ -17671,6 +18610,10 @@ const prospectData = {
     products: ['Term Life $1M', 'LTC Rider'],
     annualValue: '$3,600/yr', commission: '$432',
     pipelineDealId: 'D002',
+    campaignId: 'C002',
+    campaignName: 'Term Life — Young Families',
+    campaignType: 'campaign',
+    campaignColor: '#0891b2',
     thirdParty: {
       wealth: {
         provider: 'CoreLogic Mortgage & Property Data',
@@ -17756,6 +18699,10 @@ const prospectData = {
     products: ['Disability Insurance $8K/mo'],
     annualValue: '$2,400/yr', commission: '$288',
     pipelineDealId: 'D003',
+    campaignId: 'C001',
+    campaignName: 'Whole Life Protection Campaign',
+    campaignType: 'campaign',
+    campaignColor: '#003087',
     thirdParty: {
       wealth: {
         provider: 'Equifax Wealth Insight',
@@ -17841,6 +18788,10 @@ const prospectData = {
     products: ['Universal Life $750K', 'NQDC Plan'],
     annualValue: '$6,800/yr', commission: '$816',
     pipelineDealId: 'D004',
+    campaignId: null,
+    campaignName: 'Organic — Referral',
+    campaignType: 'referral',
+    campaignColor: '#6b7280',
     thirdParty: {
       wealth: {
         provider: 'Dun & Bradstreet Business Credit',
@@ -17929,6 +18880,10 @@ const prospectData = {
     products: ['Fixed Annuity $120K', 'Income Annuity'],
     annualValue: '$9,600/yr', commission: '$768',
     pipelineDealId: 'D005',
+    campaignId: 'C003',
+    campaignName: 'Retirement Income — Annuity',
+    campaignType: 'campaign',
+    campaignColor: '#059669',
     thirdParty: {
       wealth: {
         provider: 'Dun & Bradstreet Wealth Signals',
@@ -18014,6 +18969,10 @@ const prospectData = {
     products: ['Whole Life $1M', 'Estate Planning'],
     annualValue: '$14,400/yr', commission: '$1,728',
     pipelineDealId: null,
+    campaignId: 'C004',
+    campaignName: 'Wealth Management — HNW Segment',
+    campaignType: 'campaign',
+    campaignColor: '#7c3aed',
     thirdParty: {
       wealth: {
         provider: 'AMA (American Medical Assoc.) Financial Data',
@@ -18101,6 +19060,10 @@ const prospectData = {
     products: ['Term Life $500K', '529 College Plan'],
     annualValue: '$2,800/yr', commission: '$336',
     pipelineDealId: null,
+    campaignId: 'C002',
+    campaignName: 'Term Life — Young Families',
+    campaignType: 'campaign',
+    campaignColor: '#0891b2',
     thirdParty: {
       wealth: {
         provider: 'Experian Life Event Triggers',
@@ -18185,6 +19148,10 @@ const prospectData = {
     products: ['Universal Life $1M', 'Income Annuity', 'Estate Review'],
     annualValue: '$18,000/yr', commission: '$2,160',
     pipelineDealId: null,
+    campaignId: 'C004',
+    campaignName: 'Wealth Management — HNW Segment',
+    campaignType: 'campaign',
+    campaignColor: '#7c3aed',
     thirdParty: {
       wealth: {
         provider: 'Bloomberg Executive Compensation Data',
@@ -18271,6 +19238,10 @@ const prospectData = {
     products: ['Estate Planning', 'Whole Life $500K'],
     annualValue: '$8,200/yr', commission: '$984',
     pipelineDealId: null,
+    campaignId: null,
+    campaignName: 'Organic — Referral',
+    campaignType: 'referral',
+    campaignColor: '#6b7280',
     thirdParty: {
       wealth: {
         provider: 'Dun & Bradstreet Attorney Wealth Data',
@@ -18354,6 +19325,10 @@ const prospectData = {
     products: ['Whole Life $750K', 'Mutual Funds'],
     annualValue: '$9,000/yr', commission: '$1,080',
     pipelineDealId: null,
+    campaignId: 'C001',
+    campaignName: 'Whole Life Protection Campaign',
+    campaignType: 'campaign',
+    campaignColor: '#003087',
     thirdParty: {
       wealth: {
         provider: 'Dun & Bradstreet Business Credit',
@@ -18441,6 +19416,10 @@ const prospectData = {
     products: ['Disability Insurance $12K/mo', 'SEP-IRA'],
     annualValue: '$4,800/yr', commission: '$576',
     pipelineDealId: null,
+    campaignId: 'C001',
+    campaignName: 'Whole Life Protection Campaign',
+    campaignType: 'campaign',
+    campaignColor: '#003087',
     thirdParty: {
       wealth: {
         provider: 'ADA Financial Data + D&B',
@@ -18523,6 +19502,10 @@ const prospectData = {
     products: ['Deferred Annuity', 'LTC Insurance'],
     annualValue: '$7,200/yr', commission: '$864',
     pipelineDealId: null,
+    campaignId: 'C003',
+    campaignName: 'Retirement Income — Annuity',
+    campaignType: 'campaign',
+    campaignColor: '#059669',
     thirdParty: {
       wealth: {
         provider: 'Dun & Bradstreet + FINRA Data',
@@ -18608,6 +19591,10 @@ const prospectData = {
     products: ['529 College Plan', 'Term Life $600K'],
     annualValue: '$3,400/yr', commission: '$408',
     pipelineDealId: null,
+    campaignId: 'C006',
+    campaignName: 'Investment Portfolio — Mid-Market',
+    campaignType: 'campaign',
+    campaignColor: '#0891b2',
     thirdParty: {
       wealth: {
         provider: 'Experian ConsumerView + Facebook Data Signal',
@@ -18692,6 +19679,10 @@ const prospectData = {
     products: ['Whole Life $1M', 'Business Succession Planning'],
     annualValue: '$12,000/yr', commission: '$1,440',
     pipelineDealId: null,
+    campaignId: 'C004',
+    campaignName: 'Wealth Management — HNW Segment',
+    campaignType: 'campaign',
+    campaignColor: '#7c3aed',
     thirdParty: {
       wealth: {
         provider: 'CoreLogic Property + D&B Business',
@@ -19520,6 +20511,7 @@ function openProspectModal(id) {
           <span class="pm-stage-pill" style="background:${stageColor}18;color:${stageColor};border:1px solid ${stageColor}40">${p.stage}</span>
           <span class="pm-source-lbl"><i class="fas fa-link"></i> ${p.source}</span>
           <span class="pm-income-lbl"><i class="fas fa-briefcase"></i> ${p.income}</span>
+          ${p.campaignName ? `<span class="pm-camp-badge" style="background:${p.campaignColor}18;color:${p.campaignColor};border:1px solid ${p.campaignColor}40"><i class="fas fa-bullhorn"></i> ${p.campaignName}</span>` : ''}
         </div>
       </div>
       <div class="pm-score-ring">
@@ -20236,6 +21228,9 @@ function apSaveProspect() {
         <span class="prosp-tp-chip" title="Income Data"><i class="fas fa-briefcase"></i> ${income} Income</span>
         <span class="prosp-tp-chip" title="Net Worth"><i class="fas fa-gem"></i> ${nw} NW</span>
       </div>
+      <div class="prosp-camp-source-row">
+        <span class="prosp-camp-tag" style="background:#003087;color:#003087;border:1px solid #00308740;background:rgba(0,48,135,0.08)"><i class="fas fa-bullhorn"></i> ${campaignSource || 'New Lead — Direct'}</span>
+      </div>
       <div class="prosp-card-footer">
         <span class="prosp-value">${refBy ? 'Ref: ' + refBy : source}</span>
         <button class="prosp-convert-btn" onclick="event.stopPropagation();moveLeadToOpportunity('${newId}')"><i class="fas fa-bolt"></i> Move to Opportunities</button>
@@ -20844,3 +21839,1717 @@ function oppAIAnalysis() {
 }
 
 console.log('Opportunities module loaded — opportunitiesData(' + Object.keys(opportunitiesData).length + '), openOppModal, moveLeadToOpportunity, confirmLeadToOpportunity, openOppToClientModal, confirmOppToClient all ready');
+
+// ═══════════════════════════════════════════════════════════════
+//  UPSELL TRACK MODULE
+//  Data, filters, modals, AI brief generator
+// ═══════════════════════════════════════════════════════════════
+
+const upsellData = {
+  UC001: {
+    id: 'UC001', clientId: 8, name: 'Linda Morrison', initials: 'LM', age: 56,
+    segment: 'Premium', city: 'Long Island', score: 98,
+    tenureYears: 10, tenurePct: 100,
+    priority: 'high', priorityLabel: 'High Priority',
+    avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
+    existingPolicies: ['Whole Life $2M (2015)', 'LTC $300K (2019)', 'VUL $1.5M (2021)'],
+    existingInvestments: ['Mutual Funds $180K AUM', 'ETF Portfolio $100K AUM'],
+    existingRetirement: ['Deferred Annuity $280K (Variable)'],
+    tracks: {
+      retirement: { status: 'gap',     label: 'Enhance',    color: '#f59e0b',
+        gap: 'Variable annuity exists but no guaranteed income stream. Consider Fixed Immediate Annuity to lock in lifetime income at 65.',
+        product: 'Fixed Immediate Annuity + Income Rider',
+        estValue: '$350K premium · Est. $2,800/mo lifetime income',
+        aiScore: 94, trigger: '10-yr tenure + age 56 + approaching retirement window' },
+      investment: { status: 'gap',     label: 'Grow AUM',   color: '#f59e0b',
+        gap: '$280K AUM in existing funds. Opportunity to grow with diversified Managed Account strategy.',
+        product: 'Unified Managed Account (UMA) Expansion',
+        estValue: '+$200K new AUM · $2,000/yr additional fee',
+        aiScore: 91, trigger: 'High AUM base + existing advisory relationship' },
+      wealth: { status: 'gap',         label: 'UMA+',       color: '#f59e0b',
+        gap: 'Estate Plan active but no formal Trust structure or charitable giving strategy.',
+        product: 'Irrevocable Life Insurance Trust (ILIT) + Charitable Giving',
+        estValue: '$2M+ estate optimization · Tax savings est. $40K/yr',
+        aiScore: 89, trigger: 'Premium segment + $2M+ estate + estate plan active' }
+    },
+    estUpsellValue: '$820K', estCommission: '$41K',
+    nextAction: 'Annual Review meeting — Schedule Q3 2026',
+    aiRiskFlags: ['Retirement income gap at 65', 'AUM under-diversified', 'No formal trust'],
+    lifeEvents: ['Approaching retirement (est. 9 yrs)', 'Child college complete', 'Business sale in planning']
+  },
+  UC002: {
+    id: 'UC002', clientId: 3, name: 'Robert Chen', initials: 'RC', age: 45,
+    segment: 'High Value', city: 'Manhattan', score: 96,
+    tenureYears: 7, tenurePct: 70,
+    priority: 'high', priorityLabel: 'High Priority',
+    avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
+    existingPolicies: ['Whole Life $1M (2018)', 'VUL $800K (2020)'],
+    existingInvestments: ['VUL Sub-accounts $180K AUM'],
+    existingRetirement: [],
+    tracks: {
+      retirement: { status: 'missing', label: 'Not Started', color: '#ef4444',
+        gap: 'No retirement product in portfolio. Age 45 is prime accumulation phase for annuity or 401K supplement.',
+        product: 'Deferred Annuity (Tax-deferred accumulation)',
+        estValue: '$250K premium · Est. $3,200/mo at 65',
+        aiScore: 96, trigger: 'Age 45 + no retirement product + high income + 7yr tenure' },
+      investment: { status: 'gap',     label: 'Expand',     color: '#f59e0b',
+        gap: '$180K in VUL sub-accounts only. High income warrants broader diversified investment strategy.',
+        product: 'Managed Portfolio + ETF Strategy',
+        estValue: '+$300K new AUM · Est. $3,000/yr fee',
+        aiScore: 88, trigger: 'High income ($21K premium/yr) + existing sub-accounts' },
+      wealth: { status: 'present',     label: 'Active',     color: '#22c55e',
+        gap: null, product: 'Business Services + NQDC Plan (Active)',
+        estValue: 'Already active — monitor for expansion',
+        aiScore: 72, trigger: 'Active advisory — upsell to personal estate planning' }
+    },
+    estUpsellValue: '$650K', estCommission: '$32.5K',
+    nextAction: 'Follow-up call — present deferred annuity illustration',
+    aiRiskFlags: ['Zero retirement savings outside VUL', 'Business liquidity event possible'],
+    lifeEvents: ['Business growing (Deloitte client base)', 'Key-person policy review due 2026']
+  },
+  UC003: {
+    id: 'UC003', clientId: 1, name: 'James Whitfield', initials: 'JW', age: 52,
+    segment: 'High Value', city: 'New York', score: 92,
+    tenureYears: 7, tenurePct: 70,
+    priority: 'high', priorityLabel: 'High Priority',
+    avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
+    existingPolicies: ['Whole Life $500K (2019)', 'Term Life $750K (2021)', 'LTC $250K (2022)'],
+    existingInvestments: [],
+    existingRetirement: ['Deferred Annuity (illustrating only)'],
+    tracks: {
+      retirement: { status: 'gap',     label: 'Confirm',    color: '#f59e0b',
+        gap: 'Annuity illustration exists but not placed. Needs formal commitment before age 55 to maximize accumulation.',
+        product: 'Fixed Deferred Annuity — confirm & place',
+        estValue: '$200K premium · Est. $2,800/mo at 65',
+        aiScore: 93, trigger: 'Age 52 + illustrating only + 7yr tenure' },
+      investment: { status: 'missing', label: 'Not Started', color: '#ef4444',
+        gap: 'No investment products. Strong insurance base suggests readiness for investment diversification.',
+        product: 'Managed Fund Portfolio or ETF Core',
+        estValue: '$150K initial AUM · $1,500/yr fee',
+        aiScore: 85, trigger: 'Insurance-heavy portfolio + high premium spend + no investments' },
+      wealth: { status: 'gap',         label: 'Estate+',    color: '#f59e0b',
+        gap: 'Estate plan in progress. Should include irrevocable trust to protect $500K WL policy proceeds.',
+        product: 'Estate Planning Enhancement — ILIT + Will Update',
+        estValue: 'Tax savings est. $20K+, policy protection',
+        aiScore: 81, trigger: 'WL policy + LTC + estate plan active' }
+    },
+    estUpsellValue: '$480K', estCommission: '$24K',
+    nextAction: 'Annual Review Apr 15 — close annuity + present investment options',
+    aiRiskFlags: ['Annuity illustration stalling', 'No investment diversification', 'Term life renews 2041 — upsell to permanent'],
+    lifeEvents: ['Annual review scheduled Apr 2026', 'Term life mid-term review 2026']
+  },
+  UC004: {
+    id: 'UC004', clientId: 6, name: 'Maria Gonzalez', initials: 'MG', age: 48,
+    segment: 'High Value', city: 'New York', score: 91,
+    tenureYears: 9, tenurePct: 90,
+    priority: 'medium', priorityLabel: 'Medium Priority',
+    avatarGrad: 'linear-gradient(135deg,#059669,#34d399)',
+    existingPolicies: ['Universal Life $600K (2017)', 'Disability Insurance (2021)'],
+    existingInvestments: ['Fixed Annuity $95K AUM'],
+    existingRetirement: ['Immediate Annuity $95K — $520/mo income'],
+    tracks: {
+      retirement: { status: 'present', label: 'Active',     color: '#22c55e',
+        gap: null, product: 'Immediate Annuity (Active — $520/mo)',
+        estValue: 'Active — consider supplemental income annuity',
+        aiScore: 65, trigger: 'Retirement product active — monitor for enhancement' },
+      investment: { status: 'gap',     label: 'Diversify',  color: '#f59e0b',
+        gap: 'Only fixed annuity in portfolio. Opportunity to diversify into equities/managed account for growth alongside guaranteed income.',
+        product: 'Balanced Managed Account or ETF + Fixed',
+        estValue: '+$120K new AUM · $1,200/yr additional fee',
+        aiScore: 86, trigger: 'Fixed-only portfolio + $95K AUM base + age 48' },
+      wealth: { status: 'missing',     label: 'Not Started', color: '#ef4444',
+        gap: 'No wealth management or estate planning. High-value client with $600K UL policy and $95K annuity should have estate review.',
+        product: 'Wealth Management Introduction + Estate Review',
+        estValue: 'Est. $200K AUM advisory · $2,000/yr fee',
+        aiScore: 79, trigger: 'High Value segment + no advisory + 9yr tenure' }
+    },
+    estUpsellValue: '$320K', estCommission: '$16K',
+    nextAction: 'Proactive outreach — present wealth management intro meeting',
+    aiRiskFlags: ['Investment not diversified', 'No estate plan for HV client'],
+    lifeEvents: ['Children approaching college age', 'Business income growing']
+  },
+  UC005: {
+    id: 'UC005', clientId: 2, name: 'Patricia Nguyen', initials: 'PN', age: 38,
+    segment: 'Mid Market', city: 'Brooklyn', score: 87,
+    tenureYears: 6, tenurePct: 60,
+    priority: 'medium', priorityLabel: 'Medium Priority',
+    avatarGrad: 'linear-gradient(135deg,#d97706,#fbbf24)',
+    existingPolicies: ['Universal Life $400K (2020)', 'VUL $300K (2023)'],
+    existingInvestments: [],
+    existingRetirement: [],
+    tracks: {
+      retirement: { status: 'missing', label: 'Not Started', color: '#ef4444',
+        gap: 'No retirement products at age 38. Ideal window for deferred annuity accumulation over 25+ years.',
+        product: 'Deferred Annuity — 25-year accumulation',
+        estValue: '$100K premium · Est. $2,200/mo at 65',
+        aiScore: 88, trigger: 'Age 38 + 6yr tenure + no retirement product' },
+      investment: { status: 'missing', label: 'Not Started', color: '#ef4444',
+        gap: 'VUL has sub-account exposure but no standalone investment product. Growing income warrants diversification.',
+        product: 'Roth Annuity or Managed Portfolio',
+        estValue: '$80K initial · $800/yr fee',
+        aiScore: 79, trigger: 'VUL + growing income + no separate investment' },
+      wealth: { status: 'na',          label: 'N/A',         color: '#94a3b8',
+        gap: null, product: 'Not applicable — Mid Market segment',
+        estValue: 'Review at age 45+', aiScore: 30, trigger: 'Too early for wealth management' }
+    },
+    estUpsellValue: '$240K', estCommission: '$12K',
+    nextAction: 'Scheduled follow-up — retirement illustration appointment',
+    aiRiskFlags: ['No retirement savings at 38', 'Single income household risk'],
+    lifeEvents: ['Recently promoted — income increase', 'Planning second child']
+  },
+  UC006: {
+    id: 'UC006', clientId: 4, name: 'Sandra Williams', initials: 'SW', age: 61,
+    segment: 'Mid Market', city: 'Queens', score: 71,
+    tenureYears: 10, tenurePct: 100,
+    priority: 'medium', priorityLabel: 'Medium Priority',
+    avatarGrad: 'linear-gradient(135deg,#be185d,#f472b6)',
+    existingPolicies: ['Term Life $350K (2016 — Under Review)', 'LTC $180K (2020)'],
+    existingInvestments: [],
+    existingRetirement: ['Income Annuity $120K (illustrating only)'],
+    tracks: {
+      retirement: { status: 'gap',     label: 'Confirm',    color: '#f59e0b',
+        gap: 'Immediate annuity illustration exists. Age 61 — urgent to place before retirement (est. 4 yrs). $680/mo lifetime income illustration pending.',
+        product: 'Immediate Income Annuity — $120K premium placement',
+        estValue: '$680/mo lifetime income from $120K',
+        aiScore: 91, trigger: 'Age 61 + 10yr tenure + annuity illustrating + 4 yrs to retirement' },
+      investment: { status: 'missing', label: 'Not Started', color: '#ef4444',
+        gap: 'No investment products. Conservative Bond or Fixed Annuity ladder appropriate for near-retirement client.',
+        product: 'Conservative Bond Ladder or Fixed Annuity',
+        estValue: '$80K fixed allocation · $800/yr',
+        aiScore: 70, trigger: 'No investments at age 61 + approaching retirement' },
+      wealth: { status: 'na',          label: 'N/A',         color: '#94a3b8',
+        gap: null, product: 'Not applicable — Mid Market segment',
+        estValue: 'Focus on retirement income first', aiScore: 20, trigger: 'Mid market — retirement priority' }
+    },
+    estUpsellValue: '$200K', estCommission: '$10K',
+    nextAction: 'URGENT — call within 7 days to close annuity illustration',
+    aiRiskFlags: ['Annuity illustration stalling at age 61', 'Term life needs conversion before expiry', 'No investments near retirement'],
+    lifeEvents: ['Near retirement (~4 yrs)', 'Term life review due 2026', 'Grandchildren planning']
+  },
+  UC007: {
+    id: 'UC007', clientId: 5, name: 'David Thompson', initials: 'DT', age: 33,
+    segment: 'Emerging', city: 'Bronx', score: 78,
+    tenureYears: 3, tenurePct: 30,
+    priority: 'low', priorityLabel: 'Watch List',
+    avatarGrad: 'linear-gradient(135deg,#64748b,#94a3b8)',
+    existingPolicies: ['Term Life $300K (2023)'],
+    existingInvestments: [],
+    existingRetirement: [],
+    tracks: {
+      retirement: { status: 'missing', label: 'Not Started', color: '#ef4444',
+        gap: 'No retirement product. At 33, a small Roth annuity contribution could compound significantly over 30 years.',
+        product: 'Starter Deferred Annuity or Roth Strategy',
+        estValue: '$50K over time · Long-term accumulation',
+        aiScore: 74, trigger: 'Age 33 + emerging + 3yr tenure + income growing' },
+      investment: { status: 'na',      label: 'Future',      color: '#94a3b8',
+        gap: null, product: 'Introduce at 5yr tenure milestone',
+        estValue: 'Review at year 5', aiScore: 40, trigger: 'Too early — watch list' },
+      wealth: { status: 'na',          label: 'Future',      color: '#94a3b8',
+        gap: null, product: 'Not applicable at this stage',
+        estValue: 'Review at 10yr tenure', aiScore: 10, trigger: 'Emerging segment' }
+    },
+    estUpsellValue: '$80K', estCommission: '$4K',
+    nextAction: 'Annual check-in — introduce retirement savings concept',
+    aiRiskFlags: ['Single insurance product only'],
+    lifeEvents: ['Income growing', 'Planning home purchase', 'Recently married']
+  },
+  UC008: {
+    id: 'UC008', clientId: 7, name: 'Kevin Park', initials: 'KP', age: 29,
+    segment: 'Emerging', city: 'Jersey City', score: 65,
+    tenureYears: 0, tenurePct: 10,
+    priority: 'low', priorityLabel: 'Watch List',
+    avatarGrad: 'linear-gradient(135deg,#0f766e,#2dd4bf)',
+    existingPolicies: ['Term Life $250K — Pending (2026)'],
+    existingInvestments: [],
+    existingRetirement: [],
+    tracks: {
+      retirement: { status: 'missing', label: 'Not Started', color: '#ef4444',
+        gap: 'Policy not yet active. Focus on policy placement first. Retirement conversation at 1yr milestone.',
+        product: 'IRA Supplement or Starter Annuity (after 1yr)',
+        estValue: 'TBD — pending policy placement',
+        aiScore: 55, trigger: 'Age 29 + new client + pending policy' },
+      investment: { status: 'na',      label: 'Future',      color: '#94a3b8',
+        gap: null, product: 'Introduce at 2yr tenure milestone',
+        estValue: 'Future opportunity', aiScore: 20, trigger: 'Too early' },
+      wealth: { status: 'na',          label: 'Future',      color: '#94a3b8',
+        gap: null, product: 'Not applicable',
+        estValue: 'Future opportunity', aiScore: 5, trigger: 'Emerging segment' }
+    },
+    estUpsellValue: '$50K', estCommission: '$2.5K',
+    nextAction: 'Ensure policy placement — schedule 30-day welcome call',
+    aiRiskFlags: ['Policy still pending — placement at risk'],
+    lifeEvents: ['New tech job — income growth expected', 'Engaged (upcoming life event)']
+  }
+};
+
+let _currentUpsellId   = null;
+let _currentUpsellTab  = 'overview';
+let _upsellFilter      = 'all';
+
+// ── Filter & Sort ──────────────────────────────────────────────
+
+function setUpsellFilter(btn, filter) {
+  _upsellFilter = filter;
+  document.querySelectorAll('.upsell-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterUpsellCards();
+}
+
+function filterUpsellCards() {
+  const q      = (document.getElementById('upsell-search')?.value || '').toLowerCase();
+  const cards  = document.querySelectorAll('#upsell-grid .upsell-card');
+  let visible  = 0;
+  cards.forEach(card => {
+    const name   = (card.querySelector('.upsell-client-name')?.textContent || '').toLowerCase();
+    const tracks = card.dataset.tracks || '';
+    const prio   = card.dataset.priority || '';
+    const matchQ = !q || name.includes(q);
+    const matchF =
+      _upsellFilter === 'all'        ? true :
+      _upsellFilter === 'high'       ? prio === 'high' :
+      tracks.includes(_upsellFilter);
+    const show = matchQ && matchF;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const el = document.getElementById('ukpi-total');
+  if (el) el.textContent = visible;
+}
+
+function sortUpsellCards(by) {
+  const grid  = document.getElementById('upsell-grid');
+  if (!grid) return;
+  const cards = [...grid.querySelectorAll('.upsell-card')];
+  const order = { high: 0, medium: 1, low: 2 };
+  const vals  = {
+    UC001: { value: 820, tenure: 10, score: 98 },
+    UC002: { value: 650, tenure: 7,  score: 96 },
+    UC003: { value: 480, tenure: 7,  score: 92 },
+    UC004: { value: 320, tenure: 9,  score: 91 },
+    UC005: { value: 240, tenure: 6,  score: 87 },
+    UC006: { value: 200, tenure: 10, score: 71 },
+    UC007: { value: 80,  tenure: 3,  score: 78 },
+    UC008: { value: 50,  tenure: 0,  score: 65 }
+  };
+  cards.sort((a, b) => {
+    const idA = a.dataset.id, idB = b.dataset.id;
+    if (by === 'priority') return order[a.dataset.priority] - order[b.dataset.priority];
+    if (by === 'value')    return (vals[idB]?.value  || 0) - (vals[idA]?.value  || 0);
+    if (by === 'tenure')   return (vals[idB]?.tenure || 0) - (vals[idA]?.tenure || 0);
+    if (by === 'score')    return (vals[idB]?.score  || 0) - (vals[idA]?.score  || 0);
+    return 0;
+  });
+  cards.forEach(c => grid.appendChild(c));
+}
+
+// ── Detail Modal ───────────────────────────────────────────────
+
+function openUpsellModal(id) {
+  const u = upsellData[id];
+  if (!u) return;
+  _currentUpsellId  = id;
+  _currentUpsellTab = 'overview';
+  const overlay = document.getElementById('upsell-modal-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  renderUpsellModalHeader(u);
+  renderUpsellTab('overview');
+}
+
+function closeUpsellModal() {
+  const overlay = document.getElementById('upsell-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function renderUpsellModalHeader(u) {
+  const header = document.getElementById('upsell-modal-header');
+  if (!header) return;
+  const prioColors = { high: '#ef4444', medium: '#f59e0b', low: '#64748b' };
+  const prioColor  = prioColors[u.priority] || '#64748b';
+  header.innerHTML = `
+    <div class="um-header-inner">
+      <div class="um-avatar" style="background:${u.avatarGrad}">${u.initials}</div>
+      <div class="um-header-info">
+        <div class="um-client-name">${u.name}</div>
+        <div class="um-client-meta">Age ${u.age} · ${u.segment} · ${u.city}</div>
+        <div class="um-meta-row">
+          <span class="um-prio-badge" style="background:${prioColor}18;color:${prioColor};border:1px solid ${prioColor}40">
+            <i class="fas fa-fire"></i> ${u.priorityLabel}</span>
+          <span class="um-tenure-pill"><i class="fas fa-clock"></i> ${u.tenureYears} yr${u.tenureYears !== 1 ? 's' : ''} tenure</span>
+          <span class="um-score-pill"><i class="fas fa-star"></i> Score ${u.score}</span>
+        </div>
+      </div>
+      <div class="um-value-block">
+        <div class="um-val-num">${u.estUpsellValue}</div>
+        <div class="um-val-lbl">Est. Upsell Value</div>
+        <div class="um-comm-num">${u.estCommission}</div>
+        <div class="um-comm-lbl">Est. Commission</div>
+      </div>
+    </div>
+    <button class="upsell-modal-close" onclick="closeUpsellModal()"><i class="fas fa-times"></i></button>
+  `;
+}
+
+function switchUpsellTab(tab) {
+  _currentUpsellTab = tab;
+  document.querySelectorAll('.upsell-tab').forEach(t => {
+    const tname = t.textContent.toLowerCase().replace(/[^a-z-]/g,'');
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${tab}'`));
+  });
+  renderUpsellTab(tab);
+}
+
+function renderUpsellTab(tab) {
+  const body = document.getElementById('upsell-modal-body');
+  if (!body) return;
+  const u = upsellData[_currentUpsellId];
+  if (!u) return;
+
+  if (tab === 'overview') {
+    const existingProds = [
+      ...u.existingPolicies.map(p  => `<span class="um-prod-chip ins"><i class="fas fa-shield-alt"></i> ${p}</span>`),
+      ...u.existingInvestments.map(i => `<span class="um-prod-chip inv"><i class="fas fa-chart-pie"></i> ${i}</span>`),
+      ...u.existingRetirement.map(r  => `<span class="um-prod-chip ret"><i class="fas fa-umbrella"></i> ${r}</span>`)
+    ].join('');
+
+    const trackRows = Object.entries(u.tracks).map(([key, t]) => {
+      const icons = { retirement: 'fa-umbrella', investment: 'fa-chart-pie', wealth: 'fa-gem' };
+      const statusClass = { missing: 'missing', gap: 'gap', present: 'present', na: 'na' }[t.status] || 'na';
+      return `
+        <div class="um-track-row">
+          <div class="um-track-label"><i class="fas ${icons[key] || 'fa-circle'}"></i> ${key.charAt(0).toUpperCase()+key.slice(1)}</div>
+          <div class="um-track-status ${statusClass}">${t.label}</div>
+          <div class="um-track-score">AI Score <strong>${t.aiScore}</strong></div>
+          <div class="um-track-trigger">${t.trigger}</div>
+        </div>`;
+    }).join('');
+
+    const flags = u.aiRiskFlags.map(f => `<li><i class="fas fa-exclamation-triangle"></i> ${f}</li>`).join('');
+    const events = u.lifeEvents.map(e => `<li><i class="fas fa-calendar-star"></i> ${e}</li>`).join('');
+
+    body.innerHTML = `
+      <div class="um-overview">
+        <div class="um-section">
+          <div class="um-section-title"><i class="fas fa-folder-open"></i> Existing Products</div>
+          <div class="um-prod-chips">${existingProds || '<span class="um-empty">No products yet</span>'}</div>
+        </div>
+        <div class="um-section">
+          <div class="um-section-title"><i class="fas fa-arrow-trend-up"></i> Upsell Track Summary</div>
+          <div class="um-tracks-table">${trackRows}</div>
+        </div>
+        <div class="um-two-col">
+          <div class="um-section">
+            <div class="um-section-title"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> AI Risk Flags</div>
+            <ul class="um-flag-list">${flags}</ul>
+          </div>
+          <div class="um-section">
+            <div class="um-section-title"><i class="fas fa-life-ring"></i> Life Events &amp; Triggers</div>
+            <ul class="um-event-list">${events}</ul>
+          </div>
+        </div>
+        <div class="um-section um-next-action">
+          <div class="um-section-title"><i class="fas fa-bolt" style="color:#003087"></i> Recommended Next Action</div>
+          <div class="um-action-box">${u.nextAction}</div>
+        </div>
+      </div>`;
+
+  } else if (tab === 'retirement' || tab === 'investment' || tab === 'wealth') {
+    const t = u.tracks[tab];
+    const icons = { retirement: 'fa-umbrella', investment: 'fa-chart-pie', wealth: 'fa-gem' };
+    const colors = { retirement: '#7c3aed', investment: '#0891b2', wealth: '#0d9488' };
+    const color = colors[tab];
+    const statusColors = { missing: '#ef4444', gap: '#f59e0b', present: '#22c55e', na: '#94a3b8' };
+    const sColor = statusColors[t.status] || '#94a3b8';
+
+    if (t.status === 'na' || t.status === 'present' && !t.gap) {
+      body.innerHTML = `
+        <div class="um-track-detail">
+          <div class="um-track-detail-header" style="background:${color}12;border-left:4px solid ${color}">
+            <i class="fas ${icons[tab]}" style="color:${color}"></i>
+            <span style="color:${color}">${tab.charAt(0).toUpperCase()+tab.slice(1)}</span>
+            <span class="um-status-badge" style="background:${sColor}18;color:${sColor}">${t.label}</span>
+          </div>
+          <div class="um-no-action">
+            <i class="fas fa-check-circle" style="color:#22c55e;font-size:2rem"></i>
+            <p>${t.status === 'present' ? 'This track is already active. Monitor for enhancement opportunities.' : t.product}</p>
+            <p class="um-est-val">${t.estValue}</p>
+          </div>
+        </div>`;
+    } else {
+      body.innerHTML = `
+        <div class="um-track-detail">
+          <div class="um-track-detail-header" style="background:${color}12;border-left:4px solid ${color}">
+            <i class="fas ${icons[tab]}" style="color:${color}"></i>
+            <span style="color:${color}">${tab.charAt(0).toUpperCase()+tab.slice(1)}</span>
+            <span class="um-status-badge" style="background:${sColor}18;color:${sColor}">${t.label}</span>
+            <span class="um-ai-score-badge">AI Score <strong>${t.aiScore}</strong></span>
+          </div>
+          <div class="um-gap-block">
+            <div class="um-gap-label"><i class="fas fa-magnifying-glass"></i> Gap Analysis</div>
+            <p class="um-gap-text">${t.gap}</p>
+          </div>
+          <div class="um-recommend-block">
+            <div class="um-recommend-label"><i class="fas fa-lightbulb"></i> Recommended Product</div>
+            <div class="um-recommend-product">${t.product}</div>
+            <div class="um-recommend-value"><i class="fas fa-dollar-sign"></i> ${t.estValue}</div>
+          </div>
+          <div class="um-trigger-block">
+            <div class="um-trigger-label"><i class="fas fa-brain"></i> AI Trigger Signal</div>
+            <div class="um-trigger-text">${t.trigger}</div>
+          </div>
+          <div class="um-track-actions">
+            <button class="btn btn-outline" onclick="closeUpsellModal()"><i class="fas fa-file-alt"></i> View Client File</button>
+            <button class="btn btn-ai" onclick="openUpsellBriefModal('${u.id}')"><i class="fas fa-paper-plane"></i> Generate ${tab.charAt(0).toUpperCase()+tab.slice(1)} Outreach Brief</button>
+          </div>
+        </div>`;
+    }
+
+  } else if (tab === 'ai-brief') {
+    renderUpsellAIBriefTab(u);
+  }
+}
+
+function renderUpsellAIBriefTab(u) {
+  const body = document.getElementById('upsell-modal-body');
+  if (!body) return;
+  const gaps = Object.entries(u.tracks)
+    .filter(([,t]) => t.status === 'missing' || t.status === 'gap')
+    .map(([k,t]) => `<li><strong>${k.charAt(0).toUpperCase()+k.slice(1)}:</strong> ${t.product} — ${t.estValue}</li>`)
+    .join('');
+
+  body.innerHTML = `
+    <div class="um-ai-brief-preview">
+      <div class="um-ai-brief-header">
+        <i class="fas fa-robot"></i>
+        <strong>AI-Generated Outreach Brief</strong>
+        <span class="um-ai-badge">AI</span>
+      </div>
+      <div class="um-ai-brief-content" id="um-ai-brief-content">
+        <p><strong>Subject:</strong> Personalized Financial Review — ${u.name}</p>
+        <p><strong>Opening:</strong> Dear ${u.name.split(' ')[0]}, as a valued ${u.segment} client with ${u.tenureYears} year${u.tenureYears!==1?'s':''} of partnership with New York Life, 
+        I wanted to reach out with some personalized insights based on your current portfolio.</p>
+        <p><strong>Upsell Opportunities Identified:</strong></p>
+        <ul>${gaps}</ul>
+        <p><strong>Why Now:</strong> ${u.lifeEvents.join(' · ')}</p>
+        <p><strong>Next Step:</strong> ${u.nextAction}</p>
+        <p><strong>Value Summary:</strong> Estimated additional value: <strong>${u.estUpsellValue}</strong></p>
+      </div>
+      <div class="um-ai-brief-actions">
+        <button class="btn btn-outline" onclick="copyUpsellBrief()"><i class="fas fa-copy"></i> Copy</button>
+        <button class="btn btn-primary" onclick="scheduleUpsellMeeting()"><i class="fas fa-calendar-plus"></i> Schedule Meeting</button>
+      </div>
+    </div>`;
+}
+
+// ── AI Brief Modal ─────────────────────────────────────────────
+
+function openUpsellBriefModal(id) {
+  if (id === 'all') {
+    openUpsellBriefModalAll();
+    return;
+  }
+  const u = upsellData[id];
+  if (!u) return;
+  _currentUpsellId = id;
+  const overlay = document.getElementById('upsell-brief-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const gaps = Object.entries(u.tracks)
+    .filter(([,t]) => t.status === 'missing' || t.status === 'gap')
+    .map(([k,t]) => `<li><i class="fas fa-arrow-right"></i> <strong>${k.charAt(0).toUpperCase()+k.slice(1)}:</strong> ${t.product}</li>`)
+    .join('');
+
+  const flagsHtml = u.aiRiskFlags.map(f => `<span class="ub-flag"><i class="fas fa-exclamation-circle"></i> ${f}</span>`).join('');
+
+  const body = document.getElementById('upsell-brief-body');
+  if (body) body.innerHTML = `
+    <div class="ub-client-row">
+      <div class="ub-avatar" style="background:${u.avatarGrad}">${u.initials}</div>
+      <div>
+        <div class="ub-client-name">${u.name}</div>
+        <div class="ub-client-meta">Age ${u.age} · ${u.segment} · ${u.tenureYears}-year client · Score ${u.score}</div>
+      </div>
+      <div class="ub-value-pill">${u.estUpsellValue} potential</div>
+    </div>
+    <div class="ub-brief-box" id="ub-brief-text">
+      <p class="ub-subject"><strong>Subject:</strong> Your Personalized Financial Growth Review — ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</p>
+      <p>Dear <strong>${u.name.split(' ')[0]}</strong>,</p>
+      <p>As your NYL agent, I've completed a portfolio review for you as a ${u.tenureYears}-year client in the ${u.segment} segment. Based on your current coverage and life stage, I've identified <strong>${Object.values(u.tracks).filter(t=>t.status==='missing'||t.status==='gap').length} high-value opportunity area${Object.values(u.tracks).filter(t=>t.status==='missing'||t.status==='gap').length!==1?'s':''}</strong>:</p>
+      <ul>${gaps}</ul>
+      <p><strong>Why this matters now:</strong> ${u.lifeEvents.slice(0,2).join(' and ')} make this an ideal time to review your financial strategy.</p>
+      <p><strong>Recommended next step:</strong> ${u.nextAction}</p>
+      <p>I'd love to schedule a 30-minute call to walk through these opportunities. Would you be available this week?</p>
+      <p>Warm regards,<br><strong>Your NYL Agent</strong></p>
+    </div>
+    <div class="ub-flags">${flagsHtml}</div>
+    <div class="ub-est-row">
+      <div class="ub-est-item"><span class="ub-est-val">${u.estUpsellValue}</span><span class="ub-est-lbl">Est. Value</span></div>
+      <div class="ub-est-item"><span class="ub-est-val">${u.estCommission}</span><span class="ub-est-lbl">Est. Commission</span></div>
+      <div class="ub-est-item"><span class="ub-est-val">${u.score}</span><span class="ub-est-lbl">Client Score</span></div>
+    </div>`;
+}
+
+function openUpsellBriefModalAll() {
+  const overlay = document.getElementById('upsell-brief-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const highPrio = Object.values(upsellData).filter(u => u.priority === 'high');
+  const rows = highPrio.map(u => `
+    <div class="ub-bulk-row">
+      <div class="ub-avatar sm" style="background:${u.avatarGrad}">${u.initials}</div>
+      <div class="ub-bulk-info">
+        <strong>${u.name}</strong> · ${u.segment} · ${u.tenureYears}-yr tenure
+      </div>
+      <div class="ub-bulk-val">${u.estUpsellValue}</div>
+      <button class="ub-bulk-btn" onclick="openUpsellBriefModal('${u.id}')">Brief</button>
+    </div>`).join('');
+
+  const body = document.getElementById('upsell-brief-body');
+  if (body) body.innerHTML = `
+    <div class="ub-bulk-header">
+      <i class="fas fa-robot"></i>
+      <strong>Bulk Outreach — ${highPrio.length} High-Priority Clients</strong>
+    </div>
+    <p style="color:#64748b;font-size:13px;margin:8px 0 16px">Select a client below to generate their personalized outreach brief:</p>
+    <div class="ub-bulk-list">${rows}</div>
+    <div class="ub-est-row" style="margin-top:16px">
+      <div class="ub-est-item"><span class="ub-est-val">$1.95M</span><span class="ub-est-lbl">Combined Value</span></div>
+      <div class="ub-est-item"><span class="ub-est-val">$97.5K</span><span class="ub-est-lbl">Combined Commission</span></div>
+      <div class="ub-est-item"><span class="ub-est-val">3</span><span class="ub-est-lbl">High-Priority Clients</span></div>
+    </div>`;
+}
+
+function closeUpsellBriefModal() {
+  const overlay = document.getElementById('upsell-brief-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function copyUpsellBrief() {
+  const el = document.getElementById('ub-brief-text');
+  if (!el) return;
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Brief copied to clipboard', 'success');
+  }).catch(() => {
+    showToast('Copy failed — try selecting text manually', 'error');
+  });
+}
+
+function scheduleUpsellMeeting() {
+  const u = upsellData[_currentUpsellId];
+  if (!u) return;
+  closeUpsellBriefModal();
+  closeUpsellModal();
+  showToast(`Meeting request created for ${u.name} — added to Calendar`, 'success');
+  setTimeout(() => navigateTo('calendar'), 1200);
+}
+
+function runUpsellAIScan() {
+  showToast('AI scanning all 247 clients for upsell signals…', 'info');
+  setTimeout(() => {
+    showToast('AI Scan complete — 8 new upsell opportunities flagged', 'success');
+  }, 2000);
+}
+
+function exportUpsellList() {
+  showToast('Exporting upsell list to CSV…', 'info');
+  setTimeout(() => showToast('Export ready — check Downloads', 'success'), 1000);
+}
+
+
+// ─── Render upsell cards into the grid ───────────────────────────────────────
+function renderUpsellCards(filter = 'all', sortKey = 'priority') {
+  const grid = document.getElementById('upsell-grid');
+  if (!grid) return;
+
+  let items = Object.values(upsellData);
+
+  // Filter
+  if (filter !== 'all') {
+    items = items.filter(u => {
+      const t = u.tracks[filter];
+      return t && (t.status === 'missing' || t.status === 'gap');
+    });
+  }
+
+  // Sort
+  const priorityOrder = { high: 0, medium: 1, low: 2 };
+  if (sortKey === 'priority') {
+    items.sort((a, b) => (priorityOrder[a.priority] ?? 9) - (priorityOrder[b.priority] ?? 9));
+  } else if (sortKey === 'score') {
+    items.sort((a, b) => b.score - a.score);
+  } else if (sortKey === 'tenure') {
+    items.sort((a, b) => b.tenureYears - a.tenureYears);
+  } else if (sortKey === 'value') {
+    const parseVal = v => parseFloat((v || '$0').replace(/[^0-9.]/g, '')) || 0;
+    items.sort((a, b) => parseVal(b.estUpsellValue) - parseVal(a.estUpsellValue));
+  }
+
+  if (items.length === 0) {
+    grid.innerHTML = `<div class="upsell-empty"><i class="fas fa-check-circle"></i><p>No upsell opportunities match this filter.</p></div>`;
+    return;
+  }
+
+  const trackIcons = { retirement: 'fa-umbrella', investment: 'fa-chart-pie', wealth: 'fa-gem' };
+  const trackLabels = { retirement: 'Retirement', investment: 'Investments', wealth: 'Wealth Mgmt' };
+
+  grid.innerHTML = items.map(u => {
+    // Track pills
+    const trackPills = ['retirement', 'investment', 'wealth'].map(tk => {
+      const t = u.tracks[tk];
+      if (!t) return '';
+      const statusClass = t.status === 'present' ? 'present' : t.status === 'missing' ? 'missing' : 'gap';
+      return `<span class="utk-pill utk-${statusClass}" title="${t.gap || t.product}">
+        <i class="fas ${trackIcons[tk]}"></i> ${trackLabels[tk]}
+        <span class="utk-pill-lbl">${t.label}</span>
+      </span>`;
+    }).join('');
+
+    // Tenure bar
+    const tenurePct = Math.min(u.tenurePct, 100);
+    const tenureColor = tenurePct >= 80 ? '#22c55e' : tenurePct >= 50 ? '#f59e0b' : '#94a3b8';
+
+    // Priority badge
+    const prioColor = u.priority === 'high' ? '#ef4444' : u.priority === 'medium' ? '#f59e0b' : '#22c55e';
+
+    // AI risk flags (top 2)
+    const flagsHtml = (u.aiRiskFlags || []).slice(0, 2).map(f =>
+      `<span class="uc-flag"><i class="fas fa-exclamation-triangle"></i> ${f}</span>`
+    ).join('');
+
+    // Life events (top 1)
+    const lifeEvent = (u.lifeEvents || [])[0]
+      ? `<div class="uc-life-event"><i class="fas fa-calendar-star"></i> ${u.lifeEvents[0]}</div>`
+      : '';
+
+    return `
+    <div class="upsell-card uc-prio-${u.priority}" data-id="${u.id}" data-filter="${Object.keys(u.tracks).filter(tk => u.tracks[tk].status !== 'present').join(' ')}" onclick="openUpsellModal('${u.id}')">
+      <div class="uc-top">
+        <div class="uc-avatar" style="background:${u.avatarGrad}">${u.initials}</div>
+        <div class="uc-info">
+          <div class="uc-name">${u.name}</div>
+          <div class="uc-meta">${u.segment} · ${u.city} · Age ${u.age}</div>
+        </div>
+        <div class="uc-score-badge" style="border-color:${prioColor};color:${prioColor}">${u.score}</div>
+      </div>
+
+      <div class="uc-prio-row">
+        <span class="uc-prio-badge" style="background:${prioColor}18;color:${prioColor};border:1px solid ${prioColor}40">
+          <i class="fas fa-flag"></i> ${u.priorityLabel}
+        </span>
+        <span class="uc-tenure-lbl"><i class="fas fa-clock"></i> ${u.tenureYears}-yr client</span>
+      </div>
+
+      <div class="uc-tenure-bar-wrap">
+        <div class="uc-tenure-bar" style="width:${tenurePct}%;background:${tenureColor}"></div>
+      </div>
+
+      <div class="uc-tracks">${trackPills}</div>
+
+      ${lifeEvent}
+
+      <div class="uc-flags">${flagsHtml}</div>
+
+      <div class="uc-footer">
+        <div class="uc-est-val">
+          <span class="uc-val-num">${u.estUpsellValue}</span>
+          <span class="uc-val-lbl">Est. Upsell Value</span>
+        </div>
+        <div class="uc-est-comm">
+          <span class="uc-comm-num">${u.estCommission}</span>
+          <span class="uc-comm-lbl">Commission</span>
+        </div>
+        <button class="uc-brief-btn" onclick="event.stopPropagation();openUpsellBriefModal('${u.id}')">
+          <i class="fas fa-paper-plane"></i> Brief
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Init page (called by navigateTo) ────────────────────────────────────────
+function initUpsellPage() {
+  // Small delay so the DOM clone settles
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      renderUpsellCards('all', 'priority');
+      // Update KPI counts dynamically
+      const total = Object.keys(upsellData).length;
+      const retCount  = Object.values(upsellData).filter(u => u.tracks.retirement && u.tracks.retirement.status !== 'present').length;
+      const invCount  = Object.values(upsellData).filter(u => u.tracks.investment && u.tracks.investment.status !== 'present').length;
+      const wlthCount = Object.values(upsellData).filter(u => u.tracks.wealth     && u.tracks.wealth.status     !== 'present').length;
+      const totalEl = document.getElementById('ukpi-total');
+      if (totalEl) totalEl.textContent = total;
+    }, 80);
+  });
+}
+
+console.log('Upsell Track module loaded — upsellData(' + Object.keys(upsellData).length + ' clients), openUpsellModal, openUpsellBriefModal, filterUpsellCards, sortUpsellCards, runUpsellAIScan all ready');
+
+/* ═══════════════════════════════════════════════════════════════
+   POLICY ALERTS MODULE
+   Data + render + filter + detail panel + renewal timeline
+   ═══════════════════════════════════════════════════════════════ */
+
+const alertsData = [
+  {
+    id: 'AL001', type: 'lapse', severity: 'urgent',
+    client: 'Patricia Nguyen', initials: 'PN', clientId: 2,
+    avatarGrad: 'linear-gradient(135deg,#2563eb,#7c3aed)',
+    policy: 'P-100301 · Universal Life $400K', premium: '$5,800/yr',
+    trigger: 'UL Under-funded — policy lapse predicted Jun 20, 2026',
+    daysLeft: 44, riskScore: 87, riskLabel: 'Critical',
+    aiRec: 'Immediate premium top-up required. Schedule call within 48 hours. Present paid-up option or reduce face value to $300K to sustain policy.',
+    actions: ['Call Now', 'Send Email', 'Schedule Meeting', 'Adjust Coverage'],
+    renewalDate: null, lapseDate: 'Jun 20, 2026',
+    tags: ['lapse', 'urgent']
+  },
+  {
+    id: 'AL002', type: 'lapse', severity: 'urgent',
+    client: 'Sandra Williams', initials: 'SW', clientId: 4,
+    avatarGrad: 'linear-gradient(135deg,#dc2626,#f59e0b)',
+    policy: 'P-100304 · Term Life $350K', premium: '$2,800/yr',
+    trigger: 'Term policy expires Sep 2026 — no renewal/conversion action taken',
+    daysLeft: 153, riskScore: 79, riskLabel: 'High',
+    aiRec: 'Present permanent conversion options (WL or UL) before Sep. Client is 61 — this may be last affordable conversion window. Urgency: start now.',
+    actions: ['Schedule Conversion Meeting', 'Send Illustration', 'Call Now'],
+    renewalDate: 'Sep 15, 2026', lapseDate: null,
+    tags: ['lapse', 'renewal', 'urgent']
+  },
+  {
+    id: 'AL003', type: 'renewal', severity: 'high',
+    client: 'James Whitfield', initials: 'JW', clientId: 1,
+    avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
+    policy: 'P-100303 · Term Life $750K', premium: '$3,200/yr',
+    trigger: 'Annual renewal due — Jul 2026. Premium increase expected +8%.',
+    daysLeft: 61, riskScore: 52, riskLabel: 'Medium',
+    aiRec: 'Client is 52 — evaluate converting to permanent coverage before renewal. Cash value accumulation argument is strong here. Annual review Apr 15 is ideal entry point.',
+    actions: ['Add to Annual Review', 'Send Renewal Notice', 'Schedule Call'],
+    renewalDate: 'Jul 1, 2026', lapseDate: null,
+    tags: ['renewal', 'high']
+  },
+  {
+    id: 'AL004', type: 'at-risk', severity: 'high',
+    client: 'Kevin Park', initials: 'KP', clientId: 7,
+    avatarGrad: 'linear-gradient(135deg,#059669,#10b981)',
+    policy: 'P-100307 · Term Life $250K (Pending)', premium: '$1,800/yr',
+    trigger: 'Policy pending 12+ days — no contact. Score dropped from 70 → 44.',
+    daysLeft: null, riskScore: 61, riskLabel: 'Medium',
+    aiRec: 'Client has gone dark after application. Risk of withdrawal. Personal phone call recommended today. Check if underwriting question is blocking — offer agent assistance.',
+    actions: ['Call Now', 'Check UW Status', 'Send Follow-up Email'],
+    renewalDate: null, lapseDate: null,
+    tags: ['at-risk', 'high']
+  },
+  {
+    id: 'AL005', type: 'at-risk', severity: 'medium',
+    client: 'David Thompson', initials: 'DT', clientId: 5,
+    avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
+    policy: 'P-100305 · Term Life $300K', premium: '$2,400/yr',
+    trigger: 'Single-policy client, age 33 — severely under-insured. No disability or retirement coverage.',
+    daysLeft: null, riskScore: 44, riskLabel: 'Medium',
+    aiRec: 'Strong upsell opportunity disguised as risk. Present DI quote ($3K/yr) + deferred annuity illustration. Life event: recently married per social signal.',
+    actions: ['Present DI Quote', 'Schedule Needs Review', 'Send Life Event Outreach'],
+    renewalDate: null, lapseDate: null,
+    tags: ['at-risk', 'medium', 'coverage']
+  },
+  {
+    id: 'AL006', type: 'renewal', severity: 'high',
+    client: 'Maria Gonzalez', initials: 'MG', clientId: 6,
+    avatarGrad: 'linear-gradient(135deg,#059669,#0891b2)',
+    policy: 'P-100306 · Universal Life $600K', premium: '$5,600/yr',
+    trigger: 'UL anniversary review due — May 2026. Sub-account performance review needed.',
+    daysLeft: 24, riskScore: 38, riskLabel: 'Low',
+    aiRec: 'Annual policy review required per contract. Present sub-account rebalancing options. Investment addition of $50K possible — client has capacity per income data.',
+    actions: ['Schedule Policy Review', 'Prepare Illustration', 'Send Anniversary Note'],
+    renewalDate: 'May 30, 2026', lapseDate: null,
+    tags: ['renewal', 'high']
+  },
+  {
+    id: 'AL007', type: 'renewal', severity: 'normal',
+    client: 'Robert Chen', initials: 'RC', clientId: 3,
+    avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
+    policy: 'P-100303B · Key-Person Term $2M', premium: '$8,400/yr',
+    trigger: 'Business policy annual review — Aug 2026. Buy-sell agreement update required.',
+    daysLeft: 86, riskScore: 28, riskLabel: 'Low',
+    aiRec: 'Low lapse risk but high-value business review opportunity. Buy-sell valuation is outdated (2021). New business revenue warrants increased coverage.',
+    actions: ['Schedule Business Review', 'Update Buy-Sell Valuation', 'Send Summary'],
+    renewalDate: 'Aug 10, 2026', lapseDate: null,
+    tags: ['renewal', 'normal']
+  },
+  {
+    id: 'AL008', type: 'coverage', severity: 'medium',
+    client: 'Linda Morrison', initials: 'LM', clientId: 8,
+    avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
+    policy: 'Portfolio Review — All 5 Policies', premium: '$32,000/yr',
+    trigger: 'Estate plan requires trust amendment — $2M WL policy not in ILIT structure.',
+    daysLeft: null, riskScore: 22, riskLabel: 'Low',
+    aiRec: 'Transfer WL policy to ILIT to protect $2M death benefit from estate tax. Estimated savings $40K/yr. Engage estate attorney. Charitable giving strategy also recommended.',
+    actions: ['Schedule Estate Review', 'Engage Attorney', 'ILIT Illustration'],
+    renewalDate: null, lapseDate: null,
+    tags: ['coverage', 'medium']
+  },
+  {
+    id: 'AL009', type: 'renewal', severity: 'urgent',
+    client: 'Patricia Nguyen', initials: 'PN', clientId: 2,
+    avatarGrad: 'linear-gradient(135deg,#2563eb,#7c3aed)',
+    policy: 'P-100302 · Variable Universal Life $300K', premium: '$2,800/yr',
+    trigger: 'VUL renewal with rider lapse risk — long-term care rider premium past due',
+    daysLeft: 18, riskScore: 71, riskLabel: 'High',
+    aiRec: 'LTC rider premium is 18 days past due. If not paid, rider terminates — reinstatement not guaranteed. Priority: collect payment immediately.',
+    actions: ['Collect Payment', 'Send Urgent Notice', 'Call Now'],
+    renewalDate: 'May 25, 2026', lapseDate: null,
+    tags: ['renewal', 'lapse', 'urgent']
+  },
+  {
+    id: 'AL010', type: 'lapse', severity: 'medium',
+    client: 'Sandra Williams', initials: 'SW', clientId: 4,
+    avatarGrad: 'linear-gradient(135deg,#dc2626,#f59e0b)',
+    policy: 'P-100304B · LTC $180K', premium: '$5,400/yr',
+    trigger: 'LTC premium increase notice — carrier raised rate 22%. Client may lapse.',
+    daysLeft: 45, riskScore: 66, riskLabel: 'Medium',
+    aiRec: 'Client is 61 — losing LTC coverage at this age is very risky. Present shared care rider option to reduce premium. Hybrid WL+LTC alternative may cost less.',
+    actions: ['Present Hybrid Option', 'Schedule Call', 'Send Comparison'],
+    renewalDate: null, lapseDate: 'Jun 22, 2026',
+    tags: ['lapse', 'renewal', 'medium']
+  },
+  {
+    id: 'AL011', type: 'at-risk', severity: 'medium',
+    client: 'James Whitfield', initials: 'JW', clientId: 1,
+    avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
+    policy: 'LTC $250K + Estate Plan', premium: '$4,400/yr',
+    trigger: 'No contact in 32 days — scheduled annual review Apr 15 at risk of cancellation',
+    daysLeft: null, riskScore: 41, riskLabel: 'Medium',
+    aiRec: 'Client has not confirmed Apr 15 meeting. Send personalised reminder with AI-generated executive brief showing YTD policy value growth.',
+    actions: ['Send Meeting Brief', 'Call to Confirm', 'Reschedule if Needed'],
+    renewalDate: null, lapseDate: null,
+    tags: ['at-risk', 'medium']
+  },
+  {
+    id: 'AL012', type: 'renewal', severity: 'normal',
+    client: 'Maria Gonzalez', initials: 'MG', clientId: 6,
+    avatarGrad: 'linear-gradient(135deg,#059669,#0891b2)',
+    policy: 'P-100306B · Disability Insurance', premium: '$3,200/yr',
+    trigger: 'DI annual renewal — Jun 2026. Own-occ definition upgrade available.',
+    daysLeft: 55, riskScore: 20, riskLabel: 'Low',
+    aiRec: 'Low lapse risk. Renewal is routine but present own-occ definition upgrade — small premium increase for much better coverage. Client income grew to $280K.',
+    actions: ['Send Renewal Notice', 'Present Upgrade Option'],
+    renewalDate: 'Jun 15, 2026', lapseDate: null,
+    tags: ['renewal', 'normal']
+  }
+];
+
+// Renewal timeline entries (90-day view)
+const renewalTimelineData = [
+  { client: 'Patricia Nguyen', initials: 'PN', policy: 'VUL Rider', days: 18, severity: 'urgent', premium: '$2.8K' },
+  { client: 'Maria Gonzalez',  initials: 'MG', policy: 'UL $600K',  days: 24, severity: 'urgent', premium: '$5.6K' },
+  { client: 'Patricia Nguyen', initials: 'PN', policy: 'UL Lapse',  days: 44, severity: 'urgent', premium: '$5.8K' },
+  { client: 'Sandra Williams', initials: 'SW', policy: 'LTC Rider',  days: 45, severity: 'high',   premium: '$5.4K' },
+  { client: 'Maria Gonzalez',  initials: 'MG', policy: 'DI Renewal', days: 55, severity: 'high',   premium: '$3.2K' },
+  { client: 'James Whitfield', initials: 'JW', policy: 'Term $750K', days: 61, severity: 'high',   premium: '$3.2K' },
+  { client: 'Robert Chen',     initials: 'RC', policy: 'Key-Person', days: 86, severity: 'normal', premium: '$8.4K' },
+];
+
+let _currentAlertTab = 'all';
+let _currentAlertId  = null;
+
+function initAlertsPage() {
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      renderAlertList('all');
+      renderRenewalTimeline();
+    }, 80);
+  });
+}
+
+function setAlertTab(btn, tab) {
+  document.querySelectorAll('.al-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  _currentAlertTab = tab;
+  renderAlertList(tab);
+}
+
+function renderAlertList(tab) {
+  const list = document.getElementById('alerts-list');
+  if (!list) return;
+  let items = alertsData;
+  if (tab && tab !== 'all') items = items.filter(a => a.tags.includes(tab));
+  if (!items.length) {
+    list.innerHTML = `<div class="al-empty-state"><i class="fas fa-check-circle"></i><span>No alerts in this category</span></div>`;
+    return;
+  }
+  const sevOrder = { urgent: 0, high: 1, medium: 2, normal: 3 };
+  items = [...items].sort((a, b) => (sevOrder[a.severity] ?? 9) - (sevOrder[b.severity] ?? 9));
+
+  const sevMeta = {
+    urgent: { color: '#ef4444', bg: '#fef2f2', label: 'Urgent' },
+    high:   { color: '#f97316', bg: '#fff7ed', label: 'High'   },
+    medium: { color: '#f59e0b', bg: '#fefce8', label: 'Medium' },
+    normal: { color: '#22c55e', bg: '#f0fdf4', label: 'Normal' }
+  };
+  const typeIcons = {
+    lapse:    { icon: 'fa-heartbeat',          label: 'Lapse Risk'     },
+    renewal:  { icon: 'fa-sync-alt',           label: 'Renewal'        },
+    'at-risk':{ icon: 'fa-exclamation-triangle',label: 'At-Risk Client' },
+    coverage: { icon: 'fa-shield-alt',         label: 'Coverage Gap'   }
+  };
+
+  list.innerHTML = items.map(a => {
+    const sev  = sevMeta[a.severity] || sevMeta.normal;
+    const ti   = typeIcons[a.type]   || { icon: 'fa-bell', label: a.type };
+    const sel  = _currentAlertId === a.id;
+    return `
+    <div class="al-card ${sel ? 'al-card-selected' : ''}" onclick="openAlertDetail('${a.id}')">
+      <div class="al-card-sev-bar" style="background:${sev.color}"></div>
+      <div class="al-card-inner">
+        <div class="al-card-top">
+          <div class="al-card-avatar" style="background:${a.avatarGrad}">${a.initials}</div>
+          <div class="al-card-info">
+            <div class="al-card-name">${a.client}</div>
+            <div class="al-card-policy"><i class="fas fa-file-contract"></i> ${a.policy}</div>
+          </div>
+          <div class="al-card-badges">
+            <span class="al-sev-pill" style="background:${sev.bg};color:${sev.color}">${sev.label}</span>
+            ${a.daysLeft != null ? `<span class="al-days-pill" style="color:${sev.color}">${a.daysLeft}d</span>` : ''}
+          </div>
+        </div>
+        <div class="al-card-trigger">
+          <i class="fas ${ti.icon}" style="color:${sev.color}"></i>
+          <span>${a.trigger}</span>
+        </div>
+        <div class="al-card-footer">
+          <span class="al-type-chip"><i class="fas ${ti.icon}"></i> ${ti.label}</span>
+          <span class="al-risk-num" style="color:${sev.color}">Risk ${a.riskScore}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAlertDetail(id) {
+  _currentAlertId = id;
+  const a = alertsData.find(x => x.id === id);
+  if (!a) return;
+  renderAlertList(_currentAlertTab);
+
+  const emptyEl = document.getElementById('alerts-detail-empty');
+  const panelEl = document.getElementById('alerts-detail-panel');
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (!panelEl) return;
+  panelEl.style.display = 'block';
+
+  const sevMeta = {
+    urgent: { color: '#ef4444', bg: '#fef2f2', label: 'Urgent'   },
+    high:   { color: '#f97316', bg: '#fff7ed', label: 'High'     },
+    medium: { color: '#f59e0b', bg: '#fefce8', label: 'Medium'   },
+    normal: { color: '#22c55e', bg: '#f0fdf4', label: 'Normal'   }
+  };
+  const typeLabels = {
+    lapse: 'Lapse Risk', renewal: 'Renewal Due',
+    'at-risk': 'At-Risk Client', coverage: 'Coverage Gap'
+  };
+  const sev       = sevMeta[a.severity] || sevMeta.normal;
+  const typeLabel = typeLabels[a.type] || a.type;
+
+  // Progress bar urgency (inverted: more fill = more urgent)
+  const urgencyPct = a.daysLeft != null ? Math.max(4, Math.min(100, Math.round((90 - a.daysLeft) / 90 * 100))) : 0;
+
+  const actionBtns = a.actions.map((act, i) =>
+    `<button class="ad-btn ${i === 0 ? 'ad-btn-primary' : 'ad-btn-secondary'}"
+       onclick="showToast('${act} initiated for ${a.client}','success')">
+       <i class="fas fa-${i === 0 ? 'bolt' : 'arrow-right'}"></i> ${act}
+     </button>`
+  ).join('');
+
+  panelEl.innerHTML = `
+    <div class="ad-panel">
+
+      <!-- Client header -->
+      <div class="ad-client-header">
+        <div class="ad-client-avatar" style="background:${a.avatarGrad}">${a.initials}</div>
+        <div class="ad-client-info">
+          <div class="ad-client-name">${a.client}</div>
+          <div class="ad-client-policy">${a.policy} · <strong>${a.premium}</strong></div>
+        </div>
+        <div class="ad-sev-badge" style="background:${sev.bg};color:${sev.color};border:1px solid ${sev.color}40">
+          ${sev.label} · Risk ${a.riskScore}
+        </div>
+      </div>
+
+      <!-- Type pill -->
+      <div class="ad-type-row">
+        <span class="ad-type-pill">${typeLabel}</span>
+        ${a.daysLeft != null ? `<span class="ad-days-tag" style="color:${sev.color}"><i class="fas fa-clock"></i> ${a.daysLeft} days remaining</span>` : ''}
+      </div>
+
+      <!-- Urgency bar -->
+      ${a.daysLeft != null ? `
+      <div class="ad-urgency-bar-wrap">
+        <div class="ad-urgency-track">
+          <div class="ad-urgency-fill" style="width:${urgencyPct}%;background:${sev.color}"></div>
+        </div>
+        <div class="ad-urgency-labels"><span>Today</span><span style="color:${sev.color}">Deadline</span></div>
+      </div>` : ''}
+
+      <!-- Trigger -->
+      <div class="ad-section">
+        <div class="ad-section-label"><i class="fas fa-exclamation-circle" style="color:${sev.color}"></i> Alert Trigger</div>
+        <div class="ad-trigger-text">${a.trigger}</div>
+      </div>
+
+      <!-- AI Recommendation -->
+      <div class="ad-section">
+        <div class="ad-section-label"><i class="fas fa-robot" style="color:#4f46e5"></i> AI Recommendation</div>
+        <div class="ad-ai-rec-text">${a.aiRec}</div>
+      </div>
+
+      <!-- Actions -->
+      <div class="ad-actions-row">${actionBtns}</div>
+
+      <!-- Navigation links -->
+      <div class="ad-nav-row">
+        <button class="ad-nav-btn" onclick="navigateTo('clients');showToast('Opening client record','info')">
+          <i class="fas fa-user"></i> Client Record
+        </button>
+        <button class="ad-nav-btn" onclick="navigateTo('policies');showToast('Opening policy','info')">
+          <i class="fas fa-file-contract"></i> Policy
+        </button>
+        <button class="ad-nav-btn" onclick="navigateTo('upsell');showToast('Upsell track','info')">
+          <i class="fas fa-arrow-trend-up"></i> Upsell Track
+        </button>
+      </div>
+
+    </div>`;
+}
+
+function renderRenewalTimeline() {
+  const track = document.getElementById('rts-track');
+  if (!track) return;
+  const urgColor = { urgent:'#ef4444', high:'#f97316', normal:'#22c55e' };
+  if (!renewalTimelineData || !renewalTimelineData.length) {
+    track.innerHTML = '<div style="color:#94a3b8;font-size:13px;padding:12px">No renewal data available</div>';
+    return;
+  }
+  track.innerHTML = renewalTimelineData.map(r => {
+    const urg = r.daysLeft <= 30 ? 'urgent' : r.daysLeft <= 60 ? 'high' : 'normal';
+    const c = urgColor[urg];
+    return `
+    <div class="rts-card ${urg}" onclick="openAlertDetail('${r.alertId || ''}')">
+      <div class="rts-card-dot" style="background:${c}"></div>
+      <div class="rts-card-info">
+        <div class="rts-card-name">${r.client}</div>
+        <div class="rts-card-policy">${r.policy}</div>
+      </div>
+      <div class="rts-card-date" style="color:${c}">${r.daysLeft}d</div>
+    </div>`;
+  }).join('');
+}
+function runAlertScan() {
+  showToast('AI scanning all 1,842 policies for risk signals…', 'info');
+  setTimeout(() => showToast('Scan complete — 12 alerts updated, 2 new flags added', 'success'), 2200);
+}
+
+function exportAlertList() {
+  showToast('Exporting alert list to CSV…', 'info');
+  setTimeout(() => showToast('Export ready — check Downloads', 'success'), 1000);
+}
+
+console.log('Policy Alerts module loaded — alertsData(' + alertsData.length + '), renderAlertList, openAlertDetail, renderRenewalTimeline all ready');
+
+
+/* ═══════════════════════════════════════════════════════════════
+   CLIENT JOURNEY PIPELINE MODULE
+   Lead → Opportunity → Client → Upsell kanban view
+   ═══════════════════════════════════════════════════════════════ */
+
+// Pipeline cross-reference map — links all four stages
+const pipelineJourneyData = {
+  // LEADS (from prospectData)
+  leads: [
+    { id:'P001', name:'Alex Rivera',      initials:'AR', age:34, segment:'Emerging',   score:82, stage:'Meeting Scheduled', product:'Whole Life $500K',      value:'$4,200/yr', campaign:'Organic — Referral',           avatarGrad:'linear-gradient(135deg,#003087,#0057c8)', linkedOpp:'OPP001', linkedClient:null, linkedUpsell:null },
+    { id:'P002', name:'Nancy Foster',     initials:'NF', age:41, segment:'Mid Market', score:61, stage:'Proposal Sent',     product:'Term Life $1M',          value:'$3,200/yr', campaign:'Term Life — Young Families',   avatarGrad:'linear-gradient(135deg,#0891b2,#22d3ee)', linkedOpp:'OPP003', linkedClient:null, linkedUpsell:null },
+    { id:'P003', name:'John Kim',         initials:'JK', age:38, segment:'Emerging',   score:44, stage:'Contacted',         product:'Disability Insurance',   value:'$2,100/yr', campaign:'Whole Life Protection',        avatarGrad:'linear-gradient(135deg,#dc2626,#f87171)', linkedOpp:null,     linkedClient:null, linkedUpsell:null },
+    { id:'P004', name:'Rachel Moore',     initials:'RM', age:29, segment:'Emerging',   score:73, stage:'New Lead',          product:'Term Life $500K',        value:'$1,800/yr', campaign:'Organic — Referral',           avatarGrad:'linear-gradient(135deg,#7c3aed,#a855f7)', linkedOpp:null,     linkedClient:null, linkedUpsell:null },
+    { id:'P005', name:'Carlos Reyes',     initials:'CR', age:55, segment:'Mid Market', score:88, stage:'Meeting Scheduled', product:'Deferred Annuity',       value:'$4,800/yr', campaign:'Retirement Income — Annuity',  avatarGrad:'linear-gradient(135deg,#059669,#10b981)', linkedOpp:'OPP004', linkedClient:null, linkedUpsell:null },
+    { id:'P006', name:'Elizabeth Harper', initials:'EH', age:48, segment:'High Value', score:91, stage:'Proposal Sent',     product:'VUL $1M',                value:'$9,600/yr', campaign:'Wealth Management — HNW',      avatarGrad:'linear-gradient(135deg,#003087,#0057c8)', linkedOpp:'OPP005', linkedClient:null, linkedUpsell:null },
+    { id:'P007', name:'Marcus Johnson',   initials:'MJ', age:35, segment:'Emerging',   score:67, stage:'Contacted',         product:'Term Life $750K',        value:'$2,400/yr', campaign:'Term Life — Young Families',   avatarGrad:'linear-gradient(135deg,#f59e0b,#fbbf24)', linkedOpp:null,     linkedClient:null, linkedUpsell:null },
+    { id:'P008', name:'Natasha Patel',    initials:'NP', age:52, segment:'High Value', score:85, stage:'Meeting Scheduled', product:'Whole Life $2M',         value:'$14,400/yr',campaign:'Wealth Management — HNW',      avatarGrad:'linear-gradient(135deg,#7c3aed,#a855f7)', linkedOpp:null,     linkedClient:null, linkedUpsell:null },
+    { id:'P009', name:'Brian O\'Connor',  initials:'BO', age:44, segment:'Mid Market', score:76, stage:'New Lead',          product:'Universal Life $500K',   value:'$4,200/yr', campaign:'Organic — Referral',           avatarGrad:'linear-gradient(135deg,#0891b2,#22d3ee)', linkedOpp:null,     linkedClient:null, linkedUpsell:null },
+    { id:'P010', name:'Sofia Hartmann',   initials:'SH', age:31, segment:'Emerging',   score:58, stage:'Contacted',         product:'Term Life $300K',        value:'$1,440/yr', campaign:'Whole Life Protection',        avatarGrad:'linear-gradient(135deg,#dc2626,#f87171)', linkedOpp:null,     linkedClient:null, linkedUpsell:null },
+    { id:'P011', name:'Derek Washington', initials:'DW', age:47, segment:'Mid Market', score:79, stage:'Proposal Sent',     product:'Whole Life $750K',       value:'$6,000/yr', campaign:'Whole Life Protection',        avatarGrad:'linear-gradient(135deg,#003087,#0057c8)', linkedOpp:null,     linkedClient:null, linkedUpsell:null },
+    { id:'P012', name:'Angela Torres',    initials:'AT', age:59, segment:'Mid Market', score:83, stage:'Meeting Scheduled', product:'Immediate Annuity',      value:'$3,600/yr', campaign:'Retirement Income — Annuity',  avatarGrad:'linear-gradient(135deg,#059669,#10b981)', linkedOpp:'OPP002', linkedClient:null, linkedUpsell:null },
+    { id:'P013', name:'Victor Shaw',      initials:'VS', age:42, segment:'High Value', score:89, stage:'Proposal Sent',     product:'Managed Portfolio $200K','value':'$2,000/yr', campaign:'Investment Portfolio — Mid-Market', avatarGrad:'linear-gradient(135deg,#0891b2,#22d3ee)', linkedOpp:null, linkedClient:null, linkedUpsell:null },
+    { id:'P014', name:'Priya Mehta',      initials:'PM', age:51, segment:'High Value', score:94, stage:'Meeting Scheduled', product:'VUL $1.5M + Estate Plan','value':'$12,000/yr',campaign:'Wealth Management — HNW',   avatarGrad:'linear-gradient(135deg,#003087,#0057c8)', linkedOpp:null,     linkedClient:null, linkedUpsell:null },
+  ],
+  // OPPORTUNITIES (from opportunitiesData)
+  opps: [
+    { id:'OPP001', name:'Alex Rivera',      initials:'AR', age:34, segment:'Emerging',   score:82, stage:'Meeting Scheduled', product:'Whole Life $500K',        value:'$4,200', commission:'$504',   avatarGrad:'linear-gradient(135deg,#003087,#0057c8)', linkedLead:'P001',  linkedClient:null, linkedUpsell:null },
+    { id:'OPP002', name:'Michael Santos',   initials:'MS', age:47, segment:'High Value', score:91, stage:'Verbal Commit',     product:'Universal Life $750K',    value:'$6,800', commission:'$816',   avatarGrad:'linear-gradient(135deg,#7c3aed,#a855f7)', linkedLead:null,    linkedClient:null, linkedUpsell:null },
+    { id:'OPP003', name:'Nancy Foster',     initials:'NF', age:41, segment:'Mid Market', score:61, stage:'Needs Analysis',    product:'Term Life $1M',           value:'$3,200', commission:'$384',   avatarGrad:'linear-gradient(135deg,#0891b2,#22d3ee)', linkedLead:'P002',  linkedClient:null, linkedUpsell:null },
+    { id:'OPP004', name:'Carlos Reyes',     initials:'CR', age:55, segment:'Mid Market', score:88, stage:'Illustration Sent', product:'Deferred Annuity $300K',  value:'$4,800', commission:'$960',   avatarGrad:'linear-gradient(135deg,#059669,#10b981)', linkedLead:'P005',  linkedClient:null, linkedUpsell:null },
+    { id:'OPP005', name:'Elizabeth Harper', initials:'EH', age:48, segment:'High Value', score:91, stage:'Proposal Sent',     product:'VUL $1M',                 value:'$9,600', commission:'$1,152', avatarGrad:'linear-gradient(135deg,#003087,#0057c8)', linkedLead:'P006',  linkedClient:null, linkedUpsell:null },
+  ],
+  // ACTIVE CLIENTS (from mockClients)
+  clients: [
+    { id:'C001', name:'James Whitfield', initials:'JW', age:52, segment:'High Value', score:92, policies:3, premium:'$12,400/yr', segment_label:'High Value',avatarGrad:'linear-gradient(135deg,#0891b2,#22d3ee)', linkedLead:null, linkedOpp:null, linkedUpsell:'UC003' },
+    { id:'C002', name:'Patricia Nguyen', initials:'PN', age:38, segment:'Mid Market', score:87, policies:2, premium:'$5,800/yr',  segment_label:'Mid Market', avatarGrad:'linear-gradient(135deg,#2563eb,#7c3aed)', linkedLead:null, linkedOpp:null, linkedUpsell:null,   alert:'AL001' },
+    { id:'C003', name:'Robert Chen',     initials:'RC', age:45, segment:'High Value', score:96, policies:4, premium:'$21,000/yr', segment_label:'High Value', avatarGrad:'linear-gradient(135deg,#7c3aed,#a855f7)', linkedLead:null, linkedOpp:null, linkedUpsell:'UC002' },
+    { id:'C004', name:'Sandra Williams', initials:'SW', age:61, segment:'Mid Market', score:71, policies:2, premium:'$8,200/yr',  segment_label:'Mid Market', avatarGrad:'linear-gradient(135deg,#dc2626,#f59e0b)', linkedLead:null, linkedOpp:null, linkedUpsell:null,   alert:'AL002' },
+    { id:'C005', name:'David Thompson',  initials:'DT', age:33, segment:'Emerging',   score:78, policies:1, premium:'$2,400/yr',  segment_label:'Emerging',   avatarGrad:'linear-gradient(135deg,#7c3aed,#a855f7)', linkedLead:null, linkedOpp:null, linkedUpsell:'UC007' },
+    { id:'C006', name:'Maria Gonzalez',  initials:'MG', age:48, segment:'High Value', score:91, policies:3, premium:'$14,600/yr', segment_label:'High Value', avatarGrad:'linear-gradient(135deg,#059669,#0891b2)', linkedLead:null, linkedOpp:null, linkedUpsell:'UC004' },
+    { id:'C007', name:'Kevin Park',      initials:'KP', age:29, segment:'Emerging',   score:65, policies:1, premium:'$1,800/yr',  segment_label:'Emerging',   avatarGrad:'linear-gradient(135deg,#059669,#10b981)', linkedLead:null, linkedOpp:null, linkedUpsell:'UC008', alert:'AL004' },
+    { id:'C008', name:'Linda Morrison',  initials:'LM', age:56, segment:'Premium',    score:98, policies:5, premium:'$32,000/yr', segment_label:'Premium',    avatarGrad:'linear-gradient(135deg,#003087,#0057c8)', linkedLead:null, linkedOpp:null, linkedUpsell:'UC001' },
+  ],
+  // UPSELL READY (from upsellData)
+  upsells: [
+    { id:'UC001', name:'Linda Morrison',  initials:'LM', age:56, segment:'Premium',    score:98, priority:'high',   value:'$820K', commission:'$41K',   tracks:['retirement','investment','wealth'], avatarGrad:'linear-gradient(135deg,#003087,#0057c8)', linkedClient:'C008' },
+    { id:'UC002', name:'Robert Chen',     initials:'RC', age:45, segment:'High Value', score:96, priority:'high',   value:'$650K', commission:'$32.5K', tracks:['retirement','investment'],          avatarGrad:'linear-gradient(135deg,#7c3aed,#a855f7)', linkedClient:'C003' },
+    { id:'UC003', name:'James Whitfield', initials:'JW', age:52, segment:'High Value', score:92, priority:'high',   value:'$480K', commission:'$24K',   tracks:['retirement','investment','wealth'], avatarGrad:'linear-gradient(135deg,#0891b2,#22d3ee)', linkedClient:'C001' },
+    { id:'UC004', name:'Maria Gonzalez',  initials:'MG', age:48, segment:'High Value', score:91, priority:'medium', value:'$340K', commission:'$17K',   tracks:['retirement','wealth'],              avatarGrad:'linear-gradient(135deg,#059669,#0891b2)', linkedClient:'C006' },
+    { id:'UC005', name:'Patricia Nguyen', initials:'PN', age:38, segment:'Mid Market', score:87, priority:'medium', value:'$210K', commission:'$10.5K', tracks:['retirement','investment'],          avatarGrad:'linear-gradient(135deg,#2563eb,#7c3aed)', linkedClient:'C002' },
+    { id:'UC006', name:'Sandra Williams', initials:'SW', age:61, segment:'Mid Market', score:71, priority:'medium', value:'$180K', commission:'$9K',    tracks:['retirement'],                       avatarGrad:'linear-gradient(135deg,#dc2626,#f59e0b)', linkedClient:'C004' },
+    { id:'UC007', name:'David Thompson',  initials:'DT', age:33, segment:'Emerging',   score:78, priority:'low',    value:'$95K',  commission:'$4.8K',  tracks:['retirement','investment'],          avatarGrad:'linear-gradient(135deg,#7c3aed,#a855f7)', linkedClient:'C005' },
+    { id:'UC008', name:'Kevin Park',      initials:'KP', age:29, segment:'Emerging',   score:65, priority:'low',    value:'$65K',  commission:'$3.3K',  tracks:['retirement'],                       avatarGrad:'linear-gradient(135deg,#059669,#10b981)', linkedClient:'C007' },
+  ]
+};
+
+let _pvFilter = 'all';
+
+function initPipelineViewPage() {
+  requestAnimationFrame(() => {
+    setTimeout(() => renderPipelineCards(), 80);
+  });
+}
+
+function switchPVView(view, btn) {
+  document.querySelectorAll('.pv-view-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const kanban = document.getElementById('pv-view-kanban');
+  const sales  = document.getElementById('pv-view-sales');
+  if (kanban) kanban.style.display = view === 'kanban' ? '' : 'none';
+  if (sales)  sales.style.display  = view === 'sales'  ? '' : 'none';
+}
+function renderPipelineCards() {
+  const { leads, opps, clients, upsells } = pipelineJourneyData;
+
+  const leadsEl   = document.getElementById('pvk-leads');
+  const oppsEl    = document.getElementById('pvk-opps');
+  const clientsEl = document.getElementById('pvk-clients');
+  const upsellEl  = document.getElementById('pvk-upsell');
+  if (!leadsEl) return;
+
+  const scoreColor = s => s >= 80 ? '#22c55e' : s >= 60 ? '#f59e0b' : '#ef4444';
+  const prioColor  = p => p === 'high' ? '#ef4444' : p === 'medium' ? '#f59e0b' : '#22c55e';
+  const trackIcon  = t => t === 'retirement' ? '🏦' : t === 'investment' ? '📈' : '💎';
+
+  // LEADS column
+  leadsEl.innerHTML = leads.map(l => `
+    <div class="pvk-card pvk-lead-card" onclick="openPVJourneyModal('lead','${l.id}')">
+      <div class="pvk-card-top">
+        <div class="pvk-avatar" style="background:${l.avatarGrad}">${l.initials}</div>
+        <div class="pvk-card-info">
+          <div class="pvk-card-name">${l.name}</div>
+          <div class="pvk-card-meta">Age ${l.age} · ${l.segment}</div>
+        </div>
+        <div class="pvk-score" style="color:${scoreColor(l.score)}">${l.score}</div>
+      </div>
+      <div class="pvk-product-chip">${l.product}</div>
+      <div class="pvk-value-row">
+        <span class="pvk-stage-pill">${l.stage}</span>
+        <span class="pvk-value">${l.value}</span>
+      </div>
+      ${l.linkedOpp ? `<div class="pvk-linked"><i class="fas fa-link"></i> → ${l.linkedOpp}</div>` : ''}
+    </div>`).join('');
+
+  // OPPS column
+  oppsEl.innerHTML = opps.map(o => `
+    <div class="pvk-card pvk-opp-card" onclick="openPVJourneyModal('opp','${o.id}')">
+      <div class="pvk-card-top">
+        <div class="pvk-avatar" style="background:${o.avatarGrad}">${o.initials}</div>
+        <div class="pvk-card-info">
+          <div class="pvk-card-name">${o.name}</div>
+          <div class="pvk-card-meta">Age ${o.age} · ${o.segment}</div>
+        </div>
+        <div class="pvk-score" style="color:${scoreColor(o.score)}">${o.score}</div>
+      </div>
+      <div class="pvk-product-chip">${o.product}</div>
+      <div class="pvk-value-row">
+        <span class="pvk-stage-pill opp">${o.stage}</span>
+        <span class="pvk-value">$${o.value}/yr</span>
+      </div>
+      <div class="pvk-commission"><i class="fas fa-coins"></i> ${o.commission} commission</div>
+      ${o.linkedLead ? `<div class="pvk-linked"><i class="fas fa-link"></i> ← ${o.linkedLead}</div>` : ''}
+    </div>`).join('');
+
+  // CLIENTS column
+  clientsEl.innerHTML = clients.map(cl => {
+    const alertBadge = cl.alert
+      ? `<div class="pvk-alert-badge"><i class="fas fa-exclamation-triangle"></i> Alert</div>` : '';
+    return `
+    <div class="pvk-card pvk-client-card ${cl.alert ? 'has-alert' : ''}" onclick="openPVJourneyModal('client','${cl.id}')">
+      <div class="pvk-card-top">
+        <div class="pvk-avatar" style="background:${cl.avatarGrad}">${cl.initials}</div>
+        <div class="pvk-card-info">
+          <div class="pvk-card-name">${cl.name}</div>
+          <div class="pvk-card-meta">Age ${cl.age} · ${cl.segment_label}</div>
+        </div>
+        <div class="pvk-score" style="color:${scoreColor(cl.score)}">${cl.score}</div>
+      </div>
+      ${alertBadge}
+      <div class="pvk-value-row">
+        <span class="pvk-policies-chip"><i class="fas fa-file-contract"></i> ${cl.policies} policies</span>
+        <span class="pvk-value">${cl.premium}</span>
+      </div>
+      ${cl.linkedUpsell ? `<div class="pvk-linked upsell"><i class="fas fa-arrow-trend-up"></i> → ${cl.linkedUpsell}</div>` : ''}
+    </div>`; }).join('');
+
+  // UPSELL column
+  upsellEl.innerHTML = upsells.map(u => `
+    <div class="pvk-card pvk-upsell-card" onclick="openPVJourneyModal('upsell','${u.id}')">
+      <div class="pvk-card-top">
+        <div class="pvk-avatar" style="background:${u.avatarGrad}">${u.initials}</div>
+        <div class="pvk-card-info">
+          <div class="pvk-card-name">${u.name}</div>
+          <div class="pvk-card-meta">Age ${u.age} · ${u.segment}</div>
+        </div>
+        <div class="pvk-prio-dot" style="background:${prioColor(u.priority)}" title="${u.priority} priority"></div>
+      </div>
+      <div class="pvk-tracks">${u.tracks.map(t => `<span class="pvk-track-chip">${trackIcon(t)} ${t.charAt(0).toUpperCase()+t.slice(1)}</span>`).join('')}</div>
+      <div class="pvk-value-row">
+        <span class="pvk-value upsell">${u.value}</span>
+        <span class="pvk-commission">${u.commission} comm.</span>
+      </div>
+      <div class="pvk-linked client"><i class="fas fa-link"></i> ← ${u.linkedClient}</div>
+    </div>`).join('');
+}
+
+function filterPipelineView(stageFilter) {
+  // Future: implement segment/product filter
+  if (stageFilter) {
+    const map = { leads: 'pvk-leads', opps: 'pvk-opps', clients: 'pvk-clients', upsell: 'pvk-upsell' };
+    const el = document.querySelector(`.pvk-col.pvk-${stageFilter === 'opps' ? 'opps' : stageFilter === 'clients' ? 'clients' : stageFilter === 'upsell' ? 'upsell' : 'leads'}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function openPVJourneyModal(type, id) {
+  const overlay = document.getElementById('pv-journey-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const { leads, opps, clients, upsells } = pipelineJourneyData;
+  const all = { lead: leads, opp: opps, client: clients, upsell: upsells };
+  const item = all[type]?.find(x => x.id === id);
+  if (!item) return;
+
+  const header = document.getElementById('pvj-header');
+  const body   = document.getElementById('pvj-body');
+
+  const scoreColor = s => s >= 80 ? '#22c55e' : s >= 60 ? '#f59e0b' : '#ef4444';
+  const typeLabels = { lead: 'Lead', opp: 'Opportunity', client: 'Active Client', upsell: 'Upsell Ready' };
+  const typeColors = { lead: '#f59e0b', opp: '#7c3aed', client: '#003087', upsell: '#059669' };
+  const tc = typeColors[type];
+
+  // Build journey path breadcrumb
+  const buildPath = () => {
+    const stages = [
+      { label:'Lead',      active: type==='lead'   || item.linkedLead   || (type==='client'&&item.linkedLead) },
+      { label:'Opp',       active: type==='opp'    || item.linkedOpp    },
+      { label:'Client',    active: type==='client' || item.linkedClient },
+      { label:'Upsell',    active: type==='upsell' || item.linkedUpsell },
+    ];
+    return `<div class="pvj-path">${stages.map((s,i) => `
+      <span class="pvj-path-step ${type === ['lead','opp','client','upsell'][i] ? 'current' : ''}">${s.label}</span>
+      ${i < 3 ? '<span class="pvj-path-arrow">→</span>' : ''}
+    `).join('')}</div>`;
+  };
+
+  header.innerHTML = `
+    <div class="pvj-header-inner">
+      <div class="pvj-avatar" style="background:${item.avatarGrad}">${item.initials}</div>
+      <div class="pvj-header-info">
+        <div class="pvj-name">${item.name}</div>
+        <div class="pvj-meta">Age ${item.age} · ${item.segment || item.segment_label}</div>
+        <div class="pvj-type-badge" style="background:${tc}18;color:${tc};border:1px solid ${tc}40">
+          <i class="fas fa-circle" style="font-size:7px"></i> ${typeLabels[type]}
+        </div>
+      </div>
+      <div class="pvj-score" style="color:${scoreColor(item.score)}">${item.score}<div class="pvj-score-lbl">AI Score</div></div>
+    </div>
+    ${buildPath()}`;
+
+  // Build body based on type
+  let bodyHtml = '';
+
+  if (type === 'lead') {
+    const linkedOppItem = item.linkedOpp ? opps.find(o => o.id === item.linkedOpp) : null;
+    bodyHtml = `
+      <div class="pvj-kpi-row">
+        <div class="pvj-kpi"><div class="pvj-kpi-val">${item.value}</div><div class="pvj-kpi-lbl">Annual Value</div></div>
+        <div class="pvj-kpi"><div class="pvj-kpi-val">${item.stage}</div><div class="pvj-kpi-lbl">Current Stage</div></div>
+        <div class="pvj-kpi"><div class="pvj-kpi-val">${item.campaign.split('—')[0].trim()}</div><div class="pvj-kpi-lbl">Campaign</div></div>
+      </div>
+      <div class="pvj-section-title">Product Interest</div>
+      <div class="pvj-chip-row"><span class="pvj-chip">${item.product}</span></div>
+      ${linkedOppItem ? `
+        <div class="pvj-section-title"><i class="fas fa-link"></i> Linked Opportunity</div>
+        <div class="pvj-linked-card opp" onclick="openPVJourneyModal('opp','${linkedOppItem.id}')">
+          <div class="pvj-lc-avatar" style="background:${linkedOppItem.avatarGrad}">${linkedOppItem.initials}</div>
+          <div class="pvj-lc-info"><strong>${linkedOppItem.name}</strong> · ${linkedOppItem.stage} · $${linkedOppItem.value}/yr</div>
+          <i class="fas fa-chevron-right"></i>
+        </div>` : `<div class="pvj-no-link"><i class="fas fa-info-circle"></i> Not yet converted to Opportunity</div>`}
+      <div class="pvj-actions">
+        <button class="pvj-act-btn primary" onclick="closePVModal();navigateTo('prospects')"><i class="fas fa-user-clock"></i> View in Leads</button>
+        <button class="pvj-act-btn" onclick="closePVModal();moveLeadToOpportunity('${id}')"><i class="fas fa-bolt"></i> Move to Opportunity</button>
+      </div>`;
+  } else if (type === 'opp') {
+    const linkedLeadItem   = item.linkedLead   ? leads.find(l => l.id === item.linkedLead)   : null;
+    bodyHtml = `
+      <div class="pvj-kpi-row">
+        <div class="pvj-kpi"><div class="pvj-kpi-val">$${item.value}/yr</div><div class="pvj-kpi-lbl">Annual Value</div></div>
+        <div class="pvj-kpi"><div class="pvj-kpi-val">${item.commission}</div><div class="pvj-kpi-lbl">Commission</div></div>
+        <div class="pvj-kpi"><div class="pvj-kpi-val">${item.stage}</div><div class="pvj-kpi-lbl">Stage</div></div>
+      </div>
+      <div class="pvj-section-title">Product</div>
+      <div class="pvj-chip-row"><span class="pvj-chip">${item.product}</span></div>
+      ${linkedLeadItem ? `
+        <div class="pvj-section-title"><i class="fas fa-link"></i> Origin Lead</div>
+        <div class="pvj-linked-card lead" onclick="openPVJourneyModal('lead','${linkedLeadItem.id}')">
+          <div class="pvj-lc-avatar" style="background:${linkedLeadItem.avatarGrad}">${linkedLeadItem.initials}</div>
+          <div class="pvj-lc-info"><strong>${linkedLeadItem.name}</strong> · ${linkedLeadItem.campaign}</div>
+          <i class="fas fa-chevron-right"></i>
+        </div>` : ''}
+      <div class="pvj-section-title"><i class="fas fa-forward"></i> Next Stage</div>
+      <div class="pvj-no-link"><i class="fas fa-users"></i> Ready to convert to Active Client on close</div>
+      <div class="pvj-actions">
+        <button class="pvj-act-btn primary" onclick="closePVModal();navigateTo('opportunities')"><i class="fas fa-bolt"></i> View in Opportunities</button>
+        <button class="pvj-act-btn" onclick="closePVModal();showToast('Converting ${item.name} to client…','success')"><i class="fas fa-user-plus"></i> Convert to Client</button>
+      </div>`;
+  } else if (type === 'client') {
+    const linkedUpsellItem = item.linkedUpsell ? upsells.find(u => u.id === item.linkedUpsell) : null;
+    const alertItem = item.alert ? alertsData.find(a => a.id === item.alert) : null;
+    bodyHtml = `
+      <div class="pvj-kpi-row">
+        <div class="pvj-kpi"><div class="pvj-kpi-val">${item.premium}</div><div class="pvj-kpi-lbl">Annual Premium</div></div>
+        <div class="pvj-kpi"><div class="pvj-kpi-val">${item.policies}</div><div class="pvj-kpi-lbl">Policies</div></div>
+        <div class="pvj-kpi"><div class="pvj-kpi-val">${item.score}</div><div class="pvj-kpi-lbl">Client Score</div></div>
+      </div>
+      ${alertItem ? `
+        <div class="pvj-alert-box">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div><strong>Active Alert:</strong> ${alertItem.trigger}</div>
+          <button onclick="closePVModal();navigateTo('alerts')" class="pvj-alert-btn">View Alert</button>
+        </div>` : ''}
+      ${linkedUpsellItem ? `
+        <div class="pvj-section-title"><i class="fas fa-arrow-trend-up"></i> Upsell Opportunity</div>
+        <div class="pvj-linked-card upsell" onclick="openPVJourneyModal('upsell','${linkedUpsellItem.id}')">
+          <div class="pvj-lc-avatar" style="background:${linkedUpsellItem.avatarGrad}">${linkedUpsellItem.initials}</div>
+          <div class="pvj-lc-info"><strong>${linkedUpsellItem.name}</strong> · ${linkedUpsellItem.value} potential · ${linkedUpsellItem.tracks.join(', ')}</div>
+          <i class="fas fa-chevron-right"></i>
+        </div>` : `<div class="pvj-no-link"><i class="fas fa-check-circle"></i> No upsell flags — fully optimised portfolio</div>`}
+      <div class="pvj-actions">
+        <button class="pvj-act-btn primary" onclick="closePVModal();navigateTo('clients')"><i class="fas fa-users"></i> View Client Record</button>
+        ${linkedUpsellItem ? `<button class="pvj-act-btn" onclick="closePVModal();navigateTo('upsell')"><i class="fas fa-arrow-trend-up"></i> Open Upsell Track</button>` : ''}
+      </div>`;
+  } else if (type === 'upsell') {
+    const linkedClientItem = item.linkedClient ? clients.find(c => c.id === item.linkedClient) : null;
+    const prioColor = p => p === 'high' ? '#ef4444' : p === 'medium' ? '#f59e0b' : '#22c55e';
+    const trackLabels = { retirement:'Retirement Income', investment:'Investment Growth', wealth:'Wealth Management' };
+    bodyHtml = `
+      <div class="pvj-kpi-row">
+        <div class="pvj-kpi"><div class="pvj-kpi-val" style="color:#003087">${item.value}</div><div class="pvj-kpi-lbl">Est. Upsell Value</div></div>
+        <div class="pvj-kpi"><div class="pvj-kpi-val" style="color:#d97706">${item.commission}</div><div class="pvj-kpi-lbl">Commission</div></div>
+        <div class="pvj-kpi"><div class="pvj-kpi-val" style="color:${prioColor(item.priority)}">${item.priority.toUpperCase()}</div><div class="pvj-kpi-lbl">Priority</div></div>
+      </div>
+      <div class="pvj-section-title">Open Tracks</div>
+      <div class="pvj-chip-row">${item.tracks.map(t => `<span class="pvj-chip upsell">${trackLabels[t] || t}</span>`).join('')}</div>
+      ${linkedClientItem ? `
+        <div class="pvj-section-title"><i class="fas fa-link"></i> Source Client</div>
+        <div class="pvj-linked-card client" onclick="openPVJourneyModal('client','${linkedClientItem.id}')">
+          <div class="pvj-lc-avatar" style="background:${linkedClientItem.avatarGrad}">${linkedClientItem.initials}</div>
+          <div class="pvj-lc-info"><strong>${linkedClientItem.name}</strong> · ${linkedClientItem.premium} · ${linkedClientItem.policies} policies</div>
+          <i class="fas fa-chevron-right"></i>
+        </div>` : ''}
+      <div class="pvj-actions">
+        <button class="pvj-act-btn primary" onclick="closePVModal();navigateTo('upsell')"><i class="fas fa-arrow-trend-up"></i> View in Upsell Track</button>
+        <button class="pvj-act-btn" onclick="closePVModal();showToast('Opening upsell brief for ${item.name}','info')"><i class="fas fa-paper-plane"></i> Generate Brief</button>
+      </div>`;
+  }
+
+  body.innerHTML = bodyHtml;
+}
+
+function closePVModal(e) {
+  if (e && e.target !== document.getElementById('pv-journey-overlay')) return;
+  const overlay = document.getElementById('pv-journey-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function runPipelineAI() {
+  showToast('AI analysing full 35-record pipeline for bottlenecks…', 'info');
+  setTimeout(() => showToast('AI Insight: 3 leads stalled >7 days · 1 opp conversion imminent · $2.84M upsell value awaiting outreach', 'success'), 2500);
+}
+
+console.log('Client Journey Pipeline module loaded — pipelineJourneyData(leads:14, opps:5, clients:8, upsells:8), renderPipelineCards, openPVJourneyModal all ready');
+
+
+// ══════════════════════════════════════════════════════════════
+// PRODUCT INTELLIGENCE HUB MODULE
+// ══════════════════════════════════════════════════════════════
+
+const piProductsData = [
+  { id:'P01', name:'Whole Life Insurance',         cat:'insurance',   icon:'fa-shield-alt',    color:'#1d4ed8', desc:'Permanent life coverage with guaranteed cash value growth and dividend potential.',    riskLevel:'Low',    minPremium:'$150/mo',  highlights:['Guaranteed death benefit','Cash value accumulation','Dividend eligible','Policy loans available'] },
+  { id:'P02', name:'Term Life Insurance',           cat:'insurance',   icon:'fa-clock',         color:'#0891b2', desc:'Pure protection for a defined term — most affordable way to secure high coverage.',      riskLevel:'Low',    minPremium:'$30/mo',   highlights:['Level premiums','Convertible to permanent','High face value at low cost','Ideal for income protection'] },
+  { id:'P03', name:'Universal Life Insurance',      cat:'insurance',   icon:'fa-sliders-h',     color:'#7c3aed', desc:'Flexible premium permanent life with adjustable death benefit and interest-linked cash value.',riskLevel:'Medium', minPremium:'$200/mo',  highlights:['Flexible premiums','Adjustable coverage','Interest-credited cash value','Living benefits available'] },
+  { id:'P04', name:'Variable Universal Life (VUL)', cat:'insurance',   icon:'fa-chart-line',    color:'#dc2626', desc:'Market-linked permanent life — sub-account investment exposure with insurance protection.',  riskLevel:'High',   minPremium:'$300/mo',  highlights:['Market-linked growth potential','Sub-account diversification','Tax-deferred growth','Estate planning tool'] },
+  { id:'P05', name:'Long-Term Care Insurance',      cat:'insurance',   icon:'fa-hands-helping', color:'#059669', desc:'Covers nursing home, assisted living and home care expenses — protects retirement assets.',    riskLevel:'Low',    minPremium:'$180/mo',  highlights:['Inflation protection rider','Home care benefit','Spousal discount','Asset protection strategy'] },
+  { id:'P06', name:'Disability Income Insurance',   cat:'insurance',   icon:'fa-user-injured',  color:'#d97706', desc:'Replaces a portion of earned income if the insured becomes unable to work.',               riskLevel:'Low',    minPremium:'$80/mo',   highlights:['Own-occupation definition','COLA rider available','Residual/partial disability benefit','Business overhead option'] },
+  { id:'P07', name:'Fixed Deferred Annuity',        cat:'retirement',  icon:'fa-umbrella-beach',color:'#d97706', desc:'Guaranteed interest rate during accumulation phase; converts to lifetime income at retirement.',riskLevel:'Low',    minPremium:'$10K lump',highlights:['Guaranteed interest rate','Tax-deferred growth','No stock market risk','Flexible payout options'] },
+  { id:'P08', name:'Fixed Immediate Annuity',       cat:'retirement',  icon:'fa-stream',        color:'#065f46', desc:'Single premium generates guaranteed income payments starting within 12 months.',             riskLevel:'Low',    minPremium:'$50K lump',highlights:['Immediate income stream','Guaranteed for life','Joint/survivor option','Simple, predictable planning'] },
+  { id:'P09', name:'Variable Annuity',              cat:'retirement',  icon:'fa-random',        color:'#7c3aed', desc:'Market-linked annuity offering growth potential with optional income and death benefit riders.',riskLevel:'High',   minPremium:'$25K lump',highlights:['Sub-account investment options','GMIB/GMWB riders','Tax-deferred growth','Upside with downside protection'] },
+  { id:'P10', name:'Managed Portfolio',             cat:'investment',  icon:'fa-briefcase',     color:'#003087', desc:'Professionally managed diversified portfolio — equity, fixed income, and alternatives mix.',   riskLevel:'Medium', minPremium:'$50K AUM', highlights:['Active management','Rebalancing included','Risk-based models','Quarterly reviews'] },
+  { id:'P11', name:'ETF Core Portfolio',            cat:'investment',  icon:'fa-layer-group',   color:'#0891b2', desc:'Low-cost index-based portfolio using broad-market and sector ETFs.',                         riskLevel:'Medium', minPremium:'$10K AUM', highlights:['Ultra-low expense ratios','Tax efficient','Daily liquidity','Transparent holdings'] },
+  { id:'P12', name:'Mutual Fund Platform',          cat:'investment',  icon:'fa-chart-pie',     color:'#4f46e5', desc:'Curated selection of actively managed funds across asset classes and geographies.',          riskLevel:'Medium', minPremium:'$5K AUM',  highlights:['Broad fund selection','Active management','Automatic rebalancing','SRI/ESG options'] },
+  { id:'P13', name:'ILIT / Trust Services',         cat:'wealth',      icon:'fa-landmark',      color:'#9d174d', desc:'Irrevocable Life Insurance Trust structure for estate planning and tax optimisation.',        riskLevel:'Low',    minPremium:'Legal fees',highlights:['Estate tax reduction','Asset protection','Generation skipping','Charitable giving integration'] },
+];
+
+const piRecsData = [
+  { id:'R01', client:'Robert Chen',      initials:'RC', avatarGrad:'linear-gradient(135deg,#1d4ed8,#3b82f6)', age:45, segment:'High Value', productId:'P07', score:96, reason:'Zero retirement savings detected. Age 45 with 20yr investment horizon — Deferred Annuity ideally positioned.',   value:'$250K premium', commission:'$12.5K', factors:['No retirement product','High income $580K/yr','Excellent credit 820','Low debt ratio'], nextAction:'Schedule annuity illustration call' },
+  { id:'R02', client:'Patricia Nguyen',  initials:'PN', avatarGrad:'linear-gradient(135deg,#7c3aed,#a855f7)', age:38, segment:'Mid Market', productId:'P03', score:91, reason:'Existing UL is under-funded — premium top-up or face value reduction required to prevent lapse Jun 2026.',        value:'$2,400/yr top-up', commission:'$480',  factors:['Active lapse alert AL001','Under-funded UL','Stable employment','Good payment history'], nextAction:'Call within 48 hours — urgent' },
+  { id:'R03', client:'James Whitfield',  initials:'JW', avatarGrad:'linear-gradient(135deg,#059669,#10b981)', age:52, segment:'High Value', productId:'P11', score:88, reason:'3 insurance policies but zero investment products. Age 52 ideal for core ETF portfolio ahead of retirement.',      value:'$150K AUM',     commission:'$1,500', factors:['No investment products','High net worth','3 active policies','Approaching retirement'], nextAction:'Present ETF portfolio at annual review Apr 15' },
+  { id:'R04', client:'Linda Morrison',   initials:'LM', avatarGrad:'linear-gradient(135deg,#dc2626,#f87171)', age:56, segment:'Premium',    productId:'P08', score:94, reason:'Has Variable Annuity but no guaranteed income rider. Age 56 — Fixed Immediate Annuity provides certainty at 65.', value:'$350K premium',  commission:'$17.5K', factors:['Retirement gap identified','Age 56 Premium segment','Variable Annuity without income guarantee','Estate planning active'], nextAction:'Present Fixed Annuity illustration Q3 2026' },
+  { id:'R05', client:'Sandra Williams',  initials:'SW', avatarGrad:'linear-gradient(135deg,#d97706,#fbbf24)', age:61, segment:'Mid Market', productId:'P02', score:82, reason:'Term policy expiring Sep 2026. Age 61 — ideal conversion window to permanent coverage before term lapses.',        value:'$350K WL',      commission:'$8,750', factors:['Term expiry alert','No permanent coverage','Conversion window open','Retirement planning stage'], nextAction:'Send conversion proposal by Jun 2026' },
+  { id:'R06', client:'Maria Gonzalez',   initials:'MG', avatarGrad:'linear-gradient(135deg,#0891b2,#22d3ee)', age:42, segment:'Mid Market', productId:'P06', score:79, reason:'Self-employed with no disability coverage. Income $124K — DI Insurance covers business continuity risk.',         value:'$2,800/yr',     commission:'$560',   factors:['Self-employed','No DI coverage','Age 42 mid-career','Two dependants'], nextAction:'Needs analysis call to present DI options' },
+  { id:'R07', client:'David Thompson',   initials:'DT', avatarGrad:'linear-gradient(135deg,#be185d,#f472b6)', age:33, segment:'Emerging',   productId:'P11', score:75, reason:'Single policy holder age 33 — ETF core portfolio low-cost entry point, builds wealth habit early.',              value:'$15K AUM',      commission:'$150',   factors:['Single product client','Young age 33','Stable income','Emerging segment growth potential'], nextAction:'Introduce ETF portfolio at next review' },
+  { id:'R08', client:'Robert Chen',      initials:'RC', avatarGrad:'linear-gradient(135deg,#1d4ed8,#3b82f6)', age:45, segment:'High Value', productId:'P13', score:72, reason:'Business owner with $2M+ net worth — ILIT structure provides estate tax efficiency and asset protection.',      value:'Estate plan',   commission:'Referral',factors:['$2M+ net worth','Business owner','No trust structure','High estate tax exposure'], nextAction:'Introduce estate planning attorney partnership' },
+];
+
+const piMatrixClients = ['James Whitfield','Patricia Nguyen','Robert Chen','Sandra Williams','David Thompson','Maria Gonzalez','Linda Morrison','Kevin Park'];
+const piMatrixProducts = ['Whole Life','Term Life','UL','VUL','LTC','Deferred Annuity','Fixed Annuity','Managed Portfolio','ETF Core','ILIT'];
+const piMatrixScores = [
+  [92, 45, 68, 71, 88, 93, 72, 63, 88, 45],
+  [71, 82, 91, 55, 62, 44, 38, 52, 48, 21],
+  [68, 55, 74, 82, 70, 96, 84, 88, 79, 72],
+  [45, 92, 55, 38, 71, 62, 88, 41, 55, 28],
+  [78, 88, 52, 44, 31, 38, 22, 62, 75, 18],
+  [55, 72, 68, 41, 60, 52, 44, 71, 63, 32],
+  [88, 42, 72, 66, 94, 89, 94, 82, 76, 89],
+  [62, 90, 48, 52, 55, 71, 58, 68, 80, 35],
+];
+
+let _piSelectedProduct = null;
+let _piFilter = 'all';
+
+function initProductsPage() {
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      renderPIProducts();
+      renderPIRecs();
+      renderPIMatrix();
+    }, 80);
+  });
+}
+
+function filterPIProducts(cat, btn) {
+  document.querySelectorAll('.pi-cat-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  _piFilter = cat;
+  renderPIProducts();
+}
+
+function renderPIProducts() {
+  const el = document.getElementById('pi-product-list');
+  if (!el) return;
+  const items = _piFilter === 'all' ? piProductsData : piProductsData.filter(p => p.cat === _piFilter);
+  const catColors = { insurance:'#1d4ed8', retirement:'#d97706', investment:'#0891b2', wealth:'#9d174d' };
+  el.innerHTML = items.map(p => `
+    <div class="pi-prod-row ${_piSelectedProduct === p.id ? 'selected' : ''}" onclick="openPIProductDetail('${p.id}')">
+      <div class="pi-prod-icon" style="background:${p.color}18;color:${p.color}"><i class="fas ${p.icon}"></i></div>
+      <div class="pi-prod-info">
+        <div class="pi-prod-name">${p.name}</div>
+        <div class="pi-prod-meta">${p.minPremium} · <span class="pi-risk-${p.riskLevel.toLowerCase()}">${p.riskLevel} Risk</span></div>
+      </div>
+      <i class="fas fa-chevron-right pi-prod-arrow"></i>
+    </div>`).join('');
+}
+
+function sortPIRecs(by) {
+  renderPIRecs(by);
+}
+
+function renderPIRecs(sortBy) {
+  const el = document.getElementById('pi-rec-list');
+  if (!el) return;
+  let recs = [...piRecsData];
+  if (sortBy === 'value') recs.sort((a,b) => b.score - a.score);
+  else if (sortBy === 'segment') recs.sort((a,b) => a.segment.localeCompare(b.segment));
+  else recs.sort((a,b) => b.score - a.score);
+
+  const scoreColor = s => s >= 85 ? '#22c55e' : s >= 70 ? '#f59e0b' : '#ef4444';
+  el.innerHTML = recs.map(r => {
+    const prod = piProductsData.find(p => p.id === r.productId);
+    const sc = scoreColor(r.score);
+    return `
+    <div class="pi-rec-card" onclick="openPIRecDetail('${r.id}')">
+      <div class="pi-rec-card-top">
+        <div class="pi-rec-avatar" style="background:${r.avatarGrad}">${r.initials}</div>
+        <div class="pi-rec-info">
+          <div class="pi-rec-name">${r.client}</div>
+          <div class="pi-rec-prod">${prod ? prod.name : r.productId}</div>
+        </div>
+        <div class="pi-rec-score-ring" style="border-color:${sc};color:${sc}">${r.score}</div>
+      </div>
+      <div class="pi-rec-reason">${r.reason.slice(0,90)}…</div>
+      <div class="pi-rec-footer">
+        <span class="pi-rec-value">${r.value}</span>
+        <span class="pi-rec-comm"><i class="fas fa-coins"></i> ${r.commission}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openPIProductDetail(id) {
+  _piSelectedProduct = id;
+  renderPIProducts();
+  const p = piProductsData.find(x => x.id === id);
+  if (!p) return;
+  const emptyEl  = document.getElementById('pi-detail-empty');
+  const panelEl  = document.getElementById('pi-detail-panel');
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (!panelEl) return;
+  panelEl.style.display = 'block';
+
+  // Find matching recommendations for this product
+  const recs = piRecsData.filter(r => r.productId === id);
+  const sc = s => s >= 85 ? '#22c55e' : s >= 70 ? '#f59e0b' : '#ef4444';
+
+  panelEl.innerHTML = `
+    <div class="pi-detail-panel">
+      <div class="pi-det-header" style="border-left:4px solid ${p.color}">
+        <div class="pi-det-icon" style="background:${p.color}18;color:${p.color}"><i class="fas ${p.icon}"></i></div>
+        <div class="pi-det-title-block">
+          <div class="pi-det-name">${p.name}</div>
+          <div class="pi-det-cat">${p.cat.charAt(0).toUpperCase()+p.cat.slice(1)} · ${p.riskLevel} Risk · ${p.minPremium}</div>
+        </div>
+      </div>
+      <p class="pi-det-desc">${p.desc}</p>
+      <div class="pi-det-section-label">Key Features</div>
+      <ul class="pi-det-features">
+        ${p.highlights.map(h => `<li><i class="fas fa-check" style="color:${p.color}"></i> ${h}</li>`).join('')}
+      </ul>
+      ${recs.length ? `
+        <div class="pi-det-section-label"><i class="fas fa-robot"></i> AI-Matched Clients (${recs.length})</div>
+        ${recs.map(r => `
+        <div class="pi-det-match-row" onclick="openPIRecDetail('${r.id}')">
+          <div class="pi-det-match-avatar" style="background:${r.avatarGrad}">${r.initials}</div>
+          <div class="pi-det-match-info">
+            <div class="pi-det-match-name">${r.client}</div>
+            <div class="pi-det-match-val">${r.value}</div>
+          </div>
+          <div class="pi-det-match-score" style="color:${sc(r.score)}">${r.score}</div>
+        </div>`).join('')}
+      ` : `<div class="pi-det-no-match">No current client matches — run propensity model to refresh.</div>`}
+      <div class="pi-det-actions">
+        <button class="btn btn-ai" onclick="runProductPropensity()"><i class="fas fa-robot"></i> Match Clients</button>
+        <button class="btn btn-outline" onclick="openQuickQuoteModal()"><i class="fas fa-calculator"></i> Quick Quote</button>
+      </div>
+    </div>`;
+}
+
+function openPIRecDetail(id) {
+  const r = piRecsData.find(x => x.id === id);
+  if (!r) return;
+  const p = piProductsData.find(x => x.id === r.productId);
+  const emptyEl  = document.getElementById('pi-detail-empty');
+  const panelEl  = document.getElementById('pi-detail-panel');
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (!panelEl) return;
+  panelEl.style.display = 'block';
+
+  const sc = r.score >= 85 ? '#22c55e' : r.score >= 70 ? '#f59e0b' : '#ef4444';
+  const scoreLabel = r.score >= 85 ? 'High Confidence' : r.score >= 70 ? 'Moderate' : 'Low';
+
+  panelEl.innerHTML = `
+    <div class="pi-detail-panel">
+      <div class="pi-det-rec-header">
+        <div class="pi-det-avatar" style="background:${r.avatarGrad}">${r.initials}</div>
+        <div class="pi-det-title-block">
+          <div class="pi-det-name">${r.client}</div>
+          <div class="pi-det-cat">Age ${r.age} · ${r.segment}</div>
+        </div>
+        <div class="pi-det-score-badge" style="background:${sc}18;color:${sc};border:1px solid ${sc}40">
+          ${r.score} <span style="font-size:10px;font-weight:400">${scoreLabel}</span>
+        </div>
+      </div>
+
+      <div class="pi-det-product-pill" style="background:${p ? p.color+'18' : '#f1f5f9'};color:${p ? p.color : '#334155'}">
+        <i class="fas ${p ? p.icon : 'fa-box'}"></i> ${p ? p.name : r.productId}
+      </div>
+
+      <div class="pi-det-section-label">Why AI recommends this</div>
+      <div class="pi-det-reason-box">${r.reason}</div>
+
+      <div class="pi-det-section-label">Suitability Factors</div>
+      <div class="pi-det-factors">
+        ${r.factors.map(f => `<span class="pi-det-factor"><i class="fas fa-check-circle"></i> ${f}</span>`).join('')}
+      </div>
+
+      <div class="pi-det-kpi-row">
+        <div class="pi-det-kpi"><div class="pi-det-kpi-val">${r.value}</div><div class="pi-det-kpi-lbl">Estimated Value</div></div>
+        <div class="pi-det-kpi"><div class="pi-det-kpi-val">${r.commission}</div><div class="pi-det-kpi-lbl">Commission</div></div>
+        <div class="pi-det-kpi"><div class="pi-det-kpi-val" style="color:${sc}">${r.score}</div><div class="pi-det-kpi-lbl">AI Score</div></div>
+      </div>
+
+      <div class="pi-det-section-label">Recommended Next Action</div>
+      <div class="pi-det-next-action"><i class="fas fa-arrow-right" style="color:#003087"></i> ${r.nextAction}</div>
+
+      <div class="pi-det-actions">
+        <button class="btn btn-ai" onclick="showToast('Opening brief for ${r.client}','info');navigateTo('upsell')"><i class="fas fa-paper-plane"></i> Generate Brief</button>
+        <button class="btn btn-outline" onclick="navigateTo('clients');showToast('Opening client record','info')"><i class="fas fa-user"></i> Client Record</button>
+      </div>
+    </div>`;
+}
+
+function renderPIMatrix() {
+  const wrap = document.getElementById('pi-matrix-wrap');
+  if (!wrap) return;
+  const scoreColor = s => s >= 85 ? '#22c55e' : s >= 70 ? '#f59e0b' : s >= 50 ? '#f97316' : '#e2e8f0';
+  const scoreBg    = s => s >= 85 ? '#dcfce7' : s >= 70 ? '#fef9c3' : s >= 50 ? '#fff7ed' : '#f8fafc';
+  const scoreText  = s => s >= 50 ? '#0f172a' : '#94a3b8';
+
+  let html = `<table class="pi-matrix-table">
+    <thead><tr><th></th>${piMatrixProducts.map(p => `<th>${p}</th>`).join('')}</tr></thead>
+    <tbody>`;
+  piMatrixClients.forEach((client, ci) => {
+    html += `<tr><td class="pi-matrix-client">${client}</td>`;
+    piMatrixScores[ci].forEach(score => {
+      html += `<td class="pi-matrix-cell" style="background:${scoreBg(score)};color:${scoreText(score)};border:1px solid ${scoreColor(score)}40">
+        <span style="font-weight:${score>=70?700:400}">${score}</span>
+      </td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function runProductPropensity() {
+  showToast('AI Propensity Model running across 8 clients × 13 products…', 'info');
+  setTimeout(() => {
+    showToast('Model complete: 8 high-confidence matches found. Top: Robert Chen × Deferred Annuity (96)', 'success');
+    renderPIMatrix();
+  }, 2400);
+}
+
+console.log('Product Intelligence Hub module loaded — piProductsData(13), piRecsData(8), propensity matrix ready');
+
+
+
