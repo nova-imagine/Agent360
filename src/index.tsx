@@ -303,6 +303,8 @@ function MainApp() {
         <div id="tpl-alerts"><PolicyAlertsPage /></div>
         <div id="tpl-pipeline-view"><PipelineViewPage /></div>
         <div id="tpl-help"><HelpPage /></div>
+        <div id="tpl-fna"><FNADiscoveryPage /></div>
+        <div id="tpl-delivery"><PolicyDeliveryPage /></div>
       </div>
 
       {/* ── Workflow Execution Modal ── */}
@@ -439,89 +441,97 @@ function Sidebar() {
       </div>
 
       <nav class="sidebar-nav">
+
+        {/* ── MAIN ── */}
         <div class="nav-section-label">MAIN</div>
         <a class="nav-item active" onclick="navigateTo('dashboard')" href="#">
-          <i class="fas fa-th-large"></i>
-          <span>Dashboard</span>
+          <i class="fas fa-th-large"></i><span>Dashboard</span>
         </a>
         <a class="nav-item" onclick="navigateTo('clients')" href="#">
-          <i class="fas fa-users"></i>
-          <span>Clients</span>
+          <i class="fas fa-users"></i><span>Clients</span>
           <span class="nav-badge">247</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('policies')" href="#">
-          <i class="fas fa-file-contract"></i>
-          <span>Policies</span>
-          <span class="nav-badge">1.8K</span>
+        <a class="nav-item" onclick="navigateTo('calendar')" href="#">
+          <i class="fas fa-calendar-alt"></i><span>Calendar</span>
+          <span class="nav-badge alert">3</span>
         </a>
-        <div class="nav-section-label">SALES</div>
+
+        {/* ── PROSPECTING (Phase 1–2) ── */}
+        <div class="nav-section-label">PROSPECTING</div>
         <a class="nav-item campaigns-nav" onclick="navigateTo('campaigns')" href="#">
-          <i class="fas fa-bullhorn"></i>
-          <span>Campaigns</span>
+          <i class="fas fa-bullhorn"></i><span>Campaigns</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
         </a>
         <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
-          <i class="fas fa-user-clock"></i>
-          <span>Leads</span>
+          <i class="fas fa-user-clock"></i><span>Leads</span>
           <span class="nav-badge" style="background:#f59e0b;color:#fff">14</span>
         </a>
+        <a class="nav-item" onclick="navigateTo('fna')" href="#">
+          <i class="fas fa-clipboard-list"></i><span>FNA Discovery</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">3</span>
+        </a>
+
+        {/* ── SALES (Phase 3–4) ── */}
+        <div class="nav-section-label">SALES</div>
         <a class="nav-item opportunities-nav" onclick="navigateTo('opportunities')" href="#">
-          <i class="fas fa-bolt"></i>
-          <span>Opportunities</span>
+          <i class="fas fa-bolt"></i><span>Opportunities</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff" id="opp-nav-badge">5</span>
         </a>
-        <a class="nav-item upsell-nav" onclick="navigateTo('upsell')" href="#">
-          <i class="fas fa-arrow-trend-up"></i>
-          <span>Upsell Track</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">8</span>
-        </a>
-
-        <a class="nav-item pipeline-view-nav" id="pipeline-view-nav" onclick="navigateTo('pipeline-view')" href="#">
-          <i class="fas fa-route"></i>
-          <span>Journey Pipeline</span>
-        </a>
-
         <a class="nav-item" onclick="navigateTo('products')" href="#">
-          <i class="fas fa-box-open"></i>
-          <span>Products</span>
+          <i class="fas fa-flask"></i><span>Products &amp; Illustrations</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('calendar')" href="#">
-          <i class="fas fa-calendar-alt"></i>
-          <span>Calendar</span>
-          <span class="nav-badge alert">3</span>
+        <a class="nav-item" onclick="navigateTo('sales')" href="#">
+          <i class="fas fa-file-signature"></i><span>E-App &amp; Proposals</span>
+          <span class="nav-badge" style="background:#003087;color:#fff">2</span>
         </a>
+        <a class="nav-item pipeline-view-nav" id="pipeline-view-nav" onclick="navigateTo('pipeline-view')" href="#">
+          <i class="fas fa-route"></i><span>Journey Pipeline</span>
+        </a>
+
+        {/* ── ONBOARDING (Phase 5–6) ── */}
+        <div class="nav-section-label">ONBOARDING</div>
+        <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
+          <i class="fas fa-microscope"></i><span>Underwriting</span>
+          <span class="nav-badge" style="background:#0891b2;color:white">4</span>
+        </a>
+        <a class="nav-item delivery-nav" onclick="navigateTo('delivery')" href="#">
+          <i class="fas fa-box-open"></i><span>Policy Delivery</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">2</span>
+        </a>
+
+        {/* ── SERVICE (Phase 7) ── */}
         <div class="nav-section-label">SERVICE</div>
+        <a class="nav-item" onclick="navigateTo('policies')" href="#">
+          <i class="fas fa-file-contract"></i><span>Policies</span>
+          <span class="nav-badge">1.8K</span>
+        </a>
         <a class="nav-item alerts-nav" onclick="navigateTo('alerts')" href="#">
-          <i class="fas fa-bell"></i>
-          <span>Policy Alerts</span>
+          <i class="fas fa-bell"></i><span>Policy Alerts</span>
           <span class="nav-badge alert" id="alerts-nav-badge">4</span>
         </a>
         <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
-          <i class="fas fa-file-medical-alt"></i>
-          <span>Claims</span>
+          <i class="fas fa-file-medical-alt"></i><span>Claims</span>
           <span class="nav-badge alert">7</span>
         </a>
-        <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
-          <i class="fas fa-microscope"></i>
-          <span>Underwriting</span>
-          <span class="nav-badge" style="background:#0891b2;color:white">4</span>
+        <a class="nav-item upsell-nav" onclick="navigateTo('upsell')" href="#">
+          <i class="fas fa-arrow-trend-up"></i><span>Upsell Track</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">8</span>
         </a>
 
+        {/* ── ANALYTICS ── */}
         <div class="nav-section-label">ANALYTICS</div>
         <a class="nav-item" onclick="navigateTo('reports')" href="#">
-          <i class="fas fa-chart-bar"></i>
-          <span>Business Intelligence</span>
+          <i class="fas fa-chart-bar"></i><span>Business Intelligence</span>
         </a>
         <a class="nav-item ai-insights-nav" onclick="navigateTo('ai-insights')" href="#">
-          <i class="fas fa-brain"></i>
-          <span>AI Insights</span>
+          <i class="fas fa-brain"></i><span>AI Insights</span>
           <span class="nav-badge ai-pulse">NEW</span>
         </a>
         <a class="nav-item ai-nav" onclick="navigateTo('ai-agents')" href="#">
-          <i class="fas fa-robot"></i>
-          <span>AI Agents</span>
+          <i class="fas fa-robot"></i><span>AI Agents</span>
           <span class="nav-badge ai-pulse">AI</span>
         </a>
+
       </nav>
 
       <div class="sidebar-footer">
@@ -3683,6 +3693,34 @@ function ProspectsPage() {
         </div>
       </div>
 
+      {/* ── AI Workflow Guidance Banner (Phase 1–2) ── */}
+      <div class="prosp-workflow-strip">
+        <div class="prosp-wf-step active" onclick="navigateTo('campaigns')">
+          <div class="prosp-wf-num">1</div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">Campaigns</div><div class="prosp-wf-sub">Generate leads</div></div>
+          <i class="fas fa-chevron-right prosp-wf-arrow"></i>
+        </div>
+        <div class="prosp-wf-step active" onclick="navigateTo('prospects')">
+          <div class="prosp-wf-num">2</div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">Qualify Lead</div><div class="prosp-wf-sub">AI score + PMAIL</div></div>
+          <i class="fas fa-chevron-right prosp-wf-arrow"></i>
+        </div>
+        <div class="prosp-wf-step" onclick="navigateTo('fna')">
+          <div class="prosp-wf-num">3</div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">FNA Discovery</div><div class="prosp-wf-sub">Fact-find + gap analysis</div></div>
+          <i class="fas fa-chevron-right prosp-wf-arrow"></i>
+        </div>
+        <div class="prosp-wf-step" onclick="navigateTo('products')">
+          <div class="prosp-wf-num">4</div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">Illustration</div><div class="prosp-wf-sub">Product + proposal</div></div>
+          <i class="fas fa-chevron-right prosp-wf-arrow"></i>
+        </div>
+        <div class="prosp-wf-step" onclick="navigateTo('opportunities')">
+          <div class="prosp-wf-num">5</div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">Opportunity</div><div class="prosp-wf-sub">Submit E-App</div></div>
+        </div>
+      </div>
+
       {/* ── AI Intel Banner ── */}
       <div class="prosp-ai-banner">
         <div class="prosp-ai-banner-left">
@@ -3697,6 +3735,7 @@ function ProspectsPage() {
           <span class="prosp-ai-chip amber"><i class="fas fa-clock"></i> 4 Meetings This Week</span>
           <span class="prosp-ai-chip green"><i class="fas fa-trophy"></i> 3 Ready to Convert</span>
         </div>
+        <button class="prosp-fna-btn" onclick="openNewFNA()"><i class="fas fa-clipboard-list"></i> Start FNA</button>
       </div>
 
       {/* ── Toolbar ── */}
@@ -4494,6 +4533,91 @@ function PoliciesPage() {
         </div>
       </div>
 
+      {/* ── Phase 7 AI Service Actions Bar ── */}
+      <div class="policy-ai-actions-bar">
+        <div class="paa-title"><i class="fas fa-robot"></i> AI Service Intelligence</div>
+        <button class="paa-btn paa-lapse" onclick="openLapseRiskDashboard()">
+          <i class="fas fa-heartbeat"></i>
+          <div><span class="paa-btn-val">6 Policies</span><span class="paa-btn-lbl">Lapse Risk</span></div>
+          <span class="paa-urgency-dot red"></span>
+        </button>
+        <button class="paa-btn paa-conversion" onclick="openConversionAlerts()">
+          <i class="fas fa-exchange-alt"></i>
+          <div><span class="paa-btn-val">4 Policies</span><span class="paa-btn-lbl">Conversion Window</span></div>
+          <span class="paa-urgency-dot amber"></span>
+        </button>
+        <button class="paa-btn paa-beneficiary" onclick="openBeneficiaryAudit()">
+          <i class="fas fa-user-shield"></i>
+          <div><span class="paa-btn-val">8 Policies</span><span class="paa-btn-lbl">Beneficiary Issues</span></div>
+          <span class="paa-urgency-dot amber"></span>
+        </button>
+        <button class="paa-btn paa-renewal" onclick="openRenewalCenter()">
+          <i class="fas fa-sync-alt"></i>
+          <div><span class="paa-btn-val">23 Due</span><span class="paa-btn-lbl">Renewals (90d)</span></div>
+          <span class="paa-urgency-dot green"></span>
+        </button>
+        <button class="paa-btn paa-premium" onclick="openPremiumChangeModal()">
+          <i class="fas fa-sliders-h"></i>
+          <div><span class="paa-btn-val">Model Impact</span><span class="paa-btn-lbl">Premium Change</span></div>
+        </button>
+        <button class="paa-btn paa-1035" onclick="open1035Analyzer()">
+          <i class="fas fa-random"></i>
+          <div><span class="paa-btn-val">3 Candidates</span><span class="paa-btn-lbl">1035 Exchange</span></div>
+          <span class="paa-urgency-dot green"></span>
+        </button>
+      </div>
+
+      {/* ── Lapse Risk Dashboard (Phase 7F) ── */}
+      <div class="lapse-risk-panel" id="lapse-risk-panel" style="display:none">
+        <div class="lrp-header">
+          <div class="lrp-header-left">
+            <i class="fas fa-heartbeat lrp-icon"></i>
+            <div>
+              <div class="lrp-title">AI Lapse Risk Dashboard <span class="lrp-live">LIVE</span></div>
+              <div class="lrp-sub">Policies scored weekly · AI predicts lapse 60–90 days early · cash value monitoring active</div>
+            </div>
+          </div>
+          <button class="lrp-close" onclick="closeLapseRiskDashboard()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="lrp-list" id="lrp-list">
+          {/* Rendered by initLapseRiskPanel() */}
+        </div>
+      </div>
+
+      {/* ── Conversion Alerts (Phase 7C) ── */}
+      <div class="conversion-panel" id="conversion-panel" style="display:none">
+        <div class="cvp-header">
+          <div class="cvp-header-left">
+            <i class="fas fa-exchange-alt cvp-icon"></i>
+            <div>
+              <div class="cvp-title">Term → Permanent Conversion Opportunities</div>
+              <div class="cvp-sub">AI identifies term policies approaching conversion window · no new underwriting required</div>
+            </div>
+          </div>
+          <button class="cvp-close" onclick="closeConversionAlerts()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cvp-list" id="cvp-list">
+          {/* Rendered by initConversionPanel() */}
+        </div>
+      </div>
+
+      {/* ── Beneficiary Audit (Phase 7B) ── */}
+      <div class="bene-audit-panel" id="bene-audit-panel" style="display:none">
+        <div class="bap-header">
+          <div class="bap-header-left">
+            <i class="fas fa-user-shield bap-icon"></i>
+            <div>
+              <div class="bap-title">AI Beneficiary Audit Scanner <span class="bap-live">LIVE</span></div>
+              <div class="bap-sub">Scans all policies for stale, incomplete, or legally problematic beneficiary designations</div>
+            </div>
+          </div>
+          <button class="bap-close" onclick="closeBeneficiaryAudit()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="bap-list" id="bap-list">
+          {/* Rendered by initBeneficiaryAudit() */}
+        </div>
+      </div>
+
       {/* ── Retention Intelligence & Lapse Prevention Banner ── */}
       <div class="ri-banner">
         <div class="ri-banner-left">
@@ -5110,6 +5234,27 @@ function ClaimsPage() {
             <div class="ckpi-lbl">Avg Payout Turnaround</div>
             <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.4d MoM</div>
           </div>
+        </div>
+      </div>
+
+      {/* ── AI Claims Navigator (Phase 7G) ── */}
+      <div class="claims-ai-navigator">
+        <div class="can-left">
+          <div class="can-icon"><i class="fas fa-robot"></i></div>
+          <div>
+            <div class="can-title">AI Claims Navigator <span class="can-live">LIVE</span></div>
+            <div class="can-sub">Guides beneficiaries through claim submission · pre-fills forms · tracks document receipt · detects contestability flags · ADB eligibility screening</div>
+          </div>
+        </div>
+        <div class="can-stats">
+          <div class="can-stat"><span class="can-val red">2</span><span class="can-lbl">Contestability Flags</span></div>
+          <div class="can-stat"><span class="can-val amber">1</span><span class="can-lbl">ADB Eligible</span></div>
+          <div class="can-stat"><span class="can-val blue">4</span><span class="can-lbl">Docs Missing</span></div>
+          <div class="can-stat"><span class="can-val green">61%</span><span class="can-lbl">Doc Completion</span></div>
+        </div>
+        <div class="can-actions">
+          <button class="can-btn primary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
+          <button class="can-btn ghost" onclick="openADBScreener()"><i class="fas fa-heartbeat"></i> ADB Screener</button>
         </div>
       </div>
 
@@ -7016,6 +7161,52 @@ function UnderwritingPage() {
         <div class="uw-tb-right">
           <button class="uw-tb-btn ghost" onclick="runUWScan()"><i class="fas fa-sync-alt"></i> AI Scan</button>
           <button class="uw-tb-btn primary" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> New Case</button>
+        </div>
+      </div>
+
+      {/* ── APS Triage + Requirement Tracker (Phase 5) ── */}
+      <div class="aps-triage-panel">
+        <div class="atp-header">
+          <div class="atp-header-left">
+            <i class="fas fa-file-medical atp-icon"></i>
+            <div>
+              <div class="atp-title">AI APS Triage &amp; Requirement Tracker <span class="atp-live">LIVE</span></div>
+              <div class="atp-sub">AI reads medical records (50–200 pages) · extracts diagnoses, Rx, lab dates · generates 1-page summary · auto-sends requirement requests</div>
+            </div>
+          </div>
+          <div class="atp-stats">
+            <div class="atp-stat"><span class="atp-val orange">2</span><span class="atp-lbl">APS In Review</span></div>
+            <div class="atp-stat"><span class="atp-val green">18</span><span class="atp-lbl">APS Avoided MTD</span></div>
+            <div class="atp-stat"><span class="atp-val blue">$5,760</span><span class="atp-lbl">Cost Saved</span></div>
+            <div class="atp-stat"><span class="atp-val cyan">3</span><span class="atp-lbl">Reqs Pending</span></div>
+          </div>
+          <button class="atp-btn" onclick="openAPSTriageModal()"><i class="fas fa-file-medical-alt"></i> APS Triage Center</button>
+        </div>
+        <div class="atp-req-track">
+          <div class="atp-req-item" onclick="openUWModal('UW-2026-0014')">
+            <div class="atp-req-client"><div class="mini-avatar jc" style="width:24px;height:24px;font-size:9px;background:#7c3aed">JC</div><span>Julia Chen · UW-2026-0014</span></div>
+            <div class="atp-reqs">
+              <span class="atp-req done" title="Rx History received"><i class="fas fa-check-circle"></i> Rx</span>
+              <span class="atp-req done" title="MIB check complete"><i class="fas fa-check-circle"></i> MIB</span>
+              <span class="atp-req pending" title="APS from Dr. Martinez pending"><i class="fas fa-clock"></i> APS <span class="atp-req-days">8d</span></span>
+              <span class="atp-req pending" title="Lab results pending"><i class="fas fa-clock"></i> Labs</span>
+              <span class="atp-req miss" title="Financial docs not received"><i class="fas fa-times-circle"></i> Financials</span>
+            </div>
+            <div class="atp-ai-summary">AI summary ready · <strong>T2DM controlled · BMI 28 · No CV events</strong> → Est. Table 2</div>
+            <button class="atp-follow-btn" onclick="event.stopPropagation();sendAPSFollowUp('UW-2026-0014')"><i class="fas fa-paper-plane"></i> Send Follow-up</button>
+          </div>
+          <div class="atp-req-item" onclick="openUWModal('UW-2026-0013')">
+            <div class="atp-req-client"><div class="mini-avatar jk2" style="width:24px;height:24px;font-size:9px;background:#0891b2">JK</div><span>John Kim · UW-2026-0013</span></div>
+            <div class="atp-reqs">
+              <span class="atp-req done"><i class="fas fa-check-circle"></i> Rx</span>
+              <span class="atp-req done"><i class="fas fa-check-circle"></i> MIB</span>
+              <span class="atp-req done"><i class="fas fa-check-circle"></i> MVR</span>
+              <span class="atp-req stale" title="APS overdue — 14+ days"><i class="fas fa-exclamation-triangle"></i> APS <span class="atp-req-days urgent">14d</span></span>
+              <span class="atp-req pending"><i class="fas fa-clock"></i> Labs</span>
+            </div>
+            <div class="atp-ai-summary">AI summary: <strong>Hypertension Stage 1 · BP 142/88 · Metoprolol 50mg</strong> → Est. Standard / Table 2</div>
+            <button class="atp-follow-btn urgent" onclick="event.stopPropagation();sendAPSFollowUp('UW-2026-0013')"><i class="fas fa-paper-plane"></i> Urgent Follow-up</button>
+          </div>
         </div>
       </div>
 
@@ -12422,6 +12613,404 @@ function HelpPage() {
           <button class="btn btn-outline" onclick="showToast('Connecting to live chat…','info')"><i class="fas fa-comments"></i> Live Chat</button>
           <button class="btn btn-primary" onclick="showToast('Calling support: 1-800-NYL-HELP','info')"><i class="fas fa-phone"></i> Call Support</button>
         </div>
+      </div>
+
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PHASE 1–2 · FNA DISCOVERY PAGE
+   Financial Needs Analysis — structured discovery capture
+   ═══════════════════════════════════════════════════════════ */
+function FNADiscoveryPage() {
+  return (
+    <div class="page fna-page">
+
+      {/* Header */}
+      <div class="fna-header">
+        <div class="fna-header-left">
+          <div class="fna-header-icon"><i class="fas fa-clipboard-list"></i></div>
+          <div>
+            <h2 class="fna-title">FNA Discovery Center</h2>
+            <p class="fna-sub">Financial Needs Analysis · structured fact-finding · AI-powered coverage gap calculation</p>
+          </div>
+        </div>
+        <div class="fna-header-actions">
+          <button class="btn btn-ai" onclick="openFNAAIAssist()"><i class="fas fa-robot"></i> AI Pre-fill from Notes</button>
+          <button class="btn btn-primary" onclick="openNewFNA()"><i class="fas fa-plus"></i> New FNA</button>
+        </div>
+      </div>
+
+      {/* AI Summary Bar */}
+      <div class="fna-ai-bar">
+        <div class="fna-ai-bar-icon"><i class="fas fa-brain"></i></div>
+        <div class="fna-ai-bar-body">
+          <span class="fna-ai-bar-label">AI Discovery Assistant · Analysing 3 in-progress FNAs</span>
+          <span class="fna-ai-bar-text"><strong>Coverage gaps detected:</strong> Patricia Nguyen — $240K income gap · Alex Rivera — no DI coverage · Nancy Foster — no LTC rider</span>
+        </div>
+        <div class="fna-ai-bar-kpis">
+          <div class="fna-ai-kpi"><span class="fna-ai-kpi-val">3</span><span class="fna-ai-kpi-lbl">In Progress</span></div>
+          <div class="fna-ai-kpi hi"><span class="fna-ai-kpi-val">5</span><span class="fna-ai-kpi-lbl">Gaps Found</span></div>
+          <div class="fna-ai-kpi"><span class="fna-ai-kpi-val">$1.4M</span><span class="fna-ai-kpi-lbl">Uncovered Need</span></div>
+          <div class="fna-ai-kpi good"><span class="fna-ai-kpi-val">8</span><span class="fna-ai-kpi-lbl">Completed</span></div>
+        </div>
+      </div>
+
+      {/* Phase workflow */}
+      <div class="fna-phase-bar">
+        <div class="fna-phase active" onclick="switchFNAPhase('discovery',this)">
+          <div class="fna-phase-num">1</div>
+          <div class="fna-phase-body"><div class="fna-phase-title">Prospect Discovery</div><div class="fna-phase-sub">Lead qualification · PMAIL</div></div>
+        </div>
+        <div class="fna-phase-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="fna-phase" onclick="switchFNAPhase('factfind',this)">
+          <div class="fna-phase-num">2</div>
+          <div class="fna-phase-body"><div class="fna-phase-title">Fact-Find</div><div class="fna-phase-sub">Personal · health · financial</div></div>
+        </div>
+        <div class="fna-phase-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="fna-phase" onclick="switchFNAPhase('gap',this)">
+          <div class="fna-phase-num">3</div>
+          <div class="fna-phase-body"><div class="fna-phase-title">Gap Analysis</div><div class="fna-phase-sub">AI coverage gap calc</div></div>
+        </div>
+        <div class="fna-phase-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="fna-phase" onclick="switchFNAPhase('recommend',this)">
+          <div class="fna-phase-num">4</div>
+          <div class="fna-phase-body"><div class="fna-phase-title">AI Recommendation</div><div class="fna-phase-sub">Product + face amount</div></div>
+        </div>
+        <div class="fna-phase-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="fna-phase" onclick="switchFNAPhase('illustration',this)">
+          <div class="fna-phase-num">5</div>
+          <div class="fna-phase-body"><div class="fna-phase-title">Run Illustration</div><div class="fna-phase-sub">→ E-App submission</div></div>
+        </div>
+      </div>
+
+      {/* Main 2-col body */}
+      <div class="fna-body">
+
+        {/* LEFT — Active FNA list */}
+        <div class="fna-list-col">
+          <div class="fna-list-header">
+            <span class="fna-list-title">Active FNAs</span>
+            <input type="text" class="fna-search" placeholder="Search client…" oninput="filterFNAs(this.value)" />
+          </div>
+          <div class="fna-list" id="fna-list">
+            {/* FNA Card 1 */}
+            <div class="fna-card fna-card-active" onclick="openFNADetail('FNA-001')" data-id="FNA-001">
+              <div class="fna-card-top">
+                <div class="fna-avatar fna-av-ar">AR</div>
+                <div class="fna-card-meta">
+                  <div class="fna-card-name">Alex Rivera</div>
+                  <div class="fna-card-sub">Executive · Age 34 · Phase 3 of 5</div>
+                </div>
+                <span class="fna-status-pill gap">Gap Found</span>
+              </div>
+              <div class="fna-card-progress">
+                <div class="fna-prog-bar"><div class="fna-prog-fill" style="width:60%"></div></div>
+                <span class="fna-prog-lbl">60% complete</span>
+              </div>
+              <div class="fna-card-chips">
+                <span class="fna-chip ins"><i class="fas fa-shield-alt"></i> Whole Life $500K</span>
+                <span class="fna-chip warn"><i class="fas fa-exclamation-triangle"></i> No DI</span>
+              </div>
+              <div class="fna-card-footer">
+                <span class="fna-foot-date"><i class="fas fa-clock"></i> Updated 2h ago</span>
+                <button class="fna-foot-btn" onclick="event.stopPropagation();continueFNA('FNA-001')">Continue <i class="fas fa-arrow-right"></i></button>
+              </div>
+            </div>
+            {/* FNA Card 2 */}
+            <div class="fna-card" onclick="openFNADetail('FNA-002')" data-id="FNA-002">
+              <div class="fna-card-top">
+                <div class="fna-avatar fna-av-nf">NF</div>
+                <div class="fna-card-meta">
+                  <div class="fna-card-name">Nancy Foster</div>
+                  <div class="fna-card-sub">Healthcare Director · Age 41 · Phase 2 of 5</div>
+                </div>
+                <span class="fna-status-pill progress">In Progress</span>
+              </div>
+              <div class="fna-card-progress">
+                <div class="fna-prog-bar"><div class="fna-prog-fill" style="width:40%"></div></div>
+                <span class="fna-prog-lbl">40% complete</span>
+              </div>
+              <div class="fna-card-chips">
+                <span class="fna-chip ins"><i class="fas fa-shield-alt"></i> Term $1M</span>
+                <span class="fna-chip warn"><i class="fas fa-exclamation-triangle"></i> No LTC</span>
+              </div>
+              <div class="fna-card-footer">
+                <span class="fna-foot-date"><i class="fas fa-clock"></i> Updated 1d ago</span>
+                <button class="fna-foot-btn" onclick="event.stopPropagation();continueFNA('FNA-002')">Continue <i class="fas fa-arrow-right"></i></button>
+              </div>
+            </div>
+            {/* FNA Card 3 */}
+            <div class="fna-card" onclick="openFNADetail('FNA-003')" data-id="FNA-003">
+              <div class="fna-card-top">
+                <div class="fna-avatar fna-av-pn">PN</div>
+                <div class="fna-card-meta">
+                  <div class="fna-card-name">Patricia Nguyen</div>
+                  <div class="fna-card-sub">Senior Manager · Age 48 · Phase 4 of 5</div>
+                </div>
+                <span class="fna-status-pill urgent">Urgent Gap</span>
+              </div>
+              <div class="fna-card-progress">
+                <div class="fna-prog-bar"><div class="fna-prog-fill urgent" style="width:80%"></div></div>
+                <span class="fna-prog-lbl">80% complete</span>
+              </div>
+              <div class="fna-card-chips">
+                <span class="fna-chip warn"><i class="fas fa-exclamation-circle"></i> $240K income gap</span>
+                <span class="fna-chip ins"><i class="fas fa-shield-alt"></i> UL top-up needed</span>
+              </div>
+              <div class="fna-card-footer">
+                <span class="fna-foot-date"><i class="fas fa-clock"></i> Updated today</span>
+                <button class="fna-foot-btn urgent" onclick="event.stopPropagation();continueFNA('FNA-003')">Act Now <i class="fas fa-arrow-right"></i></button>
+              </div>
+            </div>
+          </div>
+
+          {/* Completed FNA section */}
+          <div class="fna-completed-header" onclick="toggleFNACompleted(this)">
+            <i class="fas fa-check-circle" style="color:#059669"></i> 8 Completed FNAs
+            <i class="fas fa-chevron-down fna-toggle-icon"></i>
+          </div>
+          <div class="fna-completed-list" id="fna-completed-list" style="display:none">
+            <div class="fna-card fna-card-done" onclick="openFNADetail('FNA-004')">
+              <div class="fna-card-top">
+                <div class="fna-avatar fna-av-jw">JW</div>
+                <div class="fna-card-meta">
+                  <div class="fna-card-name">James Whitfield</div>
+                  <div class="fna-card-sub">Completed · Mar 2026 · Whole Life + Annuity</div>
+                </div>
+                <span class="fna-status-pill done">Complete</span>
+              </div>
+            </div>
+            <div class="fna-card fna-card-done" onclick="openFNADetail('FNA-005')">
+              <div class="fna-card-top">
+                <div class="fna-avatar fna-av-rc">RC</div>
+                <div class="fna-card-meta">
+                  <div class="fna-card-name">Robert Chen</div>
+                  <div class="fna-card-sub">Completed · Feb 2026 · Whole Life $1M</div>
+                </div>
+                <span class="fna-status-pill done">Complete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT — FNA Detail Panel */}
+        <div class="fna-detail-col" id="fna-detail-col">
+          <div class="fna-detail-empty" id="fna-detail-empty">
+            <i class="fas fa-clipboard-list fna-empty-icon"></i>
+            <strong>Select an FNA to view details</strong>
+            <p>Or start a new FNA with the button above</p>
+          </div>
+          <div id="fna-detail-panel" style="display:none">
+            {/* Rendered by JS */}
+          </div>
+        </div>
+
+      </div>
+
+      {/* New FNA Modal */}
+      <div id="new-fna-overlay" class="fna-overlay" style="display:none" onclick="closeFNAOverlay(event)">
+        <div class="fna-modal" onclick="event.stopPropagation()">
+          <div class="fna-modal-header">
+            <div class="fna-modal-title"><i class="fas fa-clipboard-list"></i> New Financial Needs Analysis</div>
+            <button class="fna-modal-close" onclick="closeFNAOverlay()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="fna-modal-body" id="new-fna-body">
+            {/* Step 1 — Client Selection */}
+            <div class="fna-step" id="fna-step-1">
+              <div class="fna-step-label">Step 1 of 5 — Client / Prospect</div>
+              <div class="fna-field-group">
+                <label class="fna-label">Select existing client or prospect</label>
+                <select class="fna-select">
+                  <option value="">— Choose client / prospect —</option>
+                  <option>Alex Rivera (Lead)</option>
+                  <option>Nancy Foster (Lead)</option>
+                  <option>James Whitfield (Client)</option>
+                  <option>Patricia Nguyen (Client)</option>
+                  <option>Robert Chen (Client)</option>
+                </select>
+                <div class="fna-or-line"><span>or</span></div>
+                <label class="fna-label">New prospect name</label>
+                <input type="text" class="fna-input" placeholder="Full name" />
+              </div>
+              <div class="fna-step-actions">
+                <button class="btn btn-primary" onclick="fnaNextStep(2)">Next — Personal Info <i class="fas fa-arrow-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PHASE 6 · POLICY DELIVERY PAGE
+   Delivery checklist · receipt capture · AI prep brief
+   ═══════════════════════════════════════════════════════════ */
+function PolicyDeliveryPage() {
+  return (
+    <div class="page delivery-page">
+
+      {/* Header */}
+      <div class="del-header">
+        <div class="del-header-left">
+          <div class="del-header-icon"><i class="fas fa-box-open"></i></div>
+          <div>
+            <h2 class="del-title">Policy Delivery</h2>
+            <p class="del-sub">Deliver issued policies · capture signed receipts · AI-powered delivery preparation · client onboarding</p>
+          </div>
+        </div>
+        <div class="del-header-actions">
+          <button class="btn btn-ai" onclick="openDeliveryAIPrep()"><i class="fas fa-robot"></i> AI Delivery Brief</button>
+          <button class="btn btn-primary" onclick="openNewDelivery()"><i class="fas fa-plus"></i> Schedule Delivery</button>
+        </div>
+      </div>
+
+      {/* AI Summary bar */}
+      <div class="del-ai-bar">
+        <div class="del-ai-icon"><i class="fas fa-brain"></i></div>
+        <div class="del-ai-body">
+          <span class="del-ai-label">AI Delivery Assistant · 2 policies ready for delivery · 1 overdue</span>
+          <span class="del-ai-text"><strong>Overdue:</strong> Kevin Park — Policy P-100350 issued 8 days ago, delivery not scheduled · <strong>Ready:</strong> Alex Rivera (Whole Life $500K) · Nancy Foster (Term $1M)</span>
+        </div>
+        <div class="del-ai-kpis">
+          <div class="del-ai-kpi warn"><span class="del-ai-kpi-val">1</span><span class="del-ai-kpi-lbl">Overdue</span></div>
+          <div class="del-ai-kpi"><span class="del-ai-kpi-val">2</span><span class="del-ai-kpi-lbl">Ready</span></div>
+          <div class="del-ai-kpi good"><span class="del-ai-kpi-val">11</span><span class="del-ai-kpi-lbl">Delivered YTD</span></div>
+          <div class="del-ai-kpi"><span class="del-ai-kpi-val">97%</span><span class="del-ai-kpi-lbl">Free-look Retained</span></div>
+        </div>
+      </div>
+
+      {/* KPI Strip */}
+      <div class="del-kpi-strip">
+        <div class="del-kpi" onclick="filterDeliveries('pending')">
+          <div class="del-kpi-icon" style="background:#fff7ed;color:#ea580c"><i class="fas fa-clock"></i></div>
+          <div class="del-kpi-data"><div class="del-kpi-val">2</div><div class="del-kpi-lbl">Pending Delivery</div></div>
+        </div>
+        <div class="del-kpi del-kpi-alert" onclick="filterDeliveries('overdue')">
+          <div class="del-kpi-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="del-kpi-data"><div class="del-kpi-val">1</div><div class="del-kpi-lbl">Overdue (&gt;7d)</div></div>
+        </div>
+        <div class="del-kpi" onclick="filterDeliveries('scheduled')">
+          <div class="del-kpi-icon" style="background:#f0fdf4;color:#059669"><i class="fas fa-calendar-check"></i></div>
+          <div class="del-kpi-data"><div class="del-kpi-val">1</div><div class="del-kpi-lbl">Scheduled</div></div>
+        </div>
+        <div class="del-kpi" onclick="filterDeliveries('delivered')">
+          <div class="del-kpi-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-check-double"></i></div>
+          <div class="del-kpi-data"><div class="del-kpi-val">11</div><div class="del-kpi-lbl">Delivered YTD</div></div>
+        </div>
+        <div class="del-kpi">
+          <div class="del-kpi-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-undo"></i></div>
+          <div class="del-kpi-data"><div class="del-kpi-val">0</div><div class="del-kpi-lbl">Free-Look Returns</div></div>
+        </div>
+        <div class="del-kpi">
+          <div class="del-kpi-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-dollar-sign"></i></div>
+          <div class="del-kpi-data"><div class="del-kpi-val">$48.2K</div><div class="del-kpi-lbl">Premium Delivered YTD</div></div>
+        </div>
+      </div>
+
+      {/* Main 2-col body */}
+      <div class="del-body">
+
+        {/* LEFT — Delivery Queue */}
+        <div class="del-list-col">
+
+          {/* Overdue */}
+          <div class="del-section-label del-section-urgent"><i class="fas fa-fire"></i> Overdue — Act Now</div>
+          <div class="del-card del-card-overdue" onclick="openDeliveryDetail('DEL-003')">
+            <div class="del-card-top">
+              <div class="del-avatar del-av-kp">KP</div>
+              <div class="del-card-meta">
+                <div class="del-card-name">Kevin Park</div>
+                <div class="del-card-pol">Policy P-100350 · Term Life $250K</div>
+              </div>
+              <span class="del-status-pill overdue"><i class="fas fa-fire"></i> 8d Overdue</span>
+            </div>
+            <div class="del-card-checklist">
+              <span class="del-check done"><i class="fas fa-check-circle"></i> Policy issued</span>
+              <span class="del-check done"><i class="fas fa-check-circle"></i> Documents ready</span>
+              <span class="del-check miss"><i class="fas fa-times-circle"></i> Delivery not scheduled</span>
+              <span class="del-check miss"><i class="fas fa-times-circle"></i> Receipt not captured</span>
+            </div>
+            <div class="del-card-footer">
+              <span class="del-premium">$3,200/yr premium</span>
+              <button class="del-action-btn urgent" onclick="event.stopPropagation();scheduleDelivery('DEL-003')"><i class="fas fa-calendar-plus"></i> Schedule Now</button>
+            </div>
+          </div>
+
+          {/* Pending */}
+          <div class="del-section-label"><i class="fas fa-hourglass-half"></i> Ready for Delivery</div>
+          <div class="del-card del-card-ready" onclick="openDeliveryDetail('DEL-001')">
+            <div class="del-card-top">
+              <div class="del-avatar del-av-ar">AR</div>
+              <div class="del-card-meta">
+                <div class="del-card-name">Alex Rivera</div>
+                <div class="del-card-pol">Policy P-100360 · Whole Life $500K</div>
+              </div>
+              <span class="del-status-pill ready">Ready</span>
+            </div>
+            <div class="del-card-checklist">
+              <span class="del-check done"><i class="fas fa-check-circle"></i> Policy issued Apr 8</span>
+              <span class="del-check done"><i class="fas fa-check-circle"></i> AI delivery brief ready</span>
+              <span class="del-check done"><i class="fas fa-check-circle"></i> Meeting Apr 14 scheduled</span>
+              <span class="del-check miss"><i class="fas fa-circle"></i> Receipt pending</span>
+            </div>
+            <div class="del-card-footer">
+              <span class="del-premium">$4,800/yr premium</span>
+              <button class="del-action-btn" onclick="event.stopPropagation();openDeliveryBrief('DEL-001')"><i class="fas fa-robot"></i> AI Brief</button>
+            </div>
+          </div>
+          <div class="del-card del-card-ready" onclick="openDeliveryDetail('DEL-002')">
+            <div class="del-card-top">
+              <div class="del-avatar del-av-nf">NF</div>
+              <div class="del-card-meta">
+                <div class="del-card-name">Nancy Foster</div>
+                <div class="del-card-pol">Policy P-100365 · Term Life $1M</div>
+              </div>
+              <span class="del-status-pill scheduled"><i class="fas fa-calendar-check"></i> Apr 16</span>
+            </div>
+            <div class="del-card-checklist">
+              <span class="del-check done"><i class="fas fa-check-circle"></i> Policy issued Apr 9</span>
+              <span class="del-check done"><i class="fas fa-check-circle"></i> AI brief generated</span>
+              <span class="del-check done"><i class="fas fa-check-circle"></i> Meeting Apr 16 confirmed</span>
+              <span class="del-check miss"><i class="fas fa-circle"></i> Receipt pending</span>
+            </div>
+            <div class="del-card-footer">
+              <span class="del-premium">$3,600/yr premium</span>
+              <button class="del-action-btn" onclick="event.stopPropagation();openDeliveryBrief('DEL-002')"><i class="fas fa-robot"></i> AI Brief</button>
+            </div>
+          </div>
+
+          {/* Recent Deliveries */}
+          <div class="del-section-label" style="margin-top:8px"><i class="fas fa-check-double" style="color:#059669"></i> Recently Delivered</div>
+          <div class="del-card del-card-done" onclick="openDeliveryDetail('DEL-R1')">
+            <div class="del-card-top">
+              <div class="del-avatar del-av-sw">SW</div>
+              <div class="del-card-meta">
+                <div class="del-card-name">Sandra Williams</div>
+                <div class="del-card-pol">P-100320 · Term $350K · Delivered Apr 3</div>
+              </div>
+              <span class="del-status-pill delivered"><i class="fas fa-check-double"></i> Delivered</span>
+            </div>
+            <div class="del-card-receipt"><i class="fas fa-file-signature"></i> Signed receipt on file · Premium active</div>
+          </div>
+        </div>
+
+        {/* RIGHT — Delivery Detail / AI Brief */}
+        <div class="del-detail-col" id="del-detail-col">
+          <div class="del-detail-empty" id="del-detail-empty">
+            <i class="fas fa-box-open del-empty-icon"></i>
+            <strong>Select a delivery to view details</strong>
+            <p>View AI delivery brief, checklist, and receipt capture</p>
+          </div>
+          <div id="del-detail-panel" style="display:none">
+            {/* Rendered by JS — see openDeliveryDetail() */}
+          </div>
+        </div>
+
       </div>
 
     </div>
