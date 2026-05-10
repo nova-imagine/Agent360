@@ -9276,130 +9276,124 @@ function SalesPage() {
 
 function ProductsPage() {
   return (
-    <div class="page products-page pi-page">
+    <div class="page pi-page">
 
-      {/* ── Header ── */}
+      {/* ══ HEADER ══ */}
       <div class="pi-header">
         <div class="pi-header-left">
           <div class="pi-header-icon"><i class="fas fa-flask"></i></div>
           <div>
             <h2 class="pi-title">Product Intelligence Hub</h2>
-            <p class="pi-sub">AI-powered product research · client suitability matching · propensity scoring · personalised recommendations</p>
+            <p class="pi-sub">Research products · match to client profiles · AI propensity scoring · personalised recommendations</p>
           </div>
         </div>
         <div class="pi-header-actions">
-          <button class="btn btn-outline" onclick="openProductSearch()"><i class="fas fa-search"></i> Research Product</button>
-          <button class="btn btn-ai" onclick="runProductPropensity()"><i class="fas fa-robot"></i> Run AI Propensity</button>
+          <button class="btn btn-outline" onclick="runProductPropensity()"><i class="fas fa-robot"></i> Re-run AI Model</button>
           <button class="btn btn-outline" onclick="openQuickQuoteModal()"><i class="fas fa-calculator"></i> Quick Quote</button>
         </div>
       </div>
 
-      {/* ── KPI Strip ── */}
-      <div class="pi-kpi-strip">
-        <div class="pi-kpi-tile">
-          <div class="pi-kpi-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-robot"></i></div>
-          <div class="pi-kpi-val">24</div>
-          <div class="pi-kpi-lbl">AI Recommendations</div>
-          <div class="pi-kpi-delta up">+6 this week</div>
+      {/* ══ SECTION 1 — AI SUMMARY BAR: What to do today ══ */}
+      <div class="pi-ai-summary-bar">
+        <div class="pi-ai-summary-icon"><i class="fas fa-brain"></i></div>
+        <div class="pi-ai-summary-body">
+          <span class="pi-ai-summary-label">AI Propensity Model · Last run today 9:00 AM</span>
+          <span class="pi-ai-summary-text">
+            <strong>3 urgent actions:</strong>
+            Patricia Nguyen — UL top-up needed (lapse risk, score 91) ·
+            Robert Chen — Deferred Annuity gap (score 96) ·
+            Linda Morrison — Fixed Annuity income gap (score 94)
+          </span>
         </div>
-        <div class="pi-kpi-tile">
-          <div class="pi-kpi-icon" style="background:#d1fae5;color:#065f46"><i class="fas fa-bullseye"></i></div>
-          <div class="pi-kpi-val">91%</div>
-          <div class="pi-kpi-lbl">Match Accuracy</div>
-          <div class="pi-kpi-delta up">AI propensity model</div>
-        </div>
-        <div class="pi-kpi-tile">
-          <div class="pi-kpi-icon" style="background:#fef3c7;color:#92400e"><i class="fas fa-fire"></i></div>
-          <div class="pi-kpi-val">8</div>
-          <div class="pi-kpi-lbl">Hot Matches</div>
-          <div class="pi-kpi-delta up">Score ≥85</div>
-        </div>
-        <div class="pi-kpi-tile">
-          <div class="pi-kpi-icon" style="background:#f3e8ff;color:#5b21b6"><i class="fas fa-shield-alt"></i></div>
-          <div class="pi-kpi-val">13</div>
-          <div class="pi-kpi-lbl">Active Products</div>
-          <div class="pi-kpi-delta neutral">NYL portfolio</div>
-        </div>
-        <div class="pi-kpi-tile">
-          <div class="pi-kpi-icon" style="background:#fce7f3;color:#9d174d"><i class="fas fa-dollar-sign"></i></div>
-          <div class="pi-kpi-val">$4.6M</div>
-          <div class="pi-kpi-lbl">Pipeline from Recs</div>
-          <div class="pi-kpi-delta up">+$840K vs last month</div>
+        <div class="pi-ai-summary-kpis">
+          <div class="pi-ai-sum-kpi"><span class="pi-ai-sum-val">8</span><span class="pi-ai-sum-lbl">Recommendations</span></div>
+          <div class="pi-ai-sum-kpi hi"><span class="pi-ai-sum-val">3</span><span class="pi-ai-sum-lbl">Urgent</span></div>
+          <div class="pi-ai-sum-kpi"><span class="pi-ai-sum-val">91%</span><span class="pi-ai-sum-lbl">Accuracy</span></div>
+          <div class="pi-ai-sum-kpi"><span class="pi-ai-sum-val">$4.6M</span><span class="pi-ai-sum-lbl">Pipeline</span></div>
         </div>
       </div>
 
-      {/* ── Main 3-column layout ── */}
-      <div class="pi-main">
+      {/* ══ MAIN BODY ══ */}
+      <div class="pi-body">
 
-        {/* ── LEFT: Product Catalog ── */}
-        <div class="pi-catalog-col">
-          <div class="pi-col-header">
-            <span class="pi-col-title"><i class="fas fa-layer-group"></i> Product Catalog</span>
-            <div class="pi-catalog-filters">
-              <button class="pi-cat-btn active" onclick="filterPIProducts('all',this)">All</button>
-              <button class="pi-cat-btn" onclick="filterPIProducts('insurance',this)">Insurance</button>
-              <button class="pi-cat-btn" onclick="filterPIProducts('retirement',this)">Retirement</button>
-              <button class="pi-cat-btn" onclick="filterPIProducts('investment',this)">Investment</button>
-              <button class="pi-cat-btn" onclick="filterPIProducts('wealth',this)">Wealth</button>
+        {/* ══ LEFT COLUMN: Products + Propensity Matrix ══ */}
+        <div class="pi-left-col">
+
+          {/* BLOCK A — Product Catalogue */}
+          <div class="pi-block">
+            <div class="pi-block-header">
+              <span class="pi-block-title"><i class="fas fa-layer-group"></i> Product Catalogue</span>
+              <div class="pi-cat-pills" id="pi-cat-pills">
+                <button class="pi-cat-pill active" onclick="filterPIProducts('all',this)">All (13)</button>
+                <button class="pi-cat-pill" onclick="filterPIProducts('insurance',this)">Insurance (6)</button>
+                <button class="pi-cat-pill" onclick="filterPIProducts('retirement',this)">Retirement (3)</button>
+                <button class="pi-cat-pill" onclick="filterPIProducts('investment',this)">Investment (3)</button>
+                <button class="pi-cat-pill" onclick="filterPIProducts('wealth',this)">Wealth (1)</button>
+              </div>
+            </div>
+            <div class="pi-product-grid" id="pi-product-list">
+              {/* rendered by renderPIProducts() */}
             </div>
           </div>
-          <div class="pi-product-list" id="pi-product-list">
-            {/* rendered by renderPIProducts() */}
-          </div>
-        </div>
 
-        {/* ── CENTRE: AI Recommendations ── */}
-        <div class="pi-recs-col">
-          <div class="pi-col-header">
-            <span class="pi-col-title"><i class="fas fa-robot"></i> AI Recommendations</span>
-            <select class="pi-rec-sort" onchange="sortPIRecs(this.value)">
-              <option value="score">By Score</option>
-              <option value="value">By Value</option>
-              <option value="segment">By Segment</option>
-            </select>
-          </div>
-
-          {/* AI Insight Banner */}
-          <div class="pi-ai-banner">
-            <div class="pi-ai-banner-icon"><i class="fas fa-brain"></i></div>
-            <div class="pi-ai-banner-body">
-              <strong>Propensity Model ran at 9:00 AM today.</strong> 3 high-confidence matches identified:
-              Robert Chen (Annuity, score 96) · Patricia Nguyen (UL top-up, score 91) · James Whitfield (ETF Core, score 88).
+          {/* BLOCK B — Propensity Matrix */}
+          <div class="pi-block">
+            <div class="pi-block-header">
+              <span class="pi-block-title"><i class="fas fa-th"></i> AI Propensity Matrix</span>
+              <span class="pi-block-sub">Client × Product fit scores — green = strong match, yellow = moderate, red = poor</span>
             </div>
-            <button class="pi-ai-banner-cta" onclick="runProductPropensity()">Refresh</button>
+            <div class="pi-matrix-scroll" id="pi-matrix-wrap">
+              {/* rendered by renderPIMatrix() */}
+            </div>
+            <div class="pi-matrix-legend">
+              <span class="pi-leg pi-leg-hot">≥85 Strong</span>
+              <span class="pi-leg pi-leg-med">70–84 Moderate</span>
+              <span class="pi-leg pi-leg-low">50–69 Possible</span>
+              <span class="pi-leg pi-leg-none">&lt;50 Poor</span>
+            </div>
           </div>
 
-          {/* Recommendation Cards */}
-          <div class="pi-rec-list" id="pi-rec-list">
-            {/* rendered by renderPIRecs() */}
-          </div>
         </div>
 
-        {/* ── RIGHT: Product Detail / Suitability ── */}
-        <div class="pi-detail-col" id="pi-detail-col">
-          <div class="pi-detail-empty" id="pi-detail-empty">
-            <div class="pi-detail-empty-icon"><i class="fas fa-flask"></i></div>
-            <p>Select a product or recommendation to view suitability analysis, features, and client match details</p>
+        {/* ══ RIGHT COLUMN: AI Recommendations + Detail Panel ══ */}
+        <div class="pi-right-col">
+
+          {/* BLOCK C — AI Recommendations */}
+          <div class="pi-block">
+            <div class="pi-block-header">
+              <span class="pi-block-title"><i class="fas fa-robot"></i> AI Recommendations</span>
+              <div class="pi-rec-sort-wrap">
+                <span class="pi-sort-lbl">Sort:</span>
+                <select class="pi-rec-sort" onchange="sortPIRecs(this.value)">
+                  <option value="score">By AI Score</option>
+                  <option value="value">By Value</option>
+                  <option value="segment">By Segment</option>
+                </select>
+              </div>
+            </div>
+            <p class="pi-block-desc">Each card shows a client–product match identified by AI. Click any card to see the full suitability analysis and next action.</p>
+            <div class="pi-rec-list" id="pi-rec-list">
+              {/* rendered by renderPIRecs() */}
+            </div>
           </div>
-          <div id="pi-detail-panel" style="display:none">
-            {/* rendered dynamically */}
+
+          {/* BLOCK D — Detail / Suitability Panel */}
+          <div class="pi-block pi-detail-block" id="pi-detail-block">
+            <div class="pi-detail-empty" id="pi-detail-empty">
+              <i class="fas fa-hand-pointer"></i>
+              <strong>Select a recommendation or product</strong>
+              <p>You'll see the full AI suitability analysis, matched client list, key product features, and recommended next action.</p>
+            </div>
+            <div id="pi-detail-panel" style="display:none">
+              {/* rendered dynamically */}
+            </div>
           </div>
+
         </div>
 
       </div>
 
-      {/* ── Bottom: Propensity Matrix ── */}
-      <div class="pi-matrix-section">
-        <div class="pi-matrix-header">
-          <span class="pi-col-title"><i class="fas fa-th"></i> Client × Product Propensity Matrix</span>
-          <span class="pi-matrix-sub">AI scores (0–100) showing likelihood of successful placement per client per product category</span>
-        </div>
-        <div class="pi-matrix-wrap" id="pi-matrix-wrap">
-          {/* rendered by renderPIMatrix() */}
-        </div>
-      </div>
-
-      {/* Quick Quote Modal (carried forward) */}
+      {/* Quick Quote Modal */}
       <div id="quick-quote-modal" style="display:none" onclick="closeQuickQuoteModal(event)">
         <div class="qq-modal">
           <div class="qq-header">
