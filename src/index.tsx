@@ -13060,16 +13060,16 @@ function LeadsPage() {
       {/* ── FILTER BAR ── */}
       <div class="leads-filter-bar">
         <div class="leads-filter-tabs">
-          <button class="leads-filter-tab active" onclick="filterLeadsByStatus('all')" id="leads-tab-all">
+          <button class="leads-filter-tab active" data-filter="all" onclick="filterLeadsByStatus('all')" id="leads-tab-all">
             All <span class="leads-tab-count" id="leads-count-all">14</span>
           </button>
-          <button class="leads-filter-tab" onclick="filterLeadsByStatus('new')" id="leads-tab-new">
+          <button class="leads-filter-tab" data-filter="new" onclick="filterLeadsByStatus('new')" id="leads-tab-new">
             <i class="fas fa-star"></i> New <span class="leads-tab-count" id="leads-count-new">3</span>
           </button>
-          <button class="leads-filter-tab" onclick="filterLeadsByStatus('qualified')" id="leads-tab-qualified">
+          <button class="leads-filter-tab" data-filter="qualified" onclick="filterLeadsByStatus('qualified')" id="leads-tab-qualified">
             <i class="fas fa-check-circle"></i> Qualified <span class="leads-tab-count" id="leads-count-qualified">3</span>
           </button>
-          <button class="leads-filter-tab" onclick="filterLeadsByStatus('converted')" id="leads-tab-converted">
+          <button class="leads-filter-tab" data-filter="converted" onclick="filterLeadsByStatus('converted')" id="leads-tab-converted">
             <i class="fas fa-user-check"></i> Converted <span class="leads-tab-count" id="leads-count-converted">8</span>
           </button>
         </div>

@@ -24873,12 +24873,21 @@ function selectLead(id) {
   document.querySelectorAll('.lead-card').forEach(function(c){ c.classList.remove('lead-card-active'); });
   var card = document.getElementById('lead-' + id);
   if (card) card.classList.add('lead-card-active');
+  // Show detail panel, hide empty state
+  var emptyState = document.getElementById('lead-detail-empty');
+  var panel = document.getElementById('lead-detail-panel');
+  if (emptyState) emptyState.style.display = 'none';
+  if (panel) panel.style.display = 'block';
   renderLeadDetail(id);
 }
 
 function renderLeadDetail(id) {
   var panel = document.getElementById('lead-detail-panel');
   if (!panel) return;
+  // Always ensure panel is visible and empty state is hidden
+  var emptyState = document.getElementById('lead-detail-empty');
+  if (emptyState) emptyState.style.display = 'none';
+  panel.style.display = 'block';
   var lead = leadsData.find(function(l){ return l.id === id; });
   if (!lead) return;
   var pp = propensityProfiles[id];
