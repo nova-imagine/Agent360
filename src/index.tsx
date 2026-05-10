@@ -9466,6 +9466,165 @@ function SalesPage() {
         </div>
       </div>
 
+      {/* ════════════════════════════════════════════════════════
+          PHASE 4 — APPLICATION SUBMISSION HUB
+          ════════════════════════════════════════════════════════ */}
+      <div class="p4-hub-section">
+
+        {/* ── Hub Header ── */}
+        <div class="p4-hub-header">
+          <div class="p4-hub-header-left">
+            <div class="p4-hub-icon"><i class="fas fa-paper-plane"></i></div>
+            <div>
+              <div class="p4-hub-title">Phase 4 — Application Submission Center</div>
+              <div class="p4-hub-sub">Smart e-App · Good Order Check · Exam Scheduler · Accelerated UW · APS Predictor · Financial Justification</div>
+            </div>
+          </div>
+          <div class="p4-hub-kpis">
+            <div class="p4-hub-kpi blue"><div class="p4-hub-kpi-val">3</div><div class="p4-hub-kpi-lbl">Apps Ready</div></div>
+            <div class="p4-hub-kpi green"><div class="p4-hub-kpi-val">1</div><div class="p4-hub-kpi-lbl">STP Eligible</div></div>
+            <div class="p4-hub-kpi amber"><div class="p4-hub-kpi-val">2</div><div class="p4-hub-kpi-lbl">Exam Required</div></div>
+            <div class="p4-hub-kpi purple"><div class="p4-hub-kpi-val">$27.6K</div><div class="p4-hub-kpi-lbl">Commission Pipeline</div></div>
+          </div>
+        </div>
+
+        {/* ── Phase Progress Bar ── */}
+        <div class="p4-phase-bar">
+          <div class="p4-phase-step done"><div class="p4-phase-dot"><i class="fas fa-check"></i></div><div class="p4-phase-lbl">Prospecting</div></div>
+          <div class="p4-phase-connector done"></div>
+          <div class="p4-phase-step done"><div class="p4-phase-dot"><i class="fas fa-check"></i></div><div class="p4-phase-lbl">Discovery</div></div>
+          <div class="p4-phase-connector done"></div>
+          <div class="p4-phase-step done"><div class="p4-phase-dot"><i class="fas fa-check"></i></div><div class="p4-phase-lbl">Illustration</div></div>
+          <div class="p4-phase-connector done"></div>
+          <div class="p4-phase-step active"><div class="p4-phase-dot active"><i class="fas fa-file-signature"></i></div><div class="p4-phase-lbl">Application</div></div>
+          <div class="p4-phase-connector"></div>
+          <div class="p4-phase-step"><div class="p4-phase-dot"><i class="fas fa-microscope"></i></div><div class="p4-phase-lbl">Underwriting</div></div>
+          <div class="p4-phase-connector"></div>
+          <div class="p4-phase-step"><div class="p4-phase-dot"><i class="fas fa-handshake"></i></div><div class="p4-phase-lbl">Delivery</div></div>
+        </div>
+
+        {/* ── AI Intelligence Banner ── */}
+        <div class="p4-ai-banner">
+          <div class="p4-ai-banner-left">
+            <i class="fas fa-robot p4-ai-icon"></i>
+            <div>
+              <div class="p4-ai-banner-title">AI Application Intelligence <span class="p4-ai-live-dot"></span></div>
+              <div class="p4-ai-banner-sub">Smart pre-fill · Good Order validation · STP scoring · Exam routing · APS prediction · Financial justification drafting</div>
+            </div>
+          </div>
+          <div class="p4-ai-banner-chips">
+            <div class="p4-ai-chip green"><i class="fas fa-bolt"></i><span class="p4-ai-chip-val">94%</span><span class="p4-ai-chip-lbl">Top STP Score</span></div>
+            <div class="p4-ai-chip blue"><i class="fas fa-magic"></i><span class="p4-ai-chip-val">85%</span><span class="p4-ai-chip-lbl">Avg Pre-fill</span></div>
+            <div class="p4-ai-chip amber"><i class="fas fa-clock"></i><span class="p4-ai-chip-val">~28 min</span><span class="p4-ai-chip-lbl">Time Saved / App</span></div>
+          </div>
+        </div>
+
+        {/* ── Two-column layout: prospect queue (left) + detail panel (right) ── */}
+        <div class="p4-body">
+
+          {/* Left: Prospect Application Queue */}
+          <div class="p4-left-col">
+            <div class="p4-col-title"><i class="fas fa-users"></i> Application Queue</div>
+            <div id="p4-submission-hub" class="p4-app-queue">
+              {/* Rendered by p4RenderSubmissionHub() */}
+            </div>
+          </div>
+
+          {/* Right: Detail / Action Panel */}
+          <div class="p4-right-col" id="p4-detail-panel">
+            <div class="p4-empty-state">
+              <i class="fas fa-hand-pointer"></i>
+              <div>Select a prospect from the queue to view details, run AI tools, and launch their Smart e-App.</div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── Case Tracker ── */}
+        <div class="p4-tracker-section">
+          <div class="p4-tracker-header">
+            <div class="p4-tracker-title"><i class="fas fa-tasks"></i> New Business Case Tracker</div>
+            <div class="p4-tracker-sub">Live status · Requirements checklist · Commission tracking</div>
+          </div>
+          <div id="p4-case-tracker" class="p4-case-grid">
+            {/* Rendered by p4RenderCaseTracker() */}
+          </div>
+        </div>
+
+      </div>
+
+      {/* ════ PHASE 4 OVERLAYS ════ */}
+
+      {/* ── Good Order Check Overlay ── */}
+      <div id="p4-goc-overlay" class="p4-overlay" style="display:none" onclick="p4CloseGOC(event)">
+        <div class="p4-overlay-modal" onclick="event.stopPropagation()">
+          <div class="p4-overlay-header green">
+            <div class="p4-overlay-header-left">
+              <i class="fas fa-check-double"></i>
+              <span>Good Order Check — AI Application Validator</span>
+            </div>
+            <button class="p4-overlay-close" onclick="p4CloseGOCForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p4-overlay-body" id="p4-goc-body"></div>
+        </div>
+      </div>
+
+      {/* ── Exam Scheduler Overlay ── */}
+      <div id="p4-exam-overlay" class="p4-overlay" style="display:none" onclick="p4CloseExam(event)">
+        <div class="p4-overlay-modal" onclick="event.stopPropagation()">
+          <div class="p4-overlay-header teal">
+            <div class="p4-overlay-header-left">
+              <i class="fas fa-stethoscope"></i>
+              <span>AI Exam Scheduler — Paramedical &amp; Accelerated UW Routing</span>
+            </div>
+            <button class="p4-overlay-close" onclick="p4CloseExamForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p4-overlay-body" id="p4-exam-body"></div>
+        </div>
+      </div>
+
+      {/* ── Accelerated UW Eligibility Overlay ── */}
+      <div id="p4-auw-overlay" class="p4-overlay" style="display:none" onclick="p4CloseAccelUW(event)">
+        <div class="p4-overlay-modal" onclick="event.stopPropagation()">
+          <div class="p4-overlay-header blue">
+            <div class="p4-overlay-header-left">
+              <i class="fas fa-bolt"></i>
+              <span>Accelerated UW Eligibility — STP Probability Engine</span>
+            </div>
+            <button class="p4-overlay-close" onclick="p4CloseAccelUWForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p4-overlay-body" id="p4-auw-body"></div>
+        </div>
+      </div>
+
+      {/* ── APS Predictor Overlay ── */}
+      <div id="p4-aps-overlay" class="p4-overlay" style="display:none" onclick="p4CloseAPS(event)">
+        <div class="p4-overlay-modal" onclick="event.stopPropagation()">
+          <div class="p4-overlay-header red">
+            <div class="p4-overlay-header-left">
+              <i class="fas fa-file-medical-alt"></i>
+              <span>APS Predictor — Attending Physician Statement Risk Analysis</span>
+            </div>
+            <button class="p4-overlay-close" onclick="p4CloseAPSForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p4-overlay-body" id="p4-aps-body"></div>
+        </div>
+      </div>
+
+      {/* ── Financial Justification Builder Overlay ── */}
+      <div id="p4-finj-overlay" class="p4-overlay" style="display:none" onclick="p4CloseFinJust(event)">
+        <div class="p4-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p4-overlay-header purple">
+            <div class="p4-overlay-header-left">
+              <i class="fas fa-dollar-sign"></i>
+              <span>Financial Justification Builder — AI Narrative Generator</span>
+            </div>
+            <button class="p4-overlay-close" onclick="p4CloseFinJustForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p4-overlay-body" id="p4-finj-body"></div>
+        </div>
+      </div>
+
     </div>
   )
 }
