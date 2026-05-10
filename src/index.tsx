@@ -305,6 +305,7 @@ function MainApp() {
         <div id="tpl-help"><HelpPage /></div>
         <div id="tpl-fna"><FNADiscoveryPage /></div>
         <div id="tpl-delivery"><PolicyDeliveryPage /></div>
+        <div id="tpl-leads"><LeadsPage /></div>
       </div>
 
       {/* ── Workflow Execution Modal ── */}
@@ -458,13 +459,17 @@ function Sidebar() {
 
         {/* ── PROSPECTING (Phase 1–2) ── */}
         <div class="nav-section-label">PROSPECTING</div>
+        <a class="nav-item leads-nav" onclick="navigateTo('leads')" href="#">
+          <i class="fas fa-user-plus"></i><span>Leads</span>
+          <span class="nav-badge" style="background:#f59e0b;color:#fff" id="leads-nav-badge">6</span>
+        </a>
         <a class="nav-item campaigns-nav" onclick="navigateTo('campaigns')" href="#">
           <i class="fas fa-bullhorn"></i><span>Campaigns</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">5</span>
         </a>
         <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
-          <i class="fas fa-user-clock"></i><span>Leads</span>
-          <span class="nav-badge" style="background:#f59e0b;color:#fff">14</span>
+          <i class="fas fa-user-clock"></i><span>Prospects</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">14</span>
         </a>
         <a class="nav-item" onclick="navigateTo('fna')" href="#">
           <i class="fas fa-clipboard-list"></i><span>FNA Discovery</span>
@@ -13012,6 +13017,146 @@ function PolicyDeliveryPage() {
         </div>
 
       </div>
+
+    </div>
+  )
+}
+
+// ============================================================
+// LEADS PAGE — Phase 1 Prospecting & Lead Identification
+// ============================================================
+function LeadsPage() {
+  return (
+    <div class="leads-page">
+
+      {/* ── STAT STRIP ── */}
+      <div class="lead-stats-strip">
+        <div class="lead-stat-card">
+          <div class="lead-stat-num" id="lead-stat-total">14</div>
+          <div class="lead-stat-lbl">Total Leads</div>
+        </div>
+        <div class="lead-stat-card lead-stat-new">
+          <div class="lead-stat-num" id="lead-stat-new">3</div>
+          <div class="lead-stat-lbl"><i class="fas fa-star"></i> New</div>
+        </div>
+        <div class="lead-stat-card lead-stat-qualified">
+          <div class="lead-stat-num" id="lead-stat-qualified">3</div>
+          <div class="lead-stat-lbl"><i class="fas fa-check-circle"></i> Qualified</div>
+        </div>
+        <div class="lead-stat-card lead-stat-converted">
+          <div class="lead-stat-num" id="lead-stat-converted">8</div>
+          <div class="lead-stat-lbl"><i class="fas fa-user-check"></i> Converted</div>
+        </div>
+        <div class="lead-stat-card lead-stat-avg">
+          <div class="lead-stat-num" id="lead-stat-avg">84</div>
+          <div class="lead-stat-lbl"><i class="fas fa-brain"></i> Avg AI Score</div>
+        </div>
+        <div class="lead-stat-card lead-stat-pipeline">
+          <div class="lead-stat-num" id="lead-stat-pipeline">$2.4M</div>
+          <div class="lead-stat-lbl"><i class="fas fa-dollar-sign"></i> Est. Pipeline</div>
+        </div>
+      </div>
+
+      {/* ── FILTER BAR ── */}
+      <div class="leads-filter-bar">
+        <div class="leads-filter-tabs">
+          <button class="leads-filter-tab active" onclick="filterLeadsByStatus('all')" id="leads-tab-all">
+            All <span class="leads-tab-count" id="leads-count-all">14</span>
+          </button>
+          <button class="leads-filter-tab" onclick="filterLeadsByStatus('new')" id="leads-tab-new">
+            <i class="fas fa-star"></i> New <span class="leads-tab-count" id="leads-count-new">3</span>
+          </button>
+          <button class="leads-filter-tab" onclick="filterLeadsByStatus('qualified')" id="leads-tab-qualified">
+            <i class="fas fa-check-circle"></i> Qualified <span class="leads-tab-count" id="leads-count-qualified">3</span>
+          </button>
+          <button class="leads-filter-tab" onclick="filterLeadsByStatus('converted')" id="leads-tab-converted">
+            <i class="fas fa-user-check"></i> Converted <span class="leads-tab-count" id="leads-count-converted">8</span>
+          </button>
+        </div>
+        <div class="leads-search-wrap">
+          <i class="fas fa-search leads-search-icon"></i>
+          <input
+            type="text"
+            class="leads-search-input"
+            id="leads-search-input"
+            placeholder="Search leads by name, trigger, source..."
+            oninput="searchLeads(this.value)"
+          />
+        </div>
+        <button class="leads-add-btn" onclick="showToast('Add Lead form coming soon','info')">
+          <i class="fas fa-plus"></i> Add Lead
+        </button>
+      </div>
+
+      {/* ── AI BANNER ── */}
+      <div class="leads-ai-banner">
+        <i class="fas fa-robot leads-ai-icon"></i>
+        <div class="leads-ai-text">
+          <strong>AI Lead Intelligence</strong> — 3 new leads identified this week.
+          Top priority: <strong>L009 (Marcus Thompson)</strong> — New baby + $195K income matches 61 closed cases.
+          Run PMAIL qualification to advance to prospect pipeline.
+        </div>
+        <button class="leads-ai-action-btn" onclick="selectLead('L009')">
+          <i class="fas fa-arrow-right"></i> Review Top Lead
+        </button>
+      </div>
+
+      {/* ── TWO-COLUMN BODY ── */}
+      <div class="leads-body">
+
+        {/* LEFT — Lead List */}
+        <div class="leads-list-col">
+          <div class="leads-list-header">
+            <span class="leads-list-label" id="leads-list-label">All Leads (14)</span>
+            <select class="leads-sort-select" onchange="sortLeads(this.value)">
+              <option value="score">Sort: AI Score</option>
+              <option value="date">Sort: Entry Date</option>
+              <option value="name">Sort: Name</option>
+            </select>
+          </div>
+          <div id="leads-list-container">
+            {/* Rendered by renderLeadsList() */}
+            <div class="leads-empty" id="leads-empty-state" style="display:none">
+              <i class="fas fa-inbox" style="font-size:2rem;color:#cbd5e1;margin-bottom:8px"></i>
+              <div>No leads match this filter</div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT — Lead Detail Panel */}
+        <div class="lead-detail-col" id="lead-detail-col">
+          <div class="lead-detail-empty" id="lead-detail-empty">
+            <i class="fas fa-user-plus lead-detail-empty-icon"></i>
+            <strong>Select a lead to view details</strong>
+            <p>View AI score, PMAIL qualification status, propensity match, and conversion options</p>
+          </div>
+          <div id="lead-detail-panel" style="display:none">
+            {/* Rendered by renderLeadDetail() */}
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── PMAIL MODAL (hidden, rendered by JS) ── */}
+      <div class="pmail-overlay" id="pmail-overlay" style="display:none" onclick="closePMAILModal()">
+        <div class="pmail-modal" id="pmail-modal" onclick="event.stopPropagation()">
+          <div id="pmail-modal-inner">
+            {/* Rendered by buildPMAILModalHTML() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ── CONVERT TO PROSPECT MODAL (hidden, rendered by JS) ── */}
+      <div class="pmail-overlay" id="convert-overlay" style="display:none" onclick="closeConvertModal()">
+        <div class="convert-modal" id="convert-modal" onclick="event.stopPropagation()">
+          <div id="convert-modal-inner">
+            {/* Rendered by openConvertToProspect() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ── TOAST ── */}
+      <div class="phase1-toast" id="phase1-toast"></div>
 
     </div>
   )
