@@ -9472,135 +9472,169 @@ function SalesPage() {
 
 function ProductsPage() {
   return (
-    <div class="page pi-page">
+    <div class="page p3-page">
 
-      {/* ══ HEADER ══ */}
-      <div class="pi-header">
-        <div class="pi-header-left">
-          <div class="pi-header-icon"><i class="fas fa-flask"></i></div>
+      {/* ══ PHASE 3 HEADER ══ */}
+      <div class="p3-header">
+        <div class="p3-header-left">
+          <div class="p3-header-icon"><i class="fas fa-file-contract"></i></div>
           <div>
-            <h2 class="pi-title">Product Intelligence Hub</h2>
-            <p class="pi-sub">Research products · match to client profiles · AI propensity scoring · personalised recommendations</p>
+            <h2 class="p3-title">Product Illustration &amp; Proposal Hub</h2>
+            <p class="p3-sub">Phase 3 · Run illustrations · Build multi-product proposals · AI objection coaching · NAIC compliance · Signature capture</p>
           </div>
         </div>
-        <div class="pi-header-actions">
-          <button class="btn btn-outline" onclick="runProductPropensity()"><i class="fas fa-robot"></i> Re-run AI Model</button>
-          <button class="btn btn-outline" onclick="openQuickQuoteModal()"><i class="fas fa-calculator"></i> Quick Quote</button>
-        </div>
-      </div>
-
-      {/* ══ SECTION 1 — AI SUMMARY BAR: What to do today ══ */}
-      <div class="pi-ai-summary-bar">
-        <div class="pi-ai-summary-icon"><i class="fas fa-brain"></i></div>
-        <div class="pi-ai-summary-body">
-          <span class="pi-ai-summary-label">AI Propensity Model · Last run today 9:00 AM</span>
-          <span class="pi-ai-summary-text">
-            <strong>3 urgent actions:</strong>
-            Patricia Nguyen — UL top-up needed (lapse risk, score 91) ·
-            Robert Chen — Deferred Annuity gap (score 96) ·
-            Linda Morrison — Fixed Annuity income gap (score 94)
-          </span>
-        </div>
-        <div class="pi-ai-summary-kpis">
-          <div class="pi-ai-sum-kpi"><span class="pi-ai-sum-val">8</span><span class="pi-ai-sum-lbl">Recommendations</span></div>
-          <div class="pi-ai-sum-kpi hi"><span class="pi-ai-sum-val">3</span><span class="pi-ai-sum-lbl">Urgent</span></div>
-          <div class="pi-ai-sum-kpi"><span class="pi-ai-sum-val">91%</span><span class="pi-ai-sum-lbl">Accuracy</span></div>
-          <div class="pi-ai-sum-kpi"><span class="pi-ai-sum-val">$4.6M</span><span class="pi-ai-sum-lbl">Pipeline</span></div>
+        <div class="p3-header-actions">
+          <button class="btn btn-outline" onclick="p3OpenObjCoach()"><i class="fas fa-comments"></i> Objection Coach</button>
+          <button class="btn btn-ai"     onclick="p3RunAIComparison()"><i class="fas fa-robot"></i> AI Compare</button>
+          <button class="btn btn-primary" onclick="p3OpenIllustrationEngine()"><i class="fas fa-calculator"></i> Run Illustration</button>
         </div>
       </div>
 
-      {/* ══ MAIN BODY ══ */}
-      <div class="pi-body">
+      {/* ══ AI SUMMARY BAR ══ */}
+      <div class="p3-ai-bar">
+        <div class="p3-ai-bar-icon"><i class="fas fa-brain"></i></div>
+        <div class="p3-ai-bar-body">
+          <span class="p3-ai-bar-label">AI Illustration Assistant · 3 prospects ready for illustration</span>
+          <span class="p3-ai-bar-text"><strong>Urgent:</strong> Patricia Nguyen — UL lapse risk 68 days · Alex Rivera — DI gap unaddressed · Nancy Foster — LTC hybrid proposal pending compliance review</span>
+        </div>
+        <div class="p3-ai-bar-kpis">
+          <div class="p3-ai-kpi"><span class="p3-ai-kpi-val">3</span><span class="p3-ai-kpi-lbl">Prospects</span></div>
+          <div class="p3-ai-kpi hi"><span class="p3-ai-kpi-val">1</span><span class="p3-ai-kpi-lbl">Urgent</span></div>
+          <div class="p3-ai-kpi"><span class="p3-ai-kpi-val">$17.3K</span><span class="p3-ai-kpi-lbl">Annual Premium</span></div>
+          <div class="p3-ai-kpi good"><span class="p3-ai-kpi-val">3</span><span class="p3-ai-kpi-lbl">Proposals Ready</span></div>
+        </div>
+      </div>
 
-        {/* ══ LEFT COLUMN: Products + Propensity Matrix ══ */}
-        <div class="pi-left-col">
+      {/* ══ PHASE WORKFLOW BAR ══ */}
+      <div class="p3-phase-bar">
+        <div class="p3-phase done">
+          <div class="p3-phase-num"><i class="fas fa-check"></i></div>
+          <div class="p3-phase-body"><div class="p3-phase-title">Prospect Discovery</div><div class="p3-phase-sub">PMAIL qualified</div></div>
+        </div>
+        <div class="p3-phase-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="p3-phase done">
+          <div class="p3-phase-num"><i class="fas fa-check"></i></div>
+          <div class="p3-phase-body"><div class="p3-phase-title">Fact-Find</div><div class="p3-phase-sub">FNA complete</div></div>
+        </div>
+        <div class="p3-phase-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="p3-phase active">
+          <div class="p3-phase-num">3</div>
+          <div class="p3-phase-body"><div class="p3-phase-title">Illustration &amp; Proposal</div><div class="p3-phase-sub">Run · compare · present</div></div>
+        </div>
+        <div class="p3-phase-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="p3-phase">
+          <div class="p3-phase-num">4</div>
+          <div class="p3-phase-body"><div class="p3-phase-title">Application</div><div class="p3-phase-sub">E-App · submission</div></div>
+        </div>
+        <div class="p3-phase-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="p3-phase">
+          <div class="p3-phase-num">5</div>
+          <div class="p3-phase-body"><div class="p3-phase-title">Underwriting</div><div class="p3-phase-sub">Review · decision</div></div>
+        </div>
+      </div>
 
-          {/* BLOCK A — Product Catalogue */}
-          <div class="pi-block">
-            <div class="pi-block-header">
-              <span class="pi-block-title"><i class="fas fa-layer-group"></i> Product Catalogue</span>
-              <div class="pi-cat-pills" id="pi-cat-pills">
-                <button class="pi-cat-pill active" onclick="filterPIProducts('all',this)">All (13)</button>
-                <button class="pi-cat-pill" onclick="filterPIProducts('insurance',this)">Insurance (6)</button>
-                <button class="pi-cat-pill" onclick="filterPIProducts('retirement',this)">Retirement (3)</button>
-                <button class="pi-cat-pill" onclick="filterPIProducts('investment',this)">Investment (3)</button>
-                <button class="pi-cat-pill" onclick="filterPIProducts('wealth',this)">Wealth (1)</button>
-              </div>
-            </div>
-            <div class="pi-product-grid" id="pi-product-list">
-              {/* rendered by renderPIProducts() */}
-            </div>
+      {/* ══ MAIN 2-COL LAYOUT ══ */}
+      <div class="p3-body">
+
+        {/* ── LEFT — Prospect list ── */}
+        <div class="p3-left-col">
+          <div class="p3-left-header">
+            <span class="p3-left-title"><i class="fas fa-users"></i> FNA-Ready Prospects</span>
+            <span class="p3-left-sub">Select a prospect to view or build their proposal</span>
+          </div>
+          <div id="p3-prospect-list">
+            {/* Rendered by p3RenderProspectList() */}
           </div>
 
-          {/* BLOCK B — Propensity Matrix */}
-          <div class="pi-block">
-            <div class="pi-block-header">
-              <span class="pi-block-title"><i class="fas fa-th"></i> AI Propensity Matrix</span>
-              <span class="pi-block-sub">Client × Product fit scores — green = strong match, yellow = moderate, red = poor</span>
-            </div>
-            <div class="pi-matrix-scroll" id="pi-matrix-wrap">
-              {/* rendered by renderPIMatrix() */}
-            </div>
-            <div class="pi-matrix-legend">
-              <span class="pi-leg pi-leg-hot">≥85 Strong</span>
-              <span class="pi-leg pi-leg-med">70–84 Moderate</span>
-              <span class="pi-leg pi-leg-low">50–69 Possible</span>
-              <span class="pi-leg pi-leg-none">&lt;50 Poor</span>
+          {/* Product catalogue quick reference */}
+          <div class="p3-catalog-section">
+            <div class="p3-catalog-title"><i class="fas fa-layer-group"></i> Product Families</div>
+            <div class="p3-catalog-chips">
+              <span class="p3-cat-chip term"><i class="fas fa-umbrella"></i> Term Life</span>
+              <span class="p3-cat-chip whole"><i class="fas fa-shield-alt"></i> Whole Life</span>
+              <span class="p3-cat-chip ul"><i class="fas fa-chart-line"></i> Universal Life</span>
+              <span class="p3-cat-chip di"><i class="fas fa-user-injured"></i> Disability Income</span>
+              <span class="p3-cat-chip ltc"><i class="fas fa-hands-helping"></i> LTC / Hybrid</span>
+              <span class="p3-cat-chip annuity"><i class="fas fa-coins"></i> Annuity</span>
             </div>
           </div>
-
         </div>
 
-        {/* ══ RIGHT COLUMN: AI Recommendations + Detail Panel ══ */}
-        <div class="pi-right-col">
-
-          {/* BLOCK C — AI Recommendations */}
-          <div class="pi-block">
-            <div class="pi-block-header">
-              <span class="pi-block-title"><i class="fas fa-robot"></i> AI Recommendations</span>
-              <div class="pi-rec-sort-wrap">
-                <span class="pi-sort-lbl">Sort:</span>
-                <select class="pi-rec-sort" onchange="sortPIRecs(this.value)">
-                  <option value="score">By AI Score</option>
-                  <option value="value">By Value</option>
-                  <option value="segment">By Segment</option>
-                </select>
-              </div>
-            </div>
-            <p class="pi-block-desc">Each card shows a client–product match identified by AI. Click any card to see the full suitability analysis and next action.</p>
-            <div class="pi-rec-list" id="pi-rec-list">
-              {/* rendered by renderPIRecs() */}
-            </div>
-          </div>
-
-          {/* BLOCK D — Detail / Suitability Panel */}
-          <div class="pi-block pi-detail-block" id="pi-detail-block">
-            <div class="pi-detail-empty" id="pi-detail-empty">
-              <i class="fas fa-hand-pointer"></i>
-              <strong>Select a recommendation or product</strong>
-              <p>You'll see the full AI suitability analysis, matched client list, key product features, and recommended next action.</p>
-            </div>
-            <div id="pi-detail-panel" style="display:none">
-              {/* rendered dynamically */}
-            </div>
-          </div>
-
+        {/* ── RIGHT — Main proposal panel ── */}
+        <div class="p3-right-col" id="p3-main-panel">
+          {/* Rendered by p3RenderMainPanel() */}
         </div>
 
       </div>
 
-      {/* Quick Quote Modal */}
-      <div id="quick-quote-modal" style="display:none" onclick="closeQuickQuoteModal(event)">
-        <div class="qq-modal">
-          <div class="qq-header">
-            <span><i class="fas fa-calculator"></i> Quick Quote</span>
-            <button onclick="closeQuickQuoteModal()" class="qq-close">✕</button>
-          </div>
-          <div class="qq-body" id="qq-body">
-            <div style="padding:20px;color:#64748b;text-align:center">
-              <i class="fas fa-circle-notch fa-spin" style="font-size:24px;margin-bottom:10px"></i><br/>
-              Loading quick quote tool…
+      {/* ══════════════════════════════════════════════════
+          OVERLAY 1 — ILLUSTRATION ENGINE MODAL
+          ══════════════════════════════════════════════════ */}
+      <div id="p3-illustration-overlay" class="p3-overlay" style="display:none" onclick="p3CloseIllustBg(event)">
+        <div class="p3-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p3-overlay-header">
+            <div class="p3-overlay-header-left">
+              <i class="fas fa-calculator"></i>
+              <span>Illustration Engine — NYL Proprietary System</span>
             </div>
+            <button class="p3-overlay-close" onclick="closeP3IllustrationOverlay()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p3-overlay-body" id="p3-illust-engine-body">
+            {/* Rendered by p3OpenIllustrationEngine() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          OVERLAY 2 — OBJECTION HANDLING COACH
+          ══════════════════════════════════════════════════ */}
+      <div id="p3-objcoach-overlay" class="p3-overlay" style="display:none" onclick="p3CloseObjCoach(event)">
+        <div class="p3-overlay-modal" onclick="event.stopPropagation()">
+          <div class="p3-overlay-header purple">
+            <div class="p3-overlay-header-left">
+              <i class="fas fa-comments"></i>
+              <span>AI Objection Handling Coach</span>
+            </div>
+            <button class="p3-overlay-close" onclick="p3CloseObjCoach()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p3-overlay-body" id="p3-objcoach-body">
+            {/* Rendered by p3RenderObjCoach() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          OVERLAY 3 — PLAIN-ENGLISH EXPLAINER
+          ══════════════════════════════════════════════════ */}
+      <div id="p3-explainer-overlay" class="p3-overlay" style="display:none" onclick="closeP3ExplainerOverlay(event)">
+        <div class="p3-overlay-modal" onclick="event.stopPropagation()">
+          <div class="p3-overlay-header emerald">
+            <div class="p3-overlay-header-left">
+              <i class="fas fa-comment-alt"></i>
+              <span>Plain-English Illustration Explainer</span>
+            </div>
+            <button class="p3-overlay-close" onclick="closeP3ExplainerOverlay()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p3-overlay-body" id="p3-explainer-body">
+            {/* Rendered by p3OpenExplainerModal() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          OVERLAY 4 — SIGNATURE PAGE (NAIC)
+          ══════════════════════════════════════════════════ */}
+      <div id="p3-signature-overlay" class="p3-overlay" style="display:none" onclick="closeP3SignatureOverlay(event)">
+        <div class="p3-overlay-modal sig" onclick="event.stopPropagation()">
+          <div class="p3-overlay-header dark">
+            <div class="p3-overlay-header-left">
+              <i class="fas fa-signature"></i>
+              <span>Illustration Acknowledgment &amp; Signature — NAIC Model Reg</span>
+            </div>
+            <button class="p3-overlay-close" onclick="closeP3SignatureOverlay()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p3-overlay-body" id="p3-signature-body">
+            {/* Rendered by p3OpenSignaturePage() */}
           </div>
         </div>
       </div>
