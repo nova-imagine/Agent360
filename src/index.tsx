@@ -12847,6 +12847,77 @@ function FNADiscoveryPage() {
         </div>
       </div>
 
+      {/* ── FNA EDITOR OVERLAY ── full 4-section fact-find modal */}
+      <div id="fna-editor-overlay" class="fna-editor-overlay" style="display:none" onclick="_closeFNAEditorBg(event)">
+        <div class="fna-ed-modal" onclick="event.stopPropagation()">
+          {/* Modal header */}
+          <div class="fna-ed-header">
+            <div class="fna-ed-header-left">
+              <i class="fas fa-clipboard-list"></i>
+              <span id="fna-ed-title">Financial Needs Analysis — Fact-Find</span>
+            </div>
+            <div class="fna-ed-header-right">
+              <button class="fna-ed-ai-btn" onclick="openFNAAIPrefill()"><i class="fas fa-robot"></i> AI Pre-fill</button>
+              <button class="fna-ed-close-btn" onclick="_closeFNAEditorForce()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          {/* Section nav tabs */}
+          <div class="fna-ed-nav-tabs" id="fna-ed-nav-tabs">
+            <button class="fna-ed-nav-btn active" onclick="fnaEditorNav(0)" data-idx="0">
+              <i class="fas fa-user"></i> Personal &amp; Profile
+            </button>
+            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(1)" data-idx="1">
+              <i class="fas fa-heartbeat"></i> Health History
+            </button>
+            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(2)" data-idx="2">
+              <i class="fas fa-dollar-sign"></i> Financial Suitability
+            </button>
+            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(3)" data-idx="3">
+              <i class="fas fa-shield-alt"></i> Coverage Needs
+            </button>
+          </div>
+          {/* Section body — rendered by JS */}
+          <div class="fna-ed-body" id="fna-ed-body">
+            <div class="fna-ed-loading"><i class="fas fa-spinner fa-spin"></i> Loading FNA data…</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI PRE-FILL PANEL ── floating side-panel for note extraction */}
+      <div id="fna-ai-prefill-panel" class="fna-ai-prefill-panel" style="display:none">
+        <div class="fna-prefill-header">
+          <span class="fna-prefill-title"><i class="fas fa-robot"></i> AI Pre-fill from Notes</span>
+          <button class="fna-prefill-close" onclick="closeFNAAIPrefill()"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="fna-prefill-hint">Paste meeting notes, a call transcript, or spoken summary below. AI will extract and pre-populate FNA fields.</p>
+        <textarea id="fna-ai-notes-input" class="fna-prefill-textarea" placeholder="e.g. 'Client is 42, non-smoker, earns $120K, has $450K mortgage, existing $500K term policy expires 2029, concerned about retirement income gap…'"></textarea>
+        <button class="fna-prefill-run-btn" onclick="runAIPrefill()"><i class="fas fa-magic"></i> Extract &amp; Pre-fill Fields</button>
+        <div id="fna-prefill-results" class="fna-prefill-results" style="display:none">
+          {/* Rendered by runAIPrefill() */}
+        </div>
+      </div>
+
+      {/* ── MEETING SUMMARY OVERLAY ── generated email summary modal */}
+      <div id="fna-summary-overlay" class="fna-summary-overlay" style="display:none" onclick="closeFNASummary(event)">
+        <div class="fna-summary-modal" onclick="event.stopPropagation()">
+          <div class="fna-sum-header">
+            <div class="fna-sum-header-left">
+              <i class="fas fa-envelope"></i>
+              <span>AI Meeting Summary Email</span>
+            </div>
+            <button class="fna-ed-close-btn" onclick="closeFNASummary()"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="fna-summary-body" class="fna-sum-body">
+            {/* Rendered by generateMeetingSummary() */}
+          </div>
+          <div class="fna-sum-actions">
+            <button class="fna-sum-send-btn" onclick="sendMeetingSummary()"><i class="fas fa-paper-plane"></i> Send to Client</button>
+            <button class="fna-sum-copy-btn" onclick="copyMeetingSummary()"><i class="fas fa-copy"></i> Copy to Clipboard</button>
+            <button class="fna-sum-cancel-btn" onclick="closeFNASummary()"><i class="fas fa-times"></i> Close</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   )
 }
