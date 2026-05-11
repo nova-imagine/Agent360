@@ -4659,6 +4659,26 @@ function PoliciesPage() {
         </div>
       </div>
 
+      {/* ── Phase 7A — Service Request Hub (JS-rendered) ── */}
+      <div class="p7-service-hub-wrap">
+        <div id="p7-service-hub">
+          {/* Rendered by p7InitServiceHub() on initPoliciesPage() */}
+        </div>
+        <div class="p7-sr-detail-col">
+          <div class="p7-sr-detail-empty" id="p7-sr-detail-empty">
+            <i class="fas fa-cogs" style="font-size:32px;color:#cbd5e1;margin-bottom:10px"></i>
+            <strong>Select a service request</strong>
+            <p>Click any request card to view details, AI recommendation and processing form</p>
+          </div>
+          <div id="p7-sr-detail-panel" style="display:none"></div>
+        </div>
+      </div>
+
+      {/* ── Phase 7D — Loan & Cash Value Center (JS-rendered) ── */}
+      <div id="p7-loan-center">
+        {/* Rendered by p7InitLoanCenter() on initPoliciesPage() */}
+      </div>
+
       <div class="policies-table-wrapper">
         <table class="data-table" id="policies-table">
           <thead>
