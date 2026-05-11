@@ -13334,130 +13334,28 @@ function PolicyDeliveryPage() {
         </div>
       </div>
 
-      {/* KPI Strip */}
-      <div class="del-kpi-strip">
-        <div class="del-kpi" onclick="filterDeliveries('pending')">
-          <div class="del-kpi-icon" style="background:#fff7ed;color:#ea580c"><i class="fas fa-clock"></i></div>
-          <div class="del-kpi-data"><div class="del-kpi-val">2</div><div class="del-kpi-lbl">Pending Delivery</div></div>
-        </div>
-        <div class="del-kpi del-kpi-alert" onclick="filterDeliveries('overdue')">
-          <div class="del-kpi-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-exclamation-triangle"></i></div>
-          <div class="del-kpi-data"><div class="del-kpi-val">1</div><div class="del-kpi-lbl">Overdue (&gt;7d)</div></div>
-        </div>
-        <div class="del-kpi" onclick="filterDeliveries('scheduled')">
-          <div class="del-kpi-icon" style="background:#f0fdf4;color:#059669"><i class="fas fa-calendar-check"></i></div>
-          <div class="del-kpi-data"><div class="del-kpi-val">1</div><div class="del-kpi-lbl">Scheduled</div></div>
-        </div>
-        <div class="del-kpi" onclick="filterDeliveries('delivered')">
-          <div class="del-kpi-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-check-double"></i></div>
-          <div class="del-kpi-data"><div class="del-kpi-val">11</div><div class="del-kpi-lbl">Delivered YTD</div></div>
-        </div>
-        <div class="del-kpi">
-          <div class="del-kpi-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-undo"></i></div>
-          <div class="del-kpi-data"><div class="del-kpi-val">0</div><div class="del-kpi-lbl">Free-Look Returns</div></div>
-        </div>
-        <div class="del-kpi">
-          <div class="del-kpi-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-dollar-sign"></i></div>
-          <div class="del-kpi-data"><div class="del-kpi-val">$48.2K</div><div class="del-kpi-lbl">Premium Delivered YTD</div></div>
-        </div>
-      </div>
+      {/* Phase 6 — KPI Strip (JS-rendered) */}
+      <div id="p6-kpi-strip" class="p6-kpi-strip"></div>
 
-      {/* Main 2-col body */}
+      {/* Phase 6 — Main 2-col body */}
       <div class="del-body">
 
-        {/* LEFT — Delivery Queue */}
+        {/* LEFT — JS-rendered delivery queue */}
         <div class="del-list-col">
-
-          {/* Overdue */}
-          <div class="del-section-label del-section-urgent"><i class="fas fa-fire"></i> Overdue — Act Now</div>
-          <div class="del-card del-card-overdue" onclick="openDeliveryDetail('DEL-003')">
-            <div class="del-card-top">
-              <div class="del-avatar del-av-kp">KP</div>
-              <div class="del-card-meta">
-                <div class="del-card-name">Kevin Park</div>
-                <div class="del-card-pol">Policy P-100350 · Term Life $250K</div>
-              </div>
-              <span class="del-status-pill overdue"><i class="fas fa-fire"></i> 8d Overdue</span>
-            </div>
-            <div class="del-card-checklist">
-              <span class="del-check done"><i class="fas fa-check-circle"></i> Policy issued</span>
-              <span class="del-check done"><i class="fas fa-check-circle"></i> Documents ready</span>
-              <span class="del-check miss"><i class="fas fa-times-circle"></i> Delivery not scheduled</span>
-              <span class="del-check miss"><i class="fas fa-times-circle"></i> Receipt not captured</span>
-            </div>
-            <div class="del-card-footer">
-              <span class="del-premium">$3,200/yr premium</span>
-              <button class="del-action-btn urgent" onclick="event.stopPropagation();scheduleDelivery('DEL-003')"><i class="fas fa-calendar-plus"></i> Schedule Now</button>
-            </div>
-          </div>
-
-          {/* Pending */}
-          <div class="del-section-label"><i class="fas fa-hourglass-half"></i> Ready for Delivery</div>
-          <div class="del-card del-card-ready" onclick="openDeliveryDetail('DEL-001')">
-            <div class="del-card-top">
-              <div class="del-avatar del-av-ar">AR</div>
-              <div class="del-card-meta">
-                <div class="del-card-name">Alex Rivera</div>
-                <div class="del-card-pol">Policy P-100360 · Whole Life $500K</div>
-              </div>
-              <span class="del-status-pill ready">Ready</span>
-            </div>
-            <div class="del-card-checklist">
-              <span class="del-check done"><i class="fas fa-check-circle"></i> Policy issued Apr 8</span>
-              <span class="del-check done"><i class="fas fa-check-circle"></i> AI delivery brief ready</span>
-              <span class="del-check done"><i class="fas fa-check-circle"></i> Meeting Apr 14 scheduled</span>
-              <span class="del-check miss"><i class="fas fa-circle"></i> Receipt pending</span>
-            </div>
-            <div class="del-card-footer">
-              <span class="del-premium">$4,800/yr premium</span>
-              <button class="del-action-btn" onclick="event.stopPropagation();openDeliveryBrief('DEL-001')"><i class="fas fa-robot"></i> AI Brief</button>
-            </div>
-          </div>
-          <div class="del-card del-card-ready" onclick="openDeliveryDetail('DEL-002')">
-            <div class="del-card-top">
-              <div class="del-avatar del-av-nf">NF</div>
-              <div class="del-card-meta">
-                <div class="del-card-name">Nancy Foster</div>
-                <div class="del-card-pol">Policy P-100365 · Term Life $1M</div>
-              </div>
-              <span class="del-status-pill scheduled"><i class="fas fa-calendar-check"></i> Apr 16</span>
-            </div>
-            <div class="del-card-checklist">
-              <span class="del-check done"><i class="fas fa-check-circle"></i> Policy issued Apr 9</span>
-              <span class="del-check done"><i class="fas fa-check-circle"></i> AI brief generated</span>
-              <span class="del-check done"><i class="fas fa-check-circle"></i> Meeting Apr 16 confirmed</span>
-              <span class="del-check miss"><i class="fas fa-circle"></i> Receipt pending</span>
-            </div>
-            <div class="del-card-footer">
-              <span class="del-premium">$3,600/yr premium</span>
-              <button class="del-action-btn" onclick="event.stopPropagation();openDeliveryBrief('DEL-002')"><i class="fas fa-robot"></i> AI Brief</button>
-            </div>
-          </div>
-
-          {/* Recent Deliveries */}
-          <div class="del-section-label" style="margin-top:8px"><i class="fas fa-check-double" style="color:#059669"></i> Recently Delivered</div>
-          <div class="del-card del-card-done" onclick="openDeliveryDetail('DEL-R1')">
-            <div class="del-card-top">
-              <div class="del-avatar del-av-sw">SW</div>
-              <div class="del-card-meta">
-                <div class="del-card-name">Sandra Williams</div>
-                <div class="del-card-pol">P-100320 · Term $350K · Delivered Apr 3</div>
-              </div>
-              <span class="del-status-pill delivered"><i class="fas fa-check-double"></i> Delivered</span>
-            </div>
-            <div class="del-card-receipt"><i class="fas fa-file-signature"></i> Signed receipt on file · Premium active</div>
+          <div id="p6-queue">
+            {/* Rendered by p6RenderQueue() on initDeliveryPage() */}
           </div>
         </div>
 
-        {/* RIGHT — Delivery Detail / AI Brief */}
+        {/* RIGHT — Delivery Detail / AI Brief (5-tab panel) */}
         <div class="del-detail-col" id="del-detail-col">
           <div class="del-detail-empty" id="del-detail-empty">
             <i class="fas fa-box-open del-empty-icon"></i>
             <strong>Select a delivery to view details</strong>
-            <p>View AI delivery brief, checklist, and receipt capture</p>
+            <p>Click any delivery card to view the full checklist, AI delivery brief, beneficiary validation, CRM entry, and portal onboarding guide</p>
           </div>
           <div id="del-detail-panel" style="display:none">
-            {/* Rendered by JS — see openDeliveryDetail() */}
+            {/* Rendered by p6BuildDetailHTML() */}
           </div>
         </div>
 
