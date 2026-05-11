@@ -23363,7 +23363,7 @@ let _piSelectedProduct = null;
 let _piSelectedRec = null;
 let _piFilter = 'all';
 
-function initProductsPage() {
+function _orig_initProductsPage() {
   requestAnimationFrame(function() {
     setTimeout(function() {
       renderPIProducts();
@@ -23633,7 +23633,7 @@ var fnaData = [
   }
 ];
 
-function initFNAPage() {
+function _orig_initFNAPage() {
   // page init — list already in JSX, detail starts empty
 }
 
@@ -23663,7 +23663,7 @@ function openFNADetail(id) {
   if (panel) { panel.style.display = ''; panel.innerHTML = renderFNADetail(fna); }
 }
 
-function renderFNADetail(fna) {
+function _orig_renderFNADetail(fna) {
   var statusCls = { urgent: 'fna-status-pill urgent', gap: 'fna-status-pill gap', progress: 'fna-status-pill progress', done: 'fna-status-pill done' };
   var phases = ['Prospect Discovery','Fact-Find','Gap Analysis','AI Recommendation','Run Illustration'];
   var phaseHtml = phases.map(function(p, i) {
@@ -23732,7 +23732,7 @@ function renderFNADetail(fna) {
   '</div>';
 }
 
-function continueFNA(id) {
+function _orig_continueFNA(id) {
   showToast('Opening FNA editor for ' + id + '…', 'info');
 }
 
@@ -23753,7 +23753,7 @@ function fnaNextStep(step) {
   closeFNAOverlay();
 }
 
-function openFNAAIAssist() {
+function _orig_openFNAAIAssist() {
   showToast('AI Assistant scanning meeting notes and CRM data to pre-fill FNA fields…', 'ai');
 }
 
@@ -23772,7 +23772,7 @@ function toggleFNACompleted(el) {
   if (icon) icon.style.transform = isOpen ? '' : 'rotate(180deg)';
 }
 
-function launchIllustrationFromFNA(id) {
+function _orig_launchIllustrationFromFNA(id) {
   showToast('Launching Product Intelligence Hub with FNA data pre-loaded…', 'ai');
   setTimeout(function() { navigateTo('products'); }, 600);
 }
@@ -25520,18 +25520,7 @@ function viewCampaignProspects(campId) {
   showToast('Showing ' + camp.respondedLeads.length + ' responded prospects for "' + camp.name + '"', 'info');
 }
 
-// ── TOAST HELPER ──────────────────────────────────────────────
-function showToast(msg, type) {
-  var existing = document.getElementById('phase1-toast');
-  if (existing) existing.remove();
-  var t = document.createElement('div');
-  t.id = 'phase1-toast';
-  t.className = 'phase1-toast phase1-toast-' + (type || 'success');
-  t.innerHTML = msg;
-  document.body.appendChild(t);
-  setTimeout(function(){ t.classList.add('phase1-toast-show'); }, 10);
-  setTimeout(function(){ t.classList.remove('phase1-toast-show'); setTimeout(function(){ t.remove(); }, 400); }, 3500);
-}
+// ── TOAST HELPER (duplicate removed — routes to phase1 showToast above) ──
 
 // ── sortLeads — Phase 1 sort helper ──
 function sortLeads(criterion) {
@@ -28570,9 +28559,7 @@ function p4RenderAccelUW() {
     +     '<div class="p4-auw-verdict-label">Accelerated UW: <strong>' + verdict + '</strong></div>'
     +     '<div class="p4-auw-prospect">' + p.name + ' · Age ' + p.age + ' · ' + p.coverage + '</div>'
     +     '<div class="p4-auw-verdict-note">'
-    +       (eligible ? 'This applicant qualifies for no-exam straight-through processing. Expected decision within 2–4 hours of submission.'
-    +        : marginal ? 'Marginal eligibility. A paramedical exam may be waived if MIB returns clean. Expect 3–5 business day decision.'
-    +        : 'Full underwriting required. Exam + APS expected. Estimated 3–6 week decision timeline.')
+    +       (eligible ? 'This applicant qualifies for no-exam straight-through processing. Expected decision within 2–4 hours of submission.' : marginal ? 'Marginal eligibility. A paramedical exam may be waived if MIB returns clean. Expect 3–5 business day decision.' : 'Full underwriting required. Exam + APS expected. Estimated 3–6 week decision timeline.')
     +     '</div>'
     +   '</div>'
     + '</div>'
