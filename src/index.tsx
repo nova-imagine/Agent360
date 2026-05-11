@@ -8052,6 +8052,187 @@ function UnderwritingPage() {
         </div>
       </div>
 
+      {/* ════════════════════════════════════════════════════════
+          PHASE 5 — UNDERWRITING DECISION ENGINE
+          ════════════════════════════════════════════════════════ */}
+
+      {/* Phase 5 Hub Section */}
+      <div class="p5-hub-section">
+
+        {/* Hub Header */}
+        <div class="p5-hub-header">
+          <div class="p5-hub-header-left">
+            <div class="p5-hub-icon"><i class="fas fa-balance-scale"></i></div>
+            <div>
+              <div class="p5-hub-title">Phase 5 — Underwriting Decision Center</div>
+              <div class="p5-hub-sub">Requirements Checklist · Medical UW · Financial UW · AML/OFAC · Decision Engine · Agent Communication</div>
+            </div>
+          </div>
+          <div class="p5-hub-actions">
+            <button class="p5-hub-btn secondary" onclick="p5OpenStatusCenter()"><i class="fas fa-stream"></i> Status Feed</button>
+            <button class="p5-hub-btn primary" id="p5-scan-btn" onclick="p5RunAIScan()"><i class="fas fa-sync-alt"></i> AI Scan</button>
+          </div>
+        </div>
+
+        {/* KPI Strip */}
+        <div id="p5-kpi-strip" class="p5-kpi-strip"></div>
+
+        {/* AI Intelligence Banner */}
+        <div class="p5-ai-banner">
+          <div class="p5-ai-banner-left">
+            <i class="fas fa-robot p5-ai-banner-icon"></i>
+            <div>
+              <div class="p5-ai-banner-title">AI Underwriting Intelligence <span class="p5-live-dot"></span></div>
+              <div class="p5-ai-banner-sub">Predictive risk scoring · APS triage (1-page summaries from 150-page records) · STP auto-approval · Fraud detection · Requirement gap auto-chase · Agent status broadcasts</div>
+            </div>
+          </div>
+          <div class="p5-ai-chips">
+            <div class="p5-ai-chip green"><i class="fas fa-bolt"></i><span>73%</span><span class="p5-chip-lbl">STP Rate</span></div>
+            <div class="p5-ai-chip blue"><i class="fas fa-file-medical"></i><span>18</span><span class="p5-chip-lbl">APS Avoided</span></div>
+            <div class="p5-ai-chip amber"><i class="fas fa-tachometer-alt"></i><span>94.6%</span><span class="p5-chip-lbl">AI Accuracy</span></div>
+            <div class="p5-ai-chip purple"><i class="fas fa-clock"></i><span>4.2 hrs</span><span class="p5-chip-lbl">Avg Decision</span></div>
+          </div>
+        </div>
+
+        {/* Toolbar */}
+        <div class="p5-toolbar">
+          <div class="p5-tb-left">
+            <select class="p5-tb-select" onchange="p5FilterByStage(this.value)">
+              <option value="">All Stages</option>
+              <option>Application Received</option>
+              <option>Evidence Gathering</option>
+              <option>AI Review</option>
+              <option>Decision</option>
+              <option>Approved</option>
+              <option>Declined</option>
+            </select>
+            <select class="p5-tb-select" onchange="p5FilterBySTP(this.value)">
+              <option value="">All STP Scores</option>
+              <option value="high">High ≥ 80</option>
+              <option value="med">Medium 60–79</option>
+              <option value="low">Low &lt; 60</option>
+            </select>
+            <select class="p5-tb-select" onchange="p5SortCases(this.value)">
+              <option value="">Sort: Default</option>
+              <option value="stp-desc">STP Score ↓</option>
+              <option value="stp-asc">STP Score ↑</option>
+              <option value="days-desc">Days in Stage ↓</option>
+              <option value="urgent">Urgent First</option>
+            </select>
+          </div>
+          <div class="p5-tb-right">
+            <button class="p5-tb-btn ghost" onclick="p5OpenStatusCenter()"><i class="fas fa-broadcast-tower"></i> Agent Updates</button>
+            <button class="p5-tb-btn secondary" onclick="p5OpenRiskScore('UW-2026-0018')"><i class="fas fa-chart-bar"></i> Risk Scoring</button>
+          </div>
+        </div>
+
+        {/* Case Queue Board */}
+        <div id="p5-case-queue" class="p5-case-queue"></div>
+
+      </div>{/* end p5-hub-section */}
+
+      {/* ── Phase 5 Overlay: Requirements Checklist ── */}
+      <div id="p5-reqs-overlay" class="p5-overlay" onclick="p5CloseReqs(event)" style="display:none">
+        <div class="p5-overlay-modal" onclick="event.stopPropagation()">
+          <div class="p5-overlay-header blue">
+            <div class="p5-overlay-header-left">
+              <div class="p5-overlay-icon"><i class="fas fa-list-check"></i></div>
+              <div>
+                <div class="p5-overlay-title">Requirements Checklist</div>
+                <div class="p5-overlay-sub">Rx · MIB · MVR · Labs · APS · Financials · Credit — AI gap detection &amp; auto-chase</div>
+              </div>
+            </div>
+            <button class="p5-overlay-close" onclick="p5CloseReqsForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p5-overlay-body" id="p5-reqs-body"></div>
+        </div>
+      </div>
+
+      {/* ── Phase 5 Overlay: Medical Underwriting ── */}
+      <div id="p5-meduw-overlay" class="p5-overlay" onclick="p5CloseMedUW(event)" style="display:none">
+        <div class="p5-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p5-overlay-header teal">
+            <div class="p5-overlay-header-left">
+              <div class="p5-overlay-icon"><i class="fas fa-heartbeat"></i></div>
+              <div>
+                <div class="p5-overlay-title">Medical Underwriting</div>
+                <div class="p5-overlay-sub">Vitals · Conditions · Medications · Mortality rating · STP eligibility · AI risk assessment</div>
+              </div>
+            </div>
+            <button class="p5-overlay-close" onclick="p5CloseMedUWForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p5-overlay-body" id="p5-meduw-body"></div>
+        </div>
+      </div>
+
+      {/* ── Phase 5 Overlay: Financial Underwriting ── */}
+      <div id="p5-finuw-overlay" class="p5-overlay" onclick="p5CloseFinUW(event)" style="display:none">
+        <div class="p5-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p5-overlay-header green">
+            <div class="p5-overlay-header-left">
+              <div class="p5-overlay-icon"><i class="fas fa-dollar-sign"></i></div>
+              <div>
+                <div class="p5-overlay-title">Financial Underwriting</div>
+                <div class="p5-overlay-sub">Income multiple · HLOVA · Insurable interest · AML · OFAC · AI fraud detection</div>
+              </div>
+            </div>
+            <button class="p5-overlay-close" onclick="p5CloseFinUWForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p5-overlay-body" id="p5-finuw-body"></div>
+        </div>
+      </div>
+
+      {/* ── Phase 5 Overlay: Decision Engine ── */}
+      <div id="p5-decision-overlay" class="p5-overlay" onclick="p5CloseDecision(event)" style="display:none">
+        <div class="p5-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p5-overlay-header amber">
+            <div class="p5-overlay-header-left">
+              <div class="p5-overlay-icon"><i class="fas fa-gavel"></i></div>
+              <div>
+                <div class="p5-overlay-title">Underwriter Decision Engine</div>
+                <div class="p5-overlay-sub">Approve · Modify · Counter-offer · Postpone · Decline — AI recommendation + evidence checklist + agent communication</div>
+              </div>
+            </div>
+            <button class="p5-overlay-close" onclick="p5CloseDecisionForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p5-overlay-body" id="p5-decision-body"></div>
+        </div>
+      </div>
+
+      {/* ── Phase 5 Overlay: Predictive Risk Scoring ── */}
+      <div id="p5-risk-overlay" class="p5-overlay" onclick="p5CloseRiskScore(event)" style="display:none">
+        <div class="p5-overlay-modal" onclick="event.stopPropagation()">
+          <div class="p5-overlay-header purple">
+            <div class="p5-overlay-header-left">
+              <div class="p5-overlay-icon"><i class="fas fa-chart-bar"></i></div>
+              <div>
+                <div class="p5-overlay-title">Predictive Risk Scoring</div>
+                <div class="p5-overlay-sub">AI scores mortality/morbidity risk from structured data before labs arrive — 6-factor model · 94.6% accuracy</div>
+              </div>
+            </div>
+            <button class="p5-overlay-close" onclick="p5CloseRiskScoreForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p5-overlay-body" id="p5-risk-body"></div>
+        </div>
+      </div>
+
+      {/* ── Phase 5 Overlay: Case Status Center ── */}
+      <div id="p5-status-overlay" class="p5-overlay" onclick="p5CloseStatusCenter(event)" style="display:none">
+        <div class="p5-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p5-overlay-header navy">
+            <div class="p5-overlay-header-left">
+              <div class="p5-overlay-icon"><i class="fas fa-broadcast-tower"></i></div>
+              <div>
+                <div class="p5-overlay-title">Case Status Center</div>
+                <div class="p5-overlay-sub">AI sends automated status updates to agents — APS received, exam scheduled, decision made, counter-offer issued</div>
+              </div>
+            </div>
+            <button class="p5-overlay-close" onclick="p5CloseStatusCenterForce()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p5-overlay-body" id="p5-status-body"></div>
+        </div>
+      </div>
+
     </div>
   )
 }
