@@ -44,10 +44,10 @@ function navigateTo(page) {
   const breadcrumbs = {
     dashboard: 'Home / Dashboard',
     clients: 'Home / Clients',
-    prospects: 'Home / Clients / Prospects',
+    prospects: 'Home / Marketing / Prospects',
     policies: 'Home / Policies',
     'ai-agents': 'Home / AI Agents',
-    campaigns: 'Home / Sales / Campaigns',
+    campaigns: 'Home / Marketing / Campaigns',
     upsell: 'Home / Sales / Upsell Track',
     alerts: 'Home / Service / Policy Alerts',
     'pipeline-view': 'Home / Sales / Journey Pipeline',
@@ -60,9 +60,9 @@ function navigateTo(page) {
     underwriting: 'Home / Sales / Underwriting',
     settings: 'Home / Settings',
     help: 'Home / Help & Support',
-    fna: 'Home / Prospecting / FNA Discovery',
+    fna: 'Home / Sales / FNA Discovery',
     delivery: 'Home / Onboarding / Policy Delivery',
-    leads: 'Home / Prospecting / Leads'
+    leads: 'Home / Marketing / Leads'
   };
 
   const titleEl = document.getElementById('page-title');

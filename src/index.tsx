@@ -457,8 +457,8 @@ function Sidebar() {
           <span class="nav-badge alert">3</span>
         </a>
 
-        {/* ── PROSPECTING (Phase 1–2) ── */}
-        <div class="nav-section-label">PROSPECTING</div>
+        {/* ── MARKETING (Phase 1) ── */}
+        <div class="nav-section-label">MARKETING</div>
         <a class="nav-item leads-nav" onclick="navigateTo('leads')" href="#">
           <i class="fas fa-user-plus"></i><span>Leads</span>
           <span class="nav-badge" style="background:#f59e0b;color:#fff" id="leads-nav-badge">6</span>
@@ -471,13 +471,13 @@ function Sidebar() {
           <i class="fas fa-user-clock"></i><span>Prospects</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff">14</span>
         </a>
+
+        {/* ── SALES (Phase 2–4) ── */}
+        <div class="nav-section-label">SALES</div>
         <a class="nav-item" onclick="navigateTo('fna')" href="#">
           <i class="fas fa-clipboard-list"></i><span>FNA Discovery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">3</span>
         </a>
-
-        {/* ── SALES (Phase 3–4) ── */}
-        <div class="nav-section-label">SALES</div>
         <a class="nav-item opportunities-nav" onclick="navigateTo('opportunities')" href="#">
           <i class="fas fa-bolt"></i><span>Opportunities</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff" id="opp-nav-badge">5</span>
