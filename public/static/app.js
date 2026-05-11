@@ -113,6 +113,8 @@ function navigateTo(page) {
       requestAnimationFrame(() => setTimeout(() => initLeadsPage(), 80));
     } else if (page === 'campaigns') {
       requestAnimationFrame(() => setTimeout(() => initCampaignsPage(), 80));
+    } else if (page === 'underwriting') {
+      requestAnimationFrame(() => setTimeout(() => initUnderwritingPage(), 80));
     }
   }
 }
