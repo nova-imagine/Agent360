@@ -306,6 +306,7 @@ function MainApp() {
         <div id="tpl-fna"><FNADiscoveryPage /></div>
         <div id="tpl-delivery"><PolicyDeliveryPage /></div>
         <div id="tpl-leads"><LeadsPage /></div>
+        <div id="tpl-inv-accounts"><InvestmentAccountsPage /></div>
       </div>
 
       {/* ── Workflow Execution Modal ── */}
@@ -504,11 +505,15 @@ function Sidebar() {
           <span class="nav-badge" style="background:#059669;color:#fff">2</span>
         </a>
 
-        {/* ── SERVICE (Phase 7) ── */}
+        {/* ── SERVICE (Phase 7 + INV) ── */}
         <div class="nav-section-label">SERVICE</div>
         <a class="nav-item" onclick="navigateTo('policies')" href="#">
           <i class="fas fa-file-contract"></i><span>Policies</span>
           <span class="nav-badge">1.8K</span>
+        </a>
+        <a class="nav-item inv-accounts-nav" onclick="navigateTo('inv-accounts')" href="#">
+          <i class="fas fa-chart-line"></i><span>Investment Accounts</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">12</span>
         </a>
         <a class="nav-item alerts-nav" onclick="navigateTo('alerts')" href="#">
           <i class="fas fa-bell"></i><span>Policy Alerts</span>
@@ -13520,6 +13525,243 @@ function LeadsPage() {
 
       {/* ── TOAST ── */}
       <div class="phase1-toast" id="phase1-toast"></div>
+
+    </div>
+  )
+}
+
+function InvestmentAccountsPage() {
+  return (
+    <div class="page inv-accounts-page">
+
+      {/* ── Investment Accounts KPI Bar ── */}
+      <div class="ia-kpi-bar">
+        <div class="ia-kpi-card ia-kpi-aum">
+          <div class="ia-kpi-icon"><i class="fas fa-coins"></i></div>
+          <div class="ia-kpi-data">
+            <div class="ia-kpi-val">$2.84M</div>
+            <div class="ia-kpi-lbl">Total AUM</div>
+            <div class="ia-kpi-sub ia-sub-up"><i class="fas fa-arrow-up"></i> +$124K MTD</div>
+          </div>
+        </div>
+        <div class="ia-kpi-card ia-kpi-ret">
+          <div class="ia-kpi-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="ia-kpi-data">
+            <div class="ia-kpi-val">+8.4%</div>
+            <div class="ia-kpi-lbl">Avg Return YTD</div>
+            <div class="ia-kpi-sub ia-sub-up"><i class="fas fa-arrow-up"></i> +1.2% vs benchmark</div>
+          </div>
+        </div>
+        <div class="ia-kpi-card ia-kpi-accts">
+          <div class="ia-kpi-icon"><i class="fas fa-folder-open"></i></div>
+          <div class="ia-kpi-data">
+            <div class="ia-kpi-val">12</div>
+            <div class="ia-kpi-lbl">Active Accounts</div>
+            <div class="ia-kpi-sub">Across 8 clients</div>
+          </div>
+        </div>
+        <div class="ia-kpi-card ia-kpi-drift">
+          <div class="ia-kpi-icon"><i class="fas fa-balance-scale"></i></div>
+          <div class="ia-kpi-data">
+            <div class="ia-kpi-val">3</div>
+            <div class="ia-kpi-lbl">Drift Alerts</div>
+            <div class="ia-kpi-sub ia-sub-warn"><i class="fas fa-exclamation-triangle"></i> Rebalance needed</div>
+          </div>
+        </div>
+        <div class="ia-kpi-card ia-kpi-fee">
+          <div class="ia-kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
+          <div class="ia-kpi-data">
+            <div class="ia-kpi-val">$23.8K</div>
+            <div class="ia-kpi-lbl">Advisory Fees/yr</div>
+            <div class="ia-kpi-sub">Avg 0.84% of AUM</div>
+          </div>
+        </div>
+        <div class="ia-kpi-card ia-kpi-rmd">
+          <div class="ia-kpi-icon"><i class="fas fa-calendar-exclamation"></i></div>
+          <div class="ia-kpi-data">
+            <div class="ia-kpi-val">2</div>
+            <div class="ia-kpi-lbl">RMD Due (2026)</div>
+            <div class="ia-kpi-sub ia-sub-warn">Linda M. · James W.</div>
+          </div>
+        </div>
+        <div class="ia-kpi-card ia-kpi-review">
+          <div class="ia-kpi-icon"><i class="fas fa-clipboard-check"></i></div>
+          <div class="ia-kpi-data">
+            <div class="ia-kpi-val">4</div>
+            <div class="ia-kpi-lbl">Reviews Due (Q2)</div>
+            <div class="ia-kpi-sub">Quarterly cycle</div>
+          </div>
+        </div>
+        <div class="ia-kpi-card ia-kpi-tlh">
+          <div class="ia-kpi-icon"><i class="fas fa-leaf"></i></div>
+          <div class="ia-kpi-data">
+            <div class="ia-kpi-val">$8.2K</div>
+            <div class="ia-kpi-lbl">TLH Opportunity</div>
+            <div class="ia-kpi-sub ia-sub-up">Tax savings available</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Portfolio Intelligence Banner ── */}
+      <div class="ia-ai-banner">
+        <div class="ia-ai-banner-left">
+          <div class="ia-ai-icon"><i class="fas fa-robot"></i><span class="ia-ai-pulse"></span></div>
+          <div>
+            <div class="ia-ai-title">AI Portfolio Intelligence <span class="ia-ai-live">● LIVE</span></div>
+            <div class="ia-ai-sub">Real-time drift monitoring · Tax-loss harvesting scanner · RMD calculator · Rebalancing optimizer · Performance attribution</div>
+          </div>
+        </div>
+        <div class="ia-ai-stats">
+          <div class="ia-ai-stat"><span class="ia-ai-stat-val orange">3</span><span class="ia-ai-stat-lbl">Drift Alerts</span></div>
+          <div class="ia-ai-stat"><span class="ia-ai-stat-val green">$8.2K</span><span class="ia-ai-stat-lbl">TLH Savings</span></div>
+          <div class="ia-ai-stat"><span class="ia-ai-stat-val blue">2</span><span class="ia-ai-stat-lbl">RMDs Due</span></div>
+          <div class="ia-ai-stat"><span class="ia-ai-stat-val purple">4</span><span class="ia-ai-stat-lbl">Reviews Due</span></div>
+        </div>
+        <div class="ia-ai-actions">
+          <button class="ia-ai-btn primary" onclick="iaRunDriftScan()"><i class="fas fa-balance-scale"></i> Drift Scan</button>
+          <button class="ia-ai-btn ghost" onclick="iaRunTLHScan()"><i class="fas fa-leaf"></i> TLH Scan</button>
+          <button class="ia-ai-btn ghost" onclick="iaOpenRMDCenter()"><i class="fas fa-calendar-check"></i> RMD Center</button>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <div class="search-inline">
+            <i class="fas fa-search"></i>
+            <input type="text" id="ia-search" placeholder="Search accounts, clients, holdings..." oninput="iaFilterAccounts()" />
+          </div>
+          <select class="filter-select" id="ia-type-filter" onchange="iaFilterAccounts()">
+            <option value="">All Account Types</option>
+            <option>Advisory (UMA)</option>
+            <option>Advisory (SMA)</option>
+            <option>ETF Portfolio</option>
+            <option>Mutual Fund Portfolio</option>
+            <option>529 College Savings</option>
+            <option>IRA (Traditional)</option>
+            <option>IRA (Roth)</option>
+            <option>Joint Brokerage</option>
+          </select>
+          <select class="filter-select" id="ia-status-filter" onchange="iaFilterAccounts()">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Funding Pending</option>
+            <option>Review Due</option>
+            <option>Drift Alert</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-ai" onclick="iaOpenPortfolioReview()">
+            <i class="fas fa-robot"></i> AI Portfolio Review
+          </button>
+          <button class="btn btn-primary" onclick="iaOpenNewAccount()">
+            <i class="fas fa-plus"></i> New Account
+          </button>
+        </div>
+      </div>
+
+      {/* ── Drift Alerts Panel (hidden, JS-rendered) ── */}
+      <div class="ia-drift-panel" id="ia-drift-panel" style="display:none">
+        <div class="ia-drift-header">
+          <div class="ia-drift-header-left">
+            <i class="fas fa-balance-scale ia-drift-icon"></i>
+            <div>
+              <div class="ia-drift-title">Portfolio Drift Monitor <span class="ia-drift-live">LIVE</span></div>
+              <div class="ia-drift-sub">Accounts where current allocation has drifted &gt;5% from target · AI recommends rebalancing trades</div>
+            </div>
+          </div>
+          <button class="ia-drift-close" onclick="iaCloseDriftPanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="ia-drift-list">
+          {/* Rendered by iaRenderDriftList() */}
+        </div>
+      </div>
+
+      {/* ── TLH Scanner Panel (hidden, JS-rendered) ── */}
+      <div class="ia-tlh-panel" id="ia-tlh-panel" style="display:none">
+        <div class="ia-tlh-header">
+          <div class="ia-tlh-header-left">
+            <i class="fas fa-leaf ia-tlh-icon"></i>
+            <div>
+              <div class="ia-tlh-title">Tax-Loss Harvesting Scanner <span class="ia-tlh-badge">AI-Powered</span></div>
+              <div class="ia-tlh-sub">Identifies unrealized losses that can offset capital gains · Estimates net tax savings per account</div>
+            </div>
+          </div>
+          <button class="ia-tlh-close" onclick="iaCloseTLHPanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="ia-tlh-list">
+          {/* Rendered by iaRenderTLHList() */}
+        </div>
+      </div>
+
+      {/* ── RMD Center Panel (hidden, JS-rendered) ── */}
+      <div class="ia-rmd-panel" id="ia-rmd-panel" style="display:none">
+        <div class="ia-rmd-header">
+          <div class="ia-rmd-header-left">
+            <i class="fas fa-calendar-exclamation ia-rmd-icon"></i>
+            <div>
+              <div class="ia-rmd-title">Required Minimum Distribution Center</div>
+              <div class="ia-rmd-sub">IRS RMD calculations for Traditional IRA clients age 73+ · Deadline Dec 31, 2026 · Penalty: 25% of undistributed amount</div>
+            </div>
+          </div>
+          <button class="ia-rmd-close" onclick="iaCloseRMDPanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="ia-rmd-list">
+          {/* Rendered by iaRenderRMDList() */}
+        </div>
+      </div>
+
+      {/* ── Main 2-col layout: Account List + Detail ── */}
+      <div class="ia-body">
+
+        {/* LEFT — Account Queue */}
+        <div class="ia-list-col">
+          <div id="ia-account-queue">
+            {/* Rendered by iaRenderAccountQueue() on initInvAccountsPage() */}
+          </div>
+        </div>
+
+        {/* RIGHT — Account Detail Panel */}
+        <div class="ia-detail-col" id="ia-detail-col">
+          <div class="ia-detail-empty" id="ia-detail-empty">
+            <i class="fas fa-chart-pie ia-empty-icon"></i>
+            <strong>Select an account to view details</strong>
+            <p>Click any investment account to view portfolio allocation,
+               performance attribution, holdings, rebalancing tools,
+               AI insights, and client reporting</p>
+          </div>
+          <div id="ia-detail-panel" style="display:none">
+            {/* Rendered by iaBuildDetailHTML() */}
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── New Account Modal (hidden) ── */}
+      <div class="ia-modal-overlay" id="ia-new-acct-overlay" style="display:none" onclick="iaCloseNewAccount()">
+        <div class="ia-modal" onclick="event.stopPropagation()">
+          <div class="ia-modal-header">
+            <div class="ia-modal-title"><i class="fas fa-plus-circle"></i> Open New Investment Account</div>
+            <button class="ia-modal-close" onclick="iaCloseNewAccount()"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="ia-new-acct-body">
+            {/* Rendered by iaRenderNewAccountForm() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Portfolio Review Modal (hidden) ── */}
+      <div class="ia-modal-overlay" id="ia-review-overlay" style="display:none" onclick="iaClosePortfolioReview()">
+        <div class="ia-modal ia-modal-wide" onclick="event.stopPropagation()">
+          <div class="ia-modal-header">
+            <div class="ia-modal-title"><i class="fas fa-robot"></i> AI Portfolio Review</div>
+            <button class="ia-modal-close" onclick="iaClosePortfolioReview()"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="ia-review-body">
+            {/* Rendered by iaRenderPortfolioReview() */}
+          </div>
+        </div>
+      </div>
 
     </div>
   )
