@@ -307,6 +307,7 @@ function MainApp() {
         <div id="tpl-delivery"><PolicyDeliveryPage /></div>
         <div id="tpl-leads"><LeadsPage /></div>
         <div id="tpl-inv-accounts"><InvestmentAccountsPage /></div>
+        <div id="tpl-ret-accounts"><RetirementAccountsPage /></div>
       </div>
 
       {/* ── Workflow Execution Modal ── */}
@@ -503,6 +504,13 @@ function Sidebar() {
         <a class="nav-item delivery-nav" onclick="navigateTo('delivery')" href="#">
           <i class="fas fa-box-open"></i><span>Policy Delivery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">2</span>
+        </a>
+
+        {/* ── RETIREMENT ── */}
+        <div class="nav-section-label">RETIREMENT</div>
+        <a class="nav-item ret-accounts-nav" onclick="navigateTo('ret-accounts')" href="#">
+          <i class="fas fa-umbrella-beach"></i><span>Annuity Accounts</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
         </a>
 
         {/* ── SERVICE (Phase 7 + INV) ── */}
@@ -13764,6 +13772,79 @@ function InvestmentAccountsPage() {
             {/* Rendered by iaRenderPortfolioReview() */}
           </div>
         </div>
+      </div>
+
+    </div>
+  )
+}
+
+function RetirementAccountsPage() {
+  return (
+    <div class="page ret-accounts-page">
+      {/* ── KPI Bar (rendered by JS module) ── */}
+      <div class="ra-kpi-bar" id="ra-kpi-bar"></div>
+
+      {/* ── AI Retirement Intelligence Banner ── */}
+      <div class="ra-ai-banner" id="ra-ai-banner"></div>
+
+      {/* ── Toolbar ── */}
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <div class="search-inline">
+            <i class="fas fa-search"></i>
+            <input type="text" id="ra-search" placeholder="Search annuity contracts, clients..." oninput="raFilterContracts()" />
+          </div>
+          <select class="filter-select" id="ra-type-filter" onchange="raFilterContracts()">
+            <option value="">All Annuity Types</option>
+            <option>Fixed Index Annuity (FIA)</option>
+            <option>Variable Annuity (VA)</option>
+            <option>Single Premium Immediate (SPIA)</option>
+            <option>Deferred Income Annuity (DIA)</option>
+            <option>Fixed Deferred Annuity</option>
+          </select>
+          <select class="filter-select" id="ra-status-filter" onchange="raFilterContracts()">
+            <option value="">All Status</option>
+            <option>Active — Accumulating</option>
+            <option>Active — Income Phase</option>
+            <option>Quote Stage</option>
+            <option>Illustration</option>
+            <option>In Review</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-ai" onclick="raRunIncomeGapScan()">
+            <i class="fas fa-robot"></i> Income Gap Scan
+          </button>
+          <button class="btn btn-primary" onclick="raOpenNewContract()">
+            <i class="fas fa-plus"></i> New Contract
+          </button>
+        </div>
+      </div>
+
+      {/* ── Split layout: queue + detail ── */}
+      <div class="ra-split">
+        {/* ── Left: Contract Queue ── */}
+        <div class="ra-queue-col" id="ra-queue-col">
+          <div id="ra-contract-queue">
+            {/* Rendered by raRenderQueue() */}
+          </div>
+        </div>
+
+        {/* ── Right: Contract Detail Panel ── */}
+        <div class="ra-detail-col" id="ra-detail-col">
+          <div class="ra-detail-empty" id="ra-detail-empty">
+            <i class="fas fa-umbrella-beach"></i>
+            <div>Select a contract to view details</div>
+          </div>
+          <div class="ra-detail-panel" id="ra-detail-panel" style="display:none">
+            {/* Rendered by raBuildDetailHTML() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Income Gap Scan Panel (hidden) ── */}
+      <div class="ra-gap-panel" id="ra-gap-panel" style="display:none">
+        <div id="ra-gap-content"></div>
       </div>
 
     </div>
