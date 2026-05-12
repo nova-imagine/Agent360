@@ -39241,3 +39241,1406 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
 
 })(); // 'RET Step 5 module loaded'
 
+
+
+(function() {
+  'use strict';
+
+  // ── ADV Step 1: Financial Plans page ────────────────────────────────────────
+  // 6 clients, 6-tab detail panel (Summary · Goals · Cash Flow · Assets · Risk · AI)
+  // KPI bar, AI banner, client list with plan health score
+
+  var _advClients = [
+    {
+      id: 'ADV-JW-001', name: 'James Whitfield', age: 52,
+      planType: 'Comprehensive', status: 'active', priority: 'high',
+      healthScore: 74, lastReview: '2025-03-10', nextReview: '2025-06-10',
+      aum: 842000, annualFee: 8420, feeType: 'AUM-based',
+      goals: [
+        { label: 'Retire at 62', progress: 58, target: 2200000, current: 842000, onTrack: false },
+        { label: 'College Fund (2 kids)', progress: 82, target: 120000, current: 98400, onTrack: true },
+        { label: 'Vacation Home', progress: 31, target: 450000, current: 139500, onTrack: false }
+      ],
+      cashFlow: { monthlyIncome: 14200, monthlyExpenses: 9800, monthlySavings: 4400, savingsRate: 31 },
+      assets: [
+        { label: '401(k)', value: 420000, pct: 50, color: '#0ea5e9' },
+        { label: 'Brokerage', value: 215000, pct: 26, color: '#8b5cf6' },
+        { label: 'Annuity (VA)', value: 150000, pct: 18, color: '#f59e0b' },
+        { label: 'Cash/MM', value: 57000, pct: 6, color: '#10b981' }
+      ],
+      risk: { score: 7, label: 'Growth', equity: 72, fixed: 20, alt: 8 },
+      aiInsight: 'James is 26% behind his retirement goal. Recommend increasing 401(k) contribution to max ($30,500 at age 52) and converting $80K brokerage holdings to a DIA starting at age 62. College fund is on track — no action needed.'
+    },
+    {
+      id: 'ADV-SW-001', name: 'Sandra Williams', age: 68,
+      planType: 'Retirement Distribution', status: 'distributing', priority: 'urgent',
+      healthScore: 91, lastReview: '2025-04-02', nextReview: '2025-07-02',
+      aum: 1240000, annualFee: 11160, feeType: 'AUM-based',
+      goals: [
+        { label: 'Sustain $7K/mo income', progress: 97, target: 7000, current: 6800, onTrack: true },
+        { label: 'Legacy to 3 children', progress: 88, target: 500000, current: 440000, onTrack: true },
+        { label: 'LTC Reserve', progress: 72, target: 200000, current: 144000, onTrack: true }
+      ],
+      cashFlow: { monthlyIncome: 9200, monthlyExpenses: 6800, monthlySavings: 2400, savingsRate: 26 },
+      assets: [
+        { label: 'IRA (Trad)', value: 680000, pct: 55, color: '#0ea5e9' },
+        { label: 'SPIA Income', value: 220000, pct: 18, color: '#10b981' },
+        { label: 'Brokerage', value: 240000, pct: 19, color: '#8b5cf6' },
+        { label: 'Cash/MM', value: 100000, pct: 8, color: '#f59e0b' }
+      ],
+      risk: { score: 4, label: 'Conservative', equity: 35, fixed: 55, alt: 10 },
+      aiInsight: 'Sandra\'s plan is performing well. RMD for 2025 is $47,320 — schedule distribution by Dec 15. Consider a Roth conversion of $30K this year while in the 22% bracket before RMDs push her to 24%. Legacy goal on track.'
+    },
+    {
+      id: 'ADV-LM-001', name: 'Linda Morrison', age: 58,
+      planType: 'Pre-Retirement', status: 'active', priority: 'high',
+      healthScore: 68, lastReview: '2025-02-18', nextReview: '2025-05-18',
+      aum: 1580000, annualFee: 14220, feeType: 'AUM-based',
+      goals: [
+        { label: 'Retire at 63', progress: 71, target: 3100000, current: 1580000, onTrack: false },
+        { label: 'Debt-free by 60', progress: 60, target: 0, current: 87000, onTrack: false },
+        { label: 'Estate Plan Update', progress: 45, target: 100, current: 45, onTrack: false }
+      ],
+      cashFlow: { monthlyIncome: 18500, monthlyExpenses: 12400, monthlySavings: 6100, savingsRate: 33 },
+      assets: [
+        { label: '403(b)', value: 780000, pct: 49, color: '#0ea5e9' },
+        { label: 'FIA Annuity', value: 200000, pct: 13, color: '#f59e0b' },
+        { label: 'Real Estate', value: 420000, pct: 27, color: '#ef4444' },
+        { label: 'Brokerage', value: 180000, pct: 11, color: '#8b5cf6' }
+      ],
+      risk: { score: 6, label: 'Moderate Growth', equity: 62, fixed: 28, alt: 10 },
+      aiInsight: 'Linda needs $1.52M more to retire comfortably at 63. Recommend accelerating 403(b) contributions ($30,500/yr catch-up) and exploring a 1031 exchange on the real estate to rebalance into income-producing assets. Estate plan is overdue — refer to estate attorney.'
+    },
+    {
+      id: 'ADV-MG-001', name: 'Maria Gonzalez', age: 71,
+      planType: 'Estate & Distribution', status: 'rmd-required', priority: 'urgent',
+      healthScore: 88, lastReview: '2025-04-15', nextReview: '2025-07-15',
+      aum: 920000, annualFee: 9200, feeType: 'AUM-based',
+      goals: [
+        { label: 'Monthly income $4,800', progress: 92, target: 4800, current: 4400, onTrack: true },
+        { label: 'Estate to 4 grandchildren', progress: 78, target: 400000, current: 312000, onTrack: true },
+        { label: 'Charitable giving $5K/yr', progress: 100, target: 5000, current: 5000, onTrack: true }
+      ],
+      cashFlow: { monthlyIncome: 7100, monthlyExpenses: 4900, monthlySavings: 2200, savingsRate: 31 },
+      assets: [
+        { label: 'IRA (Trad)', value: 510000, pct: 55, color: '#0ea5e9' },
+        { label: 'Fixed Annuity', value: 95000, pct: 10, color: '#f59e0b' },
+        { label: 'Brokerage', value: 215000, pct: 23, color: '#8b5cf6' },
+        { label: 'Cash/MM', value: 100000, pct: 12, color: '#10b981' }
+      ],
+      risk: { score: 3, label: 'Conservative', equity: 28, fixed: 62, alt: 10 },
+      aiInsight: 'Maria\'s RMD of $38,760 is due — FIA contract matures Jun 15, requires immediate action. Recommend QCD of $5,000 to satisfy charitable goal and reduce taxable RMD. Consider IRMAA planning for Medicare Part B (income just below threshold).'
+    },
+    {
+      id: 'ADV-RC-001', name: 'Robert Chen', age: 55,
+      planType: 'Comprehensive', status: 'active', priority: 'high',
+      healthScore: 62, lastReview: '2025-01-22', nextReview: '2025-04-22',
+      aum: 2140000, annualFee: 19260, feeType: 'AUM-based',
+      goals: [
+        { label: 'Retire at 60 — $12K/mo', progress: 54, target: 4800000, current: 2140000, onTrack: false },
+        { label: 'Business succession', progress: 25, target: 100, current: 25, onTrack: false },
+        { label: 'Protect $2M estate', progress: 89, target: 2000000, current: 1780000, onTrack: true }
+      ],
+      cashFlow: { monthlyIncome: 28000, monthlyExpenses: 16000, monthlySavings: 12000, savingsRate: 43 },
+      assets: [
+        { label: '401(k)/SEP', value: 980000, pct: 46, color: '#0ea5e9' },
+        { label: 'Business Equity', value: 650000, pct: 30, color: '#ef4444' },
+        { label: 'DIA Annuity', value: 250000, pct: 12, color: '#f59e0b' },
+        { label: 'Brokerage', value: 260000, pct: 12, color: '#8b5cf6' }
+      ],
+      risk: { score: 8, label: 'Aggressive Growth', equity: 80, fixed: 12, alt: 8 },
+      aiInsight: 'Robert is significantly behind for a 60-retirement. Gap is $2.66M over 5 years — requires $44K/mo savings vs. current $12K. Recommend business succession planning with buy-sell agreement, key-man life insurance, and converting business equity into diversified assets over 3-year glide path.'
+    },
+    {
+      id: 'ADV-DW-001', name: 'Dorothy Wilson', age: 72,
+      planType: 'Legacy & Distribution', status: 'distributing', priority: 'low',
+      healthScore: 95, lastReview: '2025-04-28', nextReview: '2025-07-28',
+      aum: 680000, annualFee: 6120, feeType: 'AUM-based',
+      goals: [
+        { label: 'Income $4,200/mo', progress: 100, target: 4200, current: 4200, onTrack: true },
+        { label: 'Leave home to daughter', progress: 100, target: 100, current: 100, onTrack: true },
+        { label: 'Final expense fund', progress: 100, target: 25000, current: 25000, onTrack: true }
+      ],
+      cashFlow: { monthlyIncome: 5800, monthlyExpenses: 4100, monthlySavings: 1700, savingsRate: 29 },
+      assets: [
+        { label: 'SPIA', value: 280000, pct: 41, color: '#10b981' },
+        { label: 'IRA (Trad)', value: 220000, pct: 32, color: '#0ea5e9' },
+        { label: 'Brokerage', value: 130000, pct: 19, color: '#8b5cf6' },
+        { label: 'Cash/MM', value: 50000, pct: 8, color: '#f59e0b' }
+      ],
+      risk: { score: 2, label: 'Income', equity: 20, fixed: 70, alt: 10 },
+      aiInsight: 'Dorothy\'s plan is fully on track. All goals met. Annual review recommended to ensure RMD is processed and beneficiary designations are current. Consider a small Roth conversion ($15K) to reduce future RMD burden for heirs.'
+    }
+  ];
+
+  var _advSelectedId = null;
+  var _advFilter = '';
+
+  // ── KPI bar ──────────────────────────────────────────────────────────────────
+  function _advRenderKPIBar() {
+    var el = document.getElementById('adv-kpi-bar');
+    if (!el) return;
+    var totalAUM    = _advClients.reduce(function(s,c){ return s + c.aum; }, 0);
+    var totalFees   = _advClients.reduce(function(s,c){ return s + c.annualFee; }, 0);
+    var avgHealth   = Math.round(_advClients.reduce(function(s,c){ return s + c.healthScore; }, 0) / _advClients.length);
+    var urgent      = _advClients.filter(function(c){ return c.priority === 'urgent'; }).length;
+    var distributing= _advClients.filter(function(c){ return c.status === 'distributing' || c.status === 'rmd-required'; }).length;
+    var accumulating= _advClients.filter(function(c){ return c.status === 'active'; }).length;
+    var offTrack    = _advClients.filter(function(c){ return c.goals.some(function(g){ return !g.onTrack; }); }).length;
+
+    el.innerHTML =
+      '<div class="adv-kpi-card">' +
+        '<div class="adv-kpi-icon"><i class="fas fa-users"></i></div>' +
+        '<div class="adv-kpi-body"><div class="adv-kpi-val">' + _advClients.length + '</div>' +
+        '<div class="adv-kpi-label">ADVISORY<br>CLIENTS</div>' +
+        '<div class="adv-kpi-sub">' + distributing + ' distributing</div></div>' +
+      '</div>' +
+      '<div class="adv-kpi-card">' +
+        '<div class="adv-kpi-icon" style="color:#8b5cf6"><i class="fas fa-dollar-sign"></i></div>' +
+        '<div class="adv-kpi-body"><div class="adv-kpi-val">$' + (totalAUM/1000000).toFixed(1) + 'M</div>' +
+        '<div class="adv-kpi-label">TOTAL AUM<br>MANAGED</div>' +
+        '<div class="adv-kpi-sub">$' + Math.round(totalAUM/6/1000) + 'K avg</div></div>' +
+      '</div>' +
+      '<div class="adv-kpi-card">' +
+        '<div class="adv-kpi-icon" style="color:#10b981"><i class="fas fa-hand-holding-usd"></i></div>' +
+        '<div class="adv-kpi-body"><div class="adv-kpi-val">$' + Math.round(totalFees/1000) + 'K</div>' +
+        '<div class="adv-kpi-label">ANNUAL FEES<br>MANAGED</div>' +
+        '<div class="adv-kpi-sub">avg ' + ((totalFees/totalAUM)*100).toFixed(2) + '% AUM</div></div>' +
+      '</div>' +
+      '<div class="adv-kpi-card">' +
+        '<div class="adv-kpi-icon" style="color:' + (avgHealth >= 80 ? '#10b981' : avgHealth >= 65 ? '#f59e0b' : '#ef4444') + '">' +
+        '<i class="fas fa-heartbeat"></i></div>' +
+        '<div class="adv-kpi-body"><div class="adv-kpi-val">' + avgHealth + '</div>' +
+        '<div class="adv-kpi-label">AVG PLAN<br>HEALTH SCORE</div>' +
+        '<div class="adv-kpi-sub">out of 100</div></div>' +
+      '</div>' +
+      '<div class="adv-kpi-card">' +
+        '<div class="adv-kpi-icon" style="color:#ef4444"><i class="fas fa-exclamation-triangle"></i></div>' +
+        '<div class="adv-kpi-body"><div class="adv-kpi-val">' + urgent + '</div>' +
+        '<div class="adv-kpi-label">URGENT<br>ACTIONS</div>' +
+        '<div class="adv-kpi-sub">require attention</div></div>' +
+      '</div>' +
+      '<div class="adv-kpi-card">' +
+        '<div class="adv-kpi-icon" style="color:#f59e0b"><i class="fas fa-bullseye"></i></div>' +
+        '<div class="adv-kpi-body"><div class="adv-kpi-val">' + offTrack + '</div>' +
+        '<div class="adv-kpi-label">GOALS<br>OFF TRACK</div>' +
+        '<div class="adv-kpi-sub">need plan adjustment</div></div>' +
+      '</div>' +
+      '<div class="adv-kpi-card">' +
+        '<div class="adv-kpi-icon" style="color:#0ea5e9"><i class="fas fa-chart-pie"></i></div>' +
+        '<div class="adv-kpi-body"><div class="adv-kpi-val">' + accumulating + '</div>' +
+        '<div class="adv-kpi-label">ACCUMULATION<br>PHASE</div>' +
+        '<div class="adv-kpi-sub">actively building</div></div>' +
+      '</div>' +
+      '<div class="adv-kpi-card">' +
+        '<div class="adv-kpi-icon" style="color:#06b6d4"><i class="fas fa-calendar-check"></i></div>' +
+        '<div class="adv-kpi-body"><div class="adv-kpi-val">3</div>' +
+        '<div class="adv-kpi-label">REVIEWS<br>DUE THIS MONTH</div>' +
+        '<div class="adv-kpi-sub">scheduled</div></div>' +
+      '</div>';
+  }
+
+  // ── AI Banner ─────────────────────────────────────────────────────────────────
+  function _advRenderAIBanner() {
+    var el = document.getElementById('adv-ai-banner');
+    if (!el) return;
+    var offTrackClients = _advClients.filter(function(c){ return c.goals.some(function(g){ return !g.onTrack; }); });
+    var totalGap = _advClients.reduce(function(s,c){
+      return s + c.goals.filter(function(g){ return !g.onTrack; }).length;
+    }, 0);
+    el.innerHTML =
+      '<div class="adv-ai-pulse-wrap"><div class="adv-ai-pulse"></div>' +
+      '<span class="adv-ai-label"><i class="fas fa-robot"></i> AI PLAN OPTIMIZER</span></div>' +
+      '<div class="adv-ai-text">' +
+        '<strong>Plan Gap Alert:</strong> ' + offTrackClients.length + ' clients have ' + totalGap + ' off-track goals. ' +
+        'Robert Chen has the largest retirement gap at <strong>$2.66M</strong>. ' +
+        'Maria Gonzalez\'s FIA contract requires <strong>immediate action before Jun 15</strong>.' +
+      '</div>' +
+      '<div class="adv-ai-actions">' +
+        '<button class="adv-ai-btn adv-ai-btn-primary" onclick="advBatchReview()"><i class="fas fa-magic"></i> Full Gap Report</button>' +
+        '<button class="adv-ai-btn adv-ai-btn-secondary" onclick="advBatchReview()"><i class="fas fa-file-alt"></i> AI Plan Letters</button>' +
+      '</div>' +
+      '<div class="adv-ai-summary">' +
+        '<div class="adv-ai-stat"><span class="adv-ai-stat-val">' + totalGap + '</span><span class="adv-ai-stat-lbl">TOTAL<br>OFF-TRACK</span></div>' +
+        '<div class="adv-ai-stat"><span class="adv-ai-stat-val">' + offTrackClients.length + '</span><span class="adv-ai-stat-lbl">CLIENTS<br>AT RISK</span></div>' +
+      '</div>';
+  }
+
+  function advBatchReview() {
+    alert('AI Batch Plan Review — generating optimization report for all 6 advisory clients...');
+  }
+
+  // ── Client List ───────────────────────────────────────────────────────────────
+  function advRenderClientList() {
+    var el = document.getElementById('adv-client-list');
+    if (!el) return;
+    var filtered = _advFilter
+      ? _advClients.filter(function(c){
+          var q = _advFilter.toLowerCase();
+          return c.name.toLowerCase().indexOf(q) > -1 || c.planType.toLowerCase().indexOf(q) > -1 || c.status.indexOf(q) > -1;
+        })
+      : _advClients;
+
+    var sorted = filtered.slice().sort(function(a,b){
+      var p = {urgent:0,high:1,medium:2,low:3};
+      return (p[a.priority]||4) - (p[b.priority]||4);
+    });
+
+    el.innerHTML = sorted.map(function(c) {
+      var healthColor = c.healthScore >= 85 ? '#10b981' : c.healthScore >= 70 ? '#f59e0b' : '#ef4444';
+      var statusBadge = {
+        'active':       '<span class="adv-status-badge adv-status-active">Active</span>',
+        'distributing': '<span class="adv-status-badge adv-status-dist">Distributing</span>',
+        'rmd-required': '<span class="adv-status-badge adv-status-rmd">RMD Due</span>'
+      }[c.status] || '<span class="adv-status-badge">' + c.status + '</span>';
+      var priorityDot = {urgent:'#ef4444',high:'#f59e0b',medium:'#0ea5e9',low:'#10b981'}[c.priority] || '#6b7280';
+      var isSelected = c.id === _advSelectedId;
+      var offTrackCount = c.goals.filter(function(g){ return !g.onTrack; }).length;
+
+      return '<div class="adv-client-card' + (isSelected ? ' adv-selected' : '') + '" onclick="advOpenClient(\'' + c.id + '\')">' +
+        '<div class="adv-cc-top">' +
+          '<div class="adv-cc-avatar" style="background:' + (isSelected ? '#1e40af' : '#334155') + '">' +
+            c.name.split(' ').map(function(n){ return n[0]; }).join('') +
+          '</div>' +
+          '<div class="adv-cc-info">' +
+            '<div class="adv-cc-name">' + c.name + '</div>' +
+            '<div class="adv-cc-meta">Age ' + c.age + ' · ' + c.planType + '</div>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">' +
+            statusBadge +
+            '<span style="width:8px;height:8px;border-radius:50%;background:' + priorityDot + ';margin-top:2px;display:inline-block;align-self:flex-end"></span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="adv-cc-health-row">' +
+          '<div class="adv-cc-health-bar-wrap">' +
+            '<div class="adv-cc-health-bar" style="width:' + c.healthScore + '%;background:' + healthColor + '"></div>' +
+          '</div>' +
+          '<span class="adv-cc-health-val" style="color:' + healthColor + '">' + c.healthScore + '</span>' +
+        '</div>' +
+        '<div class="adv-cc-footer">' +
+          '<span>$' + (c.aum/1000).toFixed(0) + 'K AUM</span>' +
+          '<span style="color:' + (offTrackCount > 0 ? '#f59e0b' : '#10b981') + '">' +
+            (offTrackCount > 0 ? offTrackCount + ' goal' + (offTrackCount>1?'s':'' ) + ' off track' : 'All goals on track') +
+          '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── Open Client ───────────────────────────────────────────────────────────────
+  function advOpenClient(id) {
+    _advSelectedId = id;
+    advRenderClientList();
+    var c = _advClients.find(function(x){ return x.id === id; });
+    if (!c) return;
+    var emptyEl = document.getElementById('adv-detail-empty');
+    var panelEl = document.getElementById('adv-detail-panel');
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (panelEl) { panelEl.style.display = 'block'; panelEl.innerHTML = _advBuildDetailHTML(c); }
+    advSwitchTab('summary', panelEl ? panelEl.querySelector('.adv-tab-btn') : null);
+  }
+
+  // ── Tab switcher ──────────────────────────────────────────────────────────────
+  function advSwitchTab(key, el) {
+    var panel = document.getElementById('adv-detail-panel');
+    if (!panel) return;
+    panel.querySelectorAll('.adv-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    panel.querySelectorAll('.adv-tab-panel').forEach(function(p){ p.style.display = 'none'; });
+    if (el) el.classList.add('active');
+    var tp = document.getElementById('adv-tab-' + key);
+    if (tp) tp.style.display = 'block';
+  }
+
+  // ── Detail HTML ───────────────────────────────────────────────────────────────
+  function _advBuildDetailHTML(c) {
+    var healthColor = c.healthScore >= 85 ? '#10b981' : c.healthScore >= 70 ? '#f59e0b' : '#ef4444';
+    return (
+      '<div class="adv-detail-header">' +
+        '<div class="adv-dh-left">' +
+          '<div class="adv-dh-avatar">' + c.name.split(' ').map(function(n){ return n[0]; }).join('') + '</div>' +
+          '<div>' +
+            '<div class="adv-dh-name">' + c.name + '</div>' +
+            '<div class="adv-dh-meta">Age ' + c.age + ' · ' + c.planType + ' · ' + c.feeType + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="adv-dh-right">' +
+          '<div class="adv-dh-score" style="color:' + healthColor + '">' + c.healthScore + '<span style="font-size:12px;color:#94a3b8">/100</span></div>' +
+          '<div style="font-size:10px;color:#94a3b8;text-align:center">Plan Health</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="adv-tab-bar">' +
+        ['summary','goals','cashflow','assets','risk','ai'].map(function(k, i){
+          var icons = ['fas fa-clipboard-list','fas fa-bullseye','fas fa-exchange-alt','fas fa-chart-pie','fas fa-shield-alt','fas fa-robot'];
+          var labels = ['Summary','Goals','Cash Flow','Assets','Risk','AI'];
+          return '<button class="adv-tab-btn' + (i===0?' active':'') + '" onclick="advSwitchTab(\'' + k + '\',this)">' +
+            '<i class="' + icons[i] + '"></i> ' + labels[i] + '</button>';
+        }).join('') +
+      '</div>' +
+      '<div class="adv-tab-panels">' +
+        _advTabSummary(c) +
+        _advTabGoals(c) +
+        _advTabCashFlow(c) +
+        _advTabAssets(c) +
+        _advTabRisk(c) +
+        _advTabAI(c) +
+      '</div>'
+    );
+  }
+
+  // ── Tab: Summary ──────────────────────────────────────────────────────────────
+  function _advTabSummary(c) {
+    var onTrack = c.goals.filter(function(g){ return g.onTrack; }).length;
+    var offTrack = c.goals.filter(function(g){ return !g.onTrack; }).length;
+    return '<div id="adv-tab-summary" class="adv-tab-panel">' +
+      '<div class="adv-summary-grid">' +
+        '<div class="adv-summary-card">' +
+          '<div class="adv-sc-label">Plan Type</div><div class="adv-sc-val">' + c.planType + '</div>' +
+        '</div>' +
+        '<div class="adv-summary-card">' +
+          '<div class="adv-sc-label">Status</div><div class="adv-sc-val">' + c.status.replace('-',' ').replace(/\b\w/g,function(x){return x.toUpperCase();}) + '</div>' +
+        '</div>' +
+        '<div class="adv-summary-card">' +
+          '<div class="adv-sc-label">AUM</div><div class="adv-sc-val">$' + (c.aum/1000).toFixed(0) + 'K</div>' +
+        '</div>' +
+        '<div class="adv-summary-card">' +
+          '<div class="adv-sc-label">Annual Fee</div><div class="adv-sc-val">$' + c.annualFee.toLocaleString() + '</div>' +
+        '</div>' +
+        '<div class="adv-summary-card">' +
+          '<div class="adv-sc-label">Last Review</div><div class="adv-sc-val">' + c.lastReview + '</div>' +
+        '</div>' +
+        '<div class="adv-summary-card">' +
+          '<div class="adv-sc-label">Next Review</div><div class="adv-sc-val">' + c.nextReview + '</div>' +
+        '</div>' +
+        '<div class="adv-summary-card">' +
+          '<div class="adv-sc-label">Goals On Track</div>' +
+          '<div class="adv-sc-val" style="color:#10b981">' + onTrack + ' / ' + c.goals.length + '</div>' +
+        '</div>' +
+        '<div class="adv-summary-card">' +
+          '<div class="adv-sc-label">Goals Off Track</div>' +
+          '<div class="adv-sc-val" style="color:' + (offTrack>0?'#ef4444':'#10b981') + '">' + offTrack + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="adv-summary-actions">' +
+        '<button class="adv-action-btn adv-action-primary"><i class="fas fa-file-pdf"></i> Generate Plan Report</button>' +
+        '<button class="adv-action-btn adv-action-secondary"><i class="fas fa-envelope"></i> Send to Client</button>' +
+        '<button class="adv-action-btn adv-action-secondary"><i class="fas fa-calendar-plus"></i> Schedule Review</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── Tab: Goals ────────────────────────────────────────────────────────────────
+  function _advTabGoals(c) {
+    var rows = c.goals.map(function(g) {
+      var barColor = g.onTrack ? '#10b981' : '#ef4444';
+      return '<div class="adv-goal-row">' +
+        '<div class="adv-goal-top">' +
+          '<span class="adv-goal-label">' + g.label + '</span>' +
+          '<span class="adv-goal-badge" style="background:' + (g.onTrack?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)') +
+            ';color:' + (g.onTrack?'#10b981':'#ef4444') + '">' +
+            (g.onTrack ? '<i class="fas fa-check"></i> On Track' : '<i class="fas fa-times"></i> Off Track') +
+          '</span>' +
+        '</div>' +
+        '<div class="adv-goal-bar-wrap">' +
+          '<div class="adv-goal-bar" style="width:' + g.progress + '%;background:' + barColor + '"></div>' +
+        '</div>' +
+        '<div class="adv-goal-footer">' +
+          '<span>' + g.progress + '% complete</span>' +
+          (g.target > 1000
+            ? '<span>$' + (g.current/1000).toFixed(0) + 'K of $' + (g.target/1000).toFixed(0) + 'K</span>'
+            : '<span>' + g.current + ' of ' + g.target + '</span>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div id="adv-tab-goals" class="adv-tab-panel" style="display:none">' +
+      '<div class="adv-goals-list">' + rows + '</div>' +
+    '</div>';
+  }
+
+  // ── Tab: Cash Flow ────────────────────────────────────────────────────────────
+  function _advTabCashFlow(c) {
+    var cf = c.cashFlow;
+    return '<div id="adv-tab-cashflow" class="adv-tab-panel" style="display:none">' +
+      '<div class="adv-cf-grid">' +
+        '<div class="adv-cf-card adv-cf-income">' +
+          '<div class="adv-cf-icon"><i class="fas fa-arrow-down"></i></div>' +
+          '<div><div class="adv-cf-label">Monthly Income</div>' +
+          '<div class="adv-cf-val">${' + cf.monthlyIncome.toLocaleString() + '}</div></div>' +
+        '</div>' +
+        '<div class="adv-cf-card adv-cf-expense">' +
+          '<div class="adv-cf-icon"><i class="fas fa-arrow-up"></i></div>' +
+          '<div><div class="adv-cf-label">Monthly Expenses</div>' +
+          '<div class="adv-cf-val">${' + cf.monthlyExpenses.toLocaleString() + '}</div></div>' +
+        '</div>' +
+        '<div class="adv-cf-card adv-cf-savings">' +
+          '<div class="adv-cf-icon"><i class="fas fa-piggy-bank"></i></div>' +
+          '<div><div class="adv-cf-label">Monthly Savings</div>' +
+          '<div class="adv-cf-val">${' + cf.monthlySavings.toLocaleString() + '}</div></div>' +
+        '</div>' +
+        '<div class="adv-cf-card adv-cf-rate">' +
+          '<div class="adv-cf-icon"><i class="fas fa-percentage"></i></div>' +
+          '<div><div class="adv-cf-label">Savings Rate</div>' +
+          '<div class="adv-cf-val">' + cf.savingsRate + '%</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="adv-cf-bar-section">' +
+        '<div class="adv-cf-bar-label">Income Allocation</div>' +
+        '<div class="adv-cf-bar-wrap">' +
+          '<div class="adv-cf-seg" style="width:' + Math.round((cf.monthlyExpenses/cf.monthlyIncome)*100) + '%;background:#ef4444" title="Expenses"></div>' +
+          '<div class="adv-cf-seg" style="width:' + Math.round((cf.monthlySavings/cf.monthlyIncome)*100) + '%;background:#10b981" title="Savings"></div>' +
+        '</div>' +
+        '<div class="adv-cf-bar-legend">' +
+          '<span style="color:#ef4444"><i class="fas fa-square"></i> Expenses ' + Math.round((cf.monthlyExpenses/cf.monthlyIncome)*100) + '%</span>' +
+          '<span style="color:#10b981"><i class="fas fa-square"></i> Savings ' + cf.savingsRate + '%</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── Tab: Assets ───────────────────────────────────────────────────────────────
+  function _advTabAssets(c) {
+    var rows = c.assets.map(function(a) {
+      return '<div class="adv-asset-row">' +
+        '<div class="adv-asset-dot" style="background:' + a.color + '"></div>' +
+        '<div class="adv-asset-label">' + a.label + '</div>' +
+        '<div class="adv-asset-bar-wrap">' +
+          '<div class="adv-asset-bar" style="width:' + a.pct + '%;background:' + a.color + '"></div>' +
+        '</div>' +
+        '<div class="adv-asset-pct">' + a.pct + '%</div>' +
+        '<div class="adv-asset-val">$' + (a.value/1000).toFixed(0) + 'K</div>' +
+      '</div>';
+    }).join('');
+    return '<div id="adv-tab-assets" class="adv-tab-panel" style="display:none">' +
+      '<div class="adv-assets-header">' +
+        '<div class="adv-assets-total">Total AUM: <strong>$' + (c.aum/1000).toFixed(0) + 'K</strong></div>' +
+        '<button class="adv-action-btn adv-action-secondary" style="padding:6px 14px;font-size:11px">' +
+          '<i class="fas fa-rebalance"></i> Rebalance</button>' +
+      '</div>' +
+      '<div class="adv-asset-rows">' + rows + '</div>' +
+    '</div>';
+  }
+
+  // ── Tab: Risk ─────────────────────────────────────────────────────────────────
+  function _advTabRisk(c) {
+    var r = c.risk;
+    var scoreColor = r.score >= 7 ? '#ef4444' : r.score >= 5 ? '#f59e0b' : '#10b981';
+    return '<div id="adv-tab-risk" class="adv-tab-panel" style="display:none">' +
+      '<div class="adv-risk-header">' +
+        '<div class="adv-risk-score" style="color:' + scoreColor + '">' + r.score + '<span style="font-size:14px;color:#94a3b8">/10</span></div>' +
+        '<div>' +
+          '<div class="adv-risk-label">' + r.label + '</div>' +
+          '<div style="font-size:11px;color:#64748b">Risk Tolerance Score</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="adv-risk-alloc">' +
+        '<div class="adv-risk-alloc-row">' +
+          '<span class="adv-risk-alloc-label">Equity</span>' +
+          '<div class="adv-risk-alloc-bar-wrap">' +
+            '<div class="adv-risk-alloc-bar" style="width:' + r.equity + '%;background:#0ea5e9"></div>' +
+          '</div>' +
+          '<span class="adv-risk-alloc-pct">' + r.equity + '%</span>' +
+        '</div>' +
+        '<div class="adv-risk-alloc-row">' +
+          '<span class="adv-risk-alloc-label">Fixed Income</span>' +
+          '<div class="adv-risk-alloc-bar-wrap">' +
+            '<div class="adv-risk-alloc-bar" style="width:' + r.fixed + '%;background:#8b5cf6"></div>' +
+          '</div>' +
+          '<span class="adv-risk-alloc-pct">' + r.fixed + '%</span>' +
+        '</div>' +
+        '<div class="adv-risk-alloc-row">' +
+          '<span class="adv-risk-alloc-label">Alternatives</span>' +
+          '<div class="adv-risk-alloc-bar-wrap">' +
+            '<div class="adv-risk-alloc-bar" style="width:' + r.alt + '%;background:#f59e0b"></div>' +
+          '</div>' +
+          '<span class="adv-risk-alloc-pct">' + r.alt + '%</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── Tab: AI ───────────────────────────────────────────────────────────────────
+  function _advTabAI(c) {
+    return '<div id="adv-tab-ai" class="adv-tab-panel" style="display:none">' +
+      '<div class="adv-ai-insight-card">' +
+        '<div class="adv-ai-insight-header"><i class="fas fa-robot"></i> AI Plan Optimizer — ' + c.name + '</div>' +
+        '<div class="adv-ai-insight-body">' + c.aiInsight + '</div>' +
+      '</div>' +
+      '<div class="adv-ai-actions-grid">' +
+        '<button class="adv-ai-action-card"><i class="fas fa-file-alt"></i><span>Generate IPS</span></button>' +
+        '<button class="adv-ai-action-card"><i class="fas fa-envelope"></i><span>Draft Client Letter</span></button>' +
+        '<button class="adv-ai-action-card"><i class="fas fa-chart-line"></i><span>Run Projection</span></button>' +
+        '<button class="adv-ai-action-card"><i class="fas fa-calendar-alt"></i><span>Schedule Review</span></button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────────
+  function initAdvFinancialPlansPage() {
+    _advRenderKPIBar();
+    _advRenderAIBanner();
+    advRenderClientList();
+    // Auto-open Maria Gonzalez (urgent RMD + FIA action)
+    setTimeout(function() { advOpenClient('ADV-MG-001'); }, 120);
+  }
+
+  // ── navigateTo monkey-patch ───────────────────────────────────────────────────
+  var _orig_navigateTo_adv = navigateTo;
+  navigateTo = function(page) {
+    _orig_navigateTo_adv(page);
+    if (page === 'adv-plans') {
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          var t = document.getElementById('page-title');
+          var b = document.getElementById('page-breadcrumb');
+          if (t) t.textContent = 'Financial Plans';
+          if (b) b.textContent = 'Advisory / Financial Plans';
+          initAdvFinancialPlansPage();
+        }, 80);
+      });
+    }
+  };
+
+  console.log('ADV Step 1 module loaded');
+})();
+
+
+
+(function() {
+  'use strict';
+
+  // ── ADV Step 2: Goals & Wealth Map tab injected into FNA Discovery page ──────
+  // Adds a 6th tab "Goals & Wealth" to the existing FNA tab bar
+  // Renders: net worth snapshot, 3-goal progress bars, wealth timeline, AI recommendation card
+
+  var _advFNAData = {
+    'alex-rivera': {
+      name: 'Alex Rivera', age: 34,
+      netWorth: 187000,
+      assets: { '401k': 82000, brokerage: 45000, home: 0, cash: 60000 },
+      liabilities: { studentLoan: 0, creditCard: 0 },
+      goals: [
+        { label: 'Buy First Home (age 37)', target: 80000, current: 45000, pct: 56, onTrack: true },
+        { label: 'Emergency Fund 6-month', target: 30000, current: 27000, pct: 90, onTrack: true },
+        { label: 'Retire at 62 — $6K/mo', target: 1800000, current: 127000, pct: 7, onTrack: false }
+      ],
+      wealthStages: [
+        { age: 34, val: 187, label: 'Today' },
+        { age: 40, val: 380, label: 'Age 40' },
+        { age: 50, val: 820, label: 'Age 50' },
+        { age: 62, val: 1640, label: 'Target Retire' }
+      ],
+      aiRec: 'Alex is on track for the home purchase but needs to accelerate retirement savings immediately. Recommend opening a Roth IRA ($7,000/yr) and increasing 401(k) to at least 15%. A whole-life policy now locks in low premiums and builds cash value for the home purchase.'
+    },
+    'default': {
+      name: 'Client', age: 45,
+      netWorth: 420000,
+      assets: { '401k': 210000, brokerage: 95000, home: 180000, cash: 55000 },
+      liabilities: { mortgage: 120000 },
+      goals: [
+        { label: 'Retire at 65 — $7K/mo', target: 2100000, current: 420000, pct: 20, onTrack: false },
+        { label: 'College Fund', target: 100000, current: 42000, pct: 42, onTrack: true },
+        { label: 'Pay off mortgage (age 55)', target: 0, current: 120000, pct: 60, onTrack: true }
+      ],
+      wealthStages: [
+        { age: 45, val: 420, label: 'Today' },
+        { age: 50, val: 680, label: 'Age 50' },
+        { age: 60, val: 1250, label: 'Age 60' },
+        { age: 65, val: 1820, label: 'Target Retire' }
+      ],
+      aiRec: 'Client is behind on retirement savings. Recommend increasing contribution rate to 20% and reviewing asset allocation. Insurance gap of $1.2M in life coverage identified — term policy recommended immediately.'
+    }
+  };
+
+  function _renderFNAGoalsTab(clientKey) {
+    var d = _advFNAData[clientKey] || _advFNAData['default'];
+    var totalAssets = Object.values(d.assets).reduce(function(s,v){ return s+v; }, 0);
+    var totalLiab   = Object.values(d.liabilities).reduce(function(s,v){ return s+v; }, 0);
+
+    var goalRows = d.goals.map(function(g) {
+      var barColor = g.onTrack ? '#10b981' : '#ef4444';
+      return '<div class="fna-goals-row">' +
+        '<div class="fna-goals-top">' +
+          '<span class="fna-goals-label">' + g.label + '</span>' +
+          '<span class="fna-goals-badge" style="background:' + (g.onTrack?'rgba(16,185,129,.15)':'rgba(239,68,68,.15)') +
+            ';color:' + (g.onTrack?'#10b981':'#ef4444') + '">' +
+            (g.onTrack?'✓ On Track':'✗ Off Track') + '</span>' +
+        '</div>' +
+        '<div class="fna-goals-bar-wrap"><div class="fna-goals-bar" style="width:' + g.pct + '%;background:' + barColor + '"></div></div>' +
+        '<div class="fna-goals-foot"><span>' + g.pct + '%</span>' +
+          (g.target > 1000 ? '<span>$' + (g.current/1000).toFixed(0) + 'K of $' + (g.target/1000).toFixed(0) + 'K</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var maxVal = Math.max.apply(null, d.wealthStages.map(function(s){ return s.val; }));
+    var timelineHTML = d.wealthStages.map(function(s) {
+      var h = Math.round((s.val / maxVal) * 80);
+      return '<div class="fna-wt-col">' +
+        '<div class="fna-wt-val">$' + s.val + 'K</div>' +
+        '<div class="fna-wt-bar-wrap"><div class="fna-wt-bar" style="height:' + h + 'px;background:#3b82f6"></div></div>' +
+        '<div class="fna-wt-label">' + s.label + '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="fna-goals-wrap">' +
+      '<div class="fna-goals-nw-row">' +
+        '<div class="fna-goals-nw-card">' +
+          '<div class="fna-goals-nw-label">Net Worth</div>' +
+          '<div class="fna-goals-nw-val">$' + (d.netWorth/1000).toFixed(0) + 'K</div>' +
+        '</div>' +
+        '<div class="fna-goals-nw-card">' +
+          '<div class="fna-goals-nw-label">Total Assets</div>' +
+          '<div class="fna-goals-nw-val" style="color:#10b981">$' + (totalAssets/1000).toFixed(0) + 'K</div>' +
+        '</div>' +
+        '<div class="fna-goals-nw-card">' +
+          '<div class="fna-goals-nw-label">Liabilities</div>' +
+          '<div class="fna-goals-nw-val" style="color:#ef4444">$' + (totalLiab/1000).toFixed(0) + 'K</div>' +
+        '</div>' +
+        '<div class="fna-goals-nw-card">' +
+          '<div class="fna-goals-nw-label">Age</div>' +
+          '<div class="fna-goals-nw-val">' + d.age + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fna-goals-section-title">Goal Progress</div>' +
+      '<div class="fna-goals-list">' + goalRows + '</div>' +
+      '<div class="fna-goals-section-title" style="margin-top:18px">Wealth Projection</div>' +
+      '<div class="fna-wt-chart">' + timelineHTML + '</div>' +
+      '<div class="fna-goals-ai-card">' +
+        '<div class="fna-goals-ai-header"><i class="fas fa-robot"></i> AI Wealth Recommendation</div>' +
+        '<div class="fna-goals-ai-body">' + d.aiRec + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function _wireGoalsFNATab() {
+    var tabBar = document.querySelector('.fna-tab-bar');
+    if (!tabBar || document.getElementById('fna-tab-btn-goals')) return;
+
+    var btn = document.createElement('button');
+    btn.id = 'fna-tab-btn-goals';
+    btn.className = 'fna-tab-btn';
+    btn.innerHTML = '<i class="fas fa-bullseye"></i> Goals & Wealth';
+    btn.onclick = function() {
+      document.querySelectorAll('.fna-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.fna-tab-panel, [id^="fna-tab-"]').forEach(function(p){ p.style.display = 'none'; });
+      var panel = document.getElementById('fna-goals-panel');
+      if (panel) { panel.style.display = 'block'; return; }
+      // Create panel and inject
+      var container = document.querySelector('.fna-tab-content') || document.querySelector('.fna-body') || document.querySelector('.fna-content');
+      if (!container) return;
+      var div = document.createElement('div');
+      div.id = 'fna-goals-panel';
+      div.className = 'fna-tab-panel';
+      div.innerHTML = _renderFNAGoalsTab('alex-rivera');
+      container.appendChild(div);
+    };
+    tabBar.appendChild(btn);
+  }
+
+  // Patch navigateTo for FNA
+  var _orig_nav_adv2 = navigateTo;
+  navigateTo = function(page) {
+    _orig_nav_adv2(page);
+    if (page === 'fna') {
+      setTimeout(function() { _wireGoalsFNATab(); }, 250);
+    }
+  };
+
+  console.log('ADV Step 2 module loaded');
+})();
+
+
+
+(function() {
+  'use strict';
+
+  // ── ADV Step 3: Advisory Proposals page ──────────────────────────────────────
+  // Fee-based planning proposals with status workflow, 5 proposals, detail panel
+
+  var _advProposals = [
+    {
+      id: 'PROP-001', client: 'Robert Chen', age: 55,
+      type: 'Comprehensive Wealth Plan', status: 'pending-review', priority: 'urgent',
+      fee: 19260, feeType: 'AUM 0.90%', aum: 2140000,
+      created: '2025-04-28', expires: '2025-05-28',
+      advisor: 'Sridhar R',
+      scope: ['Retirement Planning', 'Business Succession', 'Estate Plan', 'Risk Management', 'Tax Strategy'],
+      summary: 'Full comprehensive plan addressing 5-year retirement timeline, business buyout strategy, and estate restructuring for $2.14M AUM client. Includes DIA ladder recommendation and key-man insurance.',
+      nextAction: 'Client signature required by May 28',
+      aiScore: 94
+    },
+    {
+      id: 'PROP-002', client: 'Linda Morrison', age: 58,
+      type: 'Pre-Retirement Optimization', status: 'draft', priority: 'high',
+      fee: 14220, feeType: 'AUM 0.90%', aum: 1580000,
+      created: '2025-05-01', expires: '2025-06-01',
+      advisor: 'Sridhar R',
+      scope: ['Retirement Income', 'Estate Plan Update', 'Debt Elimination', 'FIA Strategy'],
+      summary: 'Pre-retirement optimization for 5-year glide path to age 63. Focuses on debt elimination, 403(b) catch-up maximization, and FIA conversion strategy for guaranteed income.',
+      nextAction: 'Finalize estate attorney referral before sending',
+      aiScore: 81
+    },
+    {
+      id: 'PROP-003', client: 'James Whitfield', age: 52,
+      type: 'Retirement & College Funding Plan', status: 'sent', priority: 'high',
+      fee: 8420, feeType: 'AUM 1.00%', aum: 842000,
+      created: '2025-04-15', expires: '2025-05-15',
+      advisor: 'Sridhar R',
+      scope: ['Retirement Savings Acceleration', 'College 529 Review', 'DIA Recommendation'],
+      summary: 'Dual-focus plan addressing retirement gap and college funding for two children. Recommends 401(k) max catch-up, DIA at age 62, and 529 rebalancing.',
+      nextAction: 'Follow up — sent 14 days ago, no response',
+      aiScore: 77
+    },
+    {
+      id: 'PROP-004', client: 'Sandra Williams', age: 68,
+      type: 'RMD & Roth Conversion Strategy', status: 'accepted', priority: 'low',
+      fee: 11160, feeType: 'AUM 0.90%', aum: 1240000,
+      created: '2025-03-20', expires: '2025-06-20',
+      advisor: 'Sridhar R',
+      scope: ['RMD Planning', 'Roth Conversion', 'Legacy Strategy', 'IRMAA Management'],
+      summary: 'Annual advisory engagement covering 2025 RMD of $47,320, strategic $30K Roth conversion, and legacy planning for 3 children. IRMAA threshold monitoring included.',
+      nextAction: 'Implementation in progress — Roth conversion scheduled Q2',
+      aiScore: 92
+    },
+    {
+      id: 'PROP-005', client: 'Maria Gonzalez', age: 71,
+      type: 'Estate & Distribution Review', status: 'pending-review', priority: 'urgent',
+      fee: 9200, feeType: 'AUM 1.00%', aum: 920000,
+      created: '2025-05-05', expires: '2025-06-05',
+      advisor: 'Sridhar R',
+      scope: ['RMD + QCD Strategy', 'FIA Maturity Action', 'Beneficiary Update', 'IRMAA Planning'],
+      summary: 'Urgent review triggered by FIA contract maturing Jun 15. Includes RMD of $38,760, QCD of $5,000 for charitable goal, beneficiary designation review for 4 grandchildren.',
+      nextAction: 'FIA maturity decision required BEFORE Jun 15 — urgent',
+      aiScore: 88
+    }
+  ];
+
+  var _propSelectedId = null;
+
+  var STATUS_META = {
+    'draft':          { label: 'Draft',          color: '#64748b', bg: 'rgba(100,116,139,.15)' },
+    'pending-review': { label: 'Pending Review', color: '#f59e0b', bg: 'rgba(245,158,11,.15)'  },
+    'sent':           { label: 'Sent',            color: '#0ea5e9', bg: 'rgba(14,165,233,.15)'  },
+    'accepted':       { label: 'Accepted',        color: '#10b981', bg: 'rgba(16,185,129,.15)'  },
+    'declined':       { label: 'Declined',        color: '#ef4444', bg: 'rgba(239,68,68,.15)'   }
+  };
+
+  function _propRenderKPIBar() {
+    var el = document.getElementById('prop-kpi-bar');
+    if (!el) return;
+    var totalFees    = _advProposals.reduce(function(s,p){ return s + p.fee; }, 0);
+    var accepted     = _advProposals.filter(function(p){ return p.status === 'accepted'; }).length;
+    var pending      = _advProposals.filter(function(p){ return p.status === 'pending-review'; }).length;
+    var sent         = _advProposals.filter(function(p){ return p.status === 'sent'; }).length;
+    var avgScore     = Math.round(_advProposals.reduce(function(s,p){ return s + p.aiScore; }, 0) / _advProposals.length);
+    var totalAUM     = _advProposals.reduce(function(s,p){ return s + p.aum; }, 0);
+
+    el.innerHTML = [
+      ['fas fa-file-contract', '#0ea5e9', _advProposals.length, 'TOTAL PROPOSALS', '5 clients'],
+      ['fas fa-dollar-sign',   '#10b981', '$' + Math.round(totalFees/1000) + 'K', 'ANNUAL FEES', 'if all accepted'],
+      ['fas fa-check-circle',  '#10b981', accepted, 'ACCEPTED', 'active engagement'],
+      ['fas fa-clock',         '#f59e0b', pending,  'PENDING REVIEW', 'awaiting decision'],
+      ['fas fa-paper-plane',   '#0ea5e9', sent,     'SENT TO CLIENT', 'follow-up needed'],
+      ['fas fa-robot',         '#8b5cf6', avgScore, 'AVG AI SCORE', 'proposal quality'],
+      ['fas fa-chart-bar',     '#06b6d4', '$' + (totalAUM/1000000).toFixed(1) + 'M', 'TOTAL AUM', 'under proposal']
+    ].map(function(k) {
+      return '<div class="prop-kpi-card">' +
+        '<div class="prop-kpi-icon" style="color:' + k[1] + '"><i class="' + k[0] + '"></i></div>' +
+        '<div class="prop-kpi-body"><div class="prop-kpi-val">' + k[2] + '</div>' +
+        '<div class="prop-kpi-label">' + k[3] + '</div>' +
+        '<div class="prop-kpi-sub">' + k[4] + '</div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function _propRenderList() {
+    var el = document.getElementById('prop-list');
+    if (!el) return;
+    el.innerHTML = _advProposals.map(function(p) {
+      var sm = STATUS_META[p.status] || STATUS_META['draft'];
+      var isSelected = p.id === _propSelectedId;
+      var priorityDot = {urgent:'#ef4444',high:'#f59e0b',medium:'#0ea5e9',low:'#10b981'}[p.priority]||'#6b7280';
+      return '<div class="prop-card' + (isSelected?' prop-selected':'') + '" onclick="propOpenDetail(\'' + p.id + '\')">' +
+        '<div class="prop-card-top">' +
+          '<div class="prop-card-avatar">' + p.client.split(' ').map(function(n){return n[0];}).join('') + '</div>' +
+          '<div class="prop-card-info">' +
+            '<div class="prop-card-client">' + p.client + '</div>' +
+            '<div class="prop-card-type">' + p.type + '</div>' +
+          '</div>' +
+          '<span class="prop-status-badge" style="background:' + sm.bg + ';color:' + sm.color + '">' + sm.label + '</span>' +
+        '</div>' +
+        '<div class="prop-card-meta">' +
+          '<span>$' + p.fee.toLocaleString() + '/yr · ' + p.feeType + '</span>' +
+          '<span style="color:' + priorityDot + '">' + p.priority.toUpperCase() + '</span>' +
+        '</div>' +
+        '<div class="prop-card-action">' +
+          '<i class="fas fa-exclamation-circle" style="color:' + priorityDot + ';font-size:10px"></i> ' + p.nextAction +
+        '</div>' +
+        '<div class="prop-ai-score">' +
+          '<div class="prop-ai-score-bar-wrap"><div class="prop-ai-score-bar" style="width:' + p.aiScore + '%;background:' + (p.aiScore>=85?'#10b981':p.aiScore>=70?'#f59e0b':'#ef4444') + '"></div></div>' +
+          '<span>AI ' + p.aiScore + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function propOpenDetail(id) {
+    _propSelectedId = id;
+    _propRenderList();
+    var p = _advProposals.find(function(x){ return x.id === id; });
+    if (!p) return;
+    var el = document.getElementById('prop-detail-empty');
+    var panel = document.getElementById('prop-detail-panel');
+    if (el) el.style.display = 'none';
+    if (!panel) return;
+    panel.style.display = 'block';
+    var sm = STATUS_META[p.status] || STATUS_META['draft'];
+    panel.innerHTML =
+      '<div class="prop-detail-header">' +
+        '<div class="prop-dh-left">' +
+          '<div class="prop-dh-avatar">' + p.client.split(' ').map(function(n){return n[0];}).join('') + '</div>' +
+          '<div>' +
+            '<div class="prop-dh-client">' + p.client + ' <span style="font-size:12px;color:#64748b">Age ' + p.age + '</span></div>' +
+            '<div class="prop-dh-type">' + p.type + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="prop-dh-right">' +
+          '<span class="prop-status-badge" style="background:' + sm.bg + ';color:' + sm.color + ';font-size:12px;padding:5px 14px">' + sm.label + '</span>' +
+          '<div class="prop-dh-fee">$' + p.fee.toLocaleString() + '<span style="font-size:11px;color:#64748b">/yr</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="prop-detail-body">' +
+        '<div class="prop-detail-grid">' +
+          _propDetailCard('Proposal ID', p.id) +
+          _propDetailCard('AUM Under Management', '$' + (p.aum/1000).toFixed(0) + 'K') +
+          _propDetailCard('Fee Type', p.feeType) +
+          _propDetailCard('Created', p.created) +
+          _propDetailCard('Expires', p.expires) +
+          _propDetailCard('AI Quality Score', p.aiScore + ' / 100') +
+        '</div>' +
+        '<div class="prop-detail-section">' +
+          '<div class="prop-ds-title">Scope of Engagement</div>' +
+          '<div class="prop-scope-chips">' +
+            p.scope.map(function(s){ return '<span class="prop-scope-chip">' + s + '</span>'; }).join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="prop-detail-section">' +
+          '<div class="prop-ds-title">Plan Summary</div>' +
+          '<div class="prop-summary-text">' + p.summary + '</div>' +
+        '</div>' +
+        '<div class="prop-detail-section prop-urgent-action">' +
+          '<div class="prop-ds-title"><i class="fas fa-bolt"></i> Next Action</div>' +
+          '<div class="prop-next-action-text">' + p.nextAction + '</div>' +
+        '</div>' +
+        '<div class="prop-detail-actions">' +
+          '<button class="prop-action-btn prop-action-primary"><i class="fas fa-paper-plane"></i> Send to Client</button>' +
+          '<button class="prop-action-btn prop-action-secondary"><i class="fas fa-edit"></i> Edit Proposal</button>' +
+          '<button class="prop-action-btn prop-action-secondary"><i class="fas fa-file-pdf"></i> Export PDF</button>' +
+          '<button class="prop-action-btn prop-action-secondary"><i class="fas fa-calendar-plus"></i> Book Review</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function _propDetailCard(label, val) {
+    return '<div class="prop-dc-card"><div class="prop-dc-label">' + label + '</div><div class="prop-dc-val">' + val + '</div></div>';
+  }
+
+  function initAdvProposalsPage() {
+    _propRenderKPIBar();
+    _propRenderList();
+    setTimeout(function() { propOpenDetail('PROP-001'); }, 120);
+  }
+
+  var _orig_nav_adv3 = navigateTo;
+  navigateTo = function(page) {
+    _orig_nav_adv3(page);
+    if (page === 'adv-proposals') {
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          var t = document.getElementById('page-title');
+          var b = document.getElementById('page-breadcrumb');
+          if (t) t.textContent = 'Advisory Proposals';
+          if (b) b.textContent = 'Advisory / Proposals';
+          initAdvProposalsPage();
+        }, 80);
+      });
+    }
+  };
+
+  console.log('ADV Step 3 module loaded');
+})();
+
+
+
+(function() {
+  'use strict';
+
+  // ── ADV Step 4: Portfolio Review page ────────────────────────────────────────
+  // Holistic asset allocation view, rebalance alerts, drift analysis, 6 clients
+
+  var _portfolioClients = [
+    {
+      id: 'PF-JW-001', name: 'James Whitfield', age: 52,
+      aum: 842000, targetAlloc: { equity:72, fixed:20, alt:8 },
+      currentAlloc: { equity:79, fixed:15, alt:6 },
+      drift: 7, rebalanceNeeded: true, lastRebalance: '2024-09-12',
+      ytdReturn: 8.4, benchmarkReturn: 7.1,
+      holdings: [
+        { name: 'US Large Cap (401k)', value: 420000, alloc: 50, type: 'equity', drift: 4 },
+        { name: 'Intl Equity (Brokerage)', value: 145000, alloc: 17, type: 'equity', drift: 3 },
+        { name: 'Bond Index (401k)', value: 126000, alloc: 15, type: 'fixed',  drift: -5 },
+        { name: 'VA Annuity', value: 150000, alloc: 18, type: 'alt',    drift: -2 }
+      ],
+      alert: 'Equity overweight by 7%. Rebalance: sell $58K equity → buy $42K fixed + $16K alt.'
+    },
+    {
+      id: 'PF-SW-001', name: 'Sandra Williams', age: 68,
+      aum: 1240000, targetAlloc: { equity:35, fixed:55, alt:10 },
+      currentAlloc: { equity:33, fixed:57, alt:10 },
+      drift: 2, rebalanceNeeded: false, lastRebalance: '2025-01-08',
+      ytdReturn: 4.2, benchmarkReturn: 4.0,
+      holdings: [
+        { name: 'IRA — Bond Ladder', value: 680000, alloc: 55, type: 'fixed',  drift: 2 },
+        { name: 'SPIA Contract', value: 220000, alloc: 18, type: 'alt',    drift: 0 },
+        { name: 'Blue Chip Equity', value: 240000, alloc: 19, type: 'equity', drift: -2 },
+        { name: 'Money Market', value: 100000, alloc: 8,  type: 'fixed',  drift: 0 }
+      ],
+      alert: 'Portfolio within tolerance. Next review due Jul 2025.'
+    },
+    {
+      id: 'PF-LM-001', name: 'Linda Morrison', age: 58,
+      aum: 1580000, targetAlloc: { equity:62, fixed:28, alt:10 },
+      currentAlloc: { equity:55, fixed:31, alt:14 },
+      drift: 9, rebalanceNeeded: true, lastRebalance: '2024-06-30',
+      ytdReturn: 6.1, benchmarkReturn: 7.1,
+      holdings: [
+        { name: '403(b) — Target Date', value: 780000, alloc: 49, type: 'equity', drift: -7 },
+        { name: 'FIA Annuity', value: 200000, alloc: 13, type: 'alt',    drift: 3 },
+        { name: 'Real Estate (REIT)', value: 420000, alloc: 27, type: 'alt',    drift: 1 },
+        { name: 'Muni Bonds', value: 180000, alloc: 11, type: 'fixed',  drift: 3 }
+      ],
+      alert: 'Equity underweight by 7%, alt overweight by 4%. Underperforming benchmark by 1%. Rebalance recommended.'
+    },
+    {
+      id: 'PF-MG-001', name: 'Maria Gonzalez', age: 71,
+      aum: 920000, targetAlloc: { equity:28, fixed:62, alt:10 },
+      currentAlloc: { equity:23, fixed:67, alt:10 },
+      drift: 5, rebalanceNeeded: false, lastRebalance: '2025-02-14',
+      ytdReturn: 3.8, benchmarkReturn: 3.5,
+      holdings: [
+        { name: 'IRA — Bond Fund', value: 510000, alloc: 55, type: 'fixed',  drift: 5 },
+        { name: 'Fixed Annuity', value: 95000,  alloc: 10, type: 'alt',    drift: 0 },
+        { name: 'Dividend Equity', value: 215000, alloc: 23, type: 'equity', drift: -5 },
+        { name: 'Cash/MM', value: 100000, alloc: 12, type: 'fixed',  drift: 0 }
+      ],
+      alert: 'Minor drift only. FIA maturity Jun 15 — reinvestment decision pending (see RET track).'
+    },
+    {
+      id: 'PF-RC-001', name: 'Robert Chen', age: 55,
+      aum: 2140000, targetAlloc: { equity:80, fixed:12, alt:8 },
+      currentAlloc: { equity:84, fixed:10, alt:6 },
+      drift: 6, rebalanceNeeded: true, lastRebalance: '2024-11-20',
+      ytdReturn: 11.2, benchmarkReturn: 9.8,
+      holdings: [
+        { name: '401k/SEP — Growth', value: 980000,  alloc: 46, type: 'equity', drift: 4 },
+        { name: 'Business Equity (est.)', value: 650000, alloc: 30, type: 'alt',    drift: -2 },
+        { name: 'DIA Annuity', value: 250000, alloc: 12, type: 'fixed',  drift: -2 },
+        { name: 'Brokerage — Tech', value: 260000, alloc: 12, type: 'equity', drift: 2 }
+      ],
+      alert: 'Outperforming benchmark by 1.4%. Business equity creates concentration risk — succession plan needed to reduce to <20%.'
+    },
+    {
+      id: 'PF-DW-001', name: 'Dorothy Wilson', age: 72,
+      aum: 680000, targetAlloc: { equity:20, fixed:70, alt:10 },
+      currentAlloc: { equity:19, fixed:72, alt:9 },
+      drift: 2, rebalanceNeeded: false, lastRebalance: '2025-03-01',
+      ytdReturn: 3.2, benchmarkReturn: 3.0,
+      holdings: [
+        { name: 'SPIA Contract', value: 280000, alloc: 41, type: 'alt',    drift: -1 },
+        { name: 'IRA — Bond', value: 220000, alloc: 32, type: 'fixed',  drift: 2 },
+        { name: 'Dividend Stocks', value: 130000, alloc: 19, type: 'equity', drift: -1 },
+        { name: 'Cash/MM', value: 50000,  alloc: 8,  type: 'fixed',  drift: 0 }
+      ],
+      alert: 'Portfolio on target. All goals funded. Annual review Jul 2025.'
+    }
+  ];
+
+  var _pfSelectedId = null;
+
+  function _pfRenderKPIBar() {
+    var el = document.getElementById('pf-kpi-bar');
+    if (!el) return;
+    var totalAUM      = _portfolioClients.reduce(function(s,c){ return s+c.aum; }, 0);
+    var needRebal     = _portfolioClients.filter(function(c){ return c.rebalanceNeeded; }).length;
+    var avgDrift      = (_portfolioClients.reduce(function(s,c){ return s+c.drift; }, 0) / _portfolioClients.length).toFixed(1);
+    var avgYTD        = (_portfolioClients.reduce(function(s,c){ return s+c.ytdReturn; }, 0) / _portfolioClients.length).toFixed(1);
+    var outperforming = _portfolioClients.filter(function(c){ return c.ytdReturn >= c.benchmarkReturn; }).length;
+
+    el.innerHTML = [
+      ['fas fa-chart-pie',  '#0ea5e9', '$' + (totalAUM/1000000).toFixed(1)+'M', 'TOTAL AUM', 'under management'],
+      ['fas fa-balance-scale','#f59e0b', needRebal, 'REBALANCE', 'required now'],
+      ['fas fa-arrows-alt', '#ef4444', avgDrift + '%', 'AVG DRIFT', 'from target alloc'],
+      ['fas fa-chart-line', '#10b981', avgYTD + '%', 'AVG YTD', 'portfolio return'],
+      ['fas fa-trophy',     '#8b5cf6', outperforming, 'BEATING', 'benchmark'],
+      ['fas fa-sync',       '#06b6d4', '3', 'DUE FOR', 'review this mo']
+    ].map(function(k){
+      return '<div class="pf-kpi-card">' +
+        '<div class="pf-kpi-icon" style="color:'+k[1]+'"><i class="'+k[0]+'"></i></div>' +
+        '<div class="pf-kpi-body"><div class="pf-kpi-val">'+k[2]+'</div>' +
+        '<div class="pf-kpi-label">'+k[3]+'</div>' +
+        '<div class="pf-kpi-sub">'+k[4]+'</div></div></div>';
+    }).join('');
+  }
+
+  function _pfRenderList() {
+    var el = document.getElementById('pf-client-list');
+    if (!el) return;
+    el.innerHTML = _portfolioClients.map(function(c) {
+      var driftColor = c.drift >= 8 ? '#ef4444' : c.drift >= 5 ? '#f59e0b' : '#10b981';
+      var ytdColor   = c.ytdReturn >= c.benchmarkReturn ? '#10b981' : '#ef4444';
+      var isSelected = c.id === _pfSelectedId;
+      return '<div class="pf-client-card'+(isSelected?' pf-selected':'')+'" onclick="pfOpenClient(\''+c.id+'\')">' +
+        '<div class="pf-cc-top">' +
+          '<div class="pf-cc-avatar" style="background:'+(isSelected?'#1e40af':'#334155')+'">' +
+            c.name.split(' ').map(function(n){return n[0];}).join('') +
+          '</div>' +
+          '<div class="pf-cc-info">' +
+            '<div class="pf-cc-name">'+c.name+'</div>' +
+            '<div class="pf-cc-meta">Age '+c.age+' · $'+(c.aum/1000).toFixed(0)+'K AUM</div>' +
+          '</div>' +
+          (c.rebalanceNeeded ? '<span class="pf-rebal-badge">REBALANCE</span>' : '<span class="pf-ok-badge">ON TARGET</span>') +
+        '</div>' +
+        '<div class="pf-cc-metrics">' +
+          '<div class="pf-cc-metric"><span class="pf-cc-metric-val" style="color:'+driftColor+'">'+c.drift+'%</span><span class="pf-cc-metric-lbl">Drift</span></div>' +
+          '<div class="pf-cc-metric"><span class="pf-cc-metric-val" style="color:'+ytdColor+'">'+c.ytdReturn+'%</span><span class="pf-cc-metric-lbl">YTD</span></div>' +
+          '<div class="pf-cc-metric"><span class="pf-cc-metric-val">'+c.benchmarkReturn+'%</span><span class="pf-cc-metric-lbl">Benchmark</span></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function pfOpenClient(id) {
+    _pfSelectedId = id;
+    _pfRenderList();
+    var c = _portfolioClients.find(function(x){ return x.id === id; });
+    if (!c) return;
+    var emptyEl = document.getElementById('pf-detail-empty');
+    var panelEl = document.getElementById('pf-detail-panel');
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (!panelEl) return;
+    panelEl.style.display = 'block';
+
+    var typeColors = { equity:'#0ea5e9', fixed:'#8b5cf6', alt:'#f59e0b' };
+    var holdingRows = c.holdings.map(function(h) {
+      var driftColor = Math.abs(h.drift) >= 4 ? '#f59e0b' : '#10b981';
+      return '<div class="pf-holding-row">' +
+        '<div class="pf-holding-dot" style="background:'+typeColors[h.type]+'"></div>' +
+        '<div class="pf-holding-name">'+h.name+'</div>' +
+        '<div class="pf-holding-bar-wrap"><div class="pf-holding-bar" style="width:'+h.alloc+'%;background:'+typeColors[h.type]+'"></div></div>' +
+        '<div class="pf-holding-pct">'+h.alloc+'%</div>' +
+        '<div class="pf-holding-val">$'+(h.value/1000).toFixed(0)+'K</div>' +
+        '<div class="pf-holding-drift" style="color:'+driftColor+'">'+(h.drift>=0?'+':'')+h.drift+'%</div>' +
+      '</div>';
+    }).join('');
+
+    var allocRows = ['equity','fixed','alt'].map(function(k) {
+      var target  = c.targetAlloc[k];
+      var current = c.currentAlloc[k];
+      var diff    = current - target;
+      var color   = typeColors[k];
+      return '<div class="pf-alloc-row">' +
+        '<div class="pf-alloc-label">'+k.charAt(0).toUpperCase()+k.slice(1)+'</div>' +
+        '<div class="pf-alloc-bars">' +
+          '<div class="pf-alloc-bar-target" style="width:'+target+'%;background:'+color+';opacity:.35"></div>' +
+          '<div class="pf-alloc-bar-current" style="width:'+current+'%;background:'+color+'"></div>' +
+        '</div>' +
+        '<div class="pf-alloc-pcts">' +
+          '<span style="color:'+color+'">'+current+'%</span>' +
+          '<span style="color:#475569"> vs '+target+'% target</span>' +
+          '<span style="color:'+(Math.abs(diff)>=5?'#ef4444':'#10b981')+'">'+(diff>=0?'+':'')+diff+'%</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    panelEl.innerHTML =
+      '<div class="pf-detail-header">' +
+        '<div class="pf-dh-left">' +
+          '<div class="pf-dh-avatar">'+c.name.split(' ').map(function(n){return n[0];}).join('')+'</div>' +
+          '<div><div class="pf-dh-name">'+c.name+'</div><div class="pf-dh-meta">Age '+c.age+' · $'+(c.aum/1000).toFixed(0)+'K AUM · Last rebalanced: '+c.lastRebalance+'</div></div>' +
+        '</div>' +
+        '<div class="pf-dh-returns">' +
+          '<div class="pf-dh-ytd" style="color:'+(c.ytdReturn>=c.benchmarkReturn?'#10b981':'#ef4444')+'">'+c.ytdReturn+'%<span style="font-size:11px;color:#64748b"> YTD</span></div>' +
+          '<div style="font-size:10px;color:#475569">Benchmark: '+c.benchmarkReturn+'%</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pf-detail-body">' +
+        '<div class="pf-alert-banner'+(c.rebalanceNeeded?' pf-alert-warn':' pf-alert-ok')+'">' +
+          '<i class="fas fa-'+(c.rebalanceNeeded?'exclamation-triangle':'check-circle')+'"></i> ' + c.alert +
+        '</div>' +
+        '<div class="pf-section-title">Allocation vs Target</div>' +
+        '<div class="pf-alloc-rows">'+allocRows+'</div>' +
+        '<div class="pf-section-title">Holdings Breakdown</div>' +
+        '<div class="pf-holdings">'+holdingRows+'</div>' +
+        '<div class="pf-detail-actions">' +
+          '<button class="pf-action-btn pf-action-primary"><i class="fas fa-sync"></i> Execute Rebalance</button>' +
+          '<button class="pf-action-btn pf-action-secondary"><i class="fas fa-file-pdf"></i> Export Report</button>' +
+          '<button class="pf-action-btn pf-action-secondary"><i class="fas fa-calendar-plus"></i> Schedule Review</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function initAdvPortfolioPage() {
+    _pfRenderKPIBar();
+    _pfRenderList();
+    setTimeout(function() { pfOpenClient('PF-RC-001'); }, 120);
+  }
+
+  var _orig_nav_adv4 = navigateTo;
+  navigateTo = function(page) {
+    _orig_nav_adv4(page);
+    if (page === 'adv-portfolio') {
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          var t = document.getElementById('page-title');
+          var b = document.getElementById('page-breadcrumb');
+          if (t) t.textContent = 'Portfolio Review';
+          if (b) b.textContent = 'Advisory / Portfolio Review';
+          initAdvPortfolioPage();
+        }, 80);
+      });
+    }
+  };
+
+  console.log('ADV Step 4 module loaded');
+})();
+
+
+
+(function() {
+  'use strict';
+
+  // ── ADV Step 5: Business Intelligence dashboard upgrade ───────────────────────
+  // Real KPIs, 6-chart analytics suite, advisor scorecard, book composition
+
+  function initAdvBIPage() {
+    var el = document.getElementById('reports-page');
+    if (!el) {
+      el = document.querySelector('.page');
+    }
+    var container = document.getElementById('tpl-reports');
+    if (!container) return;
+
+    container.innerHTML =
+      '<div class="page bi-page">' +
+        '<div class="bi-kpi-bar" id="bi-kpi-bar"></div>' +
+        '<div class="bi-body">' +
+          '<div class="bi-charts-grid" id="bi-charts-grid"></div>' +
+          '<div class="bi-scorecard" id="bi-scorecard"></div>' +
+        '</div>' +
+      '</div>';
+
+    _biRenderKPIs();
+    _biRenderCharts();
+    _biRenderScorecard();
+  }
+
+  function _biRenderKPIs() {
+    var el = document.getElementById('bi-kpi-bar');
+    if (!el) return;
+    var kpis = [
+      { icon:'fas fa-dollar-sign',    color:'#10b981', val:'$187K',   label:'YTD REVENUE',         sub:'+18% vs last yr' },
+      { icon:'fas fa-users',           color:'#0ea5e9', val:'247',     label:'TOTAL CLIENTS',        sub:'14 new this month' },
+      { icon:'fas fa-chart-bar',       color:'#8b5cf6', val:'$8.1M',   label:'AUM + PREMIUMS',       sub:'$6.7M AUM' },
+      { icon:'fas fa-percentage',      color:'#f59e0b', val:'94.6%',   label:'AI ACCURACY',          sub:'UW decisions' },
+      { icon:'fas fa-clock',           color:'#06b6d4', val:'4.2 hrs', label:'UW TIME SAVED',        sub:'per case avg' },
+      { icon:'fas fa-heart',           color:'#ef4444', val:'87',      label:'NPS SCORE',            sub:'+12 vs Q4 2024' },
+      { icon:'fas fa-funnel-dollar',   color:'#10b981', val:'$42.2K',  label:'COMMISSION MTD',       sub:'78% of $54K target' },
+      { icon:'fas fa-robot',           color:'#8b5cf6', val:'87/100',  label:'AI IMPACT SCORE',      sub:'Agent 360 overall' }
+    ];
+    el.innerHTML = kpis.map(function(k) {
+      return '<div class="bi-kpi-card">' +
+        '<div class="bi-kpi-icon" style="color:'+k.color+'"><i class="'+k.icon+'"></i></div>' +
+        '<div><div class="bi-kpi-val">'+k.val+'</div>' +
+        '<div class="bi-kpi-label">'+k.label+'</div>' +
+        '<div class="bi-kpi-sub">'+k.sub+'</div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function _biRenderCharts() {
+    var el = document.getElementById('bi-charts-grid');
+    if (!el) return;
+
+    el.innerHTML =
+      '<div class="bi-chart-card bi-chart-wide">' +
+        '<div class="bi-chart-title">Revenue by Month (YTD)</div>' +
+        '<canvas id="biRevChart" height="160"></canvas>' +
+      '</div>' +
+      '<div class="bi-chart-card">' +
+        '<div class="bi-chart-title">Book Composition</div>' +
+        '<canvas id="biBookChart" height="160"></canvas>' +
+      '</div>' +
+      '<div class="bi-chart-card">' +
+        '<div class="bi-chart-title">Pipeline by Stage</div>' +
+        '<canvas id="biPipeChart" height="160"></canvas>' +
+      '</div>' +
+      '<div class="bi-chart-card bi-chart-wide">' +
+        '<div class="bi-chart-title">Client Retention & Lapse Risk Trend</div>' +
+        '<canvas id="biRetentionChart" height="160"></canvas>' +
+      '</div>';
+
+    // Wait for Chart.js to be available
+    function tryCharts() {
+      if (typeof Chart === 'undefined') { setTimeout(tryCharts, 200); return; }
+      _drawRevChart();
+      _drawBookChart();
+      _drawPipeChart();
+      _drawRetentionChart();
+    }
+    tryCharts();
+  }
+
+  function _drawRevChart() {
+    var cv = document.getElementById('biRevChart');
+    if (!cv) return;
+    if (cv._ci) { cv._ci.destroy(); }
+    cv._ci = new Chart(cv, {
+      type: 'bar',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [
+          { label: 'Insurance ($K)',   data: [22,18,25,28,31,0,0,0,0,0,0,0],   backgroundColor: '#0ea5e9' },
+          { label: 'Investments ($K)', data: [8,9,11,12,14,0,0,0,0,0,0,0],    backgroundColor: '#8b5cf6' },
+          { label: 'Advisory ($K)',    data: [5,6,7,7,8,0,0,0,0,0,0,0],        backgroundColor: '#10b981' },
+          { label: 'Annuity ($K)',     data: [12,10,14,16,20,0,0,0,0,0,0,0],   backgroundColor: '#f59e0b' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+        scales: {
+          x: { stacked: true, ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } },
+          y: { stacked: true, ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } }
+        }
+      }
+    });
+  }
+
+  function _drawBookChart() {
+    var cv = document.getElementById('biBookChart');
+    if (!cv) return;
+    if (cv._ci) { cv._ci.destroy(); }
+    cv._ci = new Chart(cv, {
+      type: 'doughnut',
+      data: {
+        labels: ['Insurance', 'Investments', 'Retirement', 'Advisory'],
+        datasets: [{ data: [48, 22, 18, 12], backgroundColor: ['#0ea5e9','#8b5cf6','#10b981','#f59e0b'], borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 12 } } }
+      }
+    });
+  }
+
+  function _drawPipeChart() {
+    var cv = document.getElementById('biPipeChart');
+    if (!cv) return;
+    if (cv._ci) { cv._ci.destroy(); }
+    cv._ci = new Chart(cv, {
+      type: 'bar',
+      data: {
+        labels: ['Prospect','Qualified','Proposal','Negotiation','Closed'],
+        datasets: [{ label: 'Deals', data: [32, 18, 11, 7, 4], backgroundColor: ['#334155','#475569','#f59e0b','#0ea5e9','#10b981'] }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } },
+          y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function _drawRetentionChart() {
+    var cv = document.getElementById('biRetentionChart');
+    if (!cv) return;
+    if (cv._ci) { cv._ci.destroy(); }
+    cv._ci = new Chart(cv, {
+      type: 'line',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May'],
+        datasets: [
+          { label: 'Retention Rate %', data: [91,92,93,94,94.6], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.08)', fill: true, tension: .4 },
+          { label: 'Lapse Risk Clients', data: [8,7,6,5,4], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.08)', fill: true, tension: .4, yAxisID: 'y1' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+        scales: {
+          x:  { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } },
+          y:  { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' }, min: 85, max: 100, position: 'left' },
+          y1: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false }, position: 'right', min: 0, max: 15 }
+        }
+      }
+    });
+  }
+
+  function _biRenderScorecard() {
+    var el = document.getElementById('bi-scorecard');
+    if (!el) return;
+    var domains = [
+      { label: 'Insurance',         score: 91, trend: '+3', color: '#0ea5e9' },
+      { label: 'Investments',       score: 76, trend: '+8', color: '#8b5cf6' },
+      { label: 'Retirement (ADV)',   score: 84, trend: '+5', color: '#10b981' },
+      { label: 'Retention AI',      score: 88, trend: '+2', color: '#06b6d4' },
+      { label: 'Claims AI',         score: 85, trend: '+1', color: '#f59e0b' },
+      { label: 'UW AI',             score: 92, trend: '+4', color: '#ef4444' }
+    ];
+
+    el.innerHTML =
+      '<div class="bi-sc-title">Advisor AI Scorecard</div>' +
+      '<div class="bi-sc-overall">' +
+        '<div class="bi-sc-gauge">87<span style="font-size:14px;color:#64748b">/100</span></div>' +
+        '<div class="bi-sc-gauge-label">Overall AI Impact Score</div>' +
+      '</div>' +
+      '<div class="bi-sc-domains">' +
+        domains.map(function(d) {
+          return '<div class="bi-sc-row">' +
+            '<div class="bi-sc-label">'+d.label+'</div>' +
+            '<div class="bi-sc-bar-wrap"><div class="bi-sc-bar" style="width:'+d.score+'%;background:'+d.color+'"></div></div>' +
+            '<div class="bi-sc-score" style="color:'+d.color+'">'+d.score+'</div>' +
+            '<div class="bi-sc-trend" style="color:#10b981">'+d.trend+'</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      '<div class="bi-sc-actions">' +
+        '<button class="bi-sc-btn"><i class="fas fa-download"></i> Export Report</button>' +
+        '<button class="bi-sc-btn"><i class="fas fa-share"></i> Share Dashboard</button>' +
+      '</div>';
+  }
+
+  // Patch navigateTo for reports page
+  var _orig_nav_adv5 = navigateTo;
+  navigateTo = function(page) {
+    _orig_nav_adv5(page);
+    if (page === 'reports') {
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          var t = document.getElementById('page-title');
+          var b = document.getElementById('page-breadcrumb');
+          if (t) t.textContent = 'Business Intelligence';
+          if (b) b.textContent = 'Analytics / Business Intelligence';
+          initAdvBIPage();
+        }, 80);
+      });
+    }
+  };
+
+  console.log('ADV Step 5 module loaded');
+})();
+
