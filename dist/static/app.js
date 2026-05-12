@@ -39786,13 +39786,13 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
   var _orig_navigateTo_adv = navigateTo;
   navigateTo = function(page) {
     _orig_navigateTo_adv(page);
-    if (page === 'adv-plans') {
+    if (page === 'adv-wealth') {
       requestAnimationFrame(function() {
         setTimeout(function() {
           var t = document.getElementById('page-title');
           var b = document.getElementById('page-breadcrumb');
-          if (t) t.textContent = 'Financial Plans';
-          if (b) b.textContent = 'Advisory / Financial Plans';
+          if (t) t.textContent = 'Wealth Management';
+          if (b) b.textContent = 'Advisory / Wealth Management';
           initAdvFinancialPlansPage();
         }, 80);
       });
@@ -40154,13 +40154,13 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
   var _orig_nav_adv3 = navigateTo;
   navigateTo = function(page) {
     _orig_nav_adv3(page);
-    if (page === 'adv-proposals') {
+    if (page === 'adv-estate') {
       requestAnimationFrame(function() {
         setTimeout(function() {
           var t = document.getElementById('page-title');
           var b = document.getElementById('page-breadcrumb');
-          if (t) t.textContent = 'Advisory Proposals';
-          if (b) b.textContent = 'Advisory / Proposals';
+          if (t) t.textContent = 'Estate Planning';
+          if (b) b.textContent = 'Advisory / Estate Planning';
           initAdvProposalsPage();
         }, 80);
       });
@@ -40398,13 +40398,13 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
   var _orig_nav_adv4 = navigateTo;
   navigateTo = function(page) {
     _orig_nav_adv4(page);
-    if (page === 'adv-portfolio') {
+    if (page === 'adv-smallbiz') {
       requestAnimationFrame(function() {
         setTimeout(function() {
           var t = document.getElementById('page-title');
           var b = document.getElementById('page-breadcrumb');
-          if (t) t.textContent = 'Portfolio Review';
-          if (b) b.textContent = 'Advisory / Portfolio Review';
+          if (t) t.textContent = 'Small Business Services';
+          if (b) b.textContent = 'Advisory / Small Business';
           initAdvPortfolioPage();
         }, 80);
       });
@@ -40642,5 +40642,817 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
   };
 
   console.log('ADV Step 5 module loaded');
+})();
+
+
+
+(function() {
+  'use strict';
+
+  // ── ADV Estate Planning Module ─────────────────────────────────────────────
+  // NYL pillar: Estate Planning — "Guidance to identify potential needs in
+  // coordination with your other advisors and set you up with an estate plan
+  // that can protect your legacy."
+  // Container IDs (from tpl-adv-estate shell):
+  //   prop-kpi-bar, prop-list, prop-detail-empty, prop-detail-panel
+  // ──────────────────────────────────────────────────────────────────────────
+
+  var EP_CLIENTS = [
+    {
+      id: 'ep001',
+      name: 'James Whitfield',
+      age: 68,
+      estateValue: '$4.2M',
+      status: 'needs-review',
+      statusLabel: 'Needs Review',
+      lastReview: '14 months ago',
+      avatar: 'JW',
+      color: '#ef4444',
+      summary: 'Will is 12 years old and does not reflect current asset distribution. Trust documents need updating following 2022 property sale.',
+      pillars: {
+        will: { status: 'outdated', label: 'Will — Outdated', note: 'Last updated 2012. Does not include Lakewood property or 401(k) rollover IRA.' },
+        trust: { status: 'partial', label: 'Trust — Needs Update', note: 'Revocable living trust in place; schedule of assets not updated since 2019.' },
+        beneficiary: { status: 'alert', label: 'Beneficiaries — Alert', note: 'Ex-spouse still listed as primary on $380K IRA. Update required immediately.' },
+        pow: { status: 'ok', label: 'Power of Attorney — On File', note: 'Durable POA executed 2021. Healthcare proxy current.' },
+        legacy: { status: 'partial', label: 'Legacy Plan — Partial', note: 'Charitable giving strategy in draft. Foundation structure not yet established.' }
+      },
+      coordinators: ['Estate Attorney: Michael Crane (Crane & Webb)', 'CPA: Linda Torres'],
+      aiRec: 'Priority: update IRA beneficiary designation immediately — this overrides any will. Schedule estate attorney review within 60 days.'
+    },
+    {
+      id: 'ep002',
+      name: 'Sandra Williams',
+      age: 61,
+      estateValue: '$1.8M',
+      status: 'current',
+      statusLabel: 'Current',
+      lastReview: '4 months ago',
+      avatar: 'SW',
+      color: '#22c55e',
+      summary: 'Estate plan fully updated following 2023 review. All documents current. Annual beneficiary check-in scheduled.',
+      pillars: {
+        will: { status: 'ok', label: 'Will — Current', note: 'Updated June 2023. Reflects all assets and distribution wishes.' },
+        trust: { status: 'ok', label: 'Trust — Current', note: 'Irrevocable life insurance trust (ILIT) in place. NYL policy correctly owned by trust.' },
+        beneficiary: { status: 'ok', label: 'Beneficiaries — Verified', note: 'All designations reviewed June 2023. Primary and contingent confirmed.' },
+        pow: { status: 'ok', label: 'Power of Attorney — On File', note: 'Healthcare proxy and financial POA both current.' },
+        legacy: { status: 'ok', label: 'Legacy Plan — Active', note: 'Charitable remainder trust funded. Donor-advised fund established.' }
+      },
+      coordinators: ['Estate Attorney: Patricia Holt (Holt Law Group)', 'CPA: James Nguyen', 'Financial Advisor: Self-directed'],
+      aiRec: 'Estate plan in excellent shape. Next annual check-in due October 2024. Consider reviewing ILIT premium funding strategy before year-end.'
+    },
+    {
+      id: 'ep003',
+      name: 'Linda Morrison',
+      age: 74,
+      estateValue: '$2.9M',
+      status: 'urgent',
+      statusLabel: 'Urgent',
+      lastReview: '3 years ago',
+      avatar: 'LM',
+      color: '#ef4444',
+      summary: 'No trust structure in place. Estate will pass through probate without action. Potential estate tax exposure above federal exemption threshold.',
+      pillars: {
+        will: { status: 'outdated', label: 'Will — Very Outdated', note: 'Will dated 2009. Three major asset changes not reflected. Probate risk is high.' },
+        trust: { status: 'missing', label: 'Trust — Not Established', note: 'No living trust in place. Estate will require full probate — 12–18 month process.' },
+        beneficiary: { status: 'alert', label: 'Beneficiaries — Critical', note: 'Deceased sibling listed as beneficiary on $220K annuity. Must be corrected now.' },
+        pow: { status: 'outdated', label: 'Power of Attorney — Expired Agent', note: 'POA agent (former spouse) no longer valid. New agent must be designated.' },
+        legacy: { status: 'missing', label: 'Legacy Plan — None', note: 'No legacy or charitable giving strategy documented.' }
+      },
+      coordinators: ['Estate Attorney: None on file — referral needed'],
+      aiRec: 'Urgent: correct annuity beneficiary today. Refer to estate attorney immediately. Trust formation could save $80K+ in probate costs and 12+ months of estate settlement time.'
+    },
+    {
+      id: 'ep004',
+      name: 'Maria Gonzalez',
+      age: 58,
+      estateValue: '$1.1M',
+      status: 'in-progress',
+      statusLabel: 'In Progress',
+      lastReview: '2 months ago',
+      avatar: 'MG',
+      color: '#f59e0b',
+      summary: 'Estate planning initiated following life insurance review. Trust formation in progress with referred estate attorney.',
+      pillars: {
+        will: { status: 'partial', label: 'Will — In Draft', note: 'Attorney has draft will for review. Signing appointment scheduled next month.' },
+        trust: { status: 'partial', label: 'Trust — In Formation', note: 'Revocable living trust being drafted. Funding schedule to follow execution.' },
+        beneficiary: { status: 'ok', label: 'Beneficiaries — Updated', note: 'All NYL policy and account beneficiaries updated as of last month.' },
+        pow: { status: 'partial', label: 'Power of Attorney — Pending', note: 'Healthcare proxy drafted; financial POA pending attorney appointment.' },
+        legacy: { status: 'partial', label: 'Legacy Plan — Discussing', note: 'Wants to leave $50K to university scholarship fund. Mechanism TBD.' }
+      },
+      coordinators: ['Estate Attorney: Robert Vega (referred by NYL)', 'CPA: Carlos Reyes'],
+      aiRec: 'Good momentum — keep attorney appointment on track. Once trust is executed, ensure NYL life policy ownership is transferred into trust before next renewal.'
+    },
+    {
+      id: 'ep005',
+      name: 'Robert Chen',
+      age: 52,
+      estateValue: '$870K',
+      status: 'no-plan',
+      statusLabel: 'No Plan',
+      lastReview: 'Never',
+      avatar: 'RC',
+      color: '#ef4444',
+      summary: 'No estate documents on file. Young family with two minor children — guardianship must be established urgently.',
+      pillars: {
+        will: { status: 'missing', label: 'Will — None', note: 'No will on file. Minor children have no designated guardian. High legal exposure.' },
+        trust: { status: 'missing', label: 'Trust — None', note: 'No trust structure. Life insurance proceeds would go to court-administered account for minors.' },
+        beneficiary: { status: 'partial', label: 'Beneficiaries — Partial', note: 'NYL policy has spouse as primary. No contingent beneficiary for children.' },
+        pow: { status: 'missing', label: 'Power of Attorney — None', note: 'No POA or healthcare directive on file.' },
+        legacy: { status: 'missing', label: 'Legacy Plan — None', note: 'No legacy planning discussion initiated.' }
+      },
+      coordinators: ['Estate Attorney: None — referral needed urgently'],
+      aiRec: 'Most urgent case on book: minor children with no guardianship document. A simple will can resolve this within weeks. Refer to estate attorney today and add contingent beneficiary to policy immediately.'
+    },
+    {
+      id: 'ep006',
+      name: 'Dorothy Wilson',
+      age: 79,
+      estateValue: '$3.6M',
+      status: 'current',
+      statusLabel: 'Current',
+      lastReview: '6 months ago',
+      avatar: 'DW',
+      color: '#22c55e',
+      summary: 'Comprehensive estate plan in place. Irrevocable trust, charitable giving, and generation-skipping transfer strategy all active.',
+      pillars: {
+        will: { status: 'ok', label: 'Will — Current', note: 'Pour-over will updated 2023. Coordinates with trust for seamless transfer.' },
+        trust: { status: 'ok', label: 'Trust — Active', note: 'Irrevocable trust funded with real estate and investment portfolio. GST exemption allocated.' },
+        beneficiary: { status: 'ok', label: 'Beneficiaries — Verified', note: 'All designations reviewed and aligned with trust strategy.' },
+        pow: { status: 'ok', label: 'Power of Attorney — On File', note: 'Son designated as agent. Healthcare directive current.' },
+        legacy: { status: 'ok', label: 'Legacy Plan — Fully Active', note: 'Community foundation donor-advised fund active. $200K annual grant cycle in place.' }
+      },
+      coordinators: ['Estate Attorney: Harrison Wolfe (Wolfe & Associates)', 'CPA: Patricia Kim', 'Trust Officer: First National Bank'],
+      aiRec: 'Exemplary plan. Monitor federal estate tax exemption changes (sunsets 2025). Recommend scheduling mid-year review with attorney to assess any GST strategy adjustments.'
+    }
+  ];
+
+  var EP_TABS = [
+    { key: 'overview',    label: 'Overview' },
+    { key: 'documents',   label: 'Documents' },
+    { key: 'beneficiary', label: 'Beneficiaries' },
+    { key: 'advisors',    label: 'Advisors' },
+    { key: 'legacy',      label: 'Legacy Plan' },
+    { key: 'ai',          label: 'AI Insights' }
+  ];
+
+  var selectedEpClient = null;
+
+  // ── KPI bar ───────────────────────────────────────────────────────────────
+  function renderEpKpiBar() {
+    var bar = document.getElementById('prop-kpi-bar');
+    if (!bar) return;
+    var urgent   = EP_CLIENTS.filter(function(c) { return c.status === 'urgent' || c.status === 'no-plan'; }).length;
+    var current  = EP_CLIENTS.filter(function(c) { return c.status === 'current'; }).length;
+    var inProg   = EP_CLIENTS.filter(function(c) { return c.status === 'in-progress'; }).length;
+    var needsRev = EP_CLIENTS.filter(function(c) { return c.status === 'needs-review'; }).length;
+    bar.innerHTML =
+      '<div class="ep-kpi-card ep-kpi-urgent"><div class="ep-kpi-value">' + urgent + '</div><div class="ep-kpi-label">Urgent Action</div></div>' +
+      '<div class="ep-kpi-card ep-kpi-review"><div class="ep-kpi-value">' + needsRev + '</div><div class="ep-kpi-label">Needs Review</div></div>' +
+      '<div class="ep-kpi-card ep-kpi-progress"><div class="ep-kpi-value">' + inProg + '</div><div class="ep-kpi-label">In Progress</div></div>' +
+      '<div class="ep-kpi-card ep-kpi-current"><div class="ep-kpi-value">' + current + '</div><div class="ep-kpi-label">Fully Current</div></div>' +
+      '<div class="ep-kpi-card ep-kpi-total"><div class="ep-kpi-value">' + EP_CLIENTS.length + '</div><div class="ep-kpi-label">Estate Clients</div></div>';
+  }
+
+  // ── Client list ───────────────────────────────────────────────────────────
+  function renderEpClientList() {
+    var list = document.getElementById('prop-list');
+    if (!list) return;
+    list.innerHTML = '<div class="ep-list-header"><span class="ep-list-title">Estate Planning Clients</span><span class="ep-list-sub">Click to open estate profile</span></div>';
+    EP_CLIENTS.forEach(function(c) {
+      var div = document.createElement('div');
+      div.className = 'ep-client-item' + (selectedEpClient && selectedEpClient.id === c.id ? ' ep-client-active' : '');
+      div.onclick = function() { selectEpClient(c); };
+      div.innerHTML =
+        '<div class="ep-client-avatar" style="background:' + c.color + '">' + c.avatar + '</div>' +
+        '<div class="ep-client-info">' +
+          '<div class="ep-client-name">' + c.name + '</div>' +
+          '<div class="ep-client-meta">Age ' + c.age + ' &middot; Estate: ' + c.estateValue + '</div>' +
+          '<div class="ep-client-review">Last reviewed: ' + c.lastReview + '</div>' +
+        '</div>' +
+        '<div class="ep-status-badge ep-status-' + c.status + '">' + c.statusLabel + '</div>';
+      list.appendChild(div);
+    });
+  }
+
+  // ── Client detail ─────────────────────────────────────────────────────────
+  function selectEpClient(client) {
+    selectedEpClient = client;
+    renderEpClientList();
+
+    var empty = document.getElementById('prop-detail-empty');
+    var panel = document.getElementById('prop-detail-panel');
+    if (empty) empty.style.display = 'none';
+    if (!panel) return;
+    panel.style.display = 'block';
+
+    panel.innerHTML =
+      '<div class="ep-detail-header">' +
+        '<div class="ep-detail-avatar" style="background:' + client.color + '">' + client.avatar + '</div>' +
+        '<div class="ep-detail-hinfo">' +
+          '<div class="ep-detail-name">' + client.name + '</div>' +
+          '<div class="ep-detail-meta">Age ' + client.age + ' &middot; Estate Value: ' + client.estateValue + '</div>' +
+          '<div class="ep-detail-meta" style="margin-top:4px">' +
+            '<span class="ep-status-badge ep-status-' + client.status + '">' + client.statusLabel + '</span>' +
+            ' &nbsp; Last reviewed: ' + client.lastReview +
+          '</div>' +
+        '</div>' +
+        '<button class="ep-schedule-btn" onclick="window.openEpSchedule && window.openEpSchedule(\'' + client.id + '\')"><i class="fas fa-calendar-plus"></i> Schedule Review</button>' +
+      '</div>' +
+      '<div class="ep-summary-bar"><i class="fas fa-info-circle"></i> ' + client.summary + '</div>' +
+      '<div class="ep-tab-bar">' +
+        EP_TABS.map(function(tab) {
+          return '<button class="ep-tab-btn" id="ep-tab-btn-' + tab.key + '" onclick="switchEpTab(\'' + tab.key + '\', this)">' + tab.label + '</button>';
+        }).join('') +
+      '</div>' +
+      EP_TABS.map(function(tab) {
+        return '<div class="ep-tab-panel" id="ep-tab-' + tab.key + '" style="display:none">' + renderEpTabContent(tab.key, client) + '</div>';
+      }).join('');
+
+    // Activate first tab
+    switchEpTab('overview', panel.querySelector('#ep-tab-btn-overview'));
+  }
+
+  function renderEpTabContent(key, c) {
+    if (key === 'overview') {
+      return '<div class="ep-overview-grid">' +
+        Object.keys(c.pillars).map(function(pk) {
+          var p = c.pillars[pk];
+          var iconMap = { ok: 'fa-check-circle ep-icon-ok', partial: 'fa-exclamation-circle ep-icon-partial', outdated: 'fa-clock ep-icon-outdated', alert: 'fa-exclamation-triangle ep-icon-alert', missing: 'fa-times-circle ep-icon-missing' };
+          var icon = iconMap[p.status] || 'fa-circle ep-icon-partial';
+          return '<div class="ep-pillar-card">' +
+            '<div class="ep-pillar-header"><i class="fas ' + icon + '"></i><span class="ep-pillar-label">' + p.label + '</span></div>' +
+            '<div class="ep-pillar-note">' + p.note + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+    if (key === 'documents') {
+      var docs = [
+        { name: 'Last Will & Testament', status: c.pillars.will.status, updated: c.lastReview },
+        { name: 'Revocable Living Trust', status: c.pillars.trust.status, updated: c.lastReview },
+        { name: 'Power of Attorney', status: c.pillars.pow.status, updated: c.lastReview },
+        { name: 'Healthcare Directive / Proxy', status: c.pillars.pow.status, updated: c.lastReview }
+      ];
+      return '<div class="ep-docs-list">' +
+        docs.map(function(d) {
+          var icon = d.status === 'ok' ? 'fa-file-alt ep-icon-ok' : d.status === 'missing' ? 'fa-file ep-icon-missing' : 'fa-file-alt ep-icon-partial';
+          return '<div class="ep-doc-row">' +
+            '<i class="fas ' + icon + '"></i>' +
+            '<span class="ep-doc-name">' + d.name + '</span>' +
+            '<span class="ep-doc-status ep-doc-' + d.status + '">' + d.status.charAt(0).toUpperCase() + d.status.slice(1) + '</span>' +
+            '<span class="ep-doc-updated">Last: ' + d.updated + '</span>' +
+            '<button class="ep-doc-action">Request Update</button>' +
+          '</div>';
+        }).join('') +
+        '<div class="ep-upload-row"><i class="fas fa-upload"></i> <button class="ep-upload-btn">Upload Signed Documents</button></div>' +
+      '</div>';
+    }
+    if (key === 'beneficiary') {
+      var bStatus = c.pillars.beneficiary;
+      return '<div class="ep-beneficiary-section">' +
+        '<div class="ep-bene-alert ep-bene-' + bStatus.status + '">' +
+          '<i class="fas fa-' + (bStatus.status === 'ok' ? 'check-circle' : 'exclamation-triangle') + '"></i>' +
+          '<div>' +
+            '<div class="ep-bene-alert-title">' + bStatus.label + '</div>' +
+            '<div class="ep-bene-alert-note">' + bStatus.note + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ep-bene-grid">' +
+          '<div class="ep-bene-col"><div class="ep-bene-col-header">NYL Policies</div>' +
+            '<div class="ep-bene-row"><span>Whole Life #WL-4821</span><span class="ep-bene-who">Primary: Spouse</span><span class="ep-bene-tag ep-bene-ok">Verified</span></div>' +
+            '<div class="ep-bene-row"><span>Term Life #TL-9904</span><span class="ep-bene-who">Primary: Spouse</span><span class="ep-bene-tag ep-bene-ok">Verified</span></div>' +
+          '</div>' +
+          '<div class="ep-bene-col"><div class="ep-bene-col-header">Retirement Accounts</div>' +
+            '<div class="ep-bene-row"><span>IRA Rollover</span><span class="ep-bene-who">See status above</span><span class="ep-bene-tag ep-bene-' + bStatus.status + '">' + bStatus.statusLabel + '</span></div>' +
+            '<div class="ep-bene-row"><span>401(k)</span><span class="ep-bene-who">Primary: Spouse</span><span class="ep-bene-tag ep-bene-ok">Verified</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="ep-bene-update-btn"><i class="fas fa-edit"></i> Initiate Beneficiary Update</button>' +
+      '</div>';
+    }
+    if (key === 'advisors') {
+      return '<div class="ep-advisors-section">' +
+        '<div class="ep-advisors-header">Coordinating Advisors</div>' +
+        '<div class="ep-advisors-note">NYL agents coordinate with the client\'s broader advisory team for a holistic estate strategy.</div>' +
+        '<div class="ep-advisor-list">' +
+          c.coordinators.map(function(coord) {
+            var parts = coord.split(':');
+            var role = parts[0].trim();
+            var name = parts.slice(1).join(':').trim();
+            return '<div class="ep-advisor-row">' +
+              '<div class="ep-advisor-icon"><i class="fas fa-user-tie"></i></div>' +
+              '<div class="ep-advisor-info">' +
+                '<div class="ep-advisor-role">' + role + '</div>' +
+                '<div class="ep-advisor-name">' + name + '</div>' +
+              '</div>' +
+              '<button class="ep-advisor-contact">Contact</button>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<div class="ep-referral-box">' +
+          '<i class="fas fa-handshake"></i>' +
+          '<div><div class="ep-referral-title">Need an Estate Attorney?</div>' +
+          '<div class="ep-referral-note">NYL can provide a warm referral to a vetted estate planning attorney in your client\'s area.</div></div>' +
+          '<button class="ep-referral-btn">Request Referral</button>' +
+        '</div>' +
+      '</div>';
+    }
+    if (key === 'legacy') {
+      var legacyStatus = c.pillars.legacy;
+      return '<div class="ep-legacy-section">' +
+        '<div class="ep-legacy-header"><i class="fas fa-heart"></i> Legacy & Charitable Planning</div>' +
+        '<div class="ep-legacy-status ep-legacy-' + legacyStatus.status + '">' +
+          '<div class="ep-legacy-status-label">' + legacyStatus.label + '</div>' +
+          '<div class="ep-legacy-status-note">' + legacyStatus.note + '</div>' +
+        '</div>' +
+        '<div class="ep-legacy-options">' +
+          '<div class="ep-legacy-option"><i class="fas fa-landmark"></i><div><div class="ep-legacy-opt-title">Donor-Advised Fund</div><div class="ep-legacy-opt-desc">Flexible charitable giving with immediate tax deduction</div></div></div>' +
+          '<div class="ep-legacy-option"><i class="fas fa-university"></i><div><div class="ep-legacy-opt-title">Charitable Remainder Trust</div><div class="ep-legacy-opt-desc">Income stream to client, remainder to charity at death</div></div></div>' +
+          '<div class="ep-legacy-option"><i class="fas fa-users"></i><div><div class="ep-legacy-opt-title">Generation-Skipping Transfer</div><div class="ep-legacy-opt-desc">Pass assets to grandchildren tax-efficiently</div></div></div>' +
+          '<div class="ep-legacy-option"><i class="fas fa-building"></i><div><div class="ep-legacy-opt-title">Private Foundation</div><div class="ep-legacy-opt-desc">Structured philanthropy with family governance</div></div></div>' +
+        '</div>' +
+      '</div>';
+    }
+    if (key === 'ai') {
+      return '<div class="ep-ai-section">' +
+        '<div class="ep-ai-banner"><i class="fas fa-robot"></i> AI Estate Planning Insights</div>' +
+        '<div class="ep-ai-rec-card">' +
+          '<div class="ep-ai-rec-icon"><i class="fas fa-lightbulb"></i></div>' +
+          '<div class="ep-ai-rec-body">' +
+            '<div class="ep-ai-rec-title">Primary Recommendation</div>' +
+            '<div class="ep-ai-rec-text">' + c.aiRec + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ep-ai-checklist-header">Estate Readiness Checklist</div>' +
+        '<div class="ep-ai-checklist">' +
+          Object.keys(c.pillars).map(function(pk) {
+            var p = c.pillars[pk];
+            var done = p.status === 'ok';
+            return '<div class="ep-ai-check-item ep-ai-check-' + (done ? 'ok' : 'pending') + '">' +
+              '<i class="fas fa-' + (done ? 'check-circle' : 'circle') + '"></i>' +
+              '<span>' + p.label + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }
+    return '<div class="ep-placeholder">Content coming soon</div>';
+  }
+
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  window.switchEpTab = function(key, el) {
+    EP_TABS.forEach(function(tab) {
+      var panel = document.getElementById('ep-tab-' + tab.key);
+      var btn   = document.getElementById('ep-tab-btn-' + tab.key);
+      if (panel) panel.style.display = tab.key === key ? 'block' : 'none';
+      if (btn)   btn.classList.toggle('ep-tab-active', tab.key === key);
+    });
+  };
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  function initEstatePlanningPage() {
+    var kpi = document.getElementById('prop-kpi-bar');
+    if (!kpi) return;
+
+    renderEpKpiBar();
+    renderEpClientList();
+
+    // Auto-open Linda Morrison (urgent — most critical)
+    var autoClient = EP_CLIENTS.find(function(c) { return c.id === 'ep003'; }) || EP_CLIENTS[0];
+    selectEpClient(autoClient);
+  }
+
+  // ── NavigateTo intercept ──────────────────────────────────────────────────
+  var _orig_navigateTo_ep = window.navigateTo;
+  window.navigateTo = function(page) {
+    _orig_navigateTo_ep(page);
+    if (page === 'adv-estate') {
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          var t = document.getElementById('page-title');
+          var b = document.getElementById('page-breadcrumb');
+          if (t) t.textContent = 'Estate Planning';
+          if (b) b.textContent = 'Advisory / Estate Planning';
+          initEstatePlanningPage();
+        }, 80);
+      });
+    }
+  };
+
+  console.log('ADV Estate module loaded');
+})();
+
+
+
+(function() {
+  'use strict';
+
+  // ── ADV Small Business Services Module ────────────────────────────────────
+  // NYL pillar: Small Business Services — "Insurance planning and retirement
+  // for employees, executives, or business owners, plus many other options
+  // to help a small business thrive."
+  // Container IDs (from tpl-adv-smallbiz shell):
+  //   pf-kpi-bar, pf-client-list, pf-detail-empty, pf-detail-panel
+  // ──────────────────────────────────────────────────────────────────────────
+
+  var SB_CLIENTS = [
+    {
+      id: 'sb001',
+      name: 'James Whitfield',
+      bizName: 'Whitfield Dental Group',
+      bizType: 'Medical Practice',
+      employees: 18,
+      status: 'needs-review',
+      statusLabel: 'Needs Review',
+      avatar: 'JW',
+      color: '#f59e0b',
+      lastReview: '11 months ago',
+      summary: 'Group benefits last reviewed pre-pandemic. Key-man coverage insufficient relative to current practice valuation. Executive bonus plan not yet implemented.',
+      products: {
+        keyman: { status: 'partial', label: 'Key-Man Insurance — Underinsured', note: 'Current policy: $500K. Practice valuation: $2.1M. Gap of $1.6M if owner becomes disabled or dies.' },
+        group: { status: 'active', label: 'Group Benefits — Active', note: 'Group health (15 enrolled), group dental/vision, $50K group term life. Up for renewal in 4 months.' },
+        execComp: { status: 'missing', label: 'Executive Comp — Not Implemented', note: 'No formal executive bonus or deferred compensation plan. 3 associate dentists are retention risk.' },
+        succession: { status: 'partial', label: 'Business Succession — Draft', note: 'Buy-sell agreement in draft with partner Dr. Nguyen. Life insurance funding not yet in place.' },
+        retirement: { status: 'active', label: 'Retirement Plan — SIMPLE IRA', note: 'SIMPLE IRA with 3% match for all employees. May benefit from upgrading to Solo 401(k) or defined benefit.' }
+      },
+      aiRec: 'Priority: increase key-man coverage to at least $1.5M and fund the buy-sell agreement with cross-purchase life insurance. Review group benefits before renewal window closes.'
+    },
+    {
+      id: 'sb002',
+      name: 'Sandra Williams',
+      bizName: 'Williams Marketing LLC',
+      bizType: 'Marketing Consultancy',
+      employees: 7,
+      status: 'current',
+      statusLabel: 'Current',
+      avatar: 'SW',
+      color: '#22c55e',
+      lastReview: '3 months ago',
+      summary: 'Comprehensive small business plan in place. All products reviewed and current. Annual review scheduled.',
+      products: {
+        keyman: { status: 'active', label: 'Key-Man Insurance — Adequate', note: '$1.2M policy on owner. Covers outstanding business loan and 2-year revenue replacement.' },
+        group: { status: 'active', label: 'Group Benefits — Active', note: 'Group health, dental, vision, life, and short-term disability. 100% employee participation.' },
+        execComp: { status: 'active', label: 'Executive Comp — In Place', note: 'Executive bonus (Section 162) plan for owner and office manager. NYL whole life vehicles in use.' },
+        succession: { status: 'active', label: 'Business Succession — Funded', note: 'Buy-sell agreement signed and fully funded with cross-purchase life insurance policies.' },
+        retirement: { status: 'active', label: 'Retirement Plan — SEP IRA', note: 'SEP IRA with maximum contributions. Planning review suggests Solo 401(k) transition for higher limits.' }
+      },
+      aiRec: 'Excellent coverage across all pillars. Consider upgrading SEP IRA to Solo 401(k) to allow catch-up contributions ($7,500/year). Next annual review due June 2024.'
+    },
+    {
+      id: 'sb003',
+      name: 'Robert Chen',
+      bizName: 'Chen Tech Solutions',
+      bizType: 'IT Consulting',
+      employees: 12,
+      status: 'urgent',
+      statusLabel: 'Urgent',
+      avatar: 'RC',
+      color: '#ef4444',
+      lastReview: 'Never',
+      summary: 'Growing tech firm with no business insurance or retirement plan. Key-man and succession planning completely absent. High risk profile.',
+      products: {
+        keyman: { status: 'missing', label: 'Key-Man Insurance — None', note: 'Owner is sole revenue driver. No coverage if Chen is disabled or dies. Business would likely fail.' },
+        group: { status: 'missing', label: 'Group Benefits — None', note: 'No group benefits. Competing for tech talent without standard benefits package is a significant disadvantage.' },
+        execComp: { status: 'missing', label: 'Executive Comp — None', note: 'No retention strategy for two senior engineers who are critical to $1.8M annual revenue.' },
+        succession: { status: 'missing', label: 'Business Succession — None', note: 'No buy-sell agreement. No succession plan. Business has no defined path in owner disability or death scenario.' },
+        retirement: { status: 'missing', label: 'Retirement Plan — None', note: 'No business retirement plan. Owner is funding personal IRA only ($6,500/year).' }
+      },
+      aiRec: 'Immediate action on key-man insurance and group benefits. A $1M key-man policy is affordable given Chen\'s age and health. Group benefits package will help retain critical talent. This client represents a significant opportunity across all five pillars.'
+    },
+    {
+      id: 'sb004',
+      name: 'Maria Gonzalez',
+      bizName: 'Gonzalez Catering & Events',
+      bizType: 'Food & Hospitality',
+      employees: 24,
+      status: 'in-progress',
+      statusLabel: 'In Progress',
+      avatar: 'MG',
+      color: '#f59e0b',
+      lastReview: '2 months ago',
+      summary: 'Group health plan enrollment in progress. Key-man policy application submitted. Succession planning discussion initiated.',
+      products: {
+        keyman: { status: 'partial', label: 'Key-Man Insurance — Applied', note: 'Application submitted for $750K policy. Underwriting in progress. Expected approval in 2 weeks.' },
+        group: { status: 'partial', label: 'Group Benefits — Enrolling', note: 'Group health plan selected. Open enrollment running this month. 18 of 24 employees enrolled so far.' },
+        execComp: { status: 'missing', label: 'Executive Comp — Not Started', note: 'Discussion deferred until group plan is in place. Two managers flagged for retention review.' },
+        succession: { status: 'partial', label: 'Business Succession — Discussing', note: 'Daughter identified as potential successor. Valuation not yet completed. Buy-sell terms under discussion.' },
+        retirement: { status: 'missing', label: 'Retirement Plan — None', note: 'SIMPLE IRA proposal prepared. Waiting for group plan to finalize before presenting to owner.' }
+      },
+      aiRec: 'Good progress — follow up on underwriting status weekly. Once key-man is approved, pivot to SIMPLE IRA presentation and set executive comp meeting. Target full coverage by Q3.'
+    },
+    {
+      id: 'sb005',
+      name: 'Dorothy Wilson',
+      bizName: 'Wilson Family Properties',
+      bizType: 'Real Estate Holdings',
+      employees: 4,
+      status: 'current',
+      statusLabel: 'Current',
+      avatar: 'DW',
+      color: '#22c55e',
+      lastReview: '5 months ago',
+      summary: 'Closely-held family business with comprehensive succession and executive comp strategy. All products current.',
+      products: {
+        keyman: { status: 'active', label: 'Key-Man Insurance — Adequate', note: '$2M survivorship policy covering Dorothy and son Thomas. Tied to estate and succession plan.' },
+        group: { status: 'active', label: 'Group Benefits — Active', note: 'Small group plan covering 4 FTEs. Simple HRA arrangement in place for owner.' },
+        execComp: { status: 'active', label: 'Executive Comp — Active', note: 'Executive bonus plan for son Thomas as part of succession grooming. Whole life vehicle accumulating.' },
+        succession: { status: 'active', label: 'Business Succession — Funded', note: 'Family LLC transfer in progress. Buy-sell funded with survivorship policy. Trust coordinates transfer.' },
+        retirement: { status: 'active', label: 'Retirement Plan — Defined Benefit', note: 'Defined benefit pension plan for Dorothy (age 79) — maximizes current-year deduction of $265K.' }
+      },
+      aiRec: 'Model client for small business services. LLC transfer nearing completion. Schedule annual strategy review to confirm defined benefit plan contributions align with current IRS limits.'
+    },
+    {
+      id: 'sb006',
+      name: 'Linda Morrison',
+      bizName: 'Morrison Consulting Partners',
+      bizType: 'Management Consulting',
+      employees: 9,
+      status: 'needs-review',
+      statusLabel: 'Needs Review',
+      avatar: 'LM',
+      color: '#f59e0b',
+      lastReview: '16 months ago',
+      summary: 'Group benefits overdue for renewal review. Key-man coverage was adequate but practice has grown significantly since last assessment.',
+      products: {
+        keyman: { status: 'partial', label: 'Key-Man Insurance — May Be Insufficient', note: 'Policy written in 2020 for $600K. Firm revenue grew 40% since. Recommend re-evaluation.' },
+        group: { status: 'partial', label: 'Group Benefits — Renewal Overdue', note: 'Group plan renewed on autopilot. 3 new hires not enrolled. Dependent coverage changes not recorded.' },
+        execComp: { status: 'missing', label: 'Executive Comp — None', note: 'No executive bonus or deferred comp in place. Senior partner retains all comp as S-corp distributions.' },
+        succession: { status: 'missing', label: 'Business Succession — None', note: 'No buy-sell agreement. Partner buyout terms not documented. High legal exposure.' },
+        retirement: { status: 'active', label: 'Retirement Plan — Solo 401(k)', note: 'Solo 401(k) contributing $66K/year (max). Partners not covered — ERISA exposure if classified as employees.' }
+      },
+      aiRec: 'Schedule a full business review. Priority items: update group enrollment for new hires, increase key-man coverage by at least $400K, draft buy-sell agreement with attorney. ERISA risk re: 401(k) eligibility should be reviewed by plan counsel.'
+    }
+  ];
+
+  var SB_TABS = [
+    { key: 'overview',    label: 'Overview' },
+    { key: 'keyman',      label: 'Key-Man' },
+    { key: 'benefits',    label: 'Group Benefits' },
+    { key: 'execcomp',    label: 'Exec Comp' },
+    { key: 'succession',  label: 'Succession' },
+    { key: 'ai',          label: 'AI Insights' }
+  ];
+
+  var selectedSbClient = null;
+
+  // ── KPI bar ───────────────────────────────────────────────────────────────
+  function renderSbKpiBar() {
+    var bar = document.getElementById('pf-kpi-bar');
+    if (!bar) return;
+    var urgent  = SB_CLIENTS.filter(function(c) { return c.status === 'urgent'; }).length;
+    var current = SB_CLIENTS.filter(function(c) { return c.status === 'current'; }).length;
+    var inProg  = SB_CLIENTS.filter(function(c) { return c.status === 'in-progress'; }).length;
+    var review  = SB_CLIENTS.filter(function(c) { return c.status === 'needs-review'; }).length;
+    var totalEmp = SB_CLIENTS.reduce(function(sum, c) { return sum + c.employees; }, 0);
+    bar.innerHTML =
+      '<div class="sb-kpi-card sb-kpi-urgent"><div class="sb-kpi-value">' + urgent + '</div><div class="sb-kpi-label">Urgent Action</div></div>' +
+      '<div class="sb-kpi-card sb-kpi-review"><div class="sb-kpi-value">' + review + '</div><div class="sb-kpi-label">Needs Review</div></div>' +
+      '<div class="sb-kpi-card sb-kpi-progress"><div class="sb-kpi-value">' + inProg + '</div><div class="sb-kpi-label">In Progress</div></div>' +
+      '<div class="sb-kpi-card sb-kpi-current"><div class="sb-kpi-value">' + current + '</div><div class="sb-kpi-label">Fully Covered</div></div>' +
+      '<div class="sb-kpi-card sb-kpi-emp"><div class="sb-kpi-value">' + totalEmp + '</div><div class="sb-kpi-label">Total Employees</div></div>';
+  }
+
+  // ── Client list ───────────────────────────────────────────────────────────
+  function renderSbClientList() {
+    var list = document.getElementById('pf-client-list');
+    if (!list) return;
+    list.innerHTML = '<div class="sb-list-header"><span class="sb-list-title">Small Business Clients</span><span class="sb-list-sub">Click to open business profile</span></div>';
+    SB_CLIENTS.forEach(function(c) {
+      var div = document.createElement('div');
+      div.className = 'sb-client-item' + (selectedSbClient && selectedSbClient.id === c.id ? ' sb-client-active' : '');
+      div.onclick = function() { selectSbClient(c); };
+      div.innerHTML =
+        '<div class="sb-client-avatar" style="background:' + c.color + '">' + c.avatar + '</div>' +
+        '<div class="sb-client-info">' +
+          '<div class="sb-client-name">' + c.name + '</div>' +
+          '<div class="sb-biz-name">' + c.bizName + '</div>' +
+          '<div class="sb-client-meta">' + c.bizType + ' &middot; ' + c.employees + ' employees</div>' +
+        '</div>' +
+        '<div class="sb-status-badge sb-status-' + c.status + '">' + c.statusLabel + '</div>';
+      list.appendChild(div);
+    });
+  }
+
+  // ── Client detail ─────────────────────────────────────────────────────────
+  function selectSbClient(client) {
+    selectedSbClient = client;
+    renderSbClientList();
+
+    var empty = document.getElementById('pf-detail-empty');
+    var panel = document.getElementById('pf-detail-panel');
+    if (empty) empty.style.display = 'none';
+    if (!panel) return;
+    panel.style.display = 'block';
+
+    // Score: count active products
+    var score = Object.keys(client.products).filter(function(k) { return client.products[k].status === 'active'; }).length;
+    var totalProducts = Object.keys(client.products).length;
+
+    panel.innerHTML =
+      '<div class="sb-detail-header">' +
+        '<div class="sb-detail-avatar" style="background:' + client.color + '">' + client.avatar + '</div>' +
+        '<div class="sb-detail-hinfo">' +
+          '<div class="sb-detail-name">' + client.name + '</div>' +
+          '<div class="sb-detail-biz">' + client.bizName + '</div>' +
+          '<div class="sb-detail-meta">' + client.bizType + ' &middot; ' + client.employees + ' employees &middot; Last reviewed: ' + client.lastReview + '</div>' +
+          '<div style="margin-top:6px"><span class="sb-status-badge sb-status-' + client.status + '">' + client.statusLabel + '</span></div>' +
+        '</div>' +
+        '<div class="sb-coverage-score">' +
+          '<div class="sb-score-value">' + score + '/' + totalProducts + '</div>' +
+          '<div class="sb-score-label">Pillars<br>Covered</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sb-summary-bar"><i class="fas fa-info-circle"></i> ' + client.summary + '</div>' +
+      '<div class="sb-tab-bar">' +
+        SB_TABS.map(function(tab) {
+          return '<button class="sb-tab-btn" id="sb-tab-btn-' + tab.key + '" onclick="switchSbTab(\'' + tab.key + '\', this)">' + tab.label + '</button>';
+        }).join('') +
+      '</div>' +
+      SB_TABS.map(function(tab) {
+        return '<div class="sb-tab-panel" id="sb-tab-' + tab.key + '" style="display:none">' + renderSbTabContent(tab.key, client) + '</div>';
+      }).join('');
+
+    switchSbTab('overview', panel.querySelector('#sb-tab-btn-overview'));
+  }
+
+  function productStatusIcon(status) {
+    var map = { active: 'fa-check-circle sb-icon-active', partial: 'fa-exclamation-circle sb-icon-partial', missing: 'fa-times-circle sb-icon-missing', 'needs-review': 'fa-clock sb-icon-review' };
+    return map[status] || 'fa-circle sb-icon-partial';
+  }
+
+  function renderSbTabContent(key, c) {
+    if (key === 'overview') {
+      return '<div class="sb-overview-grid">' +
+        Object.keys(c.products).map(function(pk) {
+          var p = c.products[pk];
+          return '<div class="sb-product-card">' +
+            '<div class="sb-product-header"><i class="fas ' + productStatusIcon(p.status) + '"></i><span class="sb-product-label">' + p.label + '</span></div>' +
+            '<div class="sb-product-note">' + p.note + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+    if (key === 'keyman') {
+      var km = c.products.keyman;
+      return '<div class="sb-keyman-section">' +
+        '<div class="sb-section-header"><i class="fas fa-user-shield"></i> Key-Man Insurance</div>' +
+        '<div class="sb-product-status-card sb-product-' + km.status + '">' +
+          '<div class="sb-ps-label">' + km.label + '</div>' +
+          '<div class="sb-ps-note">' + km.note + '</div>' +
+        '</div>' +
+        '<div class="sb-keyman-explainer">' +
+          '<div class="sb-explainer-title">Why Key-Man Insurance Matters</div>' +
+          '<div class="sb-explainer-grid">' +
+            '<div class="sb-explainer-item"><i class="fas fa-building"></i><span>Covers business loan obligations if owner dies or is disabled</span></div>' +
+            '<div class="sb-explainer-item"><i class="fas fa-users"></i><span>Provides capital to recruit and train a replacement</span></div>' +
+            '<div class="sb-explainer-item"><i class="fas fa-chart-line"></i><span>Protects revenue during ownership transition</span></div>' +
+            '<div class="sb-explainer-item"><i class="fas fa-handshake"></i><span>Can fund a buy-sell agreement between partners</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="sb-action-row">' +
+          '<button class="sb-action-btn sb-action-primary"><i class="fas fa-calculator"></i> Run Coverage Analysis</button>' +
+          '<button class="sb-action-btn"><i class="fas fa-file-alt"></i> Generate Illustration</button>' +
+        '</div>' +
+      '</div>';
+    }
+    if (key === 'benefits') {
+      var gb = c.products.group;
+      return '<div class="sb-benefits-section">' +
+        '<div class="sb-section-header"><i class="fas fa-heartbeat"></i> Group Benefits</div>' +
+        '<div class="sb-product-status-card sb-product-' + gb.status + '">' +
+          '<div class="sb-ps-label">' + gb.label + '</div>' +
+          '<div class="sb-ps-note">' + gb.note + '</div>' +
+        '</div>' +
+        '<div class="sb-benefits-grid">' +
+          '<div class="sb-benefit-row"><i class="fas fa-hospital"></i><span class="sb-ben-name">Group Health Insurance</span><span class="sb-ben-status sb-ben-' + (gb.status === 'active' ? 'active' : 'missing') + '">' + (gb.status === 'active' ? 'Active' : 'Not in Place') + '</span></div>' +
+          '<div class="sb-benefit-row"><i class="fas fa-tooth"></i><span class="sb-ben-name">Group Dental & Vision</span><span class="sb-ben-status sb-ben-' + (gb.status === 'active' ? 'active' : 'missing') + '">' + (gb.status === 'active' ? 'Active' : 'Not in Place') + '</span></div>' +
+          '<div class="sb-benefit-row"><i class="fas fa-umbrella"></i><span class="sb-ben-name">Group Life Insurance</span><span class="sb-ben-status sb-ben-' + (gb.status === 'active' ? 'active' : 'missing') + '">' + (gb.status === 'active' ? 'Active' : 'Not in Place') + '</span></div>' +
+          '<div class="sb-benefit-row"><i class="fas fa-wheelchair"></i><span class="sb-ben-name">Short-Term Disability</span><span class="sb-ben-status sb-ben-' + (gb.status === 'active' ? 'active' : 'missing') + '">' + (gb.status === 'active' ? 'Active' : 'Not in Place') + '</span></div>' +
+        '</div>' +
+        '<div class="sb-action-row">' +
+          '<button class="sb-action-btn sb-action-primary"><i class="fas fa-plus-circle"></i> Add / Update Benefits</button>' +
+          '<button class="sb-action-btn"><i class="fas fa-users"></i> Manage Enrollment</button>' +
+        '</div>' +
+      '</div>';
+    }
+    if (key === 'execcomp') {
+      var ec = c.products.execComp;
+      return '<div class="sb-execcomp-section">' +
+        '<div class="sb-section-header"><i class="fas fa-briefcase"></i> Executive Compensation</div>' +
+        '<div class="sb-product-status-card sb-product-' + ec.status + '">' +
+          '<div class="sb-ps-label">' + ec.label + '</div>' +
+          '<div class="sb-ps-note">' + ec.note + '</div>' +
+        '</div>' +
+        '<div class="sb-execcomp-options">' +
+          '<div class="sb-ec-option"><div class="sb-ec-opt-title"><i class="fas fa-star"></i> Executive Bonus (Section 162)</div><div class="sb-ec-opt-desc">Business pays insurance premiums as a bonus — simple, flexible, tax-deductible for the business.</div></div>' +
+          '<div class="sb-ec-option"><div class="sb-ec-opt-title"><i class="fas fa-lock"></i> Split Dollar Arrangement</div><div class="sb-ec-opt-desc">Business and executive share premium costs and death benefit. Excellent for retention of key talent.</div></div>' +
+          '<div class="sb-ec-option"><div class="sb-ec-opt-title"><i class="fas fa-chart-bar"></i> Deferred Compensation (NQDC)</div><div class="sb-ec-opt-desc">Executive defers income, receives payout at retirement. Business retains flexibility on funding.</div></div>' +
+          '<div class="sb-ec-option"><div class="sb-ec-opt-title"><i class="fas fa-shield-alt"></i> Business Owner Disability</div><div class="sb-ec-opt-desc">Replaces owner income if disability prevents them from working. Protects both personal and business cash flow.</div></div>' +
+        '</div>' +
+        '<div class="sb-action-row">' +
+          '<button class="sb-action-btn sb-action-primary"><i class="fas fa-calculator"></i> Design Exec Comp Plan</button>' +
+        '</div>' +
+      '</div>';
+    }
+    if (key === 'succession') {
+      var succ = c.products.succession;
+      var ret  = c.products.retirement;
+      return '<div class="sb-succession-section">' +
+        '<div class="sb-section-header"><i class="fas fa-sitemap"></i> Succession & Retirement</div>' +
+        '<div class="sb-product-status-card sb-product-' + succ.status + '">' +
+          '<div class="sb-ps-label">' + succ.label + '</div>' +
+          '<div class="sb-ps-note">' + succ.note + '</div>' +
+        '</div>' +
+        '<div class="sb-product-status-card sb-product-' + ret.status + '" style="margin-top:12px">' +
+          '<div class="sb-ps-label">' + ret.label + '</div>' +
+          '<div class="sb-ps-note">' + ret.note + '</div>' +
+        '</div>' +
+        '<div class="sb-succession-steps">' +
+          '<div class="sb-succ-step"><div class="sb-succ-step-num">1</div><div class="sb-succ-step-text"><strong>Business Valuation</strong> — Establish current fair market value for buy-sell pricing</div></div>' +
+          '<div class="sb-succ-step"><div class="sb-succ-step-num">2</div><div class="sb-succ-step-text"><strong>Buy-Sell Agreement</strong> — Define trigger events, pricing formula, and transfer terms</div></div>' +
+          '<div class="sb-succ-step"><div class="sb-succ-step-num">3</div><div class="sb-succ-step-text"><strong>Insurance Funding</strong> — Life or disability insurance funds the agreement at trigger event</div></div>' +
+          '<div class="sb-succ-step"><div class="sb-succ-step-num">4</div><div class="sb-succ-step-text"><strong>Successor Identification</strong> — Family member, partner, key employee, or third-party sale</div></div>' +
+          '<div class="sb-succ-step"><div class="sb-succ-step-num">5</div><div class="sb-succ-step-text"><strong>Retirement Plan Alignment</strong> — Coordinate exit timing with retirement income strategy</div></div>' +
+        '</div>' +
+        '<div class="sb-action-row">' +
+          '<button class="sb-action-btn sb-action-primary"><i class="fas fa-file-signature"></i> Start Succession Plan</button>' +
+          '<button class="sb-action-btn"><i class="fas fa-piggy-bank"></i> Review Retirement Plan</button>' +
+        '</div>' +
+      '</div>';
+    }
+    if (key === 'ai') {
+      var covered  = Object.keys(c.products).filter(function(k) { return c.products[k].status === 'active'; }).length;
+      var total    = Object.keys(c.products).length;
+      var pct      = Math.round((covered / total) * 100);
+      return '<div class="sb-ai-section">' +
+        '<div class="sb-ai-banner"><i class="fas fa-robot"></i> AI Business Planning Insights</div>' +
+        '<div class="sb-ai-rec-card">' +
+          '<div class="sb-ai-rec-icon"><i class="fas fa-lightbulb"></i></div>' +
+          '<div class="sb-ai-rec-body">' +
+            '<div class="sb-ai-rec-title">Primary Recommendation</div>' +
+            '<div class="sb-ai-rec-text">' + c.aiRec + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="sb-coverage-bar-section">' +
+          '<div class="sb-cov-bar-header">Coverage Completeness: ' + pct + '%</div>' +
+          '<div class="sb-cov-bar-bg"><div class="sb-cov-bar-fill" style="width:' + pct + '%;background:' + (pct >= 80 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444') + '"></div></div>' +
+        '</div>' +
+        '<div class="sb-ai-checklist-header">Small Business Coverage Checklist</div>' +
+        '<div class="sb-ai-checklist">' +
+          Object.keys(c.products).map(function(pk) {
+            var p = c.products[pk];
+            var done = p.status === 'active';
+            return '<div class="sb-ai-check-item sb-ai-check-' + (done ? 'ok' : 'pending') + '">' +
+              '<i class="fas fa-' + (done ? 'check-circle' : 'circle') + '"></i>' +
+              '<span>' + p.label + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }
+    return '<div class="sb-placeholder">Content coming soon</div>';
+  }
+
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  window.switchSbTab = function(key, el) {
+    SB_TABS.forEach(function(tab) {
+      var panel = document.getElementById('sb-tab-' + tab.key);
+      var btn   = document.getElementById('sb-tab-btn-' + tab.key);
+      if (panel) panel.style.display = tab.key === key ? 'block' : 'none';
+      if (btn)   btn.classList.toggle('sb-tab-active', tab.key === key);
+    });
+  };
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  function initSmallBizPage() {
+    var kpi = document.getElementById('pf-kpi-bar');
+    if (!kpi) return;
+
+    renderSbKpiBar();
+    renderSbClientList();
+
+    // Auto-open Robert Chen (urgent — no coverage at all)
+    var autoClient = SB_CLIENTS.find(function(c) { return c.id === 'sb003'; }) || SB_CLIENTS[0];
+    selectSbClient(autoClient);
+  }
+
+  // ── NavigateTo intercept ──────────────────────────────────────────────────
+  var _orig_navigateTo_sb = window.navigateTo;
+  window.navigateTo = function(page) {
+    _orig_navigateTo_sb(page);
+    if (page === 'adv-smallbiz') {
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          var t = document.getElementById('page-title');
+          var b = document.getElementById('page-breadcrumb');
+          if (t) t.textContent = 'Small Business Services';
+          if (b) b.textContent = 'Advisory / Small Business';
+          initSmallBizPage();
+        }, 80);
+      });
+    }
+  };
+
+  console.log('ADV SmallBiz module loaded');
 })();
 
