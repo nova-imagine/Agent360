@@ -13274,6 +13274,9 @@ function FNADiscoveryPage() {
             <button class="fna-ed-nav-btn" onclick="fnaEditorNav(3)" data-idx="3">
               <i class="fas fa-shield-alt"></i> Coverage Needs
             </button>
+            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(4)" id="fna-ed-nav-4" data-idx="4">
+              <i class="fas fa-chart-pie"></i> Investment Profile
+            </button>
           </div>
           {/* Section body — rendered by JS */}
           <div class="fna-ed-body" id="fna-ed-body">
