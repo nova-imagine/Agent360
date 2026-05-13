@@ -2628,18 +2628,20 @@ function ClientsPage() {
 
           {/* Tab bar */}
           <div class="cm-tabs" id="cm-tabs">
-            <button class="cm-tab active" id="cm-tab-overview"  onclick="switchClientTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
-            <button class="cm-tab"         id="cm-tab-ai"        onclick="switchClientTab('ai',this)"><i class="fas fa-robot"></i> AI Insights</button>
-            <button class="cm-tab"         id="cm-tab-policies"  onclick="switchClientTab('policies',this)"><i class="fas fa-layer-group"></i> Products</button>
-            <button class="cm-tab"         id="cm-tab-financial" onclick="switchClientTab('financial',this)"><i class="fas fa-chart-pie"></i> Wealth Snapshot</button>
-            <button class="cm-tab"         id="cm-tab-goals"     onclick="switchClientTab('goals',this)"><i class="fas fa-bullseye"></i> Goals</button>
-            <button class="cm-tab"         id="cm-tab-outreach"  onclick="switchClientTab('outreach',this)"><i class="fas fa-paper-plane"></i> Outreach</button>
-            <button class="cm-tab"         id="cm-tab-timeline"  onclick="switchClientTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
-            <button class="cm-tab"         id="cm-tab-documents" onclick="switchClientTab('documents',this)"><i class="fas fa-folder-open"></i> Documents</button>
-            <button class="cm-tab"         id="cm-tab-referrals" onclick="switchClientTab('referrals',this)"><i class="fas fa-users"></i> Referrals</button>
-            <button class="cm-tab cm-tab-intel"    id="cm-tab-intel"     onclick="switchClientTab('intel',this)"><i class="fas fa-satellite-dish"></i> 3rd-Party Intel</button>
-            <button class="cm-tab cm-tab-planning" id="cm-tab-planning"  onclick="switchClientTab('planning',this)"><i class="fas fa-drafting-compass"></i> Financial Plan</button>
-            <button class="cm-tab cm-tab-illust"   id="cm-tab-illust"    onclick="switchClientTab('illust',this)"><i class="fas fa-chart-area"></i> Illustrations</button>
+            <button class="cm-tab active"  id="cm-tab-overview"      onclick="switchClientTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
+            <button class="cm-tab"         id="cm-tab-ai"            onclick="switchClientTab('ai',this)"><i class="fas fa-robot"></i> AI Insights</button>
+            <button class="cm-tab"         id="cm-tab-policies"      onclick="switchClientTab('policies',this)"><i class="fas fa-layer-group"></i> Products</button>
+            <button class="cm-tab"         id="cm-tab-financial"     onclick="switchClientTab('financial',this)"><i class="fas fa-chart-pie"></i> Wealth Snapshot</button>
+            <button class="cm-tab cm-tab-planning" id="cm-tab-planning" onclick="switchClientTab('planning',this)"><i class="fas fa-drafting-compass"></i> Financial Plan</button>
+            <button class="cm-tab"         id="cm-tab-portfolio"     onclick="switchClientTab('portfolio',this)"><i class="fas fa-briefcase"></i> Portfolio</button>
+            <button class="cm-tab"         id="cm-tab-retirement"    onclick="switchClientTab('retirement',this)"><i class="fas fa-umbrella-beach"></i> Retirement</button>
+            <button class="cm-tab"         id="cm-tab-estateprot"    onclick="switchClientTab('estateprot',this)"><i class="fas fa-shield-alt"></i> Estate &amp; Protection</button>
+            <button class="cm-tab"         id="cm-tab-outreach"      onclick="switchClientTab('outreach',this)"><i class="fas fa-paper-plane"></i> Outreach</button>
+            <button class="cm-tab"         id="cm-tab-timeline"      onclick="switchClientTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
+            <button class="cm-tab"         id="cm-tab-referrals"     onclick="switchClientTab('referrals',this)"><i class="fas fa-users"></i> Referrals</button>
+            <button class="cm-tab"         id="cm-tab-serviceclaims" onclick="switchClientTab('serviceclaims',this)"><i class="fas fa-file-medical-alt"></i> Service &amp; Claims</button>
+            <button class="cm-tab"         id="cm-tab-documents"     onclick="switchClientTab('documents',this)"><i class="fas fa-folder-open"></i> Documents</button>
+            <button class="cm-tab cm-tab-intel" id="cm-tab-intel"   onclick="switchClientTab('intel',this)"><i class="fas fa-satellite-dish"></i> 3rd-Party Intel</button>
           </div>
 
           {/* Tab body */}
