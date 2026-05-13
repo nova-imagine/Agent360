@@ -91,7 +91,11 @@ function navigateTo(page) {
     if (page === 'dashboard') {
       requestAnimationFrame(() => {
         setTimeout(() => {
-          initDashboardCharts();
+          // Only init charts if My Book tab is currently active
+          const _mb = document.getElementById('home-pane-mybook');
+          if (_mb && _mb.style.display !== 'none') {
+            initDashboardCharts();
+          }
           animateKPICards();
         }, 80);
       });
@@ -2998,7 +3002,11 @@ function animateKPICards() {
 
 // ---- INIT ----
 document.addEventListener('DOMContentLoaded', () => {
-  initDashboardCharts();
+  // Charts live in My Book tab (hidden by default) — only init if pane is visible
+  const _mbPane = document.getElementById('home-pane-mybook');
+  if (!_mbPane || _mbPane.style.display !== 'none') {
+    initDashboardCharts();
+  }
   animateKPICards();
 
   // Add click handler for quick quote calculate
@@ -41456,3 +41464,28 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
   console.log('ADV SmallBiz module loaded');
 })();
 
+
+
+/* HOME_TABS_SWITCHER_v1 */
+// ── Home page tab switcher ──────────────────────────────────────────────────
+function switchHomeTab(tab, btn) {
+  // Deactivate all tabs
+  document.querySelectorAll('.home-tab').forEach(function(t) {
+    t.classList.remove('active');
+  });
+  // Hide all panes
+  document.querySelectorAll('.home-tab-pane').forEach(function(p) {
+    p.style.display = 'none';
+  });
+  // Activate the clicked button
+  if (btn) btn.classList.add('active');
+  // Show the target pane
+  var pane = document.getElementById('home-pane-' + tab);
+  if (pane) pane.style.display = 'block';
+  // Initialise charts when My Book tab becomes visible
+  if (tab === 'mybook') {
+    setTimeout(function() {
+      initDashboardCharts();
+    }, 80);
+  }
+}
