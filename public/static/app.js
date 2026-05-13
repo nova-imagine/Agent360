@@ -39,7 +39,11 @@ function navigateTo(page) {
     fna: 'Needs Analysis',
     delivery: 'Policy Delivery',
     leads: 'Leads — Pre-Qualification',
-    'inv-accounts': 'Investment Accounts'
+    'inv-accounts': 'Investment Accounts',
+    'ret-accounts': 'Annuity Accounts',
+    'adv-wealth': 'Wealth Management',
+    'adv-estate': 'Estate Planning',
+    'adv-smallbiz': 'Small Business Advisory'
   };
 
   const breadcrumbs = {
@@ -64,7 +68,11 @@ function navigateTo(page) {
     fna: 'Home / Sales / Needs Analysis',
     delivery: 'Home / Insurance / Policy Delivery',
     leads: 'Home / Marketing / Leads',
-    'inv-accounts': 'Home / Investments / Investment Accounts'
+    'inv-accounts': 'Home / Investments / Investment Accounts',
+    'ret-accounts': 'Home / Retirement / Annuity Accounts',
+    'adv-wealth': 'Home / Advisory / Wealth Management',
+    'adv-estate': 'Home / Advisory / Estate Planning',
+    'adv-smallbiz': 'Home / Advisory / Small Business'
   };
 
   const titleEl = document.getElementById('page-title');

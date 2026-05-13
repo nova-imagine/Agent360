@@ -308,6 +308,9 @@ function MainApp() {
         <div id="tpl-leads"><LeadsPage /></div>
         <div id="tpl-inv-accounts"><InvestmentAccountsPage /></div>
         <div id="tpl-ret-accounts"><RetirementAccountsPage /></div>
+        <div id="tpl-adv-wealth"></div>
+        <div id="tpl-adv-estate"></div>
+        <div id="tpl-adv-smallbiz"></div>
       </div>
 
       {/* ── Workflow Execution Modal ── */}
@@ -474,15 +477,11 @@ function Sidebar() {
           <span class="nav-badge" style="background:#7c3aed;color:#fff">14</span>
         </a>
 
-        {/* ── SALES (Phase 2–4) ── */}
+        {/* ── SALES ── */}
         <div class="nav-section-label">SALES</div>
         <a class="nav-item" onclick="navigateTo('fna')" href="#">
           <i class="fas fa-clipboard-list"></i><span>FNA Discovery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">3</span>
-        </a>
-        <a class="nav-item opportunities-nav" onclick="navigateTo('opportunities')" href="#">
-          <i class="fas fa-bolt"></i><span>Opportunities</span>
-          <span class="nav-badge" style="background:#7c3aed;color:#fff" id="opp-nav-badge">5</span>
         </a>
         <a class="nav-item" onclick="navigateTo('products')" href="#">
           <i class="fas fa-flask"></i><span>Products &amp; Illustrations</span>
@@ -491,12 +490,16 @@ function Sidebar() {
           <i class="fas fa-file-signature"></i><span>E-App &amp; Proposals</span>
           <span class="nav-badge" style="background:#003087;color:#fff">2</span>
         </a>
+        <a class="nav-item upsell-nav" onclick="navigateTo('upsell')" href="#">
+          <i class="fas fa-arrow-trend-up"></i><span>Upsell Track</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">8</span>
+        </a>
         <a class="nav-item pipeline-view-nav" id="pipeline-view-nav" onclick="navigateTo('pipeline-view')" href="#">
           <i class="fas fa-route"></i><span>Journey Pipeline</span>
         </a>
 
-        {/* ── ONBOARDING (Phase 5–6) ── */}
-        <div class="nav-section-label">ONBOARDING</div>
+        {/* ── INSURANCE ── */}
+        <div class="nav-section-label">INSURANCE</div>
         <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
           <i class="fas fa-microscope"></i><span>Underwriting</span>
           <span class="nav-badge" style="background:#0891b2;color:white">4</span>
@@ -506,6 +509,13 @@ function Sidebar() {
           <span class="nav-badge" style="background:#059669;color:#fff">2</span>
         </a>
 
+        {/* ── INVESTMENTS ── */}
+        <div class="nav-section-label">INVESTMENTS</div>
+        <a class="nav-item inv-accounts-nav" onclick="navigateTo('inv-accounts')" href="#">
+          <i class="fas fa-chart-line"></i><span>Investment Accounts</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">12</span>
+        </a>
+
         {/* ── RETIREMENT ── */}
         <div class="nav-section-label">RETIREMENT</div>
         <a class="nav-item ret-accounts-nav" onclick="navigateTo('ret-accounts')" href="#">
@@ -513,15 +523,26 @@ function Sidebar() {
           <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
         </a>
 
-        {/* ── SERVICE (Phase 7 + INV) ── */}
+        {/* ── ADVISORY ── */}
+        <div class="nav-section-label">ADVISORY</div>
+        <a class="nav-item adv-wealth-nav" onclick="navigateTo('adv-wealth')" href="#">
+          <i class="fas fa-gem"></i><span>Wealth Management</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">3</span>
+        </a>
+        <a class="nav-item adv-estate-nav" onclick="navigateTo('adv-estate')" href="#">
+          <i class="fas fa-gavel"></i><span>Estate Planning</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">4</span>
+        </a>
+        <a class="nav-item adv-smallbiz-nav" onclick="navigateTo('adv-smallbiz')" href="#">
+          <i class="fas fa-briefcase"></i><span>Small Business</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">2</span>
+        </a>
+
+        {/* ── SERVICE ── */}
         <div class="nav-section-label">SERVICE</div>
         <a class="nav-item" onclick="navigateTo('policies')" href="#">
           <i class="fas fa-file-contract"></i><span>Policies</span>
           <span class="nav-badge">1.8K</span>
-        </a>
-        <a class="nav-item inv-accounts-nav" onclick="navigateTo('inv-accounts')" href="#">
-          <i class="fas fa-chart-line"></i><span>Investment Accounts</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">12</span>
         </a>
         <a class="nav-item alerts-nav" onclick="navigateTo('alerts')" href="#">
           <i class="fas fa-bell"></i><span>Policy Alerts</span>
@@ -530,10 +551,6 @@ function Sidebar() {
         <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
           <i class="fas fa-file-medical-alt"></i><span>Claims</span>
           <span class="nav-badge alert">7</span>
-        </a>
-        <a class="nav-item upsell-nav" onclick="navigateTo('upsell')" href="#">
-          <i class="fas fa-arrow-trend-up"></i><span>Upsell Track</span>
-          <span class="nav-badge" style="background:#059669;color:#fff">8</span>
         </a>
 
         {/* ── ANALYTICS ── */}
