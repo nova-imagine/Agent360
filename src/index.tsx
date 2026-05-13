@@ -13648,21 +13648,29 @@ function LeadsPage() {
           <div class="lead-stat-num" id="lead-stat-new">3</div>
           <div class="lead-stat-lbl"><i class="fas fa-star"></i> New</div>
         </div>
+        <div class="lead-stat-card lead-stat-contacted">
+          <div class="lead-stat-num" id="lead-stat-contacted">1</div>
+          <div class="lead-stat-lbl"><i class="fas fa-phone"></i> Contacted</div>
+        </div>
         <div class="lead-stat-card lead-stat-qualified">
           <div class="lead-stat-num" id="lead-stat-qualified">3</div>
           <div class="lead-stat-lbl"><i class="fas fa-check-circle"></i> Qualified</div>
         </div>
+        <div class="lead-stat-card lead-stat-incampaign">
+          <div class="lead-stat-num" id="lead-stat-incampaign">2</div>
+          <div class="lead-stat-lbl"><i class="fas fa-bullhorn"></i> In Campaign</div>
+        </div>
+        <div class="lead-stat-card lead-stat-responded">
+          <div class="lead-stat-num" id="lead-stat-responded">1</div>
+          <div class="lead-stat-lbl"><i class="fas fa-reply"></i> Responded</div>
+        </div>
         <div class="lead-stat-card lead-stat-converted">
-          <div class="lead-stat-num" id="lead-stat-converted">8</div>
+          <div class="lead-stat-num" id="lead-stat-converted">4</div>
           <div class="lead-stat-lbl"><i class="fas fa-user-check"></i> Converted</div>
         </div>
         <div class="lead-stat-card lead-stat-avg">
           <div class="lead-stat-num" id="lead-stat-avg">84</div>
           <div class="lead-stat-lbl"><i class="fas fa-brain"></i> Avg AI Score</div>
-        </div>
-        <div class="lead-stat-card lead-stat-pipeline">
-          <div class="lead-stat-num" id="lead-stat-pipeline">$2.4M</div>
-          <div class="lead-stat-lbl"><i class="fas fa-dollar-sign"></i> Est. Pipeline</div>
         </div>
       </div>
 
@@ -13675,11 +13683,20 @@ function LeadsPage() {
           <button class="leads-filter-tab" data-filter="new" onclick="filterLeadsByStatus('new')" id="leads-tab-new">
             <i class="fas fa-star"></i> New <span class="leads-tab-count" id="leads-count-new">3</span>
           </button>
+          <button class="leads-filter-tab" data-filter="contacted" onclick="filterLeadsByStatus('contacted')" id="leads-tab-contacted">
+            <i class="fas fa-phone"></i> Contacted <span class="leads-tab-count" id="leads-count-contacted">1</span>
+          </button>
           <button class="leads-filter-tab" data-filter="qualified" onclick="filterLeadsByStatus('qualified')" id="leads-tab-qualified">
             <i class="fas fa-check-circle"></i> Qualified <span class="leads-tab-count" id="leads-count-qualified">3</span>
           </button>
+          <button class="leads-filter-tab" data-filter="in-campaign" onclick="filterLeadsByStatus('in-campaign')" id="leads-tab-incampaign">
+            <i class="fas fa-bullhorn"></i> In Campaign <span class="leads-tab-count" id="leads-count-incampaign">2</span>
+          </button>
+          <button class="leads-filter-tab" data-filter="responded" onclick="filterLeadsByStatus('responded')" id="leads-tab-responded">
+            <i class="fas fa-reply"></i> Responded <span class="leads-tab-count" id="leads-count-responded">1</span>
+          </button>
           <button class="leads-filter-tab" data-filter="converted" onclick="filterLeadsByStatus('converted')" id="leads-tab-converted">
-            <i class="fas fa-user-check"></i> Converted <span class="leads-tab-count" id="leads-count-converted">8</span>
+            <i class="fas fa-user-check"></i> Converted <span class="leads-tab-count" id="leads-count-converted">4</span>
           </button>
         </div>
         <div class="leads-search-wrap">

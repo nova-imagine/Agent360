@@ -20593,6 +20593,12 @@ kbd {
 .le-event-icon.baby        { background: #eff6ff; color: #1e40af; }
 .le-event-icon.retirement  { background: #ecfdf5; color: #065f46; }
 .le-event-icon.home        { background: #fffbeb; color: #92400e; }
+.le-event-icon.job-change  { background: #f0f9ff; color: #0369a1; }
+.le-event-icon.divorce     { background: #fff1f2; color: #be123c; }
+.le-event-icon.business-sale { background: #faf5ff; color: #7c3aed; }
+.le-event-icon.death-spouse  { background: #f8fafc; color: #475569; }
+/* Follow-up Queue urgency badge */
+.le-badge.new.urgent { background: #fee2e2; color: #dc2626; }
 .le-client-name { font-size: 0.84rem; font-weight: 700; color: #1e293b; }
 .le-event-type  { font-size: 0.77rem; color: #334155; margin-top: 2px; font-weight: 600; }
 .le-event-source{ font-size: 0.68rem; color: #94a3b8; margin-top: 2px; }
@@ -34382,3 +34388,207 @@ kbd {
   .port-aum-bar { grid-template-columns: 1fr 1fr; }
   .port-accts-grid { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LEADS V2 — 6-stage lifecycle, domain propensity, modals
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Stat strip new status cards ─────────────────────────────── */
+.lead-stat-card.lead-stat-contacted  { border-top: 3px solid #0891b2; }
+.lead-stat-card.lead-stat-incampaign { border-top: 3px solid #7c3aed; }
+.lead-stat-card.lead-stat-responded  { border-top: 3px solid #059669; }
+
+/* ── Status pills (all 6 stages) ─────────────────────────────── */
+.lead-status-contacted  { background: #e0f2fe; color: #0369a1; }
+.lead-status-incampaign { background: #ede9fe; color: #6d28d9; }
+.lead-status-responded  { background: #d1fae5; color: #065f46; }
+
+/* ── Domain bar (list card) ───────────────────────────────────── */
+.lead-domain-bars       { margin: 6px 0 4px; display: flex; flex-direction: column; gap: 3px; }
+.lead-domain-bar-row    { display: flex; align-items: center; gap: 6px; font-size: 10px; }
+.ldb-lbl                { width: 62px; color: #64748b; font-weight: 500; flex-shrink: 0; }
+.ldb-track              { flex: 1; height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.ldb-fill               { height: 100%; border-radius: 3px; transition: width .3s; }
+.ldb-ins                { background: #003087; }
+.ldb-inv                { background: #0891b2; }
+.ldb-ret                { background: #7c3aed; }
+.ldb-pct                { width: 28px; text-align: right; color: #334155; font-weight: 600; font-size: 10px; }
+.ldb-strategy           { font-size: 10px; color: #7c3aed; font-style: italic; margin-top: 2px; }
+
+/* ── Campaign tag (list card) ─────────────────────────────────── */
+.lead-camp-tag          { display: inline-flex; align-items: center; gap: 4px; font-size: 10px;
+                          background: #ede9fe; color: #6d28d9; border-radius: 12px;
+                          padding: 2px 8px; font-weight: 600; margin: 3px 0; }
+.lead-camp-tag i        { font-size: 9px; }
+
+/* ── AI Opener box (detail) ───────────────────────────────────── */
+.ld-opener-box          { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;
+                          padding: 10px 12px; margin-bottom: 10px; }
+.ld-opener-label        { font-size: 10px; font-weight: 700; color: #0369a1; text-transform: uppercase;
+                          letter-spacing: .5px; margin-bottom: 5px; }
+.ld-opener-label i      { margin-right: 4px; }
+.ld-opener-text         { font-size: 12px; color: #1e3a5f; line-height: 1.5; font-style: italic;
+                          margin-bottom: 7px; }
+.ld-opener-copy         { font-size: 10px; background: #0369a1; color: #fff; border: none;
+                          border-radius: 4px; padding: 3px 10px; cursor: pointer; font-weight: 600; }
+.ld-opener-copy:hover   { background: #0284c7; }
+
+/* ── 3-Domain propensity grid (detail) ───────────────────────── */
+.ld-domain-grid         { display: flex; gap: 8px; margin-bottom: 8px; }
+.ld-domain-block        { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0;
+                          border-radius: 8px; padding: 8px 10px; }
+.ld-domain-block-header { display: flex; align-items: center; gap: 5px; font-size: 10px;
+                          font-weight: 700; color: #334155; margin-bottom: 6px; }
+.ld-domain-block-header i { font-size: 11px; }
+.ld-domain-track        { height: 6px; background: #e2e8f0; border-radius: 3px;
+                          overflow: hidden; margin-bottom: 4px; }
+.ld-domain-fill         { height: 100%; border-radius: 3px; }
+.ld-domain-pct          { font-size: 16px; font-weight: 700; color: #1e293b; }
+.ld-domain-strategy     { font-size: 10px; color: #7c3aed; font-style: italic; margin-top: 6px;
+                          padding-top: 6px; border-top: 1px solid #e2e8f0; line-height: 1.4; }
+.ld-domain-strategy i   { margin-right: 4px; }
+
+/* ── Compact PMAIL (detail) ───────────────────────────────────── */
+.ld-pmail-compact       { background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px;
+                          padding: 8px 10px; margin-bottom: 8px; }
+.ld-pmail-compact-row   { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.ld-pmail-compact-label { font-size: 10px; font-weight: 700; color: #64748b;
+                          text-transform: uppercase; letter-spacing: .4px; width: 14px; }
+.ld-pmail-compact-bar   { flex: 1; height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.ld-pmail-compact-score { font-size: 10px; font-weight: 700; color: #334155; width: 28px; text-align: right; }
+.ld-pmail-qual-badge    { display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
+                          font-weight: 700; padding: 3px 10px; border-radius: 12px; margin-top: 4px; }
+.ld-pmail-qual-badge.qual { background: #d1fae5; color: #065f46; }
+.ld-pmail-qual-badge.pend { background: #fef9c3; color: #854d0e; }
+
+/* ── Campaign section (detail) ───────────────────────────────── */
+.ld-camp-box            { background: #faf5ff; border: 1px solid #ddd6fe; border-radius: 8px;
+                          padding: 10px 12px; margin-bottom: 8px; }
+.ld-camp-name           { font-size: 13px; font-weight: 700; color: #5b21b6; margin-bottom: 3px; }
+.ld-camp-status         { font-size: 11px; color: #64748b; margin-bottom: 5px; }
+.ld-camp-responded      { background: #d1fae5; color: #065f46; border-radius: 6px;
+                          padding: 5px 8px; font-size: 11px; }
+.ld-camp-active         { background: #ede9fe; color: #5b21b6; border-radius: 6px;
+                          padding: 5px 8px; font-size: 11px; }
+.ld-camp-note           { font-size: 11px; color: #475569; font-style: italic; margin-top: 4px; }
+
+/* ── Contact log (detail) ────────────────────────────────────── */
+.ld-contact-log         { display: flex; flex-direction: column; gap: 6px; }
+.ld-log-row             { display: flex; gap: 8px; align-items: flex-start; }
+.ld-log-icon            { width: 24px; height: 24px; border-radius: 50%; display: flex;
+                          align-items: center; justify-content: center; flex-shrink: 0;
+                          font-size: 10px; margin-top: 1px; }
+.ld-log-icon.email      { background: #dbeafe; color: #1d4ed8; }
+.ld-log-icon.call       { background: #d1fae5; color: #065f46; }
+.ld-log-icon.pmail      { background: #fef9c3; color: #854d0e; }
+.ld-log-icon.campaign   { background: #ede9fe; color: #6d28d9; }
+.ld-log-body            { flex: 1; }
+.ld-log-top             { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.ld-log-date            { font-size: 10px; color: #94a3b8; }
+.ld-log-outcome         { font-size: 10px; font-weight: 700; }
+.ld-log-outcome.positive { color: #059669; }
+.ld-log-outcome.neutral  { color: #d97706; }
+.ld-log-outcome.pending  { color: #64748b; }
+.ld-log-note            { font-size: 11px; color: #475569; line-height: 1.4; }
+
+/* ── Detail header status badge ──────────────────────────────── */
+.ld-status-badge        { font-size: 11px; font-weight: 700; padding: 3px 10px;
+                          border-radius: 12px; margin-left: 8px; }
+
+/* ── Detail action buttons ───────────────────────────────────── */
+.lead-action-btn.lead-action-incampaign { background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; }
+.lead-action-btn.lead-action-respond    { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.ld-act-purple          { background: #7c3aed !important; color: #fff !important; }
+.ld-act-purple:hover    { background: #6d28d9 !important; }
+
+/* ── Schedule Call Modal ─────────────────────────────────────── */
+.sched-modal            { position: fixed; inset: 0; z-index: 3000; display: flex;
+                          align-items: center; justify-content: center;
+                          background: rgba(0,0,0,.45); }
+.sched-modal-header     { display: flex; align-items: center; justify-content: space-between;
+                          padding: 14px 16px; border-bottom: 1px solid #e2e8f0; }
+.sched-modal-title      { font-size: 15px; font-weight: 700; color: #1e293b; }
+.sched-modal-body       { padding: 14px 16px; overflow-y: auto; max-height: 72vh; }
+.sched-modal-footer     { padding: 12px 16px; border-top: 1px solid #e2e8f0;
+                          display: flex; gap: 8px; justify-content: flex-end; }
+.sched-section-label    { font-size: 10px; font-weight: 700; color: #64748b;
+                          text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.sched-slots            { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.sched-slot             { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+                          cursor: pointer; font-size: 12px; color: #334155;
+                          transition: all .15s; background: #f8fafc; }
+.sched-slot:hover       { border-color: #003087; background: #eff6ff; }
+.sched-slot-active      { border-color: #003087 !important; background: #dbeafe !important;
+                          color: #1e3a5f; font-weight: 600; }
+.sched-slot-custom      { margin-top: 4px; }
+.sched-custom-input     { width: 100%; margin-top: 6px; padding: 7px 10px; border: 1px solid #cbd5e1;
+                          border-radius: 6px; font-size: 12px; box-sizing: border-box; }
+.sched-script           { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+                          padding: 10px 12px; margin-bottom: 14px; }
+.sched-script-line      { font-size: 11px; color: #475569; line-height: 1.6; margin-bottom: 4px; }
+.sched-script-line strong { color: #1e293b; }
+.sched-outcomes         { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.sched-outcome-chip     { padding: 4px 12px; border-radius: 12px; font-size: 11px;
+                          border: 1px solid #e2e8f0; cursor: pointer; background: #f8fafc;
+                          color: #475569; transition: all .15s; }
+.sched-outcome-chip:hover { border-color: #003087; }
+.sched-outcome-active   { background: #003087 !important; color: #fff !important;
+                          border-color: #003087 !important; font-weight: 600; }
+
+/* ── Outreach Modal ──────────────────────────────────────────── */
+.outreach-channels      { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.outreach-channel-chip  { padding: 5px 14px; border-radius: 12px; font-size: 11px; font-weight: 600;
+                          border: 1px solid #e2e8f0; cursor: pointer; background: #f8fafc;
+                          color: #475569; transition: all .15s; }
+.outreach-channel-chip:hover    { border-color: #003087; }
+.outreach-channel-active        { background: #003087 !important; color: #fff !important;
+                                  border-color: #003087 !important; }
+.outreach-draft-area    { width: 100%; min-height: 120px; padding: 10px 12px;
+                          border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px;
+                          line-height: 1.6; box-sizing: border-box; resize: vertical; color: #1e293b; }
+.outreach-draft-hint    { font-size: 10px; color: #94a3b8; margin-top: 4px; }
+.outreach-context-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.outreach-ctx-pill      { font-size: 10px; padding: 2px 8px; border-radius: 10px;
+                          background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;
+                          font-weight: 500; }
+
+/* ── Add to Campaign Modal ───────────────────────────────────── */
+.addcamp-list           { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.addcamp-row            { padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+                          cursor: pointer; transition: all .15s; background: #f8fafc;
+                          display: flex; gap: 10px; align-items: flex-start; }
+.addcamp-row:hover      { border-color: #7c3aed; background: #faf5ff; }
+.addcamp-row-selected   { border-color: #7c3aed !important; background: #faf5ff !important; }
+.addcamp-row-match      { border-left: 3px solid #7c3aed; }
+.addcamp-row-check      { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cbd5e1;
+                          display: flex; align-items: center; justify-content: center;
+                          flex-shrink: 0; margin-top: 2px; font-size: 10px; }
+.addcamp-row-selected .addcamp-row-check { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+.addcamp-row-left       { flex: 1; }
+.addcamp-camp-icon      { width: 28px; height: 28px; border-radius: 6px; background: #ede9fe;
+                          display: flex; align-items: center; justify-content: center;
+                          font-size: 12px; color: #7c3aed; flex-shrink: 0; }
+.addcamp-camp-name      { font-size: 13px; font-weight: 700; color: #1e293b; }
+.addcamp-match-tag      { font-size: 9px; font-weight: 700; background: #7c3aed; color: #fff;
+                          border-radius: 10px; padding: 1px 7px; margin-left: 6px; }
+.addcamp-camp-sub       { font-size: 11px; color: #64748b; margin: 2px 0; }
+.addcamp-camp-stats     { font-size: 10px; color: #94a3b8; }
+.addcamp-lead-summary   { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;
+                          padding: 8px 10px; margin-bottom: 14px; }
+.addcamp-lead-name      { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+.addcamp-lead-sub       { font-size: 11px; color: #475569; }
+
+/* ── Lead History Modal ──────────────────────────────────────── */
+#leadhist-overlay       { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,.45);
+                          display: flex; align-items: center; justify-content: center; }
+.leadhist-summary       { display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+                          margin-bottom: 14px; }
+.leadhist-row           { display: flex; flex-direction: column; gap: 1px; padding: 7px 10px;
+                          background: #f8fafc; border-radius: 6px; }
+.lh-lbl                 { font-size: 10px; color: #94a3b8; font-weight: 600;
+                          text-transform: uppercase; letter-spacing: .4px; }
+
+/* ── Common modal inner container (shared by leads modals) ───── */
+.leads-modal-inner      { background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+                          width: 520px; max-width: 95vw; overflow: hidden; }
+
