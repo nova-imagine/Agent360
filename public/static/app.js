@@ -30,7 +30,7 @@ function navigateTo(page) {
     sales: 'Applications & Proposals',
     products: 'Product Intelligence Hub',
     reports: 'Reports & Analytics',
-    calendar: 'Calendar & Events',
+    calendar: 'Schedule',
     'ai-insights': 'AI Insights',
     claims: 'Claims Management',
     underwriting: 'Underwriting Pipeline',
@@ -59,7 +59,7 @@ function navigateTo(page) {
     sales: 'Home / Sales',
     products: 'Home / Products',
     reports: 'Home / Reports',
-    calendar: 'Home / Calendar',
+    calendar: 'Home / Schedule',
     'ai-insights': 'Home / Insights / AI Insights',
     claims: 'Home / Claims',
     underwriting: 'Home / Sales / Underwriting',
@@ -13553,7 +13553,11 @@ function exportDriftReport(clientCode) {
   showToast('<i class="fas fa-file-export"></i> Portfolio Drift Report exported.');
 }
 
-console.log('AI Schedule Intelligence modules loaded — switchCalAITab, openAnnualReviewBrief, openLifeEventOutreach, openLtcPlanningModal, openDriftRebalance all ready');
+function exportFollowupReport() {
+  showToast('<i class="fas fa-file-export"></i> Follow-up Queue exported.');
+}
+
+console.log('AI Schedule Intelligence modules loaded — switchCalAITab, openAnnualReviewBrief, openLifeEventOutreach, openLtcPlanningModal, exportFollowupReport all ready');
 
 /* ═══════════════════════════════════════════════════════════════
    PHASE 4 — Products Detail Modal · Kanban Move Visual ·

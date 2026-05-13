@@ -458,7 +458,7 @@ function Sidebar() {
           <span class="nav-badge">247</span>
         </a>
         <a class="nav-item" onclick="navigateTo('calendar')" href="#">
-          <i class="fas fa-calendar-alt"></i><span>Calendar</span>
+          <i class="fas fa-calendar-alt"></i><span>Schedule</span>
           <span class="nav-badge alert">3</span>
         </a>
 
@@ -10767,8 +10767,8 @@ function CalendarPage() {
       {/* ── Page Header ── */}
       <div class="cal-page-header">
         <div class="cal-page-header-left">
-          <h2><i class="fas fa-calendar-alt"></i> Calendar &amp; Schedule</h2>
-          <p>AI-prepared meetings · Smart scheduling · Full activity history</p>
+          <h2><i class="fas fa-calendar-alt"></i> Schedule</h2>
+          <p>AI-optimised scheduling · Smart meeting prep · Trigger-based outreach · Full activity history</p>
         </div>
         <div class="cal-page-header-right">
           <button class="btn btn-outline" onclick="switchCalView('week')" id="cal-view-week"><i class="fas fa-bars"></i> Week</button>
@@ -10813,11 +10813,11 @@ function CalendarPage() {
           </div>
         </div>
         <div class="cal-kpi-card">
-          <div class="cal-kpi-icon purple"><i class="fas fa-handshake"></i></div>
+          <div class="cal-kpi-icon purple"><i class="fas fa-user-plus"></i></div>
           <div class="cal-kpi-body">
-            <div class="cal-kpi-val">87%</div>
-            <div class="cal-kpi-lbl">Meeting Prep Score</div>
-            <div class="cal-kpi-delta green">Above target</div>
+            <div class="cal-kpi-val">6</div>
+            <div class="cal-kpi-lbl">Prospect Meetings</div>
+            <div class="cal-kpi-delta green"><i class="fas fa-arrow-up"></i> +2 vs last month</div>
           </div>
         </div>
         <div class="cal-kpi-card">
@@ -10845,9 +10845,9 @@ function CalendarPage() {
         <div class="cal-ai-tabs">
           <button class="cal-ai-tab active" id="tab-ai-insights" onclick="switchCalAITab('insights')"><i class="fas fa-lightbulb"></i> Insights</button>
           <button class="cal-ai-tab" id="tab-ai-annual" onclick="switchCalAITab('annual')"><i class="fas fa-calendar-check"></i> Annual Review</button>
-          <button class="cal-ai-tab" id="tab-ai-life-events" onclick="switchCalAITab('life-events')"><i class="fas fa-heartbeat"></i> Life Events</button>
+          <button class="cal-ai-tab" id="tab-ai-life-events" onclick="switchCalAITab('life-events')"><i class="fas fa-bolt"></i> Client Triggers</button>
           <button class="cal-ai-tab" id="tab-ai-ltc" onclick="switchCalAITab('ltc')"><i class="fas fa-hand-holding-medical"></i> LTC &amp; Medicare</button>
-          <button class="cal-ai-tab" id="tab-ai-drift" onclick="switchCalAITab('drift')"><i class="fas fa-chart-line"></i> Portfolio Drift</button>
+          <button class="cal-ai-tab" id="tab-ai-followup" onclick="switchCalAITab('followup')"><i class="fas fa-tasks"></i> Follow-up Queue</button>
         </div>
 
         {/* ── Tab: Insights (default) ── */}
@@ -11011,18 +11011,19 @@ function CalendarPage() {
           </div>
         </div>
 
-        {/* ── Tab: Life Event Trigger Engine ── */}
+        {/* ── Tab: Client Trigger Engine ── */}
         <div class="cal-ai-tab-panel" id="cal-ai-panel-life-events" style="display:none">
           <div class="cal-ai-feature-header">
-            <div class="cal-ai-feat-title"><i class="fas fa-heartbeat"></i> Life Event Trigger Engine</div>
-            <div class="cal-ai-feat-sub">Real-time detection of life events from 3rd-party data — auto-triggers personalized outreach &amp; product recommendations</div>
+            <div class="cal-ai-feat-title"><i class="fas fa-bolt"></i> Client Trigger Engine</div>
+            <div class="cal-ai-feat-sub">Real-time signal detection from 3rd-party data — auto-triggers personalised outreach &amp; product recommendations on every life or financial change</div>
             <div class="cal-ai-feat-stats">
-              <span class="feat-stat-pill amber"><i class="fas fa-bell"></i> 3 New Events</span>
+              <span class="feat-stat-pill amber"><i class="fas fa-bell"></i> 7 New Triggers</span>
               <span class="feat-stat-pill green"><i class="fas fa-paper-plane"></i> 5 Outreach Sent</span>
-              <span class="feat-stat-pill blue"><i class="fas fa-robot"></i> AI Drafts Ready: 3</span>
+              <span class="feat-stat-pill blue"><i class="fas fa-robot"></i> AI Drafts Ready: 6</span>
             </div>
           </div>
           <div class="cal-ai-le-list">
+
             <div class="cal-le-row le-new">
               <div class="le-event-icon marriage"><i class="fas fa-ring"></i></div>
               <div class="le-client-info">
@@ -11040,6 +11041,7 @@ function CalendarPage() {
                 <button class="cai-btn" onclick="openLifeEventOutreach('PN', 'marriage')">Draft Outreach <i class="fas fa-robot"></i></button>
               </div>
             </div>
+
             <div class="cal-le-row le-new">
               <div class="le-event-icon baby"><i class="fas fa-baby"></i></div>
               <div class="le-client-info">
@@ -11057,6 +11059,64 @@ function CalendarPage() {
                 <button class="cai-btn" onclick="openLifeEventOutreach('DT', 'newchild')">Draft Outreach <i class="fas fa-robot"></i></button>
               </div>
             </div>
+
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon job-change"><i class="fas fa-briefcase"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Kevin Park</div>
+                <div class="le-event-type">Job Change / New Employer Detected</div>
+                <div class="le-event-source">Source: LinkedIn Signal · Detected: 3 days ago</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">401k Rollover</span>
+                <span class="le-rec-tag">Group Benefits Gap</span>
+                <span class="le-rec-tag">DI Review</span>
+                <span class="le-rec-tag">Executive Benefits</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge new">New</span>
+                <button class="cai-btn" onclick="openLifeEventOutreach('KP', 'jobchange')">Draft Outreach <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon divorce"><i class="fas fa-heart-broken"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Sandra Williams</div>
+                <div class="le-event-type">Divorce / Legal Separation Filed</div>
+                <div class="le-event-source">Source: Court Records · Detected: 1 day ago</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Beneficiary Change</span>
+                <span class="le-rec-tag">Policy Ownership Review</span>
+                <span class="le-rec-tag">Individual Income Plan</span>
+                <span class="le-rec-tag">QDRO Review</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge new urgent">Urgent</span>
+                <button class="cai-btn" onclick="openLifeEventOutreach('SW', 'divorce')">Draft Outreach <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon business-sale"><i class="fas fa-building"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Robert Chen</div>
+                <div class="le-event-type">Business Sale / Exit Event Detected</div>
+                <div class="le-event-source">Source: Business Registry · M&amp;A Signal · Detected: 6 days ago</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Liquidity Event Planning</span>
+                <span class="le-rec-tag">Estate Tax Strategy</span>
+                <span class="le-rec-tag">Annuity / Income Stream</span>
+                <span class="le-rec-tag">Wealth Transfer</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge new">New</span>
+                <button class="cai-btn" onclick="openLifeEventOutreach('RC', 'bizSale')">Draft Outreach <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+
             <div class="cal-le-row le-new">
               <div class="le-event-icon retirement"><i class="fas fa-umbrella-beach"></i></div>
               <div class="le-client-info">
@@ -11075,6 +11135,26 @@ function CalendarPage() {
                 <button class="cai-btn" onclick="openLifeEventOutreach('MG', 'retirement')">Draft Outreach <i class="fas fa-robot"></i></button>
               </div>
             </div>
+
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon death-spouse"><i class="fas fa-dove"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Linda Morrison</div>
+                <div class="le-event-type">Death of Spouse / Survivor Trigger</div>
+                <div class="le-event-source">Source: Vital Records · Detected: 8 days ago</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Survivor Income Plan</span>
+                <span class="le-rec-tag">Beneficiary Review</span>
+                <span class="le-rec-tag">Estate Settlement</span>
+                <span class="le-rec-tag">Grief-Sensitive Outreach</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge new urgent">Sensitive</span>
+                <button class="cai-btn" onclick="openLifeEventOutreach('LM', 'deathSpouse')">Draft Outreach <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+
             <div class="cal-le-row le-sent">
               <div class="le-event-icon home"><i class="fas fa-home"></i></div>
               <div class="le-client-info">
@@ -11091,6 +11171,7 @@ function CalendarPage() {
                 <button class="cai-btn secondary" onclick="viewLifeEventLog('JW', 'home')">View Log <i class="fas fa-eye"></i></button>
               </div>
             </div>
+
           </div>
           <div class="cal-ar-footer">
             <button class="cal-ai-action-btn" onclick="scanAllLifeEvents()"><i class="fas fa-satellite-dish"></i> Scan All Clients Now</button>
@@ -11098,231 +11179,204 @@ function CalendarPage() {
           </div>
         </div>
 
-        {/* ── Tab: LTC & Medicare Planning ── */}
+        {/* ── Tab: LTC & Medicare Planning (trigger-only) ── */}
         <div class="cal-ai-tab-panel" id="cal-ai-panel-ltc" style="display:none">
           <div class="cal-ai-feature-header">
-            <div class="cal-ai-feat-title"><i class="fas fa-hand-holding-medical"></i> LTC &amp; Medicare Planning Center</div>
-            <div class="cal-ai-feat-sub">AI identifies clients approaching Medicare eligibility, LTC need windows, and hybrid product opportunities</div>
+            <div class="cal-ai-feat-title"><i class="fas fa-hand-holding-medical"></i> LTC &amp; Medicare Triggers</div>
+            <div class="cal-ai-feat-sub">Clients approaching Medicare eligibility or with an LTC coverage gap — trigger-based outreach queue</div>
             <div class="cal-ai-feat-stats">
               <span class="feat-stat-pill red"><i class="fas fa-exclamation-circle"></i> 2 Medicare Urgent</span>
-              <span class="feat-stat-pill amber"><i class="fas fa-shield-alt"></i> 4 LTC Candidates</span>
-              <span class="feat-stat-pill blue"><i class="fas fa-exchange-alt"></i> 2 Hybrid Opportunities</span>
+              <span class="feat-stat-pill amber"><i class="fas fa-shield-alt"></i> 4 LTC Gaps</span>
+              <span class="feat-stat-pill blue"><i class="fas fa-robot"></i> AI Drafts Ready: 4</span>
             </div>
           </div>
-          <div class="cal-ai-ltc-grid">
-            <div class="cal-ltc-card urgent">
-              <div class="ltc-card-header">
-                <div class="ltc-avatar">MG</div>
-                <div class="ltc-client-info">
-                  <div class="ltc-client-name">Maria Gonzalez</div>
-                  <div class="ltc-client-age">Age 61 · Medicare eligible in 4 months</div>
-                </div>
-                <span class="ltc-urgency-badge red">Action Required</span>
+          <div class="cal-ai-le-list">
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-shield-alt"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Maria Gonzalez · Age 61</div>
+                <div class="le-event-type">Medicare Eligible in 4 months — Part A &amp; B enrollment window opens Jul 2026</div>
+                <div class="le-event-source">Source: DOB on File · LTC gap: No hybrid policy</div>
               </div>
-              <div class="ltc-timeline">
-                <div class="ltc-timeline-item done"><i class="fas fa-check-circle"></i> Initial Medicare consultation scheduled</div>
-                <div class="ltc-timeline-item active"><i class="fas fa-circle"></i> Part A &amp; B enrollment window opens Jul 2026</div>
-                <div class="ltc-timeline-item upcoming"><i class="fas fa-clock"></i> Medigap / Part D comparison — due May 15</div>
-                <div class="ltc-timeline-item upcoming"><i class="fas fa-clock"></i> LTC hybrid product review — recommended age 62</div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Medicare Supplement G</span>
+                <span class="le-rec-tag">Part D Rx</span>
+                <span class="le-rec-tag">Hybrid LTC/Life</span>
               </div>
-              <div class="ltc-products">
-                <span class="ltc-product-tag">Medicare Supplement Plan G</span>
-                <span class="ltc-product-tag">Part D Rx</span>
-                <span class="ltc-product-tag">Hybrid LTC/Life</span>
-              </div>
-              <div class="ltc-card-actions">
-                <button class="cai-btn" onclick="openLtcPlanningModal('MG')">Full Plan <i class="fas fa-arrow-right"></i></button>
-                <button class="cai-btn secondary" onclick="openMeetingBrief('LTC-MG')">Brief <i class="fas fa-file-alt"></i></button>
+              <div class="le-actions">
+                <span class="le-badge new urgent">Urgent</span>
+                <button class="cai-btn" onclick="openLtcPlanningModal('MG')">Draft Outreach <i class="fas fa-robot"></i></button>
               </div>
             </div>
-            <div class="cal-ltc-card high">
-              <div class="ltc-card-header">
-                <div class="ltc-avatar">SW</div>
-                <div class="ltc-client-info">
-                  <div class="ltc-client-name">Sandra Williams</div>
-                  <div class="ltc-client-age">Age 52 · LTC planning window open now</div>
-                </div>
-                <span class="ltc-urgency-badge amber">High Value</span>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-shield-alt"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Sandra Williams · Age 52</div>
+                <div class="le-event-type">LTC Planning Window Open — renewal meeting Apr 28 is ideal window</div>
+                <div class="le-event-source">Source: Policy data · WL includes LTC rider option</div>
               </div>
-              <div class="ltc-timeline">
-                <div class="ltc-timeline-item done"><i class="fas fa-check-circle"></i> WL policy includes LTC rider option</div>
-                <div class="ltc-timeline-item active"><i class="fas fa-circle"></i> Hybrid LTC product analysis ready</div>
-                <div class="ltc-timeline-item upcoming"><i class="fas fa-clock"></i> Renewal meeting Apr 28 — ideal LTC conversation</div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">LTC Rider Add-on</span>
+                <span class="le-rec-tag">Hybrid Life/LTC</span>
+                <span class="le-rec-tag">Annuity w/ LTC</span>
               </div>
-              <div class="ltc-products">
-                <span class="ltc-product-tag">LTC Rider Add-on</span>
-                <span class="ltc-product-tag">Hybrid Life/LTC</span>
-                <span class="ltc-product-tag">Annuity w/ LTC</span>
-              </div>
-              <div class="ltc-card-actions">
-                <button class="cai-btn" onclick="openLtcPlanningModal('SW')">Full Plan <i class="fas fa-arrow-right"></i></button>
-                <button class="cai-btn secondary" onclick="openMeetingBrief('LTC-SW')">Brief <i class="fas fa-file-alt"></i></button>
+              <div class="le-actions">
+                <span class="le-badge new">New</span>
+                <button class="cai-btn" onclick="openLtcPlanningModal('SW')">Draft Outreach <i class="fas fa-robot"></i></button>
               </div>
             </div>
-            <div class="cal-ltc-card normal">
-              <div class="ltc-card-header">
-                <div class="ltc-avatar">LM</div>
-                <div class="ltc-client-info">
-                  <div class="ltc-client-name">Linda Morrison</div>
-                  <div class="ltc-client-age">Age 58 · LTC gap in current portfolio</div>
-                </div>
-                <span class="ltc-urgency-badge blue">Opportunity</span>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-shield-alt"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Linda Morrison · Age 58</div>
+                <div class="le-event-type">LTC Gap Detected — $3,200/mo exposure, no LTC policy on file</div>
+                <div class="le-event-source">Source: AI Portfolio Scan · Annual review Apr 15</div>
               </div>
-              <div class="ltc-timeline">
-                <div class="ltc-timeline-item done"><i class="fas fa-check-circle"></i> WL $2M — no LTC coverage</div>
-                <div class="ltc-timeline-item active"><i class="fas fa-circle"></i> AI gap analysis complete — $3,200/mo LTC exposure</div>
-                <div class="ltc-timeline-item upcoming"><i class="fas fa-clock"></i> Annual review Apr 15 — include LTC in agenda</div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Standalone LTC Policy</span>
+                <span class="le-rec-tag">Asset-Based LTC</span>
               </div>
-              <div class="ltc-products">
-                <span class="ltc-product-tag">Standalone LTC Policy</span>
-                <span class="ltc-product-tag">Asset-Based LTC</span>
+              <div class="le-actions">
+                <span class="le-badge upcoming">Apr 15</span>
+                <button class="cai-btn" onclick="openLtcPlanningModal('LM')">Draft Outreach <i class="fas fa-robot"></i></button>
               </div>
-              <div class="ltc-card-actions">
-                <button class="cai-btn" onclick="openLtcPlanningModal('LM')">Full Plan <i class="fas fa-arrow-right"></i></button>
-                <button class="cai-btn secondary" onclick="openMeetingBrief('LTC-LM')">Brief <i class="fas fa-file-alt"></i></button>
+            </div>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-shield-alt"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">James Whitfield · Age 52</div>
+                <div class="le-event-type">LTC Rider Expiring — current rider doesn't cover facility care after age 80</div>
+                <div class="le-event-source">Source: Policy P-100293 · LTC rider review recommended</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">LTC Rider Upgrade</span>
+                <span class="le-rec-tag">Hybrid Life/LTC</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge upcoming">Upcoming</span>
+                <button class="cai-btn" onclick="openLtcPlanningModal('JW')">Draft Outreach <i class="fas fa-robot"></i></button>
               </div>
             </div>
           </div>
           <div class="cal-ar-footer">
             <button class="cal-ai-action-btn" onclick="runLtcScan()"><i class="fas fa-search-plus"></i> Scan All Clients for LTC Gaps</button>
-            <button class="cal-ai-action-btn secondary" onclick="exportLtcReport()"><i class="fas fa-file-export"></i> Export LTC Report</button>
+            <button class="cal-ai-action-btn secondary" onclick="exportLtcReport()"><i class="fas fa-file-export"></i> Export Report</button>
           </div>
         </div>
 
-        {/* ── Tab: Portfolio Drift Monitor ── */}
-        <div class="cal-ai-tab-panel" id="cal-ai-panel-drift" style="display:none">
+        {/* ── Tab: Follow-up Queue ── */}
+        <div class="cal-ai-tab-panel" id="cal-ai-panel-followup" style="display:none">
           <div class="cal-ai-feature-header">
-            <div class="cal-ai-feat-title"><i class="fas fa-chart-line"></i> Portfolio Drift Monitor</div>
-            <div class="cal-ai-feat-sub">Real-time allocation drift detection · AI rebalancing proposals · Automated client alerts</div>
+            <div class="cal-ai-feat-title"><i class="fas fa-tasks"></i> Follow-up Queue</div>
+            <div class="cal-ai-feat-sub">AI-ranked list of pending follow-ups across all clients · Sorted by urgency, value, and days overdue</div>
             <div class="cal-ai-feat-stats">
-              <span class="feat-stat-pill red"><i class="fas fa-exclamation-triangle"></i> 2 Critical Drift</span>
-              <span class="feat-stat-pill amber"><i class="fas fa-exclamation-circle"></i> 3 Moderate Drift</span>
-              <span class="feat-stat-pill green"><i class="fas fa-check-circle"></i> 5 On Target</span>
-              <span class="feat-stat-pill blue"><i class="fas fa-dollar-sign"></i> Total AUM: $4.2M</span>
+              <span class="feat-stat-pill red"><i class="fas fa-exclamation-circle"></i> 3 Overdue</span>
+              <span class="feat-stat-pill amber"><i class="fas fa-clock"></i> 4 Due Today</span>
+              <span class="feat-stat-pill blue"><i class="fas fa-calendar-check"></i> 6 This Week</span>
+              <span class="feat-stat-pill green"><i class="fas fa-dollar-sign"></i> $68K Pipeline</span>
             </div>
           </div>
-          <div class="cal-ai-drift-list">
-            <div class="cal-drift-row drift-critical">
-              <div class="drift-client-col">
-                <div class="cal-ar-avatar">RC</div>
-                <div>
-                  <div class="drift-client-name">Robert Chen</div>
-                  <div class="drift-aum">AUM: $890K · VUL + Investment</div>
-                </div>
+          <div class="cal-ai-le-list">
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#fee2e2;color:#dc2626"><i class="fas fa-phone"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Kevin Park <span style="font-size:0.72rem;color:#dc2626;font-weight:600;margin-left:6px">3 days overdue</span></div>
+                <div class="le-event-type">Application Follow-up — Whole Life $500K pending 14 days</div>
+                <div class="le-event-source">Last contact: Apr 7 · Trigger: Application stale</div>
               </div>
-              <div class="drift-bars-col">
-                <div class="drift-bar-row">
-                  <span class="drift-asset-lbl">Equities</span>
-                  <div class="drift-bar-wrap">
-                    <div class="drift-bar-target" style="width:60%"></div>
-                    <div class="drift-bar-actual drift-over" style="width:73%"></div>
-                  </div>
-                  <span class="drift-pct red">+13% <i class="fas fa-arrow-up"></i></span>
-                </div>
-                <div class="drift-bar-row">
-                  <span class="drift-asset-lbl">Fixed Inc.</span>
-                  <div class="drift-bar-wrap">
-                    <div class="drift-bar-target" style="width:30%"></div>
-                    <div class="drift-bar-actual drift-under" style="width:19%"></div>
-                  </div>
-                  <span class="drift-pct amber">-11% <i class="fas fa-arrow-down"></i></span>
-                </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Call Today</span>
+                <span class="le-rec-tag">Application Status</span>
               </div>
-              <div class="drift-action-col">
-                <span class="drift-badge critical">8% Drift</span>
-                <button class="cai-btn" onclick="openDriftRebalance('RC')">Rebalance <i class="fas fa-balance-scale"></i></button>
+              <div class="le-actions">
+                <span class="le-badge new urgent">Overdue</span>
+                <button class="cai-btn" onclick="openMeetingBrief('MTG-001')">Brief <i class="fas fa-arrow-right"></i></button>
               </div>
             </div>
-            <div class="cal-drift-row drift-critical">
-              <div class="drift-client-col">
-                <div class="cal-ar-avatar">MG</div>
-                <div>
-                  <div class="drift-client-name">Maria Gonzalez</div>
-                  <div class="drift-aum">AUM: $340K · Annuity + IRA</div>
-                </div>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#fee2e2;color:#dc2626"><i class="fas fa-file-alt"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Sandra Williams <span style="font-size:0.72rem;color:#dc2626;font-weight:600;margin-left:6px">1 day overdue</span></div>
+                <div class="le-event-type">Divorce trigger — beneficiary change + policy ownership review needed</div>
+                <div class="le-event-source">Last contact: Apr 6 · Trigger: Legal filing detected</div>
               </div>
-              <div class="drift-bars-col">
-                <div class="drift-bar-row">
-                  <span class="drift-asset-lbl">Growth</span>
-                  <div class="drift-bar-wrap">
-                    <div class="drift-bar-target" style="width:40%"></div>
-                    <div class="drift-bar-actual drift-over" style="width:55%"></div>
-                  </div>
-                  <span class="drift-pct red">+15% <i class="fas fa-arrow-up"></i></span>
-                </div>
-                <div class="drift-bar-row">
-                  <span class="drift-asset-lbl">Income</span>
-                  <div class="drift-bar-wrap">
-                    <div class="drift-bar-target" style="width:50%"></div>
-                    <div class="drift-bar-actual drift-under" style="width:36%"></div>
-                  </div>
-                  <span class="drift-pct amber">-14% <i class="fas fa-arrow-down"></i></span>
-                </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Beneficiary Change</span>
+                <span class="le-rec-tag">Policy Review</span>
               </div>
-              <div class="drift-action-col">
-                <span class="drift-badge critical">7% Drift</span>
-                <button class="cai-btn" onclick="openDriftRebalance('MG')">Rebalance <i class="fas fa-balance-scale"></i></button>
+              <div class="le-actions">
+                <span class="le-badge new urgent">Overdue</span>
+                <button class="cai-btn" onclick="openLifeEventOutreach('SW', 'divorce')">Draft Outreach <i class="fas fa-robot"></i></button>
               </div>
             </div>
-            <div class="cal-drift-row drift-moderate">
-              <div class="drift-client-col">
-                <div class="cal-ar-avatar">LM</div>
-                <div>
-                  <div class="drift-client-name">Linda Morrison</div>
-                  <div class="drift-aum">AUM: $500K · UMA + WL</div>
-                </div>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-video"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Robert Chen <span style="font-size:0.72rem;color:#d97706;font-weight:600;margin-left:6px">Due today</span></div>
+                <div class="le-event-type">Claim update — CLM-2026-0041 documentation chase (Susan Chen)</div>
+                <div class="le-event-source">Last contact: Apr 10 · Trigger: Claim docs pending</div>
               </div>
-              <div class="drift-bars-col">
-                <div class="drift-bar-row">
-                  <span class="drift-asset-lbl">Equities</span>
-                  <div class="drift-bar-wrap">
-                    <div class="drift-bar-target" style="width:55%"></div>
-                    <div class="drift-bar-actual drift-over" style="width:60%"></div>
-                  </div>
-                  <span class="drift-pct amber">+5% <i class="fas fa-arrow-up"></i></span>
-                </div>
-                <div class="drift-bar-row">
-                  <span class="drift-asset-lbl">Alts</span>
-                  <div class="drift-bar-wrap">
-                    <div class="drift-bar-target" style="width:15%"></div>
-                    <div class="drift-bar-actual drift-under" style="width:10%"></div>
-                  </div>
-                  <span class="drift-pct amber">-5% <i class="fas fa-arrow-down"></i></span>
-                </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Compassionate Call</span>
+                <span class="le-rec-tag">Doc Upload</span>
               </div>
-              <div class="drift-action-col">
-                <span class="drift-badge moderate">4% Drift</span>
-                <button class="cai-btn secondary" onclick="openDriftRebalance('LM')">Review <i class="fas fa-eye"></i></button>
+              <div class="le-actions">
+                <span class="le-badge new">Today</span>
+                <button class="cai-btn" onclick="openMeetingBrief('MTG-002')">Brief <i class="fas fa-arrow-right"></i></button>
               </div>
             </div>
-            <div class="cal-drift-row drift-ok">
-              <div class="drift-client-col">
-                <div class="cal-ar-avatar">JW</div>
-                <div>
-                  <div class="drift-client-name">James Whitfield</div>
-                  <div class="drift-aum">AUM: $430K · Annuity + IRA</div>
-                </div>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-envelope"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Patricia Nguyen <span style="font-size:0.72rem;color:#d97706;font-weight:600;margin-left:6px">Due today</span></div>
+                <div class="le-event-type">UL policy under-funded — lapse risk in ~68 days. Premium catch-up needed</div>
+                <div class="le-event-source">Last contact: Apr 5 · Trigger: Policy health alert</div>
               </div>
-              <div class="drift-bars-col">
-                <div class="drift-bar-row">
-                  <span class="drift-asset-lbl">Balanced</span>
-                  <div class="drift-bar-wrap">
-                    <div class="drift-bar-target" style="width:50%"></div>
-                    <div class="drift-bar-actual drift-ok" style="width:51%"></div>
-                  </div>
-                  <span class="drift-pct green">+1% <i class="fas fa-check"></i></span>
-                </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Premium Catch-up</span>
+                <span class="le-rec-tag">Lapse Prevention</span>
               </div>
-              <div class="drift-action-col">
-                <span class="drift-badge ok">On Target</span>
-                <button class="cai-btn secondary" onclick="openDriftRebalance('JW')">View <i class="fas fa-eye"></i></button>
+              <div class="le-actions">
+                <span class="le-badge new">Today</span>
+                <button class="cai-btn" onclick="openMeetingBrief('MTG-005')">Brief <i class="fas fa-arrow-right"></i></button>
+              </div>
+            </div>
+            <div class="cal-le-row le-new">
+              <div class="le-event-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-calendar-check"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">James Whitfield <span style="font-size:0.72rem;color:#2563eb;font-weight:600;margin-left:6px">This week</span></div>
+                <div class="le-event-type">Annual review overdue 400 days — schedule before end of month</div>
+                <div class="le-event-source">Last contact: Mar 2025 · AI priority: 88/100</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">Schedule Review</span>
+                <span class="le-rec-tag">Annuity Illustration</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge upcoming">This Week</span>
+                <button class="cai-btn" onclick="openAnnualReviewBrief('JW')">AI Brief <i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+            <div class="cal-le-row le-sent">
+              <div class="le-event-icon" style="background:#f0fdf4;color:#16a34a"><i class="fas fa-handshake"></i></div>
+              <div class="le-client-info">
+                <div class="le-client-name">Linda Morrison</div>
+                <div class="le-event-type">Annual review Apr 15 — AI brief prepared, meeting confirmed</div>
+                <div class="le-event-source">Last contact: Apr 9 · Status: On track</div>
+              </div>
+              <div class="le-recommendations">
+                <span class="le-rec-tag">UMA Proposal</span>
+                <span class="le-rec-tag">Estate Agenda</span>
+              </div>
+              <div class="le-actions">
+                <span class="le-badge sent">Confirmed</span>
+                <button class="cai-btn secondary" onclick="openMeetingBrief('MTG-004')">Brief <i class="fas fa-eye"></i></button>
               </div>
             </div>
           </div>
           <div class="cal-ar-footer">
-            <button class="cal-ai-action-btn" onclick="runDriftScanAll()"><i class="fas fa-sync-alt"></i> Scan All Portfolios</button>
-            <button class="cal-ai-action-btn secondary" onclick="autoRebalanceAll()"><i class="fas fa-magic"></i> AI Auto-Rebalance Proposals</button>
-            <button class="cal-ai-action-btn secondary" onclick="exportDriftReport()"><i class="fas fa-file-export"></i> Export Report</button>
+            <button class="cal-ai-action-btn" onclick="scheduleAllAnnualReviews()"><i class="fas fa-magic"></i> AI Schedule All Overdue</button>
+            <button class="cal-ai-action-btn secondary" onclick="exportFollowupReport()"><i class="fas fa-file-export"></i> Export Queue</button>
           </div>
         </div>
 

@@ -20593,6 +20593,12 @@ kbd {
 .le-event-icon.baby        { background: #eff6ff; color: #1e40af; }
 .le-event-icon.retirement  { background: #ecfdf5; color: #065f46; }
 .le-event-icon.home        { background: #fffbeb; color: #92400e; }
+.le-event-icon.job-change  { background: #f0f9ff; color: #0369a1; }
+.le-event-icon.divorce     { background: #fff1f2; color: #be123c; }
+.le-event-icon.business-sale { background: #faf5ff; color: #7c3aed; }
+.le-event-icon.death-spouse  { background: #f8fafc; color: #475569; }
+/* Follow-up Queue urgency badge */
+.le-badge.new.urgent { background: #fee2e2; color: #dc2626; }
 .le-client-name { font-size: 0.84rem; font-weight: 700; color: #1e293b; }
 .le-event-type  { font-size: 0.77rem; color: #334155; margin-top: 2px; font-weight: 600; }
 .le-event-source{ font-size: 0.68rem; color: #94a3b8; margin-top: 2px; }
