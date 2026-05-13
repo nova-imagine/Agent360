@@ -19,15 +19,15 @@ function navigateTo(page) {
   // Update page title & breadcrumb
   const titles = {
     dashboard: 'Dashboard',
-    clients: 'Client Management',
+    clients: 'Client 360',
     prospects: 'Leads Pipeline',
     policies: 'Policy Management',
     'ai-agents': 'AI Agent Hub',
     campaigns: 'Campaigns',
-    upsell: 'Upsell Track',
+    upsell: 'Growth Track',
     alerts: 'Policy Alerts',
-    'pipeline-view': 'Client Journey Pipeline',
-    sales: 'Sales Pipeline',
+    'pipeline-view': 'Sales Pipeline',
+    sales: 'Applications & Proposals',
     products: 'Product Intelligence Hub',
     reports: 'Reports & Analytics',
     calendar: 'Calendar & Events',
@@ -36,7 +36,7 @@ function navigateTo(page) {
     underwriting: 'Underwriting Pipeline',
     settings: 'Settings',
     help: 'Help & Support',
-    fna: 'FNA Discovery Center',
+    fna: 'Needs Analysis',
     delivery: 'Policy Delivery',
     leads: 'Leads — Pre-Qualification',
     'inv-accounts': 'Investment Accounts'
@@ -44,14 +44,14 @@ function navigateTo(page) {
 
   const breadcrumbs = {
     dashboard: 'Home / Dashboard',
-    clients: 'Home / Clients',
+    clients: 'Home / Client 360',
     prospects: 'Home / Marketing / Prospects',
     policies: 'Home / Policies',
     'ai-agents': 'Home / AI Agents',
     campaigns: 'Home / Marketing / Campaigns',
-    upsell: 'Home / Sales / Upsell Track',
+    upsell: 'Home / Sales / Growth Track',
     alerts: 'Home / Service / Policy Alerts',
-    'pipeline-view': 'Home / Sales / Journey Pipeline',
+    'pipeline-view': 'Home / Sales / Sales Pipeline',
     sales: 'Home / Sales',
     products: 'Home / Products',
     reports: 'Home / Reports',
@@ -61,10 +61,10 @@ function navigateTo(page) {
     underwriting: 'Home / Sales / Underwriting',
     settings: 'Home / Settings',
     help: 'Home / Help & Support',
-    fna: 'Home / Sales / FNA Discovery',
-    delivery: 'Home / Onboarding / Policy Delivery',
+    fna: 'Home / Sales / Needs Analysis',
+    delivery: 'Home / Insurance / Policy Delivery',
     leads: 'Home / Marketing / Leads',
-    'inv-accounts': 'Home / Service / Investment Accounts'
+    'inv-accounts': 'Home / Investments / Investment Accounts'
   };
 
   const titleEl = document.getElementById('page-title');
