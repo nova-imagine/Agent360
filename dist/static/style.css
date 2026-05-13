@@ -34592,3 +34592,424 @@ kbd {
 .leads-modal-inner      { background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.2);
                           width: 520px; max-width: 95vw; overflow: hidden; }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   LM MODAL SYSTEM — Schedule Call / Send Outreach / Lead History
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Base modal container ─────────────────────────────────────── */
+.lm-modal {
+  background: #fff;
+  border-radius: 14px;
+  width: 520px;
+  max-width: 94vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(15,23,42,.22), 0 4px 16px rgba(15,23,42,.1);
+}
+.lm-modal-hist {
+  width: 480px;
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.lm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+.lm-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lm-header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.lm-icon-blue  { background: #dbeafe; color: #1d4ed8; }
+.lm-icon-teal  { background: #ccfbf1; color: #0d9488; }
+.lm-icon-navy  { background: #dbeafe; color: #003087; }
+.lm-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+.lm-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.lm-close {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: #f8fafc;
+  border-radius: 7px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+.lm-close:hover { background: #fee2e2; color: #dc2626; }
+
+/* ── Body ─────────────────────────────────────────────────────── */
+.lm-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ── Section label ────────────────────────────────────────────── */
+.lm-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Time slots (Schedule Call) ───────────────────────────────── */
+.lm-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.lm-slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  cursor: pointer;
+  background: #fafafa;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+  user-select: none;
+}
+.lm-slot:hover {
+  border-color: #93c5fd;
+  background: #f0f9ff;
+}
+.lm-slot-active {
+  border-color: #003087 !important;
+  background: #eff6ff !important;
+  box-shadow: 0 0 0 3px rgba(0,48,135,.08);
+}
+.lm-slot-icon {
+  font-size: 12px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+.lm-slot-active .lm-slot-icon { color: #003087; }
+.lm-slot-day {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  flex: 1;
+}
+.lm-slot-time {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+.lm-slot-active .lm-slot-day,
+.lm-slot-active .lm-slot-time { color: #003087; }
+.lm-slot-custom .lm-slot-day { color: #64748b; font-style: italic; font-weight: 500; }
+
+/* ── Call script box ──────────────────────────────────────────── */
+.lm-script-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 12px 14px;
+  margin-bottom: 4px;
+}
+.lm-script-line {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.65;
+  padding: 1px 0;
+}
+
+/* ── Outcome chips (shared: schedule + outreach channel) ──────── */
+.lm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+.lm-chip {
+  padding: 5px 13px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #475569;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+}
+.lm-chip:hover { border-color: #94a3b8; color: #1e293b; }
+.lm-chip-active {
+  background: #003087 !important;
+  border-color: #003087 !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* ── Text inputs ──────────────────────────────────────────────── */
+.lm-text-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #1e293b;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color .15s;
+}
+.lm-text-input:focus { border-color: #93c5fd; }
+
+/* ── Channel recommendation bar (Outreach) ────────────────────── */
+.lm-channel-rec {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.lm-channel-rec strong { color: #0f172a; }
+.lm-channel-rec-src { font-weight: 400; text-transform: none; letter-spacing: 0; color: #94a3b8; }
+
+/* ── Channel chips row ────────────────────────────────────────── */
+.lm-ch-row {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.lm-ch-chip {
+  padding: 5px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+}
+.lm-ch-chip:hover { border-color: #94a3b8; }
+.lm-ch-active {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #fff !important;
+}
+
+/* ── Draft textarea ───────────────────────────────────────────── */
+.lm-draft-area {
+  width: 100%;
+  min-height: 110px;
+  padding: 10px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  font-size: 12px;
+  color: #1e293b;
+  line-height: 1.65;
+  box-sizing: border-box;
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s;
+  font-family: inherit;
+}
+.lm-draft-area:focus { border-color: #93c5fd; }
+.lm-draft-hint {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 5px;
+  margin-bottom: 4px;
+  font-style: italic;
+}
+
+/* ── Context pills (Outreach) ─────────────────────────────────── */
+.lm-ctx-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.lm-ctx-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.lm-ctx-pill i { font-size: 9px; }
+
+/* ── Lead History info grid ───────────────────────────────────── */
+.lh-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.lh-info-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 11px;
+}
+.lh-info-wide { grid-column: span 2; }
+.lh-info-full { grid-column: 1 / -1; }
+.lh-info-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 4px;
+}
+.lh-info-val {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+}
+.lh-prospect-link {
+  color: #003087;
+  font-weight: 700;
+  text-decoration: none;
+}
+.lh-prospect-link:hover { text-decoration: underline; }
+
+/* ── Contact timeline (Lead History) ─────────────────────────── */
+.lh-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lh-timeline-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.lh-tl-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.lh-tl-body { flex: 1; }
+.lh-tl-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.lh-tl-date {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+.lh-tl-outcome {
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+.lh-tl-outcome.positive { background: #d1fae5; color: #065f46; }
+.lh-tl-outcome.neutral  { background: #fef9c3; color: #854d0e; }
+.lh-tl-outcome.pending  { background: #f1f5f9; color: #64748b; }
+.lh-tl-note {
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.45;
+}
+.lh-empty {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 16px 0;
+  font-style: italic;
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.lm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  padding: 13px 18px;
+  border-top: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+.lm-btn-cancel {
+  padding: 7px 18px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+.lm-btn-cancel:hover { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
+.lm-btn-confirm {
+  padding: 7px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #059669;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .15s, transform .1s;
+}
+.lm-btn-confirm:hover  { background: #047857; }
+.lm-btn-confirm:active { transform: scale(.98); }
+.lm-btn-teal  { background: #0d9488 !important; }
+.lm-btn-teal:hover { background: #0f766e !important; }
+

@@ -25653,72 +25653,75 @@ function openScheduleCallModal(leadId) {
   var pp   = propensityProfiles[leadId];
   if (!lead) return;
 
-  // Generate 3 AI-suggested slots (based on today + patterns)
-  var today = new Date(2026, 3, 11); // Apr 11 2026 (sandbox date)
-  var slots = [];
-  var slotDays = [1, 2, 4]; // tomorrow, day after, skip weekend
+  var today = new Date(2026, 3, 11);
+  var slotDays = [1, 2, 4];
   var slotTimes = ['9:00 AM', '11:00 AM', '2:00 PM'];
   var dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  slotDays.forEach(function(d, i) {
+  var slots = slotDays.map(function(d, i) {
     var dt = new Date(today); dt.setDate(today.getDate() + d);
-    slots.push({ label: dayNames[dt.getDay()] + ' ' + monthNames[dt.getMonth()] + ' ' + dt.getDate(), time: slotTimes[i] });
+    return { label: dayNames[dt.getDay()] + ' ' + monthNames[dt.getMonth()] + ' ' + dt.getDate(), time: slotTimes[i] };
   });
 
-  // Call script based on propensity
   var scriptLines = [
     'Hi ' + lead.name.split(' ')[0] + ', this is Sridhar from New York Life.',
     'I\'m reaching out because ' + (lead.lifeEventTrigger === 'Referral' ? 'one of my clients mentioned you' : lead.lifeEventTrigger.toLowerCase() + ' caught my attention') + '.',
     'I help people in your situation with ' + pp.topProducts + '.',
-    'Do you have 15 minutes ' + slots[0].label + ' at ' + slots[0].time + '? No commitment — just a conversation.'
+    'Do you have 15 minutes ' + slots[0].label + ' at ' + slots[0].time + '? No commitment \u2014 just a conversation.'
   ];
 
   var overlay = document.createElement('div');
-  overlay.id   = 'schedcall-overlay';
+  overlay.id = 'schedcall-overlay';
   overlay.className = 'pmail-overlay';
   overlay.onclick = function(e) { if (e.target === overlay) closeScheduleCallModal(); };
   overlay.innerHTML =
-    '<div class="sched-modal">' +
-      '<div class="sched-modal-header">' +
-        '<div class="sched-modal-title"><i class="fas fa-calendar-plus"></i> Schedule Call — ' + lead.name + '</div>' +
-        '<button class="pmail-modal-close" onclick="closeScheduleCallModal()">×</button>' +
-      '</div>' +
-      '<div class="sched-modal-body">' +
-        // AI slots
-        '<div class="sched-section-label"><i class="fas fa-robot"></i> AI Suggested Times</div>' +
-        '<div class="sched-slots">' +
-          slots.map(function(s, i) {
-            return '<div class="sched-slot" id="sched-slot-' + i + '" onclick="selectSchedSlot(' + i + ')">' +
-              '<i class="fas fa-clock"></i> <strong>' + s.label + '</strong> &nbsp;' + s.time +
-            '</div>';
-          }).join('') +
-          '<div class="sched-slot sched-slot-custom" onclick="selectSchedSlot(3)">' +
-            '<i class="fas fa-pencil-alt"></i> Custom date/time' +
+    '<div class="lm-modal">' +
+      '<div class="lm-header">' +
+        '<div class="lm-header-left">' +
+          '<div class="lm-header-icon lm-icon-blue"><i class="fas fa-calendar-plus"></i></div>' +
+          '<div>' +
+            '<div class="lm-title">Schedule Call \u2014 ' + lead.name + '</div>' +
+            '<div class="lm-subtitle">' + lead.occupation + ' &nbsp;&middot;&nbsp; ' + lead.city + '</div>' +
           '</div>' +
         '</div>' +
-        // Custom input (hidden by default)
-        '<div id="sched-custom-wrap" style="display:none;margin:8px 0">' +
-          '<input type="text" class="sched-custom-input" id="sched-custom-input" placeholder="e.g. Apr 18 at 3:00 PM" />' +
+        '<button class="lm-close" onclick="closeScheduleCallModal()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="lm-body">' +
+        '<div class="lm-section-label"><i class="fas fa-clock"></i> AI SUGGESTED TIMES</div>' +
+        '<div class="lm-slots">' +
+          slots.map(function(s, i) {
+            return '<div class="lm-slot" id="sched-slot-' + i + '" onclick="selectSchedSlot(' + i + ')">' +
+              '<i class="fas fa-clock lm-slot-icon"></i>' +
+              '<span class="lm-slot-day">' + s.label + '</span>' +
+              '<span class="lm-slot-time">' + s.time + '</span>' +
+            '</div>';
+          }).join('') +
+          '<div class="lm-slot lm-slot-custom" id="sched-slot-3" onclick="selectSchedSlot(3)">' +
+            '<i class="fas fa-pencil-alt lm-slot-icon"></i>' +
+            '<span class="lm-slot-day">Custom date/time</span>' +
+          '</div>' +
         '</div>' +
-        // Call script
-        '<div class="sched-section-label" style="margin-top:14px"><i class="fas fa-microphone"></i> AI Call Script</div>' +
-        '<div class="sched-script">' +
-          scriptLines.map(function(line) { return '<div class="sched-script-line">' + line + '</div>'; }).join('') +
+        '<div id="sched-custom-wrap" style="display:none;margin:6px 0 12px">' +
+          '<input type="text" class="lm-text-input" id="sched-custom-input" placeholder="e.g. Apr 18 at 3:00 PM" />' +
         '</div>' +
-        // Outcome (shown after call)
-        '<div class="sched-section-label" style="margin-top:14px"><i class="fas fa-clipboard"></i> Log Outcome</div>' +
-        '<div class="sched-outcomes">' +
-          ['Reached — interested','Reached — not interested','Left Voicemail','No Answer','Rescheduled'].map(function(o) {
-            return '<div class="sched-outcome-chip" onclick="selectSchedOutcome(this,\'' + o + '\')">' + o + '</div>';
+        '<div class="lm-section-label" style="margin-top:16px"><i class="fas fa-microphone"></i> AI CALL SCRIPT</div>' +
+        '<div class="lm-script-box">' +
+          scriptLines.map(function(line) { return '<div class="lm-script-line">' + line + '</div>'; }).join('') +
+        '</div>' +
+        '<div class="lm-section-label" style="margin-top:16px"><i class="fas fa-clipboard-check"></i> LOG OUTCOME</div>' +
+        '<div class="lm-chips">' +
+          ['\u2192 Reached \u2014 interested','\u2192 Reached \u2014 not interested','Left Voicemail','No Answer','Rescheduled'].map(function(o) {
+            var key = o.replace('\u2192 ','');
+            return '<div class="lm-chip" onclick="selectSchedOutcome(this,\'' + key + '\')">' + o + '</div>';
           }).join('') +
         '</div>' +
         '<div id="sched-outcome-note-wrap" style="display:none;margin-top:8px">' +
-          '<input type="text" class="sched-custom-input" id="sched-outcome-note" placeholder="Optional note..." />' +
+          '<input type="text" class="lm-text-input" id="sched-outcome-note" placeholder="Optional note\u2026" />' +
         '</div>' +
       '</div>' +
-      '<div class="sched-modal-footer">' +
-        '<button class="pmail-btn-back" onclick="closeScheduleCallModal()">Cancel</button>' +
-        '<button class="pmail-btn-next pmail-btn-qualify" onclick="confirmScheduleCall()"><i class="fas fa-check"></i> Confirm &amp; Log</button>' +
+      '<div class="lm-footer">' +
+        '<button class="lm-btn-cancel" onclick="closeScheduleCallModal()">Cancel</button>' +
+        '<button class="lm-btn-confirm" onclick="confirmScheduleCall()"><i class="fas fa-check"></i> Confirm &amp; Log</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);
@@ -25729,15 +25732,15 @@ var _schedOutcomeSelected = null;
 
 function selectSchedSlot(idx) {
   _schedSlotSelected = idx;
-  document.querySelectorAll('.sched-slot').forEach(function(el, i) { el.classList.toggle('sched-slot-active', i === idx); });
+  document.querySelectorAll('.lm-slot').forEach(function(el, i) { el.classList.toggle('lm-slot-active', i === idx); });
   var custom = document.getElementById('sched-custom-wrap');
   if (custom) custom.style.display = idx === 3 ? 'block' : 'none';
 }
 
 function selectSchedOutcome(el, outcome) {
   _schedOutcomeSelected = outcome;
-  document.querySelectorAll('.sched-outcome-chip').forEach(function(c){ c.classList.remove('sched-outcome-active'); });
-  el.classList.add('sched-outcome-active');
+  document.querySelectorAll('.lm-chip').forEach(function(c){ c.classList.remove('lm-chip-active'); });
+  el.classList.add('lm-chip-active');
   var noteWrap = document.getElementById('sched-outcome-note-wrap');
   if (noteWrap) noteWrap.style.display = 'block';
 }
@@ -25783,51 +25786,53 @@ function openOutreachModal(leadId) {
   var pp   = propensityProfiles[leadId];
   if (!lead) return;
 
-  // Auto-select channel based on referral type
   var channelMap = {
     'linkedin':'LinkedIn', 'campaign-linkedin':'LinkedIn', 'inbound-digital':'Email',
     'client-referral':'Email', 'seminar':'Email', 'public-record':'Email',
-    'life-event-alert':'Email', 'event':'Email', 'campaign-social':'Facebook',
+    'life-event-alert':'Email', 'event':'Email', 'campaign-social':'Text',
     'association-list':'Email', 'ai-scan':'Email'
   };
   var defaultChannel = channelMap[lead.referralType] || 'Email';
-
-  // AI draft message
-  var draft = pp.aiOpener || ('Hi ' + lead.name.split(' ')[0] + ' — ' + pp.topProducts + ' looks like a strong fit based on your recent ' + lead.lifeEventTrigger + '. Worth a quick conversation?');
-
+  var sourceLabel = lead.referralType.replace(/-/g,' ');
+  var draft = pp.aiOpener || ('Hi ' + lead.name.split(' ')[0] + ' \u2014 ' + pp.topProducts + ' looks like a strong fit based on your recent ' + lead.lifeEventTrigger + '. Worth a quick conversation?');
   var channels = ['Email','Text','LinkedIn','Phone','Direct Mail'];
 
   var overlay = document.createElement('div');
-  overlay.id   = 'outreach-overlay';
+  overlay.id = 'outreach-overlay';
   overlay.className = 'pmail-overlay';
   overlay.onclick = function(e) { if (e.target === overlay) closeOutreachModal(); };
   overlay.innerHTML =
-    '<div class="sched-modal">' +
-      '<div class="sched-modal-header">' +
-        '<div class="sched-modal-title"><i class="fas fa-paper-plane"></i> Send Outreach — ' + lead.name + '</div>' +
-        '<button class="pmail-modal-close" onclick="closeOutreachModal()">×</button>' +
+    '<div class="lm-modal">' +
+      '<div class="lm-header">' +
+        '<div class="lm-header-left">' +
+          '<div class="lm-header-icon lm-icon-teal"><i class="fas fa-paper-plane"></i></div>' +
+          '<div>' +
+            '<div class="lm-title">Send Outreach \u2014 ' + lead.name + '</div>' +
+            '<div class="lm-subtitle">' + lead.occupation + ' &nbsp;&middot;&nbsp; ' + lead.city + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="lm-close" onclick="closeOutreachModal()"><i class="fas fa-times"></i></button>' +
       '</div>' +
-      '<div class="sched-modal-body">' +
-        '<div class="sched-section-label"><i class="fas fa-robot"></i> AI Recommended Channel: <strong>' + defaultChannel + '</strong> (based on source: ' + lead.referralType.replace(/-/g,' ') + ')</div>' +
-        '<div class="outreach-channels">' +
+      '<div class="lm-body">' +
+        '<div class="lm-channel-rec"><i class="fas fa-robot"></i> AI RECOMMENDED CHANNEL: <strong>' + defaultChannel.toUpperCase() + '</strong> <span class="lm-channel-rec-src">(based on source: ' + sourceLabel + ')</span></div>' +
+        '<div class="lm-ch-row">' +
           channels.map(function(ch) {
-            var active = ch === defaultChannel;
-            return '<div class="outreach-channel-chip ' + (active?'outreach-channel-active':'') + '" onclick="selectOutreachChannel(this,\'' + ch + '\')">' + ch + '</div>';
+            return '<div class="lm-ch-chip ' + (ch === defaultChannel ? 'lm-ch-active' : '') + '" onclick="selectOutreachChannel(this,\'' + ch + '\')">' + ch + '</div>';
           }).join('') +
         '</div>' +
-        '<div class="sched-section-label" style="margin-top:14px"><i class="fas fa-robot"></i> AI-Drafted Message</div>' +
-        '<textarea class="outreach-draft-area" id="outreach-draft-text">' + draft + '</textarea>' +
-        '<div class="outreach-draft-hint">Personalised to life event trigger · Edit freely before sending</div>' +
-        '<div class="sched-section-label" style="margin-top:14px"><i class="fas fa-info-circle"></i> Context</div>' +
-        '<div class="outreach-context-pills">' +
-          '<span class="outreach-ctx-pill"><i class="fas fa-bolt"></i> ' + lead.lifeEventTrigger + '</span>' +
-          '<span class="outreach-ctx-pill"><i class="fas fa-dollar-sign"></i> ' + lead.estimatedIncome + '</span>' +
-          '<span class="outreach-ctx-pill"><i class="fas fa-tag"></i> ' + lead.productInterest[0] + '</span>' +
+        '<div class="lm-section-label" style="margin-top:14px"><i class="fas fa-robot"></i> AI-DRAFTED MESSAGE</div>' +
+        '<textarea class="lm-draft-area" id="outreach-draft-text">' + draft + '</textarea>' +
+        '<div class="lm-draft-hint">Personalised to life event trigger &nbsp;&middot;&nbsp; Edit freely before sending</div>' +
+        '<div class="lm-section-label" style="margin-top:12px"><i class="fas fa-info-circle"></i> CONTEXT</div>' +
+        '<div class="lm-ctx-pills">' +
+          '<span class="lm-ctx-pill"><i class="fas fa-bolt"></i> ' + lead.lifeEventTrigger + '</span>' +
+          '<span class="lm-ctx-pill"><i class="fas fa-dollar-sign"></i> ' + lead.estimatedIncome + '</span>' +
+          '<span class="lm-ctx-pill"><i class="fas fa-tag"></i> ' + lead.productInterest[0] + '</span>' +
         '</div>' +
       '</div>' +
-      '<div class="sched-modal-footer">' +
-        '<button class="pmail-btn-back" onclick="closeOutreachModal()">Cancel</button>' +
-        '<button class="pmail-btn-next pmail-btn-qualify" onclick="confirmOutreach()"><i class="fas fa-paper-plane"></i> Send &amp; Log</button>' +
+      '<div class="lm-footer">' +
+        '<button class="lm-btn-cancel" onclick="closeOutreachModal()">Cancel</button>' +
+        '<button class="lm-btn-confirm lm-btn-teal" onclick="confirmOutreach()"><i class="fas fa-paper-plane"></i> Send &amp; Log</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);
@@ -25837,8 +25842,8 @@ var _outreachChannelSelected = null;
 
 function selectOutreachChannel(el, channel) {
   _outreachChannelSelected = channel;
-  document.querySelectorAll('.outreach-channel-chip').forEach(function(c){ c.classList.remove('outreach-channel-active'); });
-  el.classList.add('outreach-channel-active');
+  document.querySelectorAll('.lm-ch-chip').forEach(function(c){ c.classList.remove('lm-ch-active'); });
+  el.classList.add('lm-ch-active');
 }
 
 function confirmOutreach() {
@@ -25962,48 +25967,68 @@ function openLeadHistory(leadId) {
   var pp   = propensityProfiles[leadId];
   if (!lead) return;
 
-  var typeIcon = { call:'fa-phone', email:'fa-envelope', linkedin:'fa-linkedin', text:'fa-sms', social:'fa-hashtag' };
-  var outcomeColor = { Reached:'#059669', Replied:'#059669', Opened:'#0891b2', Sent:'#64748b', 'Left VM':'#d97706', Delivered:'#64748b', Clicked:'#0891b2' };
+  var typeIconMap  = { call:'fa-phone', email:'fa-envelope', linkedin:'fa-linkedin', text:'fa-comment-alt', social:'fa-hashtag', campaign:'fa-bullhorn', pmail:'fa-clipboard-check' };
+  var outcomeColorMap = { Reached:'#059669', Replied:'#059669', Opened:'#0891b2', Sent:'#64748b', 'Left VM':'#d97706', Delivered:'#64748b', Clicked:'#0891b2', Scheduled:'#003087' };
 
   var logRows = (lead.contactLog || []).map(function(entry) {
-    var ic = typeIcon[entry.type] || 'fa-circle';
-    var oc = outcomeColor[entry.outcome] || '#64748b';
-    return '<div class="ld-log-row">' +
-      '<div class="ld-log-icon" style="background:' + oc + '15;color:' + oc + '"><i class="fas ' + ic + '"></i></div>' +
-      '<div class="ld-log-body">' +
-        '<div class="ld-log-top"><span class="ld-log-date">' + entry.date + '</span><span class="ld-log-outcome" style="color:' + oc + '">' + entry.outcome + '</span></div>' +
-        '<div class="ld-log-note">' + entry.note + '</div>' +
+    var ic  = typeIconMap[entry.type]  || 'fa-circle';
+    var oc  = outcomeColorMap[entry.outcome] || '#64748b';
+    var positiveOutcomes = ['Reached','Replied','Opened','Clicked','Scheduled'];
+    var neutralOutcomes  = ['Left VM','Sent','Delivered'];
+    var ocCls = positiveOutcomes.indexOf(entry.outcome) > -1 ? 'positive' : neutralOutcomes.indexOf(entry.outcome) > -1 ? 'neutral' : 'pending';
+    return '<div class="lh-timeline-row">' +
+      '<div class="lh-tl-icon" style="background:' + oc + '18;color:' + oc + '"><i class="fas ' + ic + '"></i></div>' +
+      '<div class="lh-tl-body">' +
+        '<div class="lh-tl-top">' +
+          '<span class="lh-tl-date">' + entry.date + '</span>' +
+          '<span class="lh-tl-outcome ld-log-outcome ' + ocCls + '">' + entry.outcome + '</span>' +
+        '</div>' +
+        '<div class="lh-tl-note">' + entry.note + '</div>' +
       '</div>' +
     '</div>';
-  }).join('') || '<div style="color:#94a3b8;font-size:0.82rem">No contact history recorded.</div>';
+  }).join('') || '<div class="lh-empty">No contact history recorded.</div>';
+
+  var pmailStr = pm ? pm.total + '/100 &nbsp;&middot;&nbsp; ' + pm.qualDate : '\u2014';
+  var campStr  = lead.campaignLink ? lead.campaignLink.name : '\u2014';
+  var respStr  = (lead.campaignLink && lead.campaignLink.responded)
+    ? lead.campaignLink.responseDate + ' \u2014 ' + (lead.campaignLink.responseNote || '')
+    : 'No response recorded';
 
   var overlay = document.createElement('div');
-  overlay.id   = 'leadhist-overlay';
+  overlay.id = 'leadhist-overlay';
   overlay.className = 'pmail-overlay';
   overlay.onclick = function(e) { if (e.target === overlay) closeLeadHistory(); };
   overlay.innerHTML =
-    '<div class="sched-modal" style="max-width:560px">' +
-      '<div class="sched-modal-header">' +
-        '<div class="sched-modal-title"><i class="fas fa-history"></i> Lead History — ' + lead.name + '</div>' +
-        '<button class="pmail-modal-close" onclick="closeLeadHistory()">×</button>' +
-      '</div>' +
-      '<div class="sched-modal-body">' +
-        '<div class="leadhist-summary">' +
-          '<div class="leadhist-row"><span class="lh-lbl">Lead ID</span><span>' + lead.id + '</span></div>' +
-          '<div class="leadhist-row"><span class="lh-lbl">Entry Date</span><span>' + lead.entryDate + '</span></div>' +
-          '<div class="leadhist-row"><span class="lh-lbl">Source</span><span>' + lead.referralSource + '</span></div>' +
-          '<div class="leadhist-row"><span class="lh-lbl">Life Event</span><span>' + lead.lifeEventTrigger + '</span></div>' +
-          '<div class="leadhist-row"><span class="lh-lbl">PMAIL Score</span><span>' + (pm ? pm.total + '/100 · ' + pm.qualDate : '—') + '</span></div>' +
-          '<div class="leadhist-row"><span class="lh-lbl">Campaign</span><span>' + (lead.campaignLink ? lead.campaignLink.name : '—') + '</span></div>' +
-          '<div class="leadhist-row"><span class="lh-lbl">Response</span><span>' + (lead.campaignLink && lead.campaignLink.responded ? lead.campaignLink.responseDate + ' — ' + (lead.campaignLink.responseNote||'') : 'No response recorded') + '</span></div>' +
-          '<div class="leadhist-row"><span class="lh-lbl">Prospect ID</span><span><a href="#" onclick="closeLeadHistory();viewLinkedProspect(\'' + lead.prospectId + '\');return false" style="color:#003087;font-weight:600">' + (lead.prospectId || '—') + ' →</a></span></div>' +
+    '<div class="lm-modal lm-modal-hist">' +
+      '<div class="lm-header">' +
+        '<div class="lm-header-left">' +
+          '<div class="lm-header-icon lm-icon-navy"><i class="fas fa-history"></i></div>' +
+          '<div>' +
+            '<div class="lm-title">Lead History</div>' +
+            '<div class="lm-subtitle">' + lead.name + ' &nbsp;&middot;&nbsp; ' + lead.id + '</div>' +
+          '</div>' +
         '</div>' +
-        '<div class="sched-section-label" style="margin-top:12px"><i class="fas fa-history"></i> Contact Timeline</div>' +
-        '<div class="ld-contact-log">' + logRows + '</div>' +
+        '<button class="lm-close" onclick="closeLeadHistory()"><i class="fas fa-times"></i></button>' +
       '</div>' +
-      '<div class="sched-modal-footer">' +
-        '<button class="pmail-btn-back" onclick="closeLeadHistory()">Close</button>' +
-        (lead.prospectId ? '<button class="pmail-btn-next pmail-btn-qualify" onclick="closeLeadHistory();viewLinkedProspect(\'' + lead.prospectId + '\')"><i class="fas fa-user"></i> Open Prospect Record</button>' : '') +
+      '<div class="lm-body">' +
+        '<div class="lh-info-grid">' +
+          '<div class="lh-info-card"><div class="lh-info-lbl">LEAD ID</div><div class="lh-info-val">' + lead.id + '</div></div>' +
+          '<div class="lh-info-card"><div class="lh-info-lbl">ENTRY DATE</div><div class="lh-info-val">' + lead.entryDate + '</div></div>' +
+          '<div class="lh-info-card lh-info-wide"><div class="lh-info-lbl">SOURCE</div><div class="lh-info-val">' + lead.referralSource + '</div></div>' +
+          '<div class="lh-info-card"><div class="lh-info-lbl">LIFE EVENT</div><div class="lh-info-val">' + lead.lifeEventTrigger + '</div></div>' +
+          '<div class="lh-info-card"><div class="lh-info-lbl">PMAIL SCORE</div><div class="lh-info-val">' + pmailStr + '</div></div>' +
+          '<div class="lh-info-card lh-info-wide"><div class="lh-info-lbl">CAMPAIGN</div><div class="lh-info-val">' + campStr + '</div></div>' +
+          '<div class="lh-info-card lh-info-full"><div class="lh-info-lbl">RESPONSE</div><div class="lh-info-val">' + respStr + '</div></div>' +
+          '<div class="lh-info-card lh-info-full"><div class="lh-info-lbl">PROSPECT ID</div><div class="lh-info-val">' +
+            (lead.prospectId ? '<a href="#" onclick="closeLeadHistory();viewLinkedProspect(\'' + lead.prospectId + '\');return false" class="lh-prospect-link">' + lead.prospectId + ' <i class="fas fa-arrow-right"></i></a>' : '\u2014') +
+          '</div></div>' +
+        '</div>' +
+        '<div class="lm-section-label" style="margin-top:16px"><i class="fas fa-history"></i> CONTACT TIMELINE</div>' +
+        '<div class="lh-timeline">' + logRows + '</div>' +
+      '</div>' +
+      '<div class="lm-footer">' +
+        '<button class="lm-btn-cancel" onclick="closeLeadHistory()">Close</button>' +
+        (lead.prospectId ? '<button class="lm-btn-confirm" onclick="closeLeadHistory();viewLinkedProspect(\'' + lead.prospectId + '\')"><i class="fas fa-user"></i> Open Prospect Record</button>' : '') +
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);
