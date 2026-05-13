@@ -1242,6 +1242,129 @@ function DashboardPage() {
           </div>
         </div>
 
+        {/* ── AI OUTREACH HUB — Today Tab ── */}
+        <div class="outreach-hub outreach-hub-dashboard" id="outreach-hub-today">
+          <div class="oh-header">
+            <div class="oh-header-left">
+              <div class="oh-icon"><i class="fas fa-paper-plane"></i><span class="ai-pulse-ring"></span></div>
+              <div>
+                <div class="oh-title">AI Outreach Hub <span class="oh-live-badge">LIVE</span></div>
+                <div class="oh-subtitle">AI-ranked queue · 10 clients prioritized by revenue opportunity, lapse risk &amp; life events</div>
+              </div>
+            </div>
+            <div class="oh-header-right">
+              <div class="oh-stat"><span class="oh-stat-val">10</span><span class="oh-stat-lbl">In Queue</span></div>
+              <div class="oh-stat"><span class="oh-stat-val green">3</span><span class="oh-stat-lbl">Urgent</span></div>
+              <div class="oh-stat"><span class="oh-stat-val amber">4</span><span class="oh-stat-lbl">This Week</span></div>
+              <div class="oh-stat"><span class="oh-stat-val">$41.2K</span><span class="oh-stat-lbl">Revenue Potential</span></div>
+              <button class="oh-collapse-btn" onclick="toggleOutreachHubDashboard()"><i class="fas fa-chevron-up" id="oh-dash-chevron"></i></button>
+            </div>
+          </div>
+          <div class="oh-body" id="oh-body-dashboard">
+            <div class="oh-table">
+              <div class="oh-table-header">
+                <span>Priority</span>
+                <span>Client</span>
+                <span>Trigger</span>
+                <span>Outreach Type</span>
+                <span>Channel</span>
+                <span>Revenue Potential</span>
+                <span>Action</span>
+              </div>
+              <div class="oh-row oh-urgent" onclick="openOutreachModal('OR-001')">
+                <div class="oh-priority"><span class="oh-rank urgent">1</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar pn">PN</div><div><div class="oh-cname">Patricia Nguyen</div><div class="oh-csub">Mid Market · UL + VUL</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge lapse"><i class="fas fa-exclamation-triangle"></i> Lapse Risk · 94%</span></div>
+                <div><span class="oh-type-badge retention">Retention Save</span></div>
+                <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+                <div class="oh-rev green">$5,800/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-001')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row oh-urgent" onclick="openOutreachModal('OR-002')">
+                <div class="oh-priority"><span class="oh-rank urgent">2</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar sw">SW</div><div><div class="oh-cname">Sandra Williams</div><div class="oh-csub">Term expiring 153d</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge renewal"><i class="fas fa-calendar-alt"></i> Term Renewal · 153 days</span></div>
+                <div><span class="oh-type-badge upsell">Conversion Upsell</span></div>
+                <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email + SMS</span></div>
+                <div class="oh-rev green">$8,200/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-002')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row oh-urgent" onclick="openOutreachModal('OR-003')">
+                <div class="oh-priority"><span class="oh-rank urgent">3</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar kp">KP</div><div><div class="oh-cname">Kevin Park</div><div class="oh-csub">Emerging · Term pending</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge lifecycle"><i class="fas fa-signature"></i> E-Signature Pending · 2 days</span></div>
+                <div><span class="oh-type-badge close">Close Deal</span></div>
+                <div><span class="oh-channel sms"><i class="fas fa-sms"></i> SMS</span></div>
+                <div class="oh-rev green">$1,800/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-003')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row" onclick="openOutreachModal('OR-004')">
+                <div class="oh-priority"><span class="oh-rank high">4</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar lm">LM</div><div><div class="oh-cname">Linda Morrison</div><div class="oh-csub">Premium · $812K portfolio</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge portfolio"><i class="fas fa-chart-line"></i> UMA Transfer + Estate Review</span></div>
+                <div><span class="oh-type-badge cross-sell">Cross-Sell</span></div>
+                <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+                <div class="oh-rev green">$2,800/yr fee</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-004')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row" onclick="openOutreachModal('OR-005')">
+                <div class="oh-priority"><span class="oh-rank high">5</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar rc">RC</div><div><div class="oh-cname">Robert Chen</div><div class="oh-csub">High Value · Business owner</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge portfolio"><i class="fas fa-briefcase"></i> Estate Plan + NQDC Review</span></div>
+                <div><span class="oh-type-badge advisory">Advisory</span></div>
+                <div><span class="oh-channel call"><i class="fas fa-phone"></i> Call</span></div>
+                <div class="oh-rev green">$2,000/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-005')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row" onclick="openOutreachModal('OR-006')">
+                <div class="oh-priority"><span class="oh-rank mid">6</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar jw">JW</div><div><div class="oh-cname">James Whitfield</div><div class="oh-csub">High Value · Retirement gap</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge lifecycle"><i class="fas fa-umbrella-beach"></i> Retirement Income Gap $8,500/mo</span></div>
+                <div><span class="oh-type-badge retirement">Retirement</span></div>
+                <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+                <div class="oh-rev green">$4,800/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-006')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row" onclick="openOutreachModal('OR-007')">
+                <div class="oh-priority"><span class="oh-rank mid">7</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar mg">MG</div><div><div class="oh-cname">Maria Gonzalez</div><div class="oh-csub">High Value · No Advisory</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge gap"><i class="fas fa-exclamation-circle"></i> No Advisory Services — Gap</span></div>
+                <div><span class="oh-type-badge cross-sell">Cross-Sell</span></div>
+                <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+                <div class="oh-rev green">$2,400/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-007')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row" onclick="openOutreachModal('OR-008')">
+                <div class="oh-priority"><span class="oh-rank mid">8</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar dt">DT</div><div><div class="oh-cname">David Thompson</div><div class="oh-csub">Emerging · Single policy only</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge gap"><i class="fas fa-plus-circle"></i> No Investments or Retirement</span></div>
+                <div><span class="oh-type-badge upsell">Upsell</span></div>
+                <div><span class="oh-channel sms"><i class="fas fa-sms"></i> SMS</span></div>
+                <div class="oh-rev amber">$1,200/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-008')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row" onclick="openOutreachModal('OR-009')">
+                <div class="oh-priority"><span class="oh-rank low">9</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar rc">RC</div><div><div class="oh-cname">Alex Rivera</div><div class="oh-csub">Prospect · WL $500K</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge lifecycle"><i class="fas fa-calendar-check"></i> Meeting Apr 12 — Pre-brief ready</span></div>
+                <div><span class="oh-type-badge close">Meeting Prep</span></div>
+                <div><span class="oh-channel email"><i class="fas fa-envelope"></i> Email</span></div>
+                <div class="oh-rev amber">$4,800/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-009')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+              <div class="oh-row" onclick="openOutreachModal('OR-010')">
+                <div class="oh-priority"><span class="oh-rank low">10</span></div>
+                <div class="oh-client-cell"><div class="mini-avatar ms">MS</div><div><div class="oh-cname">Michael Santos</div><div class="oh-csub">Prospect · UL $750K hot deal</div></div></div>
+                <div class="oh-trigger"><span class="oh-trigger-badge portfolio"><i class="fas fa-fire"></i> Lab Results Apr 14 — Follow-up</span></div>
+                <div><span class="oh-type-badge close">Close Deal</span></div>
+                <div><span class="oh-channel call"><i class="fas fa-phone"></i> Call + Email</span></div>
+                <div class="oh-rev amber">$6,400/yr</div>
+                <div><button class="oh-gen-btn" onclick="event.stopPropagation();openOutreachModal('OR-010')"><i class="fas fa-robot"></i> Generate</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ── AI HOLISTIC INSIGHTS BANNER ── */}
         <div class="ai-highlight-banner" onclick="navigateTo('ai-agents')">
           <div class="ai-banner-icon"><i class="fas fa-robot"></i></div>
@@ -1773,8 +1896,8 @@ function ClientsPage() {
         </div>
       </div>
 
-      {/* ── Outreach Hub Panel ── */}
-      <div class="outreach-hub" id="outreach-hub">
+      {/* ── Outreach Hub Panel — moved to Dashboard Today tab; stub kept for JS compatibility ── */}
+      <div class="outreach-hub" id="outreach-hub" style="display:none">
         <div class="oh-header">
           <div class="oh-header-left">
             <div class="oh-icon"><i class="fas fa-paper-plane"></i><span class="ai-pulse-ring"></span></div>
@@ -1976,8 +2099,8 @@ function ClientsPage() {
           return (
             <div class={`client-card segment-${client.segment.replace(' ', '-').toLowerCase()}${lapseInfo ? ' has-lapse-risk' : ''}`} data-lapse={lapseInfo ? lapseInfo.level : ''}>
 
-              {/* ── Card Header ── opens 9-tab Client 360 modal ── */}
-              <div class="client-card-header" onclick={`openClientModal(${client.id})`} style="cursor:pointer" title="Open Client 360 Profile">
+              {/* ── Card Header ── click expands product panel; use View Profile btn to open modal ── */}
+              <div class="client-card-header">
                 <div class={`client-avatar-lg ca-${avatarKey}`}>{initials}</div>
                 <div class="client-card-info">
                   <h4>{client.name}</h4>
@@ -2506,14 +2629,14 @@ function ClientsPage() {
           {/* Tab bar */}
           <div class="cm-tabs" id="cm-tabs">
             <button class="cm-tab active" id="cm-tab-overview"  onclick="switchClientTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
-            <button class="cm-tab"         id="cm-tab-policies"  onclick="switchClientTab('policies',this)"><i class="fas fa-file-contract"></i> Policies</button>
-            <button class="cm-tab"         id="cm-tab-financial" onclick="switchClientTab('financial',this)"><i class="fas fa-chart-pie"></i> Financial Health</button>
-            <button class="cm-tab"         id="cm-tab-goals"     onclick="switchClientTab('goals',this)"><i class="fas fa-bullseye"></i> Goals</button>
             <button class="cm-tab"         id="cm-tab-ai"        onclick="switchClientTab('ai',this)"><i class="fas fa-robot"></i> AI Insights</button>
+            <button class="cm-tab"         id="cm-tab-policies"  onclick="switchClientTab('policies',this)"><i class="fas fa-layer-group"></i> Products</button>
+            <button class="cm-tab"         id="cm-tab-financial" onclick="switchClientTab('financial',this)"><i class="fas fa-chart-pie"></i> Wealth Snapshot</button>
+            <button class="cm-tab"         id="cm-tab-goals"     onclick="switchClientTab('goals',this)"><i class="fas fa-bullseye"></i> Goals</button>
             <button class="cm-tab"         id="cm-tab-outreach"  onclick="switchClientTab('outreach',this)"><i class="fas fa-paper-plane"></i> Outreach</button>
+            <button class="cm-tab"         id="cm-tab-timeline"  onclick="switchClientTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
             <button class="cm-tab"         id="cm-tab-documents" onclick="switchClientTab('documents',this)"><i class="fas fa-folder-open"></i> Documents</button>
             <button class="cm-tab"         id="cm-tab-referrals" onclick="switchClientTab('referrals',this)"><i class="fas fa-users"></i> Referrals</button>
-            <button class="cm-tab"         id="cm-tab-timeline"  onclick="switchClientTab('timeline',this)"><i class="fas fa-history"></i> Timeline</button>
             <button class="cm-tab cm-tab-intel"    id="cm-tab-intel"     onclick="switchClientTab('intel',this)"><i class="fas fa-satellite-dish"></i> 3rd-Party Intel</button>
             <button class="cm-tab cm-tab-planning" id="cm-tab-planning"  onclick="switchClientTab('planning',this)"><i class="fas fa-drafting-compass"></i> Financial Plan</button>
             <button class="cm-tab cm-tab-illust"   id="cm-tab-illust"    onclick="switchClientTab('illust',this)"><i class="fas fa-chart-area"></i> Illustrations</button>
@@ -2524,7 +2647,7 @@ function ClientsPage() {
 
           {/* Footer actions */}
           <div class="cm-footer" id="cm-footer">
-            <button class="btn btn-primary" onclick="closeClientModal();navigateTo('policies')"><i class="fas fa-file-contract"></i> View Policies</button>
+            <button class="btn btn-primary" onclick="switchClientTab('policies',document.getElementById('cm-tab-policies'))"><i class="fas fa-layer-group"></i> View Products</button>
             <button class="btn btn-outline" id="cm-btn-outreach" onclick="switchClientTab('outreach',document.getElementById('cm-tab-outreach'))"><i class="fas fa-paper-plane"></i> Outreach</button>
             <button class="btn btn-outline" id="cm-btn-call"><i class="fas fa-phone"></i> Call</button>
             <button class="btn btn-outline" id="cm-btn-meeting" onclick="scheduleCMeMeeting(_cmClientId)"><i class="fas fa-calendar-plus"></i> Schedule</button>

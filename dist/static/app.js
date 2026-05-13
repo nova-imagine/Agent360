@@ -813,7 +813,8 @@ function _cmOverview(client) {
   if (!products.investments.length) gaps.push('Investments');
   if (!products.retirement.length)  gaps.push('Retirement');
   if (!products.advisory.length)    gaps.push('Advisory');
-  if (products.insurance.length < 2) gaps.push('More Insurance');
+  // Insurance gap: only flag if NO insurance at all (not "needs more")
+  if (!products.insurance.length)   gaps.push('Insurance');
 
   const npsColor = (profile.nps||0) >= 90 ? '#059669' : (profile.nps||0) >= 70 ? '#0891b2' : '#f59e0b';
   const lifeStageIcon = {'Peak Earner':'fa-briefcase','Young Family':'fa-baby','Wealth Accumulation':'fa-chart-line','Pre-Retirement':'fa-clock','Wealth Preservation':'fa-shield-alt','Early Career':'fa-seedling'}[profile.lifeStage] || 'fa-user';
@@ -831,15 +832,15 @@ function _cmOverview(client) {
         <div class="cm-info-row"><i class="fas fa-comment-dots" style="color:#7c3aed"></i><span>Prefers: <strong>${profile.preferredChannel||'—'}</strong> · ${profile.preferredTime||''}</span></div>
       </div>
       <div class="cm-info-card">
-        <div class="cm-card-title"><i class="fas fa-briefcase"></i> Portfolio Summary</div>
+        <div class="cm-card-title"><i class="fas fa-briefcase"></i> Client 360 Summary</div>
         <div class="cm-kpi-row">
           <div class="cm-kpi"><span class="cm-kpi-val">${products.insurance.length}</span><span class="cm-kpi-lbl">Insurance</span></div>
           <div class="cm-kpi"><span class="cm-kpi-val">${products.investments.length}</span><span class="cm-kpi-lbl">Invest.</span></div>
           <div class="cm-kpi"><span class="cm-kpi-val">${products.retirement.length}</span><span class="cm-kpi-lbl">Retire.</span></div>
           <div class="cm-kpi"><span class="cm-kpi-val">${products.advisory.length}</span><span class="cm-kpi-lbl">Advisory</span></div>
         </div>
-        <div class="cm-info-row premium-row"><i class="fas fa-dollar-sign"></i><span>Annual Premium: <strong>$${client.premium.toLocaleString()}</strong></span></div>
-        <div class="cm-info-row"><i class="fas fa-layer-group"></i><span>${totalPolicies} total product${totalPolicies !== 1 ? 's' : ''} · Net Worth: <strong>${profile.netWorth||'—'}</strong></span></div>
+        <div class="cm-info-row premium-row"><i class="fas fa-chart-line" style="color:#059669"></i><span>Net Worth: <strong>${profile.netWorth||'—'}</strong> · Income: <strong>${profile.income||'—'}</strong></span></div>
+        <div class="cm-info-row"><i class="fas fa-layer-group"></i><span>${totalPolicies} total product${totalPolicies !== 1 ? 's' : ''} · Annual Premium: <strong>${client.premium.toLocaleString()}</strong></span></div>
         <div class="cm-info-row"><i class="fas fa-wallet"></i><span>Household Income: <strong>${profile.income||'—'}</strong></span></div>
       </div>
     </div>
@@ -874,7 +875,7 @@ function _cmOverview(client) {
 
     ${gaps.length ? `
     <div class="cm-gaps-bar">
-      <div class="cm-gaps-label"><i class="fas fa-exclamation-circle" style="color:#f59e0b"></i> Coverage Gaps Identified</div>
+      <div class="cm-gaps-label"><i class="fas fa-exclamation-circle" style="color:#f59e0b"></i> Product Gaps — Growth Opportunities</div>
       <div class="cm-gaps-pills">${gaps.map(g => `<span class="cm-gap-pill">${g}</span>`).join('')}</div>
     </div>` : ''}
     <div class="cm-domain-strip">
@@ -41488,4 +41489,16 @@ function switchHomeTab(tab, btn) {
       initDashboardCharts();
     }, 80);
   }
+}
+
+
+/* CLIENT360_BIAS_FIX_v1 */
+// ── Dashboard Outreach Hub toggle (separate from Clients page hub) ──────────
+function toggleOutreachHubDashboard() {
+  var body    = document.getElementById('oh-body-dashboard');
+  var chevron = document.getElementById('oh-dash-chevron');
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (chevron) chevron.className = isOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
 }
