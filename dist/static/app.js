@@ -39964,43 +39964,293 @@ function srOpenFullReview(id) {
     raRenderQueue(q);
   }
 
-  /* ── 21. AI INCOME GAP SCAN ───────────────────────────────────────── */
+  /* ── 21. AI INCOME GAP SCAN — full modal ─────────────────────────── */
   function raRunIncomeGapScan() {
-    var panel = document.getElementById('ra-gap-panel');
-    var content = document.getElementById('ra-gap-content');
-    if (!panel) return;
+    var existing = document.getElementById('ra-gap-modal');
+    if (existing) { existing.remove(); }
 
-    var rows = Object.values(_raContracts).map(function(c) {
-      var gapColor = c.incomeGap > 1500 ? '#dc2626' : c.incomeGap > 800 ? '#d97706' : '#059669';
-      return '<div class="ra-gap-scan-row">' +
-        '<div class="ra-gap-scan-avatar" style="background:' + c.avatarGrad + '">' + c.initials + '</div>' +
-        '<div class="ra-gap-scan-body">' +
-          '<div class="ra-gap-scan-name">' + c.clientName + '</div>' +
-          '<div class="ra-gap-scan-product">' + c.productType + ' · ' + c.guaranteedIncomeFmt + ' guaranteed</div>' +
+    var contracts = Object.values(_raContracts);
+    var totalGap  = contracts.reduce(function(s,c){ return s + (c.incomeGap||0); }, 0);
+    var urgent    = contracts.filter(function(c){ return c.reviewStatus === 'urgent'; });
+
+    // Sort: largest gap first
+    var sorted = contracts.slice().sort(function(a,b){ return (b.incomeGap||0) - (a.incomeGap||0); });
+
+    // KPI strip
+    var kpiHtml =
+      '<div class="ra-gs-kpi-strip">' +
+        '<div class="ra-gs-kpi">' +
+          '<div class="ra-gs-kpi-val" style="color:#dc2626">$' + totalGap.toLocaleString() + '/mo</div>' +
+          '<div class="ra-gs-kpi-lbl">Total Book Gap</div>' +
         '</div>' +
-        '<div class="ra-gap-scan-right">' +
-          (c.incomeGap > 0
-            ? '<span style="color:' + gapColor + ';font-weight:800">Gap: $' + c.incomeGap.toLocaleString() + '/mo</span><br>' +
-              '<span style="font-size:11px;color:#64748b">Covered: ' + c.gapCovered + '%</span>'
-            : '<span style="color:#059669;font-weight:700">✅ Gap Covered</span>') +
+        '<div class="ra-gs-kpi">' +
+          '<div class="ra-gs-kpi-val" style="color:#d97706">' + urgent.length + '</div>' +
+          '<div class="ra-gs-kpi-lbl">Urgent (act now)</div>' +
+        '</div>' +
+        '<div class="ra-gs-kpi">' +
+          '<div class="ra-gs-kpi-val" style="color:#003087">' + contracts.length + '</div>' +
+          '<div class="ra-gs-kpi-lbl">Contracts Scanned</div>' +
+        '</div>' +
+        '<div class="ra-gs-kpi">' +
+          '<div class="ra-gs-kpi-val" style="color:#059669">$' + contracts.reduce(function(s,c){ return s+(c.guaranteedIncome||0);},0).toLocaleString() + '/mo</div>' +
+          '<div class="ra-gs-kpi-lbl">Guaranteed Income</div>' +
+        '</div>' +
+      '</div>';
+
+    // Client rows
+    var rowsHtml = sorted.map(function(c) {
+      var gapColor  = c.incomeGap > 1500 ? '#dc2626' : c.incomeGap > 800 ? '#d97706' : '#059669';
+      var covPct    = Math.min(100, c.gapCovered);
+      var covColor  = covPct >= 100 ? '#059669' : covPct >= 70 ? '#d97706' : '#dc2626';
+      var urgBadge  = c.reviewStatus === 'urgent'
+        ? '<span class="ra-gs-urgent-badge"><i class="fas fa-exclamation-triangle"></i> URGENT</span>'
+        : (c.reviewStatus === 'action' ? '<span class="ra-gs-action-badge"><i class="fas fa-bell"></i> Action Due</span>' : '');
+
+      // Progress bar for gap coverage
+      var barHtml =
+        '<div class="ra-gs-bar-wrap">' +
+          '<div class="ra-gs-bar-fill" style="width:' + covPct + '%;background:' + covColor + '"></div>' +
+        '</div>' +
+        '<div class="ra-gs-bar-labels">' +
+          '<span style="color:' + covColor + ';font-weight:700">' + covPct + '% covered</span>' +
+          (c.incomeGap > 0 ? '<span style="color:' + gapColor + ';font-weight:800">Gap: $' + c.incomeGap.toLocaleString() + '/mo</span>' : '<span style="color:#059669;font-weight:700">✅ Fully covered</span>') +
+        '</div>';
+
+      // Recommended action per contract
+      var actionMap = {
+        'ANN-JW-001': { icon:'fa-file-pdf', label:'Generate DIA Illustration', color:'#003087' },
+        'ANN-SW-001': { icon:'fa-phone',    label:'Call — SPIA Quote Expires May 30', color:'#dc2626' },
+        'ANN-LM-001': { icon:'fa-calendar-check', label:'Present at Apr 15 Review', color:'#d97706' },
+        'ANN-MG-001': { icon:'fa-exclamation-circle', label:'Contact Before Jun 15 Maturity', color:'#dc2626' },
+        'ANN-RC-001': { icon:'fa-chart-bar', label:'Present DIA at Follow-up Call', color:'#7c3aed' },
+        'ANN-DW-001': { icon:'fa-handshake', label:'Close at Apr 16 Renewal Meeting', color:'#059669' }
+      };
+      var act = actionMap[c.id] || { icon:'fa-arrow-right', label:'Schedule Review', color:'#003087' };
+
+      return '<div class="ra-gs-row" onclick="raCloseGapScan();raOpenContract(\'' + c.id + '\')">' +
+        '<div class="ra-gs-row-left">' +
+          '<div class="ra-gs-avatar" style="background:' + c.avatarGrad + '">' + c.initials + '</div>' +
+          '<div class="ra-gs-row-body">' +
+            '<div class="ra-gs-row-top">' +
+              '<span class="ra-gs-row-name">' + c.clientName + '</span>' +
+              urgBadge +
+              '<span class="ra-gs-type-pill">' + c.typeCode.toUpperCase() + '</span>' +
+            '</div>' +
+            '<div class="ra-gs-row-product">' + c.productType + '</div>' +
+            barHtml +
+          '</div>' +
+        '</div>' +
+        '<div class="ra-gs-row-right">' +
+          '<div class="ra-gs-income">' + c.guaranteedIncomeFmt + '<span class="ra-gs-income-lbl"> guaranteed</span></div>' +
+          '<button class="ra-gs-act-btn" style="border-color:' + act.color + ';color:' + act.color + '" onclick="event.stopPropagation();_raToast(\'' + act.label + ' — opening…\')">' +
+            '<i class="fas ' + act.icon + '"></i> ' + act.label +
+          '</button>' +
         '</div>' +
       '</div>';
     }).join('');
 
-    content.innerHTML =
-      '<div class="ra-gap-panel-hdr">' +
-        '<div><div style="font-weight:700;font-size:14px"><i class="fas fa-search-dollar" style="color:#003087"></i> AI Retirement Income Gap Scan</div>' +
-        '<div style="font-size:11px;color:#64748b">Across ' + Object.keys(_raContracts).length + ' annuity contracts</div></div>' +
-        '<button onclick="document.getElementById(\'ra-gap-panel\').style.display=\'none\'" style="background:none;border:none;cursor:pointer;font-size:16px;color:#6b7280"><i class="fas fa-times"></i></button>' +
-      '</div>' +
-      rows +
-      '<div style="padding:12px;background:#fef3c7;border-radius:8px;margin:12px;font-size:12px;color:#92400e">' +
-        '<i class="fas fa-exclamation-triangle"></i> <strong>Total book gap: $' +
-        Object.values(_raContracts).reduce(function(s,c){ return s+(c.incomeGap||0); },0).toLocaleString() +
-        '/mo</strong> across 6 contracts. Priority actions: Sandra Williams SPIA (expires May 30) and Maria Gonzalez annuity maturity (Jun 15).' +
+    // Priority alerts block
+    var alertsHtml =
+      '<div class="ra-gs-alerts">' +
+        '<div class="ra-gs-alerts-hdr"><i class="fas fa-exclamation-triangle" style="color:#dc2626"></i> Priority Actions This Week</div>' +
+        '<div class="ra-gs-alert-row red"><i class="fas fa-calendar-times"></i><div><strong>Maria Gonzalez</strong> — Fixed Deferred Annuity matures <strong>Jun 15, 2026</strong>. Must act within 34 days or contract defaults to low declared rate. Revenue at risk: $3,750.</div></div>' +
+        '<div class="ra-gs-alert-row orange"><i class="fas fa-file-invoice-dollar"></i><div><strong>Sandra Williams</strong> — SPIA quote expires <strong>May 30, 2026</strong>. $1,340/mo guaranteed income locked at current rates. Schedule close meeting this week.</div></div>' +
+        '<div class="ra-gs-alert-row blue"><i class="fas fa-robot"></i><div><strong>AI Recommendation:</strong> Combined annuity premium opportunity across 4 gap clients = <strong>$590,000</strong>. Est. commission pipeline: <strong>$26,200</strong>.</div></div>' +
       '</div>';
 
-    panel.style.display = '';
+    var modal =
+      '<div class="ra-gs-overlay" id="ra-gap-modal" onclick="if(event.target===this)raCloseGapScan()">' +
+        '<div class="ra-gs-modal">' +
+          '<div class="ra-gs-modal-hdr">' +
+            '<div class="ra-gs-modal-hdr-left">' +
+              '<div class="ra-gs-modal-icon"><i class="fas fa-search-dollar"></i></div>' +
+              '<div>' +
+                '<div class="ra-gs-modal-title">AI Retirement Income Gap Scan</div>' +
+                '<div class="ra-gs-modal-sub">Scanning ' + contracts.length + ' annuity contracts across your retirement book · ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<button class="ra-gs-close-btn" onclick="raCloseGapScan()"><i class="fas fa-times"></i></button>' +
+          '</div>' +
+          kpiHtml +
+          '<div class="ra-gs-modal-body">' +
+            '<div class="ra-gs-section-hdr"><i class="fas fa-sort-amount-down"></i> Clients Ranked by Income Gap</div>' +
+            rowsHtml +
+            alertsHtml +
+          '</div>' +
+          '<div class="ra-gs-modal-footer">' +
+            '<button class="ra-gs-footer-btn ghost" onclick="raCloseGapScan()"><i class="fas fa-times"></i> Close</button>' +
+            '<button class="ra-gs-footer-btn outline" onclick="_raToast(\'Exporting gap scan report PDF…\');"><i class="fas fa-file-pdf"></i> Export Report</button>' +
+            '<button class="ra-gs-footer-btn primary" onclick="raCloseGapScan();raOpenNewContract()"><i class="fas fa-plus"></i> New Contract</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', modal);
+    requestAnimationFrame(function(){
+      var el = document.getElementById('ra-gap-modal');
+      if (el) el.classList.add('ra-gs-open');
+    });
+  }
+
+  function raCloseGapScan() {
+    var el = document.getElementById('ra-gap-modal');
+    if (!el) return;
+    el.classList.remove('ra-gs-open');
+    setTimeout(function(){ if (el.parentNode) el.remove(); }, 280);
+  }
+
+  /* ── 22. NEW CONTRACT WIZARD ──────────────────────────────────────── */
+  function raOpenNewContract() {
+    var existing = document.getElementById('ra-nc-modal');
+    if (existing) { existing.remove(); }
+
+    var immediateProducts = [
+      { code:'GLIA', name:'Guaranteed Lifetime Income Annuity', icon:'fa-infinity', color:'#059669',
+        minPremium:'$10K', feature:'Income starts immediately, guaranteed for life',
+        bestFor:'Clients who want dependable income right away — no accumulation phase.' },
+      { code:'LMIA', name:'Lifetime Mutual Income Annuity', icon:'fa-hands-helping', color:'#003087',
+        minPremium:'$10K', feature:'Mutual company dividends may increase income over time',
+        bestFor:'Clients who want immediate income with potential upside from policy dividends.' },
+      { code:'GPIA', name:'Guaranteed Period Income Annuity', icon:'fa-calendar-check', color:'#0891b2',
+        minPremium:'$10K', feature:'Income guaranteed for a chosen period (5–30 yrs)',
+        bestFor:'Clients bridging a specific income gap — e.g., until Social Security begins.' }
+    ];
+
+    var deferredProducts = [
+      { code:'GFIA', name:'Guaranteed Future Income Annuity', icon:'fa-shield-alt', color:'#003087',
+        minPremium:'$10K', feature:'Lock in guaranteed income for a future date',
+        bestFor:'Clients planning ahead — purchase now, income starts at retirement date.' },
+      { code:'FMIA', name:'Future Mutual Income Annuity', icon:'fa-chart-pie', color:'#059669',
+        minPremium:'$10K', feature:'Deferred income + mutual dividend participation',
+        bestFor:'Long-horizon clients who want guaranteed future income with growth potential.' },
+      { code:'CAFIA', name:'Clear Income Advantage Fixed Annuity', icon:'fa-lock', color:'#d97706',
+        minPremium:'$20K', feature:'Guaranteed interest rate + income rider',
+        bestFor:'Conservative clients wanting predictable accumulation and a guaranteed income switch.' },
+      { code:'VA', name:'Variable Annuity', icon:'fa-chart-line', color:'#7c3aed',
+        minPremium:'$25K', feature:'Market-linked growth + optional GMWB/GMIB rider',
+        bestFor:'Clients comfortable with market risk who want tax-deferred growth and rider protection.' },
+      { code:'IndexFlex', name:'Hybrid Variable Annuity (IndexFlex)', icon:'fa-balance-scale', color:'#0891b2',
+        minPremium:'$25K', feature:'Index-linked + fixed account with 0% floor protection',
+        bestFor:'Clients who want market upside with downside protection — best of both worlds.' }
+    ];
+
+    function renderProductCard(p) {
+      return '<div class="ra-nc-prod-card" style="border-color:' + p.color + '40" onclick="raNCSelectProduct(\'' + p.code + '\',\'' + p.name.replace(/'/g,"\\'") + '\')">' +
+        '<div class="ra-nc-prod-card-top" style="background:' + p.color + '10">' +
+          '<div class="ra-nc-prod-icon" style="background:' + p.color + '20;color:' + p.color + '"><i class="fas ' + p.icon + '"></i></div>' +
+          '<div class="ra-nc-prod-info">' +
+            '<div class="ra-nc-prod-name">' + p.name + '</div>' +
+            '<div class="ra-nc-prod-code" style="color:' + p.color + '">' + p.code + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ra-nc-prod-card-body">' +
+          '<div class="ra-nc-prod-feature"><i class="fas fa-check-circle" style="color:' + p.color + '"></i> ' + p.feature + '</div>' +
+          '<div class="ra-nc-prod-min"><i class="fas fa-coins" style="color:#64748b"></i> Min: ' + p.minPremium + '</div>' +
+          '<div class="ra-nc-prod-best"><i class="fas fa-user-check" style="color:#64748b"></i> <em>' + p.bestFor + '</em></div>' +
+        '</div>' +
+        '<div class="ra-nc-prod-select-btn" style="color:' + p.color + '"><i class="fas fa-arrow-right"></i> Select</div>' +
+      '</div>';
+    }
+
+    var benefitsHtml =
+      '<div class="ra-nc-benefits-strip">' +
+        '<div class="ra-nc-benefit"><div class="ra-nc-benefit-icon" style="background:#003087"><i class="fas fa-shield-alt"></i></div><div class="ra-nc-benefit-name">Guaranteed Income</div></div>' +
+        '<div class="ra-nc-benefit"><div class="ra-nc-benefit-icon" style="background:#059669"><i class="fas fa-building-columns"></i></div><div class="ra-nc-benefit-name">Financial Reliability</div></div>' +
+        '<div class="ra-nc-benefit"><div class="ra-nc-benefit-icon" style="background:#d97706"><i class="fas fa-seedling"></i></div><div class="ra-nc-benefit-name">Stretching Savings</div></div>' +
+        '<div class="ra-nc-benefit"><div class="ra-nc-benefit-icon" style="background:#7c3aed"><i class="fas fa-sliders-h"></i></div><div class="ra-nc-benefit-name">Personal Flexibility</div></div>' +
+      '</div>';
+
+    var modalHtml =
+      '<div class="ra-nc-overlay" id="ra-nc-modal" onclick="if(event.target===this)raCloseNewContract()">' +
+        '<div class="ra-nc-modal">' +
+
+          /* ── Header ── */
+          '<div class="ra-nc-modal-hdr">' +
+            '<div class="ra-nc-modal-hdr-left">' +
+              '<div class="ra-nc-modal-icon"><i class="fas fa-file-contract"></i></div>' +
+              '<div>' +
+                '<div class="ra-nc-modal-title">New Annuity Contract</div>' +
+                '<div class="ra-nc-modal-sub">Select a NYL annuity product to begin the application</div>' +
+              '</div>' +
+            '</div>' +
+            '<button class="ra-nc-close-btn" onclick="raCloseNewContract()"><i class="fas fa-times"></i></button>' +
+          '</div>' +
+
+          /* ── AI banner ── */
+          '<div class="ra-nc-ai-banner">' +
+            '<div class="ra-nc-ai-left">' +
+              '<div class="ra-nc-ai-icon"><i class="fas fa-robot"></i><span class="ra-nc-ai-pulse"></span></div>' +
+              '<div>' +
+                '<div class="ra-nc-ai-title">AI Annuity Recommender <span class="ra-nc-ai-live">● LIVE</span></div>' +
+                '<div class="ra-nc-ai-sub">Based on your book: 4 clients with income gaps · $590K premium opportunity · Top match: SPIA for Sandra Williams, FIA for Linda Morrison</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          benefitsHtml +
+
+          '<div class="ra-nc-modal-body">' +
+
+            /* ── Ways header ── */
+            '<div class="ra-nc-ways-hdr">' +
+              '<i class="fas fa-road"></i> You can deliver guaranteed income in two ways' +
+            '</div>' +
+
+            /* ── Immediate block ── */
+            '<div class="ra-nc-way-block">' +
+              '<div class="ra-nc-way-hdr ra-nc-way-immediate">' +
+                '<div class="ra-nc-way-icon"><i class="fas fa-bolt"></i></div>' +
+                '<div>' +
+                  '<div class="ra-nc-way-title">Immediate Income Annuities</div>' +
+                  '<div class="ra-nc-way-sub">Income begins within 12 months of purchase · ideal for clients at or near retirement</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="ra-nc-prod-grid">' +
+                immediateProducts.map(renderProductCard).join('') +
+              '</div>' +
+            '</div>' +
+
+            /* ── Deferred block ── */
+            '<div class="ra-nc-way-block">' +
+              '<div class="ra-nc-way-hdr ra-nc-way-deferred">' +
+                '<div class="ra-nc-way-icon"><i class="fas fa-seedling"></i></div>' +
+                '<div>' +
+                  '<div class="ra-nc-way-title">Deferred Income Annuities</div>' +
+                  '<div class="ra-nc-way-sub">Accumulate now, income starts at a chosen future date · for clients still in earning years</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="ra-nc-prod-grid ra-nc-prod-grid-5">' +
+                deferredProducts.map(renderProductCard).join('') +
+              '</div>' +
+            '</div>' +
+
+          '</div>' +
+
+          '<div class="ra-nc-modal-footer">' +
+            '<button class="ra-nc-footer-btn ghost" onclick="raCloseNewContract()"><i class="fas fa-times"></i> Cancel</button>' +
+            '<button class="ra-nc-footer-btn outline" onclick="_raToast(\'Opening income gap scan to match client to product…\');raCloseNewContract();raRunIncomeGapScan()"><i class="fas fa-search-dollar"></i> Match Client by Gap</button>' +
+          '</div>' +
+
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    requestAnimationFrame(function(){
+      var el = document.getElementById('ra-nc-modal');
+      if (el) el.classList.add('ra-nc-open');
+    });
+  }
+
+  function raCloseNewContract() {
+    var el = document.getElementById('ra-nc-modal');
+    if (!el) return;
+    el.classList.remove('ra-nc-open');
+    setTimeout(function(){ if (el.parentNode) el.remove(); }, 280);
+  }
+
+  function raNCSelectProduct(code, name) {
+    raCloseNewContract();
+    _raToast('Opening E-App for ' + name + ' (' + code + ') — loading suitability checklist…');
   }
 
   /* ── 22. TOAST ────────────────────────────────────────────────────── */
@@ -40015,10 +40265,97 @@ function srOpenFullReview(id) {
     fn(msg);
   }
 
-  /* ── 23. STUB BUTTONS ─────────────────────────────────────────────── */
-  function raOpenNewContract()   { _raToast('Opening new annuity contract wizard…'); }
-  function raOpenMaturityAlert() { _raToast('Maturity alert: ANN-MG-001 matures Jun 15 — contact Maria Gonzalez immediately.'); }
-  function raOpenRMDCalculator() { _raToast('Opening RMD Calculator — loading 2026 IRS life expectancy tables…'); }
+  /* ── 23. UTILITY BUTTONS ──────────────────────────────────────────── */
+  function raOpenMaturityAlert() {
+    var existing = document.getElementById('ra-mat-toast');
+    if (existing) existing.remove();
+    var el = document.createElement('div');
+    el.id = 'ra-mat-toast';
+    el.innerHTML =
+      '<div style="display:flex;align-items:flex-start;gap:12px">' +
+        '<div style="background:#dc2626;color:#fff;border-radius:8px;padding:8px 10px;font-size:18px;flex-shrink:0"><i class="fas fa-calendar-exclamation"></i></div>' +
+        '<div>' +
+          '<div style="font-weight:700;font-size:13px;color:#1e293b">⚠️ Maturity Alert — ANN-MG-001</div>' +
+          '<div style="font-size:12px;color:#374151;margin-top:2px">Maria Gonzalez · Fixed Deferred · <strong>Matures Jun 15, 2026</strong></div>' +
+          '<div style="font-size:11px;color:#6b7280;margin-top:4px">Revenue at risk: $3,750 commission on FIA rollover. Contact Maria this week.</div>' +
+          '<div style="margin-top:8px;display:flex;gap:8px">' +
+            '<button onclick="raCloseMaturityAlert();raOpenContract(\'ANN-MG-001\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;font-weight:600"><i class="fas fa-arrow-right"></i> View Contract</button>' +
+            '<button onclick="raCloseMaturityAlert()" style="background:#f1f5f9;color:#374151;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer">Dismiss</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#fff;border:1.5px solid #dc2626;border-radius:12px;padding:16px;width:340px;z-index:9998;box-shadow:0 8px 24px rgba(0,0,0,.15);animation:ra-slide-in .25s ease';
+    document.body.appendChild(el);
+    setTimeout(function(){ raCloseMaturityAlert(); }, 8000);
+  }
+  function raCloseMaturityAlert() {
+    var el = document.getElementById('ra-mat-toast');
+    if (el) el.remove();
+  }
+
+  function raOpenRMDCalculator() {
+    var existing = document.getElementById('ra-rmd-modal');
+    if (existing) { existing.remove(); }
+    var rmdData = [
+      { name:'James Whitfield', age:52, acctVal:'$178,400', rmd:'Not yet required (age < 73)', urgency:'none' },
+      { name:'Sandra Williams', age:68, acctVal:'$120,000 (SPIA)',  rmd:'N/A — immediate annuity',    urgency:'none' },
+      { name:'Linda Morrison',  age:58, acctVal:'$200,000',  rmd:'Not yet required (age < 73)', urgency:'none' },
+      { name:'Maria Gonzalez',  age:71, acctVal:'$115,800',  rmd:'Required in 2 yrs (age 73)', urgency:'warn' },
+      { name:'Robert Chen',     age:45, acctVal:'$250,000',  rmd:'Not yet required (age < 73)', urgency:'none' },
+      { name:'Dorothy Wilson',  age:61, acctVal:'$120,000 (SPIA)',  rmd:'N/A — immediate annuity',    urgency:'none' }
+    ];
+    var rowsHtml = rmdData.map(function(r) {
+      var urgColor = r.urgency === 'warn' ? '#d97706' : '#059669';
+      var urgIcon  = r.urgency === 'warn' ? 'fa-exclamation-triangle' : 'fa-check-circle';
+      return '<tr>' +
+        '<td style="font-weight:600">' + r.name + '</td>' +
+        '<td>' + r.age + '</td>' +
+        '<td>' + r.acctVal + '</td>' +
+        '<td style="color:' + urgColor + ';font-weight:600"><i class="fas ' + urgIcon + '"></i> ' + r.rmd + '</td>' +
+      '</tr>';
+    }).join('');
+    var html =
+      '<div class="ra-nc-overlay" id="ra-rmd-modal" onclick="if(event.target===this)document.getElementById(\'ra-rmd-modal\').remove()" style="z-index:10001">' +
+        '<div class="ra-nc-modal" style="max-width:700px">' +
+          '<div class="ra-nc-modal-hdr">' +
+            '<div class="ra-nc-modal-hdr-left">' +
+              '<div class="ra-nc-modal-icon" style="background:#d97706"><i class="fas fa-calculator"></i></div>' +
+              '<div>' +
+                '<div class="ra-nc-modal-title">RMD Calculator — 2026</div>' +
+                '<div class="ra-nc-modal-sub">IRS Uniform Lifetime Table · Required Minimum Distributions per client</div>' +
+              '</div>' +
+            '</div>' +
+            '<button class="ra-nc-close-btn" onclick="document.getElementById(\'ra-rmd-modal\').remove()"><i class="fas fa-times"></i></button>' +
+          '</div>' +
+          '<div style="padding:20px">' +
+            '<div class="ra-gs-alerts" style="margin-bottom:16px">' +
+              '<div class="ra-gs-alert-row orange"><i class="fas fa-exclamation-triangle"></i><div><strong>Maria Gonzalez</strong> (age 71) will reach RMD age in 2 years. Begin planning now — annuity RMD strategy required before Jun 15 maturity.</div></div>' +
+            '</div>' +
+            '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+              '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0">' +
+                '<th style="text-align:left;padding:10px 12px;color:#475569">Client</th>' +
+                '<th style="text-align:left;padding:10px 12px;color:#475569">Age</th>' +
+                '<th style="text-align:left;padding:10px 12px;color:#475569">Account Value</th>' +
+                '<th style="text-align:left;padding:10px 12px;color:#475569">RMD Status</th>' +
+              '</tr></thead>' +
+              '<tbody>' + rowsHtml + '</tbody>' +
+            '</table>' +
+            '<div style="margin-top:16px;padding:12px;background:#f0f9ff;border-radius:8px;font-size:12px;color:#0369a1">' +
+              '<i class="fas fa-info-circle"></i> RMDs begin at age 73 per SECURE 2.0 Act. Annuity contracts inside IRAs are subject to RMD rules. SPIAs automatically satisfy RMDs for the annuity value.' +
+            '</div>' +
+          '</div>' +
+          '<div class="ra-nc-modal-footer">' +
+            '<button class="ra-nc-footer-btn ghost" onclick="document.getElementById(\'ra-rmd-modal\').remove()">Close</button>' +
+            '<button class="ra-nc-footer-btn primary" onclick="_raToast(\'Exporting RMD report…\')"><i class="fas fa-file-pdf"></i> Export RMD Report</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function(){
+      var el = document.getElementById('ra-rmd-modal');
+      if (el) el.classList.add('ra-nc-open');
+    });
+  }
 
   /* ── 24. PAGE INIT ────────────────────────────────────────────────── */
   function initRetAccountsPage() {
@@ -40051,10 +40388,15 @@ function srOpenFullReview(id) {
   window.raSwitchTab         = raSwitchTab;
   window.raFilterContracts   = raFilterContracts;
   window.raRunIncomeGapScan  = raRunIncomeGapScan;
+  window.raCloseGapScan      = raCloseGapScan;
   window.raOpenNewContract   = raOpenNewContract;
+  window.raCloseNewContract  = raCloseNewContract;
+  window.raNCSelectProduct   = raNCSelectProduct;
   window.raOpenMaturityAlert = raOpenMaturityAlert;
+  window.raCloseMaturityAlert= raCloseMaturityAlert;
   window.raOpenRMDCalculator = raOpenRMDCalculator;
   window.initRetAccountsPage = initRetAccountsPage;
+  window._raToast            = _raToast;
 
   console.log('RET Step 2 module loaded — Annuity Accounts page: 6 contracts, initRetAccountsPage, raBuildDetailHTML, raSwitchTab ready');
 })();

@@ -14750,10 +14750,11 @@ function InvestmentAccountsPage() {
 function RetirementAccountsPage() {
   return (
     <div class="page ret-accounts-page">
-      {/* ── KPI Bar (rendered by JS module) ── */}
+
+      {/* ── KPI Bar (rendered by JS) ── */}
       <div class="ra-kpi-bar" id="ra-kpi-bar"></div>
 
-      {/* ── AI Retirement Intelligence Banner ── */}
+      {/* ── AI Retirement Intelligence Banner (rendered by JS) ── */}
       <div class="ra-ai-banner" id="ra-ai-banner"></div>
 
       {/* ── Toolbar ── */}
@@ -14761,15 +14762,19 @@ function RetirementAccountsPage() {
         <div class="toolbar-left">
           <div class="search-inline">
             <i class="fas fa-search"></i>
-            <input type="text" id="ra-search" placeholder="Search annuity contracts, clients..." oninput="raFilterContracts()" />
+            <input type="text" id="ra-search" placeholder="Search annuity contracts, clients…" oninput="raFilterContracts()" />
           </div>
           <select class="filter-select" id="ra-type-filter" onchange="raFilterContracts()">
             <option value="">All Annuity Types</option>
-            <option>Fixed Index Annuity (FIA)</option>
-            <option>Variable Annuity (VA)</option>
-            <option>Single Premium Immediate (SPIA)</option>
-            <option>Deferred Income Annuity (DIA)</option>
-            <option>Fixed Deferred Annuity</option>
+            <optgroup label="── Immediate ──">
+              <option>Single Premium Immediate (SPIA)</option>
+              <option>Deferred Income Annuity (DIA)</option>
+            </optgroup>
+            <optgroup label="── Deferred ──">
+              <option>Fixed Index Annuity (FIA)</option>
+              <option>Variable Annuity (VA)</option>
+              <option>Fixed Deferred Annuity</option>
+            </optgroup>
           </select>
           <select class="filter-select" id="ra-status-filter" onchange="raFilterContracts()">
             <option value="">All Status</option>
@@ -14782,7 +14787,13 @@ function RetirementAccountsPage() {
         </div>
         <div class="toolbar-right">
           <button class="btn btn-ai" onclick="raRunIncomeGapScan()">
-            <i class="fas fa-robot"></i> Income Gap Scan
+            <i class="fas fa-search-dollar"></i> Income Gap Scan
+          </button>
+          <button class="btn btn-ghost" onclick="raOpenMaturityAlert()">
+            <i class="fas fa-calendar-exclamation"></i> Maturity Alert
+          </button>
+          <button class="btn btn-ghost" onclick="raOpenRMDCalculator()">
+            <i class="fas fa-calculator"></i> RMD Calculator
           </button>
           <button class="btn btn-primary" onclick="raOpenNewContract()">
             <i class="fas fa-plus"></i> New Contract
@@ -14790,30 +14801,34 @@ function RetirementAccountsPage() {
         </div>
       </div>
 
-      {/* ── Split layout: queue + detail ── */}
-      <div class="ra-split">
-        {/* ── Left: Contract Queue ── */}
-        <div class="ra-queue-col" id="ra-queue-col">
+      {/* ── Main 2-col layout: Contract Queue + Detail ── */}
+      <div class="ra-body">
+
+        {/* LEFT — Contract Queue */}
+        <div class="ra-list-col">
+          <div class="ra-list-col-hdr">
+            <span class="ra-list-col-title"><i class="fas fa-file-contract"></i> Annuity Contracts</span>
+            <span class="ra-list-col-count" id="ra-list-count">6 contracts</span>
+          </div>
           <div id="ra-contract-queue">
             {/* Rendered by raRenderQueue() */}
           </div>
         </div>
 
-        {/* ── Right: Contract Detail Panel ── */}
+        {/* RIGHT — Contract Detail Panel */}
         <div class="ra-detail-col" id="ra-detail-col">
           <div class="ra-detail-empty" id="ra-detail-empty">
-            <i class="fas fa-umbrella-beach"></i>
-            <div>Select a contract to view details</div>
+            <i class="fas fa-umbrella-beach ra-empty-icon"></i>
+            <strong>Select a contract to view details</strong>
+            <p>Click any annuity contract to view income projections,<br/>
+               gap coverage, contract terms, riders, suitability,<br/>
+               and AI-powered retirement income brief</p>
           </div>
-          <div class="ra-detail-panel" id="ra-detail-panel" style="display:none">
+          <div id="ra-detail-panel" style="display:none">
             {/* Rendered by raBuildDetailHTML() */}
           </div>
         </div>
-      </div>
 
-      {/* ── Income Gap Scan Panel (hidden) ── */}
-      <div class="ra-gap-panel" id="ra-gap-panel" style="display:none">
-        <div id="ra-gap-content"></div>
       </div>
 
     </div>
