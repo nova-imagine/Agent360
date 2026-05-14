@@ -722,8 +722,6 @@ function Sidebar() {
           <i class="fas fa-box-open"></i><span>Policy Delivery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">2</span>
         </a>
-        {/* micro-divider: pre-sale → post-sale */}
-        <div class="nav-micro-divider"></div>
         <a class="nav-item policies-nav" onclick="navigateTo('policies')" href="#">
           <i class="fas fa-file-contract"></i><span>Policies</span>
           <span class="nav-badge">1.8K</span>
