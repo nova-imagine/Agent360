@@ -12653,6 +12653,14 @@ const campaignsData = {
     aiScore: 94, color: '#003087',
     aiInsight: 'Top performer at 3× avg conversion. Recommend scaling budget by $2K for May push.',
     aiTargeting: 'Professionals 35–55, dual income, dependents, homeowners. AI-matched 89 prospects in CRM.',
+    aiChannelTip: 'Email is outperforming calls 2:1 for this segment. Shift 20% of call budget to email sequences for May. Social Media driving awareness but low direct conversion — use for retargeting only.',
+    aiBudgetNote: 'Spend pace is 70% ($2,940 of $4,200) with 60% of campaign duration elapsed. On track. Recommend reserving $800 for a final May push targeting the 6 non-responsive enrolled leads.',
+    aiNextActions: [
+      { lead: 'Alex Rivera', action: 'Follow-up call overdue — 11 days since last contact. High ins score (88). Priority dial today.' },
+      { lead: 'Nancy Foster', action: 'Replied to email — schedule discovery call within 48 hrs while engagement is warm.' },
+      { lead: 'Stephanie Lee', action: 'Send policy comparison doc — expressed interest in $500K WL. Personalise with income bracket.' }
+    ],
+    aiTiming: 'Best outreach window for this segment: Tuesday & Thursday, 10–11 AM. Avoid Monday AM and Friday PM — 34% lower response rate.',
     leadIds: ['L001','L002','L003','L004','L005'],
     weeklyLeads: [4, 6, 8, 5, 7, 4],
     monthlyConv: [0, 1, 1, 2]
@@ -12666,6 +12674,14 @@ const campaignsData = {
     aiScore: 78, color: '#0891b2',
     aiInsight: 'Good lead volume, lower conversion. AI recommends adding live webinar touchpoint to lift close rate.',
     aiTargeting: 'Ages 28–40, recently married or new parent, mortgage holders. AI-matched 134 prospects.',
+    aiChannelTip: 'SMS open rate is 91% vs 38% for email in this segment. Lead with SMS for appointment setting, follow with email for documents and detail. Consider a short-form video explainer link in SMS.',
+    aiBudgetNote: 'Only 40% of budget spent ($1,120 of $2,800) at campaign midpoint. Underspending. Recommend activating a 3rd channel — webinar or LinkedIn — to accelerate lead engagement before July.',
+    aiNextActions: [
+      { lead: 'Jessica Patel', action: 'No response to 2 emails. Switch to SMS — high open rate for her demographic.' },
+      { lead: 'Daniel Kim', action: 'Showed interest — send term life calculator link to help him size coverage need.' },
+      { lead: 'Rachel Moore', action: 'New lead, no outreach yet. Send welcome SMS within 24 hrs of entry date.' }
+    ],
+    aiTiming: 'Optimal contact window: Weekday evenings 6–8 PM and Saturday mornings 9–11 AM. Young families are hardest to reach during core work hours.',
     leadIds: ['L006','L007','L008'],
     weeklyLeads: [5, 8, 6, 4, 3, 2],
     monthlyConv: [0, 0, 1, 1]
@@ -12679,6 +12695,14 @@ const campaignsData = {
     aiScore: 86, color: '#059669',
     aiInsight: 'Seminar channel generating 4× more qualified leads vs email alone. Scale seminar budget.',
     aiTargeting: 'Existing clients 50–65 with WL/UL policies but no annuity product. AI-identified 47 clients.',
+    aiChannelTip: 'In-person meetings closing at 33% vs 11% for email-only sequences. For the 6 enrolled leads past 3 contact attempts, escalate to in-person meeting invitation. Seminar attendees convert 2× faster.',
+    aiBudgetNote: 'Budget 60% utilized ($3,300 of $5,500) with campaign ending May 31 — 6 weeks out. Pace is healthy. Recommend allocating remaining $2,200 to schedule one final seminar event in mid-May to capture late-stage prospects.',
+    aiNextActions: [
+      { lead: 'Thomas Grant', action: 'High ret score — propose in-person meeting to walk through deferred annuity illustration.' },
+      { lead: 'Carol Bennett', action: 'Highest score in roster (ret: 93). Invite to private lunch seminar — VIP treatment likely to accelerate close.' },
+      { lead: 'Frank Russo', action: 'Contacted but no appointment set. Send seminar invite with personalised retirement income projection.' }
+    ],
+    aiTiming: 'Pre-retirement segment most responsive mid-morning (10 AM–12 PM) on weekdays. Seminars perform best on Thursday evenings 6–8 PM for this age group.',
     leadIds: ['L009','L010','L011'],
     weeklyLeads: [3, 5, 7, 6, 5, 5],
     monthlyConv: [1, 0, 1, 1]
@@ -12692,6 +12716,13 @@ const campaignsData = {
     aiScore: 82, color: '#7c3aed',
     aiInsight: 'Referral channel has 2× close rate vs direct. Incentivize existing HNW clients for referrals.',
     aiTargeting: 'Net worth $1M+, business owners or executives, existing policyholders. AI-matched 28 prospects.',
+    aiChannelTip: 'Referral-sourced leads closing at 22% vs 8% for direct outreach. Recommend a structured referral incentive — concierge gift or charitable donation in client\'s name — to activate 5 dormant referral relationships.',
+    aiBudgetNote: 'Spend at 60% ($4,800 of $8,000) with 5 months elapsed of 6. Slightly under-paced. Private Events have the highest ROI per dollar — consider one more exclusive dinner event in June to convert the 2 remaining high-score enrolled leads.',
+    aiNextActions: [
+      { lead: 'Diana Walsh', action: 'Highest inv score in portfolio (95). Propose UMA portfolio review — time-sensitive given market conditions.' },
+      { lead: 'Henry Okafor', action: 'Contacted — no response in 4 days. Send handwritten note + private event invite. HNW segment responds to personal touch.' }
+    ],
+    aiTiming: 'HNW segment most reachable 7–9 AM (pre-market) or 5–7 PM (post-market). Avoid lunch windows. Private events should be Thursday evenings for highest acceptance rate.',
     leadIds: ['L012','L013'],
     weeklyLeads: [2, 3, 4, 3, 4, 3],
     monthlyConv: [0, 1, 0, 1]
@@ -12705,6 +12736,13 @@ const campaignsData = {
     aiScore: 58, color: '#ea580c',
     aiInsight: 'Low conversion — AI suggests pairing with Medicare education webinar to improve engagement.',
     aiTargeting: 'Clients 55–70 without LTC coverage. AI-identified 62 clients eligible for outreach.',
+    aiChannelTip: 'Content Marketing is generating awareness but not appointments. Add a clear call-to-action at the end of each content piece — a "Free LTC Planning Consultation" offer converts 3× better than passive reading. Consider a Medicare co-education webinar as a low-barrier entry point.',
+    aiBudgetNote: 'Only 30% of budget spent ($930 of $3,100) — campaign is currently paused. Upon resuming, recommend a revised 8-week sprint focused on the webinar channel before the Aug 31 deadline. Remaining $2,170 is sufficient for 2 webinar events and a targeted email re-engagement sequence.',
+    aiNextActions: [
+      { lead: 'Paula Simmons', action: 'New lead, no outreach since entry Apr 3. Re-engage with LTC awareness email + Medicare cost comparison tool link.' },
+      { lead: 'George Huang', action: 'Was contacted — send Medicare/LTC joint webinar invitation as re-engagement. Personalize with age-specific cost projections.' }
+    ],
+    aiTiming: 'Seniors 55–70 respond best to emails sent Tuesday–Thursday 9–10 AM. Webinars have highest attendance on Wednesday evenings 6 PM. Avoid weekend outreach for this segment.',
     leadIds: ['L014','L015'],
     weeklyLeads: [3, 4, 5, 3, 2, 1],
     monthlyConv: [0, 0, 0, 0]
@@ -12718,6 +12756,12 @@ const campaignsData = {
     aiScore: 70, color: '#0891b2',
     aiInsight: 'Early stage — first webinar had 34 attendees with 12 leads captured. Second webinar scheduled May 8.',
     aiTargeting: 'Clients with $50K+ idle savings, low investment product penetration. AI-matched 78 prospects.',
+    aiChannelTip: 'Webinar is performing well as a lead capture tool (35% attendance-to-lead rate). Now add a post-webinar email sequence: Day 1 thank-you + recording, Day 3 portfolio assessment offer, Day 7 follow-up call prompt. This 3-step sequence typically lifts conversion by 40%.',
+    aiBudgetNote: 'Early stage — only 25% of budget spent ($900 of $3,600) after 4 weeks. Healthy pace for a webinar-led campaign. Recommend holding budget for post-May-8 webinar follow-up sequence and 1:1 discovery calls for the 4 enrolled leads showing inv domain scores above 70.',
+    aiNextActions: [
+      { lead: 'No enrolled leads yet', action: 'Post-webinar: contact the 12 leads captured within 24 hrs of the May 8 event. Speed-to-contact is the #1 predictor of webinar lead conversion.' }
+    ],
+    aiTiming: 'Mid-market professionals most reachable Tuesday–Thursday 8–9 AM or 12–1 PM. Webinars perform best at 12 PM (lunch slot) or 6 PM (post-work). Avoid Monday and Friday for initial outreach.',
     leadIds: [],
     weeklyLeads: [0, 0, 4, 5, 3, 0],
     monthlyConv: [0, 0, 0, 0]
@@ -12782,109 +12826,160 @@ function openCampaignDetail(campId) {
   const body = document.getElementById('camp-modal-body');
   if (!overlay || !title || !body) return;
 
-  title.innerHTML = `<span style="color:${camp.color}"><i class="fas fa-bullhorn"></i></span> ${camp.name}`;
+  title.innerHTML = '<span style="color:' + camp.color + '"><i class="fas fa-bullhorn"></i></span> ' + camp.name;
 
-  const leadsHtml = (camp.leadIds || []).slice(0, 5).map(lid => {
-    const lead = campaignLeadsData[lid];
-    if (!lead) return '';
-    const scoreColor = lead.score >= 80 ? '#059669' : lead.score >= 65 ? '#d97706' : '#dc2626';
-    const statusColor = { 'Opportunity': '#7c3aed', 'Contacted': '#0891b2', 'New': '#6b7280' }[lead.status] || '#6b7280';
-    return `
-      <div class="camp-lead-row">
-        <div class="camp-lead-avatar">${lead.name.split(' ').map(n=>n[0]).join('')}</div>
-        <div class="camp-lead-info">
-          <div class="camp-lead-name">${lead.name}</div>
-          <div class="camp-lead-product">${lead.product}</div>
-        </div>
-        <span class="camp-lead-score" style="background:${scoreColor}">${lead.score}</span>
-        <span class="camp-lead-status" style="background:${statusColor}20;color:${statusColor}">${lead.status}</span>
-        <span class="camp-lead-date">${lead.lastContact}</span>
-        <button class="camp-btn-xs" onclick="navigateTo('prospects')"><i class="fas fa-arrow-right"></i></button>
-      </div>`;
-  }).join('');
+  // Build Campaign Roster from main leadsData (cross-referenced by leadIds)
+  var rosterIds = camp.leadIds || [];
+  var rosterHtml = '';
+  if (rosterIds.length === 0) {
+    rosterHtml = '<div class="camp-roster-empty"><i class="fas fa-user-slash"></i> No leads enrolled in this campaign yet.</div>';
+  } else {
+    // Look up each lead in leadsData (the authoritative source)
+    var rosterItems = rosterIds.map(function(lid) {
+      var lead = null;
+      for (var i = 0; i < leadsData.length; i++) {
+        if (leadsData[i].id === lid) { lead = leadsData[i]; break; }
+      }
+      // Fall back to campaignLeadsData if not found in leadsData
+      if (!lead) {
+        var cl = campaignLeadsData[lid];
+        if (!cl) return '';
+        lead = { id: lid, name: cl.name, initials: cl.name.split(' ').map(function(n){return n[0];}).join(''), avatarColor: '#6b7280', domainScores: { ins: 0, inv: 0, ret: 0 }, status: cl.status.toLowerCase(), lastContact: cl.lastContact, productInterest: [cl.product] };
+      }
+      var meta = _leadStatusMeta(lead.status);
+      var ins = (lead.domainScores || {}).ins || 0;
+      var inv = (lead.domainScores || {}).inv || 0;
+      var ret = (lead.domainScores || {}).ret || 0;
+      var topScore = Math.max(ins, inv, ret);
+      var scoreColor = topScore >= 80 ? '#059669' : topScore >= 60 ? '#d97706' : '#9ca3af';
+      var lastC = lead.lastContact || '—';
+      var products = (lead.productInterest || []).join(', ') || '—';
+      return '<div class="camp-roster-row">' +
+        '<div class="camp-lead-avatar" style="background:' + (lead.avatarColor || '#6b7280') + '">' + (lead.initials || lead.name.split(' ').map(function(n){return n[0];}).join('')) + '</div>' +
+        '<div class="camp-roster-info">' +
+          '<div class="camp-roster-name">' + lead.name + '</div>' +
+          '<div class="camp-roster-product">' + products + '</div>' +
+        '</div>' +
+        '<div class="camp-roster-bars">' +
+          '<div class="camp-roster-bar-row"><span class="camp-roster-bar-lbl">Ins</span><div class="camp-roster-bar-track"><div class="camp-roster-bar-fill" style="width:' + ins + '%;background:#003087"></div></div><span class="camp-roster-bar-pct">' + ins + '</span></div>' +
+          '<div class="camp-roster-bar-row"><span class="camp-roster-bar-lbl">Inv</span><div class="camp-roster-bar-track"><div class="camp-roster-bar-fill" style="width:' + inv + '%;background:#7c3aed"></div></div><span class="camp-roster-bar-pct">' + inv + '</span></div>' +
+          '<div class="camp-roster-bar-row"><span class="camp-roster-bar-lbl">Ret</span><div class="camp-roster-bar-track"><div class="camp-roster-bar-fill" style="width:' + ret + '%;background:#059669"></div></div><span class="camp-roster-bar-pct">' + ret + '</span></div>' +
+        '</div>' +
+        '<div class="camp-roster-right">' +
+          '<span class="camp-roster-stage" style="background:' + meta.color + '20;color:' + meta.color + '">' + meta.label + '</span>' +
+          '<span class="camp-roster-date"><i class="fas fa-clock"></i> ' + lastC + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    rosterHtml = rosterItems || '<div class="camp-roster-empty"><i class="fas fa-user-slash"></i> No enrolled leads found.</div>';
+  }
 
-  const budgetPct = Math.round((camp.spent / camp.budget) * 100);
+  var budgetPct = Math.round((camp.spent / camp.budget) * 100);
 
-  body.innerHTML = `
-    <div class="camp-detail-grid">
-      <!-- Left: KPIs + Funnel -->
-      <div class="camp-detail-left">
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Campaign Performance</div>
-          <div class="camp-detail-kpis">
-            <div class="camp-det-kpi"><div class="camp-det-val">${camp.leads}</div><div class="camp-det-lbl">Leads</div></div>
-            <div class="camp-det-kpi"><div class="camp-det-val">${camp.opps}</div><div class="camp-det-lbl">Opps</div></div>
-            <div class="camp-det-kpi"><div class="camp-det-val">${camp.clients}</div><div class="camp-det-lbl">Clients</div></div>
-            <div class="camp-det-kpi"><div class="camp-det-val">${camp.convRate}</div><div class="camp-det-lbl">Conv. Rate</div></div>
-          </div>
-        </div>
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Budget Utilisation</div>
-          <div class="camp-budget-row">
-            <span>$${camp.spent.toLocaleString()} spent of $${camp.budget.toLocaleString()}</span>
-            <span>${budgetPct}%</span>
-          </div>
-          <div class="camp-budget-bar"><div class="camp-budget-fill" style="width:${budgetPct}%;background:${camp.color}"></div></div>
-        </div>
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Funnel</div>
-          <div class="camp-detail-funnel">
-            <div class="camp-detail-funnel-step" style="border-color:#0891b2">
-              <div class="camp-detail-funnel-n" style="color:#0891b2">1</div>
-              <div>Campaign Active</div>
-            </div>
-            <div class="camp-detail-funnel-arr">↓</div>
-            <div class="camp-detail-funnel-step" style="border-color:#f59e0b">
-              <div class="camp-detail-funnel-n" style="color:#f59e0b">${camp.leads}</div>
-              <div>Leads Generated</div>
-            </div>
-            <div class="camp-detail-funnel-arr">↓</div>
-            <div class="camp-detail-funnel-step" style="border-color:#7c3aed">
-              <div class="camp-detail-funnel-n" style="color:#7c3aed">${camp.opps}</div>
-              <div>Opportunities</div>
-            </div>
-            <div class="camp-detail-funnel-arr">↓</div>
-            <div class="camp-detail-funnel-step" style="border-color:#059669">
-              <div class="camp-detail-funnel-n" style="color:#059669">${camp.clients}</div>
-              <div>Clients Won</div>
-            </div>
-          </div>
-        </div>
-        <div class="camp-detail-section camp-detail-ai-box">
-          <div class="camp-detail-section-title"><i class="fas fa-robot"></i> AI Intelligence</div>
-          <div class="camp-detail-ai-insight">${camp.aiInsight}</div>
-          <div class="camp-detail-ai-target" style="margin-top:8px"><strong>Targeting:</strong> ${camp.aiTargeting}</div>
-        </div>
-      </div>
-      <!-- Right: Info + Leads -->
-      <div class="camp-detail-right">
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Campaign Details</div>
-          <div class="camp-detail-info-grid">
-            <div class="camp-info-row"><span class="camp-info-lbl">Type</span><span class="camp-info-val">${camp.type}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Status</span><span class="camp-info-val camp-status-${camp.status.toLowerCase()}">${camp.status}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Segment</span><span class="camp-info-val">${camp.segment}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Channels</span><span class="camp-info-val">${camp.channels.join(', ')}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Start Date</span><span class="camp-info-val">${camp.startDate}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">End Date</span><span class="camp-info-val">${camp.endDate}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Pipeline Value</span><span class="camp-info-val" style="color:#059669;font-weight:600">${camp.pipelineValue}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">AI Score</span><span class="camp-info-val"><span class="camp-ai-score-badge">${camp.aiScore}/100</span></span></div>
-          </div>
-        </div>
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Recent Leads <button class="camp-see-all" onclick="navigateTo('prospects');closeCampaignDetail()">See All →</button></div>
-          <div class="camp-leads-list">${leadsHtml || '<div style="color:#9ca3af;padding:12px 0">No leads yet</div>'}</div>
-        </div>
-        <div class="camp-detail-footer">
-          <button class="btn btn-primary" onclick="closeCampaignDetail();navigateTo('prospects')"><i class="fas fa-users"></i> View All Leads</button>
-          <button class="btn btn-ai" onclick="runCampaignAI('${campId}')"><i class="fas fa-robot"></i> AI Optimize</button>
-          ${camp.status === 'Paused' ?
-            `<button class="btn btn-success" onclick="resumeCampaign('${campId}')"><i class="fas fa-play"></i> Resume</button>` :
-            `<button class="btn btn-ghost" onclick="pauseCampaign('${campId}')"><i class="fas fa-pause"></i> Pause</button>`
-          }
-        </div>
-      </div>
-    </div>`;
+  body.innerHTML =
+    '<div class="camp-detail-grid">' +
+      '<!-- Left: KPIs + Funnel -->' +
+      '<div class="camp-detail-left">' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Campaign Performance</div>' +
+          '<div class="camp-detail-kpis">' +
+            '<div class="camp-det-kpi"><div class="camp-det-val">' + camp.leads + '</div><div class="camp-det-lbl">Enrolled</div></div>' +
+            '<div class="camp-det-kpi"><div class="camp-det-val">' + camp.opps + '</div><div class="camp-det-lbl">Prospects</div></div>' +
+            '<div class="camp-det-kpi"><div class="camp-det-val">' + camp.clients + '</div><div class="camp-det-lbl">Clients</div></div>' +
+            '<div class="camp-det-kpi"><div class="camp-det-val">' + camp.convRate + '</div><div class="camp-det-lbl">Conv. Rate</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Budget Utilisation</div>' +
+          '<div class="camp-budget-row">' +
+            '<span>$' + camp.spent.toLocaleString() + ' spent of $' + camp.budget.toLocaleString() + '</span>' +
+            '<span>' + budgetPct + '%</span>' +
+          '</div>' +
+          '<div class="camp-budget-bar"><div class="camp-budget-fill" style="width:' + budgetPct + '%;background:' + camp.color + '"></div></div>' +
+        '</div>' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Funnel</div>' +
+          '<div class="camp-detail-funnel">' +
+            '<div class="camp-detail-funnel-step" style="border-color:#0891b2">' +
+              '<div class="camp-detail-funnel-n" style="color:#0891b2">1</div>' +
+              '<div>Campaign Active</div>' +
+            '</div>' +
+            '<div class="camp-detail-funnel-arr">\u2193</div>' +
+            '<div class="camp-detail-funnel-step" style="border-color:#f59e0b">' +
+              '<div class="camp-detail-funnel-n" style="color:#f59e0b">' + camp.leads + '</div>' +
+              '<div>Leads Enrolled</div>' +
+            '</div>' +
+            '<div class="camp-detail-funnel-arr">\u2193</div>' +
+            '<div class="camp-detail-funnel-step" style="border-color:#7c3aed">' +
+              '<div class="camp-detail-funnel-n" style="color:#7c3aed">' + camp.opps + '</div>' +
+              '<div>Prospects</div>' +
+            '</div>' +
+            '<div class="camp-detail-funnel-arr">\u2193</div>' +
+            '<div class="camp-detail-funnel-step" style="border-color:#059669">' +
+              '<div class="camp-detail-funnel-n" style="color:#059669">' + camp.clients + '</div>' +
+              '<div>Clients Won</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="camp-detail-section camp-detail-ai-box">' +
+          '<div class="camp-detail-section-title"><i class="fas fa-robot"></i> AI Intelligence</div>' +
+          '<div class="camp-detail-ai-insight">' + camp.aiInsight + '</div>' +
+          '<div class="camp-detail-ai-target" style="margin-top:8px"><strong>Targeting:</strong> ' + camp.aiTargeting + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<!-- Right: Info + Campaign Roster -->' +
+      '<div class="camp-detail-right">' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Campaign Details</div>' +
+          '<div class="camp-detail-info-grid">' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Type</span><span class="camp-info-val">' + camp.type + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Status</span><span class="camp-info-val camp-status-' + camp.status.toLowerCase() + '">' + camp.status + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Segment</span><span class="camp-info-val">' + camp.segment + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Channels</span><span class="camp-info-val">' + camp.channels.join(', ') + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Start Date</span><span class="camp-info-val">' + camp.startDate + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">End Date</span><span class="camp-info-val">' + camp.endDate + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Pipeline Value</span><span class="camp-info-val" style="color:#059669;font-weight:600">' + camp.pipelineValue + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">AI Score</span><span class="camp-info-val"><span class="camp-ai-score-badge">' + camp.aiScore + '/100</span></span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Campaign Roster' +
+            '<span class="camp-roster-count">' + rosterIds.length + ' lead' + (rosterIds.length !== 1 ? 's' : '') + ' enrolled</span>' +
+          '</div>' +
+          '<div class="camp-roster-list">' + rosterHtml + '</div>' +
+        '</div>' +
+        '<div class="camp-detail-footer">' +
+          '<button class="btn btn-secondary" onclick="closeCampaignDetail()"><i class="fas fa-times"></i> Close</button>' +
+          '<button class="btn btn-ai" id="camp-ai-btn-' + campId + '" onclick="toggleCampaignAIPanel(\'' + campId + '\')"><i class="fas fa-robot"></i> AI Optimize</button>' +
+        '</div>' +
+        '<!-- AI Optimize Panel (hidden by default) -->' +
+        '<div class="camp-ai-panel" id="camp-ai-panel-' + campId + '" style="display:none">' +
+          '<div class="camp-ai-panel-header"><i class="fas fa-brain"></i> AI Recommendations — ' + camp.name + '</div>' +
+          '<div class="camp-ai-panel-sections">' +
+            '<div class="camp-ai-panel-block">' +
+              '<div class="camp-ai-panel-block-title"><i class="fas fa-broadcast-tower"></i> Channel Mix</div>' +
+              '<div class="camp-ai-panel-block-body">' + (camp.aiChannelTip || 'No channel recommendations available.') + '</div>' +
+            '</div>' +
+            '<div class="camp-ai-panel-block">' +
+              '<div class="camp-ai-panel-block-title"><i class="fas fa-dollar-sign"></i> Budget Allocation</div>' +
+              '<div class="camp-ai-panel-block-body">' + (camp.aiBudgetNote || 'No budget notes available.') + '</div>' +
+            '</div>' +
+            '<div class="camp-ai-panel-block">' +
+              '<div class="camp-ai-panel-block-title"><i class="fas fa-clock"></i> Timing Insight</div>' +
+              '<div class="camp-ai-panel-block-body">' + (camp.aiTiming || 'No timing data available.') + '</div>' +
+            '</div>' +
+            '<div class="camp-ai-panel-block">' +
+              '<div class="camp-ai-panel-block-title"><i class="fas fa-bolt"></i> Next Best Actions</div>' +
+              '<div class="camp-ai-panel-nba">' +
+                (camp.aiNextActions || []).map(function(a) {
+                  return '<div class="camp-ai-nba-row"><div class="camp-ai-nba-lead"><i class="fas fa-user"></i> ' + a.lead + '</div><div class="camp-ai-nba-action">' + a.action + '</div></div>';
+                }).join('') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 
   overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -12931,12 +13026,24 @@ function openCampAIWizard() {
 }
 
 function runCampaignAI(campId) {
-  const camp = campaignsData[campId];
-  if (!camp) return;
-  showToast(`<i class="fas fa-robot"></i> Running AI optimisation for <strong>${camp.name}</strong>…`);
-  setTimeout(() => {
-    showToast(`<i class="fas fa-check-circle" style="color:#059669"></i> AI recommendation ready — ${camp.aiInsight}`);
-  }, 1800);
+  // Legacy stub — now handled by toggleCampaignAIPanel
+  toggleCampaignAIPanel(campId);
+}
+
+function toggleCampaignAIPanel(campId) {
+  var panel = document.getElementById('camp-ai-panel-' + campId);
+  var btn = document.getElementById('camp-ai-btn-' + campId);
+  if (!panel) return;
+  var isOpen = panel.style.display !== 'none';
+  if (isOpen) {
+    panel.style.display = 'none';
+    if (btn) { btn.innerHTML = '<i class="fas fa-robot"></i> AI Optimize'; btn.classList.remove('camp-ai-btn-open'); }
+  } else {
+    panel.style.display = 'block';
+    if (btn) { btn.innerHTML = '<i class="fas fa-check-circle"></i> AI Panel Open'; btn.classList.add('camp-ai-btn-open'); }
+    // Scroll panel into view
+    setTimeout(function() { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 80);
+  }
 }
 
 // ── New Campaign Modal ─────────────────────────────────────────
@@ -23645,10 +23752,11 @@ console.log('Product Intelligence Hub module loaded \u2014 piProductsData(' + pi
 var fnaData = [
   {
     id: 'FNA-001', client: 'Alex Rivera', initials: 'AR', phase: 3,
-    stage: 'Gap Analysis', pct: 60, status: 'gap',
+    stage: 'Needs Analysis', pct: 60, status: 'gap',
     dob: '1992-03-14', age: 34, gender: 'Male', smoker: false,
     occupation: 'VP of Technology', income: 185000, netWorth: 340000,
     lifeEvent: 'New Baby (Dec 2025)',
+    domains: ['insurance'],
     products: ['Whole Life $500K'],
     gaps: ['No disability coverage', 'No LTC rider'],
     coverageNeeded: 780000, annualPremiumEst: 4200,
@@ -23661,6 +23769,7 @@ var fnaData = [
     dob: '1983-07-22', age: 41, gender: 'Female', smoker: false,
     occupation: 'Healthcare Director', income: 220000, netWorth: 620000,
     lifeEvent: 'New Home (Mar 2026)',
+    domains: ['insurance', 'retirement'],
     products: ['Term Life $1M', 'LTC Rider interest'],
     gaps: ['No LTC coverage', 'Income gap $310K'],
     coverageNeeded: 1000000, annualPremiumEst: 3600,
@@ -23669,10 +23778,11 @@ var fnaData = [
   },
   {
     id: 'FNA-003', client: 'Patricia Nguyen', initials: 'PN', phase: 4,
-    stage: 'AI Recommendation', pct: 80, status: 'urgent',
+    stage: 'AI Proposal', pct: 80, status: 'urgent',
     dob: '1978-11-05', age: 48, gender: 'Female', smoker: false,
     occupation: 'Senior Operations Manager', income: 148000, netWorth: 510000,
     lifeEvent: 'Children approaching college age',
+    domains: ['insurance', 'retirement', 'advisory'],
     products: ['UL top-up needed'],
     gaps: ['$240K income gap', 'UL underfunded — lapse risk 68 days'],
     coverageNeeded: 640000, annualPremiumEst: 6200,
@@ -26217,8 +26327,9 @@ var fnaFullData = {
 
   'FNA-001': {
     id: 'FNA-001', client: 'Alex Rivera', initials: 'AR', avatarColor: '#003087',
-    phase: 3, stage: 'Gap Analysis', pct: 60, status: 'gap',
+    phase: 3, stage: 'Needs Analysis', pct: 60, status: 'gap',
     prospectId: 'P001',
+    domains: ['insurance'],
     meetingDate: 'Apr 3, 2026', meetingType: 'In-Person', meetingLocation: 'NYL Midtown Office',
 
     // 2.3 Personal data
@@ -26302,6 +26413,36 @@ var fnaFullData = {
       meetingSummaryGenerated: true
     },
 
+    // Retirement profile (not primary domain for Alex — deferred, age 34)
+    retirement: {
+      targetRetirementAge: 58,
+      targetMonthlyIncome: 10000,
+      socialSecurityAge: 67, socialSecurityEst: 2300,
+      pensionIncome: 0,
+      existingAnnuityIncome: 0,
+      rolloverAssets: { k401: 148000, ira: 0, roth: 0, other: 0 },
+      annuityInterest: 'Not yet — revisit at 45',
+      annuityType: 'none',
+      incomeFloor: 7000,
+      aiRetirementNote: 'Retirement planning deferred — primary need is life + DI. Flag for annuity conversation at age 40–45 when retirement savings projected to reach $450K.'
+    },
+
+    // Investment & Advisory profile (not primary domain — early stage)
+    investmentAdvisory: {
+      riskTolerance: 'Growth',
+      riskScore: 72,
+      timeHorizon: '20+ years',
+      investableAssets: { taxable: 95000, ira: 0, roth: 0, k401: 148000, other: 0 },
+      currentHoldings: 'Employer 401K (Vanguard target-date 2055). Brokerage — $95K self-managed index funds.',
+      investmentObjective: 'Long-term growth — accumulation phase',
+      smaUmaCandidate: false, smaUmaNote: 'Below $250K investable threshold — revisit when liquid assets exceed $250K.',
+      advisoryDomains: [],
+      estateDocuments: { will: false, trust: false, poa: false, healthcareDirective: false },
+      businessOwner: false,
+      aiInvestmentNote: 'Growth profile confirmed. Current 401K + brokerage allocation appropriate. Not yet SMA/UMA candidate — threshold is $250K investable. Recommend annual review of allocation as income grows.',
+      aiAdvisoryNote: 'No advisory products needed currently. Beneficiary designations should be updated post-Sofia birth — flag for Personal section review.'
+    },
+
     gaps: ['No disability income coverage ($8,500/mo gap)', 'Employer term not portable — gap if job changes', 'No LTC planning started'],
     aiRec: 'Whole Life $500K + DI $8,500/mo · strong candidate for PUAs · revisit LTC at age 40',
     notes: 'Alex very engaged. Spouse Maria attended virtually. Key driver: protecting Sofia. Budget confirmed $700–800/mo. Ready to see illustration.',
@@ -26312,6 +26453,7 @@ var fnaFullData = {
     id: 'FNA-002', client: 'Nancy Foster', initials: 'NF', avatarColor: '#7c3aed',
     phase: 2, stage: 'Fact-Find', pct: 40, status: 'progress',
     prospectId: 'P002',
+    domains: ['insurance', 'retirement'],
     meetingDate: 'Apr 7, 2026', meetingType: 'Virtual (Zoom)', meetingLocation: '',
 
     personal: {
@@ -26367,6 +26509,36 @@ var fnaFullData = {
       meetingSummaryGenerated: false
     },
 
+    // Retirement — secondary domain for Nancy (age 41, retirement at 60)
+    retirement: {
+      targetRetirementAge: 60,
+      targetMonthlyIncome: 11700,
+      socialSecurityAge: 67, socialSecurityEst: 2667,
+      pensionIncome: 0,
+      existingAnnuityIncome: 0,
+      rolloverAssets: { k401: 380000, ira: 0, roth: 0, other: 0 },
+      annuityInterest: 'Deferred Annuity — income at 60',
+      annuityType: 'deferred',
+      incomeFloor: 9000,
+      aiRetirementNote: 'Retirement gap: Target $11,700/mo at 60. SS $2,667 + projected 401K income $3,800/mo = ~$6,500/mo. Gap ~$5,200/mo. Deferred annuity with $380K rollover could fill $2,800–3,200/mo of gap. Recommend annuity illustration alongside life insurance proposal — strong case for bundled sale.'
+    },
+
+    // Investment & Advisory — not primary, but relevant
+    investmentAdvisory: {
+      riskTolerance: 'Moderate',
+      riskScore: 55,
+      timeHorizon: '15–20 years',
+      investableAssets: { taxable: 145000, ira: 0, roth: 0, k401: 380000, other: 0 },
+      currentHoldings: 'NYU employer 401K — Fidelity target-date 2045. Brokerage $145K — mix of ETFs and individual stocks.',
+      investmentObjective: 'Growth with income floor by retirement',
+      smaUmaCandidate: false, smaUmaNote: 'Investable assets $145K — below $250K SMA minimum. Revisit when liquid assets grow past $250K.',
+      advisoryDomains: [],
+      estateDocuments: { will: true, trust: false, poa: true, healthcareDirective: false },
+      businessOwner: false,
+      aiInvestmentNote: 'Moderate risk profile appropriate. 401K allocation should shift from target-date to a more aggressive growth allocation — 19 years to retirement. Not yet SMA/UMA candidate.',
+      aiAdvisoryNote: 'Will and POA in place — good start. No trust or healthcare directive. Given mortgage size ($1.15M) and children, recommend estate planning consultation to set up trust for minors. Flag for Advisory referral.'
+    },
+
     gaps: ['No LTC coverage — family history elevates risk', 'Income gap $310K after employer group', 'Student loans $42K uncovered', 'No portable life if she leaves NYU'],
     aiRec: 'Term Life $1M 20-yr + LTC Hybrid · flag BP for UW rating · APS needed from PCP',
     notes: 'Nancy is detail-oriented — brought her own spreadsheet. Concerned about LTC costs. Husband David not yet engaged. Second meeting needed to complete financial section.',
@@ -26375,8 +26547,9 @@ var fnaFullData = {
 
   'FNA-003': {
     id: 'FNA-003', client: 'Patricia Nguyen', initials: 'PN', avatarColor: '#dc2626',
-    phase: 4, stage: 'AI Recommendation', pct: 80, status: 'urgent',
+    phase: 4, stage: 'AI Proposal', pct: 80, status: 'urgent',
     prospectId: 'P003',
+    domains: ['insurance', 'retirement', 'advisory'],
     meetingDate: 'Apr 1, 2026', meetingType: 'In-Person', meetingLocation: 'Client Home — Hoboken NJ',
 
     personal: {
@@ -26432,20 +26605,52 @@ var fnaFullData = {
       meetingSummaryGenerated: true
     },
 
-    gaps: ['$240K income replacement gap', 'UL lapse risk — 68 days at current premium', 'No LTC planning — T2DM elevates LTC risk significantly', 'College funding gap for twins'],
-    aiRec: 'Increase UL premium $320/mo OR convert to WL + PUAs · urgent lapse intervention · LTC hybrid when budget allows',
+    // Retirement — strong need (age 48, retire at 62, T2DM adds urgency)
+    retirement: {
+      targetRetirementAge: 62,
+      targetMonthlyIncome: 7500,
+      socialSecurityAge: 67, socialSecurityEst: 2167,
+      pensionIncome: 0,
+      existingAnnuityIncome: 0,
+      rolloverAssets: { k401: 295000, ira: 0, roth: 0, other: 167000 },
+      annuityInterest: 'Immediate / Fixed Indexed Annuity',
+      annuityType: 'fixed-indexed',
+      incomeFloor: 5500,
+      aiRetirementNote: 'Retirement gap: Target $7,500/mo at 62. SS $2,167/mo (age 67, deferred). 401K + investments projected $462K at 62 → ~$2,300/mo. Gap ~$3,000/mo needs annuity fill. Fixed indexed annuity on $295K 401K rollover could generate $2,600–3,100/mo guaranteed income from age 62. URGENT — T2DM longevity risk makes guaranteed income critical. Recommend FIA illustration before UL lapse discussion.'
+    },
+
+    // Investment & Advisory — estate and wealth inventory needed
+    investmentAdvisory: {
+      riskTolerance: 'Moderate Conservative',
+      riskScore: 40,
+      timeHorizon: '10–14 years',
+      investableAssets: { taxable: 167000, ira: 0, roth: 0, k401: 295000, other: 0 },
+      currentHoldings: 'J&J 401K — Fidelity target-date 2030. Personal brokerage $167K — individual stocks, some J&J RSUs.',
+      investmentObjective: 'Capital preservation + income at retirement',
+      smaUmaCandidate: true, smaUmaNote: 'Investable liquid assets $167K — approaching SMA minimum ($100K for some platforms). Full SMA/UMA candidate when 401K rolled over at retirement. Recommend Rep Advisory account now on $167K brokerage.',
+      advisoryDomains: ['wealth-management'],
+      estateDocuments: { will: true, trust: false, poa: true, healthcareDirective: true },
+      businessOwner: false,
+      aiInvestmentNote: 'Moderate-Conservative profile correct given 14-year horizon with T2DM health context. Brokerage $167K is concentrated in J&J RSUs — recommend diversification. Rep Advisory account appropriate at this asset level.',
+      aiAdvisoryNote: 'Will, POA, healthcare directive in place — good estate foundation. No trust established. With $510K net worth and two college-age twins, a revocable living trust is recommended to avoid probate. Estate planning consultation should be scheduled. Beneficiary designations on UL and 401K should be confirmed current — Michael Nguyen as primary.'
+    },
+
+    gaps: ['$240K income replacement gap', 'UL lapse risk — 68 days at current premium', 'No LTC planning — T2DM elevates LTC risk significantly', 'College funding gap for twins', 'No trust — estate exposed to probate', 'RSU concentration risk in brokerage'],
+    aiRec: 'Increase UL premium $320/mo OR convert to WL + PUAs · urgent lapse intervention · LTC hybrid when budget allows · FIA illustration for retirement income',
     notes: 'Patricia very concerned about UL lapse. Husband Michael joined — both understand urgency. T2DM labs requested. Ready to act this week.',
     healthNotes: 'T2DM well-controlled (A1c 6.8). Metformin + statin. Table 2 rating on existing UL. Request current labs before new illustration.'
   }
 };
 
-// ── PMAIL QUESTIONS (5-step, for reference in PMAIL modal) ─────────
-var _fnaEditorSections = ['personal', 'health', 'financial', 'needs'];
+// ── FNA EDITOR STATE & SECTION CONFIG ──────────────────────────────
+var _fnaEditorSections = ['personal', 'health', 'financial', 'needs', 'retirement', 'investment'];
 var _fnaEditorSectionLabels = [
-  { label: 'Personal & Health Profile',  icon: 'fa-user',         sub: 'DOB · gender · smoker · occupation · hobbies · existing coverage · beneficiary' },
-  { label: 'Health History',             icon: 'fa-heartbeat',    sub: 'Diagnoses · medications · surgeries · family history · risk flags' },
-  { label: 'Financial Suitability',      icon: 'fa-dollar-sign',  sub: 'Income · debts · savings · budget · goals' },
-  { label: 'Coverage Needs Analysis',    icon: 'fa-shield-alt',   sub: 'Income replacement · debts · final expense · retirement · LTC/DI' }
+  { label: 'Personal & Profile',        icon: 'fa-user',          sub: 'DOB · gender · smoker · occupation · existing coverage · beneficiary',                  domains: null },
+  { label: 'Health History',            icon: 'fa-heartbeat',     sub: 'Vitals · diagnoses · medications · surgeries · family history · UW pre-screen',          domains: ['insurance'] },
+  { label: 'Financial Profile',         icon: 'fa-dollar-sign',   sub: 'Income · debts · savings · budget · goals · suitability check',                          domains: null },
+  { label: 'Insurance Needs',           icon: 'fa-shield-alt',    sub: 'Income replacement · debt coverage · final expense · DI · LTC gap analysis',             domains: ['insurance'] },
+  { label: 'Retirement & Annuity',      icon: 'fa-umbrella-beach',sub: 'Retirement income goal · Social Security · annuity type · income gap calculator',        domains: ['retirement'] },
+  { label: 'Investment & Advisory',     icon: 'fa-chart-pie',     sub: 'Risk profile · investable assets · Wealth Mgmt · Estate Planning · Small Business',      domains: ['investments', 'advisory'] }
 ];
 
 // ── OPEN FNA EDITOR (full fact-find modal) ─────────────────────────
@@ -26863,8 +27068,10 @@ function buildNeedsSection(fna) {
       '<textarea class="fna-ed-textarea" rows="3" id="fna-agent-notes-' + fna.id + '">' + (fna.notes || '') + '</textarea>' +
     '</div>' +
 
-    // Action footer
-    fnaNavFooter(3, true) +
+    // Action footer — pass false so the domain-aware fnaNavFooter patch
+    // decides whether Tab 4 (Retirement) or Tab 5 (Advisory) follows,
+    // or shows Save/Summary if neither domain is active for this FNA.
+    fnaNavFooter(3, false) +
 
   '</div>';
 }
@@ -27251,6 +27458,784 @@ console.log('Phase 2 FNA module loaded — fnaFullData(FNA-001,002,003), openFNA
 function _closeFNAEditorBg(e) { if (e && e.target !== e.currentTarget) return; _closeFNAEditorForce(); }
 
 function closeFNAAIPrefill() { var p = document.getElementById("fna-ai-prefill-panel"); if (p) p.style.display = "none"; }
+
+// ═══════════════════════════════════════════════════════════════════════
+// PHASE 2b — FNA DISCOVERY REBUILD: RETIREMENT + ADVISORY SECTIONS
+// Tabs 4 & 5, domain-aware nav, wizard JS, enhanced renderFNADetail
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── HELPERS ────────────────────────────────────────────────────────────
+
+function fnaRetField(label, val, style) {
+  return '<div class="fna-ed-field"' + (style ? ' style="' + style + '"' : '') + '>' +
+    '<div class="fna-ed-label">' + label + '</div>' +
+    '<div class="fna-ed-val-display">' + val + '</div>' +
+  '</div>';
+}
+
+function fnaRetDollarField(label, val, style) {
+  return '<div class="fna-ed-field"' + (style ? ' style="' + style + '"' : '') + '>' +
+    '<div class="fna-ed-label">' + label + '</div>' +
+    '<div class="fna-ed-val-display fna-ed-dollar">$' + (val || 0).toLocaleString() + '</div>' +
+  '</div>';
+}
+
+function fnaCheckBadge(label, checked) {
+  return '<div class="fna-check-badge' + (checked ? ' fna-check-badge-on' : ' fna-check-badge-off') + '">' +
+    '<i class="fas ' + (checked ? 'fa-check-circle' : 'fa-times-circle') + '"></i>' +
+    '<span>' + label + '</span>' +
+  '</div>';
+}
+
+// ── SECTION 4: RETIREMENT & ANNUITY ────────────────────────────────────
+function buildRetirementSection(fna) {
+  var r = fna.retirement || {};
+
+  // Income gap calculator
+  var targetMo   = r.targetMonthlyIncome || 0;
+  var ssMo       = r.socialSecurityEst   || 0;
+  var pensionMo  = r.pensionIncome        || 0;
+  var annuityMo  = r.existingAnnuityIncome|| 0;
+  var incomeFloor= r.incomeFloor          || 0;
+  var coveredMo  = ssMo + pensionMo + annuityMo;
+  var gapMo      = Math.max(0, targetMo - coveredMo);
+
+  // Rollover assets totals
+  var ro = r.rolloverAssets || {};
+  var roTotal = (ro.k401 || 0) + (ro.ira || 0) + (ro.roth || 0) + (ro.other || 0);
+
+  // Gap colour
+  var gapColor = gapMo > 3000 ? '#dc2626' : gapMo > 1500 ? '#d97706' : '#059669';
+  var gapPct   = targetMo > 0 ? Math.round((gapMo / targetMo) * 100) : 0;
+
+  // Annuity type badge
+  var annuityTypes = {
+    'none':          { label: 'None / Not Decided',          cls: 'fna-ann-none'  },
+    'immediate':     { label: 'Immediate Annuity (SPIA)',     cls: 'fna-ann-imm'   },
+    'deferred':      { label: 'Deferred Annuity',            cls: 'fna-ann-def'   },
+    'fixed-indexed': { label: 'Fixed Indexed Annuity (FIA)', cls: 'fna-ann-fia'   },
+    'variable':      { label: 'Variable Annuity (VA)',        cls: 'fna-ann-va'    }
+  };
+  var annType  = annuityTypes[r.annuityType] || annuityTypes['none'];
+
+  // AI note card class
+  var aiNoteUrgent = (r.annuityType === 'fixed-indexed' || gapMo > 3000) ? 'fna-ret-ai-urgent' : '';
+
+  return '<div class="fna-ed-section">' +
+
+    // ─ Retirement Goals ─────────────────────────────────────────────
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-bullseye"></i> Retirement Goals</div>' +
+      '<div class="fna-ed-row">' +
+        fnaRetField('Target Retirement Age', r.targetRetirementAge || '—') +
+        fnaRetDollarField('Target Monthly Income', r.targetMonthlyIncome) +
+        fnaRetField('Income Floor (minimum acceptable)', '$' + (incomeFloor || 0).toLocaleString()) +
+      '</div>' +
+      '<div class="fna-ed-row">' +
+        fnaRetField('Social Security Claiming Age', r.socialSecurityAge || '67') +
+        fnaRetDollarField('Est. SS Monthly Benefit', r.socialSecurityEst) +
+        fnaRetDollarField('Pension / DB Income', r.pensionIncome) +
+        fnaRetDollarField('Existing Annuity Income', r.existingAnnuityIncome) +
+      '</div>' +
+    '</div>' +
+
+    // ─ Rollover Assets ───────────────────────────────────────────────
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-piggy-bank"></i> Rollover &amp; Retirement Assets</div>' +
+      '<div class="fna-ed-row">' +
+        fnaRetDollarField('401(k) / 403(b)', ro.k401) +
+        fnaRetDollarField('Traditional IRA', ro.ira) +
+        fnaRetDollarField('Roth IRA', ro.roth) +
+        fnaRetDollarField('Other Qualified', ro.other) +
+      '</div>' +
+      '<div class="fna-ret-rollover-total">' +
+        '<span>Total Rollover Assets</span>' +
+        '<span class="fna-ret-rollover-val">$' + roTotal.toLocaleString() + '</span>' +
+      '</div>' +
+    '</div>' +
+
+    // ─ Annuity Selection ─────────────────────────────────────────────
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-umbrella"></i> Annuity Type &amp; Interest</div>' +
+      '<div class="fna-ed-row">' +
+        '<div class="fna-ed-field" style="flex:2">' +
+          '<div class="fna-ed-label">Client Annuity Interest</div>' +
+          '<div class="fna-ed-val-display">' + (r.annuityInterest || 'Not yet discussed') + '</div>' +
+        '</div>' +
+        '<div class="fna-ed-field">' +
+          '<div class="fna-ed-label">Annuity Type</div>' +
+          '<div class="fna-ann-type-badge ' + annType.cls + '">' + annType.label + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fna-ret-annuity-tiles">' +
+        ['immediate','deferred','fixed-indexed','variable','none'].map(function(key) {
+          var t = annuityTypes[key];
+          var active = r.annuityType === key;
+          return '<div class="fna-ann-tile' + (active ? ' fna-ann-tile-active' : '') + '" onclick="showToast(\'Annuity type selection — save in next sprint\',\'info\')">' +
+            '<div class="fna-ann-tile-lbl">' + t.label + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+
+    // ─ Income Gap Calculator ─────────────────────────────────────────
+    '<div class="fna-ed-card fna-ret-gap-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-calculator"></i> Retirement Income Gap Calculator</div>' +
+      '<div class="fna-ret-gap-grid">' +
+        '<div class="fna-ret-gap-row">' +
+          '<span class="fna-ret-gap-lbl">Target Monthly Income</span>' +
+          '<span class="fna-ret-gap-val">$' + targetMo.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div class="fna-ret-gap-row fna-ret-gap-src">' +
+          '<span class="fna-ret-gap-lbl"><i class="fas fa-minus-circle"></i> Social Security</span>' +
+          '<span class="fna-ret-gap-val">$' + ssMo.toLocaleString() + '</span>' +
+        '</div>' +
+        (pensionMo > 0 ? '<div class="fna-ret-gap-row fna-ret-gap-src">' +
+          '<span class="fna-ret-gap-lbl"><i class="fas fa-minus-circle"></i> Pension / DB</span>' +
+          '<span class="fna-ret-gap-val">$' + pensionMo.toLocaleString() + '</span>' +
+        '</div>' : '') +
+        (annuityMo > 0 ? '<div class="fna-ret-gap-row fna-ret-gap-src">' +
+          '<span class="fna-ret-gap-lbl"><i class="fas fa-minus-circle"></i> Existing Annuity</span>' +
+          '<span class="fna-ret-gap-val">$' + annuityMo.toLocaleString() + '</span>' +
+        '</div>' : '') +
+        '<div class="fna-ret-gap-divider"></div>' +
+        '<div class="fna-ret-gap-row fna-ret-gap-result">' +
+          '<span class="fna-ret-gap-lbl">Monthly Income Gap</span>' +
+          '<span class="fna-ret-gap-val" style="color:' + gapColor + ';font-size:20px;font-weight:700">$' + gapMo.toLocaleString() + '/mo</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fna-ret-gap-bar-wrap">' +
+        '<div class="fna-ret-gap-bar-track">' +
+          '<div class="fna-ret-gap-bar-covered" style="width:' + Math.round((coveredMo/targetMo)*100) + '%"></div>' +
+          '<div class="fna-ret-gap-bar-unfilled" style="width:' + gapPct + '%"></div>' +
+        '</div>' +
+        '<div class="fna-ret-gap-bar-legend">' +
+          '<span class="fna-ret-gap-leg-cov"><i class="fas fa-circle"></i> Covered: $' + coveredMo.toLocaleString() + '/mo</span>' +
+          '<span class="fna-ret-gap-leg-gap"><i class="fas fa-circle"></i> Gap: $' + gapMo.toLocaleString() + '/mo (' + gapPct + '%)</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // ─ AI Retirement Note ─────────────────────────────────────────────
+    '<div class="fna-ret-ai-card ' + aiNoteUrgent + '">' +
+      '<div class="fna-ret-ai-header"><i class="fas fa-robot"></i> AI Retirement Analysis</div>' +
+      '<div class="fna-ret-ai-body">' + (r.aiRetirementNote || 'No AI retirement note generated yet.') + '</div>' +
+      '<div class="fna-ret-ai-actions">' +
+        '<button class="fna-ret-ai-btn" onclick="showToast(\'Annuity illustration queued — opening Phase 3\',\'success\')"><i class="fas fa-chart-line"></i> Run Annuity Illustration</button>' +
+        '<button class="fna-ret-ai-btn fna-ret-ai-btn-sec" onclick="showToast(\'SS analysis added to client file\',\'info\')"><i class="fas fa-shield-alt"></i> Add SS Optimization Note</button>' +
+      '</div>' +
+    '</div>' +
+
+    fnaNavFooter(4, false) +
+  '</div>';
+}
+
+// ── SECTION 5: INVESTMENT & ADVISORY ───────────────────────────────────
+function buildInvestmentAdvisorySection(fna) {
+  var ia = fna.investmentAdvisory || {};
+  var assets = ia.investableAssets || {};
+  var estDocs = ia.estateDocuments || {};
+
+  // Risk tolerance colour
+  var riskColors = {
+    'Conservative':           '#059669',
+    'Moderate Conservative':  '#0891b2',
+    'Moderate':               '#6366f1',
+    'Growth':                 '#d97706',
+    'Aggressive':             '#dc2626'
+  };
+  var riskScore  = ia.riskScore || 0;
+  var riskColor  = riskColors[ia.riskTolerance] || '#6366f1';
+  var riskLevels = ['Conservative','Moderate Conservative','Moderate','Growth','Aggressive'];
+
+  // Total investable
+  var totalInvestable = (assets.taxable||0) + (assets.ira||0) + (assets.roth||0) + (assets.k401||0) + (assets.other||0);
+
+  // SMA/UMA candidacy thresholds
+  var repAdvisory  = totalInvestable >= 100000;
+  var smaCandidate = totalInvestable >= 250000;
+  var umaCandidate = totalInvestable >= 500000;
+
+  // Risk score bar width
+  var riskBarW = Math.min(100, Math.round(riskScore));
+
+  return '<div class="fna-ed-section">' +
+
+    // ─ A. INVESTMENT PROFILE ──────────────────────────────────────────
+    '<div class="fna-inv-section-header"><i class="fas fa-chart-pie"></i> A — Investment Profile</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-tachometer-alt"></i> Risk Tolerance</div>' +
+      '<div class="fna-inv-risk-levels">' +
+        riskLevels.map(function(lv) {
+          var active = ia.riskTolerance === lv;
+          return '<div class="fna-inv-risk-tile' + (active ? ' fna-inv-risk-tile-active' : '') + '" style="' + (active ? 'border-color:' + riskColor + ';background:' + riskColor + '15;' : '') + '" onclick="showToast(\'Risk selection — save in next sprint\',\'info\')">' +
+            '<div class="fna-inv-risk-lbl" style="' + (active ? 'color:' + riskColor : '') + '">' + lv + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      '<div class="fna-inv-score-row">' +
+        '<span class="fna-inv-score-lbl">Risk Score:</span>' +
+        '<div class="fna-inv-score-bar-wrap">' +
+          '<div class="fna-inv-score-bar"><div class="fna-inv-score-fill" style="width:' + riskBarW + '%;background:' + riskColor + '"></div></div>' +
+        '</div>' +
+        '<span class="fna-inv-score-val" style="color:' + riskColor + '">' + riskScore + ' / 100</span>' +
+      '</div>' +
+      '<div class="fna-ed-row" style="margin-top:12px">' +
+        fnaRetField('Time Horizon', ia.timeHorizon || '—') +
+        '<div class="fna-ed-field" style="flex:3"><div class="fna-ed-label">Investment Objective</div><div class="fna-ed-val-display">' + (ia.investmentObjective || '—') + '</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-coins"></i> Investable Assets by Account Type</div>' +
+      '<div class="fna-ed-row">' +
+        fnaRetDollarField('Taxable / Brokerage', assets.taxable) +
+        fnaRetDollarField('Traditional IRA', assets.ira) +
+        fnaRetDollarField('Roth IRA', assets.roth) +
+        fnaRetDollarField('401(k) / 403(b)', assets.k401) +
+        fnaRetDollarField('Other', assets.other) +
+      '</div>' +
+      '<div class="fna-inv-asset-total">' +
+        '<span>Total Investable Assets</span>' +
+        '<span class="fna-inv-asset-total-val">$' + totalInvestable.toLocaleString() + '</span>' +
+      '</div>' +
+      '<div class="fna-ed-field" style="margin-top:10px;flex:1">' +
+        '<div class="fna-ed-label">Current Holdings Summary</div>' +
+        '<div class="fna-ed-val-display fna-ed-note">' + (ia.currentHoldings || '—') + '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // ─ B. WEALTH MANAGEMENT (SMA / UMA / Rep Advisory) ───────────────
+    '<div class="fna-inv-section-header"><i class="fas fa-gem"></i> B — Wealth Management (Rep Advisory · SMA · UMA)</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-chart-line"></i> Advisory Candidacy</div>' +
+      '<div class="fna-inv-candidacy-row">' +
+        '<div class="fna-inv-cand-tile' + (repAdvisory ? ' fna-inv-cand-met' : ' fna-inv-cand-unmet') + '">' +
+          '<div class="fna-inv-cand-icon"><i class="fas ' + (repAdvisory ? 'fa-check-circle' : 'fa-times-circle') + '"></i></div>' +
+          '<div class="fna-inv-cand-lbl">Rep Advisory</div>' +
+          '<div class="fna-inv-cand-threshold">$100K minimum</div>' +
+          '<div class="fna-inv-cand-val">$' + (assets.taxable||0).toLocaleString() + ' liquid</div>' +
+        '</div>' +
+        '<div class="fna-inv-cand-tile' + (smaCandidate ? ' fna-inv-cand-met' : ' fna-inv-cand-unmet') + '">' +
+          '<div class="fna-inv-cand-icon"><i class="fas ' + (smaCandidate ? 'fa-check-circle' : 'fa-times-circle') + '"></i></div>' +
+          '<div class="fna-inv-cand-lbl">SMA (Separately Managed)</div>' +
+          '<div class="fna-inv-cand-threshold">$250K minimum</div>' +
+          '<div class="fna-inv-cand-val">$' + totalInvestable.toLocaleString() + ' total</div>' +
+        '</div>' +
+        '<div class="fna-inv-cand-tile' + (umaCandidate ? ' fna-inv-cand-met' : ' fna-inv-cand-unmet') + '">' +
+          '<div class="fna-inv-cand-icon"><i class="fas ' + (umaCandidate ? 'fa-check-circle' : 'fa-times-circle') + '"></i></div>' +
+          '<div class="fna-inv-cand-lbl">UMA (Unified Managed)</div>' +
+          '<div class="fna-inv-cand-threshold">$500K minimum</div>' +
+          '<div class="fna-inv-cand-val">$' + totalInvestable.toLocaleString() + ' total</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fna-ed-field" style="margin-top:10px">' +
+        '<div class="fna-ed-label">Advisory Note</div>' +
+        '<div class="fna-ed-val-display fna-ed-note">' + (ia.smaUmaNote || '—') + '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // AI Investment note
+    '<div class="fna-inv-ai-card">' +
+      '<div class="fna-inv-ai-header"><i class="fas fa-robot"></i> AI Investment Analysis</div>' +
+      '<div class="fna-inv-ai-body">' + (ia.aiInvestmentNote || 'No AI investment note generated yet.') + '</div>' +
+    '</div>' +
+
+    // ─ C. ESTATE PLANNING ─────────────────────────────────────────────
+    '<div class="fna-inv-section-header"><i class="fas fa-scroll"></i> C — Estate Planning</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-file-signature"></i> Estate Documents Status</div>' +
+      '<div class="fna-inv-estate-checks">' +
+        fnaCheckBadge('Will / Testament', estDocs.will) +
+        fnaCheckBadge('Revocable Living Trust', estDocs.trust) +
+        fnaCheckBadge('Power of Attorney', estDocs.poa) +
+        fnaCheckBadge('Healthcare Directive', estDocs.healthcareDirective) +
+      '</div>' +
+      '<div class="fna-inv-ai-card" style="margin-top:12px">' +
+        '<div class="fna-inv-ai-header"><i class="fas fa-robot"></i> AI Estate Planning Note</div>' +
+        '<div class="fna-inv-ai-body">' + (ia.aiAdvisoryNote || 'No estate planning note generated yet.') + '</div>' +
+      '</div>' +
+      '<button class="fna-ed-add-btn" style="margin-top:10px" onclick="showToast(\'Estate planning referral queued\',\'success\')"><i class="fas fa-external-link-alt"></i> Refer to Estate Planning Specialist</button>' +
+    '</div>' +
+
+    // ─ D. SMALL BUSINESS ──────────────────────────────────────────────
+    '<div class="fna-inv-section-header"><i class="fas fa-store"></i> D — Small Business</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-briefcase"></i> Business Owner Profile</div>' +
+      '<div class="fna-ed-row">' +
+        fnaFieldYN('Business Owner?', ia.businessOwner || false, 'biz-owner-toggle') +
+      '</div>' +
+      (ia.businessOwner ? (
+        '<div class="fna-inv-biz-panel">' +
+          '<div class="fna-ed-row">' +
+            fnaRetField('Business Type', ia.businessType || '—', 'flex:2') +
+            fnaRetField('Business Est. Valuation', ia.businessValuation ? '$' + ia.businessValuation.toLocaleString() : '—') +
+          '</div>' +
+          '<div class="fna-inv-estate-checks">' +
+            fnaCheckBadge('Buy-Sell Agreement', ia.buySellAgreement || false) +
+            fnaCheckBadge('Key-Person Insurance', ia.keyPersonInsurance || false) +
+            fnaCheckBadge('Succession Plan', ia.successionPlan || false) +
+          '</div>' +
+          (ia.businessNotes ? '<div class="fna-ed-field" style="margin-top:10px;flex:1"><div class="fna-ed-label">Business Notes</div><div class="fna-ed-val-display fna-ed-note">' + ia.businessNotes + '</div></div>' : '') +
+        '</div>'
+      ) : (
+        '<div class="fna-inv-biz-na"><i class="fas fa-info-circle"></i> Client is not a business owner — Business Planning section not applicable.</div>'
+      )) +
+    '</div>' +
+
+    fnaNavFooter(5, true) +
+  '</div>';
+}
+
+// ── UPDATE renderFNAEditorSection — add cases 4 & 5 ───────────────────
+// Redefine the entire function with all 6 cases
+renderFNAEditorSection = function() {
+  var container = document.getElementById('fna-ed-body');
+  if (!container) return;
+  var fna = fnaFullData[_fnaEditorId];
+  if (!fna) return;
+
+  switch(_fnaEditorSection) {
+    case 0: container.innerHTML = buildPersonalSection(fna);           break;
+    case 1: container.innerHTML = buildHealthSection(fna);             break;
+    case 2: container.innerHTML = buildFinancialSection(fna);          break;
+    case 3: container.innerHTML = buildNeedsSection(fna);              break;
+    case 4: container.innerHTML = buildRetirementSection(fna);         break;
+    case 5: container.innerHTML = buildInvestmentAdvisorySection(fna); break;
+    default: container.innerHTML = buildPersonalSection(fna);
+  }
+};
+
+// ── UPDATE renderFNAEditorNav — domain-aware tab visibility ────────────
+// Redefine with visibility logic and domain pills
+renderFNAEditorNav = function() {
+  var fna = fnaFullData[_fnaEditorId];
+  if (!fna) return;
+  var domains = fna.domains || [];
+
+  _fnaEditorSectionLabels.forEach(function(sec, i) {
+    var btn = document.getElementById('fna-ed-nav-' + i);
+    if (!btn) return;
+
+    // Domain-aware show/hide
+    var shouldShow = true;
+    if (sec.domains !== null) {
+      // Tab is only visible if at least one of sec.domains is in fna.domains[]
+      shouldShow = sec.domains.some(function(d) { return domains.indexOf(d) !== -1; });
+    }
+    btn.style.display = shouldShow ? '' : 'none';
+    btn.classList.toggle('active', i === _fnaEditorSection);
+  });
+
+  // Update header subtitle
+  var sub = document.getElementById('fna-ed-section-sub');
+  if (sub) sub.textContent = _fnaEditorSectionLabels[_fnaEditorSection].label + ' \u2014 ' + fna.client;
+
+  // Render domain pills into #fna-ed-domain-pills
+  _renderFNAEditorDomainPills(fna);
+};
+
+// ── DOMAIN PILLS in editor header ─────────────────────────────────────
+function _renderFNAEditorDomainPills(fna) {
+  var container = document.getElementById('fna-ed-domain-pills');
+  if (!container) return;
+  var domains = fna.domains || [];
+  var pillDefs = {
+    insurance:  { label: 'Insurance',   icon: 'fa-shield-alt',     cls: 'ins' },
+    retirement: { label: 'Retirement',  icon: 'fa-umbrella-beach', cls: 'ret' },
+    advisory:   { label: 'Advisory',    icon: 'fa-handshake',      cls: 'adv' }
+  };
+  container.innerHTML = domains.map(function(d) {
+    var def = pillDefs[d];
+    if (!def) return '';
+    return '<span class="fna-ed-domain-pill fna-ed-domain-pill-' + def.cls + '">' +
+      '<i class="fas ' + def.icon + '"></i> ' + def.label +
+    '</span>';
+  }).join('');
+}
+
+// ── PATCH openFNAEditor to reset to first visible tab ─────────────────
+(function() {
+  var _origOpenFNAEditor = openFNAEditor;
+  openFNAEditor = function(id) {
+    var fna = fnaFullData[id] || fnaFullData['FNA-001'];
+    _fnaEditorId = fna.id;
+    _fnaEditorSection = 0; // always start at Personal (always visible)
+    _fnaEditorDirty = false;
+    var overlay = document.getElementById('fna-editor-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    renderFNAEditorSection();
+    renderFNAEditorNav();
+  };
+})();
+
+// ── WIZARD STATE ───────────────────────────────────────────────────────
+var _fnaWizSelectedDomains = [];
+var _fnaWizCurrentStep     = 1;
+
+// ── fnaWizNext(step) — advance/retreat wizard panels ──────────────────
+function fnaWizNext(step) {
+  // Validate step 2: at least one domain must be selected
+  if (step === 3 && _fnaWizSelectedDomains.length === 0) {
+    showToast('Please select at least one planning domain to continue.', 'warn');
+    return;
+  }
+
+  _fnaWizCurrentStep = step;
+
+  // Show/hide panels
+  for (var i = 1; i <= 3; i++) {
+    var panel = document.getElementById('fna-wiz-panel-' + i);
+    if (panel) panel.style.display = i === step ? 'flex' : 'none';
+  }
+
+  // Update step indicator bubbles
+  var stepEls = document.querySelectorAll('.fna-wiz-step');
+  stepEls.forEach(function(el, idx) {
+    var n = idx + 1;
+    el.classList.remove('fna-wiz-step-done', 'fna-wiz-step-active');
+    if (n < step)      el.classList.add('fna-wiz-step-done');
+    else if (n === step) el.classList.add('fna-wiz-step-active');
+  });
+}
+
+// ── fnaToggleDomain(domain, el) — card toggle + state tracking ────────
+function fnaToggleDomain(domain, el) {
+  var card = el.closest ? el.closest('.fna-domain-card') : el.parentElement;
+  if (!card) card = el;
+
+  var idx = _fnaWizSelectedDomains.indexOf(domain);
+  if (idx === -1) {
+    _fnaWizSelectedDomains.push(domain);
+    card.classList.add('selected');
+  } else {
+    _fnaWizSelectedDomains.splice(idx, 1);
+    card.classList.remove('selected');
+  }
+
+  // Update none-row visibility
+  var noneRow = document.getElementById('fna-dom-none-row');
+  if (noneRow) {
+    noneRow.style.display = _fnaWizSelectedDomains.length === 0 ? 'flex' : 'none';
+  }
+}
+
+// ── fnaWizCreate() — finalize wizard and open FNA editor ───────────────
+function fnaWizCreate() {
+  // Gather Step 1 inputs
+  var clientSel  = document.getElementById('fna-wiz-client-select');
+  var nameEl     = document.getElementById('fna-wiz-name');
+  var ageEl      = document.getElementById('fna-wiz-age');
+  var lifeEvent  = document.getElementById('fna-wiz-life-event');
+  var meetDate   = document.getElementById('fna-wiz-meet-date');
+  var meetType   = document.getElementById('fna-wiz-meet-type');
+  var meetLoc    = document.getElementById('fna-wiz-meet-loc');
+  var notesEl    = document.getElementById('fna-wiz-notes');
+
+  var clientName = (clientSel && clientSel.value && clientSel.value !== '__manual__')
+    ? clientSel.options[clientSel.selectedIndex].text
+    : (nameEl ? nameEl.value.trim() : '');
+
+  if (!clientName) {
+    showToast('Please select or enter a client name.', 'warn');
+    return;
+  }
+  if (_fnaWizSelectedDomains.length === 0) {
+    showToast('Please go back and select at least one planning domain.', 'warn');
+    return;
+  }
+
+  // Close wizard overlay
+  var wizOverlay = document.getElementById('fna-new-overlay');
+  if (wizOverlay) wizOverlay.style.display = 'none';
+
+  // Reset wizard state for next use
+  _fnaWizSelectedDomains = [];
+  _fnaWizCurrentStep = 1;
+
+  showToast('New FNA created for ' + clientName + ' — opening editor…', 'success');
+
+  // Open editor using FNA-001 as template (since this is demo data)
+  setTimeout(function() {
+    openFNAEditor('FNA-001');
+  }, 800);
+}
+
+// ── openFNAWizard — launch wizard overlay ─────────────────────────────
+function openFNAWizard() {
+  _fnaWizSelectedDomains = [];
+  _fnaWizCurrentStep = 1;
+
+  var overlay = document.getElementById('fna-new-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+
+  // Reset to step 1
+  fnaWizNext(1);
+
+  // Clear domain card selections
+  document.querySelectorAll('.fna-domain-card').forEach(function(c) {
+    c.classList.remove('selected');
+  });
+
+  // Reset none-row
+  var nr = document.getElementById('fna-dom-none-row');
+  if (nr) nr.style.display = 'flex';
+}
+
+function closeFNAWizard() {
+  var overlay = document.getElementById('fna-new-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function closeFNAWizardBg(e) {
+  if (e && e.target !== e.currentTarget) return;
+  closeFNAWizard();
+}
+
+// ── PATCH: override any existing openNewFNAForm / openFNAModal ─────────
+function openNewFNAForm() { openFNAWizard(); }
+
+// ── UPDATE renderFNADetail — domain badges + domain-specific AI cards ──
+(function() {
+  var _origRenderFNADetail = renderFNADetail;
+
+  renderFNADetail = function(fna) {
+    var full = fnaFullData[fna.id];
+    if (!full) return _origRenderFNADetail(fna);
+
+    var ai = full.ai;
+    var p  = full.personal;
+    var h  = full.health;
+    var f  = full.financial;
+    var n  = full.needs;
+    var domains = full.domains || [];
+
+    var statusCls = { urgent:'fna-status-pill urgent', gap:'fna-status-pill gap', progress:'fna-status-pill progress', done:'fna-status-pill done' };
+
+    // ── Domain-neutral phase labels (updated)
+    var phases = ['Discovery','Fact-Find','Needs Analysis','AI Proposal','Next Step'];
+    var phaseHtml = phases.map(function(ph, i) {
+      var cls  = (i+1) <  full.phase ? 'fnd-phase-step done' : (i+1) === full.phase ? 'fnd-phase-step active' : 'fnd-phase-step';
+      var icon = (i+1) <  full.phase ? '<i class="fas fa-check-circle"></i>' : (i+1) === full.phase ? '<i class="fas fa-dot-circle"></i>' : '<i class="far fa-circle"></i>';
+      return '<div class="' + cls + '">' + icon + '<span>' + ph + '</span></div>';
+    }).join('<div class="fnd-phase-line"></div>');
+
+    // ── Health flag
+    var healthFlagHtml = '';
+    if (ai.healthFlag) {
+      healthFlagHtml = '<div class="fnd-health-flag fnd-hf-' + ai.healthFlag.level + '">' +
+        '<i class="fas ' + (ai.healthFlag.level==='error'?'fa-exclamation-circle':'fa-exclamation-triangle') + '"></i>' +
+        '<span>' + ai.healthFlag.message + '</span>' +
+      '</div>';
+    }
+
+    // ── Coverage gaps list
+    var gapsHtml = full.gaps.map(function(g) {
+      return '<div class="fnd-gap-item"><i class="fas fa-exclamation-triangle"></i><span>' + g + '</span></div>';
+    }).join('');
+
+    // ── Domain badge row
+    var domainPillDefs = {
+      insurance:  { label:'Insurance',  icon:'fa-shield-alt',     cls:'ins' },
+      retirement: { label:'Retirement', icon:'fa-umbrella-beach', cls:'ret' },
+      advisory:   { label:'Advisory',   icon:'fa-handshake',      cls:'adv' }
+    };
+    var domainBadgesHtml = '<div class="fnd-domain-badges">' +
+      domains.map(function(d) {
+        var def = domainPillDefs[d];
+        if (!def) return '';
+        return '<span class="fna-domain-badge ' + def.cls + '"><i class="fas ' + def.icon + '"></i> ' + def.label + '</span>';
+      }).join('') +
+    '</div>';
+
+    // ── Coverage summary rows
+    var coverageRows = [
+      { label:'Income Gap',            val:'$' + n.incomeReplacement.gap.toLocaleString() },
+      { label:'Debt Total',            val:'$' + n.debtObligations.total.toLocaleString() },
+      { label:'Final Expense',         val:'$' + n.finalExpense.total.toLocaleString() },
+      { label:'Recommended Face Amount', val:'$' + ai.recommendedFaceAmount.toLocaleString(), highlight: true }
+    ];
+
+    // ── Retirement domain AI card (if retirement in domains)
+    var retirementCardHtml = '';
+    if (domains.indexOf('retirement') !== -1 && full.retirement) {
+      var r = full.retirement;
+      var targetMo  = r.targetMonthlyIncome || 0;
+      var ssMo      = r.socialSecurityEst   || 0;
+      var pensionMo = r.pensionIncome        || 0;
+      var annMo     = r.existingAnnuityIncome|| 0;
+      var gapMo     = Math.max(0, targetMo - ssMo - pensionMo - annMo);
+      var annTypes  = { 'none':'None', 'immediate':'SPIA', 'deferred':'Deferred', 'fixed-indexed':'FIA', 'variable':'VA' };
+      retirementCardHtml =
+        '<div class="fnd-section fnd-section-domain-card fnd-section-ret">' +
+          '<div class="fnd-section-title"><i class="fas fa-umbrella-beach"></i> Retirement &amp; Annuity</div>' +
+          '<div class="fnd-grid">' +
+            '<div class="fnd-field"><span class="fnd-lbl">Target Retirement Age</span><span class="fnd-val">' + (r.targetRetirementAge||'—') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Target Monthly Income</span><span class="fnd-val">$' + targetMo.toLocaleString() + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Social Security Est.</span><span class="fnd-val">$' + ssMo.toLocaleString() + '/mo</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Monthly Income Gap</span><span class="fnd-val fnd-val-hi" style="color:' + (gapMo>2000?'#dc2626':'#d97706') + '">$' + gapMo.toLocaleString() + '/mo</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Annuity Interest</span><span class="fnd-val">' + (annTypes[r.annuityType]||'—') + '</span></div>' +
+          '</div>' +
+          '<div class="fnd-ai-rec" style="margin-top:8px">' + (r.aiRetirementNote||'') + '</div>' +
+        '</div>';
+    }
+
+    // ── Advisory domain AI card (if advisory in domains)
+    var advisoryCardHtml = '';
+    if (domains.indexOf('advisory') !== -1 && full.investmentAdvisory) {
+      var ia = full.investmentAdvisory;
+      var estDocs = ia.estateDocuments || {};
+      advisoryCardHtml =
+        '<div class="fnd-section fnd-section-domain-card fnd-section-adv">' +
+          '<div class="fnd-section-title"><i class="fas fa-chart-pie"></i> Investment &amp; Advisory</div>' +
+          '<div class="fnd-grid">' +
+            '<div class="fnd-field"><span class="fnd-lbl">Risk Tolerance</span><span class="fnd-val">' + (ia.riskTolerance||'—') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Time Horizon</span><span class="fnd-val">' + (ia.timeHorizon||'—') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">SMA/UMA Candidate</span><span class="fnd-val">' + (ia.smaUmaCandidate?'<span style="color:#059669;font-weight:700">Yes</span>':'No') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Estate Docs</span><span class="fnd-val">' +
+              (estDocs.will?'Will ':'') + (estDocs.trust?'Trust ':'') + (estDocs.poa?'POA ':'') + (estDocs.healthcareDirective?'HC Directive':'') +
+              (!estDocs.will && !estDocs.trust && !estDocs.poa && !estDocs.healthcareDirective ? 'None on file' : '') +
+            '</span></div>' +
+          '</div>' +
+          '<div class="fnd-ai-rec" style="margin-top:8px">' + (ia.aiAdvisoryNote||'') + '</div>' +
+        '</div>';
+    }
+
+    return '<div class="fna-detail-content">' +
+
+      '<div class="fnd-header">' +
+        '<div class="fnd-avatar fna-av-' + full.initials.toLowerCase() + '" style="background:' + full.avatarColor + '">' + full.initials + '</div>' +
+        '<div class="fnd-header-body">' +
+          '<div class="fnd-name">' + full.client + '</div>' +
+          '<div class="fnd-meta">' + p.occupation + ' \u00b7 Age ' + full.personal.dob.split('-')[0] + ' \u00b7 Phase ' + full.phase + ' of 5</div>' +
+          '<div class="fnd-meeting"><i class="fas fa-calendar-check"></i> ' + full.meetingDate + ' \u00b7 ' + full.meetingType + '</div>' +
+        '</div>' +
+        '<span class="' + (statusCls[full.status]||'fna-status-pill') + '">' + full.stage + '</span>' +
+      '</div>' +
+
+      domainBadgesHtml +
+
+      '<div class="fnd-progress-row">' +
+        '<div class="fna-prog-bar" style="flex:1"><div class="fna-prog-fill" style="width:' + full.pct + '%"></div></div>' +
+        '<span class="fna-prog-lbl">' + full.pct + '% complete</span>' +
+      '</div>' +
+
+      '<div class="fnd-phase-track">' + phaseHtml + '</div>' +
+
+      healthFlagHtml +
+
+      '<div class="fnd-sections">' +
+
+        '<div class="fnd-section">' +
+          '<div class="fnd-section-title"><i class="fas fa-user"></i> Personal &amp; Health Snapshot</div>' +
+          '<div class="fnd-grid">' +
+            '<div class="fnd-field"><span class="fnd-lbl">Date of Birth</span><span class="fnd-val">' + p.dob + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Gender</span><span class="fnd-val">' + p.gender + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Smoker</span><span class="fnd-val">' + (p.smoker?'Yes':'No') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Risk Class</span><span class="fnd-val">' + p.riskClass + '</span></div>' +
+            '<div class="fnd-field fnd-wide"><span class="fnd-lbl">Health Notes</span><span class="fnd-val">' + full.healthNotes + '</span></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="fnd-section">' +
+          '<div class="fnd-section-title"><i class="fas fa-dollar-sign"></i> Financial Snapshot</div>' +
+          '<div class="fnd-grid">' +
+            '<div class="fnd-field"><span class="fnd-lbl">Annual Income</span><span class="fnd-val">$' + f.annualIncome.toLocaleString() + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Net Worth</span><span class="fnd-val">$' + f.netWorth.toLocaleString() + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Premium Budget</span><span class="fnd-val">$' + f.monthlyBudgetForPremium + '/mo</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Est. Annual Premium</span><span class="fnd-val fnd-val-hi">$' + ai.annualPremiumEst.toLocaleString() + '/yr</span></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="fnd-section">' +
+          '<div class="fnd-section-title"><i class="fas fa-calculator"></i> Insurance Coverage Gap Summary</div>' +
+          '<div class="fnd-gap-rows">' +
+            coverageRows.map(function(r) {
+              return '<div class="fnd-gap-row' + (r.highlight?' fnd-gap-row-hi':'') + '">' +
+                '<span class="fnd-gap-lbl">' + r.label + '</span>' +
+                '<span class="fnd-gap-val">' + r.val + '</span>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+
+        retirementCardHtml +
+        advisoryCardHtml +
+
+        '<div class="fnd-section fnd-section-gaps">' +
+          '<div class="fnd-section-title"><i class="fas fa-exclamation-triangle"></i> Coverage Gaps Detected</div>' +
+          '<div class="fnd-gaps">' + gapsHtml + '</div>' +
+        '</div>' +
+
+        '<div class="fnd-section fnd-section-ai">' +
+          '<div class="fnd-section-title"><i class="fas fa-robot"></i> AI Recommendation</div>' +
+          '<div class="fnd-ai-rec">' + full.aiRec + '</div>' +
+        '</div>' +
+
+      '</div>' +
+
+      '<div class="fnd-actions">' +
+        '<button class="btn btn-primary" onclick="continueFNA(\'' + full.id + '\')"><i class="fas fa-edit"></i> Open Fact-Find Editor</button>' +
+        '<button class="btn btn-outline" onclick="generateMeetingSummary(\'' + full.id + '\')"><i class="fas fa-envelope"></i> ' + (ai.meetingSummaryGenerated?'Re-send':'Generate') + ' Summary Email</button>' +
+        '<button class="btn btn-outline" onclick="openFNAAIAssist()"><i class="fas fa-robot"></i> AI Pre-fill</button>' +
+      '</div>' +
+
+    '</div>';
+  };
+})();
+
+// ── PATCH fnaNavFooter to be domain-aware (skip hidden tabs) ──────────
+// The nav footer prev/next should jump to the next *visible* tab index
+(function() {
+  var _origFnaNavFooter = fnaNavFooter;
+  fnaNavFooter = function(idx, isFinal) {
+    // Find prev and next visible tab indices
+    var fna = fnaFullData[_fnaEditorId];
+    var domains = fna ? (fna.domains || []) : [];
+
+    function isTabVisible(i) {
+      var sec = _fnaEditorSectionLabels[i];
+      if (!sec) return false;
+      if (sec.domains === null) return true;
+      return sec.domains.some(function(d) { return domains.indexOf(d) !== -1; });
+    }
+
+    var prevIdx = -1;
+    for (var p = idx - 1; p >= 0; p--) {
+      if (isTabVisible(p)) { prevIdx = p; break; }
+    }
+
+    var nextIdx = -1;
+    var maxTab = _fnaEditorSectionLabels.length - 1;
+    for (var n = idx + 1; n <= maxTab; n++) {
+      if (isTabVisible(n)) { nextIdx = n; break; }
+    }
+
+    // Determine if this is truly the final visible tab
+    var trueIsFinal = (nextIdx === -1);
+
+    var prevHtml = prevIdx >= 0
+      ? '<button class="fna-ed-nav-btn fna-ed-nav-prev" onclick="fnaEditorNav(' + prevIdx + ')"><i class="fas fa-arrow-left"></i> ' + _fnaEditorSectionLabels[prevIdx].label + '</button>'
+      : '<div></div>';
+
+    var nextHtml = trueIsFinal
+      ? '<div class="fna-ed-final-actions">' +
+          '<button class="fna-ed-save-btn" onclick="saveFNAAndClose()"><i class="fas fa-save"></i> Save FNA</button>' +
+          '<button class="fna-ed-summary-btn" onclick="generateMeetingSummary(\'' + _fnaEditorId + '\')"><i class="fas fa-envelope"></i> Generate Meeting Summary Email</button>' +
+        '</div>'
+      : '<button class="fna-ed-nav-btn fna-ed-nav-next" onclick="fnaEditorNav(' + nextIdx + ')">' + _fnaEditorSectionLabels[nextIdx].label + ' <i class="fas fa-arrow-right"></i></button>';
+
+    return '<div class="fna-ed-nav-footer">' + prevHtml + nextHtml + '</div>';
+  };
+})();
+
+console.log('Phase 2b FNA Discovery Rebuild loaded — buildRetirementSection, buildInvestmentAdvisorySection, domain-aware nav, renderFNADetail(domains), wizard JS all ready');
 
 
 /* ================================================================
@@ -35236,359 +36221,9 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
     _closeFNAEditorForce();
     if (typeof navigateTo === 'function') navigateTo('products');
     setTimeout(function() {
-      if (typeof p3SwitchMainTab === 'function') p3SwitchMainTab('investment');
+      if (typeof p3SwitchDomainTab === 'function') p3SwitchDomainTab('investments');
     }, 400);
   };
-
-
-  /* ─────────────────────────────────────────────────────────────────
-     PART B: PRODUCTS PAGE — INVESTMENT PROPOSAL TAB
-     Strategy: Wrap p3RenderMainPanel to inject a tab strip above
-     the existing content, then intercept tab switching.
-     ───────────────────────────────────────────────────────────────── */
-
-  // ── B1. State variable for Products main tab ───────────────────
-  window._p3MainTab = window._p3MainTab || 'insurance';
-
-  window.p3SwitchMainTab = function(tab) {
-    window._p3MainTab = tab;
-    p3RenderMainPanel();
-  };
-
-  // ── B2. Investment Proposal data per prospect ──────────────────
-  var _invProposalData = {
-    'FNA-001': {
-      prospectName: 'Patricia L.',
-      preparedDate: 'Jun 10, 2025',
-      advisor: 'Agent — M. Reyes',
-      suitabilityScore: 78,
-      riskProfile: 'Moderate',
-      timeHorizon: '12 years',
-      accountRecommendations: [
-        {
-          type: 'Traditional IRA Rollover',
-          icon: 'fa-piggy-bank',
-          color: '#3b82f6',
-          rationale: 'Roll existing 401(k) ($295K) to IRA for broader fund access and lower fees',
-          aum: 295000,
-          model: 'Balanced Growth 60/40',
-          estAnnualFee: '0.85%'
-        },
-        {
-          type: 'Managed Discretionary Account',
-          icon: 'fa-chart-line',
-          color: '#059669',
-          rationale: 'Taxable brokerage for $167K existing investments — managed for tax efficiency',
-          aum: 167000,
-          model: 'Tax-Managed Equity 70/30',
-          estAnnualFee: '1.00%'
-        },
-        {
-          type: 'Short-Term Bond Sleeve',
-          icon: 'fa-shield-alt',
-          color: '#d97706',
-          rationale: 'College funding in 2–3 years — laddered bonds/CDs for twins ($80K target)',
-          aum: 80000,
-          model: 'Short Duration Bond',
-          estAnnualFee: '0.45%'
-        }
-      ],
-      totalAUM: 542000,
-      blendedFee: '0.87%',
-      projections: [
-        { year: 1,  age: 49,  conservative: 557000,  base: 579000,  optimistic: 601000 },
-        { year: 3,  age: 51,  conservative: 589000,  base: 638000,  optimistic: 687000 },
-        { year: 5,  age: 53,  conservative: 621000,  base: 698000,  optimistic: 781000 },
-        { year: 10, age: 58,  conservative: 693000,  base: 836000,  optimistic: 993000 },
-        { year: 12, age: 60,  conservative: 718000,  base: 895000,  optimistic: 1084000 }
-      ],
-      complianceChecks: [
-        { rule: 'Suitability — FINRA Rule 2111', status: 'pass', note: 'Moderate profile supports 60/40 allocation' },
-        { rule: 'Best Interest — Reg BI', status: 'pass', note: 'Fee disclosure completed; alternatives documented' },
-        { rule: 'Form ADV Part 2 Delivered', status: 'warn', note: 'Pending client signature acknowledgment' },
-        { rule: 'Concentration Risk Check', status: 'warn', note: 'Employer stock 12% — reduction plan documented' },
-        { rule: 'Liquidity Risk Disclosure', status: 'pass', note: 'Short-term sleeve addresses liquidity needs' }
-      ],
-      aiNarrative: 'This Balanced Growth proposal consolidates Patricia\'s $542K investable assets into three complementary sleeves addressing retirement accumulation, tax efficiency, and near-term college liquidity. The 60/40 IRA rollover is the core vehicle; the managed taxable account harvests losses for tax efficiency at the 32% bracket; the short bond sleeve protects the college fund. Projected portfolio value at retirement (age 60): $895K base case — sufficient to supplement Social Security and life insurance income replacement. All-in fee of 0.87% is below the 1% benchmark for this AUM tier.'
-    },
-    'FNA-002': {
-      prospectName: 'James R.',
-      preparedDate: 'Jun 10, 2025',
-      advisor: 'Agent — M. Reyes',
-      suitabilityScore: 91,
-      riskProfile: 'Conservative-Moderate',
-      timeHorizon: '6 years',
-      accountRecommendations: [
-        {
-          type: 'Roth IRA',
-          icon: 'fa-leaf',
-          color: '#059669',
-          rationale: 'Max Roth contributions ($7,000/yr) for tax-free growth at 22% bracket',
-          aum: 42000,
-          model: 'ESG Conservative Income',
-          estAnnualFee: '0.65%'
-        },
-        {
-          type: 'ESG Taxable Brokerage',
-          icon: 'fa-seedling',
-          color: '#16a34a',
-          rationale: 'ESG-screened portfolio for core savings — tax-efficient dividend income',
-          aum: 95000,
-          model: 'ESG Balanced 35/65',
-          estAnnualFee: '0.75%'
-        }
-      ],
-      totalAUM: 137000,
-      blendedFee: '0.72%',
-      projections: [
-        { year: 1,  age: 36,  conservative: 141000,  base: 145000,  optimistic: 149000 },
-        { year: 3,  age: 38,  conservative: 148000,  base: 158000,  optimistic: 168000 },
-        { year: 5,  age: 40,  conservative: 154000,  base: 172000,  optimistic: 190000 },
-        { year: 6,  age: 41,  conservative: 157000,  base: 179000,  optimistic: 200000 }
-      ],
-      complianceChecks: [
-        { rule: 'Suitability — FINRA Rule 2111', status: 'pass', note: 'Conservative-Moderate profile supports 35/65 ESG allocation' },
-        { rule: 'Best Interest — Reg BI', status: 'pass', note: 'ESG preference documented; fee disclosure signed' },
-        { rule: 'Form ADV Part 2 Delivered', status: 'pass', note: 'Acknowledged and signed' },
-        { rule: 'ESG Disclosure — SEC Guidance', status: 'pass', note: 'ESG criteria and screening methodology disclosed' }
-      ],
-      aiNarrative: 'James\'s Conservative-Moderate profile with ESG preference is well-served by this two-sleeve structure. The Roth IRA prioritises tax-free growth given the 22% bracket, while the ESG taxable account provides a tax-efficient income stream. At a 6-year horizon, the 35/65 allocation appropriately limits volatility. Projected value at year 6: $179K base case — on track for goals. All-in fee 0.72% is competitive for ESG-screened managed accounts.'
-    }
-  };
-
-  // ── B3. Patch p3RenderMainPanel ────────────────────────────────
-  if (typeof p3RenderMainPanel === 'function') {
-    var _orig_p3RenderMainPanel = p3RenderMainPanel;
-    p3RenderMainPanel = function() {
-      _orig_p3RenderMainPanel.apply(this, arguments);
-
-      // Now inject the tab strip and, if investment tab is active, replace content
-      var panel = document.getElementById('p3-main-panel');
-      if (!panel) return;
-
-      var pr = (typeof p3Prospects !== 'undefined' && typeof _p3ActiveProspect !== 'undefined')
-        ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
-      if (!pr) return;
-
-      // Insert tab strip at top of panel (after header strip)
-      var existingTabs = panel.querySelector('.p3-main-tabs');
-      if (!existingTabs) {
-        var tabStrip = document.createElement('div');
-        tabStrip.className = 'p3-main-tabs';
-        tabStrip.innerHTML = invpBuildTabStrip();
-
-        // Insert after the header strip (first child)
-        var headerStrip = panel.querySelector('.p3-panel-header, .p3-panel-header.urgent, .p3-panel-header.high');
-        if (headerStrip && headerStrip.nextSibling) {
-          panel.insertBefore(tabStrip, headerStrip.nextSibling);
-        } else {
-          panel.insertBefore(tabStrip, panel.firstChild);
-        }
-      } else {
-        existingTabs.innerHTML = invpBuildTabStrip();
-      }
-
-      // If investment tab is active, render investment proposal over the main content
-      if (window._p3MainTab === 'investment') {
-        // Remove everything after the tab strip and replace with investment proposal
-        var tabs = panel.querySelector('.p3-main-tabs');
-        var children = Array.prototype.slice.call(panel.children);
-        var afterTabs = false;
-        children.forEach(function(child) {
-          if (afterTabs) panel.removeChild(child);
-          if (child === tabs) afterTabs = true;
-        });
-
-        var invDiv = document.createElement('div');
-        invDiv.className = 'invp-wrap';
-        invDiv.innerHTML = invpBuildProposalView(pr);
-        panel.appendChild(invDiv);
-      }
-    };
-  }
-
-  function invpBuildTabStrip() {
-    var isIns = window._p3MainTab !== 'investment';
-    var isInv = window._p3MainTab === 'investment';
-    return '<button class="p3-main-tab-btn' + (isIns ? ' active' : '') + '" onclick="p3SwitchMainTab(\'insurance\')">'
-      + '<i class="fas fa-file-contract"></i> Insurance Proposal</button>'
-      + '<button class="p3-main-tab-btn' + (isInv ? ' active' : '') + '" onclick="p3SwitchMainTab(\'investment\')">'
-      + '<i class="fas fa-chart-line"></i> Investment Proposal</button>';
-  }
-
-  function invpBuildProposalView(pr) {
-    var inv = _invProposalData[pr.id] || invpBuildDefaultProposal(pr);
-
-    // ── KPI strip
-    var kpiHtml = '<div class="invp-kpi-strip">'
-      + '<div class="invp-kpi"><div class="invp-kpi-val">$' + inv.totalAUM.toLocaleString() + '</div><div class="invp-kpi-lbl">Total AUM</div></div>'
-      + '<div class="invp-kpi"><div class="invp-kpi-val">' + inv.blendedFee + '</div><div class="invp-kpi-lbl">Blended Fee</div></div>'
-      + '<div class="invp-kpi"><div class="invp-kpi-val">' + inv.riskProfile + '</div><div class="invp-kpi-lbl">Risk Profile</div></div>'
-      + '<div class="invp-kpi"><div class="invp-kpi-val">' + inv.timeHorizon + '</div><div class="invp-kpi-lbl">Time Horizon</div></div>'
-      + '<div class="invp-kpi"><div class="invp-kpi-val invp-suit-val" style="color:' + (inv.suitabilityScore >= 85 ? '#16a34a' : inv.suitabilityScore >= 70 ? '#d97706' : '#dc2626') + '">'
-      + inv.suitabilityScore + '<span class="invp-suit-denom">/100</span></div><div class="invp-kpi-lbl">Suitability</div></div>'
-      + '</div>';
-
-    // ── Header bar
-    var headerHtml = '<div class="invp-header">'
-      + '<div class="invp-header-left">'
-      +   '<div class="invp-header-title"><i class="fas fa-chart-line"></i> Investment Proposal — ' + inv.prospectName + '</div>'
-      +   '<div class="invp-header-meta">Prepared ' + inv.preparedDate + ' · ' + inv.advisor + '</div>'
-      + '</div>'
-      + '<div class="invp-header-right">'
-      +   '<button class="invp-btn primary" onclick="invpOpenToIAModule()"><i class="fas fa-external-link-alt"></i> Open in Accounts</button>'
-      +   '<button class="invp-btn outline" onclick="invpExportProposal()"><i class="fas fa-file-pdf"></i> Export</button>'
-      + '</div>'
-      + '</div>';
-
-    // ── Account recommendation cards
-    var acctCards = inv.accountRecommendations.map(function(acct) {
-      return '<div class="invp-acct-card">'
-        + '<div class="invp-acct-icon" style="background:' + acct.color + '18;color:' + acct.color + '">'
-        +   '<i class="fas ' + acct.icon + '"></i>'
-        + '</div>'
-        + '<div class="invp-acct-info">'
-        +   '<div class="invp-acct-type">' + acct.type + '</div>'
-        +   '<div class="invp-acct-model">' + acct.model + '</div>'
-        +   '<div class="invp-acct-rationale">' + acct.rationale + '</div>'
-        + '</div>'
-        + '<div class="invp-acct-right">'
-        +   '<div class="invp-acct-aum">$' + acct.aum.toLocaleString() + '</div>'
-        +   '<div class="invp-acct-fee">' + acct.estAnnualFee + ' /yr</div>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-
-    // ── Projection table
-    var projRows = inv.projections.map(function(row) {
-      return '<tr>'
-        + '<td>Year ' + row.year + '</td>'
-        + '<td>Age ' + row.age + '</td>'
-        + '<td class="invp-proj-cons">$' + row.conservative.toLocaleString() + '</td>'
-        + '<td class="invp-proj-base">$' + row.base.toLocaleString() + '</td>'
-        + '<td class="invp-proj-opt">$' + row.optimistic.toLocaleString() + '</td>'
-        + '</tr>';
-    }).join('');
-
-    var projHtml = '<div class="invp-card invp-proj-card">'
-      + '<div class="invp-card-title"><i class="fas fa-chart-area"></i> Projected Portfolio Value</div>'
-      + '<div class="invp-proj-legend">'
-      +   '<span class="invp-leg-dot cons"></span><span>Conservative</span>'
-      +   '<span class="invp-leg-dot base"></span><span>Base Case</span>'
-      +   '<span class="invp-leg-dot opt"></span><span>Optimistic</span>'
-      + '</div>'
-      + '<div class="invp-table-wrap"><table class="invp-proj-table">'
-      + '<thead><tr><th>Period</th><th>Age</th>'
-      + '<th class="invp-proj-cons">Conservative</th>'
-      + '<th class="invp-proj-base">Base Case</th>'
-      + '<th class="invp-proj-opt">Optimistic</th>'
-      + '</tr></thead>'
-      + '<tbody>' + projRows + '</tbody>'
-      + '</table></div>'
-      + '<div class="invp-proj-footnote">† Projections are illustrative. Not a guarantee. Conservative = 75th percentile; Base = median; Optimistic = 25th percentile Monte Carlo.</div>'
-      + '</div>';
-
-    // ── Compliance
-    var compRows = inv.complianceChecks.map(function(c) {
-      var icon = c.status === 'pass' ? 'fa-check-circle' : c.status === 'warn' ? 'fa-exclamation-triangle' : 'fa-times-circle';
-      return '<div class="invp-comp-row invp-comp-' + c.status + '">'
-        + '<i class="fas ' + icon + ' invp-comp-icon"></i>'
-        + '<div class="invp-comp-body">'
-        +   '<div class="invp-comp-rule">' + c.rule + '</div>'
-        +   '<div class="invp-comp-note">' + c.note + '</div>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-
-    var hasWarn = inv.complianceChecks.some(function(c) { return c.status !== 'pass'; });
-
-    var compHtml = '<div class="invp-card invp-comp-card">'
-      + '<div class="invp-comp-header">'
-      +   '<div class="invp-card-title"><i class="fas fa-shield-alt"></i> Compliance &amp; Reg BI Check</div>'
-      +   '<span class="invp-comp-badge ' + (hasWarn ? 'warn' : 'pass') + '">'
-      +     (hasWarn ? '<i class="fas fa-exclamation-triangle"></i> Review Needed' : '<i class="fas fa-check-shield"></i> All Clear')
-      +   '</span>'
-      + '</div>'
-      + '<div class="invp-comp-rows">' + compRows + '</div>'
-      + '</div>';
-
-    // ── AI Narrative
-    var aiHtml = '<div class="invp-ai-card">'
-      + '<div class="invp-ai-header"><i class="fas fa-robot"></i> AI Investment Analysis</div>'
-      + '<div class="invp-ai-text">' + inv.aiNarrative + '</div>'
-      + '<div class="invp-ai-actions">'
-      +   '<button class="invp-btn primary" onclick="invpOpenToIAModule()"><i class="fas fa-link"></i> Link to Investment Account</button>'
-      +   '<button class="invp-btn outline" onclick="invpRunCompliance()"><i class="fas fa-sync"></i> Re-run Compliance</button>'
-      +   '<button class="invp-btn outline" onclick="invpScheduleReview()"><i class="fas fa-calendar-check"></i> Schedule Review</button>'
-      + '</div>'
-      + '</div>';
-
-    return headerHtml
-      + kpiHtml
-      + '<div class="invp-card">'
-      +   '<div class="invp-card-title"><i class="fas fa-layer-group"></i> Account Recommendations</div>'
-      +   '<div class="invp-acct-cards">' + acctCards + '</div>'
-      + '</div>'
-      + projHtml
-      + compHtml
-      + aiHtml;
-  }
-
-  function invpBuildDefaultProposal(pr) {
-    return {
-      prospectName: pr.name,
-      preparedDate: 'Jun 10, 2025',
-      advisor: 'Agent — M. Reyes',
-      suitabilityScore: 75,
-      riskProfile: pr.riskClass || 'Moderate',
-      timeHorizon: '10+ years',
-      accountRecommendations: [
-        {
-          type: 'Managed Discretionary Account',
-          icon: 'fa-chart-line',
-          color: '#3b82f6',
-          rationale: 'Core investment account aligned with risk profile and objectives',
-          aum: pr.coverageNeeded ? Math.round(pr.coverageNeeded * 0.15) : 100000,
-          model: 'Balanced Growth 60/40',
-          estAnnualFee: '0.90%'
-        }
-      ],
-      totalAUM: pr.coverageNeeded ? Math.round(pr.coverageNeeded * 0.15) : 100000,
-      blendedFee: '0.90%',
-      projections: [
-        { year: 5,  age: (pr.age || 40) + 5,  conservative: 118000, base: 135000, optimistic: 152000 },
-        { year: 10, age: (pr.age || 40) + 10, conservative: 138000, base: 170000, optimistic: 205000 }
-      ],
-      complianceChecks: [
-        { rule: 'Suitability — FINRA Rule 2111', status: 'pass', note: 'Profile aligned with recommended allocation' },
-        { rule: 'Best Interest — Reg BI', status: 'pass', note: 'Fee and alternatives documentation complete' }
-      ],
-      aiNarrative: 'Preliminary investment proposal based on available FNA data. Complete the Investment Profile section for a fully personalised analysis and accurate suitability scoring.'
-    };
-  }
-
-  // ── B4. Action stubs ────────────────────────────────────────────
-  window.invpOpenToIAModule = function() {
-    if (typeof navigateTo === 'function') navigateTo('inv-accounts');
-  };
-
-  window.invpExportProposal = function() {
-    alert('Investment Proposal PDF export — connected to proposal generation workflow.');
-  };
-
-  window.invpRunCompliance = function() {
-    var btn = event && event.target ? event.target.closest('button') : null;
-    if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running…'; btn.disabled = true; }
-    setTimeout(function() {
-      if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Complete'; btn.disabled = false; }
-    }, 1600);
-  };
-
-  window.invpScheduleReview = function() {
-    alert('Schedule Investment Review — calendar integration coming in Step 4.');
-  };
-
-  console.log('[INV Step 2] Investment Profile (FNA) + Investment Proposal (Products) loaded.');
 
 })();
 
@@ -39610,52 +40245,13 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
     };
   }
 
-  // Also patch navigateTo so when FNA page loads, retirement tab is wired up
-  var _orig_nav_ret4 = navigateTo;
-  navigateTo = function(page) {
-    _orig_nav_ret4(page);
-    if (page === 'fna') {
-      requestAnimationFrame(function() {
-        setTimeout(function() {
-          _wireRetirementFNATab();
-        }, 200);
-      });
-    }
-  };
-
-  function _wireRetirementFNATab() {
-    // Check if tab already exists
-    var tabBar = document.querySelector('.fna-tab-bar, [class*="fna"][class*="tab"]');
-    if (!tabBar) return;
-    if (document.getElementById('fna-tab-btn-retirement')) return; // already wired
-
-    // Add tab button
-    var btn = document.createElement('button');
-    btn.id = 'fna-tab-btn-retirement';
-    btn.className = 'fna-tab-btn';
-    btn.innerHTML = '<i class="fas fa-umbrella-beach"></i> Retirement Profile';
-    btn.onclick = function() {
-      tabBar.querySelectorAll('.fna-tab-btn').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      document.querySelectorAll('.fna-tab-panel').forEach(function(p) { p.style.display = 'none'; });
-      var retPanel = document.getElementById('fna-tab-retirement');
-      if (!retPanel) {
-        retPanel = document.createElement('div');
-        retPanel.id = 'fna-tab-retirement';
-        retPanel.className = 'fna-tab-panel';
-        retPanel.innerHTML = '<div id="fna-ret-tab-content"></div>';
-        var panels = document.querySelector('.fna-tab-panels, .fna-panels');
-        if (panels) panels.appendChild(retPanel);
-        else {
-          // fallback — append after tab bar's parent
-          tabBar.parentNode.appendChild(retPanel);
-        }
-      }
-      retPanel.style.display = 'block';
-      renderFNARetirementTab('fna-ret-tab-content');
-    };
-    tabBar.appendChild(btn);
-  }
+  // _wireRetirementFNATab disabled — the broad CSS selector
+  // '.fna-tab-bar, [class*="fna"][class*="tab"]' was matching the FNA editor
+  // nav bar (#fna-ed-nav-*) and injecting the Retirement Income Waterfall +
+  // AI Annuity Recommendation card into Tab 2 (Financial Profile) body.
+  // The Retirement & Annuity content is now handled exclusively by
+  // buildRetirementSection() in the domain-aware Tab 4 of the FNA editor.
+  function _wireRetirementFNATab() { /* intentionally disabled — see above */ }
 
   function _rfmt(n) { return Number(n).toLocaleString(); }
 
@@ -42636,3 +43232,1005 @@ function cmAskNova(fullName, suffix) {
 }
 
 /* LEADS_V2_PATCH_APPLIED */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   PHASE 3 — DOMAIN HUB MODULE
+   4-domain Products & Illustrations hub:
+     insurance   → existing p3 core (illustration engine, proposals, NAIC)
+     retirement  → annuity illustration hub (SPIA / DIA / FIA / VA)
+     investments → ETF / Mutual Fund / 529 proposal builder
+     advisory    → Wealth Mgmt (Rep Advisory/SMA/UMA) + Estate + Small Business
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   A. STATE & DOMAIN SWITCHER
+   ───────────────────────────────────────────────────────────────────── */
+
+var _p3DomainTab = 'insurance';
+
+window.p3SwitchDomainTab = function(domain) {
+  _p3DomainTab = domain;
+  p3RenderProspectList();
+  p3RenderMainPanel();
+};
+
+/* ─────────────────────────────────────────────────────────────────────
+   B. PROSPECT LIST — domain-filtered
+   Patch p3RenderProspectList to filter by active domain tab.
+   Insurance = any prospect (all have insurance FNA or are insurance leads)
+   Retirement / Investments / Advisory = those with matching fna.domains[]
+   ───────────────────────────────────────────────────────────────────── */
+
+(function() {
+  var _origP3RenderProspectList = p3RenderProspectList;
+  p3RenderProspectList = function() {
+    _origP3RenderProspectList.apply(this, arguments);
+
+    // After original renders, re-inject tab-aware sub-header
+    var el = document.getElementById('p3-prospect-list');
+    if (!el) return;
+
+    // Domain → fna.domains[] key map
+    var domainKeyMap = {
+      'insurance':   'insurance',
+      'retirement':  'retirement',
+      'investments': 'investments', // advisory fna also shows for inv if they have inv domain
+      'advisory':    'advisory'
+    };
+
+    if (_p3DomainTab === 'insurance') return; // insurance shows all prospects as before
+
+    // For non-insurance domains, dim prospects that don't match
+    var domainKey = domainKeyMap[_p3DomainTab];
+    var cards = el.querySelectorAll('.p3-prospect-card');
+    cards.forEach(function(card) {
+      var id = card.getAttribute('data-prospect-id') || card.onclick && card.onclick.toString().match(/'(FNA-\d+)'/)?.[1];
+      // Attempt to match FNA domain
+      var fna = (typeof fnaFullData !== 'undefined' && id) ? fnaFullData[id] : null;
+      var hasMatch = false;
+      if (fna && fna.domains) {
+        hasMatch = fna.domains.indexOf(domainKey) !== -1;
+      } else {
+        // Retirement domain — p3Prospects with gaps referencing retirement/annuity
+        if (_p3DomainTab === 'retirement') {
+          hasMatch = card.textContent.indexOf('annuity') !== -1
+                  || card.textContent.indexOf('Annuity') !== -1
+                  || card.textContent.indexOf('income gap') !== -1
+                  || card.textContent.indexOf('retirement') !== -1;
+        } else {
+          hasMatch = true; // show all if no FNA data
+        }
+      }
+      card.style.opacity = hasMatch ? '1' : '0.38';
+      card.title = hasMatch ? '' : 'No ' + _p3DomainTab + ' domain in FNA';
+    });
+  };
+})();
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   C. MAIN PANEL PATCH — inject 4-tab domain strip + route
+   ───────────────────────────────────────────────────────────────────── */
+
+(function() {
+  var _origP3RenderMainPanel = p3RenderMainPanel;
+
+  p3RenderMainPanel = function() {
+    // 1. Run the original insurance render
+    _origP3RenderMainPanel.apply(this, arguments);
+
+    // 2. Inject domain tab strip above the panel
+    var panel = document.getElementById('p3-main-panel');
+    if (!panel) return;
+
+    var tabs = [
+      { id: 'insurance',   icon: 'fa-shield-alt',    label: 'Insurance',   color: '#1e3a5f' },
+      { id: 'retirement',  icon: 'fa-umbrella-beach', label: 'Retirement',  color: '#b45309' },
+      { id: 'investments', icon: 'fa-chart-line',     label: 'Investments', color: '#059669' },
+      { id: 'advisory',    icon: 'fa-handshake',      label: 'Advisory',    color: '#7c3aed' }
+    ];
+
+    var stripHtml = '<div class="p3-domain-strip">'
+      + tabs.map(function(t) {
+          var active = _p3DomainTab === t.id;
+          return '<button class="p3-domain-tab' + (active ? ' p3-domain-tab-active' : '') + '"'
+            + ' style="' + (active ? '--dt-color:' + t.color : '') + '"'
+            + ' onclick="p3SwitchDomainTab(\'' + t.id + '\')">'
+            + '<i class="fas ' + t.icon + '"></i>'
+            + '<span>' + t.label + '</span>'
+            + '</button>';
+        }).join('')
+      + '</div>';
+
+    // Prepend the strip
+    panel.insertAdjacentHTML('afterbegin', stripHtml);
+
+    // 3. If non-insurance tab, replace content area below the strip
+    if (_p3DomainTab === 'retirement') {
+      _p3InjectDomainContent(panel, p3BuildRetirementHub());
+    } else if (_p3DomainTab === 'investments') {
+      _p3InjectDomainContent(panel, p3BuildInvestmentsHub());
+    } else if (_p3DomainTab === 'advisory') {
+      _p3InjectDomainContent(panel, p3BuildAdvisoryHub());
+    }
+    // insurance: leave original content as-is
+  };
+
+  function _p3InjectDomainContent(panel, html) {
+    // Remove everything after the strip
+    var strip = panel.querySelector('.p3-domain-strip');
+    // Remove all siblings after strip
+    while (strip.nextSibling) {
+      panel.removeChild(strip.nextSibling);
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'p3-domain-content';
+    wrap.innerHTML = html;
+    panel.appendChild(wrap);
+  }
+})();
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   D. RETIREMENT HUB — SPIA / DIA / FIA / VA
+   ───────────────────────────────────────────────────────────────────── */
+
+var _retAnnuityData = {
+  'FNA-001': {
+    name: 'Alex Rivera', age: 34,
+    targetIncomeMo: 6500, ssMo: 2200, pensionMo: 0, existingAnnuityMo: 0,
+    gapMo: 4300, rolloverAssets: 295000, investableAssets: 462000,
+    retirementAge: 62, yearsToRetirement: 28,
+    riskProfile: 'Moderate', taxBracket: '32%',
+    aiRec: 'FIA',
+    aiNote: 'With 28 years to retirement and a $4,300/mo gap, a Deferred Income Annuity or FIA with income rider best fits the accumulation timeline. DIA locks in guaranteed income; FIA adds index-linked growth potential.'
+  },
+  'FNA-002': {
+    name: 'Nancy Foster', age: 41,
+    targetIncomeMo: 7200, ssMo: 2600, pensionMo: 500, existingAnnuityMo: 0,
+    gapMo: 4100, rolloverAssets: 145000, investableAssets: 298000,
+    retirementAge: 65, yearsToRetirement: 24,
+    riskProfile: 'Conservative-Moderate', taxBracket: '22%',
+    aiRec: 'DIA',
+    aiNote: 'Nancy\'s conservative profile and 24-year horizon favor a DIA funded from existing rollover assets. Income start date at 65 provides certainty; ESG preference noted but does not apply to fixed annuity products.'
+  },
+  'FNA-003': {
+    name: 'Patricia Nguyen', age: 48,
+    targetIncomeMo: 5800, ssMo: 2100, pensionMo: 400, existingAnnuityMo: 0,
+    gapMo: 3300, rolloverAssets: 187000, investableAssets: 324000,
+    retirementAge: 65, yearsToRetirement: 17,
+    riskProfile: 'Moderate', taxBracket: '24%',
+    aiRec: 'FIA',
+    aiNote: 'Patricia\'s 17-year horizon and $3,300/mo gap are well-served by a FIA with a 6%/yr income rider rollup. Projected income at 65: ~$3,900/mo from a $187K premium — closing the gap with a modest surplus.'
+  }
+};
+
+var _retAnnuityProducts = [
+  {
+    id: 'SPIA',
+    name: 'Single Premium Immediate Annuity',
+    short: 'SPIA',
+    icon: 'fa-play-circle',
+    color: '#0891b2',
+    tagline: 'Income starts immediately',
+    bestFor: 'Age 60+, needs income now, rollover assets available',
+    guarantees: ['Lifetime income guaranteed', 'Fixed monthly payment', 'No market risk', 'Optional period certain (10/20yr)'],
+    riskLevel: 'None',
+    naicNote: 'Not subject to NAIC Illustration Model Reg — income disclosure form required.',
+    sampleRate: '$5,200/mo per $1M premium (age 65, male, life only)'
+  },
+  {
+    id: 'DIA',
+    name: 'Deferred Income Annuity',
+    short: 'DIA',
+    icon: 'fa-hourglass-half',
+    color: '#7c3aed',
+    tagline: 'Guaranteed income at a future date',
+    bestFor: 'Age 45–60, retirement 10+ years away, wants certainty',
+    guarantees: ['Lock in income amount today', 'Longevity hedge', 'Higher payout than SPIA (deferral bonus)', 'Inflation rider available'],
+    riskLevel: 'None',
+    naicNote: 'Annuity illustration must show income start date, premium, guaranteed income amount.',
+    sampleRate: '$4,800/mo at 65 per $100K premium at age 45 (15-yr deferral)'
+  },
+  {
+    id: 'FIA',
+    name: 'Fixed Indexed Annuity',
+    short: 'FIA',
+    icon: 'fa-chart-bar',
+    color: '#b45309',
+    tagline: 'Index-linked growth + income rider',
+    bestFor: 'Moderate risk, 10–25 yr horizon, wants growth potential',
+    guarantees: ['0% floor — no market loss', 'Income rider: 6%/yr rollup', 'Cap rate 10–14% (S&P 500)', 'Tax-deferred accumulation'],
+    riskLevel: 'Low-Medium',
+    naicNote: 'Reg BI / NAIC Model 275 suitability form required. Must show income rider projections separately.',
+    sampleRate: '~$3,900/mo at 65 per $187K premium at age 48 (6% rollup, 17-yr)'
+  },
+  {
+    id: 'VA',
+    name: 'Variable Annuity',
+    short: 'VA',
+    icon: 'fa-chart-area',
+    color: '#dc2626',
+    tagline: 'Market-linked growth with living benefits',
+    bestFor: 'Higher risk tolerance, long horizon (20+ yr), growth-first',
+    guarantees: ['GMIB / GMWB living benefit riders', 'Sub-account market participation', 'Death benefit guarantee', 'FINRA-regulated — Series 6/63 required'],
+    riskLevel: 'Medium-High',
+    naicNote: 'FINRA-regulated. Prospectus required. Illustration shows hypothetical, not projected, returns.',
+    sampleRate: 'Income varies — depends on sub-account performance + rider terms'
+  }
+];
+
+window.p3BuildRetirementHub = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && typeof _p3ActiveProspect !== 'undefined')
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+
+  var rd = (pr && _retAnnuityData[pr.id]) ? _retAnnuityData[pr.id] : null;
+
+  // No prospect selected
+  if (!pr) {
+    return '<div class="p3-domain-empty"><i class="fas fa-umbrella-beach"></i>'
+      + '<div>Select a prospect from the left panel to build a retirement income illustration.</div></div>';
+  }
+
+  // ── Income gap summary bar
+  var gapMo = rd ? rd.gapMo : 0;
+  var gapColor = gapMo > 3000 ? '#dc2626' : gapMo > 1500 ? '#d97706' : '#16a34a';
+  var targetMo = rd ? rd.targetIncomeMo : 0;
+  var coveredPct = targetMo > 0 ? Math.min(100, Math.round(((targetMo - gapMo) / targetMo) * 100)) : 0;
+
+  var gapBar = rd ? (
+    '<div class="p3ret-gap-bar">'
+    + '<div class="p3ret-gap-bar-label">Income Coverage</div>'
+    + '<div class="p3ret-gap-bar-track">'
+    +   '<div class="p3ret-gap-bar-fill" style="width:' + coveredPct + '%"></div>'
+    + '</div>'
+    + '<div class="p3ret-gap-bar-vals">'
+    +   '<span class="p3ret-covered">Covered: $' + (targetMo - gapMo).toLocaleString() + '/mo</span>'
+    +   '<span class="p3ret-gap" style="color:' + gapColor + '">Gap: $' + gapMo.toLocaleString() + '/mo</span>'
+    + '</div>'
+    + '</div>'
+  ) : '';
+
+  // ── AI recommendation banner
+  var aiRec = rd ? rd.aiRec : null;
+  var aiBanner = rd ? (
+    '<div class="p3ret-ai-banner">'
+    + '<div class="p3ret-ai-icon"><i class="fas fa-robot"></i></div>'
+    + '<div class="p3ret-ai-body">'
+    +   '<div class="p3ret-ai-title">AI Recommendation — <strong>' + rd.aiRec + '</strong></div>'
+    +   '<div class="p3ret-ai-note">' + rd.aiNote + '</div>'
+    + '</div>'
+    + '</div>'
+  ) : '';
+
+  // ── Prospect summary
+  var prospectSummary = rd ? (
+    '<div class="p3ret-prospect-summary">'
+    + '<div class="p3ret-ps-row"><span>Age</span><strong>' + rd.age + '</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Target Income</span><strong>$' + rd.targetIncomeMo.toLocaleString() + '/mo</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Social Security</span><strong>$' + rd.ssMo.toLocaleString() + '/mo</strong></div>'
+    + (rd.pensionMo > 0 ? '<div class="p3ret-ps-row"><span>Pension</span><strong>$' + rd.pensionMo.toLocaleString() + '/mo</strong></div>' : '')
+    + '<div class="p3ret-ps-row gap"><span>Income Gap</span><strong style="color:' + gapColor + '">$' + rd.gapMo.toLocaleString() + '/mo</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Rollover Assets</span><strong>$' + rd.rolloverAssets.toLocaleString() + '</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Years to Retirement</span><strong>' + rd.yearsToRetirement + ' yrs</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Risk Profile</span><strong>' + rd.riskProfile + '</strong></div>'
+    + '</div>'
+  ) : '<div class="p3ret-prospect-summary"><div class="p3ret-ps-row"><span>No retirement data on file — complete FNA Tab 4</span></div></div>';
+
+  // ── Annuity product tiles
+  var tiles = _retAnnuityProducts.map(function(prod) {
+    var isRec = aiRec && prod.id === aiRec;
+    var guaranteesList = prod.guarantees.map(function(g) {
+      return '<div class="p3ret-guarantee"><i class="fas fa-check-circle"></i>' + g + '</div>';
+    }).join('');
+
+    return '<div class="p3ret-ann-tile' + (isRec ? ' p3ret-ann-tile-rec' : '') + '" onclick="p3RetSelectAnnuity(\'' + prod.id + '\')" id="p3ret-tile-' + prod.id + '">'
+      + (isRec ? '<div class="p3ret-rec-badge"><i class="fas fa-star"></i> AI Recommended</div>' : '')
+      + '<div class="p3ret-ann-tile-header" style="border-left:4px solid ' + prod.color + '">'
+      +   '<div class="p3ret-ann-icon" style="color:' + prod.color + '"><i class="fas ' + prod.icon + '"></i></div>'
+      +   '<div>'
+      +     '<div class="p3ret-ann-name">' + prod.short + '</div>'
+      +     '<div class="p3ret-ann-full">' + prod.name + '</div>'
+      +   '</div>'
+      +   '<div class="p3ret-ann-risk p3ret-risk-' + prod.riskLevel.toLowerCase().replace(/[^a-z]/g,'-') + '">' + prod.riskLevel + '</div>'
+      + '</div>'
+      + '<div class="p3ret-ann-tagline">' + prod.tagline + '</div>'
+      + '<div class="p3ret-ann-bestfor"><i class="fas fa-user-check"></i> ' + prod.bestFor + '</div>'
+      + '<div class="p3ret-ann-guarantees">' + guaranteesList + '</div>'
+      + '<div class="p3ret-ann-sample"><i class="fas fa-calculator"></i> ' + prod.sampleRate + '</div>'
+      + '<div class="p3ret-ann-naic"><i class="fas fa-gavel"></i> ' + prod.naicNote + '</div>'
+      + '<button class="p3ret-ann-btn" style="background:' + prod.color + '" onclick="event.stopPropagation();p3RetRunIllustration(\'' + prod.id + '\')"><i class="fas fa-play"></i> Run ' + prod.short + ' Illustration</button>'
+      + '</div>';
+  }).join('');
+
+  return '<div class="p3ret-hub">'
+
+    // Header
+    + '<div class="p3-domain-header ret">'
+    +   '<div class="p3-domain-header-icon"><i class="fas fa-umbrella-beach"></i></div>'
+    +   '<div>'
+    +     '<div class="p3-domain-header-title">Retirement Income Illustration Hub</div>'
+    +     '<div class="p3-domain-header-sub">SPIA · DIA · FIA · VA — Gap-to-product pipeline from FNA Tab 4</div>'
+    +   '</div>'
+    +   '<div class="p3-domain-header-actions">'
+    +     '<button class="p3-dh-btn" onclick="p3RetCompareAll()"><i class="fas fa-balance-scale"></i> Compare All</button>'
+    +     '<button class="p3-dh-btn primary" onclick="p3RetGenerateIncomeProposal()"><i class="fas fa-file-invoice-dollar"></i> Income Proposal</button>'
+    +   '</div>'
+    + '</div>'
+
+    // 2-col: prospect summary + gap bar
+    + '<div class="p3ret-top-row">'
+    +   '<div class="p3ret-top-left">'
+    +     '<div class="p3ret-section-title"><i class="fas fa-user"></i> ' + pr.name + ' — Retirement Profile</div>'
+    +     prospectSummary
+    +   '</div>'
+    +   '<div class="p3ret-top-right">'
+    +     '<div class="p3ret-section-title"><i class="fas fa-tachometer-alt"></i> Income Gap Analysis</div>'
+    +     gapBar
+    +     aiBanner
+    +   '</div>'
+    + '</div>'
+
+    // Annuity product tiles
+    + '<div class="p3ret-section-title" style="margin:20px 0 12px"><i class="fas fa-layer-group"></i> Select Annuity Type</div>'
+    + '<div class="p3ret-ann-grid">' + tiles + '</div>'
+
+    // Illustration output area
+    + '<div id="p3ret-illust-output"></div>'
+
+    + '</div>'; // p3ret-hub
+};
+
+window.p3RetSelectAnnuity = function(productId) {
+  document.querySelectorAll('.p3ret-ann-tile').forEach(function(t) {
+    t.classList.remove('p3ret-ann-tile-selected');
+  });
+  var tile = document.getElementById('p3ret-tile-' + productId);
+  if (tile) tile.classList.add('p3ret-ann-tile-selected');
+};
+
+window.p3RetRunIllustration = function(productId) {
+  var prod = _retAnnuityProducts.find(function(p) { return p.id === productId; });
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  var rd = pr ? _retAnnuityData[pr.id] : null;
+  if (!prod || !pr) return;
+
+  var premium = rd ? rd.rolloverAssets : 100000;
+  var yrs = rd ? rd.yearsToRetirement : 15;
+  var rows = '';
+  var rollup = productId === 'FIA' ? 1.06 : productId === 'DIA' ? 1.055 : 1.04;
+  var base = premium;
+  for (var y = 1; y <= Math.min(yrs, 30); y += (y < 10 ? 1 : 5)) {
+    base = base * Math.pow(rollup, (y === 1 ? 1 : (y <= 10 ? 1 : 5)));
+    var estIncome = productId === 'SPIA' ? 0 : Math.round(base * 0.05 / 12);
+    rows += '<tr>'
+      + '<td>' + y + '</td>'
+      + '<td>' + (rd ? rd.age + y - 1 : '--') + '</td>'
+      + '<td>$' + Math.round(base).toLocaleString() + '</td>'
+      + (productId !== 'SPIA' ? '<td>$' + estIncome.toLocaleString() + '/mo</td>' : '<td>—</td>')
+      + '</tr>';
+  }
+
+  var output = document.getElementById('p3ret-illust-output');
+  if (!output) return;
+
+  output.innerHTML = '<div class="p3ret-illust-card">'
+    + '<div class="p3ret-illust-header">'
+    +   '<div><i class="fas fa-calculator"></i> ' + prod.name + ' Illustration — ' + pr.name + '</div>'
+    +   '<div class="p3ret-illust-actions">'
+    +     '<button class="p3ret-illust-btn" onclick="showToast(\'Income Proposal PDF generating…\',\'ai\')"><i class="fas fa-file-pdf"></i> Export</button>'
+    +     '<button class="p3ret-illust-btn" onclick="showToast(\'Suitability form opened.\',\'info\')"><i class="fas fa-clipboard-check"></i> Suitability Form</button>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="p3ret-illust-kpis">'
+    +   '<div class="p3ret-illust-kpi"><div class="p3ret-illust-kpi-val">$' + premium.toLocaleString() + '</div><div class="p3ret-illust-kpi-lbl">Premium / Rollover</div></div>'
+    +   '<div class="p3ret-illust-kpi"><div class="p3ret-illust-kpi-val">' + yrs + ' yrs</div><div class="p3ret-illust-kpi-lbl">Deferral Period</div></div>'
+    +   '<div class="p3ret-illust-kpi"><div class="p3ret-illust-kpi-val">' + (rollup * 100 - 100).toFixed(1) + '%</div><div class="p3ret-illust-kpi-lbl">Rollup / Credit Rate</div></div>'
+    +   '<div class="p3ret-illust-kpi hi"><div class="p3ret-illust-kpi-val">' + prod.riskLevel + '</div><div class="p3ret-illust-kpi-lbl">Risk Level</div></div>'
+    + '</div>'
+    + '<table class="p3ret-illust-table">'
+    +   '<thead><tr><th>Year</th><th>Age</th><th>Account Value</th><th>Est. Income</th></tr></thead>'
+    +   '<tbody>' + rows + '</tbody>'
+    + '</table>'
+    + '<div class="p3ret-illust-naic"><i class="fas fa-gavel"></i> <strong>NAIC Note:</strong> ' + prod.naicNote + '</div>'
+    + '</div>';
+
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window.p3RetCompareAll = function() {
+  showToast('Building side-by-side annuity comparison for all 4 types…', 'ai');
+};
+
+window.p3RetGenerateIncomeProposal = function() {
+  showToast('Generating Income Proposal PDF — includes gap analysis + recommended annuity illustration…', 'ai');
+};
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   E. INVESTMENTS HUB — ETF / Mutual Fund / 529
+   ───────────────────────────────────────────────────────────────────── */
+
+var _invHubProducts = [
+  {
+    id: 'ETF_CORE',
+    category: 'ETF',
+    name: 'Core Equity ETF Portfolio',
+    icon: 'fa-chart-line',
+    color: '#059669',
+    minInvestment: '$2,500',
+    expenseRatio: '0.08%',
+    tagline: 'Low-cost broad market exposure — S&P 500, Total Market, International',
+    components: ['VOO — Vanguard S&P 500 ETF (0.03%)', 'VTI — Vanguard Total Market ETF (0.03%)', 'VXUS — International ex-US ETF (0.07%)'],
+    suitability: 'Moderate to Aggressive · 7+ year horizon',
+    taxEfficiency: 'High — minimal capital gain distributions',
+    accountTypes: ['Taxable Brokerage', 'Roth IRA', '401(k) Rollover']
+  },
+  {
+    id: 'ETF_INCOME',
+    category: 'ETF',
+    name: 'Income & Dividend ETF Portfolio',
+    icon: 'fa-hand-holding-usd',
+    color: '#0891b2',
+    minInvestment: '$2,500',
+    expenseRatio: '0.15%',
+    tagline: 'Dividend-focused ETFs for income generation — utilities, REITs, dividend aristocrats',
+    components: ['VYM — High Dividend Yield ETF (0.06%)', 'SCHD — Schwab Dividend ETF (0.06%)', 'VNQ — Real Estate ETF (0.12%)'],
+    suitability: 'Conservative-Moderate · Income need · 5+ year horizon',
+    taxEfficiency: 'Moderate — qualified dividends, some ordinary income',
+    accountTypes: ['IRA (tax-deferred preferred)', 'Taxable Brokerage']
+  },
+  {
+    id: 'MF_BALANCED',
+    category: 'Mutual Fund',
+    name: 'Balanced Growth Fund',
+    icon: 'fa-balance-scale',
+    color: '#6366f1',
+    minInvestment: '$1,000',
+    expenseRatio: '0.48%',
+    tagline: 'Professionally managed 60/40 allocation — growth with income component',
+    components: ['60% Large-cap equity sleeve', '30% Investment-grade bond sleeve', '10% International equity'],
+    suitability: 'Moderate · 5–10 year horizon · first-time managed account',
+    taxEfficiency: 'Moderate — may distribute capital gains annually',
+    accountTypes: ['Traditional IRA', 'Taxable Brokerage', 'Rollover IRA']
+  },
+  {
+    id: 'MF_GROWTH',
+    category: 'Mutual Fund',
+    name: 'Large Cap Growth Fund',
+    icon: 'fa-rocket',
+    color: '#7c3aed',
+    minInvestment: '$1,000',
+    expenseRatio: '0.62%',
+    tagline: 'Actively managed large-cap growth — S&P 500 benchmark, seeks alpha',
+    components: ['Top 50 S&P 500 growth stocks', 'Active stock selection — P/E, EPS growth', 'Annual turnover ~25%'],
+    suitability: 'Moderate-Aggressive · 10+ year horizon · accumulation phase',
+    taxEfficiency: 'Low-Moderate — active management creates distributions',
+    accountTypes: ['Roth IRA (best for high-growth)', 'Tax-deferred accounts']
+  },
+  {
+    id: 'MF_ESG',
+    category: 'Mutual Fund',
+    name: 'ESG Responsible Growth Fund',
+    icon: 'fa-leaf',
+    color: '#16a34a',
+    minInvestment: '$1,000',
+    expenseRatio: '0.35%',
+    tagline: 'Environmental, Social & Governance screened — responsible investing without sacrificing returns',
+    components: ['ESG-screened large & mid cap equity', 'Excludes tobacco, weapons, fossil fuels', 'Positive ESG score threshold: top 50%'],
+    suitability: 'Moderate · ESG preference documented in FNA · any horizon',
+    taxEfficiency: 'Moderate',
+    accountTypes: ['Any account type']
+  },
+  {
+    id: '529_STANDARD',
+    category: '529 Plan',
+    name: 'State 529 College Savings Plan',
+    icon: 'fa-graduation-cap',
+    color: '#b45309',
+    minInvestment: '$250',
+    expenseRatio: '0.15–0.30% (age-based)',
+    tagline: 'Tax-advantaged college savings — contributions grow tax-free, withdrawals tax-free for qualified education',
+    components: ['Age-based portfolio (automatically de-risks as college nears)', 'Static portfolios: aggressive / moderate / conservative', 'FDIC-insured bank option available'],
+    suitability: 'Any risk profile · parent or grandparent · child under 13',
+    taxEfficiency: 'Highest — tax-free growth + deduction in many states',
+    accountTypes: ['529 Account (beneficiary = student)', 'UGMA/UTMA (taxable alternative)']
+  }
+];
+
+var _invHubData = {
+  'FNA-001': {
+    name: 'Alex Rivera',
+    investableAssets: 462000,
+    taxBracket: '32%',
+    timeHorizonYrs: 12,
+    riskProfile: 'Moderate',
+    esgPreference: false,
+    collegeFundNeeds: true,
+    collegeFundChild: 'Twins, age 8 — 10 years to college',
+    collegeFundTarget: 160000,
+    aiRec: ['ETF_CORE', '529_STANDARD'],
+    aiNote: 'Alex\'s high bracket (32%) strongly favours tax-advantaged vehicles. Core ETF portfolio in a rollover IRA + 529 for twins addresses both accumulation and college goals. ESG not a priority.'
+  },
+  'FNA-002': {
+    name: 'Nancy Foster',
+    investableAssets: 298000,
+    taxBracket: '22%',
+    timeHorizonYrs: 6,
+    riskProfile: 'Conservative-Moderate',
+    esgPreference: true,
+    collegeFundNeeds: false,
+    collegeFundChild: null,
+    collegeFundTarget: 0,
+    aiRec: ['MF_ESG', 'ETF_INCOME'],
+    aiNote: 'ESG preference documented. Income & Dividend ETF + ESG Responsible Growth Fund align with Nancy\'s conservative-moderate profile. 6-year horizon means a near-term cash sleeve is needed alongside these positions.'
+  },
+  'FNA-003': {
+    name: 'Patricia Nguyen',
+    investableAssets: 324000,
+    taxBracket: '24%',
+    timeHorizonYrs: 17,
+    riskProfile: 'Moderate',
+    esgPreference: false,
+    collegeFundNeeds: false,
+    collegeFundChild: null,
+    collegeFundTarget: 0,
+    aiRec: ['MF_BALANCED', 'ETF_CORE'],
+    aiNote: 'Patricia\'s 17-year horizon and moderate profile suit a Balanced Growth Fund core with a Core ETF satellite. Tax-deferred rollover account preferred given 24% bracket.'
+  }
+};
+
+window.p3BuildInvestmentsHub = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && typeof _p3ActiveProspect !== 'undefined')
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+
+  if (!pr) {
+    return '<div class="p3-domain-empty"><i class="fas fa-chart-line"></i>'
+      + '<div>Select a prospect to build an investment product proposal.</div></div>';
+  }
+
+  var id = pr.id;
+  var hd = _invHubData[id] || {
+    name: pr.name, investableAssets: 100000, taxBracket: '24%',
+    timeHorizonYrs: 10, riskProfile: 'Moderate', esgPreference: false,
+    collegeFundNeeds: false, collegeFundTarget: 0,
+    aiRec: ['ETF_CORE', 'MF_BALANCED'],
+    aiNote: 'Complete FNA Investment Advisory section for a personalised recommendation.'
+  };
+
+  // Category groups
+  var categories = ['ETF', 'Mutual Fund', '529 Plan'];
+  var catIcons = { 'ETF': 'fa-chart-line', 'Mutual Fund': 'fa-layer-group', '529 Plan': 'fa-graduation-cap' };
+  var catColors = { 'ETF': '#059669', 'Mutual Fund': '#6366f1', '529 Plan': '#b45309' };
+
+  var productCards = categories.map(function(cat) {
+    var prods = _invHubProducts.filter(function(p) { return p.category === cat; });
+    var cards = prods.map(function(prod) {
+      var isRec = hd.aiRec.indexOf(prod.id) !== -1;
+      var compList = prod.components.map(function(c) {
+        return '<div class="p3inv-comp"><i class="fas fa-dot-circle"></i>' + c + '</div>';
+      }).join('');
+      var acctPills = prod.accountTypes.map(function(a) {
+        return '<span class="p3inv-acct-pill">' + a + '</span>';
+      }).join('');
+
+      return '<div class="p3inv-prod-card' + (isRec ? ' p3inv-prod-rec' : '') + '">'
+        + (isRec ? '<div class="p3inv-rec-badge"><i class="fas fa-star"></i> AI Pick</div>' : '')
+        + '<div class="p3inv-prod-header">'
+        +   '<div class="p3inv-prod-icon" style="color:' + prod.color + '"><i class="fas ' + prod.icon + '"></i></div>'
+        +   '<div>'
+        +     '<div class="p3inv-prod-name">' + prod.name + '</div>'
+        +     '<div class="p3inv-prod-tagline">' + prod.tagline + '</div>'
+        +   '</div>'
+        + '</div>'
+        + '<div class="p3inv-prod-meta">'
+        +   '<div class="p3inv-meta-row"><span>Min Investment</span><strong>' + prod.minInvestment + '</strong></div>'
+        +   '<div class="p3inv-meta-row"><span>Expense Ratio</span><strong>' + prod.expenseRatio + '</strong></div>'
+        +   '<div class="p3inv-meta-row"><span>Tax Efficiency</span><strong>' + prod.taxEfficiency + '</strong></div>'
+        +   '<div class="p3inv-meta-row"><span>Suitability</span><strong>' + prod.suitability + '</strong></div>'
+        + '</div>'
+        + '<div class="p3inv-comp-list">' + compList + '</div>'
+        + '<div class="p3inv-acct-pills">' + acctPills + '</div>'
+        + '<div class="p3inv-prod-actions">'
+        +   '<button class="p3inv-btn" onclick="p3InvBuildProposal(\'' + prod.id + '\')"><i class="fas fa-file-alt"></i> Build Proposal</button>'
+        +   '<button class="p3inv-btn outline" onclick="p3InvRunProjection(\'' + prod.id + '\')"><i class="fas fa-calculator"></i> Run Projection</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    return '<div class="p3inv-cat-section">'
+      + '<div class="p3inv-cat-header" style="border-left:4px solid ' + catColors[cat] + '">'
+      +   '<i class="fas ' + catIcons[cat] + '" style="color:' + catColors[cat] + '"></i>'
+      +   '<span>' + cat + (cat === '529 Plan' && !hd.collegeFundNeeds ? ' <span class="p3inv-cat-note">(No college need identified in FNA)</span>' : '') + '</span>'
+      + '</div>'
+      + '<div class="p3inv-prod-grid">' + cards + '</div>'
+      + '</div>';
+  }).join('');
+
+  // Client summary bar
+  var clientBar = '<div class="p3inv-client-bar">'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">$' + hd.investableAssets.toLocaleString() + '</div><div class="p3inv-cb-lbl">Investable Assets</div></div>'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">' + hd.taxBracket + '</div><div class="p3inv-cb-lbl">Tax Bracket</div></div>'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">' + hd.timeHorizonYrs + ' yrs</div><div class="p3inv-cb-lbl">Time Horizon</div></div>'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">' + hd.riskProfile + '</div><div class="p3inv-cb-lbl">Risk Profile</div></div>'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">' + (hd.esgPreference ? '✓ Yes' : 'No') + '</div><div class="p3inv-cb-lbl">ESG Preference</div></div>'
+    + (hd.collegeFundNeeds ? '<div class="p3inv-cb-item hi"><div class="p3inv-cb-val">$' + hd.collegeFundTarget.toLocaleString() + '</div><div class="p3inv-cb-lbl">529 Target</div></div>' : '')
+    + '</div>';
+
+  var aiBanner = '<div class="p3inv-ai-banner">'
+    + '<div class="p3inv-ai-icon"><i class="fas fa-robot"></i></div>'
+    + '<div><div class="p3inv-ai-title">AI Investment Picks for ' + hd.name + '</div>'
+    +   '<div class="p3inv-ai-note">' + hd.aiNote + '</div></div>'
+    + '</div>';
+
+  return '<div class="p3inv-hub">'
+    + '<div class="p3-domain-header inv">'
+    +   '<div class="p3-domain-header-icon"><i class="fas fa-chart-line"></i></div>'
+    +   '<div>'
+    +     '<div class="p3-domain-header-title">Investment Products Hub</div>'
+    +     '<div class="p3-domain-header-sub">ETF Portfolios · Mutual Funds · 529 College Savings</div>'
+    +   '</div>'
+    +   '<div class="p3-domain-header-actions">'
+    +     '<button class="p3-dh-btn" onclick="showToast(\'Opening investment accounts module…\',\'info\');navigateTo(\'inv-accounts\')"><i class="fas fa-external-link-alt"></i> Investment Accounts</button>'
+    +     '<button class="p3-dh-btn primary" onclick="p3InvBuildAllProposals()"><i class="fas fa-file-alt"></i> Full Proposal</button>'
+    +   '</div>'
+    + '</div>'
+    + clientBar
+    + aiBanner
+    + productCards
+    + '<div id="p3inv-projection-output"></div>'
+    + '</div>';
+};
+
+window.p3InvBuildProposal = function(productId) {
+  var prod = _invHubProducts.find(function(p) { return p.id === productId; });
+  if (!prod) return;
+  showToast('Building ' + prod.name + ' proposal for ' + (_p3ActiveProspect || 'prospect') + '…', 'ai');
+};
+
+window.p3InvRunProjection = function(productId) {
+  var prod = _invHubProducts.find(function(p) { return p.id === productId; });
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  var hd = pr ? (_invHubData[pr.id] || null) : null;
+  if (!prod || !pr) return;
+
+  var principal = hd ? hd.investableAssets : 50000;
+  var yrs = hd ? hd.timeHorizonYrs : 10;
+  var rates = { ETF: 0.072, 'Mutual Fund': 0.065, '529 Plan': 0.058 };
+  var rate = rates[prod.category] || 0.065;
+
+  var rows = '';
+  for (var y = 1; y <= yrs; y++) {
+    var val = Math.round(principal * Math.pow(1 + rate, y));
+    var gain = Math.round(val - principal);
+    rows += '<tr><td>' + y + '</td><td>$' + val.toLocaleString() + '</td><td class="p3inv-proj-gain">+$' + gain.toLocaleString() + '</td></tr>';
+  }
+
+  var output = document.getElementById('p3inv-projection-output');
+  if (!output) return;
+
+  output.innerHTML = '<div class="p3inv-proj-card">'
+    + '<div class="p3inv-proj-header"><i class="fas fa-chart-area"></i> ' + prod.name + ' — Growth Projection (' + (rate * 100).toFixed(1) + '% assumed return)</div>'
+    + '<table class="p3inv-proj-table"><thead><tr><th>Year</th><th>Projected Value</th><th>Gain</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody></table>'
+    + '<div class="p3inv-proj-disc">Projections are hypothetical and not guaranteed. Past performance does not predict future results.</div>'
+    + '</div>';
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window.p3InvBuildAllProposals = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  showToast('Generating comprehensive investment proposal for ' + (pr ? pr.name : 'prospect') + '…', 'ai');
+};
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   F. ADVISORY HUB — Rep Advisory / SMA / UMA + Estate Planning + Small Business
+   ───────────────────────────────────────────────────────────────────── */
+
+var _advHubData = {
+  'FNA-001': {
+    name: 'Alex Rivera',
+    investableAssets: 462000,
+    // Wealth Management
+    repAdvisoryEligible: true,   // >= $100K
+    smaEligible: true,           // >= $250K
+    umaEligible: true,           // >= $500K? No — 462K < 500K
+    umaNote: '$462K investable — below $500K UMA threshold. SMA recommended.',
+    wealthAiNote: 'Alex qualifies for SMA ($462K investable). A Single Manager Account with a Balanced Growth mandate fits the 12-year horizon and 32% bracket. UMA eligibility reached at $500K — PUAs on WL policy will accelerate.',
+    // Estate Planning
+    estate: {
+      hasWill: true, hasTrust: false, hasPOA: true, hasHCDirective: false,
+      estateValue: 847000,
+      aiGap: 'No revocable living trust — with $847K estate, trust avoids probate and protects beneficiaries. Healthcare directive missing — critical with young children.',
+      recommendations: ['Revocable Living Trust — $847K estate qualifies', 'Healthcare Directive — urgent with minor children', 'ILIT review if life insurance grows above $1M estate threshold']
+    },
+    // Small Business
+    smallBusiness: {
+      isOwner: false,
+      note: 'No small business identified in FNA.'
+    }
+  },
+  'FNA-002': {
+    name: 'Nancy Foster',
+    investableAssets: 298000,
+    repAdvisoryEligible: true,
+    smaEligible: true,           // >= $250K
+    umaEligible: false,
+    umaNote: '$298K investable — below $500K UMA threshold.',
+    wealthAiNote: 'Nancy qualifies for SMA at $298K. Conservative-Moderate profile fits a Fixed Income SMA mandate. ESG preference should be applied at the manager level — ESG-screened bond SMA available.',
+    estate: {
+      hasWill: true, hasTrust: true, hasPOA: true, hasHCDirective: true,
+      estateValue: 620000,
+      aiGap: 'Estate documents appear complete. Recommend annual review — trust beneficiary designations should be verified post-divorce.',
+      recommendations: ['Beneficiary designation audit — post-divorce', 'ILIT consideration if life insurance grows above $1M combined']
+    },
+    smallBusiness: {
+      isOwner: false,
+      note: 'No small business identified in FNA.'
+    }
+  },
+  'FNA-003': {
+    name: 'Patricia Nguyen',
+    investableAssets: 324000,
+    repAdvisoryEligible: true,
+    smaEligible: true,
+    umaEligible: false,
+    umaNote: '$324K investable — below $500K UMA threshold.',
+    wealthAiNote: 'Patricia qualifies for SMA ($324K). With T2DM managed well and a 17-year horizon, an Equity Growth SMA is appropriate. Priority: resolve UL lapse risk before committing to managed account fees.',
+    estate: {
+      hasWill: false, hasTrust: false, hasPOA: false, hasHCDirective: false,
+      estateValue: 524000,
+      aiGap: 'No estate documents on file — urgent. At age 48 with $524K estate and existing life insurance, a will and POA are critical minimum. Trust strongly recommended.',
+      recommendations: ['Will & Testament — urgent', 'Durable POA — urgent', 'Revocable Living Trust', 'Healthcare Directive', 'Beneficiary audit on all policies']
+    },
+    smallBusiness: {
+      isOwner: true,
+      type: 'LLC',
+      industry: 'Operations Consulting',
+      employees: 4,
+      businessValuation: 380000,
+      hasBuySell: false,
+      hasKeyPerson: false,
+      hasSuccessionPlan: false,
+      aiNote: 'Patricia owns a 4-person LLC valued at $380K. Three critical gaps: (1) No buy-sell agreement — business continuity risk; (2) No key person coverage; (3) No succession plan. Buy-sell funding via life insurance is the priority recommendation.'
+    }
+  }
+};
+
+var _advWealthTiers = [
+  {
+    id: 'rep-advisory',
+    name: 'Rep Advisory',
+    threshold: 100000,
+    icon: 'fa-user-tie',
+    color: '#4f46e5',
+    desc: 'Agent-directed managed brokerage account. Agent retains discretion over asset allocation and individual security selection.',
+    features: ['Minimum $100K investable assets', 'Agent selects model portfolio', 'Annual fee: 1.0–1.25% AUM', 'Quarterly performance reporting', 'Tax-loss harvesting available'],
+    bestFor: 'Clients $100K–$249K who want personalized agent guidance'
+  },
+  {
+    id: 'sma',
+    name: 'SMA',
+    threshold: 250000,
+    icon: 'fa-building',
+    color: '#0891b2',
+    desc: 'Single Manager Account — assets managed by a specialist investment manager with a dedicated mandate (equity, fixed income, balanced).',
+    features: ['Minimum $250K investable assets', 'Dedicated portfolio manager', 'Annual fee: 0.75–1.10% AUM', 'Direct security ownership (not fund)', 'Custom tax management', 'Transparent holdings'],
+    bestFor: 'Clients $250K–$499K who want institutional-quality active management'
+  },
+  {
+    id: 'uma',
+    name: 'UMA',
+    threshold: 500000,
+    icon: 'fa-layer-group',
+    color: '#7c3aed',
+    desc: 'Unified Managed Account — multiple investment strategies (ETF, SMA, alternatives) in a single account with overlay management.',
+    features: ['Minimum $500K investable assets', 'Overlay portfolio management', 'Annual fee: 0.65–0.90% AUM', 'Multi-strategy in one account', 'Tax overlay across all sleeves', 'Alternative sleeve access'],
+    bestFor: 'Clients $500K+ who want a single-account multi-strategy solution'
+  }
+];
+
+window.p3BuildAdvisoryHub = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && typeof _p3ActiveProspect !== 'undefined')
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+
+  if (!pr) {
+    return '<div class="p3-domain-empty"><i class="fas fa-handshake"></i>'
+      + '<div>Select a prospect to view advisory product recommendations.</div></div>';
+  }
+
+  var hd = _advHubData[pr.id] || {
+    name: pr.name, investableAssets: 0,
+    repAdvisoryEligible: false, smaEligible: false, umaEligible: false,
+    umaNote: 'Complete FNA Advisory section to calculate eligibility.',
+    wealthAiNote: 'Complete FNA Tab 5 for wealth management recommendation.',
+    estate: { hasWill: false, hasTrust: false, hasPOA: false, hasHCDirective: false, estateValue: 0, aiGap: 'No estate data on file.', recommendations: [] },
+    smallBusiness: { isOwner: false, note: 'No small business identified.' }
+  };
+
+  var assets = hd.investableAssets;
+
+  // ── A. Wealth Management tiers
+  var tierCards = _advWealthTiers.map(function(tier) {
+    var eligible = assets >= tier.threshold;
+    var isRec = (tier.id === 'uma' && hd.umaEligible) ||
+                (tier.id === 'sma' && hd.smaEligible && !hd.umaEligible) ||
+                (tier.id === 'rep-advisory' && hd.repAdvisoryEligible && !hd.smaEligible);
+
+    var featList = tier.features.map(function(f) {
+      return '<div class="p3adv-feat"><i class="fas fa-check"></i>' + f + '</div>';
+    }).join('');
+
+    return '<div class="p3adv-tier-card' + (eligible ? ' p3adv-tier-eligible' : ' p3adv-tier-unmet') + (isRec ? ' p3adv-tier-rec' : '') + '">'
+      + (isRec ? '<div class="p3adv-rec-badge"><i class="fas fa-star"></i> Recommended</div>' : '')
+      + '<div class="p3adv-tier-header" style="border-top:3px solid ' + tier.color + '">'
+      +   '<div class="p3adv-tier-icon" style="color:' + tier.color + '"><i class="fas ' + tier.icon + '"></i></div>'
+      +   '<div>'
+      +     '<div class="p3adv-tier-name">' + tier.name + '</div>'
+      +     '<div class="p3adv-tier-threshold">Min $' + (tier.threshold / 1000) + 'K</div>'
+      +   '</div>'
+      +   '<div class="p3adv-tier-status ' + (eligible ? 'met' : 'unmet') + '">'
+      +     '<i class="fas ' + (eligible ? 'fa-check-circle' : 'fa-times-circle') + '"></i>'
+      +     (eligible ? 'Eligible' : 'Not Yet')
+      +   '</div>'
+      + '</div>'
+      + '<div class="p3adv-tier-desc">' + tier.desc + '</div>'
+      + '<div class="p3adv-tier-feats">' + featList + '</div>'
+      + '<div class="p3adv-tier-bestfor"><i class="fas fa-bullseye"></i> ' + tier.bestFor + '</div>'
+      + (eligible
+          ? '<button class="p3adv-tier-btn" style="background:' + tier.color + '" onclick="p3AdvOpenManagedProposal(\'' + tier.id + '\')">'
+            + '<i class="fas fa-file-signature"></i> Build ' + tier.name + ' Proposal</button>'
+          : '<div class="p3adv-tier-unmet-note"><i class="fas fa-info-circle"></i> $' + ((tier.threshold - assets) / 1000).toFixed(0) + 'K more assets needed</div>')
+      + '</div>';
+  }).join('');
+
+  // AUM display bar
+  var aumBar = '<div class="p3adv-aum-bar">'
+    + '<div class="p3adv-aum-val">$' + assets.toLocaleString() + '</div>'
+    + '<div class="p3adv-aum-lbl">Investable Assets</div>'
+    + '<div class="p3adv-aum-track">'
+    +   '<div class="p3adv-aum-seg rep" style="width:' + Math.min(100, Math.round(Math.min(assets, 250000) / 5000)) + '%"></div>'
+    +   '<div class="p3adv-aum-seg sma" style="width:' + (assets >= 250000 ? Math.min(50, Math.round(Math.min(assets - 250000, 250000) / 5000)) : 0) + '%"></div>'
+    +   '<div class="p3adv-aum-seg uma" style="width:' + (assets >= 500000 ? Math.min(30, Math.round((assets - 500000) / 10000)) : 0) + '%"></div>'
+    + '</div>'
+    + '<div class="p3adv-aum-scale"><span>$0</span><span>$100K</span><span>$250K</span><span>$500K+</span></div>'
+    + '</div>';
+
+  var wealthAiBanner = '<div class="p3adv-ai-banner wealth">'
+    + '<i class="fas fa-robot"></i>'
+    + '<div><strong>Wealth Management AI:</strong> ' + hd.wealthAiNote + '</div>'
+    + '</div>';
+
+  // ── B. Estate Planning
+  var estateChecks = [
+    { label: 'Will & Testament', has: hd.estate.hasWill },
+    { label: 'Revocable Living Trust', has: hd.estate.hasTrust },
+    { label: 'Durable Power of Attorney', has: hd.estate.hasPOA },
+    { label: 'Healthcare Directive', has: hd.estate.hasHCDirective }
+  ].map(function(item) {
+    return '<div class="p3adv-estate-check ' + (item.has ? 'has' : 'missing') + '">'
+      + '<i class="fas ' + (item.has ? 'fa-check-circle' : 'fa-times-circle') + '"></i>'
+      + item.label
+      + '<span class="p3adv-estate-status">' + (item.has ? 'On File' : 'Missing') + '</span>'
+      + '</div>';
+  }).join('');
+
+  var estateRecs = hd.estate.recommendations.map(function(r) {
+    return '<div class="p3adv-estate-rec"><i class="fas fa-arrow-right"></i>' + r + '</div>';
+  }).join('');
+
+  var allDocsPresent = hd.estate.hasWill && hd.estate.hasTrust && hd.estate.hasPOA && hd.estate.hasHCDirective;
+  var estateSection = '<div class="p3adv-section">'
+    + '<div class="p3adv-section-header estate"><i class="fas fa-scroll"></i> Estate Planning</div>'
+    + '<div class="p3adv-estate-row">'
+    +   '<div class="p3adv-estate-checks">' + estateChecks + '</div>'
+    +   '<div class="p3adv-estate-right">'
+    +     '<div class="p3adv-estate-value"><span>Est. Estate Value</span><strong>$' + hd.estate.estateValue.toLocaleString() + '</strong></div>'
+    +     '<div class="p3adv-estate-ai"><i class="fas fa-robot"></i> ' + hd.estate.aiGap + '</div>'
+    +     (estateRecs ? '<div class="p3adv-estate-recs">' + estateRecs + '</div>' : '')
+    +     '<div class="p3adv-estate-actions">'
+    +       '<button class="p3adv-estate-btn" onclick="p3AdvBookEstateConsult()"><i class="fas fa-calendar-check"></i> Book Consultation</button>'
+    +       '<button class="p3adv-estate-btn outline" onclick="p3AdvExportEstateGap()"><i class="fas fa-file-export"></i> Export Gap Report</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>'
+    + '</div>';
+
+  // ── C. Small Business
+  var biz = hd.smallBusiness;
+  var smallBizSection;
+
+  if (!biz.isOwner) {
+    smallBizSection = '<div class="p3adv-section">'
+      + '<div class="p3adv-section-header biz"><i class="fas fa-briefcase"></i> Small Business</div>'
+      + '<div class="p3adv-biz-na"><i class="fas fa-info-circle"></i> ' + biz.note + '</div>'
+      + '</div>';
+  } else {
+    var bizGaps = [
+      { label: 'Buy-Sell Agreement', has: biz.hasBuySell, rec: 'Life-funded buy-sell protects business continuity — critical for LLC' },
+      { label: 'Key Person Coverage', has: biz.hasKeyPerson, rec: 'Key person policy on owner + any employees critical to revenue' },
+      { label: 'Succession Plan', has: biz.hasSuccessionPlan, rec: 'Formal succession plan required before any sale or transition event' }
+    ].map(function(g) {
+      return '<div class="p3adv-biz-gap ' + (g.has ? 'has' : 'missing') + '">'
+        + '<i class="fas ' + (g.has ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i>'
+        + '<div>'
+        +   '<div class="p3adv-biz-gap-label">' + g.label + ' — <em>' + (g.has ? 'In Place' : 'Not in Place') + '</em></div>'
+        +   (!g.has ? '<div class="p3adv-biz-gap-rec">' + g.rec + '</div>' : '')
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    smallBizSection = '<div class="p3adv-section">'
+      + '<div class="p3adv-section-header biz"><i class="fas fa-briefcase"></i> Small Business — ' + biz.type + '</div>'
+      + '<div class="p3adv-biz-summary">'
+      +   '<div class="p3adv-biz-row"><span>Business Type</span><strong>' + biz.type + ' — ' + biz.industry + '</strong></div>'
+      +   '<div class="p3adv-biz-row"><span>Employees</span><strong>' + biz.employees + '</strong></div>'
+      +   '<div class="p3adv-biz-row"><span>Business Valuation</span><strong>$' + biz.businessValuation.toLocaleString() + '</strong></div>'
+      + '</div>'
+      + '<div class="p3adv-biz-ai"><i class="fas fa-robot"></i> ' + biz.aiNote + '</div>'
+      + '<div class="p3adv-biz-gaps">' + bizGaps + '</div>'
+      + '<div class="p3adv-biz-actions">'
+      +   '<button class="p3adv-biz-btn" onclick="p3AdvBuildBizPlan()"><i class="fas fa-file-invoice"></i> Business Planning Proposal</button>'
+      +   '<button class="p3adv-biz-btn outline" onclick="p3AdvRunBuySellIllustration()"><i class="fas fa-calculator"></i> Buy-Sell Illustration</button>'
+      +   '<button class="p3adv-biz-btn outline" onclick="p3AdvBookBizConsult()"><i class="fas fa-calendar-check"></i> Book Consultation</button>'
+      + '</div>'
+      + '</div>';
+  }
+
+  return '<div class="p3adv-hub">'
+
+    // Header
+    + '<div class="p3-domain-header adv">'
+    +   '<div class="p3-domain-header-icon"><i class="fas fa-handshake"></i></div>'
+    +   '<div>'
+    +     '<div class="p3-domain-header-title">Advisory Products Hub</div>'
+    +     '<div class="p3-domain-header-sub">Wealth Management (Rep Advisory · SMA · UMA) · Estate Planning · Small Business</div>'
+    +   '</div>'
+    +   '<div class="p3-domain-header-actions">'
+    +     '<button class="p3-dh-btn" onclick="navigateTo(\'adv-wealth\')"><i class="fas fa-external-link-alt"></i> Wealth Accounts</button>'
+    +     '<button class="p3-dh-btn primary" onclick="p3AdvBuildFullProposal()"><i class="fas fa-file-contract"></i> Full Advisory Proposal</button>'
+    +   '</div>'
+    + '</div>'
+
+    // ── Wealth Management
+    + '<div class="p3adv-section">'
+    +   '<div class="p3adv-section-header wealth"><i class="fas fa-chart-pie"></i> Wealth Management</div>'
+    +   aumBar
+    +   wealthAiBanner
+    +   '<div class="p3adv-tier-grid">' + tierCards + '</div>'
+    + '</div>'
+
+    // ── Estate Planning
+    + estateSection
+
+    // ── Small Business
+    + smallBizSection
+
+    + '</div>'; // p3adv-hub
+};
+
+// Advisory action stubs
+window.p3AdvOpenManagedProposal = function(tierId) {
+  var tier = _advWealthTiers.find(function(t) { return t.id === tierId; });
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  showToast('Building ' + (tier ? tier.name : tierId) + ' managed account proposal for ' + (pr ? pr.name : 'prospect') + '…', 'ai');
+};
+window.p3AdvBookEstateConsult = function() { showToast('Opening calendar to schedule estate planning consultation…', 'info'); };
+window.p3AdvExportEstateGap   = function() { showToast('Generating estate planning gap report PDF…', 'ai'); };
+window.p3AdvBuildBizPlan      = function() { showToast('Building business planning proposal…', 'ai'); };
+window.p3AdvRunBuySellIllustration = function() { showToast('Running buy-sell agreement life insurance illustration…', 'ai'); };
+window.p3AdvBookBizConsult    = function() { showToast('Opening calendar for small business planning consultation…', 'info'); };
+window.p3AdvBuildFullProposal = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  showToast('Generating comprehensive advisory proposal for ' + (pr ? pr.name : 'prospect') + ' — Wealth + Estate + Business…', 'ai');
+};
+
+console.log('Phase 3 Domain Hub loaded — Insurance · Retirement · Investments · Advisory');
+

@@ -10028,8 +10028,8 @@ function ProductsPage() {
         <div class="p3-header-left">
           <div class="p3-header-icon"><i class="fas fa-file-contract"></i></div>
           <div>
-            <h2 class="p3-title">Product Illustration &amp; Proposal Hub</h2>
-            <p class="p3-sub">Phase 3 · Run illustrations · Build multi-product proposals · AI objection coaching · NAIC compliance · Signature capture</p>
+            <h2 class="p3-title">Product &amp; Illustration Hub</h2>
+            <p class="p3-sub">Insurance · Retirement · Investments · Advisory — Run illustrations · Build proposals · AI coaching · NAIC compliance · Signature capture</p>
           </div>
         </div>
         <div class="p3-header-actions">

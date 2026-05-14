@@ -36221,359 +36221,9 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
     _closeFNAEditorForce();
     if (typeof navigateTo === 'function') navigateTo('products');
     setTimeout(function() {
-      if (typeof p3SwitchMainTab === 'function') p3SwitchMainTab('investment');
+      if (typeof p3SwitchDomainTab === 'function') p3SwitchDomainTab('investments');
     }, 400);
   };
-
-
-  /* ─────────────────────────────────────────────────────────────────
-     PART B: PRODUCTS PAGE — INVESTMENT PROPOSAL TAB
-     Strategy: Wrap p3RenderMainPanel to inject a tab strip above
-     the existing content, then intercept tab switching.
-     ───────────────────────────────────────────────────────────────── */
-
-  // ── B1. State variable for Products main tab ───────────────────
-  window._p3MainTab = window._p3MainTab || 'insurance';
-
-  window.p3SwitchMainTab = function(tab) {
-    window._p3MainTab = tab;
-    p3RenderMainPanel();
-  };
-
-  // ── B2. Investment Proposal data per prospect ──────────────────
-  var _invProposalData = {
-    'FNA-001': {
-      prospectName: 'Patricia L.',
-      preparedDate: 'Jun 10, 2025',
-      advisor: 'Agent — M. Reyes',
-      suitabilityScore: 78,
-      riskProfile: 'Moderate',
-      timeHorizon: '12 years',
-      accountRecommendations: [
-        {
-          type: 'Traditional IRA Rollover',
-          icon: 'fa-piggy-bank',
-          color: '#3b82f6',
-          rationale: 'Roll existing 401(k) ($295K) to IRA for broader fund access and lower fees',
-          aum: 295000,
-          model: 'Balanced Growth 60/40',
-          estAnnualFee: '0.85%'
-        },
-        {
-          type: 'Managed Discretionary Account',
-          icon: 'fa-chart-line',
-          color: '#059669',
-          rationale: 'Taxable brokerage for $167K existing investments — managed for tax efficiency',
-          aum: 167000,
-          model: 'Tax-Managed Equity 70/30',
-          estAnnualFee: '1.00%'
-        },
-        {
-          type: 'Short-Term Bond Sleeve',
-          icon: 'fa-shield-alt',
-          color: '#d97706',
-          rationale: 'College funding in 2–3 years — laddered bonds/CDs for twins ($80K target)',
-          aum: 80000,
-          model: 'Short Duration Bond',
-          estAnnualFee: '0.45%'
-        }
-      ],
-      totalAUM: 542000,
-      blendedFee: '0.87%',
-      projections: [
-        { year: 1,  age: 49,  conservative: 557000,  base: 579000,  optimistic: 601000 },
-        { year: 3,  age: 51,  conservative: 589000,  base: 638000,  optimistic: 687000 },
-        { year: 5,  age: 53,  conservative: 621000,  base: 698000,  optimistic: 781000 },
-        { year: 10, age: 58,  conservative: 693000,  base: 836000,  optimistic: 993000 },
-        { year: 12, age: 60,  conservative: 718000,  base: 895000,  optimistic: 1084000 }
-      ],
-      complianceChecks: [
-        { rule: 'Suitability — FINRA Rule 2111', status: 'pass', note: 'Moderate profile supports 60/40 allocation' },
-        { rule: 'Best Interest — Reg BI', status: 'pass', note: 'Fee disclosure completed; alternatives documented' },
-        { rule: 'Form ADV Part 2 Delivered', status: 'warn', note: 'Pending client signature acknowledgment' },
-        { rule: 'Concentration Risk Check', status: 'warn', note: 'Employer stock 12% — reduction plan documented' },
-        { rule: 'Liquidity Risk Disclosure', status: 'pass', note: 'Short-term sleeve addresses liquidity needs' }
-      ],
-      aiNarrative: 'This Balanced Growth proposal consolidates Patricia\'s $542K investable assets into three complementary sleeves addressing retirement accumulation, tax efficiency, and near-term college liquidity. The 60/40 IRA rollover is the core vehicle; the managed taxable account harvests losses for tax efficiency at the 32% bracket; the short bond sleeve protects the college fund. Projected portfolio value at retirement (age 60): $895K base case — sufficient to supplement Social Security and life insurance income replacement. All-in fee of 0.87% is below the 1% benchmark for this AUM tier.'
-    },
-    'FNA-002': {
-      prospectName: 'James R.',
-      preparedDate: 'Jun 10, 2025',
-      advisor: 'Agent — M. Reyes',
-      suitabilityScore: 91,
-      riskProfile: 'Conservative-Moderate',
-      timeHorizon: '6 years',
-      accountRecommendations: [
-        {
-          type: 'Roth IRA',
-          icon: 'fa-leaf',
-          color: '#059669',
-          rationale: 'Max Roth contributions ($7,000/yr) for tax-free growth at 22% bracket',
-          aum: 42000,
-          model: 'ESG Conservative Income',
-          estAnnualFee: '0.65%'
-        },
-        {
-          type: 'ESG Taxable Brokerage',
-          icon: 'fa-seedling',
-          color: '#16a34a',
-          rationale: 'ESG-screened portfolio for core savings — tax-efficient dividend income',
-          aum: 95000,
-          model: 'ESG Balanced 35/65',
-          estAnnualFee: '0.75%'
-        }
-      ],
-      totalAUM: 137000,
-      blendedFee: '0.72%',
-      projections: [
-        { year: 1,  age: 36,  conservative: 141000,  base: 145000,  optimistic: 149000 },
-        { year: 3,  age: 38,  conservative: 148000,  base: 158000,  optimistic: 168000 },
-        { year: 5,  age: 40,  conservative: 154000,  base: 172000,  optimistic: 190000 },
-        { year: 6,  age: 41,  conservative: 157000,  base: 179000,  optimistic: 200000 }
-      ],
-      complianceChecks: [
-        { rule: 'Suitability — FINRA Rule 2111', status: 'pass', note: 'Conservative-Moderate profile supports 35/65 ESG allocation' },
-        { rule: 'Best Interest — Reg BI', status: 'pass', note: 'ESG preference documented; fee disclosure signed' },
-        { rule: 'Form ADV Part 2 Delivered', status: 'pass', note: 'Acknowledged and signed' },
-        { rule: 'ESG Disclosure — SEC Guidance', status: 'pass', note: 'ESG criteria and screening methodology disclosed' }
-      ],
-      aiNarrative: 'James\'s Conservative-Moderate profile with ESG preference is well-served by this two-sleeve structure. The Roth IRA prioritises tax-free growth given the 22% bracket, while the ESG taxable account provides a tax-efficient income stream. At a 6-year horizon, the 35/65 allocation appropriately limits volatility. Projected value at year 6: $179K base case — on track for goals. All-in fee 0.72% is competitive for ESG-screened managed accounts.'
-    }
-  };
-
-  // ── B3. Patch p3RenderMainPanel ────────────────────────────────
-  if (typeof p3RenderMainPanel === 'function') {
-    var _orig_p3RenderMainPanel = p3RenderMainPanel;
-    p3RenderMainPanel = function() {
-      _orig_p3RenderMainPanel.apply(this, arguments);
-
-      // Now inject the tab strip and, if investment tab is active, replace content
-      var panel = document.getElementById('p3-main-panel');
-      if (!panel) return;
-
-      var pr = (typeof p3Prospects !== 'undefined' && typeof _p3ActiveProspect !== 'undefined')
-        ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
-      if (!pr) return;
-
-      // Insert tab strip at top of panel (after header strip)
-      var existingTabs = panel.querySelector('.p3-main-tabs');
-      if (!existingTabs) {
-        var tabStrip = document.createElement('div');
-        tabStrip.className = 'p3-main-tabs';
-        tabStrip.innerHTML = invpBuildTabStrip();
-
-        // Insert after the header strip (first child)
-        var headerStrip = panel.querySelector('.p3-panel-header, .p3-panel-header.urgent, .p3-panel-header.high');
-        if (headerStrip && headerStrip.nextSibling) {
-          panel.insertBefore(tabStrip, headerStrip.nextSibling);
-        } else {
-          panel.insertBefore(tabStrip, panel.firstChild);
-        }
-      } else {
-        existingTabs.innerHTML = invpBuildTabStrip();
-      }
-
-      // If investment tab is active, render investment proposal over the main content
-      if (window._p3MainTab === 'investment') {
-        // Remove everything after the tab strip and replace with investment proposal
-        var tabs = panel.querySelector('.p3-main-tabs');
-        var children = Array.prototype.slice.call(panel.children);
-        var afterTabs = false;
-        children.forEach(function(child) {
-          if (afterTabs) panel.removeChild(child);
-          if (child === tabs) afterTabs = true;
-        });
-
-        var invDiv = document.createElement('div');
-        invDiv.className = 'invp-wrap';
-        invDiv.innerHTML = invpBuildProposalView(pr);
-        panel.appendChild(invDiv);
-      }
-    };
-  }
-
-  function invpBuildTabStrip() {
-    var isIns = window._p3MainTab !== 'investment';
-    var isInv = window._p3MainTab === 'investment';
-    return '<button class="p3-main-tab-btn' + (isIns ? ' active' : '') + '" onclick="p3SwitchMainTab(\'insurance\')">'
-      + '<i class="fas fa-file-contract"></i> Insurance Proposal</button>'
-      + '<button class="p3-main-tab-btn' + (isInv ? ' active' : '') + '" onclick="p3SwitchMainTab(\'investment\')">'
-      + '<i class="fas fa-chart-line"></i> Investment Proposal</button>';
-  }
-
-  function invpBuildProposalView(pr) {
-    var inv = _invProposalData[pr.id] || invpBuildDefaultProposal(pr);
-
-    // ── KPI strip
-    var kpiHtml = '<div class="invp-kpi-strip">'
-      + '<div class="invp-kpi"><div class="invp-kpi-val">$' + inv.totalAUM.toLocaleString() + '</div><div class="invp-kpi-lbl">Total AUM</div></div>'
-      + '<div class="invp-kpi"><div class="invp-kpi-val">' + inv.blendedFee + '</div><div class="invp-kpi-lbl">Blended Fee</div></div>'
-      + '<div class="invp-kpi"><div class="invp-kpi-val">' + inv.riskProfile + '</div><div class="invp-kpi-lbl">Risk Profile</div></div>'
-      + '<div class="invp-kpi"><div class="invp-kpi-val">' + inv.timeHorizon + '</div><div class="invp-kpi-lbl">Time Horizon</div></div>'
-      + '<div class="invp-kpi"><div class="invp-kpi-val invp-suit-val" style="color:' + (inv.suitabilityScore >= 85 ? '#16a34a' : inv.suitabilityScore >= 70 ? '#d97706' : '#dc2626') + '">'
-      + inv.suitabilityScore + '<span class="invp-suit-denom">/100</span></div><div class="invp-kpi-lbl">Suitability</div></div>'
-      + '</div>';
-
-    // ── Header bar
-    var headerHtml = '<div class="invp-header">'
-      + '<div class="invp-header-left">'
-      +   '<div class="invp-header-title"><i class="fas fa-chart-line"></i> Investment Proposal — ' + inv.prospectName + '</div>'
-      +   '<div class="invp-header-meta">Prepared ' + inv.preparedDate + ' · ' + inv.advisor + '</div>'
-      + '</div>'
-      + '<div class="invp-header-right">'
-      +   '<button class="invp-btn primary" onclick="invpOpenToIAModule()"><i class="fas fa-external-link-alt"></i> Open in Accounts</button>'
-      +   '<button class="invp-btn outline" onclick="invpExportProposal()"><i class="fas fa-file-pdf"></i> Export</button>'
-      + '</div>'
-      + '</div>';
-
-    // ── Account recommendation cards
-    var acctCards = inv.accountRecommendations.map(function(acct) {
-      return '<div class="invp-acct-card">'
-        + '<div class="invp-acct-icon" style="background:' + acct.color + '18;color:' + acct.color + '">'
-        +   '<i class="fas ' + acct.icon + '"></i>'
-        + '</div>'
-        + '<div class="invp-acct-info">'
-        +   '<div class="invp-acct-type">' + acct.type + '</div>'
-        +   '<div class="invp-acct-model">' + acct.model + '</div>'
-        +   '<div class="invp-acct-rationale">' + acct.rationale + '</div>'
-        + '</div>'
-        + '<div class="invp-acct-right">'
-        +   '<div class="invp-acct-aum">$' + acct.aum.toLocaleString() + '</div>'
-        +   '<div class="invp-acct-fee">' + acct.estAnnualFee + ' /yr</div>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-
-    // ── Projection table
-    var projRows = inv.projections.map(function(row) {
-      return '<tr>'
-        + '<td>Year ' + row.year + '</td>'
-        + '<td>Age ' + row.age + '</td>'
-        + '<td class="invp-proj-cons">$' + row.conservative.toLocaleString() + '</td>'
-        + '<td class="invp-proj-base">$' + row.base.toLocaleString() + '</td>'
-        + '<td class="invp-proj-opt">$' + row.optimistic.toLocaleString() + '</td>'
-        + '</tr>';
-    }).join('');
-
-    var projHtml = '<div class="invp-card invp-proj-card">'
-      + '<div class="invp-card-title"><i class="fas fa-chart-area"></i> Projected Portfolio Value</div>'
-      + '<div class="invp-proj-legend">'
-      +   '<span class="invp-leg-dot cons"></span><span>Conservative</span>'
-      +   '<span class="invp-leg-dot base"></span><span>Base Case</span>'
-      +   '<span class="invp-leg-dot opt"></span><span>Optimistic</span>'
-      + '</div>'
-      + '<div class="invp-table-wrap"><table class="invp-proj-table">'
-      + '<thead><tr><th>Period</th><th>Age</th>'
-      + '<th class="invp-proj-cons">Conservative</th>'
-      + '<th class="invp-proj-base">Base Case</th>'
-      + '<th class="invp-proj-opt">Optimistic</th>'
-      + '</tr></thead>'
-      + '<tbody>' + projRows + '</tbody>'
-      + '</table></div>'
-      + '<div class="invp-proj-footnote">† Projections are illustrative. Not a guarantee. Conservative = 75th percentile; Base = median; Optimistic = 25th percentile Monte Carlo.</div>'
-      + '</div>';
-
-    // ── Compliance
-    var compRows = inv.complianceChecks.map(function(c) {
-      var icon = c.status === 'pass' ? 'fa-check-circle' : c.status === 'warn' ? 'fa-exclamation-triangle' : 'fa-times-circle';
-      return '<div class="invp-comp-row invp-comp-' + c.status + '">'
-        + '<i class="fas ' + icon + ' invp-comp-icon"></i>'
-        + '<div class="invp-comp-body">'
-        +   '<div class="invp-comp-rule">' + c.rule + '</div>'
-        +   '<div class="invp-comp-note">' + c.note + '</div>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-
-    var hasWarn = inv.complianceChecks.some(function(c) { return c.status !== 'pass'; });
-
-    var compHtml = '<div class="invp-card invp-comp-card">'
-      + '<div class="invp-comp-header">'
-      +   '<div class="invp-card-title"><i class="fas fa-shield-alt"></i> Compliance &amp; Reg BI Check</div>'
-      +   '<span class="invp-comp-badge ' + (hasWarn ? 'warn' : 'pass') + '">'
-      +     (hasWarn ? '<i class="fas fa-exclamation-triangle"></i> Review Needed' : '<i class="fas fa-check-shield"></i> All Clear')
-      +   '</span>'
-      + '</div>'
-      + '<div class="invp-comp-rows">' + compRows + '</div>'
-      + '</div>';
-
-    // ── AI Narrative
-    var aiHtml = '<div class="invp-ai-card">'
-      + '<div class="invp-ai-header"><i class="fas fa-robot"></i> AI Investment Analysis</div>'
-      + '<div class="invp-ai-text">' + inv.aiNarrative + '</div>'
-      + '<div class="invp-ai-actions">'
-      +   '<button class="invp-btn primary" onclick="invpOpenToIAModule()"><i class="fas fa-link"></i> Link to Investment Account</button>'
-      +   '<button class="invp-btn outline" onclick="invpRunCompliance()"><i class="fas fa-sync"></i> Re-run Compliance</button>'
-      +   '<button class="invp-btn outline" onclick="invpScheduleReview()"><i class="fas fa-calendar-check"></i> Schedule Review</button>'
-      + '</div>'
-      + '</div>';
-
-    return headerHtml
-      + kpiHtml
-      + '<div class="invp-card">'
-      +   '<div class="invp-card-title"><i class="fas fa-layer-group"></i> Account Recommendations</div>'
-      +   '<div class="invp-acct-cards">' + acctCards + '</div>'
-      + '</div>'
-      + projHtml
-      + compHtml
-      + aiHtml;
-  }
-
-  function invpBuildDefaultProposal(pr) {
-    return {
-      prospectName: pr.name,
-      preparedDate: 'Jun 10, 2025',
-      advisor: 'Agent — M. Reyes',
-      suitabilityScore: 75,
-      riskProfile: pr.riskClass || 'Moderate',
-      timeHorizon: '10+ years',
-      accountRecommendations: [
-        {
-          type: 'Managed Discretionary Account',
-          icon: 'fa-chart-line',
-          color: '#3b82f6',
-          rationale: 'Core investment account aligned with risk profile and objectives',
-          aum: pr.coverageNeeded ? Math.round(pr.coverageNeeded * 0.15) : 100000,
-          model: 'Balanced Growth 60/40',
-          estAnnualFee: '0.90%'
-        }
-      ],
-      totalAUM: pr.coverageNeeded ? Math.round(pr.coverageNeeded * 0.15) : 100000,
-      blendedFee: '0.90%',
-      projections: [
-        { year: 5,  age: (pr.age || 40) + 5,  conservative: 118000, base: 135000, optimistic: 152000 },
-        { year: 10, age: (pr.age || 40) + 10, conservative: 138000, base: 170000, optimistic: 205000 }
-      ],
-      complianceChecks: [
-        { rule: 'Suitability — FINRA Rule 2111', status: 'pass', note: 'Profile aligned with recommended allocation' },
-        { rule: 'Best Interest — Reg BI', status: 'pass', note: 'Fee and alternatives documentation complete' }
-      ],
-      aiNarrative: 'Preliminary investment proposal based on available FNA data. Complete the Investment Profile section for a fully personalised analysis and accurate suitability scoring.'
-    };
-  }
-
-  // ── B4. Action stubs ────────────────────────────────────────────
-  window.invpOpenToIAModule = function() {
-    if (typeof navigateTo === 'function') navigateTo('inv-accounts');
-  };
-
-  window.invpExportProposal = function() {
-    alert('Investment Proposal PDF export — connected to proposal generation workflow.');
-  };
-
-  window.invpRunCompliance = function() {
-    var btn = event && event.target ? event.target.closest('button') : null;
-    if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running…'; btn.disabled = true; }
-    setTimeout(function() {
-      if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Complete'; btn.disabled = false; }
-    }, 1600);
-  };
-
-  window.invpScheduleReview = function() {
-    alert('Schedule Investment Review — calendar integration coming in Step 4.');
-  };
-
-  console.log('[INV Step 2] Investment Profile (FNA) + Investment Proposal (Products) loaded.');
 
 })();
 
@@ -43582,3 +43232,1005 @@ function cmAskNova(fullName, suffix) {
 }
 
 /* LEADS_V2_PATCH_APPLIED */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   PHASE 3 — DOMAIN HUB MODULE
+   4-domain Products & Illustrations hub:
+     insurance   → existing p3 core (illustration engine, proposals, NAIC)
+     retirement  → annuity illustration hub (SPIA / DIA / FIA / VA)
+     investments → ETF / Mutual Fund / 529 proposal builder
+     advisory    → Wealth Mgmt (Rep Advisory/SMA/UMA) + Estate + Small Business
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   A. STATE & DOMAIN SWITCHER
+   ───────────────────────────────────────────────────────────────────── */
+
+var _p3DomainTab = 'insurance';
+
+window.p3SwitchDomainTab = function(domain) {
+  _p3DomainTab = domain;
+  p3RenderProspectList();
+  p3RenderMainPanel();
+};
+
+/* ─────────────────────────────────────────────────────────────────────
+   B. PROSPECT LIST — domain-filtered
+   Patch p3RenderProspectList to filter by active domain tab.
+   Insurance = any prospect (all have insurance FNA or are insurance leads)
+   Retirement / Investments / Advisory = those with matching fna.domains[]
+   ───────────────────────────────────────────────────────────────────── */
+
+(function() {
+  var _origP3RenderProspectList = p3RenderProspectList;
+  p3RenderProspectList = function() {
+    _origP3RenderProspectList.apply(this, arguments);
+
+    // After original renders, re-inject tab-aware sub-header
+    var el = document.getElementById('p3-prospect-list');
+    if (!el) return;
+
+    // Domain → fna.domains[] key map
+    var domainKeyMap = {
+      'insurance':   'insurance',
+      'retirement':  'retirement',
+      'investments': 'investments', // advisory fna also shows for inv if they have inv domain
+      'advisory':    'advisory'
+    };
+
+    if (_p3DomainTab === 'insurance') return; // insurance shows all prospects as before
+
+    // For non-insurance domains, dim prospects that don't match
+    var domainKey = domainKeyMap[_p3DomainTab];
+    var cards = el.querySelectorAll('.p3-prospect-card');
+    cards.forEach(function(card) {
+      var id = card.getAttribute('data-prospect-id') || card.onclick && card.onclick.toString().match(/'(FNA-\d+)'/)?.[1];
+      // Attempt to match FNA domain
+      var fna = (typeof fnaFullData !== 'undefined' && id) ? fnaFullData[id] : null;
+      var hasMatch = false;
+      if (fna && fna.domains) {
+        hasMatch = fna.domains.indexOf(domainKey) !== -1;
+      } else {
+        // Retirement domain — p3Prospects with gaps referencing retirement/annuity
+        if (_p3DomainTab === 'retirement') {
+          hasMatch = card.textContent.indexOf('annuity') !== -1
+                  || card.textContent.indexOf('Annuity') !== -1
+                  || card.textContent.indexOf('income gap') !== -1
+                  || card.textContent.indexOf('retirement') !== -1;
+        } else {
+          hasMatch = true; // show all if no FNA data
+        }
+      }
+      card.style.opacity = hasMatch ? '1' : '0.38';
+      card.title = hasMatch ? '' : 'No ' + _p3DomainTab + ' domain in FNA';
+    });
+  };
+})();
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   C. MAIN PANEL PATCH — inject 4-tab domain strip + route
+   ───────────────────────────────────────────────────────────────────── */
+
+(function() {
+  var _origP3RenderMainPanel = p3RenderMainPanel;
+
+  p3RenderMainPanel = function() {
+    // 1. Run the original insurance render
+    _origP3RenderMainPanel.apply(this, arguments);
+
+    // 2. Inject domain tab strip above the panel
+    var panel = document.getElementById('p3-main-panel');
+    if (!panel) return;
+
+    var tabs = [
+      { id: 'insurance',   icon: 'fa-shield-alt',    label: 'Insurance',   color: '#1e3a5f' },
+      { id: 'retirement',  icon: 'fa-umbrella-beach', label: 'Retirement',  color: '#b45309' },
+      { id: 'investments', icon: 'fa-chart-line',     label: 'Investments', color: '#059669' },
+      { id: 'advisory',    icon: 'fa-handshake',      label: 'Advisory',    color: '#7c3aed' }
+    ];
+
+    var stripHtml = '<div class="p3-domain-strip">'
+      + tabs.map(function(t) {
+          var active = _p3DomainTab === t.id;
+          return '<button class="p3-domain-tab' + (active ? ' p3-domain-tab-active' : '') + '"'
+            + ' style="' + (active ? '--dt-color:' + t.color : '') + '"'
+            + ' onclick="p3SwitchDomainTab(\'' + t.id + '\')">'
+            + '<i class="fas ' + t.icon + '"></i>'
+            + '<span>' + t.label + '</span>'
+            + '</button>';
+        }).join('')
+      + '</div>';
+
+    // Prepend the strip
+    panel.insertAdjacentHTML('afterbegin', stripHtml);
+
+    // 3. If non-insurance tab, replace content area below the strip
+    if (_p3DomainTab === 'retirement') {
+      _p3InjectDomainContent(panel, p3BuildRetirementHub());
+    } else if (_p3DomainTab === 'investments') {
+      _p3InjectDomainContent(panel, p3BuildInvestmentsHub());
+    } else if (_p3DomainTab === 'advisory') {
+      _p3InjectDomainContent(panel, p3BuildAdvisoryHub());
+    }
+    // insurance: leave original content as-is
+  };
+
+  function _p3InjectDomainContent(panel, html) {
+    // Remove everything after the strip
+    var strip = panel.querySelector('.p3-domain-strip');
+    // Remove all siblings after strip
+    while (strip.nextSibling) {
+      panel.removeChild(strip.nextSibling);
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'p3-domain-content';
+    wrap.innerHTML = html;
+    panel.appendChild(wrap);
+  }
+})();
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   D. RETIREMENT HUB — SPIA / DIA / FIA / VA
+   ───────────────────────────────────────────────────────────────────── */
+
+var _retAnnuityData = {
+  'FNA-001': {
+    name: 'Alex Rivera', age: 34,
+    targetIncomeMo: 6500, ssMo: 2200, pensionMo: 0, existingAnnuityMo: 0,
+    gapMo: 4300, rolloverAssets: 295000, investableAssets: 462000,
+    retirementAge: 62, yearsToRetirement: 28,
+    riskProfile: 'Moderate', taxBracket: '32%',
+    aiRec: 'FIA',
+    aiNote: 'With 28 years to retirement and a $4,300/mo gap, a Deferred Income Annuity or FIA with income rider best fits the accumulation timeline. DIA locks in guaranteed income; FIA adds index-linked growth potential.'
+  },
+  'FNA-002': {
+    name: 'Nancy Foster', age: 41,
+    targetIncomeMo: 7200, ssMo: 2600, pensionMo: 500, existingAnnuityMo: 0,
+    gapMo: 4100, rolloverAssets: 145000, investableAssets: 298000,
+    retirementAge: 65, yearsToRetirement: 24,
+    riskProfile: 'Conservative-Moderate', taxBracket: '22%',
+    aiRec: 'DIA',
+    aiNote: 'Nancy\'s conservative profile and 24-year horizon favor a DIA funded from existing rollover assets. Income start date at 65 provides certainty; ESG preference noted but does not apply to fixed annuity products.'
+  },
+  'FNA-003': {
+    name: 'Patricia Nguyen', age: 48,
+    targetIncomeMo: 5800, ssMo: 2100, pensionMo: 400, existingAnnuityMo: 0,
+    gapMo: 3300, rolloverAssets: 187000, investableAssets: 324000,
+    retirementAge: 65, yearsToRetirement: 17,
+    riskProfile: 'Moderate', taxBracket: '24%',
+    aiRec: 'FIA',
+    aiNote: 'Patricia\'s 17-year horizon and $3,300/mo gap are well-served by a FIA with a 6%/yr income rider rollup. Projected income at 65: ~$3,900/mo from a $187K premium — closing the gap with a modest surplus.'
+  }
+};
+
+var _retAnnuityProducts = [
+  {
+    id: 'SPIA',
+    name: 'Single Premium Immediate Annuity',
+    short: 'SPIA',
+    icon: 'fa-play-circle',
+    color: '#0891b2',
+    tagline: 'Income starts immediately',
+    bestFor: 'Age 60+, needs income now, rollover assets available',
+    guarantees: ['Lifetime income guaranteed', 'Fixed monthly payment', 'No market risk', 'Optional period certain (10/20yr)'],
+    riskLevel: 'None',
+    naicNote: 'Not subject to NAIC Illustration Model Reg — income disclosure form required.',
+    sampleRate: '$5,200/mo per $1M premium (age 65, male, life only)'
+  },
+  {
+    id: 'DIA',
+    name: 'Deferred Income Annuity',
+    short: 'DIA',
+    icon: 'fa-hourglass-half',
+    color: '#7c3aed',
+    tagline: 'Guaranteed income at a future date',
+    bestFor: 'Age 45–60, retirement 10+ years away, wants certainty',
+    guarantees: ['Lock in income amount today', 'Longevity hedge', 'Higher payout than SPIA (deferral bonus)', 'Inflation rider available'],
+    riskLevel: 'None',
+    naicNote: 'Annuity illustration must show income start date, premium, guaranteed income amount.',
+    sampleRate: '$4,800/mo at 65 per $100K premium at age 45 (15-yr deferral)'
+  },
+  {
+    id: 'FIA',
+    name: 'Fixed Indexed Annuity',
+    short: 'FIA',
+    icon: 'fa-chart-bar',
+    color: '#b45309',
+    tagline: 'Index-linked growth + income rider',
+    bestFor: 'Moderate risk, 10–25 yr horizon, wants growth potential',
+    guarantees: ['0% floor — no market loss', 'Income rider: 6%/yr rollup', 'Cap rate 10–14% (S&P 500)', 'Tax-deferred accumulation'],
+    riskLevel: 'Low-Medium',
+    naicNote: 'Reg BI / NAIC Model 275 suitability form required. Must show income rider projections separately.',
+    sampleRate: '~$3,900/mo at 65 per $187K premium at age 48 (6% rollup, 17-yr)'
+  },
+  {
+    id: 'VA',
+    name: 'Variable Annuity',
+    short: 'VA',
+    icon: 'fa-chart-area',
+    color: '#dc2626',
+    tagline: 'Market-linked growth with living benefits',
+    bestFor: 'Higher risk tolerance, long horizon (20+ yr), growth-first',
+    guarantees: ['GMIB / GMWB living benefit riders', 'Sub-account market participation', 'Death benefit guarantee', 'FINRA-regulated — Series 6/63 required'],
+    riskLevel: 'Medium-High',
+    naicNote: 'FINRA-regulated. Prospectus required. Illustration shows hypothetical, not projected, returns.',
+    sampleRate: 'Income varies — depends on sub-account performance + rider terms'
+  }
+];
+
+window.p3BuildRetirementHub = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && typeof _p3ActiveProspect !== 'undefined')
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+
+  var rd = (pr && _retAnnuityData[pr.id]) ? _retAnnuityData[pr.id] : null;
+
+  // No prospect selected
+  if (!pr) {
+    return '<div class="p3-domain-empty"><i class="fas fa-umbrella-beach"></i>'
+      + '<div>Select a prospect from the left panel to build a retirement income illustration.</div></div>';
+  }
+
+  // ── Income gap summary bar
+  var gapMo = rd ? rd.gapMo : 0;
+  var gapColor = gapMo > 3000 ? '#dc2626' : gapMo > 1500 ? '#d97706' : '#16a34a';
+  var targetMo = rd ? rd.targetIncomeMo : 0;
+  var coveredPct = targetMo > 0 ? Math.min(100, Math.round(((targetMo - gapMo) / targetMo) * 100)) : 0;
+
+  var gapBar = rd ? (
+    '<div class="p3ret-gap-bar">'
+    + '<div class="p3ret-gap-bar-label">Income Coverage</div>'
+    + '<div class="p3ret-gap-bar-track">'
+    +   '<div class="p3ret-gap-bar-fill" style="width:' + coveredPct + '%"></div>'
+    + '</div>'
+    + '<div class="p3ret-gap-bar-vals">'
+    +   '<span class="p3ret-covered">Covered: $' + (targetMo - gapMo).toLocaleString() + '/mo</span>'
+    +   '<span class="p3ret-gap" style="color:' + gapColor + '">Gap: $' + gapMo.toLocaleString() + '/mo</span>'
+    + '</div>'
+    + '</div>'
+  ) : '';
+
+  // ── AI recommendation banner
+  var aiRec = rd ? rd.aiRec : null;
+  var aiBanner = rd ? (
+    '<div class="p3ret-ai-banner">'
+    + '<div class="p3ret-ai-icon"><i class="fas fa-robot"></i></div>'
+    + '<div class="p3ret-ai-body">'
+    +   '<div class="p3ret-ai-title">AI Recommendation — <strong>' + rd.aiRec + '</strong></div>'
+    +   '<div class="p3ret-ai-note">' + rd.aiNote + '</div>'
+    + '</div>'
+    + '</div>'
+  ) : '';
+
+  // ── Prospect summary
+  var prospectSummary = rd ? (
+    '<div class="p3ret-prospect-summary">'
+    + '<div class="p3ret-ps-row"><span>Age</span><strong>' + rd.age + '</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Target Income</span><strong>$' + rd.targetIncomeMo.toLocaleString() + '/mo</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Social Security</span><strong>$' + rd.ssMo.toLocaleString() + '/mo</strong></div>'
+    + (rd.pensionMo > 0 ? '<div class="p3ret-ps-row"><span>Pension</span><strong>$' + rd.pensionMo.toLocaleString() + '/mo</strong></div>' : '')
+    + '<div class="p3ret-ps-row gap"><span>Income Gap</span><strong style="color:' + gapColor + '">$' + rd.gapMo.toLocaleString() + '/mo</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Rollover Assets</span><strong>$' + rd.rolloverAssets.toLocaleString() + '</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Years to Retirement</span><strong>' + rd.yearsToRetirement + ' yrs</strong></div>'
+    + '<div class="p3ret-ps-row"><span>Risk Profile</span><strong>' + rd.riskProfile + '</strong></div>'
+    + '</div>'
+  ) : '<div class="p3ret-prospect-summary"><div class="p3ret-ps-row"><span>No retirement data on file — complete FNA Tab 4</span></div></div>';
+
+  // ── Annuity product tiles
+  var tiles = _retAnnuityProducts.map(function(prod) {
+    var isRec = aiRec && prod.id === aiRec;
+    var guaranteesList = prod.guarantees.map(function(g) {
+      return '<div class="p3ret-guarantee"><i class="fas fa-check-circle"></i>' + g + '</div>';
+    }).join('');
+
+    return '<div class="p3ret-ann-tile' + (isRec ? ' p3ret-ann-tile-rec' : '') + '" onclick="p3RetSelectAnnuity(\'' + prod.id + '\')" id="p3ret-tile-' + prod.id + '">'
+      + (isRec ? '<div class="p3ret-rec-badge"><i class="fas fa-star"></i> AI Recommended</div>' : '')
+      + '<div class="p3ret-ann-tile-header" style="border-left:4px solid ' + prod.color + '">'
+      +   '<div class="p3ret-ann-icon" style="color:' + prod.color + '"><i class="fas ' + prod.icon + '"></i></div>'
+      +   '<div>'
+      +     '<div class="p3ret-ann-name">' + prod.short + '</div>'
+      +     '<div class="p3ret-ann-full">' + prod.name + '</div>'
+      +   '</div>'
+      +   '<div class="p3ret-ann-risk p3ret-risk-' + prod.riskLevel.toLowerCase().replace(/[^a-z]/g,'-') + '">' + prod.riskLevel + '</div>'
+      + '</div>'
+      + '<div class="p3ret-ann-tagline">' + prod.tagline + '</div>'
+      + '<div class="p3ret-ann-bestfor"><i class="fas fa-user-check"></i> ' + prod.bestFor + '</div>'
+      + '<div class="p3ret-ann-guarantees">' + guaranteesList + '</div>'
+      + '<div class="p3ret-ann-sample"><i class="fas fa-calculator"></i> ' + prod.sampleRate + '</div>'
+      + '<div class="p3ret-ann-naic"><i class="fas fa-gavel"></i> ' + prod.naicNote + '</div>'
+      + '<button class="p3ret-ann-btn" style="background:' + prod.color + '" onclick="event.stopPropagation();p3RetRunIllustration(\'' + prod.id + '\')"><i class="fas fa-play"></i> Run ' + prod.short + ' Illustration</button>'
+      + '</div>';
+  }).join('');
+
+  return '<div class="p3ret-hub">'
+
+    // Header
+    + '<div class="p3-domain-header ret">'
+    +   '<div class="p3-domain-header-icon"><i class="fas fa-umbrella-beach"></i></div>'
+    +   '<div>'
+    +     '<div class="p3-domain-header-title">Retirement Income Illustration Hub</div>'
+    +     '<div class="p3-domain-header-sub">SPIA · DIA · FIA · VA — Gap-to-product pipeline from FNA Tab 4</div>'
+    +   '</div>'
+    +   '<div class="p3-domain-header-actions">'
+    +     '<button class="p3-dh-btn" onclick="p3RetCompareAll()"><i class="fas fa-balance-scale"></i> Compare All</button>'
+    +     '<button class="p3-dh-btn primary" onclick="p3RetGenerateIncomeProposal()"><i class="fas fa-file-invoice-dollar"></i> Income Proposal</button>'
+    +   '</div>'
+    + '</div>'
+
+    // 2-col: prospect summary + gap bar
+    + '<div class="p3ret-top-row">'
+    +   '<div class="p3ret-top-left">'
+    +     '<div class="p3ret-section-title"><i class="fas fa-user"></i> ' + pr.name + ' — Retirement Profile</div>'
+    +     prospectSummary
+    +   '</div>'
+    +   '<div class="p3ret-top-right">'
+    +     '<div class="p3ret-section-title"><i class="fas fa-tachometer-alt"></i> Income Gap Analysis</div>'
+    +     gapBar
+    +     aiBanner
+    +   '</div>'
+    + '</div>'
+
+    // Annuity product tiles
+    + '<div class="p3ret-section-title" style="margin:20px 0 12px"><i class="fas fa-layer-group"></i> Select Annuity Type</div>'
+    + '<div class="p3ret-ann-grid">' + tiles + '</div>'
+
+    // Illustration output area
+    + '<div id="p3ret-illust-output"></div>'
+
+    + '</div>'; // p3ret-hub
+};
+
+window.p3RetSelectAnnuity = function(productId) {
+  document.querySelectorAll('.p3ret-ann-tile').forEach(function(t) {
+    t.classList.remove('p3ret-ann-tile-selected');
+  });
+  var tile = document.getElementById('p3ret-tile-' + productId);
+  if (tile) tile.classList.add('p3ret-ann-tile-selected');
+};
+
+window.p3RetRunIllustration = function(productId) {
+  var prod = _retAnnuityProducts.find(function(p) { return p.id === productId; });
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  var rd = pr ? _retAnnuityData[pr.id] : null;
+  if (!prod || !pr) return;
+
+  var premium = rd ? rd.rolloverAssets : 100000;
+  var yrs = rd ? rd.yearsToRetirement : 15;
+  var rows = '';
+  var rollup = productId === 'FIA' ? 1.06 : productId === 'DIA' ? 1.055 : 1.04;
+  var base = premium;
+  for (var y = 1; y <= Math.min(yrs, 30); y += (y < 10 ? 1 : 5)) {
+    base = base * Math.pow(rollup, (y === 1 ? 1 : (y <= 10 ? 1 : 5)));
+    var estIncome = productId === 'SPIA' ? 0 : Math.round(base * 0.05 / 12);
+    rows += '<tr>'
+      + '<td>' + y + '</td>'
+      + '<td>' + (rd ? rd.age + y - 1 : '--') + '</td>'
+      + '<td>$' + Math.round(base).toLocaleString() + '</td>'
+      + (productId !== 'SPIA' ? '<td>$' + estIncome.toLocaleString() + '/mo</td>' : '<td>—</td>')
+      + '</tr>';
+  }
+
+  var output = document.getElementById('p3ret-illust-output');
+  if (!output) return;
+
+  output.innerHTML = '<div class="p3ret-illust-card">'
+    + '<div class="p3ret-illust-header">'
+    +   '<div><i class="fas fa-calculator"></i> ' + prod.name + ' Illustration — ' + pr.name + '</div>'
+    +   '<div class="p3ret-illust-actions">'
+    +     '<button class="p3ret-illust-btn" onclick="showToast(\'Income Proposal PDF generating…\',\'ai\')"><i class="fas fa-file-pdf"></i> Export</button>'
+    +     '<button class="p3ret-illust-btn" onclick="showToast(\'Suitability form opened.\',\'info\')"><i class="fas fa-clipboard-check"></i> Suitability Form</button>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="p3ret-illust-kpis">'
+    +   '<div class="p3ret-illust-kpi"><div class="p3ret-illust-kpi-val">$' + premium.toLocaleString() + '</div><div class="p3ret-illust-kpi-lbl">Premium / Rollover</div></div>'
+    +   '<div class="p3ret-illust-kpi"><div class="p3ret-illust-kpi-val">' + yrs + ' yrs</div><div class="p3ret-illust-kpi-lbl">Deferral Period</div></div>'
+    +   '<div class="p3ret-illust-kpi"><div class="p3ret-illust-kpi-val">' + (rollup * 100 - 100).toFixed(1) + '%</div><div class="p3ret-illust-kpi-lbl">Rollup / Credit Rate</div></div>'
+    +   '<div class="p3ret-illust-kpi hi"><div class="p3ret-illust-kpi-val">' + prod.riskLevel + '</div><div class="p3ret-illust-kpi-lbl">Risk Level</div></div>'
+    + '</div>'
+    + '<table class="p3ret-illust-table">'
+    +   '<thead><tr><th>Year</th><th>Age</th><th>Account Value</th><th>Est. Income</th></tr></thead>'
+    +   '<tbody>' + rows + '</tbody>'
+    + '</table>'
+    + '<div class="p3ret-illust-naic"><i class="fas fa-gavel"></i> <strong>NAIC Note:</strong> ' + prod.naicNote + '</div>'
+    + '</div>';
+
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window.p3RetCompareAll = function() {
+  showToast('Building side-by-side annuity comparison for all 4 types…', 'ai');
+};
+
+window.p3RetGenerateIncomeProposal = function() {
+  showToast('Generating Income Proposal PDF — includes gap analysis + recommended annuity illustration…', 'ai');
+};
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   E. INVESTMENTS HUB — ETF / Mutual Fund / 529
+   ───────────────────────────────────────────────────────────────────── */
+
+var _invHubProducts = [
+  {
+    id: 'ETF_CORE',
+    category: 'ETF',
+    name: 'Core Equity ETF Portfolio',
+    icon: 'fa-chart-line',
+    color: '#059669',
+    minInvestment: '$2,500',
+    expenseRatio: '0.08%',
+    tagline: 'Low-cost broad market exposure — S&P 500, Total Market, International',
+    components: ['VOO — Vanguard S&P 500 ETF (0.03%)', 'VTI — Vanguard Total Market ETF (0.03%)', 'VXUS — International ex-US ETF (0.07%)'],
+    suitability: 'Moderate to Aggressive · 7+ year horizon',
+    taxEfficiency: 'High — minimal capital gain distributions',
+    accountTypes: ['Taxable Brokerage', 'Roth IRA', '401(k) Rollover']
+  },
+  {
+    id: 'ETF_INCOME',
+    category: 'ETF',
+    name: 'Income & Dividend ETF Portfolio',
+    icon: 'fa-hand-holding-usd',
+    color: '#0891b2',
+    minInvestment: '$2,500',
+    expenseRatio: '0.15%',
+    tagline: 'Dividend-focused ETFs for income generation — utilities, REITs, dividend aristocrats',
+    components: ['VYM — High Dividend Yield ETF (0.06%)', 'SCHD — Schwab Dividend ETF (0.06%)', 'VNQ — Real Estate ETF (0.12%)'],
+    suitability: 'Conservative-Moderate · Income need · 5+ year horizon',
+    taxEfficiency: 'Moderate — qualified dividends, some ordinary income',
+    accountTypes: ['IRA (tax-deferred preferred)', 'Taxable Brokerage']
+  },
+  {
+    id: 'MF_BALANCED',
+    category: 'Mutual Fund',
+    name: 'Balanced Growth Fund',
+    icon: 'fa-balance-scale',
+    color: '#6366f1',
+    minInvestment: '$1,000',
+    expenseRatio: '0.48%',
+    tagline: 'Professionally managed 60/40 allocation — growth with income component',
+    components: ['60% Large-cap equity sleeve', '30% Investment-grade bond sleeve', '10% International equity'],
+    suitability: 'Moderate · 5–10 year horizon · first-time managed account',
+    taxEfficiency: 'Moderate — may distribute capital gains annually',
+    accountTypes: ['Traditional IRA', 'Taxable Brokerage', 'Rollover IRA']
+  },
+  {
+    id: 'MF_GROWTH',
+    category: 'Mutual Fund',
+    name: 'Large Cap Growth Fund',
+    icon: 'fa-rocket',
+    color: '#7c3aed',
+    minInvestment: '$1,000',
+    expenseRatio: '0.62%',
+    tagline: 'Actively managed large-cap growth — S&P 500 benchmark, seeks alpha',
+    components: ['Top 50 S&P 500 growth stocks', 'Active stock selection — P/E, EPS growth', 'Annual turnover ~25%'],
+    suitability: 'Moderate-Aggressive · 10+ year horizon · accumulation phase',
+    taxEfficiency: 'Low-Moderate — active management creates distributions',
+    accountTypes: ['Roth IRA (best for high-growth)', 'Tax-deferred accounts']
+  },
+  {
+    id: 'MF_ESG',
+    category: 'Mutual Fund',
+    name: 'ESG Responsible Growth Fund',
+    icon: 'fa-leaf',
+    color: '#16a34a',
+    minInvestment: '$1,000',
+    expenseRatio: '0.35%',
+    tagline: 'Environmental, Social & Governance screened — responsible investing without sacrificing returns',
+    components: ['ESG-screened large & mid cap equity', 'Excludes tobacco, weapons, fossil fuels', 'Positive ESG score threshold: top 50%'],
+    suitability: 'Moderate · ESG preference documented in FNA · any horizon',
+    taxEfficiency: 'Moderate',
+    accountTypes: ['Any account type']
+  },
+  {
+    id: '529_STANDARD',
+    category: '529 Plan',
+    name: 'State 529 College Savings Plan',
+    icon: 'fa-graduation-cap',
+    color: '#b45309',
+    minInvestment: '$250',
+    expenseRatio: '0.15–0.30% (age-based)',
+    tagline: 'Tax-advantaged college savings — contributions grow tax-free, withdrawals tax-free for qualified education',
+    components: ['Age-based portfolio (automatically de-risks as college nears)', 'Static portfolios: aggressive / moderate / conservative', 'FDIC-insured bank option available'],
+    suitability: 'Any risk profile · parent or grandparent · child under 13',
+    taxEfficiency: 'Highest — tax-free growth + deduction in many states',
+    accountTypes: ['529 Account (beneficiary = student)', 'UGMA/UTMA (taxable alternative)']
+  }
+];
+
+var _invHubData = {
+  'FNA-001': {
+    name: 'Alex Rivera',
+    investableAssets: 462000,
+    taxBracket: '32%',
+    timeHorizonYrs: 12,
+    riskProfile: 'Moderate',
+    esgPreference: false,
+    collegeFundNeeds: true,
+    collegeFundChild: 'Twins, age 8 — 10 years to college',
+    collegeFundTarget: 160000,
+    aiRec: ['ETF_CORE', '529_STANDARD'],
+    aiNote: 'Alex\'s high bracket (32%) strongly favours tax-advantaged vehicles. Core ETF portfolio in a rollover IRA + 529 for twins addresses both accumulation and college goals. ESG not a priority.'
+  },
+  'FNA-002': {
+    name: 'Nancy Foster',
+    investableAssets: 298000,
+    taxBracket: '22%',
+    timeHorizonYrs: 6,
+    riskProfile: 'Conservative-Moderate',
+    esgPreference: true,
+    collegeFundNeeds: false,
+    collegeFundChild: null,
+    collegeFundTarget: 0,
+    aiRec: ['MF_ESG', 'ETF_INCOME'],
+    aiNote: 'ESG preference documented. Income & Dividend ETF + ESG Responsible Growth Fund align with Nancy\'s conservative-moderate profile. 6-year horizon means a near-term cash sleeve is needed alongside these positions.'
+  },
+  'FNA-003': {
+    name: 'Patricia Nguyen',
+    investableAssets: 324000,
+    taxBracket: '24%',
+    timeHorizonYrs: 17,
+    riskProfile: 'Moderate',
+    esgPreference: false,
+    collegeFundNeeds: false,
+    collegeFundChild: null,
+    collegeFundTarget: 0,
+    aiRec: ['MF_BALANCED', 'ETF_CORE'],
+    aiNote: 'Patricia\'s 17-year horizon and moderate profile suit a Balanced Growth Fund core with a Core ETF satellite. Tax-deferred rollover account preferred given 24% bracket.'
+  }
+};
+
+window.p3BuildInvestmentsHub = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && typeof _p3ActiveProspect !== 'undefined')
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+
+  if (!pr) {
+    return '<div class="p3-domain-empty"><i class="fas fa-chart-line"></i>'
+      + '<div>Select a prospect to build an investment product proposal.</div></div>';
+  }
+
+  var id = pr.id;
+  var hd = _invHubData[id] || {
+    name: pr.name, investableAssets: 100000, taxBracket: '24%',
+    timeHorizonYrs: 10, riskProfile: 'Moderate', esgPreference: false,
+    collegeFundNeeds: false, collegeFundTarget: 0,
+    aiRec: ['ETF_CORE', 'MF_BALANCED'],
+    aiNote: 'Complete FNA Investment Advisory section for a personalised recommendation.'
+  };
+
+  // Category groups
+  var categories = ['ETF', 'Mutual Fund', '529 Plan'];
+  var catIcons = { 'ETF': 'fa-chart-line', 'Mutual Fund': 'fa-layer-group', '529 Plan': 'fa-graduation-cap' };
+  var catColors = { 'ETF': '#059669', 'Mutual Fund': '#6366f1', '529 Plan': '#b45309' };
+
+  var productCards = categories.map(function(cat) {
+    var prods = _invHubProducts.filter(function(p) { return p.category === cat; });
+    var cards = prods.map(function(prod) {
+      var isRec = hd.aiRec.indexOf(prod.id) !== -1;
+      var compList = prod.components.map(function(c) {
+        return '<div class="p3inv-comp"><i class="fas fa-dot-circle"></i>' + c + '</div>';
+      }).join('');
+      var acctPills = prod.accountTypes.map(function(a) {
+        return '<span class="p3inv-acct-pill">' + a + '</span>';
+      }).join('');
+
+      return '<div class="p3inv-prod-card' + (isRec ? ' p3inv-prod-rec' : '') + '">'
+        + (isRec ? '<div class="p3inv-rec-badge"><i class="fas fa-star"></i> AI Pick</div>' : '')
+        + '<div class="p3inv-prod-header">'
+        +   '<div class="p3inv-prod-icon" style="color:' + prod.color + '"><i class="fas ' + prod.icon + '"></i></div>'
+        +   '<div>'
+        +     '<div class="p3inv-prod-name">' + prod.name + '</div>'
+        +     '<div class="p3inv-prod-tagline">' + prod.tagline + '</div>'
+        +   '</div>'
+        + '</div>'
+        + '<div class="p3inv-prod-meta">'
+        +   '<div class="p3inv-meta-row"><span>Min Investment</span><strong>' + prod.minInvestment + '</strong></div>'
+        +   '<div class="p3inv-meta-row"><span>Expense Ratio</span><strong>' + prod.expenseRatio + '</strong></div>'
+        +   '<div class="p3inv-meta-row"><span>Tax Efficiency</span><strong>' + prod.taxEfficiency + '</strong></div>'
+        +   '<div class="p3inv-meta-row"><span>Suitability</span><strong>' + prod.suitability + '</strong></div>'
+        + '</div>'
+        + '<div class="p3inv-comp-list">' + compList + '</div>'
+        + '<div class="p3inv-acct-pills">' + acctPills + '</div>'
+        + '<div class="p3inv-prod-actions">'
+        +   '<button class="p3inv-btn" onclick="p3InvBuildProposal(\'' + prod.id + '\')"><i class="fas fa-file-alt"></i> Build Proposal</button>'
+        +   '<button class="p3inv-btn outline" onclick="p3InvRunProjection(\'' + prod.id + '\')"><i class="fas fa-calculator"></i> Run Projection</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    return '<div class="p3inv-cat-section">'
+      + '<div class="p3inv-cat-header" style="border-left:4px solid ' + catColors[cat] + '">'
+      +   '<i class="fas ' + catIcons[cat] + '" style="color:' + catColors[cat] + '"></i>'
+      +   '<span>' + cat + (cat === '529 Plan' && !hd.collegeFundNeeds ? ' <span class="p3inv-cat-note">(No college need identified in FNA)</span>' : '') + '</span>'
+      + '</div>'
+      + '<div class="p3inv-prod-grid">' + cards + '</div>'
+      + '</div>';
+  }).join('');
+
+  // Client summary bar
+  var clientBar = '<div class="p3inv-client-bar">'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">$' + hd.investableAssets.toLocaleString() + '</div><div class="p3inv-cb-lbl">Investable Assets</div></div>'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">' + hd.taxBracket + '</div><div class="p3inv-cb-lbl">Tax Bracket</div></div>'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">' + hd.timeHorizonYrs + ' yrs</div><div class="p3inv-cb-lbl">Time Horizon</div></div>'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">' + hd.riskProfile + '</div><div class="p3inv-cb-lbl">Risk Profile</div></div>'
+    + '<div class="p3inv-cb-item"><div class="p3inv-cb-val">' + (hd.esgPreference ? '✓ Yes' : 'No') + '</div><div class="p3inv-cb-lbl">ESG Preference</div></div>'
+    + (hd.collegeFundNeeds ? '<div class="p3inv-cb-item hi"><div class="p3inv-cb-val">$' + hd.collegeFundTarget.toLocaleString() + '</div><div class="p3inv-cb-lbl">529 Target</div></div>' : '')
+    + '</div>';
+
+  var aiBanner = '<div class="p3inv-ai-banner">'
+    + '<div class="p3inv-ai-icon"><i class="fas fa-robot"></i></div>'
+    + '<div><div class="p3inv-ai-title">AI Investment Picks for ' + hd.name + '</div>'
+    +   '<div class="p3inv-ai-note">' + hd.aiNote + '</div></div>'
+    + '</div>';
+
+  return '<div class="p3inv-hub">'
+    + '<div class="p3-domain-header inv">'
+    +   '<div class="p3-domain-header-icon"><i class="fas fa-chart-line"></i></div>'
+    +   '<div>'
+    +     '<div class="p3-domain-header-title">Investment Products Hub</div>'
+    +     '<div class="p3-domain-header-sub">ETF Portfolios · Mutual Funds · 529 College Savings</div>'
+    +   '</div>'
+    +   '<div class="p3-domain-header-actions">'
+    +     '<button class="p3-dh-btn" onclick="showToast(\'Opening investment accounts module…\',\'info\');navigateTo(\'inv-accounts\')"><i class="fas fa-external-link-alt"></i> Investment Accounts</button>'
+    +     '<button class="p3-dh-btn primary" onclick="p3InvBuildAllProposals()"><i class="fas fa-file-alt"></i> Full Proposal</button>'
+    +   '</div>'
+    + '</div>'
+    + clientBar
+    + aiBanner
+    + productCards
+    + '<div id="p3inv-projection-output"></div>'
+    + '</div>';
+};
+
+window.p3InvBuildProposal = function(productId) {
+  var prod = _invHubProducts.find(function(p) { return p.id === productId; });
+  if (!prod) return;
+  showToast('Building ' + prod.name + ' proposal for ' + (_p3ActiveProspect || 'prospect') + '…', 'ai');
+};
+
+window.p3InvRunProjection = function(productId) {
+  var prod = _invHubProducts.find(function(p) { return p.id === productId; });
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  var hd = pr ? (_invHubData[pr.id] || null) : null;
+  if (!prod || !pr) return;
+
+  var principal = hd ? hd.investableAssets : 50000;
+  var yrs = hd ? hd.timeHorizonYrs : 10;
+  var rates = { ETF: 0.072, 'Mutual Fund': 0.065, '529 Plan': 0.058 };
+  var rate = rates[prod.category] || 0.065;
+
+  var rows = '';
+  for (var y = 1; y <= yrs; y++) {
+    var val = Math.round(principal * Math.pow(1 + rate, y));
+    var gain = Math.round(val - principal);
+    rows += '<tr><td>' + y + '</td><td>$' + val.toLocaleString() + '</td><td class="p3inv-proj-gain">+$' + gain.toLocaleString() + '</td></tr>';
+  }
+
+  var output = document.getElementById('p3inv-projection-output');
+  if (!output) return;
+
+  output.innerHTML = '<div class="p3inv-proj-card">'
+    + '<div class="p3inv-proj-header"><i class="fas fa-chart-area"></i> ' + prod.name + ' — Growth Projection (' + (rate * 100).toFixed(1) + '% assumed return)</div>'
+    + '<table class="p3inv-proj-table"><thead><tr><th>Year</th><th>Projected Value</th><th>Gain</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody></table>'
+    + '<div class="p3inv-proj-disc">Projections are hypothetical and not guaranteed. Past performance does not predict future results.</div>'
+    + '</div>';
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window.p3InvBuildAllProposals = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  showToast('Generating comprehensive investment proposal for ' + (pr ? pr.name : 'prospect') + '…', 'ai');
+};
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   F. ADVISORY HUB — Rep Advisory / SMA / UMA + Estate Planning + Small Business
+   ───────────────────────────────────────────────────────────────────── */
+
+var _advHubData = {
+  'FNA-001': {
+    name: 'Alex Rivera',
+    investableAssets: 462000,
+    // Wealth Management
+    repAdvisoryEligible: true,   // >= $100K
+    smaEligible: true,           // >= $250K
+    umaEligible: true,           // >= $500K? No — 462K < 500K
+    umaNote: '$462K investable — below $500K UMA threshold. SMA recommended.',
+    wealthAiNote: 'Alex qualifies for SMA ($462K investable). A Single Manager Account with a Balanced Growth mandate fits the 12-year horizon and 32% bracket. UMA eligibility reached at $500K — PUAs on WL policy will accelerate.',
+    // Estate Planning
+    estate: {
+      hasWill: true, hasTrust: false, hasPOA: true, hasHCDirective: false,
+      estateValue: 847000,
+      aiGap: 'No revocable living trust — with $847K estate, trust avoids probate and protects beneficiaries. Healthcare directive missing — critical with young children.',
+      recommendations: ['Revocable Living Trust — $847K estate qualifies', 'Healthcare Directive — urgent with minor children', 'ILIT review if life insurance grows above $1M estate threshold']
+    },
+    // Small Business
+    smallBusiness: {
+      isOwner: false,
+      note: 'No small business identified in FNA.'
+    }
+  },
+  'FNA-002': {
+    name: 'Nancy Foster',
+    investableAssets: 298000,
+    repAdvisoryEligible: true,
+    smaEligible: true,           // >= $250K
+    umaEligible: false,
+    umaNote: '$298K investable — below $500K UMA threshold.',
+    wealthAiNote: 'Nancy qualifies for SMA at $298K. Conservative-Moderate profile fits a Fixed Income SMA mandate. ESG preference should be applied at the manager level — ESG-screened bond SMA available.',
+    estate: {
+      hasWill: true, hasTrust: true, hasPOA: true, hasHCDirective: true,
+      estateValue: 620000,
+      aiGap: 'Estate documents appear complete. Recommend annual review — trust beneficiary designations should be verified post-divorce.',
+      recommendations: ['Beneficiary designation audit — post-divorce', 'ILIT consideration if life insurance grows above $1M combined']
+    },
+    smallBusiness: {
+      isOwner: false,
+      note: 'No small business identified in FNA.'
+    }
+  },
+  'FNA-003': {
+    name: 'Patricia Nguyen',
+    investableAssets: 324000,
+    repAdvisoryEligible: true,
+    smaEligible: true,
+    umaEligible: false,
+    umaNote: '$324K investable — below $500K UMA threshold.',
+    wealthAiNote: 'Patricia qualifies for SMA ($324K). With T2DM managed well and a 17-year horizon, an Equity Growth SMA is appropriate. Priority: resolve UL lapse risk before committing to managed account fees.',
+    estate: {
+      hasWill: false, hasTrust: false, hasPOA: false, hasHCDirective: false,
+      estateValue: 524000,
+      aiGap: 'No estate documents on file — urgent. At age 48 with $524K estate and existing life insurance, a will and POA are critical minimum. Trust strongly recommended.',
+      recommendations: ['Will & Testament — urgent', 'Durable POA — urgent', 'Revocable Living Trust', 'Healthcare Directive', 'Beneficiary audit on all policies']
+    },
+    smallBusiness: {
+      isOwner: true,
+      type: 'LLC',
+      industry: 'Operations Consulting',
+      employees: 4,
+      businessValuation: 380000,
+      hasBuySell: false,
+      hasKeyPerson: false,
+      hasSuccessionPlan: false,
+      aiNote: 'Patricia owns a 4-person LLC valued at $380K. Three critical gaps: (1) No buy-sell agreement — business continuity risk; (2) No key person coverage; (3) No succession plan. Buy-sell funding via life insurance is the priority recommendation.'
+    }
+  }
+};
+
+var _advWealthTiers = [
+  {
+    id: 'rep-advisory',
+    name: 'Rep Advisory',
+    threshold: 100000,
+    icon: 'fa-user-tie',
+    color: '#4f46e5',
+    desc: 'Agent-directed managed brokerage account. Agent retains discretion over asset allocation and individual security selection.',
+    features: ['Minimum $100K investable assets', 'Agent selects model portfolio', 'Annual fee: 1.0–1.25% AUM', 'Quarterly performance reporting', 'Tax-loss harvesting available'],
+    bestFor: 'Clients $100K–$249K who want personalized agent guidance'
+  },
+  {
+    id: 'sma',
+    name: 'SMA',
+    threshold: 250000,
+    icon: 'fa-building',
+    color: '#0891b2',
+    desc: 'Single Manager Account — assets managed by a specialist investment manager with a dedicated mandate (equity, fixed income, balanced).',
+    features: ['Minimum $250K investable assets', 'Dedicated portfolio manager', 'Annual fee: 0.75–1.10% AUM', 'Direct security ownership (not fund)', 'Custom tax management', 'Transparent holdings'],
+    bestFor: 'Clients $250K–$499K who want institutional-quality active management'
+  },
+  {
+    id: 'uma',
+    name: 'UMA',
+    threshold: 500000,
+    icon: 'fa-layer-group',
+    color: '#7c3aed',
+    desc: 'Unified Managed Account — multiple investment strategies (ETF, SMA, alternatives) in a single account with overlay management.',
+    features: ['Minimum $500K investable assets', 'Overlay portfolio management', 'Annual fee: 0.65–0.90% AUM', 'Multi-strategy in one account', 'Tax overlay across all sleeves', 'Alternative sleeve access'],
+    bestFor: 'Clients $500K+ who want a single-account multi-strategy solution'
+  }
+];
+
+window.p3BuildAdvisoryHub = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && typeof _p3ActiveProspect !== 'undefined')
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+
+  if (!pr) {
+    return '<div class="p3-domain-empty"><i class="fas fa-handshake"></i>'
+      + '<div>Select a prospect to view advisory product recommendations.</div></div>';
+  }
+
+  var hd = _advHubData[pr.id] || {
+    name: pr.name, investableAssets: 0,
+    repAdvisoryEligible: false, smaEligible: false, umaEligible: false,
+    umaNote: 'Complete FNA Advisory section to calculate eligibility.',
+    wealthAiNote: 'Complete FNA Tab 5 for wealth management recommendation.',
+    estate: { hasWill: false, hasTrust: false, hasPOA: false, hasHCDirective: false, estateValue: 0, aiGap: 'No estate data on file.', recommendations: [] },
+    smallBusiness: { isOwner: false, note: 'No small business identified.' }
+  };
+
+  var assets = hd.investableAssets;
+
+  // ── A. Wealth Management tiers
+  var tierCards = _advWealthTiers.map(function(tier) {
+    var eligible = assets >= tier.threshold;
+    var isRec = (tier.id === 'uma' && hd.umaEligible) ||
+                (tier.id === 'sma' && hd.smaEligible && !hd.umaEligible) ||
+                (tier.id === 'rep-advisory' && hd.repAdvisoryEligible && !hd.smaEligible);
+
+    var featList = tier.features.map(function(f) {
+      return '<div class="p3adv-feat"><i class="fas fa-check"></i>' + f + '</div>';
+    }).join('');
+
+    return '<div class="p3adv-tier-card' + (eligible ? ' p3adv-tier-eligible' : ' p3adv-tier-unmet') + (isRec ? ' p3adv-tier-rec' : '') + '">'
+      + (isRec ? '<div class="p3adv-rec-badge"><i class="fas fa-star"></i> Recommended</div>' : '')
+      + '<div class="p3adv-tier-header" style="border-top:3px solid ' + tier.color + '">'
+      +   '<div class="p3adv-tier-icon" style="color:' + tier.color + '"><i class="fas ' + tier.icon + '"></i></div>'
+      +   '<div>'
+      +     '<div class="p3adv-tier-name">' + tier.name + '</div>'
+      +     '<div class="p3adv-tier-threshold">Min $' + (tier.threshold / 1000) + 'K</div>'
+      +   '</div>'
+      +   '<div class="p3adv-tier-status ' + (eligible ? 'met' : 'unmet') + '">'
+      +     '<i class="fas ' + (eligible ? 'fa-check-circle' : 'fa-times-circle') + '"></i>'
+      +     (eligible ? 'Eligible' : 'Not Yet')
+      +   '</div>'
+      + '</div>'
+      + '<div class="p3adv-tier-desc">' + tier.desc + '</div>'
+      + '<div class="p3adv-tier-feats">' + featList + '</div>'
+      + '<div class="p3adv-tier-bestfor"><i class="fas fa-bullseye"></i> ' + tier.bestFor + '</div>'
+      + (eligible
+          ? '<button class="p3adv-tier-btn" style="background:' + tier.color + '" onclick="p3AdvOpenManagedProposal(\'' + tier.id + '\')">'
+            + '<i class="fas fa-file-signature"></i> Build ' + tier.name + ' Proposal</button>'
+          : '<div class="p3adv-tier-unmet-note"><i class="fas fa-info-circle"></i> $' + ((tier.threshold - assets) / 1000).toFixed(0) + 'K more assets needed</div>')
+      + '</div>';
+  }).join('');
+
+  // AUM display bar
+  var aumBar = '<div class="p3adv-aum-bar">'
+    + '<div class="p3adv-aum-val">$' + assets.toLocaleString() + '</div>'
+    + '<div class="p3adv-aum-lbl">Investable Assets</div>'
+    + '<div class="p3adv-aum-track">'
+    +   '<div class="p3adv-aum-seg rep" style="width:' + Math.min(100, Math.round(Math.min(assets, 250000) / 5000)) + '%"></div>'
+    +   '<div class="p3adv-aum-seg sma" style="width:' + (assets >= 250000 ? Math.min(50, Math.round(Math.min(assets - 250000, 250000) / 5000)) : 0) + '%"></div>'
+    +   '<div class="p3adv-aum-seg uma" style="width:' + (assets >= 500000 ? Math.min(30, Math.round((assets - 500000) / 10000)) : 0) + '%"></div>'
+    + '</div>'
+    + '<div class="p3adv-aum-scale"><span>$0</span><span>$100K</span><span>$250K</span><span>$500K+</span></div>'
+    + '</div>';
+
+  var wealthAiBanner = '<div class="p3adv-ai-banner wealth">'
+    + '<i class="fas fa-robot"></i>'
+    + '<div><strong>Wealth Management AI:</strong> ' + hd.wealthAiNote + '</div>'
+    + '</div>';
+
+  // ── B. Estate Planning
+  var estateChecks = [
+    { label: 'Will & Testament', has: hd.estate.hasWill },
+    { label: 'Revocable Living Trust', has: hd.estate.hasTrust },
+    { label: 'Durable Power of Attorney', has: hd.estate.hasPOA },
+    { label: 'Healthcare Directive', has: hd.estate.hasHCDirective }
+  ].map(function(item) {
+    return '<div class="p3adv-estate-check ' + (item.has ? 'has' : 'missing') + '">'
+      + '<i class="fas ' + (item.has ? 'fa-check-circle' : 'fa-times-circle') + '"></i>'
+      + item.label
+      + '<span class="p3adv-estate-status">' + (item.has ? 'On File' : 'Missing') + '</span>'
+      + '</div>';
+  }).join('');
+
+  var estateRecs = hd.estate.recommendations.map(function(r) {
+    return '<div class="p3adv-estate-rec"><i class="fas fa-arrow-right"></i>' + r + '</div>';
+  }).join('');
+
+  var allDocsPresent = hd.estate.hasWill && hd.estate.hasTrust && hd.estate.hasPOA && hd.estate.hasHCDirective;
+  var estateSection = '<div class="p3adv-section">'
+    + '<div class="p3adv-section-header estate"><i class="fas fa-scroll"></i> Estate Planning</div>'
+    + '<div class="p3adv-estate-row">'
+    +   '<div class="p3adv-estate-checks">' + estateChecks + '</div>'
+    +   '<div class="p3adv-estate-right">'
+    +     '<div class="p3adv-estate-value"><span>Est. Estate Value</span><strong>$' + hd.estate.estateValue.toLocaleString() + '</strong></div>'
+    +     '<div class="p3adv-estate-ai"><i class="fas fa-robot"></i> ' + hd.estate.aiGap + '</div>'
+    +     (estateRecs ? '<div class="p3adv-estate-recs">' + estateRecs + '</div>' : '')
+    +     '<div class="p3adv-estate-actions">'
+    +       '<button class="p3adv-estate-btn" onclick="p3AdvBookEstateConsult()"><i class="fas fa-calendar-check"></i> Book Consultation</button>'
+    +       '<button class="p3adv-estate-btn outline" onclick="p3AdvExportEstateGap()"><i class="fas fa-file-export"></i> Export Gap Report</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>'
+    + '</div>';
+
+  // ── C. Small Business
+  var biz = hd.smallBusiness;
+  var smallBizSection;
+
+  if (!biz.isOwner) {
+    smallBizSection = '<div class="p3adv-section">'
+      + '<div class="p3adv-section-header biz"><i class="fas fa-briefcase"></i> Small Business</div>'
+      + '<div class="p3adv-biz-na"><i class="fas fa-info-circle"></i> ' + biz.note + '</div>'
+      + '</div>';
+  } else {
+    var bizGaps = [
+      { label: 'Buy-Sell Agreement', has: biz.hasBuySell, rec: 'Life-funded buy-sell protects business continuity — critical for LLC' },
+      { label: 'Key Person Coverage', has: biz.hasKeyPerson, rec: 'Key person policy on owner + any employees critical to revenue' },
+      { label: 'Succession Plan', has: biz.hasSuccessionPlan, rec: 'Formal succession plan required before any sale or transition event' }
+    ].map(function(g) {
+      return '<div class="p3adv-biz-gap ' + (g.has ? 'has' : 'missing') + '">'
+        + '<i class="fas ' + (g.has ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i>'
+        + '<div>'
+        +   '<div class="p3adv-biz-gap-label">' + g.label + ' — <em>' + (g.has ? 'In Place' : 'Not in Place') + '</em></div>'
+        +   (!g.has ? '<div class="p3adv-biz-gap-rec">' + g.rec + '</div>' : '')
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    smallBizSection = '<div class="p3adv-section">'
+      + '<div class="p3adv-section-header biz"><i class="fas fa-briefcase"></i> Small Business — ' + biz.type + '</div>'
+      + '<div class="p3adv-biz-summary">'
+      +   '<div class="p3adv-biz-row"><span>Business Type</span><strong>' + biz.type + ' — ' + biz.industry + '</strong></div>'
+      +   '<div class="p3adv-biz-row"><span>Employees</span><strong>' + biz.employees + '</strong></div>'
+      +   '<div class="p3adv-biz-row"><span>Business Valuation</span><strong>$' + biz.businessValuation.toLocaleString() + '</strong></div>'
+      + '</div>'
+      + '<div class="p3adv-biz-ai"><i class="fas fa-robot"></i> ' + biz.aiNote + '</div>'
+      + '<div class="p3adv-biz-gaps">' + bizGaps + '</div>'
+      + '<div class="p3adv-biz-actions">'
+      +   '<button class="p3adv-biz-btn" onclick="p3AdvBuildBizPlan()"><i class="fas fa-file-invoice"></i> Business Planning Proposal</button>'
+      +   '<button class="p3adv-biz-btn outline" onclick="p3AdvRunBuySellIllustration()"><i class="fas fa-calculator"></i> Buy-Sell Illustration</button>'
+      +   '<button class="p3adv-biz-btn outline" onclick="p3AdvBookBizConsult()"><i class="fas fa-calendar-check"></i> Book Consultation</button>'
+      + '</div>'
+      + '</div>';
+  }
+
+  return '<div class="p3adv-hub">'
+
+    // Header
+    + '<div class="p3-domain-header adv">'
+    +   '<div class="p3-domain-header-icon"><i class="fas fa-handshake"></i></div>'
+    +   '<div>'
+    +     '<div class="p3-domain-header-title">Advisory Products Hub</div>'
+    +     '<div class="p3-domain-header-sub">Wealth Management (Rep Advisory · SMA · UMA) · Estate Planning · Small Business</div>'
+    +   '</div>'
+    +   '<div class="p3-domain-header-actions">'
+    +     '<button class="p3-dh-btn" onclick="navigateTo(\'adv-wealth\')"><i class="fas fa-external-link-alt"></i> Wealth Accounts</button>'
+    +     '<button class="p3-dh-btn primary" onclick="p3AdvBuildFullProposal()"><i class="fas fa-file-contract"></i> Full Advisory Proposal</button>'
+    +   '</div>'
+    + '</div>'
+
+    // ── Wealth Management
+    + '<div class="p3adv-section">'
+    +   '<div class="p3adv-section-header wealth"><i class="fas fa-chart-pie"></i> Wealth Management</div>'
+    +   aumBar
+    +   wealthAiBanner
+    +   '<div class="p3adv-tier-grid">' + tierCards + '</div>'
+    + '</div>'
+
+    // ── Estate Planning
+    + estateSection
+
+    // ── Small Business
+    + smallBizSection
+
+    + '</div>'; // p3adv-hub
+};
+
+// Advisory action stubs
+window.p3AdvOpenManagedProposal = function(tierId) {
+  var tier = _advWealthTiers.find(function(t) { return t.id === tierId; });
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  showToast('Building ' + (tier ? tier.name : tierId) + ' managed account proposal for ' + (pr ? pr.name : 'prospect') + '…', 'ai');
+};
+window.p3AdvBookEstateConsult = function() { showToast('Opening calendar to schedule estate planning consultation…', 'info'); };
+window.p3AdvExportEstateGap   = function() { showToast('Generating estate planning gap report PDF…', 'ai'); };
+window.p3AdvBuildBizPlan      = function() { showToast('Building business planning proposal…', 'ai'); };
+window.p3AdvRunBuySellIllustration = function() { showToast('Running buy-sell agreement life insurance illustration…', 'ai'); };
+window.p3AdvBookBizConsult    = function() { showToast('Opening calendar for small business planning consultation…', 'info'); };
+window.p3AdvBuildFullProposal = function() {
+  var pr = (typeof p3Prospects !== 'undefined' && _p3ActiveProspect)
+    ? p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; }) : null;
+  showToast('Generating comprehensive advisory proposal for ' + (pr ? pr.name : 'prospect') + ' — Wealth + Estate + Business…', 'ai');
+};
+
+console.log('Phase 3 Domain Hub loaded — Insurance · Retirement · Investments · Advisory');
+
