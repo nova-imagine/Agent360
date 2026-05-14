@@ -27457,76 +27457,456 @@ function _closeFNAEditorBg(e) { if (e && e.target !== e.currentTarget) return; _
 
 function closeFNAAIPrefill() { var p = document.getElementById("fna-ai-prefill-panel"); if (p) p.style.display = "none"; }
 
-/* ================================================================
-   PHASE 2B — FNA Domain Sections: Retirement & Investment/Advisory
-   buildRetirementSection · buildInvestmentAdvisorySection
-   renderFNAEditorSection (cases 4-5) · renderFNAEditorNav (domain-aware)
-   openFNAEditor (domain pills) · renderFNADetail (domain badges + AI)
-   fnaWizNext · fnaToggleDomain · fnaWizCreate
-   ================================================================ */
+// ═══════════════════════════════════════════════════════════════════════
+// PHASE 2b — FNA DISCOVERY REBUILD: RETIREMENT + ADVISORY SECTIONS
+// Tabs 4 & 5, domain-aware nav, wizard JS, enhanced renderFNADetail
+// ═══════════════════════════════════════════════════════════════════════
 
-// ── WIZARD STATE ──────────────────────────────────────────────────
+// ── HELPERS ────────────────────────────────────────────────────────────
+
+function fnaRetField(label, val, style) {
+  return '<div class="fna-ed-field"' + (style ? ' style="' + style + '"' : '') + '>' +
+    '<div class="fna-ed-label">' + label + '</div>' +
+    '<div class="fna-ed-val-display">' + val + '</div>' +
+  '</div>';
+}
+
+function fnaRetDollarField(label, val, style) {
+  return '<div class="fna-ed-field"' + (style ? ' style="' + style + '"' : '') + '>' +
+    '<div class="fna-ed-label">' + label + '</div>' +
+    '<div class="fna-ed-val-display fna-ed-dollar">$' + (val || 0).toLocaleString() + '</div>' +
+  '</div>';
+}
+
+function fnaCheckBadge(label, checked) {
+  return '<div class="fna-check-badge' + (checked ? ' fna-check-badge-on' : ' fna-check-badge-off') + '">' +
+    '<i class="fas ' + (checked ? 'fa-check-circle' : 'fa-times-circle') + '"></i>' +
+    '<span>' + label + '</span>' +
+  '</div>';
+}
+
+// ── SECTION 4: RETIREMENT & ANNUITY ────────────────────────────────────
+function buildRetirementSection(fna) {
+  var r = fna.retirement || {};
+
+  // Income gap calculator
+  var targetMo   = r.targetMonthlyIncome || 0;
+  var ssMo       = r.socialSecurityEst   || 0;
+  var pensionMo  = r.pensionIncome        || 0;
+  var annuityMo  = r.existingAnnuityIncome|| 0;
+  var incomeFloor= r.incomeFloor          || 0;
+  var coveredMo  = ssMo + pensionMo + annuityMo;
+  var gapMo      = Math.max(0, targetMo - coveredMo);
+
+  // Rollover assets totals
+  var ro = r.rolloverAssets || {};
+  var roTotal = (ro.k401 || 0) + (ro.ira || 0) + (ro.roth || 0) + (ro.other || 0);
+
+  // Gap colour
+  var gapColor = gapMo > 3000 ? '#dc2626' : gapMo > 1500 ? '#d97706' : '#059669';
+  var gapPct   = targetMo > 0 ? Math.round((gapMo / targetMo) * 100) : 0;
+
+  // Annuity type badge
+  var annuityTypes = {
+    'none':          { label: 'None / Not Decided',          cls: 'fna-ann-none'  },
+    'immediate':     { label: 'Immediate Annuity (SPIA)',     cls: 'fna-ann-imm'   },
+    'deferred':      { label: 'Deferred Annuity',            cls: 'fna-ann-def'   },
+    'fixed-indexed': { label: 'Fixed Indexed Annuity (FIA)', cls: 'fna-ann-fia'   },
+    'variable':      { label: 'Variable Annuity (VA)',        cls: 'fna-ann-va'    }
+  };
+  var annType  = annuityTypes[r.annuityType] || annuityTypes['none'];
+
+  // AI note card class
+  var aiNoteUrgent = (r.annuityType === 'fixed-indexed' || gapMo > 3000) ? 'fna-ret-ai-urgent' : '';
+
+  return '<div class="fna-ed-section">' +
+
+    // ─ Retirement Goals ─────────────────────────────────────────────
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-bullseye"></i> Retirement Goals</div>' +
+      '<div class="fna-ed-row">' +
+        fnaRetField('Target Retirement Age', r.targetRetirementAge || '—') +
+        fnaRetDollarField('Target Monthly Income', r.targetMonthlyIncome) +
+        fnaRetField('Income Floor (minimum acceptable)', '$' + (incomeFloor || 0).toLocaleString()) +
+      '</div>' +
+      '<div class="fna-ed-row">' +
+        fnaRetField('Social Security Claiming Age', r.socialSecurityAge || '67') +
+        fnaRetDollarField('Est. SS Monthly Benefit', r.socialSecurityEst) +
+        fnaRetDollarField('Pension / DB Income', r.pensionIncome) +
+        fnaRetDollarField('Existing Annuity Income', r.existingAnnuityIncome) +
+      '</div>' +
+    '</div>' +
+
+    // ─ Rollover Assets ───────────────────────────────────────────────
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-piggy-bank"></i> Rollover &amp; Retirement Assets</div>' +
+      '<div class="fna-ed-row">' +
+        fnaRetDollarField('401(k) / 403(b)', ro.k401) +
+        fnaRetDollarField('Traditional IRA', ro.ira) +
+        fnaRetDollarField('Roth IRA', ro.roth) +
+        fnaRetDollarField('Other Qualified', ro.other) +
+      '</div>' +
+      '<div class="fna-ret-rollover-total">' +
+        '<span>Total Rollover Assets</span>' +
+        '<span class="fna-ret-rollover-val">$' + roTotal.toLocaleString() + '</span>' +
+      '</div>' +
+    '</div>' +
+
+    // ─ Annuity Selection ─────────────────────────────────────────────
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-umbrella"></i> Annuity Type &amp; Interest</div>' +
+      '<div class="fna-ed-row">' +
+        '<div class="fna-ed-field" style="flex:2">' +
+          '<div class="fna-ed-label">Client Annuity Interest</div>' +
+          '<div class="fna-ed-val-display">' + (r.annuityInterest || 'Not yet discussed') + '</div>' +
+        '</div>' +
+        '<div class="fna-ed-field">' +
+          '<div class="fna-ed-label">Annuity Type</div>' +
+          '<div class="fna-ann-type-badge ' + annType.cls + '">' + annType.label + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fna-ret-annuity-tiles">' +
+        ['immediate','deferred','fixed-indexed','variable','none'].map(function(key) {
+          var t = annuityTypes[key];
+          var active = r.annuityType === key;
+          return '<div class="fna-ann-tile' + (active ? ' fna-ann-tile-active' : '') + '" onclick="showToast(\'Annuity type selection — save in next sprint\',\'info\')">' +
+            '<div class="fna-ann-tile-lbl">' + t.label + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+
+    // ─ Income Gap Calculator ─────────────────────────────────────────
+    '<div class="fna-ed-card fna-ret-gap-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-calculator"></i> Retirement Income Gap Calculator</div>' +
+      '<div class="fna-ret-gap-grid">' +
+        '<div class="fna-ret-gap-row">' +
+          '<span class="fna-ret-gap-lbl">Target Monthly Income</span>' +
+          '<span class="fna-ret-gap-val">$' + targetMo.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div class="fna-ret-gap-row fna-ret-gap-src">' +
+          '<span class="fna-ret-gap-lbl"><i class="fas fa-minus-circle"></i> Social Security</span>' +
+          '<span class="fna-ret-gap-val">$' + ssMo.toLocaleString() + '</span>' +
+        '</div>' +
+        (pensionMo > 0 ? '<div class="fna-ret-gap-row fna-ret-gap-src">' +
+          '<span class="fna-ret-gap-lbl"><i class="fas fa-minus-circle"></i> Pension / DB</span>' +
+          '<span class="fna-ret-gap-val">$' + pensionMo.toLocaleString() + '</span>' +
+        '</div>' : '') +
+        (annuityMo > 0 ? '<div class="fna-ret-gap-row fna-ret-gap-src">' +
+          '<span class="fna-ret-gap-lbl"><i class="fas fa-minus-circle"></i> Existing Annuity</span>' +
+          '<span class="fna-ret-gap-val">$' + annuityMo.toLocaleString() + '</span>' +
+        '</div>' : '') +
+        '<div class="fna-ret-gap-divider"></div>' +
+        '<div class="fna-ret-gap-row fna-ret-gap-result">' +
+          '<span class="fna-ret-gap-lbl">Monthly Income Gap</span>' +
+          '<span class="fna-ret-gap-val" style="color:' + gapColor + ';font-size:20px;font-weight:700">$' + gapMo.toLocaleString() + '/mo</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fna-ret-gap-bar-wrap">' +
+        '<div class="fna-ret-gap-bar-track">' +
+          '<div class="fna-ret-gap-bar-covered" style="width:' + Math.round((coveredMo/targetMo)*100) + '%"></div>' +
+          '<div class="fna-ret-gap-bar-unfilled" style="width:' + gapPct + '%"></div>' +
+        '</div>' +
+        '<div class="fna-ret-gap-bar-legend">' +
+          '<span class="fna-ret-gap-leg-cov"><i class="fas fa-circle"></i> Covered: $' + coveredMo.toLocaleString() + '/mo</span>' +
+          '<span class="fna-ret-gap-leg-gap"><i class="fas fa-circle"></i> Gap: $' + gapMo.toLocaleString() + '/mo (' + gapPct + '%)</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // ─ AI Retirement Note ─────────────────────────────────────────────
+    '<div class="fna-ret-ai-card ' + aiNoteUrgent + '">' +
+      '<div class="fna-ret-ai-header"><i class="fas fa-robot"></i> AI Retirement Analysis</div>' +
+      '<div class="fna-ret-ai-body">' + (r.aiRetirementNote || 'No AI retirement note generated yet.') + '</div>' +
+      '<div class="fna-ret-ai-actions">' +
+        '<button class="fna-ret-ai-btn" onclick="showToast(\'Annuity illustration queued — opening Phase 3\',\'success\')"><i class="fas fa-chart-line"></i> Run Annuity Illustration</button>' +
+        '<button class="fna-ret-ai-btn fna-ret-ai-btn-sec" onclick="showToast(\'SS analysis added to client file\',\'info\')"><i class="fas fa-shield-alt"></i> Add SS Optimization Note</button>' +
+      '</div>' +
+    '</div>' +
+
+    fnaNavFooter(4, false) +
+  '</div>';
+}
+
+// ── SECTION 5: INVESTMENT & ADVISORY ───────────────────────────────────
+function buildInvestmentAdvisorySection(fna) {
+  var ia = fna.investmentAdvisory || {};
+  var assets = ia.investableAssets || {};
+  var estDocs = ia.estateDocuments || {};
+
+  // Risk tolerance colour
+  var riskColors = {
+    'Conservative':           '#059669',
+    'Moderate Conservative':  '#0891b2',
+    'Moderate':               '#6366f1',
+    'Growth':                 '#d97706',
+    'Aggressive':             '#dc2626'
+  };
+  var riskScore  = ia.riskScore || 0;
+  var riskColor  = riskColors[ia.riskTolerance] || '#6366f1';
+  var riskLevels = ['Conservative','Moderate Conservative','Moderate','Growth','Aggressive'];
+
+  // Total investable
+  var totalInvestable = (assets.taxable||0) + (assets.ira||0) + (assets.roth||0) + (assets.k401||0) + (assets.other||0);
+
+  // SMA/UMA candidacy thresholds
+  var repAdvisory  = totalInvestable >= 100000;
+  var smaCandidate = totalInvestable >= 250000;
+  var umaCandidate = totalInvestable >= 500000;
+
+  // Risk score bar width
+  var riskBarW = Math.min(100, Math.round(riskScore));
+
+  return '<div class="fna-ed-section">' +
+
+    // ─ A. INVESTMENT PROFILE ──────────────────────────────────────────
+    '<div class="fna-inv-section-header"><i class="fas fa-chart-pie"></i> A — Investment Profile</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-tachometer-alt"></i> Risk Tolerance</div>' +
+      '<div class="fna-inv-risk-levels">' +
+        riskLevels.map(function(lv) {
+          var active = ia.riskTolerance === lv;
+          return '<div class="fna-inv-risk-tile' + (active ? ' fna-inv-risk-tile-active' : '') + '" style="' + (active ? 'border-color:' + riskColor + ';background:' + riskColor + '15;' : '') + '" onclick="showToast(\'Risk selection — save in next sprint\',\'info\')">' +
+            '<div class="fna-inv-risk-lbl" style="' + (active ? 'color:' + riskColor : '') + '">' + lv + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      '<div class="fna-inv-score-row">' +
+        '<span class="fna-inv-score-lbl">Risk Score:</span>' +
+        '<div class="fna-inv-score-bar-wrap">' +
+          '<div class="fna-inv-score-bar"><div class="fna-inv-score-fill" style="width:' + riskBarW + '%;background:' + riskColor + '"></div></div>' +
+        '</div>' +
+        '<span class="fna-inv-score-val" style="color:' + riskColor + '">' + riskScore + ' / 100</span>' +
+      '</div>' +
+      '<div class="fna-ed-row" style="margin-top:12px">' +
+        fnaRetField('Time Horizon', ia.timeHorizon || '—') +
+        '<div class="fna-ed-field" style="flex:3"><div class="fna-ed-label">Investment Objective</div><div class="fna-ed-val-display">' + (ia.investmentObjective || '—') + '</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-coins"></i> Investable Assets by Account Type</div>' +
+      '<div class="fna-ed-row">' +
+        fnaRetDollarField('Taxable / Brokerage', assets.taxable) +
+        fnaRetDollarField('Traditional IRA', assets.ira) +
+        fnaRetDollarField('Roth IRA', assets.roth) +
+        fnaRetDollarField('401(k) / 403(b)', assets.k401) +
+        fnaRetDollarField('Other', assets.other) +
+      '</div>' +
+      '<div class="fna-inv-asset-total">' +
+        '<span>Total Investable Assets</span>' +
+        '<span class="fna-inv-asset-total-val">$' + totalInvestable.toLocaleString() + '</span>' +
+      '</div>' +
+      '<div class="fna-ed-field" style="margin-top:10px;flex:1">' +
+        '<div class="fna-ed-label">Current Holdings Summary</div>' +
+        '<div class="fna-ed-val-display fna-ed-note">' + (ia.currentHoldings || '—') + '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // ─ B. WEALTH MANAGEMENT (SMA / UMA / Rep Advisory) ───────────────
+    '<div class="fna-inv-section-header"><i class="fas fa-gem"></i> B — Wealth Management (Rep Advisory · SMA · UMA)</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-chart-line"></i> Advisory Candidacy</div>' +
+      '<div class="fna-inv-candidacy-row">' +
+        '<div class="fna-inv-cand-tile' + (repAdvisory ? ' fna-inv-cand-met' : ' fna-inv-cand-unmet') + '">' +
+          '<div class="fna-inv-cand-icon"><i class="fas ' + (repAdvisory ? 'fa-check-circle' : 'fa-times-circle') + '"></i></div>' +
+          '<div class="fna-inv-cand-lbl">Rep Advisory</div>' +
+          '<div class="fna-inv-cand-threshold">$100K minimum</div>' +
+          '<div class="fna-inv-cand-val">$' + (assets.taxable||0).toLocaleString() + ' liquid</div>' +
+        '</div>' +
+        '<div class="fna-inv-cand-tile' + (smaCandidate ? ' fna-inv-cand-met' : ' fna-inv-cand-unmet') + '">' +
+          '<div class="fna-inv-cand-icon"><i class="fas ' + (smaCandidate ? 'fa-check-circle' : 'fa-times-circle') + '"></i></div>' +
+          '<div class="fna-inv-cand-lbl">SMA (Separately Managed)</div>' +
+          '<div class="fna-inv-cand-threshold">$250K minimum</div>' +
+          '<div class="fna-inv-cand-val">$' + totalInvestable.toLocaleString() + ' total</div>' +
+        '</div>' +
+        '<div class="fna-inv-cand-tile' + (umaCandidate ? ' fna-inv-cand-met' : ' fna-inv-cand-unmet') + '">' +
+          '<div class="fna-inv-cand-icon"><i class="fas ' + (umaCandidate ? 'fa-check-circle' : 'fa-times-circle') + '"></i></div>' +
+          '<div class="fna-inv-cand-lbl">UMA (Unified Managed)</div>' +
+          '<div class="fna-inv-cand-threshold">$500K minimum</div>' +
+          '<div class="fna-inv-cand-val">$' + totalInvestable.toLocaleString() + ' total</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fna-ed-field" style="margin-top:10px">' +
+        '<div class="fna-ed-label">Advisory Note</div>' +
+        '<div class="fna-ed-val-display fna-ed-note">' + (ia.smaUmaNote || '—') + '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // AI Investment note
+    '<div class="fna-inv-ai-card">' +
+      '<div class="fna-inv-ai-header"><i class="fas fa-robot"></i> AI Investment Analysis</div>' +
+      '<div class="fna-inv-ai-body">' + (ia.aiInvestmentNote || 'No AI investment note generated yet.') + '</div>' +
+    '</div>' +
+
+    // ─ C. ESTATE PLANNING ─────────────────────────────────────────────
+    '<div class="fna-inv-section-header"><i class="fas fa-scroll"></i> C — Estate Planning</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-file-signature"></i> Estate Documents Status</div>' +
+      '<div class="fna-inv-estate-checks">' +
+        fnaCheckBadge('Will / Testament', estDocs.will) +
+        fnaCheckBadge('Revocable Living Trust', estDocs.trust) +
+        fnaCheckBadge('Power of Attorney', estDocs.poa) +
+        fnaCheckBadge('Healthcare Directive', estDocs.healthcareDirective) +
+      '</div>' +
+      '<div class="fna-inv-ai-card" style="margin-top:12px">' +
+        '<div class="fna-inv-ai-header"><i class="fas fa-robot"></i> AI Estate Planning Note</div>' +
+        '<div class="fna-inv-ai-body">' + (ia.aiAdvisoryNote || 'No estate planning note generated yet.') + '</div>' +
+      '</div>' +
+      '<button class="fna-ed-add-btn" style="margin-top:10px" onclick="showToast(\'Estate planning referral queued\',\'success\')"><i class="fas fa-external-link-alt"></i> Refer to Estate Planning Specialist</button>' +
+    '</div>' +
+
+    // ─ D. SMALL BUSINESS ──────────────────────────────────────────────
+    '<div class="fna-inv-section-header"><i class="fas fa-store"></i> D — Small Business</div>' +
+
+    '<div class="fna-ed-card">' +
+      '<div class="fna-ed-card-title"><i class="fas fa-briefcase"></i> Business Owner Profile</div>' +
+      '<div class="fna-ed-row">' +
+        fnaFieldYN('Business Owner?', ia.businessOwner || false, 'biz-owner-toggle') +
+      '</div>' +
+      (ia.businessOwner ? (
+        '<div class="fna-inv-biz-panel">' +
+          '<div class="fna-ed-row">' +
+            fnaRetField('Business Type', ia.businessType || '—', 'flex:2') +
+            fnaRetField('Business Est. Valuation', ia.businessValuation ? '$' + ia.businessValuation.toLocaleString() : '—') +
+          '</div>' +
+          '<div class="fna-inv-estate-checks">' +
+            fnaCheckBadge('Buy-Sell Agreement', ia.buySellAgreement || false) +
+            fnaCheckBadge('Key-Person Insurance', ia.keyPersonInsurance || false) +
+            fnaCheckBadge('Succession Plan', ia.successionPlan || false) +
+          '</div>' +
+          (ia.businessNotes ? '<div class="fna-ed-field" style="margin-top:10px;flex:1"><div class="fna-ed-label">Business Notes</div><div class="fna-ed-val-display fna-ed-note">' + ia.businessNotes + '</div></div>' : '') +
+        '</div>'
+      ) : (
+        '<div class="fna-inv-biz-na"><i class="fas fa-info-circle"></i> Client is not a business owner — Business Planning section not applicable.</div>'
+      )) +
+    '</div>' +
+
+    fnaNavFooter(5, true) +
+  '</div>';
+}
+
+// ── UPDATE renderFNAEditorSection — add cases 4 & 5 ───────────────────
+// Redefine the entire function with all 6 cases
+renderFNAEditorSection = function() {
+  var container = document.getElementById('fna-ed-body');
+  if (!container) return;
+  var fna = fnaFullData[_fnaEditorId];
+  if (!fna) return;
+
+  switch(_fnaEditorSection) {
+    case 0: container.innerHTML = buildPersonalSection(fna);           break;
+    case 1: container.innerHTML = buildHealthSection(fna);             break;
+    case 2: container.innerHTML = buildFinancialSection(fna);          break;
+    case 3: container.innerHTML = buildNeedsSection(fna);              break;
+    case 4: container.innerHTML = buildRetirementSection(fna);         break;
+    case 5: container.innerHTML = buildInvestmentAdvisorySection(fna); break;
+    default: container.innerHTML = buildPersonalSection(fna);
+  }
+};
+
+// ── UPDATE renderFNAEditorNav — domain-aware tab visibility ────────────
+// Redefine with visibility logic and domain pills
+renderFNAEditorNav = function() {
+  var fna = fnaFullData[_fnaEditorId];
+  if (!fna) return;
+  var domains = fna.domains || [];
+
+  _fnaEditorSectionLabels.forEach(function(sec, i) {
+    var btn = document.getElementById('fna-ed-nav-' + i);
+    if (!btn) return;
+
+    // Domain-aware show/hide
+    var shouldShow = true;
+    if (sec.domains !== null) {
+      // Tab is only visible if at least one of sec.domains is in fna.domains[]
+      shouldShow = sec.domains.some(function(d) { return domains.indexOf(d) !== -1; });
+    }
+    btn.style.display = shouldShow ? '' : 'none';
+    btn.classList.toggle('active', i === _fnaEditorSection);
+  });
+
+  // Update header subtitle
+  var sub = document.getElementById('fna-ed-section-sub');
+  if (sub) sub.textContent = _fnaEditorSectionLabels[_fnaEditorSection].label + ' \u2014 ' + fna.client;
+
+  // Render domain pills into #fna-ed-domain-pills
+  _renderFNAEditorDomainPills(fna);
+};
+
+// ── DOMAIN PILLS in editor header ─────────────────────────────────────
+function _renderFNAEditorDomainPills(fna) {
+  var container = document.getElementById('fna-ed-domain-pills');
+  if (!container) return;
+  var domains = fna.domains || [];
+  var pillDefs = {
+    insurance:  { label: 'Insurance',   icon: 'fa-shield-alt',     cls: 'ins' },
+    retirement: { label: 'Retirement',  icon: 'fa-umbrella-beach', cls: 'ret' },
+    advisory:   { label: 'Advisory',    icon: 'fa-handshake',      cls: 'adv' }
+  };
+  container.innerHTML = domains.map(function(d) {
+    var def = pillDefs[d];
+    if (!def) return '';
+    return '<span class="fna-ed-domain-pill fna-ed-domain-pill-' + def.cls + '">' +
+      '<i class="fas ' + def.icon + '"></i> ' + def.label +
+    '</span>';
+  }).join('');
+}
+
+// ── PATCH openFNAEditor to reset to first visible tab ─────────────────
+(function() {
+  var _origOpenFNAEditor = openFNAEditor;
+  openFNAEditor = function(id) {
+    var fna = fnaFullData[id] || fnaFullData['FNA-001'];
+    _fnaEditorId = fna.id;
+    _fnaEditorSection = 0; // always start at Personal (always visible)
+    _fnaEditorDirty = false;
+    var overlay = document.getElementById('fna-editor-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    renderFNAEditorSection();
+    renderFNAEditorNav();
+  };
+})();
+
+// ── WIZARD STATE ───────────────────────────────────────────────────────
 var _fnaWizSelectedDomains = [];
+var _fnaWizCurrentStep     = 1;
 
-// ── WIZARD NAV ───────────────────────────────────────────────────
+// ── fnaWizNext(step) — advance/retreat wizard panels ──────────────────
 function fnaWizNext(step) {
-  // step = the panel we are LEAVING (0-indexed), moving to step+1
-  // Validate step 0: need a client selection or name
-  if (step === 0) {
-    var sel = document.getElementById('fna-wiz-client-select');
-    var manual = document.getElementById('fna-wiz-manual-name');
-    var hasClient = (sel && sel.value) || (manual && manual.value.trim());
-    if (!hasClient) {
-      showToast('Please select or enter a client name to continue.', 'warn');
-      return;
-    }
-  }
-  // Validate step 1: at least one domain must be selected
-  if (step === 1) {
-    if (!_fnaWizSelectedDomains.length) {
-      showToast('Please select at least one domain (Insurance, Retirement, or Advisory).', 'warn');
-      return;
-    }
+  // Validate step 2: at least one domain must be selected
+  if (step === 3 && _fnaWizSelectedDomains.length === 0) {
+    showToast('Please select at least one planning domain to continue.', 'warn');
+    return;
   }
 
-  // Hide all panels
-  for (var i = 0; i < 3; i++) {
-    var p = document.getElementById('fna-wiz-panel-' + i);
-    if (p) p.style.display = 'none';
-  }
-  // Show next panel
-  var next = document.getElementById('fna-wiz-panel-' + (step + 1));
-  if (next) next.style.display = 'block';
+  _fnaWizCurrentStep = step;
 
-  // Update step indicators
-  var steps = document.querySelectorAll('.fna-wiz-step');
-  steps.forEach(function(s, idx) {
-    s.classList.remove('active', 'done');
-    if (idx < step + 1) s.classList.add('done');
-    else if (idx === step + 1) s.classList.add('active');
+  // Show/hide panels
+  for (var i = 1; i <= 3; i++) {
+    var panel = document.getElementById('fna-wiz-panel-' + i);
+    if (panel) panel.style.display = i === step ? 'flex' : 'none';
+  }
+
+  // Update step indicator bubbles
+  var stepEls = document.querySelectorAll('.fna-wiz-step');
+  stepEls.forEach(function(el, idx) {
+    var n = idx + 1;
+    el.classList.remove('fna-wiz-step-done', 'fna-wiz-step-active');
+    if (n < step)      el.classList.add('fna-wiz-step-done');
+    else if (n === step) el.classList.add('fna-wiz-step-active');
   });
 }
 
-function fnaWizBack(step) {
-  // step = the panel we are LEAVING, moving to step-1
-  for (var i = 0; i < 3; i++) {
-    var p = document.getElementById('fna-wiz-panel-' + i);
-    if (p) p.style.display = 'none';
-  }
-  var prev = document.getElementById('fna-wiz-panel-' + (step - 1));
-  if (prev) prev.style.display = 'block';
-
-  var steps = document.querySelectorAll('.fna-wiz-step');
-  steps.forEach(function(s, idx) {
-    s.classList.remove('active', 'done');
-    if (idx < step - 1) s.classList.add('done');
-    else if (idx === step - 1) s.classList.add('active');
-  });
-}
-
+// ── fnaToggleDomain(domain, el) — card toggle + state tracking ────────
 function fnaToggleDomain(domain, el) {
   var card = el.closest ? el.closest('.fna-domain-card') : el.parentElement;
   if (!card) card = el;
+
   var idx = _fnaWizSelectedDomains.indexOf(domain);
   if (idx === -1) {
     _fnaWizSelectedDomains.push(domain);
@@ -27535,506 +27915,116 @@ function fnaToggleDomain(domain, el) {
     _fnaWizSelectedDomains.splice(idx, 1);
     card.classList.remove('selected');
   }
-  // Update the none-row visibility
+
+  // Update none-row visibility
   var noneRow = document.getElementById('fna-dom-none-row');
-  if (noneRow) noneRow.style.display = _fnaWizSelectedDomains.length ? 'none' : 'flex';
+  if (noneRow) {
+    noneRow.style.display = _fnaWizSelectedDomains.length === 0 ? 'flex' : 'none';
+  }
 }
 
+// ── fnaWizCreate() — finalize wizard and open FNA editor ───────────────
 function fnaWizCreate() {
-  // Collect inputs
-  var clientSel   = document.getElementById('fna-wiz-client-select');
-  var manualName  = document.getElementById('fna-wiz-manual-name');
-  var manualAge   = document.getElementById('fna-wiz-manual-age');
-  var lifeEvent   = document.getElementById('fna-wiz-life-event');
-  var meetDate    = document.getElementById('fna-wiz-meet-date');
-  var meetType    = document.getElementById('fna-wiz-meet-type');
-  var meetLoc     = document.getElementById('fna-wiz-meet-loc');
-  var notes       = document.getElementById('fna-wiz-notes');
+  // Gather Step 1 inputs
+  var clientSel  = document.getElementById('fna-wiz-client-select');
+  var nameEl     = document.getElementById('fna-wiz-name');
+  var ageEl      = document.getElementById('fna-wiz-age');
+  var lifeEvent  = document.getElementById('fna-wiz-life-event');
+  var meetDate   = document.getElementById('fna-wiz-meet-date');
+  var meetType   = document.getElementById('fna-wiz-meet-type');
+  var meetLoc    = document.getElementById('fna-wiz-meet-loc');
+  var notesEl    = document.getElementById('fna-wiz-notes');
 
-  var clientName  = (clientSel && clientSel.value) ? clientSel.options[clientSel.selectedIndex].text : (manualName ? manualName.value.trim() : 'New Client');
-  var domains     = _fnaWizSelectedDomains.length ? _fnaWizSelectedDomains.slice() : ['insurance'];
+  var clientName = (clientSel && clientSel.value && clientSel.value !== '__manual__')
+    ? clientSel.options[clientSel.selectedIndex].text
+    : (nameEl ? nameEl.value.trim() : '');
 
-  showToast('FNA created for ' + clientName + ' — opening fact-find editor…', 'success');
+  if (!clientName) {
+    showToast('Please select or enter a client name.', 'warn');
+    return;
+  }
+  if (_fnaWizSelectedDomains.length === 0) {
+    showToast('Please go back and select at least one planning domain.', 'warn');
+    return;
+  }
 
-  // Close the new FNA overlay
-  var overlay = document.getElementById('new-fna-overlay');
-  if (overlay) overlay.style.display = 'none';
+  // Close wizard overlay
+  var wizOverlay = document.getElementById('fna-new-overlay');
+  if (wizOverlay) wizOverlay.style.display = 'none';
 
-  // Reset wizard state
+  // Reset wizard state for next use
   _fnaWizSelectedDomains = [];
-  for (var i = 0; i < 3; i++) {
-    var p = document.getElementById('fna-wiz-panel-' + i);
-    if (p) p.style.display = i === 0 ? 'block' : 'none';
-  }
-  document.querySelectorAll('.fna-wiz-step').forEach(function(s, idx) {
-    s.classList.remove('active', 'done');
-    if (idx === 0) s.classList.add('active');
+  _fnaWizCurrentStep = 1;
+
+  showToast('New FNA created for ' + clientName + ' — opening editor…', 'success');
+
+  // Open editor using FNA-001 as template (since this is demo data)
+  setTimeout(function() {
+    openFNAEditor('FNA-001');
+  }, 800);
+}
+
+// ── openFNAWizard — launch wizard overlay ─────────────────────────────
+function openFNAWizard() {
+  _fnaWizSelectedDomains = [];
+  _fnaWizCurrentStep = 1;
+
+  var overlay = document.getElementById('fna-new-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+
+  // Reset to step 1
+  fnaWizNext(1);
+
+  // Clear domain card selections
+  document.querySelectorAll('.fna-domain-card').forEach(function(c) {
+    c.classList.remove('selected');
   });
-  document.querySelectorAll('.fna-domain-card').forEach(function(c) { c.classList.remove('selected'); });
 
-  // Open the first FNA record as a stand-in (in production, would create a new record)
-  setTimeout(function() { openFNAEditor('FNA-001'); }, 400);
+  // Reset none-row
+  var nr = document.getElementById('fna-dom-none-row');
+  if (nr) nr.style.display = 'flex';
 }
 
-// ── SECTION 4: RETIREMENT & ANNUITY ──────────────────────────────
-function buildRetirementSection(fna) {
-  var r = fna.retirement;
-  if (!r) {
-    return '<div class="fna-ed-section"><div class="fna-ed-card"><div class="fna-ed-card-title"><i class="fas fa-umbrella-beach"></i> Retirement & Annuity</div><p style="color:#6b7280;font-size:13px">Retirement data not available for this FNA record.</p></div>' + fnaNavFooter(4, true) + '</div>';
-  }
-
-  // Income gap calculation
-  var targetMonthly  = r.targetMonthlyIncome || 0;
-  var ssMonthly      = r.socialSecurityEst   || 0;
-  var pensionMonthly = r.pensionIncome        || 0;
-  var annuityMonthly = r.existingAnnuityIncome|| 0;
-  var incomeFloor    = r.incomeFloor          || 0;
-  var totalProjected = ssMonthly + pensionMonthly + annuityMonthly;
-  var incomeGap      = Math.max(0, targetMonthly - totalProjected);
-
-  var gapClass = incomeGap > 3000 ? 'fna-ret-gap-high' : incomeGap > 1000 ? 'fna-ret-gap-med' : 'fna-ret-gap-low';
-  var gapIcon  = incomeGap > 3000 ? 'fa-exclamation-circle' : incomeGap > 1000 ? 'fa-exclamation-triangle' : 'fa-check-circle';
-
-  // Rollover assets table
-  var ra = r.rolloverAssets || {};
-  var totalRollover = (ra.k401||0) + (ra.ira||0) + (ra.roth||0) + (ra.other||0);
-
-  var rolloverRows = [
-    { label: '401(k) / 403(b)',   val: ra.k401  || 0, icon: 'fa-building' },
-    { label: 'Traditional IRA',   val: ra.ira   || 0, icon: 'fa-university' },
-    { label: 'Roth IRA',          val: ra.roth  || 0, icon: 'fa-sun' },
-    { label: 'Other (SEP/SIMPLE/Pension Lump Sum)', val: ra.other || 0, icon: 'fa-coins' }
-  ].filter(function(rr) { return rr.val > 0; });
-
-  var rolloverHtml = rolloverRows.length
-    ? rolloverRows.map(function(rr) {
-        var pct = totalRollover > 0 ? Math.round(rr.val / totalRollover * 100) : 0;
-        return '<div class="fna-ret-rollover-row">' +
-          '<div class="fna-ret-rollover-lbl"><i class="fas ' + rr.icon + '"></i> ' + rr.label + '</div>' +
-          '<div class="fna-ret-rollover-bar-wrap">' +
-            '<div class="fna-ret-rollover-bar" style="width:' + pct + '%"></div>' +
-          '</div>' +
-          '<div class="fna-ret-rollover-val">$' + rr.val.toLocaleString() + '</div>' +
-        '</div>';
-      }).join('') +
-      '<div class="fna-ret-rollover-total"><span>Total Rollover Assets</span><span>$' + totalRollover.toLocaleString() + '</span></div>'
-    : '<div class="fna-ret-empty">No rollover assets on file.</div>';
-
-  // Annuity type selector
-  var annuityTypes = [
-    { val: 'none',         label: 'None / Not Interested',    icon: 'fa-times-circle'   },
-    { val: 'immediate',    label: 'Immediate (SPIA)',          icon: 'fa-bolt'           },
-    { val: 'deferred',     label: 'Deferred Annuity',         icon: 'fa-clock'          },
-    { val: 'fixed-indexed',label: 'Fixed Indexed (FIA)',       icon: 'fa-shield-alt'     },
-    { val: 'variable',     label: 'Variable Annuity (VA)',     icon: 'fa-chart-line'     }
-  ];
-
-  var annuityHtml = '<div class="fna-ret-annuity-grid">' +
-    annuityTypes.map(function(at) {
-      var isActive = r.annuityType === at.val;
-      return '<div class="fna-ret-annuity-chip' + (isActive ? ' active' : '') + '" onclick="fnaSelectAnnuityType(\'' + at.val + '\')" data-val="' + at.val + '">' +
-        '<i class="fas ' + at.icon + '"></i> ' + at.label +
-      '</div>';
-    }).join('') +
-  '</div>';
-
-  // AI retirement note card
-  var aiNoteHtml = r.aiRetirementNote
-    ? '<div class="fna-ret-ai-card">' +
-        '<div class="fna-ret-ai-icon"><i class="fas fa-robot"></i></div>' +
-        '<div class="fna-ret-ai-body">' +
-          '<div class="fna-ret-ai-title">AI Retirement Analysis</div>' +
-          '<div class="fna-ret-ai-text">' + r.aiRetirementNote + '</div>' +
-        '</div>' +
-      '</div>'
-    : '';
-
-  return '<div class="fna-ed-section">' +
-
-    // Income gap banner
-    '<div class="fna-ret-gap-banner ' + gapClass + '">' +
-      '<div class="fna-ret-gap-icon"><i class="fas ' + gapIcon + '"></i></div>' +
-      '<div class="fna-ret-gap-body">' +
-        '<div class="fna-ret-gap-title">Monthly Retirement Income Gap</div>' +
-        '<div class="fna-ret-gap-amount">$' + incomeGap.toLocaleString() + ' / month</div>' +
-        '<div class="fna-ret-gap-sub">Target $' + targetMonthly.toLocaleString() + '/mo · Projected $' + totalProjected.toLocaleString() + '/mo (SS + Pension + Annuity)</div>' +
-      '</div>' +
-    '</div>' +
-
-    // Retirement goals
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-flag"></i> Retirement Goals</div>' +
-      '<div class="fna-ed-row">' +
-        fnaField('Target Retirement Age', r.targetRetirementAge || '—', 'readonly') +
-        fnaFieldDollar('Monthly Income Target', targetMonthly) +
-        fnaFieldDollar('Income Floor (Minimum Needed)', incomeFloor) +
-      '</div>' +
-    '</div>' +
-
-    // Social Security & Pension
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-landmark"></i> Social Security & Pension</div>' +
-      '<div class="fna-ed-row">' +
-        fnaField('SS Claiming Age', r.socialSecurityAge || 67, 'readonly') +
-        fnaFieldDollar('SS Estimated Benefit / mo', ssMonthly) +
-        fnaFieldDollar('Pension Income / mo', pensionMonthly) +
-      '</div>' +
-      (fna.id === 'FNA-002' || fna.id === 'FNA-003'
-        ? '<div class="fna-ret-ss-note"><i class="fas fa-info-circle"></i> SS estimate reflects Full Retirement Age (FRA). Claiming early reduces benefit by up to 30%. Consider delay strategy in proposal.</div>'
-        : '') +
-    '</div>' +
-
-    // Rollover assets
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-piggy-bank"></i> Rollover Assets</div>' +
-      rolloverHtml +
-    '</div>' +
-
-    // Existing annuity income (if any)
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-coins"></i> Existing Annuity Income</div>' +
-      '<div class="fna-ed-row">' +
-        fnaFieldDollar('Current Annuity Income / mo', annuityMonthly) +
-        fnaField('Annuity Interest / Notes', r.annuityInterest || 'None on file', 'text') +
-      '</div>' +
-    '</div>' +
-
-    // Annuity type selector
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-sliders-h"></i> Annuity Product Interest</div>' +
-      '<div class="fna-ed-label" style="margin-bottom:8px">Select the annuity type that best fits client goals:</div>' +
-      annuityHtml +
-    '</div>' +
-
-    // Income gap calculator (visual)
-    '<div class="fna-ed-card fna-ret-calc-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-calculator"></i> Income Gap Calculator</div>' +
-      '<div class="fna-ret-calc-rows">' +
-        '<div class="fna-ret-calc-row"><span class="fna-ret-calc-lbl"><i class="fas fa-flag"></i> Monthly Income Target</span><span class="fna-ret-calc-val">$' + targetMonthly.toLocaleString() + '</span></div>' +
-        '<div class="fna-ret-calc-row fna-ret-calc-deduct"><span class="fna-ret-calc-lbl"><i class="fas fa-minus-circle"></i> Social Security Estimate</span><span class="fna-ret-calc-val">&minus; $' + ssMonthly.toLocaleString() + '</span></div>' +
-        '<div class="fna-ret-calc-row fna-ret-calc-deduct"><span class="fna-ret-calc-lbl"><i class="fas fa-minus-circle"></i> Pension Income</span><span class="fna-ret-calc-val">&minus; $' + pensionMonthly.toLocaleString() + '</span></div>' +
-        '<div class="fna-ret-calc-row fna-ret-calc-deduct"><span class="fna-ret-calc-lbl"><i class="fas fa-minus-circle"></i> Existing Annuity Income</span><span class="fna-ret-calc-val">&minus; $' + annuityMonthly.toLocaleString() + '</span></div>' +
-        '<div class="fna-ret-calc-row fna-ret-calc-total"><span class="fna-ret-calc-lbl"><i class="fas fa-equals"></i> Monthly Gap (Annuity Target)</span><span class="fna-ret-calc-val fna-ret-calc-gap">$' + incomeGap.toLocaleString() + '</span></div>' +
-      '</div>' +
-      '<div class="fna-ret-calc-cta">' +
-        '<button class="fna-ed-add-btn" onclick="showToast(\'Annuity illustration queued for ' + (r.annuityType !== 'none' && r.annuityType ? r.annuityType.charAt(0).toUpperCase() + r.annuityType.slice(1) : 'deferred') + ' — check Illustration Hub\',\'info\')"><i class="fas fa-file-chart-line"></i> Run Annuity Illustration</button>' +
-      '</div>' +
-    '</div>' +
-
-    aiNoteHtml +
-
-    fnaNavFooter(4, !(_fnaEditorSectionLabels[5] && fna.domains && (fna.domains.indexOf('investments') !== -1 || fna.domains.indexOf('advisory') !== -1))) +
-  '</div>';
+function closeFNAWizard() {
+  var overlay = document.getElementById('fna-new-overlay');
+  if (overlay) overlay.style.display = 'none';
 }
 
-function fnaSelectAnnuityType(val) {
-  document.querySelectorAll('.fna-ret-annuity-chip').forEach(function(c) {
-    c.classList.toggle('active', c.getAttribute('data-val') === val);
-  });
-  showToast('Annuity type set to: ' + val, 'info');
+function closeFNAWizardBg(e) {
+  if (e && e.target !== e.currentTarget) return;
+  closeFNAWizard();
 }
 
-// ── SECTION 5: INVESTMENT & ADVISORY ─────────────────────────────
-function buildInvestmentAdvisorySection(fna) {
-  var ia = fna.investmentAdvisory;
-  if (!ia) {
-    return '<div class="fna-ed-section"><div class="fna-ed-card"><div class="fna-ed-card-title"><i class="fas fa-chart-pie"></i> Investment & Advisory</div><p style="color:#6b7280;font-size:13px">Investment/Advisory data not available for this FNA record.</p></div>' + fnaNavFooter(5, true) + '</div>';
-  }
+// ── PATCH: override any existing openNewFNAForm / openFNAModal ─────────
+function openNewFNAForm() { openFNAWizard(); }
 
-  // ── Risk tolerance selector
-  var riskLevels = [
-    { val: 'Conservative',          label: 'Conservative',          color: '#059669', score: '0–25'  },
-    { val: 'Moderate Conservative', label: 'Mod. Conservative',     color: '#0891b2', score: '26–45' },
-    { val: 'Moderate',              label: 'Moderate',              color: '#d97706', score: '46–65' },
-    { val: 'Growth',                label: 'Growth',                color: '#7c3aed', score: '66–80' },
-    { val: 'Aggressive',            label: 'Aggressive',            color: '#dc2626', score: '81–100'}
-  ];
-  var currentRisk = ia.riskTolerance || 'Moderate';
-  var riskScore   = ia.riskScore || 55;
-  var riskPct     = Math.round(riskScore);
-
-  var riskHtml = '<div class="fna-inv-risk-bar-wrap">' +
-    '<div class="fna-inv-risk-bar">' +
-      '<div class="fna-inv-risk-fill" style="width:' + riskPct + '%"></div>' +
-      '<div class="fna-inv-risk-thumb" style="left:' + riskPct + '%"></div>' +
-    '</div>' +
-    '<div class="fna-inv-risk-labels">' +
-      riskLevels.map(function(rl) {
-        var isActive = rl.val === currentRisk;
-        return '<div class="fna-inv-risk-chip' + (isActive ? ' active' : '') + '" style="' + (isActive ? 'border-color:' + rl.color + ';color:' + rl.color : '') + '">' + rl.label + '<br><span style="font-size:9px;opacity:.7">' + rl.score + '</span></div>';
-      }).join('') +
-    '</div>' +
-  '</div>' +
-  '<div class="fna-inv-risk-score-row"><span>Composite Risk Score:</span><strong>' + riskScore + ' / 100 — ' + currentRisk + '</strong></div>';
-
-  // ── Investable assets by account type
-  var inv = ia.investableAssets || {};
-  var totalInv = (inv.taxable||0) + (inv.ira||0) + (inv.roth||0) + (inv.k401||0) + (inv.other||0);
-
-  var assetRows = [
-    { label: 'Taxable Brokerage', val: inv.taxable||0, icon: 'fa-chart-line', color: '#0891b2' },
-    { label: 'Traditional IRA',   val: inv.ira||0,     icon: 'fa-university', color: '#7c3aed' },
-    { label: 'Roth IRA',          val: inv.roth||0,    icon: 'fa-sun',        color: '#059669' },
-    { label: '401(k) / 403(b)',   val: inv.k401||0,    icon: 'fa-building',   color: '#003087' },
-    { label: 'Other Assets',      val: inv.other||0,   icon: 'fa-coins',      color: '#d97706' }
-  ].filter(function(a) { return a.val > 0; });
-
-  var assetHtml = assetRows.map(function(a) {
-    var pct = totalInv > 0 ? Math.round(a.val / totalInv * 100) : 0;
-    return '<div class="fna-inv-asset-row">' +
-      '<div class="fna-inv-asset-lbl"><i class="fas ' + a.icon + '" style="color:' + a.color + '"></i> ' + a.label + '</div>' +
-      '<div class="fna-inv-asset-bar-wrap"><div class="fna-inv-asset-bar-fill" style="width:' + pct + '%;background:' + a.color + '"></div></div>' +
-      '<div class="fna-inv-asset-val">$' + a.val.toLocaleString() + '<span class="fna-inv-asset-pct"> ' + pct + '%</span></div>' +
-    '</div>';
-  }).join('') +
-  '<div class="fna-inv-asset-total"><span>Total Investable Assets</span><span>$' + totalInv.toLocaleString() + '</span></div>';
-
-  // ── SMA / UMA candidacy indicator
-  var smaThreshold  = 250000;
-  var repThreshold  = 100000;
-  var smaCandidate  = ia.smaUmaCandidate || totalInv >= smaThreshold;
-  var repCandidate  = totalInv >= repThreshold;
-  var smaBarPct     = Math.min(100, Math.round(totalInv / smaThreshold * 100));
-
-  var wealthMgmtHtml =
-    '<div class="fna-adv-threshold-block">' +
-      '<div class="fna-adv-thresh-row">' +
-        '<div class="fna-adv-thresh-lbl">Rep Advisory Eligibility (≥ $100K)</div>' +
-        '<div class="fna-adv-thresh-status ' + (repCandidate ? 'fna-adv-thresh-yes' : 'fna-adv-thresh-no') + '">' +
-          '<i class="fas ' + (repCandidate ? 'fa-check-circle' : 'fa-times-circle') + '"></i> ' +
-          (repCandidate ? 'Eligible — Recommend Now' : 'Below threshold ($' + Math.max(0, repThreshold - totalInv).toLocaleString() + ' to go)') +
-        '</div>' +
-      '</div>' +
-      '<div class="fna-adv-thresh-row">' +
-        '<div class="fna-adv-thresh-lbl">SMA / UMA Candidacy (≥ $250K investable)</div>' +
-        '<div class="fna-adv-thresh-bar-wrap">' +
-          '<div class="fna-adv-thresh-bar-fill" style="width:' + smaBarPct + '%"></div>' +
-          '<div class="fna-adv-thresh-bar-lbl">' + smaBarPct + '% of $250K threshold</div>' +
-        '</div>' +
-        '<div class="fna-adv-thresh-status ' + (smaCandidate ? 'fna-adv-thresh-yes' : 'fna-adv-thresh-no') + '">' +
-          '<i class="fas ' + (smaCandidate ? 'fa-check-circle' : 'fa-clock') + '"></i> ' +
-          (smaCandidate ? 'SMA/UMA Candidate' : 'Not yet — ' + (smaThreshold - totalInv).toLocaleString() + ' to SMA threshold') +
-        '</div>' +
-      '</div>' +
-      (ia.smaUmaNote ? '<div class="fna-adv-thresh-note"><i class="fas fa-robot"></i> ' + ia.smaUmaNote + '</div>' : '') +
-    '</div>';
-
-  // ── Estate Planning checklist
-  var estate = ia.estateDocuments || {};
-  var estateItems = [
-    { key: 'will',               label: 'Will / Testament',          icon: 'fa-scroll' },
-    { key: 'trust',              label: 'Trust (Revocable / Irrev.)', icon: 'fa-balance-scale' },
-    { key: 'poa',                label: 'Power of Attorney',         icon: 'fa-handshake' },
-    { key: 'healthcareDirective',label: 'Healthcare Directive / Living Will', icon: 'fa-heartbeat' }
-  ];
-
-  var estateHtml = '<div class="fna-adv-estate-checklist">' +
-    estateItems.map(function(item) {
-      var done = !!estate[item.key];
-      return '<div class="fna-adv-estate-item ' + (done ? 'done' : 'missing') + '">' +
-        '<i class="fas ' + (done ? 'fa-check-circle' : 'fa-times-circle') + '"></i>' +
-        '<div class="fna-adv-estate-lbl">' +
-          '<span>' + item.label + '</span>' +
-          '<span class="fna-adv-estate-status">' + (done ? 'On file' : 'Not established') + '</span>' +
-        '</div>' +
-      '</div>';
-    }).join('') +
-  '</div>';
-
-  // ── Small Business section
-  var isBizOwner = !!ia.businessOwner;
-  var bizHtml = isBizOwner
-    ? '<div class="fna-adv-biz-grid">' +
-        fnaField('Business Type', ia.businessType || '—', 'text') +
-        fnaFieldDollar('Business Valuation', ia.businessValuation || 0) +
-        fnaFieldYN('Buy-Sell Agreement in Place', !!ia.buySellAgreement, 'biz-buysell') +
-        fnaFieldYN('Key-Person Insurance', !!ia.keyPersonInsurance, 'biz-keyperson') +
-      '</div>' +
-      '<div class="fna-adv-biz-note"><i class="fas fa-info-circle"></i> Succession planning analysis available — schedule a Business Planning Review.</div>'
-    : '<div class="fna-adv-biz-notowner"><i class="fas fa-info-circle"></i> Client is not a business owner. If situation changes, re-open Advisory section to activate Small Business support services.</div>';
-
-  // ── AI notes
-  var aiInvHtml = ia.aiInvestmentNote
-    ? '<div class="fna-adv-ai-block fna-adv-ai-inv">' +
-        '<div class="fna-adv-ai-icon"><i class="fas fa-robot"></i></div>' +
-        '<div class="fna-adv-ai-body">' +
-          '<div class="fna-adv-ai-title">AI Investment Analysis</div>' +
-          '<div class="fna-adv-ai-text">' + ia.aiInvestmentNote + '</div>' +
-        '</div>' +
-      '</div>'
-    : '';
-
-  var aiAdvHtml = ia.aiAdvisoryNote
-    ? '<div class="fna-adv-ai-block fna-adv-ai-adv">' +
-        '<div class="fna-adv-ai-icon"><i class="fas fa-robot"></i></div>' +
-        '<div class="fna-adv-ai-body">' +
-          '<div class="fna-adv-ai-title">AI Advisory Analysis</div>' +
-          '<div class="fna-adv-ai-text">' + ia.aiAdvisoryNote + '</div>' +
-        '</div>' +
-      '</div>'
-    : '';
-
-  return '<div class="fna-ed-section">' +
-
-    // Investment Profile
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-sliders-h"></i> Investment Profile</div>' +
-      riskHtml +
-      '<div class="fna-ed-row" style="margin-top:14px">' +
-        fnaField('Time Horizon', ia.timeHorizon || '—', 'text') +
-        fnaField('Investment Objective', ia.investmentObjective || '—', 'text', 'flex:2') +
-      '</div>' +
-      '<div class="fna-ed-label" style="margin-top:12px;margin-bottom:6px">Current Holdings</div>' +
-      '<div class="fna-ed-val-display fna-ed-note">' + (ia.currentHoldings || 'Not yet recorded') + '</div>' +
-    '</div>' +
-
-    // Investable Assets
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-wallet"></i> Investable Assets by Account Type</div>' +
-      assetHtml +
-    '</div>' +
-
-    // Wealth Management — Rep Advisory + SMA/UMA
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-gem"></i> Wealth Management — Rep Advisory · SMA · UMA</div>' +
-      wealthMgmtHtml +
-      aiInvHtml +
-    '</div>' +
-
-    // Estate Planning
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-balance-scale"></i> Estate Planning</div>' +
-      estateHtml +
-      '<div class="fna-ed-row" style="margin-top:12px">' +
-        '<button class="fna-ed-add-btn" onclick="showToast(\'Beneficiary review scheduled — see Calendar\',\'info\')"><i class="fas fa-users"></i> Review Beneficiary Designations</button>' +
-        '<button class="fna-ed-add-btn" style="margin-left:10px" onclick="showToast(\'Estate planning referral queued\',\'success\')"><i class="fas fa-handshake"></i> Refer to Estate Planner</button>' +
-      '</div>' +
-      aiAdvHtml +
-    '</div>' +
-
-    // Small Business
-    '<div class="fna-ed-card">' +
-      '<div class="fna-ed-card-title"><i class="fas fa-briefcase"></i> Small Business Support</div>' +
-      fnaFieldYN('Business Owner', isBizOwner, 'biz-owner-toggle') +
-      '<div id="fna-adv-biz-detail" style="margin-top:12px">' + (isBizOwner ? bizHtml : '<div class="fna-adv-biz-notowner"><i class="fas fa-info-circle"></i> Toggle to Yes to activate Small Business fields.</div>') + '</div>' +
-    '</div>' +
-
-    fnaNavFooter(5, true) +
-  '</div>';
-}
-
-// ── PATCH: renderFNAEditorSection — add cases 4 & 5 ──────────────
+// ── UPDATE renderFNADetail — domain badges + domain-specific AI cards ──
 (function() {
-  var _origRenderSection = renderFNAEditorSection;
-  renderFNAEditorSection = function() {
-    var container = document.getElementById('fna-ed-body');
-    if (!container) return;
-    var fna = fnaFullData[_fnaEditorId];
-    if (!fna) return;
+  var _origRenderFNADetail = renderFNADetail;
 
-    if (_fnaEditorSection === 4) {
-      container.innerHTML = buildRetirementSection(fna);
-      return;
-    }
-    if (_fnaEditorSection === 5) {
-      container.innerHTML = buildInvestmentAdvisorySection(fna);
-      return;
-    }
-    _origRenderSection.apply(this, arguments);
-  };
-})();
-
-// ── PATCH: renderFNAEditorNav — domain-aware tab visibility + domain pills ──
-(function() {
-  var _origRenderNav = renderFNAEditorNav;
-  renderFNAEditorNav = function() {
-    var fna = fnaFullData[_fnaEditorId];
-    if (!fna) { _origRenderNav.apply(this, arguments); return; }
-
-    var domains = fna.domains || [];
-
-    // Show/hide tabs based on domain filter
-    _fnaEditorSectionLabels.forEach(function(sec, i) {
-      var btn = document.getElementById('fna-ed-nav-' + i);
-      if (!btn) return;
-
-      // Determine visibility
-      var visible = true;
-      if (sec.domains) {
-        // Tab is domain-gated: show only if fna.domains intersects sec.domains
-        visible = sec.domains.some(function(d) { return domains.indexOf(d) !== -1; });
-      }
-      btn.style.display = visible ? '' : 'none';
-
-      // If current section is now hidden, skip to first visible tab
-      if (!visible && _fnaEditorSection === i) {
-        _fnaEditorSection = 0;
-      }
-
-      // Active state
-      btn.classList.toggle('active', i === _fnaEditorSection);
-    });
-
-    // Update header subtitle
-    var sub = document.getElementById('fna-ed-section-sub');
-    var secLabel = _fnaEditorSectionLabels[_fnaEditorSection];
-    if (sub && secLabel) sub.textContent = secLabel.label + ' — ' + fna.client;
-
-    // Render domain pills into #fna-ed-domain-pills
-    var pillContainer = document.getElementById('fna-ed-domain-pills');
-    if (pillContainer) {
-      var domainMeta = {
-        insurance:  { label: 'Insurance',   cls: 'ins', icon: 'fa-shield-alt'    },
-        retirement: { label: 'Retirement',  cls: 'ret', icon: 'fa-umbrella-beach'},
-        advisory:   { label: 'Advisory',    cls: 'adv', icon: 'fa-handshake'     }
-      };
-      pillContainer.innerHTML = domains.map(function(d) {
-        var m = domainMeta[d] || { label: d, cls: 'ins', icon: 'fa-tag' };
-        return '<span class="fna-ed-domain-pill fna-ed-pill-' + m.cls + '"><i class="fas ' + m.icon + '"></i> ' + m.label + '</span>';
-      }).join('');
-    }
-  };
-})();
-
-// ── PATCH: openFNAEditor — seed domain pills on open ──────────────
-(function() {
-  var _origOpen = openFNAEditor;
-  openFNAEditor = function(id) {
-    _origOpen.apply(this, arguments);
-    // Reset to first *visible* tab for this fna
-    var fna = fnaFullData[id] || fnaFullData['FNA-001'];
-    var domains = fna ? (fna.domains || []) : [];
-    _fnaEditorSection = 0; // always start at Personal (always visible)
-    renderFNAEditorNav();
-  };
-})();
-
-// ── PATCH: renderFNADetail — domain badges + domain AI sections ───
-(function() {
-  var _origDetail = renderFNADetail;
   renderFNADetail = function(fna) {
     var full = fnaFullData[fna.id];
-    if (!full) return _origDetail.apply(this, arguments);
+    if (!full) return _origRenderFNADetail(fna);
 
-    var domains      = full.domains || [];
-    var ai           = full.ai;
-    var p            = full.personal;
-    var h            = full.health;
-    var f            = full.financial;
-    var n            = full.needs;
-    var r            = full.retirement;
-    var ia           = full.investmentAdvisory;
+    var ai = full.ai;
+    var p  = full.personal;
+    var h  = full.health;
+    var f  = full.financial;
+    var n  = full.needs;
+    var domains = full.domains || [];
 
     var statusCls = { urgent:'fna-status-pill urgent', gap:'fna-status-pill gap', progress:'fna-status-pill progress', done:'fna-status-pill done' };
 
-    // Updated phase labels matching src/index.tsx
-    var phases = ['Discovery', 'Fact-Find', 'Needs Analysis', 'AI Proposal', 'Next Step'];
+    // ── Domain-neutral phase labels (updated)
+    var phases = ['Discovery','Fact-Find','Needs Analysis','AI Proposal','Next Step'];
     var phaseHtml = phases.map(function(ph, i) {
-      var cls  = (i+1) < full.phase ? 'fnd-phase-step done' : (i+1) === full.phase ? 'fnd-phase-step active' : 'fnd-phase-step';
-      var icon = (i+1) < full.phase ? '<i class="fas fa-check-circle"></i>' : (i+1) === full.phase ? '<i class="fas fa-dot-circle"></i>' : '<i class="far fa-circle"></i>';
+      var cls  = (i+1) <  full.phase ? 'fnd-phase-step done' : (i+1) === full.phase ? 'fnd-phase-step active' : 'fnd-phase-step';
+      var icon = (i+1) <  full.phase ? '<i class="fas fa-check-circle"></i>' : (i+1) === full.phase ? '<i class="fas fa-dot-circle"></i>' : '<i class="far fa-circle"></i>';
       return '<div class="' + cls + '">' + icon + '<span>' + ph + '</span></div>';
     }).join('<div class="fnd-phase-line"></div>');
 
+    // ── Health flag
     var healthFlagHtml = '';
     if (ai.healthFlag) {
       healthFlagHtml = '<div class="fnd-health-flag fnd-hf-' + ai.healthFlag.level + '">' +
@@ -28043,78 +28033,76 @@ function buildInvestmentAdvisorySection(fna) {
       '</div>';
     }
 
+    // ── Coverage gaps list
     var gapsHtml = full.gaps.map(function(g) {
       return '<div class="fnd-gap-item"><i class="fas fa-exclamation-triangle"></i><span>' + g + '</span></div>';
     }).join('');
 
+    // ── Domain badge row
+    var domainPillDefs = {
+      insurance:  { label:'Insurance',  icon:'fa-shield-alt',     cls:'ins' },
+      retirement: { label:'Retirement', icon:'fa-umbrella-beach', cls:'ret' },
+      advisory:   { label:'Advisory',   icon:'fa-handshake',      cls:'adv' }
+    };
+    var domainBadgesHtml = '<div class="fnd-domain-badges">' +
+      domains.map(function(d) {
+        var def = domainPillDefs[d];
+        if (!def) return '';
+        return '<span class="fna-domain-badge ' + def.cls + '"><i class="fas ' + def.icon + '"></i> ' + def.label + '</span>';
+      }).join('') +
+    '</div>';
+
+    // ── Coverage summary rows
     var coverageRows = [
-      { label:'Income Gap',             val:'$' + n.incomeReplacement.gap.toLocaleString() },
-      { label:'Debt Total',             val:'$' + n.debtObligations.total.toLocaleString() },
-      { label:'Final Expense',          val:'$' + n.finalExpense.total.toLocaleString() },
-      { label:'Recommended Face Amount',val:'$' + ai.recommendedFaceAmount.toLocaleString(), highlight: true }
+      { label:'Income Gap',            val:'$' + n.incomeReplacement.gap.toLocaleString() },
+      { label:'Debt Total',            val:'$' + n.debtObligations.total.toLocaleString() },
+      { label:'Final Expense',         val:'$' + n.finalExpense.total.toLocaleString() },
+      { label:'Recommended Face Amount', val:'$' + ai.recommendedFaceAmount.toLocaleString(), highlight: true }
     ];
 
-    // Domain badge pills row
-    var domainMeta2 = {
-      insurance:  { label:'Insurance',  cls:'ins', icon:'fa-shield-alt'    },
-      retirement: { label:'Retirement', cls:'ret', icon:'fa-umbrella-beach'},
-      advisory:   { label:'Advisory',   cls:'adv', icon:'fa-handshake'     }
-    };
-    var domainBadgesHtml = domains.length
-      ? '<div class="fna-detail-domain-row">' +
-          domains.map(function(d) {
-            var m = domainMeta2[d] || { label:d, cls:'ins', icon:'fa-tag' };
-            return '<span class="fna-domain-badge ' + m.cls + '"><i class="fas ' + m.icon + '"></i> ' + m.label + '</span>';
-          }).join('') +
-        '</div>'
-      : '';
-
-    // Retirement AI section (only if retirement domain active)
-    var retAIHtml = '';
-    if (domains.indexOf('retirement') !== -1 && r) {
-      var targetMonthly  = r.targetMonthlyIncome  || 0;
-      var ssMonthly      = r.socialSecurityEst    || 0;
-      var pensionMonthly = r.pensionIncome         || 0;
-      var annuityMonthly = r.existingAnnuityIncome || 0;
-      var incomeGap      = Math.max(0, targetMonthly - ssMonthly - pensionMonthly - annuityMonthly);
-      var urgCls         = incomeGap > 2500 ? 'fnd-domain-card fnd-dc-urgent' : 'fnd-domain-card fnd-dc-ret';
-
-      retAIHtml = '<div class="' + urgCls + '">' +
-        '<div class="fnd-dc-header"><i class="fas fa-umbrella-beach"></i> Retirement Income Analysis</div>' +
-        '<div class="fnd-dc-grid">' +
-          '<div class="fnd-field"><span class="fnd-lbl">Target Retirement Age</span><span class="fnd-val">' + (r.targetRetirementAge||'—') + '</span></div>' +
-          '<div class="fnd-field"><span class="fnd-lbl">Monthly Income Target</span><span class="fnd-val">$' + targetMonthly.toLocaleString() + '/mo</span></div>' +
-          '<div class="fnd-field"><span class="fnd-lbl">Social Security Est.</span><span class="fnd-val">$' + ssMonthly.toLocaleString() + '/mo</span></div>' +
-          '<div class="fnd-field"><span class="fnd-lbl">Annuity Interest</span><span class="fnd-val">' + (r.annuityInterest||'—') + '</span></div>' +
-        '</div>' +
-        '<div class="fnd-dc-gap-row">' +
-          '<span class="fnd-dc-gap-lbl">Monthly Income Gap</span>' +
-          '<span class="fnd-dc-gap-val ' + (incomeGap > 2500 ? 'fnd-dc-gap-hi' : '') + '">$' + incomeGap.toLocaleString() + '/mo</span>' +
-        '</div>' +
-        (r.aiRetirementNote ? '<div class="fnd-dc-ai-note"><i class="fas fa-robot"></i> ' + r.aiRetirementNote + '</div>' : '') +
-        '<button class="fnd-dc-btn" onclick="continueFNA(\'' + full.id + '\');setTimeout(function(){fnaEditorNav(4);},300)"><i class="fas fa-umbrella-beach"></i> Open Retirement Tab</button>' +
-      '</div>';
+    // ── Retirement domain AI card (if retirement in domains)
+    var retirementCardHtml = '';
+    if (domains.indexOf('retirement') !== -1 && full.retirement) {
+      var r = full.retirement;
+      var targetMo  = r.targetMonthlyIncome || 0;
+      var ssMo      = r.socialSecurityEst   || 0;
+      var pensionMo = r.pensionIncome        || 0;
+      var annMo     = r.existingAnnuityIncome|| 0;
+      var gapMo     = Math.max(0, targetMo - ssMo - pensionMo - annMo);
+      var annTypes  = { 'none':'None', 'immediate':'SPIA', 'deferred':'Deferred', 'fixed-indexed':'FIA', 'variable':'VA' };
+      retirementCardHtml =
+        '<div class="fnd-section fnd-section-domain-card fnd-section-ret">' +
+          '<div class="fnd-section-title"><i class="fas fa-umbrella-beach"></i> Retirement &amp; Annuity</div>' +
+          '<div class="fnd-grid">' +
+            '<div class="fnd-field"><span class="fnd-lbl">Target Retirement Age</span><span class="fnd-val">' + (r.targetRetirementAge||'—') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Target Monthly Income</span><span class="fnd-val">$' + targetMo.toLocaleString() + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Social Security Est.</span><span class="fnd-val">$' + ssMo.toLocaleString() + '/mo</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Monthly Income Gap</span><span class="fnd-val fnd-val-hi" style="color:' + (gapMo>2000?'#dc2626':'#d97706') + '">$' + gapMo.toLocaleString() + '/mo</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Annuity Interest</span><span class="fnd-val">' + (annTypes[r.annuityType]||'—') + '</span></div>' +
+          '</div>' +
+          '<div class="fnd-ai-rec" style="margin-top:8px">' + (r.aiRetirementNote||'') + '</div>' +
+        '</div>';
     }
 
-    // Advisory AI section (only if advisory domain active)
-    var advAIHtml = '';
-    if ((domains.indexOf('advisory') !== -1 || domains.indexOf('investments') !== -1) && ia) {
-      var totalInvDet = ((ia.investableAssets||{}).taxable||0) + ((ia.investableAssets||{}).ira||0) +
-                        ((ia.investableAssets||{}).roth||0) + ((ia.investableAssets||{}).k401||0) + ((ia.investableAssets||{}).other||0);
-      var smaRdy = ia.smaUmaCandidate || totalInvDet >= 250000;
-
-      advAIHtml = '<div class="fnd-domain-card fnd-dc-adv">' +
-        '<div class="fnd-dc-header"><i class="fas fa-chart-pie"></i> Investment & Advisory Analysis</div>' +
-        '<div class="fnd-dc-grid">' +
-          '<div class="fnd-field"><span class="fnd-lbl">Risk Tolerance</span><span class="fnd-val">' + (ia.riskTolerance||'—') + '</span></div>' +
-          '<div class="fnd-field"><span class="fnd-lbl">Time Horizon</span><span class="fnd-val">' + (ia.timeHorizon||'—') + '</span></div>' +
-          '<div class="fnd-field"><span class="fnd-lbl">Total Investable</span><span class="fnd-val">$' + totalInvDet.toLocaleString() + '</span></div>' +
-          '<div class="fnd-field"><span class="fnd-lbl">SMA/UMA Candidate</span><span class="fnd-val">' + (smaRdy ? '✅ Yes' : '⏳ Not yet') + '</span></div>' +
-        '</div>' +
-        (ia.aiInvestmentNote ? '<div class="fnd-dc-ai-note"><i class="fas fa-robot"></i> ' + ia.aiInvestmentNote + '</div>' : '') +
-        (ia.aiAdvisoryNote   ? '<div class="fnd-dc-ai-note" style="margin-top:8px;border-color:#7c3aed"><i class="fas fa-balance-scale"></i> ' + ia.aiAdvisoryNote + '</div>' : '') +
-        '<button class="fnd-dc-btn" onclick="continueFNA(\'' + full.id + '\');setTimeout(function(){fnaEditorNav(5);},300)"><i class="fas fa-chart-pie"></i> Open Advisory Tab</button>' +
-      '</div>';
+    // ── Advisory domain AI card (if advisory in domains)
+    var advisoryCardHtml = '';
+    if (domains.indexOf('advisory') !== -1 && full.investmentAdvisory) {
+      var ia = full.investmentAdvisory;
+      var estDocs = ia.estateDocuments || {};
+      advisoryCardHtml =
+        '<div class="fnd-section fnd-section-domain-card fnd-section-adv">' +
+          '<div class="fnd-section-title"><i class="fas fa-chart-pie"></i> Investment &amp; Advisory</div>' +
+          '<div class="fnd-grid">' +
+            '<div class="fnd-field"><span class="fnd-lbl">Risk Tolerance</span><span class="fnd-val">' + (ia.riskTolerance||'—') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Time Horizon</span><span class="fnd-val">' + (ia.timeHorizon||'—') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">SMA/UMA Candidate</span><span class="fnd-val">' + (ia.smaUmaCandidate?'<span style="color:#059669;font-weight:700">Yes</span>':'No') + '</span></div>' +
+            '<div class="fnd-field"><span class="fnd-lbl">Estate Docs</span><span class="fnd-val">' +
+              (estDocs.will?'Will ':'') + (estDocs.trust?'Trust ':'') + (estDocs.poa?'POA ':'') + (estDocs.healthcareDirective?'HC Directive':'') +
+              (!estDocs.will && !estDocs.trust && !estDocs.poa && !estDocs.healthcareDirective ? 'None on file' : '') +
+            '</span></div>' +
+          '</div>' +
+          '<div class="fnd-ai-rec" style="margin-top:8px">' + (ia.aiAdvisoryNote||'') + '</div>' +
+        '</div>';
     }
 
     return '<div class="fna-detail-content">' +
@@ -28123,8 +28111,8 @@ function buildInvestmentAdvisorySection(fna) {
         '<div class="fnd-avatar fna-av-' + full.initials.toLowerCase() + '" style="background:' + full.avatarColor + '">' + full.initials + '</div>' +
         '<div class="fnd-header-body">' +
           '<div class="fnd-name">' + full.client + '</div>' +
-          '<div class="fnd-meta">' + p.occupation + ' · Age ' + p.age + ' · Phase ' + full.phase + ' of 5</div>' +
-          '<div class="fnd-meeting"><i class="fas fa-calendar-check"></i> ' + full.meetingDate + ' · ' + full.meetingType + '</div>' +
+          '<div class="fnd-meta">' + p.occupation + ' \u00b7 Age ' + full.personal.dob.split('-')[0] + ' \u00b7 Phase ' + full.phase + ' of 5</div>' +
+          '<div class="fnd-meeting"><i class="fas fa-calendar-check"></i> ' + full.meetingDate + ' \u00b7 ' + full.meetingType + '</div>' +
         '</div>' +
         '<span class="' + (statusCls[full.status]||'fna-status-pill') + '">' + full.stage + '</span>' +
       '</div>' +
@@ -28164,16 +28152,19 @@ function buildInvestmentAdvisorySection(fna) {
         '</div>' +
 
         '<div class="fnd-section">' +
-          '<div class="fnd-section-title"><i class="fas fa-calculator"></i> Coverage Gap Summary</div>' +
+          '<div class="fnd-section-title"><i class="fas fa-calculator"></i> Insurance Coverage Gap Summary</div>' +
           '<div class="fnd-gap-rows">' +
-            coverageRows.map(function(rr) {
-              return '<div class="fnd-gap-row' + (rr.highlight?' fnd-gap-row-hi':'') + '">' +
-                '<span class="fnd-gap-lbl">' + rr.label + '</span>' +
-                '<span class="fnd-gap-val">' + rr.val + '</span>' +
+            coverageRows.map(function(r) {
+              return '<div class="fnd-gap-row' + (r.highlight?' fnd-gap-row-hi':'') + '">' +
+                '<span class="fnd-gap-lbl">' + r.label + '</span>' +
+                '<span class="fnd-gap-val">' + r.val + '</span>' +
               '</div>';
             }).join('') +
           '</div>' +
         '</div>' +
+
+        retirementCardHtml +
+        advisoryCardHtml +
 
         '<div class="fnd-section fnd-section-gaps">' +
           '<div class="fnd-section-title"><i class="fas fa-exclamation-triangle"></i> Coverage Gaps Detected</div>' +
@@ -28181,12 +28172,9 @@ function buildInvestmentAdvisorySection(fna) {
         '</div>' +
 
         '<div class="fnd-section fnd-section-ai">' +
-          '<div class="fnd-section-title"><i class="fas fa-robot"></i> AI Recommendation — Insurance</div>' +
+          '<div class="fnd-section-title"><i class="fas fa-robot"></i> AI Recommendation</div>' +
           '<div class="fnd-ai-rec">' + full.aiRec + '</div>' +
         '</div>' +
-
-        retAIHtml +
-        advAIHtml +
 
       '</div>' +
 
@@ -28200,7 +28188,53 @@ function buildInvestmentAdvisorySection(fna) {
   };
 })();
 
-console.log('Phase 2B FNA loaded — buildRetirementSection, buildInvestmentAdvisorySection, renderFNAEditorNav(domain-aware), renderFNADetail(domain badges+AI), wizard functions all ready');
+// ── PATCH fnaNavFooter to be domain-aware (skip hidden tabs) ──────────
+// The nav footer prev/next should jump to the next *visible* tab index
+(function() {
+  var _origFnaNavFooter = fnaNavFooter;
+  fnaNavFooter = function(idx, isFinal) {
+    // Find prev and next visible tab indices
+    var fna = fnaFullData[_fnaEditorId];
+    var domains = fna ? (fna.domains || []) : [];
+
+    function isTabVisible(i) {
+      var sec = _fnaEditorSectionLabels[i];
+      if (!sec) return false;
+      if (sec.domains === null) return true;
+      return sec.domains.some(function(d) { return domains.indexOf(d) !== -1; });
+    }
+
+    var prevIdx = -1;
+    for (var p = idx - 1; p >= 0; p--) {
+      if (isTabVisible(p)) { prevIdx = p; break; }
+    }
+
+    var nextIdx = -1;
+    var maxTab = _fnaEditorSectionLabels.length - 1;
+    for (var n = idx + 1; n <= maxTab; n++) {
+      if (isTabVisible(n)) { nextIdx = n; break; }
+    }
+
+    // Determine if this is truly the final visible tab
+    var trueIsFinal = (nextIdx === -1);
+
+    var prevHtml = prevIdx >= 0
+      ? '<button class="fna-ed-nav-btn fna-ed-nav-prev" onclick="fnaEditorNav(' + prevIdx + ')"><i class="fas fa-arrow-left"></i> ' + _fnaEditorSectionLabels[prevIdx].label + '</button>'
+      : '<div></div>';
+
+    var nextHtml = trueIsFinal
+      ? '<div class="fna-ed-final-actions">' +
+          '<button class="fna-ed-save-btn" onclick="saveFNAAndClose()"><i class="fas fa-save"></i> Save FNA</button>' +
+          '<button class="fna-ed-summary-btn" onclick="generateMeetingSummary(\'' + _fnaEditorId + '\')"><i class="fas fa-envelope"></i> Generate Meeting Summary Email</button>' +
+        '</div>'
+      : '<button class="fna-ed-nav-btn fna-ed-nav-next" onclick="fnaEditorNav(' + nextIdx + ')">' + _fnaEditorSectionLabels[nextIdx].label + ' <i class="fas fa-arrow-right"></i></button>';
+
+    return '<div class="fna-ed-nav-footer">' + prevHtml + nextHtml + '</div>';
+  };
+})();
+
+console.log('Phase 2b FNA Discovery Rebuild loaded — buildRetirementSection, buildInvestmentAdvisorySection, domain-aware nav, renderFNADetail(domains), wizard JS all ready');
+
 
 /* ================================================================
    PHASE 3 — Product Illustration & Proposal  (spliced by splice_phase3.cjs)
