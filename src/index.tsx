@@ -658,8 +658,8 @@ function Sidebar() {
 
       <nav class="sidebar-nav">
 
-        {/* ── MAIN ── */}
-        <div class="nav-section-label">MAIN</div>
+        {/* ── HOME ── */}
+        <div class="nav-section-label">HOME</div>
         <a class="nav-item active" onclick="navigateTo('dashboard')" href="#">
           <i class="fas fa-th-large"></i><span>Dashboard</span>
         </a>
