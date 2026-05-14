@@ -11914,6 +11914,7 @@ function AIImpactScorecardPage() {
           <button class="btn btn-outline ais-btn-sm" onclick="refreshAIInsights()"><i class="fas fa-sync-alt"></i> Refresh</button>
           <button class="btn btn-outline ais-btn-sm" onclick="shareAIScorecard()"><i class="fas fa-share-alt"></i> Share</button>
           <button class="btn btn-primary ais-btn-sm" onclick="exportAIScorecard()"><i class="fas fa-download"></i> Export PDF</button>
+          <a class="btn ais-launch-btn" href="https://toydxqyp.gensparkspace.com/" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Launch NOVA AI</a>
         </div>
       </div>
 
@@ -11975,7 +11976,10 @@ function AIImpactScorecardPage() {
           <span class="ais-live-badge"><i class="fas fa-circle"></i> LIVE</span>
           <span class="ais-live-title"><i class="fas fa-brain"></i> AI Priority Actions — 4 items require your attention today</span>
         </div>
-        <button class="ais-live-refresh" onclick="refreshAIInsights()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        <div class="ais-live-banner-right">
+          <a class="ais-live-nova-link" href="https://toydxqyp.gensparkspace.com/" target="_blank" rel="noopener noreferrer"><i class="fas fa-robot"></i> Open NOVA AI <i class="fas fa-external-link-alt" style="font-size:10px;opacity:0.8"></i></a>
+          <button class="ais-live-refresh" onclick="refreshAIInsights()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
       </div>
       <div class="ais-live-actions">
         <div class="ais-live-item urgent">
