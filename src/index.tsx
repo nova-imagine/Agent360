@@ -314,6 +314,81 @@ function MainApp() {
         <div id="tpl-eapp-submissions"><EAppSubmissionsPage /></div>
       </div>
 
+      {/* ══════════════════════════════════════════════════
+          E-APP WIZARD MODAL — global overlay, always in DOM
+          so openEApp() works from any page (E-App & Submissions,
+          Underwriting, Sales Pipeline, etc.)
+          ══════════════════════════════════════════════════ */}
+      <div class="eapp-overlay" id="eapp-overlay" onclick="closeEApp(event)" style="display:none">
+        <div class="eapp-modal">
+
+          {/* Header */}
+          <div class="eapp-header">
+            <div class="eapp-header-left">
+              <div class="eapp-header-icon"><i class="fas fa-file-contract"></i></div>
+              <div>
+                <div class="eapp-header-title" id="eapp-header-title">AI-Assisted E-Application</div>
+                <div class="eapp-header-sub" id="eapp-header-sub">Auto-prefilled from client profile · Review and confirm each section</div>
+              </div>
+            </div>
+            <div class="eapp-header-right">
+              <div class="eapp-ai-badge"><i class="fas fa-robot"></i> AI Pre-filled <span id="eapp-ai-pct">87%</span></div>
+              <button class="eapp-close-btn" onclick="closeEApp()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+
+          {/* Step Progress Bar */}
+          <div class="eapp-progress-wrap">
+            <div class="eapp-progress-bar-track">
+              <div class="eapp-progress-bar-fill" id="eapp-progress-fill" style="width:20%"></div>
+            </div>
+            <div class="eapp-steps">
+              <div class="eapp-step active" id="eapp-step-dot-1" onclick="goToEAppStep(1)">
+                <div class="eapp-step-circle"><i class="fas fa-user"></i></div>
+                <div class="eapp-step-lbl">Client Info</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-2" onclick="goToEAppStep(2)">
+                <div class="eapp-step-circle"><i class="fas fa-shield-alt"></i></div>
+                <div class="eapp-step-lbl">Product</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-3" onclick="goToEAppStep(3)">
+                <div class="eapp-step-circle"><i class="fas fa-heartbeat"></i></div>
+                <div class="eapp-step-lbl">Health</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-4" onclick="goToEAppStep(4)">
+                <div class="eapp-step-circle"><i class="fas fa-file-signature"></i></div>
+                <div class="eapp-step-lbl">Documents</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-5" onclick="goToEAppStep(5)">
+                <div class="eapp-step-circle"><i class="fas fa-check-double"></i></div>
+                <div class="eapp-step-lbl">Review</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Body: step content */}
+          <div class="eapp-body" id="eapp-body">
+            {/* Content injected by JS */}
+          </div>
+
+          {/* Footer */}
+          <div class="eapp-footer">
+            <div class="eapp-footer-left">
+              <button class="eapp-btn-secondary" id="eapp-btn-back" onclick="eAppStepNav(-1)"><i class="fas fa-arrow-left"></i> Back</button>
+              <button class="eapp-btn-save" onclick="eAppSaveDraft()"><i class="fas fa-save"></i> Save Draft</button>
+            </div>
+            <div class="eapp-footer-center">
+              <span class="eapp-step-indicator">Step <span id="eapp-cur-step">1</span> of 5</span>
+            </div>
+            <div class="eapp-footer-right">
+              <button class="eapp-btn-ai" onclick="eAppAIFill()"><i class="fas fa-robot"></i> AI Auto-Fill</button>
+              <button class="eapp-btn-next" id="eapp-btn-next" onclick="eAppStepNav(1)">Next <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       {/* ── Workflow Execution Modal ── */}
       <div id="wf-modal-overlay" class="wf-modal-overlay" onclick="closeWfModal(event)">
         <div class="wf-modal" id="wf-modal">
@@ -8165,79 +8240,6 @@ function UnderwritingPage() {
             <button class="uwi-rtab" onclick="switchUWIReportTab('accuracy',this)"><i class="fas fa-bullseye"></i> Accuracy</button>
           </div>
           <div class="uwi-report-body" id="uwi-report-body"></div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════
-          E-APP WIZARD MODAL
-          ══════════════════════════════════════════════════ */}
-      <div class="eapp-overlay" id="eapp-overlay" onclick="closeEApp(event)" style="display:none">
-        <div class="eapp-modal">
-
-          {/* Header */}
-          <div class="eapp-header">
-            <div class="eapp-header-left">
-              <div class="eapp-header-icon"><i class="fas fa-file-contract"></i></div>
-              <div>
-                <div class="eapp-header-title" id="eapp-header-title">AI-Assisted E-Application</div>
-                <div class="eapp-header-sub" id="eapp-header-sub">Auto-prefilled from client profile · Review and confirm each section</div>
-              </div>
-            </div>
-            <div class="eapp-header-right">
-              <div class="eapp-ai-badge"><i class="fas fa-robot"></i> AI Pre-filled <span id="eapp-ai-pct">87%</span></div>
-              <button class="eapp-close-btn" onclick="closeEApp()"><i class="fas fa-times"></i></button>
-            </div>
-          </div>
-
-          {/* Step Progress Bar */}
-          <div class="eapp-progress-wrap">
-            <div class="eapp-progress-bar-track">
-              <div class="eapp-progress-bar-fill" id="eapp-progress-fill" style="width:20%"></div>
-            </div>
-            <div class="eapp-steps">
-              <div class="eapp-step active" id="eapp-step-dot-1" onclick="goToEAppStep(1)">
-                <div class="eapp-step-circle"><i class="fas fa-user"></i></div>
-                <div class="eapp-step-lbl">Client Info</div>
-              </div>
-              <div class="eapp-step" id="eapp-step-dot-2" onclick="goToEAppStep(2)">
-                <div class="eapp-step-circle"><i class="fas fa-shield-alt"></i></div>
-                <div class="eapp-step-lbl">Product</div>
-              </div>
-              <div class="eapp-step" id="eapp-step-dot-3" onclick="goToEAppStep(3)">
-                <div class="eapp-step-circle"><i class="fas fa-heartbeat"></i></div>
-                <div class="eapp-step-lbl">Health</div>
-              </div>
-              <div class="eapp-step" id="eapp-step-dot-4" onclick="goToEAppStep(4)">
-                <div class="eapp-step-circle"><i class="fas fa-file-signature"></i></div>
-                <div class="eapp-step-lbl">Documents</div>
-              </div>
-              <div class="eapp-step" id="eapp-step-dot-5" onclick="goToEAppStep(5)">
-                <div class="eapp-step-circle"><i class="fas fa-check-double"></i></div>
-                <div class="eapp-step-lbl">Review</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Body: step content */}
-          <div class="eapp-body" id="eapp-body">
-            {/* Content injected by JS */}
-          </div>
-
-          {/* Footer */}
-          <div class="eapp-footer">
-            <div class="eapp-footer-left">
-              <button class="eapp-btn-secondary" id="eapp-btn-back" onclick="eAppStepNav(-1)"><i class="fas fa-arrow-left"></i> Back</button>
-              <button class="eapp-btn-save" onclick="eAppSaveDraft()"><i class="fas fa-save"></i> Save Draft</button>
-            </div>
-            <div class="eapp-footer-center">
-              <span class="eapp-step-indicator">Step <span id="eapp-cur-step">1</span> of 5</span>
-            </div>
-            <div class="eapp-footer-right">
-              <button class="eapp-btn-ai" onclick="eAppAIFill()"><i class="fas fa-robot"></i> AI Auto-Fill</button>
-              <button class="eapp-btn-next" id="eapp-btn-next" onclick="eAppStepNav(1)">Next <i class="fas fa-arrow-right"></i></button>
-            </div>
-          </div>
-
         </div>
       </div>
 
