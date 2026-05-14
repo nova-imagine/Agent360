@@ -27068,8 +27068,10 @@ function buildNeedsSection(fna) {
       '<textarea class="fna-ed-textarea" rows="3" id="fna-agent-notes-' + fna.id + '">' + (fna.notes || '') + '</textarea>' +
     '</div>' +
 
-    // Action footer
-    fnaNavFooter(3, true) +
+    // Action footer — pass false so the domain-aware fnaNavFooter patch
+    // decides whether Tab 4 (Retirement) or Tab 5 (Advisory) follows,
+    // or shows Save/Summary if neither domain is active for this FNA.
+    fnaNavFooter(3, false) +
 
   '</div>';
 }
@@ -40593,52 +40595,13 @@ console.log('Investment Accounts module loaded — ' + iaAccounts.length + ' acc
     };
   }
 
-  // Also patch navigateTo so when FNA page loads, retirement tab is wired up
-  var _orig_nav_ret4 = navigateTo;
-  navigateTo = function(page) {
-    _orig_nav_ret4(page);
-    if (page === 'fna') {
-      requestAnimationFrame(function() {
-        setTimeout(function() {
-          _wireRetirementFNATab();
-        }, 200);
-      });
-    }
-  };
-
-  function _wireRetirementFNATab() {
-    // Check if tab already exists
-    var tabBar = document.querySelector('.fna-tab-bar, [class*="fna"][class*="tab"]');
-    if (!tabBar) return;
-    if (document.getElementById('fna-tab-btn-retirement')) return; // already wired
-
-    // Add tab button
-    var btn = document.createElement('button');
-    btn.id = 'fna-tab-btn-retirement';
-    btn.className = 'fna-tab-btn';
-    btn.innerHTML = '<i class="fas fa-umbrella-beach"></i> Retirement Profile';
-    btn.onclick = function() {
-      tabBar.querySelectorAll('.fna-tab-btn').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      document.querySelectorAll('.fna-tab-panel').forEach(function(p) { p.style.display = 'none'; });
-      var retPanel = document.getElementById('fna-tab-retirement');
-      if (!retPanel) {
-        retPanel = document.createElement('div');
-        retPanel.id = 'fna-tab-retirement';
-        retPanel.className = 'fna-tab-panel';
-        retPanel.innerHTML = '<div id="fna-ret-tab-content"></div>';
-        var panels = document.querySelector('.fna-tab-panels, .fna-panels');
-        if (panels) panels.appendChild(retPanel);
-        else {
-          // fallback — append after tab bar's parent
-          tabBar.parentNode.appendChild(retPanel);
-        }
-      }
-      retPanel.style.display = 'block';
-      renderFNARetirementTab('fna-ret-tab-content');
-    };
-    tabBar.appendChild(btn);
-  }
+  // _wireRetirementFNATab disabled — the broad CSS selector
+  // '.fna-tab-bar, [class*="fna"][class*="tab"]' was matching the FNA editor
+  // nav bar (#fna-ed-nav-*) and injecting the Retirement Income Waterfall +
+  // AI Annuity Recommendation card into Tab 2 (Financial Profile) body.
+  // The Retirement & Annuity content is now handled exclusively by
+  // buildRetirementSection() in the domain-aware Tab 4 of the FNA editor.
+  function _wireRetirementFNATab() { /* intentionally disabled — see above */ }
 
   function _rfmt(n) { return Number(n).toLocaleString(); }
 
