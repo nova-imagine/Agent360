@@ -46613,3 +46613,57 @@ function advRenderPortfolioReview() {
 })();
 
 console.log('Advisory Accounts module loaded — ' + advAccounts.length + ' accounts · $' + (advAccounts.reduce(function(s,a){return s+a.aum;},0)/1000000).toFixed(2) + 'M AUM · SMA/UMA/Fund Advisory/Rep-Directed');
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS PAGE — Tab switching + init + navigateTo patch
+   ═══════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* clmSwitchTab — ID-based selection only; never touches .pol-tab class
+     so it cannot interfere with polSwitchTab on the Policies page        */
+  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved'];
+
+  window.clmSwitchTab = function(tab) {
+    CLM_TABS.forEach(function(t) {
+      var btn = document.getElementById('clm-tab-' + t);
+      if (btn) {
+        if (t === tab) {
+          btn.classList.add('pol-tab-active');
+        } else {
+          btn.classList.remove('pol-tab-active');
+        }
+      }
+      var panel = document.getElementById('clm-panel-' + t);
+      if (panel) {
+        panel.style.display = (t === tab) ? '' : 'none';
+      }
+    });
+  };
+
+  /* initClaimsPage — called by navigateTo patch; defaults to Overview */
+  window.initClaimsPage = function(targetTab) {
+    var tab = targetTab || 'overview';
+    clmSwitchTab(tab);
+  };
+
+})();
+
+/* navigateTo PATCH — claims
+   Wraps the current navigateTo (which may already be the adv-accounts
+   wrapper) so the chain stays intact.                                   */
+(function() {
+  var _origNavClm = typeof navigateTo === 'function' ? navigateTo : null;
+  if (!_origNavClm) return;
+  window.navigateTo = function(page, opts) {
+    _origNavClm(page, opts);
+    if (page === 'claims') {
+      var goTab = (opts && opts.tab) ? opts.tab : 'overview';
+      requestAnimationFrame(function() {
+        setTimeout(function() { initClaimsPage(goTab); }, 80);
+      });
+    }
+  };
+})();
+
+console.log('Claims tab module loaded — clmSwitchTab + initClaimsPage + navigateTo patch active');

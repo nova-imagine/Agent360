@@ -41242,3 +41242,59 @@ kbd {
   color: #fff;
 }
 
+/* ══════════════════════════════════════════════════════
+   CLAIMS PAGE — clickable rows + workbench header
+   ══════════════════════════════════════════════════════ */
+
+/* Clickable claim rows — mirrors pol-row-clickable */
+.clm-row-clickable {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.clm-row-clickable:hover {
+  background: #f0f7ff !important;
+}
+.clm-row-clickable:hover .claim-id {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+/* Workbench header actions — flex row for ghost button + collapse btn */
+.cwb-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cwb-action-btn.ghost {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.cwb-action-btn.ghost:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+.cwb-action-btn.ghost i {
+  margin-right: 5px;
+}
+
+/* Claims KPI bar — ensure cards are clickable */
+.claim-kpi-bar .claim-kpi-card[onclick],
+.claim-kpi-bar .kpi-card[onclick] {
+  cursor: pointer;
+  transition: box-shadow 0.12s, transform 0.12s;
+}
+.claim-kpi-bar .claim-kpi-card[onclick]:hover,
+.claim-kpi-bar .kpi-card[onclick]:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
+}
+

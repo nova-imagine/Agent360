@@ -5669,9 +5669,11 @@ function ClaimsPage() {
   return (
     <div class="page claims-page">
 
-      {/* ── Claims KPI Dashboard Bar ── */}
+      {/* ══════════════════════════════════════════════════════
+          PERSISTENT KPI BAR — always visible above tabs
+          ══════════════════════════════════════════════════════ */}
       <div class="claim-kpi-bar">
-        <div class="ckpi-card ckpi-open" onclick="filterClaimsByStatus('open')">
+        <div class="ckpi-card ckpi-open" onclick="clmSwitchTab('active');filterClaimsByStatus('open')">
           <div class="ckpi-icon"><i class="fas fa-folder-open"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">7</div>
@@ -5679,7 +5681,7 @@ function ClaimsPage() {
             <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +2 this week</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-review" onclick="filterClaimsByStatus('review')">
+        <div class="ckpi-card ckpi-review" onclick="clmSwitchTab('active');filterClaimsByStatus('review')">
           <div class="ckpi-icon"><i class="fas fa-search"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">3</div>
@@ -5687,7 +5689,7 @@ function ClaimsPage() {
             <div class="ckpi-trend neutral"><i class="fas fa-minus"></i> Steady</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-pending" onclick="filterClaimsByStatus('pending')">
+        <div class="ckpi-card ckpi-pending" onclick="clmSwitchTab('active');filterClaimsByStatus('pending')">
           <div class="ckpi-icon"><i class="fas fa-hourglass-half"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">2</div>
@@ -5695,7 +5697,7 @@ function ClaimsPage() {
             <div class="ckpi-trend warn"><i class="fas fa-exclamation-triangle"></i> 1 overdue</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-sla" onclick="filterClaimsBySLA()">
+        <div class="ckpi-card ckpi-sla" onclick="clmSwitchTab('active');filterClaimsBySLA()">
           <div class="ckpi-icon"><i class="fas fa-stopwatch"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">2</div>
@@ -5703,7 +5705,7 @@ function ClaimsPage() {
             <div class="ckpi-trend warn"><i class="fas fa-exclamation-circle"></i> Act today</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-exposure" onclick="filterClaimsByExposure()">
+        <div class="ckpi-card ckpi-exposure" onclick="clmSwitchTab('active');filterClaimsByExposure()">
           <div class="ckpi-icon"><i class="fas fa-coins"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">$1.41M</div>
@@ -5711,7 +5713,7 @@ function ClaimsPage() {
             <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +$1M (new death)</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-approved" onclick="filterClaimsByStatus('approved')">
+        <div class="ckpi-card ckpi-approved" onclick="clmSwitchTab('resolved')">
           <div class="ckpi-icon"><i class="fas fa-check-circle"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">14</div>
@@ -5719,7 +5721,7 @@ function ClaimsPage() {
             <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +4 vs last yr</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-paid" onclick="filterClaimsByStatus('paid')">
+        <div class="ckpi-card ckpi-paid" onclick="clmSwitchTab('resolved')">
           <div class="ckpi-icon"><i class="fas fa-dollar-sign"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">$284K</div>
@@ -5727,7 +5729,7 @@ function ClaimsPage() {
             <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> On track</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-avg" onclick="showClaimsResolutionChart()">
+        <div class="ckpi-card ckpi-avg" onclick="clmSwitchTab('resolved');showClaimsResolutionChart()">
           <div class="ckpi-icon"><i class="fas fa-clock"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">5.2d</div>
@@ -5735,7 +5737,7 @@ function ClaimsPage() {
             <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.8d vs target</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-docs" onclick="filterClaimsByDocStatus()">
+        <div class="ckpi-card ckpi-docs" onclick="clmSwitchTab('intelligence')">
           <div class="ckpi-icon"><i class="fas fa-file-check"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">61%</div>
@@ -5743,1035 +5745,850 @@ function ClaimsPage() {
             <div class="ckpi-trend warn"><i class="fas fa-arrow-down"></i> Below 80% target</div>
           </div>
         </div>
-        <div class="ckpi-card ckpi-payout" onclick="showPayoutTurnaroundPanel()">
+        <div class="ckpi-card ckpi-payout" onclick="clmSwitchTab('resolved')">
           <div class="ckpi-icon"><i class="fas fa-bolt"></i></div>
           <div class="ckpi-body">
             <div class="ckpi-val">3.1d</div>
-            <div class="ckpi-lbl">Avg Payout Turnaround</div>
+            <div class="ckpi-lbl">Avg Payout</div>
             <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.4d MoM</div>
           </div>
         </div>
       </div>
 
-      {/* ── AI Claims Navigator (Phase 7G) ── */}
-      <div class="claims-ai-navigator">
-        <div class="can-left">
-          <div class="can-icon"><i class="fas fa-robot"></i></div>
-          <div>
-            <div class="can-title">AI Claims Navigator <span class="can-live">LIVE</span></div>
-            <div class="can-sub">Guides beneficiaries through claim submission · pre-fills forms · tracks document receipt · detects contestability flags · ADB eligibility screening</div>
-          </div>
-        </div>
-        <div class="can-stats">
-          <div class="can-stat"><span class="can-val red">2</span><span class="can-lbl">Contestability Flags</span></div>
-          <div class="can-stat"><span class="can-val amber">1</span><span class="can-lbl">ADB Eligible</span></div>
-          <div class="can-stat"><span class="can-val blue">4</span><span class="can-lbl">Docs Missing</span></div>
-          <div class="can-stat"><span class="can-val green">61%</span><span class="can-lbl">Doc Completion</span></div>
-        </div>
-        <div class="can-actions">
-          <button class="can-btn primary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
-          <button class="can-btn ghost" onclick="openADBScreener()"><i class="fas fa-heartbeat"></i> ADB Screener</button>
-        </div>
+      {/* ══════════════════════════════════════════════════════
+          4-TAB BAR
+          tabs: overview | active | intelligence | resolved
+          ══════════════════════════════════════════════════════ */}
+      <div class="pol-tab-bar">
+        <button class="pol-tab pol-tab-active" id="clm-tab-overview" onclick="clmSwitchTab('overview')">
+          <i class="fas fa-chart-pie"></i> Overview
+        </button>
+        <button class="pol-tab" id="clm-tab-active" onclick="clmSwitchTab('active')">
+          <i class="fas fa-folder-open"></i> Active Claims
+          <span class="pol-tab-count pol-tab-count-red">7</span>
+        </button>
+        <button class="pol-tab" id="clm-tab-intelligence" onclick="clmSwitchTab('intelligence')">
+          <i class="fas fa-brain"></i> Intelligence
+          <span class="pol-tab-count pol-tab-count-orange">3</span>
+        </button>
+        <button class="pol-tab" id="clm-tab-resolved" onclick="clmSwitchTab('resolved')">
+          <i class="fas fa-check-circle"></i> Resolved &amp; Analytics
+          <span class="pol-tab-count">14</span>
+        </button>
       </div>
 
-      {/* ── Toolbar ── */}
-      <div class="page-toolbar">
-        <div class="toolbar-left">
-          <div class="search-inline">
-            <i class="fas fa-search"></i>
-            <input type="text" id="claim-search" placeholder="Search claims, clients, policy IDs..." oninput="filterClaims()" />
-          </div>
-          <select class="filter-select" id="claim-type-filter" onchange="filterClaims()">
-            <option value="">All Types</option>
-            <option>Death Benefit</option>
-            <option>Disability</option>
-            <option>Long-term Care</option>
-            <option>Accelerated Benefit</option>
-            <option>Waiver of Premium</option>
-          </select>
-          <select class="filter-select" id="claim-status-filter" onchange="filterClaims()">
-            <option value="">All Status</option>
-            <option>Open</option>
-            <option>Under Review</option>
-            <option>Pending Documentation</option>
-            <option>Approved</option>
-            <option>Paid</option>
-            <option>Denied</option>
-          </select>
-          <select class="filter-select" id="claim-priority-filter" onchange="filterClaims()">
-            <option value="">All Priority</option>
-            <option>Urgent</option>
-            <option>Normal</option>
-            <option>Low</option>
-          </select>
-        </div>
-        <div class="toolbar-right">
-          <button class="btn btn-ai" onclick="navigateTo('ai-agents')">
-            <i class="fas fa-robot"></i> AI Claims Analysis
-          </button>
-          <button class="btn btn-primary">
-            <i class="fas fa-plus"></i> File New Claim
-          </button>
-        </div>
-      </div>
+      {/* ════════════════════════════════════════════════════════
+          TAB 1 — OVERVIEW
+          AI Claims Intelligence · Workbench · Type breakdown
+          ════════════════════════════════════════════════════════ */}
+      <div class="pol-tab-panel" id="clm-panel-overview">
 
-      {/* ── Claims Workbench / Priority Triage Queue ── */}
-      <div class="claims-workbench" id="claims-workbench">
-        <div class="cwb-header">
-          <div class="cwb-header-left">
-            <div class="cwb-icon"><i class="fas fa-tasks"></i></div>
+        {/* AI Claims Intelligence Banner */}
+        <div class="ci-banner" id="ci-banner">
+          <div class="ci-banner-left">
+            <div class="ci-banner-icon"><i class="fas fa-brain"></i><span class="ci-pulse"></span></div>
+            <div class="ci-banner-text">
+              <div class="ci-banner-title">AI Claims Intelligence <span class="ci-live-badge">● LIVE</span></div>
+              <div class="ci-banner-sub">ML fraud detection · NLP doc extraction · Predictive resolution · Real-time triage</div>
+            </div>
+          </div>
+          <div class="ci-kpis">
+            <div class="ci-kpi ci-kpi-red"><div class="ci-kpi-val">1</div><div class="ci-kpi-lbl">Fraud Flagged</div></div>
+            <div class="ci-kpi ci-kpi-orange"><div class="ci-kpi-val">2</div><div class="ci-kpi-lbl">Watch List</div></div>
+            <div class="ci-kpi ci-kpi-blue"><div class="ci-kpi-val">94%</div><div class="ci-kpi-lbl">NLP Accuracy</div></div>
+            <div class="ci-kpi ci-kpi-green"><div class="ci-kpi-val">5.2d</div><div class="ci-kpi-lbl">Avg Resolution</div></div>
+            <div class="ci-kpi ci-kpi-purple"><div class="ci-kpi-val">+32%</div><div class="ci-kpi-lbl">Detection Lift</div></div>
+            <div class="ci-kpi ci-kpi-red ci-kpi-sla"><div class="ci-kpi-val">2</div><div class="ci-kpi-lbl">SLA At Risk</div></div>
+          </div>
+          <div class="ci-banner-actions">
+            <button class="btn-ci-action primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Intelligence Report</button>
+            <button class="btn-ci-action secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
+            <button class="btn-ci-action secondary" onclick="sendContextMessage('Run full claims triage — prioritize by fraud risk, resolution urgency and document completeness','claims')"><i class="fas fa-robot"></i> AI Triage</button>
+          </div>
+        </div>
+
+        {/* AI Claims Navigator */}
+        <div class="claims-ai-navigator">
+          <div class="can-left">
+            <div class="can-icon"><i class="fas fa-robot"></i></div>
             <div>
-              <div class="cwb-title">Claims Workbench <span class="cwb-badge">4 Require Action</span></div>
-              <div class="cwb-sub">AI-prioritised queue — work from left to right · Updated just now</div>
+              <div class="can-title">AI Claims Navigator <span class="can-live">LIVE</span></div>
+              <div class="can-sub">Guides beneficiaries through claim submission · pre-fills forms · tracks document receipt · detects contestability flags · ADB eligibility screening</div>
             </div>
           </div>
-          <button class="cwb-collapse-btn" onclick="toggleWorkbench(this)" title="Collapse workbench"><i class="fas fa-chevron-up"></i></button>
-        </div>
-        <div class="cwb-cards" id="cwb-cards">
-
-          {/* Card 1 — SLA breach imminent */}
-          <div class="cwb-card cwb-urgent">
-            <div class="cwb-card-top">
-              <span class="cwb-priority-dot urgent"></span>
-              <span class="cwb-claim-id">CLM-2026-0041</span>
-              <span class="cwb-sla-badge breach"><i class="fas fa-fire"></i> SLA: 1d left</span>
-            </div>
-            <div class="cwb-client"><div class="mini-avatar rc" style="width:24px;height:24px;font-size:9px">RC</div><span>Robert Chen</span></div>
-            <div class="cwb-reason"><i class="fas fa-exclamation-triangle"></i> Missing ID docs — $1M death benefit on hold</div>
-            <div class="cwb-card-actions">
-              <button class="cwb-action-btn primary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-upload"></i> Upload Docs</button>
-              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i> AI</button>
-            </div>
+          <div class="can-stats">
+            <div class="can-stat"><span class="can-val red">2</span><span class="can-lbl">Contestability Flags</span></div>
+            <div class="can-stat"><span class="can-val amber">1</span><span class="can-lbl">ADB Eligible</span></div>
+            <div class="can-stat"><span class="can-val blue">4</span><span class="can-lbl">Docs Missing</span></div>
+            <div class="can-stat"><span class="can-val green">61%</span><span class="can-lbl">Doc Completion</span></div>
           </div>
-
-          {/* Card 2 — Fraud hold */}
-          <div class="cwb-card cwb-fraud">
-            <div class="cwb-card-top">
-              <span class="cwb-priority-dot flagged"></span>
-              <span class="cwb-claim-id">CLM-2026-0025</span>
-              <span class="cwb-sla-badge fraud"><i class="fas fa-shield-virus"></i> Fraud Hold</span>
-            </div>
-            <div class="cwb-client"><div class="mini-avatar kp" style="width:24px;height:24px;font-size:9px">KP</div><span>Kevin Park</span></div>
-            <div class="cwb-reason"><i class="fas fa-ban"></i> Risk score 78 — coverage determination required</div>
-            <div class="cwb-card-actions">
-              <button class="cwb-action-btn primary" onclick="openFraudDetailModal('CLM-2026-0025')"><i class="fas fa-search-plus"></i> Review</button>
-              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i> AI</button>
-            </div>
-          </div>
-
-          {/* Card 3 — Compassionate / urgent ADB */}
-          <div class="cwb-card cwb-compassionate">
-            <div class="cwb-card-top">
-              <span class="cwb-priority-dot urgent"></span>
-              <span class="cwb-claim-id">CLM-2026-0028</span>
-              <span class="cwb-sla-badge compassionate"><i class="fas fa-heart"></i> Compassionate</span>
-            </div>
-            <div class="cwb-client"><div class="mini-avatar mg" style="width:24px;height:24px;font-size:9px">MG</div><span>Maria Gonzalez</span></div>
-            <div class="cwb-reason"><i class="fas fa-file-medical"></i> Terminal cert pending — ADB $120K expedite</div>
-            <div class="cwb-card-actions">
-              <button class="cwb-action-btn primary" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Chase Docs</button>
-              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i> View</button>
-            </div>
-          </div>
-
-          {/* Card 4 — Doc pending but near approval */}
-          <div class="cwb-card cwb-normal">
-            <div class="cwb-card-top">
-              <span class="cwb-priority-dot normal"></span>
-              <span class="cwb-claim-id">CLM-2026-0035</span>
-              <span class="cwb-sla-badge watch"><i class="fas fa-clock"></i> 21d SLA</span>
-            </div>
-            <div class="cwb-client"><div class="mini-avatar mg" style="width:24px;height:24px;font-size:9px">MG</div><span>Maria Gonzalez</span></div>
-            <div class="cwb-reason"><i class="fas fa-stethoscope"></i> APS from physician needed — disability $4.2K/mo</div>
-            <div class="cwb-card-actions">
-              <button class="cwb-action-btn primary" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send Reminder</button>
-              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i> View</button>
-            </div>
-          </div>
-
-          {/* Card 5 — On track / informational */}
-          <div class="cwb-card cwb-ok">
-            <div class="cwb-card-top">
-              <span class="cwb-priority-dot ok"></span>
-              <span class="cwb-claim-id">CLM-2026-0033</span>
-              <span class="cwb-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span>
-            </div>
-            <div class="cwb-client"><div class="mini-avatar jw" style="width:24px;height:24px;font-size:9px">JW</div><span>James Whitfield</span></div>
-            <div class="cwb-reason"><i class="fas fa-thumbs-up"></i> All docs in — approval imminent (~3 days)</div>
-            <div class="cwb-card-actions">
-              <button class="cwb-action-btn primary" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review &amp; Approve</button>
-              <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i> AI</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ── AI Claims Intelligence Banner ── */}
-      <div class="ci-banner" id="ci-banner">
-        <div class="ci-banner-left">
-          <div class="ci-banner-icon"><i class="fas fa-brain"></i><span class="ci-pulse"></span></div>
-          <div class="ci-banner-text">
-            <div class="ci-banner-title">AI Claims Intelligence <span class="ci-live-badge">● LIVE</span></div>
-            <div class="ci-banner-sub">ML fraud detection · NLP doc extraction · Predictive resolution · Real-time triage</div>
+          <div class="can-actions">
+            <button class="can-btn primary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
+            <button class="can-btn ghost" onclick="openADBScreener()"><i class="fas fa-heartbeat"></i> ADB Screener</button>
           </div>
         </div>
-        <div class="ci-kpis">
-          <div class="ci-kpi ci-kpi-red">
-            <div class="ci-kpi-val">1</div>
-            <div class="ci-kpi-lbl">Fraud Flagged</div>
+
+        {/* Claims Workbench — Priority Triage Queue */}
+        <div class="claims-workbench" id="claims-workbench">
+          <div class="cwb-header">
+            <div class="cwb-header-left">
+              <div class="cwb-icon"><i class="fas fa-tasks"></i></div>
+              <div>
+                <div class="cwb-title">Claims Workbench <span class="cwb-badge">4 Require Action</span></div>
+                <div class="cwb-sub">AI-prioritised queue — work from left to right · Updated just now</div>
+              </div>
+            </div>
+            <div class="cwb-header-actions">
+              <button class="cwb-action-btn ghost" onclick="clmSwitchTab('active')"><i class="fas fa-table"></i> All Claims</button>
+              <button class="cwb-collapse-btn" onclick="toggleWorkbench(this)" title="Collapse"><i class="fas fa-chevron-up"></i></button>
+            </div>
           </div>
-          <div class="ci-kpi ci-kpi-orange">
-            <div class="ci-kpi-val">2</div>
-            <div class="ci-kpi-lbl">Watch List</div>
-          </div>
-          <div class="ci-kpi ci-kpi-blue">
-            <div class="ci-kpi-val">94%</div>
-            <div class="ci-kpi-lbl">NLP Accuracy</div>
-          </div>
-          <div class="ci-kpi ci-kpi-green">
-            <div class="ci-kpi-val">5.2d</div>
-            <div class="ci-kpi-lbl">Avg Resolution</div>
-          </div>
-          <div class="ci-kpi ci-kpi-purple">
-            <div class="ci-kpi-val">+32%</div>
-            <div class="ci-kpi-lbl">Detection Lift</div>
-          </div>
-          <div class="ci-kpi ci-kpi-red ci-kpi-sla">
-            <div class="ci-kpi-val">2</div>
-            <div class="ci-kpi-lbl">SLA At Risk</div>
+          <div class="cwb-cards" id="cwb-cards">
+            <div class="cwb-card cwb-urgent">
+              <div class="cwb-card-top">
+                <span class="cwb-priority-dot urgent"></span>
+                <span class="cwb-claim-id">CLM-2026-0041</span>
+                <span class="cwb-sla-badge breach"><i class="fas fa-fire"></i> SLA: 1d left</span>
+              </div>
+              <div class="cwb-client"><div class="mini-avatar rc" style="width:24px;height:24px;font-size:9px">RC</div><span>Robert Chen</span></div>
+              <div class="cwb-reason"><i class="fas fa-exclamation-triangle"></i> Missing ID docs — $1M death benefit on hold</div>
+              <div class="cwb-card-actions">
+                <button class="cwb-action-btn primary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-upload"></i> Upload Docs</button>
+                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i> AI</button>
+              </div>
+            </div>
+            <div class="cwb-card cwb-fraud">
+              <div class="cwb-card-top">
+                <span class="cwb-priority-dot flagged"></span>
+                <span class="cwb-claim-id">CLM-2026-0025</span>
+                <span class="cwb-sla-badge fraud"><i class="fas fa-shield-virus"></i> Fraud Hold</span>
+              </div>
+              <div class="cwb-client"><div class="mini-avatar kp" style="width:24px;height:24px;font-size:9px">KP</div><span>Kevin Park</span></div>
+              <div class="cwb-reason"><i class="fas fa-ban"></i> Risk score 78 — coverage determination required</div>
+              <div class="cwb-card-actions">
+                <button class="cwb-action-btn primary" onclick="openFraudDetailModal('CLM-2026-0025')"><i class="fas fa-search-plus"></i> Review</button>
+                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i> AI</button>
+              </div>
+            </div>
+            <div class="cwb-card cwb-compassionate">
+              <div class="cwb-card-top">
+                <span class="cwb-priority-dot urgent"></span>
+                <span class="cwb-claim-id">CLM-2026-0028</span>
+                <span class="cwb-sla-badge compassionate"><i class="fas fa-heart"></i> Compassionate</span>
+              </div>
+              <div class="cwb-client"><div class="mini-avatar mg" style="width:24px;height:24px;font-size:9px">MG</div><span>Maria Gonzalez</span></div>
+              <div class="cwb-reason"><i class="fas fa-file-medical"></i> Terminal cert pending — ADB $120K expedite</div>
+              <div class="cwb-card-actions">
+                <button class="cwb-action-btn primary" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Chase Docs</button>
+                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i> View</button>
+              </div>
+            </div>
+            <div class="cwb-card cwb-normal">
+              <div class="cwb-card-top">
+                <span class="cwb-priority-dot normal"></span>
+                <span class="cwb-claim-id">CLM-2026-0035</span>
+                <span class="cwb-sla-badge watch"><i class="fas fa-clock"></i> 21d SLA</span>
+              </div>
+              <div class="cwb-client"><div class="mini-avatar mg" style="width:24px;height:24px;font-size:9px">MG</div><span>Maria Gonzalez</span></div>
+              <div class="cwb-reason"><i class="fas fa-stethoscope"></i> APS from physician needed — disability $4.2K/mo</div>
+              <div class="cwb-card-actions">
+                <button class="cwb-action-btn primary" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send Reminder</button>
+                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i> View</button>
+              </div>
+            </div>
+            <div class="cwb-card cwb-ok">
+              <div class="cwb-card-top">
+                <span class="cwb-priority-dot ok"></span>
+                <span class="cwb-claim-id">CLM-2026-0033</span>
+                <span class="cwb-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span>
+              </div>
+              <div class="cwb-client"><div class="mini-avatar jw" style="width:24px;height:24px;font-size:9px">JW</div><span>James Whitfield</span></div>
+              <div class="cwb-reason"><i class="fas fa-thumbs-up"></i> All docs in — approval imminent (~3 days)</div>
+              <div class="cwb-card-actions">
+                <button class="cwb-action-btn primary" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review &amp; Approve</button>
+                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i> AI</button>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="ci-banner-actions">
-          <button class="btn-ci-action primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Intelligence Report</button>
-          <button class="btn-ci-action secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
-          <button class="btn-ci-action secondary" onclick="sendContextMessage('Run full claims triage — prioritize by fraud risk, resolution urgency and document completeness','claims')"><i class="fas fa-robot"></i> AI Triage</button>
-        </div>
-      </div>
 
-      {/* ── Proactive AI Alert Card ── */}
-      <div class="proactive-alert-card">
-        <div class="pac-header">
-          <div class="pac-header-left">
-            <div class="pac-icon"><i class="fas fa-brain"></i><span class="pac-pulse"></span></div>
-            <div>
-              <div class="pac-title">Proactive AI Detection Engine</div>
-              <div class="pac-sub">Monitoring obituaries, lapse signals, renewal windows &amp; coverage events · Updated <span class="pac-updated">just now</span></div>
+        {/* Claims by Type — now promoted to Overview */}
+        <div class="claims-type-grid">
+          <div class="ctype-card death-type" onclick="clmSwitchTab('active');filterClaimsByStatus('open')">
+            <div class="ctype-icon"><i class="fas fa-heart-broken"></i></div>
+            <div class="ctype-body">
+              <div class="ctype-name">Death Benefit</div>
+              <div class="ctype-count">2 open · 4 resolved</div>
+              <div class="ctype-value">$1.25M total</div>
             </div>
           </div>
-          <div class="pac-header-stats">
-            <div class="pac-hstat"><span class="pac-hstat-val red">1</span><span class="pac-hstat-lbl">Death Detected</span></div>
-            <div class="pac-hstat"><span class="pac-hstat-val orange">2</span><span class="pac-hstat-lbl">Lapse Risk</span></div>
-            <div class="pac-hstat"><span class="pac-hstat-val gold">1</span><span class="pac-hstat-lbl">Renewal Alert</span></div>
-            <div class="pac-hstat"><span class="pac-hstat-val red">2</span><span class="pac-hstat-lbl">SLA At Risk</span></div>
-            <div class="pac-hstat"><span class="pac-hstat-val blue">5</span><span class="pac-hstat-lbl">Total Alerts</span></div>
-          </div>
-          <button class="btn-pac-dismiss" onclick="togglePACPanel(this)" title="Collapse alerts"><i class="fas fa-chevron-up"></i></button>
-        </div>
-
-        <div class="pac-alerts-body" id="pac-alerts-body">
-
-          {/* Alert 1 — Obituary / Death Detected */}
-          <div class="pac-alert pac-alert-death" id="pac-alert-1">
-            <div class="pac-alert-type-icon death"><i class="fas fa-heart-broken"></i></div>
-            <div class="pac-alert-content">
-              <div class="pac-alert-badges">
-                <span class="pac-badge death"><i class="fas fa-exclamation-circle"></i> Death Detected</span>
-                <span class="pac-badge urgent">Urgent</span>
-                <span class="pac-badge new">New — 14 mins ago</span>
-              </div>
-              <div class="pac-alert-headline">Obituary Match — Kevin Park · Policy P-100350</div>
-              <div class="pac-alert-detail">AI cross-referenced public obituary data with client registry. Kevin Park (age 29, Jersey City) confirmed deceased 2026-04-10. Policy P-100350 (Term Life $250K) currently in <strong>Pending</strong> status — coverage determination required before claim processing. Estate contact not yet identified.</div>
-              <div class="pac-alert-meta">
-                <span><i class="fas fa-search"></i> Source: Public obituary registry · NJ DoH cross-match</span>
-                <span><i class="fas fa-file-contract"></i> Policy P-100350 · $250,000 Death Benefit</span>
-                <span><i class="fas fa-shield-virus"></i> Fraud Score: 78 / 100 — Flagged</span>
-              </div>
-            </div>
-            <div class="pac-alert-actions">
-              <button class="btn-pac-action primary" onclick="openPACModal('obituary-kevin')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
-              <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i> View Claim</button>
+          <div class="ctype-card disability-type" onclick="clmSwitchTab('active')">
+            <div class="ctype-icon"><i class="fas fa-user-injured"></i></div>
+            <div class="ctype-body">
+              <div class="ctype-name">Disability</div>
+              <div class="ctype-count">1 open · 3 resolved</div>
+              <div class="ctype-value">$50K/yr total</div>
             </div>
           </div>
-
-          {/* Alert 2 — Policy Lapse Risk (UL under-funded) */}
-          <div class="pac-alert pac-alert-lapse" id="pac-alert-2">
-            <div class="pac-alert-type-icon lapse"><i class="fas fa-battery-quarter"></i></div>
-            <div class="pac-alert-content">
-              <div class="pac-alert-badges">
-                <span class="pac-badge lapse"><i class="fas fa-exclamation-triangle"></i> Lapse Risk</span>
-                <span class="pac-badge high">High Priority</span>
-                <span class="pac-badge new2">2 quarters under-funded</span>
-              </div>
-              <div class="pac-alert-headline">Policy Lapse Risk — Patricia Nguyen · P-100301 Universal Life</div>
-              <div class="pac-alert-detail">AI cash-flow model predicts policy lapse within <strong>60–90 days</strong> if premiums are not increased. P-100301 has been under-funded for 2 consecutive quarters. Current cash value $21,400 is below minimum threshold. Client age 38 — re-qualification after lapse would require new medical underwriting.</div>
-              <div class="pac-alert-meta">
-                <span><i class="fas fa-chart-line"></i> Cash value: $21,400 · Minimum required: $28,000</span>
-                <span><i class="fas fa-file-contract"></i> Policy P-100301 · $400K face value</span>
-                <span><i class="fas fa-calendar-times"></i> Predicted lapse: ~2026-06-20 if no action</span>
-              </div>
-            </div>
-            <div class="pac-alert-actions">
-              <button class="btn-pac-action primary" onclick="openPACModal('lapse-patricia')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
-              <button class="btn-pac-action secondary" onclick="openPolicyModal('P-100301','ai')"><i class="fas fa-robot"></i> AI Analysis</button>
+          <div class="ctype-card ltc-type" onclick="clmSwitchTab('active')">
+            <div class="ctype-icon"><i class="fas fa-hospital"></i></div>
+            <div class="ctype-body">
+              <div class="ctype-name">Long-term Care</div>
+              <div class="ctype-count">2 open · 4 resolved</div>
+              <div class="ctype-value">$27.6K total</div>
             </div>
           </div>
-
-          {/* Alert 3 — Conversion Window Closing */}
-          <div class="pac-alert pac-alert-renewal" id="pac-alert-3">
-            <div class="pac-alert-type-icon renewal"><i class="fas fa-hourglass-end"></i></div>
-            <div class="pac-alert-content">
-              <div class="pac-alert-badges">
-                <span class="pac-badge renewal"><i class="fas fa-sync"></i> Renewal Window</span>
-                <span class="pac-badge urgent2">5 Months Left</span>
-              </div>
-              <div class="pac-alert-headline">Conversion Window Closing — Sandra Williams · P-100320 Term Life</div>
-              <div class="pac-alert-detail">Policy P-100320 (20-year term, $350K face value) expires <strong>September 2026 — 5 months away</strong>. Sandra Williams, age 61, can convert to permanent life without medical evidence only until renewal. After expiry, new underwriting at age 61 will significantly increase premiums or risk denial. AI recommends immediate outreach to schedule conversion discussion.</div>
-              <div class="pac-alert-meta">
-                <span><i class="fas fa-calendar-alt"></i> Renewal date: 2026-09-30 · 150 days remaining</span>
-                <span><i class="fas fa-file-contract"></i> Policy P-100320 · $350K · Beneficiary: Michael Williams</span>
-                <span><i class="fas fa-user-clock"></i> Client age 61 — conversion premium savings est. $4,200/yr if acted now</span>
-              </div>
-            </div>
-            <div class="pac-alert-actions">
-              <button class="btn-pac-action primary" onclick="openPACModal('renewal-sandra')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
-              <button class="btn-pac-action secondary" onclick="openPolicyModal('P-100320','ai')"><i class="fas fa-robot"></i> AI Analysis</button>
+          <div class="ctype-card accelerated-type" onclick="clmSwitchTab('active')">
+            <div class="ctype-icon"><i class="fas fa-bolt"></i></div>
+            <div class="ctype-body">
+              <div class="ctype-name">Accelerated Benefit</div>
+              <div class="ctype-count">1 open · 2 resolved</div>
+              <div class="ctype-value">$195K total</div>
             </div>
           </div>
-
-          {/* Alert 4b — SLA Compliance Risk */}
-          <div class="pac-alert pac-alert-sla" id="pac-alert-sla">
-            <div class="pac-alert-type-icon sla"><i class="fas fa-stopwatch"></i></div>
-            <div class="pac-alert-content">
-              <div class="pac-alert-badges">
-                <span class="pac-badge sla"><i class="fas fa-balance-scale"></i> SLA Breach Risk</span>
-                <span class="pac-badge urgent">2 Claims</span>
-                <span class="pac-badge new">Regulatory Deadline</span>
-              </div>
-              <div class="pac-alert-headline">State SLA Deadline — CLM-2026-0041 expires tomorrow · CLM-2026-0028 expires in 5 days</div>
-              <div class="pac-alert-detail">New York State Insurance Law §3420 requires death benefit claims to be resolved within 30 days of notice. <strong>CLM-2026-0041 (Robert Chen, $1M)</strong> has 1 day remaining. Compassionate SLA applies to <strong>CLM-2026-0028 (Maria Gonzalez, $120K)</strong> — expedite immediately to avoid regulatory breach and potential fines of up to $5,000 per violation.</div>
-              <div class="pac-alert-meta">
-                <span><i class="fas fa-balance-scale"></i> NY Ins. Law §3420 · 30-day resolution requirement</span>
-                <span><i class="fas fa-exclamation-circle"></i> 2 claims in breach window · Total exposure $1.12M</span>
-                <span><i class="fas fa-calendar-times"></i> CLM-2026-0041: Apr 14 · CLM-2026-0028: Apr 19</span>
-              </div>
-            </div>
-            <div class="pac-alert-actions">
-              <button class="btn-pac-action primary" onclick="filterClaimsBySLA()"><i class="fas fa-stopwatch"></i> View SLA Queue</button>
-              <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
+          <div class="ctype-card waiver-type" onclick="clmSwitchTab('active')">
+            <div class="ctype-icon"><i class="fas fa-ban"></i></div>
+            <div class="ctype-body">
+              <div class="ctype-name">Waiver of Premium</div>
+              <div class="ctype-count">1 open · 1 resolved</div>
+              <div class="ctype-value">$18K/yr total</div>
             </div>
           </div>
-
-          {/* Alert 4 — Proactive New Coverage */}
-          <div class="pac-alert pac-alert-coverage" id="pac-alert-4">
-            <div class="pac-alert-type-icon coverage"><i class="fas fa-user-plus"></i></div>
-            <div class="pac-alert-content">
-              <div class="pac-alert-badges">
-                <span class="pac-badge coverage"><i class="fas fa-shield-alt"></i> Coverage Gap</span>
-                <span class="pac-badge normal2">Opportunity</span>
-              </div>
-              <div class="pac-alert-headline">Surviving Family — New Coverage Opportunity · Robert Chen Estate</div>
-              <div class="pac-alert-detail">Following the active death benefit claim (CLM-2026-0041), AI identified that <strong>Susan Chen (beneficiary, est. age 42)</strong> has no existing NYL coverage. Upon claim resolution, proactively reach out with a new coverage needs analysis. Estate payout of $1M creates an ideal window for investment, insurance and estate planning conversations.</div>
-              <div class="pac-alert-meta">
-                <span><i class="fas fa-dollar-sign"></i> Expected payout: $1,000,000 to Susan Chen</span>
-                <span><i class="fas fa-lightbulb"></i> Opportunity: Whole Life + investment + estate planning</span>
-                <span><i class="fas fa-calendar-check"></i> Outreach timing: After claim resolves ~2026-04-17</span>
-              </div>
+          <div class="ctype-card ai-card">
+            <div class="ctype-icon"><i class="fas fa-robot"></i></div>
+            <div class="ctype-body">
+              <div class="ctype-name">AI Claims Assistant</div>
+              <div class="ctype-count">3 pending doc requests</div>
+              <div class="ctype-value">Auto-follow-ups ready</div>
             </div>
-            <div class="pac-alert-actions">
-              <button class="btn-pac-action primary" onclick="openPACModal('coverage-susan')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
-              <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ── Open / Active Claims ── */}
-      <div class="claims-section-header">
-        <div class="claims-section-label-row">
-          <div class="claims-section-label">
-            <i class="fas fa-folder-open"></i> Open &amp; Active Claims
-            <span class="claims-count-badge">7</span>
-          </div>
-          <div class="claims-batch-toolbar">
-            <label class="batch-select-all"><input type="checkbox" id="select-all-claims" onchange="toggleAllClaims(this)" /> Select All</label>
-            <button class="btn-batch" id="batch-send-btn" disabled onclick="batchSendDocReminders()"><i class="fas fa-paper-plane"></i> Send Reminders</button>
-            <button class="btn-batch" id="batch-assign-btn" disabled onclick="batchAssignAdjuster()"><i class="fas fa-user-tag"></i> Assign Adjuster</button>
-            <button class="btn-batch" id="batch-export-btn" onclick="batchExportClaims()"><i class="fas fa-file-export"></i> Export</button>
+            <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="sendContextMessage('Show all open claims and urgent actions needed — triage by priority and expected resolution','claims')">Run AI Triage</button>
           </div>
         </div>
-      </div>
 
-      <div class="claims-table-wrapper">
-        <table class="data-table claims-table">
-          <thead>
-            <tr>
-              <th style="width:36px"><input type="checkbox" id="th-checkbox" /></th>
-              <th>Claim ID</th>
-              <th>Client</th>
-              <th>Policy</th>
-              <th>Claim Type</th>
-              <th>Amount</th>
-              <th>Filed Date</th>
-              <th><i class="fas fa-calendar-day" style="color:#64748b;margin-right:4px"></i>Days Open</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th><i class="fas fa-user-tie" style="color:#64748b;margin-right:4px"></i>Adjuster / Team</th>
-              <th><i class="fas fa-shield-virus" style="color:#dc2626;margin-right:4px"></i>Fraud Score</th>
-              <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Doc Status</th>
-              <th><i class="fas fa-brain" style="color:#0ea5e9;margin-right:4px"></i>AI Triage</th>
-              <th><i class="fas fa-hourglass-half" style="color:#d97706;margin-right:4px"></i>Resolution</th>
-              <th><i class="fas fa-stopwatch" style="color:#dc2626;margin-right:4px"></i>SLA Status</th>
-              <th><i class="fas fa-gavel" style="color:#7c3aed;margin-right:4px"></i>Liability</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="claim-row urgent">
-              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
-              <td><span class="claim-id">CLM-2026-0041</span></td>
-              <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
-              <td><span class="policy-id">P-100310</span></td>
-              <td><span class="claim-type-badge death">Death Benefit</span></td>
-              <td class="premium">$1,000,000</td>
-              <td class="text-muted">2026-04-09</td>
-              <td><span class="days-open-badge urgent">5d</span></td>
-              <td><span class="claim-status-badge review">Under Review</span></td>
-              <td><span class="priority-badge urgent">Urgent</span></td>
-              <td><div class="adjuster-cell"><div class="adj-avatar cd">CD</div><div class="adj-info"><div class="adj-name">Chris Davis</div><div class="adj-team team-claims">Claims Dept.</div></div></div></td>
-              <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0041')"><span class="fraud-score-num">42</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0041')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
-              <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0041','ci')"><span class="ci-triage-label">⚡ Expedite</span><span class="ci-triage-sub">Missing ID docs</span></div></td>
-              <td><div class="ci-res-timer urgent"><i class="fas fa-hourglass-half"></i><span class="ci-res-days">1d left</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:85%"></div></div></div></td>
-              <td><div class="sla-cell sla-breach"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-breach" style="width:95%"></div></div><span class="sla-label breach"><i class="fas fa-fire"></i> 1d left</span><span class="sla-deadline">State SLA: Apr 14</span></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0041','liability')"><div class="liab-score-wrap high"><span class="liab-score">72%</span></div><span class="liab-flag high">High</span><span class="litig-risk high"><i class="fas fa-gavel"></i> Litig.</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i></button>
+      </div>{/* end clm-panel-overview */}
+
+      {/* ════════════════════════════════════════════════════════
+          TAB 2 — ACTIVE CLAIMS
+          Toolbar · 9-col slim table (clickable rows) · Fraud+IDP grid
+          ════════════════════════════════════════════════════════ */}
+      <div class="pol-tab-panel" id="clm-panel-active" style="display:none">
+
+        {/* Toolbar */}
+        <div class="page-toolbar">
+          <div class="toolbar-left">
+            <div class="search-inline-wrap">
+              <i class="fas fa-search search-inline-icon"></i>
+              <input type="text" id="claim-search" class="search-inline" placeholder="Search claims, clients, policy IDs…" oninput="filterClaims()" />
+            </div>
+            <select class="filter-select" id="claim-type-filter" onchange="filterClaims()">
+              <option value="">All Types</option>
+              <option>Death Benefit</option>
+              <option>Disability</option>
+              <option>Long-term Care</option>
+              <option>Accelerated Benefit</option>
+              <option>Waiver of Premium</option>
+            </select>
+            <select class="filter-select" id="claim-status-filter" onchange="filterClaims()">
+              <option value="">All Status</option>
+              <option>Open</option>
+              <option>Under Review</option>
+              <option>Pending Documentation</option>
+              <option>Approved</option>
+              <option>Paid</option>
+              <option>Denied</option>
+            </select>
+            <select class="filter-select" id="claim-priority-filter" onchange="filterClaims()">
+              <option value="">All Priority</option>
+              <option>Urgent</option>
+              <option>Normal</option>
+              <option>Low</option>
+            </select>
+            <button class="btn btn-ghost" onclick="clearClaimFilters()"><i class="fas fa-times"></i> Clear</button>
+          </div>
+          <div class="toolbar-right">
+            <div class="claims-batch-toolbar">
+              <label class="batch-select-all"><input type="checkbox" id="select-all-claims" onchange="toggleAllClaims(this)" /> Select All</label>
+              <button class="btn-batch" id="batch-send-btn" disabled onclick="batchSendDocReminders()"><i class="fas fa-paper-plane"></i> Reminders</button>
+              <button class="btn-batch" id="batch-export-btn" onclick="batchExportClaims()"><i class="fas fa-file-export"></i> Export</button>
+            </div>
+            <button class="btn btn-ai" onclick="openCIReviewModal()">
+              <i class="fas fa-brain"></i> AI Triage
+            </button>
+            <button class="btn btn-primary" onclick="p7Toast('New claim wizard — select client and claim type to begin…',2500)">
+              <i class="fas fa-plus"></i> File Claim
+            </button>
+          </div>
+        </div>
+
+        {/* 9-column slim table — clickable rows open claim detail modal */}
+        <div class="claims-table-wrapper">
+          <table class="data-table claims-table" id="claims-table">
+            <thead>
+              <tr>
+                <th style="width:32px"><input type="checkbox" id="th-checkbox" /></th>
+                <th>Claim ID</th>
+                <th>Client</th>
+                <th>Type</th>
+                <th class="text-right">Amount</th>
+                <th><i class="fas fa-stopwatch" style="color:#dc2626;margin-right:4px"></i>SLA</th>
+                <th><i class="fas fa-shield-virus" style="color:#dc2626;margin-right:4px"></i>Fraud</th>
+                <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Docs</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Row 1 — Robert Chen, Death Benefit, SLA breach */}
+              <tr class="claim-row urgent clm-row-clickable" onclick="openClaimModal('CLM-2026-0041','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0041</span></td>
+                <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
+                <td><span class="claim-type-badge death">Death Benefit</span></td>
+                <td class="premium text-right">$1,000,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-breach"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-breach" style="width:95%"></div></div><span class="sla-label breach"><i class="fas fa-fire"></i> 1d left</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0041')"><span class="fraud-score-num">42</span><span class="fraud-score-lbl">Watch</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0041')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 2 — Sandra Williams, LTC */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0038','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0038</span></td>
+                <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
+                <td><span class="claim-type-badge ltc">Long-term Care</span></td>
+                <td class="premium text-right">$18,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:38%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 22d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0038')"><span class="fraud-score-num">12</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0038')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0038','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 3 — Maria Gonzalez, Disability */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0035','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0035</span></td>
+                <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
+                <td><span class="claim-type-badge disability">Disability</span></td>
+                <td class="premium text-right">$4,200/mo</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:55%"></div></div><span class="sla-label warn"><i class="fas fa-exclamation-triangle"></i> 9d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0035')"><span class="fraud-score-num">18</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0035')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0035','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 4 — James Whitfield, LTC */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0033','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0033</span></td>
+                <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
+                <td><span class="claim-type-badge ltc">Long-term Care</span></td>
+                <td class="premium text-right">$9,600</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:28%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 17d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0033')"><span class="fraud-score-num">9</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0033')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 5 — Linda Morrison, Waiver */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0031','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0031</span></td>
+                <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
+                <td><span class="claim-type-badge waiver">Waiver of Premium</span></td>
+                <td class="premium text-right">$9,600/yr</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:20%"></div></div><span class="sla-label ok"><i class="fas fa-infinity"></i> No SLA</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0031')"><span class="fraud-score-num">7</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0031')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0031','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 6 — Maria Gonzalez, ADB Compassionate */}
+              <tr class="claim-row compassionate-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0028','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0028</span></td>
+                <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez <span class="compassionate-tag"><i class="fas fa-heart"></i></span></span></div></td>
+                <td><span class="claim-type-badge accelerated">Accel. Benefit</span></td>
+                <td class="premium text-right">$120,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:68%"></div></div><span class="sla-label warn"><i class="fas fa-heart"></i> 5d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0028')"><span class="fraud-score-num">38</span><span class="fraud-score-lbl">Watch</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0028')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-orange" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0028','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 7 — Kevin Park, Death/Fraud Hold */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0025','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0025</span></td>
+                <td><div class="client-cell"><div class="mini-avatar kp">KP</div><span>Kevin Park</span></div></td>
+                <td><span class="claim-type-badge death">Death Benefit</span></td>
+                <td class="premium text-right">$250,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-hold"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-hold" style="width:100%"></div></div><span class="sla-label hold"><i class="fas fa-ban"></i> Hold</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell flagged" onclick="openFraudDetailModal('CLM-2026-0025')"><span class="fraud-score-num">78</span><span class="fraud-score-lbl">Flagged</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0025')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 1/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-red" style="width:25%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Fraud Review" onclick="openFraudDetailModal('CLM-2026-0025')"><i class="fas fa-shield-virus"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Fraud + IDP side-by-side */}
+        <div class="fraud-idp-grid">
+          <div class="fraud-detection-panel">
+            <div class="fdp-header">
+              <div class="fdp-title">
+                <div class="fdp-icon"><i class="fas fa-shield-virus"></i></div>
+                <div>
+                  <div class="fdp-heading">AI Fraud Detection Engine</div>
+                  <div class="fdp-sub">Continuously monitoring 11 active &amp; resolved claims · Last scan 2 mins ago</div>
                 </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
-              <td><span class="claim-id">CLM-2026-0038</span></td>
-              <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
-              <td><span class="policy-id">P-100321</span></td>
-              <td><span class="claim-type-badge ltc">Long-term Care</span></td>
-              <td class="premium">$18,000</td>
-              <td class="text-muted">2026-04-01</td>
-              <td><span class="days-open-badge normal">13d</span></td>
-              <td><span class="claim-status-badge open">Open</span></td>
-              <td><span class="priority-badge normal">Normal</span></td>
-              <td><div class="adjuster-cell"><div class="adj-avatar lt">LT</div><div class="adj-info"><div class="adj-name">Lisa Torres</div><div class="adj-team team-ltc">LTC Team</div></div></div></td>
-              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0038')"><span class="fraud-score-num">12</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0038')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
-              <td><div class="ci-triage-cell normal" onclick="openClaimModal('CLM-2026-0038','ci')"><span class="ci-triage-label">📋 Doc Request</span><span class="ci-triage-sub">Plan of care pending</span></div></td>
-              <td><div class="ci-res-timer normal"><i class="fas fa-clock"></i><span class="ci-res-days">8d est.</span><div class="ci-res-bar"><div class="ci-res-fill normal" style="width:45%"></div></div></div></td>
-              <td><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:38%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 22d left</span><span class="sla-deadline">State SLA: May 1</span></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0038','liability')"><div class="liab-score-wrap low"><span class="liab-score">18%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0038','ci')"><i class="fas fa-robot"></i></button>
+              </div>
+              <div class="fdp-stats">
+                <div class="fdp-stat"><span class="fdp-stat-val green">8</span><span class="fdp-stat-lbl">Clear</span></div>
+                <div class="fdp-stat"><span class="fdp-stat-val gold">2</span><span class="fdp-stat-lbl">Watch</span></div>
+                <div class="fdp-stat"><span class="fdp-stat-val red">1</span><span class="fdp-stat-lbl">Flagged</span></div>
+                <div class="fdp-divider"></div>
+                <div class="fdp-stat"><span class="fdp-stat-val blue">+32%</span><span class="fdp-stat-lbl">Detection Lift</span></div>
+              </div>
+              <button class="btn btn-ai fdp-btn" onclick="openFraudReportModal()"><i class="fas fa-search-plus"></i> Full Fraud Report</button>
+            </div>
+            <div class="fdp-risk-matrix">
+              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Claim Timing</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill red" style="width:72%"></div></div><div class="fdp-matrix-val red">High</div></div>
+              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Doc Completeness</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill orange" style="width:55%"></div></div><div class="fdp-matrix-val orange">Med</div></div>
+              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Policy History</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill green" style="width:90%"></div></div><div class="fdp-matrix-val green">Low</div></div>
+              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Beneficiary Match</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill orange" style="width:60%"></div></div><div class="fdp-matrix-val orange">Med</div></div>
+              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Claim Amount</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill red" style="width:80%"></div></div><div class="fdp-matrix-val red">High</div></div>
+            </div>
+            <div class="fdp-flags">
+              <div class="fdp-flag flagged" onclick="openFraudDetailModal('CLM-2026-0025')">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span class="fdp-flag-id">CLM-2026-0025</span>
+                <span class="fdp-flag-reason">Policy in Pending status at time of death · Coverage determination required · Medical records inconsistency · ML: 3 anomalies detected</span>
+                <div class="fdp-flag-signals"><span class="fdp-signal red">Timing</span><span class="fdp-signal red">Coverage Gap</span><span class="fdp-signal orange">Doc Delay</span></div>
+                <span class="fdp-flag-score">Risk: 78</span>
+              </div>
+              <div class="fdp-flag watch" onclick="openFraudDetailModal('CLM-2026-0041')">
+                <i class="fas fa-eye"></i>
+                <span class="fdp-flag-id">CLM-2026-0041</span>
+                <span class="fdp-flag-reason">$1M claim · Claimant ID docs pending · High-value threshold monitoring active · ML: enhanced review protocol</span>
+                <div class="fdp-flag-signals"><span class="fdp-signal orange">High Value</span><span class="fdp-signal orange">ID Pending</span></div>
+                <span class="fdp-flag-score">Risk: 42</span>
+              </div>
+              <div class="fdp-flag watch" onclick="openFraudDetailModal('CLM-2026-0028')">
+                <i class="fas fa-eye"></i>
+                <span class="fdp-flag-id">CLM-2026-0028</span>
+                <span class="fdp-flag-reason">Terminal certification pending · ADB claim filed 30 days post-diagnosis · NLP: document language inconsistency detected</span>
+                <div class="fdp-flag-signals"><span class="fdp-signal orange">Cert Delay</span><span class="fdp-signal yellow">NLP Flag</span></div>
+                <span class="fdp-flag-score">Risk: 38</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="idp-hub-panel idp-hub-panel-grid">
+            <div class="idp-hub-header">
+              <div class="idp-hub-title">
+                <div class="idp-hub-icon"><i class="fas fa-file-import"></i></div>
+                <div>
+                  <div class="idp-hub-name">Intelligent Document Processing Hub</div>
+                  <div class="idp-hub-sub">AI-powered auto-extraction · Last scan <span class="idp-scan-time">3 mins ago</span></div>
                 </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
-              <td><span class="claim-id">CLM-2026-0035</span></td>
-              <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
-              <td><span class="policy-id">P-100341</span></td>
-              <td><span class="claim-type-badge disability">Disability</span></td>
-              <td class="premium">$4,200/mo</td>
-              <td class="text-muted">2026-03-22</td>
-              <td><span class="days-open-badge warn">23d</span></td>
-              <td><span class="claim-status-badge pending">Pending Docs</span></td>
-              <td><span class="priority-badge normal">Normal</span></td>
-              <td><div class="adjuster-cell"><div class="adj-avatar dr">DR</div><div class="adj-info"><div class="adj-name">David Reyes</div><div class="adj-team team-di">DI Unit</div></div></div></td>
-              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0035')"><span class="fraud-score-num">18</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0035')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
-              <td><div class="ci-triage-cell watch" onclick="openClaimModal('CLM-2026-0035','ci')"><span class="ci-triage-label">🩺 APS Needed</span><span class="ci-triage-sub">Physician stmt pending</span></div></td>
-              <td><div class="ci-res-timer watch"><i class="fas fa-clock"></i><span class="ci-res-days">21d est.</span><div class="ci-res-bar"><div class="ci-res-fill watch" style="width:30%"></div></div></div></td>
-              <td><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:55%"></div></div><span class="sla-label warn"><i class="fas fa-exclamation-triangle"></i> 9d left</span><span class="sla-deadline">State SLA: Apr 22</span></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0035','liability')"><div class="liab-score-wrap med"><span class="liab-score">41%</span></div><span class="liab-flag med">Medium</span><span class="litig-risk med"><i class="fas fa-exclamation"></i> Watch</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0035','ci')"><i class="fas fa-robot"></i></button>
+              </div>
+              <div class="idp-hub-stats">
+                <div class="idp-stat"><div class="idp-stat-val green">5</div><div class="idp-stat-lbl">Docs Verified</div></div>
+                <div class="idp-stat"><div class="idp-stat-val orange">6</div><div class="idp-stat-lbl">Pending Upload</div></div>
+                <div class="idp-stat"><div class="idp-stat-val purple">4</div><div class="idp-stat-lbl">AI Extracting</div></div>
+                <div class="idp-stat"><div class="idp-stat-val blue">94%</div><div class="idp-stat-lbl">Accuracy Rate</div></div>
+              </div>
+              <div class="idp-hub-actions">
+                <div class="idp-drop-zone" id="idp-drop-zone" ondragover="event.preventDefault();this.classList.add('idp-drag-over')" ondragleave="this.classList.remove('idp-drag-over')" ondrop="handleIDPDrop(event)">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <span>Drop documents here to scan</span>
                 </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
-              <td><span class="claim-id">CLM-2026-0033</span></td>
-              <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
-              <td><span class="policy-id">P-100293</span></td>
-              <td><span class="claim-type-badge ltc">Long-term Care</span></td>
-              <td class="premium">$9,600</td>
-              <td class="text-muted">2026-03-15</td>
-              <td><span class="days-open-badge normal">30d</span></td>
-              <td><span class="claim-status-badge review">Under Review</span></td>
-              <td><span class="priority-badge normal">Normal</span></td>
-              <td><div class="adjuster-cell"><div class="adj-avatar lt">LT</div><div class="adj-info"><div class="adj-name">Lisa Torres</div><div class="adj-team team-ltc">LTC Team</div></div></div></td>
-              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0033')"><span class="fraud-score-num">9</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0033')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
-              <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0033','ci')"><span class="ci-triage-label">✅ On Track</span><span class="ci-triage-sub">Approval imminent</span></div></td>
-              <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">3d est.</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:80%"></div></div></div></td>
-              <td><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:28%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 17d left</span><span class="sla-deadline">State SLA: Apr 30</span></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0033','liability')"><div class="liab-score-wrap low"><span class="liab-score">12%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i></button>
+                <button class="btn btn-idp-scan" onclick="runIDPScan()"><i class="fas fa-search"></i> Run IDP Scan</button>
+              </div>
+            </div>
+            <div class="idp-queue" id="idp-queue">
+              <div class="idp-queue-item idp-qi-extracting">
+                <div class="idp-qi-icon"><i class="fas fa-file-pdf"></i></div>
+                <div class="idp-qi-info"><div class="idp-qi-name">Death_Certificate_RC_2026.pdf</div><div class="idp-qi-meta">CLM-2026-0041 · Robert Chen · Uploaded 2026-04-09</div></div>
+                <div class="idp-qi-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting fields…</div>
+                <div class="idp-qi-confidence">—</div>
+              </div>
+              <div class="idp-queue-item idp-qi-verified">
+                <div class="idp-qi-icon"><i class="fas fa-file-medical"></i></div>
+                <div class="idp-qi-info"><div class="idp-qi-name">Medical_Certificate_Cardiac.pdf</div><div class="idp-qi-meta">CLM-2026-0041 · Robert Chen · Uploaded 2026-04-09</div></div>
+                <div class="idp-qi-status verified"><i class="fas fa-check-circle"></i> Verified</div>
+                <div class="idp-qi-confidence">Confidence: <strong>98%</strong></div>
+              </div>
+              <div class="idp-queue-item idp-qi-pending">
+                <div class="idp-qi-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="idp-qi-info"><div class="idp-qi-name">Terminal_Illness_Certification.pdf</div><div class="idp-qi-meta">CLM-2026-0028 · Maria Gonzalez · Awaiting oncologist</div></div>
+                <div class="idp-qi-status pending"><i class="fas fa-clock"></i> Awaiting Upload</div>
+                <div class="idp-qi-confidence">—</div>
+              </div>
+              <div class="idp-queue-item idp-qi-verified">
+                <div class="idp-qi-icon"><i class="fas fa-file-contract"></i></div>
+                <div class="idp-qi-info"><div class="idp-qi-name">LTC_Eligibility_Cert_SW.pdf</div><div class="idp-qi-meta">CLM-2026-0038 · Sandra Williams · Uploaded 2026-04-01</div></div>
+                <div class="idp-qi-status verified"><i class="fas fa-check-circle"></i> Verified</div>
+                <div class="idp-qi-confidence">Confidence: <strong>99%</strong></div>
+              </div>
+              <div class="idp-queue-item idp-qi-extracting">
+                <div class="idp-qi-icon"><i class="fas fa-file-medical-alt"></i></div>
+                <div class="idp-qi-info"><div class="idp-qi-name">APS_DrHernandez_MG.pdf</div><div class="idp-qi-meta">CLM-2026-0035 · Maria Gonzalez · Uploading…</div></div>
+                <div class="idp-qi-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting fields…</div>
+                <div class="idp-qi-confidence">—</div>
+              </div>
+            </div>
+          </div>
+        </div>{/* end fraud-idp-grid */}
+
+      </div>{/* end clm-panel-active */}
+
+      {/* ════════════════════════════════════════════════════════
+          TAB 3 — INTELLIGENCE
+          Proactive AI Detection (claims-only: death + SLA + coverage)
+          Smart Doc Request Automation
+          ════════════════════════════════════════════════════════ */}
+      <div class="pol-tab-panel" id="clm-panel-intelligence" style="display:none">
+
+        {/* Proactive AI Detection Engine — cleaned: lapse/renewal alerts removed */}
+        <div class="proactive-alert-card">
+          <div class="pac-header">
+            <div class="pac-header-left">
+              <div class="pac-icon"><i class="fas fa-brain"></i><span class="pac-pulse"></span></div>
+              <div>
+                <div class="pac-title">Proactive AI Detection Engine</div>
+                <div class="pac-sub">Monitoring obituaries, SLA compliance &amp; post-claim coverage events · Updated <span class="pac-updated">just now</span></div>
+              </div>
+            </div>
+            <div class="pac-header-stats">
+              <div class="pac-hstat"><span class="pac-hstat-val red">1</span><span class="pac-hstat-lbl">Death Detected</span></div>
+              <div class="pac-hstat"><span class="pac-hstat-val red">2</span><span class="pac-hstat-lbl">SLA At Risk</span></div>
+              <div class="pac-hstat"><span class="pac-hstat-val blue">1</span><span class="pac-hstat-lbl">Coverage Opp.</span></div>
+              <div class="pac-hstat"><span class="pac-hstat-val blue">3</span><span class="pac-hstat-lbl">Total Alerts</span></div>
+            </div>
+            <button class="btn-pac-dismiss" onclick="togglePACPanel(this)" title="Collapse alerts"><i class="fas fa-chevron-up"></i></button>
+          </div>
+          <div class="pac-alerts-body" id="pac-alerts-body">
+
+            {/* Alert 1 — Death Detected */}
+            <div class="pac-alert pac-alert-death" id="pac-alert-1">
+              <div class="pac-alert-type-icon death"><i class="fas fa-heart-broken"></i></div>
+              <div class="pac-alert-content">
+                <div class="pac-alert-badges">
+                  <span class="pac-badge death"><i class="fas fa-exclamation-circle"></i> Death Detected</span>
+                  <span class="pac-badge urgent">Urgent</span>
+                  <span class="pac-badge new">New — 14 mins ago</span>
                 </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
-              <td><span class="claim-id">CLM-2026-0031</span></td>
-              <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
-              <td><span class="policy-id">P-100362</span></td>
-              <td><span class="claim-type-badge waiver">Waiver of Premium</span></td>
-              <td class="premium">$9,600/yr</td>
-              <td class="text-muted">2026-03-10</td>
-              <td><span class="days-open-badge normal">35d</span></td>
-              <td><span class="claim-status-badge open">Open</span></td>
-              <td><span class="priority-badge low">Low</span></td>
-              <td><div class="adjuster-cell"><div class="adj-avatar as">AS</div><div class="adj-info"><div class="adj-name">Amy Santos</div><div class="adj-team team-support">Agent Support</div></div></div></td>
-              <td><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0031')"><span class="fraud-score-num">7</span><span class="fraud-score-lbl">Clear</span><i class="fas fa-check"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0031')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
-              <td><div class="ci-triage-cell ok" onclick="openClaimModal('CLM-2026-0031','ci')"><span class="ci-triage-label">✅ Waiver Active</span><span class="ci-triage-sub">Monitor recovery</span></div></td>
-              <td><div class="ci-res-timer ok"><i class="fas fa-check-circle"></i><span class="ci-res-days">Open</span><div class="ci-res-bar"><div class="ci-res-fill ok" style="width:60%"></div></div></div></td>
-              <td><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:20%"></div></div><span class="sla-label ok"><i class="fas fa-infinity"></i> Ongoing</span><span class="sla-deadline">Waiver · No SLA</span></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0031','liability')"><div class="liab-score-wrap low"><span class="liab-score">8%</span></div><span class="liab-flag low">Low</span><span class="litig-risk low"><i class="fas fa-check"></i> Clear</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0031','ci')"><i class="fas fa-robot"></i></button>
+                <div class="pac-alert-headline">Obituary Match — Kevin Park · Policy P-100350</div>
+                <div class="pac-alert-detail">AI cross-referenced public obituary data with client registry. Kevin Park (age 29, Jersey City) confirmed deceased 2026-04-10. Policy P-100350 (Term Life $250K) currently in <strong>Pending</strong> status — coverage determination required before claim processing. Estate contact not yet identified.</div>
+                <div class="pac-alert-meta">
+                  <span><i class="fas fa-search"></i> Source: Public obituary registry · NJ DoH cross-match</span>
+                  <span><i class="fas fa-file-contract"></i> Policy P-100350 · $250,000 Death Benefit</span>
+                  <span><i class="fas fa-shield-virus"></i> Fraud Score: 78 / 100 — Flagged</span>
                 </div>
-              </td>
-            </tr>
-            <tr class="claim-row compassionate-row">
-              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
-              <td><span class="claim-id">CLM-2026-0028</span></td>
-              <td><div class="client-cell"><div class="mini-avatar mg">MG</div><span>Maria Gonzalez</span></div></td>
-              <td><span class="policy-id">P-100340</span></td>
-              <td><span class="claim-type-badge accelerated">Accelerated Benefit</span></td>
-              <td class="premium">$120,000</td>
-              <td class="text-muted">2026-03-05</td>
-              <td><span class="days-open-badge warn">40d</span></td>
-              <td><span class="claim-status-badge pending">Pending Docs</span></td>
-              <td><span class="priority-badge urgent">Urgent <span class="compassionate-tag"><i class="fas fa-heart"></i> Compassionate</span></span></td>
-              <td><div class="adjuster-cell"><div class="adj-avatar cd">CD</div><div class="adj-info"><div class="adj-name">Chris Davis</div><div class="adj-team team-claims">Claims Dept.</div></div></div></td>
-              <td><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0028')"><span class="fraud-score-num">38</span><span class="fraud-score-lbl">Watch</span><i class="fas fa-eye"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0028')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 2/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-orange" style="width:50%"></div></div></div></td>
-              <td><div class="ci-triage-cell urgent" onclick="openClaimModal('CLM-2026-0028','ci')"><span class="ci-triage-label">⚡ Compassionate</span><span class="ci-triage-sub">Terminal — expedite</span></div></td>
-              <td><div class="ci-res-timer urgent"><i class="fas fa-fire"></i><span class="ci-res-days">9d est.</span><div class="ci-res-bar"><div class="ci-res-fill urgent" style="width:70%"></div></div></div></td>
-              <td><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:68%"></div></div><span class="sla-label warn"><i class="fas fa-heart"></i> 5d left</span><span class="sla-deadline">Compassionate SLA: Apr 19</span></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0028','liability')"><div class="liab-score-wrap med"><span class="liab-score">29%</span></div><span class="liab-flag med">Medium</span><span class="litig-risk med"><i class="fas fa-exclamation"></i> Watch</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0028','ci')"><i class="fas fa-robot"></i></button>
+              </div>
+              <div class="pac-alert-actions">
+                <button class="btn-pac-action primary" onclick="openPACModal('obituary-kevin')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
+                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i> View Claim</button>
+              </div>
+            </div>
+
+            {/* Alert 2 — SLA Compliance Risk */}
+            <div class="pac-alert pac-alert-sla" id="pac-alert-sla">
+              <div class="pac-alert-type-icon sla"><i class="fas fa-stopwatch"></i></div>
+              <div class="pac-alert-content">
+                <div class="pac-alert-badges">
+                  <span class="pac-badge sla"><i class="fas fa-balance-scale"></i> SLA Breach Risk</span>
+                  <span class="pac-badge urgent">2 Claims</span>
+                  <span class="pac-badge new">Regulatory Deadline</span>
                 </div>
-              </td>
-            </tr>
-            <tr class="claim-row">
-              <td><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
-              <td><span class="claim-id">CLM-2026-0025</span></td>
-              <td><div class="client-cell"><div class="mini-avatar kp">KP</div><span>Kevin Park</span></div></td>
-              <td><span class="policy-id">P-100350</span></td>
-              <td><span class="claim-type-badge death">Death Benefit</span></td>
-              <td class="premium">$250,000</td>
-              <td class="text-muted">2026-02-28</td>
-              <td><span class="days-open-badge warn">45d</span></td>
-              <td><span class="claim-status-badge review">Under Review</span></td>
-              <td><span class="priority-badge normal">Normal</span></td>
-              <td><div class="adjuster-cell"><div class="adj-avatar cd">CD</div><div class="adj-info"><div class="adj-name">Chris Davis</div><div class="adj-team team-claims">Claims Dept.</div></div></div></td>
-              <td><div class="fraud-score-cell flagged" onclick="openFraudDetailModal('CLM-2026-0025')"><span class="fraud-score-num">78</span><span class="fraud-score-lbl">Flagged</span><i class="fas fa-exclamation-triangle"></i></div></td>
-              <td><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0025')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 1/4 Docs</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-red" style="width:25%"></div></div></div></td>
-              <td><div class="ci-triage-cell flagged" onclick="openClaimModal('CLM-2026-0025','ci')"><span class="ci-triage-label">🚨 Fraud Review</span><span class="ci-triage-sub">Coverage pending</span></div></td>
-              <td><div class="ci-res-timer flagged"><i class="fas fa-exclamation-triangle"></i><span class="ci-res-days">Hold</span><div class="ci-res-bar"><div class="ci-res-fill flagged" style="width:15%"></div></div></div></td>
-              <td><div class="sla-cell sla-hold"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-hold" style="width:100%"></div></div><span class="sla-label hold"><i class="fas fa-ban"></i> On Hold</span><span class="sla-deadline">Fraud review · Paused</span></div></td>
-              <td><div class="liability-cell" onclick="openClaimModal('CLM-2026-0025','liability')"><div class="liab-score-wrap critical"><span class="liab-score">88%</span></div><span class="liab-flag critical">Critical</span><span class="litig-risk critical"><i class="fas fa-gavel"></i> Litig. Risk</span></div></td>
-              <td>
-                <div class="action-btns">
-                  <button class="btn-icon" title="View Claim" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Upload Documents"><i class="fas fa-upload"></i></button>
-                  <button class="btn-icon ai-btn" title="AI Analysis" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i></button>
+                <div class="pac-alert-headline">State SLA Deadline — CLM-2026-0041 expires tomorrow · CLM-2026-0028 expires in 5 days</div>
+                <div class="pac-alert-detail">New York State Insurance Law §3420 requires death benefit claims to be resolved within 30 days of notice. <strong>CLM-2026-0041 (Robert Chen, $1M)</strong> has 1 day remaining. Compassionate SLA applies to <strong>CLM-2026-0028 (Maria Gonzalez, $120K)</strong> — expedite immediately to avoid regulatory breach and potential fines of up to $5,000 per violation.</div>
+                <div class="pac-alert-meta">
+                  <span><i class="fas fa-balance-scale"></i> NY Ins. Law §3420 · 30-day resolution requirement</span>
+                  <span><i class="fas fa-exclamation-circle"></i> 2 claims in breach window · Total exposure $1.12M</span>
+                  <span><i class="fas fa-calendar-times"></i> CLM-2026-0041: Apr 14 · CLM-2026-0028: Apr 19</span>
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </div>
+              <div class="pac-alert-actions">
+                <button class="btn-pac-action primary" onclick="clmSwitchTab('active');filterClaimsBySLA()"><i class="fas fa-stopwatch"></i> View SLA Queue</button>
+                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
+              </div>
+            </div>
 
-      {/* ── Fraud + IDP side-by-side grid ── */}
-      <div class="fraud-idp-grid">
+            {/* Alert 3 — Surviving Family Coverage Opportunity */}
+            <div class="pac-alert pac-alert-coverage" id="pac-alert-4">
+              <div class="pac-alert-type-icon coverage"><i class="fas fa-user-plus"></i></div>
+              <div class="pac-alert-content">
+                <div class="pac-alert-badges">
+                  <span class="pac-badge coverage"><i class="fas fa-shield-alt"></i> Coverage Gap</span>
+                  <span class="pac-badge normal2">Opportunity</span>
+                </div>
+                <div class="pac-alert-headline">Surviving Family — New Coverage Opportunity · Robert Chen Estate</div>
+                <div class="pac-alert-detail">Following the active death benefit claim (CLM-2026-0041), AI identified that <strong>Susan Chen (beneficiary, est. age 42)</strong> has no existing NYL coverage. Upon claim resolution, proactively reach out with a new coverage needs analysis. Estate payout of $1M creates an ideal window for investment, insurance and estate planning conversations.</div>
+                <div class="pac-alert-meta">
+                  <span><i class="fas fa-dollar-sign"></i> Expected payout: $1,000,000 to Susan Chen</span>
+                  <span><i class="fas fa-lightbulb"></i> Opportunity: Whole Life + investment + estate planning</span>
+                  <span><i class="fas fa-calendar-check"></i> Outreach timing: After claim resolves ~2026-04-17</span>
+                </div>
+              </div>
+              <div class="pac-alert-actions">
+                <button class="btn-pac-action primary" onclick="openPACModal('coverage-susan')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
+                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
+              </div>
+            </div>
 
-      {/* ── Fraud Detection Panel ── */}
-      <div class="fraud-detection-panel">
-        <div class="fdp-header">
-          <div class="fdp-title">
-            <div class="fdp-icon"><i class="fas fa-shield-virus"></i></div>
-            <div>
-              <div class="fdp-heading">AI Fraud Detection Engine</div>
-              <div class="fdp-sub">Continuously monitoring 11 active &amp; resolved claims · Last scan 2 mins ago</div>
-            </div>
-          </div>
-          <div class="fdp-stats">
-            <div class="fdp-stat">
-              <span class="fdp-stat-val green">8</span>
-              <span class="fdp-stat-lbl">Clear</span>
-            </div>
-            <div class="fdp-stat">
-              <span class="fdp-stat-val gold">2</span>
-              <span class="fdp-stat-lbl">Watch</span>
-            </div>
-            <div class="fdp-stat">
-              <span class="fdp-stat-val red">1</span>
-              <span class="fdp-stat-lbl">Flagged</span>
-            </div>
-            <div class="fdp-divider"></div>
-            <div class="fdp-stat">
-              <span class="fdp-stat-val blue">+32%</span>
-              <span class="fdp-stat-lbl">Detection Lift</span>
-            </div>
-          </div>
-          <button class="btn btn-ai fdp-btn" onclick="openFraudReportModal()">
-            <i class="fas fa-search-plus"></i> Full Fraud Report
-          </button>
-        </div>
-        {/* ML Risk Matrix */}
-        <div class="fdp-risk-matrix">
-          <div class="fdp-matrix-col">
-            <div class="fdp-matrix-label">Claim Timing</div>
-            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill red" style="width:72%"></div></div>
-            <div class="fdp-matrix-val red">High</div>
-          </div>
-          <div class="fdp-matrix-col">
-            <div class="fdp-matrix-label">Doc Completeness</div>
-            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill orange" style="width:55%"></div></div>
-            <div class="fdp-matrix-val orange">Med</div>
-          </div>
-          <div class="fdp-matrix-col">
-            <div class="fdp-matrix-label">Policy History</div>
-            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill green" style="width:90%"></div></div>
-            <div class="fdp-matrix-val green">Low</div>
-          </div>
-          <div class="fdp-matrix-col">
-            <div class="fdp-matrix-label">Beneficiary Match</div>
-            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill orange" style="width:60%"></div></div>
-            <div class="fdp-matrix-val orange">Med</div>
-          </div>
-          <div class="fdp-matrix-col">
-            <div class="fdp-matrix-label">Claim Amount</div>
-            <div class="fdp-matrix-bar"><div class="fdp-matrix-fill red" style="width:80%"></div></div>
-            <div class="fdp-matrix-val red">High</div>
           </div>
         </div>
-        <div class="fdp-flags">
-          <div class="fdp-flag flagged" onclick="openFraudDetailModal('CLM-2026-0025')">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span class="fdp-flag-id">CLM-2026-0025</span>
-            <span class="fdp-flag-reason">Policy in Pending status at time of death · Coverage determination required · Medical records inconsistency · ML: 3 anomalies detected</span>
-            <div class="fdp-flag-signals">
-              <span class="fdp-signal red">Timing</span>
-              <span class="fdp-signal red">Coverage Gap</span>
-              <span class="fdp-signal orange">Doc Delay</span>
-            </div>
-            <span class="fdp-flag-score">Risk: 78</span>
-          </div>
-          <div class="fdp-flag watch" onclick="openFraudDetailModal('CLM-2026-0041')">
-            <i class="fas fa-eye"></i>
-            <span class="fdp-flag-id">CLM-2026-0041</span>
-            <span class="fdp-flag-reason">$1M claim · Claimant ID docs pending · High-value threshold monitoring active · ML: enhanced review protocol</span>
-            <div class="fdp-flag-signals">
-              <span class="fdp-signal orange">High Value</span>
-              <span class="fdp-signal orange">ID Pending</span>
-            </div>
-            <span class="fdp-flag-score">Risk: 42</span>
-          </div>
-          <div class="fdp-flag watch" onclick="openFraudDetailModal('CLM-2026-0028')">
-            <i class="fas fa-eye"></i>
-            <span class="fdp-flag-id">CLM-2026-0028</span>
-            <span class="fdp-flag-reason">Terminal certification pending · ADB claim filed 30 days post-diagnosis · NLP: document language inconsistency detected</span>
-            <div class="fdp-flag-signals">
-              <span class="fdp-signal orange">Cert Delay</span>
-              <span class="fdp-signal yellow">NLP Flag</span>
-            </div>
-            <span class="fdp-flag-score">Risk: 38</span>
-          </div>
-        </div>
-      </div>
 
-      {/* ── IDP Hub Panel ── */}
-      <div class="idp-hub-panel idp-hub-panel-grid">
-        <div class="idp-hub-header">
-          <div class="idp-hub-title">
-            <div class="idp-hub-icon"><i class="fas fa-file-import"></i></div>
-            <div>
-              <div class="idp-hub-name">Intelligent Document Processing Hub</div>
-              <div class="idp-hub-sub">AI-powered auto-extraction · Last scan <span class="idp-scan-time">3 mins ago</span></div>
+        {/* Smart Doc Request Automation */}
+        <div class="smart-doc-panel">
+          <div class="sdp-header">
+            <div class="sdp-title-area">
+              <div class="sdp-icon"><i class="fas fa-paper-plane"></i></div>
+              <div>
+                <div class="sdp-title">Smart Doc Request Automation</div>
+                <div class="sdp-sub">AI drafts and sends personalized document reminder emails · Last run: 4 mins ago</div>
+              </div>
             </div>
-          </div>
-          <div class="idp-hub-stats">
-            <div class="idp-stat"><div class="idp-stat-val green">5</div><div class="idp-stat-lbl">Docs Verified</div></div>
-            <div class="idp-stat"><div class="idp-stat-val orange">6</div><div class="idp-stat-lbl">Pending Upload</div></div>
-            <div class="idp-stat"><div class="idp-stat-val purple">4</div><div class="idp-stat-lbl">AI Extracting</div></div>
-            <div class="idp-stat"><div class="idp-stat-val blue">94%</div><div class="idp-stat-lbl">Accuracy Rate</div></div>
-          </div>
-          <div class="idp-hub-actions">
-            <div class="idp-drop-zone" id="idp-drop-zone" ondragover="event.preventDefault();this.classList.add('idp-drag-over')" ondragleave="this.classList.remove('idp-drag-over')" ondrop="handleIDPDrop(event)">
-              <i class="fas fa-cloud-upload-alt"></i>
-              <span>Drop documents here to scan</span>
+            <div class="sdp-stats">
+              <div class="sdp-stat"><span class="sdp-stat-val orange">3</span><span class="sdp-stat-lbl">Pending Requests</span></div>
+              <div class="sdp-stat"><span class="sdp-stat-val green">8</span><span class="sdp-stat-lbl">Sent This Week</span></div>
+              <div class="sdp-stat"><span class="sdp-stat-val blue">67%</span><span class="sdp-stat-lbl">Response Rate</span></div>
             </div>
-            <button class="btn btn-idp-scan" onclick="runIDPScan()"><i class="fas fa-search"></i> Run IDP Scan</button>
+            <button class="btn btn-ai sdp-run-btn" onclick="runSmartDocRequests()"><i class="fas fa-paper-plane"></i> Send All Reminders</button>
+          </div>
+          <div class="sdp-queue">
+            <div class="sdp-item sdp-urgent">
+              <div class="sdp-item-icon"><i class="fas fa-file-signature"></i></div>
+              <div class="sdp-item-content">
+                <div class="sdp-item-title">Identity Documents — Susan Chen (Beneficiary)</div>
+                <div class="sdp-item-meta">CLM-2026-0041 · Robert Chen · Death Benefit $1M · Overdue 1 day</div>
+                <div class="sdp-item-draft">"Dear Susan Chen, to process your $1,000,000 death benefit claim, we need your government-issued photo ID and bank account details. These are the final steps before we can release your payment…"</div>
+              </div>
+              <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0041','Susan Chen')"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+            <div class="sdp-item sdp-urgent">
+              <div class="sdp-item-icon"><i class="fas fa-file-medical"></i></div>
+              <div class="sdp-item-content">
+                <div class="sdp-item-title">Terminal Illness Certification — Dr. Hernandez Office</div>
+                <div class="sdp-item-meta">CLM-2026-0028 · Maria Gonzalez · ADB $120,000 · 9 days pending</div>
+                <div class="sdp-item-draft">"Dear Dr. Hernandez's Office, we are processing a compassionate accelerated benefit claim for Maria Gonzalez. We respectfully request expedited completion of the terminal illness certification form…"</div>
+              </div>
+              <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+            <div class="sdp-item sdp-normal">
+              <div class="sdp-item-icon"><i class="fas fa-file-alt"></i></div>
+              <div class="sdp-item-content">
+                <div class="sdp-item-title">Attending Physician Statement — Dr. Hernandez</div>
+                <div class="sdp-item-meta">CLM-2026-0035 · Maria Gonzalez · Disability $4,200/mo · 22 days pending</div>
+                <div class="sdp-item-draft">"Dear Dr. Hernandez, we are processing a disability insurance claim for your patient Maria Gonzalez. Please complete the Attending Physician Statement to allow us to begin benefit payments…"</div>
+              </div>
+              <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
           </div>
         </div>
-        <div class="idp-queue" id="idp-queue">
-          <div class="idp-queue-item idp-qi-extracting">
-            <div class="idp-qi-icon"><i class="fas fa-file-pdf"></i></div>
-            <div class="idp-qi-info">
-              <div class="idp-qi-name">Death_Certificate_RC_2026.pdf</div>
-              <div class="idp-qi-meta">CLM-2026-0041 · Robert Chen · Uploaded 2026-04-09</div>
-            </div>
-            <div class="idp-qi-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting fields…</div>
-            <div class="idp-qi-confidence">—</div>
-          </div>
-          <div class="idp-queue-item idp-qi-verified">
-            <div class="idp-qi-icon"><i class="fas fa-file-medical"></i></div>
-            <div class="idp-qi-info">
-              <div class="idp-qi-name">Medical_Certificate_Cardiac.pdf</div>
-              <div class="idp-qi-meta">CLM-2026-0041 · Robert Chen · Uploaded 2026-04-09</div>
-            </div>
-            <div class="idp-qi-status verified"><i class="fas fa-check-circle"></i> Verified</div>
-            <div class="idp-qi-confidence">Confidence: <strong>98%</strong></div>
-          </div>
-          <div class="idp-queue-item idp-qi-pending">
-            <div class="idp-qi-icon"><i class="fas fa-file-alt"></i></div>
-            <div class="idp-qi-info">
-              <div class="idp-qi-name">Terminal_Illness_Certification.pdf</div>
-              <div class="idp-qi-meta">CLM-2026-0028 · Maria Gonzalez · Awaiting oncologist</div>
-            </div>
-            <div class="idp-qi-status pending"><i class="fas fa-clock"></i> Awaiting Upload</div>
-            <div class="idp-qi-confidence">—</div>
-          </div>
-          <div class="idp-queue-item idp-qi-verified">
-            <div class="idp-qi-icon"><i class="fas fa-file-contract"></i></div>
-            <div class="idp-qi-info">
-              <div class="idp-qi-name">LTC_Eligibility_Cert_SW.pdf</div>
-              <div class="idp-qi-meta">CLM-2026-0038 · Sandra Williams · Uploaded 2026-04-01</div>
-            </div>
-            <div class="idp-qi-status verified"><i class="fas fa-check-circle"></i> Verified</div>
-            <div class="idp-qi-confidence">Confidence: <strong>99%</strong></div>
-          </div>
-          <div class="idp-queue-item idp-qi-extracting">
-            <div class="idp-qi-icon"><i class="fas fa-file-medical-alt"></i></div>
-            <div class="idp-qi-info">
-              <div class="idp-qi-name">APS_DrHernandez_MG.pdf</div>
-              <div class="idp-qi-meta">CLM-2026-0035 · Maria Gonzalez · Uploading…</div>
-            </div>
-            <div class="idp-qi-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting fields…</div>
-            <div class="idp-qi-confidence">—</div>
-          </div>
-        </div>
-      </div>
 
-      </div>{/* ── end fraud-idp-grid ── */}
+      </div>{/* end clm-panel-intelligence */}
 
+      {/* ════════════════════════════════════════════════════════
+          TAB 4 — RESOLVED & ANALYTICS
+          Recently Resolved table · Claims Performance Analytics
+          ════════════════════════════════════════════════════════ */}
+      <div class="pol-tab-panel" id="clm-panel-resolved" style="display:none">
 
-      {/* ── Recently Resolved Claims ── */}
-      <div class="claims-section-label" style="margin-top:28px">
-        <i class="fas fa-check-circle" style="color:#059669"></i> Recently Resolved Claims
-        <span class="claims-count-badge resolved">14 YTD</span>
-        <span class="claims-denied-badge"><i class="fas fa-times-circle"></i> 1 Denied · Appeal window open</span>
-      </div>
+        {/* Section header */}
+        <div class="claims-section-header">
+          <div class="claims-section-label-row">
+            <div class="claims-section-label">
+              <i class="fas fa-check-circle" style="color:#059669"></i> Recently Resolved Claims
+              <span class="claims-count-badge resolved">14 YTD</span>
+              <span class="claims-denied-badge"><i class="fas fa-times-circle"></i> 1 Denied · Appeal window open</span>
+            </div>
+          </div>
+        </div>
 
-      <div class="claims-table-wrapper">
-        <table class="data-table claims-table">
-          <thead>
-            <tr>
-              <th>Claim ID</th>
-              <th>Client</th>
-              <th>Policy</th>
-              <th>Claim Type</th>
-              <th>Amount Paid</th>
-              <th>Filed</th>
-              <th>Resolved</th>
-              <th>Status</th>
-              <th>Resolution Days</th>
-              <th><i class="fas fa-tag" style="color:#64748b;margin-right:4px"></i>Resolution Category</th>
-              <th><i class="fas fa-times-circle" style="color:#dc2626;margin-right:4px"></i>Denial Reason</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="claim-id">CLM-2026-0022</span></td>
-              <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
-              <td><span class="policy-id">P-100360</span></td>
-              <td><span class="claim-type-badge death">Death Benefit (Rider)</span></td>
-              <td class="premium">$50,000</td>
-              <td class="text-muted">2026-02-10</td>
-              <td class="text-muted">2026-02-17</td>
-              <td><span class="claim-status-badge paid">Paid</span></td>
-              <td><span class="res-days good">7 days</span></td>
-              <td><span class="res-category fast-track"><i class="fas fa-bolt"></i> Fast-Track</span></td>
-              <td><span class="denial-reason none">—</span></td>
-              <td><div class="action-btns">
-                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0022','view')"><i class="fas fa-eye"></i></button>
-                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0022')"><i class="fas fa-redo"></i></button>
-              </div></td>
-            </tr>
-            <tr>
-              <td><span class="claim-id">CLM-2026-0019</span></td>
-              <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
-              <td><span class="policy-id">P-100311</span></td>
-              <td><span class="claim-type-badge waiver">Waiver of Premium</span></td>
-              <td class="premium">$8,400/yr</td>
-              <td class="text-muted">2026-01-20</td>
-              <td class="text-muted">2026-01-24</td>
-              <td><span class="claim-status-badge paid">Approved</span></td>
-              <td><span class="res-days good">4 days</span></td>
-              <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
-              <td><span class="denial-reason none">—</span></td>
-              <td><div class="action-btns">
-                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0019','view')"><i class="fas fa-eye"></i></button>
-                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0019')"><i class="fas fa-redo"></i></button>
-              </div></td>
-            </tr>
-            <tr>
-              <td><span class="claim-id">CLM-2026-0015</span></td>
-              <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
-              <td><span class="policy-id">P-100291</span></td>
-              <td><span class="claim-type-badge accelerated">Accelerated Benefit</span></td>
-              <td class="premium">$75,000</td>
-              <td class="text-muted">2026-01-08</td>
-              <td class="text-muted">2026-01-15</td>
-              <td><span class="claim-status-badge paid">Paid</span></td>
-              <td><span class="res-days good">7 days</span></td>
-              <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
-              <td><span class="denial-reason none">—</span></td>
-              <td><div class="action-btns">
-                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0015','view')"><i class="fas fa-eye"></i></button>
-                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0015')"><i class="fas fa-redo"></i></button>
-              </div></td>
-            </tr>
-            <tr class="claim-row-denied">
-              <td><span class="claim-id">CLM-2025-0201</span></td>
-              <td><div class="client-cell"><div class="mini-avatar dk">DK</div><span>Daniel Kim</span></div></td>
-              <td><span class="policy-id">P-100371</span></td>
-              <td><span class="claim-type-badge disability">Disability</span></td>
-              <td class="premium text-muted">$0</td>
-              <td class="text-muted">2025-11-15</td>
-              <td class="text-muted">2025-12-02</td>
-              <td><span class="claim-status-badge denied">Denied</span></td>
-              <td><span class="res-days slow">17 days</span></td>
-              <td><span class="res-category escalated"><i class="fas fa-arrow-up"></i> Escalated</span></td>
-              <td><span class="denial-reason active" title="Pre-existing condition exclusion — disability pre-dates policy by 8 months">Pre-existing Condition</span></td>
-              <td><div class="action-btns">
-                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0201','view')"><i class="fas fa-eye"></i></button>
-                <button class="btn-icon appeal-btn" title="File Appeal" onclick="openAppealModal('CLM-2025-0201')"><i class="fas fa-balance-scale"></i></button>
-                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2025-0201')"><i class="fas fa-redo"></i></button>
-              </div></td>
-            </tr>
-            <tr>
-              <td><span class="claim-id">CLM-2025-0198</span></td>
-              <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
-              <td><span class="policy-id">P-100320</span></td>
-              <td><span class="claim-type-badge disability">Disability</span></td>
-              <td class="premium">$12,600</td>
-              <td class="text-muted">2025-12-01</td>
-              <td class="text-muted">2025-12-08</td>
-              <td><span class="claim-status-badge paid">Paid</span></td>
-              <td><span class="res-days good">7 days</span></td>
-              <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
-              <td><span class="denial-reason none">—</span></td>
-              <td><div class="action-btns">
-                <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0198','view')"><i class="fas fa-eye"></i></button>
-                <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2025-0198')"><i class="fas fa-redo"></i></button>
-              </div></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <div class="claims-table-wrapper">
+          <table class="data-table claims-table">
+            <thead>
+              <tr>
+                <th>Claim ID</th>
+                <th>Client</th>
+                <th>Policy</th>
+                <th>Claim Type</th>
+                <th>Amount Paid</th>
+                <th>Filed</th>
+                <th>Resolved</th>
+                <th>Status</th>
+                <th>Resolution Days</th>
+                <th><i class="fas fa-tag" style="color:#64748b;margin-right:4px"></i>Category</th>
+                <th><i class="fas fa-times-circle" style="color:#dc2626;margin-right:4px"></i>Denial Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="claim-id">CLM-2026-0022</span></td>
+                <td><div class="client-cell"><div class="mini-avatar lm">LM</div><span>Linda Morrison</span></div></td>
+                <td><span class="policy-id">P-100360</span></td>
+                <td><span class="claim-type-badge death">Death Benefit (Rider)</span></td>
+                <td class="premium">$50,000</td>
+                <td class="text-muted">2026-02-10</td>
+                <td class="text-muted">2026-02-17</td>
+                <td><span class="claim-status-badge paid">Paid</span></td>
+                <td><span class="res-days good">7 days</span></td>
+                <td><span class="res-category fast-track"><i class="fas fa-bolt"></i> Fast-Track</span></td>
+                <td><span class="denial-reason none">—</span></td>
+                <td><div class="action-btns">
+                  <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0022','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0022')"><i class="fas fa-redo"></i></button>
+                </div></td>
+              </tr>
+              <tr>
+                <td><span class="claim-id">CLM-2026-0019</span></td>
+                <td><div class="client-cell"><div class="mini-avatar rc">RC</div><span>Robert Chen</span></div></td>
+                <td><span class="policy-id">P-100311</span></td>
+                <td><span class="claim-type-badge waiver">Waiver of Premium</span></td>
+                <td class="premium">$8,400/yr</td>
+                <td class="text-muted">2026-01-20</td>
+                <td class="text-muted">2026-01-24</td>
+                <td><span class="claim-status-badge paid">Approved</span></td>
+                <td><span class="res-days good">4 days</span></td>
+                <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
+                <td><span class="denial-reason none">—</span></td>
+                <td><div class="action-btns">
+                  <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0019','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0019')"><i class="fas fa-redo"></i></button>
+                </div></td>
+              </tr>
+              <tr>
+                <td><span class="claim-id">CLM-2026-0015</span></td>
+                <td><div class="client-cell"><div class="mini-avatar jw">JW</div><span>James Whitfield</span></div></td>
+                <td><span class="policy-id">P-100291</span></td>
+                <td><span class="claim-type-badge accelerated">Accelerated Benefit</span></td>
+                <td class="premium">$75,000</td>
+                <td class="text-muted">2026-01-08</td>
+                <td class="text-muted">2026-01-15</td>
+                <td><span class="claim-status-badge paid">Paid</span></td>
+                <td><span class="res-days good">7 days</span></td>
+                <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
+                <td><span class="denial-reason none">—</span></td>
+                <td><div class="action-btns">
+                  <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0015','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0015')"><i class="fas fa-redo"></i></button>
+                </div></td>
+              </tr>
+              <tr class="claim-row-denied">
+                <td><span class="claim-id">CLM-2025-0201</span></td>
+                <td><div class="client-cell"><div class="mini-avatar dk">DK</div><span>Daniel Kim</span></div></td>
+                <td><span class="policy-id">P-100371</span></td>
+                <td><span class="claim-type-badge disability">Disability</span></td>
+                <td class="premium text-muted">$0</td>
+                <td class="text-muted">2025-11-15</td>
+                <td class="text-muted">2025-12-02</td>
+                <td><span class="claim-status-badge denied">Denied</span></td>
+                <td><span class="res-days slow">17 days</span></td>
+                <td><span class="res-category escalated"><i class="fas fa-arrow-up"></i> Escalated</span></td>
+                <td><span class="denial-reason active" title="Pre-existing condition exclusion — disability pre-dates policy by 8 months">Pre-existing Condition</span></td>
+                <td><div class="action-btns">
+                  <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0201','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon appeal-btn" title="File Appeal" onclick="openAppealModal('CLM-2025-0201')"><i class="fas fa-balance-scale"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2025-0201')"><i class="fas fa-redo"></i></button>
+                </div></td>
+              </tr>
+              <tr>
+                <td><span class="claim-id">CLM-2025-0198</span></td>
+                <td><div class="client-cell"><div class="mini-avatar sw">SW</div><span>Sandra Williams</span></div></td>
+                <td><span class="policy-id">P-100320</span></td>
+                <td><span class="claim-type-badge disability">Disability</span></td>
+                <td class="premium">$12,600</td>
+                <td class="text-muted">2025-12-01</td>
+                <td class="text-muted">2025-12-08</td>
+                <td><span class="claim-status-badge paid">Paid</span></td>
+                <td><span class="res-days good">7 days</span></td>
+                <td><span class="res-category standard"><i class="fas fa-check"></i> Standard</span></td>
+                <td><span class="denial-reason none">—</span></td>
+                <td><div class="action-btns">
+                  <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0198','view')"><i class="fas fa-eye"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2025-0198')"><i class="fas fa-redo"></i></button>
+                </div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      {/* ── Smart Doc Request Automation Panel ── */}
-      <div class="smart-doc-panel">
-        <div class="sdp-header">
-          <div class="sdp-title-area">
-            <div class="sdp-icon"><i class="fas fa-paper-plane"></i></div>
-            <div>
-              <div class="sdp-title">Smart Doc Request Automation</div>
-              <div class="sdp-sub">AI drafts and sends personalized document reminder emails · Last run: 4 mins ago</div>
+        {/* Claims Performance Analytics */}
+        <div class="cpa-panel" id="cpa-panel">
+          <div class="cpa-header" onclick="toggleCPAPanel()">
+            <div class="cpa-header-left">
+              <div class="cpa-icon"><i class="fas fa-chart-line"></i></div>
+              <div>
+                <div class="cpa-title">My Claims Performance <span class="cpa-period">Q2 2026 (Apr 1 – Apr 13)</span></div>
+                <div class="cpa-sub">Personal productivity metrics · AI-powered benchmarking against team averages</div>
+              </div>
             </div>
+            <button class="cpa-collapse-btn" id="cpa-collapse-btn" title="Toggle panel"><i class="fas fa-chevron-down"></i></button>
           </div>
-          <div class="sdp-stats">
-            <div class="sdp-stat"><span class="sdp-stat-val orange">3</span><span class="sdp-stat-lbl">Pending Requests</span></div>
-            <div class="sdp-stat"><span class="sdp-stat-val green">8</span><span class="sdp-stat-lbl">Sent This Week</span></div>
-            <div class="sdp-stat"><span class="sdp-stat-val blue">67%</span><span class="sdp-stat-lbl">Response Rate</span></div>
-          </div>
-          <button class="btn btn-ai sdp-run-btn" onclick="runSmartDocRequests()"><i class="fas fa-paper-plane"></i> Send All Reminders</button>
-        </div>
-        <div class="sdp-queue">
-          <div class="sdp-item sdp-urgent">
-            <div class="sdp-item-icon"><i class="fas fa-file-signature"></i></div>
-            <div class="sdp-item-content">
-              <div class="sdp-item-title">Identity Documents — Susan Chen (Beneficiary)</div>
-              <div class="sdp-item-meta">CLM-2026-0041 · Robert Chen · Death Benefit $1M · Overdue 1 day</div>
-              <div class="sdp-item-draft">"Dear Susan Chen, to process your $1,000,000 death benefit claim, we need your government-issued photo ID and bank account details. These are the final steps before we can release your payment…"</div>
+          <div class="cpa-body" id="cpa-body">
+            <div class="cpa-kpi-row">
+              <div class="cpa-kpi green"><div class="cpa-kpi-val">7</div><div class="cpa-kpi-lbl">Claims Active</div><div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 5.2</div></div>
+              <div class="cpa-kpi green"><div class="cpa-kpi-val">4</div><div class="cpa-kpi-lbl">Closed This Month</div><div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 3.8</div></div>
+              <div class="cpa-kpi blue"><div class="cpa-kpi-val">5.2d</div><div class="cpa-kpi-lbl">Avg Resolution Time</div><div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 6.1d</div></div>
+              <div class="cpa-kpi blue"><div class="cpa-kpi-val">3.1d</div><div class="cpa-kpi-lbl">Avg Payout Turnaround</div><div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 3.8d</div></div>
+              <div class="cpa-kpi orange"><div class="cpa-kpi-val">67%</div><div class="cpa-kpi-lbl">Doc Request Response Rate</div><div class="cpa-kpi-bench"><i class="fas fa-arrow-down" style="color:#dc2626"></i> Below 75% target</div></div>
+              <div class="cpa-kpi green"><div class="cpa-kpi-val">93%</div><div class="cpa-kpi-lbl">SLA Compliance Rate</div><div class="cpa-kpi-bench"><i class="fas fa-check" style="color:#059669"></i> Above 90% target</div></div>
+              <div class="cpa-kpi red"><div class="cpa-kpi-val">1</div><div class="cpa-kpi-lbl">SLA Breaches YTD</div><div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 2.1</div></div>
+              <div class="cpa-kpi purple"><div class="cpa-kpi-val">94%</div><div class="cpa-kpi-lbl">AI Triage Accuracy</div><div class="cpa-kpi-bench"><i class="fas fa-robot" style="color:#7c3aed"></i> AI-assisted</div></div>
             </div>
-            <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0041','Susan Chen')"><i class="fas fa-paper-plane"></i> Send</button>
-          </div>
-          <div class="sdp-item sdp-urgent">
-            <div class="sdp-item-icon"><i class="fas fa-file-medical"></i></div>
-            <div class="sdp-item-content">
-              <div class="sdp-item-title">Terminal Illness Certification — Dr. Hernandez Office</div>
-              <div class="sdp-item-meta">CLM-2026-0028 · Maria Gonzalez · ADB $120,000 · 9 days pending</div>
-              <div class="sdp-item-draft">"Dear Dr. Hernandez's Office, we are processing a compassionate accelerated benefit claim for Maria Gonzalez. We respectfully request expedited completion of the terminal illness certification form…"</div>
+            <div class="cpa-insights">
+              <div class="cpa-insight good"><i class="fas fa-star"></i> <strong>Strength:</strong> Your resolution time (5.2d) is 15% faster than team average — keep it up.</div>
+              <div class="cpa-insight warn"><i class="fas fa-exclamation-triangle"></i> <strong>Opportunity:</strong> Doc request response rate (67%) is below the 75% target — send reminders sooner after filing.</div>
+              <div class="cpa-insight info"><i class="fas fa-robot"></i> <strong>AI Tip:</strong> Enabling auto-send reminders at 48h intervals could lift response rate to ~82% based on portfolio patterns.</div>
             </div>
-            <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Send</button>
-          </div>
-          <div class="sdp-item sdp-normal">
-            <div class="sdp-item-icon"><i class="fas fa-file-alt"></i></div>
-            <div class="sdp-item-content">
-              <div class="sdp-item-title">Attending Physician Statement — Dr. Hernandez</div>
-              <div class="sdp-item-meta">CLM-2026-0035 · Maria Gonzalez · Disability $4,200/mo · 22 days pending</div>
-              <div class="sdp-item-draft">"Dear Dr. Hernandez, we are processing a disability insurance claim for your patient Maria Gonzalez. Please complete the Attending Physician Statement to allow us to begin benefit payments…"</div>
+            <div class="cpa-footer">
+              <button class="btn btn-ai" onclick="sendContextMessage('Show my claims performance for Q2 2026 — resolution times, SLA compliance, doc response rates and recommendations','claims')"><i class="fas fa-robot"></i> Full AI Performance Analysis</button>
+              <button class="btn btn-outline-sm" onclick="alert('Exporting performance report…')"><i class="fas fa-download"></i> Export Report</button>
             </div>
-            <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send</button>
           </div>
         </div>
-      </div>
 
-      {/* ── Claims Performance Analytics Panel ── */}
-      <div class="cpa-panel" id="cpa-panel">
-        <div class="cpa-header" onclick="toggleCPAPanel()">
-          <div class="cpa-header-left">
-            <div class="cpa-icon"><i class="fas fa-chart-line"></i></div>
-            <div>
-              <div class="cpa-title">My Claims Performance <span class="cpa-period">Q2 2026 (Apr 1 – Apr 13)</span></div>
-              <div class="cpa-sub">Personal productivity metrics · AI-powered benchmarking against team averages</div>
-            </div>
-          </div>
-          <button class="cpa-collapse-btn" id="cpa-collapse-btn" title="Toggle panel"><i class="fas fa-chevron-down"></i></button>
-        </div>
-        <div class="cpa-body" id="cpa-body">
-          <div class="cpa-kpi-row">
-            <div class="cpa-kpi green">
-              <div class="cpa-kpi-val">7</div>
-              <div class="cpa-kpi-lbl">Claims Active</div>
-              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 5.2</div>
-            </div>
-            <div class="cpa-kpi green">
-              <div class="cpa-kpi-val">4</div>
-              <div class="cpa-kpi-lbl">Closed This Month</div>
-              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 3.8</div>
-            </div>
-            <div class="cpa-kpi blue">
-              <div class="cpa-kpi-val">5.2d</div>
-              <div class="cpa-kpi-lbl">Avg Resolution Time</div>
-              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 6.1d</div>
-            </div>
-            <div class="cpa-kpi blue">
-              <div class="cpa-kpi-val">3.1d</div>
-              <div class="cpa-kpi-lbl">Avg Payout Turnaround</div>
-              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 3.8d</div>
-            </div>
-            <div class="cpa-kpi orange">
-              <div class="cpa-kpi-val">67%</div>
-              <div class="cpa-kpi-lbl">Doc Request Response Rate</div>
-              <div class="cpa-kpi-bench"><i class="fas fa-arrow-down" style="color:#dc2626"></i> Below 75% target</div>
-            </div>
-            <div class="cpa-kpi green">
-              <div class="cpa-kpi-val">93%</div>
-              <div class="cpa-kpi-lbl">SLA Compliance Rate</div>
-              <div class="cpa-kpi-bench"><i class="fas fa-check" style="color:#059669"></i> Above 90% target</div>
-            </div>
-            <div class="cpa-kpi red">
-              <div class="cpa-kpi-val">1</div>
-              <div class="cpa-kpi-lbl">SLA Breaches YTD</div>
-              <div class="cpa-kpi-bench"><i class="fas fa-users"></i> Team avg: 2.1</div>
-            </div>
-            <div class="cpa-kpi purple">
-              <div class="cpa-kpi-val">94%</div>
-              <div class="cpa-kpi-lbl">AI Triage Accuracy</div>
-              <div class="cpa-kpi-bench"><i class="fas fa-robot" style="color:#7c3aed"></i> AI-assisted</div>
-            </div>
-          </div>
-          <div class="cpa-insights">
-            <div class="cpa-insight good"><i class="fas fa-star"></i> <strong>Strength:</strong> Your resolution time (5.2d) is 15% faster than team average — keep it up.</div>
-            <div class="cpa-insight warn"><i class="fas fa-exclamation-triangle"></i> <strong>Opportunity:</strong> Doc request response rate (67%) is below the 75% target — send reminders sooner after filing.</div>
-            <div class="cpa-insight info"><i class="fas fa-robot"></i> <strong>AI Tip:</strong> Enabling auto-send reminders at 48h intervals could lift response rate to ~82% based on portfolio patterns.</div>
-          </div>
-          <div class="cpa-footer">
-            <button class="btn btn-ai" onclick="sendContextMessage('Show my claims performance for Q2 2026 — resolution times, SLA compliance, doc response rates and recommendations','claims')"><i class="fas fa-robot"></i> Full AI Performance Analysis</button>
-            <button class="btn btn-outline-sm" onclick="alert('Exporting performance report…')"><i class="fas fa-download"></i> Export Report</button>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Claims by Type Summary ── */}
-      <div class="claims-type-grid">
-        <div class="ctype-card death-type">
-          <div class="ctype-icon"><i class="fas fa-heart-broken"></i></div>
-          <div class="ctype-body">
-            <div class="ctype-name">Death Benefit</div>
-            <div class="ctype-count">2 open · 4 resolved</div>
-            <div class="ctype-value">$1.25M total</div>
-          </div>
-        </div>
-        <div class="ctype-card disability-type">
-          <div class="ctype-icon"><i class="fas fa-user-injured"></i></div>
-          <div class="ctype-body">
-            <div class="ctype-name">Disability</div>
-            <div class="ctype-count">1 open · 3 resolved</div>
-            <div class="ctype-value">$50K/yr total</div>
-          </div>
-        </div>
-        <div class="ctype-card ltc-type">
-          <div class="ctype-icon"><i class="fas fa-hospital"></i></div>
-          <div class="ctype-body">
-            <div class="ctype-name">Long-term Care</div>
-            <div class="ctype-count">2 open · 4 resolved</div>
-            <div class="ctype-value">$27.6K total</div>
-          </div>
-        </div>
-        <div class="ctype-card accelerated-type">
-          <div class="ctype-icon"><i class="fas fa-bolt"></i></div>
-          <div class="ctype-body">
-            <div class="ctype-name">Accelerated Benefit</div>
-            <div class="ctype-count">1 open · 2 resolved</div>
-            <div class="ctype-value">$195K total</div>
-          </div>
-        </div>
-        <div class="ctype-card waiver-type">
-          <div class="ctype-icon"><i class="fas fa-ban"></i></div>
-          <div class="ctype-body">
-            <div class="ctype-name">Waiver of Premium</div>
-            <div class="ctype-count">1 open · 1 resolved</div>
-            <div class="ctype-value">$18K/yr total</div>
-          </div>
-        </div>
-        <div class="ctype-card ai-card">
-          <div class="ctype-icon"><i class="fas fa-robot"></i></div>
-          <div class="ctype-body">
-            <div class="ctype-name">AI Claims Assistant</div>
-            <div class="ctype-count">3 pending doc requests</div>
-            <div class="ctype-value">Auto-follow-ups ready</div>
-          </div>
-          <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="sendContextMessage('Show all open claims and urgent actions needed — triage by priority and expected resolution','claims')">Run AI Triage</button>
-        </div>
-      </div>
+      </div>{/* end clm-panel-resolved */}
 
       {/* ── Claims Intelligence Full Report Modal ── */}
       <div class="detail-modal-overlay" id="ci-review-overlay" onclick="closeCIReviewModal()">
