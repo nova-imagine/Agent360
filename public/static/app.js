@@ -118,7 +118,9 @@ function navigateTo(page) {
     } else if (page === 'upsell') {
       initUpsellPage();
     } else if (page === 'alerts') {
-      initAlertsPage();
+      // Rerouted: Policy Alerts dissolved into Policies → Lapse & Alerts tab
+      navigateTo('policies');
+      requestAnimationFrame(function() { setTimeout(function() { polSwitchTab('alerts'); }, 200); });
     } else if (page === 'pipeline-view') {
       initPipelineViewPage();
     } else if (page === 'products') {
@@ -34007,14 +34009,71 @@ function togglePACPanel(btn) {
    7A · POLICIES PAGE INIT (Service Hub + Loan Center)
    ═══════════════════════════════════════════════════════════════════ */
 
-function initPoliciesPage() {
-  requestAnimationFrame(function() {
-    setTimeout(function() {
-      p7InitServiceHub();
-      p7InitLoanCenter();
-    }, 80);
-  });
+function initPoliciesPage(targetTab) {
+  // Default to overview tab on first load
+  var tab = targetTab || 'overview';
+  polSwitchTab(tab);
+  // Lazily init service hub + loan center when overview is active
+  if (tab === 'overview') {
+    requestAnimationFrame(function() {
+      setTimeout(function() {
+        p7InitServiceHub();
+        p7InitLoanCenter();
+      }, 80);
+    });
+  }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   polSwitchTab(tab) — drives the 4-tab Policies page
+   tabs: 'overview' | 'list' | 'alerts' | 'renewals'
+   ───────────────────────────────────────────────────────────── */
+(function() {
+  var _alertsInited = false;
+
+  window.polSwitchTab = function(tab) {
+    // Update tab buttons
+    var buttons = document.querySelectorAll('.pol-tab');
+    buttons.forEach(function(btn) {
+      btn.classList.remove('pol-tab-active');
+    });
+    var activeBtn = document.getElementById('pol-tab-' + tab);
+    if (activeBtn) activeBtn.classList.add('pol-tab-active');
+
+    // Show/hide panels
+    var panels = document.querySelectorAll('.pol-tab-panel');
+    panels.forEach(function(p) { p.style.display = 'none'; });
+    var activePanel = document.getElementById('pol-panel-' + tab);
+    if (activePanel) activePanel.style.display = '';
+
+    // Lazy-init tab content
+    if (tab === 'overview') {
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          if (typeof p7InitServiceHub === 'function') p7InitServiceHub();
+          if (typeof p7InitLoanCenter === 'function') p7InitLoanCenter();
+        }, 80);
+      });
+    }
+    if (tab === 'alerts' && !_alertsInited) {
+      _alertsInited = true;
+      requestAnimationFrame(function() {
+        setTimeout(function() {
+          if (typeof initAlertsPage === 'function') {
+            // Override initAlertsPage's timeline target to our new element
+            var origTimeline = document.getElementById('alert-renewal-timeline');
+            initAlertsPage();
+          }
+          if (typeof renderAlertList === 'function') renderAlertList('all');
+          if (typeof renderRenewalTimeline === 'function') {
+            // Render into pol-panel-alerts timeline
+            renderRenewalTimeline();
+          }
+        }, 80);
+      });
+    }
+  };
+})();
 
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -34271,10 +34330,11 @@ function p7Initiate1035(policyId) {
 (function() {
   var _origNav = typeof navigateTo === 'function' ? navigateTo : null;
   if (!_origNav) return;
-  navigateTo = function(page) {
-    _origNav(page);
+  navigateTo = function(page, opts) {
+    _origNav(page, opts);
     if (page === 'policies') {
-      requestAnimationFrame(function() { setTimeout(initPoliciesPage, 80); });
+      var goTab = (opts && opts.tab) ? opts.tab : 'overview';
+      requestAnimationFrame(function() { setTimeout(function() { initPoliciesPage(goTab); }, 80); });
     }
   };
 })();
