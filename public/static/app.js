@@ -43259,11 +43259,227 @@ function srOpenFullReview(id) {
   };
 
   // ── Init ──────────────────────────────────────────────────────────────────
+  // ── NYL Feature Cards ─────────────────────────────────────────────────────
+  var EP_NYL_FEATURES = [
+    {
+      icon: 'fa-scroll',
+      color: '#7c3aed',
+      title: 'Last Will & Testament',
+      body: 'Allows you to control and direct how your assets should be distributed and identifies guardians for minor children.'
+    },
+    {
+      icon: 'fa-user-shield',
+      color: '#0369a1',
+      title: 'Power of Attorney',
+      body: 'Gives a person authority to make decisions on your behalf, including financial (durable power of attorney) and medical (medical power of attorney) decisions.'
+    },
+    {
+      icon: 'fa-landmark',
+      color: '#065f46',
+      title: 'Trusts',
+      body: 'A form of property and asset transfer that can reduce your estate tax liability, name a trustee, and hold assets for the beneficiaries you name.'
+    },
+    {
+      icon: 'fa-gift',
+      color: '#b45309',
+      title: 'Lifetime Gifts',
+      body: 'Includes gifts for family, charity, education, or medical needs that you give during your lifetime to reduce estate taxes after death.'
+    },
+    {
+      icon: 'fa-file-invoice-dollar',
+      color: '#be185d',
+      title: 'Taxes',
+      body: 'Strategies to manage the taxation of income and asset growth to preserve the value of your estate.'
+    },
+    {
+      icon: 'fa-heart',
+      color: '#9f1239',
+      title: 'Special Provisions',
+      body: 'Ensuring a loved one with special needs is adequately provided for or that an unmarried partner is provided for as you intend.'
+    }
+  ];
+
+  function renderEpFeatureCards() {
+    var wrap = document.getElementById('ep-feature-cards');
+    if (!wrap) return;
+    wrap.innerHTML =
+      '<div class="ep-feature-heading">' +
+        '<i class="fas fa-shield-alt"></i>' +
+        '<div>' +
+          '<div class="ep-feature-heading-title">Every estate plan is unique — and every one matters</div>' +
+          '<div class="ep-feature-heading-sub">NYL coordinates with your client\'s estate attorney, CPA, and other advisors to help identify gaps and protect their legacy.</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ep-feature-grid">' +
+        EP_NYL_FEATURES.map(function(f) {
+          return '<div class="ep-feature-card">' +
+            '<div class="ep-feature-card-icon" style="background:' + f.color + '22;color:' + f.color + '"><i class="fas ' + f.icon + '"></i></div>' +
+            '<div class="ep-feature-card-title">' + f.title + '</div>' +
+            '<div class="ep-feature-card-body">' + f.body + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+  }
+
+  // ── AI Estate Gap Scanner ─────────────────────────────────────────────────
+  function epRunGapScan() {
+    var existing = document.getElementById('ep-gap-modal');
+    if (existing) { existing.remove(); }
+
+    var urgent     = EP_CLIENTS.filter(function(c){ return c.status==='urgent'||c.status==='no-plan'; });
+    var review     = EP_CLIENTS.filter(function(c){ return c.status==='needs-review'; });
+    var inProg     = EP_CLIENTS.filter(function(c){ return c.status==='in-progress'; });
+    var totalGaps  = EP_CLIENTS.reduce(function(acc,c){
+      return acc + Object.keys(c.pillars).filter(function(k){ return c.pillars[k].status !== 'ok'; }).length;
+    }, 0);
+
+    var rows = EP_CLIENTS.slice().sort(function(a,b){
+      var priority = { urgent:0, 'no-plan':1, 'needs-review':2, 'in-progress':3, current:4 };
+      return (priority[a.status]||9) - (priority[b.status]||9);
+    }).map(function(c) {
+      var gaps = Object.keys(c.pillars).filter(function(k){ return c.pillars[k].status !== 'ok'; }).length;
+      var total = Object.keys(c.pillars).length;
+      var pct   = Math.round(((total - gaps) / total) * 100);
+      var isUrgent = c.status === 'urgent' || c.status === 'no-plan';
+      var barColor = pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#ef4444';
+      return '<div class="ep-gs-row">' +
+        '<div class="ep-gs-row-avatar" style="background:' + c.color + '">' + c.avatar + '</div>' +
+        '<div class="ep-gs-row-info">' +
+          '<div class="ep-gs-row-name">' + c.name + '</div>' +
+          '<div class="ep-gs-row-meta">Estate: ' + c.estateValue + ' &middot; ' + gaps + ' gap' + (gaps!==1?'s':'') + ' identified</div>' +
+          '<div class="ep-gs-bar-wrap"><div class="ep-gs-bar" style="width:' + pct + '%;background:' + barColor + '"></div></div>' +
+        '</div>' +
+        '<div class="ep-gs-row-right">' +
+          (isUrgent ? '<span class="ep-gs-badge ep-gs-badge-urgent">URGENT</span>' : '<span class="ep-gs-badge ep-gs-badge-action">Action</span>') +
+          '<span class="ep-gs-pct">' + pct + '%</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var alerts = [
+      { icon:'fa-exclamation-triangle', color:'#ef4444', text:'Linda Morrison — No estate attorney on file. Probate risk if she passes without a trust. Estimated cost: $80K+.' },
+      { icon:'fa-exclamation-triangle', color:'#ef4444', text:'Robert Chen — Minor children have no designated guardian. A single will appointment resolves this within weeks.' },
+      { icon:'fa-clock',                color:'#f59e0b', text:'James Whitfield — IRA beneficiary still lists ex-spouse. This designation overrides the will. Update immediately.' },
+      { icon:'fa-robot',                color:'#a78bfa', text:'AI: 3 clients have not had an estate review in 12+ months. Scheduling annual reviews could generate 4–6 policy conversations.' }
+    ].map(function(a){
+      return '<div class="ep-gs-alert-row"><i class="fas ' + a.icon + '" style="color:' + a.color + ';flex-shrink:0"></i><span>' + a.text + '</span></div>';
+    }).join('');
+
+    var modal =
+      '<div class="ep-gs-overlay" id="ep-gap-modal" onclick="if(event.target===this)epCloseGapScan()">' +
+        '<div class="ep-gs-modal">' +
+          '<div class="ep-gs-modal-hdr">' +
+            '<div><div class="ep-gs-modal-title"><i class="fas fa-search-dollar"></i> Estate Gap Scan Results</div>' +
+            '<div class="ep-gs-modal-sub">AI analysis across ' + EP_CLIENTS.length + ' estate planning clients — ' + new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) + '</div></div>' +
+            '<button class="ep-gs-close-btn" onclick="epCloseGapScan()">&times;</button>' +
+          '</div>' +
+          '<div class="ep-gs-kpi-strip">' +
+            '<div class="ep-gs-kpi"><div class="ep-gs-kpi-val" style="color:#ef4444">' + urgent.length + '</div><div class="ep-gs-kpi-lbl">Urgent / No Plan</div></div>' +
+            '<div class="ep-gs-kpi"><div class="ep-gs-kpi-val" style="color:#f59e0b">' + review.length + '</div><div class="ep-gs-kpi-lbl">Needs Review</div></div>' +
+            '<div class="ep-gs-kpi"><div class="ep-gs-kpi-val" style="color:#3b82f6">' + inProg.length + '</div><div class="ep-gs-kpi-lbl">In Progress</div></div>' +
+            '<div class="ep-gs-kpi"><div class="ep-gs-kpi-val" style="color:#a78bfa">' + totalGaps + '</div><div class="ep-gs-kpi-lbl">Total Gaps Found</div></div>' +
+          '</div>' +
+          '<div class="ep-gs-scroll">' +
+            '<div class="ep-gs-section-title">Client Priority Queue</div>' +
+            rows +
+            '<div class="ep-gs-section-title" style="margin-top:20px">Priority Alerts</div>' +
+            '<div class="ep-gs-alerts">' + alerts + '</div>' +
+          '</div>' +
+          '<div class="ep-gs-footer">' +
+            '<button class="ep-gs-footer-btn ghost" onclick="epCloseGapScan()"><i class="fas fa-times"></i> Close</button>' +
+            '<button class="ep-gs-footer-btn outline" onclick="epCloseGapScan();window.openEpSchedule&&window.openEpSchedule()"><i class="fas fa-calendar-plus"></i> Schedule Reviews</button>' +
+            '<button class="ep-gs-footer-btn primary"><i class="fas fa-file-export"></i> Export Report</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', modal);
+    requestAnimationFrame(function(){
+      document.getElementById('ep-gap-modal').classList.add('ep-gs-open');
+    });
+  }
+  window.epRunGapScan = epRunGapScan;
+
+  function epCloseGapScan() {
+    var el = document.getElementById('ep-gap-modal');
+    if (!el) return;
+    el.classList.remove('ep-gs-open');
+    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 280);
+  }
+  window.epCloseGapScan = epCloseGapScan;
+
+  // ── Schedule Consultation Modal ────────────────────────────────────────────
+  window.openEpSchedule = function(clientId) {
+    var client = clientId ? EP_CLIENTS.find(function(c){ return c.id === clientId; }) : null;
+    var existing = document.getElementById('ep-sched-modal');
+    if (existing) existing.remove();
+
+    var clientOpts = EP_CLIENTS.map(function(c){
+      return '<option value="' + c.id + '"' + (client && client.id===c.id ? ' selected' : '') + '>' + c.name + ' — ' + c.estateValue + '</option>';
+    }).join('');
+
+    var modal =
+      '<div class="ep-sched-overlay" id="ep-sched-modal" onclick="if(event.target===this)epCloseSched()">' +
+        '<div class="ep-sched-dialog">' +
+          '<div class="ep-sched-hdr">' +
+            '<div class="ep-sched-hdr-title"><i class="fas fa-calendar-plus"></i> Schedule Estate Review</div>' +
+            '<button class="ep-gs-close-btn" onclick="epCloseSched()">&times;</button>' +
+          '</div>' +
+          '<div class="ep-sched-body">' +
+            '<div class="ep-sched-field"><label>Client</label>' +
+              '<select class="ep-sched-select" id="ep-sched-client">' + clientOpts + '</select>' +
+            '</div>' +
+            '<div class="ep-sched-field"><label>Review Type</label>' +
+              '<select class="ep-sched-select">' +
+                '<option>Full Estate Review (60 min)</option>' +
+                '<option>Beneficiary Update Only (30 min)</option>' +
+                '<option>Trust / Will Check-In (45 min)</option>' +
+                '<option>Legacy & Charitable Planning (45 min)</option>' +
+                '<option>Attorney Coordination Call (30 min)</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="ep-sched-row2">' +
+              '<div class="ep-sched-field"><label>Preferred Date</label><input type="date" class="ep-sched-input" /></div>' +
+              '<div class="ep-sched-field"><label>Time</label>' +
+                '<select class="ep-sched-select">' +
+                  '<option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>' +
+                  '<option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>' +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ep-sched-field"><label>Advisors to Include</label>' +
+              '<div class="ep-sched-check-row"><label><input type="checkbox" checked /> Estate Attorney</label><label><input type="checkbox" checked /> CPA / Tax Advisor</label><label><input type="checkbox" /> Trust Officer</label></div>' +
+            '</div>' +
+            '<div class="ep-sched-field"><label>Notes (optional)</label><textarea class="ep-sched-textarea" rows="3" placeholder="Key agenda items, documents to bring, specific concerns…"></textarea></div>' +
+          '</div>' +
+          '<div class="ep-sched-footer">' +
+            '<button class="ep-gs-footer-btn ghost" onclick="epCloseSched()">Cancel</button>' +
+            '<button class="ep-gs-footer-btn primary" onclick="epCloseSched();window._raToast&&window._raToast(\'Review scheduled — calendar invite sent\')"><i class="fas fa-check"></i> Confirm Appointment</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', modal);
+    requestAnimationFrame(function(){
+      document.getElementById('ep-sched-modal').classList.add('ep-gs-open');
+    });
+  };
+
+  function epCloseSched() {
+    var el = document.getElementById('ep-sched-modal');
+    if (!el) return;
+    el.classList.remove('ep-gs-open');
+    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 280);
+  }
+  window.epCloseSched = epCloseSched;
+
+  // ── Init ──────────────────────────────────────────────────────────────────
   function initEstatePlanningPage() {
     var kpi = document.getElementById('prop-kpi-bar');
     if (!kpi) return;
 
     renderEpKpiBar();
+    renderEpFeatureCards();
     renderEpClientList();
 
     // Auto-open Linda Morrison (urgent — most critical)
@@ -43672,12 +43888,179 @@ function srOpenFullReview(id) {
     });
   };
 
+  // ── NYL Services Panel ────────────────────────────────────────────────────
+  var SB_NYL_SECTIONS = [
+    {
+      key: 'owners',
+      icon: 'fa-briefcase',
+      color: '#1d4ed8',
+      label: 'Business Owners',
+      tagline: 'Whether you\'re a sole proprietor or you employ others, we can help protect you as both a business owner and an individual.',
+      products: [
+        { icon: 'fa-shield-alt',    title: 'Business Owner Life Insurance',     desc: 'Individual policies that help replace your income and cover business-related debts if you die and provide a source of cash for your business.' },
+        { icon: 'fa-wheelchair',    title: 'Business Owner Disability Insurance', desc: 'Helps to replace your income if you\'re sick or injured while also covering overhead costs to help keep your business running.' },
+        { icon: 'fa-piggy-bank',    title: 'Business Owner Retirement Planning', desc: 'A personal combination of investments, annuities, and life insurance strategies to help you retire when you\'re ready.' },
+        { icon: 'fa-user-tie',      title: 'Key Person Policy',                 desc: 'A specific type of life insurance owned by your business that covers you or other critical employees to help keep the business afloat and cover the costs of replacing someone.' },
+        { icon: 'fa-handshake',     title: 'Business Owner Succession Planning', desc: 'Arrangements such as a buy-sell agreement, funded by life insurance, help a business partner buy your part of the business if you die, with proceeds going to your heirs.' }
+      ]
+    },
+    {
+      key: 'exec',
+      icon: 'fa-star',
+      color: '#7c3aed',
+      label: 'Executive Benefits',
+      tagline: 'No matter the size of your company, we work with you to develop customized benefits for attracting, retaining, and rewarding key members of your workforce.',
+      products: [
+        { icon: 'fa-award',         title: 'Executive Bonus',          desc: 'Paid annually to certain employees, often in the form of premiums paid on personally owned life insurance.' },
+        { icon: 'fa-lock',          title: 'Deferred Compensation',    desc: 'An option to delay some earnings to a later date, possibly after retirement, to improve executive retention and offset some of the individual\'s tax burden.' },
+        { icon: 'fa-heart',         title: 'Long-Term Care Carve-Out', desc: 'As an added benefit, long-term care insurance for key executives or employees may be tax deductible to the business.' }
+      ]
+    },
+    {
+      key: 'employees',
+      icon: 'fa-users',
+      color: '#059669',
+      label: 'Employee Benefits',
+      tagline: 'Our knowledgeable agents make it their personal mission to connect with your employees individually, help them find the right solutions, and help them address their financial needs beyond what\'s offered in the workplace.',
+      products: [
+        { icon: 'fa-wheelchair',    title: 'Group Disability Insurance',      desc: 'If you provide this benefit, employees continue to receive income if a disability takes them out of work.', cta: 'See group disability' },
+        { icon: 'fa-umbrella',      title: 'Group Term Life Insurance',       desc: 'A benefit you can offer for your employees, helping to protect their loved ones if the unexpected happens.', cta: 'See group term life' },
+        { icon: 'fa-heart',         title: "Employee's Whole Life Insurance", desc: 'Employees can also purchase an individual whole life policy, covering the cost of coverage themselves.', cta: 'See employee whole life' }
+      ]
+    }
+  ];
+
+  var _sbNylActive = 'owners';
+
+  function renderSbNylPanel() {
+    var wrap = document.getElementById('sb-nyl-panel');
+    if (!wrap) return;
+
+    var tabBar = SB_NYL_SECTIONS.map(function(s) {
+      return '<button class="sb-nyl-tab' + (s.key === _sbNylActive ? ' sb-nyl-tab-active' : '') + '" ' +
+        'onclick="sbNylSwitch(\'' + s.key + '\')" style="' + (s.key === _sbNylActive ? '--accent:' + s.color : '') + '">' +
+        '<i class="fas ' + s.icon + '"></i> ' + s.label +
+      '</button>';
+    }).join('');
+
+    var section = SB_NYL_SECTIONS.find(function(s){ return s.key === _sbNylActive; });
+    var cards = section.products.map(function(p) {
+      return '<div class="sb-nyl-card">' +
+        '<div class="sb-nyl-card-icon" style="background:' + section.color + '18;color:' + section.color + '"><i class="fas ' + p.icon + '"></i></div>' +
+        '<div class="sb-nyl-card-title">' + p.title + '</div>' +
+        '<div class="sb-nyl-card-desc">' + p.desc + '</div>' +
+        (p.cta ? '<div class="sb-nyl-card-cta">' + p.cta + ' <i class="fas fa-arrow-right"></i></div>' : '') +
+      '</div>';
+    }).join('');
+
+    wrap.innerHTML =
+      '<div class="sb-nyl-hdr">' +
+        '<div class="sb-nyl-hdr-title"><i class="fas fa-building"></i> NYL Small Business Services</div>' +
+        '<div class="sb-nyl-tab-bar">' + tabBar + '</div>' +
+      '</div>' +
+      '<div class="sb-nyl-section-tagline">' +
+        '<i class="fas ' + section.icon + '" style="color:' + section.color + '"></i>' +
+        '<span>' + section.tagline + '</span>' +
+      '</div>' +
+      '<div class="sb-nyl-card-grid' + (section.products.length <= 3 ? ' sb-nyl-grid-3' : ' sb-nyl-grid-5') + '">' + cards + '</div>';
+  }
+
+  window.sbNylSwitch = function(key) {
+    _sbNylActive = key;
+    renderSbNylPanel();
+  };
+
+  // ── AI Business Gap Scanner ───────────────────────────────────────────────
+  function sbRunGapScan() {
+    var existing = document.getElementById('sb-gap-modal');
+    if (existing) existing.remove();
+
+    var urgent  = SB_CLIENTS.filter(function(c){ return c.status==='urgent'; });
+    var review  = SB_CLIENTS.filter(function(c){ return c.status==='needs-review'; });
+    var inProg  = SB_CLIENTS.filter(function(c){ return c.status==='in-progress'; });
+    var totalEmp = SB_CLIENTS.reduce(function(s,c){ return s + c.employees; }, 0);
+
+    var rows = SB_CLIENTS.slice().sort(function(a,b){
+      var p = { urgent:0, 'needs-review':1, 'in-progress':2, current:3 };
+      return (p[a.status]||9) - (p[b.status]||9);
+    }).map(function(c) {
+      var covered = Object.keys(c.products).filter(function(k){ return c.products[k].status==='active'; }).length;
+      var total   = Object.keys(c.products).length;
+      var pct     = Math.round((covered / total) * 100);
+      var barCol  = pct >= 80 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
+      return '<div class="ep-gs-row">' +
+        '<div class="ep-gs-row-avatar" style="background:' + c.color + '">' + c.avatar + '</div>' +
+        '<div class="ep-gs-row-info">' +
+          '<div class="ep-gs-row-name">' + c.name + ' <span style="font-weight:400;color:#64748b;font-size:11px">· ' + c.bizName + '</span></div>' +
+          '<div class="ep-gs-row-meta">' + c.bizType + ' · ' + c.employees + ' employees · ' + covered + '/' + total + ' pillars covered</div>' +
+          '<div class="ep-gs-bar-wrap"><div class="ep-gs-bar" style="width:' + pct + '%;background:' + barCol + '"></div></div>' +
+        '</div>' +
+        '<div class="ep-gs-row-right">' +
+          (c.status==='urgent' ? '<span class="ep-gs-badge ep-gs-badge-urgent">URGENT</span>' : '<span class="ep-gs-badge ep-gs-badge-action">Review</span>') +
+          '<span class="ep-gs-pct">' + pct + '%</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var alerts = [
+      { icon:'fa-exclamation-triangle', color:'#ef4444', text:'Robert Chen — No coverage whatsoever. Sole revenue driver with 12 employees and zero key-man or group benefits. Immediate action required.' },
+      { icon:'fa-exclamation-triangle', color:'#ef4444', text:'James Whitfield — Buy-sell agreement in draft but not funded. Practice worth $2.1M with no death-trigger funding in place.' },
+      { icon:'fa-clock',                color:'#f59e0b', text:'Linda Morrison — 3 new hires not enrolled in group benefits. ERISA compliance exposure on 401(k) eligibility rules.' },
+      { icon:'fa-robot',                color:'#38bdf8', text:'AI: Across 6 clients, 74 employee lives are unprotected by group benefits. One group benefits conversation could cover all 74.' }
+    ].map(function(a){
+      return '<div class="ep-gs-alert-row"><i class="fas ' + a.icon + '" style="color:' + a.color + ';flex-shrink:0"></i><span>' + a.text + '</span></div>';
+    }).join('');
+
+    var modal =
+      '<div class="ep-gs-overlay" id="sb-gap-modal" onclick="if(event.target===this)sbCloseGapScan()">' +
+        '<div class="ep-gs-modal">' +
+          '<div class="ep-gs-modal-hdr">' +
+            '<div><div class="ep-gs-modal-title"><i class="fas fa-chart-pie"></i> Business Coverage Gap Scan</div>' +
+            '<div class="ep-gs-modal-sub">AI analysis across ' + SB_CLIENTS.length + ' small business clients — ' + totalEmp + ' total employees</div></div>' +
+            '<button class="ep-gs-close-btn" onclick="sbCloseGapScan()">&times;</button>' +
+          '</div>' +
+          '<div class="ep-gs-kpi-strip">' +
+            '<div class="ep-gs-kpi"><div class="ep-gs-kpi-val" style="color:#ef4444">' + urgent.length + '</div><div class="ep-gs-kpi-lbl">Urgent</div></div>' +
+            '<div class="ep-gs-kpi"><div class="ep-gs-kpi-val" style="color:#f59e0b">' + review.length + '</div><div class="ep-gs-kpi-lbl">Needs Review</div></div>' +
+            '<div class="ep-gs-kpi"><div class="ep-gs-kpi-val" style="color:#3b82f6">' + inProg.length + '</div><div class="ep-gs-kpi-lbl">In Progress</div></div>' +
+            '<div class="ep-gs-kpi"><div class="ep-gs-kpi-val" style="color:#38bdf8">' + totalEmp + '</div><div class="ep-gs-kpi-lbl">Employee Lives</div></div>' +
+          '</div>' +
+          '<div class="ep-gs-scroll">' +
+            '<div class="ep-gs-section-title">Business Client Priority Queue</div>' +
+            rows +
+            '<div class="ep-gs-section-title" style="margin-top:20px">Priority Alerts</div>' +
+            '<div class="ep-gs-alerts">' + alerts + '</div>' +
+          '</div>' +
+          '<div class="ep-gs-footer">' +
+            '<button class="ep-gs-footer-btn ghost" onclick="sbCloseGapScan()"><i class="fas fa-times"></i> Close</button>' +
+            '<button class="ep-gs-footer-btn outline"><i class="fas fa-calendar-plus"></i> Schedule Reviews</button>' +
+            '<button class="ep-gs-footer-btn primary"><i class="fas fa-file-export"></i> Export Report</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', modal);
+    requestAnimationFrame(function(){
+      document.getElementById('sb-gap-modal').classList.add('ep-gs-open');
+    });
+  }
+  window.sbRunGapScan = sbRunGapScan;
+
+  function sbCloseGapScan() {
+    var el = document.getElementById('sb-gap-modal');
+    if (!el) return;
+    el.classList.remove('ep-gs-open');
+    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 280);
+  }
+  window.sbCloseGapScan = sbCloseGapScan;
+
   // ── Init ──────────────────────────────────────────────────────────────────
   function initSmallBizPage() {
     var kpi = document.getElementById('pf-kpi-bar');
     if (!kpi) return;
 
     renderSbKpiBar();
+    renderSbNylPanel();
     renderSbClientList();
 
     // Auto-open Robert Chen (urgent — no coverage at all)

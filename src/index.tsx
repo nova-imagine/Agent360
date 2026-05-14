@@ -310,8 +310,141 @@ function MainApp() {
         <div id="tpl-ret-accounts"><RetirementAccountsPage /></div>
         <div id="tpl-adv-wealth"></div>
         <div id="tpl-adv-accounts"><AdvisoryAccountsPage /></div>
-        <div id="tpl-adv-estate"></div>
-        <div id="tpl-adv-smallbiz"></div>
+        <div id="tpl-adv-estate">
+          <div class="adv-estate-page page">
+            {/* KPI bar — rendered by renderEpKpiBar() */}
+            <div id="prop-kpi-bar"></div>
+
+            {/* NYL Feature Cards — rendered by renderEpFeatureCards() */}
+            <div id="ep-feature-cards"></div>
+
+            {/* Toolbar */}
+            <div class="page-toolbar ep-toolbar">
+              <div class="toolbar-left">
+                <div class="search-inline-wrap">
+                  <i class="fas fa-search search-inline-icon"></i>
+                  <input class="search-inline" type="text" placeholder="Search estate clients…" oninput="epFilterClients(this.value)" />
+                </div>
+                <select class="filter-select" onchange="epFilterStatus(this.value)">
+                  <option value="">All Statuses</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="no-plan">No Plan</option>
+                  <option value="needs-review">Needs Review</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="current">Current</option>
+                </select>
+              </div>
+              <div class="toolbar-right">
+                <button class="btn btn-ai" onclick="epRunGapScan()">
+                  <i class="fas fa-search-dollar"></i> Estate Gap Scan
+                </button>
+                <button class="btn btn-ghost" onclick="window.openEpSchedule&&window.openEpSchedule()">
+                  <i class="fas fa-calendar-plus"></i> Schedule Review
+                </button>
+                <button class="btn btn-primary" onclick="window.openEpSchedule&&window.openEpSchedule()">
+                  <i class="fas fa-plus"></i> New Estate Review
+                </button>
+              </div>
+            </div>
+
+            {/* Main split layout */}
+            <div class="ep-body">
+              {/* Left: client list */}
+              <div class="ep-list-col">
+                <div class="ep-list-col-hdr">
+                  <span class="ep-list-col-title"><i class="fas fa-users"></i> Estate Planning Clients</span>
+                  <span class="ep-list-col-count" id="ep-list-count">6 clients</span>
+                </div>
+                <div id="prop-list"></div>
+              </div>
+
+              {/* Right: client detail */}
+              <div class="ep-detail-col" id="ep-detail-col">
+                <div class="ep-detail-empty" id="prop-detail-empty">
+                  <i class="fas fa-landmark ep-empty-icon"></i>
+                  <strong>Select a client to view their estate profile</strong>
+                  <p>Review will status, trust documents, beneficiary designations, power of attorney, and legacy planning — all in one place.</p>
+                  <button class="btn btn-ai" style="margin-top:16px" onclick="epRunGapScan()">
+                    <i class="fas fa-search-dollar"></i> Run Estate Gap Scan
+                  </button>
+                </div>
+                <div id="prop-detail-panel" style="display:none"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tpl-adv-smallbiz">
+          <div class="adv-smallbiz-page page">
+            {/* KPI bar — rendered by renderSbKpiBar() */}
+            <div id="pf-kpi-bar"></div>
+
+            {/* NYL Services Panel — rendered by renderSbNylPanel() */}
+            <div id="sb-nyl-panel"></div>
+
+            {/* Toolbar */}
+            <div class="page-toolbar sb-toolbar">
+              <div class="toolbar-left">
+                <div class="search-inline-wrap">
+                  <i class="fas fa-search search-inline-icon"></i>
+                  <input class="search-inline" type="text" placeholder="Search business clients…" oninput="sbFilterClients(this.value)" />
+                </div>
+                <select class="filter-select" onchange="sbFilterStatus(this.value)">
+                  <option value="">All Statuses</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="needs-review">Needs Review</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="current">Current</option>
+                </select>
+                <select class="filter-select" onchange="sbFilterBizType(this.value)">
+                  <option value="">All Business Types</option>
+                  <option value="Medical Practice">Medical Practice</option>
+                  <option value="IT Consulting">IT Consulting</option>
+                  <option value="Marketing Consultancy">Marketing Consultancy</option>
+                  <option value="Food &amp; Hospitality">Food &amp; Hospitality</option>
+                  <option value="Real Estate Holdings">Real Estate Holdings</option>
+                  <option value="Management Consulting">Management Consulting</option>
+                </select>
+              </div>
+              <div class="toolbar-right">
+                <button class="btn btn-ai" onclick="sbRunGapScan()">
+                  <i class="fas fa-chart-pie"></i> Business Gap Scan
+                </button>
+                <button class="btn btn-ghost" onclick="window._raToast&&window._raToast('Generating business review report…')">
+                  <i class="fas fa-file-alt"></i> Review Report
+                </button>
+                <button class="btn btn-primary" onclick="window._raToast&&window._raToast('Opening new business client intake…')">
+                  <i class="fas fa-plus"></i> New Business Client
+                </button>
+              </div>
+            </div>
+
+            {/* Main split layout */}
+            <div class="sb-body">
+              {/* Left: client list */}
+              <div class="sb-list-col">
+                <div class="sb-list-col-hdr">
+                  <span class="sb-list-col-title"><i class="fas fa-briefcase"></i> Small Business Clients</span>
+                  <span class="sb-list-col-count" id="sb-list-count">6 clients</span>
+                </div>
+                <div id="pf-client-list"></div>
+              </div>
+
+              {/* Right: business detail */}
+              <div class="sb-detail-col" id="sb-detail-col">
+                <div class="sb-detail-empty" id="pf-detail-empty">
+                  <i class="fas fa-building sb-empty-icon"></i>
+                  <strong>Select a business client to view their profile</strong>
+                  <p>Review key-man coverage, group benefits, executive compensation, succession planning, and retirement strategy — all in one view.</p>
+                  <button class="btn btn-ai" style="margin-top:16px" onclick="sbRunGapScan()">
+                    <i class="fas fa-chart-pie"></i> Run Business Gap Scan
+                  </button>
+                </div>
+                <div id="pf-detail-panel" style="display:none"></div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="tpl-eapp-submissions"><EAppSubmissionsPage /></div>
       </div>
 
