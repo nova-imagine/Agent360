@@ -69,7 +69,7 @@ function navigateTo(page) {
     fna: 'Home / Sales / Needs Analysis',
     delivery: 'Home / Insurance / Policy Delivery',
     leads: 'Home / Marketing / Leads',
-    'inv-accounts': 'Home / Investments / Investment Accounts & Suitability Review',
+    'inv-accounts': 'Home / Investments / Investment Accounts · Suitability Review · Funding & IPS',
     'ret-accounts': 'Home / Retirement / Annuity Accounts',
     'adv-wealth': 'Home / Advisory / Wealth Management',
     'adv-estate': 'Home / Advisory / Estate Planning',
@@ -36796,17 +36796,12 @@ function srOpenFullReview(id) {
 
 
 /* ================================================
-   INV Step 4 — Account Funding & IPS Tab (p6)
+   INV Step 4 — Account Funding & IPS (promoted to global)
    ================================================ */
-/* ============================================================
-   INV Track Step 4 — Account Funding & IPS Tab (Policy Delivery / p6)
-   Monkey-patches p6BuildDetailHTML to inject a 6th tab:
-     "Account Funding & IPS"  (key: 'funding')
-   Per-delivery funding + IPS data keyed by delivery id.
-   Guard: 'INV Step 4 module loaded'
+/* Data and render functions promoted from IIFE to global scope.
+   Displayed as a native section on InvestmentAccountsPage (inv-accounts).
+   Keyed by delivery id (DEL-001 … DEL-R2) — same ids used in p6Deliveries.
    ============================================================ */
-(function () {
-  'use strict';
 
   /* ── 1. PER-DELIVERY FUNDING + IPS DATA ─────────────────────────────── */
   var _afData = {
@@ -37295,58 +37290,24 @@ function srOpenFullReview(id) {
   window._afCopyIPS = function (id) {
     var af = _afData[id];
     if (!af) return;
-    _p6Toast('<i class="fas fa-copy"></i> IPS summary for <strong>' + af.client + '</strong> copied — ready to paste into email or compliance vault.', 2800);
+    showToast('<i class="fas fa-copy"></i> IPS summary for <strong>' + af.client + '</strong> copied — ready to paste into email or compliance vault.');
   };
   window._afOpenIPS = function (id) {
     var af = _afData[id];
     if (!af) return;
-    _p6Toast('<i class="fas fa-external-link-alt"></i> Opening IPS document vault for <strong>' + af.client + '</strong>…', 2000);
+    showToast('<i class="fas fa-external-link-alt"></i> Opening IPS document vault for <strong>' + af.client + '</strong>…');
+  };
+  window.afRunIPSReview = function () {
+    showToast('<i class="fas fa-robot"></i> AI IPS Review engine running across all 5 accounts… results in 3s.');
+    setTimeout(function () {
+      showToast('<i class="fas fa-check-circle" style="color:#059669"></i> IPS Review complete — 4 approved, 1 pending (Kevin Park — ACH verification outstanding).');
+    }, 3000);
+  };
+  window.afExportAll = function () {
+    showToast('<i class="fas fa-file-export"></i> Exporting Funding & IPS report for all 5 accounts…');
   };
 
-  /* ── 9. MONKEY-PATCH p6BuildDetailHTML ───────────────────────────────── */
-  /* Add 6th tab button and inject tab panel */
-  var _orig_p6BuildDetailHTML = p6BuildDetailHTML;
-
-  p6BuildDetailHTML = function (d) {
-    var html = _orig_p6BuildDetailHTML.apply(this, arguments);
-
-    /* Inject 6th tab button into the tab strip */
-    var fundingBtn = '<button class="p6-tab-btn' +
-      (_p6ActiveTab === 'funding' ? ' active' : '') +
-      '" onclick="p6SwitchTab(\'funding\',this)">' +
-      '<i class="fas fa-piggy-bank"></i> Funding &amp; IPS</button>';
-
-    /* Inject tab panel */
-    var panelHtml = '<div id="p6-tab-funding" class="p6-tab-panel" style="display:' +
-      (_p6ActiveTab === 'funding' ? '' : 'none') + '">' +
-      _p6TabFunding(d) +
-      '</div>';
-
-    /* Insert button before closing </div> of .p6-tabs */
-    html = html.replace(/<\/div>\s*<div class="p6-tab-panels">/, fundingBtn + '</div><div class="p6-tab-panels">');
-
-    /* Append panel before closing </div> of .p6-tab-panels */
-    html = html.replace(/<\/div>\s*(<div class="p6-timeline-section">)/, panelHtml + '</div>$1');
-
-    return html;
-  };
-
-  /* ── 10. MONKEY-PATCH p6SwitchTab ────────────────────────────────────── */
-  /* Extend to handle the 'funding' tab key */
-  var _orig_p6SwitchTab = p6SwitchTab;
-
-  p6SwitchTab = function (tab, el) {
-    _orig_p6SwitchTab.apply(this, arguments);
-    /* The original already handles show/hide via getElementById('p6-tab-' + tab) */
-    /* Nothing extra needed — the panel id 'p6-tab-funding' matches the pattern */
-  };
-
-  /* ── 11. DONE ─────────────────────────────────────────────────────────── */
-  console.log('[INV Step 4] Account Funding & IPS tab loaded.');
-  console.log('  Deliveries patched: DEL-001, DEL-002, DEL-003, DEL-R1, DEL-R2');
-  console.log('  p6BuildDetailHTML patched — 6th tab: Funding & IPS');
-
-})(); // 'INV Step 4 module loaded'
+  console.log('[INV Step 4] Account Funding & IPS promoted to global scope — displayed on Investment Accounts page.');
 
 
 /* ================================================

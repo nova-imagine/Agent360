@@ -37839,3 +37839,225 @@ kbd {
 .p5-ai-banner-actions {
   display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap;
 }
+
+
+/* ============================================================
+   INV Step 4 (promoted) — Account Funding & IPS native section
+   Class prefix: af-inv-*
+   ============================================================ */
+
+/* Section wrapper */
+.af-inv-section {
+  margin: 24px 0 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* ── Section header ── */
+.af-inv-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+}
+.af-inv-header-left { display: flex; align-items: center; gap: 14px; }
+.af-inv-section-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+  color: #fff; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.af-inv-section-title { font-size: 16px; font-weight: 700; color: #134e4a; }
+.af-inv-section-sub   { font-size: 11px; color: #0f766e; margin-top: 2px; }
+.af-inv-header-right  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.af-inv-count-badge {
+  background: #0d9488; color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+}
+.af-inv-btn {
+  font-size: 12px; font-weight: 600; padding: 7px 14px;
+  border-radius: 8px; cursor: pointer; border: none;
+  display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+}
+.af-inv-btn-primary  { background: #0d9488; color: #fff; }
+.af-inv-btn-primary:hover  { background: #0f766e; }
+.af-inv-btn-outline  { background: #fff; color: #0d9488; border: 1.5px solid #0d9488; }
+.af-inv-btn-outline:hover  { background: #f0fdfa; }
+
+/* ── KPI strip ── */
+.af-inv-kpi-strip {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 16px 22px 0;
+}
+.af-inv-kpi-card {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 10px 14px; flex: 1; min-width: 130px;
+}
+.af-inv-kpi-icon {
+  width: 34px; height: 34px; border-radius: 8px; font-size: 15px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.af-inv-kpi-body { display: flex; flex-direction: column; gap: 1px; }
+.af-inv-kpi-val  { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.af-inv-kpi-lbl  { font-size: 11px; color: #64748b; }
+
+/* ── AI banner ── */
+.af-inv-ai-banner {
+  margin: 14px 22px 0;
+  background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+  border-radius: 12px; color: #fff;
+  padding: 14px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.af-inv-ai-left  { display: flex; align-items: center; gap: 14px; }
+.af-inv-ai-icon-wrap {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.af-inv-ai-title {
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+.af-inv-live-badge {
+  background: rgba(255,255,255,0.25); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 10px; letter-spacing: 0.5px;
+}
+.af-inv-ai-sub  { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+.af-inv-ai-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.af-inv-ai-chip {
+  background: rgba(255,255,255,0.18); color: #fff;
+  font-size: 11px; font-weight: 600; padding: 5px 11px;
+  border-radius: 20px; display: flex; align-items: center; gap: 5px;
+}
+
+/* ── Cards grid ── */
+.af-inv-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+  padding: 16px 22px;
+}
+.af-inv-card {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.af-inv-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.af-inv-card-alert { border-color: #fed7aa; background: #fff7ed; }
+
+/* card header */
+.af-inv-card-header {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 14px; border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+}
+.af-inv-card-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.af-inv-card-name   { font-size: 13px; font-weight: 700; color: #1e293b; }
+.af-inv-card-policy { font-size: 11px; color: #64748b; }
+.af-inv-card-meta   { flex: 1; min-width: 0; }
+
+/* funding & IPS badges */
+.af-inv-fund-badge, .af-inv-ips-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; white-space: nowrap;
+}
+.af-inv-fund-confirmed { background: #dcfce7; color: #166534; }
+.af-inv-fund-pending   { background: #ffedd5; color: #9a3412; }
+.af-inv-ips-approved   { background: #ede9fe; color: #5b21b6; }
+.af-inv-ips-ns         { background: #fef9c3; color: #713f12; }
+
+/* card body */
+.af-inv-card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.af-inv-card-row  {
+  display: flex; align-items: baseline; gap: 6px;
+  font-size: 12px;
+}
+.af-inv-card-row-alert { color: #9a3412; }
+.af-inv-card-row-alert i { font-size: 11px; flex-shrink: 0; }
+.af-inv-card-key  { color: #64748b; font-size: 11px; min-width: 70px; flex-shrink: 0; }
+.af-inv-card-val  { color: #1e293b; font-weight: 600; }
+.af-inv-risk-cons { color: #059669; }
+.af-inv-risk-mod  { color: #ea580c; }
+.af-inv-risk-agg  { color: #dc2626; }
+
+/* allocation colour bar */
+.af-inv-card-alloc-bar {
+  display: flex; height: 8px; border-radius: 6px; overflow: hidden;
+  margin-top: 6px; gap: 2px;
+}
+.af-inv-alloc-seg { height: 100%; border-radius: 3px; }
+
+/* card actions */
+.af-inv-card-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 10px 14px; border-top: 1px solid #e2e8f0; background: #fff;
+}
+.af-inv-card-btn {
+  font-size: 11px; font-weight: 600; padding: 5px 12px;
+  border-radius: 7px; cursor: pointer; border: none;
+  display: flex; align-items: center; gap: 5px;
+  background: #0d9488; color: #fff; transition: background 0.2s;
+}
+.af-inv-card-btn:hover        { background: #0f766e; }
+.af-inv-card-btn-outline      { background: #fff; color: #0d9488; border: 1.5px solid #0d9488; }
+.af-inv-card-btn-outline:hover { background: #f0fdfa; }
+.af-inv-card-btn-warn         { background: #ea580c; }
+.af-inv-card-btn-warn:hover   { background: #c2410c; }
+
+/* ── Summary table ── */
+.af-inv-summary-table-wrap {
+  margin: 0 22px 22px;
+  border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;
+}
+.af-inv-summary-title {
+  font-size: 13px; font-weight: 700; color: #134e4a;
+  padding: 10px 16px; background: #f0fdfa;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex; align-items: center; gap: 7px;
+}
+.af-inv-summary-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.af-inv-summary-table th {
+  background: #f8fafc; color: #64748b; font-weight: 600;
+  padding: 8px 12px; text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+.af-inv-summary-table td {
+  padding: 8px 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b;
+}
+.af-inv-summary-table tbody tr:last-child td { border-bottom: none; }
+.af-inv-row-ok   { background: #fff; }
+.af-inv-row-warn { background: #fff7ed; }
+.af-inv-tbl-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; white-space: nowrap;
+}
+.af-inv-tbl-confirmed { background: #dcfce7; color: #166534; }
+.af-inv-tbl-pending   { background: #ffedd5; color: #9a3412; }
+.af-inv-tbl-approved  { background: #ede9fe; color: #5b21b6; }
+.af-inv-tbl-ns        { background: #fef9c3; color: #713f12; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .af-inv-section-header { flex-direction: column; align-items: flex-start; }
+  .af-inv-header-right   { width: 100%; }
+  .af-inv-cards-grid     { grid-template-columns: 1fr; }
+  .af-inv-ai-banner      { flex-direction: column; }
+  .af-inv-kpi-strip      { flex-direction: column; }
+  .af-inv-summary-table-wrap { overflow-x: auto; }
+}

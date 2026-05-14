@@ -595,6 +595,7 @@ function Sidebar() {
           <i class="fas fa-chart-line"></i><span>Investment Accounts</span>
           <span class="nav-badge" style="background:#059669;color:#fff">12</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff;margin-left:2px">3 SR</span>
+          <span class="nav-badge" style="background:#0d9488;color:#fff;margin-left:2px">5 IPS</span>
         </a>
 
         {/* ── RETIREMENT ── */}
@@ -14424,6 +14425,294 @@ function InvestmentAccountsPage() {
         </div>
 
       </div>{/* end isr-section */}
+
+      {/* ══════════════════════════════════════════════════════════
+          ACCOUNT FUNDING & IPS SECTION
+          ══════════════════════════════════════════════════════════ */}
+      <div class="af-inv-section">
+
+        {/* ── Section Header ── */}
+        <div class="af-inv-section-header">
+          <div class="af-inv-header-left">
+            <div class="af-inv-section-icon"><i class="fas fa-piggy-bank"></i></div>
+            <div>
+              <div class="af-inv-section-title">Account Funding &amp; IPS</div>
+              <div class="af-inv-section-sub">Premium collection · ACH / wire setup · Investment Policy Statements · Risk profiling · Target allocation · Reg BI coordination</div>
+            </div>
+          </div>
+          <div class="af-inv-header-right">
+            <span class="af-inv-count-badge">5 Accounts</span>
+            <button class="af-inv-btn af-inv-btn-outline" onclick="afExportAll()">
+              <i class="fas fa-file-export"></i> Export All
+            </button>
+            <button class="af-inv-btn af-inv-btn-primary" onclick="afRunIPSReview()">
+              <i class="fas fa-robot"></i> Run IPS Review
+            </button>
+          </div>
+        </div>
+
+        {/* ── 5-KPI Strip ── */}
+        <div class="af-inv-kpi-strip">
+          <div class="af-inv-kpi-card">
+            <div class="af-inv-kpi-icon" style="background:#eff6ff;color:#003087"><i class="fas fa-check-circle"></i></div>
+            <div class="af-inv-kpi-body">
+              <div class="af-inv-kpi-val" style="color:#003087">4</div>
+              <div class="af-inv-kpi-lbl">Funding Confirmed</div>
+            </div>
+          </div>
+          <div class="af-inv-kpi-card">
+            <div class="af-inv-kpi-icon" style="background:#fff7ed;color:#ea580c"><i class="fas fa-clock"></i></div>
+            <div class="af-inv-kpi-body">
+              <div class="af-inv-kpi-val" style="color:#ea580c">1</div>
+              <div class="af-inv-kpi-lbl">Funding Pending</div>
+            </div>
+          </div>
+          <div class="af-inv-kpi-card">
+            <div class="af-inv-kpi-icon" style="background:#f0fdf4;color:#059669"><i class="fas fa-file-contract"></i></div>
+            <div class="af-inv-kpi-body">
+              <div class="af-inv-kpi-val" style="color:#059669">4</div>
+              <div class="af-inv-kpi-lbl">IPS Approved</div>
+            </div>
+          </div>
+          <div class="af-inv-kpi-card">
+            <div class="af-inv-kpi-icon" style="background:#fef9c3;color:#b45309"><i class="fas fa-edit"></i></div>
+            <div class="af-inv-kpi-body">
+              <div class="af-inv-kpi-val" style="color:#b45309">1</div>
+              <div class="af-inv-kpi-lbl">IPS Not Started</div>
+            </div>
+          </div>
+          <div class="af-inv-kpi-card">
+            <div class="af-inv-kpi-icon" style="background:#f0fdfa;color:#0d9488"><i class="fas fa-chart-line"></i></div>
+            <div class="af-inv-kpi-body">
+              <div class="af-inv-kpi-val" style="color:#0d9488">$26.6K</div>
+              <div class="af-inv-kpi-lbl">Total Annual Premiums</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── AI Funding Engine Banner ── */}
+        <div class="af-inv-ai-banner">
+          <div class="af-inv-ai-left">
+            <div class="af-inv-ai-icon-wrap"><i class="fas fa-robot"></i></div>
+            <div>
+              <div class="af-inv-ai-title">
+                AI Funding &amp; IPS Engine
+                <span class="af-inv-live-badge">LIVE</span>
+              </div>
+              <div class="af-inv-ai-sub">Monitors ACH status, IPS completeness, risk-score drift, and rebalance cadence across all active accounts</div>
+            </div>
+          </div>
+          <div class="af-inv-ai-chips">
+            <div class="af-inv-ai-chip"><i class="fas fa-university"></i> 4 ACH Enrolled</div>
+            <div class="af-inv-ai-chip"><i class="fas fa-file-contract"></i> 4 IPS Approved</div>
+            <div class="af-inv-ai-chip"><i class="fas fa-exclamation-triangle" style="color:#ea580c"></i> 1 Pending ACH</div>
+          </div>
+        </div>
+
+        {/* ── Account Cards ── */}
+        <div class="af-inv-cards-grid">
+
+          {/* ── DEL-001 Alex Rivera ── */}
+          <div class="af-inv-card">
+            <div class="af-inv-card-header">
+              <div class="af-inv-card-avatar" style="background:#eff6ff;color:#003087">AR</div>
+              <div class="af-inv-card-meta">
+                <div class="af-inv-card-name">Alex Rivera</div>
+                <div class="af-inv-card-policy">Term Life · $500K · DEL-001</div>
+              </div>
+              <span class="af-inv-fund-badge af-inv-fund-confirmed">Confirmed</span>
+              <span class="af-inv-ips-badge af-inv-ips-approved">IPS Approved</span>
+            </div>
+            <div class="af-inv-card-body">
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Method</span><span class="af-inv-card-val">ACH — Chase Bank ···· 4821</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Premium</span><span class="af-inv-card-val">$4,800 / Annual</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Next Due</span><span class="af-inv-card-val">Apr 8, 2027</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Risk Score</span><span class="af-inv-card-val af-inv-risk-mod">62/100 — Moderate Growth</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Rebalance</span><span class="af-inv-card-val">Semi-annually</span></div>
+              <div class="af-inv-card-alloc-bar">
+                <div class="af-inv-alloc-seg" style="width:40%;background:#003087" title="U.S. Large Cap 40%"></div>
+                <div class="af-inv-alloc-seg" style="width:25%;background:#2563eb" title="International 25%"></div>
+                <div class="af-inv-alloc-seg" style="width:20%;background:#059669" title="Fixed Income 20%"></div>
+                <div class="af-inv-alloc-seg" style="width:10%;background:#7c3aed" title="Real Estate 10%"></div>
+                <div class="af-inv-alloc-seg" style="width:5%;background:#ea580c" title="Cash 5%"></div>
+              </div>
+            </div>
+            <div class="af-inv-card-actions">
+              <button class="af-inv-card-btn" onclick="_afCopyIPS('DEL-001')"><i class="fas fa-copy"></i> Copy IPS</button>
+              <button class="af-inv-card-btn af-inv-card-btn-outline" onclick="_afOpenIPS('DEL-001')"><i class="fas fa-external-link-alt"></i> Open IPS</button>
+            </div>
+          </div>
+
+          {/* ── DEL-002 Nancy Foster ── */}
+          <div class="af-inv-card">
+            <div class="af-inv-card-header">
+              <div class="af-inv-card-avatar" style="background:#f0fdf4;color:#059669">NF</div>
+              <div class="af-inv-card-meta">
+                <div class="af-inv-card-name">Nancy Foster</div>
+                <div class="af-inv-card-policy">Whole Life · $250K · DEL-002</div>
+              </div>
+              <span class="af-inv-fund-badge af-inv-fund-confirmed">Confirmed</span>
+              <span class="af-inv-ips-badge af-inv-ips-approved">IPS Approved</span>
+            </div>
+            <div class="af-inv-card-body">
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Method</span><span class="af-inv-card-val">ACH — Wells Fargo ···· 3347</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Premium</span><span class="af-inv-card-val">$3,600 / Annual</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Next Due</span><span class="af-inv-card-val">Mar 1, 2027</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Risk Score</span><span class="af-inv-card-val af-inv-risk-cons">44/100 — Conservative Growth</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">ESG</span><span class="af-inv-card-val">Healthcare exclusion screen</span></div>
+              <div class="af-inv-card-alloc-bar">
+                <div class="af-inv-alloc-seg" style="width:20%;background:#003087" title="U.S. Large Cap 20%"></div>
+                <div class="af-inv-alloc-seg" style="width:15%;background:#2563eb" title="International 15%"></div>
+                <div class="af-inv-alloc-seg" style="width:40%;background:#059669" title="Fixed Income 40%"></div>
+                <div class="af-inv-alloc-seg" style="width:15%;background:#7c3aed" title="Real Estate 15%"></div>
+                <div class="af-inv-alloc-seg" style="width:10%;background:#ea580c" title="Cash 10%"></div>
+              </div>
+            </div>
+            <div class="af-inv-card-actions">
+              <button class="af-inv-card-btn" onclick="_afCopyIPS('DEL-002')"><i class="fas fa-copy"></i> Copy IPS</button>
+              <button class="af-inv-card-btn af-inv-card-btn-outline" onclick="_afOpenIPS('DEL-002')"><i class="fas fa-external-link-alt"></i> Open IPS</button>
+            </div>
+          </div>
+
+          {/* ── DEL-003 Kevin Park — PENDING ── */}
+          <div class="af-inv-card af-inv-card-alert">
+            <div class="af-inv-card-header">
+              <div class="af-inv-card-avatar" style="background:#fff7ed;color:#ea580c">KP</div>
+              <div class="af-inv-card-meta">
+                <div class="af-inv-card-name">Kevin Park</div>
+                <div class="af-inv-card-policy">IUL · $350K · DEL-003</div>
+              </div>
+              <span class="af-inv-fund-badge af-inv-fund-pending">Pending</span>
+              <span class="af-inv-ips-badge af-inv-ips-ns">IPS Not Started</span>
+            </div>
+            <div class="af-inv-card-body">
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Method</span><span class="af-inv-card-val">ACH — Bank of America ···· 6612</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Premium</span><span class="af-inv-card-val">$3,200 / Monthly ($266.67)</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Next Due</span><span class="af-inv-card-val">Jun 1, 2026</span></div>
+              <div class="af-inv-card-row af-inv-card-row-alert"><i class="fas fa-exclamation-triangle"></i><span class="af-inv-card-key">Risk Score</span><span class="af-inv-card-val">Pending — ACH verification required</span></div>
+              <div class="af-inv-card-row af-inv-card-row-alert"><i class="fas fa-clock"></i><span>Urgent: ACH micro-deposit verification outstanding</span></div>
+            </div>
+            <div class="af-inv-card-actions">
+              <button class="af-inv-card-btn af-inv-card-btn-warn" onclick="showToast('&lt;i class=&quot;fas fa-paper-plane&quot;&gt;&lt;/i&gt; ACH verification reminder sent to Kevin Park.')"><i class="fas fa-paper-plane"></i> Send Reminder</button>
+              <button class="af-inv-card-btn af-inv-card-btn-outline" onclick="showToast('&lt;i class=&quot;fas fa-edit&quot;&gt;&lt;/i&gt; Opening IPS builder for Kevin Park…')"><i class="fas fa-edit"></i> Start IPS</button>
+            </div>
+          </div>
+
+          {/* ── DEL-R1 Sandra Williams ── */}
+          <div class="af-inv-card">
+            <div class="af-inv-card-header">
+              <div class="af-inv-card-avatar" style="background:#f5f3ff;color:#7c3aed">SW</div>
+              <div class="af-inv-card-meta">
+                <div class="af-inv-card-name">Sandra Williams</div>
+                <div class="af-inv-card-policy">Whole Life · $750K · DEL-R1</div>
+              </div>
+              <span class="af-inv-fund-badge af-inv-fund-confirmed">Confirmed</span>
+              <span class="af-inv-ips-badge af-inv-ips-approved">IPS Approved</span>
+            </div>
+            <div class="af-inv-card-body">
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Method</span><span class="af-inv-card-val">ACH — Fidelity ···· 8874 · Semi-annual</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Premium</span><span class="af-inv-card-val">$3,600 / Semi-annual</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Next Due</span><span class="af-inv-card-val">Aug 12, 2026</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Risk Score</span><span class="af-inv-card-val af-inv-risk-cons">28/100 — Income &amp; Preservation</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">ESG</span><span class="af-inv-card-val">SRI screen active</span></div>
+              <div class="af-inv-card-alloc-bar">
+                <div class="af-inv-alloc-seg" style="width:10%;background:#003087" title="U.S. Large Cap 10%"></div>
+                <div class="af-inv-alloc-seg" style="width:5%;background:#2563eb" title="International 5%"></div>
+                <div class="af-inv-alloc-seg" style="width:50%;background:#059669" title="Fixed Income 50%"></div>
+                <div class="af-inv-alloc-seg" style="width:25%;background:#7c3aed" title="Real Estate 25%"></div>
+                <div class="af-inv-alloc-seg" style="width:10%;background:#ea580c" title="Cash 10%"></div>
+              </div>
+            </div>
+            <div class="af-inv-card-actions">
+              <button class="af-inv-card-btn" onclick="_afCopyIPS('DEL-R1')"><i class="fas fa-copy"></i> Copy IPS</button>
+              <button class="af-inv-card-btn af-inv-card-btn-outline" onclick="_afOpenIPS('DEL-R1')"><i class="fas fa-external-link-alt"></i> Open IPS</button>
+            </div>
+          </div>
+
+          {/* ── DEL-R2 James Whitfield ── */}
+          <div class="af-inv-card">
+            <div class="af-inv-card-header">
+              <div class="af-inv-card-avatar" style="background:#fef9c3;color:#b45309">JW</div>
+              <div class="af-inv-card-meta">
+                <div class="af-inv-card-name">James Whitfield</div>
+                <div class="af-inv-card-policy">Whole Life Participating · $500K · DEL-R2</div>
+              </div>
+              <span class="af-inv-fund-badge af-inv-fund-confirmed">Confirmed</span>
+              <span class="af-inv-ips-badge af-inv-ips-approved">IPS Approved</span>
+            </div>
+            <div class="af-inv-card-body">
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Method</span><span class="af-inv-card-val">Annual Wire — Citibank Private ···· 9901</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Premium</span><span class="af-inv-card-val">$12,400 / Annual</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Next Due</span><span class="af-inv-card-val">Jan 15, 2027</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-val af-inv-risk-agg">81/100 — Aggressive Growth</span></div>
+              <div class="af-inv-card-row"><span class="af-inv-card-key">Rebalance</span><span class="af-inv-card-val">Quarterly · Trust structure</span></div>
+              <div class="af-inv-card-alloc-bar">
+                <div class="af-inv-alloc-seg" style="width:45%;background:#003087" title="U.S. Large Cap 45%"></div>
+                <div class="af-inv-alloc-seg" style="width:25%;background:#2563eb" title="International 25%"></div>
+                <div class="af-inv-alloc-seg" style="width:15%;background:#059669" title="Fixed Income 15%"></div>
+                <div class="af-inv-alloc-seg" style="width:10%;background:#7c3aed" title="Real Estate 10%"></div>
+                <div class="af-inv-alloc-seg" style="width:5%;background:#ea580c" title="Cash 5%"></div>
+              </div>
+            </div>
+            <div class="af-inv-card-actions">
+              <button class="af-inv-card-btn" onclick="_afCopyIPS('DEL-R2')"><i class="fas fa-copy"></i> Copy IPS</button>
+              <button class="af-inv-card-btn af-inv-card-btn-outline" onclick="_afOpenIPS('DEL-R2')"><i class="fas fa-external-link-alt"></i> Open IPS</button>
+            </div>
+          </div>
+
+        </div>{/* end af-inv-cards-grid */}
+
+        {/* ── Funding Status Summary Table ── */}
+        <div class="af-inv-summary-table-wrap">
+          <div class="af-inv-summary-title"><i class="fas fa-table"></i> Funding Method Summary</div>
+          <table class="af-inv-summary-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Method</th>
+                <th>Premium</th>
+                <th>Frequency</th>
+                <th>Funding Status</th>
+                <th>IPS Status</th>
+                <th>Risk Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="af-inv-row-ok">
+                <td>Alex Rivera</td><td>ACH</td><td>$4,800</td><td>Annual</td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-confirmed">Confirmed</span></td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-approved">Approved</span></td>
+                <td>62</td>
+              </tr>
+              <tr class="af-inv-row-ok">
+                <td>Nancy Foster</td><td>ACH</td><td>$3,600</td><td>Annual</td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-confirmed">Confirmed</span></td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-approved">Approved</span></td>
+                <td>44</td>
+              </tr>
+              <tr class="af-inv-row-warn">
+                <td>Kevin Park</td><td>ACH</td><td>$3,200</td><td>Monthly</td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-pending">Pending</span></td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-ns">Not Started</span></td>
+                <td>—</td>
+              </tr>
+              <tr class="af-inv-row-ok">
+                <td>Sandra Williams</td><td>ACH</td><td>$3,600</td><td>Semi-annual</td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-confirmed">Confirmed</span></td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-approved">Approved</span></td>
+                <td>28</td>
+              </tr>
+              <tr class="af-inv-row-ok">
+                <td>James Whitfield</td><td>Wire</td><td>$12,400</td><td>Annual</td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-confirmed">Confirmed</span></td>
+                <td><span class="af-inv-tbl-badge af-inv-tbl-approved">Approved</span></td>
+                <td>81</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>{/* end af-inv-section */}
 
     </div>
   )
