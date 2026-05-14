@@ -594,6 +594,7 @@ function Sidebar() {
         <a class="nav-item inv-accounts-nav" onclick="navigateTo('inv-accounts')" href="#">
           <i class="fas fa-chart-line"></i><span>Investment Accounts</span>
           <span class="nav-badge" style="background:#059669;color:#fff">12</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff;margin-left:2px">3 SR</span>
         </a>
 
         {/* ── RETIREMENT ── */}
@@ -7541,50 +7542,55 @@ function UnderwritingPage() {
         </div>
       </div>
 
-      {/* ── AI UW Intelligence Banner ── */}
-      <div class="uwi-banner">
-        <div class="uwi-banner-left">
-          <div class="uwi-banner-icon">
-            <i class="fas fa-brain"></i>
-            <span class="uwi-live-badge">LIVE</span>
-          </div>
-          <div class="uwi-banner-info">
-            <div class="uwi-banner-title">AI Underwriting Intelligence Engine <span class="uwi-pulse-dot"></span></div>
-            <div class="uwi-banner-sub">ML risk scoring · NLP medical record analysis · APS avoidance engine · STP optimization · 94.6% accuracy vs 89% manual</div>
-          </div>
-        </div>
-        <div class="uwi-banner-chips">
-          <div class="uwi-chip green"><i class="fas fa-bolt"></i><span class="uwi-chip-val">5</span><span class="uwi-chip-lbl">Auto-Approved</span></div>
-          <div class="uwi-chip orange"><i class="fas fa-file-medical"></i><span class="uwi-chip-val">18</span><span class="uwi-chip-lbl">APS Avoided</span></div>
-          <div class="uwi-chip blue"><i class="fas fa-tachometer-alt"></i><span class="uwi-chip-val">94.6%</span><span class="uwi-chip-lbl">AI Accuracy</span></div>
-          <div class="uwi-chip cyan"><i class="fas fa-clock"></i><span class="uwi-chip-val">4.2 hrs</span><span class="uwi-chip-lbl">Avg Decision</span></div>
-        </div>
-        <div class="uwi-banner-actions">
-          <button class="uwi-btn-primary" onclick="openUWIReport()"><i class="fas fa-chart-bar"></i> UW Intel Report</button>
-          <button class="uwi-btn-secondary" onclick="openAPSAvoidance()"><i class="fas fa-file-medical-alt"></i> APS Engine</button>
-        </div>
-      </div>
+      {/* ── AI Intelligence Dual Banner (UW Intel + Pricing) ── */}
+      <div class="uw-dual-banner">
 
-      {/* ── Pricing Intelligence Banner ── */}
-      <div class="pricing-analysis-banner">
-        <div class="pab-left">
-          <div class="pab-icon"><i class="fas fa-chart-line"></i><span class="pab-live-badge">LIVE</span></div>
-          <div class="pab-info">
-            <div class="pab-title">AI Pricing Intelligence &amp; Risk Narrative Engine <span class="pab-pulse"></span></div>
-            <div class="pab-sub">Real-time benchmark pricing · AI-generated risk narratives · Competitor rate comparison · Rating class optimization · Market-adjusted premium scoring</div>
+        {/* Left panel — UW Intelligence */}
+        <div class="uw-dual-panel uwi-panel">
+          <div class="uw-dual-panel-top">
+            <div class="uw-dual-panel-icon uwi-icon-bg"><i class="fas fa-brain"></i><span class="uw-dual-live-dot"></span></div>
+            <div class="uw-dual-panel-text">
+              <div class="uw-dual-panel-title">AI Underwriting Intelligence</div>
+              <div class="uw-dual-panel-sub">ML risk scoring · APS avoidance · STP optimization · 94.6% accuracy</div>
+            </div>
+          </div>
+          <div class="uw-dual-chips">
+            <div class="uw-dual-chip green"><span class="uw-dual-chip-val">5</span><span class="uw-dual-chip-lbl">Auto-Approved</span></div>
+            <div class="uw-dual-chip orange"><span class="uw-dual-chip-val">18</span><span class="uw-dual-chip-lbl">APS Avoided</span></div>
+            <div class="uw-dual-chip blue"><span class="uw-dual-chip-val">94.6%</span><span class="uw-dual-chip-lbl">Accuracy</span></div>
+            <div class="uw-dual-chip cyan"><span class="uw-dual-chip-val">4.2 hrs</span><span class="uw-dual-chip-lbl">Avg Decision</span></div>
+          </div>
+          <div class="uw-dual-panel-actions">
+            <button class="uw-dual-btn primary" onclick="openUWIReport()"><i class="fas fa-chart-bar"></i> UW Intel Report</button>
+            <button class="uw-dual-btn ghost" onclick="openAPSAvoidance()"><i class="fas fa-file-medical-alt"></i> APS Engine</button>
           </div>
         </div>
-        <div class="pab-chips">
-          <div class="pab-chip green"><i class="fas fa-percentage"></i><span class="pab-chip-val">3.1%</span><span class="pab-chip-lbl">Avg Savings Found</span></div>
-          <div class="pab-chip blue"><i class="fas fa-trophy"></i><span class="pab-chip-val">NYL #1</span><span class="pab-chip-lbl">Value Score</span></div>
-          <div class="pab-chip orange"><i class="fas fa-file-alt"></i><span class="pab-chip-val">11</span><span class="pab-chip-lbl">Reports Ready</span></div>
-          <div class="pab-chip cyan"><i class="fas fa-robot"></i><span class="pab-chip-val">AI-Written</span><span class="pab-chip-lbl">Narratives</span></div>
+
+        {/* Divider */}
+        <div class="uw-dual-divider"></div>
+
+        {/* Right panel — Pricing Intelligence */}
+        <div class="uw-dual-panel pricing-panel">
+          <div class="uw-dual-panel-top">
+            <div class="uw-dual-panel-icon pricing-icon-bg"><i class="fas fa-chart-line"></i><span class="uw-dual-live-dot"></span></div>
+            <div class="uw-dual-panel-text">
+              <div class="uw-dual-panel-title">AI Pricing Intelligence</div>
+              <div class="uw-dual-panel-sub">Benchmark pricing · Risk narratives · Rating class optimization · Market-adjusted</div>
+            </div>
+          </div>
+          <div class="uw-dual-chips">
+            <div class="uw-dual-chip green"><span class="uw-dual-chip-val">3.1%</span><span class="uw-dual-chip-lbl">Avg Savings</span></div>
+            <div class="uw-dual-chip blue"><span class="uw-dual-chip-val">NYL #1</span><span class="uw-dual-chip-lbl">Value Score</span></div>
+            <div class="uw-dual-chip orange"><span class="uw-dual-chip-val">11</span><span class="uw-dual-chip-lbl">Reports Ready</span></div>
+            <div class="uw-dual-chip cyan"><span class="uw-dual-chip-val">AI</span><span class="uw-dual-chip-lbl">Narratives</span></div>
+          </div>
+          <div class="uw-dual-panel-actions">
+            <button class="uw-dual-btn primary" onclick="openPricingReport()"><i class="fas fa-chart-bar"></i> Pricing Report</button>
+            <button class="uw-dual-btn ghost" onclick="openBenchmarkModal()"><i class="fas fa-balance-scale"></i> Benchmarks</button>
+          </div>
         </div>
-        <div class="pab-actions">
-          <button class="pab-btn-primary" onclick="openPricingReport()"><i class="fas fa-chart-bar"></i> Pricing Report</button>
-          <button class="pab-btn-secondary" onclick="openBenchmarkModal()"><i class="fas fa-balance-scale"></i> Benchmarks</button>
-        </div>
-      </div>
+
+      </div>{/* end uw-dual-banner */}
 
       {/* ── Pipeline Board ── */}
       <div class="uw-pipeline" id="uw-pipeline-board">
@@ -8294,20 +8300,18 @@ function UnderwritingPage() {
         {/* KPI Strip */}
         <div id="p5-kpi-strip" class="p5-kpi-strip"></div>
 
-        {/* AI Intelligence Banner */}
-        <div class="p5-ai-banner">
+        {/* AI Intelligence Banner — compact action bar */}
+        <div class="p5-ai-banner p5-ai-banner-compact">
           <div class="p5-ai-banner-left">
             <i class="fas fa-robot p5-ai-banner-icon"></i>
             <div>
-              <div class="p5-ai-banner-title">AI Underwriting Intelligence <span class="p5-live-dot"></span></div>
-              <div class="p5-ai-banner-sub">Predictive risk scoring · APS triage (1-page summaries from 150-page records) · STP auto-approval · Fraud detection · Requirement gap auto-chase · Agent status broadcasts</div>
+              <div class="p5-ai-banner-title">Phase 5 — AI Decision Engine <span class="p5-live-dot"></span></div>
+              <div class="p5-ai-banner-sub">Requirements checklist · Medical UW · Financial UW · AML/OFAC · Decision engine · Agent status broadcasts</div>
             </div>
           </div>
-          <div class="p5-ai-chips">
-            <div class="p5-ai-chip green"><i class="fas fa-bolt"></i><span>73%</span><span class="p5-chip-lbl">STP Rate</span></div>
-            <div class="p5-ai-chip blue"><i class="fas fa-file-medical"></i><span>18</span><span class="p5-chip-lbl">APS Avoided</span></div>
-            <div class="p5-ai-chip amber"><i class="fas fa-tachometer-alt"></i><span>94.6%</span><span class="p5-chip-lbl">AI Accuracy</span></div>
-            <div class="p5-ai-chip purple"><i class="fas fa-clock"></i><span>4.2 hrs</span><span class="p5-chip-lbl">Avg Decision</span></div>
+          <div class="p5-ai-banner-actions">
+            <button class="p5-hub-btn secondary" onclick="p5OpenStatusCenter()"><i class="fas fa-broadcast-tower"></i> Agent Updates</button>
+            <button class="p5-hub-btn primary" id="p5-scan-btn-inline" onclick="p5RunAIScan()"><i class="fas fa-sync-alt"></i> AI Scan</button>
           </div>
         </div>
 
@@ -14196,6 +14200,230 @@ function InvestmentAccountsPage() {
           </div>
         </div>
       </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          INVESTMENT SUITABILITY REVIEW
+          Reg BI · FINRA 2111 · Form ADV · Concentration Risk · Fee Disclosure
+          ══════════════════════════════════════════════════════════════ */}
+      <div class="isr-section">
+
+        {/* Section Header */}
+        <div class="isr-section-header">
+          <div class="isr-section-header-left">
+            <div class="isr-section-icon"><i class="fas fa-shield-alt"></i></div>
+            <div>
+              <div class="isr-section-title">Investment Suitability Review</div>
+              <div class="isr-section-sub">FINRA Rule 2111 · Reg BI — Best Interest · Form ADV · Concentration Risk · Fee Disclosure · AI-monitored compliance</div>
+            </div>
+          </div>
+          <div class="isr-section-actions">
+            <span class="isr-regbi-badge"><i class="fas fa-balance-scale"></i> Reg BI Active</span>
+            <button class="isr-action-btn ghost" onclick="srRunAllChecks()"><i class="fas fa-sync"></i> Re-run All Checks</button>
+          </div>
+        </div>
+
+        {/* KPI Strip */}
+        <div class="isr-kpi-strip">
+          <div class="isr-kpi">
+            <div class="isr-kpi-val">3</div>
+            <div class="isr-kpi-lbl">Cases In Review</div>
+          </div>
+          <div class="isr-kpi green">
+            <div class="isr-kpi-val">1</div>
+            <div class="isr-kpi-lbl">Approved</div>
+          </div>
+          <div class="isr-kpi amber">
+            <div class="isr-kpi-val">1</div>
+            <div class="isr-kpi-lbl">Pending Sign-off</div>
+          </div>
+          <div class="isr-kpi red">
+            <div class="isr-kpi-val">1</div>
+            <div class="isr-kpi-lbl">Blocked</div>
+          </div>
+          <div class="isr-kpi blue">
+            <div class="isr-kpi-val">$889K</div>
+            <div class="isr-kpi-lbl">Total AUM</div>
+          </div>
+        </div>
+
+        {/* AI Suitability Engine Banner */}
+        <div class="isr-ai-banner">
+          <div class="isr-ai-banner-left">
+            <i class="fas fa-robot isr-ai-icon"></i>
+            <div>
+              <div class="isr-ai-label">AI Suitability Engine <span class="isr-ai-live">● LIVE</span></div>
+              <div class="isr-ai-text">Reg BI checks · FINRA 2111 · Concentration risk · Fee disclosure · Liquidity suitability — continuous real-time monitoring</div>
+            </div>
+          </div>
+          <div class="isr-ai-chips">
+            <div class="isr-ai-chip green"><i class="fas fa-check-shield"></i><span>1</span><span class="isr-chip-lbl">Approved</span></div>
+            <div class="isr-ai-chip amber"><i class="fas fa-exclamation-triangle"></i><span>1</span><span class="isr-chip-lbl">Flags Pending</span></div>
+            <div class="isr-ai-chip red"><i class="fas fa-times-circle"></i><span>1</span><span class="isr-chip-lbl">Blocked</span></div>
+          </div>
+        </div>
+
+        {/* Case Cards */}
+        <div class="isr-cards-label"><i class="fas fa-clipboard-check"></i> Suitability Review Cases</div>
+        <div class="isr-cards-grid">
+
+          {/* SR-2026-001 — Patricia Nguyen — Pending */}
+          <div class="isr-case-card isr-stage-pending">
+            <div class="isr-card-header">
+              <div class="isr-card-avatar" style="background:#7c3aed">PN</div>
+              <div class="isr-card-info">
+                <div class="isr-card-name">Patricia Nguyen <span class="isr-case-id">SR-2026-001</span></div>
+                <div class="isr-card-acct">IRA Rollover + Managed Account · $542,000 AUM</div>
+                <div class="isr-card-model">Balanced Growth 60/40 · 0.87% fee</div>
+              </div>
+              <div class="isr-card-score">
+                <div class="isr-score-num" style="color:#d97706">78</div>
+                <div class="isr-score-lbl">/ 100</div>
+              </div>
+            </div>
+            <div class="isr-card-stage isr-stage-pending">
+              <span class="isr-stage-dot"></span>Pending Advisor Sign-off · 2d in review
+            </div>
+            <div class="isr-checks-row">
+              <span class="isr-check-pill isr-pill-pass" title="FINRA Rule 2111 — Suitability"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-warn" title="Reg BI — Best Interest"><i class="fas fa-exclamation"></i></span>
+              <span class="isr-check-pill isr-pill-warn" title="Form ADV Part 2 Delivery"><i class="fas fa-exclamation"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Investment Profile Completeness"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Fee Disclosure (Form CRS)"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-warn" title="Concentration Risk Review"><i class="fas fa-exclamation"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Liquidity Suitability"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Tax Suitability Check"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="isr-flags">
+              <div class="isr-flag isr-flag-warn"><i class="fas fa-exclamation-triangle"></i><div><div class="isr-flag-rule">Concentration Risk</div><div class="isr-flag-detail">Employer stock 12% &gt; 5% guideline — reduction plan documented</div></div></div>
+              <div class="isr-flag isr-flag-warn"><i class="fas fa-exclamation-triangle"></i><div><div class="isr-flag-rule">Form ADV Delivery</div><div class="isr-flag-detail">Client acknowledgment pending — DocuSign sent Jun 10</div></div></div>
+            </div>
+            <div class="isr-ai-rec" style="color:#d97706"><i class="fas fa-robot"></i> Conditionally Approved — resolve 3 flags</div>
+            <div class="isr-card-narrative">Suitability is conditionally met. Reg BI documentation requires ADV Part 2 client acknowledgment before account funding. Employer stock concentration reduction plan is documented and acceptable per FINRA guidance.</div>
+            <div class="isr-card-actions">
+              <button class="isr-btn primary" onclick="srApproveCase('SR-2026-001')"><i class="fas fa-check-shield"></i> Approve</button>
+              <button class="isr-btn outline" onclick="srRequestDocs('SR-2026-001')"><i class="fas fa-paper-plane"></i> Request Docs</button>
+              <button class="isr-btn outline" onclick="srOpenFullReview('SR-2026-001')"><i class="fas fa-search"></i> Full Review</button>
+            </div>
+          </div>
+
+          {/* SR-2026-002 — James Rivera — Approved */}
+          <div class="isr-case-card isr-stage-approved">
+            <div class="isr-card-header">
+              <div class="isr-card-avatar" style="background:#0891b2">JR</div>
+              <div class="isr-card-info">
+                <div class="isr-card-name">James Rivera <span class="isr-case-id">SR-2026-002</span></div>
+                <div class="isr-card-acct">Roth IRA + ESG Brokerage · $137,000 AUM</div>
+                <div class="isr-card-model">ESG Conservative 35/65 · 0.72% fee</div>
+              </div>
+              <div class="isr-card-score">
+                <div class="isr-score-num" style="color:#16a34a">91</div>
+                <div class="isr-score-lbl">/ 100</div>
+              </div>
+            </div>
+            <div class="isr-card-stage isr-stage-approved">
+              <span class="isr-stage-dot"></span>Approved — Pending Funding · 1d in review
+            </div>
+            <div class="isr-checks-row">
+              <span class="isr-check-pill isr-pill-pass" title="FINRA Rule 2111 — Suitability"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Reg BI — Best Interest"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Form ADV Part 2 Delivery"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Investment Profile Completeness"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Fee Disclosure (Form CRS)"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="ESG Mandate Disclosure"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Liquidity Suitability"><i class="fas fa-check"></i></span>
+              <span class="isr-check-pill isr-pill-pass" title="Tax Suitability Check"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="isr-ai-rec" style="color:#16a34a"><i class="fas fa-robot"></i> Approved — All Checks Passed</div>
+            <div class="isr-card-narrative">Full suitability confirmed. All 8 regulatory checks passed. ESG mandate properly documented per SEC guidance. Conservative-Moderate profile correctly aligned with 6-year horizon and capital preservation objective. Ready for initial funding.</div>
+            <div class="isr-card-actions">
+              <button class="isr-btn primary" onclick="srApproveCase('SR-2026-002')"><i class="fas fa-check-shield"></i> Approve</button>
+              <button class="isr-btn outline" onclick="srRequestDocs('SR-2026-002')"><i class="fas fa-paper-plane"></i> Request Docs</button>
+              <button class="isr-btn outline" onclick="srOpenFullReview('SR-2026-002')"><i class="fas fa-search"></i> Full Review</button>
+            </div>
+          </div>
+
+          {/* SR-2026-003 — Nancy Foster — Blocked */}
+          <div class="isr-case-card isr-stage-incomplete">
+            <div class="isr-card-header">
+              <div class="isr-card-avatar" style="background:#059669">NF</div>
+              <div class="isr-card-info">
+                <div class="isr-card-name">Nancy Foster <span class="isr-case-id">SR-2026-003</span></div>
+                <div class="isr-card-acct">Managed Discretionary Account · $210,000 AUM</div>
+                <div class="isr-card-model">Growth 70/30 · 0.95% fee</div>
+              </div>
+              <div class="isr-card-score">
+                <div class="isr-score-num" style="color:#dc2626">65</div>
+                <div class="isr-score-lbl">/ 100</div>
+              </div>
+            </div>
+            <div class="isr-card-stage isr-stage-incomplete">
+              <span class="isr-stage-dot"></span>Incomplete — Documents Missing · 5d in review
+            </div>
+            <div class="isr-checks-row">
+              <span class="isr-check-pill isr-pill-fail" title="FINRA Rule 2111 — Suitability"><i class="fas fa-times"></i></span>
+              <span class="isr-check-pill isr-pill-fail" title="Reg BI — Best Interest"><i class="fas fa-times"></i></span>
+              <span class="isr-check-pill isr-pill-fail" title="Form ADV Part 2 Delivery"><i class="fas fa-times"></i></span>
+              <span class="isr-check-pill isr-pill-fail" title="Investment Profile Completeness"><i class="fas fa-times"></i></span>
+              <span class="isr-check-pill isr-pill-pend" title="Fee Disclosure (Form CRS)"><i class="fas fa-clock"></i></span>
+              <span class="isr-check-pill isr-pill-pend" title="Concentration Risk Review"><i class="fas fa-clock"></i></span>
+              <span class="isr-check-pill isr-pill-pend" title="Liquidity Suitability"><i class="fas fa-clock"></i></span>
+              <span class="isr-check-pill isr-pill-pend" title="Tax Suitability Check"><i class="fas fa-clock"></i></span>
+            </div>
+            <div class="isr-flags">
+              <div class="isr-flag isr-flag-fail"><i class="fas fa-times-circle"></i><div><div class="isr-flag-rule">Investment Profile</div><div class="isr-flag-detail">Risk tolerance questionnaire not completed — cannot score suitability</div></div></div>
+              <div class="isr-flag isr-flag-fail"><i class="fas fa-times-circle"></i><div><div class="isr-flag-rule">Form ADV Delivery</div><div class="isr-flag-detail">ADV Part 2A not yet sent to client</div></div></div>
+              <div class="isr-flag isr-flag-warn"><i class="fas fa-exclamation-triangle"></i><div><div class="isr-flag-rule">Source of Funds</div><div class="isr-flag-detail">Funding source not documented — required for accounts &gt; $100K</div></div></div>
+            </div>
+            <div class="isr-ai-rec" style="color:#dc2626"><i class="fas fa-robot"></i> Blocked — Critical Items Missing</div>
+            <div class="isr-card-narrative">Account opening is blocked pending completion of regulatory documents. Investment Profile Questionnaire must be completed before suitability can be assessed. ADV Part 2 must be delivered and acknowledged.</div>
+            <div class="isr-card-actions">
+              <button class="isr-btn primary" onclick="srApproveCase('SR-2026-003')"><i class="fas fa-check-shield"></i> Approve</button>
+              <button class="isr-btn outline" onclick="srRequestDocs('SR-2026-003')"><i class="fas fa-paper-plane"></i> Request Docs</button>
+              <button class="isr-btn outline" onclick="srOpenFullReview('SR-2026-003')"><i class="fas fa-search"></i> Full Review</button>
+            </div>
+          </div>
+
+        </div>{/* end isr-cards-grid */}
+
+        {/* Reg BI Compliance Summary Table */}
+        <div class="isr-regbi-card">
+          <div class="isr-table-label"><i class="fas fa-balance-scale"></i> Reg BI Compliance Summary</div>
+          <div class="isr-table-wrap">
+            <table class="isr-regbi-table">
+              <thead>
+                <tr><th></th><th>Client</th><th>Account Type</th><th>Score</th><th>Checks</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr class="isr-regbi-warn">
+                  <td><div class="isr-mini-avatar" style="background:#7c3aed">PN</div></td>
+                  <td>Patricia Nguyen</td>
+                  <td>IRA Rollover + Managed Account</td>
+                  <td><span class="isr-score-badge" style="color:#d97706">78/100</span></td>
+                  <td>5/8</td>
+                  <td><i class="fas fa-exclamation-triangle"></i> Pending Advisor Sign-off</td>
+                </tr>
+                <tr class="isr-regbi-pass">
+                  <td><div class="isr-mini-avatar" style="background:#0891b2">JR</div></td>
+                  <td>James Rivera</td>
+                  <td>Roth IRA + ESG Brokerage</td>
+                  <td><span class="isr-score-badge" style="color:#16a34a">91/100</span></td>
+                  <td>8/8</td>
+                  <td><i class="fas fa-check-circle"></i> Approved — Pending Funding</td>
+                </tr>
+                <tr class="isr-regbi-fail">
+                  <td><div class="isr-mini-avatar" style="background:#059669">NF</div></td>
+                  <td>Nancy Foster</td>
+                  <td>Managed Discretionary Account</td>
+                  <td><span class="isr-score-badge" style="color:#dc2626">65/100</span></td>
+                  <td>0/8</td>
+                  <td><i class="fas fa-times-circle"></i> Incomplete — Documents Missing</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>{/* end isr-section */}
 
     </div>
   )
