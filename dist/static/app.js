@@ -42,6 +42,7 @@ function navigateTo(page) {
     'inv-accounts': 'Investment Accounts',
     'ret-accounts': 'Annuity Accounts',
     'adv-wealth': 'Wealth Management',
+    'adv-accounts': 'Advisory Accounts',
     'adv-estate': 'Estate Planning',
     'adv-smallbiz': 'Small Business Advisory',
     'eapp-submissions': 'E-App & Submissions'
@@ -72,6 +73,7 @@ function navigateTo(page) {
     'inv-accounts': 'Home / Investments / Investment Accounts · Suitability Review · Funding & IPS',
     'ret-accounts': 'Home / Retirement / Annuity Accounts',
     'adv-wealth': 'Home / Advisory / Wealth Management',
+    'adv-accounts': 'Home / Advisory / Advisory Accounts',
     'adv-estate': 'Home / Advisory / Estate Planning',
     'adv-smallbiz': 'Home / Advisory / Small Business',
     'eapp-submissions': 'Home / Insurance / E-App & Submissions'
@@ -34740,6 +34742,119 @@ var iaAccounts = [
     }
   },
 
+  /* ── Sandra Williams — Fixed Deferred Annuity ── */
+  {
+    id: 'IA-SW-002', clientId: 4, clientName: 'Sandra Williams', initials: 'SW',
+    avatarGrad: 'linear-gradient(135deg,#dc2626,#f59e0b)',
+    accountType: 'Fixed Deferred Annuity', accountNum: 'FDA-320002',
+    custodian: 'New York Life Insurance', openDate: 'Jan 2020',
+    aum: 95000, aumFmt: '$95K', currency: 'USD',
+    returnYTD: 4.8, returnYTDFmt: '+4.8%', benchmark: 'Fixed Rate 4.75%', benchmarkYTD: 4.75,
+    alpha: '+0.05%', sharpe: null,
+    fee: 0, feePct: '0.00% (no advisory fee)',
+    status: 'Active', statusCls: 'ia-status-active',
+    driftAlert: false, driftScore: 0,
+    rmdDue: true, rmdAmount: 3800, rmdDeadline: 'Dec 31, 2026',
+    reviewDue: true, lastReview: 'Sep 15, 2025', nextReview: 'Apr 10, 2026',
+    tlhOpportunity: 0, tlhPositions: [],
+    riskProfile: 'Conservative', horizon: '5 years (retirement 2031)',
+    annuityDetails: { type:'Fixed Deferred', guaranteedRate:'4.75%', surrenderPeriod:'5 years (ends Jan 2025 — free)', deathBenefit:'Contract value', incomeRider:'Optional — not elected', taxStatus:'Tax-deferred' },
+    targetAlloc: { usEquity:0, intlEquity:0, fixedIncome:100, alternatives:0, cash:0 },
+    currentAlloc: { usEquity:0, intlEquity:0, fixedIncome:100, alternatives:0, cash:0 },
+    holdings: [
+      { name:'Fixed Interest Account', type:'Fixed Annuity', value:95000, pct:100.0, ret:'+4.8%', status:'on-target' }
+    ],
+    rebalanceTrades: [],
+    timeline: [
+      { date:'Jan 1, 2026', event:'Annual interest credited — 4.75% guaranteed rate', type:'contribution' },
+      { date:'Sep 15, 2025', event:'Annual review — surrender period expired, no changes', type:'review' },
+      { date:'Jan 1, 2020', event:'Fixed Deferred Annuity opened — $80K premium', type:'open' }
+    ],
+    aiInsights: {
+      headline: 'Guaranteed 4.75% growth — income conversion opportunity at retirement',
+      summary: 'FDA-320002 is growing at a guaranteed 4.75% with no market risk. Surrender period has ended — full liquidity available. With Sandra retiring in 5 years, consider activating an income rider or annuitizing for guaranteed lifetime income to supplement her IRA distributions.',
+      actions: ['Discuss income rider election for guaranteed retirement income stream','Coordinate with IRA-320001 for combined distribution strategy','Review 1035 exchange option to upgrade to income annuity','Process $3,800 RMD before Dec 31, 2026 — IRS required']
+    }
+  },
+
+  /* ── James Whitfield — Variable Annuity ── */
+  {
+    id: 'IA-JW-002', clientId: 1, clientName: 'James Whitfield', initials: 'JW',
+    avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
+    accountType: 'Variable Annuity', accountNum: 'VA-291002',
+    custodian: 'New York Life Insurance', openDate: 'Mar 2018',
+    aum: 210000, aumFmt: '$210K', currency: 'USD',
+    returnYTD: 9.8, returnYTDFmt: '+9.8%', benchmark: 'S&P 500 Blend', benchmarkYTD: 9.2,
+    alpha: '+0.6%', sharpe: 1.10,
+    fee: 3150, feePct: '1.50% (M&E + fund expenses)',
+    status: 'Review Due', statusCls: 'ia-status-review',
+    driftAlert: true, driftScore: 6.2,
+    rmdDue: true, rmdAmount: 8400, rmdDeadline: 'Dec 31, 2026',
+    reviewDue: true, lastReview: 'Oct 20, 2025', nextReview: 'Apr 15, 2026',
+    tlhOpportunity: 0, tlhPositions: [],
+    riskProfile: 'Moderate', horizon: '13 years (retirement 2039)',
+    annuityDetails: { type:'Variable Annuity', mAndE:'1.10%', fundExpenses:'0.40%', surrenderPeriod:'Expired (opened 2018)', deathBenefit:'Greater of account value or premiums paid ($185K)', incomeRider:'GMIB elected — $9,200/yr guaranteed at age 73', taxStatus:'Tax-deferred' },
+    targetAlloc: { usEquity:50, intlEquity:15, fixedIncome:30, alternatives:0, cash:5 },
+    currentAlloc: { usEquity:56, intlEquity:11, fixedIncome:28, alternatives:0, cash:5 },
+    holdings: [
+      { name:'NYLIM Growth Sub-Account', type:'Variable Sub-Account', value:117600, pct:56.0, ret:'+12.4%', status:'overweight' },
+      { name:'NYLIM International Sub-Account', type:'Variable Sub-Account', value:23100, pct:11.0, ret:'+6.8%', status:'underweight' },
+      { name:'NYLIM Bond Sub-Account', type:'Variable Sub-Account', value:58800, pct:28.0, ret:'+3.6%', status:'underweight' },
+      { name:'Fixed Account (guaranteed)', type:'Fixed Account', value:10500, pct:5.0, ret:'+3.0%', status:'on-target' }
+    ],
+    rebalanceTrades: [
+      { action:'SELL', security:'NYLIM Growth Sub-Account', amount:'$12,600', reason:'Reduce equity overweight 56%→50%' },
+      { action:'BUY',  security:'NYLIM International Sub-Account', amount:'$8,400', reason:'Restore Intl 11%→15%' },
+      { action:'BUY',  security:'NYLIM Bond Sub-Account', amount:'$4,200', reason:'Restore Fixed Income 28%→30%' }
+    ],
+    timeline: [
+      { date:'Apr 10, 2026', event:'Review overdue — GMIB rider anniversary review needed', type:'alert' },
+      { date:'Oct 20, 2025', event:'Annual review — GMIB benefit base confirmed $192K', type:'review' },
+      { date:'Mar 1, 2026', event:'Sub-account rebalance — growth sleeve trimmed', type:'rebalance' },
+      { date:'Dec 15, 2025', event:'RMD $8,000 processed — IRS compliant 2025', type:'rmd' }
+    ],
+    aiInsights: {
+      headline: 'Variable annuity outperforming — GMIB rider review due',
+      summary: 'VA-291002 is growing strongly at +9.8% YTD. GMIB rider provides $9,200/yr guaranteed income floor at age 73 — valuable protection. Equity sub-account has drifted +6% over target. Review due to assess rider optimization and sub-account reallocation. RMD of $8,400 must be processed.',
+      actions: ['Execute sub-account rebalance — 3 trades to restore target allocation','Review GMIB benefit base — confirm income base for retirement planning','Process $8,400 RMD before Dec 31, 2026','Present GMIB income projection alongside IRA-291001 for total retirement income picture']
+    }
+  },
+
+  /* ── Maria Gonzalez — Hybrid Variable (IndexFlex) Annuity ── */
+  {
+    id: 'IA-MG-003', clientId: 6, clientName: 'Maria Gonzalez', initials: 'MG',
+    avatarGrad: 'linear-gradient(135deg,#059669,#34d399)',
+    accountType: 'Hybrid Variable Annuity', accountNum: 'HVA-341003',
+    custodian: 'New York Life Insurance', openDate: 'Jun 2024',
+    aum: 75000, aumFmt: '$75K', currency: 'USD',
+    returnYTD: 7.2, returnYTDFmt: '+7.2%', benchmark: 'S&P 500 Floor 0%', benchmarkYTD: 9.2,
+    alpha: null, sharpe: null,
+    fee: 1125, feePct: '1.50% (M&E + rider)',
+    status: 'Active', statusCls: 'ia-status-active',
+    driftAlert: false, driftScore: 0,
+    rmdDue: false, rmdAmount: 0, rmdDeadline: null,
+    reviewDue: false, lastReview: 'Jun 1, 2024', nextReview: 'Jun 1, 2026',
+    tlhOpportunity: 0, tlhPositions: [],
+    riskProfile: 'Moderate Growth', horizon: '17 years (retirement 2043)',
+    annuityDetails: { type:'Hybrid Variable (IndexFlex)', indexedAccount:'S&P 500 with 0% floor / 11% cap', fixedAccount:'Guaranteed 3.0%', surrenderPeriod:'7 years (ends Jun 2031)', deathBenefit:'Account value or premiums paid ($75K)', incomeRider:'Not elected — optional upgrade available', taxStatus:'Tax-deferred' },
+    targetAlloc: { usEquity:70, intlEquity:0, fixedIncome:30, alternatives:0, cash:0 },
+    currentAlloc: { usEquity:72, intlEquity:0, fixedIncome:28, alternatives:0, cash:0 },
+    holdings: [
+      { name:'S&P 500 Indexed Account (0% floor / 11% cap)', type:'Indexed Account', value:54000, pct:72.0, ret:'+7.2%', status:'on-target' },
+      { name:'Fixed Guaranteed Account (3.0%)', type:'Fixed Account', value:21000, pct:28.0, ret:'+3.0%', status:'on-target' }
+    ],
+    rebalanceTrades: [],
+    timeline: [
+      { date:'Jun 1, 2025', event:'First index anniversary — S&P crediting locked in +7.2%', type:'contribution' },
+      { date:'Jun 1, 2024', event:'IndexFlex annuity opened — $75K single premium', type:'open' }
+    ],
+    aiInsights: {
+      headline: 'IndexFlex delivering growth with downside protection',
+      summary: 'HVA-341003 (IndexFlex) credited +7.2% in its first anniversary — strong relative to the 0% floor guarantee. No downside risk. Surrender period runs until 2031, aligning well with Maria\'s 17-year retirement horizon. Consider electing income rider at next anniversary for guaranteed income floor.',
+      actions: ['Review income rider election at Jun 2026 anniversary — add guaranteed income floor','No rebalancing needed — indexed account allocation is managed automatically','Present alongside ETF portfolio for total investment picture at next review','Consider additional premium if client has excess cash — no additional cost for first 2 years']
+    }
+  },
+
   /* ── David Thompson (1 account — recently opened) ── */
   {
     id: 'IA-DT-001', clientId: 5, clientName: 'David Thompson', initials: 'DT',
@@ -35350,10 +35465,14 @@ function iaFilterAccounts() {
 function iaRunDriftScan() {
   var panel = document.getElementById('ia-drift-panel');
   if (!panel) return;
-  panel.style.display = panel.style.display === 'none' ? '' : 'none';
-  if (panel.style.display !== 'none') {
+  var hidden = panel.style.display === 'none' || panel.style.display === '';
+  if (hidden) {
+    panel.style.display = 'block';
     var list = document.getElementById('ia-drift-list');
     if (list) list.innerHTML = iaRenderDriftList();
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  } else {
+    panel.style.display = 'none';
   }
 }
 
@@ -35445,10 +35564,14 @@ function iaRenderDriftList() {
 function iaRunTLHScan() {
   var panel = document.getElementById('ia-tlh-panel');
   if (!panel) return;
-  panel.style.display = panel.style.display === 'none' ? '' : 'none';
-  if (panel.style.display !== 'none') {
+  var hidden = panel.style.display === 'none' || panel.style.display === '';
+  if (hidden) {
+    panel.style.display = 'block';
     var list = document.getElementById('ia-tlh-list');
     if (list) list.innerHTML = iaRenderTLHList();
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  } else {
+    panel.style.display = 'none';
   }
 }
 
@@ -35522,10 +35645,14 @@ function iaRenderTLHList() {
 function iaOpenRMDCenter() {
   var panel = document.getElementById('ia-rmd-panel');
   if (!panel) return;
-  panel.style.display = panel.style.display === 'none' ? '' : 'none';
-  if (panel.style.display !== 'none') {
+  var hidden = panel.style.display === 'none' || panel.style.display === '';
+  if (hidden) {
+    panel.style.display = 'block';
     var list = document.getElementById('ia-rmd-list');
     if (list) list.innerHTML = iaRenderRMDList();
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  } else {
+    panel.style.display = 'none';
   }
 }
 
@@ -35636,16 +35763,16 @@ function iaCloseNewAccount() {
 
 function iaRenderNewAccountForm() {
   var accountTypes = [
-    { type:'Advisory (UMA)',         icon:'fa-layer-group',    fee:'1.00%', min:'$50K',  desc:'Unified managed account — multi-sleeve, discretionary' },
-    { type:'Advisory (SMA)',         icon:'fa-chart-bar',      fee:'0.75%', min:'$100K', desc:'Separately managed — direct equity holdings' },
-    { type:'ETF Portfolio',          icon:'fa-chart-area',     fee:'0.35%', min:'$10K',  desc:'Low-cost passive ETF model portfolio' },
-    { type:'Mutual Fund Portfolio',  icon:'fa-coins',          fee:'0.80%', min:'$5K',   desc:'Diversified MainStay mutual fund portfolio' },
-    { type:'IRA (Traditional)',      icon:'fa-piggy-bank',     fee:'0.75%', min:'$5K',   desc:'Pre-tax retirement · RMD required at 73' },
-    { type:'IRA (Roth)',             icon:'fa-sun',            fee:'0.75%', min:'$5K',   desc:'After-tax · tax-free growth · no RMD' },
-    { type:'IRA (SEP)',              icon:'fa-briefcase',      fee:'0.75%', min:'$5K',   desc:'Self-employed · higher contribution limits' },
-    { type:'529 College Savings',    icon:'fa-graduation-cap', fee:'0.50%', min:'$1K',   desc:'Tax-advantaged education savings · state deduction' },
-    { type:'Joint Brokerage',        icon:'fa-users',          fee:'0.65%', min:'$25K',  desc:'Jointly held · flexible withdrawals' },
-    { type:'Individual Brokerage',   icon:'fa-user',           fee:'0.65%', min:'$10K',  desc:'Individual taxable account · flexible' }
+    { type:'ETF Portfolio',             icon:'fa-chart-area',     fee:'0.35%', min:'$10K',  desc:'Low-cost passive ETF model portfolio — diversified index funds' },
+    { type:'Mutual Fund Portfolio',     icon:'fa-coins',          fee:'0.80%', min:'$5K',   desc:'Diversified MainStay mutual fund portfolio — actively managed' },
+    { type:'IRA (Traditional)',         icon:'fa-piggy-bank',     fee:'0.75%', min:'$5K',   desc:'Pre-tax retirement savings · RMD required at age 73' },
+    { type:'IRA (Roth)',                icon:'fa-sun',            fee:'0.75%', min:'$5K',   desc:'After-tax contributions · tax-free growth · no RMD' },
+    { type:'IRA (SEP)',                 icon:'fa-briefcase',      fee:'0.75%', min:'$5K',   desc:'Self-employed retirement · higher contribution limits' },
+    { type:'529 College Savings',       icon:'fa-graduation-cap', fee:'0.50%', min:'$1K',   desc:'Tax-advantaged education savings · NY state deduction available' },
+    { type:'Joint Brokerage',           icon:'fa-users',          fee:'0.65%', min:'$25K',  desc:'Jointly held taxable account · flexible withdrawals' },
+    { type:'Fixed Deferred Annuity',    icon:'fa-shield-alt',     fee:'0.00%', min:'$10K',  desc:'Guaranteed rate growth · tax-deferred · principal protection · no market risk' },
+    { type:'Variable Annuity',          icon:'fa-chart-line',     fee:'1.50%', min:'$25K',  desc:'Market-linked growth in sub-accounts · death benefit · optional GMIB income rider' },
+    { type:'Hybrid Variable Annuity',   icon:'fa-balance-scale',  fee:'1.50%', min:'$25K',  desc:'IndexFlex — S&P 500 indexed with 0% floor · no downside risk · growth potential' }
   ];
 
   return '<div class="ia-naf-form">' +
@@ -44459,3 +44586,827 @@ function submitToUnderwriting(eaId, clientName) {
 })();
 
 console.log('E-App & Submissions module loaded — Insurance workflow hub');
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADVISORY ACCOUNTS MODULE
+   SMA · UMA · Fund Advisory Program · Rep-Directed Program
+   ═══════════════════════════════════════════════════════════════════ */
+
+var advAccounts = [
+
+  /* ── Linda Morrison — UMA ── */
+  {
+    id: 'ADV-LM-001', clientId: 8, clientName: 'Linda Morrison', initials: 'LM',
+    avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
+    programType: 'UMA (Unified Managed Account)', accountNum: 'UMA-880301',
+    custodian: 'NYLIM / Pershing', openDate: 'Mar 2021', manager: 'NYLIM Asset Management',
+    aum: 420000, aumFmt: '$420K',
+    returnYTD: 9.4, returnYTDFmt: '+9.4%', benchmark: 'S&P 500 Blend', benchmarkYTD: 8.0,
+    alpha: '+1.4%', sharpe: 1.38, fee: 4200, feePct: '1.00%',
+    status: 'Active', statusCls: 'ia-status-active',
+    driftAlert: true, driftScore: 7.1, reviewDue: true,
+    lastReview: 'Jan 15, 2026', nextReview: 'Apr 15, 2026',
+    riskProfile: 'Moderate Growth', horizon: '9 years',
+    strategy: 'Multi-sleeve UMA: US Equity SMA + Intl Mutual Funds + Bond ETFs + Alternatives',
+    discretionary: true,
+    targetAlloc: { usEquity:40, intlEquity:20, fixedIncome:25, alternatives:10, cash:5 },
+    currentAlloc: { usEquity:47, intlEquity:16, fixedIncome:22, alternatives:10, cash:5 },
+    sleeves: [
+      { name:'US Large Cap SMA (NYLIM)', type:'SMA Sleeve', value:197400, pct:47.0, ret:'+11.8%', status:'overweight', manager:'NYLIM Equity' },
+      { name:'Intl Developed Mutual Fund', type:'Mutual Fund', value:67200, pct:16.0, ret:'+6.4%', status:'underweight', manager:'MainStay Candriam' },
+      { name:'Core Bond ETF Sleeve', type:'ETF', value:92400, pct:22.0, ret:'+3.9%', status:'underweight', manager:'Passively managed' },
+      { name:'Alternatives (REIT + Commodities)', type:'ETF', value:42000, pct:10.0, ret:'+7.2%', status:'on-target', manager:'iShares' },
+      { name:'Cash / MMF', type:'Cash', value:21000, pct:5.0, ret:'+5.1%', status:'on-target', manager:'NYLIM' }
+    ],
+    rebalanceTrades: [
+      { action:'SELL', security:'US Large Cap SMA', amount:'$29,400', reason:'Reduce US Equity overweight 47%→40%' },
+      { action:'BUY',  security:'Intl Developed Fund', amount:'$16,800', reason:'Restore Intl 16%→20%' },
+      { action:'BUY',  security:'Core Bond ETF', amount:'$12,600', reason:'Restore Fixed Income 22%→25%' }
+    ],
+    timeline: [
+      { date:'Apr 10, 2026', event:'Q1 Performance Report — +9.4% YTD, +1.4% alpha', type:'report' },
+      { date:'Mar 15, 2026', event:'Drift alert — US Equity +7% over target weight', type:'alert' },
+      { date:'Jan 15, 2026', event:'Annual review completed — IPS reaffirmed', type:'review' }
+    ],
+    aiInsights: {
+      headline: 'UMA outperforming — multi-sleeve drift rebalance overdue',
+      summary: 'UMA-880301 is generating strong +1.4% alpha across all sleeves. US Equity SMA has drifted 7% over target. Discretionary authority allows same-day rebalance. Annual review overdue — Q2 appointment needed.',
+      actions: ['Execute 3-trade discretionary rebalance across sleeves','Schedule Q2 review Apr 15 — present alternatives expansion to 15%','Review manager performance attribution — NYLIM Equity +1.8% above benchmark','Coordinate with IRA-880201 for total portfolio picture']
+    }
+  },
+
+  /* ── Robert Chen — SMA ── */
+  {
+    id: 'ADV-RC-001', clientId: 3, clientName: 'Robert Chen', initials: 'RC',
+    avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
+    programType: 'SMA (Separately Managed Account)', accountNum: 'SMA-300301',
+    custodian: 'NYLIM / Pershing', openDate: 'Nov 2020', manager: 'NYLIM Growth Equity',
+    aum: 580000, aumFmt: '$580K',
+    returnYTD: 11.2, returnYTDFmt: '+11.2%', benchmark: 'S&P 500', benchmarkYTD: 9.2,
+    alpha: '+2.0%', sharpe: 1.55, fee: 5800, feePct: '1.00%',
+    status: 'Review Due', statusCls: 'ia-status-review',
+    driftAlert: true, driftScore: 8.3, reviewDue: true,
+    lastReview: 'Jan 20, 2026', nextReview: 'Apr 20, 2026',
+    riskProfile: 'Growth', horizon: '20 years',
+    strategy: 'Direct equity SMA — individual securities, tax-loss harvesting optimized, ESG-screened',
+    discretionary: true,
+    targetAlloc: { usEquity:60, intlEquity:20, fixedIncome:10, alternatives:5, cash:5 },
+    currentAlloc: { usEquity:68, intlEquity:15, fixedIncome:8, alternatives:5, cash:4 },
+    sleeves: [
+      { name:'US Large Cap Growth (direct equities)', type:'Direct Equity', value:394400, pct:68.0, ret:'+13.1%', status:'overweight', manager:'NYLIM Growth' },
+      { name:'Intl Developed (ADRs)', type:'Direct Equity', value:87000, pct:15.0, ret:'+7.6%', status:'underweight', manager:'NYLIM Intl' },
+      { name:'Investment Grade Bonds (direct)', type:'Direct Bond', value:46400, pct:8.0, ret:'+3.2%', status:'underweight', manager:'NYLIM Fixed' },
+      { name:'Alternatives (REIT + Commodity)', type:'ETF', value:29000, pct:5.0, ret:'+6.9%', status:'on-target', manager:'iShares' },
+      { name:'Cash / MMF', type:'Cash', value:23200, pct:4.0, ret:'+5.1%', status:'on-target', manager:'NYLIM' }
+    ],
+    rebalanceTrades: [
+      { action:'SELL', security:'US Large Cap (reduce AAPL/MSFT overweight)', amount:'$46,400', reason:'Reduce US Equity 68%→60%' },
+      { action:'BUY',  security:'Intl Developed ADRs', amount:'$29,000', reason:'Restore Intl 15%→20%' },
+      { action:'BUY',  security:'Investment Grade Bonds', amount:'$11,600', reason:'Restore Fixed Income 8%→10%' },
+      { action:'BUY',  security:'Cash / MMF buffer', amount:'$5,800', reason:'Restore cash 4%→5%' }
+    ],
+    timeline: [
+      { date:'Apr 8, 2026', event:'SMA quarterly report — +2.0% alpha vs S&P 500', type:'report' },
+      { date:'Mar 20, 2026', event:'Drift alert — growth equity +8.3% over target', type:'alert' },
+      { date:'Jan 20, 2026', event:'Annual review — IPS updated, ESG screen added', type:'review' },
+      { date:'Nov 30, 2025', event:'Tax-loss harvest — $6,200 losses realized', type:'tlh' }
+    ],
+    aiInsights: {
+      headline: 'SMA generating 2% alpha — significant rebalance needed',
+      summary: 'SMA-300301 is Robert\'s flagship account at $580K. Exceptional +2.0% alpha driven by concentrated US growth equity. Drift of 8.3% creates concentrated risk. Discretionary authority enables immediate rebalance. Q2 review overdue — Robert is a strong candidate for additional SMA contributions.',
+      actions: ['Execute 4-trade discretionary rebalance immediately — high priority','Harvest additional TLH in intl sleeve — ~$3,800 opportunity','Present SMA expansion to $750K — consolidate brokerage assets','Schedule Q2 review Apr 20 — introduce ESG reporting dashboard']
+    }
+  },
+
+  /* ── Maria Gonzalez — Fund Advisory Program ── */
+  {
+    id: 'ADV-MG-001', clientId: 6, clientName: 'Maria Gonzalez', initials: 'MG',
+    avatarGrad: 'linear-gradient(135deg,#059669,#34d399)',
+    programType: 'Fund Advisory Program', accountNum: 'FAP-341001',
+    custodian: 'NYLIM / MainStay', openDate: 'Feb 2022', manager: 'NYLIM Model Portfolios',
+    aum: 155000, aumFmt: '$155K',
+    returnYTD: 8.5, returnYTDFmt: '+8.5%', benchmark: 'Morningstar Moderate Growth', benchmarkYTD: 8.0,
+    alpha: '+0.5%', sharpe: 1.14, fee: 1163, feePct: '0.75%',
+    status: 'Active', statusCls: 'ia-status-active',
+    driftAlert: false, driftScore: 2.1, reviewDue: false,
+    lastReview: 'Mar 5, 2026', nextReview: 'Jun 5, 2026',
+    riskProfile: 'Moderate Growth', horizon: '17 years',
+    strategy: 'Broadly diversified mutual fund portfolio — MainStay model, single consolidated account',
+    discretionary: false,
+    targetAlloc: { usEquity:55, intlEquity:20, fixedIncome:20, alternatives:0, cash:5 },
+    currentAlloc: { usEquity:55, intlEquity:20, fixedIncome:20, alternatives:0, cash:5 },
+    sleeves: [
+      { name:'MainStay Epoch US Equity Fund', type:'Mutual Fund', value:85250, pct:55.0, ret:'+10.8%', status:'on-target', manager:'Epoch Advisors' },
+      { name:'MainStay Candriam Intl Equity', type:'Mutual Fund', value:31000, pct:20.0, ret:'+6.4%', status:'on-target', manager:'Candriam' },
+      { name:'MainStay MacKay Bond Fund', type:'Mutual Fund', value:31000, pct:20.0, ret:'+3.7%', status:'on-target', manager:'MacKay Shields' },
+      { name:'Cash / MMF', type:'Cash', value:7750, pct:5.0, ret:'+5.1%', status:'on-target', manager:'NYLIM' }
+    ],
+    rebalanceTrades: [],
+    timeline: [
+      { date:'Mar 5, 2026', event:'Q1 review — portfolio perfectly on target, alpha +0.5%', type:'review' },
+      { date:'Jan 15, 2026', event:'Model rebalance triggered — auto-rebalanced to target', type:'rebalance' },
+      { date:'Dec 1, 2025', event:'$12,000 DCA contribution invested per model', type:'contribution' }
+    ],
+    aiInsights: {
+      headline: 'Fund Advisory perfectly on target — DCA plan effective',
+      summary: 'FAP-341001 is performing solidly with automatic model rebalancing keeping it perfectly allocated. Maria\'s $1,000/month DCA plan is building wealth systematically. At current rate, projects to $348K by retirement 2043. Consider upgrading to UMA as AUM approaches $250K.',
+      actions: ['Continue DCA plan — $1,000/month systematic investment','Upgrade path: present UMA when AUM reaches $200K (est. 2027)','Schedule Q2 review Jun 5 — discuss international allocation increase','Review ESG model option — Maria expressed interest at last review']
+    }
+  },
+
+  /* ── David Thompson — Rep-Directed Program ── */
+  {
+    id: 'ADV-DT-001', clientId: 5, clientName: 'David Thompson', initials: 'DT',
+    avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
+    programType: 'Rep-Directed Program', accountNum: 'RDP-305001',
+    custodian: 'NYLIM / MainStay', openDate: 'Mar 2026', manager: 'Rep-Directed (Agent Discretion)',
+    aum: 58000, aumFmt: '$58K',
+    returnYTD: 3.4, returnYTDFmt: '+3.4%', benchmark: 'Morningstar Moderate Growth', benchmarkYTD: 8.0,
+    alpha: null, sharpe: null, fee: 435, feePct: '0.75%',
+    status: 'Active', statusCls: 'ia-status-active',
+    driftAlert: false, driftScore: 0.6, reviewDue: false,
+    lastReview: 'Mar 15, 2026', nextReview: 'Sep 15, 2026',
+    riskProfile: 'Moderate Growth', horizon: '32 years',
+    strategy: 'Rep-directed mix of mutual funds and ETFs — advisor manages allocation decisions',
+    discretionary: false,
+    targetAlloc: { usEquity:60, intlEquity:20, fixedIncome:15, alternatives:0, cash:5 },
+    currentAlloc: { usEquity:60, intlEquity:20, fixedIncome:15, alternatives:0, cash:5 },
+    sleeves: [
+      { name:'MainStay Epoch US Equity Fund', type:'Mutual Fund', value:34800, pct:60.0, ret:'+4.1%', status:'on-target', manager:'Epoch Advisors' },
+      { name:'MainStay Candriam Intl Equity', type:'Mutual Fund', value:11600, pct:20.0, ret:'+2.3%', status:'on-target', manager:'Candriam' },
+      { name:'MainStay MacKay Bond Fund', type:'Mutual Fund', value:8700, pct:15.0, ret:'+1.1%', status:'on-target', manager:'MacKay Shields' },
+      { name:'Cash / MMF', type:'Cash', value:2900, pct:5.0, ret:'+1.4%', status:'on-target', manager:'NYLIM' }
+    ],
+    rebalanceTrades: [],
+    timeline: [
+      { date:'Mar 15, 2026', event:'Account opened — $58K initial investment per IPS', type:'open' },
+      { date:'Mar 15, 2026', event:'Rep-directed allocation set — Moderate Growth model', type:'open' }
+    ],
+    aiInsights: {
+      headline: 'New rep-directed account — partial year performance expected',
+      summary: 'RDP-305001 was opened Mar 2026. YTD returns of +3.4% reflect 1 month of performance. David\'s 32-year horizon is excellent for long-term growth. Rep-directed program gives advisor full control — consider upgrading to Fund Advisory Program for automatic rebalancing as AUM grows.',
+      actions: ['Set up $500/month automatic investment plan','Upgrade to Fund Advisory Program when AUM exceeds $100K','Present DI insurance gap — income protection alongside investment growth','Schedule 6-month check-in Sep 15, 2026']
+    }
+  },
+
+  /* ── James Whitfield — Fund Advisory Program ── */
+  {
+    id: 'ADV-JW-001', clientId: 1, clientName: 'James Whitfield', initials: 'JW',
+    avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
+    programType: 'Fund Advisory Program', accountNum: 'FAP-291001',
+    custodian: 'NYLIM / MainStay', openDate: 'Jun 2019', manager: 'NYLIM Model Portfolios',
+    aum: 195000, aumFmt: '$195K',
+    returnYTD: 7.6, returnYTDFmt: '+7.6%', benchmark: 'Morningstar Moderate', benchmarkYTD: 7.8,
+    alpha: '-0.2%', sharpe: 0.92, fee: 1365, feePct: '0.70%',
+    status: 'Review Due', statusCls: 'ia-status-review',
+    driftAlert: false, driftScore: 1.8, reviewDue: true,
+    lastReview: 'Oct 20, 2025', nextReview: 'Apr 15, 2026',
+    riskProfile: 'Moderate', horizon: '13 years',
+    strategy: 'Conservative-leaning fund advisory — mutual fund model, systematic quarterly rebalancing',
+    discretionary: false,
+    targetAlloc: { usEquity:50, intlEquity:15, fixedIncome:30, alternatives:0, cash:5 },
+    currentAlloc: { usEquity:51, intlEquity:14, fixedIncome:30, alternatives:0, cash:5 },
+    sleeves: [
+      { name:'MainStay Epoch US Equity Fund', type:'Mutual Fund', value:99450, pct:51.0, ret:'+10.9%', status:'on-target', manager:'Epoch Advisors' },
+      { name:'MainStay Candriam Intl Equity', type:'Mutual Fund', value:27300, pct:14.0, ret:'+5.8%', status:'on-target', manager:'Candriam' },
+      { name:'MainStay MacKay Bond Fund', type:'Mutual Fund', value:58500, pct:30.0, ret:'+3.7%', status:'on-target', manager:'MacKay Shields' },
+      { name:'Cash / MMF', type:'Cash', value:9750, pct:5.0, ret:'+5.1%', status:'on-target', manager:'NYLIM' }
+    ],
+    rebalanceTrades: [],
+    timeline: [
+      { date:'Apr 10, 2026', event:'Review overdue — last review Oct 2025 (6 months)', type:'alert' },
+      { date:'Oct 20, 2025', event:'Semi-annual review — bond sleeve discussed', type:'review' },
+      { date:'Jan 10, 2026', event:'Annual rebalance — portfolio maintained at target', type:'rebalance' }
+    ],
+    aiInsights: {
+      headline: 'Fund Advisory slightly underperforming — review overdue',
+      summary: 'FAP-291001 is marginally behind its Morningstar Moderate benchmark by -0.2%. Review is 6 months overdue. Portfolio is well-allocated. Consider whether UMA upgrade with active management could improve returns. James has 13-year horizon — still has time to recover any underperformance.',
+      actions: ['Schedule review Apr 15 — combine with IRA and VA annual meeting','Evaluate UMA upgrade — active management may close benchmark gap','Discuss shifting 5% from bonds to alternatives for better risk-adjusted returns','Confirm $7,000 annual contribution reinvestment plan']
+    }
+  }
+
+];
+
+/* ── Derived arrays ── */
+var advDriftAccounts = advAccounts.filter(function(a) { return a.driftAlert; });
+
+/* ── State ── */
+var _advActiveAccount = null;
+var _advFilterType    = '';
+var _advFilterStatus  = '';
+var _advSearchTerm    = '';
+
+/* ═══════════════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════════════ */
+function initAdvAccountsPage() {
+  requestAnimationFrame(function() {
+    setTimeout(function() {
+      advUpdateKPIs();
+      advRenderAccountQueue();
+    }, 80);
+  });
+}
+
+function advUpdateKPIs() {
+  var totalAUM = advAccounts.reduce(function(s,a){ return s+a.aum; }, 0);
+  var smaCount  = advAccounts.filter(function(a){ return a.programType.startsWith('SMA'); }).length;
+  var umaCount  = advAccounts.filter(function(a){ return a.programType.startsWith('UMA'); }).length;
+  var fundCount = advAccounts.filter(function(a){ return a.programType.startsWith('Fund'); }).length;
+  var repCount  = advAccounts.filter(function(a){ return a.programType.startsWith('Rep'); }).length;
+  var driftCnt  = advDriftAccounts.length;
+  var set = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
+  set('adv-kpi-aum',  '$' + (totalAUM/1000000).toFixed(2) + 'M');
+  set('adv-kpi-sma',  smaCount);
+  set('adv-kpi-uma',  umaCount);
+  set('adv-kpi-fund', fundCount);
+  set('adv-kpi-rep',  repCount);
+  set('adv-kpi-drift',driftCnt);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACCOUNT QUEUE
+   ═══════════════════════════════════════════════════════════════════ */
+function advGetFilteredAccounts() {
+  return advAccounts.filter(function(a) {
+    var typeMatch   = !_advFilterType   || a.programType.includes(_advFilterType.split(' ')[0]);
+    var statusMatch = !_advFilterStatus || a.status === _advFilterStatus ||
+                      (_advFilterStatus === 'Drift Alert' && a.driftAlert);
+    var searchMatch = !_advSearchTerm   ||
+      a.clientName.toLowerCase().includes(_advSearchTerm) ||
+      a.accountNum.toLowerCase().includes(_advSearchTerm) ||
+      a.programType.toLowerCase().includes(_advSearchTerm);
+    return typeMatch && statusMatch && searchMatch;
+  });
+}
+
+function advFilterAccounts() {
+  var s = document.getElementById('adv-search');
+  var t = document.getElementById('adv-type-filter');
+  var st= document.getElementById('adv-status-filter');
+  _advSearchTerm   = s  ? s.value.toLowerCase()  : '';
+  _advFilterType   = t  ? t.value    : '';
+  _advFilterStatus = st ? st.value   : '';
+  advRenderAccountQueue();
+}
+
+function advRenderAccountQueue() {
+  var queue = document.getElementById('adv-account-queue');
+  if (!queue) return;
+  var accounts = advGetFilteredAccounts();
+  var drift   = accounts.filter(function(a){ return a.driftAlert; });
+  var review  = accounts.filter(function(a){ return a.reviewDue && !a.driftAlert; });
+  var active  = accounts.filter(function(a){ return !a.driftAlert && !a.reviewDue; });
+  var html = '';
+  if (drift.length) {
+    html += '<div class="ia-section-hdr ia-section-drift"><i class="fas fa-balance-scale"></i> Drift Alert <span class="ia-sec-count">' + drift.length + '</span></div>';
+    html += drift.map(advRenderAccountCard).join('');
+  }
+  if (review.length) {
+    html += '<div class="ia-section-hdr ia-section-review"><i class="fas fa-exclamation-circle"></i> Review Due <span class="ia-sec-count">' + review.length + '</span></div>';
+    html += review.map(advRenderAccountCard).join('');
+  }
+  if (active.length) {
+    html += '<div class="ia-section-hdr ia-section-active"><i class="fas fa-check-circle"></i> Active — On Target <span class="ia-sec-count">' + active.length + '</span></div>';
+    html += active.map(advRenderAccountCard).join('');
+  }
+  if (!accounts.length) html = '<div class="ia-empty-state"><i class="fas fa-search"></i><span>No accounts match your filters</span></div>';
+  queue.innerHTML = html;
+}
+
+var _advProgramIcons = {
+  'SMA':'fa-chart-bar','UMA':'fa-layer-group','Fund':'fa-coins','Rep':'fa-user-tie'
+};
+var _advProgramColors = {
+  'SMA':'#7c3aed','UMA':'#0891b2','Fund':'#059669','Rep':'#d97706'
+};
+
+function advRenderAccountCard(a) {
+  var active  = _advActiveAccount === a.id ? ' ia-card-active' : '';
+  var pKey    = a.programType.split(' ')[0];
+  var pIcon   = _advProgramIcons[pKey]   || 'fa-gem';
+  var pColor  = _advProgramColors[pKey]  || '#003087';
+  var discTag = a.discretionary
+    ? '<span style="background:#dcfce7;color:#15803d;font-size:9px;font-weight:700;padding:1px 6px;border-radius:5px">DISCRETIONARY</span>'
+    : '<span style="background:#f1f5f9;color:#64748b;font-size:9px;font-weight:700;padding:1px 6px;border-radius:5px">NON-DISCRETIONARY</span>';
+  var retCls  = a.returnYTD >= 0 ? 'ia-ret-pos' : 'ia-ret-neg';
+  return '<div class="ia-card' + active + '" onclick="advOpenAccount(\'' + a.id + '\')">' +
+    '<div class="ia-card-header">' +
+      '<div class="ia-card-avatar" style="' + a.avatarGrad + '">' + a.initials + '</div>' +
+      '<div class="ia-card-meta">' +
+        '<div class="ia-card-client">' + a.clientName + '</div>' +
+        '<div class="ia-card-acct">' + a.accountNum + '</div>' +
+      '</div>' +
+      '<div class="ia-card-status ' + a.statusCls + '">' + a.status + '</div>' +
+    '</div>' +
+    '<div class="ia-card-body">' +
+      '<div><span style="color:' + pColor + ';font-weight:700;font-size:11px"><i class="fas ' + pIcon + '"></i> ' + a.programType.split('(')[0].trim() + '</span></div>' +
+      '<div>' + discTag + '</div>' +
+    '</div>' +
+    '<div class="ia-card-body">' +
+      '<div class="ia-card-aum">' + a.aumFmt + '</div>' +
+      '<div class="ia-card-ret ' + retCls + '">' + a.returnYTDFmt + ' YTD</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACCOUNT DETAIL
+   ═══════════════════════════════════════════════════════════════════ */
+function advOpenAccount(id) {
+  _advActiveAccount = id;
+  advRenderAccountQueue();
+  var a = advAccounts.find(function(x){ return x.id === id; });
+  if (!a) return;
+  var empty  = document.getElementById('adv-detail-empty');
+  var panel  = document.getElementById('adv-detail-panel');
+  if (empty) empty.style.display = 'none';
+  if (!panel) return;
+  panel.style.display = 'block';
+  panel.innerHTML = advBuildDetailHTML(a);
+}
+
+function advBuildDetailHTML(a) {
+  var statusColor = { 'Active':'#059669','Review Due':'#d97706','Funding Pending':'#0891b2' }[a.status] || '#64748b';
+  var retColor = a.returnYTD > 0 ? '#059669' : a.returnYTD < 0 ? '#dc2626' : '#64748b';
+  var pKey    = a.programType.split(' ')[0];
+  var pColor  = _advProgramColors[pKey] || '#003087';
+
+  var tabs = [
+    { id:'overview',   icon:'fa-th-large',     label:'Overview'    },
+    { id:'sleeves',    icon:'fa-layer-group',   label:'Sleeves'     },
+    { id:'performance',icon:'fa-chart-line',    label:'Performance' },
+    { id:'ai',         icon:'fa-robot',         label:'AI Insights' }
+  ];
+  var tabBtns = tabs.map(function(t) {
+    var active = t.id === 'overview' ? ' ia-tab-active' : '';
+    return '<button class="ia-tab-btn' + active + '" onclick="advSwitchTab(\'' + t.id + '\',this)">' +
+      '<i class="fas ' + t.icon + '"></i> ' + t.label + '</button>';
+  }).join('');
+
+  var overviewHTML = advRenderOverviewTab(a);
+
+  return '<div class="ia-detail-header">' +
+    '<div class="ia-detail-title-row">' +
+      '<div class="ia-detail-avatar" style="' + a.avatarGrad + '">' + a.initials + '</div>' +
+      '<div>' +
+        '<div class="ia-detail-client">' + a.clientName + '</div>' +
+        '<div class="ia-detail-acct">' + a.accountNum + ' · ' + a.programType + '</div>' +
+      '</div>' +
+      '<div class="ia-detail-status" style="background:' + statusColor + '20;color:' + statusColor + '">' + a.status + '</div>' +
+    '</div>' +
+    '<div class="ia-detail-tabs">' + tabBtns + '</div>' +
+  '</div>' +
+  '<div class="ia-tab-content" id="adv-tab-content">' + overviewHTML + '</div>';
+}
+
+function advSwitchTab(tabId, btn) {
+  if (btn) {
+    var btns = btn.closest('.ia-detail-tabs');
+    if (btns) btns.querySelectorAll('.ia-tab-btn').forEach(function(b){ b.classList.remove('ia-tab-active'); });
+    btn.classList.add('ia-tab-active');
+  }
+  var a = advAccounts.find(function(x){ return x.id === _advActiveAccount; });
+  if (!a) return;
+  var content = document.getElementById('adv-tab-content');
+  if (!content) return;
+  if (tabId === 'overview')    content.innerHTML = advRenderOverviewTab(a);
+  else if (tabId === 'sleeves')    content.innerHTML = advRenderSleevesTab(a);
+  else if (tabId === 'performance') content.innerHTML = advRenderPerformanceTab(a);
+  else if (tabId === 'ai')     content.innerHTML = advRenderAITab(a);
+}
+
+function advRenderOverviewTab(a) {
+  var retColor = a.returnYTD > 0 ? '#059669' : '#dc2626';
+  var pKey = a.programType.split(' ')[0];
+  var pColor = _advProgramColors[pKey] || '#003087';
+  var allocBar = Object.entries(a.currentAlloc).filter(function(e){ return e[1]>0; }).map(function(e) {
+    var colors = { usEquity:'#003087', intlEquity:'#0891b2', fixedIncome:'#059669', alternatives:'#7c3aed', cash:'#94a3b8' };
+    return '<div class="ia-alloc-seg" style="background:' + (colors[e[0]]||'#ccc') + ';width:' + e[1] + '%;height:100%"></div>';
+  }).join('');
+  var discTag = a.discretionary
+    ? '<span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px"><i class="fas fa-check-circle"></i> Discretionary</span>'
+    : '<span style="background:#f1f5f9;color:#64748b;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px"><i class="fas fa-user-edit"></i> Non-Discretionary</span>';
+  return '<div class="ia-overview-grid" style="grid-template-columns:repeat(3,1fr)">' +
+    '<div class="ia-kpi-card"><div class="ia-kpi-lbl">AUM</div><div class="ia-kpi-val">' + a.aumFmt + '</div></div>' +
+    '<div class="ia-kpi-card"><div class="ia-kpi-lbl">Return YTD</div><div class="ia-kpi-val" style="color:' + retColor + '">' + a.returnYTDFmt + '</div><div class="ia-kpi-sub">Benchmark: +' + a.benchmarkYTD + '%</div></div>' +
+    '<div class="ia-kpi-card"><div class="ia-kpi-lbl">Alpha</div><div class="ia-kpi-val" style="color:' + (a.alpha && a.alpha.startsWith('+') ? '#059669' : '#dc2626') + '">' + (a.alpha||'N/A') + '</div></div>' +
+  '</div>' +
+  '<div class="ia-meta-grid">' +
+    '<div class="ia-meta-item"><div class="ia-meta-key">Program</div><div class="ia-meta-val" style="color:' + pColor + '">' + a.programType + '</div></div>' +
+    '<div class="ia-meta-item"><div class="ia-meta-key">Manager</div><div class="ia-meta-val">' + a.manager + '</div></div>' +
+    '<div class="ia-meta-item"><div class="ia-meta-key">Custodian</div><div class="ia-meta-val">' + a.custodian + '</div></div>' +
+    '<div class="ia-meta-item"><div class="ia-meta-key">Opened</div><div class="ia-meta-val">' + a.openDate + '</div></div>' +
+    '<div class="ia-meta-item"><div class="ia-meta-key">Risk Profile</div><div class="ia-meta-val">' + a.riskProfile + '</div></div>' +
+    '<div class="ia-meta-item"><div class="ia-meta-key">Advisory Fee</div><div class="ia-meta-val">' + a.feePct + ' ($' + Math.round(a.fee/12).toLocaleString() + '/mo)</div></div>' +
+    '<div class="ia-meta-item"><div class="ia-meta-key">Next Review</div><div class="ia-meta-val">' + a.nextReview + '</div></div>' +
+    '<div class="ia-meta-item"><div class="ia-meta-key">Authority</div><div class="ia-meta-val">' + discTag + '</div></div>' +
+  '</div>' +
+  '<div class="ia-alloc-section">' +
+    '<div class="ia-alloc-title">Current Allocation</div>' +
+    '<div class="ia-alloc-bar">' + allocBar + '</div>' +
+  '</div>' +
+  '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:12px;color:#475569;line-height:1.6;margin-bottom:12px">' +
+    '<strong>Strategy:</strong> ' + a.strategy +
+  '</div>' +
+  (a.rebalanceTrades.length ? '<div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">' +
+    '<i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:16px"></i>' +
+    '<div><strong style="color:#92400e">Drift Alert — Rebalance Required</strong><br>' +
+    '<span style="font-size:12px;color:#78350f">' + a.rebalanceTrades.length + ' trades needed · ' + a.driftScore + '% drift from target</span></div>' +
+    '<button onclick="advSwitchTab(\'sleeves\',null);document.querySelector(\'.ia-tab-active\').classList.remove(\'ia-tab-active\')" style="margin-left:auto;background:#d97706;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">View Rebalance Plan</button>' +
+  '</div>' : '') +
+  '<div class="ia-actions-row">' +
+    '<button class="ia-action-btn primary" onclick="advOpenAccount(\'' + a.id + '\')"><i class="fas fa-sync-alt"></i> Rebalance</button>' +
+    '<button class="ia-action-btn secondary" onclick="iaToast(\'<i class=\\\"fas fa-file-pdf\\\"></i> Generating performance report…\')"><i class="fas fa-file-pdf"></i> Report</button>' +
+    '<button class="ia-action-btn secondary" onclick="iaToast(\'<i class=\\\"fas fa-envelope\\\"></i> Client statement queued for ' + a.clientName + '\')"><i class="fas fa-envelope"></i> Statement</button>' +
+  '</div>';
+}
+
+function advRenderSleevesTab(a) {
+  var rows = a.sleeves.map(function(s) {
+    var statusColor = { 'overweight':'#dc2626','underweight':'#d97706','on-target':'#059669' }[s.status] || '#64748b';
+    var retColor = parseFloat(s.ret) >= 0 ? '#059669' : '#dc2626';
+    return '<div style="display:grid;grid-template-columns:1fr 100px 80px 80px 90px;gap:8px;padding:10px 12px;border-bottom:1px solid #f1f5f9;align-items:center;font-size:12px">' +
+      '<div><div style="font-weight:700;color:#1e293b">' + s.name + '</div><div style="font-size:10px;color:#94a3b8">' + s.type + ' · ' + s.manager + '</div></div>' +
+      '<div style="font-weight:700;color:#003087">$' + (s.value/1000).toFixed(0) + 'K</div>' +
+      '<div style="font-weight:700;color:' + retColor + '">' + s.ret + '</div>' +
+      '<div style="font-weight:700">' + s.pct + '%</div>' +
+      '<div style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:' + statusColor + '20;color:' + statusColor + ';text-align:center">' + s.status + '</div>' +
+    '</div>';
+  }).join('');
+
+  var tradeRows = a.rebalanceTrades.length
+    ? a.rebalanceTrades.map(function(t) {
+        var cls = t.action === 'SELL' ? '#fee2e2' : '#dcfce7';
+        var clr = t.action === 'SELL' ? '#dc2626' : '#059669';
+        return '<div style="display:grid;grid-template-columns:60px 1fr 90px 1fr;gap:8px;padding:8px 12px;border-bottom:1px solid #f1f5f9;font-size:12px;align-items:center">' +
+          '<span style="background:' + cls + ';color:' + clr + ';font-weight:800;font-size:10px;padding:2px 7px;border-radius:5px;text-align:center">' + t.action + '</span>' +
+          '<span style="font-weight:600;color:#1e293b">' + t.security + '</span>' +
+          '<span style="font-weight:700;color:#003087">' + t.amount + '</span>' +
+          '<span style="color:#64748b">' + t.reason + '</span>' +
+        '</div>';
+      }).join('')
+    : '<div style="padding:16px;text-align:center;color:#94a3b8;font-size:13px"><i class="fas fa-check-circle" style="color:#22c55e"></i> No rebalancing required — all sleeves on target</div>';
+
+  return '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Account Sleeves &amp; Allocation</div>' +
+    '<div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:16px">' +
+      '<div style="display:grid;grid-template-columns:1fr 100px 80px 80px 90px;gap:8px;padding:8px 12px;background:#f8fafc;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase">' +
+        '<span>Sleeve / Security</span><span>Value</span><span>Return</span><span>Weight</span><span>Status</span>' +
+      '</div>' + rows +
+    '</div>' +
+    '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Proposed Rebalance Trades</div>' +
+    '<div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:16px">' +
+      (a.rebalanceTrades.length ? '<div style="display:grid;grid-template-columns:60px 1fr 90px 1fr;gap:8px;padding:8px 12px;background:#f8fafc;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase"><span>Action</span><span>Security</span><span>Amount</span><span>Reason</span></div>' : '') +
+      tradeRows +
+    '</div>' +
+    (a.rebalanceTrades.length ? '<div class="ia-actions-row">' +
+      '<button class="ia-action-btn primary" onclick="iaToast(\'<i class=\\\"fas fa-play-circle\\\"></i> ' + a.rebalanceTrades.length + ' rebalance trades submitted for ' + a.clientName + ' — confirms within 2 hours\')"><i class="fas fa-play-circle"></i> Execute Rebalance (' + a.rebalanceTrades.length + ' trades)</button>' +
+      '<button class="ia-action-btn secondary" onclick="iaToast(\'<i class=\\\"fas fa-file-export\\\"></i> Trade list exported to PDF\')"><i class="fas fa-file-export"></i> Export Trade List</button>' +
+    '</div>' : '');
+}
+
+function advRenderPerformanceTab(a) {
+  var retColor = a.returnYTD > 0 ? '#059669' : '#dc2626';
+  var timeline = a.timeline.map(function(t) {
+    var iconMap = { report:'fa-chart-bar',alert:'fa-exclamation-triangle',review:'fa-clipboard-check',rebalance:'fa-balance-scale',tlh:'fa-leaf',contribution:'fa-plus-circle',open:'fa-folder-open' };
+    var colorMap = { report:'#0891b2',alert:'#dc2626',review:'#4f46e5',rebalance:'#059669',tlh:'#059669',contribution:'#7c3aed',open:'#003087' };
+    var icon = iconMap[t.type] || 'fa-circle';
+    var color = colorMap[t.type] || '#94a3b8';
+    return '<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9">' +
+      '<div style="width:32px;height:32px;border-radius:50%;background:' + color + '20;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+        '<i class="fas ' + icon + '" style="color:' + color + ';font-size:12px"></i>' +
+      '</div>' +
+      '<div><div style="font-size:12px;font-weight:700;color:#1e293b">' + t.event + '</div>' +
+      '<div style="font-size:10px;color:#94a3b8;margin-top:2px">' + t.date + '</div></div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="ia-overview-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">' +
+    '<div class="ia-kpi-card"><div class="ia-kpi-lbl">YTD Return</div><div class="ia-kpi-val" style="color:' + retColor + '">' + a.returnYTDFmt + '</div></div>' +
+    '<div class="ia-kpi-card"><div class="ia-kpi-lbl">Benchmark</div><div class="ia-kpi-val">+' + a.benchmarkYTD + '%</div><div class="ia-kpi-sub">' + a.benchmark + '</div></div>' +
+    '<div class="ia-kpi-card"><div class="ia-kpi-lbl">Alpha</div><div class="ia-kpi-val" style="color:' + (a.alpha && a.alpha.startsWith('+') ? '#059669' : '#dc2626') + '">' + (a.alpha||'N/A') + '</div></div>' +
+    '<div class="ia-kpi-card"><div class="ia-kpi-lbl">Annual Fee</div><div class="ia-kpi-val">$' + a.fee.toLocaleString() + '</div><div class="ia-kpi-sub">' + a.feePct + '</div></div>' +
+  '</div>' +
+  '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Account Timeline</div>' +
+  '<div>' + timeline + '</div>';
+}
+
+function advRenderAITab(a) {
+  var actions = a.aiInsights.actions.map(function(act) {
+    return '<button class="ia-ai-action-btn" onclick="iaToast(\'<i class=\\\"fas fa-robot\\\"></i> AI action initiated: ' + act.substring(0,40).replace(/'/g,'') + '…\')"><i class="fas fa-check-circle"></i> ' + act + '</button>';
+  }).join('');
+  return '<div class="ia-ai-tab">' +
+    '<div class="ia-ai-headline">' +
+      '<div class="ia-ai-chip"><i class="fas fa-robot"></i> AI Advisory Intelligence</div>' +
+      '<div class="ia-ai-headline-text">' + a.aiInsights.headline + '</div>' +
+    '</div>' +
+    '<div class="ia-ai-summary-box">' +
+      '<div class="ia-ai-summary-label"><i class="fas fa-brain"></i> Analysis</div>' +
+      '<div class="ia-ai-summary-text">' + a.aiInsights.summary + '</div>' +
+    '</div>' +
+    '<div class="ia-ai-actions-section">' +
+      '<div class="ia-ai-actions-label"><i class="fas fa-tasks"></i> Recommended Actions</div>' +
+      '<div class="ia-ai-actions-list">' + actions + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DRIFT SCAN PANEL
+   ═══════════════════════════════════════════════════════════════════ */
+function advRunDriftScan() {
+  var panel = document.getElementById('adv-drift-panel');
+  if (!panel) return;
+  var hidden = panel.style.display === 'none' || panel.style.display === '';
+  if (hidden) {
+    panel.style.display = 'block';
+    var list = document.getElementById('adv-drift-list');
+    if (list) {
+      list.innerHTML = advDriftAccounts.length
+        ? advDriftAccounts.map(function(a) {
+            var urgColor = a.driftScore >= 7 ? '#dc2626' : '#d97706';
+            return '<div class="ia-drift-card ' + (a.driftScore>=7?'ia-drift-card-high':'ia-drift-card-med') + '" onclick="advOpenAccount(\'' + a.id + '\')" style="cursor:pointer">' +
+              '<div class="ia-drift-card-body">' +
+                '<div class="ia-drift-card-client">' + a.clientName + ' — ' + a.accountNum + '</div>' +
+                '<div class="ia-drift-card-acct">' + a.programType + ' · ' + a.aumFmt + ' AUM · ' + a.driftScore + '% drift</div>' +
+                '<div class="ia-drift-card-meta" style="margin-top:4px">' +
+                  '<span style="color:' + urgColor + ';font-weight:700"><i class="fas fa-exclamation-triangle"></i> ' + a.rebalanceTrades.length + ' trades needed</span>' +
+                '</div>' +
+              '</div>' +
+              '<button class="ia-drift-card-btn ia-drift-card-btn-primary" onclick="event.stopPropagation();iaToast(\'<i class=\\\"fas fa-play-circle\\\"></i> Rebalance initiated for ' + a.clientName + '\')"><i class="fas fa-balance-scale"></i> Execute</button>' +
+            '</div>';
+          }).join('')
+        : '<div style="text-align:center;padding:24px;color:#94a3b8"><i class="fas fa-check-circle" style="color:#22c55e;font-size:24px;display:block;margin-bottom:8px"></i>No drift alerts — all advisory accounts on target</div>';
+    }
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function advCloseDriftPanel() {
+  var panel = document.getElementById('adv-drift-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NEW ACCOUNT MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+function advOpenNewAccount() {
+  var overlay = document.getElementById('adv-new-acct-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  var body = document.getElementById('adv-new-acct-body');
+  if (body) body.innerHTML = advRenderNewAccountForm();
+}
+
+function advCloseNewAccount() {
+  var overlay = document.getElementById('adv-new-acct-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function advRenderNewAccountForm() {
+  var programTypes = [
+    {
+      type: 'SMA (Separately Managed Account)',
+      icon: 'fa-chart-bar', color: '#7c3aed', fee: '1.00%', min: '$100K',
+      desc: 'Customized portfolio of individual securities managed by a professional asset manager on your behalf. Ideal for tax-efficient, personalized equity management.',
+      features: ['Direct ownership of individual securities','Tax-loss harvesting at security level','ESG screening available','Customizable restrictions']
+    },
+    {
+      type: 'UMA (Unified Managed Account)',
+      icon: 'fa-layer-group', color: '#0891b2', fee: '1.00%', min: '$50K',
+      desc: 'Combines multiple strategies in a single account — SMA sleeves, mutual funds, ETFs, and alternatives — with a professional coordinating the whole portfolio.',
+      features: ['Multi-sleeve single account','Combines SMA + mutual funds + ETFs','Single consolidated statement','Professional oversight across all sleeves']
+    },
+    {
+      type: 'Fund Advisory Program',
+      icon: 'fa-coins', color: '#059669', fee: '0.75%', min: '$25K',
+      desc: 'Broadly diversified portfolio through mutual funds and/or ETFs in a single investment account. Automatic model-based rebalancing keeps allocation on target.',
+      features: ['Broad diversification via mutual funds & ETFs','Automatic model rebalancing','Single consolidated account','Lower minimum than SMA/UMA']
+    },
+    {
+      type: 'Rep-Directed Program',
+      icon: 'fa-user-tie', color: '#d97706', fee: '0.75%', min: '$25K',
+      desc: 'Managed by your financial advisor — portfolios typically encompass a mix of mutual funds and/or ETFs. Advisor directs all investment decisions.',
+      features: ['Advisor-directed allocation decisions','Mix of mutual funds and/or ETFs','Flexible strategy implementation','Close advisor-client collaboration']
+    }
+  ];
+
+  var cards = programTypes.map(function(p) {
+    var featureList = p.features.map(function(f) {
+      return '<div style="font-size:11px;color:#475569;display:flex;align-items:center;gap:5px;margin-top:3px"><i class="fas fa-check" style="color:' + p.color + ';font-size:9px"></i>' + f + '</div>';
+    }).join('');
+    return '<div class="ia-naf-type-card" onclick="advSelectProgramType(this,\'' + p.type.replace(/'/g,"\\'") + '\')" style="border-top:3px solid ' + p.color + '">' +
+      '<div class="ia-naf-type-icon" style="color:' + p.color + '"><i class="fas ' + p.icon + '"></i></div>' +
+      '<div class="ia-naf-type-name" style="color:' + p.color + '">' + p.type + '</div>' +
+      '<div class="ia-naf-type-desc">' + p.desc + '</div>' +
+      '<div style="margin-top:8px">' + featureList + '</div>' +
+      '<div class="ia-naf-type-meta" style="margin-top:10px">' +
+        '<span class="ia-naf-type-fee">Fee: ' + p.fee + '</span>' +
+        '<span class="ia-naf-type-min">Min: ' + p.min + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="ia-naf-form">' +
+    '<div class="ia-naf-ai-banner">' +
+      '<div class="ia-naf-ai-icon"><i class="fas fa-robot"></i></div>' +
+      '<div class="ia-naf-ai-content">' +
+        '<div class="ia-naf-ai-title">AI Program Recommendation <span class="ia-naf-ai-live">LIVE</span></div>' +
+        '<div class="ia-naf-ai-text"><strong>UMA</strong> recommended for clients with $200K+ seeking consolidated multi-strategy management. <strong>SMA</strong> for $300K+ with tax-sensitivity needs. <strong>Fund Advisory</strong> for $25K–$200K with diversified growth goals. <strong>Rep-Directed</strong> when advisor customization is preferred.</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="ia-naf-step-bar">' +
+      '<div class="ia-naf-step ia-naf-step-active"><span>1</span> Program Type</div>' +
+      '<div class="ia-naf-step"><span>2</span> Client &amp; Account</div>' +
+      '<div class="ia-naf-step"><span>3</span> Investment Profile</div>' +
+      '<div class="ia-naf-step"><span>4</span> IPS &amp; Suitability</div>' +
+      '<div class="ia-naf-step"><span>5</span> Funding</div>' +
+    '</div>' +
+    '<div class="ia-naf-section">' +
+      '<div class="ia-naf-section-title"><i class="fas fa-gem"></i> Step 1 — Select Advisory Program Type</div>' +
+      '<div class="ia-naf-type-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">' + cards + '</div>' +
+    '</div>' +
+    '<div class="ia-naf-section">' +
+      '<div class="ia-naf-section-title"><i class="fas fa-user"></i> Step 2 — Client &amp; Account Details</div>' +
+      '<div class="ia-naf-form-grid">' +
+        '<div class="ia-naf-field ia-naf-full"><label>Select Client</label>' +
+          '<select class="ia-naf-input">' +
+            '<option value="">— Select existing client —</option>' +
+            '<option>Linda Morrison · $420K AUM · 1 advisory account</option>' +
+            '<option>Robert Chen · $580K AUM · 1 advisory account</option>' +
+            '<option>James Whitfield · $195K AUM · 1 advisory account</option>' +
+            '<option>Maria Gonzalez · $155K AUM · 1 advisory account</option>' +
+            '<option>David Thompson · $58K AUM · 1 advisory account</option>' +
+            '<option>Patricia Nguyen · $0 advisory · Investment client</option>' +
+            '<option>Sandra Williams · $0 advisory · Investment client</option>' +
+            '<option value="new">+ Add New Client</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="ia-naf-field"><label>Account Title</label><input class="ia-naf-input" placeholder="e.g. Robert Chen SMA Growth"/></div>' +
+        '<div class="ia-naf-field"><label>Custodian</label>' +
+          '<select class="ia-naf-input"><option>NYLIM / Pershing</option><option>NYLIM / MainStay</option><option>Charles Schwab (ACAT)</option><option>Fidelity (ACAT)</option></select>' +
+        '</div>' +
+        '<div class="ia-naf-field"><label>Primary Manager / Model</label>' +
+          '<select class="ia-naf-input"><option>NYLIM Growth Equity</option><option>NYLIM Moderate Blend</option><option>NYLIM Conservative</option><option>NYLIM Model Portfolios</option><option>Rep-Directed (Custom)</option></select>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="ia-naf-section">' +
+      '<div class="ia-naf-section-title"><i class="fas fa-shield-alt"></i> Step 3 — Investment Profile</div>' +
+      '<div class="ia-naf-form-grid">' +
+        '<div class="ia-naf-field"><label>Risk Tolerance</label><select class="ia-naf-input"><option>Conservative</option><option>Moderate</option><option selected>Moderate Growth</option><option>Growth</option><option>Aggressive Growth</option></select></div>' +
+        '<div class="ia-naf-field"><label>Investment Horizon</label><select class="ia-naf-input"><option>1–3 years</option><option>3–5 years</option><option>5–10 years</option><option selected>10–20 years</option><option>20+ years</option></select></div>' +
+        '<div class="ia-naf-field"><label>Primary Objective</label><select class="ia-naf-input"><option>Capital Preservation</option><option>Income</option><option selected>Growth &amp; Income</option><option>Growth</option><option>Aggressive Growth</option></select></div>' +
+        '<div class="ia-naf-field"><label>Tax Sensitivity</label><select class="ia-naf-input"><option>Low</option><option selected>Moderate</option><option>High (TLH priority)</option></select></div>' +
+      '</div>' +
+      '<div class="ia-naf-risk-preview">' +
+        '<div class="ia-naf-risk-title">AI Suitability Score Preview</div>' +
+        '<div class="ia-naf-risk-bar-wrap"><div class="ia-naf-risk-bar" style="width:68%"></div></div>' +
+        '<div class="ia-naf-risk-labels"><span>Low Risk</span><span style="color:#003087;font-weight:700">68/100 Suitable</span><span>High Risk</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="ia-naf-section">' +
+      '<div class="ia-naf-section-title"><i class="fas fa-file-contract"></i> Step 4 — IPS &amp; Suitability Documents</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px">' +
+        ['Investment Policy Statement (IPS)', 'Suitability Assessment Form', 'Advisory Agreement / IMA', 'Custodian Account Application', 'FINRA Form ADV Part 2 Disclosure', 'Privacy Policy Acknowledgment'].map(function(doc, i) {
+          var req = i < 4 ? 'Required' : 'Optional';
+          var reqColor = i < 4 ? '#dc2626' : '#64748b';
+          return '<div class="ia-naf-check-row"><div class="ia-naf-check-text"><i class="far fa-square"></i> ' + doc + '</div><span class="' + (i<4?'ia-naf-req':'ia-naf-opt') + '" style="background:' + reqColor + '15;color:' + reqColor + '">' + req + '</span></div>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="ia-naf-section">' +
+      '<div class="ia-naf-section-title"><i class="fas fa-dollar-sign"></i> Step 5 — Initial Funding</div>' +
+      '<div class="ia-naf-form-grid">' +
+        '<div class="ia-naf-field"><label>Initial Deposit Amount</label><input class="ia-naf-input" id="adv-naf-deposit" type="number" placeholder="e.g. 100000" oninput="advNafUpdateFee()"/></div>' +
+        '<div class="ia-naf-field"><label>Funding Method</label><select class="ia-naf-input"><option>ACH Transfer</option><option>Wire Transfer</option><option>ACAT Transfer</option><option>Check</option></select></div>' +
+        '<div class="ia-naf-field"><label>Funding Date (Est.)</label><input class="ia-naf-input" type="date" value="2026-05-20"/></div>' +
+        '<div class="ia-naf-field"><label>DCA / Recurring Contribution</label><input class="ia-naf-input" type="number" placeholder="e.g. 1000/month"/></div>' +
+      '</div>' +
+      '<div class="ia-naf-fee-preview" id="adv-fee-preview">' +
+        '<div class="ia-naf-fee-title"><i class="fas fa-calculator"></i> Live Fee Preview</div>' +
+        '<div class="ia-naf-fee-grid">' +
+          '<div class="ia-naf-fee-item"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700">Annual Fee</div><div style="font-size:18px;font-weight:800;color:#003087" id="adv-fee-annual">—</div></div>' +
+          '<div class="ia-naf-fee-item"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700">Monthly Fee</div><div style="font-size:18px;font-weight:800;color:#003087" id="adv-fee-monthly">—</div></div>' +
+          '<div class="ia-naf-fee-item"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700">5-Yr AUM (@8%)</div><div style="font-size:18px;font-weight:800;color:#059669" id="adv-fee-5yr">—</div></div>' +
+          '<div class="ia-naf-fee-item"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700">5-Yr Fees</div><div style="font-size:18px;font-weight:800;color:#64748b" id="adv-fee-5yrcost">—</div></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;padding:16px 0 4px;justify-content:flex-end">' +
+      '<button onclick="advCloseNewAccount()" style="padding:9px 18px;background:#f1f5f9;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#475569">Cancel</button>' +
+      '<button onclick="iaToast(\'<i class=\\\"fas fa-save\\\"></i> Advisory account draft saved\')" style="padding:9px 18px;background:#fff;border:1.5px solid #003087;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#003087">Save Draft</button>' +
+      '<button onclick="iaToast(\'<i class=\\\"fas fa-check-circle\\\"></i> Advisory account opening initiated — compliance review pending\');advCloseNewAccount()" style="padding:9px 18px;background:#003087;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff"><i class="fas fa-paper-plane"></i> Open Account</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function advSelectProgramType(el, type) {
+  el.closest('.ia-naf-type-grid').querySelectorAll('.ia-naf-type-card').forEach(function(c){ c.classList.remove('ia-naf-type-card-selected'); });
+  el.classList.add('ia-naf-type-card-selected');
+}
+
+function advNafUpdateFee() {
+  var dep = parseFloat(document.getElementById('adv-naf-deposit') && document.getElementById('adv-naf-deposit').value) || 0;
+  var rate = 0.0100;
+  var annual = dep * rate;
+  var monthly = annual / 12;
+  var aum5yr = dep * Math.pow(1.08, 5);
+  var fee5yr = aum5yr * rate * 5;
+  var fmt = function(n){ return '$' + Math.round(n).toLocaleString(); };
+  var set = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
+  set('adv-fee-annual',   dep ? fmt(annual)  : '—');
+  set('adv-fee-monthly',  dep ? fmt(monthly) : '—');
+  set('adv-fee-5yr',      dep ? fmt(aum5yr)  : '—');
+  set('adv-fee-5yrcost',  dep ? fmt(fee5yr)  : '—');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PORTFOLIO REVIEW MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+function advOpenPortfolioReview() {
+  var overlay = document.getElementById('adv-review-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  var body = document.getElementById('adv-review-body');
+  if (body) body.innerHTML = advRenderPortfolioReview();
+}
+
+function advClosePortfolioReview() {
+  var overlay = document.getElementById('adv-review-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function advRenderPortfolioReview() {
+  var totalAUM  = advAccounts.reduce(function(s,a){ return s+a.aum; }, 0);
+  var avgAlpha  = advAccounts.filter(function(a){ return a.alpha && a.alpha !== 'null'; })
+                   .reduce(function(s,a,_,arr){ return s + parseFloat(a.alpha||0)/arr.length; }, 0);
+  var clientRows = advAccounts.map(function(a) {
+    var barW = Math.min((a.aum / 600000) * 100, 100);
+    var retColor = a.returnYTD >= 0 ? '#059669' : '#dc2626';
+    var pKey = a.programType.split(' ')[0];
+    var pColor = _advProgramColors[pKey] || '#003087';
+    var flags = [];
+    if (a.driftAlert) flags.push('<span style="background:#fee2e2;color:#dc2626;font-size:9px;font-weight:700;padding:1px 6px;border-radius:5px">DRIFT</span>');
+    if (a.reviewDue)  flags.push('<span style="background:#fef3c7;color:#b45309;font-size:9px;font-weight:700;padding:1px 6px;border-radius:5px">REVIEW</span>');
+    return '<div class="ia-pr-client-row" onclick="advClosePortfolioReview();setTimeout(function(){advOpenAccount(\'' + a.id + '\');},100)" style="cursor:pointer">' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<div class="ia-pr-avatar" style="' + a.avatarGrad + '">' + a.initials + '</div>' +
+        '<div><div style="font-size:13px;font-weight:700;color:#1e293b">' + a.clientName + '</div>' +
+        '<div style="font-size:10px;color:#94a3b8">' + a.accountNum + '</div></div>' +
+      '</div>' +
+      '<div class="ia-pr-aum-bar-wrap"><div class="ia-pr-aum-bar-fill" style="width:' + barW + '%"></div></div>' +
+      '<div style="font-size:13px;font-weight:700;color:' + retColor + '">' + a.returnYTDFmt + '</div>' +
+      '<div style="font-size:11px;font-weight:700;color:' + pColor + '">' + a.programType.split('(')[0].trim() + '</div>' +
+      '<div>' + (flags.join(' ') || '<span style="color:#94a3b8;font-size:11px">On Track</span>') + '</div>' +
+      '<button class="ia-pr-open-btn" onclick="event.stopPropagation();advClosePortfolioReview();setTimeout(function(){advOpenAccount(\'' + a.id + '\');},100)"><i class="fas fa-arrow-right"></i></button>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="ia-pr-wrap">' +
+    '<div class="ia-pr-kpi-bar">' +
+      '<div class="ia-pr-kpi"><div class="ia-pr-kpi-val">$' + (totalAUM/1000000).toFixed(2) + 'M</div><div class="ia-pr-kpi-lbl">Total AUM</div></div>' +
+      '<div class="ia-pr-kpi ia-pr-kpi-green"><div class="ia-pr-kpi-val">+' + avgAlpha.toFixed(1) + '%</div><div class="ia-pr-kpi-lbl">Avg Alpha</div></div>' +
+      '<div class="ia-pr-kpi"><div class="ia-pr-kpi-val">' + advAccounts.length + '</div><div class="ia-pr-kpi-lbl">Total Accounts</div></div>' +
+      '<div class="ia-pr-kpi ia-pr-kpi-warn"><div class="ia-pr-kpi-val">' + advDriftAccounts.length + '</div><div class="ia-pr-kpi-lbl">Drift Alerts</div></div>' +
+      '<div class="ia-pr-kpi ia-pr-kpi-warn"><div class="ia-pr-kpi-val">' + advAccounts.filter(function(a){return a.reviewDue;}).length + '</div><div class="ia-pr-kpi-lbl">Reviews Due</div></div>' +
+    '</div>' +
+    '<div class="ia-pr-ai-banner"><div class="ia-pr-ai-icon"><i class="fas fa-robot"></i></div>' +
+      '<div><div class="ia-pr-ai-title">Advisory AI Health Score</div>' +
+        '<div class="ia-pr-ai-sub">Portfolio health: <strong style="color:#003087">81/100</strong> — 2 drift alerts require immediate attention · 2 reviews overdue</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:16px">' +
+      '<div class="ia-pr-client-header-row">' +
+        '<span>Client</span><span>AUM Bar</span><span>YTD</span><span>Program</span><span>Flags</span><span></span>' +
+      '</div>' + clientRows +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px">' +
+      '<button onclick="advClosePortfolioReview();setTimeout(advRunDriftScan,100)" style="padding:8px 14px;background:#003087;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit"><i class="fas fa-balance-scale"></i> Open Drift Scan</button>' +
+      '<button onclick="advClosePortfolioReview()" style="padding:8px 14px;background:#f1f5f9;color:#475569;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit"><i class="fas fa-times"></i> Close</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   navigateTo PATCH — adv-accounts
+   ═══════════════════════════════════════════════════════════════════ */
+(function() {
+  var _origNavAdv = typeof navigateTo === 'function' ? navigateTo : null;
+  if (!_origNavAdv) return;
+  window.navigateTo = function(page) {
+    _origNavAdv(page);
+    if (page === 'adv-accounts') {
+      requestAnimationFrame(function() { setTimeout(initAdvAccountsPage, 80); });
+    }
+  };
+})();
+
+console.log('Advisory Accounts module loaded — ' + advAccounts.length + ' accounts · $' + (advAccounts.reduce(function(s,a){return s+a.aum;},0)/1000000).toFixed(2) + 'M AUM · SMA/UMA/Fund Advisory/Rep-Directed');

@@ -309,6 +309,7 @@ function MainApp() {
         <div id="tpl-inv-accounts"><InvestmentAccountsPage /></div>
         <div id="tpl-ret-accounts"><RetirementAccountsPage /></div>
         <div id="tpl-adv-wealth"></div>
+        <div id="tpl-adv-accounts"><AdvisoryAccountsPage /></div>
         <div id="tpl-adv-estate"></div>
         <div id="tpl-adv-smallbiz"></div>
         <div id="tpl-eapp-submissions"><EAppSubmissionsPage /></div>
@@ -607,9 +608,9 @@ function Sidebar() {
 
         {/* ── ADVISORY ── */}
         <div class="nav-section-label">ADVISORY</div>
-        <a class="nav-item adv-wealth-nav" onclick="navigateTo('adv-wealth')" href="#">
-          <i class="fas fa-gem"></i><span>Wealth Management</span>
-          <span class="nav-badge" style="background:#7c3aed;color:#fff">3</span>
+        <a class="nav-item adv-accounts-nav" onclick="navigateTo('adv-accounts')" href="#">
+          <i class="fas fa-gem"></i><span>Advisory Accounts</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">4</span>
         </a>
         <a class="nav-item adv-estate-nav" onclick="navigateTo('adv-estate')" href="#">
           <i class="fas fa-gavel"></i><span>Estate Planning</span>
@@ -14072,14 +14073,22 @@ function InvestmentAccountsPage() {
           </div>
           <select class="filter-select" id="ia-type-filter" onchange="iaFilterAccounts()">
             <option value="">All Account Types</option>
-            <option>Advisory (UMA)</option>
-            <option>Advisory (SMA)</option>
-            <option>ETF Portfolio</option>
-            <option>Mutual Fund Portfolio</option>
-            <option>529 College Savings</option>
-            <option>IRA (Traditional)</option>
-            <option>IRA (Roth)</option>
-            <option>Joint Brokerage</option>
+            <optgroup label="── Market Accounts ──">
+              <option>ETF Portfolio</option>
+              <option>Mutual Fund Portfolio</option>
+              <option>Joint Brokerage</option>
+            </optgroup>
+            <optgroup label="── Retirement Accounts ──">
+              <option>IRA (Traditional)</option>
+              <option>IRA (Roth)</option>
+              <option>IRA (SEP)</option>
+              <option>529 College Savings</option>
+            </optgroup>
+            <optgroup label="── Annuities ──">
+              <option>Fixed Deferred Annuity</option>
+              <option>Variable Annuity</option>
+              <option>Hybrid Variable Annuity</option>
+            </optgroup>
           </select>
           <select class="filter-select" id="ia-status-filter" onchange="iaFilterAccounts()">
             <option value="">All Status</option>
@@ -15236,6 +15245,152 @@ function EAppSubmissionsPage() {
         </div>
 
       </div>{/* end eapp-uw-rail */}
+
+    </div>
+  )
+}
+
+function AdvisoryAccountsPage() {
+  return (
+    <div class="page adv-page">
+
+      {/* ── Page Header ── */}
+      <div class="adv-page-header">
+        <div class="adv-page-header-left">
+          <div class="adv-page-icon"><i class="fas fa-gem"></i></div>
+          <div>
+            <h2 class="adv-page-title">Advisory Accounts</h2>
+            <p class="adv-page-sub">SMA · UMA · Fund Advisory · Rep-Directed · AI-powered portfolio oversight · Discretionary &amp; non-discretionary management</p>
+          </div>
+        </div>
+        <div class="adv-page-header-right">
+          <button class="btn btn-ai" onclick="advOpenPortfolioReview()"><i class="fas fa-robot"></i> AI Portfolio Review</button>
+          <button class="btn btn-primary" onclick="advOpenNewAccount()"><i class="fas fa-plus"></i> New Account</button>
+        </div>
+      </div>
+
+      {/* ── KPI Strip ── */}
+      <div class="adv-kpi-strip" id="adv-kpi-strip">
+        <div class="adv-kpi-card">
+          <div class="adv-kpi-icon" style="background:linear-gradient(135deg,#003087,#1d4ed8)"><i class="fas fa-gem"></i></div>
+          <div class="adv-kpi-body"><div class="adv-kpi-val" id="adv-kpi-aum">$0</div><div class="adv-kpi-lbl">Total AUM</div></div>
+        </div>
+        <div class="adv-kpi-card">
+          <div class="adv-kpi-icon" style="background:linear-gradient(135deg,#7c3aed,#a855f7)"><i class="fas fa-chart-bar"></i></div>
+          <div class="adv-kpi-body"><div class="adv-kpi-val" id="adv-kpi-sma">0</div><div class="adv-kpi-lbl">SMA Accounts</div></div>
+        </div>
+        <div class="adv-kpi-card">
+          <div class="adv-kpi-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)"><i class="fas fa-layer-group"></i></div>
+          <div class="adv-kpi-body"><div class="adv-kpi-val" id="adv-kpi-uma">0</div><div class="adv-kpi-lbl">UMA Accounts</div></div>
+        </div>
+        <div class="adv-kpi-card">
+          <div class="adv-kpi-icon" style="background:linear-gradient(135deg,#059669,#34d399)"><i class="fas fa-coins"></i></div>
+          <div class="adv-kpi-body"><div class="adv-kpi-val" id="adv-kpi-fund">0</div><div class="adv-kpi-lbl">Fund Advisory</div></div>
+        </div>
+        <div class="adv-kpi-card">
+          <div class="adv-kpi-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b)"><i class="fas fa-user-tie"></i></div>
+          <div class="adv-kpi-body"><div class="adv-kpi-val" id="adv-kpi-rep">0</div><div class="adv-kpi-lbl">Rep-Directed</div></div>
+        </div>
+        <div class="adv-kpi-card">
+          <div class="adv-kpi-icon" style="background:linear-gradient(135deg,#dc2626,#f87171)"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="adv-kpi-body"><div class="adv-kpi-val" id="adv-kpi-drift">0</div><div class="adv-kpi-lbl">Drift Alerts</div></div>
+        </div>
+      </div>
+
+      {/* ── AI Banner ── */}
+      <div class="adv-ai-banner">
+        <div class="adv-ai-banner-left">
+          <div class="adv-ai-icon"><i class="fas fa-robot"></i><span class="adv-ai-pulse"></span></div>
+          <div>
+            <div class="adv-ai-title">AI Advisory Intelligence <span class="adv-ai-live">● LIVE</span></div>
+            <div class="adv-ai-sub">Discretionary oversight · Drift monitoring · Fee billing · Performance attribution · Suitability tracking</div>
+          </div>
+        </div>
+        <div class="adv-ai-actions">
+          <button class="adv-ai-btn primary" onclick="advRunDriftScan()"><i class="fas fa-balance-scale"></i> Drift Scan</button>
+          <button class="adv-ai-btn ghost" onclick="advOpenPortfolioReview()"><i class="fas fa-robot"></i> Portfolio Review</button>
+        </div>
+      </div>
+
+      {/* ── Toolbar ── */}
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <div class="search-inline">
+            <i class="fas fa-search"></i>
+            <input type="text" id="adv-search" placeholder="Search accounts, clients, strategies..." oninput="advFilterAccounts()" />
+          </div>
+          <select class="filter-select" id="adv-type-filter" onchange="advFilterAccounts()">
+            <option value="">All Program Types</option>
+            <option>SMA (Separately Managed Account)</option>
+            <option>UMA (Unified Managed Account)</option>
+            <option>Fund Advisory Program</option>
+            <option>Rep-Directed Program</option>
+          </select>
+          <select class="filter-select" id="adv-status-filter" onchange="advFilterAccounts()">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Funding Pending</option>
+            <option>Review Due</option>
+            <option>Drift Alert</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-ai" onclick="advOpenPortfolioReview()"><i class="fas fa-robot"></i> AI Portfolio Review</button>
+          <button class="btn btn-primary" onclick="advOpenNewAccount()"><i class="fas fa-plus"></i> New Account</button>
+        </div>
+      </div>
+
+      {/* ── Drift Panel (hidden) ── */}
+      <div class="adv-drift-panel" id="adv-drift-panel" style="display:none">
+        <div class="adv-panel-header">
+          <div class="adv-panel-header-left">
+            <i class="fas fa-balance-scale" style="font-size:20px;color:#dc2626"></i>
+            <div>
+              <div class="adv-panel-title">Portfolio Drift Monitor <span class="adv-live-badge">LIVE</span></div>
+              <div class="adv-panel-sub">Accounts where allocation has drifted &gt;5% from IPS target · Discretionary rebalancing available</div>
+            </div>
+          </div>
+          <button class="adv-panel-close" onclick="advCloseDriftPanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="adv-drift-list" style="padding:14px 18px"></div>
+      </div>
+
+      {/* ── 2-Col Layout ── */}
+      <div class="adv-body">
+        <div class="adv-list-col">
+          <div id="adv-account-queue"></div>
+        </div>
+        <div class="adv-detail-col" id="adv-detail-col">
+          <div class="adv-detail-empty" id="adv-detail-empty">
+            <i class="fas fa-gem" style="font-size:48px;color:#cbd5e1"></i>
+            <strong>Select an account to view details</strong>
+            <p>Click any advisory account to view strategy details, performance attribution, holdings, billing, and AI insights</p>
+          </div>
+          <div id="adv-detail-panel" style="display:none"></div>
+        </div>
+      </div>
+
+      {/* ── New Account Modal ── */}
+      <div class="ia-modal-overlay" id="adv-new-acct-overlay" style="display:none" onclick="advCloseNewAccount()">
+        <div class="ia-modal ia-modal-wide" onclick="event.stopPropagation()">
+          <div class="ia-modal-header">
+            <div class="ia-modal-title"><i class="fas fa-plus-circle"></i> Open New Advisory Account</div>
+            <button class="ia-modal-close" onclick="advCloseNewAccount()"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="adv-new-acct-body" style="padding:22px"></div>
+        </div>
+      </div>
+
+      {/* ── Portfolio Review Modal ── */}
+      <div class="ia-modal-overlay" id="adv-review-overlay" style="display:none" onclick="advClosePortfolioReview()">
+        <div class="ia-modal ia-modal-wide" onclick="event.stopPropagation()">
+          <div class="ia-modal-header">
+            <div class="ia-modal-title"><i class="fas fa-robot"></i> AI Advisory Portfolio Review</div>
+            <button class="ia-modal-close" onclick="advClosePortfolioReview()"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="adv-review-body" style="padding:22px"></div>
+        </div>
+      </div>
 
     </div>
   )
