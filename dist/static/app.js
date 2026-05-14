@@ -35366,21 +35366,77 @@ function iaRenderDriftList() {
   if (!iaDriftAccounts.length) {
     return '<div class="ia-drift-empty"><i class="fas fa-check-circle"></i> No accounts with significant drift detected.</div>';
   }
-  return iaDriftAccounts.map(function(a) {
-    var urgency = a.driftScore >= 7 ? 'ia-drift-card-high' : 'ia-drift-card-med';
-    return '<div class="ia-drift-card ' + urgency + '" onclick="iaOpenAccount(\'' + a.id + '\')">' +
-      '<div class="ia-drift-card-left">' +
-        '<div class="ia-drift-card-score">' + a.driftScore.toFixed(1) + '<span>%</span></div>' +
-        '<div class="ia-drift-card-lbl">Drift</div>' +
+
+  var totalTrades = iaDriftAccounts.reduce(function(s,a){ return s + a.rebalanceTrades.length; }, 0);
+  var totalAUM    = iaDriftAccounts.reduce(function(s,a){ return s + a.aum; }, 0);
+
+  var summaryBar =
+    '<div class="ia-scan-summary-bar">' +
+      '<div class="ia-scan-summary-item"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i><strong>' + iaDriftAccounts.length + '</strong> accounts need rebalancing</div>' +
+      '<div class="ia-scan-summary-item"><i class="fas fa-exchange-alt" style="color:#003087"></i><strong>' + totalTrades + '</strong> trades required</div>' +
+      '<div class="ia-scan-summary-item"><i class="fas fa-coins" style="color:#059669"></i><strong>$' + (totalAUM/1000000).toFixed(2) + 'M</strong> AUM affected</div>' +
+      '<button class="ia-scan-execute-all-btn" onclick="iaExecuteAllRebalances()"><i class="fas fa-play-circle"></i> Execute All Rebalances</button>' +
+    '</div>';
+
+  var cards = iaDriftAccounts.map(function(a) {
+    var urgency   = a.driftScore >= 7 ? 'ia-drift-card-high' : 'ia-drift-card-med';
+    var urgLabel  = a.driftScore >= 7 ? 'HIGH' : 'MODERATE';
+    var urgColor  = a.driftScore >= 7 ? '#dc2626' : '#d97706';
+    var driftPct  = Math.min(a.driftScore / 15 * 100, 100);
+
+    var tradeRows = a.rebalanceTrades.map(function(t) {
+      var actionCls = t.action === 'SELL' ? 'ia-trade-sell' : 'ia-trade-buy';
+      return '<div class="ia-trade-row ' + actionCls + '">' +
+        '<span class="ia-trade-action">' + t.action + '</span>' +
+        '<span class="ia-trade-security">' + t.security + '</span>' +
+        '<span class="ia-trade-amount">' + t.amount + '</span>' +
+        '<span class="ia-trade-reason">' + t.reason + '</span>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="ia-drift-card ' + urgency + '">' +
+      '<div class="ia-drift-card-header" onclick="iaOpenAccount(\'' + a.id + '\')" style="cursor:pointer">' +
+        '<div class="ia-drift-card-left">' +
+          '<div class="ia-drift-gauge-wrap">' +
+            '<svg width="64" height="64" viewBox="0 0 64 64">' +
+              '<circle cx="32" cy="32" r="26" fill="none" stroke="#e2e8f0" stroke-width="6"/>' +
+              '<circle cx="32" cy="32" r="26" fill="none" stroke="' + urgColor + '" stroke-width="6"' +
+                ' stroke-dasharray="' + (driftPct * 1.634).toFixed(1) + ' 163.4"' +
+                ' stroke-linecap="round" transform="rotate(-90 32 32)"/>' +
+              '<text x="32" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="' + urgColor + '">' + a.driftScore.toFixed(1) + '</text>' +
+              '<text x="32" y="42" text-anchor="middle" font-size="9" fill="#94a3b8">% DRIFT</text>' +
+            '</svg>' +
+          '</div>' +
+          '<span class="ia-drift-urgency-badge" style="background:' + urgColor + '20;color:' + urgColor + '">' + urgLabel + '</span>' +
+        '</div>' +
+        '<div class="ia-drift-card-body">' +
+          '<div class="ia-drift-card-client">' + a.clientName + '</div>' +
+          '<div class="ia-drift-card-acct">' + a.accountNum + ' · ' + a.accountType + ' · ' + a.custodian + '</div>' +
+          '<div class="ia-drift-card-meta">' +
+            '<span><i class="fas fa-coins"></i> ' + a.aumFmt + ' AUM</span>' +
+            '<span><i class="fas fa-chart-line"></i> ' + a.returnYTDFmt + ' YTD</span>' +
+            '<span><i class="fas fa-exchange-alt"></i> ' + a.rebalanceTrades.length + ' trades</span>' +
+            '<span><i class="fas fa-shield-alt"></i> ' + a.riskProfile + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ia-drift-card-actions">' +
+          '<button class="ia-drift-preview-btn" onclick="event.stopPropagation();iaOpenAccount(\'' + a.id + '\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120)"><i class="fas fa-eye"></i> View Plan</button>' +
+          '<button class="ia-drift-execute-btn" onclick="event.stopPropagation();iaExecuteRebalance(\'' + a.id + '\')"><i class="fas fa-play-circle"></i> Execute</button>' +
+        '</div>' +
       '</div>' +
-      '<div class="ia-drift-card-body">' +
-        '<div class="ia-drift-card-client">' + a.clientName + '</div>' +
-        '<div class="ia-drift-card-acct">' + a.accountNum + ' · ' + a.accountType + '</div>' +
-        '<div class="ia-drift-card-trades">' + a.rebalanceTrades.length + ' trades required · Est. ' + a.aumFmt + ' AUM</div>' +
-      '</div>' +
-      '<button class="ia-drift-card-btn" onclick="event.stopPropagation();iaOpenAccount(\'' + a.id + '\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},100)"><i class="fas fa-balance-scale"></i> Rebalance</button>' +
+      (a.rebalanceTrades.length ? '<div class="ia-drift-trades-wrap">' +
+        '<div class="ia-drift-trades-hdr"><i class="fas fa-exchange-alt"></i> Proposed Trades</div>' +
+        '<div class="ia-drift-trades-header-row"><span>Action</span><span>Security</span><span>Amount</span><span>Reason</span></div>' +
+        tradeRows +
+        '<div class="ia-drift-trades-footer">' +
+          '<button class="ia-drift-card-btn" onclick="iaExportTradeList(\'' + a.id + '\')"><i class="fas fa-file-export"></i> Export Trade List</button>' +
+          '<button class="ia-drift-card-btn ia-drift-card-btn-primary" onclick="iaExecuteRebalance(\'' + a.id + '\')"><i class="fas fa-balance-scale"></i> Execute Rebalance</button>' +
+        '</div>' +
+      '</div>' : '') +
     '</div>';
   }).join('');
+
+  return summaryBar + cards;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -35406,22 +35462,58 @@ function iaRenderTLHList() {
   if (!iaTLHAccounts.length) {
     return '<div class="ia-tlh-empty"><i class="fas fa-check-circle"></i> No tax-loss harvesting opportunities identified at this time.</div>';
   }
-  var header = '<div class="ia-tlh-total-bar"><i class="fas fa-leaf"></i> Total TLH Opportunity: <strong>$' + totalSavings.toLocaleString() + '</strong> estimated tax savings across ' + iaTLHAccounts.length + ' accounts</div>';
+
+  var summaryBar =
+    '<div class="ia-scan-summary-bar ia-scan-summary-green">' +
+      '<div class="ia-scan-summary-item"><i class="fas fa-leaf" style="color:#059669"></i><strong>$' + totalSavings.toLocaleString() + '</strong> total estimated tax savings</div>' +
+      '<div class="ia-scan-summary-item"><i class="fas fa-folder-open" style="color:#003087"></i><strong>' + iaTLHAccounts.length + '</strong> accounts with opportunities</div>' +
+      '<div class="ia-scan-summary-item"><i class="fas fa-info-circle" style="color:#0891b2"></i>30-day wash-sale rules applied automatically</div>' +
+      '<button class="ia-scan-execute-all-btn ia-scan-execute-green" onclick="iaExecuteAllTLH()"><i class="fas fa-leaf"></i> Harvest All</button>' +
+    '</div>';
+
   var cards = iaTLHAccounts.map(function(a) {
-    var positions = a.tlhPositions.map(function(p) {
-      return '<div class="ia-tlh-card-pos"><i class="fas fa-angle-right"></i>' + p + '</div>';
+    /* estimate after-tax savings at ~35% bracket */
+    var taxSavings = Math.round(a.tlhOpportunity * 0.35);
+    var posRows = a.tlhPositions.map(function(p) {
+      /* parse name and loss from e.g. "INTL Growth Fund (-$4.1K)" */
+      var match = p.match(/^(.+?)\s*\((-\$[\d.]+K)\)$/);
+      var posName = match ? match[1] : p;
+      var posLoss = match ? match[2] : '—';
+      return '<div class="ia-tlh-pos-row">' +
+        '<span class="ia-tlh-pos-name"><i class="fas fa-angle-right"></i> ' + posName + '</span>' +
+        '<span class="ia-tlh-pos-loss">' + posLoss + ' unrealized</span>' +
+        '<span class="ia-tlh-pos-action">Harvest</span>' +
+      '</div>';
     }).join('');
-    return '<div class="ia-tlh-card" onclick="iaOpenAccount(\'' + a.id + '\')">' +
-      '<div class="ia-tlh-card-header">' +
-        '<div class="ia-tlh-card-client">' + a.clientName + '</div>' +
-        '<div class="ia-tlh-card-acct">' + a.accountNum + ' · ' + a.accountType + '</div>' +
+
+    return '<div class="ia-tlh-card">' +
+      '<div class="ia-tlh-card-header" onclick="iaOpenAccount(\'' + a.id + '\')" style="cursor:pointer">' +
+        '<div class="ia-tlh-card-left">' +
+          '<div class="ia-tlh-card-avatar" style="background:' + a.avatarGrad + '">' + a.initials + '</div>' +
+          '<div>' +
+            '<div class="ia-tlh-card-client">' + a.clientName + '</div>' +
+            '<div class="ia-tlh-card-acct">' + a.accountNum + ' · ' + a.accountType + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ia-tlh-card-right">' +
+          '<div class="ia-tlh-savings-big">$' + a.tlhOpportunity.toLocaleString() + '</div>' +
+          '<div class="ia-tlh-savings-lbl">gross losses available</div>' +
+          '<div class="ia-tlh-tax-est">≈ $' + taxSavings.toLocaleString() + ' after-tax savings @ 35%</div>' +
+        '</div>' +
       '</div>' +
-      '<div class="ia-tlh-card-savings">$' + a.tlhOpportunity.toLocaleString() + ' <span>estimated tax savings</span></div>' +
-      positions +
-      '<button class="ia-tlh-card-btn" onclick="event.stopPropagation();iaExecuteTLH(\'' + a.id + '\')"><i class="fas fa-leaf"></i> Execute Harvest</button>' +
+      '<div class="ia-tlh-positions-wrap">' +
+        '<div class="ia-tlh-pos-hdr"><span>Position</span><span>Unrealized Loss</span><span>Action</span></div>' +
+        posRows +
+      '</div>' +
+      '<div class="ia-tlh-wash-warning"><i class="fas fa-shield-alt"></i> 30-day wash-sale window applied · Replacement securities pre-selected to maintain exposure</div>' +
+      '<div class="ia-tlh-card-footer">' +
+        '<button class="ia-tlh-detail-btn" onclick="iaOpenAccount(\'' + a.id + '\')"><i class="fas fa-external-link-alt"></i> View Account</button>' +
+        '<button class="ia-tlh-card-btn" onclick="iaExecuteTLH(\'' + a.id + '\')"><i class="fas fa-leaf"></i> Execute Harvest for ' + a.clientName.split(' ')[0] + '</button>' +
+      '</div>' +
     '</div>';
   }).join('');
-  return header + cards;
+
+  return summaryBar + cards;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -35446,22 +35538,82 @@ function iaRenderRMDList() {
   if (!iaRMDAccounts.length) {
     return '<div class="ia-rmd-empty"><i class="fas fa-check-circle"></i> No RMDs required for 2026.</div>';
   }
-  var totalRMD = iaRMDAccounts.reduce(function(s,a) { return s + a.rmdAmount; }, 0);
-  var header = '<div class="ia-rmd-total-bar"><i class="fas fa-calendar-exclamation"></i> Total 2026 RMDs: <strong>$' + totalRMD.toLocaleString() + '</strong> across ' + iaRMDAccounts.length + ' accounts · Deadline: <strong>Dec 31, 2026</strong> · Penalty: 25% of undistributed amount</div>';
-  var cards = iaRMDAccounts.map(function(a) {
-    var penalty = Math.round(a.rmdAmount * 0.25);
-    return '<div class="ia-rmd-card" onclick="iaOpenAccount(\'' + a.id + '\')">' +
-      '<div class="ia-rmd-card-header">' +
-        '<div class="ia-rmd-card-client">' + a.clientName + '</div>' +
-        '<div class="ia-rmd-card-acct">' + a.accountNum + ' · ' + a.accountType + ' · ' + a.aumFmt + ' AUM</div>' +
+  var totalRMD  = iaRMDAccounts.reduce(function(s,a) { return s + a.rmdAmount; }, 0);
+  var totalPenalty = Math.round(totalRMD * 0.25);
+  var today     = new Date('2026-05-14');
+  var deadline  = new Date('2026-12-31');
+  var daysLeft  = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+
+  /* IRS Uniform Lifetime Table factor for approximate age — simplified */
+  var irsTableData = [
+    { age: 76, factor: 23.7 },
+    { age: 77, factor: 22.9 },
+    { age: 78, factor: 22.0 },
+    { age: 79, factor: 21.1 }
+  ];
+
+  var summaryBar =
+    '<div class="ia-rmd-summary-bar">' +
+      '<div class="ia-rmd-summary-kpis">' +
+        '<div class="ia-rmd-sum-kpi"><div class="ia-rmd-sum-val warn">$' + (totalRMD/1000).toFixed(1) + 'K</div><div class="ia-rmd-sum-lbl">Total 2026 RMDs</div></div>' +
+        '<div class="ia-rmd-sum-kpi"><div class="ia-rmd-sum-val red">$' + (totalPenalty/1000).toFixed(1) + 'K</div><div class="ia-rmd-sum-lbl">Penalty if Missed</div></div>' +
+        '<div class="ia-rmd-sum-kpi"><div class="ia-rmd-sum-val blue">' + iaRMDAccounts.length + '</div><div class="ia-rmd-sum-lbl">Accounts Due</div></div>' +
+        '<div class="ia-rmd-sum-kpi"><div class="ia-rmd-sum-val ' + (daysLeft < 120 ? 'warn' : 'green') + '">' + daysLeft + ' days</div><div class="ia-rmd-sum-lbl">Until Dec 31 Deadline</div></div>' +
       '</div>' +
-      '<div class="ia-rmd-card-amount">$' + a.rmdAmount.toLocaleString() + ' <span>required distribution</span></div>' +
-      '<div class="ia-rmd-card-penalty"><i class="fas fa-exclamation-triangle"></i> IRS penalty if missed: $' + penalty.toLocaleString() + ' (25%)</div>' +
-      '<div class="ia-rmd-card-deadline"><i class="fas fa-calendar-times"></i> Deadline: ' + a.rmdDeadline + '</div>' +
-      '<button class="ia-rmd-card-btn" onclick="event.stopPropagation();iaProcessRMD(\'' + a.id + '\')"><i class="fas fa-paper-plane"></i> Process Distribution</button>' +
+      '<div class="ia-rmd-summary-rule"><i class="fas fa-gavel"></i> <strong>IRS Rule:</strong> Age 73+ must take RMDs from all Traditional IRAs annually · Penalty: 25% of undistributed amount · QCD up to $105,000 allowed for charitable offset</div>' +
+      '<button class="ia-scan-execute-all-btn ia-scan-execute-red" onclick="iaProcessAllRMDs()"><i class="fas fa-paper-plane"></i> Process All RMDs</button>' +
+    '</div>';
+
+  var cards = iaRMDAccounts.map(function(a) {
+    var penalty    = Math.round(a.rmdAmount * 0.25);
+    var monthly    = Math.round(a.rmdAmount / 12);
+    var quarterly  = Math.round(a.rmdAmount / 4);
+    var pctOfAUM   = a.aum > 0 ? ((a.rmdAmount / a.aum) * 100).toFixed(1) : '—';
+
+    return '<div class="ia-rmd-card">' +
+      '<div class="ia-rmd-card-header" onclick="iaOpenAccount(\'' + a.id + '\')" style="cursor:pointer">' +
+        '<div class="ia-rmd-card-avatar" style="background:' + a.avatarGrad + '">' + a.initials + '</div>' +
+        '<div class="ia-rmd-card-info">' +
+          '<div class="ia-rmd-card-client">' + a.clientName + '</div>' +
+          '<div class="ia-rmd-card-acct">' + a.accountNum + ' · ' + a.accountType + ' · ' + a.aumFmt + ' AUM</div>' +
+          '<div class="ia-rmd-card-tags">' +
+            '<span class="ia-rmd-tag ia-rmd-tag-due">RMD Due 2026</span>' +
+            '<span class="ia-rmd-tag ia-rmd-tag-pct">' + pctOfAUM + '% of AUM</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ia-rmd-card-amount-wrap">' +
+          '<div class="ia-rmd-amount-big">$' + a.rmdAmount.toLocaleString() + '</div>' +
+          '<div class="ia-rmd-amount-lbl">required distribution</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="ia-rmd-detail-grid">' +
+        '<div class="ia-rmd-detail-row">' +
+          '<div class="ia-rmd-detail-item"><span class="ia-rmd-detail-key">Deadline</span><span class="ia-rmd-detail-val warn">' + a.rmdDeadline + '</span></div>' +
+          '<div class="ia-rmd-detail-item"><span class="ia-rmd-detail-key">IRS Penalty</span><span class="ia-rmd-detail-val red">$' + penalty.toLocaleString() + ' (25%)</span></div>' +
+          '<div class="ia-rmd-detail-item"><span class="ia-rmd-detail-key">Quarterly Option</span><span class="ia-rmd-detail-val">$' + quarterly.toLocaleString() + ' / qtr</span></div>' +
+          '<div class="ia-rmd-detail-item"><span class="ia-rmd-detail-key">Monthly Option</span><span class="ia-rmd-detail-val">$' + monthly.toLocaleString() + ' / mo</span></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="ia-rmd-method-row">' +
+        '<div class="ia-rmd-method-label"><i class="fas fa-university"></i> Distribution Method:</div>' +
+        '<div class="ia-rmd-method-options">' +
+          '<label class="ia-rmd-method-opt ia-rmd-method-selected"><input type="radio" name="rmd-method-' + a.id + '" checked/> ACH to Linked Bank</label>' +
+          '<label class="ia-rmd-method-opt"><input type="radio" name="rmd-method-' + a.id + '"/> Check by Mail</label>' +
+          '<label class="ia-rmd-method-opt"><input type="radio" name="rmd-method-' + a.id + '"/> QCD to Charity</label>' +
+          '<label class="ia-rmd-method-opt"><input type="radio" name="rmd-method-' + a.id + '"/> In-Kind Transfer</label>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="ia-rmd-card-footer">' +
+        '<button class="ia-rmd-view-btn" onclick="iaOpenAccount(\'' + a.id + '\')"><i class="fas fa-external-link-alt"></i> View Account</button>' +
+        '<button class="ia-rmd-card-btn" onclick="iaProcessRMD(\'' + a.id + '\')"><i class="fas fa-paper-plane"></i> Process RMD — $' + a.rmdAmount.toLocaleString() + '</button>' +
+      '</div>' +
     '</div>';
   }).join('');
-  return header + cards;
+
+  return summaryBar + cards;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -35483,82 +35635,195 @@ function iaCloseNewAccount() {
 }
 
 function iaRenderNewAccountForm() {
+  var accountTypes = [
+    { type:'Advisory (UMA)',         icon:'fa-layer-group',    fee:'1.00%', min:'$50K',  desc:'Unified managed account — multi-sleeve, discretionary' },
+    { type:'Advisory (SMA)',         icon:'fa-chart-bar',      fee:'0.75%', min:'$100K', desc:'Separately managed — direct equity holdings' },
+    { type:'ETF Portfolio',          icon:'fa-chart-area',     fee:'0.35%', min:'$10K',  desc:'Low-cost passive ETF model portfolio' },
+    { type:'Mutual Fund Portfolio',  icon:'fa-coins',          fee:'0.80%', min:'$5K',   desc:'Diversified MainStay mutual fund portfolio' },
+    { type:'IRA (Traditional)',      icon:'fa-piggy-bank',     fee:'0.75%', min:'$5K',   desc:'Pre-tax retirement · RMD required at 73' },
+    { type:'IRA (Roth)',             icon:'fa-sun',            fee:'0.75%', min:'$5K',   desc:'After-tax · tax-free growth · no RMD' },
+    { type:'IRA (SEP)',              icon:'fa-briefcase',      fee:'0.75%', min:'$5K',   desc:'Self-employed · higher contribution limits' },
+    { type:'529 College Savings',    icon:'fa-graduation-cap', fee:'0.50%', min:'$1K',   desc:'Tax-advantaged education savings · state deduction' },
+    { type:'Joint Brokerage',        icon:'fa-users',          fee:'0.65%', min:'$25K',  desc:'Jointly held · flexible withdrawals' },
+    { type:'Individual Brokerage',   icon:'fa-user',           fee:'0.65%', min:'$10K',  desc:'Individual taxable account · flexible' }
+  ];
+
   return '<div class="ia-naf-form">' +
 
+    /* ── AI Recommendation Banner ── */
+    '<div class="ia-naf-ai-banner">' +
+      '<div class="ia-naf-ai-icon"><i class="fas fa-robot"></i></div>' +
+      '<div class="ia-naf-ai-content">' +
+        '<div class="ia-naf-ai-title">AI Account Recommendation <span class="ia-naf-ai-live">LIVE</span></div>' +
+        '<div class="ia-naf-ai-text">Based on client profile analysis: <strong>Advisory (UMA)</strong> recommended for growth-oriented clients with $50K+ AUM. <strong>IRA (Traditional)</strong> for clients within 15 years of retirement. <strong>529</strong> if children under 18 with college funding goal.</div>' +
+      '</div>' +
+    '</div>' +
+
+    /* ── Progress Steps ── */
     '<div class="ia-naf-step-bar">' +
       '<div class="ia-naf-step ia-naf-step-active"><span>1</span> Account Type</div>' +
       '<div class="ia-naf-step"><span>2</span> Client Profile</div>' +
       '<div class="ia-naf-step"><span>3</span> Investment Profile</div>' +
-      '<div class="ia-naf-step"><span>4</span> IMA & Suitability</div>' +
+      '<div class="ia-naf-step"><span>4</span> IMA &amp; Suitability</div>' +
       '<div class="ia-naf-step"><span>5</span> Funding</div>' +
     '</div>' +
 
+    /* ── Step 1: Account Type ── */
     '<div class="ia-naf-section">' +
       '<div class="ia-naf-section-title"><i class="fas fa-folder-open"></i> Step 1 — Select Account Type</div>' +
       '<div class="ia-naf-type-grid">' +
-        ['Advisory (UMA)','Advisory (SMA)','ETF Portfolio','Mutual Fund Portfolio','IRA (Traditional)','IRA (Roth)','IRA (SEP)','529 College Savings','Joint Brokerage','Individual Brokerage'].map(function(t) {
-          return '<div class="ia-naf-type-card" onclick="iaSelectAccountType(this,\'' + t + '\')">' + t + '</div>';
+        accountTypes.map(function(t) {
+          return '<div class="ia-naf-type-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')">' +
+            '<div class="ia-naf-type-icon"><i class="fas ' + t.icon + '"></i></div>' +
+            '<div class="ia-naf-type-name">' + t.type + '</div>' +
+            '<div class="ia-naf-type-desc">' + t.desc + '</div>' +
+            '<div class="ia-naf-type-meta">' +
+              '<span class="ia-naf-type-fee">Fee: ' + t.fee + '</span>' +
+              '<span class="ia-naf-type-min">Min: ' + t.min + '</span>' +
+            '</div>' +
+          '</div>';
         }).join('') +
       '</div>' +
     '</div>' +
 
+    /* ── Step 2: Client ── */
     '<div class="ia-naf-section">' +
-      '<div class="ia-naf-section-title"><i class="fas fa-user"></i> Step 2 — Select Existing Client</div>' +
+      '<div class="ia-naf-section-title"><i class="fas fa-user"></i> Step 2 — Client &amp; Account Details</div>' +
       '<div class="ia-naf-form-grid">' +
-        '<div class="ia-naf-field ia-naf-full"><label>Client</label>' +
+        '<div class="ia-naf-field ia-naf-full"><label>Select Client</label>' +
           '<select class="ia-naf-input">' +
-            '<option>James Whitfield (ID-1)</option>' +
-            '<option>Patricia Nguyen (ID-2)</option>' +
-            '<option>Robert Chen (ID-3)</option>' +
-            '<option>Sandra Williams (ID-4)</option>' +
-            '<option>David Thompson (ID-5)</option>' +
-            '<option>Maria Gonzalez (ID-6)</option>' +
-            '<option>Alex Rivera (ID-9)</option>' +
-            '<option>Linda Morrison (ID-8)</option>' +
+            '<option value="">— Select existing client —</option>' +
+            '<option>James Whitfield · $145K AUM · 2 accounts</option>' +
+            '<option>Patricia Nguyen · $68K AUM · 1 account</option>' +
+            '<option>Robert Chen · $415K AUM · 2 accounts</option>' +
+            '<option>Sandra Williams · $312K AUM · 1 account</option>' +
+            '<option>David Thompson · $42K AUM · 1 account</option>' +
+            '<option>Maria Gonzalez · $148K AUM · 2 accounts</option>' +
+            '<option>Alex Rivera · Funding pending · 1 account</option>' +
+            '<option>Linda Morrison · $554K AUM · 3 accounts</option>' +
+            '<option value="new">+ Add New Client</option>' +
           '</select>' +
         '</div>' +
-        '<div class="ia-naf-field"><label>Account Title</label><input class="ia-naf-input" placeholder="e.g. James Whitfield IRA"/></div>' +
-        '<div class="ia-naf-field"><label>Custodian</label><select class="ia-naf-input"><option>NYLIM / Pershing</option><option>NYLIM / MainStay</option><option>NY 529 Direct Plan</option></select></div>' +
+        '<div class="ia-naf-field"><label>Account Title</label><input class="ia-naf-input" placeholder="e.g. James Whitfield Roth IRA"/></div>' +
+        '<div class="ia-naf-field"><label>Custodian</label>' +
+          '<select class="ia-naf-input">' +
+            '<option>NYLIM / Pershing</option>' +
+            '<option>NYLIM / MainStay</option>' +
+            '<option>NY 529 Direct Plan</option>' +
+            '<option>Charles Schwab (ACAT)</option>' +
+            '<option>Fidelity (ACAT)</option>' +
+          '</select>' +
+        '</div>' +
       '</div>' +
     '</div>' +
 
+    /* ── Step 3: Investment Profile ── */
     '<div class="ia-naf-section">' +
       '<div class="ia-naf-section-title"><i class="fas fa-chart-pie"></i> Step 3 — Investment Profile</div>' +
       '<div class="ia-naf-form-grid">' +
         '<div class="ia-naf-field"><label>Risk Tolerance</label><select class="ia-naf-input"><option>Conservative</option><option>Conservative Growth</option><option selected>Moderate Growth</option><option>Growth</option><option>Aggressive Growth</option></select></div>' +
         '<div class="ia-naf-field"><label>Time Horizon</label><select class="ia-naf-input"><option>Short (&lt;3yr)</option><option>Medium (3–7yr)</option><option selected>Long (7–20yr)</option><option>Very Long (20yr+)</option></select></div>' +
         '<div class="ia-naf-field"><label>Primary Goal</label><select class="ia-naf-input"><option>Capital Preservation</option><option>Income</option><option selected>Growth</option><option>Aggressive Growth</option><option>College Funding</option><option>Retirement Income</option></select></div>' +
-        '<div class="ia-naf-field"><label>Annual Income</label><input class="ia-naf-input" placeholder="$150,000"/></div>' +
+        '<div class="ia-naf-field"><label>Annual Income</label><input class="ia-naf-input" placeholder="$150,000" id="naf-income"/></div>' +
         '<div class="ia-naf-field"><label>Liquid Net Worth</label><input class="ia-naf-input" placeholder="$500,000"/></div>' +
         '<div class="ia-naf-field"><label>Tax Bracket</label><select class="ia-naf-input"><option>22%</option><option>24%</option><option selected>32%</option><option>35%</option><option>37%</option></select></div>' +
+        '<div class="ia-naf-field"><label>ESG / SRI Preference</label><select class="ia-naf-input"><option selected>No ESG screen</option><option>ESG Aware</option><option>Full SRI screen</option><option>Faith-based</option></select></div>' +
+        '<div class="ia-naf-field"><label>Liquidity Need</label><select class="ia-naf-input"><option>Low — long-term only</option><option selected>Moderate — 6-month buffer</option><option>High — may need access</option></select></div>' +
+      '</div>' +
+      /* ── AI Risk Score ── */
+      '<div class="ia-naf-risk-preview">' +
+        '<div class="ia-naf-risk-title"><i class="fas fa-robot"></i> AI Suitability Score Preview</div>' +
+        '<div class="ia-naf-risk-bar-wrap">' +
+          '<div class="ia-naf-risk-bar" style="width:62%"></div>' +
+        '</div>' +
+        '<div class="ia-naf-risk-labels"><span>Conservative</span><span style="color:#003087;font-weight:700">62/100 — Moderate Growth</span><span>Aggressive</span></div>' +
       '</div>' +
     '</div>' +
 
+    /* ── Step 4: IMA & Suitability ── */
     '<div class="ia-naf-section">' +
-      '<div class="ia-naf-section-title"><i class="fas fa-handshake"></i> Step 4 — IMA & Suitability</div>' +
+      '<div class="ia-naf-section-title"><i class="fas fa-handshake"></i> Step 4 — IMA &amp; Suitability Compliance</div>' +
       '<div class="ia-naf-checklist">' +
-        ['Investment Management Agreement (IMA) reviewed with client','Regulation BI Best Interest disclosure provided','Suitability questionnaire completed and signed','Form CRS (Client Relationship Summary) delivered','Advisory fee schedule disclosed (1.00% of AUM)','Discretionary trading authority granted by client','Beneficiary designation completed (IRA accounts)'].map(function(item) {
-          return '<label class="ia-naf-check-row"><input type="checkbox"/> ' + item + '</label>';
+        [
+          { text:'Investment Management Agreement (IMA) reviewed with client', required:true },
+          { text:'Regulation BI — Best Interest disclosure provided and acknowledged', required:true },
+          { text:'Suitability questionnaire completed and signed by client', required:true },
+          { text:'Form CRS (Client Relationship Summary) delivered', required:true },
+          { text:'Advisory fee schedule disclosed — ' + '1.00% of AUM annually', required:true },
+          { text:'Discretionary trading authority granted (signed authorization)', required:true },
+          { text:'Beneficiary designation completed (required for IRA accounts)', required:false },
+          { text:'State-specific disclosures reviewed (if applicable)', required:false }
+        ].map(function(item) {
+          return '<label class="ia-naf-check-row">' +
+            '<input type="checkbox"/>' +
+            '<span class="ia-naf-check-text">' + item.text + '</span>' +
+            (item.required ? '<span class="ia-naf-check-req">Required</span>' : '<span class="ia-naf-check-opt">Optional</span>') +
+          '</label>';
         }).join('') +
       '</div>' +
     '</div>' +
 
+    /* ── Step 5: Funding ── */
     '<div class="ia-naf-section">' +
       '<div class="ia-naf-section-title"><i class="fas fa-money-bill-wave"></i> Step 5 — Funding Instructions</div>' +
       '<div class="ia-naf-form-grid">' +
-        '<div class="ia-naf-field"><label>Initial Deposit Amount</label><input class="ia-naf-input" placeholder="$50,000"/></div>' +
-        '<div class="ia-naf-field"><label>Funding Method</label><select class="ia-naf-input"><option>ACH Bank Transfer</option><option>Wire Transfer</option><option>ACAT Transfer (from another custodian)</option><option>Check</option></select></div>' +
-        '<div class="ia-naf-field"><label>Bank / Custodian Name</label><input class="ia-naf-input" placeholder="e.g. Schwab, Fidelity, Chase"/></div>' +
+        '<div class="ia-naf-field"><label>Initial Deposit Amount</label><input class="ia-naf-input" placeholder="$50,000" id="naf-deposit" oninput="iaNafUpdateFee()"/></div>' +
+        '<div class="ia-naf-field"><label>Funding Method</label>' +
+          '<select class="ia-naf-input">' +
+            '<option>ACH Bank Transfer (3–5 business days)</option>' +
+            '<option>Wire Transfer (same day)</option>' +
+            '<option>ACAT Transfer — from another custodian (5–7 days)</option>' +
+            '<option>Check (5–10 days)</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="ia-naf-field"><label>Bank / Custodian Name</label><input class="ia-naf-input" placeholder="e.g. Chase, Schwab, Fidelity"/></div>' +
+        '<div class="ia-naf-field"><label>Account Last 4 Digits</label><input class="ia-naf-input" placeholder="e.g. 4821" maxlength="4"/></div>' +
         '<div class="ia-naf-field"><label>Expected Funding Date</label><input class="ia-naf-input" type="date"/></div>' +
+        '<div class="ia-naf-field"><label>Recurring Contributions</label>' +
+          '<select class="ia-naf-input">' +
+            '<option selected>None</option>' +
+            '<option>Monthly ACH auto-contribution</option>' +
+            '<option>Quarterly</option>' +
+            '<option>Annual</option>' +
+          '</select>' +
+        '</div>' +
+      '</div>' +
+      /* ── Live Fee Preview ── */
+      '<div class="ia-naf-fee-preview" id="ia-naf-fee-preview">' +
+        '<div class="ia-naf-fee-title"><i class="fas fa-calculator"></i> Fee Preview</div>' +
+        '<div class="ia-naf-fee-grid">' +
+          '<div class="ia-naf-fee-item"><span>Advisory Rate</span><strong>1.00% / year</strong></div>' +
+          '<div class="ia-naf-fee-item"><span>On $50,000 AUM</span><strong>$500 / year · $41.67 / mo</strong></div>' +
+          '<div class="ia-naf-fee-item"><span>Projected AUM (5yr @ 8%)</span><strong>≈ $73,466</strong></div>' +
+          '<div class="ia-naf-fee-item"><span>Projected Fee (5yr)</span><strong>≈ $735 / year</strong></div>' +
+        '</div>' +
       '</div>' +
     '</div>' +
 
+    /* ── Actions ── */
     '<div class="ia-naf-actions">' +
       '<button class="ia-naf-btn ghost" onclick="iaCloseNewAccount()"><i class="fas fa-times"></i> Cancel</button>' +
+      '<button class="ia-naf-btn secondary" onclick="iaToast(\'<i class=\\\"fas fa-save\\\"></i> Draft saved — resume anytime from New Account\')"><i class="fas fa-save"></i> Save Draft</button>' +
       '<button class="ia-naf-btn primary" onclick="iaSubmitNewAccount()"><i class="fas fa-check-circle"></i> Open Account</button>' +
     '</div>' +
 
   '</div>';
+}
+
+function iaNafUpdateFee() {
+  var input = document.getElementById('naf-deposit');
+  var preview = document.getElementById('ia-naf-fee-preview');
+  if (!input || !preview) return;
+  var val = parseFloat(input.value.replace(/[$,]/g,'')) || 50000;
+  var annual = Math.round(val * 0.01);
+  var monthly = Math.round(annual / 12);
+  var proj5   = Math.round(val * Math.pow(1.08, 5));
+  var fee5    = Math.round(proj5 * 0.01);
+  preview.querySelector('.ia-naf-fee-grid').innerHTML =
+    '<div class="ia-naf-fee-item"><span>Advisory Rate</span><strong>1.00% / year</strong></div>' +
+    '<div class="ia-naf-fee-item"><span>On $' + val.toLocaleString() + ' AUM</span><strong>$' + annual.toLocaleString() + ' / year · $' + monthly.toLocaleString() + ' / mo</strong></div>' +
+    '<div class="ia-naf-fee-item"><span>Projected AUM (5yr @ 8%)</span><strong>≈ $' + proj5.toLocaleString() + '</strong></div>' +
+    '<div class="ia-naf-fee-item"><span>Projected Fee (5yr)</span><strong>≈ $' + fee5.toLocaleString() + ' / year</strong></div>';
 }
 
 function iaSelectAccountType(el, type) {
@@ -35596,70 +35861,116 @@ function iaRenderPortfolioReview() {
   var rmdTotal    = iaRMDAccounts.reduce(function(s,a) { return s + a.rmdAmount; }, 0);
   var reviewDue   = iaAccounts.filter(function(a) { return a.reviewDue; }).length;
   var fundingPend = iaAccounts.filter(function(a) { return a.status === 'Funding Pending'; }).length;
+  var avgAlpha    = '+1.1%';
+  var avgSharpe   = '1.18';
 
   var clientSummary = [
-    { name:'Linda Morrison', accts:3, aum:554000, ret:'+9.0%',  flag:'RMD + drift' },
-    { name:'Robert Chen',    accts:2, aum:415000, ret:'+9.6%',  flag:'Drift alert' },
-    { name:'Sandra Williams',accts:1, aum:312000, ret:'+6.8%',  flag:'RMD + review overdue' },
-    { name:'James Whitfield',accts:1, aum:145000, ret:'+7.9%',  flag:'Review + RMD overdue' },
-    { name:'Maria Gonzalez', accts:2, aum:148000, ret:'+8.4%',  flag:'On track' },
-    { name:'Patricia Nguyen',accts:1, aum:68000,  ret:'+7.4%',  flag:'Drift alert' },
-    { name:'David Thompson', accts:1, aum:42000,  ret:'+3.1%',  flag:'New account' },
-    { name:'Alex Rivera',    accts:1, aum:0,      ret:'—',       flag:'Funding pending' }
+    { name:'Linda Morrison',  initials:'LM', grad:'linear-gradient(135deg,#003087,#0057c8)', accts:3, aum:554000, ret:'+9.0%',  retPos:true,  flag:'RMD + Drift',          flagLevel:'urgent', acctId:'IA-LM-001' },
+    { name:'Robert Chen',     initials:'RC', grad:'linear-gradient(135deg,#059669,#0d9488)', accts:2, aum:415000, ret:'+9.6%',  retPos:true,  flag:'Drift Alert',          flagLevel:'high',   acctId:'IA-RC-001' },
+    { name:'Sandra Williams', initials:'SW', grad:'linear-gradient(135deg,#7c3aed,#9333ea)', accts:1, aum:312000, ret:'+6.8%',  retPos:true,  flag:'RMD + Review Overdue', flagLevel:'urgent', acctId:'IA-SW-001' },
+    { name:'James Whitfield', initials:'JW', grad:'linear-gradient(135deg,#b45309,#d97706)', accts:1, aum:145000, ret:'+7.9%',  retPos:true,  flag:'Review + RMD Overdue', flagLevel:'high',   acctId:'IA-JW-001' },
+    { name:'Maria Gonzalez',  initials:'MG', grad:'linear-gradient(135deg,#0891b2,#06b6d4)', accts:2, aum:148000, ret:'+8.4%',  retPos:true,  flag:'On Track',             flagLevel:'ok',     acctId:'IA-MG-001' },
+    { name:'Patricia Nguyen', initials:'PN', grad:'linear-gradient(135deg,#dc2626,#ef4444)', accts:1, aum:68000,  ret:'+7.4%',  retPos:true,  flag:'Minor Drift',          flagLevel:'med',    acctId:'IA-PN-001' },
+    { name:'David Thompson',  initials:'DT', grad:'linear-gradient(135deg,#64748b,#94a3b8)', accts:1, aum:42000,  ret:'+3.1%',  retPos:true,  flag:'New Account',          flagLevel:'info',   acctId:'IA-DT-001' },
+    { name:'Alex Rivera',     initials:'AR', grad:'linear-gradient(135deg,#0891b2,#38bdf8)', accts:1, aum:0,      ret:'—',       retPos:false, flag:'Funding Pending',      flagLevel:'info',   acctId:'IA-AR-001' }
   ];
 
+  var flagColors = { urgent:'#dc2626', high:'#d97706', med:'#0891b2', ok:'#059669', info:'#7c3aed' };
+  var flagBg     = { urgent:'#fef2f2', high:'#fff7ed', med:'#eff6ff', ok:'#f0fdf4', info:'#f5f3ff' };
+
+  /* AUM bar chart — max = Linda Morrison $554K */
+  var maxAUM = 554000;
+
   var clientRows = clientSummary.map(function(c) {
-    var flagCls = c.flag.includes('RMD') || c.flag.includes('overdue') || c.flag.includes('Drift') ? 'ia-pr-flag-warn' : c.flag.includes('pending') || c.flag.includes('New') ? 'ia-pr-flag-info' : 'ia-pr-flag-ok';
-    return '<div class="ia-pr-client-row">' +
-      '<div class="ia-pr-client-name">' + c.name + '</div>' +
-      '<div class="ia-pr-client-accts">' + c.accts + ' account' + (c.accts > 1 ? 's' : '') + '</div>' +
-      '<div class="ia-pr-client-aum">$' + (c.aum/1000).toFixed(0) + 'K</div>' +
-      '<div class="ia-pr-client-ret">' + c.ret + '</div>' +
-      '<div class="ia-pr-client-flag ' + flagCls + '">' + c.flag + '</div>' +
+    var barW    = c.aum > 0 ? Math.round((c.aum / maxAUM) * 100) : 0;
+    var fc      = flagColors[c.flagLevel] || '#64748b';
+    var fb      = flagBg[c.flagLevel]    || '#f8fafc';
+    var retCls  = c.retPos ? 'ia-pr-ret-pos' : 'ia-pr-ret-neu';
+    return '<div class="ia-pr-client-row" onclick="iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'' + c.acctId + '\');},100)" style="cursor:pointer">' +
+      '<div class="ia-pr-client-left">' +
+        '<div class="ia-pr-avatar" style="background:' + c.grad + '">' + c.initials + '</div>' +
+        '<div>' +
+          '<div class="ia-pr-client-name">' + c.name + '</div>' +
+          '<div class="ia-pr-client-sub">' + c.accts + ' account' + (c.accts > 1 ? 's' : '') + ' · $' + (c.aum/1000).toFixed(0) + 'K AUM</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ia-pr-aum-bar-wrap">' +
+        '<div class="ia-pr-aum-bar-fill" style="width:' + barW + '%;background:' + c.grad + '"></div>' +
+      '</div>' +
+      '<div class="ia-pr-client-ret ' + retCls + '">' + c.ret + '</div>' +
+      '<div class="ia-pr-client-flag" style="background:' + fb + ';color:' + fc + ';border:1px solid ' + fc + '30">' + c.flag + '</div>' +
+      '<button class="ia-pr-open-btn" onclick="event.stopPropagation();iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'' + c.acctId + '\');},100)"><i class="fas fa-arrow-right"></i></button>' +
+    '</div>';
+  }).join('');
+
+  /* Priority action items with inline action buttons */
+  var actions = [
+    { urgency:'urgent', icon:'fa-paper-plane',   text:'Process Linda Morrison RMD — $14,200 due Dec 31, 2026',        btn:'Process RMD',   fn:'iaProcessRMD(\'IA-LM-001\')' },
+    { urgency:'urgent', icon:'fa-paper-plane',   text:'Process Sandra Williams RMD — $11,400 due Dec 31, 2026',       btn:'Process RMD',   fn:'iaProcessRMD(\'IA-SW-001\')' },
+    { urgency:'urgent', icon:'fa-balance-scale', text:'Rebalance Robert Chen SMA-300201 — 6.8% drift · 4 trades',     btn:'Rebalance',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-RC-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' },
+    { urgency:'high',   icon:'fa-balance-scale', text:'Rebalance Linda Morrison UMA-880201 — 7.4% drift · 3 trades',  btn:'Rebalance',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-LM-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' },
+    { urgency:'high',   icon:'fa-calendar-check',text:'James Whitfield annual review overdue — schedule Q2 meeting',  btn:'Schedule',      fn:'iaToast(\'<i class=\\\"fas fa-calendar-check\\\"></i> Q2 review scheduled for James Whitfield — Apr 15, 2026\',3000)' },
+    { urgency:'med',    icon:'fa-leaf',           text:'Harvest $4,200 TLH — Robert Chen SMA before Q2 close',        btn:'Harvest',       fn:'iaExecuteTLH(\'IA-RC-001\')' },
+    { urgency:'med',    icon:'fa-leaf',           text:'Harvest $3,200 TLH — Linda Morrison UMA before year-end',      btn:'Harvest',       fn:'iaExecuteTLH(\'IA-LM-001\')' },
+    { urgency:'low',    icon:'fa-clock',          text:'Monitor Alex Rivera funding — ACH + ACAT expected Apr 18',     btn:'View Account',  fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-AR-001\');},100)' },
+    { urgency:'low',    icon:'fa-balance-scale',  text:'Patricia Nguyen ETF drift 5.1% — minor rebalance recommended', btn:'View Plan',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-PN-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' }
+  ];
+
+  var urgColors = { urgent:'#dc2626', high:'#d97706', med:'#0891b2', low:'#64748b' };
+  var urgLabels = { urgent:'URGENT', high:'HIGH', med:'MED', low:'LOW' };
+
+  var actionRows = actions.map(function(item) {
+    var uc = urgColors[item.urgency] || '#64748b';
+    var ul = urgLabels[item.urgency] || item.urgency.toUpperCase();
+    return '<div class="ia-pr-action-row">' +
+      '<span class="ia-pr-urgency-pill" style="background:' + uc + '15;color:' + uc + ';border:1px solid ' + uc + '40">' + ul + '</span>' +
+      '<i class="fas ' + item.icon + ' ia-pr-action-icon" style="color:' + uc + '"></i>' +
+      '<span class="ia-pr-action-text">' + item.text + '</span>' +
+      '<button class="ia-pr-action-btn" style="border-color:' + uc + '50;color:' + uc + '" onclick="' + item.fn + '">' + item.btn + '</button>' +
     '</div>';
   }).join('');
 
   return '<div class="ia-pr-wrap">' +
 
+    /* ── KPI Bar ── */
     '<div class="ia-pr-kpi-bar">' +
       '<div class="ia-pr-kpi"><div class="ia-pr-kpi-val">$' + (totalAUM/1000000).toFixed(2) + 'M</div><div class="ia-pr-kpi-lbl">Total AUM</div></div>' +
+      '<div class="ia-pr-kpi"><div class="ia-pr-kpi-val green">' + avgAlpha + '</div><div class="ia-pr-kpi-lbl">Avg Alpha</div></div>' +
+      '<div class="ia-pr-kpi"><div class="ia-pr-kpi-val">' + avgSharpe + '</div><div class="ia-pr-kpi-lbl">Avg Sharpe</div></div>' +
       '<div class="ia-pr-kpi warn"><div class="ia-pr-kpi-val">' + driftCount + '</div><div class="ia-pr-kpi-lbl">Drift Alerts</div></div>' +
-      '<div class="ia-pr-kpi green"><div class="ia-pr-kpi-val">$' + (tlhTotal/1000).toFixed(1) + 'K</div><div class="ia-pr-kpi-lbl">TLH Opportunity</div></div>' +
+      '<div class="ia-pr-kpi green"><div class="ia-pr-kpi-val">$' + (tlhTotal/1000).toFixed(1) + 'K</div><div class="ia-pr-kpi-lbl">TLH Available</div></div>' +
       '<div class="ia-pr-kpi warn"><div class="ia-pr-kpi-val">$' + (rmdTotal/1000).toFixed(0) + 'K</div><div class="ia-pr-kpi-lbl">RMDs Due 2026</div></div>' +
       '<div class="ia-pr-kpi warn"><div class="ia-pr-kpi-val">' + reviewDue + '</div><div class="ia-pr-kpi-lbl">Reviews Overdue</div></div>' +
       '<div class="ia-pr-kpi blue"><div class="ia-pr-kpi-val">' + fundingPend + '</div><div class="ia-pr-kpi-lbl">Funding Pending</div></div>' +
     '</div>' +
 
-    '<div class="ia-pr-section-title"><i class="fas fa-list"></i> Client Portfolio Summary</div>' +
-    '<div class="ia-pr-client-header">' +
-      '<span>Client</span><span>Accounts</span><span>AUM</span><span>Return YTD</span><span>Action Required</span>' +
+    /* ── AI Insight Banner ── */
+    '<div class="ia-pr-ai-banner">' +
+      '<i class="fas fa-robot ia-pr-ai-icon"></i>' +
+      '<div>' +
+        '<div class="ia-pr-ai-title">AI Portfolio Health Score: <span style="color:#f59e0b">74/100</span> — Action Required</div>' +
+        '<div class="ia-pr-ai-sub">Strong alpha generation across most accounts. Critical items: 2 RMDs due, 3 drift alerts requiring rebalancing. TLH opportunities will expire if not executed before Q4. Book Linda Morrison + James Whitfield for combined review.</div>' +
+      '</div>' +
+    '</div>' +
+
+    /* ── Client Table ── */
+    '<div class="ia-pr-section-title"><i class="fas fa-users"></i> Client Portfolio Summary <span class="ia-pr-section-note">Click any row to open account</span></div>' +
+    '<div class="ia-pr-client-header-row">' +
+      '<span>Client / Accounts</span><span>AUM Distribution</span><span>Return YTD</span><span>Status</span><span></span>' +
     '</div>' +
     clientRows +
 
-    '<div class="ia-pr-section-title" style="margin-top:20px"><i class="fas fa-robot"></i> AI Priority Action List</div>' +
-    '<div class="ia-pr-actions">' +
-      [
-        { urgency:'urgent', text:'Process Linda Morrison RMD ($14,200) — IRS deadline Dec 31, 2026' },
-        { urgency:'urgent', text:'Process Sandra Williams RMD ($11,400) — review overdue 7 months' },
-        { urgency:'urgent', text:'Execute rebalance: Robert Chen SMA-300201 (drift 6.8%, 4 trades)' },
-        { urgency:'high',   text:'Execute rebalance: Linda Morrison UMA-880201 (drift 7.4%, 3 trades)' },
-        { urgency:'high',   text:'James Whitfield IRA review overdue — schedule Apr 15 combined meeting' },
-        { urgency:'med',    text:'Harvest $4,200 TLH in Robert Chen SMA before Q2 close' },
-        { urgency:'med',    text:'Harvest $3,200 TLH in Linda Morrison UMA before year-end' },
-        { urgency:'low',    text:'Monitor Alex Rivera funding — ACH + ACAT expected Apr 18' },
-        { urgency:'low',    text:'Patricia Nguyen ETF drift 5.1% — minor rebalance recommended' }
-      ].map(function(item) {
-        return '<div class="ia-pr-action-item ia-pr-' + item.urgency + '">' +
-          '<span class="ia-pr-urgency-dot ' + item.urgency + '"></span>' +
-          '<span>' + item.text + '</span>' +
-        '</div>';
-      }).join('') +
-    '</div>' +
+    /* ── Priority Actions ── */
+    '<div class="ia-pr-section-title" style="margin-top:18px"><i class="fas fa-bolt"></i> AI Priority Action List <span class="ia-pr-section-note">' + actions.length + ' items requiring attention</span></div>' +
+    '<div class="ia-pr-action-list">' + actionRows + '</div>' +
 
+    /* ── Footer buttons ── */
     '<div class="ia-pr-modal-actions">' +
       '<button class="ia-pr-btn primary" onclick="iaExportReview()"><i class="fas fa-file-pdf"></i> Export Full Report</button>' +
-      '<button class="ia-pr-btn ghost"   onclick="iaRunDriftScan();iaClosePortfolioReview()"><i class="fas fa-balance-scale"></i> Run Drift Scan</button>' +
-      '<button class="ia-pr-btn ghost"   onclick="iaClosePortfolioReview()"><i class="fas fa-times"></i> Close</button>' +
+      '<button class="ia-pr-btn secondary" onclick="iaClosePortfolioReview();setTimeout(iaRunDriftScan,100)"><i class="fas fa-balance-scale"></i> Open Drift Scan</button>' +
+      '<button class="ia-pr-btn secondary" onclick="iaClosePortfolioReview();setTimeout(iaRunTLHScan,100)"><i class="fas fa-leaf"></i> Open TLH Scan</button>' +
+      '<button class="ia-pr-btn secondary" onclick="iaClosePortfolioReview();setTimeout(iaOpenRMDCenter,100)"><i class="fas fa-calendar-check"></i> Open RMD Center</button>' +
+      '<button class="ia-pr-btn ghost" onclick="iaClosePortfolioReview()"><i class="fas fa-times"></i> Close</button>' +
     '</div>' +
 
   '</div>';
@@ -35668,6 +35979,19 @@ function iaRenderPortfolioReview() {
 /* ═══════════════════════════════════════════════════════════════════
    ACTION HANDLERS
    ═══════════════════════════════════════════════════════════════════ */
+function iaExecuteAllRebalances() {
+  iaToast('<i class="fas fa-play-circle"></i> Executing rebalance trades for <strong>' + iaDriftAccounts.length + ' accounts</strong> — confirmations will be sent to each client.', 4000);
+  setTimeout(function() { iaToast('<i class="fas fa-check-circle"></i> All rebalances complete — ' + iaDriftAccounts.length + ' accounts restored to target allocation.', 3500); }, 3000);
+}
+function iaExecuteAllTLH() {
+  var total = iaTLHAccounts.reduce(function(s,a){ return s + a.tlhOpportunity; }, 0);
+  iaToast('<i class="fas fa-leaf"></i> Harvesting losses across <strong>' + iaTLHAccounts.length + ' accounts</strong> — $' + total.toLocaleString() + ' in losses realised. Wash-sale rules applied.', 4500);
+}
+function iaProcessAllRMDs() {
+  var total = iaRMDAccounts.reduce(function(s,a){ return s + a.rmdAmount; }, 0);
+  iaToast('<i class="fas fa-paper-plane"></i> Processing <strong>' + iaRMDAccounts.length + ' RMD distributions</strong> totalling $' + total.toLocaleString() + ' — ACH transfers initiated to linked bank accounts.', 4500);
+}
+
 function iaExecuteRebalance(id) {
   var a = iaAccounts.find(function(x) { return x.id === id; });
   if (!a) return;

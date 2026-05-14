@@ -14202,10 +14202,30 @@ function InvestmentAccountsPage() {
         </div>
       </div>
 
+      {/* ── Section Navigation Shortcut Bar ── */}
+      <div class="ia-section-nav-bar">
+        <div class="ia-section-nav-label"><i class="fas fa-layer-group"></i> Jump to section:</div>
+        <a class="ia-section-nav-chip ia-snav-accounts" href="#ia-accounts-anchor">
+          <i class="fas fa-folder-open"></i> Accounts
+        </a>
+        <a class="ia-section-nav-chip ia-snav-suitability" href="#ia-isr-anchor">
+          <i class="fas fa-shield-alt"></i> Suitability Review
+          <span class="ia-snav-badge" style="background:#7c3aed">3 SR</span>
+        </a>
+        <a class="ia-section-nav-chip ia-snav-funding" href="#ia-af-anchor">
+          <i class="fas fa-piggy-bank"></i> Funding &amp; IPS
+          <span class="ia-snav-badge" style="background:#0d9488">5 IPS</span>
+        </a>
+      </div>
+
+      {/* ── Accounts section anchor ── */}
+      <div id="ia-accounts-anchor" style="scroll-margin-top:16px"></div>
+
       {/* ══════════════════════════════════════════════════════════════
           INVESTMENT SUITABILITY REVIEW
           Reg BI · FINRA 2111 · Form ADV · Concentration Risk · Fee Disclosure
           ══════════════════════════════════════════════════════════════ */}
+      <div id="ia-isr-anchor" style="scroll-margin-top:16px"></div>
       <div class="isr-section">
 
         {/* Section Header */}
@@ -14429,6 +14449,7 @@ function InvestmentAccountsPage() {
       {/* ══════════════════════════════════════════════════════════
           ACCOUNT FUNDING & IPS SECTION
           ══════════════════════════════════════════════════════════ */}
+      <div id="ia-af-anchor" style="scroll-margin-top:16px"></div>
       <div class="af-inv-section">
 
         {/* ── Section Header ── */}
