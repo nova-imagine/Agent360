@@ -27,7 +27,7 @@ function navigateTo(page) {
     upsell: 'Growth Track',
     alerts: 'Policy Alerts',
     'pipeline-view': 'Sales Pipeline',
-    sales: 'Applications & Proposals',
+    sales: 'Sales Pipeline',
     products: 'Product Intelligence Hub',
     reports: 'Reports & Analytics',
     calendar: 'Schedule',
@@ -43,7 +43,8 @@ function navigateTo(page) {
     'ret-accounts': 'Annuity Accounts',
     'adv-wealth': 'Wealth Management',
     'adv-estate': 'Estate Planning',
-    'adv-smallbiz': 'Small Business Advisory'
+    'adv-smallbiz': 'Small Business Advisory',
+    'eapp-submissions': 'E-App & Submissions'
   };
 
   const breadcrumbs = {
@@ -56,7 +57,7 @@ function navigateTo(page) {
     upsell: 'Home / Sales / Growth Track',
     alerts: 'Home / Service / Policy Alerts',
     'pipeline-view': 'Home / Sales / Sales Pipeline',
-    sales: 'Home / Sales',
+    sales: 'Home / Sales / Sales Pipeline',
     products: 'Home / Products',
     reports: 'Home / Reports',
     calendar: 'Home / Schedule',
@@ -72,7 +73,8 @@ function navigateTo(page) {
     'ret-accounts': 'Home / Retirement / Annuity Accounts',
     'adv-wealth': 'Home / Advisory / Wealth Management',
     'adv-estate': 'Home / Advisory / Estate Planning',
-    'adv-smallbiz': 'Home / Advisory / Small Business'
+    'adv-smallbiz': 'Home / Advisory / Small Business',
+    'eapp-submissions': 'Home / Insurance / E-App & Submissions'
   };
 
   const titleEl = document.getElementById('page-title');
@@ -129,6 +131,8 @@ function navigateTo(page) {
       requestAnimationFrame(() => setTimeout(() => initCampaignsPage(), 80));
     } else if (page === 'underwriting') {
       requestAnimationFrame(() => setTimeout(() => initUnderwritingPage(), 80));
+    } else if (page === 'eapp-submissions') {
+      requestAnimationFrame(() => setTimeout(() => initEAppSubmissionsPage(), 80));
     }
   }
 }
@@ -44234,3 +44238,114 @@ window.p3AdvBuildFullProposal = function() {
 
 console.log('Phase 3 Domain Hub loaded — Insurance · Retirement · Investments · Advisory');
 
+
+/* ═══════════════════════════════════════════════════════════════════════
+   E-APP & SUBMISSIONS MODULE
+   Insurance workflow: FNA → Products → E-App → Underwriting → Delivery
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── E-App page init ── */
+function initEAppSubmissionsPage() {
+  // Highlight any sig-pending cards with a pulse
+  var cards = document.querySelectorAll('.eapp-card-sig');
+  cards.forEach(function(c) { c.classList.add('eapp-card-pulse'); });
+}
+
+/* ── Filter queue by search text ── */
+function filterEAppQueue(val) {
+  var v = (val || '').toLowerCase();
+  document.querySelectorAll('#eapp-queue .eapp-card').forEach(function(card) {
+    var text = card.textContent.toLowerCase();
+    card.style.display = (!v || text.includes(v)) ? '' : 'none';
+  });
+}
+
+/* ── Filter queue by status ── */
+function filterEAppByStatus(status) {
+  document.querySelectorAll('#eapp-queue .eapp-card').forEach(function(card) {
+    if (!status) { card.style.display = ''; return; }
+    var map = {
+      'draft':       'eapp-card-draft',
+      'prefilling':  'eapp-card-prefilling',
+      'sig':         'eapp-card-sig',
+      'submitted':   'eapp-card-submitted',
+      'received':    'eapp-card-received'
+    };
+    card.style.display = card.classList.contains(map[status] || '') ? '' : 'none';
+  });
+}
+
+/* ── Resend e-signature ── */
+function resendEAppSignature(eaId) {
+  var clientMap = { 'EA-001': 'Kevin Park', 'EA-002': 'Linda Morrison' };
+  var client = clientMap[eaId] || eaId;
+  showToast('DocuSign reminder sent to ' + client + ' — signature link re-sent via email & SMS.', 'success');
+}
+
+/* ── Submit to Underwriting — creates UW case ── */
+function submitToUnderwriting(eaId, clientName) {
+  var uwId = 'UW-2026-' + String(Math.floor(1000 + Math.random() * 9000));
+  // Update the pending handoff card in the UW rail if visible
+  var railCard = document.querySelector('.eapp-uw-rail-card.pending-handoff');
+  if (railCard) {
+    var badge = railCard.querySelector('.eapp-uw-rail-badge');
+    var submitBtn = railCard.querySelector('.eapp-uw-submit-btn');
+    if (badge) {
+      badge.className = 'eapp-uw-rail-badge done';
+      badge.innerHTML = '<i class="fas fa-check-circle"></i> UW Case Created';
+    }
+    var detailsEl = railCard.querySelector('.eapp-uw-rail-details');
+    if (detailsEl) {
+      var spans = detailsEl.querySelectorAll('span');
+      if (spans[1]) spans[1].innerHTML = '<i class="fas fa-tag"></i> ' + uwId;
+    }
+    if (submitBtn) {
+      submitBtn.className = 'eapp-uw-track-btn';
+      submitBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Track UW Case';
+      submitBtn.onclick = function() { navigateTo('underwriting'); };
+    }
+    railCard.classList.remove('pending-handoff');
+    railCard.classList.add('completed-handoff');
+  }
+  // Update the queue card status pill
+  document.querySelectorAll('#eapp-queue .eapp-card').forEach(function(card) {
+    if (card.textContent.includes(clientName)) {
+      var pill = card.querySelector('.eapp-status-pill');
+      if (pill) {
+        pill.className = 'eapp-status-pill status-received';
+        pill.innerHTML = '<i class="fas fa-check-double"></i> Received by Carrier';
+      }
+      var uwBtn = card.querySelector('.eapp-card-btn.uw-btn');
+      if (uwBtn) {
+        uwBtn.className = 'eapp-card-btn uw-active-btn';
+        uwBtn.innerHTML = '<i class="fas fa-microscope"></i> Track in UW';
+        uwBtn.onclick = function(e) { e.stopPropagation(); navigateTo('underwriting'); };
+      }
+    }
+  });
+  showToast(
+    'UW case ' + uwId + ' created for ' + (clientName || eaId) +
+    ' — transferred to Underwriting pipeline. STP scoring in progress.',
+    'success'
+  );
+}
+
+/* ── Spotlight search entries for E-App ── */
+(function() {
+  var orig = window.navigateTo;
+  // Already patched by later modules — just ensure eapp-submissions is in spotlight
+  if (window._spotlightEAppRegistered) return;
+  window._spotlightEAppRegistered = true;
+  // The spotlight data array is populated in the main app module.
+  // Add page entry here so keyboard shortcut / search picks it up.
+  if (window._spotlightItems) {
+    window._spotlightItems.push({
+      type: 'page',
+      label: 'E-App & Submissions',
+      sub: 'Insurance applications · AI prefill · Carrier submission · UW handoff',
+      action: function() { navigateTo('eapp-submissions'); }
+    });
+  }
+})();
+
+console.log('E-App & Submissions module loaded — Insurance workflow hub');

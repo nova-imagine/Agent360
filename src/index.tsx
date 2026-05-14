@@ -311,6 +311,7 @@ function MainApp() {
         <div id="tpl-adv-wealth"></div>
         <div id="tpl-adv-estate"></div>
         <div id="tpl-adv-smallbiz"></div>
+        <div id="tpl-eapp-submissions"><EAppSubmissionsPage /></div>
       </div>
 
       {/* ── Workflow Execution Modal ── */}
@@ -487,7 +488,7 @@ function Sidebar() {
           <i class="fas fa-flask"></i><span>Products &amp; Illustrations</span>
         </a>
         <a class="nav-item" onclick="navigateTo('sales')" href="#">
-          <i class="fas fa-file-signature"></i><span>E-App &amp; Proposals</span>
+          <i class="fas fa-route"></i><span>Sales Pipeline</span>
           <span class="nav-badge" style="background:#003087;color:#fff">2</span>
         </a>
         <a class="nav-item upsell-nav" onclick="navigateTo('upsell')" href="#">
@@ -500,6 +501,10 @@ function Sidebar() {
 
         {/* ── INSURANCE ── */}
         <div class="nav-section-label">INSURANCE</div>
+        <a class="nav-item eapp-submissions-nav" onclick="navigateTo('eapp-submissions')" href="#">
+          <i class="fas fa-file-signature"></i><span>E-App &amp; Submissions</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">2</span>
+        </a>
         <a class="nav-item" onclick="navigateTo('underwriting')" href="#">
           <i class="fas fa-microscope"></i><span>Underwriting</span>
           <span class="nav-badge" style="background:#0891b2;color:white">4</span>
@@ -7442,22 +7447,23 @@ function UnderwritingPage() {
         <button class="btn-uw-scan" onclick="runUWScan()"><i class="fas fa-sync-alt"></i> Run AI Scan</button>
       </div>
 
-      {/* ── AI Enrollment Automation Banner ── */}
-      <div class="eapp-uw-banner">
-        <div class="eapp-uw-banner-left">
-          <div class="eapp-uw-icon"><i class="fas fa-file-contract"></i></div>
+      {/* ── E-App Handoff Banner ── */}
+      <div class="uw-eapp-handoff-banner">
+        <div class="uw-eapp-handoff-left">
+          <i class="fas fa-file-signature uw-eapp-handoff-icon"></i>
           <div>
-            <div class="eapp-uw-title">AI Automated Enrollment Engine <span class="eapp-live-badge">LIVE</span></div>
-            <div class="eapp-uw-sub">Auto-prefills E-App forms using client profile, health data, and policy details · Reduces data entry by 87% · Average enrollment: 4 min (vs 35 min manual)</div>
+            <div class="uw-eapp-handoff-title">New application? Start in E-App &amp; Submissions</div>
+            <div class="uw-eapp-handoff-sub">AI auto-prefills the E-App · Submission creates this UW case automatically · 87% fields filled · avg 4 min</div>
           </div>
         </div>
-        <div class="eapp-uw-stats">
-          <div class="eapp-uw-stat"><span class="eapp-uw-val green">5</span><span class="eapp-uw-lbl">Auto-Prefilled</span></div>
-          <div class="eapp-uw-stat"><span class="eapp-uw-val blue">2</span><span class="eapp-uw-lbl">Awaiting Sig.</span></div>
-          <div class="eapp-uw-stat"><span class="eapp-uw-val gold">87%</span><span class="eapp-uw-lbl">Fields Auto-Filled</span></div>
-          <div class="eapp-uw-stat"><span class="eapp-uw-val cyan">4 min</span><span class="eapp-uw-lbl">Avg. Enrollment</span></div>
+        <div class="uw-eapp-handoff-stats">
+          <span class="uw-eapp-hs"><span class="uw-eapp-hs-val">2</span><span class="uw-eapp-hs-lbl">Awaiting Sig.</span></span>
+          <span class="uw-eapp-hs"><span class="uw-eapp-hs-val">5</span><span class="uw-eapp-hs-lbl">Pending Handoff</span></span>
         </div>
-        <button class="eapp-uw-launch-btn" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> New E-App</button>
+        <div class="uw-eapp-handoff-btns">
+          <button class="uw-eapp-hb-btn primary" onclick="navigateTo('eapp-submissions')"><i class="fas fa-file-signature"></i> E-App &amp; Submissions</button>
+          <button class="uw-eapp-hb-btn ghost" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> Quick New E-App</button>
+        </div>
       </div>
 
       {/* ── AI UW Intelligence Banner ── */}
@@ -14261,6 +14267,435 @@ function RetirementAccountsPage() {
       <div class="ra-gap-panel" id="ra-gap-panel" style="display:none">
         <div id="ra-gap-content"></div>
       </div>
+
+    </div>
+  )
+}
+
+function EAppSubmissionsPage() {
+  return (
+    <div class="page eapp-page">
+
+      {/* ── Page Header ── */}
+      <div class="eapp-page-header">
+        <div class="eapp-page-header-left">
+          <div class="eapp-page-icon"><i class="fas fa-file-signature"></i></div>
+          <div>
+            <h2 class="eapp-page-title">E-App &amp; Submissions</h2>
+            <p class="eapp-page-sub">AI-assisted applications · Carrier submission · Underwriting handoff · NAIC compliance</p>
+          </div>
+        </div>
+        <div class="eapp-page-header-right">
+          <button class="eapp-hdr-btn ghost" onclick="navigateTo('underwriting')"><i class="fas fa-microscope"></i> View Underwriting</button>
+          <button class="eapp-hdr-btn primary" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> New E-App</button>
+        </div>
+      </div>
+
+      {/* ── Zone 1: KPI Strip ── */}
+      <div class="eapp-kpi-strip">
+        <div class="eapp-kpi-card">
+          <div class="eapp-kpi-icon blue"><i class="fas fa-file-contract"></i></div>
+          <div class="eapp-kpi-body">
+            <div class="eapp-kpi-val">7</div>
+            <div class="eapp-kpi-lbl">Apps In Flight</div>
+            <div class="eapp-kpi-sub">Active this month</div>
+          </div>
+        </div>
+        <div class="eapp-kpi-card">
+          <div class="eapp-kpi-icon amber"><i class="fas fa-signature"></i></div>
+          <div class="eapp-kpi-body">
+            <div class="eapp-kpi-val">2</div>
+            <div class="eapp-kpi-lbl">Awaiting Signature</div>
+            <div class="eapp-kpi-sub eapp-kpi-warn">Action needed</div>
+          </div>
+        </div>
+        <div class="eapp-kpi-card">
+          <div class="eapp-kpi-icon green"><i class="fas fa-paper-plane"></i></div>
+          <div class="eapp-kpi-body">
+            <div class="eapp-kpi-val">12</div>
+            <div class="eapp-kpi-lbl">Submitted MTD</div>
+            <div class="eapp-kpi-sub eapp-kpi-up"><i class="fas fa-arrow-up"></i> +3 vs last month</div>
+          </div>
+        </div>
+        <div class="eapp-kpi-card">
+          <div class="eapp-kpi-icon cyan"><i class="fas fa-robot"></i></div>
+          <div class="eapp-kpi-body">
+            <div class="eapp-kpi-val">87%</div>
+            <div class="eapp-kpi-lbl">Avg AI Fill Rate</div>
+            <div class="eapp-kpi-sub eapp-kpi-up"><i class="fas fa-arrow-up"></i> vs 0% manual</div>
+          </div>
+        </div>
+        <div class="eapp-kpi-card">
+          <div class="eapp-kpi-icon teal"><i class="fas fa-stopwatch"></i></div>
+          <div class="eapp-kpi-body">
+            <div class="eapp-kpi-val">4 min</div>
+            <div class="eapp-kpi-lbl">Avg Submit Time</div>
+            <div class="eapp-kpi-sub eapp-kpi-up"><i class="fas fa-arrow-down"></i> vs 35 min manual</div>
+          </div>
+        </div>
+        <div class="eapp-kpi-card">
+          <div class="eapp-kpi-icon emerald"><i class="fas fa-check-double"></i></div>
+          <div class="eapp-kpi-body">
+            <div class="eapp-kpi-val">96%</div>
+            <div class="eapp-kpi-lbl">Carrier Accept Rate</div>
+            <div class="eapp-kpi-sub eapp-kpi-up"><i class="fas fa-arrow-up"></i> +2% vs industry avg</div>
+          </div>
+        </div>
+        <div class="eapp-kpi-card">
+          <div class="eapp-kpi-icon purple"><i class="fas fa-exchange-alt"></i></div>
+          <div class="eapp-kpi-body">
+            <div class="eapp-kpi-val">5</div>
+            <div class="eapp-kpi-lbl">Sent to Underwriting</div>
+            <div class="eapp-kpi-sub">This month</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Zone 2: AI Enrollment Engine Banner ── */}
+      <div class="eapp-ai-banner">
+        <div class="eapp-ai-banner-left">
+          <div class="eapp-ai-banner-icon">
+            <i class="fas fa-brain"></i>
+            <span class="eapp-ai-live-badge">LIVE</span>
+          </div>
+          <div class="eapp-ai-banner-info">
+            <div class="eapp-ai-banner-title">AI Automated Enrollment Engine <span class="eapp-ai-pulse"></span></div>
+            <div class="eapp-ai-banner-sub">Auto-prefills E-App forms using client profile, health data, FNA answers &amp; policy details · Reduces data entry by 87% · Avg enrollment: 4 min vs 35 min manual · NAIC-compliant suitability check on every submission</div>
+          </div>
+        </div>
+        <div class="eapp-ai-banner-stats">
+          <div class="eapp-ai-stat"><span class="eapp-ai-stat-val green">5</span><span class="eapp-ai-stat-lbl">Auto-Prefilled</span></div>
+          <div class="eapp-ai-stat"><span class="eapp-ai-stat-val amber">2</span><span class="eapp-ai-stat-lbl">Awaiting Sig.</span></div>
+          <div class="eapp-ai-stat"><span class="eapp-ai-stat-val blue">87%</span><span class="eapp-ai-stat-lbl">Fields Auto-Filled</span></div>
+          <div class="eapp-ai-stat"><span class="eapp-ai-stat-val cyan">4 min</span><span class="eapp-ai-stat-lbl">Avg Enrollment</span></div>
+        </div>
+        <button class="eapp-ai-launch-btn" onclick="openEApp('EA-NEW')"><i class="fas fa-plus"></i> New E-App</button>
+      </div>
+
+      {/* ── Zone 3: Active Applications Queue ── */}
+      <div class="eapp-section-header">
+        <div class="eapp-section-title"><i class="fas fa-layer-group"></i> Active Applications</div>
+        <div class="eapp-section-tools">
+          <div class="eapp-search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search by client or product…" oninput="filterEAppQueue(this.value)" />
+          </div>
+          <select class="eapp-filter-sel" onchange="filterEAppByStatus(this.value)">
+            <option value="">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="prefilling">AI Pre-filling</option>
+            <option value="sig">Awaiting Signature</option>
+            <option value="submitted">Submitted</option>
+            <option value="received">Received by Carrier</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="eapp-queue" id="eapp-queue">
+
+        {/* EA-001 — Awaiting Signature — HOT */}
+        <div class="eapp-card eapp-card-sig" onclick="openEApp('EA-001')">
+          <div class="eapp-card-alert-bar sig-bar"><i class="fas fa-signature"></i> E-Signature Pending — Act Today</div>
+          <div class="eapp-card-body">
+            <div class="eapp-card-left">
+              <div class="mini-avatar kp" style="width:38px;height:38px;font-size:13px;background:#003087;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">KP</div>
+              <div class="eapp-card-info">
+                <div class="eapp-card-client">Kevin Park</div>
+                <div class="eapp-card-product"><i class="fas fa-shield-alt"></i> Term Life — $500K · $1,800/yr</div>
+                <div class="eapp-card-meta">
+                  <span class="eapp-card-id">EA-001</span>
+                  <span class="eapp-card-carrier">Carrier: NYL</span>
+                  <span class="eapp-card-age warn"><i class="fas fa-clock"></i> 2d since sent</span>
+                </div>
+              </div>
+            </div>
+            <div class="eapp-card-center">
+              <div class="eapp-fill-bar-wrap">
+                <div class="eapp-fill-label"><i class="fas fa-robot"></i> AI Fill</div>
+                <div class="eapp-fill-track"><div class="eapp-fill-fill" style="width:95%;background:#059669"></div></div>
+                <div class="eapp-fill-pct">95%</div>
+              </div>
+              <div class="eapp-status-pill status-sig"><i class="fas fa-pen-nib"></i> Awaiting Signature</div>
+            </div>
+            <div class="eapp-card-right">
+              <button class="eapp-card-btn primary" onclick="event.stopPropagation();openEApp('EA-001')"><i class="fas fa-file-contract"></i> Open E-App</button>
+              <button class="eapp-card-btn ghost" onclick="event.stopPropagation();resendEAppSignature('EA-001')"><i class="fas fa-paper-plane"></i> Resend Sig.</button>
+            </div>
+          </div>
+        </div>
+
+        {/* EA-002 — Awaiting Signature */}
+        <div class="eapp-card eapp-card-sig" onclick="openEApp('EA-002')">
+          <div class="eapp-card-alert-bar sig-bar"><i class="fas fa-signature"></i> E-Signature Pending</div>
+          <div class="eapp-card-body">
+            <div class="eapp-card-left">
+              <div class="mini-avatar lm" style="width:38px;height:38px;font-size:13px;background:#7c3aed;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">LM</div>
+              <div class="eapp-card-info">
+                <div class="eapp-card-client">Linda Morrison</div>
+                <div class="eapp-card-product"><i class="fas fa-shield-alt"></i> Whole Life — $1M · $9,600/yr</div>
+                <div class="eapp-card-meta">
+                  <span class="eapp-card-id">EA-002</span>
+                  <span class="eapp-card-carrier">Carrier: NYL</span>
+                  <span class="eapp-card-age ok"><i class="fas fa-clock"></i> 1d since sent</span>
+                </div>
+              </div>
+            </div>
+            <div class="eapp-card-center">
+              <div class="eapp-fill-bar-wrap">
+                <div class="eapp-fill-label"><i class="fas fa-robot"></i> AI Fill</div>
+                <div class="eapp-fill-track"><div class="eapp-fill-fill" style="width:100%;background:#059669"></div></div>
+                <div class="eapp-fill-pct">100%</div>
+              </div>
+              <div class="eapp-status-pill status-sig"><i class="fas fa-pen-nib"></i> Awaiting Signature</div>
+            </div>
+            <div class="eapp-card-right">
+              <button class="eapp-card-btn primary" onclick="event.stopPropagation();openEApp('EA-002')"><i class="fas fa-file-contract"></i> Open E-App</button>
+              <button class="eapp-card-btn ghost" onclick="event.stopPropagation();resendEAppSignature('EA-002')"><i class="fas fa-paper-plane"></i> Resend Sig.</button>
+            </div>
+          </div>
+        </div>
+
+        {/* EA-003 — Submitted to Carrier */}
+        <div class="eapp-card eapp-card-submitted" onclick="openEApp('EA-003')">
+          <div class="eapp-card-body">
+            <div class="eapp-card-left">
+              <div class="mini-avatar ms" style="width:38px;height:38px;font-size:13px;background:#0891b2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">MS</div>
+              <div class="eapp-card-info">
+                <div class="eapp-card-client">Michael Santos</div>
+                <div class="eapp-card-product"><i class="fas fa-shield-alt"></i> Universal Life — $750K · $6,400/yr</div>
+                <div class="eapp-card-meta">
+                  <span class="eapp-card-id">EA-003</span>
+                  <span class="eapp-card-carrier">Carrier: NYL</span>
+                  <span class="eapp-card-age ok"><i class="fas fa-check-circle"></i> Submitted Apr 11</span>
+                </div>
+              </div>
+            </div>
+            <div class="eapp-card-center">
+              <div class="eapp-fill-bar-wrap">
+                <div class="eapp-fill-label"><i class="fas fa-robot"></i> AI Fill</div>
+                <div class="eapp-fill-track"><div class="eapp-fill-fill" style="width:87%;background:#0891b2"></div></div>
+                <div class="eapp-fill-pct">87%</div>
+              </div>
+              <div class="eapp-status-pill status-submitted"><i class="fas fa-paper-plane"></i> Submitted</div>
+            </div>
+            <div class="eapp-card-right">
+              <button class="eapp-card-btn uw-btn" onclick="event.stopPropagation();submitToUnderwriting('EA-003','Michael Santos')"><i class="fas fa-microscope"></i> Send to UW</button>
+              <button class="eapp-card-btn ghost" onclick="event.stopPropagation();openEApp('EA-003')"><i class="fas fa-eye"></i> View</button>
+            </div>
+          </div>
+        </div>
+
+        {/* EA-004 — Received by Carrier */}
+        <div class="eapp-card eapp-card-received" onclick="openEApp('EA-004')">
+          <div class="eapp-card-body">
+            <div class="eapp-card-left">
+              <div class="mini-avatar tw" style="width:38px;height:38px;font-size:13px;background:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">TW</div>
+              <div class="eapp-card-info">
+                <div class="eapp-card-client">Thomas Wright</div>
+                <div class="eapp-card-product"><i class="fas fa-shield-alt"></i> Whole Life — $1M · $9,600/yr</div>
+                <div class="eapp-card-meta">
+                  <span class="eapp-card-id">EA-004</span>
+                  <span class="eapp-card-carrier">Carrier: NYL</span>
+                  <span class="eapp-card-age ok"><i class="fas fa-check-double"></i> Received Apr 9 · UW Case: UW-2026-0015</span>
+                </div>
+              </div>
+            </div>
+            <div class="eapp-card-center">
+              <div class="eapp-fill-bar-wrap">
+                <div class="eapp-fill-label"><i class="fas fa-robot"></i> AI Fill</div>
+                <div class="eapp-fill-track"><div class="eapp-fill-fill" style="width:92%;background:#059669"></div></div>
+                <div class="eapp-fill-pct">92%</div>
+              </div>
+              <div class="eapp-status-pill status-received"><i class="fas fa-check-double"></i> Received by Carrier</div>
+            </div>
+            <div class="eapp-card-right">
+              <button class="eapp-card-btn uw-active-btn" onclick="event.stopPropagation();navigateTo('underwriting')"><i class="fas fa-microscope"></i> Track in UW</button>
+              <button class="eapp-card-btn ghost" onclick="event.stopPropagation();openEApp('EA-004')"><i class="fas fa-eye"></i> View</button>
+            </div>
+          </div>
+        </div>
+
+        {/* EA-005 — AI Pre-filling Draft */}
+        <div class="eapp-card eapp-card-prefilling" onclick="openEApp('EA-005')">
+          <div class="eapp-card-body">
+            <div class="eapp-card-left">
+              <div class="mini-avatar jc" style="width:38px;height:38px;font-size:13px;background:#d97706;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">JC</div>
+              <div class="eapp-card-info">
+                <div class="eapp-card-client">Julia Chen</div>
+                <div class="eapp-card-product"><i class="fas fa-umbrella-beach"></i> Deferred Annuity · $8,000/yr</div>
+                <div class="eapp-card-meta">
+                  <span class="eapp-card-id">EA-005</span>
+                  <span class="eapp-card-carrier">Carrier: NYL</span>
+                  <span class="eapp-card-age ok"><i class="fas fa-robot"></i> AI filling in progress…</span>
+                </div>
+              </div>
+            </div>
+            <div class="eapp-card-center">
+              <div class="eapp-fill-bar-wrap">
+                <div class="eapp-fill-label"><i class="fas fa-robot"></i> AI Fill</div>
+                <div class="eapp-fill-track eapp-fill-animated"><div class="eapp-fill-fill" style="width:62%;background:#d97706"></div></div>
+                <div class="eapp-fill-pct">62%</div>
+              </div>
+              <div class="eapp-status-pill status-prefilling"><i class="fas fa-spinner fa-spin"></i> AI Pre-filling</div>
+            </div>
+            <div class="eapp-card-right">
+              <button class="eapp-card-btn primary" onclick="event.stopPropagation();openEApp('EA-005')"><i class="fas fa-file-contract"></i> Review &amp; Complete</button>
+            </div>
+          </div>
+        </div>
+
+        {/* EA-006 — Draft */}
+        <div class="eapp-card eapp-card-draft" onclick="openEApp('EA-006')">
+          <div class="eapp-card-body">
+            <div class="eapp-card-left">
+              <div class="mini-avatar ar" style="width:38px;height:38px;font-size:13px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">AR</div>
+              <div class="eapp-card-info">
+                <div class="eapp-card-client">Alex Rivera</div>
+                <div class="eapp-card-product"><i class="fas fa-shield-alt"></i> Whole Life — $500K · $4,800/yr</div>
+                <div class="eapp-card-meta">
+                  <span class="eapp-card-id">EA-006</span>
+                  <span class="eapp-card-carrier">Carrier: NYL</span>
+                  <span class="eapp-card-age neutral"><i class="fas fa-edit"></i> Draft — Started Apr 10</span>
+                </div>
+              </div>
+            </div>
+            <div class="eapp-card-center">
+              <div class="eapp-fill-bar-wrap">
+                <div class="eapp-fill-label"><i class="fas fa-robot"></i> AI Fill</div>
+                <div class="eapp-fill-track"><div class="eapp-fill-fill" style="width:78%;background:#6366f1"></div></div>
+                <div class="eapp-fill-pct">78%</div>
+              </div>
+              <div class="eapp-status-pill status-draft"><i class="fas fa-pencil-alt"></i> Draft</div>
+            </div>
+            <div class="eapp-card-right">
+              <button class="eapp-card-btn primary" onclick="event.stopPropagation();openEApp('EA-006')"><i class="fas fa-play"></i> Resume</button>
+            </div>
+          </div>
+        </div>
+
+      </div>{/* end eapp-queue */}
+
+      {/* ── Zone 4: UW Handoff Rail ── */}
+      <div class="eapp-uw-rail">
+        <div class="eapp-uw-rail-header">
+          <div class="eapp-uw-rail-title"><i class="fas fa-arrow-right"></i> Underwriting Handoff</div>
+          <div class="eapp-uw-rail-sub">Submitted applications ready to be sent to Underwriting — one click creates the UW case</div>
+          <button class="eapp-uw-rail-view-btn" onclick="navigateTo('underwriting')"><i class="fas fa-microscope"></i> Open Underwriting</button>
+        </div>
+
+        <div class="eapp-uw-rail-cards">
+
+          {/* Pending handoff — EA-003 */}
+          <div class="eapp-uw-rail-card pending-handoff">
+            <div class="eapp-uw-rail-card-top">
+              <span class="eapp-uw-rail-badge pending"><i class="fas fa-hourglass-half"></i> Pending Handoff</span>
+              <span class="eapp-uw-rail-id">EA-003</span>
+            </div>
+            <div class="eapp-uw-rail-client">
+              <div class="mini-avatar ms2" style="width:30px;height:30px;font-size:11px;background:#0891b2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">MS</div>
+              <div>
+                <div class="eapp-uw-rail-name">Michael Santos</div>
+                <div class="eapp-uw-rail-product">Universal Life — $750K</div>
+              </div>
+            </div>
+            <div class="eapp-uw-rail-details">
+              <span><i class="fas fa-calendar-alt"></i> Submitted Apr 11</span>
+              <span><i class="fas fa-robot"></i> AI Fill: 87%</span>
+              <span><i class="fas fa-check-circle"></i> NAIC: Clear</span>
+            </div>
+            <button class="eapp-uw-submit-btn" onclick="submitToUnderwriting('EA-003','Michael Santos')">
+              <i class="fas fa-microscope"></i> Submit to Underwriting
+            </button>
+          </div>
+
+          {/* Completed handoff — EA-004 */}
+          <div class="eapp-uw-rail-card completed-handoff">
+            <div class="eapp-uw-rail-card-top">
+              <span class="eapp-uw-rail-badge done"><i class="fas fa-check-circle"></i> UW Case Created</span>
+              <span class="eapp-uw-rail-id">EA-004</span>
+            </div>
+            <div class="eapp-uw-rail-client">
+              <div class="mini-avatar tw2" style="width:30px;height:30px;font-size:11px;background:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">TW</div>
+              <div>
+                <div class="eapp-uw-rail-name">Thomas Wright</div>
+                <div class="eapp-uw-rail-product">Whole Life — $1M</div>
+              </div>
+            </div>
+            <div class="eapp-uw-rail-details">
+              <span><i class="fas fa-check-double"></i> Received Apr 9</span>
+              <span><i class="fas fa-tag"></i> UW-2026-0015</span>
+              <span><i class="fas fa-bolt"></i> STP Score: 84</span>
+            </div>
+            <button class="eapp-uw-track-btn" onclick="navigateTo('underwriting')">
+              <i class="fas fa-external-link-alt"></i> Track UW Case
+            </button>
+          </div>
+
+          {/* Completed handoff — EA-UW-009 */}
+          <div class="eapp-uw-rail-card completed-handoff">
+            <div class="eapp-uw-rail-card-top">
+              <span class="eapp-uw-rail-badge done"><i class="fas fa-check-circle"></i> UW Case Created</span>
+              <span class="eapp-uw-rail-id">EA-UW-009</span>
+            </div>
+            <div class="eapp-uw-rail-client">
+              <div class="mini-avatar jk3" style="width:30px;height:30px;font-size:11px;background:#003087;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">JK</div>
+              <div>
+                <div class="eapp-uw-rail-name">Julia Kim</div>
+                <div class="eapp-uw-rail-product">Whole Life — $500K</div>
+              </div>
+            </div>
+            <div class="eapp-uw-rail-details">
+              <span><i class="fas fa-check-double"></i> Received Apr 7</span>
+              <span><i class="fas fa-tag"></i> UW-2026-0009</span>
+              <span><i class="fas fa-bolt"></i> STP Score: 100 · AI 100%</span>
+            </div>
+            <button class="eapp-uw-track-btn" onclick="navigateTo('underwriting')">
+              <i class="fas fa-external-link-alt"></i> Track UW Case
+            </button>
+          </div>
+
+          {/* Completed handoff — EA-UW-008 */}
+          <div class="eapp-uw-rail-card completed-handoff">
+            <div class="eapp-uw-rail-card-top">
+              <span class="eapp-uw-rail-badge done"><i class="fas fa-check-circle"></i> UW Case Created</span>
+              <span class="eapp-uw-rail-id">EA-UW-008</span>
+            </div>
+            <div class="eapp-uw-rail-client">
+              <div class="mini-avatar gl2" style="width:30px;height:30px;font-size:11px;background:#7c3aed;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">GL</div>
+              <div>
+                <div class="eapp-uw-rail-name">Grace Lee</div>
+                <div class="eapp-uw-rail-product">VUL — $250K</div>
+              </div>
+            </div>
+            <div class="eapp-uw-rail-details">
+              <span><i class="fas fa-check-double"></i> Received Mar 26</span>
+              <span><i class="fas fa-tag"></i> UW-2026-0008</span>
+              <span><i class="fas fa-exclamation-triangle"></i> STP Score: 68 · APS Required</span>
+            </div>
+            <button class="eapp-uw-track-btn" onclick="navigateTo('underwriting')">
+              <i class="fas fa-external-link-alt"></i> Track UW Case
+            </button>
+          </div>
+
+        </div>{/* end eapp-uw-rail-cards */}
+
+        {/* Workflow legend */}
+        <div class="eapp-workflow-legend">
+          <div class="ewl-title">Insurance Application Workflow</div>
+          <div class="ewl-steps">
+            <div class="ewl-step done"><i class="fas fa-clipboard-list"></i><span>FNA Discovery</span></div>
+            <div class="ewl-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="ewl-step done"><i class="fas fa-flask"></i><span>Illustration</span></div>
+            <div class="ewl-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="ewl-step active"><i class="fas fa-file-signature"></i><span>E-App</span></div>
+            <div class="ewl-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="ewl-step next"><i class="fas fa-microscope"></i><span>Underwriting</span></div>
+            <div class="ewl-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="ewl-step next"><i class="fas fa-box-open"></i><span>Policy Delivery</span></div>
+          </div>
+        </div>
+
+      </div>{/* end eapp-uw-rail */}
 
     </div>
   )
