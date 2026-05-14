@@ -35230,3 +35230,721 @@ kbd {
   color: #374151;
   line-height: 1.5;
 }
+
+/* ================================================================
+   FNA PHASE 2B — Domain Badges · Wizard · Retirement · Advisory
+   ================================================================ */
+
+/* ── Domain badges (FNA card list + detail panel) ──────────────── */
+.fna-card-domains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.fna-domain-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.fna-domain-badge.ins { background: #dbeafe; color: #1e40af; }
+.fna-domain-badge.ret { background: #d1fae5; color: #065f46; }
+.fna-domain-badge.adv { background: #ede9fe; color: #5b21b6; }
+
+/* ── FNA detail domain row ────────────────────────────────────── */
+.fna-detail-domain-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0 4px;
+  margin-bottom: 4px;
+}
+
+/* ── Domain cards in detail panel ────────────────────────────── */
+.fnd-domain-card {
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 14px 16px;
+  margin: 8px 0;
+  background: #f9fafb;
+}
+.fnd-dc-ret  { border-left: 4px solid #059669; background: #f0fdf4; }
+.fnd-dc-adv  { border-left: 4px solid #7c3aed; background: #faf5ff; }
+.fnd-dc-urgent { border-left: 4px solid #dc2626; background: #fff5f5; }
+
+.fnd-dc-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fnd-dc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+  margin-bottom: 10px;
+}
+.fnd-dc-gap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+.fnd-dc-gap-lbl { font-size: 12px; font-weight: 600; color: #374151; }
+.fnd-dc-gap-val { font-size: 15px; font-weight: 800; color: #374151; }
+.fnd-dc-gap-hi  { color: #dc2626 !important; }
+
+.fnd-dc-ai-note {
+  font-size: 11px;
+  color: #374151;
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-left: 3px solid #059669;
+  border-radius: 6px;
+  padding: 8px 10px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.fnd-dc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #003087;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.fnd-dc-btn:hover { background: #001f5c; }
+
+/* ── Wizard step indicator ───────────────────────────────────── */
+.fna-wizard-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0 0 24px;
+}
+.fna-wiz-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+  min-width: 90px;
+}
+.fna-wiz-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  background: #f9fafb;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+}
+.fna-wiz-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-align: center;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  transition: color .2s;
+}
+.fna-wiz-line {
+  flex: 1;
+  height: 2px;
+  background: #e5e7eb;
+  margin-bottom: 14px;
+  min-width: 40px;
+  max-width: 80px;
+  transition: background .2s;
+}
+.fna-wiz-step.active .fna-wiz-num {
+  border-color: #003087;
+  background: #003087;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(0,48,135,.15);
+}
+.fna-wiz-step.active .fna-wiz-lbl { color: #003087; }
+.fna-wiz-step.done .fna-wiz-num {
+  border-color: #059669;
+  background: #059669;
+  color: #fff;
+}
+.fna-wiz-step.done .fna-wiz-lbl { color: #059669; }
+
+/* ── Wizard panels ──────────────────────────────────────────── */
+.fna-wiz-panel { display: none; animation: fnaWizIn .22s ease; }
+.fna-wiz-panel:first-child { display: block; }
+@keyframes fnaWizIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fna-wiz-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.fna-wiz-sep {
+  text-align: center;
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 600;
+  margin: 10px 0;
+  position: relative;
+}
+.fna-wiz-sep::before, .fna-wiz-sep::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #e5e7eb;
+}
+.fna-wiz-sep::before { left: 0; }
+.fna-wiz-sep::after  { right: 0; }
+
+/* ── Domain selector cards (wizard step 2) ───────────────────── */
+.fna-domain-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+.fna-domain-card {
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 12px;
+  cursor: pointer;
+  background: #fff;
+  transition: all .18s;
+  position: relative;
+  user-select: none;
+}
+.fna-domain-card:hover { border-color: #93c5fd; background: #eff6ff; }
+.fna-domain-card.selected { border-color: #003087; background: #eff6ff; box-shadow: 0 0 0 3px rgba(0,48,135,.12); }
+.fna-domain-card.selected .fna-dom-title { color: #003087; }
+.fna-dom-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.fna-dom-body {}
+.fna-dom-title { font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+.fna-dom-sub   { font-size: 11px; color: #6b7280; line-height: 1.4; margin-bottom: 8px; }
+.fna-dom-tags  { display: flex; flex-wrap: wrap; gap: 4px; }
+.fna-dom-tag {
+  font-size: 9px;
+  font-weight: 600;
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 10px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.fna-dom-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: transparent;
+  transition: all .15s;
+}
+.fna-domain-card.selected .fna-dom-check {
+  border-color: #003087;
+  background: #003087;
+  color: #fff;
+}
+.fna-dom-none-row {
+  text-align: center;
+  font-size: 12px;
+  color: #d97706;
+  padding: 6px 0 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* ── Editor header domain pills ─────────────────────────────── */
+.fna-ed-header-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.fna-ed-domain-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.fna-ed-pill-ins { background: #dbeafe; color: #1e40af; }
+.fna-ed-pill-ret { background: #d1fae5; color: #065f46; }
+.fna-ed-pill-adv { background: #ede9fe; color: #5b21b6; }
+
+/* ================================================================
+   RETIREMENT SECTION (Tab 4)
+   ================================================================ */
+
+/* ── Income gap banner ──────────────────────────────────────── */
+.fna-ret-gap-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border: 1px solid #e5e7eb;
+}
+.fna-ret-gap-high   { background: #fff5f5; border-color: #fca5a5; }
+.fna-ret-gap-med    { background: #fffbeb; border-color: #fcd34d; }
+.fna-ret-gap-low    { background: #f0fdf4; border-color: #6ee7b7; }
+
+.fna-ret-gap-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.fna-ret-gap-high .fna-ret-gap-icon { color: #dc2626; }
+.fna-ret-gap-med  .fna-ret-gap-icon { color: #d97706; }
+.fna-ret-gap-low  .fna-ret-gap-icon { color: #059669; }
+
+.fna-ret-gap-title  { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: #6b7280; margin-bottom: 2px; }
+.fna-ret-gap-amount { font-size: 22px; font-weight: 800; color: #111827; line-height: 1.1; }
+.fna-ret-gap-sub    { font-size: 11px; color: #6b7280; margin-top: 3px; }
+
+/* ── Rollover assets bar chart ───────────────────────────────── */
+.fna-ret-rollover-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 90px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.fna-ret-rollover-lbl {
+  font-size: 12px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fna-ret-rollover-lbl i { color: #0891b2; width: 14px; }
+.fna-ret-rollover-bar-wrap {
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.fna-ret-rollover-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #0891b2, #06b6d4);
+  border-radius: 5px;
+  transition: width .4s ease;
+}
+.fna-ret-rollover-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+  text-align: right;
+}
+.fna-ret-rollover-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+  padding-top: 8px;
+  border-top: 2px solid #e5e7eb;
+  margin-top: 4px;
+}
+.fna-ret-empty {
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* ── Annuity chip selector ───────────────────────────────────── */
+.fna-ret-annuity-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.fna-ret-annuity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  cursor: pointer;
+  color: #374151;
+  transition: all .15s;
+}
+.fna-ret-annuity-chip:hover { border-color: #93c5fd; background: #eff6ff; }
+.fna-ret-annuity-chip.active {
+  border-color: #003087;
+  background: #003087;
+  color: #fff;
+}
+
+/* ── Income gap calculator ───────────────────────────────────── */
+.fna-ret-calc-card { background: #f8faff; border-color: #c7d2fe; }
+.fna-ret-calc-rows { margin-bottom: 12px; }
+.fna-ret-calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 6px;
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+.fna-ret-calc-lbl { color: #374151; display: flex; align-items: center; gap: 7px; }
+.fna-ret-calc-val { font-weight: 700; color: #111827; }
+.fna-ret-calc-deduct { background: #fff; }
+.fna-ret-calc-deduct .fna-ret-calc-lbl { color: #6b7280; }
+.fna-ret-calc-deduct .fna-ret-calc-val { color: #059669; }
+.fna-ret-calc-total {
+  background: #003087;
+  color: #fff !important;
+  border-radius: 8px;
+  margin-top: 6px;
+  padding: 10px 12px;
+}
+.fna-ret-calc-total .fna-ret-calc-lbl { color: #bfdbfe; }
+.fna-ret-calc-total .fna-ret-calc-val { color: #fff; font-size: 16px; }
+.fna-ret-calc-gap { font-size: 18px !important; font-weight: 800 !important; }
+.fna-ret-calc-cta { text-align: center; margin-top: 4px; }
+
+/* ── Social Security note ────────────────────────────────────── */
+.fna-ret-ss-note {
+  font-size: 11px;
+  color: #0369a1;
+  background: #e0f2fe;
+  border-radius: 5px;
+  padding: 6px 10px;
+  margin-top: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+/* ── AI retirement note card ─────────────────────────────────── */
+.fna-ret-ai-card {
+  display: flex;
+  gap: 12px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e8f5e9 100%);
+  border: 1px solid #b2dfdb;
+  border-left: 4px solid #059669;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 8px;
+}
+.fna-ret-ai-icon {
+  font-size: 20px;
+  color: #059669;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.fna-ret-ai-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: #065f46;
+  margin-bottom: 5px;
+}
+.fna-ret-ai-text {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* ================================================================
+   INVESTMENT & ADVISORY SECTION (Tab 5)
+   ================================================================ */
+
+/* ── Risk tolerance bar ─────────────────────────────────────── */
+.fna-inv-risk-bar-wrap { margin-bottom: 10px; }
+.fna-inv-risk-bar {
+  position: relative;
+  height: 10px;
+  background: linear-gradient(90deg, #059669, #0891b2, #d97706, #7c3aed, #dc2626);
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.fna-inv-risk-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: rgba(0,0,0,.15);
+  border-radius: 5px 0 0 5px;
+}
+.fna-inv-risk-thumb {
+  position: absolute;
+  top: -3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #003087;
+  transform: translateX(-50%);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+.fna-inv-risk-labels {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.fna-inv-risk-chip {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  color: #6b7280;
+  background: #f9fafb;
+  text-align: center;
+  cursor: default;
+}
+.fna-inv-risk-chip.active {
+  background: #003087;
+  border-color: #003087;
+  color: #fff;
+}
+.fna-inv-risk-score-row {
+  font-size: 12px;
+  color: #374151;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Investable assets bar chart ─────────────────────────────── */
+.fna-inv-asset-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 110px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.fna-inv-asset-lbl {
+  font-size: 12px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fna-inv-asset-bar-wrap {
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.fna-inv-asset-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width .4s ease;
+}
+.fna-inv-asset-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+  text-align: right;
+}
+.fna-inv-asset-pct { font-weight: 400; color: #6b7280; font-size: 10px; }
+.fna-inv-asset-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  padding-top: 8px;
+  border-top: 2px solid #e5e7eb;
+  margin-top: 4px;
+}
+
+/* ── SMA/UMA threshold block ─────────────────────────────────── */
+.fna-adv-threshold-block { display: flex; flex-direction: column; gap: 10px; }
+.fna-adv-thresh-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+}
+.fna-adv-thresh-lbl { font-size: 11px; font-weight: 700; color: #374151; }
+.fna-adv-thresh-bar-wrap {
+  position: relative;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: visible;
+}
+.fna-adv-thresh-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #003087, #0891b2);
+  border-radius: 4px;
+  transition: width .4s;
+}
+.fna-adv-thresh-bar-lbl {
+  font-size: 9px;
+  color: #6b7280;
+  margin-top: 3px;
+}
+.fna-adv-thresh-status {
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fna-adv-thresh-yes { color: #059669; }
+.fna-adv-thresh-no  { color: #6b7280; }
+.fna-adv-thresh-note {
+  font-size: 11px;
+  color: #374151;
+  background: #fff;
+  border: 1px solid #e0e7ff;
+  border-left: 3px solid #6366f1;
+  border-radius: 5px;
+  padding: 7px 10px;
+  line-height: 1.5;
+  display: flex;
+  gap: 5px;
+}
+
+/* ── Estate planning checklist ──────────────────────────────── */
+.fna-adv-estate-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.fna-adv-estate-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 7px;
+  padding: 9px 12px;
+  border: 1px solid;
+  font-size: 12px;
+}
+.fna-adv-estate-item.done    { background: #f0fdf4; border-color: #6ee7b7; color: #065f46; }
+.fna-adv-estate-item.missing { background: #fef2f2; border-color: #fca5a5; color: #7f1d1d; }
+.fna-adv-estate-item i { font-size: 14px; flex-shrink: 0; }
+.fna-adv-estate-item.done i    { color: #059669; }
+.fna-adv-estate-item.missing i { color: #dc2626; }
+.fna-adv-estate-lbl {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.fna-adv-estate-status { font-size: 10px; opacity: .75; }
+
+/* ── Business section ────────────────────────────────────────── */
+.fna-adv-biz-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.fna-adv-biz-note {
+  font-size: 11px;
+  color: #0369a1;
+  background: #e0f2fe;
+  border-radius: 5px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fna-adv-biz-notowner {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  font-style: italic;
+}
+
+/* ── AI advisory / investment note blocks ───────────────────── */
+.fna-adv-ai-block {
+  display: flex;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  border: 1px solid;
+}
+.fna-adv-ai-inv { background: #eff6ff; border-color: #bfdbfe; border-left: 4px solid #0891b2; }
+.fna-adv-ai-adv { background: #faf5ff; border-color: #ddd6fe; border-left: 4px solid #7c3aed; }
+.fna-adv-ai-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.fna-adv-ai-inv .fna-adv-ai-icon { color: #0891b2; }
+.fna-adv-ai-adv .fna-adv-ai-icon { color: #7c3aed; }
+.fna-adv-ai-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: 4px;
+}
+.fna-adv-ai-inv .fna-adv-ai-title { color: #0369a1; }
+.fna-adv-ai-adv .fna-adv-ai-title { color: #5b21b6; }
+.fna-adv-ai-text {
+  font-size: 11px;
+  color: #374151;
+  line-height: 1.55;
+}

@@ -13303,7 +13303,7 @@ function FNADiscoveryPage() {
       <div class="fna-phase-bar">
         <div class="fna-phase active" onclick="switchFNAPhase('discovery',this)">
           <div class="fna-phase-num">1</div>
-          <div class="fna-phase-body"><div class="fna-phase-title">Prospect Discovery</div><div class="fna-phase-sub">Lead qualification · PMAIL</div></div>
+          <div class="fna-phase-body"><div class="fna-phase-title">Discovery</div><div class="fna-phase-sub">Qualify · domains · life event</div></div>
         </div>
         <div class="fna-phase-arrow"><i class="fas fa-chevron-right"></i></div>
         <div class="fna-phase" onclick="switchFNAPhase('factfind',this)">
@@ -13311,19 +13311,19 @@ function FNADiscoveryPage() {
           <div class="fna-phase-body"><div class="fna-phase-title">Fact-Find</div><div class="fna-phase-sub">Personal · health · financial</div></div>
         </div>
         <div class="fna-phase-arrow"><i class="fas fa-chevron-right"></i></div>
-        <div class="fna-phase" onclick="switchFNAPhase('gap',this)">
+        <div class="fna-phase" onclick="switchFNAPhase('needs',this)">
           <div class="fna-phase-num">3</div>
-          <div class="fna-phase-body"><div class="fna-phase-title">Gap Analysis</div><div class="fna-phase-sub">AI coverage gap calc</div></div>
+          <div class="fna-phase-body"><div class="fna-phase-title">Needs Analysis</div><div class="fna-phase-sub">Gaps · goals · income sizing</div></div>
         </div>
         <div class="fna-phase-arrow"><i class="fas fa-chevron-right"></i></div>
-        <div class="fna-phase" onclick="switchFNAPhase('recommend',this)">
+        <div class="fna-phase" onclick="switchFNAPhase('proposal',this)">
           <div class="fna-phase-num">4</div>
-          <div class="fna-phase-body"><div class="fna-phase-title">AI Recommendation</div><div class="fna-phase-sub">Product + face amount</div></div>
+          <div class="fna-phase-body"><div class="fna-phase-title">AI Proposal</div><div class="fna-phase-sub">Product · portfolio · plan</div></div>
         </div>
         <div class="fna-phase-arrow"><i class="fas fa-chevron-right"></i></div>
-        <div class="fna-phase" onclick="switchFNAPhase('illustration',this)">
+        <div class="fna-phase" onclick="switchFNAPhase('nextstep',this)">
           <div class="fna-phase-num">5</div>
-          <div class="fna-phase-body"><div class="fna-phase-title">Run Illustration</div><div class="fna-phase-sub">→ E-App submission</div></div>
+          <div class="fna-phase-body"><div class="fna-phase-title">Next Step</div><div class="fna-phase-sub">Illustration · proposal · e-app</div></div>
         </div>
       </div>
 
@@ -13337,15 +13337,18 @@ function FNADiscoveryPage() {
             <input type="text" class="fna-search" placeholder="Search client…" oninput="filterFNAs(this.value)" />
           </div>
           <div class="fna-list" id="fna-list">
-            {/* FNA Card 1 */}
+            {/* FNA Card 1 — Insurance only */}
             <div class="fna-card fna-card-active" onclick="openFNADetail('FNA-001')" data-id="FNA-001">
               <div class="fna-card-top">
                 <div class="fna-avatar fna-av-ar">AR</div>
                 <div class="fna-card-meta">
                   <div class="fna-card-name">Alex Rivera</div>
-                  <div class="fna-card-sub">Executive · Age 34 · Phase 3 of 5</div>
+                  <div class="fna-card-sub">VP Technology · Age 34 · Phase 3 of 5</div>
                 </div>
                 <span class="fna-status-pill gap">Gap Found</span>
+              </div>
+              <div class="fna-card-domains">
+                <span class="fna-domain-badge ins"><i class="fas fa-shield-alt"></i> Insurance</span>
               </div>
               <div class="fna-card-progress">
                 <div class="fna-prog-bar"><div class="fna-prog-fill" style="width:60%"></div></div>
@@ -13360,7 +13363,7 @@ function FNADiscoveryPage() {
                 <button class="fna-foot-btn" onclick="event.stopPropagation();continueFNA('FNA-001')">Continue <i class="fas fa-arrow-right"></i></button>
               </div>
             </div>
-            {/* FNA Card 2 */}
+            {/* FNA Card 2 — Insurance + Retirement */}
             <div class="fna-card" onclick="openFNADetail('FNA-002')" data-id="FNA-002">
               <div class="fna-card-top">
                 <div class="fna-avatar fna-av-nf">NF</div>
@@ -13369,6 +13372,10 @@ function FNADiscoveryPage() {
                   <div class="fna-card-sub">Healthcare Director · Age 41 · Phase 2 of 5</div>
                 </div>
                 <span class="fna-status-pill progress">In Progress</span>
+              </div>
+              <div class="fna-card-domains">
+                <span class="fna-domain-badge ins"><i class="fas fa-shield-alt"></i> Insurance</span>
+                <span class="fna-domain-badge ret"><i class="fas fa-umbrella-beach"></i> Retirement</span>
               </div>
               <div class="fna-card-progress">
                 <div class="fna-prog-bar"><div class="fna-prog-fill" style="width:40%"></div></div>
@@ -13383,7 +13390,7 @@ function FNADiscoveryPage() {
                 <button class="fna-foot-btn" onclick="event.stopPropagation();continueFNA('FNA-002')">Continue <i class="fas fa-arrow-right"></i></button>
               </div>
             </div>
-            {/* FNA Card 3 */}
+            {/* FNA Card 3 — Insurance + Retirement + Advisory */}
             <div class="fna-card" onclick="openFNADetail('FNA-003')" data-id="FNA-003">
               <div class="fna-card-top">
                 <div class="fna-avatar fna-av-pn">PN</div>
@@ -13393,13 +13400,18 @@ function FNADiscoveryPage() {
                 </div>
                 <span class="fna-status-pill urgent">Urgent Gap</span>
               </div>
+              <div class="fna-card-domains">
+                <span class="fna-domain-badge ins"><i class="fas fa-shield-alt"></i> Insurance</span>
+                <span class="fna-domain-badge ret"><i class="fas fa-umbrella-beach"></i> Retirement</span>
+                <span class="fna-domain-badge adv"><i class="fas fa-handshake"></i> Advisory</span>
+              </div>
               <div class="fna-card-progress">
                 <div class="fna-prog-bar"><div class="fna-prog-fill urgent" style="width:80%"></div></div>
                 <span class="fna-prog-lbl">80% complete</span>
               </div>
               <div class="fna-card-chips">
-                <span class="fna-chip warn"><i class="fas fa-exclamation-circle"></i> $240K income gap</span>
-                <span class="fna-chip ins"><i class="fas fa-shield-alt"></i> UL top-up needed</span>
+                <span class="fna-chip warn"><i class="fas fa-exclamation-circle"></i> UL lapse risk</span>
+                <span class="fna-chip ret"><i class="fas fa-umbrella-beach"></i> Annuity gap</span>
               </div>
               <div class="fna-card-footer">
                 <span class="fna-foot-date"><i class="fas fa-clock"></i> Updated today</span>
@@ -13451,40 +13463,189 @@ function FNADiscoveryPage() {
 
       </div>
 
-      {/* New FNA Modal */}
+      {/* New FNA Modal — 3-step wizard */}
       <div id="new-fna-overlay" class="fna-overlay" style="display:none" onclick="closeFNAOverlay(event)">
-        <div class="fna-modal" onclick="event.stopPropagation()">
+        <div class="fna-modal fna-modal-wide" onclick="event.stopPropagation()">
           <div class="fna-modal-header">
             <div class="fna-modal-title"><i class="fas fa-clipboard-list"></i> New Financial Needs Analysis</div>
             <button class="fna-modal-close" onclick="closeFNAOverlay()"><i class="fas fa-times"></i></button>
           </div>
+          {/* Wizard step indicator */}
+          <div class="fna-wizard-steps">
+            <div class="fna-wiz-step active" id="fna-wiz-s1"><span class="fna-wiz-num">1</span><span class="fna-wiz-lbl">Client</span></div>
+            <div class="fna-wiz-line"></div>
+            <div class="fna-wiz-step" id="fna-wiz-s2"><span class="fna-wiz-num">2</span><span class="fna-wiz-lbl">Domains</span></div>
+            <div class="fna-wiz-line"></div>
+            <div class="fna-wiz-step" id="fna-wiz-s3"><span class="fna-wiz-num">3</span><span class="fna-wiz-lbl">Life Event</span></div>
+          </div>
           <div class="fna-modal-body" id="new-fna-body">
+
             {/* Step 1 — Client Selection */}
-            <div class="fna-step" id="fna-step-1">
-              <div class="fna-step-label">Step 1 of 5 — Client / Prospect</div>
+            <div class="fna-wiz-panel" id="fna-wiz-panel-1">
+              <div class="fna-step-label">Step 1 of 3 — Select Client or Prospect</div>
               <div class="fna-field-group">
-                <label class="fna-label">Select existing client or prospect</label>
-                <select class="fna-select">
+                <label class="fna-label">Choose from existing CRM records</label>
+                <select class="fna-select" id="fna-wiz-client-select">
                   <option value="">— Choose client / prospect —</option>
-                  <option>Alex Rivera (Lead)</option>
-                  <option>Nancy Foster (Lead)</option>
-                  <option>James Whitfield (Client)</option>
-                  <option>Patricia Nguyen (Client)</option>
-                  <option>Robert Chen (Client)</option>
+                  <option value="alex">Alex Rivera (Lead — In Campaign)</option>
+                  <option value="nancy">Nancy Foster (Lead — Qualified)</option>
+                  <option value="patricia">Patricia Nguyen (Client — Active)</option>
+                  <option value="james">James Whitfield (Client — Active)</option>
+                  <option value="robert">Robert Chen (Client — Active)</option>
+                  <option value="diana">Diana Walsh (Lead — Responded)</option>
+                  <option value="thomas">Thomas Grant (Lead — Responded)</option>
                 </select>
-                <div class="fna-or-line"><span>or</span></div>
-                <label class="fna-label">New prospect name</label>
-                <input type="text" class="fna-input" placeholder="Full name" />
+                <div class="fna-or-line"><span>or enter manually</span></div>
+                <div class="fna-wiz-name-row">
+                  <div class="fna-field-group" style="flex:1">
+                    <label class="fna-label">First Name</label>
+                    <input type="text" class="fna-input" id="fna-wiz-fname" placeholder="First name" />
+                  </div>
+                  <div class="fna-field-group" style="flex:1">
+                    <label class="fna-label">Last Name</label>
+                    <input type="text" class="fna-input" id="fna-wiz-lname" placeholder="Last name" />
+                  </div>
+                  <div class="fna-field-group" style="flex:1">
+                    <label class="fna-label">Age</label>
+                    <input type="number" class="fna-input" id="fna-wiz-age" placeholder="Age" min="18" max="99" />
+                  </div>
+                </div>
               </div>
               <div class="fna-step-actions">
-                <button class="btn btn-primary" onclick="fnaNextStep(2)">Next — Personal Info <i class="fas fa-arrow-right"></i></button>
+                <div></div>
+                <button class="btn btn-primary" onclick="fnaWizNext(2)">Next — Select Domains <i class="fas fa-arrow-right"></i></button>
               </div>
             </div>
+
+            {/* Step 2 — Domain Selector */}
+            <div class="fna-wiz-panel" id="fna-wiz-panel-2" style="display:none">
+              <div class="fna-step-label">Step 2 of 3 — Select Product Domains</div>
+              <p class="fna-wiz-hint">Select all domains relevant to this client. The FNA fact-find sections will be tailored to match. You can update this at any time.</p>
+              <div class="fna-domain-grid">
+
+                <div class="fna-domain-card" id="fna-dom-insurance" onclick="fnaToggleDomain('insurance',this)">
+                  <div class="fna-dom-icon" style="background:#003087"><i class="fas fa-shield-alt"></i></div>
+                  <div class="fna-dom-body">
+                    <div class="fna-dom-title">Insurance</div>
+                    <div class="fna-dom-sub">Life · Term · Whole · UL · DI · LTC</div>
+                    <div class="fna-dom-tags">
+                      <span>Term Life</span><span>Whole Life</span><span>Universal Life</span><span>Disability Income</span><span>Long-Term Care</span>
+                    </div>
+                  </div>
+                  <div class="fna-dom-check"><i class="fas fa-check-circle"></i></div>
+                </div>
+
+                <div class="fna-domain-card" id="fna-dom-retirement" onclick="fnaToggleDomain('retirement',this)">
+                  <div class="fna-dom-icon" style="background:#0891b2"><i class="fas fa-umbrella-beach"></i></div>
+                  <div class="fna-dom-body">
+                    <div class="fna-dom-title">Retirement</div>
+                    <div class="fna-dom-sub">Annuities · 401K rollover · income planning</div>
+                    <div class="fna-dom-tags">
+                      <span>Deferred Annuity</span><span>Immediate Annuity</span><span>Fixed Indexed</span><span>Variable Annuity</span><span>401K Rollover</span>
+                    </div>
+                  </div>
+                  <div class="fna-dom-check"><i class="fas fa-check-circle"></i></div>
+                </div>
+
+                <div class="fna-domain-card" id="fna-dom-advisory" onclick="fnaToggleDomain('advisory',this)">
+                  <div class="fna-dom-icon" style="background:#7c3aed"><i class="fas fa-handshake"></i></div>
+                  <div class="fna-dom-body">
+                    <div class="fna-dom-title">Advisory</div>
+                    <div class="fna-dom-sub">Wealth Management · Estate Planning · Small Business</div>
+                    <div class="fna-dom-tags">
+                      <span>Rep Advisory</span><span>SMA</span><span>UMA</span><span>Estate Planning</span><span>Buy-Sell</span><span>Key Person</span>
+                    </div>
+                  </div>
+                  <div class="fna-dom-check"><i class="fas fa-check-circle"></i></div>
+                </div>
+
+              </div>
+              <div class="fna-dom-none-row">
+                <i class="fas fa-info-circle"></i> Select at least one domain to proceed. You can add domains later as the client relationship develops.
+              </div>
+              <div class="fna-step-actions">
+                <button class="btn btn-secondary" onclick="fnaWizNext(1)"><i class="fas fa-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="fnaWizNext(3)">Next — Life Event <i class="fas fa-arrow-right"></i></button>
+              </div>
+            </div>
+
+            {/* Step 3 — Life Event + Meeting */}
+            <div class="fna-wiz-panel" id="fna-wiz-panel-3" style="display:none">
+              <div class="fna-step-label">Step 3 of 3 — Life Event Trigger &amp; Meeting Details</div>
+              <div class="fna-field-group">
+                <label class="fna-label">Life Event Trigger <span style="color:#6b7280;font-weight:400">(primary reason for FNA)</span></label>
+                <select class="fna-select" id="fna-wiz-event">
+                  <option value="">— Select life event —</option>
+                  <optgroup label="Family">
+                    <option>New Baby / Expecting</option>
+                    <option>Marriage / Domestic Partnership</option>
+                    <option>Divorce / Separation</option>
+                    <option>Death of Spouse / Dependent</option>
+                    <option>Children approaching college age</option>
+                    <option>Adult children becoming independent</option>
+                  </optgroup>
+                  <optgroup label="Financial">
+                    <option>Home Purchase / Mortgage</option>
+                    <option>Career Promotion / Income Increase</option>
+                    <option>Job Change / Income Event</option>
+                    <option>Business Sale / Liquidity Event</option>
+                    <option>Inheritance / Windfall</option>
+                    <option>CD / Investment maturing</option>
+                  </optgroup>
+                  <optgroup label="Retirement">
+                    <option>Approaching Retirement (5–10 yrs)</option>
+                    <option>Retirement Planning Review</option>
+                    <option>401K Rollover Needed</option>
+                    <option>Social Security Timing Decision</option>
+                  </optgroup>
+                  <optgroup label="Business">
+                    <option>New Business Owner</option>
+                    <option>Partnership / Buy-Sell Need</option>
+                    <option>Key Person Insurance Review</option>
+                    <option>Business Succession Planning</option>
+                  </optgroup>
+                  <optgroup label="Other">
+                    <option>Annual Review / Portfolio Check</option>
+                    <option>Existing Policy Review / Lapse Risk</option>
+                    <option>Estate Planning Review</option>
+                    <option>Referral — General Review</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="fna-wiz-name-row">
+                <div class="fna-field-group" style="flex:1">
+                  <label class="fna-label">Meeting Date</label>
+                  <input type="text" class="fna-input" id="fna-wiz-meeting-date" placeholder="Apr 20, 2026" />
+                </div>
+                <div class="fna-field-group" style="flex:1">
+                  <label class="fna-label">Meeting Type</label>
+                  <select class="fna-select" id="fna-wiz-meeting-type">
+                    <option>In-Person</option>
+                    <option>Virtual (Zoom)</option>
+                    <option>Virtual (Teams)</option>
+                    <option>Phone Call</option>
+                  </select>
+                </div>
+                <div class="fna-field-group" style="flex:1.5">
+                  <label class="fna-label">Location / Link</label>
+                  <input type="text" class="fna-input" id="fna-wiz-meeting-loc" placeholder="NYL Office / Zoom link" />
+                </div>
+              </div>
+              <div class="fna-field-group">
+                <label class="fna-label">Initial Notes <span style="color:#6b7280;font-weight:400">(optional)</span></label>
+                <textarea class="fna-input" id="fna-wiz-notes" rows="3" placeholder="Key concerns, referral context, what client mentioned before the meeting…" style="resize:vertical"></textarea>
+              </div>
+              <div class="fna-step-actions">
+                <button class="btn btn-secondary" onclick="fnaWizNext(2)"><i class="fas fa-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="fnaWizCreate()"><i class="fas fa-clipboard-list"></i> Create FNA &amp; Open Fact-Find</button>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
 
-      {/* ── FNA EDITOR OVERLAY ── full 4-section fact-find modal */}
+      {/* ── FNA EDITOR OVERLAY ── full 6-section fact-find modal */}
       <div id="fna-editor-overlay" class="fna-editor-overlay" style="display:none" onclick="_closeFNAEditorBg(event)">
         <div class="fna-ed-modal" onclick="event.stopPropagation()">
           {/* Modal header */}
@@ -13493,27 +13654,34 @@ function FNADiscoveryPage() {
               <i class="fas fa-clipboard-list"></i>
               <span id="fna-ed-title">Financial Needs Analysis — Fact-Find</span>
             </div>
+            <div class="fna-ed-header-center">
+              {/* Domain pills rendered by JS into this container */}
+              <div id="fna-ed-domain-pills"></div>
+            </div>
             <div class="fna-ed-header-right">
               <button class="fna-ed-ai-btn" onclick="openFNAAIPrefill()"><i class="fas fa-robot"></i> AI Pre-fill</button>
               <button class="fna-ed-close-btn" onclick="_closeFNAEditorForce()"><i class="fas fa-times"></i></button>
             </div>
           </div>
-          {/* Section nav tabs */}
+          {/* Section nav tabs — 6 tabs, domain-filtered visibility controlled by JS */}
           <div class="fna-ed-nav-tabs" id="fna-ed-nav-tabs">
-            <button class="fna-ed-nav-btn active" onclick="fnaEditorNav(0)" data-idx="0">
+            <button class="fna-ed-nav-btn active" onclick="fnaEditorNav(0)" id="fna-ed-nav-0" data-idx="0">
               <i class="fas fa-user"></i> Personal &amp; Profile
             </button>
-            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(1)" data-idx="1">
+            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(1)" id="fna-ed-nav-1" data-idx="1">
               <i class="fas fa-heartbeat"></i> Health History
             </button>
-            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(2)" data-idx="2">
-              <i class="fas fa-dollar-sign"></i> Financial Suitability
+            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(2)" id="fna-ed-nav-2" data-idx="2">
+              <i class="fas fa-dollar-sign"></i> Financial Profile
             </button>
-            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(3)" data-idx="3">
-              <i class="fas fa-shield-alt"></i> Coverage Needs
+            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(3)" id="fna-ed-nav-3" data-idx="3">
+              <i class="fas fa-shield-alt"></i> Insurance Needs
             </button>
             <button class="fna-ed-nav-btn" onclick="fnaEditorNav(4)" id="fna-ed-nav-4" data-idx="4">
-              <i class="fas fa-chart-pie"></i> Investment Profile
+              <i class="fas fa-umbrella-beach"></i> Retirement &amp; Annuity
+            </button>
+            <button class="fna-ed-nav-btn" onclick="fnaEditorNav(5)" id="fna-ed-nav-5" data-idx="5">
+              <i class="fas fa-chart-pie"></i> Investment &amp; Advisory
             </button>
           </div>
           {/* Section body — rendered by JS */}
