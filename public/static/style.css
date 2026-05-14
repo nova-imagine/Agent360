@@ -35013,3 +35013,220 @@ kbd {
 .lm-btn-teal  { background: #0d9488 !important; }
 .lm-btn-teal:hover { background: #0f766e !important; }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   CAMPAIGN MODAL — Roster + AI Panel (redesign)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Campaign Roster section header ──────────────────────────── */
+.camp-roster-count {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+/* ── Roster row ───────────────────────────────────────────────── */
+.camp-roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.camp-roster-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: background .15s;
+}
+.camp-roster-row:hover { background: #f1f5f9; }
+
+.camp-roster-info {
+  flex: 0 0 130px;
+  min-width: 0;
+}
+.camp-roster-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.camp-roster-product {
+  font-size: 10px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Domain propensity mini-bars in roster ─────────────────────  */
+.camp-roster-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 90px;
+}
+.camp-roster-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.camp-roster-bar-lbl {
+  font-size: 9px;
+  font-weight: 600;
+  color: #94a3b8;
+  width: 18px;
+  flex-shrink: 0;
+}
+.camp-roster-bar-track {
+  flex: 1;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.camp-roster-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .3s;
+}
+.camp-roster-bar-pct {
+  font-size: 9px;
+  color: #64748b;
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── Roster right column: stage badge + date ───────────────────  */
+.camp-roster-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.camp-roster-stage {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.camp-roster-date {
+  font-size: 10px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+.camp-roster-date i { margin-right: 3px; }
+
+/* ── Roster empty state ──────────────────────────────────────── */
+.camp-roster-empty {
+  padding: 20px 0;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+  font-style: italic;
+}
+.camp-roster-empty i { margin-right: 6px; }
+
+/* ── AI Optimize button — open state ────────────────────────── */
+.camp-ai-btn-open {
+  background: #059669 !important;
+  color: #fff !important;
+  border-color: #059669 !important;
+}
+.camp-ai-btn-open:hover { background: #047857 !important; }
+
+/* ── AI Recommendations Panel ───────────────────────────────── */
+.camp-ai-panel {
+  margin-top: 12px;
+  border: 1.5px solid #6366f1;
+  border-radius: 12px;
+  background: #fafafe;
+  overflow: hidden;
+  animation: campAIPanelIn .2s ease;
+}
+@keyframes campAIPanelIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.camp-ai-panel-header {
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.camp-ai-panel-header i { font-size: 14px; }
+
+.camp-ai-panel-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.camp-ai-panel-block {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e0e7ff;
+}
+.camp-ai-panel-block:last-child { border-bottom: none; }
+
+.camp-ai-panel-block-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4f46e5;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.camp-ai-panel-block-body {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.55;
+}
+
+/* ── Next Best Actions list ──────────────────────────────────── */
+.camp-ai-panel-nba {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.camp-ai-nba-row {
+  background: #fff;
+  border: 1px solid #e0e7ff;
+  border-left: 3px solid #6366f1;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.camp-ai-nba-lead {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4f46e5;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.camp-ai-nba-action {
+  font-size: 11px;
+  color: #374151;
+  line-height: 1.5;
+}

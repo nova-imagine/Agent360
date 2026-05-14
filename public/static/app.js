@@ -12653,6 +12653,14 @@ const campaignsData = {
     aiScore: 94, color: '#003087',
     aiInsight: 'Top performer at 3× avg conversion. Recommend scaling budget by $2K for May push.',
     aiTargeting: 'Professionals 35–55, dual income, dependents, homeowners. AI-matched 89 prospects in CRM.',
+    aiChannelTip: 'Email is outperforming calls 2:1 for this segment. Shift 20% of call budget to email sequences for May. Social Media driving awareness but low direct conversion — use for retargeting only.',
+    aiBudgetNote: 'Spend pace is 70% ($2,940 of $4,200) with 60% of campaign duration elapsed. On track. Recommend reserving $800 for a final May push targeting the 6 non-responsive enrolled leads.',
+    aiNextActions: [
+      { lead: 'Alex Rivera', action: 'Follow-up call overdue — 11 days since last contact. High ins score (88). Priority dial today.' },
+      { lead: 'Nancy Foster', action: 'Replied to email — schedule discovery call within 48 hrs while engagement is warm.' },
+      { lead: 'Stephanie Lee', action: 'Send policy comparison doc — expressed interest in $500K WL. Personalise with income bracket.' }
+    ],
+    aiTiming: 'Best outreach window for this segment: Tuesday & Thursday, 10–11 AM. Avoid Monday AM and Friday PM — 34% lower response rate.',
     leadIds: ['L001','L002','L003','L004','L005'],
     weeklyLeads: [4, 6, 8, 5, 7, 4],
     monthlyConv: [0, 1, 1, 2]
@@ -12666,6 +12674,14 @@ const campaignsData = {
     aiScore: 78, color: '#0891b2',
     aiInsight: 'Good lead volume, lower conversion. AI recommends adding live webinar touchpoint to lift close rate.',
     aiTargeting: 'Ages 28–40, recently married or new parent, mortgage holders. AI-matched 134 prospects.',
+    aiChannelTip: 'SMS open rate is 91% vs 38% for email in this segment. Lead with SMS for appointment setting, follow with email for documents and detail. Consider a short-form video explainer link in SMS.',
+    aiBudgetNote: 'Only 40% of budget spent ($1,120 of $2,800) at campaign midpoint. Underspending. Recommend activating a 3rd channel — webinar or LinkedIn — to accelerate lead engagement before July.',
+    aiNextActions: [
+      { lead: 'Jessica Patel', action: 'No response to 2 emails. Switch to SMS — high open rate for her demographic.' },
+      { lead: 'Daniel Kim', action: 'Showed interest — send term life calculator link to help him size coverage need.' },
+      { lead: 'Rachel Moore', action: 'New lead, no outreach yet. Send welcome SMS within 24 hrs of entry date.' }
+    ],
+    aiTiming: 'Optimal contact window: Weekday evenings 6–8 PM and Saturday mornings 9–11 AM. Young families are hardest to reach during core work hours.',
     leadIds: ['L006','L007','L008'],
     weeklyLeads: [5, 8, 6, 4, 3, 2],
     monthlyConv: [0, 0, 1, 1]
@@ -12679,6 +12695,14 @@ const campaignsData = {
     aiScore: 86, color: '#059669',
     aiInsight: 'Seminar channel generating 4× more qualified leads vs email alone. Scale seminar budget.',
     aiTargeting: 'Existing clients 50–65 with WL/UL policies but no annuity product. AI-identified 47 clients.',
+    aiChannelTip: 'In-person meetings closing at 33% vs 11% for email-only sequences. For the 6 enrolled leads past 3 contact attempts, escalate to in-person meeting invitation. Seminar attendees convert 2× faster.',
+    aiBudgetNote: 'Budget 60% utilized ($3,300 of $5,500) with campaign ending May 31 — 6 weeks out. Pace is healthy. Recommend allocating remaining $2,200 to schedule one final seminar event in mid-May to capture late-stage prospects.',
+    aiNextActions: [
+      { lead: 'Thomas Grant', action: 'High ret score — propose in-person meeting to walk through deferred annuity illustration.' },
+      { lead: 'Carol Bennett', action: 'Highest score in roster (ret: 93). Invite to private lunch seminar — VIP treatment likely to accelerate close.' },
+      { lead: 'Frank Russo', action: 'Contacted but no appointment set. Send seminar invite with personalised retirement income projection.' }
+    ],
+    aiTiming: 'Pre-retirement segment most responsive mid-morning (10 AM–12 PM) on weekdays. Seminars perform best on Thursday evenings 6–8 PM for this age group.',
     leadIds: ['L009','L010','L011'],
     weeklyLeads: [3, 5, 7, 6, 5, 5],
     monthlyConv: [1, 0, 1, 1]
@@ -12692,6 +12716,13 @@ const campaignsData = {
     aiScore: 82, color: '#7c3aed',
     aiInsight: 'Referral channel has 2× close rate vs direct. Incentivize existing HNW clients for referrals.',
     aiTargeting: 'Net worth $1M+, business owners or executives, existing policyholders. AI-matched 28 prospects.',
+    aiChannelTip: 'Referral-sourced leads closing at 22% vs 8% for direct outreach. Recommend a structured referral incentive — concierge gift or charitable donation in client\'s name — to activate 5 dormant referral relationships.',
+    aiBudgetNote: 'Spend at 60% ($4,800 of $8,000) with 5 months elapsed of 6. Slightly under-paced. Private Events have the highest ROI per dollar — consider one more exclusive dinner event in June to convert the 2 remaining high-score enrolled leads.',
+    aiNextActions: [
+      { lead: 'Diana Walsh', action: 'Highest inv score in portfolio (95). Propose UMA portfolio review — time-sensitive given market conditions.' },
+      { lead: 'Henry Okafor', action: 'Contacted — no response in 4 days. Send handwritten note + private event invite. HNW segment responds to personal touch.' }
+    ],
+    aiTiming: 'HNW segment most reachable 7–9 AM (pre-market) or 5–7 PM (post-market). Avoid lunch windows. Private events should be Thursday evenings for highest acceptance rate.',
     leadIds: ['L012','L013'],
     weeklyLeads: [2, 3, 4, 3, 4, 3],
     monthlyConv: [0, 1, 0, 1]
@@ -12705,6 +12736,13 @@ const campaignsData = {
     aiScore: 58, color: '#ea580c',
     aiInsight: 'Low conversion — AI suggests pairing with Medicare education webinar to improve engagement.',
     aiTargeting: 'Clients 55–70 without LTC coverage. AI-identified 62 clients eligible for outreach.',
+    aiChannelTip: 'Content Marketing is generating awareness but not appointments. Add a clear call-to-action at the end of each content piece — a "Free LTC Planning Consultation" offer converts 3× better than passive reading. Consider a Medicare co-education webinar as a low-barrier entry point.',
+    aiBudgetNote: 'Only 30% of budget spent ($930 of $3,100) — campaign is currently paused. Upon resuming, recommend a revised 8-week sprint focused on the webinar channel before the Aug 31 deadline. Remaining $2,170 is sufficient for 2 webinar events and a targeted email re-engagement sequence.',
+    aiNextActions: [
+      { lead: 'Paula Simmons', action: 'New lead, no outreach since entry Apr 3. Re-engage with LTC awareness email + Medicare cost comparison tool link.' },
+      { lead: 'George Huang', action: 'Was contacted — send Medicare/LTC joint webinar invitation as re-engagement. Personalize with age-specific cost projections.' }
+    ],
+    aiTiming: 'Seniors 55–70 respond best to emails sent Tuesday–Thursday 9–10 AM. Webinars have highest attendance on Wednesday evenings 6 PM. Avoid weekend outreach for this segment.',
     leadIds: ['L014','L015'],
     weeklyLeads: [3, 4, 5, 3, 2, 1],
     monthlyConv: [0, 0, 0, 0]
@@ -12718,6 +12756,12 @@ const campaignsData = {
     aiScore: 70, color: '#0891b2',
     aiInsight: 'Early stage — first webinar had 34 attendees with 12 leads captured. Second webinar scheduled May 8.',
     aiTargeting: 'Clients with $50K+ idle savings, low investment product penetration. AI-matched 78 prospects.',
+    aiChannelTip: 'Webinar is performing well as a lead capture tool (35% attendance-to-lead rate). Now add a post-webinar email sequence: Day 1 thank-you + recording, Day 3 portfolio assessment offer, Day 7 follow-up call prompt. This 3-step sequence typically lifts conversion by 40%.',
+    aiBudgetNote: 'Early stage — only 25% of budget spent ($900 of $3,600) after 4 weeks. Healthy pace for a webinar-led campaign. Recommend holding budget for post-May-8 webinar follow-up sequence and 1:1 discovery calls for the 4 enrolled leads showing inv domain scores above 70.',
+    aiNextActions: [
+      { lead: 'No enrolled leads yet', action: 'Post-webinar: contact the 12 leads captured within 24 hrs of the May 8 event. Speed-to-contact is the #1 predictor of webinar lead conversion.' }
+    ],
+    aiTiming: 'Mid-market professionals most reachable Tuesday–Thursday 8–9 AM or 12–1 PM. Webinars perform best at 12 PM (lunch slot) or 6 PM (post-work). Avoid Monday and Friday for initial outreach.',
     leadIds: [],
     weeklyLeads: [0, 0, 4, 5, 3, 0],
     monthlyConv: [0, 0, 0, 0]
@@ -12782,109 +12826,160 @@ function openCampaignDetail(campId) {
   const body = document.getElementById('camp-modal-body');
   if (!overlay || !title || !body) return;
 
-  title.innerHTML = `<span style="color:${camp.color}"><i class="fas fa-bullhorn"></i></span> ${camp.name}`;
+  title.innerHTML = '<span style="color:' + camp.color + '"><i class="fas fa-bullhorn"></i></span> ' + camp.name;
 
-  const leadsHtml = (camp.leadIds || []).slice(0, 5).map(lid => {
-    const lead = campaignLeadsData[lid];
-    if (!lead) return '';
-    const scoreColor = lead.score >= 80 ? '#059669' : lead.score >= 65 ? '#d97706' : '#dc2626';
-    const statusColor = { 'Opportunity': '#7c3aed', 'Contacted': '#0891b2', 'New': '#6b7280' }[lead.status] || '#6b7280';
-    return `
-      <div class="camp-lead-row">
-        <div class="camp-lead-avatar">${lead.name.split(' ').map(n=>n[0]).join('')}</div>
-        <div class="camp-lead-info">
-          <div class="camp-lead-name">${lead.name}</div>
-          <div class="camp-lead-product">${lead.product}</div>
-        </div>
-        <span class="camp-lead-score" style="background:${scoreColor}">${lead.score}</span>
-        <span class="camp-lead-status" style="background:${statusColor}20;color:${statusColor}">${lead.status}</span>
-        <span class="camp-lead-date">${lead.lastContact}</span>
-        <button class="camp-btn-xs" onclick="navigateTo('prospects')"><i class="fas fa-arrow-right"></i></button>
-      </div>`;
-  }).join('');
+  // Build Campaign Roster from main leadsData (cross-referenced by leadIds)
+  var rosterIds = camp.leadIds || [];
+  var rosterHtml = '';
+  if (rosterIds.length === 0) {
+    rosterHtml = '<div class="camp-roster-empty"><i class="fas fa-user-slash"></i> No leads enrolled in this campaign yet.</div>';
+  } else {
+    // Look up each lead in leadsData (the authoritative source)
+    var rosterItems = rosterIds.map(function(lid) {
+      var lead = null;
+      for (var i = 0; i < leadsData.length; i++) {
+        if (leadsData[i].id === lid) { lead = leadsData[i]; break; }
+      }
+      // Fall back to campaignLeadsData if not found in leadsData
+      if (!lead) {
+        var cl = campaignLeadsData[lid];
+        if (!cl) return '';
+        lead = { id: lid, name: cl.name, initials: cl.name.split(' ').map(function(n){return n[0];}).join(''), avatarColor: '#6b7280', domainScores: { ins: 0, inv: 0, ret: 0 }, status: cl.status.toLowerCase(), lastContact: cl.lastContact, productInterest: [cl.product] };
+      }
+      var meta = _leadStatusMeta(lead.status);
+      var ins = (lead.domainScores || {}).ins || 0;
+      var inv = (lead.domainScores || {}).inv || 0;
+      var ret = (lead.domainScores || {}).ret || 0;
+      var topScore = Math.max(ins, inv, ret);
+      var scoreColor = topScore >= 80 ? '#059669' : topScore >= 60 ? '#d97706' : '#9ca3af';
+      var lastC = lead.lastContact || '—';
+      var products = (lead.productInterest || []).join(', ') || '—';
+      return '<div class="camp-roster-row">' +
+        '<div class="camp-lead-avatar" style="background:' + (lead.avatarColor || '#6b7280') + '">' + (lead.initials || lead.name.split(' ').map(function(n){return n[0];}).join('')) + '</div>' +
+        '<div class="camp-roster-info">' +
+          '<div class="camp-roster-name">' + lead.name + '</div>' +
+          '<div class="camp-roster-product">' + products + '</div>' +
+        '</div>' +
+        '<div class="camp-roster-bars">' +
+          '<div class="camp-roster-bar-row"><span class="camp-roster-bar-lbl">Ins</span><div class="camp-roster-bar-track"><div class="camp-roster-bar-fill" style="width:' + ins + '%;background:#003087"></div></div><span class="camp-roster-bar-pct">' + ins + '</span></div>' +
+          '<div class="camp-roster-bar-row"><span class="camp-roster-bar-lbl">Inv</span><div class="camp-roster-bar-track"><div class="camp-roster-bar-fill" style="width:' + inv + '%;background:#7c3aed"></div></div><span class="camp-roster-bar-pct">' + inv + '</span></div>' +
+          '<div class="camp-roster-bar-row"><span class="camp-roster-bar-lbl">Ret</span><div class="camp-roster-bar-track"><div class="camp-roster-bar-fill" style="width:' + ret + '%;background:#059669"></div></div><span class="camp-roster-bar-pct">' + ret + '</span></div>' +
+        '</div>' +
+        '<div class="camp-roster-right">' +
+          '<span class="camp-roster-stage" style="background:' + meta.color + '20;color:' + meta.color + '">' + meta.label + '</span>' +
+          '<span class="camp-roster-date"><i class="fas fa-clock"></i> ' + lastC + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    rosterHtml = rosterItems || '<div class="camp-roster-empty"><i class="fas fa-user-slash"></i> No enrolled leads found.</div>';
+  }
 
-  const budgetPct = Math.round((camp.spent / camp.budget) * 100);
+  var budgetPct = Math.round((camp.spent / camp.budget) * 100);
 
-  body.innerHTML = `
-    <div class="camp-detail-grid">
-      <!-- Left: KPIs + Funnel -->
-      <div class="camp-detail-left">
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Campaign Performance</div>
-          <div class="camp-detail-kpis">
-            <div class="camp-det-kpi"><div class="camp-det-val">${camp.leads}</div><div class="camp-det-lbl">Leads</div></div>
-            <div class="camp-det-kpi"><div class="camp-det-val">${camp.opps}</div><div class="camp-det-lbl">Opps</div></div>
-            <div class="camp-det-kpi"><div class="camp-det-val">${camp.clients}</div><div class="camp-det-lbl">Clients</div></div>
-            <div class="camp-det-kpi"><div class="camp-det-val">${camp.convRate}</div><div class="camp-det-lbl">Conv. Rate</div></div>
-          </div>
-        </div>
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Budget Utilisation</div>
-          <div class="camp-budget-row">
-            <span>$${camp.spent.toLocaleString()} spent of $${camp.budget.toLocaleString()}</span>
-            <span>${budgetPct}%</span>
-          </div>
-          <div class="camp-budget-bar"><div class="camp-budget-fill" style="width:${budgetPct}%;background:${camp.color}"></div></div>
-        </div>
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Funnel</div>
-          <div class="camp-detail-funnel">
-            <div class="camp-detail-funnel-step" style="border-color:#0891b2">
-              <div class="camp-detail-funnel-n" style="color:#0891b2">1</div>
-              <div>Campaign Active</div>
-            </div>
-            <div class="camp-detail-funnel-arr">↓</div>
-            <div class="camp-detail-funnel-step" style="border-color:#f59e0b">
-              <div class="camp-detail-funnel-n" style="color:#f59e0b">${camp.leads}</div>
-              <div>Leads Generated</div>
-            </div>
-            <div class="camp-detail-funnel-arr">↓</div>
-            <div class="camp-detail-funnel-step" style="border-color:#7c3aed">
-              <div class="camp-detail-funnel-n" style="color:#7c3aed">${camp.opps}</div>
-              <div>Opportunities</div>
-            </div>
-            <div class="camp-detail-funnel-arr">↓</div>
-            <div class="camp-detail-funnel-step" style="border-color:#059669">
-              <div class="camp-detail-funnel-n" style="color:#059669">${camp.clients}</div>
-              <div>Clients Won</div>
-            </div>
-          </div>
-        </div>
-        <div class="camp-detail-section camp-detail-ai-box">
-          <div class="camp-detail-section-title"><i class="fas fa-robot"></i> AI Intelligence</div>
-          <div class="camp-detail-ai-insight">${camp.aiInsight}</div>
-          <div class="camp-detail-ai-target" style="margin-top:8px"><strong>Targeting:</strong> ${camp.aiTargeting}</div>
-        </div>
-      </div>
-      <!-- Right: Info + Leads -->
-      <div class="camp-detail-right">
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Campaign Details</div>
-          <div class="camp-detail-info-grid">
-            <div class="camp-info-row"><span class="camp-info-lbl">Type</span><span class="camp-info-val">${camp.type}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Status</span><span class="camp-info-val camp-status-${camp.status.toLowerCase()}">${camp.status}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Segment</span><span class="camp-info-val">${camp.segment}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Channels</span><span class="camp-info-val">${camp.channels.join(', ')}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Start Date</span><span class="camp-info-val">${camp.startDate}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">End Date</span><span class="camp-info-val">${camp.endDate}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">Pipeline Value</span><span class="camp-info-val" style="color:#059669;font-weight:600">${camp.pipelineValue}</span></div>
-            <div class="camp-info-row"><span class="camp-info-lbl">AI Score</span><span class="camp-info-val"><span class="camp-ai-score-badge">${camp.aiScore}/100</span></span></div>
-          </div>
-        </div>
-        <div class="camp-detail-section">
-          <div class="camp-detail-section-title">Recent Leads <button class="camp-see-all" onclick="navigateTo('prospects');closeCampaignDetail()">See All →</button></div>
-          <div class="camp-leads-list">${leadsHtml || '<div style="color:#9ca3af;padding:12px 0">No leads yet</div>'}</div>
-        </div>
-        <div class="camp-detail-footer">
-          <button class="btn btn-primary" onclick="closeCampaignDetail();navigateTo('prospects')"><i class="fas fa-users"></i> View All Leads</button>
-          <button class="btn btn-ai" onclick="runCampaignAI('${campId}')"><i class="fas fa-robot"></i> AI Optimize</button>
-          ${camp.status === 'Paused' ?
-            `<button class="btn btn-success" onclick="resumeCampaign('${campId}')"><i class="fas fa-play"></i> Resume</button>` :
-            `<button class="btn btn-ghost" onclick="pauseCampaign('${campId}')"><i class="fas fa-pause"></i> Pause</button>`
-          }
-        </div>
-      </div>
-    </div>`;
+  body.innerHTML =
+    '<div class="camp-detail-grid">' +
+      '<!-- Left: KPIs + Funnel -->' +
+      '<div class="camp-detail-left">' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Campaign Performance</div>' +
+          '<div class="camp-detail-kpis">' +
+            '<div class="camp-det-kpi"><div class="camp-det-val">' + camp.leads + '</div><div class="camp-det-lbl">Enrolled</div></div>' +
+            '<div class="camp-det-kpi"><div class="camp-det-val">' + camp.opps + '</div><div class="camp-det-lbl">Prospects</div></div>' +
+            '<div class="camp-det-kpi"><div class="camp-det-val">' + camp.clients + '</div><div class="camp-det-lbl">Clients</div></div>' +
+            '<div class="camp-det-kpi"><div class="camp-det-val">' + camp.convRate + '</div><div class="camp-det-lbl">Conv. Rate</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Budget Utilisation</div>' +
+          '<div class="camp-budget-row">' +
+            '<span>$' + camp.spent.toLocaleString() + ' spent of $' + camp.budget.toLocaleString() + '</span>' +
+            '<span>' + budgetPct + '%</span>' +
+          '</div>' +
+          '<div class="camp-budget-bar"><div class="camp-budget-fill" style="width:' + budgetPct + '%;background:' + camp.color + '"></div></div>' +
+        '</div>' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Funnel</div>' +
+          '<div class="camp-detail-funnel">' +
+            '<div class="camp-detail-funnel-step" style="border-color:#0891b2">' +
+              '<div class="camp-detail-funnel-n" style="color:#0891b2">1</div>' +
+              '<div>Campaign Active</div>' +
+            '</div>' +
+            '<div class="camp-detail-funnel-arr">\u2193</div>' +
+            '<div class="camp-detail-funnel-step" style="border-color:#f59e0b">' +
+              '<div class="camp-detail-funnel-n" style="color:#f59e0b">' + camp.leads + '</div>' +
+              '<div>Leads Enrolled</div>' +
+            '</div>' +
+            '<div class="camp-detail-funnel-arr">\u2193</div>' +
+            '<div class="camp-detail-funnel-step" style="border-color:#7c3aed">' +
+              '<div class="camp-detail-funnel-n" style="color:#7c3aed">' + camp.opps + '</div>' +
+              '<div>Prospects</div>' +
+            '</div>' +
+            '<div class="camp-detail-funnel-arr">\u2193</div>' +
+            '<div class="camp-detail-funnel-step" style="border-color:#059669">' +
+              '<div class="camp-detail-funnel-n" style="color:#059669">' + camp.clients + '</div>' +
+              '<div>Clients Won</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="camp-detail-section camp-detail-ai-box">' +
+          '<div class="camp-detail-section-title"><i class="fas fa-robot"></i> AI Intelligence</div>' +
+          '<div class="camp-detail-ai-insight">' + camp.aiInsight + '</div>' +
+          '<div class="camp-detail-ai-target" style="margin-top:8px"><strong>Targeting:</strong> ' + camp.aiTargeting + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<!-- Right: Info + Campaign Roster -->' +
+      '<div class="camp-detail-right">' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Campaign Details</div>' +
+          '<div class="camp-detail-info-grid">' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Type</span><span class="camp-info-val">' + camp.type + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Status</span><span class="camp-info-val camp-status-' + camp.status.toLowerCase() + '">' + camp.status + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Segment</span><span class="camp-info-val">' + camp.segment + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Channels</span><span class="camp-info-val">' + camp.channels.join(', ') + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Start Date</span><span class="camp-info-val">' + camp.startDate + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">End Date</span><span class="camp-info-val">' + camp.endDate + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">Pipeline Value</span><span class="camp-info-val" style="color:#059669;font-weight:600">' + camp.pipelineValue + '</span></div>' +
+            '<div class="camp-info-row"><span class="camp-info-lbl">AI Score</span><span class="camp-info-val"><span class="camp-ai-score-badge">' + camp.aiScore + '/100</span></span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="camp-detail-section">' +
+          '<div class="camp-detail-section-title">Campaign Roster' +
+            '<span class="camp-roster-count">' + rosterIds.length + ' lead' + (rosterIds.length !== 1 ? 's' : '') + ' enrolled</span>' +
+          '</div>' +
+          '<div class="camp-roster-list">' + rosterHtml + '</div>' +
+        '</div>' +
+        '<div class="camp-detail-footer">' +
+          '<button class="btn btn-secondary" onclick="closeCampaignDetail()"><i class="fas fa-times"></i> Close</button>' +
+          '<button class="btn btn-ai" id="camp-ai-btn-' + campId + '" onclick="toggleCampaignAIPanel(\'' + campId + '\')"><i class="fas fa-robot"></i> AI Optimize</button>' +
+        '</div>' +
+        '<!-- AI Optimize Panel (hidden by default) -->' +
+        '<div class="camp-ai-panel" id="camp-ai-panel-' + campId + '" style="display:none">' +
+          '<div class="camp-ai-panel-header"><i class="fas fa-brain"></i> AI Recommendations — ' + camp.name + '</div>' +
+          '<div class="camp-ai-panel-sections">' +
+            '<div class="camp-ai-panel-block">' +
+              '<div class="camp-ai-panel-block-title"><i class="fas fa-broadcast-tower"></i> Channel Mix</div>' +
+              '<div class="camp-ai-panel-block-body">' + (camp.aiChannelTip || 'No channel recommendations available.') + '</div>' +
+            '</div>' +
+            '<div class="camp-ai-panel-block">' +
+              '<div class="camp-ai-panel-block-title"><i class="fas fa-dollar-sign"></i> Budget Allocation</div>' +
+              '<div class="camp-ai-panel-block-body">' + (camp.aiBudgetNote || 'No budget notes available.') + '</div>' +
+            '</div>' +
+            '<div class="camp-ai-panel-block">' +
+              '<div class="camp-ai-panel-block-title"><i class="fas fa-clock"></i> Timing Insight</div>' +
+              '<div class="camp-ai-panel-block-body">' + (camp.aiTiming || 'No timing data available.') + '</div>' +
+            '</div>' +
+            '<div class="camp-ai-panel-block">' +
+              '<div class="camp-ai-panel-block-title"><i class="fas fa-bolt"></i> Next Best Actions</div>' +
+              '<div class="camp-ai-panel-nba">' +
+                (camp.aiNextActions || []).map(function(a) {
+                  return '<div class="camp-ai-nba-row"><div class="camp-ai-nba-lead"><i class="fas fa-user"></i> ' + a.lead + '</div><div class="camp-ai-nba-action">' + a.action + '</div></div>';
+                }).join('') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 
   overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -12931,12 +13026,24 @@ function openCampAIWizard() {
 }
 
 function runCampaignAI(campId) {
-  const camp = campaignsData[campId];
-  if (!camp) return;
-  showToast(`<i class="fas fa-robot"></i> Running AI optimisation for <strong>${camp.name}</strong>…`);
-  setTimeout(() => {
-    showToast(`<i class="fas fa-check-circle" style="color:#059669"></i> AI recommendation ready — ${camp.aiInsight}`);
-  }, 1800);
+  // Legacy stub — now handled by toggleCampaignAIPanel
+  toggleCampaignAIPanel(campId);
+}
+
+function toggleCampaignAIPanel(campId) {
+  var panel = document.getElementById('camp-ai-panel-' + campId);
+  var btn = document.getElementById('camp-ai-btn-' + campId);
+  if (!panel) return;
+  var isOpen = panel.style.display !== 'none';
+  if (isOpen) {
+    panel.style.display = 'none';
+    if (btn) { btn.innerHTML = '<i class="fas fa-robot"></i> AI Optimize'; btn.classList.remove('camp-ai-btn-open'); }
+  } else {
+    panel.style.display = 'block';
+    if (btn) { btn.innerHTML = '<i class="fas fa-check-circle"></i> AI Panel Open'; btn.classList.add('camp-ai-btn-open'); }
+    // Scroll panel into view
+    setTimeout(function() { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 80);
+  }
 }
 
 // ── New Campaign Modal ─────────────────────────────────────────
