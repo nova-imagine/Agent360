@@ -668,7 +668,7 @@ function Sidebar() {
           <span class="nav-badge">247</span>
         </a>
         <a class="nav-item" onclick="navigateTo('calendar')" href="#">
-          <i class="fas fa-calendar-alt"></i><span>Schedule</span>
+          <i class="fas fa-calendar-alt"></i><span>AI Planner</span>
           <span class="nav-badge alert">3</span>
         </a>
 
