@@ -35067,6 +35067,7 @@ function iaBuildDetailHTML(a) {
 
   var retColor = a.returnYTD > 0 ? '#059669' : a.returnYTD < 0 ? '#dc2626' : '#64748b';
 
+  var isAnnuity = a.annuityDetails != null;
   var tabs = [
     { id:'overview',    icon:'fa-th-large',      label:'Overview'    },
     { id:'portfolio',   icon:'fa-chart-pie',      label:'Portfolio'   },
@@ -35074,6 +35075,7 @@ function iaBuildDetailHTML(a) {
     { id:'ai',          icon:'fa-robot',          label:'AI Insights' },
     { id:'timeline',    icon:'fa-stream',         label:'Timeline'    }
   ];
+  if (isAnnuity) tabs.splice(1, 0, { id:'annuity', icon:'fa-shield-alt', label:'Annuity Details' });
 
   var tabBtns = tabs.map(function(t) {
     var active = t.id === _iaActiveTab ? ' ia-tab-active' : '';
@@ -35172,6 +35174,7 @@ function iaSwitchTab(tab, el) {
 
 function iaRenderTab(a, tab) {
   if (tab === 'overview')  return iaRenderOverviewTab(a);
+  if (tab === 'annuity')   return iaRenderAnnuityTab(a);
   if (tab === 'portfolio') return iaRenderPortfolioTab(a);
   if (tab === 'rebalance') return iaRenderRebalanceTab(a);
   if (tab === 'ai')        return iaRenderAITab(a);
@@ -35181,6 +35184,7 @@ function iaRenderTab(a, tab) {
 
 /* ── Overview Tab ── */
 function iaRenderOverviewTab(a) {
+  if (a.annuityDetails) return iaRenderAnnuityOverview(a);
   var tc = a.targetAlloc;
   var cc = a.currentAlloc;
 
@@ -35273,6 +35277,331 @@ function iaRenderOverviewTab(a) {
         '<button class="ia-tlh-btn" onclick="iaExecuteTLH(\'' + a.id + '\')"><i class="fas fa-leaf"></i> Execute TLH</button>' +
       '</div>' : '') +
 
+    '</div>' +
+
+  '</div>';
+}
+
+/* ── Annuity Overview (replaces allocation grid for annuity accounts) ── */
+function iaRenderAnnuityOverview(a) {
+  var ad = a.annuityDetails;
+  var retColor = a.returnYTD > 0 ? '#059669' : '#64748b';
+
+  // Annuity category badge
+  var isDeferred  = ad.type && (ad.type.indexOf('Deferred') !== -1 || ad.type.indexOf('Variable') !== -1 || ad.type.indexOf('Hybrid') !== -1 || ad.type.indexOf('IndexFlex') !== -1);
+  var isImmediate = ad.type && ad.type.indexOf('Immediate') !== -1;
+  var catLabel    = isImmediate ? 'Immediate Income Annuity' : 'Deferred Annuity';
+  var catIcon     = isImmediate ? 'fa-bolt' : 'fa-hourglass-half';
+  var catColor    = isImmediate ? '#059669' : '#d97706';
+
+  // Key specs from annuityDetails — cover all three product types
+  var specRows = [];
+  if (ad.guaranteedRate)  specRows.push({ lbl:'Guaranteed Rate',    val: ad.guaranteedRate,   icon:'fa-lock',           color:'#059669' });
+  if (ad.indexedAccount)  specRows.push({ lbl:'Indexed Account',    val: ad.indexedAccount,   icon:'fa-chart-area',     color:'#003087' });
+  if (ad.fixedAccount)    specRows.push({ lbl:'Fixed Account',      val: ad.fixedAccount,     icon:'fa-shield-alt',     color:'#059669' });
+  if (ad.mAndE)           specRows.push({ lbl:'M&E Charge',         val: ad.mAndE,            icon:'fa-percent',        color:'#64748b' });
+  if (ad.fundExpenses)    specRows.push({ lbl:'Fund Expenses',      val: ad.fundExpenses,     icon:'fa-coins',          color:'#64748b' });
+  if (ad.surrenderPeriod) specRows.push({ lbl:'Surrender Period',   val: ad.surrenderPeriod,  icon:'fa-calendar-alt',   color:'#7c3aed' });
+  if (ad.deathBenefit)    specRows.push({ lbl:'Death Benefit',      val: ad.deathBenefit,     icon:'fa-heart',          color:'#dc2626' });
+  if (ad.incomeRider)     specRows.push({ lbl:'Income Rider',       val: ad.incomeRider,      icon:'fa-hand-holding-usd', color:'#0891b2' });
+  if (ad.taxStatus)       specRows.push({ lbl:'Tax Status',         val: ad.taxStatus,        icon:'fa-landmark',       color:'#7c3aed' });
+
+  var specsHTML = specRows.map(function(s) {
+    return '<div class="ia-ann-spec-row">' +
+      '<div class="ia-ann-spec-icon" style="background:' + s.color + '18;color:' + s.color + '"><i class="fas ' + s.icon + '"></i></div>' +
+      '<div class="ia-ann-spec-lbl">' + s.lbl + '</div>' +
+      '<div class="ia-ann-spec-val">' + s.val + '</div>' +
+    '</div>';
+  }).join('');
+
+  // Income path timeline
+  var incomePathHTML = '';
+  if (isDeferred) {
+    incomePathHTML =
+      '<div class="ia-ann-path">' +
+        '<div class="ia-ann-path-title"><i class="fas fa-route"></i> Guaranteed Income Path</div>' +
+        '<div class="ia-ann-path-steps">' +
+          '<div class="ia-ann-path-step active">' +
+            '<div class="ia-ann-path-dot" style="background:#003087"></div>' +
+            '<div class="ia-ann-path-body"><div class="ia-ann-path-label">Accumulation Phase</div><div class="ia-ann-path-sub">Tax-deferred growth · ' + (ad.guaranteedRate || ad.indexedAccount ? 'Guaranteed / Indexed' : 'Sub-account') + ' crediting</div></div>' +
+          '</div>' +
+          '<div class="ia-ann-path-connector"></div>' +
+          '<div class="ia-ann-path-step">' +
+            '<div class="ia-ann-path-dot" style="background:#d97706"></div>' +
+            '<div class="ia-ann-path-body"><div class="ia-ann-path-label">Income Election</div><div class="ia-ann-path-sub">Activate income rider or annuitize at retirement</div></div>' +
+          '</div>' +
+          '<div class="ia-ann-path-connector"></div>' +
+          '<div class="ia-ann-path-step">' +
+            '<div class="ia-ann-path-dot" style="background:#059669"></div>' +
+            '<div class="ia-ann-path-body"><div class="ia-ann-path-label">Distribution Phase</div><div class="ia-ann-path-sub">Guaranteed lifetime income · RMD compliant</div></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  } else {
+    incomePathHTML =
+      '<div class="ia-ann-path">' +
+        '<div class="ia-ann-path-title"><i class="fas fa-route"></i> Income in Two Ways</div>' +
+        '<div class="ia-ann-path-steps">' +
+          '<div class="ia-ann-path-step active">' +
+            '<div class="ia-ann-path-dot" style="background:#059669"></div>' +
+            '<div class="ia-ann-path-body"><div class="ia-ann-path-label">Immediate Income Annuity</div><div class="ia-ann-path-sub">Income starts now · consistent, predictable payments</div></div>' +
+          '</div>' +
+          '<div class="ia-ann-path-connector"></div>' +
+          '<div class="ia-ann-path-step">' +
+            '<div class="ia-ann-path-dot" style="background:#0891b2"></div>' +
+            '<div class="ia-ann-path-body"><div class="ia-ann-path-label">Guaranteed for Life</div><div class="ia-ann-path-sub">Protects savings · supports lifestyle · financial reliability</div></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  var quickActions = [
+    { icon:'fa-shield-alt', label:'Annuity Details', fn:'iaSwitchTab(\'annuity\',null)'   },
+    { icon:'fa-robot',      label:'AI Review',        fn:'iaSwitchTab(\'ai\',null)'         },
+    { icon:'fa-file-pdf',   label:'Illustration',     fn:'iaGenerateReport(\'' + a.id + '\')' },
+    { icon:'fa-envelope',   label:'Send to Client',   fn:'iaSendReport(\'' + a.id + '\')'    }
+  ];
+
+  return '<div class="ia-overview-grid">' +
+
+    '<div class="ia-overview-left">' +
+
+      // Category badge + specs
+      '<div class="ia-ov-section">' +
+        '<div class="ia-ann-cat-badge" style="background:' + catColor + '18;border:1.5px solid ' + catColor + '40;color:' + catColor + '">' +
+          '<i class="fas ' + catIcon + '"></i> ' + catLabel +
+        '</div>' +
+        '<div class="ia-ann-specs">' + specsHTML + '</div>' +
+      '</div>' +
+
+      // Quick actions
+      '<div class="ia-ov-section">' +
+        '<div class="ia-ov-section-title"><i class="fas fa-bolt"></i> Quick Actions</div>' +
+        '<div class="ia-quick-actions">' +
+          quickActions.map(function(q) {
+            return '<button class="ia-qa-btn" onclick="' + q.fn + '"><i class="fas ' + q.icon + '"></i><span>' + q.label + '</span></button>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+
+    '</div>' +
+
+    '<div class="ia-overview-right">' +
+
+      // Performance
+      '<div class="ia-ov-section">' +
+        '<div class="ia-ov-section-title"><i class="fas fa-tachometer-alt"></i> Performance</div>' +
+        '<div class="ia-perf-grid">' +
+          '<div class="ia-perf-card"><div class="ia-perf-val green">' + a.returnYTDFmt + '</div><div class="ia-perf-lbl">Return YTD</div></div>' +
+          '<div class="ia-perf-card"><div class="ia-perf-val blue">' + a.benchmarkYTD + '%</div><div class="ia-perf-lbl">Benchmark</div></div>' +
+          '<div class="ia-perf-card"><div class="ia-perf-val">' + (a.fee ? '$' + a.fee.toLocaleString() : '$0') + '</div><div class="ia-perf-lbl">Annual Cost</div></div>' +
+          '<div class="ia-perf-card"><div class="ia-perf-val" style="color:#7c3aed">' + a.feePct.split(' ')[0] + '</div><div class="ia-perf-lbl">Total Fee</div></div>' +
+        '</div>' +
+      '</div>' +
+
+      // Income path
+      incomePathHTML +
+
+      // RMD banner if applicable
+      (a.rmdDue ? '<div class="ia-ov-section ia-ov-rmd">' +
+        '<div class="ia-ov-section-title ia-rmd-title"><i class="fas fa-calendar-exclamation"></i> RMD Required — ' + a.rmdDeadline + '</div>' +
+        '<div class="ia-rmd-amount">$' + a.rmdAmount.toLocaleString() + ' <span>must be distributed</span></div>' +
+        '<button class="ia-rmd-btn" onclick="iaProcessRMD(\'' + a.id + '\')"><i class="fas fa-paper-plane"></i> Process RMD</button>' +
+      '</div>' : '') +
+
+      // Drift alert (VA sub-accounts can drift)
+      (a.driftAlert ? '<div class="ia-ov-section ia-ov-alert">' +
+        '<div class="ia-ov-section-title ia-alert-title"><i class="fas fa-exclamation-triangle"></i> Sub-Account Drift — ' + a.driftScore.toFixed(1) + '% from Target</div>' +
+        '<div class="ia-alert-body">Sub-account rebalancing recommended. ' + a.rebalanceTrades.length + ' trades identified.</div>' +
+        '<button class="ia-alert-btn" onclick="iaSwitchTab(\'rebalance\',null)"><i class="fas fa-balance-scale"></i> View Rebalance Plan</button>' +
+      '</div>' : '') +
+
+    '</div>' +
+
+  '</div>';
+}
+
+/* ── Annuity Details Tab ── */
+function iaRenderAnnuityTab(a) {
+  var ad = a.annuityDetails;
+  if (!ad) return '<div class="ia-empty-holdings"><p>No annuity details available.</p></div>';
+
+  var isFixed    = ad.type === 'Fixed Deferred';
+  var isVariable = ad.type === 'Variable Annuity';
+  var isHybrid   = ad.type && ad.type.indexOf('Hybrid') !== -1 || (ad.type && ad.type.indexOf('IndexFlex') !== -1);
+
+  // ── NYL product category header ──
+  var prodMap = {
+    'Fixed Deferred':    { label:'Fixed Deferred Annuity',         color:'#d97706', bg:'#fffbeb', icon:'fa-shield-alt',     cat:'Deferred',  sub:'Guaranteed interest rate growth with principal protection' },
+    'Variable Annuity':  { label:'Variable Annuity',               color:'#7c3aed', bg:'#f5f3ff', icon:'fa-chart-line',     cat:'Deferred',  sub:'Market-linked sub-account growth with optional income rider' },
+    'Hybrid Variable (IndexFlex)': { label:'Hybrid Variable Annuity (IndexFlex)', color:'#0891b2', bg:'#ecfeff', icon:'fa-balance-scale', cat:'Deferred', sub:'S&P 500 indexed with 0% floor — growth potential, no downside risk' }
+  };
+  var prod = prodMap[ad.type] || { label: ad.type, color:'#64748b', bg:'#f8fafc', icon:'fa-umbrella-beach', cat:'Deferred', sub:'' };
+
+  // ── NYL income ways section ──
+  var incomeHTML = '';
+  if (isFixed) {
+    incomeHTML =
+      '<div class="ia-ann-income-section">' +
+        '<div class="ia-ann-income-title"><i class="fas fa-hand-holding-usd"></i> You can receive guaranteed income in two ways</div>' +
+        '<div class="ia-ann-income-ways">' +
+          '<div class="ia-ann-income-card">' +
+            '<div class="ia-ann-income-card-title"><i class="fas fa-bolt" style="color:#059669"></i> Immediate income annuities</div>' +
+            '<div class="ia-ann-income-card-desc">Start to receive income now, for as long as you need it.</div>' +
+            '<div class="ia-ann-income-card-link"><i class="fas fa-arrow-right"></i> See immediate income options</div>' +
+          '</div>' +
+          '<div class="ia-ann-income-card">' +
+            '<div class="ia-ann-income-card-title"><i class="fas fa-hourglass-half" style="color:#d97706"></i> Deferred income annuities</div>' +
+            '<div class="ia-ann-income-card-desc">Receive income for life and larger payouts by delaying them for up to 40 years.</div>' +
+            '<div class="ia-ann-income-card-link"><i class="fas fa-arrow-right"></i> See deferred income options</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  } else if (isVariable) {
+    incomeHTML =
+      '<div class="ia-ann-income-section">' +
+        '<div class="ia-ann-income-title"><i class="fas fa-hand-holding-usd"></i> Guaranteed Income Options</div>' +
+        '<div class="ia-ann-income-ways">' +
+          '<div class="ia-ann-income-card">' +
+            '<div class="ia-ann-income-card-title"><i class="fas fa-umbrella" style="color:#7c3aed"></i> GMIB Rider — Guaranteed Minimum Income Benefit</div>' +
+            '<div class="ia-ann-income-card-desc">' + (ad.incomeRider || 'Optional GMIB rider available') + '</div>' +
+            '<div class="ia-ann-income-card-sub"><strong>Best for:</strong> Clients wanting guaranteed income floor regardless of market performance</div>' +
+          '</div>' +
+          '<div class="ia-ann-income-card">' +
+            '<div class="ia-ann-income-card-title"><i class="fas fa-chart-line" style="color:#059669"></i> Death Benefit Protection</div>' +
+            '<div class="ia-ann-income-card-desc">' + (ad.deathBenefit || 'Death benefit protection included') + '</div>' +
+            '<div class="ia-ann-income-card-sub"><strong>Best for:</strong> Clients who want estate protection alongside market growth</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  } else {
+    // Hybrid / IndexFlex
+    incomeHTML =
+      '<div class="ia-ann-income-section">' +
+        '<div class="ia-ann-income-title"><i class="fas fa-hand-holding-usd"></i> IndexFlex — How Growth Works</div>' +
+        '<div class="ia-ann-income-ways">' +
+          '<div class="ia-ann-income-card">' +
+            '<div class="ia-ann-income-card-title"><i class="fas fa-chart-area" style="color:#003087"></i> S&amp;P 500 Indexed Account</div>' +
+            '<div class="ia-ann-income-card-desc">' + (ad.indexedAccount || 'S&P 500 with 0% floor / 11% cap') + '</div>' +
+            '<div class="ia-ann-income-card-sub"><strong>Best for:</strong> Clients who want market-linked growth with zero downside risk</div>' +
+          '</div>' +
+          '<div class="ia-ann-income-card">' +
+            '<div class="ia-ann-income-card-title"><i class="fas fa-shield-alt" style="color:#059669"></i> Fixed Guaranteed Account</div>' +
+            '<div class="ia-ann-income-card-desc">' + (ad.fixedAccount || 'Guaranteed 3.0% fixed rate') + '</div>' +
+            '<div class="ia-ann-income-card-sub"><strong>Best for:</strong> Portion of premium seeking stable, guaranteed crediting each year</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // ── Four core benefits (NYL style) ──
+  var benefitsHTML =
+    '<div class="ia-ann-benefits">' +
+      '<div class="ia-ann-benefits-title"><i class="fas fa-star"></i> How income annuities can help in retirement</div>' +
+      '<div class="ia-ann-benefits-grid">' +
+        '<div class="ia-ann-benefit-item">' +
+          '<div class="ia-ann-benefit-icon"><i class="fas fa-lock"></i></div>' +
+          '<div class="ia-ann-benefit-name">Guaranteed income</div>' +
+          '<div class="ia-ann-benefit-desc">Your retirement savings are converted into an income stream that pays you for as long as you need</div>' +
+        '</div>' +
+        '<div class="ia-ann-benefit-item">' +
+          '<div class="ia-ann-benefit-icon"><i class="fas fa-medal"></i></div>' +
+          '<div class="ia-ann-benefit-name">Financial reliability</div>' +
+          '<div class="ia-ann-benefit-desc">NYL has been paying benefits for 178+ years and always puts clients\' financial interests first</div>' +
+        '</div>' +
+        '<div class="ia-ann-benefit-item">' +
+          '<div class="ia-ann-benefit-icon"><i class="fas fa-piggy-bank"></i></div>' +
+          '<div class="ia-ann-benefit-name">Stretching your savings</div>' +
+          '<div class="ia-ann-benefit-desc">Alleviate worries about running out of money and possibly earn more with annuities offering potential dividends</div>' +
+        '</div>' +
+        '<div class="ia-ann-benefit-item">' +
+          '<div class="ia-ann-benefit-icon"><i class="fas fa-sliders-h"></i></div>' +
+          '<div class="ia-ann-benefit-name">Personal flexibility</div>' +
+          '<div class="ia-ann-benefit-desc">Options to set the start date and amounts of income payments, based on personal needs</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  // ── Contract details grid ──
+  var contractItems = [];
+  if (ad.guaranteedRate)  contractItems.push({ lbl:'Guaranteed Rate',    val:ad.guaranteedRate   });
+  if (ad.indexedAccount)  contractItems.push({ lbl:'Indexed Account',    val:ad.indexedAccount   });
+  if (ad.fixedAccount)    contractItems.push({ lbl:'Fixed Account',      val:ad.fixedAccount     });
+  if (ad.mAndE)           contractItems.push({ lbl:'M&E Charge',         val:ad.mAndE            });
+  if (ad.fundExpenses)    contractItems.push({ lbl:'Fund Expenses',      val:ad.fundExpenses     });
+  if (ad.surrenderPeriod) contractItems.push({ lbl:'Surrender Period',   val:ad.surrenderPeriod  });
+  if (ad.deathBenefit)    contractItems.push({ lbl:'Death Benefit',      val:ad.deathBenefit     });
+  if (ad.incomeRider)     contractItems.push({ lbl:'Income Rider',       val:ad.incomeRider      });
+  if (ad.taxStatus)       contractItems.push({ lbl:'Tax Treatment',      val:ad.taxStatus        });
+
+  var contractHTML = contractItems.map(function(c) {
+    return '<div class="ia-ann-contract-row"><span class="ia-ann-contract-lbl">' + c.lbl + '</span><span class="ia-ann-contract-val">' + c.val + '</span></div>';
+  }).join('');
+
+  // ── Projection table (illustrative) ──
+  var projRows = '';
+  var base = a.aum;
+  if (isFixed && ad.guaranteedRate) {
+    var rate = parseFloat(ad.guaranteedRate) / 100 || 0.0475;
+    [1,3,5,10].forEach(function(yr) {
+      var val = Math.round(base * Math.pow(1 + rate, yr));
+      projRows += '<tr><td>' + yr + ' yr</td><td>$' + val.toLocaleString() + '</td><td>' + (rate*100).toFixed(2) + '%</td><td style="color:#059669">Protected</td></tr>';
+    });
+  } else if (isHybrid) {
+    [[1,7.2,0],[3,6.5,0],[5,7.0,0],[10,6.8,0]].forEach(function(r) {
+      var val = Math.round(base * Math.pow(1 + r[1]/100, r[0]));
+      projRows += '<tr><td>' + r[0] + ' yr</td><td>$' + val.toLocaleString() + '</td><td>' + r[1] + '%</td><td style="color:#059669">0% floor</td></tr>';
+    });
+  } else if (isVariable) {
+    [[1,9.8,8],[3,8.5,7],[5,9.2,8],[10,8.8,7.5]].forEach(function(r) {
+      var val = Math.round(base * Math.pow(1 + r[1]/100, r[0]));
+      projRows += '<tr><td>' + r[0] + ' yr</td><td>$' + val.toLocaleString() + '</td><td>' + r[1] + '%</td><td style="color:#0891b2">' + r[2] + '% benchmark</td></tr>';
+    });
+  }
+
+  var projHTML = projRows ? (
+    '<div class="ia-ann-proj">' +
+      '<div class="ia-ann-proj-title"><i class="fas fa-chart-bar"></i> Illustrative Projection</div>' +
+      '<table class="ia-ann-proj-table">' +
+        '<thead><tr><th>Year</th><th>Est. Value</th><th>Rate</th><th>Protection</th></tr></thead>' +
+        '<tbody>' + projRows + '</tbody>' +
+      '</table>' +
+      '<div class="ia-ann-proj-note"><i class="fas fa-info-circle"></i> Illustration only — actual results may vary. Past performance not guaranteed.</div>' +
+    '</div>'
+  ) : '';
+
+  return '<div class="ia-annuity-tab">' +
+
+    // Product header
+    '<div class="ia-ann-prod-header" style="background:' + prod.bg + ';border-left:4px solid ' + prod.color + '">' +
+      '<div class="ia-ann-prod-icon" style="background:' + prod.color + '"><i class="fas ' + prod.icon + '"></i></div>' +
+      '<div class="ia-ann-prod-info">' +
+        '<div class="ia-ann-prod-name">' + prod.label + '</div>' +
+        '<div class="ia-ann-prod-sub">' + prod.sub + '</div>' +
+        '<div class="ia-ann-prod-cat"><i class="fas fa-tag"></i> ' + prod.cat + ' Annuity · Tax-Deferred · NYL</div>' +
+      '</div>' +
+    '</div>' +
+
+    // Income ways
+    incomeHTML +
+
+    // Contract details
+    '<div class="ia-ann-contract">' +
+      '<div class="ia-ann-contract-title"><i class="fas fa-file-contract"></i> Contract Details</div>' +
+      contractHTML +
+    '</div>' +
+
+    // Illustrative projection
+    projHTML +
+
+    // Core benefits
+    benefitsHTML +
+
+    // Action row
+    '<div class="ia-ann-action-row">' +
+      '<button class="ia-ann-action-btn primary" onclick="iaGenerateReport(\'' + a.id + '\')"><i class="fas fa-file-pdf"></i> Generate Illustration</button>' +
+      '<button class="ia-ann-action-btn ghost"   onclick="iaSwitchTab(\'ai\',null)"><i class="fas fa-robot"></i> AI Insights</button>' +
+      (a.rmdDue ? '<button class="ia-ann-action-btn ghost" onclick="iaProcessRMD(\'' + a.id + '\')"><i class="fas fa-calendar-check"></i> Process RMD</button>' : '') +
     '</div>' +
 
   '</div>';
@@ -35762,31 +36091,75 @@ function iaCloseNewAccount() {
 }
 
 function iaRenderNewAccountForm() {
-  var accountTypes = [
-    { type:'ETF Portfolio',             icon:'fa-chart-area',     fee:'0.35%', min:'$10K',  desc:'Low-cost passive ETF model portfolio — diversified index funds' },
-    { type:'Mutual Fund Portfolio',     icon:'fa-coins',          fee:'0.80%', min:'$5K',   desc:'Diversified MainStay mutual fund portfolio — actively managed' },
-    { type:'IRA (Traditional)',         icon:'fa-piggy-bank',     fee:'0.75%', min:'$5K',   desc:'Pre-tax retirement savings · RMD required at age 73' },
-    { type:'IRA (Roth)',                icon:'fa-sun',            fee:'0.75%', min:'$5K',   desc:'After-tax contributions · tax-free growth · no RMD' },
-    { type:'IRA (SEP)',                 icon:'fa-briefcase',      fee:'0.75%', min:'$5K',   desc:'Self-employed retirement · higher contribution limits' },
-    { type:'529 College Savings',       icon:'fa-graduation-cap', fee:'0.50%', min:'$1K',   desc:'Tax-advantaged education savings · NY state deduction available' },
-    { type:'Joint Brokerage',           icon:'fa-users',          fee:'0.65%', min:'$25K',  desc:'Jointly held taxable account · flexible withdrawals' },
-    { type:'Fixed Deferred Annuity',    icon:'fa-shield-alt',     fee:'0.00%', min:'$10K',  desc:'Guaranteed rate growth · tax-deferred · principal protection · no market risk' },
-    { type:'Variable Annuity',          icon:'fa-chart-line',     fee:'1.50%', min:'$25K',  desc:'Market-linked growth in sub-accounts · death benefit · optional GMIB income rider' },
-    { type:'Hybrid Variable Annuity',   icon:'fa-balance-scale',  fee:'1.50%', min:'$25K',  desc:'IndexFlex — S&P 500 indexed with 0% floor · no downside risk · growth potential' }
+  var nonAnnuityTypes = [
+    { type:'ETF Portfolio',         icon:'fa-chart-area',     fee:'0.35%', min:'$10K',  desc:'Low-cost passive ETF model portfolio — diversified index funds' },
+    { type:'Mutual Fund Portfolio', icon:'fa-coins',          fee:'0.80%', min:'$5K',   desc:'Diversified MainStay mutual fund portfolio — actively managed' },
+    { type:'IRA (Traditional)',     icon:'fa-piggy-bank',     fee:'0.75%', min:'$5K',   desc:'Pre-tax retirement savings · RMD required at age 73' },
+    { type:'IRA (Roth)',            icon:'fa-sun',            fee:'0.75%', min:'$5K',   desc:'After-tax contributions · tax-free growth · no RMD' },
+    { type:'IRA (SEP)',             icon:'fa-briefcase',      fee:'0.75%', min:'$5K',   desc:'Self-employed retirement · higher contribution limits' },
+    { type:'529 College Savings',   icon:'fa-graduation-cap', fee:'0.50%', min:'$1K',   desc:'Tax-advantaged education savings · NY state deduction available' },
+    { type:'Joint Brokerage',       icon:'fa-users',          fee:'0.65%', min:'$25K',  desc:'Jointly held taxable account · flexible withdrawals' }
   ];
+
+  // NYL Annuity lineup — Immediate Income
+  var immediateAnnuities = [
+    { type:'Guaranteed Lifetime Income Annuity', icon:'fa-infinity',      fee:'0.00%', min:'$10K',
+      desc:'Income starts now and will be paid in consistent, predictable amounts for the rest of your life.',
+      bestFor:'Those who want dependable income right away and prefer guaranteed payments that last as long as they live' },
+    { type:'Lifetime Mutual Income Annuity',     icon:'fa-hands-helping', fee:'0.00%', min:'$10K',
+      desc:'Steady payments for life, plus the potential for dividend payments.',
+      bestFor:'Individuals who value lifetime income and want the opportunity for growth through dividends' },
+    { type:'Guaranteed Period Income Annuity',   icon:'fa-calendar-check',fee:'0.00%', min:'$5K',
+      desc:'Income for a set period, like bridging the gap until Social Security payments start.',
+      bestFor:'People who need income for a specific time frame — like early retirees waiting for other benefits to begin' }
+  ];
+
+  // NYL Annuity lineup — Deferred Income
+  var deferredAnnuities = [
+    { type:'Guaranteed Future Income Annuity',     icon:'fa-shield-alt',    fee:'0.00%', min:'$10K',
+      desc:'Lifetime income that won\'t fluctuate with financial markets, plus a variety of payout options.',
+      bestFor:'People who want predictable, guaranteed income for life without market risk' },
+    { type:'Future Mutual Income Annuity',         icon:'fa-chart-pie',     fee:'0.00%', min:'$10K',
+      desc:'Designed for people looking for protected lifetime income with some liquidity (ability to withdraw cash).',
+      bestFor:'Individuals seeking steady income with the potential for growth through dividends' },
+    { type:'Clear Income Advantage Fixed Annuity', icon:'fa-lock',          fee:'0.00%', min:'$10K',
+      desc:'Designed for people looking for protected lifetime income with some liquidity.',
+      bestFor:'Clients who want flexibility alongside guaranteed income protection' },
+    { type:'Variable Annuity',                     icon:'fa-chart-line',    fee:'1.50%', min:'$25K',
+      desc:'Market-linked sub-account growth with death benefit and optional GMIB income rider.',
+      bestFor:'Clients comfortable with market exposure who want upside potential plus income protection' },
+    { type:'Hybrid Variable Annuity (IndexFlex)',  icon:'fa-balance-scale', fee:'1.50%', min:'$25K',
+      desc:'S&P 500 indexed with 0% floor / 11% cap — market-linked growth with zero downside risk.',
+      bestFor:'Clients who want market-linked growth potential with full principal protection' }
+  ];
+
+  function renderAnnuityCards(arr, color) {
+    return arr.map(function(t) {
+      return '<div class="ia-naf-type-card ia-naf-annuity-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')" style="border-color:' + color + '60">' +
+        '<div class="ia-naf-type-icon" style="background:' + color + '18;color:' + color + '"><i class="fas ' + t.icon + '"></i></div>' +
+        '<div class="ia-naf-type-name">' + t.type + '</div>' +
+        '<div class="ia-naf-type-desc">' + t.desc + '</div>' +
+        '<div class="ia-naf-type-best"><i class="fas fa-user-check" style="color:' + color + '"></i> <strong>Best for:</strong> ' + t.bestFor + '</div>' +
+        '<div class="ia-naf-type-meta">' +
+          '<span class="ia-naf-type-fee">Fee: ' + t.fee + '</span>' +
+          '<span class="ia-naf-type-min">Min: ' + t.min + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
 
   return '<div class="ia-naf-form">' +
 
-    /* ── AI Recommendation Banner ── */
+    /* AI Recommendation Banner */
     '<div class="ia-naf-ai-banner">' +
       '<div class="ia-naf-ai-icon"><i class="fas fa-robot"></i></div>' +
       '<div class="ia-naf-ai-content">' +
         '<div class="ia-naf-ai-title">AI Account Recommendation <span class="ia-naf-ai-live">LIVE</span></div>' +
-        '<div class="ia-naf-ai-text">Based on client profile analysis: <strong>Advisory (UMA)</strong> recommended for growth-oriented clients with $50K+ AUM. <strong>IRA (Traditional)</strong> for clients within 15 years of retirement. <strong>529</strong> if children under 18 with college funding goal.</div>' +
+        '<div class="ia-naf-ai-text">Based on client profile: <strong>Guaranteed Lifetime Income Annuity</strong> for clients near retirement with income gaps. <strong>IndexFlex</strong> for growth-oriented clients wanting 0% downside risk. <strong>IRA</strong> for clients within 15 years of retirement.</div>' +
       '</div>' +
     '</div>' +
 
-    /* ── Progress Steps ── */
+    /* Progress Steps */
     '<div class="ia-naf-step-bar">' +
       '<div class="ia-naf-step ia-naf-step-active"><span>1</span> Account Type</div>' +
       '<div class="ia-naf-step"><span>2</span> Client Profile</div>' +
@@ -35795,11 +36168,11 @@ function iaRenderNewAccountForm() {
       '<div class="ia-naf-step"><span>5</span> Funding</div>' +
     '</div>' +
 
-    /* ── Step 1: Account Type ── */
+    /* Step 1: Non-annuity account types */
     '<div class="ia-naf-section">' +
       '<div class="ia-naf-section-title"><i class="fas fa-folder-open"></i> Step 1 — Select Account Type</div>' +
       '<div class="ia-naf-type-grid">' +
-        accountTypes.map(function(t) {
+        nonAnnuityTypes.map(function(t) {
           return '<div class="ia-naf-type-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')">' +
             '<div class="ia-naf-type-icon"><i class="fas ' + t.icon + '"></i></div>' +
             '<div class="ia-naf-type-name">' + t.type + '</div>' +
@@ -35812,6 +36185,51 @@ function iaRenderNewAccountForm() {
         }).join('') +
       '</div>' +
     '</div>' +
+
+    /* Annuity section — NYL income annuity lineup */
+    '<div class="ia-naf-section ia-naf-annuity-section">' +
+
+      '<div class="ia-naf-annuity-hdr">' +
+        '<div class="ia-naf-annuity-hdr-icon"><i class="fas fa-umbrella-beach"></i></div>' +
+        '<div class="ia-naf-annuity-hdr-text">' +
+          '<div class="ia-naf-annuity-hdr-title">How income annuities can help in retirement</div>' +
+          '<div class="ia-naf-annuity-hdr-sub">Whether getting close to retirement or already retired — select an income annuity that protects savings while supporting lifestyle</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="ia-naf-ann-benefits-strip">' +
+        '<div class="ia-naf-ann-benefit"><i class="fas fa-lock"></i><span><strong>Guaranteed income</strong> — pays for as long as you need</span></div>' +
+        '<div class="ia-naf-ann-benefit"><i class="fas fa-medal"></i><span><strong>Financial reliability</strong> — NYL paying benefits 178+ years</span></div>' +
+        '<div class="ia-naf-ann-benefit"><i class="fas fa-piggy-bank"></i><span><strong>Stretch savings</strong> — alleviate running-out-of-money risk</span></div>' +
+        '<div class="ia-naf-ann-benefit"><i class="fas fa-sliders-h"></i><span><strong>Personal flexibility</strong> — set start date and amounts</span></div>' +
+      '</div>' +
+
+      '<div class="ia-naf-ann-ways-label"><i class="fas fa-arrows-alt-h"></i> You can receive guaranteed income in two ways</div>' +
+
+      '<div class="ia-naf-ann-way-block">' +
+        '<div class="ia-naf-ann-way-hdr ia-naf-ann-way-immediate">' +
+          '<div class="ia-naf-ann-way-icon" style="background:#059669"><i class="fas fa-bolt"></i></div>' +
+          '<div>' +
+            '<div class="ia-naf-ann-way-name">Immediate income annuities</div>' +
+            '<div class="ia-naf-ann-way-sub">Start to receive income now, for as long as you need it.</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ia-naf-type-grid ia-naf-ann-grid">' + renderAnnuityCards(immediateAnnuities, '#059669') + '</div>' +
+      '</div>' +
+
+      '<div class="ia-naf-ann-way-block">' +
+        '<div class="ia-naf-ann-way-hdr ia-naf-ann-way-deferred">' +
+          '<div class="ia-naf-ann-way-icon" style="background:#d97706"><i class="fas fa-hourglass-half"></i></div>' +
+          '<div>' +
+            '<div class="ia-naf-ann-way-name">Deferred income annuities</div>' +
+            '<div class="ia-naf-ann-way-sub">Receive income for life and larger payouts by delaying them for up to 40 years.</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ia-naf-type-grid ia-naf-ann-grid">' + renderAnnuityCards(deferredAnnuities, '#d97706') + '</div>' +
+      '</div>' +
+
+    '</div>' +
+
 
     /* ── Step 2: Client ── */
     '<div class="ia-naf-section">' +

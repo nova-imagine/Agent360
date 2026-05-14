@@ -589,6 +589,20 @@ function Sidebar() {
           <i class="fas fa-box-open"></i><span>Policy Delivery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">2</span>
         </a>
+        {/* micro-divider: pre-sale → post-sale */}
+        <div class="nav-micro-divider"></div>
+        <a class="nav-item" onclick="navigateTo('policies')" href="#">
+          <i class="fas fa-file-contract"></i><span>Policies</span>
+          <span class="nav-badge">1.8K</span>
+        </a>
+        <a class="nav-item alerts-nav" onclick="navigateTo('alerts')" href="#">
+          <i class="fas fa-bell"></i><span>Policy Alerts</span>
+          <span class="nav-badge alert" id="alerts-nav-badge">4</span>
+        </a>
+        <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
+          <i class="fas fa-file-medical-alt"></i><span>Claims</span>
+          <span class="nav-badge alert">7</span>
+        </a>
 
         {/* ── INVESTMENTS ── */}
         <div class="nav-section-label">INVESTMENTS</div>
@@ -619,21 +633,6 @@ function Sidebar() {
         <a class="nav-item adv-smallbiz-nav" onclick="navigateTo('adv-smallbiz')" href="#">
           <i class="fas fa-briefcase"></i><span>Small Business</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff">2</span>
-        </a>
-
-        {/* ── SERVICE ── */}
-        <div class="nav-section-label">SERVICE</div>
-        <a class="nav-item" onclick="navigateTo('policies')" href="#">
-          <i class="fas fa-file-contract"></i><span>Policies</span>
-          <span class="nav-badge">1.8K</span>
-        </a>
-        <a class="nav-item alerts-nav" onclick="navigateTo('alerts')" href="#">
-          <i class="fas fa-bell"></i><span>Policy Alerts</span>
-          <span class="nav-badge alert" id="alerts-nav-badge">4</span>
-        </a>
-        <a class="nav-item claims-nav" onclick="navigateTo('claims')" href="#">
-          <i class="fas fa-file-medical-alt"></i><span>Claims</span>
-          <span class="nav-badge alert">7</span>
         </a>
 
         {/* ── ANALYTICS ── */}
