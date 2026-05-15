@@ -765,7 +765,7 @@ function Sidebar() {
           <span class="nav-badge alert">3</span>
         </a>
 
-        {/* ── MARKETING (Phase 1) ── */}
+        {/* ── MARKETING ── */}
         <div class="nav-section-label">MARKETING</div>
         <a class="nav-item leads-nav" onclick="navigateTo('leads')" href="#">
           <i class="fas fa-user-plus"></i><span>Leads</span>
@@ -775,16 +775,16 @@ function Sidebar() {
           <i class="fas fa-bullhorn"></i><span>Campaigns</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">5</span>
         </a>
-        <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
-          <i class="fas fa-user-clock"></i><span>Prospects</span>
-          <span class="nav-badge" style="background:#7c3aed;color:#fff">14</span>
-        </a>
 
         {/* ── SALES ── */}
         <div class="nav-section-label">SALES</div>
         <a class="nav-item" onclick="navigateTo('fna')" href="#">
           <i class="fas fa-clipboard-list"></i><span>FNA Discovery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">3</span>
+        </a>
+        <a class="nav-item prospects-nav" onclick="navigateTo('prospects')" href="#">
+          <i class="fas fa-user-clock"></i><span>Prospects</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">14</span>
         </a>
         <a class="nav-item" onclick="navigateTo('products')" href="#">
           <i class="fas fa-flask"></i><span>Products &amp; Illustrations</span>
@@ -4144,8 +4144,8 @@ function ProspectsPage() {
       {/* ── Header ── */}
       <div class="prospects-header">
         <div class="ph-left">
-          <h2 class="ph-title"><i class="fas fa-user-clock"></i> Leads Pipeline</h2>
-          <p class="ph-sub">15 active leads · AI-scored · 3rd-party data enriched · $284K pipeline value</p>
+          <h2 class="ph-title"><i class="fas fa-user-clock"></i> Prospect Pipeline</h2>
+          <p class="ph-sub">FNA-qualified · AI-enriched · 3rd-party data + propensity models · $284K pipeline value</p>
         </div>
         <div class="ph-actions">
           <button class="btn btn-ai" onclick="openProspectAIAnalysis()"><i class="fas fa-robot"></i> AI Lead Score All</button>
@@ -4181,31 +4181,36 @@ function ProspectsPage() {
         </div>
       </div>
 
-      {/* ── AI Workflow Guidance Banner (Phase 1–2) ── */}
+      {/* ── AI Workflow Pipeline Banner ── */}
       <div class="prosp-workflow-strip">
-        <div class="prosp-wf-step active" onclick="navigateTo('campaigns')">
-          <div class="prosp-wf-num">1</div>
-          <div class="prosp-wf-body"><div class="prosp-wf-title">Campaigns</div><div class="prosp-wf-sub">Generate leads</div></div>
+        <div class="prosp-wf-step done" onclick="navigateTo('leads')">
+          <div class="prosp-wf-num done"><i class="fas fa-check"></i></div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">Leads</div><div class="prosp-wf-sub">AI score + PMAIL qualify</div></div>
           <i class="fas fa-chevron-right prosp-wf-arrow"></i>
         </div>
-        <div class="prosp-wf-step active" onclick="navigateTo('prospects')">
-          <div class="prosp-wf-num">2</div>
-          <div class="prosp-wf-body"><div class="prosp-wf-title">Qualify Lead</div><div class="prosp-wf-sub">AI score + PMAIL</div></div>
+        <div class="prosp-wf-step done" onclick="navigateTo('campaigns')">
+          <div class="prosp-wf-num done"><i class="fas fa-check"></i></div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">Campaigns</div><div class="prosp-wf-sub">Outreach + response</div></div>
           <i class="fas fa-chevron-right prosp-wf-arrow"></i>
         </div>
-        <div class="prosp-wf-step" onclick="navigateTo('fna')">
-          <div class="prosp-wf-num">3</div>
+        <div class="prosp-wf-step done" onclick="navigateTo('fna')">
+          <div class="prosp-wf-num done"><i class="fas fa-check"></i></div>
           <div class="prosp-wf-body"><div class="prosp-wf-title">FNA Discovery</div><div class="prosp-wf-sub">Fact-find + gap analysis</div></div>
           <i class="fas fa-chevron-right prosp-wf-arrow"></i>
         </div>
-        <div class="prosp-wf-step" onclick="navigateTo('products')">
+        <div class="prosp-wf-step active" onclick="navigateTo('prospects')">
           <div class="prosp-wf-num">4</div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">Prospect</div><div class="prosp-wf-sub">Enriched · AI-modeled · Ready</div></div>
+          <i class="fas fa-chevron-right prosp-wf-arrow"></i>
+        </div>
+        <div class="prosp-wf-step" onclick="navigateTo('products')">
+          <div class="prosp-wf-num">5</div>
           <div class="prosp-wf-body"><div class="prosp-wf-title">Illustration</div><div class="prosp-wf-sub">Product + proposal</div></div>
           <i class="fas fa-chevron-right prosp-wf-arrow"></i>
         </div>
-        <div class="prosp-wf-step" onclick="navigateTo('opportunities')">
-          <div class="prosp-wf-num">5</div>
-          <div class="prosp-wf-body"><div class="prosp-wf-title">Opportunity</div><div class="prosp-wf-sub">Submit E-App</div></div>
+        <div class="prosp-wf-step" onclick="navigateTo('eapp-submissions')">
+          <div class="prosp-wf-num">6</div>
+          <div class="prosp-wf-body"><div class="prosp-wf-title">E-App</div><div class="prosp-wf-sub">Submit + underwrite</div></div>
         </div>
       </div>
 
@@ -4215,7 +4220,7 @@ function ProspectsPage() {
           <i class="fas fa-brain prosp-ai-icon"></i>
           <div>
             <div class="prosp-ai-title">AI Prospect Intelligence <span class="prosp-ai-live">LIVE</span></div>
-            <div class="prosp-ai-sub">3rd-party enrichment active: Wealth Data · Business Registry · Credit Signals · Social Footprint · Life Events · Public Records</div>
+            <div class="prosp-ai-sub">Enrichment pipeline: Lead record → FNA completion → AI model runs → 3rd-party ingestion (Wealth · Credit · Life Events · Business · Social) → Prospect created</div>
           </div>
         </div>
         <div class="prosp-ai-chips">
@@ -4709,6 +4714,7 @@ function ProspectsPage() {
           <div class="prosp-modal-header" id="prosp-modal-header"></div>
           <div class="prosp-modal-tabs" id="prosp-modal-tabs">
             <button class="pmt active" data-tab="overview"   onclick="switchProspectTab('overview',this)"><i class="fas fa-user"></i> Overview</button>
+            <button class="pmt pmt-enrichment" data-tab="enrichment" onclick="switchProspectTab('enrichment',this)"><i class="fas fa-atom"></i> AI Enrichment</button>
             <button class="pmt" data-tab="thirdparty"         onclick="switchProspectTab('thirdparty',this)"><i class="fas fa-satellite-dish"></i> 3rd-Party Intel</button>
             <button class="pmt" data-tab="financial"          onclick="switchProspectTab('financial',this)"><i class="fas fa-chart-pie"></i> Financial Health</button>
             <button class="pmt" data-tab="goals"              onclick="switchProspectTab('goals',this)"><i class="fas fa-bullseye"></i> Goals</button>

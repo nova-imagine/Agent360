@@ -20,7 +20,7 @@ function navigateTo(page) {
   const titles = {
     dashboard: 'Dashboard',
     clients: 'Client 360',
-    prospects: 'Leads Pipeline',
+    prospects: 'Prospect Pipeline',
     policies: 'Policy Management',
     'ai-agents': 'AI Agent Hub',
     campaigns: 'Campaigns',
@@ -51,7 +51,7 @@ function navigateTo(page) {
   const breadcrumbs = {
     dashboard: 'Home / Dashboard',
     clients: 'Home / Client 360',
-    prospects: 'Home / Marketing / Prospects',
+    prospects: 'Home / Sales / Prospects',
     policies: 'Home / Policies',
     'ai-agents': 'Home / AI Agents',
     campaigns: 'Home / Marketing / Campaigns',
@@ -19354,7 +19354,29 @@ const prospectData = {
       { date: 'Apr 7', title: 'WL Illustration Sent', desc: 'AI-generated $500K WL at Preferred rate', status: 'done' },
       { date: 'Apr 12', title: 'In-Person Meeting — TODAY', desc: 'Product presentation + e-app target', status: 'current' },
       { date: 'Apr 15', title: 'E-App Submission Target', desc: 'Submit to UW — Preferred Plus likely', status: 'future' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L001', sourceLeadName: 'Alex Rivera',
+      sourceCampaign: null, sourceCampaignName: 'Organic — Referral (Robert Chen)',
+      fnaDate: 'Apr 3, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Discovery call confirmed budget $350+/mo, WL interest strong, no existing coverage beyond group term. Promotion trigger identified as primary urgency driver.',
+      enrichedAt: 'Apr 3, 2026 · 6:18 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'Dun & Bradstreet Wealth Signals', type: 'wealth', status: 'ok', detail: 'Net worth $340K · Investable assets $95K · Wealth tier: Mass Affluent', refreshed: 'Apr 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 760 · DTI 28% · Clean file · 0 missed payments', refreshed: 'Apr 2026' },
+        { name: 'Experian ConsumerView', type: 'lifestyle', status: 'ok', detail: 'Young Professional · High digital savvy · Est. spend $68K/yr', refreshed: 'Apr 2026' },
+        { name: 'LinkedIn Profile Monitor', type: 'social', status: 'ok', detail: 'Active · 1,200 connections · Promotion confirmed Jan 2026', refreshed: 'Apr 10, 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 47 closed cases · WL primary 89% · DI add-on 61%', refreshed: 'Apr 3, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 88, pmailTotal: 100, closePct: 82,
+        topDomain: 'ins', domainScores: { ins: 88, inv: 42, ret: 18, adv: 15 },
+        recommendedSequence: ['Whole Life $500K (Primary)', 'Disability Insurance $7K/mo (Upsell @ close)', '529 Plan (3-yr flag)'],
+        keyInsight: 'Referral-sourced prospects at this income tier close WL 89% of the time when meeting is scheduled within 14 days of referral. Meeting is Apr 12 — day 15. Urgency is high.',
+        riskFlags: ['Competitor quote from Prudential detected (social mention)', 'Spouse not yet engaged — may request second meeting']
+      }
+    }
   },
 
   P002: {
@@ -19443,7 +19465,29 @@ const prospectData = {
       { date: 'Apr 4', title: 'Discovery Call', desc: 'Confirmed interest — 2 dependents, no current coverage', status: 'done' },
       { date: 'Apr 6', title: 'Proposal Sent', desc: 'Term $1M + LTC rider — $3,600/yr illustrated', status: 'done' },
       { date: 'Apr 13', title: 'Follow-Up Due — OVERDUE', desc: '11 days with no response — action needed', status: 'current' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L002', sourceLeadName: 'Nancy Foster',
+      sourceCampaign: 'CAM003', sourceCampaignName: 'Term Life — Young Families',
+      fnaDate: 'Apr 4, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Discovery call revealed 2 dependents under age 5, $530K new mortgage, zero life coverage. Confirmed $195K income and 11-day stall on proposal follow-up.',
+      enrichedAt: 'Apr 4, 2026 · 7:02 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'CoreLogic Mortgage & Property Data', type: 'wealth', status: 'ok', detail: 'Net worth $620K · Mortgage $530K (new Mar 2026) · Home equity $210K', refreshed: 'Apr 2026' },
+        { name: 'TransUnion TrueRisk', type: 'credit', status: 'ok', detail: 'Score 718 · DTI 41% (new mortgage) · 0 missed payments', refreshed: 'Apr 2026' },
+        { name: 'LexisNexis Consumer Data', type: 'lifestyle', status: 'ok', detail: 'New homeowner · 2 dependents · Healthcare professional', refreshed: 'Apr 2026' },
+        { name: 'Vital Records Monitor', type: 'events', status: 'ok', detail: 'Mortgage filing confirmed Mar 2026 · Homeowner flag active', refreshed: 'Apr 5, 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 38 closed cases · Term $750K–$1M primary 74% · LTC rider 45%', refreshed: 'Apr 4, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 82, pmailTotal: 96, closePct: 61,
+        topDomain: 'ins', domainScores: { ins: 82, inv: 18, ret: 34, adv: 12 },
+        recommendedSequence: ['Term Life $1M (Primary)', 'LTC Rider (Bundle at delivery)', 'Annuity (Pre-retirement — 10-yr flag)'],
+        keyInsight: 'New homeowner with $530K mortgage and 2 dependents, zero life coverage detected. Proposal sent Apr 6 — 11 days without reply. Mortgage protection urgency is the strongest re-engagement hook.',
+        riskFlags: ['11 days no response — deal at cold risk', 'DTI 41% may affect affordability perception — lead with monthly cost frame']
+      }
+    }
   },
 
   P003: {
@@ -19532,7 +19576,29 @@ const prospectData = {
       { date: 'Mar 27', title: 'Discovery Call', desc: 'Confirmed zero DI, income $220K, interested', status: 'done' },
       { date: 'Mar 29', title: 'APS Ordered', desc: 'Full medical records requested — delay began', status: 'done' },
       { date: 'Apr 13', title: 'RE-ENGAGE REQUIRED', desc: '15 days stale — contact today or deal goes cold', status: 'current' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L003', sourceLeadName: 'John Kim',
+      sourceCampaign: null, sourceCampaignName: 'LinkedIn Outreach — DI Gap Campaign',
+      fnaDate: 'Mar 27, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Discovery call confirmed zero DI coverage on $220K income, ESPP vesting $42K this quarter, interested in DI + possible investment account.',
+      enrichedAt: 'Mar 27, 2026 · 5:44 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'LinkedIn Wealth Signals', type: 'wealth', status: 'ok', detail: 'Net worth est. $580K · Stock portfolio $95K · ESPP vesting Q2 2026', refreshed: 'Mar 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 742 · DTI 22% · Clean file · Excellent capacity', refreshed: 'Mar 2026' },
+        { name: 'LinkedIn Profile Monitor', type: 'social', status: 'warn', detail: 'Active · 3,100 connections · ESPP vest confirmed via company SEC filing', refreshed: 'Mar 27, 2026' },
+        { name: 'Medical Records (APS)', type: 'health', status: 'warn', detail: 'APS ordered Mar 29 — pending · Minor health flag possible', refreshed: 'Pending' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 29 closed cases · DI primary 66% · Investment account add-on 38%', refreshed: 'Mar 27, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 62, pmailTotal: 88, closePct: 44,
+        topDomain: 'inv', domainScores: { ins: 62, inv: 81, ret: 44, adv: 20 },
+        recommendedSequence: ['Disability Insurance $14K/mo (Primary)', 'Investment Account — ESPP rollover (Bundle)', 'Roth IRA (Annual contribution)'],
+        keyInsight: 'APS delay is the stall driver — 15 days with no contact creates cold-lead risk. ESPP vesting creates a 30-day window for investment conversation. Re-engage today with DI + ESPP dual value prop.',
+        riskFlags: ['APS pending — underwriting delay risk', '15-day stall — re-engage today or lose deal', 'ESPP vest window closes Q2 end']
+      }
+    }
   },
 
   P004: {
@@ -19624,7 +19690,29 @@ const prospectData = {
       { date: 'Apr 8', title: 'Lab Results — CLEAR', desc: 'Minor cholesterol flag — Preferred still OK', status: 'done' },
       { date: 'Apr 12', title: 'Attorney Review Complete', desc: 'Beneficiary clause confirmed — ready to close', status: 'current' },
       { date: 'Apr 13', title: 'CLOSE TODAY', desc: 'Call + e-app + DocuSign', status: 'future' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L004', sourceLeadName: 'Michael Santos',
+      sourceCampaign: null, sourceCampaignName: 'Referral — Linda Morrison',
+      fnaDate: 'Mar 22, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Estate planning review revealed key-person gap and buy-sell need. Business grew 22% last year, 4 new employees, zero key-person coverage. Attorney engaged for beneficiary clause.',
+      enrichedAt: 'Mar 22, 2026 · 4:15 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'Dun & Bradstreet Business Registry', type: 'business', status: 'ok', detail: 'Santos Tech Solutions LLC · 4 employees · Revenue $2.1M · Founded 2019', refreshed: 'Mar 2026' },
+        { name: 'Dun & Bradstreet Wealth Signals', type: 'wealth', status: 'ok', detail: 'Net worth est. $1.8M · Business assets $1.2M · Investable $320K', refreshed: 'Mar 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 788 · DTI 18% · Excellent · 0 derogatory', refreshed: 'Mar 2026' },
+        { name: 'Secretary of State — LLC Filings', type: 'public', status: 'ok', detail: 'Santos Tech Solutions active · 3 LLCs registered 2019–2024', refreshed: 'Mar 22, 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 22 closed cases · Key-Person Life 95% · Buy-Sell funding 82%', refreshed: 'Mar 22, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 96, pmailTotal: 96, closePct: 91,
+        topDomain: 'ins', domainScores: { ins: 96, inv: 28, ret: 22, adv: 78 },
+        recommendedSequence: ['Key-Person UL $750K (Primary)', 'Buy-Sell Agreement Funding (Advisory bundle)', 'Business Succession Plan (6-month follow-up)'],
+        keyInsight: 'Attorney review complete, beneficiary confirmed — this is a same-day close. 91% close probability on key-person + buy-sell combination for this business-owner profile.',
+        riskFlags: ['Attorney may request minor clause revision — have DocuSign ready', 'Business partner not yet engaged for buy-sell second signature']
+      }
+    }
   },
 
   P005: {
@@ -19713,7 +19801,29 @@ const prospectData = {
       { date: 'Mar 21', title: 'Follow-Up Call', desc: 'Discovery — CD maturing May, $420K investable', status: 'done' },
       { date: 'Apr 2', title: 'Proposal Sent', desc: 'Fixed annuity $120K + income annuity illustration', status: 'done' },
       { date: 'Apr 13', title: 'FOLLOW-UP OVERDUE', desc: '11 days, no reply — call today (CD urgency)', status: 'current' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L005', sourceLeadName: 'Julia Chen',
+      sourceCampaign: 'CAM005', sourceCampaignName: 'NYL Retirement Workshop Seminar',
+      fnaDate: 'Mar 21, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Discovery call revealed $180K CD maturing May 2026 at 4.8%, $420K investable assets, pension $78K/yr. Annuity rate comparison is primary close driver — urgent before CD auto-renews.',
+      enrichedAt: 'Mar 21, 2026 · 2:30 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'Dun & Bradstreet Wealth Signals', type: 'wealth', status: 'ok', detail: 'Net worth $820K · CD $180K maturing May · Investable $420K · Retired', refreshed: 'Mar 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 801 · DTI 12% · Exceptional · Zero debt exposure', refreshed: 'Mar 2026' },
+        { name: 'Bank CD Monitor (AI)', type: 'financial', status: 'ok', detail: 'CD maturity date: May 14, 2026 · Auto-renewal risk if no action by May 7', refreshed: 'Apr 10, 2026' },
+        { name: 'Experian ConsumerView', type: 'lifestyle', status: 'ok', detail: 'Retired homeowner · Hoboken, NJ · Conservative investor profile', refreshed: 'Mar 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 31 closed cases · Fixed annuity primary 71% · Income rider add-on 52%', refreshed: 'Mar 21, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 91, pmailTotal: 84, closePct: 58,
+        topDomain: 'ret', domainScores: { ins: 38, inv: 45, ret: 91, adv: 22 },
+        recommendedSequence: ['Fixed Annuity $120K (Primary — CD replacement)', 'Immediate Annuity Income Rider (Bundle)', 'Income Planning (Annual review follow-up)'],
+        keyInsight: 'CD matures May 14 — 31 days away. If Julia does not act, CD auto-renews at 4.8% and annuity window closes for 1 year. Call today with rate comparison: annuity 6.1% vs CD 4.8% = $2,340/yr more income.',
+        riskFlags: ['11-day proposal stall — CD urgency window closing', 'CD auto-renews May 14 if no decision — creates 12-month re-engagement delay']
+      }
+    }
   },
 
   P006: {
@@ -19892,7 +20002,29 @@ const prospectData = {
       { date: 'Mar 2026', title: 'Baby Born', desc: 'Vital records alert triggered — new parent signal', status: 'done' },
       { date: 'Apr 9', title: 'Added to Prospects', desc: 'AI identified + enriched with 3rd-party data', status: 'done' },
       { date: 'Apr 13', title: 'FIRST OUTREACH — TODAY', desc: 'Congratulations email + protection brief', status: 'current' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L007', sourceLeadName: 'Rachel Park',
+      sourceCampaign: 'CAM001', sourceCampaignName: 'New Parent Protection Drive',
+      fnaDate: null, fnaAdvisor: 'You', fnaStatus: 'Pending — Not Yet Scheduled',
+      fnaSummary: 'Prospect created from life-event trigger (new baby) and campaign response. FNA discovery not yet conducted — first outreach today. AI enrichment pre-run on 3rd-party signals.',
+      enrichedAt: 'Apr 9, 2026 · 9:00 AM',
+      enrichmentStatus: 'pre-fna',
+      dataSources: [
+        { name: 'Vital Records Monitor', type: 'events', status: 'ok', detail: 'Birth record detected Mar 2026 · Infant added to household', refreshed: 'Apr 9, 2026' },
+        { name: 'Dun & Bradstreet Wealth Signals', type: 'wealth', status: 'ok', detail: 'Household income est. $148K · Net worth $210K · Dual income', refreshed: 'Mar 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 744 · DTI 29% · Good standing · Young professional profile', refreshed: 'Mar 2026' },
+        { name: 'RSU/ESPP Vest Monitor (AI)', type: 'financial', status: 'ok', detail: 'RSU vest confirmed Q2 2026 via employer SEC filing — timing aligns', refreshed: 'Apr 9, 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 52 closed cases · Term Life primary 88% · 529 Plan add-on 61%', refreshed: 'Apr 9, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 85, pmailTotal: 88, closePct: 55,
+        topDomain: 'ins', domainScores: { ins: 85, inv: 52, ret: 28, adv: 15 },
+        recommendedSequence: ['Term Life $600K (Primary)', '529 Plan (Bundle — present at delivery)', 'DI $8K/mo (Upsell — 3-month follow-up)'],
+        keyInsight: 'New baby + RSU vest = two simultaneous triggers. Both Term Life and 529 can be set up in one meeting. Pre-FNA enrichment confirms strong fit — first outreach today to schedule FNA discovery call.',
+        riskFlags: ['FNA not yet conducted — discovery call needed before proposal', 'Spouse not yet engaged — both parents are decision makers']
+      }
+    }
   },
 
   P008: {
@@ -21345,6 +21477,192 @@ function renderProspectTab(tab, p) {
             <div class="pm-value-sub">Commission: ${p.commission} · Deal ID: ${p.pipelineDealId || 'Not yet in pipeline'}</div>
           </div>
         </div>
+      </div>`;
+  }
+
+  else if (tab === 'enrichment') {
+    const enr = p.enrichment;
+    if (!enr) {
+      body.innerHTML = `<div style="padding:32px;text-align:center;color:#94a3b8"><i class="fas fa-atom" style="font-size:2rem;margin-bottom:8px;display:block"></i>No enrichment data available for this prospect.</div>`;
+      return;
+    }
+
+    // ── Status config
+    const statusConfig = {
+      'complete':  { color: '#059669', bg: '#d1fae5', icon: 'fa-check-circle', label: 'Enrichment Complete' },
+      'pre-fna':   { color: '#d97706', bg: '#fef3c7', icon: 'fa-hourglass-half', label: 'Pre-FNA — Partial Enrichment' },
+      'pending':   { color: '#94a3b8', bg: '#f1f5f9', icon: 'fa-clock', label: 'Enrichment Pending' }
+    };
+    const sc = statusConfig[enr.enrichmentStatus] || statusConfig['pending'];
+
+    // ── Data source type config
+    const typeConfig = {
+      wealth:    { icon: 'fa-gem',           color: '#d97706', label: 'Wealth Intelligence' },
+      credit:    { icon: 'fa-star',          color: '#0891b2', label: 'Credit Signals' },
+      lifestyle: { icon: 'fa-user-circle',   color: '#7c3aed', label: 'Lifestyle & Household' },
+      social:    { icon: 'fa-share-alt',     color: '#2563eb', label: 'Social Footprint' },
+      events:    { icon: 'fa-calendar-check',color: '#059669', label: 'Life Events & Triggers' },
+      model:     { icon: 'fa-robot',         color: '#003087', label: 'AI Propensity Model' },
+      business:  { icon: 'fa-briefcase',     color: '#ea580c', label: 'Business Intelligence' },
+      financial: { icon: 'fa-chart-line',    color: '#0891b2', label: 'Financial Monitor' },
+      health:    { icon: 'fa-heartbeat',     color: '#ef4444', label: 'Health & Underwriting' },
+      public:    { icon: 'fa-landmark',      color: '#475569', label: 'Public Records' }
+    };
+    const dsStatusDot = s => s === 'ok' ? '#22c55e' : s === 'warn' ? '#f59e0b' : '#ef4444';
+    const dsStatusLabel = s => s === 'ok' ? 'Live' : s === 'warn' ? 'Review' : 'Error';
+
+    // ── Domain score bars
+    const ds = enr.aiModelOutputs?.domainScores || {};
+    const domainCfg = [
+      { key: 'ins', label: 'Insurance',   color: '#2563eb' },
+      { key: 'inv', label: 'Investments', color: '#059669' },
+      { key: 'ret', label: 'Retirement',  color: '#d97706' },
+      { key: 'adv', label: 'Advisory',    color: '#7c3aed' }
+    ];
+
+    const domainBarsHTML = domainCfg.map(d => {
+      const score = ds[d.key] || 0;
+      const scoreColor = score >= 75 ? d.color : score >= 50 ? '#f59e0b' : '#94a3b8';
+      return `
+        <div class="enr-domain-bar-item">
+          <div class="enr-domain-bar-header">
+            <span class="enr-domain-bar-label">${d.label}</span>
+            <span class="enr-domain-bar-score" style="color:${scoreColor}">${score}</span>
+          </div>
+          <div class="enr-domain-bar-track">
+            <div class="enr-domain-bar-fill" style="width:${score}%;background:${scoreColor}"></div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // ── Data source cards
+    const dataSourcesHTML = (enr.dataSources || []).map(src => {
+      const tc = typeConfig[src.type] || { icon: 'fa-database', color: '#64748b', label: src.type };
+      return `
+        <div class="enr-source-card">
+          <div class="enr-source-icon" style="background:${tc.color}18;color:${tc.color}"><i class="fas ${tc.icon}"></i></div>
+          <div class="enr-source-body">
+            <div class="enr-source-name">${src.name}</div>
+            <div class="enr-source-detail">${src.detail}</div>
+            <div class="enr-source-meta">Refreshed: ${src.refreshed}</div>
+          </div>
+          <div class="enr-source-status" style="color:${dsStatusDot(src.status)}">
+            <i class="fas fa-circle" style="font-size:7px"></i> ${dsStatusLabel(src.status)}
+          </div>
+        </div>`;
+    }).join('');
+
+    // ── Recommended product sequence
+    const ai = enr.aiModelOutputs || {};
+    const seqHTML = (ai.recommendedSequence || []).map((p, i) => `
+      <div class="enr-seq-step">
+        <div class="enr-seq-num">${i + 1}</div>
+        <div class="enr-seq-text">${p}</div>
+      </div>`).join('');
+
+    // ── Risk flags
+    const riskHTML = (ai.riskFlags || []).map(f => `
+      <div class="enr-risk-row"><i class="fas fa-exclamation-triangle"></i> ${f}</div>`).join('');
+
+    body.innerHTML = `
+      <div class="enr-panel">
+
+        <!-- ── Enrichment Status Header ── -->
+        <div class="enr-status-bar" style="background:${sc.bg};border:1px solid ${sc.color}40">
+          <i class="fas ${sc.icon}" style="color:${sc.color}"></i>
+          <span style="color:${sc.color};font-weight:700">${sc.label}</span>
+          <span class="enr-timestamp">Enriched: ${enr.enrichedAt}</span>
+        </div>
+
+        <!-- ── Provenance: Lead → Campaign → FNA ── -->
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-route"></i> Prospect Provenance</div>
+          <div class="enr-provenance-chain">
+            <div class="enr-prov-step" onclick="navigateTo('leads')">
+              <div class="enr-prov-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-user-plus"></i></div>
+              <div class="enr-prov-body">
+                <div class="enr-prov-label">Source Lead</div>
+                <div class="enr-prov-value">${enr.sourceLeadName || 'Direct Entry'} ${enr.sourceLead ? `<span class="enr-id-badge">${enr.sourceLead}</span>` : ''}</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right enr-prov-arrow"></i>
+            <div class="enr-prov-step" onclick="navigateTo('campaigns')">
+              <div class="enr-prov-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-bullhorn"></i></div>
+              <div class="enr-prov-body">
+                <div class="enr-prov-label">Campaign</div>
+                <div class="enr-prov-value">${enr.sourceCampaignName || 'No Campaign'} ${enr.sourceCampaign ? `<span class="enr-id-badge">${enr.sourceCampaign}</span>` : ''}</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right enr-prov-arrow"></i>
+            <div class="enr-prov-step ${!enr.fnaDate ? 'enr-prov-pending' : ''}" onclick="navigateTo('fna')">
+              <div class="enr-prov-icon" style="background:${enr.fnaDate ? '#dcfce7' : '#f1f5f9'};color:${enr.fnaDate ? '#059669' : '#94a3b8'}"><i class="fas fa-clipboard-list"></i></div>
+              <div class="enr-prov-body">
+                <div class="enr-prov-label">FNA Discovery</div>
+                <div class="enr-prov-value" style="color:${enr.fnaDate ? '#111827' : '#94a3b8'}">${enr.fnaDate ? `Completed ${enr.fnaDate}` : enr.fnaStatus}</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right enr-prov-arrow"></i>
+            <div class="enr-prov-step enr-prov-active">
+              <div class="enr-prov-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-atom"></i></div>
+              <div class="enr-prov-body">
+                <div class="enr-prov-label">Enriched Prospect</div>
+                <div class="enr-prov-value" style="color:#7c3aed">${p.name} <span class="enr-id-badge">${p.id}</span></div>
+              </div>
+            </div>
+          </div>
+          ${enr.fnaSummary ? `<div class="enr-fna-summary"><i class="fas fa-clipboard-check"></i> <strong>FNA Summary:</strong> ${enr.fnaSummary}</div>` : ''}
+        </div>
+
+        <!-- ── AI Model Outputs ── -->
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-brain"></i> AI Model Outputs</div>
+          <div class="enr-model-kpis">
+            <div class="enr-model-kpi">
+              <div class="enr-model-kpi-val" style="color:${(ai.propensityScore||0)>=80?'#22c55e':(ai.propensityScore||0)>=60?'#f59e0b':'#ef4444'}">${ai.propensityScore || '—'}</div>
+              <div class="enr-model-kpi-lbl">Propensity Score</div>
+            </div>
+            <div class="enr-model-kpi">
+              <div class="enr-model-kpi-val" style="color:${(ai.pmailTotal||0)>=90?'#22c55e':(ai.pmailTotal||0)>=70?'#f59e0b':'#ef4444'}">${ai.pmailTotal || '—'}<span style="font-size:0.6em">/100</span></div>
+              <div class="enr-model-kpi-lbl">PMAIL Score</div>
+            </div>
+            <div class="enr-model-kpi">
+              <div class="enr-model-kpi-val" style="color:${(ai.closePct||0)>=75?'#22c55e':(ai.closePct||0)>=50?'#f59e0b':'#ef4444'}">${ai.closePct || '—'}%</div>
+              <div class="enr-model-kpi-lbl">Close Probability</div>
+            </div>
+            <div class="enr-model-kpi">
+              <div class="enr-model-kpi-val" style="color:#7c3aed">${ai.topDomain ? ai.topDomain.toUpperCase() : '—'}</div>
+              <div class="enr-model-kpi-lbl">Top Domain</div>
+            </div>
+          </div>
+
+          <div class="enr-domain-bars">${domainBarsHTML}</div>
+
+          ${ai.keyInsight ? `
+          <div class="enr-ai-insight">
+            <i class="fas fa-lightbulb" style="color:#f59e0b;flex-shrink:0;margin-top:2px"></i>
+            <span>${ai.keyInsight}</span>
+          </div>` : ''}
+        </div>
+
+        <!-- ── Recommended Product Sequence ── -->
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-list-ol"></i> AI Recommended Product Sequence</div>
+          <div class="enr-seq-list">${seqHTML}</div>
+        </div>
+
+        <!-- ── Risk Flags ── -->
+        ${riskHTML ? `
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> AI Risk Flags</div>
+          <div class="enr-risk-list">${riskHTML}</div>
+        </div>` : ''}
+
+        <!-- ── Data Source Intelligence Grid ── -->
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-database"></i> Enrichment Data Sources <span class="enr-source-count">${(enr.dataSources||[]).length} sources</span></div>
+          <div class="enr-sources-grid">${dataSourcesHTML}</div>
+        </div>
+
       </div>`;
   }
 
