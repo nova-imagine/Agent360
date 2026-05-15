@@ -8447,8 +8447,8 @@ function closeCIReviewModal() {
   document.body.style.overflow = '';
 }
 
-// ── Smart Doc Request ──
-function runSmartDocRequests() {
+// ── Smart Doc Request (stub — overridden below by enhanced version) ──
+function _orig_runSmartDocRequests() {
   const btn = event.currentTarget;
   const orig = btn.innerHTML;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
@@ -35247,8 +35247,535 @@ function p7AddTimelineNote(claimId) {
   if (input) input.value = '';
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   SEND DOC REQUEST — RICH MODAL (Smart Doc Request Automation)
+   ═══════════════════════════════════════════════════════════════════ */
+var _sdrData = {
+  'CLM-2026-0041': {
+    claimId: 'CLM-2026-0041',
+    client: 'Robert Chen',
+    docType: 'Identity Documents',
+    recipient: 'Susan Chen',
+    recipientRole: 'Beneficiary',
+    recipientEmail: 'susan.chen@email.com',
+    recipientFax: '',
+    claimType: 'Death Benefit',
+    amount: '$1,000,000',
+    urgency: 'OVERDUE',
+    urgencyLabel: '⚠ Overdue 1 day',
+    urgencyColor: '#dc2626',
+    daysLabel: '1 day overdue',
+    icon: 'fa-file-signature',
+    subject: 'ACTION REQUIRED: Identity Documents Needed — Death Benefit Claim CLM-2026-0041',
+    draft: 'Dear Susan Chen,\n\nWe hope this message finds you well during this difficult time. We are writing regarding your $1,000,000 death benefit claim (Ref: CLM-2026-0041) for the late Robert Chen.\n\nTo finalize processing of your claim, we require the following documents at your earliest convenience:\n\n  • Government-issued photo identification (driver\'s license or passport)\n  • Bank account details for direct deposit of benefit payment\n  • Completed and signed Claimant\'s Statement form\n\nThese are the final outstanding items before we can authorize and release your payment. Once received, we anticipate processing within 3–5 business days.\n\nPlease submit documents via our secure portal at claims.nyl.com/upload (reference: CLM-2026-0041), or fax to (800) 555-0141.\n\nIf you have any questions, please contact your dedicated claims specialist, Amanda Rivera, at (800) 555-0100 ext. 2241.\n\nWarm regards,\nAmanda Rivera\nSenior Claims Specialist\nNew York Life Insurance Company\nPhone: (800) 555-0100 ext. 2241\nclaims@nyl.com'
+  },
+  'CLM-2026-0028': {
+    claimId: 'CLM-2026-0028',
+    client: 'Maria Gonzalez',
+    docType: 'Terminal Illness Certification',
+    recipient: 'Dr. Hernandez\'s Office',
+    recipientRole: 'Attending Physician Office',
+    recipientEmail: 'records@hernandez-md.com',
+    recipientFax: '(213) 555-0198',
+    claimType: 'ADB — Accelerated Death Benefit',
+    amount: '$120,000',
+    urgency: 'PENDING',
+    urgencyLabel: '9 days pending',
+    urgencyColor: '#d97706',
+    daysLabel: '9 days pending',
+    icon: 'fa-file-medical',
+    subject: 'COMPASSIONATE REQUEST: Terminal Illness Certification — ADB Claim CLM-2026-0028',
+    draft: 'Dear Dr. Hernandez\'s Office,\n\nWe are writing on behalf of our policyholder Maria Gonzalez (DOB: 03/14/1965) regarding an Accelerated Death Benefit (ADB) claim (Ref: CLM-2026-0028) in the amount of $120,000.\n\nMs. Gonzalez has authorized the release of relevant medical information. We respectfully request expedited completion of the enclosed Terminal Illness Certification form, which requires:\n\n  • Confirmed diagnosis and ICD-10 code\n  • Prognosis statement (life expectancy of 12 months or fewer)\n  • Attending physician signature and NPI number\n  • Date of terminal diagnosis\n\nAs this is a compassionate benefit designed to assist patients during a critical time, we kindly ask for your office\'s prioritized attention. Our goal is to ensure Ms. Gonzalez receives her benefit as quickly as possible.\n\nPlease return the completed form via fax to (800) 555-0141 or our secure email at claims@nyl.com. A pre-addressed return envelope is also included.\n\nWe sincerely appreciate your office\'s time and cooperation in this matter.\n\nWith gratitude,\nDr. Priya Nair, Medical Director\nClaims Medical Review — New York Life\nDirect: (800) 555-0100 ext. 3310\nclaims@nyl.com'
+  },
+  'CLM-2026-0035': {
+    claimId: 'CLM-2026-0035',
+    client: 'Maria Gonzalez',
+    docType: 'Attending Physician Statement',
+    recipient: 'Dr. Hernandez',
+    recipientRole: 'Attending Physician',
+    recipientEmail: 'dr.hernandez@hernandez-md.com',
+    recipientFax: '(213) 555-0198',
+    claimType: 'Disability — Long-Term',
+    amount: '$4,200/month',
+    urgency: 'FOLLOW-UP',
+    urgencyLabel: '22 days pending',
+    urgencyColor: '#6b7280',
+    daysLabel: '22 days pending',
+    icon: 'fa-file-alt',
+    subject: 'FOLLOW-UP: Attending Physician Statement Required — Disability Claim CLM-2026-0035',
+    draft: 'Dear Dr. Hernandez,\n\nWe are following up regarding a disability insurance claim for your patient Maria Gonzalez (DOB: 03/14/1965), Claim Reference: CLM-2026-0035, monthly benefit: $4,200.\n\nOur records indicate the Attending Physician Statement (APS) was originally requested 22 days ago and remains outstanding. Without this form, we are unable to begin benefit payments to Ms. Gonzalez.\n\nWe kindly ask that you or your staff complete the APS, which requires:\n\n  • Primary diagnosis and ICD-10 code\n  • Date of disability onset and functional limitations\n  • Current treatment plan and prognosis\n  • Estimated return-to-work date (if applicable)\n  • Physician signature, NPI, and license number\n\nThe completed APS can be returned via:\n  • Fax: (800) 555-0141 (secure medical fax)\n  • Secure upload: claims.nyl.com/upload (Ref: CLM-2026-0035)\n  • Email: claims@nyl.com (encrypted portal link enclosed)\n\nWe understand your office handles a high volume of requests and appreciate your attention to this matter. Please contact our medical review team at (800) 555-0100 ext. 3310 if you have any questions.\n\nThank you for your continued support of your patient\'s claim.\n\nSincerely,\nDr. Priya Nair, Medical Director\nClaims Medical Review — New York Life\nDirect: (800) 555-0100 ext. 3310\nclaims@nyl.com'
+  }
+};
+
 function sendDocRequest(claimId, recipient) {
-  p7Toast('<i class="fas fa-paper-plane"></i> Document request sent to ' + recipient + ' for claim ' + claimId + ' — AI-drafted letter generated', 3500);
+  // Normalize claimId key — look up by claimId string
+  var data = _sdrData[claimId];
+
+  // If we don't have detailed data (called from other contexts), use a fallback
+  if (!data) {
+    data = {
+      claimId: claimId,
+      client: recipient,
+      docType: 'Document Request',
+      recipient: recipient,
+      recipientRole: 'Recipient',
+      recipientEmail: '',
+      recipientFax: '',
+      claimType: 'Insurance Claim',
+      amount: '',
+      urgency: 'PENDING',
+      urgencyLabel: 'Pending',
+      urgencyColor: '#6b7280',
+      daysLabel: 'Pending',
+      icon: 'fa-file-alt',
+      subject: 'Document Request — Claim ' + claimId,
+      draft: 'Dear ' + recipient + ',\n\nPlease provide the required documents for claim ' + claimId + ' at your earliest convenience.\n\nThank you,\nNew York Life Claims Team'
+    };
+  }
+
+  var urgencyBadge = data.urgency === 'OVERDUE'
+    ? '<span class="sdr-badge sdr-badge-overdue"><i class="fas fa-exclamation-circle"></i> ' + data.urgencyLabel + '</span>'
+    : data.urgency === 'PENDING'
+    ? '<span class="sdr-badge sdr-badge-pending"><i class="fas fa-clock"></i> ' + data.urgencyLabel + '</span>'
+    : '<span class="sdr-badge sdr-badge-followup"><i class="fas fa-redo"></i> ' + data.urgencyLabel + '</span>';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay';
+  overlay.id = 'sdr-overlay-' + claimId.replace(/[^a-z0-9]/gi, '');
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML =
+    '<div class="sdr-modal" onclick="event.stopPropagation()">' +
+
+      // ── Header ──
+      '<div class="sdr-header">' +
+        '<div class="sdr-header-left">' +
+          '<div class="sdr-header-icon"><i class="fas fa-paper-plane"></i></div>' +
+          '<div>' +
+            '<div class="sdr-header-title">Send Document Request</div>' +
+            '<div class="sdr-header-sub">AI-Drafted · Personalized · Secure Delivery</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="sdr-close" onclick="document.getElementById(\'' + overlay.id + '\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+
+      // ── Claim Context Bar ──
+      '<div class="sdr-context-bar">' +
+        '<div class="sdr-context-item"><span class="sdr-ctx-lbl">Claim</span><span class="sdr-ctx-val">' + data.claimId + '</span></div>' +
+        '<div class="sdr-context-sep"></div>' +
+        '<div class="sdr-context-item"><span class="sdr-ctx-lbl">Client</span><span class="sdr-ctx-val">' + data.client + '</span></div>' +
+        '<div class="sdr-context-sep"></div>' +
+        '<div class="sdr-context-item"><span class="sdr-ctx-lbl">Type</span><span class="sdr-ctx-val">' + data.claimType + '</span></div>' +
+        '<div class="sdr-context-sep"></div>' +
+        '<div class="sdr-context-item"><span class="sdr-ctx-lbl">Amount</span><span class="sdr-ctx-val sdr-ctx-amount">' + data.amount + '</span></div>' +
+        '<div class="sdr-context-sep"></div>' +
+        '<div class="sdr-context-item">' + urgencyBadge + '</div>' +
+      '</div>' +
+
+      // ── Body ──
+      '<div class="sdr-body">' +
+
+        // Left column — Recipient + Channel
+        '<div class="sdr-col-left">' +
+
+          '<div class="sdr-section">' +
+            '<div class="sdr-section-title"><i class="fas fa-user"></i> Recipient</div>' +
+            '<div class="sdr-recipient-card">' +
+              '<div class="sdr-recipient-avatar"><i class="fas fa-' + (data.recipientRole.includes('Physician') ? 'user-md' : 'user') + '"></i></div>' +
+              '<div class="sdr-recipient-info">' +
+                '<div class="sdr-recipient-name">' + data.recipient + '</div>' +
+                '<div class="sdr-recipient-role">' + data.recipientRole + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="sdr-field">' +
+              '<label class="sdr-field-label"><i class="fas fa-envelope"></i> Email</label>' +
+              '<input type="email" class="sdr-input" id="sdr-email-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="' + data.recipientEmail + '" placeholder="recipient@domain.com">' +
+            '</div>' +
+            (data.recipientFax ? '<div class="sdr-field">' +
+              '<label class="sdr-field-label"><i class="fas fa-fax"></i> Fax</label>' +
+              '<input type="text" class="sdr-input" id="sdr-fax-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="' + data.recipientFax + '">' +
+            '</div>' : '') +
+          '</div>' +
+
+          '<div class="sdr-section">' +
+            '<div class="sdr-section-title"><i class="fas fa-satellite-dish"></i> Delivery Channel</div>' +
+            '<div class="sdr-channel-group" id="sdr-channels-' + claimId.replace(/[^a-z0-9]/gi,'') + '">' +
+              '<label class="sdr-channel-opt selected" onclick="sdrSelectChannel(this)">' +
+                '<input type="radio" name="sdr-ch-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="email-sms" checked> ' +
+                '<span class="sdr-ch-icon"><i class="fas fa-envelope"></i><i class="fas fa-comment-dots"></i></span>' +
+                '<span class="sdr-ch-label">Email + SMS</span>' +
+                '<span class="sdr-ch-tag">Recommended</span>' +
+              '</label>' +
+              '<label class="sdr-channel-opt" onclick="sdrSelectChannel(this)">' +
+                '<input type="radio" name="sdr-ch-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="email"> ' +
+                '<span class="sdr-ch-icon"><i class="fas fa-envelope"></i></span>' +
+                '<span class="sdr-ch-label">Email Only</span>' +
+              '</label>' +
+              (data.recipientFax ? '<label class="sdr-channel-opt" onclick="sdrSelectChannel(this)">' +
+                '<input type="radio" name="sdr-ch-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="fax"> ' +
+                '<span class="sdr-ch-icon"><i class="fas fa-fax"></i></span>' +
+                '<span class="sdr-ch-label">Fax</span>' +
+              '</label>' : '') +
+              '<label class="sdr-channel-opt" onclick="sdrSelectChannel(this)">' +
+                '<input type="radio" name="sdr-ch-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="mail"> ' +
+                '<span class="sdr-ch-icon"><i class="fas fa-mail-bulk"></i></span>' +
+                '<span class="sdr-ch-label">Physical Mail</span>' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="sdr-section">' +
+            '<div class="sdr-section-title"><i class="fas fa-calendar-alt"></i> Schedule</div>' +
+            '<div class="sdr-schedule-row">' +
+              '<button class="sdr-sched-btn active" id="sdr-sched-now-' + claimId.replace(/[^a-z0-9]/gi,'') + '" onclick="sdrSetSchedule(this,\'now\',\'' + claimId + '\')">' +
+                '<i class="fas fa-bolt"></i> Send Now' +
+              '</button>' +
+              '<button class="sdr-sched-btn" id="sdr-sched-later-' + claimId.replace(/[^a-z0-9]/gi,'') + '" onclick="sdrSetSchedule(this,\'later\',\'' + claimId + '\')">' +
+                '<i class="fas fa-clock"></i> Schedule' +
+              '</button>' +
+            '</div>' +
+            '<div class="sdr-schedule-picker" id="sdr-sched-picker-' + claimId.replace(/[^a-z0-9]/gi,'') + '" style="display:none">' +
+              '<input type="datetime-local" class="sdr-input" style="margin-top:8px">' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="sdr-ai-note">' +
+            '<div class="sdr-ai-note-header"><i class="fas fa-robot"></i> AI Draft Intelligence</div>' +
+            '<div class="sdr-ai-note-rows">' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>Personalized for ' + data.recipient + '</div>' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>References specific missing docs</div>' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>Includes secure upload link</div>' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot blue"></span>7-day auto-follow-up queued</div>' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot blue"></span>Read-receipt tracking enabled</div>' +
+            '</div>' +
+          '</div>' +
+
+        '</div>' +
+
+        // Right column — Letter Preview
+        '<div class="sdr-col-right">' +
+          '<div class="sdr-letter-header">' +
+            '<div class="sdr-letter-title-row">' +
+              '<div class="sdr-letter-doc-icon"><i class="fas fa-' + data.icon + '"></i></div>' +
+              '<div>' +
+                '<div class="sdr-letter-doc-type">' + data.docType + '</div>' +
+                '<div class="sdr-letter-subject">' + data.subject + '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="sdr-letter-toolbar">' +
+            '<span class="sdr-letter-lbl"><i class="fas fa-robot" style="color:#7c3aed;margin-right:4px"></i>AI-Drafted — Click to edit</span>' +
+            '<button class="sdr-edit-btn" onclick="sdrToggleEdit(\'' + claimId + '\')" id="sdr-edit-btn-' + claimId.replace(/[^a-z0-9]/gi,'') + '">' +
+              '<i class="fas fa-pen"></i> Edit Draft' +
+            '</button>' +
+          '</div>' +
+          '<textarea class="sdr-letter-body" id="sdr-letter-' + claimId.replace(/[^a-z0-9]/gi,'') + '" readonly>' + data.draft + '</textarea>' +
+          '<div class="sdr-char-count" id="sdr-chars-' + claimId.replace(/[^a-z0-9]/gi,'') + '">' + data.draft.length + ' characters · ~' + Math.ceil(data.draft.split('\n').length * 1.4) + ' sec read time</div>' +
+        '</div>' +
+
+      '</div>' + // end sdr-body
+
+      // ── Footer ──
+      '<div class="sdr-footer">' +
+        '<div class="sdr-footer-left">' +
+          '<i class="fas fa-shield-alt" style="color:#16a34a;margin-right:4px"></i>' +
+          '<span style="font-size:11px;color:#6b7280">Encrypted delivery · HIPAA compliant · Archived to claim file</span>' +
+        '</div>' +
+        '<div class="sdr-footer-actions">' +
+          '<button class="sdr-btn-ghost" onclick="document.getElementById(\'' + overlay.id + '\').remove()">' +
+            '<i class="fas fa-times"></i> Cancel' +
+          '</button>' +
+          '<button class="sdr-btn-secondary" onclick="sdrSaveDraft(\'' + claimId + '\')">' +
+            '<i class="fas fa-save"></i> Save Draft' +
+          '</button>' +
+          '<button class="sdr-btn-primary" id="sdr-send-btn-' + claimId.replace(/[^a-z0-9]/gi,'') + '" onclick="sdrConfirmSend(\'' + claimId + '\',\'' + overlay.id + '\')">' +
+            '<i class="fas fa-paper-plane"></i> Send Now' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+
+    '</div>'; // end sdr-modal
+
+  document.body.appendChild(overlay);
+
+  // Wire up character counter on textarea input
+  var ta = document.getElementById('sdr-letter-' + claimId.replace(/[^a-z0-9]/gi,''));
+  var cc = document.getElementById('sdr-chars-' + claimId.replace(/[^a-z0-9]/gi,''));
+  if (ta && cc) {
+    ta.addEventListener('input', function() {
+      var lines = ta.value.split('\n').length;
+      cc.textContent = ta.value.length + ' characters · ~' + Math.ceil(lines * 1.4) + ' sec read time';
+    });
+  }
+}
+
+function sdrSelectChannel(lbl) {
+  var grp = lbl.parentNode;
+  grp.querySelectorAll('.sdr-channel-opt').forEach(function(o) { o.classList.remove('selected'); });
+  lbl.classList.add('selected');
+  lbl.querySelector('input').checked = true;
+}
+
+function sdrSetSchedule(btn, mode, claimId) {
+  var key = claimId.replace(/[^a-z0-9]/gi,'');
+  var nowBtn   = document.getElementById('sdr-sched-now-' + key);
+  var laterBtn = document.getElementById('sdr-sched-later-' + key);
+  var picker   = document.getElementById('sdr-sched-picker-' + key);
+  var sendBtn  = document.getElementById('sdr-send-btn-' + key);
+  if (nowBtn)   nowBtn.classList.remove('active');
+  if (laterBtn) laterBtn.classList.remove('active');
+  btn.classList.add('active');
+  if (picker) picker.style.display = mode === 'later' ? 'block' : 'none';
+  if (sendBtn) {
+    sendBtn.innerHTML = mode === 'later'
+      ? '<i class="fas fa-calendar-check"></i> Schedule Send'
+      : '<i class="fas fa-paper-plane"></i> Send Now';
+  }
+}
+
+function sdrToggleEdit(claimId) {
+  var key = claimId.replace(/[^a-z0-9]/gi,'');
+  var ta = document.getElementById('sdr-letter-' + key);
+  var btn = document.getElementById('sdr-edit-btn-' + key);
+  if (!ta) return;
+  if (ta.readOnly) {
+    ta.readOnly = false;
+    ta.classList.add('editing');
+    ta.focus();
+    if (btn) btn.innerHTML = '<i class="fas fa-check"></i> Done Editing';
+  } else {
+    ta.readOnly = true;
+    ta.classList.remove('editing');
+    if (btn) btn.innerHTML = '<i class="fas fa-pen"></i> Edit Draft';
+  }
+}
+
+function sdrSaveDraft(claimId) {
+  if (_sdrData[claimId]) {
+    var key = claimId.replace(/[^a-z0-9]/gi,'');
+    var ta = document.getElementById('sdr-letter-' + key);
+    if (ta) _sdrData[claimId].draft = ta.value;
+  }
+  p7Toast('<i class="fas fa-save"></i> Draft saved — will persist for this session', 2200);
+}
+
+function sdrConfirmSend(claimId, overlayId) {
+  var key = claimId.replace(/[^a-z0-9]/gi,'');
+  var data = _sdrData[claimId];
+  var btn = document.getElementById('sdr-send-btn-' + key);
+  var isScheduled = btn && btn.innerHTML.includes('Schedule');
+
+  // Animate the button
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+  }
+
+  setTimeout(function() {
+    // Close the modal
+    var ov = document.getElementById(overlayId);
+    if (ov) ov.remove();
+
+    // Mark the sdp-item as sent in the Intelligence panel
+    sdrMarkAsSent(claimId);
+
+    // Toast confirmation
+    var label = data ? data.recipient : claimId;
+    var verb  = isScheduled ? 'scheduled for' : 'sent to';
+    p7Toast(
+      '<i class="fas fa-check-circle" style="color:#10b981"></i> ' +
+      'Doc request ' + verb + ' <strong>' + label + '</strong> · ' +
+      (data ? data.docType : 'Document') + ' · ' +
+      'Read-receipt tracking active · Auto-follow-up in 7 days',
+      4500
+    );
+  }, 1200);
+}
+
+function sdrMarkAsSent(claimId) {
+  // Find the sdp-item that contains a button calling sendDocRequest with this claimId
+  var allItems = document.querySelectorAll('.sdp-item');
+  allItems.forEach(function(item) {
+    var btn = item.querySelector('.btn-sdp-send');
+    if (!btn) return;
+    var onclickStr = btn.getAttribute('onclick') || '';
+    if (onclickStr.indexOf(claimId) === -1) return;
+
+    // Found the matching item — mark as sent
+    item.classList.add('sdp-sent');
+
+    // Replace the Send button with a sent indicator
+    btn.outerHTML =
+      '<div class="btn-sdp-sent">' +
+        '<i class="fas fa-check-circle"></i> Sent' +
+      '</div>';
+
+    // Add sent overlay to item-content draft text
+    var draft = item.querySelector('.sdp-item-draft');
+    if (draft) {
+      draft.style.opacity = '0.4';
+      draft.style.textDecoration = 'line-through';
+    }
+
+    // Decrement the Pending Requests counter
+    sdrDecrementPendingCount();
+  });
+}
+
+function sdrDecrementPendingCount() {
+  // Find the orange stat value showing "3" Pending Requests in the sdp-stats area
+  var statVals = document.querySelectorAll('.sdp-stat-val.orange');
+  statVals.forEach(function(el) {
+    var curr = parseInt(el.textContent, 10);
+    if (!isNaN(curr) && curr > 0) {
+      var next = curr - 1;
+      el.textContent = next;
+      // Pulse animation
+      el.style.transition = 'transform 0.2s, color 0.3s';
+      el.style.transform = 'scale(1.4)';
+      if (next === 0) {
+        el.classList.remove('orange');
+        el.classList.add('green');
+      }
+      setTimeout(function() { el.style.transform = 'scale(1)'; }, 250);
+
+      // Update Sent This Week counter (green stat)
+      var greenVals = document.querySelectorAll('.sdp-stat-val.green');
+      greenVals.forEach(function(g) {
+        var gCurr = parseInt(g.textContent, 10);
+        if (!isNaN(gCurr)) {
+          g.textContent = gCurr + 1;
+          g.style.transition = 'transform 0.2s';
+          g.style.transform = 'scale(1.4)';
+          setTimeout(function() { g.style.transform = 'scale(1)'; }, 250);
+        }
+      });
+    }
+  });
+}
+
+// ── Send All Reminders ── (enhanced batch)
+function runSmartDocRequests() {
+  // Collect all unsent items in the sdp queue
+  var unsentBtns = document.querySelectorAll('.sdp-item .btn-sdp-send');
+  var items = [];
+  unsentBtns.forEach(function(btn) {
+    var oc = btn.getAttribute('onclick') || '';
+    var match = oc.match(/sendDocRequest\('([^']+)','([^']+)'\)/);
+    if (match) {
+      var cid = match[1];
+      var d = _sdrData[cid];
+      items.push({
+        claimId: cid,
+        recipient: d ? d.recipient : match[2],
+        docType: d ? d.docType : 'Document',
+        urgencyLabel: d ? d.urgencyLabel : 'Pending',
+        urgencyColor: d ? d.urgencyColor : '#6b7280'
+      });
+    }
+  });
+
+  if (items.length === 0) {
+    p7Toast('<i class="fas fa-check-circle" style="color:#10b981"></i> All document requests already sent!', 2500);
+    return;
+  }
+
+  var itemRows = items.map(function(it) {
+    return '<div class="sdr-batch-row">' +
+      '<div class="sdr-batch-row-icon"><i class="fas fa-file-alt"></i></div>' +
+      '<div class="sdr-batch-row-content">' +
+        '<div class="sdr-batch-row-title">' + it.docType + '</div>' +
+        '<div class="sdr-batch-row-meta">→ ' + it.recipient + ' · ' + it.claimId + ' · <span style="color:' + it.urgencyColor + '">' + it.urgencyLabel + '</span></div>' +
+      '</div>' +
+      '<div class="sdr-batch-row-check"><i class="fas fa-paper-plane" style="color:#0ea5e9"></i></div>' +
+    '</div>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay';
+  overlay.id = 'sdr-batch-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML =
+    '<div class="sdr-modal" style="max-width:520px" onclick="event.stopPropagation()">' +
+
+      '<div class="sdr-header">' +
+        '<div class="sdr-header-left">' +
+          '<div class="sdr-header-icon"><i class="fas fa-paper-plane"></i></div>' +
+          '<div>' +
+            '<div class="sdr-header-title">Send All Reminders</div>' +
+            '<div class="sdr-header-sub">Batch AI-drafted delivery to ' + items.length + ' recipient(s)</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="sdr-close" onclick="document.getElementById(\'sdr-batch-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+
+      '<div class="sdr-body" style="display:block;padding:20px">' +
+
+        '<div class="sdr-batch-queue">' + itemRows + '</div>' +
+
+        '<div style="margin-top:16px">' +
+          '<label class="sdr-field-label"><i class="fas fa-satellite-dish"></i> Delivery Channel (all)</label>' +
+          '<select class="sdr-input" id="sdr-batch-channel" style="margin-top:6px">' +
+            '<option value="email-sms">Email + SMS (recommended)</option>' +
+            '<option value="email">Email only</option>' +
+            '<option value="fax">Fax (where available)</option>' +
+            '<option value="mail">Physical Mail (AI-drafted letters)</option>' +
+          '</select>' +
+        '</div>' +
+
+        '<div class="sdr-ai-note" style="margin-top:16px">' +
+          '<div class="sdr-ai-note-header"><i class="fas fa-robot"></i> Batch AI Intelligence</div>' +
+          '<div class="sdr-ai-note-rows">' +
+            '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>Each letter independently personalized</div>' +
+            '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>Claim-specific missing doc lists</div>' +
+            '<div class="sdr-ai-note-row"><span class="sdr-ai-dot blue"></span>Read-receipt tracking on all sends</div>' +
+            '<div class="sdr-ai-note-row"><span class="sdr-ai-dot blue"></span>7-day auto-follow-up queued for each</div>' +
+          '</div>' +
+        '</div>' +
+
+      '</div>' +
+
+      '<div class="sdr-footer">' +
+        '<div class="sdr-footer-left">' +
+          '<i class="fas fa-shield-alt" style="color:#16a34a;margin-right:4px"></i>' +
+          '<span style="font-size:11px;color:#6b7280">Encrypted · HIPAA compliant · Logged</span>' +
+        '</div>' +
+        '<div class="sdr-footer-actions">' +
+          '<button class="sdr-btn-ghost" onclick="document.getElementById(\'sdr-batch-overlay\').remove()">' +
+            '<i class="fas fa-times"></i> Cancel' +
+          '</button>' +
+          '<button class="sdr-btn-primary" onclick="sdrBatchConfirmSend(' + JSON.stringify(items.map(function(i){return i.claimId;})) + ')">' +
+            '<i class="fas fa-paper-plane"></i> Send All ' + items.length + ' Reminders' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+
+    '</div>';
+
+  document.body.appendChild(overlay);
+}
+
+function sdrBatchConfirmSend(claimIds) {
+  var overlay = document.getElementById('sdr-batch-overlay');
+  var btn = overlay ? overlay.querySelector('.sdr-btn-primary') : null;
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
+
+  var delay = 600;
+  claimIds.forEach(function(cid, idx) {
+    setTimeout(function() {
+      sdrMarkAsSent(cid);
+    }, delay * (idx + 1));
+  });
+
+  setTimeout(function() {
+    if (overlay) overlay.remove();
+    p7Toast(
+      '<i class="fas fa-check-circle" style="color:#10b981"></i> <strong>' + claimIds.length + ' doc requests sent</strong> · ' +
+      'All letters archived · Read-receipt tracking active · Auto-follow-ups queued',
+      5000
+    );
+  }, delay * (claimIds.length + 1));
 }
 
 // Override existing modal-less stubs
