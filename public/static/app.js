@@ -137,6 +137,8 @@ function navigateTo(page) {
       requestAnimationFrame(() => setTimeout(() => initUnderwritingPage(), 80));
     } else if (page === 'eapp-submissions') {
       requestAnimationFrame(() => setTimeout(() => initEAppSubmissionsPage(), 80));
+    } else if (page === 'sales') {
+      requestAnimationFrame(() => setTimeout(() => initSalesPage(), 80));
     }
   }
 }
