@@ -7235,6 +7235,23 @@ function closeCRMOutreachModal(e) {
 
 console.log('Outreach Hub JS loaded — outreachData(10), openCRMOutreachModal, switchOutreachChannel, sendOutreach');
 
+/* ── openOutreachModal router ──────────────────────────────────
+   The dashboard Generate buttons call openOutreachModal('OR-xxx').
+   Route OR-* ids → openCRMOutreachModal (outreachData-backed modal).
+   All other ids   → _openLeadsOutreachModal (leads-modal, defined
+                     later in the file as a non-hoisting named fn).
+   ─────────────────────────────────────────────────────────────── */
+window.openOutreachModal = function(id) {
+  if (typeof id === 'string' && id.startsWith('OR-')) {
+    openCRMOutreachModal(id);
+  } else {
+    // Delegate to the leads-modal handler (defined further down)
+    if (typeof _openLeadsOutreachModal === 'function') {
+      _openLeadsOutreachModal(id);
+    }
+  }
+};
+
 /* ═══════════════════════════════════════════════════════════════
    TASK #11 — AUTOMATED CUSTOMER ENROLLMENT / E-APP WIZARD
    ═══════════════════════════════════════════════════════════════ */
@@ -25979,10 +25996,12 @@ function closeScheduleCallModal() {
   _schedOutcomeSelected = null;
 }
 
-// ── OUTREACH MODAL ─────────────────────────────────────────────
+// ── OUTREACH MODAL (Leads) ──────────────────────────────────────
+// NOTE: openOutreachModal is already defined as a router shim above.
+// This function handles lead-specific IDs (non-OR-*) via that shim.
 var _outreachLeadId = null;
 
-function openOutreachModal(leadId) {
+function _openLeadsOutreachModal(leadId) {
   _outreachLeadId = leadId;
   var lead = leadsData.find(function(l){ return l.id === leadId; });
   var pp   = propensityProfiles[leadId];

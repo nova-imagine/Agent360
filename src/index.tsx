@@ -2764,7 +2764,7 @@ function ClientsPage() {
       </div>
 
       {/* ── Outreach Composer Modal ── */}
-      <div class="oc-overlay" id="oc-overlay" onclick="closeOutreachModal(event)" style="display:none">
+      <div class="oc-overlay" id="oc-overlay" onclick="closeCRMOutreachModal(event)" style="display:none">
         <div class="oc-modal">
 
           {/* Header */}
@@ -2776,7 +2776,7 @@ function ClientsPage() {
                 <div class="oc-header-sub" id="oc-header-sub">Hyperpersonalized message · AI-generated</div>
               </div>
             </div>
-            <button class="oc-close-btn" onclick="closeOutreachModal()"><i class="fas fa-times"></i></button>
+            <button class="oc-close-btn" onclick="closeCRMOutreachModal()"><i class="fas fa-times"></i></button>
           </div>
 
           {/* Channel Tabs */}
@@ -2844,7 +2844,7 @@ function ClientsPage() {
           {/* Footer Actions */}
           <div class="oc-footer">
             <div class="oc-footer-left">
-              <button class="oc-btn-secondary" onclick="closeOutreachModal()"><i class="fas fa-times"></i> Cancel</button>
+              <button class="oc-btn-secondary" onclick="closeCRMOutreachModal()"><i class="fas fa-times"></i> Cancel</button>
             </div>
             <div class="oc-footer-right">
               <button class="oc-btn-schedule" onclick="scheduleOutreach()"><i class="fas fa-calendar-alt"></i> Schedule</button>
