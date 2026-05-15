@@ -6045,10 +6045,19 @@ function ClaimsPage() {
             <select class="filter-select" id="claim-type-filter" onchange="filterClaims()">
               <option value="">All Types</option>
               <option>Death Benefit</option>
-              <option>Disability</option>
+              <option>Accidental Death Benefit Rider</option>
+              <option>Disability Income</option>
               <option>Long-term Care</option>
               <option>Accelerated Benefit</option>
               <option>Waiver of Premium</option>
+              <option>Critical Illness Rider</option>
+              <option>Child Term Rider</option>
+              <option>Chronic Illness Rider</option>
+              <option>Maturity / Endowment</option>
+              <option>Policy Surrender</option>
+              <option>Paid-up Additions</option>
+              <option>Annuity Income</option>
+              <option>Survivorship (2nd-to-die)</option>
             </select>
             <select class="filter-select" id="claim-status-filter" onchange="filterClaims()">
               <option value="">All Status</option>
@@ -6222,6 +6231,168 @@ function ClaimsPage() {
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
                     <button class="btn-icon" title="Fraud Review" onclick="openFraudDetailModal('CLM-2026-0025')"><i class="fas fa-shield-virus"></i></button>
                     <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 8 — Thomas Reed, Accidental Death Benefit Rider */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0045','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0045</span></td>
+                <td><div class="client-cell"><div class="mini-avatar tr2">TR</div><span>Thomas Reed</span></div></td>
+                <td><span class="claim-type-badge adb-rider">Accid. Death Rider</span></td>
+                <td class="premium text-right">$150,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:62%"></div></div><span class="sla-label warn"><i class="fas fa-exclamation-triangle"></i> 7d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0045')"><span class="fraud-score-num">44</span><span class="fraud-score-lbl">Watch</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0045')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 3/5</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:60%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0045','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0045')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0045','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 9 — Patricia Nguyen, Critical Illness Rider */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0046','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0046</span></td>
+                <td><div class="client-cell"><div class="mini-avatar pn">PN</div><span>Patricia Nguyen</span></div></td>
+                <td><span class="claim-type-badge ci-rider">Critical Illness Rider</span></td>
+                <td class="premium text-right">$50,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:30%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 18d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0046')"><span class="fraud-score-num">11</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0046')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 3/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:75%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0046','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0046')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0046','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 10 — David Thompson, Child Term Rider */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0047','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0047</span></td>
+                <td><div class="client-cell"><div class="mini-avatar dt">DT</div><span>David Thompson</span></div></td>
+                <td><span class="claim-type-badge child-rider">Child Term Rider</span></td>
+                <td class="premium text-right">$25,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:22%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 24d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0047')"><span class="fraud-score-num">8</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0047')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/3</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:67%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0047','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0047')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0047','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 11 — Angela Foster, Chronic Illness Rider */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0048','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0048</span></td>
+                <td><div class="client-cell"><div class="mini-avatar af">AF</div><span>Angela Foster</span></div></td>
+                <td><span class="claim-type-badge chronic">Chronic Illness Rider</span></td>
+                <td class="premium text-right">$36,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:70%"></div></div><span class="sla-label warn"><i class="fas fa-exclamation-triangle"></i> 6d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0048')"><span class="fraud-score-num">15</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0048')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0048','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0048')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0048','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 12 — Harold Simmons, Maturity / Endowment */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0049','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0049</span></td>
+                <td><div class="client-cell"><div class="mini-avatar hs">HS</div><span>Harold Simmons</span></div></td>
+                <td><span class="claim-type-badge maturity">Maturity / Endowment</span></td>
+                <td class="premium text-right">$500,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:15%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 30d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0049')"><span class="fraud-score-num">5</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0049')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 3/3</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0049','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0049')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0049','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 13 — Christine Blake, Policy Surrender / Cash Value */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0050','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0050</span></td>
+                <td><div class="client-cell"><div class="mini-avatar cb">CB</div><span>Christine Blake</span></div></td>
+                <td><span class="claim-type-badge surrender">Policy Surrender</span></td>
+                <td class="premium text-right">$84,200</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:25%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 21d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0050')"><span class="fraud-score-num">6</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0050')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/3</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:67%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0050','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0050')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0050','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 14 — George Martinez, Paid-up Additions */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0051','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0051</span></td>
+                <td><div class="client-cell"><div class="mini-avatar gm">GM</div><span>George Martinez</span></div></td>
+                <td><span class="claim-type-badge pua">Paid-up Additions</span></td>
+                <td class="premium text-right">$42,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:18%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 28d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0051')"><span class="fraud-score-num">4</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0051')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 3/3</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0051','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0051')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0051','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 15 — Nancy Rivera, Annuity Income */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0052','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0052</span></td>
+                <td><div class="client-cell"><div class="mini-avatar nr">NR</div><span>Nancy Rivera</span></div></td>
+                <td><span class="claim-type-badge annuity">Annuity Income</span></td>
+                <td class="premium text-right">$3,800/mo</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:10%"></div></div><span class="sla-label ok"><i class="fas fa-infinity"></i> Recurring</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0052')"><span class="fraud-score-num">3</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0052')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0052','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0052')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0052','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 16 — Eleanor &amp; Frank Marsh, Survivorship (2nd-to-die) */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0053','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0053</span></td>
+                <td><div class="client-cell"><div class="mini-avatar em">EM</div><span>Eleanor Marsh (Estate)</span></div></td>
+                <td><span class="claim-type-badge survivorship">Survivorship (2nd-to-die)</span></td>
+                <td class="premium text-right">$2,000,000</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-breach"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-breach" style="width:90%"></div></div><span class="sla-label breach"><i class="fas fa-fire"></i> 2d left</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0053')"><span class="fraud-score-num">22</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0053')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 3/5</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:60%"></div></div></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0053','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0053')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0053','ci')"><i class="fas fa-robot"></i></button>
                   </div>
                 </td>
               </tr>

@@ -20,7 +20,7 @@ function navigateTo(page) {
   const titles = {
     dashboard: 'Dashboard',
     clients: 'Client 360',
-    prospects: 'Leads Pipeline',
+    prospects: 'Prospect Pipeline',
     policies: 'Policy Management',
     'ai-agents': 'AI Agent Hub',
     campaigns: 'Campaigns',
@@ -51,7 +51,7 @@ function navigateTo(page) {
   const breadcrumbs = {
     dashboard: 'Home / Dashboard',
     clients: 'Home / Client 360',
-    prospects: 'Home / Marketing / Prospects',
+    prospects: 'Home / Sales / Prospects',
     policies: 'Home / Policies',
     'ai-agents': 'Home / AI Agents',
     campaigns: 'Home / Marketing / Campaigns',
@@ -4042,16 +4042,129 @@ function handleIDPDrop(event) {
 }
 
 function runIDPScan() {
-  const btn = document.querySelector('.btn-idp-scan');
+  var btn = document.querySelector('.btn-idp-scan');
   if (btn) { btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> Scanning…'; btn.disabled = true; }
-  const timeEl = document.querySelector('.idp-scan-time');
-  setTimeout(() => {
-    if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Scan Complete'; btn.disabled = false; }
+  var timeEl = document.querySelector('.idp-scan-time');
+
+  // Phase 1: animate progress, then open results modal
+  setTimeout(function() {
+    if (btn) { btn.innerHTML = '<i class="fas fa-search"></i> Run IDP Scan'; btn.disabled = false; }
     if (timeEl) timeEl.textContent = 'just now';
-    setTimeout(() => {
-      if (btn) btn.innerHTML = '<i class="fas fa-search"></i> Run IDP Scan';
-    }, 2000);
-  }, 2200);
+    openIDPScanResultsModal();
+  }, 2400);
+}
+
+function openIDPScanResultsModal() {
+  var scanResults = [
+    {
+      id:'CLM-2026-0041', client:'Robert Chen', docName:'Death_Certificate_RC_2026.pdf', docType:'Death Certificate',
+      status:'extracting', confidence:null, fields:[
+        { name:'Deceased Name', value:'Robert Chen', conf:98 },
+        { name:'Date of Death', value:'2026-04-07', conf:99 },
+        { name:'Cause of Death', value:'Acute Myocardial Infarction', conf:95 },
+        { name:'Certifying Physician', value:'Dr. Alan Park, MD', conf:91 },
+        { name:'Place of Death', value:'St. Luke\'s Hospital, New York', conf:97 }
+      ]
+    },
+    {
+      id:'CLM-2026-0041', client:'Robert Chen', docName:'Medical_Certificate_Cardiac.pdf', docType:'Medical Certificate',
+      status:'verified', confidence:98, fields:[
+        { name:'Diagnosis Code', value:'I21.9 — STEMI', conf:99 },
+        { name:'Admission Date', value:'2026-04-06', conf:99 },
+        { name:'Discharge Status', value:'Deceased', conf:99 },
+        { name:'Attending Physician', value:'Dr. Alan Park, MD', conf:98 },
+        { name:'Hospital', value:'St. Luke\'s — Cardiac ICU', conf:97 }
+      ]
+    },
+    {
+      id:'CLM-2026-0028', client:'Maria Gonzalez', docName:'Terminal_Illness_Certification.pdf', docType:'ADB Terminal Cert',
+      status:'pending', confidence:null, fields:[]
+    },
+    {
+      id:'CLM-2026-0038', client:'Sandra Williams', docName:'LTC_Eligibility_Cert_SW.pdf', docType:'LTC Eligibility',
+      status:'verified', confidence:99, fields:[
+        { name:'Eligibility Date', value:'2026-03-28', conf:99 },
+        { name:'Care Level', value:'Skilled Nursing — Level 3', conf:97 },
+        { name:'Monthly Benefit', value:'$4,500/month', conf:99 },
+        { name:'Certifying Provider', value:'Sunrise Care Facility', conf:95 },
+        { name:'Benefit Period', value:'24 months maximum', conf:99 }
+      ]
+    },
+    {
+      id:'CLM-2026-0035', client:'Maria Gonzalez', docName:'APS_DrHernandez_MG.pdf', docType:'Attending Physician Statement',
+      status:'extracting', confidence:null, fields:[
+        { name:'Diagnosis', value:'Pancreatic Adenocarcinoma Stage IV', conf:94 },
+        { name:'Disability Date', value:'2026-02-15', conf:89 },
+        { name:'Functional Limitations', value:'INCOMPLETE — awaiting supplement', conf:0 },
+        { name:'Prognosis', value:'6–8 months', conf:87 },
+        { name:'Physician', value:'Dr. Miguel Hernandez, MD Oncology', conf:96 }
+      ]
+    }
+  ];
+
+  var statusConfig = {
+    verified:   { color:'#16a34a', icon:'fas fa-check-double', label:'VERIFIED' },
+    extracting: { color:'#7c3aed', icon:'fas fa-cog fa-spin',  label:'EXTRACTING' },
+    pending:    { color:'#d97706', icon:'fas fa-clock',        label:'AWAITING UPLOAD' }
+  };
+
+  var cardsHTML = scanResults.map(function(r) {
+    var sc = statusConfig[r.status];
+    var fieldsHTML = r.fields.length ? r.fields.map(function(f) {
+      var confColor = f.conf >= 90 ? '#16a34a' : f.conf >= 70 ? '#d97706' : '#dc2626';
+      return '<div class="idp-field-row">' +
+        '<span class="idp-field-name">' + f.name + '</span>' +
+        '<span class="idp-field-value">' + f.value + '</span>' +
+        (f.conf > 0 ? '<span class="idp-field-conf" style="color:' + confColor + '">' + f.conf + '%</span>' : '') +
+      '</div>';
+    }).join('') : '<div class="idp-field-empty">Document not yet received — upload pending</div>';
+
+    return '<div class="idp-scan-card idp-scan-' + r.status + '">' +
+      '<div class="idp-scan-card-top">' +
+        '<i class="fas fa-file-pdf idp-scan-card-icon"></i>' +
+        '<div class="idp-scan-card-info">' +
+          '<div class="idp-scan-card-name">' + r.docName + '</div>' +
+          '<div class="idp-scan-card-meta">' + r.id + ' · ' + r.client + ' · <em>' + r.docType + '</em></div>' +
+        '</div>' +
+        '<div class="idp-scan-card-status" style="color:' + sc.color + '">' +
+          '<i class="' + sc.icon + '"></i> ' + sc.label +
+          (r.confidence ? '<span class="idp-scan-conf">' + r.confidence + '% conf.</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="idp-scan-fields">' + fieldsHTML + '</div>' +
+    '</div>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay idp-scan-overlay';
+  overlay.id = 'idp-scan-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="idp-scan-modal" onclick="event.stopPropagation()">' +
+      '<div class="idp-scan-header">' +
+        '<div class="idp-scan-header-left">' +
+          '<div class="idp-scan-icon"><i class="fas fa-file-import"></i></div>' +
+          '<div>' +
+            '<div class="idp-scan-title">IDP Scan Results <span class="idp-scan-live-badge">● COMPLETE</span></div>' +
+            '<div class="idp-scan-sub">AI-powered field extraction · 5 documents scanned · NLP confidence scoring · Auto-population to claim fields</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'idp-scan-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="idp-scan-summary">' +
+        '<div class="idp-sum-item blue"><i class="fas fa-file-import"></i><span>5 Docs Scanned</span></div>' +
+        '<div class="idp-sum-item green"><i class="fas fa-check-double"></i><span>2 Verified</span></div>' +
+        '<div class="idp-sum-item purple"><i class="fas fa-cog"></i><span>2 Extracting</span></div>' +
+        '<div class="idp-sum-item orange"><i class="fas fa-clock"></i><span>1 Pending Upload</span></div>' +
+        '<div class="idp-sum-item blue"><i class="fas fa-bullseye"></i><span>94% Avg Confidence</span></div>' +
+      '</div>' +
+      '<div class="idp-scan-body">' + cardsHTML + '</div>' +
+      '<div class="idp-scan-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'idp-scan-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="p7Toast(\'<i class=\\\'fas fa-download\\\'></i> Extracted fields auto-populated into all claim forms — review required for low-confidence fields\',4000);document.getElementById(\'idp-scan-overlay\').remove()"><i class="fas fa-magic"></i> Auto-Populate Claim Fields</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
 // ============================================================
@@ -8334,8 +8447,8 @@ function closeCIReviewModal() {
   document.body.style.overflow = '';
 }
 
-// ── Smart Doc Request ──
-function runSmartDocRequests() {
+// ── Smart Doc Request (stub — overridden below by enhanced version) ──
+function _orig_runSmartDocRequests() {
   const btn = event.currentTarget;
   const orig = btn.innerHTML;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
@@ -19354,7 +19467,29 @@ const prospectData = {
       { date: 'Apr 7', title: 'WL Illustration Sent', desc: 'AI-generated $500K WL at Preferred rate', status: 'done' },
       { date: 'Apr 12', title: 'In-Person Meeting — TODAY', desc: 'Product presentation + e-app target', status: 'current' },
       { date: 'Apr 15', title: 'E-App Submission Target', desc: 'Submit to UW — Preferred Plus likely', status: 'future' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L001', sourceLeadName: 'Alex Rivera',
+      sourceCampaign: null, sourceCampaignName: 'Organic — Referral (Robert Chen)',
+      fnaDate: 'Apr 3, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Discovery call confirmed budget $350+/mo, WL interest strong, no existing coverage beyond group term. Promotion trigger identified as primary urgency driver.',
+      enrichedAt: 'Apr 3, 2026 · 6:18 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'Dun & Bradstreet Wealth Signals', type: 'wealth', status: 'ok', detail: 'Net worth $340K · Investable assets $95K · Wealth tier: Mass Affluent', refreshed: 'Apr 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 760 · DTI 28% · Clean file · 0 missed payments', refreshed: 'Apr 2026' },
+        { name: 'Experian ConsumerView', type: 'lifestyle', status: 'ok', detail: 'Young Professional · High digital savvy · Est. spend $68K/yr', refreshed: 'Apr 2026' },
+        { name: 'LinkedIn Profile Monitor', type: 'social', status: 'ok', detail: 'Active · 1,200 connections · Promotion confirmed Jan 2026', refreshed: 'Apr 10, 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 47 closed cases · WL primary 89% · DI add-on 61%', refreshed: 'Apr 3, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 88, pmailTotal: 100, closePct: 82,
+        topDomain: 'ins', domainScores: { ins: 88, inv: 42, ret: 18, adv: 15 },
+        recommendedSequence: ['Whole Life $500K (Primary)', 'Disability Insurance $7K/mo (Upsell @ close)', '529 Plan (3-yr flag)'],
+        keyInsight: 'Referral-sourced prospects at this income tier close WL 89% of the time when meeting is scheduled within 14 days of referral. Meeting is Apr 12 — day 15. Urgency is high.',
+        riskFlags: ['Competitor quote from Prudential detected (social mention)', 'Spouse not yet engaged — may request second meeting']
+      }
+    }
   },
 
   P002: {
@@ -19443,7 +19578,29 @@ const prospectData = {
       { date: 'Apr 4', title: 'Discovery Call', desc: 'Confirmed interest — 2 dependents, no current coverage', status: 'done' },
       { date: 'Apr 6', title: 'Proposal Sent', desc: 'Term $1M + LTC rider — $3,600/yr illustrated', status: 'done' },
       { date: 'Apr 13', title: 'Follow-Up Due — OVERDUE', desc: '11 days with no response — action needed', status: 'current' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L002', sourceLeadName: 'Nancy Foster',
+      sourceCampaign: 'CAM003', sourceCampaignName: 'Term Life — Young Families',
+      fnaDate: 'Apr 4, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Discovery call revealed 2 dependents under age 5, $530K new mortgage, zero life coverage. Confirmed $195K income and 11-day stall on proposal follow-up.',
+      enrichedAt: 'Apr 4, 2026 · 7:02 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'CoreLogic Mortgage & Property Data', type: 'wealth', status: 'ok', detail: 'Net worth $620K · Mortgage $530K (new Mar 2026) · Home equity $210K', refreshed: 'Apr 2026' },
+        { name: 'TransUnion TrueRisk', type: 'credit', status: 'ok', detail: 'Score 718 · DTI 41% (new mortgage) · 0 missed payments', refreshed: 'Apr 2026' },
+        { name: 'LexisNexis Consumer Data', type: 'lifestyle', status: 'ok', detail: 'New homeowner · 2 dependents · Healthcare professional', refreshed: 'Apr 2026' },
+        { name: 'Vital Records Monitor', type: 'events', status: 'ok', detail: 'Mortgage filing confirmed Mar 2026 · Homeowner flag active', refreshed: 'Apr 5, 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 38 closed cases · Term $750K–$1M primary 74% · LTC rider 45%', refreshed: 'Apr 4, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 82, pmailTotal: 96, closePct: 61,
+        topDomain: 'ins', domainScores: { ins: 82, inv: 18, ret: 34, adv: 12 },
+        recommendedSequence: ['Term Life $1M (Primary)', 'LTC Rider (Bundle at delivery)', 'Annuity (Pre-retirement — 10-yr flag)'],
+        keyInsight: 'New homeowner with $530K mortgage and 2 dependents, zero life coverage detected. Proposal sent Apr 6 — 11 days without reply. Mortgage protection urgency is the strongest re-engagement hook.',
+        riskFlags: ['11 days no response — deal at cold risk', 'DTI 41% may affect affordability perception — lead with monthly cost frame']
+      }
+    }
   },
 
   P003: {
@@ -19532,7 +19689,29 @@ const prospectData = {
       { date: 'Mar 27', title: 'Discovery Call', desc: 'Confirmed zero DI, income $220K, interested', status: 'done' },
       { date: 'Mar 29', title: 'APS Ordered', desc: 'Full medical records requested — delay began', status: 'done' },
       { date: 'Apr 13', title: 'RE-ENGAGE REQUIRED', desc: '15 days stale — contact today or deal goes cold', status: 'current' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L003', sourceLeadName: 'John Kim',
+      sourceCampaign: null, sourceCampaignName: 'LinkedIn Outreach — DI Gap Campaign',
+      fnaDate: 'Mar 27, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Discovery call confirmed zero DI coverage on $220K income, ESPP vesting $42K this quarter, interested in DI + possible investment account.',
+      enrichedAt: 'Mar 27, 2026 · 5:44 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'LinkedIn Wealth Signals', type: 'wealth', status: 'ok', detail: 'Net worth est. $580K · Stock portfolio $95K · ESPP vesting Q2 2026', refreshed: 'Mar 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 742 · DTI 22% · Clean file · Excellent capacity', refreshed: 'Mar 2026' },
+        { name: 'LinkedIn Profile Monitor', type: 'social', status: 'warn', detail: 'Active · 3,100 connections · ESPP vest confirmed via company SEC filing', refreshed: 'Mar 27, 2026' },
+        { name: 'Medical Records (APS)', type: 'health', status: 'warn', detail: 'APS ordered Mar 29 — pending · Minor health flag possible', refreshed: 'Pending' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 29 closed cases · DI primary 66% · Investment account add-on 38%', refreshed: 'Mar 27, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 62, pmailTotal: 88, closePct: 44,
+        topDomain: 'inv', domainScores: { ins: 62, inv: 81, ret: 44, adv: 20 },
+        recommendedSequence: ['Disability Insurance $14K/mo (Primary)', 'Investment Account — ESPP rollover (Bundle)', 'Roth IRA (Annual contribution)'],
+        keyInsight: 'APS delay is the stall driver — 15 days with no contact creates cold-lead risk. ESPP vesting creates a 30-day window for investment conversation. Re-engage today with DI + ESPP dual value prop.',
+        riskFlags: ['APS pending — underwriting delay risk', '15-day stall — re-engage today or lose deal', 'ESPP vest window closes Q2 end']
+      }
+    }
   },
 
   P004: {
@@ -19624,7 +19803,29 @@ const prospectData = {
       { date: 'Apr 8', title: 'Lab Results — CLEAR', desc: 'Minor cholesterol flag — Preferred still OK', status: 'done' },
       { date: 'Apr 12', title: 'Attorney Review Complete', desc: 'Beneficiary clause confirmed — ready to close', status: 'current' },
       { date: 'Apr 13', title: 'CLOSE TODAY', desc: 'Call + e-app + DocuSign', status: 'future' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L004', sourceLeadName: 'Michael Santos',
+      sourceCampaign: null, sourceCampaignName: 'Referral — Linda Morrison',
+      fnaDate: 'Mar 22, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Estate planning review revealed key-person gap and buy-sell need. Business grew 22% last year, 4 new employees, zero key-person coverage. Attorney engaged for beneficiary clause.',
+      enrichedAt: 'Mar 22, 2026 · 4:15 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'Dun & Bradstreet Business Registry', type: 'business', status: 'ok', detail: 'Santos Tech Solutions LLC · 4 employees · Revenue $2.1M · Founded 2019', refreshed: 'Mar 2026' },
+        { name: 'Dun & Bradstreet Wealth Signals', type: 'wealth', status: 'ok', detail: 'Net worth est. $1.8M · Business assets $1.2M · Investable $320K', refreshed: 'Mar 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 788 · DTI 18% · Excellent · 0 derogatory', refreshed: 'Mar 2026' },
+        { name: 'Secretary of State — LLC Filings', type: 'public', status: 'ok', detail: 'Santos Tech Solutions active · 3 LLCs registered 2019–2024', refreshed: 'Mar 22, 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 22 closed cases · Key-Person Life 95% · Buy-Sell funding 82%', refreshed: 'Mar 22, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 96, pmailTotal: 96, closePct: 91,
+        topDomain: 'ins', domainScores: { ins: 96, inv: 28, ret: 22, adv: 78 },
+        recommendedSequence: ['Key-Person UL $750K (Primary)', 'Buy-Sell Agreement Funding (Advisory bundle)', 'Business Succession Plan (6-month follow-up)'],
+        keyInsight: 'Attorney review complete, beneficiary confirmed — this is a same-day close. 91% close probability on key-person + buy-sell combination for this business-owner profile.',
+        riskFlags: ['Attorney may request minor clause revision — have DocuSign ready', 'Business partner not yet engaged for buy-sell second signature']
+      }
+    }
   },
 
   P005: {
@@ -19713,7 +19914,29 @@ const prospectData = {
       { date: 'Mar 21', title: 'Follow-Up Call', desc: 'Discovery — CD maturing May, $420K investable', status: 'done' },
       { date: 'Apr 2', title: 'Proposal Sent', desc: 'Fixed annuity $120K + income annuity illustration', status: 'done' },
       { date: 'Apr 13', title: 'FOLLOW-UP OVERDUE', desc: '11 days, no reply — call today (CD urgency)', status: 'current' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L005', sourceLeadName: 'Julia Chen',
+      sourceCampaign: 'CAM005', sourceCampaignName: 'NYL Retirement Workshop Seminar',
+      fnaDate: 'Mar 21, 2026', fnaAdvisor: 'You', fnaStatus: 'Completed',
+      fnaSummary: 'Discovery call revealed $180K CD maturing May 2026 at 4.8%, $420K investable assets, pension $78K/yr. Annuity rate comparison is primary close driver — urgent before CD auto-renews.',
+      enrichedAt: 'Mar 21, 2026 · 2:30 PM',
+      enrichmentStatus: 'complete',
+      dataSources: [
+        { name: 'Dun & Bradstreet Wealth Signals', type: 'wealth', status: 'ok', detail: 'Net worth $820K · CD $180K maturing May · Investable $420K · Retired', refreshed: 'Mar 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 801 · DTI 12% · Exceptional · Zero debt exposure', refreshed: 'Mar 2026' },
+        { name: 'Bank CD Monitor (AI)', type: 'financial', status: 'ok', detail: 'CD maturity date: May 14, 2026 · Auto-renewal risk if no action by May 7', refreshed: 'Apr 10, 2026' },
+        { name: 'Experian ConsumerView', type: 'lifestyle', status: 'ok', detail: 'Retired homeowner · Hoboken, NJ · Conservative investor profile', refreshed: 'Mar 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 31 closed cases · Fixed annuity primary 71% · Income rider add-on 52%', refreshed: 'Mar 21, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 91, pmailTotal: 84, closePct: 58,
+        topDomain: 'ret', domainScores: { ins: 38, inv: 45, ret: 91, adv: 22 },
+        recommendedSequence: ['Fixed Annuity $120K (Primary — CD replacement)', 'Immediate Annuity Income Rider (Bundle)', 'Income Planning (Annual review follow-up)'],
+        keyInsight: 'CD matures May 14 — 31 days away. If Julia does not act, CD auto-renews at 4.8% and annuity window closes for 1 year. Call today with rate comparison: annuity 6.1% vs CD 4.8% = $2,340/yr more income.',
+        riskFlags: ['11-day proposal stall — CD urgency window closing', 'CD auto-renews May 14 if no decision — creates 12-month re-engagement delay']
+      }
+    }
   },
 
   P006: {
@@ -19892,7 +20115,29 @@ const prospectData = {
       { date: 'Mar 2026', title: 'Baby Born', desc: 'Vital records alert triggered — new parent signal', status: 'done' },
       { date: 'Apr 9', title: 'Added to Prospects', desc: 'AI identified + enriched with 3rd-party data', status: 'done' },
       { date: 'Apr 13', title: 'FIRST OUTREACH — TODAY', desc: 'Congratulations email + protection brief', status: 'current' }
-    ]
+    ],
+    enrichment: {
+      sourceLead: 'L007', sourceLeadName: 'Rachel Park',
+      sourceCampaign: 'CAM001', sourceCampaignName: 'New Parent Protection Drive',
+      fnaDate: null, fnaAdvisor: 'You', fnaStatus: 'Pending — Not Yet Scheduled',
+      fnaSummary: 'Prospect created from life-event trigger (new baby) and campaign response. FNA discovery not yet conducted — first outreach today. AI enrichment pre-run on 3rd-party signals.',
+      enrichedAt: 'Apr 9, 2026 · 9:00 AM',
+      enrichmentStatus: 'pre-fna',
+      dataSources: [
+        { name: 'Vital Records Monitor', type: 'events', status: 'ok', detail: 'Birth record detected Mar 2026 · Infant added to household', refreshed: 'Apr 9, 2026' },
+        { name: 'Dun & Bradstreet Wealth Signals', type: 'wealth', status: 'ok', detail: 'Household income est. $148K · Net worth $210K · Dual income', refreshed: 'Mar 2026' },
+        { name: 'Equifax Credit Insights', type: 'credit', status: 'ok', detail: 'Score 744 · DTI 29% · Good standing · Young professional profile', refreshed: 'Mar 2026' },
+        { name: 'RSU/ESPP Vest Monitor (AI)', type: 'financial', status: 'ok', detail: 'RSU vest confirmed Q2 2026 via employer SEC filing — timing aligns', refreshed: 'Apr 9, 2026' },
+        { name: 'NYL Propensity Model v4.2', type: 'model', status: 'ok', detail: 'Matched 52 closed cases · Term Life primary 88% · 529 Plan add-on 61%', refreshed: 'Apr 9, 2026' }
+      ],
+      aiModelOutputs: {
+        propensityScore: 85, pmailTotal: 88, closePct: 55,
+        topDomain: 'ins', domainScores: { ins: 85, inv: 52, ret: 28, adv: 15 },
+        recommendedSequence: ['Term Life $600K (Primary)', '529 Plan (Bundle — present at delivery)', 'DI $8K/mo (Upsell — 3-month follow-up)'],
+        keyInsight: 'New baby + RSU vest = two simultaneous triggers. Both Term Life and 529 can be set up in one meeting. Pre-FNA enrichment confirms strong fit — first outreach today to schedule FNA discovery call.',
+        riskFlags: ['FNA not yet conducted — discovery call needed before proposal', 'Spouse not yet engaged — both parents are decision makers']
+      }
+    }
   },
 
   P008: {
@@ -21345,6 +21590,192 @@ function renderProspectTab(tab, p) {
             <div class="pm-value-sub">Commission: ${p.commission} · Deal ID: ${p.pipelineDealId || 'Not yet in pipeline'}</div>
           </div>
         </div>
+      </div>`;
+  }
+
+  else if (tab === 'enrichment') {
+    const enr = p.enrichment;
+    if (!enr) {
+      body.innerHTML = `<div style="padding:32px;text-align:center;color:#94a3b8"><i class="fas fa-atom" style="font-size:2rem;margin-bottom:8px;display:block"></i>No enrichment data available for this prospect.</div>`;
+      return;
+    }
+
+    // ── Status config
+    const statusConfig = {
+      'complete':  { color: '#059669', bg: '#d1fae5', icon: 'fa-check-circle', label: 'Enrichment Complete' },
+      'pre-fna':   { color: '#d97706', bg: '#fef3c7', icon: 'fa-hourglass-half', label: 'Pre-FNA — Partial Enrichment' },
+      'pending':   { color: '#94a3b8', bg: '#f1f5f9', icon: 'fa-clock', label: 'Enrichment Pending' }
+    };
+    const sc = statusConfig[enr.enrichmentStatus] || statusConfig['pending'];
+
+    // ── Data source type config
+    const typeConfig = {
+      wealth:    { icon: 'fa-gem',           color: '#d97706', label: 'Wealth Intelligence' },
+      credit:    { icon: 'fa-star',          color: '#0891b2', label: 'Credit Signals' },
+      lifestyle: { icon: 'fa-user-circle',   color: '#7c3aed', label: 'Lifestyle & Household' },
+      social:    { icon: 'fa-share-alt',     color: '#2563eb', label: 'Social Footprint' },
+      events:    { icon: 'fa-calendar-check',color: '#059669', label: 'Life Events & Triggers' },
+      model:     { icon: 'fa-robot',         color: '#003087', label: 'AI Propensity Model' },
+      business:  { icon: 'fa-briefcase',     color: '#ea580c', label: 'Business Intelligence' },
+      financial: { icon: 'fa-chart-line',    color: '#0891b2', label: 'Financial Monitor' },
+      health:    { icon: 'fa-heartbeat',     color: '#ef4444', label: 'Health & Underwriting' },
+      public:    { icon: 'fa-landmark',      color: '#475569', label: 'Public Records' }
+    };
+    const dsStatusDot = s => s === 'ok' ? '#22c55e' : s === 'warn' ? '#f59e0b' : '#ef4444';
+    const dsStatusLabel = s => s === 'ok' ? 'Live' : s === 'warn' ? 'Review' : 'Error';
+
+    // ── Domain score bars
+    const ds = enr.aiModelOutputs?.domainScores || {};
+    const domainCfg = [
+      { key: 'ins', label: 'Insurance',   color: '#2563eb' },
+      { key: 'inv', label: 'Investments', color: '#059669' },
+      { key: 'ret', label: 'Retirement',  color: '#d97706' },
+      { key: 'adv', label: 'Advisory',    color: '#7c3aed' }
+    ];
+
+    const domainBarsHTML = domainCfg.map(d => {
+      const score = ds[d.key] || 0;
+      const scoreColor = score >= 75 ? d.color : score >= 50 ? '#f59e0b' : '#94a3b8';
+      return `
+        <div class="enr-domain-bar-item">
+          <div class="enr-domain-bar-header">
+            <span class="enr-domain-bar-label">${d.label}</span>
+            <span class="enr-domain-bar-score" style="color:${scoreColor}">${score}</span>
+          </div>
+          <div class="enr-domain-bar-track">
+            <div class="enr-domain-bar-fill" style="width:${score}%;background:${scoreColor}"></div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // ── Data source cards
+    const dataSourcesHTML = (enr.dataSources || []).map(src => {
+      const tc = typeConfig[src.type] || { icon: 'fa-database', color: '#64748b', label: src.type };
+      return `
+        <div class="enr-source-card">
+          <div class="enr-source-icon" style="background:${tc.color}18;color:${tc.color}"><i class="fas ${tc.icon}"></i></div>
+          <div class="enr-source-body">
+            <div class="enr-source-name">${src.name}</div>
+            <div class="enr-source-detail">${src.detail}</div>
+            <div class="enr-source-meta">Refreshed: ${src.refreshed}</div>
+          </div>
+          <div class="enr-source-status" style="color:${dsStatusDot(src.status)}">
+            <i class="fas fa-circle" style="font-size:7px"></i> ${dsStatusLabel(src.status)}
+          </div>
+        </div>`;
+    }).join('');
+
+    // ── Recommended product sequence
+    const ai = enr.aiModelOutputs || {};
+    const seqHTML = (ai.recommendedSequence || []).map((p, i) => `
+      <div class="enr-seq-step">
+        <div class="enr-seq-num">${i + 1}</div>
+        <div class="enr-seq-text">${p}</div>
+      </div>`).join('');
+
+    // ── Risk flags
+    const riskHTML = (ai.riskFlags || []).map(f => `
+      <div class="enr-risk-row"><i class="fas fa-exclamation-triangle"></i> ${f}</div>`).join('');
+
+    body.innerHTML = `
+      <div class="enr-panel">
+
+        <!-- ── Enrichment Status Header ── -->
+        <div class="enr-status-bar" style="background:${sc.bg};border:1px solid ${sc.color}40">
+          <i class="fas ${sc.icon}" style="color:${sc.color}"></i>
+          <span style="color:${sc.color};font-weight:700">${sc.label}</span>
+          <span class="enr-timestamp">Enriched: ${enr.enrichedAt}</span>
+        </div>
+
+        <!-- ── Provenance: Lead → Campaign → FNA ── -->
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-route"></i> Prospect Provenance</div>
+          <div class="enr-provenance-chain">
+            <div class="enr-prov-step" onclick="navigateTo('leads')">
+              <div class="enr-prov-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-user-plus"></i></div>
+              <div class="enr-prov-body">
+                <div class="enr-prov-label">Source Lead</div>
+                <div class="enr-prov-value">${enr.sourceLeadName || 'Direct Entry'} ${enr.sourceLead ? `<span class="enr-id-badge">${enr.sourceLead}</span>` : ''}</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right enr-prov-arrow"></i>
+            <div class="enr-prov-step" onclick="navigateTo('campaigns')">
+              <div class="enr-prov-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-bullhorn"></i></div>
+              <div class="enr-prov-body">
+                <div class="enr-prov-label">Campaign</div>
+                <div class="enr-prov-value">${enr.sourceCampaignName || 'No Campaign'} ${enr.sourceCampaign ? `<span class="enr-id-badge">${enr.sourceCampaign}</span>` : ''}</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right enr-prov-arrow"></i>
+            <div class="enr-prov-step ${!enr.fnaDate ? 'enr-prov-pending' : ''}" onclick="navigateTo('fna')">
+              <div class="enr-prov-icon" style="background:${enr.fnaDate ? '#dcfce7' : '#f1f5f9'};color:${enr.fnaDate ? '#059669' : '#94a3b8'}"><i class="fas fa-clipboard-list"></i></div>
+              <div class="enr-prov-body">
+                <div class="enr-prov-label">FNA Discovery</div>
+                <div class="enr-prov-value" style="color:${enr.fnaDate ? '#111827' : '#94a3b8'}">${enr.fnaDate ? `Completed ${enr.fnaDate}` : enr.fnaStatus}</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right enr-prov-arrow"></i>
+            <div class="enr-prov-step enr-prov-active">
+              <div class="enr-prov-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-atom"></i></div>
+              <div class="enr-prov-body">
+                <div class="enr-prov-label">Enriched Prospect</div>
+                <div class="enr-prov-value" style="color:#7c3aed">${p.name} <span class="enr-id-badge">${p.id}</span></div>
+              </div>
+            </div>
+          </div>
+          ${enr.fnaSummary ? `<div class="enr-fna-summary"><i class="fas fa-clipboard-check"></i> <strong>FNA Summary:</strong> ${enr.fnaSummary}</div>` : ''}
+        </div>
+
+        <!-- ── AI Model Outputs ── -->
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-brain"></i> AI Model Outputs</div>
+          <div class="enr-model-kpis">
+            <div class="enr-model-kpi">
+              <div class="enr-model-kpi-val" style="color:${(ai.propensityScore||0)>=80?'#22c55e':(ai.propensityScore||0)>=60?'#f59e0b':'#ef4444'}">${ai.propensityScore || '—'}</div>
+              <div class="enr-model-kpi-lbl">Propensity Score</div>
+            </div>
+            <div class="enr-model-kpi">
+              <div class="enr-model-kpi-val" style="color:${(ai.pmailTotal||0)>=90?'#22c55e':(ai.pmailTotal||0)>=70?'#f59e0b':'#ef4444'}">${ai.pmailTotal || '—'}<span style="font-size:0.6em">/100</span></div>
+              <div class="enr-model-kpi-lbl">PMAIL Score</div>
+            </div>
+            <div class="enr-model-kpi">
+              <div class="enr-model-kpi-val" style="color:${(ai.closePct||0)>=75?'#22c55e':(ai.closePct||0)>=50?'#f59e0b':'#ef4444'}">${ai.closePct || '—'}%</div>
+              <div class="enr-model-kpi-lbl">Close Probability</div>
+            </div>
+            <div class="enr-model-kpi">
+              <div class="enr-model-kpi-val" style="color:#7c3aed">${ai.topDomain ? ai.topDomain.toUpperCase() : '—'}</div>
+              <div class="enr-model-kpi-lbl">Top Domain</div>
+            </div>
+          </div>
+
+          <div class="enr-domain-bars">${domainBarsHTML}</div>
+
+          ${ai.keyInsight ? `
+          <div class="enr-ai-insight">
+            <i class="fas fa-lightbulb" style="color:#f59e0b;flex-shrink:0;margin-top:2px"></i>
+            <span>${ai.keyInsight}</span>
+          </div>` : ''}
+        </div>
+
+        <!-- ── Recommended Product Sequence ── -->
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-list-ol"></i> AI Recommended Product Sequence</div>
+          <div class="enr-seq-list">${seqHTML}</div>
+        </div>
+
+        <!-- ── Risk Flags ── -->
+        ${riskHTML ? `
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> AI Risk Flags</div>
+          <div class="enr-risk-list">${riskHTML}</div>
+        </div>` : ''}
+
+        <!-- ── Data Source Intelligence Grid ── -->
+        <div class="enr-section">
+          <div class="enr-section-title"><i class="fas fa-database"></i> Enrichment Data Sources <span class="enr-source-count">${(enr.dataSources||[]).length} sources</span></div>
+          <div class="enr-sources-grid">${dataSourcesHTML}</div>
+        </div>
+
       </div>`;
   }
 
@@ -24962,7 +25393,110 @@ function renderNavigatorStep(num, status, title, desc, items) {
 }
 
 function openADBScreener() {
-  showToast('AI ADB Eligibility Screener: checking all open policies against terminal/chronic illness criteria…', 'ai');
+  var criteria = [
+    { label:'Terminal illness diagnosis by licensed physician', met:true,  note:'Confirmed — oncologist Dr. Hernandez, diagnosis 2026-03-12' },
+    { label:'Life expectancy ≤ 24 months (carrier standard)', met:true,  note:'Physician-stated prognosis: 6–8 months' },
+    { label:'Policy in force ≥ 2 years (no contestability)', met:true,  note:'Policy NYL-P-100487 issued 2023-11-01 — 2.3 years in force' },
+    { label:'No existing ADB claim on same policy',          met:true,  note:'First ADB filing — no prior acceleration' },
+    { label:'Terminal certification form (ADB-TC-2026) received', met:false, note:'PENDING — oncologist contacted 2026-04-05; 5-day SLA remaining' },
+    { label:'Benefit amount ≤ 80% of face value ($150K max)', met:true,  note:'$120,000 requested = 80% of $150,000 face value — at limit' },
+    { label:'Contestability review waived (compassionate track)', met:true,  note:'Compassionate fast-track approved by Sr. Adjuster M. Torres' }
+  ];
+
+  var criteriaHTML = criteria.map(function(c) {
+    var iconCls = c.met ? 'fas fa-check-circle' : 'fas fa-clock';
+    var color   = c.met ? '#16a34a' : '#d97706';
+    var rowCls  = c.met ? 'adb-crit-met' : 'adb-crit-pending';
+    return '<div class="adb-crit-row ' + rowCls + '">' +
+      '<i class="' + iconCls + '" style="color:' + color + ';width:18px;flex-shrink:0"></i>' +
+      '<div class="adb-crit-body">' +
+        '<div class="adb-crit-label">' + c.label + '</div>' +
+        '<div class="adb-crit-note">' + c.note + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var docItems = [
+    { name:'Terminal Illness Certification (ADB-TC-2026)',         status:'pending',   icon:'fas fa-clock',           color:'#d97706' },
+    { name:'Claimant Statement (ADB-CS-2026) — signed by beneficiary', status:'received',  icon:'fas fa-check-circle',    color:'#16a34a' },
+    { name:'Attending Physician Statement (APS)',                   status:'partial',   icon:'fas fa-exclamation-circle',color:'#d97706' },
+    { name:'Policy Document — NYL-P-100487',                       status:'verified',  icon:'fas fa-check-double',    color:'#2563eb' },
+    { name:'Government-issued photo ID — beneficiary',             status:'verified',  icon:'fas fa-check-double',    color:'#2563eb' }
+  ];
+  var docHTML = docItems.map(function(d) {
+    return '<div class="adb-doc-row">' +
+      '<i class="' + d.icon + '" style="color:' + d.color + ';width:18px;flex-shrink:0"></i>' +
+      '<span class="adb-doc-name">' + d.name + '</span>' +
+      '<span class="adb-doc-status" style="color:' + d.color + '">' + d.status.toUpperCase() + '</span>' +
+    '</div>';
+  }).join('');
+
+  var metCount = criteria.filter(function(c){ return c.met; }).length;
+  var pct = Math.round(metCount / criteria.length * 100);
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay adb-overlay';
+  overlay.id = 'adb-screener-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="adb-modal" onclick="event.stopPropagation()">' +
+      '<div class="adb-header">' +
+        '<div class="adb-header-left">' +
+          '<div class="adb-icon"><i class="fas fa-heartbeat"></i></div>' +
+          '<div>' +
+            '<div class="adb-title">ADB Eligibility Screener</div>' +
+            '<div class="adb-sub">Accelerated Death Benefit · Compassionate Fast-Track · AI-verified eligibility</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'adb-screener-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="adb-body">' +
+        '<div class="adb-claim-banner">' +
+          '<div class="adb-claim-info">' +
+            '<div class="adb-claim-id">CLM-2026-0028 <span class="adb-compassionate-tag"><i class="fas fa-heart"></i> Compassionate</span></div>' +
+            '<div class="adb-claim-client"><strong>Maria Gonzalez</strong> · Policy NYL-P-100487 · Face Value $150,000</div>' +
+            '<div class="adb-claim-detail">ADB Requested: $120,000 · Diagnosis: Stage IV Pancreatic Cancer · Prognosis: 6–8 months</div>' +
+          '</div>' +
+          '<div class="adb-eligibility-score">' +
+            '<div class="adb-elig-pct" style="color:' + (pct >= 80 ? '#16a34a' : '#d97706') + '">' + pct + '%</div>' +
+            '<div class="adb-elig-lbl">Eligibility</div>' +
+            '<div class="adb-elig-sub">' + metCount + '/' + criteria.length + ' criteria met</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="adb-section-title"><i class="fas fa-clipboard-check"></i> Eligibility Criteria Checklist</div>' +
+        '<div class="adb-criteria-list">' + criteriaHTML + '</div>' +
+
+        '<div class="adb-section-title" style="margin-top:20px"><i class="fas fa-file-medical"></i> Document Tracking</div>' +
+        '<div class="adb-doc-list">' + docHTML + '</div>' +
+
+        '<div class="adb-pending-alert">' +
+          '<i class="fas fa-exclamation-triangle"></i>' +
+          '<div>' +
+            '<strong>Action Required:</strong> Terminal Illness Certification (ADB-TC-2026) still pending from Dr. Hernandez (oncologist).' +
+            ' AI-drafted follow-up letter ready to send. 5-day SLA window remaining.' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="adb-workflow-strip">' +
+          '<div class="adb-wf-step done"><i class="fas fa-check-circle"></i><span>Claim Filed</span></div>' +
+          '<div class="adb-wf-arrow">›</div>' +
+          '<div class="adb-wf-step done"><i class="fas fa-check-circle"></i><span>Fast-Track Approved</span></div>' +
+          '<div class="adb-wf-arrow">›</div>' +
+          '<div class="adb-wf-step active"><i class="fas fa-clock"></i><span>Cert Pending</span></div>' +
+          '<div class="adb-wf-arrow">›</div>' +
+          '<div class="adb-wf-step pending"><i class="far fa-circle"></i><span>Final Review</span></div>' +
+          '<div class="adb-wf-arrow">›</div>' +
+          '<div class="adb-wf-step pending"><i class="far fa-circle"></i><span>Payout $120K</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="adb-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'adb-screener-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="sendDocRequest(\'CLM-2026-0028\',\'Dr. Hernandez — ADB Terminal Certification\');document.getElementById(\'adb-screener-overlay\').remove()"><i class="fas fa-paper-plane"></i> Send Cert Request to Dr. Hernandez</button>' +
+        '<button class="p7m-btn primary" onclick="p7Toast(\'<i class=\\\'fas fa-bolt\\\'></i> ADB CLM-2026-0028 flagged for expedited processing — compassionate specialist assigned\',3500);document.getElementById(\'adb-screener-overlay\').remove()"><i class="fas fa-bolt"></i> Expedite Processing</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -34336,6 +34870,19 @@ var p7ClaimsData = {
     fraudScore: 42, fraudLabel: 'Watch',
     slaDeadline: 'Apr 14, 2026', slaDaysLeft: 1, slaStatus: 'breach',
     liabilityScore: 72, liabilityLabel: 'High',
+    reserveAmount: '$1,050,000', reserveStatus: 'Set', paymentHistory: [],
+    coverageLimits: 'Face value $1,000,000 — Whole Life policy in-force since 2018.',
+    exclusions: 'No applicable exclusions. Policy > 2-year contestability period.',
+    regulatoryState: 'NY', regulatoryNote: 'NY Ins. Law §3420: insurer must pay within 15 days of proof of claim. SLA breach imminent.',
+    legalHold: false, badFaithRisk: 'Elevated — SLA breach in 1 day if docs not collected.',
+    beneficiary: 'Susan Chen', benefRel: 'Spouse', benefKYC: 'ID Pending',
+    benefEmail: 'susan.chen@email.com', benefPhone: '415-555-0182',
+    benefPayAccount: 'Bank account details not yet provided',
+    communications: [
+      { date: 'Apr 9, 2026', type: 'Phone', dir: 'Inbound', from: 'Susan Chen', note: 'Called to file claim. Provided initial info. Death certificate in hand.' },
+      { date: 'Apr 10, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Sent upload portal link and required document checklist to Susan Chen.' },
+      { date: 'Apr 11, 2026', type: 'System', dir: 'Auto', from: 'AI Auto-Reminder', note: 'Automated reminder sent: identity documents and bank details still needed.' }
+    ],
     docs: [
       { name: 'Death Certificate', status: 'received', date: 'Apr 10, 2026' },
       { name: 'Claimant ID (Susan Chen)', status: 'received', date: 'Apr 10, 2026' },
@@ -34351,55 +34898,43 @@ var p7ClaimsData = {
       { date: 'Apr 12', event: 'SLA warning: 2 days to breach NY Ins. Law §3420', type: 'alert' }
     ]
   },
-  'CLM-2026-0025': {
-    id: 'CLM-2026-0025', client: 'Kevin Park', initials: 'KP', policy: 'P-100350',
-    type: 'Death Benefit', amount: '$250,000', filed: '2026-04-05',
-    daysOpen: 9, status: 'Under Review', priority: 'Urgent',
-    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
-    fraudScore: 78, fraudLabel: 'Flagged',
-    slaDeadline: 'May 5, 2026', slaDaysLeft: 21, slaStatus: 'ok',
-    liabilityScore: 58, liabilityLabel: 'Medium',
-    docs: [
-      { name: 'Death Certificate', status: 'received', date: 'Apr 7, 2026' },
-      { name: 'Obituary / Public Record', status: 'received', date: 'Apr 6, 2026' },
-      { name: 'Claimant ID', status: 'missing', date: null },
-      { name: 'Fraud Review Form', status: 'in-progress', date: null }
+  'CLM-2026-0038': {
+    id: 'CLM-2026-0038', client: 'Sandra Williams', initials: 'SW', policy: 'P-100321',
+    type: 'Long-Term Care', amount: '$18,000', filed: '2026-04-01',
+    daysOpen: 13, status: 'Open', priority: 'Normal',
+    adjuster: 'Lisa Torres', adjusterTeam: 'LTC Team',
+    fraudScore: 12, fraudLabel: 'Clear',
+    slaDeadline: 'Apr 30, 2026', slaDaysLeft: 22, slaStatus: 'ok',
+    liabilityScore: 18, liabilityLabel: 'Low',
+    reserveAmount: '$72,000', reserveStatus: 'Set — 90-day benefit period', paymentHistory: [
+      { date: 'Pending', amount: '$6,000', note: 'First monthly payment pending Plan of Care approval' }
     ],
-    contestability: true,
-    contestabilityNote: 'Policy issued Oct 2025 — within 2-year contestability window. Carrier will review application for material misrepresentation. Fraud score 78 triggers mandatory investigation.',
-    aiTriage: 'FRAUD HOLD — do not process until investigation complete. Policy is within 2-year contestability window. Fraud score 78 requires full documentation review and independent investigation.',
-    timeline: [
-      { date: 'Apr 5', event: 'Claim filed by Jennifer Park (beneficiary)', type: 'filed' },
-      { date: 'Apr 6', event: 'Obituary match confirmed via AI public record scan', type: 'update' },
-      { date: 'Apr 7', event: 'Death certificate received — cause: cardiac event (age 29)', type: 'update' },
-      { date: 'Apr 8', event: 'Fraud score: 78 — Flagged for investigation (young insured, large benefit, new policy)', type: 'alert' },
-      { date: 'Apr 10', event: 'Contestability review initiated — policy < 2 years old', type: 'alert' }
-    ]
-  },
-  'CLM-2026-0028': {
-    id: 'CLM-2026-0028', client: 'Maria Gonzalez', initials: 'MG', policy: 'P-100340',
-    type: 'Accelerated Benefit (ADB)', amount: '$120,000', filed: '2026-03-05',
-    daysOpen: 40, status: 'Pending Docs', priority: 'Urgent (Compassionate)',
-    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
-    fraudScore: 38, fraudLabel: 'Watch',
-    slaDeadline: 'Apr 19, 2026', slaDaysLeft: 5, slaStatus: 'warn',
-    liabilityScore: 29, liabilityLabel: 'Low-Medium',
+    coverageLimits: 'Daily benefit $200/day. Benefit period: 90 days. LTC rider on P-100321.',
+    exclusions: 'Pre-existing conditions exclusion waived (3-year look-back satisfied). Custodial care covered.',
+    regulatoryState: 'NY', regulatoryNote: 'NY LTC Insurance Law §1117: claim acknowledgment within 15 days, determination within 45 days.',
+    legalHold: false, badFaithRisk: 'Low — timeline on track. Plan of Care is routine administrative item.',
+    beneficiary: 'Sandra Williams', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'sandra.w@email.com', benefPhone: '646-555-0210',
+    benefPayAccount: 'Chase checking ****4821 — verified',
+    communications: [
+      { date: 'Apr 1, 2026', type: 'Phone', dir: 'Inbound', from: 'Sandra Williams', note: 'Filed LTC claim following hospitalization. Home aide services starting Apr 3.' },
+      { date: 'Apr 5, 2026', type: 'Email', dir: 'Outbound', from: 'LTC Team', note: 'Sent care provider document checklist and Plan of Care form.' },
+      { date: 'Apr 10, 2026', type: 'Email', dir: 'Outbound', from: 'LTC Team', note: 'Follow-up to home health agency re: Plan of Care submission.' }
+    ],
     docs: [
-      { name: 'Terminal Illness Certification (Dr. Hernandez)', status: 'missing', date: null },
-      { name: 'ADB Claim Form', status: 'received', date: 'Mar 6, 2026' },
-      { name: 'Client ID', status: 'received', date: 'Mar 6, 2026' },
-      { name: 'Life Expectancy Statement', status: 'pending', date: null }
+      { name: 'LTC Eligibility Certification', status: 'received', date: 'Apr 1, 2026' },
+      { name: 'Care Provider License', status: 'received', date: 'Apr 3, 2026' },
+      { name: 'Plan of Care Document', status: 'pending', date: null },
+      { name: 'Monthly Care Summary', status: 'pending', date: null }
     ],
     contestability: false,
-    adbEligible: true,
-    adbNote: 'ADB rider active — $120K (24% of $500K face). Eligible if life expectancy < 12 months. Terminal certification from Dr. Hernandez required.',
-    aiTriage: 'COMPASSIONATE — expedite immediately. Terminal illness ADB claim. Dr. Hernandez certification is the only blocker. AI recommends direct physician outreach within 24 hours.',
+    aiTriage: 'Plan of Care from home health agency is final blocker. All eligibility documents received. First payment est. Apr 20 once Plan of Care approved. No fraud indicators.',
     timeline: [
-      { date: 'Mar 5', event: 'ADB claim filed — terminal diagnosis per primary physician', type: 'filed' },
-      { date: 'Mar 6', event: 'Claim form and client ID received', type: 'update' },
-      { date: 'Mar 20', event: 'Doc reminder sent to Dr. Hernandez — no response', type: 'update' },
-      { date: 'Apr 1', event: 'Second reminder sent — SLA approaching', type: 'alert' },
-      { date: 'Apr 10', event: 'Compassionate SLA triggered — 5 days to deadline', type: 'alert' }
+      { date: 'Apr 1', event: 'LTC claim filed by Sandra Williams', type: 'filed' },
+      { date: 'Apr 1', event: 'Initial eligibility check passed — LTC trigger confirmed', type: 'update' },
+      { date: 'Apr 3', event: 'Assigned to LTC Team — Lisa Torres', type: 'update' },
+      { date: 'Apr 5', event: 'Care provider license received and verified', type: 'update' },
+      { date: 'Apr 10', event: 'Plan of Care pending from home health agency', type: 'alert' }
     ]
   },
   'CLM-2026-0035': {
@@ -34410,6 +34945,20 @@ var p7ClaimsData = {
     fraudScore: 18, fraudLabel: 'Clear',
     slaDeadline: 'Apr 22, 2026', slaDaysLeft: 9, slaStatus: 'warn',
     liabilityScore: 41, liabilityLabel: 'Medium',
+    reserveAmount: '$25,200', reserveStatus: 'Set — 6-month reserve', paymentHistory: [],
+    coverageLimits: '60% income replacement = $4,200/mo. 90-day elimination period. Own-occupation definition. Max benefit period: 5 years.',
+    exclusions: 'Pre-existing back conditions reviewed — surgery post-policy issue date, no exclusion applies. Mental/nervous exclusion not applicable.',
+    regulatoryState: 'CA', regulatoryNote: 'CA Ins. Code §10269.1: DI claim must be acknowledged within 10 days, resolved within 40 days. SLA at 9 days.',
+    legalHold: false, badFaithRisk: 'Low-Medium — APS delay may trigger bad faith exposure if claim not processed by Apr 22.',
+    beneficiary: 'Maria Gonzalez', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'maria.g@email.com', benefPhone: '213-555-0177',
+    benefPayAccount: 'Wells Fargo checking ****2934 — verified',
+    communications: [
+      { date: 'Mar 22, 2026', type: 'Phone', dir: 'Inbound', from: 'Maria Gonzalez', note: 'Filed DI claim following back surgery Mar 10. Unable to perform nursing duties.' },
+      { date: 'Mar 25, 2026', type: 'Fax', dir: 'Inbound', from: 'Employer HR', note: 'Employer statement received confirming pre-disability income.' },
+      { date: 'Apr 1, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'APS request form sent to Dr. Hernandez office via secure email.' },
+      { date: 'Apr 9, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'Second APS reminder sent to Dr. Hernandez. No response yet.' }
+    ],
     docs: [
       { name: 'APS — Dr. Hernandez', status: 'pending', date: null },
       { name: 'Disability Claim Form', status: 'received', date: 'Mar 22, 2026' },
@@ -34433,6 +34982,19 @@ var p7ClaimsData = {
     fraudScore: 9, fraudLabel: 'Clear',
     slaDeadline: 'Apr 30, 2026', slaDaysLeft: 17, slaStatus: 'ok',
     liabilityScore: 12, liabilityLabel: 'Low',
+    reserveAmount: '$38,400', reserveStatus: 'Set — 4-month reserve', paymentHistory: [],
+    coverageLimits: 'Daily benefit $200/day. Benefit period: 3 years. Assisted living facility covered.',
+    exclusions: 'All standard exclusions waived — ADL threshold met (2 of 6 impairments). Clean claim.',
+    regulatoryState: 'NY', regulatoryNote: 'NY LTC §1117: determination within 45 days. Well within timeline.',
+    legalHold: false, badFaithRisk: 'Very Low — complete file, no flags. Standard approval expected.',
+    beneficiary: 'James Whitfield', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'james.w@email.com', benefPhone: '212-555-0155',
+    benefPayAccount: 'Direct billing to Sunrise Assisted Living ****7743',
+    communications: [
+      { date: 'Mar 15, 2026', type: 'Phone', dir: 'Inbound', from: 'James Whitfield', note: 'Filed LTC claim — placed in assisted living facility Mar 12.' },
+      { date: 'Mar 18, 2026', type: 'Fax', dir: 'Inbound', from: 'Sunrise Assisted Living', note: 'ADL assessment, care plan, and facility invoice received.' },
+      { date: 'Mar 20, 2026', type: 'Email', dir: 'Inbound', from: 'Dr. P. Okonkwo', note: 'Physician certification completed and submitted electronically.' }
+    ],
     docs: [
       { name: 'Care Plan / Plan of Care', status: 'received', date: 'Mar 18, 2026' },
       { name: 'ADL Assessment', status: 'received', date: 'Mar 18, 2026' },
@@ -34447,6 +35009,435 @@ var p7ClaimsData = {
       { date: 'Mar 20', event: 'Physician certification received — LTC trigger confirmed', type: 'update' },
       { date: 'Mar 22', event: 'Facility invoice received — all docs complete', type: 'update' },
       { date: 'Apr 5', event: 'Under review — approval expected within 5 business days', type: 'update' }
+    ]
+  },
+  'CLM-2026-0031': {
+    id: 'CLM-2026-0031', client: 'Linda Morrison', initials: 'LM', policy: 'P-100362',
+    type: 'Waiver of Premium', amount: '$9,600/yr', filed: '2026-03-10',
+    daysOpen: 35, status: 'Open', priority: 'Low',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 7, fraudLabel: 'Clear',
+    slaDeadline: 'No SLA', slaDaysLeft: 999, slaStatus: 'ok',
+    liabilityScore: 8, liabilityLabel: 'Very Low',
+    reserveAmount: '$2,400', reserveStatus: 'Set — quarterly proration', paymentHistory: [
+      { date: 'Mar 14, 2026', amount: '$2,400', note: 'Q1 2026 premium waived — approved' }
+    ],
+    coverageLimits: 'Waiver of Premium rider on P-100362. Annual premium $9,600. Waiver active during disability period (max 2 years).',
+    exclusions: 'Elective surgery covered under waiver rider. No exclusion applicable.',
+    regulatoryState: 'NY', regulatoryNote: 'No specific SLA for Waiver of Premium. Standard good-faith timeline applies.',
+    legalHold: false, badFaithRisk: 'Very Low — claim approved, waiver in effect. No disputes.',
+    beneficiary: 'Linda Morrison', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'linda.m@email.com', benefPhone: '917-555-0143',
+    benefPayAccount: 'Premium auto-debit cancelled (CitiBank ****5510) — reinstated at recovery',
+    communications: [
+      { date: 'Mar 10, 2026', type: 'Email', dir: 'Inbound', from: 'Linda Morrison', note: 'Submitted waiver of premium application with all supporting docs.' },
+      { date: 'Mar 14, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Waiver approved for 90-day period. Premium auto-debit suspended.' }
+    ],
+    docs: [
+      { name: 'Disability Certification', status: 'received', date: 'Mar 10, 2026' },
+      { name: 'Surgical Report', status: 'received', date: 'Mar 10, 2026' },
+      { name: 'Physician Recovery Estimate', status: 'received', date: 'Mar 10, 2026' },
+      { name: 'Premium Waiver Application', status: 'received', date: 'Mar 10, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Claim approved and active. Monitor for disability end date (est. June 2026). Schedule premium reinstatement reminder for May 2026. No action required.',
+    timeline: [
+      { date: 'Mar 10', event: 'Waiver of premium claim filed — all docs submitted', type: 'filed' },
+      { date: 'Mar 12', event: 'Assigned to Agent Support — Priya Sharma', type: 'update' },
+      { date: 'Mar 14', event: 'Waiver approved — 90-day disability period confirmed', type: 'update' },
+      { date: 'Mar 14', event: 'Premium auto-debit suspended — $2,400 Q1 saved', type: 'update' }
+    ]
+  },
+  'CLM-2026-0028': {
+    id: 'CLM-2026-0028', client: 'Maria Gonzalez', initials: 'MG', policy: 'P-100340',
+    type: 'Accelerated Benefit (ADB)', amount: '$120,000', filed: '2026-03-05',
+    daysOpen: 40, status: 'Pending Docs', priority: 'Urgent (Compassionate)',
+    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
+    fraudScore: 38, fraudLabel: 'Watch',
+    slaDeadline: 'Apr 19, 2026', slaDaysLeft: 5, slaStatus: 'warn',
+    liabilityScore: 29, liabilityLabel: 'Low-Medium',
+    reserveAmount: '$120,000', reserveStatus: 'Reserved — pending certification', paymentHistory: [],
+    coverageLimits: 'ADB rider: up to 24% of face value ($120K of $500K). Eligible if life expectancy < 12 months.',
+    exclusions: 'No exclusions applicable to terminal illness ADB trigger. Full certification required.',
+    regulatoryState: 'CA', regulatoryNote: 'CA §10169.1: ADB claims for terminal illness must be processed within 30 days of complete submission. Currently blocked on physician certification.',
+    legalHold: false, badFaithRisk: 'Medium — compassionate case. Delay exposes carrier to regulatory complaint risk if not handled promptly.',
+    beneficiary: 'Maria Gonzalez', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'maria.g@email.com', benefPhone: '213-555-0177',
+    benefPayAccount: 'Wells Fargo checking ****2934 — verified',
+    communications: [
+      { date: 'Mar 5, 2026', type: 'Phone', dir: 'Inbound', from: 'Maria Gonzalez', note: 'Filed ADB claim — oncologist confirmed terminal diagnosis. Needs funds urgently.' },
+      { date: 'Mar 20, 2026', type: 'Fax', dir: 'Outbound', from: 'Claims Dept.', note: 'APS/terminal certification form sent to Dr. Hernandez office.' },
+      { date: 'Apr 1, 2026', type: 'Phone', dir: 'Outbound', from: 'Chris Davis', note: 'Called Dr. Hernandez office — assistant confirmed doc in queue, ETA unknown.' },
+      { date: 'Apr 10, 2026', type: 'Email', dir: 'Outbound', from: 'AI Auto-Reminder', note: 'Third automated reminder sent to physician portal — compassionate case flag set.' }
+    ],
+    docs: [
+      { name: 'Terminal Illness Certification (Dr. Hernandez)', status: 'missing', date: null },
+      { name: 'ADB Claim Form', status: 'received', date: 'Mar 6, 2026' },
+      { name: 'Client ID', status: 'received', date: 'Mar 6, 2026' },
+      { name: 'Life Expectancy Statement', status: 'pending', date: null }
+    ],
+    contestability: false,
+    adbEligible: true,
+    adbNote: 'ADB rider active — $120K (24% of $500K face). Eligible if life expectancy < 12 months. Terminal certification from Dr. Hernandez required.',
+    aiTriage: 'COMPASSIONATE — expedite immediately. Terminal illness ADB claim. Dr. Hernandez certification is the only blocker. AI recommends direct physician outreach within 24 hours.',
+    timeline: [
+      { date: 'Mar 5', event: 'ADB claim filed — terminal diagnosis per primary physician', type: 'filed' },
+      { date: 'Mar 6', event: 'Claim form and client ID received', type: 'update' },
+      { date: 'Mar 20', event: 'Doc reminder sent to Dr. Hernandez — no response', type: 'update' },
+      { date: 'Apr 1', event: 'Second reminder sent — SLA approaching', type: 'alert' },
+      { date: 'Apr 10', event: 'Compassionate SLA triggered — 5 days to deadline', type: 'alert' }
+    ]
+  },
+  'CLM-2026-0025': {
+    id: 'CLM-2026-0025', client: 'Kevin Park', initials: 'KP', policy: 'P-100350',
+    type: 'Death Benefit', amount: '$250,000', filed: '2026-04-05',
+    daysOpen: 9, status: 'Under Review', priority: 'Urgent',
+    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
+    fraudScore: 78, fraudLabel: 'Flagged',
+    slaDeadline: 'May 5, 2026', slaDaysLeft: 21, slaStatus: 'ok',
+    liabilityScore: 58, liabilityLabel: 'Medium',
+    reserveAmount: '$265,000', reserveStatus: 'Provisionally Set — investigation hold', paymentHistory: [],
+    coverageLimits: 'Term Life $250,000. Policy status was "Pending" at time of death — coverage determination required.',
+    exclusions: 'Contestability window applies (policy < 2 years). Material misrepresentation review in progress. Potential suicide exclusion review (age 29, new policy).',
+    regulatoryState: 'NY', regulatoryNote: 'NY §3420: mandatory investigation hold. Carrier has 15 days from proof of claim to respond. Investigation may extend timeline per fraud regulations.',
+    legalHold: true, badFaithRisk: 'High — fraud score 78. Legal team should be looped in before any decision. Document all communications with estate.',
+    beneficiary: 'Estate of Kevin Park', benefRel: 'Estate / Trustee', benefKYC: 'Partial — estate docs pending',
+    benefEmail: 'park.estate@legalfirm.com', benefPhone: '212-555-0199',
+    benefPayAccount: 'Estate account — bank details pending legal resolution',
+    communications: [
+      { date: 'Apr 5, 2026', type: 'Phone', dir: 'Inbound', from: 'Jennifer Park (beneficiary)', note: 'Filed claim by phone. Provided death certificate and obituary.' },
+      { date: 'Apr 8, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Fraud hold notification sent. Case assigned to investigation team.' },
+      { date: 'Apr 10, 2026', type: 'Phone', dir: 'Inbound', from: 'Park Family Attorney', note: 'Attorney engaged. Requests timeline and claim status. Advised of fraud review process.' }
+    ],
+    docs: [
+      { name: 'Death Certificate', status: 'received', date: 'Apr 7, 2026' },
+      { name: 'Obituary / Public Record', status: 'received', date: 'Apr 6, 2026' },
+      { name: 'Claimant ID', status: 'missing', date: null },
+      { name: 'Fraud Review Form', status: 'in-progress', date: null }
+    ],
+    contestability: true,
+    contestabilityNote: 'Policy issued Oct 2025 — within 2-year contestability window. Carrier will review application for material misrepresentation. Fraud score 78 triggers mandatory investigation.',
+    aiTriage: 'FRAUD HOLD — do not process until investigation complete. Policy is within 2-year contestability window. Fraud score 78 requires full documentation review and independent investigation.',
+    timeline: [
+      { date: 'Apr 5', event: 'Claim filed by Jennifer Park (beneficiary)', type: 'filed' },
+      { date: 'Apr 6', event: 'Obituary match confirmed via AI public record scan', type: 'update' },
+      { date: 'Apr 7', event: 'Death certificate received — cause: cardiac event (age 29)', type: 'update' },
+      { date: 'Apr 8', event: 'Fraud score: 78 — Flagged for investigation (young insured, large benefit, new policy)', type: 'alert' },
+      { date: 'Apr 10', event: 'Contestability review initiated — policy < 2 years old', type: 'alert' }
+    ]
+  },
+
+  /* ── NEW CLAIM TYPES ── */
+  'CLM-2026-0045': {
+    id: 'CLM-2026-0045', client: 'Thomas Reed', initials: 'TR', policy: 'P-100378',
+    type: 'Accidental Death Benefit Rider', amount: '$150,000', filed: '2026-04-08',
+    daysOpen: 6, status: 'Under Review', priority: 'Normal',
+    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
+    fraudScore: 44, fraudLabel: 'Watch',
+    slaDeadline: 'Apr 23, 2026', slaDaysLeft: 7, slaStatus: 'warn',
+    liabilityScore: 48, liabilityLabel: 'Medium',
+    reserveAmount: '$157,500', reserveStatus: 'Set — pending accidental cause confirmation', paymentHistory: [],
+    coverageLimits: 'ADB Rider: $150,000 in addition to base death benefit $300,000. Rider pays only if death is accidental per policy definition.',
+    exclusions: 'Motor vehicle exclusion review underway (insured was driving at time of accident). Alcohol involvement flag from police report — exclusion may apply.',
+    regulatoryState: 'TX', regulatoryNote: 'TX Ins. Code §1701.055: accidental death must be confirmed as proximate cause. No SLA for contested accidental cause — standard 30-day investigation timeline.',
+    legalHold: false, badFaithRisk: 'Medium — alcohol exclusion review could trigger dispute. Document all investigation steps carefully.',
+    beneficiary: 'Patricia Reed', benefRel: 'Spouse', benefKYC: 'ID Verified',
+    benefEmail: 'patricia.reed@email.com', benefPhone: '512-555-0184',
+    benefPayAccount: 'Bank of America checking ****6612 — verified',
+    communications: [
+      { date: 'Apr 8, 2026', type: 'Phone', dir: 'Inbound', from: 'Patricia Reed', note: 'Filed ADB rider claim. Husband killed in car accident Apr 5. Police report obtained.' },
+      { date: 'Apr 9, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Sent accidental death claim form and required doc checklist.' },
+      { date: 'Apr 11, 2026', type: 'Phone', dir: 'Outbound', from: 'Chris Davis', note: 'Requested toxicology report from police department for alcohol review.' }
+    ],
+    docs: [
+      { name: 'Death Certificate', status: 'received', date: 'Apr 9, 2026' },
+      { name: 'Police Accident Report', status: 'received', date: 'Apr 9, 2026' },
+      { name: 'Toxicology Report', status: 'pending', date: null },
+      { name: 'Coroner / Medical Examiner Report', status: 'pending', date: null },
+      { name: 'ADB Claim Form', status: 'received', date: 'Apr 10, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Accidental cause review in progress. Toxicology report is key — alcohol involvement could trigger exclusion. Obtain report within 48 hours. Base death benefit ($300K) can be processed independently.',
+    timeline: [
+      { date: 'Apr 8', event: 'ADB rider claim filed — car accident Apr 5', type: 'filed' },
+      { date: 'Apr 9', event: 'Death certificate and police report received', type: 'update' },
+      { date: 'Apr 10', event: 'ADB claim form received — accidental cause review initiated', type: 'update' },
+      { date: 'Apr 11', event: 'Toxicology report requested — alcohol exclusion review', type: 'alert' }
+    ]
+  },
+  'CLM-2026-0046': {
+    id: 'CLM-2026-0046', client: 'Patricia Nguyen', initials: 'PN', policy: 'P-100382',
+    type: 'Critical Illness Rider', amount: '$50,000', filed: '2026-04-02',
+    daysOpen: 12, status: 'Under Review', priority: 'Normal',
+    adjuster: 'David Reyes', adjusterTeam: 'DI Unit',
+    fraudScore: 11, fraudLabel: 'Clear',
+    slaDeadline: 'May 2, 2026', slaDaysLeft: 18, slaStatus: 'ok',
+    liabilityScore: 14, liabilityLabel: 'Low',
+    reserveAmount: '$52,000', reserveStatus: 'Set — lump sum reserve', paymentHistory: [],
+    coverageLimits: 'Critical Illness Rider: lump sum $50,000 on first diagnosis of covered condition (cancer, heart attack, stroke, kidney failure, major organ transplant).',
+    exclusions: 'Pre-existing condition exclusion: diagnosis must be > 90 days from policy issue. Policy issued Jan 2025 — 90-day window satisfied. No exclusion applies.',
+    regulatoryState: 'CA', regulatoryNote: 'CA §10270.93: CI rider claim must be processed within 30 days of proof of diagnosis.',
+    legalHold: false, badFaithRisk: 'Very Low — clean claim, complete documentation nearly ready.',
+    beneficiary: 'Patricia Nguyen', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'patricia.n@email.com', benefPhone: '415-555-0166',
+    benefPayAccount: 'Chase checking ****3301 — verified',
+    communications: [
+      { date: 'Apr 2, 2026', type: 'Email', dir: 'Inbound', from: 'Patricia Nguyen', note: 'Submitted CI claim online — breast cancer diagnosis Mar 28 confirmed by oncologist.' },
+      { date: 'Apr 4, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'Sent oncologist verification form and CI claim checklist.' },
+      { date: 'Apr 9, 2026', type: 'Email', dir: 'Inbound', from: 'Dr. K. Sharma', note: 'Oncologist diagnosis letter received — pathology report to follow.' }
+    ],
+    docs: [
+      { name: 'Oncologist Diagnosis Letter', status: 'received', date: 'Apr 9, 2026' },
+      { name: 'Pathology / Biopsy Report', status: 'pending', date: null },
+      { name: 'CI Claim Form', status: 'received', date: 'Apr 2, 2026' },
+      { name: 'Client ID', status: 'received', date: 'Apr 2, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Diagnosis confirmed by oncologist. Pathology report is the only remaining document. Once received, recommend immediate lump-sum payout processing. Claim is clean.',
+    timeline: [
+      { date: 'Apr 2', event: 'Critical illness rider claim filed — breast cancer diagnosis', type: 'filed' },
+      { date: 'Apr 4', event: 'Claim form verified — diagnosis within coverage window', type: 'update' },
+      { date: 'Apr 9', event: 'Oncologist letter received — pathology report pending', type: 'update' }
+    ]
+  },
+  'CLM-2026-0047': {
+    id: 'CLM-2026-0047', client: 'David Thompson', initials: 'DT', policy: 'P-100391',
+    type: 'Child Term Rider', amount: '$25,000', filed: '2026-04-07',
+    daysOpen: 7, status: 'Pending Docs', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 8, fraudLabel: 'Clear',
+    slaDeadline: 'May 7, 2026', slaDaysLeft: 24, slaStatus: 'ok',
+    liabilityScore: 10, liabilityLabel: 'Very Low',
+    reserveAmount: '$26,000', reserveStatus: 'Set', paymentHistory: [],
+    coverageLimits: 'Child Term Rider: $25,000 on death of covered child. Child must be listed on rider at time of claim. Max age for covered child: 25.',
+    exclusions: 'Covered child (age 4) was listed on rider since policy inception. No exclusion applies.',
+    regulatoryState: 'FL', regulatoryNote: 'FL Ins. Stat. §627.4131: insurer must acknowledge within 14 days. Within timeline.',
+    legalHold: false, badFaithRisk: 'Very Low — small claim, straightforward. Handle with sensitivity (child loss).',
+    beneficiary: 'David Thompson', benefRel: 'Parent / Policyholder', benefKYC: 'Verified',
+    benefEmail: 'david.t@email.com', benefPhone: '305-555-0198',
+    benefPayAccount: 'BB&T checking ****8823 — verified',
+    communications: [
+      { date: 'Apr 7, 2026', type: 'Phone', dir: 'Inbound', from: 'David Thompson', note: 'Filed claim following tragic loss of daughter (age 4) on Apr 4. Handle with sensitivity.' },
+      { date: 'Apr 8, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Sent condolences letter and expedited document checklist. Offered dedicated case manager.' }
+    ],
+    docs: [
+      { name: 'Death Certificate (Child)', status: 'received', date: 'Apr 8, 2026' },
+      { name: 'Child Term Rider Claim Form', status: 'pending', date: null },
+      { name: 'Birth Certificate / Relationship Proof', status: 'received', date: 'Apr 8, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Sensitive claim — child death. Claim form is only remaining doc. Expedite for compassionate handling. Verify child was listed on rider (confirmed in CRM). Payout recommended once form received.',
+    timeline: [
+      { date: 'Apr 7', event: 'Child term rider claim filed — compassionate case', type: 'filed' },
+      { date: 'Apr 8', event: 'Death certificate and birth certificate received', type: 'update' },
+      { date: 'Apr 8', event: 'Dedicated case manager assigned — expedited handling', type: 'update' }
+    ]
+  },
+  'CLM-2026-0048': {
+    id: 'CLM-2026-0048', client: 'Angela Foster', initials: 'AF', policy: 'P-100403',
+    type: 'Chronic Illness Rider', amount: '$36,000', filed: '2026-04-03',
+    daysOpen: 11, status: 'Pending Docs', priority: 'Normal',
+    adjuster: 'Lisa Torres', adjusterTeam: 'LTC Team',
+    fraudScore: 15, fraudLabel: 'Clear',
+    slaDeadline: 'Apr 18, 2026', slaDaysLeft: 6, slaStatus: 'warn',
+    liabilityScore: 22, liabilityLabel: 'Low',
+    reserveAmount: '$36,000', reserveStatus: 'Set — annual accelerated benefit', paymentHistory: [],
+    coverageLimits: 'Chronic Illness Rider: annual accelerated benefit up to $36,000 (6% of $600K face). Requires 2+ ADL impairments or severe cognitive impairment certification.',
+    exclusions: 'Pre-existing condition review: MS diagnosis was 2 years before policy issue — exclusion may apply for first 2 years. Policy now 3 years old — exclusion period expired.',
+    regulatoryState: 'IL', regulatoryNote: 'IL Ins. Code §224.7: chronic illness rider claims must be determined within 45 days. At 11 days, timeline is manageable.',
+    legalHold: false, badFaithRisk: 'Low — clear claim, exclusion period expired. Physician certification is routine blocker.',
+    beneficiary: 'Angela Foster', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'angela.f@email.com', benefPhone: '312-555-0171',
+    benefPayAccount: 'Northern Trust checking ****4499 — verified',
+    communications: [
+      { date: 'Apr 3, 2026', type: 'Email', dir: 'Inbound', from: 'Angela Foster', note: 'Filed chronic illness rider claim — MS progression resulting in 2 ADL impairments.' },
+      { date: 'Apr 5, 2026', type: 'Email', dir: 'Outbound', from: 'LTC Team', note: 'Sent physician certification form and chronic illness claim checklist.' },
+      { date: 'Apr 10, 2026', type: 'Phone', dir: 'Outbound', from: 'Lisa Torres', note: 'Called neurologist office re: ADL certification. ETA 3-5 business days.' }
+    ],
+    docs: [
+      { name: 'Physician Certification (ADL / Cognitive Impairment)', status: 'pending', date: null },
+      { name: 'Chronic Illness Claim Form', status: 'received', date: 'Apr 3, 2026' },
+      { name: 'Medical Records Summary (MS diagnosis)', status: 'received', date: 'Apr 5, 2026' },
+      { name: 'Client ID', status: 'received', date: 'Apr 3, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Physician ADL certification is the sole blocker. Exclusion period for pre-existing MS expired (policy year 3). Recommend approval once certification received. SLA at 6 days — prioritize.',
+    timeline: [
+      { date: 'Apr 3', event: 'Chronic illness rider claim filed — MS with 2 ADL impairments', type: 'filed' },
+      { date: 'Apr 5', event: 'Medical records received — MS diagnosis confirmed', type: 'update' },
+      { date: 'Apr 10', event: 'Physician ADL certification requested — ETA 3-5 days', type: 'alert' }
+    ]
+  },
+  'CLM-2026-0049': {
+    id: 'CLM-2026-0049', client: 'Harold Simmons', initials: 'HS', policy: 'P-100355',
+    type: 'Maturity / Endowment', amount: '$500,000', filed: '2026-04-01',
+    daysOpen: 13, status: 'Open', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 5, fraudLabel: 'Clear',
+    slaDeadline: 'May 1, 2026', slaDaysLeft: 30, slaStatus: 'ok',
+    liabilityScore: 5, liabilityLabel: 'Very Low',
+    reserveAmount: '$500,000', reserveStatus: 'Fully Reserved — maturity date reached', paymentHistory: [],
+    coverageLimits: 'Endowment policy matured Apr 1, 2026. Face value $500,000 payable to policyholder on maturity date. No contested components.',
+    exclusions: 'No exclusions applicable. Maturity payout is contractual obligation — not a claim in traditional sense.',
+    regulatoryState: 'NY', regulatoryNote: 'NY Ins. Law §3203: maturity proceeds must be paid within 30 days of maturity date. Due by May 1, 2026.',
+    legalHold: false, badFaithRisk: 'Very Low — contractual maturity. No dispute risk.',
+    beneficiary: 'Harold Simmons', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'harold.s@email.com', benefPhone: '646-555-0134',
+    benefPayAccount: 'Fidelity investment account ****7721 — transfer pending',
+    communications: [
+      { date: 'Apr 1, 2026', type: 'Email', dir: 'Inbound', from: 'Harold Simmons', note: 'Policy matured today. Requesting maturity proceeds payment to Fidelity account.' },
+      { date: 'Apr 2, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Confirmed maturity. Processing payment — ETA 10-15 business days per policy terms.' }
+    ],
+    docs: [
+      { name: 'Maturity Proceeds Request Form', status: 'received', date: 'Apr 1, 2026' },
+      { name: 'Client ID Verification', status: 'received', date: 'Apr 1, 2026' },
+      { name: 'Bank / Investment Account Details', status: 'received', date: 'Apr 2, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Routine maturity payout. All docs complete. No fraud indicators. Recommend payment processing within next 5 business days. Tax reporting (1099-R) required for policyholder.',
+    timeline: [
+      { date: 'Apr 1', event: 'Policy P-100355 reached maturity date — $500K endowment proceeds', type: 'filed' },
+      { date: 'Apr 1', event: 'Maturity request form and ID received', type: 'update' },
+      { date: 'Apr 2', event: 'Bank details confirmed — payment processing initiated', type: 'update' }
+    ]
+  },
+  'CLM-2026-0050': {
+    id: 'CLM-2026-0050', client: 'Christine Blake', initials: 'CB', policy: 'P-100367',
+    type: 'Policy Surrender / Cash Value', amount: '$84,200', filed: '2026-04-05',
+    daysOpen: 9, status: 'Open', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 6, fraudLabel: 'Clear',
+    slaDeadline: 'May 5, 2026', slaDaysLeft: 21, slaStatus: 'ok',
+    liabilityScore: 15, liabilityLabel: 'Low',
+    reserveAmount: '$84,200', reserveStatus: 'CSV balance confirmed', paymentHistory: [],
+    coverageLimits: 'Whole Life policy CSV = $84,200 as of Apr 1, 2026. Surrender terminates coverage. Surrender charge applies: $4,100 (4.9% — year 18 of schedule). Net payout: $80,100.',
+    exclusions: 'No exclusions — voluntary surrender is policyholder right. Surrender charge applied per schedule. Policy termination will be confirmed.',
+    regulatoryState: 'NY', regulatoryNote: 'NY Ins. Law §3203(b): CSV must be paid within 30 days of surrender request.',
+    legalHold: false, badFaithRisk: 'Very Low — voluntary surrender. Ensure surrender charge disclosure is documented.',
+    beneficiary: 'Christine Blake', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'christine.b@email.com', benefPhone: '718-555-0162',
+    benefPayAccount: 'TD Bank checking ****9934 — verified',
+    communications: [
+      { date: 'Apr 5, 2026', type: 'Phone', dir: 'Inbound', from: 'Christine Blake', note: 'Requesting full policy surrender. Advised of CSV amount ($84,200) and surrender charge ($4,100). Client acknowledged.' },
+      { date: 'Apr 6, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Sent surrender form and disclosure of surrender charge. Noted tax implications (gains taxable).' }
+    ],
+    docs: [
+      { name: 'Surrender Request Form', status: 'received', date: 'Apr 5, 2026' },
+      { name: 'Signed Surrender Disclosure', status: 'pending', date: null },
+      { name: 'Client ID', status: 'received', date: 'Apr 5, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Routine surrender. Signed disclosure is the only remaining document. Net payout $80,100 after surrender charge. Advise client on tax implications (1099-R). Policy termination upon payment.',
+    timeline: [
+      { date: 'Apr 5', event: 'Policy surrender request submitted — CSV $84,200', type: 'filed' },
+      { date: 'Apr 5', event: 'Surrender charge ($4,100) disclosed and acknowledged by client', type: 'update' },
+      { date: 'Apr 6', event: 'Surrender form and disclosure sent — signed disclosure pending', type: 'update' }
+    ]
+  },
+  'CLM-2026-0051': {
+    id: 'CLM-2026-0051', client: 'George Martinez', initials: 'GM', policy: 'P-100344',
+    type: 'Paid-up Additions (PUA) Withdrawal', amount: '$42,000', filed: '2026-04-04',
+    daysOpen: 10, status: 'Open', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 4, fraudLabel: 'Clear',
+    slaDeadline: 'May 4, 2026', slaDaysLeft: 28, slaStatus: 'ok',
+    liabilityScore: 6, liabilityLabel: 'Very Low',
+    reserveAmount: '$42,000', reserveStatus: 'PUA balance verified', paymentHistory: [],
+    coverageLimits: 'PUA rider on Whole Life P-100344. Accumulated PUA cash value: $42,000. Withdrawal reduces paid-up additional death benefit proportionally. Base coverage unaffected.',
+    exclusions: 'No exclusions. PUA withdrawals are contractual policyholder right. Death benefit reduction disclosed.',
+    regulatoryState: 'TX', regulatoryNote: 'TX Ins. Code: PUA liquidation must be processed within 30 days of written request.',
+    legalHold: false, badFaithRisk: 'Very Low — routine PUA liquidation. No dispute risk.',
+    beneficiary: 'George Martinez', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'george.m@email.com', benefPhone: '214-555-0189',
+    benefPayAccount: 'JPMorgan Chase ****5523 — verified',
+    communications: [
+      { date: 'Apr 4, 2026', type: 'Email', dir: 'Inbound', from: 'George Martinez', note: 'Requesting withdrawal of accumulated PUA balance ($42,000) for home renovation.' },
+      { date: 'Apr 5, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Confirmed PUA balance. Sent withdrawal form and death benefit impact disclosure.' }
+    ],
+    docs: [
+      { name: 'PUA Withdrawal Request Form', status: 'received', date: 'Apr 4, 2026' },
+      { name: 'Death Benefit Reduction Disclosure', status: 'received', date: 'Apr 5, 2026' },
+      { name: 'Client ID', status: 'received', date: 'Apr 4, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'All docs complete. Routine PUA liquidation. Confirm death benefit reduction in policy admin. Process payment. Suggest annual review to discuss PUA rebuilding strategy.',
+    timeline: [
+      { date: 'Apr 4', event: 'PUA withdrawal request submitted — $42,000', type: 'filed' },
+      { date: 'Apr 5', event: 'Death benefit impact disclosure signed by client', type: 'update' },
+      { date: 'Apr 5', event: 'All docs complete — payment processing queue', type: 'update' }
+    ]
+  },
+  'CLM-2026-0052': {
+    id: 'CLM-2026-0052', client: 'Nancy Rivera', initials: 'NR', policy: 'P-100329',
+    type: 'Annuity Income', amount: '$3,800/mo', filed: '2026-04-01',
+    daysOpen: 13, status: 'Open', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 3, fraudLabel: 'Clear',
+    slaDeadline: 'Recurring — Monthly', slaDaysLeft: 999, slaStatus: 'ok',
+    liabilityScore: 4, liabilityLabel: 'Very Low',
+    reserveAmount: '$456,000', reserveStatus: 'Actuarially reserved — 10-year payout period', paymentHistory: [
+      { date: 'Apr 1, 2026', amount: '$3,800', note: 'First monthly annuity payment processed — ACH transfer confirmed' }
+    ],
+    coverageLimits: 'Fixed annuity P-100329. Annuitization elected Apr 1, 2026. Monthly benefit $3,800 for 10 years (certain and life). Joint and survivor option: 50% to spouse if insured dies.',
+    exclusions: 'No exclusions. Annuity income is contractual obligation per elected payout option.',
+    regulatoryState: 'FL', regulatoryNote: 'FL Ins. Stat. §627.9607: annuity payments must begin per elected start date. First payment confirmed on time.',
+    legalHold: false, badFaithRisk: 'Very Low — routine annuity payout. Monthly monitoring required.',
+    beneficiary: 'Nancy Rivera (primary); Carlos Rivera (50% survivor)', benefRel: 'Policyholder + Spouse', benefKYC: 'Both Verified',
+    benefEmail: 'nancy.r@email.com', benefPhone: '305-555-0176',
+    benefPayAccount: 'SunTrust checking ****2211 — ACH active',
+    communications: [
+      { date: 'Mar 15, 2026', type: 'Email', dir: 'Inbound', from: 'Nancy Rivera', note: 'Elected annuitization with 10-year certain and life, joint 50% survivor option.' },
+      { date: 'Apr 1, 2026', type: 'System', dir: 'Auto', from: 'Annuity Processing', note: 'First monthly payment $3,800 processed via ACH — confirmed.' }
+    ],
+    docs: [
+      { name: 'Annuitization Election Form', status: 'received', date: 'Mar 15, 2026' },
+      { name: 'Survivor Beneficiary Designation', status: 'received', date: 'Mar 15, 2026' },
+      { name: 'ACH Authorization Form', status: 'received', date: 'Mar 20, 2026' },
+      { name: 'Client ID (Nancy Rivera)', status: 'received', date: 'Mar 15, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Annuity payout active. Monthly ACH scheduled. First payment confirmed. No action required — set recurring payment monitoring. Annual review for survivor benefit update.',
+    timeline: [
+      { date: 'Mar 15', event: 'Annuitization election submitted — 10-yr certain + life, 50% J&S', type: 'filed' },
+      { date: 'Mar 20', event: 'ACH authorization and all docs received', type: 'update' },
+      { date: 'Apr 1', event: 'First monthly payment $3,800 processed via ACH', type: 'update' }
+    ]
+  },
+  'CLM-2026-0053': {
+    id: 'CLM-2026-0053', client: 'Eleanor Marsh (Estate)', initials: 'EM', policy: 'P-100312',
+    type: 'Survivorship (2nd-to-die)', amount: '$2,000,000', filed: '2026-04-10',
+    daysOpen: 4, status: 'Under Review', priority: 'Urgent',
+    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
+    fraudScore: 22, fraudLabel: 'Clear',
+    slaDeadline: 'Apr 25, 2026', slaDaysLeft: 2, slaStatus: 'breach',
+    liabilityScore: 35, liabilityLabel: 'Low-Medium',
+    reserveAmount: '$2,100,000', reserveStatus: 'Set — estate payout pending legal verification', paymentHistory: [],
+    coverageLimits: 'Survivorship Life (2nd-to-die): $2,000,000 payable upon death of second insured (Eleanor Marsh). First insured (Frank Marsh) died 2023. Policy designed for estate tax funding.',
+    exclusions: 'No exclusions. Policy is post-contestability (issued 2015). Clean claim subject to estate documentation verification.',
+    regulatoryState: 'NY', regulatoryNote: 'NY §3420: $2M claim — carrier must pay within 15 days of proof of claim. SLA at 2 days. Coordinate with estate legal counsel.',
+    legalHold: true, badFaithRisk: 'Medium-High — $2M estate claim. Legal hold pending estate document validation. Coordinate with legal team to avoid bad faith exposure.',
+    beneficiary: 'Marsh Family Trust', benefRel: 'Irrevocable Life Insurance Trust (ILIT)', benefKYC: 'Trust documents pending',
+    benefEmail: 'marsh.trust@wealthfirm.com', benefPhone: '212-555-0210',
+    benefPayAccount: 'Marsh Family Trust estate account — bank details pending legal resolution',
+    communications: [
+      { date: 'Apr 10, 2026', type: 'Phone', dir: 'Inbound', from: 'Marsh Family Attorney', note: 'Filed 2nd-to-die claim. Eleanor Marsh passed Apr 7. Frank Marsh died 2023. Trust is beneficiary.' },
+      { date: 'Apr 10, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Sent estate documentation checklist. Urgent — SLA at 2 days. Legal team notified.' },
+      { date: 'Apr 11, 2026', type: 'Phone', dir: 'Outbound', from: 'Chris Davis', note: 'Coordinating with Marsh family attorney re: trust documents. Death certificates for both insureds received.' }
+    ],
+    docs: [
+      { name: 'Death Certificate — Eleanor Marsh', status: 'received', date: 'Apr 10, 2026' },
+      { name: 'Death Certificate — Frank Marsh (1st insured)', status: 'received', date: 'Apr 10, 2026' },
+      { name: 'Trust Document — Marsh Family ILIT', status: 'pending', date: null },
+      { name: 'Estate Attorney Letter of Authorization', status: 'pending', date: null },
+      { name: 'Bank / Trust Account Details', status: 'missing', date: null }
+    ],
+    contestability: false,
+    aiTriage: 'URGENT — $2M survivorship claim. SLA 2 days. Both death certificates received. Trust document and attorney authorization are key blockers. Legal team coordination required immediately.',
+    timeline: [
+      { date: 'Apr 10', event: 'Survivorship claim filed — Eleanor Marsh (2nd insured) passed Apr 7', type: 'filed' },
+      { date: 'Apr 10', event: 'Both death certificates received — Frank (2023) and Eleanor (2026)', type: 'update' },
+      { date: 'Apr 10', event: 'SLA clock started — NY §3420 requires response by Apr 25', type: 'alert' },
+      { date: 'Apr 11', event: 'Legal hold set — trust document verification required', type: 'alert' }
     ]
   }
 };
@@ -34468,18 +35459,27 @@ function openClaimModal(claimId, tab) {
   }
 
   var tabActive = tab || 'view';
-  var tabs = ['view', 'docs', 'ci', 'timeline', 'liability'];
-  var tabLabels = { view: 'Overview', docs: 'Documents', ci: 'AI Intelligence', timeline: 'Timeline', liability: 'Liability' };
+  var tabs = ['view', 'docs', 'comms', 'beneficiary', 'payments', 'liability', 'ci'];
+  var tabLabels = {
+    view: '<i class="fas fa-file-alt"></i> Overview',
+    docs: '<i class="fas fa-folder-open"></i> Documents',
+    comms: '<i class="fas fa-comments"></i> Communications',
+    beneficiary: '<i class="fas fa-user-check"></i> Beneficiary',
+    payments: '<i class="fas fa-dollar-sign"></i> Payments & Reserve',
+    liability: '<i class="fas fa-gavel"></i> Liability & Legal',
+    ci: '<i class="fas fa-robot"></i> AI Intelligence'
+  };
 
   var tabBtns = tabs.map(function(t) {
     return '<button class="p7cm-tab ' + (t === tabActive ? 'active' : '') + '" onclick="p7SwitchClaimTab(\'' + claimId + '\',\'' + t + '\',this)">' +
-      (t === 'ci' ? '<i class="fas fa-robot"></i>' : '') + ' ' + tabLabels[t] +
+      tabLabels[t] +
     '</button>';
   }).join('');
 
   var slaColor = { breach: '#dc2626', warn: '#d97706', ok: '#059669' };
   var sc = slaColor[claim.slaStatus] || '#64748b';
-  var fraudColor = claim.fraudScore >= 70 ? '#dc2626' : claim.fraudScore >= 40 ? '#d97706' : '#059669';
+  var slaDisplay = claim.slaDaysLeft >= 999 ? claim.slaDeadline : claim.slaDaysLeft + 'd left';
+  var legalHoldBadge = claim.legalHold ? '<div class="p7cm-legal-hold-badge"><i class="fas fa-lock"></i> Legal Hold</div>' : '';
 
   overlay.innerHTML = '<div class="p7cm-modal" onclick="event.stopPropagation()">' +
     '<div class="p7cm-header">' +
@@ -34488,7 +35488,8 @@ function openClaimModal(claimId, tab) {
         '<div class="p7cm-client"><div class="p7cm-avatar">' + claim.initials + '</div><span>' + claim.client + '</span></div>' +
         '<div class="p7cm-type-badge">' + claim.type + '</div>' +
         '<div class="p7cm-amount">' + claim.amount + '</div>' +
-        '<div class="p7cm-sla-pill" style="background:' + sc + '20;color:' + sc + ';border:1px solid ' + sc + '40"><i class="fas fa-stopwatch"></i> ' + claim.slaDaysLeft + 'd left</div>' +
+        '<div class="p7cm-sla-pill" style="background:' + sc + '20;color:' + sc + ';border:1px solid ' + sc + '40"><i class="fas fa-stopwatch"></i> ' + slaDisplay + '</div>' +
+        legalHoldBadge +
         '<button class="p7cm-close" onclick="p7CloseClaimModal()"><i class="fas fa-times"></i></button>' +
       '</div>' +
       '<div class="p7cm-tabs">' + tabBtns + '</div>' +
@@ -34507,11 +35508,14 @@ function p7SwitchClaimTab(claimId, tab, el) {
 }
 
 function p7BuildClaimTabContent(claim, tab) {
+
+  /* ── TAB: OVERVIEW ── */
   if (tab === 'view') {
     var statusColors = { 'Under Review':'#0891b2', 'Pending Docs':'#d97706', 'Open':'#4f46e5', 'Approved':'#059669', 'Paid':'#059669', 'Denied':'#dc2626' };
     var sc2 = statusColors[claim.status] || '#64748b';
-    var slaColor = { breach: '#dc2626', warn: '#d97706', ok: '#059669' };
-    var slac = slaColor[claim.slaStatus] || '#64748b';
+    var slaColor2 = { breach: '#dc2626', warn: '#d97706', ok: '#059669' };
+    var slac = slaColor2[claim.slaStatus] || '#64748b';
+    var slaDisp = claim.slaDaysLeft >= 999 ? claim.slaDeadline : claim.slaDeadline + ' · ' + claim.slaDaysLeft + 'd left';
     return '<div class="p7cm-overview">' +
       '<div class="p7cm-ov-grid">' +
         '<div class="p7cm-ov-card">' +
@@ -34528,7 +35532,7 @@ function p7BuildClaimTabContent(claim, tab) {
         '</div>' +
         '<div class="p7cm-ov-card">' +
           '<div class="p7cm-ov-label">SLA Deadline</div>' +
-          '<div class="p7cm-ov-val" style="color:' + slac + ';font-weight:600">' + claim.slaDeadline + ' · <span>' + claim.slaDaysLeft + 'd left</span></div>' +
+          '<div class="p7cm-ov-val" style="color:' + slac + ';font-weight:600">' + slaDisp + '</div>' +
         '</div>' +
         '<div class="p7cm-ov-card">' +
           '<div class="p7cm-ov-label">Policy</div>' +
@@ -34547,6 +35551,7 @@ function p7BuildClaimTabContent(claim, tab) {
           '<div class="p7cm-ov-val"><strong>' + claim.priority + '</strong></div>' +
         '</div>' +
       '</div>' +
+      (claim.legalHold ? '<div class="p7cm-legal-hold-banner"><i class="fas fa-lock"></i> <strong>Legal Hold Active</strong> — Do not process payout until legal team approves. Coordinate with counsel before any claim decision.</div>' : '') +
       (claim.contestability ? '<div class="p7cm-contestability-alert"><i class="fas fa-shield-virus"></i> <strong>Contestability Window Active</strong> — ' + claim.contestabilityNote + '</div>' : '') +
       (claim.adbEligible ? '<div class="p7cm-adb-banner"><i class="fas fa-heartbeat"></i> <strong>ADB Eligible</strong> — ' + claim.adbNote + '</div>' : '') +
       '<div class="p7cm-ai-triage"><div class="p7cm-ai-triage-label"><i class="fas fa-robot"></i> AI Triage</div><div>' + claim.aiTriage + '</div></div>' +
@@ -34559,6 +35564,7 @@ function p7BuildClaimTabContent(claim, tab) {
     '</div>';
   }
 
+  /* ── TAB: DOCUMENTS ── */
   if (tab === 'docs') {
     var docRows = claim.docs.map(function(doc) {
       var icon = doc.status === 'received' ? 'fa-check-circle' : doc.status === 'missing' ? 'fa-times-circle' : doc.status === 'in-progress' ? 'fa-spinner' : 'fa-clock';
@@ -34577,18 +35583,194 @@ function p7BuildClaimTabContent(claim, tab) {
     var completePct = Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100);
     return '<div class="p7cm-docs-panel">' +
       '<div class="p7cm-docs-header">' +
-        '<div class="p7cm-docs-complete">Doc Completion: <strong>' + completePct + '%</strong></div>' +
+        '<div class="p7cm-docs-complete">Doc Completion: <strong>' + completePct + '%</strong> (' + claim.docs.filter(function(d){return d.status==='received';}).length + ' of ' + claim.docs.length + ' received)</div>' +
         '<div class="p7cm-docs-progress-bar"><div style="width:' + completePct + '%;height:8px;background:' + (completePct === 100 ? '#059669' : completePct >= 50 ? '#d97706' : '#dc2626') + ';border-radius:4px"></div></div>' +
       '</div>' +
       '<div class="p7cm-doc-list">' + docRows + '</div>' +
       '<div class="p7cm-doc-actions">' +
         '<button class="p7cm-act-btn primary" onclick="p7SendAllDocRequests(\'' + claim.id + '\')"><i class="fas fa-paper-plane"></i> Request All Missing Docs</button>' +
         '<button class="p7cm-act-btn secondary" onclick="showToast(\'Upload portal link sent to claimant\',\'success\')"><i class="fas fa-upload"></i> Send Upload Portal Link</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Document checklist exported to PDF\',\'success\')"><i class="fas fa-file-pdf"></i> Export Checklist</button>' +
       '</div>' +
     '</div>';
   }
 
+  /* ── TAB: COMMUNICATIONS ── */
+  if (tab === 'comms') {
+    var commRows = (claim.communications || []).map(function(c, idx) {
+      var dirColor = c.dir === 'Inbound' ? '#059669' : c.dir === 'Auto' ? '#7c3aed' : '#003087';
+      var dirBg = c.dir === 'Inbound' ? '#d1fae5' : c.dir === 'Auto' ? '#ede9fe' : '#dbeafe';
+      var typeIcon = c.type === 'Phone' ? 'fa-phone-alt' : c.type === 'Email' ? 'fa-envelope' : c.type === 'Fax' ? 'fa-fax' : c.type === 'Letter' ? 'fa-file-alt' : 'fa-robot';
+      return '<div class="p7cm-comm-row">' +
+        '<div class="p7cm-comm-icon" style="background:' + dirBg + ';color:' + dirColor + '"><i class="fas ' + typeIcon + '"></i></div>' +
+        '<div class="p7cm-comm-body">' +
+          '<div class="p7cm-comm-meta">' +
+            '<span class="p7cm-comm-date">' + c.date + '</span>' +
+            '<span class="p7cm-comm-type-badge" style="background:' + dirBg + ';color:' + dirColor + '">' + c.dir + ' · ' + c.type + '</span>' +
+            '<span class="p7cm-comm-from">' + c.from + '</span>' +
+          '</div>' +
+          '<div class="p7cm-comm-note">' + c.note + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    if (!commRows) commRows = '<div class="p7cm-empty-state"><i class="fas fa-comments"></i><p>No communications logged yet.</p></div>';
+    return '<div class="p7cm-comms-panel">' +
+      '<div class="p7cm-comms-header">' +
+        '<div class="p7cm-comms-title"><i class="fas fa-comments"></i> Communication Log — ' + claim.id + '</div>' +
+        '<div class="p7cm-comms-actions">' +
+          '<button class="p7cm-act-btn primary" onclick="p7LogCall(\'' + claim.id + '\')"><i class="fas fa-phone-alt"></i> Log Call</button>' +
+          '<button class="p7cm-act-btn secondary" onclick="p7SendClaimEmail(\'' + claim.id + '\')"><i class="fas fa-envelope"></i> Send Email</button>' +
+          '<button class="p7cm-act-btn ghost" onclick="showToast(\'Letter template opened\',\'info\')"><i class="fas fa-file-alt"></i> Draft Letter</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="p7cm-comm-list">' + commRows + '</div>' +
+      '<div class="p7cm-comm-add">' +
+        '<div class="p7cm-comm-add-label"><i class="fas fa-plus-circle"></i> Log New Interaction</div>' +
+        '<div class="p7cm-comm-add-row">' +
+          '<select class="p7m-select" id="p7cm-comm-type" style="width:140px"><option>Phone</option><option>Email</option><option>Fax</option><option>Letter</option><option>In-Person</option></select>' +
+          '<select class="p7m-select" id="p7cm-comm-dir" style="width:120px"><option>Inbound</option><option>Outbound</option></select>' +
+          '<input class="p7m-input" id="p7cm-comm-from" placeholder="From / To…" style="width:200px" />' +
+          '<input class="p7m-input" id="p7cm-comm-note" placeholder="Note…" style="flex:1" />' +
+          '<button class="p7cm-act-btn primary" onclick="p7AddCommLog(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Add</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: BENEFICIARY ── */
+  if (tab === 'beneficiary') {
+    var kycColor = claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified' ? '#059669' : claim.benefKYC && claim.benefKYC.indexOf('Pending') >= 0 ? '#d97706' : '#dc2626';
+    var kycIcon = claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    return '<div class="p7cm-bene-panel">' +
+      '<div class="p7cm-bene-header"><i class="fas fa-user-check"></i> Beneficiary Verification</div>' +
+      '<div class="p7cm-bene-card">' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Beneficiary</span><span class="p7cm-bene-val"><strong>' + (claim.beneficiary || '—') + '</strong></span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Relationship</span><span class="p7cm-bene-val">' + (claim.benefRel || '—') + '</span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">KYC Status</span><span class="p7cm-bene-val"><span style="color:' + kycColor + ';font-weight:600"><i class="fas ' + kycIcon + '"></i> ' + (claim.benefKYC || 'Not Started') + '</span></span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Email</span><span class="p7cm-bene-val"><a href="mailto:' + (claim.benefEmail || '') + '" style="color:#003087">' + (claim.benefEmail || '—') + '</a></span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Phone</span><span class="p7cm-bene-val">' + (claim.benefPhone || '—') + '</span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Payment Account</span><span class="p7cm-bene-val">' + (claim.benefPayAccount || 'Not provided') + '</span></div>' +
+      '</div>' +
+      '<div class="p7cm-bene-kyc-section">' +
+        '<div class="p7cm-bene-kyc-title"><i class="fas fa-id-card"></i> KYC Checklist</div>' +
+        '<div class="p7cm-bene-kyc-items">' +
+          '<div class="p7cm-bene-kyc-item ' + ((claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified') ? 'done' : 'todo') + '"><i class="fas ' + ((claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified') ? 'fa-check-circle' : 'fa-circle') + '"></i> Government-issued Photo ID</div>' +
+          '<div class="p7cm-bene-kyc-item ' + (claim.benefPayAccount && claim.benefPayAccount.indexOf('pending') < 0 && claim.benefPayAccount.indexOf('Not') < 0 ? 'done' : 'todo') + '"><i class="fas ' + (claim.benefPayAccount && claim.benefPayAccount.indexOf('pending') < 0 && claim.benefPayAccount.indexOf('Not') < 0 ? 'fa-check-circle' : 'fa-circle') + '"></i> Bank / Payment Account Verified</div>' +
+          '<div class="p7cm-bene-kyc-item ' + ((claim.benefRel && claim.benefRel !== '—') ? 'done' : 'todo') + '"><i class="fas ' + ((claim.benefRel && claim.benefRel !== '—') ? 'fa-check-circle' : 'fa-circle') + '"></i> Relationship to Insured Confirmed</div>' +
+          '<div class="p7cm-bene-kyc-item ' + (!claim.legalHold ? 'done' : 'todo') + '"><i class="fas ' + (!claim.legalHold ? 'fa-check-circle' : 'fa-circle') + '"></i> No Legal Hold / Dispute</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="p7cm-bene-actions">' +
+        '<button class="p7cm-act-btn primary" onclick="showToast(\'KYC verification request sent to beneficiary\',\'success\')"><i class="fas fa-id-card"></i> Send KYC Request</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Bank account verification initiated\',\'success\')"><i class="fas fa-university"></i> Verify Bank Account</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Beneficiary designation pulled from policy record\',\'info\')"><i class="fas fa-file-contract"></i> View Designation on File</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: PAYMENTS & RESERVE ── */
+  if (tab === 'payments') {
+    var payHistory = claim.paymentHistory || [];
+    var payRows = payHistory.length > 0 ? payHistory.map(function(p) {
+      return '<div class="p7cm-pay-row">' +
+        '<div class="p7cm-pay-date">' + p.date + '</div>' +
+        '<div class="p7cm-pay-amount" style="color:#059669;font-weight:700">' + p.amount + '</div>' +
+        '<div class="p7cm-pay-note">' + p.note + '</div>' +
+      '</div>';
+    }).join('') : '<div class="p7cm-empty-state"><i class="fas fa-dollar-sign"></i><p>No payments processed yet.</p></div>';
+
+    return '<div class="p7cm-payments-panel">' +
+      '<div class="p7cm-payments-header"><i class="fas fa-dollar-sign"></i> Payments & Reserve — ' + claim.id + '</div>' +
+      '<div class="p7cm-reserve-card">' +
+        '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Reserve Amount</span><span class="p7cm-reserve-val reserve-amount">' + (claim.reserveAmount || 'Not set') + '</span></div>' +
+        '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Reserve Status</span><span class="p7cm-reserve-val">' + (claim.reserveStatus || 'Pending') + '</span></div>' +
+        '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Claim Amount</span><span class="p7cm-reserve-val">' + claim.amount + '</span></div>' +
+        '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Coverage Limits</span><span class="p7cm-reserve-val">' + (claim.coverageLimits || '—') + '</span></div>' +
+      '</div>' +
+      '<div class="p7cm-pay-history-title"><i class="fas fa-history"></i> Payment History</div>' +
+      '<div class="p7cm-pay-list">' + payRows + '</div>' +
+      '<div class="p7cm-pay-actions">' +
+        '<button class="p7cm-act-btn primary" onclick="p7ApproveClaim(\'' + claim.id + '\')"><i class="fas fa-check-circle"></i> Authorize Payout</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Reserve amount updated in claims system\',\'success\')"><i class="fas fa-edit"></i> Adjust Reserve</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Payment history exported\',\'success\')"><i class="fas fa-file-export"></i> Export Payment Report</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: LIABILITY & LEGAL ── */
+  if (tab === 'liability') {
+    var lc = claim.liabilityScore;
+    var lColor = lc >= 60 ? '#dc2626' : lc >= 30 ? '#d97706' : '#059669';
+    var lBg = lc >= 60 ? '#fee2e2' : lc >= 30 ? '#fef3c7' : '#d1fae5';
+    var docPct = Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100);
+    return '<div class="p7cm-liability-panel">' +
+      '<div class="p7cm-liab-score-section">' +
+        '<div class="p7cm-liab-dial" style="--liab-color:' + lColor + '">' +
+          '<span class="p7cm-liab-num">' + lc + '</span>' +
+          '<span class="p7cm-liab-lbl">' + claim.liabilityLabel + '</span>' +
+        '</div>' +
+        '<div class="p7cm-liab-info">' +
+          '<div style="font-size:17px;font-weight:700;color:' + lColor + ';margin-bottom:8px">Liability Score: ' + lc + '/100 — ' + claim.liabilityLabel + '</div>' +
+          '<div style="color:#475569;line-height:1.6;font-size:14px">AI liability assessment based on: policy coverage limits, exclusion clauses, fraud probability, contestability status, regulatory exposure, and documentation completeness.</div>' +
+          (lc >= 60 ? '<div class="p7cm-liab-warn"><i class="fas fa-gavel"></i> Litigation risk detected. Legal team must review before claim decision. Document all actions.</div>' :
+           lc >= 30 ? '<div class="p7cm-liab-warn" style="background:#fef3c7;border-color:#fbbf24;color:#92400e"><i class="fas fa-exclamation-triangle"></i> Moderate liability exposure. Monitor closely and document all steps.</div>' : '') +
+        '</div>' +
+      '</div>' +
+
+      '<div class="p7cm-liab-section-title"><i class="fas fa-chart-bar"></i> Liability Risk Factors</div>' +
+      '<div class="p7cm-liab-factors">' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>Documentation Completeness</span><span style="font-weight:700;color:' + (docPct===100?'#059669':docPct>=50?'#d97706':'#dc2626') + '">' + docPct + '%</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + docPct + '%;background:' + (docPct===100?'#059669':docPct>=50?'#d97706':'#dc2626') + '"></div></div>' +
+        '</div>' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>Fraud Risk Score</span><span style="font-weight:700;color:' + (claim.fraudScore>=70?'#dc2626':claim.fraudScore>=40?'#d97706':'#059669') + '">' + claim.fraudScore + '/100</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + claim.fraudScore + '%;background:' + (claim.fraudScore>=70?'#dc2626':claim.fraudScore>=40?'#d97706':'#059669') + '"></div></div>' +
+        '</div>' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>Contestability Exposure</span><span style="font-weight:700;color:' + (claim.contestability?'#dc2626':'#059669') + '">' + (claim.contestability?'Active':'None') + '</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.contestability?85:5) + '%;background:' + (claim.contestability?'#dc2626':'#059669') + '"></div></div>' +
+        '</div>' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>SLA Compliance Pressure</span><span style="font-weight:700;color:' + (claim.slaStatus==='breach'?'#dc2626':claim.slaStatus==='warn'?'#d97706':'#059669') + '">' + (claim.slaStatus==='breach'?'BREACH':claim.slaStatus==='warn'?'Warning':'On Track') + '</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.slaStatus==='ok'?20:claim.slaStatus==='warn'?60:95) + '%;background:' + (claim.slaStatus==='ok'?'#059669':claim.slaStatus==='warn'?'#d97706':'#dc2626') + '"></div></div>' +
+        '</div>' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>Bad Faith Risk</span><span style="font-weight:700;color:' + (claim.legalHold?'#dc2626':lc>=50?'#d97706':'#059669') + '">' + (claim.legalHold?'High':'Low-Medium') + '</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.legalHold?80:lc>=50?45:15) + '%;background:' + (claim.legalHold?'#dc2626':lc>=50?'#d97706':'#059669') + '"></div></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="p7cm-liab-detail-grid">' +
+        '<div class="p7cm-liab-detail-card">' +
+          '<div class="p7cm-liab-detail-title"><i class="fas fa-file-contract"></i> Coverage & Exclusions</div>' +
+          '<div class="p7cm-liab-detail-body">' +
+            '<div class="p7cm-liab-detail-row"><label>Coverage Limits</label><span>' + (claim.coverageLimits || '—') + '</span></div>' +
+            '<div class="p7cm-liab-detail-row"><label>Exclusion Analysis</label><span>' + (claim.exclusions || 'No exclusions identified.') + '</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="p7cm-liab-detail-card">' +
+          '<div class="p7cm-liab-detail-title"><i class="fas fa-landmark"></i> Regulatory & Legal Exposure</div>' +
+          '<div class="p7cm-liab-detail-body">' +
+            '<div class="p7cm-liab-detail-row"><label>Governing State</label><span>' + (claim.regulatoryState || '—') + '</span></div>' +
+            '<div class="p7cm-liab-detail-row"><label>Regulatory Note</label><span>' + (claim.regulatoryNote || '—') + '</span></div>' +
+            '<div class="p7cm-liab-detail-row"><label>Legal Hold</label><span style="color:' + (claim.legalHold?'#dc2626':'#059669') + ';font-weight:600">' + (claim.legalHold ? '<i class="fas fa-lock"></i> ACTIVE' : '<i class="fas fa-lock-open"></i> None') + '</span></div>' +
+            '<div class="p7cm-liab-detail-row"><label>Bad Faith Risk</label><span>' + (claim.badFaithRisk || '—') + '</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="p7cm-pay-actions" style="margin-top:16px">' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Legal team notified — case flagged for attorney review\',\'success\')"><i class="fas fa-gavel"></i> Notify Legal Team</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Liability report exported\',\'success\')"><i class="fas fa-file-pdf"></i> Export Liability Report</button>' +
+        (claim.legalHold ? '<button class="p7cm-act-btn ghost" onclick="showToast(\'Legal hold removal request submitted\',\'info\')"><i class="fas fa-unlock"></i> Request Hold Removal</button>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: AI INTELLIGENCE ── */
   if (tab === 'ci') {
+    var docPct2 = Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100);
     return '<div class="p7cm-ci-panel">' +
       '<div class="p7cm-ci-header">' +
         '<div class="p7cm-ci-icon"><i class="fas fa-robot"></i></div>' +
@@ -34601,14 +35783,14 @@ function p7BuildClaimTabContent(claim, tab) {
             '<div class="p7cm-ci-fraud-dial ' + (claim.fraudScore >= 70 ? 'red' : claim.fraudScore >= 40 ? 'amber' : 'green') + '">' + claim.fraudScore + '</div>' +
             '<div>' +
               '<div style="font-weight:600;margin-bottom:4px">' + claim.fraudLabel + ' Risk — Score ' + claim.fraudScore + '/100</div>' +
-              (claim.fraudScore >= 70 ? '<div style="color:#dc2626">Investigation required before processing. Potential red flags detected.</div>' :
+              (claim.fraudScore >= 70 ? '<div style="color:#dc2626">Investigation required before processing. Potential red flags detected. Do not approve without full investigation.</div>' :
                claim.fraudScore >= 40 ? '<div style="color:#d97706">Elevated score — monitor closely. Case assigned to senior adjuster.</div>' :
-               '<div style="color:#059669">Low fraud risk. No suspicious patterns detected.</div>') +
+               '<div style="color:#059669">Low fraud risk. No suspicious patterns detected. Standard processing recommended.</div>') +
             '</div>' +
           '</div>' +
         '</div>' +
         '<div class="p7cm-ci-section">' +
-          '<div class="p7cm-ci-section-title"><i class="fas fa-tasks"></i> AI Recommendation</div>' +
+          '<div class="p7cm-ci-section-title"><i class="fas fa-tasks"></i> AI Triage Recommendation</div>' +
           '<div class="p7cm-ci-rec">' + claim.aiTriage + '</div>' +
         '</div>' +
         (claim.contestability ? '<div class="p7cm-ci-section p7cm-ci-contest">' +
@@ -34616,62 +35798,36 @@ function p7BuildClaimTabContent(claim, tab) {
           '<div>' + claim.contestabilityNote + '</div>' +
         '</div>' : '') +
         '<div class="p7cm-ci-section">' +
+          '<div class="p7cm-ci-section-title"><i class="fas fa-chart-line"></i> Liability Score</div>' +
+          '<div style="display:flex;align-items:center;gap:16px">' +
+            '<div class="p7cm-ci-fraud-dial ' + (claim.liabilityScore >= 60 ? 'red' : claim.liabilityScore >= 30 ? 'amber' : 'green') + '" style="font-size:18px">' + claim.liabilityScore + '</div>' +
+            '<div><strong>' + claim.liabilityLabel + ' Liability</strong><br><span style="color:#64748b;font-size:13px">Composite AI score based on docs, fraud, contestability, and SLA.</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="p7cm-ci-section">' +
           '<div class="p7cm-ci-section-title"><i class="fas fa-chart-bar"></i> Resolution Prediction</div>' +
-          '<div>Based on document completeness (' + Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100) + '%) and case complexity, AI estimates <strong>' + (claim.slaStatus === 'ok' ? '5–10 business days' : claim.slaStatus === 'warn' ? '2–5 business days (expedite)' : '1–2 days URGENT') + '</strong> to resolution.</div>' +
+          '<div>Document completeness: <strong>' + docPct2 + '%</strong>. AI estimates <strong>' + (claim.slaStatus === 'ok' ? '5–10 business days' : claim.slaStatus === 'warn' ? '2–5 business days (expedite recommended)' : '1–2 days URGENT action required') + '</strong> to resolution based on current case status.</div>' +
         '</div>' +
       '</div>' +
       '<div class="p7cm-ci-actions">' +
         '<button class="p7cm-act-btn primary" onclick="showToast(\'Full AI analysis report generated — check email\',\'success\')"><i class="fas fa-file-alt"></i> Generate Full Report</button>' +
-        '<button class="p7cm-act-btn secondary" onclick="openFraudDetailModal(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="p7OpenFraudDetail(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'AI re-scored claim — refreshing intelligence\',\'info\')"><i class="fas fa-sync-alt"></i> Re-run AI Analysis</button>' +
       '</div>' +
     '</div>';
   }
 
-  if (tab === 'timeline') {
-    var timelineRows = claim.timeline.map(function(t, idx) {
-      var dotColor = t.type === 'alert' ? '#dc2626' : t.type === 'filed' ? '#003087' : '#059669';
-      var isLast = idx === claim.timeline.length - 1;
-      return '<div class="p7cm-tl-row ' + (isLast ? 'p7cm-tl-latest' : '') + '">' +
-        '<div class="p7cm-tl-dot" style="background:' + dotColor + '"></div>' +
-        '<div class="p7cm-tl-date">' + t.date + '</div>' +
-        '<div class="p7cm-tl-event">' + t.event + '</div>' +
-      '</div>';
-    }).join('');
-
-    return '<div class="p7cm-timeline-panel">' +
-      '<div class="p7cm-tl-header">Claim Activity Timeline — ' + claim.id + '</div>' +
-      '<div class="p7cm-tl-list">' + timelineRows + '</div>' +
-      '<div class="p7cm-tl-add">' +
-        '<input class="p7m-input" id="p7cm-tl-note" placeholder="Add timeline note…" style="flex:1"/>' +
-        '<button class="p7cm-act-btn primary" onclick="p7AddTimelineNote(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Add Note</button>' +
-      '</div>' +
-    '</div>';
-  }
-
-  if (tab === 'liability') {
-    var lc = claim.liabilityScore;
-    var lColor = lc >= 60 ? '#dc2626' : lc >= 30 ? '#d97706' : '#059669';
-    return '<div class="p7cm-liability-panel">' +
-      '<div class="p7cm-liab-score-section">' +
-        '<div class="p7cm-liab-dial" style="--liab-color:' + lColor + '">' +
-          '<span class="p7cm-liab-num">' + lc + '%</span>' +
-          '<span class="p7cm-liab-lbl">' + claim.liabilityLabel + '</span>' +
-        '</div>' +
-        '<div class="p7cm-liab-info">' +
-          '<div style="font-size:16px;font-weight:700;color:' + lColor + ';margin-bottom:8px">Liability Score: ' + lc + '% — ' + claim.liabilityLabel + '</div>' +
-          '<div style="color:#475569;line-height:1.6">AI liability assessment based on: policy terms, exclusion clauses, fraud probability, documentation completeness, and regulatory exposure.</div>' +
-          (lc >= 60 ? '<div class="p7cm-liab-warn"><i class="fas fa-gavel"></i> Litigation risk detected. Legal team notification recommended before claim decision.</div>' : '') +
-        '</div>' +
-      '</div>' +
-      '<div class="p7cm-liab-factors">' +
-        '<div class="p7cm-liab-factor"><span>Documentation Completeness</span><div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100) + '%;background:#059669"></div></div></div>' +
-        '<div class="p7cm-liab-factor"><span>Fraud Risk</span><div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + claim.fraudScore + '%;background:' + (claim.fraudScore >= 70 ? '#dc2626' : '#d97706') + '"></div></div></div>' +
-        '<div class="p7cm-liab-factor"><span>Contestability Exposure</span><div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.contestability ? 85 : 5) + '%;background:' + (claim.contestability ? '#dc2626' : '#059669') + '"></div></div></div>' +
-        '<div class="p7cm-liab-factor"><span>SLA Compliance</span><div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.slaStatus === 'ok' ? 20 : claim.slaStatus === 'warn' ? 60 : 90) + '%;background:' + (claim.slaStatus === 'ok' ? '#059669' : claim.slaStatus === 'warn' ? '#d97706' : '#dc2626') + '"></div></div></div>' +
-      '</div>' +
-    '</div>';
-  }
   return '<div class="p7cm-empty">Tab content loading…</div>';
+}
+
+function p7LogCall(claimId) { p7Toast('<i class="fas fa-phone-alt"></i> Call log modal opened for ' + claimId, 2500); }
+function p7SendClaimEmail(claimId) { p7Toast('<i class="fas fa-envelope"></i> Email composer opened for ' + claimId, 2500); }
+function p7AddCommLog(claimId) {
+  var type = (document.getElementById('p7cm-comm-type') || {}).value || 'Phone';
+  var dir = (document.getElementById('p7cm-comm-dir') || {}).value || 'Outbound';
+  var note = (document.getElementById('p7cm-comm-note') || {}).value || '';
+  if (!note.trim()) { p7Toast('Please enter a note before adding', 2000); return; }
+  p7Toast('<i class="fas fa-check-circle"></i> Communication logged: ' + type + ' — ' + note.substring(0,40) + '…', 3000);
 }
 
 function p7CloseClaimModal() {
@@ -34713,21 +35869,989 @@ function p7AddTimelineNote(claimId) {
   if (input) input.value = '';
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   SEND DOC REQUEST — RICH MODAL (Smart Doc Request Automation)
+   ═══════════════════════════════════════════════════════════════════ */
+var _sdrData = {
+  'CLM-2026-0041': {
+    claimId: 'CLM-2026-0041',
+    client: 'Robert Chen',
+    docType: 'Identity Documents',
+    recipient: 'Susan Chen',
+    recipientRole: 'Beneficiary',
+    recipientEmail: 'susan.chen@email.com',
+    recipientFax: '',
+    claimType: 'Death Benefit',
+    amount: '$1,000,000',
+    urgency: 'OVERDUE',
+    urgencyLabel: '⚠ Overdue 1 day',
+    urgencyColor: '#dc2626',
+    daysLabel: '1 day overdue',
+    icon: 'fa-file-signature',
+    subject: 'ACTION REQUIRED: Identity Documents Needed — Death Benefit Claim CLM-2026-0041',
+    draft: 'Dear Susan Chen,\n\nWe hope this message finds you well during this difficult time. We are writing regarding your $1,000,000 death benefit claim (Ref: CLM-2026-0041) for the late Robert Chen.\n\nTo finalize processing of your claim, we require the following documents at your earliest convenience:\n\n  • Government-issued photo identification (driver\'s license or passport)\n  • Bank account details for direct deposit of benefit payment\n  • Completed and signed Claimant\'s Statement form\n\nThese are the final outstanding items before we can authorize and release your payment. Once received, we anticipate processing within 3–5 business days.\n\nPlease submit documents via our secure portal at claims.nyl.com/upload (reference: CLM-2026-0041), or fax to (800) 555-0141.\n\nIf you have any questions, please contact your dedicated claims specialist, Amanda Rivera, at (800) 555-0100 ext. 2241.\n\nWarm regards,\nAmanda Rivera\nSenior Claims Specialist\nNew York Life Insurance Company\nPhone: (800) 555-0100 ext. 2241\nclaims@nyl.com'
+  },
+  'CLM-2026-0028': {
+    claimId: 'CLM-2026-0028',
+    client: 'Maria Gonzalez',
+    docType: 'Terminal Illness Certification',
+    recipient: 'Dr. Hernandez\'s Office',
+    recipientRole: 'Attending Physician Office',
+    recipientEmail: 'records@hernandez-md.com',
+    recipientFax: '(213) 555-0198',
+    claimType: 'ADB — Accelerated Death Benefit',
+    amount: '$120,000',
+    urgency: 'PENDING',
+    urgencyLabel: '9 days pending',
+    urgencyColor: '#d97706',
+    daysLabel: '9 days pending',
+    icon: 'fa-file-medical',
+    subject: 'COMPASSIONATE REQUEST: Terminal Illness Certification — ADB Claim CLM-2026-0028',
+    draft: 'Dear Dr. Hernandez\'s Office,\n\nWe are writing on behalf of our policyholder Maria Gonzalez (DOB: 03/14/1965) regarding an Accelerated Death Benefit (ADB) claim (Ref: CLM-2026-0028) in the amount of $120,000.\n\nMs. Gonzalez has authorized the release of relevant medical information. We respectfully request expedited completion of the enclosed Terminal Illness Certification form, which requires:\n\n  • Confirmed diagnosis and ICD-10 code\n  • Prognosis statement (life expectancy of 12 months or fewer)\n  • Attending physician signature and NPI number\n  • Date of terminal diagnosis\n\nAs this is a compassionate benefit designed to assist patients during a critical time, we kindly ask for your office\'s prioritized attention. Our goal is to ensure Ms. Gonzalez receives her benefit as quickly as possible.\n\nPlease return the completed form via fax to (800) 555-0141 or our secure email at claims@nyl.com. A pre-addressed return envelope is also included.\n\nWe sincerely appreciate your office\'s time and cooperation in this matter.\n\nWith gratitude,\nDr. Priya Nair, Medical Director\nClaims Medical Review — New York Life\nDirect: (800) 555-0100 ext. 3310\nclaims@nyl.com'
+  },
+  'CLM-2026-0035': {
+    claimId: 'CLM-2026-0035',
+    client: 'Maria Gonzalez',
+    docType: 'Attending Physician Statement',
+    recipient: 'Dr. Hernandez',
+    recipientRole: 'Attending Physician',
+    recipientEmail: 'dr.hernandez@hernandez-md.com',
+    recipientFax: '(213) 555-0198',
+    claimType: 'Disability — Long-Term',
+    amount: '$4,200/month',
+    urgency: 'FOLLOW-UP',
+    urgencyLabel: '22 days pending',
+    urgencyColor: '#6b7280',
+    daysLabel: '22 days pending',
+    icon: 'fa-file-alt',
+    subject: 'FOLLOW-UP: Attending Physician Statement Required — Disability Claim CLM-2026-0035',
+    draft: 'Dear Dr. Hernandez,\n\nWe are following up regarding a disability insurance claim for your patient Maria Gonzalez (DOB: 03/14/1965), Claim Reference: CLM-2026-0035, monthly benefit: $4,200.\n\nOur records indicate the Attending Physician Statement (APS) was originally requested 22 days ago and remains outstanding. Without this form, we are unable to begin benefit payments to Ms. Gonzalez.\n\nWe kindly ask that you or your staff complete the APS, which requires:\n\n  • Primary diagnosis and ICD-10 code\n  • Date of disability onset and functional limitations\n  • Current treatment plan and prognosis\n  • Estimated return-to-work date (if applicable)\n  • Physician signature, NPI, and license number\n\nThe completed APS can be returned via:\n  • Fax: (800) 555-0141 (secure medical fax)\n  • Secure upload: claims.nyl.com/upload (Ref: CLM-2026-0035)\n  • Email: claims@nyl.com (encrypted portal link enclosed)\n\nWe understand your office handles a high volume of requests and appreciate your attention to this matter. Please contact our medical review team at (800) 555-0100 ext. 3310 if you have any questions.\n\nThank you for your continued support of your patient\'s claim.\n\nSincerely,\nDr. Priya Nair, Medical Director\nClaims Medical Review — New York Life\nDirect: (800) 555-0100 ext. 3310\nclaims@nyl.com'
+  }
+};
+
 function sendDocRequest(claimId, recipient) {
-  p7Toast('<i class="fas fa-paper-plane"></i> Document request sent to ' + recipient + ' for claim ' + claimId + ' — AI-drafted letter generated', 3500);
+  // Normalize claimId key — look up by claimId string
+  var data = _sdrData[claimId];
+
+  // If we don't have detailed data (called from other contexts), use a fallback
+  if (!data) {
+    data = {
+      claimId: claimId,
+      client: recipient,
+      docType: 'Document Request',
+      recipient: recipient,
+      recipientRole: 'Recipient',
+      recipientEmail: '',
+      recipientFax: '',
+      claimType: 'Insurance Claim',
+      amount: '',
+      urgency: 'PENDING',
+      urgencyLabel: 'Pending',
+      urgencyColor: '#6b7280',
+      daysLabel: 'Pending',
+      icon: 'fa-file-alt',
+      subject: 'Document Request — Claim ' + claimId,
+      draft: 'Dear ' + recipient + ',\n\nPlease provide the required documents for claim ' + claimId + ' at your earliest convenience.\n\nThank you,\nNew York Life Claims Team'
+    };
+  }
+
+  var urgencyBadge = data.urgency === 'OVERDUE'
+    ? '<span class="sdr-badge sdr-badge-overdue"><i class="fas fa-exclamation-circle"></i> ' + data.urgencyLabel + '</span>'
+    : data.urgency === 'PENDING'
+    ? '<span class="sdr-badge sdr-badge-pending"><i class="fas fa-clock"></i> ' + data.urgencyLabel + '</span>'
+    : '<span class="sdr-badge sdr-badge-followup"><i class="fas fa-redo"></i> ' + data.urgencyLabel + '</span>';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay';
+  overlay.id = 'sdr-overlay-' + claimId.replace(/[^a-z0-9]/gi, '');
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML =
+    '<div class="sdr-modal" onclick="event.stopPropagation()">' +
+
+      // ── Header ──
+      '<div class="sdr-header">' +
+        '<div class="sdr-header-left">' +
+          '<div class="sdr-header-icon"><i class="fas fa-paper-plane"></i></div>' +
+          '<div>' +
+            '<div class="sdr-header-title">Send Document Request</div>' +
+            '<div class="sdr-header-sub">AI-Drafted · Personalized · Secure Delivery</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="sdr-close" onclick="document.getElementById(\'' + overlay.id + '\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+
+      // ── Claim Context Bar ──
+      '<div class="sdr-context-bar">' +
+        '<div class="sdr-context-item"><span class="sdr-ctx-lbl">Claim</span><span class="sdr-ctx-val">' + data.claimId + '</span></div>' +
+        '<div class="sdr-context-sep"></div>' +
+        '<div class="sdr-context-item"><span class="sdr-ctx-lbl">Client</span><span class="sdr-ctx-val">' + data.client + '</span></div>' +
+        '<div class="sdr-context-sep"></div>' +
+        '<div class="sdr-context-item"><span class="sdr-ctx-lbl">Type</span><span class="sdr-ctx-val">' + data.claimType + '</span></div>' +
+        '<div class="sdr-context-sep"></div>' +
+        '<div class="sdr-context-item"><span class="sdr-ctx-lbl">Amount</span><span class="sdr-ctx-val sdr-ctx-amount">' + data.amount + '</span></div>' +
+        '<div class="sdr-context-sep"></div>' +
+        '<div class="sdr-context-item">' + urgencyBadge + '</div>' +
+      '</div>' +
+
+      // ── Body ──
+      '<div class="sdr-body">' +
+
+        // Left column — Recipient + Channel
+        '<div class="sdr-col-left">' +
+
+          '<div class="sdr-section">' +
+            '<div class="sdr-section-title"><i class="fas fa-user"></i> Recipient</div>' +
+            '<div class="sdr-recipient-card">' +
+              '<div class="sdr-recipient-avatar"><i class="fas fa-' + (data.recipientRole.includes('Physician') ? 'user-md' : 'user') + '"></i></div>' +
+              '<div class="sdr-recipient-info">' +
+                '<div class="sdr-recipient-name">' + data.recipient + '</div>' +
+                '<div class="sdr-recipient-role">' + data.recipientRole + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="sdr-field">' +
+              '<label class="sdr-field-label"><i class="fas fa-envelope"></i> Email</label>' +
+              '<input type="email" class="sdr-input" id="sdr-email-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="' + data.recipientEmail + '" placeholder="recipient@domain.com">' +
+            '</div>' +
+            (data.recipientFax ? '<div class="sdr-field">' +
+              '<label class="sdr-field-label"><i class="fas fa-fax"></i> Fax</label>' +
+              '<input type="text" class="sdr-input" id="sdr-fax-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="' + data.recipientFax + '">' +
+            '</div>' : '') +
+          '</div>' +
+
+          '<div class="sdr-section">' +
+            '<div class="sdr-section-title"><i class="fas fa-satellite-dish"></i> Delivery Channel</div>' +
+            '<div class="sdr-channel-group" id="sdr-channels-' + claimId.replace(/[^a-z0-9]/gi,'') + '">' +
+              '<label class="sdr-channel-opt selected" onclick="sdrSelectChannel(this)">' +
+                '<input type="radio" name="sdr-ch-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="email-sms" checked> ' +
+                '<span class="sdr-ch-icon"><i class="fas fa-envelope"></i><i class="fas fa-comment-dots"></i></span>' +
+                '<span class="sdr-ch-label">Email + SMS</span>' +
+                '<span class="sdr-ch-tag">Recommended</span>' +
+              '</label>' +
+              '<label class="sdr-channel-opt" onclick="sdrSelectChannel(this)">' +
+                '<input type="radio" name="sdr-ch-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="email"> ' +
+                '<span class="sdr-ch-icon"><i class="fas fa-envelope"></i></span>' +
+                '<span class="sdr-ch-label">Email Only</span>' +
+              '</label>' +
+              (data.recipientFax ? '<label class="sdr-channel-opt" onclick="sdrSelectChannel(this)">' +
+                '<input type="radio" name="sdr-ch-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="fax"> ' +
+                '<span class="sdr-ch-icon"><i class="fas fa-fax"></i></span>' +
+                '<span class="sdr-ch-label">Fax</span>' +
+              '</label>' : '') +
+              '<label class="sdr-channel-opt" onclick="sdrSelectChannel(this)">' +
+                '<input type="radio" name="sdr-ch-' + claimId.replace(/[^a-z0-9]/gi,'') + '" value="mail"> ' +
+                '<span class="sdr-ch-icon"><i class="fas fa-mail-bulk"></i></span>' +
+                '<span class="sdr-ch-label">Physical Mail</span>' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="sdr-section">' +
+            '<div class="sdr-section-title"><i class="fas fa-calendar-alt"></i> Schedule</div>' +
+            '<div class="sdr-schedule-row">' +
+              '<button class="sdr-sched-btn active" id="sdr-sched-now-' + claimId.replace(/[^a-z0-9]/gi,'') + '" onclick="sdrSetSchedule(this,\'now\',\'' + claimId + '\')">' +
+                '<i class="fas fa-bolt"></i> Send Now' +
+              '</button>' +
+              '<button class="sdr-sched-btn" id="sdr-sched-later-' + claimId.replace(/[^a-z0-9]/gi,'') + '" onclick="sdrSetSchedule(this,\'later\',\'' + claimId + '\')">' +
+                '<i class="fas fa-clock"></i> Schedule' +
+              '</button>' +
+            '</div>' +
+            '<div class="sdr-schedule-picker" id="sdr-sched-picker-' + claimId.replace(/[^a-z0-9]/gi,'') + '" style="display:none">' +
+              '<input type="datetime-local" class="sdr-input" style="margin-top:8px">' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="sdr-ai-note">' +
+            '<div class="sdr-ai-note-header"><i class="fas fa-robot"></i> AI Draft Intelligence</div>' +
+            '<div class="sdr-ai-note-rows">' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>Personalized for ' + data.recipient + '</div>' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>References specific missing docs</div>' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>Includes secure upload link</div>' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot blue"></span>7-day auto-follow-up queued</div>' +
+              '<div class="sdr-ai-note-row"><span class="sdr-ai-dot blue"></span>Read-receipt tracking enabled</div>' +
+            '</div>' +
+          '</div>' +
+
+        '</div>' +
+
+        // Right column — Letter Preview
+        '<div class="sdr-col-right">' +
+          '<div class="sdr-letter-header">' +
+            '<div class="sdr-letter-title-row">' +
+              '<div class="sdr-letter-doc-icon"><i class="fas fa-' + data.icon + '"></i></div>' +
+              '<div>' +
+                '<div class="sdr-letter-doc-type">' + data.docType + '</div>' +
+                '<div class="sdr-letter-subject">' + data.subject + '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="sdr-letter-toolbar">' +
+            '<span class="sdr-letter-lbl"><i class="fas fa-robot" style="color:#7c3aed;margin-right:4px"></i>AI-Drafted — Click to edit</span>' +
+            '<button class="sdr-edit-btn" onclick="sdrToggleEdit(\'' + claimId + '\')" id="sdr-edit-btn-' + claimId.replace(/[^a-z0-9]/gi,'') + '">' +
+              '<i class="fas fa-pen"></i> Edit Draft' +
+            '</button>' +
+          '</div>' +
+          '<textarea class="sdr-letter-body" id="sdr-letter-' + claimId.replace(/[^a-z0-9]/gi,'') + '" readonly>' + data.draft + '</textarea>' +
+          '<div class="sdr-char-count" id="sdr-chars-' + claimId.replace(/[^a-z0-9]/gi,'') + '">' + data.draft.length + ' characters · ~' + Math.ceil(data.draft.split('\n').length * 1.4) + ' sec read time</div>' +
+        '</div>' +
+
+      '</div>' + // end sdr-body
+
+      // ── Footer ──
+      '<div class="sdr-footer">' +
+        '<div class="sdr-footer-left">' +
+          '<i class="fas fa-shield-alt" style="color:#16a34a;margin-right:4px"></i>' +
+          '<span style="font-size:11px;color:#6b7280">Encrypted delivery · HIPAA compliant · Archived to claim file</span>' +
+        '</div>' +
+        '<div class="sdr-footer-actions">' +
+          '<button class="sdr-btn-ghost" onclick="document.getElementById(\'' + overlay.id + '\').remove()">' +
+            '<i class="fas fa-times"></i> Cancel' +
+          '</button>' +
+          '<button class="sdr-btn-secondary" onclick="sdrSaveDraft(\'' + claimId + '\')">' +
+            '<i class="fas fa-save"></i> Save Draft' +
+          '</button>' +
+          '<button class="sdr-btn-primary" id="sdr-send-btn-' + claimId.replace(/[^a-z0-9]/gi,'') + '" onclick="sdrConfirmSend(\'' + claimId + '\',\'' + overlay.id + '\')">' +
+            '<i class="fas fa-paper-plane"></i> Send Now' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+
+    '</div>'; // end sdr-modal
+
+  document.body.appendChild(overlay);
+
+  // Wire up character counter on textarea input
+  var ta = document.getElementById('sdr-letter-' + claimId.replace(/[^a-z0-9]/gi,''));
+  var cc = document.getElementById('sdr-chars-' + claimId.replace(/[^a-z0-9]/gi,''));
+  if (ta && cc) {
+    ta.addEventListener('input', function() {
+      var lines = ta.value.split('\n').length;
+      cc.textContent = ta.value.length + ' characters · ~' + Math.ceil(lines * 1.4) + ' sec read time';
+    });
+  }
+}
+
+function sdrSelectChannel(lbl) {
+  var grp = lbl.parentNode;
+  grp.querySelectorAll('.sdr-channel-opt').forEach(function(o) { o.classList.remove('selected'); });
+  lbl.classList.add('selected');
+  lbl.querySelector('input').checked = true;
+}
+
+function sdrSetSchedule(btn, mode, claimId) {
+  var key = claimId.replace(/[^a-z0-9]/gi,'');
+  var nowBtn   = document.getElementById('sdr-sched-now-' + key);
+  var laterBtn = document.getElementById('sdr-sched-later-' + key);
+  var picker   = document.getElementById('sdr-sched-picker-' + key);
+  var sendBtn  = document.getElementById('sdr-send-btn-' + key);
+  if (nowBtn)   nowBtn.classList.remove('active');
+  if (laterBtn) laterBtn.classList.remove('active');
+  btn.classList.add('active');
+  if (picker) picker.style.display = mode === 'later' ? 'block' : 'none';
+  if (sendBtn) {
+    sendBtn.innerHTML = mode === 'later'
+      ? '<i class="fas fa-calendar-check"></i> Schedule Send'
+      : '<i class="fas fa-paper-plane"></i> Send Now';
+  }
+}
+
+function sdrToggleEdit(claimId) {
+  var key = claimId.replace(/[^a-z0-9]/gi,'');
+  var ta = document.getElementById('sdr-letter-' + key);
+  var btn = document.getElementById('sdr-edit-btn-' + key);
+  if (!ta) return;
+  if (ta.readOnly) {
+    ta.readOnly = false;
+    ta.classList.add('editing');
+    ta.focus();
+    if (btn) btn.innerHTML = '<i class="fas fa-check"></i> Done Editing';
+  } else {
+    ta.readOnly = true;
+    ta.classList.remove('editing');
+    if (btn) btn.innerHTML = '<i class="fas fa-pen"></i> Edit Draft';
+  }
+}
+
+function sdrSaveDraft(claimId) {
+  if (_sdrData[claimId]) {
+    var key = claimId.replace(/[^a-z0-9]/gi,'');
+    var ta = document.getElementById('sdr-letter-' + key);
+    if (ta) _sdrData[claimId].draft = ta.value;
+  }
+  p7Toast('<i class="fas fa-save"></i> Draft saved — will persist for this session', 2200);
+}
+
+function sdrConfirmSend(claimId, overlayId) {
+  var key = claimId.replace(/[^a-z0-9]/gi,'');
+  var data = _sdrData[claimId];
+  var btn = document.getElementById('sdr-send-btn-' + key);
+  var isScheduled = btn && btn.innerHTML.includes('Schedule');
+
+  // Animate the button
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+  }
+
+  setTimeout(function() {
+    // Close the modal
+    var ov = document.getElementById(overlayId);
+    if (ov) ov.remove();
+
+    // Mark the sdp-item as sent in the Intelligence panel
+    sdrMarkAsSent(claimId);
+
+    // Toast confirmation
+    var label = data ? data.recipient : claimId;
+    var verb  = isScheduled ? 'scheduled for' : 'sent to';
+    p7Toast(
+      '<i class="fas fa-check-circle" style="color:#10b981"></i> ' +
+      'Doc request ' + verb + ' <strong>' + label + '</strong> · ' +
+      (data ? data.docType : 'Document') + ' · ' +
+      'Read-receipt tracking active · Auto-follow-up in 7 days',
+      4500
+    );
+  }, 1200);
+}
+
+function sdrMarkAsSent(claimId) {
+  // Find the sdp-item that contains a button calling sendDocRequest with this claimId
+  var allItems = document.querySelectorAll('.sdp-item');
+  allItems.forEach(function(item) {
+    var btn = item.querySelector('.btn-sdp-send');
+    if (!btn) return;
+    var onclickStr = btn.getAttribute('onclick') || '';
+    if (onclickStr.indexOf(claimId) === -1) return;
+
+    // Found the matching item — mark as sent
+    item.classList.add('sdp-sent');
+
+    // Replace the Send button with a sent indicator
+    btn.outerHTML =
+      '<div class="btn-sdp-sent">' +
+        '<i class="fas fa-check-circle"></i> Sent' +
+      '</div>';
+
+    // Add sent overlay to item-content draft text
+    var draft = item.querySelector('.sdp-item-draft');
+    if (draft) {
+      draft.style.opacity = '0.4';
+      draft.style.textDecoration = 'line-through';
+    }
+
+    // Decrement the Pending Requests counter
+    sdrDecrementPendingCount();
+  });
+}
+
+function sdrDecrementPendingCount() {
+  // Find the orange stat value showing "3" Pending Requests in the sdp-stats area
+  var statVals = document.querySelectorAll('.sdp-stat-val.orange');
+  statVals.forEach(function(el) {
+    var curr = parseInt(el.textContent, 10);
+    if (!isNaN(curr) && curr > 0) {
+      var next = curr - 1;
+      el.textContent = next;
+      // Pulse animation
+      el.style.transition = 'transform 0.2s, color 0.3s';
+      el.style.transform = 'scale(1.4)';
+      if (next === 0) {
+        el.classList.remove('orange');
+        el.classList.add('green');
+      }
+      setTimeout(function() { el.style.transform = 'scale(1)'; }, 250);
+
+      // Update Sent This Week counter (green stat)
+      var greenVals = document.querySelectorAll('.sdp-stat-val.green');
+      greenVals.forEach(function(g) {
+        var gCurr = parseInt(g.textContent, 10);
+        if (!isNaN(gCurr)) {
+          g.textContent = gCurr + 1;
+          g.style.transition = 'transform 0.2s';
+          g.style.transform = 'scale(1.4)';
+          setTimeout(function() { g.style.transform = 'scale(1)'; }, 250);
+        }
+      });
+    }
+  });
+}
+
+// ── Send All Reminders ── (enhanced batch)
+function runSmartDocRequests() {
+  // Collect all unsent items in the sdp queue
+  var unsentBtns = document.querySelectorAll('.sdp-item .btn-sdp-send');
+  var items = [];
+  unsentBtns.forEach(function(btn) {
+    var oc = btn.getAttribute('onclick') || '';
+    var match = oc.match(/sendDocRequest\('([^']+)','([^']+)'\)/);
+    if (match) {
+      var cid = match[1];
+      var d = _sdrData[cid];
+      items.push({
+        claimId: cid,
+        recipient: d ? d.recipient : match[2],
+        docType: d ? d.docType : 'Document',
+        urgencyLabel: d ? d.urgencyLabel : 'Pending',
+        urgencyColor: d ? d.urgencyColor : '#6b7280'
+      });
+    }
+  });
+
+  if (items.length === 0) {
+    p7Toast('<i class="fas fa-check-circle" style="color:#10b981"></i> All document requests already sent!', 2500);
+    return;
+  }
+
+  var itemRows = items.map(function(it) {
+    return '<div class="sdr-batch-row">' +
+      '<div class="sdr-batch-row-icon"><i class="fas fa-file-alt"></i></div>' +
+      '<div class="sdr-batch-row-content">' +
+        '<div class="sdr-batch-row-title">' + it.docType + '</div>' +
+        '<div class="sdr-batch-row-meta">→ ' + it.recipient + ' · ' + it.claimId + ' · <span style="color:' + it.urgencyColor + '">' + it.urgencyLabel + '</span></div>' +
+      '</div>' +
+      '<div class="sdr-batch-row-check"><i class="fas fa-paper-plane" style="color:#0ea5e9"></i></div>' +
+    '</div>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay';
+  overlay.id = 'sdr-batch-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML =
+    '<div class="sdr-modal" style="max-width:520px" onclick="event.stopPropagation()">' +
+
+      '<div class="sdr-header">' +
+        '<div class="sdr-header-left">' +
+          '<div class="sdr-header-icon"><i class="fas fa-paper-plane"></i></div>' +
+          '<div>' +
+            '<div class="sdr-header-title">Send All Reminders</div>' +
+            '<div class="sdr-header-sub">Batch AI-drafted delivery to ' + items.length + ' recipient(s)</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="sdr-close" onclick="document.getElementById(\'sdr-batch-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+
+      '<div class="sdr-body" style="display:block;padding:20px">' +
+
+        '<div class="sdr-batch-queue">' + itemRows + '</div>' +
+
+        '<div style="margin-top:16px">' +
+          '<label class="sdr-field-label"><i class="fas fa-satellite-dish"></i> Delivery Channel (all)</label>' +
+          '<select class="sdr-input" id="sdr-batch-channel" style="margin-top:6px">' +
+            '<option value="email-sms">Email + SMS (recommended)</option>' +
+            '<option value="email">Email only</option>' +
+            '<option value="fax">Fax (where available)</option>' +
+            '<option value="mail">Physical Mail (AI-drafted letters)</option>' +
+          '</select>' +
+        '</div>' +
+
+        '<div class="sdr-ai-note" style="margin-top:16px">' +
+          '<div class="sdr-ai-note-header"><i class="fas fa-robot"></i> Batch AI Intelligence</div>' +
+          '<div class="sdr-ai-note-rows">' +
+            '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>Each letter independently personalized</div>' +
+            '<div class="sdr-ai-note-row"><span class="sdr-ai-dot green"></span>Claim-specific missing doc lists</div>' +
+            '<div class="sdr-ai-note-row"><span class="sdr-ai-dot blue"></span>Read-receipt tracking on all sends</div>' +
+            '<div class="sdr-ai-note-row"><span class="sdr-ai-dot blue"></span>7-day auto-follow-up queued for each</div>' +
+          '</div>' +
+        '</div>' +
+
+      '</div>' +
+
+      '<div class="sdr-footer">' +
+        '<div class="sdr-footer-left">' +
+          '<i class="fas fa-shield-alt" style="color:#16a34a;margin-right:4px"></i>' +
+          '<span style="font-size:11px;color:#6b7280">Encrypted · HIPAA compliant · Logged</span>' +
+        '</div>' +
+        '<div class="sdr-footer-actions">' +
+          '<button class="sdr-btn-ghost" onclick="document.getElementById(\'sdr-batch-overlay\').remove()">' +
+            '<i class="fas fa-times"></i> Cancel' +
+          '</button>' +
+          '<button class="sdr-btn-primary" onclick="sdrBatchConfirmSend(' + JSON.stringify(items.map(function(i){return i.claimId;})) + ')">' +
+            '<i class="fas fa-paper-plane"></i> Send All ' + items.length + ' Reminders' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+
+    '</div>';
+
+  document.body.appendChild(overlay);
+}
+
+function sdrBatchConfirmSend(claimIds) {
+  var overlay = document.getElementById('sdr-batch-overlay');
+  var btn = overlay ? overlay.querySelector('.sdr-btn-primary') : null;
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
+
+  var delay = 600;
+  claimIds.forEach(function(cid, idx) {
+    setTimeout(function() {
+      sdrMarkAsSent(cid);
+    }, delay * (idx + 1));
+  });
+
+  setTimeout(function() {
+    if (overlay) overlay.remove();
+    p7Toast(
+      '<i class="fas fa-check-circle" style="color:#10b981"></i> <strong>' + claimIds.length + ' doc requests sent</strong> · ' +
+      'All letters archived · Read-receipt tracking active · Auto-follow-ups queued',
+      5000
+    );
+  }, delay * (claimIds.length + 1));
 }
 
 // Override existing modal-less stubs
 function openFraudDetailModal(claimId) {
-  p7Toast('<i class="fas fa-shield-virus"></i> Fraud Investigation Report — ' + claimId + ': Score analysis, timeline anomalies, investigation checklist loading…', 4000);
+  var fraudDetails = {
+    'CLM-2026-0025': {
+      client:'Kevin Park', amount:'$250,000', type:'Death Benefit', score:78, status:'FLAGGED',
+      policyDate:'2024-02-15', claimDate:'2026-04-03', daysInForce:412,
+      contestability: true, paymentHold: true,
+      anomalies:[
+        { type:'Timeline', severity:'HIGH',   desc:'Policy issued 412 days before death — within 2-year contestability window' },
+        { type:'Coverage', severity:'HIGH',   desc:'Policy status was "Pending" at time of death — coverage determination required' },
+        { type:'Medical',  severity:'MEDIUM', desc:'Application medical records inconsistency detected by NLP — 2 discrepancies flagged' },
+        { type:'Beneficiary', severity:'MEDIUM', desc:'Beneficiary designation changed 183 days before death — unusual timing' }
+      ],
+      signals:['Claim Timing','Coverage Gap','Medical Inconsistency','Beneficiary Change'],
+      sigColors:['#dc2626','#dc2626','#d97706','#d97706'],
+      checklist:[
+        { item:'Order full medical records from original 2024 UW application', done:false },
+        { item:'Request attending physician statement from date of death', done:false },
+        { item:'Verify beneficiary relationship and designation history', done:false },
+        { item:'Refer to Special Investigations Unit (SIU)', done:false },
+        { item:'Notify beneficiary of contestability review (30-day window)', done:false },
+        { item:'Assign senior adjuster with fraud investigation experience', done:false }
+      ],
+      recommendation:'SIU Referral Recommended · Hold payment pending investigation · Contestability review active'
+    },
+    'CLM-2026-0041': {
+      client:'Robert Chen', amount:'$1,000,000', type:'Death Benefit', score:42, status:'WATCH',
+      policyDate:'2022-06-01', claimDate:'2026-04-08', daysInForce:1402,
+      contestability: false, paymentHold: false,
+      anomalies:[
+        { type:'High Value', severity:'MEDIUM', desc:'Claim exceeds $1M threshold — enhanced review protocol automatically triggered' },
+        { type:'ID Pending', severity:'MEDIUM', desc:'Claimant ID documents not yet received — payout blocked pending verification' },
+        { type:'Timing',    severity:'LOW',    desc:'Claim filed 1 day after death — normal processing, no anomaly' }
+      ],
+      signals:['High Value Threshold','ID Documents Pending'],
+      sigColors:['#d97706','#d97706'],
+      checklist:[
+        { item:'Verify claimant identity once ID documents received', done:false },
+        { item:'Confirm beneficiary relationship to Robert Chen', done:false },
+        { item:'Enhanced adjuster review before authorizing $1M payout', done:false },
+        { item:'Confirm banking details for electronic transfer', done:false }
+      ],
+      recommendation:'Enhanced monitoring active · Approve once ID verified and adjuster review complete'
+    },
+    'CLM-2026-0028': {
+      client:'Maria Gonzalez', amount:'$120,000', type:'Accel. Death Benefit', score:38, status:'WATCH',
+      policyDate:'2023-11-01', claimDate:'2026-04-05', daysInForce:885,
+      contestability: false, paymentHold: false,
+      anomalies:[
+        { type:'ADB Timing', severity:'MEDIUM', desc:'ADB claim filed 30 days after terminal diagnosis — slightly delayed but within policy window' },
+        { type:'Cert Pending', severity:'MEDIUM', desc:'Terminal illness certification not yet received — standard for ADB claims' },
+        { type:'NLP Flag', severity:'LOW',    desc:'Minor language inconsistency in claimant statement — NLP confidence 82%' }
+      ],
+      signals:['ADB Timing','Cert Pending','NLP Flag'],
+      sigColors:['#d97706','#d97706','#eab308'],
+      checklist:[
+        { item:'Receive and authenticate terminal illness certification from oncologist', done:false },
+        { item:'Verify ADB eligibility criteria (6 criteria — 6/7 met)', done:false },
+        { item:'Confirm NLP language inconsistency — no material issue found', done:false },
+        { item:'Expedite review for compassionate fast-track', done:false }
+      ],
+      recommendation:'Standard ADB processing — expedite on compassionate track once terminal cert received'
+    }
+  };
+
+  var d = fraudDetails[claimId] || {
+    client:'Client', amount:'N/A', type:'Claim', score:0, status:'CLEAR',
+    policyDate:'N/A', claimDate:'N/A', daysInForce:0, contestability:false, paymentHold:false,
+    anomalies:[], signals:[], sigColors:[], checklist:[],
+    recommendation:'No fraud indicators detected — normal processing'
+  };
+
+  var scoreColor = d.score >= 60 ? '#dc2626' : d.score >= 30 ? '#d97706' : '#16a34a';
+  var statusColor = d.status === 'FLAGGED' ? '#dc2626' : d.status === 'WATCH' ? '#d97706' : '#16a34a';
+
+  var anomalyHTML = d.anomalies.map(function(a) {
+    var sevColor = a.severity === 'HIGH' ? '#dc2626' : a.severity === 'MEDIUM' ? '#d97706' : '#16a34a';
+    return '<div class="fraud-anomaly-row">' +
+      '<span class="fraud-anom-type" style="background:' + sevColor + '20;color:' + sevColor + '">' + a.type + '</span>' +
+      '<span class="fraud-anom-sev" style="color:' + sevColor + ';font-weight:600;font-size:11px">' + a.severity + '</span>' +
+      '<span class="fraud-anom-desc">' + a.desc + '</span>' +
+    '</div>';
+  }).join('') || '<div class="fraud-anom-empty">No anomalies detected</div>';
+
+  var sigsHTML = d.signals.map(function(s, i) {
+    return '<span class="fraud-sig-chip" style="background:' + d.sigColors[i] + '20;color:' + d.sigColors[i] + ';border:1px solid ' + d.sigColors[i] + '40">' + s + '</span>';
+  }).join('');
+
+  var checklistHTML = d.checklist.map(function(c) {
+    return '<label class="adb-crit-row" style="cursor:pointer">' +
+      '<input type="checkbox"' + (c.done ? ' checked' : '') + ' style="margin-right:8px"> ' + c.item +
+    '</label>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay fraud-detail-overlay';
+  overlay.id = 'fraud-detail-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="fraud-detail-modal" onclick="event.stopPropagation()">' +
+      '<div class="fraud-report-header">' +
+        '<div class="fraud-report-header-left">' +
+          '<div class="fraud-report-icon"><i class="fas fa-shield-virus"></i></div>' +
+          '<div>' +
+            '<div class="fraud-report-title">Fraud Investigation Report <span style="font-size:14px;opacity:0.8">— ' + claimId + '</span></div>' +
+            '<div class="fraud-report-sub">' + d.client + ' · ' + d.type + ' · ' + d.amount + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'fraud-detail-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="fraud-report-body">' +
+        '<div class="fraud-detail-top-bar">' +
+          '<div class="fraud-detail-score-block">' +
+            '<div class="fraud-detail-score" style="color:' + scoreColor + '">' + d.score + '</div>' +
+            '<div class="fraud-detail-score-lbl">Fraud Score</div>' +
+          '</div>' +
+          '<div class="fraud-detail-meta">' +
+            '<div class="fraud-detail-meta-row"><span>Status</span><span class="fraud-rr-status" style="background:' + statusColor + '20;color:' + statusColor + '">' + d.status + '</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Policy Date</span><span>' + d.policyDate + '</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Claim Date</span><span>' + d.claimDate + '</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Days In Force</span><span>' + d.daysInForce + 'd</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Contestability</span><span style="color:' + (d.contestability ? '#dc2626':'#16a34a') + '">' + (d.contestability ? '⚠ ACTIVE':'Clear') + '</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Payment Hold</span><span style="color:' + (d.paymentHold ? '#dc2626':'#16a34a') + '">' + (d.paymentHold ? '🔴 HOLD':'Released') + '</span></div>' +
+          '</div>' +
+          '<div class="fraud-detail-signals">' +
+            '<div class="fraud-detail-sigs-title">Active Signals</div>' +
+            sigsHTML +
+          '</div>' +
+        '</div>' +
+
+        '<div class="fraud-report-section-title" style="margin-top:20px"><i class="fas fa-exclamation-triangle"></i> Detected Anomalies</div>' +
+        '<div class="fraud-anomaly-list">' + anomalyHTML + '</div>' +
+
+        '<div class="fraud-report-section-title" style="margin-top:16px"><i class="fas fa-clipboard-check"></i> Investigation Checklist</div>' +
+        '<div class="adb-criteria-list">' + checklistHTML + '</div>' +
+
+        '<div class="adb-pending-alert" style="margin-top:16px">' +
+          '<i class="fas fa-lightbulb"></i>' +
+          '<div><strong>AI Recommendation:</strong> ' + d.recommendation + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fraud-report-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'fraud-detail-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="sendDocRequest(\'' + claimId + '\',\'beneficiary\');document.getElementById(\'fraud-detail-overlay\').remove()"><i class="fas fa-paper-plane"></i> Chase Documents</button>' +
+        (d.paymentHold ? '' : '<button class="p7m-btn danger" onclick="p7Toast(\'<i class=\\\'fas fa-ban\\\'></i> Payment hold placed on ' + claimId + ' · SIU notified · Adjuster assigned\',3500);document.getElementById(\'fraud-detail-overlay\').remove()"><i class="fas fa-ban"></i> Place Payment Hold</button>') +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — FULL INTELLIGENCE REPORT MODAL
+   ═══════════════════════════════════════════════════════════════════ */
 function openCIReviewModal() {
-  p7Toast('<i class="fas fa-brain"></i> Full AI Claims Intelligence Report: loading cross-portfolio fraud analysis, SLA projections, and resolution modeling…', 4000);
+  var claimsML = [
+    { id:'CLM-2026-0041', client:'Robert Chen', type:'Death Benefit', amount:'$1,000,000', fraud:42, nlpConf:94, slaRisk:'BREACH', resEst:'7–10d', priority:'URGENT', recAction:'Escalate ID doc chase — trigger automated beneficiary outreach within 24h' },
+    { id:'CLM-2026-0025', client:'Kevin Park',   type:'Death Benefit', amount:'$250,000',  fraud:78, nlpConf:71, slaRisk:'HOLD',   resEst:'30–90d',priority:'FLAGGED',recAction:'Contestability review — request full medical records from original UW file' },
+    { id:'CLM-2026-0028', client:'Maria Gonzalez',type:'Accel. Benefit',amount:'$120,000', fraud:38, nlpConf:82, slaRisk:'5d',     resEst:'5–8d',  priority:'HIGH',   recAction:'ADB expedite — contact oncologist directly for terminal certification' },
+    { id:'CLM-2026-0035', client:'Maria Gonzalez',type:'Disability',   amount:'$4,200/mo',fraud:18, nlpConf:89, slaRisk:'9d',     resEst:'9–12d', priority:'MEDIUM', recAction:'APS follow-up to Dr. Hernandez — auto-letter drafted, send now' },
+    { id:'CLM-2026-0038', client:'Sandra Williams',type:'LTC',         amount:'$18,000',  fraud:12, nlpConf:99, slaRisk:'22d',    resEst:'3–5d',  priority:'LOW',    recAction:'Docs complete — route to adjuster for final LTC eligibility sign-off' },
+    { id:'CLM-2026-0033', client:'James Whitfield',type:'LTC',         amount:'$9,600',   fraud:9,  nlpConf:97, slaRisk:'17d',    resEst:'2–3d',  priority:'READY',  recAction:'All docs verified — approve and initiate payout within 48h' },
+    { id:'CLM-2026-0031', client:'Linda Morrison', type:'Waiver',      amount:'$9,600/yr',fraud:7,  nlpConf:98, slaRisk:'N/A',    resEst:'4–6d',  priority:'LOW',    recAction:'Waiver criteria confirmed — final medical sign-off pending' },
+    { id:'CLM-2026-0025B',client:'Kevin Park',    type:'Investigation',amount:'HOLD',     fraud:78, nlpConf:71, slaRisk:'HOLD',   resEst:'30–90d',priority:'REVIEW', recAction:'SIU referral recommended — senior adjuster assignment required' }
+  ];
+  var priorityColor = { URGENT:'#dc2626',FLAGGED:'#7c3aed',HIGH:'#d97706',MEDIUM:'#2563eb',LOW:'#16a34a',READY:'#059669',REVIEW:'#dc2626' };
+  var slaColor = { BREACH:'#dc2626',HOLD:'#7c3aed','5d':'#d97706','9d':'#d97706','22d':'#16a34a','17d':'#16a34a','N/A':'#6b7280' };
+
+  var rowsHTML = claimsML.map(function(c) {
+    var fraudColor = c.fraud >= 60 ? '#dc2626' : c.fraud >= 30 ? '#d97706' : '#16a34a';
+    var fraudLabel = c.fraud >= 60 ? 'Flagged' : c.fraud >= 30 ? 'Watch' : 'Clear';
+    return '<tr class="ci-report-row">' +
+      '<td><span class="ci-claim-id">' + c.id + '</span></td>' +
+      '<td>' + c.client + '</td>' +
+      '<td><span class="ci-type-badge">' + c.type + '</span></td>' +
+      '<td class="text-right">' + c.amount + '</td>' +
+      '<td><span class="ci-score-pill" style="background:' + fraudColor + '15;color:' + fraudColor + ';border:1px solid ' + fraudColor + '40"><strong>' + c.fraud + '</strong> ' + fraudLabel + '</span></td>' +
+      '<td><span class="ci-nlp-bar-wrap"><span class="ci-nlp-bar" style="width:' + c.nlpConf + '%"></span></span><span class="ci-nlp-val">' + c.nlpConf + '%</span></td>' +
+      '<td><span class="ci-sla-badge" style="color:' + (slaColor[c.slaRisk]||'#6b7280') + '">' + c.slaRisk + '</span></td>' +
+      '<td>' + c.resEst + '</td>' +
+      '<td><span class="ci-priority-tag" style="background:' + (priorityColor[c.priority]||'#6b7280') + '20;color:' + (priorityColor[c.priority]||'#6b7280') + '">' + c.priority + '</span></td>' +
+      '<td class="ci-rec-cell" title="' + c.recAction + '">' + c.recAction.substring(0,50) + '…</td>' +
+    '</tr>';
+  }).join('');
+
+  var kpiBlock =
+    '<div class="ci-report-kpis">' +
+      '<div class="ci-rk-card red"><div class="ci-rk-val">1</div><div class="ci-rk-lbl">Fraud Flagged</div></div>' +
+      '<div class="ci-rk-card orange"><div class="ci-rk-val">2</div><div class="ci-rk-lbl">Watch List</div></div>' +
+      '<div class="ci-rk-card blue"><div class="ci-rk-val">94%</div><div class="ci-rk-lbl">NLP Accuracy</div></div>' +
+      '<div class="ci-rk-card green"><div class="ci-rk-val">5.2d</div><div class="ci-rk-lbl">Avg Resolution</div></div>' +
+      '<div class="ci-rk-card purple"><div class="ci-rk-val">+32%</div><div class="ci-rk-lbl">Fraud Detection Lift</div></div>' +
+      '<div class="ci-rk-card red"><div class="ci-rk-val">2</div><div class="ci-rk-lbl">SLA At Risk</div></div>' +
+      '<div class="ci-rk-card teal"><div class="ci-rk-val">$1.4M</div><div class="ci-rk-lbl">Open Exposure</div></div>' +
+      '<div class="ci-rk-card green"><div class="ci-rk-val">61%</div><div class="ci-rk-lbl">Doc Completion</div></div>' +
+    '</div>';
+
+  var slaHeatmap =
+    '<div class="ci-sla-heatmap">' +
+      '<div class="ci-sla-hm-title"><i class="fas fa-stopwatch"></i> SLA Compliance Heatmap</div>' +
+      '<div class="ci-sla-hm-bars">' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0041</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:95%;background:#dc2626"></div></div><span class="ci-sla-hm-days breach">1d LEFT</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0025</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:100%;background:#7c3aed"></div></div><span class="ci-sla-hm-days hold">HOLD</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0028</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:70%;background:#d97706"></div></div><span class="ci-sla-hm-days warn">5d</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0035</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:55%;background:#d97706"></div></div><span class="ci-sla-hm-days warn">9d</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0033</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:28%;background:#16a34a"></div></div><span class="ci-sla-hm-days ok">17d</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0038</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:22%;background:#16a34a"></div></div><span class="ci-sla-hm-days ok">22d</span></div>' +
+      '</div>' +
+    '</div>';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay ci-report-overlay';
+  overlay.id = 'ci-report-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="ci-report-modal" onclick="event.stopPropagation()">' +
+      '<div class="ci-report-header">' +
+        '<div class="ci-report-header-left">' +
+          '<div class="ci-report-icon"><i class="fas fa-brain"></i></div>' +
+          '<div>' +
+            '<div class="ci-report-title">Full AI Claims Intelligence Report</div>' +
+            '<div class="ci-report-sub">ML fraud detection · NLP extraction accuracy · SLA heatmap · Resolution modeling · Recommended actions</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ci-report-header-right">' +
+          '<span class="ci-live-badge">● LIVE</span>' +
+          '<button class="p7m-close" onclick="document.getElementById(\'ci-report-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ci-report-body">' +
+        kpiBlock +
+        slaHeatmap +
+        '<div class="ci-report-table-wrap">' +
+          '<div class="ci-report-table-title"><i class="fas fa-table"></i> ML Score Matrix — All Claims</div>' +
+          '<div style="overflow-x:auto">' +
+            '<table class="ci-report-table">' +
+              '<thead><tr><th>Claim ID</th><th>Client</th><th>Type</th><th>Amount</th><th>Fraud Score</th><th>NLP Conf.</th><th>SLA</th><th>Resolution Est.</th><th>Priority</th><th>Recommended Action</th></tr></thead>' +
+              '<tbody>' + rowsHTML + '</tbody>' +
+            '</table>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ci-model-footnote"><i class="fas fa-robot"></i> Model: NYL Claims AI v2.4 · Trained on 47,200 historical claims · Last retrained 2026-04-01 · AUC 0.94 · Precision 91% · Recall 88%</div>' +
+      '</div>' +
+      '<div class="ci-report-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'ci-report-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="openAITriageModal();document.getElementById(\'ci-report-overlay\').remove()"><i class="fas fa-robot"></i> Run AI Triage</button>' +
+        '<button class="p7m-btn primary" onclick="openFraudReportModal();document.getElementById(\'ci-report-overlay\').remove()"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — AI TRIAGE MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+function openAITriageModal() {
+  var triageQueue = [
+    {
+      id:'CLM-2026-0041', client:'Robert Chen', initials:'RC', color:'#dc2626', type:'Death Benefit',
+      urgency:97, reasoning:'$1M claim SLA breaches in 24h · Missing claimant ID prevents payout · Beneficiary unresponsive · AI recommends escalated outreach + adjuster priority assignment',
+      nextActions:['Call beneficiary directly — use agent direct line','Send FedEx courier for certified ID pickup','Escalate to Sr. Adjuster James Reyes by EOD','Flag for SLA exception approval if docs arrive late'],
+      sla:'1d left', fraudScore:42, docCompletion:50, tag:'SLA BREACH'
+    },
+    {
+      id:'CLM-2026-0025', client:'Kevin Park', initials:'KP', color:'#7c3aed', type:'Death Benefit',
+      urgency:91, reasoning:'Policy pending at time of death — contestability window active · ML detected 3 timeline anomalies · Medical records inconsistency flagged · SIU referral score: 82/100',
+      nextActions:['Order original UW medical records from 2024 application','Refer to Special Investigations Unit (SIU)','Notify beneficiary of 30-day contestability review','Assign Sr. Adjuster with fraud investigation experience'],
+      sla:'On Hold', fraudScore:78, docCompletion:25, tag:'FRAUD HOLD'
+    },
+    {
+      id:'CLM-2026-0028', client:'Maria Gonzalez', initials:'MG', color:'#d97706', type:'Accel. Benefit (ADB)',
+      urgency:84, reasoning:'Terminal illness certification pending from oncologist · ADB compassionate fast-track eligible · $120K acceleration on hold · Patient prognosis: 6–8 months · 5-day SLA window',
+      nextActions:['Contact Dr. Hernandez (oncologist) directly — AI letter drafted','Pre-approve ADB conditional on certification receipt','Assign compassionate case specialist','Expedite internal review once certification arrives'],
+      sla:'5d', fraudScore:38, docCompletion:50, tag:'COMPASSIONATE'
+    },
+    {
+      id:'CLM-2026-0035', client:'Maria Gonzalez', initials:'MG', color:'#2563eb', type:'Disability',
+      urgency:68, reasoning:'APS from Dr. Hernandez overdue by 4 days · $4,200/mo disability benefit impacted · AI auto-drafted follow-up letter ready to send · NLP: initial APS incomplete — missing functional limitations section',
+      nextActions:['Send AI-drafted APS follow-up letter to Dr. Hernandez','Request supplemental APS form targeting functional limitations','Set 5-day follow-up reminder for non-response','Review occupational disability definition against claimant\'s role'],
+      sla:'9d', fraudScore:18, docCompletion:50, tag:'DOCS PENDING'
+    },
+    {
+      id:'CLM-2026-0038', client:'Sandra Williams', initials:'SW', color:'#059669', type:'Long-term Care',
+      urgency:42, reasoning:'LTC eligibility certificate verified · Care plan reviewed and approved · Only adjuster sign-off remaining · No fraud indicators detected · On track for payout within 3–5 days',
+      nextActions:['Route to adjuster for final LTC eligibility confirmation','Initiate payout authorization once confirmed','Notify Sandra Williams of approval status','Archive all documents to policy file'],
+      sla:'22d', fraudScore:12, docCompletion:75, tag:'NEAR READY'
+    },
+    {
+      id:'CLM-2026-0033', client:'James Whitfield', initials:'JW', color:'#16a34a', type:'Long-term Care',
+      urgency:28, reasoning:'All 4 required documents verified by IDP · NLP confidence 97% · No fraud signals · Approval-ready — adjuster review is only remaining step · Payout can initiate within 48h of approval',
+      nextActions:['Send to adjuster for final approval (SLA: today)','Initiate electronic payout once approved','Confirm James Whitfield\'s banking details on file','Send approval notification letter'],
+      sla:'17d', fraudScore:9, docCompletion:100, tag:'APPROVAL READY'
+    }
+  ];
+
+  var cardsHTML = triageQueue.map(function(c, i) {
+    var urgencyColor = c.urgency >= 85 ? '#dc2626' : c.urgency >= 60 ? '#d97706' : '#16a34a';
+    var tagColors = {
+      'SLA BREACH':'#dc2626','FRAUD HOLD':'#7c3aed','COMPASSIONATE':'#db2777',
+      'DOCS PENDING':'#2563eb','NEAR READY':'#059669','APPROVAL READY':'#16a34a'
+    };
+    var tagColor = tagColors[c.tag] || '#6b7280';
+    var actionsHTML = c.nextActions.map(function(a, j) {
+      return '<div class="triage-action-item"><span class="triage-action-num">' + (j+1) + '</span><span>' + a + '</span></div>';
+    }).join('');
+    return '<div class="triage-card" style="border-left:4px solid ' + c.color + '">' +
+      '<div class="triage-card-top">' +
+        '<div class="triage-rank">#' + (i+1) + '</div>' +
+        '<div class="mini-avatar" style="background:' + c.color + ';width:36px;height:36px;font-size:12px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-weight:700;flex-shrink:0">' + c.initials + '</div>' +
+        '<div class="triage-card-info">' +
+          '<div class="triage-card-id">' + c.id + ' <span class="triage-tag" style="background:' + tagColor + '20;color:' + tagColor + ';border:1px solid ' + tagColor + '40">' + c.tag + '</span></div>' +
+          '<div class="triage-card-client">' + c.client + ' · ' + c.type + '</div>' +
+        '</div>' +
+        '<div class="triage-urgency-score" style="background:' + urgencyColor + '15;border:2px solid ' + urgencyColor + '">' +
+          '<div class="triage-urgency-num" style="color:' + urgencyColor + '">' + c.urgency + '</div>' +
+          '<div class="triage-urgency-lbl">Urgency</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="triage-reasoning"><i class="fas fa-robot" style="color:#7c3aed;margin-right:6px"></i>' + c.reasoning + '</div>' +
+      '<div class="triage-metrics">' +
+        '<div class="triage-metric"><span class="triage-m-lbl">SLA</span><span class="triage-m-val">' + c.sla + '</span></div>' +
+        '<div class="triage-metric"><span class="triage-m-lbl">Fraud</span><span class="triage-m-val">' + c.fraudScore + '</span></div>' +
+        '<div class="triage-metric"><span class="triage-m-lbl">Docs</span><span class="triage-m-val">' + c.docCompletion + '%</span></div>' +
+      '</div>' +
+      '<div class="triage-actions-block">' +
+        '<div class="triage-actions-title"><i class="fas fa-bolt"></i> AI Recommended Next Actions</div>' +
+        actionsHTML +
+      '</div>' +
+      '<div class="triage-card-btns">' +
+        '<button class="p7m-btn ghost" style="font-size:11px;padding:6px 12px" onclick="openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> View Claim</button>' +
+        '<button class="p7m-btn primary" style="font-size:11px;padding:6px 12px" onclick="sendDocRequest(\'' + c.id + '\',\'beneficiary\')"><i class="fas fa-paper-plane"></i> Send Doc Request</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay triage-modal-overlay';
+  overlay.id = 'triage-modal-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="triage-modal" onclick="event.stopPropagation()">' +
+      '<div class="triage-modal-header">' +
+        '<div class="triage-modal-header-left">' +
+          '<div class="triage-modal-icon"><i class="fas fa-robot"></i></div>' +
+          '<div>' +
+            '<div class="triage-modal-title">AI Claims Triage Queue</div>' +
+            '<div class="triage-modal-sub">6 active claims · Prioritized by urgency score · ML-weighted: SLA 40% · Fraud 30% · Doc Completeness 20% · Claim Value 10%</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'triage-modal-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="triage-modal-summary">' +
+        '<div class="triage-sum-item red"><i class="fas fa-fire"></i><span>1 SLA Breach</span></div>' +
+        '<div class="triage-sum-item purple"><i class="fas fa-shield-virus"></i><span>1 Fraud Hold</span></div>' +
+        '<div class="triage-sum-item pink"><i class="fas fa-heart"></i><span>1 Compassionate</span></div>' +
+        '<div class="triage-sum-item green"><i class="fas fa-check-circle"></i><span>1 Approval Ready</span></div>' +
+      '</div>' +
+      '<div class="triage-modal-body">' + cardsHTML + '</div>' +
+      '<div class="triage-modal-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="p7Toast(\'<i class=\\\'fas fa-paper-plane\\\'></i> Batch doc reminders sent to all 4 pending claims — AI letters generated\',3500);document.getElementById(\'triage-modal-overlay\').remove()"><i class="fas fa-paper-plane"></i> Send All Doc Reminders</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — FULL FRAUD REPORT MODAL
+   ═══════════════════════════════════════════════════════════════════ */
 function openFraudReportModal() {
-  p7Toast('<i class="fas fa-shield-virus"></i> Fraud Report: CLM-2026-0025 (Score 78) flagged for contestability review. CLM-2026-0041 (Score 42) on watch list.', 4000);
+  var fraudData = [
+    { id:'CLM-2026-0025', client:'Kevin Park',    amount:'$250,000',  score:78, status:'FLAGGED', signals:['Policy pending at death','Medical records inconsistency','Timeline anomaly (3)','Beneficiary change 6mo prior'], hold:true,  recommendation:'SIU referral · Contestability investigation · Senior adjuster assignment required' },
+    { id:'CLM-2026-0041', client:'Robert Chen',   amount:'$1,000,000',score:42, status:'WATCH',   signals:['High-value threshold','Claimant ID pending','Expedited claim filed'], hold:false, recommendation:'Enhanced monitoring · ID document verification priority · Adjuster review before payout' },
+    { id:'CLM-2026-0028', client:'Maria Gonzalez',amount:'$120,000',  score:38, status:'WATCH',   signals:['Terminal cert timing','ADB filed 30 days post-diagnosis','NLP doc inconsistency'], hold:false, recommendation:'ADB eligibility verification · Oncologist direct contact · Cert authentication' },
+    { id:'CLM-2026-0035', client:'Maria Gonzalez',amount:'$4,200/mo', score:18, status:'CLEAR',   signals:['Standard disability claim','APS pending (normal)'], hold:false, recommendation:'Normal processing — APS receipt required for approval' },
+    { id:'CLM-2026-0038', client:'Sandra Williams',amount:'$18,000',  score:12, status:'CLEAR',   signals:['Clean policy history','All docs verified'], hold:false, recommendation:'Approve — no fraud indicators detected' },
+    { id:'CLM-2026-0033', client:'James Whitfield',amount:'$9,600',   score:9,  status:'CLEAR',   signals:['All 4 docs verified','NLP confidence 97%'], hold:false, recommendation:'Approve immediately — no fraud signals' },
+    { id:'CLM-2026-0031', client:'Linda Morrison', amount:'$9,600/yr',score:7,  status:'CLEAR',   signals:['Waiver criteria met','Long-standing policy'], hold:false, recommendation:'Approve pending medical sign-off' }
+  ];
+
+  var signalCounts = { timing: 2, docDelay: 3, highValue: 1, benefChange: 1, nlpFlag: 1, coverageGap: 1 };
+
+  var fraudRowsHTML = fraudData.map(function(f) {
+    var statusColor = f.status === 'FLAGGED' ? '#dc2626' : f.status === 'WATCH' ? '#d97706' : '#16a34a';
+    var scoreColor = f.score >= 60 ? '#dc2626' : f.score >= 30 ? '#d97706' : '#16a34a';
+    var sigHTML = f.signals.map(function(s) { return '<span class="fraud-sig-chip">' + s + '</span>'; }).join('');
+    return '<div class="fraud-report-row' + (f.hold ? ' fraud-row-hold' : '') + '">' +
+      '<div class="fraud-rr-top">' +
+        '<span class="fraud-rr-id">' + f.id + (f.hold ? ' <i class="fas fa-ban" style="color:#dc2626;margin-left:4px" title="Payment Hold"></i>' : '') + '</span>' +
+        '<span class="fraud-rr-client">' + f.client + '</span>' +
+        '<span class="fraud-rr-amount">' + f.amount + '</span>' +
+        '<span class="fraud-rr-score" style="background:' + scoreColor + '20;color:' + scoreColor + ';border:1px solid ' + scoreColor + '40">' + f.score + '</span>' +
+        '<span class="fraud-rr-status" style="background:' + statusColor + '20;color:' + statusColor + '">' + f.status + '</span>' +
+      '</div>' +
+      '<div class="fraud-rr-signals">' + sigHTML + '</div>' +
+      '<div class="fraud-rr-rec"><i class="fas fa-lightbulb" style="color:#d97706;margin-right:6px"></i>' + f.recommendation + '</div>' +
+    '</div>';
+  }).join('');
+
+  var signalMatrixHTML =
+    '<div class="fraud-signal-matrix">' +
+      '<div class="fsm-title"><i class="fas fa-chart-bar"></i> Fraud Signal Distribution</div>' +
+      '<div class="fsm-bars">' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Claim Timing</span><div class="fsm-track"><div class="fsm-fill" style="width:72%;background:#dc2626"></div></div><span class="fsm-count">High</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Doc Completeness</span><div class="fsm-track"><div class="fsm-fill" style="width:55%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Policy History</span><div class="fsm-track"><div class="fsm-fill" style="width:90%;background:#16a34a"></div></div><span class="fsm-count">Low</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Beneficiary Match</span><div class="fsm-track"><div class="fsm-fill" style="width:60%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Claim Amount</span><div class="fsm-track"><div class="fsm-fill" style="width:80%;background:#dc2626"></div></div><span class="fsm-count">High</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">NLP Anomalies</span><div class="fsm-track"><div class="fsm-fill" style="width:45%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
+      '</div>' +
+    '</div>';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay fraud-report-overlay';
+  overlay.id = 'fraud-report-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="fraud-report-modal" onclick="event.stopPropagation()">' +
+      '<div class="fraud-report-header">' +
+        '<div class="fraud-report-header-left">' +
+          '<div class="fraud-report-icon"><i class="fas fa-shield-virus"></i></div>' +
+          '<div>' +
+            '<div class="fraud-report-title">Full AI Fraud Detection Report</div>' +
+            '<div class="fraud-report-sub">All active &amp; resolved claims · ML anomaly detection · Signal breakdown · Hold recommendations</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'fraud-report-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="fraud-report-body">' +
+        '<div class="fraud-report-kpis">' +
+          '<div class="fraud-rkpi red"><div class="fraud-rkpi-val">1</div><div class="fraud-rkpi-lbl">Flagged</div></div>' +
+          '<div class="fraud-rkpi orange"><div class="fraud-rkpi-val">2</div><div class="fraud-rkpi-lbl">Watch List</div></div>' +
+          '<div class="fraud-rkpi green"><div class="fraud-rkpi-val">4</div><div class="fraud-rkpi-lbl">Clear</div></div>' +
+          '<div class="fraud-rkpi blue"><div class="fraud-rkpi-val">+32%</div><div class="fraud-rkpi-lbl">Detection Lift</div></div>' +
+          '<div class="fraud-rkpi red"><div class="fraud-rkpi-val">1</div><div class="fraud-rkpi-lbl">Payment Hold</div></div>' +
+          '<div class="fraud-rkpi purple"><div class="fraud-rkpi-val">1</div><div class="fraud-rkpi-lbl">SIU Referral Rec.</div></div>' +
+        '</div>' +
+        '<div class="fraud-report-layout">' +
+          '<div class="fraud-report-claims">' +
+            '<div class="fraud-report-section-title"><i class="fas fa-list"></i> All Claims — Fraud Score &amp; Analysis</div>' +
+            fraudRowsHTML +
+          '</div>' +
+          signalMatrixHTML +
+        '</div>' +
+        '<div class="fraud-model-note"><i class="fas fa-robot"></i> Model: NYL Fraud AI v3.1 · XGBoost ensemble · Trained on 12,400 historical fraud cases · AUC 0.96 · False positive rate: 4.2%</div>' +
+      '</div>' +
+      '<div class="fraud-report-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'fraud-report-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn danger" onclick="p7Toast(\'<i class=\\\'fas fa-ban\\\'></i> Payment hold confirmed for CLM-2026-0025 · SIU referral initiated · Senior adjuster notified\',4000);document.getElementById(\'fraud-report-overlay\').remove()"><i class="fas fa-ban"></i> Confirm SIU Referral</button>' +
+        '<button class="p7m-btn primary" onclick="openFraudDetailModal(\'CLM-2026-0025\');document.getElementById(\'fraud-report-overlay\').remove()"><i class="fas fa-search-plus"></i> Investigate CLM-0025</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
 function toggleWorkbench(btn) {
@@ -34751,9 +36875,1249 @@ function updateBatchButtons() {
   if (assignBtn) assignBtn.disabled = checked === 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — DOCUMENT UPLOAD MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+function openUploadModal(claimId) {
+  var claimMeta = {
+    'CLM-2026-0041': { client:'Robert Chen',   type:'Death Benefit',    docs:['Death Certificate','Claimant ID','Beneficiary Designation Form','Medical Certificate'] },
+    'CLM-2026-0025': { client:'Kevin Park',    type:'Death Benefit',    docs:['Death Certificate','Medical Records (Full)','Policy Document','Beneficiary ID'] },
+    'CLM-2026-0028': { client:'Maria Gonzalez',type:'Accel. Benefit',   docs:['Terminal Illness Certification (ADB-TC-2026)','Attending Physician Statement','Claimant Statement','Oncologist Letter'] },
+    'CLM-2026-0035': { client:'Maria Gonzalez',type:'Disability',       docs:['Attending Physician Statement (APS)','Disability Claim Form','Employment Records','Occupational Assessment'] },
+    'CLM-2026-0038': { client:'Sandra Williams',type:'Long-term Care',  docs:['LTC Eligibility Certificate','Care Plan Documentation','Provider Invoice','Medical Necessity Letter'] },
+    'CLM-2026-0033': { client:'James Whitfield',type:'Long-term Care',  docs:['LTC Eligibility Certificate','Care Plan Update','Provider Invoice Q2','Authorization Form'] },
+    'CLM-2026-0031': { client:'Linda Morrison', type:'Waiver of Premium',docs:['Physician Disability Statement','Premium Waiver Application','Medical History Summary','Employer Disability Confirmation'] }
+  };
+  var meta = claimMeta[claimId] || { client:'Client', type:'Claim', docs:['Required Document 1','Required Document 2','Required Document 3'] };
+
+  var docChecklist = meta.docs.map(function(d) {
+    return '<label class="upload-doc-check">' +
+      '<input type="checkbox" style="margin-right:8px"> ' + d +
+    '</label>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay upload-modal-overlay';
+  overlay.id = 'upload-modal-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="upload-modal" onclick="event.stopPropagation()">' +
+      '<div class="upload-modal-header">' +
+        '<div class="upload-modal-header-left">' +
+          '<div class="upload-modal-icon"><i class="fas fa-upload"></i></div>' +
+          '<div>' +
+            '<div class="upload-modal-title">Upload Documents <span class="upload-claim-id-badge">' + claimId + '</span></div>' +
+            '<div class="upload-modal-sub">' + meta.client + ' · ' + meta.type + ' · IDP auto-extraction enabled</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'upload-modal-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="upload-modal-body">' +
+        '<div class="upload-drop-zone" id="upload-drop-zone" ' +
+          'ondragover="event.preventDefault();this.classList.add(\'upload-drag-active\')" ' +
+          'ondragleave="this.classList.remove(\'upload-drag-active\')" ' +
+          'ondrop="handleUploadDrop(event,\'' + claimId + '\')">' +
+          '<i class="fas fa-cloud-upload-alt upload-drop-icon"></i>' +
+          '<div class="upload-drop-title">Drag &amp; drop documents here</div>' +
+          '<div class="upload-drop-sub">or click to browse · PDF, JPG, PNG, DOCX accepted · Max 50MB per file</div>' +
+          '<button class="p7m-btn ghost" style="margin-top:12px" onclick="handleUploadDrop({dataTransfer:{files:[\'mock.pdf\']}},\'' + claimId + '\')"><i class="fas fa-folder-open"></i> Browse Files</button>' +
+        '</div>' +
+
+        '<div class="upload-doc-type-selector">' +
+          '<label class="upload-field-label">Document Type</label>' +
+          '<select class="filter-select" id="upload-doc-type" style="width:100%;margin-bottom:8px">' +
+            meta.docs.map(function(d){ return '<option>' + d + '</option>'; }).join('') +
+            '<option>Other / Miscellaneous</option>' +
+          '</select>' +
+          '<label class="upload-field-label">Notes (optional)</label>' +
+          '<input type="text" id="upload-notes" class="search-inline" placeholder="e.g. Original certified copy from Cook County Vital Records…" style="width:100%;box-sizing:border-box">' +
+        '</div>' +
+
+        '<div class="upload-checklist">' +
+          '<div class="upload-checklist-title"><i class="fas fa-clipboard-list"></i> Required Documents for ' + claimId + '</div>' +
+          '<div class="upload-doc-checks">' + docChecklist + '</div>' +
+        '</div>' +
+
+        '<div class="upload-idp-note">' +
+          '<i class="fas fa-robot" style="color:#7c3aed"></i>' +
+          ' <strong>AI Auto-Extraction:</strong> Uploaded documents will be automatically processed by the IDP engine · Fields extracted and pre-populated into claim form within 2–5 minutes · Review confidence scores before approving' +
+        '</div>' +
+      '</div>' +
+      '<div class="upload-modal-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'upload-modal-overlay\').remove()">Cancel</button>' +
+        '<button class="p7m-btn primary" onclick="submitUpload(\'' + claimId + '\')"><i class="fas fa-upload"></i> Upload &amp; Start IDP Extraction</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function handleUploadDrop(event, claimId) {
+  var zone = document.getElementById('upload-drop-zone');
+  if (zone) {
+    zone.classList.remove('upload-drag-active');
+    zone.innerHTML =
+      '<i class="fas fa-file-check upload-drop-icon" style="color:#16a34a"></i>' +
+      '<div class="upload-drop-title" style="color:#16a34a">Document ready for upload</div>' +
+      '<div class="upload-drop-sub">document.pdf · Click "Upload &amp; Start IDP Extraction" to proceed</div>';
+  }
+}
+
+function submitUpload(claimId) {
+  var docType = document.getElementById('upload-doc-type') ? document.getElementById('upload-doc-type').value : 'Document';
+  var overlay = document.getElementById('upload-modal-overlay');
+  if (overlay) overlay.remove();
+  p7Toast('<i class="fas fa-upload"></i> ' + docType + ' uploaded for ' + claimId + ' · IDP extraction starting — fields auto-populated in 2–3 minutes', 4000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> IDP extraction complete for ' + claimId + ' · 5 fields extracted · Confidence: 94% · Review in claim detail', 4000);
+  }, 3500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — FILE NEW CLAIM WIZARD
+   ═══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   FILE NEW CLAIM — 5-STEP WIZARD  (state machine)
+   State stored in window._fcw = { step, client, type, policy, docs, claimId }
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────
+   FILE NEW CLAIM WIZARD — CLIENT + CLAIMANT DATA
+   Each client has: id, dob, age, policies[], claimants[]
+   claimants[] = approved people who can file on behalf of this insured
+   ───────────────────────────────────────────────────────────────── */
+var _fcwClientData = {
+  'Robert Chen': {
+    id:'P-100350', dob:'1968-03-14', age:58,
+    claimants:[
+      { name:'Susan Chen',            rel:'Spouse',           email:'susan.chen@email.com',   phone:'415-555-0182' },
+      { name:'Robert Chen Jr.',       rel:'Son',              email:'rchen.jr@email.com',      phone:'415-555-0193' },
+      { name:'Estate of Robert Chen', rel:'Trustee / Estate', email:'attorney@legalfirm.com',  phone:'415-555-0200' }
+    ],
+    policies:[
+      { num:'NYL-P-100350',  type:'Whole Life',       face:'$1,000,000', status:'In Force', issued:'2018-06-01', premium:'$4,200/yr', bene:'Susan Chen (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Waiver of Premium','Accidental Death Benefit (ADB Rider)'] },
+      { num:'NYL-P-100350B', type:'Term Life (20yr)', face:'$500,000',   status:'In Force', issued:'2020-01-15', premium:'$980/yr',   bene:'Susan Chen (spouse)',
+        riders:['Waiver of Premium','Child Term Rider'] },
+      { num:'NYL-P-100350C', type:'Variable Universal Life (VUL)', face:'$750,000', status:'In Force', issued:'2022-03-01', premium:'$6,100/yr', bene:'Susan Chen (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Critical Illness Rider'] }
+    ]
+  },
+  'Sandra Williams': {
+    id:'P-100287', dob:'1955-09-22', age:70,
+    claimants:[
+      { name:'Daniel Williams',   rel:'Son',              email:'daniel.w@email.com',    phone:'312-555-0147' },
+      { name:'Sandra Williams',   rel:'Policyholder',     email:'sandra.w@email.com',    phone:'312-555-0148' },
+      { name:'Rachel Williams',   rel:'Daughter',         email:'rachel.w@email.com',    phone:'312-555-0149' }
+    ],
+    policies:[
+      { num:'NYL-P-100287',  type:'Universal Life',   face:'$250,000', status:'In Force', issued:'2012-03-10', premium:'$3,100/yr', bene:'Daniel Williams (son)',
+        riders:['Waiver of Premium','Accidental Death Benefit (ADB Rider)'] },
+      { num:'NYL-P-100287B', type:'Long-term Care (LTC) Standalone', face:'$180,000 pool', status:'In Force', issued:'2015-07-01', premium:'$2,400/yr', bene:'N/A',
+        riders:['Inflation Protection','Shared Care Rider'] },
+      { num:'NYL-P-100287C', type:'Disability Income', face:'$3,500/mo', status:'In Force', issued:'2014-05-20', premium:'$900/yr', bene:'N/A',
+        riders:['COLA Rider','Own Occupation Rider'] }
+    ]
+  },
+  'Maria Gonzalez': {
+    id:'P-100398', dob:'1972-07-05', age:53,
+    claimants:[
+      { name:'Maria Gonzalez',    rel:'Policyholder',     email:'maria.g@email.com',     phone:'213-555-0201' },
+      { name:'Carlos Gonzalez',   rel:'Spouse (POA)',      email:'carlos.g@email.com',    phone:'213-555-0202' },
+      { name:'Sofia Gonzalez',    rel:'Daughter',          email:'sofia.g@email.com',     phone:'213-555-0203' }
+    ],
+    policies:[
+      { num:'NYL-P-100398',  type:'Whole Life',       face:'$500,000',   status:'In Force', issued:'2019-11-20', premium:'$2,800/yr', bene:'Carlos Gonzalez (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Critical Illness Rider','Waiver of Premium'] },
+      { num:'NYL-P-100487',  type:'Disability Income', face:'$4,200/mo', status:'In Force', issued:'2021-04-01', premium:'$1,200/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider','Catastrophic Disability Rider'] },
+      { num:'NYL-P-100398C', type:'Universal Life',    face:'$120,000',  status:'In Force', issued:'2017-06-15', premium:'$1,400/yr', bene:'Carlos Gonzalez (spouse)',
+        riders:['Accelerated Death Benefit (ADB)'] }
+    ]
+  },
+  'James Whitfield': {
+    id:'P-100421', dob:'1949-12-30', age:76,
+    claimants:[
+      { name:'Alice Whitfield',   rel:'Spouse',           email:'alice.w@email.com',     phone:'617-555-0311' },
+      { name:'James Whitfield',   rel:'Policyholder',     email:'james.w@email.com',     phone:'617-555-0312' },
+      { name:'Thomas Whitfield',  rel:'Son (POA)',         email:'thomas.w@email.com',    phone:'617-555-0313' }
+    ],
+    policies:[
+      { num:'NYL-P-100421',  type:'Long-term Care (LTC) Combo', face:'$300,000 pool', status:'In Force', issued:'2010-08-14', premium:'$5,600/yr', bene:'Alice Whitfield (spouse)',
+        riders:['Inflation Protection','Shared Care','Return of Premium'] },
+      { num:'NYL-P-100421B', type:'Whole Life',       face:'$250,000',   status:'In Force', issued:'2005-03-01', premium:'$3,200/yr', bene:'Alice Whitfield (spouse)',
+        riders:['Waiver of Premium','Accelerated Death Benefit (ADB)'] }
+    ]
+  },
+  'Linda Morrison': {
+    id:'P-100312', dob:'1961-04-18', age:64,
+    claimants:[
+      { name:'Linda Morrison',    rel:'Policyholder',     email:'linda.m@email.com',     phone:'202-555-0421' },
+      { name:'Michael Morrison',  rel:'Spouse',           email:'michael.m@email.com',   phone:'202-555-0422' },
+      { name:'Jessica Morrison',  rel:'Daughter',         email:'jessica.m@email.com',   phone:'202-555-0423' }
+    ],
+    policies:[
+      { num:'NYL-P-100312',  type:'Term Life (30yr)',  face:'$200,000',  status:'In Force', issued:'2008-09-01', premium:'$520/yr',   bene:'Michael Morrison (spouse)',
+        riders:['Waiver of Premium','Child Term Rider'] },
+      { num:'NYL-P-100362',  type:'Variable Universal Life (VUL)', face:'$650,000', status:'In Force', issued:'2015-01-10', premium:'$5,200/yr', bene:'Michael Morrison (spouse)',
+        riders:['Waiver of Premium','Accidental Death Benefit (ADB Rider)','Critical Illness Rider'] },
+      { num:'NYL-P-100312C', type:'Disability Income', face:'$3,200/mo', status:'In Force', issued:'2012-06-01', premium:'$780/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider'] }
+    ]
+  },
+  'Kevin Park': {
+    id:'P-100445', dob:'1980-11-02', age:45,
+    claimants:[
+      { name:'Jenny Park',        rel:'Spouse',           email:'jenny.park@email.com',  phone:'718-555-0531' },
+      { name:'Estate of Kevin Park', rel:'Trustee / Estate', email:'attorney@parklaw.com', phone:'718-555-0532' }
+    ],
+    policies:[
+      { num:'NYL-P-100445',  type:'Whole Life',       face:'$250,000',   status:'Pending',  issued:'2024-02-15', premium:'$1,840/yr', bene:'Jenny Park (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Waiver of Premium'] }
+    ]
+  },
+  'Patricia Nguyen': {
+    id:'P-100378', dob:'1970-06-25', age:55,
+    claimants:[
+      { name:'Patricia Nguyen',   rel:'Policyholder',     email:'pat.nguyen@email.com',  phone:'408-555-0611' },
+      { name:'Andrew Nguyen',     rel:'Spouse',           email:'andrew.n@email.com',    phone:'408-555-0612' },
+      { name:'Lily Nguyen',       rel:'Daughter',         email:'lily.n@email.com',      phone:'408-555-0613' }
+    ],
+    policies:[
+      { num:'NYL-P-100378',  type:'Universal Life',   face:'$400,000',   status:'In Force', issued:'2016-02-28', premium:'$3,600/yr', bene:'Andrew Nguyen (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Critical Illness Rider','Waiver of Premium'] },
+      { num:'NYL-P-100378B', type:'Long-term Care (LTC) Rider (on UL)', face:'$150,000 pool', status:'In Force', issued:'2018-04-01', premium:'Included in UL', bene:'N/A',
+        riders:['Inflation Protection'] },
+      { num:'NYL-P-100378C', type:'Disability Income', face:'$4,000/mo', status:'In Force', issued:'2019-01-15', premium:'$1,050/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider'] }
+    ]
+  },
+  'Susan Chen': {
+    id:'P-100290', dob:'1966-08-11', age:59,
+    claimants:[
+      { name:'Susan Chen',        rel:'Policyholder',     email:'susan.chen@email.com',  phone:'415-555-0182' },
+      { name:'Robert Chen',       rel:'Spouse',           email:'robert.chen@email.com', phone:'415-555-0101' },
+      { name:'Robert Chen Jr.',   rel:'Son',              email:'rchen.jr@email.com',    phone:'415-555-0193' }
+    ],
+    policies:[
+      { num:'NYL-P-100290',  type:'Term Life (20yr)',  face:'$300,000',   status:'In Force', issued:'2015-05-01', premium:'$1,100/yr', bene:'Robert Chen (spouse)',
+        riders:['Waiver of Premium'] },
+      { num:'NYL-P-100290B', type:'Disability Income', face:'$3,800/mo', status:'In Force', issued:'2018-08-01', premium:'$920/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider'] }
+    ]
+  },
+  'David Kim': {
+    id:'P-100456', dob:'1985-02-14', age:41,
+    claimants:[
+      { name:'David Kim',         rel:'Policyholder',     email:'david.kim@email.com',   phone:'646-555-0711' },
+      { name:'Emily Kim',         rel:'Spouse',           email:'emily.kim@email.com',   phone:'646-555-0712' },
+      { name:'Jason Kim',         rel:'Son',              email:'jason.kim@email.com',   phone:'646-555-0713' }
+    ],
+    policies:[
+      { num:'NYL-P-100456',  type:'Whole Life',       face:'$500,000',   status:'In Force', issued:'2022-09-01', premium:'$2,400/yr', bene:'Emily Kim (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Critical Illness Rider','Waiver of Premium','Child Term Rider'] },
+      { num:'NYL-P-100456B', type:'Disability Income', face:'$5,500/mo', status:'In Force', issued:'2023-01-01', premium:'$1,400/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider','Catastrophic Disability Rider'] }
+    ]
+  },
+  'Emily Rodriguez': {
+    id:'P-100341', dob:'1958-10-07', age:67,
+    claimants:[
+      { name:'Emily Rodriguez',   rel:'Policyholder',     email:'emily.rod@email.com',   phone:'305-555-0811' },
+      { name:'Marco Rodriguez',   rel:'Spouse',           email:'marco.rod@email.com',   phone:'305-555-0812' },
+      { name:'Sofia Rodriguez',   rel:'Daughter (POA)',   email:'sofia.rod@email.com',   phone:'305-555-0813' }
+    ],
+    policies:[
+      { num:'NYL-P-100341',  type:'Long-term Care (LTC) Rider', face:'$150,000 pool', status:'In Force', issued:'2011-03-15', premium:'$2,900/yr', bene:'Marco Rodriguez (spouse)',
+        riders:['Inflation Protection','Shared Care'] },
+      { num:'NYL-P-100341B', type:'Whole Life',       face:'$200,000',   status:'In Force', issued:'2008-06-01', premium:'$2,100/yr', bene:'Marco Rodriguez (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Waiver of Premium'] }
+    ]
+  }
+};
+
+/* ─────────────────────────────────────────────────────────────────
+   COMPREHENSIVE CLAIM TYPE → POLICY AFFINITY MAP
+   Maps each claim type to the policy types that cover it.
+   Used in Step 3 to rank / auto-highlight the right policy.
+   ───────────────────────────────────────────────────────────────── */
+var _fcwTypeToPolicy = {
+  'Death Benefit':                        ['Whole Life','Term Life','Universal Life','Variable Universal Life (VUL)','Variable Life','Indexed Universal Life (IUL)','Survivorship / Joint Life'],
+  'Accelerated Death Benefit (ADB)':      ['Whole Life','Universal Life','Variable Universal Life (VUL)','Indexed Universal Life (IUL)'],
+  'Accidental Death Benefit (ADB Rider)': ['Whole Life','Term Life','Universal Life','Variable Universal Life (VUL)'],
+  'Disability Income':                    ['Disability Income'],
+  'Long-term Care (LTC)':                 ['Long-term Care (LTC) Standalone','Long-term Care (LTC) Combo','Long-term Care (LTC) Rider'],
+  'Waiver of Premium':                    ['Whole Life','Term Life','Universal Life','Variable Universal Life (VUL)','Indexed Universal Life (IUL)'],
+  'Critical Illness Rider':               ['Whole Life','Universal Life','Variable Universal Life (VUL)','Indexed Universal Life (IUL)'],
+  'Child Term Rider':                     ['Whole Life','Term Life','Universal Life'],
+  'Chronic Illness Rider (Living Benefit)':['Whole Life','Universal Life','Indexed Universal Life (IUL)','Variable Universal Life (VUL)'],
+  'Maturity / Endowment':                 ['Whole Life','Endowment Policy'],
+  'Paid-up Additions':                    ['Whole Life'],
+  'Policy Surrender / Cash Value':        ['Whole Life','Universal Life','Variable Universal Life (VUL)','Indexed Universal Life (IUL)','Variable Life'],
+  'Annuity Income Claim':                 ['Fixed Annuity','Variable Annuity','Indexed Annuity','Immediate Annuity'],
+  'Survivorship (2nd-to-die) Benefit':    ['Survivorship / Joint Life']
+};
+
+/* ─────────────────────────────────────────────────────────────────
+   COMPREHENSIVE DOCUMENT CHECKLIST  per claim type
+   Format: [{ name, required, preloaded, hint }]
+   required: true = must have before payout
+   preloaded: true = AI has already pulled/verified this from CRM
+   ───────────────────────────────────────────────────────────────── */
+var _fcwClaimTypeDocs = {
+  'Death Benefit': [
+    { name:'Death Certificate (certified copy)',          required:true,  preloaded:false, hint:'Must be government-issued — hospital copy not accepted' },
+    { name:'Claimant Statement (Form CL-1)',              required:true,  preloaded:false, hint:'NYL standard claimant declaration form' },
+    { name:'Claimant Government-issued Photo ID',         required:true,  preloaded:false, hint:'Passport, driver\'s license, or national ID' },
+    { name:'Beneficiary Designation Form (on file)',      required:false, preloaded:true,  hint:'AI pre-fetched from CRM policy record' },
+    { name:'Policy Document (original or certified copy)',required:false, preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'Funeral Home / Burial Statement',             required:false, preloaded:false, hint:'Required if funeral expense reimbursement is claimed' },
+    { name:'Medical Examiner / Coroner Report',           required:false, preloaded:false, hint:'Required for accidental, sudden, or suspicious death' },
+    { name:'Autopsy Report',                              required:false, preloaded:false, hint:'Required if cause of death is contested or unclear' }
+  ],
+  'Accelerated Death Benefit (ADB)': [
+    { name:'Terminal Illness Certification (Form ADB-TC-2026)', required:true,  preloaded:false, hint:'Must be signed by licensed physician — life expectancy ≤ 12 months' },
+    { name:'Attending Physician Statement (APS)',          required:true,  preloaded:false, hint:'Detailed prognosis and treatment history from treating physician' },
+    { name:'Claimant Statement (Form ADB-1)',              required:true,  preloaded:false, hint:'Policyholder\'s own statement of diagnosis and purpose of funds' },
+    { name:'Medical Records (diagnosis confirmation)',     required:false, preloaded:false, hint:'Oncology / specialist records confirming terminal condition' },
+    { name:'Policy Document',                             required:false, preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'Claimant Government-issued Photo ID',         required:false, preloaded:false, hint:'Passport or driver\'s license' },
+    { name:'ADB Application Form (signed)',               required:false, preloaded:false, hint:'Available from NYL agent portal or digital submission' }
+  ],
+  'Accidental Death Benefit (ADB Rider)': [
+    { name:'Death Certificate (certified copy)',          required:true,  preloaded:false, hint:'Government-issued, listing accidental cause of death' },
+    { name:'Accident / Police Report',                    required:true,  preloaded:false, hint:'Official report from police, fire department, or investigating authority' },
+    { name:'Claimant Statement (Form CL-1)',              required:true,  preloaded:false, hint:'NYL standard claimant declaration form' },
+    { name:'Claimant Government-issued Photo ID',         required:false, preloaded:false, hint:'Passport or driver\'s license' },
+    { name:'Medical Examiner / Coroner Report',           required:false, preloaded:false, hint:'Required for accidental death — official cause determination' },
+    { name:'Hospital / Emergency Records',                required:false, preloaded:false, hint:'ER or trauma records establishing accidental injury chain' },
+    { name:'News Report / Third-party Accident Witness',  required:false, preloaded:false, hint:'Supporting evidence of accidental event' }
+  ],
+  'Disability Income': [
+    { name:'Attending Physician Statement (APS)',          required:true,  preloaded:false, hint:'Treating physician must confirm diagnosis, functional limitations, and expected duration' },
+    { name:'Claimant Disability Statement (Form DI-1)',    required:true,  preloaded:false, hint:'Policyholder\'s signed description of disability onset and impact on work' },
+    { name:'Employer Disability Verification Letter',     required:true,  preloaded:false, hint:'HR or payroll confirmation of last day worked and current employment status' },
+    { name:'Pre-disability Earnings Documentation',       required:false, preloaded:true,  hint:'AI pre-fetched from employer payroll records on file' },
+    { name:'Medical Records (supporting diagnosis)',      required:false, preloaded:false, hint:'Hospital admission, surgery, or specialist records' },
+    { name:'Occupational Assessment Form (OA-2)',         required:false, preloaded:false, hint:'Required for own-occupation policies — describes job duties in detail' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Passport or driver\'s license' },
+    { name:'Surgical Report (if disability from surgery)',required:false, preloaded:false, hint:'Operating surgeon\'s report confirming procedure and recovery timeline' }
+  ],
+  'Long-term Care (LTC)': [
+    { name:'LTC Eligibility Certification (Form LTC-EC)', required:true,  preloaded:false, hint:'Licensed physician must certify inability to perform 2+ ADLs or cognitive impairment' },
+    { name:'Activities of Daily Living (ADL) Assessment', required:true,  preloaded:false, hint:'Standardized ADL assessment form — minimum 2 of 6 impairments required' },
+    { name:'Plan of Care from Licensed Care Provider',    required:true,  preloaded:false, hint:'Signed plan of care from licensed home health agency, ALF, or skilled nursing facility' },
+    { name:'Care Provider Invoice / Facility Agreement',  required:false, preloaded:false, hint:'Facility admission contract or home care agency invoice for reimbursement calculation' },
+    { name:'Medical Necessity Letter',                    required:false, preloaded:false, hint:'Physician letter confirming long-term care is medically necessary' },
+    { name:'Care Provider License & Accreditation',       required:false, preloaded:false, hint:'State license number and accreditation of the care facility or agency' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Claimant or authorized representative photo ID' },
+    { name:'Monthly Care Summary (ongoing)',              required:false, preloaded:false, hint:'Submitted monthly for ongoing benefit continuation' }
+  ],
+  'Waiver of Premium': [
+    { name:'Physician Disability Statement (Form WP-PDS)',required:true,  preloaded:false, hint:'Treating physician must certify total disability and expected duration' },
+    { name:'Premium Waiver Application (Form WP-1)',      required:true,  preloaded:false, hint:'NYL standard waiver application — policyholder or authorized rep signs' },
+    { name:'Employer Disability Confirmation',            required:true,  preloaded:false, hint:'Employer confirmation of last day worked and inability to return' },
+    { name:'Medical History Summary',                     required:false, preloaded:false, hint:'Hospital or specialist records supporting disability onset' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Policyholder photo ID' },
+    { name:'Surgical or Hospital Report',                 required:false, preloaded:false, hint:'If disability is surgery-related — operating surgeon\'s report' }
+  ],
+  'Critical Illness Rider': [
+    { name:'Specialist Diagnosis Report',                 required:true,  preloaded:false, hint:'Board-certified specialist confirming covered critical illness — oncologist, cardiologist, etc.' },
+    { name:'Pathology / Lab Report',                      required:true,  preloaded:false, hint:'Biopsy, imaging, or lab results confirming diagnosis code' },
+    { name:'Hospital Admission & Discharge Records',      required:true,  preloaded:false, hint:'Full inpatient records for the qualifying event' },
+    { name:'Attending Physician Statement (APS)',          required:false, preloaded:false, hint:'Primary treating physician\'s clinical summary' },
+    { name:'Claimant Statement (Form CI-1)',              required:false, preloaded:false, hint:'Claimant signed description of illness and treatment plan' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Claimant passport or driver\'s license' },
+    { name:'Prior Authorization / Insurance EOB',         required:false, preloaded:false, hint:'If other insurance has adjudicated — include EOB for coordination of benefits' }
+  ],
+  'Child Term Rider': [
+    { name:'Child\'s Birth Certificate',                  required:true,  preloaded:false, hint:'Certified copy proving insurable interest and age eligibility' },
+    { name:'Death Certificate (child)',                   required:true,  preloaded:false, hint:'Government-issued certified copy' },
+    { name:'Claimant Statement (Form CL-1)',              required:true,  preloaded:false, hint:'Parent or guardian statement' },
+    { name:'Claimant Government-issued Photo ID',         required:false, preloaded:false, hint:'Filing parent or guardian photo ID' },
+    { name:'Physician / Coroner Report',                  required:false, preloaded:false, hint:'Medical report confirming cause of death' }
+  ],
+  'Chronic Illness Rider (Living Benefit)': [
+    { name:'Chronic Illness Certification (Form CI-LB)',  required:true,  preloaded:false, hint:'Licensed healthcare practitioner certifying permanent inability to perform 2+ ADLs or severe cognitive impairment' },
+    { name:'Attending Physician Statement (APS)',          required:true,  preloaded:false, hint:'Full clinical summary from treating physician' },
+    { name:'ADL Functional Assessment',                   required:true,  preloaded:false, hint:'Standardized assessment — minimum 2 of 6 ADLs permanently impaired' },
+    { name:'Medical Records (chronic condition history)', required:false, preloaded:false, hint:'Specialist records documenting chronic condition timeline' },
+    { name:'Plan of Care (if receiving care services)',   required:false, preloaded:false, hint:'Care provider plan if LTC services are being utilized alongside the rider claim' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Claimant photo ID' }
+  ],
+  'Maturity / Endowment': [
+    { name:'Policy Document (original)',                  required:true,  preloaded:true,  hint:'AI pre-loaded from digital policy vault — maturity date confirmed' },
+    { name:'Claimant Identity Verification',              required:true,  preloaded:false, hint:'Government-issued photo ID to confirm policyholder identity at maturity' },
+    { name:'Maturity Claim Form (Form MT-1)',              required:true,  preloaded:false, hint:'NYL maturity election form — choose lump sum or annuity payout' },
+    { name:'Bank Details for Payment',                    required:false, preloaded:false, hint:'Voided check or bank letter for EFT payout' },
+    { name:'Tax Form W-9 / W-8BEN',                       required:false, preloaded:false, hint:'Required for IRS reporting on maturity payout' }
+  ],
+  'Policy Surrender / Cash Value': [
+    { name:'Policy Surrender Request (Form SV-1)',        required:true,  preloaded:false, hint:'Signed and notarized surrender form — full or partial surrender' },
+    { name:'Original Policy Document',                    required:true,  preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'Government-issued Photo ID',                  required:true,  preloaded:false, hint:'Policyholder passport or driver\'s license' },
+    { name:'Bank Details for Payment',                    required:false, preloaded:false, hint:'Voided check or bank letter for EFT' },
+    { name:'Tax Form W-9',                                required:false, preloaded:false, hint:'Required — surrender may trigger taxable gain' },
+    { name:'Loan Balance Statement (if policy has loan)', required:false, preloaded:true,  hint:'AI pre-fetched outstanding loan balance from CRM' }
+  ],
+  'Annuity Income Claim': [
+    { name:'Annuity Contract (original)',                 required:true,  preloaded:true,  hint:'AI pre-loaded from digital vault' },
+    { name:'Annuitization Election Form (Form ANN-1)',    required:true,  preloaded:false, hint:'Claimant selects payout option — life only, joint, period certain, etc.' },
+    { name:'Government-issued Photo ID',                  required:true,  preloaded:false, hint:'Annuitant or beneficiary photo ID' },
+    { name:'Death Certificate (for death benefit annuity claims)', required:false, preloaded:false, hint:'Required if claim is triggered by annuitant\'s death' },
+    { name:'Bank Details for Payment',                    required:false, preloaded:false, hint:'Voided check or bank letter for EFT' },
+    { name:'Tax Form W-9 / W-8BEN',                       required:false, preloaded:false, hint:'Required for IRS 1099-R reporting' }
+  ],
+  'Survivorship (2nd-to-die) Benefit': [
+    { name:'Death Certificates (both insured parties)',   required:true,  preloaded:false, hint:'Certified copies for both first and second insured deaths' },
+    { name:'Claimant Statement (Form CL-1)',              required:true,  preloaded:false, hint:'Estate, trust, or beneficiary declaration' },
+    { name:'Letters Testamentary / Trust Documents',      required:true,  preloaded:false, hint:'Estate executor authority or trust documentation proving claimant standing' },
+    { name:'Claimant Government-issued Photo ID',         required:false, preloaded:false, hint:'Estate representative or trustee photo ID' },
+    { name:'Policy Document',                             required:false, preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'Attorney / Trustee Contact Information',      required:false, preloaded:false, hint:'For large survivorship policies — legal representative contact required' }
+  ],
+  'Paid-up Additions': [
+    { name:'Policy Document',                             required:true,  preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'PUA Claim / Dividend Election Form',          required:true,  preloaded:false, hint:'Select dividend application option — PUA purchase, premium reduction, or cash' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Policyholder photo ID' }
+  ]
+};
+
+var _fcwFraudFlags = {
+  'Kevin Park':    { score:78, flags:['Policy in Pending status at time of claim','Contestability window active (< 2 years)','Beneficiary change 6mo prior'], level:'HIGH' },
+  'Robert Chen':   { score:42, flags:['High-value claim ($1M) — enhanced review triggered'], level:'WATCH' }
+};
+
+function openFileClaimWizard() {
+  window._fcw = { step: 1, client: '', clientKey: '', type: '', policy: null, docs: [], docsInitialized: false, claimId: '', lossDate: '', desc: '', claimant: '', relationship: '', amount: '', hasUpload: false };
+  var el = document.getElementById('file-claim-overlay');
+  if (el) el.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay fcw-overlay';
+  overlay.id = 'file-claim-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="fcw-modal" onclick="event.stopPropagation()" id="fcw-modal-inner"><div id="fcw-content"></div></div>';
+  document.body.appendChild(overlay);
+  fcwRender(1);
+}
+
+function fcwClose() {
+  var el = document.getElementById('file-claim-overlay');
+  if (el) el.remove();
+}
+
+function fcwRender(step) {
+  window._fcw.step = step;
+  var inner = document.getElementById('fcw-modal-inner');
+  if (!inner) return;
+
+  // Build step indicator
+  var stepDefs = [
+    { n:1, label:'Client' }, { n:2, label:'Type' }, { n:3, label:'Policy' },
+    { n:4, label:'Docs' },   { n:5, label:'Submit' }
+  ];
+  var stepsHTML = stepDefs.map(function(s) {
+    var cls = s.n < step ? 'done' : s.n === step ? 'active' : '';
+    var icon = s.n < step ? '<i class="fas fa-check" style="font-size:13px"></i>' : s.n;
+    return (s.n > 1 ? '<div class="fcw-step-line' + (s.n - 1 < step ? ' done' : '') + '"></div>' : '') +
+      '<div class="fcw-step ' + cls + '">' + icon + '<span>' + s.label + '</span></div>';
+  }).join('');
+
+  // Build body content per step
+  var bodyHTML = '', footerHTML = '';
+  if (step === 1) { bodyHTML = fcwStep1Body(); footerHTML = fcwStep1Footer(); }
+  else if (step === 2) { bodyHTML = fcwStep2Body(); footerHTML = fcwStep2Footer(); }
+  else if (step === 3) { bodyHTML = fcwStep3Body(); footerHTML = fcwStep3Footer(); }
+  else if (step === 4) { bodyHTML = fcwStep4Body(); footerHTML = fcwStep4Footer(); }
+  else if (step === 5) { bodyHTML = fcwStep5Body(); footerHTML = fcwStep5Footer(); }
+
+  inner.innerHTML =
+    '<div class="fcw-header">' +
+      '<div class="fcw-header-left">' +
+        '<div class="fcw-header-icon"><i class="fas fa-plus"></i></div>' +
+        '<div>' +
+          '<div class="fcw-header-title">File New Claim</div>' +
+          '<div class="fcw-header-sub">NYL claims wizard · AI pre-fill from policy data · IDP auto-extraction</div>' +
+        '</div>' +
+      '</div>' +
+      '<button class="p7m-close" onclick="fcwClose()"><i class="fas fa-times"></i></button>' +
+    '</div>' +
+    '<div class="fcw-steps">' + stepsHTML + '</div>' +
+    '<div class="fcw-body" id="fcw-body">' + bodyHTML + '</div>' +
+    '<div class="fcw-footer" id="fcw-footer">' + footerHTML + '</div>';
+}
+
+/* ── STEP 1 : CLIENT SELECTION ─────────────────────────────────── */
+function fcwStep1Body() {
+  var clients = Object.keys(_fcwClientData);
+  var clientOpts = clients.map(function(c) {
+    return '<option value="' + c + '"' + (c === window._fcw.clientKey ? ' selected' : '') + '>' + c + ' (' + _fcwClientData[c].id + ')</option>';
+  }).join('');
+
+  // Build claimant dropdown from selected client's approved claimants list
+  var claimantDropHTML = '';
+  var cd = window._fcw.clientKey ? _fcwClientData[window._fcw.clientKey] : null;
+  if (cd && cd.claimants && cd.claimants.length) {
+    var claimantOpts = cd.claimants.map(function(c) {
+      var val = c.name + '|' + c.rel;
+      var isSelected = window._fcw.claimant === c.name;
+      return '<option value="' + val + '"' + (isSelected ? ' selected' : '') + '>' +
+        c.name + ' — ' + c.rel + '</option>';
+    }).join('');
+    claimantDropHTML =
+      '<div class="fcw-field-group">' +
+        '<label class="fcw-label">Claimant Name ' +
+          '<span class="fcw-hint">(person filing the claim — approved contacts from CRM)</span>' +
+        '</label>' +
+        '<select class="filter-select" id="fcw-claimant" style="width:100%" onchange="fcwOnClaimantChange(this.value)">' +
+          '<option value="">— Select approved claimant —</option>' + claimantOpts +
+        '</select>' +
+        // Show claimant detail card if selected
+        (window._fcw.claimant ? fcwClaimantCard(cd) : '') +
+      '</div>' +
+      // Relationship is auto-populated from the claimants[] record — show as read-only
+      '<div class="fcw-field-group">' +
+        '<label class="fcw-label">Relationship to Insured <span class="fcw-ai-auto-badge"><i class="fas fa-robot"></i> Auto-filled</span></label>' +
+        '<input type="text" class="fcw-input fcw-input-readonly" id="fcw-relationship-display" ' +
+          'value="' + (window._fcw.relationship || '— select claimant above —') + '" readonly>' +
+      '</div>';
+  } else {
+    // No client selected yet — show placeholder
+    claimantDropHTML =
+      '<div class="fcw-field-group">' +
+        '<label class="fcw-label">Claimant Name <span class="fcw-hint">(select client above to load approved claimants)</span></label>' +
+        '<select class="filter-select" id="fcw-claimant" style="width:100%" disabled>' +
+          '<option>— Select client first —</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="fcw-field-group">' +
+        '<label class="fcw-label">Relationship to Insured</label>' +
+        '<input type="text" class="fcw-input fcw-input-readonly" value="— select client first —" readonly>' +
+      '</div>';
+  }
+
+  var aiPreviewHTML = '';
+  if (window._fcw.clientKey && cd) {
+    var fraud = _fcwFraudFlags[window._fcw.clientKey];
+    var fraudBanner = fraud
+      ? '<div class="fcw-ai-alert ' + (fraud.level === 'HIGH' ? 'red' : 'orange') + '">' +
+          '<i class="fas fa-' + (fraud.level === 'HIGH' ? 'exclamation-triangle' : 'eye') + '"></i>' +
+          '<div><strong>AI Fraud Flag:</strong> Score ' + fraud.score + ' · ' + fraud.flags.join(' · ') + '</div>' +
+        '</div>'
+      : '<div class="fcw-ai-alert green"><i class="fas fa-check-circle"></i><div><strong>AI Fraud Check:</strong> No risk flags detected for this client — standard processing</div></div>';
+
+    var policySummary = cd.policies.map(function(p) {
+      var inForce = p.status === 'In Force';
+      return '<span class="fcw-policy-chip' + (inForce ? '' : ' pending') + '">' +
+        '<i class="fas fa-file-contract"></i> ' + p.type + ' · ' + p.face +
+        (inForce ? '' : ' <span style="color:#d97706">⚠ Pending</span>') +
+      '</span>';
+    }).join('');
+
+    aiPreviewHTML =
+      '<div class="fcw-ai-panel" id="fcw-ai-panel-1">' +
+        '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Client Intelligence — Auto-fetched from CRM</div>' +
+        '<div class="fcw-ai-panel-body">' +
+          '<div class="fcw-ai-grid">' +
+            '<div class="fcw-ai-row"><span>Client ID</span><strong>' + cd.id + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>Date of Birth</span><strong>' + cd.dob + ' (Age ' + cd.age + ')</strong></div>' +
+            '<div class="fcw-ai-row"><span>Policies In Force</span><strong>' + cd.policies.length + ' polic' + (cd.policies.length === 1 ? 'y' : 'ies') + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>Primary Beneficiary</span><strong>' + cd.policies[0].bene + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>Approved Claimants</span><strong>' + cd.claimants.length + ' on file</strong></div>' +
+          '</div>' +
+          '<div style="margin:8px 0 4px;font-size:11px;font-weight:600;color:#64748b">Active Policies</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">' + policySummary + '</div>' +
+          fraudBanner +
+          '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> AI will match the selected claim type to the most eligible policy automatically in Step 3.</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  return '<div class="fcw-step-title"><i class="fas fa-user"></i> Step 1 — Select Client &amp; Claimant</div>' +
+    '<div class="fcw-field-group">' +
+      '<label class="fcw-label">Client (Insured) Name</label>' +
+      '<select class="filter-select" id="fcw-client-sel" style="width:100%" onchange="fcwOnClientChange(this.value)">' +
+        '<option value="">— Select insured client —</option>' + clientOpts +
+      '</select>' +
+    '</div>' +
+    claimantDropHTML +
+    aiPreviewHTML;
+}
+
+function fcwClaimantCard(cd) {
+  if (!window._fcw.claimant || !cd) return '';
+  var found = null;
+  cd.claimants.forEach(function(c) { if (c.name === window._fcw.claimant) found = c; });
+  if (!found) return '';
+  return '<div class="fcw-claimant-card">' +
+    '<div class="fcw-claimant-card-row"><i class="fas fa-user-circle"></i><strong>' + found.name + '</strong><span class="fcw-rel-badge">' + found.rel + '</span></div>' +
+    '<div class="fcw-claimant-card-row"><i class="fas fa-envelope"></i><span>' + found.email + '</span></div>' +
+    '<div class="fcw-claimant-card-row"><i class="fas fa-phone"></i><span>' + found.phone + '</span></div>' +
+    '<div class="fcw-ai-auto-note"><i class="fas fa-robot"></i> Contact details auto-fetched from CRM · Pre-filled into correspondence templates</div>' +
+  '</div>';
+}
+
+function fcwStep1Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwClose()">Cancel</button>' +
+    '<button class="p7m-btn primary" onclick="fcwNextStep1()">Next: Claim Type <i class="fas fa-arrow-right"></i></button>';
+}
+function fcwOnClientChange(val) {
+  window._fcw.clientKey = val;
+  window._fcw.client = val;
+  window._fcw.claimant = '';
+  window._fcw.relationship = '';
+  fcwRender(1);
+  var sel = document.getElementById('fcw-client-sel');
+  if (sel) sel.value = val;
+}
+function fcwOnClaimantChange(val) {
+  if (!val) { window._fcw.claimant = ''; window._fcw.relationship = ''; return; }
+  var parts = val.split('|');
+  window._fcw.claimant = parts[0] || '';
+  window._fcw.relationship = parts[1] || '';
+  // Update the read-only relationship field without full re-render
+  var relDisp = document.getElementById('fcw-relationship-display');
+  if (relDisp) relDisp.value = window._fcw.relationship;
+  // Update claimant card area
+  var cd = _fcwClientData[window._fcw.clientKey];
+  var sel = document.getElementById('fcw-claimant');
+  // Re-render to show the card — lightweight
+  fcwRender(1);
+  if (sel) { sel = document.getElementById('fcw-claimant'); if (sel) sel.value = val; }
+}
+function fcwNextStep1() {
+  var sel = document.getElementById('fcw-client-sel');
+  var cl  = document.getElementById('fcw-claimant');
+  if (!sel || !sel.value) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a client to continue', 2000); return; }
+  if (!window._fcw.claimant) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select an approved claimant', 2000); return; }
+  if (!window._fcw.relationship) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Claimant relationship not set', 2000); return; }
+  window._fcw.clientKey = sel.value;
+  window._fcw.client    = sel.value;
+  fcwRender(2);
+}
+
+/* ── STEP 2 : CLAIM TYPE + DATE + DESCRIPTION ───────────────────── */
+function fcwStep2Body() {
+  // Comprehensive life insurance claim type catalog
+  var typeGroups = [
+    {
+      group: 'Death-Related Claims',
+      color: '#7c3aed',
+      types: [
+        { key:'Death Benefit',                        icon:'heart-broken',  desc:'Lump-sum payout to beneficiary upon insured\'s death' },
+        { key:'Accelerated Death Benefit (ADB)',      icon:'heartbeat',     desc:'Early access to death benefit — terminal illness (≤12 mo life expectancy)' },
+        { key:'Accidental Death Benefit (ADB Rider)', icon:'car-crash',     desc:'Additional benefit when death results from a covered accident' },
+        { key:'Survivorship (2nd-to-die) Benefit',   icon:'users',         desc:'Pays out after both insureds on a joint policy have died' }
+      ]
+    },
+    {
+      group: 'Living Benefits & Riders',
+      color: '#0369a1',
+      types: [
+        { key:'Critical Illness Rider',               icon:'disease',       desc:'Lump-sum upon diagnosis of covered critical illness (cancer, stroke, heart attack)' },
+        { key:'Chronic Illness Rider (Living Benefit)',icon:'wheelchair',   desc:'Living benefit access when unable to perform 2+ ADLs permanently' },
+        { key:'Child Term Rider',                     icon:'baby',          desc:'Death benefit for covered dependent children on the policy' }
+      ]
+    },
+    {
+      group: 'Disability & Care Claims',
+      color: '#0f766e',
+      types: [
+        { key:'Disability Income',                    icon:'user-injured',  desc:'Monthly income replacement when the insured cannot work due to disability' },
+        { key:'Long-term Care (LTC)',                 icon:'hospital',      desc:'Reimbursement for care services — home care, assisted living, skilled nursing' },
+        { key:'Waiver of Premium',                    icon:'ban',           desc:'Suspends premium obligations during a qualifying total disability period' }
+      ]
+    },
+    {
+      group: 'Policy Value & Contract Claims',
+      color: '#b45309',
+      types: [
+        { key:'Maturity / Endowment',                 icon:'calendar-check',desc:'Policy matures — policyholder collects face value or accumulated endowment' },
+        { key:'Policy Surrender / Cash Value',        icon:'money-bill-wave',desc:'Full or partial surrender of policy for accumulated cash surrender value' },
+        { key:'Paid-up Additions',                    icon:'plus-circle',   desc:'Claim dividends as paid-up additional insurance (PUA)' },
+        { key:'Annuity Income Claim',                 icon:'chart-line',    desc:'Annuitization or death benefit claim on an annuity contract' }
+      ]
+    }
+  ];
+
+  // Check which types are eligible based on client's policies + riders
+  var cd = window._fcw.clientKey ? _fcwClientData[window._fcw.clientKey] : null;
+  var eligibleTypes = {};
+  if (cd) {
+    cd.policies.forEach(function(p) {
+      // Check base policy type coverage
+      Object.keys(_fcwTypeToPolicy).forEach(function(claimType) {
+        var covers = _fcwTypeToPolicy[claimType];
+        var covered = covers.some(function(pt) { return p.type.indexOf(pt) !== -1; });
+        if (covered) eligibleTypes[claimType] = true;
+      });
+      // Check riders
+      (p.riders || []).forEach(function(rider) {
+        if (_fcwTypeToPolicy[rider]) eligibleTypes[rider] = true;
+        // Normalize partial rider name matches
+        if (rider.indexOf('Accelerated Death Benefit') !== -1) eligibleTypes['Accelerated Death Benefit (ADB)'] = true;
+        if (rider.indexOf('Accidental Death') !== -1) eligibleTypes['Accidental Death Benefit (ADB Rider)'] = true;
+        if (rider.indexOf('Critical Illness') !== -1) eligibleTypes['Critical Illness Rider'] = true;
+        if (rider.indexOf('Waiver of Premium') !== -1) eligibleTypes['Waiver of Premium'] = true;
+        if (rider.indexOf('Child Term') !== -1) eligibleTypes['Child Term Rider'] = true;
+        if (rider.indexOf('Chronic Illness') !== -1) eligibleTypes['Chronic Illness Rider (Living Benefit)'] = true;
+        if (rider.indexOf('Disability') !== -1) eligibleTypes['Disability Income'] = true;
+        if (rider.indexOf('Long-term Care') !== -1 || rider.indexOf('LTC') !== -1) eligibleTypes['Long-term Care (LTC)'] = true;
+      });
+    });
+  }
+  var hasEligibilityData = Object.keys(eligibleTypes).length > 0;
+
+  var typeGroupsHTML = typeGroups.map(function(grp) {
+    var cards = grp.types.map(function(t) {
+      var isSelected = window._fcw.type === t.key;
+      var isEligible = !hasEligibilityData || eligibleTypes[t.key];
+      var hasDocSet  = !!_fcwClaimTypeDocs[t.key];
+      return '<div class="fcw-type-card' + (isSelected ? ' selected' : '') + (isEligible ? '' : ' fcw-type-ineligible') +
+        '" onclick="fcwSelectType(\'' + t.key.replace(/\'/g,"\\'") + '\')" title="' + (isEligible ? '' : 'No matching policy on file for this client') + '">' +
+        '<i class="fas fa-' + t.icon + ' fcw-type-icon" style="color:' + grp.color + '"></i>' +
+        '<div class="fcw-type-name">' + t.key + '</div>' +
+        '<div class="fcw-type-desc">' + t.desc + '</div>' +
+        (!isEligible && hasEligibilityData ? '<div class="fcw-type-no-policy"><i class="fas fa-exclamation-circle"></i> No matching policy</div>' : '') +
+        (isEligible && !hasDocSet ? '' : '') +
+        (isSelected ? '<i class="fas fa-check-circle fcw-type-check"></i>' : '') +
+      '</div>';
+    }).join('');
+    return '<div class="fcw-type-group">' +
+      '<div class="fcw-type-group-label" style="border-left:3px solid ' + grp.color + ';color:' + grp.color + '">' + grp.group + '</div>' +
+      '<div class="fcw-type-grid">' + cards + '</div>' +
+    '</div>';
+  }).join('');
+
+  var aiTypeHint = '';
+  if (window._fcw.type) {
+    var docs = _fcwClaimTypeDocs[window._fcw.type] || [];
+    var reqCount  = docs.filter(function(d){ return d.required; }).length;
+    var recCount  = docs.length - reqCount;
+    var preloaded = docs.filter(function(d){ return d.preloaded; }).length;
+    var processTime = {
+      'Death Benefit':'5–10 business days',
+      'Accelerated Death Benefit (ADB)':'3–7 business days (compassionate fast-track)',
+      'Accidental Death Benefit (ADB Rider)':'5–10 business days',
+      'Disability Income':'10–15 business days',
+      'Long-term Care (LTC)':'7–14 business days',
+      'Waiver of Premium':'10–15 business days',
+      'Critical Illness Rider':'5–10 business days',
+      'Child Term Rider':'5–7 business days',
+      'Chronic Illness Rider (Living Benefit)':'10–15 business days',
+      'Maturity / Endowment':'3–5 business days (scheduled)',
+      'Policy Surrender / Cash Value':'5–10 business days',
+      'Paid-up Additions':'3–5 business days',
+      'Annuity Income Claim':'5–10 business days',
+      'Survivorship (2nd-to-die) Benefit':'10–15 business days'
+    };
+    var fraudRisk = _fcwFraudFlags[window._fcw.clientKey];
+    var slaLabel  = (window._fcw.type === 'Accelerated Death Benefit (ADB)') ? '5 business days (expedited)' : '21 business days (standard)';
+    aiTypeHint =
+      '<div class="fcw-ai-panel">' +
+        '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Claim Intelligence — ' + window._fcw.type + '</div>' +
+        '<div class="fcw-ai-panel-body">' +
+          '<div class="fcw-ai-grid">' +
+            '<div class="fcw-ai-row"><span>Typical Processing</span><strong>' + (processTime[window._fcw.type] || '5–10 business days') + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>Required Documents</span><strong>' + reqCount + ' required · ' + recCount + ' recommended</strong></div>' +
+            '<div class="fcw-ai-row"><span>AI Pre-loaded Docs</span><strong style="color:#16a34a">' + preloaded + ' already fetched from CRM</strong></div>' +
+            '<div class="fcw-ai-row"><span>SLA Window</span><strong>' + slaLabel + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>IDP Extraction</span><strong>Auto-enabled — AI pre-fills all form fields from uploaded docs</strong></div>' +
+            '<div class="fcw-ai-row"><span>Policy Match</span><strong>' + (eligibleTypes[window._fcw.type] ? '✓ Eligible policy found for this client' : '⚠ No direct policy match — manual review required') + '</strong></div>' +
+          '</div>' +
+          (fraudRisk ? '<div class="fcw-ai-alert ' + (fraudRisk.level === 'HIGH' ? 'red' : 'orange') + '"><i class="fas fa-shield-virus"></i><div><strong>AI Fraud Alert:</strong> Score ' + fraudRisk.score + ' — adjuster review mandatory before payout</div></div>' : '') +
+          '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Proceed to Step 3 — AI will rank your client\'s policies by match score for this claim type.</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  return '<div class="fcw-step-title"><i class="fas fa-clipboard-list"></i> Step 2 — Claim Type &amp; Event Details</div>' +
+    '<div class="fcw-field-group">' +
+      '<label class="fcw-label">Select Claim Type ' +
+        (hasEligibilityData ? '<span class="fcw-ai-auto-badge"><i class="fas fa-robot"></i> Eligible types highlighted</span>' : '') +
+      '</label>' +
+      typeGroupsHTML +
+    '</div>' +
+    '<div class="fcw-field-row">' +
+      '<div class="fcw-field-group" style="flex:1">' +
+        '<label class="fcw-label">Date of Loss / Event</label>' +
+        '<input type="date" class="fcw-input" id="fcw-loss-date" value="' + (window._fcw.lossDate || '') + '">' +
+      '</div>' +
+      '<div class="fcw-field-group" style="flex:1">' +
+        '<label class="fcw-label">Estimated Claim Amount</label>' +
+        '<input type="text" class="fcw-input" id="fcw-amount" placeholder="e.g. $250,000 or Full Face Value" value="' + (window._fcw.amount || '') + '">' +
+      '</div>' +
+    '</div>' +
+    '<div class="fcw-field-group">' +
+      '<label class="fcw-label">Brief Description of Event</label>' +
+      '<textarea class="fcw-textarea" id="fcw-desc" placeholder="e.g. Robert Chen passed away on 2026-04-07 due to acute myocardial infarction at St. Luke\'s Hospital…" rows="3">' + (window._fcw.desc || '') + '</textarea>' +
+    '</div>' +
+    aiTypeHint;
+}
+function fcwStep2Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwRender(1)"><i class="fas fa-arrow-left"></i> Back</button>' +
+    '<button class="p7m-btn primary" onclick="fcwNextStep2()">Next: Policy Match <i class="fas fa-arrow-right"></i></button>';
+}
+function fcwSelectType(t) {
+  var ld = document.getElementById('fcw-loss-date');
+  var am = document.getElementById('fcw-amount');
+  var dc = document.getElementById('fcw-desc');
+  if (ld) window._fcw.lossDate = ld.value;
+  if (am) window._fcw.amount = am.value;
+  if (dc) window._fcw.desc = dc.value;
+  window._fcw.type = t;
+  // Clear policy + docs when type changes so Step 3 re-matches and Step 4 re-initializes
+  window._fcw.policy = null;
+  window._fcw.docs = [];
+  window._fcw.docsInitialized = false;
+  fcwRender(2);
+}
+function fcwNextStep2() {
+  var ld = document.getElementById('fcw-loss-date');
+  var dc = document.getElementById('fcw-desc');
+  var am = document.getElementById('fcw-amount');
+  if (!window._fcw.type) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a claim type', 2000); return; }
+  if (!ld || !ld.value) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please enter the date of loss', 2000); return; }
+  window._fcw.lossDate = ld.value;
+  window._fcw.desc     = dc ? dc.value : '';
+  window._fcw.amount   = am ? am.value : '';
+  fcwRender(3);
+}
+
+/* ── STEP 3 : POLICY LOOKUP & MATCH ─────────────────────────────── */
+function fcwStep3Body() {
+  var cd = _fcwClientData[window._fcw.clientKey];
+  if (!cd) return '<div class="fcw-step-title">Policy Lookup</div><div class="fcw-error">No client selected — please go back to Step 1.</div>';
+
+  // Use comprehensive type-to-policy affinity map
+  var matchTypes = _fcwTypeToPolicy[window._fcw.type] || [];
+
+  // Also check if the claim type matches a rider on any policy
+  function policyScoreForType(p) {
+    // Base match: policy type covers the claim type
+    var baseMatch = matchTypes.some(function(m) { return p.type.indexOf(m) !== -1; });
+    if (baseMatch) return 95;
+    // Rider match: claim type available as a rider on this policy
+    var riderMatch = (p.riders || []).some(function(r) {
+      return r.indexOf(window._fcw.type) !== -1 ||
+        (window._fcw.type === 'Accelerated Death Benefit (ADB)' && r.indexOf('Accelerated Death Benefit') !== -1) ||
+        (window._fcw.type === 'Accidental Death Benefit (ADB Rider)' && r.indexOf('Accidental Death') !== -1) ||
+        (window._fcw.type === 'Critical Illness Rider' && r.indexOf('Critical Illness') !== -1) ||
+        (window._fcw.type === 'Waiver of Premium' && r.indexOf('Waiver of Premium') !== -1) ||
+        (window._fcw.type === 'Child Term Rider' && r.indexOf('Child Term') !== -1) ||
+        (window._fcw.type === 'Chronic Illness Rider (Living Benefit)' && r.indexOf('Chronic Illness') !== -1);
+    });
+    if (riderMatch) return 88;
+    return 32; // low match
+  }
+
+  // Score and sort all policies; auto-select top match if none chosen yet
+  var scoredPolicies = cd.policies.map(function(p) {
+    return { p: p, score: policyScoreForType(p) };
+  }).sort(function(a, b) { return b.score - a.score; });
+
+  // Auto-select the best matching policy on first arrival at Step 3
+  if (!window._fcw.policy && scoredPolicies[0] && scoredPolicies[0].score >= 85) {
+    window._fcw.policy = scoredPolicies[0].p;
+  }
+
+  var policyCards = scoredPolicies.map(function(sp) {
+    var p = sp.p;
+    var score = sp.score;
+    var isMatch = score >= 85;
+    var isRiderMatch = score === 88;
+    var isSelected = window._fcw.policy && window._fcw.policy.num === p.num;
+    var statusColor = p.status === 'In Force' ? '#16a34a' : p.status === 'Pending' ? '#d97706' : '#dc2626';
+    var aiLabel = score >= 95 ? 'Best Match' : score >= 85 ? 'Rider Match' : 'Low Match';
+    var aiColor = score >= 95 ? '#16a34a' : score >= 85 ? '#0369a1' : '#9ca3af';
+
+    // Rider chips
+    var riderChips = (p.riders || []).map(function(r) {
+      var isRelevant = r.indexOf(window._fcw.type) !== -1 ||
+        (window._fcw.type === 'Accelerated Death Benefit (ADB)' && r.indexOf('Accelerated Death Benefit') !== -1) ||
+        (window._fcw.type === 'Accidental Death Benefit (ADB Rider)' && r.indexOf('Accidental Death') !== -1) ||
+        (window._fcw.type === 'Critical Illness Rider' && r.indexOf('Critical Illness') !== -1) ||
+        (window._fcw.type === 'Waiver of Premium' && r.indexOf('Waiver') !== -1) ||
+        (window._fcw.type === 'Child Term Rider' && r.indexOf('Child Term') !== -1) ||
+        (window._fcw.type === 'Chronic Illness Rider (Living Benefit)' && r.indexOf('Chronic') !== -1);
+      return '<span class="fcw-rider-chip' + (isRelevant ? ' active' : '') + '">' +
+        (isRelevant ? '<i class="fas fa-star"></i> ' : '') + r + '</span>';
+    }).join('');
+
+    return '<div class="fcw-policy-card' + (isSelected ? ' selected' : '') + (isMatch ? ' ai-match' : '') + '" onclick="fcwSelectPolicy(\'' + p.num + '\')">' +
+      '<div class="fcw-policy-card-top">' +
+        '<div class="fcw-policy-num">' + p.num + '</div>' +
+        '<div class="fcw-policy-ai-score" style="background:' + aiColor + '18;color:' + aiColor + ';border:1px solid ' + aiColor + '35">' +
+          '<i class="fas fa-robot"></i> ' + aiLabel + ' · ' + score + '%' +
+        '</div>' +
+        (isSelected ? '<i class="fas fa-check-circle" style="color:#2563eb;font-size:18px;margin-left:auto"></i>' : '') +
+      '</div>' +
+      '<div class="fcw-policy-meta">' +
+        '<div class="fcw-policy-row"><span>Policy Type</span><strong>' + p.type + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Face / Benefit</span><strong>' + p.face + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Status</span><strong style="color:' + statusColor + '">' + p.status + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Issued</span><strong>' + p.issued + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Premium</span><strong>' + p.premium + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Beneficiary</span><strong>' + p.bene + '</strong></div>' +
+      '</div>' +
+      (riderChips ? '<div class="fcw-rider-list"><span style="font-size:10px;color:#64748b;font-weight:600;margin-right:4px">RIDERS:</span>' + riderChips + '</div>' : '') +
+      (isSelected && isRiderMatch ? '<div class="fcw-policy-rider-note"><i class="fas fa-info-circle"></i> This claim type is covered as a <strong>rider</strong> on this policy — not the base coverage</div>' : '') +
+      (p.status === 'Pending' ? '<div class="fcw-policy-warning"><i class="fas fa-exclamation-triangle"></i> Policy in Pending status — coverage determination required. Contestability review may apply.</div>' : '') +
+      (isSelected && score < 85 ? '<div class="fcw-policy-warning" style="background:#fef3c7;border-color:#fbbf24;color:#92400e"><i class="fas fa-question-circle"></i> No exact policy match for this claim type — manual eligibility review required</div>' : '') +
+    '</div>';
+  }).join('');
+
+  var aiPolicyPanel = '';
+  if (window._fcw.policy) {
+    var contestable = window._fcw.policy.issued && (new Date() - new Date(window._fcw.policy.issued)) / (1000 * 60 * 60 * 24) < 730;
+    var selScore = policyScoreForType(window._fcw.policy);
+    var preloadedDocs = (_fcwClaimTypeDocs[window._fcw.type] || []).filter(function(d){ return d.preloaded; });
+    aiPolicyPanel = '<div class="fcw-ai-panel">' +
+      '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Policy Analysis — ' + window._fcw.policy.num + '</div>' +
+      '<div class="fcw-ai-panel-body">' +
+        '<div class="fcw-ai-grid">' +
+          '<div class="fcw-ai-row"><span>Claim Eligibility</span><strong style="color:' + (window._fcw.policy.status === 'In Force' ? '#16a34a' : '#dc2626') + '">' + (window._fcw.policy.status === 'In Force' ? '✓ Eligible — policy in force' : '⚠ Under Review — policy not in force') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Match Score</span><strong style="color:' + (selScore >= 90 ? '#16a34a' : selScore >= 80 ? '#0369a1' : '#dc2626') + '">' + selScore + '% — ' + (selScore >= 90 ? 'Direct coverage' : selScore >= 80 ? 'Rider coverage' : 'Manual review needed') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Contestability</span><strong style="color:' + (contestable ? '#d97706' : '#16a34a') + '">' + (contestable ? '⚠ ACTIVE — policy < 2 years old' : '✓ Clear — > 2 years in force') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Named Beneficiary</span><strong>' + window._fcw.policy.bene + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>AI Pre-loaded Docs</span><strong style="color:#16a34a">' + preloadedDocs.length + ' doc(s) already fetched from CRM</strong></div>' +
+        '</div>' +
+        (preloadedDocs.length ? '<div class="fcw-ai-preloaded-list"><div class="fcw-ai-preloaded-title"><i class="fas fa-robot"></i> Auto-loaded from CRM vault:</div>' +
+          preloadedDocs.map(function(d){ return '<div class="fcw-ai-preloaded-item"><i class="fas fa-check-circle" style="color:#16a34a"></i> ' + d.name + '</div>'; }).join('') +
+        '</div>' : '') +
+        '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Policy data pre-filled into claim form · Document checklist auto-loaded in Step 4 · IDP extraction ready.</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  return '<div class="fcw-step-title"><i class="fas fa-file-contract"></i> Step 3 — Policy Lookup &amp; Match</div>' +
+    '<div class="fcw-policy-ai-note"><i class="fas fa-robot"></i> AI ranked <strong>' + scoredPolicies.length + '</strong> polic' + (scoredPolicies.length === 1 ? 'y' : 'ies') + ' for <strong>' + window._fcw.clientKey + '</strong> by compatibility with <em>' + window._fcw.type + '</em>' +
+    (window._fcw.policy ? ' · <span style="color:#16a34a"><i class="fas fa-check-circle"></i> Best match auto-selected</span>' : '') +
+    ' · Click a card to confirm or change selection</div>' +
+    '<div class="fcw-policy-list">' + policyCards + '</div>' +
+    aiPolicyPanel;
+}
+function fcwStep3Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwRender(2)"><i class="fas fa-arrow-left"></i> Back</button>' +
+    '<button class="p7m-btn primary" onclick="fcwNextStep3()">Next: Documents <i class="fas fa-arrow-right"></i></button>';
+}
+function fcwSelectPolicy(pNum) {
+  var cd = _fcwClientData[window._fcw.clientKey];
+  if (!cd) return;
+  cd.policies.forEach(function(p) { if (p.num === pNum) window._fcw.policy = p; });
+  fcwRender(3);
+}
+function fcwNextStep3() {
+  if (!window._fcw.policy) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a policy to continue', 2000); return; }
+  fcwRender(4);
+}
+
+/* ── STEP 4 : DOCUMENT CHECKLIST + UPLOAD ───────────────────────── */
+function fcwStep4Body() {
+  var docDefs = _fcwClaimTypeDocs[window._fcw.type];
+  if (!docDefs) {
+    // Fallback for claim types without a doc set
+    docDefs = [
+      { name:'Completed Claim Form',       required:true,  preloaded:false, hint:'NYL standard claim submission form' },
+      { name:'Government-issued Photo ID', required:true,  preloaded:false, hint:'Passport or driver\'s license' },
+      { name:'Policy Document',            required:true,  preloaded:true,  hint:'AI pre-loaded from policy vault' }
+    ];
+  }
+
+  // On first arrival, auto-check all preloaded docs
+  if (!window._fcw.docsInitialized) {
+    window._fcw.docs = [];
+    docDefs.forEach(function(d) {
+      if (d.preloaded) window._fcw.docs.push(d.name);
+    });
+    window._fcw.docsInitialized = true;
+  }
+
+  var reqDocs  = docDefs.filter(function(d){ return d.required; });
+  var recDocs  = docDefs.filter(function(d){ return !d.required; });
+  var checkedCount = window._fcw.docs.length;
+  var reqDone  = reqDocs.every(function(d){ return window._fcw.docs.indexOf(d.name) !== -1; });
+  var reqCount = reqDocs.filter(function(d){ return window._fcw.docs.indexOf(d.name) !== -1; }).length;
+
+  function renderDocSection(title, sectionDocs, iconColor) {
+    if (!sectionDocs.length) return '';
+    var items = sectionDocs.map(function(d) {
+      var isChecked   = window._fcw.docs.indexOf(d.name) !== -1;
+      var isPreloaded = d.preloaded;
+      return '<div class="fcw-doc-item' + (isChecked ? ' checked' : '') + (isPreloaded ? ' preloaded' : '') + '" ' +
+        'onclick="fcwToggleDoc(\'' + d.name.replace(/\'/g,"\\'") + '\')">' +
+        '<div class="fcw-doc-checkbox">' +
+          (isChecked
+            ? '<i class="fas fa-check-circle" style="color:' + (isPreloaded ? '#0369a1' : '#16a34a') + '"></i>'
+            : '<i class="far fa-circle" style="color:#d1d5db"></i>') +
+        '</div>' +
+        '<div class="fcw-doc-info">' +
+          '<div class="fcw-doc-name">' + d.name +
+            (d.required ? ' <span class="fcw-doc-req">Required</span>' : ' <span class="fcw-doc-opt">Recommended</span>') +
+            (isPreloaded ? ' <span class="fcw-doc-preloaded"><i class="fas fa-robot"></i> AI Pre-loaded</span>' : '') +
+          '</div>' +
+          (d.hint ? '<div class="fcw-doc-hint">' + d.hint + '</div>' : '') +
+        '</div>' +
+        '<div class="fcw-doc-action">' +
+          (isPreloaded && isChecked
+            ? '<span class="fcw-doc-ready ai"><i class="fas fa-robot"></i> CRM</span>'
+            : isChecked
+              ? '<span class="fcw-doc-ready"><i class="fas fa-check"></i> Ready</span>'
+              : '<span class="fcw-doc-pending">Pending</span>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="fcw-doc-section">' +
+      '<div class="fcw-doc-section-hdr" style="border-left:3px solid ' + iconColor + ';color:' + iconColor + '">' + title + '</div>' +
+      items +
+    '</div>';
+  }
+
+  var docListHTML =
+    renderDocSection('Required Documents (' + reqCount + '/' + reqDocs.length + ' confirmed)', reqDocs, '#dc2626') +
+    renderDocSection('Recommended Documents (' + (checkedCount - reqCount) + '/' + recDocs.length + ' confirmed)', recDocs, '#0369a1');
+
+  // Drop zone: show pre-loaded file stubs for CRM-fetched docs
+  var preloadedDocs = docDefs.filter(function(d){ return d.preloaded; });
+  var preloadedStubs = preloadedDocs.map(function(d) {
+    return '<div class="fcw-drop-file-stub">' +
+      '<i class="fas fa-file-pdf" style="color:#dc2626"></i>' +
+      '<span>' + d.name + '</span>' +
+      '<span class="fcw-drop-file-source"><i class="fas fa-robot"></i> CRM Vault</span>' +
+    '</div>';
+  }).join('');
+
+  var dropFilesArea = preloadedStubs
+    ? '<div class="fcw-drop-preloaded">' +
+        '<div class="fcw-drop-preloaded-title"><i class="fas fa-robot"></i> AI Pre-loaded from CRM — ready for IDP extraction:</div>' +
+        preloadedStubs +
+      '</div>'
+    : '';
+
+  var dropZone =
+    '<div class="fcw-drop-zone" id="fcw-drop-zone"' +
+    ' ondragover="event.preventDefault();this.classList.add(\'fcw-drag-active\')"' +
+    ' ondragleave="this.classList.remove(\'fcw-drag-active\')"' +
+    ' ondrop="fcwHandleDrop(event)">' +
+    '<i class="fas fa-cloud-upload-alt fcw-drop-icon"></i>' +
+    '<div class="fcw-drop-title">Drag &amp; drop additional documents here</div>' +
+    '<div class="fcw-drop-sub">PDF, JPG, PNG, DOCX · Max 50MB per file · IDP extraction starts immediately on upload</div>' +
+    '<div id="fcw-dropped-files">' + (window._fcw.hasUpload ? '<div class="fcw-dropped-indicator"><i class="fas fa-check-circle"></i> Document attached — IDP extraction queued</div>' : '') + '</div>' +
+  '</div>';
+
+  var aiDocPanel =
+    '<div class="fcw-ai-panel">' +
+      '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Document Intelligence</div>' +
+      '<div class="fcw-ai-panel-body">' +
+        '<div class="fcw-ai-grid">' +
+          '<div class="fcw-ai-row"><span>Total Documents</span><strong>' + checkedCount + ' / ' + docDefs.length + ' confirmed</strong></div>' +
+          '<div class="fcw-ai-row"><span>Required Status</span><strong style="color:' + (reqDone ? '#16a34a' : '#dc2626') + '">' + (reqDone ? '✓ All ' + reqDocs.length + ' required docs confirmed' : '⚠ ' + (reqDocs.length - reqCount) + ' required doc(s) still missing') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>CRM Pre-loaded</span><strong style="color:#0369a1">' + preloadedDocs.length + ' doc(s) auto-fetched from policy vault</strong></div>' +
+          '<div class="fcw-ai-row"><span>IDP Auto-Extract</span><strong>Enabled · NLP confidence 94% · 2–5 min per doc</strong></div>' +
+        '</div>' +
+        '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Check all documents you currently have in hand. Missing items can be collected and uploaded from the Claim Workspace after creation. IDP auto-extracts all fields from any uploaded PDF.</div>' +
+      '</div>' +
+    '</div>';
+
+  return '<div class="fcw-step-title"><i class="fas fa-folder-open"></i> Step 4 — Document Checklist</div>' +
+    '<div class="fcw-doc-context-bar">' +
+      '<span><i class="fas fa-clipboard-list"></i> <strong>' + window._fcw.type + '</strong></span>' +
+      '<span>·</span>' +
+      '<span><i class="fas fa-file-contract"></i> ' + (window._fcw.policy ? window._fcw.policy.num + ' · ' + window._fcw.policy.type : 'No policy selected') + '</span>' +
+    '</div>' +
+    '<div class="fcw-doc-progress">' +
+      '<div class="fcw-doc-prog-bar"><div class="fcw-doc-prog-fill" style="width:' + Math.round(checkedCount / Math.max(docDefs.length,1) * 100) + '%"></div></div>' +
+      '<span class="fcw-doc-prog-lbl">' + checkedCount + ' of ' + docDefs.length + ' documents confirmed</span>' +
+    '</div>' +
+    '<div class="fcw-doc-list">' + docListHTML + '</div>' +
+    dropFilesArea +
+    dropZone +
+    aiDocPanel;
+}
+function fcwStep4Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwRender(3)"><i class="fas fa-arrow-left"></i> Back</button>' +
+    '<button class="p7m-btn primary" onclick="fcwNextStep4()">Next: Review &amp; Submit <i class="fas fa-arrow-right"></i></button>';
+}
+function fcwToggleDoc(d) {
+  if (!window._fcw.docs) window._fcw.docs = [];
+  var idx = window._fcw.docs.indexOf(d);
+  if (idx === -1) window._fcw.docs.push(d); else window._fcw.docs.splice(idx, 1);
+  // Don't reset docsInitialized so manual toggles are preserved
+  var step4body = document.getElementById('fcw-body');
+  if (step4body) step4body.innerHTML = fcwStep4Body();
+}
+function fcwHandleDrop(event) {
+  event.preventDefault();
+  var zone = document.getElementById('fcw-drop-zone');
+  if (zone) zone.classList.remove('fcw-drag-active');
+  var files = event.dataTransfer ? event.dataTransfer.files : [];
+  var dropped = document.getElementById('fcw-dropped-files');
+  window._fcw.hasUpload = true;
+  if (dropped) {
+    var fileNames = '';
+    if (files && files.length) {
+      for (var i = 0; i < files.length; i++) {
+        fileNames += '<div class="fcw-dropped-indicator"><i class="fas fa-file-pdf" style="color:#dc2626"></i> ' + files[i].name + ' <span style="color:#16a34a;margin-left:6px"><i class="fas fa-check-circle"></i> IDP queued</span></div>';
+      }
+    } else {
+      fileNames = '<div class="fcw-dropped-indicator"><i class="fas fa-check-circle"></i> Document attached — IDP extraction queued</div>';
+    }
+    dropped.innerHTML = fileNames;
+  }
+}
+function fcwNextStep4() {
+  var docDefs = _fcwClaimTypeDocs[window._fcw.type];
+  if (!docDefs) { fcwRender(5); return; }
+  var required = docDefs.filter(function(d){ return d.required; });
+  var confirmedReq = required.filter(function(d){ return (window._fcw.docs||[]).indexOf(d.name) !== -1; }).length;
+  if (confirmedReq === 0) {
+    p7Toast('<i class="fas fa-exclamation-triangle"></i> Please confirm at least one required document to proceed', 2500);
+    return;
+  }
+  fcwRender(5);
+}
+
+/* ── STEP 5 : REVIEW & SUBMIT ────────────────────────────────────── */
+function fcwStep5Body() {
+  var w = window._fcw;
+  var cd = _fcwClientData[w.clientKey] || {};
+  var fraud = _fcwFraudFlags[w.clientKey];
+  var contestable = w.policy && w.policy.issued && (new Date() - new Date(w.policy.issued)) / (1000 * 60 * 60 * 24) < 730;
+  var newId = 'CLM-2026-' + (Math.floor(Math.random() * 900) + 100);
+  window._fcw.claimId = newId;
+
+  var docDefs = _fcwClaimTypeDocs[w.type] || [];
+  var docsHTML = (w.docs && w.docs.length)
+    ? w.docs.map(function(dname){
+        var def = docDefs.find ? docDefs.find(function(x){ return x.name === dname; }) : null;
+        var isPreloaded = def && def.preloaded;
+        return '<div class="fcw-review-doc">' +
+          '<i class="fas fa-check-circle" style="color:' + (isPreloaded ? '#0369a1' : '#16a34a') + '"></i> ' +
+          dname +
+          (isPreloaded ? ' <span style="font-size:10px;color:#0369a1;font-weight:600"><i class="fas fa-robot"></i> CRM</span>' : '') +
+        '</div>';
+      }).join('')
+    : '<div class="fcw-review-doc" style="color:#6b7280"><i class="fas fa-clock"></i> No documents confirmed yet — can be added from claim workspace</div>';
+
+  var aiRiskPanel = '<div class="fcw-ai-panel' + (fraud ? (fraud.level === 'HIGH' ? ' fcw-ai-panel-red' : ' fcw-ai-panel-orange') : ' fcw-ai-panel-green') + '">' +
+    '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Pre-Submission Analysis</div>' +
+    '<div class="fcw-ai-panel-body">' +
+      '<div class="fcw-ai-grid">' +
+        '<div class="fcw-ai-row"><span>Fraud Risk Score</span><strong style="color:' + (fraud ? (fraud.level === 'HIGH' ? '#dc2626' : '#d97706') : '#16a34a') + '">' + (fraud ? fraud.score + ' — ' + fraud.level : '< 20 — LOW RISK') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Contestability</span><strong style="color:' + (contestable ? '#d97706' : '#16a34a') + '">' + (contestable ? 'Active — adjuster review required' : 'Clear — policy > 2 years in force') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Auto-Assigned SLA</span><strong>' + (w.type === 'Accelerated Death Benefit (ADB)' ? '5 business days (expedited)' : '21 business days') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Priority Level</span><strong style="color:' + (fraud && fraud.level === 'HIGH' ? '#dc2626' : contestable ? '#d97706' : '#16a34a') + '">' + (fraud && fraud.level === 'HIGH' ? 'URGENT — fraud hold recommended' : contestable ? 'HIGH — contestability active' : 'STANDARD') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Recommended Adjuster</span><strong>' + (fraud ? 'Sr. Adjuster M. Torres (Fraud Specialist)' : 'Standard adjuster pool') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>IDP Extraction</span><strong>' + (w.hasUpload ? 'Document attached — extraction queued' : 'No doc uploaded — available from workspace') + '</strong></div>' +
+      '</div>' +
+      (fraud ? '<div class="fcw-ai-alert ' + (fraud.level === 'HIGH' ? 'red' : 'orange') + '"><i class="fas fa-shield-virus"></i><div><strong>AI Fraud Flag:</strong> ' + fraud.flags.join(' · ') + ' — Payment hold will be applied automatically</div></div>' : '<div class="fcw-ai-alert green"><i class="fas fa-check-circle"></i><div><strong>AI Clearance:</strong> No fraud indicators detected — standard processing approved</div></div>') +
+    '</div>' +
+  '</div>';
+
+  return '<div class="fcw-step-title"><i class="fas fa-check-double"></i> Step 5 — Review &amp; Submit</div>' +
+    '<div class="fcw-review-block">' +
+      '<div class="fcw-review-id-banner"><i class="fas fa-hashtag"></i> Claim ID to be assigned: <strong>' + newId + '</strong></div>' +
+      '<div class="fcw-review-grid">' +
+        '<div class="fcw-review-section">' +
+          '<div class="fcw-review-section-title">Client &amp; Claimant</div>' +
+          '<div class="fcw-review-row"><span>Insured</span><strong>' + (w.client || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Client ID</span><strong>' + (cd.id || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Claimant</span><strong>' + (w.claimant || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Relationship</span><strong>' + (w.relationship || '—') + '</strong></div>' +
+        '</div>' +
+        '<div class="fcw-review-section">' +
+          '<div class="fcw-review-section-title">Claim Details</div>' +
+          '<div class="fcw-review-row"><span>Type</span><strong>' + (w.type || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Date of Loss</span><strong>' + (w.lossDate || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Est. Amount</span><strong>' + (w.amount || 'Full policy face value') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Description</span><strong>' + (w.desc ? w.desc.substring(0,60) + (w.desc.length > 60 ? '…' : '') : '—') + '</strong></div>' +
+        '</div>' +
+        '<div class="fcw-review-section">' +
+          '<div class="fcw-review-section-title">Policy</div>' +
+          '<div class="fcw-review-row"><span>Policy No.</span><strong>' + (w.policy ? w.policy.num : '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Policy Type</span><strong>' + (w.policy ? w.policy.type : '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Face Value</span><strong>' + (w.policy ? w.policy.face : '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Beneficiary</span><strong>' + (w.policy ? w.policy.bene : '—') + '</strong></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fcw-review-docs-section">' +
+        '<div class="fcw-review-section-title">Confirmed Documents (' + (w.docs ? w.docs.length : 0) + ')</div>' +
+        docsHTML +
+      '</div>' +
+    '</div>' +
+    aiRiskPanel;
+}
+function fcwStep5Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwRender(4)"><i class="fas fa-arrow-left"></i> Back</button>' +
+    '<button class="p7m-btn ghost" onclick="fcwClose()">Cancel</button>' +
+    '<button class="p7m-btn primary fcw-submit-btn" onclick="fcwSubmitClaim()"><i class="fas fa-plus-circle"></i> Create Claim &amp; Open Workspace</button>';
+}
+function fcwSubmitClaim() {
+  var w = window._fcw;
+  var fraud = _fcwFraudFlags[w.clientKey];
+  var submitBtn = document.querySelector('.fcw-submit-btn');
+  if (submitBtn) { submitBtn.innerHTML = '<i class="fas fa-cog fa-spin"></i> Creating claim…'; submitBtn.disabled = true; }
+
+  setTimeout(function() {
+    fcwClose();
+    p7Toast('<i class="fas fa-plus-circle"></i> Claim ' + w.claimId + ' created for ' + w.client + ' · ' + w.type + ' · AI assigning adjuster…', 4500);
+    setTimeout(function() {
+      if (fraud && fraud.level === 'HIGH') {
+        p7Toast('<i class="fas fa-ban"></i> AI Fraud Flag: Payment hold applied to ' + w.claimId + ' · Sr. Adjuster M. Torres assigned · SIU notified', 4500);
+      } else {
+        p7Toast('<i class="fas fa-check-circle"></i> Claim workspace ready — upload documents from the Active Claims tab to begin IDP extraction', 4000);
+      }
+    }, 2500);
+    if (w.hasUpload) {
+      setTimeout(function() {
+        p7Toast('<i class="fas fa-file-import"></i> IDP extraction started on uploaded document · Fields will be auto-populated in 2–3 minutes', 3500);
+      }, 5000);
+    }
+  }, 1800);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — BATCH SEND DOC REMINDERS (ENHANCED)
+   ═══════════════════════════════════════════════════════════════════ */
 function batchSendDocReminders() {
   var checked = document.querySelectorAll('.claim-row-checkbox:checked').length;
-  p7Toast('<i class="fas fa-paper-plane"></i> Sending doc reminders to ' + checked + ' selected claim(s) — AI-drafted letters generated', 3000);
+  if (checked === 0) {
+    p7Toast('<i class="fas fa-exclamation-triangle"></i> Select at least one claim to send reminders', 2000);
+    return;
+  }
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay';
+  overlay.id = 'batch-reminder-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="p7m-modal" style="max-width:480px" onclick="event.stopPropagation()">' +
+      '<div class="p7m-header"><div class="p7m-title"><i class="fas fa-paper-plane"></i> Send Doc Reminders</div><button class="p7m-close" onclick="document.getElementById(\'batch-reminder-overlay\').remove()"><i class="fas fa-times"></i></button></div>' +
+      '<div class="p7m-body">' +
+        '<div style="margin-bottom:16px">Sending AI-drafted document reminder letters to <strong>' + checked + ' selected claim(s)</strong>.</div>' +
+        '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:#374151">Reminder Channel</label>' +
+          '<select class="filter-select" style="width:100%;margin-top:4px">' +
+            '<option>Email + SMS (recommended)</option>' +
+            '<option>Email only</option>' +
+            '<option>SMS only</option>' +
+            '<option>Physical mail (AI-drafted letter)</option>' +
+          '</select>' +
+        '</div>' +
+        '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-size:12px">' +
+          '<i class="fas fa-robot" style="color:#16a34a;margin-right:6px"></i>' +
+          '<strong>AI Draft Ready:</strong> Personalized reminder letters generated for each claim — includes specific missing documents, deadline, and contact information.' +
+        '</div>' +
+      '</div>' +
+      '<div class="p7m-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'batch-reminder-overlay\').remove()">Cancel</button>' +
+        '<button class="p7m-btn primary" onclick="confirmBatchReminders(' + checked + ')"><i class="fas fa-paper-plane"></i> Send ' + checked + ' Reminder(s)</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function confirmBatchReminders(count) {
+  var overlay = document.getElementById('batch-reminder-overlay');
+  if (overlay) overlay.remove();
+  p7Toast('<i class="fas fa-paper-plane"></i> ' + count + ' AI-drafted doc reminder(s) sent · Letters archived in claim files · 7-day auto-follow-up scheduled', 4000);
 }
 
 function batchAssignAdjuster() {
