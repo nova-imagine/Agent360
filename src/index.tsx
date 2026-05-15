@@ -550,6 +550,99 @@ function MainApp() {
         </div>
       </div>
 
+      {/* ── AI Outreach Composer Modal — GLOBAL (visible from any page) ── */}
+      <div class="oc-overlay" id="oc-overlay" onclick="closeCRMOutreachModal(event)" style="display:none">
+        <div class="oc-modal">
+
+          {/* Header */}
+          <div class="oc-header" id="oc-header">
+            <div class="oc-header-left">
+              <div class="oc-header-icon"><i class="fas fa-paper-plane"></i></div>
+              <div>
+                <div class="oc-header-title" id="oc-header-title">AI Outreach Composer</div>
+                <div class="oc-header-sub" id="oc-header-sub">Hyperpersonalized message · AI-generated</div>
+              </div>
+            </div>
+            <button class="oc-close-btn" onclick="closeCRMOutreachModal()"><i class="fas fa-times"></i></button>
+          </div>
+
+          {/* Channel Tabs */}
+          <div class="oc-channel-tabs">
+            <button class="oc-ch-tab active" id="tab-email" onclick="switchOutreachChannel('email')"><i class="fas fa-envelope"></i> Email</button>
+            <button class="oc-ch-tab" id="tab-sms" onclick="switchOutreachChannel('sms')"><i class="fas fa-sms"></i> SMS</button>
+            <button class="oc-ch-tab" id="tab-call" onclick="switchOutreachChannel('call')"><i class="fas fa-phone"></i> Call Script</button>
+          </div>
+
+          {/* Body — two columns: message + context */}
+          <div class="oc-body">
+
+            {/* Left: Message Composer */}
+            <div class="oc-composer">
+              <div class="oc-field-row">
+                <label class="oc-label">To</label>
+                <input class="oc-input" id="oc-to" type="text" readonly />
+              </div>
+              <div class="oc-field-row" id="oc-subject-row">
+                <label class="oc-label">Subject</label>
+                <input class="oc-input" id="oc-subject" type="text" />
+              </div>
+              <div class="oc-field-row">
+                <label class="oc-label">Message <span class="oc-ai-tag"><i class="fas fa-robot"></i> AI-drafted</span></label>
+                <textarea class="oc-textarea" id="oc-body" rows={12}></textarea>
+              </div>
+              <div class="oc-token-bar">
+                <span class="oc-token-lbl">Insert token:</span>
+                <button class="oc-token" onclick="insertToken('[Client Name]')">[Client Name]</button>
+                <button class="oc-token" onclick="insertToken('[Agent Name]')">[Agent Name]</button>
+                <button class="oc-token" onclick="insertToken('[Policy #]')">[Policy #]</button>
+                <button class="oc-token" onclick="insertToken('[Product]')">[Product]</button>
+                <button class="oc-token" onclick="insertToken('[Premium]')">[Premium]</button>
+                <button class="oc-token" onclick="insertToken('[Date]')">[Date]</button>
+              </div>
+            </div>
+
+            {/* Right: Context Panel */}
+            <div class="oc-context">
+              <div class="oc-ctx-section">
+                <div class="oc-ctx-title"><i class="fas fa-user"></i> Client Context</div>
+                <div class="oc-ctx-body" id="oc-ctx-client"></div>
+              </div>
+              <div class="oc-ctx-section">
+                <div class="oc-ctx-title"><i class="fas fa-robot"></i> AI Rationale</div>
+                <div class="oc-ctx-body oc-ctx-ai" id="oc-ctx-ai"></div>
+              </div>
+              <div class="oc-ctx-section">
+                <div class="oc-ctx-title"><i class="fas fa-bullseye"></i> Goal &amp; Tone</div>
+                <div class="oc-ctx-body" id="oc-ctx-goal"></div>
+              </div>
+              <div class="oc-regen-section">
+                <button class="oc-regen-btn" onclick="regenOutreachMessage()"><i class="fas fa-sync-alt"></i> Regenerate</button>
+                <select class="oc-tone-select" id="oc-tone" onchange="regenOutreachMessage()">
+                  <option value="professional">Professional</option>
+                  <option value="warm">Warm &amp; Personal</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="educational">Educational</option>
+                </select>
+              </div>
+            </div>
+
+          </div>{/* end oc-body */}
+
+          {/* Footer Actions */}
+          <div class="oc-footer">
+            <div class="oc-footer-left">
+              <button class="oc-btn-secondary" onclick="closeCRMOutreachModal()"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+            <div class="oc-footer-right">
+              <button class="oc-btn-schedule" onclick="scheduleOutreach()"><i class="fas fa-calendar-alt"></i> Schedule</button>
+              <button class="oc-btn-ai" onclick="askAIOutreach()"><i class="fas fa-robot"></i> Ask AI Agent</button>
+              <button class="oc-btn-send" onclick="sendOutreach()"><i class="fas fa-paper-plane"></i> Send Now</button>
+            </div>
+          </div>
+
+        </div>{/* end oc-modal */}
+      </div>{/* end oc-overlay — GLOBAL */}
+
       {/* ── Cmd+K Spotlight Search Modal ── */}
       <div id="spotlight-overlay" class="spotlight-overlay" onclick="closeSpotlight(event)">
         <div class="spotlight-modal" id="spotlight-modal">
@@ -2762,99 +2855,6 @@ function ClientsPage() {
           </div>
         </div>
       </div>
-
-      {/* ── Outreach Composer Modal ── */}
-      <div class="oc-overlay" id="oc-overlay" onclick="closeCRMOutreachModal(event)" style="display:none">
-        <div class="oc-modal">
-
-          {/* Header */}
-          <div class="oc-header" id="oc-header">
-            <div class="oc-header-left">
-              <div class="oc-header-icon"><i class="fas fa-paper-plane"></i></div>
-              <div>
-                <div class="oc-header-title" id="oc-header-title">AI Outreach Composer</div>
-                <div class="oc-header-sub" id="oc-header-sub">Hyperpersonalized message · AI-generated</div>
-              </div>
-            </div>
-            <button class="oc-close-btn" onclick="closeCRMOutreachModal()"><i class="fas fa-times"></i></button>
-          </div>
-
-          {/* Channel Tabs */}
-          <div class="oc-channel-tabs">
-            <button class="oc-ch-tab active" id="tab-email" onclick="switchOutreachChannel('email')"><i class="fas fa-envelope"></i> Email</button>
-            <button class="oc-ch-tab" id="tab-sms" onclick="switchOutreachChannel('sms')"><i class="fas fa-sms"></i> SMS</button>
-            <button class="oc-ch-tab" id="tab-call" onclick="switchOutreachChannel('call')"><i class="fas fa-phone"></i> Call Script</button>
-          </div>
-
-          {/* Body — two columns: message + context */}
-          <div class="oc-body">
-
-            {/* Left: Message Composer */}
-            <div class="oc-composer">
-              <div class="oc-field-row">
-                <label class="oc-label">To</label>
-                <input class="oc-input" id="oc-to" type="text" readonly />
-              </div>
-              <div class="oc-field-row" id="oc-subject-row">
-                <label class="oc-label">Subject</label>
-                <input class="oc-input" id="oc-subject" type="text" />
-              </div>
-              <div class="oc-field-row">
-                <label class="oc-label">Message <span class="oc-ai-tag"><i class="fas fa-robot"></i> AI-drafted</span></label>
-                <textarea class="oc-textarea" id="oc-body" rows={12}></textarea>
-              </div>
-              <div class="oc-token-bar">
-                <span class="oc-token-lbl">Insert token:</span>
-                <button class="oc-token" onclick="insertToken('[Client Name]')">[Client Name]</button>
-                <button class="oc-token" onclick="insertToken('[Agent Name]')">[Agent Name]</button>
-                <button class="oc-token" onclick="insertToken('[Policy #]')">[Policy #]</button>
-                <button class="oc-token" onclick="insertToken('[Product]')">[Product]</button>
-                <button class="oc-token" onclick="insertToken('[Premium]')">[Premium]</button>
-                <button class="oc-token" onclick="insertToken('[Date]')">[Date]</button>
-              </div>
-            </div>
-
-            {/* Right: Context Panel */}
-            <div class="oc-context">
-              <div class="oc-ctx-section">
-                <div class="oc-ctx-title"><i class="fas fa-user"></i> Client Context</div>
-                <div class="oc-ctx-body" id="oc-ctx-client"></div>
-              </div>
-              <div class="oc-ctx-section">
-                <div class="oc-ctx-title"><i class="fas fa-robot"></i> AI Rationale</div>
-                <div class="oc-ctx-body oc-ctx-ai" id="oc-ctx-ai"></div>
-              </div>
-              <div class="oc-ctx-section">
-                <div class="oc-ctx-title"><i class="fas fa-bullseye"></i> Goal &amp; Tone</div>
-                <div class="oc-ctx-body" id="oc-ctx-goal"></div>
-              </div>
-              <div class="oc-regen-section">
-                <button class="oc-regen-btn" onclick="regenOutreachMessage()"><i class="fas fa-sync-alt"></i> Regenerate</button>
-                <select class="oc-tone-select" id="oc-tone" onchange="regenOutreachMessage()">
-                  <option value="professional">Professional</option>
-                  <option value="warm">Warm &amp; Personal</option>
-                  <option value="urgent">Urgent</option>
-                  <option value="educational">Educational</option>
-                </select>
-              </div>
-            </div>
-
-          </div>{/* end oc-body */}
-
-          {/* Footer Actions */}
-          <div class="oc-footer">
-            <div class="oc-footer-left">
-              <button class="oc-btn-secondary" onclick="closeCRMOutreachModal()"><i class="fas fa-times"></i> Cancel</button>
-            </div>
-            <div class="oc-footer-right">
-              <button class="oc-btn-schedule" onclick="scheduleOutreach()"><i class="fas fa-calendar-alt"></i> Schedule</button>
-              <button class="oc-btn-ai" onclick="askAIOutreach()"><i class="fas fa-robot"></i> Ask AI Agent</button>
-              <button class="oc-btn-send" onclick="sendOutreach()"><i class="fas fa-paper-plane"></i> Send Now</button>
-            </div>
-          </div>
-
-        </div>{/* end oc-modal */}
-      </div>{/* end oc-overlay */}
 
       {/* Client Detail Modal */}
       {/* ── Client Detail Modal (Phase 2 — tabbed) ── */}
