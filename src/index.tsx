@@ -12874,6 +12874,9 @@ function SettingsPage() {
           <button class="stab" data-tab="appearance" onclick="switchSettingsTab('appearance',this)">
             <i class="fas fa-palette"></i> Appearance
           </button>
+          <button class="stab" data-tab="data" onclick="switchSettingsTab('data',this)">
+            <i class="fas fa-database"></i> Data &amp; Privacy
+          </button>
         </nav>
 
         {/* ── Tab Panels ── */}
@@ -12903,7 +12906,7 @@ function SettingsPage() {
               </div>
               <div class="stg-field">
                 <label>Email Address</label>
-                <input type="email" class="stg-input" value="sridhar.ramalingam@nyl.com" id="set-email"/>
+                <input type="email" class="stg-input" value="sridhar.r@newyorklife.com" id="set-email"/>
               </div>
               <div class="stg-field">
                 <label>Phone</label>
@@ -12938,8 +12941,8 @@ function SettingsPage() {
                 <div class="stg-lic-info"><strong>NYS Life &amp; Health License</strong> — NY-LH-0047392<span class="stg-lic-exp">Exp: Jun 2026</span></div>
               </div>
               <div class="stg-license-row">
-                <div class="stg-lic-badge warn">Renew Soon</div>
-                <div class="stg-lic-info"><strong>CFP® Certification</strong> — Certified Financial Planner<span class="stg-lic-exp">Exp: Aug 2025</span></div>
+                <div class="stg-lic-badge expired">Expired</div>
+                <div class="stg-lic-info"><strong>CFP® Certification</strong> — Certified Financial Planner<span class="stg-lic-exp stg-lic-exp--expired">Expired Aug 2025 · <a href="#" onclick="showToast('Opening CFP renewal portal…','info');return false">Renew now</a></span></div>
               </div>
             </div>
           </div>
@@ -13258,6 +13261,46 @@ function SettingsPage() {
             </div>
           </div>
 
+          {/* ─── DATA & PRIVACY ─── */}
+          <div class="stab-panel" id="stab-data">
+            <div class="settings-section-title"><i class="fas fa-database"></i> Data &amp; Privacy</div>
+            <p class="stg-sub">Control how your data is stored, used, and shared within NOVA Agent 360.</p>
+
+            <div class="stg-notif-group">
+              <div class="stg-notif-header">Data Usage</div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Cache AI Insights</strong><span>Store AI results locally for faster page loads</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="dp-cache" checked/><label for="dp-cache"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>Usage Analytics</strong><span>Help improve NOVA by sharing anonymised usage data</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="dp-analytics" checked/><label for="dp-analytics"></label></div>
+              </div>
+              <div class="stg-toggle-row">
+                <div class="stg-toggle-info"><strong>AI Model Training</strong><span>Client PII is never used · only anonymised interaction signals</span></div>
+                <div class="stg-toggle-wrap"><input type="checkbox" class="stg-toggle" id="dp-training"/><label for="dp-training"></label></div>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">Compliance &amp; Certifications</div>
+              <div class="stg-compliance-list">
+                <div class="stg-compliance-row"><i class="fas fa-check-circle" style="color:#059669"></i><div><strong>SOC 2 Type II</strong><span>Last audited: Jan 2026 · Next: Jan 2027</span></div></div>
+                <div class="stg-compliance-row"><i class="fas fa-check-circle" style="color:#059669"></i><div><strong>FINRA Rule 4370</strong><span>Business continuity plan — current</span></div></div>
+                <div class="stg-compliance-row"><i class="fas fa-check-circle" style="color:#059669"></i><div><strong>NAIC Model Law</strong><span>AI system disclosure — compliant</span></div></div>
+                <div class="stg-compliance-row"><i class="fas fa-check-circle" style="color:#059669"></i><div><strong>AES-256 + TLS 1.3</strong><span>All data encrypted at rest and in transit</span></div></div>
+              </div>
+            </div>
+
+            <div class="stg-notif-group" style="margin-top:20px">
+              <div class="stg-notif-header">Data Export &amp; Deletion</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+                <button class="btn btn-outline stn-sm" onclick="showToast('Preparing your data export… you will receive an email within 24 hours.','info')"><i class="fas fa-download"></i> Export My Data</button>
+                <button class="btn btn-outline stn-sm" style="color:#dc2626;border-color:#dc2626" onclick="showToast('Account deletion request submitted. Your manager will be notified.','error')"><i class="fas fa-trash-alt"></i> Request Account Deletion</button>
+              </div>
+            </div>
+          </div>
+
         </div>{/* /settings-content */}
       </div>{/* /settings-layout */}
     </div>
@@ -13383,6 +13426,16 @@ function HelpPage() {
               <div class="help-art-info"><strong>Reports &amp; Analytics — Data Glossary</strong><span>Every metric defined and explained</span></div>
               <i class="fas fa-chevron-right help-art-chevron"></i>
             </div>
+            <div class="help-article-row" onclick="helpOpenArticle('sales')">
+              <i class="fas fa-file-alt help-art-icon"></i>
+              <div class="help-art-info"><strong>Sales Pipeline — 5-Tab View Guide</strong><span>Kanban, List, Focus, Analytics &amp; Lifecycle explained</span></div>
+              <i class="fas fa-chevron-right help-art-chevron"></i>
+            </div>
+            <div class="help-article-row" onclick="helpOpenArticle('growth-opportunities')">
+              <i class="fas fa-file-alt help-art-icon"></i>
+              <div class="help-art-info"><strong>Growth Opportunities — AI Score Guide</strong><span>How AI scores work and how to act on them</span></div>
+              <i class="fas fa-chevron-right help-art-chevron"></i>
+            </div>
           </div>
 
           <div class="help-article-group" style="margin-top:16px">
@@ -13390,37 +13443,51 @@ function HelpPage() {
             <div class="help-shortcuts-grid">
               <div class="help-shortcut-row"><kbd>G D</kbd><span>Go to Dashboard</span></div>
               <div class="help-shortcut-row"><kbd>G C</kbd><span>Go to Clients</span></div>
-              <div class="help-shortcut-row"><kbd>G P</kbd><span>Go to Pipeline</span></div>
+              <div class="help-shortcut-row"><kbd>G P</kbd><span>Go to Sales Pipeline</span></div>
               <div class="help-shortcut-row"><kbd>G A</kbd><span>Go to AI Agents</span></div>
               <div class="help-shortcut-row"><kbd>⌘K</kbd><span>Spotlight Search</span></div>
               <div class="help-shortcut-row"><kbd>Esc</kbd><span>Close any modal</span></div>
               <div class="help-shortcut-row"><kbd>G R</kbd><span>Go to Reports</span></div>
               <div class="help-shortcut-row"><kbd>G I</kbd><span>Go to AI Insights</span></div>
+              <div class="help-shortcut-row"><kbd>G L</kbd><span>Go to AI Planner</span></div>
+              <div class="help-shortcut-row"><kbd>G G</kbd><span>Go to Growth Opportunities</span></div>
             </div>
           </div>
 
           <div class="help-article-group" style="margin-top:16px">
-            <div class="help-article-group-title">🔔 What's New — Q1 2026</div>
+            <div class="help-article-group-title">🔔 What's New — Q2 2026</div>
             <div class="help-release-list">
               <div class="help-release-row">
                 <span class="help-release-tag new">New</span>
-                <div class="help-release-info"><strong>AI Insights Dashboard</strong> — Full AI scorecard with 6 domain scores and trend charts</div>
+                <div class="help-release-info"><strong>Sales Pipeline 5-Tab View</strong> — Kanban, List, Focus, Analytics &amp; Lifecycle tabs. Persistent stale-deal badge in toolbar</div>
               </div>
               <div class="help-release-row">
                 <span class="help-release-tag new">New</span>
-                <div class="help-release-info"><strong>View Trend &amp; Actions</strong> — Drill-down modals with 9-month score trends and prioritized actions</div>
+                <div class="help-release-info"><strong>Lifecycle Tab</strong> — Full lead-to-growth kanban: Leads → Opportunities → Active Clients → Growth Ready in one view</div>
+              </div>
+              <div class="help-release-row">
+                <span class="help-release-tag new">New</span>
+                <div class="help-release-info"><strong>Growth Opportunities</strong> — Renamed from Upsell Track. AI score chips (0–100) on all 8 client cards with colour-coded priority</div>
+              </div>
+              <div class="help-release-row">
+                <span class="help-release-tag new">New</span>
+                <div class="help-release-info"><strong>Claims — 4-Tab Redesign</strong> — Overview, Active Claims, AI Triage, and Analytics tabs replace single-view layout</div>
               </div>
               <div class="help-release-row">
                 <span class="help-release-tag improved">Improved</span>
-                <div class="help-release-info"><strong>Underwriting STP Engine</strong> — 73% straight-through rate (up from 61% in Q4 2025)</div>
+                <div class="help-release-info"><strong>AI Insights — NOVA AI Link</strong> — Direct “Launch NOVA AI” button in header and live banner for instant access</div>
               </div>
               <div class="help-release-row">
                 <span class="help-release-tag improved">Improved</span>
-                <div class="help-release-info"><strong>Retention Intelligence</strong> — Lapse prediction now 67 days ahead (was 45 days)</div>
+                <div class="help-release-info"><strong>Navigation</strong> — HOME label, AI Planner (was Schedule), Journey Pipeline merged into Sales Lifecycle tab</div>
+              </div>
+              <div class="help-release-row">
+                <span class="help-release-tag improved">Improved</span>
+                <div class="help-release-info"><strong>Settings</strong> — Added Data &amp; Privacy tab with SOC 2 / FINRA / NAIC compliance status and data export controls</div>
               </div>
               <div class="help-release-row">
                 <span class="help-release-tag fixed">Fixed</span>
-                <div class="help-release-info"><strong>Claims Triage</strong> — Document gap detection accuracy improved to 91%</div>
+                <div class="help-release-info"><strong>Sales Pipeline Phase 4 Queue</strong> — Application Submission Hub now populates correctly on page load</div>
               </div>
             </div>
           </div>

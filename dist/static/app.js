@@ -24,13 +24,13 @@ function navigateTo(page) {
     policies: 'Policy Management',
     'ai-agents': 'AI Agent Hub',
     campaigns: 'Campaigns',
-    upsell: 'Growth Track',
+    upsell: 'Growth Opportunities',
     alerts: 'Policy Alerts',
     'pipeline-view': 'Sales Pipeline',
     sales: 'Sales Pipeline',
     products: 'Product Intelligence Hub',
     reports: 'Reports & Analytics',
-    calendar: 'Schedule',
+    calendar: 'AI Planner',
     'ai-insights': 'AI Insights',
     claims: 'Claims Management',
     underwriting: 'Underwriting Pipeline',
@@ -55,13 +55,13 @@ function navigateTo(page) {
     policies: 'Home / Policies',
     'ai-agents': 'Home / AI Agents',
     campaigns: 'Home / Marketing / Campaigns',
-    upsell: 'Home / Sales / Growth Track',
+    upsell: 'Home / Sales / Growth Opportunities',
     alerts: 'Home / Service / Policy Alerts',
     'pipeline-view': 'Home / Sales / Sales Pipeline',
     sales: 'Home / Sales / Sales Pipeline',
     products: 'Home / Products',
     reports: 'Home / Reports',
-    calendar: 'Home / Schedule',
+    calendar: 'Home / AI Planner',
     'ai-insights': 'Home / Insights / AI Insights',
     claims: 'Home / Claims',
     underwriting: 'Home / Sales / Underwriting',
@@ -15335,7 +15335,7 @@ function toggleProfileMenu() {
           <span class="pm-item-shortcut">YTD: $1.87M</span>
         </div>
         <div class="pm-item" onclick="navigateTo('calendar');closeProfileMenu()">
-          <i class="fas fa-calendar"></i> My Calendar
+          <i class="fas fa-calendar-alt"></i> AI Planner
           <span class="pm-item-shortcut">8 upcoming</span>
         </div>
         <div class="pm-item" onclick="navigateTo('sales');closeProfileMenu()">
@@ -15343,12 +15343,15 @@ function toggleProfileMenu() {
           <span class="pm-item-shortcut">9 deals</span>
         </div>
         <hr class="pm-sep"/>
-        <div class="pm-item pm-settings" onclick="openProfileSettings()">
+        <div class="pm-item pm-settings" onclick="navigateTo('settings');closeProfileMenu()">
           <i class="fas fa-cog"></i> Settings &amp; Preferences
           <span class="pm-item-kbd">⌘,</span>
         </div>
         <div class="pm-item" onclick="openPreferences()">
           <i class="fas fa-sliders-h"></i> Appearance &amp; Notifications
+        </div>
+        <div class="pm-item" onclick="navigateTo('help');closeProfileMenu()">
+          <i class="fas fa-life-ring"></i> Help &amp; Support
         </div>
         <hr class="pm-sep"/>
         <div class="pm-item pm-logout" onclick="handleLogout()">
@@ -15397,7 +15400,7 @@ function openProfileSettings() {
   overlay.innerHTML = `
     <div class="modal-box ps-modal" style="max-width:480px">
       <div class="modal-header">
-        <h3><i class="fas fa-cog" style="margin-right:8px;color:#003087"></i>Profile Settings</h3>
+        <h3><i class="fas fa-cog" style="margin-right:8px;color:#003087"></i>Settings &amp; Preferences</h3>
         <button class="modal-close" onclick="document.getElementById('profile-settings-overlay').remove()">&times;</button>
       </div>
       <div class="modal-body" style="padding:20px">
@@ -17216,15 +17219,17 @@ function settingsFontSize(size) {
    ════════════════════════════════════════════════════════════════ */
 
 const _helpArticles = {
-  'getting-started': { title: 'Getting Started with NOVA Analytics Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore the Client Management section to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The AI Agents tab gives you context-aware AI for any client or deal.' },
-  'ai-guide': { title: 'AI Features Guide', body: 'NYL Agent 360 includes 6 AI domains: Underwriting STP (73% auto-approval), Retention Intelligence (67-day lapse prediction), Claims Automation (IDP document processing), Proactive Alert Engine (obituary + NBA detection), Investment Advisory AI, and Meeting Intelligence. View your AI Scorecard in AI Insights.' },
-  'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Pipeline · G+A: AI Agents · G+R: Reports · G+I: AI Insights · ⌘K: Spotlight Search · Esc: Close modal · ?: Show this help panel' },
+  'getting-started': { title: 'Getting Started with NOVA Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore Client 360 to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The AI Agents tab gives context-aware AI for any client or deal. Use G+D/G+C/G+P shortcuts to jump between pages, and ⌘, (or Settings & Preferences from your profile) to configure notifications and AI behaviour.' },
+  'ai-guide': { title: 'AI Features Guide', body: 'NOVA Agent 360 includes 6 AI domains: Underwriting STP (73% auto-approval), Retention Intelligence (67-day lapse prediction), Claims Automation (IDP document processing, 4-tab layout), Proactive Alert Engine (obituary + NBA detection), Investment Advisory AI, and Meeting Intelligence. View your AI Scorecard in AI Insights, and launch NOVA AI directly via the Launch NOVA AI button. Growth Opportunities shows AI scores (0–100) per client.' },
+  'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Sales Pipeline · G+A: AI Agents · G+R: Reports · G+I: AI Insights · G+L: AI Planner · G+G: Growth Opportunities · ⌘K: Spotlight Search · Esc: Close modal · ⌘,: Settings · ?: Show Help' },
   'video-tutorials': { title: 'Video Tutorials', body: 'Video walkthroughs are available on the NYL internal portal. Topics include: Setting up your client profile, Using AI agents for underwriting, Understanding your AI Scorecard, and Configuring notifications. Contact support for access.' },
-  'release-notes': { title: 'Q1 2026 Release Notes', body: 'New: AI Insights Dashboard with 6 domain scores · View Trend & Actions drill-down modals · Settings & Help pages · Improved: STP rate 73% (+12pts) · Retention lapse prediction 67 days ahead · Claims triage <2 min · Fixed: Modal overlay bug, AI Score Trend chart infinite scroll' },
+  'release-notes': { title: 'Q2 2026 Release Notes', body: 'New: Sales Pipeline 5-tab view (Kanban/List/Focus/Analytics/Lifecycle) · Lifecycle tab merges Journey Pipeline into lead-to-growth kanban · Growth Opportunities (AI score chips 0–100 per client) · Claims 4-tab redesign · NOVA AI launch link in AI Insights · Settings Data & Privacy tab · Improved: Navigation (HOME, AI Planner, no Insurance divider) · Phase 4 Application Queue fix · Fixed: Sales Pipeline queue blank on load' },
   'uw-guide': { title: 'Underwriting Pipeline Guide', body: 'The Underwriting STP Engine auto-approves applications scoring below the risk threshold. Applications above threshold route to manual review with AI-generated risk summaries. APS orders are avoided where AI confidence is high — saving $450/case. Current STP rate: 73% (18 APS cases avoided/month).' },
   'retention-guide': { title: 'Retention Intelligence Best Practices', body: 'When a client appears in the Lapse Risk list, act within 48 hours. AI recommends: 1) Personal outreach call, 2) Policy review meeting, 3) Flexible payment options. Clients contacted within the 67-day window have a 60% retention rate vs 23% without AI-guided outreach.' },
   'claims-guide': { title: 'Claims Automation — IDP & Triage', body: 'The IDP (Intelligent Document Processing) engine extracts data from claims documents in <30 seconds with 97.3% accuracy. Claims are auto-triaged within 2 minutes. If a document gap is detected, the system flags the specific missing items and drafts a request letter automatically.' },
   'reports-guide': { title: 'Reports & Analytics — Data Glossary', body: 'STP Rate: % of UW applications auto-approved. Lapse Risk Score: 0–100 AI risk index. AI Score: Composite AI utilization + ROI index. Revenue Unlocked: Direct revenue attributable to AI recommendations. APS Avoided: Applications where AI replaced physical exam. Decision Accuracy: AI vs manual accuracy comparison.' },
+  'sales': { title: 'Sales Pipeline — 5-Tab View Guide', body: 'The Sales Pipeline has 5 views: Kanban (default deal board), List (sortable table), Focus (high-priority deals), Analytics (intel grid + activity log + quick-quote tool), and Lifecycle (full lead-to-growth kanban with 4 columns: Leads → Opportunities → Active Clients → Growth Ready). A persistent stale-deal badge in the toolbar reminds you of deals inactive >14 days. Click it to jump back to Kanban.' },
+  'growth-opportunities': { title: 'Growth Opportunities Guide', body: 'Growth Opportunities (formerly Upsell Track) shows all 8 AI-flagged clients ranked by conversion probability. Each card displays an AI Score (0–100): green ≥80 (high probability), amber ≥60 (medium), grey <60 (watch). The KPI strip shows Total Growth Potential ($2.84M across all clients) and Est. Agent Commission ($141K). Click any card to open the full client brief and outreach tools.' },
 };
 
 const _helpFaqKb = [
@@ -17233,8 +17238,11 @@ const _helpFaqKb = [
   { q: 'add client new', a: 'clients' },
   { q: 'export pdf report excel', a: 'reports' },
   { q: 'ai score 0 100 scorecard', a: 'ai-insights' },
-  { q: 'cmd k search spotlight shortcut keyboard', a: 'keyboard' },
-  { q: 'data security privacy encryption', a: 'security' },
+  { q: 'cmd k search spotlight shortcut keyboard ai planner growth opportunities lifecycle', a: 'keyboard' },
+  { q: 'data security privacy encryption soc finra naic', a: 'security' },
+  { q: 'pipeline sales lifecycle journey kanban analytics tab', a: 'sales' },
+  { q: 'upsell growth opportunities ai chip score', a: 'ai-guide' },
+  { q: 'claims triage idp 4 tab automation', a: 'claims-guide' },
 ];
 
 function helpSearch(query) {

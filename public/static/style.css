@@ -16910,8 +16910,21 @@ body.spotlight-open { overflow: hidden; }
 }
 .stg-lic-badge.active { background: #dcfce7; color: #15803d; }
 .stg-lic-badge.warn { background: #fef3c7; color: #d97706; }
+.stg-lic-badge.expired { background: #fee2e2; color: #dc2626; }
 .stg-lic-info { font-size: 13px; color: #1e293b; flex: 1; }
 .stg-lic-exp { font-size: 11px; color: #94a3b8; margin-left: 8px; }
+.stg-lic-exp--expired { color: #dc2626; font-weight: 600; }
+.stg-lic-exp--expired a { color: #dc2626; text-decoration: underline; }
+/* Data & Privacy — compliance list */
+.stg-compliance-list { display: flex; flex-direction: column; gap: 0; }
+.stg-compliance-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid #f1f5f9;
+}
+.stg-compliance-row:last-child { border-bottom: none; }
+.stg-compliance-row i { margin-top: 2px; flex-shrink: 0; }
+.stg-compliance-row strong { font-size: 13px; color: #1e293b; display: block; }
+.stg-compliance-row span { font-size: 11px; color: #64748b; }
 
 /* Notification toggles */
 .stg-notif-group {
