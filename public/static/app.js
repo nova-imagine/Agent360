@@ -36358,26 +36358,306 @@ function submitUpload(claimId) {
    State stored in window._fcw = { step, client, type, policy, docs, claimId }
    ═══════════════════════════════════════════════════════════════════ */
 
+/* ─────────────────────────────────────────────────────────────────
+   FILE NEW CLAIM WIZARD — CLIENT + CLAIMANT DATA
+   Each client has: id, dob, age, policies[], claimants[]
+   claimants[] = approved people who can file on behalf of this insured
+   ───────────────────────────────────────────────────────────────── */
 var _fcwClientData = {
-  'Robert Chen':    { id:'P-100350', dob:'1968-03-14', age:58, policies:[{ num:'NYL-P-100350', type:'Whole Life',    face:'$1,000,000', status:'In Force', issued:'2018-06-01', premium:'$4,200/yr',  bene:'Susan Chen (spouse)' }, { num:'NYL-P-100350B', type:'Term 20',       face:'$500,000',   status:'In Force', issued:'2020-01-15', premium:'$980/yr',   bene:'Susan Chen (spouse)' }] },
-  'Sandra Williams':{ id:'P-100287', dob:'1955-09-22', age:70, policies:[{ num:'NYL-P-100287', type:'Universal Life',face:'$250,000',   status:'In Force', issued:'2012-03-10', premium:'$3,100/yr',  bene:'Daniel Williams (son)' }] },
-  'Maria Gonzalez': { id:'P-100398', dob:'1972-07-05', age:53, policies:[{ num:'NYL-P-100398', type:'Whole Life',    face:'$500,000',   status:'In Force', issued:'2019-11-20', premium:'$2,800/yr',  bene:'Carlos Gonzalez (spouse)' }, { num:'NYL-P-100487', type:'Disability Income',face:'$4,200/mo', status:'In Force', issued:'2021-04-01', premium:'$1,200/yr',  bene:'N/A' }] },
-  'James Whitfield':{ id:'P-100421', dob:'1949-12-30', age:76, policies:[{ num:'NYL-P-100421', type:'LTC Combo',     face:'$300,000',   status:'In Force', issued:'2010-08-14', premium:'$5,600/yr',  bene:'Alice Whitfield (spouse)' }] },
-  'Linda Morrison': { id:'P-100312', dob:'1961-04-18', age:64, policies:[{ num:'NYL-P-100312', type:'Term 30',       face:'$200,000',   status:'In Force', issued:'2008-09-01', premium:'$520/yr',    bene:'Michael Morrison (spouse)' }] },
-  'Kevin Park':     { id:'P-100445', dob:'1980-11-02', age:45, policies:[{ num:'NYL-P-100445', type:'Whole Life',    face:'$250,000',   status:'Pending',  issued:'2024-02-15', premium:'$1,840/yr',  bene:'Jenny Park (spouse)' }] },
-  'Patricia Nguyen':{ id:'P-100378', dob:'1970-06-25', age:55, policies:[{ num:'NYL-P-100378', type:'Universal Life',face:'$400,000',   status:'In Force', issued:'2016-02-28', premium:'$3,600/yr',  bene:'Andrew Nguyen (spouse)' }] },
-  'Susan Chen':     { id:'P-100290', dob:'1966-08-11', age:59, policies:[{ num:'NYL-P-100290', type:'Term 20',       face:'$300,000',   status:'In Force', issued:'2015-05-01', premium:'$1,100/yr',  bene:'Robert Chen (spouse)' }] },
-  'David Kim':      { id:'P-100456', dob:'1985-02-14', age:41, policies:[{ num:'NYL-P-100456', type:'Whole Life',    face:'$500,000',   status:'In Force', issued:'2022-09-01', premium:'$2,400/yr',  bene:'Emily Kim (spouse)' }] },
-  'Emily Rodriguez':{ id:'P-100341', dob:'1958-10-07', age:67, policies:[{ num:'NYL-P-100341', type:'LTC Rider',     face:'$150,000',   status:'In Force', issued:'2011-03-15', premium:'$2,900/yr',  bene:'Marco Rodriguez (spouse)' }] }
+  'Robert Chen': {
+    id:'P-100350', dob:'1968-03-14', age:58,
+    claimants:[
+      { name:'Susan Chen',            rel:'Spouse',           email:'susan.chen@email.com',   phone:'415-555-0182' },
+      { name:'Robert Chen Jr.',       rel:'Son',              email:'rchen.jr@email.com',      phone:'415-555-0193' },
+      { name:'Estate of Robert Chen', rel:'Trustee / Estate', email:'attorney@legalfirm.com',  phone:'415-555-0200' }
+    ],
+    policies:[
+      { num:'NYL-P-100350',  type:'Whole Life',       face:'$1,000,000', status:'In Force', issued:'2018-06-01', premium:'$4,200/yr', bene:'Susan Chen (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Waiver of Premium','Accidental Death Benefit (ADB Rider)'] },
+      { num:'NYL-P-100350B', type:'Term Life (20yr)', face:'$500,000',   status:'In Force', issued:'2020-01-15', premium:'$980/yr',   bene:'Susan Chen (spouse)',
+        riders:['Waiver of Premium','Child Term Rider'] },
+      { num:'NYL-P-100350C', type:'Variable Universal Life (VUL)', face:'$750,000', status:'In Force', issued:'2022-03-01', premium:'$6,100/yr', bene:'Susan Chen (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Critical Illness Rider'] }
+    ]
+  },
+  'Sandra Williams': {
+    id:'P-100287', dob:'1955-09-22', age:70,
+    claimants:[
+      { name:'Daniel Williams',   rel:'Son',              email:'daniel.w@email.com',    phone:'312-555-0147' },
+      { name:'Sandra Williams',   rel:'Policyholder',     email:'sandra.w@email.com',    phone:'312-555-0148' },
+      { name:'Rachel Williams',   rel:'Daughter',         email:'rachel.w@email.com',    phone:'312-555-0149' }
+    ],
+    policies:[
+      { num:'NYL-P-100287',  type:'Universal Life',   face:'$250,000', status:'In Force', issued:'2012-03-10', premium:'$3,100/yr', bene:'Daniel Williams (son)',
+        riders:['Waiver of Premium','Accidental Death Benefit (ADB Rider)'] },
+      { num:'NYL-P-100287B', type:'Long-term Care (LTC) Standalone', face:'$180,000 pool', status:'In Force', issued:'2015-07-01', premium:'$2,400/yr', bene:'N/A',
+        riders:['Inflation Protection','Shared Care Rider'] },
+      { num:'NYL-P-100287C', type:'Disability Income', face:'$3,500/mo', status:'In Force', issued:'2014-05-20', premium:'$900/yr', bene:'N/A',
+        riders:['COLA Rider','Own Occupation Rider'] }
+    ]
+  },
+  'Maria Gonzalez': {
+    id:'P-100398', dob:'1972-07-05', age:53,
+    claimants:[
+      { name:'Maria Gonzalez',    rel:'Policyholder',     email:'maria.g@email.com',     phone:'213-555-0201' },
+      { name:'Carlos Gonzalez',   rel:'Spouse (POA)',      email:'carlos.g@email.com',    phone:'213-555-0202' },
+      { name:'Sofia Gonzalez',    rel:'Daughter',          email:'sofia.g@email.com',     phone:'213-555-0203' }
+    ],
+    policies:[
+      { num:'NYL-P-100398',  type:'Whole Life',       face:'$500,000',   status:'In Force', issued:'2019-11-20', premium:'$2,800/yr', bene:'Carlos Gonzalez (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Critical Illness Rider','Waiver of Premium'] },
+      { num:'NYL-P-100487',  type:'Disability Income', face:'$4,200/mo', status:'In Force', issued:'2021-04-01', premium:'$1,200/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider','Catastrophic Disability Rider'] },
+      { num:'NYL-P-100398C', type:'Universal Life',    face:'$120,000',  status:'In Force', issued:'2017-06-15', premium:'$1,400/yr', bene:'Carlos Gonzalez (spouse)',
+        riders:['Accelerated Death Benefit (ADB)'] }
+    ]
+  },
+  'James Whitfield': {
+    id:'P-100421', dob:'1949-12-30', age:76,
+    claimants:[
+      { name:'Alice Whitfield',   rel:'Spouse',           email:'alice.w@email.com',     phone:'617-555-0311' },
+      { name:'James Whitfield',   rel:'Policyholder',     email:'james.w@email.com',     phone:'617-555-0312' },
+      { name:'Thomas Whitfield',  rel:'Son (POA)',         email:'thomas.w@email.com',    phone:'617-555-0313' }
+    ],
+    policies:[
+      { num:'NYL-P-100421',  type:'Long-term Care (LTC) Combo', face:'$300,000 pool', status:'In Force', issued:'2010-08-14', premium:'$5,600/yr', bene:'Alice Whitfield (spouse)',
+        riders:['Inflation Protection','Shared Care','Return of Premium'] },
+      { num:'NYL-P-100421B', type:'Whole Life',       face:'$250,000',   status:'In Force', issued:'2005-03-01', premium:'$3,200/yr', bene:'Alice Whitfield (spouse)',
+        riders:['Waiver of Premium','Accelerated Death Benefit (ADB)'] }
+    ]
+  },
+  'Linda Morrison': {
+    id:'P-100312', dob:'1961-04-18', age:64,
+    claimants:[
+      { name:'Linda Morrison',    rel:'Policyholder',     email:'linda.m@email.com',     phone:'202-555-0421' },
+      { name:'Michael Morrison',  rel:'Spouse',           email:'michael.m@email.com',   phone:'202-555-0422' },
+      { name:'Jessica Morrison',  rel:'Daughter',         email:'jessica.m@email.com',   phone:'202-555-0423' }
+    ],
+    policies:[
+      { num:'NYL-P-100312',  type:'Term Life (30yr)',  face:'$200,000',  status:'In Force', issued:'2008-09-01', premium:'$520/yr',   bene:'Michael Morrison (spouse)',
+        riders:['Waiver of Premium','Child Term Rider'] },
+      { num:'NYL-P-100362',  type:'Variable Universal Life (VUL)', face:'$650,000', status:'In Force', issued:'2015-01-10', premium:'$5,200/yr', bene:'Michael Morrison (spouse)',
+        riders:['Waiver of Premium','Accidental Death Benefit (ADB Rider)','Critical Illness Rider'] },
+      { num:'NYL-P-100312C', type:'Disability Income', face:'$3,200/mo', status:'In Force', issued:'2012-06-01', premium:'$780/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider'] }
+    ]
+  },
+  'Kevin Park': {
+    id:'P-100445', dob:'1980-11-02', age:45,
+    claimants:[
+      { name:'Jenny Park',        rel:'Spouse',           email:'jenny.park@email.com',  phone:'718-555-0531' },
+      { name:'Estate of Kevin Park', rel:'Trustee / Estate', email:'attorney@parklaw.com', phone:'718-555-0532' }
+    ],
+    policies:[
+      { num:'NYL-P-100445',  type:'Whole Life',       face:'$250,000',   status:'Pending',  issued:'2024-02-15', premium:'$1,840/yr', bene:'Jenny Park (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Waiver of Premium'] }
+    ]
+  },
+  'Patricia Nguyen': {
+    id:'P-100378', dob:'1970-06-25', age:55,
+    claimants:[
+      { name:'Patricia Nguyen',   rel:'Policyholder',     email:'pat.nguyen@email.com',  phone:'408-555-0611' },
+      { name:'Andrew Nguyen',     rel:'Spouse',           email:'andrew.n@email.com',    phone:'408-555-0612' },
+      { name:'Lily Nguyen',       rel:'Daughter',         email:'lily.n@email.com',      phone:'408-555-0613' }
+    ],
+    policies:[
+      { num:'NYL-P-100378',  type:'Universal Life',   face:'$400,000',   status:'In Force', issued:'2016-02-28', premium:'$3,600/yr', bene:'Andrew Nguyen (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Critical Illness Rider','Waiver of Premium'] },
+      { num:'NYL-P-100378B', type:'Long-term Care (LTC) Rider (on UL)', face:'$150,000 pool', status:'In Force', issued:'2018-04-01', premium:'Included in UL', bene:'N/A',
+        riders:['Inflation Protection'] },
+      { num:'NYL-P-100378C', type:'Disability Income', face:'$4,000/mo', status:'In Force', issued:'2019-01-15', premium:'$1,050/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider'] }
+    ]
+  },
+  'Susan Chen': {
+    id:'P-100290', dob:'1966-08-11', age:59,
+    claimants:[
+      { name:'Susan Chen',        rel:'Policyholder',     email:'susan.chen@email.com',  phone:'415-555-0182' },
+      { name:'Robert Chen',       rel:'Spouse',           email:'robert.chen@email.com', phone:'415-555-0101' },
+      { name:'Robert Chen Jr.',   rel:'Son',              email:'rchen.jr@email.com',    phone:'415-555-0193' }
+    ],
+    policies:[
+      { num:'NYL-P-100290',  type:'Term Life (20yr)',  face:'$300,000',   status:'In Force', issued:'2015-05-01', premium:'$1,100/yr', bene:'Robert Chen (spouse)',
+        riders:['Waiver of Premium'] },
+      { num:'NYL-P-100290B', type:'Disability Income', face:'$3,800/mo', status:'In Force', issued:'2018-08-01', premium:'$920/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider'] }
+    ]
+  },
+  'David Kim': {
+    id:'P-100456', dob:'1985-02-14', age:41,
+    claimants:[
+      { name:'David Kim',         rel:'Policyholder',     email:'david.kim@email.com',   phone:'646-555-0711' },
+      { name:'Emily Kim',         rel:'Spouse',           email:'emily.kim@email.com',   phone:'646-555-0712' },
+      { name:'Jason Kim',         rel:'Son',              email:'jason.kim@email.com',   phone:'646-555-0713' }
+    ],
+    policies:[
+      { num:'NYL-P-100456',  type:'Whole Life',       face:'$500,000',   status:'In Force', issued:'2022-09-01', premium:'$2,400/yr', bene:'Emily Kim (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Critical Illness Rider','Waiver of Premium','Child Term Rider'] },
+      { num:'NYL-P-100456B', type:'Disability Income', face:'$5,500/mo', status:'In Force', issued:'2023-01-01', premium:'$1,400/yr', bene:'N/A',
+        riders:['Own Occupation Rider','COLA Rider','Catastrophic Disability Rider'] }
+    ]
+  },
+  'Emily Rodriguez': {
+    id:'P-100341', dob:'1958-10-07', age:67,
+    claimants:[
+      { name:'Emily Rodriguez',   rel:'Policyholder',     email:'emily.rod@email.com',   phone:'305-555-0811' },
+      { name:'Marco Rodriguez',   rel:'Spouse',           email:'marco.rod@email.com',   phone:'305-555-0812' },
+      { name:'Sofia Rodriguez',   rel:'Daughter (POA)',   email:'sofia.rod@email.com',   phone:'305-555-0813' }
+    ],
+    policies:[
+      { num:'NYL-P-100341',  type:'Long-term Care (LTC) Rider', face:'$150,000 pool', status:'In Force', issued:'2011-03-15', premium:'$2,900/yr', bene:'Marco Rodriguez (spouse)',
+        riders:['Inflation Protection','Shared Care'] },
+      { num:'NYL-P-100341B', type:'Whole Life',       face:'$200,000',   status:'In Force', issued:'2008-06-01', premium:'$2,100/yr', bene:'Marco Rodriguez (spouse)',
+        riders:['Accelerated Death Benefit (ADB)','Waiver of Premium'] }
+    ]
+  }
 };
 
+/* ─────────────────────────────────────────────────────────────────
+   COMPREHENSIVE CLAIM TYPE → POLICY AFFINITY MAP
+   Maps each claim type to the policy types that cover it.
+   Used in Step 3 to rank / auto-highlight the right policy.
+   ───────────────────────────────────────────────────────────────── */
+var _fcwTypeToPolicy = {
+  'Death Benefit':                        ['Whole Life','Term Life','Universal Life','Variable Universal Life (VUL)','Variable Life','Indexed Universal Life (IUL)','Survivorship / Joint Life'],
+  'Accelerated Death Benefit (ADB)':      ['Whole Life','Universal Life','Variable Universal Life (VUL)','Indexed Universal Life (IUL)'],
+  'Accidental Death Benefit (ADB Rider)': ['Whole Life','Term Life','Universal Life','Variable Universal Life (VUL)'],
+  'Disability Income':                    ['Disability Income'],
+  'Long-term Care (LTC)':                 ['Long-term Care (LTC) Standalone','Long-term Care (LTC) Combo','Long-term Care (LTC) Rider'],
+  'Waiver of Premium':                    ['Whole Life','Term Life','Universal Life','Variable Universal Life (VUL)','Indexed Universal Life (IUL)'],
+  'Critical Illness Rider':               ['Whole Life','Universal Life','Variable Universal Life (VUL)','Indexed Universal Life (IUL)'],
+  'Child Term Rider':                     ['Whole Life','Term Life','Universal Life'],
+  'Chronic Illness Rider (Living Benefit)':['Whole Life','Universal Life','Indexed Universal Life (IUL)','Variable Universal Life (VUL)'],
+  'Maturity / Endowment':                 ['Whole Life','Endowment Policy'],
+  'Paid-up Additions':                    ['Whole Life'],
+  'Policy Surrender / Cash Value':        ['Whole Life','Universal Life','Variable Universal Life (VUL)','Indexed Universal Life (IUL)','Variable Life'],
+  'Annuity Income Claim':                 ['Fixed Annuity','Variable Annuity','Indexed Annuity','Immediate Annuity'],
+  'Survivorship (2nd-to-die) Benefit':    ['Survivorship / Joint Life']
+};
+
+/* ─────────────────────────────────────────────────────────────────
+   COMPREHENSIVE DOCUMENT CHECKLIST  per claim type
+   Format: [{ name, required, preloaded, hint }]
+   required: true = must have before payout
+   preloaded: true = AI has already pulled/verified this from CRM
+   ───────────────────────────────────────────────────────────────── */
 var _fcwClaimTypeDocs = {
-  'Death Benefit':                  ['Death Certificate (certified copy)','Claimant Statement (Form CL-1)','Claimant Government-issued ID','Policy Document (original or copy)','Beneficiary Designation Form','Funeral Home Statement (if applicable)'],
-  'Accelerated Death Benefit (ADB)':['Terminal Illness Certification (ADB-TC-2026)','Attending Physician Statement (APS)','Claimant Statement (Form ADB-1)','Medical Records (diagnosis confirmation)','Policy Document','Claimant Government-issued ID'],
-  'Disability Income':              ['Attending Physician Statement (APS)','Claimant Disability Statement','Employer Disability Verification','Occupational Assessment Form','Medical Records (supporting diagnosis)','Government-issued ID'],
-  'Long-term Care (LTC)':           ['LTC Eligibility Certification','Care Plan from Licensed Provider','Provider Invoice / Facility Agreement','Medical Necessity Letter','Activities of Daily Living (ADL) Assessment','Government-issued ID'],
-  'Waiver of Premium':              ['Physician Disability Statement','Premium Waiver Application (Form WP-1)','Medical History Summary','Employer Disability Confirmation Letter','Government-issued ID'],
-  'Critical Illness Rider':         ['Specialist Diagnosis Report','Hospital Records (admission & diagnosis)','Pathology / Lab Report','Attending Physician Statement','Claimant Statement','Government-issued ID']
+  'Death Benefit': [
+    { name:'Death Certificate (certified copy)',          required:true,  preloaded:false, hint:'Must be government-issued — hospital copy not accepted' },
+    { name:'Claimant Statement (Form CL-1)',              required:true,  preloaded:false, hint:'NYL standard claimant declaration form' },
+    { name:'Claimant Government-issued Photo ID',         required:true,  preloaded:false, hint:'Passport, driver\'s license, or national ID' },
+    { name:'Beneficiary Designation Form (on file)',      required:false, preloaded:true,  hint:'AI pre-fetched from CRM policy record' },
+    { name:'Policy Document (original or certified copy)',required:false, preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'Funeral Home / Burial Statement',             required:false, preloaded:false, hint:'Required if funeral expense reimbursement is claimed' },
+    { name:'Medical Examiner / Coroner Report',           required:false, preloaded:false, hint:'Required for accidental, sudden, or suspicious death' },
+    { name:'Autopsy Report',                              required:false, preloaded:false, hint:'Required if cause of death is contested or unclear' }
+  ],
+  'Accelerated Death Benefit (ADB)': [
+    { name:'Terminal Illness Certification (Form ADB-TC-2026)', required:true,  preloaded:false, hint:'Must be signed by licensed physician — life expectancy ≤ 12 months' },
+    { name:'Attending Physician Statement (APS)',          required:true,  preloaded:false, hint:'Detailed prognosis and treatment history from treating physician' },
+    { name:'Claimant Statement (Form ADB-1)',              required:true,  preloaded:false, hint:'Policyholder\'s own statement of diagnosis and purpose of funds' },
+    { name:'Medical Records (diagnosis confirmation)',     required:false, preloaded:false, hint:'Oncology / specialist records confirming terminal condition' },
+    { name:'Policy Document',                             required:false, preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'Claimant Government-issued Photo ID',         required:false, preloaded:false, hint:'Passport or driver\'s license' },
+    { name:'ADB Application Form (signed)',               required:false, preloaded:false, hint:'Available from NYL agent portal or digital submission' }
+  ],
+  'Accidental Death Benefit (ADB Rider)': [
+    { name:'Death Certificate (certified copy)',          required:true,  preloaded:false, hint:'Government-issued, listing accidental cause of death' },
+    { name:'Accident / Police Report',                    required:true,  preloaded:false, hint:'Official report from police, fire department, or investigating authority' },
+    { name:'Claimant Statement (Form CL-1)',              required:true,  preloaded:false, hint:'NYL standard claimant declaration form' },
+    { name:'Claimant Government-issued Photo ID',         required:false, preloaded:false, hint:'Passport or driver\'s license' },
+    { name:'Medical Examiner / Coroner Report',           required:false, preloaded:false, hint:'Required for accidental death — official cause determination' },
+    { name:'Hospital / Emergency Records',                required:false, preloaded:false, hint:'ER or trauma records establishing accidental injury chain' },
+    { name:'News Report / Third-party Accident Witness',  required:false, preloaded:false, hint:'Supporting evidence of accidental event' }
+  ],
+  'Disability Income': [
+    { name:'Attending Physician Statement (APS)',          required:true,  preloaded:false, hint:'Treating physician must confirm diagnosis, functional limitations, and expected duration' },
+    { name:'Claimant Disability Statement (Form DI-1)',    required:true,  preloaded:false, hint:'Policyholder\'s signed description of disability onset and impact on work' },
+    { name:'Employer Disability Verification Letter',     required:true,  preloaded:false, hint:'HR or payroll confirmation of last day worked and current employment status' },
+    { name:'Pre-disability Earnings Documentation',       required:false, preloaded:true,  hint:'AI pre-fetched from employer payroll records on file' },
+    { name:'Medical Records (supporting diagnosis)',      required:false, preloaded:false, hint:'Hospital admission, surgery, or specialist records' },
+    { name:'Occupational Assessment Form (OA-2)',         required:false, preloaded:false, hint:'Required for own-occupation policies — describes job duties in detail' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Passport or driver\'s license' },
+    { name:'Surgical Report (if disability from surgery)',required:false, preloaded:false, hint:'Operating surgeon\'s report confirming procedure and recovery timeline' }
+  ],
+  'Long-term Care (LTC)': [
+    { name:'LTC Eligibility Certification (Form LTC-EC)', required:true,  preloaded:false, hint:'Licensed physician must certify inability to perform 2+ ADLs or cognitive impairment' },
+    { name:'Activities of Daily Living (ADL) Assessment', required:true,  preloaded:false, hint:'Standardized ADL assessment form — minimum 2 of 6 impairments required' },
+    { name:'Plan of Care from Licensed Care Provider',    required:true,  preloaded:false, hint:'Signed plan of care from licensed home health agency, ALF, or skilled nursing facility' },
+    { name:'Care Provider Invoice / Facility Agreement',  required:false, preloaded:false, hint:'Facility admission contract or home care agency invoice for reimbursement calculation' },
+    { name:'Medical Necessity Letter',                    required:false, preloaded:false, hint:'Physician letter confirming long-term care is medically necessary' },
+    { name:'Care Provider License & Accreditation',       required:false, preloaded:false, hint:'State license number and accreditation of the care facility or agency' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Claimant or authorized representative photo ID' },
+    { name:'Monthly Care Summary (ongoing)',              required:false, preloaded:false, hint:'Submitted monthly for ongoing benefit continuation' }
+  ],
+  'Waiver of Premium': [
+    { name:'Physician Disability Statement (Form WP-PDS)',required:true,  preloaded:false, hint:'Treating physician must certify total disability and expected duration' },
+    { name:'Premium Waiver Application (Form WP-1)',      required:true,  preloaded:false, hint:'NYL standard waiver application — policyholder or authorized rep signs' },
+    { name:'Employer Disability Confirmation',            required:true,  preloaded:false, hint:'Employer confirmation of last day worked and inability to return' },
+    { name:'Medical History Summary',                     required:false, preloaded:false, hint:'Hospital or specialist records supporting disability onset' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Policyholder photo ID' },
+    { name:'Surgical or Hospital Report',                 required:false, preloaded:false, hint:'If disability is surgery-related — operating surgeon\'s report' }
+  ],
+  'Critical Illness Rider': [
+    { name:'Specialist Diagnosis Report',                 required:true,  preloaded:false, hint:'Board-certified specialist confirming covered critical illness — oncologist, cardiologist, etc.' },
+    { name:'Pathology / Lab Report',                      required:true,  preloaded:false, hint:'Biopsy, imaging, or lab results confirming diagnosis code' },
+    { name:'Hospital Admission & Discharge Records',      required:true,  preloaded:false, hint:'Full inpatient records for the qualifying event' },
+    { name:'Attending Physician Statement (APS)',          required:false, preloaded:false, hint:'Primary treating physician\'s clinical summary' },
+    { name:'Claimant Statement (Form CI-1)',              required:false, preloaded:false, hint:'Claimant signed description of illness and treatment plan' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Claimant passport or driver\'s license' },
+    { name:'Prior Authorization / Insurance EOB',         required:false, preloaded:false, hint:'If other insurance has adjudicated — include EOB for coordination of benefits' }
+  ],
+  'Child Term Rider': [
+    { name:'Child\'s Birth Certificate',                  required:true,  preloaded:false, hint:'Certified copy proving insurable interest and age eligibility' },
+    { name:'Death Certificate (child)',                   required:true,  preloaded:false, hint:'Government-issued certified copy' },
+    { name:'Claimant Statement (Form CL-1)',              required:true,  preloaded:false, hint:'Parent or guardian statement' },
+    { name:'Claimant Government-issued Photo ID',         required:false, preloaded:false, hint:'Filing parent or guardian photo ID' },
+    { name:'Physician / Coroner Report',                  required:false, preloaded:false, hint:'Medical report confirming cause of death' }
+  ],
+  'Chronic Illness Rider (Living Benefit)': [
+    { name:'Chronic Illness Certification (Form CI-LB)',  required:true,  preloaded:false, hint:'Licensed healthcare practitioner certifying permanent inability to perform 2+ ADLs or severe cognitive impairment' },
+    { name:'Attending Physician Statement (APS)',          required:true,  preloaded:false, hint:'Full clinical summary from treating physician' },
+    { name:'ADL Functional Assessment',                   required:true,  preloaded:false, hint:'Standardized assessment — minimum 2 of 6 ADLs permanently impaired' },
+    { name:'Medical Records (chronic condition history)', required:false, preloaded:false, hint:'Specialist records documenting chronic condition timeline' },
+    { name:'Plan of Care (if receiving care services)',   required:false, preloaded:false, hint:'Care provider plan if LTC services are being utilized alongside the rider claim' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Claimant photo ID' }
+  ],
+  'Maturity / Endowment': [
+    { name:'Policy Document (original)',                  required:true,  preloaded:true,  hint:'AI pre-loaded from digital policy vault — maturity date confirmed' },
+    { name:'Claimant Identity Verification',              required:true,  preloaded:false, hint:'Government-issued photo ID to confirm policyholder identity at maturity' },
+    { name:'Maturity Claim Form (Form MT-1)',              required:true,  preloaded:false, hint:'NYL maturity election form — choose lump sum or annuity payout' },
+    { name:'Bank Details for Payment',                    required:false, preloaded:false, hint:'Voided check or bank letter for EFT payout' },
+    { name:'Tax Form W-9 / W-8BEN',                       required:false, preloaded:false, hint:'Required for IRS reporting on maturity payout' }
+  ],
+  'Policy Surrender / Cash Value': [
+    { name:'Policy Surrender Request (Form SV-1)',        required:true,  preloaded:false, hint:'Signed and notarized surrender form — full or partial surrender' },
+    { name:'Original Policy Document',                    required:true,  preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'Government-issued Photo ID',                  required:true,  preloaded:false, hint:'Policyholder passport or driver\'s license' },
+    { name:'Bank Details for Payment',                    required:false, preloaded:false, hint:'Voided check or bank letter for EFT' },
+    { name:'Tax Form W-9',                                required:false, preloaded:false, hint:'Required — surrender may trigger taxable gain' },
+    { name:'Loan Balance Statement (if policy has loan)', required:false, preloaded:true,  hint:'AI pre-fetched outstanding loan balance from CRM' }
+  ],
+  'Annuity Income Claim': [
+    { name:'Annuity Contract (original)',                 required:true,  preloaded:true,  hint:'AI pre-loaded from digital vault' },
+    { name:'Annuitization Election Form (Form ANN-1)',    required:true,  preloaded:false, hint:'Claimant selects payout option — life only, joint, period certain, etc.' },
+    { name:'Government-issued Photo ID',                  required:true,  preloaded:false, hint:'Annuitant or beneficiary photo ID' },
+    { name:'Death Certificate (for death benefit annuity claims)', required:false, preloaded:false, hint:'Required if claim is triggered by annuitant\'s death' },
+    { name:'Bank Details for Payment',                    required:false, preloaded:false, hint:'Voided check or bank letter for EFT' },
+    { name:'Tax Form W-9 / W-8BEN',                       required:false, preloaded:false, hint:'Required for IRS 1099-R reporting' }
+  ],
+  'Survivorship (2nd-to-die) Benefit': [
+    { name:'Death Certificates (both insured parties)',   required:true,  preloaded:false, hint:'Certified copies for both first and second insured deaths' },
+    { name:'Claimant Statement (Form CL-1)',              required:true,  preloaded:false, hint:'Estate, trust, or beneficiary declaration' },
+    { name:'Letters Testamentary / Trust Documents',      required:true,  preloaded:false, hint:'Estate executor authority or trust documentation proving claimant standing' },
+    { name:'Claimant Government-issued Photo ID',         required:false, preloaded:false, hint:'Estate representative or trustee photo ID' },
+    { name:'Policy Document',                             required:false, preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'Attorney / Trustee Contact Information',      required:false, preloaded:false, hint:'For large survivorship policies — legal representative contact required' }
+  ],
+  'Paid-up Additions': [
+    { name:'Policy Document',                             required:true,  preloaded:true,  hint:'AI pre-loaded from digital policy vault' },
+    { name:'PUA Claim / Dividend Election Form',          required:true,  preloaded:false, hint:'Select dividend application option — PUA purchase, premium reduction, or cash' },
+    { name:'Government-issued Photo ID',                  required:false, preloaded:false, hint:'Policyholder photo ID' }
+  ]
 };
 
 var _fcwFraudFlags = {
@@ -36386,7 +36666,7 @@ var _fcwFraudFlags = {
 };
 
 function openFileClaimWizard() {
-  window._fcw = { step: 1, client: '', clientKey: '', type: '', policy: null, docs: [], claimId: '', lossDate: '', desc: '', claimant: '', relationship: '' };
+  window._fcw = { step: 1, client: '', clientKey: '', type: '', policy: null, docs: [], docsInitialized: false, claimId: '', lossDate: '', desc: '', claimant: '', relationship: '', amount: '', hasUpload: false };
   var el = document.getElementById('file-claim-overlay');
   if (el) el.remove();
   var overlay = document.createElement('div');
@@ -36451,9 +36731,50 @@ function fcwStep1Body() {
     return '<option value="' + c + '"' + (c === window._fcw.clientKey ? ' selected' : '') + '>' + c + ' (' + _fcwClientData[c].id + ')</option>';
   }).join('');
 
+  // Build claimant dropdown from selected client's approved claimants list
+  var claimantDropHTML = '';
+  var cd = window._fcw.clientKey ? _fcwClientData[window._fcw.clientKey] : null;
+  if (cd && cd.claimants && cd.claimants.length) {
+    var claimantOpts = cd.claimants.map(function(c) {
+      var val = c.name + '|' + c.rel;
+      var isSelected = window._fcw.claimant === c.name;
+      return '<option value="' + val + '"' + (isSelected ? ' selected' : '') + '>' +
+        c.name + ' — ' + c.rel + '</option>';
+    }).join('');
+    claimantDropHTML =
+      '<div class="fcw-field-group">' +
+        '<label class="fcw-label">Claimant Name ' +
+          '<span class="fcw-hint">(person filing the claim — approved contacts from CRM)</span>' +
+        '</label>' +
+        '<select class="filter-select" id="fcw-claimant" style="width:100%" onchange="fcwOnClaimantChange(this.value)">' +
+          '<option value="">— Select approved claimant —</option>' + claimantOpts +
+        '</select>' +
+        // Show claimant detail card if selected
+        (window._fcw.claimant ? fcwClaimantCard(cd) : '') +
+      '</div>' +
+      // Relationship is auto-populated from the claimants[] record — show as read-only
+      '<div class="fcw-field-group">' +
+        '<label class="fcw-label">Relationship to Insured <span class="fcw-ai-auto-badge"><i class="fas fa-robot"></i> Auto-filled</span></label>' +
+        '<input type="text" class="fcw-input fcw-input-readonly" id="fcw-relationship-display" ' +
+          'value="' + (window._fcw.relationship || '— select claimant above —') + '" readonly>' +
+      '</div>';
+  } else {
+    // No client selected yet — show placeholder
+    claimantDropHTML =
+      '<div class="fcw-field-group">' +
+        '<label class="fcw-label">Claimant Name <span class="fcw-hint">(select client above to load approved claimants)</span></label>' +
+        '<select class="filter-select" id="fcw-claimant" style="width:100%" disabled>' +
+          '<option>— Select client first —</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="fcw-field-group">' +
+        '<label class="fcw-label">Relationship to Insured</label>' +
+        '<input type="text" class="fcw-input fcw-input-readonly" value="— select client first —" readonly>' +
+      '</div>';
+  }
+
   var aiPreviewHTML = '';
-  if (window._fcw.clientKey && _fcwClientData[window._fcw.clientKey]) {
-    var cd = _fcwClientData[window._fcw.clientKey];
+  if (window._fcw.clientKey && cd) {
     var fraud = _fcwFraudFlags[window._fcw.clientKey];
     var fraudBanner = fraud
       ? '<div class="fcw-ai-alert ' + (fraud.level === 'HIGH' ? 'red' : 'orange') + '">' +
@@ -36461,6 +36782,15 @@ function fcwStep1Body() {
           '<div><strong>AI Fraud Flag:</strong> Score ' + fraud.score + ' · ' + fraud.flags.join(' · ') + '</div>' +
         '</div>'
       : '<div class="fcw-ai-alert green"><i class="fas fa-check-circle"></i><div><strong>AI Fraud Check:</strong> No risk flags detected for this client — standard processing</div></div>';
+
+    var policySummary = cd.policies.map(function(p) {
+      var inForce = p.status === 'In Force';
+      return '<span class="fcw-policy-chip' + (inForce ? '' : ' pending') + '">' +
+        '<i class="fas fa-file-contract"></i> ' + p.type + ' · ' + p.face +
+        (inForce ? '' : ' <span style="color:#d97706">⚠ Pending</span>') +
+      '</span>';
+    }).join('');
+
     aiPreviewHTML =
       '<div class="fcw-ai-panel" id="fcw-ai-panel-1">' +
         '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Client Intelligence — Auto-fetched from CRM</div>' +
@@ -36468,36 +36798,42 @@ function fcwStep1Body() {
           '<div class="fcw-ai-grid">' +
             '<div class="fcw-ai-row"><span>Client ID</span><strong>' + cd.id + '</strong></div>' +
             '<div class="fcw-ai-row"><span>Date of Birth</span><strong>' + cd.dob + ' (Age ' + cd.age + ')</strong></div>' +
-            '<div class="fcw-ai-row"><span>Policies In Force</span><strong>' + cd.policies.length + ' active</strong></div>' +
+            '<div class="fcw-ai-row"><span>Policies In Force</span><strong>' + cd.policies.length + ' polic' + (cd.policies.length === 1 ? 'y' : 'ies') + '</strong></div>' +
             '<div class="fcw-ai-row"><span>Primary Beneficiary</span><strong>' + cd.policies[0].bene + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>Approved Claimants</span><strong>' + cd.claimants.length + ' on file</strong></div>' +
           '</div>' +
+          '<div style="margin:8px 0 4px;font-size:11px;font-weight:600;color:#64748b">Active Policies</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">' + policySummary + '</div>' +
           fraudBanner +
-          '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> AI recommendation: Select claim type based on the event — we\'ll match it to the correct policy automatically.</div>' +
+          '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> AI will match the selected claim type to the most eligible policy automatically in Step 3.</div>' +
         '</div>' +
       '</div>';
   }
 
-  return '<div class="fcw-step-title"><i class="fas fa-user"></i> Step 1 — Select Client</div>' +
+  return '<div class="fcw-step-title"><i class="fas fa-user"></i> Step 1 — Select Client &amp; Claimant</div>' +
     '<div class="fcw-field-group">' +
-      '<label class="fcw-label">Client Name</label>' +
+      '<label class="fcw-label">Client (Insured) Name</label>' +
       '<select class="filter-select" id="fcw-client-sel" style="width:100%" onchange="fcwOnClientChange(this.value)">' +
-        '<option value="">— Select client —</option>' + clientOpts +
+        '<option value="">— Select insured client —</option>' + clientOpts +
       '</select>' +
     '</div>' +
-    '<div class="fcw-field-group">' +
-      '<label class="fcw-label">Claimant Name <span class="fcw-hint">(person filing the claim — may differ from insured)</span></label>' +
-      '<input type="text" class="fcw-input" id="fcw-claimant" placeholder="e.g. Susan Chen" value="' + (window._fcw.claimant || '') + '">' +
-    '</div>' +
-    '<div class="fcw-field-group">' +
-      '<label class="fcw-label">Relationship to Insured</label>' +
-      '<select class="filter-select" id="fcw-relationship" style="width:100%">' +
-        ['— Select —','Spouse','Child','Parent','Sibling','Trustee / Estate','Other'].map(function(r) {
-          return '<option' + (r === window._fcw.relationship ? ' selected' : '') + '>' + r + '</option>';
-        }).join('') +
-      '</select>' +
-    '</div>' +
+    claimantDropHTML +
     aiPreviewHTML;
 }
+
+function fcwClaimantCard(cd) {
+  if (!window._fcw.claimant || !cd) return '';
+  var found = null;
+  cd.claimants.forEach(function(c) { if (c.name === window._fcw.claimant) found = c; });
+  if (!found) return '';
+  return '<div class="fcw-claimant-card">' +
+    '<div class="fcw-claimant-card-row"><i class="fas fa-user-circle"></i><strong>' + found.name + '</strong><span class="fcw-rel-badge">' + found.rel + '</span></div>' +
+    '<div class="fcw-claimant-card-row"><i class="fas fa-envelope"></i><span>' + found.email + '</span></div>' +
+    '<div class="fcw-claimant-card-row"><i class="fas fa-phone"></i><span>' + found.phone + '</span></div>' +
+    '<div class="fcw-ai-auto-note"><i class="fas fa-robot"></i> Contact details auto-fetched from CRM · Pre-filled into correspondence templates</div>' +
+  '</div>';
+}
+
 function fcwStep1Footer() {
   return '<button class="p7m-btn ghost" onclick="fcwClose()">Cancel</button>' +
     '<button class="p7m-btn primary" onclick="fcwNextStep1()">Next: Claim Type <i class="fas fa-arrow-right"></i></button>';
@@ -36505,64 +36841,179 @@ function fcwStep1Footer() {
 function fcwOnClientChange(val) {
   window._fcw.clientKey = val;
   window._fcw.client = val;
+  window._fcw.claimant = '';
+  window._fcw.relationship = '';
   fcwRender(1);
-  // re-apply select value after re-render
   var sel = document.getElementById('fcw-client-sel');
   if (sel) sel.value = val;
+}
+function fcwOnClaimantChange(val) {
+  if (!val) { window._fcw.claimant = ''; window._fcw.relationship = ''; return; }
+  var parts = val.split('|');
+  window._fcw.claimant = parts[0] || '';
+  window._fcw.relationship = parts[1] || '';
+  // Update the read-only relationship field without full re-render
+  var relDisp = document.getElementById('fcw-relationship-display');
+  if (relDisp) relDisp.value = window._fcw.relationship;
+  // Update claimant card area
+  var cd = _fcwClientData[window._fcw.clientKey];
+  var sel = document.getElementById('fcw-claimant');
+  // Re-render to show the card — lightweight
+  fcwRender(1);
+  if (sel) { sel = document.getElementById('fcw-claimant'); if (sel) sel.value = val; }
 }
 function fcwNextStep1() {
   var sel = document.getElementById('fcw-client-sel');
   var cl  = document.getElementById('fcw-claimant');
-  var rel = document.getElementById('fcw-relationship');
   if (!sel || !sel.value) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a client to continue', 2000); return; }
-  if (!cl || !cl.value.trim()) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please enter the claimant name', 2000); return; }
-  if (!rel || rel.value === '— Select —') { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select claimant relationship', 2000); return; }
-  window._fcw.clientKey   = sel.value;
-  window._fcw.client      = sel.value;
-  window._fcw.claimant    = cl.value.trim();
-  window._fcw.relationship= rel.value;
+  if (!window._fcw.claimant) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select an approved claimant', 2000); return; }
+  if (!window._fcw.relationship) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Claimant relationship not set', 2000); return; }
+  window._fcw.clientKey = sel.value;
+  window._fcw.client    = sel.value;
   fcwRender(2);
 }
 
 /* ── STEP 2 : CLAIM TYPE + DATE + DESCRIPTION ───────────────────── */
 function fcwStep2Body() {
-  var types = ['Death Benefit','Accelerated Death Benefit (ADB)','Disability Income','Long-term Care (LTC)','Waiver of Premium','Critical Illness Rider'];
-  var typeCards = types.map(function(t) {
-    var icons = { 'Death Benefit':'heart-broken','Accelerated Death Benefit (ADB)':'heartbeat','Disability Income':'user-injured','Long-term Care (LTC)':'hospital','Waiver of Premium':'ban','Critical Illness Rider':'disease' };
-    var descs = { 'Death Benefit':'Lump-sum payout to beneficiary upon insured\'s death','Accelerated Death Benefit (ADB)':'Early access to death benefit upon terminal diagnosis (ADB clause)','Disability Income':'Monthly income replacement when insured cannot work','Long-term Care (LTC)':'Reimbursement for care services — home, assisted living or skilled nursing','Waiver of Premium':'Suspends premium payments during qualifying disability period','Critical Illness Rider':'Lump-sum payment upon diagnosis of covered critical illness' };
-    var isSelected = window._fcw.type === t;
-    return '<div class="fcw-type-card' + (isSelected ? ' selected' : '') + '" onclick="fcwSelectType(\'' + t.replace(/'/g,"\\'") + '\')">' +
-      '<i class="fas fa-' + (icons[t]||'file-medical') + ' fcw-type-icon"></i>' +
-      '<div class="fcw-type-name">' + t + '</div>' +
-      '<div class="fcw-type-desc">' + (descs[t]||'') + '</div>' +
-      (isSelected ? '<i class="fas fa-check-circle fcw-type-check"></i>' : '') +
+  // Comprehensive life insurance claim type catalog
+  var typeGroups = [
+    {
+      group: 'Death-Related Claims',
+      color: '#7c3aed',
+      types: [
+        { key:'Death Benefit',                        icon:'heart-broken',  desc:'Lump-sum payout to beneficiary upon insured\'s death' },
+        { key:'Accelerated Death Benefit (ADB)',      icon:'heartbeat',     desc:'Early access to death benefit — terminal illness (≤12 mo life expectancy)' },
+        { key:'Accidental Death Benefit (ADB Rider)', icon:'car-crash',     desc:'Additional benefit when death results from a covered accident' },
+        { key:'Survivorship (2nd-to-die) Benefit',   icon:'users',         desc:'Pays out after both insureds on a joint policy have died' }
+      ]
+    },
+    {
+      group: 'Living Benefits & Riders',
+      color: '#0369a1',
+      types: [
+        { key:'Critical Illness Rider',               icon:'disease',       desc:'Lump-sum upon diagnosis of covered critical illness (cancer, stroke, heart attack)' },
+        { key:'Chronic Illness Rider (Living Benefit)',icon:'wheelchair',   desc:'Living benefit access when unable to perform 2+ ADLs permanently' },
+        { key:'Child Term Rider',                     icon:'baby',          desc:'Death benefit for covered dependent children on the policy' }
+      ]
+    },
+    {
+      group: 'Disability & Care Claims',
+      color: '#0f766e',
+      types: [
+        { key:'Disability Income',                    icon:'user-injured',  desc:'Monthly income replacement when the insured cannot work due to disability' },
+        { key:'Long-term Care (LTC)',                 icon:'hospital',      desc:'Reimbursement for care services — home care, assisted living, skilled nursing' },
+        { key:'Waiver of Premium',                    icon:'ban',           desc:'Suspends premium obligations during a qualifying total disability period' }
+      ]
+    },
+    {
+      group: 'Policy Value & Contract Claims',
+      color: '#b45309',
+      types: [
+        { key:'Maturity / Endowment',                 icon:'calendar-check',desc:'Policy matures — policyholder collects face value or accumulated endowment' },
+        { key:'Policy Surrender / Cash Value',        icon:'money-bill-wave',desc:'Full or partial surrender of policy for accumulated cash surrender value' },
+        { key:'Paid-up Additions',                    icon:'plus-circle',   desc:'Claim dividends as paid-up additional insurance (PUA)' },
+        { key:'Annuity Income Claim',                 icon:'chart-line',    desc:'Annuitization or death benefit claim on an annuity contract' }
+      ]
+    }
+  ];
+
+  // Check which types are eligible based on client's policies + riders
+  var cd = window._fcw.clientKey ? _fcwClientData[window._fcw.clientKey] : null;
+  var eligibleTypes = {};
+  if (cd) {
+    cd.policies.forEach(function(p) {
+      // Check base policy type coverage
+      Object.keys(_fcwTypeToPolicy).forEach(function(claimType) {
+        var covers = _fcwTypeToPolicy[claimType];
+        var covered = covers.some(function(pt) { return p.type.indexOf(pt) !== -1; });
+        if (covered) eligibleTypes[claimType] = true;
+      });
+      // Check riders
+      (p.riders || []).forEach(function(rider) {
+        if (_fcwTypeToPolicy[rider]) eligibleTypes[rider] = true;
+        // Normalize partial rider name matches
+        if (rider.indexOf('Accelerated Death Benefit') !== -1) eligibleTypes['Accelerated Death Benefit (ADB)'] = true;
+        if (rider.indexOf('Accidental Death') !== -1) eligibleTypes['Accidental Death Benefit (ADB Rider)'] = true;
+        if (rider.indexOf('Critical Illness') !== -1) eligibleTypes['Critical Illness Rider'] = true;
+        if (rider.indexOf('Waiver of Premium') !== -1) eligibleTypes['Waiver of Premium'] = true;
+        if (rider.indexOf('Child Term') !== -1) eligibleTypes['Child Term Rider'] = true;
+        if (rider.indexOf('Chronic Illness') !== -1) eligibleTypes['Chronic Illness Rider (Living Benefit)'] = true;
+        if (rider.indexOf('Disability') !== -1) eligibleTypes['Disability Income'] = true;
+        if (rider.indexOf('Long-term Care') !== -1 || rider.indexOf('LTC') !== -1) eligibleTypes['Long-term Care (LTC)'] = true;
+      });
+    });
+  }
+  var hasEligibilityData = Object.keys(eligibleTypes).length > 0;
+
+  var typeGroupsHTML = typeGroups.map(function(grp) {
+    var cards = grp.types.map(function(t) {
+      var isSelected = window._fcw.type === t.key;
+      var isEligible = !hasEligibilityData || eligibleTypes[t.key];
+      var hasDocSet  = !!_fcwClaimTypeDocs[t.key];
+      return '<div class="fcw-type-card' + (isSelected ? ' selected' : '') + (isEligible ? '' : ' fcw-type-ineligible') +
+        '" onclick="fcwSelectType(\'' + t.key.replace(/\'/g,"\\'") + '\')" title="' + (isEligible ? '' : 'No matching policy on file for this client') + '">' +
+        '<i class="fas fa-' + t.icon + ' fcw-type-icon" style="color:' + grp.color + '"></i>' +
+        '<div class="fcw-type-name">' + t.key + '</div>' +
+        '<div class="fcw-type-desc">' + t.desc + '</div>' +
+        (!isEligible && hasEligibilityData ? '<div class="fcw-type-no-policy"><i class="fas fa-exclamation-circle"></i> No matching policy</div>' : '') +
+        (isEligible && !hasDocSet ? '' : '') +
+        (isSelected ? '<i class="fas fa-check-circle fcw-type-check"></i>' : '') +
+      '</div>';
+    }).join('');
+    return '<div class="fcw-type-group">' +
+      '<div class="fcw-type-group-label" style="border-left:3px solid ' + grp.color + ';color:' + grp.color + '">' + grp.group + '</div>' +
+      '<div class="fcw-type-grid">' + cards + '</div>' +
     '</div>';
   }).join('');
 
   var aiTypeHint = '';
   if (window._fcw.type) {
-    var docCount = (_fcwClaimTypeDocs[window._fcw.type] || []).length;
-    var processTime = { 'Death Benefit':'5–10 business days','Accelerated Death Benefit (ADB)':'3–7 business days (compassionate fast-track available)','Disability Income':'10–15 business days','Long-term Care (LTC)':'7–14 business days','Waiver of Premium':'10–15 business days','Critical Illness Rider':'5–10 business days' };
-    var fraudRisk = (_fcwFraudFlags[window._fcw.clientKey]);
-    aiTypeHint = '<div class="fcw-ai-panel">' +
-      '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Claim Intelligence — ' + window._fcw.type + '</div>' +
-      '<div class="fcw-ai-panel-body">' +
-        '<div class="fcw-ai-grid">' +
-          '<div class="fcw-ai-row"><span>Typical Processing</span><strong>' + (processTime[window._fcw.type]||'5–10 business days') + '</strong></div>' +
-          '<div class="fcw-ai-row"><span>Required Documents</span><strong>' + docCount + ' documents</strong></div>' +
-          '<div class="fcw-ai-row"><span>IDP Extraction</span><strong>Auto-enabled — AI will pre-fill all fields</strong></div>' +
-          '<div class="fcw-ai-row"><span>SLA Window</span><strong>' + (window._fcw.type === 'Accelerated Death Benefit (ADB)' ? '5 business days (expedited)' : '21 business days (standard)') + '</strong></div>' +
+    var docs = _fcwClaimTypeDocs[window._fcw.type] || [];
+    var reqCount  = docs.filter(function(d){ return d.required; }).length;
+    var recCount  = docs.length - reqCount;
+    var preloaded = docs.filter(function(d){ return d.preloaded; }).length;
+    var processTime = {
+      'Death Benefit':'5–10 business days',
+      'Accelerated Death Benefit (ADB)':'3–7 business days (compassionate fast-track)',
+      'Accidental Death Benefit (ADB Rider)':'5–10 business days',
+      'Disability Income':'10–15 business days',
+      'Long-term Care (LTC)':'7–14 business days',
+      'Waiver of Premium':'10–15 business days',
+      'Critical Illness Rider':'5–10 business days',
+      'Child Term Rider':'5–7 business days',
+      'Chronic Illness Rider (Living Benefit)':'10–15 business days',
+      'Maturity / Endowment':'3–5 business days (scheduled)',
+      'Policy Surrender / Cash Value':'5–10 business days',
+      'Paid-up Additions':'3–5 business days',
+      'Annuity Income Claim':'5–10 business days',
+      'Survivorship (2nd-to-die) Benefit':'10–15 business days'
+    };
+    var fraudRisk = _fcwFraudFlags[window._fcw.clientKey];
+    var slaLabel  = (window._fcw.type === 'Accelerated Death Benefit (ADB)') ? '5 business days (expedited)' : '21 business days (standard)';
+    aiTypeHint =
+      '<div class="fcw-ai-panel">' +
+        '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Claim Intelligence — ' + window._fcw.type + '</div>' +
+        '<div class="fcw-ai-panel-body">' +
+          '<div class="fcw-ai-grid">' +
+            '<div class="fcw-ai-row"><span>Typical Processing</span><strong>' + (processTime[window._fcw.type] || '5–10 business days') + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>Required Documents</span><strong>' + reqCount + ' required · ' + recCount + ' recommended</strong></div>' +
+            '<div class="fcw-ai-row"><span>AI Pre-loaded Docs</span><strong style="color:#16a34a">' + preloaded + ' already fetched from CRM</strong></div>' +
+            '<div class="fcw-ai-row"><span>SLA Window</span><strong>' + slaLabel + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>IDP Extraction</span><strong>Auto-enabled — AI pre-fills all form fields from uploaded docs</strong></div>' +
+            '<div class="fcw-ai-row"><span>Policy Match</span><strong>' + (eligibleTypes[window._fcw.type] ? '✓ Eligible policy found for this client' : '⚠ No direct policy match — manual review required') + '</strong></div>' +
+          '</div>' +
+          (fraudRisk ? '<div class="fcw-ai-alert ' + (fraudRisk.level === 'HIGH' ? 'red' : 'orange') + '"><i class="fas fa-shield-virus"></i><div><strong>AI Fraud Alert:</strong> Score ' + fraudRisk.score + ' — adjuster review mandatory before payout</div></div>' : '') +
+          '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Proceed to Step 3 — AI will rank your client\'s policies by match score for this claim type.</div>' +
         '</div>' +
-        (fraudRisk ? '<div class="fcw-ai-alert ' + (fraudRisk.level === 'HIGH' ? 'red' : 'orange') + '"><i class="fas fa-shield-virus"></i><div><strong>AI Fraud Alert (carried from Step 1):</strong> Score ' + fraudRisk.score + ' — adjuster review will be mandatory before payout</div></div>' : '') +
-        '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Proceed to Step 3 — AI will match the best policy for this claim type automatically.</div>' +
-      '</div>' +
-    '</div>';
+      '</div>';
   }
 
   return '<div class="fcw-step-title"><i class="fas fa-clipboard-list"></i> Step 2 — Claim Type &amp; Event Details</div>' +
     '<div class="fcw-field-group">' +
-      '<label class="fcw-label">Select Claim Type</label>' +
-      '<div class="fcw-type-grid">' + typeCards + '</div>' +
+      '<label class="fcw-label">Select Claim Type ' +
+        (hasEligibilityData ? '<span class="fcw-ai-auto-badge"><i class="fas fa-robot"></i> Eligible types highlighted</span>' : '') +
+      '</label>' +
+      typeGroupsHTML +
     '</div>' +
     '<div class="fcw-field-row">' +
       '<div class="fcw-field-group" style="flex:1">' +
@@ -36592,6 +37043,10 @@ function fcwSelectType(t) {
   if (am) window._fcw.amount = am.value;
   if (dc) window._fcw.desc = dc.value;
   window._fcw.type = t;
+  // Clear policy + docs when type changes so Step 3 re-matches and Step 4 re-initializes
+  window._fcw.policy = null;
+  window._fcw.docs = [];
+  window._fcw.docsInitialized = false;
   fcwRender(2);
 }
 function fcwNextStep2() {
@@ -36611,63 +37066,111 @@ function fcwStep3Body() {
   var cd = _fcwClientData[window._fcw.clientKey];
   if (!cd) return '<div class="fcw-step-title">Policy Lookup</div><div class="fcw-error">No client selected — please go back to Step 1.</div>';
 
-  // AI match logic: score policies by claim type fit
-  var typeMap = {
-    'Death Benefit': ['Whole Life','Universal Life','Term 20','Term 30'],
-    'Accelerated Death Benefit (ADB)': ['Whole Life','Universal Life'],
-    'Disability Income': ['Disability Income','LTC Combo'],
-    'Long-term Care (LTC)': ['LTC Combo','LTC Rider'],
-    'Waiver of Premium': ['Term 20','Term 30','Universal Life','Whole Life'],
-    'Critical Illness Rider': ['Whole Life','Universal Life']
-  };
-  var matchTypes = typeMap[window._fcw.type] || [];
+  // Use comprehensive type-to-policy affinity map
+  var matchTypes = _fcwTypeToPolicy[window._fcw.type] || [];
 
-  var policyCards = cd.policies.map(function(p) {
-    var isMatch = matchTypes.some(function(m){ return p.type.indexOf(m) !== -1; });
+  // Also check if the claim type matches a rider on any policy
+  function policyScoreForType(p) {
+    // Base match: policy type covers the claim type
+    var baseMatch = matchTypes.some(function(m) { return p.type.indexOf(m) !== -1; });
+    if (baseMatch) return 95;
+    // Rider match: claim type available as a rider on this policy
+    var riderMatch = (p.riders || []).some(function(r) {
+      return r.indexOf(window._fcw.type) !== -1 ||
+        (window._fcw.type === 'Accelerated Death Benefit (ADB)' && r.indexOf('Accelerated Death Benefit') !== -1) ||
+        (window._fcw.type === 'Accidental Death Benefit (ADB Rider)' && r.indexOf('Accidental Death') !== -1) ||
+        (window._fcw.type === 'Critical Illness Rider' && r.indexOf('Critical Illness') !== -1) ||
+        (window._fcw.type === 'Waiver of Premium' && r.indexOf('Waiver of Premium') !== -1) ||
+        (window._fcw.type === 'Child Term Rider' && r.indexOf('Child Term') !== -1) ||
+        (window._fcw.type === 'Chronic Illness Rider (Living Benefit)' && r.indexOf('Chronic Illness') !== -1);
+    });
+    if (riderMatch) return 88;
+    return 32; // low match
+  }
+
+  // Score and sort all policies; auto-select top match if none chosen yet
+  var scoredPolicies = cd.policies.map(function(p) {
+    return { p: p, score: policyScoreForType(p) };
+  }).sort(function(a, b) { return b.score - a.score; });
+
+  // Auto-select the best matching policy on first arrival at Step 3
+  if (!window._fcw.policy && scoredPolicies[0] && scoredPolicies[0].score >= 85) {
+    window._fcw.policy = scoredPolicies[0].p;
+  }
+
+  var policyCards = scoredPolicies.map(function(sp) {
+    var p = sp.p;
+    var score = sp.score;
+    var isMatch = score >= 85;
+    var isRiderMatch = score === 88;
     var isSelected = window._fcw.policy && window._fcw.policy.num === p.num;
     var statusColor = p.status === 'In Force' ? '#16a34a' : p.status === 'Pending' ? '#d97706' : '#dc2626';
-    var aiScore = isMatch ? (isSelected ? 99 : 94) : 41;
-    var aiLabel = isMatch ? 'AI Match' : 'Low Match';
-    var aiColor = isMatch ? '#16a34a' : '#6b7280';
+    var aiLabel = score >= 95 ? 'Best Match' : score >= 85 ? 'Rider Match' : 'Low Match';
+    var aiColor = score >= 95 ? '#16a34a' : score >= 85 ? '#0369a1' : '#9ca3af';
+
+    // Rider chips
+    var riderChips = (p.riders || []).map(function(r) {
+      var isRelevant = r.indexOf(window._fcw.type) !== -1 ||
+        (window._fcw.type === 'Accelerated Death Benefit (ADB)' && r.indexOf('Accelerated Death Benefit') !== -1) ||
+        (window._fcw.type === 'Accidental Death Benefit (ADB Rider)' && r.indexOf('Accidental Death') !== -1) ||
+        (window._fcw.type === 'Critical Illness Rider' && r.indexOf('Critical Illness') !== -1) ||
+        (window._fcw.type === 'Waiver of Premium' && r.indexOf('Waiver') !== -1) ||
+        (window._fcw.type === 'Child Term Rider' && r.indexOf('Child Term') !== -1) ||
+        (window._fcw.type === 'Chronic Illness Rider (Living Benefit)' && r.indexOf('Chronic') !== -1);
+      return '<span class="fcw-rider-chip' + (isRelevant ? ' active' : '') + '">' +
+        (isRelevant ? '<i class="fas fa-star"></i> ' : '') + r + '</span>';
+    }).join('');
+
     return '<div class="fcw-policy-card' + (isSelected ? ' selected' : '') + (isMatch ? ' ai-match' : '') + '" onclick="fcwSelectPolicy(\'' + p.num + '\')">' +
       '<div class="fcw-policy-card-top">' +
         '<div class="fcw-policy-num">' + p.num + '</div>' +
-        '<div class="fcw-policy-ai-score" style="background:' + aiColor + '20;color:' + aiColor + ';border:1px solid ' + aiColor + '40">' +
-          '<i class="fas fa-robot"></i> ' + aiLabel + ' · ' + aiScore + '%' +
+        '<div class="fcw-policy-ai-score" style="background:' + aiColor + '18;color:' + aiColor + ';border:1px solid ' + aiColor + '35">' +
+          '<i class="fas fa-robot"></i> ' + aiLabel + ' · ' + score + '%' +
         '</div>' +
-        (isSelected ? '<i class="fas fa-check-circle" style="color:#2563eb;font-size:18px"></i>' : '') +
+        (isSelected ? '<i class="fas fa-check-circle" style="color:#2563eb;font-size:18px;margin-left:auto"></i>' : '') +
       '</div>' +
       '<div class="fcw-policy-meta">' +
-        '<div class="fcw-policy-row"><span>Type</span><strong>' + p.type + '</strong></div>' +
-        '<div class="fcw-policy-row"><span>Face Value</span><strong>' + p.face + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Policy Type</span><strong>' + p.type + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Face / Benefit</span><strong>' + p.face + '</strong></div>' +
         '<div class="fcw-policy-row"><span>Status</span><strong style="color:' + statusColor + '">' + p.status + '</strong></div>' +
         '<div class="fcw-policy-row"><span>Issued</span><strong>' + p.issued + '</strong></div>' +
         '<div class="fcw-policy-row"><span>Premium</span><strong>' + p.premium + '</strong></div>' +
         '<div class="fcw-policy-row"><span>Beneficiary</span><strong>' + p.bene + '</strong></div>' +
       '</div>' +
-      (p.status === 'Pending' ? '<div class="fcw-policy-warning"><i class="fas fa-exclamation-triangle"></i> Policy in Pending status — coverage determination required before payout. Contestability review may apply.</div>' : '') +
+      (riderChips ? '<div class="fcw-rider-list"><span style="font-size:10px;color:#64748b;font-weight:600;margin-right:4px">RIDERS:</span>' + riderChips + '</div>' : '') +
+      (isSelected && isRiderMatch ? '<div class="fcw-policy-rider-note"><i class="fas fa-info-circle"></i> This claim type is covered as a <strong>rider</strong> on this policy — not the base coverage</div>' : '') +
+      (p.status === 'Pending' ? '<div class="fcw-policy-warning"><i class="fas fa-exclamation-triangle"></i> Policy in Pending status — coverage determination required. Contestability review may apply.</div>' : '') +
+      (isSelected && score < 85 ? '<div class="fcw-policy-warning" style="background:#fef3c7;border-color:#fbbf24;color:#92400e"><i class="fas fa-question-circle"></i> No exact policy match for this claim type — manual eligibility review required</div>' : '') +
     '</div>';
   }).join('');
 
   var aiPolicyPanel = '';
   if (window._fcw.policy) {
     var contestable = window._fcw.policy.issued && (new Date() - new Date(window._fcw.policy.issued)) / (1000 * 60 * 60 * 24) < 730;
+    var selScore = policyScoreForType(window._fcw.policy);
+    var preloadedDocs = (_fcwClaimTypeDocs[window._fcw.type] || []).filter(function(d){ return d.preloaded; });
     aiPolicyPanel = '<div class="fcw-ai-panel">' +
       '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Policy Analysis — ' + window._fcw.policy.num + '</div>' +
       '<div class="fcw-ai-panel-body">' +
         '<div class="fcw-ai-grid">' +
-          '<div class="fcw-ai-row"><span>Claim Eligibility</span><strong style="color:' + (window._fcw.policy.status === 'In Force' ? '#16a34a' : '#dc2626') + '">' + (window._fcw.policy.status === 'In Force' ? 'Eligible — policy in force' : 'Under Review — policy not in force') + '</strong></div>' +
-          '<div class="fcw-ai-row"><span>Contestability Window</span><strong style="color:' + (contestable ? '#d97706' : '#16a34a') + '">' + (contestable ? 'ACTIVE — policy < 2 years old' : 'Clear — policy > 2 years in force') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Claim Eligibility</span><strong style="color:' + (window._fcw.policy.status === 'In Force' ? '#16a34a' : '#dc2626') + '">' + (window._fcw.policy.status === 'In Force' ? '✓ Eligible — policy in force' : '⚠ Under Review — policy not in force') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Match Score</span><strong style="color:' + (selScore >= 90 ? '#16a34a' : selScore >= 80 ? '#0369a1' : '#dc2626') + '">' + selScore + '% — ' + (selScore >= 90 ? 'Direct coverage' : selScore >= 80 ? 'Rider coverage' : 'Manual review needed') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Contestability</span><strong style="color:' + (contestable ? '#d97706' : '#16a34a') + '">' + (contestable ? '⚠ ACTIVE — policy < 2 years old' : '✓ Clear — > 2 years in force') + '</strong></div>' +
           '<div class="fcw-ai-row"><span>Named Beneficiary</span><strong>' + window._fcw.policy.bene + '</strong></div>' +
-          '<div class="fcw-ai-row"><span>IDP Pre-fill</span><strong>Policy data auto-loaded into claim form</strong></div>' +
+          '<div class="fcw-ai-row"><span>AI Pre-loaded Docs</span><strong style="color:#16a34a">' + preloadedDocs.length + ' doc(s) already fetched from CRM</strong></div>' +
         '</div>' +
-        '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> AI has pre-filled policy number, face value, and beneficiary data — proceed to document checklist.</div>' +
+        (preloadedDocs.length ? '<div class="fcw-ai-preloaded-list"><div class="fcw-ai-preloaded-title"><i class="fas fa-robot"></i> Auto-loaded from CRM vault:</div>' +
+          preloadedDocs.map(function(d){ return '<div class="fcw-ai-preloaded-item"><i class="fas fa-check-circle" style="color:#16a34a"></i> ' + d.name + '</div>'; }).join('') +
+        '</div>' : '') +
+        '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Policy data pre-filled into claim form · Document checklist auto-loaded in Step 4 · IDP extraction ready.</div>' +
       '</div>' +
     '</div>';
   }
 
   return '<div class="fcw-step-title"><i class="fas fa-file-contract"></i> Step 3 — Policy Lookup &amp; Match</div>' +
-    '<div class="fcw-policy-ai-note"><i class="fas fa-robot"></i> AI matched ' + cd.policies.length + ' polic' + (cd.policies.length === 1 ? 'y' : 'ies') + ' for <strong>' + window._fcw.clientKey + '</strong> · Ranked by compatibility with <em>' + window._fcw.type + '</em> · Click a card to select</div>' +
+    '<div class="fcw-policy-ai-note"><i class="fas fa-robot"></i> AI ranked <strong>' + scoredPolicies.length + '</strong> polic' + (scoredPolicies.length === 1 ? 'y' : 'ies') + ' for <strong>' + window._fcw.clientKey + '</strong> by compatibility with <em>' + window._fcw.type + '</em>' +
+    (window._fcw.policy ? ' · <span style="color:#16a34a"><i class="fas fa-check-circle"></i> Best match auto-selected</span>' : '') +
+    ' · Click a card to confirm or change selection</div>' +
     '<div class="fcw-policy-list">' + policyCards + '</div>' +
     aiPolicyPanel;
 }
@@ -36688,55 +37191,123 @@ function fcwNextStep3() {
 
 /* ── STEP 4 : DOCUMENT CHECKLIST + UPLOAD ───────────────────────── */
 function fcwStep4Body() {
-  var docs = _fcwClaimTypeDocs[window._fcw.type] || ['Required Document 1','Required Document 2'];
-  if (!window._fcw.docs) window._fcw.docs = [];
+  var docDefs = _fcwClaimTypeDocs[window._fcw.type];
+  if (!docDefs) {
+    // Fallback for claim types without a doc set
+    docDefs = [
+      { name:'Completed Claim Form',       required:true,  preloaded:false, hint:'NYL standard claim submission form' },
+      { name:'Government-issued Photo ID', required:true,  preloaded:false, hint:'Passport or driver\'s license' },
+      { name:'Policy Document',            required:true,  preloaded:true,  hint:'AI pre-loaded from policy vault' }
+    ];
+  }
 
-  var docItems = docs.map(function(d, i) {
-    var isChecked = window._fcw.docs.indexOf(d) !== -1;
-    var required = i < 3;
-    return '<div class="fcw-doc-item' + (isChecked ? ' checked' : '') + '" onclick="fcwToggleDoc(\'' + d.replace(/'/g,"\\'") + '\')">' +
-      '<div class="fcw-doc-checkbox">' + (isChecked ? '<i class="fas fa-check-circle" style="color:#16a34a"></i>' : '<i class="far fa-circle" style="color:#d1d5db"></i>') + '</div>' +
-      '<div class="fcw-doc-info">' +
-        '<div class="fcw-doc-name">' + d + (required ? ' <span class="fcw-doc-req">Required</span>' : ' <span class="fcw-doc-opt">Recommended</span>') + '</div>' +
-      '</div>' +
-      '<div class="fcw-doc-action">' +
-        (isChecked ? '<span class="fcw-doc-ready"><i class="fas fa-check"></i> Ready</span>' : '<span class="fcw-doc-pending">Pending</span>') +
-      '</div>' +
+  // On first arrival, auto-check all preloaded docs
+  if (!window._fcw.docsInitialized) {
+    window._fcw.docs = [];
+    docDefs.forEach(function(d) {
+      if (d.preloaded) window._fcw.docs.push(d.name);
+    });
+    window._fcw.docsInitialized = true;
+  }
+
+  var reqDocs  = docDefs.filter(function(d){ return d.required; });
+  var recDocs  = docDefs.filter(function(d){ return !d.required; });
+  var checkedCount = window._fcw.docs.length;
+  var reqDone  = reqDocs.every(function(d){ return window._fcw.docs.indexOf(d.name) !== -1; });
+  var reqCount = reqDocs.filter(function(d){ return window._fcw.docs.indexOf(d.name) !== -1; }).length;
+
+  function renderDocSection(title, sectionDocs, iconColor) {
+    if (!sectionDocs.length) return '';
+    var items = sectionDocs.map(function(d) {
+      var isChecked   = window._fcw.docs.indexOf(d.name) !== -1;
+      var isPreloaded = d.preloaded;
+      return '<div class="fcw-doc-item' + (isChecked ? ' checked' : '') + (isPreloaded ? ' preloaded' : '') + '" ' +
+        'onclick="fcwToggleDoc(\'' + d.name.replace(/\'/g,"\\'") + '\')">' +
+        '<div class="fcw-doc-checkbox">' +
+          (isChecked
+            ? '<i class="fas fa-check-circle" style="color:' + (isPreloaded ? '#0369a1' : '#16a34a') + '"></i>'
+            : '<i class="far fa-circle" style="color:#d1d5db"></i>') +
+        '</div>' +
+        '<div class="fcw-doc-info">' +
+          '<div class="fcw-doc-name">' + d.name +
+            (d.required ? ' <span class="fcw-doc-req">Required</span>' : ' <span class="fcw-doc-opt">Recommended</span>') +
+            (isPreloaded ? ' <span class="fcw-doc-preloaded"><i class="fas fa-robot"></i> AI Pre-loaded</span>' : '') +
+          '</div>' +
+          (d.hint ? '<div class="fcw-doc-hint">' + d.hint + '</div>' : '') +
+        '</div>' +
+        '<div class="fcw-doc-action">' +
+          (isPreloaded && isChecked
+            ? '<span class="fcw-doc-ready ai"><i class="fas fa-robot"></i> CRM</span>'
+            : isChecked
+              ? '<span class="fcw-doc-ready"><i class="fas fa-check"></i> Ready</span>'
+              : '<span class="fcw-doc-pending">Pending</span>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="fcw-doc-section">' +
+      '<div class="fcw-doc-section-hdr" style="border-left:3px solid ' + iconColor + ';color:' + iconColor + '">' + title + '</div>' +
+      items +
+    '</div>';
+  }
+
+  var docListHTML =
+    renderDocSection('Required Documents (' + reqCount + '/' + reqDocs.length + ' confirmed)', reqDocs, '#dc2626') +
+    renderDocSection('Recommended Documents (' + (checkedCount - reqCount) + '/' + recDocs.length + ' confirmed)', recDocs, '#0369a1');
+
+  // Drop zone: show pre-loaded file stubs for CRM-fetched docs
+  var preloadedDocs = docDefs.filter(function(d){ return d.preloaded; });
+  var preloadedStubs = preloadedDocs.map(function(d) {
+    return '<div class="fcw-drop-file-stub">' +
+      '<i class="fas fa-file-pdf" style="color:#dc2626"></i>' +
+      '<span>' + d.name + '</span>' +
+      '<span class="fcw-drop-file-source"><i class="fas fa-robot"></i> CRM Vault</span>' +
     '</div>';
   }).join('');
 
-  var checkedCount = window._fcw.docs.length;
-  var requiredDone = docs.slice(0,3).every(function(d){ return window._fcw.docs.indexOf(d) !== -1; });
+  var dropFilesArea = preloadedStubs
+    ? '<div class="fcw-drop-preloaded">' +
+        '<div class="fcw-drop-preloaded-title"><i class="fas fa-robot"></i> AI Pre-loaded from CRM — ready for IDP extraction:</div>' +
+        preloadedStubs +
+      '</div>'
+    : '';
 
-  var aiDocPanel = '<div class="fcw-ai-panel">' +
-    '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Document Intelligence</div>' +
-    '<div class="fcw-ai-panel-body">' +
-      '<div class="fcw-ai-grid">' +
-        '<div class="fcw-ai-row"><span>Docs Confirmed</span><strong>' + checkedCount + ' / ' + docs.length + '</strong></div>' +
-        '<div class="fcw-ai-row"><span>Required Docs</span><strong style="color:' + (requiredDone ? '#16a34a' : '#dc2626') + '">' + (requiredDone ? '✓ All required confirmed' : '⚠ 3 required docs needed') + '</strong></div>' +
-        '<div class="fcw-ai-row"><span>IDP Auto-Extract</span><strong>Enabled — upload PDFs for instant field extraction</strong></div>' +
-        '<div class="fcw-ai-row"><span>Avg Processing</span><strong>NLP confidence 94% · 2–5 min extraction</strong></div>' +
-      '</div>' +
-      '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Tick all documents you have in hand. Missing documents can be uploaded later from the claim workspace. IDP will auto-extract fields from any uploaded PDF.</div>' +
-    '</div>' +
-  '</div>';
-
-  var dropZone = '<div class="fcw-drop-zone" id="fcw-drop-zone"' +
+  var dropZone =
+    '<div class="fcw-drop-zone" id="fcw-drop-zone"' +
     ' ondragover="event.preventDefault();this.classList.add(\'fcw-drag-active\')"' +
     ' ondragleave="this.classList.remove(\'fcw-drag-active\')"' +
     ' ondrop="fcwHandleDrop(event)">' +
     '<i class="fas fa-cloud-upload-alt fcw-drop-icon"></i>' +
-    '<div class="fcw-drop-title">Drag &amp; drop documents here to begin IDP extraction now</div>' +
-    '<div class="fcw-drop-sub">PDF, JPG, PNG, DOCX · Max 50MB · Or attach after claim is created</div>' +
-    '<div id="fcw-dropped-files" style="margin-top:8px"></div>' +
+    '<div class="fcw-drop-title">Drag &amp; drop additional documents here</div>' +
+    '<div class="fcw-drop-sub">PDF, JPG, PNG, DOCX · Max 50MB per file · IDP extraction starts immediately on upload</div>' +
+    '<div id="fcw-dropped-files">' + (window._fcw.hasUpload ? '<div class="fcw-dropped-indicator"><i class="fas fa-check-circle"></i> Document attached — IDP extraction queued</div>' : '') + '</div>' +
   '</div>';
 
+  var aiDocPanel =
+    '<div class="fcw-ai-panel">' +
+      '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Document Intelligence</div>' +
+      '<div class="fcw-ai-panel-body">' +
+        '<div class="fcw-ai-grid">' +
+          '<div class="fcw-ai-row"><span>Total Documents</span><strong>' + checkedCount + ' / ' + docDefs.length + ' confirmed</strong></div>' +
+          '<div class="fcw-ai-row"><span>Required Status</span><strong style="color:' + (reqDone ? '#16a34a' : '#dc2626') + '">' + (reqDone ? '✓ All ' + reqDocs.length + ' required docs confirmed' : '⚠ ' + (reqDocs.length - reqCount) + ' required doc(s) still missing') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>CRM Pre-loaded</span><strong style="color:#0369a1">' + preloadedDocs.length + ' doc(s) auto-fetched from policy vault</strong></div>' +
+          '<div class="fcw-ai-row"><span>IDP Auto-Extract</span><strong>Enabled · NLP confidence 94% · 2–5 min per doc</strong></div>' +
+        '</div>' +
+        '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Check all documents you currently have in hand. Missing items can be collected and uploaded from the Claim Workspace after creation. IDP auto-extracts all fields from any uploaded PDF.</div>' +
+      '</div>' +
+    '</div>';
+
   return '<div class="fcw-step-title"><i class="fas fa-folder-open"></i> Step 4 — Document Checklist</div>' +
-    '<div class="fcw-doc-progress">' +
-      '<div class="fcw-doc-prog-bar"><div class="fcw-doc-prog-fill" style="width:' + Math.round(checkedCount/docs.length*100) + '%"></div></div>' +
-      '<span class="fcw-doc-prog-lbl">' + checkedCount + ' of ' + docs.length + ' documents confirmed</span>' +
+    '<div class="fcw-doc-context-bar">' +
+      '<span><i class="fas fa-clipboard-list"></i> <strong>' + window._fcw.type + '</strong></span>' +
+      '<span>·</span>' +
+      '<span><i class="fas fa-file-contract"></i> ' + (window._fcw.policy ? window._fcw.policy.num + ' · ' + window._fcw.policy.type : 'No policy selected') + '</span>' +
     '</div>' +
-    '<div class="fcw-doc-list">' + docItems + '</div>' +
+    '<div class="fcw-doc-progress">' +
+      '<div class="fcw-doc-prog-bar"><div class="fcw-doc-prog-fill" style="width:' + Math.round(checkedCount / Math.max(docDefs.length,1) * 100) + '%"></div></div>' +
+      '<span class="fcw-doc-prog-lbl">' + checkedCount + ' of ' + docDefs.length + ' documents confirmed</span>' +
+    '</div>' +
+    '<div class="fcw-doc-list">' + docListHTML + '</div>' +
+    dropFilesArea +
     dropZone +
     aiDocPanel;
 }
@@ -36748,23 +37319,35 @@ function fcwToggleDoc(d) {
   if (!window._fcw.docs) window._fcw.docs = [];
   var idx = window._fcw.docs.indexOf(d);
   if (idx === -1) window._fcw.docs.push(d); else window._fcw.docs.splice(idx, 1);
-  fcwRender(4);
+  // Don't reset docsInitialized so manual toggles are preserved
+  var step4body = document.getElementById('fcw-body');
+  if (step4body) step4body.innerHTML = fcwStep4Body();
 }
 function fcwHandleDrop(event) {
   event.preventDefault();
   var zone = document.getElementById('fcw-drop-zone');
   if (zone) zone.classList.remove('fcw-drag-active');
+  var files = event.dataTransfer ? event.dataTransfer.files : [];
   var dropped = document.getElementById('fcw-dropped-files');
-  if (dropped) {
-    dropped.innerHTML = '<div style="color:#16a34a;font-size:12px;font-weight:600"><i class="fas fa-check-circle"></i> Document attached — IDP extraction will begin when claim is created</div>';
-  }
   window._fcw.hasUpload = true;
+  if (dropped) {
+    var fileNames = '';
+    if (files && files.length) {
+      for (var i = 0; i < files.length; i++) {
+        fileNames += '<div class="fcw-dropped-indicator"><i class="fas fa-file-pdf" style="color:#dc2626"></i> ' + files[i].name + ' <span style="color:#16a34a;margin-left:6px"><i class="fas fa-check-circle"></i> IDP queued</span></div>';
+      }
+    } else {
+      fileNames = '<div class="fcw-dropped-indicator"><i class="fas fa-check-circle"></i> Document attached — IDP extraction queued</div>';
+    }
+    dropped.innerHTML = fileNames;
+  }
 }
 function fcwNextStep4() {
-  var docs = _fcwClaimTypeDocs[window._fcw.type] || [];
-  var required = docs.slice(0,3);
-  var missing = required.filter(function(d){ return (window._fcw.docs||[]).indexOf(d) === -1; });
-  if (missing.length === 3) {
+  var docDefs = _fcwClaimTypeDocs[window._fcw.type];
+  if (!docDefs) { fcwRender(5); return; }
+  var required = docDefs.filter(function(d){ return d.required; });
+  var confirmedReq = required.filter(function(d){ return (window._fcw.docs||[]).indexOf(d.name) !== -1; }).length;
+  if (confirmedReq === 0) {
     p7Toast('<i class="fas fa-exclamation-triangle"></i> Please confirm at least one required document to proceed', 2500);
     return;
   }
@@ -36780,8 +37363,17 @@ function fcwStep5Body() {
   var newId = 'CLM-2026-' + (Math.floor(Math.random() * 900) + 100);
   window._fcw.claimId = newId;
 
+  var docDefs = _fcwClaimTypeDocs[w.type] || [];
   var docsHTML = (w.docs && w.docs.length)
-    ? w.docs.map(function(d){ return '<div class="fcw-review-doc"><i class="fas fa-check-circle" style="color:#16a34a"></i> ' + d + '</div>'; }).join('')
+    ? w.docs.map(function(dname){
+        var def = docDefs.find ? docDefs.find(function(x){ return x.name === dname; }) : null;
+        var isPreloaded = def && def.preloaded;
+        return '<div class="fcw-review-doc">' +
+          '<i class="fas fa-check-circle" style="color:' + (isPreloaded ? '#0369a1' : '#16a34a') + '"></i> ' +
+          dname +
+          (isPreloaded ? ' <span style="font-size:10px;color:#0369a1;font-weight:600"><i class="fas fa-robot"></i> CRM</span>' : '') +
+        '</div>';
+      }).join('')
     : '<div class="fcw-review-doc" style="color:#6b7280"><i class="fas fa-clock"></i> No documents confirmed yet — can be added from claim workspace</div>';
 
   var aiRiskPanel = '<div class="fcw-ai-panel' + (fraud ? (fraud.level === 'HIGH' ? ' fcw-ai-panel-red' : ' fcw-ai-panel-orange') : ' fcw-ai-panel-green') + '">' +

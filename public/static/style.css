@@ -42938,3 +42938,246 @@ kbd {
 .sdr-batch-row-title { font-size: 12px; font-weight: 700; color: #1e3a5f; }
 .sdr-batch-row-meta { font-size: 11px; color: #6b7280; margin-top: 2px; }
 .sdr-batch-row-check { font-size: 14px; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   FCW WIZARD — NEW UI ELEMENTS (Session 4 Step 2 Enhancements)
+   Claimant dropdown card · Comprehensive type groups · Rider chips ·
+   Doc sections · Pre-loaded stubs · Context bar
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Claimant card (Step 1) */
+.fcw-claimant-card {
+  margin-top: 8px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.fcw-claimant-card-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #1e40af;
+}
+.fcw-claimant-card-row i { width: 14px; text-align: center; color: #3b82f6; }
+.fcw-claimant-card-row strong { font-weight: 700; }
+.fcw-rel-badge {
+  background: #2563eb;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+.fcw-ai-auto-note {
+  font-size: 10px;
+  color: #6d28d9;
+  margin-top: 4px;
+  font-style: italic;
+}
+.fcw-ai-auto-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #7c3aed;
+  background: #ede9fe;
+  border: 1px solid #c4b5fd;
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-left: 8px;
+}
+.fcw-input-readonly {
+  background: #f8fafc !important;
+  color: #6b7280 !important;
+  border: 1px solid #e5e7eb !important;
+  cursor: default !important;
+}
+.fcw-policy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  padding: 3px 9px;
+  border-radius: 10px;
+}
+.fcw-policy-chip.pending { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+
+/* Step 2 — type group headers */
+.fcw-type-group { margin-bottom: 16px; }
+.fcw-type-group-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  margin-bottom: 8px;
+  background: #f8fafc;
+  border-radius: 4px;
+}
+.fcw-type-ineligible {
+  opacity: 0.45;
+  filter: grayscale(60%);
+  cursor: not-allowed !important;
+}
+.fcw-type-no-policy {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Step 3 — rider chips on policy cards */
+.fcw-rider-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 12px 6px;
+  border-top: 1px solid #f0f4f8;
+  align-items: center;
+}
+.fcw-rider-chip {
+  font-size: 9px;
+  font-weight: 600;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  padding: 2px 6px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.fcw-rider-chip.active {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  font-weight: 800;
+}
+.fcw-rider-chip .fas { font-size: 8px; }
+.fcw-policy-rider-note {
+  margin: 0 12px 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #1e40af;
+}
+.fcw-ai-preloaded-list {
+  margin-top: 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.fcw-ai-preloaded-title { font-size: 11px; font-weight: 700; color: #15803d; margin-bottom: 5px; }
+.fcw-ai-preloaded-item { font-size: 11px; color: #166534; display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+
+/* Step 4 — document sections */
+.fcw-doc-context-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: #374151;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.fcw-doc-context-bar i { color: #6366f1; margin-right: 4px; }
+.fcw-doc-section { margin-bottom: 12px; }
+.fcw-doc-section-hdr {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  margin-bottom: 6px;
+  background: #f8fafc;
+  border-radius: 4px;
+}
+.fcw-doc-item.preloaded {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe) !important;
+  border-color: #bae6fd !important;
+}
+.fcw-doc-preloaded {
+  font-size: 10px;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  padding: 1px 7px;
+  border-radius: 8px;
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.fcw-doc-hint {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-top: 2px;
+  font-style: italic;
+}
+.fcw-doc-ready.ai {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+/* Pre-loaded stubs above drop zone */
+.fcw-drop-preloaded {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+.fcw-drop-preloaded-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 8px;
+}
+.fcw-drop-file-stub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #166534;
+  background: #fff;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-top: 5px;
+}
+.fcw-drop-file-stub i { font-size: 14px; }
+.fcw-drop-file-source {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  padding: 1px 7px;
+  border-radius: 8px;
+}
+.fcw-dropped-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #15803d;
+  font-weight: 600;
+  padding: 4px 0;
+}
