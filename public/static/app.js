@@ -13087,32 +13087,511 @@ function closeNewCampaignModal(e) {
   const overlay = document.getElementById('camp-new-overlay');
   if (overlay) overlay.style.display = 'none';
   document.body.style.overflow = '';
+  // Reset form state
+  const briefContainer = document.getElementById('camp-brief-container');
+  if (briefContainer) briefContainer.remove();
+  const leadsPanel = document.getElementById('camp-ai-leads-panel');
+  if (leadsPanel) leadsPanel.innerHTML = '';
+  const suggestBox = document.getElementById('camp-ai-suggest');
+  if (suggestBox) {
+    suggestBox.style.display = '';
+    suggestBox.innerHTML = '<i class="fas fa-robot"></i> <span>Select products above, fill in Campaign Goal, then click <strong>Generate AI Brief</strong> to get a sophisticated multi-section targeting brief, messaging strategy, channel cadence, KPIs, and AI risk flags.</span>';
+  }
+  // Uncheck all product checkboxes
+  document.querySelectorAll('.cpd-cb').forEach(cb => cb.checked = false);
+  // Reset form fields
+  ['new-camp-name','new-camp-goal','new-camp-budget'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  window._campBriefData = null;
 }
 
 function generateCampaignAIBrief() {
-  const name = document.getElementById('new-camp-name')?.value || 'your campaign';
-  const type = document.getElementById('new-camp-type')?.value || 'Life Insurance';
-  const segment = document.getElementById('new-camp-segment')?.value || '';
+  const name = document.getElementById('new-camp-name')?.value.trim() || 'New Campaign';
+  const segment = document.getElementById('new-camp-segment')?.value || 'Mid-Career (40–55)';
+  const channel = document.getElementById('new-camp-channel')?.value || 'Email + Outbound';
+  const budget = parseInt(document.getElementById('new-camp-budget')?.value) || 5000;
+  const goal = document.getElementById('new-camp-goal')?.value.trim() || '';
+
+  // Collect selected products by domain
+  const checked = Array.from(document.querySelectorAll('.cpd-cb:checked'));
+  if (checked.length === 0) {
+    showToast('<i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> Please select at least one product type before generating the brief');
+    return;
+  }
+  if (!goal) {
+    showToast('<i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> Please enter a Campaign Goal so the AI can tailor the brief');
+    return;
+  }
+
+  const selectedByDomain = { ins: [], inv: [], ret: [], adv: [] };
+  checked.forEach(cb => {
+    const d = cb.dataset.domain;
+    if (selectedByDomain[d]) selectedByDomain[d].push(cb.value);
+  });
+  const allSelected = checked.map(cb => cb.value);
+  const activeDomains = Object.keys(selectedByDomain).filter(d => selectedByDomain[d].length > 0);
+
   const suggestBox = document.getElementById('camp-ai-suggest');
+  const leadsPanel = document.getElementById('camp-ai-leads-panel');
   if (!suggestBox) return;
-  suggestBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Generating AI brief…</span>';
+
+  // Show loading state
+  suggestBox.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#2563eb"></i> <span style="color:#1e40af">AI is analyzing your product selection, segment, and goal to generate a comprehensive campaign brief…</span>';
+  if (leadsPanel) leadsPanel.innerHTML = '';
+
   setTimeout(() => {
-    const briefs = {
-      'Life Insurance': `<strong>AI Brief — ${name}:</strong> Target ${segment}. Lead messaging: financial security + legacy planning. Key objection handler: cost vs. term. Recommended touchpoints: email x3 → phone call → in-person meeting. Predicted close probability: <span style="color:#059669">78%</span>. Estimated leads: 40–60 over 90 days.`,
-      'Retirement': `<strong>AI Brief — ${name}:</strong> Target ${segment}. Message: guaranteed income in retirement, inflation protection. Seminar + 1:1 meeting recommended. Upsell from existing life policyholders. Predicted close probability: <span style="color:#059669">71%</span>. Estimated leads: 25–40 over 60 days.`,
-      'Investments': `<strong>AI Brief — ${name}:</strong> Target ${segment}. Message: market-linked growth with NYL stability. Webinar → follow-up email → needs analysis call. Predicted close probability: <span style="color:#d97706">64%</span>. Estimated leads: 30–50 over 90 days.`,
-      'Wealth Management': `<strong>AI Brief — ${name}:</strong> Target ${segment}. White-glove referral model. Lead with estate planning value prop + UMA performance data. Predicted close probability: <span style="color:#059669">82%</span>. Estimated leads: 15–25 over 120 days.`,
-      'LTC': `<strong>AI Brief — ${name}:</strong> Target ${segment}. Education-first approach — Medicare awareness + LTC gap analysis. Predicted close probability: <span style="color:#d97706">58%</span>. Pair with Medicare seminar for 2× engagement lift. Estimated leads: 20–35 over 90 days.`
+    // ── Domain labels
+    const domainLabels = { ins: 'Insurance', inv: 'Investments', ret: 'Retirement', adv: 'Advisory' };
+    const domainColors = { ins: 'ins', inv: 'inv', ret: 'ret', adv: 'adv' };
+    const domainIcons  = { ins: 'fa-shield-alt', inv: 'fa-chart-line', ret: 'fa-umbrella-beach', adv: 'fa-handshake' };
+
+    // ── Segment-driven profile data
+    const segProfiles = {
+      'Young Families (28–40)': { ageRange: '28–40', income: '$80K–$160K', lifeTrigger: 'new baby, home purchase, marriage', protection: 'income replacement & mortgage protection', closePct: '78', leads: '35–55', days: 90 },
+      'Mid-Career (40–55)':     { ageRange: '40–55', income: '$140K–$320K', lifeTrigger: 'career peak, business formation, 401k ramp-up', protection: 'peak-earning protection & wealth accumulation', closePct: '71', leads: '28–45', days: 90 },
+      'Pre-Retirement (55–65)': { ageRange: '55–65', income: '$120K–$280K', lifeTrigger: 'pension decision, CD maturity, Medicare enrollment', protection: 'guaranteed income & LTC gap coverage', closePct: '68', leads: '20–35', days: 75 },
+      'HNW Clients':            { ageRange: '45–65', income: '$400K+', lifeTrigger: 'IPO/vest event, estate trigger, business exit', protection: 'legacy optimization & estate tax efficiency', closePct: '84', leads: '12–20', days: 120 },
+      'Existing Clients (Upsell)': { ageRange: 'varies', income: 'established', lifeTrigger: 'annual review, life event, product gap identified', protection: 'upsell to next coverage tier', closePct: '87', leads: '15–30', days: 60 }
     };
-    suggestBox.innerHTML = `<i class="fas fa-check-circle" style="color:#059669"></i> <span>${briefs[type] || briefs['Life Insurance']}</span>`;
-  }, 1600);
+    const seg = segProfiles[segment] || segProfiles['Mid-Career (40–55)'];
+
+    // ── Per-domain product strategy text
+    const domainStrategyText = {
+      ins: {
+        products: selectedByDomain.ins,
+        strategy: selectedByDomain.ins.includes('Whole Life') || selectedByDomain.ins.includes('Universal Life')
+          ? `Lead with permanent life as a tax-sheltered wealth vehicle — not just protection. For ${seg.ageRange} ${segment.toLowerCase()}, premium financing conversations open naturally from the income profile. Key objection anchor: cost-vs-value over 20-year horizon vs. term + invest-the-difference.`
+          : selectedByDomain.ins.includes('Term Life')
+          ? `Position term as the financially disciplined choice for ${seg.ageRange} clients with ${seg.income} income and ${seg.lifeTrigger} triggers. Bundle DI conversation at delivery: 68% of agents who add a DI rider review close it within 30 days.`
+          : `Disability Insurance is the most underutilized product in the ${segment} segment. ${Math.round(budget * 0.35).toLocaleString()} of the budget should go to education-first outreach — income gap calculator + "What if you couldn't work for 90 days?" opener.`
+      },
+      inv: {
+        products: selectedByDomain.inv,
+        strategy: selectedByDomain.inv.includes('529 Plan')
+          ? `529 is the lowest-friction first product for new-parent and young-family segments — position as college cost gap vs. projected tuition inflation ($340K+ by 2042). Pair with Term Life at delivery for 2.1× conversion uplift.`
+          : selectedByDomain.inv.includes('ESPP / Equity Plans') || selectedByDomain.inv.includes('UMA / Managed Acct')
+          ? `ESPP vesting events create a narrow 30-day window where clients are receptive to redirecting equity proceeds. UMA / Managed Account conversations benefit from concentration-risk framing — help them diversify before the next down cycle.`
+          : `Investment conversations should be anchored in tax efficiency for the ${segment} profile (${seg.income}). Lead with after-tax return comparison and liquidity trade-off analysis vs. pure market exposure.`
+      },
+      ret: {
+        products: selectedByDomain.ret,
+        strategy: selectedByDomain.ret.includes('Deferred Annuity') || selectedByDomain.ret.includes('Immediate Annuity')
+          ? `Annuity positioning must address the "CD maturity" or "pension freeze" trigger. A fixed annuity rate-vs-CD comparison deck closes 71% of Pre-Retirement segment meetings when presented within 30 days of CD maturity or lump-sum availability.`
+          : selectedByDomain.ret.includes('Income Planning')
+          ? `Income planning framing: "What is your guaranteed income floor in retirement?" Sequence-of-returns risk visualization drives urgency better than product-first pitching for the ${seg.ageRange} cohort.`
+          : `SEP-IRA / NQDC conversations are most effective when led with tax deferral math — show current-year tax savings in dollars before projecting accumulation. Business-owner segment converts at 91% when the tax benefit exceeds $12K/yr.`
+      },
+      adv: {
+        products: selectedByDomain.adv,
+        strategy: selectedByDomain.adv.includes('Business Succession') || selectedByDomain.adv.includes('Buy-Sell Agreement')
+          ? `Business succession and buy-sell are urgency-driven products — a single "what happens to your business if you can't come in tomorrow?" question opens 84% of meetings with business-owner segments. Partner with a tax attorney for joint client presentations to accelerate deal flow.`
+          : selectedByDomain.adv.includes('Estate Planning') || selectedByDomain.adv.includes('Trust / Will')
+          ? `Estate planning conversations work best as discovery-led: start with "Who inherits your largest asset?" and build backward. For HNW clients, lead with estate tax exposure calculator — anything above $13.6M federal exemption requires immediate planning.`
+          : `Tax and key-person planning are high-ROI conversations for ${segment} profiles. Position as a complimentary financial diagnostic — the advice framing eliminates the product objection barrier.`
+      }
+    };
+
+    // ── KPI projections (budget-driven)
+    const cpl = activeDomains.length > 2 ? 85 : 65;
+    const convRate = parseFloat(seg.closePct) / 100;
+    const estLeadCount = Math.round(budget / cpl);
+    const estClosures = Math.round(estLeadCount * convRate);
+    const estRevenue = estClosures * (activeDomains.includes('adv') || activeDomains.includes('ret') ? 18500 : 12000);
+    const roi = Math.round(((estRevenue * 0.12) - budget) / budget * 100);
+
+    // ── Channel cadence steps
+    const channelSteps = {
+      'Email + Outbound': [
+        { day: 'Day 0', action: 'Personalized email — AI-drafted subject line based on life trigger' },
+        { day: 'Day 3', action: 'Outbound call — reference email, offer 15-min needs analysis' },
+        { day: 'Day 7', action: 'Follow-up email — include product-specific calculator link' },
+        { day: 'Day 12', action: 'Final call attempt — "last reach out" framing, leave VM + SMS' },
+        { day: 'Day 18', action: 'Drip sequence — 30/60/90-day educational content' },
+        { day: 'Day 30+', action: 'Quarterly re-engagement for non-responders (life-event retrigger)' }
+      ],
+      'Email + SMS': [
+        { day: 'Day 0', action: 'Email: personalized opener + single CTA (schedule a call)' },
+        { day: 'Day 1', action: 'SMS: "Did you see my email? Quick 10-min call this week?" (< 160 chars)' },
+        { day: 'Day 5', action: 'Email: follow-up with infographic or calculator link' },
+        { day: 'Day 8', action: 'SMS: reminder nudge — calendar link' },
+        { day: 'Day 14', action: 'Email: social proof — client story relevant to segment' },
+        { day: 'Day 21+', action: 'Monthly drip: life-event tips, market updates, product highlights' }
+      ],
+      'Seminar + Email': [
+        { day: 'Week –2', action: 'Invitation email + direct mail — seminar with complimentary dinner offer' },
+        { day: 'Week –1', action: 'Reminder email + SMS confirmation' },
+        { day: 'Seminar Day', action: 'Live event: education-first presentation, needs analysis sheets' },
+        { day: 'Day +1', action: 'Personal follow-up email with meeting request' },
+        { day: 'Day +3', action: 'Outbound call — reference seminar insight that resonated' },
+        { day: 'Day +14', action: 'Drip: post-seminar content series (3-part email sequence)' }
+      ],
+      'Webinar + Email': [
+        { day: 'Week –2', action: 'Registration invite email + LinkedIn connection request' },
+        { day: 'Week –1', action: 'Reminder email + pre-webinar survey (personalization data)' },
+        { day: 'Webinar Day', action: 'Live session — interactive polls, Q&A, 15-min product spotlight' },
+        { day: 'Day +1', action: 'Recording + summary email with CTA for 1:1 consultation' },
+        { day: 'Day +4', action: 'Personalized follow-up based on poll responses' },
+        { day: 'Day +10', action: 'Final push: "Book your free analysis" with deadline urgency' }
+      ],
+      'Referral + Event': [
+        { day: 'Day 0', action: 'Warm intro email (cc\'d referral source or name-drop)' },
+        { day: 'Day 2', action: 'Outbound call — "Your colleague mentioned…" opener' },
+        { day: 'Day 5', action: 'Event invitation (client appreciation dinner or financial workshop)' },
+        { day: 'Day 8', action: 'Follow-up with personalized needs summary based on referral notes' },
+        { day: 'Day 14', action: 'Meeting request + introductory analysis package' },
+        { day: 'Day 21+', action: 'Ongoing: include in quarterly client events + annual review cycle' }
+      ]
+    };
+    const cadenceSteps = channelSteps[channel] || channelSteps['Email + Outbound'];
+
+    // ── Risk flags
+    const riskFlags = [];
+    if (activeDomains.length > 2) riskFlags.push('Multi-domain campaigns risk message dilution — sequence product conversations: protection first, accumulation second, advisory last.');
+    if (budget < 3000) riskFlags.push('Budget below $3,000 may limit reach to fewer than 20 leads — consider extending timeline or narrowing segment for better CPL efficiency.');
+    if (segment === 'HNW Clients') riskFlags.push('HNW segment requires concierge-level outreach — automation alone achieves only 40% of expected conversion. Personal phone contact is non-negotiable.');
+    if (selectedByDomain.ins.includes('Long-Term Care')) riskFlags.push('LTC conversations require health disclosure sensitivity — train outreach team on HIPAA-compliant screening language before first contact.');
+    if (selectedByDomain.adv.includes('Buy-Sell Agreement') || selectedByDomain.adv.includes('Business Succession')) riskFlags.push('Business succession deals average 4.2 meetings to close — allocate 25% more time budget per lead in this product line.');
+    if (riskFlags.length === 0) riskFlags.push('No critical risk flags detected. Monitor open rate (target: >28%) and response rate (target: >12%) in first 7 days and adjust messaging if below threshold.');
+
+    // ── Assemble the domain strategy HTML
+    const domainStrategyHTML = activeDomains.map(d => {
+      const prods = selectedByDomain[d];
+      const strat = domainStrategyText[d];
+      if (!strat) return '';
+      return `
+        <div style="margin-bottom:8px;padding:8px 10px;background:#f8fafc;border-radius:7px;border-left:3px solid ${d==='ins'?'#2563eb':d==='inv'?'#059669':d==='ret'?'#d97706':'#7c3aed'}">
+          <div style="font-size:0.72rem;font-weight:700;color:${d==='ins'?'#2563eb':d==='inv'?'#059669':d==='ret'?'#d97706':'#7c3aed'};margin-bottom:4px;">
+            <i class="fas ${domainIcons[d]}"></i> ${domainLabels[d]}: ${prods.join(' · ')}
+          </div>
+          <div style="font-size:0.78rem;color:#374151;line-height:1.5;">${strat.strategy}</div>
+        </div>`;
+    }).join('');
+
+    // ── Domain tag pills
+    const domainTagsHTML = activeDomains.map(d =>
+      `<span class="camp-brief-domain-tag ${d}">${domainLabels[d]} (${selectedByDomain[d].length})</span>`
+    ).join('');
+
+    // ── Channel cadence steps HTML
+    const cadenceHTML = cadenceSteps.map(step => `
+      <div class="camp-brief-cadence-step">
+        <div class="camp-brief-cadence-day">${step.day}</div>
+        ${step.action}
+      </div>`).join('');
+
+    // ── Risk flags HTML
+    const riskHTML = riskFlags.map(f =>
+      `<div class="camp-brief-risk-flag"><i class="fas fa-exclamation-triangle"></i>${f}</div>`
+    ).join('');
+
+    // ── Lead scoring criteria
+    const leadScoringCriteria = `
+      <div style="font-size:0.78rem;color:#374151;line-height:1.55;">
+        <strong>Composite PMAIL Score ≥ 80</strong> — qualified leads only enter active outreach sequence.<br/>
+        ${activeDomains.includes('ins') ? '<strong>Insurance propensity ≥ 65</strong> — required for any insurance product assignment.<br/>' : ''}
+        ${activeDomains.includes('inv') ? '<strong>Investment propensity ≥ 60</strong> — ESPP/vesting event within 90 days scores +15 bonus.<br/>' : ''}
+        ${activeDomains.includes('ret') ? '<strong>Retirement propensity ≥ 70</strong> — CD maturity or pension freeze within 180 days elevates priority.<br/>' : ''}
+        ${activeDomains.includes('adv') ? '<strong>Advisory propensity ≥ 65</strong> — business trigger (LLC filing, equity event, trust) mandatory.<br/>' : ''}
+        <strong>Life Event Recency:</strong> Triggers within 90 days → Tier 1; 91–180 days → Tier 2; 180+ days → nurture only.<br/>
+        <strong>Close Probability:</strong> Propensity model closePct ≥ ${Math.max(45, parseInt(seg.closePct) - 15)}% required for campaign enrollment.
+      </div>`;
+
+    // ── Messaging framework
+    const messagingFramework = `
+      <div style="font-size:0.78rem;color:#374151;line-height:1.55;">
+        <strong>Primary Hook:</strong> ${goal.length > 10 ? `"${goal.substring(0, 120)}${goal.length > 120 ? '…' : ''}"` : `Financial protection and wealth growth for ${segment.toLowerCase()}`}<br/><br/>
+        <strong>Proof Points:</strong> NYL financial strength rating (A++ AM Best), $1.7T in total assets under management, 178-year history of dividend payments.<br/><br/>
+        <strong>Objection Handling:</strong><br/>
+        → <em>"I already have coverage through work"</em> — Group coverage averages 1.5× salary; your target segment needs 8–12× income replacement.<br/>
+        → <em>"The market is too volatile right now"</em> — Fixed products (annuities, WL) are uncorrelated to market volatility — ideal hedge.<br/>
+        → <em>"I need to think about it"</em> — Deploy the decision-delay cost calculator: every 90-day delay increases WL premium by 2.3% on average.
+      </div>`;
+
+    // ── Build the full brief HTML
+    const briefHTML = `
+      <div class="camp-ai-brief-output">
+        <div class="camp-ai-brief-header">
+          <div class="camp-ai-brief-header-title"><i class="fas fa-brain"></i> AI Campaign Brief — ${name}</div>
+          <div class="camp-ai-brief-header-meta">${allSelected.length} products · ${activeDomains.length} domains · generated ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+        <div class="camp-ai-brief-body">
+
+          <div class="camp-brief-section">
+            <div class="camp-brief-section-title"><i class="fas fa-flag"></i> Executive Summary</div>
+            <div class="camp-brief-section-body">
+              <strong>${name}</strong> targets the <strong>${segment}</strong> segment (age ${seg.ageRange}, ${seg.income}) across ${activeDomains.length} product domain${activeDomains.length>1?'s':''}
+              via <strong>${channel}</strong> over a <strong>${seg.days}-day</strong> campaign window. Budget allocation of <strong>$${budget.toLocaleString()}</strong>
+              projects <strong>${estLeadCount} qualified contacts</strong>, converting at an estimated <strong>${seg.closePct}%</strong> close rate to yield
+              <strong>${estClosures} new cases</strong> and <strong>~$${estRevenue.toLocaleString()} in estimated premium revenue</strong>.
+              AI propensity models and PMAIL scoring will pre-qualify all leads before outreach begins — only Tier 1 and Tier 2 leads enter the active sequence.
+              <div class="camp-brief-domain-tags" style="margin-top:8px;">${domainTagsHTML}</div>
+            </div>
+          </div>
+
+          <div class="camp-brief-section">
+            <div class="camp-brief-section-title"><i class="fas fa-user-circle"></i> Target Profile</div>
+            <div class="camp-brief-section-body">
+              <strong>Segment:</strong> ${segment} · Age ${seg.ageRange} · Income ${seg.income}<br/>
+              <strong>Primary Life Triggers:</strong> ${seg.lifeTrigger}<br/>
+              <strong>Core Value Proposition:</strong> ${seg.protection}<br/>
+              <strong>Channel:</strong> ${channel} · <strong>Estimated CPL:</strong> $${cpl} · <strong>Projected Qualified Leads:</strong> ${seg.leads} over ${seg.days} days
+            </div>
+          </div>
+
+          <div class="camp-brief-section">
+            <div class="camp-brief-section-title"><i class="fas fa-layer-group"></i> Product Strategy by Domain</div>
+            ${domainStrategyHTML}
+          </div>
+
+          <div class="camp-brief-section">
+            <div class="camp-brief-section-title"><i class="fas fa-comment-dots"></i> Messaging Framework</div>
+            ${messagingFramework}
+          </div>
+
+          <div class="camp-brief-section">
+            <div class="camp-brief-section-title"><i class="fas fa-calendar-alt"></i> Channel Cadence — ${channel}</div>
+            <div class="camp-brief-cadence-grid">${cadenceHTML}</div>
+          </div>
+
+          <div class="camp-brief-section">
+            <div class="camp-brief-section-title"><i class="fas fa-filter"></i> Lead Scoring Criteria</div>
+            ${leadScoringCriteria}
+          </div>
+
+          <div class="camp-brief-section">
+            <div class="camp-brief-section-title"><i class="fas fa-chart-bar"></i> KPIs & Success Metrics</div>
+            <div class="camp-brief-kpi-grid">
+              <div class="camp-brief-kpi-card"><span class="camp-brief-kpi-val">${seg.closePct}%</span><span class="camp-brief-kpi-lbl">Target Close Rate</span></div>
+              <div class="camp-brief-kpi-card"><span class="camp-brief-kpi-val">${estLeadCount}</span><span class="camp-brief-kpi-lbl">Projected Contacts</span></div>
+              <div class="camp-brief-kpi-card"><span class="camp-brief-kpi-val">${estClosures}</span><span class="camp-brief-kpi-lbl">Est. Closures</span></div>
+              <div class="camp-brief-kpi-card"><span class="camp-brief-kpi-val">${roi > 0 ? '+' : ''}${roi}%</span><span class="camp-brief-kpi-lbl">Projected ROI</span></div>
+            </div>
+            <div style="font-size:0.75rem;color:#6b7280;margin-top:8px;">
+              Additional KPIs: Email open rate target &gt;28% · Response rate target &gt;12% · Meeting-to-proposal ratio target 65% · Proposal-to-close target ${seg.closePct}%
+            </div>
+          </div>
+
+          <div class="camp-brief-section">
+            <div class="camp-brief-section-title"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> AI Risk Flags</div>
+            <div class="camp-brief-risk-flags">${riskHTML}</div>
+          </div>
+
+          <button class="camp-brief-suggest-btn" onclick="suggestCampaignLeads()">
+            <i class="fas fa-users"></i> AI Suggested Leads — Run Propensity + PMAIL Match
+          </button>
+
+        </div>
+      </div>`;
+
+    suggestBox.innerHTML = '';
+    suggestBox.style.display = 'none';
+    const leadsPanel2 = document.getElementById('camp-ai-leads-panel');
+    const briefContainer = document.createElement('div');
+    briefContainer.id = 'camp-brief-container';
+    briefContainer.innerHTML = briefHTML;
+    if (leadsPanel2) {
+      leadsPanel2.parentNode.insertBefore(briefContainer, leadsPanel2);
+    } else {
+      suggestBox.parentNode.insertBefore(briefContainer, suggestBox.nextSibling);
+    }
+
+    // Store selections for lead matching
+    window._campBriefData = { name, segment, channel, budget, goal, selectedByDomain, activeDomains, allSelected };
+    showToast('<i class="fas fa-check-circle" style="color:#059669"></i> AI Brief generated — click <strong>AI Suggested Leads</strong> to find your best-fit prospects');
+  }, 1800);
+}
+
+function suggestCampaignLeads() {
+  const briefData = window._campBriefData;
+  if (!briefData) { showToast('Please generate an AI Brief first'); return; }
+  const { selectedByDomain, activeDomains, segment } = briefData;
+
+  const leadsPanel = document.getElementById('camp-ai-leads-panel');
+  if (!leadsPanel) return;
+  leadsPanel.innerHTML = '<div style="padding:12px;text-align:center;font-size:0.8rem;color:#059669"><i class="fas fa-spinner fa-spin"></i> Running propensity model + PMAIL scoring against all 15 leads…</div>';
+
+  setTimeout(() => {
+    // ── Domain weight from selected products (how many products per domain = weight)
+    const domainWeights = {
+      ins: selectedByDomain.ins.length,
+      inv: selectedByDomain.inv.length,
+      ret: selectedByDomain.ret.length,
+      adv: selectedByDomain.adv.length
+    };
+    const totalDomainWeight = Object.values(domainWeights).reduce((a,b) => a+b, 0) || 1;
+
+    // ── Score each lead
+    const scored = leadsData.map(lead => {
+      const pmail = pmailScores[lead.id];
+      const prop  = propensityProfiles[lead.id];
+      if (!pmail || !prop) return null;
+
+      // Weighted propensity score across selected domains
+      let propScore = 0;
+      if (domainWeights.ins > 0) propScore += (prop.ins || 0) * (domainWeights.ins / totalDomainWeight);
+      if (domainWeights.inv > 0) propScore += (prop.inv || 0) * (domainWeights.inv / totalDomainWeight);
+      if (domainWeights.ret > 0) propScore += (prop.ret || 0) * (domainWeights.ret / totalDomainWeight);
+      if (domainWeights.adv > 0) propScore += (prop.adv || 0) * (domainWeights.adv / totalDomainWeight);
+
+      // PMAIL total (normalized 0–100)
+      const pmailNorm = pmail.total;
+
+      // Close probability from propensity profile
+      const closePct = prop.closePct || 50;
+
+      // Composite score: 45% propensity, 35% PMAIL, 20% close probability
+      const composite = Math.round(propScore * 0.45 + pmailNorm * 0.35 + closePct * 0.20);
+
+      // Segment affinity bonus
+      const segBonus = {
+        'Young Families (28–40)': (lead.age <= 40 && lead.age >= 27) ? 5 : 0,
+        'Mid-Career (40–55)':     (lead.age >= 39 && lead.age <= 56) ? 5 : 0,
+        'Pre-Retirement (55–65)': (lead.age >= 54 && lead.age <= 66) ? 5 : 0,
+        'HNW Clients':            (lead.estimatedIncome && lead.estimatedIncome.includes('400') || lead.estimatedIncome && parseInt(lead.estimatedIncome.replace(/\D/g,'').substring(0,6)) >= 280) ? 5 : 0,
+        'Existing Clients (Upsell)': lead.status === 'converted' ? 8 : 0
+      };
+      const bonus = segBonus[segment] || 0;
+
+      // Build per-domain match description
+      const domainMatchParts = activeDomains.map(d => {
+        const score = prop[d] || 0;
+        const label = { ins:'INS', inv:'INV', ret:'RET', adv:'ADV' }[d];
+        return `${label}: ${score}`;
+      });
+
+      return {
+        lead, pmail, prop,
+        propScore: Math.round(propScore),
+        pmailNorm,
+        closePct,
+        composite: Math.min(100, composite + bonus),
+        domainMatchParts
+      };
+    }).filter(Boolean);
+
+    // Sort descending, take top 8
+    scored.sort((a, b) => b.composite - a.composite);
+    const topLeads = scored.slice(0, 8);
+
+    // ── Render chip color
+    const chipClass = score => score >= 90 ? 'top' : score >= 75 ? 'high' : 'good';
+
+    // ── Domain bar colors
+    const domainBarColors = { ins: '#2563eb', inv: '#059669', ret: '#d97706', adv: '#7c3aed' };
+    const domainBarLabels = { ins: 'INS', inv: 'INV', ret: 'RET', adv: 'ADV' };
+
+    // ── Build lead rows
+    const leadRowsHTML = topLeads.map((entry, idx) => {
+      const { lead, prop, pmail, composite, domainMatchParts } = entry;
+      const avatarColor = lead.avatarColor || '#003087';
+
+      const domainBarsHTML = activeDomains.map(d => {
+        const score = prop[d] || 0;
+        const pct = Math.round(score * 0.4); // scale to 40px max height
+        return `
+          <div class="camp-sug-domain-bar-wrap">
+            <div class="camp-sug-domain-bar-track">
+              <div class="camp-sug-domain-bar-fill" style="height:${pct}px;background:${domainBarColors[d]}"></div>
+            </div>
+            <div class="camp-sug-domain-bar-lbl">${domainBarLabels[d]}</div>
+          </div>`;
+      }).join('');
+
+      const rank = idx + 1;
+      const rankBadge = rank <= 3 ? `<span style="font-size:0.68rem;background:${rank===1?'#fbbf24':rank===2?'#94a3b8':'#cd7c2f'};color:#fff;padding:1px 6px;border-radius:20px;font-weight:700;">#${rank}</span>` : '';
+
+      return `
+        <div class="camp-sug-lead-row" id="camp-sug-row-${lead.id}">
+          <div class="camp-sug-cb-wrap">
+            <input type="checkbox" class="camp-sug-cb" id="csug-${lead.id}" onchange="toggleCampSugLead('${lead.id}')" />
+          </div>
+          <div class="camp-sug-avatar" style="background:${avatarColor}">${lead.initials}</div>
+          <div class="camp-sug-lead-info">
+            <div class="camp-sug-lead-name">${lead.name} ${rankBadge}</div>
+            <div class="camp-sug-lead-occ">${lead.occupation} · ${lead.city} · Age ${lead.age}</div>
+            <div class="camp-sug-lead-occ" style="margin-top:2px;"><i class="fas fa-bolt" style="color:#f59e0b;font-size:0.65rem"></i> ${lead.lifeEventTrigger} · PMAIL: ${pmail.total}/100 · Close: ${prop.closePct}%</div>
+            <div class="camp-sug-lead-opener">"${prop.aiOpener}"</div>
+          </div>
+          <div class="camp-sug-score-col">
+            <div class="camp-sug-score-chip ${chipClass(composite)}">${composite}<span style="font-size:0.6rem;opacity:0.8">/100</span></div>
+            <div class="camp-sug-domain-bars">${domainBarsHTML}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    leadsPanel.innerHTML = `
+      <div class="camp-sug-panel">
+        <div class="camp-sug-panel-header">
+          <div class="camp-sug-panel-title"><i class="fas fa-robot"></i> AI Suggested Leads — Propensity + PMAIL Match</div>
+          <div class="camp-sug-panel-count">${topLeads.length} of 15 leads</div>
+        </div>
+        <div style="padding:8px 12px 4px;font-size:0.73rem;color:#065f46;background:#ecfdf5;border-bottom:1px solid #a7f3d0;">
+          <i class="fas fa-info-circle"></i> Sorted by composite score (45% propensity · 35% PMAIL · 20% close probability). Check leads to enroll in campaign.
+        </div>
+        <div class="camp-sug-leads-list">${leadRowsHTML}</div>
+        <div style="padding:10px 14px;border-top:1px solid #d1fae5;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div style="font-size:0.75rem;color:#065f46;"><i class="fas fa-check-square"></i> <span id="camp-sug-count">0</span> leads selected for campaign</div>
+          <button onclick="enrollSelectedLeads()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:0.78rem;font-weight:700;cursor:pointer;">
+            <i class="fas fa-plus-circle"></i> Enroll Selected Leads
+          </button>
+        </div>
+      </div>`;
+
+    showToast(`<i class="fas fa-users" style="color:#059669"></i> AI identified <strong>${topLeads.length} best-fit leads</strong> for <strong>${briefData.name}</strong>`);
+  }, 1400);
+}
+
+function toggleCampSugLead(leadId) {
+  const row = document.getElementById('camp-sug-row-' + leadId);
+  const cb  = document.getElementById('csug-' + leadId);
+  if (row && cb) {
+    row.classList.toggle('selected', cb.checked);
+  }
+  // Update count
+  const allChecked = document.querySelectorAll('.camp-sug-cb:checked');
+  const countEl = document.getElementById('camp-sug-count');
+  if (countEl) countEl.textContent = allChecked.length;
+}
+
+function enrollSelectedLeads() {
+  const selected = Array.from(document.querySelectorAll('.camp-sug-cb:checked'));
+  if (selected.length === 0) {
+    showToast('<i class="fas fa-info-circle" style="color:#2563eb"></i> Select at least one lead to enroll');
+    return;
+  }
+  const names = selected.map(cb => {
+    const id = cb.id.replace('csug-', '');
+    const lead = leadsData.find(l => l.id === id);
+    return lead ? lead.name.split(' ')[0] : id;
+  });
+  const campName = window._campBriefData?.name || 'campaign';
+  showToast(`<i class="fas fa-check-circle" style="color:#059669"></i> <strong>${selected.length} lead${selected.length>1?'s':''}</strong> enrolled in <strong>${campName}</strong> — ${names.join(', ')}`);
 }
 
 function saveNewCampaign() {
-  const name = document.getElementById('new-camp-name')?.value;
+  const name = document.getElementById('new-camp-name')?.value.trim();
   if (!name) { showToast('<i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i> Please enter a campaign name'); return; }
+
+  // Collect selected products
+  const checked = Array.from(document.querySelectorAll('.cpd-cb:checked'));
+  const products = checked.map(cb => cb.value);
+
+  // Collect enrolled leads
+  const enrolledCbs = Array.from(document.querySelectorAll('.camp-sug-cb:checked'));
+  const enrolledLeadIds = enrolledCbs.map(cb => cb.id.replace('csug-',''));
+
+  // Clean up brief container if exists
+  const briefContainer = document.getElementById('camp-brief-container');
+  if (briefContainer) briefContainer.remove();
+
   closeNewCampaignModal();
-  showToast(`<i class="fas fa-bullhorn" style="color:#0891b2"></i> Campaign <strong>${name}</strong> launched successfully!`);
+
+  const productSummary = products.length > 0 ? ` (${products.slice(0,3).join(', ')}${products.length>3?` +${products.length-3} more`:''})` : '';
+  const leadsSummary = enrolledLeadIds.length > 0 ? ` · ${enrolledLeadIds.length} lead${enrolledLeadIds.length>1?'s':''} enrolled` : '';
+  showToast(`<i class="fas fa-rocket" style="color:#059669"></i> Campaign <strong>${name}</strong>${productSummary} launched!${leadsSummary}`);
+  window._campBriefData = null;
 }
 
 console.log('Campaigns module loaded — filterCampaigns, openCampaignDetail, openNewCampaignModal, openCampAIWizard all ready');

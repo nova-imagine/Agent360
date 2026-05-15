@@ -3281,16 +3281,57 @@ function CampaignsPage() {
                 <label class="camp-label">Campaign Name</label>
                 <input type="text" class="camp-input" placeholder="e.g. Q3 Whole Life Drive" id="new-camp-name" />
               </div>
-              <div class="camp-form-group">
-                <label class="camp-label">Product Type</label>
-                <select class="camp-input" id="new-camp-type">
-                  <option>Life Insurance</option>
-                  <option>Retirement</option>
-                  <option>Investments</option>
-                  <option>Wealth Management</option>
-                  <option>LTC</option>
-                </select>
+              <div class="camp-form-group camp-span2">
+                <label class="camp-label">Product Types <span style="font-size:10px;color:#94a3b8;font-weight:400">— select all that apply across domains</span></label>
+                <div class="camp-product-domains" id="camp-product-domains">
+
+                  {/* Insurance domain */}
+                  <div class="camp-product-domain-group cpd-ins">
+                    <div class="camp-pdg-header"><i class="fas fa-shield-alt"></i> Insurance</div>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ins" value="Term Life" /> Term Life</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ins" value="Whole Life" /> Whole Life</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ins" value="Universal Life" /> Universal Life</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ins" value="Variable UL" /> Variable UL</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ins" value="Disability Insurance" /> Disability (DI)</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ins" value="Long-Term Care" /> Long-Term Care</label>
+                  </div>
+
+                  {/* Investments domain */}
+                  <div class="camp-product-domain-group cpd-inv">
+                    <div class="camp-pdg-header"><i class="fas fa-chart-line"></i> Investments</div>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="inv" value="529 Plan" /> 529 Plan</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="inv" value="Roth IRA" /> Roth IRA</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="inv" value="Mutual Funds" /> Mutual Funds</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="inv" value="UMA / Managed Acct" /> UMA / Managed Acct</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="inv" value="ESPP / Equity Plans" /> ESPP / Equity Plans</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="inv" value="Taxable Brokerage" /> Taxable Brokerage</label>
+                  </div>
+
+                  {/* Retirement domain */}
+                  <div class="camp-product-domain-group cpd-ret">
+                    <div class="camp-pdg-header"><i class="fas fa-umbrella-beach"></i> Retirement</div>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ret" value="Deferred Annuity" /> Deferred Annuity</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ret" value="Immediate Annuity" /> Immediate Annuity</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ret" value="SEP-IRA / 401(k)" /> SEP-IRA / 401(k)</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ret" value="NQDC Plan" /> NQDC Plan</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ret" value="Income Planning" /> Income Planning</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="ret" value="Pension Rollover" /> Pension Rollover</label>
+                  </div>
+
+                  {/* Advisory domain */}
+                  <div class="camp-product-domain-group cpd-adv">
+                    <div class="camp-pdg-header"><i class="fas fa-handshake"></i> Advisory</div>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="adv" value="Estate Planning" /> Estate Planning</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="adv" value="Trust / Will" /> Trust / Will</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="adv" value="Business Succession" /> Biz Succession</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="adv" value="Tax Planning" /> Tax Planning</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="adv" value="Buy-Sell Agreement" /> Buy-Sell Agreement</label>
+                    <label class="camp-pdg-check"><input type="checkbox" class="cpd-cb" data-domain="adv" value="Key-Person Coverage" /> Key-Person Coverage</label>
+                  </div>
+
+                </div>
               </div>
+
               <div class="camp-form-group">
                 <label class="camp-label">Target Segment</label>
                 <select class="camp-input" id="new-camp-segment">
@@ -3322,11 +3363,12 @@ function CampaignsPage() {
             </div>
             <div class="camp-ai-suggest-box" id="camp-ai-suggest">
               <i class="fas fa-robot"></i>
-              <span>Fill in the fields above and click <strong>Generate AI Brief</strong> to get targeting recommendations, messaging strategy, and lead scoring criteria.</span>
+              <span>Select products above, fill in Campaign Goal, then click <strong>Generate AI Brief</strong> to get a sophisticated multi-section targeting brief, messaging strategy, channel cadence, KPIs, and AI risk flags.</span>
             </div>
+            <div id="camp-ai-leads-panel"></div>
             <div class="camp-modal-footer">
               <button class="btn btn-ai" onclick="generateCampaignAIBrief()"><i class="fas fa-magic"></i> Generate AI Brief</button>
-              <button class="btn btn-primary" onclick="saveNewCampaign()"><i class="fas fa-save"></i> Launch Campaign</button>
+              <button class="btn btn-primary" onclick="saveNewCampaign()"><i class="fas fa-rocket"></i> Launch Campaign</button>
               <button class="btn btn-ghost" onclick="closeNewCampaignModal()">Cancel</button>
             </div>
           </div>
