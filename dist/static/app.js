@@ -46751,3 +46751,352 @@ console.log('Advisory Accounts module loaded — ' + advAccounts.length + ' acco
 })();
 
 console.log('Claims tab module loaded — clmSwitchTab + initClaimsPage + navigateTo patch active');
+
+/* ============================================================
+   SETTINGS — INTEGRATIONS MODULE
+   filterIntegrations()  — filter panel by office / connected
+   showIntegrationDetail() — detail modal for each integration
+   ============================================================ */
+
+window.filterIntegrations = function(category, btn) {
+  // Update filter button active state
+  document.querySelectorAll('.stg-int-filter-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  if (btn) btn.classList.add('active');
+
+  var rows = document.querySelectorAll('.stg-int-row');
+  var cats = document.querySelectorAll('.stg-int-category');
+
+  rows.forEach(function(row) {
+    if (category === 'all') {
+      row.style.display = '';
+    } else if (category === 'connected') {
+      row.style.display = row.classList.contains('connected') ? '' : 'none';
+    } else {
+      row.style.display = (row.dataset.office === category) ? '' : 'none';
+    }
+  });
+
+  // Show/hide category header blocks based on visible rows
+  cats.forEach(function(cat) {
+    var hasVisible = Array.from(cat.querySelectorAll('.stg-int-row'))
+      .some(function(r) { return r.style.display !== 'none'; });
+    cat.style.display = hasVisible ? '' : 'none';
+  });
+};
+
+/* Integration detail data — keyed by integration id */
+var _intDetailData = {
+  'salesforce-fsc': {
+    name: 'Salesforce Financial Services Cloud',
+    icon: '<i class="fas fa-cloud" style="color:#00a1e0"></i>',
+    office: 'Front Office',
+    status: 'connected',
+    lastSync: '3 min ago',
+    syncFreq: 'Every 5 min',
+    direction: 'Bidirectional',
+    aiFeatures: [
+      { label: 'AI Lead Scoring', sub: 'Nova scores inbound Salesforce leads', on: true },
+      { label: 'Opportunity Sync', sub: 'Push/pull deals & pipeline stages', on: true },
+      { label: 'Activity Intelligence', sub: 'Summarize call/email activity via AI', on: true },
+      { label: 'Next Best Action Push', sub: 'Send Nova NBA recommendations to SF tasks', on: false }
+    ],
+    fieldMap: [
+      { src: 'Contact.Email', dst: 'Agent360.Prospect.email' },
+      { src: 'Opportunity.StageName', dst: 'Agent360.Pipeline.stage' },
+      { src: 'Opportunity.Amount', dst: 'Agent360.Pipeline.premium' },
+      { src: 'Lead.LeadSource', dst: 'Agent360.Prospect.source' }
+    ],
+    log: [
+      { status: 'ok',   time: '10:42 AM', msg: '214 contacts synced successfully' },
+      { status: 'ok',   time: '10:37 AM', msg: '8 opportunities updated from Salesforce' },
+      { status: 'warn', time: '09:15 AM', msg: '2 leads skipped — missing email field' },
+      { status: 'ok',   time: '08:00 AM', msg: 'Daily full sync completed — 1,847 records' }
+    ]
+  },
+  'outlook-teams': {
+    name: 'Microsoft Outlook & Teams',
+    icon: '<i class="fab fa-microsoft" style="color:#0078d4"></i>',
+    office: 'Front Office',
+    status: 'connected',
+    lastSync: '1 min ago',
+    syncFreq: 'Real-time',
+    direction: 'Bidirectional',
+    aiFeatures: [
+      { label: 'Email Sentiment Analysis', sub: 'AI flags at-risk client emails', on: true },
+      { label: 'Meeting Transcription', sub: 'Teams calls auto-transcribed + summarized', on: true },
+      { label: 'Follow-up Extraction', sub: 'Action items pulled from meeting summaries', on: true },
+      { label: 'Calendar Conflict AI', sub: 'Smart scheduling around client time zones', on: false }
+    ],
+    fieldMap: [
+      { src: 'Outlook.Contact', dst: 'Agent360.Client.profile' },
+      { src: 'Calendar.Event', dst: 'Agent360.Activity.meeting' },
+      { src: 'Teams.Transcript', dst: 'Agent360.Notes.callSummary' },
+      { src: 'Email.Thread', dst: 'Agent360.Activity.email' }
+    ],
+    log: [
+      { status: 'ok',   time: '11:01 AM', msg: 'Teams call transcribed — Johnson review meeting' },
+      { status: 'ok',   time: '10:55 AM', msg: '3 calendar events synced' },
+      { status: 'ok',   time: '10:30 AM', msg: 'Email sentiment scan: 0 at-risk flags' },
+      { status: 'ok',   time: '09:00 AM', msg: 'Overnight email batch processed — 47 threads' }
+    ]
+  },
+  'docusign': {
+    name: 'DocuSign eSignature',
+    icon: '<i class="fas fa-file-signature" style="color:#ffcc00"></i>',
+    office: 'Front Office',
+    status: 'connected',
+    lastSync: '18 min ago',
+    syncFreq: 'On event',
+    direction: 'Bidirectional',
+    aiFeatures: [
+      { label: 'Signature Status Alerts', sub: 'Nova notifies on pending/declined envelopes', on: true },
+      { label: 'Document Pre-fill AI', sub: 'Auto-populate forms from CRM data', on: true },
+      { label: 'Compliance Check', sub: 'AI flags missing required disclosures', on: true },
+      { label: 'Smart Reminder Timing', sub: 'AI picks optimal re-send time per client', on: false }
+    ],
+    fieldMap: [
+      { src: 'Envelope.Status', dst: 'Agent360.Policy.signatureStatus' },
+      { src: 'Signer.Email', dst: 'Agent360.Client.email' },
+      { src: 'Document.Name', dst: 'Agent360.Document.type' },
+      { src: 'CompletedDate', dst: 'Agent360.Policy.executedDate' }
+    ],
+    log: [
+      { status: 'ok',   time: '10:44 AM', msg: 'Envelope signed — Martinez Term Life Application' },
+      { status: 'warn', time: '09:50 AM', msg: 'Reminder sent — Thompson envelope pending 3 days' },
+      { status: 'ok',   time: '09:30 AM', msg: 'Pre-fill completed — 4 fields auto-populated' },
+      { status: 'ok',   time: '08:15 AM', msg: '2 completed envelopes archived to policy records' }
+    ]
+  },
+  'linkedin-sn': {
+    name: 'LinkedIn Sales Navigator',
+    icon: '<i class="fab fa-linkedin" style="color:#0077b5"></i>',
+    office: 'Front Office',
+    status: 'connected',
+    lastSync: '45 min ago',
+    syncFreq: 'Every 30 min',
+    direction: 'Inbound',
+    aiFeatures: [
+      { label: 'Lead Enrichment', sub: 'Pull job changes, funding events to Agent360', on: true },
+      { label: 'Prospect Scoring', sub: 'AI scores LinkedIn leads for insurance fit', on: true },
+      { label: 'Life Event Detection', sub: 'Flag promotions, new roles as trigger events', on: true },
+      { label: 'InMail Draft AI', sub: 'Generate personalized outreach from profile data', on: true }
+    ],
+    fieldMap: [
+      { src: 'Profile.CurrentTitle', dst: 'Agent360.Prospect.occupation' },
+      { src: 'Profile.Company', dst: 'Agent360.Prospect.employer' },
+      { src: 'Alert.JobChange', dst: 'Agent360.Trigger.lifeEvent' },
+      { src: 'LeadList.Member', dst: 'Agent360.Pipeline.prospect' }
+    ],
+    log: [
+      { status: 'ok',   time: '10:15 AM', msg: '3 life event alerts imported — job changes detected' },
+      { status: 'ok',   time: '09:45 AM', msg: '12 lead list members enriched' },
+      { status: 'ok',   time: '09:00 AM', msg: 'AI scored 8 new leads — avg score 74/100' },
+      { status: 'warn', time: 'Yesterday', msg: 'API rate limit approached — throttled 2 requests' }
+    ]
+  },
+  'ipipeline': {
+    name: 'iPipeline iGo e-App',
+    icon: '<i class="fas fa-paper-plane" style="color:#ef4444"></i>',
+    office: 'Middle Office',
+    status: 'connected',
+    lastSync: '12 min ago',
+    syncFreq: 'On submission',
+    direction: 'Bidirectional',
+    aiFeatures: [
+      { label: 'Application Pre-fill', sub: 'Auto-populate e-App from CRM + underwriting data', on: true },
+      { label: 'NIGO Detection AI', sub: 'Flag not-in-good-order issues before submission', on: true },
+      { label: 'Status Push', sub: 'App status updates sync to Agent360 pipeline', on: true },
+      { label: 'Product Suitability AI', sub: 'Recommend optimal product based on client profile', on: false }
+    ],
+    fieldMap: [
+      { src: 'Application.Status', dst: 'Agent360.Pipeline.appStatus' },
+      { src: 'Client.DOB', dst: 'iGo.Applicant.dateOfBirth' },
+      { src: 'Policy.FaceAmount', dst: 'iGo.Coverage.amount' },
+      { src: 'Underwriting.Decision', dst: 'Agent360.Policy.uwDecision' }
+    ],
+    log: [
+      { status: 'ok',   time: '10:33 AM', msg: 'App submitted — Williams Whole Life $500K' },
+      { status: 'ok',   time: '10:28 AM', msg: 'NIGO check passed — 0 issues detected' },
+      { status: 'warn', time: '09:10 AM', msg: 'Pre-fill: 2 fields require manual entry (beneficiary)' },
+      { status: 'ok',   time: '08:45 AM', msg: 'Status sync: 5 in-flight applications updated' }
+    ]
+  },
+  'examone': {
+    name: 'ExamOne / APPS Paramedical',
+    icon: '<i class="fas fa-heartbeat" style="color:#14b8a6"></i>',
+    office: 'Middle Office',
+    status: 'connected',
+    lastSync: '2 hrs ago',
+    syncFreq: 'On result',
+    direction: 'Inbound',
+    aiFeatures: [
+      { label: 'Lab Result Summarization', sub: 'AI summarizes APS and lab results for agents', on: true },
+      { label: 'Risk Flag Detection', sub: 'Flag elevated biomarkers linked to UW concerns', on: true },
+      { label: 'Scheduling Intelligence', sub: 'Suggest exam times based on client calendar', on: false },
+      { label: 'Result-to-Policy Link', sub: 'Auto-attach results to policy record', on: true }
+    ],
+    fieldMap: [
+      { src: 'Exam.LabResults', dst: 'Agent360.Underwriting.labData' },
+      { src: 'Exam.CompletedDate', dst: 'Agent360.Policy.examDate' },
+      { src: 'Applicant.ExamCode', dst: 'ExamOne.Order.requisitionId' },
+      { src: 'Result.Flags', dst: 'Agent360.Risk.uwFlags' }
+    ],
+    log: [
+      { status: 'ok',   time: '08:30 AM', msg: 'Lab results received — Chen application' },
+      { status: 'ok',   time: '08:31 AM', msg: 'AI summary generated — 2 elevated biomarkers flagged' },
+      { status: 'ok',   time: 'Yesterday', msg: 'Results auto-attached to policy record #PL-8847' },
+      { status: 'ok',   time: 'Yesterday', msg: '3 exam orders fulfilled — all results clean' }
+    ]
+  },
+  'fidelity': {
+    name: 'Fidelity Wealthscape',
+    icon: '<i class="fas fa-university" style="color:#003087"></i>',
+    office: 'Back Office',
+    status: 'connected',
+    lastSync: '6 min ago',
+    syncFreq: 'Every 15 min',
+    direction: 'Bidirectional',
+    aiFeatures: [
+      { label: 'Portfolio Drift Alert', sub: 'AI detects allocation drift vs. target', on: true },
+      { label: 'Rebalance Recommendation', sub: 'Suggest trades to restore target allocation', on: true },
+      { label: 'Fee Analysis AI', sub: 'Flag high-fee funds vs. equivalent alternatives', on: true },
+      { label: 'Tax-Loss Harvesting', sub: 'Identify harvesting opportunities automatically', on: false }
+    ],
+    fieldMap: [
+      { src: 'Account.Balance', dst: 'Agent360.Client.aum' },
+      { src: 'Holdings.Positions', dst: 'Agent360.Portfolio.holdings' },
+      { src: 'Account.RepCode', dst: 'Agent360.Agent.id' },
+      { src: 'Transaction.History', dst: 'Agent360.Activity.trades' }
+    ],
+    log: [
+      { status: 'ok',   time: '10:54 AM', msg: '847 account positions refreshed' },
+      { status: 'ok',   time: '10:40 AM', msg: 'Portfolio drift alert: 3 accounts flagged' },
+      { status: 'warn', time: '09:30 AM', msg: 'Rebalance suggestion sent — awaiting approval' },
+      { status: 'ok',   time: '08:00 AM', msg: 'Overnight batch: $284M AUM reconciled' }
+    ]
+  }
+};
+
+/* Lightweight generic modal for integration detail panels */
+window.showGenericModal = function(title, bodyHtml) {
+  var existingId = 'int-detail-modal-overlay';
+  var existing = document.getElementById(existingId);
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = existingId;
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = '<div style="background:#fff;border-radius:16px;width:100%;max-width:680px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.25);overflow:hidden;animation:prospModalIn 0.22s ease">'
+    + '<div style="background:linear-gradient(135deg,#003087,#1d4ed8);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">'
+    + '<div style="font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px">' + title + '</div>'
+    + '<button onclick="document.getElementById(\'' + existingId + '\').remove()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:30px;height:30px;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center"><i class="fas fa-times"></i></button>'
+    + '</div>'
+    + '<div style="overflow-y:auto;padding:20px 22px;flex:1">' + bodyHtml + '</div>'
+    + '</div>';
+
+  document.body.appendChild(overlay);
+};
+
+window.showIntegrationDetail = function(id) {
+  var data = _intDetailData[id];
+  if (!data) {
+    showToast('Integration details coming soon for this connection.', 'info');
+    return;
+  }
+
+  // Build AI feature toggle rows
+  var aiRows = data.aiFeatures.map(function(f) {
+    var toggleId = 'idt-' + id + '-' + Math.random().toString(36).substr(2, 5);
+    var checked = f.on ? 'checked' : '';
+    return '<div class="int-detail-toggle-row">'
+      + '<span class="int-detail-toggle-label">' + f.label
+      + ' <span class="int-detail-toggle-sub">— ' + f.sub + '</span></span>'
+      + '<label class="stg-toggle"><input type="checkbox" id="' + toggleId + '" ' + checked
+      + ' onchange="showToast(\'' + f.label + ' ' + (f.on ? 'disabled' : 'enabled') + '\',\'info\')"><span class="stg-toggle-slider"></span></label>'
+      + '</div>';
+  }).join('');
+
+  // Build field mapping rows
+  var mapRows = data.fieldMap.map(function(m) {
+    return '<div class="int-detail-map-row">'
+      + '<span class="int-detail-map-src">' + m.src + '</span>'
+      + '<span class="int-detail-map-arrow">⇄</span>'
+      + '<span class="int-detail-map-dst">' + m.dst + '</span>'
+      + '</div>';
+  }).join('');
+
+  // Build sync log rows
+  var logRows = data.log.map(function(l) {
+    return '<div class="int-detail-log-row">'
+      + '<div class="int-detail-log-dot ' + l.status + '"></div>'
+      + '<span style="color:#94a3b8;min-width:70px;font-size:11px">' + l.time + '</span>'
+      + '<span>' + l.msg + '</span>'
+      + '</div>';
+  }).join('');
+
+  var dirBadge = data.direction === 'Bidirectional'
+    ? '<span style="color:#6d28d9;font-weight:600">⇄ Bidirectional</span>'
+    : data.direction === 'Inbound'
+    ? '<span style="color:#0369a1;font-weight:600">↓ Inbound</span>'
+    : '<span style="color:#0369a1;font-weight:600">↑ Outbound</span>';
+
+  var html = '<div class="int-detail-modal-body">'
+    // Status bar
+    + '<div style="display:flex;align-items:center;gap:16px;padding:10px 14px;background:#f8fafc;border-radius:8px;margin-bottom:16px;font-size:12px">'
+    + '<span style="color:#059669;font-weight:600"><i class="fas fa-check-circle" style="margin-right:4px"></i>Connected</span>'
+    + '<span style="color:#64748b">Last sync: <strong>' + data.lastSync + '</strong></span>'
+    + '<span style="color:#64748b">Frequency: <strong>' + data.syncFreq + '</strong></span>'
+    + '<span style="color:#64748b">Direction: ' + dirBadge + '</span>'
+    + '<button class="btn btn-outline stn-sm" style="margin-left:auto" onclick="showToast(\'Manual sync triggered for ' + data.name.replace(/'/g, '') + '\',\'ai\')"><i class="fas fa-sync-alt"></i> Sync Now</button>'
+    + '</div>'
+    // AI Features
+    + '<div class="int-detail-section">'
+    + '<h5><i class="fas fa-robot" style="margin-right:6px;color:#6d28d9"></i>AI Feature Toggles</h5>'
+    + aiRows
+    + '</div>'
+    // Field Mapping
+    + '<div class="int-detail-section">'
+    + '<h5><i class="fas fa-exchange-alt" style="margin-right:6px;color:#0369a1"></i>Field Mapping</h5>'
+    + '<div style="background:#f8fafc;border-radius:6px;padding:8px 12px">'
+    + '<div style="display:flex;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid #e2e8f0;margin-bottom:4px">'
+    + '<span style="flex:1">Source Field</span><span style="padding:0 10px"></span><span style="flex:1">Agent 360 Field</span></div>'
+    + mapRows
+    + '</div>'
+    + '</div>'
+    // Sync Log
+    + '<div class="int-detail-section">'
+    + '<h5><i class="fas fa-history" style="margin-right:6px;color:#64748b"></i>Recent Sync Log</h5>'
+    + logRows
+    + '</div>'
+    // Actions
+    + '<div style="display:flex;gap:8px;padding-top:8px;border-top:1px solid #e2e8f0;margin-top:4px">'
+    + '<button class="btn btn-outline stn-sm" onclick="showToast(\'Disconnect requires confirmation — contact your admin.\',\'info\')"><i class="fas fa-unlink"></i> Disconnect</button>'
+    + '<button class="btn btn-outline stn-sm" onclick="showToast(\'Sync settings saved.\',\'success\')"><i class="fas fa-cog"></i> Save Settings</button>'
+    + '<button class="btn btn-primary stn-sm" style="margin-left:auto" onclick="showToast(\'Generating integration health report…\',\'ai\')"><i class="fas fa-chart-bar"></i> Health Report</button>'
+    + '</div>'
+    + '</div>';
+
+  // Render via existing modal infrastructure
+  var modalTitle = data.icon + ' ' + data.name;
+  if (typeof showGenericModal === 'function') {
+    showGenericModal(modalTitle, html);
+  } else {
+    // Fallback: inject into any available modal slot
+    var m = document.getElementById('prospect-modal');
+    if (m) {
+      var mTitle = m.querySelector('.modal-title, h3');
+      var mBody = m.querySelector('.modal-body, .modal-content > div');
+      if (mTitle) mTitle.innerHTML = modalTitle;
+      if (mBody) mBody.innerHTML = html;
+      m.style.display = 'flex';
+    } else {
+      showToast('Opening ' + data.name + ' integration settings…', 'info');
+    }
+  }
+};
+
+console.log('Settings Integrations module loaded — filterIntegrations + showIntegrationDetail active');

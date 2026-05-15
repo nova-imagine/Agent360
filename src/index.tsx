@@ -13075,49 +13075,349 @@ function SettingsPage() {
 
           {/* ─── INTEGRATIONS ─── */}
           <div class="stab-panel" id="stab-integrations">
-            <div class="settings-section-title"><i class="fas fa-plug"></i> Integrations &amp; Connected Apps</div>
-            <p class="stg-sub">Manage connections to external platforms and data sources.</p>
 
-            <div class="stg-integration-list">
-              <div class="stg-int-row connected">
-                <div class="stg-int-icon" style="background:#e0f2fe;color:#0369a1"><i class="fas fa-envelope"></i></div>
-                <div class="stg-int-info"><strong>Microsoft Outlook</strong><span>Calendar sync, email threading, meeting invites</span></div>
-                <div class="stg-int-status connected">Connected</div>
-                <button class="btn btn-outline stn-sm" onclick="showToast('Outlook settings opened','info')">Manage</button>
+            {/* Header + search/filter bar */}
+            <div class="stg-int-header-row">
+              <div>
+                <div class="settings-section-title" style="margin-bottom:2px"><i class="fas fa-plug"></i> Integrations &amp; Connected Apps</div>
+                <p class="stg-sub" style="margin:0">Bi-directional AI-powered connections across front, middle &amp; back office · <strong>7 active</strong> · 18 available</p>
               </div>
-              <div class="stg-int-row connected">
-                <div class="stg-int-icon" style="background:#dcfce7;color:#15803d"><i class="fas fa-file-alt"></i></div>
-                <div class="stg-int-info"><strong>DocuSign</strong><span>E-signature for applications and client agreements</span></div>
-                <div class="stg-int-status connected">Connected</div>
-                <button class="btn btn-outline stn-sm" onclick="showToast('DocuSign settings opened','info')">Manage</button>
-              </div>
-              <div class="stg-int-row connected">
-                <div class="stg-int-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-star"></i></div>
-                <div class="stg-int-info"><strong>Salesforce CRM</strong><span>Bi-directional client and pipeline sync</span></div>
-                <div class="stg-int-status connected">Connected</div>
-                <button class="btn btn-outline stn-sm" onclick="showToast('Salesforce settings opened','info')">Manage</button>
-              </div>
-              <div class="stg-int-row">
-                <div class="stg-int-icon" style="background:#f5f3ff;color:#6d28d9"><i class="fas fa-video"></i></div>
-                <div class="stg-int-info"><strong>Zoom</strong><span>Auto-generate meeting links for client appointments</span></div>
-                <div class="stg-int-status">Not connected</div>
-                <button class="btn btn-primary stn-sm" onclick="showToast('Zoom OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
-              </div>
-              <div class="stg-int-row">
-                <div class="stg-int-icon" style="background:#fff1f2;color:#e11d48"><i class="fab fa-google"></i></div>
-                <div class="stg-int-info"><strong>Google Workspace</strong><span>Gmail, Google Calendar, Google Drive sync</span></div>
-                <div class="stg-int-status">Not connected</div>
-                <button class="btn btn-primary stn-sm" onclick="showToast('Google OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
-              </div>
-              <div class="stg-int-row">
-                <div class="stg-int-icon" style="background:#eff6ff;color:#1d4ed8"><i class="fab fa-linkedin"></i></div>
-                <div class="stg-int-info"><strong>LinkedIn Sales Navigator</strong><span>Prospect intelligence and social selling insights</span></div>
-                <div class="stg-int-status">Not connected</div>
-                <button class="btn btn-primary stn-sm" onclick="showToast('LinkedIn OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+              <div class="stg-int-filter-bar">
+                <button class="stg-int-filter-btn active" onclick="filterIntegrations('all',this)">All (25)</button>
+                <button class="stg-int-filter-btn" onclick="filterIntegrations('front',this)">Front Office</button>
+                <button class="stg-int-filter-btn" onclick="filterIntegrations('middle',this)">Middle Office</button>
+                <button class="stg-int-filter-btn" onclick="filterIntegrations('back',this)">Back Office</button>
+                <button class="stg-int-filter-btn" onclick="filterIntegrations('connected',this)"><i class="fas fa-check-circle" style="color:#059669"></i> Connected</button>
               </div>
             </div>
 
-            <div class="settings-section-title" style="margin-top:24px"><i class="fas fa-key"></i> API &amp; Webhooks</div>
+            {/* ══ FRONT OFFICE ══ */}
+            <div class="stg-int-category" data-category="front">
+              <div class="stg-int-cat-label"><i class="fas fa-user-tie"></i> Front Office — Client Engagement &amp; Sales</div>
+              <div class="stg-integration-list">
+
+                <div class="stg-int-row connected" data-office="front">
+                  <div class="stg-int-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-cloud"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Salesforce Financial Services Cloud</strong>
+                    <span>Bi-directional client, household &amp; pipeline sync · AI auto-updates opportunities from NOVA insights</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI syncs deal stage changes, lapse alerts &amp; meeting notes to SF records automatically</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-sync-badge">Last sync: 4 min ago</span></div>
+                  <div class="stg-int-status connected"><i class="fas fa-check-circle"></i> Connected</div>
+                  <button class="btn btn-outline stn-sm" onclick="showIntegrationDetail('salesforce')">Manage</button>
+                </div>
+
+                <div class="stg-int-row connected" data-office="front">
+                  <div class="stg-int-icon" style="background:#e0f2fe;color:#0369a1"><i class="fas fa-envelope"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Microsoft Outlook + Teams</strong>
+                    <span>Calendar sync, email threading, meeting invites &amp; Teams video calls</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI drafts follow-up emails post-meeting &amp; inserts client context into meeting prep</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-sync-badge">Last sync: 2 min ago</span></div>
+                  <div class="stg-int-status connected"><i class="fas fa-check-circle"></i> Connected</div>
+                  <button class="btn btn-outline stn-sm" onclick="showIntegrationDetail('outlook')">Manage</button>
+                </div>
+
+                <div class="stg-int-row connected" data-office="front">
+                  <div class="stg-int-icon" style="background:#dcfce7;color:#15803d"><i class="fas fa-file-signature"></i></div>
+                  <div class="stg-int-info">
+                    <strong>DocuSign</strong>
+                    <span>E-signature for applications, client agreements &amp; change-of-beneficiary forms</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI pre-fills application fields from client profile · flags missing sections before sending</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-sync-badge">2 pending sigs</span></div>
+                  <div class="stg-int-status connected"><i class="fas fa-check-circle"></i> Connected</div>
+                  <button class="btn btn-outline stn-sm" onclick="showIntegrationDetail('docusign')">Manage</button>
+                </div>
+
+                <div class="stg-int-row connected" data-office="front">
+                  <div class="stg-int-icon" style="background:#eff6ff;color:#1d4ed8"><i class="fab fa-linkedin"></i></div>
+                  <div class="stg-int-info">
+                    <strong>LinkedIn Sales Navigator</strong>
+                    <span>Prospect intelligence, social signals &amp; warm intro paths</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI surfaces life-event signals (job change, promotion) as NBA triggers in real time</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-sync-badge">14 signals today</span></div>
+                  <div class="stg-int-status connected"><i class="fas fa-check-circle"></i> Connected</div>
+                  <button class="btn btn-outline stn-sm" onclick="showIntegrationDetail('linkedin')">Manage</button>
+                </div>
+
+                <div class="stg-int-row" data-office="front">
+                  <div class="stg-int-icon" style="background:#f5f3ff;color:#6d28d9"><i class="fas fa-video"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Zoom</strong>
+                    <span>Auto-generate meeting links, post-call transcripts &amp; action item extraction</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI transcribes calls, extracts commitments &amp; creates follow-up tasks in NOVA automatically</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Zoom OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="front">
+                  <div class="stg-int-icon" style="background:#fef9c3;color:#ca8a04"><i class="fas fa-chart-line"></i></div>
+                  <div class="stg-int-info">
+                    <strong>eMoney Advisor</strong>
+                    <span>Financial planning, cash-flow modeling, estate &amp; retirement projections</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI pulls plan gaps into NOVA Growth Opportunities &amp; triggers outreach recommendations</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('eMoney OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="front">
+                  <div class="stg-int-icon" style="background:#fff1f2;color:#e11d48"><i class="fab fa-google"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Google Workspace</strong>
+                    <span>Gmail, Google Calendar, Google Drive sync &amp; Meet video</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI indexes Drive documents for client briefings &amp; surfaces relevant files before meetings</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Google OAuth flow starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="front">
+                  <div class="stg-int-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-mobile-alt"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Redtail CRM</strong>
+                    <span>Financial advisor CRM — client households, notes, tasks &amp; workflows</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI classifies meeting notes by intent &amp; pushes follow-up tasks back into Redtail automatically</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Redtail API connecting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+              </div>
+            </div>
+
+            {/* ══ MIDDLE OFFICE ══ */}
+            <div class="stg-int-category" data-category="middle">
+              <div class="stg-int-cat-label"><i class="fas fa-cogs"></i> Middle Office — Underwriting, Applications &amp; Risk</div>
+              <div class="stg-integration-list">
+
+                <div class="stg-int-row connected" data-office="middle">
+                  <div class="stg-int-icon" style="background:#f0fdf4;color:#15803d"><i class="fas fa-file-medical"></i></div>
+                  <div class="stg-int-info">
+                    <strong>iPipeline iGo e-App</strong>
+                    <span>Multi-carrier electronic application submission &amp; good-order checking</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI pre-fills 85% of app fields from client profile · runs real-time GOC before submit</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-sync-badge">3 apps in flight</span></div>
+                  <div class="stg-int-status connected"><i class="fas fa-check-circle"></i> Connected</div>
+                  <button class="btn btn-outline stn-sm" onclick="showIntegrationDetail('ipipeline')">Manage</button>
+                </div>
+
+                <div class="stg-int-row connected" data-office="middle">
+                  <div class="stg-int-icon" style="background:#fff7ed;color:#c2410c"><i class="fas fa-heartbeat"></i></div>
+                  <div class="stg-int-info">
+                    <strong>ExamOne / APPS (Exam Scheduling)</strong>
+                    <span>Paramedical exam scheduling, lab routing &amp; APS ordering</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI predicts APS likelihood (73% accuracy) &amp; auto-schedules exams for flagged applicants</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-sync-badge">2 exams pending</span></div>
+                  <div class="stg-int-status connected"><i class="fas fa-check-circle"></i> Connected</div>
+                  <button class="btn btn-outline stn-sm" onclick="showIntegrationDetail('examone')">Manage</button>
+                </div>
+
+                <div class="stg-int-row" data-office="middle">
+                  <div class="stg-int-icon" style="background:#ede9fe;color:#6d28d9"><i class="fas fa-search-dollar"></i></div>
+                  <div class="stg-int-info">
+                    <strong>DTCC / Depository Trust</strong>
+                    <span>Insurance transaction settlement, policy data exchange &amp; ACORD messaging</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI reconciles policy data discrepancies between NYL systems and DTCC records nightly</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Requesting DTCC API credentials…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="middle">
+                  <div class="stg-int-icon" style="background:#fef2f2;color:#b91c1c"><i class="fas fa-shield-virus"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Munich Re / Swiss Re Risk Engine</strong>
+                    <span>Automated mortality &amp; morbidity scoring, facultative reinsurance referrals</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI enriches applicant risk profile with lab data + MIB signals before UW decision</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Requesting reinsurance API access…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="middle">
+                  <div class="stg-int-icon" style="background:#f0f9ff;color:#0369a1"><i class="fas fa-database"></i></div>
+                  <div class="stg-int-info">
+                    <strong>MIB Group (Medical Information Bureau)</strong>
+                    <span>Underwriting data exchange · prior application &amp; medical disclosures</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI cross-references MIB codes against application responses to flag undisclosed conditions</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('MIB credentialing required — contact compliance','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="middle">
+                  <div class="stg-int-icon" style="background:#f0fdf4;color:#166534"><i class="fas fa-balance-scale"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Applied Epic / AMS360</strong>
+                    <span>Agency management system — policy lifecycle, renewals &amp; endorsements</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI detects renewal &amp; endorsement opportunities 60 days ahead and surfaces them in pipeline</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Applied Epic API connecting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="middle">
+                  <div class="stg-int-icon" style="background:#fef9c3;color:#92400e"><i class="fas fa-file-invoice"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Laser App / FormsFire</strong>
+                    <span>Smart form automation — auto-populates FINRA, NAIC &amp; carrier-specific forms</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI maps client data to form fields across 400+ carrier forms · eliminates NIGO submissions</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('LaserApp form API starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+              </div>
+            </div>
+
+            {/* ══ BACK OFFICE ══ */}
+            <div class="stg-int-category" data-category="back">
+              <div class="stg-int-cat-label"><i class="fas fa-server"></i> Back Office — Compliance, Custody &amp; Finance</div>
+              <div class="stg-integration-list">
+
+                <div class="stg-int-row connected" data-office="back">
+                  <div class="stg-int-icon" style="background:#eff6ff;color:#1d4ed8"><i class="fas fa-university"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Fidelity Wealthscape (Custodian)</strong>
+                    <span>Investment account custody · trade execution, positions &amp; account statements</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI monitors portfolio drift daily &amp; triggers rebalancing alerts in the Investment Accounts module</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-sync-badge">Last sync: 6:00 AM</span></div>
+                  <div class="stg-int-status connected"><i class="fas fa-check-circle"></i> Connected</div>
+                  <button class="btn btn-outline stn-sm" onclick="showIntegrationDetail('fidelity')">Manage</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#f0fdf4;color:#065f46"><i class="fas fa-piggy-bank"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Charles Schwab Advisor Services</strong>
+                    <span>Custodial accounts, money movement, RMD calculations &amp; reporting</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI flags RMD deadlines and calculates optimal distribution strategies per client tax bracket</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Schwab API credentials required','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#fdf4ff;color:#7e22ce"><i class="fas fa-archive"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Smarsh / Global Relay (Archiving)</strong>
+                    <span>FINRA / SEC compliant email &amp; communication archiving &amp; e-discovery</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI flags suitability concerns in archived communications before compliance review</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Smarsh integration requires compliance approval','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#fff7ed;color:#9a3412"><i class="fas fa-user-shield"></i></div>
+                  <div class="stg-int-info">
+                    <strong>NICE Actimize (AML / Fraud)</strong>
+                    <span>Anti-money laundering, fraud detection &amp; SAR filing automation</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI pre-screens new clients against AML watchlists &amp; surfaces transaction anomalies in real time</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Actimize integration requires compliance team','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#ecfdf5;color:#065f46"><i class="fas fa-dollar-sign"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Ebix SmartOffice / CommissionTrac</strong>
+                    <span>Commission tracking, chargeback monitoring &amp; production reporting</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI reconciles commission statements against policy records &amp; alerts on discrepancies within 24hrs</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('CommissionTrac API connecting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#fef2f2;color:#991b1b"><i class="fas fa-chart-pie"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Orion / Tamarac Portfolio Accounting</strong>
+                    <span>Portfolio performance, billing, rebalancing &amp; client reporting</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI generates personalised performance narratives for client statements using portfolio data</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Orion API connecting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#f0f9ff;color:#0c4a6e"><i class="fas fa-file-contract"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Workday (HR &amp; Payroll)</strong>
+                    <span>Agent onboarding, licensing status, territory management &amp; payroll</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI syncs CE / license renewal deadlines to AI Planner &amp; sends compliance reminders</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Workday SOAP API connecting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#fff9db;color:#b45309"><i class="fas fa-receipt"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Intuit QuickBooks / Sage Accounting</strong>
+                    <span>Business expense tracking, P&amp;L reporting &amp; tax preparation data</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI categorises business expenses and flags deductible items for quarterly tax planning</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('QuickBooks OAuth starting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#f5f3ff;color:#4c1d95"><i class="fas fa-gavel"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Broadridge RegTech / RegEd</strong>
+                    <span>CE tracking, supervision workflows, exam management &amp; reg change monitoring</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI monitors regulatory changes and proactively surfaces compliance tasks before deadlines</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('RegEd API connecting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+                <div class="stg-int-row" data-office="back">
+                  <div class="stg-int-icon" style="background:#ecfdf5;color:#047857"><i class="fas fa-comments-dollar"></i></div>
+                  <div class="stg-int-info">
+                    <strong>Riskalyze / Nitrogen (Suitability)</strong>
+                    <span>Risk tolerance questionnaires, suitability scoring &amp; proposal generation</span>
+                    <div class="stg-int-ai-tag"><i class="fas fa-robot"></i> AI maps Riskalyze scores to product recommendations and flags suitability mismatches</div>
+                  </div>
+                  <div class="stg-int-meta"><span class="stg-int-na-badge">Not connected</span></div>
+                  <div class="stg-int-status"></div>
+                  <button class="btn btn-primary stn-sm" onclick="showToast('Riskalyze API connecting…','info')"><i class="fas fa-plus"></i> Connect</button>
+                </div>
+
+              </div>
+            </div>
+
+            {/* ══ API & WEBHOOKS ══ */}
+            <div class="settings-section-title" style="margin-top:28px"><i class="fas fa-key"></i> API &amp; Webhooks</div>
+            <p class="stg-sub">Use the NOVA Agent 360 REST API to build custom integrations or connect internal systems.</p>
             <div class="stg-field">
               <label>Personal API Token</label>
               <div class="stg-api-row">
@@ -13125,6 +13425,15 @@ function SettingsPage() {
                 <button class="btn btn-outline stn-sm" onclick="settingsToggleToken()"><i class="fas fa-eye"></i></button>
                 <button class="btn btn-outline stn-sm" onclick="settingsRegenToken()"><i class="fas fa-sync"></i> Regen</button>
               </div>
+            </div>
+            <div class="stg-field" style="margin-top:12px">
+              <label>Webhook Endpoint URL</label>
+              <div class="stg-api-row">
+                <input type="text" class="stg-input" placeholder="https://your-system.com/webhooks/nova" style="flex:1;font-family:monospace"/>
+                <button class="btn btn-outline stn-sm" onclick="showToast('Webhook endpoint saved','success')"><i class="fas fa-save"></i> Save</button>
+                <button class="btn btn-outline stn-sm" onclick="showToast('Test payload sent to endpoint','info')"><i class="fas fa-paper-plane"></i> Test</button>
+              </div>
+              <div class="stg-field-hint">NOVA will POST events (deal stage changes, AI alerts, signature completions) to this URL in real time</div>
             </div>
           </div>
 
