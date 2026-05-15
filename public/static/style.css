@@ -41858,3 +41858,527 @@ kbd {
   border-color: rgba(255,255,255,0.6);
   text-decoration: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — FULL INTELLIGENCE REPORT MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+.ci-report-overlay { z-index: 9800; }
+.ci-report-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 96%;
+  max-width: 1100px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.ci-report-header {
+  background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.ci-report-header-left { display: flex; align-items: center; gap: 14px; }
+.ci-report-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(255,255,255,0.2); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 22px; color: #fff;
+}
+.ci-report-title { font-size: 18px; font-weight: 700; color: #fff; }
+.ci-report-sub { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.ci-report-header-right { display: flex; align-items: center; gap: 12px; }
+.ci-report-body { padding: 20px 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 20px; }
+.ci-report-footer {
+  padding: 16px 24px; border-top: 1px solid #e5e7eb;
+  display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
+}
+
+.ci-report-kpis { display: flex; gap: 12px; flex-wrap: wrap; }
+.ci-rk-card {
+  flex: 1; min-width: 90px; padding: 12px 14px; border-radius: 10px;
+  text-align: center; border: 1px solid;
+}
+.ci-rk-card.red    { background: #fef2f2; border-color: #fecaca; }
+.ci-rk-card.orange { background: #fffbeb; border-color: #fde68a; }
+.ci-rk-card.blue   { background: #eff6ff; border-color: #bfdbfe; }
+.ci-rk-card.green  { background: #f0fdf4; border-color: #bbf7d0; }
+.ci-rk-card.purple { background: #faf5ff; border-color: #e9d5ff; }
+.ci-rk-card.teal   { background: #f0fdfa; border-color: #99f6e4; }
+.ci-rk-val { font-size: 20px; font-weight: 800; color: #111827; }
+.ci-rk-lbl { font-size: 10px; color: #6b7280; margin-top: 2px; font-weight: 600; }
+.ci-rk-card.red .ci-rk-val    { color: #dc2626; }
+.ci-rk-card.orange .ci-rk-val { color: #d97706; }
+.ci-rk-card.blue .ci-rk-val   { color: #2563eb; }
+.ci-rk-card.green .ci-rk-val  { color: #16a34a; }
+.ci-rk-card.purple .ci-rk-val { color: #7c3aed; }
+.ci-rk-card.teal .ci-rk-val   { color: #0f766e; }
+
+.ci-sla-heatmap { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; }
+.ci-sla-hm-title { font-size: 13px; font-weight: 700; color: #1e3a5f; margin-bottom: 12px; }
+.ci-sla-hm-bars { display: flex; flex-direction: column; gap: 8px; }
+.ci-sla-hm-row { display: flex; align-items: center; gap: 10px; }
+.ci-sla-hm-lbl { width: 130px; font-size: 11px; font-weight: 600; color: #374151; flex-shrink: 0; }
+.ci-sla-hm-track { flex: 1; height: 10px; background: #e5e7eb; border-radius: 5px; overflow: hidden; }
+.ci-sla-hm-fill { height: 100%; border-radius: 5px; transition: width 0.5s; }
+.ci-sla-hm-days { width: 60px; font-size: 11px; font-weight: 700; text-align: right; flex-shrink: 0; }
+.ci-sla-hm-days.breach { color: #dc2626; }
+.ci-sla-hm-days.hold   { color: #7c3aed; }
+.ci-sla-hm-days.warn   { color: #d97706; }
+.ci-sla-hm-days.ok     { color: #16a34a; }
+
+.ci-report-table-wrap { border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+.ci-report-table-title { padding: 12px 16px; font-size: 13px; font-weight: 700; color: #1e3a5f; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
+.ci-report-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ci-report-table thead { background: #f1f5f9; }
+.ci-report-table th { padding: 10px 12px; font-weight: 700; color: #374151; text-align: left; border-bottom: 1px solid #e5e7eb; }
+.ci-report-table td { padding: 9px 12px; border-bottom: 1px solid #f1f5f9; color: #374151; }
+.ci-report-row:hover { background: #f8fafc; }
+.ci-claim-id { font-weight: 700; color: #1e3a5f; font-family: monospace; }
+.ci-type-badge { background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.ci-score-pill { padding: 3px 8px; border-radius: 10px; font-size: 11px; }
+.ci-nlp-bar-wrap { display: inline-block; width: 50px; height: 6px; background: #e5e7eb; border-radius: 3px; vertical-align: middle; margin-right: 4px; overflow: hidden; }
+.ci-nlp-bar { display: block; height: 100%; background: #2563eb; border-radius: 3px; }
+.ci-nlp-val { font-size: 11px; color: #374151; }
+.ci-sla-badge { font-size: 11px; font-weight: 700; }
+.ci-priority-tag { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+.ci-rec-cell { font-size: 11px; color: #6b7280; max-width: 200px; }
+.ci-model-footnote { font-size: 10px; color: #9ca3af; padding: 8px 0; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — AI TRIAGE MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+.triage-modal-overlay { z-index: 9800; }
+.triage-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 96%;
+  max-width: 860px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.triage-modal-header {
+  background: linear-gradient(135deg, #4c1d95, #7c3aed);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.triage-modal-header-left { display: flex; align-items: center; gap: 14px; }
+.triage-modal-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #fff;
+}
+.triage-modal-title { font-size: 18px; font-weight: 700; color: #fff; }
+.triage-modal-sub { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.triage-modal-summary {
+  padding: 12px 24px; background: #faf5ff; border-bottom: 1px solid #e9d5ff;
+  display: flex; gap: 16px; flex-wrap: wrap; flex-shrink: 0;
+}
+.triage-sum-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.triage-sum-item.red    { color: #dc2626; }
+.triage-sum-item.purple { color: #7c3aed; }
+.triage-sum-item.pink   { color: #db2777; }
+.triage-sum-item.green  { color: #16a34a; }
+.triage-modal-body { padding: 16px 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.triage-modal-footer {
+  padding: 16px 24px; border-top: 1px solid #e5e7eb;
+  display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
+}
+
+.triage-card {
+  border-radius: 12px; border: 1px solid #e5e7eb;
+  padding: 16px; background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+.triage-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.triage-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.triage-rank { font-size: 20px; font-weight: 900; color: #d1d5db; width: 28px; flex-shrink: 0; }
+.triage-card-info { flex: 1; }
+.triage-card-id { font-size: 13px; font-weight: 700; color: #1e3a5f; font-family: monospace; }
+.triage-card-client { font-size: 11px; color: #6b7280; margin-top: 2px; }
+.triage-tag { padding: 2px 7px; border-radius: 8px; font-size: 10px; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+.triage-urgency-score {
+  width: 60px; height: 60px; border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.triage-urgency-num { font-size: 22px; font-weight: 900; line-height: 1; }
+.triage-urgency-lbl { font-size: 9px; color: #6b7280; font-weight: 600; margin-top: 2px; }
+.triage-reasoning { font-size: 12px; color: #374151; line-height: 1.5; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 8px; }
+.triage-metrics { display: flex; gap: 16px; margin-bottom: 10px; }
+.triage-metric { display: flex; flex-direction: column; align-items: center; }
+.triage-m-lbl { font-size: 10px; color: #9ca3af; font-weight: 600; }
+.triage-m-val { font-size: 13px; font-weight: 700; color: #374151; }
+.triage-actions-block { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.triage-actions-title { font-size: 11px; font-weight: 700; color: #16a34a; margin-bottom: 6px; }
+.triage-action-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; font-size: 11px; color: #374151; }
+.triage-action-num { background: #16a34a; color: #fff; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+.triage-card-btns { display: flex; gap: 8px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — FULL FRAUD REPORT MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+.fraud-report-overlay, .fraud-detail-overlay { z-index: 9800; }
+.fraud-report-modal, .fraud-detail-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 96%;
+  max-width: 900px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.fraud-report-header {
+  background: linear-gradient(135deg, #7f1d1d, #dc2626);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.fraud-report-header-left { display: flex; align-items: center; gap: 14px; }
+.fraud-report-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #fff;
+}
+.fraud-report-title { font-size: 18px; font-weight: 700; color: #fff; }
+.fraud-report-sub { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.fraud-report-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.fraud-report-footer {
+  padding: 16px 24px; border-top: 1px solid #e5e7eb;
+  display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
+}
+.fraud-report-kpis { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.fraud-rkpi {
+  flex: 1; min-width: 80px; padding: 12px; border-radius: 10px;
+  text-align: center; border: 1px solid;
+}
+.fraud-rkpi.red    { background: #fef2f2; border-color: #fecaca; }
+.fraud-rkpi.orange { background: #fffbeb; border-color: #fde68a; }
+.fraud-rkpi.green  { background: #f0fdf4; border-color: #bbf7d0; }
+.fraud-rkpi.blue   { background: #eff6ff; border-color: #bfdbfe; }
+.fraud-rkpi.purple { background: #faf5ff; border-color: #e9d5ff; }
+.fraud-rkpi-val { font-size: 20px; font-weight: 800; color: #111827; }
+.fraud-rkpi-lbl { font-size: 10px; color: #6b7280; font-weight: 600; margin-top: 2px; }
+.fraud-rkpi.red .fraud-rkpi-val    { color: #dc2626; }
+.fraud-rkpi.orange .fraud-rkpi-val { color: #d97706; }
+.fraud-rkpi.green .fraud-rkpi-val  { color: #16a34a; }
+.fraud-rkpi.blue .fraud-rkpi-val   { color: #2563eb; }
+.fraud-rkpi.purple .fraud-rkpi-val { color: #7c3aed; }
+
+.fraud-report-layout { display: flex; gap: 20px; }
+.fraud-report-claims { flex: 1; }
+.fraud-report-section-title { font-size: 13px; font-weight: 700; color: #1e3a5f; margin-bottom: 10px; }
+.fraud-report-row {
+  border: 1px solid #e5e7eb; border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 10px; background: #fff;
+}
+.fraud-row-hold { border-color: #fecaca; background: #fef2f2; }
+.fraud-rr-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.fraud-rr-id { font-family: monospace; font-size: 12px; font-weight: 700; color: #1e3a5f; }
+.fraud-rr-client { font-size: 12px; color: #374151; flex: 1; }
+.fraud-rr-amount { font-size: 12px; font-weight: 700; color: #374151; }
+.fraud-rr-score { padding: 2px 10px; border-radius: 10px; font-size: 13px; font-weight: 800; }
+.fraud-rr-status { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+.fraud-rr-signals { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.fraud-sig-chip { padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.fraud-rr-rec { font-size: 11px; color: #4b5563; line-height: 1.4; }
+.fraud-signal-matrix { width: 240px; flex-shrink: 0; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
+.fsm-title { font-size: 12px; font-weight: 700; color: #1e3a5f; margin-bottom: 12px; }
+.fsm-bars { display: flex; flex-direction: column; gap: 10px; }
+.fsm-bar-row { display: flex; align-items: center; gap: 8px; }
+.fsm-lbl { font-size: 10px; color: #6b7280; width: 100px; flex-shrink: 0; }
+.fsm-track { flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+.fsm-fill { height: 100%; border-radius: 4px; }
+.fsm-count { width: 30px; font-size: 10px; font-weight: 700; text-align: right; flex-shrink: 0; color: #374151; }
+.fraud-model-note { font-size: 10px; color: #9ca3af; margin-top: 12px; }
+
+/* Fraud Detail Modal specific */
+.fraud-detail-top-bar { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 16px; padding: 16px; background: #f8fafc; border-radius: 10px; }
+.fraud-detail-score-block { text-align: center; flex-shrink: 0; }
+.fraud-detail-score { font-size: 48px; font-weight: 900; line-height: 1; }
+.fraud-detail-score-lbl { font-size: 11px; color: #6b7280; font-weight: 600; }
+.fraud-detail-meta { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.fraud-detail-meta-row { display: flex; justify-content: space-between; font-size: 12px; color: #374151; }
+.fraud-detail-meta-row span:first-child { color: #6b7280; }
+.fraud-detail-signals { flex-shrink: 0; width: 200px; }
+.fraud-detail-sigs-title { font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+.fraud-anomaly-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.fraud-anomaly-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+.fraud-anom-type { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.fraud-anom-sev { flex-shrink: 0; min-width: 40px; font-size: 10px; }
+.fraud-anom-desc { font-size: 11px; color: #374151; flex: 1; }
+.fraud-anom-empty { font-size: 12px; color: #6b7280; padding: 8px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — ADB SCREENER MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+.adb-overlay { z-index: 9800; }
+.adb-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 96%;
+  max-width: 740px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.adb-header {
+  background: linear-gradient(135deg, #831843, #db2777);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.adb-header-left { display: flex; align-items: center; gap: 14px; }
+.adb-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #fff;
+}
+.adb-title { font-size: 18px; font-weight: 700; color: #fff; }
+.adb-sub { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+.adb-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.adb-footer {
+  padding: 16px 24px; border-top: 1px solid #e5e7eb;
+  display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
+}
+.adb-claim-banner {
+  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  border: 1px solid #f9a8d4;
+  border-radius: 12px; padding: 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.adb-claim-id { font-family: monospace; font-size: 14px; font-weight: 800; color: #831843; }
+.adb-compassionate-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #db2777; color: #fff;
+  padding: 2px 8px; border-radius: 8px;
+  font-size: 10px; font-weight: 700; margin-left: 8px;
+}
+.adb-claim-client { font-size: 13px; color: #374151; margin-top: 4px; }
+.adb-claim-detail { font-size: 11px; color: #6b7280; margin-top: 3px; }
+.adb-eligibility-score { text-align: center; flex-shrink: 0; }
+.adb-elig-pct { font-size: 40px; font-weight: 900; line-height: 1; }
+.adb-elig-lbl { font-size: 11px; color: #6b7280; font-weight: 600; }
+.adb-elig-sub { font-size: 10px; color: #9ca3af; }
+.adb-section-title { font-size: 13px; font-weight: 700; color: #1e3a5f; margin-bottom: 10px; }
+.adb-criteria-list { display: flex; flex-direction: column; gap: 8px; }
+.adb-crit-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border-radius: 8px; border: 1px solid;
+}
+.adb-crit-met { background: #f0fdf4; border-color: #bbf7d0; }
+.adb-crit-pending { background: #fffbeb; border-color: #fde68a; }
+.adb-crit-body { flex: 1; }
+.adb-crit-label { font-size: 12px; font-weight: 600; color: #374151; }
+.adb-crit-note { font-size: 11px; color: #6b7280; margin-top: 2px; }
+.adb-doc-list { display: flex; flex-direction: column; gap: 8px; }
+.adb-doc-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; background: #f8fafc;
+  border: 1px solid #e5e7eb; border-radius: 8px;
+}
+.adb-doc-name { flex: 1; font-size: 12px; color: #374151; }
+.adb-doc-status { font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.adb-pending-alert {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #fffbeb; border: 1px solid #fde68a;
+  border-radius: 10px; padding: 12px 14px; margin-top: 16px;
+  font-size: 12px; color: #374151; line-height: 1.5;
+}
+.adb-pending-alert i { color: #d97706; margin-top: 2px; flex-shrink: 0; }
+.adb-workflow-strip {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 20px; padding: 14px 16px;
+  background: #f8fafc; border-radius: 10px; flex-wrap: wrap;
+}
+.adb-wf-step {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; font-size: 10px; font-weight: 600;
+}
+.adb-wf-step.done  { color: #16a34a; }
+.adb-wf-step.active { color: #d97706; }
+.adb-wf-step.pending { color: #d1d5db; }
+.adb-wf-step i { font-size: 18px; }
+.adb-wf-arrow { color: #d1d5db; font-size: 16px; font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — IDP SCAN RESULTS MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+.idp-scan-overlay { z-index: 9800; }
+.idp-scan-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 96%;
+  max-width: 860px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.idp-scan-header {
+  background: linear-gradient(135deg, #2e1065, #7c3aed);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.idp-scan-header-left { display: flex; align-items: center; gap: 14px; }
+.idp-scan-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #fff;
+}
+.idp-scan-title { font-size: 18px; font-weight: 700; color: #fff; }
+.idp-scan-live-badge {
+  display: inline-block; background: #16a34a;
+  color: #fff; padding: 2px 8px; border-radius: 6px;
+  font-size: 11px; margin-left: 8px; vertical-align: middle;
+}
+.idp-scan-sub { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.idp-scan-summary {
+  padding: 12px 24px; background: #faf5ff; border-bottom: 1px solid #e9d5ff;
+  display: flex; gap: 16px; flex-wrap: wrap; flex-shrink: 0;
+}
+.idp-sum-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.idp-sum-item.blue   { color: #2563eb; }
+.idp-sum-item.green  { color: #16a34a; }
+.idp-sum-item.purple { color: #7c3aed; }
+.idp-sum-item.orange { color: #d97706; }
+.idp-scan-body { padding: 16px 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.idp-scan-footer {
+  padding: 16px 24px; border-top: 1px solid #e5e7eb;
+  display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
+}
+
+.idp-scan-card {
+  border: 1px solid #e5e7eb; border-radius: 12px;
+  overflow: hidden; background: #fff;
+}
+.idp-scan-verified { border-color: #bbf7d0; }
+.idp-scan-extracting { border-color: #e9d5ff; }
+.idp-scan-pending { border-color: #fde68a; }
+.idp-scan-card-top {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+.idp-scan-verified .idp-scan-card-top { background: #f0fdf4; }
+.idp-scan-extracting .idp-scan-card-top { background: #faf5ff; }
+.idp-scan-pending .idp-scan-card-top { background: #fffbeb; }
+.idp-scan-card-icon { font-size: 20px; color: #6b7280; }
+.idp-scan-card-info { flex: 1; }
+.idp-scan-card-name { font-size: 13px; font-weight: 700; color: #1e3a5f; }
+.idp-scan-card-meta { font-size: 11px; color: #6b7280; margin-top: 2px; }
+.idp-scan-card-status { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.idp-scan-conf { display: block; font-size: 10px; font-weight: 600; color: #16a34a; margin-top: 2px; text-align: right; }
+.idp-scan-fields { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.idp-field-row { display: flex; align-items: center; gap: 10px; font-size: 11px; }
+.idp-field-name { width: 180px; color: #6b7280; font-weight: 600; flex-shrink: 0; }
+.idp-field-value { flex: 1; color: #1e3a5f; font-weight: 600; }
+.idp-field-conf { font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.idp-field-empty { font-size: 12px; color: #9ca3af; font-style: italic; padding: 4px 0; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — UPLOAD MODAL + FILE CLAIM WIZARD
+   ═══════════════════════════════════════════════════════════════════ */
+.upload-modal-overlay { z-index: 9800; }
+.upload-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 96%;
+  max-width: 620px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.upload-modal-header {
+  background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.upload-modal-header-left { display: flex; align-items: center; gap: 12px; }
+.upload-modal-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff;
+}
+.upload-modal-title { font-size: 16px; font-weight: 700; color: #fff; }
+.upload-claim-id-badge {
+  display: inline-block; background: rgba(255,255,255,0.25);
+  color: #fff; padding: 1px 8px; border-radius: 6px;
+  font-size: 11px; font-family: monospace; margin-left: 6px;
+}
+.upload-modal-sub { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.upload-modal-body { padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+.upload-modal-footer {
+  padding: 14px 20px; border-top: 1px solid #e5e7eb;
+  display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0;
+}
+.upload-drop-zone {
+  border: 2px dashed #bfdbfe; border-radius: 12px;
+  padding: 32px 20px; text-align: center;
+  background: #eff6ff; cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.upload-drop-zone:hover, .upload-drag-active { background: #dbeafe; border-color: #2563eb; }
+.upload-drop-icon { font-size: 32px; color: #2563eb; margin-bottom: 8px; }
+.upload-drop-title { font-size: 14px; font-weight: 700; color: #1e3a5f; }
+.upload-drop-sub { font-size: 11px; color: #6b7280; margin-top: 4px; }
+.upload-field-label { display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 4px; }
+.upload-doc-type-selector { display: flex; flex-direction: column; gap: 4px; }
+.upload-checklist { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; }
+.upload-checklist-title { font-size: 12px; font-weight: 700; color: #1e3a5f; margin-bottom: 10px; }
+.upload-doc-checks { display: flex; flex-direction: column; gap: 8px; }
+.upload-doc-check { font-size: 12px; color: #374151; display: flex; align-items: center; cursor: pointer; }
+.upload-idp-note {
+  background: #faf5ff; border: 1px solid #e9d5ff;
+  border-radius: 8px; padding: 10px 12px;
+  font-size: 11px; color: #374151; line-height: 1.5;
+}
+
+/* File Claim Wizard */
+.wizard-step-header { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.wizard-step {
+  display: flex; flex-direction: column; align-items: center;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: #e5e7eb; color: #9ca3af;
+  font-size: 14px; font-weight: 800;
+  justify-content: center; position: relative;
+}
+.wizard-step span { font-size: 9px; font-weight: 600; position: absolute; bottom: -16px; white-space: nowrap; color: #6b7280; }
+.wizard-step.active { background: #2563eb; color: #fff; }
+.wizard-step.active span { color: #2563eb; }
+.wizard-step-arrow { color: #d1d5db; font-size: 18px; font-weight: 700; }
+.wizard-field-group { display: flex; flex-direction: column; gap: 4px; }

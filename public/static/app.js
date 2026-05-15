@@ -4042,16 +4042,129 @@ function handleIDPDrop(event) {
 }
 
 function runIDPScan() {
-  const btn = document.querySelector('.btn-idp-scan');
+  var btn = document.querySelector('.btn-idp-scan');
   if (btn) { btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> Scanning…'; btn.disabled = true; }
-  const timeEl = document.querySelector('.idp-scan-time');
-  setTimeout(() => {
-    if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> Scan Complete'; btn.disabled = false; }
+  var timeEl = document.querySelector('.idp-scan-time');
+
+  // Phase 1: animate progress, then open results modal
+  setTimeout(function() {
+    if (btn) { btn.innerHTML = '<i class="fas fa-search"></i> Run IDP Scan'; btn.disabled = false; }
     if (timeEl) timeEl.textContent = 'just now';
-    setTimeout(() => {
-      if (btn) btn.innerHTML = '<i class="fas fa-search"></i> Run IDP Scan';
-    }, 2000);
-  }, 2200);
+    openIDPScanResultsModal();
+  }, 2400);
+}
+
+function openIDPScanResultsModal() {
+  var scanResults = [
+    {
+      id:'CLM-2026-0041', client:'Robert Chen', docName:'Death_Certificate_RC_2026.pdf', docType:'Death Certificate',
+      status:'extracting', confidence:null, fields:[
+        { name:'Deceased Name', value:'Robert Chen', conf:98 },
+        { name:'Date of Death', value:'2026-04-07', conf:99 },
+        { name:'Cause of Death', value:'Acute Myocardial Infarction', conf:95 },
+        { name:'Certifying Physician', value:'Dr. Alan Park, MD', conf:91 },
+        { name:'Place of Death', value:'St. Luke\'s Hospital, New York', conf:97 }
+      ]
+    },
+    {
+      id:'CLM-2026-0041', client:'Robert Chen', docName:'Medical_Certificate_Cardiac.pdf', docType:'Medical Certificate',
+      status:'verified', confidence:98, fields:[
+        { name:'Diagnosis Code', value:'I21.9 — STEMI', conf:99 },
+        { name:'Admission Date', value:'2026-04-06', conf:99 },
+        { name:'Discharge Status', value:'Deceased', conf:99 },
+        { name:'Attending Physician', value:'Dr. Alan Park, MD', conf:98 },
+        { name:'Hospital', value:'St. Luke\'s — Cardiac ICU', conf:97 }
+      ]
+    },
+    {
+      id:'CLM-2026-0028', client:'Maria Gonzalez', docName:'Terminal_Illness_Certification.pdf', docType:'ADB Terminal Cert',
+      status:'pending', confidence:null, fields:[]
+    },
+    {
+      id:'CLM-2026-0038', client:'Sandra Williams', docName:'LTC_Eligibility_Cert_SW.pdf', docType:'LTC Eligibility',
+      status:'verified', confidence:99, fields:[
+        { name:'Eligibility Date', value:'2026-03-28', conf:99 },
+        { name:'Care Level', value:'Skilled Nursing — Level 3', conf:97 },
+        { name:'Monthly Benefit', value:'$4,500/month', conf:99 },
+        { name:'Certifying Provider', value:'Sunrise Care Facility', conf:95 },
+        { name:'Benefit Period', value:'24 months maximum', conf:99 }
+      ]
+    },
+    {
+      id:'CLM-2026-0035', client:'Maria Gonzalez', docName:'APS_DrHernandez_MG.pdf', docType:'Attending Physician Statement',
+      status:'extracting', confidence:null, fields:[
+        { name:'Diagnosis', value:'Pancreatic Adenocarcinoma Stage IV', conf:94 },
+        { name:'Disability Date', value:'2026-02-15', conf:89 },
+        { name:'Functional Limitations', value:'INCOMPLETE — awaiting supplement', conf:0 },
+        { name:'Prognosis', value:'6–8 months', conf:87 },
+        { name:'Physician', value:'Dr. Miguel Hernandez, MD Oncology', conf:96 }
+      ]
+    }
+  ];
+
+  var statusConfig = {
+    verified:   { color:'#16a34a', icon:'fas fa-check-double', label:'VERIFIED' },
+    extracting: { color:'#7c3aed', icon:'fas fa-cog fa-spin',  label:'EXTRACTING' },
+    pending:    { color:'#d97706', icon:'fas fa-clock',        label:'AWAITING UPLOAD' }
+  };
+
+  var cardsHTML = scanResults.map(function(r) {
+    var sc = statusConfig[r.status];
+    var fieldsHTML = r.fields.length ? r.fields.map(function(f) {
+      var confColor = f.conf >= 90 ? '#16a34a' : f.conf >= 70 ? '#d97706' : '#dc2626';
+      return '<div class="idp-field-row">' +
+        '<span class="idp-field-name">' + f.name + '</span>' +
+        '<span class="idp-field-value">' + f.value + '</span>' +
+        (f.conf > 0 ? '<span class="idp-field-conf" style="color:' + confColor + '">' + f.conf + '%</span>' : '') +
+      '</div>';
+    }).join('') : '<div class="idp-field-empty">Document not yet received — upload pending</div>';
+
+    return '<div class="idp-scan-card idp-scan-' + r.status + '">' +
+      '<div class="idp-scan-card-top">' +
+        '<i class="fas fa-file-pdf idp-scan-card-icon"></i>' +
+        '<div class="idp-scan-card-info">' +
+          '<div class="idp-scan-card-name">' + r.docName + '</div>' +
+          '<div class="idp-scan-card-meta">' + r.id + ' · ' + r.client + ' · <em>' + r.docType + '</em></div>' +
+        '</div>' +
+        '<div class="idp-scan-card-status" style="color:' + sc.color + '">' +
+          '<i class="' + sc.icon + '"></i> ' + sc.label +
+          (r.confidence ? '<span class="idp-scan-conf">' + r.confidence + '% conf.</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="idp-scan-fields">' + fieldsHTML + '</div>' +
+    '</div>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay idp-scan-overlay';
+  overlay.id = 'idp-scan-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="idp-scan-modal" onclick="event.stopPropagation()">' +
+      '<div class="idp-scan-header">' +
+        '<div class="idp-scan-header-left">' +
+          '<div class="idp-scan-icon"><i class="fas fa-file-import"></i></div>' +
+          '<div>' +
+            '<div class="idp-scan-title">IDP Scan Results <span class="idp-scan-live-badge">● COMPLETE</span></div>' +
+            '<div class="idp-scan-sub">AI-powered field extraction · 5 documents scanned · NLP confidence scoring · Auto-population to claim fields</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'idp-scan-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="idp-scan-summary">' +
+        '<div class="idp-sum-item blue"><i class="fas fa-file-import"></i><span>5 Docs Scanned</span></div>' +
+        '<div class="idp-sum-item green"><i class="fas fa-check-double"></i><span>2 Verified</span></div>' +
+        '<div class="idp-sum-item purple"><i class="fas fa-cog"></i><span>2 Extracting</span></div>' +
+        '<div class="idp-sum-item orange"><i class="fas fa-clock"></i><span>1 Pending Upload</span></div>' +
+        '<div class="idp-sum-item blue"><i class="fas fa-bullseye"></i><span>94% Avg Confidence</span></div>' +
+      '</div>' +
+      '<div class="idp-scan-body">' + cardsHTML + '</div>' +
+      '<div class="idp-scan-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'idp-scan-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="p7Toast(\'<i class=\\\'fas fa-download\\\'></i> Extracted fields auto-populated into all claim forms — review required for low-confidence fields\',4000);document.getElementById(\'idp-scan-overlay\').remove()"><i class="fas fa-magic"></i> Auto-Populate Claim Fields</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
 // ============================================================
@@ -25280,7 +25393,110 @@ function renderNavigatorStep(num, status, title, desc, items) {
 }
 
 function openADBScreener() {
-  showToast('AI ADB Eligibility Screener: checking all open policies against terminal/chronic illness criteria…', 'ai');
+  var criteria = [
+    { label:'Terminal illness diagnosis by licensed physician', met:true,  note:'Confirmed — oncologist Dr. Hernandez, diagnosis 2026-03-12' },
+    { label:'Life expectancy ≤ 24 months (carrier standard)', met:true,  note:'Physician-stated prognosis: 6–8 months' },
+    { label:'Policy in force ≥ 2 years (no contestability)', met:true,  note:'Policy NYL-P-100487 issued 2023-11-01 — 2.3 years in force' },
+    { label:'No existing ADB claim on same policy',          met:true,  note:'First ADB filing — no prior acceleration' },
+    { label:'Terminal certification form (ADB-TC-2026) received', met:false, note:'PENDING — oncologist contacted 2026-04-05; 5-day SLA remaining' },
+    { label:'Benefit amount ≤ 80% of face value ($150K max)', met:true,  note:'$120,000 requested = 80% of $150,000 face value — at limit' },
+    { label:'Contestability review waived (compassionate track)', met:true,  note:'Compassionate fast-track approved by Sr. Adjuster M. Torres' }
+  ];
+
+  var criteriaHTML = criteria.map(function(c) {
+    var iconCls = c.met ? 'fas fa-check-circle' : 'fas fa-clock';
+    var color   = c.met ? '#16a34a' : '#d97706';
+    var rowCls  = c.met ? 'adb-crit-met' : 'adb-crit-pending';
+    return '<div class="adb-crit-row ' + rowCls + '">' +
+      '<i class="' + iconCls + '" style="color:' + color + ';width:18px;flex-shrink:0"></i>' +
+      '<div class="adb-crit-body">' +
+        '<div class="adb-crit-label">' + c.label + '</div>' +
+        '<div class="adb-crit-note">' + c.note + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var docItems = [
+    { name:'Terminal Illness Certification (ADB-TC-2026)',         status:'pending',   icon:'fas fa-clock',           color:'#d97706' },
+    { name:'Claimant Statement (ADB-CS-2026) — signed by beneficiary', status:'received',  icon:'fas fa-check-circle',    color:'#16a34a' },
+    { name:'Attending Physician Statement (APS)',                   status:'partial',   icon:'fas fa-exclamation-circle',color:'#d97706' },
+    { name:'Policy Document — NYL-P-100487',                       status:'verified',  icon:'fas fa-check-double',    color:'#2563eb' },
+    { name:'Government-issued photo ID — beneficiary',             status:'verified',  icon:'fas fa-check-double',    color:'#2563eb' }
+  ];
+  var docHTML = docItems.map(function(d) {
+    return '<div class="adb-doc-row">' +
+      '<i class="' + d.icon + '" style="color:' + d.color + ';width:18px;flex-shrink:0"></i>' +
+      '<span class="adb-doc-name">' + d.name + '</span>' +
+      '<span class="adb-doc-status" style="color:' + d.color + '">' + d.status.toUpperCase() + '</span>' +
+    '</div>';
+  }).join('');
+
+  var metCount = criteria.filter(function(c){ return c.met; }).length;
+  var pct = Math.round(metCount / criteria.length * 100);
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay adb-overlay';
+  overlay.id = 'adb-screener-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="adb-modal" onclick="event.stopPropagation()">' +
+      '<div class="adb-header">' +
+        '<div class="adb-header-left">' +
+          '<div class="adb-icon"><i class="fas fa-heartbeat"></i></div>' +
+          '<div>' +
+            '<div class="adb-title">ADB Eligibility Screener</div>' +
+            '<div class="adb-sub">Accelerated Death Benefit · Compassionate Fast-Track · AI-verified eligibility</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'adb-screener-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="adb-body">' +
+        '<div class="adb-claim-banner">' +
+          '<div class="adb-claim-info">' +
+            '<div class="adb-claim-id">CLM-2026-0028 <span class="adb-compassionate-tag"><i class="fas fa-heart"></i> Compassionate</span></div>' +
+            '<div class="adb-claim-client"><strong>Maria Gonzalez</strong> · Policy NYL-P-100487 · Face Value $150,000</div>' +
+            '<div class="adb-claim-detail">ADB Requested: $120,000 · Diagnosis: Stage IV Pancreatic Cancer · Prognosis: 6–8 months</div>' +
+          '</div>' +
+          '<div class="adb-eligibility-score">' +
+            '<div class="adb-elig-pct" style="color:' + (pct >= 80 ? '#16a34a' : '#d97706') + '">' + pct + '%</div>' +
+            '<div class="adb-elig-lbl">Eligibility</div>' +
+            '<div class="adb-elig-sub">' + metCount + '/' + criteria.length + ' criteria met</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="adb-section-title"><i class="fas fa-clipboard-check"></i> Eligibility Criteria Checklist</div>' +
+        '<div class="adb-criteria-list">' + criteriaHTML + '</div>' +
+
+        '<div class="adb-section-title" style="margin-top:20px"><i class="fas fa-file-medical"></i> Document Tracking</div>' +
+        '<div class="adb-doc-list">' + docHTML + '</div>' +
+
+        '<div class="adb-pending-alert">' +
+          '<i class="fas fa-exclamation-triangle"></i>' +
+          '<div>' +
+            '<strong>Action Required:</strong> Terminal Illness Certification (ADB-TC-2026) still pending from Dr. Hernandez (oncologist).' +
+            ' AI-drafted follow-up letter ready to send. 5-day SLA window remaining.' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="adb-workflow-strip">' +
+          '<div class="adb-wf-step done"><i class="fas fa-check-circle"></i><span>Claim Filed</span></div>' +
+          '<div class="adb-wf-arrow">›</div>' +
+          '<div class="adb-wf-step done"><i class="fas fa-check-circle"></i><span>Fast-Track Approved</span></div>' +
+          '<div class="adb-wf-arrow">›</div>' +
+          '<div class="adb-wf-step active"><i class="fas fa-clock"></i><span>Cert Pending</span></div>' +
+          '<div class="adb-wf-arrow">›</div>' +
+          '<div class="adb-wf-step pending"><i class="far fa-circle"></i><span>Final Review</span></div>' +
+          '<div class="adb-wf-arrow">›</div>' +
+          '<div class="adb-wf-step pending"><i class="far fa-circle"></i><span>Payout $120K</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="adb-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'adb-screener-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="sendDocRequest(\'CLM-2026-0028\',\'Dr. Hernandez — ADB Terminal Certification\');document.getElementById(\'adb-screener-overlay\').remove()"><i class="fas fa-paper-plane"></i> Send Cert Request to Dr. Hernandez</button>' +
+        '<button class="p7m-btn primary" onclick="p7Toast(\'<i class=\\\'fas fa-bolt\\\'></i> ADB CLM-2026-0028 flagged for expedited processing — compassionate specialist assigned\',3500);document.getElementById(\'adb-screener-overlay\').remove()"><i class="fas fa-bolt"></i> Expedite Processing</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -35037,15 +35253,456 @@ function sendDocRequest(claimId, recipient) {
 
 // Override existing modal-less stubs
 function openFraudDetailModal(claimId) {
-  p7Toast('<i class="fas fa-shield-virus"></i> Fraud Investigation Report — ' + claimId + ': Score analysis, timeline anomalies, investigation checklist loading…', 4000);
+  var fraudDetails = {
+    'CLM-2026-0025': {
+      client:'Kevin Park', amount:'$250,000', type:'Death Benefit', score:78, status:'FLAGGED',
+      policyDate:'2024-02-15', claimDate:'2026-04-03', daysInForce:412,
+      contestability: true, paymentHold: true,
+      anomalies:[
+        { type:'Timeline', severity:'HIGH',   desc:'Policy issued 412 days before death — within 2-year contestability window' },
+        { type:'Coverage', severity:'HIGH',   desc:'Policy status was "Pending" at time of death — coverage determination required' },
+        { type:'Medical',  severity:'MEDIUM', desc:'Application medical records inconsistency detected by NLP — 2 discrepancies flagged' },
+        { type:'Beneficiary', severity:'MEDIUM', desc:'Beneficiary designation changed 183 days before death — unusual timing' }
+      ],
+      signals:['Claim Timing','Coverage Gap','Medical Inconsistency','Beneficiary Change'],
+      sigColors:['#dc2626','#dc2626','#d97706','#d97706'],
+      checklist:[
+        { item:'Order full medical records from original 2024 UW application', done:false },
+        { item:'Request attending physician statement from date of death', done:false },
+        { item:'Verify beneficiary relationship and designation history', done:false },
+        { item:'Refer to Special Investigations Unit (SIU)', done:false },
+        { item:'Notify beneficiary of contestability review (30-day window)', done:false },
+        { item:'Assign senior adjuster with fraud investigation experience', done:false }
+      ],
+      recommendation:'SIU Referral Recommended · Hold payment pending investigation · Contestability review active'
+    },
+    'CLM-2026-0041': {
+      client:'Robert Chen', amount:'$1,000,000', type:'Death Benefit', score:42, status:'WATCH',
+      policyDate:'2022-06-01', claimDate:'2026-04-08', daysInForce:1402,
+      contestability: false, paymentHold: false,
+      anomalies:[
+        { type:'High Value', severity:'MEDIUM', desc:'Claim exceeds $1M threshold — enhanced review protocol automatically triggered' },
+        { type:'ID Pending', severity:'MEDIUM', desc:'Claimant ID documents not yet received — payout blocked pending verification' },
+        { type:'Timing',    severity:'LOW',    desc:'Claim filed 1 day after death — normal processing, no anomaly' }
+      ],
+      signals:['High Value Threshold','ID Documents Pending'],
+      sigColors:['#d97706','#d97706'],
+      checklist:[
+        { item:'Verify claimant identity once ID documents received', done:false },
+        { item:'Confirm beneficiary relationship to Robert Chen', done:false },
+        { item:'Enhanced adjuster review before authorizing $1M payout', done:false },
+        { item:'Confirm banking details for electronic transfer', done:false }
+      ],
+      recommendation:'Enhanced monitoring active · Approve once ID verified and adjuster review complete'
+    },
+    'CLM-2026-0028': {
+      client:'Maria Gonzalez', amount:'$120,000', type:'Accel. Death Benefit', score:38, status:'WATCH',
+      policyDate:'2023-11-01', claimDate:'2026-04-05', daysInForce:885,
+      contestability: false, paymentHold: false,
+      anomalies:[
+        { type:'ADB Timing', severity:'MEDIUM', desc:'ADB claim filed 30 days after terminal diagnosis — slightly delayed but within policy window' },
+        { type:'Cert Pending', severity:'MEDIUM', desc:'Terminal illness certification not yet received — standard for ADB claims' },
+        { type:'NLP Flag', severity:'LOW',    desc:'Minor language inconsistency in claimant statement — NLP confidence 82%' }
+      ],
+      signals:['ADB Timing','Cert Pending','NLP Flag'],
+      sigColors:['#d97706','#d97706','#eab308'],
+      checklist:[
+        { item:'Receive and authenticate terminal illness certification from oncologist', done:false },
+        { item:'Verify ADB eligibility criteria (6 criteria — 6/7 met)', done:false },
+        { item:'Confirm NLP language inconsistency — no material issue found', done:false },
+        { item:'Expedite review for compassionate fast-track', done:false }
+      ],
+      recommendation:'Standard ADB processing — expedite on compassionate track once terminal cert received'
+    }
+  };
+
+  var d = fraudDetails[claimId] || {
+    client:'Client', amount:'N/A', type:'Claim', score:0, status:'CLEAR',
+    policyDate:'N/A', claimDate:'N/A', daysInForce:0, contestability:false, paymentHold:false,
+    anomalies:[], signals:[], sigColors:[], checklist:[],
+    recommendation:'No fraud indicators detected — normal processing'
+  };
+
+  var scoreColor = d.score >= 60 ? '#dc2626' : d.score >= 30 ? '#d97706' : '#16a34a';
+  var statusColor = d.status === 'FLAGGED' ? '#dc2626' : d.status === 'WATCH' ? '#d97706' : '#16a34a';
+
+  var anomalyHTML = d.anomalies.map(function(a) {
+    var sevColor = a.severity === 'HIGH' ? '#dc2626' : a.severity === 'MEDIUM' ? '#d97706' : '#16a34a';
+    return '<div class="fraud-anomaly-row">' +
+      '<span class="fraud-anom-type" style="background:' + sevColor + '20;color:' + sevColor + '">' + a.type + '</span>' +
+      '<span class="fraud-anom-sev" style="color:' + sevColor + ';font-weight:600;font-size:11px">' + a.severity + '</span>' +
+      '<span class="fraud-anom-desc">' + a.desc + '</span>' +
+    '</div>';
+  }).join('') || '<div class="fraud-anom-empty">No anomalies detected</div>';
+
+  var sigsHTML = d.signals.map(function(s, i) {
+    return '<span class="fraud-sig-chip" style="background:' + d.sigColors[i] + '20;color:' + d.sigColors[i] + ';border:1px solid ' + d.sigColors[i] + '40">' + s + '</span>';
+  }).join('');
+
+  var checklistHTML = d.checklist.map(function(c) {
+    return '<label class="adb-crit-row" style="cursor:pointer">' +
+      '<input type="checkbox"' + (c.done ? ' checked' : '') + ' style="margin-right:8px"> ' + c.item +
+    '</label>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay fraud-detail-overlay';
+  overlay.id = 'fraud-detail-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="fraud-detail-modal" onclick="event.stopPropagation()">' +
+      '<div class="fraud-report-header">' +
+        '<div class="fraud-report-header-left">' +
+          '<div class="fraud-report-icon"><i class="fas fa-shield-virus"></i></div>' +
+          '<div>' +
+            '<div class="fraud-report-title">Fraud Investigation Report <span style="font-size:14px;opacity:0.8">— ' + claimId + '</span></div>' +
+            '<div class="fraud-report-sub">' + d.client + ' · ' + d.type + ' · ' + d.amount + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'fraud-detail-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="fraud-report-body">' +
+        '<div class="fraud-detail-top-bar">' +
+          '<div class="fraud-detail-score-block">' +
+            '<div class="fraud-detail-score" style="color:' + scoreColor + '">' + d.score + '</div>' +
+            '<div class="fraud-detail-score-lbl">Fraud Score</div>' +
+          '</div>' +
+          '<div class="fraud-detail-meta">' +
+            '<div class="fraud-detail-meta-row"><span>Status</span><span class="fraud-rr-status" style="background:' + statusColor + '20;color:' + statusColor + '">' + d.status + '</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Policy Date</span><span>' + d.policyDate + '</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Claim Date</span><span>' + d.claimDate + '</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Days In Force</span><span>' + d.daysInForce + 'd</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Contestability</span><span style="color:' + (d.contestability ? '#dc2626':'#16a34a') + '">' + (d.contestability ? '⚠ ACTIVE':'Clear') + '</span></div>' +
+            '<div class="fraud-detail-meta-row"><span>Payment Hold</span><span style="color:' + (d.paymentHold ? '#dc2626':'#16a34a') + '">' + (d.paymentHold ? '🔴 HOLD':'Released') + '</span></div>' +
+          '</div>' +
+          '<div class="fraud-detail-signals">' +
+            '<div class="fraud-detail-sigs-title">Active Signals</div>' +
+            sigsHTML +
+          '</div>' +
+        '</div>' +
+
+        '<div class="fraud-report-section-title" style="margin-top:20px"><i class="fas fa-exclamation-triangle"></i> Detected Anomalies</div>' +
+        '<div class="fraud-anomaly-list">' + anomalyHTML + '</div>' +
+
+        '<div class="fraud-report-section-title" style="margin-top:16px"><i class="fas fa-clipboard-check"></i> Investigation Checklist</div>' +
+        '<div class="adb-criteria-list">' + checklistHTML + '</div>' +
+
+        '<div class="adb-pending-alert" style="margin-top:16px">' +
+          '<i class="fas fa-lightbulb"></i>' +
+          '<div><strong>AI Recommendation:</strong> ' + d.recommendation + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fraud-report-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'fraud-detail-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="sendDocRequest(\'' + claimId + '\',\'beneficiary\');document.getElementById(\'fraud-detail-overlay\').remove()"><i class="fas fa-paper-plane"></i> Chase Documents</button>' +
+        (d.paymentHold ? '' : '<button class="p7m-btn danger" onclick="p7Toast(\'<i class=\\\'fas fa-ban\\\'></i> Payment hold placed on ' + claimId + ' · SIU notified · Adjuster assigned\',3500);document.getElementById(\'fraud-detail-overlay\').remove()"><i class="fas fa-ban"></i> Place Payment Hold</button>') +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — FULL INTELLIGENCE REPORT MODAL
+   ═══════════════════════════════════════════════════════════════════ */
 function openCIReviewModal() {
-  p7Toast('<i class="fas fa-brain"></i> Full AI Claims Intelligence Report: loading cross-portfolio fraud analysis, SLA projections, and resolution modeling…', 4000);
+  var claimsML = [
+    { id:'CLM-2026-0041', client:'Robert Chen', type:'Death Benefit', amount:'$1,000,000', fraud:42, nlpConf:94, slaRisk:'BREACH', resEst:'7–10d', priority:'URGENT', recAction:'Escalate ID doc chase — trigger automated beneficiary outreach within 24h' },
+    { id:'CLM-2026-0025', client:'Kevin Park',   type:'Death Benefit', amount:'$250,000',  fraud:78, nlpConf:71, slaRisk:'HOLD',   resEst:'30–90d',priority:'FLAGGED',recAction:'Contestability review — request full medical records from original UW file' },
+    { id:'CLM-2026-0028', client:'Maria Gonzalez',type:'Accel. Benefit',amount:'$120,000', fraud:38, nlpConf:82, slaRisk:'5d',     resEst:'5–8d',  priority:'HIGH',   recAction:'ADB expedite — contact oncologist directly for terminal certification' },
+    { id:'CLM-2026-0035', client:'Maria Gonzalez',type:'Disability',   amount:'$4,200/mo',fraud:18, nlpConf:89, slaRisk:'9d',     resEst:'9–12d', priority:'MEDIUM', recAction:'APS follow-up to Dr. Hernandez — auto-letter drafted, send now' },
+    { id:'CLM-2026-0038', client:'Sandra Williams',type:'LTC',         amount:'$18,000',  fraud:12, nlpConf:99, slaRisk:'22d',    resEst:'3–5d',  priority:'LOW',    recAction:'Docs complete — route to adjuster for final LTC eligibility sign-off' },
+    { id:'CLM-2026-0033', client:'James Whitfield',type:'LTC',         amount:'$9,600',   fraud:9,  nlpConf:97, slaRisk:'17d',    resEst:'2–3d',  priority:'READY',  recAction:'All docs verified — approve and initiate payout within 48h' },
+    { id:'CLM-2026-0031', client:'Linda Morrison', type:'Waiver',      amount:'$9,600/yr',fraud:7,  nlpConf:98, slaRisk:'N/A',    resEst:'4–6d',  priority:'LOW',    recAction:'Waiver criteria confirmed — final medical sign-off pending' },
+    { id:'CLM-2026-0025B',client:'Kevin Park',    type:'Investigation',amount:'HOLD',     fraud:78, nlpConf:71, slaRisk:'HOLD',   resEst:'30–90d',priority:'REVIEW', recAction:'SIU referral recommended — senior adjuster assignment required' }
+  ];
+  var priorityColor = { URGENT:'#dc2626',FLAGGED:'#7c3aed',HIGH:'#d97706',MEDIUM:'#2563eb',LOW:'#16a34a',READY:'#059669',REVIEW:'#dc2626' };
+  var slaColor = { BREACH:'#dc2626',HOLD:'#7c3aed','5d':'#d97706','9d':'#d97706','22d':'#16a34a','17d':'#16a34a','N/A':'#6b7280' };
+
+  var rowsHTML = claimsML.map(function(c) {
+    var fraudColor = c.fraud >= 60 ? '#dc2626' : c.fraud >= 30 ? '#d97706' : '#16a34a';
+    var fraudLabel = c.fraud >= 60 ? 'Flagged' : c.fraud >= 30 ? 'Watch' : 'Clear';
+    return '<tr class="ci-report-row">' +
+      '<td><span class="ci-claim-id">' + c.id + '</span></td>' +
+      '<td>' + c.client + '</td>' +
+      '<td><span class="ci-type-badge">' + c.type + '</span></td>' +
+      '<td class="text-right">' + c.amount + '</td>' +
+      '<td><span class="ci-score-pill" style="background:' + fraudColor + '15;color:' + fraudColor + ';border:1px solid ' + fraudColor + '40"><strong>' + c.fraud + '</strong> ' + fraudLabel + '</span></td>' +
+      '<td><span class="ci-nlp-bar-wrap"><span class="ci-nlp-bar" style="width:' + c.nlpConf + '%"></span></span><span class="ci-nlp-val">' + c.nlpConf + '%</span></td>' +
+      '<td><span class="ci-sla-badge" style="color:' + (slaColor[c.slaRisk]||'#6b7280') + '">' + c.slaRisk + '</span></td>' +
+      '<td>' + c.resEst + '</td>' +
+      '<td><span class="ci-priority-tag" style="background:' + (priorityColor[c.priority]||'#6b7280') + '20;color:' + (priorityColor[c.priority]||'#6b7280') + '">' + c.priority + '</span></td>' +
+      '<td class="ci-rec-cell" title="' + c.recAction + '">' + c.recAction.substring(0,50) + '…</td>' +
+    '</tr>';
+  }).join('');
+
+  var kpiBlock =
+    '<div class="ci-report-kpis">' +
+      '<div class="ci-rk-card red"><div class="ci-rk-val">1</div><div class="ci-rk-lbl">Fraud Flagged</div></div>' +
+      '<div class="ci-rk-card orange"><div class="ci-rk-val">2</div><div class="ci-rk-lbl">Watch List</div></div>' +
+      '<div class="ci-rk-card blue"><div class="ci-rk-val">94%</div><div class="ci-rk-lbl">NLP Accuracy</div></div>' +
+      '<div class="ci-rk-card green"><div class="ci-rk-val">5.2d</div><div class="ci-rk-lbl">Avg Resolution</div></div>' +
+      '<div class="ci-rk-card purple"><div class="ci-rk-val">+32%</div><div class="ci-rk-lbl">Fraud Detection Lift</div></div>' +
+      '<div class="ci-rk-card red"><div class="ci-rk-val">2</div><div class="ci-rk-lbl">SLA At Risk</div></div>' +
+      '<div class="ci-rk-card teal"><div class="ci-rk-val">$1.4M</div><div class="ci-rk-lbl">Open Exposure</div></div>' +
+      '<div class="ci-rk-card green"><div class="ci-rk-val">61%</div><div class="ci-rk-lbl">Doc Completion</div></div>' +
+    '</div>';
+
+  var slaHeatmap =
+    '<div class="ci-sla-heatmap">' +
+      '<div class="ci-sla-hm-title"><i class="fas fa-stopwatch"></i> SLA Compliance Heatmap</div>' +
+      '<div class="ci-sla-hm-bars">' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0041</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:95%;background:#dc2626"></div></div><span class="ci-sla-hm-days breach">1d LEFT</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0025</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:100%;background:#7c3aed"></div></div><span class="ci-sla-hm-days hold">HOLD</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0028</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:70%;background:#d97706"></div></div><span class="ci-sla-hm-days warn">5d</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0035</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:55%;background:#d97706"></div></div><span class="ci-sla-hm-days warn">9d</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0033</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:28%;background:#16a34a"></div></div><span class="ci-sla-hm-days ok">17d</span></div>' +
+        '<div class="ci-sla-hm-row"><span class="ci-sla-hm-lbl">CLM-2026-0038</span><div class="ci-sla-hm-track"><div class="ci-sla-hm-fill" style="width:22%;background:#16a34a"></div></div><span class="ci-sla-hm-days ok">22d</span></div>' +
+      '</div>' +
+    '</div>';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay ci-report-overlay';
+  overlay.id = 'ci-report-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="ci-report-modal" onclick="event.stopPropagation()">' +
+      '<div class="ci-report-header">' +
+        '<div class="ci-report-header-left">' +
+          '<div class="ci-report-icon"><i class="fas fa-brain"></i></div>' +
+          '<div>' +
+            '<div class="ci-report-title">Full AI Claims Intelligence Report</div>' +
+            '<div class="ci-report-sub">ML fraud detection · NLP extraction accuracy · SLA heatmap · Resolution modeling · Recommended actions</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ci-report-header-right">' +
+          '<span class="ci-live-badge">● LIVE</span>' +
+          '<button class="p7m-close" onclick="document.getElementById(\'ci-report-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ci-report-body">' +
+        kpiBlock +
+        slaHeatmap +
+        '<div class="ci-report-table-wrap">' +
+          '<div class="ci-report-table-title"><i class="fas fa-table"></i> ML Score Matrix — All Claims</div>' +
+          '<div style="overflow-x:auto">' +
+            '<table class="ci-report-table">' +
+              '<thead><tr><th>Claim ID</th><th>Client</th><th>Type</th><th>Amount</th><th>Fraud Score</th><th>NLP Conf.</th><th>SLA</th><th>Resolution Est.</th><th>Priority</th><th>Recommended Action</th></tr></thead>' +
+              '<tbody>' + rowsHTML + '</tbody>' +
+            '</table>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ci-model-footnote"><i class="fas fa-robot"></i> Model: NYL Claims AI v2.4 · Trained on 47,200 historical claims · Last retrained 2026-04-01 · AUC 0.94 · Precision 91% · Recall 88%</div>' +
+      '</div>' +
+      '<div class="ci-report-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'ci-report-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="openAITriageModal();document.getElementById(\'ci-report-overlay\').remove()"><i class="fas fa-robot"></i> Run AI Triage</button>' +
+        '<button class="p7m-btn primary" onclick="openFraudReportModal();document.getElementById(\'ci-report-overlay\').remove()"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — AI TRIAGE MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+function openAITriageModal() {
+  var triageQueue = [
+    {
+      id:'CLM-2026-0041', client:'Robert Chen', initials:'RC', color:'#dc2626', type:'Death Benefit',
+      urgency:97, reasoning:'$1M claim SLA breaches in 24h · Missing claimant ID prevents payout · Beneficiary unresponsive · AI recommends escalated outreach + adjuster priority assignment',
+      nextActions:['Call beneficiary directly — use agent direct line','Send FedEx courier for certified ID pickup','Escalate to Sr. Adjuster James Reyes by EOD','Flag for SLA exception approval if docs arrive late'],
+      sla:'1d left', fraudScore:42, docCompletion:50, tag:'SLA BREACH'
+    },
+    {
+      id:'CLM-2026-0025', client:'Kevin Park', initials:'KP', color:'#7c3aed', type:'Death Benefit',
+      urgency:91, reasoning:'Policy pending at time of death — contestability window active · ML detected 3 timeline anomalies · Medical records inconsistency flagged · SIU referral score: 82/100',
+      nextActions:['Order original UW medical records from 2024 application','Refer to Special Investigations Unit (SIU)','Notify beneficiary of 30-day contestability review','Assign Sr. Adjuster with fraud investigation experience'],
+      sla:'On Hold', fraudScore:78, docCompletion:25, tag:'FRAUD HOLD'
+    },
+    {
+      id:'CLM-2026-0028', client:'Maria Gonzalez', initials:'MG', color:'#d97706', type:'Accel. Benefit (ADB)',
+      urgency:84, reasoning:'Terminal illness certification pending from oncologist · ADB compassionate fast-track eligible · $120K acceleration on hold · Patient prognosis: 6–8 months · 5-day SLA window',
+      nextActions:['Contact Dr. Hernandez (oncologist) directly — AI letter drafted','Pre-approve ADB conditional on certification receipt','Assign compassionate case specialist','Expedite internal review once certification arrives'],
+      sla:'5d', fraudScore:38, docCompletion:50, tag:'COMPASSIONATE'
+    },
+    {
+      id:'CLM-2026-0035', client:'Maria Gonzalez', initials:'MG', color:'#2563eb', type:'Disability',
+      urgency:68, reasoning:'APS from Dr. Hernandez overdue by 4 days · $4,200/mo disability benefit impacted · AI auto-drafted follow-up letter ready to send · NLP: initial APS incomplete — missing functional limitations section',
+      nextActions:['Send AI-drafted APS follow-up letter to Dr. Hernandez','Request supplemental APS form targeting functional limitations','Set 5-day follow-up reminder for non-response','Review occupational disability definition against claimant\'s role'],
+      sla:'9d', fraudScore:18, docCompletion:50, tag:'DOCS PENDING'
+    },
+    {
+      id:'CLM-2026-0038', client:'Sandra Williams', initials:'SW', color:'#059669', type:'Long-term Care',
+      urgency:42, reasoning:'LTC eligibility certificate verified · Care plan reviewed and approved · Only adjuster sign-off remaining · No fraud indicators detected · On track for payout within 3–5 days',
+      nextActions:['Route to adjuster for final LTC eligibility confirmation','Initiate payout authorization once confirmed','Notify Sandra Williams of approval status','Archive all documents to policy file'],
+      sla:'22d', fraudScore:12, docCompletion:75, tag:'NEAR READY'
+    },
+    {
+      id:'CLM-2026-0033', client:'James Whitfield', initials:'JW', color:'#16a34a', type:'Long-term Care',
+      urgency:28, reasoning:'All 4 required documents verified by IDP · NLP confidence 97% · No fraud signals · Approval-ready — adjuster review is only remaining step · Payout can initiate within 48h of approval',
+      nextActions:['Send to adjuster for final approval (SLA: today)','Initiate electronic payout once approved','Confirm James Whitfield\'s banking details on file','Send approval notification letter'],
+      sla:'17d', fraudScore:9, docCompletion:100, tag:'APPROVAL READY'
+    }
+  ];
+
+  var cardsHTML = triageQueue.map(function(c, i) {
+    var urgencyColor = c.urgency >= 85 ? '#dc2626' : c.urgency >= 60 ? '#d97706' : '#16a34a';
+    var tagColors = {
+      'SLA BREACH':'#dc2626','FRAUD HOLD':'#7c3aed','COMPASSIONATE':'#db2777',
+      'DOCS PENDING':'#2563eb','NEAR READY':'#059669','APPROVAL READY':'#16a34a'
+    };
+    var tagColor = tagColors[c.tag] || '#6b7280';
+    var actionsHTML = c.nextActions.map(function(a, j) {
+      return '<div class="triage-action-item"><span class="triage-action-num">' + (j+1) + '</span><span>' + a + '</span></div>';
+    }).join('');
+    return '<div class="triage-card" style="border-left:4px solid ' + c.color + '">' +
+      '<div class="triage-card-top">' +
+        '<div class="triage-rank">#' + (i+1) + '</div>' +
+        '<div class="mini-avatar" style="background:' + c.color + ';width:36px;height:36px;font-size:12px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-weight:700;flex-shrink:0">' + c.initials + '</div>' +
+        '<div class="triage-card-info">' +
+          '<div class="triage-card-id">' + c.id + ' <span class="triage-tag" style="background:' + tagColor + '20;color:' + tagColor + ';border:1px solid ' + tagColor + '40">' + c.tag + '</span></div>' +
+          '<div class="triage-card-client">' + c.client + ' · ' + c.type + '</div>' +
+        '</div>' +
+        '<div class="triage-urgency-score" style="background:' + urgencyColor + '15;border:2px solid ' + urgencyColor + '">' +
+          '<div class="triage-urgency-num" style="color:' + urgencyColor + '">' + c.urgency + '</div>' +
+          '<div class="triage-urgency-lbl">Urgency</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="triage-reasoning"><i class="fas fa-robot" style="color:#7c3aed;margin-right:6px"></i>' + c.reasoning + '</div>' +
+      '<div class="triage-metrics">' +
+        '<div class="triage-metric"><span class="triage-m-lbl">SLA</span><span class="triage-m-val">' + c.sla + '</span></div>' +
+        '<div class="triage-metric"><span class="triage-m-lbl">Fraud</span><span class="triage-m-val">' + c.fraudScore + '</span></div>' +
+        '<div class="triage-metric"><span class="triage-m-lbl">Docs</span><span class="triage-m-val">' + c.docCompletion + '%</span></div>' +
+      '</div>' +
+      '<div class="triage-actions-block">' +
+        '<div class="triage-actions-title"><i class="fas fa-bolt"></i> AI Recommended Next Actions</div>' +
+        actionsHTML +
+      '</div>' +
+      '<div class="triage-card-btns">' +
+        '<button class="p7m-btn ghost" style="font-size:11px;padding:6px 12px" onclick="openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> View Claim</button>' +
+        '<button class="p7m-btn primary" style="font-size:11px;padding:6px 12px" onclick="sendDocRequest(\'' + c.id + '\',\'beneficiary\')"><i class="fas fa-paper-plane"></i> Send Doc Request</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay triage-modal-overlay';
+  overlay.id = 'triage-modal-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="triage-modal" onclick="event.stopPropagation()">' +
+      '<div class="triage-modal-header">' +
+        '<div class="triage-modal-header-left">' +
+          '<div class="triage-modal-icon"><i class="fas fa-robot"></i></div>' +
+          '<div>' +
+            '<div class="triage-modal-title">AI Claims Triage Queue</div>' +
+            '<div class="triage-modal-sub">6 active claims · Prioritized by urgency score · ML-weighted: SLA 40% · Fraud 30% · Doc Completeness 20% · Claim Value 10%</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'triage-modal-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="triage-modal-summary">' +
+        '<div class="triage-sum-item red"><i class="fas fa-fire"></i><span>1 SLA Breach</span></div>' +
+        '<div class="triage-sum-item purple"><i class="fas fa-shield-virus"></i><span>1 Fraud Hold</span></div>' +
+        '<div class="triage-sum-item pink"><i class="fas fa-heart"></i><span>1 Compassionate</span></div>' +
+        '<div class="triage-sum-item green"><i class="fas fa-check-circle"></i><span>1 Approval Ready</span></div>' +
+      '</div>' +
+      '<div class="triage-modal-body">' + cardsHTML + '</div>' +
+      '<div class="triage-modal-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn primary" onclick="p7Toast(\'<i class=\\\'fas fa-paper-plane\\\'></i> Batch doc reminders sent to all 4 pending claims — AI letters generated\',3500);document.getElementById(\'triage-modal-overlay\').remove()"><i class="fas fa-paper-plane"></i> Send All Doc Reminders</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — FULL FRAUD REPORT MODAL
+   ═══════════════════════════════════════════════════════════════════ */
 function openFraudReportModal() {
-  p7Toast('<i class="fas fa-shield-virus"></i> Fraud Report: CLM-2026-0025 (Score 78) flagged for contestability review. CLM-2026-0041 (Score 42) on watch list.', 4000);
+  var fraudData = [
+    { id:'CLM-2026-0025', client:'Kevin Park',    amount:'$250,000',  score:78, status:'FLAGGED', signals:['Policy pending at death','Medical records inconsistency','Timeline anomaly (3)','Beneficiary change 6mo prior'], hold:true,  recommendation:'SIU referral · Contestability investigation · Senior adjuster assignment required' },
+    { id:'CLM-2026-0041', client:'Robert Chen',   amount:'$1,000,000',score:42, status:'WATCH',   signals:['High-value threshold','Claimant ID pending','Expedited claim filed'], hold:false, recommendation:'Enhanced monitoring · ID document verification priority · Adjuster review before payout' },
+    { id:'CLM-2026-0028', client:'Maria Gonzalez',amount:'$120,000',  score:38, status:'WATCH',   signals:['Terminal cert timing','ADB filed 30 days post-diagnosis','NLP doc inconsistency'], hold:false, recommendation:'ADB eligibility verification · Oncologist direct contact · Cert authentication' },
+    { id:'CLM-2026-0035', client:'Maria Gonzalez',amount:'$4,200/mo', score:18, status:'CLEAR',   signals:['Standard disability claim','APS pending (normal)'], hold:false, recommendation:'Normal processing — APS receipt required for approval' },
+    { id:'CLM-2026-0038', client:'Sandra Williams',amount:'$18,000',  score:12, status:'CLEAR',   signals:['Clean policy history','All docs verified'], hold:false, recommendation:'Approve — no fraud indicators detected' },
+    { id:'CLM-2026-0033', client:'James Whitfield',amount:'$9,600',   score:9,  status:'CLEAR',   signals:['All 4 docs verified','NLP confidence 97%'], hold:false, recommendation:'Approve immediately — no fraud signals' },
+    { id:'CLM-2026-0031', client:'Linda Morrison', amount:'$9,600/yr',score:7,  status:'CLEAR',   signals:['Waiver criteria met','Long-standing policy'], hold:false, recommendation:'Approve pending medical sign-off' }
+  ];
+
+  var signalCounts = { timing: 2, docDelay: 3, highValue: 1, benefChange: 1, nlpFlag: 1, coverageGap: 1 };
+
+  var fraudRowsHTML = fraudData.map(function(f) {
+    var statusColor = f.status === 'FLAGGED' ? '#dc2626' : f.status === 'WATCH' ? '#d97706' : '#16a34a';
+    var scoreColor = f.score >= 60 ? '#dc2626' : f.score >= 30 ? '#d97706' : '#16a34a';
+    var sigHTML = f.signals.map(function(s) { return '<span class="fraud-sig-chip">' + s + '</span>'; }).join('');
+    return '<div class="fraud-report-row' + (f.hold ? ' fraud-row-hold' : '') + '">' +
+      '<div class="fraud-rr-top">' +
+        '<span class="fraud-rr-id">' + f.id + (f.hold ? ' <i class="fas fa-ban" style="color:#dc2626;margin-left:4px" title="Payment Hold"></i>' : '') + '</span>' +
+        '<span class="fraud-rr-client">' + f.client + '</span>' +
+        '<span class="fraud-rr-amount">' + f.amount + '</span>' +
+        '<span class="fraud-rr-score" style="background:' + scoreColor + '20;color:' + scoreColor + ';border:1px solid ' + scoreColor + '40">' + f.score + '</span>' +
+        '<span class="fraud-rr-status" style="background:' + statusColor + '20;color:' + statusColor + '">' + f.status + '</span>' +
+      '</div>' +
+      '<div class="fraud-rr-signals">' + sigHTML + '</div>' +
+      '<div class="fraud-rr-rec"><i class="fas fa-lightbulb" style="color:#d97706;margin-right:6px"></i>' + f.recommendation + '</div>' +
+    '</div>';
+  }).join('');
+
+  var signalMatrixHTML =
+    '<div class="fraud-signal-matrix">' +
+      '<div class="fsm-title"><i class="fas fa-chart-bar"></i> Fraud Signal Distribution</div>' +
+      '<div class="fsm-bars">' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Claim Timing</span><div class="fsm-track"><div class="fsm-fill" style="width:72%;background:#dc2626"></div></div><span class="fsm-count">High</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Doc Completeness</span><div class="fsm-track"><div class="fsm-fill" style="width:55%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Policy History</span><div class="fsm-track"><div class="fsm-fill" style="width:90%;background:#16a34a"></div></div><span class="fsm-count">Low</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Beneficiary Match</span><div class="fsm-track"><div class="fsm-fill" style="width:60%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">Claim Amount</span><div class="fsm-track"><div class="fsm-fill" style="width:80%;background:#dc2626"></div></div><span class="fsm-count">High</span></div>' +
+        '<div class="fsm-bar-row"><span class="fsm-lbl">NLP Anomalies</span><div class="fsm-track"><div class="fsm-fill" style="width:45%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
+      '</div>' +
+    '</div>';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay fraud-report-overlay';
+  overlay.id = 'fraud-report-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="fraud-report-modal" onclick="event.stopPropagation()">' +
+      '<div class="fraud-report-header">' +
+        '<div class="fraud-report-header-left">' +
+          '<div class="fraud-report-icon"><i class="fas fa-shield-virus"></i></div>' +
+          '<div>' +
+            '<div class="fraud-report-title">Full AI Fraud Detection Report</div>' +
+            '<div class="fraud-report-sub">All active &amp; resolved claims · ML anomaly detection · Signal breakdown · Hold recommendations</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'fraud-report-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="fraud-report-body">' +
+        '<div class="fraud-report-kpis">' +
+          '<div class="fraud-rkpi red"><div class="fraud-rkpi-val">1</div><div class="fraud-rkpi-lbl">Flagged</div></div>' +
+          '<div class="fraud-rkpi orange"><div class="fraud-rkpi-val">2</div><div class="fraud-rkpi-lbl">Watch List</div></div>' +
+          '<div class="fraud-rkpi green"><div class="fraud-rkpi-val">4</div><div class="fraud-rkpi-lbl">Clear</div></div>' +
+          '<div class="fraud-rkpi blue"><div class="fraud-rkpi-val">+32%</div><div class="fraud-rkpi-lbl">Detection Lift</div></div>' +
+          '<div class="fraud-rkpi red"><div class="fraud-rkpi-val">1</div><div class="fraud-rkpi-lbl">Payment Hold</div></div>' +
+          '<div class="fraud-rkpi purple"><div class="fraud-rkpi-val">1</div><div class="fraud-rkpi-lbl">SIU Referral Rec.</div></div>' +
+        '</div>' +
+        '<div class="fraud-report-layout">' +
+          '<div class="fraud-report-claims">' +
+            '<div class="fraud-report-section-title"><i class="fas fa-list"></i> All Claims — Fraud Score &amp; Analysis</div>' +
+            fraudRowsHTML +
+          '</div>' +
+          signalMatrixHTML +
+        '</div>' +
+        '<div class="fraud-model-note"><i class="fas fa-robot"></i> Model: NYL Fraud AI v3.1 · XGBoost ensemble · Trained on 12,400 historical fraud cases · AUC 0.96 · False positive rate: 4.2%</div>' +
+      '</div>' +
+      '<div class="fraud-report-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'fraud-report-overlay\').remove()">Close</button>' +
+        '<button class="p7m-btn danger" onclick="p7Toast(\'<i class=\\\'fas fa-ban\\\'></i> Payment hold confirmed for CLM-2026-0025 · SIU referral initiated · Senior adjuster notified\',4000);document.getElementById(\'fraud-report-overlay\').remove()"><i class="fas fa-ban"></i> Confirm SIU Referral</button>' +
+        '<button class="p7m-btn primary" onclick="openFraudDetailModal(\'CLM-2026-0025\');document.getElementById(\'fraud-report-overlay\').remove()"><i class="fas fa-search-plus"></i> Investigate CLM-0025</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
 }
 
 function toggleWorkbench(btn) {
@@ -35069,9 +35726,258 @@ function updateBatchButtons() {
   if (assignBtn) assignBtn.disabled = checked === 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — DOCUMENT UPLOAD MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+function openUploadModal(claimId) {
+  var claimMeta = {
+    'CLM-2026-0041': { client:'Robert Chen',   type:'Death Benefit',    docs:['Death Certificate','Claimant ID','Beneficiary Designation Form','Medical Certificate'] },
+    'CLM-2026-0025': { client:'Kevin Park',    type:'Death Benefit',    docs:['Death Certificate','Medical Records (Full)','Policy Document','Beneficiary ID'] },
+    'CLM-2026-0028': { client:'Maria Gonzalez',type:'Accel. Benefit',   docs:['Terminal Illness Certification (ADB-TC-2026)','Attending Physician Statement','Claimant Statement','Oncologist Letter'] },
+    'CLM-2026-0035': { client:'Maria Gonzalez',type:'Disability',       docs:['Attending Physician Statement (APS)','Disability Claim Form','Employment Records','Occupational Assessment'] },
+    'CLM-2026-0038': { client:'Sandra Williams',type:'Long-term Care',  docs:['LTC Eligibility Certificate','Care Plan Documentation','Provider Invoice','Medical Necessity Letter'] },
+    'CLM-2026-0033': { client:'James Whitfield',type:'Long-term Care',  docs:['LTC Eligibility Certificate','Care Plan Update','Provider Invoice Q2','Authorization Form'] },
+    'CLM-2026-0031': { client:'Linda Morrison', type:'Waiver of Premium',docs:['Physician Disability Statement','Premium Waiver Application','Medical History Summary','Employer Disability Confirmation'] }
+  };
+  var meta = claimMeta[claimId] || { client:'Client', type:'Claim', docs:['Required Document 1','Required Document 2','Required Document 3'] };
+
+  var docChecklist = meta.docs.map(function(d) {
+    return '<label class="upload-doc-check">' +
+      '<input type="checkbox" style="margin-right:8px"> ' + d +
+    '</label>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay upload-modal-overlay';
+  overlay.id = 'upload-modal-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="upload-modal" onclick="event.stopPropagation()">' +
+      '<div class="upload-modal-header">' +
+        '<div class="upload-modal-header-left">' +
+          '<div class="upload-modal-icon"><i class="fas fa-upload"></i></div>' +
+          '<div>' +
+            '<div class="upload-modal-title">Upload Documents <span class="upload-claim-id-badge">' + claimId + '</span></div>' +
+            '<div class="upload-modal-sub">' + meta.client + ' · ' + meta.type + ' · IDP auto-extraction enabled</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'upload-modal-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="upload-modal-body">' +
+        '<div class="upload-drop-zone" id="upload-drop-zone" ' +
+          'ondragover="event.preventDefault();this.classList.add(\'upload-drag-active\')" ' +
+          'ondragleave="this.classList.remove(\'upload-drag-active\')" ' +
+          'ondrop="handleUploadDrop(event,\'' + claimId + '\')">' +
+          '<i class="fas fa-cloud-upload-alt upload-drop-icon"></i>' +
+          '<div class="upload-drop-title">Drag &amp; drop documents here</div>' +
+          '<div class="upload-drop-sub">or click to browse · PDF, JPG, PNG, DOCX accepted · Max 50MB per file</div>' +
+          '<button class="p7m-btn ghost" style="margin-top:12px" onclick="handleUploadDrop({dataTransfer:{files:[\'mock.pdf\']}},\'' + claimId + '\')"><i class="fas fa-folder-open"></i> Browse Files</button>' +
+        '</div>' +
+
+        '<div class="upload-doc-type-selector">' +
+          '<label class="upload-field-label">Document Type</label>' +
+          '<select class="filter-select" id="upload-doc-type" style="width:100%;margin-bottom:8px">' +
+            meta.docs.map(function(d){ return '<option>' + d + '</option>'; }).join('') +
+            '<option>Other / Miscellaneous</option>' +
+          '</select>' +
+          '<label class="upload-field-label">Notes (optional)</label>' +
+          '<input type="text" id="upload-notes" class="search-inline" placeholder="e.g. Original certified copy from Cook County Vital Records…" style="width:100%;box-sizing:border-box">' +
+        '</div>' +
+
+        '<div class="upload-checklist">' +
+          '<div class="upload-checklist-title"><i class="fas fa-clipboard-list"></i> Required Documents for ' + claimId + '</div>' +
+          '<div class="upload-doc-checks">' + docChecklist + '</div>' +
+        '</div>' +
+
+        '<div class="upload-idp-note">' +
+          '<i class="fas fa-robot" style="color:#7c3aed"></i>' +
+          ' <strong>AI Auto-Extraction:</strong> Uploaded documents will be automatically processed by the IDP engine · Fields extracted and pre-populated into claim form within 2–5 minutes · Review confidence scores before approving' +
+        '</div>' +
+      '</div>' +
+      '<div class="upload-modal-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'upload-modal-overlay\').remove()">Cancel</button>' +
+        '<button class="p7m-btn primary" onclick="submitUpload(\'' + claimId + '\')"><i class="fas fa-upload"></i> Upload &amp; Start IDP Extraction</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function handleUploadDrop(event, claimId) {
+  var zone = document.getElementById('upload-drop-zone');
+  if (zone) {
+    zone.classList.remove('upload-drag-active');
+    zone.innerHTML =
+      '<i class="fas fa-file-check upload-drop-icon" style="color:#16a34a"></i>' +
+      '<div class="upload-drop-title" style="color:#16a34a">Document ready for upload</div>' +
+      '<div class="upload-drop-sub">document.pdf · Click "Upload &amp; Start IDP Extraction" to proceed</div>';
+  }
+}
+
+function submitUpload(claimId) {
+  var docType = document.getElementById('upload-doc-type') ? document.getElementById('upload-doc-type').value : 'Document';
+  var overlay = document.getElementById('upload-modal-overlay');
+  if (overlay) overlay.remove();
+  p7Toast('<i class="fas fa-upload"></i> ' + docType + ' uploaded for ' + claimId + ' · IDP extraction starting — fields auto-populated in 2–3 minutes', 4000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> IDP extraction complete for ' + claimId + ' · 5 fields extracted · Confidence: 94% · Review in claim detail', 4000);
+  }, 3500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — FILE NEW CLAIM WIZARD
+   ═══════════════════════════════════════════════════════════════════ */
+function openFileClaimWizard() {
+  var clients = [
+    'Robert Chen (P-100350)', 'Sandra Williams (P-100287)', 'Maria Gonzalez (P-100398)',
+    'James Whitfield (P-100421)', 'Linda Morrison (P-100312)', 'Kevin Park (P-100445)',
+    'Patricia Nguyen (P-100378)', 'Susan Chen (P-100290)', 'David Kim (P-100456)',
+    'Emily Rodriguez (P-100341)'
+  ];
+  var clientOpts = clients.map(function(c){ return '<option>' + c + '</option>'; }).join('');
+
+  var checklist = [
+    'Death Certificate or Medical Certificate',
+    'Claimant ID (government-issued photo ID)',
+    'Policy document (if available)',
+    'Beneficiary designation form',
+    'Medical records (if applicable)',
+    'Attending Physician Statement (APS) — for disability/ADB'
+  ];
+  var checklistHTML = checklist.map(function(c) {
+    return '<label class="upload-doc-check"><input type="checkbox" style="margin-right:8px"> ' + c + '</label>';
+  }).join('');
+
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay upload-modal-overlay';
+  overlay.id = 'file-claim-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="upload-modal" style="max-width:620px" onclick="event.stopPropagation()">' +
+      '<div class="upload-modal-header">' +
+        '<div class="upload-modal-header-left">' +
+          '<div class="upload-modal-icon" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)"><i class="fas fa-plus"></i></div>' +
+          '<div>' +
+            '<div class="upload-modal-title">File New Claim</div>' +
+            '<div class="upload-modal-sub">NYL claims wizard · AI pre-fill from policy data · IDP auto-extraction</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="document.getElementById(\'file-claim-overlay\').remove()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="upload-modal-body">' +
+        '<div class="wizard-step-header">' +
+          '<div class="wizard-step active">1<span>Client</span></div>' +
+          '<div class="wizard-step-arrow">›</div>' +
+          '<div class="wizard-step">2<span>Type</span></div>' +
+          '<div class="wizard-step-arrow">›</div>' +
+          '<div class="wizard-step">3<span>Policy</span></div>' +
+          '<div class="wizard-step-arrow">›</div>' +
+          '<div class="wizard-step">4<span>Docs</span></div>' +
+          '<div class="wizard-step-arrow">›</div>' +
+          '<div class="wizard-step">5<span>Submit</span></div>' +
+        '</div>' +
+
+        '<div class="wizard-field-group">' +
+          '<label class="upload-field-label">Select Client</label>' +
+          '<select class="filter-select" id="wizard-client" style="width:100%">' +
+            '<option value="">— Select client —</option>' + clientOpts +
+          '</select>' +
+        '</div>' +
+        '<div class="wizard-field-group">' +
+          '<label class="upload-field-label">Claim Type</label>' +
+          '<select class="filter-select" id="wizard-claim-type" style="width:100%">' +
+            '<option value="">— Select type —</option>' +
+            '<option>Death Benefit</option>' +
+            '<option>Accelerated Death Benefit (ADB)</option>' +
+            '<option>Disability Income</option>' +
+            '<option>Long-term Care (LTC)</option>' +
+            '<option>Waiver of Premium</option>' +
+            '<option>Critical Illness Rider</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="wizard-field-group">' +
+          '<label class="upload-field-label">Date of Loss / Event</label>' +
+          '<input type="date" class="search-inline" id="wizard-loss-date" style="width:100%;box-sizing:border-box">' +
+        '</div>' +
+        '<div class="wizard-field-group">' +
+          '<label class="upload-field-label">Brief Description</label>' +
+          '<input type="text" class="search-inline" id="wizard-desc" placeholder="e.g. Death of insured on 2026-04-07 — cardiac arrest…" style="width:100%;box-sizing:border-box">' +
+        '</div>' +
+        '<div class="upload-checklist">' +
+          '<div class="upload-checklist-title"><i class="fas fa-clipboard-list"></i> Document Checklist — gather before submitting</div>' +
+          '<div class="upload-doc-checks">' + checklistHTML + '</div>' +
+        '</div>' +
+        '<div class="upload-idp-note">' +
+          '<i class="fas fa-robot" style="color:#7c3aed"></i>' +
+          ' <strong>AI Pre-fill:</strong> Policy data, client details, and beneficiary information will be automatically populated from CRM records · IDP will extract fields from uploaded documents' +
+        '</div>' +
+      '</div>' +
+      '<div class="upload-modal-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'file-claim-overlay\').remove()">Cancel</button>' +
+        '<button class="p7m-btn primary" onclick="submitNewClaim()"><i class="fas fa-plus"></i> Create Claim &amp; Open Workspace</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function submitNewClaim() {
+  var client = document.getElementById('wizard-client') ? document.getElementById('wizard-client').value : '';
+  var type   = document.getElementById('wizard-claim-type') ? document.getElementById('wizard-claim-type').value : '';
+  var overlay = document.getElementById('file-claim-overlay');
+  if (!client || !type) {
+    p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a client and claim type to continue', 2500);
+    return;
+  }
+  if (overlay) overlay.remove();
+  var newId = 'CLM-2026-' + (Math.floor(Math.random() * 90) + 10);
+  p7Toast('<i class="fas fa-plus-circle"></i> New claim ' + newId + ' created for ' + client + ' · ' + type + ' · AI pre-filling policy data…', 4500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> Claim workspace ready — upload required documents to begin IDP extraction', 3500);
+  }, 3000);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIMS — BATCH SEND DOC REMINDERS (ENHANCED)
+   ═══════════════════════════════════════════════════════════════════ */
 function batchSendDocReminders() {
   var checked = document.querySelectorAll('.claim-row-checkbox:checked').length;
-  p7Toast('<i class="fas fa-paper-plane"></i> Sending doc reminders to ' + checked + ' selected claim(s) — AI-drafted letters generated', 3000);
+  if (checked === 0) {
+    p7Toast('<i class="fas fa-exclamation-triangle"></i> Select at least one claim to send reminders', 2000);
+    return;
+  }
+  var overlay = document.createElement('div');
+  overlay.className = 'p7-modal-overlay';
+  overlay.id = 'batch-reminder-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML =
+    '<div class="p7m-modal" style="max-width:480px" onclick="event.stopPropagation()">' +
+      '<div class="p7m-header"><div class="p7m-title"><i class="fas fa-paper-plane"></i> Send Doc Reminders</div><button class="p7m-close" onclick="document.getElementById(\'batch-reminder-overlay\').remove()"><i class="fas fa-times"></i></button></div>' +
+      '<div class="p7m-body">' +
+        '<div style="margin-bottom:16px">Sending AI-drafted document reminder letters to <strong>' + checked + ' selected claim(s)</strong>.</div>' +
+        '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:#374151">Reminder Channel</label>' +
+          '<select class="filter-select" style="width:100%;margin-top:4px">' +
+            '<option>Email + SMS (recommended)</option>' +
+            '<option>Email only</option>' +
+            '<option>SMS only</option>' +
+            '<option>Physical mail (AI-drafted letter)</option>' +
+          '</select>' +
+        '</div>' +
+        '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-size:12px">' +
+          '<i class="fas fa-robot" style="color:#16a34a;margin-right:6px"></i>' +
+          '<strong>AI Draft Ready:</strong> Personalized reminder letters generated for each claim — includes specific missing documents, deadline, and contact information.' +
+        '</div>' +
+      '</div>' +
+      '<div class="p7m-footer">' +
+        '<button class="p7m-btn ghost" onclick="document.getElementById(\'batch-reminder-overlay\').remove()">Cancel</button>' +
+        '<button class="p7m-btn primary" onclick="confirmBatchReminders(' + checked + ')"><i class="fas fa-paper-plane"></i> Send ' + checked + ' Reminder(s)</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function confirmBatchReminders(count) {
+  var overlay = document.getElementById('batch-reminder-overlay');
+  if (overlay) overlay.remove();
+  p7Toast('<i class="fas fa-paper-plane"></i> ' + count + ' AI-drafted doc reminder(s) sent · Letters archived in claim files · 7-day auto-follow-up scheduled', 4000);
 }
 
 function batchAssignAdjuster() {

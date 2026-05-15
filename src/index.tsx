@@ -5855,17 +5855,17 @@ function ClaimsPage() {
             </div>
           </div>
           <div class="ci-kpis">
-            <div class="ci-kpi ci-kpi-red"><div class="ci-kpi-val">1</div><div class="ci-kpi-lbl">Fraud Flagged</div></div>
-            <div class="ci-kpi ci-kpi-orange"><div class="ci-kpi-val">2</div><div class="ci-kpi-lbl">Watch List</div></div>
-            <div class="ci-kpi ci-kpi-blue"><div class="ci-kpi-val">94%</div><div class="ci-kpi-lbl">NLP Accuracy</div></div>
-            <div class="ci-kpi ci-kpi-green"><div class="ci-kpi-val">5.2d</div><div class="ci-kpi-lbl">Avg Resolution</div></div>
-            <div class="ci-kpi ci-kpi-purple"><div class="ci-kpi-val">+32%</div><div class="ci-kpi-lbl">Detection Lift</div></div>
-            <div class="ci-kpi ci-kpi-red ci-kpi-sla"><div class="ci-kpi-val">2</div><div class="ci-kpi-lbl">SLA At Risk</div></div>
+            <div class="ci-kpi ci-kpi-red" onclick="openFraudReportModal()" style="cursor:pointer" title="View Fraud Report"><div class="ci-kpi-val">1</div><div class="ci-kpi-lbl">Fraud Flagged</div></div>
+            <div class="ci-kpi ci-kpi-orange" onclick="openFraudReportModal()" style="cursor:pointer" title="View Watch List"><div class="ci-kpi-val">2</div><div class="ci-kpi-lbl">Watch List</div></div>
+            <div class="ci-kpi ci-kpi-blue" onclick="openCIReviewModal()" style="cursor:pointer" title="View Intelligence Report"><div class="ci-kpi-val">94%</div><div class="ci-kpi-lbl">NLP Accuracy</div></div>
+            <div class="ci-kpi ci-kpi-green" onclick="openCIReviewModal()" style="cursor:pointer" title="View Resolution Details"><div class="ci-kpi-val">5.2d</div><div class="ci-kpi-lbl">Avg Resolution</div></div>
+            <div class="ci-kpi ci-kpi-purple" onclick="openCIReviewModal()" style="cursor:pointer" title="View Detection Lift Details"><div class="ci-kpi-val">+32%</div><div class="ci-kpi-lbl">Detection Lift</div></div>
+            <div class="ci-kpi ci-kpi-red ci-kpi-sla" onclick="filterClaimsBySLA()" style="cursor:pointer" title="View SLA At-Risk Claims"><div class="ci-kpi-val">2</div><div class="ci-kpi-lbl">SLA At Risk</div></div>
           </div>
           <div class="ci-banner-actions">
             <button class="btn-ci-action primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Intelligence Report</button>
             <button class="btn-ci-action secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
-            <button class="btn-ci-action secondary" onclick="sendContextMessage('Run full claims triage — prioritize by fraud risk, resolution urgency and document completeness','claims')"><i class="fas fa-robot"></i> AI Triage</button>
+            <button class="btn-ci-action secondary" onclick="openAITriageModal()"><i class="fas fa-robot"></i> AI Triage</button>
           </div>
         </div>
 
@@ -5915,7 +5915,7 @@ function ClaimsPage() {
               <div class="cwb-client"><div class="mini-avatar rc" style="width:24px;height:24px;font-size:9px">RC</div><span>Robert Chen</span></div>
               <div class="cwb-reason"><i class="fas fa-exclamation-triangle"></i> Missing ID docs — $1M death benefit on hold</div>
               <div class="cwb-card-actions">
-                <button class="cwb-action-btn primary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-upload"></i> Upload Docs</button>
+                <button class="cwb-action-btn primary" onclick="openUploadModal('CLM-2026-0041')"><i class="fas fa-upload"></i> Upload Docs</button>
                 <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i> AI</button>
               </div>
             </div>
@@ -6023,7 +6023,7 @@ function ClaimsPage() {
               <div class="ctype-count">3 pending doc requests</div>
               <div class="ctype-value">Auto-follow-ups ready</div>
             </div>
-            <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="sendContextMessage('Show all open claims and urgent actions needed — triage by priority and expected resolution','claims')">Run AI Triage</button>
+            <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="openAITriageModal()">Run AI Triage</button>
           </div>
         </div>
 
@@ -6073,10 +6073,10 @@ function ClaimsPage() {
               <button class="btn-batch" id="batch-send-btn" disabled onclick="batchSendDocReminders()"><i class="fas fa-paper-plane"></i> Reminders</button>
               <button class="btn-batch" id="batch-export-btn" onclick="batchExportClaims()"><i class="fas fa-file-export"></i> Export</button>
             </div>
-            <button class="btn btn-ai" onclick="openCIReviewModal()">
+            <button class="btn btn-ai" onclick="openAITriageModal()">
               <i class="fas fa-brain"></i> AI Triage
             </button>
-            <button class="btn btn-primary" onclick="p7Toast('New claim wizard — select client and claim type to begin…',2500)">
+            <button class="btn btn-primary" onclick="openFileClaimWizard()">
               <i class="fas fa-plus"></i> File Claim
             </button>
           </div>
@@ -6112,7 +6112,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0041')"><i class="fas fa-upload"></i></button>
                     <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i></button>
                   </div>
                 </td>
@@ -6130,7 +6130,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0038')"><i class="fas fa-upload"></i></button>
                     <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0038','ci')"><i class="fas fa-robot"></i></button>
                   </div>
                 </td>
@@ -6148,7 +6148,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0035')"><i class="fas fa-upload"></i></button>
                     <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0035','ci')"><i class="fas fa-robot"></i></button>
                   </div>
                 </td>
@@ -6166,7 +6166,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0033')"><i class="fas fa-upload"></i></button>
                     <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i></button>
                   </div>
                 </td>
@@ -6184,7 +6184,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0031')"><i class="fas fa-upload"></i></button>
                     <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0031','ci')"><i class="fas fa-robot"></i></button>
                   </div>
                 </td>
@@ -6202,7 +6202,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon" title="Upload"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0028')"><i class="fas fa-upload"></i></button>
                     <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0028','ci')"><i class="fas fa-robot"></i></button>
                   </div>
                 </td>
