@@ -35826,113 +35826,512 @@ function submitUpload(claimId) {
 /* ═══════════════════════════════════════════════════════════════════
    CLAIMS — FILE NEW CLAIM WIZARD
    ═══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   FILE NEW CLAIM — 5-STEP WIZARD  (state machine)
+   State stored in window._fcw = { step, client, type, policy, docs, claimId }
+   ═══════════════════════════════════════════════════════════════════ */
+
+var _fcwClientData = {
+  'Robert Chen':    { id:'P-100350', dob:'1968-03-14', age:58, policies:[{ num:'NYL-P-100350', type:'Whole Life',    face:'$1,000,000', status:'In Force', issued:'2018-06-01', premium:'$4,200/yr',  bene:'Susan Chen (spouse)' }, { num:'NYL-P-100350B', type:'Term 20',       face:'$500,000',   status:'In Force', issued:'2020-01-15', premium:'$980/yr',   bene:'Susan Chen (spouse)' }] },
+  'Sandra Williams':{ id:'P-100287', dob:'1955-09-22', age:70, policies:[{ num:'NYL-P-100287', type:'Universal Life',face:'$250,000',   status:'In Force', issued:'2012-03-10', premium:'$3,100/yr',  bene:'Daniel Williams (son)' }] },
+  'Maria Gonzalez': { id:'P-100398', dob:'1972-07-05', age:53, policies:[{ num:'NYL-P-100398', type:'Whole Life',    face:'$500,000',   status:'In Force', issued:'2019-11-20', premium:'$2,800/yr',  bene:'Carlos Gonzalez (spouse)' }, { num:'NYL-P-100487', type:'Disability Income',face:'$4,200/mo', status:'In Force', issued:'2021-04-01', premium:'$1,200/yr',  bene:'N/A' }] },
+  'James Whitfield':{ id:'P-100421', dob:'1949-12-30', age:76, policies:[{ num:'NYL-P-100421', type:'LTC Combo',     face:'$300,000',   status:'In Force', issued:'2010-08-14', premium:'$5,600/yr',  bene:'Alice Whitfield (spouse)' }] },
+  'Linda Morrison': { id:'P-100312', dob:'1961-04-18', age:64, policies:[{ num:'NYL-P-100312', type:'Term 30',       face:'$200,000',   status:'In Force', issued:'2008-09-01', premium:'$520/yr',    bene:'Michael Morrison (spouse)' }] },
+  'Kevin Park':     { id:'P-100445', dob:'1980-11-02', age:45, policies:[{ num:'NYL-P-100445', type:'Whole Life',    face:'$250,000',   status:'Pending',  issued:'2024-02-15', premium:'$1,840/yr',  bene:'Jenny Park (spouse)' }] },
+  'Patricia Nguyen':{ id:'P-100378', dob:'1970-06-25', age:55, policies:[{ num:'NYL-P-100378', type:'Universal Life',face:'$400,000',   status:'In Force', issued:'2016-02-28', premium:'$3,600/yr',  bene:'Andrew Nguyen (spouse)' }] },
+  'Susan Chen':     { id:'P-100290', dob:'1966-08-11', age:59, policies:[{ num:'NYL-P-100290', type:'Term 20',       face:'$300,000',   status:'In Force', issued:'2015-05-01', premium:'$1,100/yr',  bene:'Robert Chen (spouse)' }] },
+  'David Kim':      { id:'P-100456', dob:'1985-02-14', age:41, policies:[{ num:'NYL-P-100456', type:'Whole Life',    face:'$500,000',   status:'In Force', issued:'2022-09-01', premium:'$2,400/yr',  bene:'Emily Kim (spouse)' }] },
+  'Emily Rodriguez':{ id:'P-100341', dob:'1958-10-07', age:67, policies:[{ num:'NYL-P-100341', type:'LTC Rider',     face:'$150,000',   status:'In Force', issued:'2011-03-15', premium:'$2,900/yr',  bene:'Marco Rodriguez (spouse)' }] }
+};
+
+var _fcwClaimTypeDocs = {
+  'Death Benefit':                  ['Death Certificate (certified copy)','Claimant Statement (Form CL-1)','Claimant Government-issued ID','Policy Document (original or copy)','Beneficiary Designation Form','Funeral Home Statement (if applicable)'],
+  'Accelerated Death Benefit (ADB)':['Terminal Illness Certification (ADB-TC-2026)','Attending Physician Statement (APS)','Claimant Statement (Form ADB-1)','Medical Records (diagnosis confirmation)','Policy Document','Claimant Government-issued ID'],
+  'Disability Income':              ['Attending Physician Statement (APS)','Claimant Disability Statement','Employer Disability Verification','Occupational Assessment Form','Medical Records (supporting diagnosis)','Government-issued ID'],
+  'Long-term Care (LTC)':           ['LTC Eligibility Certification','Care Plan from Licensed Provider','Provider Invoice / Facility Agreement','Medical Necessity Letter','Activities of Daily Living (ADL) Assessment','Government-issued ID'],
+  'Waiver of Premium':              ['Physician Disability Statement','Premium Waiver Application (Form WP-1)','Medical History Summary','Employer Disability Confirmation Letter','Government-issued ID'],
+  'Critical Illness Rider':         ['Specialist Diagnosis Report','Hospital Records (admission & diagnosis)','Pathology / Lab Report','Attending Physician Statement','Claimant Statement','Government-issued ID']
+};
+
+var _fcwFraudFlags = {
+  'Kevin Park':    { score:78, flags:['Policy in Pending status at time of claim','Contestability window active (< 2 years)','Beneficiary change 6mo prior'], level:'HIGH' },
+  'Robert Chen':   { score:42, flags:['High-value claim ($1M) — enhanced review triggered'], level:'WATCH' }
+};
+
 function openFileClaimWizard() {
-  var clients = [
-    'Robert Chen (P-100350)', 'Sandra Williams (P-100287)', 'Maria Gonzalez (P-100398)',
-    'James Whitfield (P-100421)', 'Linda Morrison (P-100312)', 'Kevin Park (P-100445)',
-    'Patricia Nguyen (P-100378)', 'Susan Chen (P-100290)', 'David Kim (P-100456)',
-    'Emily Rodriguez (P-100341)'
-  ];
-  var clientOpts = clients.map(function(c){ return '<option>' + c + '</option>'; }).join('');
-
-  var checklist = [
-    'Death Certificate or Medical Certificate',
-    'Claimant ID (government-issued photo ID)',
-    'Policy document (if available)',
-    'Beneficiary designation form',
-    'Medical records (if applicable)',
-    'Attending Physician Statement (APS) — for disability/ADB'
-  ];
-  var checklistHTML = checklist.map(function(c) {
-    return '<label class="upload-doc-check"><input type="checkbox" style="margin-right:8px"> ' + c + '</label>';
-  }).join('');
-
+  window._fcw = { step: 1, client: '', clientKey: '', type: '', policy: null, docs: [], claimId: '', lossDate: '', desc: '', claimant: '', relationship: '' };
+  var el = document.getElementById('file-claim-overlay');
+  if (el) el.remove();
   var overlay = document.createElement('div');
-  overlay.className = 'p7-modal-overlay upload-modal-overlay';
+  overlay.className = 'p7-modal-overlay fcw-overlay';
   overlay.id = 'file-claim-overlay';
   overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
-  overlay.innerHTML =
-    '<div class="upload-modal" style="max-width:620px" onclick="event.stopPropagation()">' +
-      '<div class="upload-modal-header">' +
-        '<div class="upload-modal-header-left">' +
-          '<div class="upload-modal-icon" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)"><i class="fas fa-plus"></i></div>' +
-          '<div>' +
-            '<div class="upload-modal-title">File New Claim</div>' +
-            '<div class="upload-modal-sub">NYL claims wizard · AI pre-fill from policy data · IDP auto-extraction</div>' +
-          '</div>' +
-        '</div>' +
-        '<button class="p7m-close" onclick="document.getElementById(\'file-claim-overlay\').remove()"><i class="fas fa-times"></i></button>' +
-      '</div>' +
-      '<div class="upload-modal-body">' +
-        '<div class="wizard-step-header">' +
-          '<div class="wizard-step active">1<span>Client</span></div>' +
-          '<div class="wizard-step-arrow">›</div>' +
-          '<div class="wizard-step">2<span>Type</span></div>' +
-          '<div class="wizard-step-arrow">›</div>' +
-          '<div class="wizard-step">3<span>Policy</span></div>' +
-          '<div class="wizard-step-arrow">›</div>' +
-          '<div class="wizard-step">4<span>Docs</span></div>' +
-          '<div class="wizard-step-arrow">›</div>' +
-          '<div class="wizard-step">5<span>Submit</span></div>' +
-        '</div>' +
-
-        '<div class="wizard-field-group">' +
-          '<label class="upload-field-label">Select Client</label>' +
-          '<select class="filter-select" id="wizard-client" style="width:100%">' +
-            '<option value="">— Select client —</option>' + clientOpts +
-          '</select>' +
-        '</div>' +
-        '<div class="wizard-field-group">' +
-          '<label class="upload-field-label">Claim Type</label>' +
-          '<select class="filter-select" id="wizard-claim-type" style="width:100%">' +
-            '<option value="">— Select type —</option>' +
-            '<option>Death Benefit</option>' +
-            '<option>Accelerated Death Benefit (ADB)</option>' +
-            '<option>Disability Income</option>' +
-            '<option>Long-term Care (LTC)</option>' +
-            '<option>Waiver of Premium</option>' +
-            '<option>Critical Illness Rider</option>' +
-          '</select>' +
-        '</div>' +
-        '<div class="wizard-field-group">' +
-          '<label class="upload-field-label">Date of Loss / Event</label>' +
-          '<input type="date" class="search-inline" id="wizard-loss-date" style="width:100%;box-sizing:border-box">' +
-        '</div>' +
-        '<div class="wizard-field-group">' +
-          '<label class="upload-field-label">Brief Description</label>' +
-          '<input type="text" class="search-inline" id="wizard-desc" placeholder="e.g. Death of insured on 2026-04-07 — cardiac arrest…" style="width:100%;box-sizing:border-box">' +
-        '</div>' +
-        '<div class="upload-checklist">' +
-          '<div class="upload-checklist-title"><i class="fas fa-clipboard-list"></i> Document Checklist — gather before submitting</div>' +
-          '<div class="upload-doc-checks">' + checklistHTML + '</div>' +
-        '</div>' +
-        '<div class="upload-idp-note">' +
-          '<i class="fas fa-robot" style="color:#7c3aed"></i>' +
-          ' <strong>AI Pre-fill:</strong> Policy data, client details, and beneficiary information will be automatically populated from CRM records · IDP will extract fields from uploaded documents' +
-        '</div>' +
-      '</div>' +
-      '<div class="upload-modal-footer">' +
-        '<button class="p7m-btn ghost" onclick="document.getElementById(\'file-claim-overlay\').remove()">Cancel</button>' +
-        '<button class="p7m-btn primary" onclick="submitNewClaim()"><i class="fas fa-plus"></i> Create Claim &amp; Open Workspace</button>' +
-      '</div>' +
-    '</div>';
+  overlay.innerHTML = '<div class="fcw-modal" onclick="event.stopPropagation()" id="fcw-modal-inner"><div id="fcw-content"></div></div>';
   document.body.appendChild(overlay);
+  fcwRender(1);
 }
 
-function submitNewClaim() {
-  var client = document.getElementById('wizard-client') ? document.getElementById('wizard-client').value : '';
-  var type   = document.getElementById('wizard-claim-type') ? document.getElementById('wizard-claim-type').value : '';
-  var overlay = document.getElementById('file-claim-overlay');
-  if (!client || !type) {
-    p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a client and claim type to continue', 2500);
+function fcwClose() {
+  var el = document.getElementById('file-claim-overlay');
+  if (el) el.remove();
+}
+
+function fcwRender(step) {
+  window._fcw.step = step;
+  var inner = document.getElementById('fcw-modal-inner');
+  if (!inner) return;
+
+  // Build step indicator
+  var stepDefs = [
+    { n:1, label:'Client' }, { n:2, label:'Type' }, { n:3, label:'Policy' },
+    { n:4, label:'Docs' },   { n:5, label:'Submit' }
+  ];
+  var stepsHTML = stepDefs.map(function(s) {
+    var cls = s.n < step ? 'done' : s.n === step ? 'active' : '';
+    var icon = s.n < step ? '<i class="fas fa-check" style="font-size:13px"></i>' : s.n;
+    return (s.n > 1 ? '<div class="fcw-step-line' + (s.n - 1 < step ? ' done' : '') + '"></div>' : '') +
+      '<div class="fcw-step ' + cls + '">' + icon + '<span>' + s.label + '</span></div>';
+  }).join('');
+
+  // Build body content per step
+  var bodyHTML = '', footerHTML = '';
+  if (step === 1) { bodyHTML = fcwStep1Body(); footerHTML = fcwStep1Footer(); }
+  else if (step === 2) { bodyHTML = fcwStep2Body(); footerHTML = fcwStep2Footer(); }
+  else if (step === 3) { bodyHTML = fcwStep3Body(); footerHTML = fcwStep3Footer(); }
+  else if (step === 4) { bodyHTML = fcwStep4Body(); footerHTML = fcwStep4Footer(); }
+  else if (step === 5) { bodyHTML = fcwStep5Body(); footerHTML = fcwStep5Footer(); }
+
+  inner.innerHTML =
+    '<div class="fcw-header">' +
+      '<div class="fcw-header-left">' +
+        '<div class="fcw-header-icon"><i class="fas fa-plus"></i></div>' +
+        '<div>' +
+          '<div class="fcw-header-title">File New Claim</div>' +
+          '<div class="fcw-header-sub">NYL claims wizard · AI pre-fill from policy data · IDP auto-extraction</div>' +
+        '</div>' +
+      '</div>' +
+      '<button class="p7m-close" onclick="fcwClose()"><i class="fas fa-times"></i></button>' +
+    '</div>' +
+    '<div class="fcw-steps">' + stepsHTML + '</div>' +
+    '<div class="fcw-body" id="fcw-body">' + bodyHTML + '</div>' +
+    '<div class="fcw-footer" id="fcw-footer">' + footerHTML + '</div>';
+}
+
+/* ── STEP 1 : CLIENT SELECTION ─────────────────────────────────── */
+function fcwStep1Body() {
+  var clients = Object.keys(_fcwClientData);
+  var clientOpts = clients.map(function(c) {
+    return '<option value="' + c + '"' + (c === window._fcw.clientKey ? ' selected' : '') + '>' + c + ' (' + _fcwClientData[c].id + ')</option>';
+  }).join('');
+
+  var aiPreviewHTML = '';
+  if (window._fcw.clientKey && _fcwClientData[window._fcw.clientKey]) {
+    var cd = _fcwClientData[window._fcw.clientKey];
+    var fraud = _fcwFraudFlags[window._fcw.clientKey];
+    var fraudBanner = fraud
+      ? '<div class="fcw-ai-alert ' + (fraud.level === 'HIGH' ? 'red' : 'orange') + '">' +
+          '<i class="fas fa-' + (fraud.level === 'HIGH' ? 'exclamation-triangle' : 'eye') + '"></i>' +
+          '<div><strong>AI Fraud Flag:</strong> Score ' + fraud.score + ' · ' + fraud.flags.join(' · ') + '</div>' +
+        '</div>'
+      : '<div class="fcw-ai-alert green"><i class="fas fa-check-circle"></i><div><strong>AI Fraud Check:</strong> No risk flags detected for this client — standard processing</div></div>';
+    aiPreviewHTML =
+      '<div class="fcw-ai-panel" id="fcw-ai-panel-1">' +
+        '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Client Intelligence — Auto-fetched from CRM</div>' +
+        '<div class="fcw-ai-panel-body">' +
+          '<div class="fcw-ai-grid">' +
+            '<div class="fcw-ai-row"><span>Client ID</span><strong>' + cd.id + '</strong></div>' +
+            '<div class="fcw-ai-row"><span>Date of Birth</span><strong>' + cd.dob + ' (Age ' + cd.age + ')</strong></div>' +
+            '<div class="fcw-ai-row"><span>Policies In Force</span><strong>' + cd.policies.length + ' active</strong></div>' +
+            '<div class="fcw-ai-row"><span>Primary Beneficiary</span><strong>' + cd.policies[0].bene + '</strong></div>' +
+          '</div>' +
+          fraudBanner +
+          '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> AI recommendation: Select claim type based on the event — we\'ll match it to the correct policy automatically.</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  return '<div class="fcw-step-title"><i class="fas fa-user"></i> Step 1 — Select Client</div>' +
+    '<div class="fcw-field-group">' +
+      '<label class="fcw-label">Client Name</label>' +
+      '<select class="filter-select" id="fcw-client-sel" style="width:100%" onchange="fcwOnClientChange(this.value)">' +
+        '<option value="">— Select client —</option>' + clientOpts +
+      '</select>' +
+    '</div>' +
+    '<div class="fcw-field-group">' +
+      '<label class="fcw-label">Claimant Name <span class="fcw-hint">(person filing the claim — may differ from insured)</span></label>' +
+      '<input type="text" class="fcw-input" id="fcw-claimant" placeholder="e.g. Susan Chen" value="' + (window._fcw.claimant || '') + '">' +
+    '</div>' +
+    '<div class="fcw-field-group">' +
+      '<label class="fcw-label">Relationship to Insured</label>' +
+      '<select class="filter-select" id="fcw-relationship" style="width:100%">' +
+        ['— Select —','Spouse','Child','Parent','Sibling','Trustee / Estate','Other'].map(function(r) {
+          return '<option' + (r === window._fcw.relationship ? ' selected' : '') + '>' + r + '</option>';
+        }).join('') +
+      '</select>' +
+    '</div>' +
+    aiPreviewHTML;
+}
+function fcwStep1Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwClose()">Cancel</button>' +
+    '<button class="p7m-btn primary" onclick="fcwNextStep1()">Next: Claim Type <i class="fas fa-arrow-right"></i></button>';
+}
+function fcwOnClientChange(val) {
+  window._fcw.clientKey = val;
+  window._fcw.client = val;
+  fcwRender(1);
+  // re-apply select value after re-render
+  var sel = document.getElementById('fcw-client-sel');
+  if (sel) sel.value = val;
+}
+function fcwNextStep1() {
+  var sel = document.getElementById('fcw-client-sel');
+  var cl  = document.getElementById('fcw-claimant');
+  var rel = document.getElementById('fcw-relationship');
+  if (!sel || !sel.value) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a client to continue', 2000); return; }
+  if (!cl || !cl.value.trim()) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please enter the claimant name', 2000); return; }
+  if (!rel || rel.value === '— Select —') { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select claimant relationship', 2000); return; }
+  window._fcw.clientKey   = sel.value;
+  window._fcw.client      = sel.value;
+  window._fcw.claimant    = cl.value.trim();
+  window._fcw.relationship= rel.value;
+  fcwRender(2);
+}
+
+/* ── STEP 2 : CLAIM TYPE + DATE + DESCRIPTION ───────────────────── */
+function fcwStep2Body() {
+  var types = ['Death Benefit','Accelerated Death Benefit (ADB)','Disability Income','Long-term Care (LTC)','Waiver of Premium','Critical Illness Rider'];
+  var typeCards = types.map(function(t) {
+    var icons = { 'Death Benefit':'heart-broken','Accelerated Death Benefit (ADB)':'heartbeat','Disability Income':'user-injured','Long-term Care (LTC)':'hospital','Waiver of Premium':'ban','Critical Illness Rider':'disease' };
+    var descs = { 'Death Benefit':'Lump-sum payout to beneficiary upon insured\'s death','Accelerated Death Benefit (ADB)':'Early access to death benefit upon terminal diagnosis (ADB clause)','Disability Income':'Monthly income replacement when insured cannot work','Long-term Care (LTC)':'Reimbursement for care services — home, assisted living or skilled nursing','Waiver of Premium':'Suspends premium payments during qualifying disability period','Critical Illness Rider':'Lump-sum payment upon diagnosis of covered critical illness' };
+    var isSelected = window._fcw.type === t;
+    return '<div class="fcw-type-card' + (isSelected ? ' selected' : '') + '" onclick="fcwSelectType(\'' + t.replace(/'/g,"\\'") + '\')">' +
+      '<i class="fas fa-' + (icons[t]||'file-medical') + ' fcw-type-icon"></i>' +
+      '<div class="fcw-type-name">' + t + '</div>' +
+      '<div class="fcw-type-desc">' + (descs[t]||'') + '</div>' +
+      (isSelected ? '<i class="fas fa-check-circle fcw-type-check"></i>' : '') +
+    '</div>';
+  }).join('');
+
+  var aiTypeHint = '';
+  if (window._fcw.type) {
+    var docCount = (_fcwClaimTypeDocs[window._fcw.type] || []).length;
+    var processTime = { 'Death Benefit':'5–10 business days','Accelerated Death Benefit (ADB)':'3–7 business days (compassionate fast-track available)','Disability Income':'10–15 business days','Long-term Care (LTC)':'7–14 business days','Waiver of Premium':'10–15 business days','Critical Illness Rider':'5–10 business days' };
+    var fraudRisk = (_fcwFraudFlags[window._fcw.clientKey]);
+    aiTypeHint = '<div class="fcw-ai-panel">' +
+      '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Claim Intelligence — ' + window._fcw.type + '</div>' +
+      '<div class="fcw-ai-panel-body">' +
+        '<div class="fcw-ai-grid">' +
+          '<div class="fcw-ai-row"><span>Typical Processing</span><strong>' + (processTime[window._fcw.type]||'5–10 business days') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Required Documents</span><strong>' + docCount + ' documents</strong></div>' +
+          '<div class="fcw-ai-row"><span>IDP Extraction</span><strong>Auto-enabled — AI will pre-fill all fields</strong></div>' +
+          '<div class="fcw-ai-row"><span>SLA Window</span><strong>' + (window._fcw.type === 'Accelerated Death Benefit (ADB)' ? '5 business days (expedited)' : '21 business days (standard)') + '</strong></div>' +
+        '</div>' +
+        (fraudRisk ? '<div class="fcw-ai-alert ' + (fraudRisk.level === 'HIGH' ? 'red' : 'orange') + '"><i class="fas fa-shield-virus"></i><div><strong>AI Fraud Alert (carried from Step 1):</strong> Score ' + fraudRisk.score + ' — adjuster review will be mandatory before payout</div></div>' : '') +
+        '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Proceed to Step 3 — AI will match the best policy for this claim type automatically.</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  return '<div class="fcw-step-title"><i class="fas fa-clipboard-list"></i> Step 2 — Claim Type &amp; Event Details</div>' +
+    '<div class="fcw-field-group">' +
+      '<label class="fcw-label">Select Claim Type</label>' +
+      '<div class="fcw-type-grid">' + typeCards + '</div>' +
+    '</div>' +
+    '<div class="fcw-field-row">' +
+      '<div class="fcw-field-group" style="flex:1">' +
+        '<label class="fcw-label">Date of Loss / Event</label>' +
+        '<input type="date" class="fcw-input" id="fcw-loss-date" value="' + (window._fcw.lossDate || '') + '">' +
+      '</div>' +
+      '<div class="fcw-field-group" style="flex:1">' +
+        '<label class="fcw-label">Estimated Claim Amount</label>' +
+        '<input type="text" class="fcw-input" id="fcw-amount" placeholder="e.g. $250,000 or Full Face Value" value="' + (window._fcw.amount || '') + '">' +
+      '</div>' +
+    '</div>' +
+    '<div class="fcw-field-group">' +
+      '<label class="fcw-label">Brief Description of Event</label>' +
+      '<textarea class="fcw-textarea" id="fcw-desc" placeholder="e.g. Robert Chen passed away on 2026-04-07 due to acute myocardial infarction at St. Luke\'s Hospital…" rows="3">' + (window._fcw.desc || '') + '</textarea>' +
+    '</div>' +
+    aiTypeHint;
+}
+function fcwStep2Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwRender(1)"><i class="fas fa-arrow-left"></i> Back</button>' +
+    '<button class="p7m-btn primary" onclick="fcwNextStep2()">Next: Policy Match <i class="fas fa-arrow-right"></i></button>';
+}
+function fcwSelectType(t) {
+  var ld = document.getElementById('fcw-loss-date');
+  var am = document.getElementById('fcw-amount');
+  var dc = document.getElementById('fcw-desc');
+  if (ld) window._fcw.lossDate = ld.value;
+  if (am) window._fcw.amount = am.value;
+  if (dc) window._fcw.desc = dc.value;
+  window._fcw.type = t;
+  fcwRender(2);
+}
+function fcwNextStep2() {
+  var ld = document.getElementById('fcw-loss-date');
+  var dc = document.getElementById('fcw-desc');
+  var am = document.getElementById('fcw-amount');
+  if (!window._fcw.type) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a claim type', 2000); return; }
+  if (!ld || !ld.value) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please enter the date of loss', 2000); return; }
+  window._fcw.lossDate = ld.value;
+  window._fcw.desc     = dc ? dc.value : '';
+  window._fcw.amount   = am ? am.value : '';
+  fcwRender(3);
+}
+
+/* ── STEP 3 : POLICY LOOKUP & MATCH ─────────────────────────────── */
+function fcwStep3Body() {
+  var cd = _fcwClientData[window._fcw.clientKey];
+  if (!cd) return '<div class="fcw-step-title">Policy Lookup</div><div class="fcw-error">No client selected — please go back to Step 1.</div>';
+
+  // AI match logic: score policies by claim type fit
+  var typeMap = {
+    'Death Benefit': ['Whole Life','Universal Life','Term 20','Term 30'],
+    'Accelerated Death Benefit (ADB)': ['Whole Life','Universal Life'],
+    'Disability Income': ['Disability Income','LTC Combo'],
+    'Long-term Care (LTC)': ['LTC Combo','LTC Rider'],
+    'Waiver of Premium': ['Term 20','Term 30','Universal Life','Whole Life'],
+    'Critical Illness Rider': ['Whole Life','Universal Life']
+  };
+  var matchTypes = typeMap[window._fcw.type] || [];
+
+  var policyCards = cd.policies.map(function(p) {
+    var isMatch = matchTypes.some(function(m){ return p.type.indexOf(m) !== -1; });
+    var isSelected = window._fcw.policy && window._fcw.policy.num === p.num;
+    var statusColor = p.status === 'In Force' ? '#16a34a' : p.status === 'Pending' ? '#d97706' : '#dc2626';
+    var aiScore = isMatch ? (isSelected ? 99 : 94) : 41;
+    var aiLabel = isMatch ? 'AI Match' : 'Low Match';
+    var aiColor = isMatch ? '#16a34a' : '#6b7280';
+    return '<div class="fcw-policy-card' + (isSelected ? ' selected' : '') + (isMatch ? ' ai-match' : '') + '" onclick="fcwSelectPolicy(\'' + p.num + '\')">' +
+      '<div class="fcw-policy-card-top">' +
+        '<div class="fcw-policy-num">' + p.num + '</div>' +
+        '<div class="fcw-policy-ai-score" style="background:' + aiColor + '20;color:' + aiColor + ';border:1px solid ' + aiColor + '40">' +
+          '<i class="fas fa-robot"></i> ' + aiLabel + ' · ' + aiScore + '%' +
+        '</div>' +
+        (isSelected ? '<i class="fas fa-check-circle" style="color:#2563eb;font-size:18px"></i>' : '') +
+      '</div>' +
+      '<div class="fcw-policy-meta">' +
+        '<div class="fcw-policy-row"><span>Type</span><strong>' + p.type + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Face Value</span><strong>' + p.face + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Status</span><strong style="color:' + statusColor + '">' + p.status + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Issued</span><strong>' + p.issued + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Premium</span><strong>' + p.premium + '</strong></div>' +
+        '<div class="fcw-policy-row"><span>Beneficiary</span><strong>' + p.bene + '</strong></div>' +
+      '</div>' +
+      (p.status === 'Pending' ? '<div class="fcw-policy-warning"><i class="fas fa-exclamation-triangle"></i> Policy in Pending status — coverage determination required before payout. Contestability review may apply.</div>' : '') +
+    '</div>';
+  }).join('');
+
+  var aiPolicyPanel = '';
+  if (window._fcw.policy) {
+    var contestable = window._fcw.policy.issued && (new Date() - new Date(window._fcw.policy.issued)) / (1000 * 60 * 60 * 24) < 730;
+    aiPolicyPanel = '<div class="fcw-ai-panel">' +
+      '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Policy Analysis — ' + window._fcw.policy.num + '</div>' +
+      '<div class="fcw-ai-panel-body">' +
+        '<div class="fcw-ai-grid">' +
+          '<div class="fcw-ai-row"><span>Claim Eligibility</span><strong style="color:' + (window._fcw.policy.status === 'In Force' ? '#16a34a' : '#dc2626') + '">' + (window._fcw.policy.status === 'In Force' ? 'Eligible — policy in force' : 'Under Review — policy not in force') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Contestability Window</span><strong style="color:' + (contestable ? '#d97706' : '#16a34a') + '">' + (contestable ? 'ACTIVE — policy < 2 years old' : 'Clear — policy > 2 years in force') + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>Named Beneficiary</span><strong>' + window._fcw.policy.bene + '</strong></div>' +
+          '<div class="fcw-ai-row"><span>IDP Pre-fill</span><strong>Policy data auto-loaded into claim form</strong></div>' +
+        '</div>' +
+        '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> AI has pre-filled policy number, face value, and beneficiary data — proceed to document checklist.</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  return '<div class="fcw-step-title"><i class="fas fa-file-contract"></i> Step 3 — Policy Lookup &amp; Match</div>' +
+    '<div class="fcw-policy-ai-note"><i class="fas fa-robot"></i> AI matched ' + cd.policies.length + ' polic' + (cd.policies.length === 1 ? 'y' : 'ies') + ' for <strong>' + window._fcw.clientKey + '</strong> · Ranked by compatibility with <em>' + window._fcw.type + '</em> · Click a card to select</div>' +
+    '<div class="fcw-policy-list">' + policyCards + '</div>' +
+    aiPolicyPanel;
+}
+function fcwStep3Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwRender(2)"><i class="fas fa-arrow-left"></i> Back</button>' +
+    '<button class="p7m-btn primary" onclick="fcwNextStep3()">Next: Documents <i class="fas fa-arrow-right"></i></button>';
+}
+function fcwSelectPolicy(pNum) {
+  var cd = _fcwClientData[window._fcw.clientKey];
+  if (!cd) return;
+  cd.policies.forEach(function(p) { if (p.num === pNum) window._fcw.policy = p; });
+  fcwRender(3);
+}
+function fcwNextStep3() {
+  if (!window._fcw.policy) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a policy to continue', 2000); return; }
+  fcwRender(4);
+}
+
+/* ── STEP 4 : DOCUMENT CHECKLIST + UPLOAD ───────────────────────── */
+function fcwStep4Body() {
+  var docs = _fcwClaimTypeDocs[window._fcw.type] || ['Required Document 1','Required Document 2'];
+  if (!window._fcw.docs) window._fcw.docs = [];
+
+  var docItems = docs.map(function(d, i) {
+    var isChecked = window._fcw.docs.indexOf(d) !== -1;
+    var required = i < 3;
+    return '<div class="fcw-doc-item' + (isChecked ? ' checked' : '') + '" onclick="fcwToggleDoc(\'' + d.replace(/'/g,"\\'") + '\')">' +
+      '<div class="fcw-doc-checkbox">' + (isChecked ? '<i class="fas fa-check-circle" style="color:#16a34a"></i>' : '<i class="far fa-circle" style="color:#d1d5db"></i>') + '</div>' +
+      '<div class="fcw-doc-info">' +
+        '<div class="fcw-doc-name">' + d + (required ? ' <span class="fcw-doc-req">Required</span>' : ' <span class="fcw-doc-opt">Recommended</span>') + '</div>' +
+      '</div>' +
+      '<div class="fcw-doc-action">' +
+        (isChecked ? '<span class="fcw-doc-ready"><i class="fas fa-check"></i> Ready</span>' : '<span class="fcw-doc-pending">Pending</span>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var checkedCount = window._fcw.docs.length;
+  var requiredDone = docs.slice(0,3).every(function(d){ return window._fcw.docs.indexOf(d) !== -1; });
+
+  var aiDocPanel = '<div class="fcw-ai-panel">' +
+    '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Document Intelligence</div>' +
+    '<div class="fcw-ai-panel-body">' +
+      '<div class="fcw-ai-grid">' +
+        '<div class="fcw-ai-row"><span>Docs Confirmed</span><strong>' + checkedCount + ' / ' + docs.length + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Required Docs</span><strong style="color:' + (requiredDone ? '#16a34a' : '#dc2626') + '">' + (requiredDone ? '✓ All required confirmed' : '⚠ 3 required docs needed') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>IDP Auto-Extract</span><strong>Enabled — upload PDFs for instant field extraction</strong></div>' +
+        '<div class="fcw-ai-row"><span>Avg Processing</span><strong>NLP confidence 94% · 2–5 min extraction</strong></div>' +
+      '</div>' +
+      '<div class="fcw-ai-tip"><i class="fas fa-lightbulb"></i> Tick all documents you have in hand. Missing documents can be uploaded later from the claim workspace. IDP will auto-extract fields from any uploaded PDF.</div>' +
+    '</div>' +
+  '</div>';
+
+  var dropZone = '<div class="fcw-drop-zone" id="fcw-drop-zone"' +
+    ' ondragover="event.preventDefault();this.classList.add(\'fcw-drag-active\')"' +
+    ' ondragleave="this.classList.remove(\'fcw-drag-active\')"' +
+    ' ondrop="fcwHandleDrop(event)">' +
+    '<i class="fas fa-cloud-upload-alt fcw-drop-icon"></i>' +
+    '<div class="fcw-drop-title">Drag &amp; drop documents here to begin IDP extraction now</div>' +
+    '<div class="fcw-drop-sub">PDF, JPG, PNG, DOCX · Max 50MB · Or attach after claim is created</div>' +
+    '<div id="fcw-dropped-files" style="margin-top:8px"></div>' +
+  '</div>';
+
+  return '<div class="fcw-step-title"><i class="fas fa-folder-open"></i> Step 4 — Document Checklist</div>' +
+    '<div class="fcw-doc-progress">' +
+      '<div class="fcw-doc-prog-bar"><div class="fcw-doc-prog-fill" style="width:' + Math.round(checkedCount/docs.length*100) + '%"></div></div>' +
+      '<span class="fcw-doc-prog-lbl">' + checkedCount + ' of ' + docs.length + ' documents confirmed</span>' +
+    '</div>' +
+    '<div class="fcw-doc-list">' + docItems + '</div>' +
+    dropZone +
+    aiDocPanel;
+}
+function fcwStep4Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwRender(3)"><i class="fas fa-arrow-left"></i> Back</button>' +
+    '<button class="p7m-btn primary" onclick="fcwNextStep4()">Next: Review &amp; Submit <i class="fas fa-arrow-right"></i></button>';
+}
+function fcwToggleDoc(d) {
+  if (!window._fcw.docs) window._fcw.docs = [];
+  var idx = window._fcw.docs.indexOf(d);
+  if (idx === -1) window._fcw.docs.push(d); else window._fcw.docs.splice(idx, 1);
+  fcwRender(4);
+}
+function fcwHandleDrop(event) {
+  event.preventDefault();
+  var zone = document.getElementById('fcw-drop-zone');
+  if (zone) zone.classList.remove('fcw-drag-active');
+  var dropped = document.getElementById('fcw-dropped-files');
+  if (dropped) {
+    dropped.innerHTML = '<div style="color:#16a34a;font-size:12px;font-weight:600"><i class="fas fa-check-circle"></i> Document attached — IDP extraction will begin when claim is created</div>';
+  }
+  window._fcw.hasUpload = true;
+}
+function fcwNextStep4() {
+  var docs = _fcwClaimTypeDocs[window._fcw.type] || [];
+  var required = docs.slice(0,3);
+  var missing = required.filter(function(d){ return (window._fcw.docs||[]).indexOf(d) === -1; });
+  if (missing.length === 3) {
+    p7Toast('<i class="fas fa-exclamation-triangle"></i> Please confirm at least one required document to proceed', 2500);
     return;
   }
-  if (overlay) overlay.remove();
-  var newId = 'CLM-2026-' + (Math.floor(Math.random() * 90) + 10);
-  p7Toast('<i class="fas fa-plus-circle"></i> New claim ' + newId + ' created for ' + client + ' · ' + type + ' · AI pre-filling policy data…', 4500);
+  fcwRender(5);
+}
+
+/* ── STEP 5 : REVIEW & SUBMIT ────────────────────────────────────── */
+function fcwStep5Body() {
+  var w = window._fcw;
+  var cd = _fcwClientData[w.clientKey] || {};
+  var fraud = _fcwFraudFlags[w.clientKey];
+  var contestable = w.policy && w.policy.issued && (new Date() - new Date(w.policy.issued)) / (1000 * 60 * 60 * 24) < 730;
+  var newId = 'CLM-2026-' + (Math.floor(Math.random() * 900) + 100);
+  window._fcw.claimId = newId;
+
+  var docsHTML = (w.docs && w.docs.length)
+    ? w.docs.map(function(d){ return '<div class="fcw-review-doc"><i class="fas fa-check-circle" style="color:#16a34a"></i> ' + d + '</div>'; }).join('')
+    : '<div class="fcw-review-doc" style="color:#6b7280"><i class="fas fa-clock"></i> No documents confirmed yet — can be added from claim workspace</div>';
+
+  var aiRiskPanel = '<div class="fcw-ai-panel' + (fraud ? (fraud.level === 'HIGH' ? ' fcw-ai-panel-red' : ' fcw-ai-panel-orange') : ' fcw-ai-panel-green') + '">' +
+    '<div class="fcw-ai-panel-header"><i class="fas fa-robot"></i> AI Pre-Submission Analysis</div>' +
+    '<div class="fcw-ai-panel-body">' +
+      '<div class="fcw-ai-grid">' +
+        '<div class="fcw-ai-row"><span>Fraud Risk Score</span><strong style="color:' + (fraud ? (fraud.level === 'HIGH' ? '#dc2626' : '#d97706') : '#16a34a') + '">' + (fraud ? fraud.score + ' — ' + fraud.level : '< 20 — LOW RISK') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Contestability</span><strong style="color:' + (contestable ? '#d97706' : '#16a34a') + '">' + (contestable ? 'Active — adjuster review required' : 'Clear — policy > 2 years in force') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Auto-Assigned SLA</span><strong>' + (w.type === 'Accelerated Death Benefit (ADB)' ? '5 business days (expedited)' : '21 business days') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Priority Level</span><strong style="color:' + (fraud && fraud.level === 'HIGH' ? '#dc2626' : contestable ? '#d97706' : '#16a34a') + '">' + (fraud && fraud.level === 'HIGH' ? 'URGENT — fraud hold recommended' : contestable ? 'HIGH — contestability active' : 'STANDARD') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>Recommended Adjuster</span><strong>' + (fraud ? 'Sr. Adjuster M. Torres (Fraud Specialist)' : 'Standard adjuster pool') + '</strong></div>' +
+        '<div class="fcw-ai-row"><span>IDP Extraction</span><strong>' + (w.hasUpload ? 'Document attached — extraction queued' : 'No doc uploaded — available from workspace') + '</strong></div>' +
+      '</div>' +
+      (fraud ? '<div class="fcw-ai-alert ' + (fraud.level === 'HIGH' ? 'red' : 'orange') + '"><i class="fas fa-shield-virus"></i><div><strong>AI Fraud Flag:</strong> ' + fraud.flags.join(' · ') + ' — Payment hold will be applied automatically</div></div>' : '<div class="fcw-ai-alert green"><i class="fas fa-check-circle"></i><div><strong>AI Clearance:</strong> No fraud indicators detected — standard processing approved</div></div>') +
+    '</div>' +
+  '</div>';
+
+  return '<div class="fcw-step-title"><i class="fas fa-check-double"></i> Step 5 — Review &amp; Submit</div>' +
+    '<div class="fcw-review-block">' +
+      '<div class="fcw-review-id-banner"><i class="fas fa-hashtag"></i> Claim ID to be assigned: <strong>' + newId + '</strong></div>' +
+      '<div class="fcw-review-grid">' +
+        '<div class="fcw-review-section">' +
+          '<div class="fcw-review-section-title">Client &amp; Claimant</div>' +
+          '<div class="fcw-review-row"><span>Insured</span><strong>' + (w.client || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Client ID</span><strong>' + (cd.id || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Claimant</span><strong>' + (w.claimant || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Relationship</span><strong>' + (w.relationship || '—') + '</strong></div>' +
+        '</div>' +
+        '<div class="fcw-review-section">' +
+          '<div class="fcw-review-section-title">Claim Details</div>' +
+          '<div class="fcw-review-row"><span>Type</span><strong>' + (w.type || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Date of Loss</span><strong>' + (w.lossDate || '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Est. Amount</span><strong>' + (w.amount || 'Full policy face value') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Description</span><strong>' + (w.desc ? w.desc.substring(0,60) + (w.desc.length > 60 ? '…' : '') : '—') + '</strong></div>' +
+        '</div>' +
+        '<div class="fcw-review-section">' +
+          '<div class="fcw-review-section-title">Policy</div>' +
+          '<div class="fcw-review-row"><span>Policy No.</span><strong>' + (w.policy ? w.policy.num : '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Policy Type</span><strong>' + (w.policy ? w.policy.type : '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Face Value</span><strong>' + (w.policy ? w.policy.face : '—') + '</strong></div>' +
+          '<div class="fcw-review-row"><span>Beneficiary</span><strong>' + (w.policy ? w.policy.bene : '—') + '</strong></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fcw-review-docs-section">' +
+        '<div class="fcw-review-section-title">Confirmed Documents (' + (w.docs ? w.docs.length : 0) + ')</div>' +
+        docsHTML +
+      '</div>' +
+    '</div>' +
+    aiRiskPanel;
+}
+function fcwStep5Footer() {
+  return '<button class="p7m-btn ghost" onclick="fcwRender(4)"><i class="fas fa-arrow-left"></i> Back</button>' +
+    '<button class="p7m-btn ghost" onclick="fcwClose()">Cancel</button>' +
+    '<button class="p7m-btn primary fcw-submit-btn" onclick="fcwSubmitClaim()"><i class="fas fa-plus-circle"></i> Create Claim &amp; Open Workspace</button>';
+}
+function fcwSubmitClaim() {
+  var w = window._fcw;
+  var fraud = _fcwFraudFlags[w.clientKey];
+  var submitBtn = document.querySelector('.fcw-submit-btn');
+  if (submitBtn) { submitBtn.innerHTML = '<i class="fas fa-cog fa-spin"></i> Creating claim…'; submitBtn.disabled = true; }
+
   setTimeout(function() {
-    p7Toast('<i class="fas fa-check-circle"></i> Claim workspace ready — upload required documents to begin IDP extraction', 3500);
-  }, 3000);
+    fcwClose();
+    p7Toast('<i class="fas fa-plus-circle"></i> Claim ' + w.claimId + ' created for ' + w.client + ' · ' + w.type + ' · AI assigning adjuster…', 4500);
+    setTimeout(function() {
+      if (fraud && fraud.level === 'HIGH') {
+        p7Toast('<i class="fas fa-ban"></i> AI Fraud Flag: Payment hold applied to ' + w.claimId + ' · Sr. Adjuster M. Torres assigned · SIU notified', 4500);
+      } else {
+        p7Toast('<i class="fas fa-check-circle"></i> Claim workspace ready — upload documents from the Active Claims tab to begin IDP extraction', 4000);
+      }
+    }, 2500);
+    if (w.hasUpload) {
+      setTimeout(function() {
+        p7Toast('<i class="fas fa-file-import"></i> IDP extraction started on uploaded document · Fields will be auto-populated in 2–3 minutes', 3500);
+      }, 5000);
+    }
+  }, 1800);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
