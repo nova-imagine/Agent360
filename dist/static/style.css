@@ -13940,6 +13940,66 @@ body.spotlight-open { overflow: hidden; }
 }
 .ptb-add-btn:hover { opacity: 0.88; }
 
+/* ── Persistent stale-deals badge in toolbar ── */
+.ptb-stale-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+  border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  white-space: nowrap; margin-left: 4px;
+}
+.ptb-stale-badge:hover { background: #fde68a; transform: scale(1.03); }
+.ptb-stale-badge i { font-size: 9px; color: #b45309; }
+
+/* ── Lifecycle kanban card styles ── */
+.pvk-lc-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 8px 10px; margin-bottom: 6px; transition: box-shadow 0.15s;
+}
+.pvk-lc-card:hover { box-shadow: 0 2px 8px rgba(0,48,135,0.1); }
+.pvk-lc-card--client { border-left: 3px solid #059669; }
+.pvk-lc-card--upsell { border-left: 3px solid #7c3aed; }
+.pvk-lc-name { font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.pvk-lc-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.pvk-lc-tag {
+  font-size: 10px; font-weight: 600; background: #f1f5f9; color: #475569;
+  border-radius: 4px; padding: 1px 6px;
+}
+.pvk-lc-temp { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 1px 6px; text-transform: capitalize; }
+.pvk-temp-hot  { background: #fef2f2; color: #dc2626; }
+.pvk-temp-warm { background: #fff7ed; color: #ea580c; }
+.pvk-temp-cold { background: #eff6ff; color: #2563eb; }
+.pvk-lc-stage { font-size: 10px; color: #64748b; }
+.pvk-lc-value { font-size: 11px; font-weight: 700; color: #003087; margin-top: 3px; }
+.pvk-lc-value-badge {
+  font-size: 10px; font-weight: 700; color: #059669;
+  background: #ecfdf5; border-radius: 4px; padding: 1px 6px;
+}
+.pvk-lc-ai-score {
+  font-size: 10px; font-weight: 700; color: #fff;
+  border-radius: 4px; padding: 1px 7px;
+}
+.pvk-lc-empty {
+  font-size: 12px; color: #94a3b8; text-align: center; padding: 20px 8px;
+}
+.pvk-placeholder {
+  font-size: 12px; color: #94a3b8; text-align: center; padding: 20px 8px;
+  font-style: italic;
+}
+
+/* ── Upsell AI score chip on client cards ── */
+.upsell-ai-score {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff; white-space: nowrap; margin-left: auto; flex-shrink: 0;
+}
+.upsell-ai-score span { font-size: 11px; font-weight: 800; }
+/* Score-based color variants */
+.upsell-ai-score--high  { background: linear-gradient(135deg, #059669, #0d9488); }
+.upsell-ai-score--med   { background: linear-gradient(135deg, #d97706, #ea580c); }
+.upsell-ai-score--low   { background: linear-gradient(135deg, #6b7280, #475569); }
+
 /* ── 3. Kanban enrichments ── */
 .kc-stage-badge {
   display: inline-flex; align-items: center; gap: 4px;
@@ -41298,3 +41358,59 @@ kbd {
   transform: translateY(-1px);
 }
 
+
+/* ── AI Insights — Launch NOVA AI button (header) ── */
+.ais-launch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+  color: #fff !important;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.12s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(124,58,237,0.30);
+  white-space: nowrap;
+}
+.ais-launch-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(124,58,237,0.40);
+  text-decoration: none;
+}
+
+/* ── AI Insights — Live banner right group ── */
+.ais-live-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── AI Insights — "Open NOVA AI" link inside live banner ── */
+.ais-live-nova-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.15);
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.ais-live-nova-link:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.6);
+  text-decoration: none;
+}

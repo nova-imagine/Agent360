@@ -600,10 +600,10 @@ function MainApp() {
                 <span class="sp-row-label">View All Claims</span>
                 <span class="sp-row-meta">Claims page</span>
               </div>
-              <div class="sp-row sp-action-row" onclick="navigateTo('sales'); closeSpotlight()">
-                <span class="sp-row-icon sp-icon-deals"><i class="fas fa-handshake"></i></span>
-                <span class="sp-row-label">Journey Pipeline</span>
-                <span class="sp-row-meta">Journey Pipeline page</span>
+              <div class="sp-row sp-action-row" onclick="navigateTo('sales'); document.getElementById('ptb-btn-lifecycle')?.click(); closeSpotlight()">
+                <span class="sp-row-icon sp-icon-deals"><i class="fas fa-route"></i></span>
+                <span class="sp-row-label">Lifecycle View</span>
+                <span class="sp-row-meta">Sales Pipeline → Lifecycle tab</span>
               </div>
               <div class="sp-row sp-action-row" onclick="navigateTo('calendar'); closeSpotlight()">
                 <span class="sp-row-icon sp-icon-cal"><i class="fas fa-calendar-alt"></i></span>
@@ -701,12 +701,10 @@ function Sidebar() {
           <span class="nav-badge" style="background:#003087;color:#fff">2</span>
         </a>
         <a class="nav-item upsell-nav" onclick="navigateTo('upsell')" href="#">
-          <i class="fas fa-arrow-trend-up"></i><span>Upsell Track</span>
+          <i class="fas fa-arrow-trend-up"></i><span>Growth Opportunities</span>
           <span class="nav-badge" style="background:#059669;color:#fff">8</span>
         </a>
-        <a class="nav-item pipeline-view-nav" id="pipeline-view-nav" onclick="navigateTo('pipeline-view')" href="#">
-          <i class="fas fa-route"></i><span>Journey Pipeline</span>
-        </a>
+        {/* Journey Pipeline nav removed — content merged into Sales Pipeline → Lifecycle tab */}
 
         {/* ── INSURANCE ── */}
         <div class="nav-section-label">INSURANCE</div>
@@ -3453,10 +3451,20 @@ function PolicyAlertsPage() {
 
 
 function PipelineViewPage() {
+  // Journey Pipeline content merged into Sales Pipeline → Lifecycle tab.
+  // Keeping this function (and tpl-pipeline-view template ref) as a stub.
+  return (
+    <div class="page pipeline-view-page">
+      {/* stub — content lives in Sales Pipeline Lifecycle tab */}
+    </div>
+  )
+}
+
+function _PipelineViewPage_ARCHIVED() {
   return (
     <div class="page pipeline-view-page">
 
-      {/* ── Header ── */}
+      {/* ── Header (archived) ── */}
       <div class="pv-header">
         <div class="pv-header-left">
           <h2 class="pv-title"><i class="fas fa-route"></i> Client Journey Pipeline</h2>
@@ -3734,8 +3742,8 @@ function UpsellTrackPage() {
       {/* ── Header ── */}
       <div class="upsell-header">
         <div class="upsell-header-left">
-          <h2 class="upsell-title"><i class="fas fa-arrow-trend-up"></i> Upsell Track</h2>
-          <p class="upsell-sub">AI-flagged clients ready for retirement · investment · wealth management upsell · Based on policy tenure &amp; life stage signals</p>
+          <h2 class="upsell-title"><i class="fas fa-arrow-trend-up"></i> Growth Opportunities</h2>
+          <p class="upsell-sub">AI-scored growth opportunities across your book · Ranked by conversion probability · retirement · investments · wealth management</p>
         </div>
         <div class="upsell-header-actions">
           <button class="btn btn-ai" onclick="runUpsellAIScan()"><i class="fas fa-robot"></i> AI Scan All</button>
@@ -3746,11 +3754,11 @@ function UpsellTrackPage() {
       {/* ── KPI Strip ── */}
       <div class="upsell-kpi-strip">
         <div class="upsell-kpi"><div class="upsell-kpi-val" id="ukpi-total">8</div><div class="upsell-kpi-lbl">Flagged Clients</div></div>
-        <div class="upsell-kpi upsell-kpi-ret"><div class="upsell-kpi-val">5</div><div class="upsell-kpi-lbl"><i class="fas fa-umbrella"></i> Retirement</div></div>
-        <div class="upsell-kpi upsell-kpi-inv"><div class="upsell-kpi-val">4</div><div class="upsell-kpi-lbl"><i class="fas fa-chart-pie"></i> Investments</div></div>
-        <div class="upsell-kpi upsell-kpi-wlth"><div class="upsell-kpi-val">3</div><div class="upsell-kpi-lbl"><i class="fas fa-gem"></i> Wealth Mgmt</div></div>
-        <div class="upsell-kpi upsell-kpi-val2"><div class="upsell-kpi-val">$2.84M</div><div class="upsell-kpi-lbl">Est. Upsell Value</div></div>
-        <div class="upsell-kpi upsell-kpi-comm"><div class="upsell-kpi-val">$141K</div><div class="upsell-kpi-lbl">Est. Commission</div></div>
+        <div class="upsell-kpi upsell-kpi-ret"><div class="upsell-kpi-val"><i class="fas fa-umbrella"></i></div><div class="upsell-kpi-lbl">Retirement</div></div>
+        <div class="upsell-kpi upsell-kpi-inv"><div class="upsell-kpi-val"><i class="fas fa-chart-pie"></i></div><div class="upsell-kpi-lbl">Investments</div></div>
+        <div class="upsell-kpi upsell-kpi-wlth"><div class="upsell-kpi-val"><i class="fas fa-gem"></i></div><div class="upsell-kpi-lbl">Wealth Mgmt</div></div>
+        <div class="upsell-kpi upsell-kpi-val2"><div class="upsell-kpi-val">$2.84M</div><div class="upsell-kpi-lbl">Total Growth Potential</div></div>
+        <div class="upsell-kpi upsell-kpi-comm"><div class="upsell-kpi-val">$141K</div><div class="upsell-kpi-lbl">Est. Agent Commission</div></div>
       </div>
 
       {/* ── AI Insight Banner ── */}
@@ -3798,6 +3806,7 @@ function UpsellTrackPage() {
               <div class="upsell-client-meta">Age 56 · Premium · Long Island</div>
             </div>
             <div class="upsell-priority-badge high"><i class="fas fa-fire"></i> High</div>
+            <div class="upsell-ai-score upsell-ai-score--high">AI <span>94</span></div>
           </div>
           <div class="upsell-tenure-bar">
             <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
@@ -3831,6 +3840,7 @@ function UpsellTrackPage() {
               <div class="upsell-client-meta">Age 45 · High Value · Manhattan</div>
             </div>
             <div class="upsell-priority-badge high"><i class="fas fa-fire"></i> High</div>
+            <div class="upsell-ai-score upsell-ai-score--high">AI <span>91</span></div>
           </div>
           <div class="upsell-tenure-bar">
             <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
@@ -3862,6 +3872,7 @@ function UpsellTrackPage() {
               <div class="upsell-client-meta">Age 52 · High Value · New York</div>
             </div>
             <div class="upsell-priority-badge high"><i class="fas fa-fire"></i> High</div>
+            <div class="upsell-ai-score upsell-ai-score--high">AI <span>88</span></div>
           </div>
           <div class="upsell-tenure-bar">
             <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
@@ -3894,6 +3905,7 @@ function UpsellTrackPage() {
               <div class="upsell-client-meta">Age 48 · High Value · New York</div>
             </div>
             <div class="upsell-priority-badge medium"><i class="fas fa-bolt"></i> Medium</div>
+            <div class="upsell-ai-score upsell-ai-score--med">AI <span>79</span></div>
           </div>
           <div class="upsell-tenure-bar">
             <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
@@ -3926,6 +3938,7 @@ function UpsellTrackPage() {
               <div class="upsell-client-meta">Age 38 · Mid Market · Brooklyn</div>
             </div>
             <div class="upsell-priority-badge medium"><i class="fas fa-bolt"></i> Medium</div>
+            <div class="upsell-ai-score upsell-ai-score--med">AI <span>72</span></div>
           </div>
           <div class="upsell-tenure-bar">
             <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
@@ -3956,6 +3969,7 @@ function UpsellTrackPage() {
               <div class="upsell-client-meta">Age 61 · Mid Market · Queens</div>
             </div>
             <div class="upsell-priority-badge medium"><i class="fas fa-bolt"></i> Medium</div>
+            <div class="upsell-ai-score upsell-ai-score--med">AI <span>68</span></div>
           </div>
           <div class="upsell-tenure-bar">
             <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
@@ -3987,6 +4001,7 @@ function UpsellTrackPage() {
               <div class="upsell-client-meta">Age 33 · Emerging · Bronx</div>
             </div>
             <div class="upsell-priority-badge low"><i class="fas fa-seedling"></i> Watch</div>
+            <div class="upsell-ai-score upsell-ai-score--low">AI <span>54</span></div>
           </div>
           <div class="upsell-tenure-bar">
             <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
@@ -4016,6 +4031,7 @@ function UpsellTrackPage() {
               <div class="upsell-client-meta">Age 29 · Emerging · Jersey City</div>
             </div>
             <div class="upsell-priority-badge low"><i class="fas fa-seedling"></i> Watch</div>
+            <div class="upsell-ai-score upsell-ai-score--low">AI <span>41</span></div>
           </div>
           <div class="upsell-tenure-bar">
             <span class="upsell-tenure-lbl"><i class="fas fa-clock"></i> Policy Tenure</span>
@@ -8498,7 +8514,7 @@ function SalesPage() {
   return (
     <div class="page sales-page">
 
-      {/* ── KPI Bar (10 cards, enriched with trends) ── */}
+      {/* ── KPI Bar (6 core cards) ── */}
       <div class="sales-kpi-bar">
         <div class="skpi-card skpi-blue" onclick="filterPipelineByStatus('all')">
           <div class="skpi-card-icon"><i class="fas fa-funnel-dollar"></i></div>
@@ -8546,38 +8562,6 @@ function SalesPage() {
             <div class="skpi-card-val">78%</div>
             <div class="skpi-card-lbl">YTD Quota ($187K / $240K)</div>
             <div class="skpi-card-trend up"><i class="fas fa-check"></i> On Track</div>
-          </div>
-        </div>
-        <div class="skpi-card skpi-orange" onclick="showStageCycleDetails()">
-          <div class="skpi-card-icon"><i class="fas fa-hourglass-half"></i></div>
-          <div class="skpi-card-body">
-            <div class="skpi-card-val">8.3d</div>
-            <div class="skpi-card-lbl">Avg Days in Stage</div>
-            <div class="skpi-card-trend warn"><i class="fas fa-exclamation-triangle"></i> 2 deals stale</div>
-          </div>
-        </div>
-        <div class="skpi-card skpi-red" onclick="filterPipelineByRisk('at-risk')">
-          <div class="skpi-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
-          <div class="skpi-card-body">
-            <div class="skpi-card-val">2</div>
-            <div class="skpi-card-lbl">At-Risk Deals</div>
-            <div class="skpi-card-trend warn"><i class="fas fa-arrow-down"></i> Score &lt; 50</div>
-          </div>
-        </div>
-        <div class="skpi-card skpi-emerald" onclick="showUpsellPanel()">
-          <div class="skpi-card-icon"><i class="fas fa-lightbulb"></i></div>
-          <div class="skpi-card-body">
-            <div class="skpi-card-val">$31.2K</div>
-            <div class="skpi-card-lbl">Upsell Potential</div>
-            <div class="skpi-card-trend up"><i class="fas fa-robot"></i> AI-identified</div>
-          </div>
-        </div>
-        <div class="skpi-card skpi-slate" onclick="filterPipelineByStatus('lost')">
-          <div class="skpi-card-icon"><i class="fas fa-times-circle"></i></div>
-          <div class="skpi-card-body">
-            <div class="skpi-card-val">3</div>
-            <div class="skpi-card-lbl">Closed Lost MTD</div>
-            <div class="skpi-card-trend neutral"><i class="fas fa-minus"></i> Steady</div>
           </div>
         </div>
       </div>
@@ -8657,7 +8641,10 @@ function SalesPage() {
             <button class="ptb-view-btn active" id="ptb-btn-kanban" onclick="setPipelineView('kanban',this)" title="Kanban Board"><i class="fas fa-th-large"></i> Kanban</button>
             <button class="ptb-view-btn" id="ptb-btn-list" onclick="setPipelineView('list',this)" title="List / Table"><i class="fas fa-list"></i> List</button>
             <button class="ptb-view-btn" id="ptb-btn-focus" onclick="setPipelineView('focus',this)" title="Focus: Top 3 Deals"><i class="fas fa-crosshairs"></i> Focus</button>
+            <button class="ptb-view-btn" id="ptb-btn-analytics" onclick="setPipelineView('analytics',this)" title="Analytics &amp; AI Win Engine"><i class="fas fa-chart-bar"></i> Analytics</button>
+            <button class="ptb-view-btn" id="ptb-btn-lifecycle" onclick="setPipelineView('lifecycle',this)" title="Client Lifecycle View"><i class="fas fa-route"></i> Lifecycle</button>
           </div>
+          <div class="ptb-stale-badge" id="ptb-stale-badge" onclick="setPipelineView('kanban',document.getElementById('ptb-btn-kanban'))" title="2 stale deals — click to view in Kanban" style="display:none"><i class="fas fa-exclamation-triangle"></i> 2 stale</div>
           <button class="ptb-add-btn" onclick="openAddDealModal()"><i class="fas fa-plus"></i> New Deal</button>
         </div>
       </div>
@@ -9085,6 +9072,9 @@ function SalesPage() {
           </div>{/* end kanban-board */}
         </div>{/* end sales-kanban-wrap */}
       </div>{/* end sales-main-col */}
+
+      {/* ══ Analytics Tab Panel ══ */}
+      <div id="pipeline-analytics-view" style="display:none">
 
       {/* ── Below-Kanban Intelligence Grid ── */}
       <div class="sales-intel-grid">
@@ -9622,6 +9612,150 @@ function SalesPage() {
           </div>
         </div>
       </div>
+
+      </div>{/* ══ end Analytics Tab Panel ══ */}
+
+      {/* ══ Lifecycle Tab Panel ══ */}
+      <div id="pipeline-lifecycle-view" style="display:none">
+
+        {/* Funnel KPI Bar */}
+        <div class="pv-funnel-kpis">
+          <div class="pvf-stage" onclick="filterPipelineView('leads')">
+            <div class="pvf-num">14</div>
+            <div class="pvf-lbl"><i class="fas fa-user-clock"></i> Leads</div>
+            <div class="pvf-sub">$1.24M pipeline</div>
+            <div class="pvf-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="pvf-stage" onclick="filterPipelineView('opps')">
+            <div class="pvf-num">5</div>
+            <div class="pvf-lbl"><i class="fas fa-bolt"></i> Opportunities</div>
+            <div class="pvf-sub">$21.5K est. value</div>
+            <div class="pvf-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="pvf-stage" onclick="filterPipelineView('clients')">
+            <div class="pvf-num">8</div>
+            <div class="pvf-lbl"><i class="fas fa-users"></i> Active Clients</div>
+            <div class="pvf-sub">$63.4K/yr premium</div>
+            <div class="pvf-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="pvf-stage">
+            <div class="pvf-num">8</div>
+            <div class="pvf-lbl"><i class="fas fa-arrow-trend-up"></i> Growth Ready</div>
+            <div class="pvf-sub">$2.84M opportunity</div>
+          </div>
+        </div>
+
+        {/* Conversion Rate Bar */}
+        <div class="pv-conv-bar">
+          <div class="pv-conv-item">
+            <span class="pv-conv-label">Lead → Opp</span>
+            <div class="pv-conv-track"><div class="pv-conv-fill" style="width:36%"></div></div>
+            <span class="pv-conv-pct">36%</span>
+          </div>
+          <div class="pv-conv-item">
+            <span class="pv-conv-label">Opp → Client</span>
+            <div class="pv-conv-track"><div class="pv-conv-fill" style="width:62%"></div></div>
+            <span class="pv-conv-pct">62%</span>
+          </div>
+          <div class="pv-conv-item">
+            <span class="pv-conv-label">Client → Growth</span>
+            <div class="pv-conv-track"><div class="pv-conv-fill" style="width:100%"></div></div>
+            <span class="pv-conv-pct">100%</span>
+          </div>
+          <div class="pv-conv-item">
+            <span class="pv-conv-label">Avg Days / Stage</span>
+            <div class="pv-conv-track"><div class="pv-conv-fill amber" style="width:55%"></div></div>
+            <span class="pv-conv-pct">18d</span>
+          </div>
+        </div>
+
+        {/* Lifecycle Kanban */}
+        <div class="pv-stale-alert">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>2 stale deals</strong> — D003 (15d idle, score 44%), D007 (12d idle)
+          <button class="pv-stale-btn" onclick="setPipelineView('kanban',document.getElementById('ptb-btn-kanban'))">View in Kanban</button>
+        </div>
+        <div class="pv-kanban" id="pv-kanban-lc">
+          <div class="pvk-col pvk-leads">
+            <div class="pvk-col-header">
+              <div class="pvk-col-title"><i class="fas fa-user-clock"></i> Leads</div>
+              <span class="pvk-col-badge lead">14</span>
+            </div>
+            <div class="pvk-cards" id="pvk-leads-lc"></div>
+          </div>
+          <div class="pvk-col pvk-opps">
+            <div class="pvk-col-header">
+              <div class="pvk-col-title"><i class="fas fa-bolt"></i> Opportunities</div>
+              <span class="pvk-col-badge opp">5</span>
+            </div>
+            <div class="pvk-cards" id="pvk-opps-lc"></div>
+          </div>
+          <div class="pvk-col pvk-clients">
+            <div class="pvk-col-header">
+              <div class="pvk-col-title"><i class="fas fa-users"></i> Active Clients</div>
+              <span class="pvk-col-badge client">8</span>
+            </div>
+            <div class="pvk-cards" id="pvk-clients-lc"></div>
+          </div>
+          <div class="pvk-col pvk-upsell">
+            <div class="pvk-col-header">
+              <div class="pvk-col-title"><i class="fas fa-arrow-trend-up"></i> Growth Ready</div>
+              <span class="pvk-col-badge upsell">8</span>
+            </div>
+            <div class="pvk-cards" id="pvk-upsell-lc"></div>
+          </div>
+        </div>
+
+        {/* Revenue Forecast + Activity Log row */}
+        <div class="pv-sales-row" style="margin-top:18px">
+          <div class="pv-forecast-panel">
+            <div class="pv-panel-title"><i class="fas fa-chart-line"></i> AI Revenue Forecast</div>
+            <div class="pv-forecast-months">
+              <div class="pv-fm-bar-wrap">
+                <div class="pv-fm-bar" style="height:70%;background:#003087"></div>
+                <span class="pv-fm-lbl">Apr<br/>$42K</span>
+              </div>
+              <div class="pv-fm-bar-wrap">
+                <div class="pv-fm-bar" style="height:87%;background:#1e40af"></div>
+                <span class="pv-fm-lbl">May<br/>$52K</span>
+              </div>
+              <div class="pv-fm-bar-wrap">
+                <div class="pv-fm-bar" style="height:60%;background:#94a3b8;opacity:.6"></div>
+                <span class="pv-fm-lbl">Jun<br/>~$36K</span>
+              </div>
+            </div>
+            <div class="pv-forecast-ai-note">
+              <i class="fas fa-robot"></i> High confidence: Michael Santos ($6.4K) and Alex Rivera ($4.2K) likely to close by May 15.
+            </div>
+          </div>
+          <div class="pv-velocity-panel">
+            <div class="pv-panel-title"><i class="fas fa-tachometer-alt"></i> Deal Velocity</div>
+            <div class="pv-velocity-grid">
+              <div class="pv-vel-item"><div class="pv-vel-val">12.4d</div><div class="pv-vel-lbl">Avg Cycle</div></div>
+              <div class="pv-vel-item"><div class="pv-vel-val green">−1.2d</div><div class="pv-vel-lbl">vs Last Month</div></div>
+              <div class="pv-vel-item"><div class="pv-vel-val">3.2</div><div class="pv-vel-lbl">Deals/Week</div></div>
+              <div class="pv-vel-item"><div class="pv-vel-val orange">9d</div><div class="pv-vel-lbl">Avg First Contact</div></div>
+            </div>
+            <div class="pv-panel-title" style="margin-top:14px"><i class="fas fa-chart-pie"></i> Lead Source Mix</div>
+            <div class="pv-source-list">
+              <div class="pv-src-row"><span>Referrals</span><div class="pv-src-bar"><div style="width:52%;background:#003087"></div></div><span>52%</span></div>
+              <div class="pv-src-row"><span>Digital</span><div class="pv-src-bar"><div style="width:28%;background:#4f46e5"></div></div><span>28%</span></div>
+              <div class="pv-src-row"><span>Events</span><div class="pv-src-bar"><div style="width:12%;background:#0891b2"></div></div><span>12%</span></div>
+              <div class="pv-src-row"><span>Other</span><div class="pv-src-bar"><div style="width:8%;background:#94a3b8"></div></div><span>8%</span></div>
+            </div>
+          </div>
+          <div class="pv-activity-panel">
+            <div class="pv-panel-title"><i class="fas fa-history"></i> Recent Activity</div>
+            <div class="pv-activity-list">
+              <div class="pv-act-row"><span class="pv-act-dot green"></span><span class="pv-act-time">Today 2:14pm</span><span class="pv-act-text">Michael Santos — verbal commit received · closing paperwork sent</span></div>
+              <div class="pv-act-row"><span class="pv-act-dot blue"></span><span class="pv-act-time">Today 10:30am</span><span class="pv-act-text">Alex Rivera — pre-meeting brief sent · meeting confirmed Apr 18</span></div>
+              <div class="pv-act-row"><span class="pv-act-dot orange"></span><span class="pv-act-time">Yesterday</span><span class="pv-act-text">John Kim — APS request submitted · underwriting review pending</span></div>
+              <div class="pv-act-row"><span class="pv-act-dot red"></span><span class="pv-act-time">Apr 10</span><span class="pv-act-text">D003 stale alert triggered — 15 days no activity, AI score 44%</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>{/* ══ end Lifecycle Tab Panel ══ */}
 
       {/* ── Deal Detail Modal ── */}
       <div class="deal-modal-overlay" id="deal-modal-overlay" onclick="closeDealModal(event)" style="display:none">

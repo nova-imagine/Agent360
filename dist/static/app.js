@@ -16367,18 +16367,92 @@ function sortPipelineDeals() {
 function setPipelineView(view, btn) {
   // Update button state
   document.querySelectorAll('.ptb-view-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   // Toggle views
-  const kanban  = document.getElementById('pipeline-kanban-view');
-  const listV   = document.getElementById('pipeline-list-view');
-  const focusV  = document.getElementById('pipeline-focus-view');
-  const staleS  = document.getElementById('stale-alert-strip');
-  if (kanban)  kanban.style.display  = view === 'kanban' ? '' : 'none';
-  if (listV)   listV.style.display   = view === 'list'   ? '' : 'none';
-  if (focusV)  focusV.style.display  = view === 'focus'  ? '' : 'none';
-  if (staleS)  staleS.style.display  = view === 'kanban' ? '' : 'none';
-  if (view === 'list')  renderPipelineListView();
-  if (view === 'focus') renderPipelineFocusView();
+  const kanban     = document.getElementById('pipeline-kanban-view');
+  const listV      = document.getElementById('pipeline-list-view');
+  const focusV     = document.getElementById('pipeline-focus-view');
+  const analyticsV = document.getElementById('pipeline-analytics-view');
+  const lifecycleV = document.getElementById('pipeline-lifecycle-view');
+  const staleS     = document.getElementById('stale-alert-strip');
+  const staleBadge = document.getElementById('ptb-stale-badge');
+  if (kanban)     kanban.style.display     = view === 'kanban'    ? '' : 'none';
+  if (listV)      listV.style.display      = view === 'list'      ? '' : 'none';
+  if (focusV)     focusV.style.display     = view === 'focus'     ? '' : 'none';
+  if (analyticsV) analyticsV.style.display = view === 'analytics' ? '' : 'none';
+  if (lifecycleV) lifecycleV.style.display = view === 'lifecycle' ? '' : 'none';
+  if (staleS)     staleS.style.display     = view === 'kanban'    ? '' : 'none';
+  // Persistent stale badge — visible in all non-kanban views as a reminder
+  if (staleBadge) staleBadge.style.display = view !== 'kanban'    ? '' : 'none';
+  if (view === 'list')      renderPipelineListView();
+  if (view === 'focus')     renderPipelineFocusView();
+  if (view === 'lifecycle') renderLifecycleView();
+}
+
+function renderLifecycleView() {
+  // Populate the 4 lifecycle kanban columns using existing pipeline + journey data
+  const leads   = document.getElementById('pvk-leads-lc');
+  const opps    = document.getElementById('pvk-opps-lc');
+  const clients = document.getElementById('pvk-clients-lc');
+  const upsell  = document.getElementById('pvk-upsell-lc');
+  // Leads column — prospects not yet in active pipeline
+  if (leads) leads.innerHTML = [
+    { name:'Taylor Brooks',    tag:'Auto',       temp:'warm' },
+    { name:'Olivia Harrison',  tag:'Home',       temp:'hot'  },
+    { name:'Marcus Webb',      tag:'Term Life',  temp:'warm' },
+    { name:'Priya Nair',       tag:'Umbrella',   temp:'cold' },
+    { name:'Derek Solano',     tag:'Investments',temp:'warm' },
+    { name:'Chloe Nakamura',   tag:'Retirement', temp:'hot'  },
+    { name:'Ben Fitzgerald',   tag:'Commercial', temp:'cold' },
+    { name:'Yara Osei',        tag:'Home',       temp:'warm' },
+    { name:'Tomas Reinholt',   tag:'Auto',       temp:'cold' },
+    { name:'Elena Petrova',    tag:'Term Life',  temp:'hot'  },
+    { name:'Kwame Asante',     tag:'Investments',temp:'warm' },
+    { name:'Sofia Delgado',    tag:'Retirement', temp:'cold' },
+    { name:'Jared Mullen',     tag:'Home',       temp:'warm' },
+    { name:'Iris Chang',       tag:'Auto',       temp:'hot'  }
+  ].map(l => `<div class="pvk-lc-card">
+    <div class="pvk-lc-name">${l.name}</div>
+    <div class="pvk-lc-meta"><span class="pvk-lc-tag">${l.tag}</span><span class="pvk-lc-temp pvk-temp-${l.temp}">${l.temp}</span></div>
+  </div>`).join('');
+  // Opportunities column — active pipeline deals
+  if (opps && typeof pipelineData !== 'undefined') {
+    opps.innerHTML = Object.entries(pipelineData).map(([id, d]) => `<div class="pvk-lc-card">
+      <div class="pvk-lc-name">${d.client}</div>
+      <div class="pvk-lc-meta"><span class="pvk-lc-tag">${d.product}</span><span class="pvk-lc-stage">${d.stage}</span></div>
+      <div class="pvk-lc-value">${d.value || ''}</div>
+    </div>`).join('');
+  } else if (opps) {
+    opps.innerHTML = '<div class="pvk-lc-empty">5 active opportunities</div>';
+  }
+  // Active Clients column — closed/won accounts
+  if (clients) clients.innerHTML = [
+    { name:'Linda Morrison',  product:'Whole Life + Auto',  value:'$8,400/yr' },
+    { name:'Robert Chen',     product:'Commercial Pkg',     value:'$14,200/yr'},
+    { name:'James Whitfield', product:'Term Life + Home',   value:'$6,100/yr' },
+    { name:'Maria Gonzalez',  product:'Auto Bundle',        value:'$3,800/yr' },
+    { name:'Patricia Nguyen', product:'Retirement + Life',  value:'$11,600/yr'},
+    { name:'Sandra Williams', product:'Home + Umbrella',    value:'$5,200/yr' },
+    { name:'David Thompson',  product:'Commercial Auto',    value:'$9,400/yr' },
+    { name:'Kevin Park',      product:'Term Life',          value:'$4,700/yr' }
+  ].map(c => `<div class="pvk-lc-card pvk-lc-card--client">
+    <div class="pvk-lc-name">${c.name}</div>
+    <div class="pvk-lc-meta"><span class="pvk-lc-tag">${c.product}</span><span class="pvk-lc-value-badge">${c.value}</span></div>
+  </div>`).join('');
+  // Growth Ready column — upsell-flagged clients
+  if (upsell) upsell.innerHTML = [
+    { name:'Linda Morrison',  opp:'Umbrella + Inv.',  score:94 },
+    { name:'Robert Chen',     opp:'Cyber Liability',  score:91 },
+    { name:'James Whitfield', opp:'Whole Life conv.', score:88 },
+    { name:'Maria Gonzalez',  opp:'Renters + Life',   score:79 },
+    { name:'Patricia Nguyen', opp:'Wealth Mgmt.',     score:72 },
+    { name:'Sandra Williams', opp:'Auto + Jewel.',    score:68 },
+    { name:'David Thompson',  opp:'Workers Comp.',    score:54 },
+    { name:'Kevin Park',      opp:'Home + Bundle',    score:41 }
+  ].map(u => `<div class="pvk-lc-card pvk-lc-card--upsell">
+    <div class="pvk-lc-name">${u.name}</div>
+    <div class="pvk-lc-meta"><span class="pvk-lc-tag">${u.opp}</span><span class="pvk-lc-ai-score" style="background:${u.score>=80?'#059669':u.score>=60?'#d97706':'#6b7280'}">AI ${u.score}</span></div>
+  </div>`).join('');
 }
 
 function renderPipelineListView() {
