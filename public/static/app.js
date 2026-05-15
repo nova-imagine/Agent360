@@ -24522,7 +24522,7 @@ console.log('Phase 7 modules loaded — lapseRiskData(' + lapseRiskData.length +
 // Leads · PMAIL Qualification · Prospect Creation · Campaigns
 // ============================================================
 
-console.log('Phase 1 module loaded — leadsData(14), PMAIL qualification, prospect creation, campaigns');
+console.log('Phase 1 module loaded — leadsData(15), PMAIL qualification, prospect creation, campaigns');
 
 // ── RAW LEADS DATA ────────────────────────────────────────────
 // These are pre-qualification leads — basic data only.
@@ -24785,6 +24785,25 @@ var leadsData = [
     notes: 'AI-identified via LLC filing. $2.1M mortgage debt with no life coverage = critical gap.',
     contactAttempts: 0,
     lastContact: null
+  },
+  {
+    id: 'L015', name: 'Marcus Thompson',  initials: 'MT', avatarColor: '#7c3aed',
+    domainScores: { ins: 91, inv: 82, ret: 78, adv: 85 },
+    age: 34, city: 'Hoboken, NJ',
+    occupation: 'VP of Product — FinTech Startup (Series B)',
+    estimatedIncome: '$185K–$210K/yr',
+    email: 'm.thompson@email.com', phone: '(201) 555-0915',
+    lifeEventTrigger: 'New Baby + Wealth Event',
+    lifeEventDetail: 'First child born Mar 2026; ESPP vesting $58K Apr 2026; no life, investment, or retirement coverage detected',
+    referralSource: 'Life Event Alert — Birth Record + ESPP Filing',
+    referralType: 'life-event-alert',
+    productInterest: ['Term Life $750K', 'Disability Insurance', '529 Plan', 'Roth IRA', 'Deferred Annuity', 'Advisory — Estate Planning'],
+    entryDate: 'Apr 10, 2026',
+    status: 'new',
+    prospectId: null,
+    notes: 'AI flagged: new baby + ESPP vesting + zero NYL products. All four domains have active opportunities. Highest cross-domain score in current lead book. Contact window: before ESPP re-deploys.',
+    contactAttempts: 0,
+    lastContact: null
   }
 ];
 
@@ -24805,7 +24824,8 @@ var pmailScores = {
   L011: { P:5, M:4, A:4, I:5, L:5, total:88,  qualified:false, qualDate:null,           qualNotes:'DI critical for practice. Good income but student loans reduce net capacity. Engagement is strong trigger. Need to confirm fiancé involvement in decision.' },
   L012: { P:5, M:4, A:4, I:3, L:5, total:84,  qualified:true,  qualDate:'Apr 9, 2026',  qualNotes:'LTC + annuity = spot-on. Pension eliminated = immediate annuity gap. Spouse health = LTC urgency. Budget constrained by rollover timing. Spouse is co-decision maker.' },
   L013: { P:5, M:4, A:4, I:5, L:5, total:88,  qualified:true,  qualDate:'Apr 9, 2026',  qualNotes:'529 + term = ideal young family. Income solid. Both parents in decision (spouse not met yet). Healthy. New baby + cash-out refi = dual trigger.' },
-  L014: { P:5, M:5, A:5, I:4, L:4, total:88,  qualified:false, qualDate:null,           qualNotes:'WL + succession = strong fit. High income / assets. LLC owner = authority. Age 48, unknown health. LLC filing = business trigger but no direct life event yet.' }
+  L014: { P:5, M:5, A:5, I:4, L:4, total:88,  qualified:false, qualDate:null,           qualNotes:'WL + succession = strong fit. High income / assets. LLC owner = authority. Age 48, unknown health. LLC filing = business trigger but no direct life event yet.' },
+  L015: { P:5, M:5, A:5, I:5, L:5, total:97,  qualified:false, qualDate:null,           qualNotes:'All-domain opportunity: Insurance (Term+DI), Investments (ESPP/529/Roth), Retirement (Deferred Annuity), Advisory (Estate). New baby = strongest trigger. ESPP vesting creates immediate investment window. Healthy 34yo, sole decision maker. Top-priority new lead.' }
 };
 
 // ── PROPENSITY MATCH PROFILES ─────────────────────────────────
@@ -24866,7 +24886,11 @@ var propensityProfiles = {
   L014: { closedCasesLike: 16, topProducts: 'WL $1M + Business Succession', closePct: 48,
     ins: 92, inv: 44, ret: 26,
     aiOpener: 'James — your AI identified your LLC filing and $1.4M property purchase. With $2.1M in mortgage debt across your portfolio and no life coverage, you have a significant gap. A Whole Life policy at your asset level is both protection and a business asset.',
-    matchDesc: 'Matches 16 closed cases: Real estate developer, 45–52, AI-identified, LLC portfolio. 75% bought WL $1M+; 62% needed business succession planning.' }
+    matchDesc: 'Matches 16 closed cases: Real estate developer, 45–52, AI-identified, LLC portfolio. 75% bought WL $1M+; 62% needed business succession planning.' },
+  L015: { closedCasesLike: 61, topProducts: 'Term Life $750K + DI + 529 + Roth IRA + Annuity + Estate Plan', closePct: 94,
+    ins: 91, inv: 82, ret: 78, adv: 85,
+    aiOpener: 'Marcus — congratulations on your new baby! With $58K in ESPP vesting this month and zero life, investment, or retirement coverage in place, this is the most important financial moment of your decade. I can set up Term Life, a 529, and a Roth IRA in a single 30-minute call.',
+    matchDesc: 'Matches 61 closed cases: FinTech VP, 30–37, life-event alert, new parent + wealth event. 94% bought Term Life first; 78% added DI within 30 days; 65% opened investment account at delivery; 58% engaged estate planning within 6 months. Highest all-domain match in current lead book.' }
 };
 
 // ── CAMPAIGN DATA ─────────────────────────────────────────────
@@ -26400,6 +26424,246 @@ function viewCampaignProspects(campId) {
 // ── TOAST HELPER (duplicate removed — routes to phase1 showToast above) ──
 
 // ── sortLeads — Phase 1 sort helper ──
+/* ═══════════════════════════════════════════════════════════════
+   ADD LEAD MODAL — openAddLeadModal()
+   Full form: name, contact, trigger, income, products (all 4 domains),
+   notes. Saves to leadsData + auto-generates PMAIL & propensity stubs.
+   ═══════════════════════════════════════════════════════════════ */
+window.openAddLeadModal = function() {
+  var existing = document.getElementById('add-lead-overlay');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'add-lead-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:9300;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  overlay.innerHTML = [
+    '<div style="background:#fff;border-radius:16px;width:100%;max-width:660px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.28);overflow:hidden;animation:prospModalIn 0.22s ease">',
+
+    // ── Header
+    '<div style="background:linear-gradient(135deg,#003087,#1d4ed8);padding:18px 24px;display:flex;align-items:center;gap:14px;flex-shrink:0">',
+      '<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-user-plus" style="color:#93c5fd;font-size:1.1rem"></i></div>',
+      '<div style="flex:1">',
+        '<div style="font-size:1rem;font-weight:800;color:#fff">Add New Lead</div>',
+        '<div style="font-size:0.76rem;color:#93c5fd;margin-top:2px">AI will score & enrich on save — PMAIL qualification runs automatically</div>',
+      '</div>',
+      '<button onclick="document.getElementById(\'add-lead-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:30px;height:30px;color:#fff;cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center"><i class="fas fa-times"></i></button>',
+    '</div>',
+
+    // ── AI banner
+    '<div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:9px 24px;font-size:0.78rem;color:#92400e;display:flex;align-items:center;gap:8px;flex-shrink:0">',
+      '<i class="fas fa-robot" style="color:#d97706"></i>',
+      '<span><strong>AI Enrichment Active</strong> — Nova will auto-score product fit, pull life-event signals, and generate an AI opening line on save.</span>',
+    '</div>',
+
+    // ── Body
+    '<div style="flex:1;overflow-y:auto;padding:20px 24px">',
+
+      // Section: Contact
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0"><i class="fas fa-user" style="margin-right:5px"></i>Contact Information</div>',
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">',
+        '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">First Name <span style="color:#ef4444">*</span></label><input id="al-fname" type="text" placeholder="First name" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+        '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Last Name <span style="color:#ef4444">*</span></label><input id="al-lname" type="text" placeholder="Last name" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+        '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Email</label><input id="al-email" type="email" placeholder="email@domain.com" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+        '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Phone</label><input id="al-phone" type="text" placeholder="(xxx) xxx-xxxx" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+        '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Age</label><input id="al-age" type="number" placeholder="e.g. 38" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+        '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">City / Location</label><input id="al-city" type="text" placeholder="e.g. Brooklyn, NY" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+        '<div style="grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Occupation / Employer</label><input id="al-occ" type="text" placeholder="e.g. VP of Sales — Acme Corp" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+        '<div style="grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Estimated Income</label><input id="al-income" type="text" placeholder="e.g. $150K–$180K/yr" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+      '</div>',
+
+      // Section: Life Event
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0"><i class="fas fa-bolt" style="margin-right:5px"></i>Life Event Trigger</div>',
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">',
+        '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Trigger Type</label>',
+          '<select id="al-trigger" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box">',
+            '<option value="New Baby">New Baby</option>',
+            '<option value="Career Promotion">Career Promotion</option>',
+            '<option value="Home Purchase">Home Purchase</option>',
+            '<option value="Business Event">Business Event</option>',
+            '<option value="Job Change / Income Event">Job Change / Income Event</option>',
+            '<option value="Retirement / Pension Event">Retirement / Pension Event</option>',
+            '<option value="Estate / Legal Event">Estate / Legal Event</option>',
+            '<option value="Health Event">Health Event</option>',
+            '<option value="Divorce / Family Change">Divorce / Family Change</option>',
+            '<option value="Wealth / Investment Event">Wealth / Investment Event</option>',
+            '<option value="Other">Other</option>',
+          '</select>',
+        '</div>',
+        '<div><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Lead Source</label>',
+          '<select id="al-source" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box">',
+            '<option value="client-referral">Client Referral</option>',
+            '<option value="linkedin">LinkedIn Outreach</option>',
+            '<option value="seminar">Seminar / Event</option>',
+            '<option value="public-record">Public Record</option>',
+            '<option value="inbound-digital">Inbound — Digital</option>',
+            '<option value="life-event-alert">Life Event Alert</option>',
+            '<option value="campaign-social">Campaign — Social</option>',
+            '<option value="association-list">Association List</option>',
+            '<option value="ai-scan">AI Scan</option>',
+          '</select>',
+        '</div>',
+        '<div style="grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Trigger Detail</label><input id="al-triggerdetail" type="text" placeholder="e.g. First child born Mar 2026; ESPP vesting Apr 2026" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box" /></div>',
+      '</div>',
+
+      // Section: Product Interest (4 domains)
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0"><i class="fas fa-box-open" style="margin-right:5px"></i>Product Interest <span style="font-weight:400;color:#94a3b8">— check all that apply</span></div>',
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">',
+        // Insurance
+        '<div style="background:#eff6ff;border-radius:8px;padding:10px 12px;border:1px solid #bfdbfe">',
+          '<div style="font-size:11px;font-weight:700;color:#1e40af;margin-bottom:7px"><i class="fas fa-shield-alt" style="margin-right:5px"></i>Insurance</div>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-ins-term" /> Term Life</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-ins-wl" /> Whole Life</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-ins-ul" /> Universal Life</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-ins-di" /> Disability Insurance</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;cursor:pointer"><input type="checkbox" id="al-ins-ltc" /> Long-Term Care</label>',
+        '</div>',
+        // Investments
+        '<div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;border:1px solid #bbf7d0">',
+          '<div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:7px"><i class="fas fa-chart-line" style="margin-right:5px"></i>Investments</div>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-inv-529" /> 529 Plan</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-inv-roth" /> Roth IRA</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-inv-mf" /> Mutual Funds</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-inv-vul" /> VUL Sub-accounts</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;cursor:pointer"><input type="checkbox" id="al-inv-uma" /> UMA / Managed Account</label>',
+        '</div>',
+        // Retirement
+        '<div style="background:#fdf4ff;border-radius:8px;padding:10px 12px;border:1px solid #e9d5ff">',
+          '<div style="font-size:11px;font-weight:700;color:#6b21a8;margin-bottom:7px"><i class="fas fa-umbrella-beach" style="margin-right:5px"></i>Retirement</div>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-ret-deferred" /> Deferred Annuity</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-ret-immediate" /> Immediate Annuity</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-ret-sep" /> SEP-IRA / 401(k) Rollover</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-ret-nqdc" /> NQDC Plan</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;cursor:pointer"><input type="checkbox" id="al-ret-income" /> Income Planning</label>',
+        '</div>',
+        // Advisory
+        '<div style="background:#fff7ed;border-radius:8px;padding:10px 12px;border:1px solid #fed7aa">',
+          '<div style="font-size:11px;font-weight:700;color:#c2410c;margin-bottom:7px"><i class="fas fa-handshake" style="margin-right:5px"></i>Advisory</div>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-adv-estate" /> Estate Planning</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-adv-trust" /> Trust / Will Review</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-adv-biz" /> Business Succession</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;margin-bottom:4px;cursor:pointer"><input type="checkbox" id="al-adv-tax" /> Tax Planning</label>',
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#374151;cursor:pointer"><input type="checkbox" id="al-adv-buysell" /> Buy-Sell Agreements</label>',
+        '</div>',
+      '</div>',
+
+      // Notes
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0"><i class="fas fa-sticky-note" style="margin-right:5px"></i>Notes</div>',
+      '<textarea id="al-notes" rows="3" placeholder="Referral context, conversation notes, source details…" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:inherit"></textarea>',
+
+    '</div>',
+
+    // ── Footer
+    '<div style="padding:14px 24px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;background:#f8fafc">',
+      '<button onclick="document.getElementById(\'add-lead-overlay\').remove()" style="padding:8px 18px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer">Cancel</button>',
+      '<div style="display:flex;gap:8px">',
+        '<button onclick="saveNewLead()" style="padding:8px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,#003087,#1d4ed8);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="fas fa-robot"></i> AI Enrich &amp; Save</button>',
+      '</div>',
+    '</div>',
+
+    '</div>'
+  ].join('');
+
+  document.body.appendChild(overlay);
+};
+
+window.saveNewLead = function() {
+  var fname   = (document.getElementById('al-fname')   || {}).value || '';
+  var lname   = (document.getElementById('al-lname')   || {}).value || '';
+  var email   = (document.getElementById('al-email')   || {}).value || '';
+  var phone   = (document.getElementById('al-phone')   || {}).value || '';
+  var age     = parseInt((document.getElementById('al-age')    || {}).value) || 0;
+  var city    = (document.getElementById('al-city')    || {}).value || '';
+  var occ     = (document.getElementById('al-occ')     || {}).value || '';
+  var income  = (document.getElementById('al-income')  || {}).value || '';
+  var trigger = (document.getElementById('al-trigger') || {}).value || 'Other';
+  var source  = (document.getElementById('al-source')  || {}).value || 'inbound-digital';
+  var detail  = (document.getElementById('al-triggerdetail') || {}).value || '';
+  var notes   = (document.getElementById('al-notes')   || {}).value || '';
+
+  if (!fname.trim() || !lname.trim()) {
+    showToast('First and last name are required.', 'warn');
+    return;
+  }
+
+  // Collect selected products
+  var products = [];
+  var checkMap = {
+    'al-ins-term':'Term Life', 'al-ins-wl':'Whole Life', 'al-ins-ul':'Universal Life',
+    'al-ins-di':'Disability Insurance', 'al-ins-ltc':'Long-Term Care',
+    'al-inv-529':'529 Plan', 'al-inv-roth':'Roth IRA', 'al-inv-mf':'Mutual Funds',
+    'al-inv-vul':'VUL Sub-accounts', 'al-inv-uma':'UMA / Managed Account',
+    'al-ret-deferred':'Deferred Annuity', 'al-ret-immediate':'Immediate Annuity',
+    'al-ret-sep':'SEP-IRA / 401(k) Rollover', 'al-ret-nqdc':'NQDC Plan',
+    'al-ret-income':'Income Planning', 'al-adv-estate':'Estate Planning',
+    'al-adv-trust':'Trust / Will Review', 'al-adv-biz':'Business Succession',
+    'al-adv-tax':'Tax Planning', 'al-adv-buysell':'Buy-Sell Agreements'
+  };
+  Object.keys(checkMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.checked) products.push(checkMap[id]);
+  });
+  if (products.length === 0) products = ['General Interest'];
+
+  // Generate new ID
+  var newId = 'L' + String(leadsData.length + 1).padStart(3, '0');
+  var initials = (fname[0] + lname[0]).toUpperCase();
+  var colors = ['#003087','#0369a1','#0f766e','#7c3aed','#b45309','#dc2626','#059669','#1e40af'];
+  var avatarColor = colors[leadsData.length % colors.length];
+
+  // Build lead object
+  var newLead = {
+    id: newId,
+    name: fname.trim() + ' ' + lname.trim(),
+    initials: initials,
+    avatarColor: avatarColor,
+    domainScores: { ins: 70, inv: 60, ret: 55 },
+    age: age || null,
+    city: city.trim() || 'Not provided',
+    occupation: occ.trim() || 'Not provided',
+    estimatedIncome: income.trim() || 'TBD',
+    email: email.trim() || '',
+    phone: phone.trim() || '',
+    lifeEventTrigger: trigger,
+    lifeEventDetail: detail.trim() || trigger + ' — details pending AI enrichment',
+    referralSource: source.replace(/-/g,' '),
+    referralType: source,
+    productInterest: products,
+    entryDate: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
+    status: 'new',
+    prospectId: null,
+    notes: notes.trim() || 'New lead — AI enrichment pending.',
+    contactAttempts: 0,
+    lastContact: null
+  };
+
+  // Auto-generate PMAIL stub and propensity profile
+  pmailScores[newId] = { P:3, M:3, A:3, I:3, L:4, total:64, qualified:false, qualDate:null,
+    qualNotes:'New lead — pending PMAIL qualification. Run AI qualification scan to score fully.' };
+  propensityProfiles[newId] = { closedCasesLike: 0, topProducts: products[0] || 'TBD', closePct: 55,
+    ins: 70, inv: 60, ret: 55,
+    aiOpener: 'Hi ' + fname + ' — I noticed a recent life event that makes this a great time to connect. I\'d love to share how we\'ve helped people in similar situations. Would a quick call work this week?',
+    matchDesc: 'New lead — AI will enrich with historical closed-case pattern matching on next qualification run.' };
+
+  leadsData.push(newLead);
+
+  // Close modal and refresh list
+  var overlay = document.getElementById('add-lead-overlay');
+  if (overlay) overlay.remove();
+
+  // Simulate AI enrichment animation then render
+  showToast('<i class="fas fa-robot"></i> AI enriching <strong>' + newLead.name + '</strong> — lead added to queue!', 'ai');
+  setTimeout(function() {
+    if (typeof renderLeadsList === 'function') renderLeadsList();
+    // Update the "All Leads" count label
+    var label = document.getElementById('leads-list-label');
+    if (label) label.textContent = 'All Leads (' + leadsData.length + ')';
+    // Auto-select the new lead to show detail
+    if (typeof selectLead === 'function') selectLead(newId);
+  }, 400);
+};
+
 function sortLeads(criterion) {
   if (typeof leadsData === 'undefined') return;
   var sorted = leadsData.slice();

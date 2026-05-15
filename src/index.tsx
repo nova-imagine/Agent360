@@ -4103,7 +4103,7 @@ function ProspectsPage() {
       <div class="prospects-header">
         <div class="ph-left">
           <h2 class="ph-title"><i class="fas fa-user-clock"></i> Leads Pipeline</h2>
-          <p class="ph-sub">14 active leads · AI-scored · 3rd-party data enriched · $284K pipeline value</p>
+          <p class="ph-sub">15 active leads · AI-scored · 3rd-party data enriched · $284K pipeline value</p>
         </div>
         <div class="ph-actions">
           <button class="btn btn-ai" onclick="openProspectAIAnalysis()"><i class="fas fa-robot"></i> AI Lead Score All</button>
@@ -14439,7 +14439,7 @@ function LeadsPage() {
             oninput="searchLeads(this.value)"
           />
         </div>
-        <button class="leads-add-btn" onclick="showToast('Add Lead form coming soon','info')">
+        <button class="leads-add-btn" onclick="openAddLeadModal()">
           <i class="fas fa-plus"></i> Add Lead
         </button>
       </div>
@@ -14449,10 +14449,10 @@ function LeadsPage() {
         <i class="fas fa-robot leads-ai-icon"></i>
         <div class="leads-ai-text">
           <strong>AI Lead Intelligence</strong> — 3 new leads identified this week.
-          Top priority: <strong>L009 (Marcus Thompson)</strong> — New baby + $195K income matches 61 closed cases.
+          Top priority: <strong>L015 (Marcus Thompson)</strong> — New baby + $195K income + ESPP vesting matches 61 closed cases across all 4 product domains.
           Run PMAIL qualification to advance to prospect pipeline.
         </div>
-        <button class="leads-ai-action-btn" onclick="selectLead('L009')">
+        <button class="leads-ai-action-btn" onclick="selectLead('L015')">
           <i class="fas fa-arrow-right"></i> Review Top Lead
         </button>
       </div>
@@ -14463,7 +14463,7 @@ function LeadsPage() {
         {/* LEFT — Lead List */}
         <div class="leads-list-col">
           <div class="leads-list-header">
-            <span class="leads-list-label" id="leads-list-label">All Leads (14)</span>
+            <span class="leads-list-label" id="leads-list-label">All Leads (15)</span>
             <select class="leads-sort-select" onchange="sortLeads(this.value)">
               <option value="score">Sort: AI Score</option>
               <option value="date">Sort: Entry Date</option>
