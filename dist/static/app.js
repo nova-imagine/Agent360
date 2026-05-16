@@ -7370,360 +7370,1659 @@ window.openOutreachModal = function(id) {
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── E-App data store (AI-prefilled per application) ── */
+/* ════════════════════════════════════════════════════════════════
+   E-APP DATA STORE — All active + historical applications
+   ════════════════════════════════════════════════════════════════ */
 const eAppData = {
-  'EA-008': {
-    id: 'EA-008', dealId: 'D008', uwId: null,
-    client: 'Kevin Park', age: 29, dob: '1997-03-14',
-    email: 'kevin.p@email.com', phone: '(212) 555-0829',
-    address: '420 Lexington Ave, New York, NY 10170',
-    ssn: '***-**-4821',
-    product: 'Term Life Insurance', productCode: 'term',
-    coverage: '$500,000', premium: '$1,800/yr', term: '20 years',
-    beneficiary: 'Sarah Park (Spouse)', beneficiaryPct: '100%',
-    riders: ['Waiver of Premium Rider', 'Accelerated Death Benefit'],
-    healthClass: 'Preferred Plus',
-    smoker: 'Non-smoker',
+  /* ── EA-001: Kevin Park — Term Life — Awaiting Signature ───────── */
+  'EA-001': {
+    id: 'EA-001', dealId: 'D001', uwId: null, cardStatus: 'sig',
+    client: 'Kevin Park', age: 28, dob: '1997-03-14', gender: 'Male',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New York',
+    driversLicenseState: 'NY', occupation: 'Software Engineer', employer: 'TechCorp Inc.',
+    annualIncome: '$185,000', netWorth: '$420,000',
+    email: 'kevin.park@email.com', phone: '(212) 555-0829',
+    address: '420 Lexington Ave, Apt 14B, New York, NY 10170',
+    ssn: '***-**-4821', taxId: '***-**-4821',
+    product: 'Term Life Insurance — 20 Year Level', productCode: 'TERM20',
+    carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '$500,000', premium: '$1,800/yr', premiumMode: 'Annual',
+    policyNumber: 'PENDING', term: '20 years', issueAge: 28,
+    beneficiary: 'Sarah Park', beneficiaryRelationship: 'Spouse', beneficiaryPct: '100%',
+    contingentBeneficiary: 'Daniel Park (Son)', contingentPct: '100%',
+    riders: ['Waiver of Premium Rider ($0 additional)', 'Accelerated Death Benefit Rider ($0 additional)', 'Child Rider — $10K per child ($120/yr)'],
+    ownerType: 'Insured is Owner',
+    payor: 'Kevin Park',
+    paymentMethod: 'ACH — Chase Bank ****3241',
+    healthClass: 'Preferred Plus Non-Tobacco',
+    smoker: 'Non-Tobacco User (never)',
     height: "5'11\"", weight: '172 lbs', bmi: '24.0',
+    bloodPressure: '118/76 mmHg', cholesterol: '182 mg/dL', glucose: '94 mg/dL',
     conditions: 'None disclosed',
     medications: 'None',
-    familyHistory: 'No significant history',
-    labResults: 'Cholesterol 182, BP 118/76, Blood Glucose 94 — All Normal',
-    aiHealthScore: 96,
-    aiPrefillPct: 95,
-    status: 'Awaiting E-Signature',
-    step: 4,
+    surgeries: 'None',
+    familyHistory: 'Father alive age 58, healthy. Mother alive age 55, healthy. No family history of heart disease, cancer, or diabetes.',
+    drivingRecord: 'Clean — no DUI, no major violations in 5 years',
+    foreignTravel: 'None in past 12 months',
+    hazardousActivities: 'None',
+    aviationUse: 'None',
+    existingInsurance: 'Group Term Life $200K through employer (TechCorp Inc.)',
+    replacingExistingPolicy: 'No',
+    mibConsent: 'Consented',
+    hipaaConsent: 'Consented',
+    labResults: 'Cholesterol 182, BP 118/76, Blood Glucose 94, eGFR >60, EKG Normal, Urinalysis Normal — All within Preferred Plus parameters',
+    paramedExam: 'Paramedical exam completed April 8, 2026 — Results received',
+    aireport: {
+      stpScore: 95, mibFlags: 0, mvrFlags: 0, creditRisk: 'Low',
+      riskClass: 'Preferred Plus', autoApproval: true,
+      expectedDecision: '2–4 hours (STP eligible)',
+      naicCompliance: 'Pass', suitabilityCheck: 'Pass',
+      predictiveRiskBand: 'Very Low', mortalityRatio: '0.68',
+      aiSummary: 'Kevin Park is a strong Preferred Plus candidate. MIB report is clear, MVR is clean, lab work is excellent. STP engine recommends automatic approval. No exclusions required. No ratings necessary. Policy ready for immediate issue upon e-signature.'
+    },
+    aiHealthScore: 96, aiPrefillPct: 95,
+    status: 'Awaiting E-Signature', urgency: 'urgent',
+    step: 7, // Starting at documents step since almost complete
+    submittedDate: null, receivedDate: null, issuedDate: null,
+    uwCaseId: null, signatureSentDate: 'May 13, 2026', signatureDaysSince: 2,
     documents: [
-      { name: 'Application Form 1040-NYL', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'Health Questionnaire', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'Beneficiary Designation', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'HIPAA Authorization', status: 'pending', aiTag: 'Needs Signature' },
-      { name: 'E-Delivery Consent', status: 'pending', aiTag: 'Needs Signature' }
+      { name: 'NYL Term Life Application (Form TL-2026)', status: 'signed', aiTag: 'Signed ✓', required: true, docType: 'application' },
+      { name: 'Health & Medical Questionnaire', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'health' },
+      { name: 'Beneficiary Designation Form', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'beneficiary' },
+      { name: 'HIPAA Authorization & Medical Release', status: 'pending', aiTag: 'Needs E-Signature', required: true, docType: 'hipaa' },
+      { name: 'E-Delivery Consent & Paperless Agreement', status: 'pending', aiTag: 'Needs E-Signature', required: true, docType: 'delivery' },
+      { name: 'NAIC Replacement Notice (NY Reg 60)', status: 'signed', aiTag: 'Signed ✓ — No replacement', required: true, docType: 'naic' },
+      { name: 'ACH Payment Authorization', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'payment' }
     ],
-    aiInsight: 'Kevin qualifies for Preferred Plus health class. AI detected no MIB flags, clean MVR, and excellent lab results. STP score 95 — recommend immediate e-signature request. Expected time to issue: 2–4 hours.'
+    aiInsight: 'Kevin Park qualifies for Preferred Plus — top health class. AI detected: 0 MIB flags, clean MVR, excellent lab results across all biomarkers. STP score 95/100 — highest confidence automatic approval. Recommend immediate e-signature resend (2 days outstanding). Expected time to issue upon signature: 2–4 hours. Annual premium $1,800 is 13% below peer average for same coverage class.',
+    agentNotes: 'Kevin was very engaged during the paramedical exam. Resend signature link to mobile number as well — he mentioned he prefers text.',
+    complianceChecks: [
+      { label: 'NY Reg 60 Replacement Notice', status: 'pass', note: 'No replacement — standard notice filed' },
+      { label: 'NAIC Suitability Check', status: 'pass', note: 'Income $185K supports $500K face amount — suitability confirmed' },
+      { label: 'MIB Database Check', status: 'pass', note: 'No adverse findings — code clearance received' },
+      { label: 'OFAC / AML Screening', status: 'pass', note: 'No matches — cleared May 8, 2026' },
+      { label: 'Age & Identity Verification', status: 'pass', note: 'DOB verified via ID — age 28 at application' },
+      { label: 'Premium Affordability Test', status: 'pass', note: '$1,800/yr = 0.97% of annual income — well within guidelines' }
+    ]
   },
-  'EA-009': {
-    id: 'EA-009', dealId: 'D009', uwId: null,
-    client: 'Linda Morrison', age: 56, dob: '1969-11-02',
-    email: 'linda.m@email.com', phone: '(212) 555-0856',
+
+  /* ── EA-002: Linda Morrison — Whole Life — Awaiting Signature ──── */
+  'EA-002': {
+    id: 'EA-002', dealId: 'D002', uwId: null, cardStatus: 'sig',
+    client: 'Linda Morrison', age: 57, dob: '1969-11-02', gender: 'Female',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New York',
+    driversLicenseState: 'NY', occupation: 'Chief Financial Officer', employer: 'Morrison Capital Group LLC',
+    annualIncome: '$420,000', netWorth: '$2,100,000',
+    email: 'linda.morrison@mcapital.com', phone: '(212) 555-0856',
     address: '1 World Trade Center, Suite 4200, New York, NY 10007',
-    ssn: '***-**-7743',
-    product: 'Unified Managed Account (UMA)', productCode: 'uma',
-    coverage: '$280,000 AUM', premium: '$2,800/yr fee', term: 'Ongoing',
-    beneficiary: 'James Morrison (Son)', beneficiaryPct: '100%',
-    riders: ['Discretionary Management', 'Tax-Loss Harvesting', 'ESG Overlay'],
-    healthClass: 'N/A — Advisory Product',
-    smoker: 'N/A', height: 'N/A', weight: 'N/A', bmi: 'N/A',
-    conditions: 'N/A', medications: 'N/A',
-    familyHistory: 'N/A',
-    labResults: 'N/A — Suitability assessment completed',
-    aiHealthScore: null,
-    aiPrefillPct: 100,
-    status: 'Documents Signed — Ready to Activate',
-    step: 5,
-    documents: [
-      { name: 'UMA Account Application', status: 'signed', aiTag: 'Signed' },
-      { name: 'Investment Policy Statement', status: 'signed', aiTag: 'Signed' },
-      { name: 'Suitability Questionnaire', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'Fee Disclosure ADV Part 2', status: 'signed', aiTag: 'Signed' },
-      { name: 'Transfer Authorization', status: 'signed', aiTag: 'Signed' }
-    ],
-    aiInsight: 'Linda\'s suitability score is 98/100. Portfolio allocation: 60% equities, 30% fixed income, 10% alternatives — matches her Moderate Growth profile. AI recommends activating account transfer from current custodian. Estimated transfer completion: 3–5 business days.'
-  },
-  'EA-UW-009': {
-    id: 'EA-UW-009', dealId: null, uwId: 'UW-2026-0009',
-    client: 'Linda Morrison', age: 56, dob: '1969-11-02',
-    email: 'linda.m@email.com', phone: '(212) 555-0856',
-    address: '1 World Trade Center, Suite 4200, New York, NY 10007',
-    ssn: '***-**-7743',
-    product: 'Whole Life Rider Add-on', productCode: 'wl-rider',
-    coverage: '$250,000 Rider', premium: '$1,200/yr', term: 'Permanent',
-    beneficiary: 'James Morrison (Son)', beneficiaryPct: '100%',
-    riders: ['Paid-Up Additions Rider', 'Disability Waiver'],
-    healthClass: 'Preferred Plus',
-    smoker: 'Non-smoker',
+    ssn: '***-**-7743', taxId: '***-**-7743',
+    product: 'Whole Life Insurance — Participating', productCode: 'WL',
+    carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '$1,000,000', premium: '$9,600/yr', premiumMode: 'Annual',
+    policyNumber: 'PENDING', term: 'Permanent / Lifetime',
+    beneficiary: 'James Morrison', beneficiaryRelationship: 'Son', beneficiaryPct: '60%',
+    contingentBeneficiary: 'Rachel Morrison (Daughter) 40%', contingentPct: '40%',
+    riders: ['Paid-Up Additions Rider ($2,400/yr)', 'Waiver of Premium Rider ($200/yr)', 'Accidental Death Benefit ($150/yr)', 'Long Term Care Acceleration Rider ($0 at issue)'],
+    ownerType: 'Insured is Owner — Trust designation pending',
+    payor: 'Linda Morrison',
+    paymentMethod: 'ACH — JP Morgan Chase ****8821',
+    healthClass: 'Preferred Non-Tobacco',
+    smoker: 'Non-Tobacco User (never)',
     height: "5'6\"", weight: '138 lbs', bmi: '22.3',
-    conditions: 'Hypertension — controlled, medication: Lisinopril 10mg',
+    bloodPressure: '124/80 mmHg (controlled — Lisinopril 10mg)', cholesterol: '198 mg/dL', glucose: '97 mg/dL',
+    conditions: 'Hypertension (controlled with medication since 2019)',
     medications: 'Lisinopril 10mg daily',
-    familyHistory: 'Father: cardiovascular disease age 72',
-    labResults: 'BP 128/82 (controlled), Cholesterol 198, All other labs normal',
-    aiHealthScore: 91,
-    aiPrefillPct: 100,
-    status: 'Approved — Awaiting Signature',
-    step: 4,
+    surgeries: 'None',
+    familyHistory: 'Father: cardiovascular disease age 72 (alive). Mother: alive age 80, no significant history.',
+    drivingRecord: 'Clean — no violations in 5 years',
+    foreignTravel: 'Business travel to UK and Germany annually (disclosed)',
+    hazardousActivities: 'None',
+    aviationUse: 'Commercial passenger only',
+    existingInsurance: 'Universal Life $2M NYL (existing — not replacing)',
+    replacingExistingPolicy: 'No — adding new policy',
+    mibConsent: 'Consented', hipaaConsent: 'Consented',
+    labResults: 'BP 124/80 (controlled), Cholesterol 198, Glucose 97, eGFR 72 (normal), Urinalysis clear — Preferred class confirmed despite HTN (well-controlled)',
+    paramedExam: 'Paramedical exam completed May 12, 2026 by exam vendor LabOne',
+    aireport: {
+      stpScore: 88, mibFlags: 0, mvrFlags: 0, creditRisk: 'Low',
+      riskClass: 'Preferred (not Preferred Plus due to HTN med)', autoApproval: false,
+      expectedDecision: '4–8 hours (medical review required for HTN)',
+      naicCompliance: 'Pass', suitabilityCheck: 'Pass',
+      predictiveRiskBand: 'Low', mortalityRatio: '0.82',
+      aiSummary: 'Linda Morrison qualifies for Preferred class. Hypertension is well-controlled — BP 124/80 on Lisinopril, well within Preferred parameters. No other adverse findings. Whole Life $1M is appropriate for her $2.1M net worth and estate planning goals. STP Score 88 — medical team review recommended before final approval. AI projects 6-hour approval timeline.'
+    },
+    aiHealthScore: 91, aiPrefillPct: 100,
+    status: 'Awaiting E-Signature', urgency: 'high',
+    step: 7,
+    submittedDate: null, receivedDate: null, issuedDate: null,
+    uwCaseId: null, signatureSentDate: 'May 14, 2026', signatureDaysSince: 1,
     documents: [
-      { name: 'Rider Application Form', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'Health Update Form', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'Beneficiary Designation Update', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'Policy Amendment Rider', status: 'pending', aiTag: 'Needs Signature' },
-      { name: 'Disclosure Notice', status: 'signed', aiTag: 'Signed' }
+      { name: 'NYL Whole Life Application (Form WL-2026)', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'application' },
+      { name: 'Health & Medical Questionnaire', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'health' },
+      { name: 'Attending Physician Statement Request', status: 'signed', aiTag: 'Signed ✓ — sent to Dr. Chen', required: true, docType: 'aps' },
+      { name: 'Beneficiary Designation Form', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'beneficiary' },
+      { name: 'HIPAA Authorization & Medical Release', status: 'pending', aiTag: 'Needs E-Signature', required: true, docType: 'hipaa' },
+      { name: 'E-Delivery Consent', status: 'pending', aiTag: 'Needs E-Signature', required: true, docType: 'delivery' },
+      { name: 'Financial Questionnaire — High-Face-Amount ($1M+)', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'financial' },
+      { name: 'PUA Rider Election Form', status: 'signed', aiTag: 'Signed ✓', required: false, docType: 'rider' },
+      { name: 'NAIC NY Reg 60 Replacement Notice', status: 'signed', aiTag: 'Signed ✓ — not replacing', required: true, docType: 'naic' }
     ],
-    aiInsight: 'AI STP engine approved this rider add-on in 1.8 hours. Hypertension is well-controlled per recent labs. STP score 99 — highest confidence auto-approval. Rider activation will increase Linda\'s total coverage to $750K WL + $250K rider. Immediate e-signature can activate policy same day.'
+    aiInsight: 'Linda Morrison is a strong Preferred class candidate for Whole Life $1M. AI validated: controlled hypertension within Preferred parameters, 0 MIB flags, clean MVR. High net worth ($2.1M) supports $1M face amount — financial justification clear. PUA Rider added ($2,400/yr) will compound cash value significantly. AI projects CSV of $284K by age 65. Recommend: complete APS from Dr. Chen within 10 days to avoid application delay.',
+    agentNotes: 'Linda wants to explore an ILIT (Irrevocable Life Insurance Trust) to hold this policy. Coordinate with estate planning attorney before policy issuance.',
+    complianceChecks: [
+      { label: 'NY Reg 60 Replacement Notice', status: 'pass', note: 'Not replacing — adding new policy' },
+      { label: 'Financial Justification ($1M+)', status: 'pass', note: 'Net worth $2.1M — high-face-amount justified' },
+      { label: 'MIB Database Check', status: 'pass', note: 'No adverse findings' },
+      { label: 'OFAC / AML Screening', status: 'pass', note: 'Cleared — no matches' },
+      { label: 'HTN Medical Review', status: 'warn', note: 'Hypertension flagged — medical team review required' },
+      { label: 'APS Receipt (Dr. Chen)', status: 'warn', note: 'APS requested May 14 — awaiting receipt' }
+    ]
   },
-  'EA-UW-008': {
-    id: 'EA-UW-008', dealId: null, uwId: 'UW-2026-0008',
-    client: 'Maria Gonzalez', age: 48, dob: '1977-07-19',
-    email: 'maria.g@email.com', phone: '(212) 555-0748',
-    address: '350 Park Ave, New York, NY 10022',
-    ssn: '***-**-5534',
-    product: 'Disability Insurance Increase', productCode: 'di',
-    coverage: '+$3,000/mo benefit increase', premium: '$800/yr', term: 'To age 65',
-    beneficiary: 'N/A — Disability Product',
-    beneficiaryPct: 'N/A',
-    riders: ['COLA Rider', 'Future Increase Option'],
-    healthClass: 'Preferred',
-    smoker: 'Non-smoker',
-    height: "5'4\"", weight: '128 lbs', bmi: '22.0',
+
+  /* ── EA-003: Michael Santos — Universal Life — Submitted ───────── */
+  'EA-003': {
+    id: 'EA-003', dealId: 'D003', uwId: null, cardStatus: 'submitted',
+    client: 'Michael Santos', age: 42, dob: '1983-08-22', gender: 'Male',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New Jersey',
+    driversLicenseState: 'NJ', occupation: 'Senior Vice President — Operations', employer: 'Atlantic Capital Partners',
+    annualIncome: '$310,000', netWorth: '$890,000',
+    email: 'michael.santos@atlanticcap.com', phone: '(201) 555-0342',
+    address: '88 Hudson St, Apt 32C, Jersey City, NJ 07302',
+    ssn: '***-**-6612', taxId: '***-**-6612',
+    product: 'Universal Life Insurance — No-Lapse Guarantee', productCode: 'GUL',
+    carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '$750,000', premium: '$6,400/yr', premiumMode: 'Annual',
+    policyNumber: 'PENDING', term: 'Permanent (NLG to Age 90)',
+    beneficiary: 'Carmen Santos', beneficiaryRelationship: 'Spouse', beneficiaryPct: '100%',
+    contingentBeneficiary: 'Isabella Santos (Daughter)', contingentPct: '50%',
+    riders: ['No-Lapse Guarantee Rider (included)', 'Accelerated Death Benefit ($0)', 'Children\'s Insurance Rider — $25K ($240/yr)'],
+    ownerType: 'Insured is Owner',
+    payor: 'Michael Santos',
+    paymentMethod: 'ACH — Bank of America ****5521',
+    healthClass: 'Standard Plus Non-Tobacco',
+    smoker: 'Non-Tobacco User (never)',
+    height: "5'9\"", weight: '198 lbs', bmi: '29.2',
+    bloodPressure: '132/84 mmHg', cholesterol: '218 mg/dL', glucose: '101 mg/dL',
+    conditions: 'Elevated BMI (29.2) — not obese. Mild hypercholesterolemia (well-controlled — diet only). Pre-hypertension range.',
+    medications: 'None (declined statin — diet controlled)',
+    surgeries: 'Knee arthroscopy 2018 — fully recovered',
+    familyHistory: 'Father: heart attack age 58 (deceased). Mother: alive age 69, Type 2 DM controlled.',
+    drivingRecord: '1 minor speeding violation in 2023 — $200 fine',
+    foreignTravel: 'Annual trips to Brazil (ancestral country — disclosed)',
+    hazardousActivities: 'Recreational cycling — no racing',
+    aviationUse: 'Commercial passenger only',
+    existingInsurance: 'Group Life $400K employer. No individual life insurance.',
+    replacingExistingPolicy: 'No — supplemental coverage',
+    mibConsent: 'Consented', hipaaConsent: 'Consented',
+    labResults: 'BP 132/84 (pre-HTN range, no meds), Cholesterol 218 (mild elevation), Glucose 101 (border), BMI 29.2, All other labs normal — Standard Plus classification confirmed',
+    paramedExam: 'Paramedical exam completed April 10, 2026',
+    aireport: {
+      stpScore: 72, mibFlags: 0, mvrFlags: 1, creditRisk: 'Low',
+      riskClass: 'Standard Plus', autoApproval: false,
+      expectedDecision: '1–3 business days (manual UW review — cholesterol + BMI)',
+      naicCompliance: 'Pass', suitabilityCheck: 'Pass',
+      predictiveRiskBand: 'Moderate-Low', mortalityRatio: '1.15',
+      aiSummary: 'Michael Santos is classified Standard Plus. Key factors: mild hypercholesterolemia (218 mg/dL, diet-controlled), pre-hypertension (132/84), elevated BMI 29.2, and paternal cardiac history (deceased father age 58). No medications — positive indicator. AI recommends manual underwriting review. No table rating expected. Submit to UW for formal assessment.'
+    },
+    aiHealthScore: 78, aiPrefillPct: 87,
+    status: 'Submitted to Carrier', urgency: 'medium',
+    step: 8,
+    submittedDate: 'April 11, 2026', receivedDate: null, issuedDate: null,
+    uwCaseId: null,
+    documents: [
+      { name: 'GUL Application Form (Form UL-750-NJ)', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'application' },
+      { name: 'Health & Medical Questionnaire', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'health' },
+      { name: 'Beneficiary Designation Form', status: 'signed', aiTag: 'Signed ✓', required: true, docType: 'beneficiary' },
+      { name: 'HIPAA Authorization', status: 'signed', aiTag: 'Signed ✓', required: true, docType: 'hipaa' },
+      { name: 'Children\'s Rider Application', status: 'signed', aiTag: 'Signed ✓', required: false, docType: 'rider' },
+      { name: 'NJ Reg Replacement Notice', status: 'signed', aiTag: 'Signed ✓ — supplemental, not replacing', required: true, docType: 'naic' },
+      { name: 'E-Delivery Consent', status: 'signed', aiTag: 'Signed ✓', required: true, docType: 'delivery' },
+      { name: 'ACH Payment Authorization', status: 'signed', aiTag: 'Signed ✓', required: true, docType: 'payment' }
+    ],
+    aiInsight: 'Application submitted April 11, 2026. Standard Plus classification based on mild cholesterol elevation and BMI. AI recommends proactive UW handoff now — cholesterol is diet-controlled with no medication, which is a positive. Recommend agent provide supplemental letter noting Michael\'s active lifestyle (cycling). Expected UW decision: 1–3 business days. Ready to submit to Underwriting.',
+    agentNotes: 'Michael is motivated to close quickly — has a business travel schedule. Target UW decision by April 15.',
+    complianceChecks: [
+      { label: 'NJ Replacement Notice', status: 'pass', note: 'Supplemental coverage — no replacement' },
+      { label: 'NAIC Suitability Check', status: 'pass', note: 'Income $310K supports $750K face — suitability confirmed' },
+      { label: 'MIB Database Check', status: 'pass', note: 'No adverse findings' },
+      { label: 'OFAC / AML Screening', status: 'pass', note: 'Cleared' },
+      { label: 'Cholesterol Flag', status: 'warn', note: '218 mg/dL — borderline. UW review required' },
+      { label: 'Family Cardiac History', status: 'warn', note: 'Father deceased age 58 (cardiac) — flagged for UW review' }
+    ]
+  },
+
+  /* ── EA-004: Thomas Wright — Whole Life — Received by Carrier ──── */
+  'EA-004': {
+    id: 'EA-004', dealId: 'D004', uwId: 'UW-2026-0015', cardStatus: 'received',
+    client: 'Thomas Wright', age: 45, dob: '1980-07-15', gender: 'Male',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New York',
+    driversLicenseState: 'NY', occupation: 'Partner, Wright & Associates Law Firm', employer: 'Wright & Associates LLP',
+    annualIncome: '$580,000', netWorth: '$3,200,000',
+    email: 'thomas.wright@wlegal.com', phone: '(212) 555-0415',
+    address: '740 Park Ave, Apt 22A, New York, NY 10021',
+    ssn: '***-**-9981', taxId: '***-**-9981',
+    product: 'Whole Life Insurance — Participating (Paid-Up at 65)', productCode: 'WL-PU65',
+    carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '$1,000,000', premium: '$9,600/yr', premiumMode: 'Annual',
+    policyNumber: 'WL-2026-0415-TW', term: 'Permanent (Paid-Up at 65)',
+    beneficiary: 'Margaret Wright', beneficiaryRelationship: 'Spouse', beneficiaryPct: '70%',
+    contingentBeneficiary: 'Thomas Wright Jr. & Lily Wright (children equally)', contingentPct: '30%',
+    riders: ['Paid-Up Additions Rider ($3,600/yr)', 'Waiver of Premium Rider ($200/yr)', 'Accelerated Death Benefit'],
+    ownerType: 'Wright Family Revocable Trust',
+    payor: 'Thomas Wright',
+    paymentMethod: 'ACH — Goldman Sachs Private Bank ****2200',
+    healthClass: 'Preferred Plus Non-Tobacco',
+    smoker: 'Non-Tobacco User (never)',
+    height: "6'1\"", weight: '186 lbs', bmi: '24.6',
+    bloodPressure: '116/72 mmHg', cholesterol: '172 mg/dL', glucose: '88 mg/dL',
     conditions: 'None',
     medications: 'None',
-    familyHistory: 'Mother: Type 2 diabetes (disclosed)',
-    labResults: 'All labs normal, Blood Glucose 98',
-    aiHealthScore: 89,
-    aiPrefillPct: 87,
-    status: 'Approved — Awaiting Signature',
-    step: 3,
-    documents: [
-      { name: 'DI Application Form', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'Attending Physician Statement', status: 'ai-filled', aiTag: 'AI Filled' },
-      { name: 'Occupational Questionnaire', status: 'pending', aiTag: 'AI Needs Review' },
-      { name: 'Policy Amendment', status: 'pending', aiTag: 'Needs Signature' },
-      { name: 'Premium Authorization', status: 'pending', aiTag: 'Needs Signature' }
+    surgeries: 'Appendectomy 2005 — fully recovered',
+    familyHistory: 'Both parents alive and healthy. No family history of cancer, heart disease, or diabetes.',
+    drivingRecord: 'Clean — no violations',
+    foreignTravel: 'Annual Europe trip (vacation — disclosed)',
+    hazardousActivities: 'None',
+    aviationUse: 'Commercial passenger only',
+    existingInsurance: 'Group Term $500K through law firm partnership. No individual life.',
+    replacingExistingPolicy: 'No — adding permanent coverage',
+    mibConsent: 'Consented', hipaaConsent: 'Consented',
+    labResults: 'BP 116/72 (excellent), Cholesterol 172 (optimal), Glucose 88 (normal), eGFR 82 (excellent), All labs — Preferred Plus confirmed',
+    paramedExam: 'Paramedical exam completed April 5, 2026 — All results excellent',
+    aireport: {
+      stpScore: 84, mibFlags: 0, mvrFlags: 0, creditRisk: 'Very Low',
+      riskClass: 'Preferred Plus', autoApproval: true,
+      expectedDecision: 'RECEIVED — UW Case UW-2026-0015 in progress',
+      naicCompliance: 'Pass', suitabilityCheck: 'Pass',
+      predictiveRiskBand: 'Very Low', mortalityRatio: '0.72',
+      aiSummary: 'Thomas Wright is an ideal Preferred Plus candidate. All biomarkers excellent — BP 116/72, Cholesterol 172, Glucose 88. No medical conditions, no medications, no family history concerns. STP score 84 (trust ownership adds manual step). UW case UW-2026-0015 received by carrier April 9. AI projects: policy issued within 24–48 hours.'
+    },
+    aiHealthScore: 96, aiPrefillPct: 92,
+    status: 'Received by Carrier — UW In Progress',
+    urgency: 'low', step: 9,
+    submittedDate: 'April 7, 2026', receivedDate: 'April 9, 2026', issuedDate: null,
+    uwCaseId: 'UW-2026-0015',
+    uwTimeline: [
+      { date: 'Apr 7', event: 'Application Submitted', status: 'done', note: 'All documents complete — submitted via NYL Agent Portal' },
+      { date: 'Apr 9', event: 'Received by Carrier', status: 'done', note: 'NYL acknowledged receipt. Assigned to UW Team B.' },
+      { date: 'Apr 9', event: 'UW Case Created', status: 'done', note: 'UW Case UW-2026-0015 opened. Assigned to Sr. Underwriter R. Collins.' },
+      { date: 'Apr 10', event: 'Lab Results Received', status: 'done', note: 'All labs excellent — Preferred Plus confirmed by UW' },
+      { date: 'Apr 11', event: 'Trust Documentation Review', status: 'done', note: 'Wright Family Trust docs reviewed — ownership verified' },
+      { date: 'Apr 14', event: 'UW Decision — Pending', status: 'active', note: 'Sr. UW R. Collins reviewing final file — expected decision today' },
+      { date: 'Apr 15', event: 'Policy Issue', status: 'pending', note: 'Estimated issue date — pending UW approval' }
     ],
-    aiInsight: 'AI scored Maria at Preferred class (STP 86). Family history of diabetes flagged but no personal history — DI policy increase approved with standard exclusion clause for diabetes-related disability. Occupational questionnaire needs agent review: Maria is listed as "Manager" — confirm she performs no manual labor over 20% of duties to maintain Preferred class.'
+    documents: [
+      { name: 'WL Paid-Up-65 Application (Form WL-PU65)', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'application' },
+      { name: 'Health Questionnaire', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'health' },
+      { name: 'Trust Ownership Documentation (Wright Family Trust)', status: 'signed', aiTag: 'Attorney Certified ✓', required: true, docType: 'trust' },
+      { name: 'Beneficiary Designation Form', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'beneficiary' },
+      { name: 'HIPAA Authorization', status: 'signed', aiTag: 'Signed ✓', required: true, docType: 'hipaa' },
+      { name: 'Financial Questionnaire ($1M+ Face)', status: 'signed', aiTag: 'AI Filled + Signed ✓', required: true, docType: 'financial' },
+      { name: 'PUA Rider Election Form', status: 'signed', aiTag: 'Signed ✓', required: false, docType: 'rider' },
+      { name: 'NY Reg 60 Notice', status: 'signed', aiTag: 'Signed ✓', required: true, docType: 'naic' },
+      { name: 'E-Delivery Consent', status: 'signed', aiTag: 'Signed ✓', required: true, docType: 'delivery' }
+    ],
+    aiInsight: 'Case UW-2026-0015 is in final underwriting review. Thomas Wright is Preferred Plus with excellent vitals. Trust ownership documentation has been verified. All 9 documents signed and complete. AI predicts policy will be issued by April 15. $9,600/yr premium — PUA rider maximizes cash value to ~$380K by age 65.',
+    agentNotes: 'Thomas wanted the trust as owner for estate planning. His attorney (Sarah Klein, JD) coordinated the trust documents directly.',
+    complianceChecks: [
+      { label: 'NY Reg 60 Replacement Notice', status: 'pass', note: 'Not replacing — adding permanent coverage' },
+      { label: 'Financial Justification ($1M+ Face)', status: 'pass', note: 'Net worth $3.2M fully supports $1M face' },
+      { label: 'Trust Ownership Verification', status: 'pass', note: 'Trust certified by attorney Sarah Klein, JD' },
+      { label: 'MIB Database Check', status: 'pass', note: 'No adverse findings — cleared' },
+      { label: 'OFAC / AML Screening', status: 'pass', note: 'Cleared' },
+      { label: 'Preferred Plus Confirmation', status: 'pass', note: 'All biomarkers confirm Preferred Plus — no rating' }
+    ]
+  },
+
+  /* ── EA-005: Julia Chen — Deferred Annuity — AI Pre-filling ──── */
+  'EA-005': {
+    id: 'EA-005', dealId: 'D005', uwId: null, cardStatus: 'prefilling',
+    client: 'Julia Chen', age: 52, dob: '1973-04-18', gender: 'Female',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'Connecticut',
+    driversLicenseState: 'CT', occupation: 'Director of Finance', employer: 'Chen Enterprises LLC',
+    annualIncome: '$290,000', netWorth: '$1,450,000',
+    email: 'julia.chen@chenenterprises.com', phone: '(203) 555-0918',
+    address: '45 Riverside Dr, Greenwich, CT 06830',
+    ssn: '***-**-3312', taxId: '***-**-3312',
+    product: 'Deferred Income Annuity — Clear Income Advantage Fixed', productCode: 'DIA-CAF',
+    carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: 'Deferred Income Annuity — $8,000/yr contribution', premium: '$8,000/yr',
+    premiumMode: 'Annual', policyNumber: 'PENDING', term: 'Deferred 13 years (income starts at age 65)',
+    beneficiary: 'David Chen', beneficiaryRelationship: 'Spouse', beneficiaryPct: '100%',
+    contingentBeneficiary: 'Chen Family Trust', contingentPct: '100%',
+    riders: ['Return of Premium Death Benefit Rider', 'Inflation Adjustment Option (3% CPI-linked)', 'Joint Life Income Option (Julia + David)'],
+    ownerType: 'Insured is Owner — Joint with Right of Survivorship',
+    payor: 'Julia Chen',
+    paymentMethod: 'ACH — TD Bank ****4490',
+    healthClass: 'N/A — Annuity Product (Suitability-Based)',
+    smoker: 'Non-Tobacco User',
+    height: "5'4\"", weight: '128 lbs', bmi: '22.0',
+    bloodPressure: 'N/A', cholesterol: 'N/A', glucose: 'N/A',
+    conditions: 'N/A — Annuity (no medical underwriting required)',
+    medications: 'N/A',
+    surgeries: 'N/A',
+    familyHistory: 'N/A — Annuity product',
+    drivingRecord: 'N/A',
+    foreignTravel: 'N/A',
+    hazardousActivities: 'N/A',
+    aviationUse: 'N/A',
+    existingInsurance: 'No existing annuity. 401(k) $380K, IRA $290K.',
+    replacingExistingPolicy: 'No',
+    mibConsent: 'N/A — Annuity', hipaaConsent: 'N/A — Annuity',
+    labResults: 'N/A — Annuity (suitability-based, no labs required)',
+    paramedExam: 'N/A — Annuity product',
+    suitability: {
+      riskTolerance: 'Conservative to Moderate',
+      investmentObjective: 'Guaranteed Lifetime Income',
+      liquidityNeeds: 'Low — existing emergency fund covers 12 months',
+      timeHorizon: '13 years to income start',
+      otherRetirementAssets: '$670K (401K + IRA)',
+      suitabilityScore: 94,
+      suitabilityResult: 'SUITABLE — Annuity aligns with income-focused retirement objective',
+      aiSuitabilityNote: 'Julia\'s Conservative-Moderate profile, 13-year deferral, and desire for guaranteed income are well-matched to the Clear Income Advantage Fixed DIA. FINRA suitability model: 94/100. No concerns.'
+    },
+    aireport: {
+      stpScore: 0, mibFlags: 0, mvrFlags: 0, creditRisk: 'N/A',
+      riskClass: 'N/A — Annuity (suitability only)', autoApproval: false,
+      expectedDecision: 'No UW required — suitability-based product',
+      naicCompliance: 'Pass', suitabilityCheck: 'Pass (94/100)',
+      predictiveRiskBand: 'N/A', mortalityRatio: 'N/A',
+      aiSummary: 'AI is currently pre-filling Julia Chen\'s Deferred Income Annuity application (62% complete). Suitability score 94/100 — excellent fit. No medical underwriting required. Financial questionnaire being populated from CRM. Estimated AI completion: 3 minutes. Review and confirm before signature request.'
+    },
+    aiHealthScore: null, aiPrefillPct: 62,
+    status: 'AI Pre-filling in Progress', urgency: 'medium',
+    step: 3,
+    submittedDate: null, receivedDate: null, issuedDate: null,
+    uwCaseId: null,
+    documents: [
+      { name: 'DIA Application (Form DIA-NYL-2026)', status: 'ai-filling', aiTag: 'AI Filling — 62%', required: true, docType: 'application' },
+      { name: 'Suitability Questionnaire (FINRA Model)', status: 'ai-filling', aiTag: 'AI Filling — 75%', required: true, docType: 'suitability' },
+      { name: 'Financial Disclosure Form', status: 'ai-filling', aiTag: 'AI Filling — 55%', required: true, docType: 'financial' },
+      { name: 'Beneficiary Designation Form', status: 'pending', aiTag: 'Awaiting Review', required: true, docType: 'beneficiary' },
+      { name: 'CT Annuity Replacement Notice', status: 'pending', aiTag: 'Awaiting Review', required: true, docType: 'naic' },
+      { name: 'E-Delivery Consent', status: 'pending', aiTag: 'Awaiting Review', required: true, docType: 'delivery' }
+    ],
+    aiInsight: 'AI is pre-filling Julia Chen\'s Deferred Income Annuity application. Suitability score 94/100 — strong match for guaranteed income objective. $8,000/yr contribution over 13 years projects $2,840/mo guaranteed lifetime income starting at age 65 (Joint Life option with David). No medical underwriting required. Review & Complete to finish the remaining 38% of fields and initiate e-signature.',
+    agentNotes: 'Julia wants Joint Life income option with husband David (age 54). Include Return of Premium rider per her instructions — she wants heirs protected.',
+    complianceChecks: [
+      { label: 'FINRA Suitability (Annuity Best Interest)', status: 'pass', note: 'Score 94/100 — suitable for client profile' },
+      { label: 'CT Annuity Replacement Disclosure', status: 'pending', note: 'Awaiting completion — not replacing existing contract' },
+      { label: 'NAIC Annuity Suitability Model Reg', status: 'pass', note: 'Conservative-Moderate profile matches DIA' },
+      { label: 'OFAC / AML Screening', status: 'pass', note: 'Cleared' },
+      { label: 'Liquidity Assessment', status: 'pass', note: 'Client has adequate liquid assets — surrender charges disclosed' }
+    ]
+  },
+
+  /* ── EA-006: Alex Rivera — Whole Life — Draft ──────────────────── */
+  'EA-006': {
+    id: 'EA-006', dealId: 'D006', uwId: null, cardStatus: 'draft',
+    client: 'Alex Rivera', age: 34, dob: '1991-09-12', gender: 'Male',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New York',
+    driversLicenseState: 'NY', occupation: 'VP of Technology', employer: 'Meridian Tech Solutions',
+    annualIncome: '$185,000', netWorth: '$520,000',
+    email: 'alex.rivera@meridiantech.com', phone: '(212) 555-0834',
+    address: '310 West 56th St, Apt 8E, New York, NY 10019',
+    ssn: '***-**-7733', taxId: '***-**-7733',
+    product: 'Whole Life Insurance — Participating', productCode: 'WL',
+    carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '$500,000', premium: '$4,800/yr', premiumMode: 'Annual',
+    policyNumber: 'PENDING', term: 'Permanent / Lifetime',
+    beneficiary: 'Maria Rivera', beneficiaryRelationship: 'Spouse', beneficiaryPct: '100%',
+    contingentBeneficiary: 'Not yet designated', contingentPct: '',
+    riders: ['Paid-Up Additions Rider ($200/mo — maximizing CSV)', 'Waiver of Premium Rider', 'Disability Income Rider ($8,500/mo — NOT YET APPLIED)'],
+    ownerType: 'Insured is Owner',
+    payor: 'Alex Rivera',
+    paymentMethod: 'Not yet selected — ACH or credit card',
+    healthClass: 'Preferred Plus (estimated — paramedical pending)',
+    smoker: 'Non-Tobacco User (never)',
+    height: "5'10\"", weight: '168 lbs', bmi: '24.1',
+    bloodPressure: 'Not yet taken — paramedical pending', cholesterol: 'Not yet tested', glucose: 'Not yet tested',
+    conditions: 'No known conditions disclosed',
+    medications: 'None disclosed',
+    surgeries: 'None',
+    familyHistory: 'Father alive age 58, healthy. Mother alive age 56, controlled blood pressure.',
+    drivingRecord: 'Clean',
+    foreignTravel: 'Vacation trips to Mexico and Spain (disclosed)',
+    hazardousActivities: 'Recreational soccer — no competitive racing',
+    aviationUse: 'None',
+    existingInsurance: 'Group Life $200K through Meridian Tech. FNA identified DI gap — $8,500/mo uncovered.',
+    replacingExistingPolicy: 'No — adding individual coverage',
+    mibConsent: 'Pending', hipaaConsent: 'Pending',
+    labResults: 'Paramedical exam not yet scheduled — AI estimates Preferred Plus based on disclosed health.',
+    paramedExam: 'Paramedical exam NOT yet scheduled — REQUIRED to proceed',
+    aireport: {
+      stpScore: 0, mibFlags: 0, mvrFlags: 0, creditRisk: 'Low',
+      riskClass: 'Estimated Preferred Plus (pending exam)', autoApproval: false,
+      expectedDecision: 'Pending paramedical exam — est. 2–4 days after exam',
+      naicCompliance: 'Pending', suitabilityCheck: 'Pending',
+      predictiveRiskBand: 'Very Low (preliminary)', mortalityRatio: 'TBD',
+      aiSummary: 'Alex Rivera application is in DRAFT. AI has pre-filled 78% of fields from FNA and CRM data. Key outstanding items: (1) Paramedical exam not scheduled — must be completed before submission. (2) DI rider ($8,500/mo) is recommended but not yet added to this application — consider adding now. (3) Payment method not selected. (4) Contingent beneficiary not designated. Resume application to complete.'
+    },
+    aiHealthScore: null, aiPrefillPct: 78,
+    status: 'Draft — In Progress', urgency: 'low',
+    step: 2,
+    submittedDate: null, receivedDate: null, issuedDate: null,
+    uwCaseId: null,
+    documents: [
+      { name: 'NYL WL Application (Form WL-2026)', status: 'pending', aiTag: 'AI Filled 78% — Needs Review', required: true, docType: 'application' },
+      { name: 'Health & Medical Questionnaire', status: 'pending', aiTag: 'Needs Completion (paramedical required)', required: true, docType: 'health' },
+      { name: 'Beneficiary Designation Form', status: 'pending', aiTag: 'Partial — contingent beneficiary missing', required: true, docType: 'beneficiary' },
+      { name: 'HIPAA Authorization', status: 'pending', aiTag: 'Not started', required: true, docType: 'hipaa' },
+      { name: 'NY Reg 60 Replacement Notice', status: 'pending', aiTag: 'Not started', required: true, docType: 'naic' },
+      { name: 'PUA Rider Election Form', status: 'pending', aiTag: 'Not started', required: false, docType: 'rider' }
+    ],
+    aiInsight: 'Draft application — AI has pre-filled 78% from FNA and CRM. Three critical blockers before submission: (1) Schedule paramedical exam (call LabOne 1-800-555-2900). (2) Add Disability Income Rider — FNA identified $8,500/mo DI gap. (3) Select payment method and confirm contingent beneficiary. Once complete, estimated STP score: 92+ (Preferred Plus projected). Quick to close — Alex is a clean risk.',
+    agentNotes: 'Alex mentioned he prefers morning exam times (before 9am). LabOne can accommodate. Note: Alex\'s FNA recommended WL + DI bundle — the DI rider should be added to this application rather than a separate policy.',
+    complianceChecks: [
+      { label: 'NY Reg 60 Replacement Notice', status: 'pending', note: 'Not yet completed' },
+      { label: 'NAIC Suitability Check', status: 'pass', note: 'Income $185K supports $500K face — preliminary pass' },
+      { label: 'Paramedical Exam', status: 'warn', note: 'REQUIRED — not yet scheduled' },
+      { label: 'OFAC / AML Screening', status: 'pending', note: 'Pending — runs on submission' },
+      { label: 'DI Rider Assessment', status: 'warn', note: 'FNA gap identified — DI rider recommended but not added' }
+    ]
+  },
+
+  /* ── Existing legacy records (for backward compat) ─────────────── */
+  'EA-008': {
+    id: 'EA-008', dealId: 'D008', uwId: null, cardStatus: 'sig',
+    client: 'Kevin Park', age: 29, dob: '1997-03-14', gender: 'Male',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New York',
+    occupation: 'Software Engineer', employer: 'TechCorp Inc.',
+    annualIncome: '$185,000', netWorth: '$420,000',
+    email: 'kevin.p@email.com', phone: '(212) 555-0829',
+    address: '420 Lexington Ave, New York, NY 10170', ssn: '***-**-4821', taxId: '***-**-4821',
+    product: 'Term Life Insurance', productCode: 'term', carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '$500,000', premium: '$1,800/yr', premiumMode: 'Annual', policyNumber: 'PENDING', term: '20 years',
+    beneficiary: 'Sarah Park (Spouse)', beneficiaryRelationship: 'Spouse', beneficiaryPct: '100%', contingentBeneficiary: '', contingentPct: '',
+    riders: ['Waiver of Premium Rider', 'Accelerated Death Benefit'],
+    ownerType: 'Insured is Owner', payor: 'Kevin Park', paymentMethod: 'ACH',
+    healthClass: 'Preferred Plus', smoker: 'Non-smoker', height: "5'11\"", weight: '172 lbs', bmi: '24.0',
+    bloodPressure: '118/76', cholesterol: '182', glucose: '94',
+    conditions: 'None', medications: 'None', surgeries: 'None', familyHistory: 'No significant history',
+    drivingRecord: 'Clean', foreignTravel: 'None', hazardousActivities: 'None', aviationUse: 'None',
+    existingInsurance: 'Group Term $200K', replacingExistingPolicy: 'No',
+    mibConsent: 'Consented', hipaaConsent: 'Consented',
+    labResults: 'Cholesterol 182, BP 118/76, Blood Glucose 94 — All Normal',
+    paramedExam: 'Completed April 8, 2026',
+    suitability: null,
+    aireport: { stpScore: 95, mibFlags: 0, mvrFlags: 0, creditRisk: 'Low', riskClass: 'Preferred Plus', autoApproval: true, expectedDecision: '2–4 hours (STP)', naicCompliance: 'Pass', suitabilityCheck: 'Pass', predictiveRiskBand: 'Very Low', mortalityRatio: '0.68', aiSummary: 'Preferred Plus — STP eligible. Immediate issue upon signature.' },
+    aiHealthScore: 96, aiPrefillPct: 95, status: 'Awaiting E-Signature', urgency: 'urgent',
+    step: 4, submittedDate: null, receivedDate: null, issuedDate: null, uwCaseId: null, signatureSentDate: 'May 13, 2026', signatureDaysSince: 2,
+    documents: [
+      { name: 'Application Form 1040-NYL', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'application' },
+      { name: 'Health Questionnaire', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'health' },
+      { name: 'Beneficiary Designation', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'beneficiary' },
+      { name: 'HIPAA Authorization', status: 'pending', aiTag: 'Needs Signature', required: true, docType: 'hipaa' },
+      { name: 'E-Delivery Consent', status: 'pending', aiTag: 'Needs Signature', required: true, docType: 'delivery' }
+    ],
+    aiInsight: 'Kevin qualifies for Preferred Plus health class. AI detected no MIB flags. STP score 95 — recommend immediate e-signature request.',
+    agentNotes: '',
+    complianceChecks: [
+      { label: 'NY Reg 60 Replacement Notice', status: 'pass', note: 'No replacement' },
+      { label: 'NAIC Suitability Check', status: 'pass', note: 'Suitability confirmed' },
+      { label: 'MIB Database Check', status: 'pass', note: 'Clear' },
+      { label: 'OFAC / AML Screening', status: 'pass', note: 'Cleared' }
+    ]
+  },
+  'EA-009': {
+    id: 'EA-009', dealId: 'D009', uwId: null, cardStatus: 'complete',
+    client: 'Linda Morrison', age: 56, dob: '1969-11-02', gender: 'Female',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New York',
+    occupation: 'Chief Financial Officer', employer: 'Morrison Capital Group LLC',
+    annualIncome: '$420,000', netWorth: '$2,100,000',
+    email: 'linda.m@email.com', phone: '(212) 555-0856',
+    address: '1 World Trade Center, Suite 4200, New York, NY 10007', ssn: '***-**-7743', taxId: '***-**-7743',
+    product: 'Unified Managed Account (UMA)', productCode: 'uma', carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '$280,000 AUM', premium: '$2,800/yr fee', premiumMode: 'Annual', policyNumber: 'UMA-2026-0903', term: 'Ongoing',
+    beneficiary: 'James Morrison (Son)', beneficiaryRelationship: 'Son', beneficiaryPct: '100%', contingentBeneficiary: '', contingentPct: '',
+    riders: ['Discretionary Management', 'Tax-Loss Harvesting', 'ESG Overlay'],
+    ownerType: 'Insured is Owner', payor: 'Linda Morrison', paymentMethod: 'ACH — JP Morgan',
+    healthClass: 'N/A — Advisory Product', smoker: 'N/A', height: 'N/A', weight: 'N/A', bmi: 'N/A',
+    bloodPressure: 'N/A', cholesterol: 'N/A', glucose: 'N/A',
+    conditions: 'N/A', medications: 'N/A', surgeries: 'N/A', familyHistory: 'N/A',
+    drivingRecord: 'N/A', foreignTravel: 'N/A', hazardousActivities: 'N/A', aviationUse: 'N/A',
+    existingInsurance: 'N/A', replacingExistingPolicy: 'No',
+    mibConsent: 'N/A', hipaaConsent: 'N/A',
+    labResults: 'N/A — Suitability assessment completed',
+    paramedExam: 'N/A — Advisory product',
+    suitability: { riskTolerance: 'Moderate Growth', investmentObjective: 'Wealth Accumulation', suitabilityScore: 98, suitabilityResult: 'SUITABLE', aiSuitabilityNote: 'Portfolio allocation: 60% equities, 30% fixed income, 10% alternatives.' },
+    aireport: { stpScore: 0, mibFlags: 0, mvrFlags: 0, creditRisk: 'N/A', riskClass: 'N/A — Advisory', autoApproval: false, expectedDecision: 'No UW required', naicCompliance: 'Pass', suitabilityCheck: 'Pass', predictiveRiskBand: 'N/A', mortalityRatio: 'N/A', aiSummary: 'Suitability score 98/100. Transfer from current custodian: 3–5 business days.' },
+    aiHealthScore: null, aiPrefillPct: 100, status: 'Documents Signed — Ready to Activate', urgency: 'low',
+    step: 5, submittedDate: null, receivedDate: null, issuedDate: null, uwCaseId: null,
+    documents: [
+      { name: 'UMA Account Application', status: 'signed', aiTag: 'Signed', required: true, docType: 'application' },
+      { name: 'Investment Policy Statement', status: 'signed', aiTag: 'Signed', required: true, docType: 'financial' },
+      { name: 'Suitability Questionnaire', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'suitability' },
+      { name: 'Fee Disclosure ADV Part 2', status: 'signed', aiTag: 'Signed', required: true, docType: 'disclosure' },
+      { name: 'Transfer Authorization', status: 'signed', aiTag: 'Signed', required: true, docType: 'transfer' }
+    ],
+    aiInsight: 'Suitability 98/100. 60/30/10 allocation matches Moderate Growth profile. Activate transfer from current custodian.',
+    agentNotes: '',
+    complianceChecks: [
+      { label: 'FINRA Suitability', status: 'pass', note: '98/100' },
+      { label: 'ADV Part 2 Delivery', status: 'pass', note: 'Delivered and signed' }
+    ]
+  },
+  'EA-UW-009': {
+    id: 'EA-UW-009', dealId: null, uwId: 'UW-2026-0009', cardStatus: 'received',
+    client: 'Linda Morrison', age: 56, dob: '1969-11-02', gender: 'Female',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New York',
+    occupation: 'CFO', employer: 'Morrison Capital Group LLC',
+    annualIncome: '$420,000', netWorth: '$2,100,000',
+    email: 'linda.m@email.com', phone: '(212) 555-0856',
+    address: '1 World Trade Center, Suite 4200, New York, NY 10007', ssn: '***-**-7743', taxId: '***-**-7743',
+    product: 'Whole Life Rider Add-on', productCode: 'wl-rider', carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '$250,000 Rider', premium: '$1,200/yr', premiumMode: 'Annual', policyNumber: 'RIDER-PENDING', term: 'Permanent',
+    beneficiary: 'James Morrison (Son)', beneficiaryRelationship: 'Son', beneficiaryPct: '100%', contingentBeneficiary: '', contingentPct: '',
+    riders: ['Paid-Up Additions Rider', 'Disability Waiver'],
+    ownerType: 'Insured is Owner', payor: 'Linda Morrison', paymentMethod: 'ACH',
+    healthClass: 'Preferred Plus', smoker: 'Non-smoker', height: "5'6\"", weight: '138 lbs', bmi: '22.3',
+    bloodPressure: '128/82 (controlled)', cholesterol: '198', glucose: '97',
+    conditions: 'Hypertension — controlled, Lisinopril 10mg', medications: 'Lisinopril 10mg daily',
+    surgeries: 'None', familyHistory: 'Father: cardiovascular disease age 72',
+    drivingRecord: 'Clean', foreignTravel: 'Business travel UK/Germany', hazardousActivities: 'None', aviationUse: 'Commercial only',
+    existingInsurance: 'WL $1M NYL (adding rider)', replacingExistingPolicy: 'No — adding rider',
+    mibConsent: 'Consented', hipaaConsent: 'Consented',
+    labResults: 'BP 128/82 (controlled), Cholesterol 198, All other labs normal',
+    paramedExam: 'Completed',
+    suitability: null,
+    aireport: { stpScore: 99, mibFlags: 0, mvrFlags: 0, creditRisk: 'Low', riskClass: 'Preferred Plus', autoApproval: true, expectedDecision: 'APPROVED — STP 99', naicCompliance: 'Pass', suitabilityCheck: 'Pass', predictiveRiskBand: 'Very Low', mortalityRatio: '0.82', aiSummary: 'STP 99 — highest confidence. HTN well-controlled. Rider approved same day.' },
+    aiHealthScore: 91, aiPrefillPct: 100, status: 'Approved — Awaiting Signature', urgency: 'medium',
+    step: 4, submittedDate: null, receivedDate: null, issuedDate: null, uwCaseId: 'UW-2026-0009',
+    uwTimeline: [
+      { date: 'Apr 7', event: 'Rider Application Submitted', status: 'done', note: 'All documents complete' },
+      { date: 'Apr 7', event: 'STP Auto-Approved (Score: 99)', status: 'done', note: 'Automatic approval — no human UW needed' },
+      { date: 'Apr 8', event: 'E-Signature Requested', status: 'done', note: 'Signature link sent to Linda Morrison' },
+      { date: 'Apr 10', event: 'Awaiting Signature', status: 'active', note: 'Signature outstanding — resend if needed' }
+    ],
+    documents: [
+      { name: 'Rider Application Form', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'application' },
+      { name: 'Health Update Form', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'health' },
+      { name: 'Beneficiary Designation Update', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'beneficiary' },
+      { name: 'Policy Amendment Rider', status: 'pending', aiTag: 'Needs Signature', required: true, docType: 'rider' },
+      { name: 'Disclosure Notice', status: 'signed', aiTag: 'Signed', required: true, docType: 'naic' }
+    ],
+    aiInsight: 'STP score 99 — approved in 1.8 hours. Rider increases Linda\'s total WL coverage to $1.25M. Resend signature immediately.',
+    agentNotes: '',
+    complianceChecks: [
+      { label: 'STP Engine Approval', status: 'pass', note: 'Score 99 — auto-approved' },
+      { label: 'HTN Medical Review', status: 'pass', note: 'Well-controlled — Preferred Plus confirmed' }
+    ]
+  },
+  'EA-UW-008': {
+    id: 'EA-UW-008', dealId: null, uwId: 'UW-2026-0008', cardStatus: 'received',
+    client: 'Maria Gonzalez', age: 48, dob: '1977-07-19', gender: 'Female',
+    citizenship: 'U.S. Citizen', stateOfResidence: 'New York',
+    occupation: 'Senior Manager', employer: 'Gonzalez Consulting LLC',
+    annualIncome: '$210,000', netWorth: '$650,000',
+    email: 'maria.g@email.com', phone: '(212) 555-0748',
+    address: '350 Park Ave, New York, NY 10022', ssn: '***-**-5534', taxId: '***-**-5534',
+    product: 'Disability Insurance Increase', productCode: 'di', carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '+$3,000/mo benefit increase', premium: '$800/yr', premiumMode: 'Annual', policyNumber: 'DI-AMEND-PENDING', term: 'To age 65',
+    beneficiary: 'N/A — Disability Product', beneficiaryRelationship: 'N/A', beneficiaryPct: 'N/A', contingentBeneficiary: '', contingentPct: '',
+    riders: ['COLA Rider', 'Future Increase Option'],
+    ownerType: 'Insured is Owner', payor: 'Maria Gonzalez', paymentMethod: 'ACH',
+    healthClass: 'Preferred', smoker: 'Non-smoker', height: "5'4\"", weight: '128 lbs', bmi: '22.0',
+    bloodPressure: '118/74', cholesterol: '188', glucose: '98',
+    conditions: 'None', medications: 'None', surgeries: 'None', familyHistory: 'Mother: Type 2 DM (disclosed)',
+    drivingRecord: 'Clean', foreignTravel: 'None', hazardousActivities: 'None', aviationUse: 'Commercial only',
+    existingInsurance: 'DI $5,000/mo (increasing to $8,000/mo)', replacingExistingPolicy: 'No — amendment',
+    mibConsent: 'Consented', hipaaConsent: 'Consented',
+    labResults: 'All labs normal, Blood Glucose 98',
+    paramedExam: 'Completed',
+    suitability: null,
+    aireport: { stpScore: 86, mibFlags: 0, mvrFlags: 0, creditRisk: 'Low', riskClass: 'Preferred', autoApproval: false, expectedDecision: 'Occupational questionnaire review needed', naicCompliance: 'Pass', suitabilityCheck: 'Pass', predictiveRiskBand: 'Low', mortalityRatio: '0.95', aiSummary: 'Preferred class. Family DM history — personal health clear. Occupational questionnaire needs agent review for manual labor %. Recommend clarifying occupation classification.' },
+    aiHealthScore: 89, aiPrefillPct: 87, status: 'Approved — Awaiting Signature', urgency: 'medium',
+    step: 3, submittedDate: null, receivedDate: null, issuedDate: null, uwCaseId: 'UW-2026-0008',
+    documents: [
+      { name: 'DI Application Form', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'application' },
+      { name: 'Attending Physician Statement', status: 'ai-filled', aiTag: 'AI Filled', required: true, docType: 'aps' },
+      { name: 'Occupational Questionnaire', status: 'pending', aiTag: 'AI Needs Review', required: true, docType: 'occupation' },
+      { name: 'Policy Amendment', status: 'pending', aiTag: 'Needs Signature', required: true, docType: 'amendment' },
+      { name: 'Premium Authorization', status: 'pending', aiTag: 'Needs Signature', required: true, docType: 'payment' }
+    ],
+    aiInsight: 'Preferred class. Occupational questionnaire needs agent review for manual labor percentage. Resolve to proceed.',
+    agentNotes: 'Maria is a manager — confirm she performs <20% manual labor to maintain Preferred class.',
+    complianceChecks: [
+      { label: 'Occupational Classification', status: 'warn', note: 'Manual labor % needs confirmation' },
+      { label: 'Family History DM', status: 'pass', note: 'No personal history — DI exclusion not required' }
+    ]
   },
   'EA-NEW': {
-    id: 'EA-NEW', dealId: null, uwId: null,
-    client: '', age: '', dob: '',
-    email: '', phone: '',
-    address: '', ssn: '',
-    product: 'Select Product', productCode: '',
-    coverage: '', premium: '', term: '',
-    beneficiary: '', beneficiaryPct: '100%',
-    riders: [],
-    healthClass: '',
-    smoker: '',
-    height: '', weight: '', bmi: '',
-    conditions: '',
-    medications: '',
-    familyHistory: '',
-    labResults: '',
-    aiHealthScore: null,
-    aiPrefillPct: 0,
-    status: 'New Application',
-    step: 1,
+    id: 'EA-NEW', dealId: null, uwId: null, cardStatus: 'draft',
+    client: '', age: '', dob: '', gender: '',
+    citizenship: 'U.S. Citizen', stateOfResidence: '',
+    driversLicenseState: '', occupation: '', employer: '',
+    annualIncome: '', netWorth: '',
+    email: '', phone: '', address: '', ssn: '', taxId: '',
+    product: 'Select Product', productCode: '', carrier: 'New York Life Insurance Company', carrierCode: 'NYL',
+    coverage: '', premium: '', premiumMode: 'Annual', policyNumber: 'PENDING', term: '',
+    beneficiary: '', beneficiaryRelationship: '', beneficiaryPct: '100%', contingentBeneficiary: '', contingentPct: '',
+    riders: [], ownerType: 'Insured is Owner', payor: '', paymentMethod: '',
+    healthClass: '', smoker: '', height: '', weight: '', bmi: '',
+    bloodPressure: '', cholesterol: '', glucose: '',
+    conditions: '', medications: '', surgeries: '', familyHistory: '',
+    drivingRecord: '', foreignTravel: '', hazardousActivities: '', aviationUse: '',
+    existingInsurance: '', replacingExistingPolicy: 'No',
+    mibConsent: 'Pending', hipaaConsent: 'Pending',
+    labResults: '', paramedExam: '',
+    suitability: null,
+    aireport: { stpScore: 0, mibFlags: 0, mvrFlags: 0, creditRisk: 'TBD', riskClass: 'TBD', autoApproval: false, expectedDecision: 'Complete application to assess', naicCompliance: 'Pending', suitabilityCheck: 'Pending', predictiveRiskBand: 'TBD', mortalityRatio: 'TBD', aiSummary: 'Complete all sections to receive AI risk assessment and STP eligibility score.' },
+    aiHealthScore: null, aiPrefillPct: 0, status: 'New Application', urgency: 'low',
+    step: 1, submittedDate: null, receivedDate: null, issuedDate: null, uwCaseId: null,
     documents: [],
-    aiInsight: 'Complete all sections to receive AI risk assessment and STP eligibility score.'
+    aiInsight: 'Complete all sections to receive AI risk assessment and STP eligibility score.',
+    agentNotes: '',
+    complianceChecks: []
   }
 };
 
 /* ── Active E-App state ── */
 let activeEAppId = null;
 let currentEAppStep = 1;
-const totalEAppSteps = 5;
+const totalEAppSteps = 9;
 
-/* ── Step content templates ── */
+/* ── Step content templates (9-step NYL E-App) ── */
+
+// Helper: AI tag badge
+const _ai = () => `<span class="eapp-ai-fill-tag"><i class="fas fa-robot"></i> AI</span>`;
+const _aiV = (v) => v ? _ai() : '';
+
+/* ────────────────────────────────────────────────────────────────
+   STEP 1 — Client Information
+   Full demographics, citizenship, state of issue, DL, contact
+──────────────────────────────────────────────────────────────── */
 function _eAppStep1HTML(d) {
-  const ai = (f) => `<span class="eapp-ai-fill-tag"><i class="fas fa-robot"></i> AI</span>`;
   return `
     <div class="eapp-section">
-      <div class="eapp-section-title"><i class="fas fa-user"></i> Client Information</div>
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-user-circle"></i> Client Information</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 1: Proposed Insured / Owner Details</div>
+      </div>
+
+      <div class="eapp-subsection-label">Personal Demographics</div>
       <div class="eapp-form-grid">
         <div class="eapp-field-group">
-          <label class="eapp-label">Full Legal Name ${d.client ? ai() : ''}</label>
-          <input class="eapp-input ${d.client?'eapp-ai-filled':''}" id="ea-name" type="text" value="${d.client}" placeholder="Enter full legal name" />
+          <label class="eapp-label">Full Legal Name ${_aiV(d.client)}</label>
+          <input class="eapp-input ${d.client?'eapp-ai-filled':''}" value="${d.client||''}" placeholder="As shown on government ID" />
         </div>
         <div class="eapp-field-group">
-          <label class="eapp-label">Date of Birth ${d.dob ? ai() : ''}</label>
-          <input class="eapp-input ${d.dob?'eapp-ai-filled':''}" id="ea-dob" type="text" value="${d.dob}" placeholder="YYYY-MM-DD" />
+          <label class="eapp-label">Date of Birth ${_aiV(d.dob)}</label>
+          <input class="eapp-input ${d.dob?'eapp-ai-filled':''}" value="${d.dob||''}" placeholder="MM/DD/YYYY" />
         </div>
         <div class="eapp-field-group">
-          <label class="eapp-label">Age ${d.age ? ai() : ''}</label>
-          <input class="eapp-input ${d.age?'eapp-ai-filled':''}" id="ea-age" type="text" value="${d.age}" placeholder="Age" />
+          <label class="eapp-label">Age at Issue ${_aiV(d.age)}</label>
+          <input class="eapp-input ${d.age?'eapp-ai-filled':''}" value="${d.age||''}" placeholder="Age" />
         </div>
         <div class="eapp-field-group">
-          <label class="eapp-label">SSN ${d.ssn ? ai() : ''}</label>
-          <input class="eapp-input ${d.ssn?'eapp-ai-filled':''}" id="ea-ssn" type="text" value="${d.ssn}" placeholder="XXX-XX-XXXX" />
+          <label class="eapp-label">Gender ${_aiV(d.gender)}</label>
+          <select class="eapp-select ${d.gender?'eapp-ai-filled':''}">
+            <option ${d.gender==='Male'?'selected':''}>Male</option>
+            <option ${d.gender==='Female'?'selected':''}>Female</option>
+          </select>
         </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Social Security Number ${_aiV(d.ssn)}</label>
+          <input class="eapp-input ${d.ssn?'eapp-ai-filled':''}" value="${d.ssn||''}" placeholder="XXX-XX-XXXX (encrypted)" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Marital Status ${_aiV(d.maritalStatus)}</label>
+          <select class="eapp-select ${d.maritalStatus?'eapp-ai-filled':''}">
+            <option ${d.maritalStatus==='Married'?'selected':''}>Married</option>
+            <option ${d.maritalStatus==='Single'?'selected':''}>Single</option>
+            <option ${d.maritalStatus==='Divorced'?'selected':''}>Divorced</option>
+            <option ${d.maritalStatus==='Widowed'?'selected':''}>Widowed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Contact & Residence</div>
+      <div class="eapp-form-grid">
         <div class="eapp-field-group eapp-field-wide">
-          <label class="eapp-label">Email ${d.email ? ai() : ''}</label>
-          <input class="eapp-input ${d.email?'eapp-ai-filled':''}" id="ea-email" type="email" value="${d.email}" placeholder="client@email.com" />
+          <label class="eapp-label">Primary Email ${_aiV(d.email)}</label>
+          <input class="eapp-input ${d.email?'eapp-ai-filled':''}" type="email" value="${d.email||''}" placeholder="client@email.com" />
         </div>
         <div class="eapp-field-group">
-          <label class="eapp-label">Phone ${d.phone ? ai() : ''}</label>
-          <input class="eapp-input ${d.phone?'eapp-ai-filled':''}" id="ea-phone" type="text" value="${d.phone}" placeholder="(212) 555-0000" />
+          <label class="eapp-label">Primary Phone ${_aiV(d.phone)}</label>
+          <input class="eapp-input ${d.phone?'eapp-ai-filled':''}" value="${d.phone||''}" placeholder="(212) 555-0000" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Secondary Phone</label>
+          <input class="eapp-input" placeholder="(optional)" />
         </div>
         <div class="eapp-field-group eapp-field-full">
-          <label class="eapp-label">Address ${d.address ? ai() : ''}</label>
-          <input class="eapp-input ${d.address?'eapp-ai-filled':''}" id="ea-address" type="text" value="${d.address}" placeholder="Street, City, State, ZIP" />
+          <label class="eapp-label">Street Address ${_aiV(d.address)}</label>
+          <input class="eapp-input ${d.address?'eapp-ai-filled':''}" value="${d.address||''}" placeholder="Street address" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">City ${_aiV(d.city)}</label>
+          <input class="eapp-input ${d.city?'eapp-ai-filled':''}" value="${d.city||''}" placeholder="City" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">State of Issue ${_aiV(d.state)}</label>
+          <input class="eapp-input ${d.state?'eapp-ai-filled':''}" value="${d.state||'New York'}" placeholder="NY" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">ZIP Code</label>
+          <input class="eapp-input" value="${d.zip||''}" placeholder="10001" />
         </div>
       </div>
-      ${d.aiPrefillPct > 0 ? `<div class="eapp-ai-note"><i class="fas fa-robot"></i> AI prefilled ${d.aiPrefillPct}% of fields from client profile. Fields highlighted in blue were auto-populated — please verify accuracy.</div>` : ''}
-    </div>`;
-}
 
-function _eAppStep2HTML(d) {
-  const ai = () => `<span class="eapp-ai-fill-tag"><i class="fas fa-robot"></i> AI</span>`;
-  return `
-    <div class="eapp-section">
-      <div class="eapp-section-title"><i class="fas fa-shield-alt"></i> Product & Coverage Details</div>
+      <div class="eapp-subsection-label">Identity & Compliance (NAIC / AML)</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Citizenship Status ${_aiV(d.citizenship)}</label>
+          <select class="eapp-select ${d.citizenship?'eapp-ai-filled':''}">
+            <option ${d.citizenship==='US Citizen'?'selected':''}>US Citizen</option>
+            <option ${d.citizenship==='Permanent Resident'?'selected':''}>Permanent Resident</option>
+            <option>Non-Resident Alien</option>
+          </select>
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Country of Birth ${_aiV(d.countryOfBirth)}</label>
+          <input class="eapp-input ${d.countryOfBirth?'eapp-ai-filled':''}" value="${d.countryOfBirth||'United States'}" placeholder="Country" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Driver's License # ${_aiV(d.driversLicense)}</label>
+          <input class="eapp-input ${d.driversLicense?'eapp-ai-filled':''}" value="${d.driversLicense||''}" placeholder="DL number" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">DL Issuing State</label>
+          <input class="eapp-input" value="${d.dlState||''}" placeholder="NY" />
+        </div>
+        <div class="eapp-field-group eapp-field-wide">
+          <label class="eapp-label">Employer / Occupation ${_aiV(d.occupation)}</label>
+          <input class="eapp-input ${d.occupation?'eapp-ai-filled':''}" value="${d.occupation||''}" placeholder="Job title and industry" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Years at Current Employer</label>
+          <input class="eapp-input" value="${d.yearsEmployed||''}" placeholder="e.g. 5" />
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Owner Information (if different from Insured)</div>
       <div class="eapp-form-grid">
         <div class="eapp-field-group eapp-field-wide">
-          <label class="eapp-label">Product ${d.product ? ai() : ''}</label>
-          <input class="eapp-input ${d.product?'eapp-ai-filled':''}" id="ea-product" type="text" value="${d.product}" placeholder="Select product" />
+          <label class="eapp-label">Owner Type ${_aiV(d.ownerType)}</label>
+          <select class="eapp-select ${d.ownerType?'eapp-ai-filled':''}">
+            <option ${(!d.ownerType||d.ownerType==='Insured')?'selected':''}>Insured (Same as Proposed Insured)</option>
+            <option ${d.ownerType&&d.ownerType.includes('Spouse')?'selected':''}>Spouse</option>
+            <option ${d.ownerType&&d.ownerType.includes('Trust')?'selected':''}>Trust</option>
+            <option ${d.ownerType&&d.ownerType.includes('Business')?'selected':''}>Business Entity</option>
+          </select>
         </div>
-        <div class="eapp-field-group">
-          <label class="eapp-label">Coverage Amount ${d.coverage ? ai() : ''}</label>
-          <input class="eapp-input ${d.coverage?'eapp-ai-filled':''}" id="ea-coverage" type="text" value="${d.coverage}" placeholder="e.g. $500,000" />
-        </div>
-        <div class="eapp-field-group">
-          <label class="eapp-label">Annual Premium ${d.premium ? ai() : ''}</label>
-          <input class="eapp-input ${d.premium?'eapp-ai-filled':''}" id="ea-premium" type="text" value="${d.premium}" placeholder="e.g. $1,800/yr" />
-        </div>
-        <div class="eapp-field-group">
-          <label class="eapp-label">Policy Term ${d.term ? ai() : ''}</label>
-          <input class="eapp-input ${d.term?'eapp-ai-filled':''}" id="ea-term" type="text" value="${d.term}" placeholder="e.g. 20 years" />
-        </div>
+        ${d.ownerType && !d.ownerType.includes('Insured') ? `
         <div class="eapp-field-group eapp-field-wide">
-          <label class="eapp-label">Primary Beneficiary ${d.beneficiary ? ai() : ''}</label>
-          <input class="eapp-input ${d.beneficiary?'eapp-ai-filled':''}" id="ea-beneficiary" type="text" value="${d.beneficiary}" placeholder="Name and relationship" />
-        </div>
-        <div class="eapp-field-group">
-          <label class="eapp-label">Beneficiary % ${d.beneficiaryPct ? ai() : ''}</label>
-          <input class="eapp-input ${d.beneficiaryPct?'eapp-ai-filled':''}" id="ea-bene-pct" type="text" value="${d.beneficiaryPct}" placeholder="100%" />
-        </div>
-      </div>
-      ${d.riders && d.riders.length ? `
-        <div class="eapp-riders-section">
-          <div class="eapp-riders-title"><i class="fas fa-robot"></i> AI-Recommended Riders</div>
-          <div class="eapp-riders-grid">
-            ${d.riders.map(r => `<label class="eapp-rider-item"><input type="checkbox" checked /> <span>${r}</span></label>`).join('')}
-          </div>
+          <label class="eapp-label">Owner Name / Trust Name ${_ai()}</label>
+          <input class="eapp-input eapp-ai-filled" value="${d.ownerType||''}" />
         </div>` : ''}
+      </div>
+
+      <div class="eapp-ai-note"><i class="fas fa-robot"></i> AI pre-filled <strong>${d.aiPrefillPct||0}%</strong> of fields from your CRM client profile, FNA data, and prior KYC documentation. Fields highlighted in blue were auto-populated — please review for accuracy. SSN is AES-256 encrypted at rest and in transit per NAIC data security standards.</div>
+
+      ${d.aireport && d.aireport.mibFlags === 0 ? `
+      <div class="eapp-compliance-banner ok"><i class="fas fa-check-shield"></i> <strong>OFAC / AML Pre-Check:</strong> No watchlist matches detected. Client identity verified against FinCEN beneficial ownership database.</div>` : `
+      <div class="eapp-compliance-banner warn"><i class="fas fa-exclamation-triangle"></i> <strong>Compliance Review Required:</strong> Additional identity verification documents may be needed.</div>`}
     </div>`;
 }
 
-function _eAppStep3HTML(d) {
-  const ai = () => `<span class="eapp-ai-fill-tag"><i class="fas fa-robot"></i> AI</span>`;
-  const isAdvisory = d.productCode === 'uma';
+/* ────────────────────────────────────────────────────────────────
+   STEP 2 — Coverage & Product Details
+   Carrier, product, face amount, premium mode, owner, payor, payment
+──────────────────────────────────────────────────────────────── */
+function _eAppStep2HTML(d) {
+  const premiumModes = ['Annual','Semi-Annual','Quarterly','Monthly (EFT)','Monthly (List Bill)'];
+  const paymentMethods = ['ACH / Bank Draft','Credit Card','Check','Payroll Deduction'];
   return `
     <div class="eapp-section">
-      <div class="eapp-section-title"><i class="fas fa-heartbeat"></i> Health & Medical ${isAdvisory ? '(Suitability)' : 'Questionnaire'}</div>
-      ${isAdvisory ? `
-        <div class="eapp-advisory-suitability">
-          <div class="eapp-suitability-score"><div class="eapp-suit-val">98</div><div class="eapp-suit-lbl">AI Suitability Score</div></div>
-          <div class="eapp-suitability-details">
-            <div class="eapp-suit-row"><span>Risk Tolerance</span><span class="eapp-ai-filled-val">Moderate Growth ${ai()}</span></div>
-            <div class="eapp-suit-row"><span>Investment Horizon</span><span class="eapp-ai-filled-val">10+ years ${ai()}</span></div>
-            <div class="eapp-suit-row"><span>Annual Income</span><span class="eapp-ai-filled-val">$350,000+ ${ai()}</span></div>
-            <div class="eapp-suit-row"><span>Net Worth</span><span class="eapp-ai-filled-val">$2.0M+ ${ai()}</span></div>
-            <div class="eapp-suit-row"><span>Experience</span><span class="eapp-ai-filled-val">Sophisticated Investor ${ai()}</span></div>
-          </div>
-        </div>` : `
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-shield-alt"></i> Coverage &amp; Product Details</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 2: Policy Specifications</div>
+      </div>
+
+      <div class="eapp-subsection-label">Carrier &amp; Product Selection</div>
       <div class="eapp-form-grid">
-        <div class="eapp-field-group">
-          <label class="eapp-label">Health Class ${d.healthClass ? ai() : ''}</label>
-          <input class="eapp-input ${d.healthClass?'eapp-ai-filled':''}" id="ea-hclass" type="text" value="${d.healthClass}" placeholder="e.g. Preferred Plus" />
+        <div class="eapp-field-group eapp-field-wide">
+          <label class="eapp-label">Carrier ${_ai()}</label>
+          <input class="eapp-input eapp-ai-filled" value="${d.carrier||'New York Life Insurance Company'}" readonly />
+        </div>
+        <div class="eapp-field-group eapp-field-wide">
+          <label class="eapp-label">Product Name ${_aiV(d.product)}</label>
+          <input class="eapp-input ${d.product?'eapp-ai-filled':''}" value="${d.product||''}" placeholder="Select insurance product" />
         </div>
         <div class="eapp-field-group">
-          <label class="eapp-label">Tobacco Use ${d.smoker ? ai() : ''}</label>
-          <input class="eapp-input ${d.smoker?'eapp-ai-filled':''}" id="ea-smoker" type="text" value="${d.smoker}" placeholder="Smoker / Non-smoker" />
+          <label class="eapp-label">Product Code ${_aiV(d.productCode)}</label>
+          <input class="eapp-input ${d.productCode?'eapp-ai-filled':''}" value="${d.productCode||''}" placeholder="e.g. TERM20, WL, GUL" />
         </div>
         <div class="eapp-field-group">
-          <label class="eapp-label">Height ${d.height ? ai() : ''}</label>
-          <input class="eapp-input ${d.height?'eapp-ai-filled':''}" id="ea-height" type="text" value="${d.height}" placeholder="5'10&quot;" />
-        </div>
-        <div class="eapp-field-group">
-          <label class="eapp-label">Weight ${d.weight ? ai() : ''}</label>
-          <input class="eapp-input ${d.weight?'eapp-ai-filled':''}" id="ea-weight" type="text" value="${d.weight}" placeholder="170 lbs" />
-        </div>
-        <div class="eapp-field-group eapp-field-full">
-          <label class="eapp-label">Current Conditions / Medications ${d.conditions ? ai() : ''}</label>
-          <textarea class="eapp-textarea ${d.conditions?'eapp-ai-filled':''}" id="ea-conditions" rows="2">${d.conditions}</textarea>
-        </div>
-        <div class="eapp-field-group eapp-field-full">
-          <label class="eapp-label">Family History ${d.familyHistory ? ai() : ''}</label>
-          <textarea class="eapp-textarea ${d.familyHistory?'eapp-ai-filled':''}" id="ea-family" rows="2">${d.familyHistory}</textarea>
-        </div>
-        <div class="eapp-field-group eapp-field-full">
-          <label class="eapp-label">Lab Results ${d.labResults ? ai() : ''}</label>
-          <textarea class="eapp-textarea ${d.labResults?'eapp-ai-filled':''}" id="ea-labs" rows="2">${d.labResults}</textarea>
+          <label class="eapp-label">Plan / Series</label>
+          <input class="eapp-input eapp-ai-filled" value="${d.productCode||''} — NYL 2026 Series" />
         </div>
       </div>
+
+      <div class="eapp-subsection-label">Policy Amount &amp; Premium Structure</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Face Amount / Coverage ${_aiV(d.coverage)}</label>
+          <input class="eapp-input ${d.coverage?'eapp-ai-filled':''}" value="${d.coverage||''}" placeholder="e.g. $500,000" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Annual Base Premium ${_aiV(d.premium)}</label>
+          <input class="eapp-input ${d.premium?'eapp-ai-filled':''}" value="${d.premium||''}" placeholder="e.g. $1,800/yr" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Policy Term ${_aiV(d.term)}</label>
+          <input class="eapp-input ${d.term?'eapp-ai-filled':''}" value="${d.term||''}" placeholder="e.g. 20 years / Permanent" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Premium Payment Mode</label>
+          <select class="eapp-select eapp-ai-filled">
+            ${premiumModes.map(m => `<option ${m.startsWith('Annual')?'selected':''}>${m}</option>`).join('')}
+          </select>
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Premium Payment Method</label>
+          <select class="eapp-select eapp-ai-filled">
+            ${paymentMethods.map(m => `<option ${m.startsWith('ACH')?'selected':''}>${m}</option>`).join('')}
+          </select>
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Policy Effective Date</label>
+          <input class="eapp-input eapp-ai-filled" value="Date of Issue (upon approval)" />
+        </div>
+      </div>
+
+      ${d.riders && d.riders.length ? `
+      <div class="eapp-subsection-label">Optional Riders &amp; Endorsements</div>
+      <div class="eapp-riders-section">
+        <div class="eapp-riders-ai-note"><i class="fas fa-robot"></i> AI-recommended riders based on client profile, age, health class, and financial objectives. Review and confirm each selection.</div>
+        <div class="eapp-riders-grid">
+          ${d.riders.map(r => `
+            <label class="eapp-rider-item">
+              <input type="checkbox" checked />
+              <span class="eapp-rider-name">${r}</span>
+              <span class="eapp-rider-tag"><i class="fas fa-robot"></i> Recommended</span>
+            </label>`).join('')}
+          <label class="eapp-rider-item">
+            <input type="checkbox" />
+            <span class="eapp-rider-name">Return of Premium Rider</span>
+            <span class="eapp-rider-tag optional">Optional</span>
+          </label>
+          <label class="eapp-rider-item">
+            <input type="checkbox" />
+            <span class="eapp-rider-name">Chronic Illness Rider</span>
+            <span class="eapp-rider-tag optional">Optional</span>
+          </label>
+        </div>
+      </div>` : ''}
+
+      <div class="eapp-subsection-label">NY Regulation 60 — Replacement Notice</div>
+      <div class="eapp-reg60-box">
+        <div class="eapp-reg60-header"><i class="fas fa-balance-scale"></i> NY Reg 60 Replacement Disclosure — Required for New York Applicants</div>
+        <div class="eapp-reg60-body">
+          <label class="eapp-consent-item"><input type="checkbox" id="ea-reg60-1" /> <span>Is the proposed insurance intended to replace, alter, or relinquish any existing life insurance policy or annuity contract?</span></label>
+          <label class="eapp-consent-item"><input type="checkbox" id="ea-reg60-2" /> <span>Within the past 24 months, has any life insurance policy been lapsed, surrendered, or reduced in value?</span></label>
+          <div class="eapp-reg60-note">If yes to either: A signed NY Reg 60 Disclosure Statement must be attached. Replacement notice sent to existing carrier within 5 business days per DFS requirements.</div>
+        </div>
+      </div>
+
+      <div class="eapp-ai-note"><i class="fas fa-magic"></i> AI matched this product to the client's FNA needs analysis. Premium competitiveness score: <strong>92/100</strong> vs. peer carriers. Estimated policy ROI over 20 years: <strong>+$140K cash value (participating dividends included)</strong>.</div>
+    </div>`;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   STEP 3 — Beneficiary Designations
+   Primary + contingent, relationship, %, trust option, minor details
+──────────────────────────────────────────────────────────────── */
+function _eAppStep3HTML(d) {
+  const bene = d.beneficiary || 'Not specified';
+  const beneRel = d.beneficiaryRelationship || 'Spouse';
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-users"></i> Beneficiary Designations</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 3: Death Benefit Distribution</div>
+      </div>
+
+      <div class="eapp-bene-ai-banner"><i class="fas fa-robot"></i> AI pre-populated beneficiary from client's FNA profile and estate planning documents. Please verify all designations before submitting. Beneficiary changes after policy issue require a signed Change of Beneficiary form (NYL Form 12345).</div>
+
+      <div class="eapp-subsection-label">Primary Beneficiary(ies)</div>
+      <div class="eapp-bene-card primary-bene">
+        <div class="eapp-bene-card-header"><i class="fas fa-star"></i> Primary Beneficiary 1 ${_ai()}</div>
+        <div class="eapp-form-grid">
+          <div class="eapp-field-group eapp-field-wide">
+            <label class="eapp-label">Full Legal Name</label>
+            <input class="eapp-input eapp-ai-filled" value="${bene}" />
+          </div>
+          <div class="eapp-field-group">
+            <label class="eapp-label">Relationship to Insured</label>
+            <select class="eapp-select eapp-ai-filled">
+              <option ${beneRel==='Spouse'?'selected':''}>Spouse</option>
+              <option ${beneRel==='Child'?'selected':''}>Child</option>
+              <option ${beneRel==='Parent'?'selected':''}>Parent</option>
+              <option ${beneRel==='Sibling'?'selected':''}>Sibling</option>
+              <option ${beneRel==='Trust'?'selected':''}>Irrevocable Trust</option>
+              <option ${beneRel==='Estate'?'selected':''}>Estate</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="eapp-field-group">
+            <label class="eapp-label">Date of Birth</label>
+            <input class="eapp-input" placeholder="MM/DD/YYYY" />
+          </div>
+          <div class="eapp-field-group">
+            <label class="eapp-label">Social Security Number</label>
+            <input class="eapp-input" placeholder="XXX-XX-XXXX (encrypted)" />
+          </div>
+          <div class="eapp-field-group">
+            <label class="eapp-label">Share of Death Benefit</label>
+            <input class="eapp-input eapp-ai-filled" value="${d.beneficiaryPct||'100%'}" />
+          </div>
+          <div class="eapp-field-group">
+            <label class="eapp-label">Per Stirpes / Per Capita</label>
+            <select class="eapp-select">
+              <option selected>Per Stirpes</option>
+              <option>Per Capita</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="eapp-bene-add-row">
+        <button class="eapp-bene-add-btn" onclick="_addBeneficiary('primary')"><i class="fas fa-plus"></i> Add Primary Beneficiary</button>
+        <span class="eapp-bene-add-note">Maximum 5 primary beneficiaries. Total must equal 100%.</span>
+      </div>
+
+      <div class="eapp-subsection-label">Contingent (Secondary) Beneficiary(ies)</div>
+      <div class="eapp-bene-card contingent-bene">
+        <div class="eapp-bene-card-header"><i class="fas fa-user-friends"></i> Contingent Beneficiary 1</div>
+        <div class="eapp-form-grid">
+          <div class="eapp-field-group eapp-field-wide">
+            <label class="eapp-label">Full Legal Name</label>
+            <input class="eapp-input" placeholder="Contingent beneficiary name" />
+          </div>
+          <div class="eapp-field-group">
+            <label class="eapp-label">Relationship</label>
+            <select class="eapp-select"><option>Child</option><option>Parent</option><option>Sibling</option><option>Trust</option><option>Estate</option></select>
+          </div>
+          <div class="eapp-field-group">
+            <label class="eapp-label">Share %</label>
+            <input class="eapp-input" placeholder="100%" />
+          </div>
+          <div class="eapp-field-group">
+            <label class="eapp-label">Date of Birth</label>
+            <input class="eapp-input" placeholder="MM/DD/YYYY" />
+          </div>
+        </div>
+      </div>
+
+      <div class="eapp-bene-add-row">
+        <button class="eapp-bene-add-btn" onclick="_addBeneficiary('contingent')"><i class="fas fa-plus"></i> Add Contingent Beneficiary</button>
+      </div>
+
+      <div class="eapp-subsection-label">Trust &amp; Minor Beneficiary Options</div>
+      <div class="eapp-trust-box">
+        <label class="eapp-consent-item"><input type="checkbox" /> <span>Beneficiary is an Irrevocable Life Insurance Trust (ILIT) — attach trust certification and trustee signature</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" /> <span>Beneficiary is a minor — I wish to appoint a custodian under UTMA/UGMA</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" /> <span>Beneficiary is a special needs trust — attach Special Needs Trust Declaration (Form NYL-5502)</span></label>
+      </div>
+
+      <div class="eapp-ai-note"><i class="fas fa-robot"></i> AI recommendation: Based on ${d.client}'s estate plan, consider a Trusteed IRA or Spousal Lifetime Access Trust (SLAT) structure to protect the death benefit from estate taxes above the $13.61M exemption threshold. Coordinate with estate planning attorney before finalizing trust beneficiary designations.</div>
+    </div>`;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   STEP 4 — Financial Profile
+   Income, net worth, existing insurance, replacement, liquidity, objectives
+──────────────────────────────────────────────────────────────── */
+function _eAppStep4HTML(d) {
+  const fin = d.financial || {};
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-chart-line"></i> Financial Profile &amp; Suitability</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 4: Financial Suitability &amp; NAIC Best Interest</div>
+      </div>
+
+      <div class="eapp-compliance-banner info"><i class="fas fa-info-circle"></i> <strong>NAIC Best Interest Standard:</strong> New York's Regulation 187 requires that this recommendation be in the client's best interest. All financial data collected here is used to substantiate suitability. AI has pre-scored suitability at <strong>${d.suitability ? d.suitability.suitabilityScore : 94}/100</strong>.</div>
+
+      <div class="eapp-subsection-label">Income &amp; Net Worth</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Annual Income (Gross) ${_aiV(fin.annualIncome||d.annualIncome)}</label>
+          <input class="eapp-input ${(fin.annualIncome||d.annualIncome)?'eapp-ai-filled':''}" value="${fin.annualIncome||d.annualIncome||''}" placeholder="e.g. $120,000" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Household Income</label>
+          <input class="eapp-input" value="${fin.householdIncome||''}" placeholder="e.g. $180,000" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Liquid Net Worth ${_aiV(fin.liquidNetWorth||d.liquidNetWorth)}</label>
+          <input class="eapp-input ${(fin.liquidNetWorth||d.liquidNetWorth)?'eapp-ai-filled':''}" value="${fin.liquidNetWorth||d.liquidNetWorth||''}" placeholder="Cash + liquid investments" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Total Net Worth</label>
+          <input class="eapp-input" value="${fin.totalNetWorth||''}" placeholder="Including real estate, retirement" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Monthly Discretionary Income</label>
+          <input class="eapp-input" placeholder="After all expenses" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Federal Tax Bracket</label>
+          <select class="eapp-select">
+            <option>22%</option><option>24%</option><option selected>32%</option><option>35%</option><option>37%</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Existing Insurance &amp; Replacement Analysis</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Total Existing Life Insurance Coverage ${_aiV(fin.existingInsurance)}</label>
+          <input class="eapp-input ${fin.existingInsurance?'eapp-ai-filled':''}" value="${fin.existingInsurance||''}" placeholder="e.g. $250,000" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Total Coverage After This Policy ${_ai()}</label>
+          <input class="eapp-input eapp-ai-filled" value="${d.coverage ? 'See illustration summary' : ''}" placeholder="AI calculates total" />
+        </div>
+        <div class="eapp-field-group eapp-field-wide">
+          <label class="eapp-label">Purpose of This Insurance ${_aiV(fin.purpose)}</label>
+          <select class="eapp-select ${fin.purpose?'eapp-ai-filled':''}">
+            <option>Income Replacement</option>
+            <option>Estate Planning / Wealth Transfer</option>
+            <option>Business Continuation / Key Person</option>
+            <option>Charitable Giving</option>
+            <option>Mortgage / Debt Protection</option>
+            <option selected>Multiple Purposes (see FNA)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Liquidity &amp; Premium Sustainability</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Emergency Fund (Months of Expenses)</label>
+          <select class="eapp-select">
+            <option>Less than 3</option><option>3–6 months</option><option selected>6–12 months</option><option>12+ months</option>
+          </select>
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Premium as % of Annual Income ${_ai()}</label>
+          <input class="eapp-input eapp-ai-filled" value="${d.premium && fin.annualIncome ? 'AI calculating...' : 'Pending income data'}" readonly />
+        </div>
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Does this premium payment cause any financial hardship?</label>
+          <select class="eapp-select">
+            <option selected>No — within budget and fully sustainable</option>
+            <option>Minor adjustment to savings rate required</option>
+            <option>Will require budget restructuring</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Investment Objectives &amp; Risk Profile</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Primary Investment Objective</label>
+          <select class="eapp-select eapp-ai-filled">
+            <option selected>Protection + Cash Value Accumulation</option>
+            <option>Pure Death Benefit Protection</option>
+            <option>Retirement Income Supplement</option>
+            <option>Estate Preservation</option>
+          </select>
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Risk Tolerance ${_aiV(d.suitability)}</label>
+          <select class="eapp-select ${d.suitability?'eapp-ai-filled':''}">
+            <option>Conservative</option>
+            <option ${d.suitability&&d.suitability.riskTolerance&&d.suitability.riskTolerance.includes('Moderate')?'selected':''}>Conservative to Moderate</option>
+            <option ${!d.suitability?'selected':''}>Moderate</option>
+            <option>Moderate to Aggressive</option>
+            <option>Aggressive</option>
+          </select>
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Investment Horizon</label>
+          <select class="eapp-select eapp-ai-filled">
+            <option>Short-term (1–5 years)</option>
+            <option>Medium-term (5–10 years)</option>
+            <option selected>Long-term (10–20 years)</option>
+            <option>Permanent (lifetime)</option>
+          </select>
+        </div>
+      </div>
+
+      ${d.suitability ? `
+      <div class="eapp-suitability-score-panel">
+        <div class="eapp-ss-header"><i class="fas fa-robot"></i> AI Suitability Assessment (NYL Reg 187 Best Interest)</div>
+        <div class="eapp-ss-body">
+          <div class="eapp-ss-score-circle"><div class="eapp-ss-score-val">${d.suitability.suitabilityScore}</div><div class="eapp-ss-score-lbl">Suitability Score</div></div>
+          <div class="eapp-ss-details">
+            <div class="eapp-ss-row ok"><i class="fas fa-check-circle"></i> <span>Premium-to-income ratio within NAIC guidelines</span></div>
+            <div class="eapp-ss-row ok"><i class="fas fa-check-circle"></i> <span>Product complexity matches investor sophistication level</span></div>
+            <div class="eapp-ss-row ok"><i class="fas fa-check-circle"></i> <span>Coverage need validated by FNA discovery session</span></div>
+            <div class="eapp-ss-row ok"><i class="fas fa-check-circle"></i> <span>Liquidity preserved — adequate emergency fund confirmed</span></div>
+            ${d.suitability.suitabilityScore >= 90 ? `<div class="eapp-ss-verdict pass"><i class="fas fa-award"></i> Suitability PASSED — Product qualifies for Best Interest submission</div>` : `<div class="eapp-ss-verdict review"><i class="fas fa-exclamation-triangle"></i> Additional suitability documentation recommended</div>`}
+          </div>
+        </div>
+      </div>` : ''}
+    </div>`;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   STEP 5 — Health & Medical History
+   Full health questionnaire, conditions, meds, family history, BMI, labs,
+   paramedical, tobacco, hazardous activities, foreign travel, aviation
+──────────────────────────────────────────────────────────────── */
+function _eAppStep5HTML(d) {
+  const hasConditions = d.conditions && d.conditions !== 'None reported';
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-heartbeat"></i> Health &amp; Medical History</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 5: Non-Medical Questionnaire + Medical Evidence</div>
+      </div>
+
       ${d.aiHealthScore ? `
       <div class="eapp-health-score-bar">
-        <div class="eapp-hs-label">AI Health Score</div>
-        <div class="eapp-hs-track"><div class="eapp-hs-fill" style="width:${d.aiHealthScore}%"><span>${d.aiHealthScore}/100</span></div></div>
-        <div class="eapp-hs-note">Based on Rx history, MIB check, MVR, lab results, and medical exam data</div>
-      </div>` : ''}`}
+        <div class="eapp-hs-label"><i class="fas fa-robot"></i> AI Health Score</div>
+        <div class="eapp-hs-track"><div class="eapp-hs-fill ${d.aiHealthScore>=85?'hs-excellent':d.aiHealthScore>=70?'hs-good':'hs-review'}" style="width:${d.aiHealthScore}%"><span>${d.aiHealthScore}/100</span></div></div>
+        <div class="eapp-hs-note">Score derived from: Rx database, MIB check, MVR report, paramedical exam results, and AI health pattern analysis</div>
+      </div>` : ''}
+
+      <div class="eapp-subsection-label">Physical Measurements</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Height ${_aiV(d.height)}</label>
+          <input class="eapp-input ${d.height?'eapp-ai-filled':''}" value="${d.height||''}" placeholder="e.g. 5'10&quot;" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Weight ${_aiV(d.weight)}</label>
+          <input class="eapp-input ${d.weight?'eapp-ai-filled':''}" value="${d.weight||''}" placeholder="e.g. 175 lbs" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">BMI ${_aiV(d.bmi)}</label>
+          <input class="eapp-input ${d.bmi?'eapp-ai-filled':''}" value="${d.bmi||''}" placeholder="AI calculated" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Tobacco Use</label>
+          <select class="eapp-select ${d.smoker?'eapp-ai-filled':''}">
+            <option ${!d.smoker||d.smoker==='No'?'selected':''}>Non-Tobacco User</option>
+            <option ${d.smoker==='Cigarettes'?'selected':''}>Cigarettes (current)</option>
+            <option ${d.smoker==='Former'?'selected':''}>Former Smoker (quit &gt; 12 months ago)</option>
+            <option>Cigar (occasional)</option>
+            <option>E-Cigarette / Vape</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Blood Pressure, Cholesterol &amp; Labs ${d.aireport ? `<span class="eapp-subsection-badge ai-badge"><i class="fas fa-robot"></i> AI pre-filled from paramedical exam</span>` : ''}</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group">
+          <label class="eapp-label">Blood Pressure ${_aiV(d.bloodPressure)}</label>
+          <input class="eapp-input ${d.bloodPressure?'eapp-ai-filled':''}" value="${d.bloodPressure||''}" placeholder="e.g. 120/80 mmHg" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Total Cholesterol ${_aiV(d.cholesterol)}</label>
+          <input class="eapp-input ${d.cholesterol?'eapp-ai-filled':''}" value="${d.cholesterol||''}" placeholder="mg/dL" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Fasting Glucose ${_aiV(d.glucose)}</label>
+          <input class="eapp-input ${d.glucose?'eapp-ai-filled':''}" value="${d.glucose||''}" placeholder="mg/dL" />
+        </div>
+        <div class="eapp-field-group">
+          <label class="eapp-label">Paramedical Exam Status ${_aiV(d.paramedical)}</label>
+          <select class="eapp-select ${d.paramedical?'eapp-ai-filled':''}">
+            <option ${(!d.paramedical||d.paramedical==='Completed')?'selected':''}>Completed — Results on File</option>
+            <option ${d.paramedical==='Scheduled'?'selected':''}>Scheduled</option>
+            <option ${d.paramedical==='Pending'?'selected':''}>Pending Scheduling</option>
+            <option>Waived — Non-Medical Limits Apply</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Medical History — Current Conditions &amp; Medications</div>
+      <div class="eapp-form-grid">
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Diagnosed Conditions ${_aiV(d.conditions)}</label>
+          <textarea class="eapp-textarea ${d.conditions&&d.conditions!=='None'?'eapp-ai-filled':''}" rows="2" placeholder="List all diagnosed conditions — include diagnosis date, treating physician, and current status">${d.conditions||''}</textarea>
+        </div>
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Current Medications ${_aiV(d.medications)}</label>
+          <textarea class="eapp-textarea ${d.medications?'eapp-ai-filled':''}" rows="2" placeholder="Generic name, dosage, frequency, prescribing physician">${d.medications||''}</textarea>
+        </div>
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Surgeries / Hospitalizations (last 10 years) ${_aiV(d.surgeries)}</label>
+          <textarea class="eapp-textarea ${d.surgeries?'eapp-ai-filled':''}" rows="2" placeholder="Type, date, hospital, outcome">${d.surgeries||'None in last 10 years'}</textarea>
+        </div>
+        <div class="eapp-field-group eapp-field-full">
+          <label class="eapp-label">Family Medical History ${_aiV(d.familyHistory)}</label>
+          <textarea class="eapp-textarea ${d.familyHistory?'eapp-ai-filled':''}" rows="2" placeholder="Parents, siblings — heart disease, cancer, diabetes, stroke, age of onset">${d.familyHistory||''}</textarea>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Lifestyle &amp; Hazardous Activities</div>
+      <div class="eapp-health-yna-grid">
+        <div class="eapp-yna-row"><span class="eapp-yna-q">Do you participate in aviation (pilot or crew)?</span><label class="eapp-yna-opt"><input type="radio" name="yna1" value="no" checked /> No</label><label class="eapp-yna-opt"><input type="radio" name="yna1" value="yes" /> Yes</label></div>
+        <div class="eapp-yna-row"><span class="eapp-yna-q">Do you engage in hazardous sports? (skydiving, rock climbing, auto racing, scuba)</span><label class="eapp-yna-opt"><input type="radio" name="yna2" value="no" checked /> No</label><label class="eapp-yna-opt"><input type="radio" name="yna2" value="yes" /> Yes</label></div>
+        <div class="eapp-yna-row"><span class="eapp-yna-q">Have you traveled or resided outside the US in the past 12 months?</span><label class="eapp-yna-opt"><input type="radio" name="yna3" value="no" checked /> No</label><label class="eapp-yna-opt"><input type="radio" name="yna3" value="yes" /> Yes</label></div>
+        <div class="eapp-yna-row"><span class="eapp-yna-q">Do you plan foreign travel to a Level 2/3/4 country within 12 months?</span><label class="eapp-yna-opt"><input type="radio" name="yna4" value="no" checked /> No</label><label class="eapp-yna-opt"><input type="radio" name="yna4" value="yes" /> Yes</label></div>
+        <div class="eapp-yna-row"><span class="eapp-yna-q">Have you used recreational drugs (cannabis, other) in the past 12 months?</span><label class="eapp-yna-opt"><input type="radio" name="yna5" value="no" checked /> No</label><label class="eapp-yna-opt"><input type="radio" name="yna5" value="yes" /> Yes</label></div>
+        <div class="eapp-yna-row"><span class="eapp-yna-q">Have you had a DUI / DWI or moving violation in the past 3 years?</span><label class="eapp-yna-opt"><input type="radio" name="yna6" value="no" checked /> No</label><label class="eapp-yna-opt"><input type="radio" name="yna6" value="yes" /> Yes</label></div>
+        <div class="eapp-yna-row"><span class="eapp-yna-q">Have you filed for bankruptcy or had financial judgments in the past 5 years?</span><label class="eapp-yna-opt"><input type="radio" name="yna7" value="no" checked /> No</label><label class="eapp-yna-opt"><input type="radio" name="yna7" value="yes" /> Yes</label></div>
+      </div>
+
+      ${hasConditions ? `
+      <div class="eapp-ai-note warn"><i class="fas fa-robot"></i> <strong>AI Medical Alert:</strong> AI detected reported conditions that may affect underwriting classification. Expected health class: <strong>${d.healthClass||'Standard'}</strong>. AI predicts <strong>possible rating or flat extra premium</strong> pending APS review. See Step 6 for full AI underwriting pre-screen.</div>` : `
+      <div class="eapp-ai-note"><i class="fas fa-robot"></i> No significant medical flags detected. AI predicts health class: <strong>${d.healthClass||'Preferred Plus Non-Tobacco'}</strong>. Straight-through processing pathway is eligible based on current medical data.</div>`}
     </div>`;
 }
 
-function _eAppStep4HTML(d) {
-  const statusIcon = { 'ai-filled':'<i class="fas fa-robot" style="color:#2563eb"></i>', 'signed':'<i class="fas fa-check-circle" style="color:#059669"></i>', 'pending':'<i class="fas fa-clock" style="color:#d97706"></i>' };
-  const statusClass = { 'ai-filled':'doc-ai', 'signed':'doc-signed', 'pending':'doc-pending' };
+/* ────────────────────────────────────────────────────────────────
+   STEP 6 — AI Underwriting Pre-Screen
+   STP score, MIB check, MVR, risk class prediction, AI health score,
+   compliance flags, expected decision timeline
+──────────────────────────────────────────────────────────────── */
+function _eAppStep6HTML(d) {
+  const air = d.aireport || {};
+  const stp = air.stpScore || 0;
+  const stpColor = stp >= 90 ? '#059669' : stp >= 70 ? '#d97706' : '#dc2626';
+  const stpLabel = stp >= 90 ? 'Straight-Through Processing (STP)' : stp >= 70 ? 'Expedited Review' : 'Manual Underwriting Required';
+  const mibFlags = air.mibFlags || 0;
+  const autoApproval = air.autoApproval || false;
   return `
     <div class="eapp-section">
-      <div class="eapp-section-title"><i class="fas fa-file-signature"></i> Documents & Consent</div>
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-robot"></i> AI Underwriting Pre-Screen</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 6: Automated Risk Analysis &amp; UW Pathway</div>
+      </div>
+
+      <div class="eapp-uw-pre-banner ${autoApproval ? 'stp-eligible' : 'manual-uw'}">
+        <i class="fas ${autoApproval ? 'fa-bolt' : 'fa-user-check'}"></i>
+        <div>
+          <strong>${autoApproval ? 'STP ELIGIBLE — Auto-Approval Pathway Active' : 'Manual Underwriting Pathway'}</strong>
+          <span>${air.expectedDecision || 'Decision timeline pending data completion'}</span>
+        </div>
+      </div>
+
+      <div class="eapp-uw-scores-grid">
+        <div class="eapp-uw-score-card">
+          <div class="eapp-uw-score-circle" style="--score-color:${stpColor}">
+            <div class="eapp-uw-score-val" style="color:${stpColor}">${stp || '—'}</div>
+            <div class="eapp-uw-score-lbl">AI STP Score</div>
+          </div>
+          <div class="eapp-uw-score-detail">${stpLabel}</div>
+          <div class="eapp-uw-score-sub">Score ≥90 = auto-approve<br>Score 70–89 = expedited<br>Score &lt;70 = manual UW</div>
+        </div>
+        <div class="eapp-uw-score-card">
+          <div class="eapp-uw-score-circle" style="--score-color:${d.aiHealthScore>=85?'#059669':d.aiHealthScore>=70?'#d97706':'#dc2626'}">
+            <div class="eapp-uw-score-val" style="color:${d.aiHealthScore>=85?'#059669':d.aiHealthScore>=70?'#d97706':'#dc2626'}">${d.aiHealthScore||'N/A'}</div>
+            <div class="eapp-uw-score-lbl">AI Health Score</div>
+          </div>
+          <div class="eapp-uw-score-detail">${d.healthClass||'Pending classification'}</div>
+          <div class="eapp-uw-score-sub">Preferred Plus: 90+<br>Preferred: 80–89<br>Standard Plus: 70–79</div>
+        </div>
+        <div class="eapp-uw-score-card">
+          <div class="eapp-uw-score-circle" style="--score-color:${mibFlags===0?'#059669':'#dc2626'}">
+            <div class="eapp-uw-score-val" style="color:${mibFlags===0?'#059669':'#dc2626'}">${mibFlags === 0 ? '✓' : mibFlags}</div>
+            <div class="eapp-uw-score-lbl">MIB Flags</div>
+          </div>
+          <div class="eapp-uw-score-detail">${mibFlags === 0 ? 'No MIB activity detected' : `${mibFlags} item(s) for review`}</div>
+          <div class="eapp-uw-score-sub">Medical Information Bureau database check completed</div>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Automated Database Checks</div>
+      <div class="eapp-uw-checks-grid">
+        <div class="eapp-uw-check-row ${mibFlags===0?'check-pass':'check-fail'}">
+          <i class="fas ${mibFlags===0?'fa-check-circle':'fa-exclamation-circle'}"></i>
+          <div class="eapp-uw-check-info">
+            <span class="eapp-uw-check-name">MIB (Medical Information Bureau)</span>
+            <span class="eapp-uw-check-result">${mibFlags===0?'Clear — No activity codes found':'Review required — Activity codes detected'}</span>
+          </div>
+          <span class="eapp-uw-check-badge ${mibFlags===0?'pass':'fail'}">${mibFlags===0?'PASS':'REVIEW'}</span>
+        </div>
+        <div class="eapp-uw-check-row check-pass">
+          <i class="fas fa-check-circle"></i>
+          <div class="eapp-uw-check-info">
+            <span class="eapp-uw-check-name">MVR (Motor Vehicle Report)</span>
+            <span class="eapp-uw-check-result">${air.mvrResult||'Clean driving record — no DUI, major violations, or suspensions in 3-year lookback'}</span>
+          </div>
+          <span class="eapp-uw-check-badge pass">PASS</span>
+        </div>
+        <div class="eapp-uw-check-row check-pass">
+          <i class="fas fa-check-circle"></i>
+          <div class="eapp-uw-check-info">
+            <span class="eapp-uw-check-name">Rx Database Check (Milliman IntelliScript)</span>
+            <span class="eapp-uw-check-result">${air.rxResult||'Prescription history reviewed — consistent with disclosed conditions'}</span>
+          </div>
+          <span class="eapp-uw-check-badge pass">PASS</span>
+        </div>
+        <div class="eapp-uw-check-row check-pass">
+          <i class="fas fa-check-circle"></i>
+          <div class="eapp-uw-check-info">
+            <span class="eapp-uw-check-name">OFAC / AML Watchlist Screening</span>
+            <span class="eapp-uw-check-result">No matches against OFAC SDN list, FinCEN watchlist, or PEP database</span>
+          </div>
+          <span class="eapp-uw-check-badge pass">CLEAR</span>
+        </div>
+        <div class="eapp-uw-check-row check-pass">
+          <i class="fas fa-check-circle"></i>
+          <div class="eapp-uw-check-info">
+            <span class="eapp-uw-check-name">Existing Coverage / Overinsurance Check</span>
+            <span class="eapp-uw-check-result">Total in-force coverage within NAIC financial underwriting guidelines for income and net worth</span>
+          </div>
+          <span class="eapp-uw-check-badge pass">PASS</span>
+        </div>
+        <div class="eapp-uw-check-row check-pass">
+          <i class="fas fa-check-circle"></i>
+          <div class="eapp-uw-check-info">
+            <span class="eapp-uw-check-name">Attending Physician Statement (APS)</span>
+            <span class="eapp-uw-check-result">${air.apsRequired?'Required — Request sent to Dr. primary care physician':'Not required at current coverage level and health class'}</span>
+          </div>
+          <span class="eapp-uw-check-badge ${air.apsRequired?'warn':'pass'}">${air.apsRequired?'PENDING':'NOT REQ'}</span>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">AI Risk Class Prediction</div>
+      <div class="eapp-risk-class-panel">
+        <div class="eapp-rc-prediction">
+          <div class="eapp-rc-pred-label">Predicted Risk Classification</div>
+          <div class="eapp-rc-pred-val ${d.healthClass&&d.healthClass.includes('Preferred Plus')?'rc-pp':d.healthClass&&d.healthClass.includes('Preferred')?'rc-pref':'rc-std'}">${d.healthClass||'Standard Non-Tobacco'}</div>
+          <div class="eapp-rc-pred-conf">AI Confidence: ${stp >= 90 ? '96%' : stp >= 70 ? '78%' : '62%'}</div>
+        </div>
+        <div class="eapp-rc-factors">
+          <div class="eapp-rc-factor-label">Key Risk Factors Analyzed</div>
+          ${[
+            ['Age at Issue', `${d.age} years — ${d.age <= 35 ? 'Low age factor' : d.age <= 45 ? 'Moderate age factor' : 'Elevated age consideration'}`],
+            ['Blood Pressure', d.bloodPressure || 'Pending paramedical'],
+            ['Cholesterol', d.cholesterol || 'Pending labs'],
+            ['BMI / Build Table', d.bmi ? `BMI ${d.bmi}` : d.weight ? 'Within standard build table' : 'Pending exam'],
+            ['Family History', d.familyHistory && d.familyHistory !== 'None' ? 'Family history noted — see Step 5' : 'No significant family history'],
+            ['Tobacco Status', d.smoker && d.smoker !== 'No' ? 'Tobacco user — NT rates not applicable' : 'Non-tobacco user confirmed'],
+          ].map(([k,v]) => `<div class="eapp-rc-factor-row"><span>${k}</span><span>${v}</span></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="eapp-uw-timeline-estimate">
+        <div class="eapp-uwt-header"><i class="fas fa-clock"></i> Estimated Underwriting Timeline</div>
+        <div class="eapp-uwt-path">
+          <div class="eapp-uwt-node ${autoApproval?'uwt-active':'uwt-done'}"><i class="fas fa-file-alt"></i><span>Application Received</span></div>
+          <div class="eapp-uwt-arrow">→</div>
+          <div class="eapp-uwt-node ${autoApproval?'uwt-active':''}"><i class="fas fa-database"></i><span>DB Checks (instant)</span></div>
+          <div class="eapp-uwt-arrow">→</div>
+          <div class="eapp-uwt-node"><i class="fas fa-robot"></i><span>AI Scoring (instant)</span></div>
+          <div class="eapp-uwt-arrow">→</div>
+          <div class="eapp-uwt-node"><i class="fas fa-${autoApproval?'bolt':'user-check'}"></i><span>${autoApproval?'STP Auto-Approve':'UW Review'}</span></div>
+          <div class="eapp-uwt-arrow">→</div>
+          <div class="eapp-uwt-node"><i class="fas fa-box-open"></i><span>Policy Issued</span></div>
+        </div>
+        <div class="eapp-uwt-estimate"><strong>Expected Decision:</strong> ${air.expectedDecision||'2–5 business days'}</div>
+      </div>
+    </div>`;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   STEP 7 — Documents & E-Signatures
+   All required docs with status, sign/resend/view buttons, consent
+──────────────────────────────────────────────────────────────── */
+function _eAppStep7HTML(d) {
+  const statusIcon = {
+    'signed': `<span class="doc-status-signed"><i class="fas fa-check-circle"></i> Signed</span>`,
+    'pending': `<span class="doc-status-pending"><i class="fas fa-clock"></i> Awaiting Signature</span>`,
+    'ai-filling': `<span class="doc-status-ai"><i class="fas fa-robot fa-spin"></i> AI Filling</span>`,
+    'ai-filled': `<span class="doc-status-ai"><i class="fas fa-robot"></i> AI Pre-filled</span>`,
+    'not-required': `<span class="doc-status-na"><i class="fas fa-minus-circle"></i> N/A</span>`,
+  };
+  const pendingCount = (d.documents||[]).filter(doc => doc.status === 'pending').length;
+  const signedCount = (d.documents||[]).filter(doc => doc.status === 'signed').length;
+  const totalDocs = (d.documents||[]).length;
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-file-signature"></i> Documents &amp; E-Signatures</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 7: Required Documents &amp; Electronic Consent</div>
+      </div>
+
+      <div class="eapp-doc-progress-banner">
+        <div class="eapp-doc-prog-stat"><i class="fas fa-check-circle" style="color:#059669"></i> <strong>${signedCount}</strong> of ${totalDocs} documents signed</div>
+        ${pendingCount > 0 ? `<div class="eapp-doc-prog-pending"><i class="fas fa-clock" style="color:#d97706"></i> <strong>${pendingCount} signature(s) required</strong> before submission</div>` : `<div class="eapp-doc-prog-complete"><i class="fas fa-award" style="color:#059669"></i> All documents complete — ready to submit</div>`}
+        ${pendingCount > 0 ? `<button class="eapp-doc-resend-all-btn" onclick="resendEAppSignature(activeEAppId)"><i class="fas fa-paper-plane"></i> Send All Pending for Signature</button>` : ''}
+      </div>
+
       <div class="eapp-docs-list">
-        ${(d.documents||[]).map((doc,i) => `
-          <div class="eapp-doc-row ${statusClass[doc.status]||''}">
-            <div class="eapp-doc-num">${i+1}</div>
+        ${(d.documents||[]).map((doc, i) => `
+          <div class="eapp-doc-row ${doc.status === 'signed' ? 'doc-signed' : doc.status === 'pending' ? 'doc-pending' : doc.status.includes('ai') ? 'doc-ai' : ''}">
+            <div class="eapp-doc-num">${i + 1}</div>
+            <div class="eapp-doc-icon">
+              <i class="fas ${doc.docType === 'application' ? 'fa-file-contract' : doc.docType === 'disclosure' ? 'fa-exclamation-circle' : doc.docType === 'hipaa' ? 'fa-shield-alt' : doc.docType === 'illustration' ? 'fa-chart-line' : doc.docType === 'exam' ? 'fa-heartbeat' : 'fa-file-alt'}"></i>
+            </div>
             <div class="eapp-doc-info">
               <div class="eapp-doc-name">${doc.name}</div>
-              <div class="eapp-doc-status">${statusIcon[doc.status]||''} ${doc.aiTag}</div>
+              <div class="eapp-doc-meta">
+                ${doc.pages ? `<span><i class="fas fa-file-alt"></i> ${doc.pages} pages</span>` : ''}
+                ${doc.signedDate ? `<span><i class="fas fa-calendar-check"></i> Signed ${doc.signedDate}</span>` : ''}
+                ${doc.aiTag ? `<span>${doc.aiTag}</span>` : ''}
+              </div>
+              <div class="eapp-doc-status-row">${statusIcon[doc.status] || statusIcon['pending']}</div>
             </div>
-            ${doc.status === 'pending' ?
-              `<button class="eapp-doc-sign-btn" onclick="eAppSignDoc(${i})"><i class="fas fa-signature"></i> Sign</button>` :
-              `<button class="eapp-doc-view-btn"><i class="fas fa-eye"></i> View</button>`}
+            <div class="eapp-doc-actions">
+              ${doc.status === 'pending' ?
+                `<button class="eapp-doc-sign-btn" onclick="eAppSignDoc(${i})"><i class="fas fa-signature"></i> Sign Now</button>
+                 <button class="eapp-doc-send-btn" onclick="eAppSendDocForSig(${i})"><i class="fas fa-paper-plane"></i> Send</button>` :
+                doc.status === 'signed' ?
+                `<button class="eapp-doc-view-btn"><i class="fas fa-eye"></i> View</button>
+                 <button class="eapp-doc-download-btn"><i class="fas fa-download"></i> PDF</button>` :
+                `<button class="eapp-doc-view-btn"><i class="fas fa-eye"></i> View</button>`}
+            </div>
           </div>`).join('')}
       </div>
+
+      <div class="eapp-subsection-label">Standard NYL Required Documents Checklist</div>
+      <div class="eapp-std-docs-list">
+        ${[
+          ['NYL Life Insurance Application (Form LA-2)', 'application', 'Required'],
+          ['Notice Regarding Replacement of Life Insurance (NY Reg 60)', 'disclosure', d.replacing ? 'Required' : 'N/A — No replacement'],
+          ['HIPAA Authorization for Release of Medical Records', 'hipaa', 'Required'],
+          ['Conditional Receipt / Conditional Insurance Agreement', 'disclosure', 'Required'],
+          ['Policy Illustration — Signed by Agent and Applicant', 'illustration', 'Required'],
+          ['Illustration Disclosure (NY Reg 74)', 'disclosure', 'Required'],
+          ['Beneficiary Designation Form', 'application', 'Required'],
+          ['Owner / Payor Authorization', 'application', 'Required'],
+          ['AML — Anti-Money Laundering Customer Identification', 'disclosure', 'Required'],
+          ['Attending Physician Statement (APS)', 'exam', d.aireport && d.aireport.apsRequired ? 'Required — Requested' : 'Not Required'],
+        ].map(([name, type, status]) => `
+          <div class="eapp-std-doc-row ${status === 'Required' ? '' : status.includes('N/A') ? 'std-doc-na' : status.includes('Not') ? 'std-doc-na' : 'std-doc-ok'}">
+            <i class="fas ${status.includes('N/A') || status.includes('Not') ? 'fa-minus-circle' : 'fa-check-circle'}"></i>
+            <span class="eapp-std-doc-name">${name}</span>
+            <span class="eapp-std-doc-status">${status}</span>
+          </div>`).join('')}
+      </div>
+
+      <div class="eapp-subsection-label">Authorization &amp; Consent</div>
       <div class="eapp-consent-section">
-        <div class="eapp-section-title" style="margin-top:16px"><i class="fas fa-check-square"></i> Authorization & Consent</div>
-        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I authorize New York Life to access medical records for underwriting purposes</span></label>
-        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I consent to electronic delivery of policy documents and communications</span></label>
-        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I acknowledge receipt of the Privacy Notice and Policy Disclosure</span></label>
-        <label class="eapp-consent-item"><input type="checkbox" /> <span>I authorize automated premium payment via ACH debit</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I authorize New York Life Insurance Company to access my medical records, prescription history, and MIB file for underwriting purposes (HIPAA Authorization)</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I consent to electronic delivery of all policy documents, correspondence, and annual statements per ESIGN Act and NYS Electronic Signatures and Records Act</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I acknowledge that I have received, reviewed, and signed the Policy Illustration as required by NY Regulation 74</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I certify that all information in this application is true and complete to the best of my knowledge — material misrepresentation may void coverage within the contestability period</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" /> <span>I authorize automatic premium payment via ACH bank draft on each premium due date</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I acknowledge receipt of the Privacy Notice and agree to NYL's Privacy Policy regarding use of personal and health information</span></label>
       </div>
     </div>`;
 }
 
-function _eAppStep5HTML(d) {
-  const allSigned = (d.documents||[]).every(doc => doc.status !== 'pending');
+/* ────────────────────────────────────────────────────────────────
+   STEP 8 — AI Assessment & NAIC Compliance
+   Full AI report, compliance checks grid, suitability score
+──────────────────────────────────────────────────────────────── */
+function _eAppStep8HTML(d) {
+  const air = d.aireport || {};
+  const checks = d.complianceChecks || [];
+  const defaultChecks = [
+    { name: 'NAIC Best Interest (Reg 187)', status: 'pass', detail: 'Suitability score ' + (d.suitability ? d.suitability.suitabilityScore : 94) + '/100 — product meets Best Interest standard' },
+    { name: 'NY Regulation 60 — Replacement Notice', status: d.replacing ? 'warn' : 'pass', detail: d.replacing ? 'Replacement detected — Reg 60 disclosure required and attached' : 'No replacement — Reg 60 not applicable' },
+    { name: 'NY Regulation 74 — Illustration Standards', status: 'pass', detail: 'Signed illustration on file — AI verified compliance with 7702 ledger requirements' },
+    { name: 'OFAC / AML / FinCEN Screening', status: 'pass', detail: 'No watchlist matches — client cleared through full AML verification process' },
+    { name: 'IRC §7702 Life Insurance Definition Test', status: 'pass', detail: 'Policy structure satisfies CVAT and GPT tests — qualifies as life insurance for tax purposes' },
+    { name: 'IRC §101(a) — Tax-Free Death Benefit', status: 'pass', detail: 'Death benefit qualifies for income tax exclusion under §101(a) — no modified endowment contract risk' },
+    { name: 'IRC §72 — Premium Overfunding / MEC Test', status: 'pass', detail: 'Premium level within 7-pay limit — policy does not qualify as Modified Endowment Contract' },
+    { name: 'FINRA Suitability (if investment component)', status: d.productCode === 'VUL' ? 'warn' : 'na', detail: d.productCode === 'VUL' ? 'Variable product — FINRA suitability and prospectus delivery required' : 'Non-variable product — FINRA review not required' },
+  ];
+  const allChecks = checks.length > 0 ? checks : defaultChecks;
+  const passCount = allChecks.filter(c => c.status === 'pass').length;
+  const warnCount = allChecks.filter(c => c.status === 'warn').length;
+  const failCount = allChecks.filter(c => c.status === 'fail').length;
   return `
     <div class="eapp-section">
-      <div class="eapp-section-title"><i class="fas fa-check-double"></i> Review & Submit</div>
-      <div class="eapp-review-grid">
-        <div class="eapp-review-card">
-          <div class="eapp-rc-title"><i class="fas fa-user"></i> Client</div>
-          <div class="eapp-rc-row"><span>Name</span><span>${d.client}</span></div>
-          <div class="eapp-rc-row"><span>Age / DOB</span><span>${d.age} / ${d.dob}</span></div>
-          <div class="eapp-rc-row"><span>Email</span><span>${d.email}</span></div>
-          <div class="eapp-rc-row"><span>Phone</span><span>${d.phone}</span></div>
-        </div>
-        <div class="eapp-review-card">
-          <div class="eapp-rc-title"><i class="fas fa-shield-alt"></i> Product</div>
-          <div class="eapp-rc-row"><span>Product</span><span>${d.product}</span></div>
-          <div class="eapp-rc-row"><span>Coverage</span><span>${d.coverage}</span></div>
-          <div class="eapp-rc-row"><span>Premium</span><span>${d.premium}</span></div>
-          <div class="eapp-rc-row"><span>Term</span><span>${d.term}</span></div>
-        </div>
-        <div class="eapp-review-card">
-          <div class="eapp-rc-title"><i class="fas fa-heartbeat"></i> Health</div>
-          <div class="eapp-rc-row"><span>Class</span><span>${d.healthClass}</span></div>
-          <div class="eapp-rc-row"><span>Tobacco</span><span>${d.smoker}</span></div>
-          ${d.aiHealthScore ? `<div class="eapp-rc-row"><span>AI Score</span><span class="green">${d.aiHealthScore}/100</span></div>` : ''}
-          <div class="eapp-rc-row"><span>Status</span><span class="eapp-status-pill">${d.status}</span></div>
-        </div>
-        <div class="eapp-review-card eapp-review-ai">
-          <div class="eapp-rc-title"><i class="fas fa-robot"></i> AI Assessment</div>
-          <div class="eapp-ai-insight-review">${d.aiInsight}</div>
-          <div class="eapp-ai-prefill-summary"><i class="fas fa-magic"></i> ${d.aiPrefillPct}% fields auto-prefilled · Time saved: ~${Math.round(d.aiPrefillPct * 0.3)} min</div>
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-balance-scale"></i> AI Assessment &amp; NAIC Compliance</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 8: Regulatory Compliance &amp; AI Intelligence Report</div>
+      </div>
+
+      <div class="eapp-compliance-scorecard">
+        <div class="eapp-comp-score-item pass"><div class="eapp-comp-score-val">${passCount}</div><div class="eapp-comp-score-lbl"><i class="fas fa-check-circle"></i> Passed</div></div>
+        <div class="eapp-comp-score-item ${warnCount > 0 ? 'warn' : 'na'}"><div class="eapp-comp-score-val">${warnCount}</div><div class="eapp-comp-score-lbl"><i class="fas fa-exclamation-triangle"></i> Review</div></div>
+        <div class="eapp-comp-score-item ${failCount > 0 ? 'fail' : 'na'}"><div class="eapp-comp-score-val">${failCount}</div><div class="eapp-comp-score-lbl"><i class="fas fa-times-circle"></i> Failed</div></div>
+        <div class="eapp-comp-score-item overall-${failCount === 0 && warnCount === 0 ? 'pass' : failCount > 0 ? 'fail' : 'warn'}">
+          <div class="eapp-comp-score-val">${failCount === 0 ? (warnCount === 0 ? '✓' : '!') : '✗'}</div>
+          <div class="eapp-comp-score-lbl">Overall</div>
         </div>
       </div>
+
+      <div class="eapp-subsection-label">NAIC &amp; Regulatory Compliance Grid</div>
+      <div class="eapp-comp-grid">
+        ${allChecks.map(c => `
+          <div class="eapp-comp-row comp-${c.status}">
+            <i class="fas ${c.status === 'pass' ? 'fa-check-circle' : c.status === 'warn' ? 'fa-exclamation-triangle' : c.status === 'na' ? 'fa-minus-circle' : 'fa-times-circle'}"></i>
+            <div class="eapp-comp-info">
+              <span class="eapp-comp-name">${c.name}</span>
+              <span class="eapp-comp-detail">${c.detail}</span>
+            </div>
+            <span class="eapp-comp-badge comp-badge-${c.status}">${c.status.toUpperCase()}</span>
+          </div>`).join('')}
+      </div>
+
+      <div class="eapp-subsection-label">AI Full Intelligence Report</div>
+      <div class="eapp-ai-report-panel">
+        <div class="eapp-air-header"><i class="fas fa-robot"></i> NYL AI Underwriting Intelligence Report — ${d.client}</div>
+        <div class="eapp-air-body">
+          <div class="eapp-air-section">
+            <div class="eapp-air-section-title">Executive Summary</div>
+            <div class="eapp-air-content">${d.aiInsight || `${d.client} is a ${d.age}-year-old applicant applying for ${d.product} with a face amount of ${d.coverage}. AI analysis of all available data sources — including MIB, Rx database, paramedical exam, and financial profile — indicates a risk profile consistent with <strong>${d.healthClass || 'Standard'}</strong> classification. The application presents ${(d.aireport && d.aireport.stpScore >= 90) ? 'no significant underwriting concerns and qualifies for straight-through processing' : 'minor underwriting considerations requiring expedited review'}. Overall risk score: <strong>${(d.aireport && d.aireport.stpScore) || 'N/A'}/100</strong>.`}</div>
+          </div>
+          <div class="eapp-air-section">
+            <div class="eapp-air-section-title">AI Prefill &amp; Efficiency Metrics</div>
+            <div class="eapp-air-metrics-row">
+              <div class="eapp-air-metric"><div class="eapp-air-m-val">${d.aiPrefillPct || 0}%</div><div class="eapp-air-m-lbl">Fields Auto-filled</div></div>
+              <div class="eapp-air-metric"><div class="eapp-air-m-val">~${Math.round((d.aiPrefillPct || 0) * 0.4)} min</div><div class="eapp-air-m-lbl">Time Saved</div></div>
+              <div class="eapp-air-metric"><div class="eapp-air-m-val">${(d.aireport && d.aireport.stpScore) || 'N/A'}</div><div class="eapp-air-m-lbl">STP Score</div></div>
+              <div class="eapp-air-metric"><div class="eapp-air-m-val">${d.aiHealthScore || 'N/A'}</div><div class="eapp-air-m-lbl">Health Score</div></div>
+              <div class="eapp-air-metric"><div class="eapp-air-m-val">6/6</div><div class="eapp-air-m-lbl">Checks Passed</div></div>
+              <div class="eapp-air-metric"><div class="eapp-air-m-val">${(d.aireport && d.aireport.expectedDecision) || 'TBD'}</div><div class="eapp-air-m-lbl">Expected Decision</div></div>
+            </div>
+          </div>
+          ${d.suitability ? `
+          <div class="eapp-air-section">
+            <div class="eapp-air-section-title">Suitability &amp; Best Interest Documentation (NY Reg 187)</div>
+            <div class="eapp-air-content">AI suitability assessment confirms this product recommendation is in ${d.client}'s best interest. Risk tolerance: <strong>${d.suitability.riskTolerance || 'Moderate'}</strong>. Suitability score: <strong>${d.suitability.suitabilityScore}/100</strong>. Premium-to-income ratio within NYL underwriting guidelines. Product complexity appropriate for client's financial sophistication level. No conflicts of interest detected. Documentation is complete for Reg 187 supervisory review.</div>
+          </div>` : ''}
+          <div class="eapp-air-section">
+            <div class="eapp-air-section-title">Agent Certification &amp; Good Order Requirements</div>
+            <div class="eapp-air-content">AI has verified this application is in Good Order (IGO) for submission. All required fields are completed. All mandatory documents are present. Agent license is active in the state of issue. No outstanding compliance items require resolution prior to submission. Application is cleared for carrier submission.</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   STEP 9 — Review & Submit
+   Full summary, submit button or UW handoff, final certifications
+──────────────────────────────────────────────────────────────── */
+function _eAppStep9HTML(d) {
+  const allSigned = (d.documents||[]).length === 0 || (d.documents||[]).every(doc => doc.status !== 'pending');
+  const air = d.aireport || {};
+  const stp = air.stpScore || 0;
+  const isReadyToSubmit = allSigned;
+  return `
+    <div class="eapp-section">
+      <div class="eapp-section-header-row">
+        <div class="eapp-section-title"><i class="fas fa-check-double"></i> Review &amp; Submit</div>
+        <div class="eapp-section-subtitle">NYL Application — Section 9: Final Review &amp; Carrier Submission</div>
+      </div>
+
+      ${isReadyToSubmit ?
+        `<div class="eapp-submit-ready-banner"><i class="fas fa-check-circle"></i> <strong>Application Ready for Submission</strong> — All sections complete, all signatures obtained, all compliance checks passed.</div>` :
+        `<div class="eapp-submit-blocked-banner"><i class="fas fa-exclamation-triangle"></i> <strong>Action Required Before Submission:</strong> ${(d.documents||[]).filter(x=>x.status==='pending').length} document signature(s) still pending. Return to Step 7 to complete.</div>`}
+
+      <div class="eapp-review-grid">
+        <div class="eapp-review-card">
+          <div class="eapp-rc-title"><i class="fas fa-user"></i> Proposed Insured</div>
+          <div class="eapp-rc-row"><span>Name</span><span><strong>${d.client}</strong></span></div>
+          <div class="eapp-rc-row"><span>Age / DOB</span><span>${d.age} / ${d.dob || 'On file'}</span></div>
+          <div class="eapp-rc-row"><span>Gender</span><span>${d.gender || 'On file'}</span></div>
+          <div class="eapp-rc-row"><span>State of Issue</span><span>${d.state || 'New York'}</span></div>
+          <div class="eapp-rc-row"><span>Citizenship</span><span>${d.citizenship || 'US Citizen'}</span></div>
+          <div class="eapp-rc-row"><span>Email</span><span>${d.email || 'On file'}</span></div>
+          <div class="eapp-rc-row"><span>Phone</span><span>${d.phone || 'On file'}</span></div>
+        </div>
+
+        <div class="eapp-review-card">
+          <div class="eapp-rc-title"><i class="fas fa-shield-alt"></i> Policy Specifications</div>
+          <div class="eapp-rc-row"><span>Carrier</span><span><strong>${d.carrier || 'New York Life'}</strong></span></div>
+          <div class="eapp-rc-row"><span>Product</span><span>${d.product}</span></div>
+          <div class="eapp-rc-row"><span>Face Amount</span><span><strong>${d.coverage || 'N/A'}</strong></span></div>
+          <div class="eapp-rc-row"><span>Annual Premium</span><span><strong>${d.premium}</strong></span></div>
+          <div class="eapp-rc-row"><span>Term</span><span>${d.term || 'Permanent'}</span></div>
+          <div class="eapp-rc-row"><span>Owner</span><span>${d.ownerType || 'Insured'}</span></div>
+          <div class="eapp-rc-row"><span>Beneficiary</span><span>${d.beneficiary || 'On file'}</span></div>
+        </div>
+
+        <div class="eapp-review-card">
+          <div class="eapp-rc-title"><i class="fas fa-heartbeat"></i> Health &amp; Underwriting</div>
+          <div class="eapp-rc-row"><span>Health Class</span><span><strong>${d.healthClass || 'Pending'}</strong></span></div>
+          <div class="eapp-rc-row"><span>Tobacco</span><span>${d.smoker || 'Non-Tobacco'}</span></div>
+          <div class="eapp-rc-row"><span>AI Health Score</span><span class="${d.aiHealthScore >= 85 ? 'eapp-val-green' : 'eapp-val-orange'}">${d.aiHealthScore || 'Pending'} / 100</span></div>
+          <div class="eapp-rc-row"><span>MIB Check</span><span class="${(air.mibFlags||0) === 0 ? 'eapp-val-green' : 'eapp-val-orange'}">${(air.mibFlags||0) === 0 ? 'Clear' : 'Review Required'}</span></div>
+          <div class="eapp-rc-row"><span>STP Score</span><span class="${stp >= 90 ? 'eapp-val-green' : stp >= 70 ? 'eapp-val-orange' : 'eapp-val-red'}">${stp || 'N/A'} / 100</span></div>
+          <div class="eapp-rc-row"><span>Expected Decision</span><span>${air.expectedDecision || '1–5 business days'}</span></div>
+        </div>
+
+        <div class="eapp-review-card eapp-review-ai">
+          <div class="eapp-rc-title"><i class="fas fa-robot"></i> AI Summary &amp; Recommendation</div>
+          <div class="eapp-ai-insight-review">${d.aiInsight || 'AI analysis complete — application is in Good Order and recommended for submission.'}</div>
+          <div class="eapp-ai-prefill-summary"><i class="fas fa-magic"></i> ${d.aiPrefillPct || 0}% fields auto-prefilled · ~${Math.round((d.aiPrefillPct || 0) * 0.4)} min saved</div>
+          <div class="eapp-ai-prefill-summary" style="margin-top:6px"><i class="fas fa-check-double"></i> All NAIC compliance checks: <strong>PASSED</strong></div>
+        </div>
+      </div>
+
+      <div class="eapp-subsection-label">Agent Certification</div>
+      <div class="eapp-final-cert-box">
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I certify that I have personally reviewed this application with the client and that the information is accurate and complete to the best of my knowledge</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I confirm that this recommendation is in the client's Best Interest per NAIC Model Regulation and NY Regulation 187</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I confirm that I have provided the client with all required disclosures, illustrations, and replacement notices as required by New York DFS</span></label>
+        <label class="eapp-consent-item"><input type="checkbox" checked /> <span>I confirm my agent license is active in New York State and I am authorized to solicit this product</span></label>
+      </div>
+
       <div class="eapp-submit-section">
-        ${allSigned ?
-          `<button class="eapp-submit-btn" onclick="submitEApp()"><i class="fas fa-paper-plane"></i> Submit Application to New York Life</button>` :
-          `<div class="eapp-submit-warning"><i class="fas fa-exclamation-triangle"></i> Please complete all document signatures in Step 4 before submitting.</div>
-           <button class="eapp-btn-secondary" onclick="goToEAppStep(4)"><i class="fas fa-arrow-left"></i> Back to Documents</button>`}
+        ${isReadyToSubmit ? `
+          <div class="eapp-submit-options">
+            ${stp >= 90 ? `
+              <div class="eapp-submit-stp-note"><i class="fas fa-bolt"></i> <strong>STP Auto-Approval Eligible</strong> — This application qualifies for Straight-Through Processing. Expected decision: ${air.expectedDecision || '2–4 hours'}.</div>
+            ` : ''}
+            <button class="eapp-submit-btn" onclick="submitEApp()">
+              <i class="fas fa-paper-plane"></i> Submit Application to New York Life
+            </button>
+            ${d.cardStatus === 'submitted' || d.cardStatus === 'received' ? '' : `
+            <div class="eapp-submit-divider">— or —</div>
+            <button class="eapp-submit-uw-btn" onclick="submitToUnderwriting('${d.id}')">
+              <i class="fas fa-microscope"></i> Submit &amp; Create Underwriting Case
+            </button>`}
+          </div>
+        ` : `
+          <div class="eapp-submit-warning"><i class="fas fa-exclamation-triangle"></i> Please complete all pending document signatures in Step 7 before submitting.</div>
+          <button class="eapp-btn-secondary" onclick="goToEAppStep(7)"><i class="fas fa-file-signature"></i> Go to Documents</button>
+        `}
       </div>
     </div>`;
 }
@@ -7791,7 +9090,7 @@ function _renderEAppStep(step) {
   // Render step body
   const body = document.getElementById('eapp-body');
   if (!body) return;
-  const renderers = { 1: _eAppStep1HTML, 2: _eAppStep2HTML, 3: _eAppStep3HTML, 4: _eAppStep4HTML, 5: _eAppStep5HTML };
+  const renderers = { 1: _eAppStep1HTML, 2: _eAppStep2HTML, 3: _eAppStep3HTML, 4: _eAppStep4HTML, 5: _eAppStep5HTML, 6: _eAppStep6HTML, 7: _eAppStep7HTML, 8: _eAppStep8HTML, 9: _eAppStep9HTML };
   body.innerHTML = renderers[step] ? renderers[step](d) : '<div style="padding:40px;text-align:center">Step content coming soon.</div>';
 }
 
@@ -7831,7 +9130,7 @@ function eAppSignDoc(docIndex) {
   if (!d || !d.documents[docIndex]) return;
   d.documents[docIndex].status = 'signed';
   d.documents[docIndex].aiTag = 'Signed ✓';
-  _renderEAppStep(4);
+  _renderEAppStep(7);
   const toast = document.createElement('div');
   toast.className = 'stage-toast';
   toast.innerHTML = `<i class="fas fa-check-circle"></i> "${d.documents[docIndex].name}" signed successfully`;
@@ -7845,7 +9144,7 @@ function eAppSaveDraft() {
   if (!d) return;
   const toast = document.createElement('div');
   toast.className = 'stage-toast';
-  toast.innerHTML = `<i class="fas fa-save"></i> E-App draft saved — ${d.client || 'New Application'} (Step ${currentEAppStep}/5)`;
+  toast.innerHTML = `<i class="fas fa-save"></i> E-App draft saved — ${d.client || 'New Application'} (Step ${currentEAppStep}/9)`;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
@@ -7871,7 +9170,7 @@ function closeEApp(e) {
   currentEAppStep = 1;
 }
 
-console.log('E-App Wizard JS loaded — eAppData(5), openEApp, eAppStepNav, submitEApp');
+console.log('E-App Wizard JS loaded — eAppData(9-step), openEApp, eAppStepNav, submitEApp, submitToUnderwriting');
 
 // ================================================================
 //  NLP POLICY REVIEW & RISK EXPERT  (Task #12)
@@ -51419,59 +52718,279 @@ function filterEAppByStatus(status) {
   });
 }
 
-/* ── Resend e-signature ── */
+/* ── Resend e-signature (enhanced) ── */
 function resendEAppSignature(eaId) {
-  var clientMap = { 'EA-001': 'Kevin Park', 'EA-002': 'Linda Morrison' };
-  var client = clientMap[eaId] || eaId;
-  showToast('DocuSign reminder sent to ' + client + ' — signature link re-sent via email & SMS.', 'success');
+  var d = eAppData[eaId];
+  if (!d) { showToast('Application not found', 'error'); return; }
+  var client = d.client || eaId;
+  var email = d.email || 'client email';
+  var phone = d.phone || 'client phone';
+  var pendingDocs = (d.documents || []).filter(function(doc) { return doc.status === 'pending'; });
+  var docCount = pendingDocs.length;
+  // Animated progress toast
+  var toast = document.createElement('div');
+  toast.className = 'stage-toast stage-toast-progress';
+  toast.innerHTML = '<i class="fas fa-paper-plane fa-spin"></i> Sending e-signature requests...';
+  document.body.appendChild(toast);
+  setTimeout(function() {
+    toast.innerHTML = '<i class="fas fa-envelope"></i> Email sent to ' + email;
+  }, 1200);
+  setTimeout(function() {
+    toast.innerHTML = '<i class="fas fa-sms"></i> SMS sent to ' + phone;
+  }, 2000);
+  setTimeout(function() {
+    toast.innerHTML = '<i class="fas fa-check-circle" style="color:#059669"></i> ' + docCount + ' signature request(s) re-sent to ' + client + ' via DocuSign — email + SMS confirmation delivered.';
+  }, 2800);
+  setTimeout(function() { toast.remove(); }, 6000);
 }
 
-/* ── Submit to Underwriting — creates UW case ── */
-function submitToUnderwriting(eaId, clientName) {
+/* ── Submit to Underwriting — opens confirmation modal ── */
+var _pendingUWSubmitId = null;
+function submitToUnderwriting(eaId) {
+  var d = eAppData[eaId];
+  if (!d) { showToast('Application not found', 'error'); return; }
+  _pendingUWSubmitId = eaId;
+  var air = d.aireport || {};
+  var stp = air.stpScore || 0;
+  var stpColor = stp >= 90 ? '#059669' : stp >= 70 ? '#d97706' : '#dc2626';
+  var stpLabel = stp >= 90 ? 'STP Auto-Approve Eligible' : stp >= 70 ? 'Expedited Review' : 'Manual Underwriting';
+
+  // Build confirmation modal body
+  var body = document.getElementById('uwc-body');
+  var title = document.getElementById('uwc-title');
+  var sub = document.getElementById('uwc-sub');
+  if (title) title.textContent = 'Submit to Underwriting — ' + d.client;
+  if (sub) sub.textContent = d.product + ' · ' + (d.coverage || d.premium);
+
+  if (body) body.innerHTML = `
+    <div class="uwc-summary">
+      <div class="uwc-summary-row">
+        <div class="uwc-summary-card">
+          <div class="uwc-card-label">Application</div>
+          <div class="uwc-card-val">${eaId}</div>
+        </div>
+        <div class="uwc-summary-card">
+          <div class="uwc-card-label">Client</div>
+          <div class="uwc-card-val">${d.client}</div>
+        </div>
+        <div class="uwc-summary-card">
+          <div class="uwc-card-label">Product</div>
+          <div class="uwc-card-val">${d.product}</div>
+        </div>
+        <div class="uwc-summary-card">
+          <div class="uwc-card-label">Coverage</div>
+          <div class="uwc-card-val">${d.coverage || d.premium}</div>
+        </div>
+      </div>
+    </div>
+    <div class="uwc-stp-panel">
+      <div class="uwc-stp-score-wrap">
+        <div class="uwc-stp-circle" style="border-color:${stpColor}">
+          <div class="uwc-stp-val" style="color:${stpColor}">${stp || '—'}</div>
+          <div class="uwc-stp-lbl">AI STP Score</div>
+        </div>
+        <div class="uwc-stp-detail">
+          <div class="uwc-stp-pathway" style="color:${stpColor}"><i class="fas fa-${stp>=90?'bolt':'user-check'}"></i> ${stpLabel}</div>
+          <div class="uwc-stp-eta"><i class="fas fa-clock"></i> Expected decision: <strong>${air.expectedDecision || '1–5 business days'}</strong></div>
+          <div class="uwc-stp-health"><i class="fas fa-heartbeat"></i> AI Health Score: <strong>${d.aiHealthScore || 'N/A'}</strong> / 100</div>
+          <div class="uwc-stp-health"><i class="fas fa-shield-alt"></i> Predicted class: <strong>${d.healthClass || 'Standard'}</strong></div>
+          <div class="uwc-stp-health"><i class="fas fa-database"></i> MIB: ${(air.mibFlags||0) === 0 ? '<span style="color:#059669"><i class="fas fa-check-circle"></i> Clear</span>' : '<span style="color:#dc2626">Review required</span>'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="uwc-checklist">
+      <div class="uwc-checklist-title"><i class="fas fa-clipboard-check"></i> Pre-Submission Checklist</div>
+      <div class="uwc-check-row ok"><i class="fas fa-check-circle"></i> Application complete — all 9 sections reviewed</div>
+      <div class="uwc-check-row ok"><i class="fas fa-check-circle"></i> All required documents present and signed</div>
+      <div class="uwc-check-row ok"><i class="fas fa-check-circle"></i> NAIC compliance checks passed</div>
+      <div class="uwc-check-row ok"><i class="fas fa-check-circle"></i> Agent certification complete</div>
+      <div class="uwc-check-row ok"><i class="fas fa-check-circle"></i> OFAC / AML screening clear</div>
+      <div class="uwc-check-row ok"><i class="fas fa-check-circle"></i> Reg 187 suitability documented</div>
+    </div>
+    <div class="uwc-uw-info">
+      <div class="uwc-uw-info-note"><i class="fas fa-info-circle"></i> Submitting will create a new Underwriting case in the NYL UW workflow system. You will receive a UW Case ID and can track progress in the Underwriting Dashboard.</div>
+    </div>`;
+
+  var overlay = document.getElementById('eapp-uw-confirm-overlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+
+/* ── Execute UW Submission (after confirmation) ── */
+function executeUWSubmit() {
+  var eaId = _pendingUWSubmitId;
+  if (!eaId) return;
+  var d = eAppData[eaId];
   var uwId = 'UW-2026-' + String(Math.floor(1000 + Math.random() * 9000));
-  // Update the pending handoff card in the UW rail if visible
-  var railCard = document.querySelector('.eapp-uw-rail-card.pending-handoff');
-  if (railCard) {
-    var badge = railCard.querySelector('.eapp-uw-rail-badge');
-    var submitBtn = railCard.querySelector('.eapp-uw-submit-btn');
-    if (badge) {
-      badge.className = 'eapp-uw-rail-badge done';
-      badge.innerHTML = '<i class="fas fa-check-circle"></i> UW Case Created';
-    }
-    var detailsEl = railCard.querySelector('.eapp-uw-rail-details');
-    if (detailsEl) {
-      var spans = detailsEl.querySelectorAll('span');
-      if (spans[1]) spans[1].innerHTML = '<i class="fas fa-tag"></i> ' + uwId;
-    }
-    if (submitBtn) {
-      submitBtn.className = 'eapp-uw-track-btn';
-      submitBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Track UW Case';
-      submitBtn.onclick = function() { navigateTo('underwriting'); };
-    }
-    railCard.classList.remove('pending-handoff');
-    railCard.classList.add('completed-handoff');
-  }
-  // Update the queue card status pill
+  var clientName = d ? d.client : eaId;
+  closeUWConfirmOverlay();
+
+  // Animated UW case creation sequence
+  var steps = [
+    { icon: 'fa-paper-plane', msg: 'Transmitting application to NYL systems...' },
+    { icon: 'fa-database', msg: 'Running final MIB / OFAC verification...' },
+    { icon: 'fa-robot', msg: 'AI underwriting pre-screen complete...' },
+    { icon: 'fa-briefcase', msg: 'UW case ' + uwId + ' created in NYL UW pipeline...' },
+    { icon: 'fa-check-circle', msg: 'UW case <strong>' + uwId + '</strong> created for <strong>' + clientName + '</strong> — Transfer to Underwriting complete.' },
+  ];
+  var toast = document.createElement('div');
+  toast.className = 'stage-toast stage-toast-uw';
+  toast.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting to Underwriting...';
+  document.body.appendChild(toast);
+
+  steps.forEach(function(s, i) {
+    setTimeout(function() {
+      var icon = i === steps.length - 1 ? 'fa-check-circle' : 'fa-spinner fa-spin';
+      toast.innerHTML = '<i class="fas ' + (i < steps.length - 1 ? icon : s.icon) + '" style="color:' + (i === steps.length - 1 ? '#059669' : '') + '"></i> ' + s.msg;
+    }, i * 900);
+  });
+  setTimeout(function() { toast.remove(); }, 6000);
+
+  // Update eAppData
+  if (d) { d.cardStatus = 'received'; d.uwCaseId = uwId; }
+
+  // Update queue card
   document.querySelectorAll('#eapp-queue .eapp-card').forEach(function(card) {
     if (card.textContent.includes(clientName)) {
       var pill = card.querySelector('.eapp-status-pill');
-      if (pill) {
-        pill.className = 'eapp-status-pill status-received';
-        pill.innerHTML = '<i class="fas fa-check-double"></i> Received by Carrier';
-      }
+      if (pill) { pill.className = 'eapp-status-pill status-received'; pill.innerHTML = '<i class="fas fa-check-double"></i> Received by Carrier'; }
       var uwBtn = card.querySelector('.eapp-card-btn.uw-btn');
       if (uwBtn) {
         uwBtn.className = 'eapp-card-btn uw-active-btn';
         uwBtn.innerHTML = '<i class="fas fa-microscope"></i> Track in UW';
-        uwBtn.onclick = function(e) { e.stopPropagation(); navigateTo('underwriting'); };
+        uwBtn.onclick = function(e) { e.stopPropagation(); openTrackUWModal(eaId); };
       }
     }
   });
-  showToast(
-    'UW case ' + uwId + ' created for ' + (clientName || eaId) +
-    ' — transferred to Underwriting pipeline. STP scoring in progress.',
-    'success'
-  );
+
+  // Update UW rail card
+  var railCard = document.querySelector('.eapp-uw-rail-card.pending-handoff');
+  if (railCard) {
+    var badge = railCard.querySelector('.eapp-uw-rail-badge');
+    if (badge) { badge.className = 'eapp-uw-rail-badge done'; badge.innerHTML = '<i class="fas fa-check-circle"></i> UW Case Created'; }
+    var submitBtn = railCard.querySelector('.eapp-uw-submit-btn');
+    if (submitBtn) {
+      submitBtn.className = 'eapp-uw-track-btn';
+      submitBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Track UW Case';
+      submitBtn.onclick = function() { openTrackUWModal(eaId); };
+    }
+    var detailsEl = railCard.querySelector('.eapp-uw-rail-details');
+    if (detailsEl) { var spans = detailsEl.querySelectorAll('span'); if (spans[1]) spans[1].innerHTML = '<i class="fas fa-tag"></i> ' + uwId; }
+    railCard.classList.remove('pending-handoff'); railCard.classList.add('completed-handoff');
+  }
+  _pendingUWSubmitId = null;
+}
+
+/* ── Close UW Confirm Overlay ── */
+function closeUWConfirmOverlay(e) {
+  if (e && e.target !== document.getElementById('eapp-uw-confirm-overlay')) return;
+  var overlay = document.getElementById('eapp-uw-confirm-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+/* ── Open Track in UW Modal ── */
+function openTrackUWModal(eaId) {
+  var d = eAppData[eaId];
+  if (!d) { showToast('No underwriting data found for ' + eaId, 'warn'); return; }
+  var overlay = document.getElementById('eapp-track-uw-overlay');
+  if (!overlay) return;
+  activeEAppId = eaId;
+
+  var title = document.getElementById('tuw-title');
+  var sub = document.getElementById('tuw-sub');
+  var caseIdEl = document.getElementById('tuw-case-id');
+  if (title) title.textContent = 'UW Tracker — ' + d.client;
+  if (sub) sub.textContent = d.product + ' · ' + (d.coverage || d.premium);
+  if (caseIdEl) caseIdEl.textContent = d.uwCaseId || 'Case Pending';
+
+  var air = d.aireport || {};
+  var timeline = d.uwTimeline || [];
+  var defaultTimeline = [
+    { date: 'May 10, 2026', time: '08:00 AM', event: 'Application Transmitted', status: 'done', note: 'E-App submitted to NYL from agent portal. All 9 sections complete.' },
+    { date: 'May 10, 2026', time: '08:02 AM', event: 'Automated DB Checks', status: 'done', note: 'MIB: Clear. MVR: Clean. Rx: Consistent. OFAC: No match. FinCEN: Clear.' },
+    { date: 'May 10, 2026', time: '08:05 AM', event: 'AI Underwriting Pre-Screen', status: 'done', note: 'STP Score: ' + (air.stpScore || 'N/A') + '. Health Score: ' + (d.aiHealthScore || 'N/A') + '. Predicted class: ' + (d.healthClass || 'Standard') + '.' },
+    { date: 'May 10, 2026', time: '09:30 AM', event: 'Assigned to UW Officer', status: 'done', note: 'Assigned to Senior UW Officer J. Martinez. Priority queue.' },
+    { date: 'May 11, 2026', time: '02:15 PM', event: 'Paramedical Results Received', status: 'done', note: 'Paramedical exam results uploaded. Labs within normal limits. BP: ' + (d.bloodPressure || 'On file') + '.' },
+    { date: 'May 12, 2026', time: '11:00 AM', event: 'Medical Review in Progress', status: d.cardStatus === 'received' ? 'active' : 'done', note: 'UW officer reviewing medical history. APS request pending if conditions noted.' },
+    { date: 'Expected May 15', time: '', event: 'Decision Expected', status: 'pending', note: air.expectedDecision || '1–3 business days from last evidence received.' },
+  ];
+  var uwTimeline = timeline.length > 0 ? timeline : defaultTimeline;
+
+  var body = document.getElementById('tuw-body');
+  if (body) body.innerHTML = `
+    <div class="tuw-summary-row">
+      <div class="tuw-summary-card"><div class="tuw-sc-label">Case ID</div><div class="tuw-sc-val">${d.uwCaseId || 'Pending'}</div></div>
+      <div class="tuw-summary-card"><div class="tuw-sc-label">AI STP Score</div><div class="tuw-sc-val" style="color:${(air.stpScore||0)>=90?'#059669':(air.stpScore||0)>=70?'#d97706':'#dc2626'}">${air.stpScore || 'N/A'}</div></div>
+      <div class="tuw-summary-card"><div class="tuw-sc-label">Health Class</div><div class="tuw-sc-val">${d.healthClass || 'Pending'}</div></div>
+      <div class="tuw-summary-card"><div class="tuw-sc-label">Status</div><div class="tuw-sc-val tuw-status-${d.cardStatus||'pending'}">${d.cardStatus === 'received' ? 'Under Review' : d.cardStatus === 'submitted' ? 'Submitted' : 'Processing'}</div></div>
+    </div>
+    <div class="tuw-ai-panel">
+      <div class="tuw-ai-header"><i class="fas fa-robot"></i> AI Underwriting Intelligence</div>
+      <div class="tuw-ai-body">
+        <div class="tuw-ai-row"><i class="fas fa-check-circle" style="color:#059669"></i> MIB Check: <strong>${(air.mibFlags||0) === 0 ? 'Clear — No activity codes' : air.mibFlags + ' code(s) for review'}</strong></div>
+        <div class="tuw-ai-row"><i class="fas fa-check-circle" style="color:#059669"></i> MVR: <strong>${air.mvrResult || 'Clean driving record — no major violations'}</strong></div>
+        <div class="tuw-ai-row"><i class="fas fa-check-circle" style="color:#059669"></i> Rx Database: <strong>${air.rxResult || 'Prescription history consistent with disclosed conditions'}</strong></div>
+        <div class="tuw-ai-row"><i class="fas fa-check-circle" style="color:#059669"></i> OFAC / AML: <strong>Clear — No watchlist matches</strong></div>
+        <div class="tuw-ai-row"><i class="fas fa-heartbeat" style="color:#0891b2"></i> Predicted Health Class: <strong>${d.healthClass || 'Standard'}</strong> (${air.stpScore >= 90 ? 'STP auto-approve' : 'Pending UW review'})</div>
+        <div class="tuw-ai-row"><i class="fas fa-clock" style="color:#d97706"></i> Expected Decision: <strong>${air.expectedDecision || '1–3 business days'}</strong></div>
+      </div>
+    </div>
+    <div class="tuw-timeline-section">
+      <div class="tuw-timeline-header"><i class="fas fa-stream"></i> Underwriting Timeline</div>
+      <div class="tuw-timeline">
+        ${uwTimeline.map(function(t, i) {
+          var cls = t.status === 'done' ? 'tuw-tl-done' : t.status === 'active' ? 'tuw-tl-active' : 'tuw-tl-pending';
+          var icon = t.status === 'done' ? 'fa-check-circle' : t.status === 'active' ? 'fa-spinner fa-spin' : 'fa-circle';
+          return '<div class="tuw-tl-row ' + cls + '">'
+            + '<div class="tuw-tl-icon"><i class="fas ' + icon + '"></i></div>'
+            + '<div class="tuw-tl-body">'
+            +   '<div class="tuw-tl-event">' + t.event + '</div>'
+            +   '<div class="tuw-tl-date">' + t.date + (t.time ? ' · ' + t.time : '') + '</div>'
+            +   '<div class="tuw-tl-note">' + t.note + '</div>'
+            + '</div>'
+            + '</div>';
+        }).join('')}
+      </div>
+    </div>
+    <div class="tuw-docs-section">
+      <div class="tuw-docs-header"><i class="fas fa-file-alt"></i> Documents on File</div>
+      <div class="tuw-docs-list">
+        ${(d.documents||[]).slice(0,5).map(function(doc) {
+          return '<div class="tuw-doc-row">'
+            + '<i class="fas ' + (doc.status === 'signed' ? 'fa-check-circle tuw-doc-ok' : 'fa-clock tuw-doc-pend') + '"></i>'
+            + '<span>' + doc.name + '</span>'
+            + '<span class="tuw-doc-status">' + (doc.status === 'signed' ? 'Signed' : 'Pending') + '</span>'
+            + '</div>';
+        }).join('')}
+      </div>
+    </div>`;
+
+  overlay.style.display = 'flex';
+}
+
+/* ── Open E-App from inside UW Tracker ── */
+function openEAppFromUWTracker() {
+  closeTrackUWModal();
+  if (activeEAppId) openEApp(activeEAppId);
+}
+
+/* ── Close Track in UW Modal ── */
+function closeTrackUWModal(e) {
+  if (e && e.target !== document.getElementById('eapp-track-uw-overlay')) return;
+  var overlay = document.getElementById('eapp-track-uw-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+/* ── Send a single document for e-signature ── */
+function eAppSendDocForSig(docIndex) {
+  var d = eAppData[activeEAppId];
+  if (!d || !d.documents[docIndex]) return;
+  var docName = d.documents[docIndex].name;
+  showToast('Signature request sent for "' + docName + '" via DocuSign — ' + (d.email || 'client email') + ' notified.', 'success');
+}
+
+/* ── Add beneficiary (placeholder) ── */
+function _addBeneficiary(type) {
+  showToast('Additional ' + type + ' beneficiary form added — fill in details below.', 'info');
 }
 
 /* ── Spotlight search entries for E-App ── */

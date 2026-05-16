@@ -471,29 +471,45 @@ function MainApp() {
             </div>
           </div>
 
-          {/* Step Progress Bar */}
+          {/* Step Progress Bar — 9 Steps */}
           <div class="eapp-progress-wrap">
             <div class="eapp-progress-bar-track">
-              <div class="eapp-progress-bar-fill" id="eapp-progress-fill" style="width:20%"></div>
+              <div class="eapp-progress-bar-fill" id="eapp-progress-fill" style="width:11%"></div>
             </div>
-            <div class="eapp-steps">
+            <div class="eapp-steps eapp-steps-9">
               <div class="eapp-step active" id="eapp-step-dot-1" onclick="goToEAppStep(1)">
                 <div class="eapp-step-circle"><i class="fas fa-user"></i></div>
                 <div class="eapp-step-lbl">Client Info</div>
               </div>
               <div class="eapp-step" id="eapp-step-dot-2" onclick="goToEAppStep(2)">
                 <div class="eapp-step-circle"><i class="fas fa-shield-alt"></i></div>
-                <div class="eapp-step-lbl">Product</div>
+                <div class="eapp-step-lbl">Coverage</div>
               </div>
               <div class="eapp-step" id="eapp-step-dot-3" onclick="goToEAppStep(3)">
+                <div class="eapp-step-circle"><i class="fas fa-users"></i></div>
+                <div class="eapp-step-lbl">Beneficiaries</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-4" onclick="goToEAppStep(4)">
+                <div class="eapp-step-circle"><i class="fas fa-chart-line"></i></div>
+                <div class="eapp-step-lbl">Financial</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-5" onclick="goToEAppStep(5)">
                 <div class="eapp-step-circle"><i class="fas fa-heartbeat"></i></div>
                 <div class="eapp-step-lbl">Health</div>
               </div>
-              <div class="eapp-step" id="eapp-step-dot-4" onclick="goToEAppStep(4)">
+              <div class="eapp-step" id="eapp-step-dot-6" onclick="goToEAppStep(6)">
+                <div class="eapp-step-circle"><i class="fas fa-robot"></i></div>
+                <div class="eapp-step-lbl">UW Pre-Screen</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-7" onclick="goToEAppStep(7)">
                 <div class="eapp-step-circle"><i class="fas fa-file-signature"></i></div>
                 <div class="eapp-step-lbl">Documents</div>
               </div>
-              <div class="eapp-step" id="eapp-step-dot-5" onclick="goToEAppStep(5)">
+              <div class="eapp-step" id="eapp-step-dot-8" onclick="goToEAppStep(8)">
+                <div class="eapp-step-circle"><i class="fas fa-balance-scale"></i></div>
+                <div class="eapp-step-lbl">Compliance</div>
+              </div>
+              <div class="eapp-step" id="eapp-step-dot-9" onclick="goToEAppStep(9)">
                 <div class="eapp-step-circle"><i class="fas fa-check-double"></i></div>
                 <div class="eapp-step-lbl">Review</div>
               </div>
@@ -512,7 +528,7 @@ function MainApp() {
               <button class="eapp-btn-save" onclick="eAppSaveDraft()"><i class="fas fa-save"></i> Save Draft</button>
             </div>
             <div class="eapp-footer-center">
-              <span class="eapp-step-indicator">Step <span id="eapp-cur-step">1</span> of 5</span>
+              <span class="eapp-step-indicator">Step <span id="eapp-cur-step">1</span> of 9</span>
             </div>
             <div class="eapp-footer-right">
               <button class="eapp-btn-ai" onclick="eAppAIFill()"><i class="fas fa-robot"></i> AI Auto-Fill</button>
@@ -16471,8 +16487,8 @@ function EAppSubmissionsPage() {
               <div class="eapp-status-pill status-submitted"><i class="fas fa-paper-plane"></i> Submitted</div>
             </div>
             <div class="eapp-card-right">
-              <button class="eapp-card-btn uw-btn" onclick="event.stopPropagation();submitToUnderwriting('EA-003','Michael Santos')"><i class="fas fa-microscope"></i> Send to UW</button>
-              <button class="eapp-card-btn ghost" onclick="event.stopPropagation();openEApp('EA-003')"><i class="fas fa-eye"></i> View</button>
+              <button class="eapp-card-btn uw-btn" onclick="event.stopPropagation();submitToUnderwriting('EA-003')"><i class="fas fa-microscope"></i> Send to UW</button>
+              <button class="eapp-card-btn ghost" onclick="event.stopPropagation();openEApp('EA-003')"><i class="fas fa-eye"></i> View E-App</button>
             </div>
           </div>
         </div>
@@ -16501,8 +16517,8 @@ function EAppSubmissionsPage() {
               <div class="eapp-status-pill status-received"><i class="fas fa-check-double"></i> Received by Carrier</div>
             </div>
             <div class="eapp-card-right">
-              <button class="eapp-card-btn uw-active-btn" onclick="event.stopPropagation();navigateTo('underwriting')"><i class="fas fa-microscope"></i> Track in UW</button>
-              <button class="eapp-card-btn ghost" onclick="event.stopPropagation();openEApp('EA-004')"><i class="fas fa-eye"></i> View</button>
+              <button class="eapp-card-btn uw-active-btn" onclick="event.stopPropagation();openTrackUWModal('EA-004')"><i class="fas fa-microscope"></i> Track in UW</button>
+              <button class="eapp-card-btn ghost" onclick="event.stopPropagation();openEApp('EA-004')"><i class="fas fa-eye"></i> View E-App</button>
             </div>
           </div>
         </div>
@@ -16595,7 +16611,7 @@ function EAppSubmissionsPage() {
               <span><i class="fas fa-robot"></i> AI Fill: 87%</span>
               <span><i class="fas fa-check-circle"></i> NAIC: Clear</span>
             </div>
-            <button class="eapp-uw-submit-btn" onclick="submitToUnderwriting('EA-003','Michael Santos')">
+            <button class="eapp-uw-submit-btn" onclick="submitToUnderwriting('EA-003')">
               <i class="fas fa-microscope"></i> Submit to Underwriting
             </button>
           </div>
@@ -16618,7 +16634,7 @@ function EAppSubmissionsPage() {
               <span><i class="fas fa-tag"></i> UW-2026-0015</span>
               <span><i class="fas fa-bolt"></i> STP Score: 84</span>
             </div>
-            <button class="eapp-uw-track-btn" onclick="navigateTo('underwriting')">
+            <button class="eapp-uw-track-btn" onclick="openTrackUWModal('EA-004')">
               <i class="fas fa-external-link-alt"></i> Track UW Case
             </button>
           </div>
@@ -16688,6 +16704,53 @@ function EAppSubmissionsPage() {
         </div>
 
       </div>{/* end eapp-uw-rail */}
+
+      {/* ── UW Submit Confirmation Overlay ── */}
+      <div class="uw-confirm-overlay" id="eapp-uw-confirm-overlay" style="display:none" onclick="closeUWConfirmOverlay(event)">
+        <div class="uw-confirm-modal">
+          <div class="uw-confirm-header">
+            <div class="uw-confirm-icon-wrap"><i class="fas fa-microscope"></i></div>
+            <div>
+              <div class="uw-confirm-title" id="uwc-title">Submit to Underwriting</div>
+              <div class="uw-confirm-sub" id="uwc-sub">Review before creating UW case</div>
+            </div>
+            <button class="uw-confirm-close" onclick="closeUWConfirmOverlay()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="uw-confirm-body" id="uwc-body">
+            {/* Injected by JS */}
+          </div>
+          <div class="uw-confirm-footer">
+            <button class="uw-confirm-btn-cancel" onclick="closeUWConfirmOverlay()"><i class="fas fa-times"></i> Cancel</button>
+            <button class="uw-confirm-btn-submit" id="uwc-submit-btn" onclick="executeUWSubmit()"><i class="fas fa-paper-plane"></i> Confirm &amp; Submit to UW</button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Track in UW Modal ── */}
+      <div class="track-uw-overlay" id="eapp-track-uw-overlay" style="display:none" onclick="closeTrackUWModal(event)">
+        <div class="track-uw-modal">
+          <div class="track-uw-header">
+            <div class="track-uw-header-left">
+              <div class="track-uw-icon"><i class="fas fa-search"></i></div>
+              <div>
+                <div class="track-uw-title" id="tuw-title">UW Case Tracker</div>
+                <div class="track-uw-sub" id="tuw-sub">Real-time underwriting status</div>
+              </div>
+            </div>
+            <div class="track-uw-header-right">
+              <div class="track-uw-case-id" id="tuw-case-id">UW-2026-XXXX</div>
+              <button class="track-uw-close" onclick="closeTrackUWModal()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="track-uw-body" id="tuw-body">
+            {/* Injected by JS */}
+          </div>
+          <div class="track-uw-footer">
+            <button class="track-uw-btn-eapp" onclick="openEAppFromUWTracker()"><i class="fas fa-file-contract"></i> Open E-App</button>
+            <button class="track-uw-btn-uw" onclick="navigateTo('underwriting');closeTrackUWModal()"><i class="fas fa-microscope"></i> Full UW Dashboard</button>
+          </div>
+        </div>
+      </div>
 
     </div>
   )
