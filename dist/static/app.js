@@ -8577,22 +8577,10 @@ window.renderClaimModal = function(claimId, tab) {
   `;
 };
 
-// Update tabMap for claim modal to include 'ci' at index 2
-const _origOpenClaimModal = window.openClaimModal;
-window.openClaimModal = function(claimId, tab) {
-  _currentClaimId = claimId;
-  _currentClaimTab = tab || 'view';
-  const overlay = document.getElementById('claim-modal-overlay');
-  if (!overlay) return;
-  overlay.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  document.querySelectorAll('#claim-modal-tabs .dmt-tab').forEach(t => t.classList.remove('active'));
-  const tabMap = { view: 0, ai: 1, ci: 2 };
-  const tabs = document.querySelectorAll('#claim-modal-tabs .dmt-tab');
-  const idx = tabMap[_currentClaimTab];
-  if (tabs[idx !== undefined ? idx : 0]) tabs[idx !== undefined ? idx : 0].classList.add('active');
-  renderClaimModal(_currentClaimId, _currentClaimTab);
-};
+// NOTE: window.openClaimModal override removed.
+// The p7 openClaimModal function declaration (line ~35445) is the authoritative handler.
+// All claim row clicks route directly to that function via the global name.
+// No legacy override needed here.
 
 
 // ================================================================
