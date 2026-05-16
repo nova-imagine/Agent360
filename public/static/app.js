@@ -46417,8 +46417,8 @@ function srOpenFullReview(id) {
     'ANN-JW-001': {
       id: 'ANN-JW-001', clientId: 1, clientName: 'James Whitfield', initials: 'JW',
       avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
-      contractNum: 'NYL-VA-2024-00291', productType: 'Variable Annuity (VA)',
-      typeCode: 'va', issuer: 'New York Life Insurance and Annuity Corp.',
+      contractNum: 'NYL-GLIA-2024-00291', productType: 'Guaranteed Lifetime Income Annuity',
+      typeCode: 'glia', issuer: 'New York Life Insurance and Annuity Corp.',
       premium: 150000, premiumFmt: '$150,000', paymentMode: 'Single Premium',
       issueDate: 'Feb 14, 2024', contractDate: 'Feb 14, 2024',
       surrenderEndDate: 'Feb 14, 2031', contractAge: '2 yrs 3 mo',
@@ -46445,14 +46445,14 @@ function srOpenFullReview(id) {
         { role: 'Primary', name: 'Emily Whitfield', relation: 'Spouse', pct: 100 }
       ],
       suitability: { riskProfile: 'Moderate-Aggressive', score: 93, horizon: '15 years (to age 67)', liquidity: 'Low — long accumulation', tax: '37% bracket — tax-deferral critical', regNote: 'FINRA Reg BI — suitability score 93/100 ✓' },
-      aiNarrative: 'James Whitfield\'s VA is 2 years into a 7-year accumulation phase. The GMWB income rider is compounding at 7% annually — at income activation (age 67) the rider base will be approximately $299K, generating an estimated $1,870/mo guaranteed for life. Combined with Social Security ($3,200/mo at FRA) and pension ($3,200/mo), this closes his $2,100/mo income gap. Priority action: confirm James is on track with the no-more-than-10% free withdrawal policy to protect the rider. Annual review is 2 months overdue — schedule immediately.'
+      aiNarrative: 'James Whitfield\'s Guaranteed Lifetime Income Annuity is 2 years into a 7-year accumulation phase. The GMWB income rider is compounding at 7% annually — at income activation (age 67) the rider base will be approximately $299K, generating an estimated $1,870/mo guaranteed for life. Income starts now and will be paid in consistent, predictable amounts for the rest of his life. Combined with Social Security ($3,200/mo at FRA) and pension ($3,200/mo), this closes his $2,100/mo income gap. Priority action: confirm James is on track with the no-more-than-10% free withdrawal policy to protect the rider. Annual review is 2 months overdue — schedule immediately.'
     },
 
     'ANN-SW-001': {
       id: 'ANN-SW-001', clientId: 4, clientName: 'Sandra Williams', initials: 'SW',
       avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
-      contractNum: 'NYL-SPIA-QUOTE-2026-0044', productType: 'Single Premium Immediate Annuity (SPIA)',
-      typeCode: 'spia', issuer: 'New York Life Insurance and Annuity Corp.',
+      contractNum: 'NYL-LMIA-QUOTE-2026-0044', productType: 'Lifetime Mutual Income Annuity',
+      typeCode: 'lmia', issuer: 'New York Life Insurance and Annuity Corp.',
       premium: 120000, premiumFmt: '$120,000', paymentMode: 'Single Premium',
       issueDate: null, contractDate: null,
       surrenderEndDate: 'N/A — immediate annuity',
@@ -46477,14 +46477,14 @@ function srOpenFullReview(id) {
         { role: 'Contingent', name: 'Estate of Sandra Williams', relation: 'Estate', pct: 100 }
       ],
       suitability: { riskProfile: 'Conservative', score: 85, horizon: 'Lifetime income (25+ yrs)', liquidity: 'Low — irrevocable stream', tax: '22% bracket → 22% in retirement', regNote: 'FINRA Reg BI — suitability score 85/100 ✓' },
-      aiNarrative: 'Sandra Williams (age 61) faces a $1,800/mo retirement income gap. Her term life policy expires September 2026 — the SPIA conversion meeting should be combined with the term renewal discussion for maximum efficiency. The $120K SPIA at $1,340/mo fills 74% of the gap; pairing with a term-to-permanent conversion and Social Security bridge strategy closes the remainder. Quote valid until May 30 — act now. This is the highest-urgency annuity placement in the book.'
+      aiNarrative: 'Sandra Williams (age 61) faces a $1,800/mo retirement income gap. The Lifetime Mutual Income Annuity provides steady payments for life, plus the potential for dividend payments — ideal for clients who value lifetime income and want the opportunity for growth through dividends. Her term life policy expires September 2026 — the LMIA conversion meeting should be combined with the term renewal discussion for maximum efficiency. The $120K contract at $1,340/mo fills 74% of the gap; pairing with a term-to-permanent conversion and Social Security bridge strategy closes the remainder. Quote valid until May 30 — act now. This is the highest-urgency annuity placement in the book.'
     },
 
     'ANN-LM-001': {
       id: 'ANN-LM-001', clientId: 8, clientName: 'Linda Morrison', initials: 'LM',
       avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
-      contractNum: 'NYL-FIA-QUOTE-2026-0062', productType: 'Fixed Index Annuity (FIA)',
-      typeCode: 'fia', issuer: 'New York Life Insurance and Annuity Corp.',
+      contractNum: 'NYL-FMIA-QUOTE-2026-0062', productType: 'Future Mutual Income Annuity',
+      typeCode: 'fmia', issuer: 'New York Life Insurance and Annuity Corp.',
       premium: 200000, premiumFmt: '$200,000', paymentMode: 'Single Premium',
       issueDate: null, contractDate: null,
       surrenderEndDate: 'TBD — 10-yr surrender (est. 2036)',
@@ -46509,14 +46509,14 @@ function srOpenFullReview(id) {
         { role: 'Primary', name: 'Trust (Morrison Family Trust)', relation: 'Trust', pct: 100 }
       ],
       suitability: { riskProfile: 'Moderate-Conservative', score: 94, horizon: '6 years (to age 62) + lifetime income', liquidity: 'Medium — 10% free withdrawal', tax: '37% bracket — tax-deferral + income optimization', regNote: 'FINRA Reg BI + estate planning coordination. Score: 94/100 ✓' },
-      aiNarrative: 'Linda Morrison\'s FIA is the anchor piece of her retirement income strategy. The 6% compound rollup income rider will grow the $200K premium to approximately $283K by income activation at age 62, generating $1,840/mo — fully covering her $1,400/mo income gap with $440/mo surplus. The S&P 500 point-to-point strategy with 9.5% cap provides upside participation with 0% floor protection. Present at the April 15 annual review alongside the UMA $280K proposal. Compliance note: beneficiary must be updated to reflect current trust documents.'
+      aiNarrative: 'Linda Morrison\'s Future Mutual Income Annuity is the anchor piece of her retirement income strategy. Designed for people who are looking for protected lifetime income with some liquidity — the 6% compound rollup income rider will grow the $200K premium to approximately $283K by income activation at age 62, generating $1,840/mo — fully covering her $1,400/mo income gap with $440/mo surplus. The S&P 500 point-to-point strategy with 9.5% cap provides upside participation with 0% floor protection. The FMIA also provides the ability to withdraw cash (10% free withdrawal/yr), addressing Linda\'s liquidity concerns. Present at the April 15 annual review alongside the $280K portfolio proposal. Compliance note: beneficiary must be updated to reflect current trust documents.'
     },
 
     'ANN-MG-001': {
       id: 'ANN-MG-001', clientId: 6, clientName: 'Maria Gonzalez', initials: 'MG',
       avatarGrad: 'linear-gradient(135deg,#059669,#34d399)',
-      contractNum: 'NYL-FA-2021-00453', productType: 'Fixed Deferred Annuity',
-      typeCode: 'fda', issuer: 'New York Life Insurance and Annuity Corp.',
+      contractNum: 'NYL-CIAFA-2021-00453', productType: 'Clear Income Advantage Fixed Annuity',
+      typeCode: 'ciafa', issuer: 'New York Life Insurance and Annuity Corp.',
       premium: 95000, premiumFmt: '$95,000', paymentMode: 'Single Premium',
       issueDate: 'Jun 15, 2021', contractDate: 'Jun 15, 2021',
       surrenderEndDate: 'Jun 15, 2026',
@@ -46542,14 +46542,14 @@ function srOpenFullReview(id) {
         { role: 'Primary', name: 'Sofia Gonzalez', relation: 'Daughter', pct: 40 }
       ],
       suitability: { riskProfile: 'Moderate', score: 88, horizon: '17 years (to age 65)', liquidity: 'High at maturity, then restricted', tax: '22% bracket — tax-deferral beneficial', regNote: 'FINRA Reg BI — suitability score 88/100 ✓' },
-      aiNarrative: 'Maria Gonzalez\'s fixed deferred annuity matures June 15, 2026 — 34 days away. This is the most time-critical action in the retirement book. At maturity, Maria has two optimal paths: (A) Rollover to a new FIA with 6.2% cap rate, preserving tax deferral and adding an income rider for $620/mo at age 65; or (B) 1035 exchange to a Deferred Income Annuity for higher guaranteed payout at age 65. If Maria does nothing, the contract defaults to a reduced declared rate. Revenue opportunity: $3,750 commission on FIA rollover. Contact Maria this week.'
+      aiNarrative: 'Maria Gonzalez\'s Clear Income Advantage Fixed Annuity matures June 15, 2026 — 34 days away. This is the most time-critical action in the retirement book. The CIAFA is designed for people looking for protected lifetime income with flexible access to their money — at maturity, Maria\'s full surrender value of $115,800 is liquid with no penalty. Two optimal paths: (A) Rollover to a new Clear Income Advantage contract with updated rate, preserving tax deferral and adding an income rider for $620/mo at age 65; or (B) 1035 exchange to a Guaranteed Future Income Annuity for higher guaranteed deferred payout at age 65. If Maria does nothing, the contract defaults to a reduced declared rate. Revenue opportunity: $3,750 commission on rollover. Contact Maria this week.'
     },
 
     'ANN-RC-001': {
       id: 'ANN-RC-001', clientId: 3, clientName: 'Robert Chen', initials: 'RC',
       avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
-      contractNum: 'NYL-DIA-ILLUS-2026-0031', productType: 'Deferred Income Annuity (DIA)',
-      typeCode: 'dia', issuer: 'New York Life Insurance and Annuity Corp.',
+      contractNum: 'NYL-GFIA-ILLUS-2026-0031', productType: 'Guaranteed Future Income Annuity',
+      typeCode: 'gfia', issuer: 'New York Life Insurance and Annuity Corp.',
       premium: 250000, premiumFmt: '$250,000', paymentMode: 'Single Premium (proposed)',
       issueDate: null, contractDate: null,
       surrenderEndDate: 'N/A — DIA income begins at 65',
@@ -46573,14 +46573,14 @@ function srOpenFullReview(id) {
         { role: 'Primary', name: 'Susan Chen', relation: 'Spouse', pct: 100 }
       ],
       suitability: { riskProfile: 'Moderate', score: 96, horizon: '20 years (to age 65)', liquidity: 'Low — longevity hedge product', tax: '37% bracket — max tax deferral on $250K premium', regNote: 'FINRA Reg BI — suitability score 96/100 ✓' },
-      aiNarrative: 'Robert Chen (age 45) has zero retirement products — a critical gap for a High Value client with $380K/yr income. The Deferred Income Annuity (DIA) is the ideal longevity hedge: a $250K single premium now generates $3,200/mo guaranteed income starting at age 65, fully leveraging 20 years of deferral. Combined with SEP-IRA and business assets, Robert\'s retirement income would be fully secured. Key objection to prepare for: liquidity. Address with the "set it and forget it" framing — this supplements, not replaces, liquid assets. Close probability: 96/100 per AI suitability score.'
+      aiNarrative: 'Robert Chen (age 45) has zero retirement products — a critical gap for a High Value client with $380K/yr income. The Guaranteed Future Income Annuity is the ideal longevity hedge: lifetime income that won\'t fluctuate with the financial markets, plus a variety of payout options — a $250K single premium now generates $3,200/mo guaranteed income starting at age 65, fully leveraging 20 years of deferral. Combined with SEP-IRA and business assets, Robert\'s retirement income would be fully secured. Key objection to prepare for: liquidity. Address with the "set it and forget it" framing — this supplements, not replaces, liquid assets. Close probability: 96/100 per AI suitability score.'
     },
 
     'ANN-DW-001': {
       id: 'ANN-DW-001', clientId: 7, clientName: 'Dorothy Wilson', initials: 'DW',
       avatarGrad: 'linear-gradient(135deg,#d97706,#fbbf24)',
-      contractNum: 'NYL-SPIA-QUOTE-2026-0044B', productType: 'Single Premium Immediate Annuity (SPIA)',
-      typeCode: 'spia', issuer: 'New York Life Insurance and Annuity Corp.',
+      contractNum: 'NYL-GPIA-QUOTE-2026-0044B', productType: 'Guaranteed Period Income Annuity',
+      typeCode: 'gpia', issuer: 'New York Life Insurance and Annuity Corp.',
       premium: 120000, premiumFmt: '$120,000', paymentMode: 'Single Premium',
       issueDate: null, contractDate: null,
       surrenderEndDate: 'N/A — immediate annuity',
@@ -46604,7 +46604,7 @@ function srOpenFullReview(id) {
         { role: 'Primary', name: 'Michael Wilson (son)', relation: 'Child (adult)', pct: 100 }
       ],
       suitability: { riskProfile: 'Conservative', score: 87, horizon: 'Lifetime', liquidity: 'Low — fixed income stream', tax: '22% bracket', regNote: 'FINRA Reg BI — suitability score 87/100 ✓' },
-      aiNarrative: 'Dorothy Wilson\'s SPIA quote was generated Apr 9, 2026 alongside the term-to-whole-life conversion illustration. Pension ($2,100/mo) + SS ($1,980/mo) + SPIA ($1,340/mo) = $5,420/mo, fully covering her $4,300/mo lifestyle target with a $1,120/mo surplus as a buffer. The Apr 16 renewal meeting is the ideal close opportunity — present both the WL conversion and the SPIA together as a retirement income completion package. Commission: $9,600 on SPIA + $2,800 on WL conversion = $12,400 total revenue from one meeting.'
+      aiNarrative: 'Dorothy Wilson\'s Guaranteed Period Income Annuity quote was generated Apr 9, 2026 alongside the term-to-whole-life conversion illustration. The GPIA provides income for a set period — ideal for bridging the gap until other benefit payments begin. Pension ($2,100/mo) + SS ($1,980/mo) + GPIA ($1,340/mo) = $5,420/mo, fully covering her $4,300/mo lifestyle target with a $1,120/mo surplus as a buffer. The Apr 16 renewal meeting is the ideal close opportunity — present both the WL conversion and the GPIA together as a retirement income completion package. Commission: $9,600 on GPIA + $2,800 on WL conversion = $12,400 total revenue from one meeting.'
     }
   };
 
@@ -46626,13 +46626,16 @@ function srOpenFullReview(id) {
   /* ── 3. TYPE BADGE HELPER ─────────────────────────────────────────── */
   function _raTypeBadge(typeCode) {
     var map = {
-      va:   { label: 'VA', bg: '#ede9fe', color: '#7c3aed' },
-      fia:  { label: 'FIA', bg: '#dbeafe', color: '#003087' },
-      spia: { label: 'SPIA', bg: '#d1fae5', color: '#059669' },
-      dia:  { label: 'DIA', bg: '#faf5ff', color: '#6d28d9' },
-      fda:  { label: 'Fixed', bg: '#fef3c7', color: '#d97706' }
+      /* Immediate Income Annuities */
+      glia:  { label: 'GLIA',  bg: '#dbeafe', color: '#003087' },   /* Guaranteed Lifetime Income — NYL blue */
+      lmia:  { label: 'LMIA',  bg: '#e0f2fe', color: '#0891b2' },   /* Lifetime Mutual Income — teal */
+      gpia:  { label: 'GPIA',  bg: '#ede9fe', color: '#4f46e5' },   /* Guaranteed Period Income — indigo */
+      /* Deferred Income Annuities */
+      gfia:  { label: 'GFIA',  bg: '#d1fae5', color: '#059669' },   /* Guaranteed Future Income — green */
+      fmia:  { label: 'FMIA',  bg: '#d1fae5', color: '#10b981' },   /* Future Mutual Income — emerald */
+      ciafa: { label: 'CIAFA', bg: '#fef3c7', color: '#d97706' }    /* Clear Income Advantage — amber */
     };
-    var t = map[typeCode] || { label: typeCode.toUpperCase(), bg: '#f1f5f9', color: '#64748b' };
+    var t = map[typeCode] || { label: (typeCode || 'N/A').toUpperCase(), bg: '#f1f5f9', color: '#64748b' };
     return '<span class="ra-type-badge" style="background:' + t.bg + ';color:' + t.color + '">' + t.label + '</span>';
   }
 
@@ -46726,7 +46729,7 @@ function srOpenFullReview(id) {
     }
     var typeFilter  = (document.getElementById('ra-type-filter')  || {}).value || '';
     var statFilter  = (document.getElementById('ra-status-filter') || {}).value || '';
-    if (typeFilter)  contracts = contracts.filter(function(c){ return c.productType.indexOf(typeFilter.split(' ')[0]) >= 0; });
+    if (typeFilter)  contracts = contracts.filter(function(c){ return c.productType === typeFilter; });
     if (statFilter)  contracts = contracts.filter(function(c){ return c.status.indexOf(statFilter.split(' ')[0]) >= 0; });
 
     // Sort: urgent/maturity first
@@ -47257,6 +47260,17 @@ function srOpenFullReview(id) {
     raRenderQueue(q);
   }
 
+  /* ── 20b. FILTER BY TYPE (called from type card clicks) ──────────────── */
+  function raFilterByType(type) {
+    var el = document.getElementById('ra-type-filter');
+    if (el) {
+      el.value = type;
+      raFilterContracts();
+    }
+    var panel = document.getElementById('ra-contract-queue');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   /* ── 21. AI INCOME GAP SCAN — full modal ─────────────────────────── */
   function raRunIncomeGapScan() {
     var existing = document.getElementById('ra-gap-modal');
@@ -47311,12 +47325,12 @@ function srOpenFullReview(id) {
 
       // Recommended action per contract
       var actionMap = {
-        'ANN-JW-001': { icon:'fa-file-pdf', label:'Generate DIA Illustration', color:'#003087' },
-        'ANN-SW-001': { icon:'fa-phone',    label:'Call — SPIA Quote Expires May 30', color:'#dc2626' },
-        'ANN-LM-001': { icon:'fa-calendar-check', label:'Present at Apr 15 Review', color:'#d97706' },
-        'ANN-MG-001': { icon:'fa-exclamation-circle', label:'Contact Before Jun 15 Maturity', color:'#dc2626' },
-        'ANN-RC-001': { icon:'fa-chart-bar', label:'Present DIA at Follow-up Call', color:'#7c3aed' },
-        'ANN-DW-001': { icon:'fa-handshake', label:'Close at Apr 16 Renewal Meeting', color:'#059669' }
+        'ANN-JW-001': { icon:'fa-file-pdf',           label:'Generate GLIA Illustration',           color:'#003087' },
+        'ANN-SW-001': { icon:'fa-phone',               label:'Call — LMIA Quote Expires May 30',     color:'#dc2626' },
+        'ANN-LM-001': { icon:'fa-calendar-check',      label:'Present FMIA at Apr 15 Review',        color:'#d97706' },
+        'ANN-MG-001': { icon:'fa-exclamation-circle',  label:'Contact Before Jun 15 CIAFA Maturity', color:'#dc2626' },
+        'ANN-RC-001': { icon:'fa-chart-bar',           label:'Present GFIA at Follow-up Call',       color:'#7c3aed' },
+        'ANN-DW-001': { icon:'fa-handshake',           label:'Close GPIA at Apr 16 Meeting',         color:'#059669' }
       };
       var act = actionMap[c.id] || { icon:'fa-arrow-right', label:'Schedule Review', color:'#003087' };
 
@@ -47569,8 +47583,8 @@ function srOpenFullReview(id) {
         '<div style="background:#dc2626;color:#fff;border-radius:8px;padding:8px 10px;font-size:18px;flex-shrink:0"><i class="fas fa-calendar-exclamation"></i></div>' +
         '<div>' +
           '<div style="font-weight:700;font-size:13px;color:#1e293b">⚠️ Maturity Alert — ANN-MG-001</div>' +
-          '<div style="font-size:12px;color:#374151;margin-top:2px">Maria Gonzalez · Fixed Deferred · <strong>Matures Jun 15, 2026</strong></div>' +
-          '<div style="font-size:11px;color:#6b7280;margin-top:4px">Revenue at risk: $3,750 commission on FIA rollover. Contact Maria this week.</div>' +
+          '<div style="font-size:12px;color:#374151;margin-top:2px">Maria Gonzalez · Clear Income Advantage Fixed Annuity · <strong>Matures Jun 15, 2026</strong></div>' +
+          '<div style="font-size:11px;color:#6b7280;margin-top:4px">Revenue at risk: $3,750 commission on CIAFA rollover. Contact Maria this week.</div>' +
           '<div style="margin-top:8px;display:flex;gap:8px">' +
             '<button onclick="raCloseMaturityAlert();raOpenContract(\'ANN-MG-001\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;font-weight:600"><i class="fas fa-arrow-right"></i> View Contract</button>' +
             '<button onclick="raCloseMaturityAlert()" style="background:#f1f5f9;color:#374151;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer">Dismiss</button>' +
@@ -47680,6 +47694,7 @@ function srOpenFullReview(id) {
   window.raBuildDetailHTML   = raBuildDetailHTML;
   window.raSwitchTab         = raSwitchTab;
   window.raFilterContracts   = raFilterContracts;
+  window.raFilterByType      = raFilterByType;
   window.raRunIncomeGapScan  = raRunIncomeGapScan;
   window.raCloseGapScan      = raCloseGapScan;
   window.raOpenNewContract   = raOpenNewContract;
@@ -47739,12 +47754,12 @@ function srOpenFullReview(id) {
       coveragePct: 74,
       sources: [
         { label: 'Social Security', monthly: 2400, color: '#6b7280', pct: 35 },
-        { label: 'FIA Income', monthly: 2800, color: '#003087', pct: 41 },
+        { label: 'FMIA Income', monthly: 2800, color: '#003087', pct: 41 },
         { label: 'Investment RMDs', monthly: 1200, color: '#0891b2', pct: 18 },
         { label: 'Pension', monthly: 400, color: '#059669', pct: 6 }
       ],
       contracts: ['ANN-LM-001'],
-      aiNote: 'Linda retires in 5 years with a $2,400/mo gap. FIA accumulation value is $200K — consider a SPIA conversion at age 63 to close the gap entirely.',
+      aiNote: 'Linda retires in 5 years with a $2,400/mo gap. FMIA accumulation value is $200K — consider a LMIA conversion at age 63 to close the gap entirely.',
       priority: 'high'
     },
     {
@@ -47759,7 +47774,7 @@ function srOpenFullReview(id) {
         { label: 'Part-time Work', monthly: 500, color: '#059669', pct: 11 }
       ],
       contracts: ['ANN-MG-001'],
-      aiNote: 'Contract ANN-MG-001 matures Jun 15 — RMD must be calculated before rollover. Recommend 1035 exchange to new FIA to maintain tax-deferred status and eliminate the $400/mo gap.',
+      aiNote: 'Contract ANN-MG-001 (CIAFA) matures Jun 15 — RMD must be calculated before rollover. Recommend 1035 exchange to new Clear Income Advantage Fixed Annuity to maintain tax-deferred status and eliminate the $400/mo gap.',
       priority: 'urgent'
     },
     {
@@ -47769,12 +47784,12 @@ function srOpenFullReview(id) {
       coveragePct: 63,
       sources: [
         { label: 'Social Security', monthly: 2800, color: '#6b7280', pct: 37 },
-        { label: 'DIA Income', monthly: 3200, color: '#003087', pct: 43 },
+        { label: 'GFIA Income', monthly: 3200, color: '#003087', pct: 43 },
         { label: 'Investment RMDs', monthly: 1200, color: '#0891b2', pct: 16 },
         { label: 'Business Sale', monthly: 300, color: '#059669', pct: 4 }
       ],
       contracts: ['ANN-RC-001'],
-      aiNote: 'Robert\'s $4,500/mo gap is the largest in the book. DIA illustration at $250K covers $3,200/mo starting 2037. Recommend additional $150K DIA tranche or bridge annuity to close remaining gap.',
+      aiNote: 'Robert\'s $4,500/mo gap is the largest in the book. GFIA illustration at $250K covers $3,200/mo starting 2037. Recommend additional $150K GFIA tranche or bridge annuity to close remaining gap.',
       priority: 'high'
     },
     {
@@ -47784,7 +47799,7 @@ function srOpenFullReview(id) {
       coveragePct: 100,
       sources: [
         { label: 'Social Security', monthly: 1900, color: '#6b7280', pct: 45 },
-        { label: 'SPIA Income', monthly: 1400, color: '#003087', pct: 33 },
+        { label: 'GPIA Income', monthly: 1400, color: '#003087', pct: 33 },
         { label: 'Investment RMDs', monthly: 700, color: '#0891b2', pct: 17 },
         { label: 'Rental Income', monthly: 200, color: '#059669', pct: 5 }
       ],
@@ -48581,17 +48596,17 @@ function srOpenFullReview(id) {
       id: 'RU-003', name: 'James Whitfield', age: 52, status: 'client',
       track: 'gap', trackLabel: 'Confirm',
       potential: '$12,000/yr', priority: 'urgent',
-      reason: 'VA contract active (ANN-JW-001). Income gap $2,300/mo. 13 years to retirement — optimal DIA window closing.',
-      recommended: 'DIA tranche + GLWB rider', premium: '$180,000',
-      nextAction: 'Run DIA illustration — present at next review'
+      reason: 'GLIA contract active (ANN-JW-001). Income gap $2,300/mo. 13 years to retirement — optimal GFIA deferral window closing.',
+      recommended: 'GFIA tranche + GLWB rider', premium: '$180,000',
+      nextAction: 'Run GFIA illustration — present at next review'
     },
     {
       id: 'RU-004', name: 'Linda Morrison', age: 58, status: 'client',
       track: 'gap', trackLabel: 'Enhance',
       potential: '$8,000/yr', priority: 'high',
-      reason: 'FIA in review (ANN-LM-001, $200K). Retires in 5 years. Gap: $2,400/mo. SPIA conversion at 63 closes gap entirely.',
-      recommended: 'SPIA at age 63 (FIA conversion)', premium: '$200,000',
-      nextAction: 'SPIA conversion illustration — present at FIA review'
+      reason: 'FMIA in review (ANN-LM-001, $200K). Retires in 5 years. Gap: $2,400/mo. LMIA conversion at 63 closes gap entirely.',
+      recommended: 'LMIA at age 63 (FMIA conversion)', premium: '$200,000',
+      nextAction: 'LMIA conversion illustration — present at FMIA review'
     },
     {
       id: 'RU-005', name: 'David Thompson', age: 31, status: 'prospect',
@@ -48605,9 +48620,9 @@ function srOpenFullReview(id) {
       id: 'RU-006', name: 'Robert Chen', age: 55, status: 'client',
       track: 'present', trackLabel: 'Active',
       potential: '$0/yr', priority: 'low',
-      reason: 'DIA illustration in progress (ANN-RC-001, $250K). Largest contract in book. Good standing.',
-      recommended: 'Additional DIA tranche', premium: '$150,000',
-      nextAction: 'Complete DIA illustration and close'
+      reason: 'GFIA illustration in progress (ANN-RC-001, $250K). Largest contract in book. Good standing.',
+      recommended: 'Additional GFIA tranche', premium: '$150,000',
+      nextAction: 'Complete GFIA illustration and close'
     },
     {
       id: 'RU-007', name: 'Maria Gonzalez', age: 71, status: 'client',

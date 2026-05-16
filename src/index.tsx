@@ -16254,44 +16254,86 @@ function RetirementAccountsPage() {
       {/* ── AI Retirement Intelligence Banner (rendered by JS) ── */}
       <div class="ra-ai-banner" id="ra-ai-banner"></div>
 
-      {/* ── Annuity Program Types Overview ── */}
+      {/* ── NYL Annuity Product Types Overview ── */}
       <div class="ra-prog-types-section">
         <div class="ra-prog-types-header">
           <div class="ra-prog-types-header-icon"><i class="fas fa-umbrella-beach"></i></div>
           <div>
-            <div class="ra-prog-types-title">NYL Annuity Programs <span class="ra-prog-types-badge">4 Types</span></div>
-            <div class="ra-prog-types-sub">Guaranteed lifetime income solutions — immediate or deferred, fixed or variable growth</div>
+            <div class="ra-prog-types-title">NYL Annuity Product Types <span class="ra-prog-types-badge">6 Types</span></div>
+            <div class="ra-prog-types-sub">Immediate and deferred income annuity solutions — guaranteed lifetime income tailored to every client's timeline and needs</div>
+          </div>
+        </div>
+
+        {/* ── Immediate Income Annuities ── */}
+        <div class="ra-prog-category-hdr">
+          <div class="ra-prog-category-icon" style="background:#00308718;color:#003087"><i class="fas fa-bolt"></i></div>
+          <div>
+            <div class="ra-prog-category-title" style="color:#003087">Immediate Income Annuities</div>
+            <div class="ra-prog-category-sub">Income starts now and will be paid in consistent, predictable amounts for the rest of your life</div>
           </div>
         </div>
         <div class="ra-prog-types-grid">
-          <div class="ra-prog-type-card ra-prog-type-spia">
-            <div class="ra-prog-type-icon"><i class="fas fa-bolt"></i></div>
-            <div class="ra-prog-type-name">Immediate Income Annuities</div>
-            <div class="ra-prog-type-desc">Income starts now and is paid in consistent, predictable amounts for the rest of your life — SPIA, Lifetime Mutual, Guaranteed Period.</div>
-            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Immediate payout · No surrender period</div>
-            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">SPIA</span><span class="ra-prog-ex-chip">Lifetime Mutual</span><span class="ra-prog-ex-chip">Guaranteed Period</span></div>
+
+          <div class="ra-prog-type-card ra-prog-type-glia" onclick="raFilterByType('Guaranteed Lifetime Income Annuity')">
+            <div class="ra-prog-type-icon"><i class="fas fa-infinity"></i></div>
+            <div class="ra-prog-type-name">Guaranteed Lifetime Income Annuity</div>
+            <div class="ra-prog-type-desc">Income starts now and will be paid in consistent, predictable amounts for the rest of your life.</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Best for: Those who want dependable income right away and prefer guaranteed payments that last as long as they live</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">ANN-JW-001</span></div>
           </div>
-          <div class="ra-prog-type-card ra-prog-type-dia">
-            <div class="ra-prog-type-icon"><i class="fas fa-hourglass-half"></i></div>
-            <div class="ra-prog-type-name">Deferred Income Annuities</div>
-            <div class="ra-prog-type-desc">Receive income for life and larger payouts by delaying them — DIA, Future Mutual Income, Clear Income Advantage Fixed Annuity.</div>
-            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Higher payout · Up to 40-year deferral</div>
-            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">DIA</span><span class="ra-prog-ex-chip">Future Mutual</span><span class="ra-prog-ex-chip">Clear Income</span></div>
+
+          <div class="ra-prog-type-card ra-prog-type-lmia" onclick="raFilterByType('Lifetime Mutual Income Annuity')">
+            <div class="ra-prog-type-icon"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="ra-prog-type-name">Lifetime Mutual Income Annuity</div>
+            <div class="ra-prog-type-desc">Steady payments for life, plus the potential for dividend payments.</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Best for: Individuals who value lifetime income and want the opportunity for growth through dividends</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">ANN-SW-001</span></div>
           </div>
-          <div class="ra-prog-type-card ra-prog-type-fia">
+
+          <div class="ra-prog-type-card ra-prog-type-gpia" onclick="raFilterByType('Guaranteed Period Income Annuity')">
+            <div class="ra-prog-type-icon"><i class="fas fa-hourglass-start"></i></div>
+            <div class="ra-prog-type-name">Guaranteed Period Income Annuity</div>
+            <div class="ra-prog-type-desc">Income for a set period, like bridging the gap until Social Security payments start.</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Best for: People who need income for a specific time frame — like early retirees waiting for other benefits to begin</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">ANN-DW-001</span></div>
+          </div>
+
+        </div>
+
+        {/* ── Deferred Income Annuities ── */}
+        <div class="ra-prog-category-hdr" style="margin-top:20px">
+          <div class="ra-prog-category-icon" style="background:#05966918;color:#059669"><i class="fas fa-hourglass-half"></i></div>
+          <div>
+            <div class="ra-prog-category-title" style="color:#059669">Deferred Income Annuities</div>
+            <div class="ra-prog-category-sub">Receive income for life with larger payouts by delaying them — up to 40-year deferral period</div>
+          </div>
+        </div>
+        <div class="ra-prog-types-grid">
+
+          <div class="ra-prog-type-card ra-prog-type-gfia" onclick="raFilterByType('Guaranteed Future Income Annuity')">
+            <div class="ra-prog-type-icon"><i class="fas fa-lock"></i></div>
+            <div class="ra-prog-type-name">Guaranteed Future Income Annuity</div>
+            <div class="ra-prog-type-desc">Lifetime income that won't fluctuate with the financial markets, plus a variety of payout options.</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Best for: People who want predictable, guaranteed income for life without market risk</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">ANN-RC-001</span></div>
+          </div>
+
+          <div class="ra-prog-type-card ra-prog-type-fmia" onclick="raFilterByType('Future Mutual Income Annuity')">
+            <div class="ra-prog-type-icon"><i class="fas fa-seedling"></i></div>
+            <div class="ra-prog-type-name">Future Mutual Income Annuity</div>
+            <div class="ra-prog-type-desc">Designed for people who are looking for protected lifetime income with some liquidity (ability to withdraw cash).</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Best for: Individual seeking steady income with the potential for growth through dividends</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">ANN-LM-001</span></div>
+          </div>
+
+          <div class="ra-prog-type-card ra-prog-type-ciafa" onclick="raFilterByType('Clear Income Advantage Fixed Annuity')">
             <div class="ra-prog-type-icon"><i class="fas fa-shield-alt"></i></div>
-            <div class="ra-prog-type-name">Fixed Index Annuity (FIA)</div>
-            <div class="ra-prog-type-desc">Market-linked growth with a 0% floor — S&P 500 point-to-point crediting with cap rate, no downside risk, optional income rider.</div>
-            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> 0% floor · Index-linked growth · Income rider</div>
-            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">FIA</span><span class="ra-prog-ex-chip">6% Rollup Rider</span><span class="ra-prog-ex-chip">S&amp;P 500 Cap</span></div>
+            <div class="ra-prog-type-name">Clear Income Advantage Fixed Annuity</div>
+            <div class="ra-prog-type-desc">Designed for people who are looking for protected lifetime income with some liquidity (ability to withdraw cash).</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Best for: Those who want guaranteed income but also need flexible access to their money</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">ANN-MG-001</span></div>
           </div>
-          <div class="ra-prog-type-card ra-prog-type-va">
-            <div class="ra-prog-type-icon"><i class="fas fa-chart-line"></i></div>
-            <div class="ra-prog-type-name">Variable Annuity (VA)</div>
-            <div class="ra-prog-type-desc">Market-linked sub-account growth with death benefit and optional GMIB/GMWB income riders — upside potential with income protection.</div>
-            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Sub-account growth · GMIB/GMWB · Death benefit</div>
-            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">VA</span><span class="ra-prog-ex-chip">IndexFlex (Hybrid)</span><span class="ra-prog-ex-chip">GMWB</span></div>
-          </div>
+
         </div>
       </div>
 
@@ -16304,14 +16346,15 @@ function RetirementAccountsPage() {
           </div>
           <select class="filter-select" id="ra-type-filter" onchange="raFilterContracts()">
             <option value="">All Annuity Types</option>
-            <optgroup label="── Immediate ──">
-              <option>Single Premium Immediate (SPIA)</option>
-              <option>Deferred Income Annuity (DIA)</option>
+            <optgroup label="── Immediate Income ──">
+              <option>Guaranteed Lifetime Income Annuity</option>
+              <option>Lifetime Mutual Income Annuity</option>
+              <option>Guaranteed Period Income Annuity</option>
             </optgroup>
-            <optgroup label="── Deferred ──">
-              <option>Fixed Index Annuity (FIA)</option>
-              <option>Variable Annuity (VA)</option>
-              <option>Fixed Deferred Annuity</option>
+            <optgroup label="── Deferred Income ──">
+              <option>Guaranteed Future Income Annuity</option>
+              <option>Future Mutual Income Annuity</option>
+              <option>Clear Income Advantage Fixed Annuity</option>
             </optgroup>
           </select>
           <select class="filter-select" id="ra-status-filter" onchange="raFilterContracts()">

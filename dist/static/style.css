@@ -47303,3 +47303,182 @@ kbd {
 .ia-scan-empty strong { display: block; font-size: 14px; color: #1e293b; margin-bottom: 4px; }
 
 /* END PASS 10 */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PASS 11 — Retirement Accounts: NYL 6-Product Type Cards + Category Headers
+   + ra-detail-col scrollbar
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Category divider headers (Immediate / Deferred sections) ──────────────── */
+.ra-prog-category-hdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e2e8f0;
+}
+.ra-prog-category-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.ra-prog-category-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.ra-prog-category-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+/* ── Retirement type card grid (3-col for the 3-product rows) ──────────────── */
+.ra-prog-types-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 6px;
+}
+@media (max-width: 900px) {
+  .ra-prog-types-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Base type card (inherits the existing .ra-prog-type-card style) ────────── */
+/* These modifier classes add the per-product accent colours */
+
+/* GLIA — Guaranteed Lifetime Income Annuity — NYL blue #003087 */
+.ra-prog-type-glia {
+  border-top: 3px solid #003087;
+}
+.ra-prog-type-glia .ra-prog-type-icon {
+  background: #dbeafe;
+  color: #003087;
+}
+.ra-prog-type-glia:hover {
+  border-color: #003087;
+  box-shadow: 0 4px 16px rgba(0,48,135,0.13);
+}
+
+/* LMIA — Lifetime Mutual Income Annuity — teal #0891b2 */
+.ra-prog-type-lmia {
+  border-top: 3px solid #0891b2;
+}
+.ra-prog-type-lmia .ra-prog-type-icon {
+  background: #e0f2fe;
+  color: #0891b2;
+}
+.ra-prog-type-lmia:hover {
+  border-color: #0891b2;
+  box-shadow: 0 4px 16px rgba(8,145,178,0.13);
+}
+
+/* GPIA — Guaranteed Period Income Annuity — indigo #4f46e5 */
+.ra-prog-type-gpia {
+  border-top: 3px solid #4f46e5;
+}
+.ra-prog-type-gpia .ra-prog-type-icon {
+  background: #ede9fe;
+  color: #4f46e5;
+}
+.ra-prog-type-gpia:hover {
+  border-color: #4f46e5;
+  box-shadow: 0 4px 16px rgba(79,70,229,0.13);
+}
+
+/* GFIA — Guaranteed Future Income Annuity — green #059669 */
+.ra-prog-type-gfia {
+  border-top: 3px solid #059669;
+}
+.ra-prog-type-gfia .ra-prog-type-icon {
+  background: #d1fae5;
+  color: #059669;
+}
+.ra-prog-type-gfia:hover {
+  border-color: #059669;
+  box-shadow: 0 4px 16px rgba(5,150,105,0.13);
+}
+
+/* FMIA — Future Mutual Income Annuity — emerald #10b981 */
+.ra-prog-type-fmia {
+  border-top: 3px solid #10b981;
+}
+.ra-prog-type-fmia .ra-prog-type-icon {
+  background: #d1fae5;
+  color: #10b981;
+}
+.ra-prog-type-fmia:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 16px rgba(16,185,129,0.13);
+}
+
+/* CIAFA — Clear Income Advantage Fixed Annuity — amber #d97706 */
+.ra-prog-type-ciafa {
+  border-top: 3px solid #d97706;
+}
+.ra-prog-type-ciafa .ra-prog-type-icon {
+  background: #fef3c7;
+  color: #d97706;
+}
+.ra-prog-type-ciafa:hover {
+  border-color: #d97706;
+  box-shadow: 0 4px 16px rgba(217,119,6,0.13);
+}
+
+/* ── ra-detail-col scrollbar (mirrors ia-detail-col pattern from Pass 10) ─── */
+.ra-detail-col {
+  overflow-y: auto;
+  max-height: calc(100vh - 160px);
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.ra-detail-col::-webkit-scrollbar {
+  width: 5px;
+}
+.ra-detail-col::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ra-detail-col::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.ra-detail-col::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ── ra-list-col thin scrollbar (matching ia-list-col from Pass 10) ──────── */
+.ra-list-col {
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+.ra-list-col::-webkit-scrollbar {
+  width: 4px;
+}
+.ra-list-col::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ra-list-col::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+.ra-list-col::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+/* END PASS 11 */
+
+/* ── Pass 11 override: ra-prog-type-card is now clickable ── */
+.ra-prog-type-card {
+  cursor: pointer;
+}
+.ra-prog-type-card:hover {
+  transform: translateY(-1px);
+}
