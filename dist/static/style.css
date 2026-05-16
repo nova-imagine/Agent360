@@ -43542,3 +43542,91 @@ kbd {
 .triage-act-danger:hover   { background: #b91c1c; }
 .triage-act-ghost    { background: #f1f5f9; color: #374151; border: 1px solid #e2e8f0; }
 .triage-act-ghost:hover    { background: #e2e8f0; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLAIM MODAL — NOTES & TIMELINE TAB
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Status change strip */
+.p7cm-status-strip {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+}
+.p7cm-status-strip-label {
+  font-size: 12px; font-weight: 700; color: #374151;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.p7cm-status-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.p7cm-status-btn {
+  padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 12px; font-weight: 600; transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.p7cm-status-btn.review  { background: #e0f2fe; color: #0369a1; }
+.p7cm-status-btn.review:hover  { background: #bae6fd; }
+.p7cm-status-btn.pending { background: #fef3c7; color: #92400e; }
+.p7cm-status-btn.pending:hover { background: #fde68a; }
+.p7cm-status-btn.approve { background: #d1fae5; color: #065f46; }
+.p7cm-status-btn.approve:hover { background: #a7f3d0; }
+.p7cm-status-btn.deny    { background: #fee2e2; color: #991b1b; }
+.p7cm-status-btn.deny:hover    { background: #fecaca; }
+.p7cm-status-btn.hold    { background: #ede9fe; color: #5b21b6; }
+.p7cm-status-btn.hold:hover    { background: #ddd6fe; }
+
+/* Notes panel layout */
+.p7cm-notes-panel { padding: 16px 20px; }
+.p7cm-notes-section {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+  padding: 16px; margin-bottom: 14px;
+}
+.p7cm-notes-title {
+  font-size: 13px; font-weight: 700; color: #1e3a5f;
+  display: flex; align-items: center; gap: 7px; margin-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;
+}
+.p7cm-notes-current {
+  font-size: 13px; color: #374151; line-height: 1.6;
+  background: #f8fafc; border-radius: 8px; padding: 12px;
+  margin-bottom: 12px; border-left: 3px solid #003087;
+}
+.p7cm-notes-add-row { display: flex; flex-direction: column; gap: 8px; }
+.p7m-textarea {
+  width: 100%; border: 1px solid #d1d5db; border-radius: 8px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit;
+  resize: vertical; outline: none; transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.p7m-textarea:focus { border-color: #003087; }
+.p7cm-notes-add-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Priority strip */
+.p7cm-priority-row { display: flex; flex-direction: column; gap: 10px; }
+.p7cm-priority-current { font-size: 13px; color: #374151; }
+.p7cm-priority-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.p7cm-priority-btn {
+  padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 12px; font-weight: 600; transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.p7cm-priority-btn.urgent   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.p7cm-priority-btn.urgent:hover   { background: #fee2e2; }
+.p7cm-priority-btn.normal   { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.p7cm-priority-btn.normal:hover   { background: #dbeafe; }
+.p7cm-priority-btn.escalate { background: #fdf4ff; color: #7c3aed; border: 1px solid #e9d5ff; }
+.p7cm-priority-btn.escalate:hover { background: #ede9fe; }
+
+/* Timeline */
+.p7cm-tl-wrap { display: flex; flex-direction: column; gap: 0; margin-bottom: 12px; }
+.p7cm-tl-row  { display: flex; gap: 12px; align-items: flex-start; }
+.p7cm-tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 24px; }
+.p7cm-tl-dot  {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 10px;
+}
+.p7cm-tl-line { width: 2px; background: #e5e7eb; flex: 1; min-height: 16px; margin: 2px 0; }
+.p7cm-tl-body { padding-bottom: 14px; flex: 1; }
+.p7cm-tl-date  { font-size: 11px; color: #94a3b8; font-weight: 600; margin-bottom: 2px; }
+.p7cm-tl-event { font-size: 13px; color: #374151; line-height: 1.5; }
+.p7cm-tl-add-row { display: flex; gap: 8px; align-items: center; }

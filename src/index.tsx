@@ -6960,8 +6960,6 @@ function ClaimsPage() {
             <div class="detail-modal-header-actions">
               <div class="detail-modal-tabs" id="claim-modal-tabs">
                 <button class="dmt-tab active" onclick="switchClaimTab('view',this)"><i class="fas fa-eye"></i> View Claim</button>
-                <button class="dmt-tab ai-tab" onclick="switchClaimTab('ai',this)"><i class="fas fa-robot"></i> AI Analysis</button>
-                <button class="dmt-tab ci-tab" onclick="switchClaimTab('ci',this)"><i class="fas fa-brain"></i> Intelligence</button>
                 <button class="dmt-tab liability-tab" onclick="switchClaimTab('liability',this)"><i class="fas fa-gavel"></i> Liability</button>
                 <button class="dmt-tab docs-tab" onclick="switchClaimTab('docs',this)"><i class="fas fa-file-import"></i> Documents</button>
                 <button class="dmt-tab comms-tab" onclick="switchClaimTab('comms',this)"><i class="fas fa-comments"></i> Communications</button>

@@ -35459,15 +35459,16 @@ function openClaimModal(claimId, tab) {
   }
 
   var tabActive = tab || 'view';
-  var tabs = ['view', 'docs', 'comms', 'beneficiary', 'payments', 'liability', 'ci'];
+  var tabs = ['view', 'docs', 'comms', 'beneficiary', 'payments', 'liability', 'notes', 'ci'];
   var tabLabels = {
-    view: '<i class="fas fa-file-alt"></i> Overview',
-    docs: '<i class="fas fa-folder-open"></i> Documents',
-    comms: '<i class="fas fa-comments"></i> Communications',
+    view:        '<i class="fas fa-file-alt"></i> Overview',
+    docs:        '<i class="fas fa-folder-open"></i> Documents',
+    comms:       '<i class="fas fa-comments"></i> Communications',
     beneficiary: '<i class="fas fa-user-check"></i> Beneficiary',
-    payments: '<i class="fas fa-dollar-sign"></i> Payments & Reserve',
-    liability: '<i class="fas fa-gavel"></i> Liability & Legal',
-    ci: '<i class="fas fa-robot"></i> AI Intelligence'
+    payments:    '<i class="fas fa-dollar-sign"></i> Payments & Reserve',
+    liability:   '<i class="fas fa-gavel"></i> Liability & Legal',
+    notes:       '<i class="fas fa-sticky-note"></i> Notes & Timeline',
+    ci:          '<i class="fas fa-robot"></i> AI Intelligence'
   };
 
   var tabBtns = tabs.map(function(t) {
@@ -35817,7 +35818,130 @@ function p7BuildClaimTabContent(claim, tab) {
     '</div>';
   }
 
+  /* ── TAB: NOTES & TIMELINE ── */
+  if (tab === 'notes') {
+    return p7BuildNotesTab(claim);
+  }
+
   return '<div class="p7cm-empty">Tab content loading…</div>';
+}
+
+function p7BuildNotesTab(claim) {
+  var tl = claim.timeline || [];
+  var tlHTML = '';
+  if (tl.length > 0) {
+    tl.forEach(function(t, idx) {
+      var tColor = t.type === 'alert' ? '#dc2626' : t.type === 'filed' ? '#2563eb' : t.type === 'paid' ? '#059669' : '#64748b';
+      var tIcon  = t.type === 'alert' ? 'fa-exclamation-triangle' : t.type === 'filed' ? 'fa-file-alt' : t.type === 'paid' ? 'fa-check-circle' : 'fa-circle';
+      tlHTML +=
+        '<div class="p7cm-tl-row">' +
+          '<div class="p7cm-tl-left">' +
+            '<div class="p7cm-tl-dot" style="background:' + tColor + ';color:#fff"><i class="fas ' + tIcon + '" style="font-size:9px"></i></div>' +
+            (idx < tl.length - 1 ? '<div class="p7cm-tl-line"></div>' : '') +
+          '</div>' +
+          '<div class="p7cm-tl-body">' +
+            '<div class="p7cm-tl-date">' + t.date + '</div>' +
+            '<div class="p7cm-tl-event">' + t.event + '</div>' +
+          '</div>' +
+        '</div>';
+    });
+  } else {
+    tlHTML = '<div class="p7cm-empty-state"><i class="fas fa-history"></i><p>No timeline events yet.</p></div>';
+  }
+
+  var priorityColor = claim.priority === 'Urgent' ? '#dc2626' : claim.priority === 'Normal' ? '#2563eb' : '#059669';
+  var statusBtnClass = {
+    'Under Review': 'p7cm-status-btn review',
+    'Pending Docs': 'p7cm-status-btn pending',
+    'Approved':     'p7cm-status-btn approve',
+    'Denied':       'p7cm-status-btn deny',
+    'On Hold':      'p7cm-status-btn hold'
+  };
+
+  return '<div class="p7cm-notes-panel">' +
+
+    /* ── Status change strip ── */
+    '<div class="p7cm-status-strip">' +
+      '<div class="p7cm-status-strip-label"><i class="fas fa-exchange-alt"></i> Change Status</div>' +
+      '<div class="p7cm-status-btns">' +
+        '<button class="p7cm-status-btn review"  onclick="p7ChangeStatus(\'' + claim.id + '\',\'Under Review\')">Under Review</button>' +
+        '<button class="p7cm-status-btn pending" onclick="p7ChangeStatus(\'' + claim.id + '\',\'Pending Docs\')">Pending Docs</button>' +
+        '<button class="p7cm-status-btn approve" onclick="p7ChangeStatus(\'' + claim.id + '\',\'Approved\')"><i class="fas fa-check"></i> Approve</button>' +
+        '<button class="p7cm-status-btn deny"    onclick="p7ChangeStatus(\'' + claim.id + '\',\'Denied\')"><i class="fas fa-times"></i> Deny</button>' +
+        '<button class="p7cm-status-btn hold"    onclick="p7ChangeStatus(\'' + claim.id + '\',\'On Hold\')">Place on Hold</button>' +
+      '</div>' +
+    '</div>' +
+
+    /* ── Priority & Escalation ── */
+    '<div class="p7cm-notes-section">' +
+      '<div class="p7cm-notes-title"><i class="fas fa-flag"></i> Priority & Escalation</div>' +
+      '<div class="p7cm-priority-row">' +
+        '<div class="p7cm-priority-current">Current Priority: <strong style="color:' + priorityColor + '">' + claim.priority + '</strong> &nbsp;·&nbsp; Adjuster: <strong>' + claim.adjuster + '</strong> (' + claim.adjusterTeam + ')</div>' +
+        '<div class="p7cm-priority-btns">' +
+          '<button class="p7cm-priority-btn urgent"   onclick="p7Toast(\'<i class=\\\'fas fa-fire\\\'></i> Priority changed to URGENT — adjuster notified\',3000)"><i class="fas fa-fire"></i> Set Urgent</button>' +
+          '<button class="p7cm-priority-btn normal"   onclick="p7Toast(\'<i class=\\\'fas fa-flag\\\'></i> Priority set to Normal\',2500)"><i class="fas fa-flag"></i> Set Normal</button>' +
+          '<button class="p7cm-priority-btn escalate" onclick="p7Toast(\'<i class=\\\'fas fa-arrow-up\\\'></i> Escalated to Senior Adjuster — email sent\',3000)"><i class="fas fa-arrow-up"></i> Escalate to Sr. Adjuster</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    /* ── Adjuster Notes ── */
+    '<div class="p7cm-notes-section">' +
+      '<div class="p7cm-notes-title"><i class="fas fa-sticky-note"></i> Adjuster Notes</div>' +
+      '<div class="p7cm-notes-current">' + (claim.aiTriage || 'No notes on file.') + '</div>' +
+      '<div class="p7cm-notes-add-row">' +
+        '<textarea class="p7m-textarea" id="p7cm-note-text" placeholder="Add adjuster note, internal memo, escalation reason, or compliance observation…" rows="3"></textarea>' +
+        '<div class="p7cm-notes-add-actions">' +
+          '<select class="p7m-select" id="p7cm-note-type" style="width:160px">' +
+            '<option>Adjuster Note</option>' +
+            '<option>Escalation</option>' +
+            '<option>Legal Memo</option>' +
+            '<option>Manager Review</option>' +
+            '<option>SIU Referral Note</option>' +
+            '<option>Compliance Flag</option>' +
+          '</select>' +
+          '<button class="p7cm-act-btn primary" onclick="p7AddNote(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Save Note</button>' +
+          '<button class="p7cm-act-btn ghost" onclick="p7Toast(\'<i class=\\\'fas fa-file-pdf\\\'></i> Notes exported to PDF\',2500)"><i class="fas fa-file-pdf"></i> Export</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    /* ── Claim Timeline ── */
+    '<div class="p7cm-notes-section">' +
+      '<div class="p7cm-notes-title"><i class="fas fa-stream"></i> Claim Timeline</div>' +
+      '<div class="p7cm-tl-wrap">' + tlHTML + '</div>' +
+      '<div class="p7cm-tl-add-row">' +
+        '<input class="p7m-input" id="p7cm-tl-event" placeholder="Add manual timeline event…" style="flex:1" />' +
+        '<button class="p7cm-act-btn secondary" onclick="p7AddTimelineEvent(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Add Event</button>' +
+      '</div>' +
+    '</div>' +
+
+  '</div>';
+}
+
+function p7ChangeStatus(claimId, newStatus) {
+  var statusColors = { 'Under Review':'#0891b2','Pending Docs':'#d97706','Approved':'#059669','Denied':'#dc2626','On Hold':'#7c3aed' };
+  var sc = statusColors[newStatus] || '#64748b';
+  p7Toast('<i class="fas fa-exchange-alt"></i> ' + claimId + ' status changed to <strong style="color:' + sc + '">' + newStatus + '</strong> — workflow updated', 3500);
+}
+
+function p7AddNote(claimId) {
+  var text = (document.getElementById('p7cm-note-text') || {}).value || '';
+  var type = (document.getElementById('p7cm-note-type') || {}).value || 'Adjuster Note';
+  if (!text.trim()) { p7Toast('Please enter a note before saving', 2000); return; }
+  p7Toast('<i class="fas fa-check-circle"></i> ' + type + ' saved for ' + claimId + ' — audit trail updated', 3000);
+  var el = document.getElementById('p7cm-note-text');
+  if (el) el.value = '';
+}
+
+function p7AddTimelineEvent(claimId) {
+  var text = (document.getElementById('p7cm-tl-event') || {}).value || '';
+  if (!text.trim()) { p7Toast('Please enter an event description', 2000); return; }
+  var today = new Date();
+  var label = 'Apr ' + today.getDate();
+  p7Toast('<i class="fas fa-stream"></i> Timeline event added: ' + text.substring(0,50), 3000);
+  var el = document.getElementById('p7cm-tl-event');
+  if (el) el.value = '';
 }
 
 function p7LogCall(claimId) { p7Toast('<i class="fas fa-phone-alt"></i> Call log modal opened for ' + claimId, 2500); }
