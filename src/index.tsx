@@ -14669,6 +14669,7 @@ function FNADiscoveryPage() {
                 <button class="fna-foot-btn" onclick="event.stopPropagation();continueFNA('FNA-001')">Continue <i class="fas fa-arrow-right"></i></button>
               </div>
             </div>
+
             {/* FNA Card 2 — Insurance + Retirement */}
             <div class="fna-card" onclick="openFNADetail('FNA-002')" data-id="FNA-002">
               <div class="fna-card-top">
@@ -14688,7 +14689,7 @@ function FNADiscoveryPage() {
                 <span class="fna-prog-lbl">40% complete</span>
               </div>
               <div class="fna-card-chips">
-                <span class="fna-chip ins"><i class="fas fa-shield-alt"></i> Term $1M</span>
+                <span class="fna-chip ins"><i class="fas fa-shield-alt"></i> Term Life $1M</span>
                 <span class="fna-chip warn"><i class="fas fa-exclamation-triangle"></i> No LTC</span>
               </div>
               <div class="fna-card-footer">
@@ -14696,6 +14697,7 @@ function FNADiscoveryPage() {
                 <button class="fna-foot-btn" onclick="event.stopPropagation();continueFNA('FNA-002')">Continue <i class="fas fa-arrow-right"></i></button>
               </div>
             </div>
+
             {/* FNA Card 3 — Insurance + Retirement + Advisory */}
             <div class="fna-card" onclick="openFNADetail('FNA-003')" data-id="FNA-003">
               <div class="fna-card-top">
@@ -14717,11 +14719,43 @@ function FNADiscoveryPage() {
               </div>
               <div class="fna-card-chips">
                 <span class="fna-chip warn"><i class="fas fa-exclamation-circle"></i> UL lapse risk</span>
-                <span class="fna-chip ret"><i class="fas fa-umbrella-beach"></i> Annuity gap</span>
+                <span class="fna-chip ret"><i class="fas fa-umbrella-beach"></i> Deferred Income gap</span>
               </div>
               <div class="fna-card-footer">
                 <span class="fna-foot-date"><i class="fas fa-clock"></i> Updated today</span>
                 <button class="fna-foot-btn urgent" onclick="event.stopPropagation();continueFNA('FNA-003')">Act Now <i class="fas fa-arrow-right"></i></button>
+              </div>
+            </div>
+
+            {/* FNA Card 4 — All 4 domains: Insurance + Investments + Retirement + Advisory */}
+            <div class="fna-card" onclick="openFNADetail('FNA-004')" data-id="FNA-004">
+              <div class="fna-card-top">
+                <div class="fna-avatar fna-av-lm">LM</div>
+                <div class="fna-card-meta">
+                  <div class="fna-card-name">Linda Morrison</div>
+                  <div class="fna-card-sub">CFO · Age 57 · Phase 2 of 5</div>
+                </div>
+                <span class="fna-status-pill progress">In Progress</span>
+              </div>
+              <div class="fna-card-domains">
+                <span class="fna-domain-badge ins"><i class="fas fa-shield-alt"></i> Insurance</span>
+                <span class="fna-domain-badge inv"><i class="fas fa-chart-line"></i> Investments</span>
+                <span class="fna-domain-badge ret"><i class="fas fa-umbrella-beach"></i> Retirement</span>
+                <span class="fna-domain-badge adv"><i class="fas fa-handshake"></i> Advisory</span>
+              </div>
+              <div class="fna-card-progress">
+                <div class="fna-prog-bar"><div class="fna-prog-fill" style="width:35%"></div></div>
+                <span class="fna-prog-lbl">35% complete</span>
+              </div>
+              <div class="fna-card-chips">
+                <span class="fna-chip ins"><i class="fas fa-shield-alt"></i> Universal Life $2M</span>
+                <span class="fna-chip inv"><i class="fas fa-chart-line"></i> Fixed Indexed Annuity</span>
+                <span class="fna-chip ret"><i class="fas fa-umbrella-beach"></i> Guaranteed Lifetime Income</span>
+                <span class="fna-chip adv"><i class="fas fa-handshake"></i> Estate Planning</span>
+              </div>
+              <div class="fna-card-footer">
+                <span class="fna-foot-date"><i class="fas fa-clock"></i> Updated 3h ago</span>
+                <button class="fna-foot-btn" onclick="event.stopPropagation();continueFNA('FNA-004')">Continue <i class="fas fa-arrow-right"></i></button>
               </div>
             </div>
           </div>

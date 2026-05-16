@@ -45526,3 +45526,68 @@ kbd {
 /* ═══════════════════════════════════════════════════════════════════════
    END Pass 5
    ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FNA WIZARD — Pass 6: Investments domain badge/chip + avatar colours
+   + corrected chip colours for all 4 domains
+   Appended 2026-05-16
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── FNA card domain badges — Investments (new) ─────────────────────── */
+.fna-domain-badge.inv {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+/* ── FNA card product chips — all 4 domain colours ─────────────────── */
+/* Insurance — navy/blue */
+.fna-chip.ins {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* Investments — green */
+.fna-chip.inv {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Retirement — cyan/teal */
+.fna-chip.ret {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+/* Advisory — purple */
+.fna-chip.adv {
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
+/* Warning/gap chip */
+.fna-chip.warn {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* ── FNA card avatar colours (per-person initials backgrounds) ───────── */
+.fna-av-ar { background: linear-gradient(135deg, #003087, #1d6fe8); }  /* Alex Rivera      — NYL navy  */
+.fna-av-nf { background: linear-gradient(135deg, #059669, #10b981); }  /* Nancy Foster     — green     */
+.fna-av-pn { background: linear-gradient(135deg, #0891b2, #06b6d4); }  /* Patricia Nguyen  — cyan      */
+.fna-av-jw { background: linear-gradient(135deg, #7c3aed, #a855f7); }  /* James Whitfield  — purple    */
+.fna-av-rc { background: linear-gradient(135deg, #d97706, #f59e0b); }  /* Robert Chen      — amber     */
+.fna-av-lm { background: linear-gradient(135deg, #be185d, #ec4899); }  /* Linda Morrison   — rose/pink */
+
+/* ── Urgent progress bar fill variant ───────────────────────────────── */
+.fna-prog-fill.urgent { background: linear-gradient(90deg, #dc2626, #ef4444); }
+
+/* ── Urgent continue button variant ─────────────────────────────────── */
+.fna-foot-btn.urgent {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+.fna-foot-btn.urgent:hover { background: #991b1b; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   END Pass 6
+   ═══════════════════════════════════════════════════════════════════════ */
