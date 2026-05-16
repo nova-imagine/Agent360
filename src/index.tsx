@@ -787,7 +787,7 @@ function Sidebar() {
           <span class="nav-badge" style="background:#7c3aed;color:#fff">14</span>
         </a>
         <a class="nav-item" onclick="navigateTo('products')" href="#">
-          <i class="fas fa-flask"></i><span>Products &amp; Illustrations</span>
+          <i class="fas fa-file-contract"></i><span>Product Proposals</span>
         </a>
         <a class="nav-item" onclick="navigateTo('sales')" href="#">
           <i class="fas fa-route"></i><span>Sales Pipeline</span>
@@ -10954,14 +10954,14 @@ function ProductsPage() {
         <div class="p3-header-left">
           <div class="p3-header-icon"><i class="fas fa-file-contract"></i></div>
           <div>
-            <h2 class="p3-title">Product &amp; Illustration Hub</h2>
-            <p class="p3-sub">Insurance · Retirement · Investments · Advisory — Run illustrations · Build proposals · AI coaching · NAIC compliance · Signature capture</p>
+            <h2 class="p3-title">Product Proposals Hub</h2>
+            <p class="p3-sub">Insurance · Retirement · Investments · Advisory — Run illustrations · Build investment &amp; retirement proposals · Advisory engagements · NAIC compliance · Signature capture</p>
           </div>
         </div>
         <div class="p3-header-actions">
           <button class="btn btn-outline" onclick="p3OpenObjCoach()"><i class="fas fa-comments"></i> Objection Coach</button>
           <button class="btn btn-ai"     onclick="p3RunAIComparison()"><i class="fas fa-robot"></i> AI Compare</button>
-          <button class="btn btn-primary" onclick="p3OpenIllustrationEngine()"><i class="fas fa-calculator"></i> Run Illustration</button>
+          <button class="btn btn-primary" onclick="p3OpenDomainProposal()"><i class="fas fa-file-contract"></i> New Proposal</button>
         </div>
       </div>
 
@@ -10969,14 +10969,14 @@ function ProductsPage() {
       <div class="p3-ai-bar">
         <div class="p3-ai-bar-icon"><i class="fas fa-brain"></i></div>
         <div class="p3-ai-bar-body">
-          <span class="p3-ai-bar-label">AI Illustration Assistant · 3 prospects ready for illustration</span>
-          <span class="p3-ai-bar-text"><strong>Urgent:</strong> Patricia Nguyen — UL lapse risk 68 days · Alex Rivera — DI gap unaddressed · Nancy Foster — LTC hybrid proposal pending compliance review</span>
+          <span class="p3-ai-bar-label">AI Proposal Assistant · 4 prospects ready for proposals across all domains</span>
+          <span class="p3-ai-bar-text"><strong>Urgent:</strong> Patricia Nguyen — UL lapse risk 68 days · Linda Morrison — FIA $400K + UMA rebalance due · Nancy Foster — Deferred Income Annuity proposal pending · Alex Rivera — DI gap unaddressed</span>
         </div>
         <div class="p3-ai-bar-kpis">
-          <div class="p3-ai-kpi"><span class="p3-ai-kpi-val">3</span><span class="p3-ai-kpi-lbl">Prospects</span></div>
-          <div class="p3-ai-kpi hi"><span class="p3-ai-kpi-val">1</span><span class="p3-ai-kpi-lbl">Urgent</span></div>
-          <div class="p3-ai-kpi"><span class="p3-ai-kpi-val">$17.3K</span><span class="p3-ai-kpi-lbl">Annual Premium</span></div>
-          <div class="p3-ai-kpi good"><span class="p3-ai-kpi-val">3</span><span class="p3-ai-kpi-lbl">Proposals Ready</span></div>
+          <div class="p3-ai-kpi"><span class="p3-ai-kpi-val">4</span><span class="p3-ai-kpi-lbl">Prospects</span></div>
+          <div class="p3-ai-kpi hi"><span class="p3-ai-kpi-val">2</span><span class="p3-ai-kpi-lbl">Urgent</span></div>
+          <div class="p3-ai-kpi"><span class="p3-ai-kpi-val">$41.8K</span><span class="p3-ai-kpi-lbl">Annual Premium</span></div>
+          <div class="p3-ai-kpi good"><span class="p3-ai-kpi-val">4</span><span class="p3-ai-kpi-lbl">Proposals Ready</span></div>
         </div>
       </div>
 
@@ -10994,7 +10994,7 @@ function ProductsPage() {
         <div class="p3-phase-arrow"><i class="fas fa-chevron-right"></i></div>
         <div class="p3-phase active">
           <div class="p3-phase-num">3</div>
-          <div class="p3-phase-body"><div class="p3-phase-title">Illustration &amp; Proposal</div><div class="p3-phase-sub">Run · compare · present</div></div>
+          <div class="p3-phase-body"><div class="p3-phase-title">Product Proposals</div><div class="p3-phase-sub">Illustrate · propose · present</div></div>
         </div>
         <div class="p3-phase-arrow"><i class="fas fa-chevron-right"></i></div>
         <div class="p3-phase">
@@ -11030,7 +11030,11 @@ function ProductsPage() {
               <span class="p3-cat-chip ul"><i class="fas fa-chart-line"></i> Universal Life</span>
               <span class="p3-cat-chip di"><i class="fas fa-user-injured"></i> Disability Income</span>
               <span class="p3-cat-chip ltc"><i class="fas fa-hands-helping"></i> LTC / Hybrid</span>
-              <span class="p3-cat-chip annuity"><i class="fas fa-coins"></i> Annuity</span>
+              <span class="p3-cat-chip annuity"><i class="fas fa-coins"></i> Income Annuities</span>
+              <span class="p3-cat-chip inv"><i class="fas fa-chart-bar"></i> FIA / VA</span>
+              <span class="p3-cat-chip ret"><i class="fas fa-umbrella-beach"></i> Deferred Income</span>
+              <span class="p3-cat-chip adv"><i class="fas fa-chess-queen"></i> UMA / Advisory</span>
+              <span class="p3-cat-chip edu"><i class="fas fa-graduation-cap"></i> 529 Savings</span>
             </div>
           </div>
         </div>
@@ -11043,19 +11047,73 @@ function ProductsPage() {
       </div>
 
       {/* ══════════════════════════════════════════════════
-          OVERLAY 1 — ILLUSTRATION ENGINE MODAL
+          OVERLAY 1 — ILLUSTRATION ENGINE MODAL (Insurance)
           ══════════════════════════════════════════════════ */}
       <div id="p3-illustration-overlay" class="p3-overlay" style="display:none" onclick="p3CloseIllustBg(event)">
         <div class="p3-overlay-modal wide" onclick="event.stopPropagation()">
           <div class="p3-overlay-header">
             <div class="p3-overlay-header-left">
               <i class="fas fa-calculator"></i>
-              <span>Illustration Engine — NYL Proprietary System</span>
+              <span>Insurance Illustration Engine — NYL Proprietary System</span>
             </div>
             <button class="p3-overlay-close" onclick="closeP3IllustrationOverlay()"><i class="fas fa-times"></i></button>
           </div>
           <div class="p3-overlay-body" id="p3-illust-engine-body">
             {/* Rendered by p3OpenIllustrationEngine() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          OVERLAY 5 — RETIREMENT PROPOSAL MODAL
+          ══════════════════════════════════════════════════ */}
+      <div id="p3-retirement-overlay" class="p3-overlay" style="display:none" onclick="p3CloseRetirementBg(event)">
+        <div class="p3-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p3-overlay-header ret">
+            <div class="p3-overlay-header-left">
+              <i class="fas fa-umbrella-beach"></i>
+              <span>Retirement Proposal — Income &amp; Annuity Planning</span>
+            </div>
+            <button class="p3-overlay-close" onclick="p3CloseRetirementOverlay()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p3-overlay-body" id="p3-retirement-body">
+            {/* Rendered by p3OpenRetirementProposal() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          OVERLAY 6 — INVESTMENT PROPOSAL MODAL
+          ══════════════════════════════════════════════════ */}
+      <div id="p3-investment-overlay" class="p3-overlay" style="display:none" onclick="p3CloseInvestmentBg(event)">
+        <div class="p3-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p3-overlay-header inv">
+            <div class="p3-overlay-header-left">
+              <i class="fas fa-chart-line"></i>
+              <span>Investment Proposal — Portfolio &amp; Wealth Building</span>
+            </div>
+            <button class="p3-overlay-close" onclick="p3CloseInvestmentOverlay()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p3-overlay-body" id="p3-investment-body">
+            {/* Rendered by p3OpenInvestmentProposal() */}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          OVERLAY 7 — ADVISORY PROPOSAL MODAL
+          ══════════════════════════════════════════════════ */}
+      <div id="p3-advisory-overlay" class="p3-overlay" style="display:none" onclick="p3CloseAdvisoryBg(event)">
+        <div class="p3-overlay-modal wide" onclick="event.stopPropagation()">
+          <div class="p3-overlay-header adv">
+            <div class="p3-overlay-header-left">
+              <i class="fas fa-chess-queen"></i>
+              <span>Advisory Proposal — Wealth Management &amp; Planning Services</span>
+            </div>
+            <button class="p3-overlay-close" onclick="p3CloseAdvisoryOverlay()"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p3-overlay-body" id="p3-advisory-body">
+            {/* Rendered by p3OpenAdvisoryProposal() */}
           </div>
         </div>
       </div>

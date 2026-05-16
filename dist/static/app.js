@@ -24795,6 +24795,19 @@ var fnaData = [
     coverageNeeded: 640000, annualPremiumEst: 6200,
     healthNotes: 'Non-smoker. T2DM well-controlled. A1c 6.8.',
     aiRec: 'UL premium increase $320/mo OR convert to WL + PUAs · urgent'
+  },
+  {
+    id: 'FNA-004', client: 'Linda Morrison', initials: 'LM', phase: 2,
+    stage: 'Fact-Find', pct: 35, status: 'progress',
+    dob: '1967-09-12', age: 57, gender: 'Female', smoker: false,
+    occupation: 'Chief Financial Officer', income: 380000, netWorth: 2100000,
+    lifeEvent: 'Approaching Retirement (5–10 yrs)',
+    domains: ['insurance', 'investments', 'retirement', 'advisory'],
+    products: ['Universal Life $2M', 'Fixed Indexed Annuity'],
+    gaps: ['No guaranteed lifetime income plan', 'No trust — estate exposed to probate', 'Business succession planning needed'],
+    coverageNeeded: 2000000, annualPremiumEst: 18400,
+    healthNotes: 'Non-smoker. Excellent health. Mild osteopenia — no medications.',
+    aiRec: 'UL $2M + FIA $400K rollover · Clear Income Advantage Fixed · Revocable Living Trust · UMA for $850K investable assets'
   }
 ];
 
@@ -28015,6 +28028,102 @@ var fnaFullData = {
     aiRec: 'Increase UL premium $320/mo OR convert to WL + PUAs · urgent lapse intervention · LTC hybrid when budget allows · FIA illustration for retirement income',
     notes: 'Patricia very concerned about UL lapse. Husband Michael joined — both understand urgency. T2DM labs requested. Ready to act this week.',
     healthNotes: 'T2DM well-controlled (A1c 6.8). Metformin + statin. Table 2 rating on existing UL. Request current labs before new illustration.'
+  },
+
+  'FNA-004': {
+    id: 'FNA-004', client: 'Linda Morrison', initials: 'LM', avatarColor: '#be185d',
+    phase: 2, stage: 'Fact-Find', pct: 35, status: 'progress',
+    prospectId: 'P004',
+    domains: ['insurance', 'investments', 'retirement', 'advisory'],
+    meetingDate: 'May 8, 2026', meetingType: 'In-Person', meetingLocation: 'NYL Midtown Office',
+
+    personal: {
+      dob: '1967-09-12', age: 57, gender: 'Female', smoker: false, tobaccoLastUsed: '',
+      occupation: 'Chief Financial Officer — Morrison & Partners LLC', hobbies: 'Golf, philanthropic board work',
+      riskClass: 'Preferred Plus',
+      existingCoverage: [
+        { carrier: 'NYL (in-force)', type: 'Universal Life', faceAmount: 2000000, premium: 18400, notes: 'UL $2M — currently in-force, funded above minimum' },
+        { carrier: 'Employer Group', type: 'Term', faceAmount: 500000, premium: 0, notes: 'Executive group term — not portable at retirement' }
+      ],
+      beneficiaryIntent: 'Daughter (Karen Morrison) 60% · Son (David Morrison) 40% · Charitable remainder trust as contingent'
+    },
+
+    health: {
+      heightFt: 5, heightIn: 6, weightLbs: 142,
+      bpSystolic: 122, bpDiastolic: 78,
+      majorDiagnoses: 'Mild osteopenia (DEXA 2024) — no treatment required',
+      medications: 'Vitamin D3 + Calcium supplements',
+      surgeries: 'None',
+      familyHistory: 'Mother — alive, age 84, excellent health. Father — deceased, cardiac at 81.',
+      tobaccoUse: false, alcoholUnitsPerWeek: 5,
+      aiHealthFlag: null
+    },
+
+    financial: {
+      annualIncome: 380000, spouseIncome: 0, totalHouseholdIncome: 380000,
+      monthlyExpenses: 18500,
+      mortgage: 0, mortgageMonthly: 0, mortgageYearsLeft: 0,
+      studentLoans: 0, otherDebts: 0,
+      savings401k: 1200000, liquidSavings: 320000, investments: 850000,
+      netWorth: 2100000,
+      monthlyBudgetForPremium: 3500,
+      shortTermGoals: 'Maximize tax-advantaged income before retirement; fund charitable giving',
+      longTermGoals: 'Retire at 63; guaranteed lifetime income; protect estate for Karen and David; business succession'
+    },
+
+    needs: {
+      incomeReplacement: { yearsToReplace: 6, multiplier: 10, computed: 3800000, existingCoverage: 2500000, gap: 1300000 },
+      debtObligations: { mortgage: 0, studentLoans: 0, otherDebts: 0, total: 0 },
+      finalExpense: { funeralCost: 20000, estateAdminCost: 80000, total: 100000 },
+      businessInsurance: { applicable: true, notes: 'Buy-sell agreement needed — Morrison & Partners LLC. Key person coverage review required.' },
+      retirementIncomeGap: { targetRetirementIncome: 250000, socialSecurityEst: 38000, currentSavingsProjected: 3200000, gap: 0, applicable: true },
+      ltcDisability: { ltcApplicable: true, ltcMonthlyBenefit: 8000, diApplicable: false, diMonthlyBenefit: 0, currentDICoverage: 0, diGap: 0 }
+    },
+
+    ai: {
+      totalCoverageNeeded: 2000000, recommendedFaceAmount: 2000000,
+      recommendedProducts: ['Universal Life $2M', 'Fixed Indexed Annuity $400K', 'Clear Income Advantage Fixed', 'UMA — $850K investable'],
+      annualPremiumEst: 18400,
+      healthFlag: null,
+      suitabilityCheck: { pass: true, notes: 'All products suitable. Income and net worth confirm suitability. Preferred Plus rating confirmed. No FINRA flag.' },
+      gapSummary: 'High net worth client with broad needs across all 4 domains. UL $2M in-force — review for PUA capacity. Retirement income well-funded via 401K + investments, but guaranteed income floor (FIA/DIA) recommended. Estate planning critical — no trust in place. Business succession gap at Morrison & Partners LLC.',
+      meetingSummaryGenerated: false
+    },
+
+    // Retirement — primary need (age 57, retire 63, $2.1M net worth)
+    retirement: {
+      targetRetirementAge: 63,
+      targetMonthlyIncome: 20833,
+      socialSecurityAge: 70, socialSecurityEst: 3800,
+      pensionIncome: 0,
+      existingAnnuityIncome: 0,
+      rolloverAssets: { k401: 1200000, ira: 0, roth: 0, other: 850000 },
+      annuityInterest: 'Fixed Indexed Annuity + Clear Income Advantage Fixed',
+      annuityType: 'fixed-indexed',
+      incomeFloor: 15000,
+      aiRetirementNote: 'Retirement income target $250K/yr ($20,833/mo). SS at 70: $3,800/mo. 401K $1.2M + investments $850K projected $3.8M at 63. FIA on $400K rollover generates ~$2,200–2,800/mo guaranteed. Clear Income Advantage Fixed for deferred income floor. Guaranteed lifetime income floor of $15K/mo recommended across FIA + DIA ladder. Income gap well-covered — focus is on guaranteeing floor against longevity risk.'
+    },
+
+    // Investment & Advisory — full cross-domain (wealth, estate, small business)
+    investmentAdvisory: {
+      riskTolerance: 'Moderate Growth',
+      riskScore: 62,
+      timeHorizon: '6–25 years (retirement + estate)',
+      investableAssets: { taxable: 850000, ira: 0, roth: 0, k401: 1200000, other: 320000 },
+      currentHoldings: 'Personal brokerage $850K — diversified equity + fixed income. 401K $1.2M — Vanguard target-date 2030. Liquid savings $320K — money market.',
+      investmentObjective: 'Capital preservation + income generation approaching retirement',
+      smaUmaCandidate: true, smaUmaNote: '$850K taxable — strong UMA candidate. Recommend Unified Managed Account on brokerage assets immediately. Rep Advisory on $320K liquid savings.',
+      advisoryDomains: ['wealth-management', 'estate-planning', 'small-business'],
+      estateDocuments: { will: true, trust: false, poa: true, healthcareDirective: true },
+      businessOwner: true,
+      aiInvestmentNote: 'UMA on $850K taxable brokerage — highest priority. Diversified multi-strategy allocation: equity 55%, fixed income 35%, alternatives 10%. Annual rebalancing + tax-loss harvesting strategy recommended. Rep Advisory on $320K liquid as bridge.',
+      aiAdvisoryNote: 'Estate: Will in place but no trust — revocable living trust URGENT at $2.1M net worth to avoid probate and control distribution timing. Charitable remainder trust as contingent beneficiary on UL is sophisticated planning — needs attorney review. Business: Morrison & Partners LLC — buy-sell agreement not in place. Key person UL review required. Business succession plan needed before retirement at 63.'
+    },
+
+    gaps: ['No guaranteed lifetime income floor (FIA/DIA ladder recommended)', 'No revocable living trust — $2.1M estate exposed to probate', 'No buy-sell agreement at Morrison & Partners LLC', 'Key person coverage gap at LLC', 'No LTC plan — age 57, Preferred Plus, optimal time to act'],
+    aiRec: 'UL $2M PUA review · FIA $400K rollover + Clear Income Advantage Fixed · UMA $850K + Rep Advisory $320K · Revocable Living Trust · Buy-Sell Agreement LLC',
+    notes: 'Linda is a sophisticated client — CFO background, strong financial literacy. Very goal-oriented. Wants guaranteed income floor + estate lock-down before retirement. Daughter Karen is executor designate.',
+    healthNotes: 'Excellent health. Preferred Plus rating confirmed. Mild osteopenia — supplements only. No underwriting concerns.'
   }
 };
 
@@ -28052,6 +28161,10 @@ function _closeFNAEditorForce() {
   var overlay = document.getElementById('fna-editor-overlay');
   if (overlay) overlay.style.display = 'none';
   _fnaEditorId = null;
+  // Reset domain filter so next direct-list open shows all tabs
+  if (typeof _fnaEditorActiveDomains !== 'undefined') {
+    _fnaEditorActiveDomains = null;
+  }
 }
 
 function fnaEditorNav(idx) {
@@ -28658,9 +28771,17 @@ function closeFNASummary() {
 }
 
 // ── OVERRIDE continueFNA → openFNAEditor ──────────────────────────
+// When opening from the FNA list (not the wizard), use the FNA's own
+// domains array to filter tabs — so each client sees only their tabs.
 function continueFNA(id) {
   var fna = fnaFullData[id] || fnaFullData['FNA-001'];
+  // Capture domains from the FNA record (not from wizard state)
+  _fnaEditorActiveDomains = (fna.domains && fna.domains.length) ? fna.domains : null;
   openFNAEditor(fna.id);
+  // Apply domain tab filter after editor DOM is ready
+  setTimeout(function() {
+    fnaApplyDomainTabs(_fnaEditorActiveDomains);
+  }, 100);
 }
 
 // ── OVERRIDE openFNAAIAssist → openFNAAIPrefill ───────────────────
@@ -29245,6 +29366,20 @@ function _renderFNAEditorDomainPills(fna) {
     var overlay = document.getElementById('fna-editor-overlay');
     if (!overlay) return;
     overlay.style.display = 'flex';
+
+    // When opened directly from FNA list (not wizard), show ALL tabs
+    // _fnaEditorActiveDomains is set only when coming from the wizard;
+    // fnaWizCreate() clears it by setting to null on direct-list opens
+    if (typeof _fnaEditorActiveDomains === 'undefined' || _fnaEditorActiveDomains === null) {
+      // Show all tabs
+      for (var t = 0; t <= 5; t++) {
+        var tb = document.getElementById('fna-ed-nav-' + t);
+        if (tb) tb.style.display = '';
+      }
+      var pc = document.getElementById('fna-ed-domain-pills');
+      if (pc) pc.innerHTML = '';
+    }
+
     renderFNAEditorSection();
     renderFNAEditorNav();
   };
@@ -29301,21 +29436,128 @@ function fnaToggleDomain(domain, el) {
   }
 }
 
+// ── fnaClientSelectChange() — CRM select handler ──────────────────────
+// Called via onchange on #fna-wiz-client-select.
+// If a CRM record is chosen → hide manual entry, show populated chip.
+// If blank (manual) → show manual entry, hide chip.
+function fnaClientSelectChange() {
+  var sel      = document.getElementById('fna-wiz-client-select');
+  var chip     = document.getElementById('fna-crm-info-chip');
+  var orLine   = document.getElementById('fna-or-line');
+  var nameRow  = document.getElementById('fna-wiz-name-row');
+  var chipName = document.getElementById('fna-crm-chip-name');
+  var chipMeta = document.getElementById('fna-crm-chip-meta');
+
+  if (!sel) return;
+
+  var opt = sel.options[sel.selectedIndex];
+  var val = sel.value;
+
+  if (val && val !== '') {
+    // CRM record selected — populate chip, hide manual entry
+    var fname = opt.getAttribute('data-fname') || '';
+    var lname = opt.getAttribute('data-lname') || '';
+    var age   = opt.getAttribute('data-age')   || '';
+    var type  = opt.getAttribute('data-type')  || '';
+
+    if (chipName) chipName.textContent = fname + ' ' + lname;
+    if (chipMeta) chipMeta.textContent = 'Age ' + age + (type ? ' · ' + type : '');
+    if (chip)    chip.style.display    = 'flex';
+    if (orLine)  orLine.style.display  = 'none';
+    if (nameRow) nameRow.style.display = 'none';
+  } else {
+    // Blank / manual — hide chip, show manual entry
+    if (chip)    chip.style.display    = 'none';
+    if (orLine)  orLine.style.display  = '';
+    if (nameRow) nameRow.style.display = '';
+  }
+}
+
+// ── _fnaEditorActiveDomains — persists selected domains into the editor ──
+// Set by fnaWizCreate(), read by fnaApplyDomainTabs() after editor opens.
+// When null the editor shows all tabs (opened from FNA list, not wizard).
+var _fnaEditorActiveDomains = null;
+
+// ── fnaApplyDomainTabs() — show/hide editor nav tabs by domain ────────
+// Tab mapping (matches #fna-ed-nav-N button indices in src/index.tsx):
+//   0: Personal & Profile    — always visible
+//   1: Health History        — insurance
+//   2: Financial Profile     — always visible
+//   3: Insurance Needs       — insurance
+//   4: Retirement & Annuity  — retirement | investments
+//   5: Investment & Advisory — investments | advisory
+function fnaApplyDomainTabs(domains) {
+  var tabRules = [
+    { idx: 0, always: true  },                                           // Personal
+    { idx: 1, keys: ['insurance'] },                                     // Health History
+    { idx: 2, always: true  },                                           // Financial Profile
+    { idx: 3, keys: ['insurance'] },                                     // Insurance Needs
+    { idx: 4, keys: ['retirement', 'investments'] },                     // Retirement & Annuity
+    { idx: 5, keys: ['investments', 'advisory'] }                        // Investment & Advisory
+  ];
+
+  tabRules.forEach(function(rule) {
+    var btn = document.getElementById('fna-ed-nav-' + rule.idx);
+    if (!btn) return;
+    var visible = rule.always ||
+      (domains && rule.keys && rule.keys.some(function(k) {
+        return domains.indexOf(k) !== -1;
+      }));
+    btn.style.display = visible ? '' : 'none';
+  });
+
+  // If the currently active tab is now hidden, jump to first visible tab
+  var activeBtn = document.querySelector('.fna-ed-nav-btn.active');
+  if (activeBtn && activeBtn.style.display === 'none') {
+    var firstVisible = document.querySelector('.fna-ed-nav-btn:not([style*="display: none"]):not([style*="display:none"])');
+    if (firstVisible) {
+      var newIdx = parseInt(firstVisible.getAttribute('data-idx') || '0', 10);
+      fnaEditorNav(newIdx);
+    }
+  }
+
+  // Render domain pills in editor header
+  var pillsContainer = document.getElementById('fna-ed-domain-pills');
+  if (pillsContainer && domains) {
+    var domainMeta = {
+      insurance:   { label: 'Insurance',   color: '#003087', icon: 'fa-shield-alt' },
+      investments: { label: 'Investments', color: '#059669', icon: 'fa-chart-line' },
+      retirement:  { label: 'Retirement',  color: '#0891b2', icon: 'fa-umbrella-beach' },
+      advisory:    { label: 'Advisory',    color: '#7c3aed', icon: 'fa-handshake' }
+    };
+    pillsContainer.innerHTML = domains.map(function(d) {
+      var m = domainMeta[d] || { label: d, color: '#64748b', icon: 'fa-circle' };
+      return '<span class="fna-ed-domain-pill" style="background:' + m.color + '">' +
+        '<i class="fas ' + m.icon + '"></i> ' + m.label +
+        '</span>';
+    }).join('');
+  } else if (pillsContainer && !domains) {
+    pillsContainer.innerHTML = ''; // clear pills when opened from list
+  }
+}
+
 // ── fnaWizCreate() — finalize wizard and open FNA editor ───────────────
 function fnaWizCreate() {
   // Gather Step 1 inputs
   var clientSel  = document.getElementById('fna-wiz-client-select');
-  var nameEl     = document.getElementById('fna-wiz-name');
+  var fnameEl    = document.getElementById('fna-wiz-fname');
+  var lnameEl    = document.getElementById('fna-wiz-lname');
   var ageEl      = document.getElementById('fna-wiz-age');
-  var lifeEvent  = document.getElementById('fna-wiz-life-event');
-  var meetDate   = document.getElementById('fna-wiz-meet-date');
-  var meetType   = document.getElementById('fna-wiz-meet-type');
-  var meetLoc    = document.getElementById('fna-wiz-meet-loc');
+  var lifeEvent  = document.getElementById('fna-wiz-event');
+  var meetDate   = document.getElementById('fna-wiz-meeting-date');
+  var meetType   = document.getElementById('fna-wiz-meeting-type');
+  var meetLoc    = document.getElementById('fna-wiz-meeting-loc');
   var notesEl    = document.getElementById('fna-wiz-notes');
 
-  var clientName = (clientSel && clientSel.value && clientSel.value !== '__manual__')
-    ? clientSel.options[clientSel.selectedIndex].text
-    : (nameEl ? nameEl.value.trim() : '');
+  // Resolve client name: CRM record takes priority over manual entry
+  var clientName = '';
+  if (clientSel && clientSel.value && clientSel.value !== '') {
+    clientName = clientSel.options[clientSel.selectedIndex].text;
+  } else {
+    var fn = fnameEl ? fnameEl.value.trim() : '';
+    var ln = lnameEl ? lnameEl.value.trim() : '';
+    clientName = (fn + ' ' + ln).trim();
+  }
 
   if (!clientName) {
     showToast('Please select or enter a client name.', 'warn');
@@ -29326,19 +29568,31 @@ function fnaWizCreate() {
     return;
   }
 
+  // ── Capture selected domains BEFORE resetting wizard state ────────────
+  // Preserve the canonical order: insurance → investments → retirement → advisory
+  var _domainOrder = ['insurance', 'investments', 'retirement', 'advisory'];
+  var capturedDomains = _domainOrder.filter(function(d) {
+    return _fnaWizSelectedDomains.indexOf(d) !== -1;
+  });
+  _fnaEditorActiveDomains = capturedDomains;
+
   // Close wizard overlay
   var wizOverlay = document.getElementById('fna-new-overlay');
   if (wizOverlay) wizOverlay.style.display = 'none';
 
-  // Reset wizard state for next use
+  // Reset wizard state for next use (domains now safely captured above)
   _fnaWizSelectedDomains = [];
   _fnaWizCurrentStep = 1;
 
   showToast('New FNA created for ' + clientName + ' — opening editor…', 'success');
 
-  // Open editor using FNA-001 as template (since this is demo data)
+  // Open editor using FNA-001 as template, then apply domain tab filtering
   setTimeout(function() {
     openFNAEditor('FNA-001');
+    // Small delay to allow editor DOM to render before filtering tabs
+    setTimeout(function() {
+      fnaApplyDomainTabs(_fnaEditorActiveDomains);
+    }, 100);
   }, 800);
 }
 
@@ -29362,6 +29616,22 @@ function openFNAWizard() {
   // Reset none-row
   var nr = document.getElementById('fna-dom-none-row');
   if (nr) nr.style.display = 'flex';
+
+  // Reset Step 1 — CRM select back to blank, show manual entry, hide chip
+  var sel = document.getElementById('fna-wiz-client-select');
+  if (sel) sel.value = '';
+  var chip    = document.getElementById('fna-crm-info-chip');
+  var orLine  = document.getElementById('fna-or-line');
+  var nameRow = document.getElementById('fna-wiz-name-row');
+  if (chip)    chip.style.display    = 'none';
+  if (orLine)  orLine.style.display  = '';
+  if (nameRow) nameRow.style.display = '';
+
+  // Clear manual fields
+  ['fna-wiz-fname','fna-wiz-lname','fna-wiz-age'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
 }
 
 function closeFNAWizard() {
@@ -29751,15 +30021,16 @@ var p3ProductCatalog = [
   }
 ];
 
-/* ─── Prospects ready for illustration (from FNA phase) ─────────── */
+/* ─── Prospects ready for proposals (from FNA phase) ─────────────── */
 var p3Prospects = [
   {
     id: 'FNA-001', name: 'Alex Rivera', initials: 'AR', avatarGrad: 'linear-gradient(135deg,#1e3a5f,#3b82f6)',
     age: 34, gender: 'Male', smoker: false, riskClass: 'Preferred Plus',
     occupation: 'VP of Technology', income: 185000,
     coverageNeeded: 780000, annualBudget: 4200,
+    domains: ['insurance'],
     gaps: ['No disability coverage','No LTC rider'],
-    aiRec: 'WL $500K + DI $8,500/mo + PUAs · strong candidate for limited pay',
+    aiRec: 'WL $500K + DI $8,500/mo + PUAs — strong candidate for limited-pay structure',
     fnaStatus: 'Gap Analysis Complete', urgency: 'high',
     existingCoverage: [{ type: 'Whole Life', carrier: 'NYL', faceAmount: 500000, premium: 2400 }]
   },
@@ -29768,8 +30039,9 @@ var p3Prospects = [
     age: 41, gender: 'Female', smoker: false, riskClass: 'Standard Plus',
     occupation: 'Healthcare Director', income: 220000,
     coverageNeeded: 1000000, annualBudget: 3600,
-    gaps: ['No LTC coverage','Income gap $310K'],
-    aiRec: 'Term 20-yr $1M + LTC Hybrid · flag mild HTN for UW rating',
+    domains: ['insurance', 'retirement'],
+    gaps: ['No LTC coverage','Income gap $310K','No deferred income annuity'],
+    aiRec: 'Term 20-yr $1M + LTC Hybrid + Deferred Income Annuity (Guaranteed Future) — flag mild HTN',
     fnaStatus: 'Fact-Find Complete', urgency: 'medium',
     existingCoverage: [{ type: 'Term Life', carrier: 'External', faceAmount: 500000, premium: 1800 }]
   },
@@ -29778,187 +30050,443 @@ var p3Prospects = [
     age: 48, gender: 'Female', smoker: false, riskClass: 'Table 2',
     occupation: 'Senior Operations Manager', income: 148000,
     coverageNeeded: 640000, annualBudget: 6200,
-    gaps: ['$240K income gap','UL underfunded — lapse risk'],
-    aiRec: 'UL premium increase OR convert to WL + PUAs · urgent action needed',
+    domains: ['insurance', 'retirement', 'advisory'],
+    gaps: ['$240K income gap','UL underfunded — lapse risk','No income annuity','No estate plan'],
+    aiRec: 'Convert UL → WL + PUAs · Immediate Income Annuity (Guaranteed Lifetime) · Estate Planning review — urgent',
     fnaStatus: 'AI Recommendation Ready', urgency: 'urgent',
     existingCoverage: [{ type: 'Universal Life', carrier: 'NYL', faceAmount: 400000, premium: 2100 }]
+  },
+  {
+    id: 'FNA-004', name: 'Linda Morrison', initials: 'LM', avatarGrad: 'linear-gradient(135deg,#0f4c81,#059669)',
+    age: 57, gender: 'Female', smoker: false, riskClass: 'Preferred',
+    occupation: 'Chief Financial Officer', income: 420000,
+    coverageNeeded: 2000000, annualBudget: 22000,
+    domains: ['insurance', 'investments', 'retirement', 'advisory'],
+    gaps: ['Buy-sell agreement unfunded','FIA rebalance due','UMA allocation review','Estate plan update'],
+    aiRec: 'UL $2M + FIA $400K rebalance + Immediate Income Annuity (Lifetime Mutual) + UMA advisory — full suite review',
+    fnaStatus: 'Comprehensive FNA Complete', urgency: 'urgent',
+    existingCoverage: [
+      { type: 'Universal Life', carrier: 'NYL', faceAmount: 2000000, premium: 9600 },
+      { type: 'Fixed Indexed Annuity', carrier: 'NYL', faceAmount: 400000, premium: 0 }
+    ]
   }
 ];
 
-/* ─── Pre-built multi-product proposals ─────────────────────────── */
+/* ─── Pre-built multi-domain proposals ───────────────────────────── */
 var p3ProposalData = {
   'FNA-001': {
-    prospectId: 'FNA-001',
-    prospectName: 'Alex Rivera',
+    prospectId: 'FNA-001', prospectName: 'Alex Rivera',
     createdDate: 'May 8, 2026',
-    agentNotes: 'Discuss PUA rider benefits at the next meeting. Alex is receptive to cash value growth story.',
-    complianceStatus: 'pass',
-    signatureObtained: false,
-    options: [
-      {
-        id: 'A', label: 'Option A', tagline: 'Base Protection + Income Protection',
-        recommended: true,
-        products: [
-          { productId: 'WL', faceAmount: 500000, annualPremium: 2400, riskClass: 'Preferred Plus', riders: ['PUA Rider $200/mo','WP Rider'] },
-          { productId: 'DI', faceAmount: null, monthlyBenefit: 8500, annualPremium: 2160, riskClass: 'Class 4A', riders: ['COLA 3%','Future Purchase Option'] }
-        ],
-        totalAnnualPremium: 4560,
-        aiSummary: 'Best overall fit — permanent coverage plus income protection addresses both identified gaps. Preferred Plus WL builds strong cash value trajectory reaching $284K by age 65.',
-        projectedCashValue65: 284000,
-        internalRateOfReturn: '4.8%',
-        deathBenefitAt65: 610000,
-        suitabilityScore: 94
-      },
-      {
-        id: 'B', label: 'Option B', tagline: 'Whole Life with Maximum PUAs',
-        recommended: false,
-        products: [
-          { productId: 'WLLP', faceAmount: 500000, annualPremium: 5400, riskClass: 'Preferred Plus', riders: ['PUA Rider $500/mo — maximize CSV','WP Rider'] }
-        ],
-        totalAnnualPremium: 5400,
-        aiSummary: 'High cash value accumulation strategy — 10-pay structure frees up cash flow after year 10. Best for clients prioritizing tax-advantaged growth and wealth transfer.',
-        projectedCashValue65: 412000,
-        internalRateOfReturn: '5.1%',
-        deathBenefitAt65: 730000,
-        suitabilityScore: 88
-      },
-      {
-        id: 'C', label: 'Option C', tagline: 'IUL with Retirement Income Rider',
-        recommended: false,
-        products: [
-          { productId: 'IUL', faceAmount: 500000, annualPremium: 4200, riskClass: 'Preferred Plus', riders: ['Income Rider','Overloan Protection'] }
-        ],
-        totalAnnualPremium: 4200,
-        aiSummary: 'Market-linked growth with downside protection. Income rider provides $28K/yr tax-free retirement income starting at age 65. Higher upside potential vs WL, less guarantees.',
-        projectedCashValue65: 520000,
-        internalRateOfReturn: '6.2% (illustrated, not guaranteed)',
-        deathBenefitAt65: 580000,
-        suitabilityScore: 81
-      }
-    ],
-    illustrationYears: [
-      { year: 1,  age: 35, annualPremium: 4560, guaranteedCV: 3200,  nonGuaranteedCV: 3800,  guaranteedDB: 500000, nonGuaranteedDB: 500000 },
-      { year: 5,  age: 39, annualPremium: 4560, guaranteedCV: 19400, nonGuaranteedCV: 24600, guaranteedDB: 500000, nonGuaranteedDB: 524000 },
-      { year: 10, age: 44, annualPremium: 4560, guaranteedCV: 46800, nonGuaranteedCV: 62400, guaranteedDB: 500000, nonGuaranteedDB: 558000 },
-      { year: 15, age: 49, annualPremium: 4560, guaranteedCV: 82300, nonGuaranteedCV: 118000,guaranteedDB: 500000, nonGuaranteedDB: 596000 },
-      { year: 20, age: 54, annualPremium: 4560, guaranteedCV: 128000,nonGuaranteedCV: 196000,guaranteedDB: 500000, nonGuaranteedDB: 638000 },
-      { year: 25, age: 59, annualPremium: 4560, guaranteedCV: 184000,nonGuaranteedCV: 290000,guaranteedDB: 500000, nonGuaranteedDB: 682000 },
-      { year: 31, age: 65, annualPremium: 4560, guaranteedCV: 246000,nonGuaranteedCV: 418000,guaranteedDB: 500000, nonGuaranteedDB: 740000 }
-    ]
+    agentNotes: 'Discuss PUA rider benefits at next meeting. Alex is receptive to cash value growth story. DI gap is most pressing — needs to be addressed this quarter.',
+    complianceStatus: 'pass', signatureObtained: false,
+    // Insurance Illustration
+    insuranceProposal: {
+      label: 'Insurance Illustration',
+      options: [
+        {
+          id: 'A', label: 'Option A', tagline: 'Whole Life + Disability Income',
+          recommended: true,
+          products: [
+            { productId: 'WL', faceAmount: 500000, annualPremium: 2400, riskClass: 'Preferred Plus', riders: ['PUA Rider $200/mo','WP Rider'] },
+            { productId: 'DI', faceAmount: null, monthlyBenefit: 8500, annualPremium: 2160, riskClass: 'Class 4A', riders: ['COLA 3%','Future Purchase Option'] }
+          ],
+          totalAnnualPremium: 4560,
+          aiSummary: 'Best overall fit — permanent WL coverage plus DI addresses both identified gaps. Preferred Plus WL builds strong cash value reaching $284K by age 65. DI closes the $8,500/mo income gap.',
+          projectedCashValue65: 284000, internalRateOfReturn: '4.8%', deathBenefitAt65: 610000, suitabilityScore: 94
+        },
+        {
+          id: 'B', label: 'Option B', tagline: 'WL 10-Pay + Maximum PUAs',
+          recommended: false,
+          products: [
+            { productId: 'WLLP', faceAmount: 500000, annualPremium: 5400, riskClass: 'Preferred Plus', riders: ['PUA Rider $500/mo — maximize CSV','WP Rider'] }
+          ],
+          totalAnnualPremium: 5400,
+          aiSummary: 'High cash value accumulation — 10-pay structure frees cash flow after year 10. Best for tax-advantaged growth and wealth transfer. DI gap remains unaddressed.',
+          projectedCashValue65: 412000, internalRateOfReturn: '5.1%', deathBenefitAt65: 730000, suitabilityScore: 88
+        },
+        {
+          id: 'C', label: 'Option C', tagline: 'IUL with Income Rider',
+          recommended: false,
+          products: [
+            { productId: 'IUL', faceAmount: 500000, annualPremium: 4200, riskClass: 'Preferred Plus', riders: ['Income Rider','Overloan Protection'] }
+          ],
+          totalAnnualPremium: 4200,
+          aiSummary: 'Market-linked growth with downside protection. Income rider provides $28K/yr tax-free at age 65. Higher upside potential vs WL, fewer guarantees.',
+          projectedCashValue65: 520000, internalRateOfReturn: '6.2% (illustrated, not guaranteed)', deathBenefitAt65: 580000, suitabilityScore: 81
+        }
+      ],
+      illustrationYears: [
+        { year: 1,  age: 35, annualPremium: 4560, guaranteedCV: 3200,  nonGuaranteedCV: 3800,  guaranteedDB: 500000, nonGuaranteedDB: 500000 },
+        { year: 5,  age: 39, annualPremium: 4560, guaranteedCV: 19400, nonGuaranteedCV: 24600, guaranteedDB: 500000, nonGuaranteedDB: 524000 },
+        { year: 10, age: 44, annualPremium: 4560, guaranteedCV: 46800, nonGuaranteedCV: 62400, guaranteedDB: 500000, nonGuaranteedDB: 558000 },
+        { year: 15, age: 49, annualPremium: 4560, guaranteedCV: 82300, nonGuaranteedCV: 118000,guaranteedDB: 500000, nonGuaranteedDB: 596000 },
+        { year: 20, age: 54, annualPremium: 4560, guaranteedCV: 128000,nonGuaranteedCV: 196000,guaranteedDB: 500000, nonGuaranteedDB: 638000 },
+        { year: 31, age: 65, annualPremium: 4560, guaranteedCV: 246000,nonGuaranteedCV: 418000,guaranteedDB: 500000, nonGuaranteedDB: 740000 }
+      ],
+      complianceStatus: 'pass'
+    }
   },
+
   'FNA-002': {
-    prospectId: 'FNA-002',
-    prospectName: 'Nancy Foster',
+    prospectId: 'FNA-002', prospectName: 'Nancy Foster',
     createdDate: 'May 7, 2026',
-    agentNotes: 'Standard Plus rating due to mild HTN. LTC Hybrid particularly compelling — addresses both life and care needs.',
-    complianceStatus: 'warn',
-    signatureObtained: false,
-    options: [
-      {
-        id: 'A', label: 'Option A', tagline: 'Term + LTC Hybrid Bundle',
-        recommended: true,
-        products: [
-          { productId: 'TERM20', faceAmount: 1000000, annualPremium: 2160, riskClass: 'Standard Plus', riders: ['Accelerated DB','Children\'s Term'] },
-          { productId: 'LTCHYBRID', faceAmount: 250000, annualPremium: 5040, riskClass: 'Standard Plus', riders: ['Inflation 3% Compound'] }
-        ],
-        totalAnnualPremium: 7200,
-        aiSummary: 'Closes both identified gaps — $1M income replacement + LTC hybrid solves "use it or lose it" concern. Standard Plus adds modest rating but remains competitive.',
-        projectedCashValue65: 180000,
-        internalRateOfReturn: '3.8%',
-        deathBenefitAt65: 1250000,
-        suitabilityScore: 91
-      },
-      {
-        id: 'B', label: 'Option B', tagline: 'Whole Life + Standalone LTC',
-        recommended: false,
-        products: [
-          { productId: 'WL', faceAmount: 750000, annualPremium: 5760, riskClass: 'Standard Plus', riders: ['PUA Rider','WP'] },
-          { productId: 'LTC', faceAmount: null, monthlyBenefit: 8000, annualPremium: 3840, riskClass: 'Standard Plus', riders: ['COLA 3%'] }
-        ],
-        totalAnnualPremium: 9600,
-        aiSummary: 'Higher premium but maximum permanent coverage with strong LTC protection. Best for clients who want to maximize death benefit and have robust LTC benefits.',
-        projectedCashValue65: 320000,
-        internalRateOfReturn: '4.6%',
-        deathBenefitAt65: 950000,
-        suitabilityScore: 84
-      },
-      {
-        id: 'C', label: 'Option C', tagline: 'Budget-Conscious Term Only',
-        recommended: false,
-        products: [
-          { productId: 'TERM30', faceAmount: 1000000, annualPremium: 1560, riskClass: 'Standard Plus', riders: ['WP Rider'] }
-        ],
-        totalAnnualPremium: 1560,
-        aiSummary: 'Lowest cost option. Addresses income replacement only — LTC gap remains open. Recommend converting term if budget improves. Leave-behind option for price objections.',
-        projectedCashValue65: 0,
-        internalRateOfReturn: 'N/A (term)',
-        deathBenefitAt65: 1000000,
-        suitabilityScore: 72
-      }
-    ],
-    illustrationYears: [
-      { year: 1,  age: 42, annualPremium: 7200, guaranteedCV: 4200,  nonGuaranteedCV: 5100,  guaranteedDB: 1000000, nonGuaranteedDB: 1000000 },
-      { year: 5,  age: 46, annualPremium: 7200, guaranteedCV: 26000, nonGuaranteedCV: 33000, guaranteedDB: 1000000, nonGuaranteedDB: 1028000 },
-      { year: 10, age: 51, annualPremium: 7200, guaranteedCV: 64000, nonGuaranteedCV: 86000, guaranteedDB: 1000000, nonGuaranteedDB: 1068000 },
-      { year: 20, age: 61, annualPremium: 7200, guaranteedCV: 158000,nonGuaranteedCV: 248000,guaranteedDB: 1000000, nonGuaranteedDB: 1152000 },
-      { year: 24, age: 65, annualPremium: 7200, guaranteedCV: 198000,nonGuaranteedCV: 328000,guaranteedDB: 1000000, nonGuaranteedDB: 1200000 }
-    ]
+    agentNotes: 'Standard Plus rating due to mild HTN. LTC Hybrid particularly compelling. Deferred Income Annuity addresses retirement income gap. Review both proposals in single meeting.',
+    complianceStatus: 'warn', signatureObtained: false,
+    // Insurance Illustration
+    insuranceProposal: {
+      label: 'Insurance Illustration',
+      options: [
+        {
+          id: 'A', label: 'Option A', tagline: 'Term 20-yr + LTC Hybrid Bundle',
+          recommended: true,
+          products: [
+            { productId: 'TERM20', faceAmount: 1000000, annualPremium: 2160, riskClass: 'Standard Plus', riders: ['Accelerated DB','Children\'s Term'] },
+            { productId: 'LTCHYBRID', faceAmount: 250000, annualPremium: 5040, riskClass: 'Standard Plus', riders: ['Inflation 3% Compound'] }
+          ],
+          totalAnnualPremium: 7200,
+          aiSummary: 'Closes income replacement + LTC gaps. Term $1M + LTC Hybrid solves "use it or lose it" concern. Standard Plus rating is modest — remains competitive.',
+          projectedCashValue65: 180000, internalRateOfReturn: '3.8%', deathBenefitAt65: 1250000, suitabilityScore: 91
+        },
+        {
+          id: 'B', label: 'Option B', tagline: 'Whole Life + Standalone LTC',
+          recommended: false,
+          products: [
+            { productId: 'WL', faceAmount: 750000, annualPremium: 5760, riskClass: 'Standard Plus', riders: ['PUA Rider','WP'] },
+            { productId: 'LTC', faceAmount: null, monthlyBenefit: 8000, annualPremium: 3840, riskClass: 'Standard Plus', riders: ['COLA 3%'] }
+          ],
+          totalAnnualPremium: 9600,
+          aiSummary: 'Higher premium but maximum permanent coverage with robust LTC protection. Best for clients prioritizing death benefit and comprehensive LTC benefits.',
+          projectedCashValue65: 320000, internalRateOfReturn: '4.6%', deathBenefitAt65: 950000, suitabilityScore: 84
+        },
+        {
+          id: 'C', label: 'Option C', tagline: 'Budget Term Only',
+          recommended: false,
+          products: [
+            { productId: 'TERM30', faceAmount: 1000000, annualPremium: 1560, riskClass: 'Standard Plus', riders: ['WP Rider'] }
+          ],
+          totalAnnualPremium: 1560,
+          aiSummary: 'Lowest cost — income replacement only. LTC gap remains open. Leave-behind option for price objections.',
+          projectedCashValue65: 0, internalRateOfReturn: 'N/A (term)', deathBenefitAt65: 1000000, suitabilityScore: 72
+        }
+      ],
+      illustrationYears: [
+        { year: 1,  age: 42, annualPremium: 7200, guaranteedCV: 4200,  nonGuaranteedCV: 5100,  guaranteedDB: 1000000, nonGuaranteedDB: 1000000 },
+        { year: 5,  age: 46, annualPremium: 7200, guaranteedCV: 26000, nonGuaranteedCV: 33000, guaranteedDB: 1000000, nonGuaranteedDB: 1028000 },
+        { year: 10, age: 51, annualPremium: 7200, guaranteedCV: 64000, nonGuaranteedCV: 86000, guaranteedDB: 1000000, nonGuaranteedDB: 1068000 },
+        { year: 24, age: 65, annualPremium: 7200, guaranteedCV: 198000,nonGuaranteedCV: 328000,guaranteedDB: 1000000, nonGuaranteedDB: 1200000 }
+      ],
+      complianceStatus: 'warn'
+    },
+    // Retirement Proposal
+    retirementProposal: {
+      label: 'Retirement Proposal',
+      targetRetirementAge: 65, currentAge: 41, yearsToRetirement: 24,
+      incomeGoal: 8500, // monthly income at retirement
+      options: [
+        {
+          id: 'A', label: 'Option A', tagline: 'Deferred Income Annuity — Guaranteed Future',
+          recommended: true,
+          productName: 'Deferred Income Annuity — Guaranteed Future',
+          icon: 'fa-umbrella-beach', color: '#0284c7',
+          premium: 12000, // annual
+          monthlyIncomeAt65: 1840,
+          guaranteedPeriod: 'Life with 10-year certain',
+          deferralYears: 24,
+          aiSummary: 'Lock in guaranteed income now for retirement in 24 years. Guaranteed Future DIA provides $1,840/mo starting at 65 — hedges longevity risk with complete income certainty.',
+          suitabilityScore: 93
+        },
+        {
+          id: 'B', label: 'Option B', tagline: 'Deferred Income Annuity — Future Mutual',
+          recommended: false,
+          productName: 'Deferred Income Annuity — Future Mutual',
+          icon: 'fa-chart-bar', color: '#7c3aed',
+          premium: 10800,
+          monthlyIncomeAt65: 1620,
+          guaranteedPeriod: 'Life with dividend participation',
+          deferralYears: 24,
+          aiSummary: 'Participating DIA — dividends may increase income above guaranteed floor. Lower guaranteed base but upside potential if dividends remain strong.',
+          suitabilityScore: 85
+        },
+        {
+          id: 'C', label: 'Option C', tagline: 'Clear Income Advantage Fixed',
+          recommended: false,
+          productName: 'Clear Income Advantage Fixed',
+          icon: 'fa-lock', color: '#059669',
+          premium: 9600,
+          monthlyIncomeAt65: 1380,
+          guaranteedPeriod: 'Life only',
+          deferralYears: 24,
+          aiSummary: 'Simplified, lowest-cost deferred income option. Fixed monthly income, no riders. Best for budget-conscious clients wanting a clean retirement income floor.',
+          suitabilityScore: 77
+        }
+      ]
+    }
   },
+
   'FNA-003': {
-    prospectId: 'FNA-003',
-    prospectName: 'Patricia Nguyen',
+    prospectId: 'FNA-003', prospectName: 'Patricia Nguyen',
     createdDate: 'May 9, 2026',
-    agentNotes: 'T2DM well-controlled — Table 2 rating expected. UL lapse risk is urgent. Client needs to act within 68 days.',
-    complianceStatus: 'pass',
-    signatureObtained: false,
-    options: [
-      {
-        id: 'A', label: 'Option A', tagline: 'UL Premium Increase',
-        recommended: false,
-        products: [
-          { productId: 'GUL', faceAmount: 400000, annualPremium: 5040, riskClass: 'Table 2', riders: ['No-lapse guarantee rider'] }
-        ],
-        totalAnnualPremium: 5040,
-        aiSummary: 'Immediate action — increase monthly UL premium from $175 to $420 to secure no-lapse guarantee. Lowest disruption option but no cash value growth improvement.',
-        projectedCashValue65: 42000,
-        internalRateOfReturn: '2.1%',
-        deathBenefitAt65: 400000,
-        suitabilityScore: 77
-      },
-      {
-        id: 'B', label: 'Option B', tagline: 'Convert UL → Whole Life + PUAs',
-        recommended: true,
-        products: [
-          { productId: 'WL', faceAmount: 400000, annualPremium: 4320, riskClass: 'Table 2', riders: ['PUA Rider $150/mo','Waiver of Premium'] }
-        ],
-        totalAnnualPremium: 4320,
-        aiSummary: 'Recommended — convert existing UL to WL using 1035 exchange. Eliminates lapse risk permanently, builds guaranteed cash value. PUAs accelerate cash value to $198K by age 65.',
-        projectedCashValue65: 198000,
-        internalRateOfReturn: '4.2%',
-        deathBenefitAt65: 520000,
-        suitabilityScore: 92
-      },
-      {
-        id: 'C', label: 'Option C', tagline: 'WL + Retirement Income Gap Annuity',
-        recommended: false,
-        products: [
-          { productId: 'WL', faceAmount: 300000, annualPremium: 3240, riskClass: 'Table 2', riders: ['PUA Rider'] },
-          { productId: 'ANNUITY_IDX', faceAmount: null, lumpSum: 50000, annualPremium: 2400, riskClass: 'N/A', riders: ['Income Rider +6% rollup'] }
-        ],
-        totalAnnualPremium: 5640,
-        aiSummary: 'Comprehensive — addresses lapse risk AND retirement income gap. FIA income rider projects $18K/yr starting at 65. Slightly higher premium but closes both gaps.',
-        projectedCashValue65: 164000,
-        internalRateOfReturn: '5.0%',
-        deathBenefitAt65: 460000,
-        suitabilityScore: 87
-      }
-    ],
-    illustrationYears: [
-      { year: 1,  age: 49, annualPremium: 4320, guaranteedCV: 2800,  nonGuaranteedCV: 3400,  guaranteedDB: 400000, nonGuaranteedDB: 400000 },
-      { year: 5,  age: 53, annualPremium: 4320, guaranteedCV: 17200, nonGuaranteedCV: 21800, guaranteedDB: 400000, nonGuaranteedDB: 418000 },
-      { year: 10, age: 58, annualPremium: 4320, guaranteedCV: 42600, nonGuaranteedCV: 56400, guaranteedDB: 400000, nonGuaranteedDB: 446000 },
-      { year: 17, age: 65, annualPremium: 4320, guaranteedCV: 86000, nonGuaranteedCV: 132000,guaranteedDB: 400000, nonGuaranteedDB: 496000 }
-    ]
+    agentNotes: 'T2DM well-controlled — Table 2 rating expected. UL lapse risk urgent (68 days). Immediate income annuity addresses retirement gap. Estate plan review critical.',
+    complianceStatus: 'pass', signatureObtained: false,
+    // Insurance Illustration
+    insuranceProposal: {
+      label: 'Insurance Illustration',
+      options: [
+        {
+          id: 'A', label: 'Option A', tagline: 'GUL No-Lapse — Immediate Fix',
+          recommended: false,
+          products: [
+            { productId: 'GUL', faceAmount: 400000, annualPremium: 5040, riskClass: 'Table 2', riders: ['No-lapse guarantee rider'] }
+          ],
+          totalAnnualPremium: 5040,
+          aiSummary: 'Immediate fix — increase UL premium to secure no-lapse guarantee. Lowest disruption but no cash value improvement.',
+          projectedCashValue65: 42000, internalRateOfReturn: '2.1%', deathBenefitAt65: 400000, suitabilityScore: 77
+        },
+        {
+          id: 'B', label: 'Option B', tagline: 'Convert UL → Whole Life + PUAs (1035)',
+          recommended: true,
+          products: [
+            { productId: 'WL', faceAmount: 400000, annualPremium: 4320, riskClass: 'Table 2', riders: ['PUA Rider $150/mo','Waiver of Premium'] }
+          ],
+          totalAnnualPremium: 4320,
+          aiSummary: 'Recommended — 1035 exchange to WL eliminates lapse risk permanently. PUAs build guaranteed CSV to $198K by age 65.',
+          projectedCashValue65: 198000, internalRateOfReturn: '4.2%', deathBenefitAt65: 520000, suitabilityScore: 92
+        },
+        {
+          id: 'C', label: 'Option C', tagline: 'WL + Immediate Income Support',
+          recommended: false,
+          products: [
+            { productId: 'WL', faceAmount: 300000, annualPremium: 3240, riskClass: 'Table 2', riders: ['PUA Rider'] },
+            { productId: 'ANNUITY_IDX', faceAmount: null, lumpSum: 50000, annualPremium: 2400, riskClass: 'N/A', riders: ['Income Rider +6% rollup'] }
+          ],
+          totalAnnualPremium: 5640,
+          aiSummary: 'Addresses lapse risk AND retirement income. FIA income rider projects $18K/yr at 65. Closes both gaps — slightly higher premium.',
+          projectedCashValue65: 164000, internalRateOfReturn: '5.0%', deathBenefitAt65: 460000, suitabilityScore: 87
+        }
+      ],
+      illustrationYears: [
+        { year: 1,  age: 49, annualPremium: 4320, guaranteedCV: 2800,  nonGuaranteedCV: 3400,  guaranteedDB: 400000, nonGuaranteedDB: 400000 },
+        { year: 5,  age: 53, annualPremium: 4320, guaranteedCV: 17200, nonGuaranteedCV: 21800, guaranteedDB: 400000, nonGuaranteedDB: 418000 },
+        { year: 10, age: 58, annualPremium: 4320, guaranteedCV: 42600, nonGuaranteedCV: 56400, guaranteedDB: 400000, nonGuaranteedDB: 446000 },
+        { year: 17, age: 65, annualPremium: 4320, guaranteedCV: 86000, nonGuaranteedCV: 132000,guaranteedDB: 400000, nonGuaranteedDB: 496000 }
+      ],
+      complianceStatus: 'pass'
+    },
+    // Retirement Proposal
+    retirementProposal: {
+      label: 'Retirement Proposal',
+      targetRetirementAge: 65, currentAge: 48, yearsToRetirement: 17,
+      incomeGoal: 6500,
+      options: [
+        {
+          id: 'A', label: 'Option A', tagline: 'Immediate Income Annuity — Guaranteed Lifetime',
+          recommended: true,
+          productName: 'Immediate Income Annuity — Guaranteed Lifetime',
+          icon: 'fa-shield-alt', color: '#0284c7',
+          premium: 40000, // single premium
+          monthlyIncomeAt65: 2100,
+          guaranteedPeriod: 'Guaranteed for life — no period certain',
+          deferralYears: 17,
+          aiSummary: 'Highest monthly income — Guaranteed Lifetime payout maximizes monthly checks. Single premium $40K starts $2,100/mo at 65. Ideal for Patricia who needs maximum income certainty.',
+          suitabilityScore: 92
+        },
+        {
+          id: 'B', label: 'Option B', tagline: 'Immediate Income Annuity — Lifetime Mutual',
+          recommended: false,
+          productName: 'Immediate Income Annuity — Lifetime Mutual',
+          icon: 'fa-hand-holding-usd', color: '#7c3aed',
+          premium: 40000,
+          monthlyIncomeAt65: 1840,
+          guaranteedPeriod: 'Life with dividend participation',
+          deferralYears: 17,
+          aiSummary: 'Participating lifetime payout — dividends may increase income over time. Lower guaranteed base but potential upside vs Guaranteed Lifetime.',
+          suitabilityScore: 85
+        },
+        {
+          id: 'C', label: 'Option C', tagline: 'Immediate Income Annuity — Guaranteed Period',
+          recommended: false,
+          productName: 'Immediate Income Annuity — Guaranteed Period',
+          icon: 'fa-calendar-check', color: '#059669',
+          premium: 40000,
+          monthlyIncomeAt65: 1620,
+          guaranteedPeriod: 'Guaranteed 20 years certain — estate protection',
+          deferralYears: 17,
+          aiSummary: 'Period certain payout — 20-year guarantee protects heirs if Patricia passes early. Lower monthly income vs lifetime-only, but strong estate planning component.',
+          suitabilityScore: 79
+        }
+      ]
+    },
+    // Advisory Proposal
+    advisoryProposal: {
+      label: 'Advisory Proposal',
+      options: [
+        {
+          id: 'A', label: 'Engagement A', tagline: 'Estate Planning — Wills & Beneficiary Review',
+          recommended: true,
+          services: ['Will & Trust Drafting','Powers of Attorney (Financial + Healthcare)','Beneficiary Designation Review','HIPAA Authorization Update'],
+          annualFee: 3500,
+          oneTimeFee: 2400,
+          aiSummary: 'Critical starting point — Patricia has no estate plan. Will + POA protects family immediately. Beneficiary review on UL policy may reveal misalignment with current wishes.',
+          suitabilityScore: 95
+        },
+        {
+          id: 'B', label: 'Engagement B', tagline: 'Wealth Management — Fund Advisory Account',
+          recommended: false,
+          services: ['Fund Advisory Account Setup','Model Portfolio Allocation','Quarterly Rebalancing','Annual Financial Plan Review'],
+          annualFee: 2800,
+          aum: 125000,
+          aumFeeRate: '0.85%',
+          aiSummary: 'Fund Advisory gives Patricia managed growth for existing savings. Professional allocation and rebalancing. Good complement to the insurance and annuity solutions.',
+          suitabilityScore: 82
+        }
+      ]
+    }
+  },
+
+  'FNA-004': {
+    prospectId: 'FNA-004', prospectName: 'Linda Morrison',
+    createdDate: 'May 10, 2026',
+    agentNotes: 'CFO with complex financial picture. All 4 domains active. FIA rebalance and UMA allocation are time-sensitive. Buy-sell agreement funding is critical for business continuity.',
+    complianceStatus: 'pass', signatureObtained: false,
+    // Insurance Illustration
+    insuranceProposal: {
+      label: 'Insurance Illustration',
+      options: [
+        {
+          id: 'A', label: 'Option A', tagline: 'UL $2M + Business Buy-Sell Rider',
+          recommended: true,
+          products: [
+            { productId: 'GUL', faceAmount: 2000000, annualPremium: 9600, riskClass: 'Preferred', riders: ['No-lapse guarantee','Business use endorsement'] },
+            { productId: 'DI', faceAmount: null, monthlyBenefit: 12000, annualPremium: 4800, riskClass: 'Class 3A', riders: ['Own-Occ Rider','COLA 3%','Business Overhead Expense'] }
+          ],
+          totalAnnualPremium: 14400,
+          aiSummary: 'Comprehensive — UL $2M with no-lapse guarantee funds buy-sell agreement. DI $12K/mo (Own-Occ) protects CFO income. Business Overhead Expense rider protects the enterprise.',
+          projectedCashValue65: 0, internalRateOfReturn: '3.2%', deathBenefitAt65: 2000000, suitabilityScore: 96
+        },
+        {
+          id: 'B', label: 'Option B', tagline: 'WL 10-Pay + Key Person DI',
+          recommended: false,
+          products: [
+            { productId: 'WLLP', faceAmount: 1500000, annualPremium: 18000, riskClass: 'Preferred', riders: ['PUA Rider','Executive Bonus Plan'] },
+            { productId: 'DI', faceAmount: null, monthlyBenefit: 10000, annualPremium: 3600, riskClass: 'Class 3A', riders: ['Own-Occ Rider'] }
+          ],
+          totalAnnualPremium: 21600,
+          aiSummary: '10-Pay WL builds substantial CSV — useful as executive benefit collateral. Key Person DI protects company income. Premium higher but wealth accumulation is maximized.',
+          projectedCashValue65: 640000, internalRateOfReturn: '4.9%', deathBenefitAt65: 1800000, suitabilityScore: 88
+        }
+      ],
+      illustrationYears: [
+        { year: 1,  age: 58, annualPremium: 14400, guaranteedCV: 0,      nonGuaranteedCV: 0,      guaranteedDB: 2000000, nonGuaranteedDB: 2000000 },
+        { year: 3,  age: 60, annualPremium: 14400, guaranteedCV: 12000,  nonGuaranteedCV: 15000,  guaranteedDB: 2000000, nonGuaranteedDB: 2000000 },
+        { year: 5,  age: 62, annualPremium: 14400, guaranteedCV: 28000,  nonGuaranteedCV: 36000,  guaranteedDB: 2000000, nonGuaranteedDB: 2000000 },
+        { year: 8,  age: 65, annualPremium: 14400, guaranteedCV: 54000,  nonGuaranteedCV: 72000,  guaranteedDB: 2000000, nonGuaranteedDB: 2000000 }
+      ],
+      complianceStatus: 'pass'
+    },
+    // Investment Proposal
+    investmentProposal: {
+      label: 'Investment Proposal',
+      totalAUM: 1200000,
+      options: [
+        {
+          id: 'A', label: 'Option A', tagline: 'UMA — Unified Managed Account (Core)',
+          recommended: true,
+          productName: 'Unified Managed Account (UMA)',
+          icon: 'fa-chess-board', color: '#0f4c81',
+          allocation: { equities: 65, fixedIncome: 25, alternatives: 10 },
+          aum: 850000, feeRate: '0.75%', annualFee: 6375,
+          annualizedReturn: '8.2% (5-yr avg)', riskLevel: 'Moderate Growth',
+          aiSummary: 'UMA consolidates multiple strategies in a single account — equities, fixed income, alternatives. 65/25/10 allocation suits Linda\'s growth objectives with downside cushion. Rebalancing overdue.',
+          suitabilityScore: 94
+        },
+        {
+          id: 'B', label: 'Option B', tagline: 'Fixed Indexed Annuity — Rebalance $400K',
+          recommended: false,
+          productName: 'Fixed Indexed Annuity (FIA) Rebalance',
+          icon: 'fa-chart-bar', color: '#059669',
+          aum: 400000, feeRate: '0%', annualFee: 0,
+          annualizedReturn: 'S&P 500 participation 80% / 0% floor', riskLevel: 'Low-Medium',
+          aiSummary: 'FIA rebalance — update crediting strategy to 80% S&P participation. Tax-deferred growth with 0% floor eliminates market loss. Existing contract — no new premium required.',
+          suitabilityScore: 88
+        },
+        {
+          id: 'C', label: 'Option C', tagline: '529 College Savings — Grandchildren',
+          recommended: false,
+          productName: '529 College Savings Plan',
+          icon: 'fa-graduation-cap', color: '#d97706',
+          annualContribution: 17000, // per child, annual gift limit
+          beneficiaries: 2,
+          projectedValue18: 168000, // per child
+          aiSummary: 'Legacy planning — fund 529 plans for 2 grandchildren at $17K/yr each (annual gift exclusion). Projected $168K per child by age 18 at 7% growth. State deduction available.',
+          suitabilityScore: 82
+        }
+      ]
+    },
+    // Retirement Proposal
+    retirementProposal: {
+      label: 'Retirement Proposal',
+      targetRetirementAge: 65, currentAge: 57, yearsToRetirement: 8,
+      incomeGoal: 18000, // monthly income goal
+      options: [
+        {
+          id: 'A', label: 'Option A', tagline: 'Immediate Income Annuity — Lifetime Mutual',
+          recommended: true,
+          productName: 'Immediate Income Annuity — Lifetime Mutual',
+          icon: 'fa-hand-holding-usd', color: '#0284c7',
+          premium: 200000, // single premium at 65
+          monthlyIncomeAt65: 3840,
+          guaranteedPeriod: 'Life with dividend participation',
+          deferralYears: 8,
+          aiSummary: 'Participating lifetime income — Lifetime Mutual projects $3,840/mo with dividend upside. Complements UMA withdrawals to hit $18K/mo target. Longevity protection with potential income growth.',
+          suitabilityScore: 93
+        },
+        {
+          id: 'B', label: 'Option B', tagline: 'Deferred Income Annuity — Clear Income Advantage Fixed',
+          recommended: false,
+          productName: 'Clear Income Advantage Fixed',
+          icon: 'fa-lock', color: '#7c3aed',
+          premium: 18000, // annual for 8 years
+          monthlyIncomeAt65: 2640,
+          guaranteedPeriod: 'Life only — maximum income',
+          deferralYears: 8,
+          aiSummary: 'Annual premium DIA — fund over 8 years, guaranteed $2,640/mo at 65. Predictable cost, no market exposure. Good complement to market-linked UMA.',
+          suitabilityScore: 86
+        }
+      ]
+    },
+    // Advisory Proposal
+    advisoryProposal: {
+      label: 'Advisory Proposal',
+      options: [
+        {
+          id: 'A', label: 'Engagement A', tagline: 'Full Wealth Management Suite',
+          recommended: true,
+          services: ['UMA Portfolio Management (ongoing)','Annual Comprehensive Financial Plan','Tax-Efficient Withdrawal Strategy','Social Security Optimization (age 62–70 analysis)'],
+          annualFee: 8500,
+          aum: 1200000,
+          aumFeeRate: '0.75%',
+          aiSummary: 'Full wealth management — ongoing UMA oversight + annual financial plan + tax strategy. Comprehensive engagement appropriate for Linda\'s $2.1M net worth and executive complexity.',
+          suitabilityScore: 97
+        },
+        {
+          id: 'B', label: 'Engagement B', tagline: 'Estate Planning — Executive Package',
+          recommended: false,
+          services: ['Revocable Living Trust','Buy-Sell Agreement Legal Review','Powers of Attorney (4-document set)','Beneficiary Audit — UL + FIA + 401K','Irrevocable Life Insurance Trust (ILIT) Analysis'],
+          annualFee: 0,
+          oneTimeFee: 8500,
+          aiSummary: 'Critical estate planning — Buy-sell agreement legal review alone justifies engagement. ILIT analysis may unlock significant estate tax savings given $2.1M net worth.',
+          suitabilityScore: 94
+        },
+        {
+          id: 'C', label: 'Engagement C', tagline: 'Executive Benefits — Small Business',
+          recommended: false,
+          services: ['Executive Bonus Plan Design (Section 162)','Non-Qualified Deferred Compensation Plan','Key Employee Retention Strategy','Employee Benefits Audit'],
+          annualFee: 4200,
+          aiSummary: 'Business owner services — executive bonus plan + NQDC structure optimizes Linda\'s compensation tax efficiency. Key employee retention supports business continuity goals.',
+          suitabilityScore: 88
+        }
+      ]
+    }
   }
 };
 
@@ -30058,6 +30586,8 @@ function initProductsPage() {
   _p3ActiveProspect = 'FNA-001';
   _p3ActiveProposal = null;
   _p3SelectedOption = 'A';
+  _p3ActiveDomainTab = 'insurance';
+  _p3ProposalSentStatus = {};
   requestAnimationFrame(function() {
     setTimeout(function() {
       p3RenderProspectList();
@@ -30069,6 +30599,13 @@ function initProductsPage() {
 /* ─────────────────────────────────────────────────────────────────
    PROSPECT LIST
    ───────────────────────────────────────────────────────────────── */
+var _p3DomainMeta = {
+  insurance:   { label: 'Insurance',   cls: 'ins', icon: 'fa-shield-alt' },
+  investments: { label: 'Investments', cls: 'inv', icon: 'fa-chart-line' },
+  retirement:  { label: 'Retirement',  cls: 'ret', icon: 'fa-umbrella-beach' },
+  advisory:    { label: 'Advisory',    cls: 'adv', icon: 'fa-chess-queen' }
+};
+
 function p3RenderProspectList() {
   var el = document.getElementById('p3-prospect-list');
   if (!el) return;
@@ -30078,7 +30615,12 @@ function p3RenderProspectList() {
     if (pr.urgency === 'urgent') urgencyBadge = '<span class="p3-urg-badge urgent"><i class="fas fa-bolt"></i> Urgent</span>';
     else if (pr.urgency === 'high') urgencyBadge = '<span class="p3-urg-badge high">High Priority</span>';
     else urgencyBadge = '<span class="p3-urg-badge med">In Progress</span>';
-    var proposalIcon = p3ProposalData[pr.id] ? '<i class="fas fa-file-alt p3-has-proposal" title="Proposal ready"></i>' : '';
+    var proposalIcon = p3ProposalData[pr.id] ? '<i class="fas fa-file-alt p3-has-proposal" title="Proposals ready"></i>' : '';
+    // Domain badges
+    var domainBadges = (pr.domains || []).map(function(d) {
+      var m = _p3DomainMeta[d] || { label: d, cls: d, icon: 'fa-circle' };
+      return '<span class="p3-pc-domain-badge ' + m.cls + '"><i class="fas ' + m.icon + '"></i> ' + m.label + '</span>';
+    }).join('');
     return '<div class="p3-prospect-card ' + active + '" onclick="p3SelectProspect(\'' + pr.id + '\')" id="p3-pc-' + pr.id + '">'
       + '<div class="p3-pc-top">'
       +   '<div class="p3-pc-avatar" style="background:' + pr.avatarGrad + '">' + pr.initials + '</div>'
@@ -30088,6 +30630,7 @@ function p3RenderProspectList() {
       +   '</div>'
       +   urgencyBadge
       + '</div>'
+      + (domainBadges ? '<div class="p3-pc-domains">' + domainBadges + '</div>' : '')
       + '<div class="p3-pc-fna-status"><i class="fas fa-clipboard-check"></i> ' + pr.fnaStatus + '</div>'
       + '<div class="p3-pc-ai-rec"><i class="fas fa-robot"></i> ' + pr.aiRec + '</div>'
       + '</div>';
@@ -30097,7 +30640,10 @@ function p3RenderProspectList() {
 function p3SelectProspect(id) {
   _p3ActiveProspect = id;
   _p3ActiveProposal = p3ProposalData[id] || null;
-  _p3SelectedOption = _p3ActiveProposal ? _p3ActiveProposal.options[0].id : 'A';
+  _p3SelectedOption = 'A';
+  // Set default domain tab to first domain of this prospect
+  var pr = p3Prospects.find(function(p) { return p.id === id; });
+  _p3ActiveDomainTab = (pr && pr.domains && pr.domains.length) ? pr.domains[0] : 'insurance';
   p3RenderProspectList();
   p3RenderMainPanel();
 }
@@ -30122,6 +30668,18 @@ function p3RenderMainPanel() {
       + '</span>';
   }
 
+  // Domain-aware action buttons
+  var domains = pr.domains || [];
+  var actionBtns = '';
+  if (domains.indexOf('insurance') !== -1)
+    actionBtns += '<button class="p3-domain-action-btn ins" onclick="p3OpenIllustrationEngine()"><i class="fas fa-calculator"></i> Run Illustration</button>';
+  if (domains.indexOf('investments') !== -1)
+    actionBtns += '<button class="p3-domain-action-btn inv" onclick="p3OpenInvestmentProposal()"><i class="fas fa-chart-line"></i> Investment Proposal</button>';
+  if (domains.indexOf('retirement') !== -1)
+    actionBtns += '<button class="p3-domain-action-btn ret" onclick="p3OpenRetirementProposal()"><i class="fas fa-umbrella-beach"></i> Retirement Proposal</button>';
+  if (domains.indexOf('advisory') !== -1)
+    actionBtns += '<button class="p3-domain-action-btn adv" onclick="p3OpenAdvisoryProposal()"><i class="fas fa-chess-queen"></i> Advisory Proposal</button>';
+
   var html = '<div class="' + urgClass + '">'
     + '<div class="p3-panel-header-left">'
     +   '<div class="p3-panel-avatar" style="background:' + pr.avatarGrad + '">' + pr.initials + '</div>'
@@ -30132,7 +30690,7 @@ function p3RenderMainPanel() {
     + '</div>'
     + '<div class="p3-panel-header-right">'
     +   compBadge
-    +   '<button class="p3-ai-illustrate-btn" onclick="p3OpenIllustrationEngine()"><i class="fas fa-calculator"></i> Run Illustration</button>'
+    +   actionBtns
     + '</div>'
     + '</div>';
 
@@ -30140,7 +30698,7 @@ function p3RenderMainPanel() {
   html += '<div class="p3-ai-rec-bar">'
     + '<i class="fas fa-robot p3-ai-rec-icon"></i>'
     + '<div class="p3-ai-rec-body">'
-    +   '<span class="p3-ai-rec-label">AI Illustration Assistant</span>'
+    +   '<span class="p3-ai-rec-label">AI Proposal Assistant</span>'
     +   '<span class="p3-ai-rec-text">' + pr.aiRec + '</span>'
     + '</div>'
     + '<button class="p3-ai-compare-btn" onclick="p3RunAIComparison()"><i class="fas fa-magic"></i> AI Compare</button>'
@@ -30158,12 +30716,21 @@ function p3RenderMainPanel() {
 /* ─────────────────────────────────────────────────────────────────
    PROPOSAL VIEW (3-option cards + illustration table + compliance)
    ───────────────────────────────────────────────────────────────── */
+/* ─── Active domain tab state ───────────────────────────────────── */
+var _p3ActiveDomainTab = 'insurance'; // default
+
+function p3SetDomainTab(domain) {
+  _p3ActiveDomainTab = domain;
+  p3RenderMainPanel();
+}
+
 function p3BuildProposalView(proposal, pr) {
   var html = '';
+  var domains = pr.domains || ['insurance'];
 
   // ── Section label + actions
   html += '<div class="p3-section-bar">'
-    + '<span class="p3-section-title"><i class="fas fa-file-contract"></i> Multi-Product Proposal · ' + proposal.prospectName + '</span>'
+    + '<span class="p3-section-title"><i class="fas fa-file-contract"></i> Proposal Suite · ' + proposal.prospectName + '</span>'
     + '<div class="p3-section-actions">'
     +   '<span class="p3-proposal-date"><i class="fas fa-calendar-alt"></i> ' + proposal.createdDate + '</span>'
     +   '<button class="p3-btn-sm outline" onclick="p3OpenObjCoach()"><i class="fas fa-comments"></i> Objection Coach</button>'
@@ -30171,9 +30738,65 @@ function p3BuildProposalView(proposal, pr) {
     + '</div>'
     + '</div>';
 
-  // ── Option selector cards
+  // ── Domain tabs (only show tabs for this prospect's domains)
+  if (domains.length > 1) {
+    var activeDomTab = (domains.indexOf(_p3ActiveDomainTab) !== -1) ? _p3ActiveDomainTab : domains[0];
+    var domTabMeta = {
+      insurance:   { label: 'Insurance Illustration', icon: 'fa-calculator',     cls: 'ins' },
+      investments: { label: 'Investment Proposal',    icon: 'fa-chart-line',     cls: 'inv' },
+      retirement:  { label: 'Retirement Proposal',    icon: 'fa-umbrella-beach', cls: 'ret' },
+      advisory:    { label: 'Advisory Proposal',      icon: 'fa-chess-queen',    cls: 'adv' }
+    };
+    html += '<div class="p3-domain-tabs">';
+    domains.forEach(function(d) {
+      var m = domTabMeta[d] || { label: d, icon: 'fa-circle', cls: d };
+      var isActive = d === activeDomTab ? 'active ' + m.cls : '';
+      html += '<button class="p3-domain-tab ' + isActive + '" onclick="p3SetDomainTab(\'' + d + '\')">'
+        + '<i class="fas ' + m.icon + '"></i> ' + m.label + '</button>';
+    });
+    html += '</div>';
+    // Render the active domain tab content
+    var renderDomain = activeDomTab;
+    html += p3BuildDomainTabContent(proposal, pr, renderDomain);
+  } else {
+    // Single domain — no tabs needed, render directly
+    html += p3BuildDomainTabContent(proposal, pr, domains[0]);
+  }
+
+  // ── Agent notes
+  html += '<div class="p3-agent-notes-card">'
+    + '<div class="p3-anc-title"><i class="fas fa-sticky-note"></i> Agent Notes</div>'
+    + '<div class="p3-anc-body">' + proposal.agentNotes + '</div>'
+    + '</div>';
+
+  return html;
+}
+
+function p3BuildDomainTabContent(proposal, pr, domain) {
+  var html = '';
+  if (domain === 'insurance' && proposal.insuranceProposal) {
+    html += p3BuildInsuranceSection(proposal.insuranceProposal, proposal, pr);
+  } else if (domain === 'investments' && proposal.investmentProposal) {
+    html += p3BuildInvestmentSection(proposal.investmentProposal, proposal, pr);
+  } else if (domain === 'retirement' && proposal.retirementProposal) {
+    html += p3BuildRetirementSection(proposal.retirementProposal, proposal, pr);
+  } else if (domain === 'advisory' && proposal.advisoryProposal) {
+    html += p3BuildAdvisorySection(proposal.advisoryProposal, proposal, pr);
+  } else {
+    html += '<div class="p3-empty-state" style="padding:32px"><i class="fas fa-file-contract p3-empty-icon"></i>'
+      + '<div class="p3-empty-title">No ' + domain + ' proposal built yet</div>'
+      + '<div class="p3-empty-sub">Use the action buttons above to generate a proposal for this domain.</div></div>';
+  }
+  return html;
+}
+
+/* ─── Insurance section (illustration options + table + compliance) ── */
+function p3BuildInsuranceSection(insProposal, proposal, pr) {
+  var html = '<div class="p3-domain-section-label ins"><i class="fas fa-calculator"></i> Insurance Illustration</div>';
+
+  // Option selector cards
   html += '<div class="p3-options-row">';
-  proposal.options.forEach(function(opt) {
+  insProposal.options.forEach(function(opt) {
     var active = _p3SelectedOption === opt.id ? 'active' : '';
     var recBadge = opt.recommended ? '<span class="p3-rec-badge"><i class="fas fa-star"></i> AI Recommended</span>' : '';
     var scoreColor = opt.suitabilityScore >= 90 ? '#16a34a' : opt.suitabilityScore >= 80 ? '#d97706' : '#6b7280';
@@ -30195,23 +30818,203 @@ function p3BuildProposalView(proposal, pr) {
   });
   html += '</div>';
 
-  // ── Selected option detail
-  var selOpt = proposal.options.find(function(o) { return o.id === _p3SelectedOption; }) || proposal.options[0];
+  // Selected option detail
+  var selOpt = insProposal.options.find(function(o) { return o.id === _p3SelectedOption; }) || insProposal.options[0];
   html += p3BuildOptionDetail(selOpt, pr);
 
-  // ── Illustration table
-  html += p3BuildIllustrationTable(proposal);
+  // Illustration table
+  html += p3BuildIllustrationTable(insProposal);
 
-  // ── Compliance check
-  html += p3BuildComplianceSection(proposal);
+  // Compliance
+  html += p3BuildComplianceSection(insProposal);
 
-  // ── Agent notes
-  html += '<div class="p3-agent-notes-card">'
-    + '<div class="p3-anc-title"><i class="fas fa-sticky-note"></i> Agent Notes</div>'
-    + '<div class="p3-anc-body">' + proposal.agentNotes + '</div>'
-    + '</div>';
+  // Send + Account creation
+  html += p3BuildSendProspectBar('insurance', proposal.prospectId, pr.name);
 
   return html;
+}
+
+/* ─── Investment section ─────────────────────────────────────────── */
+function p3BuildInvestmentSection(invProposal, proposal, pr) {
+  var html = '<div class="p3-domain-section-label inv"><i class="fas fa-chart-line"></i> Investment Proposal</div>';
+
+  html += '<div class="p3-inv-summary-bar">'
+    + '<div class="p3-inv-sb-kpi"><div class="p3-inv-sb-val">$' + (invProposal.totalAUM || 0).toLocaleString() + '</div><div class="p3-inv-sb-lbl">Total AUM in Scope</div></div>'
+    + '<div class="p3-inv-sb-kpi"><div class="p3-inv-sb-val">' + invProposal.options.length + '</div><div class="p3-inv-sb-lbl">Options Generated</div></div>'
+    + '</div>';
+
+  html += '<div class="p3-options-row">';
+  invProposal.options.forEach(function(opt) {
+    var active = _p3SelectedOption === opt.id ? 'active' : '';
+    var recBadge = opt.recommended ? '<span class="p3-rec-badge inv"><i class="fas fa-star"></i> AI Recommended</span>' : '';
+    var scoreColor = opt.suitabilityScore >= 90 ? '#16a34a' : opt.suitabilityScore >= 80 ? '#d97706' : '#6b7280';
+    var aumStr = opt.aum ? '$' + opt.aum.toLocaleString() : (opt.annualContribution ? '$' + opt.annualContribution.toLocaleString() + '/yr' : '');
+    html += '<div class="p3-option-card inv ' + active + '" onclick="p3SelectOption(\'' + proposal.prospectId + '\',\'' + opt.id + '\')">'
+      + recBadge
+      + '<div class="p3-opt-label">' + opt.label + '</div>'
+      + '<div class="p3-opt-tagline">' + opt.tagline + '</div>'
+      + '<div class="p3-opt-premium" style="color:#059669">' + (aumStr || opt.productName) + '</div>'
+      + '<div class="p3-opt-meta-chip" style="border-color:#05966933;color:#059669"><i class="fas ' + (opt.icon || 'fa-chart-bar') + '"></i> ' + opt.productName + '</div>'
+      + '<div class="p3-opt-score" style="color:' + scoreColor + '">Suitability ' + opt.suitabilityScore + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+
+  var selOpt = invProposal.options.find(function(o) { return o.id === _p3SelectedOption; }) || invProposal.options[0];
+  html += '<div class="p3-opt-detail-card inv">'
+    + '<div class="p3-opt-det-header"><div class="p3-opt-det-title">' + selOpt.label + ' — ' + selOpt.tagline + '</div>'
+    + '<div class="p3-opt-det-kpis">'
+    + (selOpt.aum ? '<div class="p3-det-kpi"><div class="p3-det-kpi-val">$' + selOpt.aum.toLocaleString() + '</div><div class="p3-det-kpi-lbl">AUM</div></div>' : '')
+    + (selOpt.feeRate ? '<div class="p3-det-kpi"><div class="p3-det-kpi-val">' + selOpt.feeRate + '</div><div class="p3-det-kpi-lbl">Fee Rate</div></div>' : '')
+    + (selOpt.annualizedReturn ? '<div class="p3-det-kpi"><div class="p3-det-kpi-val">' + selOpt.annualizedReturn + '</div><div class="p3-det-kpi-lbl">Annualized Return</div></div>' : '')
+    + (selOpt.annualContribution ? '<div class="p3-det-kpi"><div class="p3-det-kpi-val">$' + selOpt.annualContribution.toLocaleString() + '</div><div class="p3-det-kpi-lbl">Annual Contribution</div></div>' : '')
+    + (selOpt.projectedValue18 ? '<div class="p3-det-kpi"><div class="p3-det-kpi-val">$' + selOpt.projectedValue18.toLocaleString() + '</div><div class="p3-det-kpi-lbl">Projected @ Age 18</div></div>' : '')
+    + '</div></div>'
+    + '<div class="p3-ai-summary-box"><i class="fas fa-robot"></i> ' + selOpt.aiSummary + '</div>'
+    + (selOpt.allocation ? '<div class="p3-inv-allocation-row">'
+        + '<div class="p3-inv-alloc-item" style="color:#1e3a5f"><div class="p3-inv-alloc-val">' + selOpt.allocation.equities + '%</div><div class="p3-inv-alloc-lbl">Equities</div></div>'
+        + '<div class="p3-inv-alloc-item" style="color:#059669"><div class="p3-inv-alloc-val">' + selOpt.allocation.fixedIncome + '%</div><div class="p3-inv-alloc-lbl">Fixed Income</div></div>'
+        + '<div class="p3-inv-alloc-item" style="color:#d97706"><div class="p3-inv-alloc-val">' + selOpt.allocation.alternatives + '%</div><div class="p3-inv-alloc-lbl">Alternatives</div></div>'
+        + '</div>' : '')
+    + '</div>';
+
+  html += p3BuildSendProspectBar('investments', proposal.prospectId, pr.name);
+  return html;
+}
+
+/* ─── Retirement section ─────────────────────────────────────────── */
+function p3BuildRetirementSection(retProposal, proposal, pr) {
+  var html = '<div class="p3-domain-section-label ret"><i class="fas fa-umbrella-beach"></i> Retirement Proposal</div>';
+
+  html += '<div class="p3-ret-summary-bar">'
+    + '<div class="p3-ret-sb-kpi"><div class="p3-ret-sb-val">Age ' + retProposal.targetRetirementAge + '</div><div class="p3-ret-sb-lbl">Target Retirement</div></div>'
+    + '<div class="p3-ret-sb-kpi"><div class="p3-ret-sb-val">' + retProposal.yearsToRetirement + ' yrs</div><div class="p3-ret-sb-lbl">Planning Horizon</div></div>'
+    + '<div class="p3-ret-sb-kpi"><div class="p3-ret-sb-val">$' + retProposal.incomeGoal.toLocaleString() + '/mo</div><div class="p3-ret-sb-lbl">Income Goal</div></div>'
+    + '</div>';
+
+  html += '<div class="p3-options-row">';
+  retProposal.options.forEach(function(opt) {
+    var active = _p3SelectedOption === opt.id ? 'active' : '';
+    var recBadge = opt.recommended ? '<span class="p3-rec-badge ret"><i class="fas fa-star"></i> AI Recommended</span>' : '';
+    var scoreColor = opt.suitabilityScore >= 90 ? '#16a34a' : opt.suitabilityScore >= 80 ? '#d97706' : '#6b7280';
+    html += '<div class="p3-option-card ret ' + active + '" onclick="p3SelectOption(\'' + proposal.prospectId + '\',\'' + opt.id + '\')">'
+      + recBadge
+      + '<div class="p3-opt-label">' + opt.label + '</div>'
+      + '<div class="p3-opt-tagline">' + opt.tagline + '</div>'
+      + '<div class="p3-opt-premium" style="color:#0284c7">$' + opt.monthlyIncomeAt65.toLocaleString() + '<span>/mo @ 65</span></div>'
+      + '<div class="p3-opt-meta-chip" style="border-color:#0284c733;color:#0284c7"><i class="fas fa-shield-alt"></i> ' + opt.guaranteedPeriod + '</div>'
+      + '<div class="p3-opt-score" style="color:' + scoreColor + '">Suitability ' + opt.suitabilityScore + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+
+  var selOpt = retProposal.options.find(function(o) { return o.id === _p3SelectedOption; }) || retProposal.options[0];
+  html += '<div class="p3-opt-detail-card ret">'
+    + '<div class="p3-opt-det-header"><div class="p3-opt-det-title">' + selOpt.label + ' — ' + selOpt.tagline + '</div>'
+    + '<div class="p3-opt-det-kpis">'
+    + '<div class="p3-det-kpi"><div class="p3-det-kpi-val" style="color:#0284c7">$' + selOpt.monthlyIncomeAt65.toLocaleString() + '/mo</div><div class="p3-det-kpi-lbl">Income @ Age 65</div></div>'
+    + '<div class="p3-det-kpi"><div class="p3-det-kpi-val">$' + selOpt.premium.toLocaleString() + '</div><div class="p3-det-kpi-lbl">' + (selOpt.deferralYears <= 0 ? 'Single Premium' : (selOpt.premium > 30000 ? 'Single Premium' : 'Annual Premium')) + '</div></div>'
+    + '<div class="p3-det-kpi"><div class="p3-det-kpi-val">' + selOpt.deferralYears + ' yrs</div><div class="p3-det-kpi-lbl">Deferral Period</div></div>'
+    + '</div></div>'
+    + '<div class="p3-ai-summary-box"><i class="fas fa-robot"></i> ' + selOpt.aiSummary + '</div>'
+    + '<div class="p3-ret-product-chip"><i class="fas ' + (selOpt.icon || 'fa-umbrella-beach') + '" style="color:' + (selOpt.color || '#0284c7') + '"></i> ' + selOpt.productName + '</div>'
+    + '<div class="p3-ret-guaranteed-pill"><i class="fas fa-shield-alt"></i> ' + selOpt.guaranteedPeriod + '</div>'
+    + '</div>';
+
+  html += p3BuildSendProspectBar('retirement', proposal.prospectId, pr.name);
+  return html;
+}
+
+/* ─── Advisory section ───────────────────────────────────────────── */
+function p3BuildAdvisorySection(advProposal, proposal, pr) {
+  var html = '<div class="p3-domain-section-label adv"><i class="fas fa-chess-queen"></i> Advisory Proposal</div>';
+
+  html += '<div class="p3-options-row">';
+  advProposal.options.forEach(function(opt) {
+    var active = _p3SelectedOption === opt.id ? 'active' : '';
+    var recBadge = opt.recommended ? '<span class="p3-rec-badge adv"><i class="fas fa-star"></i> AI Recommended</span>' : '';
+    var scoreColor = opt.suitabilityScore >= 90 ? '#16a34a' : opt.suitabilityScore >= 80 ? '#d97706' : '#6b7280';
+    var feeStr = opt.annualFee ? '$' + opt.annualFee.toLocaleString() + '/yr' : (opt.oneTimeFee ? '$' + opt.oneTimeFee.toLocaleString() + ' one-time' : 'See engagement');
+    html += '<div class="p3-option-card adv ' + active + '" onclick="p3SelectOption(\'' + proposal.prospectId + '\',\'' + opt.id + '\')">'
+      + recBadge
+      + '<div class="p3-opt-label">' + opt.label + '</div>'
+      + '<div class="p3-opt-tagline">' + opt.tagline + '</div>'
+      + '<div class="p3-opt-premium" style="color:#7c3aed">' + feeStr + '</div>'
+      + (opt.aum ? '<div class="p3-opt-meta-chip" style="border-color:#7c3aed33;color:#7c3aed"><i class="fas fa-chart-pie"></i> $' + opt.aum.toLocaleString() + ' AUM · ' + opt.aumFeeRate + ' fee</div>' : '')
+      + '<div class="p3-opt-score" style="color:' + scoreColor + '">Suitability ' + opt.suitabilityScore + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+
+  var selOpt = advProposal.options.find(function(o) { return o.id === _p3SelectedOption; }) || advProposal.options[0];
+  html += '<div class="p3-opt-detail-card adv">'
+    + '<div class="p3-opt-det-header"><div class="p3-opt-det-title">' + selOpt.label + ' — ' + selOpt.tagline + '</div></div>'
+    + '<div class="p3-ai-summary-box"><i class="fas fa-robot"></i> ' + selOpt.aiSummary + '</div>'
+    + '<div class="p3-adv-services-list">'
+    + selOpt.services.map(function(s) {
+        return '<div class="p3-adv-service-item"><i class="fas fa-check-circle" style="color:#7c3aed"></i> ' + s + '</div>';
+      }).join('')
+    + '</div>'
+    + (selOpt.annualFee ? '<div class="p3-adv-fee-pill annual"><i class="fas fa-calendar-alt"></i> Annual Engagement Fee: $' + selOpt.annualFee.toLocaleString() + '/yr</div>' : '')
+    + (selOpt.oneTimeFee ? '<div class="p3-adv-fee-pill one-time"><i class="fas fa-receipt"></i> One-Time Project Fee: $' + selOpt.oneTimeFee.toLocaleString() + '</div>' : '')
+    + (selOpt.aum ? '<div class="p3-adv-fee-pill aum"><i class="fas fa-chart-pie"></i> AUM Fee: ' + selOpt.aumFeeRate + ' on $' + selOpt.aum.toLocaleString() + ' = $' + (selOpt.annualFee || 0).toLocaleString() + '/yr</div>' : '')
+    + '</div>';
+
+  html += p3BuildSendProspectBar('advisory', proposal.prospectId, pr.name);
+  return html;
+}
+
+/* ─── "Send to Prospect" + Account Creation bar ─────────────────── */
+var _p3ProposalSentStatus = {}; // { 'FNA-001_insurance': 'sent'|'approved' }
+
+function p3BuildSendProspectBar(domain, prospectId, prospectName) {
+  var key = prospectId + '_' + domain;
+  var status = _p3ProposalSentStatus[key] || 'ready';
+  var domainLabel = { insurance: 'Insurance Illustration', investments: 'Investment Proposal', retirement: 'Retirement Proposal', advisory: 'Advisory Proposal' }[domain] || domain;
+  var acctLabel   = { insurance: 'Insurance Policy', investments: 'Investment Account', retirement: 'Retirement Account', advisory: 'Advisory Account' }[domain] || domain + ' Account';
+  var acctIcon    = { insurance: 'fa-shield-alt', investments: 'fa-chart-line', retirement: 'fa-umbrella-beach', advisory: 'fa-chess-queen' }[domain] || 'fa-check';
+  var domCls      = domain;
+
+  var html = '<div class="p3-send-bar ' + domCls + '">';
+  if (status === 'ready') {
+    html += '<div class="p3-send-bar-left"><i class="fas fa-paper-plane"></i> Ready to send ' + domainLabel + ' to ' + prospectName + ' for review</div>'
+      + '<button class="p3-send-btn ' + domCls + '" onclick="p3SendToProspect(\'' + domain + '\',\'' + prospectId + '\',\'' + prospectName.replace(/'/g, "\\'") + '\')">'
+      + '<i class="fas fa-paper-plane"></i> Send to Prospect</button>';
+  } else if (status === 'sent') {
+    html += '<div class="p3-send-bar-left sent"><i class="fas fa-check-circle"></i> ' + domainLabel + ' sent to ' + prospectName + ' — awaiting approval</div>'
+      + '<button class="p3-approve-btn" onclick="p3SimulateApproval(\'' + domain + '\',\'' + prospectId + '\',\'' + prospectName.replace(/'/g, "\\'") + '\')">'
+      + '<i class="fas fa-thumbs-up"></i> Simulate Approval</button>';
+  } else if (status === 'approved') {
+    html += '<div class="p3-send-bar-left approved"><i class="fas fa-star"></i> Approved! ' + prospectName + ' accepted the ' + domainLabel + '</div>'
+      + '<button class="p3-create-acct-btn ' + domCls + '" onclick="p3CreateAccount(\'' + domain + '\',\'' + prospectId + '\',\'' + prospectName.replace(/'/g, "\\'") + '\')">'
+      + '<i class="fas ' + acctIcon + '"></i> Create ' + acctLabel + '</button>';
+  } else if (status === 'created') {
+    html += '<div class="p3-send-bar-left created"><i class="fas fa-check-double"></i> ' + acctLabel + ' created successfully for ' + prospectName + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function p3SendToProspect(domain, prospectId, prospectName) {
+  var key = prospectId + '_' + domain;
+  _p3ProposalSentStatus[key] = 'sent';
+  showToast('Proposal sent to ' + prospectName + ' for review — awaiting response', 'success');
+  p3RenderMainPanel();
+}
+
+function p3SimulateApproval(domain, prospectId, prospectName) {
+  var key = prospectId + '_' + domain;
+  _p3ProposalSentStatus[key] = 'approved';
+  showToast(prospectName + ' approved the proposal! Create account to proceed.', 'success');
+  p3RenderMainPanel();
+}
+
+function p3CreateAccount(domain, prospectId, prospectName) {
+  var key = prospectId + '_' + domain;
+  _p3ProposalSentStatus[key] = 'created';
+  var acctLabel = { insurance: 'Insurance Policy', investments: 'Investment Account', retirement: 'Retirement Account', advisory: 'Advisory Account' }[domain] || domain + ' Account';
+  showToast(acctLabel + ' created for ' + prospectName + ' — account is now active!', 'success');
+  p3RenderMainPanel();
 }
 
 function p3BuildOptionDetail(opt, pr) {
@@ -30353,11 +31156,17 @@ function p3BuildComplianceSection(proposal) {
 }
 
 function p3BuildEmptyProposalState(pr) {
+  var domains = pr.domains || ['insurance'];
+  var btns = '';
+  if (domains.indexOf('insurance') !== -1)   btns += '<button class="p3-domain-action-btn ins" onclick="p3OpenIllustrationEngine()"><i class="fas fa-calculator"></i> Run Illustration</button>';
+  if (domains.indexOf('investments') !== -1) btns += '<button class="p3-domain-action-btn inv" onclick="p3OpenInvestmentProposal()"><i class="fas fa-chart-line"></i> Investment Proposal</button>';
+  if (domains.indexOf('retirement') !== -1)  btns += '<button class="p3-domain-action-btn ret" onclick="p3OpenRetirementProposal()"><i class="fas fa-umbrella-beach"></i> Retirement Proposal</button>';
+  if (domains.indexOf('advisory') !== -1)    btns += '<button class="p3-domain-action-btn adv" onclick="p3OpenAdvisoryProposal()"><i class="fas fa-chess-queen"></i> Advisory Proposal</button>';
   return '<div class="p3-empty-state">'
     + '<i class="fas fa-file-contract p3-empty-icon"></i>'
-    + '<div class="p3-empty-title">No proposal yet for ' + pr.name + '</div>'
-    + '<div class="p3-empty-sub">Use the AI Illustration Assistant to run scenarios and build a multi-product proposal based on the FNA fact-find data.</div>'
-    + '<button class="p3-ai-illustrate-btn" onclick="p3OpenIllustrationEngine()"><i class="fas fa-calculator"></i> Run Illustration Engine</button>'
+    + '<div class="p3-empty-title">No proposals yet for ' + pr.name + '</div>'
+    + '<div class="p3-empty-sub">Use the AI Proposal Assistant to generate proposals for each domain based on the FNA fact-find data.</div>'
+    + '<div class="p3-empty-action-row">' + btns + '</div>'
     + '</div>';
 }
 
@@ -30480,9 +31289,11 @@ function p3RunIllustration() {
 
 function p3LoadGeneratedProposal() {
   _p3ActiveProposal = p3ProposalData[_p3ActiveProspect] || null;
-  _p3SelectedOption = _p3ActiveProposal ? _p3ActiveProposal.options[0].id : 'A';
+  _p3SelectedOption = 'A';
+  _p3ActiveDomainTab = 'insurance';
+  closeP3IllustrationOverlay();
   p3RenderMainPanel();
-  showToast('Proposal loaded — 3 options ready for presentation', 'success');
+  showToast('Insurance Illustration loaded — options ready for presentation', 'success');
 }
 
 function closeP3IllustrationOverlay() {
@@ -30493,6 +31304,308 @@ function closeP3IllustrationOverlay() {
 function p3CloseIllustBg(e) {
   if (e && e.target !== e.currentTarget) return;
   closeP3IllustrationOverlay();
+}
+
+/* Dispatches "New Proposal" header button to domain-appropriate modal */
+function p3OpenDomainProposal() {
+  var pr = p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; });
+  if (!pr) return;
+  var domains = pr.domains || ['insurance'];
+  // Open the first domain's modal
+  if (domains.indexOf('insurance') !== -1) { p3OpenIllustrationEngine(); return; }
+  if (domains.indexOf('investments') !== -1) { p3OpenInvestmentProposal(); return; }
+  if (domains.indexOf('retirement') !== -1) { p3OpenRetirementProposal(); return; }
+  if (domains.indexOf('advisory') !== -1) { p3OpenAdvisoryProposal(); return; }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   RETIREMENT PROPOSAL MODAL
+   ───────────────────────────────────────────────────────────────── */
+function p3OpenRetirementProposal() {
+  var pr = p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; });
+  if (!pr) return;
+  var overlay = document.getElementById('p3-retirement-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  var body = document.getElementById('p3-retirement-body');
+  if (!body) return;
+
+  var retData = (p3ProposalData[pr.id] || {}).retirementProposal;
+  var yearsToRet = retData ? retData.yearsToRetirement : Math.max(65 - pr.age, 1);
+
+  body.innerHTML = '<div class="p3-ie-form">'
+    + '<div class="p3-ie-prospect-badge" style="background:' + pr.avatarGrad + '">'
+    +   '<div class="p3-ie-pb-initials">' + pr.initials + '</div>'
+    +   '<div class="p3-ie-pb-info"><div class="p3-ie-pb-name">' + pr.name + '</div>'
+    +   '<div class="p3-ie-pb-meta">Age ' + pr.age + ' · Retirement in ' + yearsToRet + ' years · ' + pr.riskClass + '</div></div>'
+    + '</div>'
+    + '<div class="p3-ie-row">'
+    +   p3IEField('Annuity Type', 'p3-ret-type',
+        '<select class="p3-ie-select" id="p3-ret-type">'
+        + '<option value="imm-guaranteed">Immediate Income — Guaranteed Lifetime</option>'
+        + '<option value="imm-mutual">Immediate Income — Lifetime Mutual</option>'
+        + '<option value="imm-period">Immediate Income — Guaranteed Period</option>'
+        + '<option value="def-future">Deferred Income — Guaranteed Future</option>'
+        + '<option value="def-mutual">Deferred Income — Future Mutual</option>'
+        + '<option value="def-clear">Deferred Income — Clear Income Advantage Fixed</option>'
+        + '</select>')
+    +   p3IEField('Target Monthly Income', 'p3-ret-income', '<input type="text" class="p3-ie-input" id="p3-ret-income" value="$' + (retData ? retData.incomeGoal.toLocaleString() : '3,000') + '" />')
+    + '</div>'
+    + '<div class="p3-ie-row">'
+    +   p3IEField('Premium Type', 'p3-ret-prem-type',
+        '<select class="p3-ie-select" id="p3-ret-prem-type"><option>Single Premium</option><option>Annual Premium</option></select>')
+    +   p3IEField('Premium Amount', 'p3-ret-prem', '<input type="text" class="p3-ie-input" id="p3-ret-prem" value="$40,000" />')
+    + '</div>'
+    + '<div class="p3-ie-row">'
+    +   p3IEField('Target Retirement Age', 'p3-ret-age', '<input type="number" class="p3-ie-input" id="p3-ret-age" value="' + (retData ? retData.targetRetirementAge : 65) + '" min="55" max="80" />')
+    +   p3IEField('Inflation Rider', 'p3-ret-infl',
+        '<select class="p3-ie-select" id="p3-ret-infl"><option>None</option><option>CPI-Linked</option><option>3% Compound</option></select>')
+    + '</div>'
+    + '<button class="p3-ie-run-btn ret" onclick="p3RunRetirementProposal()"><i class="fas fa-play-circle"></i> Generate Retirement Proposal</button>'
+    + '</div>'
+    + '<div id="p3-ret-results" class="p3-ie-results" style="display:none"></div>';
+}
+
+function p3RunRetirementProposal() {
+  var resultsEl = document.getElementById('p3-ret-results');
+  if (!resultsEl) return;
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = '<div class="p3-ie-running"><i class="fas fa-cog fa-spin"></i> Generating Retirement Proposal… running income projections, longevity modelling, and annuity pricing…</div>';
+
+  setTimeout(function() {
+    var pr = p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; });
+    if (!pr) return;
+    var retData = (p3ProposalData[pr.id] || {}).retirementProposal;
+    if (!retData) return;
+
+    resultsEl.innerHTML = '<div class="p3-ie-result-header">'
+      + '<i class="fas fa-check-circle" style="color:#0284c7"></i> Retirement Proposal Generated — ' + retData.options.length + ' options ready'
+      + '</div>'
+      + '<div class="p3-ie-result-options">'
+      + retData.options.map(function(opt) {
+          return '<div class="p3-ie-result-option ret">'
+            + '<div class="p3-ie-ro-label">' + opt.label + '</div>'
+            + '<div class="p3-ie-ro-tagline">' + opt.productName + '</div>'
+            + '<div class="p3-ie-ro-kpi">$' + opt.monthlyIncomeAt65.toLocaleString() + '/mo @ 65 · ' + opt.guaranteedPeriod + '</div>'
+            + '</div>';
+        }).join('')
+      + '</div>'
+      + '<button class="p3-ie-load-btn ret" onclick="_p3LoadRetirementProposal()"><i class="fas fa-file-contract"></i> Load Full Retirement Proposal</button>';
+  }, 2000);
+}
+
+function _p3LoadRetirementProposal() {
+  _p3ActiveProposal = p3ProposalData[_p3ActiveProspect] || null;
+  _p3SelectedOption = 'A';
+  _p3ActiveDomainTab = 'retirement';
+  p3CloseRetirementOverlay();
+  p3RenderMainPanel();
+  showToast('Retirement Proposal loaded — review income options', 'success');
+}
+
+function p3CloseRetirementOverlay() {
+  var overlay = document.getElementById('p3-retirement-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function p3CloseRetirementBg(e) {
+  if (e && e.target !== e.currentTarget) return;
+  p3CloseRetirementOverlay();
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   INVESTMENT PROPOSAL MODAL
+   ───────────────────────────────────────────────────────────────── */
+function p3OpenInvestmentProposal() {
+  var pr = p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; });
+  if (!pr) return;
+  var overlay = document.getElementById('p3-investment-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  var body = document.getElementById('p3-investment-body');
+  if (!body) return;
+
+  var invData = (p3ProposalData[pr.id] || {}).investmentProposal;
+
+  body.innerHTML = '<div class="p3-ie-form">'
+    + '<div class="p3-ie-prospect-badge" style="background:' + pr.avatarGrad + '">'
+    +   '<div class="p3-ie-pb-initials">' + pr.initials + '</div>'
+    +   '<div class="p3-ie-pb-info"><div class="p3-ie-pb-name">' + pr.name + '</div>'
+    +   '<div class="p3-ie-pb-meta">Age ' + pr.age + ' · ' + pr.riskClass + ' · Investment Portfolio Review</div></div>'
+    + '</div>'
+    + '<div class="p3-ie-row">'
+    +   p3IEField('Product Type', 'p3-inv-type',
+        '<select class="p3-ie-select" id="p3-inv-type">'
+        + '<option value="UMA">Unified Managed Account (UMA)</option>'
+        + '<option value="SMA">Separately Managed Account (SMA)</option>'
+        + '<option value="fund-advisory">Fund Advisory Program</option>'
+        + '<option value="rep-directed">Rep-Directed Account</option>'
+        + '<option value="FIA">Fixed Indexed Annuity (FIA)</option>'
+        + '<option value="VA">Variable Annuity</option>'
+        + '<option value="hybrid-va">Hybrid Variable Annuity</option>'
+        + '<option value="mutual-funds">Mutual Funds</option>'
+        + '<option value="ETFs">ETFs</option>'
+        + '<option value="529">529 College Savings</option>'
+        + '</select>')
+    +   p3IEField('Investment Amount', 'p3-inv-amount', '<input type="text" class="p3-ie-input" id="p3-inv-amount" value="$' + (invData ? invData.totalAUM.toLocaleString() : '250,000') + '" />')
+    + '</div>'
+    + '<div class="p3-ie-row">'
+    +   p3IEField('Risk Profile', 'p3-inv-risk',
+        '<select class="p3-ie-select" id="p3-inv-risk"><option>Conservative</option><option>Moderate</option><option selected>Moderate Growth</option><option>Aggressive Growth</option></select>')
+    +   p3IEField('Investment Horizon', 'p3-inv-horizon',
+        '<select class="p3-ie-select" id="p3-inv-horizon"><option>Short (&lt;5 yrs)</option><option selected>Medium (5–15 yrs)</option><option>Long (&gt;15 yrs)</option></select>')
+    + '</div>'
+    + '<div class="p3-ie-row">'
+    +   p3IEField('Equity Allocation %', 'p3-inv-eq', '<input type="number" class="p3-ie-input" id="p3-inv-eq" value="65" min="0" max="100" />')
+    +   p3IEField('Fixed Income %', 'p3-inv-fi', '<input type="number" class="p3-ie-input" id="p3-inv-fi" value="25" min="0" max="100" />')
+    + '</div>'
+    + '<button class="p3-ie-run-btn inv" onclick="p3RunInvestmentProposal()"><i class="fas fa-play-circle"></i> Generate Investment Proposal</button>'
+    + '</div>'
+    + '<div id="p3-inv-results" class="p3-ie-results" style="display:none"></div>';
+}
+
+function p3RunInvestmentProposal() {
+  var resultsEl = document.getElementById('p3-inv-results');
+  if (!resultsEl) return;
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = '<div class="p3-ie-running"><i class="fas fa-cog fa-spin"></i> Generating Investment Proposal… analysing portfolio, running risk models, optimising allocation…</div>';
+
+  setTimeout(function() {
+    var pr = p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; });
+    if (!pr) return;
+    var invData = (p3ProposalData[pr.id] || {}).investmentProposal;
+    if (!invData) return;
+
+    resultsEl.innerHTML = '<div class="p3-ie-result-header">'
+      + '<i class="fas fa-check-circle" style="color:#059669"></i> Investment Proposal Generated — ' + invData.options.length + ' options ready'
+      + '</div>'
+      + '<div class="p3-ie-result-options">'
+      + invData.options.map(function(opt) {
+          return '<div class="p3-ie-result-option inv">'
+            + '<div class="p3-ie-ro-label">' + opt.label + '</div>'
+            + '<div class="p3-ie-ro-tagline">' + opt.productName + '</div>'
+            + '<div class="p3-ie-ro-kpi">' + (opt.aum ? '$' + opt.aum.toLocaleString() + ' AUM' : '') + (opt.annualizedReturn ? ' · ' + opt.annualizedReturn : '') + (opt.riskLevel ? ' · ' + opt.riskLevel : '') + '</div>'
+            + '</div>';
+        }).join('')
+      + '</div>'
+      + '<button class="p3-ie-load-btn inv" onclick="_p3LoadInvestmentProposal()"><i class="fas fa-file-contract"></i> Load Full Investment Proposal</button>';
+  }, 2000);
+}
+
+function _p3LoadInvestmentProposal() {
+  _p3ActiveProposal = p3ProposalData[_p3ActiveProspect] || null;
+  _p3SelectedOption = 'A';
+  _p3ActiveDomainTab = 'investments';
+  p3CloseInvestmentOverlay();
+  p3RenderMainPanel();
+  showToast('Investment Proposal loaded — review portfolio options', 'success');
+}
+
+function p3CloseInvestmentOverlay() {
+  var overlay = document.getElementById('p3-investment-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function p3CloseInvestmentBg(e) {
+  if (e && e.target !== e.currentTarget) return;
+  p3CloseInvestmentOverlay();
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   ADVISORY PROPOSAL MODAL
+   ───────────────────────────────────────────────────────────────── */
+function p3OpenAdvisoryProposal() {
+  var pr = p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; });
+  if (!pr) return;
+  var overlay = document.getElementById('p3-advisory-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  var body = document.getElementById('p3-advisory-body');
+  if (!body) return;
+
+  var advData = (p3ProposalData[pr.id] || {}).advisoryProposal;
+
+  body.innerHTML = '<div class="p3-ie-form">'
+    + '<div class="p3-ie-prospect-badge" style="background:' + pr.avatarGrad + '">'
+    +   '<div class="p3-ie-pb-initials">' + pr.initials + '</div>'
+    +   '<div class="p3-ie-pb-info"><div class="p3-ie-pb-name">' + pr.name + '</div>'
+    +   '<div class="p3-ie-pb-meta">Age ' + pr.age + ' · ' + pr.riskClass + ' · Advisory Services Engagement</div></div>'
+    + '</div>'
+    + '<div class="p3-ie-row">'
+    +   p3IEField('Advisory Category', 'p3-adv-cat',
+        '<select class="p3-ie-select" id="p3-adv-cat">'
+        + '<option value="wealth-mgmt">Wealth Management</option>'
+        + '<option value="estate-planning">Estate Planning</option>'
+        + '<option value="small-biz">Small Business / Executive Benefits</option>'
+        + '</select>')
+    +   p3IEField('Estimated AUM', 'p3-adv-aum', '<input type="text" class="p3-ie-input" id="p3-adv-aum" value="$' + (pr.income > 200000 ? '800,000' : '200,000') + '" />')
+    + '</div>'
+    + '<div class="p3-ie-row">'
+    +   p3IEField('Key Objectives', 'p3-adv-obj',
+        '<select class="p3-ie-select" id="p3-adv-obj"><option>Wealth Accumulation</option><option>Estate Transfer</option><option>Business Succession</option><option>Executive Compensation</option></select>')
+    +   p3IEField('Engagement Timeline', 'p3-adv-timeline',
+        '<select class="p3-ie-select" id="p3-adv-timeline"><option>Immediate — start now</option><option>Q3 2026</option><option>Q4 2026</option></select>')
+    + '</div>'
+    + '<div class="p3-ie-riders-section">'
+    +   '<div class="p3-ie-riders-label">Services to Include</div>'
+    +   '<div class="p3-ie-riders-grid">'
+    +     ['Annual Comprehensive Financial Plan','Portfolio Management (ongoing)','Tax Efficiency Strategy','Estate Planning Documents','Business Owner Services','Executive Benefits Design'].map(function(s) {
+            var chk = (s === 'Annual Comprehensive Financial Plan' || s === 'Portfolio Management (ongoing)') ? 'checked' : '';
+            return '<label class="p3-ie-rider-check"><input type="checkbox" ' + chk + ' /> ' + s + '</label>';
+          }).join('')
+    +   '</div>'
+    + '</div>'
+    + '<button class="p3-ie-run-btn adv" onclick="p3RunAdvisoryProposal()"><i class="fas fa-play-circle"></i> Generate Advisory Proposal</button>'
+    + '</div>'
+    + '<div id="p3-adv-results" class="p3-ie-results" style="display:none"></div>';
+}
+
+function p3RunAdvisoryProposal() {
+  var resultsEl = document.getElementById('p3-adv-results');
+  if (!resultsEl) return;
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = '<div class="p3-ie-running"><i class="fas fa-cog fa-spin"></i> Generating Advisory Proposal… scoping services, calculating fees, building engagement plan…</div>';
+
+  setTimeout(function() {
+    var pr = p3Prospects.find(function(p) { return p.id === _p3ActiveProspect; });
+    if (!pr) return;
+    var advData = (p3ProposalData[pr.id] || {}).advisoryProposal;
+    if (!advData) return;
+
+    resultsEl.innerHTML = '<div class="p3-ie-result-header">'
+      + '<i class="fas fa-check-circle" style="color:#7c3aed"></i> Advisory Proposal Generated — ' + advData.options.length + ' engagements designed'
+      + '</div>'
+      + '<div class="p3-ie-result-options">'
+      + advData.options.map(function(opt) {
+          var feeStr = opt.annualFee ? '$' + opt.annualFee.toLocaleString() + '/yr' : (opt.oneTimeFee ? '$' + opt.oneTimeFee.toLocaleString() + ' one-time' : '');
+          return '<div class="p3-ie-result-option adv">'
+            + '<div class="p3-ie-ro-label">' + opt.label + '</div>'
+            + '<div class="p3-ie-ro-tagline">' + opt.tagline + '</div>'
+            + '<div class="p3-ie-ro-kpi">' + feeStr + ' · Suitability ' + opt.suitabilityScore + '</div>'
+            + '</div>';
+        }).join('')
+      + '</div>'
+      + '<button class="p3-ie-load-btn adv" onclick="_p3LoadAdvisoryProposal()"><i class="fas fa-file-contract"></i> Load Full Advisory Proposal</button>';
+  }, 1800);
+}
+
+function _p3LoadAdvisoryProposal() {
+  _p3ActiveProposal = p3ProposalData[_p3ActiveProspect] || null;
+  _p3SelectedOption = 'A';
+  _p3ActiveDomainTab = 'advisory';
+  p3CloseAdvisoryOverlay();
+  p3RenderMainPanel();
+  showToast('Advisory Proposal loaded — review engagement options', 'success');
+}
+
+function p3CloseAdvisoryOverlay() {
+  var overlay = document.getElementById('p3-advisory-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function p3CloseAdvisoryBg(e) {
+  if (e && e.target !== e.currentTarget) return;
+  p3CloseAdvisoryOverlay();
 }
 
 /* ─────────────────────────────────────────────────────────────────

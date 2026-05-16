@@ -45591,3 +45591,249 @@ kbd {
 /* ═══════════════════════════════════════════════════════════════════════
    END Pass 6
    ═══════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════
+   PASS 7 — Product Proposals Hub: Domain tabs, proposal modals,
+             prospect domain badges, action buttons, send/approve bars
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Domain badges in prospect card ────────────────────────────── */
+.p3-pc-domains {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  padding: 6px 14px 2px;
+}
+.p3-pc-domain-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; letter-spacing: .3px;
+  padding: 2px 8px; border-radius: 20px;
+  border: 1px solid transparent;
+}
+.p3-pc-domain-badge.ins { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.p3-pc-domain-badge.inv { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+.p3-pc-domain-badge.ret { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+.p3-pc-domain-badge.adv { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
+
+/* ── Domain-aware action buttons in panel header ────────────────── */
+.p3-domain-action-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600;
+  padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
+  transition: all .18s ease;
+}
+.p3-domain-action-btn.ins  { background: #1e3a5f; color: #fff; }
+.p3-domain-action-btn.ins:hover  { background: #2d5299; }
+.p3-domain-action-btn.inv  { background: #059669; color: #fff; }
+.p3-domain-action-btn.inv:hover  { background: #047857; }
+.p3-domain-action-btn.ret  { background: #0284c7; color: #fff; }
+.p3-domain-action-btn.ret:hover  { background: #0369a1; }
+.p3-domain-action-btn.adv  { background: #7c3aed; color: #fff; }
+.p3-domain-action-btn.adv:hover  { background: #6d28d9; }
+
+/* ── Domain tabs below section bar ─────────────────────────────── */
+.p3-domain-tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  padding: 10px 16px 0;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+.p3-domain-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 8px 16px;
+  border: 1px solid #e5e7eb; border-bottom: none;
+  border-radius: 8px 8px 0 0; background: #f9fafb; color: #6b7280;
+  cursor: pointer; transition: all .18s ease; position: relative; bottom: -2px;
+}
+.p3-domain-tab:hover { background: #f3f4f6; color: #374151; }
+.p3-domain-tab.active { color: #fff; border-color: transparent; z-index: 1; }
+.p3-domain-tab.active.ins { background: #1e3a5f; }
+.p3-domain-tab.active.inv { background: #059669; }
+.p3-domain-tab.active.ret { background: #0284c7; }
+.p3-domain-tab.active.adv { background: #7c3aed; }
+
+/* ── Domain section label (within tab content) ──────────────────── */
+.p3-domain-section-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; padding: 6px 14px;
+  border-radius: 6px; margin: 0 0 14px;
+}
+.p3-domain-section-label.ins { background: #dbeafe; color: #1e40af; }
+.p3-domain-section-label.inv { background: #d1fae5; color: #065f46; }
+.p3-domain-section-label.ret { background: #e0f2fe; color: #0369a1; }
+.p3-domain-section-label.adv { background: #ede9fe; color: #5b21b6; }
+
+/* ── Overlay header variants for new modals ─────────────────────── */
+.p3-overlay-header.ret  { background: linear-gradient(135deg,#0284c7,#0369a1); color: #fff; }
+.p3-overlay-header.inv  { background: linear-gradient(135deg,#059669,#047857); color: #fff; }
+.p3-overlay-header.adv  { background: linear-gradient(135deg,#7c3aed,#6d28d9); color: #fff; }
+
+/* ── Run button domain variants ─────────────────────────────────── */
+.p3-ie-run-btn.ret { background: linear-gradient(135deg,#0284c7,#0369a1); }
+.p3-ie-run-btn.inv { background: linear-gradient(135deg,#059669,#047857); }
+.p3-ie-run-btn.adv { background: linear-gradient(135deg,#7c3aed,#6d28d9); }
+
+/* ── Result option domain variants ─────────────────────────────── */
+.p3-ie-result-option.ret { border-left: 3px solid #0284c7; }
+.p3-ie-result-option.inv { border-left: 3px solid #059669; }
+.p3-ie-result-option.adv { border-left: 3px solid #7c3aed; }
+
+.p3-ie-load-btn.ret { background: linear-gradient(135deg,#0284c7,#0369a1); }
+.p3-ie-load-btn.inv { background: linear-gradient(135deg,#059669,#047857); }
+.p3-ie-load-btn.adv { background: linear-gradient(135deg,#7c3aed,#6d28d9); }
+
+/* ── Option card domain accent variants ─────────────────────────── */
+.p3-option-card.inv.active { border-color: #059669; box-shadow: 0 0 0 3px #05966920; }
+.p3-option-card.ret.active { border-color: #0284c7; box-shadow: 0 0 0 3px #0284c720; }
+.p3-option-card.adv.active { border-color: #7c3aed; box-shadow: 0 0 0 3px #7c3aed20; }
+
+.p3-rec-badge.inv { background: #059669; }
+.p3-rec-badge.ret { background: #0284c7; }
+.p3-rec-badge.adv { background: #7c3aed; }
+
+/* ── Option meta chip (non-premium info row on inv/ret/adv cards) ── */
+.p3-opt-meta-chip {
+  font-size: 10px; font-weight: 600; padding: 3px 9px;
+  border-radius: 20px; border: 1px solid currentColor;
+  margin-top: 4px; display: inline-block;
+}
+
+/* ── Option detail card domain variants ─────────────────────────── */
+.p3-opt-detail-card.inv { border-top: 3px solid #059669; }
+.p3-opt-detail-card.ret { border-top: 3px solid #0284c7; }
+.p3-opt-detail-card.adv { border-top: 3px solid #7c3aed; }
+
+/* ── Investment allocation row ──────────────────────────────────── */
+.p3-inv-allocation-row {
+  display: flex; gap: 16px; margin-top: 14px;
+  padding: 12px 16px; background: #f0f9ff; border-radius: 10px;
+  border: 1px solid #bae6fd;
+}
+.p3-inv-alloc-item { text-align: center; }
+.p3-inv-alloc-val { font-size: 22px; font-weight: 800; }
+.p3-inv-alloc-lbl { font-size: 10px; font-weight: 600; color: #6b7280; margin-top: 2px; }
+
+/* ── Investment proposal summary bar ────────────────────────────── */
+.p3-inv-summary-bar {
+  display: flex; gap: 20px; align-items: center;
+  padding: 12px 16px; background: linear-gradient(135deg,#d1fae5,#ecfdf5);
+  border-radius: 10px; border: 1px solid #a7f3d0; margin-bottom: 14px;
+}
+.p3-inv-sb-kpi { text-align: center; }
+.p3-inv-sb-val { font-size: 20px; font-weight: 800; color: #065f46; }
+.p3-inv-sb-lbl { font-size: 10px; font-weight: 600; color: #6b7280; }
+
+/* ── Retirement proposal summary bar ────────────────────────────── */
+.p3-ret-summary-bar {
+  display: flex; gap: 20px; align-items: center;
+  padding: 12px 16px; background: linear-gradient(135deg,#e0f2fe,#f0f9ff);
+  border-radius: 10px; border: 1px solid #bae6fd; margin-bottom: 14px;
+}
+.p3-ret-sb-kpi { text-align: center; }
+.p3-ret-sb-val { font-size: 20px; font-weight: 800; color: #0369a1; }
+.p3-ret-sb-lbl { font-size: 10px; font-weight: 600; color: #6b7280; }
+
+/* ── Retirement product + guaranteed period chips ───────────────── */
+.p3-ret-product-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; color: #0369a1;
+  padding: 6px 14px; border-radius: 8px;
+  background: #e0f2fe; border: 1px solid #bae6fd; margin-top: 10px;
+}
+.p3-ret-guaranteed-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; color: #065f46;
+  padding: 4px 12px; border-radius: 20px;
+  background: #d1fae5; border: 1px solid #a7f3d0;
+  margin: 8px 0 0 10px;
+}
+
+/* ── Advisory services list ─────────────────────────────────────── */
+.p3-adv-services-list {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 12px 0; padding: 14px; background: #faf5ff;
+  border-radius: 10px; border: 1px solid #ede9fe;
+}
+.p3-adv-service-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 500; color: #374151;
+}
+
+/* ── Advisory fee pills ─────────────────────────────────────────── */
+.p3-adv-fee-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; padding: 6px 14px;
+  border-radius: 8px; margin: 6px 6px 0 0;
+}
+.p3-adv-fee-pill.annual   { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+.p3-adv-fee-pill.one-time { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.p3-adv-fee-pill.aum      { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+
+/* ── "Send to Prospect" / Approval / Account Creation bar ───────── */
+.p3-send-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px 18px; border-radius: 10px;
+  margin-top: 16px; border: 1px solid transparent;
+}
+.p3-send-bar.insurance { background: #eff6ff; border-color: #bfdbfe; }
+.p3-send-bar.investments { background: #f0fdf4; border-color: #bbf7d0; }
+.p3-send-bar.retirement  { background: #f0f9ff; border-color: #bae6fd; }
+.p3-send-bar.advisory    { background: #faf5ff; border-color: #ddd6fe; }
+
+.p3-send-bar-left {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 600; color: #374151;
+}
+.p3-send-bar-left.sent     { color: #0369a1; }
+.p3-send-bar-left.approved { color: #065f46; }
+.p3-send-bar-left.created  { color: #5b21b6; }
+
+.p3-send-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; padding: 8px 18px;
+  border-radius: 8px; border: none; cursor: pointer; transition: all .18s ease;
+  white-space: nowrap;
+}
+.p3-send-btn.insurance   { background: #1e3a5f; color: #fff; }
+.p3-send-btn.investments { background: #059669; color: #fff; }
+.p3-send-btn.retirement  { background: #0284c7; color: #fff; }
+.p3-send-btn.advisory    { background: #7c3aed; color: #fff; }
+
+.p3-approve-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; padding: 8px 18px;
+  border-radius: 8px; border: 2px solid #16a34a; background: #fff;
+  color: #16a34a; cursor: pointer; transition: all .18s ease;
+}
+.p3-approve-btn:hover { background: #16a34a; color: #fff; }
+
+.p3-create-acct-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; padding: 8px 18px;
+  border-radius: 8px; border: none; cursor: pointer; transition: all .18s ease;
+  animation: p3-pulse-glow .8s ease-in-out infinite alternate;
+}
+.p3-create-acct-btn.insurance   { background: linear-gradient(135deg,#1e3a5f,#2d5299); color: #fff; }
+.p3-create-acct-btn.investments { background: linear-gradient(135deg,#059669,#047857); color: #fff; }
+.p3-create-acct-btn.retirement  { background: linear-gradient(135deg,#0284c7,#0369a1); color: #fff; }
+.p3-create-acct-btn.advisory    { background: linear-gradient(135deg,#7c3aed,#6d28d9); color: #fff; }
+
+@keyframes p3-pulse-glow {
+  from { box-shadow: 0 0 6px 0 rgba(100,100,255,.3); }
+  to   { box-shadow: 0 0 14px 4px rgba(100,100,255,.5); }
+}
+
+/* ── Empty state action row (multiple buttons) ──────────────────── */
+.p3-empty-action-row {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; margin-top: 16px;
+}
+
+/* ── Catalog chip extra types ────────────────────────────────────── */
+.p3-cat-chip.inv  { background: #d1fae5; color: #065f46; }
+.p3-cat-chip.ret  { background: #e0f2fe; color: #0369a1; }
+.p3-cat-chip.adv  { background: #ede9fe; color: #5b21b6; }
+.p3-cat-chip.edu  { background: #fef3c7; color: #92400e; }
+
+/* ── AI rec bar — "AI Proposal Assistant" label update ─────────── */
+.p3-ai-rec-label { font-weight: 700; font-size: 12px; color: #1e3a5f; letter-spacing: .3px; }
+
+/* END PASS 7 */

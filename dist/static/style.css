@@ -44862,3 +44862,978 @@ kbd {
   .ov-panels-row { grid-template-columns: 1fr; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   FNOL BAR + STP AUTO-ADJUDICATION PANEL
+   Classes: ov-fnol-* · ov-stp-*
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────────────────────
+   FNOL Quick-Launch Bar
+   ──────────────────────────────────────────────────────────────── */
+.ov-fnol-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(135deg, #003087 0%, #0052cc 60%, #1d6fe8 100%);
+  border-radius: 14px;
+  padding: 18px 24px;
+  box-shadow: 0 4px 16px rgba(0,48,135,0.25);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.ov-fnol-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 200px;
+}
+.ov-fnol-icon {
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  color: #fff;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+}
+.ov-fnol-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.ov-fnol-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.ov-fnol-bar-right {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.ov-fnol-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.ov-fnol-btn.primary {
+  background: #fff;
+  color: #003087;
+  border-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.ov-fnol-btn.primary:hover {
+  background: #f0f6ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+.ov-fnol-btn.secondary {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border-color: rgba(255,255,255,0.35);
+}
+.ov-fnol-btn.secondary:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   STP — Full Panel
+   ──────────────────────────────────────────────────────────────── */
+.ov-stp-panel {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+/* STP Header */
+.ov-stp-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef9c3 100%);
+  flex-wrap: wrap;
+}
+.ov-stp-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 200px;
+}
+.ov-stp-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(245,158,11,0.35);
+}
+.ov-stp-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ov-stp-live-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 9px;
+  border-radius: 20px;
+  border: 1px solid #bbf7d0;
+  animation: pulse-green 2s infinite;
+}
+.ov-stp-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+/* STP Header Stats */
+.ov-stp-header-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #fff;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.ov-stp-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 18px;
+  gap: 2px;
+  border-right: 1px solid #fde68a;
+}
+.ov-stp-stat:last-child { border-right: none; }
+.ov-stp-stat-val {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+.ov-stp-stat-val.green  { color: #16a34a; }
+.ov-stp-stat-val.blue   { color: #2563eb; }
+.ov-stp-stat-val.purple { color: #9333ea; }
+.ov-stp-stat-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.ov-stp-collapse-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.ov-stp-collapse-btn:hover { background: #f1f5f9; color: #1e293b; }
+
+/* STP Body */
+.ov-stp-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* STP Claim Card */
+.ov-stp-claim {
+  display: flex;
+  gap: 20px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1.5px solid #6ee7b7;
+  border-radius: 12px;
+  padding: 18px 20px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.ov-stp-claim-info { flex: 1; min-width: 200px; }
+.ov-stp-claim-id {
+  font-size: 13px;
+  font-weight: 800;
+  color: #065f46;
+  font-family: monospace;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ov-stp-claim-id::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+}
+.ov-stp-claim-client {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+/* STP checklist */
+.ov-stp-criteria {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+@media (max-width: 680px) { .ov-stp-criteria { grid-template-columns: 1fr; } }
+
+.ov-stp-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #374151;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.ov-stp-check.ok {
+  background: rgba(255,255,255,0.7);
+  color: #166534;
+}
+.ov-stp-check.ok i { color: #16a34a; font-size: 13px; flex-shrink: 0; }
+.ov-stp-check.fail {
+  background: rgba(255,241,242,0.8);
+  color: #b91c1c;
+}
+.ov-stp-check.fail i { color: #ef4444; font-size: 13px; flex-shrink: 0; }
+
+/* STP Claim Right — confidence dial + actions */
+.ov-stp-claim-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.ov-stp-confidence-dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: conic-gradient(#16a34a 0% 97%, #d1fae5 97% 100%);
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #6ee7b7, 0 4px 16px rgba(22,163,74,0.25);
+  position: relative;
+}
+.ov-stp-confidence-dial::after {
+  content: '';
+  position: absolute;
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: #fff;
+}
+.ov-stp-conf-num {
+  font-size: 20px;
+  font-weight: 900;
+  color: #15803d;
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+}
+.ov-stp-conf-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1;
+}
+
+/* STP Action buttons */
+.ov-stp-claim-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.ov-stp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.ov-stp-btn.approve {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  border-color: #16a34a;
+  box-shadow: 0 3px 10px rgba(22,163,74,0.35);
+}
+.ov-stp-btn.approve:hover {
+  background: linear-gradient(135deg, #15803d, #14532d);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(22,163,74,0.45);
+}
+.ov-stp-btn.secondary {
+  background: #fff;
+  color: #374151;
+  border-color: #d1d5db;
+}
+.ov-stp-btn.secondary:hover { background: #f1f5f9; border-color: #94a3b8; }
+
+/* ────────────────────────────────────────────────────────────────
+   STP — Ineligible / Blockers Row
+   ──────────────────────────────────────────────────────────────── */
+.ov-stp-ineligible-row {
+  background: #fff8f0;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ov-stp-ineligible-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ov-stp-ineligible-title i { color: #f59e0b; }
+
+.ov-stp-blockers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ov-stp-blocker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  background: #fff;
+  border: 1px solid #fde68a;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.ov-stp-blocker::before {
+  content: '⚠';
+  font-size: 12px;
+  color: #d97706;
+  flex-shrink: 0;
+}
+.ov-stp-blocker-id {
+  font-weight: 700;
+  color: #1e293b;
+  font-family: monospace;
+  font-size: 11px;
+  background: #fef3c7;
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.ov-stp-blocker-reason {
+  color: #78350f;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .ov-fnol-bar { flex-direction: column; align-items: flex-start; }
+  .ov-stp-header { flex-direction: column; align-items: flex-start; }
+  .ov-stp-claim { flex-direction: column; }
+  .ov-stp-claim-right { flex-direction: row; width: 100%; justify-content: space-between; align-items: center; }
+  .ov-stp-claim-actions { flex-direction: row; }
+  .ov-stp-header-stats { flex-wrap: wrap; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FNA WIZARD — Pass 4: 4-card domain grid + CRM info chip
+   Appended 2026-05-16
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 4-card domain grid (2×2 layout) ─────────────────────────────────── */
+.fna-domain-grid.fna-domain-grid-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Ensure each card fills its cell cleanly */
+.fna-domain-grid.fna-domain-grid-4 .fna-domain-card {
+  min-width: 0;       /* prevent grid blowout */
+  width: 100%;
+}
+
+/* On narrow viewports stack to single column */
+@media (max-width: 640px) {
+  .fna-domain-grid.fna-domain-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── CRM info chip ────────────────────────────────────────────────────── */
+.fna-crm-info-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1.5px solid #6ee7b7;
+  border-radius: 10px;
+  margin-top: 10px;
+  animation: fna-chip-fadein 0.25s ease;
+}
+
+@keyframes fna-chip-fadein {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fna-crm-chip-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #059669;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.fna-crm-chip-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.fna-crm-chip-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #064e3b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fna-crm-chip-meta {
+  font-size: 12px;
+  color: #047857;
+  margin-top: 2px;
+}
+
+.fna-crm-chip-badge {
+  background: #059669;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+/* ── Ensure Investments card icon colour renders correctly ──────────── */
+#fna-dom-investments .fna-dom-icon {
+  background: #059669;
+}
+
+/* ── Multi-select: allow multiple .selected cards simultaneously ─────── */
+/* The JS already handles array-based multi-select.
+   These rules make sure selected state is purely additive (no exclusion). */
+.fna-domain-card.selected {
+  border-color: #003087;
+  box-shadow: 0 0 0 2px rgba(0,48,135,0.18), 0 4px 14px rgba(0,48,135,0.10);
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+}
+
+.fna-domain-card.selected .fna-dom-check {
+  opacity: 1;
+  color: #003087;
+}
+
+/* Investment-domain selected accent in green to match its brand colour */
+#fna-dom-investments.selected {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5,150,105,0.18), 0 4px 14px rgba(5,150,105,0.10);
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+#fna-dom-investments.selected .fna-dom-check {
+  color: #059669;
+}
+
+/* Retirement selected accent */
+#fna-dom-retirement.selected {
+  border-color: #0891b2;
+  box-shadow: 0 0 0 2px rgba(8,145,178,0.18), 0 4px 14px rgba(8,145,178,0.10);
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+}
+
+#fna-dom-retirement.selected .fna-dom-check {
+  color: #0891b2;
+}
+
+/* Advisory selected accent */
+#fna-dom-advisory.selected {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(124,58,237,0.18), 0 4px 14px rgba(124,58,237,0.10);
+  background: linear-gradient(135deg, #faf5ff, #ede9fe);
+}
+
+#fna-dom-advisory.selected .fna-dom-check {
+  color: #7c3aed;
+}
+
+/* ── "Select at least one domain" hint row ──────────────────────────── */
+.fna-dom-none-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   END Pass 4
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FNA WIZARD — Pass 5: Advisory grouped tags + editor domain pills
+   Appended 2026-05-16
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Advisory grouped sub-item tags ────────────────────────────────── */
+.fna-dom-tags-grouped {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.fna-dom-tag-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fna-dom-tag-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 0 2px;
+}
+
+/* Use existing .fna-dom-tags inside the group */
+.fna-dom-tag-group .fna-dom-tags {
+  margin-top: 0;
+}
+
+/* ── FNA editor header domain pills ────────────────────────────────── */
+#fna-ed-domain-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.fna-ed-domain-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  opacity: 0.92;
+}
+
+.fna-ed-domain-pill i {
+  font-size: 10px;
+}
+
+/* ── Hidden nav tab: don't push layout when tabs collapse ───────────── */
+.fna-ed-nav-btn[style*="display: none"],
+.fna-ed-nav-btn[style*="display:none"] {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   END Pass 5
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FNA WIZARD — Pass 6: Investments domain badge/chip + avatar colours
+   + corrected chip colours for all 4 domains
+   Appended 2026-05-16
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── FNA card domain badges — Investments (new) ─────────────────────── */
+.fna-domain-badge.inv {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+/* ── FNA card product chips — all 4 domain colours ─────────────────── */
+/* Insurance — navy/blue */
+.fna-chip.ins {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* Investments — green */
+.fna-chip.inv {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Retirement — cyan/teal */
+.fna-chip.ret {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+/* Advisory — purple */
+.fna-chip.adv {
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
+/* Warning/gap chip */
+.fna-chip.warn {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* ── FNA card avatar colours (per-person initials backgrounds) ───────── */
+.fna-av-ar { background: linear-gradient(135deg, #003087, #1d6fe8); }  /* Alex Rivera      — NYL navy  */
+.fna-av-nf { background: linear-gradient(135deg, #059669, #10b981); }  /* Nancy Foster     — green     */
+.fna-av-pn { background: linear-gradient(135deg, #0891b2, #06b6d4); }  /* Patricia Nguyen  — cyan      */
+.fna-av-jw { background: linear-gradient(135deg, #7c3aed, #a855f7); }  /* James Whitfield  — purple    */
+.fna-av-rc { background: linear-gradient(135deg, #d97706, #f59e0b); }  /* Robert Chen      — amber     */
+.fna-av-lm { background: linear-gradient(135deg, #be185d, #ec4899); }  /* Linda Morrison   — rose/pink */
+
+/* ── Urgent progress bar fill variant ───────────────────────────────── */
+.fna-prog-fill.urgent { background: linear-gradient(90deg, #dc2626, #ef4444); }
+
+/* ── Urgent continue button variant ─────────────────────────────────── */
+.fna-foot-btn.urgent {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+.fna-foot-btn.urgent:hover { background: #991b1b; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   END Pass 6
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════
+   PASS 7 — Product Proposals Hub: Domain tabs, proposal modals,
+             prospect domain badges, action buttons, send/approve bars
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Domain badges in prospect card ────────────────────────────── */
+.p3-pc-domains {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  padding: 6px 14px 2px;
+}
+.p3-pc-domain-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; letter-spacing: .3px;
+  padding: 2px 8px; border-radius: 20px;
+  border: 1px solid transparent;
+}
+.p3-pc-domain-badge.ins { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.p3-pc-domain-badge.inv { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+.p3-pc-domain-badge.ret { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+.p3-pc-domain-badge.adv { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
+
+/* ── Domain-aware action buttons in panel header ────────────────── */
+.p3-domain-action-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600;
+  padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
+  transition: all .18s ease;
+}
+.p3-domain-action-btn.ins  { background: #1e3a5f; color: #fff; }
+.p3-domain-action-btn.ins:hover  { background: #2d5299; }
+.p3-domain-action-btn.inv  { background: #059669; color: #fff; }
+.p3-domain-action-btn.inv:hover  { background: #047857; }
+.p3-domain-action-btn.ret  { background: #0284c7; color: #fff; }
+.p3-domain-action-btn.ret:hover  { background: #0369a1; }
+.p3-domain-action-btn.adv  { background: #7c3aed; color: #fff; }
+.p3-domain-action-btn.adv:hover  { background: #6d28d9; }
+
+/* ── Domain tabs below section bar ─────────────────────────────── */
+.p3-domain-tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  padding: 10px 16px 0;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+.p3-domain-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 8px 16px;
+  border: 1px solid #e5e7eb; border-bottom: none;
+  border-radius: 8px 8px 0 0; background: #f9fafb; color: #6b7280;
+  cursor: pointer; transition: all .18s ease; position: relative; bottom: -2px;
+}
+.p3-domain-tab:hover { background: #f3f4f6; color: #374151; }
+.p3-domain-tab.active { color: #fff; border-color: transparent; z-index: 1; }
+.p3-domain-tab.active.ins { background: #1e3a5f; }
+.p3-domain-tab.active.inv { background: #059669; }
+.p3-domain-tab.active.ret { background: #0284c7; }
+.p3-domain-tab.active.adv { background: #7c3aed; }
+
+/* ── Domain section label (within tab content) ──────────────────── */
+.p3-domain-section-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; padding: 6px 14px;
+  border-radius: 6px; margin: 0 0 14px;
+}
+.p3-domain-section-label.ins { background: #dbeafe; color: #1e40af; }
+.p3-domain-section-label.inv { background: #d1fae5; color: #065f46; }
+.p3-domain-section-label.ret { background: #e0f2fe; color: #0369a1; }
+.p3-domain-section-label.adv { background: #ede9fe; color: #5b21b6; }
+
+/* ── Overlay header variants for new modals ─────────────────────── */
+.p3-overlay-header.ret  { background: linear-gradient(135deg,#0284c7,#0369a1); color: #fff; }
+.p3-overlay-header.inv  { background: linear-gradient(135deg,#059669,#047857); color: #fff; }
+.p3-overlay-header.adv  { background: linear-gradient(135deg,#7c3aed,#6d28d9); color: #fff; }
+
+/* ── Run button domain variants ─────────────────────────────────── */
+.p3-ie-run-btn.ret { background: linear-gradient(135deg,#0284c7,#0369a1); }
+.p3-ie-run-btn.inv { background: linear-gradient(135deg,#059669,#047857); }
+.p3-ie-run-btn.adv { background: linear-gradient(135deg,#7c3aed,#6d28d9); }
+
+/* ── Result option domain variants ─────────────────────────────── */
+.p3-ie-result-option.ret { border-left: 3px solid #0284c7; }
+.p3-ie-result-option.inv { border-left: 3px solid #059669; }
+.p3-ie-result-option.adv { border-left: 3px solid #7c3aed; }
+
+.p3-ie-load-btn.ret { background: linear-gradient(135deg,#0284c7,#0369a1); }
+.p3-ie-load-btn.inv { background: linear-gradient(135deg,#059669,#047857); }
+.p3-ie-load-btn.adv { background: linear-gradient(135deg,#7c3aed,#6d28d9); }
+
+/* ── Option card domain accent variants ─────────────────────────── */
+.p3-option-card.inv.active { border-color: #059669; box-shadow: 0 0 0 3px #05966920; }
+.p3-option-card.ret.active { border-color: #0284c7; box-shadow: 0 0 0 3px #0284c720; }
+.p3-option-card.adv.active { border-color: #7c3aed; box-shadow: 0 0 0 3px #7c3aed20; }
+
+.p3-rec-badge.inv { background: #059669; }
+.p3-rec-badge.ret { background: #0284c7; }
+.p3-rec-badge.adv { background: #7c3aed; }
+
+/* ── Option meta chip (non-premium info row on inv/ret/adv cards) ── */
+.p3-opt-meta-chip {
+  font-size: 10px; font-weight: 600; padding: 3px 9px;
+  border-radius: 20px; border: 1px solid currentColor;
+  margin-top: 4px; display: inline-block;
+}
+
+/* ── Option detail card domain variants ─────────────────────────── */
+.p3-opt-detail-card.inv { border-top: 3px solid #059669; }
+.p3-opt-detail-card.ret { border-top: 3px solid #0284c7; }
+.p3-opt-detail-card.adv { border-top: 3px solid #7c3aed; }
+
+/* ── Investment allocation row ──────────────────────────────────── */
+.p3-inv-allocation-row {
+  display: flex; gap: 16px; margin-top: 14px;
+  padding: 12px 16px; background: #f0f9ff; border-radius: 10px;
+  border: 1px solid #bae6fd;
+}
+.p3-inv-alloc-item { text-align: center; }
+.p3-inv-alloc-val { font-size: 22px; font-weight: 800; }
+.p3-inv-alloc-lbl { font-size: 10px; font-weight: 600; color: #6b7280; margin-top: 2px; }
+
+/* ── Investment proposal summary bar ────────────────────────────── */
+.p3-inv-summary-bar {
+  display: flex; gap: 20px; align-items: center;
+  padding: 12px 16px; background: linear-gradient(135deg,#d1fae5,#ecfdf5);
+  border-radius: 10px; border: 1px solid #a7f3d0; margin-bottom: 14px;
+}
+.p3-inv-sb-kpi { text-align: center; }
+.p3-inv-sb-val { font-size: 20px; font-weight: 800; color: #065f46; }
+.p3-inv-sb-lbl { font-size: 10px; font-weight: 600; color: #6b7280; }
+
+/* ── Retirement proposal summary bar ────────────────────────────── */
+.p3-ret-summary-bar {
+  display: flex; gap: 20px; align-items: center;
+  padding: 12px 16px; background: linear-gradient(135deg,#e0f2fe,#f0f9ff);
+  border-radius: 10px; border: 1px solid #bae6fd; margin-bottom: 14px;
+}
+.p3-ret-sb-kpi { text-align: center; }
+.p3-ret-sb-val { font-size: 20px; font-weight: 800; color: #0369a1; }
+.p3-ret-sb-lbl { font-size: 10px; font-weight: 600; color: #6b7280; }
+
+/* ── Retirement product + guaranteed period chips ───────────────── */
+.p3-ret-product-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; color: #0369a1;
+  padding: 6px 14px; border-radius: 8px;
+  background: #e0f2fe; border: 1px solid #bae6fd; margin-top: 10px;
+}
+.p3-ret-guaranteed-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; color: #065f46;
+  padding: 4px 12px; border-radius: 20px;
+  background: #d1fae5; border: 1px solid #a7f3d0;
+  margin: 8px 0 0 10px;
+}
+
+/* ── Advisory services list ─────────────────────────────────────── */
+.p3-adv-services-list {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 12px 0; padding: 14px; background: #faf5ff;
+  border-radius: 10px; border: 1px solid #ede9fe;
+}
+.p3-adv-service-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 500; color: #374151;
+}
+
+/* ── Advisory fee pills ─────────────────────────────────────────── */
+.p3-adv-fee-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; padding: 6px 14px;
+  border-radius: 8px; margin: 6px 6px 0 0;
+}
+.p3-adv-fee-pill.annual   { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+.p3-adv-fee-pill.one-time { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.p3-adv-fee-pill.aum      { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+
+/* ── "Send to Prospect" / Approval / Account Creation bar ───────── */
+.p3-send-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px 18px; border-radius: 10px;
+  margin-top: 16px; border: 1px solid transparent;
+}
+.p3-send-bar.insurance { background: #eff6ff; border-color: #bfdbfe; }
+.p3-send-bar.investments { background: #f0fdf4; border-color: #bbf7d0; }
+.p3-send-bar.retirement  { background: #f0f9ff; border-color: #bae6fd; }
+.p3-send-bar.advisory    { background: #faf5ff; border-color: #ddd6fe; }
+
+.p3-send-bar-left {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 600; color: #374151;
+}
+.p3-send-bar-left.sent     { color: #0369a1; }
+.p3-send-bar-left.approved { color: #065f46; }
+.p3-send-bar-left.created  { color: #5b21b6; }
+
+.p3-send-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; padding: 8px 18px;
+  border-radius: 8px; border: none; cursor: pointer; transition: all .18s ease;
+  white-space: nowrap;
+}
+.p3-send-btn.insurance   { background: #1e3a5f; color: #fff; }
+.p3-send-btn.investments { background: #059669; color: #fff; }
+.p3-send-btn.retirement  { background: #0284c7; color: #fff; }
+.p3-send-btn.advisory    { background: #7c3aed; color: #fff; }
+
+.p3-approve-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; padding: 8px 18px;
+  border-radius: 8px; border: 2px solid #16a34a; background: #fff;
+  color: #16a34a; cursor: pointer; transition: all .18s ease;
+}
+.p3-approve-btn:hover { background: #16a34a; color: #fff; }
+
+.p3-create-acct-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; padding: 8px 18px;
+  border-radius: 8px; border: none; cursor: pointer; transition: all .18s ease;
+  animation: p3-pulse-glow .8s ease-in-out infinite alternate;
+}
+.p3-create-acct-btn.insurance   { background: linear-gradient(135deg,#1e3a5f,#2d5299); color: #fff; }
+.p3-create-acct-btn.investments { background: linear-gradient(135deg,#059669,#047857); color: #fff; }
+.p3-create-acct-btn.retirement  { background: linear-gradient(135deg,#0284c7,#0369a1); color: #fff; }
+.p3-create-acct-btn.advisory    { background: linear-gradient(135deg,#7c3aed,#6d28d9); color: #fff; }
+
+@keyframes p3-pulse-glow {
+  from { box-shadow: 0 0 6px 0 rgba(100,100,255,.3); }
+  to   { box-shadow: 0 0 14px 4px rgba(100,100,255,.5); }
+}
+
+/* ── Empty state action row (multiple buttons) ──────────────────── */
+.p3-empty-action-row {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; margin-top: 16px;
+}
+
+/* ── Catalog chip extra types ────────────────────────────────────── */
+.p3-cat-chip.inv  { background: #d1fae5; color: #065f46; }
+.p3-cat-chip.ret  { background: #e0f2fe; color: #0369a1; }
+.p3-cat-chip.adv  { background: #ede9fe; color: #5b21b6; }
+.p3-cat-chip.edu  { background: #fef3c7; color: #92400e; }
+
+/* ── AI rec bar — "AI Proposal Assistant" label update ─────────── */
+.p3-ai-rec-label { font-weight: 700; font-size: 12px; color: #1e3a5f; letter-spacing: .3px; }
+
+/* END PASS 7 */
