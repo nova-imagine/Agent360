@@ -45300,3 +45300,160 @@ kbd {
   .ov-stp-header-stats { flex-wrap: wrap; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FNA WIZARD — Pass 4: 4-card domain grid + CRM info chip
+   Appended 2026-05-16
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 4-card domain grid (2×2 layout) ─────────────────────────────────── */
+.fna-domain-grid.fna-domain-grid-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Ensure each card fills its cell cleanly */
+.fna-domain-grid.fna-domain-grid-4 .fna-domain-card {
+  min-width: 0;       /* prevent grid blowout */
+  width: 100%;
+}
+
+/* On narrow viewports stack to single column */
+@media (max-width: 640px) {
+  .fna-domain-grid.fna-domain-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── CRM info chip ────────────────────────────────────────────────────── */
+.fna-crm-info-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1.5px solid #6ee7b7;
+  border-radius: 10px;
+  margin-top: 10px;
+  animation: fna-chip-fadein 0.25s ease;
+}
+
+@keyframes fna-chip-fadein {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fna-crm-chip-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #059669;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.fna-crm-chip-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.fna-crm-chip-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #064e3b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fna-crm-chip-meta {
+  font-size: 12px;
+  color: #047857;
+  margin-top: 2px;
+}
+
+.fna-crm-chip-badge {
+  background: #059669;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+/* ── Ensure Investments card icon colour renders correctly ──────────── */
+#fna-dom-investments .fna-dom-icon {
+  background: #059669;
+}
+
+/* ── Multi-select: allow multiple .selected cards simultaneously ─────── */
+/* The JS already handles array-based multi-select.
+   These rules make sure selected state is purely additive (no exclusion). */
+.fna-domain-card.selected {
+  border-color: #003087;
+  box-shadow: 0 0 0 2px rgba(0,48,135,0.18), 0 4px 14px rgba(0,48,135,0.10);
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+}
+
+.fna-domain-card.selected .fna-dom-check {
+  opacity: 1;
+  color: #003087;
+}
+
+/* Investment-domain selected accent in green to match its brand colour */
+#fna-dom-investments.selected {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5,150,105,0.18), 0 4px 14px rgba(5,150,105,0.10);
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+#fna-dom-investments.selected .fna-dom-check {
+  color: #059669;
+}
+
+/* Retirement selected accent */
+#fna-dom-retirement.selected {
+  border-color: #0891b2;
+  box-shadow: 0 0 0 2px rgba(8,145,178,0.18), 0 4px 14px rgba(8,145,178,0.10);
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+}
+
+#fna-dom-retirement.selected .fna-dom-check {
+  color: #0891b2;
+}
+
+/* Advisory selected accent */
+#fna-dom-advisory.selected {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(124,58,237,0.18), 0 4px 14px rgba(124,58,237,0.10);
+  background: linear-gradient(135deg, #faf5ff, #ede9fe);
+}
+
+#fna-dom-advisory.selected .fna-dom-check {
+  color: #7c3aed;
+}
+
+/* ── "Select at least one domain" hint row ──────────────────────────── */
+.fna-dom-none-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   END Pass 4
+   ═══════════════════════════════════════════════════════════════════════ */

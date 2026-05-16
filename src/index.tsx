@@ -14791,18 +14791,29 @@ function FNADiscoveryPage() {
               <div class="fna-step-label">Step 1 of 3 — Select Client or Prospect</div>
               <div class="fna-field-group">
                 <label class="fna-label">Choose from existing CRM records</label>
-                <select class="fna-select" id="fna-wiz-client-select">
+                <select class="fna-select" id="fna-wiz-client-select" onchange="fnaClientSelectChange()">
                   <option value="">— Choose client / prospect —</option>
-                  <option value="alex">Alex Rivera (Lead — In Campaign)</option>
-                  <option value="nancy">Nancy Foster (Lead — Qualified)</option>
-                  <option value="patricia">Patricia Nguyen (Client — Active)</option>
-                  <option value="james">James Whitfield (Client — Active)</option>
-                  <option value="robert">Robert Chen (Client — Active)</option>
-                  <option value="diana">Diana Walsh (Lead — Responded)</option>
-                  <option value="thomas">Thomas Grant (Lead — Responded)</option>
+                  <option value="alex" data-fname="Alex" data-lname="Rivera" data-age="38" data-type="Lead">Alex Rivera (Lead — In Campaign)</option>
+                  <option value="nancy" data-fname="Nancy" data-lname="Foster" data-age="45" data-type="Lead">Nancy Foster (Lead — Qualified)</option>
+                  <option value="patricia" data-fname="Patricia" data-lname="Nguyen" data-age="52" data-type="Client">Patricia Nguyen (Client — Active)</option>
+                  <option value="james" data-fname="James" data-lname="Whitfield" data-age="61" data-type="Client">James Whitfield (Client — Active)</option>
+                  <option value="robert" data-fname="Robert" data-lname="Chen" data-age="47" data-type="Client">Robert Chen (Client — Active)</option>
+                  <option value="diana" data-fname="Diana" data-lname="Walsh" data-age="33" data-type="Lead">Diana Walsh (Lead — Responded)</option>
+                  <option value="thomas" data-fname="Thomas" data-lname="Grant" data-age="56" data-type="Lead">Thomas Grant (Lead — Responded)</option>
                 </select>
-                <div class="fna-or-line"><span>or enter manually</span></div>
-                <div class="fna-wiz-name-row">
+
+                {/* CRM info chip — shown when a CRM record is selected */}
+                <div class="fna-crm-info-chip" id="fna-crm-info-chip" style="display:none">
+                  <div class="fna-crm-chip-icon"><i class="fas fa-user-check"></i></div>
+                  <div class="fna-crm-chip-body">
+                    <div class="fna-crm-chip-name" id="fna-crm-chip-name"></div>
+                    <div class="fna-crm-chip-meta" id="fna-crm-chip-meta"></div>
+                  </div>
+                  <div class="fna-crm-chip-badge">CRM Record Loaded</div>
+                </div>
+
+                <div class="fna-or-line" id="fna-or-line"><span>or enter manually</span></div>
+                <div class="fna-wiz-name-row" id="fna-wiz-name-row">
                   <div class="fna-field-group" style="flex:1">
                     <label class="fna-label">First Name</label>
                     <input type="text" class="fna-input" id="fna-wiz-fname" placeholder="First name" />
@@ -14827,8 +14838,9 @@ function FNADiscoveryPage() {
             <div class="fna-wiz-panel" id="fna-wiz-panel-2" style="display:none">
               <div class="fna-step-label">Step 2 of 3 — Select Product Domains</div>
               <p class="fna-wiz-hint">Select all domains relevant to this client. The FNA fact-find sections will be tailored to match. You can update this at any time.</p>
-              <div class="fna-domain-grid">
+              <div class="fna-domain-grid fna-domain-grid-4">
 
+                {/* Card 1 — Insurance */}
                 <div class="fna-domain-card" id="fna-dom-insurance" onclick="fnaToggleDomain('insurance',this)">
                   <div class="fna-dom-icon" style="background:#003087"><i class="fas fa-shield-alt"></i></div>
                   <div class="fna-dom-body">
@@ -14841,18 +14853,33 @@ function FNADiscoveryPage() {
                   <div class="fna-dom-check"><i class="fas fa-check-circle"></i></div>
                 </div>
 
-                <div class="fna-domain-card" id="fna-dom-retirement" onclick="fnaToggleDomain('retirement',this)">
-                  <div class="fna-dom-icon" style="background:#0891b2"><i class="fas fa-umbrella-beach"></i></div>
+                {/* Card 2 — Investments (NEW) */}
+                <div class="fna-domain-card" id="fna-dom-investments" onclick="fnaToggleDomain('investments',this)">
+                  <div class="fna-dom-icon" style="background:#059669"><i class="fas fa-chart-line"></i></div>
                   <div class="fna-dom-body">
-                    <div class="fna-dom-title">Retirement</div>
-                    <div class="fna-dom-sub">Annuities · 401K rollover · income planning</div>
+                    <div class="fna-dom-title">Investments</div>
+                    <div class="fna-dom-sub">Annuities · Mutual Funds · ETFs · 529 Plans</div>
                     <div class="fna-dom-tags">
-                      <span>Deferred Annuity</span><span>Immediate Annuity</span><span>Fixed Indexed</span><span>Variable Annuity</span><span>401K Rollover</span>
+                      <span>Variable Annuity</span><span>Fixed Indexed Annuity</span><span>Hybrid Variable Annuity</span><span>Mutual Funds</span><span>ETFs</span><span>529 College Savings</span>
                     </div>
                   </div>
                   <div class="fna-dom-check"><i class="fas fa-check-circle"></i></div>
                 </div>
 
+                {/* Card 3 — Retirement (updated sub-items) */}
+                <div class="fna-domain-card" id="fna-dom-retirement" onclick="fnaToggleDomain('retirement',this)">
+                  <div class="fna-dom-icon" style="background:#0891b2"><i class="fas fa-umbrella-beach"></i></div>
+                  <div class="fna-dom-body">
+                    <div class="fna-dom-title">Retirement</div>
+                    <div class="fna-dom-sub">Immediate Income · Deferred Income Annuities</div>
+                    <div class="fna-dom-tags">
+                      <span>Guaranteed Lifetime</span><span>Lifetime Mutual</span><span>Guaranteed Period</span><span>Guaranteed Future</span><span>Future Mutual</span><span>Clear Income Advantage Fixed</span>
+                    </div>
+                  </div>
+                  <div class="fna-dom-check"><i class="fas fa-check-circle"></i></div>
+                </div>
+
+                {/* Card 4 — Advisory */}
                 <div class="fna-domain-card" id="fna-dom-advisory" onclick="fnaToggleDomain('advisory',this)">
                   <div class="fna-dom-icon" style="background:#7c3aed"><i class="fas fa-handshake"></i></div>
                   <div class="fna-dom-body">

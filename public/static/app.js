@@ -29301,21 +29301,65 @@ function fnaToggleDomain(domain, el) {
   }
 }
 
+// ── fnaClientSelectChange() — CRM select handler ──────────────────────
+// Called via onchange on #fna-wiz-client-select.
+// If a CRM record is chosen → hide manual entry, show populated chip.
+// If blank (manual) → show manual entry, hide chip.
+function fnaClientSelectChange() {
+  var sel      = document.getElementById('fna-wiz-client-select');
+  var chip     = document.getElementById('fna-crm-info-chip');
+  var orLine   = document.getElementById('fna-or-line');
+  var nameRow  = document.getElementById('fna-wiz-name-row');
+  var chipName = document.getElementById('fna-crm-chip-name');
+  var chipMeta = document.getElementById('fna-crm-chip-meta');
+
+  if (!sel) return;
+
+  var opt = sel.options[sel.selectedIndex];
+  var val = sel.value;
+
+  if (val && val !== '') {
+    // CRM record selected — populate chip, hide manual entry
+    var fname = opt.getAttribute('data-fname') || '';
+    var lname = opt.getAttribute('data-lname') || '';
+    var age   = opt.getAttribute('data-age')   || '';
+    var type  = opt.getAttribute('data-type')  || '';
+
+    if (chipName) chipName.textContent = fname + ' ' + lname;
+    if (chipMeta) chipMeta.textContent = 'Age ' + age + (type ? ' · ' + type : '');
+    if (chip)    chip.style.display    = 'flex';
+    if (orLine)  orLine.style.display  = 'none';
+    if (nameRow) nameRow.style.display = 'none';
+  } else {
+    // Blank / manual — hide chip, show manual entry
+    if (chip)    chip.style.display    = 'none';
+    if (orLine)  orLine.style.display  = '';
+    if (nameRow) nameRow.style.display = '';
+  }
+}
+
 // ── fnaWizCreate() — finalize wizard and open FNA editor ───────────────
 function fnaWizCreate() {
   // Gather Step 1 inputs
   var clientSel  = document.getElementById('fna-wiz-client-select');
-  var nameEl     = document.getElementById('fna-wiz-name');
+  var fnameEl    = document.getElementById('fna-wiz-fname');
+  var lnameEl    = document.getElementById('fna-wiz-lname');
   var ageEl      = document.getElementById('fna-wiz-age');
-  var lifeEvent  = document.getElementById('fna-wiz-life-event');
-  var meetDate   = document.getElementById('fna-wiz-meet-date');
-  var meetType   = document.getElementById('fna-wiz-meet-type');
-  var meetLoc    = document.getElementById('fna-wiz-meet-loc');
+  var lifeEvent  = document.getElementById('fna-wiz-event');
+  var meetDate   = document.getElementById('fna-wiz-meeting-date');
+  var meetType   = document.getElementById('fna-wiz-meeting-type');
+  var meetLoc    = document.getElementById('fna-wiz-meeting-loc');
   var notesEl    = document.getElementById('fna-wiz-notes');
 
-  var clientName = (clientSel && clientSel.value && clientSel.value !== '__manual__')
-    ? clientSel.options[clientSel.selectedIndex].text
-    : (nameEl ? nameEl.value.trim() : '');
+  // Resolve client name: CRM record takes priority over manual entry
+  var clientName = '';
+  if (clientSel && clientSel.value && clientSel.value !== '') {
+    clientName = clientSel.options[clientSel.selectedIndex].text;
+  } else {
+    var fn = fnameEl ? fnameEl.value.trim() : '';
+    var ln = lnameEl ? lnameEl.value.trim() : '';
+    clientName = (fn + ' ' + ln).trim();
+  }
 
   if (!clientName) {
     showToast('Please select or enter a client name.', 'warn');
@@ -29362,6 +29406,22 @@ function openFNAWizard() {
   // Reset none-row
   var nr = document.getElementById('fna-dom-none-row');
   if (nr) nr.style.display = 'flex';
+
+  // Reset Step 1 — CRM select back to blank, show manual entry, hide chip
+  var sel = document.getElementById('fna-wiz-client-select');
+  if (sel) sel.value = '';
+  var chip    = document.getElementById('fna-crm-info-chip');
+  var orLine  = document.getElementById('fna-or-line');
+  var nameRow = document.getElementById('fna-wiz-name-row');
+  if (chip)    chip.style.display    = 'none';
+  if (orLine)  orLine.style.display  = '';
+  if (nameRow) nameRow.style.display = '';
+
+  // Clear manual fields
+  ['fna-wiz-fname','fna-wiz-lname','fna-wiz-age'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
 }
 
 function closeFNAWizard() {
