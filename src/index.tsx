@@ -5837,6 +5837,10 @@ function ClaimsPage() {
           <i class="fas fa-check-circle"></i> Resolved &amp; Analytics
           <span class="pol-tab-count">14</span>
         </button>
+        <button class="pol-tab" id="clm-tab-subrogation" onclick="clmSwitchTab('subrogation')">
+          <i class="fas fa-undo-alt"></i> Subrogation &amp; Recovery
+          <span class="pol-tab-count pol-tab-count-green">3</span>
+        </button>
       </div>
 
       {/* ════════════════════════════════════════════════════════
@@ -6058,6 +6062,84 @@ function ClaimsPage() {
           </div>
         </div>
 
+        {/* ── FNOL Quick-Launch Bar ── */}
+        <div class="ov-fnol-bar">
+          <div class="ov-fnol-bar-left">
+            <div class="ov-fnol-icon"><i class="fas fa-plus-circle"></i></div>
+            <div>
+              <div class="ov-fnol-title">First Notice of Loss (FNOL)</div>
+              <div class="ov-fnol-sub">AI-guided wizard · 5 steps · Policy auto-match · IDP document extraction · Fraud pre-screen</div>
+            </div>
+          </div>
+          <div class="ov-fnol-bar-right">
+            <button class="ov-fnol-btn primary" onclick="openFileClaimWizard()">
+              <i class="fas fa-file-medical-alt"></i> File New Claim
+            </button>
+            <button class="ov-fnol-btn secondary" onclick="clmSwitchTab('active')">
+              <i class="fas fa-folder-open"></i> View All Claims
+            </button>
+          </div>
+        </div>
+
+        {/* ── STP Auto-Adjudication Engine ── */}
+        <div class="ov-stp-panel" id="ov-stp-panel">
+          <div class="ov-stp-header">
+            <div class="ov-stp-header-left">
+              <div class="ov-stp-icon"><i class="fas fa-bolt"></i></div>
+              <div>
+                <div class="ov-stp-title">Straight-Through Processing <span class="ov-stp-live-badge">● LIVE</span></div>
+                <div class="ov-stp-sub">AI auto-adjudication engine · Claims that meet all criteria can be approved without adjuster review</div>
+              </div>
+            </div>
+            <div class="ov-stp-header-stats">
+              <div class="ov-stp-stat"><span class="ov-stp-stat-val green">1</span><span class="ov-stp-stat-lbl">STP Eligible</span></div>
+              <div class="ov-stp-stat"><span class="ov-stp-stat-val blue">97%</span><span class="ov-stp-stat-lbl">AI Confidence</span></div>
+              <div class="ov-stp-stat"><span class="ov-stp-stat-val purple">~8 min</span><span class="ov-stp-stat-lbl">Est. Resolution</span></div>
+            </div>
+            <button class="ov-stp-collapse-btn" onclick="toggleSTPPanel(this)" title="Collapse"><i class="fas fa-chevron-up"></i></button>
+          </div>
+          <div class="ov-stp-body" id="ov-stp-body">
+
+            {/* STP Claim Card — James Whitfield LTC */}
+            <div class="ov-stp-claim">
+              <div class="ov-stp-claim-info">
+                <div class="ov-stp-claim-id">CLM-2026-0033</div>
+                <div class="ov-stp-claim-client"><div class="mini-avatar jw" style="width:24px;height:24px;font-size:10px">JW</div><span>James Whitfield · Long-term Care · $9,600</span></div>
+                <div class="ov-stp-criteria">
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Fraud score 8 — Clear</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Docs 100% complete (4/4)</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> No contestability window</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> No legal hold</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> SLA on track · 18d remaining</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> NLP confidence 97% — ADL threshold verified</div>
+                </div>
+              </div>
+              <div class="ov-stp-claim-right">
+                <div class="ov-stp-confidence-dial">
+                  <span class="ov-stp-conf-num">97</span>
+                  <span class="ov-stp-conf-lbl">AI Score</span>
+                </div>
+                <div class="ov-stp-claim-actions">
+                  <button class="ov-stp-btn approve" onclick="stpAutoApprove('CLM-2026-0033','James Whitfield','$9,600')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
+                  <button class="ov-stp-btn secondary" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review First</button>
+                </div>
+              </div>
+            </div>
+
+            {/* STP Ineligible — reason explainer row */}
+            <div class="ov-stp-ineligible-row">
+              <div class="ov-stp-ineligible-title"><i class="fas fa-info-circle"></i> Other claims not yet STP-eligible — blockers:</div>
+              <div class="ov-stp-blockers">
+                <div class="ov-stp-blocker"><span class="ov-stp-blocker-id">CLM-2026-0041</span> <span class="ov-stp-blocker-reason">Missing beneficiary ID docs (2/4 received)</span></div>
+                <div class="ov-stp-blocker"><span class="ov-stp-blocker-id">CLM-2026-0025</span> <span class="ov-stp-blocker-reason">Fraud score 78 — SIU review required</span></div>
+                <div class="ov-stp-blocker"><span class="ov-stp-blocker-id">CLM-2026-0028</span> <span class="ov-stp-blocker-reason">Terminal cert pending (ADB compassionate)</span></div>
+                <div class="ov-stp-blocker"><span class="ov-stp-blocker-id">CLM-2026-0035</span> <span class="ov-stp-blocker-reason">APS from physician outstanding</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>{/* end clm-panel-overview */}
 
       {/* ════════════════════════════════════════════════════════
@@ -6116,7 +6198,7 @@ function ClaimsPage() {
             <button class="btn btn-ai" onclick="openAITriageModal()">
               <i class="fas fa-brain"></i> AI Triage
             </button>
-            <button class="btn btn-primary" onclick="openFileClaimWizard()">
+            <button class="btn btn-ghost" onclick="clmSwitchTab('overview');setTimeout(function(){openFileClaimWizard();},150)" title="Go to Overview to file a new claim">
               <i class="fas fa-plus"></i> File Claim
             </button>
           </div>
@@ -6853,6 +6935,164 @@ function ClaimsPage() {
         </div>
 
       </div>{/* end clm-panel-resolved */}
+
+      {/* ════════════════════════════════════════════════════════
+          TAB 5 — SUBROGATION & RECOVERY
+          AI opportunity detection · tracking · recovery dashboard
+          ════════════════════════════════════════════════════════ */}
+      <div class="pol-tab-panel" id="clm-panel-subrogation" style="display:none">
+
+        {/* Header + KPIs */}
+        <div class="sub-header-row">
+          <div class="sub-header-left">
+            <div class="sub-header-icon"><i class="fas fa-undo-alt"></i></div>
+            <div>
+              <div class="sub-header-title">Subrogation &amp; Recovery Engine <span class="ov-live-badge">● LIVE</span></div>
+              <div class="sub-header-sub">AI scans every claim for third-party liability recovery potential · Estimated industry miss: $20B/year</div>
+            </div>
+          </div>
+          <div class="sub-kpi-row">
+            <div class="sub-kpi"><span class="sub-kpi-val green">$47,200</span><span class="sub-kpi-lbl">Recovered YTD</span></div>
+            <div class="sub-kpi-divider"></div>
+            <div class="sub-kpi"><span class="sub-kpi-val blue">$312,000</span><span class="sub-kpi-lbl">Identified Pipeline</span></div>
+            <div class="sub-kpi-divider"></div>
+            <div class="sub-kpi"><span class="sub-kpi-val amber">3</span><span class="sub-kpi-lbl">Active Cases</span></div>
+            <div class="sub-kpi-divider"></div>
+            <div class="sub-kpi"><span class="sub-kpi-val purple">15%</span><span class="sub-kpi-lbl">Recovery Rate</span></div>
+          </div>
+        </div>
+
+        {/* AI Opportunity Detection Banner */}
+        <div class="sub-ai-banner">
+          <div class="sub-ai-banner-left">
+            <i class="fas fa-robot sub-ai-icon"></i>
+            <div>
+              <div class="sub-ai-banner-title">AI Opportunity Detection — 3 Claims Flagged</div>
+              <div class="sub-ai-banner-sub">NLP scanned incident descriptions · Policy exclusions · Liability indicators · Third-party fault signals</div>
+            </div>
+          </div>
+          <button class="sub-ai-scan-btn" onclick="runSubrogationScan()"><i class="fas fa-sync-alt"></i> Re-Scan All Claims</button>
+        </div>
+
+        {/* Active Subrogation Cases */}
+        <div class="sub-section-title"><i class="fas fa-gavel"></i> Active Recovery Cases</div>
+        <div class="sub-cases-list">
+
+          {/* Case 1 — High value, demand sent */}
+          <div class="sub-case-card sub-case-high">
+            <div class="sub-case-header">
+              <div class="sub-case-id-block">
+                <span class="sub-case-id">SUB-2026-001</span>
+                <span class="sub-case-badge demand">Demand Sent</span>
+                <span class="sub-case-priority urgent">High Priority</span>
+              </div>
+              <div class="sub-case-amount">$250,000 <span class="sub-case-amount-lbl">potential recovery</span></div>
+            </div>
+            <div class="sub-case-body">
+              <div class="sub-case-grid">
+                <div class="sub-case-field"><span>Source Claim</span><strong>CLM-2026-0025 · Kevin Park · Death Benefit</strong></div>
+                <div class="sub-case-field"><span>Liable Party</span><strong>Third-party pharmaceutical manufacturer</strong></div>
+                <div class="sub-case-field"><span>Liability Basis</span><strong>Product liability — adverse drug interaction cited in medical certificate</strong></div>
+                <div class="sub-case-field"><span>Identified By</span><strong><i class="fas fa-robot" style="color:#7c3aed"></i> AI — NLP scanned medical certificate 2026-03-03</strong></div>
+                <div class="sub-case-field"><span>Demand Sent</span><strong>2026-03-15 · $250,000 · Reference: SUB-2026-001</strong></div>
+                <div class="sub-case-field"><span>Response Due</span><strong style="color:#dc2626">2026-04-15 · 0 days remaining</strong></div>
+              </div>
+            </div>
+            <div class="sub-case-actions">
+              <button class="sub-act-btn primary" onclick="openClaimModal('CLM-2026-0025','liability')"><i class="fas fa-gavel"></i> Liability Tab</button>
+              <button class="sub-act-btn secondary" onclick="p7Toast('&lt;i class=\'fas fa-envelope\'&gt;&lt;/i&gt; Escalation letter drafted — review before sending',2800)"><i class="fas fa-paper-plane"></i> Escalate</button>
+              <button class="sub-act-btn secondary" onclick="p7Toast('&lt;i class=\'fas fa-check-circle\'&gt;&lt;/i&gt; Recovery of $250,000 recorded',2800)"><i class="fas fa-check-circle"></i> Record Recovery</button>
+              <button class="sub-act-btn ghost" onclick="p7Toast('&lt;i class=\'fas fa-times-circle\'&gt;&lt;/i&gt; Case closed — no recovery',2500)"><i class="fas fa-times-circle"></i> Close No Recovery</button>
+            </div>
+          </div>
+
+          {/* Case 2 — Employer liability, negotiating */}
+          <div class="sub-case-card sub-case-medium">
+            <div class="sub-case-header">
+              <div class="sub-case-id-block">
+                <span class="sub-case-id">SUB-2026-002</span>
+                <span class="sub-case-badge negotiating">Negotiating</span>
+                <span class="sub-case-priority normal">Medium Priority</span>
+              </div>
+              <div class="sub-case-amount">$50,400 <span class="sub-case-amount-lbl">potential recovery</span></div>
+            </div>
+            <div class="sub-case-body">
+              <div class="sub-case-grid">
+                <div class="sub-case-field"><span>Source Claim</span><strong>CLM-2026-0035 · Maria Gonzalez · Disability Income</strong></div>
+                <div class="sub-case-field"><span>Liable Party</span><strong>Employer — workplace ergonomic injury (OSHA report filed)</strong></div>
+                <div class="sub-case-field"><span>Liability Basis</span><strong>Workers' compensation crossover — employer OSHA violation contributing to back injury</strong></div>
+                <div class="sub-case-field"><span>Identified By</span><strong><i class="fas fa-robot" style="color:#7c3aed"></i> AI — cross-referenced claim description with OSHA records 2026-03-25</strong></div>
+                <div class="sub-case-field"><span>Status</span><strong>Employer counsel acknowledged liability — negotiating settlement amount</strong></div>
+                <div class="sub-case-field"><span>Last Contact</span><strong>2026-04-08 · Counter-offer: $38,000</strong></div>
+              </div>
+            </div>
+            <div class="sub-case-actions">
+              <button class="sub-act-btn primary" onclick="openClaimModal('CLM-2026-0035','liability')"><i class="fas fa-gavel"></i> Liability Tab</button>
+              <button class="sub-act-btn secondary" onclick="p7Toast('&lt;i class=\'fas fa-comments\'&gt;&lt;/i&gt; Negotiation log updated',2500)"><i class="fas fa-edit"></i> Log Update</button>
+              <button class="sub-act-btn secondary" onclick="p7Toast('&lt;i class=\'fas fa-check-circle\'&gt;&lt;/i&gt; Counter-offer accepted — recovery recorded',2800)"><i class="fas fa-handshake"></i> Accept Counter</button>
+              <button class="sub-act-btn ghost" onclick="p7Toast('&lt;i class=\'fas fa-balance-scale\'&gt;&lt;/i&gt; Referred to legal for arbitration',2500)"><i class="fas fa-balance-scale"></i> Refer to Legal</button>
+            </div>
+          </div>
+
+          {/* Case 3 — Identified, not yet actioned */}
+          <div class="sub-case-card sub-case-new">
+            <div class="sub-case-header">
+              <div class="sub-case-id-block">
+                <span class="sub-case-id">SUB-2026-003</span>
+                <span class="sub-case-badge identified">AI Identified</span>
+                <span class="sub-case-priority normal">Medium Priority</span>
+              </div>
+              <div class="sub-case-amount">$11,600 <span class="sub-case-amount-lbl">potential recovery</span></div>
+            </div>
+            <div class="sub-case-body">
+              <div class="sub-case-grid">
+                <div class="sub-case-field"><span>Source Claim</span><strong>CLM-2026-0038 · Sandra Williams · Long-term Care</strong></div>
+                <div class="sub-case-field"><span>Liable Party</span><strong>Facility operator — care provider negligence contributing to condition deterioration</strong></div>
+                <div class="sub-case-field"><span>Liability Basis</span><strong>AI flagged sub-standard care documentation inconsistent with ADL assessment findings</strong></div>
+                <div class="sub-case-field"><span>Identified By</span><strong><i class="fas fa-robot" style="color:#7c3aed"></i> AI — NLP cross-match on care logs vs. billing records 2026-04-10</strong></div>
+                <div class="sub-case-field"><span>AI Confidence</span><strong style="color:#d97706">72% — Review recommended before action</strong></div>
+                <div class="sub-case-field"><span>Action Required</span><strong style="color:#d97706">Adjuster review — confirm liability basis before sending demand</strong></div>
+              </div>
+            </div>
+            <div class="sub-case-actions">
+              <button class="sub-act-btn primary" onclick="p7Toast('&lt;i class=\'fas fa-paper-plane\'&gt;&lt;/i&gt; Demand letter drafted — SUB-2026-003 moved to Demand Sent',2800)"><i class="fas fa-paper-plane"></i> Send Demand</button>
+              <button class="sub-act-btn secondary" onclick="openClaimModal('CLM-2026-0038','liability')"><i class="fas fa-gavel"></i> Review Liability</button>
+              <button class="sub-act-btn ghost" onclick="p7Toast('&lt;i class=\'fas fa-archive\'&gt;&lt;/i&gt; Case dismissed — insufficient basis',2500)"><i class="fas fa-archive"></i> Dismiss</button>
+            </div>
+          </div>
+
+        </div>{/* end sub-cases-list */}
+
+        {/* Recovery History */}
+        <div class="sub-section-title" style="margin-top:24px"><i class="fas fa-history"></i> Recovery History (Closed Cases)</div>
+        <div class="sub-recovered-table-wrap">
+          <table class="data-table" style="font-size:13px">
+            <thead>
+              <tr>
+                <th>Case ID</th><th>Source Claim</th><th>Liable Party</th><th>Claimed</th><th>Recovered</th><th>Recovery %</th><th>Closed</th><th>Outcome</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SUB-2025-018</td><td>CLM-2025-0198 · Sandra Williams</td><td>Auto insurer — at-fault driver</td>
+                <td>$62,000</td><td style="color:#059669;font-weight:700">$47,200</td><td style="color:#059669">76%</td><td>2025-12-22</td>
+                <td><span class="sub-outcome-badge success">Settled</span></td>
+              </tr>
+              <tr>
+                <td>SUB-2025-011</td><td>CLM-2025-0142 · Thomas Reed</td><td>Negligent contractor</td>
+                <td>$28,500</td><td style="color:#dc2626;font-weight:700">$0</td><td style="color:#dc2626">0%</td><td>2025-09-14</td>
+                <td><span class="sub-outcome-badge failed">No Recovery</span></td>
+              </tr>
+              <tr>
+                <td>SUB-2025-007</td><td>CLM-2025-0089 · Alicia Torres</td><td>Medical device manufacturer</td>
+                <td>$150,000</td><td style="color:#059669;font-weight:700">—</td><td style="color:#64748b">Pending</td><td>—</td>
+                <td><span class="sub-outcome-badge pending">In Litigation</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>{/* end clm-panel-subrogation */}
 
       {/* ── Claims Intelligence Full Report Modal ── */}
       <div class="detail-modal-overlay" id="ci-review-overlay" onclick="closeCIReviewModal()">

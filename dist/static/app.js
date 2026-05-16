@@ -35668,14 +35668,93 @@ function p7BuildClaimTabContent(claim, tab) {
       '</div>';
     }).join('') : '<div class="p7cm-empty-state"><i class="fas fa-dollar-sign"></i><p>No payments processed yet.</p></div>';
 
+    // ── Reserve AI Recommendation ──
+    var rawAmt = parseInt((claim.amount || '0').replace(/[^0-9]/g,'')) || 0;
+    var rawRes = parseInt((claim.reserveAmount || '0').replace(/[^0-9]/g,'')) || 0;
+    var aiResRec = Math.round(rawAmt * 1.08); // 8% IBNR buffer typical
+    var resGap   = rawRes - aiResRec;
+    var resAdequate = rawRes >= aiResRec;
+    var resGapAbs   = Math.abs(resGap);
+    var resGapFmt   = '$' + resGapAbs.toLocaleString();
+    var resAIColor  = resAdequate ? '#059669' : '#dc2626';
+    var resAIBg     = resAdequate ? '#d1fae5' : '#fee2e2';
+    var resAIIcon   = resAdequate ? 'fa-check-circle' : 'fa-exclamation-triangle';
+    var resAILabel  = resAdequate ? 'Reserve Adequate' : 'Reserve Deficiency Detected';
+    var resAIMsg    = resAdequate
+      ? 'Current reserve meets AI-recommended minimum (claim amount + 8% IBNR buffer). IFRS 17 / GAAP adequacy: PASS.'
+      : 'Current reserve is ' + resGapFmt + ' below AI recommendation. Risk of under-reserving. Adjust reserve before approving payout.';
+
+    // ── Reinsurance Notification ──
+    var reinsThreshold = 500000;
+    var needsReins = rawAmt >= reinsThreshold;
+    var reinsBanner = needsReins
+      ? '<div class="p7cm-reins-banner">' +
+          '<div class="p7cm-reins-banner-left">' +
+            '<div class="p7cm-reins-icon"><i class="fas fa-building"></i></div>' +
+            '<div>' +
+              '<div class="p7cm-reins-title"><i class="fas fa-exclamation-circle"></i> Reinsurance Treaty Threshold Exceeded</div>' +
+              '<div class="p7cm-reins-detail">Claim amount ' + claim.amount + ' exceeds $500,000 facultative reinsurance reporting threshold. ' +
+              'Reinsurer notification required within 30 days of FNOL per treaty terms.</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="p7cm-reins-actions">' +
+            '<button class="p7cm-reins-btn primary" onclick="p7NotifyReinsurer(\'' + claim.id + '\')"><i class="fas fa-paper-plane"></i> Notify Reinsurer</button>' +
+            '<button class="p7cm-reins-btn ghost" onclick="showToast(\'Reinsurance treaty details opened\',\'info\')"><i class="fas fa-file-contract"></i> Treaty Details</button>' +
+          '</div>' +
+        '</div>'
+      : '';
+
+    // ── Payment Method Selection ──
+    var payMethodHTML =
+      '<div class="p7cm-pay-method-section">' +
+        '<div class="p7cm-pay-history-title"><i class="fas fa-wallet"></i> Payment Method</div>' +
+        '<div class="p7cm-pay-method-grid">' +
+          '<div class="p7cm-pay-method-card" onclick="p7SelectPayMethod(this,\'ACH\')">' +
+            '<i class="fas fa-university"></i><div>ACH Transfer</div><div class="p7cm-pay-method-sub">1–3 business days</div>' +
+          '</div>' +
+          '<div class="p7cm-pay-method-card" onclick="p7SelectPayMethod(this,\'Wire\')">' +
+            '<i class="fas fa-bolt"></i><div>Wire Transfer</div><div class="p7cm-pay-method-sub">Same day</div>' +
+          '</div>' +
+          '<div class="p7cm-pay-method-card" onclick="p7SelectPayMethod(this,\'Check\')">' +
+            '<i class="fas fa-money-check-alt"></i><div>Paper Check</div><div class="p7cm-pay-method-sub">5–7 business days</div>' +
+          '</div>' +
+          '<div class="p7cm-pay-method-card" onclick="p7SelectPayMethod(this,\'Virtual Card\')">' +
+            '<i class="fas fa-credit-card"></i><div>Virtual Card</div><div class="p7cm-pay-method-sub">Instant</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
     return '<div class="p7cm-payments-panel">' +
       '<div class="p7cm-payments-header"><i class="fas fa-dollar-sign"></i> Payments & Reserve — ' + claim.id + '</div>' +
+
+      // Reinsurance banner (only if threshold exceeded)
+      reinsBanner +
+
+      // Reserve section with AI recommendation
       '<div class="p7cm-reserve-card">' +
         '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Reserve Amount</span><span class="p7cm-reserve-val reserve-amount">' + (claim.reserveAmount || 'Not set') + '</span></div>' +
         '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Reserve Status</span><span class="p7cm-reserve-val">' + (claim.reserveStatus || 'Pending') + '</span></div>' +
         '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Claim Amount</span><span class="p7cm-reserve-val">' + claim.amount + '</span></div>' +
         '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Coverage Limits</span><span class="p7cm-reserve-val">' + (claim.coverageLimits || '—') + '</span></div>' +
       '</div>' +
+
+      // AI Reserve Recommendation
+      '<div class="p7cm-reserve-ai-rec" style="background:' + resAIBg + ';border:1px solid ' + resAIColor + '40;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;gap:14px;align-items:flex-start">' +
+        '<i class="fas ' + resAIIcon + '" style="color:' + resAIColor + ';font-size:20px;margin-top:2px;flex-shrink:0"></i>' +
+        '<div style="flex:1">' +
+          '<div style="font-weight:700;color:' + resAIColor + ';margin-bottom:4px"><i class="fas fa-robot" style="font-size:12px;margin-right:4px"></i> AI Reserve Analysis — ' + resAILabel + '</div>' +
+          '<div style="color:#475569;font-size:13px;line-height:1.6">' + resAIMsg + '</div>' +
+          '<div style="margin-top:8px;font-size:12px;color:#64748b">' +
+            'AI Recommended Reserve: <strong style="color:' + resAIColor + '">$' + aiResRec.toLocaleString() + '</strong> &nbsp;·&nbsp; ' +
+            'Based on: claim amount + 8% IBNR buffer · comparable claim history · fraud score · SLA pressure' +
+          '</div>' +
+        '</div>' +
+        (!resAdequate ? '<button class="p7cm-act-btn secondary" style="white-space:nowrap;align-self:center" onclick="showToast(\'Reserve adjusted to AI-recommended amount: $' + aiResRec.toLocaleString() + '\',\'success\')"><i class="fas fa-edit"></i> Adjust to AI Rec</button>' : '') +
+      '</div>' +
+
+      // Payment method selection
+      payMethodHTML +
+
       '<div class="p7cm-pay-history-title"><i class="fas fa-history"></i> Payment History</div>' +
       '<div class="p7cm-pay-list">' + payRows + '</div>' +
       '<div class="p7cm-pay-actions">' +
@@ -35979,6 +36058,59 @@ function p7AddTimelineNote(claimId) {
   if (!note) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter a note', 2000); return; }
   p7Toast('<i class="fas fa-check-circle"></i> Timeline note added to ' + claimId, 2000);
   if (input) input.value = '';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STP — STRAIGHT-THROUGH PROCESSING
+   ═══════════════════════════════════════════════════════════════════ */
+function stpAutoApprove(claimId, clientName, amount) {
+  p7Toast('<i class="fas fa-bolt"></i> STP Auto-Approval initiated for ' + claimId + ' · ' + clientName + ' · ' + amount + ' — AI confidence 97% · Payout processing…', 4000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> ' + claimId + ' APPROVED & PAID · ' + amount + ' · ACH transfer initiated to beneficiary account', 4000);
+    var card = document.querySelector('.ov-stp-claim');
+    if (card) {
+      card.innerHTML = '<div style="padding:20px;text-align:center;color:#059669"><i class="fas fa-check-circle" style="font-size:32px;margin-bottom:8px;display:block"></i><strong>' + claimId + ' approved and paid</strong><div style="color:#64748b;font-size:13px;margin-top:4px">STP processing complete · ' + amount + ' disbursed</div></div>';
+    }
+  }, 2200);
+}
+
+function toggleSTPPanel(btn) {
+  var body = document.getElementById('ov-stp-body');
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  var icon = btn.querySelector('i');
+  if (icon) { icon.className = isOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up'; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SUBROGATION — SCAN & FUNCTIONS
+   ═══════════════════════════════════════════════════════════════════ */
+function runSubrogationScan() {
+  p7Toast('<i class="fas fa-sync-alt fa-spin"></i> AI scanning all active claims for subrogation opportunities…', 2500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> Subrogation scan complete — 3 opportunities confirmed, no new cases identified', 3000);
+  }, 2600);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REINSURANCE NOTIFICATION
+   ═══════════════════════════════════════════════════════════════════ */
+function p7NotifyReinsurer(claimId) {
+  p7Toast('<i class="fas fa-building"></i> Reinsurance notification drafted for ' + claimId + ' — review in Communications tab before sending', 3500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-paper-plane"></i> Reinsurance notification sent to Munich Re · Ref: ' + claimId + ' · Treaty: FAC-2024-NYL-001', 3500);
+  }, 1500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAYMENT METHOD SELECTION
+   ═══════════════════════════════════════════════════════════════════ */
+function p7SelectPayMethod(card, method) {
+  var grid = card.closest('.p7cm-pay-method-grid');
+  if (grid) { grid.querySelectorAll('.p7cm-pay-method-card').forEach(function(c) { c.classList.remove('selected'); }); }
+  card.classList.add('selected');
+  p7Toast('<i class="fas fa-check-circle"></i> Payment method set: ' + method, 1800);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -50986,7 +51118,7 @@ console.log('Advisory Accounts module loaded — ' + advAccounts.length + ' acco
 
   /* clmSwitchTab — ID-based selection only; never touches .pol-tab class
      so it cannot interfere with polSwitchTab on the Policies page        */
-  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved'];
+  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved', 'subrogation'];
 
   window.clmSwitchTab = function(tab) {
     CLM_TABS.forEach(function(t) {
