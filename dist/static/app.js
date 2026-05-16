@@ -43531,8 +43531,8 @@ function iaRenderPortfolioReview() {
     { urgency:'urgent', icon:'fa-balance-scale', text:'Rebalance Robert Chen MF-300201 — 6.8% drift · 4 trades',     btn:'Rebalance',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-RC-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' },
     { urgency:'high',   icon:'fa-balance-scale', text:'Rebalance Linda Morrison MF-880201 — 7.4% drift · 3 trades',  btn:'Rebalance',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-LM-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' },
     { urgency:'high',   icon:'fa-calendar-check',text:'James Whitfield annual review overdue — schedule Q2 meeting',  btn:'Schedule',      fn:'iaToast(\'<i class=\\\"fas fa-calendar-check\\\"></i> Q2 review scheduled for James Whitfield — Apr 15, 2026\',3000)' },
-    { urgency:'med',    icon:'fa-leaf',           text:'Harvest $4,200 TLH — Robert Chen SMA before Q2 close',        btn:'Harvest',       fn:'iaExecuteTLH(\'IA-RC-001\')' },
-    { urgency:'med',    icon:'fa-leaf',           text:'Harvest $3,200 TLH — Linda Morrison UMA before year-end',      btn:'Harvest',       fn:'iaExecuteTLH(\'IA-LM-001\')' },
+    { urgency:'med',    icon:'fa-leaf',           text:'Harvest $4,200 TLH — Robert Chen MF-300201 before Q2 close',    btn:'Harvest',       fn:'iaExecuteTLH(\'IA-RC-001\')' },
+    { urgency:'med',    icon:'fa-leaf',           text:'Harvest $3,200 TLH — Linda Morrison MF-880201 before year-end',  btn:'Harvest',       fn:'iaExecuteTLH(\'IA-LM-001\')' },
     { urgency:'low',    icon:'fa-clock',          text:'Monitor Alex Rivera funding — ACH + ACAT expected Apr 18',     btn:'View Account',  fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-AR-001\');},100)' },
     { urgency:'low',    icon:'fa-balance-scale',  text:'Patricia Nguyen ETF drift 5.1% — minor rebalance recommended', btn:'View Plan',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-PN-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' }
   ];
