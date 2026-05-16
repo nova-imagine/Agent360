@@ -34870,6 +34870,19 @@ var p7ClaimsData = {
     fraudScore: 42, fraudLabel: 'Watch',
     slaDeadline: 'Apr 14, 2026', slaDaysLeft: 1, slaStatus: 'breach',
     liabilityScore: 72, liabilityLabel: 'High',
+    reserveAmount: '$1,050,000', reserveStatus: 'Set', paymentHistory: [],
+    coverageLimits: 'Face value $1,000,000 — Whole Life policy in-force since 2018.',
+    exclusions: 'No applicable exclusions. Policy > 2-year contestability period.',
+    regulatoryState: 'NY', regulatoryNote: 'NY Ins. Law §3420: insurer must pay within 15 days of proof of claim. SLA breach imminent.',
+    legalHold: false, badFaithRisk: 'Elevated — SLA breach in 1 day if docs not collected.',
+    beneficiary: 'Susan Chen', benefRel: 'Spouse', benefKYC: 'ID Pending',
+    benefEmail: 'susan.chen@email.com', benefPhone: '415-555-0182',
+    benefPayAccount: 'Bank account details not yet provided',
+    communications: [
+      { date: 'Apr 9, 2026', type: 'Phone', dir: 'Inbound', from: 'Susan Chen', note: 'Called to file claim. Provided initial info. Death certificate in hand.' },
+      { date: 'Apr 10, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Sent upload portal link and required document checklist to Susan Chen.' },
+      { date: 'Apr 11, 2026', type: 'System', dir: 'Auto', from: 'AI Auto-Reminder', note: 'Automated reminder sent: identity documents and bank details still needed.' }
+    ],
     docs: [
       { name: 'Death Certificate', status: 'received', date: 'Apr 10, 2026' },
       { name: 'Claimant ID (Susan Chen)', status: 'received', date: 'Apr 10, 2026' },
@@ -34885,55 +34898,43 @@ var p7ClaimsData = {
       { date: 'Apr 12', event: 'SLA warning: 2 days to breach NY Ins. Law §3420', type: 'alert' }
     ]
   },
-  'CLM-2026-0025': {
-    id: 'CLM-2026-0025', client: 'Kevin Park', initials: 'KP', policy: 'P-100350',
-    type: 'Death Benefit', amount: '$250,000', filed: '2026-04-05',
-    daysOpen: 9, status: 'Under Review', priority: 'Urgent',
-    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
-    fraudScore: 78, fraudLabel: 'Flagged',
-    slaDeadline: 'May 5, 2026', slaDaysLeft: 21, slaStatus: 'ok',
-    liabilityScore: 58, liabilityLabel: 'Medium',
-    docs: [
-      { name: 'Death Certificate', status: 'received', date: 'Apr 7, 2026' },
-      { name: 'Obituary / Public Record', status: 'received', date: 'Apr 6, 2026' },
-      { name: 'Claimant ID', status: 'missing', date: null },
-      { name: 'Fraud Review Form', status: 'in-progress', date: null }
+  'CLM-2026-0038': {
+    id: 'CLM-2026-0038', client: 'Sandra Williams', initials: 'SW', policy: 'P-100321',
+    type: 'Long-Term Care', amount: '$18,000', filed: '2026-04-01',
+    daysOpen: 13, status: 'Open', priority: 'Normal',
+    adjuster: 'Lisa Torres', adjusterTeam: 'LTC Team',
+    fraudScore: 12, fraudLabel: 'Clear',
+    slaDeadline: 'Apr 30, 2026', slaDaysLeft: 22, slaStatus: 'ok',
+    liabilityScore: 18, liabilityLabel: 'Low',
+    reserveAmount: '$72,000', reserveStatus: 'Set — 90-day benefit period', paymentHistory: [
+      { date: 'Pending', amount: '$6,000', note: 'First monthly payment pending Plan of Care approval' }
     ],
-    contestability: true,
-    contestabilityNote: 'Policy issued Oct 2025 — within 2-year contestability window. Carrier will review application for material misrepresentation. Fraud score 78 triggers mandatory investigation.',
-    aiTriage: 'FRAUD HOLD — do not process until investigation complete. Policy is within 2-year contestability window. Fraud score 78 requires full documentation review and independent investigation.',
-    timeline: [
-      { date: 'Apr 5', event: 'Claim filed by Jennifer Park (beneficiary)', type: 'filed' },
-      { date: 'Apr 6', event: 'Obituary match confirmed via AI public record scan', type: 'update' },
-      { date: 'Apr 7', event: 'Death certificate received — cause: cardiac event (age 29)', type: 'update' },
-      { date: 'Apr 8', event: 'Fraud score: 78 — Flagged for investigation (young insured, large benefit, new policy)', type: 'alert' },
-      { date: 'Apr 10', event: 'Contestability review initiated — policy < 2 years old', type: 'alert' }
-    ]
-  },
-  'CLM-2026-0028': {
-    id: 'CLM-2026-0028', client: 'Maria Gonzalez', initials: 'MG', policy: 'P-100340',
-    type: 'Accelerated Benefit (ADB)', amount: '$120,000', filed: '2026-03-05',
-    daysOpen: 40, status: 'Pending Docs', priority: 'Urgent (Compassionate)',
-    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
-    fraudScore: 38, fraudLabel: 'Watch',
-    slaDeadline: 'Apr 19, 2026', slaDaysLeft: 5, slaStatus: 'warn',
-    liabilityScore: 29, liabilityLabel: 'Low-Medium',
+    coverageLimits: 'Daily benefit $200/day. Benefit period: 90 days. LTC rider on P-100321.',
+    exclusions: 'Pre-existing conditions exclusion waived (3-year look-back satisfied). Custodial care covered.',
+    regulatoryState: 'NY', regulatoryNote: 'NY LTC Insurance Law §1117: claim acknowledgment within 15 days, determination within 45 days.',
+    legalHold: false, badFaithRisk: 'Low — timeline on track. Plan of Care is routine administrative item.',
+    beneficiary: 'Sandra Williams', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'sandra.w@email.com', benefPhone: '646-555-0210',
+    benefPayAccount: 'Chase checking ****4821 — verified',
+    communications: [
+      { date: 'Apr 1, 2026', type: 'Phone', dir: 'Inbound', from: 'Sandra Williams', note: 'Filed LTC claim following hospitalization. Home aide services starting Apr 3.' },
+      { date: 'Apr 5, 2026', type: 'Email', dir: 'Outbound', from: 'LTC Team', note: 'Sent care provider document checklist and Plan of Care form.' },
+      { date: 'Apr 10, 2026', type: 'Email', dir: 'Outbound', from: 'LTC Team', note: 'Follow-up to home health agency re: Plan of Care submission.' }
+    ],
     docs: [
-      { name: 'Terminal Illness Certification (Dr. Hernandez)', status: 'missing', date: null },
-      { name: 'ADB Claim Form', status: 'received', date: 'Mar 6, 2026' },
-      { name: 'Client ID', status: 'received', date: 'Mar 6, 2026' },
-      { name: 'Life Expectancy Statement', status: 'pending', date: null }
+      { name: 'LTC Eligibility Certification', status: 'received', date: 'Apr 1, 2026' },
+      { name: 'Care Provider License', status: 'received', date: 'Apr 3, 2026' },
+      { name: 'Plan of Care Document', status: 'pending', date: null },
+      { name: 'Monthly Care Summary', status: 'pending', date: null }
     ],
     contestability: false,
-    adbEligible: true,
-    adbNote: 'ADB rider active — $120K (24% of $500K face). Eligible if life expectancy < 12 months. Terminal certification from Dr. Hernandez required.',
-    aiTriage: 'COMPASSIONATE — expedite immediately. Terminal illness ADB claim. Dr. Hernandez certification is the only blocker. AI recommends direct physician outreach within 24 hours.',
+    aiTriage: 'Plan of Care from home health agency is final blocker. All eligibility documents received. First payment est. Apr 20 once Plan of Care approved. No fraud indicators.',
     timeline: [
-      { date: 'Mar 5', event: 'ADB claim filed — terminal diagnosis per primary physician', type: 'filed' },
-      { date: 'Mar 6', event: 'Claim form and client ID received', type: 'update' },
-      { date: 'Mar 20', event: 'Doc reminder sent to Dr. Hernandez — no response', type: 'update' },
-      { date: 'Apr 1', event: 'Second reminder sent — SLA approaching', type: 'alert' },
-      { date: 'Apr 10', event: 'Compassionate SLA triggered — 5 days to deadline', type: 'alert' }
+      { date: 'Apr 1', event: 'LTC claim filed by Sandra Williams', type: 'filed' },
+      { date: 'Apr 1', event: 'Initial eligibility check passed — LTC trigger confirmed', type: 'update' },
+      { date: 'Apr 3', event: 'Assigned to LTC Team — Lisa Torres', type: 'update' },
+      { date: 'Apr 5', event: 'Care provider license received and verified', type: 'update' },
+      { date: 'Apr 10', event: 'Plan of Care pending from home health agency', type: 'alert' }
     ]
   },
   'CLM-2026-0035': {
@@ -34944,6 +34945,20 @@ var p7ClaimsData = {
     fraudScore: 18, fraudLabel: 'Clear',
     slaDeadline: 'Apr 22, 2026', slaDaysLeft: 9, slaStatus: 'warn',
     liabilityScore: 41, liabilityLabel: 'Medium',
+    reserveAmount: '$25,200', reserveStatus: 'Set — 6-month reserve', paymentHistory: [],
+    coverageLimits: '60% income replacement = $4,200/mo. 90-day elimination period. Own-occupation definition. Max benefit period: 5 years.',
+    exclusions: 'Pre-existing back conditions reviewed — surgery post-policy issue date, no exclusion applies. Mental/nervous exclusion not applicable.',
+    regulatoryState: 'CA', regulatoryNote: 'CA Ins. Code §10269.1: DI claim must be acknowledged within 10 days, resolved within 40 days. SLA at 9 days.',
+    legalHold: false, badFaithRisk: 'Low-Medium — APS delay may trigger bad faith exposure if claim not processed by Apr 22.',
+    beneficiary: 'Maria Gonzalez', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'maria.g@email.com', benefPhone: '213-555-0177',
+    benefPayAccount: 'Wells Fargo checking ****2934 — verified',
+    communications: [
+      { date: 'Mar 22, 2026', type: 'Phone', dir: 'Inbound', from: 'Maria Gonzalez', note: 'Filed DI claim following back surgery Mar 10. Unable to perform nursing duties.' },
+      { date: 'Mar 25, 2026', type: 'Fax', dir: 'Inbound', from: 'Employer HR', note: 'Employer statement received confirming pre-disability income.' },
+      { date: 'Apr 1, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'APS request form sent to Dr. Hernandez office via secure email.' },
+      { date: 'Apr 9, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'Second APS reminder sent to Dr. Hernandez. No response yet.' }
+    ],
     docs: [
       { name: 'APS — Dr. Hernandez', status: 'pending', date: null },
       { name: 'Disability Claim Form', status: 'received', date: 'Mar 22, 2026' },
@@ -34967,6 +34982,19 @@ var p7ClaimsData = {
     fraudScore: 9, fraudLabel: 'Clear',
     slaDeadline: 'Apr 30, 2026', slaDaysLeft: 17, slaStatus: 'ok',
     liabilityScore: 12, liabilityLabel: 'Low',
+    reserveAmount: '$38,400', reserveStatus: 'Set — 4-month reserve', paymentHistory: [],
+    coverageLimits: 'Daily benefit $200/day. Benefit period: 3 years. Assisted living facility covered.',
+    exclusions: 'All standard exclusions waived — ADL threshold met (2 of 6 impairments). Clean claim.',
+    regulatoryState: 'NY', regulatoryNote: 'NY LTC §1117: determination within 45 days. Well within timeline.',
+    legalHold: false, badFaithRisk: 'Very Low — complete file, no flags. Standard approval expected.',
+    beneficiary: 'James Whitfield', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'james.w@email.com', benefPhone: '212-555-0155',
+    benefPayAccount: 'Direct billing to Sunrise Assisted Living ****7743',
+    communications: [
+      { date: 'Mar 15, 2026', type: 'Phone', dir: 'Inbound', from: 'James Whitfield', note: 'Filed LTC claim — placed in assisted living facility Mar 12.' },
+      { date: 'Mar 18, 2026', type: 'Fax', dir: 'Inbound', from: 'Sunrise Assisted Living', note: 'ADL assessment, care plan, and facility invoice received.' },
+      { date: 'Mar 20, 2026', type: 'Email', dir: 'Inbound', from: 'Dr. P. Okonkwo', note: 'Physician certification completed and submitted electronically.' }
+    ],
     docs: [
       { name: 'Care Plan / Plan of Care', status: 'received', date: 'Mar 18, 2026' },
       { name: 'ADL Assessment', status: 'received', date: 'Mar 18, 2026' },
@@ -34981,6 +35009,435 @@ var p7ClaimsData = {
       { date: 'Mar 20', event: 'Physician certification received — LTC trigger confirmed', type: 'update' },
       { date: 'Mar 22', event: 'Facility invoice received — all docs complete', type: 'update' },
       { date: 'Apr 5', event: 'Under review — approval expected within 5 business days', type: 'update' }
+    ]
+  },
+  'CLM-2026-0031': {
+    id: 'CLM-2026-0031', client: 'Linda Morrison', initials: 'LM', policy: 'P-100362',
+    type: 'Waiver of Premium', amount: '$9,600/yr', filed: '2026-03-10',
+    daysOpen: 35, status: 'Open', priority: 'Low',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 7, fraudLabel: 'Clear',
+    slaDeadline: 'No SLA', slaDaysLeft: 999, slaStatus: 'ok',
+    liabilityScore: 8, liabilityLabel: 'Very Low',
+    reserveAmount: '$2,400', reserveStatus: 'Set — quarterly proration', paymentHistory: [
+      { date: 'Mar 14, 2026', amount: '$2,400', note: 'Q1 2026 premium waived — approved' }
+    ],
+    coverageLimits: 'Waiver of Premium rider on P-100362. Annual premium $9,600. Waiver active during disability period (max 2 years).',
+    exclusions: 'Elective surgery covered under waiver rider. No exclusion applicable.',
+    regulatoryState: 'NY', regulatoryNote: 'No specific SLA for Waiver of Premium. Standard good-faith timeline applies.',
+    legalHold: false, badFaithRisk: 'Very Low — claim approved, waiver in effect. No disputes.',
+    beneficiary: 'Linda Morrison', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'linda.m@email.com', benefPhone: '917-555-0143',
+    benefPayAccount: 'Premium auto-debit cancelled (CitiBank ****5510) — reinstated at recovery',
+    communications: [
+      { date: 'Mar 10, 2026', type: 'Email', dir: 'Inbound', from: 'Linda Morrison', note: 'Submitted waiver of premium application with all supporting docs.' },
+      { date: 'Mar 14, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Waiver approved for 90-day period. Premium auto-debit suspended.' }
+    ],
+    docs: [
+      { name: 'Disability Certification', status: 'received', date: 'Mar 10, 2026' },
+      { name: 'Surgical Report', status: 'received', date: 'Mar 10, 2026' },
+      { name: 'Physician Recovery Estimate', status: 'received', date: 'Mar 10, 2026' },
+      { name: 'Premium Waiver Application', status: 'received', date: 'Mar 10, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Claim approved and active. Monitor for disability end date (est. June 2026). Schedule premium reinstatement reminder for May 2026. No action required.',
+    timeline: [
+      { date: 'Mar 10', event: 'Waiver of premium claim filed — all docs submitted', type: 'filed' },
+      { date: 'Mar 12', event: 'Assigned to Agent Support — Priya Sharma', type: 'update' },
+      { date: 'Mar 14', event: 'Waiver approved — 90-day disability period confirmed', type: 'update' },
+      { date: 'Mar 14', event: 'Premium auto-debit suspended — $2,400 Q1 saved', type: 'update' }
+    ]
+  },
+  'CLM-2026-0028': {
+    id: 'CLM-2026-0028', client: 'Maria Gonzalez', initials: 'MG', policy: 'P-100340',
+    type: 'Accelerated Benefit (ADB)', amount: '$120,000', filed: '2026-03-05',
+    daysOpen: 40, status: 'Pending Docs', priority: 'Urgent (Compassionate)',
+    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
+    fraudScore: 38, fraudLabel: 'Watch',
+    slaDeadline: 'Apr 19, 2026', slaDaysLeft: 5, slaStatus: 'warn',
+    liabilityScore: 29, liabilityLabel: 'Low-Medium',
+    reserveAmount: '$120,000', reserveStatus: 'Reserved — pending certification', paymentHistory: [],
+    coverageLimits: 'ADB rider: up to 24% of face value ($120K of $500K). Eligible if life expectancy < 12 months.',
+    exclusions: 'No exclusions applicable to terminal illness ADB trigger. Full certification required.',
+    regulatoryState: 'CA', regulatoryNote: 'CA §10169.1: ADB claims for terminal illness must be processed within 30 days of complete submission. Currently blocked on physician certification.',
+    legalHold: false, badFaithRisk: 'Medium — compassionate case. Delay exposes carrier to regulatory complaint risk if not handled promptly.',
+    beneficiary: 'Maria Gonzalez', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'maria.g@email.com', benefPhone: '213-555-0177',
+    benefPayAccount: 'Wells Fargo checking ****2934 — verified',
+    communications: [
+      { date: 'Mar 5, 2026', type: 'Phone', dir: 'Inbound', from: 'Maria Gonzalez', note: 'Filed ADB claim — oncologist confirmed terminal diagnosis. Needs funds urgently.' },
+      { date: 'Mar 20, 2026', type: 'Fax', dir: 'Outbound', from: 'Claims Dept.', note: 'APS/terminal certification form sent to Dr. Hernandez office.' },
+      { date: 'Apr 1, 2026', type: 'Phone', dir: 'Outbound', from: 'Chris Davis', note: 'Called Dr. Hernandez office — assistant confirmed doc in queue, ETA unknown.' },
+      { date: 'Apr 10, 2026', type: 'Email', dir: 'Outbound', from: 'AI Auto-Reminder', note: 'Third automated reminder sent to physician portal — compassionate case flag set.' }
+    ],
+    docs: [
+      { name: 'Terminal Illness Certification (Dr. Hernandez)', status: 'missing', date: null },
+      { name: 'ADB Claim Form', status: 'received', date: 'Mar 6, 2026' },
+      { name: 'Client ID', status: 'received', date: 'Mar 6, 2026' },
+      { name: 'Life Expectancy Statement', status: 'pending', date: null }
+    ],
+    contestability: false,
+    adbEligible: true,
+    adbNote: 'ADB rider active — $120K (24% of $500K face). Eligible if life expectancy < 12 months. Terminal certification from Dr. Hernandez required.',
+    aiTriage: 'COMPASSIONATE — expedite immediately. Terminal illness ADB claim. Dr. Hernandez certification is the only blocker. AI recommends direct physician outreach within 24 hours.',
+    timeline: [
+      { date: 'Mar 5', event: 'ADB claim filed — terminal diagnosis per primary physician', type: 'filed' },
+      { date: 'Mar 6', event: 'Claim form and client ID received', type: 'update' },
+      { date: 'Mar 20', event: 'Doc reminder sent to Dr. Hernandez — no response', type: 'update' },
+      { date: 'Apr 1', event: 'Second reminder sent — SLA approaching', type: 'alert' },
+      { date: 'Apr 10', event: 'Compassionate SLA triggered — 5 days to deadline', type: 'alert' }
+    ]
+  },
+  'CLM-2026-0025': {
+    id: 'CLM-2026-0025', client: 'Kevin Park', initials: 'KP', policy: 'P-100350',
+    type: 'Death Benefit', amount: '$250,000', filed: '2026-04-05',
+    daysOpen: 9, status: 'Under Review', priority: 'Urgent',
+    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
+    fraudScore: 78, fraudLabel: 'Flagged',
+    slaDeadline: 'May 5, 2026', slaDaysLeft: 21, slaStatus: 'ok',
+    liabilityScore: 58, liabilityLabel: 'Medium',
+    reserveAmount: '$265,000', reserveStatus: 'Provisionally Set — investigation hold', paymentHistory: [],
+    coverageLimits: 'Term Life $250,000. Policy status was "Pending" at time of death — coverage determination required.',
+    exclusions: 'Contestability window applies (policy < 2 years). Material misrepresentation review in progress. Potential suicide exclusion review (age 29, new policy).',
+    regulatoryState: 'NY', regulatoryNote: 'NY §3420: mandatory investigation hold. Carrier has 15 days from proof of claim to respond. Investigation may extend timeline per fraud regulations.',
+    legalHold: true, badFaithRisk: 'High — fraud score 78. Legal team should be looped in before any decision. Document all communications with estate.',
+    beneficiary: 'Estate of Kevin Park', benefRel: 'Estate / Trustee', benefKYC: 'Partial — estate docs pending',
+    benefEmail: 'park.estate@legalfirm.com', benefPhone: '212-555-0199',
+    benefPayAccount: 'Estate account — bank details pending legal resolution',
+    communications: [
+      { date: 'Apr 5, 2026', type: 'Phone', dir: 'Inbound', from: 'Jennifer Park (beneficiary)', note: 'Filed claim by phone. Provided death certificate and obituary.' },
+      { date: 'Apr 8, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Fraud hold notification sent. Case assigned to investigation team.' },
+      { date: 'Apr 10, 2026', type: 'Phone', dir: 'Inbound', from: 'Park Family Attorney', note: 'Attorney engaged. Requests timeline and claim status. Advised of fraud review process.' }
+    ],
+    docs: [
+      { name: 'Death Certificate', status: 'received', date: 'Apr 7, 2026' },
+      { name: 'Obituary / Public Record', status: 'received', date: 'Apr 6, 2026' },
+      { name: 'Claimant ID', status: 'missing', date: null },
+      { name: 'Fraud Review Form', status: 'in-progress', date: null }
+    ],
+    contestability: true,
+    contestabilityNote: 'Policy issued Oct 2025 — within 2-year contestability window. Carrier will review application for material misrepresentation. Fraud score 78 triggers mandatory investigation.',
+    aiTriage: 'FRAUD HOLD — do not process until investigation complete. Policy is within 2-year contestability window. Fraud score 78 requires full documentation review and independent investigation.',
+    timeline: [
+      { date: 'Apr 5', event: 'Claim filed by Jennifer Park (beneficiary)', type: 'filed' },
+      { date: 'Apr 6', event: 'Obituary match confirmed via AI public record scan', type: 'update' },
+      { date: 'Apr 7', event: 'Death certificate received — cause: cardiac event (age 29)', type: 'update' },
+      { date: 'Apr 8', event: 'Fraud score: 78 — Flagged for investigation (young insured, large benefit, new policy)', type: 'alert' },
+      { date: 'Apr 10', event: 'Contestability review initiated — policy < 2 years old', type: 'alert' }
+    ]
+  },
+
+  /* ── NEW CLAIM TYPES ── */
+  'CLM-2026-0045': {
+    id: 'CLM-2026-0045', client: 'Thomas Reed', initials: 'TR', policy: 'P-100378',
+    type: 'Accidental Death Benefit Rider', amount: '$150,000', filed: '2026-04-08',
+    daysOpen: 6, status: 'Under Review', priority: 'Normal',
+    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
+    fraudScore: 44, fraudLabel: 'Watch',
+    slaDeadline: 'Apr 23, 2026', slaDaysLeft: 7, slaStatus: 'warn',
+    liabilityScore: 48, liabilityLabel: 'Medium',
+    reserveAmount: '$157,500', reserveStatus: 'Set — pending accidental cause confirmation', paymentHistory: [],
+    coverageLimits: 'ADB Rider: $150,000 in addition to base death benefit $300,000. Rider pays only if death is accidental per policy definition.',
+    exclusions: 'Motor vehicle exclusion review underway (insured was driving at time of accident). Alcohol involvement flag from police report — exclusion may apply.',
+    regulatoryState: 'TX', regulatoryNote: 'TX Ins. Code §1701.055: accidental death must be confirmed as proximate cause. No SLA for contested accidental cause — standard 30-day investigation timeline.',
+    legalHold: false, badFaithRisk: 'Medium — alcohol exclusion review could trigger dispute. Document all investigation steps carefully.',
+    beneficiary: 'Patricia Reed', benefRel: 'Spouse', benefKYC: 'ID Verified',
+    benefEmail: 'patricia.reed@email.com', benefPhone: '512-555-0184',
+    benefPayAccount: 'Bank of America checking ****6612 — verified',
+    communications: [
+      { date: 'Apr 8, 2026', type: 'Phone', dir: 'Inbound', from: 'Patricia Reed', note: 'Filed ADB rider claim. Husband killed in car accident Apr 5. Police report obtained.' },
+      { date: 'Apr 9, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Sent accidental death claim form and required doc checklist.' },
+      { date: 'Apr 11, 2026', type: 'Phone', dir: 'Outbound', from: 'Chris Davis', note: 'Requested toxicology report from police department for alcohol review.' }
+    ],
+    docs: [
+      { name: 'Death Certificate', status: 'received', date: 'Apr 9, 2026' },
+      { name: 'Police Accident Report', status: 'received', date: 'Apr 9, 2026' },
+      { name: 'Toxicology Report', status: 'pending', date: null },
+      { name: 'Coroner / Medical Examiner Report', status: 'pending', date: null },
+      { name: 'ADB Claim Form', status: 'received', date: 'Apr 10, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Accidental cause review in progress. Toxicology report is key — alcohol involvement could trigger exclusion. Obtain report within 48 hours. Base death benefit ($300K) can be processed independently.',
+    timeline: [
+      { date: 'Apr 8', event: 'ADB rider claim filed — car accident Apr 5', type: 'filed' },
+      { date: 'Apr 9', event: 'Death certificate and police report received', type: 'update' },
+      { date: 'Apr 10', event: 'ADB claim form received — accidental cause review initiated', type: 'update' },
+      { date: 'Apr 11', event: 'Toxicology report requested — alcohol exclusion review', type: 'alert' }
+    ]
+  },
+  'CLM-2026-0046': {
+    id: 'CLM-2026-0046', client: 'Patricia Nguyen', initials: 'PN', policy: 'P-100382',
+    type: 'Critical Illness Rider', amount: '$50,000', filed: '2026-04-02',
+    daysOpen: 12, status: 'Under Review', priority: 'Normal',
+    adjuster: 'David Reyes', adjusterTeam: 'DI Unit',
+    fraudScore: 11, fraudLabel: 'Clear',
+    slaDeadline: 'May 2, 2026', slaDaysLeft: 18, slaStatus: 'ok',
+    liabilityScore: 14, liabilityLabel: 'Low',
+    reserveAmount: '$52,000', reserveStatus: 'Set — lump sum reserve', paymentHistory: [],
+    coverageLimits: 'Critical Illness Rider: lump sum $50,000 on first diagnosis of covered condition (cancer, heart attack, stroke, kidney failure, major organ transplant).',
+    exclusions: 'Pre-existing condition exclusion: diagnosis must be > 90 days from policy issue. Policy issued Jan 2025 — 90-day window satisfied. No exclusion applies.',
+    regulatoryState: 'CA', regulatoryNote: 'CA §10270.93: CI rider claim must be processed within 30 days of proof of diagnosis.',
+    legalHold: false, badFaithRisk: 'Very Low — clean claim, complete documentation nearly ready.',
+    beneficiary: 'Patricia Nguyen', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'patricia.n@email.com', benefPhone: '415-555-0166',
+    benefPayAccount: 'Chase checking ****3301 — verified',
+    communications: [
+      { date: 'Apr 2, 2026', type: 'Email', dir: 'Inbound', from: 'Patricia Nguyen', note: 'Submitted CI claim online — breast cancer diagnosis Mar 28 confirmed by oncologist.' },
+      { date: 'Apr 4, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'Sent oncologist verification form and CI claim checklist.' },
+      { date: 'Apr 9, 2026', type: 'Email', dir: 'Inbound', from: 'Dr. K. Sharma', note: 'Oncologist diagnosis letter received — pathology report to follow.' }
+    ],
+    docs: [
+      { name: 'Oncologist Diagnosis Letter', status: 'received', date: 'Apr 9, 2026' },
+      { name: 'Pathology / Biopsy Report', status: 'pending', date: null },
+      { name: 'CI Claim Form', status: 'received', date: 'Apr 2, 2026' },
+      { name: 'Client ID', status: 'received', date: 'Apr 2, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Diagnosis confirmed by oncologist. Pathology report is the only remaining document. Once received, recommend immediate lump-sum payout processing. Claim is clean.',
+    timeline: [
+      { date: 'Apr 2', event: 'Critical illness rider claim filed — breast cancer diagnosis', type: 'filed' },
+      { date: 'Apr 4', event: 'Claim form verified — diagnosis within coverage window', type: 'update' },
+      { date: 'Apr 9', event: 'Oncologist letter received — pathology report pending', type: 'update' }
+    ]
+  },
+  'CLM-2026-0047': {
+    id: 'CLM-2026-0047', client: 'David Thompson', initials: 'DT', policy: 'P-100391',
+    type: 'Child Term Rider', amount: '$25,000', filed: '2026-04-07',
+    daysOpen: 7, status: 'Pending Docs', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 8, fraudLabel: 'Clear',
+    slaDeadline: 'May 7, 2026', slaDaysLeft: 24, slaStatus: 'ok',
+    liabilityScore: 10, liabilityLabel: 'Very Low',
+    reserveAmount: '$26,000', reserveStatus: 'Set', paymentHistory: [],
+    coverageLimits: 'Child Term Rider: $25,000 on death of covered child. Child must be listed on rider at time of claim. Max age for covered child: 25.',
+    exclusions: 'Covered child (age 4) was listed on rider since policy inception. No exclusion applies.',
+    regulatoryState: 'FL', regulatoryNote: 'FL Ins. Stat. §627.4131: insurer must acknowledge within 14 days. Within timeline.',
+    legalHold: false, badFaithRisk: 'Very Low — small claim, straightforward. Handle with sensitivity (child loss).',
+    beneficiary: 'David Thompson', benefRel: 'Parent / Policyholder', benefKYC: 'Verified',
+    benefEmail: 'david.t@email.com', benefPhone: '305-555-0198',
+    benefPayAccount: 'BB&T checking ****8823 — verified',
+    communications: [
+      { date: 'Apr 7, 2026', type: 'Phone', dir: 'Inbound', from: 'David Thompson', note: 'Filed claim following tragic loss of daughter (age 4) on Apr 4. Handle with sensitivity.' },
+      { date: 'Apr 8, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Sent condolences letter and expedited document checklist. Offered dedicated case manager.' }
+    ],
+    docs: [
+      { name: 'Death Certificate (Child)', status: 'received', date: 'Apr 8, 2026' },
+      { name: 'Child Term Rider Claim Form', status: 'pending', date: null },
+      { name: 'Birth Certificate / Relationship Proof', status: 'received', date: 'Apr 8, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Sensitive claim — child death. Claim form is only remaining doc. Expedite for compassionate handling. Verify child was listed on rider (confirmed in CRM). Payout recommended once form received.',
+    timeline: [
+      { date: 'Apr 7', event: 'Child term rider claim filed — compassionate case', type: 'filed' },
+      { date: 'Apr 8', event: 'Death certificate and birth certificate received', type: 'update' },
+      { date: 'Apr 8', event: 'Dedicated case manager assigned — expedited handling', type: 'update' }
+    ]
+  },
+  'CLM-2026-0048': {
+    id: 'CLM-2026-0048', client: 'Angela Foster', initials: 'AF', policy: 'P-100403',
+    type: 'Chronic Illness Rider', amount: '$36,000', filed: '2026-04-03',
+    daysOpen: 11, status: 'Pending Docs', priority: 'Normal',
+    adjuster: 'Lisa Torres', adjusterTeam: 'LTC Team',
+    fraudScore: 15, fraudLabel: 'Clear',
+    slaDeadline: 'Apr 18, 2026', slaDaysLeft: 6, slaStatus: 'warn',
+    liabilityScore: 22, liabilityLabel: 'Low',
+    reserveAmount: '$36,000', reserveStatus: 'Set — annual accelerated benefit', paymentHistory: [],
+    coverageLimits: 'Chronic Illness Rider: annual accelerated benefit up to $36,000 (6% of $600K face). Requires 2+ ADL impairments or severe cognitive impairment certification.',
+    exclusions: 'Pre-existing condition review: MS diagnosis was 2 years before policy issue — exclusion may apply for first 2 years. Policy now 3 years old — exclusion period expired.',
+    regulatoryState: 'IL', regulatoryNote: 'IL Ins. Code §224.7: chronic illness rider claims must be determined within 45 days. At 11 days, timeline is manageable.',
+    legalHold: false, badFaithRisk: 'Low — clear claim, exclusion period expired. Physician certification is routine blocker.',
+    beneficiary: 'Angela Foster', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'angela.f@email.com', benefPhone: '312-555-0171',
+    benefPayAccount: 'Northern Trust checking ****4499 — verified',
+    communications: [
+      { date: 'Apr 3, 2026', type: 'Email', dir: 'Inbound', from: 'Angela Foster', note: 'Filed chronic illness rider claim — MS progression resulting in 2 ADL impairments.' },
+      { date: 'Apr 5, 2026', type: 'Email', dir: 'Outbound', from: 'LTC Team', note: 'Sent physician certification form and chronic illness claim checklist.' },
+      { date: 'Apr 10, 2026', type: 'Phone', dir: 'Outbound', from: 'Lisa Torres', note: 'Called neurologist office re: ADL certification. ETA 3-5 business days.' }
+    ],
+    docs: [
+      { name: 'Physician Certification (ADL / Cognitive Impairment)', status: 'pending', date: null },
+      { name: 'Chronic Illness Claim Form', status: 'received', date: 'Apr 3, 2026' },
+      { name: 'Medical Records Summary (MS diagnosis)', status: 'received', date: 'Apr 5, 2026' },
+      { name: 'Client ID', status: 'received', date: 'Apr 3, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Physician ADL certification is the sole blocker. Exclusion period for pre-existing MS expired (policy year 3). Recommend approval once certification received. SLA at 6 days — prioritize.',
+    timeline: [
+      { date: 'Apr 3', event: 'Chronic illness rider claim filed — MS with 2 ADL impairments', type: 'filed' },
+      { date: 'Apr 5', event: 'Medical records received — MS diagnosis confirmed', type: 'update' },
+      { date: 'Apr 10', event: 'Physician ADL certification requested — ETA 3-5 days', type: 'alert' }
+    ]
+  },
+  'CLM-2026-0049': {
+    id: 'CLM-2026-0049', client: 'Harold Simmons', initials: 'HS', policy: 'P-100355',
+    type: 'Maturity / Endowment', amount: '$500,000', filed: '2026-04-01',
+    daysOpen: 13, status: 'Open', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 5, fraudLabel: 'Clear',
+    slaDeadline: 'May 1, 2026', slaDaysLeft: 30, slaStatus: 'ok',
+    liabilityScore: 5, liabilityLabel: 'Very Low',
+    reserveAmount: '$500,000', reserveStatus: 'Fully Reserved — maturity date reached', paymentHistory: [],
+    coverageLimits: 'Endowment policy matured Apr 1, 2026. Face value $500,000 payable to policyholder on maturity date. No contested components.',
+    exclusions: 'No exclusions applicable. Maturity payout is contractual obligation — not a claim in traditional sense.',
+    regulatoryState: 'NY', regulatoryNote: 'NY Ins. Law §3203: maturity proceeds must be paid within 30 days of maturity date. Due by May 1, 2026.',
+    legalHold: false, badFaithRisk: 'Very Low — contractual maturity. No dispute risk.',
+    beneficiary: 'Harold Simmons', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'harold.s@email.com', benefPhone: '646-555-0134',
+    benefPayAccount: 'Fidelity investment account ****7721 — transfer pending',
+    communications: [
+      { date: 'Apr 1, 2026', type: 'Email', dir: 'Inbound', from: 'Harold Simmons', note: 'Policy matured today. Requesting maturity proceeds payment to Fidelity account.' },
+      { date: 'Apr 2, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Confirmed maturity. Processing payment — ETA 10-15 business days per policy terms.' }
+    ],
+    docs: [
+      { name: 'Maturity Proceeds Request Form', status: 'received', date: 'Apr 1, 2026' },
+      { name: 'Client ID Verification', status: 'received', date: 'Apr 1, 2026' },
+      { name: 'Bank / Investment Account Details', status: 'received', date: 'Apr 2, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Routine maturity payout. All docs complete. No fraud indicators. Recommend payment processing within next 5 business days. Tax reporting (1099-R) required for policyholder.',
+    timeline: [
+      { date: 'Apr 1', event: 'Policy P-100355 reached maturity date — $500K endowment proceeds', type: 'filed' },
+      { date: 'Apr 1', event: 'Maturity request form and ID received', type: 'update' },
+      { date: 'Apr 2', event: 'Bank details confirmed — payment processing initiated', type: 'update' }
+    ]
+  },
+  'CLM-2026-0050': {
+    id: 'CLM-2026-0050', client: 'Christine Blake', initials: 'CB', policy: 'P-100367',
+    type: 'Policy Surrender / Cash Value', amount: '$84,200', filed: '2026-04-05',
+    daysOpen: 9, status: 'Open', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 6, fraudLabel: 'Clear',
+    slaDeadline: 'May 5, 2026', slaDaysLeft: 21, slaStatus: 'ok',
+    liabilityScore: 15, liabilityLabel: 'Low',
+    reserveAmount: '$84,200', reserveStatus: 'CSV balance confirmed', paymentHistory: [],
+    coverageLimits: 'Whole Life policy CSV = $84,200 as of Apr 1, 2026. Surrender terminates coverage. Surrender charge applies: $4,100 (4.9% — year 18 of schedule). Net payout: $80,100.',
+    exclusions: 'No exclusions — voluntary surrender is policyholder right. Surrender charge applied per schedule. Policy termination will be confirmed.',
+    regulatoryState: 'NY', regulatoryNote: 'NY Ins. Law §3203(b): CSV must be paid within 30 days of surrender request.',
+    legalHold: false, badFaithRisk: 'Very Low — voluntary surrender. Ensure surrender charge disclosure is documented.',
+    beneficiary: 'Christine Blake', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'christine.b@email.com', benefPhone: '718-555-0162',
+    benefPayAccount: 'TD Bank checking ****9934 — verified',
+    communications: [
+      { date: 'Apr 5, 2026', type: 'Phone', dir: 'Inbound', from: 'Christine Blake', note: 'Requesting full policy surrender. Advised of CSV amount ($84,200) and surrender charge ($4,100). Client acknowledged.' },
+      { date: 'Apr 6, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Sent surrender form and disclosure of surrender charge. Noted tax implications (gains taxable).' }
+    ],
+    docs: [
+      { name: 'Surrender Request Form', status: 'received', date: 'Apr 5, 2026' },
+      { name: 'Signed Surrender Disclosure', status: 'pending', date: null },
+      { name: 'Client ID', status: 'received', date: 'Apr 5, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Routine surrender. Signed disclosure is the only remaining document. Net payout $80,100 after surrender charge. Advise client on tax implications (1099-R). Policy termination upon payment.',
+    timeline: [
+      { date: 'Apr 5', event: 'Policy surrender request submitted — CSV $84,200', type: 'filed' },
+      { date: 'Apr 5', event: 'Surrender charge ($4,100) disclosed and acknowledged by client', type: 'update' },
+      { date: 'Apr 6', event: 'Surrender form and disclosure sent — signed disclosure pending', type: 'update' }
+    ]
+  },
+  'CLM-2026-0051': {
+    id: 'CLM-2026-0051', client: 'George Martinez', initials: 'GM', policy: 'P-100344',
+    type: 'Paid-up Additions (PUA) Withdrawal', amount: '$42,000', filed: '2026-04-04',
+    daysOpen: 10, status: 'Open', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 4, fraudLabel: 'Clear',
+    slaDeadline: 'May 4, 2026', slaDaysLeft: 28, slaStatus: 'ok',
+    liabilityScore: 6, liabilityLabel: 'Very Low',
+    reserveAmount: '$42,000', reserveStatus: 'PUA balance verified', paymentHistory: [],
+    coverageLimits: 'PUA rider on Whole Life P-100344. Accumulated PUA cash value: $42,000. Withdrawal reduces paid-up additional death benefit proportionally. Base coverage unaffected.',
+    exclusions: 'No exclusions. PUA withdrawals are contractual policyholder right. Death benefit reduction disclosed.',
+    regulatoryState: 'TX', regulatoryNote: 'TX Ins. Code: PUA liquidation must be processed within 30 days of written request.',
+    legalHold: false, badFaithRisk: 'Very Low — routine PUA liquidation. No dispute risk.',
+    beneficiary: 'George Martinez', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'george.m@email.com', benefPhone: '214-555-0189',
+    benefPayAccount: 'JPMorgan Chase ****5523 — verified',
+    communications: [
+      { date: 'Apr 4, 2026', type: 'Email', dir: 'Inbound', from: 'George Martinez', note: 'Requesting withdrawal of accumulated PUA balance ($42,000) for home renovation.' },
+      { date: 'Apr 5, 2026', type: 'Email', dir: 'Outbound', from: 'Agent Support', note: 'Confirmed PUA balance. Sent withdrawal form and death benefit impact disclosure.' }
+    ],
+    docs: [
+      { name: 'PUA Withdrawal Request Form', status: 'received', date: 'Apr 4, 2026' },
+      { name: 'Death Benefit Reduction Disclosure', status: 'received', date: 'Apr 5, 2026' },
+      { name: 'Client ID', status: 'received', date: 'Apr 4, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'All docs complete. Routine PUA liquidation. Confirm death benefit reduction in policy admin. Process payment. Suggest annual review to discuss PUA rebuilding strategy.',
+    timeline: [
+      { date: 'Apr 4', event: 'PUA withdrawal request submitted — $42,000', type: 'filed' },
+      { date: 'Apr 5', event: 'Death benefit impact disclosure signed by client', type: 'update' },
+      { date: 'Apr 5', event: 'All docs complete — payment processing queue', type: 'update' }
+    ]
+  },
+  'CLM-2026-0052': {
+    id: 'CLM-2026-0052', client: 'Nancy Rivera', initials: 'NR', policy: 'P-100329',
+    type: 'Annuity Income', amount: '$3,800/mo', filed: '2026-04-01',
+    daysOpen: 13, status: 'Open', priority: 'Normal',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Agent Support',
+    fraudScore: 3, fraudLabel: 'Clear',
+    slaDeadline: 'Recurring — Monthly', slaDaysLeft: 999, slaStatus: 'ok',
+    liabilityScore: 4, liabilityLabel: 'Very Low',
+    reserveAmount: '$456,000', reserveStatus: 'Actuarially reserved — 10-year payout period', paymentHistory: [
+      { date: 'Apr 1, 2026', amount: '$3,800', note: 'First monthly annuity payment processed — ACH transfer confirmed' }
+    ],
+    coverageLimits: 'Fixed annuity P-100329. Annuitization elected Apr 1, 2026. Monthly benefit $3,800 for 10 years (certain and life). Joint and survivor option: 50% to spouse if insured dies.',
+    exclusions: 'No exclusions. Annuity income is contractual obligation per elected payout option.',
+    regulatoryState: 'FL', regulatoryNote: 'FL Ins. Stat. §627.9607: annuity payments must begin per elected start date. First payment confirmed on time.',
+    legalHold: false, badFaithRisk: 'Very Low — routine annuity payout. Monthly monitoring required.',
+    beneficiary: 'Nancy Rivera (primary); Carlos Rivera (50% survivor)', benefRel: 'Policyholder + Spouse', benefKYC: 'Both Verified',
+    benefEmail: 'nancy.r@email.com', benefPhone: '305-555-0176',
+    benefPayAccount: 'SunTrust checking ****2211 — ACH active',
+    communications: [
+      { date: 'Mar 15, 2026', type: 'Email', dir: 'Inbound', from: 'Nancy Rivera', note: 'Elected annuitization with 10-year certain and life, joint 50% survivor option.' },
+      { date: 'Apr 1, 2026', type: 'System', dir: 'Auto', from: 'Annuity Processing', note: 'First monthly payment $3,800 processed via ACH — confirmed.' }
+    ],
+    docs: [
+      { name: 'Annuitization Election Form', status: 'received', date: 'Mar 15, 2026' },
+      { name: 'Survivor Beneficiary Designation', status: 'received', date: 'Mar 15, 2026' },
+      { name: 'ACH Authorization Form', status: 'received', date: 'Mar 20, 2026' },
+      { name: 'Client ID (Nancy Rivera)', status: 'received', date: 'Mar 15, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'Annuity payout active. Monthly ACH scheduled. First payment confirmed. No action required — set recurring payment monitoring. Annual review for survivor benefit update.',
+    timeline: [
+      { date: 'Mar 15', event: 'Annuitization election submitted — 10-yr certain + life, 50% J&S', type: 'filed' },
+      { date: 'Mar 20', event: 'ACH authorization and all docs received', type: 'update' },
+      { date: 'Apr 1', event: 'First monthly payment $3,800 processed via ACH', type: 'update' }
+    ]
+  },
+  'CLM-2026-0053': {
+    id: 'CLM-2026-0053', client: 'Eleanor Marsh (Estate)', initials: 'EM', policy: 'P-100312',
+    type: 'Survivorship (2nd-to-die)', amount: '$2,000,000', filed: '2026-04-10',
+    daysOpen: 4, status: 'Under Review', priority: 'Urgent',
+    adjuster: 'Chris Davis', adjusterTeam: 'Claims Dept.',
+    fraudScore: 22, fraudLabel: 'Clear',
+    slaDeadline: 'Apr 25, 2026', slaDaysLeft: 2, slaStatus: 'breach',
+    liabilityScore: 35, liabilityLabel: 'Low-Medium',
+    reserveAmount: '$2,100,000', reserveStatus: 'Set — estate payout pending legal verification', paymentHistory: [],
+    coverageLimits: 'Survivorship Life (2nd-to-die): $2,000,000 payable upon death of second insured (Eleanor Marsh). First insured (Frank Marsh) died 2023. Policy designed for estate tax funding.',
+    exclusions: 'No exclusions. Policy is post-contestability (issued 2015). Clean claim subject to estate documentation verification.',
+    regulatoryState: 'NY', regulatoryNote: 'NY §3420: $2M claim — carrier must pay within 15 days of proof of claim. SLA at 2 days. Coordinate with estate legal counsel.',
+    legalHold: true, badFaithRisk: 'Medium-High — $2M estate claim. Legal hold pending estate document validation. Coordinate with legal team to avoid bad faith exposure.',
+    beneficiary: 'Marsh Family Trust', benefRel: 'Irrevocable Life Insurance Trust (ILIT)', benefKYC: 'Trust documents pending',
+    benefEmail: 'marsh.trust@wealthfirm.com', benefPhone: '212-555-0210',
+    benefPayAccount: 'Marsh Family Trust estate account — bank details pending legal resolution',
+    communications: [
+      { date: 'Apr 10, 2026', type: 'Phone', dir: 'Inbound', from: 'Marsh Family Attorney', note: 'Filed 2nd-to-die claim. Eleanor Marsh passed Apr 7. Frank Marsh died 2023. Trust is beneficiary.' },
+      { date: 'Apr 10, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Sent estate documentation checklist. Urgent — SLA at 2 days. Legal team notified.' },
+      { date: 'Apr 11, 2026', type: 'Phone', dir: 'Outbound', from: 'Chris Davis', note: 'Coordinating with Marsh family attorney re: trust documents. Death certificates for both insureds received.' }
+    ],
+    docs: [
+      { name: 'Death Certificate — Eleanor Marsh', status: 'received', date: 'Apr 10, 2026' },
+      { name: 'Death Certificate — Frank Marsh (1st insured)', status: 'received', date: 'Apr 10, 2026' },
+      { name: 'Trust Document — Marsh Family ILIT', status: 'pending', date: null },
+      { name: 'Estate Attorney Letter of Authorization', status: 'pending', date: null },
+      { name: 'Bank / Trust Account Details', status: 'missing', date: null }
+    ],
+    contestability: false,
+    aiTriage: 'URGENT — $2M survivorship claim. SLA 2 days. Both death certificates received. Trust document and attorney authorization are key blockers. Legal team coordination required immediately.',
+    timeline: [
+      { date: 'Apr 10', event: 'Survivorship claim filed — Eleanor Marsh (2nd insured) passed Apr 7', type: 'filed' },
+      { date: 'Apr 10', event: 'Both death certificates received — Frank (2023) and Eleanor (2026)', type: 'update' },
+      { date: 'Apr 10', event: 'SLA clock started — NY §3420 requires response by Apr 25', type: 'alert' },
+      { date: 'Apr 11', event: 'Legal hold set — trust document verification required', type: 'alert' }
     ]
   }
 };
@@ -35002,18 +35459,27 @@ function openClaimModal(claimId, tab) {
   }
 
   var tabActive = tab || 'view';
-  var tabs = ['view', 'docs', 'ci', 'timeline', 'liability'];
-  var tabLabels = { view: 'Overview', docs: 'Documents', ci: 'AI Intelligence', timeline: 'Timeline', liability: 'Liability' };
+  var tabs = ['view', 'docs', 'comms', 'beneficiary', 'payments', 'liability', 'ci'];
+  var tabLabels = {
+    view: '<i class="fas fa-file-alt"></i> Overview',
+    docs: '<i class="fas fa-folder-open"></i> Documents',
+    comms: '<i class="fas fa-comments"></i> Communications',
+    beneficiary: '<i class="fas fa-user-check"></i> Beneficiary',
+    payments: '<i class="fas fa-dollar-sign"></i> Payments & Reserve',
+    liability: '<i class="fas fa-gavel"></i> Liability & Legal',
+    ci: '<i class="fas fa-robot"></i> AI Intelligence'
+  };
 
   var tabBtns = tabs.map(function(t) {
     return '<button class="p7cm-tab ' + (t === tabActive ? 'active' : '') + '" onclick="p7SwitchClaimTab(\'' + claimId + '\',\'' + t + '\',this)">' +
-      (t === 'ci' ? '<i class="fas fa-robot"></i>' : '') + ' ' + tabLabels[t] +
+      tabLabels[t] +
     '</button>';
   }).join('');
 
   var slaColor = { breach: '#dc2626', warn: '#d97706', ok: '#059669' };
   var sc = slaColor[claim.slaStatus] || '#64748b';
-  var fraudColor = claim.fraudScore >= 70 ? '#dc2626' : claim.fraudScore >= 40 ? '#d97706' : '#059669';
+  var slaDisplay = claim.slaDaysLeft >= 999 ? claim.slaDeadline : claim.slaDaysLeft + 'd left';
+  var legalHoldBadge = claim.legalHold ? '<div class="p7cm-legal-hold-badge"><i class="fas fa-lock"></i> Legal Hold</div>' : '';
 
   overlay.innerHTML = '<div class="p7cm-modal" onclick="event.stopPropagation()">' +
     '<div class="p7cm-header">' +
@@ -35022,7 +35488,8 @@ function openClaimModal(claimId, tab) {
         '<div class="p7cm-client"><div class="p7cm-avatar">' + claim.initials + '</div><span>' + claim.client + '</span></div>' +
         '<div class="p7cm-type-badge">' + claim.type + '</div>' +
         '<div class="p7cm-amount">' + claim.amount + '</div>' +
-        '<div class="p7cm-sla-pill" style="background:' + sc + '20;color:' + sc + ';border:1px solid ' + sc + '40"><i class="fas fa-stopwatch"></i> ' + claim.slaDaysLeft + 'd left</div>' +
+        '<div class="p7cm-sla-pill" style="background:' + sc + '20;color:' + sc + ';border:1px solid ' + sc + '40"><i class="fas fa-stopwatch"></i> ' + slaDisplay + '</div>' +
+        legalHoldBadge +
         '<button class="p7cm-close" onclick="p7CloseClaimModal()"><i class="fas fa-times"></i></button>' +
       '</div>' +
       '<div class="p7cm-tabs">' + tabBtns + '</div>' +
@@ -35041,11 +35508,14 @@ function p7SwitchClaimTab(claimId, tab, el) {
 }
 
 function p7BuildClaimTabContent(claim, tab) {
+
+  /* ── TAB: OVERVIEW ── */
   if (tab === 'view') {
     var statusColors = { 'Under Review':'#0891b2', 'Pending Docs':'#d97706', 'Open':'#4f46e5', 'Approved':'#059669', 'Paid':'#059669', 'Denied':'#dc2626' };
     var sc2 = statusColors[claim.status] || '#64748b';
-    var slaColor = { breach: '#dc2626', warn: '#d97706', ok: '#059669' };
-    var slac = slaColor[claim.slaStatus] || '#64748b';
+    var slaColor2 = { breach: '#dc2626', warn: '#d97706', ok: '#059669' };
+    var slac = slaColor2[claim.slaStatus] || '#64748b';
+    var slaDisp = claim.slaDaysLeft >= 999 ? claim.slaDeadline : claim.slaDeadline + ' · ' + claim.slaDaysLeft + 'd left';
     return '<div class="p7cm-overview">' +
       '<div class="p7cm-ov-grid">' +
         '<div class="p7cm-ov-card">' +
@@ -35062,7 +35532,7 @@ function p7BuildClaimTabContent(claim, tab) {
         '</div>' +
         '<div class="p7cm-ov-card">' +
           '<div class="p7cm-ov-label">SLA Deadline</div>' +
-          '<div class="p7cm-ov-val" style="color:' + slac + ';font-weight:600">' + claim.slaDeadline + ' · <span>' + claim.slaDaysLeft + 'd left</span></div>' +
+          '<div class="p7cm-ov-val" style="color:' + slac + ';font-weight:600">' + slaDisp + '</div>' +
         '</div>' +
         '<div class="p7cm-ov-card">' +
           '<div class="p7cm-ov-label">Policy</div>' +
@@ -35081,6 +35551,7 @@ function p7BuildClaimTabContent(claim, tab) {
           '<div class="p7cm-ov-val"><strong>' + claim.priority + '</strong></div>' +
         '</div>' +
       '</div>' +
+      (claim.legalHold ? '<div class="p7cm-legal-hold-banner"><i class="fas fa-lock"></i> <strong>Legal Hold Active</strong> — Do not process payout until legal team approves. Coordinate with counsel before any claim decision.</div>' : '') +
       (claim.contestability ? '<div class="p7cm-contestability-alert"><i class="fas fa-shield-virus"></i> <strong>Contestability Window Active</strong> — ' + claim.contestabilityNote + '</div>' : '') +
       (claim.adbEligible ? '<div class="p7cm-adb-banner"><i class="fas fa-heartbeat"></i> <strong>ADB Eligible</strong> — ' + claim.adbNote + '</div>' : '') +
       '<div class="p7cm-ai-triage"><div class="p7cm-ai-triage-label"><i class="fas fa-robot"></i> AI Triage</div><div>' + claim.aiTriage + '</div></div>' +
@@ -35093,6 +35564,7 @@ function p7BuildClaimTabContent(claim, tab) {
     '</div>';
   }
 
+  /* ── TAB: DOCUMENTS ── */
   if (tab === 'docs') {
     var docRows = claim.docs.map(function(doc) {
       var icon = doc.status === 'received' ? 'fa-check-circle' : doc.status === 'missing' ? 'fa-times-circle' : doc.status === 'in-progress' ? 'fa-spinner' : 'fa-clock';
@@ -35111,18 +35583,194 @@ function p7BuildClaimTabContent(claim, tab) {
     var completePct = Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100);
     return '<div class="p7cm-docs-panel">' +
       '<div class="p7cm-docs-header">' +
-        '<div class="p7cm-docs-complete">Doc Completion: <strong>' + completePct + '%</strong></div>' +
+        '<div class="p7cm-docs-complete">Doc Completion: <strong>' + completePct + '%</strong> (' + claim.docs.filter(function(d){return d.status==='received';}).length + ' of ' + claim.docs.length + ' received)</div>' +
         '<div class="p7cm-docs-progress-bar"><div style="width:' + completePct + '%;height:8px;background:' + (completePct === 100 ? '#059669' : completePct >= 50 ? '#d97706' : '#dc2626') + ';border-radius:4px"></div></div>' +
       '</div>' +
       '<div class="p7cm-doc-list">' + docRows + '</div>' +
       '<div class="p7cm-doc-actions">' +
         '<button class="p7cm-act-btn primary" onclick="p7SendAllDocRequests(\'' + claim.id + '\')"><i class="fas fa-paper-plane"></i> Request All Missing Docs</button>' +
         '<button class="p7cm-act-btn secondary" onclick="showToast(\'Upload portal link sent to claimant\',\'success\')"><i class="fas fa-upload"></i> Send Upload Portal Link</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Document checklist exported to PDF\',\'success\')"><i class="fas fa-file-pdf"></i> Export Checklist</button>' +
       '</div>' +
     '</div>';
   }
 
+  /* ── TAB: COMMUNICATIONS ── */
+  if (tab === 'comms') {
+    var commRows = (claim.communications || []).map(function(c, idx) {
+      var dirColor = c.dir === 'Inbound' ? '#059669' : c.dir === 'Auto' ? '#7c3aed' : '#003087';
+      var dirBg = c.dir === 'Inbound' ? '#d1fae5' : c.dir === 'Auto' ? '#ede9fe' : '#dbeafe';
+      var typeIcon = c.type === 'Phone' ? 'fa-phone-alt' : c.type === 'Email' ? 'fa-envelope' : c.type === 'Fax' ? 'fa-fax' : c.type === 'Letter' ? 'fa-file-alt' : 'fa-robot';
+      return '<div class="p7cm-comm-row">' +
+        '<div class="p7cm-comm-icon" style="background:' + dirBg + ';color:' + dirColor + '"><i class="fas ' + typeIcon + '"></i></div>' +
+        '<div class="p7cm-comm-body">' +
+          '<div class="p7cm-comm-meta">' +
+            '<span class="p7cm-comm-date">' + c.date + '</span>' +
+            '<span class="p7cm-comm-type-badge" style="background:' + dirBg + ';color:' + dirColor + '">' + c.dir + ' · ' + c.type + '</span>' +
+            '<span class="p7cm-comm-from">' + c.from + '</span>' +
+          '</div>' +
+          '<div class="p7cm-comm-note">' + c.note + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    if (!commRows) commRows = '<div class="p7cm-empty-state"><i class="fas fa-comments"></i><p>No communications logged yet.</p></div>';
+    return '<div class="p7cm-comms-panel">' +
+      '<div class="p7cm-comms-header">' +
+        '<div class="p7cm-comms-title"><i class="fas fa-comments"></i> Communication Log — ' + claim.id + '</div>' +
+        '<div class="p7cm-comms-actions">' +
+          '<button class="p7cm-act-btn primary" onclick="p7LogCall(\'' + claim.id + '\')"><i class="fas fa-phone-alt"></i> Log Call</button>' +
+          '<button class="p7cm-act-btn secondary" onclick="p7SendClaimEmail(\'' + claim.id + '\')"><i class="fas fa-envelope"></i> Send Email</button>' +
+          '<button class="p7cm-act-btn ghost" onclick="showToast(\'Letter template opened\',\'info\')"><i class="fas fa-file-alt"></i> Draft Letter</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="p7cm-comm-list">' + commRows + '</div>' +
+      '<div class="p7cm-comm-add">' +
+        '<div class="p7cm-comm-add-label"><i class="fas fa-plus-circle"></i> Log New Interaction</div>' +
+        '<div class="p7cm-comm-add-row">' +
+          '<select class="p7m-select" id="p7cm-comm-type" style="width:140px"><option>Phone</option><option>Email</option><option>Fax</option><option>Letter</option><option>In-Person</option></select>' +
+          '<select class="p7m-select" id="p7cm-comm-dir" style="width:120px"><option>Inbound</option><option>Outbound</option></select>' +
+          '<input class="p7m-input" id="p7cm-comm-from" placeholder="From / To…" style="width:200px" />' +
+          '<input class="p7m-input" id="p7cm-comm-note" placeholder="Note…" style="flex:1" />' +
+          '<button class="p7cm-act-btn primary" onclick="p7AddCommLog(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Add</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: BENEFICIARY ── */
+  if (tab === 'beneficiary') {
+    var kycColor = claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified' ? '#059669' : claim.benefKYC && claim.benefKYC.indexOf('Pending') >= 0 ? '#d97706' : '#dc2626';
+    var kycIcon = claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    return '<div class="p7cm-bene-panel">' +
+      '<div class="p7cm-bene-header"><i class="fas fa-user-check"></i> Beneficiary Verification</div>' +
+      '<div class="p7cm-bene-card">' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Beneficiary</span><span class="p7cm-bene-val"><strong>' + (claim.beneficiary || '—') + '</strong></span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Relationship</span><span class="p7cm-bene-val">' + (claim.benefRel || '—') + '</span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">KYC Status</span><span class="p7cm-bene-val"><span style="color:' + kycColor + ';font-weight:600"><i class="fas ' + kycIcon + '"></i> ' + (claim.benefKYC || 'Not Started') + '</span></span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Email</span><span class="p7cm-bene-val"><a href="mailto:' + (claim.benefEmail || '') + '" style="color:#003087">' + (claim.benefEmail || '—') + '</a></span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Phone</span><span class="p7cm-bene-val">' + (claim.benefPhone || '—') + '</span></div>' +
+        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Payment Account</span><span class="p7cm-bene-val">' + (claim.benefPayAccount || 'Not provided') + '</span></div>' +
+      '</div>' +
+      '<div class="p7cm-bene-kyc-section">' +
+        '<div class="p7cm-bene-kyc-title"><i class="fas fa-id-card"></i> KYC Checklist</div>' +
+        '<div class="p7cm-bene-kyc-items">' +
+          '<div class="p7cm-bene-kyc-item ' + ((claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified') ? 'done' : 'todo') + '"><i class="fas ' + ((claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified') ? 'fa-check-circle' : 'fa-circle') + '"></i> Government-issued Photo ID</div>' +
+          '<div class="p7cm-bene-kyc-item ' + (claim.benefPayAccount && claim.benefPayAccount.indexOf('pending') < 0 && claim.benefPayAccount.indexOf('Not') < 0 ? 'done' : 'todo') + '"><i class="fas ' + (claim.benefPayAccount && claim.benefPayAccount.indexOf('pending') < 0 && claim.benefPayAccount.indexOf('Not') < 0 ? 'fa-check-circle' : 'fa-circle') + '"></i> Bank / Payment Account Verified</div>' +
+          '<div class="p7cm-bene-kyc-item ' + ((claim.benefRel && claim.benefRel !== '—') ? 'done' : 'todo') + '"><i class="fas ' + ((claim.benefRel && claim.benefRel !== '—') ? 'fa-check-circle' : 'fa-circle') + '"></i> Relationship to Insured Confirmed</div>' +
+          '<div class="p7cm-bene-kyc-item ' + (!claim.legalHold ? 'done' : 'todo') + '"><i class="fas ' + (!claim.legalHold ? 'fa-check-circle' : 'fa-circle') + '"></i> No Legal Hold / Dispute</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="p7cm-bene-actions">' +
+        '<button class="p7cm-act-btn primary" onclick="showToast(\'KYC verification request sent to beneficiary\',\'success\')"><i class="fas fa-id-card"></i> Send KYC Request</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Bank account verification initiated\',\'success\')"><i class="fas fa-university"></i> Verify Bank Account</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Beneficiary designation pulled from policy record\',\'info\')"><i class="fas fa-file-contract"></i> View Designation on File</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: PAYMENTS & RESERVE ── */
+  if (tab === 'payments') {
+    var payHistory = claim.paymentHistory || [];
+    var payRows = payHistory.length > 0 ? payHistory.map(function(p) {
+      return '<div class="p7cm-pay-row">' +
+        '<div class="p7cm-pay-date">' + p.date + '</div>' +
+        '<div class="p7cm-pay-amount" style="color:#059669;font-weight:700">' + p.amount + '</div>' +
+        '<div class="p7cm-pay-note">' + p.note + '</div>' +
+      '</div>';
+    }).join('') : '<div class="p7cm-empty-state"><i class="fas fa-dollar-sign"></i><p>No payments processed yet.</p></div>';
+
+    return '<div class="p7cm-payments-panel">' +
+      '<div class="p7cm-payments-header"><i class="fas fa-dollar-sign"></i> Payments & Reserve — ' + claim.id + '</div>' +
+      '<div class="p7cm-reserve-card">' +
+        '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Reserve Amount</span><span class="p7cm-reserve-val reserve-amount">' + (claim.reserveAmount || 'Not set') + '</span></div>' +
+        '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Reserve Status</span><span class="p7cm-reserve-val">' + (claim.reserveStatus || 'Pending') + '</span></div>' +
+        '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Claim Amount</span><span class="p7cm-reserve-val">' + claim.amount + '</span></div>' +
+        '<div class="p7cm-reserve-row"><span class="p7cm-reserve-lbl">Coverage Limits</span><span class="p7cm-reserve-val">' + (claim.coverageLimits || '—') + '</span></div>' +
+      '</div>' +
+      '<div class="p7cm-pay-history-title"><i class="fas fa-history"></i> Payment History</div>' +
+      '<div class="p7cm-pay-list">' + payRows + '</div>' +
+      '<div class="p7cm-pay-actions">' +
+        '<button class="p7cm-act-btn primary" onclick="p7ApproveClaim(\'' + claim.id + '\')"><i class="fas fa-check-circle"></i> Authorize Payout</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Reserve amount updated in claims system\',\'success\')"><i class="fas fa-edit"></i> Adjust Reserve</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Payment history exported\',\'success\')"><i class="fas fa-file-export"></i> Export Payment Report</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: LIABILITY & LEGAL ── */
+  if (tab === 'liability') {
+    var lc = claim.liabilityScore;
+    var lColor = lc >= 60 ? '#dc2626' : lc >= 30 ? '#d97706' : '#059669';
+    var lBg = lc >= 60 ? '#fee2e2' : lc >= 30 ? '#fef3c7' : '#d1fae5';
+    var docPct = Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100);
+    return '<div class="p7cm-liability-panel">' +
+      '<div class="p7cm-liab-score-section">' +
+        '<div class="p7cm-liab-dial" style="--liab-color:' + lColor + '">' +
+          '<span class="p7cm-liab-num">' + lc + '</span>' +
+          '<span class="p7cm-liab-lbl">' + claim.liabilityLabel + '</span>' +
+        '</div>' +
+        '<div class="p7cm-liab-info">' +
+          '<div style="font-size:17px;font-weight:700;color:' + lColor + ';margin-bottom:8px">Liability Score: ' + lc + '/100 — ' + claim.liabilityLabel + '</div>' +
+          '<div style="color:#475569;line-height:1.6;font-size:14px">AI liability assessment based on: policy coverage limits, exclusion clauses, fraud probability, contestability status, regulatory exposure, and documentation completeness.</div>' +
+          (lc >= 60 ? '<div class="p7cm-liab-warn"><i class="fas fa-gavel"></i> Litigation risk detected. Legal team must review before claim decision. Document all actions.</div>' :
+           lc >= 30 ? '<div class="p7cm-liab-warn" style="background:#fef3c7;border-color:#fbbf24;color:#92400e"><i class="fas fa-exclamation-triangle"></i> Moderate liability exposure. Monitor closely and document all steps.</div>' : '') +
+        '</div>' +
+      '</div>' +
+
+      '<div class="p7cm-liab-section-title"><i class="fas fa-chart-bar"></i> Liability Risk Factors</div>' +
+      '<div class="p7cm-liab-factors">' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>Documentation Completeness</span><span style="font-weight:700;color:' + (docPct===100?'#059669':docPct>=50?'#d97706':'#dc2626') + '">' + docPct + '%</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + docPct + '%;background:' + (docPct===100?'#059669':docPct>=50?'#d97706':'#dc2626') + '"></div></div>' +
+        '</div>' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>Fraud Risk Score</span><span style="font-weight:700;color:' + (claim.fraudScore>=70?'#dc2626':claim.fraudScore>=40?'#d97706':'#059669') + '">' + claim.fraudScore + '/100</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + claim.fraudScore + '%;background:' + (claim.fraudScore>=70?'#dc2626':claim.fraudScore>=40?'#d97706':'#059669') + '"></div></div>' +
+        '</div>' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>Contestability Exposure</span><span style="font-weight:700;color:' + (claim.contestability?'#dc2626':'#059669') + '">' + (claim.contestability?'Active':'None') + '</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.contestability?85:5) + '%;background:' + (claim.contestability?'#dc2626':'#059669') + '"></div></div>' +
+        '</div>' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>SLA Compliance Pressure</span><span style="font-weight:700;color:' + (claim.slaStatus==='breach'?'#dc2626':claim.slaStatus==='warn'?'#d97706':'#059669') + '">' + (claim.slaStatus==='breach'?'BREACH':claim.slaStatus==='warn'?'Warning':'On Track') + '</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.slaStatus==='ok'?20:claim.slaStatus==='warn'?60:95) + '%;background:' + (claim.slaStatus==='ok'?'#059669':claim.slaStatus==='warn'?'#d97706':'#dc2626') + '"></div></div>' +
+        '</div>' +
+        '<div class="p7cm-liab-factor">' +
+          '<div class="p7cm-liab-factor-label"><span>Bad Faith Risk</span><span style="font-weight:700;color:' + (claim.legalHold?'#dc2626':lc>=50?'#d97706':'#059669') + '">' + (claim.legalHold?'High':'Low-Medium') + '</span></div>' +
+          '<div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.legalHold?80:lc>=50?45:15) + '%;background:' + (claim.legalHold?'#dc2626':lc>=50?'#d97706':'#059669') + '"></div></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="p7cm-liab-detail-grid">' +
+        '<div class="p7cm-liab-detail-card">' +
+          '<div class="p7cm-liab-detail-title"><i class="fas fa-file-contract"></i> Coverage & Exclusions</div>' +
+          '<div class="p7cm-liab-detail-body">' +
+            '<div class="p7cm-liab-detail-row"><label>Coverage Limits</label><span>' + (claim.coverageLimits || '—') + '</span></div>' +
+            '<div class="p7cm-liab-detail-row"><label>Exclusion Analysis</label><span>' + (claim.exclusions || 'No exclusions identified.') + '</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="p7cm-liab-detail-card">' +
+          '<div class="p7cm-liab-detail-title"><i class="fas fa-landmark"></i> Regulatory & Legal Exposure</div>' +
+          '<div class="p7cm-liab-detail-body">' +
+            '<div class="p7cm-liab-detail-row"><label>Governing State</label><span>' + (claim.regulatoryState || '—') + '</span></div>' +
+            '<div class="p7cm-liab-detail-row"><label>Regulatory Note</label><span>' + (claim.regulatoryNote || '—') + '</span></div>' +
+            '<div class="p7cm-liab-detail-row"><label>Legal Hold</label><span style="color:' + (claim.legalHold?'#dc2626':'#059669') + ';font-weight:600">' + (claim.legalHold ? '<i class="fas fa-lock"></i> ACTIVE' : '<i class="fas fa-lock-open"></i> None') + '</span></div>' +
+            '<div class="p7cm-liab-detail-row"><label>Bad Faith Risk</label><span>' + (claim.badFaithRisk || '—') + '</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="p7cm-pay-actions" style="margin-top:16px">' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Legal team notified — case flagged for attorney review\',\'success\')"><i class="fas fa-gavel"></i> Notify Legal Team</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Liability report exported\',\'success\')"><i class="fas fa-file-pdf"></i> Export Liability Report</button>' +
+        (claim.legalHold ? '<button class="p7cm-act-btn ghost" onclick="showToast(\'Legal hold removal request submitted\',\'info\')"><i class="fas fa-unlock"></i> Request Hold Removal</button>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: AI INTELLIGENCE ── */
   if (tab === 'ci') {
+    var docPct2 = Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100);
     return '<div class="p7cm-ci-panel">' +
       '<div class="p7cm-ci-header">' +
         '<div class="p7cm-ci-icon"><i class="fas fa-robot"></i></div>' +
@@ -35135,14 +35783,14 @@ function p7BuildClaimTabContent(claim, tab) {
             '<div class="p7cm-ci-fraud-dial ' + (claim.fraudScore >= 70 ? 'red' : claim.fraudScore >= 40 ? 'amber' : 'green') + '">' + claim.fraudScore + '</div>' +
             '<div>' +
               '<div style="font-weight:600;margin-bottom:4px">' + claim.fraudLabel + ' Risk — Score ' + claim.fraudScore + '/100</div>' +
-              (claim.fraudScore >= 70 ? '<div style="color:#dc2626">Investigation required before processing. Potential red flags detected.</div>' :
+              (claim.fraudScore >= 70 ? '<div style="color:#dc2626">Investigation required before processing. Potential red flags detected. Do not approve without full investigation.</div>' :
                claim.fraudScore >= 40 ? '<div style="color:#d97706">Elevated score — monitor closely. Case assigned to senior adjuster.</div>' :
-               '<div style="color:#059669">Low fraud risk. No suspicious patterns detected.</div>') +
+               '<div style="color:#059669">Low fraud risk. No suspicious patterns detected. Standard processing recommended.</div>') +
             '</div>' +
           '</div>' +
         '</div>' +
         '<div class="p7cm-ci-section">' +
-          '<div class="p7cm-ci-section-title"><i class="fas fa-tasks"></i> AI Recommendation</div>' +
+          '<div class="p7cm-ci-section-title"><i class="fas fa-tasks"></i> AI Triage Recommendation</div>' +
           '<div class="p7cm-ci-rec">' + claim.aiTriage + '</div>' +
         '</div>' +
         (claim.contestability ? '<div class="p7cm-ci-section p7cm-ci-contest">' +
@@ -35150,62 +35798,36 @@ function p7BuildClaimTabContent(claim, tab) {
           '<div>' + claim.contestabilityNote + '</div>' +
         '</div>' : '') +
         '<div class="p7cm-ci-section">' +
+          '<div class="p7cm-ci-section-title"><i class="fas fa-chart-line"></i> Liability Score</div>' +
+          '<div style="display:flex;align-items:center;gap:16px">' +
+            '<div class="p7cm-ci-fraud-dial ' + (claim.liabilityScore >= 60 ? 'red' : claim.liabilityScore >= 30 ? 'amber' : 'green') + '" style="font-size:18px">' + claim.liabilityScore + '</div>' +
+            '<div><strong>' + claim.liabilityLabel + ' Liability</strong><br><span style="color:#64748b;font-size:13px">Composite AI score based on docs, fraud, contestability, and SLA.</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="p7cm-ci-section">' +
           '<div class="p7cm-ci-section-title"><i class="fas fa-chart-bar"></i> Resolution Prediction</div>' +
-          '<div>Based on document completeness (' + Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100) + '%) and case complexity, AI estimates <strong>' + (claim.slaStatus === 'ok' ? '5–10 business days' : claim.slaStatus === 'warn' ? '2–5 business days (expedite)' : '1–2 days URGENT') + '</strong> to resolution.</div>' +
+          '<div>Document completeness: <strong>' + docPct2 + '%</strong>. AI estimates <strong>' + (claim.slaStatus === 'ok' ? '5–10 business days' : claim.slaStatus === 'warn' ? '2–5 business days (expedite recommended)' : '1–2 days URGENT action required') + '</strong> to resolution based on current case status.</div>' +
         '</div>' +
       '</div>' +
       '<div class="p7cm-ci-actions">' +
         '<button class="p7cm-act-btn primary" onclick="showToast(\'Full AI analysis report generated — check email\',\'success\')"><i class="fas fa-file-alt"></i> Generate Full Report</button>' +
-        '<button class="p7cm-act-btn secondary" onclick="openFraudDetailModal(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="p7OpenFraudDetail(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'AI re-scored claim — refreshing intelligence\',\'info\')"><i class="fas fa-sync-alt"></i> Re-run AI Analysis</button>' +
       '</div>' +
     '</div>';
   }
 
-  if (tab === 'timeline') {
-    var timelineRows = claim.timeline.map(function(t, idx) {
-      var dotColor = t.type === 'alert' ? '#dc2626' : t.type === 'filed' ? '#003087' : '#059669';
-      var isLast = idx === claim.timeline.length - 1;
-      return '<div class="p7cm-tl-row ' + (isLast ? 'p7cm-tl-latest' : '') + '">' +
-        '<div class="p7cm-tl-dot" style="background:' + dotColor + '"></div>' +
-        '<div class="p7cm-tl-date">' + t.date + '</div>' +
-        '<div class="p7cm-tl-event">' + t.event + '</div>' +
-      '</div>';
-    }).join('');
-
-    return '<div class="p7cm-timeline-panel">' +
-      '<div class="p7cm-tl-header">Claim Activity Timeline — ' + claim.id + '</div>' +
-      '<div class="p7cm-tl-list">' + timelineRows + '</div>' +
-      '<div class="p7cm-tl-add">' +
-        '<input class="p7m-input" id="p7cm-tl-note" placeholder="Add timeline note…" style="flex:1"/>' +
-        '<button class="p7cm-act-btn primary" onclick="p7AddTimelineNote(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Add Note</button>' +
-      '</div>' +
-    '</div>';
-  }
-
-  if (tab === 'liability') {
-    var lc = claim.liabilityScore;
-    var lColor = lc >= 60 ? '#dc2626' : lc >= 30 ? '#d97706' : '#059669';
-    return '<div class="p7cm-liability-panel">' +
-      '<div class="p7cm-liab-score-section">' +
-        '<div class="p7cm-liab-dial" style="--liab-color:' + lColor + '">' +
-          '<span class="p7cm-liab-num">' + lc + '%</span>' +
-          '<span class="p7cm-liab-lbl">' + claim.liabilityLabel + '</span>' +
-        '</div>' +
-        '<div class="p7cm-liab-info">' +
-          '<div style="font-size:16px;font-weight:700;color:' + lColor + ';margin-bottom:8px">Liability Score: ' + lc + '% — ' + claim.liabilityLabel + '</div>' +
-          '<div style="color:#475569;line-height:1.6">AI liability assessment based on: policy terms, exclusion clauses, fraud probability, documentation completeness, and regulatory exposure.</div>' +
-          (lc >= 60 ? '<div class="p7cm-liab-warn"><i class="fas fa-gavel"></i> Litigation risk detected. Legal team notification recommended before claim decision.</div>' : '') +
-        '</div>' +
-      '</div>' +
-      '<div class="p7cm-liab-factors">' +
-        '<div class="p7cm-liab-factor"><span>Documentation Completeness</span><div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100) + '%;background:#059669"></div></div></div>' +
-        '<div class="p7cm-liab-factor"><span>Fraud Risk</span><div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + claim.fraudScore + '%;background:' + (claim.fraudScore >= 70 ? '#dc2626' : '#d97706') + '"></div></div></div>' +
-        '<div class="p7cm-liab-factor"><span>Contestability Exposure</span><div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.contestability ? 85 : 5) + '%;background:' + (claim.contestability ? '#dc2626' : '#059669') + '"></div></div></div>' +
-        '<div class="p7cm-liab-factor"><span>SLA Compliance</span><div class="p7cm-liab-bar-wrap"><div class="p7cm-liab-bar-fill" style="width:' + (claim.slaStatus === 'ok' ? 20 : claim.slaStatus === 'warn' ? 60 : 90) + '%;background:' + (claim.slaStatus === 'ok' ? '#059669' : claim.slaStatus === 'warn' ? '#d97706' : '#dc2626') + '"></div></div></div>' +
-      '</div>' +
-    '</div>';
-  }
   return '<div class="p7cm-empty">Tab content loading…</div>';
+}
+
+function p7LogCall(claimId) { p7Toast('<i class="fas fa-phone-alt"></i> Call log modal opened for ' + claimId, 2500); }
+function p7SendClaimEmail(claimId) { p7Toast('<i class="fas fa-envelope"></i> Email composer opened for ' + claimId, 2500); }
+function p7AddCommLog(claimId) {
+  var type = (document.getElementById('p7cm-comm-type') || {}).value || 'Phone';
+  var dir = (document.getElementById('p7cm-comm-dir') || {}).value || 'Outbound';
+  var note = (document.getElementById('p7cm-comm-note') || {}).value || '';
+  if (!note.trim()) { p7Toast('Please enter a note before adding', 2000); return; }
+  p7Toast('<i class="fas fa-check-circle"></i> Communication logged: ' + type + ' — ' + note.substring(0,40) + '…', 3000);
 }
 
 function p7CloseClaimModal() {

@@ -43181,3 +43181,121 @@ kbd {
   font-weight: 600;
   padding: 4px 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CLAIM MODAL — 7 new tabs + claim type badges + enhancements
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Legal hold badge in header */
+.p7cm-legal-hold-badge {
+  background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;
+  border-radius: 12px; padding: 4px 12px; font-size: 12px;
+  font-weight: 700; display: flex; align-items: center; gap: 5px;
+}
+.p7cm-legal-hold-banner {
+  background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px;
+  padding: 12px 16px; margin: 12px 0; color: #7f1d1d; font-size: 13px;
+}
+
+/* ── Communications Tab ── */
+.p7cm-comms-panel { display: flex; flex-direction: column; gap: 0; height: 100%; }
+.p7cm-comms-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 0 14px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 14px;
+}
+.p7cm-comms-title { font-weight: 700; font-size: 15px; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.p7cm-comms-actions { display: flex; gap: 8px; }
+.p7cm-comm-list { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow-y: auto; max-height: 300px; }
+.p7cm-comm-row {
+  display: flex; align-items: flex-start; gap: 12px; background: #f8fafc;
+  border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;
+}
+.p7cm-comm-icon {
+  width: 36px; height: 36px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px;
+}
+.p7cm-comm-body { flex: 1; }
+.p7cm-comm-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.p7cm-comm-date { font-size: 12px; color: #64748b; }
+.p7cm-comm-type-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+.p7cm-comm-from { font-size: 12px; font-weight: 600; color: #334155; }
+.p7cm-comm-note { font-size: 13px; color: #475569; line-height: 1.5; }
+.p7cm-comm-add {
+  border-top: 1px solid #e2e8f0; margin-top: 14px; padding-top: 14px;
+}
+.p7cm-comm-add-label { font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.p7cm-comm-add-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.p7m-select {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 7px 10px;
+  font-size: 13px; color: #1e293b; background: #fff;
+}
+.p7cm-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px; color: #94a3b8; font-size: 14px; }
+.p7cm-empty-state i { font-size: 32px; }
+
+/* ── Beneficiary Tab ── */
+.p7cm-bene-panel { display: flex; flex-direction: column; gap: 16px; }
+.p7cm-bene-header { font-weight: 700; font-size: 15px; color: #1e293b; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+.p7cm-bene-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.p7cm-bene-row { display: flex; align-items: flex-start; gap: 16px; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+.p7cm-bene-row:last-child { border-bottom: none; }
+.p7cm-bene-lbl { font-size: 12px; font-weight: 600; color: #64748b; width: 160px; flex-shrink: 0; }
+.p7cm-bene-val { font-size: 13px; color: #1e293b; flex: 1; }
+.p7cm-bene-kyc-section { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px; }
+.p7cm-bene-kyc-title { font-size: 13px; font-weight: 700; color: #166534; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.p7cm-bene-kyc-items { display: flex; flex-direction: column; gap: 8px; }
+.p7cm-bene-kyc-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
+.p7cm-bene-kyc-item.done { color: #166534; }
+.p7cm-bene-kyc-item.done i { color: #16a34a; }
+.p7cm-bene-kyc-item.todo i { color: #d1d5db; }
+.p7cm-bene-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── Payments & Reserve Tab ── */
+.p7cm-payments-panel { display: flex; flex-direction: column; gap: 16px; }
+.p7cm-payments-header { font-weight: 700; font-size: 15px; color: #1e293b; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+.p7cm-reserve-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.p7cm-reserve-row { display: flex; align-items: flex-start; gap: 16px; padding: 5px 0; }
+.p7cm-reserve-lbl { font-size: 12px; font-weight: 600; color: #64748b; width: 160px; flex-shrink: 0; }
+.p7cm-reserve-val { font-size: 13px; color: #1e293b; flex: 1; }
+.p7cm-reserve-val.reserve-amount { font-size: 18px; font-weight: 700; color: #059669; }
+.p7cm-pay-history-title { font-weight: 700; font-size: 14px; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+.p7cm-pay-list { display: flex; flex-direction: column; gap: 8px; }
+.p7cm-pay-row { display: flex; align-items: center; gap: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; }
+.p7cm-pay-date { font-size: 12px; color: #64748b; width: 120px; flex-shrink: 0; }
+.p7cm-pay-amount { font-size: 16px; font-weight: 700; color: #059669; width: 100px; flex-shrink: 0; }
+.p7cm-pay-note { font-size: 13px; color: #475569; flex: 1; }
+.p7cm-pay-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── Liability & Legal Tab — enhanced ── */
+.p7cm-liab-factor-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 13px; color: #334155; }
+.p7cm-liab-section-title { font-weight: 700; font-size: 14px; color: #1e293b; display: flex; align-items: center; gap: 6px; margin: 16px 0 10px 0; }
+.p7cm-liab-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px; }
+@media (max-width: 700px) { .p7cm-liab-detail-grid { grid-template-columns: 1fr; } }
+.p7cm-liab-detail-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
+.p7cm-liab-detail-title { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.p7cm-liab-detail-body { display: flex; flex-direction: column; gap: 8px; }
+.p7cm-liab-detail-row { display: flex; flex-direction: column; gap: 3px; }
+.p7cm-liab-detail-row label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+.p7cm-liab-detail-row span { font-size: 13px; color: #334155; line-height: 1.5; }
+
+/* ── New Claim Type Badge Colors ── */
+.claim-type-badge.adb-rider { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.claim-type-badge.ci-rider { background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; }
+.claim-type-badge.child-rider { background: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; }
+.claim-type-badge.chronic { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+.claim-type-badge.maturity { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+.claim-type-badge.surrender { background: #fff7ed; color: #9a3412; border: 1px solid #fdba74; }
+.claim-type-badge.pua { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+.claim-type-badge.annuity { background: #eef2ff; color: #3730a3; border: 1px solid #a5b4fc; }
+.claim-type-badge.survivorship { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-weight: 700; }
+
+/* Avatar colors for new clients */
+.mini-avatar.tr2 { background: #a16207; }
+.mini-avatar.pn { background: #7c3aed; }
+.mini-avatar.dt { background: #0369a1; }
+.mini-avatar.af { background: #0e7490; }
+.mini-avatar.hs { background: #166534; }
+.mini-avatar.cb { background: #9d174d; }
+.mini-avatar.gm { background: #15803d; }
+.mini-avatar.nr { background: #3730a3; }
+.mini-avatar.em { background: #374151; }
+.p7cm-avatar { width:36px; height:36px; border-radius:50%; background:#003087; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }

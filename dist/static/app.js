@@ -36704,6 +36704,51 @@ function openAITriageModal() {
     var actionsHTML = c.nextActions.map(function(a, j) {
       return '<div class="triage-action-item"><span class="triage-action-num">' + (j+1) + '</span><span>' + a + '</span></div>';
     }).join('');
+
+    /* ── Build contextual action bar based on claim tag ── */
+    var actionBar = '';
+    if (c.tag === 'SLA BREACH') {
+      actionBar =
+        '<button class="triage-act-btn triage-act-primary" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> Open Claim</button>' +
+        '<button class="triage-act-btn triage-act-warning" onclick="document.getElementById(\'triage-modal-overlay\').remove();openUploadModal(\'' + c.id + '\')"><i class="fas fa-upload"></i> Upload Docs</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'ci\')"><i class="fas fa-robot"></i> AI Intel</button>' +
+        '<button class="triage-act-btn triage-act-danger" onclick="p7Toast(\'<i class=\\\'fas fa-exclamation-triangle\\\'></i> SLA exception flagged for ' + c.id + ' — Sr. Adjuster notified\',3000)"><i class="fas fa-flag"></i> Flag SLA</button>';
+    } else if (c.tag === 'FRAUD HOLD') {
+      actionBar =
+        '<button class="triage-act-btn triage-act-primary" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> Open Claim</button>' +
+        '<button class="triage-act-btn triage-act-danger" onclick="document.getElementById(\'triage-modal-overlay\').remove();openFraudDetailModal(\'' + c.id + '\')"><i class="fas fa-search-plus"></i> Fraud Review</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'liability\')"><i class="fas fa-gavel"></i> Liability</button>' +
+        '<button class="triage-act-btn triage-act-warning" onclick="p7Toast(\'<i class=\\\'fas fa-shield-virus\\\'></i> ' + c.id + ' referred to SIU — investigation opened\',3000)"><i class="fas fa-user-shield"></i> Refer SIU</button>';
+    } else if (c.tag === 'COMPASSIONATE') {
+      actionBar =
+        '<button class="triage-act-btn triage-act-primary" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> Open Claim</button>' +
+        '<button class="triage-act-btn triage-act-warning" onclick="sendDocRequest(\'' + c.id + '\',\'oncologist\');p7Toast(\'<i class=\\\'fas fa-paper-plane\\\'></i> Doc request sent to Dr. Hernandez\',2800)"><i class="fas fa-paper-plane"></i> Chase Docs</button>' +
+        '<button class="triage-act-btn triage-act-approve" onclick="p7Toast(\'<i class=\\\'fas fa-heart\\\'></i> ' + c.id + ' pre-approved — pending cert receipt\',3000)"><i class="fas fa-check"></i> Pre-Approve</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'comms\')"><i class="fas fa-comments"></i> Comms</button>';
+    } else if (c.tag === 'DOCS PENDING') {
+      actionBar =
+        '<button class="triage-act-btn triage-act-primary" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> Open Claim</button>' +
+        '<button class="triage-act-btn triage-act-warning" onclick="sendDocRequest(\'' + c.id + '\',\'physician\');p7Toast(\'<i class=\\\'fas fa-paper-plane\\\'></i> AI follow-up letter sent to physician\',2800)"><i class="fas fa-paper-plane"></i> Send Reminder</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'docs\')"><i class="fas fa-folder-open"></i> Documents</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'comms\')"><i class="fas fa-comments"></i> Comms Log</button>';
+    } else if (c.tag === 'NEAR READY') {
+      actionBar =
+        '<button class="triage-act-btn triage-act-primary" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> Open Claim</button>' +
+        '<button class="triage-act-btn triage-act-approve" onclick="p7Toast(\'<i class=\\\'fas fa-check-circle\\\'></i> ' + c.id + ' routed to adjuster for final approval\',3000)"><i class="fas fa-check"></i> Route to Adjuster</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'payments\')"><i class="fas fa-dollar-sign"></i> Reserve</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'docs\')"><i class="fas fa-folder-open"></i> Docs</button>';
+    } else if (c.tag === 'APPROVAL READY') {
+      actionBar =
+        '<button class="triage-act-btn triage-act-primary" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> Open Claim</button>' +
+        '<button class="triage-act-btn triage-act-approve" onclick="p7Toast(\'<i class=\\\'fas fa-check-circle\\\'></i> ' + c.id + ' approved — payout initiated\',3000)"><i class="fas fa-check-circle"></i> Approve &amp; Pay</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'payments\')"><i class="fas fa-dollar-sign"></i> Payments</button>' +
+        '<button class="triage-act-btn triage-act-ghost" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'beneficiary\')"><i class="fas fa-user-check"></i> Beneficiary</button>';
+    } else {
+      actionBar =
+        '<button class="triage-act-btn triage-act-primary" onclick="document.getElementById(\'triage-modal-overlay\').remove();openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> Open Claim</button>' +
+        '<button class="triage-act-btn triage-act-warning" onclick="sendDocRequest(\'' + c.id + '\',\'beneficiary\')"><i class="fas fa-paper-plane"></i> Send Doc Request</button>';
+    }
+
     return '<div class="triage-card" style="border-left:4px solid ' + c.color + '">' +
       '<div class="triage-card-top">' +
         '<div class="triage-rank">#' + (i+1) + '</div>' +
@@ -36727,10 +36772,7 @@ function openAITriageModal() {
         '<div class="triage-actions-title"><i class="fas fa-bolt"></i> AI Recommended Next Actions</div>' +
         actionsHTML +
       '</div>' +
-      '<div class="triage-card-btns">' +
-        '<button class="p7m-btn ghost" style="font-size:11px;padding:6px 12px" onclick="openClaimModal(\'' + c.id + '\',\'view\')"><i class="fas fa-eye"></i> View Claim</button>' +
-        '<button class="p7m-btn primary" style="font-size:11px;padding:6px 12px" onclick="sendDocRequest(\'' + c.id + '\',\'beneficiary\')"><i class="fas fa-paper-plane"></i> Send Doc Request</button>' +
-      '</div>' +
+      '<div class="triage-act-bar">' + actionBar + '</div>' +
     '</div>';
   }).join('');
 

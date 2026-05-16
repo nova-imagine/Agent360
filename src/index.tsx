@@ -5845,185 +5845,216 @@ function ClaimsPage() {
           ════════════════════════════════════════════════════════ */}
       <div class="pol-tab-panel" id="clm-panel-overview">
 
-        {/* AI Claims Intelligence Banner */}
-        <div class="ci-banner" id="ci-banner">
-          <div class="ci-banner-left">
-            <div class="ci-banner-icon"><i class="fas fa-brain"></i><span class="ci-pulse"></span></div>
-            <div class="ci-banner-text">
-              <div class="ci-banner-title">AI Claims Intelligence <span class="ci-live-badge">● LIVE</span></div>
-              <div class="ci-banner-sub">ML fraud detection · NLP doc extraction · Predictive resolution · Real-time triage</div>
+        {/* ── KPI Stats Row ── */}
+        <div class="ov-kpi-row">
+          <div class="ov-kpi-card ov-kpi-red" onclick="openFraudReportModal()" title="View Fraud Report">
+            <div class="ov-kpi-icon"><i class="fas fa-shield-virus"></i></div>
+            <div class="ov-kpi-body">
+              <div class="ov-kpi-val">1</div>
+              <div class="ov-kpi-lbl">Fraud Flagged</div>
             </div>
+            <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
-          <div class="ci-kpis">
-            <div class="ci-kpi ci-kpi-red" onclick="openFraudReportModal()" style="cursor:pointer" title="View Fraud Report"><div class="ci-kpi-val">1</div><div class="ci-kpi-lbl">Fraud Flagged</div></div>
-            <div class="ci-kpi ci-kpi-orange" onclick="openFraudReportModal()" style="cursor:pointer" title="View Watch List"><div class="ci-kpi-val">2</div><div class="ci-kpi-lbl">Watch List</div></div>
-            <div class="ci-kpi ci-kpi-blue" onclick="openCIReviewModal()" style="cursor:pointer" title="View Intelligence Report"><div class="ci-kpi-val">94%</div><div class="ci-kpi-lbl">NLP Accuracy</div></div>
-            <div class="ci-kpi ci-kpi-green" onclick="openCIReviewModal()" style="cursor:pointer" title="View Resolution Details"><div class="ci-kpi-val">5.2d</div><div class="ci-kpi-lbl">Avg Resolution</div></div>
-            <div class="ci-kpi ci-kpi-purple" onclick="openCIReviewModal()" style="cursor:pointer" title="View Detection Lift Details"><div class="ci-kpi-val">+32%</div><div class="ci-kpi-lbl">Detection Lift</div></div>
-            <div class="ci-kpi ci-kpi-red ci-kpi-sla" onclick="filterClaimsBySLA()" style="cursor:pointer" title="View SLA At-Risk Claims"><div class="ci-kpi-val">2</div><div class="ci-kpi-lbl">SLA At Risk</div></div>
+          <div class="ov-kpi-card ov-kpi-orange" onclick="openFraudReportModal()" title="Watch List">
+            <div class="ov-kpi-icon"><i class="fas fa-eye"></i></div>
+            <div class="ov-kpi-body">
+              <div class="ov-kpi-val">2</div>
+              <div class="ov-kpi-lbl">Watch List</div>
+            </div>
+            <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
-          <div class="ci-banner-actions">
-            <button class="btn-ci-action primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Intelligence Report</button>
-            <button class="btn-ci-action secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
-            <button class="btn-ci-action secondary" onclick="openAITriageModal()"><i class="fas fa-robot"></i> AI Triage</button>
+          <div class="ov-kpi-card ov-kpi-amber" onclick="filterClaimsBySLA()" title="SLA At-Risk Claims">
+            <div class="ov-kpi-icon"><i class="fas fa-fire-alt"></i></div>
+            <div class="ov-kpi-body">
+              <div class="ov-kpi-val">2</div>
+              <div class="ov-kpi-lbl">SLA At Risk</div>
+            </div>
+            <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="ov-kpi-card ov-kpi-blue" onclick="openCIReviewModal()" title="NLP Accuracy">
+            <div class="ov-kpi-icon"><i class="fas fa-brain"></i></div>
+            <div class="ov-kpi-body">
+              <div class="ov-kpi-val">94%</div>
+              <div class="ov-kpi-lbl">NLP Accuracy</div>
+            </div>
+            <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="ov-kpi-card ov-kpi-green" onclick="openCIReviewModal()" title="Avg Resolution">
+            <div class="ov-kpi-icon"><i class="fas fa-clock"></i></div>
+            <div class="ov-kpi-body">
+              <div class="ov-kpi-val">5.2d</div>
+              <div class="ov-kpi-lbl">Avg Resolution</div>
+            </div>
+            <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
+          <div class="ov-kpi-card ov-kpi-purple" onclick="openCIReviewModal()" title="Detection Lift">
+            <div class="ov-kpi-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="ov-kpi-body">
+              <div class="ov-kpi-val">+32%</div>
+              <div class="ov-kpi-lbl">Detection Lift</div>
+            </div>
+            <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
         </div>
 
-        {/* AI Claims Navigator */}
-        <div class="claims-ai-navigator">
-          <div class="can-left">
-            <div class="can-icon"><i class="fas fa-robot"></i></div>
-            <div>
-              <div class="can-title">AI Claims Navigator <span class="can-live">LIVE</span></div>
-              <div class="can-sub">Guides beneficiaries through claim submission · pre-fills forms · tracks document receipt · detects contestability flags · ADB eligibility screening</div>
-            </div>
-          </div>
-          <div class="can-stats">
-            <div class="can-stat"><span class="can-val red">2</span><span class="can-lbl">Contestability Flags</span></div>
-            <div class="can-stat"><span class="can-val amber">1</span><span class="can-lbl">ADB Eligible</span></div>
-            <div class="can-stat"><span class="can-val blue">4</span><span class="can-lbl">Docs Missing</span></div>
-            <div class="can-stat"><span class="can-val green">61%</span><span class="can-lbl">Doc Completion</span></div>
-          </div>
-          <div class="can-actions">
-            <button class="can-btn primary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
-            <button class="can-btn ghost" onclick="openADBScreener()"><i class="fas fa-heartbeat"></i> ADB Screener</button>
-          </div>
-        </div>
+        {/* ── Two-column panel row: AI Intelligence + AI Navigator ── */}
+        <div class="ov-panels-row">
 
-        {/* Claims Workbench — Priority Triage Queue */}
-        <div class="claims-workbench" id="claims-workbench">
-          <div class="cwb-header">
-            <div class="cwb-header-left">
-              <div class="cwb-icon"><i class="fas fa-tasks"></i></div>
+          {/* Left: AI Claims Intelligence */}
+          <div class="ov-panel ov-panel-intel">
+            <div class="ov-panel-header">
+              <div class="ov-panel-icon intel"><i class="fas fa-brain"></i><span class="ci-pulse"></span></div>
               <div>
-                <div class="cwb-title">Claims Workbench <span class="cwb-badge">4 Require Action</span></div>
-                <div class="cwb-sub">AI-prioritised queue — work from left to right · Updated just now</div>
+                <div class="ov-panel-title">AI Claims Intelligence <span class="ov-live-badge">● LIVE</span></div>
+                <div class="ov-panel-sub">ML fraud detection · NLP extraction · Predictive resolution</div>
               </div>
             </div>
-            <div class="cwb-header-actions">
-              <button class="cwb-action-btn ghost" onclick="clmSwitchTab('active')"><i class="fas fa-table"></i> All Claims</button>
-              <button class="cwb-collapse-btn" onclick="toggleWorkbench(this)" title="Collapse"><i class="fas fa-chevron-up"></i></button>
-            </div>
-          </div>
-          <div class="cwb-cards" id="cwb-cards">
-            <div class="cwb-card cwb-urgent">
-              <div class="cwb-card-top">
-                <span class="cwb-priority-dot urgent"></span>
-                <span class="cwb-claim-id">CLM-2026-0041</span>
-                <span class="cwb-sla-badge breach"><i class="fas fa-fire"></i> SLA: 1d left</span>
-              </div>
-              <div class="cwb-client"><div class="mini-avatar rc" style="width:24px;height:24px;font-size:9px">RC</div><span>Robert Chen</span></div>
-              <div class="cwb-reason"><i class="fas fa-exclamation-triangle"></i> Missing ID docs — $1M death benefit on hold</div>
-              <div class="cwb-card-actions">
-                <button class="cwb-action-btn primary" onclick="openUploadModal('CLM-2026-0041')"><i class="fas fa-upload"></i> Upload Docs</button>
-                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i> AI</button>
-              </div>
-            </div>
-            <div class="cwb-card cwb-fraud">
-              <div class="cwb-card-top">
-                <span class="cwb-priority-dot flagged"></span>
-                <span class="cwb-claim-id">CLM-2026-0025</span>
-                <span class="cwb-sla-badge fraud"><i class="fas fa-shield-virus"></i> Fraud Hold</span>
-              </div>
-              <div class="cwb-client"><div class="mini-avatar kp" style="width:24px;height:24px;font-size:9px">KP</div><span>Kevin Park</span></div>
-              <div class="cwb-reason"><i class="fas fa-ban"></i> Risk score 78 — coverage determination required</div>
-              <div class="cwb-card-actions">
-                <button class="cwb-action-btn primary" onclick="openFraudDetailModal('CLM-2026-0025')"><i class="fas fa-search-plus"></i> Review</button>
-                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i> AI</button>
-              </div>
-            </div>
-            <div class="cwb-card cwb-compassionate">
-              <div class="cwb-card-top">
-                <span class="cwb-priority-dot urgent"></span>
-                <span class="cwb-claim-id">CLM-2026-0028</span>
-                <span class="cwb-sla-badge compassionate"><i class="fas fa-heart"></i> Compassionate</span>
-              </div>
-              <div class="cwb-client"><div class="mini-avatar mg" style="width:24px;height:24px;font-size:9px">MG</div><span>Maria Gonzalez</span></div>
-              <div class="cwb-reason"><i class="fas fa-file-medical"></i> Terminal cert pending — ADB $120K expedite</div>
-              <div class="cwb-card-actions">
-                <button class="cwb-action-btn primary" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Chase Docs</button>
-                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i> View</button>
-              </div>
-            </div>
-            <div class="cwb-card cwb-normal">
-              <div class="cwb-card-top">
-                <span class="cwb-priority-dot normal"></span>
-                <span class="cwb-claim-id">CLM-2026-0035</span>
-                <span class="cwb-sla-badge watch"><i class="fas fa-clock"></i> 21d SLA</span>
-              </div>
-              <div class="cwb-client"><div class="mini-avatar mg" style="width:24px;height:24px;font-size:9px">MG</div><span>Maria Gonzalez</span></div>
-              <div class="cwb-reason"><i class="fas fa-stethoscope"></i> APS from physician needed — disability $4.2K/mo</div>
-              <div class="cwb-card-actions">
-                <button class="cwb-action-btn primary" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send Reminder</button>
-                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i> View</button>
-              </div>
-            </div>
-            <div class="cwb-card cwb-ok">
-              <div class="cwb-card-top">
-                <span class="cwb-priority-dot ok"></span>
-                <span class="cwb-claim-id">CLM-2026-0033</span>
-                <span class="cwb-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span>
-              </div>
-              <div class="cwb-client"><div class="mini-avatar jw" style="width:24px;height:24px;font-size:9px">JW</div><span>James Whitfield</span></div>
-              <div class="cwb-reason"><i class="fas fa-thumbs-up"></i> All docs in — approval imminent (~3 days)</div>
-              <div class="cwb-card-actions">
-                <button class="cwb-action-btn primary" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review &amp; Approve</button>
-                <button class="cwb-action-btn ghost" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i> AI</button>
-              </div>
+            <div class="ov-panel-actions">
+              <button class="ov-panel-btn primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Report</button>
+              <button class="ov-panel-btn secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
+              <button class="ov-panel-btn secondary" onclick="openAITriageModal()"><i class="fas fa-robot"></i> AI Triage</button>
             </div>
           </div>
+
+          {/* Right: AI Claims Navigator */}
+          <div class="ov-panel ov-panel-nav">
+            <div class="ov-panel-header">
+              <div class="ov-panel-icon nav"><i class="fas fa-compass"></i></div>
+              <div>
+                <div class="ov-panel-title">AI Claims Navigator <span class="ov-live-badge">● LIVE</span></div>
+                <div class="ov-panel-sub">Beneficiary guidance · Doc tracking · ADB screening</div>
+              </div>
+            </div>
+            <div class="ov-nav-stats">
+              <div class="ov-nav-stat"><span class="ov-nav-val red">2</span><span class="ov-nav-lbl">Contestability</span></div>
+              <div class="ov-nav-divider"></div>
+              <div class="ov-nav-stat"><span class="ov-nav-val amber">1</span><span class="ov-nav-lbl">ADB Eligible</span></div>
+              <div class="ov-nav-divider"></div>
+              <div class="ov-nav-stat"><span class="ov-nav-val blue">4</span><span class="ov-nav-lbl">Docs Missing</span></div>
+              <div class="ov-nav-divider"></div>
+              <div class="ov-nav-stat"><span class="ov-nav-val green">61%</span><span class="ov-nav-lbl">Doc Completion</span></div>
+            </div>
+            <div class="ov-panel-actions">
+              <button class="ov-panel-btn primary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
+              <button class="ov-panel-btn secondary" onclick="openADBScreener()"><i class="fas fa-heartbeat"></i> ADB Screener</button>
+            </div>
+          </div>
+
         </div>
 
-        {/* Claims by Type — now promoted to Overview */}
-        <div class="claims-type-grid">
-          <div class="ctype-card death-type" onclick="clmSwitchTab('active');filterClaimsByStatus('open')">
-            <div class="ctype-icon"><i class="fas fa-heart-broken"></i></div>
-            <div class="ctype-body">
-              <div class="ctype-name">Death Benefit</div>
-              <div class="ctype-count">2 open · 4 resolved</div>
-              <div class="ctype-value">$1.25M total</div>
+        {/* ── Claims Workbench — 2-column grid layout ── */}
+        <div class="ov-workbench" id="claims-workbench">
+          <div class="ov-wb-header">
+            <div class="ov-wb-header-left">
+              <div class="ov-wb-icon"><i class="fas fa-tasks"></i></div>
+              <div>
+                <div class="ov-wb-title">Claims Workbench <span class="ov-wb-badge">4 Require Action</span></div>
+                <div class="ov-wb-sub">AI-prioritised — items ranked by urgency · Updated just now</div>
+              </div>
+            </div>
+            <div class="ov-wb-header-right">
+              <button class="ov-wb-link" onclick="clmSwitchTab('active')"><i class="fas fa-table"></i> All Claims</button>
+              <button class="ov-wb-link" onclick="openAITriageModal()"><i class="fas fa-robot"></i> AI Triage</button>
             </div>
           </div>
-          <div class="ctype-card disability-type" onclick="clmSwitchTab('active')">
-            <div class="ctype-icon"><i class="fas fa-user-injured"></i></div>
-            <div class="ctype-body">
-              <div class="ctype-name">Disability</div>
-              <div class="ctype-count">1 open · 3 resolved</div>
-              <div class="ctype-value">$50K/yr total</div>
+          <div class="ov-wb-grid" id="cwb-cards">
+
+            {/* Card 1 — SLA Breach */}
+            <div class="ov-wb-card ov-wb-urgent">
+              <div class="ov-wb-card-top">
+                <span class="ov-wb-dot urgent"></span>
+                <span class="ov-wb-id">CLM-2026-0041</span>
+                <span class="ov-wb-tag breach"><i class="fas fa-fire"></i> SLA: 1d left</span>
+              </div>
+              <div class="ov-wb-client"><div class="mini-avatar rc" style="width:22px;height:22px;font-size:9px;flex-shrink:0">RC</div><span>Robert Chen · Death Benefit · $1M</span></div>
+              <div class="ov-wb-reason">Missing ID docs — death benefit payout blocked. SLA breaches tomorrow.</div>
+              <div class="ov-wb-actions">
+                <button class="ov-wb-btn primary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> Open</button>
+                <button class="ov-wb-btn secondary" onclick="openUploadModal('CLM-2026-0041')"><i class="fas fa-upload"></i> Upload Docs</button>
+                <button class="ov-wb-btn ghost" onclick="openClaimModal('CLM-2026-0041','ci')"><i class="fas fa-robot"></i> AI</button>
+              </div>
             </div>
-          </div>
-          <div class="ctype-card ltc-type" onclick="clmSwitchTab('active')">
-            <div class="ctype-icon"><i class="fas fa-hospital"></i></div>
-            <div class="ctype-body">
-              <div class="ctype-name">Long-term Care</div>
-              <div class="ctype-count">2 open · 4 resolved</div>
-              <div class="ctype-value">$27.6K total</div>
+
+            {/* Card 2 — Fraud Hold */}
+            <div class="ov-wb-card ov-wb-fraud">
+              <div class="ov-wb-card-top">
+                <span class="ov-wb-dot flagged"></span>
+                <span class="ov-wb-id">CLM-2026-0025</span>
+                <span class="ov-wb-tag fraud"><i class="fas fa-shield-virus"></i> Fraud Hold</span>
+              </div>
+              <div class="ov-wb-client"><div class="mini-avatar kp" style="width:22px;height:22px;font-size:9px;flex-shrink:0">KP</div><span>Kevin Park · Death Benefit · $250K</span></div>
+              <div class="ov-wb-reason">Risk score 78 — contestability window active. SIU referral required.</div>
+              <div class="ov-wb-actions">
+                <button class="ov-wb-btn primary" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i> Open</button>
+                <button class="ov-wb-btn secondary" onclick="openFraudDetailModal('CLM-2026-0025')"><i class="fas fa-search-plus"></i> Fraud Review</button>
+                <button class="ov-wb-btn ghost" onclick="openClaimModal('CLM-2026-0025','ci')"><i class="fas fa-robot"></i> AI</button>
+              </div>
             </div>
-          </div>
-          <div class="ctype-card accelerated-type" onclick="clmSwitchTab('active')">
-            <div class="ctype-icon"><i class="fas fa-bolt"></i></div>
-            <div class="ctype-body">
-              <div class="ctype-name">Accelerated Benefit</div>
-              <div class="ctype-count">1 open · 2 resolved</div>
-              <div class="ctype-value">$195K total</div>
+
+            {/* Card 3 — Compassionate */}
+            <div class="ov-wb-card ov-wb-compassionate">
+              <div class="ov-wb-card-top">
+                <span class="ov-wb-dot urgent"></span>
+                <span class="ov-wb-id">CLM-2026-0028</span>
+                <span class="ov-wb-tag compassionate"><i class="fas fa-heart"></i> Compassionate</span>
+              </div>
+              <div class="ov-wb-client"><div class="mini-avatar mg" style="width:22px;height:22px;font-size:9px;flex-shrink:0">MG</div><span>Maria Gonzalez · ADB · $120K</span></div>
+              <div class="ov-wb-reason">Terminal cert pending from oncologist. Fast-track ADB eligible — 5d window.</div>
+              <div class="ov-wb-actions">
+                <button class="ov-wb-btn primary" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i> Open</button>
+                <button class="ov-wb-btn secondary" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Chase Docs</button>
+                <button class="ov-wb-btn ghost" onclick="openClaimModal('CLM-2026-0028','ci')"><i class="fas fa-robot"></i> AI</button>
+              </div>
             </div>
-          </div>
-          <div class="ctype-card waiver-type" onclick="clmSwitchTab('active')">
-            <div class="ctype-icon"><i class="fas fa-ban"></i></div>
-            <div class="ctype-body">
-              <div class="ctype-name">Waiver of Premium</div>
-              <div class="ctype-count">1 open · 1 resolved</div>
-              <div class="ctype-value">$18K/yr total</div>
+
+            {/* Card 4 — Docs Pending */}
+            <div class="ov-wb-card ov-wb-normal">
+              <div class="ov-wb-card-top">
+                <span class="ov-wb-dot normal"></span>
+                <span class="ov-wb-id">CLM-2026-0035</span>
+                <span class="ov-wb-tag watch"><i class="fas fa-clock"></i> 21d SLA</span>
+              </div>
+              <div class="ov-wb-client"><div class="mini-avatar mg" style="width:22px;height:22px;font-size:9px;flex-shrink:0">MG</div><span>Maria Gonzalez · Disability · $4.2K/mo</span></div>
+              <div class="ov-wb-reason">APS from Dr. Hernandez overdue 4 days. NLP: missing functional limitations.</div>
+              <div class="ov-wb-actions">
+                <button class="ov-wb-btn primary" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i> Open</button>
+                <button class="ov-wb-btn secondary" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send Reminder</button>
+                <button class="ov-wb-btn ghost" onclick="openClaimModal('CLM-2026-0035','comms')"><i class="fas fa-comments"></i> Comms</button>
+              </div>
             </div>
-          </div>
-          <div class="ctype-card ai-card">
-            <div class="ctype-icon"><i class="fas fa-robot"></i></div>
-            <div class="ctype-body">
-              <div class="ctype-name">AI Claims Assistant</div>
-              <div class="ctype-count">3 pending doc requests</div>
-              <div class="ctype-value">Auto-follow-ups ready</div>
+
+            {/* Card 5 — Near Ready */}
+            <div class="ov-wb-card ov-wb-near">
+              <div class="ov-wb-card-top">
+                <span class="ov-wb-dot near"></span>
+                <span class="ov-wb-id">CLM-2026-0038</span>
+                <span class="ov-wb-tag near-ready"><i class="fas fa-hourglass-half"></i> Near Ready</span>
+              </div>
+              <div class="ov-wb-client"><div class="mini-avatar sw" style="width:22px;height:22px;font-size:9px;flex-shrink:0">SW</div><span>Sandra Williams · LTC · $9.2K/mo</span></div>
+              <div class="ov-wb-reason">LTC eligibility cert verified. Awaiting adjuster sign-off. Payout in 3–5 days.</div>
+              <div class="ov-wb-actions">
+                <button class="ov-wb-btn primary" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i> Open</button>
+                <button class="ov-wb-btn approve" onclick="p7Toast('&lt;i class=\'fas fa-check-circle\'&gt;&lt;/i&gt; CLM-2026-0038 routed to adjuster for final approval',2800)"><i class="fas fa-check"></i> Route to Adjuster</button>
+                <button class="ov-wb-btn ghost" onclick="openClaimModal('CLM-2026-0038','payments')"><i class="fas fa-dollar-sign"></i> Reserve</button>
+              </div>
             </div>
-            <button class="btn btn-ai" style="width:100%;margin-top:10px;font-size:12px" onclick="openAITriageModal()">Run AI Triage</button>
+
+            {/* Card 6 — Approval Ready */}
+            <div class="ov-wb-card ov-wb-ok">
+              <div class="ov-wb-card-top">
+                <span class="ov-wb-dot ok"></span>
+                <span class="ov-wb-id">CLM-2026-0033</span>
+                <span class="ov-wb-tag ok"><i class="fas fa-check-circle"></i> Approval Ready</span>
+              </div>
+              <div class="ov-wb-client"><div class="mini-avatar jw" style="width:22px;height:22px;font-size:9px;flex-shrink:0">JW</div><span>James Whitfield · LTC · $7.8K/mo</span></div>
+              <div class="ov-wb-reason">All 4 docs verified. NLP confidence 97%. No fraud signals. Approve now.</div>
+              <div class="ov-wb-actions">
+                <button class="ov-wb-btn primary" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Open</button>
+                <button class="ov-wb-btn approve" onclick="p7Toast('&lt;i class=\'fas fa-check-circle\'&gt;&lt;/i&gt; CLM-2026-0033 approved — payout initiated',2800)"><i class="fas fa-check"></i> Approve &amp; Pay</button>
+                <button class="ov-wb-btn ghost" onclick="openClaimModal('CLM-2026-0033','ci')"><i class="fas fa-robot"></i> AI</button>
+              </div>
+            </div>
+
           </div>
         </div>
 
