@@ -28052,6 +28052,10 @@ function _closeFNAEditorForce() {
   var overlay = document.getElementById('fna-editor-overlay');
   if (overlay) overlay.style.display = 'none';
   _fnaEditorId = null;
+  // Reset domain filter so next direct-list open shows all tabs
+  if (typeof _fnaEditorActiveDomains !== 'undefined') {
+    _fnaEditorActiveDomains = null;
+  }
 }
 
 function fnaEditorNav(idx) {
@@ -29245,6 +29249,20 @@ function _renderFNAEditorDomainPills(fna) {
     var overlay = document.getElementById('fna-editor-overlay');
     if (!overlay) return;
     overlay.style.display = 'flex';
+
+    // When opened directly from FNA list (not wizard), show ALL tabs
+    // _fnaEditorActiveDomains is set only when coming from the wizard;
+    // fnaWizCreate() clears it by setting to null on direct-list opens
+    if (typeof _fnaEditorActiveDomains === 'undefined' || _fnaEditorActiveDomains === null) {
+      // Show all tabs
+      for (var t = 0; t <= 5; t++) {
+        var tb = document.getElementById('fna-ed-nav-' + t);
+        if (tb) tb.style.display = '';
+      }
+      var pc = document.getElementById('fna-ed-domain-pills');
+      if (pc) pc.innerHTML = '';
+    }
+
     renderFNAEditorSection();
     renderFNAEditorNav();
   };
@@ -29338,6 +29356,69 @@ function fnaClientSelectChange() {
   }
 }
 
+// ── _fnaEditorActiveDomains — persists selected domains into the editor ──
+// Set by fnaWizCreate(), read by fnaApplyDomainTabs() after editor opens.
+// When null the editor shows all tabs (opened from FNA list, not wizard).
+var _fnaEditorActiveDomains = null;
+
+// ── fnaApplyDomainTabs() — show/hide editor nav tabs by domain ────────
+// Tab mapping (matches #fna-ed-nav-N button indices in src/index.tsx):
+//   0: Personal & Profile    — always visible
+//   1: Health History        — insurance
+//   2: Financial Profile     — always visible
+//   3: Insurance Needs       — insurance
+//   4: Retirement & Annuity  — retirement | investments
+//   5: Investment & Advisory — investments | advisory
+function fnaApplyDomainTabs(domains) {
+  var tabRules = [
+    { idx: 0, always: true  },                                           // Personal
+    { idx: 1, keys: ['insurance'] },                                     // Health History
+    { idx: 2, always: true  },                                           // Financial Profile
+    { idx: 3, keys: ['insurance'] },                                     // Insurance Needs
+    { idx: 4, keys: ['retirement', 'investments'] },                     // Retirement & Annuity
+    { idx: 5, keys: ['investments', 'advisory'] }                        // Investment & Advisory
+  ];
+
+  tabRules.forEach(function(rule) {
+    var btn = document.getElementById('fna-ed-nav-' + rule.idx);
+    if (!btn) return;
+    var visible = rule.always ||
+      (domains && rule.keys && rule.keys.some(function(k) {
+        return domains.indexOf(k) !== -1;
+      }));
+    btn.style.display = visible ? '' : 'none';
+  });
+
+  // If the currently active tab is now hidden, jump to first visible tab
+  var activeBtn = document.querySelector('.fna-ed-nav-btn.active');
+  if (activeBtn && activeBtn.style.display === 'none') {
+    var firstVisible = document.querySelector('.fna-ed-nav-btn:not([style*="display: none"]):not([style*="display:none"])');
+    if (firstVisible) {
+      var newIdx = parseInt(firstVisible.getAttribute('data-idx') || '0', 10);
+      fnaEditorNav(newIdx);
+    }
+  }
+
+  // Render domain pills in editor header
+  var pillsContainer = document.getElementById('fna-ed-domain-pills');
+  if (pillsContainer && domains) {
+    var domainMeta = {
+      insurance:   { label: 'Insurance',   color: '#003087', icon: 'fa-shield-alt' },
+      investments: { label: 'Investments', color: '#059669', icon: 'fa-chart-line' },
+      retirement:  { label: 'Retirement',  color: '#0891b2', icon: 'fa-umbrella-beach' },
+      advisory:    { label: 'Advisory',    color: '#7c3aed', icon: 'fa-handshake' }
+    };
+    pillsContainer.innerHTML = domains.map(function(d) {
+      var m = domainMeta[d] || { label: d, color: '#64748b', icon: 'fa-circle' };
+      return '<span class="fna-ed-domain-pill" style="background:' + m.color + '">' +
+        '<i class="fas ' + m.icon + '"></i> ' + m.label +
+        '</span>';
+    }).join('');
+  } else if (pillsContainer && !domains) {
+    pillsContainer.innerHTML = ''; // clear pills when opened from list
+  }
+}
+
 // ── fnaWizCreate() — finalize wizard and open FNA editor ───────────────
 function fnaWizCreate() {
   // Gather Step 1 inputs
@@ -29370,19 +29451,31 @@ function fnaWizCreate() {
     return;
   }
 
+  // ── Capture selected domains BEFORE resetting wizard state ────────────
+  // Preserve the canonical order: insurance → investments → retirement → advisory
+  var _domainOrder = ['insurance', 'investments', 'retirement', 'advisory'];
+  var capturedDomains = _domainOrder.filter(function(d) {
+    return _fnaWizSelectedDomains.indexOf(d) !== -1;
+  });
+  _fnaEditorActiveDomains = capturedDomains;
+
   // Close wizard overlay
   var wizOverlay = document.getElementById('fna-new-overlay');
   if (wizOverlay) wizOverlay.style.display = 'none';
 
-  // Reset wizard state for next use
+  // Reset wizard state for next use (domains now safely captured above)
   _fnaWizSelectedDomains = [];
   _fnaWizCurrentStep = 1;
 
   showToast('New FNA created for ' + clientName + ' — opening editor…', 'success');
 
-  // Open editor using FNA-001 as template (since this is demo data)
+  // Open editor using FNA-001 as template, then apply domain tab filtering
   setTimeout(function() {
     openFNAEditor('FNA-001');
+    // Small delay to allow editor DOM to render before filtering tabs
+    setTimeout(function() {
+      fnaApplyDomainTabs(_fnaEditorActiveDomains);
+    }, 100);
   }, 800);
 }
 

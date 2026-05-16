@@ -14883,10 +14883,27 @@ function FNADiscoveryPage() {
                 <div class="fna-domain-card" id="fna-dom-advisory" onclick="fnaToggleDomain('advisory',this)">
                   <div class="fna-dom-icon" style="background:#7c3aed"><i class="fas fa-handshake"></i></div>
                   <div class="fna-dom-body">
-                    <div class="fna-dom-title">Advisory</div>
+                    <div class="fna-dom-title">Advisory Services</div>
                     <div class="fna-dom-sub">Wealth Management · Estate Planning · Small Business</div>
-                    <div class="fna-dom-tags">
-                      <span>Rep Advisory</span><span>SMA</span><span>UMA</span><span>Estate Planning</span><span>Buy-Sell</span><span>Key Person</span>
+                    <div class="fna-dom-tags-grouped">
+                      <div class="fna-dom-tag-group">
+                        <span class="fna-dom-tag-group-label">Wealth Management</span>
+                        <div class="fna-dom-tags">
+                          <span>Fund Advisory</span><span>Rep-Directed</span><span>SMA</span><span>UMA</span>
+                        </div>
+                      </div>
+                      <div class="fna-dom-tag-group">
+                        <span class="fna-dom-tag-group-label">Estate Planning</span>
+                        <div class="fna-dom-tags">
+                          <span>Wills &amp; Trusts</span><span>Powers of Attorney</span><span>Beneficiary Review</span>
+                        </div>
+                      </div>
+                      <div class="fna-dom-tag-group">
+                        <span class="fna-dom-tag-group-label">Small Business</span>
+                        <div class="fna-dom-tags">
+                          <span>Business Owners</span><span>Executive Benefits</span><span>Employee Benefits</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="fna-dom-check"><i class="fas fa-check-circle"></i></div>

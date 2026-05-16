@@ -45457,3 +45457,72 @@ kbd {
 /* ═══════════════════════════════════════════════════════════════════════
    END Pass 4
    ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FNA WIZARD — Pass 5: Advisory grouped tags + editor domain pills
+   Appended 2026-05-16
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Advisory grouped sub-item tags ────────────────────────────────── */
+.fna-dom-tags-grouped {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.fna-dom-tag-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fna-dom-tag-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 0 2px;
+}
+
+/* Use existing .fna-dom-tags inside the group */
+.fna-dom-tag-group .fna-dom-tags {
+  margin-top: 0;
+}
+
+/* ── FNA editor header domain pills ────────────────────────────────── */
+#fna-ed-domain-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.fna-ed-domain-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  opacity: 0.92;
+}
+
+.fna-ed-domain-pill i {
+  font-size: 10px;
+}
+
+/* ── Hidden nav tab: don't push layout when tabs collapse ───────────── */
+.fna-ed-nav-btn[style*="display: none"],
+.fna-ed-nav-btn[style*="display:none"] {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   END Pass 5
+   ═══════════════════════════════════════════════════════════════════════ */
