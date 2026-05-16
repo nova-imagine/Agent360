@@ -15508,44 +15508,58 @@ function InvestmentAccountsPage() {
         </div>
       </div>
 
-      {/* ── Investment Program Types Overview ── */}
+      {/* ── NYL Investment Product Types Overview ── */}
       <div class="ia-prog-types-section">
         <div class="ia-prog-types-header">
-          <div class="ia-prog-types-header-icon"><i class="fas fa-briefcase"></i></div>
+          <div class="ia-prog-types-header-icon"><i class="fas fa-layer-group"></i></div>
           <div>
-            <div class="ia-prog-types-title">Advisory Investment Programs <span class="ia-prog-types-badge">4 Programs</span></div>
-            <div class="ia-prog-types-sub">Professional investment management — choose the program that fits client goals, assets, and desired level of customization</div>
+            <div class="ia-prog-types-title">NYL Investment Account Types <span class="ia-prog-types-badge">4 Types</span></div>
+            <div class="ia-prog-types-sub">Choose the right investment product for your client — from guaranteed annuity income to professionally managed funds and tax-advantaged education savings</div>
           </div>
         </div>
         <div class="ia-prog-types-grid">
-          <div class="ia-prog-type-card ia-prog-type-fap">
+
+          {/* Annuities card with 3 nested sub-type chips */}
+          <div class="ia-prog-type-card ia-prog-type-annuity" onclick="iaFilterByType('Annuities')">
+            <div class="ia-prog-type-icon"><i class="fas fa-umbrella-beach"></i></div>
+            <div class="ia-prog-type-name">Annuities</div>
+            <div class="ia-prog-type-desc">Stable, long-term options that eventually provide an income stream.</div>
+            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Tax-deferred growth · Guaranteed income · 3 sub-types</div>
+            <div class="ia-prog-annuity-subtypes">
+              <div class="ia-prog-subtype-chip ia-prog-sub-fda"><i class="fas fa-lock"></i> Fixed deferred annuities</div>
+              <div class="ia-prog-subtype-chip ia-prog-sub-va"><i class="fas fa-chart-line"></i> Variable annuities</div>
+              <div class="ia-prog-subtype-chip ia-prog-sub-hva"><i class="fas fa-balance-scale"></i> Hybrid variable annuities</div>
+            </div>
+            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">FDA-320002</span><span class="ia-prog-ex-chip">VA-291002</span><span class="ia-prog-ex-chip">HVA-341003</span></div>
+          </div>
+
+          {/* Mutual Funds card */}
+          <div class="ia-prog-type-card ia-prog-type-mf" onclick="iaFilterByType('Mutual Funds')">
             <div class="ia-prog-type-icon"><i class="fas fa-coins"></i></div>
-            <div class="ia-prog-type-name">Fund Advisory Program</div>
-            <div class="ia-prog-type-desc">Helps meet investment goals efficiently through a broadly diversified portfolio of mutual funds and/or ETFs in one investment account.</div>
-            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Auto-rebalancing · Model portfolios · Min $25K</div>
-            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">FAP-880202</span><span class="ia-prog-ex-chip">FAP-300202</span><span class="ia-prog-ex-chip">FAP-341001</span></div>
+            <div class="ia-prog-type-name">Mutual Funds</div>
+            <div class="ia-prog-type-desc">Professionally managed investments with potential market gains.</div>
+            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Expert management · Diversification · MainStay funds</div>
+            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">MF-880201</span><span class="ia-prog-ex-chip">MF-880202</span><span class="ia-prog-ex-chip">MF-300201</span><span class="ia-prog-ex-chip">MF-305001</span></div>
           </div>
-          <div class="ia-prog-type-card ia-prog-type-sma">
-            <div class="ia-prog-type-icon"><i class="fas fa-chart-bar"></i></div>
-            <div class="ia-prog-type-name">Separately Managed Account (SMA)</div>
-            <div class="ia-prog-type-desc">A customized strategy of individual securities managed in a portfolio on your behalf by a professional asset manager.</div>
-            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Direct ownership · Tax-loss harvesting · Min $100K</div>
-            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">SMA-300201</span></div>
+
+          {/* ETFs card */}
+          <div class="ia-prog-type-card ia-prog-type-etf" onclick="iaFilterByType('Exchange Traded Funds (ETFs)')">
+            <div class="ia-prog-type-icon"><i class="fas fa-exchange-alt"></i></div>
+            <div class="ia-prog-type-name">Exchange Traded Funds (ETFs)</div>
+            <div class="ia-prog-type-desc">Bundled investments with low fees that you can quickly buy or sell.</div>
+            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Low cost · Intraday liquidity · Index-based</div>
+            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">ETF-300202</span><span class="ia-prog-ex-chip">ETF-341001</span><span class="ia-prog-ex-chip">ETF-301001</span></div>
           </div>
-          <div class="ia-prog-type-card ia-prog-type-rdp">
-            <div class="ia-prog-type-icon"><i class="fas fa-user-tie"></i></div>
-            <div class="ia-prog-type-name">Rep-Directed Program</div>
-            <div class="ia-prog-type-desc">Portfolios of mutual funds and/or ETFs managed by your financial advisor, who makes allocation and investment decisions.</div>
-            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Advisor-managed · Full control · Min $25K</div>
-            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">RDP-301001</span></div>
+
+          {/* 529 College Savings card */}
+          <div class="ia-prog-type-card ia-prog-type-529" onclick="iaFilterByType('529 College Savings Plans')">
+            <div class="ia-prog-type-icon"><i class="fas fa-graduation-cap"></i></div>
+            <div class="ia-prog-type-name">529 College Savings Plans</div>
+            <div class="ia-prog-type-desc">Investments designed to help you pay for college or other education expenses.</div>
+            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Tax-advantaged · NY state deduction · Age-based glide path</div>
+            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">529-880203</span></div>
           </div>
-          <div class="ia-prog-type-card ia-prog-type-uma">
-            <div class="ia-prog-type-icon"><i class="fas fa-layer-group"></i></div>
-            <div class="ia-prog-type-name">Unified Managed Account (UMA)</div>
-            <div class="ia-prog-type-desc">Combines several strategies from other programs — stocks, bonds, SMAs, mutual funds, and ETFs — all in a single coordinated account.</div>
-            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Multi-strategy · Single account · Min $200K</div>
-            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">UMA-880201</span><span class="ia-prog-ex-chip">UMA-360001</span></div>
-          </div>
+
         </div>
       </div>
 
@@ -15558,22 +15572,18 @@ function InvestmentAccountsPage() {
           </div>
           <select class="filter-select" id="ia-type-filter" onchange="iaFilterAccounts()">
             <option value="">All Account Types</option>
-            <optgroup label="── Advisory Programs ──">
-              <option>Fund Advisory Program</option>
-              <option>Separately Managed Account (SMA)</option>
-              <option>Rep-Directed Program</option>
-              <option>Unified Managed Account (UMA)</option>
-            </optgroup>
-            <optgroup label="── Retirement Accounts ──">
-              <option>IRA (Traditional)</option>
-              <option>IRA (Roth)</option>
-              <option>IRA (SEP)</option>
-              <option>529 College Savings</option>
-            </optgroup>
             <optgroup label="── Annuities ──">
-              <option>Fixed Deferred Annuity</option>
-              <option>Variable Annuity</option>
-              <option>Hybrid Variable Annuity</option>
+              <option>Annuities</option>
+              <option value="Fixed deferred annuities">Fixed deferred annuities</option>
+              <option value="Variable annuities">Variable annuities</option>
+              <option value="Hybrid variable annuities">Hybrid variable annuities</option>
+            </optgroup>
+            <optgroup label="── Managed Investments ──">
+              <option>Mutual Funds</option>
+              <option>Exchange Traded Funds (ETFs)</option>
+            </optgroup>
+            <optgroup label="── Education Savings ──">
+              <option>529 College Savings Plans</option>
             </optgroup>
           </select>
           <select class="filter-select" id="ia-status-filter" onchange="iaFilterAccounts()">

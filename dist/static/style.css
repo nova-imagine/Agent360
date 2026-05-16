@@ -46669,3 +46669,112 @@ kbd {
   display: flex; align-items: flex-start; gap: 6px;
 }
 .ia-det-prog-desc i { color: #1d4ed8; margin-top: 1px; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CSS PASS 10 — NYL Investment Account Type Cards
+   Investment Accounts page: Annuities / Mutual Funds / ETFs / 529
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Annuity card (amber/gold) ── */
+.ia-prog-type-annuity {
+  border-color: #d97706 !important;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.ia-prog-type-annuity:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #d9770628; }
+.ia-prog-type-annuity .ia-prog-type-icon {
+  background: #d9770618; color: #d97706;
+}
+
+/* ── Mutual Funds card (nyl-blue) ── */
+.ia-prog-type-mf {
+  border-color: #003087 !important;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.ia-prog-type-mf:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #00308728; }
+.ia-prog-type-mf .ia-prog-type-icon {
+  background: #00308718; color: #003087;
+}
+
+/* ── ETFs card (green) ── */
+.ia-prog-type-etf {
+  border-color: #059669 !important;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.ia-prog-type-etf:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #05966928; }
+.ia-prog-type-etf .ia-prog-type-icon {
+  background: #05966918; color: #059669;
+}
+
+/* ── 529 College Savings card (purple) ── */
+.ia-prog-type-529 {
+  border-color: #7c3aed !important;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.ia-prog-type-529:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #7c3aed28; }
+.ia-prog-type-529 .ia-prog-type-icon {
+  background: #7c3aed18; color: #7c3aed;
+}
+
+/* ── Annuity sub-type nested chips inside the Annuities card ── */
+.ia-prog-annuity-subtypes {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 8px 0 6px;
+}
+.ia-prog-subtype-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  border: 1px solid transparent;
+}
+.ia-prog-sub-fda {
+  background: #fef3c7; color: #92400e;
+  border-color: #fcd34d;
+}
+.ia-prog-sub-va {
+  background: #fef9ec; color: #b45309;
+  border-color: #fde68a;
+}
+.ia-prog-sub-hva {
+  background: #fff7ed; color: #c2410c;
+  border-color: #fed7aa;
+}
+.ia-prog-subtype-chip i {
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+/* ── New Account Form: Annuity sub-type cards ── */
+.ia-naf-annuity-sub-card {
+  border-width: 1.5px;
+}
+.ia-naf-annuity-hdr-block {
+  margin-bottom: 10px;
+}
+
+/* ── Update ia-det-prog-desc for annuitySubType display ── */
+.ia-det-prog-desc {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 4px 0 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  color: #92400e;
+  font-weight: 600;
+}
+.ia-det-prog-desc i { color: #d97706; margin-top: 1px; flex-shrink: 0; }
+

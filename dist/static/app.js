@@ -41394,8 +41394,7 @@ var iaAccounts = [
   {
     id: 'IA-LM-001', clientId: 8, clientName: 'Linda Morrison', initials: 'LM',
     avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
-    accountType: 'Unified Managed Account (UMA)', accountNum: 'UMA-880201',
-    programDesc: 'Combines several strategies (stocks, bonds, SMAs, mutual funds, ETFs) from other programs in a single account, with a professional coordinating the portfolio.',
+    accountType: 'Mutual Funds', accountNum: 'MF-880201',
     custodian: 'NYLIM / Pershing', openDate: 'Mar 2021',
     aum: 280000, aumFmt: '$280K', currency: 'USD',
     returnYTD: 9.2, returnYTDFmt: '+9.2%', benchmark: 'S&P 500 Blend', benchmarkYTD: 8.0,
@@ -41430,7 +41429,7 @@ var iaAccounts = [
     ],
     aiInsights: {
       headline: 'Strong alpha generation — drift rebalance overdue',
-      summary: 'UMA-880201 is outperforming its S&P Blend benchmark by +1.2% YTD. However US Equity sleeve has drifted 7% over target weighting, increasing portfolio risk. RMD of $14,200 due Dec 31. Recommend rebalancing now and scheduling Q2 review.',
+      summary: 'MF-880201 is outperforming its S&P Blend benchmark by +1.2% YTD. However US Equity sleeve has drifted 7% over target weighting, increasing portfolio risk. RMD of $14,200 due Dec 31. Recommend rebalancing now and scheduling Q2 review.',
       actions: ['Execute 3-trade rebalance to restore target allocation','Process $14,200 RMD before Dec 31 deadline','Schedule Q2 review for Apr 15 — explore alternatives expansion','Review TLH opportunity in INTL sleeve ($3.2K potential savings)']
     }
   },
@@ -41438,7 +41437,7 @@ var iaAccounts = [
   {
     id: 'IA-LM-002', clientId: 8, clientName: 'Linda Morrison', initials: 'LM',
     avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
-    accountType: 'Mutual Fund Portfolio', accountNum: 'MF-880202',
+    accountType: 'Mutual Funds', accountNum: 'MF-880202',
     custodian: 'NYLIM / MainStay', openDate: 'Jun 2018',
     aum: 180000, aumFmt: '$180K', currency: 'USD',
     returnYTD: 9.4, returnYTDFmt: '+9.4%', benchmark: 'Morningstar Moderate', benchmarkYTD: 7.8,
@@ -41466,7 +41465,7 @@ var iaAccounts = [
     ],
     aiInsights: {
       headline: 'Well-balanced — minor TLH opportunity',
-      summary: 'MF-880202 is performing above its Morningstar Moderate benchmark by +1.6%. Portfolio is well-balanced with minimal drift. $1,800 tax-loss harvesting opportunity exists in the Bond sleeve.',
+      summary: 'MF-880202 is performing above its Morningstar Moderate benchmark by +1.6%. Portfolio is well-balanced with minimal drift. $1,800 tax-loss harvesting opportunity exists in the Bond sleeve. Professionally managed MainStay mutual fund portfolio delivering consistent results.',
       actions: ['Harvest $1,800 TLH in MainStay Bond Fund before year-end','Maintain current allocation — no rebalance needed','Reinvest dividends per standing instruction']
     }
   },
@@ -41474,7 +41473,7 @@ var iaAccounts = [
   {
     id: 'IA-LM-003', clientId: 8, clientName: 'Linda Morrison', initials: 'LM',
     avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
-    accountType: '529 College Savings', accountNum: '529-880203',
+    accountType: '529 College Savings Plans', accountNum: '529-880203',
     custodian: 'NY 529 Direct Plan', openDate: 'Sep 2010',
     aum: 94000, aumFmt: '$94K', currency: 'USD',
     returnYTD: 7.8, returnYTDFmt: '+7.8%', benchmark: 'Age-Based Moderate', benchmarkYTD: 7.1,
@@ -41512,8 +41511,7 @@ var iaAccounts = [
   {
     id: 'IA-RC-001', clientId: 3, clientName: 'Robert Chen', initials: 'RC',
     avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
-    accountType: 'Separately Managed Account (SMA)', accountNum: 'SMA-300201',
-    programDesc: 'A customized strategy of individual securities managed in a portfolio on your behalf by a professional asset manager.',
+    accountType: 'Mutual Funds', accountNum: 'MF-300201',
     custodian: 'NYLIM / Pershing', openDate: 'Nov 2020',
     aum: 320000, aumFmt: '$320K', currency: 'USD',
     returnYTD: 10.1, returnYTDFmt: '+10.1%', benchmark: 'S&P 500', benchmarkYTD: 9.2,
@@ -41548,7 +41546,7 @@ var iaAccounts = [
     ],
     aiInsights: {
       headline: 'Outperforming benchmark — rebalance recommended now',
-      summary: 'SMA-300201 is generating +0.9% alpha vs S&P 500. Strong US equity performance has caused a 7% overweight drift. With Robert\'s Growth profile and 20-year horizon the drift is tolerable short-term, but rebalancing now locks in gains and restores diversification. Q2 review overdue.',
+      summary: 'MF-300201 is generating +0.9% alpha vs S&P 500. Strong US equity performance has caused a 7% overweight drift. With Robert\'s Growth profile and 20-year horizon the drift is tolerable short-term, but rebalancing now locks in gains and restores diversification. Q2 review overdue.',
       actions: ['Execute 4-trade rebalance — sell US equity overweight, buy intl/bonds/cash','Harvest $4,200 TLH in tech and intl sleeves before Q2','Schedule Q2 review Apr 20 — present deferred annuity alongside SMA','Consider adding alternatives sleeve to 10% to reduce correlation']
     }
   },
@@ -41556,7 +41554,7 @@ var iaAccounts = [
   {
     id: 'IA-RC-002', clientId: 3, clientName: 'Robert Chen', initials: 'RC',
     avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
-    accountType: 'ETF Portfolio', accountNum: 'ETF-300202',
+    accountType: 'Exchange Traded Funds (ETFs)', accountNum: 'ETF-300202',
     custodian: 'NYLIM / Pershing', openDate: 'Mar 2023',
     aum: 95000, aumFmt: '$95K', currency: 'USD',
     returnYTD: 8.6, returnYTDFmt: '+8.6%', benchmark: 'Morningstar Growth', benchmarkYTD: 8.1,
@@ -41592,7 +41590,7 @@ var iaAccounts = [
   {
     id: 'IA-JW-001', clientId: 1, clientName: 'James Whitfield', initials: 'JW',
     avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
-    accountType: 'IRA (Traditional)', accountNum: 'IRA-291001',
+    accountType: 'Mutual Funds', accountNum: 'MF-291001',
     custodian: 'NYLIM / Pershing', openDate: 'Jun 2019',
     aum: 145000, aumFmt: '$145K', currency: 'USD',
     returnYTD: 7.9, returnYTDFmt: '+7.9%', benchmark: 'Morningstar Moderate', benchmarkYTD: 7.8,
@@ -41624,7 +41622,7 @@ var iaAccounts = [
     ],
     aiInsights: {
       headline: 'Review 6 months overdue — RMD + rebalance both needed',
-      summary: 'IRA-291001 review is 6 months overdue (last Oct 2025). US Equity has drifted +5% over target. RMD of $7,250 must be distributed before Dec 31, 2026. James\'s annual review is Apr 15 — ideal to address all items simultaneously.',
+      summary: 'MF-291001 review is 6 months overdue (last Oct 2025). US Equity has drifted +5% over target. RMD of $7,250 must be distributed before Dec 31, 2026. James\'s annual review is Apr 15 — ideal to address all items simultaneously.',
       actions: ['Schedule review Apr 15 — combine with insurance annual review','Execute rebalance: 3 trades to restore target allocation','Process $7,250 RMD before Dec 31, 2026 deadline','Present deferred annuity alongside IRA for income diversification at retirement']
     }
   },
@@ -41633,7 +41631,7 @@ var iaAccounts = [
   {
     id: 'IA-MG-001', clientId: 6, clientName: 'Maria Gonzalez', initials: 'MG',
     avatarGrad: 'linear-gradient(135deg,#059669,#34d399)',
-    accountType: 'ETF Portfolio', accountNum: 'ETF-341001',
+    accountType: 'Exchange Traded Funds (ETFs)', accountNum: 'ETF-341001',
     custodian: 'NYLIM / Pershing', openDate: 'Feb 2022',
     aum: 120000, aumFmt: '$120K', currency: 'USD',
     returnYTD: 8.2, returnYTDFmt: '+8.2%', benchmark: 'Morningstar Moderate Growth', benchmarkYTD: 8.0,
@@ -41668,7 +41666,7 @@ var iaAccounts = [
   {
     id: 'IA-MG-002', clientId: 6, clientName: 'Maria Gonzalez', initials: 'MG',
     avatarGrad: 'linear-gradient(135deg,#059669,#34d399)',
-    accountType: 'IRA (Roth)', accountNum: 'ROTH-341002',
+    accountType: 'Exchange Traded Funds (ETFs)', accountNum: 'ETF-341002',
     custodian: 'NYLIM / Pershing', openDate: 'Apr 2023',
     aum: 28000, aumFmt: '$28K', currency: 'USD',
     returnYTD: 9.1, returnYTDFmt: '+9.1%', benchmark: 'S&P 500', benchmarkYTD: 9.2,
@@ -41694,7 +41692,7 @@ var iaAccounts = [
     ],
     aiInsights: {
       headline: 'Roth performing — max contributions on track',
-      summary: 'ROTH-341002 is on track with maximum annual contributions ($7,000/yr). Roth IRA grows tax-free — at current rate projects to $142K by retirement 2043. No RMD applies. Consider advisor-managed option once balance exceeds $50K.',
+      summary: 'ETF-341002 is on track with maximum annual contributions ($7,000/yr). Low-cost ETF portfolio grows tax-efficiently — at current rate projects to $142K by retirement 2043. No RMD applies. Consider advisor-managed option once balance exceeds $50K.',
       actions: ['Continue maxing Roth IRA — $7,000/yr contribution','Maintain aggressive allocation — 17-year horizon supports equity-heavy exposure','Convert to advisor-managed account when balance reaches $50K threshold']
     }
   },
@@ -41703,8 +41701,7 @@ var iaAccounts = [
   {
     id: 'IA-AR-001', clientId: 9, clientName: 'Alex Rivera', initials: 'AR',
     avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
-    accountType: 'Unified Managed Account (UMA)', accountNum: 'UMA-360001',
-    programDesc: 'Combines several strategies (stocks, bonds, SMAs, mutual funds, ETFs) from other programs in a single account, with a professional coordinating the portfolio.',
+    accountType: 'Mutual Funds', accountNum: 'MF-360001',
     custodian: 'NYLIM / Pershing', openDate: 'Apr 2026',
     aum: 0, aumFmt: '$0 (Pending)', currency: 'USD',
     returnYTD: 0, returnYTDFmt: '—', benchmark: 'S&P 500 Blend', benchmarkYTD: 9.2,
@@ -41733,7 +41730,7 @@ var iaAccounts = [
     ],
     aiInsights: {
       headline: 'New account — pending full funding Apr 18',
-      summary: 'UMA-360001 account opened Apr 12. IMA signed, suitability approved. ACH initial deposit of $50K expected Apr 14; ACAT transfer of $30K from Schwab expected Apr 18. Once funded ($80K total), initial portfolio construction trade will execute per IPS target allocation.',
+      summary: 'MF-360001 account opened Apr 12. IMA signed, suitability approved. ACH initial deposit of $50K expected Apr 14; ACAT transfer of $30K from Schwab expected Apr 18. Once funded ($80K total), initial mutual fund portfolio construction will execute per IPS target allocation.',
       actions: ['Monitor ACH receipt — expected Apr 14','Confirm ACAT transfer from Schwab — call if not received by Apr 19','Execute initial portfolio construction trade upon full funding','Send welcome package and online portal access instructions']
     }
   },
@@ -41742,8 +41739,7 @@ var iaAccounts = [
   {
     id: 'IA-PN-001', clientId: 2, clientName: 'Patricia Nguyen', initials: 'PN',
     avatarGrad: 'linear-gradient(135deg,#2563eb,#7c3aed)',
-    accountType: 'Rep-Directed Program', accountNum: 'RDP-301001',
-    programDesc: 'Portfolios of mutual funds and/or ETFs managed by your financial advisor, who makes allocation decisions and monitors the portfolio.',
+    accountType: 'Exchange Traded Funds (ETFs)', accountNum: 'ETF-301001',
     custodian: 'NYLIM / Pershing', openDate: 'Jan 2023',
     aum: 68000, aumFmt: '$68K', currency: 'USD',
     returnYTD: 7.4, returnYTDFmt: '+7.4%', benchmark: 'Morningstar Conservative Growth', benchmarkYTD: 7.0,
@@ -41774,7 +41770,7 @@ var iaAccounts = [
     ],
     aiInsights: {
       headline: 'ETF drift alert — minor rebalance needed',
-      summary: 'ETF-301001 has drifted 5% in US equity due to strong market performance. Patricia\'s Conservative Growth profile warrants keeping bonds at 35%. Small rebalance recommended. Note: Patricia\'s UL policy under-funding is a cash flow concern — coordinate insurance and investment review together.',
+      summary: 'ETF-301001 has drifted 5% in US equity due to strong market performance. Patricia\'s Conservative Growth profile warrants keeping bonds at 35%. Small rebalance recommended. Low-cost ETF portfolio with VTI/VXUS/AGG core holdings. Note: Patricia\'s UL policy under-funding is a cash flow concern — coordinate insurance and investment review together.',
       actions: ['Execute 3-trade rebalance — minor (~$3.4K total movement)','Harvest $800 TLH in AGG bond ETF','Coordinate with insurance review — UL lapse risk affects overall financial plan','Schedule combined insurance + investment review call']
     }
   },
@@ -41783,7 +41779,7 @@ var iaAccounts = [
   {
     id: 'IA-SW-001', clientId: 4, clientName: 'Sandra Williams', initials: 'SW',
     avatarGrad: 'linear-gradient(135deg,#dc2626,#f59e0b)',
-    accountType: 'IRA (Traditional)', accountNum: 'IRA-320001',
+    accountType: 'Mutual Funds', accountNum: 'MF-320001',
     custodian: 'NYLIM / Pershing', openDate: 'Aug 2017',
     aum: 312000, aumFmt: '$312K', currency: 'USD',
     returnYTD: 6.8, returnYTDFmt: '+6.8%', benchmark: 'Morningstar Conservative', benchmarkYTD: 6.5,
@@ -41811,7 +41807,7 @@ var iaAccounts = [
     ],
     aiInsights: {
       headline: 'Conservative IRA — RMD + review both overdue',
-      summary: 'IRA-320001 is Sandra\'s primary retirement vehicle with $312K. Portfolio is well-allocated for Conservative profile with 5 years to retirement. Review is 7 months overdue. $11,400 RMD due Dec 31. Sandra\'s term policy expires Sep 2026 — coordinate insurance conversion discussion with investment review.',
+      summary: 'MF-320001 is Sandra\'s primary retirement vehicle with $312K. MainStay mutual fund portfolio is well-allocated for Conservative profile with 5 years to retirement. Review is 7 months overdue. $11,400 RMD due Dec 31. Sandra\'s term policy expires Sep 2026 — coordinate insurance conversion discussion with investment review.',
       actions: ['Schedule immediate review — 7 months overdue','Process $11,400 RMD before Dec 31, 2026','Discuss annuity income rider to supplement IRA distributions at retirement','Coordinate with term policy conversion conversation — same meeting']
     }
   },
@@ -41820,7 +41816,7 @@ var iaAccounts = [
   {
     id: 'IA-SW-002', clientId: 4, clientName: 'Sandra Williams', initials: 'SW',
     avatarGrad: 'linear-gradient(135deg,#dc2626,#f59e0b)',
-    accountType: 'Fixed Deferred Annuity', accountNum: 'FDA-320002',
+    accountType: 'Annuities', annuitySubType: 'Fixed deferred annuities', accountNum: 'FDA-320002',
     custodian: 'New York Life Insurance', openDate: 'Jan 2020',
     aum: 95000, aumFmt: '$95K', currency: 'USD',
     returnYTD: 4.8, returnYTDFmt: '+4.8%', benchmark: 'Fixed Rate 4.75%', benchmarkYTD: 4.75,
@@ -41847,7 +41843,7 @@ var iaAccounts = [
     aiInsights: {
       headline: 'Guaranteed 4.75% growth — income conversion opportunity at retirement',
       summary: 'FDA-320002 is growing at a guaranteed 4.75% with no market risk. Surrender period has ended — full liquidity available. With Sandra retiring in 5 years, consider activating an income rider or annuitizing for guaranteed lifetime income to supplement her IRA distributions.',
-      actions: ['Discuss income rider election for guaranteed retirement income stream','Coordinate with IRA-320001 for combined distribution strategy','Review 1035 exchange option to upgrade to income annuity','Process $3,800 RMD before Dec 31, 2026 — IRS required']
+      actions: ['Discuss income rider election for guaranteed retirement income stream','Coordinate with MF-320001 for combined distribution strategy','Review 1035 exchange option to upgrade to income annuity','Process $3,800 RMD before Dec 31, 2026 — IRS required']
     }
   },
 
@@ -41855,7 +41851,7 @@ var iaAccounts = [
   {
     id: 'IA-JW-002', clientId: 1, clientName: 'James Whitfield', initials: 'JW',
     avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
-    accountType: 'Variable Annuity', accountNum: 'VA-291002',
+    accountType: 'Annuities', annuitySubType: 'Variable annuities', accountNum: 'VA-291002',
     custodian: 'New York Life Insurance', openDate: 'Mar 2018',
     aum: 210000, aumFmt: '$210K', currency: 'USD',
     returnYTD: 9.8, returnYTDFmt: '+9.8%', benchmark: 'S&P 500 Blend', benchmarkYTD: 9.2,
@@ -41890,7 +41886,7 @@ var iaAccounts = [
     aiInsights: {
       headline: 'Variable annuity outperforming — GMIB rider review due',
       summary: 'VA-291002 is growing strongly at +9.8% YTD. GMIB rider provides $9,200/yr guaranteed income floor at age 73 — valuable protection. Equity sub-account has drifted +6% over target. Review due to assess rider optimization and sub-account reallocation. RMD of $8,400 must be processed.',
-      actions: ['Execute sub-account rebalance — 3 trades to restore target allocation','Review GMIB benefit base — confirm income base for retirement planning','Process $8,400 RMD before Dec 31, 2026','Present GMIB income projection alongside IRA-291001 for total retirement income picture']
+      actions: ['Execute sub-account rebalance — 3 trades to restore target allocation','Review GMIB benefit base — confirm income base for retirement planning','Process $8,400 RMD before Dec 31, 2026','Present GMIB income projection alongside MF-291001 for total retirement income picture']
     }
   },
 
@@ -41898,7 +41894,7 @@ var iaAccounts = [
   {
     id: 'IA-MG-003', clientId: 6, clientName: 'Maria Gonzalez', initials: 'MG',
     avatarGrad: 'linear-gradient(135deg,#059669,#34d399)',
-    accountType: 'Hybrid Variable Annuity', accountNum: 'HVA-341003',
+    accountType: 'Annuities', annuitySubType: 'Hybrid variable annuities', accountNum: 'HVA-341003',
     custodian: 'New York Life Insurance', openDate: 'Jun 2024',
     aum: 75000, aumFmt: '$75K', currency: 'USD',
     returnYTD: 7.2, returnYTDFmt: '+7.2%', benchmark: 'S&P 500 Floor 0%', benchmarkYTD: 9.2,
@@ -41933,7 +41929,7 @@ var iaAccounts = [
   {
     id: 'IA-DT-001', clientId: 5, clientName: 'David Thompson', initials: 'DT',
     avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
-    accountType: 'Mutual Fund Portfolio', accountNum: 'MF-305001',
+    accountType: 'Mutual Funds', accountNum: 'MF-305001',
     custodian: 'NYLIM / MainStay', openDate: 'Mar 2026',
     aum: 42000, aumFmt: '$42K', currency: 'USD',
     returnYTD: 3.1, returnYTDFmt: '+3.1%', benchmark: 'Morningstar Moderate Growth', benchmarkYTD: 8.0,
@@ -42043,13 +42039,23 @@ function iaRenderAccountQueue() {
 }
 
 function iaGetFilteredAccounts() {
+  var annuitySubTypeFilters = ['Fixed deferred annuities','Variable annuities','Hybrid variable annuities'];
   return iaAccounts.filter(function(a) {
-    var typeMatch   = !_iaFilterType   || a.accountType === _iaFilterType;
+    var typeMatch;
+    if (!_iaFilterType) {
+      typeMatch = true;
+    } else if (annuitySubTypeFilters.indexOf(_iaFilterType) >= 0) {
+      // Filter by annuity sub-type
+      typeMatch = a.accountType === 'Annuities' && a.annuitySubType === _iaFilterType;
+    } else {
+      typeMatch = a.accountType === _iaFilterType;
+    }
     var statusMatch = !_iaFilterStatus || a.status === _iaFilterStatus;
     var searchMatch = !_iaSearchTerm   ||
       a.clientName.toLowerCase().includes(_iaSearchTerm) ||
       a.accountNum.toLowerCase().includes(_iaSearchTerm) ||
-      a.accountType.toLowerCase().includes(_iaSearchTerm);
+      a.accountType.toLowerCase().includes(_iaSearchTerm) ||
+      (a.annuitySubType && a.annuitySubType.toLowerCase().includes(_iaSearchTerm));
     return typeMatch && statusMatch && searchMatch;
   });
 }
@@ -42096,7 +42102,7 @@ function iaRenderAccountCard(a) {
       '<div class="ia-card-avatar" style="background:' + a.avatarGrad + '">' + a.initials + '</div>' +
       '<div class="ia-card-info">' +
         '<div class="ia-card-client">' + a.clientName + '</div>' +
-        '<div class="ia-card-acct"><i class="fas fa-folder"></i> ' + a.accountNum + ' · ' + a.accountType + '</div>' +
+        '<div class="ia-card-acct"><i class="fas fa-folder"></i> ' + a.accountNum + ' · ' + a.accountType + (a.annuitySubType ? ' — ' + a.annuitySubType : '') + '</div>' +
       '</div>' +
       '<div class="ia-card-aum">' +
         '<div class="ia-card-aum-val">' + a.aumFmt + '</div>' +
@@ -42182,7 +42188,7 @@ function iaBuildDetailHTML(a) {
       '<div class="ia-det-title-wrap">' +
         '<div class="ia-det-client">' + a.clientName + '</div>' +
         '<div class="ia-det-acct">' + a.accountNum + ' · ' + a.accountType + '</div>' +
-        (a.programDesc ? '<div class="ia-det-prog-desc"><i class="fas fa-info-circle"></i> ' + a.programDesc + '</div>' : '') +
+        (a.annuitySubType ? '<div class="ia-det-prog-desc"><i class="fas fa-umbrella-beach"></i> ' + a.annuitySubType + '</div>' : '') +
         '<div class="ia-det-meta-row">' + metaHTML + '</div>' +
       '</div>' +
       '<div class="ia-det-kpi-strip">' +
@@ -42863,6 +42869,16 @@ function iaFilterAccounts() {
   iaRenderAccountQueue();
 }
 
+function iaFilterByType(typeName) {
+  var typeEl = document.getElementById('ia-type-filter');
+  if (typeEl) {
+    typeEl.value = typeName;
+    iaFilterAccounts();
+    var queue = document.getElementById('ia-account-queue');
+    if (queue) queue.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    DRIFT MONITOR PANEL
    ═══════════════════════════════════════════════════════════════════ */
@@ -43166,74 +43182,54 @@ function iaCloseNewAccount() {
 }
 
 function iaRenderNewAccountForm() {
-  var nonAnnuityTypes = [
-    { type:'Fund Advisory Program',          icon:'fa-coins',          fee:'0.75%', min:'$25K',
-      desc:'Helps meet investment goals through a broadly diversified portfolio of mutual funds and/or ETFs in one investment account.',
-      bestFor:'Clients seeking professionally managed, auto-rebalancing diversification in a single consolidated account' },
-    { type:'Separately Managed Account (SMA)', icon:'fa-chart-bar',   fee:'1.00%', min:'$100K',
-      desc:'A customized strategy of individual securities managed in a portfolio by a professional asset manager.',
-      bestFor:'Clients with $100K+ seeking direct security ownership, tax-loss harvesting, and institutional management' },
-    { type:'Rep-Directed Program',           icon:'fa-user-tie',       fee:'0.75%', min:'$25K',
-      desc:'Portfolios of mutual funds and/or ETFs managed by your financial advisor, who controls allocation decisions.',
-      bestFor:'Clients who prefer their advisor to make portfolio decisions with full transparency and control' },
-    { type:'Unified Managed Account (UMA)',  icon:'fa-layer-group',    fee:'1.00%', min:'$200K',
-      desc:'Combines strategies from multiple programs (stocks, bonds, SMAs, mutual funds, ETFs) in a single coordinated account.',
-      bestFor:'Clients with $200K+ seeking multi-strategy diversification with consolidated oversight and reporting' },
-    { type:'IRA (Traditional)',              icon:'fa-piggy-bank',     fee:'0.75%', min:'$5K',
-      desc:'Pre-tax retirement savings · RMD required at age 73' },
-    { type:'IRA (Roth)',                     icon:'fa-sun',            fee:'0.75%', min:'$5K',
-      desc:'After-tax contributions · tax-free growth · no RMD' },
-    { type:'IRA (SEP)',                      icon:'fa-briefcase',      fee:'0.75%', min:'$5K',
-      desc:'Self-employed retirement · higher contribution limits' },
-    { type:'529 College Savings',            icon:'fa-graduation-cap', fee:'0.50%', min:'$1K',
-      desc:'Tax-advantaged education savings · NY state deduction available' }
+
+  // NYL Investment Product Types — the 4 official categories
+  var annuitySubTypes = [
+    { type:'Fixed deferred annuities',   subType:'Annuities', icon:'fa-lock',          fee:'0.00%', min:'$10K',
+      desc:'Long-term, low-risk options that grow at a guaranteed rate, with no taxes due until you make a withdrawal.',
+      bestFor:'Clients seeking guaranteed, tax-deferred growth with zero market risk and a predictable accumulation plan' },
+    { type:'Variable annuities',         subType:'Annuities', icon:'fa-chart-line',    fee:'1.50%', min:'$25K',
+      desc:'Choose from a range of professionally managed investment options, with potential for tax-deferred growth and some access to your money.',
+      bestFor:'Clients comfortable with market participation who want tax-deferred growth alongside optional income guarantees' },
+    { type:'Hybrid variable annuities',  subType:'Annuities', icon:'fa-balance-scale', fee:'1.50%', min:'$25K',
+      desc:'Combines the certainty of a fixed index-linked account, which does not lose value, with the flexibility and growth potential of a variable annuity.',
+      bestFor:'Clients who want market-linked upside with a 0% loss floor — growth potential without downside risk' }
   ];
 
-  // NYL Annuity lineup — Immediate Income
-  var immediateAnnuities = [
-    { type:'Guaranteed Lifetime Income Annuity', icon:'fa-infinity',      fee:'0.00%', min:'$10K',
-      desc:'Income starts now and will be paid in consistent, predictable amounts for the rest of your life.',
-      bestFor:'Those who want dependable income right away and prefer guaranteed payments that last as long as they live' },
-    { type:'Lifetime Mutual Income Annuity',     icon:'fa-hands-helping', fee:'0.00%', min:'$10K',
-      desc:'Steady payments for life, plus the potential for dividend payments.',
-      bestFor:'Individuals who value lifetime income and want the opportunity for growth through dividends' },
-    { type:'Guaranteed Period Income Annuity',   icon:'fa-calendar-check',fee:'0.00%', min:'$5K',
-      desc:'Income for a set period, like bridging the gap until Social Security payments start.',
-      bestFor:'People who need income for a specific time frame — like early retirees waiting for other benefits to begin' }
-  ];
+  var mutualFundsType  = { type:'Mutual Funds',                   icon:'fa-coins',          fee:'0.75%', min:'$1K',
+    desc:'Professionally managed investments with potential market gains.',
+    bestFor:'Clients seeking expert fund management with broad diversification across MainStay and other professionally managed fund families' };
+  var etfType          = { type:'Exchange Traded Funds (ETFs)',    icon:'fa-exchange-alt',   fee:'0.50%', min:'$1K',
+    desc:'Bundled investments with low fees that you can quickly buy or sell.',
+    bestFor:'Cost-conscious clients who want intraday tradability, low expense ratios, and transparent index-based diversification' };
+  var savingsType      = { type:'529 College Savings Plans',       icon:'fa-graduation-cap', fee:'0.50%', min:'$25',
+    desc:'Investments designed to help you pay for college or other education expenses.',
+    bestFor:'Families saving for education — tax-advantaged growth, NY state tax deduction up to $10,000/yr, age-based glide path' };
 
-  // NYL Annuity lineup — Deferred Income
-  var deferredAnnuities = [
-    { type:'Guaranteed Future Income Annuity',     icon:'fa-shield-alt',    fee:'0.00%', min:'$10K',
-      desc:'Lifetime income that won\'t fluctuate with financial markets, plus a variety of payout options.',
-      bestFor:'People who want predictable, guaranteed income for life without market risk' },
-    { type:'Future Mutual Income Annuity',         icon:'fa-chart-pie',     fee:'0.00%', min:'$10K',
-      desc:'Designed for people looking for protected lifetime income with some liquidity (ability to withdraw cash).',
-      bestFor:'Individuals seeking steady income with the potential for growth through dividends' },
-    { type:'Clear Income Advantage Fixed Annuity', icon:'fa-lock',          fee:'0.00%', min:'$10K',
-      desc:'Designed for people looking for protected lifetime income with some liquidity.',
-      bestFor:'Clients who want flexibility alongside guaranteed income protection' },
-    { type:'Variable Annuity',                     icon:'fa-chart-line',    fee:'1.50%', min:'$25K',
-      desc:'Market-linked sub-account growth with death benefit and optional GMIB income rider.',
-      bestFor:'Clients comfortable with market exposure who want upside potential plus income protection' },
-    { type:'Hybrid Variable Annuity (IndexFlex)',  icon:'fa-balance-scale', fee:'1.50%', min:'$25K',
-      desc:'S&P 500 indexed with 0% floor / 11% cap — market-linked growth with zero downside risk.',
-      bestFor:'Clients who want market-linked growth potential with full principal protection' }
-  ];
+  function renderSubTypeCard(t) {
+    return '<div class="ia-naf-type-card ia-naf-annuity-sub-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')" style="border-color:#d9770660">' +
+      '<div class="ia-naf-type-icon" style="background:#d9770618;color:#d97706"><i class="fas ' + t.icon + '"></i></div>' +
+      '<div class="ia-naf-type-name">' + t.type + '</div>' +
+      '<div class="ia-naf-type-desc">' + t.desc + '</div>' +
+      '<div class="ia-naf-type-best"><i class="fas fa-user-check" style="color:#d97706"></i> <strong>Best for:</strong> ' + t.bestFor + '</div>' +
+      '<div class="ia-naf-type-meta">' +
+        '<span class="ia-naf-type-fee">Fee: ' + t.fee + '</span>' +
+        '<span class="ia-naf-type-min">Min: ' + t.min + '</span>' +
+      '</div>' +
+    '</div>';
+  }
 
-  function renderAnnuityCards(arr, color) {
-    return arr.map(function(t) {
-      return '<div class="ia-naf-type-card ia-naf-annuity-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')" style="border-color:' + color + '60">' +
-        '<div class="ia-naf-type-icon" style="background:' + color + '18;color:' + color + '"><i class="fas ' + t.icon + '"></i></div>' +
-        '<div class="ia-naf-type-name">' + t.type + '</div>' +
-        '<div class="ia-naf-type-desc">' + t.desc + '</div>' +
-        '<div class="ia-naf-type-best"><i class="fas fa-user-check" style="color:' + color + '"></i> <strong>Best for:</strong> ' + t.bestFor + '</div>' +
-        '<div class="ia-naf-type-meta">' +
-          '<span class="ia-naf-type-fee">Fee: ' + t.fee + '</span>' +
-          '<span class="ia-naf-type-min">Min: ' + t.min + '</span>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+  function renderProductCard(t, colorHex) {
+    return '<div class="ia-naf-type-card ia-naf-prog-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')" style="border-color:' + colorHex + '60">' +
+      '<div class="ia-naf-type-icon" style="background:' + colorHex + '18;color:' + colorHex + '"><i class="fas ' + t.icon + '"></i></div>' +
+      '<div class="ia-naf-type-name">' + t.type + '</div>' +
+      '<div class="ia-naf-type-desc">' + t.desc + '</div>' +
+      '<div class="ia-naf-type-best"><i class="fas fa-user-check" style="color:' + colorHex + '"></i> <strong>Best for:</strong> ' + t.bestFor + '</div>' +
+      '<div class="ia-naf-type-meta">' +
+        '<span class="ia-naf-type-fee">Fee: ' + t.fee + '</span>' +
+        '<span class="ia-naf-type-min">Min: ' + t.min + '</span>' +
+      '</div>' +
+    '</div>';
   }
 
   return '<div class="ia-naf-form">' +
@@ -43243,7 +43239,7 @@ function iaRenderNewAccountForm() {
       '<div class="ia-naf-ai-icon"><i class="fas fa-robot"></i></div>' +
       '<div class="ia-naf-ai-content">' +
         '<div class="ia-naf-ai-title">AI Account Recommendation <span class="ia-naf-ai-live">LIVE</span></div>' +
-        '<div class="ia-naf-ai-text">Based on client profile: <strong>UMA</strong> recommended for clients with $200K+ seeking consolidated multi-strategy management. <strong>SMA</strong> for $100K+ with tax-sensitivity needs. <strong>Fund Advisory</strong> for $25K–$200K with diversified growth goals. <strong>Rep-Directed</strong> when advisor customization is preferred. <strong>Income Annuity</strong> for clients near retirement with income gaps.</div>' +
+        '<div class="ia-naf-ai-text">Based on client profile: <strong>Mutual Funds</strong> for professionally managed diversification with MainStay fund families. <strong>ETFs</strong> for cost-efficient, transparent index exposure with low fees. <strong>Annuities</strong> for stable, long-term growth with guaranteed income stream — choose Fixed Deferred, Variable, or Hybrid. <strong>529 Plans</strong> for education savings with NY state tax deduction up to $10,000/yr.</div>' +
       '</div>' +
     '</div>' +
 
@@ -43256,87 +43252,57 @@ function iaRenderNewAccountForm() {
       '<div class="ia-naf-step"><span>5</span> Funding</div>' +
     '</div>' +
 
-    /* Step 1: Advisory program types + Retirement accounts */
+    /* Step 1: NYL Investment Product Categories */
     '<div class="ia-naf-section">' +
-      '<div class="ia-naf-section-title"><i class="fas fa-folder-open"></i> Step 1 — Select Account Type</div>' +
-      '<div class="ia-naf-prog-hdr">' +
-        '<div class="ia-naf-prog-hdr-icon"><i class="fas fa-gem"></i></div>' +
+      '<div class="ia-naf-section-title"><i class="fas fa-folder-open"></i> Step 1 — Select Investment Account Type</div>' +
+
+      /* ── Annuities Block ── */
+      '<div class="ia-naf-prog-hdr ia-naf-annuity-hdr-block">' +
+        '<div class="ia-naf-prog-hdr-icon" style="background:#d9770618;color:#d97706"><i class="fas fa-umbrella-beach"></i></div>' +
         '<div class="ia-naf-prog-hdr-text">' +
-          '<div class="ia-naf-prog-hdr-title">Advisory Investment Programs</div>' +
-          '<div class="ia-naf-prog-hdr-sub">Choose from 4 managed investment programs — each offers professional management with different levels of customization and minimum investment</div>' +
+          '<div class="ia-naf-prog-hdr-title" style="color:#d97706">Annuities</div>' +
+          '<div class="ia-naf-prog-hdr-sub">Stable, long-term options that eventually provide an income stream — choose the annuity type that fits your client\'s risk tolerance and timeline</div>' +
         '</div>' +
       '</div>' +
-      '<div class="ia-naf-type-grid">' +
-        nonAnnuityTypes.filter(function(t){ return t.bestFor !== undefined; }).map(function(t) {
-          return '<div class="ia-naf-type-card ia-naf-prog-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')">' +
-            '<div class="ia-naf-type-icon"><i class="fas ' + t.icon + '"></i></div>' +
-            '<div class="ia-naf-type-name">' + t.type + '</div>' +
-            '<div class="ia-naf-type-desc">' + t.desc + '</div>' +
-            '<div class="ia-naf-type-best"><i class="fas fa-user-check" style="color:#003087"></i> <strong>Best for:</strong> ' + t.bestFor + '</div>' +
-            '<div class="ia-naf-type-meta">' +
-              '<span class="ia-naf-type-fee">Fee: ' + t.fee + '</span>' +
-              '<span class="ia-naf-type-min">Min: ' + t.min + '</span>' +
-            '</div>' +
-          '</div>';
-        }).join('') +
-      '</div>' +
-      '<div class="ia-naf-subsection-title" style="margin:14px 0 8px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em"><i class="fas fa-piggy-bank"></i> &nbsp;Retirement &amp; Education Accounts</div>' +
-      '<div class="ia-naf-type-grid">' +
-        nonAnnuityTypes.filter(function(t){ return t.bestFor === undefined; }).map(function(t) {
-          return '<div class="ia-naf-type-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')">' +
-            '<div class="ia-naf-type-icon"><i class="fas ' + t.icon + '"></i></div>' +
-            '<div class="ia-naf-type-name">' + t.type + '</div>' +
-            '<div class="ia-naf-type-desc">' + t.desc + '</div>' +
-            '<div class="ia-naf-type-meta">' +
-              '<span class="ia-naf-type-fee">Fee: ' + t.fee + '</span>' +
-              '<span class="ia-naf-type-min">Min: ' + t.min + '</span>' +
-            '</div>' +
-          '</div>';
-        }).join('') +
-      '</div>' +
-    '</div>' +
-
-    /* Annuity section — NYL income annuity lineup */
-    '<div class="ia-naf-section ia-naf-annuity-section">' +
-
-      '<div class="ia-naf-annuity-hdr">' +
-        '<div class="ia-naf-annuity-hdr-icon"><i class="fas fa-umbrella-beach"></i></div>' +
-        '<div class="ia-naf-annuity-hdr-text">' +
-          '<div class="ia-naf-annuity-hdr-title">How income annuities can help in retirement</div>' +
-          '<div class="ia-naf-annuity-hdr-sub">Whether getting close to retirement or already retired — select an income annuity that protects savings while supporting lifestyle</div>' +
-        '</div>' +
-      '</div>' +
-
       '<div class="ia-naf-ann-benefits-strip">' +
-        '<div class="ia-naf-ann-benefit"><i class="fas fa-lock"></i><span><strong>Guaranteed income</strong> — pays for as long as you need</span></div>' +
-        '<div class="ia-naf-ann-benefit"><i class="fas fa-medal"></i><span><strong>Financial reliability</strong> — NYL paying benefits 178+ years</span></div>' +
-        '<div class="ia-naf-ann-benefit"><i class="fas fa-piggy-bank"></i><span><strong>Stretch savings</strong> — alleviate running-out-of-money risk</span></div>' +
-        '<div class="ia-naf-ann-benefit"><i class="fas fa-sliders-h"></i><span><strong>Personal flexibility</strong> — set start date and amounts</span></div>' +
+        '<div class="ia-naf-ann-benefit"><i class="fas fa-lock" style="color:#d97706"></i><span><strong>Tax-deferred growth</strong> — no taxes until withdrawal</span></div>' +
+        '<div class="ia-naf-ann-benefit"><i class="fas fa-medal" style="color:#d97706"></i><span><strong>NYL reliability</strong> — 178+ years paying benefits</span></div>' +
+        '<div class="ia-naf-ann-benefit"><i class="fas fa-shield-alt" style="color:#d97706"></i><span><strong>Income stream</strong> — guaranteed lifetime payments</span></div>' +
+        '<div class="ia-naf-ann-benefit"><i class="fas fa-sliders-h" style="color:#d97706"></i><span><strong>Flexible options</strong> — fixed, variable, or hybrid</span></div>' +
+      '</div>' +
+      '<div class="ia-naf-type-grid ia-naf-ann-grid">' +
+        annuitySubTypes.map(function(t){ return renderSubTypeCard(t); }).join('') +
       '</div>' +
 
-      '<div class="ia-naf-ann-ways-label"><i class="fas fa-arrows-alt-h"></i> You can receive guaranteed income in two ways</div>' +
-
-      '<div class="ia-naf-ann-way-block">' +
-        '<div class="ia-naf-ann-way-hdr ia-naf-ann-way-immediate">' +
-          '<div class="ia-naf-ann-way-icon" style="background:#059669"><i class="fas fa-bolt"></i></div>' +
-          '<div>' +
-            '<div class="ia-naf-ann-way-name">Immediate income annuities</div>' +
-            '<div class="ia-naf-ann-way-sub">Start to receive income now, for as long as you need it.</div>' +
-          '</div>' +
+      /* ── Mutual Funds Block ── */
+      '<div class="ia-naf-prog-hdr" style="margin-top:20px">' +
+        '<div class="ia-naf-prog-hdr-icon" style="background:#00308718;color:#003087"><i class="fas fa-coins"></i></div>' +
+        '<div class="ia-naf-prog-hdr-text">' +
+          '<div class="ia-naf-prog-hdr-title" style="color:#003087">Mutual Funds</div>' +
+          '<div class="ia-naf-prog-hdr-sub">Professionally managed investments with potential market gains — broad diversification in a single account with expert oversight</div>' +
         '</div>' +
-        '<div class="ia-naf-type-grid ia-naf-ann-grid">' + renderAnnuityCards(immediateAnnuities, '#059669') + '</div>' +
       '</div>' +
+      '<div class="ia-naf-type-grid">' + renderProductCard(mutualFundsType, '#003087') + '</div>' +
 
-      '<div class="ia-naf-ann-way-block">' +
-        '<div class="ia-naf-ann-way-hdr ia-naf-ann-way-deferred">' +
-          '<div class="ia-naf-ann-way-icon" style="background:#d97706"><i class="fas fa-hourglass-half"></i></div>' +
-          '<div>' +
-            '<div class="ia-naf-ann-way-name">Deferred income annuities</div>' +
-            '<div class="ia-naf-ann-way-sub">Receive income for life and larger payouts by delaying them for up to 40 years.</div>' +
-          '</div>' +
+      /* ── ETFs Block ── */
+      '<div class="ia-naf-prog-hdr" style="margin-top:20px">' +
+        '<div class="ia-naf-prog-hdr-icon" style="background:#05966918;color:#059669"><i class="fas fa-exchange-alt"></i></div>' +
+        '<div class="ia-naf-prog-hdr-text">' +
+          '<div class="ia-naf-prog-hdr-title" style="color:#059669">Exchange Traded Funds (ETFs)</div>' +
+          '<div class="ia-naf-prog-hdr-sub">Bundled investments with low fees that you can quickly buy or sell — transparent, cost-efficient index exposure with intraday liquidity</div>' +
         '</div>' +
-        '<div class="ia-naf-type-grid ia-naf-ann-grid">' + renderAnnuityCards(deferredAnnuities, '#d97706') + '</div>' +
       '</div>' +
+      '<div class="ia-naf-type-grid">' + renderProductCard(etfType, '#059669') + '</div>' +
+
+      /* ── 529 College Savings Block ── */
+      '<div class="ia-naf-prog-hdr" style="margin-top:20px">' +
+        '<div class="ia-naf-prog-hdr-icon" style="background:#7c3aed18;color:#7c3aed"><i class="fas fa-graduation-cap"></i></div>' +
+        '<div class="ia-naf-prog-hdr-text">' +
+          '<div class="ia-naf-prog-hdr-title" style="color:#7c3aed">529 College Savings Plans</div>' +
+          '<div class="ia-naf-prog-hdr-sub">Investments designed to help you pay for college or other education expenses — tax-advantaged growth with NY state deduction up to $10,000/yr</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ia-naf-type-grid">' + renderProductCard(savingsType, '#7c3aed') + '</div>' +
 
     '</div>' +
 
@@ -43562,8 +43528,8 @@ function iaRenderPortfolioReview() {
   var actions = [
     { urgency:'urgent', icon:'fa-paper-plane',   text:'Process Linda Morrison RMD — $14,200 due Dec 31, 2026',        btn:'Process RMD',   fn:'iaProcessRMD(\'IA-LM-001\')' },
     { urgency:'urgent', icon:'fa-paper-plane',   text:'Process Sandra Williams RMD — $11,400 due Dec 31, 2026',       btn:'Process RMD',   fn:'iaProcessRMD(\'IA-SW-001\')' },
-    { urgency:'urgent', icon:'fa-balance-scale', text:'Rebalance Robert Chen SMA-300201 — 6.8% drift · 4 trades',     btn:'Rebalance',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-RC-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' },
-    { urgency:'high',   icon:'fa-balance-scale', text:'Rebalance Linda Morrison UMA-880201 — 7.4% drift · 3 trades',  btn:'Rebalance',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-LM-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' },
+    { urgency:'urgent', icon:'fa-balance-scale', text:'Rebalance Robert Chen MF-300201 — 6.8% drift · 4 trades',     btn:'Rebalance',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-RC-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' },
+    { urgency:'high',   icon:'fa-balance-scale', text:'Rebalance Linda Morrison MF-880201 — 7.4% drift · 3 trades',  btn:'Rebalance',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-LM-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' },
     { urgency:'high',   icon:'fa-calendar-check',text:'James Whitfield annual review overdue — schedule Q2 meeting',  btn:'Schedule',      fn:'iaToast(\'<i class=\\\"fas fa-calendar-check\\\"></i> Q2 review scheduled for James Whitfield — Apr 15, 2026\',3000)' },
     { urgency:'med',    icon:'fa-leaf',           text:'Harvest $4,200 TLH — Robert Chen SMA before Q2 close',        btn:'Harvest',       fn:'iaExecuteTLH(\'IA-RC-001\')' },
     { urgency:'med',    icon:'fa-leaf',           text:'Harvest $3,200 TLH — Linda Morrison UMA before year-end',      btn:'Harvest',       fn:'iaExecuteTLH(\'IA-LM-001\')' },
@@ -45308,9 +45274,9 @@ function srOpenFullReview(id) {
      ══════════════════════════════════════════════════════════════ */
   var _arData = {
 
-    /* ── Linda Morrison UMA ── */
+    /* ── Linda Morrison Mutual Funds ── */
     'IA-LM-001': {
-      client: 'Linda Morrison', accountNum: 'UMA-880201', accountType: 'Unified Managed Account (UMA)',
+      client: 'Linda Morrison', accountNum: 'MF-880201', accountType: 'Mutual Funds',
       reviewCycle: 'Annual (+ Quarterly check-ins)',
       lastReview: 'Jan 15, 2026', nextReview: 'Apr 15, 2026', reviewStatus: 'overdue',
       reviewStatusLabel: 'Overdue — 3 months',
@@ -45385,12 +45351,12 @@ function srOpenFullReview(id) {
         { source: 'Cash / MMF',                 contribution: '+0.3%', vs: 'Target +0.3%', status: 'inline' }
       ],
 
-      aiNarrative: 'Linda\'s UMA is performing exceptionally well at +9.2% YTD vs the 8.0% S&P Blend benchmark — a meaningful +1.2% alpha. The main concern is the 7.4% drift score driven by US Equity outperformance, which has shifted the portfolio away from its Moderate Growth target. Three priority items require attention at the Apr 15 review: (1) rebalance to restore allocation, (2) RMD planning for the Dec 31 deadline, and (3) trust estate alignment given the active LTC claim. The Fidelity consolidation opportunity ($280K AUM) is the top revenue event — priority close at the review meeting.'
+      aiNarrative: 'Linda\'s mutual fund portfolio MF-880201 is performing exceptionally well at +9.2% YTD vs the 8.0% S&P Blend benchmark — a meaningful +1.2% alpha. The main concern is the 7.4% drift score driven by US Equity outperformance, which has shifted the portfolio away from its Moderate Growth target. Three priority items require attention at the Apr 15 review: (1) rebalance to restore allocation, (2) RMD planning for the Dec 31 deadline, and (3) trust estate alignment given the active LTC claim. The Fidelity consolidation opportunity ($280K AUM) is the top revenue event — priority close at the review meeting.'
     },
 
-    /* ── Linda Morrison Mutual Fund ── */
+    /* ── Linda Morrison Mutual Funds ── */
     'IA-LM-002': {
-      client: 'Linda Morrison', accountNum: 'FAP-880202', accountType: 'Fund Advisory Program',
+      client: 'Linda Morrison', accountNum: 'MF-880202', accountType: 'Mutual Funds',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Mar 1, 2026', nextReview: 'Jun 1, 2026', reviewStatus: 'upcoming',
       reviewStatusLabel: 'Upcoming — Jun 1',
@@ -45442,7 +45408,7 @@ function srOpenFullReview(id) {
 
     /* ── Linda Morrison 529 ── */
     'IA-LM-003': {
-      client: 'Linda Morrison', accountNum: '529-880203', accountType: '529 College Savings',
+      client: 'Linda Morrison', accountNum: '529-880203', accountType: '529 College Savings Plans',
       reviewCycle: 'Annual',
       lastReview: 'Feb 15, 2026', nextReview: 'Aug 15, 2026', reviewStatus: 'scheduled',
       reviewStatusLabel: 'Scheduled — Aug 15',
@@ -45492,9 +45458,9 @@ function srOpenFullReview(id) {
       aiNarrative: '529-880203 is on its age-based glide path and performing well (+0.7% alpha). The $18K projected gap vs a 4-year private university is the primary concern — increasing the annual contribution by $2,000 closes this gap entirely. Emily is 4 years from college enrollment; the next glide path shift at age 15 will reduce equity exposure from 50% to 40%, which is appropriate. Recommend coordinating the UTMA discussion with the estate beneficiary review for the UMA account.'
     },
 
-    /* ── Robert Chen SMA ── */
+    /* ── Robert Chen Mutual Funds ── */
     'IA-RC-001': {
-      client: 'Robert Chen', accountNum: 'SMA-300201', accountType: 'Separately Managed Account (SMA)',
+      client: 'Robert Chen', accountNum: 'MF-300201', accountType: 'Mutual Funds',
       reviewCycle: 'Quarterly',
       lastReview: 'Jan 20, 2026', nextReview: 'Apr 20, 2026', reviewStatus: 'overdue',
       reviewStatusLabel: 'Overdue — Q2 review due',
@@ -45552,12 +45518,12 @@ function srOpenFullReview(id) {
         { source: 'Alternatives (REIT)',          contribution: '+0.5%', vs: 'Target +0.5%', status: 'inline'      },
         { source: 'Cash / MMF',                  contribution: '+0.1%', vs: 'Target +0.2%', status: 'inline'      }
       ],
-      aiNarrative: 'SMA-300201 is Robert\'s flagship account and the highest alpha generator in the book (+0.9% vs S&P 500). The dominant driver is the US Large Cap Growth sleeve (+6.8%), which has now drifted the portfolio 7% above its target US Equity weighting. The Q2 rebalance should be executed immediately — delaying increases risk concentration. Two critical cross-sell opportunities: (1) the deferred annuity income layer for retirement 2045, and (2) the Chen Holdings buy-sell insurance gap, estimated at $2M key-person coverage need. Both should be presented at the Apr 20 review.'
+      aiNarrative: 'MF-300201 is Robert\'s flagship account and the highest alpha generator in the book (+0.9% vs S&P 500). The dominant driver is the US Large Cap Growth sleeve (+6.8%), which has now drifted the portfolio 7% above its target US Equity weighting. The Q2 rebalance should be executed immediately — delaying increases risk concentration. Two critical cross-sell opportunities: (1) the deferred annuity income layer for retirement 2045, and (2) the Chen Holdings buy-sell insurance gap, estimated at $2M key-person coverage need. Both should be presented at the Apr 20 review.'
     },
 
-    /* ── Robert Chen ETF ── */
+    /* ── Robert Chen ETFs ── */
     'IA-RC-002': {
-      client: 'Robert Chen', accountNum: 'FAP-300202', accountType: 'Fund Advisory Program',
+      client: 'Robert Chen', accountNum: 'ETF-300202', accountType: 'Exchange Traded Funds (ETFs)',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Feb 10, 2026', nextReview: 'May 10, 2026', reviewStatus: 'upcoming',
       reviewStatusLabel: 'Upcoming — May 10',
@@ -45603,9 +45569,9 @@ function srOpenFullReview(id) {
       aiNarrative: 'ETF-300202 is a textbook low-cost core portfolio. With 0.04% average expense ratio and minimal tracking error, this account is outperforming on a cost-adjusted basis. The SMA consolidation is the primary strategic event — at the current DCA rate ($24,000/yr), Robert will cross the $150K threshold in approximately 2.3 years. Consider presenting the consolidation proposal at the May review as a proactive upgrade conversation.'
     },
 
-    /* ── James Whitfield IRA ── */
+    /* ── James Whitfield Mutual Funds ── */
     'IA-JW-001': {
-      client: 'James Whitfield', accountNum: 'IRA-291001', accountType: 'IRA (Traditional)',
+      client: 'James Whitfield', accountNum: 'MF-291001', accountType: 'Mutual Funds',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Oct 20, 2025', nextReview: 'Apr 15, 2026', reviewStatus: 'overdue',
       reviewStatusLabel: 'Overdue — 6 months',
@@ -45662,12 +45628,12 @@ function srOpenFullReview(id) {
         { source: 'Fixed Income (MacKay Bond)',  contribution: '+1.1%', vs: 'Target +1.1%', status: 'inline'      },
         { source: 'Cash / MMF',                 contribution: '+0.3%', vs: 'Target +0.3%', status: 'inline'      }
       ],
-      aiNarrative: 'IRA-291001 is 6 months overdue for its semi-annual review — this is a compliance risk for a RMD-eligible account. Three urgent items converge at the Apr 15 meeting: (1) rebalance to correct US Equity drift, (2) RMD planning for the $7,250 Dec 31 deadline, and (3) deferred annuity presentation. James\'s Whole Life cash value ($48K) serves as the conservative anchor of his overall portfolio — presenting a coordinated insurance + IRA + annuity income picture will be compelling. Estate plan gap (2017 will, 2019 beneficiary) is a relationship risk — address proactively.'
+      aiNarrative: 'MF-291001 is 6 months overdue for its semi-annual review — this is a compliance risk for a RMD-eligible account. Three urgent items converge at the Apr 15 meeting: (1) rebalance to correct US Equity drift, (2) RMD planning for the $7,250 Dec 31 deadline, and (3) deferred annuity presentation. James\'s Whole Life cash value ($48K) serves as the conservative anchor of his overall portfolio — presenting a coordinated insurance + IRA + annuity income picture will be compelling. Estate plan gap (2017 will, 2019 beneficiary) is a relationship risk — address proactively.'
     },
 
-    /* ── Maria Gonzalez ETF ── */
+    /* ── Maria Gonzalez ETFs ── */
     'IA-MG-001': {
-      client: 'Maria Gonzalez', accountNum: 'FAP-341001', accountType: 'Fund Advisory Program',
+      client: 'Maria Gonzalez', accountNum: 'ETF-341001', accountType: 'Exchange Traded Funds (ETFs)',
       reviewCycle: 'Quarterly',
       lastReview: 'Mar 5, 2026', nextReview: 'Jun 5, 2026', reviewStatus: 'scheduled',
       reviewStatusLabel: 'Scheduled — Jun 5',
@@ -45718,9 +45684,9 @@ function srOpenFullReview(id) {
       aiNarrative: 'ETF-341001 is Maria\'s core growth engine and it is performing exactly as designed — perfectly allocated, systematic DCA in place, and tracking slightly above benchmark. The primary opportunity at the Jun 5 review is the DI insurance cross-sell ($210K household income with no disability protection is a significant gap) and the UMA upgrade presentation ($80K away from the $200K advisory threshold). Both conversations are natural and client-appropriate.'
     },
 
-    /* ── Maria Gonzalez Roth IRA ── */
+    /* ── Maria Gonzalez ETFs (Roth) ── */
     'IA-MG-002': {
-      client: 'Maria Gonzalez', accountNum: 'ROTH-341002', accountType: 'IRA (Roth)',
+      client: 'Maria Gonzalez', accountNum: 'ETF-341002', accountType: 'Exchange Traded Funds (ETFs)',
       reviewCycle: 'Annual',
       lastReview: 'Mar 5, 2026', nextReview: 'Jun 5, 2026', reviewStatus: 'scheduled',
       reviewStatusLabel: 'Combined with ETF review — Jun 5',
@@ -45761,12 +45727,12 @@ function srOpenFullReview(id) {
         { source: 'VXUS — Vanguard Intl',        contribution: '+1.0%', vs: 'Target +1.2%', status: 'underperform'},
         { source: 'Cash / MMF',                  contribution: '+0.2%', vs: 'Target +0.2%', status: 'inline'      }
       ],
-      aiNarrative: 'ROTH-341002 is a straightforward, maximized account — contributions are at the limit and the aggressive allocation is appropriate for the 17-year horizon. The only strategic event is the advisor-managed upgrade at $50K ($22K away at current trajectory). Note: if Maria\'s household income approaches the Roth phase-out threshold ($218K for MFJ in 2026), a backdoor Roth strategy should be considered. This is a good annual review item to monitor.'
+      aiNarrative: 'ETF-341002 is a straightforward, maximized account — contributions are at the limit and the aggressive ETF allocation is appropriate for the 17-year horizon. The only strategic event is the advisor-managed upgrade at $50K ($22K away at current trajectory). Note: if Maria\'s household income approaches the contribution phase-out threshold ($218K for MFJ in 2026), alternative strategies should be considered. This is a good annual review item to monitor.'
     },
 
-    /* ── Alex Rivera UMA (Funding Pending) ── */
+    /* ── Alex Rivera Mutual Funds (Funding Pending) ── */
     'IA-AR-001': {
-      client: 'Alex Rivera', accountNum: 'UMA-360001', accountType: 'Unified Managed Account (UMA)',
+      client: 'Alex Rivera', accountNum: 'MF-360001', accountType: 'Mutual Funds',
       reviewCycle: 'Semi-Annual (first review when funded)',
       lastReview: 'N/A — new account', nextReview: 'Oct 1, 2026', reviewStatus: 'not-started',
       reviewStatusLabel: 'First review — Oct 1, 2026',
@@ -45808,12 +45774,12 @@ function srOpenFullReview(id) {
         { priority: 'medium', label: 'Schedule first 6-month review — Oct 1, 2026',                  owner: 'Coordinator', due: 'Apr 22, 2026', done: false }
       ],
       perfAttribution: [],
-      aiNarrative: 'UMA-360001 is Alex Rivera\'s newly opened account — funding is in progress with two tranches expected by Apr 18. Once funded ($80K initial AUM), the first portfolio construction trade will execute per the Moderate Growth IPS target allocation (60% US Equity / 20% Intl / 15% Fixed Income / 5% Cash). The first formal review is scheduled for Oct 1, 2026. Priority items before then: IPS signature, trade confirmation, and welcome onboarding. This account completes the full INV Track for Alex — from FNA Investment Profile to Products proposal, Account Opening, Funding & IPS, and now the Annual Review lifecycle.'
+      aiNarrative: 'MF-360001 is Alex Rivera\'s newly opened mutual fund account — funding is in progress with two tranches expected by Apr 18. Once funded ($80K initial AUM), the first portfolio construction trade will execute per the Moderate Growth IPS target allocation (60% US Equity / 20% Intl / 15% Fixed Income / 5% Cash). The first formal review is scheduled for Oct 1, 2026. Priority items before then: IPS signature, trade confirmation, and welcome onboarding. This account completes the full INV Track for Alex — from FNA Investment Profile to Products proposal, Account Opening, Funding & IPS, and now the Annual Review lifecycle.'
     },
 
-    /* ── Patricia Nguyen ETF ── */
+    /* ── Patricia Nguyen ETFs ── */
     'IA-PN-001': {
-      client: 'Patricia Nguyen', accountNum: 'RDP-301001', accountType: 'Rep-Directed Program',
+      client: 'Patricia Nguyen', accountNum: 'ETF-301001', accountType: 'Exchange Traded Funds (ETFs)',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Feb 20, 2026', nextReview: 'May 20, 2026', reviewStatus: 'upcoming',
       reviewStatusLabel: 'Upcoming — May 20',
@@ -45865,9 +45831,9 @@ function srOpenFullReview(id) {
       aiNarrative: 'ETF-301001 is performing well (+0.4% alpha) but the UL insurance underfunding is a compounding risk that affects Patricia\'s overall financial picture. The investment portfolio is growing while the insurance protection is eroding — these two plans are working against each other. The May 20 review should present a coordinated insurance + investment financial plan that addresses the UL cash value deficit, DI insurance gap, and ETF rebalance as a single integrated advisory conversation. This is a relationship-deepening opportunity, not just a rebalance discussion.'
     },
 
-    /* ── Sandra Williams IRA ── */
+    /* ── Sandra Williams Mutual Funds ── */
     'IA-SW-001': {
-      client: 'Sandra Williams', accountNum: 'IRA-320001', accountType: 'IRA (Traditional)',
+      client: 'Sandra Williams', accountNum: 'MF-320001', accountType: 'Mutual Funds',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Sep 15, 2025', nextReview: 'Apr 10, 2026', reviewStatus: 'overdue',
       reviewStatusLabel: 'Overdue — 7 months',
@@ -45925,12 +45891,12 @@ function srOpenFullReview(id) {
         { source: 'Fixed Income (MacKay Bond)',  contribution: '+1.9%', vs: 'Target +1.9%', status: 'inline'      },
         { source: 'Cash / Stable Value',         contribution: '+0.5%', vs: 'Target +0.5%', status: 'inline'      }
       ],
-      aiNarrative: 'IRA-320001 is Sandra\'s primary retirement vehicle — and it faces three converging urgencies: (1) 7-month review overdue on an RMD-eligible account, (2) term policy expiration in Sep 2026 requiring a permanent conversion decision, and (3) retirement 5 years away with an identified income gap of $1,800/month. The annuity income bridge presentation is the single highest-value agenda item — a $120K immediate annuity would generate ~$1,400/month, nearly closing the gap. Coordinate the IRA, LTC, term conversion, and annuity conversations as a single holistic retirement plan.'
+      aiNarrative: 'MF-320001 is Sandra\'s primary retirement vehicle — a MainStay mutual fund portfolio that faces three converging urgencies: (1) 7-month review overdue on an RMD-eligible account, (2) term policy expiration in Sep 2026 requiring a permanent conversion decision, and (3) retirement 5 years away with an identified income gap of $1,800/month. The annuity income bridge presentation is the single highest-value agenda item — a $120K immediate annuity would generate ~$1,400/month, nearly closing the gap. Coordinate the mutual fund portfolio, LTC, term conversion, and annuity conversations as a single holistic retirement plan.'
     },
 
-    /* ── David Thompson MF ── */
+    /* ── David Thompson Mutual Funds ── */
     'IA-DT-001': {
-      client: 'David Thompson', accountNum: 'FAP-305001', accountType: 'Fund Advisory Program',
+      client: 'David Thompson', accountNum: 'MF-305001', accountType: 'Mutual Funds',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Mar 15, 2026', nextReview: 'Sep 15, 2026', reviewStatus: 'scheduled',
       reviewStatusLabel: 'Scheduled — Sep 15',
