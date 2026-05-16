@@ -16814,16 +16814,42 @@ const _aiScoreDetails = {
     ]
   },
   investment: {
-    title:'Investment & Advisory AI — Detail',
-    score:76, trend:'+8', color:'#059669',
-    trendData:[52,55,57,60,62,65,68,72,76],
+    title:'Investment AI — NYLIM Products & Proposals — Detail',
+    score:84, trend:'+18', color:'#059669',
+    trendData:[48,52,56,60,64,68,72,78,84],
     trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
     actions:[
-      { urgency:'high',  text:'Linda Morrison UMA opportunity: $280K+ AUM consolidation — schedule proposal' },
-      { urgency:'high',  text:'Robert Chen portfolio gap: $180K at risk — rebalance discussion needed' },
-      { urgency:'med',   text:'Investment AI adoption: 25% — need 5 more clients to hit Q2 30% target' },
-      { urgency:'med',   text:'Patricia Nguyen VUL sub-account review — 60/40 allocation may need rebalancing' },
-      { urgency:'low',   text:'Open 529 plan conversation with James Whitfield — two college-age dependents' },
+      { urgency:'high',  text:'IP-AR-001 Alex Rivera (Mutual Fund, $500K) — Approved status: execute onboarding now' },
+      { urgency:'high',  text:'IP-LM-001 Linda Morrison (Blended, $280K) — Presented: follow up post-proposal meeting' },
+      { urgency:'med',   text:'IP-JW-001 James Whitfield (ETF, $320K) — Pending: schedule review and decision call' },
+      { urgency:'med',   text:'IP-DT-001 David Thompson (529, $140K) — Draft: complete proposal and present to client' },
+      { urgency:'low',   text:'Expand NYLIM product coverage: add HFXI/IQSU ETF fund comparison to proposal engine' },
+    ]
+  },
+  retirement: {
+    title:'Retirement Planning AI — Detail',
+    score:79, trend:'New', color:'#d97706',
+    trendData:[0,0,0,0,0,0,62,70,79],
+    trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    actions:[
+      { urgency:'high',  text:'James Whitfield — GLIA income shortfall $2,100/mo detected: schedule retirement income illustration' },
+      { urgency:'high',  text:'Maria Gonzalez — CIAFA fixed annuity matures Jun 15: recommend FIA rollover at 6.2% cap rate' },
+      { urgency:'med',   text:'Sandra Williams (61) — near-retirement: immediate annuity $120K → $1,400/mo income gap strategy' },
+      { urgency:'med',   text:'Linda Morrison — FIA $150K + UMA income strategy: present at next annual review' },
+      { urgency:'low',   text:'Review GLIA income rider optimization for 2 flagged clients — uplift available' },
+    ]
+  },
+  advisory: {
+    title:'Advisory & Wealth AI — Detail',
+    score:81, trend:'New', color:'#7c3aed',
+    trendData:[0,0,0,0,0,0,64,72,81],
+    trendLabels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
+    actions:[
+      { urgency:'high',  text:'Robert Chen — VUL $180K drifted +8% equity vs 60/40 target: initiate rebalancing conversation' },
+      { urgency:'high',  text:'Linda Morrison estate trust last updated 2019 — overdue: schedule estate planning review' },
+      { urgency:'med',   text:'Robert Chen key-person + COLI proposal ready ($20,400/yr): schedule business owner meeting' },
+      { urgency:'med',   text:'James Whitfield NQDC + Section 162 executive benefits proposal ready ($18,000/yr)' },
+      { urgency:'low',   text:'Advisory AI adoption: 4 estate planning clients qualified — expand outreach to remaining book' },
     ]
   },
   meetings: {
@@ -18899,7 +18925,8 @@ function filterAIDomain(domain, btn) {
   const items = document.querySelectorAll('.ais-activity-item');
   const tagMap = {
     underwriting: 'ins', retention: 'ret', claims: 'clm',
-    alerts: 'ins', investment: 'inv', meetings: 'mtg'
+    alerts: 'ins', investment: 'inv', meetings: 'mtg',
+    retirement: 'ret-domain', advisory: 'adv'
   };
   items.forEach(item => {
     if (domain === 'all') { item.style.display = ''; return; }
@@ -19014,7 +19041,7 @@ function initAIScoreCharts() {
       labels: ['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'],
       datasets: [{
         label: 'AI Score',
-        data: [52, 58, 63, 68, 72, 76, 80, 84, 87],
+        data: [52, 58, 63, 68, 72, 76, 80, 84, 89],
         borderColor: '#1d4ed8',
         backgroundColor: 'rgba(29,78,216,0.08)',
         pointBackgroundColor: '#1d4ed8',

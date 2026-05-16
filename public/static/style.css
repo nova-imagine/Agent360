@@ -48117,3 +48117,149 @@ kbd {
 .ip-intel-model-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
 
 /* END PASS 12 */
+
+/* ════════════════════════════════════════════════════════════════
+   PASS 13 — AI Insights: Retirement & Advisory domain cards,
+              new activity tags, ROI cards, filter bar expansion
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Retirement Planning AI domain card ── */
+.ais-ret-domain {
+  border-top: 3px solid #d97706;
+}
+.ais-ret-domain .ais-domain-score { color: #d97706; }
+.ais-ret-domain .ais-domain-score-lbl { color: #92400e; }
+.ais-ret-domain:hover { box-shadow: 0 8px 28px rgba(217,119,6,0.18); }
+
+.ret-domain-bg {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  color: #fff;
+}
+
+.ret-domain-bar {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+  border-radius: 4px;
+  height: 100%;
+}
+
+.ais-roi-box.ret-domain-roi {
+  background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+  border-left: 3px solid #d97706;
+  color: #78350f;
+}
+.ais-roi-box.ret-domain-roi i { color: #d97706; }
+
+/* ── Advisory & Wealth AI domain card ── */
+.ais-adv-domain {
+  border-top: 3px solid #7c3aed;
+}
+.ais-adv-domain .ais-domain-score { color: #7c3aed; }
+.ais-adv-domain .ais-domain-score-lbl { color: #5b21b6; }
+.ais-adv-domain:hover { box-shadow: 0 8px 28px rgba(124,58,237,0.18); }
+
+.adv-domain-bg {
+  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  color: #fff;
+}
+
+.adv-domain-bar {
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  border-radius: 4px;
+  height: 100%;
+}
+
+.ais-roi-box.adv-domain-roi {
+  background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+  border-left: 3px solid #7c3aed;
+  color: #4c1d95;
+}
+.ais-roi-box.adv-domain-roi i { color: #7c3aed; }
+
+/* ── Activity feed new dot colours ── */
+.ais-activity-dot.orange { background: #d97706; }
+.ais-activity-dot.violet { background: #7c3aed; }
+
+/* ── Activity feed tag: Retirement (distinct from Retention .ret) ── */
+.ais-activity-tag.ret-domain {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+/* ── Activity feed tag: Advisory ── */
+.ais-activity-tag.adv {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+/* ── ROI cards: Retirement opportunity + Proposals AUM ── */
+.ais-roi-card.roi-retirement {
+  background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+  border-top: 3px solid #d97706;
+}
+.ais-roi-card.roi-retirement .ais-roi-icon { color: #d97706; }
+.ais-roi-card.roi-retirement .ais-roi-val  { color: #d97706; }
+
+.ais-roi-card.roi-proposals {
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+  border-top: 3px solid #059669;
+}
+.ais-roi-card.roi-proposals .ais-roi-icon { color: #059669; }
+.ais-roi-card.roi-proposals .ais-roi-val  { color: #059669; }
+
+/* ── Filter bar: ensure it wraps gracefully with 9 buttons ── */
+.ais-domain-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ais-filter-btn {
+  padding: 4px 11px;
+  font-size: 12px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.ais-filter-btn:hover { background: #e2e8f0; color: #1e293b; }
+.ais-filter-btn.active {
+  background: #003087;
+  color: #fff;
+  border-color: #003087;
+}
+
+/* ── Overall score chip: Advisory amber ── */
+.ais-chip.amber {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+/* ── Live actions: ensure 6 items display cleanly ── */
+.ais-live-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Reco panel: ensure 9 items scroll nicely ── */
+.ais-reco-list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+/* END PASS 13 */

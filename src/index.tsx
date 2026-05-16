@@ -12879,9 +12879,9 @@ function AIImpactScorecardPage() {
         <div class="ais-kpi-card">
           <div class="ais-kpi-icon blue"><i class="fas fa-dollar-sign"></i></div>
           <div class="ais-kpi-body">
-            <div class="ais-kpi-val">$31.2K</div>
+            <div class="ais-kpi-val">$43.6K</div>
             <div class="ais-kpi-lbl">AI Revenue Unlocked</div>
-            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +$8.4K vs Q4</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +$12.4K vs Q4</div>
           </div>
         </div>
         <div class="ais-kpi-card">
@@ -12895,9 +12895,9 @@ function AIImpactScorecardPage() {
         <div class="ais-kpi-card">
           <div class="ais-kpi-icon purple"><i class="fas fa-clock"></i></div>
           <div class="ais-kpi-body">
-            <div class="ais-kpi-val">~41 hrs</div>
+            <div class="ais-kpi-val">~47 hrs</div>
             <div class="ais-kpi-lbl">Agent Time Saved/Mo</div>
-            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +12 hrs vs Q4</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +18 hrs vs Q4</div>
           </div>
         </div>
         <div class="ais-kpi-card">
@@ -12919,9 +12919,9 @@ function AIImpactScorecardPage() {
         <div class="ais-kpi-card">
           <div class="ais-kpi-icon red"><i class="fas fa-star"></i></div>
           <div class="ais-kpi-body">
-            <div class="ais-kpi-val">87 / 100</div>
+            <div class="ais-kpi-val">89 / 100</div>
             <div class="ais-kpi-lbl">Overall AI Score</div>
-            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +12 pts vs Q4</div>
+            <div class="ais-kpi-delta up"><i class="fas fa-arrow-up"></i> +14 pts vs Q4</div>
           </div>
         </div>
       </div>
@@ -12930,7 +12930,7 @@ function AIImpactScorecardPage() {
       <div class="ais-live-banner">
         <div class="ais-live-banner-left">
           <span class="ais-live-badge"><i class="fas fa-circle"></i> LIVE</span>
-          <span class="ais-live-title"><i class="fas fa-brain"></i> AI Priority Actions — 4 items require your attention today</span>
+          <span class="ais-live-title"><i class="fas fa-brain"></i> AI Priority Actions — 6 items require your attention today</span>
         </div>
         <div class="ais-live-banner-right">
           <a class="ais-live-nova-link" href="https://toydxqyp.gensparkspace.com/" target="_blank" rel="noopener noreferrer"><i class="fas fa-robot"></i> Open NOVA AI <i class="fas fa-external-link-alt" style="font-size:10px;opacity:0.8"></i></a>
@@ -12950,9 +12950,9 @@ function AIImpactScorecardPage() {
           <div class="ais-live-icon"><i class="fas fa-bell"></i></div>
           <div class="ais-live-body">
             <div class="ais-live-action-title">High — Linda Morrison UMA Opportunity</div>
-            <div class="ais-live-action-sub">$280K+ AUM consolidation identified · $2,800/yr recurring fee · Schedule proposal</div>
+            <div class="ais-live-action-sub">$280K+ AUM consolidation identified · $2,800/yr recurring fee · Proposal IP-LM-001 ready</div>
           </div>
-          <button class="ais-live-btn" onclick="sendContextMessage('Investment proposal for Linda Morrison UMA opportunity')">Schedule</button>
+          <button class="ais-live-btn" onclick="navigateTo('inv-proposals')">View Proposal</button>
         </div>
         <div class="ais-live-item high">
           <div class="ais-live-icon"><i class="fas fa-clipboard-check"></i></div>
@@ -12970,6 +12970,22 @@ function AIImpactScorecardPage() {
           </div>
           <button class="ais-live-btn" onclick="sendContextMessage('Renewal strategy for Sandra Williams term conversion')">Prepare</button>
         </div>
+        <div class="ais-live-item high">
+          <div class="ais-live-icon"><i class="fas fa-umbrella-beach"></i></div>
+          <div class="ais-live-body">
+            <div class="ais-live-action-title">High — James Whitfield GLIA Income Shortfall</div>
+            <div class="ais-live-action-sub">$2,100/mo income gap detected · GLIA illustration ready · Schedule retirement review</div>
+          </div>
+          <button class="ais-live-btn" onclick="navigateTo('ret-accounts')">View Contracts</button>
+        </div>
+        <div class="ais-live-item normal">
+          <div class="ais-live-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div class="ais-live-body">
+            <div class="ais-live-action-title">Approved — IP-AR-001 Alex Rivera Mutual Fund Proposal</div>
+            <div class="ais-live-action-sub">$500K AUM · AI Score 93 · Status: Approved — ready to execute &amp; onboard</div>
+          </div>
+          <button class="ais-live-btn" onclick="navigateTo('inv-proposals')">Execute</button>
+        </div>
       </div>
 
       {/* ── Toolbar ── */}
@@ -12983,6 +12999,8 @@ function AIImpactScorecardPage() {
             <button class="ais-filter-btn" onclick="filterAIDomain('claims',this)">Claims</button>
             <button class="ais-filter-btn" onclick="filterAIDomain('alerts',this)">Alerts</button>
             <button class="ais-filter-btn" onclick="filterAIDomain('investment',this)">Investment</button>
+            <button class="ais-filter-btn" onclick="filterAIDomain('retirement',this)">Retirement</button>
+            <button class="ais-filter-btn" onclick="filterAIDomain('advisory',this)">Advisory</button>
             <button class="ais-filter-btn" onclick="filterAIDomain('meetings',this)">Meetings</button>
           </div>
         </div>
@@ -13001,25 +13019,27 @@ function AIImpactScorecardPage() {
               <svg viewBox="0 0 120 70" class="ais-gauge-svg">
                 <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
                 <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="url(#gaugeGrad)" stroke-width="10"
-                      stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="20"/>
+                      stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="16"/>
                 <defs>
                   <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stop-color="#1d4ed8"/>
                     <stop offset="100%" stop-color="#7c3aed"/>
                   </linearGradient>
                 </defs>
-                <text x="60" y="60" text-anchor="middle" class="ais-gauge-val">87</text>
+                <text x="60" y="60" text-anchor="middle" class="ais-gauge-val">89</text>
               </svg>
               <div class="ais-gauge-label">Overall AI Score</div>
             </div>
             <div class="ais-overall-desc">
-              <p>Your AI systems are at <strong>87/100</strong> — <span class="ais-trend-up">↑ 12 pts vs. Q4 2025</span>. Six domains active. Key gains: underwriting STP (+18%), retention (+23%), claims (+31%).</p>
+              <p>Your AI systems are at <strong>89/100</strong> — <span class="ais-trend-up">↑ 14 pts vs. Q4 2025</span>. Eight domains active. Key gains: underwriting STP (+18%), retention (+23%), claims (+31%). New domains: Retirement Planning AI &amp; Advisory Wealth AI now live.</p>
               <div class="ais-overall-chips">
                 <span class="ais-chip green"><i class="fas fa-check-circle"></i> Underwriting: Excellent</span>
                 <span class="ais-chip green"><i class="fas fa-check-circle"></i> Retention AI: Strong</span>
-                <span class="ais-chip amber"><i class="fas fa-exclamation-circle"></i> Investment AI: Growing</span>
+                <span class="ais-chip green"><i class="fas fa-check-circle"></i> Investment AI: Strong</span>
                 <span class="ais-chip green"><i class="fas fa-check-circle"></i> Claims AI: Strong</span>
                 <span class="ais-chip green"><i class="fas fa-check-circle"></i> Alerts: Excellent</span>
+                <span class="ais-chip amber"><i class="fas fa-exclamation-circle"></i> Retirement AI: Growing</span>
+                <span class="ais-chip amber"><i class="fas fa-exclamation-circle"></i> Advisory AI: Growing</span>
                 <span class="ais-chip green"><i class="fas fa-check-circle"></i> Meeting AI: Strong</span>
               </div>
             </div>
@@ -13032,8 +13052,8 @@ function AIImpactScorecardPage() {
             </div>
             <div class="ais-bench-row">
               <span class="ais-bench-lbl">Your Score</span>
-              <div class="ais-bench-bar-wrap"><div class="ais-bench-bar your-bench" style="width:87%"></div></div>
-              <span class="ais-bench-val ais-trend-up">87 / 100 ↑</span>
+              <div class="ais-bench-bar-wrap"><div class="ais-bench-bar your-bench" style="width:89%"></div></div>
+              <span class="ais-bench-val ais-trend-up">89 / 100 ↑</span>
             </div>
             <div class="ais-bench-row">
               <span class="ais-bench-lbl">Q2 2026 Target</span>
@@ -13244,51 +13264,145 @@ function AIImpactScorecardPage() {
           <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('alerts')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
-        {/* Investment AI */}
+        {/* Investment AI — NYLIM Products & Proposals */}
         <div class="ais-domain-card ais-inv ais-card-clickable" data-domain="investment" onclick="openAIScoreDetail('investment')" title="View Investment AI detail">
           <div class="ais-domain-header">
             <div class="ais-domain-icon inv-bg"><i class="fas fa-chart-line"></i></div>
             <div>
-              <div class="ais-domain-title">Investment & Advisory AI</div>
+              <div class="ais-domain-title">Investment AI — NYLIM &amp; Proposals</div>
               <div class="ais-domain-score-row">
-                <span class="ais-domain-score">76</span>
+                <span class="ais-domain-score">84</span>
                 <span class="ais-domain-score-lbl">/ 100</span>
-                <span class="ais-trend-up ais-score-delta">↑ +8 vs Q4</span>
+                <span class="ais-trend-up ais-score-delta">↑ +18 vs Q4</span>
               </div>
             </div>
           </div>
           <div class="ais-metric-list">
             <div class="ais-metric-row">
+              <span class="ais-metric-lbl">AI-Generated Proposals</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">4 active <span class="ais-trend-up">ETF/Blended/529/MF</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Avg AI Score per Proposal</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:93.5%"></div></div>
+              <span class="ais-metric-val">93.5 / 100 <span class="ais-trend-up">↑ excellent</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">NYLIM Products Tracked</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:80%"></div></div>
+              <span class="ais-metric-val">16 products <span class="ais-trend-up">8 ETF + 8 MF</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">AUM Under Proposal</span>
+              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:88%"></div></div>
+              <span class="ais-metric-val">$1.24M <span class="ais-trend-up">4 proposals</span></span>
+            </div>
+            <div class="ais-metric-row">
               <span class="ais-metric-lbl">Portfolio Gap Detection Rate</span>
               <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:89%"></div></div>
-              <span class="ais-metric-val">89% <span class="ais-trend-up">↑+14%</span></span>
-            </div>
-            <div class="ais-metric-row">
-              <span class="ais-metric-lbl">Annuity Candidates Identified</span>
-              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:80%"></div></div>
-              <span class="ais-metric-val">4 clients <span class="ais-trend-up">↑+2</span></span>
-            </div>
-            <div class="ais-metric-row">
-              <span class="ais-metric-lbl">UMA Opportunity Flagged</span>
-              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:60%"></div></div>
-              <span class="ais-metric-val">$280K AUM <span class="ais-trend-up">$2,800/yr fee</span></span>
-            </div>
-            <div class="ais-metric-row">
-              <span class="ais-metric-lbl">Cross-Sell Insights Generated</span>
-              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:72%"></div></div>
-              <span class="ais-metric-val">9 insights <span class="ais-trend-up">across 247 clients</span></span>
-            </div>
-            <div class="ais-metric-row">
-              <span class="ais-metric-lbl">Investment AI Adoption Rate</span>
-              <div class="ais-bar-wrap"><div class="ais-bar inv-bar" style="width:25%"></div></div>
-              <span class="ais-metric-val">25% clients <span class="ais-trend-up">↑+6% growing</span></span>
+              <span class="ais-metric-val">89% <span class="ais-trend-up">↑+14% vs manual</span></span>
             </div>
           </div>
           <div class="ais-roi-box inv-roi">
             <i class="fas fa-dollar-sign"></i>
-            <span><strong>AI ROI:</strong> 9 cross-sell insights × avg $1,400 revenue each = <strong>$12,600 potential</strong>. UMA close: Linda Morrison $2,800/yr recurring fee.</span>
+            <span><strong>AI ROI:</strong> 4 proposals × avg $310K AUM × 1% advisory fee = <strong>$12,400/yr</strong>. Morningstar + FactSet data integrated across all 16 NYLIM products.</span>
           </div>
           <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('investment')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+        </div>
+
+        {/* Retirement Planning AI — NEW */}
+        <div class="ais-domain-card ais-ret-domain ais-card-clickable" data-domain="retirement" onclick="openAIScoreDetail('retirement')" title="View Retirement AI detail">
+          <div class="ais-domain-header">
+            <div class="ais-domain-icon ret-domain-bg"><i class="fas fa-umbrella-beach"></i></div>
+            <div>
+              <div class="ais-domain-title">Retirement Planning AI</div>
+              <div class="ais-domain-score-row">
+                <span class="ais-domain-score">79</span>
+                <span class="ais-domain-score-lbl">/ 100</span>
+                <span class="ais-trend-up ais-score-delta">↑ New Domain</span>
+              </div>
+            </div>
+          </div>
+          <div class="ais-metric-list">
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Annuity Contracts Monitored</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-domain-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">6 contracts <span class="ais-trend-up">GLIA/LMIA/GPIA/GFIA/FMIA/CIAFA</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Income Gap Clients Detected</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-domain-bar" style="width:80%"></div></div>
+              <span class="ais-metric-val">4 clients <span class="ais-trend-up">$430K opportunity</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Avg Monthly Income Shortfall</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-domain-bar" style="width:62%"></div></div>
+              <span class="ais-metric-val">$1,550 / mo <span class="ais-trend-neutral">→ across 4 clients</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">CIAFA Maturity Alert Triggered</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-domain-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">1 alert <span class="ais-trend-up">Maria G. — Jun 15</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">GLIA Rider Optimization Flagged</span>
+              <div class="ais-bar-wrap"><div class="ais-bar ret-domain-bar" style="width:67%"></div></div>
+              <span class="ais-metric-val">2 clients <span class="ais-trend-up">income uplift available</span></span>
+            </div>
+          </div>
+          <div class="ais-roi-box ret-domain-roi">
+            <i class="fas fa-dollar-sign"></i>
+            <span><strong>AI ROI:</strong> 4 income-gap clients × avg $107.5K annuity premium = <strong>$430K annuity opportunity</strong>. GLIA/FMIA/GFIA suitability scoring automated.</span>
+          </div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('retirement')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
+        </div>
+
+        {/* Advisory & Wealth AI — NEW */}
+        <div class="ais-domain-card ais-adv-domain ais-card-clickable" data-domain="advisory" onclick="openAIScoreDetail('advisory')" title="View Advisory AI detail">
+          <div class="ais-domain-header">
+            <div class="ais-domain-icon adv-domain-bg"><i class="fas fa-gem"></i></div>
+            <div>
+              <div class="ais-domain-title">Advisory &amp; Wealth AI</div>
+              <div class="ais-domain-score-row">
+                <span class="ais-domain-score">81</span>
+                <span class="ais-domain-score-lbl">/ 100</span>
+                <span class="ais-trend-up ais-score-delta">↑ New Domain</span>
+              </div>
+            </div>
+          </div>
+          <div class="ais-metric-list">
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">UMA / SMA Accounts Monitored</span>
+              <div class="ais-bar-wrap"><div class="ais-bar adv-domain-bar" style="width:100%"></div></div>
+              <span class="ais-metric-val">6 accounts <span class="ais-trend-up">AI-oversight active</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Estate Planning Clients Flagged</span>
+              <div class="ais-bar-wrap"><div class="ais-bar adv-domain-bar" style="width:80%"></div></div>
+              <span class="ais-metric-val">4 clients <span class="ais-trend-up">$45.8K revenue</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">AUM Rebalancing Alerts</span>
+              <div class="ais-bar-wrap"><div class="ais-bar adv-domain-bar" style="width:67%"></div></div>
+              <span class="ais-metric-val">2 accounts <span class="ais-trend-up">drift detected</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Business Advisory Proposals Ready</span>
+              <div class="ais-bar-wrap"><div class="ais-bar adv-domain-bar" style="width:75%"></div></div>
+              <span class="ais-metric-val">3 proposals <span class="ais-trend-up">Chen + Whitfield</span></span>
+            </div>
+            <div class="ais-metric-row">
+              <span class="ais-metric-lbl">Cross-Sell Insights Generated</span>
+              <div class="ais-bar-wrap"><div class="ais-bar adv-domain-bar" style="width:72%"></div></div>
+              <span class="ais-metric-val">9 insights <span class="ais-trend-up">across book</span></span>
+            </div>
+          </div>
+          <div class="ais-roi-box adv-domain-roi">
+            <i class="fas fa-dollar-sign"></i>
+            <span><strong>AI ROI:</strong> UMA fee $2,800/yr (Linda Morrison) + business services $20,400/yr (Robert Chen + James Whitfield) = <strong>$23,200/yr advisory revenue</strong>.</span>
+          </div>
+          <div class="ais-domain-footer"><button class="btn-ais-drill" onclick="event.stopPropagation();openAIScoreDetail('advisory')"><i class="fas fa-chart-bar"></i> View Trend &amp; Actions</button></div>
         </div>
 
         {/* Meeting AI */}
@@ -13398,6 +13512,30 @@ function AIImpactScorecardPage() {
               </div>
               <span class="ais-activity-tag ins">Insurance</span>
             </div>
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot orange"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>CIAFA Maturity Alert</strong> — Maria Gonzalez fixed annuity matures Jun 15 · FIA rollover analysis ready at 6.2% cap</div>
+                <div class="ais-activity-time">Yesterday, 9:05 AM</div>
+              </div>
+              <span class="ais-activity-tag ret-domain">Retirement</span>
+            </div>
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot orange"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>GLIA Income Scan</strong> — 4 clients with retirement income shortfalls · avg $1,550/mo gap · $430K annuity opportunity surfaced</div>
+                <div class="ais-activity-time">Apr 14, 2:18 PM</div>
+              </div>
+              <span class="ais-activity-tag ret-domain">Retirement</span>
+            </div>
+            <div class="ais-activity-item">
+              <div class="ais-activity-dot violet"></div>
+              <div class="ais-activity-body">
+                <div class="ais-activity-text"><strong>UMA Rebalancing Alert</strong> — Robert Chen $180K VUL drifted +8% equity vs 60/40 target · action recommended</div>
+                <div class="ais-activity-time">Apr 14, 10:45 AM</div>
+              </div>
+              <span class="ais-activity-tag adv">Advisory</span>
+            </div>
           </div>
         </div>
 
@@ -13405,7 +13543,7 @@ function AIImpactScorecardPage() {
         <div class="ais-reco-card">
           <div class="ais-section-header">
             <span class="ais-section-title-sm"><i class="fas fa-magic"></i> AI-Recommended Actions</span>
-            <span class="ais-reco-count">9 open</span>
+            <span class="ais-reco-count">12 open</span>
           </div>
           <div class="ais-reco-list">
             <div class="ais-reco-item">
@@ -13455,6 +13593,30 @@ function AIImpactScorecardPage() {
                 <div class="ais-reco-sub">Advisory client · Schedule proactive check-in call</div>
               </div>
               <button class="ais-reco-btn" onclick="sendContextMessage('Proactive outreach David Thompson 90 day check-in')"><i class="fas fa-user-check"></i></button>
+            </div>
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority med">MED</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">James Whitfield — GLIA Income Shortfall $2,100/mo</div>
+                <div class="ais-reco-sub">Retirement AI detected gap · GLIA illustration ready · Schedule income review meeting</div>
+              </div>
+              <button class="ais-reco-btn" onclick="navigateTo('ret-accounts')"><i class="fas fa-umbrella-beach"></i></button>
+            </div>
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority med">MED</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">Maria Gonzalez — CIAFA Maturity Jun 15</div>
+                <div class="ais-reco-sub">Fixed annuity maturing · FIA rollover at 6.2% cap recommended · Act within 30 days</div>
+              </div>
+              <button class="ais-reco-btn" onclick="sendContextMessage('CIAFA maturity rollover strategy for Maria Gonzalez')"><i class="fas fa-sync-alt"></i></button>
+            </div>
+            <div class="ais-reco-item">
+              <div class="ais-reco-priority low">LOW</div>
+              <div class="ais-reco-body">
+                <div class="ais-reco-title">IP-DT-001 David Thompson 529 Proposal — Complete Draft</div>
+                <div class="ais-reco-sub">Draft status since Apr 12 · $140K · AI Score 91 · Complete and present to client</div>
+              </div>
+              <button class="ais-reco-btn" onclick="navigateTo('inv-proposals')"><i class="fas fa-file-alt"></i></button>
             </div>
           </div>
         </div>
@@ -13519,6 +13681,18 @@ function AIImpactScorecardPage() {
             <span class="cmp-ai">12 APS orders</span>
             <span class="cmp-gain">↓ <strong>18 APS avoided ($8,100 saved)</strong></span>
           </div>
+          <div class="ais-cmp-row">
+            <span>Retirement Income Gap Detection</span>
+            <span class="cmp-manual">Quarterly review, 1–2 flagged</span>
+            <span class="cmp-ai">Real-time, 4 clients, $430K opportunity</span>
+            <span class="cmp-gain">↑ <strong>Continuous vs. quarterly</strong></span>
+          </div>
+          <div class="ais-cmp-row">
+            <span>Investment Proposal Generation</span>
+            <span class="cmp-manual">3–4 days research + formatting</span>
+            <span class="cmp-ai">&lt; 2 min, AI score 93.5 avg</span>
+            <span class="cmp-gain">↑ <strong>99% faster with AI scoring</strong></span>
+          </div>
         </div>
       </div>
 
@@ -13561,6 +13735,18 @@ function AIImpactScorecardPage() {
             <div class="ais-roi-val">+18%</div>
             <div class="ais-roi-title">Pipeline Conversion Lift</div>
             <div class="ais-roi-desc">AI-assisted UW, proactive outreach and meeting briefs improved pipeline conversion from 52% to 68%</div>
+          </div>
+          <div class="ais-roi-card roi-retirement">
+            <div class="ais-roi-icon"><i class="fas fa-umbrella-beach"></i></div>
+            <div class="ais-roi-val">$430K</div>
+            <div class="ais-roi-title">Retirement Opportunity Surfaced</div>
+            <div class="ais-roi-desc">4 income-gap clients × avg $107.5K annuity premium. GLIA/FMIA/GFIA/CIAFA suitability scoring automated across all 6 contracts.</div>
+          </div>
+          <div class="ais-roi-card roi-proposals">
+            <div class="ais-roi-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="ais-roi-val">$1.24M</div>
+            <div class="ais-roi-title">AUM Under AI Proposals</div>
+            <div class="ais-roi-desc">4 NYLIM investment proposals (ETF/Blended/529/MF) with avg AI score 93.5. Morningstar + FactSet + NYL CRM data integrated.</div>
           </div>
         </div>
       </div>
@@ -13617,12 +13803,20 @@ function AIImpactScorecardPage() {
               <div class="ais-tl-desc">8 specialised AI agents across all 4 domains. 30 context buttons for instant deep-link queries.</div>
             </div>
           </div>
+          <div class="ais-tl-item tl-done">
+            <div class="ais-tl-dot done-dot"></div>
+            <div class="ais-tl-content">
+              <div class="ais-tl-date">Q1 2026</div>
+              <div class="ais-tl-title">Investment Proposals AI Engine</div>
+              <div class="ais-tl-desc">16 NYLIM products (8 ETF + 8 MF), 4 AI-scored proposals (ETF/Blended/529/MF), avg AI score 93.5. Morningstar + FactSet + NYL CRM data sources integrated.</div>
+            </div>
+          </div>
           <div class="ais-tl-item tl-next">
             <div class="ais-tl-dot next-dot"></div>
             <div class="ais-tl-content">
               <div class="ais-tl-date">Q2 2026</div>
-              <div class="ais-tl-title">AI Portfolio Optimizer</div>
-              <div class="ais-tl-desc">Automated rebalancing recommendations, FIA suitability scoring, and UMA candidate ranking across $4.2M AUM.</div>
+              <div class="ais-tl-title">AI Retirement Income Optimizer</div>
+              <div class="ais-tl-desc">Automated GLIA/FMIA/GFIA income projection engine with suitability scoring, income gap ranking, and annuity ladder recommendations across 38 retirement clients.</div>
             </div>
           </div>
           <div class="ais-tl-item tl-next">
