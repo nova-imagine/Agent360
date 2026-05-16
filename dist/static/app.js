@@ -35447,7 +35447,7 @@ function openClaimModal(claimId, tab) {
   }
 
   var tabActive = tab || 'view';
-  var tabs = ['view', 'docs', 'comms', 'beneficiary', 'payments', 'liability', 'notes', 'ci'];
+  var tabs = ['view', 'docs', 'comms', 'beneficiary', 'payments', 'liability', 'notes', 'ci', 'medical', 'settlement'];
   var tabLabels = {
     view:        '<i class="fas fa-file-alt"></i> Overview',
     docs:        '<i class="fas fa-folder-open"></i> Documents',
@@ -35456,7 +35456,9 @@ function openClaimModal(claimId, tab) {
     payments:    '<i class="fas fa-dollar-sign"></i> Payments & Reserve',
     liability:   '<i class="fas fa-gavel"></i> Liability & Legal',
     notes:       '<i class="fas fa-sticky-note"></i> Notes & Timeline',
-    ci:          '<i class="fas fa-robot"></i> AI Intelligence'
+    ci:          '<i class="fas fa-robot"></i> AI Intelligence',
+    medical:     '<i class="fas fa-heartbeat"></i> Medical / APS',
+    settlement:  '<i class="fas fa-handshake"></i> Settlement'
   };
 
   var tabBtns = tabs.map(function(t) {
@@ -35544,11 +35546,13 @@ function p7BuildClaimTabContent(claim, tab) {
       (claim.contestability ? '<div class="p7cm-contestability-alert"><i class="fas fa-shield-virus"></i> <strong>Contestability Window Active</strong> — ' + claim.contestabilityNote + '</div>' : '') +
       (claim.adbEligible ? '<div class="p7cm-adb-banner"><i class="fas fa-heartbeat"></i> <strong>ADB Eligible</strong> — ' + claim.adbNote + '</div>' : '') +
       '<div class="p7cm-ai-triage"><div class="p7cm-ai-triage-label"><i class="fas fa-robot"></i> AI Triage</div><div>' + claim.aiTriage + '</div></div>' +
+      (claim.denialReason ? '<div class="p7cm-denial-banner"><i class="fas fa-ban"></i> <strong>Claim Denied:</strong> ' + claim.denialReason + '</div>' : '') +
       '<div class="p7cm-actions-bar">' +
         '<button class="p7cm-act-btn primary" onclick="sendDocRequest(\'' + claim.id + '\',\'beneficiary\')"><i class="fas fa-paper-plane"></i> Chase Docs</button>' +
         '<button class="p7cm-act-btn secondary" onclick="p7OpenFraudDetail(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Fraud Review</button>' +
         '<button class="p7cm-act-btn secondary" onclick="p7ApproveClaim(\'' + claim.id + '\')"><i class="fas fa-check-circle"></i> Approve Claim</button>' +
-        '<button class="p7cm-act-btn ghost" onclick="p7DenyClaim(\'' + claim.id + '\')"><i class="fas fa-times-circle"></i> Deny</button>' +
+        '<button class="p7cm-act-btn danger" onclick="p7OpenDenialModal(\'' + claim.id + '\')"><i class="fas fa-ban"></i> Issue Denial</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="openP7AppealModal(\'' + claim.id + '\')"><i class="fas fa-balance-scale"></i> Appeal</button>' +
       '</div>' +
     '</div>';
   }
@@ -35623,25 +35627,53 @@ function p7BuildClaimTabContent(claim, tab) {
           '<button class="p7cm-act-btn primary" onclick="p7AddCommLog(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Add</button>' +
         '</div>' +
       '</div>' +
+      '<div class="p7cm-audit-section">' +
+        '<div class="p7cm-audit-title"><i class="fas fa-shield-alt"></i> Immutable Audit Log <span class="p7cm-audit-badge">Tamper-Proof</span></div>' +
+        '<div class="p7cm-audit-log">' +
+          '<div class="p7cm-audit-entry"><span class="p7cm-audit-ts">2026-05-10 09:14</span><span class="p7cm-audit-actor">System</span><span class="p7cm-audit-action">Claim created — FNOL received via web portal</span></div>' +
+          '<div class="p7cm-audit-entry"><span class="p7cm-audit-ts">2026-05-10 09:15</span><span class="p7cm-audit-actor">AI Engine</span><span class="p7cm-audit-action">Fraud score computed: ' + claim.fraudScore + '/100 · Triage: ' + claim.aiTriage + '</span></div>' +
+          '<div class="p7cm-audit-entry"><span class="p7cm-audit-ts">2026-05-11 11:32</span><span class="p7cm-audit-actor">' + claim.adjuster + '</span><span class="p7cm-audit-action">Claim assigned to adjuster · Team: ' + claim.adjusterTeam + '</span></div>' +
+          (claim.legalHold ? '<div class="p7cm-audit-entry warn"><span class="p7cm-audit-ts">2026-05-12 14:05</span><span class="p7cm-audit-actor">Legal</span><span class="p7cm-audit-action">Legal hold placed — all actions frozen pending review</span></div>' : '') +
+          (claim.denialReason ? '<div class="p7cm-audit-entry warn"><span class="p7cm-audit-ts">2026-05-13 10:22</span><span class="p7cm-audit-actor">' + claim.adjuster + '</span><span class="p7cm-audit-action">Denial issued: ' + claim.denialReason + '</span></div>' : '') +
+          '<div class="p7cm-audit-entry"><span class="p7cm-audit-ts">Today</span><span class="p7cm-audit-actor">Adjuster</span><span class="p7cm-audit-action">Claim modal opened — tab: comms/notes</span></div>' +
+        '</div>' +
+        '<div class="p7cm-audit-note"><i class="fas fa-lock"></i> Audit entries are write-once and cannot be modified or deleted. All actions are timestamped and user-attributed per regulatory requirements.</div>' +
+      '</div>' +
     '</div>';
   }
 
   /* ── TAB: BENEFICIARY ── */
   if (tab === 'beneficiary') {
-    var kycColor = claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified' ? '#059669' : claim.benefKYC && claim.benefKYC.indexOf('Pending') >= 0 ? '#d97706' : '#dc2626';
-    var kycIcon = claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    var beneList = claim.beneficiaries || [
+      { name: claim.beneficiary || 'Primary Beneficiary', rel: claim.benefRel || 'Spouse', pct: 100, kyc: claim.benefKYC || 'Pending', email: claim.benefEmail || '', phone: claim.benefPhone || '', account: claim.benefPayAccount || 'Not provided', type: 'Primary' }
+    ];
+    var beneRows = beneList.map(function(b, idx) {
+      var kc = b.kyc === 'Verified' ? '#059669' : b.kyc && b.kyc.indexOf('Pending') >= 0 ? '#d97706' : '#dc2626';
+      var ki = b.kyc === 'Verified' ? 'fa-check-circle' : 'fa-exclamation-circle';
+      return '<tr>' +
+        '<td><span class="p7cm-bene-type-badge ' + (b.type === 'Primary' ? 'primary' : 'contingent') + '">' + (b.type || 'Primary') + '</span></td>' +
+        '<td><strong>' + b.name + '</strong></td>' +
+        '<td>' + b.rel + '</td>' +
+        '<td>' + b.pct + '%</td>' +
+        '<td><span style="color:' + kc + ';font-weight:600"><i class="fas ' + ki + '"></i> ' + b.kyc + '</span></td>' +
+        '<td>' + (b.email ? '<a href="mailto:' + b.email + '" style="color:#003087">' + b.email + '</a>' : '—') + '</td>' +
+        '<td>' + (b.account || 'Not provided') + '</td>' +
+        '<td>' +
+          '<button class="p7cm-act-btn ghost" style="padding:4px 10px;font-size:11px" onclick="showToast(\'KYC request sent to ' + b.name + '\',\'success\')"><i class="fas fa-id-card"></i> KYC</button> ' +
+          '<button class="p7cm-act-btn ghost" style="padding:4px 10px;font-size:11px" onclick="openBeneDisputeModal(\'' + claim.id + '\')"><i class="fas fa-exclamation-triangle"></i> Dispute</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
     return '<div class="p7cm-bene-panel">' +
-      '<div class="p7cm-bene-header"><i class="fas fa-user-check"></i> Beneficiary Verification</div>' +
-      '<div class="p7cm-bene-card">' +
-        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Beneficiary</span><span class="p7cm-bene-val"><strong>' + (claim.beneficiary || '—') + '</strong></span></div>' +
-        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Relationship</span><span class="p7cm-bene-val">' + (claim.benefRel || '—') + '</span></div>' +
-        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">KYC Status</span><span class="p7cm-bene-val"><span style="color:' + kycColor + ';font-weight:600"><i class="fas ' + kycIcon + '"></i> ' + (claim.benefKYC || 'Not Started') + '</span></span></div>' +
-        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Email</span><span class="p7cm-bene-val"><a href="mailto:' + (claim.benefEmail || '') + '" style="color:#003087">' + (claim.benefEmail || '—') + '</a></span></div>' +
-        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Phone</span><span class="p7cm-bene-val">' + (claim.benefPhone || '—') + '</span></div>' +
-        '<div class="p7cm-bene-row"><span class="p7cm-bene-lbl">Payment Account</span><span class="p7cm-bene-val">' + (claim.benefPayAccount || 'Not provided') + '</span></div>' +
+      '<div class="p7cm-bene-header"><i class="fas fa-user-check"></i> Beneficiary Management — ' + claim.id + '</div>' +
+      '<div class="p7cm-bene-table-wrap">' +
+        '<table class="p7cm-bene-table">' +
+          '<thead><tr><th>Type</th><th>Name</th><th>Relationship</th><th>Share</th><th>KYC</th><th>Email</th><th>Payment Account</th><th>Actions</th></tr></thead>' +
+          '<tbody>' + beneRows + '</tbody>' +
+        '</table>' +
       '</div>' +
       '<div class="p7cm-bene-kyc-section">' +
-        '<div class="p7cm-bene-kyc-title"><i class="fas fa-id-card"></i> KYC Checklist</div>' +
+        '<div class="p7cm-bene-kyc-title"><i class="fas fa-id-card"></i> KYC Checklist (Primary)</div>' +
         '<div class="p7cm-bene-kyc-items">' +
           '<div class="p7cm-bene-kyc-item ' + ((claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified') ? 'done' : 'todo') + '"><i class="fas ' + ((claim.benefKYC === 'Verified' || claim.benefKYC === 'Both Verified') ? 'fa-check-circle' : 'fa-circle') + '"></i> Government-issued Photo ID</div>' +
           '<div class="p7cm-bene-kyc-item ' + (claim.benefPayAccount && claim.benefPayAccount.indexOf('pending') < 0 && claim.benefPayAccount.indexOf('Not') < 0 ? 'done' : 'todo') + '"><i class="fas ' + (claim.benefPayAccount && claim.benefPayAccount.indexOf('pending') < 0 && claim.benefPayAccount.indexOf('Not') < 0 ? 'fa-check-circle' : 'fa-circle') + '"></i> Bank / Payment Account Verified</div>' +
@@ -35650,9 +35682,10 @@ function p7BuildClaimTabContent(claim, tab) {
         '</div>' +
       '</div>' +
       '<div class="p7cm-bene-actions">' +
-        '<button class="p7cm-act-btn primary" onclick="showToast(\'KYC verification request sent to beneficiary\',\'success\')"><i class="fas fa-id-card"></i> Send KYC Request</button>' +
-        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Bank account verification initiated\',\'success\')"><i class="fas fa-university"></i> Verify Bank Account</button>' +
-        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Beneficiary designation pulled from policy record\',\'info\')"><i class="fas fa-file-contract"></i> View Designation on File</button>' +
+        '<button class="p7cm-act-btn primary" onclick="showToast(\'KYC verification request sent to all beneficiaries\',\'success\')"><i class="fas fa-id-card"></i> Send KYC to All</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Bank account verification initiated\',\'success\')"><i class="fas fa-university"></i> Verify Accounts</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="openBeneDisputeModal(\'' + claim.id + '\')"><i class="fas fa-exclamation-triangle"></i> Flag Dispute</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Beneficiary designation pulled from policy record\',\'info\')"><i class="fas fa-file-contract"></i> View Designation</button>' +
       '</div>' +
     '</div>';
   }
@@ -35881,6 +35914,68 @@ function p7BuildClaimTabContent(claim, tab) {
         '<button class="p7cm-act-btn primary" onclick="showToast(\'Full AI analysis report generated — check email\',\'success\')"><i class="fas fa-file-alt"></i> Generate Full Report</button>' +
         '<button class="p7cm-act-btn secondary" onclick="p7OpenFraudDetail(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
         '<button class="p7cm-act-btn ghost" onclick="showToast(\'AI re-scored claim — refreshing intelligence\',\'info\')"><i class="fas fa-sync-alt"></i> Re-run AI Analysis</button>' +
+        '<button class="p7cm-act-btn danger" onclick="openSIUCaseModal(\'' + claim.id + '\')"><i class="fas fa-user-secret"></i> Refer to SIU</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: MEDICAL / APS ── */
+  if (tab === 'medical') {
+    var apsItems = claim.apsOrders || [
+      { physician: 'Dr. Carver', specialty: 'Cardiology', ordered: '2026-04-10', received: '2026-04-28', status: 'received' },
+      { physician: 'Dr. Nguyen', specialty: 'Neurology', ordered: '2026-04-15', received: null, status: 'pending' }
+    ];
+    var apsRows = apsItems.map(function(a) {
+      var sc3 = a.status === 'received' ? '#059669' : a.status === 'pending' ? '#d97706' : '#dc2626';
+      return '<tr>' +
+        '<td>' + a.physician + '</td><td>' + a.specialty + '</td><td>' + a.ordered + '</td>' +
+        '<td>' + (a.received || '—') + '</td>' +
+        '<td><span style="color:' + sc3 + ';font-weight:600">' + a.status.charAt(0).toUpperCase() + a.status.slice(1) + '</span></td>' +
+        '<td><button class="p7cm-act-btn ghost" style="padding:4px 10px;font-size:11px" onclick="p7OrderAPS(\'' + claim.id + '\')"><i class="fas fa-redo"></i> Chase</button></td>' +
+      '</tr>';
+    }).join('');
+    return '<div class="p7cm-medical-panel">' +
+      '<div class="p7cm-med-header"><i class="fas fa-heartbeat"></i> Medical Records & APS Tracker — ' + claim.id + '</div>' +
+      '<div class="p7cm-med-summary">' +
+        '<div class="p7cm-med-stat"><div class="p7cm-med-stat-num">' + apsItems.length + '</div><div class="p7cm-med-stat-lbl">APS Orders</div></div>' +
+        '<div class="p7cm-med-stat"><div class="p7cm-med-stat-num" style="color:#059669">' + apsItems.filter(function(a){return a.status==="received";}).length + '</div><div class="p7cm-med-stat-lbl">Received</div></div>' +
+        '<div class="p7cm-med-stat"><div class="p7cm-med-stat-num" style="color:#d97706">' + apsItems.filter(function(a){return a.status==="pending";}).length + '</div><div class="p7cm-med-stat-lbl">Pending</div></div>' +
+      '</div>' +
+      '<table class="p7cm-med-table"><thead><tr><th>Physician</th><th>Specialty</th><th>Ordered</th><th>Received</th><th>Status</th><th>Action</th></tr></thead>' +
+      '<tbody>' + apsRows + '</tbody></table>' +
+      '<div class="p7cm-med-actions">' +
+        '<button class="p7cm-act-btn primary" onclick="p7OrderAPS(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Order New APS</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'APS chase emails sent\',\'success\')"><i class="fas fa-paper-plane"></i> Chase All Pending</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Medical records exported\',\'success\')"><i class="fas fa-file-pdf"></i> Export Report</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── TAB: SETTLEMENT RANGE PREDICTOR ── */
+  if (tab === 'settlement') {
+    var rawAmt = parseFloat((claim.amount || '$0').replace(/[^0-9.]/g, '')) || 0;
+    var low = Math.round(rawAmt * 0.55), mid = Math.round(rawAmt * 0.78), high = Math.round(rawAmt * 0.95);
+    var fmt = function(n) { return '$' + n.toLocaleString(); };
+    var confPct = claim.fraudScore >= 70 ? 52 : claim.fraudScore >= 40 ? 68 : 84;
+    return '<div class="p7cm-settlement-panel">' +
+      '<div class="p7cm-settle-header"><i class="fas fa-handshake"></i> AI Settlement Range Predictor — ' + claim.id + '</div>' +
+      '<div class="p7cm-settle-ai-badge"><i class="fas fa-robot"></i> AI Confidence: <strong>' + confPct + '%</strong></div>' +
+      '<div class="p7cm-settle-range-grid">' +
+        '<div class="p7cm-settle-range-card low"><div class="p7cm-settle-range-lbl">Conservative</div><div class="p7cm-settle-range-val">' + fmt(low) + '</div><div class="p7cm-settle-range-sub">Strong dispute position</div></div>' +
+        '<div class="p7cm-settle-range-card mid"><div class="p7cm-settle-range-lbl">Recommended</div><div class="p7cm-settle-range-val">' + fmt(mid) + '</div><div class="p7cm-settle-range-sub">AI-weighted optimal</div></div>' +
+        '<div class="p7cm-settle-range-card high"><div class="p7cm-settle-range-lbl">Exposure Ceiling</div><div class="p7cm-settle-range-val">' + fmt(high) + '</div><div class="p7cm-settle-range-sub">Full liability scenario</div></div>' +
+      '</div>' +
+      '<div class="p7cm-settle-factors">' +
+        '<div class="p7cm-settle-factors-title"><i class="fas fa-chart-bar"></i> Settlement Factors</div>' +
+        '<div class="p7cm-settle-factor-row"><span>Fraud Risk</span><strong>' + claim.fraudScore + '/100</strong></div>' +
+        '<div class="p7cm-settle-factor-row"><span>Liability Score</span><strong>' + claim.liabilityScore + '/100</strong></div>' +
+        '<div class="p7cm-settle-factor-row"><span>Contestability</span><strong>' + (claim.contestability ? 'Active' : 'None') + '</strong></div>' +
+        '<div class="p7cm-settle-factor-row"><span>Legal Hold</span><strong>' + (claim.legalHold ? 'Yes' : 'No') + '</strong></div>' +
+      '</div>' +
+      '<div class="p7cm-settle-actions">' +
+        '<button class="p7cm-act-btn primary" onclick="p7SupplementClaim(\'' + claim.id + '\')"><i class="fas fa-file-signature"></i> Initiate Settlement</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Settlement analysis exported\',\'success\')"><i class="fas fa-file-pdf"></i> Export Analysis</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="openP7AppealModal(\'' + claim.id + '\')"><i class="fas fa-balance-scale"></i> Open Appeal</button>' +
       '</div>' +
     '</div>';
   }

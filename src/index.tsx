@@ -6623,6 +6623,104 @@ function ClaimsPage() {
           </div>
         </div>{/* end fraud-idp-grid */}
 
+        {/* ── GAP 6: ADJUSTER WORKLOAD & ASSIGNMENT PANEL ── */}
+        <div class="adj-workload-panel" id="adj-workload-panel">
+          <div class="adj-wl-header" onclick="toggleAdjWorkload(this)">
+            <div class="adj-wl-header-left">
+              <div class="adj-wl-icon"><i class="fas fa-users-cog"></i></div>
+              <div>
+                <div class="adj-wl-title">Adjuster Workload &amp; Assignment <span class="adj-wl-live-badge">LIVE</span></div>
+                <div class="adj-wl-sub">Team capacity · open claim load · SLA risk indicators · drag-to-reassign</div>
+              </div>
+            </div>
+            <div class="adj-wl-header-stats">
+              <div class="adj-wl-stat"><span class="adj-wl-stat-val">5</span><span class="adj-wl-stat-lbl">Adjusters</span></div>
+              <div class="adj-wl-stat"><span class="adj-wl-stat-val">47</span><span class="adj-wl-stat-lbl">Open Claims</span></div>
+              <div class="adj-wl-stat orange"><span class="adj-wl-stat-val">2</span><span class="adj-wl-stat-lbl">SLA Risk</span></div>
+            </div>
+            <button class="adj-wl-collapse-btn" title="Toggle panel"><i class="fas fa-chevron-up"></i></button>
+          </div>
+          <div class="adj-wl-body" id="adj-wl-body">
+            <div class="adj-wl-table-wrap">
+              <table class="adj-wl-table">
+                <thead>
+                  <tr>
+                    <th>Adjuster</th>
+                    <th>Team</th>
+                    <th class="text-right">Open Claims</th>
+                    <th class="text-right">Total Exposure</th>
+                    <th class="text-right">Avg Days Open</th>
+                    <th>SLA Risk</th>
+                    <th>Capacity</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="adj-wl-row adj-wl-overloaded">
+                    <td><div class="adj-wl-name-cell"><div class="mini-avatar mt">MT</div><span>Michael Torres</span></div></td>
+                    <td><span class="adj-team-badge senior">Senior</span></td>
+                    <td class="text-right"><strong style="color:#dc2626">14</strong></td>
+                    <td class="text-right">$2.1M</td>
+                    <td class="text-right">8.2d</td>
+                    <td><span class="adj-sla-badge danger"><i class="fas fa-fire"></i> High — 2 at breach</span></td>
+                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-over" style="width:95%"></div></div><span class="adj-cap-pct red">95%</span></td>
+                    <td><button class="adj-reassign-btn" onclick="openAdjReassignModal('Michael Torres')"><i class="fas fa-random"></i> Reassign</button></td>
+                  </tr>
+                  <tr class="adj-wl-row">
+                    <td><div class="adj-wl-name-cell"><div class="mini-avatar jk">JK</div><span>Jennifer Kim</span></div></td>
+                    <td><span class="adj-team-badge senior">Senior</span></td>
+                    <td class="text-right"><strong style="color:#d97706">11</strong></td>
+                    <td class="text-right">$1.4M</td>
+                    <td class="text-right">6.1d</td>
+                    <td><span class="adj-sla-badge warn"><i class="fas fa-exclamation-triangle"></i> Moderate — 1 at risk</span></td>
+                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-warn" style="width:75%"></div></div><span class="adj-cap-pct orange">75%</span></td>
+                    <td><button class="adj-reassign-btn" onclick="openAdjReassignModal('Jennifer Kim')"><i class="fas fa-random"></i> Reassign</button></td>
+                  </tr>
+                  <tr class="adj-wl-row">
+                    <td><div class="adj-wl-name-cell"><div class="mini-avatar cr">CR</div><span>Carlos Reyes</span></div></td>
+                    <td><span class="adj-team-badge standard">Standard</span></td>
+                    <td class="text-right">8</td>
+                    <td class="text-right">$620K</td>
+                    <td class="text-right">5.4d</td>
+                    <td><span class="adj-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span></td>
+                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-ok" style="width:53%"></div></div><span class="adj-cap-pct green">53%</span></td>
+                    <td><button class="adj-reassign-btn" onclick="openAdjReassignModal('Carlos Reyes')"><i class="fas fa-random"></i> Reassign</button></td>
+                  </tr>
+                  <tr class="adj-wl-row">
+                    <td><div class="adj-wl-name-cell"><div class="mini-avatar ps">PS</div><span>Priya Sharma</span></div></td>
+                    <td><span class="adj-team-badge standard">Standard</span></td>
+                    <td class="text-right">9</td>
+                    <td class="text-right">$780K</td>
+                    <td class="text-right">4.8d</td>
+                    <td><span class="adj-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span></td>
+                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-ok" style="width:60%"></div></div><span class="adj-cap-pct green">60%</span></td>
+                    <td><button class="adj-reassign-btn" onclick="openAdjReassignModal('Priya Sharma')"><i class="fas fa-random"></i> Reassign</button></td>
+                  </tr>
+                  <tr class="adj-wl-row adj-wl-available">
+                    <td><div class="adj-wl-name-cell"><div class="mini-avatar cd">CD</div><span>Chris Davis</span></div></td>
+                    <td><span class="adj-team-badge junior">Junior</span></td>
+                    <td class="text-right"><strong style="color:#059669">5</strong></td>
+                    <td class="text-right">$240K</td>
+                    <td class="text-right">3.9d</td>
+                    <td><span class="adj-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span></td>
+                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-ok" style="width:33%"></div></div><span class="adj-cap-pct green">33%</span></td>
+                    <td><button class="adj-reassign-btn primary" onclick="openAdjReassignModal('Chris Davis')"><i class="fas fa-plus"></i> Assign</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="adj-wl-footer">
+              <button class="adj-wl-footer-btn primary" onclick="openAutoBalanceModal()"><i class="fas fa-balance-scale"></i> AI Auto-Balance Workload</button>
+              <button class="adj-wl-footer-btn ghost" onclick="p7Toast('Workload report exported to PDF',2500)"><i class="fas fa-file-pdf"></i> Export Report</button>
+              <div class="adj-wl-legend">
+                <span class="adj-leg-dot red"></span>Overloaded (&gt;85%)
+                <span class="adj-leg-dot orange"></span>High (&gt;65%)
+                <span class="adj-leg-dot green"></span>Available (&lt;65%)
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>{/* end clm-panel-active */}
 
       {/* ════════════════════════════════════════════════════════
@@ -6771,6 +6869,93 @@ function ClaimsPage() {
           </div>
         </div>
 
+        {/* ── GAP 8: CLAIMANT PORTAL / STATUS SELF-SERVICE ── */}
+        <div class="claimant-portal-panel" id="claimant-portal-panel">
+          <div class="cp-header">
+            <div class="cp-header-left">
+              <div class="cp-icon"><i class="fas fa-user-circle"></i></div>
+              <div>
+                <div class="cp-title">Claimant Self-Service Portal <span class="cp-badge">AI-Powered</span></div>
+                <div class="cp-sub">Real-time status · document upload · 24/7 access · automated status notifications</div>
+              </div>
+            </div>
+            <button class="cp-configure-btn" onclick="p7Toast('Portal configuration panel opening…',2000)"><i class="fas fa-cog"></i> Configure</button>
+          </div>
+          <div class="cp-kpi-row">
+            <div class="cp-kpi"><div class="cp-kpi-val">5</div><div class="cp-kpi-lbl">Active Portal Links</div></div>
+            <div class="cp-kpi green"><div class="cp-kpi-val">3</div><div class="cp-kpi-lbl">Claimants Logged In (7d)</div></div>
+            <div class="cp-kpi blue"><div class="cp-kpi-val">8</div><div class="cp-kpi-lbl">Docs Uploaded via Portal</div></div>
+            <div class="cp-kpi orange"><div class="cp-kpi-val">2</div><div class="cp-kpi-lbl">Awaiting Portal Invite</div></div>
+          </div>
+          <div class="cp-claims-list">
+            <div class="cp-claim-row cp-portal-active">
+              <div class="cp-claim-info">
+                <div class="cp-claim-id">CLM-2026-0041</div>
+                <div class="cp-claim-client">Susan Chen (Beneficiary — Robert Chen)</div>
+                <div class="cp-portal-status"><i class="fas fa-circle" style="color:#059669;font-size:8px"></i> Portal Active · Last login: 2 hours ago</div>
+              </div>
+              <div class="cp-portal-progress">
+                <div class="cp-progress-label">Docs submitted: <strong>2/4</strong></div>
+                <div class="cp-progress-bar-wrap"><div class="cp-progress-bar" style="width:50%;background:#d97706"></div></div>
+              </div>
+              <div class="cp-claim-actions">
+                <button class="cp-act-btn primary" onclick="p7Toast('Status notification sent to Susan Chen via email + SMS',2800)"><i class="fas fa-bell"></i> Notify</button>
+                <button class="cp-act-btn ghost" onclick="p7Toast('Portal link copied: claims.nyl.com/status/CLM-2026-0041',2500)"><i class="fas fa-link"></i> Copy Link</button>
+              </div>
+            </div>
+            <div class="cp-claim-row cp-portal-active">
+              <div class="cp-claim-info">
+                <div class="cp-claim-id">CLM-2026-0035</div>
+                <div class="cp-claim-client">Maria Gonzalez (Claimant)</div>
+                <div class="cp-portal-status"><i class="fas fa-circle" style="color:#059669;font-size:8px"></i> Portal Active · Last login: Yesterday</div>
+              </div>
+              <div class="cp-portal-progress">
+                <div class="cp-progress-label">Docs submitted: <strong>2/4</strong></div>
+                <div class="cp-progress-bar-wrap"><div class="cp-progress-bar" style="width:50%;background:#d97706"></div></div>
+              </div>
+              <div class="cp-claim-actions">
+                <button class="cp-act-btn primary" onclick="p7Toast('Status notification sent to Maria Gonzalez',2800)"><i class="fas fa-bell"></i> Notify</button>
+                <button class="cp-act-btn ghost" onclick="p7Toast('Portal link copied: claims.nyl.com/status/CLM-2026-0035',2500)"><i class="fas fa-link"></i> Copy Link</button>
+              </div>
+            </div>
+            <div class="cp-claim-row cp-portal-pending">
+              <div class="cp-claim-info">
+                <div class="cp-claim-id">CLM-2026-0025</div>
+                <div class="cp-claim-client">Kevin Park Estate (Beneficiary — TBD)</div>
+                <div class="cp-portal-status"><i class="fas fa-circle" style="color:#dc2626;font-size:8px"></i> No Portal Invite Sent · Legal Hold Active</div>
+              </div>
+              <div class="cp-portal-progress">
+                <div class="cp-progress-label">Docs submitted: <strong>1/4</strong></div>
+                <div class="cp-progress-bar-wrap"><div class="cp-progress-bar" style="width:25%;background:#dc2626"></div></div>
+              </div>
+              <div class="cp-claim-actions">
+                <button class="cp-act-btn secondary" onclick="p7Toast('Note: Legal hold active — portal invite blocked until SIU clears hold',3500)"><i class="fas fa-ban"></i> Blocked</button>
+                <button class="cp-act-btn ghost" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i> View Claim</button>
+              </div>
+            </div>
+            <div class="cp-claim-row cp-portal-invite">
+              <div class="cp-claim-info">
+                <div class="cp-claim-id">CLM-2026-0033</div>
+                <div class="cp-claim-client">James Whitfield (Claimant)</div>
+                <div class="cp-portal-status"><i class="fas fa-clock" style="color:#d97706;font-size:11px"></i> Portal Invite Not Yet Sent</div>
+              </div>
+              <div class="cp-portal-progress">
+                <div class="cp-progress-label">Docs submitted: <strong>4/4 ✓</strong></div>
+                <div class="cp-progress-bar-wrap"><div class="cp-progress-bar" style="width:100%;background:#059669"></div></div>
+              </div>
+              <div class="cp-claim-actions">
+                <button class="cp-act-btn primary" onclick="p7Toast('Portal invite sent to James Whitfield — expires in 30 days',2800)"><i class="fas fa-paper-plane"></i> Send Invite</button>
+                <button class="cp-act-btn ghost" onclick="p7Toast('Portal link copied: claims.nyl.com/status/CLM-2026-0033',2500)"><i class="fas fa-link"></i> Copy Link</button>
+              </div>
+            </div>
+          </div>
+          <div class="cp-footer">
+            <button class="cp-footer-btn primary" onclick="p7Toast('Bulk portal invites sent to all eligible claimants (3 sent)',3000)"><i class="fas fa-paper-plane"></i> Send All Pending Invites</button>
+            <button class="cp-footer-btn ghost" onclick="p7Toast('Portal activity report downloading…',2000)"><i class="fas fa-chart-bar"></i> View Portal Analytics</button>
+            <div class="cp-portal-url-preview"><i class="fas fa-globe"></i> <strong>Portal URL:</strong> claims.nyl.com/status/{"{claim-id}"}</div>
+          </div>
+        </div>
+
       </div>{/* end clm-panel-intelligence */}
 
       {/* ════════════════════════════════════════════════════════
@@ -6823,7 +7008,7 @@ function ClaimsPage() {
                 <td><span class="denial-reason none">—</span></td>
                 <td><div class="action-btns">
                   <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0022','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0022')"><i class="fas fa-redo"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenClaimModal('CLM-2026-0022')"><i class="fas fa-redo"></i></button>
                 </div></td>
               </tr>
               <tr>
@@ -6840,7 +7025,7 @@ function ClaimsPage() {
                 <td><span class="denial-reason none">—</span></td>
                 <td><div class="action-btns">
                   <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0019','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0019')"><i class="fas fa-redo"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenClaimModal('CLM-2026-0019')"><i class="fas fa-redo"></i></button>
                 </div></td>
               </tr>
               <tr>
@@ -6857,7 +7042,7 @@ function ClaimsPage() {
                 <td><span class="denial-reason none">—</span></td>
                 <td><div class="action-btns">
                   <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0015','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2026-0015')"><i class="fas fa-redo"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenClaimModal('CLM-2026-0015')"><i class="fas fa-redo"></i></button>
                 </div></td>
               </tr>
               <tr class="claim-row-denied">
@@ -6875,7 +7060,7 @@ function ClaimsPage() {
                 <td><div class="action-btns">
                   <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0201','view')"><i class="fas fa-eye"></i></button>
                   <button class="btn-icon appeal-btn" title="File Appeal" onclick="openAppealModal('CLM-2025-0201')"><i class="fas fa-balance-scale"></i></button>
-                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2025-0201')"><i class="fas fa-redo"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenClaimModal('CLM-2025-0201')"><i class="fas fa-redo"></i></button>
                 </div></td>
               </tr>
               <tr>
@@ -6892,7 +7077,7 @@ function ClaimsPage() {
                 <td><span class="denial-reason none">—</span></td>
                 <td><div class="action-btns">
                   <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2025-0198','view')"><i class="fas fa-eye"></i></button>
-                  <button class="btn-icon" title="Re-open" onclick="openReopenModal('CLM-2025-0198')"><i class="fas fa-redo"></i></button>
+                  <button class="btn-icon" title="Re-open" onclick="openReopenClaimModal('CLM-2025-0198')"><i class="fas fa-redo"></i></button>
                 </div></td>
               </tr>
             </tbody>
@@ -6930,6 +7115,77 @@ function ClaimsPage() {
             <div class="cpa-footer">
               <button class="btn btn-ai" onclick="sendContextMessage('Show my claims performance for Q2 2026 — resolution times, SLA compliance, doc response rates and recommendations','claims')"><i class="fas fa-robot"></i> Full AI Performance Analysis</button>
               <button class="btn btn-outline-sm" onclick="alert('Exporting performance report…')"><i class="fas fa-download"></i> Export Report</button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── GAP 10: REGULATORY REPORTING / NAIC SUBMISSIONS ── */}
+        <div class="reg-report-panel" id="reg-report-panel">
+          <div class="rr-header">
+            <div class="rr-header-left">
+              <div class="rr-icon"><i class="fas fa-landmark"></i></div>
+              <div>
+                <div class="rr-title">Regulatory Reporting &amp; NAIC Submissions <span class="rr-badge">Compliance</span></div>
+                <div class="rr-sub">State filing tracker · NAIC form generation · prompt payment compliance · regulatory deadline alerts</div>
+              </div>
+            </div>
+            <button class="rr-collapse-btn" onclick="toggleRegReport(this)" title="Toggle panel"><i class="fas fa-chevron-up"></i></button>
+          </div>
+          <div class="rr-body" id="rr-body">
+            <div class="rr-kpi-row">
+              <div class="rr-kpi green"><div class="rr-kpi-val">12</div><div class="rr-kpi-lbl">Filed YTD</div></div>
+              <div class="rr-kpi orange"><div class="rr-kpi-val">2</div><div class="rr-kpi-lbl">Pending Submission</div></div>
+              <div class="rr-kpi red"><div class="rr-kpi-val">1</div><div class="rr-kpi-lbl">Past Due</div></div>
+              <div class="rr-kpi blue"><div class="rr-kpi-val">4</div><div class="rr-kpi-lbl">States Covered</div></div>
+            </div>
+            <div class="rr-section-title"><i class="fas fa-exclamation-triangle" style="color:#dc2626"></i> Pending &amp; Past Due Filings</div>
+            <div class="rr-filings-list">
+              <div class="rr-filing-row rr-past-due">
+                <div class="rr-filing-badge due">PAST DUE</div>
+                <div class="rr-filing-info">
+                  <div class="rr-filing-name">NAIC Claim Denial Report — Form D-3</div>
+                  <div class="rr-filing-meta">CLM-2025-0189 · Denied — NY Dept. of Financial Services · Due: 2026-04-01</div>
+                </div>
+                <div class="rr-filing-actions">
+                  <button class="rr-act-btn danger" onclick="openNAICFormModal('D-3','CLM-2025-0189','NY')"><i class="fas fa-file-signature"></i> Generate &amp; File Now</button>
+                </div>
+              </div>
+              <div class="rr-filing-row rr-pending">
+                <div class="rr-filing-badge pending">PENDING</div>
+                <div class="rr-filing-info">
+                  <div class="rr-filing-name">Prompt Payment Compliance Report — Q1 2026</div>
+                  <div class="rr-filing-meta">All resolved claims Q1 · NJ Department of Banking &amp; Insurance · Due: 2026-04-30</div>
+                </div>
+                <div class="rr-filing-actions">
+                  <button class="rr-act-btn primary" onclick="openNAICFormModal('PP-Q1','ALL','NJ')"><i class="fas fa-file-alt"></i> Generate Report</button>
+                </div>
+              </div>
+              <div class="rr-filing-row rr-pending">
+                <div class="rr-filing-badge pending">PENDING</div>
+                <div class="rr-filing-info">
+                  <div class="rr-filing-name">Large Death Benefit Notification — CLM-2026-0041</div>
+                  <div class="rr-filing-meta">$1,000,000 death benefit — NY DFS mandatory notification for claims &gt;$500K · Due: 2026-04-20</div>
+                </div>
+                <div class="rr-filing-actions">
+                  <button class="rr-act-btn primary" onclick="openNAICFormModal('LDB-N','CLM-2026-0041','NY')"><i class="fas fa-paper-plane"></i> File Notification</button>
+                </div>
+              </div>
+            </div>
+            <div class="rr-section-title"><i class="fas fa-check-circle" style="color:#059669"></i> Recently Filed</div>
+            <div class="rr-filed-table-wrap">
+              <table class="rr-filed-table">
+                <thead><tr><th>Form</th><th>Claim</th><th>State</th><th>Filed Date</th><th>Confirmation #</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>NAIC Annual Claim Report</td><td>Portfolio — All 2025</td><td>NY, NJ, CA, TX</td><td>2026-03-15</td><td>NAIC-2026-0312-NYL</td><td><span class="rr-status-badge filed">Filed ✓</span></td></tr>
+                  <tr><td>Prompt Payment — Q4 2025</td><td>Portfolio</td><td>NJ</td><td>2026-01-28</td><td>NJDBI-2026-0028</td><td><span class="rr-status-badge filed">Filed ✓</span></td></tr>
+                  <tr><td>Claim Denial Report D-3</td><td>CLM-2025-0172</td><td>NY</td><td>2026-02-10</td><td>DFS-2026-0210</td><td><span class="rr-status-badge filed">Filed ✓</span></td></tr>
+                  <tr><td>Fraud Referral Report</td><td>CLM-2025-0183</td><td>CA</td><td>2026-03-01</td><td>CADOI-2026-0301</td><td><span class="rr-status-badge filed">Filed ✓</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="rr-footer">
+              <button class="rr-footer-btn primary" onclick="p7Toast('NAIC Annual Report package generated — ready for submission',3000)"><i class="fas fa-file-contract"></i> Generate NAIC Annual Package</button>
+              <button class="rr-footer-btn ghost" onclick="p7Toast('Regulatory calendar exported to PDF',2000)"><i class="fas fa-calendar-alt"></i> Export Filing Calendar</button>
             </div>
           </div>
         </div>
