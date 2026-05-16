@@ -24795,6 +24795,19 @@ var fnaData = [
     coverageNeeded: 640000, annualPremiumEst: 6200,
     healthNotes: 'Non-smoker. T2DM well-controlled. A1c 6.8.',
     aiRec: 'UL premium increase $320/mo OR convert to WL + PUAs · urgent'
+  },
+  {
+    id: 'FNA-004', client: 'Linda Morrison', initials: 'LM', phase: 2,
+    stage: 'Fact-Find', pct: 35, status: 'progress',
+    dob: '1967-09-12', age: 57, gender: 'Female', smoker: false,
+    occupation: 'Chief Financial Officer', income: 380000, netWorth: 2100000,
+    lifeEvent: 'Approaching Retirement (5–10 yrs)',
+    domains: ['insurance', 'investments', 'retirement', 'advisory'],
+    products: ['Universal Life $2M', 'Fixed Indexed Annuity'],
+    gaps: ['No guaranteed lifetime income plan', 'No trust — estate exposed to probate', 'Business succession planning needed'],
+    coverageNeeded: 2000000, annualPremiumEst: 18400,
+    healthNotes: 'Non-smoker. Excellent health. Mild osteopenia — no medications.',
+    aiRec: 'UL $2M + FIA $400K rollover · Clear Income Advantage Fixed · Revocable Living Trust · UMA for $850K investable assets'
   }
 ];
 
@@ -28015,6 +28028,102 @@ var fnaFullData = {
     aiRec: 'Increase UL premium $320/mo OR convert to WL + PUAs · urgent lapse intervention · LTC hybrid when budget allows · FIA illustration for retirement income',
     notes: 'Patricia very concerned about UL lapse. Husband Michael joined — both understand urgency. T2DM labs requested. Ready to act this week.',
     healthNotes: 'T2DM well-controlled (A1c 6.8). Metformin + statin. Table 2 rating on existing UL. Request current labs before new illustration.'
+  },
+
+  'FNA-004': {
+    id: 'FNA-004', client: 'Linda Morrison', initials: 'LM', avatarColor: '#be185d',
+    phase: 2, stage: 'Fact-Find', pct: 35, status: 'progress',
+    prospectId: 'P004',
+    domains: ['insurance', 'investments', 'retirement', 'advisory'],
+    meetingDate: 'May 8, 2026', meetingType: 'In-Person', meetingLocation: 'NYL Midtown Office',
+
+    personal: {
+      dob: '1967-09-12', age: 57, gender: 'Female', smoker: false, tobaccoLastUsed: '',
+      occupation: 'Chief Financial Officer — Morrison & Partners LLC', hobbies: 'Golf, philanthropic board work',
+      riskClass: 'Preferred Plus',
+      existingCoverage: [
+        { carrier: 'NYL (in-force)', type: 'Universal Life', faceAmount: 2000000, premium: 18400, notes: 'UL $2M — currently in-force, funded above minimum' },
+        { carrier: 'Employer Group', type: 'Term', faceAmount: 500000, premium: 0, notes: 'Executive group term — not portable at retirement' }
+      ],
+      beneficiaryIntent: 'Daughter (Karen Morrison) 60% · Son (David Morrison) 40% · Charitable remainder trust as contingent'
+    },
+
+    health: {
+      heightFt: 5, heightIn: 6, weightLbs: 142,
+      bpSystolic: 122, bpDiastolic: 78,
+      majorDiagnoses: 'Mild osteopenia (DEXA 2024) — no treatment required',
+      medications: 'Vitamin D3 + Calcium supplements',
+      surgeries: 'None',
+      familyHistory: 'Mother — alive, age 84, excellent health. Father — deceased, cardiac at 81.',
+      tobaccoUse: false, alcoholUnitsPerWeek: 5,
+      aiHealthFlag: null
+    },
+
+    financial: {
+      annualIncome: 380000, spouseIncome: 0, totalHouseholdIncome: 380000,
+      monthlyExpenses: 18500,
+      mortgage: 0, mortgageMonthly: 0, mortgageYearsLeft: 0,
+      studentLoans: 0, otherDebts: 0,
+      savings401k: 1200000, liquidSavings: 320000, investments: 850000,
+      netWorth: 2100000,
+      monthlyBudgetForPremium: 3500,
+      shortTermGoals: 'Maximize tax-advantaged income before retirement; fund charitable giving',
+      longTermGoals: 'Retire at 63; guaranteed lifetime income; protect estate for Karen and David; business succession'
+    },
+
+    needs: {
+      incomeReplacement: { yearsToReplace: 6, multiplier: 10, computed: 3800000, existingCoverage: 2500000, gap: 1300000 },
+      debtObligations: { mortgage: 0, studentLoans: 0, otherDebts: 0, total: 0 },
+      finalExpense: { funeralCost: 20000, estateAdminCost: 80000, total: 100000 },
+      businessInsurance: { applicable: true, notes: 'Buy-sell agreement needed — Morrison & Partners LLC. Key person coverage review required.' },
+      retirementIncomeGap: { targetRetirementIncome: 250000, socialSecurityEst: 38000, currentSavingsProjected: 3200000, gap: 0, applicable: true },
+      ltcDisability: { ltcApplicable: true, ltcMonthlyBenefit: 8000, diApplicable: false, diMonthlyBenefit: 0, currentDICoverage: 0, diGap: 0 }
+    },
+
+    ai: {
+      totalCoverageNeeded: 2000000, recommendedFaceAmount: 2000000,
+      recommendedProducts: ['Universal Life $2M', 'Fixed Indexed Annuity $400K', 'Clear Income Advantage Fixed', 'UMA — $850K investable'],
+      annualPremiumEst: 18400,
+      healthFlag: null,
+      suitabilityCheck: { pass: true, notes: 'All products suitable. Income and net worth confirm suitability. Preferred Plus rating confirmed. No FINRA flag.' },
+      gapSummary: 'High net worth client with broad needs across all 4 domains. UL $2M in-force — review for PUA capacity. Retirement income well-funded via 401K + investments, but guaranteed income floor (FIA/DIA) recommended. Estate planning critical — no trust in place. Business succession gap at Morrison & Partners LLC.',
+      meetingSummaryGenerated: false
+    },
+
+    // Retirement — primary need (age 57, retire 63, $2.1M net worth)
+    retirement: {
+      targetRetirementAge: 63,
+      targetMonthlyIncome: 20833,
+      socialSecurityAge: 70, socialSecurityEst: 3800,
+      pensionIncome: 0,
+      existingAnnuityIncome: 0,
+      rolloverAssets: { k401: 1200000, ira: 0, roth: 0, other: 850000 },
+      annuityInterest: 'Fixed Indexed Annuity + Clear Income Advantage Fixed',
+      annuityType: 'fixed-indexed',
+      incomeFloor: 15000,
+      aiRetirementNote: 'Retirement income target $250K/yr ($20,833/mo). SS at 70: $3,800/mo. 401K $1.2M + investments $850K projected $3.8M at 63. FIA on $400K rollover generates ~$2,200–2,800/mo guaranteed. Clear Income Advantage Fixed for deferred income floor. Guaranteed lifetime income floor of $15K/mo recommended across FIA + DIA ladder. Income gap well-covered — focus is on guaranteeing floor against longevity risk.'
+    },
+
+    // Investment & Advisory — full cross-domain (wealth, estate, small business)
+    investmentAdvisory: {
+      riskTolerance: 'Moderate Growth',
+      riskScore: 62,
+      timeHorizon: '6–25 years (retirement + estate)',
+      investableAssets: { taxable: 850000, ira: 0, roth: 0, k401: 1200000, other: 320000 },
+      currentHoldings: 'Personal brokerage $850K — diversified equity + fixed income. 401K $1.2M — Vanguard target-date 2030. Liquid savings $320K — money market.',
+      investmentObjective: 'Capital preservation + income generation approaching retirement',
+      smaUmaCandidate: true, smaUmaNote: '$850K taxable — strong UMA candidate. Recommend Unified Managed Account on brokerage assets immediately. Rep Advisory on $320K liquid savings.',
+      advisoryDomains: ['wealth-management', 'estate-planning', 'small-business'],
+      estateDocuments: { will: true, trust: false, poa: true, healthcareDirective: true },
+      businessOwner: true,
+      aiInvestmentNote: 'UMA on $850K taxable brokerage — highest priority. Diversified multi-strategy allocation: equity 55%, fixed income 35%, alternatives 10%. Annual rebalancing + tax-loss harvesting strategy recommended. Rep Advisory on $320K liquid as bridge.',
+      aiAdvisoryNote: 'Estate: Will in place but no trust — revocable living trust URGENT at $2.1M net worth to avoid probate and control distribution timing. Charitable remainder trust as contingent beneficiary on UL is sophisticated planning — needs attorney review. Business: Morrison & Partners LLC — buy-sell agreement not in place. Key person UL review required. Business succession plan needed before retirement at 63.'
+    },
+
+    gaps: ['No guaranteed lifetime income floor (FIA/DIA ladder recommended)', 'No revocable living trust — $2.1M estate exposed to probate', 'No buy-sell agreement at Morrison & Partners LLC', 'Key person coverage gap at LLC', 'No LTC plan — age 57, Preferred Plus, optimal time to act'],
+    aiRec: 'UL $2M PUA review · FIA $400K rollover + Clear Income Advantage Fixed · UMA $850K + Rep Advisory $320K · Revocable Living Trust · Buy-Sell Agreement LLC',
+    notes: 'Linda is a sophisticated client — CFO background, strong financial literacy. Very goal-oriented. Wants guaranteed income floor + estate lock-down before retirement. Daughter Karen is executor designate.',
+    healthNotes: 'Excellent health. Preferred Plus rating confirmed. Mild osteopenia — supplements only. No underwriting concerns.'
   }
 };
 
@@ -28662,9 +28771,17 @@ function closeFNASummary() {
 }
 
 // ── OVERRIDE continueFNA → openFNAEditor ──────────────────────────
+// When opening from the FNA list (not the wizard), use the FNA's own
+// domains array to filter tabs — so each client sees only their tabs.
 function continueFNA(id) {
   var fna = fnaFullData[id] || fnaFullData['FNA-001'];
+  // Capture domains from the FNA record (not from wizard state)
+  _fnaEditorActiveDomains = (fna.domains && fna.domains.length) ? fna.domains : null;
   openFNAEditor(fna.id);
+  // Apply domain tab filter after editor DOM is ready
+  setTimeout(function() {
+    fnaApplyDomainTabs(_fnaEditorActiveDomains);
+  }, 100);
 }
 
 // ── OVERRIDE openFNAAIAssist → openFNAAIPrefill ───────────────────
