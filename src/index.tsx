@@ -15508,6 +15508,47 @@ function InvestmentAccountsPage() {
         </div>
       </div>
 
+      {/* ── Investment Program Types Overview ── */}
+      <div class="ia-prog-types-section">
+        <div class="ia-prog-types-header">
+          <div class="ia-prog-types-header-icon"><i class="fas fa-briefcase"></i></div>
+          <div>
+            <div class="ia-prog-types-title">Advisory Investment Programs <span class="ia-prog-types-badge">4 Programs</span></div>
+            <div class="ia-prog-types-sub">Professional investment management — choose the program that fits client goals, assets, and desired level of customization</div>
+          </div>
+        </div>
+        <div class="ia-prog-types-grid">
+          <div class="ia-prog-type-card ia-prog-type-fap">
+            <div class="ia-prog-type-icon"><i class="fas fa-coins"></i></div>
+            <div class="ia-prog-type-name">Fund Advisory Program</div>
+            <div class="ia-prog-type-desc">Helps meet investment goals efficiently through a broadly diversified portfolio of mutual funds and/or ETFs in one investment account.</div>
+            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Auto-rebalancing · Model portfolios · Min $25K</div>
+            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">FAP-880202</span><span class="ia-prog-ex-chip">FAP-300202</span><span class="ia-prog-ex-chip">FAP-341001</span></div>
+          </div>
+          <div class="ia-prog-type-card ia-prog-type-sma">
+            <div class="ia-prog-type-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="ia-prog-type-name">Separately Managed Account (SMA)</div>
+            <div class="ia-prog-type-desc">A customized strategy of individual securities managed in a portfolio on your behalf by a professional asset manager.</div>
+            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Direct ownership · Tax-loss harvesting · Min $100K</div>
+            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">SMA-300201</span></div>
+          </div>
+          <div class="ia-prog-type-card ia-prog-type-rdp">
+            <div class="ia-prog-type-icon"><i class="fas fa-user-tie"></i></div>
+            <div class="ia-prog-type-name">Rep-Directed Program</div>
+            <div class="ia-prog-type-desc">Portfolios of mutual funds and/or ETFs managed by your financial advisor, who makes allocation and investment decisions.</div>
+            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Advisor-managed · Full control · Min $25K</div>
+            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">RDP-301001</span></div>
+          </div>
+          <div class="ia-prog-type-card ia-prog-type-uma">
+            <div class="ia-prog-type-icon"><i class="fas fa-layer-group"></i></div>
+            <div class="ia-prog-type-name">Unified Managed Account (UMA)</div>
+            <div class="ia-prog-type-desc">Combines several strategies from other programs — stocks, bonds, SMAs, mutual funds, and ETFs — all in a single coordinated account.</div>
+            <div class="ia-prog-type-tag"><i class="fas fa-check-circle"></i> Multi-strategy · Single account · Min $200K</div>
+            <div class="ia-prog-type-examples"><span class="ia-prog-ex-chip">UMA-880201</span><span class="ia-prog-ex-chip">UMA-360001</span></div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Toolbar ── */}
       <div class="page-toolbar">
         <div class="toolbar-left">
@@ -15517,10 +15558,11 @@ function InvestmentAccountsPage() {
           </div>
           <select class="filter-select" id="ia-type-filter" onchange="iaFilterAccounts()">
             <option value="">All Account Types</option>
-            <optgroup label="── Market Accounts ──">
-              <option>ETF Portfolio</option>
-              <option>Mutual Fund Portfolio</option>
-              <option>Joint Brokerage</option>
+            <optgroup label="── Advisory Programs ──">
+              <option>Fund Advisory Program</option>
+              <option>Separately Managed Account (SMA)</option>
+              <option>Rep-Directed Program</option>
+              <option>Unified Managed Account (UMA)</option>
             </optgroup>
             <optgroup label="── Retirement Accounts ──">
               <option>IRA (Traditional)</option>
@@ -16202,6 +16244,47 @@ function RetirementAccountsPage() {
       {/* ── AI Retirement Intelligence Banner (rendered by JS) ── */}
       <div class="ra-ai-banner" id="ra-ai-banner"></div>
 
+      {/* ── Annuity Program Types Overview ── */}
+      <div class="ra-prog-types-section">
+        <div class="ra-prog-types-header">
+          <div class="ra-prog-types-header-icon"><i class="fas fa-umbrella-beach"></i></div>
+          <div>
+            <div class="ra-prog-types-title">NYL Annuity Programs <span class="ra-prog-types-badge">4 Types</span></div>
+            <div class="ra-prog-types-sub">Guaranteed lifetime income solutions — immediate or deferred, fixed or variable growth</div>
+          </div>
+        </div>
+        <div class="ra-prog-types-grid">
+          <div class="ra-prog-type-card ra-prog-type-spia">
+            <div class="ra-prog-type-icon"><i class="fas fa-bolt"></i></div>
+            <div class="ra-prog-type-name">Immediate Income Annuities</div>
+            <div class="ra-prog-type-desc">Income starts now and is paid in consistent, predictable amounts for the rest of your life — SPIA, Lifetime Mutual, Guaranteed Period.</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Immediate payout · No surrender period</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">SPIA</span><span class="ra-prog-ex-chip">Lifetime Mutual</span><span class="ra-prog-ex-chip">Guaranteed Period</span></div>
+          </div>
+          <div class="ra-prog-type-card ra-prog-type-dia">
+            <div class="ra-prog-type-icon"><i class="fas fa-hourglass-half"></i></div>
+            <div class="ra-prog-type-name">Deferred Income Annuities</div>
+            <div class="ra-prog-type-desc">Receive income for life and larger payouts by delaying them — DIA, Future Mutual Income, Clear Income Advantage Fixed Annuity.</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Higher payout · Up to 40-year deferral</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">DIA</span><span class="ra-prog-ex-chip">Future Mutual</span><span class="ra-prog-ex-chip">Clear Income</span></div>
+          </div>
+          <div class="ra-prog-type-card ra-prog-type-fia">
+            <div class="ra-prog-type-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="ra-prog-type-name">Fixed Index Annuity (FIA)</div>
+            <div class="ra-prog-type-desc">Market-linked growth with a 0% floor — S&P 500 point-to-point crediting with cap rate, no downside risk, optional income rider.</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> 0% floor · Index-linked growth · Income rider</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">FIA</span><span class="ra-prog-ex-chip">6% Rollup Rider</span><span class="ra-prog-ex-chip">S&amp;P 500 Cap</span></div>
+          </div>
+          <div class="ra-prog-type-card ra-prog-type-va">
+            <div class="ra-prog-type-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="ra-prog-type-name">Variable Annuity (VA)</div>
+            <div class="ra-prog-type-desc">Market-linked sub-account growth with death benefit and optional GMIB/GMWB income riders — upside potential with income protection.</div>
+            <div class="ra-prog-type-tag"><i class="fas fa-check-circle"></i> Sub-account growth · GMIB/GMWB · Death benefit</div>
+            <div class="ra-prog-type-examples"><span class="ra-prog-ex-chip">VA</span><span class="ra-prog-ex-chip">IndexFlex (Hybrid)</span><span class="ra-prog-ex-chip">GMWB</span></div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Toolbar ── */}
       <div class="page-toolbar">
         <div class="toolbar-left">
@@ -16815,6 +16898,47 @@ function AdvisoryAccountsPage() {
         <div class="adv-ai-actions">
           <button class="adv-ai-btn primary" onclick="advRunDriftScan()"><i class="fas fa-balance-scale"></i> Drift Scan</button>
           <button class="adv-ai-btn ghost" onclick="advOpenPortfolioReview()"><i class="fas fa-robot"></i> Portfolio Review</button>
+        </div>
+      </div>
+
+      {/* ── Advisory Program Types Overview ── */}
+      <div class="adv-prog-types-section">
+        <div class="adv-prog-types-header">
+          <div class="adv-prog-types-header-icon"><i class="fas fa-gem"></i></div>
+          <div>
+            <div class="adv-prog-types-title">Advisory Investment Programs <span class="adv-prog-types-badge">4 Programs</span></div>
+            <div class="adv-prog-types-sub">Professional management across 4 program types — each offering different levels of customization, minimum investment, and management style</div>
+          </div>
+        </div>
+        <div class="adv-prog-types-grid">
+          <div class="adv-prog-type-card adv-prog-type-fap" onclick="advFilterByType('Fund Advisory Program')">
+            <div class="adv-prog-type-icon"><i class="fas fa-coins"></i></div>
+            <div class="adv-prog-type-name">Fund Advisory Program</div>
+            <div class="adv-prog-type-desc">Helps meet investment goals efficiently through a broadly diversified portfolio of mutual funds and/or ETFs in one investment account.</div>
+            <div class="adv-prog-type-tag"><i class="fas fa-check-circle"></i> Auto-rebalancing · Model portfolios · Min $25K</div>
+            <div class="adv-prog-type-examples"><span class="adv-prog-ex-chip">Maria G. · FAP-341001</span><span class="adv-prog-ex-chip">James W. · FAP-291001</span></div>
+          </div>
+          <div class="adv-prog-type-card adv-prog-type-sma" onclick="advFilterByType('SMA (Separately Managed Account)')">
+            <div class="adv-prog-type-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="adv-prog-type-name">Separately Managed Account (SMA)</div>
+            <div class="adv-prog-type-desc">A customized strategy of individual securities managed in a portfolio on your behalf by a professional asset manager.</div>
+            <div class="adv-prog-type-tag"><i class="fas fa-check-circle"></i> Direct ownership · Tax-loss harvesting · Min $100K</div>
+            <div class="adv-prog-type-examples"><span class="adv-prog-ex-chip">Robert C. · SMA-300301</span></div>
+          </div>
+          <div class="adv-prog-type-card adv-prog-type-rdp" onclick="advFilterByType('Rep-Directed Program')">
+            <div class="adv-prog-type-icon"><i class="fas fa-user-tie"></i></div>
+            <div class="adv-prog-type-name">Rep-Directed Program</div>
+            <div class="adv-prog-type-desc">Portfolios of mutual funds and/or ETFs managed by your financial advisor, who makes allocation and investment decisions.</div>
+            <div class="adv-prog-type-tag"><i class="fas fa-check-circle"></i> Advisor-managed · Full control · Min $25K</div>
+            <div class="adv-prog-type-examples"><span class="adv-prog-ex-chip">David T. · RDP-305001</span></div>
+          </div>
+          <div class="adv-prog-type-card adv-prog-type-uma" onclick="advFilterByType('UMA (Unified Managed Account)')">
+            <div class="adv-prog-type-icon"><i class="fas fa-layer-group"></i></div>
+            <div class="adv-prog-type-name">Unified Managed Account (UMA)</div>
+            <div class="adv-prog-type-desc">Combines several strategies from other programs in a single account — may include stocks, bonds, SMAs, mutual funds, and ETFs.</div>
+            <div class="adv-prog-type-tag"><i class="fas fa-check-circle"></i> Multi-strategy · Single account · Min $200K</div>
+            <div class="adv-prog-type-examples"><span class="adv-prog-ex-chip">Linda M. · UMA-880301</span></div>
+          </div>
         </div>
       </div>
 

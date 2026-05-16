@@ -15774,18 +15774,25 @@ const _productCatalogue = {
   'wealth-mgmt': {
     name: 'Wealth Management Programs',
     icon: 'fa-gem', color: '#7c3aed',
-    tagline: 'Managed investment solutions for clients with $25K+ investable assets',
+    tagline: 'Managed investment solutions — 4 program types for clients with $25K+ investable assets',
     specs: [
-      { label: 'Fund Advisory (FAP)', value: 'Min: $25,000' },
-      { label: 'Rep-Directed', value: 'Min: $50,000' },
-      { label: 'SMA', value: 'Min: $100,000' },
-      { label: 'UMA', value: 'Min: $250,000' },
+      { label: 'Fund Advisory Program', value: 'Min: $25,000 · Mutual Funds/ETFs' },
+      { label: 'Rep-Directed Program', value: 'Min: $25,000 · Advisor-managed' },
+      { label: 'SMA', value: 'Min: $100,000 · Individual securities' },
+      { label: 'UMA', value: 'Min: $200,000 · Multi-strategy' },
       { label: 'Advisory Fee', value: '0.50% – 1.50% AUM/yr' },
       { label: 'Rebalancing', value: 'Automatic (FAP/UMA)' },
     ],
-    features: ['Fund Advisory Program: model portfolios, automatic rebalancing','Rep-Directed: custom portfolio built and managed by your advisor','SMA: direct security ownership, institutional managers, tax efficiency','UMA: combines mutual funds + ETFs + SMAs in one account','Annual performance reviews and tactical allocation shifts','Fiduciary-standard management across all programs'],
-    aiClients: ['Linda Morrison — UMA candidate, $500K+ investable assets ($2,800/yr fee potential)','Robert Chen — SMA/UMA candidate, $180K AUM + death benefit proceeds','Maria Gonzalez — Fund Advisory as entry point'],
-    aiTip: 'Linda Morrison and Robert Chen are strong UMA candidates. Combined advisory fee potential: ~$5,600/yr recurring.',
+    features: [
+      'Fund Advisory Program: broadly diversified mutual funds and/or ETFs in one investment account — automatic model rebalancing',
+      'Separately Managed Account (SMA): customized strategy of individual securities by a professional asset manager — direct ownership, tax-efficiency',
+      'Rep-Directed Program: portfolios of mutual funds and/or ETFs managed by your financial advisor — full advisor control',
+      'Unified Managed Account (UMA): combines stocks, bonds, SMAs, mutual funds, and ETFs from multiple programs in one coordinated account',
+      'Annual performance reviews and tactical allocation shifts across all 4 programs',
+      'Fiduciary-standard management — FINRA Reg BI suitability documentation required'
+    ],
+    aiClients: ['Linda Morrison — UMA candidate, $500K+ investable assets ($2,800/yr fee potential)','Robert Chen — SMA/UMA candidate, $180K AUM + death benefit proceeds','Maria Gonzalez — Fund Advisory Program entry point ($155K AUM)','David Thompson — Rep-Directed as starting point ($58K, growing)'],
+    aiTip: 'Linda Morrison and Robert Chen are strong UMA/SMA candidates. Combined advisory fee potential: ~$5,600/yr recurring revenue.',
   },
   'estate-planning': {
     name: 'Estate Planning Services',
@@ -41387,7 +41394,8 @@ var iaAccounts = [
   {
     id: 'IA-LM-001', clientId: 8, clientName: 'Linda Morrison', initials: 'LM',
     avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
-    accountType: 'Advisory (UMA)', accountNum: 'UMA-880201',
+    accountType: 'Unified Managed Account (UMA)', accountNum: 'UMA-880201',
+    programDesc: 'Combines several strategies (stocks, bonds, SMAs, mutual funds, ETFs) from other programs in a single account, with a professional coordinating the portfolio.',
     custodian: 'NYLIM / Pershing', openDate: 'Mar 2021',
     aum: 280000, aumFmt: '$280K', currency: 'USD',
     returnYTD: 9.2, returnYTDFmt: '+9.2%', benchmark: 'S&P 500 Blend', benchmarkYTD: 8.0,
@@ -41504,7 +41512,8 @@ var iaAccounts = [
   {
     id: 'IA-RC-001', clientId: 3, clientName: 'Robert Chen', initials: 'RC',
     avatarGrad: 'linear-gradient(135deg,#7c3aed,#a855f7)',
-    accountType: 'Advisory (SMA)', accountNum: 'SMA-300201',
+    accountType: 'Separately Managed Account (SMA)', accountNum: 'SMA-300201',
+    programDesc: 'A customized strategy of individual securities managed in a portfolio on your behalf by a professional asset manager.',
     custodian: 'NYLIM / Pershing', openDate: 'Nov 2020',
     aum: 320000, aumFmt: '$320K', currency: 'USD',
     returnYTD: 10.1, returnYTDFmt: '+10.1%', benchmark: 'S&P 500', benchmarkYTD: 9.2,
@@ -41694,7 +41703,8 @@ var iaAccounts = [
   {
     id: 'IA-AR-001', clientId: 9, clientName: 'Alex Rivera', initials: 'AR',
     avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
-    accountType: 'Advisory (UMA)', accountNum: 'UMA-360001',
+    accountType: 'Unified Managed Account (UMA)', accountNum: 'UMA-360001',
+    programDesc: 'Combines several strategies (stocks, bonds, SMAs, mutual funds, ETFs) from other programs in a single account, with a professional coordinating the portfolio.',
     custodian: 'NYLIM / Pershing', openDate: 'Apr 2026',
     aum: 0, aumFmt: '$0 (Pending)', currency: 'USD',
     returnYTD: 0, returnYTDFmt: '—', benchmark: 'S&P 500 Blend', benchmarkYTD: 9.2,
@@ -41732,7 +41742,8 @@ var iaAccounts = [
   {
     id: 'IA-PN-001', clientId: 2, clientName: 'Patricia Nguyen', initials: 'PN',
     avatarGrad: 'linear-gradient(135deg,#2563eb,#7c3aed)',
-    accountType: 'ETF Portfolio', accountNum: 'ETF-301001',
+    accountType: 'Rep-Directed Program', accountNum: 'RDP-301001',
+    programDesc: 'Portfolios of mutual funds and/or ETFs managed by your financial advisor, who makes allocation decisions and monitors the portfolio.',
     custodian: 'NYLIM / Pershing', openDate: 'Jan 2023',
     aum: 68000, aumFmt: '$68K', currency: 'USD',
     returnYTD: 7.4, returnYTDFmt: '+7.4%', benchmark: 'Morningstar Conservative Growth', benchmarkYTD: 7.0,
@@ -42171,6 +42182,7 @@ function iaBuildDetailHTML(a) {
       '<div class="ia-det-title-wrap">' +
         '<div class="ia-det-client">' + a.clientName + '</div>' +
         '<div class="ia-det-acct">' + a.accountNum + ' · ' + a.accountType + '</div>' +
+        (a.programDesc ? '<div class="ia-det-prog-desc"><i class="fas fa-info-circle"></i> ' + a.programDesc + '</div>' : '') +
         '<div class="ia-det-meta-row">' + metaHTML + '</div>' +
       '</div>' +
       '<div class="ia-det-kpi-strip">' +
@@ -43155,13 +43167,26 @@ function iaCloseNewAccount() {
 
 function iaRenderNewAccountForm() {
   var nonAnnuityTypes = [
-    { type:'ETF Portfolio',         icon:'fa-chart-area',     fee:'0.35%', min:'$10K',  desc:'Low-cost passive ETF model portfolio — diversified index funds' },
-    { type:'Mutual Fund Portfolio', icon:'fa-coins',          fee:'0.80%', min:'$5K',   desc:'Diversified MainStay mutual fund portfolio — actively managed' },
-    { type:'IRA (Traditional)',     icon:'fa-piggy-bank',     fee:'0.75%', min:'$5K',   desc:'Pre-tax retirement savings · RMD required at age 73' },
-    { type:'IRA (Roth)',            icon:'fa-sun',            fee:'0.75%', min:'$5K',   desc:'After-tax contributions · tax-free growth · no RMD' },
-    { type:'IRA (SEP)',             icon:'fa-briefcase',      fee:'0.75%', min:'$5K',   desc:'Self-employed retirement · higher contribution limits' },
-    { type:'529 College Savings',   icon:'fa-graduation-cap', fee:'0.50%', min:'$1K',   desc:'Tax-advantaged education savings · NY state deduction available' },
-    { type:'Joint Brokerage',       icon:'fa-users',          fee:'0.65%', min:'$25K',  desc:'Jointly held taxable account · flexible withdrawals' }
+    { type:'Fund Advisory Program',          icon:'fa-coins',          fee:'0.75%', min:'$25K',
+      desc:'Helps meet investment goals through a broadly diversified portfolio of mutual funds and/or ETFs in one investment account.',
+      bestFor:'Clients seeking professionally managed, auto-rebalancing diversification in a single consolidated account' },
+    { type:'Separately Managed Account (SMA)', icon:'fa-chart-bar',   fee:'1.00%', min:'$100K',
+      desc:'A customized strategy of individual securities managed in a portfolio by a professional asset manager.',
+      bestFor:'Clients with $100K+ seeking direct security ownership, tax-loss harvesting, and institutional management' },
+    { type:'Rep-Directed Program',           icon:'fa-user-tie',       fee:'0.75%', min:'$25K',
+      desc:'Portfolios of mutual funds and/or ETFs managed by your financial advisor, who controls allocation decisions.',
+      bestFor:'Clients who prefer their advisor to make portfolio decisions with full transparency and control' },
+    { type:'Unified Managed Account (UMA)',  icon:'fa-layer-group',    fee:'1.00%', min:'$200K',
+      desc:'Combines strategies from multiple programs (stocks, bonds, SMAs, mutual funds, ETFs) in a single coordinated account.',
+      bestFor:'Clients with $200K+ seeking multi-strategy diversification with consolidated oversight and reporting' },
+    { type:'IRA (Traditional)',              icon:'fa-piggy-bank',     fee:'0.75%', min:'$5K',
+      desc:'Pre-tax retirement savings · RMD required at age 73' },
+    { type:'IRA (Roth)',                     icon:'fa-sun',            fee:'0.75%', min:'$5K',
+      desc:'After-tax contributions · tax-free growth · no RMD' },
+    { type:'IRA (SEP)',                      icon:'fa-briefcase',      fee:'0.75%', min:'$5K',
+      desc:'Self-employed retirement · higher contribution limits' },
+    { type:'529 College Savings',            icon:'fa-graduation-cap', fee:'0.50%', min:'$1K',
+      desc:'Tax-advantaged education savings · NY state deduction available' }
   ];
 
   // NYL Annuity lineup — Immediate Income
@@ -43218,7 +43243,7 @@ function iaRenderNewAccountForm() {
       '<div class="ia-naf-ai-icon"><i class="fas fa-robot"></i></div>' +
       '<div class="ia-naf-ai-content">' +
         '<div class="ia-naf-ai-title">AI Account Recommendation <span class="ia-naf-ai-live">LIVE</span></div>' +
-        '<div class="ia-naf-ai-text">Based on client profile: <strong>Guaranteed Lifetime Income Annuity</strong> for clients near retirement with income gaps. <strong>IndexFlex</strong> for growth-oriented clients wanting 0% downside risk. <strong>IRA</strong> for clients within 15 years of retirement.</div>' +
+        '<div class="ia-naf-ai-text">Based on client profile: <strong>UMA</strong> recommended for clients with $200K+ seeking consolidated multi-strategy management. <strong>SMA</strong> for $100K+ with tax-sensitivity needs. <strong>Fund Advisory</strong> for $25K–$200K with diversified growth goals. <strong>Rep-Directed</strong> when advisor customization is preferred. <strong>Income Annuity</strong> for clients near retirement with income gaps.</div>' +
       '</div>' +
     '</div>' +
 
@@ -43231,11 +43256,33 @@ function iaRenderNewAccountForm() {
       '<div class="ia-naf-step"><span>5</span> Funding</div>' +
     '</div>' +
 
-    /* Step 1: Non-annuity account types */
+    /* Step 1: Advisory program types + Retirement accounts */
     '<div class="ia-naf-section">' +
       '<div class="ia-naf-section-title"><i class="fas fa-folder-open"></i> Step 1 — Select Account Type</div>' +
+      '<div class="ia-naf-prog-hdr">' +
+        '<div class="ia-naf-prog-hdr-icon"><i class="fas fa-gem"></i></div>' +
+        '<div class="ia-naf-prog-hdr-text">' +
+          '<div class="ia-naf-prog-hdr-title">Advisory Investment Programs</div>' +
+          '<div class="ia-naf-prog-hdr-sub">Choose from 4 managed investment programs — each offers professional management with different levels of customization and minimum investment</div>' +
+        '</div>' +
+      '</div>' +
       '<div class="ia-naf-type-grid">' +
-        nonAnnuityTypes.map(function(t) {
+        nonAnnuityTypes.filter(function(t){ return t.bestFor !== undefined; }).map(function(t) {
+          return '<div class="ia-naf-type-card ia-naf-prog-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')">' +
+            '<div class="ia-naf-type-icon"><i class="fas ' + t.icon + '"></i></div>' +
+            '<div class="ia-naf-type-name">' + t.type + '</div>' +
+            '<div class="ia-naf-type-desc">' + t.desc + '</div>' +
+            '<div class="ia-naf-type-best"><i class="fas fa-user-check" style="color:#003087"></i> <strong>Best for:</strong> ' + t.bestFor + '</div>' +
+            '<div class="ia-naf-type-meta">' +
+              '<span class="ia-naf-type-fee">Fee: ' + t.fee + '</span>' +
+              '<span class="ia-naf-type-min">Min: ' + t.min + '</span>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      '<div class="ia-naf-subsection-title" style="margin:14px 0 8px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em"><i class="fas fa-piggy-bank"></i> &nbsp;Retirement &amp; Education Accounts</div>' +
+      '<div class="ia-naf-type-grid">' +
+        nonAnnuityTypes.filter(function(t){ return t.bestFor === undefined; }).map(function(t) {
           return '<div class="ia-naf-type-card" onclick="iaSelectAccountType(this,\'' + t.type + '\')">' +
             '<div class="ia-naf-type-icon"><i class="fas ' + t.icon + '"></i></div>' +
             '<div class="ia-naf-type-name">' + t.type + '</div>' +
@@ -45263,7 +45310,7 @@ function srOpenFullReview(id) {
 
     /* ── Linda Morrison UMA ── */
     'IA-LM-001': {
-      client: 'Linda Morrison', accountNum: 'UMA-880201', accountType: 'Advisory (UMA)',
+      client: 'Linda Morrison', accountNum: 'UMA-880201', accountType: 'Unified Managed Account (UMA)',
       reviewCycle: 'Annual (+ Quarterly check-ins)',
       lastReview: 'Jan 15, 2026', nextReview: 'Apr 15, 2026', reviewStatus: 'overdue',
       reviewStatusLabel: 'Overdue — 3 months',
@@ -45343,7 +45390,7 @@ function srOpenFullReview(id) {
 
     /* ── Linda Morrison Mutual Fund ── */
     'IA-LM-002': {
-      client: 'Linda Morrison', accountNum: 'MF-880202', accountType: 'Mutual Fund Portfolio',
+      client: 'Linda Morrison', accountNum: 'FAP-880202', accountType: 'Fund Advisory Program',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Mar 1, 2026', nextReview: 'Jun 1, 2026', reviewStatus: 'upcoming',
       reviewStatusLabel: 'Upcoming — Jun 1',
@@ -45447,7 +45494,7 @@ function srOpenFullReview(id) {
 
     /* ── Robert Chen SMA ── */
     'IA-RC-001': {
-      client: 'Robert Chen', accountNum: 'SMA-300201', accountType: 'Advisory (SMA)',
+      client: 'Robert Chen', accountNum: 'SMA-300201', accountType: 'Separately Managed Account (SMA)',
       reviewCycle: 'Quarterly',
       lastReview: 'Jan 20, 2026', nextReview: 'Apr 20, 2026', reviewStatus: 'overdue',
       reviewStatusLabel: 'Overdue — Q2 review due',
@@ -45510,7 +45557,7 @@ function srOpenFullReview(id) {
 
     /* ── Robert Chen ETF ── */
     'IA-RC-002': {
-      client: 'Robert Chen', accountNum: 'ETF-300202', accountType: 'ETF Portfolio',
+      client: 'Robert Chen', accountNum: 'FAP-300202', accountType: 'Fund Advisory Program',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Feb 10, 2026', nextReview: 'May 10, 2026', reviewStatus: 'upcoming',
       reviewStatusLabel: 'Upcoming — May 10',
@@ -45620,7 +45667,7 @@ function srOpenFullReview(id) {
 
     /* ── Maria Gonzalez ETF ── */
     'IA-MG-001': {
-      client: 'Maria Gonzalez', accountNum: 'ETF-341001', accountType: 'ETF Portfolio',
+      client: 'Maria Gonzalez', accountNum: 'FAP-341001', accountType: 'Fund Advisory Program',
       reviewCycle: 'Quarterly',
       lastReview: 'Mar 5, 2026', nextReview: 'Jun 5, 2026', reviewStatus: 'scheduled',
       reviewStatusLabel: 'Scheduled — Jun 5',
@@ -45719,7 +45766,7 @@ function srOpenFullReview(id) {
 
     /* ── Alex Rivera UMA (Funding Pending) ── */
     'IA-AR-001': {
-      client: 'Alex Rivera', accountNum: 'UMA-360001', accountType: 'Advisory (UMA)',
+      client: 'Alex Rivera', accountNum: 'UMA-360001', accountType: 'Unified Managed Account (UMA)',
       reviewCycle: 'Semi-Annual (first review when funded)',
       lastReview: 'N/A — new account', nextReview: 'Oct 1, 2026', reviewStatus: 'not-started',
       reviewStatusLabel: 'First review — Oct 1, 2026',
@@ -45766,7 +45813,7 @@ function srOpenFullReview(id) {
 
     /* ── Patricia Nguyen ETF ── */
     'IA-PN-001': {
-      client: 'Patricia Nguyen', accountNum: 'ETF-301001', accountType: 'ETF Portfolio',
+      client: 'Patricia Nguyen', accountNum: 'RDP-301001', accountType: 'Rep-Directed Program',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Feb 20, 2026', nextReview: 'May 20, 2026', reviewStatus: 'upcoming',
       reviewStatusLabel: 'Upcoming — May 20',
@@ -45883,7 +45930,7 @@ function srOpenFullReview(id) {
 
     /* ── David Thompson MF ── */
     'IA-DT-001': {
-      client: 'David Thompson', accountNum: 'MF-305001', accountType: 'Mutual Fund Portfolio',
+      client: 'David Thompson', accountNum: 'FAP-305001', accountType: 'Fund Advisory Program',
       reviewCycle: 'Semi-Annual',
       lastReview: 'Mar 15, 2026', nextReview: 'Sep 15, 2026', reviewStatus: 'scheduled',
       reviewStatusLabel: 'Scheduled — Sep 15',
@@ -53277,6 +53324,17 @@ function advFilterAccounts() {
   advRenderAccountQueue();
 }
 
+/* ── Quick-filter from program type cards ── */
+function advFilterByType(typeName) {
+  _advFilterType = typeName;
+  var sel = document.getElementById('adv-type-filter');
+  if (sel) sel.value = typeName;
+  advRenderAccountQueue();
+  /* Scroll to list */
+  var queue = document.getElementById('adv-account-queue');
+  if (queue) queue.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function advRenderAccountQueue() {
   var queue = document.getElementById('adv-account-queue');
   if (!queue) return;
@@ -53597,28 +53655,28 @@ function advCloseNewAccount() {
 function advRenderNewAccountForm() {
   var programTypes = [
     {
+      type: 'Fund Advisory Program',
+      icon: 'fa-coins', color: '#1d4ed8', fee: '0.75%', min: '$25K',
+      desc: 'Helps meet investment goals efficiently and effectively through a broadly diversified portfolio of mutual funds and/or ETFs, all in one investment account.',
+      features: ['Broadly diversified — mutual funds and/or ETFs','Single consolidated investment account','Automatic model-based rebalancing','Professional allocation oversight']
+    },
+    {
       type: 'SMA (Separately Managed Account)',
       icon: 'fa-chart-bar', color: '#7c3aed', fee: '1.00%', min: '$100K',
-      desc: 'Customized portfolio of individual securities managed by a professional asset manager on your behalf. Ideal for tax-efficient, personalized equity management.',
-      features: ['Direct ownership of individual securities','Tax-loss harvesting at security level','ESG screening available','Customizable restrictions']
-    },
-    {
-      type: 'UMA (Unified Managed Account)',
-      icon: 'fa-layer-group', color: '#0891b2', fee: '1.00%', min: '$50K',
-      desc: 'Combines multiple strategies in a single account — SMA sleeves, mutual funds, ETFs, and alternatives — with a professional coordinating the whole portfolio.',
-      features: ['Multi-sleeve single account','Combines SMA + mutual funds + ETFs','Single consolidated statement','Professional oversight across all sleeves']
-    },
-    {
-      type: 'Fund Advisory Program',
-      icon: 'fa-coins', color: '#059669', fee: '0.75%', min: '$25K',
-      desc: 'Broadly diversified portfolio through mutual funds and/or ETFs in a single investment account. Automatic model-based rebalancing keeps allocation on target.',
-      features: ['Broad diversification via mutual funds & ETFs','Automatic model rebalancing','Single consolidated account','Lower minimum than SMA/UMA']
+      desc: 'A customized strategy of individual securities managed in a portfolio on your behalf by a professional asset manager.',
+      features: ['Direct ownership of individual securities','Customized strategy per client needs','Tax-loss harvesting at security level','ESG screening and restrictions available']
     },
     {
       type: 'Rep-Directed Program',
       icon: 'fa-user-tie', color: '#d97706', fee: '0.75%', min: '$25K',
-      desc: 'Managed by your financial advisor — portfolios typically encompass a mix of mutual funds and/or ETFs. Advisor directs all investment decisions.',
-      features: ['Advisor-directed allocation decisions','Mix of mutual funds and/or ETFs','Flexible strategy implementation','Close advisor-client collaboration']
+      desc: 'Managed by your financial advisor, these portfolios typically encompass a mix of mutual funds and/or exchange traded funds (ETFs).',
+      features: ['Financial advisor makes all allocation decisions','Mix of mutual funds and/or ETFs','Flexible strategy implementation','Close advisor-client collaboration']
+    },
+    {
+      type: 'UMA (Unified Managed Account)',
+      icon: 'fa-layer-group', color: '#059669', fee: '1.00%', min: '$200K',
+      desc: 'Combines several strategies from the other programs in a single account, with a professional coordinating your portfolio — may include stocks, bonds, SMAs, mutual funds, and ETFs.',
+      features: ['Combines stocks, bonds, SMAs, mutual funds, ETFs','Single consolidated account with unified reporting','Professional portfolio coordinator','Multi-strategy diversification under one umbrella']
     }
   ];
 
@@ -53643,7 +53701,7 @@ function advRenderNewAccountForm() {
       '<div class="ia-naf-ai-icon"><i class="fas fa-robot"></i></div>' +
       '<div class="ia-naf-ai-content">' +
         '<div class="ia-naf-ai-title">AI Program Recommendation <span class="ia-naf-ai-live">LIVE</span></div>' +
-        '<div class="ia-naf-ai-text"><strong>UMA</strong> recommended for clients with $200K+ seeking consolidated multi-strategy management. <strong>SMA</strong> for $300K+ with tax-sensitivity needs. <strong>Fund Advisory</strong> for $25K–$200K with diversified growth goals. <strong>Rep-Directed</strong> when advisor customization is preferred.</div>' +
+        '<div class="ia-naf-ai-text"><strong>Fund Advisory</strong> for $25K–$200K with diversified mutual fund/ETF goals. <strong>SMA</strong> for $100K+ clients seeking direct security ownership with tax-efficiency. <strong>Rep-Directed</strong> when the advisor wants full control over allocation. <strong>UMA</strong> for $200K+ seeking consolidated multi-strategy management across stocks, bonds, SMAs, and ETFs.</div>' +
       '</div>' +
     '</div>' +
     '<div class="ia-naf-step-bar">' +

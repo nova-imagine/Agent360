@@ -46460,3 +46460,212 @@ kbd {
 @keyframes esigSend { from { width: 0; } to { width: 100%; } }
 
 /* END PASS 8 */
+
+/* ═══════════════════════════════════════════════════════════
+   CSS PASS 9 — Program Types Overview Sections
+   Investment Accounts · Advisory Accounts · Retirement Annuity
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Shared Program Types Section Structure ── */
+.ia-prog-types-section,
+.adv-prog-types-section,
+.ra-prog-types-section {
+  margin: 0 0 14px 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+
+/* ── Section Header ── */
+.ia-prog-types-header,
+.adv-prog-types-header,
+.ra-prog-types-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ia-prog-types-header-icon,
+.adv-prog-types-header-icon,
+.ra-prog-types-header-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #fff; flex-shrink: 0;
+}
+.ia-prog-types-header-icon  { background: linear-gradient(135deg,#003087,#1d4ed8); }
+.adv-prog-types-header-icon { background: linear-gradient(135deg,#7c3aed,#a855f7); }
+.ra-prog-types-header-icon  { background: linear-gradient(135deg,#059669,#34d399); }
+
+.ia-prog-types-title,
+.adv-prog-types-title,
+.ra-prog-types-title {
+  font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 2px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.ia-prog-types-badge,
+.adv-prog-types-badge,
+.ra-prog-types-badge {
+  font-size: 10px; font-weight: 600; padding: 2px 7px;
+  border-radius: 10px; color: #fff;
+}
+.ia-prog-types-badge  { background: #003087; }
+.adv-prog-types-badge { background: #7c3aed; }
+.ra-prog-types-badge  { background: #059669; }
+
+.ia-prog-types-sub,
+.adv-prog-types-sub,
+.ra-prog-types-sub {
+  font-size: 11px; color: #64748b;
+}
+
+/* ── 4-Card Grid ── */
+.ia-prog-types-grid,
+.adv-prog-types-grid,
+.ra-prog-types-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 1200px) {
+  .ia-prog-types-grid,
+  .adv-prog-types-grid,
+  .ra-prog-types-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Individual Program Type Card ── */
+.ia-prog-type-card,
+.adv-prog-type-card,
+.ra-prog-type-card {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  background: #fafbfc;
+  transition: all .2s;
+  cursor: default;
+}
+.adv-prog-type-card { cursor: pointer; }
+.adv-prog-type-card:hover {
+  border-color: #7c3aed;
+  box-shadow: 0 2px 10px rgba(124,58,237,.12);
+  transform: translateY(-1px);
+}
+
+/* ── Icon ── */
+.ia-prog-type-icon,
+.adv-prog-type-icon,
+.ra-prog-type-icon {
+  width: 32px; height: 32px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; margin-bottom: 8px;
+}
+
+/* Investment program type colors */
+.ia-prog-type-fap .ia-prog-type-icon  { background: #dbeafe; color: #1d4ed8; }
+.ia-prog-type-sma .ia-prog-type-icon  { background: #ede9fe; color: #7c3aed; }
+.ia-prog-type-rdp .ia-prog-type-icon  { background: #fef3c7; color: #d97706; }
+.ia-prog-type-uma .ia-prog-type-icon  { background: #d1fae5; color: #059669; }
+
+/* Advisory program type colors */
+.adv-prog-type-fap .adv-prog-type-icon { background: #dbeafe; color: #1d4ed8; }
+.adv-prog-type-sma .adv-prog-type-icon { background: #ede9fe; color: #7c3aed; }
+.adv-prog-type-rdp .adv-prog-type-icon { background: #fef3c7; color: #d97706; }
+.adv-prog-type-uma .adv-prog-type-icon { background: #d1fae5; color: #059669; }
+
+/* Retirement annuity type colors */
+.ra-prog-type-spia .ra-prog-type-icon { background: #d1fae5; color: #059669; }
+.ra-prog-type-dia  .ra-prog-type-icon { background: #ede9fe; color: #7c3aed; }
+.ra-prog-type-fia  .ra-prog-type-icon { background: #dbeafe; color: #003087; }
+.ra-prog-type-va   .ra-prog-type-icon { background: #fef3c7; color: #d97706; }
+
+/* Border accents */
+.ia-prog-type-fap  { border-top: 3px solid #1d4ed8; }
+.ia-prog-type-sma  { border-top: 3px solid #7c3aed; }
+.ia-prog-type-rdp  { border-top: 3px solid #d97706; }
+.ia-prog-type-uma  { border-top: 3px solid #059669; }
+
+.adv-prog-type-fap { border-top: 3px solid #1d4ed8; }
+.adv-prog-type-sma { border-top: 3px solid #7c3aed; }
+.adv-prog-type-rdp { border-top: 3px solid #d97706; }
+.adv-prog-type-uma { border-top: 3px solid #059669; }
+
+.ra-prog-type-spia { border-top: 3px solid #059669; }
+.ra-prog-type-dia  { border-top: 3px solid #7c3aed; }
+.ra-prog-type-fia  { border-top: 3px solid #003087; }
+.ra-prog-type-va   { border-top: 3px solid #d97706; }
+
+/* ── Card Typography ── */
+.ia-prog-type-name,
+.adv-prog-type-name,
+.ra-prog-type-name {
+  font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 5px;
+}
+.ia-prog-type-desc,
+.adv-prog-type-desc,
+.ra-prog-type-desc {
+  font-size: 11px; color: #475569; line-height: 1.5; margin-bottom: 7px;
+}
+.ia-prog-type-tag,
+.adv-prog-type-tag,
+.ra-prog-type-tag {
+  font-size: 10px; color: #64748b; margin-bottom: 7px;
+  display: flex; align-items: center; gap: 4px;
+}
+.ia-prog-type-tag i,
+.adv-prog-type-tag i,
+.ra-prog-type-tag i { color: #059669; }
+
+/* ── Example chips ── */
+.ia-prog-type-examples,
+.adv-prog-type-examples,
+.ra-prog-type-examples {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.ia-prog-ex-chip,
+.adv-prog-ex-chip,
+.ra-prog-ex-chip {
+  font-size: 10px; font-weight: 600; padding: 2px 6px;
+  border-radius: 4px; border: 1px solid #e2e8f0;
+  background: #f1f5f9; color: #475569;
+}
+
+/* ── New Account Form — Advisory Program section header ── */
+.ia-naf-prog-hdr {
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg,#003087 0%,#1d4ed8 100%);
+  border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; color: #fff;
+}
+.ia-naf-prog-hdr-icon {
+  width: 32px; height: 32px; border-radius: 7px;
+  background: rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.ia-naf-prog-hdr-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.ia-naf-prog-hdr-sub   { font-size: 11px; opacity: .85; }
+
+/* ── Advisory program cards in New Account form ── */
+.ia-naf-prog-card {
+  border-top: 3px solid #003087 !important;
+  background: linear-gradient(180deg,#f0f4ff,#fff) !important;
+}
+.ia-naf-prog-card:hover { border-color: #1d4ed8 !important; }
+
+/* ── Retirement type chips ── */
+.ra-prog-type-examples { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* END PASS 9 */
+
+/* ── Investment Account Detail — Program description banner ── */
+.ia-det-prog-desc {
+  font-size: 11px; color: #475569; line-height: 1.5;
+  background: #f0f4ff; border: 1px solid #c7d7fc;
+  border-radius: 6px; padding: 6px 10px; margin: 4px 0 6px;
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.ia-det-prog-desc i { color: #1d4ed8; margin-top: 1px; flex-shrink: 0; }
