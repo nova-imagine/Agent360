@@ -47482,3 +47482,638 @@ kbd {
 .ra-prog-type-card:hover {
   transform: translateY(-1px);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PASS 12 — Investment Proposals Page
+   AI-powered portfolio proposals · NYLIM product cards · 2-col layout
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page wrapper ────────────────────────────────────────────────────────────── */
+.ip-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  min-height: 100%;
+  background: #f8fafc;
+}
+
+/* ── KPI Bar ─────────────────────────────────────────────────────────────────── */
+.ip-kpi-bar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+@media (max-width: 1200px) { .ip-kpi-bar { grid-template-columns: repeat(3, 1fr); } }
+.ip-kpi-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  border: 1px solid #e2e8f0;
+}
+.ip-kpi-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.ip-kpi-val { font-size: 20px; font-weight: 800; color: #1e293b; line-height: 1.1; }
+.ip-kpi-lbl { font-size: 11px; color: #64748b; font-weight: 500; margin-top: 1px; }
+.ip-kpi-sub { font-size: 11px; margin-top: 2px; font-weight: 500; }
+
+/* ── AI Banner ───────────────────────────────────────────────────────────────── */
+.ip-ai-banner {
+  background: linear-gradient(135deg, #003087 0%, #0057c8 100%);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(0,48,135,0.18);
+}
+.ip-ai-banner-left { display: flex; align-items: center; gap: 14px; }
+.ip-ai-icon {
+  position: relative;
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #fff; flex-shrink: 0;
+}
+.ip-ai-pulse {
+  position: absolute; top: -3px; right: -3px;
+  width: 10px; height: 10px;
+  background: #22c55e;
+  border-radius: 50%;
+  border: 2px solid #003087;
+  animation: ip-pulse 2s infinite;
+}
+@keyframes ip-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.2)} }
+.ip-ai-title { font-size: 15px; font-weight: 700; color: #fff; }
+.ip-ai-live { font-size: 10px; color: #22c55e; font-weight: 700; margin-left: 6px; animation: ip-pulse 2s infinite; }
+.ip-ai-sub { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+.ip-ai-banner-right { display: flex; gap: 8px; flex-shrink: 0; }
+.ip-ai-btn {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.ip-ai-btn:hover { background: rgba(255,255,255,0.28); }
+.ip-ai-btn-sec { background: rgba(255,255,255,0.08); }
+
+/* ── Data Sources strip ──────────────────────────────────────────────────────── */
+.ip-data-sources {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+.ip-ds-label { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.ip-ds-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: flex; align-items: center; gap: 4px;
+}
+.ip-ds-ai    { background: #ede9fe; color: #7c3aed; }
+.ip-ds-ms    { background: #fef3c7; color: #d97706; }
+.ip-ds-fs    { background: #dbeafe; color: #003087; }
+.ip-ds-nyl   { background: #d1fae5; color: #059669; }
+.ip-ds-crm   { background: #d1fae5; color: #059669; }
+.ip-ds-mkt   { background: #fee2e2; color: #dc2626; }
+
+/* ── Main 2-col layout ───────────────────────────────────────────────────────── */
+.ip-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+@media (max-width: 900px) { .ip-layout { grid-template-columns: 1fr; } }
+
+/* ── LEFT: Proposal Queue ────────────────────────────────────────────────────── */
+.ip-list-col {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: calc(100vh - 300px);
+}
+.ip-list-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ip-list-title { font-size: 13px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+.ip-list-filters { display: flex; gap: 6px; }
+.ip-filter-sel {
+  flex: 1;
+  font-size: 11px;
+  padding: 5px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  color: #374151;
+  background: #f8fafc;
+  cursor: pointer;
+  outline: none;
+}
+.ip-filter-sel:focus { border-color: #003087; }
+
+/* Queue rows */
+#ip-proposal-queue {
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+#ip-proposal-queue::-webkit-scrollbar { width: 4px; }
+#ip-proposal-queue::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+.ip-queue-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background .12s;
+}
+.ip-queue-row:hover { background: #f8fafc; }
+.ip-queue-row-active { background: #eff6ff !important; border-left: 3px solid #003087; }
+.ip-queue-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.ip-queue-body { flex: 1; min-width: 0; }
+.ip-queue-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px; }
+.ip-queue-name { font-size: 13px; font-weight: 700; color: #1e293b; }
+.ip-queue-title { font-size: 12px; color: #374151; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ip-queue-meta { display: flex; align-items: center; gap: 6px; }
+.ip-queue-aum { font-size: 11px; color: #64748b; font-weight: 600; }
+.ip-queue-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.ip-queue-score { font-size: 11px; font-weight: 700; color: #7c3aed; display: flex; align-items: center; gap: 3px; }
+.ip-queue-empty { padding: 40px 20px; text-align: center; color: #94a3b8; font-size: 13px; }
+
+/* ── Badges ──────────────────────────────────────────────────────────────────── */
+.ip-status-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+.ip-type-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-flex; align-items: center; gap: 3px;
+}
+.ip-client-badge {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 3px;
+}
+
+/* ── RIGHT: Detail col ───────────────────────────────────────────────────────── */
+.ip-detail-col {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow-y: auto;
+  max-height: calc(100vh - 300px);
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.ip-detail-col::-webkit-scrollbar { width: 5px; }
+.ip-detail-col::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.ip-detail-col::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Placeholder */
+.ip-detail-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  padding: 40px;
+  text-align: center;
+}
+.ip-ph-icon { font-size: 48px; color: #e2e8f0; margin-bottom: 16px; }
+.ip-ph-title { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+.ip-ph-sub { font-size: 13px; color: #64748b; max-width: 340px; line-height: 1.5; margin-bottom: 20px; }
+.ip-ph-btn {
+  background: #003087; color: #fff;
+  border: none; border-radius: 8px;
+  padding: 10px 20px; font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+}
+.ip-ph-btn:hover { background: #0057c8; }
+
+/* ── Detail wrap ─────────────────────────────────────────────────────────────── */
+.ip-detail-wrap { display: flex; flex-direction: column; height: 100%; }
+
+/* Detail header */
+.ip-detail-hdr {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fcfcfd;
+}
+.ip-detail-avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.ip-detail-hdr-body { flex: 1; min-width: 0; }
+.ip-detail-hdr-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.ip-detail-name { font-size: 16px; font-weight: 800; color: #1e293b; }
+.ip-detail-prop-title { font-size: 14px; color: #374151; font-weight: 600; margin-bottom: 6px; }
+.ip-detail-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ip-detail-meta-item { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 4px; }
+.ip-detail-actions { display: flex; gap: 8px; flex-shrink: 0; align-self: flex-start; margin-top: 4px; }
+.ip-act-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: flex; align-items: center; gap: 5px;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.ip-act-btn:hover { opacity: 0.85; }
+.ip-act-present { background: #003087; color: #fff; }
+.ip-act-pdf { background: #dc2626; color: #fff; }
+.ip-act-eapp { background: #059669; color: #fff; }
+
+/* ── Tab bar ─────────────────────────────────────────────────────────────────── */
+.ip-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 12px 16px 0;
+  border-bottom: 2px solid #f1f5f9;
+  background: #fff;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ip-tabs::-webkit-scrollbar { display: none; }
+.ip-tab {
+  padding: 8px 16px;
+  font-size: 12px; font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s;
+}
+.ip-tab:hover { color: #003087; }
+.ip-tab-active { color: #003087; border-bottom-color: #003087; }
+
+/* ── Tab body ────────────────────────────────────────────────────────────────── */
+.ip-tab-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Overview tab ────────────────────────────────────────────────────────────── */
+.ip-ov-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 800px) { .ip-ov-kpis { grid-template-columns: repeat(2, 1fr); } }
+.ip-ov-kpi {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ip-ov-kpi-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.ip-ov-kpi-val { font-size: 15px; font-weight: 800; color: #1e293b; }
+.ip-ov-kpi-lbl { font-size: 11px; color: #64748b; }
+.ip-ov-section {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+}
+.ip-ov-section-title {
+  font-size: 12px; font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.ip-ov-text { font-size: 13px; color: #1e293b; line-height: 1.5; }
+.ip-ov-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.ip-ov-step:last-child { border-bottom: none; }
+.ip-ov-step-num {
+  width: 22px; height: 22px;
+  background: #003087;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ip-ov-step-txt { font-size: 13px; color: #374151; line-height: 1.4; }
+.ip-ov-ds-chip {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px;
+  background: #dbeafe; color: #003087;
+  border-radius: 12px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+
+/* ── Allocation tab ──────────────────────────────────────────────────────────── */
+.ip-alloc-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.ip-alloc-donut {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  flex-shrink: 0;
+}
+.ip-donut-label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.ip-donut-val { font-size: 14px; font-weight: 800; color: #1e293b; }
+.ip-donut-sub { font-size: 10px; color: #64748b; margin-top: 2px; }
+.ip-alloc-list { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 8px; }
+.ip-alloc-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+.ip-alloc-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ip-alloc-body { flex: 1; min-width: 0; }
+.ip-alloc-name { font-size: 12px; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ip-alloc-sym { font-weight: 700; }
+.ip-alloc-role { font-size: 11px; color: #64748b; }
+.ip-alloc-right { text-align: right; flex-shrink: 0; }
+.ip-alloc-pct { font-size: 15px; font-weight: 800; }
+.ip-alloc-usd { font-size: 11px; color: #64748b; }
+.ip-asset-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #e2e8f0; }
+.ip-asset-row:last-child { border-bottom: none; }
+.ip-asset-lbl { font-size: 12px; color: #374151; width: 120px; font-weight: 600; flex-shrink: 0; }
+.ip-asset-bar-wrap { flex: 1; background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden; }
+.ip-asset-bar { height: 8px; border-radius: 4px; transition: width .4s; }
+.ip-asset-pct { font-size: 12px; font-weight: 700; color: #1e293b; width: 36px; text-align: right; flex-shrink: 0; }
+
+/* ── NYLIM Products tab ──────────────────────────────────────────────────────── */
+.ip-prod-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 12px;
+}
+.ip-prod-hdr-title { font-size: 14px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+.ip-prod-hdr-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+.ip-prod-hdr-link {
+  font-size: 12px; font-weight: 600; color: #003087;
+  text-decoration: none;
+  padding: 6px 12px;
+  background: #dbeafe;
+  border-radius: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.ip-prod-hdr-link:hover { background: #bfdbfe; }
+
+.ip-prod-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.ip-prod-card-hdr {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 10px;
+}
+.ip-prod-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.ip-prod-sym { font-size: 16px; font-weight: 800; }
+.ip-prod-veh { display: flex; gap: 5px; margin-top: 3px; flex-wrap: wrap; }
+.ip-veh-chip {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #f1f5f9; color: #475569;
+}
+.ip-prod-alloc {
+  margin-left: auto;
+  font-size: 22px; font-weight: 900;
+  flex-shrink: 0;
+}
+.ip-prod-name { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
+.ip-prod-ms { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.ip-prod-ms-cat { font-size: 11px; color: #64748b; }
+.ip-prod-desc { font-size: 12px; color: #475569; line-height: 1.5; margin-bottom: 12px; }
+.ip-prod-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+.ip-prod-stat { text-align: center; }
+.ip-prod-stat-val { font-size: 14px; font-weight: 800; }
+.ip-prod-stat-lbl { font-size: 10px; color: #64748b; margin-top: 2px; }
+.ip-prod-best {
+  font-size: 12px; color: #374151;
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  display: flex; align-items: flex-start; gap: 6px;
+  border: 1px solid #bbf7d0;
+}
+
+/* ── Projections tab ─────────────────────────────────────────────────────────── */
+.ip-proj-disclaimer {
+  font-size: 11px; color: #64748b;
+  padding: 8px 12px;
+  background: #fef9ec;
+  border-radius: 8px;
+  border: 1px solid #fde68a;
+  line-height: 1.5;
+}
+.ip-proj-table-wrap { overflow-x: auto; }
+.ip-proj-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.ip-proj-table th {
+  background: #f1f5f9;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid #e2e8f0;
+}
+.ip-proj-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+}
+.ip-proj-table tbody tr:hover { background: #f8fafc; }
+.ip-proj-assume-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.ip-proj-assume {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.ip-proj-assume span { font-size: 11px; color: #64748b; }
+.ip-proj-assume strong { font-size: 14px; color: #1e293b; font-weight: 700; }
+
+/* ── AI Intelligence tab ─────────────────────────────────────────────────────── */
+.ip-intel-ai-hdr {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #faf5ff, #ede9fe);
+  border-radius: 12px;
+  border: 1px solid #ddd6fe;
+}
+.ip-intel-ai-icon {
+  width: 44px; height: 44px;
+  background: #7c3aed;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #fff; flex-shrink: 0;
+}
+.ip-intel-ai-title { font-size: 15px; font-weight: 700; color: #4c1d95; }
+.ip-intel-ai-sub { font-size: 12px; color: #7c3aed; margin-top: 2px; }
+.ip-intel-score-ring {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 3px solid #059669;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  margin-left: auto; flex-shrink: 0;
+}
+.ip-intel-score-val { font-size: 16px; font-weight: 900; line-height: 1; }
+.ip-intel-score-lbl { font-size: 9px; color: #64748b; }
+.ip-intel-narrative {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.7;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #7c3aed;
+}
+.ip-intel-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: flex-start;
+}
+.ip-intel-row:last-child { border-bottom: none; }
+.ip-intel-src {
+  font-size: 11px; font-weight: 700;
+  padding: 2px 10px;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+.ip-intel-txt { font-size: 13px; color: #374151; line-height: 1.4; }
+.ip-intel-models-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.ip-intel-model {
+  display: flex; gap: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  align-items: flex-start;
+}
+.ip-intel-model-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.ip-intel-model-lbl { font-size: 12px; font-weight: 700; }
+.ip-intel-model-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+/* END PASS 12 */

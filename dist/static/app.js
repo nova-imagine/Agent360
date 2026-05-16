@@ -40,6 +40,7 @@ function navigateTo(page) {
     delivery: 'Policy Delivery',
     leads: 'Leads — Pre-Qualification',
     'inv-accounts': 'Investment Accounts',
+    'inv-proposals': 'Investment Proposals',
     'ret-accounts': 'Annuity Accounts',
     'adv-wealth': 'Wealth Management',
     'adv-accounts': 'Advisory Accounts',
@@ -71,6 +72,7 @@ function navigateTo(page) {
     delivery: 'Home / Insurance / Policy Delivery',
     leads: 'Home / Marketing / Leads',
     'inv-accounts': 'Home / Investments / Investment Accounts · Suitability Review · Funding & IPS',
+    'inv-proposals': 'Home / Investments / Investment Proposals · AI-Powered · NYLIM Products',
     'ret-accounts': 'Home / Retirement / Annuity Accounts',
     'adv-wealth': 'Home / Advisory / Wealth Management',
     'adv-accounts': 'Home / Advisory / Advisory Accounts',
@@ -139,6 +141,8 @@ function navigateTo(page) {
       requestAnimationFrame(() => setTimeout(() => initEAppSubmissionsPage(), 80));
     } else if (page === 'sales') {
       requestAnimationFrame(() => setTimeout(() => initSalesPage(), 80));
+    } else if (page === 'inv-proposals') {
+      requestAnimationFrame(() => setTimeout(() => initInvestmentProposalsPage(), 80));
     }
   }
 }
@@ -54495,3 +54499,870 @@ window.showIntegrationDetail = function(id) {
 };
 
 console.log('Settings Integrations module loaded — filterIntegrations + showIntegrationDetail active');
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   INVESTMENT PROPOSALS MODULE — AI-powered portfolio proposals
+   NYLIM product universe · GPT-4o · Morningstar · FactSet · NYL CRM
+   ══════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── 1. NYLIM PRODUCT UNIVERSE ─────────────────────────────────────────── */
+  var _nylimProducts = {
+    /* ── ETFs ── */
+    HFXI: {
+      symbol: 'HFXI', name: 'NYLI FTSE International Equity Currency Neutral ETF',
+      assetClass: 'Equities', vehicle: 'ETF', category: 'Foreign Large Blend',
+      stars: 5, ytd: 11.88, y1: 33.24, y3: 18.29, y5: 11.66, y10: 10.86,
+      inceptDate: '07/22/2015', expRatio: 0.35,
+      desc: 'Tracks FTSE Developed ex-US index with currency hedge — eliminates USD/foreign FX drag while capturing international equity upside.',
+      bestFor: 'Clients wanting international diversification without currency risk',
+      color: '#003087', icon: 'fa-globe'
+    },
+    IQSU: {
+      symbol: 'IQSU', name: 'NYLI Candriam U.S. Large Cap Equity ETF',
+      assetClass: 'Equities', vehicle: 'ETF', category: 'Large Blend',
+      stars: 3, ytd: 9.47, y1: 30.06, y3: 18.88, y5: 11.60, y10: null,
+      inceptDate: '12/17/2019', expRatio: 0.30,
+      desc: 'ESG-optimized U.S. large cap equity via Candriam\'s systematic multi-factor process — combines quality, value, momentum with sustainability screens.',
+      bestFor: 'ESG-conscious investors seeking U.S. core equity exposure',
+      color: '#0891b2', icon: 'fa-chart-line'
+    },
+    IWLG: {
+      symbol: 'IWLG', name: 'NYLI Winslow Large Cap Growth ETF',
+      assetClass: 'Equities', vehicle: 'ETF', category: 'Large Growth',
+      stars: 3, ytd: 3.24, y1: 22.58, y3: 23.89, y5: null, y10: null,
+      inceptDate: '06/23/2022', expRatio: 0.55,
+      desc: 'Growth-focused large-cap U.S. equity managed by Winslow Capital — emphasizes companies with sustainable earnings acceleration and durable competitive moats.',
+      bestFor: 'Long-term growth investors with moderate-high risk tolerance',
+      color: '#7c3aed', icon: 'fa-rocket'
+    },
+    MMIT: {
+      symbol: 'MMIT', name: 'NYLI MacKay Muni Intermediate ETF',
+      assetClass: 'Fixed Income', vehicle: 'ETF', category: 'Muni National Intermediate',
+      stars: 4, ytd: 0.43, y1: 5.99, y3: 3.49, y5: 1.11, y10: null,
+      inceptDate: '10/18/2017', expRatio: 0.38,
+      desc: 'Tax-exempt intermediate municipal bond ETF managed by MacKay Shields — optimized for after-tax yield in high tax brackets.',
+      bestFor: 'High-bracket clients seeking tax-exempt income',
+      color: '#059669', icon: 'fa-landmark'
+    },
+    CPLB: {
+      symbol: 'CPLB', name: 'NYLI MacKay Core Plus Bond ETF',
+      assetClass: 'Fixed Income', vehicle: 'ETF', category: 'Intermediate Core-Plus Bond',
+      stars: 4, ytd: -0.07, y1: 4.98, y3: 5.04, y5: null, y10: null,
+      inceptDate: '06/29/2021', expRatio: 0.45,
+      desc: 'Core-plus fixed income ETF with flexibility to invest across investment grade, high yield, and international bonds — managed by MacKay Shields.',
+      bestFor: 'Clients seeking diversified bond exposure beyond pure investment grade',
+      color: '#d97706', icon: 'fa-shield-alt'
+    },
+    IQHI: {
+      symbol: 'IQHI', name: 'NYLI MacKay High Income ETF',
+      assetClass: 'Fixed Income', vehicle: 'ETF', category: 'High Yield Bond',
+      stars: 3, ytd: 1.21, y1: 9.09, y3: 8.28, y5: null, y10: null,
+      inceptDate: '10/25/2022', expRatio: 0.55,
+      desc: 'High-yield bond ETF actively managed by MacKay Shields — targets above-average income with disciplined credit selection and risk management.',
+      bestFor: 'Income-seeking clients with moderate credit risk appetite',
+      color: '#dc2626', icon: 'fa-percentage'
+    },
+    WRND: {
+      symbol: 'WRND', name: 'NYLI Global Equity R&D Leaders ETF',
+      assetClass: 'Equities', vehicle: 'ETF', category: 'Global Large-Stock Growth',
+      stars: 4, ytd: 12.87, y1: 39.94, y3: 22.72, y5: null, y10: null,
+      inceptDate: '02/08/2022', expRatio: 0.45,
+      desc: 'Targets global companies with highest R&D investment intensity — captures innovation premium across technology, healthcare, and industrials globally.',
+      bestFor: 'Growth investors seeking innovation-driven global equity exposure',
+      color: '#6d28d9', icon: 'fa-flask'
+    },
+    QAI: {
+      symbol: 'QAI', name: 'NYLI Hedge Multi-Strategy Tracker ETF',
+      assetClass: 'Alternatives', vehicle: 'ETF', category: 'Multistrategy',
+      stars: 3, ytd: 7.12, y1: 15.86, y3: 9.46, y5: 4.24, y10: 3.69,
+      inceptDate: '03/25/2009', expRatio: 0.75,
+      desc: 'Liquid alternative ETF that replicates hedge fund multi-strategy returns — provides diversification, low correlation, and downside mitigation.',
+      bestFor: 'Sophisticated investors seeking liquid alts for portfolio ballast',
+      color: '#475569', icon: 'fa-random'
+    },
+    /* ── Mutual Funds ── */
+    MSXAX: {
+      symbol: 'MSXAX', name: 'NYLI S&P 500 Index Fund',
+      assetClass: 'Equities', vehicle: 'Mutual Fund', category: 'Large Blend',
+      stars: 4, ytd: 8.49, y1: 30.37, y3: 21.05, y5: 12.56, y10: 14.67,
+      inceptDate: '01/02/2004', expRatio: 0.55,
+      desc: 'Low-cost S&P 500 index fund — broad U.S. large-cap core equity exposure with market-cap weighting and competitive expenses.',
+      bestFor: 'Core U.S. equity allocation for any risk profile',
+      color: '#003087', icon: 'fa-chart-area'
+    },
+    MLAAX: {
+      symbol: 'MLAAX', name: 'NYLI Winslow Large Cap Growth Fund',
+      assetClass: 'Equities', vehicle: 'Mutual Fund', category: 'Large Growth',
+      stars: 3, ytd: 2.39, y1: 20.75, y3: 22.92, y5: 10.46, y10: 16.49,
+      inceptDate: '07/01/1995', expRatio: 0.95,
+      desc: 'Actively managed large-cap growth with Winslow Capital\'s fundamental research — 30+ year track record of identifying secular growth companies.',
+      bestFor: 'Long-horizon growth investors wanting active management',
+      color: '#7c3aed', icon: 'fa-chart-line'
+    },
+    EPSPX: {
+      symbol: 'EPSPX', name: 'NYLI Epoch Global Equity Yield Fund',
+      assetClass: 'Equities', vehicle: 'Mutual Fund', category: 'Global Large-Stock Value',
+      stars: 4, ytd: 12.79, y1: 32.90, y3: 19.06, y5: 12.20, y10: 9.45,
+      inceptDate: '08/02/2006', expRatio: 0.95,
+      desc: 'Global equity income fund focused on companies with strong free cash flow and dividend growth — Epoch\'s proprietary FCF framework drives stock selection.',
+      bestFor: 'Income-oriented investors wanting global dividend growth',
+      color: '#059669', icon: 'fa-hand-holding-usd'
+    },
+    MTRAX: {
+      symbol: 'MTRAX', name: 'NYLI Income Builder Fund',
+      assetClass: 'Multi-Asset', vehicle: 'Mutual Fund', category: 'Global Moderate Allocation',
+      stars: 3, ytd: 9.06, y1: 24.04, y3: 14.42, y5: 7.00, y10: 7.51,
+      inceptDate: '01/03/1995', expRatio: 0.90,
+      desc: 'Balanced multi-asset fund seeking income with growth — dynamic allocation across global stocks, bonds, and alternatives with 30-year live track record.',
+      bestFor: 'Moderate investors seeking one-stop balanced exposure',
+      color: '#0891b2', icon: 'fa-balance-scale'
+    },
+    MMHAX: {
+      symbol: 'MMHAX', name: 'NYLI MacKay High Yield Muni Bond Fund',
+      assetClass: 'Fixed Income', vehicle: 'Mutual Fund', category: 'High Yield Muni',
+      stars: 4, ytd: 1.05, y1: 6.88, y3: 4.78, y5: 1.05, y10: 3.18,
+      inceptDate: '03/31/2010', expRatio: 0.80,
+      desc: 'Tax-exempt high yield municipal bond fund — MacKay Shields\' credit expertise applied to below-investment-grade munis for enhanced after-tax yield.',
+      bestFor: 'High-bracket investors seeking maximum tax-exempt income',
+      color: '#dc2626', icon: 'fa-landmark'
+    },
+    MECKDX: {
+      symbol: 'MECDX', name: 'NYLI Epoch Capital Growth Fund',
+      assetClass: 'Equities', vehicle: 'Mutual Fund', category: 'Global Large-Stock Growth',
+      stars: 4, ytd: 4.06, y1: 19.96, y3: 14.83, y5: 9.23, y10: null,
+      inceptDate: '06/30/2016', expRatio: 1.05,
+      desc: 'Global capital growth fund using Epoch\'s FCF reinvestment model — selects companies that efficiently redeploy cash into high-ROIC growth opportunities.',
+      bestFor: 'Global growth investors focused on capital appreciation',
+      color: '#6d28d9', icon: 'fa-seedling'
+    },
+    MCYAX: {
+      symbol: 'MCYAX', name: 'NYLI Candriam Emerging Markets Equity Fund',
+      assetClass: 'Equities', vehicle: 'Mutual Fund', category: 'Diversified Emerging Markets',
+      stars: 3, ytd: 24.58, y1: 63.13, y3: 24.64, y5: 5.24, y10: null,
+      inceptDate: '11/15/2017', expRatio: 1.15,
+      desc: 'Actively managed EM equity fund by Candriam — ESG-integrated approach capturing growth in Asia, LatAm, and EMEA with rigorous sustainability screens.',
+      bestFor: 'Aggressive growth investors with long horizon and EM appetite',
+      color: '#d97706', icon: 'fa-globe-asia'
+    },
+    MMRAX: {
+      symbol: 'MMRAX', name: 'NYLI Moderate Allocation Fund',
+      assetClass: 'Multi-Asset', vehicle: 'Mutual Fund', category: 'Global Moderate Allocation',
+      stars: 3, ytd: 5.21, y1: 17.71, y3: 11.07, y5: 5.33, y10: 7.23,
+      inceptDate: '04/04/2005', expRatio: 0.85,
+      desc: 'Balanced allocation fund for moderate investors — targets 60/40 global equity/bond mix with tactical adjustments based on market conditions.',
+      bestFor: 'Moderate-risk investors seeking balanced, diversified single solution',
+      color: '#0d9488', icon: 'fa-balance-scale-right'
+    }
+  };
+
+  /* ── 2. SAMPLE PROPOSALS ─────────────────────────────────────────────────── */
+  var _ipProposals = [
+
+    /* ── Proposal 1: Growth ETF Portfolio — James Whitfield ── */
+    {
+      id: 'IP-JW-001',
+      clientId: 1, clientName: 'James Whitfield', clientInitials: 'JW',
+      clientType: 'client',
+      avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
+      proposalTitle: 'Growth-Oriented ETF Portfolio',
+      proposalType: 'ETF',
+      proposalStatus: 'Pending',
+      statusColor: '#d97706',
+      riskProfile: 'Moderate-Aggressive',
+      investmentGoal: 'Long-term wealth accumulation & retirement supplement',
+      timeHorizon: '13 years (to age 65)',
+      proposedAUM: 320000,
+      proposedAUMFmt: '$320,000',
+      estAnnualFee: 3200,
+      estAnnualFeeFmt: '$3,200/yr (1.00%)',
+      aiSuitabilityScore: 96,
+      taxBracket: '37%',
+      created: 'May 2, 2026',
+      presentDate: 'May 20, 2026',
+      dataSourcesUsed: ['GPT-4o Risk Analysis', 'Morningstar 5-Star Ratings', 'FactSet 3Y Returns', 'NYL CRM — Client Goals', 'Market Data: Bloomberg'],
+      aiNarrative: 'AI analysis of James Whitfield\'s CRM profile (37% tax bracket, 13-year horizon, Moderate-Aggressive risk score 93/100, $2.1M net worth) indicates a growth-tilted ETF portfolio is the optimal solution. The proposed allocation leverages NYLIM\'s highest-rated ETFs: HFXI provides international diversification with currency neutralization eliminating the typical FX drag that has cost investors 1.2% annually over the past decade. IWLG\'s 23.89% 3-year return ranks in the top 8% of Large Growth peers per Morningstar. IQSU adds ESG-screened U.S. large cap exposure — FactSet data shows ESG-integrated portfolios have outperformed conventional peers by 0.8% annually on a risk-adjusted basis since 2019. The MMIT tax-exempt bond sleeve generates approximately $3,840/yr after-tax vs. $2,880 from a comparable taxable bond — critical for a 37% bracket client. Total estimated fee: $3,200/yr (1.00%). Close probability: 96/100.',
+      allocation: [
+        { symbol: 'HFXI', pct: 30, dollarAmt: 96000, role: 'International Core', color: '#003087' },
+        { symbol: 'IWLG', pct: 25, dollarAmt: 80000, role: 'U.S. Large Growth', color: '#7c3aed' },
+        { symbol: 'IQSU', pct: 25, dollarAmt: 80000, role: 'U.S. ESG Core', color: '#0891b2' },
+        { symbol: 'MMIT', pct: 12, dollarAmt: 38400, role: 'Tax-Exempt Bond', color: '#059669' },
+        { symbol: 'QAI',  pct: 8,  dollarAmt: 25600, role: 'Liquid Alternatives', color: '#475569' }
+      ],
+      projections: [
+        { year: 1, conservative: 313600, base: 336000, optimistic: 352000 },
+        { year: 3, conservative: 338000, base: 385000, optimistic: 432000 },
+        { year: 5, conservative: 365000, base: 448000, optimistic: 534000 },
+        { year: 10, conservative: 428000, base: 604000, optimistic: 820000 },
+        { year: 13, conservative: 472000, base: 720000, optimistic: 1100000 }
+      ],
+      thirdPartyInsights: [
+        { source: 'Morningstar', insight: 'HFXI: ★★★★★ · Top 3% Foreign Large Blend · 5Y: 11.66%' },
+        { source: 'FactSet', insight: 'IWLG 3Y Alpha vs Russell 1000 Growth: +2.1% annualized' },
+        { source: 'Bloomberg', insight: 'International equity valuations at 40% discount to U.S. (P/E 14x vs 23x)' },
+        { source: 'NYL CRM', insight: 'Client expressed interest in international exposure at Feb 2026 review' }
+      ],
+      nextSteps: ['Schedule May 20 proposal presentation meeting', 'Generate NYLIM Product Fact Sheets (HFXI, IWLG, IQSU)', 'Prepare suitability questionnaire for Reg BI documentation', 'Draft IPS — Investment Policy Statement for James\'s file']
+    },
+
+    /* ── Proposal 2: Income & Growth Blended Portfolio — Linda Morrison ── */
+    {
+      id: 'IP-LM-001',
+      clientId: 8, clientName: 'Linda Morrison', clientInitials: 'LM',
+      clientType: 'client',
+      avatarGrad: 'linear-gradient(135deg,#059669,#34d399)',
+      proposalTitle: 'Balanced Income & Growth Portfolio',
+      proposalType: 'Blended',
+      proposalStatus: 'Presented',
+      statusColor: '#003087',
+      riskProfile: 'Moderate-Conservative',
+      investmentGoal: 'Retirement income in 5 years + capital preservation',
+      timeHorizon: '5 years to retirement + 25 years distribution',
+      proposedAUM: 280000,
+      proposedAUMFmt: '$280,000',
+      estAnnualFee: 2800,
+      estAnnualFeeFmt: '$2,800/yr (1.00%)',
+      aiSuitabilityScore: 94,
+      taxBracket: '37%',
+      created: 'Apr 10, 2026',
+      presentDate: 'Apr 15, 2026',
+      dataSourcesUsed: ['GPT-4o Income Gap Analysis', 'Morningstar Risk-Adjusted Returns', 'FactSet Dividend Data', 'NYL CRM — Retirement Goals', 'Morningstar Portfolio X-Ray'],
+      aiNarrative: 'AI income gap analysis cross-referenced with Linda Morrison\'s CRM retirement plan (retires 2030, $1,400/mo income gap, 37% bracket, $200K annuity in place) identifies a blended approach combining dividend income with growth as optimal. EPSPX (NYLI Epoch Global Equity Yield) generates 2.8% dividend yield globally while delivering 19.06% 3Y return — Morningstar rates it ★★★★ in Global Large-Stock Value. MMHAX (MacKay High Yield Muni) provides tax-exempt income: at 37% bracket, the 4.78% 3Y muni return is equivalent to a 7.59% taxable yield — a $1,260/yr after-tax advantage on the $50K allocation alone. MTRAX (Income Builder) provides the one-stop balanced core. MSXAX provides low-cost S&P 500 core equity. The proposed portfolio generates approximately $8,400/yr in dividend and interest income to bridge the 5-year pre-retirement window.',
+      allocation: [
+        { symbol: 'EPSPX', pct: 28, dollarAmt: 78400, role: 'Global Dividend Equity', color: '#059669' },
+        { symbol: 'MSXAX', pct: 22, dollarAmt: 61600, role: 'U.S. Core Equity', color: '#003087' },
+        { symbol: 'MTRAX', pct: 20, dollarAmt: 56000, role: 'Balanced Multi-Asset', color: '#0891b2' },
+        { symbol: 'MMHAX', pct: 18, dollarAmt: 50400, role: 'Tax-Exempt High Yield', color: '#dc2626' },
+        { symbol: 'CPLB',  pct: 12, dollarAmt: 33600, role: 'Core-Plus Bond', color: '#d97706' }
+      ],
+      projections: [
+        { year: 1, conservative: 274400, base: 293000, optimistic: 308000 },
+        { year: 3, conservative: 295000, base: 334000, optimistic: 374000 },
+        { year: 5, conservative: 319000, base: 384000, optimistic: 456000 },
+        { year: 10, conservative: 358000, base: 494000, optimistic: 680000 },
+        { year: 13, conservative: 380000, base: 560000, optimistic: 820000 }
+      ],
+      thirdPartyInsights: [
+        { source: 'Morningstar', insight: 'EPSPX: ★★★★ · 1Y: 32.90% · 3Y: 19.06% · Global Value top quartile' },
+        { source: 'FactSet', insight: 'MMHAX tax-equivalent yield (37% bracket): 7.59% vs 4.78% stated yield' },
+        { source: 'NYL CRM', insight: 'Linda confirmed preference for income + capital preservation at Apr 10 meeting' },
+        { source: 'Morningstar X-Ray', insight: 'Portfolio correlation to U.S. equity: 0.72 — healthy diversification' }
+      ],
+      nextSteps: ['Follow up on Apr 15 presentation — decision expected May 1', 'Coordinate with annuity team: FMIA ($200K) + this portfolio = full income plan', 'Prepare trust beneficiary documentation for Morrison Family Trust', 'Generate IPS and custodian paperwork if approved']
+    },
+
+    /* ── Proposal 3: 529 College Savings + ETF Starter — David Thompson ── */
+    {
+      id: 'IP-DT-001',
+      clientId: 7, clientName: 'David Thompson', clientInitials: 'DT',
+      clientType: 'client',
+      avatarGrad: 'linear-gradient(135deg,#0891b2,#22d3ee)',
+      proposalTitle: '529 College Savings + ETF Starter Portfolio',
+      proposalType: '529',
+      proposalStatus: 'Draft',
+      statusColor: '#64748b',
+      riskProfile: 'Moderate',
+      investmentGoal: 'College savings for newborn + personal wealth-building start',
+      timeHorizon: '18 years (college) / 30+ years (personal)',
+      proposedAUM: 140000,
+      proposedAUMFmt: '$140,000',
+      estAnnualFee: 1400,
+      estAnnualFeeFmt: '$1,400/yr (1.00%)',
+      aiSuitabilityScore: 91,
+      taxBracket: '24%',
+      created: 'May 8, 2026',
+      presentDate: 'May 22, 2026',
+      dataSourcesUsed: ['GPT-4o Life Stage Analysis', 'Morningstar Fund Ratings', 'FactSet Age-Based Returns', 'NYL CRM — New Parent Flag', 'NY 529 Direct Plan Data', 'IRS Publication 970'],
+      aiNarrative: 'AI life-stage analysis triggered by the "New Parent" flag in David Thompson\'s CRM record (age 31, 24% bracket, $120K income, newborn daughter Emma) identified a dual-track opportunity: (A) NY 529 Direct Plan for college savings with NYLIM-managed age-based options and New York State tax deduction of up to $10,000/yr for joint filers, and (B) a starter ETF portfolio for personal wealth accumulation. The 529 allocation uses NYLIM\'s Aggressive Age-Based track (18-year horizon) — historically has grown $25,000 initial investment to $89,000 at college entry based on FactSet backtesting. The ETF personal portfolio leverages WRND (R&D Leaders) for innovation exposure — its 39.94% 1-year return leads the Global Large-Stock Growth category. MCYAX\'s 63.13% 1Y EM return captures emerging market growth at an early career entry point optimal for long-horizon investors. Combined proposal: $80K 529 + $60K personal ETF portfolio. AI close probability: 91/100.',
+      allocation: [
+        { symbol: '529-NYLIM', pct: 57, dollarAmt: 80000, role: 'NY 529 — Age-Based Aggressive (NYLIM)', color: '#0891b2', is529: true },
+        { symbol: 'WRND',  pct: 21, dollarAmt: 29400, role: 'Global R&D Leaders ETF', color: '#6d28d9' },
+        { symbol: 'IQSU',  pct: 14, dollarAmt: 19600, role: 'U.S. ESG Large Cap ETF', color: '#0891b2' },
+        { symbol: 'MCYAX', pct: 8,  dollarAmt: 11200, role: 'Emerging Markets Fund', color: '#d97706' }
+      ],
+      projections: [
+        { year: 1, conservative: 136000, base: 147000, optimistic: 158000 },
+        { year: 3, conservative: 148000, base: 172000, optimistic: 200000 },
+        { year: 5, conservative: 163000, base: 204000, optimistic: 255000 },
+        { year: 10, conservative: 204000, base: 302000, optimistic: 440000 },
+        { year: 18, conservative: 298000, base: 536000, optimistic: 920000 }
+      ],
+      thirdPartyInsights: [
+        { source: 'NY 529 Direct', insight: 'NY State tax deduction: up to $10,000/yr (joint) — saves $2,400/yr at 24% bracket' },
+        { source: 'FactSet', insight: 'WRND 1Y: +39.94% · 3Y: +22.72% — top 5% Global Growth category' },
+        { source: 'FactSet', insight: 'MCYAX 1Y: +63.13% — #1 ranked Emerging Markets fund YTD 2026' },
+        { source: 'IRS Pub 970', insight: '529 qualified withdrawals for tuition, room & board are 100% federal tax-free' },
+        { source: 'NYL CRM', insight: 'David flagged as "new parent" Apr 2026 — life event trigger for 529 + protection review' }
+      ],
+      nextSteps: ['Schedule May 22 family financial plan presentation', 'Include 529 alongside life insurance review (coverage gap: $1.2M)', 'Prepare NY 529 enrollment materials + NYLIM age-based option factsheet', 'Run education cost inflation model (assume 5%/yr at target college)']
+    },
+
+    /* ── Proposal 4: High-Net-Worth Diversified Mutual Fund Portfolio — Prospect Alex Rivera ── */
+    {
+      id: 'IP-AR-001',
+      clientId: null, clientName: 'Alex Rivera', clientInitials: 'AR',
+      clientType: 'prospect',
+      avatarGrad: 'linear-gradient(135deg,#dc2626,#f87171)',
+      proposalTitle: 'Diversified Core Mutual Fund Portfolio',
+      proposalType: 'Mutual Fund',
+      proposalStatus: 'Approved',
+      statusColor: '#059669',
+      riskProfile: 'Moderate',
+      investmentGoal: '401(k) rollover + long-term wealth accumulation',
+      timeHorizon: '25 years (to age 59)',
+      proposedAUM: 500000,
+      proposedAUMFmt: '$500,000',
+      estAnnualFee: 5000,
+      estAnnualFeeFmt: '$5,000/yr (1.00%)',
+      aiSuitabilityScore: 93,
+      taxBracket: '32%',
+      created: 'Apr 28, 2026',
+      presentDate: 'May 5, 2026',
+      dataSourcesUsed: ['GPT-4o Rollover Analysis', 'Morningstar Risk-Adjusted Returns', 'FactSet Alpha Attribution', 'NYL Prospect CRM — Discovery Call Notes', 'Morningstar Portfolio Optimizer', 'Bloomberg Rate Data'],
+      aiNarrative: 'Prospect Alex Rivera (age 34, $380K/yr income, 32% bracket, prior employer 401(k): $500K at Fidelity) is an optimal rollover candidate. AI analysis of the discovery call transcript identified three key objectives: (1) professional active management, (2) income generation to supplement salary in recession scenarios, and (3) emerging market exposure for long-horizon growth. The proposed NYLIM mutual fund portfolio addresses all three: MSXAX provides low-cost S&P 500 core (0.55% expense ratio vs Fidelity equivalent at 0.015% — AI flagged the fee difference and recommends using the $485K to maximize active alpha through MLAAX and EPSPX instead). MLAAX (Winslow Large Cap Growth) has 16.49% 10Y return — FactSet attributes 3.2% annual alpha vs. Russell 1000 Growth benchmark. EPSPX global dividend equity adds income resilience. MECKDX targets global capital growth. MMRAX moderate allocation provides one-stop ballast. Rolling $500K from Fidelity 401(k) avoids $14,200 in Fidelity advisory fees over 3 years. AI close score: 93/100.',
+      allocation: [
+        { symbol: 'MLAAX',  pct: 30, dollarAmt: 150000, role: 'U.S. Large Cap Growth (Active)', color: '#7c3aed' },
+        { symbol: 'MSXAX',  pct: 20, dollarAmt: 100000, role: 'S&P 500 Index Core', color: '#003087' },
+        { symbol: 'EPSPX',  pct: 20, dollarAmt: 100000, role: 'Global Dividend Equity', color: '#059669' },
+        { symbol: 'MECKDX', pct: 15, dollarAmt: 75000,  role: 'Global Capital Growth', color: '#6d28d9' },
+        { symbol: 'MMRAX',  pct: 10, dollarAmt: 50000,  role: 'Moderate Allocation Ballast', color: '#0d9488' },
+        { symbol: 'IQHI',   pct: 5,  dollarAmt: 25000,  role: 'High Income Bond ETF', color: '#dc2626' }
+      ],
+      projections: [
+        { year: 1, conservative: 487500, base: 527000, optimistic: 562000 },
+        { year: 3, conservative: 527000, base: 625000, optimistic: 734000 },
+        { year: 5, conservative: 572000, base: 743000, optimistic: 952000 },
+        { year: 10, conservative: 690000, base: 1040000, optimistic: 1620000 },
+        { year: 25, conservative: 1200000, base: 2800000, optimistic: 5400000 }
+      ],
+      thirdPartyInsights: [
+        { source: 'Morningstar', insight: 'MLAAX: ★★★ · 10Y: 16.49% — top 15% Large Growth 10-year' },
+        { source: 'FactSet', insight: 'MLAAX alpha vs Russell 1000 Growth: +3.2%/yr over 10 years (active management premium)' },
+        { source: 'FactSet', insight: 'EPSPX 1Y: +32.90% — significantly outperformed MSCI World Value by +8.2%' },
+        { source: 'NYL CRM', insight: 'Discovery call: Alex prioritized active management & EM exposure — matched perfectly' },
+        { source: 'Morningstar', insight: 'Portfolio Risk Score: 62/100 (Moderate) — matches stated risk profile exactly' }
+      ],
+      nextSteps: ['Proposal APPROVED May 5 — initiate 401(k) direct rollover paperwork', 'Contact Fidelity plan administrator for transfer-in-kind authorization', 'Open NYLIM custodial account — target funding by May 30', 'Schedule onboarding call + IPS signature with Alex May 15']
+    }
+  ];
+
+  /* ── 3. ACTIVE PROPOSAL TRACKING ─────────────────────────────────────────── */
+  var _ipActiveProposal = null;
+
+  /* ── 4. STATUS BADGE ─────────────────────────────────────────────────────── */
+  function _ipStatusBadge(status, color) {
+    var icons = { Draft: 'fa-pencil', Pending: 'fa-clock', Presented: 'fa-presentation', Approved: 'fa-check-circle' };
+    return '<span class="ip-status-badge" style="background:' + color + '20;color:' + color + ';border:1px solid ' + color + '40">' +
+           '<i class="fas ' + (icons[status] || 'fa-circle') + '"></i> ' + status + '</span>';
+  }
+
+  /* ── 5. TYPE BADGE ───────────────────────────────────────────────────────── */
+  function _ipTypeBadge(type) {
+    var map = {
+      'ETF':         { bg: '#dbeafe', color: '#003087', label: 'ETF' },
+      'Mutual Fund': { bg: '#ede9fe', color: '#7c3aed', label: 'Mutual Fund' },
+      'Blended':     { bg: '#d1fae5', color: '#059669', label: 'Blended' },
+      '529':         { bg: '#e0f2fe', color: '#0891b2', label: '529 Plan' }
+    };
+    var t = map[type] || { bg: '#f1f5f9', color: '#64748b', label: type };
+    return '<span class="ip-type-badge" style="background:' + t.bg + ';color:' + t.color + '">' + t.label + '</span>';
+  }
+
+  /* ── 6. CLIENT TYPE BADGE ────────────────────────────────────────────────── */
+  function _ipClientBadge(type) {
+    return type === 'prospect'
+      ? '<span class="ip-client-badge" style="background:#fef3c7;color:#d97706;border:1px solid #fde68a"><i class="fas fa-user-plus"></i> Prospect</span>'
+      : '<span class="ip-client-badge" style="background:#d1fae5;color:#059669;border:1px solid #a7f3d0"><i class="fas fa-user-check"></i> Client</span>';
+  }
+
+  /* ── 7. RENDER PROPOSAL QUEUE ────────────────────────────────────────────── */
+  function ipRenderQueue(filter) {
+    var proposals = Object.values(_ipProposals);
+
+    var typeFilter   = (document.getElementById('ip-type-filter')   || {}).value || '';
+    var statusFilter = (document.getElementById('ip-status-filter') || {}).value || '';
+    if (typeFilter)   proposals = proposals.filter(function(p){ return p.proposalType === typeFilter; });
+    if (statusFilter) proposals = proposals.filter(function(p){ return p.proposalStatus === statusFilter; });
+    if (filter)       proposals = proposals.filter(function(p){
+      return p.clientName.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
+             p.proposalTitle.toLowerCase().indexOf(filter.toLowerCase()) >= 0;
+    });
+
+    var statusOrder = { Approved: 0, Pending: 1, Presented: 2, Draft: 3 };
+    proposals.sort(function(a, b) { return (statusOrder[a.proposalStatus] || 9) - (statusOrder[b.proposalStatus] || 9); });
+
+    if (!proposals.length) {
+      document.getElementById('ip-proposal-queue').innerHTML =
+        '<div class="ip-queue-empty"><i class="fas fa-search"></i> No proposals match your filter.</div>';
+      return;
+    }
+
+    var html = proposals.map(function(p) {
+      var isActive = _ipActiveProposal && _ipActiveProposal.id === p.id;
+      return '<div class="ip-queue-row' + (isActive ? ' ip-queue-row-active' : '') + '" onclick="ipOpenProposal(\'' + p.id + '\')">' +
+        '<div class="ip-queue-avatar" style="background:' + p.avatarGrad + '">' + p.clientInitials + '</div>' +
+        '<div class="ip-queue-body">' +
+          '<div class="ip-queue-top">' +
+            '<span class="ip-queue-name">' + p.clientName + '</span>' +
+            _ipClientBadge(p.clientType) +
+          '</div>' +
+          '<div class="ip-queue-title">' + p.proposalTitle + '</div>' +
+          '<div class="ip-queue-meta">' +
+            _ipTypeBadge(p.proposalType) +
+            '<span class="ip-queue-aum">' + p.proposedAUMFmt + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ip-queue-right">' +
+          _ipStatusBadge(p.proposalStatus, p.statusColor) +
+          '<div class="ip-queue-score"><i class="fas fa-robot" style="color:#7c3aed"></i> ' + p.aiSuitabilityScore + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('ip-proposal-queue').innerHTML = html;
+  }
+
+  /* ── 8. OPEN PROPOSAL DETAIL ─────────────────────────────────────────────── */
+  function ipOpenProposal(id) {
+    var p = _ipProposals.find(function(x){ return x.id === id; });
+    if (!p) return;
+    _ipActiveProposal = p;
+    ipRenderQueue();
+
+    document.getElementById('ip-detail-placeholder').style.display = 'none';
+    var panel = document.getElementById('ip-detail-panel');
+    panel.style.display = 'block';
+    panel.innerHTML = ipBuildDetailHTML(p);
+    ipSwitchTab(id, 'overview');
+  }
+
+  /* ── 9. BUILD DETAIL HTML ────────────────────────────────────────────────── */
+  function ipBuildDetailHTML(p) {
+    return '<div class="ip-detail-wrap">' +
+
+      /* Header */
+      '<div class="ip-detail-hdr">' +
+        '<div class="ip-detail-avatar" style="background:' + p.avatarGrad + '">' + p.clientInitials + '</div>' +
+        '<div class="ip-detail-hdr-body">' +
+          '<div class="ip-detail-hdr-top">' +
+            '<div class="ip-detail-name">' + p.clientName + '</div>' +
+            _ipClientBadge(p.clientType) +
+            _ipStatusBadge(p.proposalStatus, p.statusColor) +
+          '</div>' +
+          '<div class="ip-detail-prop-title">' + p.proposalTitle + '</div>' +
+          '<div class="ip-detail-meta">' +
+            _ipTypeBadge(p.proposalType) +
+            '<span class="ip-detail-meta-item"><i class="fas fa-coins"></i> ' + p.proposedAUMFmt + '</span>' +
+            '<span class="ip-detail-meta-item"><i class="fas fa-robot" style="color:#7c3aed"></i> AI Score: <strong>' + p.aiSuitabilityScore + '/100</strong></span>' +
+            '<span class="ip-detail-meta-item"><i class="fas fa-calendar"></i> ' + p.created + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ip-detail-actions">' +
+          '<button class="ip-act-btn ip-act-present" onclick="ipPresentProposal(\'' + p.id + '\')"><i class="fas fa-presentation"></i> Present</button>' +
+          '<button class="ip-act-btn ip-act-pdf" onclick="ipExportPDF(\'' + p.id + '\')"><i class="fas fa-file-pdf"></i> PDF</button>' +
+          '<button class="ip-act-btn ip-act-eapp" onclick="ipOpenEApp(\'' + p.id + '\')"><i class="fas fa-pen-to-square"></i> E-App</button>' +
+        '</div>' +
+      '</div>' +
+
+      /* Tab bar */
+      '<div class="ip-tabs" id="ip-tabs-' + p.id + '">' +
+        '<button class="ip-tab ip-tab-active" onclick="ipSwitchTab(\'' + p.id + '\',\'overview\')" id="ip-tab-overview-' + p.id + '">Overview</button>' +
+        '<button class="ip-tab" onclick="ipSwitchTab(\'' + p.id + '\',\'allocation\')" id="ip-tab-allocation-' + p.id + '">Allocation</button>' +
+        '<button class="ip-tab" onclick="ipSwitchTab(\'' + p.id + '\',\'products\')" id="ip-tab-products-' + p.id + '">NYLIM Products</button>' +
+        '<button class="ip-tab" onclick="ipSwitchTab(\'' + p.id + '\',\'projections\')" id="ip-tab-projections-' + p.id + '">Projections</button>' +
+        '<button class="ip-tab" onclick="ipSwitchTab(\'' + p.id + '\',\'intelligence\')" id="ip-tab-intelligence-' + p.id + '">AI Intelligence</button>' +
+      '</div>' +
+
+      /* Tab content area */
+      '<div id="ip-tab-body-' + p.id + '"></div>' +
+
+    '</div>';
+  }
+
+  /* ── 10. SWITCH TAB ──────────────────────────────────────────────────────── */
+  function ipSwitchTab(id, tab) {
+    var p = _ipProposals.find(function(x){ return x.id === id; });
+    if (!p) return;
+
+    document.querySelectorAll('#ip-tabs-' + id + ' .ip-tab').forEach(function(b){ b.classList.remove('ip-tab-active'); });
+    var activeBtn = document.getElementById('ip-tab-' + tab + '-' + id);
+    if (activeBtn) activeBtn.classList.add('ip-tab-active');
+
+    var body = document.getElementById('ip-tab-body-' + id);
+    if (!body) return;
+
+    if (tab === 'overview')      body.innerHTML = _ipTabOverview(p);
+    if (tab === 'allocation')    body.innerHTML = _ipTabAllocation(p);
+    if (tab === 'products')      body.innerHTML = _ipTabProducts(p);
+    if (tab === 'projections')   body.innerHTML = _ipTabProjections(p);
+    if (tab === 'intelligence')  body.innerHTML = _ipTabIntelligence(p);
+  }
+
+  /* ── 11. OVERVIEW TAB ────────────────────────────────────────────────────── */
+  function _ipTabOverview(p) {
+    var kpis = [
+      { label: 'Proposed AUM', val: p.proposedAUMFmt, icon: 'fa-coins', color: '#003087' },
+      { label: 'AI Suitability', val: p.aiSuitabilityScore + '/100', icon: 'fa-robot', color: '#7c3aed' },
+      { label: 'Est. Annual Fee', val: p.estAnnualFeeFmt, icon: 'fa-hand-holding-usd', color: '#059669' },
+      { label: 'Tax Bracket', val: p.taxBracket, icon: 'fa-receipt', color: '#d97706' },
+      { label: 'Risk Profile', val: p.riskProfile, icon: 'fa-balance-scale', color: '#0891b2' },
+      { label: 'Time Horizon', val: p.timeHorizon.split(' ')[0] + ' ' + p.timeHorizon.split(' ')[1], icon: 'fa-clock', color: '#059669' }
+    ];
+
+    var kpiHtml = kpis.map(function(k) {
+      return '<div class="ip-ov-kpi">' +
+        '<div class="ip-ov-kpi-icon" style="background:' + k.color + '18;color:' + k.color + '"><i class="fas ' + k.icon + '"></i></div>' +
+        '<div class="ip-ov-kpi-val">' + k.val + '</div>' +
+        '<div class="ip-ov-kpi-lbl">' + k.label + '</div>' +
+      '</div>';
+    }).join('');
+
+    var stepsHtml = p.nextSteps.map(function(s, i) {
+      return '<div class="ip-ov-step">' +
+        '<div class="ip-ov-step-num">' + (i + 1) + '</div>' +
+        '<div class="ip-ov-step-txt">' + s + '</div>' +
+      '</div>';
+    }).join('');
+
+    var dataHtml = p.dataSourcesUsed.map(function(d) {
+      return '<span class="ip-ov-ds-chip"><i class="fas fa-check-circle"></i> ' + d + '</span>';
+    }).join('');
+
+    return '<div class="ip-tab-body">' +
+      '<div class="ip-ov-kpis">' + kpiHtml + '</div>' +
+
+      '<div class="ip-ov-section">' +
+        '<div class="ip-ov-section-title"><i class="fas fa-bullseye"></i> Investment Objective</div>' +
+        '<div class="ip-ov-text"><strong>' + p.investmentGoal + '</strong></div>' +
+        '<div class="ip-ov-text" style="margin-top:6px;color:#475569">' + p.timeHorizon + ' horizon · ' + p.riskProfile + ' risk profile · ' + p.taxBracket + ' tax bracket</div>' +
+      '</div>' +
+
+      '<div class="ip-ov-section">' +
+        '<div class="ip-ov-section-title"><i class="fas fa-database"></i> Data Sources Used in This Proposal</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">' + dataHtml + '</div>' +
+      '</div>' +
+
+      '<div class="ip-ov-section">' +
+        '<div class="ip-ov-section-title"><i class="fas fa-tasks"></i> Next Steps</div>' +
+        stepsHtml +
+      '</div>' +
+
+    '</div>';
+  }
+
+  /* ── 12. ALLOCATION TAB ──────────────────────────────────────────────────── */
+  function _ipTabAllocation(p) {
+    var total = p.proposedAUM;
+
+    /* Donut SVG */
+    var r = 70, circ = 2 * Math.PI * r, cx = 85;
+    var offset = 0;
+    var segments = p.allocation.map(function(a) {
+      var dash = (a.pct / 100) * circ;
+      var seg = '<circle cx="' + cx + '" cy="' + cx + '" r="' + r + '" fill="none" stroke="' + a.color + '" stroke-width="22" ' +
+        'stroke-dasharray="' + dash.toFixed(1) + ' ' + (circ - dash).toFixed(1) + '" ' +
+        'stroke-dashoffset="' + (-offset).toFixed(1) + '" stroke-linecap="butt"/>';
+      offset += dash;
+      return seg;
+    }).join('');
+
+    var donutHtml = '<svg width="170" height="170" style="transform:rotate(-90deg)">' + segments + '</svg>';
+
+    var allocRows = p.allocation.map(function(a) {
+      var prod = _nylimProducts[a.symbol] || {};
+      var isSpecial = a.is529;
+      return '<div class="ip-alloc-row">' +
+        '<div class="ip-alloc-dot" style="background:' + a.color + '"></div>' +
+        '<div class="ip-alloc-body">' +
+          '<div class="ip-alloc-name">' +
+            '<span class="ip-alloc-sym" style="color:' + a.color + '">' + a.symbol + '</span>' +
+            (isSpecial ? '' : (prod.name ? ' · ' + prod.name.replace('NYLI ', '') : '')) +
+          '</div>' +
+          '<div class="ip-alloc-role">' + a.role + '</div>' +
+        '</div>' +
+        '<div class="ip-alloc-right">' +
+          '<div class="ip-alloc-pct" style="color:' + a.color + '">' + a.pct + '%</div>' +
+          '<div class="ip-alloc-usd">$' + a.dollarAmt.toLocaleString() + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    /* Asset class breakdown */
+    var assetGroups = {};
+    p.allocation.forEach(function(a) {
+      var prod = _nylimProducts[a.symbol] || {};
+      var cls = a.is529 ? '529 Plan' : (prod.assetClass || 'Other');
+      assetGroups[cls] = (assetGroups[cls] || 0) + a.pct;
+    });
+    var assetHtml = Object.keys(assetGroups).map(function(cls) {
+      var pct = assetGroups[cls];
+      var colors = { Equities: '#003087', 'Fixed Income': '#059669', 'Multi-Asset': '#0891b2', Alternatives: '#475569', '529 Plan': '#0891b2' };
+      var c = colors[cls] || '#64748b';
+      return '<div class="ip-asset-row">' +
+        '<div class="ip-asset-lbl">' + cls + '</div>' +
+        '<div class="ip-asset-bar-wrap"><div class="ip-asset-bar" style="width:' + pct + '%;background:' + c + '"></div></div>' +
+        '<div class="ip-asset-pct">' + pct + '%</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="ip-tab-body">' +
+      '<div class="ip-alloc-layout">' +
+        '<div class="ip-alloc-donut">' +
+          donutHtml +
+          '<div class="ip-donut-label">' +
+            '<div class="ip-donut-val">' + p.proposedAUMFmt + '</div>' +
+            '<div class="ip-donut-sub">Proposed AUM</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ip-alloc-list">' + allocRows + '</div>' +
+      '</div>' +
+      '<div class="ip-ov-section">' +
+        '<div class="ip-ov-section-title"><i class="fas fa-layer-group"></i> Asset Class Breakdown</div>' +
+        assetHtml +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── 13. NYLIM PRODUCTS TAB ──────────────────────────────────────────────── */
+  function _ipTabProducts(p) {
+    var cards = p.allocation.map(function(a) {
+      if (a.is529) {
+        return '<div class="ip-prod-card" style="border-top:3px solid #0891b2">' +
+          '<div class="ip-prod-card-hdr">' +
+            '<div class="ip-prod-icon" style="background:#e0f2fe;color:#0891b2"><i class="fas fa-graduation-cap"></i></div>' +
+            '<div>' +
+              '<div class="ip-prod-sym" style="color:#0891b2">NY 529 Direct Plan</div>' +
+              '<div class="ip-prod-veh"><span class="ip-veh-chip">529 College Savings</span></div>' +
+            '</div>' +
+            '<div class="ip-prod-alloc" style="color:#0891b2">' + a.pct + '%</div>' +
+          '</div>' +
+          '<div class="ip-prod-name">NYLIM Age-Based Aggressive Option — 18-Year Horizon</div>' +
+          '<div class="ip-prod-desc">New York\'s direct-sold 529 plan featuring NYLIM-managed age-based investment options that automatically shift from aggressive equity to conservative fixed income as college approaches. NYS tax deduction: up to $10,000/yr for joint filers.</div>' +
+          '<div class="ip-prod-stats">' +
+            '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:#0891b2">$10K/yr</div><div class="ip-prod-stat-lbl">NY Tax Deduction</div></div>' +
+            '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:#059669">100%</div><div class="ip-prod-stat-lbl">Federal Tax-Free Withdrawal</div></div>' +
+            '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:#003087">Age-Based</div><div class="ip-prod-stat-lbl">Auto-Rebalance</div></div>' +
+          '</div>' +
+          '<div class="ip-prod-best"><i class="fas fa-check-circle" style="color:#059669"></i> Best for: Families saving for college with 10+ year horizon wanting automatic glide path</div>' +
+        '</div>';
+      }
+
+      var prod = _nylimProducts[a.symbol];
+      if (!prod) return '';
+
+      var starsHtml = '';
+      for (var i = 0; i < 5; i++) {
+        starsHtml += '<i class="fas fa-star" style="color:' + (i < prod.stars ? '#f59e0b' : '#e5e7eb') + ';font-size:11px"></i>';
+      }
+
+      var vehicleBg = prod.vehicle === 'ETF' ? '#dbeafe' : '#ede9fe';
+      var vehicleColor = prod.vehicle === 'ETF' ? '#003087' : '#7c3aed';
+
+      return '<div class="ip-prod-card" style="border-top:3px solid ' + prod.color + '">' +
+        '<div class="ip-prod-card-hdr">' +
+          '<div class="ip-prod-icon" style="background:' + prod.color + '18;color:' + prod.color + '"><i class="fas ' + prod.icon + '"></i></div>' +
+          '<div>' +
+            '<div class="ip-prod-sym" style="color:' + prod.color + '">' + prod.symbol + '</div>' +
+            '<div class="ip-prod-veh">' +
+              '<span class="ip-veh-chip" style="background:' + vehicleBg + ';color:' + vehicleColor + '">' + prod.vehicle + '</span>' +
+              '<span class="ip-veh-chip" style="background:#f1f5f9;color:#475569">' + prod.category + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ip-prod-alloc" style="color:' + prod.color + '">' + a.pct + '%</div>' +
+        '</div>' +
+
+        '<div class="ip-prod-name">' + prod.name + '</div>' +
+        '<div class="ip-prod-ms">' + starsHtml + '<span class="ip-prod-ms-cat">Morningstar · ' + prod.category + '</span></div>' +
+        '<div class="ip-prod-desc">' + prod.desc + '</div>' +
+
+        '<div class="ip-prod-stats">' +
+          '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:' + prod.color + '">' + (prod.ytd > 0 ? '+' : '') + prod.ytd + '%</div><div class="ip-prod-stat-lbl">YTD</div></div>' +
+          '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:' + prod.color + '">' + (prod.y1 > 0 ? '+' : '') + prod.y1 + '%</div><div class="ip-prod-stat-lbl">1Y Return</div></div>' +
+          '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:' + prod.color + '">' + (prod.y3 > 0 ? '+' : '') + prod.y3 + '%</div><div class="ip-prod-stat-lbl">3Y Return</div></div>' +
+          (prod.y5 ? '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:' + prod.color + '">' + (prod.y5 > 0 ? '+' : '') + prod.y5 + '%</div><div class="ip-prod-stat-lbl">5Y Return</div></div>' : '') +
+          '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:#64748b">' + (prod.expRatio * 100).toFixed(2) + '%</div><div class="ip-prod-stat-lbl">Expense Ratio</div></div>' +
+          '<div class="ip-prod-stat"><div class="ip-prod-stat-val" style="color:#64748b">' + prod.inceptDate.split('/')[2] + '</div><div class="ip-prod-stat-lbl">Inception</div></div>' +
+        '</div>' +
+
+        '<div class="ip-prod-best"><i class="fas fa-check-circle" style="color:#059669"></i> ' + prod.bestFor + '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="ip-tab-body">' +
+      '<div class="ip-prod-header">' +
+        '<div class="ip-prod-hdr-left">' +
+          '<div class="ip-prod-hdr-title"><i class="fas fa-building"></i> NYLIM Product Universe</div>' +
+          '<div class="ip-prod-hdr-sub">Performance data as of Apr 30, 2026 · Source: NYLIM / Morningstar / FactSet</div>' +
+        '</div>' +
+        '<a class="ip-prod-hdr-link" href="https://www.nylim.com/investment-products" target="_blank"><i class="fas fa-external-link-alt"></i> nylim.com</a>' +
+      '</div>' +
+      cards +
+    '</div>';
+  }
+
+  /* ── 14. PROJECTIONS TAB ─────────────────────────────────────────────────── */
+  function _ipTabProjections(p) {
+    var rows = p.projections.map(function(proj) {
+      return '<tr>' +
+        '<td><strong>Year ' + proj.year + '</strong></td>' +
+        '<td style="color:#64748b">$' + proj.conservative.toLocaleString() + '</td>' +
+        '<td style="color:#003087;font-weight:700">$' + proj.base.toLocaleString() + '</td>' +
+        '<td style="color:#059669">$' + proj.optimistic.toLocaleString() + '</td>' +
+        '<td style="color:#059669">+$' + (proj.base - p.proposedAUM).toLocaleString() + '</td>' +
+      '</tr>';
+    }).join('');
+
+    var assumeHtml =
+      '<div class="ip-proj-assume-grid">' +
+        '<div class="ip-proj-assume"><span>Conservative Case</span><strong>5.5% / yr</strong></div>' +
+        '<div class="ip-proj-assume"><span>Base Case</span><strong>8.2% / yr</strong></div>' +
+        '<div class="ip-proj-assume"><span>Optimistic Case</span><strong>11.5% / yr</strong></div>' +
+        '<div class="ip-proj-assume"><span>Annual Fee</span><strong>1.00%</strong></div>' +
+        '<div class="ip-proj-assume"><span>Inflation Adj.</span><strong>2.8% CPI</strong></div>' +
+        '<div class="ip-proj-assume"><span>Tax Drag</span><strong>' + p.taxBracket + ' bracket</strong></div>' +
+      '</div>';
+
+    return '<div class="ip-tab-body">' +
+      '<div class="ip-ov-section">' +
+        '<div class="ip-ov-section-title"><i class="fas fa-chart-line"></i> Portfolio Growth Projections</div>' +
+        '<div class="ip-proj-disclaimer">Projections are hypothetical and not a guarantee. Based on AI-modeled return assumptions using FactSet historical data for NYLIM products in this portfolio, Monte Carlo simulation (1,000 iterations), and GPT-4o scenario analysis. Past performance does not guarantee future results.</div>' +
+      '</div>' +
+      '<div class="ip-proj-table-wrap">' +
+        '<table class="ip-proj-table">' +
+          '<thead><tr><th>Period</th><th>Conservative</th><th>Base Case</th><th>Optimistic</th><th>Base Gain</th></tr></thead>' +
+          '<tbody>' + rows + '</tbody>' +
+        '</table>' +
+      '</div>' +
+      '<div class="ip-ov-section">' +
+        '<div class="ip-ov-section-title"><i class="fas fa-sliders-h"></i> Return Assumptions</div>' +
+        assumeHtml +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── 15. AI INTELLIGENCE TAB ─────────────────────────────────────────────── */
+  function _ipTabIntelligence(p) {
+    var insightsHtml = p.thirdPartyInsights.map(function(ins) {
+      var srcColors = {
+        'Morningstar': '#f59e0b', 'FactSet': '#003087', 'Bloomberg': '#dc2626',
+        'NYL CRM': '#059669', 'Morningstar X-Ray': '#f59e0b', 'Morningstar Portfolio Optimizer': '#f59e0b',
+        'NY 529 Direct': '#0891b2', 'IRS Pub 970': '#475569', 'Morningstar Portfolio': '#f59e0b',
+        'NYL Prospect CRM — Discovery Call Notes': '#059669', 'NYL CRM — Retirement Goals': '#059669',
+        'NYL CRM — New Parent Flag': '#059669', 'NYL CRM — Client Goals': '#059669',
+        'NYL CRM — Discovery Call Notes': '#059669'
+      };
+      var c = srcColors[ins.source] || '#64748b';
+      return '<div class="ip-intel-row">' +
+        '<div class="ip-intel-src" style="color:' + c + ';border-left:3px solid ' + c + '">' + ins.source + '</div>' +
+        '<div class="ip-intel-txt">' + ins.insight + '</div>' +
+      '</div>';
+    }).join('');
+
+    var modelTags = [
+      { icon: 'fa-robot', label: 'GPT-4o', sub: 'Portfolio construction & suitability narrative', color: '#7c3aed' },
+      { icon: 'fa-star', label: 'Morningstar Direct', sub: 'Fund ratings, category ranks, risk-adjusted returns', color: '#f59e0b' },
+      { icon: 'fa-chart-bar', label: 'FactSet', sub: 'Alpha attribution, dividend data, benchmark comparisons', color: '#003087' },
+      { icon: 'fa-user-circle', label: 'NYL CRM (1st Party)', sub: 'Client goals, risk profile, meeting notes, life events', color: '#059669' },
+      { icon: 'fa-globe', label: 'Bloomberg Market Data', sub: 'Live valuations, yield curves, economic indicators', color: '#dc2626' },
+      { icon: 'fa-shield-alt', label: 'Reg BI Engine', sub: 'FINRA suitability scoring, documentation generation', color: '#0891b2' }
+    ];
+
+    var modelsHtml = modelTags.map(function(m) {
+      return '<div class="ip-intel-model">' +
+        '<div class="ip-intel-model-icon" style="background:' + m.color + '18;color:' + m.color + '"><i class="fas ' + m.icon + '"></i></div>' +
+        '<div class="ip-intel-model-body">' +
+          '<div class="ip-intel-model-lbl" style="color:' + m.color + '">' + m.label + '</div>' +
+          '<div class="ip-intel-model-sub">' + m.sub + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="ip-tab-body">' +
+
+      '<div class="ip-intel-ai-hdr">' +
+        '<div class="ip-intel-ai-icon"><i class="fas fa-brain"></i></div>' +
+        '<div>' +
+          '<div class="ip-intel-ai-title">AI-Generated Investment Thesis</div>' +
+          '<div class="ip-intel-ai-sub">Generated by GPT-4o · Verified against Morningstar & FactSet · Powered by NYL first-party client data</div>' +
+        '</div>' +
+        '<div class="ip-intel-score-ring" style="border-color:' + (p.aiSuitabilityScore >= 90 ? '#059669' : '#d97706') + '">' +
+          '<div class="ip-intel-score-val" style="color:' + (p.aiSuitabilityScore >= 90 ? '#059669' : '#d97706') + '">' + p.aiSuitabilityScore + '</div>' +
+          '<div class="ip-intel-score-lbl">AI Score</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="ip-intel-narrative">' + p.aiNarrative + '</div>' +
+
+      '<div class="ip-ov-section">' +
+        '<div class="ip-ov-section-title"><i class="fas fa-database"></i> Third-Party Data Insights</div>' +
+        insightsHtml +
+      '</div>' +
+
+      '<div class="ip-ov-section">' +
+        '<div class="ip-ov-section-title"><i class="fas fa-cogs"></i> AI Models & Data Sources Powering This Proposal</div>' +
+        '<div class="ip-intel-models-grid">' + modelsHtml + '</div>' +
+      '</div>' +
+
+    '</div>';
+  }
+
+  /* ── 16. FILTER ──────────────────────────────────────────────────────────── */
+  function ipFilterProposals() { ipRenderQueue(); }
+
+  /* ── 17. ACTION BUTTONS ──────────────────────────────────────────────────── */
+  function ipPresentProposal(id) {
+    var p = _ipProposals.find(function(x){ return x.id === id; });
+    if (p) _ipToast('<i class="fas fa-presentation"></i> Launching presentation mode for ' + p.clientName + ' — ' + p.proposalTitle + '. Opening deck…');
+  }
+  function ipExportPDF(id) {
+    var p = _ipProposals.find(function(x){ return x.id === id; });
+    if (p) _ipToast('<i class="fas fa-file-pdf"></i> Generating PDF for ' + p.proposalTitle + ' — ' + p.clientName + '. Download starting…');
+  }
+  function ipOpenEApp(id) {
+    var p = _ipProposals.find(function(x){ return x.id === id; });
+    if (p) _ipToast('<i class="fas fa-pen-to-square"></i> Opening E-App for ' + p.clientName + ' — routing to Submissions module…');
+  }
+  function ipRunAIScan() {
+    _ipToast('<i class="fas fa-robot"></i> AI scanning all client & prospect profiles for new proposal opportunities… re-ranking queue by close probability.');
+    setTimeout(function(){ ipRenderQueue(); }, 1200);
+  }
+  function ipNewProposal() {
+    _ipToast('<i class="fas fa-plus"></i> Opening New Investment Proposal builder — select client, risk profile & NYLIM product universe…');
+  }
+
+  /* ── 18. TOAST ───────────────────────────────────────────────────────────── */
+  function _ipToast(msg) {
+    var fn = window.showToast || function(m) {
+      var t = document.createElement('div');
+      t.innerHTML = m;
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:11px 20px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.28);max-width:480px;text-align:center';
+      document.body.appendChild(t);
+      setTimeout(function(){ t.remove(); }, 3500);
+    };
+    fn(msg);
+  }
+
+  /* ── 19. INIT PAGE ───────────────────────────────────────────────────────── */
+  function initInvestmentProposalsPage() {
+    ipRenderQueue();
+    /* Auto-open the Approved proposal */
+    setTimeout(function() { ipOpenProposal('IP-AR-001'); }, 150);
+  }
+
+  /* ── 20. EXPOSE GLOBALS ──────────────────────────────────────────────────── */
+  window.ipRenderQueue             = ipRenderQueue;
+  window.ipOpenProposal            = ipOpenProposal;
+  window.ipBuildDetailHTML         = ipBuildDetailHTML;
+  window.ipSwitchTab               = ipSwitchTab;
+  window.ipFilterProposals         = ipFilterProposals;
+  window.ipPresentProposal         = ipPresentProposal;
+  window.ipExportPDF               = ipExportPDF;
+  window.ipOpenEApp                = ipOpenEApp;
+  window.ipRunAIScan               = ipRunAIScan;
+  window.ipNewProposal             = ipNewProposal;
+  window.initInvestmentProposalsPage = initInvestmentProposalsPage;
+
+  console.log('Investment Proposals module loaded — 4 proposals, 16 NYLIM products, AI intelligence engine ready');
+})();

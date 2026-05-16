@@ -307,6 +307,7 @@ function MainApp() {
         <div id="tpl-delivery"><PolicyDeliveryPage /></div>
         <div id="tpl-leads"><LeadsPage /></div>
         <div id="tpl-inv-accounts"><InvestmentAccountsPage /></div>
+        <div id="tpl-inv-proposals"><InvestmentProposalsPage /></div>
         <div id="tpl-ret-accounts"><RetirementAccountsPage /></div>
         <div id="tpl-adv-wealth"></div>
         <div id="tpl-adv-accounts"><AdvisoryAccountsPage /></div>
@@ -846,6 +847,11 @@ function Sidebar() {
           <span class="nav-badge" style="background:#059669;color:#fff">12</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff;margin-left:2px">3 SR</span>
           <span class="nav-badge" style="background:#0d9488;color:#fff;margin-left:2px">5 IPS</span>
+        </a>
+        <a class="nav-item inv-proposals-nav" onclick="navigateTo('inv-proposals')" href="#">
+          <i class="fas fa-file-chart-line"></i><span>Investment Proposals</span>
+          <span class="nav-badge" style="background:#003087;color:#fff">4</span>
+          <span class="nav-badge" style="background:#f59e0b;color:#fff;margin-left:2px">AI</span>
         </a>
 
         {/* ── RETIREMENT ── */}
@@ -17073,6 +17079,140 @@ function AdvisoryAccountsPage() {
           </div>
           <div id="adv-review-body" style="padding:22px"></div>
         </div>
+      </div>
+
+    </div>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   INVESTMENT PROPOSALS PAGE
+   AI-powered portfolio proposals using NYLIM products
+   ══════════════════════════════════════════════════════════════════ */
+function InvestmentProposalsPage() {
+  return (
+    <div class="page ip-page">
+
+      {/* ── KPI Bar ── */}
+      <div class="ip-kpi-bar">
+        <div class="ip-kpi-card">
+          <div class="ip-kpi-icon" style="background:#dbeafe;color:#003087"><i class="fas fa-file-alt"></i></div>
+          <div class="ip-kpi-body">
+            <div class="ip-kpi-val">4</div>
+            <div class="ip-kpi-lbl">Active Proposals</div>
+            <div class="ip-kpi-sub" style="color:#059669"><i class="fas fa-arrow-up"></i> 2 pending approval</div>
+          </div>
+        </div>
+        <div class="ip-kpi-card">
+          <div class="ip-kpi-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-coins"></i></div>
+          <div class="ip-kpi-body">
+            <div class="ip-kpi-val">$1.24M</div>
+            <div class="ip-kpi-lbl">Proposed AUM</div>
+            <div class="ip-kpi-sub" style="color:#003087">Across 4 clients/prospects</div>
+          </div>
+        </div>
+        <div class="ip-kpi-card">
+          <div class="ip-kpi-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-robot"></i></div>
+          <div class="ip-kpi-body">
+            <div class="ip-kpi-val">94%</div>
+            <div class="ip-kpi-lbl">AI Suitability Avg</div>
+            <div class="ip-kpi-sub" style="color:#7c3aed">GPT-4 · Morningstar · FactSet</div>
+          </div>
+        </div>
+        <div class="ip-kpi-card">
+          <div class="ip-kpi-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-hand-holding-usd"></i></div>
+          <div class="ip-kpi-body">
+            <div class="ip-kpi-val">$12.4K</div>
+            <div class="ip-kpi-lbl">Est. Annual Revenue</div>
+            <div class="ip-kpi-sub" style="color:#d97706">Avg 1.0% advisory fee</div>
+          </div>
+        </div>
+        <div class="ip-kpi-card">
+          <div class="ip-kpi-icon" style="background:#fce7f3;color:#db2777"><i class="fas fa-bullseye"></i></div>
+          <div class="ip-kpi-body">
+            <div class="ip-kpi-val">3</div>
+            <div class="ip-kpi-lbl">NYLIM ETFs Used</div>
+            <div class="ip-kpi-sub" style="color:#db2777">HFXI · IQSU · IWLG</div>
+          </div>
+        </div>
+        <div class="ip-kpi-card">
+          <div class="ip-kpi-icon" style="background:#e0f2fe;color:#0891b2"><i class="fas fa-graduation-cap"></i></div>
+          <div class="ip-kpi-body">
+            <div class="ip-kpi-val">1</div>
+            <div class="ip-kpi-lbl">529 Plans Proposed</div>
+            <div class="ip-kpi-sub" style="color:#0891b2">NY 529 Direct Plan</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Intelligence Banner ── */}
+      <div class="ip-ai-banner">
+        <div class="ip-ai-banner-left">
+          <div class="ip-ai-icon"><i class="fas fa-brain"></i><span class="ip-ai-pulse"></span></div>
+          <div>
+            <div class="ip-ai-title">AI Proposal Intelligence <span class="ip-ai-live">● LIVE</span></div>
+            <div class="ip-ai-sub">
+              Powered by <strong>GPT-4o</strong> · <strong>Morningstar Direct</strong> · <strong>FactSet</strong> · <strong>NYL First-Party CRM Data</strong> — proposals auto-generated from client risk profile, tax situation, goals &amp; NYLIM product universe
+            </div>
+          </div>
+        </div>
+        <div class="ip-ai-banner-right">
+          <button class="ip-ai-btn" onclick="ipRunAIScan()"><i class="fas fa-robot"></i> Re-run AI Scan</button>
+          <button class="ip-ai-btn ip-ai-btn-sec" onclick="ipNewProposal()"><i class="fas fa-plus"></i> New Proposal</button>
+        </div>
+      </div>
+
+      {/* ── Data Sources Strip ── */}
+      <div class="ip-data-sources">
+        <span class="ip-ds-label">Data Sources:</span>
+        <span class="ip-ds-chip ip-ds-ai"><i class="fas fa-robot"></i> GPT-4o Analysis</span>
+        <span class="ip-ds-chip ip-ds-ms"><i class="fas fa-star"></i> Morningstar Ratings</span>
+        <span class="ip-ds-chip ip-ds-fs"><i class="fas fa-chart-bar"></i> FactSet Returns</span>
+        <span class="ip-ds-chip ip-ds-nyl"><i class="fas fa-building"></i> NYLIM Product Data</span>
+        <span class="ip-ds-chip ip-ds-crm"><i class="fas fa-user-circle"></i> NYL CRM (1st Party)</span>
+        <span class="ip-ds-chip ip-ds-mkt"><i class="fas fa-globe"></i> Market Data Live</span>
+      </div>
+
+      {/* ── Main 2-col layout ── */}
+      <div class="ip-layout">
+
+        {/* ── LEFT: Proposal Queue ── */}
+        <div class="ip-list-col">
+          <div class="ip-list-header">
+            <div class="ip-list-title"><i class="fas fa-list-ul"></i> Proposal Queue</div>
+            <div class="ip-list-filters">
+              <select class="ip-filter-sel" id="ip-type-filter" onchange="ipFilterProposals()">
+                <option value="">All Types</option>
+                <option value="ETF">ETF Portfolio</option>
+                <option value="Mutual Fund">Mutual Fund</option>
+                <option value="Blended">Blended</option>
+                <option value="529">529 Plan</option>
+              </select>
+              <select class="ip-filter-sel" id="ip-status-filter" onchange="ipFilterProposals()">
+                <option value="">All Status</option>
+                <option value="Draft">Draft</option>
+                <option value="Pending">Pending Review</option>
+                <option value="Presented">Presented</option>
+                <option value="Approved">Approved</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Proposal cards — rendered by JS */}
+          <div id="ip-proposal-queue"></div>
+        </div>
+
+        {/* ── RIGHT: Proposal Detail ── */}
+        <div class="ip-detail-col" id="ip-detail-col">
+          <div class="ip-detail-placeholder" id="ip-detail-placeholder">
+            <div class="ip-ph-icon"><i class="fas fa-file-chart-line"></i></div>
+            <div class="ip-ph-title">Select a Proposal</div>
+            <div class="ip-ph-sub">Click any proposal in the queue to view the full AI-generated investment analysis, product breakdown, suitability scoring, and presentation tools.</div>
+            <button class="ip-ph-btn" onclick="ipNewProposal()"><i class="fas fa-plus"></i> Create New Proposal</button>
+          </div>
+          <div id="ip-detail-panel" style="display:none"></div>
+        </div>
+
       </div>
 
     </div>
