@@ -38965,9 +38965,18 @@ kbd {
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   min-height: 500px;
+  max-height: calc(100vh - 280px);
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
 }
+.ia-detail-col::-webkit-scrollbar { width: 7px; }
+.ia-detail-col::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+.ia-detail-col::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.ia-detail-col::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ── Detail panel states ── */
 .ia-detail-empty {
@@ -46778,3 +46787,519 @@ kbd {
 }
 .ia-det-prog-desc i { color: #d97706; margin-top: 1px; flex-shrink: 0; }
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   CSS PASS 10 — Scan Overlay Panels (Drift Scan · TLH Scan · RMD Center)
+   + Right-column scrollbar polish + List-col scrollbar
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── List-col scrollbar (left column) ── */
+.ia-list-col {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+.ia-list-col::-webkit-scrollbar { width: 6px; }
+.ia-list-col::-webkit-scrollbar-track { background: #f1f5f9; }
+.ia-list-col::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.ia-list-col::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Scan panel overlay backdrop ── */
+.ia-scan-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0;
+  animation: iaScanFadeIn 0.2s ease;
+}
+@keyframes iaScanFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Scan panel drawer (slides in from right) ── */
+.ia-scan-drawer {
+  width: 720px;
+  max-width: 96vw;
+  height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.22);
+  animation: iaScanSlideIn 0.28s cubic-bezier(0.22,1,0.36,1);
+  overflow: hidden;
+}
+@keyframes iaScanSlideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Scan drawer header (colour per scan type) ── */
+.ia-scan-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.ia-scan-drawer-header.drift  { background: linear-gradient(135deg,#7f1d1d,#dc2626); }
+.ia-scan-drawer-header.tlh    { background: linear-gradient(135deg,#14532d,#15803d); }
+.ia-scan-drawer-header.rmd    { background: linear-gradient(135deg,#78350f,#d97706); }
+
+.ia-scan-drawer-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ia-scan-drawer-hdr-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.ia-scan-drawer-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+.ia-scan-drawer-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.72);
+  margin-top: 3px;
+}
+.ia-scan-drawer-live {
+  font-size: 9px;
+  font-weight: 800;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 8px;
+  letter-spacing: 0.5px;
+}
+.ia-scan-drawer-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.ia-scan-drawer-close:hover { background: rgba(255,255,255,0.28); }
+
+/* ── Scan drawer body (scrollable) ── */
+.ia-scan-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #f8fafc;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+.ia-scan-drawer-body::-webkit-scrollbar { width: 6px; }
+.ia-scan-drawer-body::-webkit-scrollbar-track { background: #f1f5f9; }
+.ia-scan-drawer-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* ── Summary bar inside drawer ── */
+.ia-scan-drawer-summary {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ia-scan-drawer-summary.drift { border-left: 4px solid #dc2626; }
+.ia-scan-drawer-summary.tlh   { border-left: 4px solid #15803d; }
+.ia-scan-drawer-summary.rmd   { border-left: 4px solid #d97706; }
+
+.ia-scan-drawer-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 80px;
+}
+.ia-scan-drawer-kpi-val {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+.ia-scan-drawer-kpi-val.red    { color: #dc2626; }
+.ia-scan-drawer-kpi-val.green  { color: #059669; }
+.ia-scan-drawer-kpi-val.blue   { color: #0891b2; }
+.ia-scan-drawer-kpi-val.orange { color: #d97706; }
+.ia-scan-drawer-kpi-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.ia-scan-drawer-kpi-divider {
+  width: 1px;
+  height: 36px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+.ia-scan-drawer-exec-all {
+  margin-left: auto;
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.ia-scan-drawer-exec-all.drift { background: #dc2626; color: #fff; }
+.ia-scan-drawer-exec-all.drift:hover { background: #b91c1c; }
+.ia-scan-drawer-exec-all.tlh   { background: #15803d; color: #fff; }
+.ia-scan-drawer-exec-all.tlh:hover   { background: #14532d; }
+.ia-scan-drawer-exec-all.rmd   { background: #d97706; color: #fff; }
+.ia-scan-drawer-exec-all.rmd:hover   { background: #b45309; }
+
+/* IRS rule strip for RMD */
+.ia-rmd-drawer-rule {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 11.5px;
+  color: #78350f;
+  line-height: 1.5;
+}
+.ia-rmd-drawer-rule i { color: #d97706; margin-right: 6px; }
+
+/* ── Drift account card in drawer ── */
+.ia-scan-acct-card {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.ia-scan-acct-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.ia-scan-acct-card.drift-high { border-left: 4px solid #dc2626; }
+.ia-scan-acct-card.drift-med  { border-left: 4px solid #d97706; }
+.ia-scan-acct-card.tlh-card   { border-left: 4px solid #15803d; }
+.ia-scan-acct-card.rmd-card   { border-left: 4px solid #d97706; }
+
+.ia-scan-card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+.ia-scan-card-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.ia-scan-card-info { flex: 1; min-width: 0; }
+.ia-scan-card-client {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.ia-scan-card-acct {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.ia-scan-card-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.ia-scan-card-meta span {
+  font-size: 11px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ia-scan-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Drift gauge badge */
+.ia-scan-drift-badge {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+.ia-scan-drift-badge.high  { color: #dc2626; }
+.ia-scan-drift-badge.med   { color: #d97706; }
+.ia-scan-urgency-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+.ia-scan-urgency-pill.high { background: #fee2e2; color: #dc2626; }
+.ia-scan-urgency-pill.med  { background: #fef3c7; color: #d97706; }
+
+/* TLH savings badge */
+.ia-scan-tlh-amount {
+  font-size: 22px;
+  font-weight: 800;
+  color: #15803d;
+  line-height: 1;
+}
+.ia-scan-tlh-sublbl {
+  font-size: 10px;
+  color: #64748b;
+  text-align: right;
+}
+.ia-scan-tlh-tax {
+  font-size: 11px;
+  color: #059669;
+  font-weight: 600;
+}
+
+/* RMD amount badge */
+.ia-scan-rmd-amount {
+  font-size: 22px;
+  font-weight: 800;
+  color: #d97706;
+  line-height: 1;
+}
+.ia-scan-rmd-days {
+  font-size: 11px;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+/* ── Trade rows inside drift card ── */
+.ia-scan-trades-section {
+  border-top: 1px solid #f1f5f9;
+  padding: 12px 16px;
+  background: #fafbfc;
+}
+.ia-scan-trades-hdr {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+}
+.ia-scan-trade-row {
+  display: grid;
+  grid-template-columns: 48px 1fr 72px;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12px;
+}
+.ia-scan-trade-row:last-child { border-bottom: none; }
+.ia-scan-trade-action {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 5px;
+  text-align: center;
+}
+.ia-scan-trade-action.sell { background: #fee2e2; color: #dc2626; }
+.ia-scan-trade-action.buy  { background: #dcfce7; color: #15803d; }
+.ia-scan-trade-name  { color: #334155; font-weight: 500; }
+.ia-scan-trade-amt   { color: #1e293b; font-weight: 700; text-align: right; }
+
+/* ── TLH positions inside card ── */
+.ia-scan-pos-section {
+  border-top: 1px solid #f1f5f9;
+  padding: 12px 16px;
+  background: #f0fdf4;
+}
+.ia-scan-pos-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 70px;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px dashed #d1fae5;
+  font-size: 12px;
+  align-items: center;
+}
+.ia-scan-pos-row:last-child { border-bottom: none; }
+.ia-scan-pos-name  { color: #334155; }
+.ia-scan-pos-loss  { color: #dc2626; font-weight: 600; text-align: right; }
+.ia-scan-pos-action {
+  font-size: 10px;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 8px;
+  text-align: center;
+}
+.ia-scan-wash-strip {
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: #166534;
+  background: #dcfce7;
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── RMD distribution detail inside card ── */
+.ia-scan-rmd-section {
+  border-top: 1px solid #f1f5f9;
+  padding: 12px 16px;
+  background: #fffbeb;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ia-scan-rmd-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #475569;
+}
+.ia-scan-rmd-row strong { color: #1e293b; }
+.ia-scan-rmd-penalty-note {
+  font-size: 11px;
+  color: #dc2626;
+  font-weight: 600;
+  background: #fee2e2;
+  border-radius: 6px;
+  padding: 5px 10px;
+}
+
+/* ── Card action footer ── */
+.ia-scan-card-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #f1f5f9;
+  background: #fff;
+}
+.ia-scan-footer-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+.ia-scan-footer-btn:hover { background: #f8fafc; border-color: #94a3b8; }
+.ia-scan-footer-btn.primary {
+  background: #003087;
+  color: #fff;
+  border-color: #003087;
+}
+.ia-scan-footer-btn.primary:hover { background: #002060; }
+.ia-scan-footer-btn.drift-exec { background: #dc2626; color: #fff; border-color: #dc2626; }
+.ia-scan-footer-btn.drift-exec:hover { background: #b91c1c; }
+.ia-scan-footer-btn.tlh-exec  { background: #15803d; color: #fff; border-color: #15803d; }
+.ia-scan-footer-btn.tlh-exec:hover  { background: #14532d; }
+.ia-scan-footer-btn.rmd-exec  { background: #d97706; color: #fff; border-color: #d97706; }
+.ia-scan-footer-btn.rmd-exec:hover  { background: #b45309; }
+
+/* ── IRS table inside RMD drawer ── */
+.ia-rmd-irs-table {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ia-rmd-irs-table-hdr {
+  background: #fffbeb;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #78350f;
+  border-bottom: 1px solid #fde68a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ia-rmd-irs-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 80px 90px;
+  gap: 12px;
+  padding: 8px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+}
+.ia-rmd-irs-row:last-child { border-bottom: none; }
+.ia-rmd-irs-row.hdr-row {
+  background: #f8fafc;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.4px;
+}
+
+/* ── Empty state for drawers ── */
+.ia-scan-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: #64748b;
+  background: #fff;
+  border: 1.5px dashed #e2e8f0;
+  border-radius: 12px;
+}
+.ia-scan-empty i {
+  font-size: 36px;
+  color: #22c55e;
+  margin-bottom: 12px;
+  display: block;
+}
+.ia-scan-empty strong { display: block; font-size: 14px; color: #1e293b; margin-bottom: 4px; }
+
+/* END PASS 10 */

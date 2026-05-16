@@ -42883,22 +42883,94 @@ function iaFilterByType(typeName) {
    DRIFT MONITOR PANEL
    ═══════════════════════════════════════════════════════════════════ */
 function iaRunDriftScan() {
-  var panel = document.getElementById('ia-drift-panel');
-  if (!panel) return;
-  var hidden = panel.style.display === 'none' || panel.style.display === '';
-  if (hidden) {
-    panel.style.display = 'block';
-    var list = document.getElementById('ia-drift-list');
-    if (list) list.innerHTML = iaRenderDriftList();
-    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
-  } else {
-    panel.style.display = 'none';
-  }
+  var existing = document.getElementById('ia-scan-overlay-drift');
+  if (existing) { existing.remove(); return; }
+
+  var totalTrades = iaDriftAccounts.reduce(function(s,a){ return s + a.rebalanceTrades.length; }, 0);
+  var totalAUM    = iaDriftAccounts.reduce(function(s,a){ return s + a.aum; }, 0);
+
+  var cards = iaDriftAccounts.length ? iaDriftAccounts.map(function(a) {
+    var isHigh    = a.driftScore >= 7;
+    var urgLabel  = isHigh ? 'HIGH' : 'MODERATE';
+    var cardCls   = isHigh ? 'drift-high' : 'drift-med';
+    var badgeCls  = isHigh ? 'high' : 'med';
+    var pillCls   = isHigh ? 'high' : 'med';
+
+    var tradeRows = a.rebalanceTrades.map(function(t) {
+      var isSell = t.action === 'SELL';
+      return '<div class="ia-scan-trade-row">' +
+        '<span class="ia-scan-trade-action ' + (isSell ? 'sell' : 'buy') + '">' + t.action + '</span>' +
+        '<span class="ia-scan-trade-name">' + t.security + '</span>' +
+        '<span class="ia-scan-trade-amt">' + t.amount + '</span>' +
+      '</div>';
+    }).join('');
+
+    var tradesSection = a.rebalanceTrades.length ?
+      '<div class="ia-scan-trades-section">' +
+        '<div class="ia-scan-trades-hdr"><i class="fas fa-exchange-alt"></i> Proposed Trades (' + a.rebalanceTrades.length + ')</div>' +
+        tradeRows +
+      '</div>' : '';
+
+    return '<div class="ia-scan-acct-card ' + cardCls + '">' +
+      '<div class="ia-scan-card-top">' +
+        '<div class="ia-scan-card-avatar" style="background:' + a.avatarGrad + '">' + a.initials + '</div>' +
+        '<div class="ia-scan-card-info">' +
+          '<div class="ia-scan-card-client">' + a.clientName + '</div>' +
+          '<div class="ia-scan-card-acct">' + a.accountNum + ' · ' + a.accountType + ' · ' + a.custodian + '</div>' +
+          '<div class="ia-scan-card-meta">' +
+            '<span><i class="fas fa-coins"></i> ' + a.aumFmt + '</span>' +
+            '<span><i class="fas fa-chart-line"></i> ' + a.returnYTDFmt + ' YTD</span>' +
+            '<span><i class="fas fa-shield-alt"></i> ' + a.riskProfile + '</span>' +
+            '<span><i class="fas fa-exchange-alt"></i> ' + a.rebalanceTrades.length + ' trades needed</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ia-scan-card-right">' +
+          '<div class="ia-scan-drift-badge ' + badgeCls + '">' + a.driftScore.toFixed(1) + '%</div>' +
+          '<div class="ia-scan-urgency-pill ' + pillCls + '">' + urgLabel + ' DRIFT</div>' +
+        '</div>' +
+      '</div>' +
+      tradesSection +
+      '<div class="ia-scan-card-footer">' +
+        '<button class="ia-scan-footer-btn" onclick="document.getElementById(\'ia-scan-overlay-drift\').remove();iaOpenAccount(\'' + a.id + '\');"><i class="fas fa-eye"></i> View Account</button>' +
+        '<button class="ia-scan-footer-btn drift-exec" onclick="event.stopPropagation();iaExecuteRebalance(\'' + a.id + '\');"><i class="fas fa-play-circle"></i> Execute Rebalance</button>' +
+      '</div>' +
+    '</div>';
+  }).join('') :
+  '<div class="ia-scan-empty"><i class="fas fa-check-circle"></i><strong>No drift detected</strong>All portfolios are within target allocation thresholds.</div>';
+
+  var html =
+    '<div class="ia-scan-overlay" id="ia-scan-overlay-drift" onclick="if(event.target===this)this.remove()">' +
+      '<div class="ia-scan-drawer">' +
+        '<div class="ia-scan-drawer-header drift">' +
+          '<div class="ia-scan-drawer-header-left">' +
+            '<div class="ia-scan-drawer-hdr-icon"><i class="fas fa-balance-scale"></i></div>' +
+            '<div>' +
+              '<div class="ia-scan-drawer-title">Portfolio Drift Monitor <span class="ia-scan-drawer-live">● LIVE</span></div>' +
+              '<div class="ia-scan-drawer-sub">Accounts where allocation has drifted &gt;5% from IPS target — AI recommends rebalancing trades</div>' +
+            '</div>' +
+          '</div>' +
+          '<button class="ia-scan-drawer-close" onclick="document.getElementById(\'ia-scan-overlay-drift\').remove()"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+        '<div class="ia-scan-drawer-body">' +
+          '<div class="ia-scan-drawer-summary drift">' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val red">' + iaDriftAccounts.length + '</div><div class="ia-scan-drawer-kpi-lbl">Accounts Drifted</div></div>' +
+            '<div class="ia-scan-drawer-kpi-divider"></div>' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val orange">' + totalTrades + '</div><div class="ia-scan-drawer-kpi-lbl">Trades Required</div></div>' +
+            '<div class="ia-scan-drawer-kpi-divider"></div>' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val blue">$' + (totalAUM/1000000).toFixed(2) + 'M</div><div class="ia-scan-drawer-kpi-lbl">AUM Affected</div></div>' +
+            (iaDriftAccounts.length ? '<button class="ia-scan-drawer-exec-all drift" onclick="iaExecuteAllRebalances();document.getElementById(\'ia-scan-overlay-drift\').remove();"><i class="fas fa-play-circle"></i> Execute All Rebalances</button>' : '') +
+          '</div>' +
+          cards +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
 function iaCloseDriftPanel() {
-  var panel = document.getElementById('ia-drift-panel');
-  if (panel) panel.style.display = 'none';
+  var el = document.getElementById('ia-scan-overlay-drift');
+  if (el) el.remove();
 }
 
 function iaRenderDriftList() {
@@ -42982,22 +43054,88 @@ function iaRenderDriftList() {
    TLH SCANNER PANEL
    ═══════════════════════════════════════════════════════════════════ */
 function iaRunTLHScan() {
-  var panel = document.getElementById('ia-tlh-panel');
-  if (!panel) return;
-  var hidden = panel.style.display === 'none' || panel.style.display === '';
-  if (hidden) {
-    panel.style.display = 'block';
-    var list = document.getElementById('ia-tlh-list');
-    if (list) list.innerHTML = iaRenderTLHList();
-    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
-  } else {
-    panel.style.display = 'none';
-  }
+  var existing = document.getElementById('ia-scan-overlay-tlh');
+  if (existing) { existing.remove(); return; }
+
+  var totalSavings = iaTLHAccounts.reduce(function(s,a){ return s + a.tlhOpportunity; }, 0);
+  var totalTaxSave = Math.round(totalSavings * 0.35);
+
+  var cards = iaTLHAccounts.length ? iaTLHAccounts.map(function(a) {
+    var taxSavings = Math.round(a.tlhOpportunity * 0.35);
+    var posRows = a.tlhPositions.map(function(p) {
+      var match   = p.match(/^(.+?)\s*\((-\$[\d.]+K)\)$/);
+      var posName = match ? match[1] : p;
+      var posLoss = match ? match[2] : '—';
+      return '<div class="ia-scan-pos-row">' +
+        '<span class="ia-scan-pos-name"><i class="fas fa-angle-right"></i> ' + posName + '</span>' +
+        '<span class="ia-scan-pos-loss">' + posLoss + '</span>' +
+        '<span class="ia-scan-pos-action">Harvest</span>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="ia-scan-acct-card tlh-card">' +
+      '<div class="ia-scan-card-top">' +
+        '<div class="ia-scan-card-avatar" style="background:' + a.avatarGrad + '">' + a.initials + '</div>' +
+        '<div class="ia-scan-card-info">' +
+          '<div class="ia-scan-card-client">' + a.clientName + '</div>' +
+          '<div class="ia-scan-card-acct">' + a.accountNum + ' · ' + a.accountType + '</div>' +
+          '<div class="ia-scan-card-meta">' +
+            '<span><i class="fas fa-coins"></i> ' + a.aumFmt + ' AUM</span>' +
+            '<span><i class="fas fa-shield-alt"></i> ' + a.riskProfile + '</span>' +
+            '<span><i class="fas fa-calendar"></i> ' + a.tlhPositions.length + ' position(s)</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ia-scan-card-right">' +
+          '<div class="ia-scan-tlh-amount">$' + a.tlhOpportunity.toLocaleString() + '</div>' +
+          '<div class="ia-scan-tlh-sublbl">gross losses</div>' +
+          '<div class="ia-scan-tlh-tax">≈ $' + taxSavings.toLocaleString() + ' tax saved</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ia-scan-pos-section">' +
+        posRows +
+        '<div class="ia-scan-wash-strip"><i class="fas fa-shield-alt"></i> 30-day wash-sale window applied · Replacement securities pre-selected</div>' +
+      '</div>' +
+      '<div class="ia-scan-card-footer">' +
+        '<button class="ia-scan-footer-btn" onclick="document.getElementById(\'ia-scan-overlay-tlh\').remove();iaOpenAccount(\'' + a.id + '\');"><i class="fas fa-external-link-alt"></i> View Account</button>' +
+        '<button class="ia-scan-footer-btn tlh-exec" onclick="iaExecuteTLH(\'' + a.id + '\');"><i class="fas fa-leaf"></i> Harvest — $' + a.tlhOpportunity.toLocaleString() + '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('') :
+  '<div class="ia-scan-empty"><i class="fas fa-check-circle"></i><strong>No TLH opportunities</strong>No accounts have significant unrealized losses at this time.</div>';
+
+  var html =
+    '<div class="ia-scan-overlay" id="ia-scan-overlay-tlh" onclick="if(event.target===this)this.remove()">' +
+      '<div class="ia-scan-drawer">' +
+        '<div class="ia-scan-drawer-header tlh">' +
+          '<div class="ia-scan-drawer-header-left">' +
+            '<div class="ia-scan-drawer-hdr-icon"><i class="fas fa-leaf"></i></div>' +
+            '<div>' +
+              '<div class="ia-scan-drawer-title">Tax-Loss Harvesting Scanner <span class="ia-scan-drawer-live">AI-Powered</span></div>' +
+              '<div class="ia-scan-drawer-sub">Unrealized losses that can offset capital gains · 30-day wash-sale rules applied automatically</div>' +
+            '</div>' +
+          '</div>' +
+          '<button class="ia-scan-drawer-close" onclick="document.getElementById(\'ia-scan-overlay-tlh\').remove()"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+        '<div class="ia-scan-drawer-body">' +
+          '<div class="ia-scan-drawer-summary tlh">' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val green">$' + totalSavings.toLocaleString() + '</div><div class="ia-scan-drawer-kpi-lbl">Gross Losses Available</div></div>' +
+            '<div class="ia-scan-drawer-kpi-divider"></div>' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val blue">$' + totalTaxSave.toLocaleString() + '</div><div class="ia-scan-drawer-kpi-lbl">Est. Tax Savings @ 35%</div></div>' +
+            '<div class="ia-scan-drawer-kpi-divider"></div>' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val orange">' + iaTLHAccounts.length + '</div><div class="ia-scan-drawer-kpi-lbl">Accounts</div></div>' +
+            (iaTLHAccounts.length ? '<button class="ia-scan-drawer-exec-all tlh" onclick="iaExecuteAllTLH();document.getElementById(\'ia-scan-overlay-tlh\').remove();"><i class="fas fa-leaf"></i> Harvest All</button>' : '') +
+          '</div>' +
+          cards +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
 function iaCloseTLHPanel() {
-  var panel = document.getElementById('ia-tlh-panel');
-  if (panel) panel.style.display = 'none';
+  var el = document.getElementById('ia-scan-overlay-tlh');
+  if (el) el.remove();
 }
 
 function iaRenderTLHList() {
@@ -43063,22 +43201,101 @@ function iaRenderTLHList() {
    RMD CENTER PANEL
    ═══════════════════════════════════════════════════════════════════ */
 function iaOpenRMDCenter() {
-  var panel = document.getElementById('ia-rmd-panel');
-  if (!panel) return;
-  var hidden = panel.style.display === 'none' || panel.style.display === '';
-  if (hidden) {
-    panel.style.display = 'block';
-    var list = document.getElementById('ia-rmd-list');
-    if (list) list.innerHTML = iaRenderRMDList();
-    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
-  } else {
-    panel.style.display = 'none';
-  }
+  var existing = document.getElementById('ia-scan-overlay-rmd');
+  if (existing) { existing.remove(); return; }
+
+  var totalRMD     = iaRMDAccounts.reduce(function(s,a){ return s + a.rmdAmount; }, 0);
+  var totalPenalty = Math.round(totalRMD * 0.25);
+  var today        = new Date();
+  var deadline     = new Date('2026-12-31');
+  var daysLeft     = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+
+  var cards = iaRMDAccounts.length ? iaRMDAccounts.map(function(a) {
+    var penalty   = Math.round(a.rmdAmount * 0.25);
+    var quarterly = Math.round(a.rmdAmount / 4);
+    var monthly   = Math.round(a.rmdAmount / 12);
+    var pctOfAUM  = a.aum > 0 ? ((a.rmdAmount / a.aum) * 100).toFixed(1) + '%' : '—';
+
+    return '<div class="ia-scan-acct-card rmd-card">' +
+      '<div class="ia-scan-card-top">' +
+        '<div class="ia-scan-card-avatar" style="background:' + a.avatarGrad + '">' + a.initials + '</div>' +
+        '<div class="ia-scan-card-info">' +
+          '<div class="ia-scan-card-client">' + a.clientName + '</div>' +
+          '<div class="ia-scan-card-acct">' + a.accountNum + ' · ' + a.accountType + ' · ' + a.aumFmt + ' AUM</div>' +
+          '<div class="ia-scan-card-meta">' +
+            '<span><i class="fas fa-shield-alt"></i> ' + a.riskProfile + '</span>' +
+            '<span><i class="fas fa-percentage"></i> ' + pctOfAUM + ' of AUM</span>' +
+            '<span><i class="fas fa-calendar-times"></i> Due: ' + a.rmdDeadline + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ia-scan-card-right">' +
+          '<div class="ia-scan-rmd-amount">$' + a.rmdAmount.toLocaleString() + '</div>' +
+          '<div class="ia-scan-tlh-sublbl">required dist.</div>' +
+          '<div class="ia-scan-rmd-days"><i class="fas fa-exclamation-triangle"></i> ' + daysLeft + ' days left</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ia-scan-rmd-section">' +
+        '<div class="ia-scan-rmd-row"><span>IRS Penalty if Missed</span><strong style="color:#dc2626">$' + penalty.toLocaleString() + ' (25%)</strong></div>' +
+        '<div class="ia-scan-rmd-row"><span>Quarterly Option</span><strong>$' + quarterly.toLocaleString() + ' / quarter</strong></div>' +
+        '<div class="ia-scan-rmd-row"><span>Monthly Option</span><strong>$' + monthly.toLocaleString() + ' / month</strong></div>' +
+        '<div class="ia-scan-rmd-row"><span>QCD Option</span><strong>Charitable — up to $105,000 tax-free</strong></div>' +
+        '<div class="ia-scan-rmd-penalty-note"><i class="fas fa-gavel"></i> IRS Rule: 25% excise tax on any undistributed amount after Dec 31</div>' +
+      '</div>' +
+      '<div class="ia-scan-card-footer">' +
+        '<button class="ia-scan-footer-btn" onclick="document.getElementById(\'ia-scan-overlay-rmd\').remove();iaOpenAccount(\'' + a.id + '\');"><i class="fas fa-external-link-alt"></i> View Account</button>' +
+        '<button class="ia-scan-footer-btn rmd-exec" onclick="iaProcessRMD(\'' + a.id + '\');"><i class="fas fa-paper-plane"></i> Process RMD — $' + a.rmdAmount.toLocaleString() + '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('') :
+  '<div class="ia-scan-empty"><i class="fas fa-check-circle"></i><strong>No RMDs Required</strong>No clients have required minimum distributions due for 2026.</div>';
+
+  var irsTable =
+    '<div class="ia-rmd-irs-table">' +
+      '<div class="ia-rmd-irs-table-hdr"><i class="fas fa-gavel"></i> IRS Uniform Lifetime Table (Reference)</div>' +
+      '<div class="ia-rmd-irs-row hdr-row"><span>Age</span><span>Client</span><span>Factor</span><span>2026 RMD</span></div>' +
+      iaRMDAccounts.map(function(a, i) {
+        var approxAge = 76 + i;
+        var factors   = [23.7, 22.9, 22.0, 21.1];
+        var factor    = factors[i] || 20.2;
+        return '<div class="ia-rmd-irs-row"><span>' + approxAge + '</span><span>' + a.clientName.split(' ')[0] + '</span><span>' + factor + '</span><span style="font-weight:700;color:#d97706">$' + a.rmdAmount.toLocaleString() + '</span></div>';
+      }).join('') +
+    '</div>';
+
+  var html =
+    '<div class="ia-scan-overlay" id="ia-scan-overlay-rmd" onclick="if(event.target===this)this.remove()">' +
+      '<div class="ia-scan-drawer">' +
+        '<div class="ia-scan-drawer-header rmd">' +
+          '<div class="ia-scan-drawer-header-left">' +
+            '<div class="ia-scan-drawer-hdr-icon"><i class="fas fa-calendar-check"></i></div>' +
+            '<div>' +
+              '<div class="ia-scan-drawer-title">Required Minimum Distribution Center</div>' +
+              '<div class="ia-scan-drawer-sub">IRS RMD calculations · Deadline Dec 31, 2026 · Penalty: 25% of undistributed amount</div>' +
+            '</div>' +
+          '</div>' +
+          '<button class="ia-scan-drawer-close" onclick="document.getElementById(\'ia-scan-overlay-rmd\').remove()"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+        '<div class="ia-scan-drawer-body">' +
+          '<div class="ia-scan-drawer-summary rmd">' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val orange">$' + (totalRMD/1000).toFixed(1) + 'K</div><div class="ia-scan-drawer-kpi-lbl">Total 2026 RMDs</div></div>' +
+            '<div class="ia-scan-drawer-kpi-divider"></div>' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val red">$' + (totalPenalty/1000).toFixed(1) + 'K</div><div class="ia-scan-drawer-kpi-lbl">Penalty if Missed</div></div>' +
+            '<div class="ia-scan-drawer-kpi-divider"></div>' +
+            '<div class="ia-scan-drawer-kpi"><div class="ia-scan-drawer-kpi-val blue">' + daysLeft + '</div><div class="ia-scan-drawer-kpi-lbl">Days Until Deadline</div></div>' +
+            (iaRMDAccounts.length ? '<button class="ia-scan-drawer-exec-all rmd" onclick="iaProcessAllRMDs();document.getElementById(\'ia-scan-overlay-rmd\').remove();"><i class="fas fa-paper-plane"></i> Process All RMDs</button>' : '') +
+          '</div>' +
+          '<div class="ia-rmd-drawer-rule"><i class="fas fa-gavel"></i><strong>IRS Rule:</strong> Clients age 73+ must take RMDs from Traditional IRAs annually. Penalty is 25% of undistributed amount. QCD up to $105,000 allowed as charitable offset.</div>' +
+          cards +
+          irsTable +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
 function iaCloseRMDPanel() {
-  var panel = document.getElementById('ia-rmd-panel');
-  if (panel) panel.style.display = 'none';
+  var el = document.getElementById('ia-scan-overlay-rmd');
+  if (el) el.remove();
 }
 
 function iaRenderRMDList() {
