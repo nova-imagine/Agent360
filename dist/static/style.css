@@ -49245,3 +49245,212 @@ kbd {
 }
 
 /* END PASS 19 */
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 20 — Claims Page Structural Improvements
+   1. Navigator KPI chips merged into top bar (ckpi-docs-missing / adb / contest)
+   2. Type strip divider separating types from flags
+   3. STP champion/secondary card ranking
+   4. AI Intelligence panel full-width
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. New KPI bar chips from merged Navigator ── */
+.ckpi-docs-missing .ckpi-icon { background: #fff7ed; color: #c2410c; }
+.ckpi-adb          .ckpi-icon { background: #fce7f3; color: #be185d; }
+.ckpi-contest      .ckpi-icon { background: #fef2f2; color: #dc2626; }
+
+/* Subtle left-border divider before the 3 new chips to visually group them */
+.ckpi-docs-missing {
+  border-left: 2px solid #e2e8f0;
+  margin-left: 4px;
+  padding-left: 20px;
+  position: relative;
+}
+.ckpi-docs-missing::before {
+  content: 'NAVIGATOR';
+  position: absolute;
+  top: -1px;
+  left: 4px;
+  font-size: 8px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── 2. Type strip: divider between types and flags ── */
+.clm-type-strip-divider {
+  width: 1px;
+  height: 22px;
+  background: #cbd5e1;
+  margin: 0 4px;
+  flex-shrink: 0;
+  align-self: center;
+}
+.clm-type-strip-flag-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #dc2626;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 2px;
+  padding: 2px 6px;
+  background: #fef2f2;
+  border-radius: 10px;
+  border: 1px solid #fca5a5;
+}
+
+/* ── 3. AI Intelligence panel full-width override ── */
+.ov-panels-row-single {
+  grid-template-columns: 1fr !important;
+}
+.ov-panel-intel-full {
+  border-left: 4px solid #6366f1;
+}
+.ov-panel-intel-full .ov-panel-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── 4. STP Champion Card ── */
+.ov-stp-claim-champion {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 60%, #fde68a 100%) !important;
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 4px 20px rgba(245,158,11,0.20), 0 0 0 4px rgba(245,158,11,0.08) !important;
+  position: relative;
+  flex-direction: column;
+  gap: 12px;
+}
+.ov-stp-claim-champion > .ov-stp-claim-info,
+.ov-stp-claim-champion > .ov-stp-claim-right {
+  /* reset: champion is column-direction at outer, row inside */
+}
+/* inner row for info + dial */
+.ov-stp-claim-champion {
+  display: flex;
+  flex-direction: column;
+}
+/* re-layout champion body as row */
+.ov-stp-claim-champion > .ov-stp-claim-info { flex: 1; }
+.ov-stp-champion-inner {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Champion banner across top */
+.ov-stp-champion-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #92400e;
+  background: linear-gradient(90deg, #fef3c7, #fde68a);
+  border-radius: 8px 8px 0 0;
+  padding: 7px 14px;
+  margin: -18px -20px 12px -20px;
+  border-bottom: 1px solid #fcd34d;
+}
+.ov-stp-champion-banner i { color: #d97706; font-size: 13px; }
+
+.ov-stp-rank-badge {
+  margin-left: auto;
+  background: #d97706;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.03em;
+}
+
+/* Champion confidence dial — gold ring */
+.ov-stp-dial-champion {
+  background: conic-gradient(#d97706 0% 97%, #fde68a 97% 100%) !important;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #f59e0b, 0 4px 20px rgba(217,119,6,0.35) !important;
+  width: 90px !important;
+  height: 90px !important;
+}
+.ov-stp-dial-champion::after {
+  width: 66px !important;
+  height: 66px !important;
+}
+.ov-stp-dial-champion .ov-stp-conf-num {
+  font-size: 24px !important;
+  color: #92400e !important;
+}
+
+/* Champion approve button — larger, gold */
+.ov-stp-btn-champion {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  border-color: #b45309 !important;
+  font-size: 13px !important;
+  padding: 10px 16px !important;
+  box-shadow: 0 3px 10px rgba(180,83,9,0.35) !important;
+}
+.ov-stp-btn-champion:hover {
+  background: linear-gradient(135deg, #b45309, #92400e) !important;
+}
+
+/* ── 4b. STP Secondary Cards — side-by-side 2-col grid ── */
+.ov-stp-secondary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 760px) {
+  .ov-stp-secondary-grid { grid-template-columns: 1fr; }
+}
+
+.ov-stp-claim-secondary {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,.06) !important;
+  opacity: 0.92;
+  position: relative;
+}
+.ov-stp-claim-secondary:hover {
+  opacity: 1;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,.10) !important;
+}
+
+.ov-stp-rank-pill {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+}
+
+/* Secondary dial — muted green */
+.ov-stp-dial-secondary {
+  width: 68px !important;
+  height: 68px !important;
+  background: conic-gradient(#64748b 0% 93%, #e2e8f0 93% 100%) !important;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px #cbd5e1, 0 3px 10px rgba(0,0,0,.10) !important;
+}
+.ov-stp-dial-secondary::after {
+  width: 50px !important;
+  height: 50px !important;
+}
+.ov-stp-conf-secondary {
+  font-size: 17px !important;
+  color: #475569 !important;
+}
+
+/* ── KPI grid: allow wrapping for extra chips ── */
+.claim-kpi-bar {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+/* END PASS 20 */

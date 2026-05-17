@@ -41973,6 +41973,14 @@ function filterClaimsByDocStatus() {
   p7Toast('<i class="fas fa-file-import"></i> Filtering claims with incomplete documentation', 2000);
 }
 
+function filterClaimsByPendingDocs() {
+  p7Toast('<i class="fas fa-file-exclamation"></i> 4 claims have missing documents — CLM-2026-0041 (ID docs), CLM-2026-0028 (oncologist cert), CLM-2026-0035 (APS pending), CLM-2026-0029 (employer verify)', 4500);
+}
+
+function filterClaimsByContestability() {
+  p7Toast('<i class="fas fa-balance-scale"></i> 2 claims within 2-year contestability window — CLM-2026-0025 Kevin Park (24d remaining) · CLM-2026-0031 (8mo remaining) — legal review required', 4500);
+}
+
 function showClaimsResolutionChart() {
   p7Toast('<i class="fas fa-chart-line"></i> Claims resolution trend: Jan 6.8d → Feb 6.1d → Mar 5.8d → Apr 5.2d (improving)', 4000);
 }

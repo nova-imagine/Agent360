@@ -5837,6 +5837,31 @@ function ClaimsPage() {
             <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.4d MoM</div>
           </div>
         </div>
+        {/* ── Navigator KPIs merged from AI Claims Navigator card ── */}
+        <div class="ckpi-card ckpi-docs-missing" onclick="clmSwitchTab('active');filterClaimsByPendingDocs()" title="Claims missing required documents">
+          <div class="ckpi-icon"><i class="fas fa-file-exclamation"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">4</div>
+            <div class="ckpi-lbl">Docs Missing</div>
+            <div class="ckpi-trend warn"><i class="fas fa-exclamation-circle"></i> Action required</div>
+          </div>
+        </div>
+        <div class="ckpi-card ckpi-adb" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Accelerated')" title="Claims eligible for ADB fast-track">
+          <div class="ckpi-icon"><i class="fas fa-heartbeat"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">1</div>
+            <div class="ckpi-lbl">ADB Eligible</div>
+            <div class="ckpi-trend warn"><i class="fas fa-clock"></i> 5d window</div>
+          </div>
+        </div>
+        <div class="ckpi-card ckpi-contest" onclick="clmSwitchTab('active');filterClaimsByContestability()" title="Claims within 2-year contestability window">
+          <div class="ckpi-icon"><i class="fas fa-balance-scale"></i></div>
+          <div class="ckpi-body">
+            <div class="ckpi-val">2</div>
+            <div class="ckpi-lbl">Contestability</div>
+            <div class="ckpi-trend warn"><i class="fas fa-gavel"></i> Legal review</div>
+          </div>
+        </div>
       </div>
 
       {/* ── Claim-Type Breakdown Strip ── */}
@@ -5848,6 +5873,9 @@ function ClaimsPage() {
         <button class="clm-type-chip clm-type-adb" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Accelerated')" title="Filter: Accelerated/ADB"><i class="fas fa-heartbeat"></i> ADB <span>1</span></button>
         <button class="clm-type-chip clm-type-rider" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Rider')" title="Filter: Riders"><i class="fas fa-plus-circle"></i> Riders <span>3</span></button>
         <button class="clm-type-chip clm-type-other" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Other')" title="Filter: Other types"><i class="fas fa-ellipsis-h"></i> Other <span>2</span></button>
+        {/* ── Divider separating claim types from status flags ── */}
+        <div class="clm-type-strip-divider"></div>
+        <div class="clm-type-strip-flag-label"><i class="fas fa-flag"></i> Flags:</div>
         <button class="clm-type-chip clm-type-fraud" onclick="clmSwitchTab('active');filterClaimsByStatus('flagged')" title="Filter: Fraud Flagged"><i class="fas fa-shield-virus"></i> Fraud <span class="clm-type-badge-red">1</span></button>
         <button class="clm-type-chip clm-type-sla" onclick="clmSwitchTab('active');filterClaimsBySLA()" title="Filter: SLA At Risk"><i class="fas fa-fire"></i> SLA Risk <span class="clm-type-badge-amber">2</span></button>
         <div class="clm-type-strip-clear"><button onclick="clearClaimFilters()" title="Clear all filters"><i class="fas fa-times"></i></button></div>
@@ -5937,45 +5965,23 @@ function ClaimsPage() {
           </div>
         </div>
 
-        {/* ── Two-column panel row: AI Intelligence + AI Navigator ── */}
-        <div class="ov-panels-row">
+        {/* ── Single-panel row: AI Claims Intelligence (Navigator card removed — KPIs merged into top bar) ── */}
+        <div class="ov-panels-row ov-panels-row-single">
 
-          {/* Left: AI Claims Intelligence */}
-          <div class="ov-panel ov-panel-intel">
+          {/* AI Claims Intelligence — now full-width */}
+          <div class="ov-panel ov-panel-intel ov-panel-intel-full">
             <div class="ov-panel-header">
               <div class="ov-panel-icon intel"><i class="fas fa-brain"></i><span class="ci-pulse"></span></div>
               <div>
                 <div class="ov-panel-title">AI Claims Intelligence <span class="ov-live-badge">● LIVE</span></div>
-                <div class="ov-panel-sub">ML fraud detection · NLP extraction · Predictive resolution</div>
+                <div class="ov-panel-sub">ML fraud detection · NLP extraction · Predictive resolution · Beneficiary guidance · ADB screening</div>
               </div>
             </div>
             <div class="ov-panel-actions">
               <button class="ov-panel-btn primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Report</button>
               <button class="ov-panel-btn secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
               <button class="ov-panel-btn secondary" onclick="openAITriageModal()"><i class="fas fa-robot"></i> AI Triage</button>
-            </div>
-          </div>
-
-          {/* Right: AI Claims Navigator */}
-          <div class="ov-panel ov-panel-nav">
-            <div class="ov-panel-header">
-              <div class="ov-panel-icon nav"><i class="fas fa-compass"></i></div>
-              <div>
-                <div class="ov-panel-title">AI Claims Navigator <span class="ov-live-badge">● LIVE</span></div>
-                <div class="ov-panel-sub">Beneficiary guidance · Doc tracking · ADB screening</div>
-              </div>
-            </div>
-            <div class="ov-nav-stats">
-              <div class="ov-nav-stat"><span class="ov-nav-val red">2</span><span class="ov-nav-lbl">Contestability</span></div>
-              <div class="ov-nav-divider"></div>
-              <div class="ov-nav-stat"><span class="ov-nav-val amber">1</span><span class="ov-nav-lbl">ADB Eligible</span></div>
-              <div class="ov-nav-divider"></div>
-              <div class="ov-nav-stat"><span class="ov-nav-val blue">4</span><span class="ov-nav-lbl">Docs Missing</span></div>
-              <div class="ov-nav-divider"></div>
-              <div class="ov-nav-stat"><span class="ov-nav-val green">61%</span><span class="ov-nav-lbl">Doc Completion</span></div>
-            </div>
-            <div class="ov-panel-actions">
-              <button class="ov-panel-btn primary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
+              <button class="ov-panel-btn secondary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
               <button class="ov-panel-btn secondary" onclick="openADBScreener()"><i class="fas fa-heartbeat"></i> ADB Screener</button>
             </div>
           </div>
@@ -6136,8 +6142,12 @@ function ClaimsPage() {
           </div>
           <div class="ov-stp-body" id="ov-stp-body">
 
-            {/* STP Claim Card — James Whitfield LTC */}
-            <div class="ov-stp-claim">
+            {/* ── STP Champion Card — Ranked #1 by AI Score (97) ── */}
+            <div class="ov-stp-claim ov-stp-claim-champion">
+              <div class="ov-stp-champion-banner">
+                <i class="fas fa-trophy"></i> AI Top Pick — Highest Confidence &middot; Process First
+                <span class="ov-stp-rank-badge">#1 of 3</span>
+              </div>
               <div class="ov-stp-claim-info">
                 <div class="ov-stp-claim-id">CLM-2026-0033</div>
                 <div class="ov-stp-claim-client"><div class="mini-avatar jw" style="width:24px;height:24px;font-size:10px">JW</div><span>James Whitfield · Long-term Care · $9,600</span></div>
@@ -6151,67 +6161,72 @@ function ClaimsPage() {
                 </div>
               </div>
               <div class="ov-stp-claim-right">
-                <div class="ov-stp-confidence-dial">
+                <div class="ov-stp-confidence-dial ov-stp-dial-champion">
                   <span class="ov-stp-conf-num">97</span>
                   <span class="ov-stp-conf-lbl">AI Score</span>
                 </div>
                 <div class="ov-stp-claim-actions">
-                  <button class="ov-stp-btn approve" onclick="stpAutoApprove('CLM-2026-0033','James Whitfield','$9,600')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
+                  <button class="ov-stp-btn approve ov-stp-btn-champion" onclick="stpAutoApprove('CLM-2026-0033','James Whitfield','$9,600')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
                   <button class="ov-stp-btn secondary" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review First</button>
                 </div>
               </div>
             </div>
 
-            {/* STP Claim Card 2 — Sandra Williams LTC */}
-            <div class="ov-stp-claim">
-              <div class="ov-stp-claim-info">
-                <div class="ov-stp-claim-id">CLM-2026-0038</div>
-                <div class="ov-stp-claim-client"><div class="mini-avatar sw" style="width:24px;height:24px;font-size:10px">SW</div><span>Sandra Williams · Long-term Care · $9,200/mo</span></div>
-                <div class="ov-stp-criteria">
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Fraud score 12 — Clear</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Docs 100% complete (4/4 received)</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> LTC eligibility certificate verified</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> No contestability · Policy active 11 years</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> SLA on track · 22d remaining</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> NLP care-plan validation 93% confidence</div>
-                </div>
-              </div>
-              <div class="ov-stp-claim-right">
-                <div class="ov-stp-confidence-dial">
-                  <span class="ov-stp-conf-num">93</span>
-                  <span class="ov-stp-conf-lbl">AI Score</span>
-                </div>
-                <div class="ov-stp-claim-actions">
-                  <button class="ov-stp-btn approve" onclick="stpAutoApprove('CLM-2026-0038','Sandra Williams','$9,200/mo')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
-                  <button class="ov-stp-btn secondary" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i> Review First</button>
-                </div>
-              </div>
-            </div>
+            {/* ── STP Secondary Cards — Ranked #2 & #3 ── */}
+            <div class="ov-stp-secondary-grid">
 
-            {/* STP Claim Card 3 — Patricia Nguyen Critical Illness */}
-            <div class="ov-stp-claim">
-              <div class="ov-stp-claim-info">
-                <div class="ov-stp-claim-id">CLM-2026-0046</div>
-                <div class="ov-stp-claim-client"><div class="mini-avatar pn" style="width:24px;height:24px;font-size:10px">PN</div><span>Patricia Nguyen · Critical Illness Rider · $50,000</span></div>
-                <div class="ov-stp-criteria">
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Fraud score 11 — Clear</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Docs 3/4 — final pathology report received</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Critical illness diagnosis confirmed (Stage III)</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Rider benefit eligibility verified by NLP</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> SLA on track · 18d remaining</div>
-                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> No legal holds · Policy in force 7 years</div>
+              <div class="ov-stp-claim ov-stp-claim-secondary">
+                <div class="ov-stp-rank-pill">#2</div>
+                <div class="ov-stp-claim-info">
+                  <div class="ov-stp-claim-id">CLM-2026-0038</div>
+                  <div class="ov-stp-claim-client"><div class="mini-avatar sw" style="width:22px;height:22px;font-size:9px">SW</div><span>Sandra Williams · LTC · $9,200/mo</span></div>
+                  <div class="ov-stp-criteria">
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Fraud score 12 — Clear</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Docs 100% complete (4/4)</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> LTC eligibility verified</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> No contestability · 11 years active</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> SLA on track · 22d remaining</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> NLP care-plan 93% confidence</div>
+                  </div>
+                </div>
+                <div class="ov-stp-claim-right">
+                  <div class="ov-stp-confidence-dial ov-stp-dial-secondary">
+                    <span class="ov-stp-conf-num ov-stp-conf-secondary">93</span>
+                    <span class="ov-stp-conf-lbl">AI Score</span>
+                  </div>
+                  <div class="ov-stp-claim-actions">
+                    <button class="ov-stp-btn approve" onclick="stpAutoApprove('CLM-2026-0038','Sandra Williams','$9,200/mo')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
+                    <button class="ov-stp-btn secondary" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i> Review First</button>
+                  </div>
                 </div>
               </div>
-              <div class="ov-stp-claim-right">
-                <div class="ov-stp-confidence-dial" style="border-color:#2563eb">
-                  <span class="ov-stp-conf-num" style="color:#2563eb">91</span>
-                  <span class="ov-stp-conf-lbl">AI Score</span>
+
+              <div class="ov-stp-claim ov-stp-claim-secondary">
+                <div class="ov-stp-rank-pill">#3</div>
+                <div class="ov-stp-claim-info">
+                  <div class="ov-stp-claim-id">CLM-2026-0046</div>
+                  <div class="ov-stp-claim-client"><div class="mini-avatar pn" style="width:22px;height:22px;font-size:9px">PN</div><span>Patricia Nguyen · Critical Illness · $50,000</span></div>
+                  <div class="ov-stp-criteria">
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Fraud score 11 — Clear</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Docs 3/4 — pathology received</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Critical illness confirmed (Stage III)</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Rider eligibility verified by NLP</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> SLA on track · 18d remaining</div>
+                    <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> No legal holds · 7 years in force</div>
+                  </div>
                 </div>
-                <div class="ov-stp-claim-actions">
-                  <button class="ov-stp-btn approve" onclick="stpAutoApprove('CLM-2026-0046','Patricia Nguyen','$50,000')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
-                  <button class="ov-stp-btn secondary" onclick="openClaimModal('CLM-2026-0046','view')"><i class="fas fa-eye"></i> Review First</button>
+                <div class="ov-stp-claim-right">
+                  <div class="ov-stp-confidence-dial ov-stp-dial-secondary">
+                    <span class="ov-stp-conf-num ov-stp-conf-secondary">91</span>
+                    <span class="ov-stp-conf-lbl">AI Score</span>
+                  </div>
+                  <div class="ov-stp-claim-actions">
+                    <button class="ov-stp-btn approve" onclick="stpAutoApprove('CLM-2026-0046','Patricia Nguyen','$50,000')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
+                    <button class="ov-stp-btn secondary" onclick="openClaimModal('CLM-2026-0046','view')"><i class="fas fa-eye"></i> Review First</button>
+                  </div>
                 </div>
               </div>
+
             </div>
 
             {/* STP Ineligible — reason explainer row */}
