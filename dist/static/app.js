@@ -39226,6 +39226,137 @@ function p7ConfirmSettlement(claimId) {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════
+   PASS 23 — INTELLIGENCE TAB + PORTAL TAB FUNCTIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Intelligence: Heatmap expand/collapse ── */
+function toggleHeatmapExpand(btn) {
+  var extra = document.getElementById('ai-hm-extra-rows');
+  if (!extra) return;
+  var isHidden = extra.style.display === 'none' || extra.style.display === '';
+  if (isHidden) {
+    extra.style.display = 'block';
+    btn.innerHTML = '<i class="fas fa-chevron-up"></i> Show fewer claims';
+  } else {
+    extra.style.display = 'none';
+    btn.innerHTML = '<i class="fas fa-chevron-down"></i> Show 9 more claims';
+  }
+}
+
+/* ── Intelligence: Refresh AI Insights ── */
+function refreshAIInsights(btn) {
+  var orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analysing…';
+  setTimeout(function() {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    p7Toast('<i class="fas fa-robot"></i> AI Predictive Insights refreshed — 4 cross-claim signals updated', 3500);
+  }, 2200);
+}
+
+/* ── Portal: Generate AI Status Message ── */
+function cpGenerateAIMessage(claimId) {
+  var messages = {
+    'CLM-2026-0038': {
+      tone: 'Empathetic',
+      name: 'Margaret',
+      text: 'Dear Margaret, we understand how difficult this time must be for you, and we want you to know that your claim is our priority. We currently need one final document — your certified Death Certificate — to complete the review and release your benefit payment. Our team is here to help if you need assistance obtaining this document. You can upload it securely through your portal at any time.',
+      blocking: 'Death Certificate'
+    },
+    'CLM-2026-0041': {
+      tone: 'Friendly',
+      name: 'James',
+      text: 'Hi James! Great news — your claim is 72% complete and progressing well. To keep things moving, we just need you to upload the Physician Form APS-7 from your treating doctor. Once we receive this, our medical review team can finalize your disability assessment. You\'re almost there — log in to your portal to upload the form today.',
+      blocking: 'Physician Form APS-7'
+    },
+    'CLM-2026-0039': {
+      tone: 'Friendly',
+      name: 'Sarah',
+      text: 'Hi Sarah! Wonderful news — all your documents have been received and your claim is fully complete. Our review team is now processing your final benefit calculation. You\'ll receive a decision notification within 3–5 business days. Thank you for your prompt cooperation throughout this process.',
+      blocking: null
+    },
+    'CLM-2026-0040': {
+      tone: 'Formal',
+      name: 'Robert',
+      text: 'Dear Mr. B., we are writing to inform you that your Long-Term Care claim (CLM-2026-0040) has been initiated. To proceed with your benefit assessment, we require the Care Facility Form from your care provider. Please access the secure portal link in this message to submit the required documentation at your earliest convenience.',
+      blocking: 'Care Facility Form'
+    }
+  };
+
+  var suffix = claimId.replace('CLM-2026-', '');
+  var data = messages[claimId] || {
+    tone: 'Professional',
+    name: 'Claimant',
+    text: 'Dear Claimant, your claim is currently under review. Please log in to your portal to check the status and upload any outstanding documents. Our team is committed to resolving your claim as quickly as possible.',
+    blocking: null
+  };
+
+  var ov = document.createElement('div');
+  ov.id = 'cp-ai-msg-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:16px;width:620px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden">' +
+      '<div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:20px 24px;display:flex;align-items:center;justify-content:space-between">' +
+        '<div style="display:flex;align-items:center;gap:12px">' +
+          '<div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px"><i class="fas fa-robot"></i></div>' +
+          '<div>' +
+            '<div style="color:#fff;font-weight:700;font-size:16px">AI Status Message Generator</div>' +
+            '<div style="color:rgba(255,255,255,.8);font-size:12px">' + claimId + ' &middot; Tone: ' + data.tone + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'cp-ai-msg-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px">&times;</button>' +
+      '</div>' +
+      '<div style="padding:24px">' +
+        (data.blocking ? '<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#92400e"><i class="fas fa-robot" style="margin-right:6px"></i><strong>AI Nudge:</strong> Missing document identified — <strong>' + data.blocking + '</strong> is the primary blocker for this claim.</div>' : '') +
+        '<div style="background:#f8f9ff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:16px">' +
+          '<div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px"><i class="fas fa-magic" style="margin-right:4px;color:#4f46e5"></i> Generated Message</div>' +
+          '<div style="font-size:14px;color:#374151;line-height:1.7;font-style:italic">' + data.text + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">' +
+          '<span style="font-size:12px;color:#6b7280;font-weight:600;align-self:center">Delivery:</span>' +
+          '<button onclick="p7Toast(\'<i class=\\\"fas fa-envelope\\\"></i> Email message sent to ' + data.name + '\',\'success\');document.getElementById(\'cp-ai-msg-overlay\').remove()" style="padding:6px 14px;border-radius:6px;border:1px solid #4f46e5;background:#4f46e5;color:#fff;cursor:pointer;font-size:13px"><i class="fas fa-envelope"></i> Send via Email</button>' +
+          '<button onclick="p7Toast(\'<i class=\\\"fas fa-sms\\\"></i> SMS sent to ' + data.name + '\',\'success\');document.getElementById(\'cp-ai-msg-overlay\').remove()" style="padding:6px 14px;border-radius:6px;border:1px solid #0284c7;background:#0284c7;color:#fff;cursor:pointer;font-size:13px"><i class="fas fa-sms"></i> Send via SMS</button>' +
+          '<button onclick="p7Toast(\'<i class=\\\"fas fa-bell\\\"></i> Portal notification pushed to ' + data.name + '\',\'success\');document.getElementById(\'cp-ai-msg-overlay\').remove()" style="padding:6px 14px;border-radius:6px;border:1px solid #059669;background:#059669;color:#fff;cursor:pointer;font-size:13px"><i class="fas fa-bell"></i> Portal Notification</button>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #e5e7eb;padding-top:16px">' +
+          '<button onclick="p7Toast(\'Message copied to clipboard\',\'info\')" style="padding:8px 16px;border-radius:8px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:13px;color:#374151"><i class="fas fa-copy"></i> Copy</button>' +
+          '<button onclick="p7Toast(\'AI regenerating with alternate tone…\',\'info\')" style="padding:8px 16px;border-radius:8px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:13px;color:#374151"><i class="fas fa-redo"></i> Regenerate</button>' +
+          '<button onclick="document.getElementById(\'cp-ai-msg-overlay\').remove()" style="padding:8px 16px;border-radius:8px;border:1px solid #d1d5db;background:#fff;cursor:pointer;font-size:13px;color:#374151">Close</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── Portal: Send Portal Invite ── */
+function cpSendPortalInvite(claimId) {
+  p7Toast('<i class="fas fa-paper-plane"></i> Portal invite sent for ' + claimId + ' — email & SMS dispatched · Link valid 30 days', 4000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> Claimant notified via preferred channel · Portal access activated', 3000);
+  }, 1500);
+}
+
+/* ── Portal: Notify Claimant ── */
+function cpNotifyClaimant(claimId) {
+  p7Toast('<i class="fas fa-bell"></i> Re-engagement notification sent for ' + claimId + ' — AI-personalized message delivered via email · Abandonment risk flagged to adjuster', 4500);
+}
+
+/* ── Portal: Copy Portal Link ── */
+function cpCopyPortalLink(claimId) {
+  var url = 'https://portal.nyl-claims.com/claimant/' + claimId.toLowerCase().replace(/-/g, '') + '?token=ai' + Math.random().toString(36).substring(2, 8);
+  p7Toast('<i class="fas fa-copy"></i> Portal link copied: ' + url, 4000);
+}
+
+/* ── Portal: Send All Pending Invites ── */
+function cpSendAllInvites() {
+  p7Toast('<i class="fas fa-paper-plane"></i> Sending portal invites to 2 pending claimants…', 2500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> All invites sent — Robert B. (CLM-2026-0040) &amp; Margaret T. (CLM-2026-0038) notified · Links valid 30 days', 5000);
+  }, 2000);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    STP — STRAIGHT-THROUGH PROCESSING
    ═══════════════════════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════════════════════════
@@ -55632,7 +55763,7 @@ console.log('Advisory Accounts module loaded — ' + advAccounts.length + ' acco
 
   /* clmSwitchTab — ID-based selection only; never touches .pol-tab class
      so it cannot interfere with polSwitchTab on the Policies page        */
-  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved', 'subrogation', 'workload'];
+  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved', 'subrogation', 'workload', 'portal'];
 
   window.clmSwitchTab = function(tab) {
     CLM_TABS.forEach(function(t) {

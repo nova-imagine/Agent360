@@ -5909,6 +5909,10 @@ function ClaimsPage() {
           <i class="fas fa-users-cog"></i> Workload
           <span class="pol-tab-count" style="background:#e0e7ff;color:#4f46e5;">5</span>
         </button>
+        <button class="pol-tab" id="clm-tab-portal" onclick="clmSwitchTab('portal')">
+          <i class="fas fa-user-circle"></i> Portal
+          <span class="pol-tab-count" style="background:#d1fae5;color:#065f46;">5</span>
+        </button>
       </div>
 
       {/* ════════════════════════════════════════════════════════
@@ -6624,50 +6628,9 @@ function ClaimsPage() {
 
       {/* ════════════════════════════════════════════════════════
           TAB 3 — INTELLIGENCE
-          Proactive AI Detection (claims-only: death + SLA + coverage)
-          Smart Doc Request Automation
+          AI Command Centre: Proactive Detection · Risk Heatmap · Predictive Insights
           ════════════════════════════════════════════════════════ */}
       <div class="pol-tab-panel" id="clm-panel-intelligence" style="display:none">
-
-        {/* ── IDP Portfolio KPI Strip ── */}
-        <div class="idp-intel-strip">
-          <div class="idp-intel-strip-title">
-            <div class="idp-intel-strip-icon"><i class="fas fa-file-import"></i></div>
-            <div>
-              <div class="idp-intel-strip-name">Intelligent Document Processing <span class="idp-intel-live">● LIVE</span></div>
-              <div class="idp-intel-strip-sub">AI-powered extraction across all active claims · Last scan <span id="idp-last-scan">3 mins ago</span></div>
-            </div>
-          </div>
-          <div class="idp-intel-kpis">
-            <div class="idp-intel-kpi" onclick="openClaimModal('CLM-2026-0041','docs')" title="Open Documents tab">
-              <span class="idp-intel-kpi-val green">5</span>
-              <span class="idp-intel-kpi-lbl">Docs Verified</span>
-            </div>
-            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-clock&quot;></i> 6 documents awaiting upload · CLM-2026-0041, CLM-2026-0028, CLM-2026-0035',3500)">
-              <span class="idp-intel-kpi-val orange">6</span>
-              <span class="idp-intel-kpi-lbl">Pending Upload</span>
-            </div>
-            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-cog fa-spin&quot;></i> 4 documents currently being AI-extracted · ETA ~2 mins',2800)">
-              <span class="idp-intel-kpi-val purple">4</span>
-              <span class="idp-intel-kpi-lbl">AI Extracting</span>
-            </div>
-            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-chart-line&quot;></i> IDP NLP accuracy: 94% avg across 15 documents processed this week',3000)">
-              <span class="idp-intel-kpi-val blue">94%</span>
-              <span class="idp-intel-kpi-lbl">Accuracy Rate</span>
-            </div>
-            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-shield-check&quot;></i> 0 tamper incidents detected · All documents passed integrity check',2800)">
-              <span class="idp-intel-kpi-val green">0</span>
-              <span class="idp-intel-kpi-lbl">Tamper Alerts</span>
-            </div>
-            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-clock&quot;></i> Average AI extraction time: 1.8 min per document',2500)">
-              <span class="idp-intel-kpi-val teal">1.8m</span>
-              <span class="idp-intel-kpi-lbl">Avg Extract Time</span>
-            </div>
-          </div>
-          <button class="idp-intel-scan-btn" onclick="p7Toast('<i class=&quot;fas fa-cog fa-spin&quot;></i> Full IDP portfolio scan initiated',3000)">
-            <i class="fas fa-search"></i> Run Full Scan
-          </button>
-        </div>
 
         {/* Proactive AI Detection Engine — cleaned: lapse/renewal alerts removed */}
         <div class="proactive-alert-card">
@@ -6760,138 +6723,298 @@ function ClaimsPage() {
           </div>
         </div>
 
-        {/* Smart Doc Request Automation */}
-        <div class="smart-doc-panel">
-          <div class="sdp-header">
-            <div class="sdp-title-area">
-              <div class="sdp-icon"><i class="fas fa-paper-plane"></i></div>
+        {/* ════════════════════════════════════════════════════
+            SECTION 2 — AI CLAIMS RISK HEATMAP
+            Portfolio-ranked risk view across all active claims
+            ════════════════════════════════════════════════════ */}
+        <div class="ai-heatmap-panel">
+          <div class="ai-hm-header">
+            <div class="ai-hm-header-left">
+              <div class="ai-hm-icon"><i class="fas fa-fire-alt"></i></div>
               <div>
-                <div class="sdp-title">Smart Doc Request Automation</div>
-                <div class="sdp-sub">AI drafts and sends personalized document reminder emails · Last run: 4 mins ago</div>
+                <div class="ai-hm-title">AI Claims Risk Heatmap <span class="ai-hm-live">● LIVE</span></div>
+                <div class="ai-hm-sub">All active claims ranked by composite AI risk score · Fraud · SLA · Liability · Doc completeness · Updated just now</div>
               </div>
             </div>
-            <div class="sdp-stats">
-              <div class="sdp-stat"><span class="sdp-stat-val orange">3</span><span class="sdp-stat-lbl">Pending Requests</span></div>
-              <div class="sdp-stat"><span class="sdp-stat-val green">8</span><span class="sdp-stat-lbl">Sent This Week</span></div>
-              <div class="sdp-stat"><span class="sdp-stat-val blue">67%</span><span class="sdp-stat-lbl">Response Rate</span></div>
+            <div class="ai-hm-header-stats">
+              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val red">3</span><span class="ai-hm-hstat-lbl">Critical</span></div>
+              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val orange">4</span><span class="ai-hm-hstat-lbl">High Risk</span></div>
+              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val blue">7</span><span class="ai-hm-hstat-lbl">Moderate</span></div>
+              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val green">3</span><span class="ai-hm-hstat-lbl">Low Risk</span></div>
             </div>
-            <button class="btn btn-ai sdp-run-btn" onclick="runSmartDocRequests()"><i class="fas fa-paper-plane"></i> Send All Reminders</button>
+            <button class="ai-hm-export-btn" onclick="p7Toast('Risk heatmap report exported to PDF',2500)"><i class="fas fa-file-pdf"></i> Export Report</button>
           </div>
-          <div class="sdp-queue">
-            <div class="sdp-item sdp-urgent">
-              <div class="sdp-item-icon"><i class="fas fa-file-signature"></i></div>
-              <div class="sdp-item-content">
-                <div class="sdp-item-title">Identity Documents — Susan Chen (Beneficiary)</div>
-                <div class="sdp-item-meta">CLM-2026-0041 · Robert Chen · Death Benefit $1M · Overdue 1 day</div>
-                <div class="sdp-item-draft">"Dear Susan Chen, to process your $1,000,000 death benefit claim, we need your government-issued photo ID and bank account details. These are the final steps before we can release your payment…"</div>
+
+          {/* Column headers */}
+          <div class="ai-hm-table-header">
+            <div class="ai-hm-col-claim">Claim</div>
+            <div class="ai-hm-col-type">Type</div>
+            <div class="ai-hm-col-score">AI Risk Score</div>
+            <div class="ai-hm-col-fraud">Fraud</div>
+            <div class="ai-hm-col-sla">SLA</div>
+            <div class="ai-hm-col-docs">Docs</div>
+            <div class="ai-hm-col-action">Action</div>
+          </div>
+
+          {/* Row 1 — CRITICAL */}
+          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0041','ci')">
+            <div class="ai-hm-col-claim">
+              <div class="ai-hm-risk-bar critical"></div>
+              <div>
+                <div class="ai-hm-claim-id">CLM-2026-0041</div>
+                <div class="ai-hm-claim-name">Robert Chen · Death Benefit</div>
               </div>
-              <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0041','Susan Chen')"><i class="fas fa-paper-plane"></i> Send</button>
             </div>
-            <div class="sdp-item sdp-urgent">
-              <div class="sdp-item-icon"><i class="fas fa-file-medical"></i></div>
-              <div class="sdp-item-content">
-                <div class="sdp-item-title">Terminal Illness Certification — Dr. Hernandez Office</div>
-                <div class="sdp-item-meta">CLM-2026-0028 · Maria Gonzalez · ADB $120,000 · 9 days pending</div>
-                <div class="sdp-item-draft">"Dear Dr. Hernandez's Office, we are processing a compassionate accelerated benefit claim for Maria Gonzalez. We respectfully request expedited completion of the terminal illness certification form…"</div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
+            <div class="ai-hm-col-score">
+              <div class="ai-hm-score-wrap">
+                <span class="ai-hm-score-num critical">91</span>
+                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:91%;background:#dc2626"></div></div>
               </div>
-              <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0028','Dr. Hernandez')"><i class="fas fa-paper-plane"></i> Send</button>
             </div>
-            <div class="sdp-item sdp-normal">
-              <div class="sdp-item-icon"><i class="fas fa-file-alt"></i></div>
-              <div class="sdp-item-content">
-                <div class="sdp-item-title">Attending Physician Statement — Dr. Hernandez</div>
-                <div class="sdp-item-meta">CLM-2026-0035 · Maria Gonzalez · Disability $4,200/mo · 22 days pending</div>
-                <div class="sdp-item-draft">"Dear Dr. Hernandez, we are processing a disability insurance claim for your patient Maria Gonzalez. Please complete the Attending Physician Statement to allow us to begin benefit payments…"</div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge red">72 <i class="fas fa-arrow-up"></i></span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge red"><i class="fas fa-fire"></i> Breach</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
+              <button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-arrow-circle-right"></i> Action</button>
+            </div>
+          </div>
+
+          {/* Row 2 — CRITICAL */}
+          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0025','ci')">
+            <div class="ai-hm-col-claim">
+              <div class="ai-hm-risk-bar critical"></div>
+              <div>
+                <div class="ai-hm-claim-id">CLM-2026-0025</div>
+                <div class="ai-hm-claim-name">Kevin Park · Death Benefit</div>
               </div>
-              <button class="btn-sdp-send" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
+            <div class="ai-hm-col-score">
+              <div class="ai-hm-score-wrap">
+                <span class="ai-hm-score-num critical">88</span>
+                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:88%;background:#dc2626"></div></div>
+              </div>
+            </div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge red">78 <i class="fas fa-arrow-up"></i></span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-exclamation-triangle"></i> Warn</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge red">1/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
+              <button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-arrow-circle-right"></i> Action</button>
+            </div>
+          </div>
+
+          {/* Row 3 — CRITICAL */}
+          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0028','ci')">
+            <div class="ai-hm-col-claim">
+              <div class="ai-hm-risk-bar critical"></div>
+              <div>
+                <div class="ai-hm-claim-id">CLM-2026-0028</div>
+                <div class="ai-hm-claim-name">Maria Gonzalez · ADB</div>
+              </div>
+            </div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge adb"><i class="fas fa-heartbeat"></i> ADB</span></div>
+            <div class="ai-hm-col-score">
+              <div class="ai-hm-score-wrap">
+                <span class="ai-hm-score-num critical">82</span>
+                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:82%;background:#dc2626"></div></div>
+              </div>
+            </div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge orange">45</span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-exclamation-triangle"></i> 5d</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
+              <button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-arrow-circle-right"></i> Action</button>
+            </div>
+          </div>
+
+          {/* Row 4 — HIGH */}
+          <div class="ai-hm-row ai-hm-high" onclick="openClaimModal('CLM-2026-0038','ci')">
+            <div class="ai-hm-col-claim">
+              <div class="ai-hm-risk-bar high"></div>
+              <div>
+                <div class="ai-hm-claim-id">CLM-2026-0038</div>
+                <div class="ai-hm-claim-name">Linda Park · LTC</div>
+              </div>
+            </div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge ltc"><i class="fas fa-bed"></i> LTC</span></div>
+            <div class="ai-hm-col-score">
+              <div class="ai-hm-score-wrap">
+                <span class="ai-hm-score-num high">67</span>
+                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:67%;background:#d97706"></div></div>
+              </div>
+            </div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge orange">55</span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
+              <button class="ai-hm-act-btn high" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i> Review</button>
+            </div>
+          </div>
+
+          {/* Row 5 — HIGH */}
+          <div class="ai-hm-row ai-hm-high" onclick="openClaimModal('CLM-2026-0035','ci')">
+            <div class="ai-hm-col-claim">
+              <div class="ai-hm-risk-bar high"></div>
+              <div>
+                <div class="ai-hm-claim-id">CLM-2026-0035</div>
+                <div class="ai-hm-claim-name">Maria Gonzalez · Disability</div>
+              </div>
+            </div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge disability"><i class="fas fa-wheelchair"></i> Disability</span></div>
+            <div class="ai-hm-col-score">
+              <div class="ai-hm-score-wrap">
+                <span class="ai-hm-score-num high">61</span>
+                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:61%;background:#d97706"></div></div>
+              </div>
+            </div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">28</span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-clock"></i> 8d</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
+              <button class="ai-hm-act-btn high" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i> Review</button>
+            </div>
+          </div>
+
+          {/* Collapsed rows toggle */}
+          <div class="ai-hm-row-more" onclick="toggleHeatmapExpand(this)">
+            <i class="fas fa-chevron-down"></i> Show 9 more claims (7 Moderate · 2 Low Risk)
+          </div>
+
+          {/* Collapsed rows — hidden by default */}
+          <div class="ai-hm-extra-rows" style="display:none">
+            <div class="ai-hm-row ai-hm-moderate" onclick="openClaimModal('CLM-2026-0033','ci')">
+              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar moderate"></div><div><div class="ai-hm-claim-id">CLM-2026-0033</div><div class="ai-hm-claim-name">James Whitfield · LTC</div></div></div>
+              <div class="ai-hm-col-type"><span class="ai-hm-type-badge ltc"><i class="fas fa-bed"></i> LTC</span></div>
+              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num moderate">48</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:48%;background:#2563eb"></div></div></div></div>
+              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">22</span></div>
+              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
+              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">4/4</span></div>
+              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn moderate" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review</button></div>
+            </div>
+            <div class="ai-hm-row ai-hm-moderate" onclick="openClaimModal('CLM-2026-0031','ci')">
+              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar moderate"></div><div><div class="ai-hm-claim-id">CLM-2026-0031</div><div class="ai-hm-claim-name">Thomas Rivera · Death Benefit</div></div></div>
+              <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
+              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num moderate">44</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:44%;background:#2563eb"></div></div></div></div>
+              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">18</span></div>
+              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
+              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">4/4</span></div>
+              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn moderate" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i> Review</button></div>
+            </div>
+            <div class="ai-hm-row ai-hm-low" onclick="openClaimModal('CLM-2026-0049','ci')">
+              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar low"></div><div><div class="ai-hm-claim-id">CLM-2026-0049</div><div class="ai-hm-claim-name">Sarah Kim · Disability</div></div></div>
+              <div class="ai-hm-col-type"><span class="ai-hm-type-badge disability"><i class="fas fa-wheelchair"></i> Disability</span></div>
+              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num low">21</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:21%;background:#059669"></div></div></div></div>
+              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">12</span></div>
+              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
+              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">3/3</span></div>
+              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn low" onclick="openClaimModal('CLM-2026-0049','view')"><i class="fas fa-eye"></i> Review</button></div>
             </div>
           </div>
         </div>
 
-        {/* ── GAP 8: CLAIMANT PORTAL / STATUS SELF-SERVICE ── */}
-        <div class="claimant-portal-panel" id="claimant-portal-panel">
-          <div class="cp-header">
-            <div class="cp-header-left">
-              <div class="cp-icon"><i class="fas fa-user-circle"></i></div>
+        {/* ════════════════════════════════════════════════════
+            SECTION 3 — AI PREDICTIVE INSIGHTS
+            Cross-claim pattern analysis & forward-looking signals
+            ════════════════════════════════════════════════════ */}
+        <div class="ai-insights-panel">
+          <div class="ai-ins-header">
+            <div class="ai-ins-header-left">
+              <div class="ai-ins-icon"><i class="fas fa-lightbulb"></i></div>
               <div>
-                <div class="cp-title">Claimant Self-Service Portal <span class="cp-badge">AI-Powered</span></div>
-                <div class="cp-sub">Real-time status · document upload · 24/7 access · automated status notifications</div>
+                <div class="ai-ins-title">AI Predictive Insights</div>
+                <div class="ai-ins-sub">Cross-portfolio pattern analysis · Forward-looking risk signals · Generated 2 mins ago</div>
               </div>
             </div>
-            <button class="cp-configure-btn" onclick="p7Toast('Portal configuration panel opening…',2000)"><i class="fas fa-cog"></i> Configure</button>
+            <button class="ai-ins-refresh-btn" onclick="refreshAIInsights(this)"><i class="fas fa-sync-alt"></i> Refresh</button>
           </div>
-          <div class="cp-kpi-row">
-            <div class="cp-kpi"><div class="cp-kpi-val">5</div><div class="cp-kpi-lbl">Active Portal Links</div></div>
-            <div class="cp-kpi green"><div class="cp-kpi-val">3</div><div class="cp-kpi-lbl">Claimants Logged In (7d)</div></div>
-            <div class="cp-kpi blue"><div class="cp-kpi-val">8</div><div class="cp-kpi-lbl">Docs Uploaded via Portal</div></div>
-            <div class="cp-kpi orange"><div class="cp-kpi-val">2</div><div class="cp-kpi-lbl">Awaiting Portal Invite</div></div>
-          </div>
-          <div class="cp-claims-list">
-            <div class="cp-claim-row cp-portal-active">
-              <div class="cp-claim-info">
-                <div class="cp-claim-id">CLM-2026-0041</div>
-                <div class="cp-claim-client">Susan Chen (Beneficiary — Robert Chen)</div>
-                <div class="cp-portal-status"><i class="fas fa-circle" style="color:#059669;font-size:8px"></i> Portal Active · Last login: 2 hours ago</div>
+
+          <div class="ai-ins-grid">
+
+            {/* Insight 1 — Fraud Pattern Cluster */}
+            <div class="ai-ins-card ai-ins-fraud">
+              <div class="ai-ins-card-top">
+                <div class="ai-ins-card-icon"><i class="fas fa-project-diagram"></i></div>
+                <span class="ai-ins-card-tag fraud">Fraud Pattern</span>
+                <span class="ai-ins-confidence">AI Confidence: 84%</span>
               </div>
-              <div class="cp-portal-progress">
-                <div class="cp-progress-label">Docs submitted: <strong>2/4</strong></div>
-                <div class="cp-progress-bar-wrap"><div class="cp-progress-bar" style="width:50%;background:#d97706"></div></div>
+              <div class="ai-ins-card-title">Fraud Pattern Cluster Detected — 2 Claims</div>
+              <div class="ai-ins-card-body">
+                AI identified a shared signal cluster across <strong>CLM-2026-0041</strong> (Robert Chen) and <strong>CLM-2026-0025</strong> (Kevin Park): both policies modified within 8 months of death, both beneficiaries are non-immediate family, both fraud scores above 70. Pattern matches a known staged-death ring profile (confidence 84%).
               </div>
-              <div class="cp-claim-actions">
-                <button class="cp-act-btn primary" onclick="p7Toast('Status notification sent to Susan Chen via email + SMS',2800)"><i class="fas fa-bell"></i> Notify</button>
-                <button class="cp-act-btn ghost" onclick="p7Toast('Portal link copied: claims.nyl.com/status/CLM-2026-0041',2500)"><i class="fas fa-link"></i> Copy Link</button>
+              <div class="ai-ins-card-claims">
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','ci')">CLM-2026-0041</span>
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0025','ci')">CLM-2026-0025</span>
               </div>
-            </div>
-            <div class="cp-claim-row cp-portal-active">
-              <div class="cp-claim-info">
-                <div class="cp-claim-id">CLM-2026-0035</div>
-                <div class="cp-claim-client">Maria Gonzalez (Claimant)</div>
-                <div class="cp-portal-status"><i class="fas fa-circle" style="color:#059669;font-size:8px"></i> Portal Active · Last login: Yesterday</div>
-              </div>
-              <div class="cp-portal-progress">
-                <div class="cp-progress-label">Docs submitted: <strong>2/4</strong></div>
-                <div class="cp-progress-bar-wrap"><div class="cp-progress-bar" style="width:50%;background:#d97706"></div></div>
-              </div>
-              <div class="cp-claim-actions">
-                <button class="cp-act-btn primary" onclick="p7Toast('Status notification sent to Maria Gonzalez',2800)"><i class="fas fa-bell"></i> Notify</button>
-                <button class="cp-act-btn ghost" onclick="p7Toast('Portal link copied: claims.nyl.com/status/CLM-2026-0035',2500)"><i class="fas fa-link"></i> Copy Link</button>
+              <div class="ai-ins-card-actions">
+                <button class="ai-ins-act-btn primary" onclick="openSIUCaseModal('CLM-2026-0041')"><i class="fas fa-user-secret"></i> Refer Both to SIU</button>
+                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Fraud cluster analysis report generated',2500)"><i class="fas fa-file-alt"></i> Full Report</button>
               </div>
             </div>
-            <div class="cp-claim-row cp-portal-pending">
-              <div class="cp-claim-info">
-                <div class="cp-claim-id">CLM-2026-0025</div>
-                <div class="cp-claim-client">Kevin Park Estate (Beneficiary — TBD)</div>
-                <div class="cp-portal-status"><i class="fas fa-circle" style="color:#dc2626;font-size:8px"></i> No Portal Invite Sent · Legal Hold Active</div>
+
+            {/* Insight 2 — SLA Cascade Risk */}
+            <div class="ai-ins-card ai-ins-sla">
+              <div class="ai-ins-card-top">
+                <div class="ai-ins-card-icon"><i class="fas fa-clock"></i></div>
+                <span class="ai-ins-card-tag sla">SLA Cascade</span>
+                <span class="ai-ins-confidence">AI Confidence: 97%</span>
               </div>
-              <div class="cp-portal-progress">
-                <div class="cp-progress-label">Docs submitted: <strong>1/4</strong></div>
-                <div class="cp-progress-bar-wrap"><div class="cp-progress-bar" style="width:25%;background:#dc2626"></div></div>
+              <div class="ai-ins-card-title">3 Claims Likely to Breach SLA Within 72 Hours</div>
+              <div class="ai-ins-card-body">
+                Model projects <strong>CLM-2026-0041</strong> breaches NY §3420 tomorrow, <strong>CLM-2026-0028</strong> in 5 days. At current document collection velocity, <strong>CLM-2026-0035</strong> will miss its 45-day disability SLA unless an APS is received by Friday. Combined regulatory fine exposure: up to <strong>$15,000</strong>.
               </div>
-              <div class="cp-claim-actions">
-                <button class="cp-act-btn secondary" onclick="p7Toast('Note: Legal hold active — portal invite blocked until SIU clears hold',3500)"><i class="fas fa-ban"></i> Blocked</button>
-                <button class="cp-act-btn ghost" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i> View Claim</button>
+              <div class="ai-ins-card-claims">
+                <span class="ai-ins-claim-chip urgent" onclick="openClaimModal('CLM-2026-0041','notes')">CLM-2026-0041 ⚡</span>
+                <span class="ai-ins-claim-chip urgent" onclick="openClaimModal('CLM-2026-0028','notes')">CLM-2026-0028 ⚡</span>
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0035','notes')">CLM-2026-0035</span>
               </div>
-            </div>
-            <div class="cp-claim-row cp-portal-invite">
-              <div class="cp-claim-info">
-                <div class="cp-claim-id">CLM-2026-0033</div>
-                <div class="cp-claim-client">James Whitfield (Claimant)</div>
-                <div class="cp-portal-status"><i class="fas fa-clock" style="color:#d97706;font-size:11px"></i> Portal Invite Not Yet Sent</div>
-              </div>
-              <div class="cp-portal-progress">
-                <div class="cp-progress-label">Docs submitted: <strong>4/4 ✓</strong></div>
-                <div class="cp-progress-bar-wrap"><div class="cp-progress-bar" style="width:100%;background:#059669"></div></div>
-              </div>
-              <div class="cp-claim-actions">
-                <button class="cp-act-btn primary" onclick="p7Toast('Portal invite sent to James Whitfield — expires in 30 days',2800)"><i class="fas fa-paper-plane"></i> Send Invite</button>
-                <button class="cp-act-btn ghost" onclick="p7Toast('Portal link copied: claims.nyl.com/status/CLM-2026-0033',2500)"><i class="fas fa-link"></i> Copy Link</button>
+              <div class="ai-ins-card-actions">
+                <button class="ai-ins-act-btn primary" onclick="clmSwitchTab('active');filterClaimsBySLA()"><i class="fas fa-stopwatch"></i> Open SLA Queue</button>
+                <button class="ai-ins-act-btn ghost" onclick="p7Toast('SLA escalation emails sent to all 3 adjusters',2800)"><i class="fas fa-envelope"></i> Escalate All</button>
               </div>
             </div>
-          </div>
-          <div class="cp-footer">
-            <button class="cp-footer-btn primary" onclick="p7Toast('Bulk portal invites sent to all eligible claimants (3 sent)',3000)"><i class="fas fa-paper-plane"></i> Send All Pending Invites</button>
-            <button class="cp-footer-btn ghost" onclick="p7Toast('Portal activity report downloading…',2000)"><i class="fas fa-chart-bar"></i> View Portal Analytics</button>
-            <div class="cp-portal-url-preview"><i class="fas fa-globe"></i> <strong>Portal URL:</strong> claims.nyl.com/status/{"{claim-id}"}</div>
+
+            {/* Insight 3 — Reserve Deficiency */}
+            <div class="ai-ins-card ai-ins-reserve">
+              <div class="ai-ins-card-top">
+                <div class="ai-ins-card-icon"><i class="fas fa-piggy-bank"></i></div>
+                <span class="ai-ins-card-tag reserve">Reserve Risk</span>
+                <span class="ai-ins-confidence">AI Confidence: 91%</span>
+              </div>
+              <div class="ai-ins-card-title">Reserve Deficiency Predicted — $1.08M Under-Reserved</div>
+              <div class="ai-ins-card-body">
+                AI reserve model (IBNR + 8% buffer) flags <strong>CLM-2026-0041</strong> as under-reserved by <strong>$80,000</strong> relative to expected total liability including legal exposure. Portfolio-wide, 2 additional claims show reserve gaps totaling $1M. IFRS 17 adequacy test: <strong>FAIL</strong> for 3 claims.
+              </div>
+              <div class="ai-ins-card-claims">
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','payments')">CLM-2026-0041</span>
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0025','payments')">CLM-2026-0025</span>
+              </div>
+              <div class="ai-ins-card-actions">
+                <button class="ai-ins-act-btn primary" onclick="openClaimModal('CLM-2026-0041','payments')"><i class="fas fa-edit"></i> Adjust Reserves</button>
+                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Reserve adequacy report exported for actuarial review',2800)"><i class="fas fa-file-pdf"></i> Actuarial Report</button>
+              </div>
+            </div>
+
+            {/* Insight 4 — Post-Claim Coverage Opportunity */}
+            <div class="ai-ins-card ai-ins-opportunity">
+              <div class="ai-ins-card-top">
+                <div class="ai-ins-card-icon"><i class="fas fa-seedling"></i></div>
+                <span class="ai-ins-card-tag opportunity">Opportunity</span>
+                <span class="ai-ins-confidence">AI Confidence: 78%</span>
+              </div>
+              <div class="ai-ins-card-title">Post-Claim Revenue Opportunity — $1M Payout Window</div>
+              <div class="ai-ins-card-body">
+                Upon resolution of <strong>CLM-2026-0041</strong>, beneficiary <strong>Susan Chen</strong> (est. age 42) will receive $1,000,000 with no existing NYL coverage. AI models a 78% likelihood of conversion given estate complexity. Optimal outreach window: <strong>14–21 days post-payout</strong>. Recommended products: Whole Life, annuity, estate trust.
+              </div>
+              <div class="ai-ins-card-claims">
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','beneficiary')">CLM-2026-0041 — Susan Chen</span>
+              </div>
+              <div class="ai-ins-card-actions">
+                <button class="ai-ins-act-btn primary" onclick="p7Toast('Susan Chen added to post-claim outreach queue · Agent notified',3000)"><i class="fas fa-user-plus"></i> Add to Outreach</button>
+                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Full opportunity analysis opened',2500)"><i class="fas fa-chart-line"></i> Full Analysis</button>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -7742,6 +7865,385 @@ function ClaimsPage() {
         </div>
 
       </div>{/* end clm-panel-workload */}
+
+      {/* ══════════════════════════════════════════════════════════════════
+          PORTAL TAB — Claimant Self-Service Portal (AI-Powered)
+          AI abandonment risk · AI status messages · doc nudge · sentiment
+          ══════════════════════════════════════════════════════════════════ */}
+      <div class="pol-tab-panel cp-portal-panel" id="clm-panel-portal" style="display:none">
+
+        {/* ── Header ── */}
+        <div class="cp-header">
+          <div class="cp-header-left">
+            <div class="cp-icon"><i class="fas fa-user-circle"></i></div>
+            <div>
+              <div class="cp-title">
+                Claimant Self-Service Portal
+                <span class="cp-ai-badge"><i class="fas fa-robot"></i> AI-Powered</span>
+              </div>
+              <div class="cp-sub">Real-time status &middot; document upload &middot; 24/7 access &middot; AI-driven engagement scoring</div>
+            </div>
+          </div>
+          <div class="cp-header-actions">
+            <button class="cp-configure-btn" onclick="p7Toast('Portal configuration panel opening…','info')">
+              <i class="fas fa-cog"></i> Configure
+            </button>
+            <button class="cp-configure-btn" style="background:#4f46e5;color:#fff;border-color:#4f46e5" onclick="cpSendAllInvites()">
+              <i class="fas fa-paper-plane"></i> Send All Pending
+            </button>
+          </div>
+        </div>
+
+        {/* ── KPI Strip ── */}
+        <div class="cp-kpi-row">
+          <div class="cp-kpi cp-kpi-blue">
+            <div class="cp-kpi-val">5</div>
+            <div class="cp-kpi-lbl"><i class="fas fa-link"></i> Active Portal Links</div>
+          </div>
+          <div class="cp-kpi cp-kpi-green">
+            <div class="cp-kpi-val">3</div>
+            <div class="cp-kpi-lbl"><i class="fas fa-sign-in-alt"></i> Logged In (7 days)</div>
+          </div>
+          <div class="cp-kpi cp-kpi-purple">
+            <div class="cp-kpi-val">8</div>
+            <div class="cp-kpi-lbl"><i class="fas fa-file-upload"></i> Docs Uploaded</div>
+          </div>
+          <div class="cp-kpi cp-kpi-amber">
+            <div class="cp-kpi-val">2</div>
+            <div class="cp-kpi-lbl"><i class="fas fa-hourglass-half"></i> Awaiting Invite</div>
+          </div>
+          <div class="cp-kpi cp-kpi-red">
+            <div class="cp-kpi-val">68%</div>
+            <div class="cp-kpi-lbl"><i class="fas fa-chart-line"></i> Avg Completion</div>
+          </div>
+        </div>
+
+        {/* ── AI Abandonment Risk Section ── */}
+        <div class="cp-ai-section cp-abandonment-section">
+          <div class="cp-ai-section-header">
+            <div class="cp-ai-section-left">
+              <span class="cp-ai-section-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-exclamation-triangle"></i></span>
+              <div>
+                <div class="cp-ai-section-title">AI Abandonment Risk Scoring</div>
+                <div class="cp-ai-section-sub">ML model predicts dropout probability based on inactivity, doc gaps, and portal engagement signals</div>
+              </div>
+            </div>
+            <span class="cp-live-badge"><span class="cp-live-dot"></span> LIVE</span>
+          </div>
+          <div class="cp-abandon-grid">
+            {/* High risk */}
+            <div class="cp-abandon-card cp-abandon-high">
+              <div class="cp-abandon-top">
+                <div class="cp-abandon-name">Margaret T. (CLM-2026-0038)</div>
+                <div class="cp-abandon-score" style="color:#dc2626">87% dropout risk</div>
+              </div>
+              <div class="cp-abandon-bar-wrap">
+                <div class="cp-abandon-bar" style="width:87%;background:#ef4444"></div>
+              </div>
+              <div class="cp-abandon-signals">
+                <span class="cp-signal-chip cp-signal-red"><i class="fas fa-clock"></i> 14 days inactive</span>
+                <span class="cp-signal-chip cp-signal-red"><i class="fas fa-file-times"></i> 3 docs missing</span>
+                <span class="cp-signal-chip cp-signal-amber"><i class="fas fa-envelope-open"></i> 2 emails unread</span>
+              </div>
+              <div class="cp-abandon-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpNotifyClaimant('CLM-2026-0038')"><i class="fas fa-bell"></i> Re-engage Now</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="cpGenerateAIMessage('CLM-2026-0038')"><i class="fas fa-robot"></i> AI Message</button>
+              </div>
+            </div>
+            {/* Medium risk */}
+            <div class="cp-abandon-card cp-abandon-medium">
+              <div class="cp-abandon-top">
+                <div class="cp-abandon-name">James K. (CLM-2026-0041)</div>
+                <div class="cp-abandon-score" style="color:#d97706">52% dropout risk</div>
+              </div>
+              <div class="cp-abandon-bar-wrap">
+                <div class="cp-abandon-bar" style="width:52%;background:#f59e0b"></div>
+              </div>
+              <div class="cp-abandon-signals">
+                <span class="cp-signal-chip cp-signal-amber"><i class="fas fa-clock"></i> 6 days inactive</span>
+                <span class="cp-signal-chip cp-signal-amber"><i class="fas fa-file-times"></i> 1 doc pending</span>
+                <span class="cp-signal-chip cp-signal-green"><i class="fas fa-check-circle"></i> Portal opened 3×</span>
+              </div>
+              <div class="cp-abandon-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpNotifyClaimant('CLM-2026-0041')"><i class="fas fa-bell"></i> Send Reminder</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="cpGenerateAIMessage('CLM-2026-0041')"><i class="fas fa-robot"></i> AI Message</button>
+              </div>
+            </div>
+            {/* Low risk */}
+            <div class="cp-abandon-card cp-abandon-low">
+              <div class="cp-abandon-top">
+                <div class="cp-abandon-name">Sarah L. (CLM-2026-0039)</div>
+                <div class="cp-abandon-score" style="color:#16a34a">18% dropout risk</div>
+              </div>
+              <div class="cp-abandon-bar-wrap">
+                <div class="cp-abandon-bar" style="width:18%;background:#22c55e"></div>
+              </div>
+              <div class="cp-abandon-signals">
+                <span class="cp-signal-chip cp-signal-green"><i class="fas fa-clock"></i> Active today</span>
+                <span class="cp-signal-chip cp-signal-green"><i class="fas fa-check-circle"></i> All docs submitted</span>
+                <span class="cp-signal-chip cp-signal-green"><i class="fas fa-thumbs-up"></i> CSAT 4.8/5</span>
+              </div>
+              <div class="cp-abandon-actions">
+                <button class="cp-act-btn cp-act-ghost" onclick="cpGenerateAIMessage('CLM-2026-0039')"><i class="fas fa-robot"></i> AI Message</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="cpCopyPortalLink('CLM-2026-0039')"><i class="fas fa-copy"></i> Copy Link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Claimant Roster with AI Features ── */}
+        <div class="cp-ai-section">
+          <div class="cp-ai-section-header">
+            <div class="cp-ai-section-left">
+              <span class="cp-ai-section-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-users"></i></span>
+              <div>
+                <div class="cp-ai-section-title">Claimant Portal Roster</div>
+                <div class="cp-ai-section-sub">AI Nudge identifies the single most-blocking missing document per claimant &middot; Sentiment derived from message analysis</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cp-roster-table">
+            <div class="cp-roster-header">
+              <span>Claimant / Claim</span>
+              <span>Portal Status</span>
+              <span>AI Nudge (Blocking Doc)</span>
+              <span>Sentiment</span>
+              <span>Completion</span>
+              <span>Actions</span>
+            </div>
+
+            {/* Row 1 — Active, frustrated */}
+            <div class="cp-claim-row">
+              <div class="cp-claim-info">
+                <div class="cp-claim-avatar" style="background:#dbeafe;color:#1d4ed8">MT</div>
+                <div>
+                  <div class="cp-claim-name">Margaret T.</div>
+                  <div class="cp-claim-id">CLM-2026-0038 &middot; Life</div>
+                </div>
+              </div>
+              <div>
+                <span class="cp-portal-status cp-portal-inactive">Inactive 14d</span>
+              </div>
+              <div>
+                <span class="cp-nudge-badge"><i class="fas fa-robot"></i> Death Certificate</span>
+                <div class="cp-nudge-reason">Blocks payment release</div>
+              </div>
+              <div>
+                <span class="cp-sentiment cp-sentiment-frustrated"><i class="fas fa-frown"></i> Frustrated</span>
+              </div>
+              <div>
+                <div class="cp-progress-wrap">
+                  <div class="cp-progress-bar" style="width:35%"></div>
+                </div>
+                <div class="cp-progress-lbl">35% complete</div>
+              </div>
+              <div class="cp-row-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpSendPortalInvite('CLM-2026-0038')"><i class="fas fa-envelope"></i> Re-invite</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="cpCopyPortalLink('CLM-2026-0038')"><i class="fas fa-link"></i></button>
+              </div>
+            </div>
+
+            {/* Row 2 — Active, cooperative */}
+            <div class="cp-claim-row">
+              <div class="cp-claim-info">
+                <div class="cp-claim-avatar" style="background:#dcfce7;color:#15803d">JK</div>
+                <div>
+                  <div class="cp-claim-name">James K.</div>
+                  <div class="cp-claim-id">CLM-2026-0041 &middot; Disability</div>
+                </div>
+              </div>
+              <div>
+                <span class="cp-portal-status cp-portal-active">Active</span>
+              </div>
+              <div>
+                <span class="cp-nudge-badge"><i class="fas fa-robot"></i> Physician Form APS-7</span>
+                <div class="cp-nudge-reason">Needed for medical review</div>
+              </div>
+              <div>
+                <span class="cp-sentiment cp-sentiment-cooperative"><i class="fas fa-smile"></i> Cooperative</span>
+              </div>
+              <div>
+                <div class="cp-progress-wrap">
+                  <div class="cp-progress-bar" style="width:72%;background:#22c55e"></div>
+                </div>
+                <div class="cp-progress-lbl">72% complete</div>
+              </div>
+              <div class="cp-row-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpNotifyClaimant('CLM-2026-0041')"><i class="fas fa-bell"></i> Remind</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="cpCopyPortalLink('CLM-2026-0041')"><i class="fas fa-link"></i></button>
+              </div>
+            </div>
+
+            {/* Row 3 — Complete */}
+            <div class="cp-claim-row">
+              <div class="cp-claim-info">
+                <div class="cp-claim-avatar" style="background:#f3e8ff;color:#7e22ce">SL</div>
+                <div>
+                  <div class="cp-claim-name">Sarah L.</div>
+                  <div class="cp-claim-id">CLM-2026-0039 &middot; ADB</div>
+                </div>
+              </div>
+              <div>
+                <span class="cp-portal-status cp-portal-complete">Complete</span>
+              </div>
+              <div>
+                <span class="cp-nudge-badge cp-nudge-clear"><i class="fas fa-check-circle"></i> All docs received</span>
+                <div class="cp-nudge-reason">No action needed</div>
+              </div>
+              <div>
+                <span class="cp-sentiment cp-sentiment-cooperative"><i class="fas fa-smile"></i> Cooperative</span>
+              </div>
+              <div>
+                <div class="cp-progress-wrap">
+                  <div class="cp-progress-bar" style="width:100%;background:#22c55e"></div>
+                </div>
+                <div class="cp-progress-lbl">100% complete</div>
+              </div>
+              <div class="cp-row-actions">
+                <button class="cp-act-btn cp-act-ghost" onclick="p7Toast('Portal closed — claim complete','success')"><i class="fas fa-lock"></i> Close</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="cpCopyPortalLink('CLM-2026-0039')"><i class="fas fa-link"></i></button>
+              </div>
+            </div>
+
+            {/* Row 4 — Unresponsive, awaiting invite */}
+            <div class="cp-claim-row">
+              <div class="cp-claim-info">
+                <div class="cp-claim-avatar" style="background:#fee2e2;color:#991b1b">RB</div>
+                <div>
+                  <div class="cp-claim-name">Robert B.</div>
+                  <div class="cp-claim-id">CLM-2026-0040 &middot; LTC</div>
+                </div>
+              </div>
+              <div>
+                <span class="cp-portal-status cp-portal-pending">Invite Pending</span>
+              </div>
+              <div>
+                <span class="cp-nudge-badge cp-nudge-warn"><i class="fas fa-robot"></i> Care Facility Form</span>
+                <div class="cp-nudge-reason">Required for LTC benefits</div>
+              </div>
+              <div>
+                <span class="cp-sentiment cp-sentiment-unresponsive"><i class="fas fa-meh"></i> Unresponsive</span>
+              </div>
+              <div>
+                <div class="cp-progress-wrap">
+                  <div class="cp-progress-bar" style="width:0%;background:#ef4444"></div>
+                </div>
+                <div class="cp-progress-lbl">Not started</div>
+              </div>
+              <div class="cp-row-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpSendPortalInvite('CLM-2026-0040')"><i class="fas fa-paper-plane"></i> Send Invite</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="cpGenerateAIMessage('CLM-2026-0040')"><i class="fas fa-robot"></i></button>
+              </div>
+            </div>
+
+            {/* Row 5 — Active, neutral */}
+            <div class="cp-claim-row">
+              <div class="cp-claim-info">
+                <div class="cp-claim-avatar" style="background:#fef9c3;color:#92400e">EW</div>
+                <div>
+                  <div class="cp-claim-name">Eleanor W.</div>
+                  <div class="cp-claim-id">CLM-2026-0042 &middot; Life</div>
+                </div>
+              </div>
+              <div>
+                <span class="cp-portal-status cp-portal-active">Active</span>
+              </div>
+              <div>
+                <span class="cp-nudge-badge"><i class="fas fa-robot"></i> Beneficiary ID Proof</span>
+                <div class="cp-nudge-reason">Identity verification pending</div>
+              </div>
+              <div>
+                <span class="cp-sentiment cp-sentiment-neutral"><i class="fas fa-meh"></i> Neutral</span>
+              </div>
+              <div>
+                <div class="cp-progress-wrap">
+                  <div class="cp-progress-bar" style="width:55%;background:#f59e0b"></div>
+                </div>
+                <div class="cp-progress-lbl">55% complete</div>
+              </div>
+              <div class="cp-row-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpNotifyClaimant('CLM-2026-0042')"><i class="fas fa-bell"></i> Remind</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="cpCopyPortalLink('CLM-2026-0042')"><i class="fas fa-link"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── AI Status Message Generator ── */}
+        <div class="cp-ai-section cp-msg-section">
+          <div class="cp-ai-section-header">
+            <div class="cp-ai-section-left">
+              <span class="cp-ai-section-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-comment-dots"></i></span>
+              <div>
+                <div class="cp-ai-section-title">AI Status Message Generator</div>
+                <div class="cp-ai-section-sub">Generates personalized, empathetic status updates for each claimant based on claim stage, missing docs, and tone profile</div>
+              </div>
+            </div>
+          </div>
+          <div class="cp-msg-grid">
+            <div class="cp-msg-card">
+              <div class="cp-msg-card-top">
+                <span class="cp-msg-claimant">Margaret T. &mdash; CLM-2026-0038</span>
+                <span class="cp-msg-tone cp-tone-empathetic">Empathetic</span>
+              </div>
+              <div class="cp-msg-preview" id="cp-msg-preview-0038">
+                <span class="cp-msg-placeholder"><i class="fas fa-robot"></i> Click "Generate" to create a personalized AI message for this claimant</span>
+              </div>
+              <div class="cp-msg-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpGenerateAIMessage('CLM-2026-0038')"><i class="fas fa-robot"></i> Generate AI Message</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="p7Toast('Choose delivery channel first','info')"><i class="fas fa-paper-plane"></i> Send</button>
+              </div>
+            </div>
+            <div class="cp-msg-card">
+              <div class="cp-msg-card-top">
+                <span class="cp-msg-claimant">James K. &mdash; CLM-2026-0041</span>
+                <span class="cp-msg-tone cp-tone-friendly">Friendly</span>
+              </div>
+              <div class="cp-msg-preview" id="cp-msg-preview-0041">
+                <span class="cp-msg-placeholder"><i class="fas fa-robot"></i> Click "Generate" to create a personalized AI message for this claimant</span>
+              </div>
+              <div class="cp-msg-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpGenerateAIMessage('CLM-2026-0041')"><i class="fas fa-robot"></i> Generate AI Message</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="p7Toast('Choose delivery channel first','info')"><i class="fas fa-paper-plane"></i> Send</button>
+              </div>
+            </div>
+            <div class="cp-msg-card">
+              <div class="cp-msg-card-top">
+                <span class="cp-msg-claimant">Robert B. &mdash; CLM-2026-0040</span>
+                <span class="cp-msg-tone cp-tone-formal">Formal</span>
+              </div>
+              <div class="cp-msg-preview" id="cp-msg-preview-0040">
+                <span class="cp-msg-placeholder"><i class="fas fa-robot"></i> Click "Generate" to create a personalized AI message for this claimant</span>
+              </div>
+              <div class="cp-msg-actions">
+                <button class="cp-act-btn cp-act-primary" onclick="cpGenerateAIMessage('CLM-2026-0040')"><i class="fas fa-robot"></i> Generate AI Message</button>
+                <button class="cp-act-btn cp-act-ghost" onclick="p7Toast('Choose delivery channel first','info')"><i class="fas fa-paper-plane"></i> Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Footer ── */}
+        <div class="cp-footer">
+          <div class="cp-footer-left">
+            <span class="cp-footer-url"><i class="fas fa-globe"></i> portal.nyl-claims.com/claimant</span>
+            <button class="cp-act-btn cp-act-ghost" onclick="p7Toast('Portal URL copied to clipboard','success')"><i class="fas fa-copy"></i> Copy URL</button>
+          </div>
+          <div class="cp-footer-right">
+            <button class="cp-act-btn cp-act-ghost" onclick="p7Toast('Portal analytics dashboard opening…','info')">
+              <i class="fas fa-chart-bar"></i> View Portal Analytics
+            </button>
+            <button class="cp-act-btn cp-act-ghost" onclick="p7Toast('Exporting portal engagement report…','info')">
+              <i class="fas fa-download"></i> Export Report
+            </button>
+            <button class="cp-act-btn cp-act-primary" onclick="cpSendAllInvites()">
+              <i class="fas fa-paper-plane"></i> Send All Pending Invites
+            </button>
+          </div>
+        </div>
+
+      </div>{/* end clm-panel-portal */}
 
       {/* ── AI Assignment Score Detail Modal ── */}
       <div class="wl-ai-modal-overlay" id="wl-assign-modal-overlay" style="display:none" onclick="closeAIAssignmentModal()">
