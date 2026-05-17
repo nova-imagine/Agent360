@@ -22,7 +22,7 @@ function navigateTo(page) {
     clients: 'Client 360',
     prospects: 'Prospect Pipeline',
     policies: 'Policy Management',
-    'ai-agents': 'AI Copilot Hub',
+    'ai-agents': 'Agentic AI',
     campaigns: 'Campaigns',
     upsell: 'Growth Opportunities',
     alerts: 'Policy Alerts',
@@ -54,7 +54,7 @@ function navigateTo(page) {
     clients: 'Home / Client 360',
     prospects: 'Home / Sales / Prospects',
     policies: 'Home / Policies',
-    'ai-agents': 'Home / AI Copilots',
+    'ai-agents': 'Home / Agentic AI',
     campaigns: 'Home / Marketing / Campaigns',
     upsell: 'Home / Sales / Growth Opportunities',
     alerts: 'Home / Service / Policy Alerts',
@@ -16179,7 +16179,7 @@ const _searchIndex = [
   { type:'page', label:'Reports',        sub:'Revenue & performance',    action:()=>navigateTo('reports') },
   { type:'page', label:'AI Insights',    sub:'AI Impact Scorecard',      action:()=>navigateTo('ai-insights') },
   { type:'page', label:'Products',       sub:'NYL product portfolio',    action:()=>navigateTo('products') },
-  { type:'page', label:'AI Copilots',    sub:'AI Copilot Hub',           action:()=>navigateTo('ai-agents') },
+  { type:'page', label:'Agentic AI',     sub:'Copilots · Workflows · Builder', action:()=>navigateTo('ai-agents') },
 ];
 
 const _searchIconMap = { client:'fa-user', policy:'fa-file-contract', claim:'fa-gavel', meeting:'fa-calendar-check', page:'fa-th-large' };
@@ -17627,7 +17627,7 @@ const _prefTabContent = {
         <div class="pref-shortcut-row"><span class="pref-shortcut-action">Go to Pipeline</span><kbd>G</kbd><kbd>P</kbd></div>
         <div class="pref-shortcut-row"><span class="pref-shortcut-action">Go to Calendar</span><kbd>G</kbd><kbd>L</kbd></div>
         <div class="pref-shortcut-row"><span class="pref-shortcut-action">Toggle Notifications</span><kbd>N</kbd></div>
-        <div class="pref-shortcut-row"><span class="pref-shortcut-action">Open AI Copilot</span><kbd>A</kbd></div>
+        <div class="pref-shortcut-row"><span class="pref-shortcut-action">Open Agentic AI</span><kbd>A</kbd></div>
         <div class="pref-shortcut-row"><span class="pref-shortcut-action">Close modal</span><kbd>Esc</kbd></div>
       </div>
     </div>`,
@@ -19259,9 +19259,9 @@ function settingsFontSize(size) {
    ════════════════════════════════════════════════════════════════ */
 
 const _helpArticles = {
-  'getting-started': { title: 'Getting Started with NOVA Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore Client 360 to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The AI Copilots tab gives context-aware AI for any client or deal. Use G+D/G+C/G+P shortcuts to jump between pages, and ⌘, (or Settings & Preferences from your profile) to configure notifications and AI behaviour.' },
+  'getting-started': { title: 'Getting Started with NOVA Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore Client 360 to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The Agentic AI section gives context-aware copilots, workflows and agent building for any client or deal. Use G+D/G+C/G+P shortcuts to jump between pages, and ⌘, (or Settings & Preferences from your profile) to configure notifications and AI behaviour.' },
   'ai-guide': { title: 'AI Features Guide', body: 'NOVA Agent 360 includes 6 AI domains: Underwriting STP (73% auto-approval), Retention Intelligence (67-day lapse prediction), Claims Automation (IDP document processing, 4-tab layout), Proactive Alert Engine (obituary + NBA detection), Investment Advisory AI, and Meeting Intelligence. View your AI Scorecard in AI Insights, and launch NOVA AI directly via the Launch NOVA AI button. Growth Opportunities shows AI scores (0–100) per client.' },
-  'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Sales Pipeline · G+A: AI Copilots · G+R: Reports · G+I: AI Insights · G+L: AI Planner · G+G: Growth Opportunities · ⌘K: Spotlight Search · Esc: Close modal · ⌘,: Settings · ?: Show Help' },
+  'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Sales Pipeline · G+A: Agentic AI · G+R: Reports · G+I: AI Insights · G+L: AI Planner · G+G: Growth Opportunities · ⌘K: Spotlight Search · Esc: Close modal · ⌘,: Settings · ?: Show Help' },
   'video-tutorials': { title: 'Video Tutorials', body: 'Video walkthroughs are available on the NYL internal portal. Topics include: Setting up your client profile, Using AI agents for underwriting, Understanding your AI Scorecard, and Configuring notifications. Contact support for access.' },
   'release-notes': { title: 'Q2 2026 Release Notes', body: 'New: Sales Pipeline 5-tab view (Kanban/List/Focus/Analytics/Lifecycle) · Lifecycle tab merges Journey Pipeline into lead-to-growth kanban · Growth Opportunities (AI score chips 0–100 per client) · Claims 4-tab redesign · NOVA AI launch link in AI Insights · Settings Data & Privacy tab · Improved: Navigation (HOME, AI Planner, no Insurance divider) · Phase 4 Application Queue fix · Fixed: Sales Pipeline queue blank on load' },
   'uw-guide': { title: 'Underwriting Pipeline Guide', body: 'The Underwriting STP Engine auto-approves applications scoring below the risk threshold. Applications above threshold route to manual review with AI-generated risk summaries. APS orders are avoided where AI confidence is high — saving $450/case. Current STP rate: 73% (18 APS cases avoided/month).' },

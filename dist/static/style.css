@@ -48913,3 +48913,73 @@ kbd {
 }
 
 /* END PASS 17 */
+
+/* ════════════════════════════════════════════════════════════════
+   PASS 18 — Simplified hero right: capability strip + nav rename
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Capability strip — replaces marketplace button ── */
+.aah-capability-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 22px;
+  padding: 5px 10px 5px 6px;
+  margin-bottom: 6px;
+}
+
+/* Separator dot */
+.aah-cap-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+
+/* Each capability pill */
+.aah-cap-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 9px 3px 7px;
+  border-radius: 16px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* Layer 1 — teal */
+.aah-cap-mkt {
+  background: rgba(8,145,178,0.28);
+  color: #a5f3fc;
+  border: 1px solid rgba(6,182,212,0.35);
+}
+.aah-cap-mkt i { color: #67e8f9; font-size: 9.5px; }
+
+/* Layer 2 — gold */
+.aah-cap-hub {
+  background: rgba(251,191,36,0.22);
+  color: #fde68a;
+  border: 1px solid rgba(251,191,36,0.35);
+}
+.aah-cap-hub i { color: #fbbf24; font-size: 9.5px; }
+
+/* Layer 3 — green */
+.aah-cap-wf {
+  background: rgba(5,150,105,0.22);
+  color: #a7f3d0;
+  border: 1px solid rgba(16,185,129,0.35);
+}
+.aah-cap-wf i { color: #6ee7b7; font-size: 9.5px; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .aah-capability-strip { flex-wrap: wrap; border-radius: 12px; padding: 6px 8px; }
+  .aah-cap-dot { display: none; }
+}
+
+/* END PASS 18 */

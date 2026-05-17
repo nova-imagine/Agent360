@@ -886,7 +886,7 @@ function Sidebar() {
           <span class="nav-badge ai-pulse">NEW</span>
         </a>
         <a class="nav-item ai-nav" onclick="navigateTo('ai-agents')" href="#">
-          <i class="fas fa-robot"></i><span>AI Copilots</span>
+          <i class="fas fa-robot"></i><span>Agentic AI</span>
           <span class="nav-badge ai-pulse">AI</span>
         </a>
 
@@ -7570,14 +7570,22 @@ function AIAgentsPage() {
           </div>
         </div>
         <div class="aah-hero-right-cluster">
-          <a class="aah-marketplace-btn" href="https://8888-i4ggffob3g710k2tcofuy-a402f90a.sandbox.novita.ai" target="_blank" rel="noopener noreferrer">
-            <i class="fas fa-store"></i>
-            <span class="aah-mkt-text">
-              <span class="aah-mkt-label">NOVA Agent Marketplace</span>
-              <span class="aah-mkt-sub">Build · Train · Deploy Agents</span>
-            </span>
-            <i class="fas fa-external-link-alt aah-mkt-ext"></i>
-          </a>
+          <div class="aah-capability-strip">
+            <div class="aah-cap-pill aah-cap-mkt">
+              <i class="fas fa-drafting-compass"></i>
+              <span>Agent Building &amp; Training</span>
+            </div>
+            <div class="aah-cap-dot"></div>
+            <div class="aah-cap-pill aah-cap-hub">
+              <i class="fas fa-robot"></i>
+              <span>AI Copilots</span>
+            </div>
+            <div class="aah-cap-dot"></div>
+            <div class="aah-cap-pill aah-cap-wf">
+              <i class="fas fa-cogs"></i>
+              <span>Agentic Workflows</span>
+            </div>
+          </div>
           <div class="aah-hero-status">
             <span class="aah-online-dot"></span>
             <span class="aah-online-label">AI Online · GPT-4o</span>
@@ -14988,7 +14996,7 @@ function HelpPage() {
               <div class="help-shortcut-row"><kbd>G D</kbd><span>Go to Dashboard</span></div>
               <div class="help-shortcut-row"><kbd>G C</kbd><span>Go to Clients</span></div>
               <div class="help-shortcut-row"><kbd>G P</kbd><span>Go to Sales Pipeline</span></div>
-              <div class="help-shortcut-row"><kbd>G A</kbd><span>Go to AI Copilots</span></div>
+              <div class="help-shortcut-row"><kbd>G A</kbd><span>Go to Agentic AI</span></div>
               <div class="help-shortcut-row"><kbd>⌘K</kbd><span>Spotlight Search</span></div>
               <div class="help-shortcut-row"><kbd>Esc</kbd><span>Close any modal</span></div>
               <div class="help-shortcut-row"><kbd>G R</kbd><span>Go to Reports</span></div>
