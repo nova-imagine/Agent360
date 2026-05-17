@@ -48359,3 +48359,209 @@ kbd {
 }
 
 /* END PASS 13 */
+
+/* ════════════════════════════════════════════════════════════════
+   PASS 16 — Three-Layer Architecture Strip + AI Copilots rename
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Architecture strip container ── */
+.aah-arch-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 0 0 18px 0;
+  padding: 0 24px;
+  background: linear-gradient(135deg, rgba(0,30,87,0.04) 0%, rgba(6,182,212,0.04) 100%);
+  border: 1px solid rgba(0,48,135,0.12);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* ── Each layer card ── */
+.aah-arch-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 18px 16px 14px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0;
+}
+.aah-arch-card:hover { background: rgba(0,48,135,0.04); }
+
+/* ── Arrow dividers ── */
+.aah-arch-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  color: rgba(100,116,139,0.45);
+  font-size: 13px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ── Layer tag pill ── */
+.aah-arch-layer-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  background: rgba(100,116,139,0.1);
+  border: 1px solid rgba(100,116,139,0.2);
+  border-radius: 20px;
+  padding: 2px 9px;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+.aah-arch-layer-here {
+  background: linear-gradient(135deg, #fef9c3, #fde68a);
+  color: #78350f;
+  border-color: #fbbf24;
+}
+
+/* ── Icon wrapper ── */
+.aah-arch-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+/* Layer 1 — Marketplace: teal */
+.aah-arch-icon-mkt {
+  background: linear-gradient(135deg, rgba(8,145,178,0.18), rgba(6,182,212,0.12));
+  color: #0891b2;
+  border: 1px solid rgba(6,182,212,0.35);
+}
+
+/* Layer 2 — Hub: gold/amber (active) */
+.aah-arch-icon-hub {
+  background: linear-gradient(135deg, rgba(251,191,36,0.25), rgba(245,158,11,0.15));
+  color: #d97706;
+  border: 1px solid rgba(251,191,36,0.45);
+  box-shadow: 0 0 0 3px rgba(251,191,36,0.15);
+}
+
+/* Layer 3 — Workflows: green */
+.aah-arch-icon-wf {
+  background: linear-gradient(135deg, rgba(5,150,105,0.18), rgba(16,185,129,0.12));
+  color: #059669;
+  border: 1px solid rgba(16,185,129,0.35);
+}
+
+/* ── Body text ── */
+.aah-arch-body { width: 100%; }
+.aah-arch-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 3px;
+  line-height: 1.2;
+}
+.aah-arch-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+/* ── Pill tags inside each card ── */
+.aah-arch-pills {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.aah-arch-pills span {
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(100,116,139,0.09);
+  color: #475569;
+  border: 1px solid rgba(100,116,139,0.18);
+  white-space: nowrap;
+}
+
+/* ── Action CTA at the bottom ── */
+.aah-arch-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: auto;
+  transition: transform 0.15s;
+}
+.aah-arch-card:hover .aah-arch-action { transform: translateY(-1px); }
+
+.aah-arch-action-mkt {
+  background: linear-gradient(135deg, rgba(8,145,178,0.15), rgba(6,182,212,0.1));
+  color: #0891b2;
+  border: 1px solid rgba(6,182,212,0.35);
+}
+.aah-arch-action-hub {
+  background: linear-gradient(135deg, #fef9c3, #fde68a);
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+.aah-arch-action-wf {
+  background: linear-gradient(135deg, rgba(5,150,105,0.12), rgba(16,185,129,0.08));
+  color: #059669;
+  border: 1px solid rgba(16,185,129,0.3);
+}
+
+/* ── Active (YOU ARE HERE) card: elevated gold glow ── */
+.aah-arch-active {
+  background: linear-gradient(180deg, rgba(254,243,199,0.35) 0%, rgba(255,255,255,0) 100%);
+  position: relative;
+}
+.aah-arch-active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+  border-radius: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .aah-arch-strip {
+    flex-direction: column;
+    padding: 12px 16px;
+    gap: 4px;
+  }
+  .aah-arch-card {
+    flex-direction: row;
+    text-align: left;
+    padding: 12px 10px;
+    gap: 12px;
+    align-items: center;
+  }
+  .aah-arch-arrow { display: none; }
+  .aah-arch-icon-wrap { margin-bottom: 0; flex-shrink: 0; }
+  .aah-arch-pills { justify-content: flex-start; }
+  .aah-arch-body { flex: 1; }
+  .aah-arch-desc { white-space: normal; }
+  .aah-arch-action { margin-top: 0; margin-left: auto; flex-shrink: 0; }
+  .aah-arch-layer-tag { margin-bottom: 4px; }
+}
+
+/* END PASS 16 */

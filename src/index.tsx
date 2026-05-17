@@ -262,7 +262,7 @@ function generateAIResponse(query: string): string {
   } else if (q.includes('advisory') || q.includes('wealth management') || q.includes('uma') || q.includes('business') || q.includes('nqdc') || q.includes('coli')) {
     return "🤝 **Advisory Services Opportunities**:\n\n**Wealth Management / UMA**:\n• **Linda Morrison** — $500K+ investable assets; excellent UMA candidate ($5K advisory fee/yr)\n\n**Estate Planning** (4 clients qualified):\n• **Linda Morrison** — $2M+ WL policy, trust beneficiary; comprehensive estate review overdue\n• **Robert Chen** — Business owner; succession planning + NQDC gap\n• **James Whitfield** — Multiple assets; will, POA, and trust review recommended\n\n**Business Services** (2 clients):\n• **Robert Chen** — NQDC, key-person insurance, buy-sell agreement funding\n• **James Whitfield** — Executive bonus plan (Section 162) and SERP review\n\nTotal advisory revenue potential: **$13K+/year**. Want me to draft client meeting agendas?"
   } else {
-    return `🤖 **AI Agent Response**:\n\nI've analyzed your query: *"${query}"*\n\nHere's what I found based on your complete book of business across all four service domains:\n\n🛡️ **Insurance**: 247 clients · 1,842 policies · $487K monthly premium · 23 renewals due\n📈 **Investments**: $4.2M AUM · 62 clients · 3 portfolio gaps · 2 rebalances pending\n🏖️ **Retirement**: 38 clients · 4 income gap alerts · $89K annuity premium\n🤝 **Advisory**: 59 clients · 4 estate planning opportunities · 2 UMA candidates\n\nTry asking me: "Show investment opportunities", "Which clients need retirement planning?", "Show estate planning alerts", or "Identify upsell opportunities"\n\nHow else can I assist you today?`
+    return `🤖 **AI Copilot Response**:\n\nI've analyzed your query: *"${query}"*\n\nHere's what I found based on your complete book of business across all four service domains:\n\n🛡️ **Insurance**: 247 clients · 1,842 policies · $487K monthly premium · 23 renewals due\n📈 **Investments**: $4.2M AUM · 62 clients · 3 portfolio gaps · 2 rebalances pending\n🏖️ **Retirement**: 38 clients · 4 income gap alerts · $89K annuity premium\n🤝 **Advisory**: 59 clients · 4 estate planning opportunities · 2 UMA candidates\n\nTry asking me: "Show investment opportunities", "Which clients need retirement planning?", "Show estate planning alerts", or "Identify upsell opportunities"\n\nHow else can I assist you today?`
   }
 }
 
@@ -652,7 +652,7 @@ function MainApp() {
             </div>
             <div class="oc-footer-right">
               <button class="oc-btn-schedule" onclick="scheduleOutreach()"><i class="fas fa-calendar-alt"></i> Schedule</button>
-              <button class="oc-btn-ai" onclick="askAIOutreach()"><i class="fas fa-robot"></i> Ask AI Agent</button>
+              <button class="oc-btn-ai" onclick="askAIOutreach()"><i class="fas fa-robot"></i> Ask AI Copilot</button>
               <button class="oc-btn-send" onclick="sendOutreach()"><i class="fas fa-paper-plane"></i> Send Now</button>
             </div>
           </div>
@@ -886,7 +886,7 @@ function Sidebar() {
           <span class="nav-badge ai-pulse">NEW</span>
         </a>
         <a class="nav-item ai-nav" onclick="navigateTo('ai-agents')" href="#">
-          <i class="fas fa-robot"></i><span>AI Agents</span>
+          <i class="fas fa-robot"></i><span>AI Copilots</span>
           <span class="nav-badge ai-pulse">AI</span>
         </a>
 
@@ -950,7 +950,7 @@ function DashboardPage() {
           <p>You have <strong>18 pending actions</strong> and <strong>3 urgent items</strong> today. · <span class="date-chip">Friday, April 10, 2026</span></p>
         </div>
         <div class="welcome-actions">
-          <button class="btn btn-primary" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Ask AI Agent</button>
+          <button class="btn btn-primary" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Ask AI Copilot</button>
         </div>
       </div>
 
@@ -1735,7 +1735,7 @@ function DashboardPage() {
         <div class="ai-highlight-banner" onclick="navigateTo('ai-agents')">
           <div class="ai-banner-icon"><i class="fas fa-robot"></i></div>
           <div class="ai-banner-content">
-            <h4>AI Agent has 9 cross-domain insights ready</h4>
+            <h4>AI Copilot has 9 cross-domain insights ready</h4>
             <p>$31.2K revenue potential · 3 investment gaps · 4 retirement planning opportunities · 2 estate planning alerts · 4 lapse risks</p>
           </div>
           <button class="btn btn-white" onclick="navigateTo('ai-insights')">View All AI Insights <i class="fas fa-arrow-right"></i></button>
@@ -7421,7 +7421,7 @@ function ClaimsPage() {
               </div>
             </div>
             <div class="ci-report-actions">
-              <button class="btn btn-ai" onclick="sendContextMessage('Full claims intelligence debrief — fraud, NLP findings, resolution forecast for all open claims','claims')"><i class="fas fa-robot"></i> Ask AI Agent</button>
+              <button class="btn btn-ai" onclick="sendContextMessage('Full claims intelligence debrief — fraud, NLP findings, resolution forecast for all open claims','claims')"><i class="fas fa-robot"></i> Ask AI Copilot</button>
               <button class="btn btn-outline-sm" onclick="closeCIReviewModal()"><i class="fas fa-times"></i> Close</button>
             </div>
           </div>
@@ -7544,7 +7544,7 @@ function AIAgentsPage() {
             <span class="aah-pulse-ring"></span>
           </div>
           <div class="aah-hero-text">
-            <h2 class="aah-hero-title">NOVA <span class="aah-hero-ai">AI Agent Hub</span></h2>
+            <h2 class="aah-hero-title">NOVA <span class="aah-hero-ai">AI Copilot Hub</span></h2>
             <p class="aah-hero-sub">Agentic AI Copilots — Insurance · Investments · Retirement · Advisory · My Book of Business</p>
           </div>
         </div>
@@ -7582,6 +7582,67 @@ function AIAgentsPage() {
             <span class="aah-online-dot"></span>
             <span class="aah-online-label">AI Online · GPT-4o</span>
             <button class="aah-settings-btn" onclick="switchSettingsTab('ai',null);navigateTo('settings')"><i class="fas fa-sliders-h"></i></button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Three-Layer Architecture Strip ── */}
+      <div class="aah-arch-strip">
+        {/* Layer 1 — NOVA Marketplace */}
+        <a class="aah-arch-card aah-arch-mkt" href="https://8888-i4ggffob3g710k2tcofuy-a402f90a.sandbox.novita.ai" target="_blank" rel="noopener noreferrer">
+          <div class="aah-arch-layer-tag">Layer 1</div>
+          <div class="aah-arch-icon-wrap aah-arch-icon-mkt">
+            <i class="fas fa-store"></i>
+          </div>
+          <div class="aah-arch-body">
+            <div class="aah-arch-name">NOVA Agent Marketplace</div>
+            <div class="aah-arch-desc">Build · Train · Deploy Agents</div>
+            <div class="aah-arch-pills">
+              <span>Agent Studio</span><span>Model Training</span><span>Deployment</span>
+            </div>
+          </div>
+          <div class="aah-arch-action aah-arch-action-mkt">
+            Open <i class="fas fa-external-link-alt"></i>
+          </div>
+        </a>
+
+        <div class="aah-arch-arrow"><i class="fas fa-chevron-right"></i></div>
+
+        {/* Layer 2 — AI Copilot Hub (YOU ARE HERE) */}
+        <div class="aah-arch-card aah-arch-hub aah-arch-active">
+          <div class="aah-arch-layer-tag aah-arch-layer-here">Layer 2 · You Are Here</div>
+          <div class="aah-arch-icon-wrap aah-arch-icon-hub">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="aah-arch-body">
+            <div class="aah-arch-name">AI Copilot Hub</div>
+            <div class="aah-arch-desc">Chat · Advise · Analyze</div>
+            <div class="aah-arch-pills">
+              <span>10 Copilots</span><span>Domain AI</span><span>Context Q&amp;A</span>
+            </div>
+          </div>
+          <div class="aah-arch-action aah-arch-action-hub">
+            Active <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+
+        <div class="aah-arch-arrow"><i class="fas fa-chevron-right"></i></div>
+
+        {/* Layer 3 — Agentic Workflows */}
+        <div class="aah-arch-card aah-arch-wf" onclick="document.querySelector('.automation-section-title')?.scrollIntoView({{behavior:'smooth'}})">
+          <div class="aah-arch-layer-tag">Layer 3</div>
+          <div class="aah-arch-icon-wrap aah-arch-icon-wf">
+            <i class="fas fa-cogs"></i>
+          </div>
+          <div class="aah-arch-body">
+            <div class="aah-arch-name">Agentic AI Workflows</div>
+            <div class="aah-arch-desc">Autonomous · Always-On · My Book</div>
+            <div class="aah-arch-pills">
+              <span>6 Active</span><span>Auto-Run</span><span>My Book</span>
+            </div>
+          </div>
+          <div class="aah-arch-action aah-arch-action-wf">
+            Scroll <i class="fas fa-arrow-down"></i>
           </div>
         </div>
       </div>
@@ -7656,7 +7717,7 @@ function AIAgentsPage() {
 
           {/* Panel header */}
           <div class="aah-panel-header">
-            <div class="aah-panel-title"><i class="fas fa-robot"></i> AI Agents</div>
+            <div class="aah-panel-title"><i class="fas fa-robot"></i> AI Copilots</div>
             <div class="aah-panel-meta">
               <span class="aah-panel-badge active">10 Active</span>
               <span class="aah-panel-badge standby">3 Standby</span>
@@ -7903,7 +7964,7 @@ function AIAgentsPage() {
             <div class="chat-msg bot">
               <div class="msg-avatar" style="background:#fef3c7;color:#d97706"><i class="fas fa-brain"></i></div>
               <div class="msg-bubble">
-                <p>Hello! I'm your <strong>NOVA Smart Advisor AI Agent</strong> — analyzing your complete book of business across all four domains.</p>
+                <p>Hello! I'm your <strong>NOVA Smart Advisor AI Copilot</strong> — analyzing your complete book of business across all four domains.</p>
                 <p><strong>Today's Snapshot:</strong> 10 active agents · 42 alerts · $43.6K AI revenue opportunity · 247 clients monitored</p>
                 <p>Select an agent on the left to focus, or ask me anything:</p>
                 <div class="quick-suggestions">
@@ -13888,7 +13949,7 @@ function AIImpactScorecardPage() {
             <div class="ais-tl-dot done-dot"></div>
             <div class="ais-tl-content">
               <div class="ais-tl-date">Q1 2026</div>
-              <div class="ais-tl-title">AI Agent Hub + Context Buttons</div>
+              <div class="ais-tl-title">AI Copilot Hub + Context Buttons</div>
               <div class="ais-tl-desc">8 specialised AI agents across all 4 domains. 30 context buttons for instant deep-link queries.</div>
             </div>
           </div>
@@ -14117,7 +14178,7 @@ function SettingsPage() {
           {/* ─── AI PREFERENCES ─── */}
           <div class="stab-panel" id="stab-ai">
             <div class="settings-section-title"><i class="fas fa-robot"></i> AI Preferences</div>
-            <p class="stg-sub">Control how AI Agents behave and which insights are surfaced for you.</p>
+            <p class="stg-sub">Control how AI Copilots behave and which insights are surfaced for you.</p>
 
             <div class="stg-notif-group">
               <div class="stg-notif-header">AI Features</div>
@@ -14753,7 +14814,7 @@ function HelpPage() {
         <div class="help-quick-card" onclick="helpOpenArticle('ai-guide')">
           <div class="help-quick-icon" style="background:#f5f3ff;color:#6d28d9"><i class="fas fa-robot"></i></div>
           <div class="help-quick-label">AI Features Guide</div>
-          <div class="help-quick-desc">Learn how to use AI Agents and Insights</div>
+          <div class="help-quick-desc">Learn how to use AI Copilots and Insights</div>
         </div>
         <div class="help-quick-card" onclick="helpOpenArticle('keyboard')">
           <div class="help-quick-icon" style="background:#dcfce7;color:#15803d"><i class="fas fa-keyboard"></i></div>
@@ -14860,7 +14921,7 @@ function HelpPage() {
               <div class="help-shortcut-row"><kbd>G D</kbd><span>Go to Dashboard</span></div>
               <div class="help-shortcut-row"><kbd>G C</kbd><span>Go to Clients</span></div>
               <div class="help-shortcut-row"><kbd>G P</kbd><span>Go to Sales Pipeline</span></div>
-              <div class="help-shortcut-row"><kbd>G A</kbd><span>Go to AI Agents</span></div>
+              <div class="help-shortcut-row"><kbd>G A</kbd><span>Go to AI Copilots</span></div>
               <div class="help-shortcut-row"><kbd>⌘K</kbd><span>Spotlight Search</span></div>
               <div class="help-shortcut-row"><kbd>Esc</kbd><span>Close any modal</span></div>
               <div class="help-shortcut-row"><kbd>G R</kbd><span>Go to Reports</span></div>

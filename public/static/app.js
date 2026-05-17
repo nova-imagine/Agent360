@@ -22,7 +22,7 @@ function navigateTo(page) {
     clients: 'Client 360',
     prospects: 'Prospect Pipeline',
     policies: 'Policy Management',
-    'ai-agents': 'AI Agent Hub',
+    'ai-agents': 'AI Copilot Hub',
     campaigns: 'Campaigns',
     upsell: 'Growth Opportunities',
     alerts: 'Policy Alerts',
@@ -54,7 +54,7 @@ function navigateTo(page) {
     clients: 'Home / Client 360',
     prospects: 'Home / Sales / Prospects',
     policies: 'Home / Policies',
-    'ai-agents': 'Home / AI Agents',
+    'ai-agents': 'Home / AI Copilots',
     campaigns: 'Home / Marketing / Campaigns',
     upsell: 'Home / Sales / Growth Opportunities',
     alerts: 'Home / Service / Policy Alerts',
@@ -3313,7 +3313,7 @@ function renderPolicyModal(policyId, tab) {
           </div>
         </div>
         <div class="pm-ai-cta">
-          <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
+          <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open AI Copilot</button>
           <button class="btn btn-outline-sm" onclick="switchPolicyTab('edit', document.querySelectorAll('#policy-modal-tabs .dmt-tab')[1])"><i class="fas fa-edit"></i> Edit Policy</button>
         </div>
       </div>
@@ -3661,7 +3661,7 @@ function renderClaimModal(claimId, tab) {
           </div>
         </div>
         <div class="pm-ai-cta">
-          <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
+          <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open AI Copilot</button>
           <button class="btn btn-outline-sm" onclick="switchClaimTab('view', document.querySelectorAll('#claim-modal-tabs .dmt-tab')[0])"><i class="fas fa-eye"></i> Back to Claim Details</button>
         </div>
       </div>
@@ -3815,7 +3815,7 @@ function _orig_openFraudDetailModal(claimId) {
       <span><strong>AI Recommendation:</strong> ${d.recommendation}</span>
     </div>
     <div class="pm-ai-cta" style="margin-top:16px">
-      <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
+      <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open AI Copilot</button>
       <button class="btn btn-outline-sm" onclick="closeFraudModal()"><i class="fas fa-times"></i> Close</button>
     </div>
   `;
@@ -4466,7 +4466,7 @@ function _orig_openPACModal(alertId) {
     </div>
   `).join('') + `
     <div class="pac-modal-footer">
-      <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
+      <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open AI Copilot</button>
       <button class="btn btn-outline-sm" onclick="closePACModal()"><i class="fas fa-times"></i> Close</button>
     </div>
   `;
@@ -6201,7 +6201,7 @@ function openDealModal(dealId) {
       <div class="dm-timeline">${timelineHTML}</div>
     </div>
     <div class="dm-footer-actions">
-      <button class="btn btn-ai" onclick="sendContextMessage('Full AI analysis for ${d.client} — ${d.product}, stage ${d.stage}, close probability ${d.probability}. Next best action and objection handling.','smart-advisor')"><i class="fas fa-robot"></i> Ask AI Agent</button>
+      <button class="btn btn-ai" onclick="sendContextMessage('Full AI analysis for ${d.client} — ${d.product}, stage ${d.stage}, close probability ${d.probability}. Next best action and objection handling.','smart-advisor')"><i class="fas fa-robot"></i> Ask AI Copilot</button>
       ${quoteBtn}
       ${moveNextBtn}
       <button class="btn btn-outline" onclick="closeDealModal()"><i class="fas fa-times"></i> Close</button>
@@ -9497,7 +9497,7 @@ function _nlpBuildSummary(d) {
     <div class="nlp-action-btn-row">
       <button class="nlp-ab nlp-ab-primary" onclick="switchNLPTab('clauses',document.querySelectorAll('.nlp-mtab')[1])"><i class="fas fa-list-ul"></i> View All Clauses</button>
       <button class="nlp-ab nlp-ab-outline" onclick="switchNLPTab('risk',document.querySelectorAll('.nlp-mtab')[2])"><i class="fas fa-exclamation-triangle"></i> Risk Detail</button>
-      <button class="nlp-ab nlp-ab-secondary" onclick="sendQuickMessage('NLP Policy Review for ${d.client}: ${d.headline}'); closeNLPReview(); navigateTo('ai-agents');"><i class="fas fa-robot"></i> Ask AI Agent</button>
+      <button class="nlp-ab nlp-ab-secondary" onclick="sendQuickMessage('NLP Policy Review for ${d.client}: ${d.headline}'); closeNLPReview(); navigateTo('ai-agents');"><i class="fas fa-robot"></i> Ask AI Copilot</button>
     </div>
   </div>`;
 }
@@ -9933,7 +9933,7 @@ window.renderClaimModal = function(claimId, tab) {
         ${actionsHTML}
       </div>
       <div class="ci-panel-cta">
-        <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open Full AI Agent</button>
+        <button class="btn btn-ai" onclick="navigateTo('ai-agents')"><i class="fas fa-robot"></i> Open AI Copilot</button>
         <button class="btn btn-outline-sm" onclick="switchClaimTab('view', document.querySelectorAll('#claim-modal-tabs .dmt-tab')[0])"><i class="fas fa-eye"></i> Back to Claim</button>
       </div>
     </div>
@@ -16133,7 +16133,7 @@ const _searchIndex = [
   { type:'page', label:'Reports',        sub:'Revenue & performance',    action:()=>navigateTo('reports') },
   { type:'page', label:'AI Insights',    sub:'AI Impact Scorecard',      action:()=>navigateTo('ai-insights') },
   { type:'page', label:'Products',       sub:'NYL product portfolio',    action:()=>navigateTo('products') },
-  { type:'page', label:'AI Agents',      sub:'AI Agent Hub',             action:()=>navigateTo('ai-agents') },
+  { type:'page', label:'AI Copilots',    sub:'AI Copilot Hub',           action:()=>navigateTo('ai-agents') },
 ];
 
 const _searchIconMap = { client:'fa-user', policy:'fa-file-contract', claim:'fa-gavel', meeting:'fa-calendar-check', page:'fa-th-large' };
@@ -16812,7 +16812,7 @@ function openReportDrillDown(domain) {
           <i class="fas fa-download"></i> Export Section
         </button>
         <button class="btn btn-outline" onclick="typeof sendContextMessage==='function'&&sendContextMessage('AI analysis for ${domain} domain')">
-          <i class="fas fa-robot"></i> Ask AI Agent
+          <i class="fas fa-robot"></i> Ask AI Copilot
         </button>
         <button class="btn btn-outline" onclick="document.getElementById('report-drill-overlay').remove()">Close</button>
       </div>
@@ -17210,7 +17210,7 @@ function openAIScoreDetail(domain) {
         </button>
         <button class="btn btn-outline"
           onclick="event.stopPropagation();sendContextMessage('Give me a detailed improvement plan for the ${domain} AI domain to push the score above ${d.score + 5}','ai-insights')">
-          <i class="fas fa-robot"></i> Ask AI Agent
+          <i class="fas fa-robot"></i> Ask AI Copilot
         </button>
         <button class="btn btn-outline" onclick="document.getElementById('ai-score-detail-overlay').remove()">Close</button>
       </div>
@@ -17581,7 +17581,7 @@ const _prefTabContent = {
         <div class="pref-shortcut-row"><span class="pref-shortcut-action">Go to Pipeline</span><kbd>G</kbd><kbd>P</kbd></div>
         <div class="pref-shortcut-row"><span class="pref-shortcut-action">Go to Calendar</span><kbd>G</kbd><kbd>L</kbd></div>
         <div class="pref-shortcut-row"><span class="pref-shortcut-action">Toggle Notifications</span><kbd>N</kbd></div>
-        <div class="pref-shortcut-row"><span class="pref-shortcut-action">Open AI Agent</span><kbd>A</kbd></div>
+        <div class="pref-shortcut-row"><span class="pref-shortcut-action">Open AI Copilot</span><kbd>A</kbd></div>
         <div class="pref-shortcut-row"><span class="pref-shortcut-action">Close modal</span><kbd>Esc</kbd></div>
       </div>
     </div>`,
@@ -19213,9 +19213,9 @@ function settingsFontSize(size) {
    ════════════════════════════════════════════════════════════════ */
 
 const _helpArticles = {
-  'getting-started': { title: 'Getting Started with NOVA Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore Client 360 to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The AI Agents tab gives context-aware AI for any client or deal. Use G+D/G+C/G+P shortcuts to jump between pages, and ⌘, (or Settings & Preferences from your profile) to configure notifications and AI behaviour.' },
+  'getting-started': { title: 'Getting Started with NOVA Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore Client 360 to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The AI Copilots tab gives context-aware AI for any client or deal. Use G+D/G+C/G+P shortcuts to jump between pages, and ⌘, (or Settings & Preferences from your profile) to configure notifications and AI behaviour.' },
   'ai-guide': { title: 'AI Features Guide', body: 'NOVA Agent 360 includes 6 AI domains: Underwriting STP (73% auto-approval), Retention Intelligence (67-day lapse prediction), Claims Automation (IDP document processing, 4-tab layout), Proactive Alert Engine (obituary + NBA detection), Investment Advisory AI, and Meeting Intelligence. View your AI Scorecard in AI Insights, and launch NOVA AI directly via the Launch NOVA AI button. Growth Opportunities shows AI scores (0–100) per client.' },
-  'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Sales Pipeline · G+A: AI Agents · G+R: Reports · G+I: AI Insights · G+L: AI Planner · G+G: Growth Opportunities · ⌘K: Spotlight Search · Esc: Close modal · ⌘,: Settings · ?: Show Help' },
+  'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Sales Pipeline · G+A: AI Copilots · G+R: Reports · G+I: AI Insights · G+L: AI Planner · G+G: Growth Opportunities · ⌘K: Spotlight Search · Esc: Close modal · ⌘,: Settings · ?: Show Help' },
   'video-tutorials': { title: 'Video Tutorials', body: 'Video walkthroughs are available on the NYL internal portal. Topics include: Setting up your client profile, Using AI agents for underwriting, Understanding your AI Scorecard, and Configuring notifications. Contact support for access.' },
   'release-notes': { title: 'Q2 2026 Release Notes', body: 'New: Sales Pipeline 5-tab view (Kanban/List/Focus/Analytics/Lifecycle) · Lifecycle tab merges Journey Pipeline into lead-to-growth kanban · Growth Opportunities (AI score chips 0–100 per client) · Claims 4-tab redesign · NOVA AI launch link in AI Insights · Settings Data & Privacy tab · Improved: Navigation (HOME, AI Planner, no Insurance divider) · Phase 4 Application Queue fix · Fixed: Sales Pipeline queue blank on load' },
   'uw-guide': { title: 'Underwriting Pipeline Guide', body: 'The Underwriting STP Engine auto-approves applications scoring below the risk threshold. Applications above threshold route to manual review with AI-generated risk summaries. APS orders are avoided where AI confidence is high — saving $450/case. Current STP rate: 73% (18 APS cases avoided/month).' },
