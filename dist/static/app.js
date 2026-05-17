@@ -38278,7 +38278,7 @@ function p7BuildClaimTabContent(claim, tab) {
           '<div class="p7cm-audit-entry"><span class="p7cm-audit-ts">2026-05-11 11:32</span><span class="p7cm-audit-actor">' + claim.adjuster + '</span><span class="p7cm-audit-action">Claim assigned to adjuster · Team: ' + claim.adjusterTeam + '</span></div>' +
           (claim.legalHold ? '<div class="p7cm-audit-entry warn"><span class="p7cm-audit-ts">2026-05-12 14:05</span><span class="p7cm-audit-actor">Legal</span><span class="p7cm-audit-action">Legal hold placed — all actions frozen pending review</span></div>' : '') +
           (claim.denialReason ? '<div class="p7cm-audit-entry warn"><span class="p7cm-audit-ts">2026-05-13 10:22</span><span class="p7cm-audit-actor">' + claim.adjuster + '</span><span class="p7cm-audit-action">Denial issued: ' + claim.denialReason + '</span></div>' : '') +
-          '<div class="p7cm-audit-entry"><span class="p7cm-audit-ts">Today</span><span class="p7cm-audit-actor">Adjuster</span><span class="p7cm-audit-action">Claim modal opened — tab: comms/notes</span></div>' +
+          '<div class="p7cm-audit-entry"><span class="p7cm-audit-ts">Today</span><span class="p7cm-audit-actor">Adjuster</span><span class="p7cm-audit-sep">&middot;</span><span class="p7cm-audit-action">Claim modal opened — tab: comms/notes</span></div>' +
         '</div>' +
         '<div class="p7cm-audit-note"><i class="fas fa-lock"></i> Audit entries are write-once and cannot be modified or deleted. All actions are timestamped and user-attributed per regulatory requirements.</div>' +
       '</div>' +
@@ -38797,6 +38797,433 @@ function p7AddTimelineNote(claimId) {
   p7Toast('<i class="fas fa-check-circle"></i> Timeline note added to ' + claimId, 2000);
   if (input) input.value = '';
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 22 — CLAIM MODAL MISSING ACTION FUNCTIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── DENIAL MODAL ── */
+function p7OpenDenialModal(claimId) {
+  var existing = document.getElementById('p7-denial-overlay');
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-denial-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  var reasons = [
+    'Material Misrepresentation on Application',
+    'Policy Exclusion — Pre-existing Condition',
+    'Death Outside Coverage Territory',
+    'Policy Lapsed — Non-payment of Premium',
+    'Contestability Window — Investigation Required',
+    'Fraudulent Claim — SIU Referral',
+    'Claimant Not Listed Beneficiary',
+    'Cause of Death Excluded Under Policy Terms'
+  ];
+  var reasonOpts = reasons.map(function(r) { return '<option>' + r + '</option>'; }).join('');
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:560px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#dc2626,#b91c1c)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-ban" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Issue Denial</div><div style="font-size:12px;color:rgba(255,255,255,0.8)">' + claimId + '</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-denial-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:24px">' +
+        '<div class="p22-field-group">' +
+          '<label class="p22-field-label"><i class="fas fa-clipboard-list"></i> Denial Reason <span style="color:#dc2626">*</span></label>' +
+          '<select class="p7m-select" id="p7-denial-reason" style="width:100%">' + reasonOpts + '</select>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-align-left"></i> Detailed Explanation (for adverse action letter)</label>' +
+          '<textarea class="p7m-textarea" id="p7-denial-detail" rows="4" placeholder="Provide specific details for the adverse action letter. This will be reviewed by compliance before sending…" style="width:100%;box-sizing:border-box"></textarea>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-gavel"></i> Regulatory Requirements</label>' +
+          '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;font-size:12px;color:#7f1d1d;line-height:1.7">' +
+            '<i class="fas fa-exclamation-triangle" style="color:#dc2626;margin-right:6px"></i>' +
+            '<strong>Adverse Action Notice required</strong> within 30 days per state insurance regulations. ' +
+            'Denial letter must cite specific policy provision, provide appeal rights, and be sent via certified mail. ' +
+            'SIU referral may be required if fraud suspected.' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-denial-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn danger" onclick="p7ConfirmDenial(\'' + claimId + '\')"><i class="fas fa-ban"></i> Confirm Denial & Generate Letter</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function p7ConfirmDenial(claimId) {
+  var reason = (document.getElementById('p7-denial-reason') || {}).value || 'Policy Exclusion';
+  var detail = (document.getElementById('p7-denial-detail') || {}).value || '';
+  document.getElementById('p7-denial-overlay').remove();
+  p7Toast('<i class="fas fa-ban"></i> Denial issued for ' + claimId + ' — Reason: ' + reason + '. Adverse action letter generated and queued for compliance review.', 5000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-envelope"></i> Adverse action letter sent via certified mail · Regulatory notification filed', 3500);
+  }, 1800);
+}
+
+/* ── APPEAL MODAL ── */
+function openP7AppealModal(claimId) {
+  var existing = document.getElementById('p7-appeal-overlay');
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-appeal-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:580px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#4f46e5,#3730a3)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-balance-scale" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Open Appeal</div><div style="font-size:12px;color:rgba(255,255,255,0.8)">' + claimId + ' · Internal Review Process</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-appeal-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:24px">' +
+        '<div class="p22-field-group">' +
+          '<label class="p22-field-label"><i class="fas fa-list-alt"></i> Appeal Type</label>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-appeal-type" value="Internal Review" checked> <i class="fas fa-building"></i> Internal Review</label>' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-appeal-type" value="External Review"> <i class="fas fa-landmark"></i> External / Regulatory</label>' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-appeal-type" value="Legal Dispute"> <i class="fas fa-gavel"></i> Legal Dispute</label>' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-appeal-type" value="Beneficiary Dispute"> <i class="fas fa-users"></i> Beneficiary Dispute</label>' +
+          '</div>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-align-left"></i> Grounds for Appeal <span style="color:#dc2626">*</span></label>' +
+          '<textarea class="p7m-textarea" id="p7-appeal-grounds" rows="4" placeholder="Describe the basis for the appeal — new evidence, procedural error, policy interpretation dispute…" style="width:100%;box-sizing:border-box"></textarea>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-user-tie"></i> Assign To</label>' +
+          '<select class="p7m-select" id="p7-appeal-assignee" style="width:100%">' +
+            '<option>Senior Claims Manager</option>' +
+            '<option>Appeals Review Committee</option>' +
+            '<option>Legal Counsel</option>' +
+            '<option>State Insurance Department</option>' +
+          '</select>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-appeal-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" onclick="p7SubmitAppeal(\'' + claimId + '\')"><i class="fas fa-balance-scale"></i> Submit Appeal</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function p7SubmitAppeal(claimId) {
+  var grounds = (document.getElementById('p7-appeal-grounds') || {}).value || '';
+  if (!grounds.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please describe the grounds for appeal', 2500); return; }
+  var assignee = (document.getElementById('p7-appeal-assignee') || {}).value || 'Senior Claims Manager';
+  var typeEl = document.querySelector('input[name="p7-appeal-type"]:checked');
+  var type = typeEl ? typeEl.value : 'Internal Review';
+  document.getElementById('p7-appeal-overlay').remove();
+  p7Toast('<i class="fas fa-balance-scale"></i> Appeal opened for ' + claimId + ' — Type: ' + type + ' · Assigned to: ' + assignee + ' · Case file created', 4500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-envelope"></i> Appeal acknowledgment sent to claimant · Review timeline: 15–30 days', 3500);
+  }, 1600);
+}
+
+/* ── BENEFICIARY DISPUTE MODAL ── */
+function openBeneDisputeModal(claimId) {
+  var existing = document.getElementById('p7-dispute-overlay');
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-dispute-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:560px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#d97706,#b45309)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-exclamation-triangle" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Flag Beneficiary Dispute</div><div style="font-size:12px;color:rgba(255,255,255,0.8)">' + claimId + ' · Beneficiary Management</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-dispute-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:24px">' +
+        '<div class="p22-field-group">' +
+          '<label class="p22-field-label"><i class="fas fa-tag"></i> Dispute Type <span style="color:#dc2626">*</span></label>' +
+          '<select class="p7m-select" id="p7-dispute-type" style="width:100%">' +
+            '<option>Competing Beneficiary Claim</option>' +
+            '<option>Beneficiary Identity Dispute</option>' +
+            '<option>Designation Change Challenged</option>' +
+            '<option>Minor Beneficiary — Guardian Dispute</option>' +
+            '<option>Estate vs. Named Beneficiary</option>' +
+            '<option>Divorce Revocation Question</option>' +
+            '<option>KYC / Identity Verification Failed</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-align-left"></i> Dispute Details <span style="color:#dc2626">*</span></label>' +
+          '<textarea class="p7m-textarea" id="p7-dispute-detail" rows="4" placeholder="Describe the dispute in detail — parties involved, conflicting documentation, nature of the challenge…" style="width:100%;box-sizing:border-box"></textarea>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-shield-alt"></i> Dispute Action</label>' +
+          '<div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">' +
+            '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-dispute-hold" checked> Place claim payment on hold pending resolution</label>' +
+            '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-dispute-legal"> Refer to Legal for interpleader action</label>' +
+            '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-dispute-notify"> Notify all claimant parties via certified mail</label>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-dispute-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn secondary" style="background:#d97706;border-color:#d97706;color:#fff" onclick="p7SubmitDispute(\'' + claimId + '\')"><i class="fas fa-exclamation-triangle"></i> Flag Dispute</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function p7SubmitDispute(claimId) {
+  var detail = (document.getElementById('p7-dispute-detail') || {}).value || '';
+  if (!detail.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please describe the dispute before flagging', 2500); return; }
+  var type = (document.getElementById('p7-dispute-type') || {}).value || 'Competing Beneficiary Claim';
+  var hold = document.getElementById('p7-dispute-hold') && document.getElementById('p7-dispute-hold').checked;
+  document.getElementById('p7-dispute-overlay').remove();
+  p7Toast('<i class="fas fa-exclamation-triangle"></i> Beneficiary dispute flagged for ' + claimId + ' — Type: ' + type + (hold ? ' · Payment hold activated' : ''), 4500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-gavel"></i> Legal team alerted · Dispute logged to audit trail · All parties to be notified', 3500);
+  }, 1600);
+}
+
+/* ── SIU REFERRAL MODAL ── */
+function openSIUCaseModal(claimId) {
+  var existing = document.getElementById('p7-siu-overlay');
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-siu-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:580px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#1e293b,#0f172a)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-user-secret" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Refer to SIU</div><div style="font-size:12px;color:rgba(255,255,255,0.7)">' + claimId + ' · Special Investigations Unit</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-siu-overlay\').remove()" style="background:rgba(255,255,255,0.12);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:24px">' +
+        '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:#7f1d1d;line-height:1.7">' +
+          '<i class="fas fa-shield-alt" style="color:#dc2626;margin-right:6px"></i>' +
+          '<strong>SIU Referral triggers a formal investigation.</strong> Claim processing is paused. All communications with claimant must be routed through SIU. Document all actions from this point forward.' +
+        '</div>' +
+        '<div class="p22-field-group">' +
+          '<label class="p22-field-label"><i class="fas fa-flag"></i> Referral Reason <span style="color:#dc2626">*</span></label>' +
+          '<select class="p7m-select" id="p7-siu-reason" style="width:100%">' +
+            '<option>Fraud Score Threshold Exceeded (≥70)</option>' +
+            '<option>Suspicious Beneficiary Change</option>' +
+            '<option>Inconsistent Medical Records</option>' +
+            '<option>Policy Pending at Time of Death</option>' +
+            '<option>Staged Accident / Event Suspected</option>' +
+            '<option>Multiple Claims — Same Insured</option>' +
+            '<option>Claimant Criminal History</option>' +
+            '<option>Physician / Provider Fraud Suspicion</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-exclamation-circle"></i> Priority Level</label>' +
+          '<div style="display:flex;gap:10px;margin-top:6px">' +
+            '<label class="p22-radio-card" style="flex:1"><input type="radio" name="p7-siu-priority" value="Standard" checked> Standard</label>' +
+            '<label class="p22-radio-card" style="flex:1;border-color:#d97706;background:#fffbeb"><input type="radio" name="p7-siu-priority" value="Elevated"> <span style="color:#b45309">Elevated</span></label>' +
+            '<label class="p22-radio-card" style="flex:1;border-color:#dc2626;background:#fef2f2"><input type="radio" name="p7-siu-priority" value="Critical"> <span style="color:#dc2626">Critical</span></label>' +
+          '</div>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-align-left"></i> Investigation Notes</label>' +
+          '<textarea class="p7m-textarea" id="p7-siu-notes" rows="3" placeholder="Detail the specific suspicious indicators, evidence observed, and recommended investigation steps…" style="width:100%;box-sizing:border-box"></textarea>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-siu-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn danger" onclick="p7SubmitSIU(\'' + claimId + '\')"><i class="fas fa-user-secret"></i> Submit SIU Referral</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function p7SubmitSIU(claimId) {
+  var reason = (document.getElementById('p7-siu-reason') || {}).value || 'Fraud Score Threshold Exceeded';
+  var priorityEl = document.querySelector('input[name="p7-siu-priority"]:checked');
+  var priority = priorityEl ? priorityEl.value : 'Standard';
+  document.getElementById('p7-siu-overlay').remove();
+  p7Toast('<i class="fas fa-user-secret"></i> SIU referral submitted for ' + claimId + ' — Priority: ' + priority + ' · Reason: ' + reason + ' · Claim processing paused', 5000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-envelope"></i> SIU case file created · Investigator assigned · Regulatory notification queued', 3500);
+  }, 1800);
+}
+
+/* ── APS ORDER MODAL ── */
+function p7OrderAPS(claimId) {
+  var existing = document.getElementById('p7-aps-overlay');
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-aps-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:540px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#0891b2,#0e7490)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-heartbeat" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Order / Chase APS</div><div style="font-size:12px;color:rgba(255,255,255,0.8)">' + claimId + ' · Medical Records Request</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-aps-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:24px">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
+          '<div class="p22-field-group">' +
+            '<label class="p22-field-label"><i class="fas fa-user-md"></i> Physician Name <span style="color:#dc2626">*</span></label>' +
+            '<input class="p7m-input" id="p7-aps-physician" placeholder="Dr. …" style="width:100%;box-sizing:border-box">' +
+          '</div>' +
+          '<div class="p22-field-group">' +
+            '<label class="p22-field-label"><i class="fas fa-stethoscope"></i> Specialty</label>' +
+            '<select class="p7m-select" id="p7-aps-specialty" style="width:100%">' +
+              '<option>Cardiology</option><option>Neurology</option><option>Oncology</option>' +
+              '<option>Internal Medicine</option><option>Psychiatry</option><option>Orthopedics</option>' +
+              '<option>General Practice</option><option>Other</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="p22-field-group">' +
+            '<label class="p22-field-label"><i class="fas fa-envelope"></i> Physician Email / Fax</label>' +
+            '<input class="p7m-input" id="p7-aps-contact" placeholder="email or fax number" style="width:100%;box-sizing:border-box">' +
+          '</div>' +
+          '<div class="p22-field-group">' +
+            '<label class="p22-field-label"><i class="fas fa-calendar-alt"></i> Records Date Range</label>' +
+            '<input class="p7m-input" id="p7-aps-dates" placeholder="e.g. 2024-01-01 to present" style="width:100%;box-sizing:border-box">' +
+          '</div>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-file-medical"></i> Records Requested</label>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">' +
+            '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" checked> Complete Medical History</label>' +
+            '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" checked> Attending Physician Statement</label>' +
+            '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox"> Pathology / Lab Results</label>' +
+            '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox"> Operative / Procedure Notes</label>' +
+            '<label style="display:flex;align-items:center;gap=6px;font-size:12px;cursor:pointer"><input type="checkbox"> Prescription Records</label>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-aps-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" onclick="p7SubmitAPS(\'' + claimId + '\')"><i class="fas fa-paper-plane"></i> Send APS Request</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function p7SubmitAPS(claimId) {
+  var physician = (document.getElementById('p7-aps-physician') || {}).value || '';
+  if (!physician.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter the physician name', 2500); return; }
+  var specialty = (document.getElementById('p7-aps-specialty') || {}).value || 'Cardiology';
+  document.getElementById('p7-aps-overlay').remove();
+  p7Toast('<i class="fas fa-heartbeat"></i> APS request sent to ' + physician + ' (' + specialty + ') for ' + claimId + ' · AI-drafted medical records request letter generated', 4500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-clock"></i> APS tracker updated · Auto-chase scheduled in 14 days if no response received', 3000);
+  }, 1600);
+}
+
+/* ── SETTLEMENT INITIATION MODAL ── */
+function p7SupplementClaim(claimId) {
+  var existing = document.getElementById('p7-settle-overlay');
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-settle-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:560px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#059669,#047857)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-handshake" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Initiate Settlement</div><div style="font-size:12px;color:rgba(255,255,255,0.8)">' + claimId + ' · Settlement Agreement</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-settle-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:24px">' +
+        '<div class="p22-field-group">' +
+          '<label class="p22-field-label"><i class="fas fa-dollar-sign"></i> Settlement Offer Amount <span style="color:#dc2626">*</span></label>' +
+          '<input class="p7m-input" id="p7-settle-amount" placeholder="e.g. $780,000" style="width:100%;box-sizing:border-box;font-size:18px;font-weight:700;color:#059669">' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-list-alt"></i> Settlement Basis</label>' +
+          '<select class="p7m-select" id="p7-settle-basis" style="width:100%">' +
+            '<option>Full Policy Benefit</option>' +
+            '<option>Negotiated Settlement</option>' +
+            '<option>AI-Recommended Range (Mid)</option>' +
+            '<option>Partial Benefit — Exclusion Applied</option>' +
+            '<option>Structured Settlement</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-align-left"></i> Settlement Terms & Notes</label>' +
+          '<textarea class="p7m-textarea" id="p7-settle-notes" rows="3" placeholder="Describe settlement terms, conditions, waivers, or special payment arrangements…" style="width:100%;box-sizing:border-box"></textarea>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-top:14px">' +
+          '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">' +
+            '<input type="checkbox" id="p7-settle-release" checked> Require signed release of all claims before disbursement' +
+          '</label>' +
+        '</div>' +
+        '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-top:14px;font-size:12px;color:#14532d;line-height:1.7">' +
+          '<i class="fas fa-info-circle" style="color:#059669;margin-right:6px"></i>' +
+          'Settlement initiation will generate a settlement agreement for signature, notify the beneficiary, and place the payment in pending authorization queue. Legal review required for offers above $500K.' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-settle-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" style="background:#059669;border-color:#059669" onclick="p7ConfirmSettlement(\'' + claimId + '\')"><i class="fas fa-handshake"></i> Initiate Settlement</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function p7ConfirmSettlement(claimId) {
+  var amount = (document.getElementById('p7-settle-amount') || {}).value || '';
+  if (!amount.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter the settlement offer amount', 2500); return; }
+  var basis = (document.getElementById('p7-settle-basis') || {}).value || 'Negotiated Settlement';
+  document.getElementById('p7-settle-overlay').remove();
+  p7Toast('<i class="fas fa-handshake"></i> Settlement initiated for ' + claimId + ' — Offer: ' + amount + ' · Basis: ' + basis + ' · Agreement generated for signature', 5000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-envelope"></i> Settlement agreement sent to beneficiary · Legal review triggered · Payment authorization pending', 3500);
+  }, 1800);
+}
+
+/* ── P22: MODAL SHARED STYLES (injected once) ── */
+(function injectP22ModalStyles() {
+  if (document.getElementById('p22-modal-styles')) return;
+  var s = document.createElement('style');
+  s.id = 'p22-modal-styles';
+  s.textContent = [
+    '.p22-field-label{display:block;font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}',
+    '.p22-field-label i{margin-right:5px;color:#64748b}',
+    '.p22-radio-card{display:flex;align-items:center;gap:8px;padding:9px 14px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:#374151;background:#fff;transition:all 0.15s}',
+    '.p22-radio-card:has(input:checked){border-color:#4f46e5;background:#eef2ff;color:#3730a3}',
+    '.p22-radio-card input{accent-color:#4f46e5}',
+    '.p22-field-group{}',
+    '.p7-modal-box .p7-modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-radius:12px 12px 0 0}',
+    '.p7-modal-box .p7-modal-body{background:#fff}'
+  ].join('');
+  document.head.appendChild(s);
+})();
 
 /* ═══════════════════════════════════════════════════════════════════
    STP — STRAIGHT-THROUGH PROCESSING

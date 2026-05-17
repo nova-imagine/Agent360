@@ -50919,3 +50919,794 @@ kbd {
 }
 
 /* END PASS 21-B */
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 22 — CLAIM MODAL STYLING FIXES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────
+   A. COMMUNICATIONS TAB — IMMUTABLE AUDIT LOG
+   ───────────────────────────────────────────────────────────────── */
+
+.p7cm-audit-section {
+  margin-top: 20px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.p7cm-audit-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #1e293b;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.p7cm-audit-title i {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.p7cm-audit-badge {
+  margin-left: auto;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.p7cm-audit-log {
+  background: #f8fafc;
+  padding: 6px 0;
+}
+
+.p7cm-audit-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.12s;
+  flex-wrap: wrap;
+}
+
+.p7cm-audit-entry:last-child {
+  border-bottom: none;
+}
+
+.p7cm-audit-entry:hover {
+  background: #f1f5f9;
+}
+
+.p7cm-audit-entry.warn {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+}
+
+.p7cm-audit-entry.warn:hover {
+  background: #fef3c7;
+}
+
+.p7cm-audit-ts {
+  display: inline-block;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: monospace;
+  border-radius: 6px;
+  padding: 3px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.p7cm-audit-actor {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Actor colour coding */
+.p7cm-audit-entry:nth-child(1) .p7cm-audit-actor,
+.p7cm-audit-entry .p7cm-audit-actor:only-of-type {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* System entries */
+.p7cm-audit-entry:has(.p7cm-audit-actor) .p7cm-audit-actor {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* Override per actor value using sibling text — handled via JS actor classes instead.
+   Apply base style; individual entries styled via data or inline overrides */
+
+.p7cm-audit-sep {
+  color: #cbd5e1;
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+.p7cm-audit-action {
+  flex: 1;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.6;
+  min-width: 0;
+}
+
+.p7cm-audit-entry.warn .p7cm-audit-action {
+  color: #92400e;
+}
+
+.p7cm-audit-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #1e293b;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.p7cm-audit-note i {
+  color: #64748b;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   B. PAYMENTS TAB — REINSURANCE BANNER
+   ───────────────────────────────────────────────────────────────── */
+
+.p7cm-reins-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fffbeb;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.p7cm-reins-banner-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.p7cm-reins-icon {
+  width: 40px;
+  height: 40px;
+  background: #f59e0b;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(245,158,11,0.35);
+}
+
+.p7cm-reins-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #92400e;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.p7cm-reins-title i {
+  color: #d97706;
+}
+
+.p7cm-reins-detail {
+  font-size: 12.5px;
+  color: #78350f;
+  line-height: 1.65;
+}
+
+.p7cm-reins-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.p7cm-reins-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  border: 2px solid;
+  white-space: nowrap;
+}
+
+.p7cm-reins-btn.primary {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #fff;
+}
+
+.p7cm-reins-btn.primary:hover {
+  background: #d97706;
+  border-color: #d97706;
+}
+
+.p7cm-reins-btn.ghost {
+  background: transparent;
+  border-color: #d97706;
+  color: #92400e;
+}
+
+.p7cm-reins-btn.ghost:hover {
+  background: #fef3c7;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   C. PAYMENTS TAB — PAYMENT METHOD CARDS
+   ───────────────────────────────────────────────────────────────── */
+
+.p7cm-pay-method-section {
+  margin-bottom: 16px;
+}
+
+.p7cm-pay-method-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+@media (max-width: 640px) {
+  .p7cm-pay-method-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.p7cm-pay-method-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.18s;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.p7cm-pay-method-card i {
+  font-size: 22px;
+  color: #94a3b8;
+  transition: color 0.18s;
+}
+
+.p7cm-pay-method-card:hover {
+  border-color: #003087;
+  background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,48,135,0.1);
+}
+
+.p7cm-pay-method-card:hover i {
+  color: #003087;
+}
+
+.p7cm-pay-method-card.selected {
+  border-color: #003087;
+  background: #dbeafe;
+  box-shadow: 0 0 0 3px rgba(0,48,135,0.12);
+}
+
+.p7cm-pay-method-card.selected i {
+  color: #003087;
+}
+
+.p7cm-pay-method-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 400;
+  margin-top: -4px;
+}
+
+.p7cm-pay-method-card.selected .p7cm-pay-method-sub {
+  color: #1d4ed8;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   D. NOTES TAB — STATUS STRIP & BUTTONS
+   ───────────────────────────────────────────────────────────────── */
+
+.p7cm-status-strip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.p7cm-status-strip-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.p7cm-status-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Base status button */
+.p7cm-status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 2px solid;
+  background: transparent;
+  letter-spacing: 0.01em;
+}
+
+.p7cm-status-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* Under Review — blue */
+.p7cm-status-btn.review {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+.p7cm-status-btn.review:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+/* Pending Docs — amber */
+.p7cm-status-btn.pending {
+  color: #b45309;
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+.p7cm-status-btn.pending:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+/* Approve — green */
+.p7cm-status-btn.approve {
+  color: #15803d;
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+.p7cm-status-btn.approve:hover {
+  background: #dcfce7;
+  border-color: #22c55e;
+}
+
+/* Deny — red */
+.p7cm-status-btn.deny {
+  color: #dc2626;
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+.p7cm-status-btn.deny:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+/* Place on Hold — purple */
+.p7cm-status-btn.hold {
+  color: #7c3aed;
+  border-color: #c4b5fd;
+  background: #f5f3ff;
+}
+.p7cm-status-btn.hold:hover {
+  background: #ede9fe;
+  border-color: #a78bfa;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   D2. NOTES TAB — SECTIONS & PRIORITY BUTTONS
+   ───────────────────────────────────────────────────────────────── */
+
+.p7cm-notes-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.p7cm-notes-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+  letter-spacing: 0.02em;
+}
+
+.p7cm-notes-title i {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.p7cm-notes-current {
+  background: #f8fafc;
+  border-left: 3px solid #7c3aed;
+  padding: 11px 14px;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.65;
+  margin-bottom: 12px;
+}
+
+.p7cm-notes-add-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.p7cm-notes-add-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Priority row */
+.p7cm-priority-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.p7cm-priority-current {
+  font-size: 13px;
+  color: #475569;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.p7cm-priority-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Base priority button */
+.p7cm-priority-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.p7cm-priority-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Urgent — red */
+.p7cm-priority-btn.urgent {
+  background: #dc2626;
+  color: #fff;
+}
+.p7cm-priority-btn.urgent:hover {
+  background: #b91c1c;
+}
+
+/* Normal — blue outline */
+.p7cm-priority-btn.normal {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1.5px solid #93c5fd;
+}
+.p7cm-priority-btn.normal:hover {
+  background: #dbeafe;
+}
+
+/* Escalate — orange */
+.p7cm-priority-btn.escalate {
+  background: #d97706;
+  color: #fff;
+}
+.p7cm-priority-btn.escalate:hover {
+  background: #b45309;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   E. SETTLEMENT TAB — RANGE PREDICTOR CARDS
+   ───────────────────────────────────────────────────────────────── */
+
+.p7cm-settlement-panel {
+  padding: 4px 0;
+}
+
+.p7cm-settle-header {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.p7cm-settle-header i {
+  color: #059669;
+}
+
+.p7cm-settle-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #ede9fe;
+  color: #5b21b6;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  border: 1px solid #c4b5fd;
+}
+
+.p7cm-settle-ai-badge i {
+  color: #7c3aed;
+}
+
+.p7cm-settle-range-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .p7cm-settle-range-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Base card */
+.p7cm-settle-range-card {
+  border-radius: 14px;
+  padding: 22px 16px;
+  text-align: center;
+  border: 2px solid;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s;
+  overflow: hidden;
+}
+
+.p7cm-settle-range-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: 12px 12px 0 0;
+}
+
+.p7cm-settle-range-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+/* Conservative — blue */
+.p7cm-settle-range-card.low {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+.p7cm-settle-range-card.low::before {
+  background: #3b82f6;
+}
+.p7cm-settle-range-card.low .p7cm-settle-range-lbl {
+  color: #1d4ed8;
+}
+.p7cm-settle-range-card.low .p7cm-settle-range-val {
+  color: #1e40af;
+}
+
+/* Recommended — green (elevated) */
+.p7cm-settle-range-card.mid {
+  background: #f0fdf4;
+  border-color: #86efac;
+  box-shadow: 0 4px 16px rgba(34,197,94,0.15);
+}
+.p7cm-settle-range-card.mid::before {
+  background: #22c55e;
+}
+.p7cm-settle-range-card.mid .p7cm-settle-range-lbl {
+  color: #15803d;
+}
+.p7cm-settle-range-card.mid .p7cm-settle-range-val {
+  color: #14532d;
+}
+
+/* AI recommended badge on mid card */
+.p7cm-settle-range-card.mid::after {
+  content: '★ AI Optimal';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #22c55e;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+/* Exposure Ceiling — orange */
+.p7cm-settle-range-card.high {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+.p7cm-settle-range-card.high::before {
+  background: #f97316;
+}
+.p7cm-settle-range-card.high .p7cm-settle-range-lbl {
+  color: #c2410c;
+}
+.p7cm-settle-range-card.high .p7cm-settle-range-val {
+  color: #9a3412;
+}
+
+/* Typography inside cards */
+.p7cm-settle-range-lbl {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 10px;
+}
+
+.p7cm-settle-range-val {
+  font-size: 30px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.p7cm-settle-range-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   E2. SETTLEMENT TAB — FACTORS TABLE
+   ───────────────────────────────────────────────────────────────── */
+
+.p7cm-settle-factors {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.p7cm-settle-factors-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.p7cm-settle-factor-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  font-size: 13px;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.p7cm-settle-factor-row:last-child {
+  border-bottom: none;
+}
+
+.p7cm-settle-factor-row span {
+  color: #64748b;
+}
+
+.p7cm-settle-factor-row strong {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.p7cm-settle-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+/* END PASS 22 */
