@@ -7496,7 +7496,9 @@ function ClaimsPage() {
             <div class="wl-ai-title">
               <i class="fas fa-robot"></i>
               AI Work Distribution Engine
-              <span class="wl-ai-model-badge">Composite Score v2</span>
+              <button class="wl-ai-model-badge wl-ai-model-badge-btn" onclick="openModelInfoModal()" title="View model details — factors, weights &amp; formula">
+                <i class="fas fa-info-circle"></i> Composite Score v2
+              </button>
             </div>
             <button class="wl-auto-assign-btn" onclick="openAutoBalanceModal()" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">
               <i class="fas fa-sync-alt"></i> Re-Balance Team
@@ -7754,6 +7756,224 @@ function ClaimsPage() {
           <div class="wl-ai-modal-body" id="wl-assign-modal-body">
             {/* populated by JS */}
           </div>
+        </div>
+      </div>
+
+      {/* ── AI Work Distribution Model Info Modal ── */}
+      <div class="wl-ai-modal-overlay" id="wl-model-info-overlay" style="display:none" onclick="closeModelInfoModal()">
+        <div class="wl-model-info-modal" onclick="event.stopPropagation()">
+
+          {/* Header */}
+          <div class="wl-mi-header">
+            <div class="wl-mi-header-left">
+              <div class="wl-mi-header-icon"><i class="fas fa-brain"></i></div>
+              <div>
+                <div class="wl-mi-title">AI Work Distribution Model</div>
+                <div class="wl-mi-sub">Composite Score v2 · 10 factors · Updated Apr 2026</div>
+              </div>
+            </div>
+            <button class="wl-ai-modal-close" onclick="closeModelInfoModal()">&times;</button>
+          </div>
+
+          {/* Intro blurb */}
+          <div class="wl-mi-body">
+            <p class="wl-mi-intro">
+              The AI Work Distribution Engine analyses every unassigned claim against all available adjusters
+              and produces a <strong>ranked shortlist of 3 adjusters</strong> per claim, each with an
+              explainable composite score and plain-language reasoning. Managers can accept with one click
+              or override — all decisions are logged for continuous model retraining.
+            </p>
+
+            {/* Formula pill */}
+            <div class="wl-mi-formula-box">
+              <div class="wl-mi-formula-title"><i class="fas fa-superscript"></i> Composite Assignment Score Formula</div>
+              <div class="wl-mi-formula">
+                Score = (Capacity <span class="wl-mi-weight">×0.30</span>) + (Specialisation <span class="wl-mi-weight">×0.25</span>) + (Complexity fit <span class="wl-mi-weight">×0.20</span>) + (SLA fit <span class="wl-mi-weight">×0.15</span>) + (Performance index <span class="wl-mi-weight">×0.10</span>)
+              </div>
+              <div class="wl-mi-formula-note">Each dimension is normalised 0–100. Final score is 0–100.</div>
+            </div>
+
+            {/* Factor table */}
+            <div class="wl-mi-section-title"><i class="fas fa-sliders-h"></i> Scoring Factors &amp; Weights</div>
+            <div class="wl-mi-factors">
+
+              {/* HIGH weight group */}
+              <div class="wl-mi-weight-group">
+                <div class="wl-mi-weight-group-label wl-mi-wg-high"><i class="fas fa-chevron-double-up"></i> High Priority Factors</div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-tachometer-alt"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Adjuster Current Capacity (% load)</div>
+                      <div class="wl-mi-factor-rationale">Never assign to an adjuster above 85% load. Overloaded adjusters are automatically deprioritised.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:30%;background:#dc2626"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#dc2626">×0.30</div>
+                  </div>
+                </div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-puzzle-piece"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Claim Complexity Score</div>
+                      <div class="wl-mi-factor-rationale">Junior adjusters receive simple claims; Senior adjusters handle fraud flags and high-value death benefits.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:20%;background:#d97706"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#d97706">×0.20</div>
+                  </div>
+                </div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-id-badge"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Adjuster Specialisation Match</div>
+                      <div class="wl-mi-factor-rationale">LTC claims route to LTC-certified adjusters; ADB claims go to medical specialists. Hard specialisation mismatch lowers score by 40 pts.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:25%;background:#7c3aed"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#7c3aed">×0.25</div>
+                  </div>
+                </div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#fef2f2;color:#ef4444"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">SLA Urgency of Claim</div>
+                      <div class="wl-mi-factor-rationale">Claims with SLA &lt;48h skip the queue entirely and go directly to the first available Senior adjuster with matching specialisation.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:15%;background:#ef4444"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#ef4444">×0.15</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* MEDIUM weight group */}
+              <div class="wl-mi-weight-group">
+                <div class="wl-mi-weight-group-label wl-mi-wg-medium"><i class="fas fa-equals"></i> Medium Priority Factors</div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#dbeafe;color:#2563eb"><i class="fas fa-chart-line"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Avg Resolution Time for Claim Type</div>
+                      <div class="wl-mi-factor-rationale">Performance-weighted routing — adjusters with lower avg resolution time for this specific claim type score higher.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:10%;background:#2563eb"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#2563eb">×0.10</div>
+                  </div>
+                </div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Geographic / Regulatory Jurisdiction</div>
+                      <div class="wl-mi-factor-rationale">NY DFS claims must route to NY-licensed adjusters. Interstate claims require multi-jurisdiction certification.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:8%;background:#059669"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#059669">Medium</div>
+                  </div>
+                </div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#fff7ed;color:#c2410c"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Current SLA Breach Count</div>
+                      <div class="wl-mi-factor-rationale">Adjusters with active SLA breaches on their queue are deprioritised — the model protects existing SLAs before accepting new assignments.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:8%;background:#c2410c"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#c2410c">Medium</div>
+                  </div>
+                </div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#e0e7ff;color:#4f46e5"><i class="fas fa-user-tie"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Adjuster Seniority vs Claim Amount</div>
+                      <div class="wl-mi-factor-rationale">Claims valued at $500K+ require a Senior adjuster or above. Claims over $1M require a Principal or Team Lead.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:8%;background:#4f46e5"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#4f46e5">Medium</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* LOW weight group */}
+              <div class="wl-mi-weight-group">
+                <div class="wl-mi-weight-group-label wl-mi-wg-low"><i class="fas fa-chevron-double-down"></i> Low Priority Factors</div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-shield-alt"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Active Fraud / SIU Holds</div>
+                      <div class="wl-mi-factor-rationale">Adjusters currently under active SIU review are excluded from new claim assignments until the hold is cleared.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:4%;background:#dc2626"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#64748b">Low</div>
+                  </div>
+                </div>
+
+                <div class="wl-mi-factor-row">
+                  <div class="wl-mi-factor-left">
+                    <div class="wl-mi-factor-icon" style="background:#f1f5f9;color:#64748b"><i class="fas fa-clock"></i></div>
+                    <div class="wl-mi-factor-info">
+                      <div class="wl-mi-factor-name">Time of Day / Shift Coverage</div>
+                      <div class="wl-mi-factor-rationale">Claims are not assigned within 90 minutes of shift end without a confirmed handoff protocol in place.</div>
+                    </div>
+                  </div>
+                  <div class="wl-mi-factor-right">
+                    <div class="wl-mi-bar-track"><div class="wl-mi-bar-fill" style="width:4%;background:#94a3b8"></div></div>
+                    <div class="wl-mi-weight-val" style="color:#64748b">Low</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>{/* end wl-mi-factors */}
+
+            {/* Example AI reasoning */}
+            <div class="wl-mi-section-title" style="margin-top:18px"><i class="fas fa-comment-alt-lines"></i> Example AI Reasoning Output</div>
+            <div class="wl-mi-reasoning-example">
+              <div class="wl-mi-re-icon"><i class="fas fa-robot"></i></div>
+              <div class="wl-mi-re-text">
+                <span class="wl-mi-re-label">AI Recommendation #1</span>
+                <span class="wl-mi-re-quote">"Priya Nair recommended — 50% load, ADB &amp; Disability certified, avg 4.2d resolution for Disability claims, SLA 7d remaining (fit: excellent), no active holds, jurisdiction: CA ✓ — Composite Score: <strong>91</strong>"</span>
+              </div>
+            </div>
+
+            {/* Override logging note */}
+            <div class="wl-mi-override-note">
+              <i class="fas fa-history" style="color:#4f46e5;flex-shrink:0;margin-top:2px"></i>
+              <div>
+                <strong>Override Logging &amp; Model Retraining</strong><br/>
+                Every manager override is logged with a required reason code. Override patterns feed directly into the next model training cycle — if a factor is consistently overridden, its weight is adjusted in the next quarterly release (v3).
+              </div>
+            </div>
+
+          </div>{/* end wl-mi-body */}
         </div>
       </div>
 

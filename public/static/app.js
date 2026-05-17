@@ -56677,5 +56677,16 @@ console.log('Settings Integrations module loaded — filterIntegrations + showIn
     }, 3000);
   };
 
+  /* ── openModelInfoModal / closeModelInfoModal ─────────────────── */
+  window.openModelInfoModal = function() {
+    var overlay = document.getElementById('wl-model-info-overlay');
+    if (overlay) overlay.style.display = 'flex';
+  };
+
+  window.closeModelInfoModal = function() {
+    var overlay = document.getElementById('wl-model-info-overlay');
+    if (overlay) overlay.style.display = 'none';
+  };
+
   console.log('Workload tab module loaded — AI Work Distribution Engine ready');
 })();
