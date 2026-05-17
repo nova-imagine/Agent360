@@ -38801,12 +38801,23 @@ function openFraudClaimDetailModal(claimId) {
   var statusColor = d.status === 'FLAGGED' ? '#dc2626' : d.status === 'WATCH' ? '#d97706' : '#16a34a';
   var scoreColor = d.score >= 60 ? '#dc2626' : d.score >= 30 ? '#d97706' : '#16a34a';
 
-  var signalsHTML = d.signals.map(function(s) {
-    return '<div class="p19-signal-row" style="cursor:pointer" onclick="p7Toast(\'<i class=\\\"' + s.icon + '\\\"></i> ' + s.name.replace(/'/g,"\\'") + '\',3000)" title="Click for detail">' +
-      '<div class="p19-signal-icon" style="background:' + s.color + '20;color:' + s.color + '"><i class="' + s.icon + '"></i></div>' +
-      '<div class="p19-signal-name">' + s.name + '</div>' +
-      '<span style="font-size:11px;padding:2px 7px;border-radius:8px;font-weight:600;background:' + s.color + '15;color:' + s.color + '">' + s.sev + '</span>' +
-      '<div class="p19-signal-score" style="color:' + s.color + '">' + s.detail.substring(0,60) + '…</div>' +
+  /* Store signal details in a closure-accessible map, keyed by index */
+  var signalDetailMap = {};
+  d.signals.forEach(function(s, idx) { signalDetailMap[idx] = s; });
+
+  var signalsHTML = d.signals.map(function(s, idx) {
+    var expandId = 'p19-sig-exp-' + claimId.replace(/[^a-z0-9]/gi,'') + '-' + idx;
+    return '<div class="p19-signal-row" style="cursor:pointer;flex-direction:column;align-items:stretch" ' +
+        'onclick="var el=document.getElementById(\'' + expandId + '\');el.style.display=el.style.display===\'none\'?\'\':\'none\'">' +
+      '<div style="display:flex;align-items:center;gap:8px;padding:2px 0">' +
+        '<div class="p19-signal-icon" style="background:' + s.color + '20;color:' + s.color + '"><i class="' + s.icon + '"></i></div>' +
+        '<div class="p19-signal-name">' + s.name + '</div>' +
+        '<span style="font-size:11px;padding:2px 7px;border-radius:8px;font-weight:600;background:' + s.color + '15;color:' + s.color + ';white-space:nowrap">' + s.sev + '</span>' +
+        '<i class="fas fa-chevron-down" style="font-size:10px;color:#94a3b8;margin-left:auto"></i>' +
+      '</div>' +
+      '<div id="' + expandId + '" style="display:none;margin-top:8px;padding:10px 12px;background:' + s.color + '08;border-left:3px solid ' + s.color + ';border-radius:0 6px 6px 0;font-size:12px;color:#374151;line-height:1.6">' +
+        s.detail +
+      '</div>' +
     '</div>';
   }).join('');
 
