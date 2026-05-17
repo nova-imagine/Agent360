@@ -7545,7 +7545,7 @@ function AIAgentsPage() {
           </div>
           <div class="aah-hero-text">
             <h2 class="aah-hero-title">NOVA <span class="aah-hero-ai">AI Agent Hub</span></h2>
-            <p class="aah-hero-sub">Holistic Agentic AI — Insurance · Investments · Retirement · Advisory</p>
+            <p class="aah-hero-sub">Agentic AI Copilots — Insurance · Investments · Retirement · Advisory · My Book of Business</p>
           </div>
         </div>
         <div class="aah-hero-kpis">
@@ -7569,10 +7569,20 @@ function AIAgentsPage() {
             <div class="aah-kpi-lbl">AI Revenue</div>
           </div>
         </div>
-        <div class="aah-hero-status">
-          <span class="aah-online-dot"></span>
-          <span class="aah-online-label">AI Online · GPT-4o</span>
-          <button class="aah-settings-btn" onclick="switchSettingsTab('ai',null);navigateTo('settings')"><i class="fas fa-sliders-h"></i></button>
+        <div class="aah-hero-right-cluster">
+          <a class="aah-marketplace-btn" href="https://8888-i4ggffob3g710k2tcofuy-a402f90a.sandbox.novita.ai" target="_blank" rel="noopener noreferrer">
+            <i class="fas fa-store"></i>
+            <span class="aah-mkt-text">
+              <span class="aah-mkt-label">NOVA Agent Marketplace</span>
+              <span class="aah-mkt-sub">Build · Train · Deploy Agents</span>
+            </span>
+            <i class="fas fa-external-link-alt aah-mkt-ext"></i>
+          </a>
+          <div class="aah-hero-status">
+            <span class="aah-online-dot"></span>
+            <span class="aah-online-label">AI Online · GPT-4o</span>
+            <button class="aah-settings-btn" onclick="switchSettingsTab('ai',null);navigateTo('settings')"><i class="fas fa-sliders-h"></i></button>
+          </div>
         </div>
       </div>
 
@@ -8092,11 +8102,14 @@ function AIAgentsPage() {
         </div>
       </div>
 
-      {/* Automation Workflows — holistic */}
+      {/* Agentic Workflows — My Book */}
       <div class="automation-section">
         <div class="automation-section-header">
-          <div class="automation-section-title"><i class="fas fa-magic"></i> Active Automation Workflows — All Domains</div>
-          <button class="aah-run-all-btn" onclick="sendQuickMessage('Run all automation workflows — give me a consolidated status update and any actions needed')"><i class="fas fa-bolt"></i> Run All Workflows</button>
+          <div class="automation-section-title">
+            <i class="fas fa-cogs"></i> Agentic AI Workflows
+            <span class="aaw-book-badge"><i class="fas fa-book-open"></i> Sridhar's Book of Business</span>
+          </div>
+          <button class="aah-run-all-btn" onclick="sendQuickMessage('Run all agentic workflows — give me a consolidated status update and any actions needed')"><i class="fas fa-bolt"></i> Run All Workflows</button>
         </div>
         <div class="wf-summary-bar">
           <div class="wf-summary-chip running-chip"><div class="chip-dot"></div><span class="chip-count">6</span><span>Running</span></div>

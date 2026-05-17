@@ -17466,6 +17466,102 @@ kbd {
 }
 .aah-settings-btn:hover { background: rgba(255,255,255,0.25); }
 
+/* ── Hero right cluster (marketplace + status stacked) ── */
+.aah-hero-right-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── NOVA Agent Marketplace Button ── */
+.aah-marketplace-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(8,145,178,0.35) 0%, rgba(6,182,212,0.25) 100%);
+  border: 1px solid rgba(6,182,212,0.55);
+  border-radius: 12px;
+  padding: 9px 16px 9px 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+.aah-marketplace-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(6,182,212,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.aah-marketplace-btn:hover { 
+  background: linear-gradient(135deg, rgba(8,145,178,0.55) 0%, rgba(6,182,212,0.4) 100%);
+  border-color: rgba(6,182,212,0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(6,182,212,0.3);
+  text-decoration: none;
+}
+.aah-marketplace-btn:hover::before { opacity: 1; }
+.aah-marketplace-btn > .fas:first-child {
+  font-size: 18px;
+  color: #67e8f9;
+  flex-shrink: 0;
+}
+.aah-mkt-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.aah-mkt-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+.aah-mkt-sub {
+  font-size: 10px;
+  color: rgba(103,232,249,0.85);
+  letter-spacing: 0.4px;
+  font-weight: 500;
+}
+.aah-mkt-ext {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Agentic Workflows — Book badge ── */
+.aaw-book-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid #86efac;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px 3px 8px;
+  border-radius: 20px;
+  margin-left: 10px;
+  letter-spacing: 0.3px;
+  vertical-align: middle;
+}
+.aaw-book-badge i { font-size: 10px; color: #16a34a; }
+
+/* Responsive: stack marketplace button on narrow screens */
+@media (max-width: 900px) {
+  .aah-hero-right-cluster { align-items: flex-start; }
+  .aah-marketplace-btn { width: 100%; }
+}
+
 /* ── Domain Insight Strip ── */
 .aah-domain-strip {
   display: grid;
