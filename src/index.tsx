@@ -5905,6 +5905,10 @@ function ClaimsPage() {
           <i class="fas fa-undo-alt"></i> Subrogation &amp; Recovery
           <span class="pol-tab-count pol-tab-count-green">3</span>
         </button>
+        <button class="pol-tab" id="clm-tab-workload" onclick="clmSwitchTab('workload')">
+          <i class="fas fa-users-cog"></i> Workload
+          <span class="pol-tab-count" style="background:#e0e7ff;color:#4f46e5;">5</span>
+        </button>
       </div>
 
       {/* ════════════════════════════════════════════════════════
@@ -6616,214 +6620,6 @@ function ClaimsPage() {
           </table>
         </div>
 
-        {/* Fraud + IDP side-by-side */}
-        <div class="fraud-idp-grid">
-          <div class="fraud-detection-panel">
-            <div class="fdp-header">
-              <div class="fdp-title">
-                <div class="fdp-icon"><i class="fas fa-shield-virus"></i></div>
-                <div>
-                  <div class="fdp-heading">AI Fraud Detection Engine</div>
-                  <div class="fdp-sub">Continuously monitoring 11 active &amp; resolved claims · Last scan 2 mins ago</div>
-                </div>
-              </div>
-              <div class="fdp-stats">
-                <div class="fdp-stat"><span class="fdp-stat-val green">8</span><span class="fdp-stat-lbl">Clear</span></div>
-                <div class="fdp-stat"><span class="fdp-stat-val gold">2</span><span class="fdp-stat-lbl">Watch</span></div>
-                <div class="fdp-stat"><span class="fdp-stat-val red">1</span><span class="fdp-stat-lbl">Flagged</span></div>
-                <div class="fdp-divider"></div>
-                <div class="fdp-stat"><span class="fdp-stat-val blue">+32%</span><span class="fdp-stat-lbl">Detection Lift</span></div>
-              </div>
-              <button class="btn btn-ai fdp-btn" onclick="openFraudReportModal()"><i class="fas fa-search-plus"></i> Full Fraud Report</button>
-            </div>
-            <div class="fdp-risk-matrix">
-              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Claim Timing</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill red" style="width:72%"></div></div><div class="fdp-matrix-val red">High</div></div>
-              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Doc Completeness</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill orange" style="width:55%"></div></div><div class="fdp-matrix-val orange">Med</div></div>
-              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Policy History</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill green" style="width:90%"></div></div><div class="fdp-matrix-val green">Low</div></div>
-              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Beneficiary Match</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill orange" style="width:60%"></div></div><div class="fdp-matrix-val orange">Med</div></div>
-              <div class="fdp-matrix-col"><div class="fdp-matrix-label">Claim Amount</div><div class="fdp-matrix-bar"><div class="fdp-matrix-fill red" style="width:80%"></div></div><div class="fdp-matrix-val red">High</div></div>
-            </div>
-            <div class="fdp-flags">
-              <div class="fdp-flag flagged" onclick="openFraudDetailModal('CLM-2026-0025')">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span class="fdp-flag-id">CLM-2026-0025</span>
-                <span class="fdp-flag-reason">Policy in Pending status at time of death · Coverage determination required · Medical records inconsistency · ML: 3 anomalies detected</span>
-                <div class="fdp-flag-signals"><span class="fdp-signal red">Timing</span><span class="fdp-signal red">Coverage Gap</span><span class="fdp-signal orange">Doc Delay</span></div>
-                <span class="fdp-flag-score">Risk: 78</span>
-              </div>
-              <div class="fdp-flag watch" onclick="openFraudDetailModal('CLM-2026-0041')">
-                <i class="fas fa-eye"></i>
-                <span class="fdp-flag-id">CLM-2026-0041</span>
-                <span class="fdp-flag-reason">$1M claim · Claimant ID docs pending · High-value threshold monitoring active · ML: enhanced review protocol</span>
-                <div class="fdp-flag-signals"><span class="fdp-signal orange">High Value</span><span class="fdp-signal orange">ID Pending</span></div>
-                <span class="fdp-flag-score">Risk: 42</span>
-              </div>
-              <div class="fdp-flag watch" onclick="openFraudDetailModal('CLM-2026-0028')">
-                <i class="fas fa-eye"></i>
-                <span class="fdp-flag-id">CLM-2026-0028</span>
-                <span class="fdp-flag-reason">Terminal certification pending · ADB claim filed 30 days post-diagnosis · NLP: document language inconsistency detected</span>
-                <div class="fdp-flag-signals"><span class="fdp-signal orange">Cert Delay</span><span class="fdp-signal yellow">NLP Flag</span></div>
-                <span class="fdp-flag-score">Risk: 38</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="idp-hub-panel idp-hub-panel-grid">
-            <div class="idp-hub-header">
-              <div class="idp-hub-title">
-                <div class="idp-hub-icon"><i class="fas fa-file-import"></i></div>
-                <div>
-                  <div class="idp-hub-name">Intelligent Document Processing Hub</div>
-                  <div class="idp-hub-sub">AI-powered auto-extraction · Last scan <span class="idp-scan-time">3 mins ago</span></div>
-                </div>
-              </div>
-              <div class="idp-hub-stats">
-                <div class="idp-stat"><div class="idp-stat-val green">5</div><div class="idp-stat-lbl">Docs Verified</div></div>
-                <div class="idp-stat"><div class="idp-stat-val orange">6</div><div class="idp-stat-lbl">Pending Upload</div></div>
-                <div class="idp-stat"><div class="idp-stat-val purple">4</div><div class="idp-stat-lbl">AI Extracting</div></div>
-                <div class="idp-stat"><div class="idp-stat-val blue">94%</div><div class="idp-stat-lbl">Accuracy Rate</div></div>
-              </div>
-              <div class="idp-hub-actions">
-                <div class="idp-drop-zone" id="idp-drop-zone" ondragover="event.preventDefault();this.classList.add('idp-drag-over')" ondragleave="this.classList.remove('idp-drag-over')" ondrop="handleIDPDrop(event)">
-                  <i class="fas fa-cloud-upload-alt"></i>
-                  <span>Drop documents here to scan</span>
-                </div>
-                <button class="btn btn-idp-scan" onclick="runIDPScan()"><i class="fas fa-search"></i> Run IDP Scan</button>
-              </div>
-            </div>
-            <div class="idp-queue" id="idp-queue">
-              <div class="idp-queue-item idp-qi-extracting">
-                <div class="idp-qi-icon"><i class="fas fa-file-pdf"></i></div>
-                <div class="idp-qi-info"><div class="idp-qi-name">Death_Certificate_RC_2026.pdf</div><div class="idp-qi-meta">CLM-2026-0041 · Robert Chen · Uploaded 2026-04-09</div></div>
-                <div class="idp-qi-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting fields…</div>
-                <div class="idp-qi-confidence">—</div>
-              </div>
-              <div class="idp-queue-item idp-qi-verified">
-                <div class="idp-qi-icon"><i class="fas fa-file-medical"></i></div>
-                <div class="idp-qi-info"><div class="idp-qi-name">Medical_Certificate_Cardiac.pdf</div><div class="idp-qi-meta">CLM-2026-0041 · Robert Chen · Uploaded 2026-04-09</div></div>
-                <div class="idp-qi-status verified"><i class="fas fa-check-circle"></i> Verified</div>
-                <div class="idp-qi-confidence">Confidence: <strong>98%</strong></div>
-              </div>
-              <div class="idp-queue-item idp-qi-pending">
-                <div class="idp-qi-icon"><i class="fas fa-file-alt"></i></div>
-                <div class="idp-qi-info"><div class="idp-qi-name">Terminal_Illness_Certification.pdf</div><div class="idp-qi-meta">CLM-2026-0028 · Maria Gonzalez · Awaiting oncologist</div></div>
-                <div class="idp-qi-status pending"><i class="fas fa-clock"></i> Awaiting Upload</div>
-                <div class="idp-qi-confidence">—</div>
-              </div>
-              <div class="idp-queue-item idp-qi-verified">
-                <div class="idp-qi-icon"><i class="fas fa-file-contract"></i></div>
-                <div class="idp-qi-info"><div class="idp-qi-name">LTC_Eligibility_Cert_SW.pdf</div><div class="idp-qi-meta">CLM-2026-0038 · Sandra Williams · Uploaded 2026-04-01</div></div>
-                <div class="idp-qi-status verified"><i class="fas fa-check-circle"></i> Verified</div>
-                <div class="idp-qi-confidence">Confidence: <strong>99%</strong></div>
-              </div>
-              <div class="idp-queue-item idp-qi-extracting">
-                <div class="idp-qi-icon"><i class="fas fa-file-medical-alt"></i></div>
-                <div class="idp-qi-info"><div class="idp-qi-name">APS_DrHernandez_MG.pdf</div><div class="idp-qi-meta">CLM-2026-0035 · Maria Gonzalez · Uploading…</div></div>
-                <div class="idp-qi-status extracting"><i class="fas fa-cog fa-spin"></i> Extracting fields…</div>
-                <div class="idp-qi-confidence">—</div>
-              </div>
-            </div>
-          </div>
-        </div>{/* end fraud-idp-grid */}
-
-        {/* ── GAP 6: ADJUSTER WORKLOAD & ASSIGNMENT PANEL ── */}
-        <div class="adj-workload-panel" id="adj-workload-panel">
-          <div class="adj-wl-header" onclick="toggleAdjWorkload(this)">
-            <div class="adj-wl-header-left">
-              <div class="adj-wl-icon"><i class="fas fa-users-cog"></i></div>
-              <div>
-                <div class="adj-wl-title">Adjuster Workload &amp; Assignment <span class="adj-wl-live-badge">LIVE</span></div>
-                <div class="adj-wl-sub">Team capacity · open claim load · SLA risk indicators · drag-to-reassign</div>
-              </div>
-            </div>
-            <div class="adj-wl-header-stats">
-              <div class="adj-wl-stat"><span class="adj-wl-stat-val">5</span><span class="adj-wl-stat-lbl">Adjusters</span></div>
-              <div class="adj-wl-stat"><span class="adj-wl-stat-val">47</span><span class="adj-wl-stat-lbl">Open Claims</span></div>
-              <div class="adj-wl-stat orange"><span class="adj-wl-stat-val">2</span><span class="adj-wl-stat-lbl">SLA Risk</span></div>
-            </div>
-            <button class="adj-wl-collapse-btn" title="Toggle panel"><i class="fas fa-chevron-up"></i></button>
-          </div>
-          <div class="adj-wl-body" id="adj-wl-body">
-            <div class="adj-wl-table-wrap">
-              <table class="adj-wl-table">
-                <thead>
-                  <tr>
-                    <th>Adjuster</th>
-                    <th>Team</th>
-                    <th class="text-right">Open Claims</th>
-                    <th class="text-right">Total Exposure</th>
-                    <th class="text-right">Avg Days Open</th>
-                    <th>SLA Risk</th>
-                    <th>Capacity</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="adj-wl-row adj-wl-overloaded">
-                    <td><div class="adj-wl-name-cell"><div class="mini-avatar mt">MT</div><span>Michael Torres</span></div></td>
-                    <td><span class="adj-team-badge senior">Senior</span></td>
-                    <td class="text-right"><strong style="color:#dc2626">14</strong></td>
-                    <td class="text-right">$2.1M</td>
-                    <td class="text-right">8.2d</td>
-                    <td><span class="adj-sla-badge danger"><i class="fas fa-fire"></i> High — 2 at breach</span></td>
-                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-over" style="width:95%"></div></div><span class="adj-cap-pct red">95%</span></td>
-                    <td><button class="adj-reassign-btn" onclick="openAdjReassignModal('Michael Torres')"><i class="fas fa-random"></i> Reassign</button></td>
-                  </tr>
-                  <tr class="adj-wl-row">
-                    <td><div class="adj-wl-name-cell"><div class="mini-avatar jk">JK</div><span>Jennifer Kim</span></div></td>
-                    <td><span class="adj-team-badge senior">Senior</span></td>
-                    <td class="text-right"><strong style="color:#d97706">11</strong></td>
-                    <td class="text-right">$1.4M</td>
-                    <td class="text-right">6.1d</td>
-                    <td><span class="adj-sla-badge warn"><i class="fas fa-exclamation-triangle"></i> Moderate — 1 at risk</span></td>
-                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-warn" style="width:75%"></div></div><span class="adj-cap-pct orange">75%</span></td>
-                    <td><button class="adj-reassign-btn" onclick="openAdjReassignModal('Jennifer Kim')"><i class="fas fa-random"></i> Reassign</button></td>
-                  </tr>
-                  <tr class="adj-wl-row">
-                    <td><div class="adj-wl-name-cell"><div class="mini-avatar cr">CR</div><span>Carlos Reyes</span></div></td>
-                    <td><span class="adj-team-badge standard">Standard</span></td>
-                    <td class="text-right">8</td>
-                    <td class="text-right">$620K</td>
-                    <td class="text-right">5.4d</td>
-                    <td><span class="adj-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span></td>
-                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-ok" style="width:53%"></div></div><span class="adj-cap-pct green">53%</span></td>
-                    <td><button class="adj-reassign-btn" onclick="openAdjReassignModal('Carlos Reyes')"><i class="fas fa-random"></i> Reassign</button></td>
-                  </tr>
-                  <tr class="adj-wl-row">
-                    <td><div class="adj-wl-name-cell"><div class="mini-avatar ps">PS</div><span>Priya Sharma</span></div></td>
-                    <td><span class="adj-team-badge standard">Standard</span></td>
-                    <td class="text-right">9</td>
-                    <td class="text-right">$780K</td>
-                    <td class="text-right">4.8d</td>
-                    <td><span class="adj-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span></td>
-                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-ok" style="width:60%"></div></div><span class="adj-cap-pct green">60%</span></td>
-                    <td><button class="adj-reassign-btn" onclick="openAdjReassignModal('Priya Sharma')"><i class="fas fa-random"></i> Reassign</button></td>
-                  </tr>
-                  <tr class="adj-wl-row adj-wl-available">
-                    <td><div class="adj-wl-name-cell"><div class="mini-avatar cd">CD</div><span>Chris Davis</span></div></td>
-                    <td><span class="adj-team-badge junior">Junior</span></td>
-                    <td class="text-right"><strong style="color:#059669">5</strong></td>
-                    <td class="text-right">$240K</td>
-                    <td class="text-right">3.9d</td>
-                    <td><span class="adj-sla-badge ok"><i class="fas fa-check-circle"></i> On Track</span></td>
-                    <td><div class="adj-cap-bar-wrap"><div class="adj-cap-bar adj-cap-ok" style="width:33%"></div></div><span class="adj-cap-pct green">33%</span></td>
-                    <td><button class="adj-reassign-btn primary" onclick="openAdjReassignModal('Chris Davis')"><i class="fas fa-plus"></i> Assign</button></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="adj-wl-footer">
-              <button class="adj-wl-footer-btn primary" onclick="openAutoBalanceModal()"><i class="fas fa-balance-scale"></i> AI Auto-Balance Workload</button>
-              <button class="adj-wl-footer-btn ghost" onclick="p7Toast('Workload report exported to PDF',2500)"><i class="fas fa-file-pdf"></i> Export Report</button>
-              <div class="adj-wl-legend">
-                <span class="adj-leg-dot red"></span>Overloaded (&gt;85%)
-                <span class="adj-leg-dot orange"></span>High (&gt;65%)
-                <span class="adj-leg-dot green"></span>Available (&lt;65%)
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>{/* end clm-panel-active */}
 
       {/* ════════════════════════════════════════════════════════
@@ -6832,6 +6628,46 @@ function ClaimsPage() {
           Smart Doc Request Automation
           ════════════════════════════════════════════════════════ */}
       <div class="pol-tab-panel" id="clm-panel-intelligence" style="display:none">
+
+        {/* ── IDP Portfolio KPI Strip ── */}
+        <div class="idp-intel-strip">
+          <div class="idp-intel-strip-title">
+            <div class="idp-intel-strip-icon"><i class="fas fa-file-import"></i></div>
+            <div>
+              <div class="idp-intel-strip-name">Intelligent Document Processing <span class="idp-intel-live">● LIVE</span></div>
+              <div class="idp-intel-strip-sub">AI-powered extraction across all active claims · Last scan <span id="idp-last-scan">3 mins ago</span></div>
+            </div>
+          </div>
+          <div class="idp-intel-kpis">
+            <div class="idp-intel-kpi" onclick="openClaimModal('CLM-2026-0041','docs')" title="Open Documents tab">
+              <span class="idp-intel-kpi-val green">5</span>
+              <span class="idp-intel-kpi-lbl">Docs Verified</span>
+            </div>
+            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-clock&quot;></i> 6 documents awaiting upload · CLM-2026-0041, CLM-2026-0028, CLM-2026-0035',3500)">
+              <span class="idp-intel-kpi-val orange">6</span>
+              <span class="idp-intel-kpi-lbl">Pending Upload</span>
+            </div>
+            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-cog fa-spin&quot;></i> 4 documents currently being AI-extracted · ETA ~2 mins',2800)">
+              <span class="idp-intel-kpi-val purple">4</span>
+              <span class="idp-intel-kpi-lbl">AI Extracting</span>
+            </div>
+            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-chart-line&quot;></i> IDP NLP accuracy: 94% avg across 15 documents processed this week',3000)">
+              <span class="idp-intel-kpi-val blue">94%</span>
+              <span class="idp-intel-kpi-lbl">Accuracy Rate</span>
+            </div>
+            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-shield-check&quot;></i> 0 tamper incidents detected · All documents passed integrity check',2800)">
+              <span class="idp-intel-kpi-val green">0</span>
+              <span class="idp-intel-kpi-lbl">Tamper Alerts</span>
+            </div>
+            <div class="idp-intel-kpi" onclick="p7Toast('<i class=&quot;fas fa-clock&quot;></i> Average AI extraction time: 1.8 min per document',2500)">
+              <span class="idp-intel-kpi-val teal">1.8m</span>
+              <span class="idp-intel-kpi-lbl">Avg Extract Time</span>
+            </div>
+          </div>
+          <button class="idp-intel-scan-btn" onclick="p7Toast('<i class=&quot;fas fa-cog fa-spin&quot;></i> Full IDP portfolio scan initiated',3000)">
+            <i class="fas fa-search"></i> Run Full Scan
+          </button>
+        </div>
 
         {/* Proactive AI Detection Engine — cleaned: lapse/renewal alerts removed */}
         <div class="proactive-alert-card">
@@ -7452,6 +7288,474 @@ function ClaimsPage() {
         </div>
 
       </div>{/* end clm-panel-subrogation */}
+
+      {/* ════════════════════════════════════════════════════════
+          TAB 6 — WORKLOAD
+          AI Work Distribution Engine · Adjuster Capacity · Assignments
+          ════════════════════════════════════════════════════════ */}
+      <div class="pol-tab-panel clm-wl-panel" id="clm-panel-workload" style="display:none">
+
+        {/* ── Section 1: Team Capacity Strip ── */}
+        <div class="wl-capacity-strip">
+          <div class="wl-capacity-header">
+            <div class="wl-capacity-title">
+              <i class="fas fa-users" style="color:#6366f1"></i>
+              Team Capacity
+              <span class="wl-live-badge">● LIVE</span>
+            </div>
+            <div class="wl-capacity-summary">
+              <span class="wl-cap-sum-item"><strong>14</strong> Active Claims</span>
+              <span class="wl-cap-sum-item"><strong>5</strong> Adjusters</span>
+              <span class="wl-cap-sum-item"><strong>5</strong> Unassigned</span>
+              <span class="wl-cap-sum-item" style="color:#d97706"><strong>2</strong> Overloaded</span>
+            </div>
+          </div>
+          <div class="wl-adjuster-rows">
+
+            {/* Adjuster 1 — Sarah Chen */}
+            <div class="wl-adjuster-row">
+              <div class="wl-adj-avatar" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">SC</div>
+              <div class="wl-adj-info">
+                <div class="wl-adj-name">Sarah Chen</div>
+                <div class="wl-adj-spec">Death Benefit · LTC</div>
+              </div>
+              <div class="wl-adj-bar-wrap">
+                <div class="wl-adj-bar-track">
+                  <div class="wl-adj-bar-fill wl-bar-yellow" style="width:85%"></div>
+                </div>
+              </div>
+              <div class="wl-adj-meta">
+                <span class="wl-adj-count">5/6</span> claims
+                <span class="wl-adj-score-badge medium">Cap 85%</span>
+                <div class="wl-adj-status-dot wl-dot-busy"></div>
+              </div>
+            </div>
+
+            {/* Adjuster 2 — Marcus Reid */}
+            <div class="wl-adjuster-row">
+              <div class="wl-adj-avatar" style="background:linear-gradient(135deg,#ef4444,#dc2626)">MR</div>
+              <div class="wl-adj-info">
+                <div class="wl-adj-name">Marcus Reid</div>
+                <div class="wl-adj-spec">Fraud · Contestability</div>
+              </div>
+              <div class="wl-adj-bar-wrap">
+                <div class="wl-adj-bar-track">
+                  <div class="wl-adj-bar-fill wl-bar-red" style="width:100%"></div>
+                </div>
+              </div>
+              <div class="wl-adj-meta">
+                <span class="wl-adj-count">6/6</span> claims
+                <span class="wl-adj-score-badge low">Overloaded</span>
+                <div class="wl-adj-status-dot wl-dot-overloaded"></div>
+              </div>
+            </div>
+
+            {/* Adjuster 3 — Priya Nair */}
+            <div class="wl-adjuster-row">
+              <div class="wl-adj-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">PN</div>
+              <div class="wl-adj-info">
+                <div class="wl-adj-name">Priya Nair</div>
+                <div class="wl-adj-spec">ADB · Disability</div>
+              </div>
+              <div class="wl-adj-bar-wrap">
+                <div class="wl-adj-bar-track">
+                  <div class="wl-adj-bar-fill wl-bar-green" style="width:50%"></div>
+                </div>
+              </div>
+              <div class="wl-adj-meta">
+                <span class="wl-adj-count">3/6</span> claims
+                <span class="wl-adj-score-badge high">Cap 50%</span>
+                <div class="wl-adj-status-dot wl-dot-available"></div>
+              </div>
+            </div>
+
+            {/* Adjuster 4 — James Okafor */}
+            <div class="wl-adjuster-row">
+              <div class="wl-adj-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">JO</div>
+              <div class="wl-adj-info">
+                <div class="wl-adj-name">James Okafor</div>
+                <div class="wl-adj-spec">Rider · LTC</div>
+              </div>
+              <div class="wl-adj-bar-wrap">
+                <div class="wl-adj-bar-track">
+                  <div class="wl-adj-bar-fill wl-bar-red" style="width:100%"></div>
+                </div>
+              </div>
+              <div class="wl-adj-meta">
+                <span class="wl-adj-count">6/6</span> claims
+                <span class="wl-adj-score-badge low">Overloaded</span>
+                <div class="wl-adj-status-dot wl-dot-overloaded"></div>
+              </div>
+            </div>
+
+            {/* Adjuster 5 — Lisa Tran */}
+            <div class="wl-adjuster-row">
+              <div class="wl-adj-avatar" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">LT</div>
+              <div class="wl-adj-info">
+                <div class="wl-adj-name">Lisa Tran</div>
+                <div class="wl-adj-spec">STP · General</div>
+              </div>
+              <div class="wl-adj-bar-wrap">
+                <div class="wl-adj-bar-track">
+                  <div class="wl-adj-bar-fill wl-bar-blue" style="width:33%"></div>
+                </div>
+              </div>
+              <div class="wl-adj-meta">
+                <span class="wl-adj-count">2/6</span> claims
+                <span class="wl-adj-score-badge high">Cap 33%</span>
+                <div class="wl-adj-status-dot wl-dot-available"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ── Section 2: Unassigned Claims Queue ── */}
+        <div class="wl-unassigned-queue">
+          <div class="wl-queue-header">
+            <div class="wl-queue-title">
+              <i class="fas fa-inbox" style="color:#f59e0b"></i>
+              Unassigned Claims Queue
+              <span class="wl-queue-badge">5 Pending</span>
+            </div>
+            <button class="wl-auto-assign-btn" onclick="openAutoBalanceModal()">
+              <i class="fas fa-magic"></i> AI Auto-Assign All
+            </button>
+          </div>
+
+          {/* Queue row 1 — CLM-2026-0041 CRITICAL */}
+          <div class="wl-claim-queue-row">
+            <span class="wl-sla-urgency-pill wl-urgency-critical">Critical</span>
+            <span class="wl-claim-id">CLM-2026-0041</span>
+            <div class="wl-claim-info">
+              <div class="wl-claim-name">Dorothy Kim</div>
+              <div class="wl-claim-type-meta">Death Benefit · Docs Missing</div>
+            </div>
+            <span class="wl-claim-amount">$950,000</span>
+            <span class="wl-claim-sla-countdown wl-sla-urgent"><i class="fas fa-clock"></i> 2d left</span>
+            <button class="wl-assign-btn" onclick="openAIAssignmentModal('CLM-2026-0041')">AI Assign</button>
+          </div>
+
+          {/* Queue row 2 — CLM-2026-0029 HIGH */}
+          <div class="wl-claim-queue-row">
+            <span class="wl-sla-urgency-pill wl-urgency-high">High</span>
+            <span class="wl-claim-id">CLM-2026-0029</span>
+            <div class="wl-claim-info">
+              <div class="wl-claim-name">Robert Ng</div>
+              <div class="wl-claim-type-meta">LTC · Employer Verify Pending</div>
+            </div>
+            <span class="wl-claim-amount">$280,000</span>
+            <span class="wl-claim-sla-countdown wl-sla-urgent"><i class="fas fa-clock"></i> 4d left</span>
+            <button class="wl-assign-btn" onclick="openAIAssignmentModal('CLM-2026-0029')">AI Assign</button>
+          </div>
+
+          {/* Queue row 3 — CLM-2026-0035 HIGH */}
+          <div class="wl-claim-queue-row">
+            <span class="wl-sla-urgency-pill wl-urgency-high">High</span>
+            <span class="wl-claim-id">CLM-2026-0035</span>
+            <div class="wl-claim-info">
+              <div class="wl-claim-name">Angela Foster</div>
+              <div class="wl-claim-type-meta">Disability · APS Pending</div>
+            </div>
+            <span class="wl-claim-amount">$185,000</span>
+            <span class="wl-claim-sla-countdown wl-sla-warning"><i class="fas fa-clock"></i> 7d left</span>
+            <button class="wl-assign-btn" onclick="openAIAssignmentModal('CLM-2026-0035')">AI Assign</button>
+          </div>
+
+          {/* Queue row 4 — CLM-2026-0028 MEDIUM */}
+          <div class="wl-claim-queue-row">
+            <span class="wl-sla-urgency-pill wl-urgency-medium">Medium</span>
+            <span class="wl-claim-id">CLM-2026-0028</span>
+            <div class="wl-claim-info">
+              <div class="wl-claim-name">Victor Reyes</div>
+              <div class="wl-claim-type-meta">Death Benefit · Oncologist Cert Needed</div>
+            </div>
+            <span class="wl-claim-amount">$500,000</span>
+            <span class="wl-claim-sla-countdown wl-sla-warning"><i class="fas fa-clock"></i> 11d left</span>
+            <button class="wl-assign-btn" onclick="openAIAssignmentModal('CLM-2026-0028')">AI Assign</button>
+          </div>
+
+          {/* Queue row 5 — CLM-2026-0047 LOW */}
+          <div class="wl-claim-queue-row">
+            <span class="wl-sla-urgency-pill wl-urgency-low">Low</span>
+            <span class="wl-claim-id">CLM-2026-0047</span>
+            <div class="wl-claim-info">
+              <div class="wl-claim-name">Hannah Cross</div>
+              <div class="wl-claim-type-meta">Rider · New Intake</div>
+            </div>
+            <span class="wl-claim-amount">$45,000</span>
+            <span class="wl-claim-sla-countdown wl-sla-ok"><i class="fas fa-clock"></i> 18d left</span>
+            <button class="wl-assign-btn" onclick="openAIAssignmentModal('CLM-2026-0047')">AI Assign</button>
+          </div>
+
+        </div>
+
+        {/* ── Section 3: AI Work Distribution Recommendations ── */}
+        <div class="wl-ai-section">
+          <div class="wl-ai-header">
+            <div class="wl-ai-title">
+              <i class="fas fa-robot"></i>
+              AI Work Distribution Engine
+              <span class="wl-ai-model-badge">Composite Score v2</span>
+            </div>
+            <button class="wl-auto-assign-btn" onclick="openAutoBalanceModal()" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">
+              <i class="fas fa-sync-alt"></i> Re-Balance Team
+            </button>
+          </div>
+
+          <div class="wl-rec-cards">
+
+            {/* Rec Card 1 — CLM-2026-0041 */}
+            <div class="wl-rec-card">
+              <div class="wl-rec-card-header">
+                <div class="wl-rec-claim-info">
+                  <div class="wl-rec-claim-id">CLM-2026-0041</div>
+                  <div class="wl-rec-claim-name">Dorothy Kim</div>
+                  <div class="wl-rec-claim-amount">Death Benefit · $950,000 · <span style="color:#dc2626;font-weight:700">CRITICAL SLA</span></div>
+                </div>
+                <div class="wl-ai-score-ring">94</div>
+              </div>
+              <div class="wl-top3-label"><i class="fas fa-trophy" style="color:#f59e0b"></i> Top 3 Adjuster Matches</div>
+              <div class="wl-adjuster-rec-list">
+                <div class="wl-adj-rec-row top-pick">
+                  <div class="wl-adj-rec-rank">1</div>
+                  <div class="wl-adj-rec-avatar" style="background:#6366f1">SC</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">Sarah Chen</div>
+                    <div class="wl-adj-rec-reason">Death Benefit specialist · SLA fit 96% · Cap 85%</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:94%"></div></div>
+                  <div class="wl-adj-rec-score-val">94</div>
+                </div>
+                <div class="wl-adj-rec-row">
+                  <div class="wl-adj-rec-rank">2</div>
+                  <div class="wl-adj-rec-avatar" style="background:#10b981">PN</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">Priya Nair</div>
+                    <div class="wl-adj-rec-reason">High capacity · Cross-trained DB · Perf index 88%</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:79%"></div></div>
+                  <div class="wl-adj-rec-score-val">79</div>
+                </div>
+                <div class="wl-adj-rec-row">
+                  <div class="wl-adj-rec-rank">3</div>
+                  <div class="wl-adj-rec-avatar" style="background:#0ea5e9">LT</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">Lisa Tran</div>
+                    <div class="wl-adj-rec-reason">Lowest load · STP focus · SLA stretch</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:71%"></div></div>
+                  <div class="wl-adj-rec-score-val">71</div>
+                </div>
+              </div>
+              <div class="wl-rec-card-actions">
+                <button class="wl-rec-btn accept" onclick="acceptAIAssignment('CLM-2026-0041','Sarah Chen')"><i class="fas fa-check"></i> Accept #1</button>
+                <button class="wl-rec-btn manual" onclick="overrideAssignment('CLM-2026-0041')"><i class="fas fa-edit"></i> Override</button>
+                <button class="wl-rec-btn details" onclick="openAIAssignmentModal('CLM-2026-0041')"><i class="fas fa-chart-bar"></i> Score Detail</button>
+              </div>
+            </div>
+
+            {/* Rec Card 2 — CLM-2026-0029 */}
+            <div class="wl-rec-card">
+              <div class="wl-rec-card-header">
+                <div class="wl-rec-claim-info">
+                  <div class="wl-rec-claim-id">CLM-2026-0029</div>
+                  <div class="wl-rec-claim-name">Robert Ng</div>
+                  <div class="wl-rec-claim-amount">LTC · $280,000 · <span style="color:#c2410c;font-weight:700">High Priority</span></div>
+                </div>
+                <div class="wl-ai-score-ring">88</div>
+              </div>
+              <div class="wl-top3-label"><i class="fas fa-trophy" style="color:#f59e0b"></i> Top 3 Adjuster Matches</div>
+              <div class="wl-adjuster-rec-list">
+                <div class="wl-adj-rec-row top-pick">
+                  <div class="wl-adj-rec-rank">1</div>
+                  <div class="wl-adj-rec-avatar" style="background:#6366f1">SC</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">Sarah Chen</div>
+                    <div class="wl-adj-rec-reason">LTC specialist · Perf 94% · Complexity fit high</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:88%"></div></div>
+                  <div class="wl-adj-rec-score-val">88</div>
+                </div>
+                <div class="wl-adj-rec-row">
+                  <div class="wl-adj-rec-rank">2</div>
+                  <div class="wl-adj-rec-avatar" style="background:#10b981">PN</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">Priya Nair</div>
+                    <div class="wl-adj-rec-reason">Available capacity · Good LTC crossover</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:82%"></div></div>
+                  <div class="wl-adj-rec-score-val">82</div>
+                </div>
+                <div class="wl-adj-rec-row">
+                  <div class="wl-adj-rec-rank">3</div>
+                  <div class="wl-adj-rec-avatar" style="background:#f59e0b">JO</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">James Okafor</div>
+                    <div class="wl-adj-rec-reason">LTC trained · Currently overloaded</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:58%"></div></div>
+                  <div class="wl-adj-rec-score-val">58</div>
+                </div>
+              </div>
+              <div class="wl-rec-card-actions">
+                <button class="wl-rec-btn accept" onclick="acceptAIAssignment('CLM-2026-0029','Sarah Chen')"><i class="fas fa-check"></i> Accept #1</button>
+                <button class="wl-rec-btn manual" onclick="overrideAssignment('CLM-2026-0029')"><i class="fas fa-edit"></i> Override</button>
+                <button class="wl-rec-btn details" onclick="openAIAssignmentModal('CLM-2026-0029')"><i class="fas fa-chart-bar"></i> Score Detail</button>
+              </div>
+            </div>
+
+            {/* Rec Card 3 — CLM-2026-0035 */}
+            <div class="wl-rec-card">
+              <div class="wl-rec-card-header">
+                <div class="wl-rec-claim-info">
+                  <div class="wl-rec-claim-id">CLM-2026-0035</div>
+                  <div class="wl-rec-claim-name">Angela Foster</div>
+                  <div class="wl-rec-claim-amount">Disability · $185,000 · <span style="color:#c2410c;font-weight:700">High Priority</span></div>
+                </div>
+                <div class="wl-ai-score-ring">91</div>
+              </div>
+              <div class="wl-top3-label"><i class="fas fa-trophy" style="color:#f59e0b"></i> Top 3 Adjuster Matches</div>
+              <div class="wl-adjuster-rec-list">
+                <div class="wl-adj-rec-row top-pick">
+                  <div class="wl-adj-rec-rank">1</div>
+                  <div class="wl-adj-rec-avatar" style="background:#10b981">PN</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">Priya Nair</div>
+                    <div class="wl-adj-rec-reason">Disability specialist · Cap 50% · Perf 91%</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:91%"></div></div>
+                  <div class="wl-adj-rec-score-val">91</div>
+                </div>
+                <div class="wl-adj-rec-row">
+                  <div class="wl-adj-rec-rank">2</div>
+                  <div class="wl-adj-rec-avatar" style="background:#0ea5e9">LT</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">Lisa Tran</div>
+                    <div class="wl-adj-rec-reason">Low load · Disability cross-trained</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:77%"></div></div>
+                  <div class="wl-adj-rec-score-val">77</div>
+                </div>
+                <div class="wl-adj-rec-row">
+                  <div class="wl-adj-rec-rank">3</div>
+                  <div class="wl-adj-rec-avatar" style="background:#6366f1">SC</div>
+                  <div style="flex:1">
+                    <div class="wl-adj-rec-name">Sarah Chen</div>
+                    <div class="wl-adj-rec-reason">Near capacity · Partial disability background</div>
+                  </div>
+                  <div class="wl-adj-rec-score-bar"><div class="wl-adj-rec-score-fill" style="width:62%"></div></div>
+                  <div class="wl-adj-rec-score-val">62</div>
+                </div>
+              </div>
+              <div class="wl-rec-card-actions">
+                <button class="wl-rec-btn accept" onclick="acceptAIAssignment('CLM-2026-0035','Priya Nair')"><i class="fas fa-check"></i> Accept #1</button>
+                <button class="wl-rec-btn manual" onclick="overrideAssignment('CLM-2026-0035')"><i class="fas fa-edit"></i> Override</button>
+                <button class="wl-rec-btn details" onclick="openAIAssignmentModal('CLM-2026-0035')"><i class="fas fa-chart-bar"></i> Score Detail</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ── Section 4: Assignment & Rebalancing Log ── */}
+        <div class="wl-rebalance-section">
+          <div class="wl-rebalance-header">
+            <div class="wl-rebalance-title">
+              <i class="fas fa-history" style="color:#6366f1"></i>
+              Assignment &amp; Rebalancing Log
+            </div>
+            <button class="wl-export-btn" onclick="p7Toast('<i class=\'fas fa-download\'></i> Workload report exported to PDF', 2500)">
+              <i class="fas fa-download"></i> Export Report
+            </button>
+          </div>
+          <table class="wl-log-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Claim</th>
+                <th>Claimant</th>
+                <th>Assigned To</th>
+                <th>Action</th>
+                <th>AI Score</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:#64748b">Today 09:14</td>
+                <td class="wl-log-score-chip">CLM-2026-0033</td>
+                <td>Elena Vasquez</td>
+                <td>Sarah Chen</td>
+                <td><span class="wl-log-action-badge wl-log-ai">AI Assigned</span></td>
+                <td class="wl-log-score-chip">94</td>
+                <td style="color:#64748b;font-size:11px">DB specialist · SLA fit 96%</td>
+              </tr>
+              <tr>
+                <td style="color:#64748b">Today 08:52</td>
+                <td class="wl-log-score-chip">CLM-2026-0038</td>
+                <td>James Hartwell</td>
+                <td>Marcus Reid</td>
+                <td><span class="wl-log-action-badge wl-log-manual">Manual Override</span></td>
+                <td class="wl-log-score-chip">—</td>
+                <td style="color:#64748b;font-size:11px">Supervisor override — fraud flag</td>
+              </tr>
+              <tr>
+                <td style="color:#64748b">Today 08:30</td>
+                <td class="wl-log-score-chip">CLM-2026-0046</td>
+                <td>Priscilla Moon</td>
+                <td>Priya Nair</td>
+                <td><span class="wl-log-action-badge wl-log-ai">AI Assigned</span></td>
+                <td class="wl-log-score-chip">91</td>
+                <td style="color:#64748b;font-size:11px">ADB specialist · High capacity</td>
+              </tr>
+              <tr>
+                <td style="color:#64748b">Yesterday 16:45</td>
+                <td class="wl-log-score-chip">CLM-2026-0025</td>
+                <td>Kevin Park</td>
+                <td>Marcus Reid</td>
+                <td><span class="wl-log-action-badge wl-log-ai">AI Assigned</span></td>
+                <td class="wl-log-score-chip">87</td>
+                <td style="color:#64748b;font-size:11px">Contestability specialist · SLA 24d</td>
+              </tr>
+              <tr>
+                <td style="color:#64748b">Yesterday 14:20</td>
+                <td style="color:#64748b;font-size:11px" colspan="2">— Team Re-Balance —</td>
+                <td>All 5 Adjusters</td>
+                <td><span class="wl-log-action-badge wl-log-auto">Auto Re-Balance</span></td>
+                <td class="wl-log-score-chip">—</td>
+                <td style="color:#64748b;font-size:11px">2 overloaded · 3 claims redistributed</td>
+              </tr>
+              <tr>
+                <td style="color:#64748b">Apr 14 11:00</td>
+                <td class="wl-log-score-chip">CLM-2026-0031</td>
+                <td>Linda Forsythe</td>
+                <td>James Okafor</td>
+                <td><span class="wl-log-action-badge wl-log-ai">AI Assigned</span></td>
+                <td class="wl-log-score-chip">82</td>
+                <td style="color:#64748b;font-size:11px">Rider specialist · Contestability match</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>{/* end clm-panel-workload */}
+
+      {/* ── AI Assignment Score Detail Modal ── */}
+      <div class="wl-ai-modal-overlay" id="wl-assign-modal-overlay" style="display:none" onclick="closeAIAssignmentModal()">
+        <div class="wl-ai-modal" onclick="event.stopPropagation()">
+          <div class="wl-ai-modal-header">
+            <div class="wl-ai-modal-title">
+              <i class="fas fa-robot" style="color:#4f46e5"></i>
+              AI Assignment Score Breakdown
+            </div>
+            <button class="wl-ai-modal-close" onclick="closeAIAssignmentModal()">&times;</button>
+          </div>
+          <div class="wl-ai-modal-body" id="wl-assign-modal-body">
+            {/* populated by JS */}
+          </div>
+        </div>
+      </div>
 
       {/* ── Claims Intelligence Full Report Modal ── */}
       <div class="detail-modal-overlay" id="ci-review-overlay" onclick="closeCIReviewModal()">

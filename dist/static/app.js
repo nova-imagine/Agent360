@@ -38115,31 +38115,118 @@ function p7BuildClaimTabContent(claim, tab) {
 
   /* ── TAB: DOCUMENTS ── */
   if (tab === 'docs') {
-    var docRows = claim.docs.map(function(doc) {
-      var icon = doc.status === 'received' ? 'fa-check-circle' : doc.status === 'missing' ? 'fa-times-circle' : doc.status === 'in-progress' ? 'fa-spinner' : 'fa-clock';
-      var color = doc.status === 'received' ? '#059669' : doc.status === 'missing' ? '#dc2626' : '#d97706';
-      return '<div class="p7cm-doc-row">' +
-        '<i class="fas ' + icon + '" style="color:' + color + ';margin-right:10px;font-size:18px"></i>' +
-        '<div class="p7cm-doc-info">' +
-          '<div class="p7cm-doc-name">' + doc.name + '</div>' +
-          '<div class="p7cm-doc-date" style="color:#94a3b8;font-size:12px">' + (doc.date || 'Not yet received') + '</div>' +
+    var totalDocs   = claim.docs.length;
+    var received    = claim.docs.filter(function(d){ return d.status === 'received'; }).length;
+    var pending     = claim.docs.filter(function(d){ return d.status === 'pending'; }).length;
+    var missing     = claim.docs.filter(function(d){ return d.status === 'missing'; }).length;
+    var inprog      = claim.docs.filter(function(d){ return d.status === 'in-progress' || d.status === 'extracting'; }).length;
+    var completePct = totalDocs > 0 ? Math.round(received / totalDocs * 100) : 0;
+    var progColor   = completePct === 100 ? '#059669' : completePct >= 50 ? '#d97706' : '#dc2626';
+
+    // IDP status map — simulated AI extraction states per document
+    var idpStateMap = {
+      'received':    { icon: 'fa-check-circle',    color: '#059669', label: 'Verified',         confidence: true  },
+      'extracting':  { icon: 'fa-cog fa-spin',     color: '#7c3aed', label: 'AI Extracting…',   confidence: false },
+      'pending':     { icon: 'fa-clock',            color: '#d97706', label: 'Awaiting Upload',  confidence: false },
+      'missing':     { icon: 'fa-times-circle',     color: '#dc2626', label: 'Missing — Request', confidence: false },
+      'in-progress': { icon: 'fa-cog fa-spin',     color: '#7c3aed', label: 'AI Extracting…',   confidence: false }
+    };
+
+    // Assign simulated AI confidence scores to received docs
+    var confScores = { 'Death Certificate': 99, 'Medical Certificate Cardiac': 98, 'LTC Eligibility Certification': 99,
+      'Care Provider License': 97, 'Disability Claim Form': 96, 'Employer Statement': 94,
+      'Client ID': 98, 'Policy Document': 95, 'Notarized Claim Form': 93, 'Claimant ID': 98 };
+
+    var docRows = claim.docs.map(function(doc, idx) {
+      var st    = idpStateMap[doc.status] || idpStateMap['pending'];
+      var conf  = (doc.status === 'received') ? (confScores[doc.name] || 94) : null;
+      var isExpandable = (doc.status === 'received');
+      var expandId = 'idp-doc-exp-' + claim.id.replace(/[^a-z0-9]/gi,'') + '-' + idx;
+
+      var rightSide = '';
+      if (doc.status === 'received') {
+        rightSide = '<div class="idp-doc-conf"><i class="fas fa-robot" style="color:#7c3aed;margin-right:4px"></i>AI Confidence: <strong style="color:#059669">' + conf + '%</strong></div>' +
+          '<button class="p7cm-doc-btn" onclick="p7ViewDoc(\'' + doc.name + '\')"><i class="fas fa-eye"></i> View</button>';
+      } else if (doc.status === 'missing' || doc.status === 'pending') {
+        rightSide = '<button class="p7cm-doc-btn request" onclick="p7RequestDoc(\'' + claim.id + '\',\'' + doc.name + '\')"><i class="fas fa-paper-plane"></i> Request</button>';
+      } else {
+        rightSide = '<div class="idp-doc-extracting-badge"><i class="fas fa-cog fa-spin"></i> Processing</div>';
+      }
+
+      var expandPanel = isExpandable ? '<div id="' + expandId + '" style="display:none;margin-top:10px;padding:12px 14px;background:#f8fafc;border-left:3px solid #7c3aed;border-radius:0 8px 8px 0">' +
+        '<div style="font-size:12px;color:#374151;line-height:1.8">' +
+          '<div><strong style="color:#7c3aed"><i class="fas fa-robot"></i> IDP Extraction Results</strong></div>' +
+          '<div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:4px 16px">' +
+            '<div><span style="color:#64748b">Fields Extracted:</span> <strong>' + (Math.floor(Math.random()*4)+5) + ' / ' + (Math.floor(Math.random()*2)+6) + '</strong></div>' +
+            '<div><span style="color:#64748b">NLP Match Score:</span> <strong style="color:#059669">' + conf + '%</strong></div>' +
+            '<div><span style="color:#64748b">Document Type:</span> <strong>' + doc.name + '</strong></div>' +
+            '<div><span style="color:#64748b">Date Received:</span> <strong>' + (doc.date || '—') + '</strong></div>' +
+            '<div><span style="color:#64748b">Tampering Check:</span> <strong style="color:#059669"><i class="fas fa-shield-check"></i> Passed</strong></div>' +
+            '<div><span style="color:#64748b">Signature Verify:</span> <strong style="color:#059669"><i class="fas fa-check"></i> Valid</strong></div>' +
+          '</div>' +
+          '<div style="margin-top:8px;padding:6px 10px;background:#ede9fe;border-radius:6px;font-size:11px;color:#5b21b6">' +
+            '<i class="fas fa-info-circle"></i> AI extracted all required fields. No anomalies detected. Document admitted to claim record.' +
+          '</div>' +
         '</div>' +
-        '<div class="p7cm-doc-status" style="color:' + color + ';font-size:13px;font-weight:600">' + doc.status.replace('-',' ').toUpperCase() + '</div>' +
-        (doc.status === 'missing' || doc.status === 'pending' ? '<button class="p7cm-doc-btn" onclick="p7RequestDoc(\'' + claim.id + '\',\'' + doc.name + '\')"><i class="fas fa-paper-plane"></i> Request</button>' : '<button class="p7cm-doc-btn" onclick="p7ViewDoc(\'' + doc.name + '\')"><i class="fas fa-eye"></i> View</button>') +
+      '</div>' : '';
+
+      return '<div class="idp-doc-row" style="cursor:' + (isExpandable ? 'pointer' : 'default') + '"' +
+          (isExpandable ? ' onclick="var el=document.getElementById(\'' + expandId + '\');el.style.display=el.style.display===\'none\'?\'\':\'none\'"' : '') + '>' +
+        '<div class="idp-doc-row-main">' +
+          '<div class="idp-doc-file-icon"><i class="fas fa-file-pdf" style="color:#dc2626"></i></div>' +
+          '<div class="idp-doc-info">' +
+            '<div class="idp-doc-name">' + doc.name + (isExpandable ? ' <i class="fas fa-chevron-down" style="font-size:10px;color:#94a3b8;margin-left:4px"></i>' : '') + '</div>' +
+            '<div class="idp-doc-meta">' + claim.id + ' · ' + (doc.date ? 'Received ' + doc.date : 'Not yet received') + '</div>' +
+          '</div>' +
+          '<div class="idp-doc-status-badge" style="color:' + st.color + ';background:' + st.color + '18;border:1px solid ' + st.color + '30">' +
+            '<i class="fas ' + st.icon + '" style="margin-right:5px"></i>' + st.label +
+          '</div>' +
+          '<div class="idp-doc-right">' + rightSide + '</div>' +
+        '</div>' +
+        expandPanel +
       '</div>';
     }).join('');
 
-    var completePct = Math.round(claim.docs.filter(function(d) { return d.status === 'received'; }).length / claim.docs.length * 100);
-    return '<div class="p7cm-docs-panel">' +
-      '<div class="p7cm-docs-header">' +
-        '<div class="p7cm-docs-complete">Doc Completion: <strong>' + completePct + '%</strong> (' + claim.docs.filter(function(d){return d.status==='received';}).length + ' of ' + claim.docs.length + ' received)</div>' +
-        '<div class="p7cm-docs-progress-bar"><div style="width:' + completePct + '%;height:8px;background:' + (completePct === 100 ? '#059669' : completePct >= 50 ? '#d97706' : '#dc2626') + ';border-radius:4px"></div></div>' +
+    return '<div class="p7cm-docs-panel idp-enhanced">' +
+      // ── IDP Engine header strip ──
+      '<div class="idp-modal-header">' +
+        '<div class="idp-modal-title">' +
+          '<div class="idp-modal-icon"><i class="fas fa-file-import"></i></div>' +
+          '<div>' +
+            '<div class="idp-modal-name">Intelligent Document Processing</div>' +
+            '<div class="idp-modal-sub">AI-powered extraction · OCR · Tamper detection · NLP verification</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="idp-modal-stats">' +
+          '<div class="idp-ms"><span class="idp-ms-val" style="color:#059669">' + received + '</span><span class="idp-ms-lbl">Verified</span></div>' +
+          '<div class="idp-ms"><span class="idp-ms-val" style="color:#7c3aed">' + inprog + '</span><span class="idp-ms-lbl">Extracting</span></div>' +
+          '<div class="idp-ms"><span class="idp-ms-val" style="color:#d97706">' + pending + '</span><span class="idp-ms-lbl">Pending</span></div>' +
+          '<div class="idp-ms"><span class="idp-ms-val" style="color:#dc2626">' + missing + '</span><span class="idp-ms-lbl">Missing</span></div>' +
+        '</div>' +
+        '<button class="idp-run-btn" onclick="p7Toast(\'<i class=\\"fas fa-cog fa-spin\\"></i> IDP Scan initiated — processing ' + totalDocs + ' documents for ' + claim.id + '\',3000)"><i class="fas fa-search"></i> Run IDP Scan</button>' +
       '</div>' +
-      '<div class="p7cm-doc-list">' + docRows + '</div>' +
+      // ── Progress bar ──
+      '<div class="idp-modal-progress">' +
+        '<div class="idp-prog-label">' +
+          '<span>Document Completion</span>' +
+          '<strong style="color:' + progColor + '">' + completePct + '% (' + received + ' of ' + totalDocs + ' received)</strong>' +
+        '</div>' +
+        '<div class="idp-prog-track"><div class="idp-prog-fill" style="width:' + completePct + '%;background:' + progColor + '"></div></div>' +
+      '</div>' +
+      // ── Drop zone ──
+      '<div class="idp-modal-dropzone" onclick="p7Toast(\'<i class=\\"fas fa-cloud-upload-alt\\"></i> Upload portal opened for ' + claim.id + '\',2500)">' +
+        '<i class="fas fa-cloud-upload-alt" style="font-size:22px;color:#7c3aed"></i>' +
+        '<span>Drop documents here or <strong style="color:#7c3aed">click to upload</strong></span>' +
+        '<span style="font-size:11px;color:#94a3b8">PDF, JPEG, PNG, TIFF accepted · Max 50MB</span>' +
+      '</div>' +
+      // ── Document list ──
+      '<div class="idp-doc-list">' + docRows + '</div>' +
+      // ── Action bar ──
       '<div class="p7cm-doc-actions">' +
-        '<button class="p7cm-act-btn primary" onclick="p7SendAllDocRequests(\'' + claim.id + '\')"><i class="fas fa-paper-plane"></i> Request All Missing Docs</button>' +
-        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Upload portal link sent to claimant\',\'success\')"><i class="fas fa-upload"></i> Send Upload Portal Link</button>' +
-        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Document checklist exported to PDF\',\'success\')"><i class="fas fa-file-pdf"></i> Export Checklist</button>' +
+        '<button class="p7cm-act-btn primary" onclick="p7SendAllDocRequests(\'' + claim.id + '\')"><i class="fas fa-paper-plane"></i> Request All Missing</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="p7Toast(\'<i class=\\"fas fa-upload\\"></i> Upload portal link sent to claimant\',2500)"><i class="fas fa-upload"></i> Send Upload Link</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="p7Toast(\'<i class=\\"fas fa-file-pdf\\"></i> Document checklist exported\',2000)"><i class="fas fa-file-pdf"></i> Export Checklist</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="p7Toast(\'<i class=\\"fas fa-robot\\"></i> Bulk IDP re-scan queued for all pending documents\',2500)"><i class="fas fa-robot"></i> Bulk Re-scan</button>' +
       '</div>' +
     '</div>';
   }
@@ -55118,7 +55205,7 @@ console.log('Advisory Accounts module loaded — ' + advAccounts.length + ' acco
 
   /* clmSwitchTab — ID-based selection only; never touches .pol-tab class
      so it cannot interfere with polSwitchTab on the Policies page        */
-  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved', 'subrogation'];
+  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved', 'subrogation', 'workload'];
 
   window.clmSwitchTab = function(tab) {
     CLM_TABS.forEach(function(t) {
@@ -56378,4 +56465,217 @@ console.log('Settings Integrations module loaded — filterIntegrations + showIn
   window.initInvestmentProposalsPage = initInvestmentProposalsPage;
 
   console.log('Investment Proposals module loaded — 4 proposals, 16 NYLIM products, AI intelligence engine ready');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   WORKLOAD TAB — AI Work Distribution Engine
+   Functions:
+     openAIAssignmentModal(claimId)  — score detail modal
+     closeAIAssignmentModal()
+     acceptAIAssignment(claimId, adjuster)
+     overrideAssignment(claimId)
+     openAutoBalanceModal()          — re-balance toast/action
+   ═══════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── Adjuster data ─────────────────────────────────────────────── */
+  var WL_ADJUSTERS = {
+    'Sarah Chen':  { initials:'SC', color:'#6366f1', spec:'Death Benefit · LTC',    capacity:5, max:6, load:85 },
+    'Marcus Reid': { initials:'MR', color:'#dc2626', spec:'Fraud · Contestability',  capacity:6, max:6, load:100},
+    'Priya Nair':  { initials:'PN', color:'#059669', spec:'ADB · Disability',        capacity:3, max:6, load:50 },
+    'James Okafor':{ initials:'JO', color:'#d97706', spec:'Rider · LTC',             capacity:6, max:6, load:100},
+    'Lisa Tran':   { initials:'LT', color:'#0284c7', spec:'STP · General',           capacity:2, max:6, load:33 }
+  };
+
+  /* ── Claim recommendation data ─────────────────────────────────── */
+  var WL_CLAIM_RECS = {
+    'CLM-2026-0041': {
+      claimant: 'Dorothy Kim', type: 'Death Benefit', amount: '$950,000', urgency: 'CRITICAL',
+      recs: [
+        { adj:'Sarah Chen',   score:94, reason:'DB specialist · SLA fit 96% · Cap 85%' },
+        { adj:'Priya Nair',   score:79, reason:'High capacity · Cross-trained DB · Perf 88%' },
+        { adj:'Lisa Tran',    score:71, reason:'Lowest load · STP focus · SLA stretch' }
+      ]
+    },
+    'CLM-2026-0029': {
+      claimant: 'Robert Ng', type: 'LTC', amount: '$280,000', urgency: 'High',
+      recs: [
+        { adj:'Sarah Chen',   score:88, reason:'LTC specialist · Perf 94% · Complexity fit high' },
+        { adj:'Priya Nair',   score:82, reason:'Available capacity · Good LTC crossover' },
+        { adj:'James Okafor', score:58, reason:'LTC trained · Currently overloaded' }
+      ]
+    },
+    'CLM-2026-0035': {
+      claimant: 'Angela Foster', type: 'Disability', amount: '$185,000', urgency: 'High',
+      recs: [
+        { adj:'Priya Nair',   score:91, reason:'Disability specialist · Cap 50% · Perf 91%' },
+        { adj:'Lisa Tran',    score:77, reason:'Low load · Disability cross-trained' },
+        { adj:'Sarah Chen',   score:62, reason:'Near capacity · Partial disability background' }
+      ]
+    },
+    'CLM-2026-0028': {
+      claimant: 'Victor Reyes', type: 'Death Benefit', amount: '$500,000', urgency: 'Medium',
+      recs: [
+        { adj:'Priya Nair',   score:86, reason:'High capacity · DB cross-trained · Perf 88%' },
+        { adj:'Sarah Chen',   score:80, reason:'DB specialist · Near capacity' },
+        { adj:'Lisa Tran',    score:68, reason:'Available · Lower specialisation match' }
+      ]
+    },
+    'CLM-2026-0047': {
+      claimant: 'Hannah Cross', type: 'Rider', amount: '$45,000', urgency: 'Low',
+      recs: [
+        { adj:'Lisa Tran',    score:89, reason:'Low load · STP capable · Rider crossover' },
+        { adj:'Priya Nair',   score:75, reason:'Available · Good general performance' },
+        { adj:'James Okafor', score:55, reason:'Rider specialist · Currently overloaded' }
+      ]
+    }
+  };
+
+  /* Score breakdown factors for the modal (composite v2 model) */
+  var WL_SCORE_FACTORS = [
+    { name: 'Capacity (×0.30)',         key: 'capacity'    },
+    { name: 'Specialisation (×0.25)',   key: 'spec'        },
+    { name: 'Complexity Fit (×0.20)',   key: 'complexity'  },
+    { name: 'SLA Fit (×0.15)',          key: 'sla'         },
+    { name: 'Performance Index (×0.10)',key: 'perf'        }
+  ];
+
+  /* Generate pseudo factor scores deterministically from composite score */
+  function wlFactorScores(score) {
+    // Slightly randomised but sum-consistent for display purposes
+    var base = Math.round(score * 0.9 + 5);
+    return {
+      capacity:   Math.min(100, base + 4),
+      spec:       Math.min(100, score + 2),
+      complexity: Math.min(100, base - 3),
+      sla:        Math.min(100, score + 5),
+      perf:       Math.min(100, base + 1)
+    };
+  }
+
+  /* ── openAIAssignmentModal ─────────────────────────────────────── */
+  window.openAIAssignmentModal = function(claimId) {
+    var data = WL_CLAIM_RECS[claimId];
+    if (!data) {
+      p7Toast('<i class="fas fa-info-circle"></i> Assignment data for ' + claimId + ' not found', 2500);
+      return;
+    }
+
+    var html = '';
+    html += '<div style="margin-bottom:14px;">';
+    html += '<div style="font-size:13px;font-weight:700;color:#1e293b;">' + claimId + ' — ' + data.claimant + '</div>';
+    html += '<div style="font-size:11px;color:#64748b;margin-top:2px;">' + data.type + ' · ' + data.amount + ' · <strong style="color:' + (data.urgency==='CRITICAL'?'#dc2626':'#d97706') + '">' + data.urgency + '</strong></div>';
+    html += '</div>';
+
+    data.recs.forEach(function(rec, idx) {
+      var adj = WL_ADJUSTERS[rec.adj] || {};
+      var factors = wlFactorScores(rec.score);
+      var isTop = idx === 0;
+      html += '<div style="border:' + (isTop?'2px solid #818cf8':'1px solid #e2e8f0') + ';border-radius:11px;padding:12px 14px;margin-bottom:12px;background:' + (isTop?'#eef2ff':'#fafafa') + ';">';
+      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">';
+      html += '<div style="width:28px;height:28px;border-radius:50%;background:' + (adj.color||'#6366f1') + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;">' + (adj.initials||'?') + '</div>';
+      html += '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#1e293b;">' + rec.adj + (isTop?' <span style="font-size:10px;font-weight:700;background:#4f46e5;color:#fff;border-radius:20px;padding:1px 7px;margin-left:4px;">TOP PICK</span>':'') + '</div>';
+      html += '<div style="font-size:10px;color:#64748b;">' + (adj.spec||'') + '</div></div>';
+      html += '<div style="font-size:22px;font-weight:900;color:#4f46e5;">' + rec.score + '</div>';
+      html += '</div>';
+      // Factor breakdown
+      html += '<div class="wl-score-breakdown-grid">';
+      WL_SCORE_FACTORS.forEach(function(f) {
+        var fv = factors[f.key] || 0;
+        html += '<div class="wl-score-factor-row">';
+        html += '<div class="wl-score-factor-name">' + f.name + '</div>';
+        html += '<div class="wl-score-factor-bar-track"><div class="wl-score-factor-bar-fill" style="width:' + fv + '%"></div></div>';
+        html += '<div class="wl-score-factor-val">' + fv + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      html += '<div style="font-size:11px;color:#64748b;margin-top:8px;font-style:italic;">' + rec.reason + '</div>';
+      html += '<div class="wl-score-total-row" style="margin-top:8px;">';
+      html += '<div class="wl-score-total-label">Composite Score</div>';
+      html += '<div class="wl-score-total-val">' + rec.score + '</div>';
+      html += '</div>';
+      if (isTop) {
+        html += '<div class="wl-modal-action-row">';
+        html += '<button class="wl-modal-btn accept" onclick="acceptAIAssignment(\'' + claimId + '\',\'' + rec.adj + '\');closeAIAssignmentModal()"><i class="fas fa-check"></i> Accept — Assign to ' + rec.adj.split(' ')[0] + '</button>';
+        html += '<button class="wl-modal-btn override" onclick="overrideAssignment(\'' + claimId + '\');closeAIAssignmentModal()"><i class="fas fa-edit"></i> Manual Override</button>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+
+    var body = document.getElementById('wl-assign-modal-body');
+    if (body) body.innerHTML = html;
+    var overlay = document.getElementById('wl-assign-modal-overlay');
+    if (overlay) overlay.style.display = 'flex';
+  };
+
+  window.closeAIAssignmentModal = function() {
+    var overlay = document.getElementById('wl-assign-modal-overlay');
+    if (overlay) overlay.style.display = 'none';
+  };
+
+  /* ── acceptAIAssignment ────────────────────────────────────────── */
+  window.acceptAIAssignment = function(claimId, adjusterName) {
+    var data = WL_CLAIM_RECS[claimId];
+    var adjFirst = adjusterName ? adjusterName.split(' ')[0] : 'Adjuster';
+    p7Toast(
+      '<i class="fas fa-check-circle" style="color:#10b981"></i> ' +
+      '<strong>' + claimId + '</strong> assigned to <strong>' + adjusterName + '</strong>' +
+      (data ? ' (' + data.type + ' · ' + data.amount + ')' : '') +
+      ' — Notification sent · Log updated',
+      4000
+    );
+    // Visual update: mark the queue row as assigned
+    var queueRows = document.querySelectorAll('.wl-claim-queue-row');
+    queueRows.forEach(function(row) {
+      var idEl = row.querySelector('.wl-claim-id');
+      if (idEl && idEl.textContent.trim() === claimId) {
+        row.style.opacity = '0.55';
+        row.style.background = '#f0fdf4';
+        var btn = row.querySelector('.wl-assign-btn');
+        if (btn) {
+          btn.textContent = adjFirst + ' ✓';
+          btn.style.background = '#059669';
+          btn.disabled = true;
+        }
+      }
+    });
+  };
+
+  /* ── overrideAssignment ────────────────────────────────────────── */
+  window.overrideAssignment = function(claimId) {
+    var data = WL_CLAIM_RECS[claimId];
+    var adjList = Object.keys(WL_ADJUSTERS).join(' / ');
+    p7Toast(
+      '<i class="fas fa-edit" style="color:#6366f1"></i> Manual override for <strong>' + claimId + '</strong>' +
+      (data ? ' (' + data.claimant + ')' : '') +
+      ' — Available adjusters: ' + adjList +
+      ' · Use supervisor portal to complete assignment',
+      5000
+    );
+  };
+
+  /* ── openAutoBalanceModal ──────────────────────────────────────── */
+  window.openAutoBalanceModal = function() {
+    p7Toast(
+      '<i class="fas fa-magic" style="color:#4f46e5"></i> <strong>AI Auto-Balance Initiated</strong> — ' +
+      'Analysing 5 unassigned claims across 5 adjusters · ' +
+      'Composite Score model v2 running · ' +
+      'Recommendations ready in ~2s · ' +
+      'Marcus Reid &amp; James Okafor flagged for redistribution',
+      5500
+    );
+    // Simulate re-balance animation on capacity bars after 2s
+    setTimeout(function() {
+      p7Toast(
+        '<i class="fas fa-check-circle" style="color:#059669"></i> <strong>Re-Balance Complete</strong> — ' +
+        '5 claims assigned · 3 redistributed · ' +
+        'Team balance: 72% avg capacity · Log updated',
+        4000
+      );
+    }, 3000);
+  };
+
+  console.log('Workload tab module loaded — AI Work Distribution Engine ready');
 })();
