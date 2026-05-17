@@ -38714,16 +38714,875 @@ function p7AddTimelineNote(claimId) {
 /* ═══════════════════════════════════════════════════════════════════
    STP — STRAIGHT-THROUGH PROCESSING
    ═══════════════════════════════════════════════════════════════════ */
-function stpAutoApprove(claimId, clientName, amount) {
-  p7Toast('<i class="fas fa-bolt"></i> STP Auto-Approval initiated for ' + claimId + ' · ' + clientName + ' · ' + amount + ' — AI confidence 97% · Payout processing…', 4000);
-  setTimeout(function() {
-    p7Toast('<i class="fas fa-check-circle"></i> ' + claimId + ' APPROVED & PAID · ' + amount + ' · ACH transfer initiated to beneficiary account', 4000);
-    var card = document.querySelector('.ov-stp-claim');
-    if (card) {
-      card.innerHTML = '<div style="padding:20px;text-align:center;color:#059669"><i class="fas fa-check-circle" style="font-size:32px;margin-bottom:8px;display:block"></i><strong>' + claimId + ' approved and paid</strong><div style="color:#64748b;font-size:13px;margin-top:4px">STP processing complete · ' + amount + ' disbursed</div></div>';
-    }
-  }, 2200);
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 19 — ALL NEW CLAIMS MODAL FUNCTIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Helper: create/remove a p19 modal overlay ── */
+function p19CreateOverlay(id) {
+  var existing = document.getElementById(id);
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'p19-modal-overlay';
+  ov.id = id;
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+  return ov;
 }
+function p19Close(id) { var el = document.getElementById(id); if (el) el.remove(); }
+
+/* ── c3: Fraud Claim Detail Modal ── */
+function openFraudClaimDetailModal(claimId) {
+  var data = {
+    'CLM-2026-0025': {
+      client:'Kevin Park', initials:'KP', color:'#dc2626',
+      type:'Death Benefit', amount:'$250,000', score:78, status:'FLAGGED',
+      policyStart:'2024-03-15', deathDate:'2024-11-02', contestWindow:true,
+      signals:[
+        { name:'Policy pending at time of death', sev:'High', icon:'fas fa-ban', color:'#dc2626', detail:'Policy was still in underwriting review when insured passed. Coverage determination required before any payout.' },
+        { name:'Beneficiary change 6 months prior', sev:'High', icon:'fas fa-user-edit', color:'#dc2626', detail:'Beneficiary changed from spouse to external party 6 months before death — flagged pattern by ML model.' },
+        { name:'Medical records inconsistency', sev:'High', icon:'fas fa-file-medical', color:'#dc2626', detail:'Attending physician notes differ from application health disclosure. NLP detected 3 conflicting entries.' },
+        { name:'Claim timing anomaly', sev:'High', icon:'fas fa-clock', color:'#dc2626', detail:'ML model detected claim filed within 7 days of policy issuance — highest-risk timing bracket.' },
+        { name:'Third-party reporter', sev:'Med', icon:'fas fa-user-secret', color:'#d97706', detail:'Claim reported by attorney, not direct beneficiary — elevated procedural risk.' }
+      ],
+      recommendation:'Refer to SIU immediately. Initiate contestability investigation. Senior adjuster assignment required. Do not release payment until investigation complete.',
+      siuScore:82, mlAnomaly:3
+    },
+    'CLM-2026-0041': {
+      client:'Robert Chen', initials:'RC', color:'#d97706',
+      type:'Death Benefit', amount:'$1,000,000', score:42, status:'WATCH',
+      policyStart:'2019-06-01', deathDate:'2026-04-08', contestWindow:false,
+      signals:[
+        { name:'High-value threshold breach', sev:'Med', icon:'fas fa-dollar-sign', color:'#d97706', detail:'$1M claim triggers enhanced monitoring protocol. All claims >$500K require additional adjuster review.' },
+        { name:'Claimant ID documents pending', sev:'Med', icon:'fas fa-id-card', color:'#d97706', detail:'Beneficiary identity not yet verified. 2 of 4 documents received. Cannot release funds until ID confirmed.' },
+        { name:'Expedited claim filing', sev:'Low', icon:'fas fa-tachometer-alt', color:'#eab308', detail:'Claim filed within 72 hours of death — within normal range but flagged for high-value protocol.' }
+      ],
+      recommendation:'Enhanced monitoring active. Prioritize ID document collection before payout. Standard adjuster review required — no SIU referral at this stage.',
+      siuScore:18, mlAnomaly:1
+    },
+    'CLM-2026-0028': {
+      client:'Maria Gonzalez', initials:'MG', color:'#d97706',
+      type:'Accelerated Death Benefit (ADB)', amount:'$120,000', score:38, status:'WATCH',
+      policyStart:'2018-09-20', deathDate:null, contestWindow:false,
+      signals:[
+        { name:'ADB filed 30 days post-diagnosis', sev:'Med', icon:'fas fa-calendar-alt', color:'#d97706', detail:'Accelerated benefit claimed 30 days after terminal diagnosis. Slightly elevated timing but within normal range for ADB filings.' },
+        { name:'Terminal certification pending', sev:'Med', icon:'fas fa-file-medical-alt', color:'#d97706', detail:'Oncologist certification not yet received. NLP flagged potential inconsistency in preliminary docs.' },
+        { name:'NLP document language inconsistency', sev:'Low', icon:'fas fa-brain', color:'#eab308', detail:'NLP model detected minor wording inconsistency between two supporting documents. Likely clerical — monitoring.' }
+      ],
+      recommendation:'ADB eligibility verification required. Direct oncologist contact for certification. No SIU referral — standard compassionate track with enhanced monitoring.',
+      siuScore:22, mlAnomaly:1
+    },
+    'CLM-2026-0035': {
+      client:'Maria Gonzalez', initials:'MG', color:'#16a34a',
+      type:'Disability Income', amount:'$4,200/mo', score:18, status:'CLEAR',
+      policyStart:'2020-01-15', deathDate:null, contestWindow:false,
+      signals:[
+        { name:'Standard disability claim filing', sev:'Low', icon:'fas fa-check', color:'#16a34a', detail:'Claim follows expected disability income pattern. No anomalies in filing sequence.' },
+        { name:'APS pending (normal processing)', sev:'Low', icon:'fas fa-file-alt', color:'#16a34a', detail:'Attending Physician Statement overdue by 4 days — normal variance for physician practices. No fraud indicator.' }
+      ],
+      recommendation:'Normal processing. APS receipt required for approval. No fraud signals — proceed with standard disability claim workflow.',
+      siuScore:5, mlAnomaly:0
+    },
+    'CLM-2026-0038': {
+      client:'Sandra Williams', initials:'SW', color:'#16a34a',
+      type:'Long-term Care', amount:'$18,000', score:12, status:'CLEAR',
+      policyStart:'2015-04-11', deathDate:null, contestWindow:false,
+      signals:[
+        { name:'Clean policy history (11 years)', sev:'Low', icon:'fas fa-shield-alt', color:'#16a34a', detail:'Policy active for 11 years with no prior claims or disputes. Clean payment history throughout.' },
+        { name:'All documents verified', sev:'Low', icon:'fas fa-check-double', color:'#16a34a', detail:'All 4 required LTC documents received and verified by IDP system. NLP confidence 93%.' }
+      ],
+      recommendation:'Approve — no fraud indicators detected. LTC eligibility confirmed. Route to adjuster for final sign-off.',
+      siuScore:3, mlAnomaly:0
+    }
+  };
+
+  var d = data[claimId];
+  if (!d) { p7Toast('Fraud detail not available for ' + claimId, 2000); return; }
+
+  var statusColor = d.status === 'FLAGGED' ? '#dc2626' : d.status === 'WATCH' ? '#d97706' : '#16a34a';
+  var scoreColor = d.score >= 60 ? '#dc2626' : d.score >= 30 ? '#d97706' : '#16a34a';
+
+  var signalsHTML = d.signals.map(function(s) {
+    return '<div class="p19-signal-row" style="cursor:pointer" onclick="p7Toast(\'<i class=\\\"' + s.icon + '\\\"></i> ' + s.name.replace(/'/g,"\\'") + '\',3000)" title="Click for detail">' +
+      '<div class="p19-signal-icon" style="background:' + s.color + '20;color:' + s.color + '"><i class="' + s.icon + '"></i></div>' +
+      '<div class="p19-signal-name">' + s.name + '</div>' +
+      '<span style="font-size:11px;padding:2px 7px;border-radius:8px;font-weight:600;background:' + s.color + '15;color:' + s.color + '">' + s.sev + '</span>' +
+      '<div class="p19-signal-score" style="color:' + s.color + '">' + s.detail.substring(0,60) + '…</div>' +
+    '</div>';
+  }).join('');
+
+  var ov = p19CreateOverlay('p19-fraud-claim-' + claimId);
+  ov.innerHTML =
+    '<div class="p19-modal" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid ' + statusColor + '">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="p19-modal-icon" style="background:' + scoreColor + '20;color:' + scoreColor + '"><i class="fas fa-shield-virus"></i></div>' +
+          '<div>' +
+            '<div class="p19-modal-title">Fraud Analysis — ' + claimId + '</div>' +
+            '<div class="p19-modal-sub">' + d.client + ' · ' + d.type + ' · ' + d.amount + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-fraud-claim-' + claimId + '\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' +
+        '<div class="p19-fraud-detail-grid">' +
+          '<div class="p19-fraud-kpi"><div class="p19-fraud-kpi-val" style="color:' + scoreColor + '">' + d.score + '</div><div class="p19-fraud-kpi-lbl">Fraud Risk Score</div></div>' +
+          '<div class="p19-fraud-kpi"><div class="p19-fraud-kpi-val" style="color:' + statusColor + '">' + d.status + '</div><div class="p19-fraud-kpi-lbl">Status</div></div>' +
+          '<div class="p19-fraud-kpi"><div class="p19-fraud-kpi-val">' + d.signals.length + '</div><div class="p19-fraud-kpi-lbl">Signals Detected</div></div>' +
+          '<div class="p19-fraud-kpi"><div class="p19-fraud-kpi-val" style="color:#7c3aed">' + d.siuScore + '</div><div class="p19-fraud-kpi-lbl">SIU Referral Score</div></div>' +
+        '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-exclamation-triangle" style="color:#d97706"></i> Fraud Signals Detected</div>' +
+        signalsHTML +
+        '<div class="p19-section-title"><i class="fas fa-lightbulb" style="color:#d97706"></i> AI Recommendation</div>' +
+        '<div class="' + (d.score >= 60 ? 'p19-warn-box' : d.score >= 30 ? 'p19-info-box' : 'p19-success-box') + '">' + d.recommendation + '</div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Policy Start Date</span><span class="p19-stat-val">' + d.policyStart + '</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Contestability Window</span><span class="p19-stat-val">' + (d.contestWindow ? '<span style="color:#dc2626;font-weight:700">ACTIVE — 2 years from issue</span>' : '<span style="color:#16a34a">Expired</span>') + '</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">ML Anomalies Found</span><span class="p19-stat-val">' + d.mlAnomaly + '</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Model</span><span class="p19-stat-val">NYL Fraud AI v3.1 · XGBoost · AUC 0.96</span></div>' +
+      '</div>' +
+      '<div class="p19-modal-ftr">' +
+        '<button class="p19-btn ghost" onclick="p19Close(\'p19-fraud-claim-' + claimId + '\')">Close</button>' +
+        (d.score >= 60 ?
+          '<button class="p19-btn danger" onclick="p19Close(\'p19-fraud-claim-' + claimId + '\');openSIUConfirmModal(\'' + claimId + '\',\'' + d.client + '\')"><i class="fas fa-user-secret"></i> Refer to SIU</button>' :
+          '<button class="p19-btn primary" onclick="p19Close(\'p19-fraud-claim-' + claimId + '\');openClaimModal(\'' + claimId + '\',\'view\')"><i class="fas fa-eye"></i> Open Claim</button>'
+        ) +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── c3: SIU Confirm Modal ── */
+function openSIUConfirmModal(claimId, clientName) {
+  claimId = claimId || 'CLM-2026-0025';
+  clientName = clientName || 'Kevin Park';
+  var ov = p19CreateOverlay('p19-siu-confirm-overlay');
+  ov.innerHTML =
+    '<div class="p19-modal" style="max-width:520px" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid #dc2626">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="p19-modal-icon red"><i class="fas fa-user-secret"></i></div>' +
+          '<div><div class="p19-modal-title">Confirm SIU Referral</div><div class="p19-modal-sub">' + claimId + ' · ' + clientName + '</div></div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-siu-confirm-overlay\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' +
+        '<div class="p19-siu-confirm">' +
+          '<div class="p19-siu-icon"><i class="fas fa-shield-virus"></i></div>' +
+          '<div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:8px">Refer ' + claimId + ' to Special Investigations Unit?</div>' +
+          '<div style="font-size:13px;color:#64748b;margin-bottom:16px">This will initiate a formal SIU investigation. The following actions will be triggered automatically:</div>' +
+        '</div>' +
+        '<ul class="p19-checklist">' +
+          '<li><i class="fas fa-check-circle"></i> Payment hold placed on ' + claimId + ' immediately</li>' +
+          '<li><i class="fas fa-check-circle"></i> SIU Case File created (Ref: SIU-2026-' + claimId.slice(-4) + ')</li>' +
+          '<li><i class="fas fa-check-circle"></i> Senior Adjuster notified via secure alert</li>' +
+          '<li><i class="fas fa-check-circle"></i> Beneficiary notified of 30-day review period</li>' +
+          '<li><i class="fas fa-check-circle"></i> Legal & Compliance team copied</li>' +
+          '<li><i class="fas fa-check-circle"></i> Regulatory log entry created (NAIC guidelines)</li>' +
+          '<li><i class="fas fa-check-circle"></i> Medical records subpoena initiated</li>' +
+        '</ul>' +
+        '<div class="p19-warn-box"><i class="fas fa-info-circle"></i> This action is logged and auditable. SIU investigations typically complete within 60–90 days. The claimant retains appeal rights under NY Ins Law §3224-a.</div>' +
+      '</div>' +
+      '<div class="p19-modal-ftr">' +
+        '<button class="p19-btn ghost" onclick="p19Close(\'p19-siu-confirm-overlay\')">Cancel</button>' +
+        '<button class="p19-btn danger" onclick="p19Close(\'p19-siu-confirm-overlay\');p7Toast(\'<i class=\\\"fas fa-user-secret\\\"></i> SIU referral confirmed for ' + claimId + ' · Case SIU-2026-' + claimId.slice(-4) + ' opened · All parties notified · Payment hold active\',5000)"><i class="fas fa-user-secret"></i> Confirm SIU Referral</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── c3: Investigate Modal ── */
+function openInvestigateModal(claimId) {
+  claimId = claimId || 'CLM-2026-0025';
+  var ov = p19CreateOverlay('p19-investigate-overlay');
+  ov.innerHTML =
+    '<div class="p19-modal" style="max-width:620px" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid #7c3aed">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="p19-modal-icon purple"><i class="fas fa-search-plus"></i></div>' +
+          '<div><div class="p19-modal-title">Investigation Launched — ' + claimId + '</div><div class="p19-modal-sub">Kevin Park · Death Benefit · $250,000 · Risk Score 78</div></div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-investigate-overlay\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' +
+        '<div class="p19-success-box"><i class="fas fa-play-circle"></i> Investigation for ' + claimId + ' is now active. AI-assisted investigation workflow initiated.</div>' +
+        '<div class="p19-section-title"><i class="fas fa-tasks" style="color:#7c3aed"></i> Investigation Checklist</div>' +
+        '<ul class="p19-checklist">' +
+          '<li><i class="fas fa-check-circle"></i> ML anomaly report generated (3 timeline flags)</li>' +
+          '<li><i class="fas fa-check-circle"></i> Original UW application pulled from archive</li>' +
+          '<li><i class="fas fa-check-circle"></i> Medical records request sent to insured\'s physician</li>' +
+          '<li><i class="fas fa-check-circle"></i> Death certificate authenticity verified via state database</li>' +
+          '<li><i class="fas fa-check-circle"></i> Beneficiary change history reviewed (6-month flag)</li>' +
+          '<li><i class="fas fa-check-circle"></i> Policy pending status at time of death — legal review initiated</li>' +
+          '<li><i class="fas fa-check-circle"></i> SIU Case assigned to Investigator J. Rodriguez</li>' +
+        '</ul>' +
+        '<div class="p19-section-title"><i class="fas fa-robot" style="color:#7c3aed"></i> AI-Assisted Next Steps</div>' +
+        '<div class="p19-model-card">' +
+          '<div style="font-size:13px;line-height:1.7;color:#374151">' +
+            '<strong>1. Coverage Determination:</strong> Policy was in "Pending" status at death — NY Ins Law §3204 requires contested coverage to be resolved before payout can be withheld beyond 30 days of receiving proof.<br>' +
+            '<strong>2. Contestability Review:</strong> Policy issued Mar 2024, death Nov 2024 — within 2-year contestability window. Material misrepresentation investigation authorized under policy §4310(c).<br>' +
+            '<strong>3. Medical Records:</strong> AI NLP identified 3 discrepancies between application health declaration and physician records. Subpoena drafted and ready for review.<br>' +
+            '<strong>4. Beneficiary Change:</strong> Change from spouse to external party 6 months prior. Interview with new beneficiary recommended to establish legitimate insurable interest.' +
+          '</div>' +
+        '</div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Estimated Investigation Duration</span><span class="p19-stat-val">60–90 days</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Assigned Investigator</span><span class="p19-stat-val">J. Rodriguez, SIU Senior Investigator</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Case Reference</span><span class="p19-stat-val">SIU-2026-0025</span></div>' +
+      '</div>' +
+      '<div class="p19-modal-ftr">' +
+        '<button class="p19-btn ghost" onclick="p19Close(\'p19-investigate-overlay\')">Close</button>' +
+        '<button class="p19-btn purple" onclick="p19Close(\'p19-investigate-overlay\');openClaimModal(\'CLM-2026-0025\',\'view\')"><i class="fas fa-eye"></i> Open Claim File</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── c3: Fraud Signal Detail Modal ── */
+function openFraudSignalModal(signal) {
+  var signals = {
+    'Claim Timing': { color:'#dc2626', icon:'fas fa-clock', detail:'Claim filing occurred within the highest-risk timing window. ML model assigns elevated risk when claims are filed within 0–12 months of policy issuance or within 7 days of loss event.', affectedClaims:['CLM-2026-0025 · Kevin Park · Risk: 78 (Policy Pending)'], modelNote:'XGBoost timing feature: training dataset shows 34% of fraudulent claims filed within 12 months of issuance vs 8% for valid claims.' },
+    'Doc Completeness': { color:'#d97706', icon:'fas fa-file-alt', detail:'Document incompleteness is a moderate fraud signal. Fraudulent claimants often delay or avoid submitting certain documents (e.g., original death certificate, medical records) that could expose inconsistencies.', affectedClaims:['CLM-2026-0041 · Robert Chen · Watch 42','CLM-2026-0028 · Maria Gonzalez · Watch 38'], modelNote:'Feature importance rank #4 in XGBoost model. Doc delay >14 days after loss: 2.1x fraud likelihood multiplier.' },
+    'Policy History': { color:'#16a34a', icon:'fas fa-history', detail:'Long-standing policy with consistent premium payments and no prior claims is the strongest negative fraud predictor. Policies >5 years with clean history are extremely low-risk.', affectedClaims:['No high-risk claims in this category'], modelNote:'Feature importance rank #2. Policies >5 years old: 0.3x fraud likelihood vs new policies.' },
+    'Beneficiary Match': { color:'#d97706', icon:'fas fa-users', detail:'Discrepancies between named beneficiaries, recent beneficiary changes, or beneficiaries with no apparent insurable interest elevate fraud risk. Changes within 6–12 months of loss are particularly significant.', affectedClaims:['CLM-2026-0025 · Kevin Park · Beneficiary changed 6mo prior'], modelNote:'Feature importance rank #3. Beneficiary change <6 months to loss: 3.8x fraud likelihood.' },
+    'Claim Amount': { color:'#dc2626', icon:'fas fa-dollar-sign', detail:'High-value claims trigger enhanced monitoring protocols. Claims exceeding $500K require additional adjuster review and are subject to reserve reporting thresholds. ML model adjusts risk scores upward for claims >$250K.', affectedClaims:['CLM-2026-0041 · Robert Chen · $1,000,000 Death Benefit','CLM-2026-0025 · Kevin Park · $250,000 Death Benefit'], modelNote:'Claims >$1M: enhanced review mandatory per NYL claims authority matrix.' },
+    'NLP Anomalies': { color:'#d97706', icon:'fas fa-brain', detail:'NLP engine (BERT-base fine-tuned on 8,000 insurance claims) detects linguistic anomalies in submitted documents — template language suggesting fabrication, date inconsistencies, terminology mismatches, and medical record language inconsistencies.', affectedClaims:['CLM-2026-0028 · Maria Gonzalez · NLP doc inconsistency detected'], modelNote:'NLP model accuracy: 94%. False positive rate: 6%. Flags reviewed by human adjuster before escalation.' }
+  };
+  var s = signals[signal];
+  if (!s) { p7Toast('Signal detail not available', 2000); return; }
+  var ov = p19CreateOverlay('p19-fraud-signal-overlay');
+  ov.innerHTML =
+    '<div class="p19-modal" style="max-width:600px" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid ' + s.color + '">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="p19-modal-icon" style="background:' + s.color + '15;color:' + s.color + '"><i class="' + s.icon + '"></i></div>' +
+          '<div><div class="p19-modal-title">Fraud Signal: ' + signal + '</div><div class="p19-modal-sub">AI fraud detection signal analysis</div></div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-fraud-signal-overlay\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' +
+        '<div class="p19-info-box">' + s.detail + '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-list" style="color:#1d4ed8"></i> Affected Claims</div>' +
+        s.affectedClaims.map(function(c) { return '<div class="p19-claim-row" style="cursor:default">' + c + '</div>'; }).join('') +
+        '<div class="p19-section-title"><i class="fas fa-robot" style="color:#7c3aed"></i> Model Note</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.6">' + s.modelNote + '</div></div>' +
+      '</div>' +
+      '<div class="p19-modal-ftr"><button class="p19-btn ghost" onclick="p19Close(\'p19-fraud-signal-overlay\')">Close</button></div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── c4: Intelligence Bar Detail Modals ── */
+function openIntelDetailModal(type) {
+  var configs = {
+    'fraud-flagged': {
+      title:'Fraud-Flagged Claims', icon:'fas fa-shield-virus', iconClass:'red',
+      sub:'Claims with fraud score ≥70 · Requires SIU review',
+      color:'#dc2626',
+      body: function() {
+        return '<div class="p19-info-box"><i class="fas fa-shield-virus"></i> <strong>1 claim currently flagged</strong> by NYL Fraud AI v3.1 with risk score ≥70. SIU referral recommended.</div>' +
+        '<div class="p19-section-title"><i class="fas fa-list" style="color:#dc2626"></i> Flagged Claims</div>' +
+        '<div class="p19-claim-row" onclick="p19Close(\'p19-intel-detail-overlay\');openFraudClaimDetailModal(\'CLM-2026-0025\')" >' +
+          '<div class="p19-claim-id">CLM-2026-0025</div>' +
+          '<div class="p19-claim-name">Kevin Park · Death Benefit · $250,000</div>' +
+          '<span class="p19-claim-badge">FLAGGED 78</span>' +
+        '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-info-circle" style="color:#dc2626"></i> Why Flagged?</div>' +
+        '<div class="p19-warn-box"><strong>5 fraud signals detected:</strong> Policy pending at death · Beneficiary change 6 months prior · Medical records inconsistency · Claim timing anomaly · Third-party reporter. ML anomaly score: 3/5 thresholds exceeded.</div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Model</span><span class="p19-stat-val">XGBoost + SHAP explainability</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">SIU Referral Threshold</span><span class="p19-stat-val">Score ≥70 (current: 78)</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Payment Hold</span><span class="p19-stat-val" style="color:#dc2626;font-weight:700">ACTIVE</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Detection Lift vs Baseline</span><span class="p19-stat-val">+32%</span></div>';
+      },
+      actions: function() {
+        return '<button class="p19-btn danger" onclick="p19Close(\'p19-intel-detail-overlay\');openSIUConfirmModal(\'CLM-2026-0025\',\'Kevin Park\')"><i class="fas fa-user-secret"></i> Confirm SIU Referral</button>' +
+               '<button class="p19-btn primary" onclick="p19Close(\'p19-intel-detail-overlay\');openFraudClaimDetailModal(\'CLM-2026-0025\')"><i class="fas fa-search-plus"></i> View Fraud Detail</button>';
+      }
+    },
+    'watch-list': {
+      title:'Watch List Claims', icon:'fas fa-eye', iconClass:'orange',
+      sub:'Claims with fraud score 30–69 · Enhanced monitoring',
+      color:'#ea580c',
+      body: function() {
+        return '<div class="p19-info-box"><i class="fas fa-eye"></i> <strong>2 claims under enhanced monitoring</strong> with fraud scores 30–69. No immediate SIU referral required but adjuster review before payout.</div>' +
+        '<div class="p19-section-title"><i class="fas fa-list" style="color:#ea580c"></i> Watch List Claims</div>' +
+        ['CLM-2026-0041|Robert Chen|Death Benefit|$1,000,000|WATCH 42','CLM-2026-0028|Maria Gonzalez|ADB|$120,000|WATCH 38'].map(function(r) {
+          var p = r.split('|'); return '<div class="p19-claim-row" onclick="p19Close(\'p19-intel-detail-overlay\');openFraudClaimDetailModal(\'' + p[0] + '\')">' +
+            '<div class="p19-claim-id">' + p[0] + '</div>' +
+            '<div class="p19-claim-name">' + p[1] + ' · ' + p[2] + ' · ' + p[3] + '</div>' +
+            '<span class="p19-claim-badge watch">' + p[4] + '</span></div>';
+        }).join('') +
+        '<div class="p19-section-title"><i class="fas fa-chart-bar" style="color:#ea580c"></i> Risk Profile Summary</div>' +
+        ['Claim Timing|72%|#dc2626','Doc Completeness|55%|#d97706','Beneficiary Match|60%|#d97706','Claim Amount|80%|#dc2626'].map(function(r) {
+          var p = r.split('|'); return '<div class="p19-bar-row"><span class="p19-bar-lbl">' + p[0] + '</span><div class="p19-bar-track"><div class="p19-bar-fill" style="width:' + p[1] + ';background:' + p[2] + '"></div></div><span class="p19-bar-val" style="color:' + p[2] + '">' + p[1] + '</span></div>';
+        }).join('') +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Monitoring Frequency</span><span class="p19-stat-val">Real-time · Re-scored every 2 hours</span></div>';
+      },
+      actions: function() {
+        return '<button class="p19-btn primary" onclick="p19Close(\'p19-intel-detail-overlay\');openFraudReportModal()"><i class="fas fa-search-plus"></i> Full Fraud Report</button>';
+      }
+    },
+    'sla-risk': {
+      title:'SLA At-Risk Claims', icon:'fas fa-fire-alt', iconClass:'amber',
+      sub:'Claims approaching or breaching SLA deadlines',
+      color:'#d97706',
+      body: function() {
+        return '<div class="p19-warn-box"><i class="fas fa-stopwatch"></i> <strong>2 claims require immediate SLA action.</strong> NY Ins Law §3224-a requires timely acknowledgment (15 days) and payment (45 days after proof of loss). Breach triggers regulatory reporting.</div>' +
+        '<div class="p19-section-title"><i class="fas fa-fire" style="color:#dc2626"></i> SLA Breach (Immediate Action)</div>' +
+        '<div class="p19-claim-row" onclick="p19Close(\'p19-intel-detail-overlay\');openClaimModal(\'CLM-2026-0041\',\'view\')">' +
+          '<div class="p19-claim-id">CLM-2026-0041</div>' +
+          '<div class="p19-claim-name">Robert Chen · Death Benefit · $1M · <strong style="color:#dc2626">1 DAY LEFT</strong></div>' +
+          '<span class="p19-claim-badge">BREACH</span>' +
+        '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-exclamation-triangle" style="color:#d97706"></i> SLA Warning (Act Today)</div>' +
+        '<div class="p19-claim-row" onclick="p19Close(\'p19-intel-detail-overlay\');openClaimModal(\'CLM-2026-0053\',\'view\')">' +
+          '<div class="p19-claim-id">CLM-2026-0053</div>' +
+          '<div class="p19-claim-name">Eleanor Marsh · Survivorship · $2M · <strong style="color:#d97706">2 DAYS LEFT</strong></div>' +
+          '<span class="p19-claim-badge watch">WARNING</span>' +
+        '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-gavel" style="color:#374151"></i> Regulatory Context</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.7"><strong>NY Ins Law §3224-a:</strong> Insurer must acknowledge receipt within 15 business days. Must pay, deny, or request additional information within 45 days of receiving all proof of loss. Penalty for late payment: interest at 6% per annum + potential market conduct action.<br><strong>NAIC Best Practices:</strong> Prompt Claims Handling Model Regulation requires SLA breach escalation to senior management with documented corrective action.</div></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">SLA Compliance Rate (YTD)</span><span class="p19-stat-val" style="color:#16a34a">94.2%</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Average Resolution Time</span><span class="p19-stat-val">5.2 days (target: 6d)</span></div>';
+      },
+      actions: function() {
+        return '<button class="p19-btn danger" onclick="p19Close(\'p19-intel-detail-overlay\');openClaimModal(\'CLM-2026-0041\',\'view\')"><i class="fas fa-fire"></i> Open CLM-0041 Now</button>';
+      }
+    },
+    'nlp-accuracy': {
+      title:'NLP Model Accuracy — 94%', icon:'fas fa-brain', iconClass:'blue',
+      sub:'Natural Language Processing performance dashboard',
+      color:'#1d4ed8',
+      body: function() {
+        return '<div class="p19-info-box"><i class="fas fa-brain"></i> NYL Claims NLP engine (BERT-base, fine-tuned on 47,000 insurance claims) achieves <strong>94% accuracy</strong> on field extraction and document classification tasks.</div>' +
+        '<div class="p19-section-title"><i class="fas fa-chart-bar" style="color:#1d4ed8"></i> Model Performance by Task</div>' +
+        ['Field Extraction|97%|#059669','Document Classification|95%|#059669','Fraud Signal Detection|92%|#059669','ADB ADL Verification|91%|#16a34a','Disability Functional Limits|88%|#d97706','Medical Terminology NER|94%|#059669'].map(function(r) {
+          var p = r.split('|'); return '<div class="p19-bar-row"><span class="p19-bar-lbl">' + p[0] + '</span><div class="p19-bar-track"><div class="p19-bar-fill" style="width:' + p[1] + ';background:' + p[2] + '"></div></div><span class="p19-bar-val" style="color:' + p[2] + '">' + p[1] + '</span></div>';
+        }).join('') +
+        '<div class="p19-section-title"><i class="fas fa-cog" style="color:#1d4ed8"></i> Model Architecture</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.7">' +
+          '<strong>Base Model:</strong> BERT-base-uncased (110M parameters)<br>' +
+          '<strong>Fine-tuning Dataset:</strong> 47,000 annotated insurance claims (NYL internal + NAIC benchmark)<br>' +
+          '<strong>Training Infrastructure:</strong> AWS SageMaker · A100 GPU cluster · 72h training cycle<br>' +
+          '<strong>Inference Latency:</strong> 340ms per document (real-time capable)<br>' +
+          '<strong>Languages:</strong> English (primary), Spanish (beta — 89% accuracy)<br>' +
+          '<strong>Last Retrained:</strong> March 2026 · Next scheduled: June 2026' +
+        '</div></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">False Positive Rate</span><span class="p19-stat-val">6%</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Documents Processed YTD</span><span class="p19-stat-val">12,847</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Adjuster Review Override Rate</span><span class="p19-stat-val">4.1% (industry benchmark: 8%)</span></div>';
+      },
+      actions: function() { return ''; }
+    },
+    'avg-resolution': {
+      title:'Avg Resolution Analytics — 5.2 Days', icon:'fas fa-clock', iconClass:'green',
+      sub:'Claims resolution time performance and trends',
+      color:'#059669',
+      body: function() {
+        return '<div class="p19-success-box"><i class="fas fa-chart-line"></i> Current average resolution of <strong>5.2 days</strong> is <strong>13% below the 6-day target</strong> and best performance in 3 years. Down from 7.8 days in Q1 2025.</div>' +
+        '<div class="p19-intel-grid">' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:#059669">5.2d</div><div class="p19-intel-card-lbl">Current Avg (All Claims)</div><div class="p19-intel-card-detail">−0.8d vs 6.0d target · −2.6d vs Q1 2025</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:#16a34a">3.1d</div><div class="p19-intel-card-lbl">Avg Payout Time (Approved)</div><div class="p19-intel-card-detail">ACH 1–2d · Check 3–5d · Wire 1d</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:#1d4ed8">1.2d</div><div class="p19-intel-card-lbl">STP Resolution (Avg)</div><div class="p19-intel-card-detail">AI auto-adjudication — no adjuster time</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:#d97706">18.4d</div><div class="p19-intel-card-lbl">Fraud Investigation Avg</div><div class="p19-intel-card-detail">SIU cases excluded from main metric</div></div>' +
+        '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-chart-bar" style="color:#059669"></i> Resolution Time by Claim Type</div>' +
+        ['LTC Claims|7.8d|#d97706','Death Benefit|6.1d|#d97706','Disability Income|9.2d|#ea580c','Accelerated Benefit|4.3d|#16a34a','Waiver of Premium|2.1d|#059669','STP Auto-Approved|1.2d|#059669'].map(function(r) {
+          var p = r.split('|'); var w = parseFloat(p[1]) / 15 * 100; return '<div class="p19-bar-row"><span class="p19-bar-lbl">' + p[0] + '</span><div class="p19-bar-track"><div class="p19-bar-fill" style="width:' + w + '%;background:' + p[2] + '"></div></div><span class="p19-bar-val" style="color:' + p[2] + '">' + p[1] + '</span></div>';
+        }).join('') +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Industry Benchmark</span><span class="p19-stat-val">8.4 days (LIMRA 2025)</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">SLA Compliance YTD</span><span class="p19-stat-val" style="color:#16a34a">94.2%</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">AI-Assisted Speed Gain</span><span class="p19-stat-val" style="color:#059669">+38% faster vs manual-only</span></div>';
+      },
+      actions: function() { return ''; }
+    },
+    'detection-lift': {
+      title:'ML Detection Lift — +32%', icon:'fas fa-chart-line', iconClass:'purple',
+      sub:'AI fraud detection improvement over baseline rules engine',
+      color:'#7c3aed',
+      body: function() {
+        return '<div class="p19-info-box"><i class="fas fa-chart-line"></i> NYL\'s ML-powered fraud detection achieves <strong>+32% detection lift</strong> compared to the legacy rules-based engine, identifying 4.2× more fraud cases at the same false-positive rate.</div>' +
+        '<div class="p19-intel-grid">' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:#7c3aed">+32%</div><div class="p19-intel-card-lbl">Detection Lift vs Rules Engine</div><div class="p19-intel-card-detail">4.2× more fraud detected · Same FPR</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:#059669">0.96</div><div class="p19-intel-card-lbl">AUC (ROC Curve)</div><div class="p19-intel-card-detail">Industry-leading · Top 5% of insurance models</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:#dc2626">4.2%</div><div class="p19-intel-card-lbl">False Positive Rate</div><div class="p19-intel-card-detail">Industry benchmark: 9.1%</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:#1d4ed8">$2.4M</div><div class="p19-intel-card-lbl">Fraud Prevented YTD</div><div class="p19-intel-card-detail">Based on detected + blocked claims</div></div>' +
+        '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-cogs" style="color:#7c3aed"></i> Model Architecture</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>Ensemble Model:</strong> XGBoost + LightGBM + Isolation Forest (anomaly detection)<br>' +
+          '<strong>Feature Set:</strong> 47 engineered features across 6 categories (timing, docs, beneficiary, claim value, history, NLP signals)<br>' +
+          '<strong>Training Data:</strong> 12,400 historical fraud cases + 88,000 valid claims (2018–2025)<br>' +
+          '<strong>SHAP Explainability:</strong> Every prediction has feature importance breakdown for adjuster transparency<br>' +
+          '<strong>Retraining Cycle:</strong> Monthly with new confirmed fraud cases<br>' +
+          '<strong>Bias Audit:</strong> Quarterly fairness review — no demographic features used; protected class testing shows <2% disparity' +
+        '</div></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Claims Scored This Month</span><span class="p19-stat-val">847</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Regulatory Compliance</span><span class="p19-stat-val">NY Circular Letter 2019-1 · NAIC AIML guidelines</span></div>';
+      },
+      actions: function() { return ''; }
+    }
+  };
+
+  var cfg = configs[type];
+  if (!cfg) { p7Toast('Detail not available', 2000); return; }
+  var ov = p19CreateOverlay('p19-intel-detail-overlay');
+  ov.innerHTML =
+    '<div class="p19-modal p19-modal-wide" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid ' + cfg.color + '">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="p19-modal-icon ' + cfg.iconClass + '"><i class="' + cfg.icon + '"></i></div>' +
+          '<div><div class="p19-modal-title">' + cfg.title + '</div><div class="p19-modal-sub">' + cfg.sub + '</div></div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-intel-detail-overlay\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' + cfg.body() + '</div>' +
+      '<div class="p19-modal-ftr">' +
+        '<button class="p19-btn ghost" onclick="p19Close(\'p19-intel-detail-overlay\')">Close</button>' +
+        cfg.actions() +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── c5: Triage Claim Detail Modal ── */
+function openTriageClaimDetailModal(claimId) {
+  var triageData = {
+    'CLM-2026-0041': {
+      client:'Robert Chen', initials:'RC', color:'#dc2626', type:'Death Benefit', amount:'$1,000,000',
+      tag:'SLA BREACH', urgency:97, fraudScore:42, docPct:50, sla:'1 day left',
+      adjuster:'James Reyes, Sr. Adjuster', filed:'2026-04-08', policyId:'NYL-001-2019-0608',
+      summary:'$1M death benefit claim with SLA breaching in under 24 hours. Beneficiary Susan Chen has not responded to 3 outreach attempts. Missing ID documents are the sole blocker to payout authorization.',
+      actions:['Call beneficiary directly — use agent direct line (800) 555-0142','Send FedEx courier for certified ID pickup — pre-authorized by Senior Adjuster Reyes','Escalate to Sr. Adjuster James Reyes by EOD for SLA exception approval','Flag for SLA exception if docs arrive after deadline — regulatory documentation required'],
+      timeline:[
+        { date:'Apr 8, 2026', event:'Claim filed by beneficiary Susan Chen', dot:'#1d4ed8' },
+        { date:'Apr 8', event:'AI IDP scan: 2/4 docs received · Missing: ID + Bank details', dot:'#d97706' },
+        { date:'Apr 9', event:'Automated doc reminder sent via email + SMS', dot:'#1d4ed8' },
+        { date:'Apr 9', event:'No response from beneficiary after 3 attempts', dot:'#dc2626' },
+        { date:'Apr 10', event:'AI Triage flags SLA breach in <24h · Urgent escalation', dot:'#dc2626' }
+      ],
+      aiRecommendation:'Immediate escalated outreach required. Consider direct phone call and/or physical courier. If beneficiary unreachable by EOD, file SLA exception with documentation of good-faith efforts. Adjuster James Reyes is pre-authorized to approve exception.'
+    },
+    'CLM-2026-0025': {
+      client:'Kevin Park', initials:'KP', color:'#7c3aed', type:'Death Benefit', amount:'$250,000',
+      tag:'FRAUD HOLD', urgency:91, fraudScore:78, docPct:25, sla:'On Hold',
+      adjuster:'Maria Santos, SIU Specialist', filed:'2026-03-22', policyId:'NYL-001-2024-0315',
+      summary:'High-risk fraud case with payment hold. Policy was in "pending" status at time of insured\'s death in Nov 2024. Contestability window active. ML detected 3 timeline anomalies and beneficiary was changed 6 months before death.',
+      actions:['Order original UW medical records from 2024 application — subpoena drafted','Refer to SIU immediately — Risk score 78 exceeds 70-point referral threshold','Notify beneficiary (attorney-represented) of 30-day contestability review notice','Assign SIU investigator with life insurance fraud experience (J. Rodriguez available)'],
+      timeline:[
+        { date:'Mar 22, 2026', event:'Claim filed by attorney on behalf of beneficiary', dot:'#7c3aed' },
+        { date:'Mar 22', event:'AI flags: Policy was in Pending status at death (Nov 2024)', dot:'#dc2626' },
+        { date:'Mar 23', event:'ML anomaly detection: 3 flags (timing, bene change, med records)', dot:'#dc2626' },
+        { date:'Mar 24', event:'Fraud score calculated: 78/100 — auto-hold triggered', dot:'#dc2626' },
+        { date:'Apr 10', event:'SIU referral pending adjuster confirmation', dot:'#d97706' }
+      ],
+      aiRecommendation:'Do not release payment. SIU referral is strongly recommended (score 78 vs 70 threshold). Contestability investigation authorized under policy §4310(c). Medical records and beneficiary change documentation are critical evidence. NY Ins Law §3224-a allows up to 45-day extension during contestability review.'
+    },
+    'CLM-2026-0028': {
+      client:'Maria Gonzalez', initials:'MG', color:'#d97706', type:'Accel. Benefit (ADB)', amount:'$120,000',
+      tag:'COMPASSIONATE', urgency:84, fraudScore:38, docPct:50, sla:'5 days',
+      adjuster:'Linda Park, Compassionate Care Specialist', filed:'2026-04-05', policyId:'NYL-001-2018-0920',
+      summary:'Terminal illness ADB claim for patient with Stage IV cancer. Oncologist certification is the sole outstanding document. Fast-track compassionate processing eligible — 5-day window before SLA pressure increases.',
+      actions:['Contact Dr. Hernandez oncology office directly — AI letter pre-drafted and ready','Pre-approve ADB conditional on certification receipt — adjuster authorization obtained','Assign Linda Park (compassionate case specialist) as primary contact','Expedite internal review queue once certification arrives — target same-day processing'],
+      timeline:[
+        { date:'Apr 5, 2026', event:'ADB claim filed — terminal diagnosis March 8, 2026', dot:'#d97706' },
+        { date:'Apr 5', event:'IDP: 2/4 docs received · Missing: terminal cert + care plan', dot:'#d97706' },
+        { date:'Apr 6', event:'AI draft doc request letter prepared for oncologist', dot:'#1d4ed8' },
+        { date:'Apr 7', event:'Compassionate fast-track flag raised by AI triage', dot:'#db2777' },
+        { date:'Apr 10', event:'5-day SLA window noted — escalation imminent', dot:'#dc2626' }
+      ],
+      aiRecommendation:'This is a compassionate ADB case. Speed is critical given the patient\'s prognosis (6–8 months). Pre-approve now conditional on certification receipt. Linda Park has experience with oncologist liaison and can obtain certification within 24–48 hours via direct physician outreach.'
+    },
+    'CLM-2026-0035': {
+      client:'Maria Gonzalez', initials:'MG', color:'#2563eb', type:'Disability Income', amount:'$4,200/mo',
+      tag:'DOCS PENDING', urgency:68, fraudScore:18, docPct:50, sla:'9 days',
+      adjuster:'Tom Bradley, Disability Specialist', filed:'2026-03-30', policyId:'NYL-001-2020-0115',
+      summary:'Disability income claim with APS overdue by 4 days from Dr. Hernandez. NLP analysis of the partial APS shows missing functional limitations section — critical for disability definition determination.',
+      actions:['Send AI-drafted APS follow-up letter to Dr. Hernandez (supplemental APS form targeting functional limitations)','Request specific functional limitations data: ADLs affected, work capacity assessment, return-to-work prognosis','Set 5-day follow-up reminder for non-response escalation to office manager','Review Own-Occupation vs Any-Occupation disability definition against claimant\'s role as Project Manager'],
+      timeline:[
+        { date:'Mar 30, 2026', event:'Disability claim filed — accident March 15, 2026', dot:'#2563eb' },
+        { date:'Apr 1', event:'APS request sent to Dr. Hernandez (due Apr 6)', dot:'#1d4ed8' },
+        { date:'Apr 6', event:'APS not received — reminder sent', dot:'#d97706' },
+        { date:'Apr 8', event:'NLP analysis of partial docs: missing functional limitations', dot:'#d97706' },
+        { date:'Apr 10', event:'APS now 4 days overdue — AI triage escalation', dot:'#ea580c' }
+      ],
+      aiRecommendation:'APS delay is the primary blocker. Standard disability claims average 12–15 days for APS receipt. 4-day overdue is within normal range but warrants proactive outreach. NLP recommendation: ensure supplemental APS form specifically asks for Activities of Daily Living impact and work capacity assessment to satisfy policy definition.'
+    },
+    'CLM-2026-0038': {
+      client:'Sandra Williams', initials:'SW', color:'#059669', type:'Long-term Care', amount:'$9,200/mo',
+      tag:'NEAR READY', urgency:42, fraudScore:12, docPct:75, sla:'22 days',
+      adjuster:'Carol Davis, LTC Specialist', filed:'2026-03-20', policyId:'NYL-001-2015-0411',
+      summary:'LTC claim is nearly approval-ready. Eligibility certificate has been verified, care plan reviewed and approved. Only adjuster sign-off on benefit amount calculation is remaining before payout initiation.',
+      actions:['Route to Carol Davis for final LTC benefit eligibility confirmation and amount verification','Initiate payout authorization workflow once adjuster confirms','Notify Sandra Williams that approval is expected within 3–5 business days','Archive all documents to policy file and confirm banking details for ACH transfer'],
+      timeline:[
+        { date:'Mar 20, 2026', event:'LTC claim filed — care facility admission March 15', dot:'#059669' },
+        { date:'Mar 25', event:'LTC eligibility certificate received and verified', dot:'#059669' },
+        { date:'Apr 2', event:'Care plan reviewed by LTC specialist — approved', dot:'#059669' },
+        { date:'Apr 7', event:'IDP: 3/4 docs complete · Final: adjuster benefit calculation', dot:'#16a34a' },
+        { date:'Apr 10', event:'Near ready — routed for final adjuster sign-off', dot:'#16a34a' }
+      ],
+      aiRecommendation:'This claim is on the fast track to approval. No blockers other than final adjuster benefit calculation review. Carol Davis has the claim and should complete review within 24 hours. Consider this a near-STP case — if calculations confirm $9,200/mo, approve immediately and initiate ACH.'
+    },
+    'CLM-2026-0033': {
+      client:'James Whitfield', initials:'JW', color:'#16a34a', type:'Long-term Care', amount:'$9,600',
+      tag:'APPROVAL READY', urgency:28, fraudScore:9, docPct:100, sla:'17 days',
+      adjuster:'Carol Davis, LTC Specialist', filed:'2026-03-15', policyId:'NYL-001-2012-0810',
+      summary:'All criteria met for immediate approval. 4/4 documents verified by IDP. NLP confidence 97%. No fraud signals. STP engine has scored this at 97/100 — highest confidence in current queue. Ready for instant payout.',
+      actions:['Send to adjuster for final approval (SLA: today — no further delay justified)','Initiate electronic ACH transfer ($9,600) immediately upon approval confirmation','Confirm James Whitfield\'s banking details are current in policy system','Send approval notification letter and payment confirmation within 24 hours'],
+      timeline:[
+        { date:'Mar 15, 2026', event:'LTC claim filed', dot:'#16a34a' },
+        { date:'Mar 22', event:'All 4 documents received and IDP verified', dot:'#059669' },
+        { date:'Mar 28', event:'NLP analysis complete — confidence 97%', dot:'#059669' },
+        { date:'Apr 5', event:'Fraud score: 9/100 — Clear', dot:'#059669' },
+        { date:'Apr 10', event:'STP engine: 97/100 — Approval Ready', dot:'#059669' }
+      ],
+      aiRecommendation:'This is the highest-readiness claim in the current queue. All 4 STP eligibility criteria are met: docs complete, fraud clear, no contestability, SLA comfortable. Recommend immediate approval and payout. Every day of delay is unjustified and risks SLA deterioration. This claim is STP-eligible — use the Auto-Approve function in the STP panel.'
+    }
+  };
+
+  var d = triageData[claimId];
+  if (!d) { p7Toast('Triage detail not available for ' + claimId, 2000); return; }
+
+  var tagColors = { 'SLA BREACH':'#dc2626','FRAUD HOLD':'#7c3aed','COMPASSIONATE':'#db2777','DOCS PENDING':'#2563eb','NEAR READY':'#059669','APPROVAL READY':'#16a34a' };
+  var tagColor = tagColors[d.tag] || '#6b7280';
+  var urgencyColor = d.urgency >= 85 ? '#dc2626' : d.urgency >= 60 ? '#d97706' : '#16a34a';
+
+  var actionsHTML = d.actions.map(function(a, i) {
+    return '<div class="p19-action-item"><div class="p19-action-num">' + (i+1) + '</div><div class="p19-action-text">' + a + '</div></div>';
+  }).join('');
+  var timelineHTML = d.timeline.map(function(t) {
+    return '<div class="p19-tl-item"><div class="p19-tl-dot" style="background:' + t.dot + '"></div><div class="p19-tl-text">' + t.event + '</div><div class="p19-tl-time">' + t.date + '</div></div>';
+  }).join('');
+
+  var ov = p19CreateOverlay('p19-triage-detail-' + claimId);
+  ov.innerHTML =
+    '<div class="p19-modal p19-modal-wide" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid ' + d.color + '">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="mini-avatar" style="background:' + d.color + ';width:44px;height:44px;font-size:14px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">' + d.initials + '</div>' +
+          '<div>' +
+            '<div class="p19-modal-title">' + claimId + ' — Triage Detail</div>' +
+            '<div class="p19-modal-sub">' + d.client + ' · ' + d.type + ' · ' + d.amount + ' · <span style="background:' + tagColor + '20;color:' + tagColor + ';padding:2px 8px;border-radius:8px;font-weight:600">' + d.tag + '</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-triage-detail-' + claimId + '\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' +
+        '<div class="p19-intel-grid">' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val" style="color:' + urgencyColor + '">' + d.urgency + '</div><div class="p19-intel-card-lbl">AI Urgency Score</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val">' + d.fraudScore + '</div><div class="p19-intel-card-lbl">Fraud Score</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val">' + d.docPct + '%</div><div class="p19-intel-card-lbl">Doc Completion</div></div>' +
+          '<div class="p19-intel-card"><div class="p19-intel-card-val">' + d.sla + '</div><div class="p19-intel-card-lbl">SLA Remaining</div></div>' +
+        '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-align-left" style="color:#374151"></i> Situation Summary</div>' +
+        '<div class="p19-info-box">' + d.summary + '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-tasks" style="color:#1d4ed8"></i> AI Recommended Next Actions</div>' +
+        actionsHTML +
+        '<div class="p19-section-title"><i class="fas fa-history" style="color:#374151"></i> Claim Timeline</div>' +
+        '<div class="p19-timeline">' + timelineHTML + '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-robot" style="color:#7c3aed"></i> AI Full Recommendation</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.7">' + d.aiRecommendation + '</div></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Assigned Adjuster</span><span class="p19-stat-val">' + d.adjuster + '</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Filed</span><span class="p19-stat-val">' + d.filed + '</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Policy ID</span><span class="p19-stat-val">' + d.policyId + '</span></div>' +
+      '</div>' +
+      '<div class="p19-modal-ftr">' +
+        '<button class="p19-btn ghost" onclick="p19Close(\'p19-triage-detail-' + claimId + '\')">Close</button>' +
+        (d.tag === 'FRAUD HOLD' ?
+          '<button class="p19-btn danger" onclick="p19Close(\'p19-triage-detail-' + claimId + '\');openSIUConfirmModal(\'' + claimId + '\',\'' + d.client + '\')"><i class="fas fa-user-secret"></i> Refer to SIU</button>' :
+          d.tag === 'APPROVAL READY' ?
+          '<button class="p19-btn green" onclick="p19Close(\'p19-triage-detail-' + claimId + '\');stpAutoApprove(\'' + claimId + '\',\'' + d.client + '\',\'' + d.amount + '\')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>' :
+          '<button class="p19-btn primary" onclick="p19Close(\'p19-triage-detail-' + claimId + '\');openClaimModal(\'' + claimId + '\',\'view\')"><i class="fas fa-eye"></i> Open Full Claim</button>'
+        ) +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── c6: AI Prioritization Rules Modal ── */
+function openAIPrioritizationRulesModal() {
+  var ov = p19CreateOverlay('p19-ai-priority-overlay');
+  ov.innerHTML =
+    '<div class="p19-modal p19-modal-wide" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid #7c3aed">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="p19-modal-icon purple"><i class="fas fa-robot"></i></div>' +
+          '<div><div class="p19-modal-title">AI Claims Prioritization — Rules &amp; Models</div><div class="p19-modal-sub">How the AI engine determines which claims are worked first</div></div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-ai-priority-overlay\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' +
+
+        /* Overview */
+        '<div class="p19-info-box"><i class="fas fa-robot"></i> The <strong>NYL Claims AI Prioritization Engine v2.1</strong> uses a weighted multi-factor ML model to rank all active claims by urgency score (0–100). The model runs continuously, re-scoring every 30 minutes as new data arrives. Urgency scores directly determine workbench order and triage queue ranking.</div>' +
+
+        /* Weighting model */
+        '<div class="p19-section-title"><i class="fas fa-balance-scale" style="color:#7c3aed"></i> Priority Factor Weights (Total = 100%)</div>' +
+        '<div class="p19-model-card">' +
+          ['SLA Time Pressure (deadline proximity)|40%|40','Fraud Risk Score (XGBoost output)|30%|30','Document Completeness (IDP score)|20%|20','Claim Value (log-normalized)|10%|10'].map(function(r) {
+            var p = r.split('|'); return '<div class="p19-weight-bar"><span class="p19-weight-lbl">' + p[0] + '</span><div class="p19-weight-track"><div class="p19-weight-fill" style="width:' + p[1] + '"></div></div><span class="p19-weight-pct">' + p[1] + '</span></div>';
+          }).join('') +
+        '</div>' +
+
+        /* SLA model */
+        '<div class="p19-section-title"><i class="fas fa-stopwatch" style="color:#dc2626"></i> SLA Pressure Model (40% weight)</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>Algorithm:</strong> Exponential decay function — urgency increases non-linearly as deadline approaches.<br>' +
+          '<code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px">SLA_Score = 40 × e^(k × (1 − days_remaining / SLA_limit))</code> where k=3.5<br>' +
+          '<strong>Regulatory Basis:</strong> NY Ins Law §3224-a (45-day payment rule), NAIC Prompt Payment Model Act. SLA breach triggers mandatory regulatory reporting and interest penalty at 6% p.a.<br>' +
+          '<strong>Bonus Modifiers:</strong> +10 pts for compassionate/ADB cases · +5 pts for beneficiary actively waiting · +15 pts for SLA already breached' +
+        '</div></div>' +
+
+        /* Fraud model */
+        '<div class="p19-section-title"><i class="fas fa-shield-virus" style="color:#dc2626"></i> Fraud Scoring Model (30% weight)</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>Model:</strong> XGBoost gradient boosting + SHAP explainability (47 features, AUC 0.96)<br>' +
+          '<strong>Key Features:</strong> Policy age at claim, beneficiary change recency, claim timing relative to issuance, medical record NLP discrepancy score, high-value threshold, third-party filer flag, contestability window status<br>' +
+          '<strong>Priority Logic:</strong> High fraud scores (≥70) = HOLD + SIU referral (excluded from payout queue). Watch scores (30–69) = enhanced review required before payout authorization. Clear (<30) = standard processing path.<br>' +
+          '<strong>Bias Controls:</strong> Quarterly fairness audits. Zero demographic features. Protected class disparity monitoring (<2% variance threshold). Compliant with NY Circular Letter 2019-1 re: AI fairness in claims.' +
+        '</div></div>' +
+
+        /* Doc completion */
+        '<div class="p19-section-title"><i class="fas fa-file-import" style="color:#7c3aed"></i> Document Completeness Model (20% weight)</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>IDP Engine:</strong> BERT-base NLP + AWS Textract for field extraction. Assigns weighted completion score per required document type.<br>' +
+          '<strong>Doc Weight Matrix:</strong> Death Certificate (30%) · Claimant ID (25%) · Medical Records/APS (25%) · Claim Form (15%) · Supplemental (5%)<br>' +
+          '<strong>Overdue Penalty:</strong> −5 pts per day a required doc is overdue beyond provider\'s standard turnaround<br>' +
+          '<strong>NLP Completeness Check:</strong> Even received docs are scored for content completeness. APS missing functional limitations section triggers partial completion score (60% weight of full APS credit).' +
+        '</div></div>' +
+
+        /* Claim value */
+        '<div class="p19-section-title"><i class="fas fa-dollar-sign" style="color:#059669"></i> Claim Value Model (10% weight)</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>Formula:</strong> <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px">Value_Score = 10 × log10(claim_amount) / log10(max_claim_amount)</code><br>' +
+          '<strong>Rationale:</strong> Log normalization prevents $1M+ claims from dominating the queue. High-value claims already receive enhanced monitoring via fraud score. The value weight ensures resource allocation reflects financial exposure without overriding SLA/fraud signals.<br>' +
+          '<strong>Reserve Trigger:</strong> Claims >$500K auto-trigger reserve increase notification to actuarial team and reinsurance reporting per Treaty FAC-2024-NYL-001.' +
+        '</div></div>' +
+
+        /* Override rules */
+        '<div class="p19-section-title"><i class="fas fa-exclamation-triangle" style="color:#d97706"></i> Override Rules (Trumps Weighted Score)</div>' +
+        [
+          'Compassionate / Terminal Illness — Always elevated to top 3 regardless of score',
+          'SLA Already Breached — Locks to position #1 with mandatory escalation notification',
+          'Court Order / Legal Hold — Removed from active queue; routed to Legal track',
+          'Reinsurance Trigger (>$500K) — Escalated to Sr. Adjuster + Reinsurance team simultaneously',
+          'NAIC Complaint Filed — Immediate supervisor review required within 24h',
+          'Regulatory Examination Period — All claims in exam scope flagged for enhanced documentation'
+        ].map(function(r, i) {
+          return '<div class="p19-rule-row"><div class="p19-rule-num">' + (i+1) + '</div><div>' + r + '</div></div>';
+        }).join('') +
+
+        /* ML Architecture */
+        '<div class="p19-section-title"><i class="fas fa-cogs" style="color:#374151"></i> ML Model Architecture &amp; Training</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>Primary Models:</strong> XGBoost (fraud) · LightGBM (SLA prediction) · BERT-base (NLP extraction) · Isolation Forest (anomaly detection)<br>' +
+          '<strong>Training Data:</strong> 160,000 historical claims (2015–2025) · 12,400 confirmed fraud cases · 47,000 NLP-annotated documents<br>' +
+          '<strong>Ensemble Voting:</strong> Final urgency score = weighted vote across 4 sub-model outputs with adjuster override capability<br>' +
+          '<strong>Explainability:</strong> SHAP values for every prediction — adjuster can see top 3 features driving each claim\'s score<br>' +
+          '<strong>Retraining:</strong> Monthly with new outcomes · Online learning for SLA prediction (daily updates)<br>' +
+          '<strong>Infrastructure:</strong> AWS SageMaker · Real-time inference <400ms · 99.7% uptime SLA' +
+        '</div></div>' +
+
+        /* Regulatory */
+        '<div class="p19-section-title"><i class="fas fa-gavel" style="color:#374151"></i> Regulatory Compliance &amp; Governance</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>NY Ins Law §3224-a:</strong> SLA weighting directly implements prompt payment compliance. Model flags all claims approaching 15-day acknowledgment and 45-day payment deadlines.<br>' +
+          '<strong>NAIC AIML Guidelines (2020):</strong> Model governance policy, bias testing, explainability requirements, human override capability — all implemented.<br>' +
+          '<strong>NY Circular Letter 2019-1:</strong> AI fairness in insurance — no protected characteristics in feature set, quarterly demographic disparity testing.<br>' +
+          '<strong>Model Risk Management:</strong> Annual third-party model validation by independent actuarial firm. Board Audit Committee oversight. Model change log maintained for regulatory examination.<br>' +
+          '<strong>Human-in-the-Loop:</strong> Any AI recommendation can be overridden by licensed adjuster. Override audit trail maintained for all cases. AI augments, never replaces, adjuster decision authority.' +
+        '</div></div>' +
+
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Model Version</span><span class="p19-stat-val">NYL Claims AI Priority Engine v2.1</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Re-scoring Frequency</span><span class="p19-stat-val">Every 30 minutes · Real-time on new doc upload</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Last Model Validation</span><span class="p19-stat-val">February 2026 — PwC Advisory</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Adjuster Override Rate</span><span class="p19-stat-val">4.1% of recommendations overridden (within governance limit)</span></div>' +
+
+      '</div>' +
+      '<div class="p19-modal-ftr">' +
+        '<button class="p19-btn ghost" onclick="p19Close(\'p19-ai-priority-overlay\')">Close</button>' +
+        '<button class="p19-btn purple" onclick="p19Close(\'p19-ai-priority-overlay\');openAITriageModal()"><i class="fas fa-robot"></i> Open AI Triage Queue</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── c7: STP AI Explainer Modal ── */
+function openSTPAIExplainerModal() {
+  var ov = p19CreateOverlay('p19-stp-explainer-overlay');
+  ov.innerHTML =
+    '<div class="p19-modal p19-modal-wide" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid #059669">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="p19-modal-icon green"><i class="fas fa-bolt"></i></div>' +
+          '<div><div class="p19-modal-title">How AI Determines STP Eligibility</div><div class="p19-modal-sub">Straight-Through Processing — full technical deep-dive</div></div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-stp-explainer-overlay\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' +
+
+        '<div class="p19-success-box"><i class="fas fa-bolt"></i> <strong>Straight-Through Processing (STP)</strong> allows the AI system to approve and initiate payment on qualifying claims <em>without human adjuster review</em>. The AI must achieve ≥90% confidence across all 6 eligibility gates before STP authorization is granted.</div>' +
+
+        '<div class="p19-section-title"><i class="fas fa-check-double" style="color:#059669"></i> The 6 STP Eligibility Gates (ALL must pass)</div>' +
+        [
+          ['Fraud Score Gate', '#dc2626', 'fas fa-shield-virus', 'Fraud score must be <25 (Clear tier). Scores 25–29 require adjuster manual review. Any score ≥30 automatically disqualifies from STP. The XGBoost fraud model (AUC 0.96) evaluates 47 features in real-time. SHAP explainability ensures no single feature dominates the decision unjustly.', 'Threshold: <25 · Model: XGBoost v3.1 · Evaluation: Real-time at claim submission + re-evaluated hourly'],
+          ['Document Completeness Gate', '#7c3aed', 'fas fa-file-import', 'IDP engine must verify 100% of required documents are received AND content-validated. NLP checks each document for: required fields present, internally consistent dates, terminology matching policy type, no red-flag language patterns. A doc received but content-incomplete counts as partial — STP disqualified until NLP passes full content.', 'Threshold: 100% IDP score · NLP confidence: ≥90% per document · IDP: AWS Textract + BERT-base'],
+          ['Contestability Window Gate', '#d97706', 'fas fa-calendar-alt', 'Policy must be outside the 2-year contestability window (per NY Ins Law §3204). If policy was issued within the last 2 years, STP is automatically blocked and claim enters enhanced review track. System pulls policy issue date from core admin system in real-time.', 'Threshold: Policy age ≥2 years · Data source: NYL Policy Admin System (real-time API)'],
+          ['Legal Hold Gate', '#374151', 'fas fa-gavel', 'No active legal holds, court orders, garnishments, or regulatory flags on the claim or policy. System checks: active litigation database, regulatory complaint registry, attorney representation flag. Any active item = STP disqualified immediately.', 'Data sources: Legal Tracking System · NY DFS Complaint Registry · Claims Legal Hold DB'],
+          ['SLA Headroom Gate', '#1d4ed8', 'fas fa-stopwatch', 'Sufficient SLA time remaining to allow post-STP audit review (minimum 5 days required). This ensures that if an STP decision is flagged for review during quality audit, there is time to reverse if needed. Compassionate claims get SLA gate waived with dual adjuster sign-off.', 'Threshold: ≥5 days remaining SLA · Exception: Compassionate/ADB cases with dual adjuster approval'],
+          ['NLP Confidence Gate', '#059669', 'fas fa-brain', 'NLP engine must achieve ≥90% confidence on claim type-specific eligibility criteria. For LTC: ADL threshold verification (2+ ADLs impaired). For Death Benefit: cause of death consistency with policy terms. For Disability: functional limitation assessment. For ADB: terminal diagnosis language and prognosis. For Critical Illness: diagnosis code matching policy schedule.', 'Model: BERT-base fine-tuned · Threshold: ≥90% · Claim-type specific NER models deployed per product line']
+        ].map(function(g, i) {
+          return '<div class="p19-model-card" style="margin-bottom:10px">' +
+            '<div class="p19-model-card-hdr">' +
+              '<div style="width:28px;height:28px;border-radius:50%;background:' + g[1] + '20;color:' + g[1] + ';display:flex;align-items:center;justify-content:center;font-size:14px"><i class="' + g[2] + '"></i></div>' +
+              '<div style="font-size:14px;font-weight:700;color:#0f172a">Gate ' + (i+1) + ': ' + g[0] + '</div>' +
+              '<span class="p19-model-badge" style="background:' + g[1] + '15;color:' + g[1] + ';border-color:' + g[1] + '30">Required</span>' +
+            '</div>' +
+            '<div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:6px">' + g[3] + '</div>' +
+            '<div style="font-size:11px;color:#7c3aed;font-weight:600"><i class="fas fa-cog" style="margin-right:4px"></i>' + g[4] + '</div>' +
+          '</div>';
+        }).join('') +
+
+        '<div class="p19-section-title"><i class="fas fa-calculator" style="color:#059669"></i> Composite STP Score Calculation</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>Formula:</strong> <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px">STP_Score = (fraud_gate × 0.30) + (doc_gate × 0.25) + (contestability_gate × 0.15) + (legal_gate × 0.10) + (sla_gate × 0.10) + (nlp_gate × 0.10)</code><br>' +
+          '<strong>Threshold:</strong> Score ≥ 0.90 (90%) required for STP authorization. Any single gate failure = immediate disqualification regardless of composite score.<br>' +
+          '<strong>Current STP Rate:</strong> 23% of all claims achieve STP eligibility. Target: 35% by end of 2026 through IDP improvements and faster document receipt.<br>' +
+          '<strong>Average STP Resolution Time:</strong> 8 minutes (from approve click to ACH initiation). Standard adjuster processing: 2.3 days.' +
+        '</div></div>' +
+
+        '<div class="p19-section-title"><i class="fas fa-network-wired" style="color:#374151"></i> Downstream System Notifications (Automatic)</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>1. Claimant Notification:</strong> Email + SMS sent within 60 seconds of approval. Includes payment amount, method, and expected delivery date.<br>' +
+          '<strong>2. Finance/Treasury:</strong> ACH batch file generated and submitted to treasury system. EFT instruction created for beneficiary account. Same-day ACH if approved before 2:00 PM ET; next-day otherwise.<br>' +
+          '<strong>3. Policy Admin System:</strong> Policy record updated: claim status → Paid, reserve released, claim history updated. Audit record created with STP flag and AI confidence score.<br>' +
+          '<strong>4. Reinsurance Reporting:</strong> If claim >$250K, reinsurance reporting system notified per FAC treaty requirements. Treaty: FAC-2024-NYL-001.<br>' +
+          '<strong>5. Compliance Log:</strong> Immutable audit trail created with: claim ID, approval timestamp, AI scores for all 6 gates, adjuster ID (for STP = AI-assisted), SHAP explanations, regulatory compliance checkmarks.<br>' +
+          '<strong>6. Adjuster Dashboard:</strong> Sr. Adjuster receives post-STP notification summary within 5 minutes. 48-hour retrospective review window with override capability if new information emerges.' +
+        '</div></div>' +
+
+        '<div class="p19-section-title"><i class="fas fa-shield-alt" style="color:#374151"></i> Governance &amp; Risk Controls</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>Authorization Limits:</strong> STP authorized up to $50,000 per claim without adjuster review. $50K–$150K requires adjuster electronic attestation (1-click confirm). >$150K always requires active adjuster review regardless of STP score.<br>' +
+          '<strong>Post-Hoc Audit:</strong> Random 10% of all STP approvals reviewed by Sr. Adjuster within 48 hours. Any error triggers model investigation and potential retraining.<br>' +
+          '<strong>Rollback:</strong> STP can be reversed within 2 hours of approval (before ACH settlement). After settlement, standard recovery process applies.<br>' +
+          '<strong>Regulatory Filing:</strong> Annual STP performance report filed with NY DFS under Market Conduct requirements. STP decisions included in annual claims audit sample.' +
+        '</div></div>' +
+
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Current STP Eligibility Rate</span><span class="p19-stat-val">23% of active claims</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Average STP Resolution Time</span><span class="p19-stat-val">8 minutes vs 2.3 days standard</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">STP Accuracy (YTD)</span><span class="p19-stat-val" style="color:#16a34a">99.2% — 0 incorrect STP approvals</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">AI Authorization Limit</span><span class="p19-stat-val">$50,000 · Above: adjuster attestation required</span></div>' +
+
+      '</div>' +
+      '<div class="p19-modal-ftr">' +
+        '<button class="p19-btn ghost" onclick="p19Close(\'p19-stp-explainer-overlay\')">Close</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+/* ── c7: STP Auto-Approve — Full Simulation Modal ── */
+function stpAutoApprove(claimId, clientName, amount) {
+  var ov = p19CreateOverlay('p19-stp-sim-overlay');
+  var stageData = [
+    { num:'1', label:'AI Validation — All 6 Gates', detail:'Fraud Gate: PASS (score < 25) · Doc Gate: PASS (100% IDP) · Contestability: PASS · Legal Hold: PASS · SLA Gate: PASS · NLP: PASS (≥90%)', time:'0.3s', status:'done' },
+    { num:'2', label:'STP Composite Score Verified', detail:'Composite score: ' + (claimId === 'CLM-2026-0033' ? '97' : claimId === 'CLM-2026-0038' ? '93' : '91') + '/100 — Above 90% STP threshold. SHAP explainability generated for audit file.', time:'0.1s', status:'done' },
+    { num:'3', label:'Fraud Clearance Confirmed', detail:'XGBoost model final check — no new signals since last scan 2 hours ago. Fraud score confirmed. Payment hold check: CLEAR.', time:'0.4s', status:'done' },
+    { num:'4', label:'Document Verification', detail:'IDP engine confirms all required documents received, content-validated. NLP confidence verified against claim-type thresholds. Claim form, death/illness cert, claimant ID — all authenticated.', time:'0.8s', status:'done' },
+    { num:'5', label:'Payment Initiation', detail:'ACH batch instruction generated. Beneficiary account: ****4821. Amount: ' + amount + '. Routing: 021000021 (JPMC). Expected delivery: ' + (new Date(Date.now()+86400000*2).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})) + ' (same-day ACH if before 2 PM ET).', time:'1.2s', status:'done' },
+    { num:'6', label:'Notifications Dispatched', detail:'All downstream systems notified simultaneously. See notification details below.', time:'0.6s', status:'done' },
+    { num:'7', label:'Audit Trail Created', detail:'Immutable audit log entry created. AI approval record with SHAP values, gate scores, timestamp, and compliance checkmarks filed to claims management system.', time:'0.2s', status:'done' }
+  ];
+
+  var stagesHTML = stageData.map(function(s) {
+    return '<div class="stp-stage">' +
+      '<div class="stp-stage-dot done"><i class="fas fa-check"></i></div>' +
+      '<div class="stp-stage-content">' +
+        '<div class="stp-stage-title">' + s.num + '. ' + s.label + '</div>' +
+        '<div class="stp-stage-detail">' + s.detail + '</div>' +
+        '<div class="stp-stage-time"><i class="fas fa-clock" style="margin-right:4px"></i>Completed in ' + s.time + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var notifChips = [
+    ['fa-envelope','Claimant Email','60s'],['fa-sms','Claimant SMS','62s'],
+    ['fa-user-tie','Adjuster Dashboard','120s'],['fa-university','Treasury/ACH','90s'],
+    ['fa-database','Policy Admin System','95s'],['fa-shield-alt','Compliance Log','100s'],
+    ['fa-building','Reinsurance System','110s'],['fa-file-alt','Audit File','105s']
+  ].map(function(n) {
+    return '<span class="stp-notif-chip"><i class="fas ' + n[0] + '"></i>' + n[1] + ' <span style="color:#94a3b8">+' + n[2] + '</span></span>';
+  }).join('');
+
+  ov.innerHTML =
+    '<div class="p19-modal p19-modal-wide" onclick="event.stopPropagation()">' +
+      '<div class="p19-modal-hdr" style="border-bottom:2px solid #059669">' +
+        '<div class="p19-modal-hdr-left">' +
+          '<div class="p19-modal-icon green"><i class="fas fa-bolt"></i></div>' +
+          '<div>' +
+            '<div class="p19-modal-title">STP Auto-Approval Complete — ' + claimId + '</div>' +
+            '<div class="p19-modal-sub">' + clientName + ' · ' + amount + ' · AI Confidence: ' + (claimId === 'CLM-2026-0033' ? '97%' : claimId === 'CLM-2026-0038' ? '93%' : '91%') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="p7m-close" onclick="p19Close(\'p19-stp-sim-overlay\')"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="p19-modal-body">' +
+        '<div class="p19-success-box" style="font-size:15px;font-weight:700"><i class="fas fa-check-circle"></i> ' + claimId + ' APPROVED &amp; PAYMENT INITIATED · ' + amount + ' disbursed via ACH · Est. delivery 1–2 business days</div>' +
+        '<div class="p19-section-title"><i class="fas fa-tasks" style="color:#059669"></i> STP Processing Steps — All Completed</div>' +
+        '<div class="stp-stage-list">' + stagesHTML + '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-bell" style="color:#059669"></i> Notifications Sent (8 Systems)</div>' +
+        '<div style="padding:12px 0">' + notifChips + '</div>' +
+        '<div class="p19-section-title"><i class="fas fa-file-alt" style="color:#374151"></i> Notification Details</div>' +
+        '<div class="p19-model-card"><div style="font-size:13px;color:#374151;line-height:1.8">' +
+          '<strong>Claimant (' + clientName + '):</strong> Email to registered address — "Your claim ' + claimId + ' has been approved. Payment of ' + amount + ' will arrive in your account within 1–2 business days via ACH. Ref: ' + claimId + '-PAY-' + Date.now().toString().slice(-6) + '"<br>' +
+          '<strong>SMS:</strong> "NYL: Claim ' + claimId + ' approved. ' + amount + ' payment initiated. Questions: (800) 555-0100. Ref: ' + claimId + '"<br>' +
+          '<strong>Adjuster Dashboard:</strong> Post-STP notification sent to Sr. Adjuster. 48-hour review window open. Override available until ACH settlement.<br>' +
+          '<strong>Finance/Treasury:</strong> ACH instruction submitted to NYL Treasury System. Batch window: 2:00 PM ET cutoff. Account: ****4821. Routing: 021000021.<br>' +
+          '<strong>Policy Admin System:</strong> Status updated: Open → Paid. Reserve released. Claim history entry created. Digital file sealed.<br>' +
+          '<strong>Compliance Log:</strong> Audit record created with all 6 gate scores, AI confidence, SHAP values, approval timestamp, and applicable regulatory checkmarks (NY §3224-a compliant).' +
+        '</div></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Total Processing Time</span><span class="p19-stat-val" style="color:#059669">3.6 seconds (vs 2.3 days standard)</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Payment Reference</span><span class="p19-stat-val">' + claimId + '-PAY-' + Date.now().toString().slice(-6) + '</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">ACH Settlement</span><span class="p19-stat-val">Submitted to treasury · 1–2 business days</span></div>' +
+        '<div class="p19-stat-row"><span class="p19-stat-lbl">Adjuster Review Window</span><span class="p19-stat-val">48 hours (until ACH settles)</span></div>' +
+      '</div>' +
+      '<div class="p19-modal-ftr">' +
+        '<button class="p19-btn ghost" onclick="p19Close(\'p19-stp-sim-overlay\')">Close</button>' +
+        '<button class="p19-btn green" onclick="p19Close(\'p19-stp-sim-overlay\');openSTPAIExplainerModal()"><i class="fas fa-bolt"></i> How AI Determines STP</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov);
+
+  /* Remove the old STP card from DOM + show toast */
+  p7Toast('<i class="fas fa-check-circle"></i> ' + claimId + ' APPROVED &amp; PAID · ' + amount + ' · ACH transfer initiated · All 8 systems notified · Audit trail created', 5000);
+  setTimeout(function() {
+    var stpCards = document.querySelectorAll('.ov-stp-claim');
+    stpCards.forEach(function(card) {
+      if (card.innerHTML.indexOf(claimId) !== -1) {
+        card.innerHTML = '<div style="padding:16px;text-align:center;color:#059669"><i class="fas fa-check-circle" style="font-size:28px;margin-bottom:6px;display:block"></i><strong>' + claimId + ' approved and paid</strong><div style="color:#64748b;font-size:12px;margin-top:3px">STP processing complete · ' + amount + ' disbursed · ' + new Date().toLocaleTimeString() + '</div></div>';
+      }
+    });
+  }, 800);
+}
+
+/* ── c1: Filter by type chip ── */
+function filterClaimsByTypeChip(typeKey) {
+  var filter = document.getElementById('claim-type-filter');
+  if (!filter) return;
+  var opts = filter.options;
+  for (var i = 0; i < opts.length; i++) {
+    if (opts[i].value.indexOf(typeKey) !== -1 || (typeKey === 'Rider' && (opts[i].value.indexOf('Rider') !== -1 || opts[i].value.indexOf('Illness') !== -1)) || (typeKey === 'Other' && (opts[i].value.indexOf('Annuity') !== -1 || opts[i].value.indexOf('Surrender') !== -1 || opts[i].value.indexOf('Paid-up') !== -1 || opts[i].value.indexOf('Survivorship') !== -1 || opts[i].value.indexOf('Maturity') !== -1))) {
+      if (typeKey === 'Rider') {
+        if (opts[i].value.indexOf('Rider') !== -1) { filter.value = opts[i].value; break; }
+      } else if (typeKey === 'Other') {
+        if (opts[i].value.indexOf('Annuity') !== -1) { filter.value = opts[i].value; break; }
+      } else {
+        if (opts[i].value.indexOf(typeKey) !== -1) { filter.value = opts[i].value; break; }
+      }
+    }
+  }
+  if (typeof filterClaims === 'function') filterClaims();
+}
+
+/* ── Pass 19 END ── */
 
 function toggleSTPPanel(btn) {
   var body = document.getElementById('ov-stp-body');
@@ -39645,7 +40504,7 @@ function openAITriageModal() {
     }
 
     return '<div class="triage-card" style="border-left:4px solid ' + c.color + '">' +
-      '<div class="triage-card-top">' +
+      '<div class="triage-card-top" onclick="openTriageClaimDetailModal(\'' + c.id + '\')" style="cursor:pointer;border-radius:8px;transition:background .14s" onmouseenter="this.style.background=\'#f8fafc\'" onmouseleave="this.style.background=\'\'" title="Click for detailed triage report">' +
         '<div class="triage-rank">#' + (i+1) + '</div>' +
         '<div class="mini-avatar" style="background:' + c.color + ';width:36px;height:36px;font-size:12px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-weight:700;flex-shrink:0">' + c.initials + '</div>' +
         '<div class="triage-card-info">' +
@@ -39656,6 +40515,7 @@ function openAITriageModal() {
           '<div class="triage-urgency-num" style="color:' + urgencyColor + '">' + c.urgency + '</div>' +
           '<div class="triage-urgency-lbl">Urgency</div>' +
         '</div>' +
+        '<span style="font-size:11px;color:#94a3b8;margin-left:4px" title="Click for detail"><i class="fas fa-chevron-right"></i></span>' +
       '</div>' +
       '<div class="triage-reasoning"><i class="fas fa-robot" style="color:#7c3aed;margin-right:6px"></i>' + c.reasoning + '</div>' +
       '<div class="triage-metrics">' +
@@ -39722,13 +40582,14 @@ function openFraudReportModal() {
     var statusColor = f.status === 'FLAGGED' ? '#dc2626' : f.status === 'WATCH' ? '#d97706' : '#16a34a';
     var scoreColor = f.score >= 60 ? '#dc2626' : f.score >= 30 ? '#d97706' : '#16a34a';
     var sigHTML = f.signals.map(function(s) { return '<span class="fraud-sig-chip">' + s + '</span>'; }).join('');
-    return '<div class="fraud-report-row' + (f.hold ? ' fraud-row-hold' : '') + '">' +
+    return '<div class="fraud-report-row' + (f.hold ? ' fraud-row-hold' : '') + '" onclick="openFraudClaimDetailModal(\'' + f.id + '\')" title="Click for full fraud analysis">' +
       '<div class="fraud-rr-top">' +
         '<span class="fraud-rr-id">' + f.id + (f.hold ? ' <i class="fas fa-ban" style="color:#dc2626;margin-left:4px" title="Payment Hold"></i>' : '') + '</span>' +
         '<span class="fraud-rr-client">' + f.client + '</span>' +
         '<span class="fraud-rr-amount">' + f.amount + '</span>' +
         '<span class="fraud-rr-score" style="background:' + scoreColor + '20;color:' + scoreColor + ';border:1px solid ' + scoreColor + '40">' + f.score + '</span>' +
         '<span class="fraud-rr-status" style="background:' + statusColor + '20;color:' + statusColor + '">' + f.status + '</span>' +
+        '<span style="font-size:11px;color:#94a3b8;margin-left:auto"><i class="fas fa-chevron-right"></i></span>' +
       '</div>' +
       '<div class="fraud-rr-signals">' + sigHTML + '</div>' +
       '<div class="fraud-rr-rec"><i class="fas fa-lightbulb" style="color:#d97706;margin-right:6px"></i>' + f.recommendation + '</div>' +
@@ -39739,12 +40600,12 @@ function openFraudReportModal() {
     '<div class="fraud-signal-matrix">' +
       '<div class="fsm-title"><i class="fas fa-chart-bar"></i> Fraud Signal Distribution</div>' +
       '<div class="fsm-bars">' +
-        '<div class="fsm-bar-row"><span class="fsm-lbl">Claim Timing</span><div class="fsm-track"><div class="fsm-fill" style="width:72%;background:#dc2626"></div></div><span class="fsm-count">High</span></div>' +
-        '<div class="fsm-bar-row"><span class="fsm-lbl">Doc Completeness</span><div class="fsm-track"><div class="fsm-fill" style="width:55%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
-        '<div class="fsm-bar-row"><span class="fsm-lbl">Policy History</span><div class="fsm-track"><div class="fsm-fill" style="width:90%;background:#16a34a"></div></div><span class="fsm-count">Low</span></div>' +
-        '<div class="fsm-bar-row"><span class="fsm-lbl">Beneficiary Match</span><div class="fsm-track"><div class="fsm-fill" style="width:60%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
-        '<div class="fsm-bar-row"><span class="fsm-lbl">Claim Amount</span><div class="fsm-track"><div class="fsm-fill" style="width:80%;background:#dc2626"></div></div><span class="fsm-count">High</span></div>' +
-        '<div class="fsm-bar-row"><span class="fsm-lbl">NLP Anomalies</span><div class="fsm-track"><div class="fsm-fill" style="width:45%;background:#d97706"></div></div><span class="fsm-count">Med</span></div>' +
+        '<div class="fsm-bar-row" onclick="openFraudSignalModal(\'Claim Timing\')" title="Click for signal detail"><span class="fsm-lbl">Claim Timing</span><div class="fsm-track"><div class="fsm-fill" style="width:72%;background:#dc2626"></div></div><span class="fsm-count">High</span><i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8;margin-left:6px"></i></div>' +
+        '<div class="fsm-bar-row" onclick="openFraudSignalModal(\'Doc Completeness\')" title="Click for signal detail"><span class="fsm-lbl">Doc Completeness</span><div class="fsm-track"><div class="fsm-fill" style="width:55%;background:#d97706"></div></div><span class="fsm-count">Med</span><i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8;margin-left:6px"></i></div>' +
+        '<div class="fsm-bar-row" onclick="openFraudSignalModal(\'Policy History\')" title="Click for signal detail"><span class="fsm-lbl">Policy History</span><div class="fsm-track"><div class="fsm-fill" style="width:90%;background:#16a34a"></div></div><span class="fsm-count">Low</span><i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8;margin-left:6px"></i></div>' +
+        '<div class="fsm-bar-row" onclick="openFraudSignalModal(\'Beneficiary Match\')" title="Click for signal detail"><span class="fsm-lbl">Beneficiary Match</span><div class="fsm-track"><div class="fsm-fill" style="width:60%;background:#d97706"></div></div><span class="fsm-count">Med</span><i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8;margin-left:6px"></i></div>' +
+        '<div class="fsm-bar-row" onclick="openFraudSignalModal(\'Claim Amount\')" title="Click for signal detail"><span class="fsm-lbl">Claim Amount</span><div class="fsm-track"><div class="fsm-fill" style="width:80%;background:#dc2626"></div></div><span class="fsm-count">High</span><i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8;margin-left:6px"></i></div>' +
+        '<div class="fsm-bar-row" onclick="openFraudSignalModal(\'NLP Anomalies\')" title="Click for signal detail"><span class="fsm-lbl">NLP Anomalies</span><div class="fsm-track"><div class="fsm-fill" style="width:45%;background:#d97706"></div></div><span class="fsm-count">Med</span><i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8;margin-left:6px"></i></div>' +
       '</div>' +
     '</div>';
 
@@ -39784,8 +40645,8 @@ function openFraudReportModal() {
       '</div>' +
       '<div class="fraud-report-footer">' +
         '<button class="p7m-btn ghost" onclick="document.getElementById(\'fraud-report-overlay\').remove()">Close</button>' +
-        '<button class="p7m-btn danger" onclick="p7Toast(\'<i class=\\\'fas fa-ban\\\'></i> Payment hold confirmed for CLM-2026-0025 · SIU referral initiated · Senior adjuster notified\',4000);document.getElementById(\'fraud-report-overlay\').remove()"><i class="fas fa-ban"></i> Confirm SIU Referral</button>' +
-        '<button class="p7m-btn primary" onclick="openFraudDetailModal(\'CLM-2026-0025\');document.getElementById(\'fraud-report-overlay\').remove()"><i class="fas fa-search-plus"></i> Investigate CLM-0025</button>' +
+        '<button class="p7m-btn danger" onclick="document.getElementById(\'fraud-report-overlay\').remove();openSIUConfirmModal(\'CLM-2026-0025\',\'Kevin Park\')"><i class="fas fa-user-secret"></i> Confirm SIU Referral</button>' +
+        '<button class="p7m-btn primary" onclick="document.getElementById(\'fraud-report-overlay\').remove();openInvestigateModal(\'CLM-2026-0025\')"><i class="fas fa-search-plus"></i> Investigate CLM-0025</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);

@@ -5760,9 +5760,9 @@ function ClaimsPage() {
         <div class="ckpi-card ckpi-open" onclick="clmSwitchTab('active');filterClaimsByStatus('open')">
           <div class="ckpi-icon"><i class="fas fa-folder-open"></i></div>
           <div class="ckpi-body">
-            <div class="ckpi-val">7</div>
+            <div class="ckpi-val">14</div>
             <div class="ckpi-lbl">Open Claims</div>
-            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +2 this week</div>
+            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +3 this week</div>
           </div>
         </div>
         <div class="ckpi-card ckpi-review" onclick="clmSwitchTab('active');filterClaimsByStatus('review')">
@@ -5839,9 +5839,23 @@ function ClaimsPage() {
         </div>
       </div>
 
+      {/* ── Claim-Type Breakdown Strip ── */}
+      <div class="clm-type-strip">
+        <div class="clm-type-strip-label"><i class="fas fa-tags"></i> By Type:</div>
+        <button class="clm-type-chip clm-type-death" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Death Benefit')" title="Filter: Death Benefit"><i class="fas fa-cross"></i> Death Benefit <span>3</span></button>
+        <button class="clm-type-chip clm-type-ltc" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Long-term Care')" title="Filter: Long-term Care"><i class="fas fa-bed"></i> LTC <span>3</span></button>
+        <button class="clm-type-chip clm-type-disability" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Disability')" title="Filter: Disability"><i class="fas fa-wheelchair"></i> Disability <span>2</span></button>
+        <button class="clm-type-chip clm-type-adb" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Accelerated')" title="Filter: Accelerated/ADB"><i class="fas fa-heartbeat"></i> ADB <span>1</span></button>
+        <button class="clm-type-chip clm-type-rider" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Rider')" title="Filter: Riders"><i class="fas fa-plus-circle"></i> Riders <span>3</span></button>
+        <button class="clm-type-chip clm-type-other" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Other')" title="Filter: Other types"><i class="fas fa-ellipsis-h"></i> Other <span>2</span></button>
+        <button class="clm-type-chip clm-type-fraud" onclick="clmSwitchTab('active');filterClaimsByStatus('flagged')" title="Filter: Fraud Flagged"><i class="fas fa-shield-virus"></i> Fraud <span class="clm-type-badge-red">1</span></button>
+        <button class="clm-type-chip clm-type-sla" onclick="clmSwitchTab('active');filterClaimsBySLA()" title="Filter: SLA At Risk"><i class="fas fa-fire"></i> SLA Risk <span class="clm-type-badge-amber">2</span></button>
+        <div class="clm-type-strip-clear"><button onclick="clearClaimFilters()" title="Clear all filters"><i class="fas fa-times"></i></button></div>
+      </div>
+
       {/* ══════════════════════════════════════════════════════
-          4-TAB BAR
-          tabs: overview | active | intelligence | resolved
+          5-TAB BAR
+          tabs: overview | active | intelligence | resolved | subrogation
           ══════════════════════════════════════════════════════ */}
       <div class="pol-tab-bar">
         <button class="pol-tab pol-tab-active" id="clm-tab-overview" onclick="clmSwitchTab('overview')">
@@ -5849,7 +5863,7 @@ function ClaimsPage() {
         </button>
         <button class="pol-tab" id="clm-tab-active" onclick="clmSwitchTab('active')">
           <i class="fas fa-folder-open"></i> Active Claims
-          <span class="pol-tab-count pol-tab-count-red">7</span>
+          <span class="pol-tab-count pol-tab-count-red">14</span>
         </button>
         <button class="pol-tab" id="clm-tab-intelligence" onclick="clmSwitchTab('intelligence')">
           <i class="fas fa-brain"></i> Intelligence
@@ -5873,7 +5887,7 @@ function ClaimsPage() {
 
         {/* ── KPI Stats Row ── */}
         <div class="ov-kpi-row">
-          <div class="ov-kpi-card ov-kpi-red" onclick="openFraudReportModal()" title="View Fraud Report">
+          <div class="ov-kpi-card ov-kpi-red" onclick="openIntelDetailModal('fraud-flagged')" title="View Fraud-Flagged Claims">
             <div class="ov-kpi-icon"><i class="fas fa-shield-virus"></i></div>
             <div class="ov-kpi-body">
               <div class="ov-kpi-val">1</div>
@@ -5881,7 +5895,7 @@ function ClaimsPage() {
             </div>
             <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
-          <div class="ov-kpi-card ov-kpi-orange" onclick="openFraudReportModal()" title="Watch List">
+          <div class="ov-kpi-card ov-kpi-orange" onclick="openIntelDetailModal('watch-list')" title="Watch List Claims">
             <div class="ov-kpi-icon"><i class="fas fa-eye"></i></div>
             <div class="ov-kpi-body">
               <div class="ov-kpi-val">2</div>
@@ -5889,7 +5903,7 @@ function ClaimsPage() {
             </div>
             <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
-          <div class="ov-kpi-card ov-kpi-amber" onclick="filterClaimsBySLA()" title="SLA At-Risk Claims">
+          <div class="ov-kpi-card ov-kpi-amber" onclick="openIntelDetailModal('sla-risk')" title="SLA At-Risk Claims">
             <div class="ov-kpi-icon"><i class="fas fa-fire-alt"></i></div>
             <div class="ov-kpi-body">
               <div class="ov-kpi-val">2</div>
@@ -5897,7 +5911,7 @@ function ClaimsPage() {
             </div>
             <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
-          <div class="ov-kpi-card ov-kpi-blue" onclick="openCIReviewModal()" title="NLP Accuracy">
+          <div class="ov-kpi-card ov-kpi-blue" onclick="openIntelDetailModal('nlp-accuracy')" title="NLP Model Accuracy">
             <div class="ov-kpi-icon"><i class="fas fa-brain"></i></div>
             <div class="ov-kpi-body">
               <div class="ov-kpi-val">94%</div>
@@ -5905,7 +5919,7 @@ function ClaimsPage() {
             </div>
             <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
-          <div class="ov-kpi-card ov-kpi-green" onclick="openCIReviewModal()" title="Avg Resolution">
+          <div class="ov-kpi-card ov-kpi-green" onclick="openIntelDetailModal('avg-resolution')" title="Avg Resolution Analytics">
             <div class="ov-kpi-icon"><i class="fas fa-clock"></i></div>
             <div class="ov-kpi-body">
               <div class="ov-kpi-val">5.2d</div>
@@ -5913,7 +5927,7 @@ function ClaimsPage() {
             </div>
             <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
-          <div class="ov-kpi-card ov-kpi-purple" onclick="openCIReviewModal()" title="Detection Lift">
+          <div class="ov-kpi-card ov-kpi-purple" onclick="openIntelDetailModal('detection-lift')" title="ML Detection Lift">
             <div class="ov-kpi-icon"><i class="fas fa-chart-line"></i></div>
             <div class="ov-kpi-body">
               <div class="ov-kpi-val">+32%</div>
@@ -5975,7 +5989,7 @@ function ClaimsPage() {
               <div class="ov-wb-icon"><i class="fas fa-tasks"></i></div>
               <div>
                 <div class="ov-wb-title">Claims Workbench <span class="ov-wb-badge">4 Require Action</span></div>
-                <div class="ov-wb-sub">AI-prioritised — items ranked by urgency · Updated just now</div>
+                <div class="ov-wb-sub">AI-prioritised — items ranked by urgency · Updated just now &nbsp;<button class="ov-wb-ai-rules-link" onclick="event.stopPropagation();openAIPrioritizationRulesModal()"><i class="fas fa-info-circle"></i> How AI prioritizes</button></div>
               </div>
             </div>
             <div class="ov-wb-header-right">
@@ -6109,12 +6123,12 @@ function ClaimsPage() {
             <div class="ov-stp-header-left">
               <div class="ov-stp-icon"><i class="fas fa-bolt"></i></div>
               <div>
-                <div class="ov-stp-title">Straight-Through Processing <span class="ov-stp-live-badge">● LIVE</span></div>
+                <div class="ov-stp-title">Straight-Through Processing <span class="ov-stp-live-badge">● LIVE</span> <button class="ov-stp-ai-link" onclick="event.stopPropagation();openSTPAIExplainerModal()"><i class="fas fa-robot"></i> How AI determines STP</button></div>
                 <div class="ov-stp-sub">AI auto-adjudication engine · Claims that meet all criteria can be approved without adjuster review</div>
               </div>
             </div>
             <div class="ov-stp-header-stats">
-              <div class="ov-stp-stat"><span class="ov-stp-stat-val green">1</span><span class="ov-stp-stat-lbl">STP Eligible</span></div>
+              <div class="ov-stp-stat"><span class="ov-stp-stat-val green">3</span><span class="ov-stp-stat-lbl">STP Eligible</span></div>
               <div class="ov-stp-stat"><span class="ov-stp-stat-val blue">97%</span><span class="ov-stp-stat-lbl">AI Confidence</span></div>
               <div class="ov-stp-stat"><span class="ov-stp-stat-val purple">~8 min</span><span class="ov-stp-stat-lbl">Est. Resolution</span></div>
             </div>
@@ -6148,14 +6162,66 @@ function ClaimsPage() {
               </div>
             </div>
 
+            {/* STP Claim Card 2 — Sandra Williams LTC */}
+            <div class="ov-stp-claim">
+              <div class="ov-stp-claim-info">
+                <div class="ov-stp-claim-id">CLM-2026-0038</div>
+                <div class="ov-stp-claim-client"><div class="mini-avatar sw" style="width:24px;height:24px;font-size:10px">SW</div><span>Sandra Williams · Long-term Care · $9,200/mo</span></div>
+                <div class="ov-stp-criteria">
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Fraud score 12 — Clear</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Docs 100% complete (4/4 received)</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> LTC eligibility certificate verified</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> No contestability · Policy active 11 years</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> SLA on track · 22d remaining</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> NLP care-plan validation 93% confidence</div>
+                </div>
+              </div>
+              <div class="ov-stp-claim-right">
+                <div class="ov-stp-confidence-dial">
+                  <span class="ov-stp-conf-num">93</span>
+                  <span class="ov-stp-conf-lbl">AI Score</span>
+                </div>
+                <div class="ov-stp-claim-actions">
+                  <button class="ov-stp-btn approve" onclick="stpAutoApprove('CLM-2026-0038','Sandra Williams','$9,200/mo')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
+                  <button class="ov-stp-btn secondary" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i> Review First</button>
+                </div>
+              </div>
+            </div>
+
+            {/* STP Claim Card 3 — Patricia Nguyen Critical Illness */}
+            <div class="ov-stp-claim">
+              <div class="ov-stp-claim-info">
+                <div class="ov-stp-claim-id">CLM-2026-0046</div>
+                <div class="ov-stp-claim-client"><div class="mini-avatar pn" style="width:24px;height:24px;font-size:10px">PN</div><span>Patricia Nguyen · Critical Illness Rider · $50,000</span></div>
+                <div class="ov-stp-criteria">
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Fraud score 11 — Clear</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Docs 3/4 — final pathology report received</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Critical illness diagnosis confirmed (Stage III)</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> Rider benefit eligibility verified by NLP</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> SLA on track · 18d remaining</div>
+                  <div class="ov-stp-check ok"><i class="fas fa-check-circle"></i> No legal holds · Policy in force 7 years</div>
+                </div>
+              </div>
+              <div class="ov-stp-claim-right">
+                <div class="ov-stp-confidence-dial" style="border-color:#2563eb">
+                  <span class="ov-stp-conf-num" style="color:#2563eb">91</span>
+                  <span class="ov-stp-conf-lbl">AI Score</span>
+                </div>
+                <div class="ov-stp-claim-actions">
+                  <button class="ov-stp-btn approve" onclick="stpAutoApprove('CLM-2026-0046','Patricia Nguyen','$50,000')"><i class="fas fa-bolt"></i> Auto-Approve &amp; Pay</button>
+                  <button class="ov-stp-btn secondary" onclick="openClaimModal('CLM-2026-0046','view')"><i class="fas fa-eye"></i> Review First</button>
+                </div>
+              </div>
+            </div>
+
             {/* STP Ineligible — reason explainer row */}
             <div class="ov-stp-ineligible-row">
               <div class="ov-stp-ineligible-title"><i class="fas fa-info-circle"></i> Other claims not yet STP-eligible — blockers:</div>
               <div class="ov-stp-blockers">
-                <div class="ov-stp-blocker"><span class="ov-stp-blocker-id">CLM-2026-0041</span> <span class="ov-stp-blocker-reason">Missing beneficiary ID docs (2/4 received)</span></div>
-                <div class="ov-stp-blocker"><span class="ov-stp-blocker-id">CLM-2026-0025</span> <span class="ov-stp-blocker-reason">Fraud score 78 — SIU review required</span></div>
-                <div class="ov-stp-blocker"><span class="ov-stp-blocker-id">CLM-2026-0028</span> <span class="ov-stp-blocker-reason">Terminal cert pending (ADB compassionate)</span></div>
-                <div class="ov-stp-blocker"><span class="ov-stp-blocker-id">CLM-2026-0035</span> <span class="ov-stp-blocker-reason">APS from physician outstanding</span></div>
+                <div class="ov-stp-blocker" onclick="openClaimModal('CLM-2026-0041','view')" style="cursor:pointer"><span class="ov-stp-blocker-id">CLM-2026-0041</span> <span class="ov-stp-blocker-reason">Missing beneficiary ID docs (2/4 received) <i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8"></i></span></div>
+                <div class="ov-stp-blocker" onclick="openFraudDetailModal('CLM-2026-0025')" style="cursor:pointer"><span class="ov-stp-blocker-id">CLM-2026-0025</span> <span class="ov-stp-blocker-reason">Fraud score 78 — SIU review required <i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8"></i></span></div>
+                <div class="ov-stp-blocker" onclick="openClaimModal('CLM-2026-0028','view')" style="cursor:pointer"><span class="ov-stp-blocker-id">CLM-2026-0028</span> <span class="ov-stp-blocker-reason">Terminal cert pending (ADB compassionate) <i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8"></i></span></div>
+                <div class="ov-stp-blocker" onclick="sendDocRequest('CLM-2026-0035','Dr. Hernandez APS')" style="cursor:pointer"><span class="ov-stp-blocker-id">CLM-2026-0035</span> <span class="ov-stp-blocker-reason">APS from physician outstanding — click to chase <i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8"></i></span></div>
               </div>
             </div>
 

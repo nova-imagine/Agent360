@@ -48983,3 +48983,265 @@ kbd {
 }
 
 /* END PASS 18 */
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 19 — Claims Page Overhaul CSS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Tab Bar Visibility Improvements (c2) ── */
+.pol-tab-bar { display:flex; gap:0; border-bottom:2px solid #e2e8f0; background:#fff; padding:0 16px; overflow-x:auto; }
+.pol-tab {
+  display:flex; align-items:center; gap:7px; padding:13px 18px; font-size:14px; font-weight:600;
+  color:#64748b; border:none; background:none; cursor:pointer; white-space:nowrap;
+  border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .18s;
+}
+.pol-tab:hover { color:#1e293b; background:#f8fafc; }
+.pol-tab.pol-tab-active { color:#1d4ed8; border-bottom-color:#1d4ed8; background:#f0f5ff; }
+.pol-tab-count {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:22px; height:22px; padding:0 7px; border-radius:11px;
+  font-size:12px; font-weight:700; line-height:1;
+  background:#e2e8f0; color:#374151;
+}
+.pol-tab-count-red { background:#fee2e2; color:#dc2626; }
+.pol-tab-count-orange { background:#ffedd5; color:#ea580c; }
+.pol-tab-count-green { background:#dcfce7; color:#16a34a; }
+
+/* ── Claim Type Breakdown Strip (c1) ── */
+.clm-type-strip {
+  display:flex; align-items:center; gap:6px; padding:9px 16px;
+  background:linear-gradient(135deg,#f8fafc,#f1f5f9);
+  border-bottom:1px solid #e2e8f0; overflow-x:auto; flex-wrap:wrap;
+}
+.clm-type-strip-label {
+  font-size:12px; font-weight:700; color:#64748b; margin-right:4px;
+  white-space:nowrap; display:flex; align-items:center; gap:5px;
+}
+.clm-type-chip {
+  display:inline-flex; align-items:center; gap:5px; padding:4px 11px;
+  border-radius:20px; font-size:12px; font-weight:600; cursor:pointer;
+  border:1px solid transparent; transition:all .15s; white-space:nowrap;
+}
+.clm-type-chip span {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:18px; height:18px; border-radius:9px; font-size:11px; font-weight:700;
+  background:rgba(0,0,0,.12); padding:0 4px;
+}
+.clm-type-badge-red { background:#fee2e2 !important; color:#dc2626 !important; }
+.clm-type-badge-amber { background:#fef3c7 !important; color:#d97706 !important; }
+.clm-type-death  { background:#fee2e2; color:#b91c1c; border-color:#fca5a5; }
+.clm-type-death:hover { background:#fecaca; }
+.clm-type-ltc    { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
+.clm-type-ltc:hover { background:#bfdbfe; }
+.clm-type-disability { background:#f3e8ff; color:#7c3aed; border-color:#c4b5fd; }
+.clm-type-disability:hover { background:#ede9fe; }
+.clm-type-adb    { background:#fce7f3; color:#be185d; border-color:#f9a8d4; }
+.clm-type-adb:hover { background:#fbcfe8; }
+.clm-type-rider  { background:#dcfce7; color:#15803d; border-color:#86efac; }
+.clm-type-rider:hover { background:#bbf7d0; }
+.clm-type-other  { background:#f1f5f9; color:#475569; border-color:#cbd5e1; }
+.clm-type-other:hover { background:#e2e8f0; }
+.clm-type-fraud  { background:#fee2e2; color:#dc2626; border-color:#fca5a5; }
+.clm-type-fraud:hover { background:#fecaca; }
+.clm-type-sla    { background:#fff7ed; color:#c2410c; border-color:#fdba74; }
+.clm-type-sla:hover { background:#fed7aa; }
+.clm-type-strip-clear button {
+  background:none; border:1px solid #e2e8f0; color:#94a3b8; padding:3px 8px;
+  border-radius:12px; font-size:11px; cursor:pointer;
+}
+.clm-type-strip-clear button:hover { background:#f1f5f9; color:#64748b; }
+
+/* ── Workbench AI Rules link (c6) ── */
+.ov-wb-ai-rules-link {
+  background:none; border:1px solid #7c3aed; color:#7c3aed; padding:2px 9px;
+  border-radius:10px; font-size:11px; font-weight:600; cursor:pointer;
+  transition:all .15s; margin-left:4px;
+}
+.ov-wb-ai-rules-link:hover { background:#7c3aed; color:#fff; }
+
+/* ── STP AI explainer link in header (c7) ── */
+.ov-stp-ai-link {
+  background:none; border:1px solid rgba(16,185,129,.5); color:#059669;
+  padding:2px 9px; border-radius:10px; font-size:11px; font-weight:600;
+  cursor:pointer; transition:all .15s; margin-left:8px;
+}
+.ov-stp-ai-link:hover { background:#059669; color:#fff; }
+
+/* ── Claims: full fraud report modal — row clickable (c3) ── */
+.fraud-report-row { cursor:pointer; border-radius:8px; transition:background .14s; }
+.fraud-report-row:hover { background:#fef2f2; }
+.fsm-bar-row { cursor:pointer; border-radius:6px; padding:3px 4px; transition:background .14s; }
+.fsm-bar-row:hover { background:#f8fafc; }
+
+/* ── AI Modal shared base (c3-c7) ── */
+.p19-modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9900;
+  display:flex; align-items:center; justify-content:center; padding:16px;
+  animation:fadeIn .18s ease;
+}
+.p19-modal {
+  background:#fff; border-radius:16px; max-width:800px; width:100%;
+  max-height:88vh; overflow:hidden; display:flex; flex-direction:column;
+  box-shadow:0 24px 64px rgba(0,0,0,.25); animation:slideUp .22s ease;
+}
+.p19-modal-wide { max-width:1000px; }
+.p19-modal-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 24px; border-bottom:1px solid #e2e8f0;
+}
+.p19-modal-hdr-left { display:flex; align-items:center; gap:14px; }
+.p19-modal-icon {
+  width:44px; height:44px; border-radius:12px; display:flex;
+  align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
+}
+.p19-modal-icon.red { background:#fee2e2; color:#dc2626; }
+.p19-modal-icon.orange { background:#ffedd5; color:#ea580c; }
+.p19-modal-icon.amber { background:#fef3c7; color:#d97706; }
+.p19-modal-icon.blue { background:#dbeafe; color:#1d4ed8; }
+.p19-modal-icon.green { background:#dcfce7; color:#059669; }
+.p19-modal-icon.purple { background:#f3e8ff; color:#7c3aed; }
+.p19-modal-icon.teal { background:#ccfbf1; color:#0d9488; }
+.p19-modal-title { font-size:17px; font-weight:700; color:#0f172a; }
+.p19-modal-sub { font-size:13px; color:#64748b; margin-top:2px; }
+.p19-modal-body { padding:20px 24px; overflow-y:auto; flex:1; }
+.p19-modal-ftr {
+  display:flex; align-items:center; justify-content:flex-end; gap:10px;
+  padding:14px 24px; border-top:1px solid #e2e8f0; background:#f8fafc;
+}
+.p19-btn { padding:9px 20px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:all .15s; }
+.p19-btn.ghost { background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
+.p19-btn.ghost:hover { background:#e2e8f0; }
+.p19-btn.primary { background:#1d4ed8; color:#fff; }
+.p19-btn.primary:hover { background:#1e40af; }
+.p19-btn.danger { background:#dc2626; color:#fff; }
+.p19-btn.danger:hover { background:#b91c1c; }
+.p19-btn.green { background:#059669; color:#fff; }
+.p19-btn.green:hover { background:#047857; }
+.p19-btn.purple { background:#7c3aed; color:#fff; }
+.p19-btn.purple:hover { background:#6d28d9; }
+
+/* ── Intel detail modal content ── */
+.p19-intel-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+.p19-intel-card {
+  background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px;
+}
+.p19-intel-card-val { font-size:24px; font-weight:800; }
+.p19-intel-card-lbl { font-size:12px; color:#64748b; margin-top:2px; }
+.p19-intel-card-detail { font-size:12px; color:#475569; margin-top:6px; line-height:1.5; }
+.p19-section-title { font-size:13px; font-weight:700; color:#374151; margin:14px 0 8px; display:flex; align-items:center; gap:6px; }
+.p19-claim-row {
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:6px;
+  cursor:pointer; transition:all .14s;
+}
+.p19-claim-row:hover { background:#f0f5ff; border-color:#93c5fd; }
+.p19-claim-id { font-size:12px; font-weight:700; color:#1d4ed8; min-width:120px; }
+.p19-claim-name { font-size:13px; font-weight:600; flex:1; }
+.p19-claim-badge {
+  padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700;
+  background:#fee2e2; color:#dc2626;
+}
+.p19-claim-badge.watch { background:#ffedd5; color:#ea580c; }
+.p19-claim-badge.clear { background:#dcfce7; color:#16a34a; }
+.p19-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.p19-bar-lbl { font-size:12px; color:#475569; min-width:120px; }
+.p19-bar-track { flex:1; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden; }
+.p19-bar-fill { height:100%; border-radius:4px; }
+.p19-bar-val { font-size:11px; font-weight:600; min-width:36px; text-align:right; }
+.p19-stat-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; }
+.p19-stat-row:last-child { border-bottom:none; }
+.p19-stat-lbl { font-size:13px; color:#64748b; }
+.p19-stat-val { font-size:13px; font-weight:700; color:#0f172a; }
+.p19-info-box { background:#f0f5ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:12px; font-size:13px; color:#1e40af; line-height:1.6; }
+.p19-warn-box { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:12px; margin-bottom:12px; font-size:13px; color:#92400e; line-height:1.6; }
+.p19-success-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; margin-bottom:12px; font-size:13px; color:#14532d; line-height:1.6; }
+
+/* ── STP Simulation modal stages (c7) ── */
+.stp-stage-list { display:flex; flex-direction:column; gap:0; }
+.stp-stage {
+  display:flex; align-items:flex-start; gap:14px; padding:14px 0;
+  border-bottom:1px dashed #e2e8f0;
+}
+.stp-stage:last-child { border-bottom:none; }
+.stp-stage-dot {
+  width:36px; height:36px; border-radius:50%; border:2px solid #e2e8f0;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-size:14px; font-weight:700; transition:all .3s;
+}
+.stp-stage-dot.done { background:#059669; border-color:#059669; color:#fff; }
+.stp-stage-dot.active { background:#1d4ed8; border-color:#1d4ed8; color:#fff; animation:pulse 1s infinite; }
+.stp-stage-dot.pending { background:#f8fafc; color:#94a3b8; }
+.stp-stage-content { flex:1; }
+.stp-stage-title { font-size:14px; font-weight:700; color:#0f172a; }
+.stp-stage-detail { font-size:12px; color:#64748b; margin-top:3px; line-height:1.5; }
+.stp-stage-detail ul { margin:4px 0 0 16px; padding:0; }
+.stp-stage-detail li { margin-bottom:2px; }
+.stp-stage-time { font-size:11px; color:#10b981; font-weight:600; margin-top:3px; }
+.stp-notif-chip {
+  display:inline-flex; align-items:center; gap:5px; padding:3px 10px;
+  border-radius:12px; font-size:11px; font-weight:600; margin:2px;
+  background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0;
+}
+
+/* ── AI Prioritization Rules modal (c6) ── */
+.p19-model-card {
+  background:linear-gradient(135deg,#f8fafc,#f0f5ff); border:1px solid #bfdbfe;
+  border-radius:12px; padding:16px; margin-bottom:12px;
+}
+.p19-model-card-hdr { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.p19-model-badge {
+  padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;
+  background:#7c3aed20; color:#7c3aed; border:1px solid #7c3aed40;
+}
+.p19-weight-bar { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.p19-weight-lbl { font-size:12px; color:#475569; min-width:160px; }
+.p19-weight-track { flex:1; height:10px; background:#e2e8f0; border-radius:5px; overflow:hidden; }
+.p19-weight-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,#7c3aed,#6d28d9); }
+.p19-weight-pct { font-size:12px; font-weight:700; color:#7c3aed; min-width:36px; text-align:right; }
+.p19-rule-row {
+  display:flex; align-items:flex-start; gap:10px; padding:8px 0;
+  border-bottom:1px solid #f1f5f9; font-size:13px; color:#374151;
+}
+.p19-rule-num {
+  width:22px; height:22px; border-radius:50%; background:#7c3aed; color:#fff;
+  font-size:11px; font-weight:700; display:flex; align-items:center;
+  justify-content:center; flex-shrink:0; margin-top:1px;
+}
+
+/* ── Fraud claim detail sub-modal (c3) ── */
+.p19-fraud-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.p19-fraud-kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; }
+.p19-fraud-kpi-val { font-size:22px; font-weight:800; }
+.p19-fraud-kpi-lbl { font-size:11px; color:#64748b; margin-top:1px; }
+.p19-signal-row { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f1f5f9; }
+.p19-signal-icon { width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+.p19-signal-name { font-size:13px; font-weight:600; flex:1; }
+.p19-signal-score { font-size:12px; font-weight:700; }
+
+/* ── Triage detail sub-modal (c5) ── */
+.p19-triage-section { margin-bottom:16px; }
+.p19-action-item { display:flex; align-items:flex-start; gap:8px; padding:7px 0; border-bottom:1px solid #f1f5f9; }
+.p19-action-num { width:22px; height:22px; border-radius:50%; background:#1d4ed8; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.p19-action-text { font-size:13px; color:#374151; flex:1; }
+.p19-timeline { display:flex; flex-direction:column; gap:0; }
+.p19-tl-item { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px dashed #f1f5f9; }
+.p19-tl-dot { width:10px; height:10px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+.p19-tl-text { font-size:13px; color:#374151; flex:1; }
+.p19-tl-time { font-size:11px; color:#94a3b8; white-space:nowrap; }
+
+/* ── SIU Confirm modal (c3) ── */
+.p19-siu-confirm { text-align:center; padding:16px 0; }
+.p19-siu-icon { font-size:48px; color:#dc2626; margin-bottom:12px; }
+.p19-checklist { list-style:none; padding:0; margin:14px 0; text-align:left; }
+.p19-checklist li { display:flex; align-items:center; gap:8px; padding:7px 12px; background:#f8fafc; border-radius:7px; margin-bottom:5px; font-size:13px; color:#374151; }
+.p19-checklist li i { color:#059669; }
+
+/* ── Responsive ── */
+@media (max-width:640px) {
+  .p19-intel-grid { grid-template-columns:1fr; }
+  .p19-fraud-detail-grid { grid-template-columns:1fr; }
+  .clm-type-strip { padding:8px 12px; }
+  .clm-type-chip { font-size:11px; padding:3px 8px; }
+}
+
+/* END PASS 19 */
