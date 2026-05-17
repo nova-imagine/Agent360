@@ -7550,7 +7550,7 @@ function AIAgentsPage() {
         </div>
         <div class="aah-hero-kpis">
           <div class="aah-kpi">
-            <div class="aah-kpi-val">8</div>
+            <div class="aah-kpi-val">10</div>
             <div class="aah-kpi-lbl">Active Agents</div>
           </div>
           <div class="aah-kpi-divider"></div>
@@ -7565,13 +7565,13 @@ function AIAgentsPage() {
           </div>
           <div class="aah-kpi-divider"></div>
           <div class="aah-kpi">
-            <div class="aah-kpi-val">$31.2K</div>
+            <div class="aah-kpi-val">$43.6K</div>
             <div class="aah-kpi-lbl">AI Revenue</div>
           </div>
         </div>
         <div class="aah-hero-status">
           <span class="aah-online-dot"></span>
-          <span class="aah-online-label">AI Online · GPT-4 Turbo</span>
+          <span class="aah-online-label">AI Online · GPT-4o</span>
           <button class="aah-settings-btn" onclick="switchSettingsTab('ai',null);navigateTo('settings')"><i class="fas fa-sliders-h"></i></button>
         </div>
       </div>
@@ -7598,12 +7598,12 @@ function AIAgentsPage() {
             <div class="aah-ds-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-chart-line"></i></div>
             <div class="aah-ds-head">
               <div class="aah-ds-label">Investments</div>
-              <div class="aah-ds-score"><span class="aah-score-dot green"></span>76/100</div>
+              <div class="aah-ds-score"><span class="aah-score-dot green"></span>84/100</div>
             </div>
           </div>
           <div class="aah-ds-metrics">
             <span><i class="fas fa-coins"></i> $4.2M AUM</span>
-            <span><i class="fas fa-chart-pie"></i> 3 gaps</span>
+            <span><i class="fas fa-file-invoice-dollar"></i> 4 proposals</span>
             <span class="aah-ds-alert"><i class="fas fa-balance-scale"></i> 2 rebalances</span>
           </div>
           <button class="aah-ds-btn" onclick="sendQuickMessage('Show investment opportunities and portfolio gaps')"><i class="fas fa-robot"></i> Ask AI</button>
@@ -7613,11 +7613,11 @@ function AIAgentsPage() {
             <div class="aah-ds-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-umbrella-beach"></i></div>
             <div class="aah-ds-head">
               <div class="aah-ds-label">Retirement</div>
-              <div class="aah-ds-score"><span class="aah-score-dot amber"></span>82/100</div>
+              <div class="aah-ds-score"><span class="aah-score-dot amber"></span>79/100</div>
             </div>
           </div>
           <div class="aah-ds-metrics">
-            <span><i class="fas fa-piggy-bank"></i> 4 annuity</span>
+            <span><i class="fas fa-piggy-bank"></i> 6 contracts</span>
             <span><i class="fas fa-user-clock"></i> 2 income gaps</span>
             <span><i class="fas fa-chart-area"></i> 6 near-retire</span>
           </div>
@@ -7628,7 +7628,7 @@ function AIAgentsPage() {
             <div class="aah-ds-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-handshake"></i></div>
             <div class="aah-ds-head">
               <div class="aah-ds-label">Advisory</div>
-              <div class="aah-ds-score"><span class="aah-score-dot purple"></span>79/100</div>
+              <div class="aah-ds-score"><span class="aah-score-dot purple"></span>81/100</div>
             </div>
           </div>
           <div class="aah-ds-metrics">
@@ -7648,7 +7648,7 @@ function AIAgentsPage() {
           <div class="aah-panel-header">
             <div class="aah-panel-title"><i class="fas fa-robot"></i> AI Agents</div>
             <div class="aah-panel-meta">
-              <span class="aah-panel-badge active">8 Active</span>
+              <span class="aah-panel-badge active">10 Active</span>
               <span class="aah-panel-badge standby">3 Standby</span>
               <button class="aah-run-all-btn" onclick="sendQuickMessage('Run all agents — give me a consolidated summary of top actions across insurance, investments, retirement and advisory')"><i class="fas fa-bolt"></i> Run All</button>
             </div>
@@ -7753,8 +7753,8 @@ function AIAgentsPage() {
             </div>
           </div>
 
-          {/* ── Investments ── */}
-          <div class="aah-domain-label aah-dl-inv"><i class="fas fa-chart-line"></i> Investments &amp; Advisory</div>
+          {/* ── Investments & Proposals ── */}
+          <div class="aah-domain-label aah-dl-inv"><i class="fas fa-chart-line"></i> Investments &amp; Proposals</div>
 
           <div class="aah-agent-card" onclick="selectAgent('portfolio')">
             <div class="aah-agent-icon aah-icon-emerald"><i class="fas fa-coins"></i></div>
@@ -7771,6 +7771,26 @@ function AIAgentsPage() {
               </div>
             </div>
           </div>
+
+          <div class="aah-agent-card aah-highlighted" onclick="selectAgent('investment-proposals')">
+            <div class="aah-agent-icon aah-icon-teal"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="aah-agent-body">
+              <div class="aah-agent-header-row">
+                <h4 class="aah-agent-name">Investment Proposals Agent <span class="aah-new-badge">NEW</span></h4>
+                <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
+              </div>
+              <p class="aah-agent-desc">AI-scores NYLIM proposals, tracks 4 active proposals across ETF, mutual fund, 529 and blended strategies — avg score 93.5/100</p>
+              <div class="aah-agent-tags"><span>NYLIM Products</span><span>AI Scoring</span><span>ETF/MF/529</span></div>
+              <div class="aah-agent-stats-row">
+                <span class="aah-stat green"><i class="fas fa-check-circle"></i> 1 Approved</span>
+                <span class="aah-stat blue"><i class="fas fa-file-alt"></i> 4 Proposals</span>
+                <span class="aah-stat amber"><i class="fas fa-dollar-sign"></i> $1.24M AUM</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Advisory & Wealth ── */}
+          <div class="aah-domain-label aah-dl-adv"><i class="fas fa-handshake"></i> Advisory &amp; Wealth</div>
 
           <div class="aah-agent-card" onclick="selectAgent('estate')">
             <div class="aah-agent-icon aah-icon-violet"><i class="fas fa-landmark"></i></div>
@@ -7806,11 +7826,13 @@ function AIAgentsPage() {
                 <h4 class="aah-agent-name">Retirement Planning Agent</h4>
                 <span class="aah-agent-status active"><i class="fas fa-circle"></i> Active</span>
               </div>
-              <p class="aah-agent-desc">Identifies clients approaching retirement, calculates income gaps, and recommends immediate or deferred annuities</p>
+              <p class="aah-agent-desc">Identifies clients approaching retirement, calculates income gaps, and recommends GLIA, LMIA, GPIA, GFIA, FMIA and CIAFA annuity contracts</p>
               <div class="aah-agent-tags"><span>Income Gap</span><span>Annuities</span><span>Projections</span></div>
               <div class="aah-agent-stats-row">
                 <span class="aah-stat amber"><i class="fas fa-user-clock"></i> 4 Candidates</span>
                 <span class="aah-stat red"><i class="fas fa-exclamation"></i> 2 Income Gaps</span>
+                <span class="aah-stat blue"><i class="fas fa-file-contract"></i> 6 Contracts</span>
+                <span class="aah-stat green"><i class="fas fa-calendar-check"></i> CIAFA Matures Jun 15</span>
               </div>
             </div>
           </div>
@@ -7872,7 +7894,7 @@ function AIAgentsPage() {
               <div class="msg-avatar" style="background:#fef3c7;color:#d97706"><i class="fas fa-brain"></i></div>
               <div class="msg-bubble">
                 <p>Hello! I'm your <strong>NOVA Smart Advisor AI Agent</strong> — analyzing your complete book of business across all four domains.</p>
-                <p><strong>Today's Snapshot:</strong> 8 active agents · 42 alerts · $31.2K AI revenue opportunity · 247 clients monitored</p>
+                <p><strong>Today's Snapshot:</strong> 10 active agents · 42 alerts · $43.6K AI revenue opportunity · 247 clients monitored</p>
                 <p>Select an agent on the left to focus, or ask me anything:</p>
                 <div class="quick-suggestions">
                   <button onclick="sendQuickMessage('Show me all upsell and cross-sell opportunities')">🎯 All opportunities</button>
@@ -8021,6 +8043,30 @@ function AIAgentsPage() {
               </div>
             </div>
 
+            {/* Investment Proposals */}
+            <div class="ctx-group ip-ctx-group">
+              <span class="ctx-group-label ip-ctx-label"><i class="fas fa-file-invoice-dollar"></i> Investment Proposals</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('IP-AR-001 Alex Rivera Mutual Fund $500K — Approved, execute onboarding steps')">IP-AR-001 Execute ✅</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('IP-LM-001 Linda Morrison Blended $280K — Presented, follow up on decision timeline')">IP-LM-001 Follow Up</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('IP-JW-001 James Whitfield ETF $320K — Pending, schedule review and decision call')">IP-JW-001 Review</button>
+                <button class="ctx-btn ctx-inv" onclick="sendQuickMessage('IP-DT-001 David Thompson 529 $140K — Draft status, complete and present to client')">IP-DT-001 Draft</button>
+                <button class="ctx-btn ctx-inv" onclick="navigateTo('inv-proposals')">All 4 Proposals →</button>
+              </div>
+            </div>
+
+            {/* Annuity Contracts */}
+            <div class="ctx-group ann-ctx-group">
+              <span class="ctx-group-label ann-ctx-label"><i class="fas fa-piggy-bank"></i> Annuity Contracts</span>
+              <div class="ctx-btns">
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('CIAFA contract matures Jun 15 — what are the reinvestment and rollover options for this client?')">CIAFA Matures Jun 15 ⚡</button>
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Show all GLIA contracts — guaranteed lifetime income status and income start dates')">GLIA Contracts</button>
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Show all LMIA contracts — living-month income accrual and payout schedule')">LMIA Contracts</button>
+                <button class="ctx-btn ctx-ret" onclick="sendQuickMessage('Which clients are eligible for GPIA or FMIA annuity upgrade based on current contract terms?')">GPIA / FMIA Upgrade</button>
+                <button class="ctx-btn ctx-ret" onclick="navigateTo('ret-accounts')">All 6 Contracts →</button>
+              </div>
+            </div>
+
           </div>
 
           <div class="chat-input-area">
@@ -8053,7 +8099,7 @@ function AIAgentsPage() {
           <button class="aah-run-all-btn" onclick="sendQuickMessage('Run all automation workflows — give me a consolidated status update and any actions needed')"><i class="fas fa-bolt"></i> Run All Workflows</button>
         </div>
         <div class="wf-summary-bar">
-          <div class="wf-summary-chip running-chip"><div class="chip-dot"></div><span class="chip-count">3</span><span>Running</span></div>
+          <div class="wf-summary-chip running-chip"><div class="chip-dot"></div><span class="chip-count">6</span><span>Running</span></div>
           <div class="wf-summary-chip paused-chip"><div class="chip-dot"></div><span class="chip-count">2</span><span>Paused</span></div>
           <div class="wf-summary-chip idle-chip"><div class="chip-dot"></div><span class="chip-count">2</span><span>Idle</span></div>
           <div style="margin-left:auto;font-size:11px;color:#64748b;">Last synced: <strong style="color:#1e293b">2 min ago</strong></div>
@@ -8165,6 +8211,36 @@ function AIAgentsPage() {
             <div class="wf-actions">
               <button class="wf-btn primary" id="wf-run-biz-review" onclick="runWorkflow('biz-review')"><i class="fas fa-play"></i> Activate</button>
               <button class="wf-btn secondary" onclick="viewWorkflow('biz-review')"><i class="fas fa-building"></i> Clients</button>
+            </div>
+          </div>
+          <div class="workflow-card running" id="wf-card-inv-proposal-monitor">
+            <div class="wf-domain-tag inv-tag"><i class="fas fa-chart-line"></i> Investments</div>
+            <div class="wf-status" id="wf-status-inv-proposal-monitor"><span class="pulse-dot"></span> Running</div>
+            <div class="wf-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <h4>Investment Proposal Monitor</h4>
+            <p>Tracks 4 active NYLIM proposals, AI-scores suitability, and alerts on decision deadlines</p>
+            <div class="wf-progress">
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" id="wf-bar-inv-proposal-monitor" style="width:75%;background:#0891b2"></div></div>
+              <span id="wf-lbl-inv-proposal-monitor">3/4 presented · 1 approved</span>
+            </div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" id="wf-run-inv-proposal-monitor" onclick="navigateTo('inv-proposals')"><i class="fas fa-file-alt"></i> Proposals</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('inv-proposal-monitor')"><i class="fas fa-eye"></i> View</button>
+            </div>
+          </div>
+          <div class="workflow-card running" id="wf-card-annuity-maturity-monitor">
+            <div class="wf-domain-tag ret-tag"><i class="fas fa-umbrella-beach"></i> Retirement</div>
+            <div class="wf-status" id="wf-status-annuity-maturity-monitor"><span class="pulse-dot"></span> Running</div>
+            <div class="wf-icon"><i class="fas fa-calendar-check"></i></div>
+            <h4>Annuity Maturity Monitor</h4>
+            <p>Monitors GLIA, LMIA, GPIA, GFIA, FMIA and CIAFA contracts for upcoming maturities and income events</p>
+            <div class="wf-progress">
+              <div class="wf-progress-bar-wrap"><div class="wf-progress-bar" id="wf-bar-annuity-maturity-monitor" style="width:100%;background:#d97706"></div></div>
+              <span id="wf-lbl-annuity-maturity-monitor">CIAFA matures Jun 15</span>
+            </div>
+            <div class="wf-actions">
+              <button class="wf-btn primary" id="wf-run-annuity-maturity-monitor" onclick="navigateTo('ret-accounts')"><i class="fas fa-piggy-bank"></i> Contracts</button>
+              <button class="wf-btn secondary" onclick="viewWorkflow('annuity-maturity-monitor')"><i class="fas fa-bell"></i> Alerts</button>
             </div>
           </div>
         </div>

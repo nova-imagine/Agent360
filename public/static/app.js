@@ -2277,21 +2277,23 @@ const agentMeta = {
   },
   retirement: {
     name: 'Retirement Planning Agent',
-    sub: 'Income Gap · Annuities · NQDC · Social Security',
+    sub: 'Income Gap · GLIA/LMIA/GPIA/GFIA/FMIA/CIAFA · NQDC',
     icon: 'fa-piggy-bank',
     color: '#7c3aed',
     ctxGroups: [
-      { label: 'Retirement', icon: 'fa-umbrella-beach', btns: [
-        { cls: 'ctx-ret', label: 'James Whitfield',   msg: 'James Whitfield deferred annuity illustration — $85K lump sum, income at age 67' },
-        { cls: 'ctx-ret', label: 'Income Gap Clients', msg: 'Which clients need retirement income gap analysis — show top 5 by gap size' },
-        { cls: 'ctx-ret', label: 'Annuity Candidates', msg: 'Show all deferred and immediate annuity candidates across the book' },
-        { cls: 'ctx-inv', label: 'Maria FIA $75K',    msg: 'Maria Gonzalez FIA: $75K allocation, income starting age 65 — full projection' },
-        { cls: 'ctx-adv', label: 'NQDC Opportunities', msg: 'Which clients are candidates for NQDC (Non-Qualified Deferred Compensation) plans?' }
+      { label: 'Contracts', icon: 'fa-file-contract', btns: [
+        { cls: 'ctx-ret', label: 'GLIA Contracts',       msg: 'Show all GLIA (Guaranteed Lifetime Income Annuity) contracts — guaranteed income status and income start dates' },
+        { cls: 'ctx-ret', label: 'CIAFA Matures Jun 15 ⚡', msg: 'CIAFA contract matures Jun 15 — what are the reinvestment and rollover options for this client?' },
+        { cls: 'ctx-ret', label: 'LMIA Contracts',       msg: 'Show all LMIA (Living-Month Income Annuity) contracts — accrual and payout schedules' },
+        { cls: 'ctx-ret', label: 'GPIA / FMIA Upgrade',  msg: 'Which clients are eligible for GPIA or FMIA annuity upgrade based on current contract terms?' },
+        { cls: 'ctx-ret', label: 'All 6 Contracts',      msg: 'Show all 6 active annuity contracts — GLIA, LMIA, GPIA, GFIA, FMIA, CIAFA — status and income dates' }
       ]},
       { label: 'Planning', icon: 'fa-calculator', btns: [
+        { cls: 'ctx-ret', label: 'James Whitfield',    msg: 'James Whitfield deferred annuity illustration — $85K lump sum, income at age 67' },
+        { cls: 'ctx-ret', label: 'Income Gap Clients', msg: 'Which clients need retirement income gap analysis — show top 5 by gap size' },
         { cls: 'ctx-ret', label: 'SS + Annuity Model', msg: 'Model retirement income for James Whitfield: Social Security $3,200 + deferred annuity $1,100 at 67' },
-        { cls: 'ctx-ret', label: '4 Clients at Risk',  msg: 'Show the 4 clients closest to retirement with no annuity product — priority action plan' },
-        { cls: 'ctx-adv', label: 'James NQDC Plan',    msg: 'James Whitfield NQDC plan — executive income deferral strategy and employer coordination' }
+        { cls: 'ctx-inv', label: 'Maria FIA $75K',     msg: 'Maria Gonzalez FIA: $75K allocation, income starting age 65 — full projection' },
+        { cls: 'ctx-adv', label: 'NQDC Opportunities', msg: 'Which clients are candidates for NQDC (Non-Qualified Deferred Compensation) plans?' }
       ]}
     ]
   },
@@ -2428,6 +2430,25 @@ const agentMeta = {
         { cls: 'ctx-nlp', label: 'Risk Report All',          msg: 'Generate NLP risk report across all flagged policies — 2 urgent, 3 flagged, plain language summaries' }
       ]}
     ]
+  },
+  'investment-proposals': {
+    name: 'Investment Proposals Agent',
+    sub: 'NYLIM Products · AI Scoring · ETF/MF/529/Blended',
+    icon: 'fa-file-invoice-dollar',
+    color: '#0891b2',
+    ctxGroups: [
+      { label: 'Proposals', icon: 'fa-file-alt', btns: [
+        { cls: 'ctx-inv', label: 'IP-AR-001 Execute ✅', msg: 'IP-AR-001 Alex Rivera Mutual Fund $500K — Approved, execute onboarding steps' },
+        { cls: 'ctx-inv', label: 'IP-LM-001 Follow Up',  msg: 'IP-LM-001 Linda Morrison Blended $280K — Presented, follow up on decision timeline' },
+        { cls: 'ctx-inv', label: 'IP-JW-001 Review',     msg: 'IP-JW-001 James Whitfield ETF $320K — Pending, schedule review and decision call' },
+        { cls: 'ctx-inv', label: 'IP-DT-001 Draft',      msg: 'IP-DT-001 David Thompson 529 $140K — Draft status, complete and present to client' },
+        { cls: 'ctx-inv', label: 'NYLIM Product Screen',  msg: 'Show all 16 NYLIM products with Morningstar ratings, YTD returns, and expense ratios' }
+      ]},
+      { label: 'Analysis', icon: 'fa-chart-bar', btns: [
+        { cls: 'ctx-inv', label: 'All 4 Proposals',    msg: 'Show all 4 investment proposals status — IP-JW/LM/DT/AR with AI scores and next steps' },
+        { cls: 'ctx-inv', label: 'Avg AI Score 93.5',  msg: 'Explain AI scoring methodology across 4 proposals — what factors drive the 93.5 average score?' }
+      ]}
+    ]
   }
 };
 
@@ -2480,7 +2501,7 @@ function selectAgent(agentId, el) {
       advisor:                  `✅ Switched to <strong>${meta.name}</strong>. I'm monitoring your full book — insurance, investments, retirement, and advisory. Use the context buttons or ask me anything.`,
       claims:                   `✅ Switched to <strong>${meta.name}</strong>. I have visibility across all 7 open claims. Two are urgent: <strong>CLM-2026-0041</strong> ($1M death benefit, Robert Chen) and <strong>CLM-2026-0028</strong> (ADB, Maria Gonzalez). How can I help?`,
       renewal:                  `✅ Switched to <strong>${meta.name}</strong>. I'm tracking <strong>23 renewals</strong> due in 90 days. ⚡ Critical: Sandra Williams term expiry Sep 2026 and Patricia Nguyen UL lapse risk (score 87). What do you need?`,
-      portfolio:                `✅ Switched to <strong>${meta.name}</strong>. I'm monitoring <strong>$4.2M AUM</strong> across 62 investment clients. Top opportunity: Linda Morrison $280K UMA ($2,800/yr fee). What would you like to analyze?`,
+      portfolio:                `✅ Switched to <strong>${meta.name}</strong>. I'm monitoring <strong>$4.2M AUM</strong> across 62 investment clients. 📋 IP-LM-001 (Linda Morrison $280K Blended) has been <strong>Presented</strong> — follow up on decision timeline. What would you like to analyze?`,
       retirement:               `✅ Switched to <strong>${meta.name}</strong>. I've identified <strong>4 annuity candidates</strong> and 2 clients with income gaps. Top priority: James Whitfield deferred annuity ($85K → $1,100/mo at 67). How can I help?`,
       estate:                   `✅ Switched to <strong>${meta.name}</strong>. I see <strong>4 estate planning opportunities</strong>. Top: Linda Morrison UMA + trust review (Apr 15) and Robert Chen business succession — Chen Holdings $4M valuation.`,
       business:                 `✅ Switched to <strong>${meta.name}</strong>. I've identified 3 business services opportunities: Chen Holdings succession, James Whitfield NQDC plan, and 2 COLI candidates. What do you need?`,
@@ -2488,7 +2509,8 @@ function selectAgent(agentId, el) {
       retention:                `✅ Switched to <strong>${meta.name}</strong>. ⚡ <strong>2 urgent</strong> lapse risks: Patricia Nguyen UL (risk score 87, $14.4K/yr) and Sandra Williams term renewal (Sep 2026, $3.2K/yr). Total <strong>$62.6K</strong> at risk across 4 clients.`,
       'underwriting-intelligence': `✅ Switched to <strong>${meta.name}</strong>. <strong>5 cases auto-approved</strong> today (STP ≥ 75). <strong>18 APS orders avoided</strong> this month ($5,760 saved). Top case: Alex Rivera STP 88 — ready for auto-approval.`,
       'claims-intelligence':    `✅ Switched to <strong>${meta.name}</strong>. ML fraud scan complete — <strong>1 flagged</strong> (CLM-2026-0025, Kevin Park, risk score 74), 2 on watch. NLP document analysis at 94% accuracy. Triage queue ready.`,
-      nlp:                      `✅ Switched to <strong>${meta.name}</strong>. <strong>2 urgent</strong> policy flags: Patricia Nguyen UL (lapse trigger clause) and Sandra Williams Term (conversion deadline risk). <strong>8 policies scanned</strong> — 3 flagged for review.`
+      nlp:                      `✅ Switched to <strong>${meta.name}</strong>. <strong>2 urgent</strong> policy flags: Patricia Nguyen UL (lapse trigger clause) and Sandra Williams Term (conversion deadline risk). <strong>8 policies scanned</strong> — 3 flagged for review.`,
+      'investment-proposals':   `✅ Switched to <strong>${meta.name}</strong>. <strong>4 NYLIM proposals active</strong> — IP-AR-001 (Approved ✅), IP-LM-001 (Presented), IP-JW-001 (Pending), IP-DT-001 (Draft). Total AUM under proposal: <strong>$1.24M</strong>. Avg AI Score: <strong>93.5/100</strong>.`
     };
     const greeting = greetings[agentId] || `✅ Switched to <strong>${meta.name}</strong>. How can I help?`;
     const msgEl = document.createElement('div');
@@ -2815,6 +2837,44 @@ const workflowConfig = {
     finalStatus: 'running',
     chatMsg: 'Show full claims triage results — all 7 open claims with triage decisions, pending documents, and next actions',
     summary: `✅ **Claims Triage Automation — Complete**\n\n📋 **7 open claims triaged** · 2 urgent escalated\n\n🔴 **Urgent (Priority 1 — Immediate Action):**\n\n**CLM-2026-0041 — Robert Chen · $1M Death Benefit**\n• Days in queue: 6 · Documents pending: Death certificate (certified copy)\n• Triage: Escalated to Senior Claims Manager\n• Action: Automated request sent to Susan Chen (beneficiary)\n• Estimated resolution: 5–7 business days once docs received\n\n**CLM-2026-0028 — Maria Gonzalez · ADB (Accelerated Death Benefit)**\n• Days in queue: 4 · Documents pending: Oncologist certification (Form AB-12)\n• Triage: Medical review team assigned\n• Action: Direct outreach to Dr. Patel's office drafted\n• Estimated resolution: 3–5 business days\n\n🟡 **Standard (Priority 2 — Action This Week):**\n• CLM-2026-0033 James Whitfield — LTC, awaiting care provider invoice (3 days)\n• CLM-2026-0029 David Thompson — Disability, employer verification pending (2 days)\n• CLM-2026-0025 Kevin Park — Contestability review, 60-day window (24 days)\n\n⚪ **Monitoring (Priority 3):**\n• CLM-2026-0019 Linda Morrison — Waiver of premium, approved, disbursement pending\n• CLM-2026-0014 Patricia Nguyen — Term waiver, documentation complete\n\n**Workflow now Active** · Auto-monitoring enabled every 4 hours`
+  },
+  'inv-proposal-monitor': {
+    name: 'Investment Proposal Monitor',
+    icon: 'fa-file-invoice-dollar',
+    color: '#0891b2',
+    domain: 'Investments',
+    steps: [
+      { label: 'Loading 4 active NYLIM investment proposals…',                  ms: 600  },
+      { label: 'Fetching AI suitability scores and Morningstar ratings…',        ms: 900  },
+      { label: 'Checking proposal status: approved, presented, pending, draft…', ms: 800  },
+      { label: 'Flagging decision deadlines and follow-up windows…',             ms: 700  },
+      { label: 'Generating next-action recommendations for each proposal…',      ms: 800  },
+      { label: 'Updating CRM pipeline with proposal progress…',                  ms: 500  },
+    ],
+    finalLabel: '1 approved · 3 active',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show all 4 investment proposals status — IP-JW/LM/DT/AR with AI scores and next steps',
+    summary: `✅ **Investment Proposal Monitor — Status Update**\n\n📋 **4 NYLIM proposals tracked** · Avg AI Score: 93.5/100 · Total AUM: $1.24M\n\n**IP-AR-001 — Alex Rivera · Mutual Fund · $500K**\n✅ Status: **Approved** · AI Score: 95/100\n• Action: Execute onboarding — account setup, KYC, fund selection confirmation\n• Estimated commission: $5,000\n\n**IP-LM-001 — Linda Morrison · Blended Strategy · $280K**\n📋 Status: **Presented** · AI Score: 92/100\n• Presented: Apr 10, 2026 · Decision expected: within 2 weeks\n• Action: Follow up on decision timeline at Apr 15 annual review\n• Estimated commission: $2,800\n\n**IP-JW-001 — James Whitfield · ETF Portfolio · $320K**\n⏳ Status: **Pending** · AI Score: 94/100\n• Action: Schedule review and decision call — proposal ready\n• Estimated commission: $1,600\n\n**IP-DT-001 — David Thompson · 529 College Savings · $140K**\n📝 Status: **Draft** · AI Score: 93/100\n• Action: Complete draft and schedule client presentation\n• Estimated commission: $1,400\n\n**Total pipeline commission**: $10,800 · Next priority: Execute IP-AR-001 onboarding`
+  },
+  'annuity-maturity-monitor': {
+    name: 'Annuity Maturity Monitor',
+    icon: 'fa-calendar-check',
+    color: '#d97706',
+    domain: 'Retirement',
+    steps: [
+      { label: 'Loading all 6 annuity contracts: GLIA, LMIA, GPIA, GFIA, FMIA, CIAFA…', ms: 700  },
+      { label: 'Checking contract maturity dates and income event schedules…',            ms: 900  },
+      { label: 'Calculating surrender charges and rollover eligibility…',                 ms: 800  },
+      { label: 'Generating reinvestment and rollover options for maturing contracts…',    ms: 1000 },
+      { label: 'Scoring upgrade suitability: GPIA/FMIA upgrade candidates…',             ms: 700  },
+      { label: 'Setting maturity alerts and scheduling advisor notifications…',           ms: 500  },
+    ],
+    finalLabel: 'CIAFA matures Jun 15',
+    finalPct: 100,
+    finalStatus: 'running',
+    chatMsg: 'Show all 6 annuity contracts — GLIA, LMIA, GPIA, GFIA, FMIA, CIAFA — maturity dates and income events',
+    summary: `✅ **Annuity Maturity Monitor — Full Contract Scan**\n\n📋 **6 annuity contracts monitored** · 1 maturing Jun 15\n\n🔴 **Immediate Action:**\n\n**CIAFA — Maturing Jun 15, 2026**\n• Contract: Contingent Interest Accumulation Fixed Annuity\n• Client: Maria Gonzalez · Current value: $75,200\n• Reinvestment options:\n  - Option A: Rollover to GLIA — guaranteed lifetime income $620/mo starting age 65\n  - Option B: Rollover to FIA — 6.2% cap rate, 0% floor\n  - Option C: Lump-sum payout (tax implications apply)\n• Action: Present reinvestment options at next client meeting\n• Deadline: 30 days before Jun 15 to avoid auto-renewal\n\n📊 **All 6 Contracts Status:**\n• **GLIA** — James Whitfield · Income starting age 67 · On track\n• **LMIA** — Linda Morrison · Monthly accrual · Performing\n• **GPIA** — Sandra Williams · Growth phase · Eligible for upgrade\n• **GFIA** — Robert Chen · Fixed interest · Accumulation phase\n• **FMIA** — David Thompson · Flex income · 3 yrs to income date\n• **CIAFA** — Maria Gonzalez · ⚡ Matures Jun 15 — action required\n\n**Upgrade opportunities:** GPIA → GLIA upgrade available for Sandra Williams (income gap match)\n\n**Total contract value monitored**: $2.1M`
   },
   'biz-review': {
     name: 'Business Client Review',
