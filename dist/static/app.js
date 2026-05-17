@@ -2452,8 +2452,54 @@ const agentMeta = {
   }
 };
 
+/* ── switchAITab — three-layer tab navigation ── */
+function switchAITab(tab) {
+  const tabs   = ['mkt','hub','wf'];
+  const panels = { mkt:'aah-panel-mkt', hub:'aah-panel-hub', wf:'aah-panel-wf' };
+  const tabEls = { mkt:'aah-tab-mkt',   hub:'aah-tab-hub',   wf:'aah-tab-wf'   };
+
+  // If marketplace tab — just open the external link and keep hub active
+  if (tab === 'mkt') {
+    window.open('https://8888-i4ggffob3g710k2tcofuy-a402f90a.sandbox.novita.ai','_blank','noopener,noreferrer');
+    return;
+  }
+
+  tabs.forEach(t => {
+    const p = document.getElementById(panels[t]);
+    const b = document.getElementById(tabEls[t]);
+    if (!p || !b) return;
+    if (t === tab) {
+      p.style.display = '';
+      b.classList.add('aah-tab-active');
+      // Update "YOU ARE HERE" only on hub tab
+      const layerTag = b.querySelector('.aah-tab-layer');
+      if (layerTag) {
+        if (t === 'hub') {
+          layerTag.textContent = 'Layer 2 · You Are Here';
+          layerTag.classList.add('aah-tab-layer-here');
+        } else if (t === 'wf') {
+          layerTag.textContent = 'Layer 3 · You Are Here';
+          layerTag.classList.add('aah-tab-layer-here');
+        }
+      }
+    } else {
+      p.style.display = 'none';
+      b.classList.remove('aah-tab-active');
+      const layerTag = b.querySelector('.aah-tab-layer');
+      if (layerTag) {
+        layerTag.classList.remove('aah-tab-layer-here');
+        if (t === 'hub')  layerTag.textContent = 'Layer 2';
+        if (t === 'wf')   layerTag.textContent = 'Layer 3';
+        if (t === 'mkt')  layerTag.textContent = 'Layer 1';
+      }
+    }
+  });
+}
+
 function selectAgent(agentId, el) {
   _activeAgentId = agentId; // track for chat responses
+  // Ensure AI Copilot Hub tab is active when selecting an agent
+  if (typeof switchAITab === 'function') switchAITab('hub');
   // Highlight the clicked card — accept explicit element or fall back to event
   const clickedEl = el || (event && (event.currentTarget || event.target));
   document.querySelectorAll('.aah-agent-card, .agent-card').forEach(c => {

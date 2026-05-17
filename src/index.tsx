@@ -7545,7 +7545,7 @@ function AIAgentsPage() {
           </div>
           <div class="aah-hero-text">
             <h2 class="aah-hero-title">NOVA <span class="aah-hero-ai">AI Copilot Hub</span></h2>
-            <p class="aah-hero-sub">Agentic AI Copilots — Insurance · Investments · Retirement · Advisory · My Book of Business</p>
+            <p class="aah-hero-sub">Three layers of Agentic AI — Build · Advise · Automate · My Book of Business</p>
           </div>
         </div>
         <div class="aah-hero-kpis">
@@ -7586,144 +7586,203 @@ function AIAgentsPage() {
         </div>
       </div>
 
-      {/* ── Three-Layer Architecture Strip ── */}
-      <div class="aah-arch-strip">
-        {/* Layer 1 — NOVA Marketplace */}
-        <a class="aah-arch-card aah-arch-mkt" href="https://8888-i4ggffob3g710k2tcofuy-a402f90a.sandbox.novita.ai" target="_blank" rel="noopener noreferrer">
-          <div class="aah-arch-layer-tag">Layer 1</div>
-          <div class="aah-arch-icon-wrap aah-arch-icon-mkt">
-            <i class="fas fa-store"></i>
+      {/* ══════════════════════════════════════════════
+          THREE-LAYER TAB BAR  (replaces arch strip)
+          ══════════════════════════════════════════════ */}
+      <div class="aah-tab-bar">
+
+        {/* Tab 1 — NOVA Marketplace */}
+        <button class="aah-tab" id="aah-tab-mkt" onclick="switchAITab('mkt')">
+          <div class="aah-tab-layer">Layer 1</div>
+          <div class="aah-tab-icon aah-tab-icon-mkt"><i class="fas fa-store"></i></div>
+          <div class="aah-tab-body">
+            <div class="aah-tab-name">NOVA Agent Marketplace</div>
+            <div class="aah-tab-sub">Build · Train · Deploy</div>
           </div>
-          <div class="aah-arch-body">
-            <div class="aah-arch-name">NOVA Agent Marketplace</div>
-            <div class="aah-arch-desc">Build · Train · Deploy Agents</div>
-            <div class="aah-arch-pills">
-              <span>Agent Studio</span><span>Model Training</span><span>Deployment</span>
+          <div class="aah-tab-pills">
+            <span>Agent Studio</span><span>Training</span><span>Deploy</span>
+          </div>
+          <div class="aah-tab-cta aah-tab-cta-mkt"><i class="fas fa-external-link-alt"></i> Open</div>
+        </button>
+
+        <div class="aah-tab-sep"><i class="fas fa-chevron-right"></i></div>
+
+        {/* Tab 2 — AI Copilots (default active) */}
+        <button class="aah-tab aah-tab-active" id="aah-tab-hub" onclick="switchAITab('hub')">
+          <div class="aah-tab-layer aah-tab-layer-here">Layer 2 · You Are Here</div>
+          <div class="aah-tab-icon aah-tab-icon-hub"><i class="fas fa-robot"></i></div>
+          <div class="aah-tab-body">
+            <div class="aah-tab-name">AI Copilot Hub</div>
+            <div class="aah-tab-sub">Chat · Advise · Analyze</div>
+          </div>
+          <div class="aah-tab-pills">
+            <span>10 Copilots</span><span>Domain AI</span><span>Q&amp;A</span>
+          </div>
+          <div class="aah-tab-cta aah-tab-cta-hub"><i class="fas fa-check-circle"></i> Active</div>
+        </button>
+
+        <div class="aah-tab-sep"><i class="fas fa-chevron-right"></i></div>
+
+        {/* Tab 3 — Agentic Workflows */}
+        <button class="aah-tab" id="aah-tab-wf" onclick="switchAITab('wf')">
+          <div class="aah-tab-layer">Layer 3</div>
+          <div class="aah-tab-icon aah-tab-icon-wf"><i class="fas fa-cogs"></i></div>
+          <div class="aah-tab-body">
+            <div class="aah-tab-name">Agentic AI Workflows</div>
+            <div class="aah-tab-sub">Autonomous · Always-On</div>
+          </div>
+          <div class="aah-tab-pills">
+            <span>6 Running</span><span>Auto-Run</span><span>My Book</span>
+          </div>
+          <div class="aah-tab-cta aah-tab-cta-wf"><i class="fas fa-cogs"></i> 6 Active</div>
+        </button>
+      </div>
+
+      {/* ══════════════════════════════════════════════
+          TAB PANEL 1 — NOVA Agent Marketplace
+          ══════════════════════════════════════════════ */}
+      <div class="aah-tab-panel" id="aah-panel-mkt" style="display:none">
+        <div class="aah-mkt-splash">
+          <div class="aah-mkt-splash-header">
+            <div class="aah-mkt-splash-icon"><i class="fas fa-store"></i></div>
+            <div>
+              <h3 class="aah-mkt-splash-title">NOVA Agent Marketplace</h3>
+              <p class="aah-mkt-splash-sub">The environment where AI Copilots are built, trained, configured and deployed to your Hub</p>
+            </div>
+            <a class="aah-mkt-open-btn" href="https://8888-i4ggffob3g710k2tcofuy-a402f90a.sandbox.novita.ai" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-external-link-alt"></i> Open Marketplace
+            </a>
+          </div>
+          <div class="aah-mkt-features">
+            <div class="aah-mkt-feat-card">
+              <div class="aah-mkt-feat-icon" style="background:#e0f2fe;color:#0369a1"><i class="fas fa-drafting-compass"></i></div>
+              <div class="aah-mkt-feat-body">
+                <div class="aah-mkt-feat-title">Agent Studio</div>
+                <div class="aah-mkt-feat-desc">Design and configure new AI copilots with domain-specific prompts, context windows, and tool integrations for your book of business</div>
+              </div>
+            </div>
+            <div class="aah-mkt-feat-card">
+              <div class="aah-mkt-feat-icon" style="background:#f0fdf4;color:#15803d"><i class="fas fa-graduation-cap"></i></div>
+              <div class="aah-mkt-feat-body">
+                <div class="aah-mkt-feat-title">Model Training</div>
+                <div class="aah-mkt-feat-desc">Fine-tune models on your specific client data, product catalog, NYL policies and historical outcomes to sharpen copilot accuracy</div>
+              </div>
+            </div>
+            <div class="aah-mkt-feat-card">
+              <div class="aah-mkt-feat-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-rocket"></i></div>
+              <div class="aah-mkt-feat-body">
+                <div class="aah-mkt-feat-title">Deploy to Hub</div>
+                <div class="aah-mkt-feat-desc">Promote tested copilots from sandbox to your live AI Copilot Hub with one click — versioning, rollback, and A/B testing included</div>
+              </div>
+            </div>
+            <div class="aah-mkt-feat-card">
+              <div class="aah-mkt-feat-icon" style="background:#faf5ff;color:#7c3aed"><i class="fas fa-plug"></i></div>
+              <div class="aah-mkt-feat-body">
+                <div class="aah-mkt-feat-title">Integrations</div>
+                <div class="aah-mkt-feat-desc">Connect copilots to NYL systems, CRM data, policy management, calendar and external data sources via pre-built connectors</div>
+              </div>
             </div>
           </div>
-          <div class="aah-arch-action aah-arch-action-mkt">
-            Open <i class="fas fa-external-link-alt"></i>
-          </div>
-        </a>
-
-        <div class="aah-arch-arrow"><i class="fas fa-chevron-right"></i></div>
-
-        {/* Layer 2 — AI Copilot Hub (YOU ARE HERE) */}
-        <div class="aah-arch-card aah-arch-hub aah-arch-active">
-          <div class="aah-arch-layer-tag aah-arch-layer-here">Layer 2 · You Are Here</div>
-          <div class="aah-arch-icon-wrap aah-arch-icon-hub">
-            <i class="fas fa-robot"></i>
-          </div>
-          <div class="aah-arch-body">
-            <div class="aah-arch-name">AI Copilot Hub</div>
-            <div class="aah-arch-desc">Chat · Advise · Analyze</div>
-            <div class="aah-arch-pills">
-              <span>10 Copilots</span><span>Domain AI</span><span>Context Q&amp;A</span>
+          <div class="aah-mkt-currently-deployed">
+            <div class="aah-mkt-dep-title"><i class="fas fa-check-circle" style="color:#059669"></i> Currently Deployed to AI Copilot Hub</div>
+            <div class="aah-mkt-dep-grid">
+              <div class="aah-mkt-dep-chip"><i class="fas fa-brain"></i> Smart Advisor</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-sync-alt"></i> Renewal Automation</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-heartbeat"></i> Retention Intelligence</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-file-medical-alt"></i> Claims Intelligence</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-chart-line"></i> Portfolio Optimizer</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-file-invoice-dollar"></i> Investment Proposals</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-umbrella-beach"></i> Retirement Planning</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-handshake"></i> Advisory &amp; Estate</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-search"></i> NLP Policy Review</div>
+              <div class="aah-mkt-dep-chip"><i class="fas fa-shield-alt"></i> Underwriting STP</div>
             </div>
-          </div>
-          <div class="aah-arch-action aah-arch-action-hub">
-            Active <i class="fas fa-check-circle"></i>
-          </div>
-        </div>
-
-        <div class="aah-arch-arrow"><i class="fas fa-chevron-right"></i></div>
-
-        {/* Layer 3 — Agentic Workflows */}
-        <div class="aah-arch-card aah-arch-wf" onclick="document.querySelector('.automation-section-title')?.scrollIntoView({{behavior:'smooth'}})">
-          <div class="aah-arch-layer-tag">Layer 3</div>
-          <div class="aah-arch-icon-wrap aah-arch-icon-wf">
-            <i class="fas fa-cogs"></i>
-          </div>
-          <div class="aah-arch-body">
-            <div class="aah-arch-name">Agentic AI Workflows</div>
-            <div class="aah-arch-desc">Autonomous · Always-On · My Book</div>
-            <div class="aah-arch-pills">
-              <span>6 Active</span><span>Auto-Run</span><span>My Book</span>
-            </div>
-          </div>
-          <div class="aah-arch-action aah-arch-action-wf">
-            Scroll <i class="fas fa-arrow-down"></i>
           </div>
         </div>
       </div>
 
-      {/* ── Domain Insight Strip ── */}
-      <div class="aah-domain-strip">
-        <div class="aah-ds-card aah-ins">
-          <div class="aah-ds-top">
-            <div class="aah-ds-icon" style="background:#dbeafe;color:#003087"><i class="fas fa-shield-alt"></i></div>
-            <div class="aah-ds-head">
-              <div class="aah-ds-label">Insurance</div>
-              <div class="aah-ds-score"><span class="aah-score-dot green"></span>91/100</div>
-            </div>
-          </div>
-          <div class="aah-ds-metrics">
-            <span><i class="fas fa-sync-alt"></i> 23 renewals</span>
-            <span><i class="fas fa-file-medical-alt"></i> 7 claims</span>
-            <span class="aah-ds-alert"><i class="fas fa-exclamation-triangle"></i> 4 lapse risks</span>
-          </div>
-          <button class="aah-ds-btn" onclick="sendQuickMessage('Show me insurance renewal and lapse risks')"><i class="fas fa-robot"></i> Ask AI</button>
-        </div>
-        <div class="aah-ds-card aah-inv">
-          <div class="aah-ds-top">
-            <div class="aah-ds-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-chart-line"></i></div>
-            <div class="aah-ds-head">
-              <div class="aah-ds-label">Investments</div>
-              <div class="aah-ds-score"><span class="aah-score-dot green"></span>84/100</div>
-            </div>
-          </div>
-          <div class="aah-ds-metrics">
-            <span><i class="fas fa-coins"></i> $4.2M AUM</span>
-            <span><i class="fas fa-file-invoice-dollar"></i> 4 proposals</span>
-            <span class="aah-ds-alert"><i class="fas fa-balance-scale"></i> 2 rebalances</span>
-          </div>
-          <button class="aah-ds-btn" onclick="sendQuickMessage('Show investment opportunities and portfolio gaps')"><i class="fas fa-robot"></i> Ask AI</button>
-        </div>
-        <div class="aah-ds-card aah-ret">
-          <div class="aah-ds-top">
-            <div class="aah-ds-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-umbrella-beach"></i></div>
-            <div class="aah-ds-head">
-              <div class="aah-ds-label">Retirement</div>
-              <div class="aah-ds-score"><span class="aah-score-dot amber"></span>79/100</div>
-            </div>
-          </div>
-          <div class="aah-ds-metrics">
-            <span><i class="fas fa-piggy-bank"></i> 6 contracts</span>
-            <span><i class="fas fa-user-clock"></i> 2 income gaps</span>
-            <span><i class="fas fa-chart-area"></i> 6 near-retire</span>
-          </div>
-          <button class="aah-ds-btn" onclick="sendQuickMessage('Which clients need retirement planning?')"><i class="fas fa-robot"></i> Ask AI</button>
-        </div>
-        <div class="aah-ds-card aah-adv">
-          <div class="aah-ds-top">
-            <div class="aah-ds-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-handshake"></i></div>
-            <div class="aah-ds-head">
-              <div class="aah-ds-label">Advisory</div>
-              <div class="aah-ds-score"><span class="aah-score-dot purple"></span>81/100</div>
-            </div>
-          </div>
-          <div class="aah-ds-metrics">
-            <span><i class="fas fa-landmark"></i> 4 estate</span>
-            <span><i class="fas fa-building"></i> 2 UMA</span>
-            <span><i class="fas fa-briefcase"></i> 3 biz reviews</span>
-          </div>
-          <button class="aah-ds-btn" onclick="sendQuickMessage('Show estate planning and advisory opportunities')"><i class="fas fa-robot"></i> Ask AI</button>
-        </div>
-      </div>
+      {/* ══════════════════════════════════════════════
+          TAB PANEL 2 — AI Copilot Hub (default shown)
+          ══════════════════════════════════════════════ */}
+      <div class="aah-tab-panel" id="aah-panel-hub">
 
-      <div class="ai-layout">
-        {/* ── Agent Cards Panel ── */}
-        <div class="aah-agents-panel">
-
-          {/* Panel header */}
-          <div class="aah-panel-header">
-            <div class="aah-panel-title"><i class="fas fa-robot"></i> AI Copilots</div>
-            <div class="aah-panel-meta">
-              <span class="aah-panel-badge active">10 Active</span>
-              <span class="aah-panel-badge standby">3 Standby</span>
-              <button class="aah-run-all-btn" onclick="sendQuickMessage('Run all agents — give me a consolidated summary of top actions across insurance, investments, retirement and advisory')"><i class="fas fa-bolt"></i> Run All</button>
+        {/* Domain Insight Strip — lives inside this tab */}
+        <div class="aah-domain-strip">
+          <div class="aah-ds-card aah-ins">
+            <div class="aah-ds-top">
+              <div class="aah-ds-icon" style="background:#dbeafe;color:#003087"><i class="fas fa-shield-alt"></i></div>
+              <div class="aah-ds-head">
+                <div class="aah-ds-label">Insurance</div>
+                <div class="aah-ds-score"><span class="aah-score-dot green"></span>91/100</div>
+              </div>
             </div>
+            <div class="aah-ds-metrics">
+              <span><i class="fas fa-sync-alt"></i> 23 renewals</span>
+              <span><i class="fas fa-file-medical-alt"></i> 7 claims</span>
+              <span class="aah-ds-alert"><i class="fas fa-exclamation-triangle"></i> 4 lapse risks</span>
+            </div>
+            <button class="aah-ds-btn" onclick="sendQuickMessage('Show me insurance renewal and lapse risks')"><i class="fas fa-robot"></i> Ask AI</button>
           </div>
+          <div class="aah-ds-card aah-inv">
+            <div class="aah-ds-top">
+              <div class="aah-ds-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-chart-line"></i></div>
+              <div class="aah-ds-head">
+                <div class="aah-ds-label">Investments</div>
+                <div class="aah-ds-score"><span class="aah-score-dot green"></span>84/100</div>
+              </div>
+            </div>
+            <div class="aah-ds-metrics">
+              <span><i class="fas fa-coins"></i> $4.2M AUM</span>
+              <span><i class="fas fa-file-invoice-dollar"></i> 4 proposals</span>
+              <span class="aah-ds-alert"><i class="fas fa-balance-scale"></i> 2 rebalances</span>
+            </div>
+            <button class="aah-ds-btn" onclick="sendQuickMessage('Show investment opportunities and portfolio gaps')"><i class="fas fa-robot"></i> Ask AI</button>
+          </div>
+          <div class="aah-ds-card aah-ret">
+            <div class="aah-ds-top">
+              <div class="aah-ds-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-umbrella-beach"></i></div>
+              <div class="aah-ds-head">
+                <div class="aah-ds-label">Retirement</div>
+                <div class="aah-ds-score"><span class="aah-score-dot amber"></span>79/100</div>
+              </div>
+            </div>
+            <div class="aah-ds-metrics">
+              <span><i class="fas fa-piggy-bank"></i> 6 contracts</span>
+              <span><i class="fas fa-user-clock"></i> 2 income gaps</span>
+              <span><i class="fas fa-chart-area"></i> 6 near-retire</span>
+            </div>
+            <button class="aah-ds-btn" onclick="sendQuickMessage('Which clients need retirement planning?')"><i class="fas fa-robot"></i> Ask AI</button>
+          </div>
+          <div class="aah-ds-card aah-adv">
+            <div class="aah-ds-top">
+              <div class="aah-ds-icon" style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-handshake"></i></div>
+              <div class="aah-ds-head">
+                <div class="aah-ds-label">Advisory</div>
+                <div class="aah-ds-score"><span class="aah-score-dot purple"></span>81/100</div>
+              </div>
+            </div>
+            <div class="aah-ds-metrics">
+              <span><i class="fas fa-landmark"></i> 4 estate</span>
+              <span><i class="fas fa-building"></i> 2 UMA</span>
+              <span><i class="fas fa-briefcase"></i> 3 biz reviews</span>
+            </div>
+            <button class="aah-ds-btn" onclick="sendQuickMessage('Show estate planning and advisory opportunities')"><i class="fas fa-robot"></i> Ask AI</button>
+          </div>
+        </div>
+
+        <div class="ai-layout">
+          {/* ── Agent Cards Panel ── */}
+          <div class="aah-agents-panel">
+
+            {/* Panel header */}
+            <div class="aah-panel-header">
+              <div class="aah-panel-title"><i class="fas fa-robot"></i> AI Copilots</div>
+              <div class="aah-panel-meta">
+                <span class="aah-panel-badge active">10 Active</span>
+                <span class="aah-panel-badge standby">3 Standby</span>
+                <button class="aah-run-all-btn" onclick="sendQuickMessage('Run all agents — give me a consolidated summary of top actions across insurance, investments, retirement and advisory')"><i class="fas fa-bolt"></i> Run All</button>
+              </div>
+            </div>
 
           {/* ── Insurance ── */}
           <div class="aah-domain-label aah-dl-ins"><i class="fas fa-shield-alt"></i> Insurance &amp; Underwriting</div>
@@ -8162,9 +8221,15 @@ function AIAgentsPage() {
           </div>
         </div>
       </div>
+      </div>{/* /aah-panel-hub */}
+
+      {/* ══════════════════════════════════════════════
+          TAB PANEL 3 — Agentic AI Workflows
+          ══════════════════════════════════════════════ */}
+      <div class="aah-tab-panel" id="aah-panel-wf" style="display:none">
 
       {/* Agentic Workflows — My Book */}
-      <div class="automation-section">
+      <div class="automation-section aah-wf-tab-section">
         <div class="automation-section-header">
           <div class="automation-section-title">
             <i class="fas fa-cogs"></i> Agentic AI Workflows
@@ -8319,6 +8384,8 @@ function AIAgentsPage() {
           </div>
         </div>
       </div>
+      </div>{/* /aah-panel-wf */}
+
     </div>
   )
 }
