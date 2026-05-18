@@ -9906,6 +9906,11 @@ window.renderClaimModal = function(claimId, tab) {
     _origRenderClaimModal(claimId, tab);
     return;
   }
+  // If this is a p7 claim, let the p7 renderer handle it so .p7cm-ci-sections exists
+  if (window.p7ClaimsData && window.p7ClaimsData[claimId]) {
+    _origRenderClaimModal(claimId, tab);
+    return;
+  }
   const c = claimData[claimId];
   const ci = claimIntelligenceData[claimId];
   if (!c || !ci) {
@@ -38708,7 +38713,7 @@ function p7BuildClaimTabContent(claim, tab) {
       '</div>' +
 
       '<div class="p7cm-pay-actions" style="margin-top:16px">' +
-        '<button class="p7cm-act-btn secondary" onclick="openLegalEscalationModal(\'' + claimId + '\')"><i class="fas fa-gavel"></i> Legal Escalation</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="openLegalEscalationModal(\'' + claim.id + '\')"><i class="fas fa-gavel"></i> Legal Escalation</button>' +
         '<button class="p7cm-act-btn ghost" onclick="showToast(\'Liability report exported\',\'success\')"><i class="fas fa-file-pdf"></i> Export Liability Report</button>' +
         (claim.legalHold ? '<button class="p7cm-act-btn ghost" onclick="showToast(\'Legal hold removal request submitted\',\'info\')"><i class="fas fa-unlock"></i> Request Hold Removal</button>' : '') +
       '</div>' +
@@ -38757,8 +38762,8 @@ function p7BuildClaimTabContent(claim, tab) {
         '</div>' +
       '</div>' +
       '<div class="p7cm-ci-actions">' +
-        '<button class="p7cm-act-btn primary" onclick="showToast(\'Full AI analysis report generated — check email\',\'success\')"><i class="fas fa-file-alt"></i> Generate Full Report</button>' +
-        '<button class="p7cm-act-btn secondary" onclick="p7OpenFraudDetail(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
+        '<button class="p7cm-act-btn primary" onclick="openCIReviewModal()"><i class="fas fa-file-alt"></i> Generate Full Report</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="openFraudDetailModal(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Full Fraud Report</button>' +
         '<button class="p7cm-act-btn ghost" onclick="showToast(\'AI re-scored claim — refreshing intelligence\',\'info\')"><i class="fas fa-sync-alt"></i> Re-run AI Analysis</button>' +
         '<button class="p7cm-act-btn danger" onclick="openSIUCaseModal(\'' + claim.id + '\')"><i class="fas fa-user-secret"></i> Refer to SIU</button>' +
       '</div>' +
@@ -59185,24 +59190,19 @@ function _crcRefresh(claimId) {
   oldPanel.parentNode.replaceChild(newPanel, oldPanel);
 }
 
-/* ── IIFE — patch renderClaimModal to inject Copilot ────────────
-   Prepends the copilot panel inside .p7cm-ci-sections using
-   insertAdjacentHTML('afterbegin', ...).  Initialises state on
-   first render; subsequent renders re-use existing state so user
-   progress is preserved across tab switches.
+/* ── IIFE — patch renderClaimModal + p7SwitchClaimTab + openClaimModal
+   to inject Copilot panel inside .p7cm-ci-sections.
+   Covers both the legacy renderClaimModal chain (OLD modal) and the
+   p7 modal which uses p7SwitchClaimTab / openClaimModal directly.
    ─────────────────────────────────────────────────────────────── */
 (function() {
-  var _prevRender = window.renderClaimModal;
-  window.renderClaimModal = function(claimId, tab) {
-    _prevRender(claimId, tab);
-    if (tab !== 'ci') return;
+  /* ── shared injection helper ── */
+  function _injectCopilot(claimId) {
     setTimeout(function() {
       var ciSections = document.querySelector('.p7cm-ci-sections');
       if (!ciSections) return;
-      // Remove any stale panel (tab re-render)
       var existing = document.getElementById('crc-panel-' + claimId);
       if (existing) existing.remove();
-      // Initialise state if first time for this claim
       if (!window._copilotState[claimId]) {
         window._copilotState[claimId] = {
           currentStep:    0,
@@ -59211,11 +59211,32 @@ function _crcRefresh(claimId) {
           steps:          _crcBuildSteps(claimId)
         };
       }
-      // Re-use steps (already built) but rebuild on fresh render
       window._copilotState[claimId].steps = _crcBuildSteps(claimId);
       var panelHTML = _crcRenderPanel(claimId);
       ciSections.insertAdjacentHTML('afterbegin', panelHTML);
-    }, 30);
+    }, 50);
+  }
+
+  /* ── 1. Patch legacy window.renderClaimModal (OLD modal chain) ── */
+  var _prevRender = window.renderClaimModal;
+  window.renderClaimModal = function(claimId, tab) {
+    _prevRender(claimId, tab);
+    if (tab === 'ci') _injectCopilot(claimId);
+  };
+
+  /* ── 2. Patch p7SwitchClaimTab (p7 modal tab switching) ── */
+  var _prevP7Switch = window.p7SwitchClaimTab;
+  window.p7SwitchClaimTab = function(claimId, tab, el) {
+    if (typeof _prevP7Switch === 'function') _prevP7Switch(claimId, tab, el);
+    if (tab === 'ci') _injectCopilot(claimId);
+  };
+
+  /* ── 3. Patch openClaimModal (p7 modal initial open) ── */
+  var _prevOpenClaim = window.openClaimModal;
+  window.openClaimModal = function(claimId, tab) {
+    if (typeof _prevOpenClaim === 'function') _prevOpenClaim(claimId, tab);
+    var activeTab = tab || 'view';
+    if (activeTab === 'ci') _injectCopilot(claimId);
   };
 })();
 
