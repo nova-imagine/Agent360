@@ -56312,7 +56312,7 @@ console.log('Advisory Accounts module loaded — ' + advAccounts.length + ' acco
 
   /* clmSwitchTab — ID-based selection only; never touches .pol-tab class
      so it cannot interfere with polSwitchTab on the Policies page        */
-  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved', 'subrogation', 'workload', 'portal'];
+  var CLM_TABS = ['overview', 'active', 'resolved', 'subrogation', 'workload', 'portal'];
 
   window.clmSwitchTab = function(tab) {
     CLM_TABS.forEach(function(t) {

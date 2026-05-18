@@ -5864,26 +5864,9 @@ function ClaimsPage() {
         </div>
       </div>
 
-      {/* ── Claim-Type Breakdown Strip ── */}
-      <div class="clm-type-strip">
-        <div class="clm-type-strip-label"><i class="fas fa-tags"></i> By Type:</div>
-        <button class="clm-type-chip clm-type-death" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Death Benefit')" title="Filter: Death Benefit"><i class="fas fa-cross"></i> Death Benefit <span>3</span></button>
-        <button class="clm-type-chip clm-type-ltc" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Long-term Care')" title="Filter: Long-term Care"><i class="fas fa-bed"></i> LTC <span>3</span></button>
-        <button class="clm-type-chip clm-type-disability" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Disability')" title="Filter: Disability"><i class="fas fa-wheelchair"></i> Disability <span>2</span></button>
-        <button class="clm-type-chip clm-type-adb" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Accelerated')" title="Filter: Accelerated/ADB"><i class="fas fa-heartbeat"></i> ADB <span>1</span></button>
-        <button class="clm-type-chip clm-type-rider" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Rider')" title="Filter: Riders"><i class="fas fa-plus-circle"></i> Riders <span>3</span></button>
-        <button class="clm-type-chip clm-type-other" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Other')" title="Filter: Other types"><i class="fas fa-ellipsis-h"></i> Other <span>2</span></button>
-        {/* ── Divider separating claim types from status flags ── */}
-        <div class="clm-type-strip-divider"></div>
-        <div class="clm-type-strip-flag-label"><i class="fas fa-flag"></i> Flags:</div>
-        <button class="clm-type-chip clm-type-fraud" onclick="clmSwitchTab('active');filterClaimsByStatus('flagged')" title="Filter: Fraud Flagged"><i class="fas fa-shield-virus"></i> Fraud <span class="clm-type-badge-red">1</span></button>
-        <button class="clm-type-chip clm-type-sla" onclick="clmSwitchTab('active');filterClaimsBySLA()" title="Filter: SLA At Risk"><i class="fas fa-fire"></i> SLA Risk <span class="clm-type-badge-amber">2</span></button>
-        <div class="clm-type-strip-clear"><button onclick="clearClaimFilters()" title="Clear all filters"><i class="fas fa-times"></i></button></div>
-      </div>
-
       {/* ══════════════════════════════════════════════════════
-          5-TAB BAR
-          tabs: overview | active | intelligence | resolved | subrogation
+          6-TAB BAR
+          tabs: overview | active | resolved | subrogation | workload | portal
           ══════════════════════════════════════════════════════ */}
       <div class="pol-tab-bar">
         <button class="pol-tab pol-tab-active" id="clm-tab-overview" onclick="clmSwitchTab('overview')">
@@ -5893,12 +5876,8 @@ function ClaimsPage() {
           <i class="fas fa-folder-open"></i> Active Claims
           <span class="pol-tab-count pol-tab-count-red">14</span>
         </button>
-        <button class="pol-tab" id="clm-tab-intelligence" onclick="clmSwitchTab('intelligence')">
-          <i class="fas fa-brain"></i> Intelligence
-          <span class="pol-tab-count pol-tab-count-orange">3</span>
-        </button>
         <button class="pol-tab" id="clm-tab-resolved" onclick="clmSwitchTab('resolved')">
-          <i class="fas fa-check-circle"></i> Resolved &amp; Analytics
+          <i class="fas fa-check-circle"></i> Resolved
           <span class="pol-tab-count">14</span>
         </button>
         <button class="pol-tab" id="clm-tab-subrogation" onclick="clmSwitchTab('subrogation')">
@@ -6251,6 +6230,296 @@ function ClaimsPage() {
           </div>
         </div>
 
+        {/* ════════════════════════════════════════════════════
+            AI SECTION — PROACTIVE DETECTION ENGINE
+            Moved from Intelligence tab — Pass 26
+            ════════════════════════════════════════════════════ */}
+        <div class="proactive-alert-card">
+          <div class="pac-header">
+            <div class="pac-header-left">
+              <div class="pac-icon"><i class="fas fa-brain"></i><span class="pac-pulse"></span></div>
+              <div>
+                <div class="pac-title">Proactive AI Detection Engine</div>
+                <div class="pac-sub">Monitoring obituaries, SLA compliance &amp; post-claim coverage events · Updated <span class="pac-updated">just now</span></div>
+              </div>
+            </div>
+            <div class="pac-header-stats">
+              <div class="pac-hstat"><span class="pac-hstat-val red">1</span><span class="pac-hstat-lbl">Death Detected</span></div>
+              <div class="pac-hstat"><span class="pac-hstat-val red">2</span><span class="pac-hstat-lbl">SLA At Risk</span></div>
+              <div class="pac-hstat"><span class="pac-hstat-val blue">1</span><span class="pac-hstat-lbl">Coverage Opp.</span></div>
+              <div class="pac-hstat"><span class="pac-hstat-val blue">3</span><span class="pac-hstat-lbl">Total Alerts</span></div>
+            </div>
+            <button class="btn-pac-dismiss" onclick="togglePACPanel(this)" title="Collapse alerts"><i class="fas fa-chevron-up"></i></button>
+          </div>
+          <div class="pac-alerts-body" id="pac-alerts-body">
+
+            {/* Alert 1 — Death Detected */}
+            <div class="pac-alert pac-alert-death" id="pac-alert-1">
+              <div class="pac-alert-type-icon death"><i class="fas fa-heart-broken"></i></div>
+              <div class="pac-alert-content">
+                <div class="pac-alert-badges">
+                  <span class="pac-badge death"><i class="fas fa-exclamation-circle"></i> Death Detected</span>
+                  <span class="pac-badge urgent">Urgent</span>
+                  <span class="pac-badge new">New — 14 mins ago</span>
+                </div>
+                <div class="pac-alert-headline">Obituary Match — Kevin Park · Policy P-100350</div>
+                <div class="pac-alert-detail">AI cross-referenced public obituary data with client registry. Kevin Park (age 29, Jersey City) confirmed deceased 2026-04-10. Policy P-100350 (Term Life $250K) currently in <strong>Pending</strong> status — coverage determination required before claim processing. Estate contact not yet identified.</div>
+                <div class="pac-alert-meta">
+                  <span><i class="fas fa-search"></i> Source: Public obituary registry · NJ DoH cross-match</span>
+                  <span><i class="fas fa-file-contract"></i> Policy P-100350 · $250,000 Death Benefit</span>
+                  <span><i class="fas fa-shield-virus"></i> Fraud Score: 78 / 100 — Flagged</span>
+                </div>
+              </div>
+              <div class="pac-alert-actions">
+                <button class="btn-pac-action primary" onclick="openPACModal('obituary-kevin')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
+                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i> View Claim</button>
+              </div>
+            </div>
+
+            {/* Alert 2 — SLA Compliance Risk */}
+            <div class="pac-alert pac-alert-sla" id="pac-alert-sla">
+              <div class="pac-alert-type-icon sla"><i class="fas fa-stopwatch"></i></div>
+              <div class="pac-alert-content">
+                <div class="pac-alert-badges">
+                  <span class="pac-badge sla"><i class="fas fa-balance-scale"></i> SLA Breach Risk</span>
+                  <span class="pac-badge urgent">2 Claims</span>
+                  <span class="pac-badge new">Regulatory Deadline</span>
+                </div>
+                <div class="pac-alert-headline">State SLA Deadline — CLM-2026-0041 expires tomorrow · CLM-2026-0028 expires in 5 days</div>
+                <div class="pac-alert-detail">New York State Insurance Law §3420 requires death benefit claims to be resolved within 30 days of notice. <strong>CLM-2026-0041 (Robert Chen, $1M)</strong> has 1 day remaining. Compassionate SLA applies to <strong>CLM-2026-0028 (Maria Gonzalez, $120K)</strong> — expedite immediately to avoid regulatory breach and potential fines of up to $5,000 per violation.</div>
+                <div class="pac-alert-meta">
+                  <span><i class="fas fa-balance-scale"></i> NY Ins. Law §3420 · 30-day resolution requirement</span>
+                  <span><i class="fas fa-exclamation-circle"></i> 2 claims in breach window · Total exposure $1.12M</span>
+                  <span><i class="fas fa-calendar-times"></i> CLM-2026-0041: Apr 14 · CLM-2026-0028: Apr 19</span>
+                </div>
+              </div>
+              <div class="pac-alert-actions">
+                <button class="btn-pac-action primary" onclick="clmSwitchTab('active');filterClaimsBySLA()"><i class="fas fa-stopwatch"></i> View SLA Queue</button>
+                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
+              </div>
+            </div>
+
+            {/* Alert 3 — Surviving Family Coverage Opportunity */}
+            <div class="pac-alert pac-alert-coverage" id="pac-alert-4">
+              <div class="pac-alert-type-icon coverage"><i class="fas fa-user-plus"></i></div>
+              <div class="pac-alert-content">
+                <div class="pac-alert-badges">
+                  <span class="pac-badge coverage"><i class="fas fa-shield-alt"></i> Coverage Gap</span>
+                  <span class="pac-badge normal2">Opportunity</span>
+                </div>
+                <div class="pac-alert-headline">Surviving Family — New Coverage Opportunity · Robert Chen Estate</div>
+                <div class="pac-alert-detail">Following the active death benefit claim (CLM-2026-0041), AI identified that <strong>Susan Chen (beneficiary, est. age 42)</strong> has no existing NYL coverage. Upon claim resolution, proactively reach out with a new coverage needs analysis. Estate payout of $1M creates an ideal window for investment, insurance and estate planning conversations.</div>
+                <div class="pac-alert-meta">
+                  <span><i class="fas fa-dollar-sign"></i> Expected payout: $1,000,000 to Susan Chen</span>
+                  <span><i class="fas fa-lightbulb"></i> Opportunity: Whole Life + investment + estate planning</span>
+                  <span><i class="fas fa-calendar-check"></i> Outreach timing: After claim resolves ~2026-04-17</span>
+                </div>
+              </div>
+              <div class="pac-alert-actions">
+                <button class="btn-pac-action primary" onclick="openPACModal('coverage-susan')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
+                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ════════════════════════════════════════════════════
+            AI SECTION — CLAIMS RISK HEATMAP
+            Moved from Intelligence tab — Pass 26
+            ════════════════════════════════════════════════════ */}
+        <div class="ai-heatmap-panel">
+          <div class="ai-hm-header">
+            <div class="ai-hm-header-left">
+              <div class="ai-hm-icon"><i class="fas fa-fire-alt"></i></div>
+              <div>
+                <div class="ai-hm-title">AI Claims Risk Heatmap <span class="ai-hm-live">● LIVE</span></div>
+                <div class="ai-hm-sub">All active claims ranked by composite AI risk score · Fraud · SLA · Liability · Doc completeness · Updated just now</div>
+              </div>
+            </div>
+            <div class="ai-hm-header-stats">
+              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val red">3</span><span class="ai-hm-hstat-lbl">Critical</span></div>
+              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val orange">4</span><span class="ai-hm-hstat-lbl">High Risk</span></div>
+              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val blue">7</span><span class="ai-hm-hstat-lbl">Moderate</span></div>
+              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val green">3</span><span class="ai-hm-hstat-lbl">Low Risk</span></div>
+            </div>
+            <button class="ai-hm-export-btn" onclick="p7Toast('Risk heatmap report exported to PDF',2500)"><i class="fas fa-file-pdf"></i> Export Report</button>
+          </div>
+          <div class="ai-hm-table-header">
+            <div class="ai-hm-col-claim">Claim</div>
+            <div class="ai-hm-col-type">Type</div>
+            <div class="ai-hm-col-score">AI Risk Score</div>
+            <div class="ai-hm-col-fraud">Fraud</div>
+            <div class="ai-hm-col-sla">SLA</div>
+            <div class="ai-hm-col-docs">Docs</div>
+            <div class="ai-hm-col-action">Action</div>
+          </div>
+          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0041','ci')">
+            <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar critical"></div><div><div class="ai-hm-claim-id">CLM-2026-0041</div><div class="ai-hm-claim-name">Robert Chen · Death Benefit</div></div></div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
+            <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num critical">91</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:91%;background:#dc2626"></div></div></div></div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge red">72 <i class="fas fa-arrow-up"></i></span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge red"><i class="fas fa-fire"></i> Breach</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-arrow-circle-right"></i> Action</button></div>
+          </div>
+          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0025','ci')">
+            <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar critical"></div><div><div class="ai-hm-claim-id">CLM-2026-0025</div><div class="ai-hm-claim-name">Kevin Park · Death Benefit</div></div></div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
+            <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num critical">88</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:88%;background:#dc2626"></div></div></div></div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge red">78 <i class="fas fa-arrow-up"></i></span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-exclamation-triangle"></i> Warn</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge red">1/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-arrow-circle-right"></i> Action</button></div>
+          </div>
+          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0028','ci')">
+            <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar critical"></div><div><div class="ai-hm-claim-id">CLM-2026-0028</div><div class="ai-hm-claim-name">Maria Gonzalez · ADB</div></div></div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge adb"><i class="fas fa-heartbeat"></i> ADB</span></div>
+            <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num critical">82</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:82%;background:#dc2626"></div></div></div></div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge orange">45</span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-exclamation-triangle"></i> 5d</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-arrow-circle-right"></i> Action</button></div>
+          </div>
+          <div class="ai-hm-row ai-hm-high" onclick="openClaimModal('CLM-2026-0038','ci')">
+            <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar high"></div><div><div class="ai-hm-claim-id">CLM-2026-0038</div><div class="ai-hm-claim-name">Linda Park · LTC</div></div></div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge ltc"><i class="fas fa-bed"></i> LTC</span></div>
+            <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num high">67</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:67%;background:#d97706"></div></div></div></div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge orange">55</span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn high" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i> Review</button></div>
+          </div>
+          <div class="ai-hm-row ai-hm-high" onclick="openClaimModal('CLM-2026-0035','ci')">
+            <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar high"></div><div><div class="ai-hm-claim-id">CLM-2026-0035</div><div class="ai-hm-claim-name">Maria Gonzalez · Disability</div></div></div>
+            <div class="ai-hm-col-type"><span class="ai-hm-type-badge disability"><i class="fas fa-wheelchair"></i> Disability</span></div>
+            <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num high">61</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:61%;background:#d97706"></div></div></div></div>
+            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">28</span></div>
+            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-clock"></i> 8d</span></div>
+            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
+            <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn high" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i> Review</button></div>
+          </div>
+          <div class="ai-hm-row-more" onclick="toggleHeatmapExpand(this)">
+            <i class="fas fa-chevron-down"></i> Show 9 more claims (7 Moderate · 2 Low Risk)
+          </div>
+          <div class="ai-hm-extra-rows" style="display:none">
+            <div class="ai-hm-row ai-hm-moderate" onclick="openClaimModal('CLM-2026-0033','ci')">
+              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar moderate"></div><div><div class="ai-hm-claim-id">CLM-2026-0033</div><div class="ai-hm-claim-name">James Whitfield · LTC</div></div></div>
+              <div class="ai-hm-col-type"><span class="ai-hm-type-badge ltc"><i class="fas fa-bed"></i> LTC</span></div>
+              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num moderate">48</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:48%;background:#2563eb"></div></div></div></div>
+              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">22</span></div>
+              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
+              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">4/4</span></div>
+              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn moderate" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review</button></div>
+            </div>
+            <div class="ai-hm-row ai-hm-moderate" onclick="openClaimModal('CLM-2026-0031','ci')">
+              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar moderate"></div><div><div class="ai-hm-claim-id">CLM-2026-0031</div><div class="ai-hm-claim-name">Thomas Rivera · Death Benefit</div></div></div>
+              <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
+              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num moderate">44</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:44%;background:#2563eb"></div></div></div></div>
+              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">18</span></div>
+              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
+              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">4/4</span></div>
+              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn moderate" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i> Review</button></div>
+            </div>
+            <div class="ai-hm-row ai-hm-low" onclick="openClaimModal('CLM-2026-0049','ci')">
+              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar low"></div><div><div class="ai-hm-claim-id">CLM-2026-0049</div><div class="ai-hm-claim-name">Sarah Kim · Disability</div></div></div>
+              <div class="ai-hm-col-type"><span class="ai-hm-type-badge disability"><i class="fas fa-wheelchair"></i> Disability</span></div>
+              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num low">21</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:21%;background:#059669"></div></div></div></div>
+              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">12</span></div>
+              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
+              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">3/3</span></div>
+              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn low" onclick="openClaimModal('CLM-2026-0049','view')"><i class="fas fa-eye"></i> Review</button></div>
+            </div>
+          </div>
+        </div>
+
+        {/* ════════════════════════════════════════════════════
+            AI SECTION — PREDICTIVE INSIGHTS
+            Moved from Intelligence tab — Pass 26
+            ════════════════════════════════════════════════════ */}
+        <div class="ai-insights-panel">
+          <div class="ai-ins-header">
+            <div class="ai-ins-header-left">
+              <div class="ai-ins-icon"><i class="fas fa-lightbulb"></i></div>
+              <div>
+                <div class="ai-ins-title">AI Predictive Insights</div>
+                <div class="ai-ins-sub">Cross-portfolio pattern analysis · Forward-looking risk signals · Generated 2 mins ago</div>
+              </div>
+            </div>
+            <button class="ai-ins-refresh-btn" onclick="refreshAIInsights(this)"><i class="fas fa-sync-alt"></i> Refresh</button>
+          </div>
+          <div class="ai-ins-grid">
+            <div class="ai-ins-card ai-ins-fraud">
+              <div class="ai-ins-card-top">
+                <div class="ai-ins-card-icon"><i class="fas fa-project-diagram"></i></div>
+                <span class="ai-ins-card-tag fraud">Fraud Pattern</span>
+                <span class="ai-ins-confidence">AI Confidence: 84%</span>
+              </div>
+              <div class="ai-ins-card-title">Fraud Pattern Cluster Detected — 2 Claims</div>
+              <div class="ai-ins-card-body">AI identified a shared signal cluster across <strong>CLM-2026-0041</strong> (Robert Chen) and <strong>CLM-2026-0025</strong> (Kevin Park): both policies modified within 8 months of death, both beneficiaries are non-immediate family, both fraud scores above 70. Pattern matches a known staged-death ring profile (confidence 84%).</div>
+              <div class="ai-ins-card-claims">
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','ci')">CLM-2026-0041</span>
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0025','ci')">CLM-2026-0025</span>
+              </div>
+              <div class="ai-ins-card-actions">
+                <button class="ai-ins-act-btn primary" onclick="openSIUCaseModal('CLM-2026-0041')"><i class="fas fa-user-secret"></i> Refer Both to SIU</button>
+                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Fraud cluster analysis report generated',2500)"><i class="fas fa-file-alt"></i> Full Report</button>
+              </div>
+            </div>
+            <div class="ai-ins-card ai-ins-sla">
+              <div class="ai-ins-card-top">
+                <div class="ai-ins-card-icon"><i class="fas fa-clock"></i></div>
+                <span class="ai-ins-card-tag sla">SLA Cascade</span>
+                <span class="ai-ins-confidence">AI Confidence: 97%</span>
+              </div>
+              <div class="ai-ins-card-title">3 Claims Likely to Breach SLA Within 72 Hours</div>
+              <div class="ai-ins-card-body">Model projects <strong>CLM-2026-0041</strong> breaches NY §3420 tomorrow, <strong>CLM-2026-0028</strong> in 5 days. At current document collection velocity, <strong>CLM-2026-0035</strong> will miss its 45-day disability SLA unless an APS is received by Friday. Combined regulatory fine exposure: up to <strong>$15,000</strong>.</div>
+              <div class="ai-ins-card-claims">
+                <span class="ai-ins-claim-chip urgent" onclick="openClaimModal('CLM-2026-0041','notes')">CLM-2026-0041 ⚡</span>
+                <span class="ai-ins-claim-chip urgent" onclick="openClaimModal('CLM-2026-0028','notes')">CLM-2026-0028 ⚡</span>
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0035','notes')">CLM-2026-0035</span>
+              </div>
+              <div class="ai-ins-card-actions">
+                <button class="ai-ins-act-btn primary" onclick="clmSwitchTab('active');filterClaimsBySLA()"><i class="fas fa-stopwatch"></i> Open SLA Queue</button>
+                <button class="ai-ins-act-btn ghost" onclick="p7Toast('SLA escalation emails sent to all 3 adjusters',2800)"><i class="fas fa-envelope"></i> Escalate All</button>
+              </div>
+            </div>
+            <div class="ai-ins-card ai-ins-reserve">
+              <div class="ai-ins-card-top">
+                <div class="ai-ins-card-icon"><i class="fas fa-piggy-bank"></i></div>
+                <span class="ai-ins-card-tag reserve">Reserve Risk</span>
+                <span class="ai-ins-confidence">AI Confidence: 91%</span>
+              </div>
+              <div class="ai-ins-card-title">Reserve Deficiency Predicted — $1.08M Under-Reserved</div>
+              <div class="ai-ins-card-body">AI reserve model (IBNR + 8% buffer) flags <strong>CLM-2026-0041</strong> as under-reserved by <strong>$80,000</strong> relative to expected total liability including legal exposure. Portfolio-wide, 2 additional claims show reserve gaps totaling $1M. IFRS 17 adequacy test: <strong>FAIL</strong> for 3 claims.</div>
+              <div class="ai-ins-card-claims">
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','payments')">CLM-2026-0041</span>
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0025','payments')">CLM-2026-0025</span>
+              </div>
+              <div class="ai-ins-card-actions">
+                <button class="ai-ins-act-btn primary" onclick="openClaimModal('CLM-2026-0041','payments')"><i class="fas fa-edit"></i> Adjust Reserves</button>
+                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Reserve adequacy report exported for actuarial review',2800)"><i class="fas fa-file-pdf"></i> Actuarial Report</button>
+              </div>
+            </div>
+            <div class="ai-ins-card ai-ins-opportunity">
+              <div class="ai-ins-card-top">
+                <div class="ai-ins-card-icon"><i class="fas fa-seedling"></i></div>
+                <span class="ai-ins-card-tag opportunity">Opportunity</span>
+                <span class="ai-ins-confidence">AI Confidence: 78%</span>
+              </div>
+              <div class="ai-ins-card-title">Post-Claim Revenue Opportunity — $1M Payout Window</div>
+              <div class="ai-ins-card-body">Upon resolution of <strong>CLM-2026-0041</strong>, beneficiary <strong>Susan Chen</strong> (est. age 42) will receive $1,000,000 with no existing NYL coverage. AI models a 78% likelihood of conversion given estate complexity. Optimal outreach window: <strong>14–21 days post-payout</strong>. Recommended products: Whole Life, annuity, estate trust.</div>
+              <div class="ai-ins-card-claims">
+                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','beneficiary')">CLM-2026-0041 — Susan Chen</span>
+              </div>
+              <div class="ai-ins-card-actions">
+                <button class="ai-ins-act-btn primary" onclick="p7Toast('Susan Chen added to post-claim outreach queue · Agent notified',3000)"><i class="fas fa-user-plus"></i> Add to Outreach</button>
+                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Full opportunity analysis opened',2500)"><i class="fas fa-chart-line"></i> Full Analysis</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>{/* end clm-panel-overview */}
 
       {/* ════════════════════════════════════════════════════════
@@ -6258,6 +6527,22 @@ function ClaimsPage() {
           Toolbar · 9-col slim table (clickable rows) · Fraud+IDP grid
           ════════════════════════════════════════════════════════ */}
       <div class="pol-tab-panel" id="clm-panel-active" style="display:none">
+
+        {/* ── Claim-Type Quick-Filter Strip ── */}
+        <div class="clm-type-strip">
+          <div class="clm-type-strip-label"><i class="fas fa-tags"></i> By Type:</div>
+          <button class="clm-type-chip clm-type-death" onclick="filterClaimsByTypeChip('Death Benefit')" title="Filter: Death Benefit"><i class="fas fa-cross"></i> Death Benefit <span>3</span></button>
+          <button class="clm-type-chip clm-type-ltc" onclick="filterClaimsByTypeChip('Long-term Care')" title="Filter: Long-term Care"><i class="fas fa-bed"></i> LTC <span>3</span></button>
+          <button class="clm-type-chip clm-type-disability" onclick="filterClaimsByTypeChip('Disability')" title="Filter: Disability"><i class="fas fa-wheelchair"></i> Disability <span>2</span></button>
+          <button class="clm-type-chip clm-type-adb" onclick="filterClaimsByTypeChip('Accelerated')" title="Filter: Accelerated/ADB"><i class="fas fa-heartbeat"></i> ADB <span>1</span></button>
+          <button class="clm-type-chip clm-type-rider" onclick="filterClaimsByTypeChip('Rider')" title="Filter: Riders"><i class="fas fa-plus-circle"></i> Riders <span>3</span></button>
+          <button class="clm-type-chip clm-type-other" onclick="filterClaimsByTypeChip('Other')" title="Filter: Other types"><i class="fas fa-ellipsis-h"></i> Other <span>2</span></button>
+          <div class="clm-type-strip-divider"></div>
+          <div class="clm-type-strip-flag-label"><i class="fas fa-flag"></i> Flags:</div>
+          <button class="clm-type-chip clm-type-fraud" onclick="filterClaimsByStatus('flagged')" title="Filter: Fraud Flagged"><i class="fas fa-shield-virus"></i> Fraud <span class="clm-type-badge-red">1</span></button>
+          <button class="clm-type-chip clm-type-sla" onclick="filterClaimsBySLA()" title="Filter: SLA At Risk"><i class="fas fa-fire"></i> SLA Risk <span class="clm-type-badge-amber">2</span></button>
+          <div class="clm-type-strip-clear"><button onclick="clearClaimFilters()" title="Clear all filters"><i class="fas fa-times"></i></button></div>
+        </div>
 
         {/* Toolbar */}
         <div class="page-toolbar">
@@ -6630,395 +6915,7 @@ function ClaimsPage() {
           TAB 3 — INTELLIGENCE
           AI Command Centre: Proactive Detection · Risk Heatmap · Predictive Insights
           ════════════════════════════════════════════════════════ */}
-      <div class="pol-tab-panel" id="clm-panel-intelligence" style="display:none">
 
-        {/* Proactive AI Detection Engine — cleaned: lapse/renewal alerts removed */}
-        <div class="proactive-alert-card">
-          <div class="pac-header">
-            <div class="pac-header-left">
-              <div class="pac-icon"><i class="fas fa-brain"></i><span class="pac-pulse"></span></div>
-              <div>
-                <div class="pac-title">Proactive AI Detection Engine</div>
-                <div class="pac-sub">Monitoring obituaries, SLA compliance &amp; post-claim coverage events · Updated <span class="pac-updated">just now</span></div>
-              </div>
-            </div>
-            <div class="pac-header-stats">
-              <div class="pac-hstat"><span class="pac-hstat-val red">1</span><span class="pac-hstat-lbl">Death Detected</span></div>
-              <div class="pac-hstat"><span class="pac-hstat-val red">2</span><span class="pac-hstat-lbl">SLA At Risk</span></div>
-              <div class="pac-hstat"><span class="pac-hstat-val blue">1</span><span class="pac-hstat-lbl">Coverage Opp.</span></div>
-              <div class="pac-hstat"><span class="pac-hstat-val blue">3</span><span class="pac-hstat-lbl">Total Alerts</span></div>
-            </div>
-            <button class="btn-pac-dismiss" onclick="togglePACPanel(this)" title="Collapse alerts"><i class="fas fa-chevron-up"></i></button>
-          </div>
-          <div class="pac-alerts-body" id="pac-alerts-body">
-
-            {/* Alert 1 — Death Detected */}
-            <div class="pac-alert pac-alert-death" id="pac-alert-1">
-              <div class="pac-alert-type-icon death"><i class="fas fa-heart-broken"></i></div>
-              <div class="pac-alert-content">
-                <div class="pac-alert-badges">
-                  <span class="pac-badge death"><i class="fas fa-exclamation-circle"></i> Death Detected</span>
-                  <span class="pac-badge urgent">Urgent</span>
-                  <span class="pac-badge new">New — 14 mins ago</span>
-                </div>
-                <div class="pac-alert-headline">Obituary Match — Kevin Park · Policy P-100350</div>
-                <div class="pac-alert-detail">AI cross-referenced public obituary data with client registry. Kevin Park (age 29, Jersey City) confirmed deceased 2026-04-10. Policy P-100350 (Term Life $250K) currently in <strong>Pending</strong> status — coverage determination required before claim processing. Estate contact not yet identified.</div>
-                <div class="pac-alert-meta">
-                  <span><i class="fas fa-search"></i> Source: Public obituary registry · NJ DoH cross-match</span>
-                  <span><i class="fas fa-file-contract"></i> Policy P-100350 · $250,000 Death Benefit</span>
-                  <span><i class="fas fa-shield-virus"></i> Fraud Score: 78 / 100 — Flagged</span>
-                </div>
-              </div>
-              <div class="pac-alert-actions">
-                <button class="btn-pac-action primary" onclick="openPACModal('obituary-kevin')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
-                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i> View Claim</button>
-              </div>
-            </div>
-
-            {/* Alert 2 — SLA Compliance Risk */}
-            <div class="pac-alert pac-alert-sla" id="pac-alert-sla">
-              <div class="pac-alert-type-icon sla"><i class="fas fa-stopwatch"></i></div>
-              <div class="pac-alert-content">
-                <div class="pac-alert-badges">
-                  <span class="pac-badge sla"><i class="fas fa-balance-scale"></i> SLA Breach Risk</span>
-                  <span class="pac-badge urgent">2 Claims</span>
-                  <span class="pac-badge new">Regulatory Deadline</span>
-                </div>
-                <div class="pac-alert-headline">State SLA Deadline — CLM-2026-0041 expires tomorrow · CLM-2026-0028 expires in 5 days</div>
-                <div class="pac-alert-detail">New York State Insurance Law §3420 requires death benefit claims to be resolved within 30 days of notice. <strong>CLM-2026-0041 (Robert Chen, $1M)</strong> has 1 day remaining. Compassionate SLA applies to <strong>CLM-2026-0028 (Maria Gonzalez, $120K)</strong> — expedite immediately to avoid regulatory breach and potential fines of up to $5,000 per violation.</div>
-                <div class="pac-alert-meta">
-                  <span><i class="fas fa-balance-scale"></i> NY Ins. Law §3420 · 30-day resolution requirement</span>
-                  <span><i class="fas fa-exclamation-circle"></i> 2 claims in breach window · Total exposure $1.12M</span>
-                  <span><i class="fas fa-calendar-times"></i> CLM-2026-0041: Apr 14 · CLM-2026-0028: Apr 19</span>
-                </div>
-              </div>
-              <div class="pac-alert-actions">
-                <button class="btn-pac-action primary" onclick="clmSwitchTab('active');filterClaimsBySLA()"><i class="fas fa-stopwatch"></i> View SLA Queue</button>
-                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
-              </div>
-            </div>
-
-            {/* Alert 3 — Surviving Family Coverage Opportunity */}
-            <div class="pac-alert pac-alert-coverage" id="pac-alert-4">
-              <div class="pac-alert-type-icon coverage"><i class="fas fa-user-plus"></i></div>
-              <div class="pac-alert-content">
-                <div class="pac-alert-badges">
-                  <span class="pac-badge coverage"><i class="fas fa-shield-alt"></i> Coverage Gap</span>
-                  <span class="pac-badge normal2">Opportunity</span>
-                </div>
-                <div class="pac-alert-headline">Surviving Family — New Coverage Opportunity · Robert Chen Estate</div>
-                <div class="pac-alert-detail">Following the active death benefit claim (CLM-2026-0041), AI identified that <strong>Susan Chen (beneficiary, est. age 42)</strong> has no existing NYL coverage. Upon claim resolution, proactively reach out with a new coverage needs analysis. Estate payout of $1M creates an ideal window for investment, insurance and estate planning conversations.</div>
-                <div class="pac-alert-meta">
-                  <span><i class="fas fa-dollar-sign"></i> Expected payout: $1,000,000 to Susan Chen</span>
-                  <span><i class="fas fa-lightbulb"></i> Opportunity: Whole Life + investment + estate planning</span>
-                  <span><i class="fas fa-calendar-check"></i> Outreach timing: After claim resolves ~2026-04-17</span>
-                </div>
-              </div>
-              <div class="pac-alert-actions">
-                <button class="btn-pac-action primary" onclick="openPACModal('coverage-susan')"><i class="fas fa-arrow-circle-right"></i> Take Action</button>
-                <button class="btn-pac-action secondary" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i> View Claim</button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* ════════════════════════════════════════════════════
-            SECTION 2 — AI CLAIMS RISK HEATMAP
-            Portfolio-ranked risk view across all active claims
-            ════════════════════════════════════════════════════ */}
-        <div class="ai-heatmap-panel">
-          <div class="ai-hm-header">
-            <div class="ai-hm-header-left">
-              <div class="ai-hm-icon"><i class="fas fa-fire-alt"></i></div>
-              <div>
-                <div class="ai-hm-title">AI Claims Risk Heatmap <span class="ai-hm-live">● LIVE</span></div>
-                <div class="ai-hm-sub">All active claims ranked by composite AI risk score · Fraud · SLA · Liability · Doc completeness · Updated just now</div>
-              </div>
-            </div>
-            <div class="ai-hm-header-stats">
-              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val red">3</span><span class="ai-hm-hstat-lbl">Critical</span></div>
-              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val orange">4</span><span class="ai-hm-hstat-lbl">High Risk</span></div>
-              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val blue">7</span><span class="ai-hm-hstat-lbl">Moderate</span></div>
-              <div class="ai-hm-hstat"><span class="ai-hm-hstat-val green">3</span><span class="ai-hm-hstat-lbl">Low Risk</span></div>
-            </div>
-            <button class="ai-hm-export-btn" onclick="p7Toast('Risk heatmap report exported to PDF',2500)"><i class="fas fa-file-pdf"></i> Export Report</button>
-          </div>
-
-          {/* Column headers */}
-          <div class="ai-hm-table-header">
-            <div class="ai-hm-col-claim">Claim</div>
-            <div class="ai-hm-col-type">Type</div>
-            <div class="ai-hm-col-score">AI Risk Score</div>
-            <div class="ai-hm-col-fraud">Fraud</div>
-            <div class="ai-hm-col-sla">SLA</div>
-            <div class="ai-hm-col-docs">Docs</div>
-            <div class="ai-hm-col-action">Action</div>
-          </div>
-
-          {/* Row 1 — CRITICAL */}
-          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0041','ci')">
-            <div class="ai-hm-col-claim">
-              <div class="ai-hm-risk-bar critical"></div>
-              <div>
-                <div class="ai-hm-claim-id">CLM-2026-0041</div>
-                <div class="ai-hm-claim-name">Robert Chen · Death Benefit</div>
-              </div>
-            </div>
-            <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
-            <div class="ai-hm-col-score">
-              <div class="ai-hm-score-wrap">
-                <span class="ai-hm-score-num critical">91</span>
-                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:91%;background:#dc2626"></div></div>
-              </div>
-            </div>
-            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge red">72 <i class="fas fa-arrow-up"></i></span></div>
-            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge red"><i class="fas fa-fire"></i> Breach</span></div>
-            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
-            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
-              <button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-arrow-circle-right"></i> Action</button>
-            </div>
-          </div>
-
-          {/* Row 2 — CRITICAL */}
-          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0025','ci')">
-            <div class="ai-hm-col-claim">
-              <div class="ai-hm-risk-bar critical"></div>
-              <div>
-                <div class="ai-hm-claim-id">CLM-2026-0025</div>
-                <div class="ai-hm-claim-name">Kevin Park · Death Benefit</div>
-              </div>
-            </div>
-            <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
-            <div class="ai-hm-col-score">
-              <div class="ai-hm-score-wrap">
-                <span class="ai-hm-score-num critical">88</span>
-                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:88%;background:#dc2626"></div></div>
-              </div>
-            </div>
-            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge red">78 <i class="fas fa-arrow-up"></i></span></div>
-            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-exclamation-triangle"></i> Warn</span></div>
-            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge red">1/4</span></div>
-            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
-              <button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-arrow-circle-right"></i> Action</button>
-            </div>
-          </div>
-
-          {/* Row 3 — CRITICAL */}
-          <div class="ai-hm-row ai-hm-critical" onclick="openClaimModal('CLM-2026-0028','ci')">
-            <div class="ai-hm-col-claim">
-              <div class="ai-hm-risk-bar critical"></div>
-              <div>
-                <div class="ai-hm-claim-id">CLM-2026-0028</div>
-                <div class="ai-hm-claim-name">Maria Gonzalez · ADB</div>
-              </div>
-            </div>
-            <div class="ai-hm-col-type"><span class="ai-hm-type-badge adb"><i class="fas fa-heartbeat"></i> ADB</span></div>
-            <div class="ai-hm-col-score">
-              <div class="ai-hm-score-wrap">
-                <span class="ai-hm-score-num critical">82</span>
-                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:82%;background:#dc2626"></div></div>
-              </div>
-            </div>
-            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge orange">45</span></div>
-            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-exclamation-triangle"></i> 5d</span></div>
-            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
-            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
-              <button class="ai-hm-act-btn critical" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-arrow-circle-right"></i> Action</button>
-            </div>
-          </div>
-
-          {/* Row 4 — HIGH */}
-          <div class="ai-hm-row ai-hm-high" onclick="openClaimModal('CLM-2026-0038','ci')">
-            <div class="ai-hm-col-claim">
-              <div class="ai-hm-risk-bar high"></div>
-              <div>
-                <div class="ai-hm-claim-id">CLM-2026-0038</div>
-                <div class="ai-hm-claim-name">Linda Park · LTC</div>
-              </div>
-            </div>
-            <div class="ai-hm-col-type"><span class="ai-hm-type-badge ltc"><i class="fas fa-bed"></i> LTC</span></div>
-            <div class="ai-hm-col-score">
-              <div class="ai-hm-score-wrap">
-                <span class="ai-hm-score-num high">67</span>
-                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:67%;background:#d97706"></div></div>
-              </div>
-            </div>
-            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge orange">55</span></div>
-            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
-            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
-            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
-              <button class="ai-hm-act-btn high" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i> Review</button>
-            </div>
-          </div>
-
-          {/* Row 5 — HIGH */}
-          <div class="ai-hm-row ai-hm-high" onclick="openClaimModal('CLM-2026-0035','ci')">
-            <div class="ai-hm-col-claim">
-              <div class="ai-hm-risk-bar high"></div>
-              <div>
-                <div class="ai-hm-claim-id">CLM-2026-0035</div>
-                <div class="ai-hm-claim-name">Maria Gonzalez · Disability</div>
-              </div>
-            </div>
-            <div class="ai-hm-col-type"><span class="ai-hm-type-badge disability"><i class="fas fa-wheelchair"></i> Disability</span></div>
-            <div class="ai-hm-col-score">
-              <div class="ai-hm-score-wrap">
-                <span class="ai-hm-score-num high">61</span>
-                <div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:61%;background:#d97706"></div></div>
-              </div>
-            </div>
-            <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">28</span></div>
-            <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge orange"><i class="fas fa-clock"></i> 8d</span></div>
-            <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge orange">2/4</span></div>
-            <div class="ai-hm-col-action" onclick="event.stopPropagation()">
-              <button class="ai-hm-act-btn high" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i> Review</button>
-            </div>
-          </div>
-
-          {/* Collapsed rows toggle */}
-          <div class="ai-hm-row-more" onclick="toggleHeatmapExpand(this)">
-            <i class="fas fa-chevron-down"></i> Show 9 more claims (7 Moderate · 2 Low Risk)
-          </div>
-
-          {/* Collapsed rows — hidden by default */}
-          <div class="ai-hm-extra-rows" style="display:none">
-            <div class="ai-hm-row ai-hm-moderate" onclick="openClaimModal('CLM-2026-0033','ci')">
-              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar moderate"></div><div><div class="ai-hm-claim-id">CLM-2026-0033</div><div class="ai-hm-claim-name">James Whitfield · LTC</div></div></div>
-              <div class="ai-hm-col-type"><span class="ai-hm-type-badge ltc"><i class="fas fa-bed"></i> LTC</span></div>
-              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num moderate">48</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:48%;background:#2563eb"></div></div></div></div>
-              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">22</span></div>
-              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
-              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">4/4</span></div>
-              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn moderate" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i> Review</button></div>
-            </div>
-            <div class="ai-hm-row ai-hm-moderate" onclick="openClaimModal('CLM-2026-0031','ci')">
-              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar moderate"></div><div><div class="ai-hm-claim-id">CLM-2026-0031</div><div class="ai-hm-claim-name">Thomas Rivera · Death Benefit</div></div></div>
-              <div class="ai-hm-col-type"><span class="ai-hm-type-badge death"><i class="fas fa-cross"></i> Death</span></div>
-              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num moderate">44</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:44%;background:#2563eb"></div></div></div></div>
-              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">18</span></div>
-              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
-              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">4/4</span></div>
-              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn moderate" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i> Review</button></div>
-            </div>
-            <div class="ai-hm-row ai-hm-low" onclick="openClaimModal('CLM-2026-0049','ci')">
-              <div class="ai-hm-col-claim"><div class="ai-hm-risk-bar low"></div><div><div class="ai-hm-claim-id">CLM-2026-0049</div><div class="ai-hm-claim-name">Sarah Kim · Disability</div></div></div>
-              <div class="ai-hm-col-type"><span class="ai-hm-type-badge disability"><i class="fas fa-wheelchair"></i> Disability</span></div>
-              <div class="ai-hm-col-score"><div class="ai-hm-score-wrap"><span class="ai-hm-score-num low">21</span><div class="ai-hm-score-bar-wrap"><div class="ai-hm-score-bar" style="width:21%;background:#059669"></div></div></div></div>
-              <div class="ai-hm-col-fraud"><span class="ai-hm-sub-badge green">12</span></div>
-              <div class="ai-hm-col-sla"><span class="ai-hm-sub-badge green"><i class="fas fa-check"></i> OK</span></div>
-              <div class="ai-hm-col-docs"><span class="ai-hm-sub-badge green">3/3</span></div>
-              <div class="ai-hm-col-action" onclick="event.stopPropagation()"><button class="ai-hm-act-btn low" onclick="openClaimModal('CLM-2026-0049','view')"><i class="fas fa-eye"></i> Review</button></div>
-            </div>
-          </div>
-        </div>
-
-        {/* ════════════════════════════════════════════════════
-            SECTION 3 — AI PREDICTIVE INSIGHTS
-            Cross-claim pattern analysis & forward-looking signals
-            ════════════════════════════════════════════════════ */}
-        <div class="ai-insights-panel">
-          <div class="ai-ins-header">
-            <div class="ai-ins-header-left">
-              <div class="ai-ins-icon"><i class="fas fa-lightbulb"></i></div>
-              <div>
-                <div class="ai-ins-title">AI Predictive Insights</div>
-                <div class="ai-ins-sub">Cross-portfolio pattern analysis · Forward-looking risk signals · Generated 2 mins ago</div>
-              </div>
-            </div>
-            <button class="ai-ins-refresh-btn" onclick="refreshAIInsights(this)"><i class="fas fa-sync-alt"></i> Refresh</button>
-          </div>
-
-          <div class="ai-ins-grid">
-
-            {/* Insight 1 — Fraud Pattern Cluster */}
-            <div class="ai-ins-card ai-ins-fraud">
-              <div class="ai-ins-card-top">
-                <div class="ai-ins-card-icon"><i class="fas fa-project-diagram"></i></div>
-                <span class="ai-ins-card-tag fraud">Fraud Pattern</span>
-                <span class="ai-ins-confidence">AI Confidence: 84%</span>
-              </div>
-              <div class="ai-ins-card-title">Fraud Pattern Cluster Detected — 2 Claims</div>
-              <div class="ai-ins-card-body">
-                AI identified a shared signal cluster across <strong>CLM-2026-0041</strong> (Robert Chen) and <strong>CLM-2026-0025</strong> (Kevin Park): both policies modified within 8 months of death, both beneficiaries are non-immediate family, both fraud scores above 70. Pattern matches a known staged-death ring profile (confidence 84%).
-              </div>
-              <div class="ai-ins-card-claims">
-                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','ci')">CLM-2026-0041</span>
-                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0025','ci')">CLM-2026-0025</span>
-              </div>
-              <div class="ai-ins-card-actions">
-                <button class="ai-ins-act-btn primary" onclick="openSIUCaseModal('CLM-2026-0041')"><i class="fas fa-user-secret"></i> Refer Both to SIU</button>
-                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Fraud cluster analysis report generated',2500)"><i class="fas fa-file-alt"></i> Full Report</button>
-              </div>
-            </div>
-
-            {/* Insight 2 — SLA Cascade Risk */}
-            <div class="ai-ins-card ai-ins-sla">
-              <div class="ai-ins-card-top">
-                <div class="ai-ins-card-icon"><i class="fas fa-clock"></i></div>
-                <span class="ai-ins-card-tag sla">SLA Cascade</span>
-                <span class="ai-ins-confidence">AI Confidence: 97%</span>
-              </div>
-              <div class="ai-ins-card-title">3 Claims Likely to Breach SLA Within 72 Hours</div>
-              <div class="ai-ins-card-body">
-                Model projects <strong>CLM-2026-0041</strong> breaches NY §3420 tomorrow, <strong>CLM-2026-0028</strong> in 5 days. At current document collection velocity, <strong>CLM-2026-0035</strong> will miss its 45-day disability SLA unless an APS is received by Friday. Combined regulatory fine exposure: up to <strong>$15,000</strong>.
-              </div>
-              <div class="ai-ins-card-claims">
-                <span class="ai-ins-claim-chip urgent" onclick="openClaimModal('CLM-2026-0041','notes')">CLM-2026-0041 ⚡</span>
-                <span class="ai-ins-claim-chip urgent" onclick="openClaimModal('CLM-2026-0028','notes')">CLM-2026-0028 ⚡</span>
-                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0035','notes')">CLM-2026-0035</span>
-              </div>
-              <div class="ai-ins-card-actions">
-                <button class="ai-ins-act-btn primary" onclick="clmSwitchTab('active');filterClaimsBySLA()"><i class="fas fa-stopwatch"></i> Open SLA Queue</button>
-                <button class="ai-ins-act-btn ghost" onclick="p7Toast('SLA escalation emails sent to all 3 adjusters',2800)"><i class="fas fa-envelope"></i> Escalate All</button>
-              </div>
-            </div>
-
-            {/* Insight 3 — Reserve Deficiency */}
-            <div class="ai-ins-card ai-ins-reserve">
-              <div class="ai-ins-card-top">
-                <div class="ai-ins-card-icon"><i class="fas fa-piggy-bank"></i></div>
-                <span class="ai-ins-card-tag reserve">Reserve Risk</span>
-                <span class="ai-ins-confidence">AI Confidence: 91%</span>
-              </div>
-              <div class="ai-ins-card-title">Reserve Deficiency Predicted — $1.08M Under-Reserved</div>
-              <div class="ai-ins-card-body">
-                AI reserve model (IBNR + 8% buffer) flags <strong>CLM-2026-0041</strong> as under-reserved by <strong>$80,000</strong> relative to expected total liability including legal exposure. Portfolio-wide, 2 additional claims show reserve gaps totaling $1M. IFRS 17 adequacy test: <strong>FAIL</strong> for 3 claims.
-              </div>
-              <div class="ai-ins-card-claims">
-                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','payments')">CLM-2026-0041</span>
-                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0025','payments')">CLM-2026-0025</span>
-              </div>
-              <div class="ai-ins-card-actions">
-                <button class="ai-ins-act-btn primary" onclick="openClaimModal('CLM-2026-0041','payments')"><i class="fas fa-edit"></i> Adjust Reserves</button>
-                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Reserve adequacy report exported for actuarial review',2800)"><i class="fas fa-file-pdf"></i> Actuarial Report</button>
-              </div>
-            </div>
-
-            {/* Insight 4 — Post-Claim Coverage Opportunity */}
-            <div class="ai-ins-card ai-ins-opportunity">
-              <div class="ai-ins-card-top">
-                <div class="ai-ins-card-icon"><i class="fas fa-seedling"></i></div>
-                <span class="ai-ins-card-tag opportunity">Opportunity</span>
-                <span class="ai-ins-confidence">AI Confidence: 78%</span>
-              </div>
-              <div class="ai-ins-card-title">Post-Claim Revenue Opportunity — $1M Payout Window</div>
-              <div class="ai-ins-card-body">
-                Upon resolution of <strong>CLM-2026-0041</strong>, beneficiary <strong>Susan Chen</strong> (est. age 42) will receive $1,000,000 with no existing NYL coverage. AI models a 78% likelihood of conversion given estate complexity. Optimal outreach window: <strong>14–21 days post-payout</strong>. Recommended products: Whole Life, annuity, estate trust.
-              </div>
-              <div class="ai-ins-card-claims">
-                <span class="ai-ins-claim-chip" onclick="openClaimModal('CLM-2026-0041','beneficiary')">CLM-2026-0041 — Susan Chen</span>
-              </div>
-              <div class="ai-ins-card-actions">
-                <button class="ai-ins-act-btn primary" onclick="p7Toast('Susan Chen added to post-claim outreach queue · Agent notified',3000)"><i class="fas fa-user-plus"></i> Add to Outreach</button>
-                <button class="ai-ins-act-btn ghost" onclick="p7Toast('Full opportunity analysis opened',2500)"><i class="fas fa-chart-line"></i> Full Analysis</button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </div>{/* end clm-panel-intelligence */}
 
       {/* ════════════════════════════════════════════════════════
           TAB 4 — RESOLVED & ANALYTICS
