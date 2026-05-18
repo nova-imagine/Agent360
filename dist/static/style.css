@@ -52497,3 +52497,409 @@ kbd {
     grid-column: 1 / -1;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 30 — CLAIMS REVIEW COPILOT
+   Step-through adjudication workflow panel — CI tab
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Panel Container ── */
+.crc-panel {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 14px;
+  padding: 16px 18px 14px;
+  margin-bottom: 16px;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 20px rgba(15,23,42,.25);
+}
+
+/* ── Header ── */
+.crc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.crc-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.crc-robot-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 17px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(99,102,241,.4);
+}
+
+.crc-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: 0.2px;
+}
+
+.crc-subtitle {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.crc-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Progress pill ── */
+.crc-progress-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  padding: 4px 10px;
+}
+
+.crc-progress-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.crc-progress-track {
+  width: 60px;
+  height: 4px;
+  background: rgba(255,255,255,.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.crc-progress-fill {
+  height: 4px;
+  background: linear-gradient(90deg, #6366f1, #22d3ee);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.crc-progress-pct {
+  font-size: 10px;
+  font-weight: 700;
+  color: #22d3ee;
+}
+
+.crc-collapse-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  transition: background .15s;
+}
+
+.crc-collapse-btn:hover {
+  background: rgba(255,255,255,.14);
+  color: #f1f5f9;
+}
+
+/* ── Step Rail ── */
+.crc-rail {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.crc-rail-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  border: 2px solid rgba(255,255,255,.15);
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+
+.crc-rail-dot:hover {
+  background: rgba(99,102,241,.2);
+  border-color: #6366f1;
+  color: #a5b4fc;
+}
+
+.crc-rail-dot.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: #6366f1;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.3);
+}
+
+.crc-rail-dot.done {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+
+.crc-rail-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255,255,255,.1);
+  min-width: 8px;
+}
+
+/* ── Step Card ── */
+.crc-step-card {
+  border: 1.5px solid;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.crc-step-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.crc-step-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.crc-step-meta {
+  flex: 1;
+}
+
+.crc-step-counter {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.crc-step-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.crc-step-pri-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── AI Callout ── */
+.crc-ai-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(15,23,42,.06);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-left: 3px solid #6366f1;
+}
+
+.crc-ai-icon {
+  color: #6366f1;
+  font-size: 14px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.crc-ai-text {
+  font-size: 12px;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+/* ── Detail items ── */
+.crc-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.crc-detail-item {
+  font-size: 12px;
+  color: #374151;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: rgba(0,0,0,.03);
+  line-height: 1.4;
+}
+
+.crc-detail-item.warn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.crc-detail-item.ok {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+/* ── Mark Complete row ── */
+.crc-mark-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,.08);
+}
+
+.crc-mark-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+}
+
+.crc-mark-check {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #6366f1;
+}
+
+.crc-action-btn {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: opacity .15s, transform .1s;
+}
+
+.crc-action-btn:hover {
+  opacity: .9;
+  transform: translateY(-1px);
+}
+
+/* ── Completed chips ── */
+.crc-done-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.crc-done-chip {
+  background: #dcfce7;
+  color: #166534;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #bbf7d0;
+}
+
+/* ── Navigation ── */
+.crc-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.crc-nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.crc-nav-btn {
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .15s;
+}
+
+.crc-nav-btn.primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border: none;
+}
+
+.crc-nav-btn.primary:hover:not(:disabled) {
+  opacity: .9;
+}
+
+.crc-nav-btn.ghost {
+  background: rgba(255,255,255,.07);
+  color: #94a3b8;
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.crc-nav-btn.ghost:hover:not(:disabled) {
+  background: rgba(255,255,255,.12);
+  color: #e2e8f0;
+}
+
+.crc-nav-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}

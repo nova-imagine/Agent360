@@ -58784,3 +58784,439 @@ function fcwReviewTypeFields(type, typeFields) {
 }
 
 console.log('Pass 29 — Dynamic Information Collection module loaded');
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 30 — CLAIMS REVIEW COPILOT STEP-THROUGH
+   Injects an interactive, claim-aware guided review workflow at the
+   top of the CI (AI Intel) tab in every claim modal.
+   Uses the IIFE patch pattern to wrap the existing renderClaimModal.
+   State stored in window._copilotState[claimId] so progress persists
+   across tab switches within the same session.
+   ═══════════════════════════════════════════════════════════════════ */
+
+window._copilotState = window._copilotState || {};
+
+/* ── _crcBuildSteps(claimId) ─────────────────────────────────────
+   Generates a personalised 5–7 step review workflow for this claim
+   by examining p7ClaimsData, claimData, CP_DATA, and claimAIInsights.
+   Each step: { id, title, icon, priority, aiInsight, action,
+                actionLabel, actionFn, checkLabel, details[] }
+   ─────────────────────────────────────────────────────────────── */
+function _crcBuildSteps(claimId) {
+  var pd  = p7ClaimsData[claimId]  || {};
+  var cd  = claimData[claimId]     || {};
+  var cp  = CP_DATA[claimId]       || {};
+  var ai  = claimAIInsights[claimId] || {};
+
+  var steps = [];
+
+  /* STEP 1 — always: Identity & Coverage Verification */
+  var contestFlag = pd.contestability || cd.contestability;
+  steps.push({
+    id: 'identity',
+    title: 'Identity & Coverage Verification',
+    icon: 'fa-id-card',
+    priority: contestFlag ? 'critical' : 'required',
+    aiInsight: contestFlag
+      ? 'AI Flag: Contestability window active — verify application accuracy before any payment. Misrepresentation review mandatory.'
+      : 'AI Cleared: No contestability issues detected. Policy in-force verification confirmed.',
+    details: [
+      'Verify government-issued photo ID for claimant: ' + (pd.beneficiary || cd.claimant || 'claimant'),
+      'Confirm policy ' + (cd.policy || '—') + ' was in force on date of loss',
+      contestFlag ? '⚠ Run contestability review — policy issued within 2-year window' : '✓ Contestability window clear — > 2 years in force',
+      'Check beneficiary designation matches claimant: ' + (pd.beneficiary || '—'),
+      'Confirm KYC/AML status: ' + (pd.benefKYC || 'Not checked')
+    ],
+    checkLabel: 'Identity & coverage confirmed',
+    actionLabel: 'Run Identity Check',
+    actionFn: 'p7Toast(\'<i class="fas fa-id-card"></i> Identity check initiated — cross-referencing CRM records against claim submission\', 2500)'
+  });
+
+  /* STEP 2 — Document Completeness Review */
+  var docs = pd.docs || cd.docsRequired || [];
+  var missingDocs = [];
+  if (pd.docs) {
+    missingDocs = pd.docs.filter(function(d) { return d.status === 'missing' || d.status === 'pending'; }).map(function(d) { return d.name; });
+  }
+  var docComplete = missingDocs.length === 0;
+  steps.push({
+    id: 'documents',
+    title: 'Document Completeness Review',
+    icon: 'fa-folder-open',
+    priority: docComplete ? 'complete' : 'required',
+    aiInsight: docComplete
+      ? 'AI: All required documents received and verified. Proceed to adjudication.'
+      : 'AI Alert: ' + missingDocs.length + ' document(s) still outstanding — ' + (missingDocs.slice(0, 2).join(', ') || 'see checklist') + '. Claim cannot be approved until complete.',
+    details: (missingDocs.length
+      ? missingDocs.map(function(d) { return '⏳ Missing: ' + d; })
+      : ['✅ All required documents on file']).concat([
+      'IDP extraction status: ' + (pd.hasUpload || cd.hasUpload ? 'Queued' : 'Not yet triggered'),
+      'Document checklist for ' + (cd.type || pd.type || 'this claim type') + ' reviewed'
+    ]),
+    checkLabel: 'Document checklist verified',
+    actionLabel: docComplete ? 'View Document Vault' : 'Chase Missing Docs',
+    actionFn: docComplete
+      ? 'p7Toast(\'<i class="fas fa-folder-open"></i> Document vault opened — all ' + docs.length + ' documents verified\', 2000)'
+      : 'p7Toast(\'<i class="fas fa-paper-plane"></i> AI-drafted document chase emails sent to claimant and providers · 48-hr response window set\', 3000)'
+  });
+
+  /* STEP 3 — Fraud & Integrity Screening */
+  var fScore = pd.fraudScore || cd.fraudScore || 0;
+  var fHigh  = fScore >= 60;
+  var fWatch = fScore >= 30 && fScore < 60;
+  steps.push({
+    id: 'fraud',
+    title: 'Fraud & Integrity Screening',
+    icon: 'fa-shield-virus',
+    priority: fHigh ? 'critical' : fWatch ? 'elevated' : 'complete',
+    aiInsight: fHigh
+      ? 'AI HIGH FRAUD RISK (Score: ' + fScore + '): Multiple red flags detected. SIU referral recommended before any payout. Do not approve without full investigation.'
+      : fWatch
+        ? 'AI WATCH (Score: ' + fScore + '): Moderate indicators present. Senior adjuster review required. Document all findings.'
+        : 'AI CLEAR (Score: ' + fScore + '): No significant fraud indicators. Standard processing approved.',
+    details: [
+      'Fraud score: ' + fScore + '/100 — ' + (fHigh ? 'HIGH RISK' : fWatch ? 'Watch' : 'Clear'),
+      'Cross-reference claim against NICB ISO ClaimSearch database',
+      fHigh ? '⚠ Run SIU referral workflow — assign investigator' : '✓ No SIU referral required',
+      'Verify claimant has no prior fraudulent claim history',
+      'Check for beneficiary change within 12 months of loss',
+      'Confirm cause of death / disability is consistent with medical records'
+    ],
+    checkLabel: 'Fraud screening completed',
+    actionLabel: fHigh ? 'Refer to SIU' : fWatch ? 'Flag for Senior Review' : 'Mark Fraud Clear',
+    actionFn: fHigh
+      ? 'openSIUCaseModal(\'' + claimId + '\')'
+      : fWatch
+        ? 'p7Toast(\'<i class="fas fa-user-tie"></i> Claim flagged for senior adjuster review · Case note added\', 2500)'
+        : 'p7Toast(\'<i class="fas fa-check-shield"></i> Fraud screening complete — claim cleared for standard processing\', 2000)'
+  });
+
+  /* STEP 4 — Medical / Clinical Review (if applicable) */
+  var needsMedical = ['Death Benefit','Accelerated Benefit','Disability','Long-term Care','Critical Illness Rider','Chronic Illness Rider (Living Benefit)','Accidental Death Benefit (ADB Rider)','Waiver of Premium'];
+  var claimType = cd.type || pd.type || '';
+  var isMedical = needsMedical.some(function(t) { return claimType.indexOf(t) !== -1 || (cd.typeBadge && (cd.typeBadge === 'death' || cd.typeBadge === 'accelerated' || cd.typeBadge === 'disability' || cd.typeBadge === 'ltc')); });
+  if (isMedical) {
+    steps.push({
+      id: 'medical',
+      title: 'Medical & Clinical Validation',
+      icon: 'fa-heartbeat',
+      priority: 'required',
+      aiInsight: 'AI Medical Review: Cross-reference ICD-10 codes on medical records against claim type. Confirm treating physician credentials. Verify diagnosis date pre-dates policy for pre-existing condition check.',
+      details: [
+        'Verify Attending Physician Statement (APS) is complete and signed',
+        'Cross-reference ICD-10 diagnosis code against covered conditions',
+        'Confirm treating physician is licensed and not on exclusion list',
+        'Check for pre-existing condition clauses in policy ' + (cd.policy || '—'),
+        cd.typeBadge === 'accelerated' ? '⚡ Terminal certification: life expectancy ≤ 12 months required' : '',
+        cd.typeBadge === 'ltc' ? '⚕ ADL assessment: minimum 2 of 6 impairments required' : '',
+        cd.typeBadge === 'disability' ? '🏥 Own-occupation vs. any-occupation definition applies' : ''
+      ].filter(function(d) { return !!d; }),
+      checkLabel: 'Medical records reviewed and validated',
+      actionLabel: 'Open Medical Records',
+      actionFn: 'p7OrderAPS(\'' + claimId + '\')'
+    });
+  }
+
+  /* STEP 5 — Liability & Reserve Assessment */
+  var ls = pd.liabilityScore || 0;
+  var lHigh = ls >= 60;
+  steps.push({
+    id: 'liability',
+    title: 'Liability & Reserve Assessment',
+    icon: 'fa-balance-scale',
+    priority: lHigh ? 'elevated' : 'required',
+    aiInsight: 'AI Liability Score: ' + ls + '/100. ' + (lHigh
+      ? 'High exposure — reserve adequacy review required. Ensure reserve covers potential legal costs.'
+      : 'Liability within acceptable parameters. Standard reserve recommended.'),
+    details: [
+      'Current reserve: ' + (pd.reserveAmount || 'Not yet set'),
+      'Reserve status: ' + (pd.reserveStatus || '—'),
+      'Liability score: ' + ls + '/100 — ' + (pd.liabilityLabel || '—'),
+      'Verify coverage limits: ' + (pd.coverageLimits || cd.amount || '—'),
+      'Check for exclusions: ' + (pd.exclusions || 'None identified'),
+      'Regulatory note: ' + (pd.regulatoryNote || 'Standard processing'),
+      lHigh ? '⚠ Bad-faith risk flagged: ' + (pd.badFaithRisk || 'Review required') : '✓ No bad-faith indicators'
+    ],
+    checkLabel: 'Reserve and liability reviewed',
+    actionLabel: 'Review Liability Report',
+    actionFn: 'switchClaimTab(\'liability\', document.querySelectorAll(\'#claim-modal-tabs .dmt-tab\')[3])'
+  });
+
+  /* STEP 6 — Complaint Risk & Claimant Communication */
+  var cpScore = cp.score || 0;
+  var cpHigh  = cpScore >= 60;
+  steps.push({
+    id: 'complaint',
+    title: 'Complaint Risk & Claimant Experience',
+    icon: 'fa-comment-alt-exclamation',
+    priority: cpHigh ? 'elevated' : 'required',
+    aiInsight: 'AI Complaint Prediction: Score ' + cpScore + '/100 — ' + (cp.tier || 'N/A') + ' risk. ' + (cp.narrative || 'Maintain proactive claimant communication to reduce complaint likelihood.'),
+    details: [
+      'Complaint risk score: ' + cpScore + '/100 (' + (cp.tier || 'N/A') + ')',
+      'Last communication: ' + (pd.communications && pd.communications.length ? pd.communications[pd.communications.length-1].date + ' — ' + pd.communications[pd.communications.length-1].note : 'No comms logged'),
+      'SLA status: ' + (pd.slaStatus === 'breach' ? '🔴 BREACH — immediate action' : pd.slaStatus === 'warn' ? '🟡 Warning — ' + pd.slaDaysLeft + ' days remaining' : '✅ On track'),
+      'Send proactive status update to claimant: ' + (pd.benefEmail || cd.contact || '—'),
+      cpHigh ? '⚠ Escalate to senior adjuster for white-glove handling' : '✓ Standard communication protocol sufficient'
+    ],
+    checkLabel: 'Communication and complaint risk addressed',
+    actionLabel: cpHigh ? 'Open Complaint Risk Report' : 'Send Status Update',
+    actionFn: cpHigh
+      ? 'openComplaintRiskModal(\'' + claimId + '\')'
+      : 'p7LogCall(\'' + claimId + '\')'
+  });
+
+  /* STEP 7 — Final Disposition & Decision */
+  var slaBreached = pd.slaStatus === 'breach';
+  steps.push({
+    id: 'decision',
+    title: 'Final Disposition & Approval Decision',
+    icon: 'fa-check-double',
+    priority: slaBreached ? 'critical' : 'required',
+    aiInsight: 'AI Recommendation: ' + (ai.headline || 'Review all prior steps before making approval decision. All checklist items should be verified.') + (slaBreached ? ' ⚡ SLA breach — decision required NOW.' : ''),
+    details: [
+      'Confirm all prior copilot steps are marked complete',
+      'Select final decision: Approve · Approve with Conditions · Deny · Refer for Further Review',
+      'If Approve: confirm beneficiary bank details and wire instructions',
+      'If Deny: generate denial letter citing specific policy provisions',
+      'If Refer: assign to specialist team with documented rationale',
+      'Log final decision in claims management system with supervisor sign-off',
+      'Set post-decision follow-up: ' + (slaBreached ? 'SAME DAY — SLA breach active' : '5 business days')
+    ],
+    checkLabel: 'Final decision made and documented',
+    actionLabel: slaBreached ? '⚡ Escalate — SLA Breach' : 'Generate Decision Letter',
+    actionFn: slaBreached
+      ? 'p7Toast(\'<i class="fas fa-exclamation-triangle"></i> SLA breach escalation triggered · Supervisor notified · Claim flagged for immediate review\', 3500)'
+      : 'p7Toast(\'<i class="fas fa-file-signature"></i> AI-drafted decision letter generated · Review in Documents tab before sending\', 3000)'
+  });
+
+  return steps;
+}
+
+/* ── _crcRenderPanel(claimId) ────────────────────────────────────
+   Builds the full Copilot panel HTML for insertion above
+   .p7cm-ci-sections.  Uses window._copilotState[claimId] for
+   current step index and completed step tracking.
+   ─────────────────────────────────────────────────────────────── */
+function _crcRenderPanel(claimId) {
+  var state = window._copilotState[claimId];
+  var steps = state.steps;
+  var cur   = state.currentStep;
+  var done  = state.completedSteps;
+  var total = steps.length;
+  var pct   = Math.round(done.length / total * 100);
+
+  var step  = steps[cur];
+
+  /* Priority badge styling */
+  var priMap = {
+    critical: { bg: '#fef2f2', border: '#fca5a5', color: '#b91c1c', icon: 'fa-exclamation-triangle', label: 'Critical' },
+    elevated: { bg: '#fefce8', border: '#fde68a', color: '#92400e', icon: 'fa-exclamation-circle',   label: 'Elevated' },
+    required: { bg: '#eff6ff', border: '#bfdbfe', color: '#1d4ed8', icon: 'fa-check-circle',          label: 'Required' },
+    complete: { bg: '#f0fdf4', border: '#bbf7d0', color: '#166534', icon: 'fa-check-double',          label: 'Complete' }
+  };
+  var pri = priMap[step.priority] || priMap['required'];
+
+  /* Step rail — mini indicators */
+  var railHTML = steps.map(function(s, i) {
+    var isDone = done.indexOf(s.id) !== -1;
+    var isCur  = i === cur;
+    var railCls = isDone ? 'crc-rail-dot done' : isCur ? 'crc-rail-dot active' : 'crc-rail-dot';
+    var railTip = (i + 1) + '. ' + s.title;
+    return '<div class="' + railCls + '" title="' + railTip + '" onclick="_crcGoTo(\'' + claimId + '\',' + i + ')">'
+      + (isDone ? '<i class="fas fa-check"></i>' : (i + 1))
+      + '</div>';
+  }).join('<div class="crc-rail-line' + '"></div>');
+
+  /* Detail bullets */
+  var detailsHTML = step.details.map(function(d) {
+    var isWarn = d.indexOf('⚠') !== -1 || d.indexOf('🔴') !== -1;
+    var isOk   = d.indexOf('✓') !== -1 || d.indexOf('✅') !== -1;
+    var cls    = isWarn ? 'crc-detail-item warn' : isOk ? 'crc-detail-item ok' : 'crc-detail-item';
+    return '<div class="' + cls + '">' + d + '</div>';
+  }).join('');
+
+  /* Completed-step chip display */
+  var doneChipsHTML = done.length
+    ? '<div class="crc-done-chips">' + done.map(function(sid) {
+        var s = steps.find ? steps.find(function(x) { return x.id === sid; }) : null;
+        return s ? '<span class="crc-done-chip"><i class="fas fa-check"></i> ' + s.title + '</span>' : '';
+      }).join('') + '</div>'
+    : '';
+
+  var isStepDone = done.indexOf(step.id) !== -1;
+
+  return '<div class="crc-panel" id="crc-panel-' + claimId + '">'
+    /* ── Header ── */
+    + '<div class="crc-header">'
+      + '<div class="crc-header-left">'
+        + '<div class="crc-robot-icon"><i class="fas fa-robot"></i></div>'
+        + '<div>'
+          + '<div class="crc-title">Claims Review Copilot</div>'
+          + '<div class="crc-subtitle">AI-guided adjudication workflow · ' + claimId + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div class="crc-header-right">'
+        + '<div class="crc-progress-pill">'
+          + '<span class="crc-progress-num">' + done.length + '/' + total + '</span>'
+          + '<div class="crc-progress-track"><div class="crc-progress-fill" style="width:' + pct + '%"></div></div>'
+          + '<span class="crc-progress-pct">' + pct + '%</span>'
+        + '</div>'
+        + '<button class="crc-collapse-btn" onclick="_crcToggle(\'' + claimId + '\')" title="Collapse copilot">'
+          + '<i class="fas fa-chevron-up"></i>'
+        + '</button>'
+      + '</div>'
+    + '</div>'
+
+    /* ── Step rail ── */
+    + '<div class="crc-rail">' + railHTML + '</div>'
+
+    /* ── Current step card ── */
+    + '<div class="crc-step-card" style="background:' + pri.bg + ';border-color:' + pri.border + '">'
+      + '<div class="crc-step-card-header">'
+        + '<div class="crc-step-icon-wrap" style="background:' + pri.bg + ';border-color:' + pri.border + ';color:' + pri.color + '">'
+          + '<i class="fas ' + step.icon + '"></i>'
+        + '</div>'
+        + '<div class="crc-step-meta">'
+          + '<div class="crc-step-counter">Step ' + (cur + 1) + ' of ' + total + '</div>'
+          + '<div class="crc-step-title">' + step.title + '</div>'
+        + '</div>'
+        + '<span class="crc-step-pri-badge" style="background:' + pri.bg + ';color:' + pri.color + ';border:1px solid ' + pri.border + '">'
+          + '<i class="fas ' + pri.icon + '"></i> ' + pri.label
+        + '</span>'
+      + '</div>'
+
+      /* AI insight callout */
+      + '<div class="crc-ai-callout">'
+        + '<i class="fas fa-brain crc-ai-icon"></i>'
+        + '<div class="crc-ai-text">' + step.aiInsight + '</div>'
+      + '</div>'
+
+      /* Detail checklist */
+      + '<div class="crc-details">' + detailsHTML + '</div>'
+
+      /* Mark complete toggle */
+      + '<div class="crc-mark-row">'
+        + '<label class="crc-mark-label">'
+          + '<input type="checkbox" class="crc-mark-check" '
+          + (isStepDone ? 'checked' : '')
+          + ' onchange="_crcToggleStep(\'' + claimId + '\',\'' + step.id + '\',this.checked)">'
+          + '<span>' + step.checkLabel + '</span>'
+        + '</label>'
+        + '<button class="crc-action-btn" onclick="' + step.actionFn + '">'
+          + '<i class="fas fa-bolt"></i> ' + step.actionLabel
+        + '</button>'
+      + '</div>'
+    + '</div>'
+
+    /* ── Completed steps chips ── */
+    + doneChipsHTML
+
+    /* ── Navigation ── */
+    + '<div class="crc-nav">'
+      + '<button class="crc-nav-btn ghost" ' + (cur === 0 ? 'disabled' : '') + ' onclick="_crcGoTo(\'' + claimId + '\',' + (cur - 1) + ')">'
+        + '<i class="fas fa-arrow-left"></i> Previous'
+      + '</button>'
+      + '<span class="crc-nav-label">' + (cur + 1) + ' / ' + total + '</span>'
+      + '<button class="crc-nav-btn primary" ' + (cur === total - 1 ? 'disabled' : '') + ' onclick="_crcGoTo(\'' + claimId + '\',' + (cur + 1) + ')">'
+        + 'Next <i class="fas fa-arrow-right"></i>'
+      + '</button>'
+    + '</div>'
+  + '</div>';
+}
+
+/* ── Copilot control functions ───────────────────────────────── */
+function _crcGoTo(claimId, stepIdx) {
+  var state = window._copilotState[claimId];
+  if (!state) return;
+  state.currentStep = stepIdx;
+  _crcRefresh(claimId);
+}
+
+function _crcToggleStep(claimId, stepId, checked) {
+  var state = window._copilotState[claimId];
+  if (!state) return;
+  var idx = state.completedSteps.indexOf(stepId);
+  if (checked && idx === -1) {
+    state.completedSteps.push(stepId);
+    // Auto-advance to next step if not on last
+    if (state.currentStep < state.steps.length - 1) {
+      setTimeout(function() {
+        state.currentStep = state.currentStep + 1;
+        _crcRefresh(claimId);
+      }, 400);
+      return;
+    }
+  } else if (!checked && idx !== -1) {
+    state.completedSteps.splice(idx, 1);
+  }
+  _crcRefresh(claimId);
+}
+
+function _crcToggle(claimId) {
+  var panel = document.getElementById('crc-panel-' + claimId);
+  if (!panel) return;
+  var body  = panel.querySelector('.crc-rail, .crc-step-card, .crc-done-chips, .crc-nav');
+  var btn   = panel.querySelector('.crc-collapse-btn i');
+  var state = window._copilotState[claimId];
+  state.collapsed = !state.collapsed;
+  panel.querySelectorAll('.crc-rail, .crc-step-card, .crc-done-chips, .crc-nav').forEach(function(el) {
+    el.style.display = state.collapsed ? 'none' : '';
+  });
+  if (btn) {
+    btn.className = state.collapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+  }
+}
+
+function _crcRefresh(claimId) {
+  var oldPanel = document.getElementById('crc-panel-' + claimId);
+  if (!oldPanel) return;
+  var newHTML = _crcRenderPanel(claimId);
+  var tmp = document.createElement('div');
+  tmp.innerHTML = newHTML;
+  var newPanel = tmp.firstElementChild;
+  // Preserve collapsed state
+  if (window._copilotState[claimId].collapsed) {
+    newPanel.querySelectorAll('.crc-rail, .crc-step-card, .crc-done-chips, .crc-nav').forEach(function(el) {
+      el.style.display = 'none';
+    });
+    var btn = newPanel.querySelector('.crc-collapse-btn i');
+    if (btn) btn.className = 'fas fa-chevron-down';
+  }
+  oldPanel.parentNode.replaceChild(newPanel, oldPanel);
+}
+
+/* ── IIFE — patch renderClaimModal to inject Copilot ────────────
+   Prepends the copilot panel inside .p7cm-ci-sections using
+   insertAdjacentHTML('afterbegin', ...).  Initialises state on
+   first render; subsequent renders re-use existing state so user
+   progress is preserved across tab switches.
+   ─────────────────────────────────────────────────────────────── */
+(function() {
+  var _prevRender = window.renderClaimModal;
+  window.renderClaimModal = function(claimId, tab) {
+    _prevRender(claimId, tab);
+    if (tab !== 'ci') return;
+    setTimeout(function() {
+      var ciSections = document.querySelector('.p7cm-ci-sections');
+      if (!ciSections) return;
+      // Remove any stale panel (tab re-render)
+      var existing = document.getElementById('crc-panel-' + claimId);
+      if (existing) existing.remove();
+      // Initialise state if first time for this claim
+      if (!window._copilotState[claimId]) {
+        window._copilotState[claimId] = {
+          currentStep:    0,
+          completedSteps: [],
+          collapsed:      false,
+          steps:          _crcBuildSteps(claimId)
+        };
+      }
+      // Re-use steps (already built) but rebuild on fresh render
+      window._copilotState[claimId].steps = _crcBuildSteps(claimId);
+      var panelHTML = _crcRenderPanel(claimId);
+      ciSections.insertAdjacentHTML('afterbegin', panelHTML);
+    }, 30);
+  };
+})();
+
+console.log('Pass 30 — Claims Review Copilot module loaded');
