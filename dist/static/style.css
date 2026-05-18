@@ -3113,6 +3113,7 @@ body {
 .pm-client-avatar.ca-mg  { background: linear-gradient(135deg, #dc2626, #f87171); }
 .pm-client-avatar.ca-kp  { background: linear-gradient(135deg, #0891b2, #06b6d4); }
 .pm-client-avatar.ca-lm  { background: linear-gradient(135deg, #c026d3, #e879f9); }
+.pm-client-avatar.ca-ar  { background: linear-gradient(135deg, #047857, #10b981); }
 .pm-client-name { font-size: 14px; font-weight: 700; color: var(--gray-900); }
 .pm-client-sub  { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
 
@@ -19074,6 +19075,7 @@ kbd {
 .client-avatar-lg.ca-mg { background: linear-gradient(135deg, #dc2626, #f87171); }
 .client-avatar-lg.ca-kp { background: linear-gradient(135deg, #0891b2, #06b6d4); }
 .client-avatar-lg.ca-lm { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+.client-avatar-lg.ca-ar { background: linear-gradient(135deg, #047857, #10b981); }
 
 /* Success toast for Add Client */
 .acm-toast {
@@ -32233,7 +32235,8 @@ kbd {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ── KPI Bar ── */

@@ -75,6 +75,7 @@ const mockClients = [
   { id: 6, name: 'Maria Gonzalez', age: 48, email: 'maria.g@email.com', phone: '(917) 555-0106', policies: 3, premium: 14600, status: 'Active', segment: 'High Value', lastContact: '2026-04-06', city: 'New York', score: 91 },
   { id: 7, name: 'Kevin Park', age: 29, email: 'kevin.p@email.com', phone: '(212) 555-0107', policies: 1, premium: 1800, status: 'Pending', segment: 'Emerging', lastContact: '2026-04-01', city: 'Jersey City', score: 65 },
   { id: 8, name: 'Linda Morrison', age: 56, email: 'linda.m@email.com', phone: '(718) 555-0108', policies: 5, premium: 32000, status: 'Active', segment: 'Premium', lastContact: '2026-04-09', city: 'Long Island', score: 98 },
+  { id: 9, name: 'Alex Rivera', age: 32, email: 'alex.rivera@deloitte.com', phone: '(212) 555-0109', policies: 1, premium: 4800, status: 'Active', segment: 'Emerging', lastContact: '2026-04-12', city: 'New York', score: 84 },
 ]
 
 // Full product holdings per client across all 4 domains
@@ -163,7 +164,7 @@ const clientProducts: Record<number, {
   },
   8: { // Linda Morrison
     insurance: [
-      { id: 'P-100360', product: 'Whole Life Insurance', type: 'Permanent', premium: 12000, faceValue: '$2M', status: 'Active', since: '2015' },
+      { id: 'P-100330', product: 'Whole Life Insurance', type: 'Permanent', premium: 12000, faceValue: '$2M', status: 'Active', since: '2015' },
       { id: 'P-100361', product: 'Long-term Care Insurance', type: 'LTC', premium: 7200, faceValue: '$300K', status: 'Active', since: '2019' },
       { id: 'P-100362', product: 'Variable Universal Life', type: 'VUL', premium: 9600, faceValue: '$1.5M', status: 'Active', since: '2021' },
     ],
@@ -177,6 +178,20 @@ const clientProducts: Record<number, {
     advisory: [
       { id: 'A-300201', product: 'Unified Managed Account', type: 'UMA — Discretionary', value: '$280K AUM', fee: '$2,800/yr (1%)', status: 'Active', since: '2022' },
       { id: 'A-300202', product: 'Estate Planning', type: 'Trust + Will + POA', value: '$2M+ estate', fee: 'Included', status: 'Active', since: '2020' },
+    ],
+  },
+  9: { // Alex Rivera
+    insurance: [
+      { id: 'P-100360', product: 'Whole Life Insurance', type: 'Permanent', premium: 4800, faceValue: '$500K', status: 'Active', since: '2026' },
+    ],
+    investments: [
+      { id: 'IA-AR-001', product: 'Mutual Funds', type: 'MainStay Growth', value: '$80K AUM', return: '+9.8% YTD', status: 'Active', since: '2026' },
+    ],
+    retirement: [
+      { id: 'ANN-AR-001', product: 'Deferred Annuity', type: 'GFIA', value: '$50K premium', income: 'Est. $1,100/mo @ 65', status: 'Active', since: '2026' },
+    ],
+    advisory: [
+      { id: 'ADV-AR-001', product: 'Financial Planning', type: 'Advisory', value: 'In Progress', fee: '$1,200/yr', status: 'Active', since: '2026' },
     ],
   },
 }
@@ -2103,6 +2118,7 @@ const clientDomains: Record<number, { ins: boolean; inv: boolean; ret: boolean; 
   6: { ins: true,  inv: true,  ret: true,  adv: false, aum: '$95K',     gaps: ['Advisory / Estate'] },
   7: { ins: true,  inv: false, ret: false, adv: false, aum: undefined,  gaps: ['Multiple — new client'] },
   8: { ins: true,  inv: true,  ret: true,  adv: true,  aum: '$280K',    gaps: [] },
+  9: { ins: true,  inv: true,  ret: true,  adv: true,  aum: '$80K',     gaps: ['Disability Insurance'] },
 }
 
 function ClientsPage() {
