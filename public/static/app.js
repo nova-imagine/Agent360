@@ -612,6 +612,18 @@ const cmAIData = {
     revenue: '$32K/yr current; $5K+ additional advisory potential',
     segment: 'Premium',
   },
+  9: {
+    score: 84, risk: 'Low', trend: 'up',
+    insights: [
+      { icon: 'fa-exclamation-circle',   color: '#dc2626', text: '⚠ Disability insurance gap — VP-level income with no personal DI coverage' },
+      { icon: 'fa-child',                color: '#7c3aed', text: 'UTMA trust for Emily Rivera (minor beneficiary on P-100360) not yet established' },
+      { icon: 'fa-chart-line',           color: '#059669', text: 'Mutual Funds MF-360001 +9.8% YTD — systematic $500/mo plan to accelerate toward $500K AUM target' },
+      { icon: 'fa-shield-alt',           color: '#0891b2', text: 'Whole Life P-100360 cash value building — review conversion options at 5-yr mark (2031)' },
+    ],
+    nba: 'Present Disability Income quote ($5K/mo) + establish UTMA trust for Emily Rivera',
+    revenue: '$2,400/yr DI potential + UTMA advisory fee',
+    segment: 'Emerging',
+  },
 };
 
 // ── Timeline per client ───────────────────────────────────────
@@ -664,6 +676,14 @@ const cmTimeline = {
     { date: 'Mar 20, 2026', icon: 'fa-chart-line',      color: '#059669', event: 'UMA account rebalanced — +12.1% YTD confirmed' },
     { date: 'Feb 15, 2026', icon: 'fa-calendar',        color: '#f59e0b', event: 'Annual review meeting — all 5 policies + UMA reviewed' },
     { date: 'Jan 05, 2026', icon: 'fa-landmark',        color: '#7c3aed', event: 'Estate planning: trust amendment executed' },
+  ],
+  9: [
+    { date: 'Apr 12, 2026', icon: 'fa-phone',           color: '#0891b2', event: 'Phone call — onboarding check-in, positive client experience' },
+    { date: 'Apr 08, 2026', icon: 'fa-file-contract',   color: '#003087', event: 'Policy P-100360 Whole Life $500K issued — first annual premium $4,800' },
+    { date: 'Apr 08, 2026', icon: 'fa-chart-line',      color: '#059669', event: 'Investment account IA-AR-001 funded — $80K Mutual Funds MF-360001' },
+    { date: 'Apr 05, 2026', icon: 'fa-piggy-bank',      color: '#f59e0b', event: 'Deferred Annuity ANN-AR-001 GFIA established — $50K premium' },
+    { date: 'Mar 25, 2026', icon: 'fa-robot',           color: '#7c3aed', event: 'AI: Disability insurance gap identified — $120K income with no DI coverage' },
+    { date: 'Feb 26, 2026', icon: 'fa-calendar',        color: '#0891b2', event: 'Discovery meeting — full financial planning engagement initiated, referred by Robert Chen' },
   ],
 };
 
@@ -835,6 +855,7 @@ const cmProfileExt = {
   6: { household: 'Divorced, 2 children (adult)', occupation: 'Hospital Administrator', income: '$210K/yr', netWorth: '$1.3M', lifeStage: 'Pre-Retirement', nps: 94, nextMeeting: 'Apr 15, 2026 — Estate + UMA Annual Review', preferredChannel: 'In-person', preferredTime: 'Mornings', referredBy: 'Robert Chen', referrals: 2 },
   7: { household: 'Single', occupation: 'UX Designer', income: '$98K/yr', netWorth: '$95K', lifeStage: 'Early Career', nps: 76, nextMeeting: 'Apr 17, 2026 — Application Follow-up', preferredChannel: 'Text/App', preferredTime: 'Evenings', referredBy: 'David Thompson', referrals: 0 },
   8: { household: 'Married, 3 children (adult)', occupation: 'Retired CFO', income: '$290K/yr', netWorth: '$5.8M', lifeStage: 'Wealth Preservation', nps: 98, nextMeeting: 'Apr 15, 2026 — Annual Review + LTC Gap', preferredChannel: 'In-person', preferredTime: 'Mornings', referredBy: 'Direct', referrals: 4 },
+  9: { household: 'Single, 1 daughter (Emily, age 4)', occupation: 'VP Technology, Deloitte', income: '$120K/yr', netWorth: '$195K', lifeStage: 'Emerging Professional', nps: 84, nextMeeting: 'Oct 01, 2026 — 6-Month Review + DI Quote', preferredChannel: 'Text/App', preferredTime: 'Evenings', referredBy: 'Robert Chen', referrals: 0 },
 };
 
 function _cmOverview(client) {
@@ -972,6 +993,7 @@ const cmFinancialData = {
   6: { netWorth:1300000, assets:[{label:'Real Estate',val:650000},{label:'Annuities',val:280000},{label:'Investments',val:190000},{label:'Cash',val:180000}], liabilities:[{label:'Mortgage',val:-210000},{label:'Other',val:-30000}], coverageRatio:82, premiumToIncome:4.2, deathBenefit:600000, ltcCoverage:0, disabilityGap:false, emergencyFund:'10 months', taxBracket:'32%', estateValue:'$1.3M', willStatus:'Current', trustStatus:'None' },
   7: { netWorth:95000, assets:[{label:'Savings',val:52000},{label:'Roth IRA',val:28000},{label:'401(k)',val:15000}], liabilities:[{label:'Student Loans',val:-68000},{label:'Auto',val:-12000}], coverageRatio:28, premiumToIncome:1.8, deathBenefit:250000, ltcCoverage:0, disabilityGap:true, emergencyFund:'3 months', taxBracket:'22%', estateValue:'$95K', willStatus:'None', trustStatus:'None' },
   8: { netWorth:5800000, assets:[{label:'Investment Portfolio',val:2200000},{label:'Real Estate',val:1800000},{label:'Annuities/UMA',val:1100000},{label:'Cash/Alt',val:700000}], liabilities:[{label:'Mortgage',val:-180000},{label:'Other',val:-20000}], coverageRatio:95, premiumToIncome:9.9, deathBenefit:3500000, ltcCoverage:300000, disabilityGap:false, emergencyFund:'24+ months', taxBracket:'37%', estateValue:'$5.8M', willStatus:'Current', trustStatus:'Active (2 Trusts)' },
+  9: { netWorth:195000, assets:[{label:'Mutual Funds (MF-360001)',val:80000},{label:'GFIA Annuity',val:50000},{label:'401(k)',val:48000},{label:'Cash/Savings',val:22000}], liabilities:[{label:'Auto Loan',val:-5000}], coverageRatio:52, premiumToIncome:4, deathBenefit:500000, ltcCoverage:0, disabilityGap:true, emergencyFund:'3 months', taxBracket:'22%', estateValue:'$195K', willStatus:'None', trustStatus:'None' },
 };
 
 function _cmFinancial(client) {
@@ -1046,6 +1068,7 @@ const cmGoalsData = {
   6: { lifeStage:'Pre-Retirement', goals:[{icon:'fa-beach',label:'Retire at 62 (14 mo)',prog:88,target:'$1.5M income assets',current:'$1.32M',due:'2027'},{icon:'fa-landmark',label:'Estate Planning Complete',prog:65,target:'Trust + Will',current:'Will done',due:'2026'},{icon:'fa-chart-pie',label:'Annuity Ladder Strategy',prog:30,target:'$95K ladder',current:'In discussion',due:'2026'},{icon:'fa-umbrella',label:'LTC Planning',prog:10,target:'$300K coverage',current:'No LTC policy',due:'2026'}], milestones:[{icon:'fa-calendar-check',label:'Annual review meeting',date:'Apr 15, 2026',type:'meeting'},{icon:'fa-file-medical-alt',label:'Claim CLM-2026-0035 resolve',date:'May 2026',type:'policy'},{icon:'fa-piggy-bank',label:'Annuity maturity date',date:'Oct 2026',type:'financial'}] },
   7: { lifeStage:'Early Career', goals:[{icon:'fa-shield-alt',label:'Close Term Life $500K',prog:80,target:'$500K Term',current:'Pending signature',due:'2026'},{icon:'fa-piggy-bank',label:'Max Roth IRA',prog:40,target:'$7K/yr',current:'$2.8K contributed',due:'Dec 2026'},{icon:'fa-home',label:'Save for Home Down Payment',prog:22,target:'$80K',current:'$17K saved',due:'2028'},{icon:'fa-graduation-cap',label:'Pay Off Student Loans',prog:18,target:'$68K',current:'$12K paid',due:'2030'}], milestones:[{icon:'fa-pen-fancy',label:'E-signature deadline',date:'Apr 15, 2026',type:'urgent'},{icon:'fa-birthday-cake',label:'30th Birthday',date:'Aug 2026',type:'family'},{icon:'fa-medal',label:'1-year policy anniversary',date:'2027',type:'policy'}] },
   8: { lifeStage:'Wealth Preservation', goals:[{icon:'fa-landmark',label:'Legacy & Estate',prog:90,target:'Trust + 2 trusts active',current:'Complete',due:'Done'},{icon:'fa-umbrella',label:'LTC Coverage Gap',prog:35,target:'$600K LTC',current:'$300K policy',due:'2026'},{icon:'fa-chart-line',label:'UMA Growth Target',prog:78,target:'$350K AUM',current:'$280K',due:'2027'},{icon:'fa-star',label:'Referral Program',prog:80,target:'5 referrals/yr',current:'4 given',due:'Dec 2026'}], milestones:[{icon:'fa-calendar-check',label:'Annual review',date:'Apr 15, 2026',type:'meeting'},{icon:'fa-medal',label:'Policy P-100360 Anniversary',date:'Jun 2026',type:'policy'},{icon:'fa-landmark',label:'Trust review — attorney',date:'Sep 2026',type:'financial'}] },
+  9: { lifeStage:'Emerging Professional', goals:[{icon:'fa-shield-alt',label:'Family Protection (Emily)',prog:60,target:'$750K death benefit',current:'$500K WL P-100360',due:'2027'},{icon:'fa-heartbeat',label:'Disability Income Coverage',prog:0,target:'$5K/mo DI benefit',current:'Not started — critical gap',due:'2026'},{icon:'fa-chart-line',label:'Investment AUM $500K',prog:16,target:'$500K by age 45',current:'$80K funded',due:'2039'},{icon:'fa-piggy-bank',label:'Emergency Fund — 6 months',prog:75,target:'$60K',current:'~$45K saved',due:'2026'}], milestones:[{icon:'fa-calendar-check',label:'6-month review meeting',date:'Oct 01, 2026',type:'meeting'},{icon:'fa-child',label:'Establish UTMA trust for Emily',date:'Q3 2026',type:'financial'},{icon:'fa-medal',label:'WL Policy P-100360 anniversary',date:'Apr 2027',type:'policy'}] },
 };
 
 function _cmGoals(client) {
@@ -1195,6 +1218,7 @@ const cmReferralsData = {
   6: { givenTo:[{name:'Kevin Park', product:'Term Life', date:'Jan 2025', status:'In Progress'},{name:'Alex Rivera', product:'Investments', date:'Nov 2025', status:'In Progress'}], receivedFrom:{name:'Robert Chen', date:'2017'}, potentialRefs:[{name:'Sister',reason:'Pre-retirement planning'},{name:'Neighbor',reason:'Estate planning interest'}] },
   7: { givenTo:[], receivedFrom:{name:'David Thompson', date:'2026'}, potentialRefs:[{name:'Roommate',reason:'Young professional, no coverage'},{name:'Work friend',reason:'Tech worker, similar profile'}] },
   8: { givenTo:[{name:'James Whitfield', product:'Estate Planning', date:'Jan 2019', status:'Converted'},{name:'Robert Chen', product:'Business Advisory', date:'Jun 2020', status:'Converted'},{name:'Sandra Williams', product:'Annuity', date:'Apr 2023', status:'In Progress'},{name:'Maria Gonzalez', product:'Advisory Services', date:'Sep 2024', status:'Converted'}], receivedFrom:{name:'Direct', date:'2015'}, potentialRefs:[{name:'Golf club member (Attorney)',reason:'Estate planning gap'},{name:'Neighbor (Doctor)',reason:'High-income, coverage review'},{name:'Former colleague (Exec)',reason:'NQDC plan opportunity'}] },
+  9: { givenTo:[], receivedFrom:{name:'Robert Chen', date:'Feb 2026'}, potentialRefs:[{name:'Colleague at Deloitte (Senior Manager)',reason:'Similar profile — VP-level, no life insurance identified'},{name:'Sister (Emily\'s aunt)',reason:'Young family, coverage gap likely'}] },
 };
 
 function _cmReferrals(client) {
@@ -1547,6 +1571,15 @@ const cmIntelData = {
     dataSource:'Experian · ATTOM Data · Citi Private Bank · Raymond James',
     lastRefreshed:'Apr 11, 2026'
   },
+  9: {
+    demographics: { age:32, maritalStatus:'Single (co-parenting — 1 daughter Emily, age 4)', dependents:'1 (Emily Rivera, minor)', education:'BS Information Systems — NYU Stern', ethnicity:'—', language:'English / Spanish', homeOwnership:'Renter', yearsAtAddress:2, vehiclesOwned:1, creditScore:724, creditTier:'Good', politicalAffiliation:'—' },
+    behavioral: { socialMedia:['LinkedIn (active)','Instagram'], onlineShopping:'High', loyaltyPrograms:['Chase Sapphire Preferred','Delta SkyMiles Gold'], travelFrequency:'3–4 trips/yr', charitableGiving:'$1.8K/yr', hobbies:['Cycling','Cooking','Tech meetups','Parenting'], autoRenewalTendency:'High (digital-first)', responseChannel:'Text/App', avgResponseTime:'<2 hrs' },
+    banking: { primaryBank:'Chase', checking:[{acct:'Chase Sapphire Checking',est_bal:'$18K avg'}], savings:[{acct:'Ally Online HYSA',est_bal:'$32K'},{acct:'Chase Savings',est_bal:'$13K'}], cds:[], otherProducts:['Chase Sapphire Preferred Visa','No student loans — paid off 2024','Tesla Model Y auto loan ($18K remaining)'] },
+    realEstate: { primaryHome:null, secondHome:null, note:'Renting — 1BR in Midtown Manhattan, NY. Est. rent $3,400/mo. Building equity through investments vs. real estate.' },
+    investments: { retirement:[{type:'401(k)',provider:'Fidelity',balance:'$48K',allocation:'Target Date 2058 (auto)',employer:'Deloitte'},{type:'Roth IRA',provider:'Fidelity',balance:'$12K',allocation:'90% equity / 10% bond'}], taxable:[{type:'Mutual Funds (MF-360001)',provider:'NYL Investments',balance:'$80K',allocation:'MainStay Growth — diversified equity'},{type:'GFIA Deferred Annuity',provider:'NYL',balance:'$50K',allocation:'Guaranteed 4.8% crediting rate'}], pension:null, socialSecurity:{estimatedAt62:'$1,950/mo',estimatedAtFRA:'$2,600/mo'} },
+    dataSource:'Experian · Fidelity NetBenefits · NYL PolicyLink · LinkedIn',
+    lastRefreshed:'Apr 12, 2026'
+  },
 };
 
 function _cmIntel(client) {
@@ -1868,6 +1901,23 @@ const cmPlanningData = {
       { id:'pp-8-1', product:'LTC Enhancement Rider $300K add-on', type:'ltc', premium:'$8,400/yr', commission:'$2,520', rationale:'Doubles LTC coverage to $600K. Existing carrier — simplified underwriting.', suitScore:93, linked:true },
       { id:'pp-8-2', product:'Survivorship Whole Life $2M (ILIT)', type:'wl', premium:'$22,000/yr', commission:'$12,100', rationale:'ILIT-owned — removes $2M from taxable estate. Children are beneficiaries.', suitScore:89, linked:true },
       { id:'pp-8-3', product:'Charitable Remainder Trust + COLI', type:'wl', premium:'Trust-funded', commission:'$15,000+', rationale:'Structured giving — CRT funds charitable legacy, COLI replaces asset for heirs.', suitScore:82, linked:false },
+    ]
+  },
+  9: {
+    lifeStage:'Emerging Professional — Foundation Building', riskTolerance:'Moderate', planningHorizon:'33 yrs to retirement (65)',
+    needsAnalysis: [
+      { category:'Disability Income', priority:'Critical', need:'VP Technology earning $120K/yr with NO personal DI. Only employer STD (60-day). A disability event would be financially devastating with minor dependent (Emily).', gap:true },
+      { category:'Life / Child Protection', priority:'High', need:'WL $500K in place — good start. Consider additional term coverage to bring total to $750K–$1M for full income replacement during Emily\'s minority years.', gap:true },
+      { category:'UTMA Trust for Emily', priority:'High', need:'Emily Rivera is minor beneficiary on P-100360. No UTMA/custodial trust established. Funds would pass through probate without proper trust designation.', gap:true },
+      { category:'Emergency Fund', priority:'Medium', need:'~$45K saved (~3 months income). Target 6 months ($60K). On track — complete by Q4 2026.', gap:false },
+      { category:'Retirement Accumulation', priority:'Medium', need:'401(k) + Roth IRA + GFIA Annuity — solid diversified start. Systematic investment plan ($500/mo) will accelerate growth.', gap:false },
+      { category:'Long-Term Care', priority:'Low', need:'Age 32 — too early for LTC. Schedule initial conversation at age 45.', gap:false },
+    ],
+    suitability: { riskProfile:'Moderate', timeHorizon:'33 years', liquidityNeeds:'Medium (single parent, NYC rent $3,400/mo)', taxSituation:'22% bracket — Roth contributions and tax-deferred annuity optimal', investorExperience:'Moderate (tech-savvy, financially engaged)', regulatoryNotes:'FINRA Reg BI compliant. Suitability score: 86/100 ✓', productRestrictions:'Digital-first delivery preferred; avoid complex products at this stage' },
+    proposedProducts: [
+      { id:'pp-9-1', product:'Disability Income — $5,000/mo benefit (own-occ)', type:'di', premium:'$2,400/yr', commission:'$720', rationale:'Critical gap — protects $120K VP Technology salary. Own-occupation definition essential for tech role. Covers Emily\'s upbringing if Alex is disabled.', suitScore:97, linked:true },
+      { id:'pp-9-2', product:'Term Life 20-yr $500K (supplemental)', type:'term', premium:'$420/yr', commission:'$50', rationale:'Supplements WL P-100360 to bring total DB to $1M. Low-cost protection during Emily\'s formative years (through age 22).', suitScore:89, linked:false },
+      { id:'pp-9-3', product:'UTMA Custodial Account for Emily Rivera', type:'advisory', premium:'Advisory fee included', commission:'$0', rationale:'Establishes proper custodial account for Emily as WL beneficiary. Prevents probate. Simple setup — open now before any life event.', suitScore:94, linked:false },
     ]
   },
 };
@@ -25626,9 +25676,16 @@ function setAlertTab(btn, tab) {
 }
 
 function renderAlertList(tab) {
-  // Support both the standalone Alerts page ('alerts-list') and the
-  // Policies-tab Lapse & Alerts panel ('alert-list-col')
-  const list = document.getElementById('alerts-list') || document.getElementById('alert-list-col');
+  // Both 'alerts-list' (standalone Alerts page) and 'alert-list-col' (Policies tab)
+  // exist simultaneously in the DOM. We must pick the VISIBLE/ACTIVE one.
+  // Check if the Policies Lapse & Alerts panel is currently shown.
+  const polAlertsPanel = document.getElementById('pol-panel-alerts');
+  const isPoliciesAlertsActive = polAlertsPanel &&
+    polAlertsPanel.style.display !== 'none' &&
+    polAlertsPanel.offsetParent !== null;
+  const list = isPoliciesAlertsActive
+    ? (document.getElementById('alert-list-col') || document.getElementById('alerts-list'))
+    : (document.getElementById('alerts-list') || document.getElementById('alert-list-col'));
   if (!list) return;
   let items = alertsData;
   if (tab && tab !== 'all') items = items.filter(a => a.tags.includes(tab));
@@ -55869,6 +55926,42 @@ var advAccounts = [
       headline: 'Fund Advisory slightly underperforming — review overdue',
       summary: 'FAP-291001 is marginally behind its Morningstar Moderate benchmark by -0.2%. Review is 6 months overdue. Portfolio is well-allocated. Consider whether UMA upgrade with active management could improve returns. James has 13-year horizon — still has time to recover any underperformance.',
       actions: ['Schedule review Apr 15 — combine with IRA and VA annual meeting','Evaluate UMA upgrade — active management may close benchmark gap','Discuss shifting 5% from bonds to alternatives for better risk-adjusted returns','Confirm $7,000 annual contribution reinvestment plan']
+    }
+  },
+
+  /* ── Alex Rivera — Rep-Directed Program (Financial Planning) ── */
+  {
+    id: 'ADV-AR-001', clientId: 9, clientName: 'Alex Rivera', initials: 'AR',
+    avatarGrad: 'linear-gradient(135deg,#047857,#10b981)',
+    programType: 'Rep-Directed Program', accountNum: 'RDP-360001',
+    custodian: 'NYLIM / MainStay', openDate: 'Apr 2026', manager: 'Rep-Directed (Agent Discretion)',
+    aum: 80000, aumFmt: '$80K',
+    returnYTD: 9.8, returnYTDFmt: '+9.8%', benchmark: 'Morningstar Moderate Growth', benchmarkYTD: 8.0,
+    alpha: '+1.8%', sharpe: 1.22, fee: 1200, feePct: '1.50% flat (emerging)',
+    status: 'Active', statusCls: 'ia-status-active',
+    driftAlert: false, driftScore: 1.2, reviewDue: false,
+    lastReview: 'Apr 12, 2026', nextReview: 'Oct 01, 2026',
+    riskProfile: 'Moderate Growth', horizon: '33 years',
+    strategy: 'Rep-directed MainStay Growth mutual fund portfolio — emerging client, flat-fee financial planning engagement',
+    discretionary: false,
+    targetAlloc: { usEquity:60, intlEquity:20, fixedIncome:15, alternatives:0, cash:5 },
+    currentAlloc: { usEquity:61, intlEquity:19, fixedIncome:15, alternatives:0, cash:5 },
+    sleeves: [
+      { name:'MainStay Epoch US Equity Fund (MF-360001)', type:'Mutual Fund', value:48800, pct:61.0, ret:'+11.4%', status:'on-target', manager:'Epoch Advisors' },
+      { name:'MainStay Candriam Intl Equity', type:'Mutual Fund', value:15200, pct:19.0, ret:'+6.2%', status:'on-target', manager:'Candriam' },
+      { name:'MainStay MacKay Bond Fund', type:'Mutual Fund', value:12000, pct:15.0, ret:'+3.6%', status:'on-target', manager:'MacKay Shields' },
+      { name:'Cash / MMF', type:'Cash', value:4000, pct:5.0, ret:'+5.1%', status:'on-target', manager:'NYLIM' }
+    ],
+    rebalanceTrades: [],
+    timeline: [
+      { date:'Apr 12, 2026', event:'Onboarding call — financial planning engagement confirmed', type:'review' },
+      { date:'Apr 08, 2026', event:'Account funded — $80K initial investment in MF-360001', type:'open' },
+      { date:'Apr 05, 2026', event:'IPS established — Moderate Growth, 33-yr horizon, $500/mo SIP planned', type:'open' }
+    ],
+    aiInsights: {
+      headline: 'New emerging client — strong start, DI gap action needed',
+      summary: 'RDP-360001 opened Apr 2026 with $80K initial investment outperforming benchmark by +1.8% in first month. Alex Rivera is an ideal emerging professional client with a complete financial foundation (WL + annuity + investments). Critical next step: close disability insurance gap before any life event. UTMA trust for Emily Rivera should be established this quarter.',
+      actions: ['Present DI quote — $5K/mo own-occupation, est. $2,400/yr premium','Establish UTMA custodial account for Emily Rivera (P-100360 beneficiary)','Set up $500/mo systematic investment plan for AUM acceleration','Schedule 6-month review Oct 01, 2026']
     }
   }
 
