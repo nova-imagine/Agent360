@@ -7318,9 +7318,9 @@ function ClaimsPage() {
             </div>
             <div class="sub-case-actions">
               <button class="sub-act-btn primary" onclick="openClaimModal('CLM-2026-0025','liability')"><i class="fas fa-gavel"></i> Liability Tab</button>
-              <button class="sub-act-btn secondary" onclick="p7Toast('&lt;i class=\'fas fa-envelope\'&gt;&lt;/i&gt; Escalation letter drafted — review before sending',2800)"><i class="fas fa-paper-plane"></i> Escalate</button>
-              <button class="sub-act-btn secondary" onclick="p7Toast('&lt;i class=\'fas fa-check-circle\'&gt;&lt;/i&gt; Recovery of $250,000 recorded',2800)"><i class="fas fa-check-circle"></i> Record Recovery</button>
-              <button class="sub-act-btn ghost" onclick="p7Toast('&lt;i class=\'fas fa-times-circle\'&gt;&lt;/i&gt; Case closed — no recovery',2500)"><i class="fas fa-times-circle"></i> Close No Recovery</button>
+              <button class="sub-act-btn secondary" onclick="openSubEscalateModal('SUB-2026-001')"><i class="fas fa-paper-plane"></i> Escalate</button>
+              <button class="sub-act-btn secondary" onclick="openSubRecordRecoveryModal('SUB-2026-001',250000)"><i class="fas fa-check-circle"></i> Record Recovery</button>
+              <button class="sub-act-btn ghost" onclick="openSubCloseNoRecoveryModal('SUB-2026-001')"><i class="fas fa-times-circle"></i> Close No Recovery</button>
             </div>
           </div>
 
@@ -7346,9 +7346,9 @@ function ClaimsPage() {
             </div>
             <div class="sub-case-actions">
               <button class="sub-act-btn primary" onclick="openClaimModal('CLM-2026-0035','liability')"><i class="fas fa-gavel"></i> Liability Tab</button>
-              <button class="sub-act-btn secondary" onclick="p7Toast('&lt;i class=\'fas fa-comments\'&gt;&lt;/i&gt; Negotiation log updated',2500)"><i class="fas fa-edit"></i> Log Update</button>
-              <button class="sub-act-btn secondary" onclick="p7Toast('&lt;i class=\'fas fa-check-circle\'&gt;&lt;/i&gt; Counter-offer accepted — recovery recorded',2800)"><i class="fas fa-handshake"></i> Accept Counter</button>
-              <button class="sub-act-btn ghost" onclick="p7Toast('&lt;i class=\'fas fa-balance-scale\'&gt;&lt;/i&gt; Referred to legal for arbitration',2500)"><i class="fas fa-balance-scale"></i> Refer to Legal</button>
+              <button class="sub-act-btn secondary" onclick="openSubLogUpdateModal('SUB-2026-002')"><i class="fas fa-edit"></i> Log Update</button>
+              <button class="sub-act-btn secondary" onclick="openSubAcceptCounterModal('SUB-2026-002',38000)"><i class="fas fa-handshake"></i> Accept Counter</button>
+              <button class="sub-act-btn ghost" onclick="openSubReferLegalModal('SUB-2026-002')"><i class="fas fa-balance-scale"></i> Refer to Legal</button>
             </div>
           </div>
 
@@ -7373,9 +7373,9 @@ function ClaimsPage() {
               </div>
             </div>
             <div class="sub-case-actions">
-              <button class="sub-act-btn primary" onclick="p7Toast('&lt;i class=\'fas fa-paper-plane\'&gt;&lt;/i&gt; Demand letter drafted — SUB-2026-003 moved to Demand Sent',2800)"><i class="fas fa-paper-plane"></i> Send Demand</button>
+              <button class="sub-act-btn primary" onclick="openSubSendDemandModal('SUB-2026-003')"><i class="fas fa-paper-plane"></i> Send Demand</button>
               <button class="sub-act-btn secondary" onclick="openClaimModal('CLM-2026-0038','liability')"><i class="fas fa-gavel"></i> Review Liability</button>
-              <button class="sub-act-btn ghost" onclick="p7Toast('&lt;i class=\'fas fa-archive\'&gt;&lt;/i&gt; Case dismissed — insufficient basis',2500)"><i class="fas fa-archive"></i> Dismiss</button>
+              <button class="sub-act-btn ghost" onclick="openSubDismissModal('SUB-2026-003')"><i class="fas fa-archive"></i> Dismiss</button>
             </div>
           </div>
 

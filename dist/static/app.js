@@ -18241,8 +18241,8 @@ function openAppealModal(claimId) {
           </div>
         </div>
         <div style="display:flex;gap:8px;margin-top:16px">
-          <button class="btn btn-primary" onclick="alert('Appeal for ${claimId} submitted successfully. Reference: APP-2026-'+Math.floor(Math.random()*1000));document.getElementById('appeal-modal-overlay').remove()"><i class="fas fa-paper-plane"></i> Submit Appeal</button>
-          <button class="btn btn-ai" onclick="alert('AI drafting appeal letter…')"><i class="fas fa-robot"></i> AI Draft Letter</button>
+          <button class="btn btn-primary" onclick="submitAppealFromModal('${claimId}')"><i class="fas fa-paper-plane"></i> Submit Appeal</button>
+          <button class="btn btn-ai" onclick="aiDraftAppealLetter('${claimId}')"><i class="fas fa-robot"></i> AI Draft Letter</button>
           <button class="btn btn-outline-sm" onclick="document.getElementById('appeal-modal-overlay').remove()">Cancel</button>
         </div>
       </div>
@@ -18281,7 +18281,7 @@ function openReopenModal(claimId) {
           <textarea class="appeal-textarea" rows="3" placeholder="Describe why this claim needs to be re-opened…" style="width:100%;margin-top:4px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;resize:vertical"></textarea>
         </div>
         <div style="display:flex;gap:8px;margin-top:16px">
-          <button class="btn btn-primary" onclick="alert('Claim ${claimId} re-opened successfully. Assigned to adjuster queue.');document.getElementById('reopen-modal-overlay').remove()"><i class="fas fa-redo"></i> Re-open Claim</button>
+          <button class="btn btn-primary" onclick="confirmReopenClaim('${claimId}')"><i class="fas fa-redo"></i> Re-open Claim</button>
           <button class="btn btn-outline-sm" onclick="document.getElementById('reopen-modal-overlay').remove()">Cancel</button>
         </div>
       </div>
@@ -18333,6 +18333,209 @@ function _orig_toggleWorkbench(btn) {
   const collapsed = cards.style.display === 'none';
   cards.style.display = collapsed ? 'flex' : 'none';
   btn.innerHTML = collapsed ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PASS 24 — RESOLVED TAB: NAIC MODAL · RE-OPEN · APPEAL · REG PANEL TOGGLE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/* ── Alias: HTML calls openReopenClaimModal; function body is openReopenModal ── */
+function openReopenClaimModal(claimId) { openReopenModal(claimId); }
+
+/* ── Re-open confirm (replaces alert) ── */
+function confirmReopenClaim(claimId) {
+  var sel = document.querySelector('#reopen-modal-overlay select');
+  var reason = sel ? sel.value : 'Additional documents received after resolution';
+  var ov = document.getElementById('reopen-modal-overlay');
+  if (ov) ov.remove();
+  p7Toast('<i class="fas fa-redo"></i> Claim ' + claimId + ' re-opened · Reason: ' + reason + ' · Returned to Active queue · Adjuster notified', 5000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-envelope"></i> Re-open confirmation sent to claims supervisor · Audit trail updated', 3500);
+  }, 1800);
+}
+
+/* ── Appeal: Submit (replaces alert) ── */
+function submitAppealFromModal(claimId) {
+  var sel = document.querySelector('#appeal-modal-overlay select');
+  var grounds = sel ? sel.value.split('\u2014')[0].trim() : 'Medical Evidence';
+  var ref = 'APP-2026-' + Math.floor(Math.random() * 9000 + 1000);
+  var ov = document.getElementById('appeal-modal-overlay');
+  if (ov) ov.remove();
+  p7Toast('<i class="fas fa-paper-plane"></i> Appeal filed for ' + claimId + ' \u00b7 Grounds: ' + grounds + ' \u00b7 Reference: ' + ref, 5500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-clock"></i> Appeal under review \u00b7 Expected decision within 30 days \u00b7 Claimant notified \u00b7 Adverse action letter on hold', 4500);
+  }, 2200);
+}
+
+/* ── Appeal: AI Draft Letter (replaces alert) ── */
+function aiDraftAppealLetter(claimId) {
+  var sel = document.querySelector('#appeal-modal-overlay select');
+  var grounds = sel ? sel.value.split('\u2014')[0].trim() : 'Medical Evidence';
+  p7Toast('<i class="fas fa-robot"></i> AI drafting appeal letter for ' + claimId + ' \u00b7 Grounds: ' + grounds + ' \u00b7 Pulling claim history and policy language\u2026', 3500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-file-alt"></i> Appeal letter drafted \u00b7 Review in Documents tab before sending to DFS \u00b7 Estimated approval probability: 68%', 5000);
+  }, 2400);
+}
+
+/* ── Export Claims Performance Report (replaces alert) ── */
+function exportClaimsPerformanceReport() {
+  p7Toast('<i class="fas fa-download"></i> Generating Q2 2026 performance report \u2014 resolution times, SLA compliance, doc response rates\u2026', 3000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> Performance report ready \u00b7 PDF downloaded \u00b7 Copy sent to manager dashboard', 3500);
+  }, 2000);
+}
+
+/* ── Regulatory Reporting panel collapse / expand ── */
+function toggleRegReport(btn) {
+  var body = document.getElementById('rr-body');
+  if (!body) return;
+  var isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? '' : 'none';
+  if (btn) btn.innerHTML = isHidden ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>';
+}
+
+/* ── NAIC Form submit confirmation handler ── */
+function submitNAICForm(formType, claimRef, state, confirmMsg) {
+  var ov = document.getElementById('naic-form-overlay');
+  if (ov) ov.remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Submitting ' + formType + ' to ' + state + ' regulatory portal\u2026', 2500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> ' + confirmMsg, 6000);
+  }, 2300);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-file-alt"></i> Filing saved to claim record \u00b7 Regulatory calendar updated \u00b7 Next deadline calculated', 4000);
+  }, 5200);
+}
+
+/* ── NAIC Form Modal ── */
+function openNAICFormModal(formType, claimRef, state) {
+  var existing = document.getElementById('naic-form-overlay');
+  if (existing) existing.remove();
+
+  var formMeta = {
+    'D-3': {
+      title: 'NAIC Claim Denial Report \u2014 Form D-3',
+      icon: 'fa-times-circle',
+      iconBg: '#fef2f2', iconCol: '#dc2626', accentCol: '#dc2626',
+      headerGrad: 'linear-gradient(135deg,#7f1d1d,#991b1b)',
+      agency: 'NY Department of Financial Services',
+      deadline: '2026-04-01', status: 'PAST DUE',
+      statusBg: '#dc2626', barBg: '#fef2f2', barBorder: '#fecaca',
+      description: 'Mandatory 15-day reporting of claim denial under NY Insurance Law \u00a73420(d). Includes denial reason, policy language cited, and adverse action notice.',
+      fields: [
+        {label:'Claim ID', val:claimRef, type:'text'},
+        {label:'Policy Number', val:'P-100371', type:'text'},
+        {label:'Claimant Name', val:'Daniel Kim', type:'text'},
+        {label:'Denial Reason', val:'Pre-existing condition exclusion \u2014 disability pre-dates policy by 8 months', type:'textarea'},
+        {label:'Policy Section Cited', val:'Section 4.2(b) \u2014 Pre-Existing Condition Exclusion Rider', type:'text'},
+        {label:'Denial Date', val:'2025-12-02', type:'text'},
+        {label:'Adverse Action Notice Sent', val:'Yes \u2014 2025-12-03 via certified mail', type:'text'}
+      ],
+      submitLabel: 'Generate & File Form D-3', submitIcon: 'fa-file-signature',
+      confirmMsg: 'NAIC Form D-3 generated and filed with NY DFS \u00b7 Confirmation: DFS-2026-' + Math.floor(Math.random()*9000+1000) + ' \u00b7 Adverse action letter attached to claim record'
+    },
+    'PP-Q1': {
+      title: 'Prompt Payment Compliance Report \u2014 Q1 2026',
+      icon: 'fa-file-invoice-dollar',
+      iconBg: '#fffbeb', iconCol: '#d97706', accentCol: '#d97706',
+      headerGrad: 'linear-gradient(135deg,#78350f,#92400e)',
+      agency: 'NJ Department of Banking & Insurance',
+      deadline: '2026-04-30', status: 'PENDING',
+      statusBg: '#d97706', barBg: '#fffbeb', barBorder: '#fde68a',
+      description: 'Quarterly prompt payment compliance report \u2014 NJ P.L. 2001, c.259. Covers all resolved claims Q1 2026 and statutory payment timeframe adherence.',
+      fields: [
+        {label:'Reporting Period', val:'Q1 2026 (Jan 1 \u2013 Mar 31)', type:'text'},
+        {label:'Carrier / NPN', val:'New York Life Insurance Co. \u00b7 NPN 6814087', type:'text'},
+        {label:'Total Claims Resolved', val:'14', type:'text'},
+        {label:'Paid Within 30-Day Statutory Period', val:'13 of 14 (92.8%)', type:'text'},
+        {label:'Late Payments', val:'None \u2014 CLM-2025-0201 denied; prompt payment clock N/A', type:'text'},
+        {label:'Average Resolution Time', val:'5.2 days', type:'text'},
+        {label:'Total Benefits Paid (Q1)', val:'$146,000', type:'text'}
+      ],
+      submitLabel: 'Generate & Submit PP Report', submitIcon: 'fa-file-alt',
+      confirmMsg: 'Prompt Payment Q1 2026 report submitted to NJDBI \u00b7 Confirmation: NJDBI-2026-' + Math.floor(Math.random()*9000+1000) + ' \u00b7 No compliance violations identified'
+    },
+    'LDB-N': {
+      title: 'Large Death Benefit Notification \u2014 CLM-2026-0041',
+      icon: 'fa-paper-plane',
+      iconBg: '#eff6ff', iconCol: '#2563eb', accentCol: '#2563eb',
+      headerGrad: 'linear-gradient(135deg,#1e3a5f,#1e40af)',
+      agency: 'NY Department of Financial Services',
+      deadline: '2026-04-20', status: 'PENDING',
+      statusBg: '#2563eb', barBg: '#eff6ff', barBorder: '#bfdbfe',
+      description: 'Mandatory DFS notification for life insurance claims exceeding $500K \u2014 NY Insurance Law \u00a73209. Must be filed within 15 business days of claim receipt.',
+      fields: [
+        {label:'Claim ID', val:'CLM-2026-0041', type:'text'},
+        {label:'Insured Name', val:'Robert Chen', type:'text'},
+        {label:'Date of Death', val:'2026-03-15', type:'text'},
+        {label:'Policy Number', val:'P-100311', type:'text'},
+        {label:'Death Benefit Amount', val:'$1,000,000', type:'text'},
+        {label:'Beneficiary', val:'Margaret Chen (Spouse \u2014 Primary)', type:'text'},
+        {label:'Current Claim Status', val:'Under Review \u2014 Documentation pending', type:'text'},
+        {label:'Expected Resolution Date', val:'2026-04-25', type:'text'}
+      ],
+      submitLabel: 'File DFS Notification', submitIcon: 'fa-paper-plane',
+      confirmMsg: 'Large Death Benefit notification filed with NY DFS \u00b7 CLM-2026-0041 ($1,000,000) \u00b7 Confirmation: DFS-LDB-2026-' + Math.floor(Math.random()*9000+1000)
+    }
+  };
+
+  var f = formMeta[formType] || formMeta['D-3'];
+
+  /* Build fields rows */
+  var fieldsHtml = '';
+  for (var fi = 0; fi < f.fields.length; fi++) {
+    var fld = f.fields[fi];
+    var inputHtml;
+    if (fld.type === 'textarea') {
+      inputHtml = '<textarea style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px;color:#374151;resize:vertical;min-height:62px;font-family:inherit;box-sizing:border-box">' + fld.val + '</textarea>';
+    } else {
+      inputHtml = '<input type="text" value="' + fld.val + '" style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px;color:#374151;box-sizing:border-box">';
+    }
+    fieldsHtml += '<div style="margin-bottom:13px"><label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">' + fld.label + '</label>' + inputHtml + '</div>';
+  }
+
+  var safeConfirm = f.confirmMsg.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+  var ov = document.createElement('div');
+  ov.id = 'naic-form-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:16px;width:660px;max-width:100%;box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;max-height:90vh;display:flex;flex-direction:column">' +
+      /* ─ Header ─ */
+      '<div style="background:' + f.headerGrad + ';padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">' +
+        '<div style="display:flex;align-items:center;gap:14px">' +
+          '<div style="width:46px;height:46px;border-radius:12px;background:' + f.iconBg + ';display:flex;align-items:center;justify-content:center;color:' + f.iconCol + ';font-size:20px;flex-shrink:0"><i class="fas ' + f.icon + '"></i></div>' +
+          '<div>' +
+            '<div style="color:#f1f5f9;font-weight:700;font-size:15px;line-height:1.3">' + f.title + '</div>' +
+            '<div style="color:#94a3b8;font-size:12px;margin-top:3px">' + f.agency + ' &middot; Deadline: ' + f.deadline + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'naic-form-overlay\').remove()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px">&times;</button>' +
+      '</div>' +
+      /* ─ Status bar ─ */
+      '<div style="background:' + f.barBg + ';border-bottom:1px solid ' + f.barBorder + ';padding:10px 24px;display:flex;align-items:flex-start;gap:10px;flex-shrink:0">' +
+        '<span style="background:' + f.statusBg + ';color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.5px;white-space:nowrap;margin-top:1px">' + f.status + '</span>' +
+        '<span style="font-size:12px;color:#4b5563;line-height:1.5">' + f.description + '</span>' +
+      '</div>' +
+      /* ─ Body (scrollable) ─ */
+      '<div style="padding:22px 24px 16px;overflow-y:auto;flex:1">' +
+        '<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;display:flex;align-items:center;gap:6px"><i class="fas fa-edit" style="color:' + f.accentCol + '"></i> Review Form Fields Before Submission</div>' +
+        fieldsHtml +
+        '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 14px;margin-top:6px;font-size:12px;color:#166534;line-height:1.5">' +
+          '<i class="fas fa-shield-alt" style="margin-right:6px"></i>' +
+          '<strong>Digital Submission:</strong> This form will be signed with your NOVA agent credentials and transmitted to the state regulatory portal. A confirmed copy and reference number will be saved to the claim record and your regulatory log.' +
+        '</div>' +
+      '</div>' +
+      /* ─ Footer ─ */
+      '<div style="padding:14px 24px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;background:#f8fafc">' +
+        '<button onclick="document.getElementById(\'naic-form-overlay\').remove()" style="padding:9px 18px;border-radius:9px;border:1px solid #d1d5db;background:#fff;color:#374151;font-size:13px;cursor:pointer;font-weight:500">Cancel</button>' +
+        '<button onclick="submitNAICForm(\'' + formType + '\',\'' + claimRef + '\',\'' + state + '\',\'' + safeConfirm + '\')" style="padding:9px 22px;border-radius:9px;border:none;background:' + f.accentCol + ';color:#fff;font-size:13px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:7px"><i class="fas ' + f.submitIcon + '"></i> ' + f.submitLabel + '</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
 }
 
 // ── Claims Performance Analytics Panel toggle ───────────────────────────────
@@ -40253,10 +40456,356 @@ function toggleSTPPanel(btn) {
    SUBROGATION — SCAN & FUNCTIONS
    ═══════════════════════════════════════════════════════════════════ */
 function runSubrogationScan() {
+  var btn = document.querySelector('.sub-ai-scan-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Scanning…'; }
   p7Toast('<i class="fas fa-sync-alt fa-spin"></i> AI scanning all active claims for subrogation opportunities…', 2500);
   setTimeout(function() {
-    p7Toast('<i class="fas fa-check-circle"></i> Subrogation scan complete — 3 opportunities confirmed, no new cases identified', 3000);
-  }, 2600);
+    p7Toast('<i class="fas fa-search"></i> NLP engine cross-referencing incident reports, OSHA records and medical certificates…', 2800);
+  }, 2700);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> Scan complete — 3 active opportunities confirmed · No new cases identified · Next scan in 24h', 3500);
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt"></i> Re-Scan All Claims'; }
+  }, 5700);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SUBROGATION MODAL HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+
+function _subModalOverlay(id, html) {
+  var existing = document.getElementById(id);
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.id = id;
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)';
+  ov.innerHTML = html;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', function(e){ if (e.target === ov) ov.remove(); });
+  return ov;
+}
+
+function _subModalCSS() {
+  return 'background:#fff;border-radius:14px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);font-family:inherit';
+}
+
+function _subModalHeader(icon, title, sub, accentColor) {
+  accentColor = accentColor || '#7c3aed';
+  return '<div style="background:'+accentColor+';padding:20px 24px;border-radius:14px 14px 0 0;display:flex;align-items:center;gap:12px">'
+    +'<div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas '+icon+'"></i></div>'
+    +'<div><div style="color:#fff;font-weight:700;font-size:16px">'+title+'</div>'
+    +'<div style="color:rgba(255,255,255,0.8);font-size:12px;margin-top:2px">'+sub+'</div></div>'
+    +'<button onclick="document.getElementById(\'_subMov\').remove()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px">✕</button>'
+    +'</div>';
+}
+
+function _subField(label, content) {
+  return '<div style="margin-bottom:14px">'
+    +'<label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+label+'</label>'
+    +content+'</div>';
+}
+
+function _subInput(name, placeholder, value) {
+  value = value || '';
+  return '<input name="'+name+'" placeholder="'+placeholder+'" value="'+value+'" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">';
+}
+
+function _subSelect(name, options) {
+  var opts = options.map(function(o){ return '<option value="'+o.v+'">'+o.l+'</option>'; }).join('');
+  return '<select name="'+name+'" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;background:#fff">'+opts+'</select>';
+}
+
+function _subTextarea(name, placeholder, rows) {
+  rows = rows || 3;
+  return '<textarea name="'+name+'" placeholder="'+placeholder+'" rows="'+rows+'" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;resize:vertical"></textarea>';
+}
+
+function _subFooter(cancelId, primaryLabel, primaryFn, primaryColor) {
+  primaryColor = primaryColor || '#7c3aed';
+  return '<div style="display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid #f1f5f9;margin-top:4px">'
+    +'<button onclick="document.getElementById(\''+cancelId+'\').remove()" style="padding:9px 20px;border:1.5px solid #e2e8f0;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#475569">Cancel</button>'
+    +'<button onclick="'+primaryFn+'" style="padding:9px 20px;background:'+primaryColor+';color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">'+primaryLabel+'</button>'
+    +'</div>';
+}
+
+/* --- SUB-2026-001: ESCALATE ---------------------------------------- */
+function openSubEscalateModal(caseId) {
+  var ovId = '_subMov';
+  var html = '<div style="'+_subModalCSS()+'">'
+    +_subModalHeader('fa-paper-plane','Escalation — '+caseId,'Draft and send escalation letter to liable party','#dc2626')
+    +'<div style="padding:24px">'
+    +_subField('Escalation Letter Preview',
+      '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:14px;font-size:12px;line-height:1.7;color:#374151">'
+      +'<strong>RE: Subrogation Demand — '+caseId+' / CLM-2026-0025</strong><br><br>'
+      +'Dear Counsel,<br><br>'
+      +'Our records indicate that the above-referenced insured (Kevin Park) suffered a loss directly attributable to a product liability incident involving your client\'s pharmaceutical compound. '
+      +'Our initial demand of $250,000 (Reference: SUB-2026-001, dated 2026-03-15) has received no response as of today\'s date, the response deadline of 2026-04-15 having passed.<br><br>'
+      +'We hereby formally escalate this matter and reserve all rights to pursue recovery through litigation. Please respond within 14 days.'
+      +'</div>')
+    +_subField('Recipient — Opposing Counsel / Insurer',_subInput('recipient','e.g. counsel@pharmcorp-legal.com',''))
+    +_subField('Urgency Level',_subSelect('urgency',[{v:'high',l:'High — 14-day response window'},{v:'urgent',l:'Urgent — 7-day response window'},{v:'final',l:'Final Notice — litigation imminent'}]))
+    +_subField('CC Claims Supervisor',_subInput('cc','supervisor@nyl.com','supervisor@nyl.com'))
+    +_subField('Additional Notes',_subTextarea('notes','Any context to add before sending…',2))
+    +_subFooter(ovId,'Send Escalation Letter','_subSubmitEscalate(\''+caseId+'\')','#dc2626')
+    +'</div></div>';
+  _subModalOverlay(ovId, html);
+}
+
+function _subSubmitEscalate(caseId) {
+  document.getElementById('_subMov').remove();
+  p7Toast('<i class="fas fa-paper-plane"></i> Escalation letter sent — '+caseId+' · Opposing counsel notified · 14-day response window logged', 3500);
+  setTimeout(function(){
+    p7Toast('<i class="fas fa-bell"></i> Calendar reminder set for 2026-05-18 — escalation follow-up due', 2800);
+  }, 1500);
+}
+
+/* --- SUB-2026-001: RECORD RECOVERY --------------------------------- */
+function openSubRecordRecoveryModal(caseId, amount) {
+  var ovId = '_subMov';
+  var fmt = '$'+amount.toLocaleString();
+  var html = '<div style="'+_subModalCSS()+'">'
+    +_subModalHeader('fa-check-circle','Record Recovery — '+caseId,'Confirm and post the recovered amount to the claim file','#059669')
+    +'<div style="padding:24px">'
+    +'<div style="background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:20px">'
+    +'<i class="fas fa-dollar-sign" style="font-size:28px;color:#059669"></i>'
+    +'<div><div style="font-size:22px;font-weight:800;color:#065f46">'+fmt+'</div>'
+    +'<div style="font-size:12px;color:#047857">Demand amount · CLM-2026-0025 · Kevin Park</div></div></div>'
+    +_subField('Actual Recovery Amount (USD)',_subInput('amount','Enter confirmed settlement amount',amount))
+    +_subField('Recovery Date',_subInput('recDate','YYYY-MM-DD','2026-05-18'))
+    +_subField('Recovery Method',_subSelect('method',[{v:'wire',l:'Wire Transfer'},{v:'check',l:'Certified Check'},{v:'ach',l:'ACH Transfer'},{v:'settlement',l:'Settlement Agreement'}]))
+    +_subField('Received From',_subInput('from','Liable party / insurer name','Pharmcorp Liability Insurer'))
+    +_subField('Reference / Cheque Number',_subInput('ref','Bank reference or cheque number',''))
+    +_subField('Notes',_subTextarea('notes','Any conditions, partial payments, or caveats…',2))
+    +_subFooter(ovId,'Post Recovery','_subSubmitRecovery(\''+caseId+'\')','#059669')
+    +'</div></div>';
+  _subModalOverlay(ovId, html);
+}
+
+function _subSubmitRecovery(caseId) {
+  var amtEl = document.querySelector('#_subMov input[name="amount"]');
+  var amt = amtEl ? '$'+Number(amtEl.value).toLocaleString() : '$250,000';
+  document.getElementById('_subMov').remove();
+  p7Toast('<i class="fas fa-check-circle"></i> Recovery of '+amt+' posted — '+caseId+' · Case marked Recovered · Ledger updated', 3500);
+  setTimeout(function(){
+    p7Toast('<i class="fas fa-file-invoice-dollar"></i> Recovery report generated · Finance team notified · YTD recovery balance updated', 3000);
+  }, 1800);
+}
+
+/* --- SUB-2026-001: CLOSE NO RECOVERY ------------------------------- */
+function openSubCloseNoRecoveryModal(caseId) {
+  var ovId = '_subMov';
+  var html = '<div style="'+_subModalCSS()+'">'
+    +_subModalHeader('fa-times-circle','Close — No Recovery · '+caseId,'Record the closure reason and archive this subrogation case','#64748b')
+    +'<div style="padding:24px">'
+    +'<div style="background:#fef9c3;border:1.5px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:13px;color:#78350f;margin-bottom:20px">'
+    +'<i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>'
+    +'Closing with no recovery is irreversible. This case will be archived and removed from the active pipeline.</div>'
+    +_subField('Closure Reason',_subSelect('reason',[
+      {v:'no_basis',l:'Insufficient liability basis after review'},
+      {v:'no_response',l:'No response — statute of limitations reached'},
+      {v:'settled_low',l:'Settlement amount below pursuit threshold'},
+      {v:'dropped',l:'Liable party dissolved / uninsured'},
+      {v:'counsel',l:'Legal counsel advised abandonment'},
+      {v:'other',l:'Other — see notes'}]))
+    +_subField('Adjuster Sign-Off',_subInput('adjuster','Your name / employee ID',''))
+    +_subField('Supervisor Approval (if required)',_subInput('supervisor','Supervisor name or email',''))
+    +_subField('Closure Notes',_subTextarea('notes','Document the reason and any relevant context for audit trail…',3))
+    +_subFooter(ovId,'Close Case — No Recovery','_subSubmitCloseNoRecovery(\''+caseId+'\')','#dc2626')
+    +'</div></div>';
+  _subModalOverlay(ovId, html);
+}
+
+function _subSubmitCloseNoRecovery(caseId) {
+  document.getElementById('_subMov').remove();
+  p7Toast('<i class="fas fa-times-circle"></i> '+caseId+' closed — No Recovery · Case archived · Audit trail logged', 3000);
+  setTimeout(function(){
+    p7Toast('<i class="fas fa-chart-bar"></i> Pipeline updated · Recovery rate recalculated · Supervisor notified', 2800);
+  }, 1500);
+}
+
+/* --- SUB-2026-002: LOG UPDATE -------------------------------------- */
+function openSubLogUpdateModal(caseId) {
+  var ovId = '_subMov';
+  var html = '<div style="'+_subModalCSS()+'">'
+    +_subModalHeader('fa-edit','Negotiation Log — '+caseId,'Record a new negotiation entry for the case file','#0ea5e9')
+    +'<div style="padding:24px">'
+    +'<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:8px;padding:12px 16px;font-size:12px;color:#0369a1;margin-bottom:20px">'
+    +'<strong>Last entry:</strong> 2026-04-08 · Employer counsel counter-offered $38,000 · Response pending</div>'
+    +_subField('Entry Type',_subSelect('type',[
+      {v:'counter',l:'Counter-offer received'},
+      {v:'call',l:'Phone call / conference'},
+      {v:'email',l:'Email correspondence'},
+      {v:'meeting',l:'In-person / video meeting'},
+      {v:'offer',l:'Our offer sent'},
+      {v:'other',l:'Other'}]))
+    +_subField('Contact / Party',_subInput('contact','Name and role of person contacted','Employer counsel — J. Hartman, Esq.'))
+    +_subField('Counter-Offer Amount (if applicable)',_subInput('counter','Leave blank if N/A',''))
+    +_subField('Our Position / Response',_subSelect('position',[
+      {v:'reviewing',l:'Under review — no response yet'},
+      {v:'counter',l:'We countered with a new offer'},
+      {v:'accepted',l:'We accepted their offer'},
+      {v:'rejected',l:'We rejected — continuing pursuit'},
+      {v:'escalate',l:'Escalating — referral to legal'}]))
+    +_subField('Log Entry Notes',_subTextarea('notes','Summarise the conversation, agreed next steps, and any commitments made…',4))
+    +_subField('Next Follow-Up Date',_subInput('followup','YYYY-MM-DD',''))
+    +_subFooter(ovId,'Save Log Entry','_subSubmitLogUpdate(\''+caseId+'\')','#0ea5e9')
+    +'</div></div>';
+  _subModalOverlay(ovId, html);
+}
+
+function _subSubmitLogUpdate(caseId) {
+  document.getElementById('_subMov').remove();
+  p7Toast('<i class="fas fa-edit"></i> Negotiation log updated — '+caseId+' · Entry saved with timestamp · Case file refreshed', 3000);
+  setTimeout(function(){
+    p7Toast('<i class="fas fa-calendar-check"></i> Follow-up reminder scheduled · Supervisor notified of log entry', 2500);
+  }, 1500);
+}
+
+/* --- SUB-2026-002: ACCEPT COUNTER ---------------------------------- */
+function openSubAcceptCounterModal(caseId, counterAmount) {
+  var ovId = '_subMov';
+  var fmt = '$'+counterAmount.toLocaleString();
+  var html = '<div style="'+_subModalCSS()+'">'
+    +_subModalHeader('fa-handshake','Accept Counter-Offer — '+caseId,'Confirm acceptance of the counter-offer and record the settlement','#059669')
+    +'<div style="padding:24px">'
+    +'<div style="background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:10px;padding:14px 18px;margin-bottom:20px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'
+    +'<div><div style="font-size:11px;color:#047857;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Counter-Offer</div>'
+    +'<div style="font-size:26px;font-weight:800;color:#065f46">'+fmt+'</div>'
+    +'<div style="font-size:12px;color:#047857">From employer counsel · Last contact 2026-04-08</div></div>'
+    +'<div style="text-align:right"><div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Original Demand</div>'
+    +'<div style="font-size:18px;font-weight:700;color:#94a3b8;text-decoration:line-through">$50,400</div></div>'
+    +'</div></div>'
+    +_subField('Confirmed Settlement Amount (USD)',_subInput('finalAmt','Confirm or adjust',counterAmount))
+    +_subField('Settlement Terms',_subSelect('terms',[
+      {v:'full',l:'Full and final settlement — all claims waived'},
+      {v:'partial',l:'Partial settlement — remaining balance to be negotiated'},
+      {v:'structured',l:'Structured payment — instalment schedule'}]))
+    +_subField('Payment Due Date',_subInput('dueDate','YYYY-MM-DD',''))
+    +_subField('Settlement Reference',_subInput('ref','Agreement or confirmation number',''))
+    +_subField('Supervisor Authorisation',_subInput('supervisor','Name / employee ID of authorising supervisor',''))
+    +_subField('Notes',_subTextarea('notes','Any conditions attached to acceptance…',2))
+    +_subFooter(ovId,'Confirm Acceptance & Post Recovery','_subSubmitAcceptCounter(\''+caseId+'\')','#059669')
+    +'</div></div>';
+  _subModalOverlay(ovId, html);
+}
+
+function _subSubmitAcceptCounter(caseId) {
+  var amtEl = document.querySelector('#_subMov input[name="finalAmt"]');
+  var amt = amtEl ? '$'+Number(amtEl.value).toLocaleString() : '$38,000';
+  document.getElementById('_subMov').remove();
+  p7Toast('<i class="fas fa-handshake"></i> Counter-offer accepted — '+caseId+' · Settlement of '+amt+' confirmed · Recovery posted', 3500);
+  setTimeout(function(){
+    p7Toast('<i class="fas fa-file-contract"></i> Settlement agreement drafted · Finance notified · Case moving to Closed-Recovered', 3000);
+  }, 1800);
+}
+
+/* --- SUB-2026-002: REFER TO LEGAL ---------------------------------- */
+function openSubReferLegalModal(caseId) {
+  var ovId = '_subMov';
+  var html = '<div style="'+_subModalCSS()+'">'
+    +_subModalHeader('fa-balance-scale','Refer to Legal — '+caseId,'Escalate this case to the legal team for arbitration or litigation','#7c3aed')
+    +'<div style="padding:24px">'
+    +'<div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:8px;padding:12px 16px;font-size:12px;color:#5b21b6;margin-bottom:20px">'
+    +'<i class="fas fa-info-circle" style="margin-right:6px"></i>'
+    +'Legal referral will transfer case management to the NYL Legal Affairs team. You will receive updates via the Communications tab.</div>'
+    +_subField('Assigned Attorney / Legal Team',_subSelect('attorney',[
+      {v:'internal',l:'Internal — NYL Legal Affairs (General Counsel)'},
+      {v:'external_arb',l:'External — Arbitration panel (AAA)'},
+      {v:'external_lit',l:'External — Litigation counsel (Morrison & Foerster)'},
+      {v:'external_med',l:'External — Mediation services'}]))
+    +_subField('Referral Basis',_subSelect('basis',[
+      {v:'no_settle',l:'Negotiations failed — no acceptable settlement reached'},
+      {v:'disputed',l:'Liability disputed — requires legal determination'},
+      {v:'threshold',l:'Recovery amount exceeds internal authority threshold'},
+      {v:'complex',l:'Legally complex — multiple liable parties'}]))
+    +_subField('Preferred Resolution Method',_subSelect('method',[
+      {v:'arbitration',l:'Binding Arbitration'},
+      {v:'mediation',l:'Mediation / Non-binding'},
+      {v:'litigation',l:'Litigation — file suit'},
+      {v:'counsel_discretion',l:'At counsel\'s discretion'}]))
+    +_subField('Priority Level',_subSelect('priority',[{v:'normal',l:'Normal'},{v:'high',l:'High — expedite'},{v:'urgent',l:'Urgent — time-sensitive'}]))
+    +_subField('Referral Notes / Case Summary',_subTextarea('notes','Summarise negotiation history, key evidence, and recommended strategy for legal team…',4))
+    +_subFooter(ovId,'Submit Legal Referral','_subSubmitReferLegal(\''+caseId+'\')','#7c3aed')
+    +'</div></div>';
+  _subModalOverlay(ovId, html);
+}
+
+function _subSubmitReferLegal(caseId) {
+  document.getElementById('_subMov').remove();
+  p7Toast('<i class="fas fa-balance-scale"></i> '+caseId+' referred to Legal Affairs · Case file and negotiation history transferred', 3500);
+  setTimeout(function(){
+    p7Toast('<i class="fas fa-gavel"></i> Legal team notified · Docket number will be assigned within 24h · Status updated to In Litigation', 3200);
+  }, 1800);
+}
+
+/* --- SUB-2026-003: SEND DEMAND ------------------------------------- */
+function openSubSendDemandModal(caseId) {
+  var ovId = '_subMov';
+  var html = '<div style="'+_subModalCSS()+'">'
+    +_subModalHeader('fa-paper-plane','Send Demand Letter — '+caseId,'Draft and dispatch the initial subrogation demand to the liable party','#dc2626')
+    +'<div style="padding:24px">'
+    +'<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:12px 16px;font-size:12px;color:#991b1b;margin-bottom:20px">'
+    +'<i class="fas fa-robot" style="color:#7c3aed;margin-right:6px"></i>'
+    +'<strong>AI Confidence: 72%</strong> — Review liability basis carefully before sending. Once dispatched, the liable party will be formally on notice.</div>'
+    +_subField('Demand Amount (USD)',_subInput('amount','Confirmed recovery amount','11600'))
+    +_subField('Liable Party / Facility',_subInput('liable','Name and address of liable party','Care facility operator — Sunrise Memory Care, 4400 Oak Blvd'))
+    +_subField('Liability Basis Summary',_subTextarea('basis','State the specific negligence or product liability basis…','Sub-standard care documentation inconsistent with ADL assessment findings — care provider negligence contributing to condition deterioration of insured Sandra Williams.',3))
+    +_subField('Delivery Method',_subSelect('delivery',[
+      {v:'cert_mail',l:'Certified Mail (USPS)'},
+      {v:'email_cert',l:'Email with read receipt'},
+      {v:'courier',l:'Same-day courier'},
+      {v:'legal_process',l:'Via process server (if applicable)'}]))
+    +_subField('Response Deadline',_subInput('deadline','YYYY-MM-DD',''))
+    +_subField('CC Internal Counsel',_subInput('cc','Internal counsel email','legal@nyl.com'))
+    +_subField('Notes',_subTextarea('notes','Any caveats or special instructions for this demand…',2))
+    +_subFooter(ovId,'Send Demand Letter','_subSubmitSendDemand(\''+caseId+'\')','#dc2626')
+    +'</div></div>';
+  _subModalOverlay(ovId, html);
+}
+
+function _subSubmitSendDemand(caseId) {
+  var amtEl = document.querySelector('#_subMov input[name="amount"]');
+  var amt = amtEl ? '$'+Number(amtEl.value).toLocaleString() : '$11,600';
+  document.getElementById('_subMov').remove();
+  p7Toast('<i class="fas fa-paper-plane"></i> Demand letter sent — '+caseId+' · Liable party notified for '+amt+' · Status → Demand Sent', 3500);
+  setTimeout(function(){
+    p7Toast('<i class="fas fa-calendar-check"></i> Response deadline logged · Adjuster calendar updated · Case escalation reminder set', 3000);
+  }, 1800);
+}
+
+/* --- SUB-2026-003: DISMISS ----------------------------------------- */
+function openSubDismissModal(caseId) {
+  var ovId = '_subMov';
+  var html = '<div style="'+_subModalCSS()+'">'
+    +_subModalHeader('fa-archive','Dismiss Case — '+caseId,'Remove this AI-identified case from the active pipeline','#64748b')
+    +'<div style="padding:24px">'
+    +'<div style="background:#fef9c3;border:1.5px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:13px;color:#78350f;margin-bottom:20px">'
+    +'<i class="fas fa-robot" style="color:#7c3aed;margin-right:6px"></i>'
+    +'AI flagged this case at 72% confidence. Dismissal will remove it from the active pipeline. Your feedback improves future AI accuracy.</div>'
+    +_subField('Dismissal Reason',_subSelect('reason',[
+      {v:'low_confidence',l:'AI confidence too low — insufficient evidence'},
+      {v:'reviewed_no_basis',l:'Adjuster reviewed — no valid liability basis'},
+      {v:'cost_benefit',l:'Pursuit cost exceeds likely recovery'},
+      {v:'insured_objects',l:'Insured objects to subrogation pursuit'},
+      {v:'statute',l:'Statute of limitations concern'},
+      {v:'other',l:'Other — see notes'}]))
+    +_subField('AI Feedback (helps improve future scans)',_subSelect('feedback',[
+      {v:'false_positive',l:'False positive — AI incorrectly flagged'},
+      {v:'insufficient_docs',l:'Insufficient documentation to confirm'},
+      {v:'correct_dismissed',l:'Correctly identified but not worth pursuing'},
+      {v:'no_comment',l:'No feedback'}]))
+    +_subField('Adjuster Notes',_subTextarea('notes','Explain why this case is being dismissed…',3))
+    +_subFooter(ovId,'Dismiss Case','_subSubmitDismiss(\''+caseId+'\')','#64748b')
+    +'</div></div>';
+  _subModalOverlay(ovId, html);
+}
+
+function _subSubmitDismiss(caseId) {
+  document.getElementById('_subMov').remove();
+  p7Toast('<i class="fas fa-archive"></i> '+caseId+' dismissed — removed from active pipeline · Audit entry created', 3000);
+  setTimeout(function(){
+    p7Toast('<i class="fas fa-robot"></i> AI feedback recorded · Model accuracy will improve on next training cycle', 2800);
+  }, 1500);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
