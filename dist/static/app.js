@@ -9016,8 +9016,8 @@ function _eAppStep8HTML(d) {
           <div class="eapp-comp-row comp-${c.status}">
             <i class="fas ${c.status === 'pass' ? 'fa-check-circle' : c.status === 'warn' ? 'fa-exclamation-triangle' : c.status === 'na' ? 'fa-minus-circle' : 'fa-times-circle'}"></i>
             <div class="eapp-comp-info">
-              <span class="eapp-comp-name">${c.name}</span>
-              <span class="eapp-comp-detail">${c.detail}</span>
+              <span class="eapp-comp-name">${c.name || c.label}</span>
+              <span class="eapp-comp-detail">${c.detail || c.note}</span>
             </div>
             <span class="eapp-comp-badge comp-badge-${c.status}">${c.status.toUpperCase()}</span>
           </div>`).join('')}
@@ -25607,14 +25607,28 @@ function initAlertsPage() {
 }
 
 function setAlertTab(btn, tab) {
-  document.querySelectorAll('.al-tab').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  // Handle both (btnElement, tabName) and (tabName) call signatures
+  if (typeof btn === 'string' && tab === undefined) {
+    tab = btn;
+    btn = null;
+  }
+  // Deactivate all filter tab buttons (both standalone .al-tab and Policies-tab .alert-ftab)
+  document.querySelectorAll('.al-tab, .alert-ftab').forEach(b => b.classList.remove('active', 'alert-ftab-active'));
+  if (btn && typeof btn.classList !== 'undefined') {
+    btn.classList.add('active');
+  } else if (tab) {
+    // Activate by ID for Policies-tab buttons
+    const byId = document.getElementById('alert-ftab-' + tab);
+    if (byId) byId.classList.add('alert-ftab-active');
+  }
   _currentAlertTab = tab;
   renderAlertList(tab);
 }
 
 function renderAlertList(tab) {
-  const list = document.getElementById('alerts-list');
+  // Support both the standalone Alerts page ('alerts-list') and the
+  // Policies-tab Lapse & Alerts panel ('alert-list-col')
+  const list = document.getElementById('alerts-list') || document.getElementById('alert-list-col');
   if (!list) return;
   let items = alertsData;
   if (tab && tab !== 'all') items = items.filter(a => a.tags.includes(tab));
@@ -25676,11 +25690,14 @@ function openAlertDetail(id) {
   if (!a) return;
   renderAlertList(_currentAlertTab);
 
+  // Support both standalone Alerts page and Policies-tab Lapse & Alerts panel
   const emptyEl = document.getElementById('alerts-detail-empty');
   const panelEl = document.getElementById('alerts-detail-panel');
+  // Policies-tab detail column (alert-detail-col)
+  const altDetailCol = document.getElementById('alert-detail-col');
   if (emptyEl) emptyEl.style.display = 'none';
-  if (!panelEl) return;
-  panelEl.style.display = 'block';
+  if (!panelEl && !altDetailCol) return;
+  if (panelEl) panelEl.style.display = 'block';
 
   const sevMeta = {
     urgent: { color: '#ef4444', bg: '#fef2f2', label: 'Urgent'   },
@@ -25705,7 +25722,7 @@ function openAlertDetail(id) {
      </button>`
   ).join('');
 
-  panelEl.innerHTML = `
+  const detailHtml = `
     <div class="ad-panel">
 
       <!-- Client header -->
@@ -25764,6 +25781,10 @@ function openAlertDetail(id) {
       </div>
 
     </div>`;
+
+  // Write to whichever detail container is active
+  if (panelEl) panelEl.innerHTML = detailHtml;
+  if (altDetailCol) altDetailCol.innerHTML = detailHtml;
 }
 
 function renderRenewalTimeline() {
@@ -43386,19 +43407,34 @@ function filterPolicies() {
 }
 
 function openNewPolicyModal() {
-  p7Toast('<i class="fas fa-plus"></i> New policy wizard — select client and product to begin…', 2500);
+  // Wire to full new policy wizard (np-overlay modal)
+  if (typeof _orig_openNewPolicyModal === 'function') {
+    _orig_openNewPolicyModal();
+  } else {
+    p7Toast('<i class="fas fa-plus"></i> New policy wizard — select client and product to begin…', 2500);
+  }
 }
 
 function openNLPReview(policyId) {
-  var msgs = {
-    all: 'NLP Portfolio Scan initiated — analyzing all 1,842 policies for exclusions, ambiguities & regulatory risks…',
-    risk: 'Risk Report: P-100301 (Score 38 — underfunding lapse clause) and P-100320 (Score 44 — renewal exclusion age 61+) require immediate attention.'
-  };
-  p7Toast('<i class="fas fa-brain"></i> ' + (msgs[policyId] || 'NLP Review for policy ' + policyId + ' — scanning clauses, exclusions and risk factors…'), 4000);
+  // Wire to full NLP modal (nlp-overlay) — _orig_openNLPReview handles 'all', 'risk' and per-policy IDs
+  if (typeof _orig_openNLPReview === 'function') {
+    _orig_openNLPReview(policyId || 'all');
+  } else {
+    var msgs = {
+      all: 'NLP Portfolio Scan initiated — analyzing all 1,842 policies for exclusions, ambiguities & regulatory risks…',
+      risk: 'Risk Report: P-100301 (Score 38 — underfunding lapse clause) and P-100320 (Score 44 — renewal exclusion age 61+) require immediate attention.'
+    };
+    p7Toast('<i class="fas fa-brain"></i> ' + (msgs[policyId] || 'NLP Review for policy ' + policyId + ' — scanning clauses, exclusions and risk factors…'), 4000);
+  }
 }
 
 function openRetentionFullReport() {
-  p7Toast('<i class="fas fa-heartbeat"></i> Lapse & Retention Full Report: 2 urgent (Patricia Nguyen, Sandra Williams), 4 high risk — total $62.6K premium at risk', 4000);
+  // Wire to full Retention Intelligence Report modal (ri-overlay)
+  if (typeof _orig_openRetentionFullReport === 'function') {
+    _orig_openRetentionFullReport();
+  } else {
+    p7Toast('<i class="fas fa-heartbeat"></i> Lapse & Retention Full Report: 2 urgent (Patricia Nguyen, Sandra Williams), 4 high risk — total $62.6K premium at risk', 4000);
+  }
 }
 
 function openRenewalCenter() {

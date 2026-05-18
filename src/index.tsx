@@ -190,6 +190,7 @@ const mockPolicies = [
   { id: 'P-100310', client: 'Robert Chen', type: 'Whole Life Insurance', premium: 6000, faceValue: 1000000, status: 'Active', issued: '2018-04-12', renewal: '2028-04-12', beneficiary: 'Susan Chen' },
   { id: 'P-100320', client: 'Sandra Williams', type: 'Term Life Insurance', premium: 2800, faceValue: 350000, status: 'Review', issued: '2016-09-30', renewal: '2026-09-30', beneficiary: 'Michael Williams' },
   { id: 'P-100330', client: 'Linda Morrison', type: 'Whole Life Insurance', premium: 12000, faceValue: 2000000, status: 'Active', issued: '2015-12-01', renewal: '2030-12-01', beneficiary: 'Trust' },
+  { id: 'P-100360', client: 'Alex Rivera', type: 'Whole Life Insurance', premium: 4800, faceValue: 500000, status: 'Active', issued: '2026-04-08', renewal: '2036-04-08', beneficiary: 'Emily Rivera (daughter)' },
 ]
 
 const mockActivities = [
@@ -5257,6 +5258,7 @@ function PoliciesPage() {
                 'P-100310': {badge:'2/4 Docs',fill:'',cls:'idp-partial',pct:50},
                 'P-100320': {badge:'1/2 Docs',fill:'idp-fill-orange',cls:'idp-missing idp-urgent',pct:50},
                 'P-100330': {badge:'3/3 Docs',fill:'idp-fill-green',cls:'idp-complete',pct:100},
+                'P-100360': {badge:'2/3 Docs',fill:'',cls:'idp-partial',pct:67},
               };
               const idp = policyIDPStatus[p.id] || {badge:'—',fill:'',cls:'idp-partial',pct:0};
               const nlpRiskMap: Record<string,{score:number,level:string,cls:string,flag:string}> = {
@@ -5268,6 +5270,7 @@ function PoliciesPage() {
                 'P-100310': {score:76,level:'Medium',cls:'nlp-med',flag:'Contestability window active'},
                 'P-100320': {score:44,level:'High',cls:'nlp-high',flag:'⚠ Renewal exclusion — age 61+'},
                 'P-100330': {score:97,level:'Low',cls:'nlp-low',flag:'Flagship — all clauses clear'},
+                'P-100360': {score:91,level:'Low',cls:'nlp-low',flag:'New WL — clean, no exclusions flagged'},
               };
               const nlp = nlpRiskMap[p.id] || {score:0,level:'—',cls:'',flag:'Not scanned'};
               const lapseRiskMap: Record<string,{score:number,level:string,cls:string,trigger:string,retId:string}> = {
@@ -5279,6 +5282,7 @@ function PoliciesPage() {
                 'P-100310': {score:35,level:'Low',   cls:'lapse-low',   trigger:'Contestability — monitor',          retId:''},
                 'P-100320': {score:79,level:'High',  cls:'lapse-high',  trigger:'⚠ Term expiry Sep 2026 — 153d',    retId:'ret-sandra'},
                 'P-100330': {score:14,level:'Low',   cls:'lapse-low',   trigger:'WL strong — $168K cash value',      retId:''},
+                'P-100360': {score: 8,level:'Low',   cls:'lapse-low',   trigger:'New WL — no lapse risk, age 32',     retId:''},
               };
               const lapse = lapseRiskMap[p.id] || {score:0,level:'—',cls:'',trigger:'Not scored',retId:''};
               const payModeMap: Record<string,{label:string,icon:string,cls:string}> = {
@@ -5290,6 +5294,7 @@ function PoliciesPage() {
                 'P-100310':{label:'Annual',  icon:'fa-calendar-check', cls:'pay-annual'},
                 'P-100320':{label:'Semi-Ann',icon:'fa-calendar-alt',   cls:'pay-semi'},
                 'P-100330':{label:'Annual',  icon:'fa-calendar-check', cls:'pay-annual'},
+                'P-100360':{label:'Annual',  icon:'fa-calendar-check', cls:'pay-annual'},
               };
               const lastContactMap: Record<string,{date:string,type:string,cls:string}> = {
                 'P-100291':{date:'Apr 9',  type:'Call',  cls:'lc-call'},
@@ -5300,6 +5305,7 @@ function PoliciesPage() {
                 'P-100310':{date:'Apr 9',  type:'Claim', cls:'lc-claim'},
                 'P-100320':{date:'Apr 10', type:'Urgent',cls:'lc-urgent'},
                 'P-100330':{date:'Apr 9',  type:'Meeting',cls:'lc-meeting'},
+                'P-100360':{date:'Apr 12', type:'Call',  cls:'lc-call'},
               };
               const pm = payModeMap[p.id] || {label:'—',icon:'fa-question',cls:''};
               const lc = lastContactMap[p.id] || {date:'—',type:'—',cls:''};
