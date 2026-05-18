@@ -12374,7 +12374,7 @@ const liabilityData = {
           <div class="liab-action-row">
             <button class="liab-btn-primary" onclick="sendContextMessage('Generate full liability analysis for claim ${claimId} — ${ld.client}','claims')"><i class="fas fa-file-alt"></i> Full Report</button>
             ${ld.earlySettleTrigger ? `<button class="liab-btn-secondary" onclick="sendContextMessage('Initiate early settlement discussion for claim ${claimId}','claims')"><i class="fas fa-handshake"></i> Start Settlement</button>` : ''}
-            <button class="liab-btn-secondary" onclick="sendContextMessage('Escalate claim ${claimId} for legal review','claims')"><i class="fas fa-balance-scale"></i> Legal Review</button>
+            <button class="liab-btn-secondary" onclick="openLegalEscalationModal('${claimId}')"><i class="fas fa-balance-scale"></i> Legal Escalation</button>
           </div>
         </div>`;
     } else {
@@ -38708,7 +38708,7 @@ function p7BuildClaimTabContent(claim, tab) {
       '</div>' +
 
       '<div class="p7cm-pay-actions" style="margin-top:16px">' +
-        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Legal team notified — case flagged for attorney review\',\'success\')"><i class="fas fa-gavel"></i> Notify Legal Team</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="openLegalEscalationModal(\'' + claimId + '\')"><i class="fas fa-gavel"></i> Legal Escalation</button>' +
         '<button class="p7cm-act-btn ghost" onclick="showToast(\'Liability report exported\',\'success\')"><i class="fas fa-file-pdf"></i> Export Liability Report</button>' +
         (claim.legalHold ? '<button class="p7cm-act-btn ghost" onclick="showToast(\'Legal hold removal request submitted\',\'info\')"><i class="fas fa-unlock"></i> Request Hold Removal</button>' : '') +
       '</div>' +
@@ -59220,3 +59220,275 @@ function _crcRefresh(claimId) {
 })();
 
 console.log('Pass 30 — Claims Review Copilot module loaded');
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PASS 31 — LITIGATION REDUCTION WORKFLOW
+   openLegalEscalationModal(claimId)
+   4 escalation paths: Early Settlement · Legal Hold · Mediation · Litigation Brief
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// ── Path catalogue ───────────────────────────────────────────────────────
+var _lrwPaths = [
+  {
+    id: 'settle',
+    icon: 'fa-handshake',
+    color: '#059669',
+    colorBg: 'linear-gradient(135deg,#ecfdf5,#d1fae5)',
+    colorBorder: '#6ee7b7',
+    label: 'Early Settlement Negotiation',
+    tag: 'RECOMMENDED',
+    tagColor: '#059669',
+    desc: 'AI-draft a settlement offer within authority limits. Route for VP/General Counsel approval when required. Fastest path to claim resolution.',
+    when: 'Best when claimant attorney is retained or litigation probability ≥ 60%.'
+  },
+  {
+    id: 'hold',
+    icon: 'fa-lock',
+    color: '#dc2626',
+    colorBg: 'linear-gradient(135deg,#fef2f2,#fee2e2)',
+    colorBorder: '#fca5a5',
+    label: 'Formal Legal Hold & Docketing',
+    tag: 'HIGH URGENCY',
+    tagColor: '#dc2626',
+    desc: 'Freeze all claim actions. Assign internal docket number. Notify General Counsel and preserve evidence chain. Required before any litigation.',
+    when: 'Required when fraud score ≥ 70 or policy is in Pending status at time of loss.'
+  },
+  {
+    id: 'mediation',
+    icon: 'fa-balance-scale',
+    color: '#7c3aed',
+    colorBg: 'linear-gradient(135deg,#f5f3ff,#ede9fe)',
+    colorBorder: '#c4b5fd',
+    label: 'Mediation / Alternative Dispute Resolution',
+    tag: 'COST EFFECTIVE',
+    tagColor: '#7c3aed',
+    desc: 'Schedule a neutral mediator (AAA panel). Generate pre-mediation brief with claim summary, liability factors, and proposed settlement band.',
+    when: 'Best when claimant has filed an inquiry letter but has not yet filed suit.'
+  },
+  {
+    id: 'litbrief',
+    icon: 'fa-gavel',
+    color: '#1e40af',
+    colorBg: 'linear-gradient(135deg,#eff6ff,#dbeafe)',
+    colorBorder: '#93c5fd',
+    label: 'Litigation Preparation Brief',
+    tag: 'LAST RESORT',
+    tagColor: '#1e40af',
+    desc: 'Generate a full litigation packet: case chronology, evidence inventory, liability analysis, outside counsel assignment, and court-filing checklist.',
+    when: 'Use only after settlement and mediation options are exhausted.'
+  }
+];
+
+// ── Helper: get combined claim context ───────────────────────────────────
+function _lrwGetClaim(claimId) {
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var ld = (window.liabilityData || {})[claimId] || {};
+  return { p7: p7, ld: ld };
+}
+
+// ── Main modal renderer ──────────────────────────────────────────────────
+function openLegalEscalationModal(claimId) {
+  var existing = document.getElementById('lrw-overlay');
+  if (existing) existing.remove();
+
+  var ctx = _lrwGetClaim(claimId);
+  var p7 = ctx.p7, ld = ctx.ld;
+
+  var clientName  = p7.client  || ld.client  || claimId;
+  var claimType   = p7.type    || ld.type    || '—';
+  var amount      = p7.amount  || ld.amount  || '—';
+  var litRisk     = ld.litigationRisk != null ? ld.litigationRisk : (p7.liabilityScore || 0);
+  var litClass    = ld.litigationClass || (litRisk >= 60 ? 'high' : litRisk >= 30 ? 'med' : 'low');
+  var litColor    = litRisk >= 60 ? '#dc2626' : litRisk >= 30 ? '#d97706' : '#059669';
+  var litDesc     = ld.litigationDesc || 'No litigation assessment on file.';
+  var aiSummary   = ld.aiSummary || 'Consult claims manager before proceeding.';
+  var authority   = (ld.settlement && ld.settlement.authority) ? ld.settlement.authority : 'Claims Manager';
+  var fraudScore  = p7.fraudScore != null ? p7.fraudScore : 0;
+  var hasTrigger  = ld.earlySettleTrigger || litRisk >= 60;
+
+  // Determine recommended path index
+  var recIdx = hasTrigger ? 0 : (litRisk >= 60 ? 1 : (litRisk >= 30 ? 2 : 3));
+
+  // Build path cards
+  var pathsHTML = _lrwPaths.map(function(p, i) {
+    var isRec = i === recIdx;
+    return '<div class="lrw-path-card' + (isRec ? ' lrw-path-rec' : '') + '" '
+      + 'style="background:' + p.colorBg + ';border-color:' + p.colorBorder + '" '
+      + 'id="lrw-path-' + p.id + '">'
+      + '<div class="lrw-path-header">'
+      +   '<div class="lrw-path-icon" style="background:' + p.color + '"><i class="fas ' + p.icon + '"></i></div>'
+      +   '<div class="lrw-path-info">'
+      +     '<div class="lrw-path-title">' + p.label + '</div>'
+      +     '<div class="lrw-path-when">' + p.when + '</div>'
+      +   '</div>'
+      +   '<div class="lrw-path-tag" style="background:' + p.color + '">' + p.tag + (isRec ? ' ★' : '') + '</div>'
+      + '</div>'
+      + '<div class="lrw-path-desc">' + p.desc + '</div>'
+      + '<button class="lrw-path-btn" style="background:' + p.color + '" '
+      +   'onclick="_lrwLaunchPath(\'' + claimId + '\',\'' + p.id + '\')">'
+      +   '<i class="fas ' + p.icon + '"></i> Initiate ' + p.label.split(' ')[0] + ' Path'
+      + '</button>'
+      + '</div>';
+  }).join('');
+
+  var html = '<div id="lrw-overlay" class="lrw-overlay" onclick="if(event.target===this)_lrwClose()">'
+    + '<div class="lrw-modal">'
+
+    // Header
+    + '<div class="lrw-header">'
+    +   '<div class="lrw-header-icon"><i class="fas fa-shield-alt"></i></div>'
+    +   '<div class="lrw-header-info">'
+    +     '<div class="lrw-header-title">Litigation Reduction Workflow</div>'
+    +     '<div class="lrw-header-sub">' + claimId + ' &nbsp;·&nbsp; ' + clientName + ' &nbsp;·&nbsp; ' + claimType + ' &nbsp;·&nbsp; ' + amount + '</div>'
+    +   '</div>'
+    +   '<button class="lrw-close-btn" onclick="_lrwClose()"><i class="fas fa-times"></i></button>'
+    + '</div>'
+
+    // Risk banner
+    + '<div class="lrw-risk-banner" style="border-left-color:' + litColor + ';background:' + (litRisk >= 60 ? 'linear-gradient(135deg,#fef2f2,#ffe4e6)' : litRisk >= 30 ? 'linear-gradient(135deg,#fffbeb,#fef3c7)' : 'linear-gradient(135deg,#f0fdf4,#dcfce7)') + '">'
+    +   '<div class="lrw-risk-kpis">'
+    +     '<div class="lrw-risk-kpi"><div class="lrw-risk-kpi-val" style="color:' + litColor + '">' + litRisk + '%</div><div class="lrw-risk-kpi-lbl">Litigation Risk</div></div>'
+    +     '<div class="lrw-risk-kpi"><div class="lrw-risk-kpi-val" style="color:' + (fraudScore >= 60 ? '#dc2626' : fraudScore >= 30 ? '#d97706' : '#059669') + '">' + fraudScore + '</div><div class="lrw-risk-kpi-lbl">Fraud Score</div></div>'
+    +     '<div class="lrw-risk-kpi"><div class="lrw-risk-kpi-val" style="font-size:11px;color:#374151">' + authority + '</div><div class="lrw-risk-kpi-lbl">Required Authority</div></div>'
+    +   '</div>'
+    +   '<div class="lrw-risk-desc"><i class="fas fa-exclamation-circle" style="color:' + litColor + ';margin-right:6px"></i>' + litDesc + '</div>'
+    +   '<div class="lrw-risk-ai"><i class="fas fa-robot" style="color:#6366f1;margin-right:6px"></i><strong>AI:</strong> ' + aiSummary + '</div>'
+    + '</div>'
+
+    // Path cards
+    + '<div class="lrw-paths-title"><i class="fas fa-road"></i> Select Escalation Path</div>'
+    + '<div class="lrw-paths-grid">' + pathsHTML + '</div>'
+
+    // Footer
+    + '<div class="lrw-footer">'
+    +   '<span class="lrw-footer-note"><i class="fas fa-info-circle"></i> All escalation actions are audit-logged and cannot be reversed without supervisor approval.</span>'
+    +   '<button class="lrw-footer-cancel" onclick="_lrwClose()">Cancel</button>'
+    + '</div>'
+
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function _lrwClose() {
+  var el = document.getElementById('lrw-overlay');
+  if (el) el.remove();
+}
+
+// ── Path launcher — builds action sub-panel ──────────────────────────────
+function _lrwLaunchPath(claimId, pathId) {
+  var ctx = _lrwGetClaim(claimId);
+  var p7 = ctx.p7, ld = ctx.ld;
+  var clientName = p7.client || ld.client || claimId;
+  var claimType  = p7.type   || ld.type   || '—';
+  var litRisk    = ld.litigationRisk != null ? ld.litigationRisk : 0;
+  var settRange  = (ld.settlement && ld.settlement.recommended) ? ld.settlement.recommended : 'To be determined';
+  var settTimeline = (ld.settlement && ld.settlement.timeline)  ? ld.settlement.timeline    : '—';
+  var authority  = (ld.settlement && ld.settlement.authority)   ? ld.settlement.authority   : 'Claims Manager';
+
+  var path = _lrwPaths.filter(function(p){ return p.id === pathId; })[0];
+  if (!path) return;
+
+  var fieldsHTML = '';
+
+  if (pathId === 'settle') {
+    fieldsHTML = _lrwField('AI-Recommended Settlement Range', '<input class="lrw-inp" name="settAmt" placeholder="e.g. $800,000 – $950,000" value="' + settRange + '">')
+      + _lrwField('Authority Level Required', '<input class="lrw-inp" name="settAuth" value="' + authority + '" readonly>')
+      + _lrwField('Estimated Resolution Timeline', '<input class="lrw-inp" name="settTime" value="' + settTimeline + '">')
+      + _lrwField('Offer Basis / Rationale', '<textarea class="lrw-ta" name="settBasis" rows="3" placeholder="Describe factual basis for the proposed settlement amount…">Based on ' + litRisk + '% litigation risk, AI recommends proactive settlement. ' + ((ld.aiSummary || '').substring(0,120)) + '</textarea>')
+      + _lrwField('Approval Routing', _lrwSelect('settApproval', [{v:'mgr',l:'Claims Manager (≤ $250K)'},{v:'vp',l:'VP Claims (≤ $1M)'},{v:'gc',l:'General Counsel (> $1M or critical)'}]))
+      + _lrwField('Draft Settlement Offer Letter', _lrwSelect('settLetter', [{v:'ai',l:'AI-Generated (review before send)'},{v:'template',l:'Standard NYL template'},{v:'manual',l:'Manually drafted by attorney'}]));
+  } else if (pathId === 'hold') {
+    fieldsHTML = _lrwField('Legal Hold Basis', _lrwSelect('holdBasis', [{v:'fraud',l:'Active fraud investigation'},{v:'pending_death',l:'Death during pending policy'},{v:'contest',l:'Contestability dispute'},{v:'regulatory',l:'Regulatory inquiry / subpoena'},{v:'estate',l:'Estate / beneficiary dispute'}]))
+      + _lrwField('Evidence Preservation Scope', _lrwSelect('holdScope', [{v:'full',l:'Full claim file — all communications and documents'},{v:'financial',l:'Financial records only'},{v:'medical',l:'Medical and APS records only'},{v:'custom',l:'Custom scope (specify in notes)'}]))
+      + _lrwField('Assign Docket Number (auto-generated)', '<input class="lrw-inp" name="holdDocket" value="NYL-LEGAL-' + claimId.replace('CLM-','') + '-' + new Date().getFullYear() + '" readonly>')
+      + _lrwField('Notify General Counsel', _lrwSelect('holdGC', [{v:'immediate',l:'Immediate — email + phone'},{v:'email',l:'Email within 1 hour'},{v:'memo',l:'Formal memo within 24 hours'}]))
+      + _lrwField('Hold Notes / Instructions', '<textarea class="lrw-ta" name="holdNotes" rows="3" placeholder="Specific preservation instructions, known risks, attorney contacts…"></textarea>');
+  } else if (pathId === 'mediation') {
+    fieldsHTML = _lrwField('Mediation Provider', _lrwSelect('medProvider', [{v:'aaa',l:'AAA — American Arbitration Association'},{v:'jams',l:'JAMS Mediation'},{v:'internal',l:'NYL Internal Mediator'},{v:'court',l:'Court-appointed mediator'}]))
+      + _lrwField('Proposed Mediation Date', '<input class="lrw-inp" name="medDate" type="date" placeholder="YYYY-MM-DD">')
+      + _lrwField('NYL Representative', _lrwSelect('medRep', [{v:'mgr',l:'Claims Manager'},{v:'vp',l:'VP Claims'},{v:'gc_rep',l:'Associate General Counsel'},{v:'outside',l:'Outside counsel (co-represent)'}]))
+      + _lrwField('Settlement Band for Mediation', '<input class="lrw-inp" name="medBand" placeholder="e.g. $38,000 – $55,000" value="' + settRange + '">')
+      + _lrwField('Pre-Mediation Brief', _lrwSelect('medBrief', [{v:'ai_gen',l:'AI-generate brief from claim file'},{v:'manual',l:'Counsel to prepare manually'},{v:'template',l:'NYL standard mediation template'}]))
+      + _lrwField('Mediation Notes', '<textarea class="lrw-ta" name="medNotes" rows="2" placeholder="Key talking points, concession limits, non-negotiable items…"></textarea>');
+  } else if (pathId === 'litbrief') {
+    fieldsHTML = _lrwField('Outside Counsel Assignment', _lrwSelect('litCounsel', [{v:'mf',l:'Morrison & Foerster LLP (primary panel)'},{v:'sidley',l:'Sidley Austin LLP (complex life)'},{v:'wc',l:'Wilson Chamberlain (regional)'},{v:'internal',l:'Internal Legal Affairs only'}]))
+      + _lrwField('Litigation Strategy', _lrwSelect('litStrategy', [{v:'defense',l:'Affirmative defense — deny liability'},{v:'partial',l:'Partial coverage defense'},{v:'counter',l:'Counterclaim — fraud / misrepresentation'},{v:'coverage',l:'Coverage determination declaratory action'}]))
+      + _lrwField('Packet Contents', '<div class="lrw-checklist">'
+          + '<label><input type="checkbox" checked> Case chronology (AI-generated)</label>'
+          + '<label><input type="checkbox" checked> Evidence inventory &amp; chain of custody</label>'
+          + '<label><input type="checkbox" checked> Liability factors analysis</label>'
+          + '<label><input type="checkbox" checked> Fraud score report</label>'
+          + '<label><input type="checkbox"> Witness list (manual entry required)</label>'
+          + '<label><input type="checkbox"> Expert witness identification</label>'
+          + '</div>')
+      + _lrwField('Court / Jurisdiction', '<input class="lrw-inp" name="litCourt" placeholder="e.g. SDNY — Southern District of New York">')
+      + _lrwField('Filing Deadline', '<input class="lrw-inp" name="litDeadline" type="date">')
+      + _lrwField('Briefing Notes', '<textarea class="lrw-ta" name="litNotes" rows="2" placeholder="Special instructions for outside counsel, key deadlines, exposure cap…"></textarea>');
+  }
+
+  var submitLabel = {
+    settle:   'Submit for Approval & Draft Offer Letter',
+    hold:     'Activate Legal Hold & Notify General Counsel',
+    mediation:'Schedule Mediation & Generate Pre-Brief',
+    litbrief: 'Generate Litigation Packet & Assign Counsel'
+  }[pathId] || 'Submit';
+
+  var subPanelHTML = '<div id="lrw-subpanel" class="lrw-subpanel">'
+    + '<div class="lrw-subpanel-header" style="border-left-color:' + path.color + '">'
+    +   '<div class="lrw-subpanel-icon" style="background:' + path.color + '"><i class="fas ' + path.icon + '"></i></div>'
+    +   '<div>'
+    +     '<div class="lrw-subpanel-title">' + path.label + '</div>'
+    +     '<div class="lrw-subpanel-sub">' + claimId + ' · ' + clientName + ' · ' + claimType + '</div>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="lrw-subpanel-fields">' + fieldsHTML + '</div>'
+    + '<div class="lrw-subpanel-footer">'
+    +   '<button class="lrw-sub-cancel" onclick="document.getElementById(\'lrw-subpanel\').remove()"><i class="fas fa-arrow-left"></i> Back</button>'
+    +   '<button class="lrw-sub-submit" style="background:' + path.color + '" onclick="_lrwSubmitPath(\'' + claimId + '\',\'' + pathId + '\')"><i class="fas ' + path.icon + '"></i> ' + submitLabel + '</button>'
+    + '</div>'
+    + '</div>';
+
+  // Remove any existing sub-panel, then append inside modal
+  var existing = document.getElementById('lrw-subpanel');
+  if (existing) existing.remove();
+  var modal = document.querySelector('.lrw-modal');
+  if (modal) modal.insertAdjacentHTML('beforeend', subPanelHTML);
+
+  // Scroll sub-panel into view
+  setTimeout(function(){
+    var sp = document.getElementById('lrw-subpanel');
+    if (sp) sp.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 60);
+}
+
+// ── Submit handler ───────────────────────────────────────────────────────
+function _lrwSubmitPath(claimId, pathId) {
+  var toastMap = {
+    settle:   '<i class="fas fa-handshake"></i> Settlement offer drafted · Routed for approval · Claimant attorney will be contacted within 24h',
+    hold:     '<i class="fas fa-lock"></i> Legal hold activated · Docket assigned · General Counsel notified · All claim actions frozen',
+    mediation:'<i class="fas fa-balance-scale"></i> Mediation scheduled · AAA panel notified · Pre-mediation brief generating…',
+    litbrief: '<i class="fas fa-gavel"></i> Litigation packet generated · Outside counsel assigned · Court filing checklist sent to Legal'
+  };
+  var followMap = {
+    settle:   '<i class="fas fa-file-contract"></i> Draft settlement letter ready for review in Documents tab · VP Claims notified by email',
+    hold:     '<i class="fas fa-shield-alt"></i> Evidence preservation confirmed · Claim status updated to Legal Hold · Audit trail locked',
+    mediation:'<i class="fas fa-calendar-check"></i> Pre-mediation brief complete · Calendar invite sent · Settlement band confirmed to mediator',
+    litbrief: '<i class="fas fa-balance-scale"></i> Counsel acknowledged receipt · Case chronology uploaded · SLA clock suspended pending litigation'
+  };
+  _lrwClose();
+  p7Toast(toastMap[pathId] || '<i class="fas fa-check"></i> Escalation submitted', 3500);
+  setTimeout(function(){
+    p7Toast(followMap[pathId] || '', 3200);
+  }, 2000);
+}
+
+// ── Small field helpers ──────────────────────────────────────────────────
+function _lrwField(label, inputHTML) {
+  return '<div class="lrw-field"><label class="lrw-label">' + label + '</label>' + inputHTML + '</div>';
+}
+function _lrwSelect(name, opts) {
+  return '<select class="lrw-inp" name="' + name + '">' + opts.map(function(o){ return '<option value="' + o.v + '">' + o.l + '</option>'; }).join('') + '</select>';
+}
+
+console.log('Pass 31 — Litigation Reduction Workflow loaded');
