@@ -504,6 +504,7 @@ const clientData = [
   { id: 6, name: 'Maria Gonzalez', age: 48, email: 'maria.g@email.com', phone: '(917) 555-0106', policies: 3, premium: 14600, status: 'Active', segment: 'High Value', lastContact: '2026-04-06', city: 'New York', score: 91 },
   { id: 7, name: 'Kevin Park', age: 29, email: 'kevin.p@email.com', phone: '(212) 555-0107', policies: 1, premium: 1800, status: 'Pending', segment: 'Emerging', lastContact: '2026-04-01', city: 'Jersey City', score: 65 },
   { id: 8, name: 'Linda Morrison', age: 56, email: 'linda.m@email.com', phone: '(718) 555-0108', policies: 5, premium: 32000, status: 'Active', segment: 'Premium', lastContact: '2026-04-09', city: 'Long Island', score: 98 },
+  { id: 9, name: 'Alex Rivera', age: 32, email: 'alex.rivera@deloitte.com', phone: '(212) 555-0109', policies: 1, premium: 4800, status: 'Active', segment: 'Emerging', lastContact: '2026-04-12', city: 'New York', score: 84 },
 ];
 
 // ============================================================
@@ -727,6 +728,12 @@ const cmProducts = {
     retirement:  [{ id:'R-200301', name:'Variable Deferred Annuity',  val:'$280K AUM',   inc:'Est. $3,200/mo @ 65' }],
     advisory:    [{ id:'A-300201', name:'UMA — Discretionary',        val:'$280K AUM',   fee:'$2,800/yr (1%)' },
                   { id:'A-300202', name:'Estate Planning Trust+Will',  val:'$2M+ estate', fee:'Included' }],
+  },
+  9: {
+    insurance:   [{ id:'P-100360', name:'Whole Life $500K',           prem:4800,  status:'Active',  since:'2026' }],
+    investments: [{ id:'IA-AR-001', name:'Mutual Funds MF-360001',    val:'$80K AUM',    ret:'+9.8% YTD'  }],
+    retirement:  [{ id:'ANN-AR-001', name:'Deferred Annuity (GFIA)',  val:'$50K premium', inc:'Est. $1,100/mo @ 65' }],
+    advisory:    [{ id:'ADV-AR-001', name:'Financial Planning',       val:'In Progress',  fee:'$1,200/yr' }],
   },
 };
 
@@ -3183,6 +3190,7 @@ const policyData = {
   'P-100310': { id:'P-100310', client:'Robert Chen', clientInitials:'RC', clientAvatar:'rc', type:'Whole Life Insurance', premium:6000, faceValue:1000000, status:'Active', issued:'2018-04-12', renewal:'2028-04-12', beneficiary:'Susan Chen', riders:['Paid-Up Additions','Business Continuation Rider','Waiver of Premium'], cashValue:'$82,500', dividends:'$3,800/yr (est.)', notes:'⚠️ Active death benefit claim CLM-2026-0041 filed 2026-04-09. Under review by Claims Dept.', nextAction:'Monitor claim resolution — est. 5-7 business days', agent:'Sridhar R.' },
   'P-100320': { id:'P-100320', client:'Sandra Williams', clientInitials:'SW', clientAvatar:'sw', type:'Term Life Insurance', premium:2800, faceValue:350000, status:'Review', issued:'2016-09-30', renewal:'2026-09-30', beneficiary:'Michael Williams', riders:['Convertibility Rider'], cashValue:'N/A', dividends:'N/A', notes:'⚠️ Policy up for renewal in Sept 2026. Client age 61 — conversion window closing. Prioritize outreach.', nextAction:'Urgent: schedule renewal/conversion discussion before Sept 2026', agent:'Sridhar R.' },
   'P-100330': { id:'P-100330', client:'Linda Morrison', clientInitials:'LM', clientAvatar:'lm', type:'Whole Life Insurance', premium:12000, faceValue:2000000, status:'Active', issued:'2015-12-01', renewal:'2030-12-01', beneficiary:'Trust', riders:['Paid-Up Additions Rider','Long-term Care Rider','Accidental Death Benefit'], cashValue:'$168,400', dividends:'$6,200/yr (est.)', notes:'Flagship policy. Trust beneficiary — coordinate with estate planning attorney. Excellent standing.', nextAction:'Annual review Apr 15 2026 — UMA + estate coordination', agent:'Sridhar R.' },
+  'P-100360': { id:'P-100360', client:'Alex Rivera', clientInitials:'AR', clientAvatar:'ar', type:'Whole Life Insurance', premium:4800, faceValue:500000, status:'Active', issued:'2026-04-08', renewal:'2036-04-08', beneficiary:'Emily Rivera (daughter)', riders:['Paid-Up Additions Rider','Waiver of Premium','Accidental Death Benefit'], cashValue:'$2,400', dividends:'$480/yr (est.)', notes:'Newly issued policy. Client age 32 — excellent long-term accumulation trajectory. Investment account IA-AR-001 linked for premium funding coordination.', nextAction:'First annual review Apr 2027 — review PUA rider elections and cash value projection', agent:'Sridhar R.' },
 };
 
 const policyAIInsights = {
@@ -3194,6 +3202,7 @@ const policyAIInsights = {
   'P-100310': { score:72, risk:'High', headline:'⚠️ Active Death Benefit Claim — CLM-2026-0041 In Progress', points:['Death benefit claim filed 2026-04-09 for $1,000,000. Currently Under Review by Claims Dept.','Policy has been active since 2018 — all premiums current, claim appears valid.','Expected resolution: 5-7 business days from filing. Estimated completion 2026-04-16.','Agent action: Ensure beneficiary (Susan Chen) has uploaded all required documentation.'], opportunities:['Expedite documentation upload to speed claim resolution','Schedule compassionate follow-up call with beneficiary','Identify surviving family members as prospective clients for new coverage'], nextSteps:['⚡ Follow up with Susan Chen re: documentation (call today)','Monitor claim status daily','Prepare new coverage needs analysis for surviving family'] },
   'P-100320': { score:55, risk:'Urgent', headline:'⚠️ URGENT — Renewal Due Sept 2026, Conversion Window Closing', points:['Sandra Williams, age 61, has a 20-year term policy expiring September 2026 — 5 months away.','Without action, coverage lapses and re-qualification requires new medical underwriting at age 61.','Conversion option available without medical evidence until renewal date.','Current face value $350K represents primary life insurance protection for Michael Williams.'], opportunities:['⚡ Convert to Whole Life or Universal Life before September 2026','Discuss long-term income and estate planning needs at renewal','Explore annuity options for retirement income supplement (Sandra, age 61)'], nextSteps:['⚡ URGENT: Call Sandra Williams this week','Prepare whole life vs UL conversion comparison','Schedule in-person renewal review meeting'] },
   'P-100330': { score:99, risk:'Low', headline:'Flagship Policy — Top Client, All Systems Optimal', points:['$2M Whole Life in excellent standing. Cash value $168,400 growing on track.','Trust beneficiary properly structured — coordinate with estate attorney for annual review.','Paid-Up Additions rider is generating +$6,200/yr in dividend-funded additions.','Long-term Care rider attached provides dual-purpose coverage — review LTC benefit adequacy.'], opportunities:['Paid-Up Additions: continue compounding for maximum estate value','Estate plan: annual review scheduled April 15 — coordinate UMA + trust update','Advisory UMA: $280K AUM candidate identified — fee opportunity $2,800/yr'], nextSteps:['Annual review April 15 — Linda Morrison (confirmed)','Coordinate estate attorney meeting','Present UMA illustration for $280K+ investable assets'] },
+  'P-100360': { score:97, risk:'Low', headline:'New Whole Life Policy — Strong Accumulation Trajectory', points:['Policy issued Apr 8, 2026. Client age 32 — 30+ year accumulation horizon maximizes dividend compounding.','$4,800/yr premium is well within Alex Rivera\'s capacity ($120K income). No lapse risk.','Paid-Up Additions rider elected — cash value projected to exceed $180K by year 20.','Beneficiary: Emily Rivera (minor daughter) — UTMA/trust coordination recommended with estate attorney.'], opportunities:['Paid-Up Additions: accelerate cash value for tax-advantaged accumulation','UTMA trust coordination for minor beneficiary Emily Rivera','Disability insurance gap — Alex has no DI coverage on file','Advisory account cross-sell — investment account funded Apr 2026'], nextSteps:['First annual review Apr 2027 — review PUA elections and cash value trajectory','Refer to estate attorney for UTMA/trust setup (minor beneficiary)','Present disability income illustration — $120K income has no protection'] },
 };
 
 let _currentPolicyId = null;
@@ -3532,6 +3541,7 @@ const claimData = {
   // Resolved claims
   'CLM-2026-0022': { id:'CLM-2026-0022', client:'Linda Morrison', clientInitials:'LM', clientAvatar:'lm', policy:'P-100360', policyType:'Whole Life Insurance', type:'Death Benefit (Rider)', typeBadge:'death', amount:'$50,000', filedDate:'2026-02-10', status:'Paid', statusBadge:'paid', priority:'Low', assignedTo:'Claims Dept.', adjuster:'Priya Sharma', contact:'linda.m@email.com', claimant:'Linda Morrison (Policyholder via Rider)', description:'Accidental Death Benefit rider claim. Spouse accidental death. Rider payout of $50,000 in addition to base policy. Resolved in 7 days.', docsRequired:['Death Certificate (✅ Received)','Accidental Death Report (✅ Received)','Beneficiary Identification (✅ Received)'], timeline:[{date:'2026-02-10',event:'Rider claim filed',icon:'fa-file-alt'},{date:'2026-02-11',event:'All docs received',icon:'fa-check'},{date:'2026-02-14',event:'Adjuster review complete',icon:'fa-check'},{date:'2026-02-17',event:'Payment of $50,000 issued',icon:'fa-dollar-sign'}], estimatedPayout:'$50,000 — PAID 2026-02-17', notes:'Resolved. Payment confirmed. No further action required.' },
   'CLM-2026-0019': { id:'CLM-2026-0019', client:'Robert Chen', clientInitials:'RC', clientAvatar:'rc', policy:'P-100311', policyType:'Variable Universal Life', type:'Waiver of Premium', typeBadge:'waiver', amount:'$8,400/yr', filedDate:'2026-01-20', status:'Approved', statusBadge:'paid', priority:'Low', assignedTo:'Claims Dept.', adjuster:'Priya Sharma', contact:'robert.c@email.com', claimant:'Robert Chen (Policyholder)', description:'Waiver of premium approved following temporary disability. 4-day resolution. Annual premium of $8,400 waived for disability period (45 days).', docsRequired:['Disability Cert (✅ Received)','Physician Statement (✅ Received)'], timeline:[{date:'2026-01-20',event:'Claim filed',icon:'fa-file-alt'},{date:'2026-01-21',event:'Docs received',icon:'fa-check'},{date:'2026-01-24',event:'Approved — premium waived',icon:'fa-check-circle'}], estimatedPayout:'Premium waived — APPROVED 2026-01-24', notes:'Resolved. Client returned to work 2026-03-05. Premium reinstated.' },
+  'CLM-2026-0055': { id:'CLM-2026-0055', client:'Alex Rivera', clientInitials:'AR', clientAvatar:'ar', policy:'P-100360', policyType:'Whole Life Insurance', type:'Waiver of Premium', typeBadge:'waiver', amount:'$4,800/yr', filedDate:'2026-04-15', status:'Approved', statusBadge:'paid', priority:'Low', assignedTo:'Claims Dept.', adjuster:'Priya Sharma', contact:'alex.rivera@deloitte.com', claimant:'Alex Rivera (Policyholder)', description:'Waiver of premium approved following short-term disability leave (knee surgery, non-occupational). 5-day resolution. Annual premium of $4,800 waived for disability period (30 days). Client recovered and returned to work May 2026.', docsRequired:['Disability Cert (✅ Received)','Physician Statement (✅ Received)','Employer Verification (✅ Received)'], timeline:[{date:'2026-04-15',event:'Claim filed by Alex Rivera',icon:'fa-file-alt'},{date:'2026-04-15',event:'Disability certificate received',icon:'fa-check'},{date:'2026-04-16',event:'Physician statement received',icon:'fa-check'},{date:'2026-04-20',event:'Approved — premium waived for 30-day disability period',icon:'fa-check-circle'},{date:'2026-05-12',event:'Client returned to work — premium reinstated',icon:'fa-redo'}], estimatedPayout:'Premium waived — APPROVED 2026-04-20', notes:'Resolved. Policy P-100360 remains in full force. Premium reinstated May 12, 2026. Good client experience — first claim handled smoothly within policy year.' },
   'CLM-2026-0015': { id:'CLM-2026-0015', client:'James Whitfield', clientInitials:'JW', clientAvatar:'jw', policy:'P-100291', policyType:'Whole Life Insurance', type:'Accelerated Benefit', typeBadge:'accelerated', amount:'$75,000', filedDate:'2026-01-08', status:'Paid', statusBadge:'paid', priority:'Normal', assignedTo:'Claims Dept.', adjuster:'Michael Torres', contact:'james.w@email.com', claimant:'James Whitfield (Policyholder)', description:'ADB claim — chronic illness. $75,000 accelerated from $500K face value. Used for long-term care and medical expenses. Resolved in 7 days.', docsRequired:['Chronic Illness Cert (✅ Received)','Physician Statement (✅ Received)','ADB Application (✅ Received)'], timeline:[{date:'2026-01-08',event:'ADB claim filed',icon:'fa-file-alt'},{date:'2026-01-09',event:'All docs verified',icon:'fa-check'},{date:'2026-01-15',event:'$75,000 paid to policyholder',icon:'fa-dollar-sign'}], estimatedPayout:'$75,000 — PAID 2026-01-15', notes:'Resolved. Face value reduced to $425K. Policy remains in force.' },
   'CLM-2025-0198': { id:'CLM-2025-0198', client:'Sandra Williams', clientInitials:'SW', clientAvatar:'sw', policy:'P-100320', policyType:'Term Life Insurance', type:'Disability', typeBadge:'disability', amount:'$12,600', filedDate:'2025-12-01', status:'Paid', statusBadge:'paid', priority:'Normal', assignedTo:'DI Unit', adjuster:'Carlos Reyes', contact:'sandra.w@email.com', claimant:'Sandra Williams (Policyholder)', description:'Short-term disability claim following knee surgery. 3-month benefit paid ($4,200/month for 3 months = $12,600 total). Resolved in 7 days.', docsRequired:['Surgical Report (✅ Received)','Disability Cert (✅ Received)','Income Verification (✅ Received)'], timeline:[{date:'2025-12-01',event:'DI claim filed',icon:'fa-file-alt'},{date:'2025-12-03',event:'Docs verified',icon:'fa-check'},{date:'2025-12-08',event:'$12,600 benefit approved and paid',icon:'fa-dollar-sign'}], estimatedPayout:'$12,600 — PAID 2025-12-08', notes:'Resolved. Client recovered and returned to work Jan 2026.' },
 };
@@ -3546,6 +3556,7 @@ const claimAIInsights = {
   'CLM-2026-0025': { headline:'Coverage Determination Required — Policy Was Pending', risk:'High', points:['Kevin Park policy P-100350 was in Pending status at time of death.','Claim requires determination of whether coverage was in force.','Contestability review in progress — 2-year window not applicable (new policy).','Medical records needed to confirm underwriting status.'], actions:['⚡ Expedite medical records request','Coordinate with underwriting team for binding coverage determination','Document all communications with estate representatives','If coverage confirmed in force: process $250K claim'] },
   'CLM-2026-0022': { headline:'Resolved — No Action Required', risk:'Low', points:['Claim paid 2026-02-17. $50,000 accidental death benefit rider paid.','7-day resolution — excellent performance.','Policy P-100360 continues in force. Face value unaffected by rider payout.'], actions:['No action required. File closed.','Consider following up with Linda Morrison re: estate update after payout.'] },
   'CLM-2026-0019': { headline:'Resolved — Premium Reinstated', risk:'Low', points:['Waiver of premium approved and expired. Client returned to work.','Premium of $8,400/yr reinstated 2026-03-05.'], actions:['No action required. File closed.'] },
+  'CLM-2026-0055': { headline:'Resolved — New Client First Claim Handled Smoothly', risk:'Low', points:['Alex Rivera waiver of premium approved 2026-04-20. Premium reinstated May 12, 2026.','First claim within first policy year — 5-day resolution time excellent.','Policy P-100360 Whole Life $500K continues in full force. No impact to face value or cash value.','Opportunity: Alex has no disability income insurance — this claim demonstrates the need.'], actions:['No action required. File closed.','Follow up: present DI illustration — $5,000/mo benefit, short elimination period.','Use claim experience as natural conversation opener for disability coverage gap.'] },
   'CLM-2026-0015': { headline:'Resolved — ADB Paid, Policy Continues', risk:'Low', points:['$75,000 ADB paid 2026-01-15. Face value reduced to $425K.','Policy P-100291 remains in force with modified face value.'], actions:['Review updated face value adequacy at next annual review.'] },
   'CLM-2025-0198': { headline:'Resolved — DI Benefit Paid', risk:'Low', points:['$12,600 disability benefit paid. Client recovered and returned to work.','Policy P-100320 remains in force.'], actions:['No action required. Note: policy P-100320 renewal due Sept 2026 — priority outreach needed.'] },
 };
@@ -38191,6 +38202,46 @@ var p7ClaimsData = {
       { date: 'Apr 10', event: 'SLA clock started — NY §3420 requires response by Apr 25', type: 'alert' },
       { date: 'Apr 11', event: 'Legal hold set — trust document verification required', type: 'alert' }
     ]
+  },
+
+  'CLM-2026-0055': {
+    id: 'CLM-2026-0055', client: 'Alex Rivera', initials: 'AR', policy: 'P-100360',
+    type: 'Waiver of Premium', amount: '$4,800/yr', filed: '2026-04-15',
+    daysOpen: 5, status: 'Approved', priority: 'Low',
+    adjuster: 'Priya Sharma', adjusterTeam: 'Claims Dept.',
+    fraudScore: 8, fraudLabel: 'Clear',
+    slaDeadline: 'May 15, 2026', slaDaysLeft: 999, slaStatus: 'ok',
+    liabilityScore: 10, liabilityLabel: 'Low',
+    reserveAmount: '$4,800', reserveStatus: 'Waiver Applied — Closed', paymentHistory: [
+      { date: '2026-04-20', amount: '$4,800 premium waived', note: 'Waiver of premium approved for 30-day disability period. Policy remains in full force.' }
+    ],
+    coverageLimits: 'Waiver of Premium rider: premiums waived during total disability. Policy P-100360 Whole Life $500K remains in force with full death benefit during waiver period.',
+    exclusions: 'No exclusions applicable. Short-term disability (non-occupational knee surgery) qualifies under policy definition. Elimination period satisfied.',
+    regulatoryState: 'NY', regulatoryNote: 'NY Ins. Law §3220: waiver benefit correctly applied. No regulatory issues. Claim resolved within required timelines.',
+    legalHold: false, badFaithRisk: 'None — clean claim, resolved in 5 days.',
+    beneficiary: 'Emily Rivera (daughter)', benefRel: 'Dependent child', benefKYC: 'Verified',
+    benefEmail: 'alex.rivera@deloitte.com', benefPhone: '212-555-0109',
+    benefPayAccount: 'N/A — waiver of premium (no cash payout)',
+    communications: [
+      { date: 'Apr 15, 2026', type: 'Phone', dir: 'Inbound', from: 'Alex Rivera', note: 'Called to file WOP claim. Knee surgery (non-occupational) Apr 10. Off work 30 days per physician.' },
+      { date: 'Apr 15, 2026', type: 'Email', dir: 'Outbound', from: 'Claims Dept.', note: 'Sent claim form and required document list to Alex Rivera.' },
+      { date: 'Apr 16, 2026', type: 'Email', dir: 'Inbound', from: 'Alex Rivera', note: 'Disability certificate and physician statement received. Employer verification attached.' },
+      { date: 'Apr 20, 2026', type: 'System', dir: 'Auto', from: 'Claims System', note: 'Claim approved — all documents received and verified. Premium waiver applied to policy P-100360.' }
+    ],
+    docs: [
+      { name: 'Disability Certificate', status: 'received', date: 'Apr 16, 2026' },
+      { name: 'Physician Statement (Dr. Marcus Webb)', status: 'received', date: 'Apr 16, 2026' },
+      { name: 'Employer Verification (Deloitte HR)', status: 'received', date: 'Apr 16, 2026' },
+      { name: 'Claim Form', status: 'received', date: 'Apr 15, 2026' }
+    ],
+    contestability: false,
+    aiTriage: 'RESOLVED — Clean claim. All documents received. Waiver applied. Policy in full force. Recommend follow-up: disability income insurance gap conversation with Alex Rivera (no DI coverage on file).',
+    timeline: [
+      { date: 'Apr 15', event: 'Waiver of premium claim filed — knee surgery disability (30 days)', type: 'filed' },
+      { date: 'Apr 16', event: 'All documents received — disability cert, physician statement, employer verification', type: 'update' },
+      { date: 'Apr 20', event: 'Claim APPROVED — $4,800 premium waived. Policy P-100360 remains in full force.', type: 'update' },
+      { date: 'May 12', event: 'Alex Rivera returned to work. Premium reinstated on policy P-100360.', type: 'update' }
+    ]
   }
 };
 
@@ -43926,41 +43977,42 @@ var iaAccounts = [
     }
   },
 
-  /* ── Alex Rivera (new client, 1 account — funding pending) ── */
+  /* ── Alex Rivera (clientId 9 — fully onboarded Apr 2026) ── */
   {
     id: 'IA-AR-001', clientId: 9, clientName: 'Alex Rivera', initials: 'AR',
     avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
     accountType: 'Mutual Funds', accountNum: 'MF-360001',
     custodian: 'NYLIM / Pershing', openDate: 'Apr 2026',
-    aum: 0, aumFmt: '$0 (Pending)', currency: 'USD',
-    returnYTD: 0, returnYTDFmt: '—', benchmark: 'S&P 500 Blend', benchmarkYTD: 9.2,
-    alpha: '—', sharpe: null,
-    fee: 0, feePct: '1.00% (when funded)',
-    status: 'Funding Pending', statusCls: 'ia-status-funding',
-    driftAlert: false, driftScore: 0,
+    aum: 80000, aumFmt: '$80K', currency: 'USD',
+    returnYTD: 9.8, returnYTDFmt: '+9.8%', benchmark: 'S&P 500 Blend', benchmarkYTD: 9.2,
+    alpha: '+0.6%', sharpe: 1.18,
+    fee: 800, feePct: '1.00%',
+    status: 'Active', statusCls: 'ia-status-active',
+    driftAlert: false, driftScore: 1.4,
     rmdDue: false, rmdAmount: 0, rmdDeadline: null,
-    reviewDue: false, lastReview: null, nextReview: 'Oct 1, 2026',
+    reviewDue: false, lastReview: 'Apr 30, 2026', nextReview: 'Oct 1, 2026',
     tlhOpportunity: 0, tlhPositions: [],
     riskProfile: 'Moderate Growth', horizon: '31 years (retirement 2057)',
     targetAlloc: { usEquity:60, intlEquity:20, fixedIncome:15, alternatives:0, cash:5 },
-    currentAlloc: { usEquity:0, intlEquity:0, fixedIncome:0, alternatives:0, cash:0 },
-    fundingDetails: {
-      initialDeposit: '$50,000 via ACH',
-      acatTransfer: '$30,000 from Schwab (in progress)',
-      expectedFundingDate: 'Apr 18, 2026',
-      imasSigned: true, suitabilityApproved: true
-    },
-    holdings: [],
+    currentAlloc: { usEquity:61, intlEquity:19, fixedIncome:15, alternatives:0, cash:5 },
+    holdings: [
+      { name:'MainStay Epoch US Equity Fund', type:'Mutual Fund', value:48800, pct:61.0, ret:'+12.1%', status:'on-target' },
+      { name:'MainStay Candriam Intl Equity', type:'Mutual Fund', value:15200, pct:19.0, ret:'+7.2%', status:'on-target' },
+      { name:'MainStay MacKay Bond Fund', type:'Mutual Fund', value:12000, pct:15.0, ret:'+3.3%', status:'on-target' },
+      { name:'Cash / MMF', type:'Cash', value:4000, pct:5.0, ret:'+5.1%', status:'on-target' }
+    ],
     rebalanceTrades: [],
     timeline: [
       { date:'Apr 12, 2026', event:'Account opened — IMA signed, suitability approved', type:'open' },
-      { date:'Apr 12, 2026', event:'Initial deposit $50K ACH initiated — ETA Apr 14', type:'funding' },
-      { date:'Apr 12, 2026', event:'ACAT transfer $30K from Schwab initiated — ETA Apr 18', type:'funding' }
+      { date:'Apr 14, 2026', event:'Initial deposit $50K ACH received and settled', type:'funding' },
+      { date:'Apr 18, 2026', event:'ACAT transfer $30K from Schwab received — account fully funded $80K', type:'funding' },
+      { date:'Apr 20, 2026', event:'Initial portfolio construction executed per IPS target allocation', type:'trade' },
+      { date:'Apr 30, 2026', event:'First monthly statement generated — portfolio up +1.2% since inception', type:'report' }
     ],
     aiInsights: {
-      headline: 'New account — pending full funding Apr 18',
-      summary: 'MF-360001 account opened Apr 12. IMA signed, suitability approved. ACH initial deposit of $50K expected Apr 14; ACAT transfer of $30K from Schwab expected Apr 18. Once funded ($80K total), initial mutual fund portfolio construction will execute per IPS target allocation.',
-      actions: ['Monitor ACH receipt — expected Apr 14','Confirm ACAT transfer from Schwab — call if not received by Apr 19','Execute initial portfolio construction trade upon full funding','Send welcome package and online portal access instructions']
+      headline: 'New account fully funded — portfolio on target, strong early performance',
+      summary: 'MF-360001 fully funded Apr 18 ($50K ACH + $30K ACAT). Initial portfolio construction executed Apr 20 per IPS target allocation (60/20/15/5). Early performance +9.8% YTD vs S&P 500 Blend benchmark +9.2% — generating +0.6% alpha. No drift, no rebalancing needed. At current savings rate and 31-year horizon, portfolio projects to $820K by retirement 2057. Recommend adding $500/mo systematic investment plan to accelerate accumulation.',
+      actions: ['Set up $500/mo systematic investment plan to accelerate accumulation','Review IPS at 6-month mark (Oct 2026) — confirm risk tolerance and goals','Present deferred annuity illustration at Oct review — $50K single premium locks in lifetime income at 65','Cross-sell: disability income insurance gap — Alex has no DI coverage']
     }
   },
 
@@ -45939,7 +45991,7 @@ function iaRenderPortfolioReview() {
     { name:'Maria Gonzalez',  initials:'MG', grad:'linear-gradient(135deg,#0891b2,#06b6d4)', accts:2, aum:148000, ret:'+8.4%',  retPos:true,  flag:'On Track',             flagLevel:'ok',     acctId:'IA-MG-001' },
     { name:'Patricia Nguyen', initials:'PN', grad:'linear-gradient(135deg,#dc2626,#ef4444)', accts:1, aum:68000,  ret:'+7.4%',  retPos:true,  flag:'Minor Drift',          flagLevel:'med',    acctId:'IA-PN-001' },
     { name:'David Thompson',  initials:'DT', grad:'linear-gradient(135deg,#64748b,#94a3b8)', accts:1, aum:42000,  ret:'+3.1%',  retPos:true,  flag:'New Account',          flagLevel:'info',   acctId:'IA-DT-001' },
-    { name:'Alex Rivera',     initials:'AR', grad:'linear-gradient(135deg,#0891b2,#38bdf8)', accts:1, aum:0,      ret:'—',       retPos:false, flag:'Funding Pending',      flagLevel:'info',   acctId:'IA-AR-001' }
+    { name:'Alex Rivera',     initials:'AR', grad:'linear-gradient(135deg,#003087,#0057c8)', accts:1, aum:80000,  ret:'+9.8%',   retPos:true,  flag:'Active',               flagLevel:'good',   acctId:'IA-AR-001' }
   ];
 
   var flagColors = { urgent:'#dc2626', high:'#d97706', med:'#0891b2', ok:'#059669', info:'#7c3aed' };
@@ -45979,7 +46031,7 @@ function iaRenderPortfolioReview() {
     { urgency:'high',   icon:'fa-calendar-check',text:'James Whitfield annual review overdue — schedule Q2 meeting',  btn:'Schedule',      fn:'iaToast(\'<i class=\\\"fas fa-calendar-check\\\"></i> Q2 review scheduled for James Whitfield — Apr 15, 2026\',3000)' },
     { urgency:'med',    icon:'fa-leaf',           text:'Harvest $4,200 TLH — Robert Chen MF-300201 before Q2 close',    btn:'Harvest',       fn:'iaExecuteTLH(\'IA-RC-001\')' },
     { urgency:'med',    icon:'fa-leaf',           text:'Harvest $3,200 TLH — Linda Morrison MF-880201 before year-end',  btn:'Harvest',       fn:'iaExecuteTLH(\'IA-LM-001\')' },
-    { urgency:'low',    icon:'fa-clock',          text:'Monitor Alex Rivera funding — ACH + ACAT expected Apr 18',     btn:'View Account',  fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-AR-001\');},100)' },
+    { urgency:'low',    icon:'fa-check-circle',   text:'Alex Rivera IA-AR-001 fully funded $80K — portfolio active, +9.8% YTD', btn:'View Account',  fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-AR-001\');},100)' },
     { urgency:'low',    icon:'fa-balance-scale',  text:'Patricia Nguyen ETF drift 5.1% — minor rebalance recommended', btn:'View Plan',     fn:'iaClosePortfolioReview();setTimeout(function(){iaOpenAccount(\'IA-PN-001\');setTimeout(function(){iaSwitchTab(\'rebalance\',null);},120);},100)' }
   ];
 
@@ -48179,48 +48231,54 @@ function srOpenFullReview(id) {
     /* ── Alex Rivera Mutual Funds (Funding Pending) ── */
     'IA-AR-001': {
       client: 'Alex Rivera', accountNum: 'MF-360001', accountType: 'Mutual Funds',
-      reviewCycle: 'Semi-Annual (first review when funded)',
-      lastReview: 'N/A — new account', nextReview: 'Oct 1, 2026', reviewStatus: 'not-started',
-      reviewStatusLabel: 'First review — Oct 1, 2026',
+      reviewCycle: 'Semi-Annual',
+      lastReview: 'Apr 30, 2026', nextReview: 'Oct 1, 2026', reviewStatus: 'upcoming',
+      reviewStatusLabel: 'Upcoming — Oct 1, 2026',
       advisor: 'Sridhar R.', coordinator: 'NYL Branch Office',
-      meetingType: 'Video Call', meetingDuration: '60 min (initial portfolio review)',
+      meetingType: 'Video Call', meetingDuration: '60 min',
       meetingScheduled: 'Oct 1, 2026 · 2:00 PM (tentative)',
       kpis: [
-        { label: 'AUM',           val: '$0',     sub: 'Funding in progress',          color: '#64748b', icon: 'fa-coins'         },
-        { label: 'Expected AUM',  val: '$80K',   sub: 'ACH $50K + ACAT $30K',        color: '#003087', icon: 'fa-hourglass-half' },
-        { label: 'First Review',  val: 'Oct 1',  sub: '6 months post-funding',        color: '#003087', icon: 'fa-calendar'      },
-        { label: 'Risk Profile',  val: 'Mod. Growth', sub: 'Score 62 — IPS drafted', color: '#ea580c', icon: 'fa-chart-pie'     },
-        { label: 'Fee',           val: '1.00%',  sub: '~$800/yr when funded',        color: '#003087', icon: 'fa-hand-holding-usd'},
-        { label: 'Status',        val: 'Pending', sub: 'Awaiting full funding',       color: '#ea580c', icon: 'fa-clock'         }
+        { label: 'AUM',           val: '$80K',   sub: '+$4.8K since inception',        color: '#003087', icon: 'fa-coins'         },
+        { label: 'Return YTD',    val: '+9.8%',  sub: '+0.6% vs S&P 500 Blend',        color: '#059669', icon: 'fa-chart-line'    },
+        { label: 'Drift Score',   val: '1.4',    sub: 'No rebalance needed',           color: '#059669', icon: 'fa-balance-scale' },
+        { label: 'Risk Profile',  val: 'Mod. Growth', sub: 'IPS signed — 31-yr horizon', color: '#0891b2', icon: 'fa-chart-pie' },
+        { label: 'Fee',           val: '$800',   sub: '1.00% of AUM',                 color: '#003087', icon: 'fa-hand-holding-usd'},
+        { label: 'Next Review',   val: 'Oct 1',  sub: '6-month IPS check-in',          color: '#003087', icon: 'fa-calendar'      }
       ],
       agenda: [
-        { done: false, item: 'Confirm ACH receipt — $50K expected Apr 14' },
-        { done: false, item: 'Confirm ACAT transfer from Schwab — $30K expected Apr 18' },
-        { done: false, item: 'Execute initial portfolio construction trade — per IPS target allocation' },
-        { done: false, item: 'Send welcome package and online portal access' },
-        { done: false, item: 'Schedule first 6-month review — Oct 1, 2026' }
+        { done: true,  item: 'ACH receipt confirmed — $50K received Apr 14' },
+        { done: true,  item: 'ACAT transfer confirmed — $30K from Schwab received Apr 18' },
+        { done: true,  item: 'Initial portfolio construction executed Apr 20 — 60/20/15/5 target allocation' },
+        { done: true,  item: 'IPS signed by client — v1.0 executed Apr 22' },
+        { done: true,  item: 'Welcome package and online portal access sent' },
+        { done: false, item: 'Oct 1 review — 6-month performance recap, DI insurance gap conversation' },
+        { done: false, item: 'Present deferred annuity illustration — $50K GFIA premium' }
       ],
       lifeChanges: [
-        { question: 'Account status?',              answer: 'Funding in progress — April 2026',   flagged: false },
-        { question: 'IPS status?',                  answer: 'Draft v1.0 — pending client signature', flagged: true },
-        { question: 'Whole Life coordination?',     answer: 'Policy P-100360 delivered Apr 14',   flagged: false }
+        { question: 'Account status?',              answer: 'Active — fully funded $80K, portfolio live since Apr 20', flagged: false },
+        { question: 'IPS status?',                  answer: 'Signed v1.0 — Apr 22, 2026', flagged: false },
+        { question: 'Whole Life coordination?',     answer: 'Policy P-100360 active. WOP claim CLM-2026-0055 resolved — good experience.', flagged: false },
+        { question: 'Disability insurance?',        answer: 'No DI coverage — gap identified after WOP claim', flagged: true }
       ],
       ipsUpdate: {
-        currentVersion: 'v1.0 Draft — Apr 12, 2026',
-        changeNeeded: true,
-        proposedChanges: ['Obtain client IPS signature after funding confirmed','Document initial trade execution in IPS'],
-        complianceStatus: 'Pending client signature'
+        currentVersion: 'v1.0 — Apr 22, 2026',
+        changeNeeded: false,
+        proposedChanges: [],
+        complianceStatus: 'Current — review at Oct 2026 6-month check-in'
       },
       actions: [
-        { priority: 'urgent', label: 'Monitor ACH receipt — expected Apr 14',                          owner: 'Agent',  due: 'Apr 14, 2026', done: false },
-        { priority: 'urgent', label: 'Confirm ACAT from Schwab — call if not received Apr 19',        owner: 'Agent',  due: 'Apr 19, 2026', done: false },
-        { priority: 'high',   label: 'Execute initial portfolio construction trade upon full funding', owner: 'Agent',  due: 'Apr 20, 2026', done: false },
-        { priority: 'high',   label: 'Obtain IPS signature — send DocuSign',                         owner: 'Agent',  due: 'Apr 18, 2026', done: false },
-        { priority: 'medium', label: 'Send welcome package and portal access instructions',           owner: 'Agent',  due: 'Apr 20, 2026', done: false },
-        { priority: 'medium', label: 'Schedule first 6-month review — Oct 1, 2026',                  owner: 'Coordinator', due: 'Apr 22, 2026', done: false }
+        { priority: 'high',   label: 'Present DI insurance illustration — $5,000/mo benefit (natural WOP claim opener)', owner: 'Agent',  due: 'Oct 1, 2026', done: false },
+        { priority: 'high',   label: 'Present GFIA deferred annuity — $50K single premium, income at 65',               owner: 'Agent',  due: 'Oct 1, 2026', done: false },
+        { priority: 'medium', label: 'Set up $500/mo systematic investment plan to accelerate accumulation',             owner: 'Client', due: 'Oct 1, 2026', done: false },
+        { priority: 'medium', label: 'Review IPS at 6-month mark — confirm risk tolerance and goals unchanged',         owner: 'Agent',  due: 'Oct 1, 2026', done: false }
       ],
-      perfAttribution: [],
-      aiNarrative: 'MF-360001 is Alex Rivera\'s newly opened mutual fund account — funding is in progress with two tranches expected by Apr 18. Once funded ($80K initial AUM), the first portfolio construction trade will execute per the Moderate Growth IPS target allocation (60% US Equity / 20% Intl / 15% Fixed Income / 5% Cash). The first formal review is scheduled for Oct 1, 2026. Priority items before then: IPS signature, trade confirmation, and welcome onboarding. This account completes the full INV Track for Alex — from FNA Investment Profile to Products proposal, Account Opening, Funding & IPS, and now the Annual Review lifecycle.'
+      perfAttribution: [
+        { source: 'MainStay Epoch US Equity', contribution: '+6.0%', vs: 'Target +5.9%', status: 'outperform' },
+        { source: 'MainStay Candriam Intl',   contribution: '+1.4%', vs: 'Target +1.4%', status: 'inline'     },
+        { source: 'MainStay MacKay Bond',     contribution: '+0.5%', vs: 'Target +0.5%', status: 'inline'     },
+        { source: 'Cash / MMF',               contribution: '+0.2%', vs: 'Target +0.2%', status: 'inline'     }
+      ],
+      aiNarrative: 'MF-360001 is Alex Rivera\'s fully funded mutual fund account — $80K received via ACH ($50K) + ACAT ($30K from Schwab) in April 2026. Portfolio construction executed Apr 20 per Moderate Growth IPS target allocation. +9.8% YTD generates +0.6% alpha vs S&P 500 Blend benchmark — strong start. No drift, no rebalancing needed. With a 31-year horizon, this account projects to $820K+ by retirement 2057 at current trajectory. Key opportunities at Oct 1 review: (1) DI insurance cross-sell — Alex has no disability income protection (WOP claim in April created a natural conversation hook); (2) GFIA deferred annuity — $50K single premium generates $1,100/mo guaranteed income at 65; (3) $500/mo systematic plan to close the long-term accumulation gap. This account is a model for a complete New Client onboarding journey.'
     },
 
     /* ── Patricia Nguyen ETFs ── */
@@ -48805,6 +48863,37 @@ function srOpenFullReview(id) {
       aiNarrative: 'Robert Chen (age 45) has zero retirement products — a critical gap for a High Value client with $380K/yr income. The Guaranteed Future Income Annuity is the ideal longevity hedge: lifetime income that won\'t fluctuate with the financial markets, plus a variety of payout options — a $250K single premium now generates $3,200/mo guaranteed income starting at age 65, fully leveraging 20 years of deferral. Combined with SEP-IRA and business assets, Robert\'s retirement income would be fully secured. Key objection to prepare for: liquidity. Address with the "set it and forget it" framing — this supplements, not replaces, liquid assets. Close probability: 96/100 per AI suitability score.'
     },
 
+    'ANN-AR-001': {
+      id: 'ANN-AR-001', clientId: 9, clientName: 'Alex Rivera', initials: 'AR',
+      avatarGrad: 'linear-gradient(135deg,#003087,#0057c8)',
+      contractNum: 'NYL-GFIA-2026-0089', productType: 'Guaranteed Future Income Annuity',
+      typeCode: 'gfia', issuer: 'New York Life Insurance and Annuity Corp.',
+      premium: 50000, premiumFmt: '$50,000', paymentMode: 'Single Premium',
+      issueDate: 'Apr 22, 2026', contractDate: 'Apr 22, 2026',
+      surrenderEndDate: 'N/A — DIA income begins at 65',
+      contractAge: '< 1 year',
+      phase: 'accumulating', status: 'Active — Accumulating',
+      accountValue: 50000, accountValueFmt: '$50,000',
+      surrenderValue: null, surrenderValueFmt: 'N/A — DIA is irrevocable at purchase',
+      surrenderCharge: 'None — income begins at elected date',
+      freeWithdrawal: 'N/A',
+      incomeRiderValue: null, incomeRiderValueFmt: null,
+      incomeRiderGrowth: null,
+      guaranteedIncome: 1100, guaranteedIncomeFmt: '$1,100/mo',
+      incomeStartAge: 65, incomeStartYear: 2059,
+      riders: ['Joint & Survivor 100% (future spouse)', 'Return of Premium (death before income start)'],
+      subAccounts: [],
+      incomeGap: 2400, incomeGapFmt: '$2,400/mo (estimated)',
+      gapCovered: 46,
+      nextAnniversary: 'Apr 22, 2027',
+      reviewStatus: 'upcoming', lastReview: 'Apr 22, 2026', nextReview: 'Apr 22, 2027',
+      beneficiaries: [
+        { role: 'Primary', name: 'Emily Rivera (daughter)', relation: 'Child', pct: 100 }
+      ],
+      suitability: { riskProfile: 'Moderate Growth', score: 92, horizon: '33 years (to age 65)', liquidity: 'Low — longevity hedge product', tax: '22% bracket — tax deferral compounds over 33 years', regNote: 'FINRA Reg BI — suitability score 92/100 ✓' },
+      aiNarrative: 'Alex Rivera (age 32) is an ideal candidate for a Guaranteed Future Income Annuity — a $50,000 single premium with 33 years of deferral generates $1,100/mo guaranteed lifetime income at age 65. This is the best use of the longevity hedge: at age 32, the compounding effect of a DIA over 33 years is unmatched by any other product. Combined with the Whole Life policy P-100360 cash value and the investment account MF-360001, Alex\'s financial plan is taking strong shape. The $1,100/mo GFIA income covers approximately 46% of the estimated $2,400/mo retirement income gap — additional contributions or a second GFIA tranche at age 40 would close the remainder. Recommend annual review at each policy anniversary to model additional premium scenarios.'
+    },
+
     'ANN-DW-001': {
       id: 'ANN-DW-001', clientId: 7, clientName: 'Dorothy Wilson', initials: 'DW',
       avatarGrad: 'linear-gradient(135deg,#d97706,#fbbf24)',
@@ -49192,7 +49281,7 @@ function srOpenFullReview(id) {
     var age   = 56; // use a representative age; approximate from contract
     var names = {
       'ANN-JW-001': 52, 'ANN-SW-001': 61, 'ANN-LM-001': 56,
-      'ANN-MG-001': 48, 'ANN-RC-001': 45, 'ANN-DW-001': 61
+      'ANN-MG-001': 48, 'ANN-RC-001': 45, 'ANN-DW-001': 61, 'ANN-AR-001': 32
     };
     age = names[c.id] || 50;
 
@@ -49251,8 +49340,8 @@ function srOpenFullReview(id) {
     }).join('');
 
     // Income source waterfall
-    var ssEst    = { 'ANN-JW-001': 3200, 'ANN-LM-001': 2800, 'ANN-SW-001': 2400, 'ANN-MG-001': 2100, 'ANN-RC-001': 3600, 'ANN-DW-001': 1980 }[c.id] || 2000;
-    var pensEst  = { 'ANN-JW-001': 3200, 'ANN-LM-001': 0, 'ANN-SW-001': 0, 'ANN-MG-001': 0, 'ANN-RC-001': 0, 'ANN-DW-001': 2100 }[c.id] || 0;
+    var ssEst    = { 'ANN-JW-001': 3200, 'ANN-LM-001': 2800, 'ANN-SW-001': 2400, 'ANN-MG-001': 2100, 'ANN-RC-001': 3600, 'ANN-DW-001': 1980, 'ANN-AR-001': 2800 }[c.id] || 2000;
+    var pensEst  = { 'ANN-JW-001': 3200, 'ANN-LM-001': 0, 'ANN-SW-001': 0, 'ANN-MG-001': 0, 'ANN-RC-001': 0, 'ANN-DW-001': 2100, 'ANN-AR-001': 0 }[c.id] || 0;
     var annInc   = c.guaranteedIncome || 0;
     var totalInc = ssEst + pensEst + annInc;
     var gapAmt   = c.incomeGap || 0;
@@ -51138,6 +51227,25 @@ function srOpenFullReview(id) {
       aiInsight: 'Robert is significantly behind for a 60-retirement. Gap is $2.66M over 5 years — requires $44K/mo savings vs. current $12K. Recommend business succession planning with buy-sell agreement, key-man life insurance, and converting business equity into diversified assets over 3-year glide path.'
     },
     {
+      id: 'ADV-AR-001', name: 'Alex Rivera', age: 32,
+      planType: 'Protection & Accumulation', status: 'active', priority: 'medium',
+      healthScore: 84, lastReview: '2026-04-22', nextReview: '2026-10-01',
+      aum: 130000, annualFee: 1200, feeType: 'Flat fee (emerging client)',
+      goals: [
+        { label: 'Emergency fund 6 months', progress: 75, target: 60000, current: 45000, onTrack: true },
+        { label: 'Investment AUM $500K by 45', progress: 16, target: 500000, current: 80000, onTrack: true },
+        { label: 'Protect Emily (minor child)', progress: 60, target: 100, current: 60, onTrack: true }
+      ],
+      cashFlow: { monthlyIncome: 10000, monthlyExpenses: 6800, monthlySavings: 3200, savingsRate: 32 },
+      assets: [
+        { label: 'Mutual Funds (MF-360001)', value: 80000, pct: 62, color: '#003087' },
+        { label: 'WL Cash Value (P-100360)', value: 2400, pct: 2, color: '#0891b2' },
+        { label: 'GFIA Annuity', value: 50000, pct: 38, color: '#f59e0b' }
+      ],
+      risk: { score: 6, label: 'Moderate Growth', equity: 61, fixed: 34, alt: 5 },
+      aiInsight: 'Alex Rivera is a strong emerging client with a complete financial foundation built in Q1 2026 (WL policy, investment account, deferred annuity). Key next steps: (1) close the disability insurance gap — a $5K/mo DI policy is critical with no employer DI benefit; (2) establish UTMA trust for Emily Rivera (minor beneficiary on P-100360); (3) systematic investment plan $500/mo to accelerate AUM toward $500K target by age 45.'
+    },
+    {
       id: 'ADV-DW-001', name: 'Dorothy Wilson', age: 72,
       planType: 'Legacy & Distribution', status: 'distributing', priority: 'low',
       healthScore: 95, lastReview: '2025-04-28', nextReview: '2025-07-28',
@@ -52550,6 +52658,27 @@ function srOpenFullReview(id) {
       aiRec: 'Most urgent case on book: minor children with no guardianship document. A simple will can resolve this within weeks. Refer to estate attorney today and add contingent beneficiary to policy immediately.'
     },
     {
+      id: 'ep007',
+      name: 'Alex Rivera',
+      age: 32,
+      estateValue: '$580K',
+      status: 'in-progress',
+      statusLabel: 'In Progress',
+      lastReview: '2 weeks ago',
+      avatar: 'AR',
+      color: '#f59e0b',
+      summary: 'Estate planning initiated alongside policy delivery. UTMA trust for minor daughter Emily Rivera is the top priority. Basic will drafted — attorney appointment scheduled.',
+      pillars: {
+        will: { status: 'partial', label: 'Will — In Draft', note: 'Basic will drafted by referred estate attorney. Signing appointment scheduled for May 2026. Designates Emily Rivera as heir and names guardian.' },
+        trust: { status: 'partial', label: 'UTMA Trust — In Progress', note: 'UTMA custodial account being established for Emily Rivera (age 4). Life insurance proceeds (P-100360 $500K) will flow into UTMA on death of policyholder. Trust attorney engaged.' },
+        beneficiary: { status: 'ok', label: 'Beneficiaries — Updated', note: 'P-100360 Whole Life beneficiary: Emily Rivera (primary, 100%). ANN-AR-001 GFIA beneficiary: Emily Rivera (primary, 100%). All designations current.' },
+        pow: { status: 'missing', label: 'Power of Attorney — Not Yet', note: 'No POA or healthcare directive in place. Recommend completing alongside will signing appointment.' },
+        legacy: { status: 'partial', label: 'Legacy Plan — Early Stage', note: 'No formal legacy plan yet. Whole Life cash value and GFIA annuity provide long-term legacy foundation. Structured giving to be discussed at age 40+ review.' }
+      },
+      coordinators: ['Estate Attorney: Sarah Kim (Kim & Associates — referred by NYL)', 'CPA: Marcus Webb'],
+      aiRec: 'Good momentum — keep attorney appointment on track for will signing. Establish POA at the same appointment. UTMA trust for Emily Rivera is the cornerstone — ensure WL policy P-100360 ownership coordinates with trust documents. Follow up in 6 months to confirm trust execution and UTMA funding instructions are in place.'
+    },
+    {
       id: 'ep006',
       name: 'Dorothy Wilson',
       age: 79,
@@ -53183,6 +53312,27 @@ function srOpenFullReview(id) {
         retirement: { status: 'active', label: 'Retirement Plan — Solo 401(k)', note: 'Solo 401(k) contributing $66K/year (max). Partners not covered — ERISA exposure if classified as employees.' }
       },
       aiRec: 'Schedule a full business review. Priority items: update group enrollment for new hires, increase key-man coverage by at least $400K, draft buy-sell agreement with attorney. ERISA risk re: 401(k) eligibility should be reviewed by plan counsel.'
+    },
+    {
+      id: 'sb007',
+      name: 'Alex Rivera',
+      bizName: 'Rivera Advisory Group LLC',
+      bizType: 'Independent Consulting',
+      employees: 1,
+      status: 'in-progress',
+      statusLabel: 'In Progress',
+      avatar: 'AR',
+      color: '#f59e0b',
+      lastReview: '1 month ago',
+      summary: 'Sole proprietor consulting practice (side business alongside Deloitte role). LLC formed March 2026. Key-man insurance conversation initiated — personal WL policy P-100360 already in force provides partial coverage. SEP-IRA setup in discussion.',
+      products: {
+        keyman: { status: 'partial', label: 'Key-Man Insurance — Partial via WL', note: 'Personal Whole Life P-100360 ($500K) provides partial key-person coverage for the sole-owner LLC. A dedicated $500K key-person term policy is recommended to fully cover business revenue replacement.' },
+        group: { status: 'missing', label: 'Group Benefits — N/A (Solo)', note: 'Single-person LLC — no group plan required. Health coverage through Deloitte employer plan.' },
+        execComp: { status: 'missing', label: 'Executive Comp — Not Started', note: 'No Section 162 executive bonus plan or deferred compensation. Opportunity: WL policy-funded executive bonus is a natural extension of existing P-100360 structure.' },
+        succession: { status: 'missing', label: 'Business Succession — None', note: 'No succession plan. Single-owner LLC dissolves on death without planning. Simple operating agreement and buy-sell trigger needed.' },
+        retirement: { status: 'partial', label: 'Retirement Plan — SEP-IRA Proposed', note: 'SEP-IRA proposal presented Apr 2026. Alex earns $30K/yr net from consulting — SEP contribution up to $7,500/yr (25% of net). High tax-deferral value. Awaiting client sign-off.' }
+      },
+      aiRec: 'Strong short-term opportunity: SEP-IRA for tax deferral on consulting income ($7,500/yr max). Pair with a dedicated $500K key-person term policy to separate personal and business coverage. Schedule operating agreement review with business attorney (Sarah Kim is already engaged for estate plan — natural expansion). Long-term: Section 162 executive bonus plan if consulting revenue scales beyond $100K.'
     }
   ];
 
