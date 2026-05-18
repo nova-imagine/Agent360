@@ -412,6 +412,7 @@ const domainCoverage = {
   6: { ins: true,  inv: true,  ret: true,  adv: false, gaps: true  },
   7: { ins: true,  inv: false, ret: false, adv: false, gaps: true  },
   8: { ins: true,  inv: true,  ret: true,  adv: true,  gaps: false },
+  9: { ins: true,  inv: true,  ret: true,  adv: true,  aum: '$80K', gaps: true  },
 };
 
 function filterByDomain(domain) {
@@ -1167,6 +1168,14 @@ const cmDocsData = {
     { id:'DOC-075', name:'Trust Documents — 2 Trusts', type:'Legal', format:'PDF', size:'8.1 MB', date:'Jan 2026', status:'current', category:'advisory' },
     { id:'DOC-076', name:'UMA Q1 2026 Performance Report', type:'Statement', format:'PDF', size:'1.4 MB', date:'Apr 2026', status:'current', category:'investments' },
     { id:'DOC-077', name:'Annual Review Deck 2026', type:'Review', format:'PPTX', size:'4.2 MB', date:'Feb 2026', status:'current', category:'review' },
+  ],
+  9: [
+    { id:'DOC-091', name:'Whole Life Policy P-100360', type:'Policy', format:'PDF', size:'2.2 MB', date:'Apr 2026', status:'current', category:'insurance' },
+    { id:'DOC-092', name:'Mutual Fund Account MF-360001', type:'Statement', format:'PDF', size:'0.8 MB', date:'Apr 2026', status:'current', category:'investments' },
+    { id:'DOC-093', name:'GFIA Annuity ANN-AR-001', type:'Policy', format:'PDF', size:'1.6 MB', date:'Apr 2026', status:'current', category:'retirement' },
+    { id:'DOC-094', name:'Financial Planning Agreement ADV-AR-001', type:'Legal', format:'PDF', size:'1.1 MB', date:'Apr 2026', status:'current', category:'advisory' },
+    { id:'DOC-095', name:'Waiver of Premium Claim CLM-2026-0055', type:'Claim', format:'PDF', size:'0.6 MB', date:'Apr 2026', status:'current', category:'claims' },
+    { id:'DOC-096', name:'Disability Income Illustration (DI gap)', type:'Illustration', format:'PDF', size:'0.9 MB', date:'Apr 2026', status:'pending', category:'insurance' },
   ],
 };
 
@@ -25677,15 +25686,14 @@ function setAlertTab(btn, tab) {
 
 function renderAlertList(tab) {
   // Both 'alerts-list' (standalone Alerts page) and 'alert-list-col' (Policies tab)
-  // exist simultaneously in the DOM. We must pick the VISIBLE/ACTIVE one.
-  // Check if the Policies Lapse & Alerts panel is currently shown.
+  // exist simultaneously in DOM. Must pick the VISIBLE one.
+  // Prefer alert-list-col if pol-panel-alerts is not explicitly hidden (display != 'none').
   const polAlertsPanel = document.getElementById('pol-panel-alerts');
-  const isPoliciesAlertsActive = polAlertsPanel &&
-    polAlertsPanel.style.display !== 'none' &&
-    polAlertsPanel.offsetParent !== null;
-  const list = isPoliciesAlertsActive
-    ? (document.getElementById('alert-list-col') || document.getElementById('alerts-list'))
-    : (document.getElementById('alerts-list') || document.getElementById('alert-list-col'));
+  const alertListCol = document.getElementById('alert-list-col');
+  const useColVersion = polAlertsPanel && polAlertsPanel.style.display !== 'none' && alertListCol;
+  const list = useColVersion
+    ? alertListCol
+    : (document.getElementById('alerts-list') || alertListCol);
   if (!list) return;
   let items = alertsData;
   if (tab && tab !== 'all') items = items.filter(a => a.tags.includes(tab));
