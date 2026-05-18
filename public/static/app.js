@@ -42291,7 +42291,7 @@ var _fcwFraudFlags = {
 };
 
 function openFileClaimWizard() {
-  window._fcw = { step: 1, client: '', clientKey: '', type: '', policy: null, docs: [], docsInitialized: false, claimId: '', lossDate: '', desc: '', claimant: '', relationship: '', amount: '', hasUpload: false };
+  window._fcw = { step: 1, client: '', clientKey: '', type: '', policy: null, docs: [], docsInitialized: false, claimId: '', lossDate: '', desc: '', claimant: '', relationship: '', amount: '', hasUpload: false, typeFields: {} };
   var el = document.getElementById('file-claim-overlay');
   if (el) el.remove();
   var overlay = document.createElement('div');
@@ -42633,6 +42633,9 @@ function fcwStep2Body() {
       '</div>';
   }
 
+  // Render adaptive conditional fields panel for the selected claim type
+  var conditionalFieldsHTML = window._fcw.type ? fcwRenderConditionalFields(window._fcw.type) : '';
+
   return '<div class="fcw-step-title"><i class="fas fa-clipboard-list"></i> Step 2 — Claim Type &amp; Event Details</div>' +
     '<div class="fcw-field-group">' +
       '<label class="fcw-label">Select Claim Type ' +
@@ -42640,6 +42643,7 @@ function fcwStep2Body() {
       '</label>' +
       typeGroupsHTML +
     '</div>' +
+    conditionalFieldsHTML +
     '<div class="fcw-field-row">' +
       '<div class="fcw-field-group" style="flex:1">' +
         '<label class="fcw-label">Date of Loss / Event</label>' +
@@ -42667,7 +42671,12 @@ function fcwSelectType(t) {
   if (ld) window._fcw.lossDate = ld.value;
   if (am) window._fcw.amount = am.value;
   if (dc) window._fcw.desc = dc.value;
+  // Harvest any already-filled type-specific fields before switching type
+  fcwHarvestTypeFields();
+  var prevType = window._fcw.type;
   window._fcw.type = t;
+  // Clear type-specific fields when claim type changes (fresh slate for new type)
+  if (prevType !== t) window._fcw.typeFields = {};
   // Clear policy + docs when type changes so Step 3 re-matches and Step 4 re-initializes
   window._fcw.policy = null;
   window._fcw.docs = [];
@@ -42680,6 +42689,9 @@ function fcwNextStep2() {
   var am = document.getElementById('fcw-amount');
   if (!window._fcw.type) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a claim type', 2000); return; }
   if (!ld || !ld.value) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please enter the date of loss', 2000); return; }
+  // Harvest + validate type-specific conditional fields
+  var validationError = fcwHarvestTypeFields(true);
+  if (validationError) { p7Toast('<i class="fas fa-exclamation-triangle"></i> ' + validationError, 2500); return; }
   window._fcw.lossDate = ld.value;
   window._fcw.desc     = dc ? dc.value : '';
   window._fcw.amount   = am ? am.value : '';
@@ -43033,6 +43045,7 @@ function fcwStep5Body() {
           '<div class="fcw-review-row"><span>Date of Loss</span><strong>' + (w.lossDate || '—') + '</strong></div>' +
           '<div class="fcw-review-row"><span>Est. Amount</span><strong>' + (w.amount || 'Full policy face value') + '</strong></div>' +
           '<div class="fcw-review-row"><span>Description</span><strong>' + (w.desc ? w.desc.substring(0,60) + (w.desc.length > 60 ? '…' : '') : '—') + '</strong></div>' +
+          fcwReviewTypeFields(w.type, w.typeFields) +
         '</div>' +
         '<div class="fcw-review-section">' +
           '<div class="fcw-review-section-title">Policy</div>' +
@@ -58433,3 +58446,341 @@ function openComplaintRiskModal(claimId) {
 }
 
 console.log('Pass 28 — Complaint Prediction module loaded');
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 29 — DYNAMIC INFORMATION COLLECTION
+   Adaptive conditional fields injected into FNOL Wizard Step 2
+   Renders claim-type-specific required inputs immediately on type
+   selection without requiring a step change.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── TYPE-SPECIFIC CONDITIONAL FIELD DEFINITIONS ─────────────────
+   Each entry is keyed by claim type string.
+   Format: { label, fields: [{ id, label, type, required, placeholder,
+             options (for select), hint, width ('half'|'full') }] }
+   ─────────────────────────────────────────────────────────────── */
+var _fcwConditionalFields = {
+
+  'Death Benefit': {
+    label: 'Death Claim — Required Information',
+    color: '#7c3aed',
+    icon:  'heart-broken',
+    fields: [
+      { id:'death_date',       label:'Date of Death',             type:'date',   required:true,  width:'half', hint:'Must match the death certificate exactly' },
+      { id:'cause_of_death',   label:'Cause of Death',            type:'select', required:true,  width:'half',
+        options:['— Select —','Natural causes / illness','Heart attack / cardiac arrest','Stroke / cerebrovascular','Cancer / malignancy','Accidental / trauma','Suicide','Homicide','Unknown / pending investigation','Other'] },
+      { id:'place_of_death',   label:'Place of Death',            type:'select', required:false, width:'half',
+        options:['— Select —','Hospital / medical facility','Home / private residence','Hospice / palliative care','Nursing / assisted living facility','Accident scene','Other'] },
+      { id:'attending_physician',label:'Attending Physician / Hospital', type:'text', required:false, width:'half', placeholder:'e.g. Dr. Sarah Kim, St. Luke\'s Medical Center' },
+      { id:'coroner_ref',      label:'Coroner / Medical Examiner Report #', type:'text', required:false, width:'half', placeholder:'Required if accidental or suspicious death' },
+      { id:'death_state',      label:'State Where Death Occurred', type:'text', required:false, width:'half', placeholder:'e.g. California', hint:'Governs applicable state insurance statutes' }
+    ]
+  },
+
+  'Accelerated Death Benefit (ADB)': {
+    label: 'ADB — Terminal Illness Details',
+    color: '#7c3aed',
+    icon:  'heartbeat',
+    fields: [
+      { id:'terminal_diagnosis',  label:'Terminal Diagnosis',       type:'text',   required:true,  width:'full', placeholder:'e.g. Stage IV Non-Small Cell Lung Cancer (NSCLC)', hint:'Must match the attending physician certification' },
+      { id:'diagnosis_date',      label:'Date of Diagnosis',        type:'date',   required:true,  width:'half', hint:'Date the terminal condition was formally diagnosed' },
+      { id:'life_expectancy_mo',  label:'Physician-Estimated Life Expectancy', type:'select', required:true, width:'half',
+        options:['— Select —','≤ 3 months','3–6 months','6–9 months','9–12 months','> 12 months (review required)'] },
+      { id:'treating_physician',  label:'Treating / Certifying Physician', type:'text', required:true, width:'half', placeholder:'Full name and NPI number' },
+      { id:'treatment_facility',  label:'Treatment Facility',       type:'text',   required:false, width:'half', placeholder:'Hospital or oncology center name' },
+      { id:'adb_pct_requested',   label:'Percentage of Benefit Requested', type:'select', required:false, width:'half',
+        options:['— Select —','25%','50%','75%','100% (Full Acceleration)'] },
+      { id:'purpose_of_funds',    label:'Intended Use of Accelerated Funds', type:'select', required:false, width:'half',
+        options:['— Select —','Medical treatment / hospice care','Living expenses','Family financial support','Estate planning','Other'] }
+    ]
+  },
+
+  'Accidental Death Benefit (ADB Rider)': {
+    label: 'Accidental Death — Incident Details',
+    color: '#dc2626',
+    icon:  'car-crash',
+    fields: [
+      { id:'accident_date',    label:'Date of Accident',            type:'date',   required:true,  width:'half', hint:'Must match police / official accident report' },
+      { id:'accident_type',    label:'Type of Accident',            type:'select', required:true,  width:'half',
+        options:['— Select —','Motor vehicle accident','Workplace / industrial accident','Fall / blunt trauma','Drowning','Accidental poisoning / overdose','Fire / explosion','Aviation accident','Other accidental cause'] },
+      { id:'accident_location',label:'Accident Location (City, State)', type:'text', required:false, width:'half', placeholder:'e.g. Houston, TX' },
+      { id:'police_report_no', label:'Police / Incident Report Number', type:'text', required:false, width:'half', placeholder:'Official report number from investigating authority' },
+      { id:'was_at_work',      label:'Did the Accident Occur During Employment?', type:'select', required:false, width:'half',
+        options:['— Select —','No — personal time','Yes — on duty','Yes — commuting to/from work'] },
+      { id:'third_party_involved', label:'Third Party / Other Vehicle Involved?', type:'select', required:false, width:'half',
+        options:['— Select —','No','Yes — identified','Yes — hit and run'] }
+    ]
+  },
+
+  'Disability Income': {
+    label: 'Disability Claim — Clinical & Employment Details',
+    color: '#0f766e',
+    icon:  'user-injured',
+    fields: [
+      { id:'disability_diagnosis', label:'Primary Disability Diagnosis', type:'text', required:true, width:'full', placeholder:'e.g. Lumbar disc herniation with radiculopathy (ICD-10: M51.16)', hint:'Include ICD-10 code where possible' },
+      { id:'last_day_worked',   label:'Last Day Actively Worked',   type:'date',   required:true,  width:'half', hint:'First day of elimination period calculation' },
+      { id:'disability_onset',  label:'Date Disability Began',      type:'date',   required:true,  width:'half', hint:'May differ from last day worked if disability was gradual onset' },
+      { id:'disability_type',   label:'Disability Type',            type:'select', required:true,  width:'half',
+        options:['— Select —','Total disability — unable to perform own occupation','Total disability — unable to perform any occupation','Partial / residual disability','Presumptive disability (total loss of sight, hearing, limbs, etc.)'] },
+      { id:'employer_name',     label:'Employer Name',              type:'text',   required:true,  width:'half', placeholder:'Current or most recent employer' },
+      { id:'employer_contact',  label:'Employer HR / Payroll Contact', type:'text', required:false, width:'half', placeholder:'Name, title, phone number' },
+      { id:'treating_physician',label:'Treating Physician (Primary)', type:'text', required:false, width:'half', placeholder:'Full name and practice / hospital' },
+      { id:'other_disability_income', label:'Other Disability Income Received?', type:'select', required:false, width:'half',
+        options:['— Select —','None','Social Security Disability (SSDI)','Workers\' Compensation','State disability benefits','Short-term disability from employer','Other group disability plan'] }
+    ]
+  },
+
+  'Long-term Care (LTC)': {
+    label: 'LTC Claim — Care Level & Facility Details',
+    color: '#0f766e',
+    icon:  'hospital',
+    fields: [
+      { id:'care_level',        label:'Level of Care Required',     type:'select', required:true,  width:'half',
+        options:['— Select —','Skilled nursing facility (SNF)','Assisted living facility (ALF)','Home health care — skilled nursing','Home health care — custodial / personal care','Adult day care','Memory care / dementia unit','Hospice / palliative care'] },
+      { id:'adl_count',         label:'Number of ADL Impairments',  type:'select', required:true,  width:'half',
+        options:['— Select —','2 ADLs (minimum threshold)','3 ADLs','4 ADLs','5 ADLs','6 ADLs (all)','Cognitive impairment (Alzheimer\'s / dementia) — no ADL count required'] },
+      { id:'adl_list',          label:'Which ADLs Are Impaired?',   type:'text',   required:false, width:'full', placeholder:'e.g. Bathing, dressing, toileting — check those that apply', hint:'From the 6 standard ADLs: bathing, dressing, eating, toileting, transferring, continence' },
+      { id:'care_start_date',   label:'Date Care Services Began',   type:'date',   required:true,  width:'half', hint:'Start of benefit period — elimination period calculated from this date' },
+      { id:'facility_name',     label:'Care Facility / Agency Name', type:'text',  required:false, width:'half', placeholder:'e.g. Sunrise Memory Care, Home Instead Senior Care' },
+      { id:'facility_license',  label:'Facility State License #',   type:'text',   required:false, width:'half', placeholder:'Required for benefit reimbursement' },
+      { id:'monthly_cost',      label:'Monthly Care Cost (USD)',     type:'text',   required:false, width:'half', placeholder:'e.g. $4,800 / month — for reimbursement calculation', hint:'Must not exceed daily maximum benefit per policy' },
+      { id:'cognitive_impairment', label:'Is Cognitive Impairment Present?', type:'select', required:false, width:'half',
+        options:['— Select —','No','Yes — Alzheimer\'s disease','Yes — vascular dementia','Yes — other dementia','Yes — traumatic brain injury (TBI)'] }
+    ]
+  },
+
+  'Waiver of Premium': {
+    label: 'Premium Waiver — Disability Certification',
+    color: '#0f766e',
+    icon:  'ban',
+    fields: [
+      { id:'disability_onset',  label:'Date Total Disability Began', type:'date',  required:true,  width:'half', hint:'Elimination period begins on this date (typically 6 months)' },
+      { id:'last_premium_paid', label:'Last Premium Payment Date',   type:'date',  required:false, width:'half', hint:'To identify premiums that qualify for waiver retroactively' },
+      { id:'waiver_diagnosis',  label:'Disabling Condition',         type:'text',  required:true,  width:'full', placeholder:'e.g. Bilateral knee replacement — total disability anticipated > 6 months' },
+      { id:'expected_duration', label:'Expected Duration of Disability', type:'select', required:false, width:'half',
+        options:['— Select —','< 6 months','6–12 months','1–2 years','2–5 years','Permanent / indefinite'] },
+      { id:'employer_name',     label:'Employer / Occupation',       type:'text',  required:false, width:'half', placeholder:'Insured\'s occupation at time of disability onset' }
+    ]
+  },
+
+  'Critical Illness Rider': {
+    label: 'Critical Illness — Diagnosis & Treatment',
+    color: '#0369a1',
+    icon:  'disease',
+    fields: [
+      { id:'ci_diagnosis',      label:'Critical Illness Diagnosed',  type:'select', required:true,  width:'half',
+        options:['— Select —','Cancer (malignant tumor)','Heart attack (myocardial infarction)','Stroke (cerebrovascular accident)','Coronary artery bypass surgery (CABG)','Kidney (renal) failure','Major organ transplant','Paralysis','Blindness (permanent)','Deafness (permanent)','Coma','Other covered critical illness'] },
+      { id:'ci_diagnosis_date', label:'Date of Confirmed Diagnosis', type:'date',  required:true,  width:'half', hint:'Date specialist confirmed the qualifying critical illness' },
+      { id:'diagnosing_specialist', label:'Diagnosing Specialist',   type:'text',  required:true,  width:'half', placeholder:'Board-certified specialist name and specialty' },
+      { id:'cancer_stage',      label:'Cancer Stage (if applicable)', type:'select', required:false, width:'half',
+        options:['— N/A —','Stage I','Stage II','Stage III','Stage IV','In situ / non-invasive'] },
+      { id:'treatment_type',    label:'Treatment Being Received',    type:'select', required:false, width:'half',
+        options:['— Select —','Surgery','Chemotherapy','Radiation therapy','Immunotherapy','Combined modality therapy','Palliative / comfort care only','No treatment initiated'] },
+      { id:'treatment_hospital',label:'Treating Hospital / Cancer Center', type:'text', required:false, width:'half', placeholder:'e.g. MD Anderson Cancer Center, Houston TX' }
+    ]
+  },
+
+  'Chronic Illness Rider (Living Benefit)': {
+    label: 'Chronic Illness — Functional Assessment',
+    color: '#0369a1',
+    icon:  'wheelchair',
+    fields: [
+      { id:'chronic_condition', label:'Primary Chronic Condition',   type:'text',  required:true,  width:'full', placeholder:'e.g. Parkinson\'s disease with severe motor impairment, Multiple Sclerosis (progressive)', hint:'Must be certified permanent — not expected to improve' },
+      { id:'certification_date',label:'Date of Chronic Illness Certification', type:'date', required:true, width:'half', hint:'Date licensed health practitioner signed the eligibility certification' },
+      { id:'adl_impairments',   label:'Number of Permanent ADL Impairments', type:'select', required:true, width:'half',
+        options:['— Select —','2 ADLs (minimum)','3 ADLs','4 ADLs','5 ADLs','6 ADLs','Severe cognitive impairment — no ADL count required'] },
+      { id:'certifying_practitioner', label:'Certifying Healthcare Practitioner', type:'text', required:false, width:'half', placeholder:'Licensed physician, RN, or licensed clinical social worker' },
+      { id:'chronic_benefit_pct', label:'Percentage of Death Benefit Requested', type:'select', required:false, width:'half',
+        options:['— Select —','25%','50%','75%','100%','Monthly indemnity (where applicable)'] }
+    ]
+  },
+
+  'Child Term Rider': {
+    label: "Child Rider — Dependent Identification",
+    color: '#0369a1',
+    icon:  'baby',
+    fields: [
+      { id:'child_name',        label:"Covered Child's Full Legal Name", type:'text', required:true, width:'half', placeholder:'As listed on birth certificate' },
+      { id:'child_dob',         label:"Child's Date of Birth",        type:'date',  required:true,  width:'half', hint:'Must match certified birth certificate' },
+      { id:'child_death_date',  label:"Date of Child's Death",        type:'date',  required:true,  width:'half', hint:'Must match the death certificate exactly' },
+      { id:'child_cause_of_death', label:"Cause of Death",            type:'select', required:true, width:'half',
+        options:['— Select —','Illness / disease','Accident / trauma','Sudden Infant Death Syndrome (SIDS)','Congenital condition','Other'] },
+      { id:'child_relationship',label:'Relationship to Insured',      type:'select', required:false, width:'half',
+        options:['— Select —','Biological child','Adopted child','Stepchild','Legal ward'] }
+    ]
+  },
+
+  'Survivorship (2nd-to-die) Benefit': {
+    label: 'Survivorship — Both Insured Deaths',
+    color: '#7c3aed',
+    icon:  'users',
+    fields: [
+      { id:'first_insured_name',  label:"First Insured's Full Name",  type:'text',  required:true,  width:'half', placeholder:'Name of the first insured who died' },
+      { id:'first_death_date',    label:"First Insured's Date of Death", type:'date', required:true, width:'half' },
+      { id:'second_insured_name', label:"Second Insured's Full Name", type:'text',  required:true,  width:'half', placeholder:'Name of the second insured who died (triggering payout)' },
+      { id:'second_death_date',   label:"Second Insured's Date of Death (Trigger)", type:'date', required:true, width:'half', hint:'Benefit is paid after the second insured dies' },
+      { id:'estate_contact',      label:'Estate Executor / Trustee',  type:'text',  required:false, width:'half', placeholder:'Name and contact info of the estate representative' },
+      { id:'probate_state',       label:'Probate / Trust Jurisdiction (State)', type:'text', required:false, width:'half', placeholder:'e.g. New York' }
+    ]
+  },
+
+  'Policy Surrender / Cash Value': {
+    label: 'Surrender — Account & Tax Details',
+    color: '#b45309',
+    icon:  'money-bill-wave',
+    fields: [
+      { id:'surrender_type',    label:'Surrender Type',              type:'select', required:true,  width:'half',
+        options:['— Select —','Full / complete surrender','Partial surrender — specified amount','Partial surrender — percentage of CSV'] },
+      { id:'surrender_amount',  label:'Partial Surrender Amount (if partial)', type:'text', required:false, width:'half', placeholder:'e.g. $25,000 — leave blank for full surrender' },
+      { id:'reason_for_surrender', label:'Reason for Surrender',    type:'select', required:false, width:'half',
+        options:['— Select —','Financial hardship — needs cash now','Policy no longer needed','Replacing with new coverage','Investment reallocation','Estate planning change','Other'] },
+      { id:'has_policy_loan',   label:'Outstanding Policy Loan?',   type:'select', required:false, width:'half',
+        options:['— Select —','No — policy loan free','Yes — I understand loan balance will be deducted from CSV'] },
+      { id:'tax_aware',         label:'Tax Acknowledgement',        type:'select', required:true,  width:'full',
+        options:['— Select —','Yes — I understand surrender gains above basis are taxable as ordinary income','No — I need tax guidance before proceeding'] }
+    ]
+  },
+
+  'Maturity / Endowment': {
+    label: 'Maturity — Payout Election',
+    color: '#b45309',
+    icon:  'calendar-check',
+    fields: [
+      { id:'maturity_date',     label:'Policy Maturity Date',        type:'date',  required:true,  width:'half', hint:'Found on the policy declaration page' },
+      { id:'payout_option',     label:'Maturity Payout Option',      type:'select', required:true, width:'half',
+        options:['— Select —','Lump sum (full face / endowment value)','Extended term insurance','Reduced paid-up insurance','Annuitize — fixed annuity','Annuitize — variable annuity','Leave proceeds on deposit (interest option)'] },
+      { id:'bank_name',         label:'Bank Name (for EFT payout)',  type:'text',  required:false, width:'half', placeholder:'e.g. Chase Bank, Wells Fargo' },
+      { id:'bank_account_type', label:'Account Type',                type:'select', required:false, width:'half',
+        options:['— Select —','Checking account','Savings account'] }
+    ]
+  },
+
+  'Annuity Income Claim': {
+    label: 'Annuity — Payout Structure',
+    color: '#b45309',
+    icon:  'chart-line',
+    fields: [
+      { id:'annuity_trigger',   label:'Claim Trigger',               type:'select', required:true,  width:'half',
+        options:['— Select —','Annuitization election (living benefit)','Death of annuitant — death benefit payout','Required Minimum Distribution (RMD)','Surrender / withdrawal','Disability / long-term care rider on annuity'] },
+      { id:'annuity_payout_option', label:'Payout Option Selected',  type:'select', required:false, width:'half',
+        options:['— Select —','Life only','Life with period certain (10/15/20 years)','Joint and survivor (50%)','Joint and survivor (100%)','Period certain only','Lump sum — death benefit','Systematic withdrawal plan'] },
+      { id:'annuitant_dob',     label:"Annuitant's Date of Birth",  type:'date',   required:false, width:'half', hint:'Required for income calculation' },
+      { id:'joint_annuitant',   label:'Joint Annuitant Name (if applicable)', type:'text', required:false, width:'half', placeholder:'Required for joint-and-survivor payout options' }
+    ]
+  },
+
+  'Paid-up Additions': {
+    label: 'PUA — Dividend Election',
+    color: '#b45309',
+    icon:  'plus-circle',
+    fields: [
+      { id:'dividend_option',   label:'Dividend Application Option', type:'select', required:true,  width:'half',
+        options:['— Select —','Paid-up additions (purchase additional insurance)','Premium reduction (apply dividend to reduce next premium)','Cash dividend payment','Leave on deposit (accumulate at interest)','One-year term insurance purchase'] },
+      { id:'pua_effective_date',label:'Effective Date for Election', type:'date',  required:false, width:'half', hint:'When the new dividend option should take effect' }
+    ]
+  }
+};
+
+/* ── fcwRenderConditionalFields(type) ────────────────────────────
+   Builds the HTML for the adaptive conditional fields panel.
+   Reads saved values from window._fcw.typeFields to pre-populate
+   on re-renders (e.g. after clicking a different type and back).
+   ─────────────────────────────────────────────────────────────── */
+function fcwRenderConditionalFields(type) {
+  var def = _fcwConditionalFields[type];
+  if (!def || !def.fields || !def.fields.length) return '';
+
+  var saved = window._fcw.typeFields || {};
+
+  var fieldsHTML = '<div class="fcw-cf-grid">';
+  def.fields.forEach(function(f) {
+    var savedVal = saved[f.id] || '';
+    var wrapClass = f.width === 'full' ? 'fcw-cf-field full' : 'fcw-cf-field half';
+    var reqMark   = f.required ? ' <span class="fcw-cf-req">*</span>' : '';
+    var hintHTML  = f.hint ? '<div class="fcw-cf-hint"><i class="fas fa-info-circle"></i> ' + f.hint + '</div>' : '';
+
+    var inputHTML = '';
+    if (f.type === 'select') {
+      var optionsHTML = (f.options || []).map(function(o) {
+        return '<option value="' + o + '"' + (savedVal === o ? ' selected' : '') + '>' + o + '</option>';
+      }).join('');
+      inputHTML = '<select class="fcw-input fcw-cf-select" id="fcw-cf-' + f.id + '" data-cf-id="' + f.id + '">' + optionsHTML + '</select>';
+    } else if (f.type === 'date') {
+      inputHTML = '<input type="date" class="fcw-input" id="fcw-cf-' + f.id + '" data-cf-id="' + f.id + '" value="' + savedVal + '">';
+    } else {
+      inputHTML = '<input type="text" class="fcw-input" id="fcw-cf-' + f.id + '" data-cf-id="' + f.id + '" value="' + savedVal.replace(/"/g, '&quot;') + '" placeholder="' + (f.placeholder || '') + '">';
+    }
+
+    fieldsHTML += '<div class="' + wrapClass + '">' +
+      '<label class="fcw-label fcw-cf-label">' + f.label + reqMark + '</label>' +
+      inputHTML +
+      hintHTML +
+    '</div>';
+  });
+  fieldsHTML += '</div>';
+
+  return '<div class="fcw-cf-panel" id="fcw-conditional-fields">' +
+    '<div class="fcw-cf-header">' +
+      '<i class="fas fa-' + def.icon + ' fcw-cf-icon"></i>' +
+      '<div>' +
+        '<div class="fcw-cf-title">' + def.label + '</div>' +
+        '<div class="fcw-cf-subtitle">Fields dynamically generated for <strong>' + type + '</strong> — complete all required fields marked <span class="fcw-cf-req">*</span></div>' +
+      '</div>' +
+      '<span class="fcw-cf-badge"><i class="fas fa-magic"></i> AI Adaptive</span>' +
+    '</div>' +
+    fieldsHTML +
+  '</div>';
+}
+
+/* ── fcwHarvestTypeFields(validate) ──────────────────────────────
+   Reads all #fcw-cf-* inputs from the DOM and stores them into
+   window._fcw.typeFields.  If validate=true, also checks required
+   fields and returns an error string (or '' if valid).
+   ─────────────────────────────────────────────────────────────── */
+function fcwHarvestTypeFields(validate) {
+  if (!window._fcw.typeFields) window._fcw.typeFields = {};
+  var inputs = document.querySelectorAll('[data-cf-id]');
+  inputs.forEach(function(el) {
+    window._fcw.typeFields[el.getAttribute('data-cf-id')] = el.value;
+  });
+
+  if (!validate) return '';
+  // Check required fields against field definitions
+  var def = _fcwConditionalFields[window._fcw.type];
+  if (!def || !def.fields) return '';
+  for (var i = 0; i < def.fields.length; i++) {
+    var f = def.fields[i];
+    if (!f.required) continue;
+    var val = (window._fcw.typeFields[f.id] || '').trim();
+    if (!val || val === '— Select —' || val === '— N/A —') {
+      return 'Please complete required field: ' + f.label;
+    }
+  }
+  return '';
+}
+
+/* ── fcwReviewTypeFields(type, typeFields) ───────────────────────
+   Renders captured type-specific field values as review rows
+   in the Step 5 summary panel.  Shows label → value pairs for
+   any non-empty captured fields.
+   ─────────────────────────────────────────────────────────────── */
+function fcwReviewTypeFields(type, typeFields) {
+  var def = _fcwConditionalFields[type];
+  if (!def || !def.fields || !typeFields) return '';
+  var rows = '';
+  def.fields.forEach(function(f) {
+    var val = (typeFields[f.id] || '').trim();
+    if (!val || val === '— Select —' || val === '— N/A —') return;
+    rows += '<div class="fcw-review-row fcw-review-cf-row">' +
+      '<span>' + f.label + '</span>' +
+      '<strong>' + val + (f.required ? '' : '') + '</strong>' +
+    '</div>';
+  });
+  if (!rows) return '';
+  return '<div class="fcw-review-cf-group">' +
+    '<div class="fcw-review-cf-group-title"><i class="fas fa-magic"></i> ' + def.label + '</div>' +
+    rows +
+  '</div>';
+}
+
+console.log('Pass 29 — Dynamic Information Collection module loaded');

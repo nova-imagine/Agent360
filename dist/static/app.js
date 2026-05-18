@@ -42291,7 +42291,7 @@ var _fcwFraudFlags = {
 };
 
 function openFileClaimWizard() {
-  window._fcw = { step: 1, client: '', clientKey: '', type: '', policy: null, docs: [], docsInitialized: false, claimId: '', lossDate: '', desc: '', claimant: '', relationship: '', amount: '', hasUpload: false };
+  window._fcw = { step: 1, client: '', clientKey: '', type: '', policy: null, docs: [], docsInitialized: false, claimId: '', lossDate: '', desc: '', claimant: '', relationship: '', amount: '', hasUpload: false, typeFields: {} };
   var el = document.getElementById('file-claim-overlay');
   if (el) el.remove();
   var overlay = document.createElement('div');
@@ -42633,6 +42633,9 @@ function fcwStep2Body() {
       '</div>';
   }
 
+  // Render adaptive conditional fields panel for the selected claim type
+  var conditionalFieldsHTML = window._fcw.type ? fcwRenderConditionalFields(window._fcw.type) : '';
+
   return '<div class="fcw-step-title"><i class="fas fa-clipboard-list"></i> Step 2 — Claim Type &amp; Event Details</div>' +
     '<div class="fcw-field-group">' +
       '<label class="fcw-label">Select Claim Type ' +
@@ -42640,6 +42643,7 @@ function fcwStep2Body() {
       '</label>' +
       typeGroupsHTML +
     '</div>' +
+    conditionalFieldsHTML +
     '<div class="fcw-field-row">' +
       '<div class="fcw-field-group" style="flex:1">' +
         '<label class="fcw-label">Date of Loss / Event</label>' +
@@ -42667,7 +42671,12 @@ function fcwSelectType(t) {
   if (ld) window._fcw.lossDate = ld.value;
   if (am) window._fcw.amount = am.value;
   if (dc) window._fcw.desc = dc.value;
+  // Harvest any already-filled type-specific fields before switching type
+  fcwHarvestTypeFields();
+  var prevType = window._fcw.type;
   window._fcw.type = t;
+  // Clear type-specific fields when claim type changes (fresh slate for new type)
+  if (prevType !== t) window._fcw.typeFields = {};
   // Clear policy + docs when type changes so Step 3 re-matches and Step 4 re-initializes
   window._fcw.policy = null;
   window._fcw.docs = [];
@@ -42680,6 +42689,9 @@ function fcwNextStep2() {
   var am = document.getElementById('fcw-amount');
   if (!window._fcw.type) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please select a claim type', 2000); return; }
   if (!ld || !ld.value) { p7Toast('<i class="fas fa-exclamation-triangle"></i> Please enter the date of loss', 2000); return; }
+  // Harvest + validate type-specific conditional fields
+  var validationError = fcwHarvestTypeFields(true);
+  if (validationError) { p7Toast('<i class="fas fa-exclamation-triangle"></i> ' + validationError, 2500); return; }
   window._fcw.lossDate = ld.value;
   window._fcw.desc     = dc ? dc.value : '';
   window._fcw.amount   = am ? am.value : '';
@@ -43033,6 +43045,7 @@ function fcwStep5Body() {
           '<div class="fcw-review-row"><span>Date of Loss</span><strong>' + (w.lossDate || '—') + '</strong></div>' +
           '<div class="fcw-review-row"><span>Est. Amount</span><strong>' + (w.amount || 'Full policy face value') + '</strong></div>' +
           '<div class="fcw-review-row"><span>Description</span><strong>' + (w.desc ? w.desc.substring(0,60) + (w.desc.length > 60 ? '…' : '') : '—') + '</strong></div>' +
+          fcwReviewTypeFields(w.type, w.typeFields) +
         '</div>' +
         '<div class="fcw-review-section">' +
           '<div class="fcw-review-section-title">Policy</div>' +
@@ -58140,3 +58153,634 @@ function _lcShowResultModal(claimId, syn, dir, callType, person, dur) {
 }
 
 console.log('Pass 27 — Postcall Synthesis module loaded');
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PASS 28 — COMPLAINT PREDICTION
+   ML risk score per claim · Overview KPI drilldown · CI tab factor panel
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Per-claim complaint prediction data ──────────────────────────────────
+   score  : 0–100 composite risk
+   tier   : 'HIGH' | 'MED' | 'LOW'
+   factors: array of { label, score, weight }  (score 0–100, weight = importance)
+   mitigation: top 1–3 recommended actions
+   ─────────────────────────────────────────────────────────────────────────*/
+var CP_DATA = {
+  'CLM-2026-0041': {
+    score: 82, tier: 'HIGH',
+    client: 'Robert Chen', type: 'Death Benefit · $1,000,000',
+    narrative: 'High complaint risk driven by SLA breach (1 day remaining), large claim amount, and pending identity documents. Beneficiary has already called twice — frustration level elevated.',
+    factors: [
+      { label: 'SLA Days Remaining',       score: 95, weight: 'Critical',  bar: '#dc2626' },
+      { label: 'Claim Complexity',          score: 80, weight: 'High',      bar: '#dc2626' },
+      { label: 'Document Completeness',     score: 50, weight: 'High',      bar: '#d97706' },
+      { label: 'Prior Complaint History',   score: 20, weight: 'Medium',    bar: '#059669' },
+      { label: 'Communication Frequency',   score: 75, weight: 'Medium',    bar: '#d97706' },
+      { label: 'Beneficiary Satisfaction',  score: 40, weight: 'High',      bar: '#d97706' }
+    ],
+    mitigation: [
+      'Contact beneficiary within 24 hours with status update and commitment date',
+      'Escalate to senior adjuster — flag for same-day document receipt',
+      'Offer supervisor callback if docs not submitted by close of business'
+    ]
+  },
+  'CLM-2026-0028': {
+    score: 76, tier: 'HIGH',
+    client: 'Maria Gonzalez', type: 'Accelerated Benefit · $120,000',
+    narrative: 'Compassionate case with terminal prognosis — delay risk is highest for regulatory complaint. State NYS DFS compassionate SLA: 5 days. Oncologist cert still pending.',
+    factors: [
+      { label: 'SLA Urgency (Compassionate)', score: 88, weight: 'Critical', bar: '#dc2626' },
+      { label: 'Medical Record Pending',       score: 78, weight: 'High',    bar: '#dc2626' },
+      { label: 'Regulatory Sensitivity',       score: 70, weight: 'High',    bar: '#d97706' },
+      { label: 'Claimant Health Status',        score: 90, weight: 'High',   bar: '#dc2626' },
+      { label: 'Document Completeness',         score: 50, weight: 'High',   bar: '#d97706' },
+      { label: 'Prior Complaint History',       score: 15, weight: 'Low',    bar: '#059669' }
+    ],
+    mitigation: [
+      'Escalate to compassionate case manager — activate expedite protocol',
+      'Direct outreach to Dr. Patel\'s office for same-day fax of terminal cert',
+      'Notify supervisor — regulatory complaint likely if not resolved today'
+    ]
+  },
+  'CLM-2026-0053': {
+    score: 71, tier: 'HIGH',
+    client: 'Eleanor Marsh (Estate)', type: 'Survivorship · $2,000,000',
+    narrative: '$2M estate claim with 2 days to SLA. Estate attorney is monitoring closely. Any delay on this claim will trigger attorney complaint to DOI.',
+    factors: [
+      { label: 'SLA Days Remaining',       score: 90, weight: 'Critical', bar: '#dc2626' },
+      { label: 'Attorney Involvement',      score: 85, weight: 'High',    bar: '#dc2626' },
+      { label: 'Claim Amount',              score: 80, weight: 'High',    bar: '#dc2626' },
+      { label: 'Document Completeness',     score: 60, weight: 'High',    bar: '#d97706' },
+      { label: 'Estate Complexity',         score: 65, weight: 'Medium',  bar: '#d97706' },
+      { label: 'Prior Complaint History',   score: 10, weight: 'Low',     bar: '#059669' }
+    ],
+    mitigation: [
+      'Assign dedicated estate claims specialist immediately',
+      'Contact estate attorney directly with status update and resolution timeline',
+      'Fast-track document review — authorize senior adjuster sign-off'
+    ]
+  },
+  'CLM-2026-0048': {
+    score: 61, tier: 'MED',
+    client: 'Angela Foster', type: 'Chronic Illness Rider · $36,000',
+    narrative: 'Moderate complaint risk due to SLA pressure (6 days) and incomplete documentation. Chronic illness cases require careful communication to avoid misunderstanding of benefit eligibility.',
+    factors: [
+      { label: 'SLA Days Remaining',       score: 70, weight: 'High',   bar: '#d97706' },
+      { label: 'Document Completeness',     score: 50, weight: 'High',  bar: '#d97706' },
+      { label: 'Benefit Eligibility Clarity', score: 60, weight: 'Medium', bar: '#d97706' },
+      { label: 'Communication Frequency',   score: 45, weight: 'Medium', bar: '#d97706' },
+      { label: 'Prior Complaint History',   score: 10, weight: 'Low',   bar: '#059669' },
+      { label: 'Claim Complexity',          score: 55, weight: 'Medium', bar: '#d97706' }
+    ],
+    mitigation: [
+      'Send clear eligibility summary letter to claimant within 48 hours',
+      'Chase outstanding chronic illness certification from treating physician',
+      'Set proactive callback for Day 4 — do not wait for claimant to follow up'
+    ]
+  },
+  'CLM-2026-0035': {
+    score: 54, tier: 'MED',
+    client: 'Maria Gonzalez', type: 'Disability Income · $4,200/mo',
+    narrative: 'APS from Dr. Hernandez is 9 days overdue. If not received in next 5 days, DI benefit delay may trigger a regulatory complaint. Claimant is currently off work — financial pressure is high.',
+    factors: [
+      { label: 'APS Delay',                 score: 65, weight: 'High',   bar: '#d97706' },
+      { label: 'Financial Pressure on Claimant', score: 70, weight: 'High', bar: '#d97706' },
+      { label: 'SLA Days Remaining',        score: 55, weight: 'Medium', bar: '#d97706' },
+      { label: 'Document Completeness',     score: 50, weight: 'High',   bar: '#d97706' },
+      { label: 'Prior Complaint History',   score: 18, weight: 'Low',    bar: '#059669' },
+      { label: 'Claim Complexity',          score: 35, weight: 'Low',    bar: '#059669' }
+    ],
+    mitigation: [
+      'Escalate APS request to physician office — send certified fax today',
+      'Interim payment option: assess if partial benefit can be issued while APS pending',
+      'Communicate clearly with claimant — provide written status update'
+    ]
+  },
+  'CLM-2026-0025': {
+    score: 47, tier: 'MED',
+    client: 'Kevin Park', type: 'Death Benefit · $250,000',
+    narrative: 'Contested coverage case with fraud hold. Estate has retained an attorney. Complaint risk is moderate — estate is aware of the investigation hold and may file regulatory complaint if process is not transparent.',
+    factors: [
+      { label: 'Attorney / Estate Representation', score: 72, weight: 'High',   bar: '#d97706' },
+      { label: 'Fraud Investigation Hold',          score: 55, weight: 'Medium', bar: '#d97706' },
+      { label: 'Claim Complexity',                  score: 60, weight: 'High',   bar: '#d97706' },
+      { label: 'Document Completeness',             score: 25, weight: 'High',   bar: '#059669' },
+      { label: 'Prior Complaint History',           score: 10, weight: 'Low',    bar: '#059669' },
+      { label: 'Communication Transparency',        score: 40, weight: 'Medium', bar: '#d97706' }
+    ],
+    mitigation: [
+      'Send formal written notice to estate attorney explaining investigation status',
+      'Set 30-day investigation completion target — assign SIU timeline',
+      'Log all communications in audit trail — ensure regulatory compliance'
+    ]
+  },
+  'CLM-2026-0038': { score: 22, tier: 'LOW', client: 'Sandra Williams',     type: 'Long-term Care · $18,000',       narrative: 'Low complaint risk. Claim progressing normally — SLA comfortable at 22 days. Claimant engaged and cooperative.', factors: [{ label: 'SLA Days Remaining', score: 22, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 50, weight: 'Med', bar: '#d97706' }, { label: 'Communication Frequency', score: 15, weight: 'Low', bar: '#059669' }, { label: 'Claimant Cooperation', score: 10, weight: 'Low', bar: '#059669' }], mitigation: ['Maintain current pace — 22-day SLA well within target', 'Ensure Plan of Care document is received and processed on schedule'] },
+  'CLM-2026-0033': { score: 18, tier: 'LOW', client: 'James Whitfield',     type: 'Long-term Care · $9,600',        narrative: 'Low risk — all documents complete, SLA comfortable. Ready for approval.', factors: [{ label: 'SLA Days Remaining', score: 18, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 5,  weight: 'Low', bar: '#059669' }, { label: 'Prior Complaint History', score: 5, weight: 'Low', bar: '#059669' }], mitigation: ['Proceed to auto-approval — no complaint indicators present'] },
+  'CLM-2026-0031': { score: 14, tier: 'LOW', client: 'Linda Morrison',      type: 'Waiver of Premium · $9,600/yr',  narrative: 'Very low risk. Approved status, awaiting disbursement. Claimant satisfied.', factors: [{ label: 'SLA (No SLA)', score: 5, weight: 'Low', bar: '#059669' }, { label: 'Claimant Satisfaction', score: 8, weight: 'Low', bar: '#059669' }], mitigation: ['Process disbursement on schedule — no action required'] },
+  'CLM-2026-0045': { score: 28, tier: 'LOW', client: 'Thomas Reed',         type: 'Accid. Death Rider · $150,000',  narrative: 'Low-medium risk. SLA at 7 days — monitor docs. No prior complaints.', factors: [{ label: 'SLA Days Remaining', score: 30, weight: 'Med', bar: '#059669' }, { label: 'Document Completeness', score: 40, weight: 'Med', bar: '#d97706' }, { label: 'Claim Complexity', score: 25, weight: 'Low', bar: '#059669' }], mitigation: ['Chase remaining 2/5 documents within 3 business days'] },
+  'CLM-2026-0046': { score: 16, tier: 'LOW', client: 'Patricia Nguyen',     type: 'Critical Illness Rider · $50,000', narrative: 'Near-complete docs, 18 days SLA. Minimal complaint risk.', factors: [{ label: 'SLA Days Remaining', score: 16, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 25, weight: 'Low', bar: '#059669' }], mitigation: ['Finalize last doc and process approval'] },
+  'CLM-2026-0047': { score: 12, tier: 'LOW', client: 'David Thompson',      type: 'Child Term Rider · $25,000',     narrative: 'Very low risk. 24 days SLA remaining, near-complete docs.', factors: [{ label: 'SLA Days Remaining', score: 12, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 15, weight: 'Low', bar: '#059669' }], mitigation: ['Process remaining document and approve'] },
+  'CLM-2026-0049': { score: 9,  tier: 'LOW', client: 'Harold Simmons',      type: 'Maturity/Endowment · $500,000',  narrative: 'All docs complete, 30-day SLA. No complaint indicators.', factors: [{ label: 'SLA Days Remaining', score: 9, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 3, weight: 'Low', bar: '#059669' }], mitigation: ['Approve and initiate payout on schedule'] },
+  'CLM-2026-0050': { score: 19, tier: 'LOW', client: 'Christine Blake',     type: 'Policy Surrender · $84,200',     narrative: 'Low risk. Surrender request proceeding normally.', factors: [{ label: 'SLA Days Remaining', score: 19, weight: 'Low', bar: '#059669' }, { label: 'Claimant Cooperation', score: 10, weight: 'Low', bar: '#059669' }], mitigation: ['Process surrender on standard timeline'] },
+  'CLM-2026-0051': { score: 8,  tier: 'LOW', client: 'George Martinez',     type: 'Paid-up Additions · $42,000',    narrative: 'Lowest risk in portfolio. All docs complete.', factors: [{ label: 'SLA Days Remaining', score: 8, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 3, weight: 'Low', bar: '#059669' }], mitigation: ['Standard processing — no action required'] },
+  'CLM-2026-0052': { score: 11, tier: 'LOW', client: 'Nancy Rivera',        type: 'Annuity Income · $3,800/mo',     narrative: 'Recurring annuity — no complaint history, stable.', factors: [{ label: 'Payment Schedule',     score: 11, weight: 'Low', bar: '#059669' }, { label: 'Prior Complaint History', score: 5, weight: 'Low', bar: '#059669' }], mitigation: ['Maintain recurring payment schedule'] }
+};
+
+/* ── Inject Complaint Risk panel into CI tab ─────────────────────────────── */
+(function() {
+  var _prevCI = window.renderClaimModal;
+  window.renderClaimModal = function(claimId, tab) {
+    _prevCI(claimId, tab);
+    if (tab !== 'ci') return;
+    // Give the DOM a tick to render
+    setTimeout(function() {
+      var ciSections = document.querySelector('.p7cm-ci-sections');
+      if (!ciSections) return;
+      if (ciSections.querySelector('.cp-ci-section')) return; // already injected
+      var cp = CP_DATA[claimId];
+      if (!cp) return;
+      var dialClass = cp.tier === 'HIGH' ? 'red' : cp.tier === 'MED' ? 'amber' : 'green';
+      var tierColor = cp.tier === 'HIGH' ? '#b91c1c' : cp.tier === 'MED' ? '#92400e' : '#166534';
+      var factorsHtml = cp.factors.map(function(f) {
+        return '<div class="cp-ci-factor-row">'
+          + '<span class="cp-ci-factor-label">' + f.label + '</span>'
+          + '<span style="font-size:10px;font-weight:600;color:#94a3b8;min-width:46px;text-align:right">' + f.weight + '</span>'
+          + '<div class="cp-ci-factor-bar-wrap"><div class="cp-ci-factor-bar" style="width:' + f.score + '%;background:' + f.bar + '"></div></div>'
+          + '<span class="cp-ci-factor-score">' + f.score + '</span>'
+          + '</div>';
+      }).join('');
+      var mitigationHtml = (cp.mitigation || []).map(function(m, i) {
+        return '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">'
+          + '<span style="background:#fb923c;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;white-space:nowrap;margin-top:1px">' + (i + 1) + '</span>'
+          + '<span style="font-size:12px;color:#1e293b;line-height:1.4">' + m + '</span>'
+          + '</div>';
+      }).join('');
+      var html = '<div class="cp-ci-section">'
+        + '<div class="cp-ci-section-title"><i class="fas fa-exclamation-circle"></i> Complaint Prediction Score <span style="margin-left:auto;background:' + tierColor + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700">' + cp.tier + ' RISK</span></div>'
+        + '<div class="cp-ci-dial-wrap">'
+          + '<div class="cp-ci-dial ' + dialClass + '">' + cp.score + '</div>'
+          + '<div><div style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:3px">' + cp.score + '/100 — ' + cp.tier + ' Complaint Risk</div>'
+          + '<div style="font-size:12px;color:#475569;line-height:1.4">' + cp.narrative + '</div></div>'
+        + '</div>'
+        + '<div class="cp-ci-factors" style="margin-bottom:12px">' + factorsHtml + '</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px"><i class="fas fa-shield-alt" style="margin-right:4px"></i>Recommended Mitigations</div>'
+        + mitigationHtml
+        + '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #fed7aa">'
+          + '<button style="padding:7px 16px;background:#f43f5e;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600" onclick="openComplaintRiskModal(\'' + claimId + '\')">'
+          + '<i class="fas fa-search-plus" style="margin-right:5px"></i>Full Complaint Risk Report</button>'
+        + '</div>'
+        + '</div>';
+      ciSections.insertAdjacentHTML('beforeend', html);
+    }, 60);
+  };
+})();
+
+/* ── Complaint Risk drilldown modal (single claim or 'all') ──────────────── */
+function openComplaintRiskModal(claimId) {
+  var existing = document.getElementById('_cpModalOv');
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'cp-modal-overlay';
+  ov.id = '_cpModalOv';
+
+  var bodyHtml;
+  if (claimId === 'all') {
+    /* Overview portfolio view — list all claims sorted by score */
+    var allClaims = Object.keys(CP_DATA).map(function(k) {
+      return Object.assign({ id: k }, CP_DATA[k]);
+    }).sort(function(a, b) { return b.score - a.score; });
+
+    var rowsHtml = allClaims.map(function(c) {
+      var tier = c.tier;
+      var bc = tier === 'HIGH' ? '#dc2626' : tier === 'MED' ? '#d97706' : '#059669';
+      var bg = tier === 'HIGH' ? '#fee2e2' : tier === 'MED' ? '#fef3c7' : '#dcfce7';
+      var tc = tier === 'HIGH' ? '#b91c1c' : tier === 'MED' ? '#92400e' : '#166534';
+      return '<div class="cp-modal-claim-row ' + tier.toLowerCase() + '" onclick="document.getElementById(\'_cpModalOv\').remove();openComplaintRiskModal(\'' + c.id + '\')">'
+        + '<div style="flex:1">'
+          + '<div style="font-weight:700;font-size:13px;color:#1e293b">' + c.id + ' · ' + c.client + '</div>'
+          + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + c.type + '</div>'
+        + '</div>'
+        + '<div style="background:' + bg + ';color:' + tc + ';font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;margin-right:10px">' + tier + '</div>'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+          + '<div style="width:60px;height:5px;background:#f1f5f9;border-radius:2px;overflow:hidden"><div style="width:' + c.score + '%;height:5px;background:' + bc + ';border-radius:2px"></div></div>'
+          + '<span style="font-size:12px;font-weight:700;color:' + bc + ';min-width:26px">' + c.score + '</span>'
+        + '</div>'
+        + '<div style="color:#94a3b8;margin-left:8px;font-size:12px"><i class="fas fa-chevron-right"></i></div>'
+        + '</div>';
+    }).join('');
+
+    var highCount = allClaims.filter(function(c) { return c.tier === 'HIGH'; }).length;
+    var medCount  = allClaims.filter(function(c) { return c.tier === 'MED';  }).length;
+    var lowCount  = allClaims.filter(function(c) { return c.tier === 'LOW';  }).length;
+
+    bodyHtml = '<div class="cp-modal-body">'
+      + '<div style="display:flex;gap:10px;margin-bottom:18px">'
+        + '<div style="flex:1;background:#fee2e2;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#b91c1c">' + highCount + '</div><div style="font-size:11px;color:#b91c1c;font-weight:600;text-transform:uppercase">High Risk</div></div>'
+        + '<div style="flex:1;background:#fef3c7;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#92400e">' + medCount + '</div><div style="font-size:11px;color:#92400e;font-weight:600;text-transform:uppercase">Med Risk</div></div>'
+        + '<div style="flex:1;background:#dcfce7;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#166534">' + lowCount + '</div><div style="font-size:11px;color:#166534;font-weight:600;text-transform:uppercase">Low Risk</div></div>'
+      + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">All Claims — Ranked by Complaint Risk Score</div>'
+      + rowsHtml
+      + '<div style="margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9;text-align:right">'
+        + '<button onclick="document.getElementById(\'_cpModalOv\').remove()" style="padding:9px 22px;border:1.5px solid #e2e8f0;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#475569">Close</button>'
+      + '</div>'
+      + '</div>';
+  } else {
+    /* Single claim detail view */
+    var cp = CP_DATA[claimId];
+    if (!cp) {
+      p7Toast('<i class="fas fa-info-circle"></i> No complaint prediction data for ' + claimId, 2500);
+      return;
+    }
+    var dialClass = cp.tier === 'HIGH' ? 'red' : cp.tier === 'MED' ? 'amber' : 'green';
+    var tierColor = cp.tier === 'HIGH' ? '#b91c1c' : cp.tier === 'MED' ? '#92400e' : '#166534';
+    var factorsHtml = cp.factors.map(function(f) {
+      return '<div class="cp-ci-factor-row" style="padding:7px 0;border-bottom:1px solid #f1f5f9">'
+        + '<span class="cp-ci-factor-label">' + f.label + '</span>'
+        + '<span style="font-size:10px;font-weight:600;color:#94a3b8;min-width:50px;text-align:right;margin-right:8px">' + f.weight + '</span>'
+        + '<div class="cp-ci-factor-bar-wrap" style="width:100px"><div class="cp-ci-factor-bar" style="width:' + f.score + '%;background:' + f.bar + '"></div></div>'
+        + '<span class="cp-ci-factor-score">' + f.score + '</span>'
+        + '</div>';
+    }).join('');
+    var mitigationHtml = (cp.mitigation || []).map(function(m, i) {
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#fff7ed;border-radius:8px;margin-bottom:8px">'
+        + '<span style="background:#fb923c;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;margin-top:1px">' + (i + 1) + '</span>'
+        + '<span style="font-size:13px;color:#1e293b;line-height:1.4">' + m + '</span>'
+        + '</div>';
+    }).join('');
+    bodyHtml = '<div class="cp-modal-body">'
+      + '<div style="display:flex;align-items:center;gap:16px;padding:16px;background:#f8fafc;border-radius:10px;margin-bottom:18px">'
+        + '<div class="cp-ci-dial ' + dialClass + '" style="width:64px;height:64px;font-size:22px">' + cp.score + '</div>'
+        + '<div>'
+          + '<div style="font-weight:800;font-size:20px;color:' + tierColor + '">' + cp.score + '/100 — ' + cp.tier + ' RISK</div>'
+          + '<div style="font-size:13px;color:#475569;line-height:1.5;margin-top:4px">' + cp.narrative + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px"><i class="fas fa-layer-group" style="margin-right:5px"></i>Risk Factor Breakdown</div>'
+      + '<div class="cp-ci-factors" style="margin-bottom:18px">' + factorsHtml + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px"><i class="fas fa-shield-alt" style="margin-right:5px"></i>Recommended Mitigations</div>'
+      + mitigationHtml
+      + '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9">'
+        + '<button onclick="document.getElementById(\'_cpModalOv\').remove();openComplaintRiskModal(\'all\')" style="padding:9px 18px;border:1.5px solid #e2e8f0;background:#fff;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;color:#475569"><i class="fas fa-list" style="margin-right:5px"></i>All Claims</button>'
+        + '<button onclick="document.getElementById(\'_cpModalOv\').remove();openClaimModal(\'' + claimId + '\',\'ci\')" style="padding:9px 18px;background:#6366f1;color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600"><i class="fas fa-robot" style="margin-right:5px"></i>Open in AI Intel</button>'
+        + '<button onclick="document.getElementById(\'_cpModalOv\').remove()" style="padding:9px 18px;background:#f43f5e;color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600">Close</button>'
+      + '</div>'
+      + '</div>';
+  }
+
+  var titleText = claimId === 'all' ? 'Portfolio Complaint Risk Dashboard' : 'Complaint Risk · ' + claimId;
+  var subText   = claimId === 'all' ? '14 active claims · AI-scored complaint probability'
+                : (CP_DATA[claimId] ? CP_DATA[claimId].client + ' · ' + CP_DATA[claimId].type : claimId);
+
+  ov.innerHTML = '<div class="cp-modal-box">'
+    + '<div class="cp-modal-header">'
+      + '<div class="cp-modal-header-icon"><i class="fas fa-exclamation-circle"></i></div>'
+      + '<div><div class="cp-modal-header-title">' + titleText + '</div><div class="cp-modal-header-sub">' + subText + '</div></div>'
+      + '<button class="cp-modal-header-close" onclick="document.getElementById(\'_cpModalOv\').remove()">✕</button>'
+    + '</div>'
+    + bodyHtml
+    + '</div>';
+
+  document.body.appendChild(ov);
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+}
+
+console.log('Pass 28 — Complaint Prediction module loaded');
+
+/* ═══════════════════════════════════════════════════════════════════
+   PASS 29 — DYNAMIC INFORMATION COLLECTION
+   Adaptive conditional fields injected into FNOL Wizard Step 2
+   Renders claim-type-specific required inputs immediately on type
+   selection without requiring a step change.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── TYPE-SPECIFIC CONDITIONAL FIELD DEFINITIONS ─────────────────
+   Each entry is keyed by claim type string.
+   Format: { label, fields: [{ id, label, type, required, placeholder,
+             options (for select), hint, width ('half'|'full') }] }
+   ─────────────────────────────────────────────────────────────── */
+var _fcwConditionalFields = {
+
+  'Death Benefit': {
+    label: 'Death Claim — Required Information',
+    color: '#7c3aed',
+    icon:  'heart-broken',
+    fields: [
+      { id:'death_date',       label:'Date of Death',             type:'date',   required:true,  width:'half', hint:'Must match the death certificate exactly' },
+      { id:'cause_of_death',   label:'Cause of Death',            type:'select', required:true,  width:'half',
+        options:['— Select —','Natural causes / illness','Heart attack / cardiac arrest','Stroke / cerebrovascular','Cancer / malignancy','Accidental / trauma','Suicide','Homicide','Unknown / pending investigation','Other'] },
+      { id:'place_of_death',   label:'Place of Death',            type:'select', required:false, width:'half',
+        options:['— Select —','Hospital / medical facility','Home / private residence','Hospice / palliative care','Nursing / assisted living facility','Accident scene','Other'] },
+      { id:'attending_physician',label:'Attending Physician / Hospital', type:'text', required:false, width:'half', placeholder:'e.g. Dr. Sarah Kim, St. Luke\'s Medical Center' },
+      { id:'coroner_ref',      label:'Coroner / Medical Examiner Report #', type:'text', required:false, width:'half', placeholder:'Required if accidental or suspicious death' },
+      { id:'death_state',      label:'State Where Death Occurred', type:'text', required:false, width:'half', placeholder:'e.g. California', hint:'Governs applicable state insurance statutes' }
+    ]
+  },
+
+  'Accelerated Death Benefit (ADB)': {
+    label: 'ADB — Terminal Illness Details',
+    color: '#7c3aed',
+    icon:  'heartbeat',
+    fields: [
+      { id:'terminal_diagnosis',  label:'Terminal Diagnosis',       type:'text',   required:true,  width:'full', placeholder:'e.g. Stage IV Non-Small Cell Lung Cancer (NSCLC)', hint:'Must match the attending physician certification' },
+      { id:'diagnosis_date',      label:'Date of Diagnosis',        type:'date',   required:true,  width:'half', hint:'Date the terminal condition was formally diagnosed' },
+      { id:'life_expectancy_mo',  label:'Physician-Estimated Life Expectancy', type:'select', required:true, width:'half',
+        options:['— Select —','≤ 3 months','3–6 months','6–9 months','9–12 months','> 12 months (review required)'] },
+      { id:'treating_physician',  label:'Treating / Certifying Physician', type:'text', required:true, width:'half', placeholder:'Full name and NPI number' },
+      { id:'treatment_facility',  label:'Treatment Facility',       type:'text',   required:false, width:'half', placeholder:'Hospital or oncology center name' },
+      { id:'adb_pct_requested',   label:'Percentage of Benefit Requested', type:'select', required:false, width:'half',
+        options:['— Select —','25%','50%','75%','100% (Full Acceleration)'] },
+      { id:'purpose_of_funds',    label:'Intended Use of Accelerated Funds', type:'select', required:false, width:'half',
+        options:['— Select —','Medical treatment / hospice care','Living expenses','Family financial support','Estate planning','Other'] }
+    ]
+  },
+
+  'Accidental Death Benefit (ADB Rider)': {
+    label: 'Accidental Death — Incident Details',
+    color: '#dc2626',
+    icon:  'car-crash',
+    fields: [
+      { id:'accident_date',    label:'Date of Accident',            type:'date',   required:true,  width:'half', hint:'Must match police / official accident report' },
+      { id:'accident_type',    label:'Type of Accident',            type:'select', required:true,  width:'half',
+        options:['— Select —','Motor vehicle accident','Workplace / industrial accident','Fall / blunt trauma','Drowning','Accidental poisoning / overdose','Fire / explosion','Aviation accident','Other accidental cause'] },
+      { id:'accident_location',label:'Accident Location (City, State)', type:'text', required:false, width:'half', placeholder:'e.g. Houston, TX' },
+      { id:'police_report_no', label:'Police / Incident Report Number', type:'text', required:false, width:'half', placeholder:'Official report number from investigating authority' },
+      { id:'was_at_work',      label:'Did the Accident Occur During Employment?', type:'select', required:false, width:'half',
+        options:['— Select —','No — personal time','Yes — on duty','Yes — commuting to/from work'] },
+      { id:'third_party_involved', label:'Third Party / Other Vehicle Involved?', type:'select', required:false, width:'half',
+        options:['— Select —','No','Yes — identified','Yes — hit and run'] }
+    ]
+  },
+
+  'Disability Income': {
+    label: 'Disability Claim — Clinical & Employment Details',
+    color: '#0f766e',
+    icon:  'user-injured',
+    fields: [
+      { id:'disability_diagnosis', label:'Primary Disability Diagnosis', type:'text', required:true, width:'full', placeholder:'e.g. Lumbar disc herniation with radiculopathy (ICD-10: M51.16)', hint:'Include ICD-10 code where possible' },
+      { id:'last_day_worked',   label:'Last Day Actively Worked',   type:'date',   required:true,  width:'half', hint:'First day of elimination period calculation' },
+      { id:'disability_onset',  label:'Date Disability Began',      type:'date',   required:true,  width:'half', hint:'May differ from last day worked if disability was gradual onset' },
+      { id:'disability_type',   label:'Disability Type',            type:'select', required:true,  width:'half',
+        options:['— Select —','Total disability — unable to perform own occupation','Total disability — unable to perform any occupation','Partial / residual disability','Presumptive disability (total loss of sight, hearing, limbs, etc.)'] },
+      { id:'employer_name',     label:'Employer Name',              type:'text',   required:true,  width:'half', placeholder:'Current or most recent employer' },
+      { id:'employer_contact',  label:'Employer HR / Payroll Contact', type:'text', required:false, width:'half', placeholder:'Name, title, phone number' },
+      { id:'treating_physician',label:'Treating Physician (Primary)', type:'text', required:false, width:'half', placeholder:'Full name and practice / hospital' },
+      { id:'other_disability_income', label:'Other Disability Income Received?', type:'select', required:false, width:'half',
+        options:['— Select —','None','Social Security Disability (SSDI)','Workers\' Compensation','State disability benefits','Short-term disability from employer','Other group disability plan'] }
+    ]
+  },
+
+  'Long-term Care (LTC)': {
+    label: 'LTC Claim — Care Level & Facility Details',
+    color: '#0f766e',
+    icon:  'hospital',
+    fields: [
+      { id:'care_level',        label:'Level of Care Required',     type:'select', required:true,  width:'half',
+        options:['— Select —','Skilled nursing facility (SNF)','Assisted living facility (ALF)','Home health care — skilled nursing','Home health care — custodial / personal care','Adult day care','Memory care / dementia unit','Hospice / palliative care'] },
+      { id:'adl_count',         label:'Number of ADL Impairments',  type:'select', required:true,  width:'half',
+        options:['— Select —','2 ADLs (minimum threshold)','3 ADLs','4 ADLs','5 ADLs','6 ADLs (all)','Cognitive impairment (Alzheimer\'s / dementia) — no ADL count required'] },
+      { id:'adl_list',          label:'Which ADLs Are Impaired?',   type:'text',   required:false, width:'full', placeholder:'e.g. Bathing, dressing, toileting — check those that apply', hint:'From the 6 standard ADLs: bathing, dressing, eating, toileting, transferring, continence' },
+      { id:'care_start_date',   label:'Date Care Services Began',   type:'date',   required:true,  width:'half', hint:'Start of benefit period — elimination period calculated from this date' },
+      { id:'facility_name',     label:'Care Facility / Agency Name', type:'text',  required:false, width:'half', placeholder:'e.g. Sunrise Memory Care, Home Instead Senior Care' },
+      { id:'facility_license',  label:'Facility State License #',   type:'text',   required:false, width:'half', placeholder:'Required for benefit reimbursement' },
+      { id:'monthly_cost',      label:'Monthly Care Cost (USD)',     type:'text',   required:false, width:'half', placeholder:'e.g. $4,800 / month — for reimbursement calculation', hint:'Must not exceed daily maximum benefit per policy' },
+      { id:'cognitive_impairment', label:'Is Cognitive Impairment Present?', type:'select', required:false, width:'half',
+        options:['— Select —','No','Yes — Alzheimer\'s disease','Yes — vascular dementia','Yes — other dementia','Yes — traumatic brain injury (TBI)'] }
+    ]
+  },
+
+  'Waiver of Premium': {
+    label: 'Premium Waiver — Disability Certification',
+    color: '#0f766e',
+    icon:  'ban',
+    fields: [
+      { id:'disability_onset',  label:'Date Total Disability Began', type:'date',  required:true,  width:'half', hint:'Elimination period begins on this date (typically 6 months)' },
+      { id:'last_premium_paid', label:'Last Premium Payment Date',   type:'date',  required:false, width:'half', hint:'To identify premiums that qualify for waiver retroactively' },
+      { id:'waiver_diagnosis',  label:'Disabling Condition',         type:'text',  required:true,  width:'full', placeholder:'e.g. Bilateral knee replacement — total disability anticipated > 6 months' },
+      { id:'expected_duration', label:'Expected Duration of Disability', type:'select', required:false, width:'half',
+        options:['— Select —','< 6 months','6–12 months','1–2 years','2–5 years','Permanent / indefinite'] },
+      { id:'employer_name',     label:'Employer / Occupation',       type:'text',  required:false, width:'half', placeholder:'Insured\'s occupation at time of disability onset' }
+    ]
+  },
+
+  'Critical Illness Rider': {
+    label: 'Critical Illness — Diagnosis & Treatment',
+    color: '#0369a1',
+    icon:  'disease',
+    fields: [
+      { id:'ci_diagnosis',      label:'Critical Illness Diagnosed',  type:'select', required:true,  width:'half',
+        options:['— Select —','Cancer (malignant tumor)','Heart attack (myocardial infarction)','Stroke (cerebrovascular accident)','Coronary artery bypass surgery (CABG)','Kidney (renal) failure','Major organ transplant','Paralysis','Blindness (permanent)','Deafness (permanent)','Coma','Other covered critical illness'] },
+      { id:'ci_diagnosis_date', label:'Date of Confirmed Diagnosis', type:'date',  required:true,  width:'half', hint:'Date specialist confirmed the qualifying critical illness' },
+      { id:'diagnosing_specialist', label:'Diagnosing Specialist',   type:'text',  required:true,  width:'half', placeholder:'Board-certified specialist name and specialty' },
+      { id:'cancer_stage',      label:'Cancer Stage (if applicable)', type:'select', required:false, width:'half',
+        options:['— N/A —','Stage I','Stage II','Stage III','Stage IV','In situ / non-invasive'] },
+      { id:'treatment_type',    label:'Treatment Being Received',    type:'select', required:false, width:'half',
+        options:['— Select —','Surgery','Chemotherapy','Radiation therapy','Immunotherapy','Combined modality therapy','Palliative / comfort care only','No treatment initiated'] },
+      { id:'treatment_hospital',label:'Treating Hospital / Cancer Center', type:'text', required:false, width:'half', placeholder:'e.g. MD Anderson Cancer Center, Houston TX' }
+    ]
+  },
+
+  'Chronic Illness Rider (Living Benefit)': {
+    label: 'Chronic Illness — Functional Assessment',
+    color: '#0369a1',
+    icon:  'wheelchair',
+    fields: [
+      { id:'chronic_condition', label:'Primary Chronic Condition',   type:'text',  required:true,  width:'full', placeholder:'e.g. Parkinson\'s disease with severe motor impairment, Multiple Sclerosis (progressive)', hint:'Must be certified permanent — not expected to improve' },
+      { id:'certification_date',label:'Date of Chronic Illness Certification', type:'date', required:true, width:'half', hint:'Date licensed health practitioner signed the eligibility certification' },
+      { id:'adl_impairments',   label:'Number of Permanent ADL Impairments', type:'select', required:true, width:'half',
+        options:['— Select —','2 ADLs (minimum)','3 ADLs','4 ADLs','5 ADLs','6 ADLs','Severe cognitive impairment — no ADL count required'] },
+      { id:'certifying_practitioner', label:'Certifying Healthcare Practitioner', type:'text', required:false, width:'half', placeholder:'Licensed physician, RN, or licensed clinical social worker' },
+      { id:'chronic_benefit_pct', label:'Percentage of Death Benefit Requested', type:'select', required:false, width:'half',
+        options:['— Select —','25%','50%','75%','100%','Monthly indemnity (where applicable)'] }
+    ]
+  },
+
+  'Child Term Rider': {
+    label: "Child Rider — Dependent Identification",
+    color: '#0369a1',
+    icon:  'baby',
+    fields: [
+      { id:'child_name',        label:"Covered Child's Full Legal Name", type:'text', required:true, width:'half', placeholder:'As listed on birth certificate' },
+      { id:'child_dob',         label:"Child's Date of Birth",        type:'date',  required:true,  width:'half', hint:'Must match certified birth certificate' },
+      { id:'child_death_date',  label:"Date of Child's Death",        type:'date',  required:true,  width:'half', hint:'Must match the death certificate exactly' },
+      { id:'child_cause_of_death', label:"Cause of Death",            type:'select', required:true, width:'half',
+        options:['— Select —','Illness / disease','Accident / trauma','Sudden Infant Death Syndrome (SIDS)','Congenital condition','Other'] },
+      { id:'child_relationship',label:'Relationship to Insured',      type:'select', required:false, width:'half',
+        options:['— Select —','Biological child','Adopted child','Stepchild','Legal ward'] }
+    ]
+  },
+
+  'Survivorship (2nd-to-die) Benefit': {
+    label: 'Survivorship — Both Insured Deaths',
+    color: '#7c3aed',
+    icon:  'users',
+    fields: [
+      { id:'first_insured_name',  label:"First Insured's Full Name",  type:'text',  required:true,  width:'half', placeholder:'Name of the first insured who died' },
+      { id:'first_death_date',    label:"First Insured's Date of Death", type:'date', required:true, width:'half' },
+      { id:'second_insured_name', label:"Second Insured's Full Name", type:'text',  required:true,  width:'half', placeholder:'Name of the second insured who died (triggering payout)' },
+      { id:'second_death_date',   label:"Second Insured's Date of Death (Trigger)", type:'date', required:true, width:'half', hint:'Benefit is paid after the second insured dies' },
+      { id:'estate_contact',      label:'Estate Executor / Trustee',  type:'text',  required:false, width:'half', placeholder:'Name and contact info of the estate representative' },
+      { id:'probate_state',       label:'Probate / Trust Jurisdiction (State)', type:'text', required:false, width:'half', placeholder:'e.g. New York' }
+    ]
+  },
+
+  'Policy Surrender / Cash Value': {
+    label: 'Surrender — Account & Tax Details',
+    color: '#b45309',
+    icon:  'money-bill-wave',
+    fields: [
+      { id:'surrender_type',    label:'Surrender Type',              type:'select', required:true,  width:'half',
+        options:['— Select —','Full / complete surrender','Partial surrender — specified amount','Partial surrender — percentage of CSV'] },
+      { id:'surrender_amount',  label:'Partial Surrender Amount (if partial)', type:'text', required:false, width:'half', placeholder:'e.g. $25,000 — leave blank for full surrender' },
+      { id:'reason_for_surrender', label:'Reason for Surrender',    type:'select', required:false, width:'half',
+        options:['— Select —','Financial hardship — needs cash now','Policy no longer needed','Replacing with new coverage','Investment reallocation','Estate planning change','Other'] },
+      { id:'has_policy_loan',   label:'Outstanding Policy Loan?',   type:'select', required:false, width:'half',
+        options:['— Select —','No — policy loan free','Yes — I understand loan balance will be deducted from CSV'] },
+      { id:'tax_aware',         label:'Tax Acknowledgement',        type:'select', required:true,  width:'full',
+        options:['— Select —','Yes — I understand surrender gains above basis are taxable as ordinary income','No — I need tax guidance before proceeding'] }
+    ]
+  },
+
+  'Maturity / Endowment': {
+    label: 'Maturity — Payout Election',
+    color: '#b45309',
+    icon:  'calendar-check',
+    fields: [
+      { id:'maturity_date',     label:'Policy Maturity Date',        type:'date',  required:true,  width:'half', hint:'Found on the policy declaration page' },
+      { id:'payout_option',     label:'Maturity Payout Option',      type:'select', required:true, width:'half',
+        options:['— Select —','Lump sum (full face / endowment value)','Extended term insurance','Reduced paid-up insurance','Annuitize — fixed annuity','Annuitize — variable annuity','Leave proceeds on deposit (interest option)'] },
+      { id:'bank_name',         label:'Bank Name (for EFT payout)',  type:'text',  required:false, width:'half', placeholder:'e.g. Chase Bank, Wells Fargo' },
+      { id:'bank_account_type', label:'Account Type',                type:'select', required:false, width:'half',
+        options:['— Select —','Checking account','Savings account'] }
+    ]
+  },
+
+  'Annuity Income Claim': {
+    label: 'Annuity — Payout Structure',
+    color: '#b45309',
+    icon:  'chart-line',
+    fields: [
+      { id:'annuity_trigger',   label:'Claim Trigger',               type:'select', required:true,  width:'half',
+        options:['— Select —','Annuitization election (living benefit)','Death of annuitant — death benefit payout','Required Minimum Distribution (RMD)','Surrender / withdrawal','Disability / long-term care rider on annuity'] },
+      { id:'annuity_payout_option', label:'Payout Option Selected',  type:'select', required:false, width:'half',
+        options:['— Select —','Life only','Life with period certain (10/15/20 years)','Joint and survivor (50%)','Joint and survivor (100%)','Period certain only','Lump sum — death benefit','Systematic withdrawal plan'] },
+      { id:'annuitant_dob',     label:"Annuitant's Date of Birth",  type:'date',   required:false, width:'half', hint:'Required for income calculation' },
+      { id:'joint_annuitant',   label:'Joint Annuitant Name (if applicable)', type:'text', required:false, width:'half', placeholder:'Required for joint-and-survivor payout options' }
+    ]
+  },
+
+  'Paid-up Additions': {
+    label: 'PUA — Dividend Election',
+    color: '#b45309',
+    icon:  'plus-circle',
+    fields: [
+      { id:'dividend_option',   label:'Dividend Application Option', type:'select', required:true,  width:'half',
+        options:['— Select —','Paid-up additions (purchase additional insurance)','Premium reduction (apply dividend to reduce next premium)','Cash dividend payment','Leave on deposit (accumulate at interest)','One-year term insurance purchase'] },
+      { id:'pua_effective_date',label:'Effective Date for Election', type:'date',  required:false, width:'half', hint:'When the new dividend option should take effect' }
+    ]
+  }
+};
+
+/* ── fcwRenderConditionalFields(type) ────────────────────────────
+   Builds the HTML for the adaptive conditional fields panel.
+   Reads saved values from window._fcw.typeFields to pre-populate
+   on re-renders (e.g. after clicking a different type and back).
+   ─────────────────────────────────────────────────────────────── */
+function fcwRenderConditionalFields(type) {
+  var def = _fcwConditionalFields[type];
+  if (!def || !def.fields || !def.fields.length) return '';
+
+  var saved = window._fcw.typeFields || {};
+
+  var fieldsHTML = '<div class="fcw-cf-grid">';
+  def.fields.forEach(function(f) {
+    var savedVal = saved[f.id] || '';
+    var wrapClass = f.width === 'full' ? 'fcw-cf-field full' : 'fcw-cf-field half';
+    var reqMark   = f.required ? ' <span class="fcw-cf-req">*</span>' : '';
+    var hintHTML  = f.hint ? '<div class="fcw-cf-hint"><i class="fas fa-info-circle"></i> ' + f.hint + '</div>' : '';
+
+    var inputHTML = '';
+    if (f.type === 'select') {
+      var optionsHTML = (f.options || []).map(function(o) {
+        return '<option value="' + o + '"' + (savedVal === o ? ' selected' : '') + '>' + o + '</option>';
+      }).join('');
+      inputHTML = '<select class="fcw-input fcw-cf-select" id="fcw-cf-' + f.id + '" data-cf-id="' + f.id + '">' + optionsHTML + '</select>';
+    } else if (f.type === 'date') {
+      inputHTML = '<input type="date" class="fcw-input" id="fcw-cf-' + f.id + '" data-cf-id="' + f.id + '" value="' + savedVal + '">';
+    } else {
+      inputHTML = '<input type="text" class="fcw-input" id="fcw-cf-' + f.id + '" data-cf-id="' + f.id + '" value="' + savedVal.replace(/"/g, '&quot;') + '" placeholder="' + (f.placeholder || '') + '">';
+    }
+
+    fieldsHTML += '<div class="' + wrapClass + '">' +
+      '<label class="fcw-label fcw-cf-label">' + f.label + reqMark + '</label>' +
+      inputHTML +
+      hintHTML +
+    '</div>';
+  });
+  fieldsHTML += '</div>';
+
+  return '<div class="fcw-cf-panel" id="fcw-conditional-fields">' +
+    '<div class="fcw-cf-header">' +
+      '<i class="fas fa-' + def.icon + ' fcw-cf-icon"></i>' +
+      '<div>' +
+        '<div class="fcw-cf-title">' + def.label + '</div>' +
+        '<div class="fcw-cf-subtitle">Fields dynamically generated for <strong>' + type + '</strong> — complete all required fields marked <span class="fcw-cf-req">*</span></div>' +
+      '</div>' +
+      '<span class="fcw-cf-badge"><i class="fas fa-magic"></i> AI Adaptive</span>' +
+    '</div>' +
+    fieldsHTML +
+  '</div>';
+}
+
+/* ── fcwHarvestTypeFields(validate) ──────────────────────────────
+   Reads all #fcw-cf-* inputs from the DOM and stores them into
+   window._fcw.typeFields.  If validate=true, also checks required
+   fields and returns an error string (or '' if valid).
+   ─────────────────────────────────────────────────────────────── */
+function fcwHarvestTypeFields(validate) {
+  if (!window._fcw.typeFields) window._fcw.typeFields = {};
+  var inputs = document.querySelectorAll('[data-cf-id]');
+  inputs.forEach(function(el) {
+    window._fcw.typeFields[el.getAttribute('data-cf-id')] = el.value;
+  });
+
+  if (!validate) return '';
+  // Check required fields against field definitions
+  var def = _fcwConditionalFields[window._fcw.type];
+  if (!def || !def.fields) return '';
+  for (var i = 0; i < def.fields.length; i++) {
+    var f = def.fields[i];
+    if (!f.required) continue;
+    var val = (window._fcw.typeFields[f.id] || '').trim();
+    if (!val || val === '— Select —' || val === '— N/A —') {
+      return 'Please complete required field: ' + f.label;
+    }
+  }
+  return '';
+}
+
+/* ── fcwReviewTypeFields(type, typeFields) ───────────────────────
+   Renders captured type-specific field values as review rows
+   in the Step 5 summary panel.  Shows label → value pairs for
+   any non-empty captured fields.
+   ─────────────────────────────────────────────────────────────── */
+function fcwReviewTypeFields(type, typeFields) {
+  var def = _fcwConditionalFields[type];
+  if (!def || !def.fields || !typeFields) return '';
+  var rows = '';
+  def.fields.forEach(function(f) {
+    var val = (typeFields[f.id] || '').trim();
+    if (!val || val === '— Select —' || val === '— N/A —') return;
+    rows += '<div class="fcw-review-row fcw-review-cf-row">' +
+      '<span>' + f.label + '</span>' +
+      '<strong>' + val + (f.required ? '' : '') + '</strong>' +
+    '</div>';
+  });
+  if (!rows) return '';
+  return '<div class="fcw-review-cf-group">' +
+    '<div class="fcw-review-cf-group-title"><i class="fas fa-magic"></i> ' + def.label + '</div>' +
+    rows +
+  '</div>';
+}
+
+console.log('Pass 29 — Dynamic Information Collection module loaded');
