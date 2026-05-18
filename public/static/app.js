@@ -38309,7 +38309,7 @@ function p7BuildClaimTabContent(claim, tab) {
       '<div class="p7cm-actions-bar">' +
         '<button class="p7cm-act-btn primary" onclick="sendDocRequest(\'' + claim.id + '\',\'beneficiary\')"><i class="fas fa-paper-plane"></i> Chase Docs</button>' +
         '<button class="p7cm-act-btn secondary" onclick="p7OpenFraudDetail(\'' + claim.id + '\')"><i class="fas fa-shield-virus"></i> Fraud Review</button>' +
-        '<button class="p7cm-act-btn secondary" onclick="p7ApproveClaim(\'' + claim.id + '\')"><i class="fas fa-check-circle"></i> Approve Claim</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="openPriorAuthScreener(\'' + claim.id + '\')"><i class="fas fa-clipboard-check"></i> Prior Auth</button>' +
         '<button class="p7cm-act-btn danger" onclick="p7OpenDenialModal(\'' + claim.id + '\')"><i class="fas fa-ban"></i> Issue Denial</button>' +
         '<button class="p7cm-act-btn ghost" onclick="openP7AppealModal(\'' + claim.id + '\')"><i class="fas fa-balance-scale"></i> Appeal</button>' +
       '</div>' +
@@ -38637,7 +38637,7 @@ function p7BuildClaimTabContent(claim, tab) {
       '<div class="p7cm-pay-history-title"><i class="fas fa-history"></i> Payment History</div>' +
       '<div class="p7cm-pay-list">' + payRows + '</div>' +
       '<div class="p7cm-pay-actions">' +
-        '<button class="p7cm-act-btn primary" onclick="p7ApproveClaim(\'' + claim.id + '\')"><i class="fas fa-check-circle"></i> Authorize Payout</button>' +
+        '<button class="p7cm-act-btn primary" onclick="openPriorAuthScreener(\'' + claim.id + '\')"><i class="fas fa-clipboard-check"></i> Prior Auth &amp; Approve</button>' +
         '<button class="p7cm-act-btn secondary" onclick="showToast(\'Reserve amount updated in claims system\',\'success\')"><i class="fas fa-edit"></i> Adjust Reserve</button>' +
         '<button class="p7cm-act-btn ghost" onclick="showToast(\'Payment history exported\',\'success\')"><i class="fas fa-file-export"></i> Export Payment Report</button>' +
       '</div>' +
@@ -59492,3 +59492,464 @@ function _lrwSelect(name, opts) {
 }
 
 console.log('Pass 31 — Litigation Reduction Workflow loaded');
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PASS 32 — PRIOR AUTHORIZATION OPTIMIZATION
+   openPriorAuthScreener(claimId)
+   Extends ADB Screener pattern to ALL 16 claim types.
+   Each type has: eligibility criteria, required docs, clinical thresholds,
+   workflow steps, and type-specific actions.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Per-type configuration map ─────────────────────────────────────────
+   Keys match p7ClaimsData[id].type exactly.
+   Each entry: { icon, color, trackLabel, criteria[], docs[], steps[], actions[] }
+   ──────────────────────────────────────────────────────────────────────── */
+var _pasCfg = {
+
+  'Accelerated Benefit (ADB)': {
+    icon:'fa-heartbeat', color:'#dc2626', track:'Compassionate Fast-Track',
+    criteria:[
+      { label:'Terminal illness diagnosis by licensed physician',              key:'dx' },
+      { label:'Life expectancy ≤ 24 months (carrier standard)',               key:'prog' },
+      { label:'Policy in force ≥ 2 years (no contestability)',                key:'inforce' },
+      { label:'No existing ADB claim on same policy',                          key:'noprior' },
+      { label:'Terminal Certification Form (ADB-TC) received',                 key:'cert',    pend:true },
+      { label:'Benefit amount ≤ 80% of face value',                            key:'pct' },
+      { label:'Compassionate fast-track approved by Sr. Adjuster',             key:'track' }
+    ],
+    docs:['Terminal Illness Certification (ADB-TC)', 'ADB Claim Form (signed)', 'Attending Physician Statement (APS)', 'Policy Document', 'Government-issued photo ID'],
+    steps:['Claim Filed','Fast-Track Approved','Cert Pending','Final Review','Payout'],
+    actions:[
+      { label:'Send Cert Request', icon:'fa-paper-plane', toast:'<i class="fas fa-paper-plane"></i> Terminal certification request sent to physician — 5-day SLA set' },
+      { label:'Expedite Processing', icon:'fa-bolt', toast:'<i class="fas fa-bolt"></i> ADB flagged for expedited compassionate processing — specialist assigned' }
+    ]
+  },
+
+  'Death Benefit': {
+    icon:'fa-cross', color:'#1e40af', track:'Standard Death Benefit Review',
+    criteria:[
+      { label:'Death certificate received (certified copy)',                    key:'dc' },
+      { label:'Cause of death consistent with policy terms',                   key:'cod' },
+      { label:'Policy in force and premiums current at time of death',         key:'inforce' },
+      { label:'Beneficiary identity verified (KYC complete)',                  key:'kyc' },
+      { label:'Claimant statement signed and notarized',                       key:'stmt' },
+      { label:'Contestability review passed (or period expired)',               key:'contest' },
+      { label:'Fraud screening score < 60',                                    key:'fraud' }
+    ],
+    docs:['Death Certificate (certified)', 'Claimant Statement', 'Beneficiary ID / KYC', 'Policy Document', 'Funeral Home Confirmation (if required)'],
+    steps:['Claim Filed','Docs Collected','Fraud Screen','Beneficiary KYC','Payout'],
+    actions:[
+      { label:'Approve & Initiate Payout', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Death benefit approved — payout initiated to verified beneficiary' },
+      { label:'Request Certified Death Cert', icon:'fa-file-alt', toast:'<i class="fas fa-file-alt"></i> Certified death certificate request sent to claimant' }
+    ]
+  },
+
+  'Long-Term Care': {
+    icon:'fa-procedures', color:'#7c3aed', track:'LTC Benefit Authorization',
+    criteria:[
+      { label:'LTC eligibility certification received from licensed provider',  key:'elig' },
+      { label:'≥ 2 ADL deficiencies documented (per policy definition)',        key:'adl' },
+      { label:'Care provider is licensed and on approved list',                 key:'prov' },
+      { label:'Plan of Care document received and approved',                    key:'poc',  pend:true },
+      { label:'Elimination period satisfied per policy terms',                  key:'elim' },
+      { label:'Monthly care summary submitted',                                 key:'sum',  pend:true },
+      { label:'Policy not lapsed — premiums current',                           key:'lapse' }
+    ],
+    docs:['LTC Eligibility Certification', 'Plan of Care Document', 'Care Provider License', 'Monthly Care Summary', 'ADL Assessment Report'],
+    steps:['Claim Filed','Eligibility Verified','Plan of Care','Provider Confirmed','Monthly Benefit Active'],
+    actions:[
+      { label:'Approve First Payment', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> LTC first monthly benefit approved — payment processing' },
+      { label:'Chase Plan of Care', icon:'fa-paper-plane', toast:'<i class="fas fa-paper-plane"></i> Plan of Care reminder sent to home health agency' }
+    ]
+  },
+
+  'Disability Income': {
+    icon:'fa-wheelchair', color:'#0369a1', track:'Disability Benefit Authorization',
+    criteria:[
+      { label:'Attending Physician Statement (APS) received and verified',      key:'aps' },
+      { label:'Disability confirmed by independent medical review',              key:'imr' },
+      { label:'Elimination period satisfied (per policy)',                       key:'elim' },
+      { label:'Occupation class confirmed — policy definition met',             key:'occ' },
+      { label:'Employer verification of income / job duties complete',           key:'emp' },
+      { label:'Claimant not engaged in gainful employment (Own-Occ check)',     key:'work' },
+      { label:'Policy not lapsed — premiums current',                           key:'lapse' }
+    ],
+    docs:['Attending Physician Statement (APS)', 'Independent Medical Exam Report', 'Employer Verification Form', 'Claimant Statement', 'Tax Return (prior year)'],
+    steps:['Claim Filed','APS Received','IME Scheduled','Employer Verified','Benefit Active'],
+    actions:[
+      { label:'Approve Monthly Benefit', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Disability monthly benefit approved — recurring payment established' },
+      { label:'Order Independent Medical Exam', icon:'fa-stethoscope', toast:'<i class="fas fa-stethoscope"></i> IME scheduled with approved physician panel' }
+    ]
+  },
+
+  'Waiver of Premium': {
+    icon:'fa-file-invoice-dollar', color:'#059669', track:'Waiver Authorization',
+    criteria:[
+      { label:'Total disability verified by attending physician',               key:'dis' },
+      { label:'Waiting period satisfied (standard: 6 months)',                  key:'wait' },
+      { label:'Policy rider confirms waiver of premium benefit',                key:'rider' },
+      { label:'Disability predates any premium lapse',                          key:'lapse' },
+      { label:'Independent review confirms ongoing disability',                 key:'imr' }
+    ],
+    docs:['Physician Disability Certification', 'Policy Rider Document', 'Premium Payment History', 'Claimant Statement'],
+    steps:['Claim Filed','Waiting Period','Disability Verified','Retroactive Review','Waiver Active'],
+    actions:[
+      { label:'Activate Premium Waiver', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Waiver of premium activated — retroactive from disability onset date' },
+      { label:'Request Ongoing Proof', icon:'fa-sync', toast:'<i class="fas fa-sync"></i> Annual disability recertification request sent to physician' }
+    ]
+  },
+
+  'Accidental Death Benefit Rider': {
+    icon:'fa-car-crash', color:'#b45309', track:'AD&D Rider Review',
+    criteria:[
+      { label:'Death certificate confirms accidental cause',                    key:'dc' },
+      { label:'Police / coroner report received and reviewed',                  key:'report' },
+      { label:'Toxicology results within policy exclusion thresholds',          key:'tox' },
+      { label:'Accident occurred within policy territory',                      key:'terr' },
+      { label:'AD&D rider in force at time of accident',                        key:'rider' },
+      { label:'No applicable exclusions triggered (self-inflicted, intox.)',    key:'excl' }
+    ],
+    docs:['Death Certificate', 'Police / Accident Report', 'Coroner / Medical Examiner Report', 'Toxicology Report', 'AD&D Rider Schedule'],
+    steps:['Claim Filed','Police Report','Toxicology Review','Exclusion Check','Payout Decision'],
+    actions:[
+      { label:'Approve AD&D Benefit', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> AD&D rider benefit approved — payout authorized' },
+      { label:'Request Police Report', icon:'fa-file-alt', toast:'<i class="fas fa-file-alt"></i> Police report request sent to law enforcement agency' }
+    ]
+  },
+
+  'Critical Illness Rider': {
+    icon:'fa-heartbeat', color:'#dc2626', track:'Critical Illness Authorization',
+    criteria:[
+      { label:'Diagnosis confirmed by board-certified specialist',               key:'dx' },
+      { label:'Illness matches covered condition in rider schedule',             key:'schedule' },
+      { label:'Survival period met (standard: 30 days post-diagnosis)',          key:'survive' },
+      { label:'Pre-existing condition exclusion window cleared',                 key:'preex' },
+      { label:'ICD-10 code verified against rider benefit table',               key:'icd' },
+      { label:'All diagnostic reports received',                                 key:'docs' }
+    ],
+    docs:['Specialist Diagnosis Report', 'Pathology / Lab Report', 'ICD-10 Confirmation', 'Claimant Statement', 'Attending Physician Statement'],
+    steps:['Claim Filed','Diagnosis Verified','Survival Period','Pre-ex Review','Lump Sum Payout'],
+    actions:[
+      { label:'Approve Lump Sum', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Critical illness lump-sum benefit approved — payout processing' },
+      { label:'Request Specialist Report', icon:'fa-stethoscope', toast:'<i class="fas fa-stethoscope"></i> Specialist confirmation report requested from treating physician' }
+    ]
+  },
+
+  'Chronic Illness Rider': {
+    icon:'fa-procedures', color:'#7c3aed', track:'Chronic Illness Authorization',
+    criteria:[
+      { label:'Chronic condition certified by licensed health care practitioner', key:'cert' },
+      { label:'≥ 2 ADL limitations confirmed OR severe cognitive impairment',   key:'adl' },
+      { label:'90-day elimination period satisfied',                             key:'elim' },
+      { label:'Plan of Care submitted and approved by carrier',                  key:'poc',  pend:true },
+      { label:'Reimbursement amount within per-diem rider limit',                key:'limit' }
+    ],
+    docs:['Chronic Illness Certification (LHC Practitioner)', 'ADL Functional Assessment', 'Plan of Care', 'Receipts / Care Provider Invoices', 'Rider Schedule'],
+    steps:['Claim Filed','Certification','90-Day Elimination','Plan of Care','Benefit Active'],
+    actions:[
+      { label:'Approve Benefit', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Chronic illness rider benefit authorized — reimbursement processing' },
+      { label:'Request Plan of Care', icon:'fa-paper-plane', toast:'<i class="fas fa-paper-plane"></i> Plan of Care form sent to health care practitioner' }
+    ]
+  },
+
+  'Child Term Rider': {
+    icon:'fa-child', color:'#0369a1', track:'Child Term Rider Review',
+    criteria:[
+      { label:'Child insured is within eligible age range per rider (to age 25)', key:'age' },
+      { label:'Death certificate or qualifying event documentation received',    key:'event' },
+      { label:'Child listed as insured on rider schedule',                       key:'schedule' },
+      { label:'Parent / guardian identity verified',                             key:'kyc' },
+      { label:'Policy premiums current — rider in force',                        key:'inforce' }
+    ],
+    docs:['Death Certificate (child)', 'Birth Certificate (proof of eligible child)', 'Parent / Guardian ID', 'Child Term Rider Schedule', 'Claimant Statement'],
+    steps:['Claim Filed','Eligibility Verified','Guardian KYC','Benefit Confirmed','Payout'],
+    actions:[
+      { label:'Approve Rider Benefit', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Child term rider benefit approved — payout to verified guardian' },
+      { label:'Verify Child Eligibility', icon:'fa-id-card', toast:'<i class="fas fa-id-card"></i> Child eligibility verification request sent — birth certificate required' }
+    ]
+  },
+
+  'Survivorship (2nd-to-die)': {
+    icon:'fa-users', color:'#1e40af', track:'Survivorship Benefit Review',
+    criteria:[
+      { label:'Both insureds confirmed deceased (certified death certificates)',  key:'both' },
+      { label:'Second-to-die date confirmed and documented',                     key:'date' },
+      { label:'Policy in force for both lives at time of second death',          key:'inforce' },
+      { label:'Estate / trust documentation complete',                           key:'estate' },
+      { label:'No outstanding premium payments or policy loans',                 key:'loans' },
+      { label:'Beneficiary designation verified (trust / estate)',               key:'bene' }
+    ],
+    docs:['Death Certificate — Insured 1', 'Death Certificate — Insured 2', 'Trust / Estate Documents', 'Policy Document', 'Beneficiary Designation', 'Attorney Letter (if trust)'],
+    steps:['First Death Logged','Second Death Confirmed','Estate Verified','Trust Review','Payout'],
+    actions:[
+      { label:'Authorize Estate Payout', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Survivorship benefit authorized — estate payout processing' },
+      { label:'Request Estate Docs', icon:'fa-file-alt', toast:'<i class="fas fa-file-alt"></i> Estate / trust documentation request sent to attorney of record' }
+    ]
+  },
+
+  'Maturity / Endowment': {
+    icon:'fa-calendar-check', color:'#059669', track:'Maturity Benefit Processing',
+    criteria:[
+      { label:'Policy maturity date reached (confirmed by system)',              key:'date' },
+      { label:'Policyholder identity verified',                                  key:'kyc' },
+      { label:'No outstanding policy loans above CSV',                           key:'loans' },
+      { label:'Tax withholding election form received (W-9 / W-8)',             key:'tax',  pend:true },
+      { label:'Bank account details verified for disbursement',                  key:'bank' }
+    ],
+    docs:['Policyholder ID (government-issued)', 'W-9 / W-8 Tax Form', 'Bank Account Verification', 'Maturity Election Form (lump sum vs. annuity)'],
+    steps:['Maturity Date Reached','Policyholder Notified','Tax Docs Received','Account Verified','Disbursement'],
+    actions:[
+      { label:'Process Maturity Payout', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Maturity payout authorized — disbursement initiated to verified account' },
+      { label:'Send Tax Election Form', icon:'fa-file-alt', toast:'<i class="fas fa-file-alt"></i> W-9 and maturity election form sent to policyholder' }
+    ]
+  },
+
+  'Policy Surrender / Cash Value': {
+    icon:'fa-hand-holding-usd', color:'#b45309', track:'Surrender Authorization',
+    criteria:[
+      { label:'Surrender request signed and notarized by policyholder',         key:'signed' },
+      { label:'Surrender value calculated net of loans and charges',             key:'calc' },
+      { label:'Surrender charge period review completed',                        key:'charge' },
+      { label:'Tax withholding election form received',                          key:'tax',  pend:true },
+      { label:'No outstanding collateral assignments or liens',                  key:'liens' },
+      { label:'MEC (Modified Endowment Contract) status checked',               key:'mec' }
+    ],
+    docs:['Signed Surrender Request Form', 'W-9 Tax Form', 'Policy Document', 'Loan Statement (if applicable)', 'MEC Determination Letter'],
+    steps:['Request Received','CSV Calculated','Tax Docs','Liens Cleared','Payout'],
+    actions:[
+      { label:'Process Surrender', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Policy surrender authorized — cash value payout processing (net of charges)' },
+      { label:'Send Surrender Paperwork', icon:'fa-file-alt', toast:'<i class="fas fa-file-alt"></i> Surrender request form and W-9 sent to policyholder for signature' }
+    ]
+  },
+
+  'Paid-up Additions (PUA) Withdrawal': {
+    icon:'fa-coins', color:'#0369a1', track:'PUA Withdrawal Authorization',
+    criteria:[
+      { label:'PUA withdrawal request signed by policyholder',                  key:'signed' },
+      { label:'Available PUA cash value confirmed (no loan offset)',             key:'avail' },
+      { label:'Withdrawal amount within annual free-withdrawal limit',           key:'limit' },
+      { label:'Tax implications reviewed (partial surrender rules)',             key:'tax' },
+      { label:'No collateral assignments on policy',                            key:'liens' }
+    ],
+    docs:['PUA Withdrawal Request Form', 'Policy / Rider Summary', 'Loan Statement', 'W-9 Tax Form'],
+    steps:['Request Received','PUA Balance Confirmed','Tax Review','Liens Cleared','Disbursement'],
+    actions:[
+      { label:'Authorize PUA Withdrawal', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> PUA withdrawal authorized — disbursement to policyholder account' },
+      { label:'Calculate Available PUA', icon:'fa-calculator', toast:'<i class="fas fa-calculator"></i> PUA available balance recalculated — illustration sent to agent' }
+    ]
+  },
+
+  'Annuity Income': {
+    icon:'fa-chart-line', color:'#059669', track:'Annuity Income Authorization',
+    criteria:[
+      { label:'Annuitization start date confirmed or income election received',  key:'start' },
+      { label:'Annuitant identity verified (KYC current)',                       key:'kyc' },
+      { label:'Income option elected (life, period-certain, joint)',             key:'option' },
+      { label:'Required Minimum Distribution (RMD) calculated if applicable',   key:'rmd' },
+      { label:'Tax withholding election on file (W-4P)',                        key:'tax' },
+      { label:'No outstanding surrender charges on annuity',                    key:'charge' }
+    ],
+    docs:['Annuity Income Election Form', 'Annuitant ID', 'W-4P Withholding Form', 'Beneficiary Designation (current)', 'RMD Calculation Sheet (if 73+)'],
+    steps:['Election Received','KYC Verified','Tax Docs','RMD Review','Income Payments Active'],
+    actions:[
+      { label:'Activate Income Stream', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Annuity income stream activated — first payment scheduled per election' },
+      { label:'Send Income Election Form', icon:'fa-file-alt', toast:'<i class="fas fa-file-alt"></i> Annuity income election form sent to annuitant for selection' }
+    ]
+  },
+
+  'Accidental Death': {
+    icon:'fa-car-crash', color:'#b45309', track:'Accidental Death Review',
+    criteria:[
+      { label:'Death certificate confirms accidental cause of death',            key:'dc' },
+      { label:'Police / accident report received',                               key:'report' },
+      { label:'Toxicology within exclusion thresholds (BAC / substances)',       key:'tox' },
+      { label:'AD&D rider or policy accidental death benefit in force',          key:'rider' },
+      { label:'Accident within policy territory',                                key:'terr' },
+      { label:'Exclusion review: self-inflicted, illegal act, intoxication',     key:'excl' }
+    ],
+    docs:['Death Certificate', 'Police Report', 'Coroner Report', 'Toxicology Report', 'AD&D Rider or Policy Schedule'],
+    steps:['Claim Filed','Police Report','Toxicology Review','Exclusion Check','Payout Decision'],
+    actions:[
+      { label:'Approve Accidental Death Benefit', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Accidental death benefit approved — payout authorized' },
+      { label:'Request Toxicology Report', icon:'fa-flask', toast:'<i class="fas fa-flask"></i> Toxicology report request sent to medical examiner office' }
+    ]
+  },
+
+  // Fallback for any unrecognized claim type
+  '_default': {
+    icon:'fa-clipboard-check', color:'#374151', track:'Standard Prior Authorization',
+    criteria:[
+      { label:'Claim form completed and signed by claimant',                    key:'form' },
+      { label:'All required supporting documents received',                     key:'docs' },
+      { label:'Policy in force and coverage confirmed',                         key:'inforce' },
+      { label:'Beneficiary / claimant identity verified',                       key:'kyc' },
+      { label:'Fraud screening completed (score < 60)',                         key:'fraud' }
+    ],
+    docs:['Claim Form (signed)', 'Supporting Documentation', 'Claimant ID', 'Policy Document'],
+    steps:['Claim Filed','Docs Reviewed','Eligibility Confirmed','Fraud Screen','Decision'],
+    actions:[
+      { label:'Authorize Benefit', icon:'fa-check-circle', toast:'<i class="fas fa-check-circle"></i> Benefit authorized — payout processing' },
+      { label:'Request Missing Docs', icon:'fa-paper-plane', toast:'<i class="fas fa-paper-plane"></i> Missing document request sent to claimant' }
+    ]
+  }
+};
+
+/* ── Main screener function ──────────────────────────────────────────────*/
+function openPriorAuthScreener(claimId) {
+  var existing = document.getElementById('pas-overlay');
+  if (existing) existing.remove();
+
+  var p7  = (window.p7ClaimsData  || {})[claimId] || {};
+  var ld  = (window.liabilityData || {})[claimId] || {};
+
+  var claimType   = p7.type   || ld.type   || 'Unknown';
+  var clientName  = p7.client || ld.client || claimId;
+  var amount      = p7.amount || ld.amount || '—';
+  var policy      = p7.policy || ld.policy || '—';
+  var fraudScore  = p7.fraudScore  != null ? p7.fraudScore  : 0;
+  var liabScore   = p7.liabilityScore != null ? p7.liabilityScore : 0;
+  var slaStatus   = p7.slaStatus  || 'ok';
+  var slaDaysLeft = p7.slaDaysLeft != null ? p7.slaDaysLeft : '—';
+  var filed       = p7.filed  || '—';
+
+  // Resolve config — exact type match first, then fallback
+  var cfg = _pasCfg[claimType] || _pasCfg['_default'];
+
+  // Simulate criteria met/pending from claim data
+  // Logic: criteria with key 'pend' = true start as pending; rest determined by claim state
+  var docsPct  = p7.docs
+    ? Math.round(p7.docs.filter(function(d){ return d.status === 'received' || d.status === 'verified'; }).length / p7.docs.length * 100)
+    : 80;
+  var fraudOk  = fraudScore < 60;
+  var slOk     = slaStatus === 'ok';
+
+  var criteria = cfg.criteria.map(function(c, i) {
+    // Heuristic: pending-flagged items derive from doc completeness
+    if (c.pend) return { label: c.label, met: docsPct >= 75, pending: docsPct < 75 };
+    if (c.key === 'fraud') return { label: c.label, met: fraudOk };
+    if (c.key === 'kyc')   return { label: c.label, met: p7.benefKYC === 'Verified' };
+    // Default: assume met for criteria not explicitly tracked
+    return { label: c.label, met: (i < Math.ceil(cfg.criteria.length * (docsPct / 100 + 0.2))) };
+  });
+
+  var metCount  = criteria.filter(function(c){ return c.met; }).length;
+  var pendCount = criteria.filter(function(c){ return c.pending; }).length;
+  var pct       = Math.round(metCount / criteria.length * 100);
+  var allClear  = metCount === criteria.length;
+  var pctColor  = pct >= 85 ? '#059669' : pct >= 60 ? '#d97706' : '#dc2626';
+  var statusLabel = allClear ? 'ELIGIBLE — APPROVE' : (pct >= 60 ? 'CONDITIONAL — REVIEW REQUIRED' : 'INELIGIBLE — BLOCKERS PRESENT');
+  var statusColor = allClear ? '#059669' : (pct >= 60 ? '#d97706' : '#dc2626');
+  var statusBg    = allClear ? 'linear-gradient(135deg,#ecfdf5,#d1fae5)' : (pct >= 60 ? 'linear-gradient(135deg,#fffbeb,#fef3c7)' : 'linear-gradient(135deg,#fef2f2,#fee2e2)');
+
+  // Criteria list HTML
+  var critHTML = criteria.map(function(c) {
+    var icon  = c.met     ? 'fa-check-circle'      : (c.pending ? 'fa-clock' : 'fa-times-circle');
+    var color = c.met     ? '#16a34a'              : (c.pending ? '#d97706'  : '#dc2626');
+    var cls   = c.met     ? 'pas-crit-met'         : (c.pending ? 'pas-crit-pend' : 'pas-crit-fail');
+    return '<div class="pas-crit-row ' + cls + '">'
+      + '<i class="fas ' + icon + '" style="color:' + color + ';width:18px;flex-shrink:0"></i>'
+      + '<span class="pas-crit-label">' + c.label + '</span>'
+      + '</div>';
+  }).join('');
+
+  // Docs tracker HTML — map against p7.docs when available
+  var docsHTML = (p7.docs ? p7.docs : cfg.docs.map(function(d){ return { name: d, status: 'pending' }; }))
+    .map(function(d) {
+      var st   = typeof d === 'string' ? 'pending' : d.status;
+      var nm   = typeof d === 'string' ? d         : d.name;
+      var icon = (st === 'received' || st === 'verified') ? 'fa-check-double' : (st === 'in-progress' ? 'fa-spinner' : 'fa-clock');
+      var col  = (st === 'received' || st === 'verified') ? '#2563eb' : (st === 'in-progress' ? '#7c3aed' : '#d97706');
+      return '<div class="pas-doc-row">'
+        + '<i class="fas ' + icon + '" style="color:' + col + ';width:18px;flex-shrink:0"></i>'
+        + '<span class="pas-doc-name">' + nm + '</span>'
+        + '<span class="pas-doc-st" style="color:' + col + '">' + st.toUpperCase() + '</span>'
+        + '</div>';
+    }).join('');
+
+  // Workflow strip HTML
+  var wfHTML = cfg.steps.map(function(s, i) {
+    var done    = i < Math.floor(cfg.steps.length * (pct / 100));
+    var active  = i === Math.floor(cfg.steps.length * (pct / 100));
+    var cls     = done ? 'pas-wf-done' : (active ? 'pas-wf-active' : 'pas-wf-pend');
+    var ic      = done ? 'fa-check-circle' : (active ? 'fa-clock' : 'far fa-circle');
+    return (i > 0 ? '<div class="pas-wf-arrow">›</div>' : '')
+      + '<div class="pas-wf-step ' + cls + '"><i class="fas ' + ic + '"></i><span>' + s + '</span></div>';
+  }).join('');
+
+  // Action buttons HTML
+  var actHTML = cfg.actions.map(function(a) {
+    var t = a.toast.replace(/'/g,"&#39;");
+    return '<button class="pas-action-btn" style="background:' + cfg.color + '" '
+      + 'onclick="p7Toast(\'' + t + '\',3200);document.getElementById(\'pas-overlay\').remove()">'
+      + '<i class="fas ' + a.icon + '"></i> ' + a.label
+      + '</button>';
+  }).join('');
+
+  var html = '<div id="pas-overlay" class="pas-overlay" onclick="if(event.target===this)document.getElementById(\'pas-overlay\').remove()">'
+    + '<div class="pas-modal" onclick="event.stopPropagation()">'
+
+    // Header
+    + '<div class="pas-header">'
+    +   '<div class="pas-header-icon" style="background:' + cfg.color + '"><i class="fas ' + cfg.icon + '"></i></div>'
+    +   '<div class="pas-header-info">'
+    +     '<div class="pas-header-title">Prior Authorization Screener</div>'
+    +     '<div class="pas-header-sub">' + claimType + ' · ' + cfg.track + '</div>'
+    +   '</div>'
+    +   '<button class="pas-close-btn" onclick="document.getElementById(\'pas-overlay\').remove()"><i class="fas fa-times"></i></button>'
+    + '</div>'
+
+    // Claim banner
+    + '<div class="pas-claim-banner" style="background:' + statusBg + ';border-color:' + statusColor + '">'
+    +   '<div class="pas-claim-left">'
+    +     '<div class="pas-claim-id">' + claimId
+    +       (cfg.track.indexOf('Compassionate') > -1 ? ' <span class="pas-compassionate-tag"><i class="fas fa-heart"></i> Compassionate</span>' : '')
+    +     '</div>'
+    +     '<div class="pas-claim-client"><strong>' + clientName + '</strong> · ' + policy + ' · ' + amount + ' · Filed ' + filed + '</div>'
+    +     '<div class="pas-claim-type">' + claimType + '</div>'
+    +   '</div>'
+    +   '<div class="pas-elig-badge">'
+    +     '<div class="pas-elig-pct" style="color:' + pctColor + '">' + pct + '%</div>'
+    +     '<div class="pas-elig-lbl">Authorization</div>'
+    +     '<div class="pas-elig-met">' + metCount + '/' + criteria.length + ' criteria</div>'
+    +   '</div>'
+    + '</div>'
+
+    // Status pill
+    + '<div class="pas-status-pill" style="background:' + statusColor + '">'
+    +   '<i class="fas ' + (allClear ? 'fa-check-circle' : pct >= 60 ? 'fa-exclamation-circle' : 'fa-times-circle') + '"></i> '
+    +   statusLabel
+    + '</div>'
+
+    // KPI strip
+    + '<div class="pas-kpi-strip">'
+    +   '<div class="pas-kpi"><div class="pas-kpi-val" style="color:' + (fraudScore < 30 ? '#059669' : fraudScore < 60 ? '#d97706' : '#dc2626') + '">' + fraudScore + '</div><div class="pas-kpi-lbl">Fraud Score</div></div>'
+    +   '<div class="pas-kpi"><div class="pas-kpi-val" style="color:' + (liabScore < 40 ? '#059669' : liabScore < 70 ? '#d97706' : '#dc2626') + '">' + liabScore + '%</div><div class="pas-kpi-lbl">Liability Score</div></div>'
+    +   '<div class="pas-kpi"><div class="pas-kpi-val" style="color:' + (slaStatus === 'ok' ? '#059669' : '#dc2626') + '">' + slaDaysLeft + '</div><div class="pas-kpi-lbl">SLA Days Left</div></div>'
+    +   '<div class="pas-kpi"><div class="pas-kpi-val" style="color:' + pctColor + '">' + metCount + '/' + criteria.length + '</div><div class="pas-kpi-lbl">Criteria Met</div></div>'
+    + '</div>'
+
+    // Criteria
+    + '<div class="pas-section-title"><i class="fas fa-clipboard-check"></i> Eligibility Criteria Checklist — ' + claimType + '</div>'
+    + '<div class="pas-criteria-list">' + critHTML + '</div>'
+
+    // Documents
+    + '<div class="pas-section-title" style="margin-top:18px"><i class="fas fa-file-medical"></i> Document Tracking</div>'
+    + '<div class="pas-doc-list">' + docsHTML + '</div>'
+
+    // Workflow
+    + '<div class="pas-section-title" style="margin-top:18px"><i class="fas fa-route"></i> Authorization Workflow</div>'
+    + '<div class="pas-wf-strip">' + wfHTML + '</div>'
+
+    // Actions
+    + '<div class="pas-footer">'
+    +   '<button class="pas-close-ghost" onclick="document.getElementById(\'pas-overlay\').remove()">Close</button>'
+    +   actHTML
+    + '</div>'
+
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded');

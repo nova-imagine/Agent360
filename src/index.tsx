@@ -5978,7 +5978,7 @@ function ClaimsPage() {
               <button class="ov-panel-btn secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
               <button class="ov-panel-btn secondary" onclick="openAITriageModal()"><i class="fas fa-robot"></i> AI Triage</button>
               <button class="ov-panel-btn secondary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
-              <button class="ov-panel-btn secondary" onclick="openADBScreener()"><i class="fas fa-heartbeat"></i> ADB Screener</button>
+              <button class="ov-panel-btn secondary" onclick="openPriorAuthScreener('CLM-2026-0028')"><i class="fas fa-clipboard-check"></i> Prior Auth Screener</button>
             </div>
           </div>
 

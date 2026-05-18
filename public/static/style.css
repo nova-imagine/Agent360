@@ -53124,3 +53124,195 @@ kbd {
 }
 .lrw-sub-submit:hover { opacity: .88; }
 .lrw-sub-submit i { margin-right: 6px; }
+
+/* ═══════════════════════════════════════════════════
+   PASS 32 — PRIOR AUTHORIZATION SCREENER styles
+   ═══════════════════════════════════════════════════ */
+.pas-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.72);
+  backdrop-filter: blur(4px);
+  z-index: 9600;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 24px 12px; overflow-y: auto;
+}
+.pas-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%; max-width: 720px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.28);
+  overflow: hidden;
+  animation: pas-in .22s ease;
+}
+@keyframes pas-in {
+  from { opacity:0; transform: translateY(-16px) scale(.97); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+/* Header */
+.pas-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg,#1e293b,#0f172a);
+  border-bottom: 1px solid #334155;
+}
+.pas-header-icon {
+  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 18px;
+}
+.pas-header-title {
+  color: #f1f5f9; font-size: 16px; font-weight: 700;
+}
+.pas-header-sub {
+  color: #94a3b8; font-size: 11px; margin-top: 2px;
+}
+.pas-close-btn {
+  margin-left: auto; background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12); color: #94a3b8;
+  border-radius: 8px; width: 32px; height: 32px;
+  cursor: pointer; font-size: 13px; transition: all .15s;
+}
+.pas-close-btn:hover { background: rgba(255,255,255,.18); color: #e2e8f0; }
+
+/* Claim banner */
+.pas-claim-banner {
+  margin: 16px 18px 0;
+  border: 1.5px solid #e5e7eb; border-radius: 10px;
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 16px;
+}
+.pas-claim-left { flex: 1; min-width: 0; }
+.pas-claim-id {
+  font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 2px;
+}
+.pas-claim-client {
+  font-size: 12px; color: #374151;
+}
+.pas-claim-type {
+  font-size: 11px; color: #6b7280; margin-top: 2px;
+}
+.pas-compassionate-tag {
+  background: #dc2626; color: #fff;
+  padding: 1px 7px; border-radius: 20px;
+  font-size: 10px; font-weight: 700;
+  margin-left: 6px;
+}
+.pas-elig-badge {
+  text-align: center; flex-shrink: 0;
+}
+.pas-elig-pct {
+  font-size: 26px; font-weight: 800; line-height: 1;
+}
+.pas-elig-lbl {
+  font-size: 10px; color: #6b7280; font-weight: 600; margin-top: 1px;
+}
+.pas-elig-met {
+  font-size: 10px; color: #9ca3af; margin-top: 1px;
+}
+
+/* Status pill */
+.pas-status-pill {
+  margin: 10px 18px 0;
+  padding: 7px 16px; border-radius: 8px;
+  color: #fff; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; gap: 7px;
+}
+
+/* KPI strip */
+.pas-kpi-strip {
+  display: flex; gap: 0;
+  margin: 14px 18px 0;
+  border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;
+}
+.pas-kpi {
+  flex: 1; padding: 10px 12px; text-align: center;
+  border-right: 1px solid #e2e8f0;
+}
+.pas-kpi:last-child { border-right: none; }
+.pas-kpi-val {
+  font-size: 18px; font-weight: 800; line-height: 1;
+}
+.pas-kpi-lbl {
+  font-size: 10px; color: #6b7280; margin-top: 2px; font-weight: 500;
+}
+
+/* Section titles */
+.pas-section-title {
+  padding: 14px 18px 6px;
+  font-size: 12px; font-weight: 700; color: #374151;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.pas-section-title i { color: #6366f1; margin-right: 6px; }
+
+/* Criteria list */
+.pas-criteria-list {
+  padding: 0 18px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.pas-crit-row {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 7px 10px; border-radius: 7px;
+  font-size: 12px;
+}
+.pas-crit-met  { background: #f0fdf4; }
+.pas-crit-pend { background: #fffbeb; }
+.pas-crit-fail { background: #fef2f2; }
+.pas-crit-label { color: #374151; line-height: 1.4; }
+
+/* Doc list */
+.pas-doc-list {
+  padding: 0 18px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.pas-doc-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 10px; border-radius: 7px;
+  background: #f8fafc; font-size: 12px;
+}
+.pas-doc-name { flex: 1; color: #374151; }
+.pas-doc-st {
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+}
+
+/* Workflow strip */
+.pas-wf-strip {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 4px; padding: 6px 18px 14px;
+}
+.pas-wf-step {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.pas-wf-done   { background: #dcfce7; color: #166534; }
+.pas-wf-active { background: #fef3c7; color: #92400e; }
+.pas-wf-pend   { background: #f1f5f9; color: #64748b; }
+.pas-wf-arrow  { color: #9ca3af; font-size: 14px; font-weight: 700; }
+
+/* Footer */
+.pas-footer {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 10px; flex-wrap: wrap;
+  padding: 12px 18px;
+  background: #f8fafc; border-top: 1px solid #e2e8f0;
+}
+.pas-close-ghost {
+  padding: 8px 16px; border-radius: 8px;
+  background: #fff; border: 1.5px solid #d1d5db;
+  color: #374151; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.pas-close-ghost:hover { background: #f1f5f9; }
+.pas-action-btn {
+  padding: 8px 18px; border-radius: 8px;
+  color: #fff; font-size: 13px; font-weight: 700;
+  border: none; cursor: pointer; transition: opacity .15s;
+}
+.pas-action-btn:hover { opacity: .88; }
+.pas-action-btn i { margin-right: 5px; }
+
+@media (max-width: 500px) {
+  .pas-kpi-strip { flex-wrap: wrap; }
+  .pas-kpi { min-width: 50%; border-bottom: 1px solid #e2e8f0; }
+  .pas-wf-strip { gap: 3px; }
+}
