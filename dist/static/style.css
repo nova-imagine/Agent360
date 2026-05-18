@@ -577,6 +577,7 @@ body {
 .mini-avatar.mg { background: linear-gradient(135deg, #d97706, #f59e0b); }
 .mini-avatar.jw { background: linear-gradient(135deg, #0066cc, #3b82f6); }
 .mini-avatar.sw { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.mini-avatar.ar { background: linear-gradient(135deg, #047857, #10b981); }
 
 .premium { color: var(--green); font-weight: 600; }
 .text-right { text-align: right; }
@@ -6090,6 +6091,7 @@ body {
 .mini-avatar.mg { background: linear-gradient(135deg,#dc2626,#9f1239); }
 .mini-avatar.dt { background: linear-gradient(135deg,#d97706,#92400e); }
 .mini-avatar.ms { background: linear-gradient(135deg,#6d28d9,#4c1d95); }
+.mini-avatar.ar { background: linear-gradient(135deg,#047857,#10b981); }
 
 /* ── Outreach button on client card ── */
 .outreach-btn {

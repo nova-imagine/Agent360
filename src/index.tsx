@@ -6782,7 +6782,26 @@ function ClaimsPage() {
                   </div>
                 </td>
               </tr>
-              {/* Row 8 — Thomas Reed, Accidental Death Benefit Rider */}
+              {/* Row 8 — Alex Rivera, Disability Income — ACTIVE */}
+              <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0058','view')">
+                <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
+                <td><span class="claim-id">CLM-2026-0058</span></td>
+                <td><div class="client-cell"><div class="mini-avatar ar">AR</div><span>Alex Rivera</span></div></td>
+                <td><span class="claim-type-badge disability">Disability Income</span></td>
+                <td class="premium text-right">$6,000/mo</td>
+                <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:20%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 28d</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0058')"><span class="fraud-score-num">14</span><span class="fraud-score-lbl">Clear</span></div></td>
+                <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0058')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/5</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:40%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0058')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:29%;background:#059669"></div></div><span class="cp-risk-score">29</span></div></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="action-btns">
+                    <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0058','view')"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon" title="Upload" onclick="openUploadModal('CLM-2026-0058')"><i class="fas fa-upload"></i></button>
+                    <button class="btn-icon ai-btn" title="AI" onclick="openClaimModal('CLM-2026-0058','ci')"><i class="fas fa-robot"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {/* Row 9 — Thomas Reed, Accidental Death Benefit Rider */}
               <tr class="claim-row clm-row-clickable" onclick="openClaimModal('CLM-2026-0045','view')">
                 <td onclick="event.stopPropagation()"><input type="checkbox" class="claim-row-checkbox" onchange="updateBatchButtons()" /></td>
                 <td><span class="claim-id">CLM-2026-0045</span></td>
