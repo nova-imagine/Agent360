@@ -7176,7 +7176,7 @@ function ClaimsPage() {
             </div>
             <div class="cpa-footer">
               <button class="btn btn-ai" onclick="sendContextMessage('Show my claims performance for Q2 2026 — resolution times, SLA compliance, doc response rates and recommendations','claims')"><i class="fas fa-robot"></i> Full AI Performance Analysis</button>
-              <button class="btn btn-outline-sm" onclick="alert('Exporting performance report…')"><i class="fas fa-download"></i> Export Report</button>
+              <button class="btn btn-outline-sm" onclick="exportClaimsPerformanceReport()"><i class="fas fa-download"></i> Export Report</button>
             </div>
           </div>
         </div>

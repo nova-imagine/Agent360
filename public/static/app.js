@@ -18241,8 +18241,8 @@ function openAppealModal(claimId) {
           </div>
         </div>
         <div style="display:flex;gap:8px;margin-top:16px">
-          <button class="btn btn-primary" onclick="alert('Appeal for ${claimId} submitted successfully. Reference: APP-2026-'+Math.floor(Math.random()*1000));document.getElementById('appeal-modal-overlay').remove()"><i class="fas fa-paper-plane"></i> Submit Appeal</button>
-          <button class="btn btn-ai" onclick="alert('AI drafting appeal letter…')"><i class="fas fa-robot"></i> AI Draft Letter</button>
+          <button class="btn btn-primary" onclick="submitAppealFromModal('${claimId}')"><i class="fas fa-paper-plane"></i> Submit Appeal</button>
+          <button class="btn btn-ai" onclick="aiDraftAppealLetter('${claimId}')"><i class="fas fa-robot"></i> AI Draft Letter</button>
           <button class="btn btn-outline-sm" onclick="document.getElementById('appeal-modal-overlay').remove()">Cancel</button>
         </div>
       </div>
@@ -18281,7 +18281,7 @@ function openReopenModal(claimId) {
           <textarea class="appeal-textarea" rows="3" placeholder="Describe why this claim needs to be re-opened…" style="width:100%;margin-top:4px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;resize:vertical"></textarea>
         </div>
         <div style="display:flex;gap:8px;margin-top:16px">
-          <button class="btn btn-primary" onclick="alert('Claim ${claimId} re-opened successfully. Assigned to adjuster queue.');document.getElementById('reopen-modal-overlay').remove()"><i class="fas fa-redo"></i> Re-open Claim</button>
+          <button class="btn btn-primary" onclick="confirmReopenClaim('${claimId}')"><i class="fas fa-redo"></i> Re-open Claim</button>
           <button class="btn btn-outline-sm" onclick="document.getElementById('reopen-modal-overlay').remove()">Cancel</button>
         </div>
       </div>
@@ -18333,6 +18333,209 @@ function _orig_toggleWorkbench(btn) {
   const collapsed = cards.style.display === 'none';
   cards.style.display = collapsed ? 'flex' : 'none';
   btn.innerHTML = collapsed ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PASS 24 — RESOLVED TAB: NAIC MODAL · RE-OPEN · APPEAL · REG PANEL TOGGLE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/* ── Alias: HTML calls openReopenClaimModal; function body is openReopenModal ── */
+function openReopenClaimModal(claimId) { openReopenModal(claimId); }
+
+/* ── Re-open confirm (replaces alert) ── */
+function confirmReopenClaim(claimId) {
+  var sel = document.querySelector('#reopen-modal-overlay select');
+  var reason = sel ? sel.value : 'Additional documents received after resolution';
+  var ov = document.getElementById('reopen-modal-overlay');
+  if (ov) ov.remove();
+  p7Toast('<i class="fas fa-redo"></i> Claim ' + claimId + ' re-opened · Reason: ' + reason + ' · Returned to Active queue · Adjuster notified', 5000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-envelope"></i> Re-open confirmation sent to claims supervisor · Audit trail updated', 3500);
+  }, 1800);
+}
+
+/* ── Appeal: Submit (replaces alert) ── */
+function submitAppealFromModal(claimId) {
+  var sel = document.querySelector('#appeal-modal-overlay select');
+  var grounds = sel ? sel.value.split('\u2014')[0].trim() : 'Medical Evidence';
+  var ref = 'APP-2026-' + Math.floor(Math.random() * 9000 + 1000);
+  var ov = document.getElementById('appeal-modal-overlay');
+  if (ov) ov.remove();
+  p7Toast('<i class="fas fa-paper-plane"></i> Appeal filed for ' + claimId + ' \u00b7 Grounds: ' + grounds + ' \u00b7 Reference: ' + ref, 5500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-clock"></i> Appeal under review \u00b7 Expected decision within 30 days \u00b7 Claimant notified \u00b7 Adverse action letter on hold', 4500);
+  }, 2200);
+}
+
+/* ── Appeal: AI Draft Letter (replaces alert) ── */
+function aiDraftAppealLetter(claimId) {
+  var sel = document.querySelector('#appeal-modal-overlay select');
+  var grounds = sel ? sel.value.split('\u2014')[0].trim() : 'Medical Evidence';
+  p7Toast('<i class="fas fa-robot"></i> AI drafting appeal letter for ' + claimId + ' \u00b7 Grounds: ' + grounds + ' \u00b7 Pulling claim history and policy language\u2026', 3500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-file-alt"></i> Appeal letter drafted \u00b7 Review in Documents tab before sending to DFS \u00b7 Estimated approval probability: 68%', 5000);
+  }, 2400);
+}
+
+/* ── Export Claims Performance Report (replaces alert) ── */
+function exportClaimsPerformanceReport() {
+  p7Toast('<i class="fas fa-download"></i> Generating Q2 2026 performance report \u2014 resolution times, SLA compliance, doc response rates\u2026', 3000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> Performance report ready \u00b7 PDF downloaded \u00b7 Copy sent to manager dashboard', 3500);
+  }, 2000);
+}
+
+/* ── Regulatory Reporting panel collapse / expand ── */
+function toggleRegReport(btn) {
+  var body = document.getElementById('rr-body');
+  if (!body) return;
+  var isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? '' : 'none';
+  if (btn) btn.innerHTML = isHidden ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>';
+}
+
+/* ── NAIC Form submit confirmation handler ── */
+function submitNAICForm(formType, claimRef, state, confirmMsg) {
+  var ov = document.getElementById('naic-form-overlay');
+  if (ov) ov.remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Submitting ' + formType + ' to ' + state + ' regulatory portal\u2026', 2500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> ' + confirmMsg, 6000);
+  }, 2300);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-file-alt"></i> Filing saved to claim record \u00b7 Regulatory calendar updated \u00b7 Next deadline calculated', 4000);
+  }, 5200);
+}
+
+/* ── NAIC Form Modal ── */
+function openNAICFormModal(formType, claimRef, state) {
+  var existing = document.getElementById('naic-form-overlay');
+  if (existing) existing.remove();
+
+  var formMeta = {
+    'D-3': {
+      title: 'NAIC Claim Denial Report \u2014 Form D-3',
+      icon: 'fa-times-circle',
+      iconBg: '#fef2f2', iconCol: '#dc2626', accentCol: '#dc2626',
+      headerGrad: 'linear-gradient(135deg,#7f1d1d,#991b1b)',
+      agency: 'NY Department of Financial Services',
+      deadline: '2026-04-01', status: 'PAST DUE',
+      statusBg: '#dc2626', barBg: '#fef2f2', barBorder: '#fecaca',
+      description: 'Mandatory 15-day reporting of claim denial under NY Insurance Law \u00a73420(d). Includes denial reason, policy language cited, and adverse action notice.',
+      fields: [
+        {label:'Claim ID', val:claimRef, type:'text'},
+        {label:'Policy Number', val:'P-100371', type:'text'},
+        {label:'Claimant Name', val:'Daniel Kim', type:'text'},
+        {label:'Denial Reason', val:'Pre-existing condition exclusion \u2014 disability pre-dates policy by 8 months', type:'textarea'},
+        {label:'Policy Section Cited', val:'Section 4.2(b) \u2014 Pre-Existing Condition Exclusion Rider', type:'text'},
+        {label:'Denial Date', val:'2025-12-02', type:'text'},
+        {label:'Adverse Action Notice Sent', val:'Yes \u2014 2025-12-03 via certified mail', type:'text'}
+      ],
+      submitLabel: 'Generate & File Form D-3', submitIcon: 'fa-file-signature',
+      confirmMsg: 'NAIC Form D-3 generated and filed with NY DFS \u00b7 Confirmation: DFS-2026-' + Math.floor(Math.random()*9000+1000) + ' \u00b7 Adverse action letter attached to claim record'
+    },
+    'PP-Q1': {
+      title: 'Prompt Payment Compliance Report \u2014 Q1 2026',
+      icon: 'fa-file-invoice-dollar',
+      iconBg: '#fffbeb', iconCol: '#d97706', accentCol: '#d97706',
+      headerGrad: 'linear-gradient(135deg,#78350f,#92400e)',
+      agency: 'NJ Department of Banking & Insurance',
+      deadline: '2026-04-30', status: 'PENDING',
+      statusBg: '#d97706', barBg: '#fffbeb', barBorder: '#fde68a',
+      description: 'Quarterly prompt payment compliance report \u2014 NJ P.L. 2001, c.259. Covers all resolved claims Q1 2026 and statutory payment timeframe adherence.',
+      fields: [
+        {label:'Reporting Period', val:'Q1 2026 (Jan 1 \u2013 Mar 31)', type:'text'},
+        {label:'Carrier / NPN', val:'New York Life Insurance Co. \u00b7 NPN 6814087', type:'text'},
+        {label:'Total Claims Resolved', val:'14', type:'text'},
+        {label:'Paid Within 30-Day Statutory Period', val:'13 of 14 (92.8%)', type:'text'},
+        {label:'Late Payments', val:'None \u2014 CLM-2025-0201 denied; prompt payment clock N/A', type:'text'},
+        {label:'Average Resolution Time', val:'5.2 days', type:'text'},
+        {label:'Total Benefits Paid (Q1)', val:'$146,000', type:'text'}
+      ],
+      submitLabel: 'Generate & Submit PP Report', submitIcon: 'fa-file-alt',
+      confirmMsg: 'Prompt Payment Q1 2026 report submitted to NJDBI \u00b7 Confirmation: NJDBI-2026-' + Math.floor(Math.random()*9000+1000) + ' \u00b7 No compliance violations identified'
+    },
+    'LDB-N': {
+      title: 'Large Death Benefit Notification \u2014 CLM-2026-0041',
+      icon: 'fa-paper-plane',
+      iconBg: '#eff6ff', iconCol: '#2563eb', accentCol: '#2563eb',
+      headerGrad: 'linear-gradient(135deg,#1e3a5f,#1e40af)',
+      agency: 'NY Department of Financial Services',
+      deadline: '2026-04-20', status: 'PENDING',
+      statusBg: '#2563eb', barBg: '#eff6ff', barBorder: '#bfdbfe',
+      description: 'Mandatory DFS notification for life insurance claims exceeding $500K \u2014 NY Insurance Law \u00a73209. Must be filed within 15 business days of claim receipt.',
+      fields: [
+        {label:'Claim ID', val:'CLM-2026-0041', type:'text'},
+        {label:'Insured Name', val:'Robert Chen', type:'text'},
+        {label:'Date of Death', val:'2026-03-15', type:'text'},
+        {label:'Policy Number', val:'P-100311', type:'text'},
+        {label:'Death Benefit Amount', val:'$1,000,000', type:'text'},
+        {label:'Beneficiary', val:'Margaret Chen (Spouse \u2014 Primary)', type:'text'},
+        {label:'Current Claim Status', val:'Under Review \u2014 Documentation pending', type:'text'},
+        {label:'Expected Resolution Date', val:'2026-04-25', type:'text'}
+      ],
+      submitLabel: 'File DFS Notification', submitIcon: 'fa-paper-plane',
+      confirmMsg: 'Large Death Benefit notification filed with NY DFS \u00b7 CLM-2026-0041 ($1,000,000) \u00b7 Confirmation: DFS-LDB-2026-' + Math.floor(Math.random()*9000+1000)
+    }
+  };
+
+  var f = formMeta[formType] || formMeta['D-3'];
+
+  /* Build fields rows */
+  var fieldsHtml = '';
+  for (var fi = 0; fi < f.fields.length; fi++) {
+    var fld = f.fields[fi];
+    var inputHtml;
+    if (fld.type === 'textarea') {
+      inputHtml = '<textarea style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px;color:#374151;resize:vertical;min-height:62px;font-family:inherit;box-sizing:border-box">' + fld.val + '</textarea>';
+    } else {
+      inputHtml = '<input type="text" value="' + fld.val + '" style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px;color:#374151;box-sizing:border-box">';
+    }
+    fieldsHtml += '<div style="margin-bottom:13px"><label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">' + fld.label + '</label>' + inputHtml + '</div>';
+  }
+
+  var safeConfirm = f.confirmMsg.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+  var ov = document.createElement('div');
+  ov.id = 'naic-form-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:16px;width:660px;max-width:100%;box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;max-height:90vh;display:flex;flex-direction:column">' +
+      /* ─ Header ─ */
+      '<div style="background:' + f.headerGrad + ';padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">' +
+        '<div style="display:flex;align-items:center;gap:14px">' +
+          '<div style="width:46px;height:46px;border-radius:12px;background:' + f.iconBg + ';display:flex;align-items:center;justify-content:center;color:' + f.iconCol + ';font-size:20px;flex-shrink:0"><i class="fas ' + f.icon + '"></i></div>' +
+          '<div>' +
+            '<div style="color:#f1f5f9;font-weight:700;font-size:15px;line-height:1.3">' + f.title + '</div>' +
+            '<div style="color:#94a3b8;font-size:12px;margin-top:3px">' + f.agency + ' &middot; Deadline: ' + f.deadline + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'naic-form-overlay\').remove()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px">&times;</button>' +
+      '</div>' +
+      /* ─ Status bar ─ */
+      '<div style="background:' + f.barBg + ';border-bottom:1px solid ' + f.barBorder + ';padding:10px 24px;display:flex;align-items:flex-start;gap:10px;flex-shrink:0">' +
+        '<span style="background:' + f.statusBg + ';color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.5px;white-space:nowrap;margin-top:1px">' + f.status + '</span>' +
+        '<span style="font-size:12px;color:#4b5563;line-height:1.5">' + f.description + '</span>' +
+      '</div>' +
+      /* ─ Body (scrollable) ─ */
+      '<div style="padding:22px 24px 16px;overflow-y:auto;flex:1">' +
+        '<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;display:flex;align-items:center;gap:6px"><i class="fas fa-edit" style="color:' + f.accentCol + '"></i> Review Form Fields Before Submission</div>' +
+        fieldsHtml +
+        '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 14px;margin-top:6px;font-size:12px;color:#166534;line-height:1.5">' +
+          '<i class="fas fa-shield-alt" style="margin-right:6px"></i>' +
+          '<strong>Digital Submission:</strong> This form will be signed with your NOVA agent credentials and transmitted to the state regulatory portal. A confirmed copy and reference number will be saved to the claim record and your regulatory log.' +
+        '</div>' +
+      '</div>' +
+      /* ─ Footer ─ */
+      '<div style="padding:14px 24px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;background:#f8fafc">' +
+        '<button onclick="document.getElementById(\'naic-form-overlay\').remove()" style="padding:9px 18px;border-radius:9px;border:1px solid #d1d5db;background:#fff;color:#374151;font-size:13px;cursor:pointer;font-weight:500">Cancel</button>' +
+        '<button onclick="submitNAICForm(\'' + formType + '\',\'' + claimRef + '\',\'' + state + '\',\'' + safeConfirm + '\')" style="padding:9px 22px;border-radius:9px;border:none;background:' + f.accentCol + ';color:#fff;font-size:13px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:7px"><i class="fas ' + f.submitIcon + '"></i> ' + f.submitLabel + '</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
 }
 
 // ── Claims Performance Analytics Panel toggle ───────────────────────────────
