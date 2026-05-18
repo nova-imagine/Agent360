@@ -865,7 +865,7 @@ function Sidebar() {
           <span class="nav-badge" style="background:#0d9488;color:#fff;margin-left:2px">5 IPS</span>
         </a>
         <a class="nav-item inv-proposals-nav" onclick="navigateTo('inv-proposals')" href="#">
-          <i class="fas fa-file-chart-line"></i><span>Investment Proposals</span>
+          <i class="fas fa-file-invoice-dollar"></i><span>Investment Proposals</span>
           <span class="nav-badge" style="background:#003087;color:#fff">4</span>
           <span class="nav-badge" style="background:#f59e0b;color:#fff;margin-left:2px">AI</span>
         </a>
@@ -4337,7 +4337,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$4,200/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P001')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4368,7 +4368,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$3,600/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P002')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4398,7 +4398,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$2,400/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P003')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4429,7 +4429,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$6,800/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P004')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4460,7 +4460,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$9,600/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P005')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4491,7 +4491,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$14,400/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P006')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4522,7 +4522,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$2,800/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P007')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4554,7 +4554,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$18,000/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P008')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4585,7 +4585,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$8,200/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P009')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4616,7 +4616,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$9,000/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P010')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4647,7 +4647,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$4,800/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P011')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4678,7 +4678,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$7,200/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P012')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4709,7 +4709,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$3,400/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P013')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -4740,7 +4740,7 @@ function ProspectsPage() {
           </div>
           <div class="prosp-card-footer">
             <span class="prosp-value">$12,000/yr</span>
-            <button class="prosp-convert-btn" onclick="event.stopPropagation();convertProspectToClient('P014')"><i class="fas fa-funnel-dollar"></i> Move to Sales Pipeline</button>
+
           </div>
         </div>
 
@@ -18695,7 +18695,7 @@ function InvestmentProposalsPage() {
         {/* ── RIGHT: Proposal Detail ── */}
         <div class="ip-detail-col" id="ip-detail-col">
           <div class="ip-detail-placeholder" id="ip-detail-placeholder">
-            <div class="ip-ph-icon"><i class="fas fa-file-chart-line"></i></div>
+            <div class="ip-ph-icon"><i class="fas fa-file-invoice-dollar"></i></div>
             <div class="ip-ph-title">Select a Proposal</div>
             <div class="ip-ph-sub">Click any proposal in the queue to view the full AI-generated investment analysis, product breakdown, suitability scoring, and presentation tools.</div>
             <button class="ip-ph-btn" onclick="ipNewProposal()"><i class="fas fa-plus"></i> Create New Proposal</button>

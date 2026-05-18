@@ -23269,8 +23269,7 @@ function openProspectModal(id) {
 
   footer.innerHTML = `
     <button class="btn btn-outline" onclick="closeProspectModal()"><i class="fas fa-times"></i> Close</button>
-    <button class="btn btn-ai" onclick="sendContextMessage('Give me a complete AI sales strategy for prospect ${p.name} — stage ${p.stage}, product interest: ${p.products.join(', ')}, score ${p.score}. Include next best action, talking points, and objection handling.','advisor')"><i class="fas fa-robot"></i> AI Strategy</button>
-    <button class="btn btn-primary" onclick="closeProspectModal();moveLeadToOpportunity('${id}')"><i class="fas fa-bolt"></i> Move to Opportunities</button>`;
+    <button class="btn btn-ai" onclick="sendContextMessage('Give me a complete AI sales strategy for prospect ${p.name} — stage ${p.stage}, product interest: ${p.products.join(', ')}, score ${p.score}. Include next best action, talking points, and objection handling.','advisor')"><i class="fas fa-robot"></i> AI Strategy</button>`;
 
   renderProspectTab('overview', p);
   overlay.style.display = 'flex';
@@ -24156,7 +24155,6 @@ function apSaveProspect() {
       </div>
       <div class="prosp-card-footer">
         <span class="prosp-value">${refBy ? 'Ref: ' + refBy : source}</span>
-        <button class="prosp-convert-btn" onclick="event.stopPropagation();moveLeadToOpportunity('${newId}')"><i class="fas fa-bolt"></i> Move to Opportunities</button>
       </div>`;
 
     card.onclick = () => {
