@@ -58140,3 +58140,296 @@ function _lcShowResultModal(claimId, syn, dir, callType, person, dur) {
 }
 
 console.log('Pass 27 — Postcall Synthesis module loaded');
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PASS 28 — COMPLAINT PREDICTION
+   ML risk score per claim · Overview KPI drilldown · CI tab factor panel
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Per-claim complaint prediction data ──────────────────────────────────
+   score  : 0–100 composite risk
+   tier   : 'HIGH' | 'MED' | 'LOW'
+   factors: array of { label, score, weight }  (score 0–100, weight = importance)
+   mitigation: top 1–3 recommended actions
+   ─────────────────────────────────────────────────────────────────────────*/
+var CP_DATA = {
+  'CLM-2026-0041': {
+    score: 82, tier: 'HIGH',
+    client: 'Robert Chen', type: 'Death Benefit · $1,000,000',
+    narrative: 'High complaint risk driven by SLA breach (1 day remaining), large claim amount, and pending identity documents. Beneficiary has already called twice — frustration level elevated.',
+    factors: [
+      { label: 'SLA Days Remaining',       score: 95, weight: 'Critical',  bar: '#dc2626' },
+      { label: 'Claim Complexity',          score: 80, weight: 'High',      bar: '#dc2626' },
+      { label: 'Document Completeness',     score: 50, weight: 'High',      bar: '#d97706' },
+      { label: 'Prior Complaint History',   score: 20, weight: 'Medium',    bar: '#059669' },
+      { label: 'Communication Frequency',   score: 75, weight: 'Medium',    bar: '#d97706' },
+      { label: 'Beneficiary Satisfaction',  score: 40, weight: 'High',      bar: '#d97706' }
+    ],
+    mitigation: [
+      'Contact beneficiary within 24 hours with status update and commitment date',
+      'Escalate to senior adjuster — flag for same-day document receipt',
+      'Offer supervisor callback if docs not submitted by close of business'
+    ]
+  },
+  'CLM-2026-0028': {
+    score: 76, tier: 'HIGH',
+    client: 'Maria Gonzalez', type: 'Accelerated Benefit · $120,000',
+    narrative: 'Compassionate case with terminal prognosis — delay risk is highest for regulatory complaint. State NYS DFS compassionate SLA: 5 days. Oncologist cert still pending.',
+    factors: [
+      { label: 'SLA Urgency (Compassionate)', score: 88, weight: 'Critical', bar: '#dc2626' },
+      { label: 'Medical Record Pending',       score: 78, weight: 'High',    bar: '#dc2626' },
+      { label: 'Regulatory Sensitivity',       score: 70, weight: 'High',    bar: '#d97706' },
+      { label: 'Claimant Health Status',        score: 90, weight: 'High',   bar: '#dc2626' },
+      { label: 'Document Completeness',         score: 50, weight: 'High',   bar: '#d97706' },
+      { label: 'Prior Complaint History',       score: 15, weight: 'Low',    bar: '#059669' }
+    ],
+    mitigation: [
+      'Escalate to compassionate case manager — activate expedite protocol',
+      'Direct outreach to Dr. Patel\'s office for same-day fax of terminal cert',
+      'Notify supervisor — regulatory complaint likely if not resolved today'
+    ]
+  },
+  'CLM-2026-0053': {
+    score: 71, tier: 'HIGH',
+    client: 'Eleanor Marsh (Estate)', type: 'Survivorship · $2,000,000',
+    narrative: '$2M estate claim with 2 days to SLA. Estate attorney is monitoring closely. Any delay on this claim will trigger attorney complaint to DOI.',
+    factors: [
+      { label: 'SLA Days Remaining',       score: 90, weight: 'Critical', bar: '#dc2626' },
+      { label: 'Attorney Involvement',      score: 85, weight: 'High',    bar: '#dc2626' },
+      { label: 'Claim Amount',              score: 80, weight: 'High',    bar: '#dc2626' },
+      { label: 'Document Completeness',     score: 60, weight: 'High',    bar: '#d97706' },
+      { label: 'Estate Complexity',         score: 65, weight: 'Medium',  bar: '#d97706' },
+      { label: 'Prior Complaint History',   score: 10, weight: 'Low',     bar: '#059669' }
+    ],
+    mitigation: [
+      'Assign dedicated estate claims specialist immediately',
+      'Contact estate attorney directly with status update and resolution timeline',
+      'Fast-track document review — authorize senior adjuster sign-off'
+    ]
+  },
+  'CLM-2026-0048': {
+    score: 61, tier: 'MED',
+    client: 'Angela Foster', type: 'Chronic Illness Rider · $36,000',
+    narrative: 'Moderate complaint risk due to SLA pressure (6 days) and incomplete documentation. Chronic illness cases require careful communication to avoid misunderstanding of benefit eligibility.',
+    factors: [
+      { label: 'SLA Days Remaining',       score: 70, weight: 'High',   bar: '#d97706' },
+      { label: 'Document Completeness',     score: 50, weight: 'High',  bar: '#d97706' },
+      { label: 'Benefit Eligibility Clarity', score: 60, weight: 'Medium', bar: '#d97706' },
+      { label: 'Communication Frequency',   score: 45, weight: 'Medium', bar: '#d97706' },
+      { label: 'Prior Complaint History',   score: 10, weight: 'Low',   bar: '#059669' },
+      { label: 'Claim Complexity',          score: 55, weight: 'Medium', bar: '#d97706' }
+    ],
+    mitigation: [
+      'Send clear eligibility summary letter to claimant within 48 hours',
+      'Chase outstanding chronic illness certification from treating physician',
+      'Set proactive callback for Day 4 — do not wait for claimant to follow up'
+    ]
+  },
+  'CLM-2026-0035': {
+    score: 54, tier: 'MED',
+    client: 'Maria Gonzalez', type: 'Disability Income · $4,200/mo',
+    narrative: 'APS from Dr. Hernandez is 9 days overdue. If not received in next 5 days, DI benefit delay may trigger a regulatory complaint. Claimant is currently off work — financial pressure is high.',
+    factors: [
+      { label: 'APS Delay',                 score: 65, weight: 'High',   bar: '#d97706' },
+      { label: 'Financial Pressure on Claimant', score: 70, weight: 'High', bar: '#d97706' },
+      { label: 'SLA Days Remaining',        score: 55, weight: 'Medium', bar: '#d97706' },
+      { label: 'Document Completeness',     score: 50, weight: 'High',   bar: '#d97706' },
+      { label: 'Prior Complaint History',   score: 18, weight: 'Low',    bar: '#059669' },
+      { label: 'Claim Complexity',          score: 35, weight: 'Low',    bar: '#059669' }
+    ],
+    mitigation: [
+      'Escalate APS request to physician office — send certified fax today',
+      'Interim payment option: assess if partial benefit can be issued while APS pending',
+      'Communicate clearly with claimant — provide written status update'
+    ]
+  },
+  'CLM-2026-0025': {
+    score: 47, tier: 'MED',
+    client: 'Kevin Park', type: 'Death Benefit · $250,000',
+    narrative: 'Contested coverage case with fraud hold. Estate has retained an attorney. Complaint risk is moderate — estate is aware of the investigation hold and may file regulatory complaint if process is not transparent.',
+    factors: [
+      { label: 'Attorney / Estate Representation', score: 72, weight: 'High',   bar: '#d97706' },
+      { label: 'Fraud Investigation Hold',          score: 55, weight: 'Medium', bar: '#d97706' },
+      { label: 'Claim Complexity',                  score: 60, weight: 'High',   bar: '#d97706' },
+      { label: 'Document Completeness',             score: 25, weight: 'High',   bar: '#059669' },
+      { label: 'Prior Complaint History',           score: 10, weight: 'Low',    bar: '#059669' },
+      { label: 'Communication Transparency',        score: 40, weight: 'Medium', bar: '#d97706' }
+    ],
+    mitigation: [
+      'Send formal written notice to estate attorney explaining investigation status',
+      'Set 30-day investigation completion target — assign SIU timeline',
+      'Log all communications in audit trail — ensure regulatory compliance'
+    ]
+  },
+  'CLM-2026-0038': { score: 22, tier: 'LOW', client: 'Sandra Williams',     type: 'Long-term Care · $18,000',       narrative: 'Low complaint risk. Claim progressing normally — SLA comfortable at 22 days. Claimant engaged and cooperative.', factors: [{ label: 'SLA Days Remaining', score: 22, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 50, weight: 'Med', bar: '#d97706' }, { label: 'Communication Frequency', score: 15, weight: 'Low', bar: '#059669' }, { label: 'Claimant Cooperation', score: 10, weight: 'Low', bar: '#059669' }], mitigation: ['Maintain current pace — 22-day SLA well within target', 'Ensure Plan of Care document is received and processed on schedule'] },
+  'CLM-2026-0033': { score: 18, tier: 'LOW', client: 'James Whitfield',     type: 'Long-term Care · $9,600',        narrative: 'Low risk — all documents complete, SLA comfortable. Ready for approval.', factors: [{ label: 'SLA Days Remaining', score: 18, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 5,  weight: 'Low', bar: '#059669' }, { label: 'Prior Complaint History', score: 5, weight: 'Low', bar: '#059669' }], mitigation: ['Proceed to auto-approval — no complaint indicators present'] },
+  'CLM-2026-0031': { score: 14, tier: 'LOW', client: 'Linda Morrison',      type: 'Waiver of Premium · $9,600/yr',  narrative: 'Very low risk. Approved status, awaiting disbursement. Claimant satisfied.', factors: [{ label: 'SLA (No SLA)', score: 5, weight: 'Low', bar: '#059669' }, { label: 'Claimant Satisfaction', score: 8, weight: 'Low', bar: '#059669' }], mitigation: ['Process disbursement on schedule — no action required'] },
+  'CLM-2026-0045': { score: 28, tier: 'LOW', client: 'Thomas Reed',         type: 'Accid. Death Rider · $150,000',  narrative: 'Low-medium risk. SLA at 7 days — monitor docs. No prior complaints.', factors: [{ label: 'SLA Days Remaining', score: 30, weight: 'Med', bar: '#059669' }, { label: 'Document Completeness', score: 40, weight: 'Med', bar: '#d97706' }, { label: 'Claim Complexity', score: 25, weight: 'Low', bar: '#059669' }], mitigation: ['Chase remaining 2/5 documents within 3 business days'] },
+  'CLM-2026-0046': { score: 16, tier: 'LOW', client: 'Patricia Nguyen',     type: 'Critical Illness Rider · $50,000', narrative: 'Near-complete docs, 18 days SLA. Minimal complaint risk.', factors: [{ label: 'SLA Days Remaining', score: 16, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 25, weight: 'Low', bar: '#059669' }], mitigation: ['Finalize last doc and process approval'] },
+  'CLM-2026-0047': { score: 12, tier: 'LOW', client: 'David Thompson',      type: 'Child Term Rider · $25,000',     narrative: 'Very low risk. 24 days SLA remaining, near-complete docs.', factors: [{ label: 'SLA Days Remaining', score: 12, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 15, weight: 'Low', bar: '#059669' }], mitigation: ['Process remaining document and approve'] },
+  'CLM-2026-0049': { score: 9,  tier: 'LOW', client: 'Harold Simmons',      type: 'Maturity/Endowment · $500,000',  narrative: 'All docs complete, 30-day SLA. No complaint indicators.', factors: [{ label: 'SLA Days Remaining', score: 9, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 3, weight: 'Low', bar: '#059669' }], mitigation: ['Approve and initiate payout on schedule'] },
+  'CLM-2026-0050': { score: 19, tier: 'LOW', client: 'Christine Blake',     type: 'Policy Surrender · $84,200',     narrative: 'Low risk. Surrender request proceeding normally.', factors: [{ label: 'SLA Days Remaining', score: 19, weight: 'Low', bar: '#059669' }, { label: 'Claimant Cooperation', score: 10, weight: 'Low', bar: '#059669' }], mitigation: ['Process surrender on standard timeline'] },
+  'CLM-2026-0051': { score: 8,  tier: 'LOW', client: 'George Martinez',     type: 'Paid-up Additions · $42,000',    narrative: 'Lowest risk in portfolio. All docs complete.', factors: [{ label: 'SLA Days Remaining', score: 8, weight: 'Low', bar: '#059669' }, { label: 'Document Completeness', score: 3, weight: 'Low', bar: '#059669' }], mitigation: ['Standard processing — no action required'] },
+  'CLM-2026-0052': { score: 11, tier: 'LOW', client: 'Nancy Rivera',        type: 'Annuity Income · $3,800/mo',     narrative: 'Recurring annuity — no complaint history, stable.', factors: [{ label: 'Payment Schedule',     score: 11, weight: 'Low', bar: '#059669' }, { label: 'Prior Complaint History', score: 5, weight: 'Low', bar: '#059669' }], mitigation: ['Maintain recurring payment schedule'] }
+};
+
+/* ── Inject Complaint Risk panel into CI tab ─────────────────────────────── */
+(function() {
+  var _prevCI = window.renderClaimModal;
+  window.renderClaimModal = function(claimId, tab) {
+    _prevCI(claimId, tab);
+    if (tab !== 'ci') return;
+    // Give the DOM a tick to render
+    setTimeout(function() {
+      var ciSections = document.querySelector('.p7cm-ci-sections');
+      if (!ciSections) return;
+      if (ciSections.querySelector('.cp-ci-section')) return; // already injected
+      var cp = CP_DATA[claimId];
+      if (!cp) return;
+      var dialClass = cp.tier === 'HIGH' ? 'red' : cp.tier === 'MED' ? 'amber' : 'green';
+      var tierColor = cp.tier === 'HIGH' ? '#b91c1c' : cp.tier === 'MED' ? '#92400e' : '#166534';
+      var factorsHtml = cp.factors.map(function(f) {
+        return '<div class="cp-ci-factor-row">'
+          + '<span class="cp-ci-factor-label">' + f.label + '</span>'
+          + '<span style="font-size:10px;font-weight:600;color:#94a3b8;min-width:46px;text-align:right">' + f.weight + '</span>'
+          + '<div class="cp-ci-factor-bar-wrap"><div class="cp-ci-factor-bar" style="width:' + f.score + '%;background:' + f.bar + '"></div></div>'
+          + '<span class="cp-ci-factor-score">' + f.score + '</span>'
+          + '</div>';
+      }).join('');
+      var mitigationHtml = (cp.mitigation || []).map(function(m, i) {
+        return '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">'
+          + '<span style="background:#fb923c;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;white-space:nowrap;margin-top:1px">' + (i + 1) + '</span>'
+          + '<span style="font-size:12px;color:#1e293b;line-height:1.4">' + m + '</span>'
+          + '</div>';
+      }).join('');
+      var html = '<div class="cp-ci-section">'
+        + '<div class="cp-ci-section-title"><i class="fas fa-exclamation-circle"></i> Complaint Prediction Score <span style="margin-left:auto;background:' + tierColor + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700">' + cp.tier + ' RISK</span></div>'
+        + '<div class="cp-ci-dial-wrap">'
+          + '<div class="cp-ci-dial ' + dialClass + '">' + cp.score + '</div>'
+          + '<div><div style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:3px">' + cp.score + '/100 — ' + cp.tier + ' Complaint Risk</div>'
+          + '<div style="font-size:12px;color:#475569;line-height:1.4">' + cp.narrative + '</div></div>'
+        + '</div>'
+        + '<div class="cp-ci-factors" style="margin-bottom:12px">' + factorsHtml + '</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px"><i class="fas fa-shield-alt" style="margin-right:4px"></i>Recommended Mitigations</div>'
+        + mitigationHtml
+        + '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #fed7aa">'
+          + '<button style="padding:7px 16px;background:#f43f5e;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600" onclick="openComplaintRiskModal(\'' + claimId + '\')">'
+          + '<i class="fas fa-search-plus" style="margin-right:5px"></i>Full Complaint Risk Report</button>'
+        + '</div>'
+        + '</div>';
+      ciSections.insertAdjacentHTML('beforeend', html);
+    }, 60);
+  };
+})();
+
+/* ── Complaint Risk drilldown modal (single claim or 'all') ──────────────── */
+function openComplaintRiskModal(claimId) {
+  var existing = document.getElementById('_cpModalOv');
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.className = 'cp-modal-overlay';
+  ov.id = '_cpModalOv';
+
+  var bodyHtml;
+  if (claimId === 'all') {
+    /* Overview portfolio view — list all claims sorted by score */
+    var allClaims = Object.keys(CP_DATA).map(function(k) {
+      return Object.assign({ id: k }, CP_DATA[k]);
+    }).sort(function(a, b) { return b.score - a.score; });
+
+    var rowsHtml = allClaims.map(function(c) {
+      var tier = c.tier;
+      var bc = tier === 'HIGH' ? '#dc2626' : tier === 'MED' ? '#d97706' : '#059669';
+      var bg = tier === 'HIGH' ? '#fee2e2' : tier === 'MED' ? '#fef3c7' : '#dcfce7';
+      var tc = tier === 'HIGH' ? '#b91c1c' : tier === 'MED' ? '#92400e' : '#166534';
+      return '<div class="cp-modal-claim-row ' + tier.toLowerCase() + '" onclick="document.getElementById(\'_cpModalOv\').remove();openComplaintRiskModal(\'' + c.id + '\')">'
+        + '<div style="flex:1">'
+          + '<div style="font-weight:700;font-size:13px;color:#1e293b">' + c.id + ' · ' + c.client + '</div>'
+          + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + c.type + '</div>'
+        + '</div>'
+        + '<div style="background:' + bg + ';color:' + tc + ';font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;margin-right:10px">' + tier + '</div>'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+          + '<div style="width:60px;height:5px;background:#f1f5f9;border-radius:2px;overflow:hidden"><div style="width:' + c.score + '%;height:5px;background:' + bc + ';border-radius:2px"></div></div>'
+          + '<span style="font-size:12px;font-weight:700;color:' + bc + ';min-width:26px">' + c.score + '</span>'
+        + '</div>'
+        + '<div style="color:#94a3b8;margin-left:8px;font-size:12px"><i class="fas fa-chevron-right"></i></div>'
+        + '</div>';
+    }).join('');
+
+    var highCount = allClaims.filter(function(c) { return c.tier === 'HIGH'; }).length;
+    var medCount  = allClaims.filter(function(c) { return c.tier === 'MED';  }).length;
+    var lowCount  = allClaims.filter(function(c) { return c.tier === 'LOW';  }).length;
+
+    bodyHtml = '<div class="cp-modal-body">'
+      + '<div style="display:flex;gap:10px;margin-bottom:18px">'
+        + '<div style="flex:1;background:#fee2e2;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#b91c1c">' + highCount + '</div><div style="font-size:11px;color:#b91c1c;font-weight:600;text-transform:uppercase">High Risk</div></div>'
+        + '<div style="flex:1;background:#fef3c7;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#92400e">' + medCount + '</div><div style="font-size:11px;color:#92400e;font-weight:600;text-transform:uppercase">Med Risk</div></div>'
+        + '<div style="flex:1;background:#dcfce7;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#166534">' + lowCount + '</div><div style="font-size:11px;color:#166534;font-weight:600;text-transform:uppercase">Low Risk</div></div>'
+      + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">All Claims — Ranked by Complaint Risk Score</div>'
+      + rowsHtml
+      + '<div style="margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9;text-align:right">'
+        + '<button onclick="document.getElementById(\'_cpModalOv\').remove()" style="padding:9px 22px;border:1.5px solid #e2e8f0;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#475569">Close</button>'
+      + '</div>'
+      + '</div>';
+  } else {
+    /* Single claim detail view */
+    var cp = CP_DATA[claimId];
+    if (!cp) {
+      p7Toast('<i class="fas fa-info-circle"></i> No complaint prediction data for ' + claimId, 2500);
+      return;
+    }
+    var dialClass = cp.tier === 'HIGH' ? 'red' : cp.tier === 'MED' ? 'amber' : 'green';
+    var tierColor = cp.tier === 'HIGH' ? '#b91c1c' : cp.tier === 'MED' ? '#92400e' : '#166534';
+    var factorsHtml = cp.factors.map(function(f) {
+      return '<div class="cp-ci-factor-row" style="padding:7px 0;border-bottom:1px solid #f1f5f9">'
+        + '<span class="cp-ci-factor-label">' + f.label + '</span>'
+        + '<span style="font-size:10px;font-weight:600;color:#94a3b8;min-width:50px;text-align:right;margin-right:8px">' + f.weight + '</span>'
+        + '<div class="cp-ci-factor-bar-wrap" style="width:100px"><div class="cp-ci-factor-bar" style="width:' + f.score + '%;background:' + f.bar + '"></div></div>'
+        + '<span class="cp-ci-factor-score">' + f.score + '</span>'
+        + '</div>';
+    }).join('');
+    var mitigationHtml = (cp.mitigation || []).map(function(m, i) {
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#fff7ed;border-radius:8px;margin-bottom:8px">'
+        + '<span style="background:#fb923c;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;margin-top:1px">' + (i + 1) + '</span>'
+        + '<span style="font-size:13px;color:#1e293b;line-height:1.4">' + m + '</span>'
+        + '</div>';
+    }).join('');
+    bodyHtml = '<div class="cp-modal-body">'
+      + '<div style="display:flex;align-items:center;gap:16px;padding:16px;background:#f8fafc;border-radius:10px;margin-bottom:18px">'
+        + '<div class="cp-ci-dial ' + dialClass + '" style="width:64px;height:64px;font-size:22px">' + cp.score + '</div>'
+        + '<div>'
+          + '<div style="font-weight:800;font-size:20px;color:' + tierColor + '">' + cp.score + '/100 — ' + cp.tier + ' RISK</div>'
+          + '<div style="font-size:13px;color:#475569;line-height:1.5;margin-top:4px">' + cp.narrative + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px"><i class="fas fa-layer-group" style="margin-right:5px"></i>Risk Factor Breakdown</div>'
+      + '<div class="cp-ci-factors" style="margin-bottom:18px">' + factorsHtml + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px"><i class="fas fa-shield-alt" style="margin-right:5px"></i>Recommended Mitigations</div>'
+      + mitigationHtml
+      + '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9">'
+        + '<button onclick="document.getElementById(\'_cpModalOv\').remove();openComplaintRiskModal(\'all\')" style="padding:9px 18px;border:1.5px solid #e2e8f0;background:#fff;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;color:#475569"><i class="fas fa-list" style="margin-right:5px"></i>All Claims</button>'
+        + '<button onclick="document.getElementById(\'_cpModalOv\').remove();openClaimModal(\'' + claimId + '\',\'ci\')" style="padding:9px 18px;background:#6366f1;color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600"><i class="fas fa-robot" style="margin-right:5px"></i>Open in AI Intel</button>'
+        + '<button onclick="document.getElementById(\'_cpModalOv\').remove()" style="padding:9px 18px;background:#f43f5e;color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600">Close</button>'
+      + '</div>'
+      + '</div>';
+  }
+
+  var titleText = claimId === 'all' ? 'Portfolio Complaint Risk Dashboard' : 'Complaint Risk · ' + claimId;
+  var subText   = claimId === 'all' ? '14 active claims · AI-scored complaint probability'
+                : (CP_DATA[claimId] ? CP_DATA[claimId].client + ' · ' + CP_DATA[claimId].type : claimId);
+
+  ov.innerHTML = '<div class="cp-modal-box">'
+    + '<div class="cp-modal-header">'
+      + '<div class="cp-modal-header-icon"><i class="fas fa-exclamation-circle"></i></div>'
+      + '<div><div class="cp-modal-header-title">' + titleText + '</div><div class="cp-modal-header-sub">' + subText + '</div></div>'
+      + '<button class="cp-modal-header-close" onclick="document.getElementById(\'_cpModalOv\').remove()">✕</button>'
+    + '</div>'
+    + bodyHtml
+    + '</div>';
+
+  document.body.appendChild(ov);
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+}
+
+console.log('Pass 28 — Complaint Prediction module loaded');

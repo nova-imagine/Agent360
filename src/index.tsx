@@ -5950,6 +5950,15 @@ function ClaimsPage() {
             </div>
             <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
           </div>
+          <div class="ov-kpi-card ov-kpi-rose" onclick="openComplaintRiskModal('all')" title="Complaint Prediction — click to drill down">
+            <div class="ov-kpi-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="ov-kpi-body">
+              <div class="ov-kpi-val" id="ov-complaint-kpi-val">3</div>
+              <div class="ov-kpi-lbl">Complaint Risk</div>
+              <div class="ov-kpi-sub" id="ov-complaint-kpi-sub" style="font-size:10px;color:#be123c;margin-top:2px">2 High · 1 Med</div>
+            </div>
+            <div class="ov-kpi-arrow"><i class="fas fa-chevron-right"></i></div>
+          </div>
         </div>
 
         {/* ── Single-panel row: AI Claims Intelligence (Navigator card removed — KPIs merged into top bar) ── */}
@@ -6613,6 +6622,7 @@ function ClaimsPage() {
                 <th><i class="fas fa-stopwatch" style="color:#dc2626;margin-right:4px"></i>SLA</th>
                 <th><i class="fas fa-shield-virus" style="color:#dc2626;margin-right:4px"></i>Fraud</th>
                 <th><i class="fas fa-file-import" style="color:#7c3aed;margin-right:4px"></i>Docs</th>
+                <th><i class="fas fa-exclamation-circle" style="color:#be123c;margin-right:4px"></i>Complaint</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -6627,6 +6637,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-breach"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-breach" style="width:95%"></div></div><span class="sla-label breach"><i class="fas fa-fire"></i> 1d left</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0041')"><span class="fraud-score-num">42</span><span class="fraud-score-lbl">Watch</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0041')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0041')"><span class="cp-risk-badge cp-high">HIGH</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:82%;background:#dc2626"></div></div><span class="cp-risk-score">82</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0041','view')"><i class="fas fa-eye"></i></button>
@@ -6645,6 +6656,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:38%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 22d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0038')"><span class="fraud-score-num">12</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0038')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0038')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:22%;background:#059669"></div></div><span class="cp-risk-score">22</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0038','view')"><i class="fas fa-eye"></i></button>
@@ -6663,6 +6675,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:55%"></div></div><span class="sla-label warn"><i class="fas fa-exclamation-triangle"></i> 9d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0035')"><span class="fraud-score-num">18</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0035')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0035')"><span class="cp-risk-badge cp-med">MED</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:54%;background:#d97706"></div></div><span class="cp-risk-score">54</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0035','view')"><i class="fas fa-eye"></i></button>
@@ -6681,6 +6694,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:28%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 17d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0033')"><span class="fraud-score-num">9</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0033')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0033')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:18%;background:#059669"></div></div><span class="cp-risk-score">18</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0033','view')"><i class="fas fa-eye"></i></button>
@@ -6699,6 +6713,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:20%"></div></div><span class="sla-label ok"><i class="fas fa-infinity"></i> No SLA</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0031')"><span class="fraud-score-num">7</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0031')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0031')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:14%;background:#059669"></div></div><span class="cp-risk-score">14</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0031','view')"><i class="fas fa-eye"></i></button>
@@ -6717,6 +6732,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:68%"></div></div><span class="sla-label warn"><i class="fas fa-heart"></i> 5d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0028')"><span class="fraud-score-num">38</span><span class="fraud-score-lbl">Watch</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0028')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-orange" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0028')"><span class="cp-risk-badge cp-high">HIGH</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:76%;background:#dc2626"></div></div><span class="cp-risk-score">76</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0028','view')"><i class="fas fa-eye"></i></button>
@@ -6735,6 +6751,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-hold"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-hold" style="width:100%"></div></div><span class="sla-label hold"><i class="fas fa-ban"></i> Hold</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell flagged" onclick="openFraudDetailModal('CLM-2026-0025')"><span class="fraud-score-num">78</span><span class="fraud-score-lbl">Flagged</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0025')"><span class="idp-badge idp-missing idp-urgent"><i class="fas fa-exclamation-circle"></i> 1/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-red" style="width:25%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0025')"><span class="cp-risk-badge cp-med">MED</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:47%;background:#d97706"></div></div><span class="cp-risk-score">47</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0025','view')"><i class="fas fa-eye"></i></button>
@@ -6753,6 +6770,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:62%"></div></div><span class="sla-label warn"><i class="fas fa-exclamation-triangle"></i> 7d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell watch" onclick="openFraudDetailModal('CLM-2026-0045')"><span class="fraud-score-num">44</span><span class="fraud-score-lbl">Watch</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0045')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 3/5</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:60%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0045')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:28%;background:#059669"></div></div><span class="cp-risk-score">28</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0045','view')"><i class="fas fa-eye"></i></button>
@@ -6771,6 +6789,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:30%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 18d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0046')"><span class="fraud-score-num">11</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0046')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 3/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:75%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0046')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:16%;background:#059669"></div></div><span class="cp-risk-score">16</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0046','view')"><i class="fas fa-eye"></i></button>
@@ -6789,6 +6808,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:22%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 24d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0047')"><span class="fraud-score-num">8</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0047')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/3</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:67%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0047')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:12%;background:#059669"></div></div><span class="cp-risk-score">12</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0047','view')"><i class="fas fa-eye"></i></button>
@@ -6807,6 +6827,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-warn"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-warn" style="width:70%"></div></div><span class="sla-label warn"><i class="fas fa-exclamation-triangle"></i> 6d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0048')"><span class="fraud-score-num">15</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0048')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 2/4</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:50%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0048')"><span class="cp-risk-badge cp-med">MED</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:61%;background:#d97706"></div></div><span class="cp-risk-score">61</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0048','view')"><i class="fas fa-eye"></i></button>
@@ -6825,6 +6846,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:15%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 30d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0049')"><span class="fraud-score-num">5</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0049')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 3/3</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0049')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:9%;background:#059669"></div></div><span class="cp-risk-score">9</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0049','view')"><i class="fas fa-eye"></i></button>
@@ -6843,6 +6865,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:25%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 21d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0050')"><span class="fraud-score-num">6</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0050')"><span class="idp-badge idp-partial"><i class="fas fa-file-import"></i> 2/3</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:67%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0050')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:19%;background:#059669"></div></div><span class="cp-risk-score">19</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0050','view')"><i class="fas fa-eye"></i></button>
@@ -6861,6 +6884,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:18%"></div></div><span class="sla-label ok"><i class="fas fa-check-circle"></i> 28d</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0051')"><span class="fraud-score-num">4</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0051')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 3/3</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0051')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:8%;background:#059669"></div></div><span class="cp-risk-score">8</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0051','view')"><i class="fas fa-eye"></i></button>
@@ -6879,6 +6903,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-ok"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-ok" style="width:10%"></div></div><span class="sla-label ok"><i class="fas fa-infinity"></i> Recurring</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0052')"><span class="fraud-score-num">3</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0052')"><span class="idp-badge idp-complete"><i class="fas fa-check-circle"></i> 4/4</span><div class="idp-scan-bar"><div class="idp-scan-fill idp-fill-green" style="width:100%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0052')"><span class="cp-risk-badge cp-low">LOW</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:11%;background:#059669"></div></div><span class="cp-risk-score">11</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0052','view')"><i class="fas fa-eye"></i></button>
@@ -6897,6 +6922,7 @@ function ClaimsPage() {
                 <td onclick="event.stopPropagation()"><div class="sla-cell sla-breach"><div class="sla-bar-wrap"><div class="sla-bar sla-fill-breach" style="width:90%"></div></div><span class="sla-label breach"><i class="fas fa-fire"></i> 2d left</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="fraud-score-cell clear" onclick="openFraudDetailModal('CLM-2026-0053')"><span class="fraud-score-num">22</span><span class="fraud-score-lbl">Clear</span></div></td>
                 <td onclick="event.stopPropagation()"><div class="idp-status-cell" onclick="openIDPModal('CLM-2026-0053')"><span class="idp-badge idp-missing"><i class="fas fa-hourglass-half"></i> 3/5</span><div class="idp-scan-bar"><div class="idp-scan-fill" style="width:60%"></div></div></div></td>
+                <td onclick="event.stopPropagation()"><div class="cp-risk-cell" onclick="openComplaintRiskModal('CLM-2026-0053')"><span class="cp-risk-badge cp-high">HIGH</span><div class="cp-risk-bar-wrap"><div class="cp-risk-bar" style="width:71%;background:#dc2626"></div></div><span class="cp-risk-score">71</span></div></td>
                 <td onclick="event.stopPropagation()">
                   <div class="action-btns">
                     <button class="btn-icon" title="View" onclick="openClaimModal('CLM-2026-0053','view')"><i class="fas fa-eye"></i></button>
