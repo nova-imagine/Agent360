@@ -38354,6 +38354,56 @@ var p7ClaimsData = {
       { date: 'Apr 20', event: 'Claim APPROVED — $4,800 premium waived. Policy P-100360 remains in full force.', type: 'update' },
       { date: 'May 12', event: 'Alex Rivera returned to work. Premium reinstated on policy P-100360.', type: 'update' }
     ]
+  },
+
+  'CLM-2026-0058': {
+    id: 'CLM-2026-0058', client: 'Alex Rivera', initials: 'AR', policy: 'P-100360',
+    type: 'Disability Income', amount: '$6,000/mo', filed: '2026-05-05',
+    daysOpen: 13, status: 'Pending Docs', priority: 'Normal',
+    adjuster: 'Carlos Reyes', adjusterTeam: 'DI Unit',
+    fraudScore: 14, fraudLabel: 'Clear',
+    slaDeadline: 'Jun 2, 2026', slaDaysLeft: 28, slaStatus: 'ok',
+    liabilityScore: 24, liabilityLabel: 'Low',
+    reserveAmount: '$24,000', reserveStatus: 'Set — 4-month initial reserve', paymentHistory: [],
+    coverageLimits: 'Disability Income rider on policy P-100360. Benefit: $6,000/month (50% income replacement on $120K annual salary). Elimination period: 30 days. Own-occupation definition applies. Max benefit period: 24 months. Bilateral carpal tunnel syndrome qualifies as total disability under own-occupation (keyboard-intensive technology role).',
+    exclusions: 'Pre-existing condition review: bilateral carpal tunnel onset 2026-04-28 — confirmed post policy issue date (April 2026). No pre-existing exclusion applicable. No mental/nervous exclusion applicable. No work-related injury exclusion (non-occupational condition).',
+    regulatoryState: 'NY', regulatoryNote: 'NY Ins. Law §3216: DI claim must be acknowledged within 15 days, determination within 45 days of proof of claim. Current timeline is on track. First payment expected ~Jun 5, 2026 (post 30-day elimination period from Apr 28 onset).',
+    legalHold: false, badFaithRisk: 'Low — day 13, well within SLA. Documents pending within normal window. No bad faith exposure.',
+    beneficiary: 'Alex Rivera', benefRel: 'Policyholder (Self)', benefKYC: 'Verified',
+    benefEmail: 'alex.rivera@deloitte.com', benefPhone: '212-555-0109',
+    benefPayAccount: 'Citibank checking ****7734 — verified (on file from CLM-2026-0055)',
+    communications: [
+      { date: 'May 5, 2026', type: 'Phone', dir: 'Inbound', from: 'Alex Rivera', note: 'Called to file DI claim. Diagnosed with bilateral carpal tunnel Apr 28. Unable to perform VP Technology duties at Deloitte (keyboard-intensive role). Elimination period started Apr 28.' },
+      { date: 'May 5, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'Sent DI claim packet to Alex Rivera: application form, APS request form for Dr. Kira Osei, and employer occupational duties verification template for Deloitte HR.' },
+      { date: 'May 6, 2026', type: 'Email', dir: 'Inbound', from: 'Alex Rivera', note: 'Claim application form returned. Signed and completed. Initial medical records (diagnosis) attached from Apr 28 appointment.' },
+      { date: 'May 6, 2026', type: 'Fax', dir: 'Outbound', from: 'DI Unit', note: 'APS request faxed to Dr. Kira Osei (orthopedic specialist). 30-day response window started. Secure upload portal link provided.' },
+      { date: 'May 6, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'Employer occupational duties verification sent to Deloitte HR Benefits Department. Reference: CLM-2026-0058. 15-day requested response window.' },
+      { date: 'May 7, 2026', type: 'Email', dir: 'Inbound', from: 'Alex Rivera', note: 'Medical records from initial diagnosis uploaded via secure portal. Dr. Osei diagnosis letter included.' },
+      { date: 'May 18, 2026', type: 'Email', dir: 'Outbound', from: 'DI Unit', note: 'Follow-up sent to Dr. Kira Osei\'s office re: APS. Surgical consultation scheduled May 19 — requested report within 3 business days post-appointment.' }
+    ],
+    docs: [
+      { name: 'Disability Claim Application Form', status: 'received', date: 'May 6, 2026' },
+      { name: 'Medical Records — Initial Diagnosis (Dr. Osei)', status: 'received', date: 'May 7, 2026' },
+      { name: 'Attending Physician Statement (APS) — Dr. Kira Osei', status: 'pending', date: null },
+      { name: 'Employer Occupational Duties Verification — Deloitte HR', status: 'pending', date: null },
+      { name: 'Surgical Consultation Report', status: 'pending', date: null }
+    ],
+    contestability: false,
+    aiTriage: 'Three documents pending: APS from Dr. Kira Osei (30-day window started May 6), employer verification from Deloitte HR (15-day window), and surgical consultation report (appointment May 19). Elimination period ends Jun 4 — first payment target Jun 5, 2026. Claim is medically plausible and occupationally consistent. Fraud score 14 (Clear). No bad faith exposure. Action: chase APS and employer verification within 5 days.',
+    adbEligible: false,
+    timeline: [
+      { date: 'Apr 28', event: 'Bilateral carpal tunnel syndrome diagnosed — Dr. Kira Osei (orthopedic). Disability onset date.', type: 'filed' },
+      { date: 'May 5', event: 'DI claim filed by Alex Rivera — CLM-2026-0058 assigned', type: 'filed' },
+      { date: 'May 5', event: 'Claim packet sent: APS request, employer verification template, upload portal', type: 'update' },
+      { date: 'May 6', event: 'Claim application received. Assigned to DI Unit — Carlos Reyes.', type: 'update' },
+      { date: 'May 7', event: 'Initial medical records received and logged — diagnosis confirmed', type: 'update' },
+      { date: 'May 6', event: 'APS request sent to Dr. Kira Osei — 30-day window (due Jun 5)', type: 'alert' },
+      { date: 'May 6', event: 'Employer verification sent to Deloitte HR Benefits — 15-day window (due May 21)', type: 'alert' },
+      { date: 'May 18', event: 'APS follow-up sent — surgical consultation scheduled May 19', type: 'update' },
+      { date: 'May 19', event: 'Surgical consultation appointment (report expected May 22)', type: 'alert' },
+      { date: 'Jun 4', event: 'Elimination period ends (30 days from Apr 28 onset)', type: 'update' },
+      { date: 'Jun 5', event: 'Target: first monthly benefit payment of $6,000', type: 'update' }
+    ]
   }
 };
 
