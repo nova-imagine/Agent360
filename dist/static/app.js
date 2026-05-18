@@ -38952,7 +38952,7 @@ function p7AddTimelineEvent(claimId) {
   if (el) el.value = '';
 }
 
-function p7LogCall(claimId) { p7Toast('<i class="fas fa-phone-alt"></i> Call log modal opened for ' + claimId, 2500); }
+function p7LogCall(claimId) { openLogCallModal(claimId); }
 function p7SendClaimEmail(claimId) { p7Toast('<i class="fas fa-envelope"></i> Email composer opened for ' + claimId, 2500); }
 function p7AddCommLog(claimId) {
   var type = (document.getElementById('p7cm-comm-type') || {}).value || 'Phone';
@@ -56312,7 +56312,7 @@ console.log('Advisory Accounts module loaded — ' + advAccounts.length + ' acco
 
   /* clmSwitchTab — ID-based selection only; never touches .pol-tab class
      so it cannot interfere with polSwitchTab on the Policies page        */
-  var CLM_TABS = ['overview', 'active', 'intelligence', 'resolved', 'subrogation', 'workload', 'portal'];
+  var CLM_TABS = ['overview', 'active', 'resolved', 'subrogation', 'workload', 'portal'];
 
   window.clmSwitchTab = function(tab) {
     CLM_TABS.forEach(function(t) {
@@ -57797,3 +57797,346 @@ console.log('Settings Integrations module loaded — filterIntegrations + showIn
 
   console.log('Workload tab module loaded — AI Work Distribution Engine ready');
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PASS 27 — POSTCALL SYNTHESIS
+   AI-powered call logging with automatic note synthesis, action items,
+   and follow-up scheduling posted to the claim's communications timeline.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Overlay helper (reuses _subModalOverlay pattern) ─────────────────── */
+function _lcOverlay(id, html) {
+  var existing = document.getElementById(id);
+  if (existing) existing.remove();
+  var ov = document.createElement('div');
+  ov.id = id;
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.70);z-index:10100;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  ov.innerHTML = html;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', function(e){ if (e.target === ov) ov.remove(); });
+  return ov;
+}
+
+/* ── Main Log Call modal ─────────────────────────────────────────────────── */
+function openLogCallModal(claimId) {
+  var ovId = '_lcMainOv';
+  var html = [
+    '<div style="background:#fff;border-radius:16px;width:620px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,0.28);font-family:inherit">',
+
+    /* Header */
+    '<div style="background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%);padding:22px 26px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:14px">',
+      '<div style="width:44px;height:44px;background:rgba(255,255,255,0.22);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff"><i class="fas fa-phone-alt"></i></div>',
+      '<div>',
+        '<div style="color:#fff;font-weight:700;font-size:17px">Log Call + AI Synthesis</div>',
+        '<div style="color:rgba(255,255,255,0.82);font-size:12px;margin-top:2px">Claim ' + claimId + ' · Postcall notes → structured AI summary</div>',
+      '</div>',
+      '<button onclick="document.getElementById(\'' + ovId + '\').remove()" style="margin-left:auto;background:rgba(255,255,255,0.22);border:none;color:#fff;width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center">✕</button>',
+    '</div>',
+
+    /* Body */
+    '<div style="padding:24px 26px" id="_lcBody">',
+
+    /* Row 1: Direction + Type */
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">',
+      '<div>',
+        '<label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Call Direction</label>',
+        '<select id="_lcDir" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;background:#fff;box-sizing:border-box">',
+          '<option value="Inbound">📥 Inbound — received from claimant/counsel</option>',
+          '<option value="Outbound">📤 Outbound — placed by adjuster</option>',
+          '<option value="Conference">🔗 Conference call — multi-party</option>',
+          '<option value="Voicemail">📧 Voicemail left</option>',
+        '</select>',
+      '</div>',
+      '<div>',
+        '<label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Call Type</label>',
+        '<select id="_lcType" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;background:#fff;box-sizing:border-box">',
+          '<option value="Claimant">Claimant</option>',
+          '<option value="Beneficiary">Beneficiary</option>',
+          '<option value="Attorney / Counsel">Attorney / Counsel</option>',
+          '<option value="Medical Provider">Medical Provider</option>',
+          '<option value="Third-Party Insurer">Third-Party Insurer</option>',
+          '<option value="Witness">Witness</option>',
+          '<option value="Internal — Adjuster">Internal — Adjuster</option>',
+          '<option value="SIU / Fraud">SIU / Fraud</option>',
+          '<option value="Other">Other</option>',
+        '</select>',
+      '</div>',
+    '</div>',
+
+    /* Row 2: Caller / Recipient + Duration */
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">',
+      '<div>',
+        '<label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Caller / Recipient Name</label>',
+        '<input id="_lcPerson" placeholder="e.g. Sarah Mitchell — claimant" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">',
+      '</div>',
+      '<div>',
+        '<label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Duration (minutes)</label>',
+        '<input id="_lcDuration" type="number" min="1" max="999" placeholder="e.g. 12" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">',
+      '</div>',
+    '</div>',
+
+    /* Adjuster Notes */
+    '<div style="margin-bottom:16px">',
+      '<label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Adjuster Notes <span style="color:#94a3b8;font-weight:400;text-transform:none;letter-spacing:0">(bullet points or free text — AI will structure these)</span></label>',
+      '<textarea id="_lcNotes" rows="5" placeholder="• Claimant confirmed last premium payment on April 28&#10;• Medical records still pending from St. Mary\'s Hospital&#10;• Claimant disputes denial reason code 14-B — wants supervisor review&#10;• Agreed to call back Friday 2 PM with claims manager on the line" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;resize:vertical;line-height:1.5"></textarea>',
+    '</div>',
+
+    /* AI Synthesis hint */
+    '<div style="background:linear-gradient(135deg,#f0f9ff 0%,#ede9fe 100%);border:1px solid #bae6fd;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px">',
+      '<div style="color:#7c3aed;font-size:16px;margin-top:1px"><i class="fas fa-magic"></i></div>',
+      '<div>',
+        '<div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:3px">AI Synthesis Engine</div>',
+        '<div style="font-size:12px;color:#475569;line-height:1.5">Your notes will be processed by the Claims AI to produce: <strong>structured summary</strong> · <strong>prioritised action items</strong> · <strong>recommended follow-up date</strong>. The result is appended to the claim\'s communications timeline with an <code style="background:#e0e7ff;color:#4338ca;padding:1px 5px;border-radius:3px;font-size:11px">[AI Call Synthesis]</code> tag.</div>',
+      '</div>',
+    '</div>',
+
+    /* Footer */
+    '<div style="display:flex;gap:10px;justify-content:flex-end;padding-top:4px">',
+      '<button onclick="document.getElementById(\'' + ovId + '\').remove()" style="padding:10px 22px;border:1.5px solid #e2e8f0;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#475569">Cancel</button>',
+      '<button id="_lcSynthBtn" onclick="_lcRunSynthesis(\'' + claimId + '\')" style="padding:10px 22px;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px"><i class="fas fa-magic"></i> Synthesise &amp; Save</button>',
+    '</div>',
+
+    '</div>', /* end body */
+    '</div>'
+  ].join('');
+  _lcOverlay(ovId, html);
+}
+
+/* ── AI synthesis engine ─────────────────────────────────────────────────── */
+function _lcRunSynthesis(claimId) {
+  var notes    = (document.getElementById('_lcNotes')    || {}).value || '';
+  var person   = (document.getElementById('_lcPerson')   || {}).value || 'Unknown party';
+  var dir      = (document.getElementById('_lcDir')      || {}).value || 'Outbound';
+  var callType = (document.getElementById('_lcType')     || {}).value || 'Claimant';
+  var dur      = (document.getElementById('_lcDuration') || {}).value || '';
+
+  if (!notes.trim()) {
+    p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter adjuster notes before synthesising', 2500);
+    return;
+  }
+
+  /* Stage 1 toast — processing */
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> AI synthesising call notes for ' + claimId + '…', 2200);
+
+  /* Disable button */
+  var btn = document.getElementById('_lcSynthBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synthesising…'; }
+
+  setTimeout(function() {
+    /* ── Generate synthesis output ─────────────────────────────── */
+    var synthesis = _lcGenerateSynthesis(notes, dir, callType, person, dur, claimId);
+
+    /* ── Append to comms panel (live DOM injection) ────────────── */
+    _lcInjectTimelineEntry(claimId, synthesis, dir, callType, person, dur);
+
+    /* ── Close input modal ─────────────────────────────────────── */
+    var ov = document.getElementById('_lcMainOv');
+    if (ov) ov.remove();
+
+    /* Stage 2 toast — success */
+    setTimeout(function() {
+      p7Toast('<i class="fas fa-check-circle"></i> Call log saved · AI summary generated for ' + claimId, 4000);
+    }, 180);
+
+    /* ── Show synthesis result modal ────────────────────────────── */
+    setTimeout(function() { _lcShowResultModal(claimId, synthesis, dir, callType, person, dur); }, 350);
+
+  }, 1800);
+}
+
+/* ── Deterministic synthesis generator ──────────────────────────────────── */
+function _lcGenerateSynthesis(notes, dir, callType, person, dur, claimId) {
+  var lines = notes.split('\n').map(function(l){ return l.replace(/^[\s•\-*]+/, '').trim(); }).filter(Boolean);
+
+  /* --- Summary ----------------------------------------------------------- */
+  var dirLabel  = dir === 'Inbound' ? 'received from' : dir === 'Conference' ? 'conference call with' : dir === 'Voicemail' ? 'voicemail from' : 'placed to';
+  var durText   = dur ? ' (' + dur + ' min)' : '';
+  var today     = new Date();
+  var dateStr   = today.toISOString().slice(0,10);
+  var timeStr   = today.getHours().toString().padStart(2,'0') + ':' + today.getMinutes().toString().padStart(2,'0');
+
+  var summary = 'On ' + dateStr + ' at ' + timeStr + ', ' + (dir === 'Inbound' ? 'a call was ' + dirLabel : 'adjuster ' + dirLabel) + ' ' + person + ' (' + callType + ')' + durText + '. ';
+
+  /* Distil first 2 substantive notes into summary prose */
+  var keyPoints = lines.slice(0, Math.min(3, lines.length));
+  if (keyPoints.length > 0) {
+    summary += 'Key topics discussed: ' + keyPoints.join('; ') + '.';
+  } else {
+    summary += 'General status update call regarding claim ' + claimId + '.';
+  }
+
+  /* --- Action items ------------------------------------------------------- */
+  var actions = [];
+  var rawLower = notes.toLowerCase();
+
+  /* Pattern-based extraction */
+  if (rawLower.indexOf('medical record') >= 0 || rawLower.indexOf('records') >= 0)
+    actions.push({ pri:'HIGH', text:'Follow up on outstanding medical records — track receipt date and escalate if >5 business days', owner:'Adjuster' });
+  if (rawLower.indexOf('dispute') >= 0 || rawLower.indexOf('denial') >= 0)
+    actions.push({ pri:'HIGH', text:'Review denial reason with supervisor — prepare written response within 10 business days per regulatory requirement', owner:'Adjuster + Supervisor' });
+  if (rawLower.indexOf('supervisor') >= 0 || rawLower.indexOf('manager') >= 0)
+    actions.push({ pri:'MEDIUM', text:'Schedule 3-way call with claims manager to address claimant concerns', owner:'Adjuster' });
+  if (rawLower.indexOf('payment') >= 0 || rawLower.indexOf('premium') >= 0)
+    actions.push({ pri:'HIGH', text:'Verify premium payment status in the policy system — obtain confirmation receipt', owner:'Underwriting' });
+  if (rawLower.indexOf('attorney') >= 0 || rawLower.indexOf('counsel') >= 0 || rawLower.indexOf('legal') >= 0)
+    actions.push({ pri:'HIGH', text:'Notify legal team of attorney involvement — route all future communications through counsel', owner:'Legal' });
+  if (rawLower.indexOf('call back') >= 0 || rawLower.indexOf('callback') >= 0 || rawLower.indexOf('follow') >= 0)
+    actions.push({ pri:'MEDIUM', text:'Schedule follow-up call as committed — add to adjuster calendar with claim ID reference', owner:'Adjuster' });
+  if (rawLower.indexOf('witness') >= 0)
+    actions.push({ pri:'MEDIUM', text:'Obtain witness statement in writing — use standard form W-14', owner:'Adjuster' });
+  if (rawLower.indexOf('document') >= 0 || rawLower.indexOf('submit') >= 0)
+    actions.push({ pri:'MEDIUM', text:'Send document checklist to claimant with submission deadline and portal upload link', owner:'Adjuster' });
+
+  /* Generic fallback actions */
+  if (actions.length === 0) {
+    actions.push({ pri:'MEDIUM', text:'Document call details and update claim file with outcome and next steps', owner:'Adjuster' });
+    actions.push({ pri:'LOW', text:'Review claim status against SLA targets — ensure processing is on schedule', owner:'Adjuster' });
+  }
+
+  /* --- Follow-up date calculation --------------------------------------- */
+  var followUpDays = 3; /* default */
+  if (rawLower.indexOf('urgent') >= 0 || rawLower.indexOf('escalat') >= 0 || rawLower.indexOf('legal') >= 0)
+    followUpDays = 1;
+  else if (rawLower.indexOf('friday') >= 0 || rawLower.indexOf('next week') >= 0)
+    followUpDays = 5;
+  else if (rawLower.indexOf('two week') >= 0 || rawLower.indexOf('2 week') >= 0)
+    followUpDays = 14;
+  else if (rawLower.indexOf('month') >= 0)
+    followUpDays = 30;
+
+  var fuDate = new Date(today.getTime() + followUpDays * 86400000);
+  var fuStr  = fuDate.toISOString().slice(0,10);
+  var fuReason = followUpDays <= 1 ? 'Urgent escalation requires next-day contact' :
+                 followUpDays <= 3 ? 'Standard 3-day follow-through commitment' :
+                 followUpDays <= 5 ? 'Scheduled callback as agreed during call' :
+                 followUpDays <= 14 ? 'Documents/records expected within two weeks' :
+                 'Monthly check-in per case plan';
+
+  return {
+    date:      dateStr,
+    time:      timeStr,
+    summary:   summary,
+    actions:   actions,
+    followUp:  fuStr,
+    fuReason:  fuReason,
+    notes:     notes
+  };
+}
+
+/* ── Inject entry into live comms list DOM ──────────────────────────────── */
+function _lcInjectTimelineEntry(claimId, syn, dir, callType, person, dur) {
+  var listEl = document.querySelector('.p7cm-comm-list');
+  if (!listEl) return;
+
+  /* Remove empty-state placeholder if present */
+  var empty = listEl.querySelector('.p7cm-empty-state');
+  if (empty) empty.remove();
+
+  var dirColor = dir === 'Inbound' ? '#059669' : dir === 'Conference' ? '#7c3aed' : dir === 'Voicemail' ? '#d97706' : '#003087';
+  var dirBg    = dir === 'Inbound' ? '#d1fae5' : dir === 'Conference' ? '#ede9fe' : dir === 'Voicemail' ? '#fef3c7' : '#dbeafe';
+  var durText  = dur ? ' · ' + dur + ' min' : '';
+
+  var actionHtml = syn.actions.slice(0,3).map(function(a) {
+    var pc = a.pri === 'HIGH' ? '#dc2626' : a.pri === 'MEDIUM' ? '#d97706' : '#059669';
+    return '<div style="display:flex;align-items:flex-start;gap:6px;margin-top:5px">'
+      + '<span style="background:' + pc + ';color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;white-space:nowrap;margin-top:1px">' + a.pri + '</span>'
+      + '<span style="font-size:12px;color:#374151;line-height:1.4">' + a.text + '</span>'
+      + '</div>';
+  }).join('');
+
+  var entryHtml = '<div class="p7cm-comm-row lc-synth-entry" style="border-left:3px solid #6366f1;background:linear-gradient(135deg,#f8faff 0%,#faf5ff 100%)">'
+    + '<div class="p7cm-comm-icon" style="background:' + dirBg + ';color:' + dirColor + '"><i class="fas fa-phone-alt"></i></div>'
+    + '<div class="p7cm-comm-body">'
+      + '<div class="p7cm-comm-meta">'
+        + '<span class="p7cm-comm-date">' + syn.date + ' ' + syn.time + '</span>'
+        + '<span class="p7cm-comm-type-badge" style="background:' + dirBg + ';color:' + dirColor + '">' + dir + ' · ' + callType + durText + '</span>'
+        + '<span class="p7cm-comm-from">' + person + '</span>'
+        + '<span style="background:#e0e7ff;color:#4338ca;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:6px"><i class="fas fa-magic" style="margin-right:3px"></i>AI Call Synthesis</span>'
+      + '</div>'
+      + '<div class="p7cm-comm-note" style="margin-top:6px">'
+        + '<div style="font-size:12px;color:#1e293b;line-height:1.5;margin-bottom:8px"><strong>Summary:</strong> ' + syn.summary + '</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px"><i class="fas fa-tasks" style="margin-right:4px"></i>Action Items</div>'
+        + actionHtml
+        + '<div style="margin-top:8px;font-size:12px;color:#6366f1"><i class="fas fa-calendar-check" style="margin-right:5px"></i><strong>Follow-up:</strong> ' + syn.followUp + ' — ' + syn.fuReason + '</div>'
+      + '</div>'
+    + '</div>'
+    + '</div>';
+
+  listEl.insertAdjacentHTML('afterbegin', entryHtml);
+}
+
+/* ── Result / review modal ──────────────────────────────────────────────── */
+function _lcShowResultModal(claimId, syn, dir, callType, person, dur) {
+  var ovId = '_lcResultOv';
+  var durText = dur ? ' · ' + dur + ' min' : '';
+
+  var actionsHtml = syn.actions.map(function(a, i) {
+    var pc = a.pri === 'HIGH' ? '#dc2626' : a.pri === 'MEDIUM' ? '#d97706' : '#059669';
+    var bg = a.pri === 'HIGH' ? '#fef2f2' : a.pri === 'MEDIUM' ? '#fffbeb' : '#f0fdf4';
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:' + bg + ';border-radius:8px;margin-bottom:8px">'
+      + '<div style="min-width:52px;text-align:center;background:' + pc + ';color:#fff;font-size:10px;font-weight:700;padding:3px 6px;border-radius:4px;margin-top:1px">' + a.pri + '</div>'
+      + '<div style="flex:1">'
+        + '<div style="font-size:13px;color:#1e293b;line-height:1.4">' + a.text + '</div>'
+        + '<div style="font-size:11px;color:#94a3b8;margin-top:3px"><i class="fas fa-user" style="margin-right:3px"></i>' + a.owner + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  var html = [
+    '<div style="background:#fff;border-radius:16px;width:640px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,0.28);font-family:inherit">',
+
+    /* Header */
+    '<div style="background:linear-gradient(135deg,#059669 0%,#0ea5e9 100%);padding:22px 26px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:14px">',
+      '<div style="width:44px;height:44px;background:rgba(255,255,255,0.22);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff"><i class="fas fa-check-circle"></i></div>',
+      '<div>',
+        '<div style="color:#fff;font-weight:700;font-size:17px">Call Synthesised Successfully</div>',
+        '<div style="color:rgba(255,255,255,0.82);font-size:12px;margin-top:2px">Claim ' + claimId + ' · ' + dir + ' · ' + callType + durText + ' · ' + person + '</div>',
+      '</div>',
+      '<button onclick="document.getElementById(\'' + ovId + '\').remove()" style="margin-left:auto;background:rgba(255,255,255,0.22);border:none;color:#fff;width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center">✕</button>',
+    '</div>',
+
+    /* Body */
+    '<div style="padding:24px 26px">',
+
+    /* Summary section */
+    '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;margin-bottom:18px">',
+      '<div style="font-size:11px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px"><i class="fas fa-align-left" style="margin-right:5px"></i>AI-Generated Summary</div>',
+      '<div style="font-size:13px;color:#1e293b;line-height:1.6">' + syn.summary + '</div>',
+    '</div>',
+
+    /* Action items */
+    '<div style="margin-bottom:18px">',
+      '<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px"><i class="fas fa-tasks" style="margin-right:5px"></i>Action Items (' + syn.actions.length + ')</div>',
+      actionsHtml,
+    '</div>',
+
+    /* Follow-up date */
+    '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:14px">',
+      '<div style="width:40px;height:40px;background:#0ea5e9;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px"><i class="fas fa-calendar-check"></i></div>',
+      '<div>',
+        '<div style="font-size:11px;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:.5px">Recommended Follow-up</div>',
+        '<div style="font-size:15px;font-weight:700;color:#0c4a6e;margin-top:2px">' + syn.followUp + '</div>',
+        '<div style="font-size:12px;color:#475569;margin-top:2px">' + syn.fuReason + '</div>',
+      '</div>',
+      '<div style="margin-left:auto;background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px"><i class="fas fa-robot" style="margin-right:4px"></i>AI Recommended</div>',
+    '</div>',
+
+    /* Audit note */
+    '<div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:20px;display:flex;align-items:center;gap:8px">',
+      '<i class="fas fa-lock" style="color:#94a3b8;font-size:13px"></i>',
+      '<span style="font-size:11px;color:#64748b">This call record has been posted to the immutable audit log with timestamp <strong>' + syn.date + ' ' + syn.time + '</strong> and tagged <code style="background:#e0e7ff;color:#4338ca;padding:1px 5px;border-radius:3px">[AI Call Synthesis]</code>. Entry cannot be modified or deleted.</span>',
+    '</div>',
+
+    /* Footer */
+    '<div style="display:flex;gap:10px;justify-content:flex-end">',
+      '<button onclick="document.getElementById(\'' + ovId + '\').remove()" style="padding:10px 22px;border:1.5px solid #e2e8f0;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#475569">Close</button>',
+      '<button onclick="document.getElementById(\'' + ovId + '\').remove();switchClaimTab(\'comms\',document.querySelector(\'#claim-modal-tabs .dmt-tab[data-tab=comms]\'))" style="padding:10px 22px;background:#6366f1;color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600"><i class="fas fa-eye" style="margin-right:6px"></i>View in Timeline</button>',
+    '</div>',
+
+    '</div>', /* end body */
+    '</div>'
+  ].join('');
+  _lcOverlay(ovId, html);
+}
+
+console.log('Pass 27 — Postcall Synthesis module loaded');
