@@ -23772,6 +23772,8 @@ function openAddProspectModal() {
   // Remove any existing modal
   const existing = document.getElementById('add-prospect-modal-overlay');
   if (existing) existing.remove();
+  // Always reset step state when opening the modal
+  _apCurrentStep = 1;
 
   const overlay = document.createElement('div');
   overlay.id = 'add-prospect-modal-overlay';
@@ -23919,6 +23921,8 @@ function openAddProspectModal() {
 
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
+  // Sync button state to step 1 after DOM is ready
+  requestAnimationFrame(() => apShowStep(1));
   document.getElementById('ap-fname')?.focus();
 }
 
@@ -23950,6 +23954,15 @@ function apStep(dir) {
       const product = document.getElementById('ap-product')?.value;
       const source  = document.getElementById('ap-source')?.value;
       if (!product || !source) {
+        // Highlight the invalid fields visually inside the modal
+        ['ap-product','ap-source'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && !el.value) {
+            el.style.borderColor = '#ef4444';
+            el.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.2)';
+            setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 2500);
+          }
+        });
         showToast('Please select a product interest and lead source.');
         return;
       }

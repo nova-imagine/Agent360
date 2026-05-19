@@ -23618,12 +23618,61 @@ kbd {
   cursor: pointer; transition: background .15s;
 }
 .fna-new-btn:hover { background: #d97706; }
+
+/* Prominent New FNA button */
+.fna-new-btn-prominent {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-size: 0.95rem; font-weight: 800;
+  border: none; border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(245,158,11,0.45);
+  transition: transform .15s, box-shadow .15s, background .15s;
+  letter-spacing: 0.02em;
+}
+.fna-new-btn-prominent:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245,158,11,0.55);
+}
+.fna-new-btn-prominent i { font-size: 1rem; }
+
 .fna-ai-bar {
   display: flex; align-items: center; gap: 20px;
   margin-top: 16px; padding-top: 14px;
   border-top: 1px solid rgba(255,255,255,.15);
   flex-wrap: wrap;
 }
+
+/* FNA AI bar sub-element styles */
+.fna-ai-bar-icon {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: #fff;
+}
+.fna-ai-bar-body {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.fna-ai-bar-label {
+  font-size: 0.72rem; font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.fna-ai-bar-text {
+  font-size: 0.82rem; color: rgba(255,255,255,0.92);
+  line-height: 1.4;
+}
+.fna-ai-bar-kpis {
+  display: flex; align-items: center; gap: 16px;
+  flex-shrink: 0;
+}
+
 .fna-ai-kpi { text-align: center; }
 .fna-ai-kpi-val { font-size: 22px; font-weight: 800; color: #fff; }
 .fna-ai-kpi-lbl { font-size: 10px; color: rgba(255,255,255,.65); margin-top: 1px; white-space: nowrap; }

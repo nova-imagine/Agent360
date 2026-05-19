@@ -16155,8 +16155,7 @@ function FNADiscoveryPage() {
           </div>
         </div>
         <div class="fna-header-actions">
-          <button class="btn btn-ai" onclick="openFNAAIAssist()"><i class="fas fa-robot"></i> AI Pre-fill from Notes</button>
-          <button class="btn btn-primary" onclick="openNewFNA()"><i class="fas fa-plus"></i> New FNA</button>
+          <button class="fna-new-btn-prominent" onclick="openNewFNA()"><i class="fas fa-plus-circle"></i> New FNA</button>
         </div>
       </div>
 
