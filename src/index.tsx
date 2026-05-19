@@ -5776,112 +5776,144 @@ function ClaimsPage() {
     <div class="page claims-page">
 
       {/* ══════════════════════════════════════════════════════
-          PERSISTENT KPI BAR — always visible above tabs
+          COLLAPSIBLE KPI RIBBON — collapsed by default
           ══════════════════════════════════════════════════════ */}
-      <div class="claim-kpi-bar">
-        <div class="ckpi-card ckpi-open" onclick="clmSwitchTab('active');filterClaimsByStatus('open')">
-          <div class="ckpi-icon"><i class="fas fa-folder-open"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">14</div>
-            <div class="ckpi-lbl">Open Claims</div>
-            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +3 this week</div>
+      <div class="ckpi-ribbon" id="ckpi-ribbon">
+        {/* Ribbon toggle strip — always visible */}
+        <div class="ckpi-ribbon-header" onclick="toggleClaimsKPIRibbon(this)">
+          <div class="ckpi-ribbon-header-left">
+            <i class="fas fa-chart-bar ckpi-ribbon-icon"></i>
+            <span class="ckpi-ribbon-title">Claims KPI Dashboard</span>
+            {/* Inline summary pills — visible even when collapsed */}
+            <span class="ckpi-pill pill-red"><i class="fas fa-folder-open"></i> 14 Open</span>
+            <span class="ckpi-pill pill-amber"><i class="fas fa-stopwatch"></i> 2 SLA Risk</span>
+            <span class="ckpi-pill pill-green"><i class="fas fa-dollar-sign"></i> $1.41M Exposure</span>
+            <span class="ckpi-pill pill-orange"><i class="fas fa-file-exclamation"></i> 4 Docs Missing</span>
+            <span class="ckpi-pill pill-purple"><i class="fas fa-balance-scale"></i> 2 Contestability</span>
+          </div>
+          <div class="ckpi-ribbon-header-right">
+            <span class="ckpi-ribbon-hint">Click to expand</span>
+            <i class="fas fa-chevron-down ckpi-ribbon-chevron" id="ckpi-ribbon-chevron"></i>
           </div>
         </div>
-        <div class="ckpi-card ckpi-review" onclick="clmSwitchTab('active');filterClaimsByStatus('review')">
-          <div class="ckpi-icon"><i class="fas fa-search"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">3</div>
-            <div class="ckpi-lbl">Under Review</div>
-            <div class="ckpi-trend neutral"><i class="fas fa-minus"></i> Steady</div>
+
+        {/* Expandable KPI grid */}
+        <div class="ckpi-ribbon-body" id="ckpi-ribbon-body" style="display:none">
+          <div class="ckpi-ribbon-section-label">Active Pipeline</div>
+          <div class="claim-kpi-bar">
+            <div class="ckpi-card ckpi-open" onclick="clmSwitchTab('active');filterClaimsByStatus('open')" title="View open claims">
+              <div class="ckpi-icon"><i class="fas fa-folder-open"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">14</div>
+                <div class="ckpi-lbl">Open Claims</div>
+                <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +3 this week</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-review" onclick="clmSwitchTab('active');filterClaimsByStatus('review')" title="View claims under review">
+              <div class="ckpi-icon"><i class="fas fa-search"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">3</div>
+                <div class="ckpi-lbl">Under Review</div>
+                <div class="ckpi-trend neutral"><i class="fas fa-minus"></i> Steady</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-pending" onclick="clmSwitchTab('active');filterClaimsByStatus('pending')" title="View pending doc claims">
+              <div class="ckpi-icon"><i class="fas fa-hourglass-half"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">2</div>
+                <div class="ckpi-lbl">Pending Docs</div>
+                <div class="ckpi-trend warn"><i class="fas fa-exclamation-triangle"></i> 1 overdue</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-sla" onclick="clmSwitchTab('active');filterClaimsBySLA()" title="View SLA at-risk claims">
+              <div class="ckpi-icon"><i class="fas fa-stopwatch"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">2</div>
+                <div class="ckpi-lbl">SLA At Risk</div>
+                <div class="ckpi-trend warn"><i class="fas fa-exclamation-circle"></i> Act today</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-exposure" onclick="clmSwitchTab('active');filterClaimsByExposure()" title="View by open exposure">
+              <div class="ckpi-icon"><i class="fas fa-coins"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">$1.41M</div>
+                <div class="ckpi-lbl">Open Exposure</div>
+                <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +$1M (new death)</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="ckpi-card ckpi-pending" onclick="clmSwitchTab('active');filterClaimsByStatus('pending')">
-          <div class="ckpi-icon"><i class="fas fa-hourglass-half"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">2</div>
-            <div class="ckpi-lbl">Pending Docs</div>
-            <div class="ckpi-trend warn"><i class="fas fa-exclamation-triangle"></i> 1 overdue</div>
+
+          <div class="ckpi-ribbon-section-label" style="margin-top:10px">Performance &amp; Resolution</div>
+          <div class="claim-kpi-bar">
+            <div class="ckpi-card ckpi-approved" onclick="clmSwitchTab('resolved')" title="View resolved claims">
+              <div class="ckpi-icon"><i class="fas fa-check-circle"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">14</div>
+                <div class="ckpi-lbl">Approved YTD</div>
+                <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +4 vs last yr</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-paid" onclick="clmSwitchTab('resolved')" title="View resolved claims">
+              <div class="ckpi-icon"><i class="fas fa-dollar-sign"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">$284K</div>
+                <div class="ckpi-lbl">Paid Out YTD</div>
+                <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> On track</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-avg" onclick="clmSwitchTab('resolved');showClaimsResolutionChart()" title="View resolution chart">
+              <div class="ckpi-icon"><i class="fas fa-clock"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">5.2d</div>
+                <div class="ckpi-lbl">Avg Resolution</div>
+                <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.8d vs target</div>
+              </div>
+            </div>
+            {/* Doc Completion — display only, no working deep-link */}
+            <div class="ckpi-card ckpi-docs ckpi-no-link" title="Doc completion rate — informational">
+              <div class="ckpi-icon"><i class="fas fa-file-check"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">61%</div>
+                <div class="ckpi-lbl">Doc Completion</div>
+                <div class="ckpi-trend warn"><i class="fas fa-arrow-down"></i> Below 80% target</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-payout" onclick="clmSwitchTab('resolved')" title="View resolved claims">
+              <div class="ckpi-icon"><i class="fas fa-bolt"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">3.1d</div>
+                <div class="ckpi-lbl">Avg Payout</div>
+                <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.4d MoM</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="ckpi-card ckpi-sla" onclick="clmSwitchTab('active');filterClaimsBySLA()">
-          <div class="ckpi-icon"><i class="fas fa-stopwatch"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">2</div>
-            <div class="ckpi-lbl">SLA At Risk</div>
-            <div class="ckpi-trend warn"><i class="fas fa-exclamation-circle"></i> Act today</div>
-          </div>
-        </div>
-        <div class="ckpi-card ckpi-exposure" onclick="clmSwitchTab('active');filterClaimsByExposure()">
-          <div class="ckpi-icon"><i class="fas fa-coins"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">$1.41M</div>
-            <div class="ckpi-lbl">Open Exposure</div>
-            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +$1M (new death)</div>
-          </div>
-        </div>
-        <div class="ckpi-card ckpi-approved" onclick="clmSwitchTab('resolved')">
-          <div class="ckpi-icon"><i class="fas fa-check-circle"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">14</div>
-            <div class="ckpi-lbl">Approved YTD</div>
-            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> +4 vs last yr</div>
-          </div>
-        </div>
-        <div class="ckpi-card ckpi-paid" onclick="clmSwitchTab('resolved')">
-          <div class="ckpi-icon"><i class="fas fa-dollar-sign"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">$284K</div>
-            <div class="ckpi-lbl">Paid Out YTD</div>
-            <div class="ckpi-trend up"><i class="fas fa-arrow-up"></i> On track</div>
-          </div>
-        </div>
-        <div class="ckpi-card ckpi-avg" onclick="clmSwitchTab('resolved');showClaimsResolutionChart()">
-          <div class="ckpi-icon"><i class="fas fa-clock"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">5.2d</div>
-            <div class="ckpi-lbl">Avg Resolution</div>
-            <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.8d vs target</div>
-          </div>
-        </div>
-        <div class="ckpi-card ckpi-docs" onclick="clmSwitchTab('intelligence')">
-          <div class="ckpi-icon"><i class="fas fa-file-check"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">61%</div>
-            <div class="ckpi-lbl">Doc Completion</div>
-            <div class="ckpi-trend warn"><i class="fas fa-arrow-down"></i> Below 80% target</div>
-          </div>
-        </div>
-        <div class="ckpi-card ckpi-payout" onclick="clmSwitchTab('resolved')">
-          <div class="ckpi-icon"><i class="fas fa-bolt"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">3.1d</div>
-            <div class="ckpi-lbl">Avg Payout</div>
-            <div class="ckpi-trend good"><i class="fas fa-arrow-down"></i> −0.4d MoM</div>
-          </div>
-        </div>
-        {/* ── Navigator KPIs merged from AI Claims Navigator card ── */}
-        <div class="ckpi-card ckpi-docs-missing" onclick="clmSwitchTab('active');filterClaimsByPendingDocs()" title="Claims missing required documents">
-          <div class="ckpi-icon"><i class="fas fa-file-exclamation"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">4</div>
-            <div class="ckpi-lbl">Docs Missing</div>
-            <div class="ckpi-trend warn"><i class="fas fa-exclamation-circle"></i> Action required</div>
-          </div>
-        </div>
-        <div class="ckpi-card ckpi-adb" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Accelerated')" title="Claims eligible for ADB fast-track">
-          <div class="ckpi-icon"><i class="fas fa-heartbeat"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">1</div>
-            <div class="ckpi-lbl">ADB Eligible</div>
-            <div class="ckpi-trend warn"><i class="fas fa-clock"></i> 5d window</div>
-          </div>
-        </div>
-        <div class="ckpi-card ckpi-contest" onclick="clmSwitchTab('active');filterClaimsByContestability()" title="Claims within 2-year contestability window">
-          <div class="ckpi-icon"><i class="fas fa-balance-scale"></i></div>
-          <div class="ckpi-body">
-            <div class="ckpi-val">2</div>
-            <div class="ckpi-lbl">Contestability</div>
-            <div class="ckpi-trend warn"><i class="fas fa-gavel"></i> Legal review</div>
+
+          <div class="ckpi-ribbon-section-label" style="margin-top:10px">Alerts &amp; Special Handling</div>
+          <div class="claim-kpi-bar" style="grid-template-columns: repeat(3,1fr)">
+            <div class="ckpi-card ckpi-docs-missing" onclick="clmSwitchTab('active');filterClaimsByPendingDocs()" title="Claims missing required documents">
+              <div class="ckpi-icon"><i class="fas fa-file-exclamation"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">4</div>
+                <div class="ckpi-lbl">Docs Missing</div>
+                <div class="ckpi-trend warn"><i class="fas fa-exclamation-circle"></i> Action required</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-adb" onclick="clmSwitchTab('active');filterClaimsByTypeChip('Accelerated')" title="Claims eligible for ADB fast-track">
+              <div class="ckpi-icon"><i class="fas fa-heartbeat"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">1</div>
+                <div class="ckpi-lbl">ADB Eligible</div>
+                <div class="ckpi-trend warn"><i class="fas fa-clock"></i> 5d window</div>
+              </div>
+            </div>
+            <div class="ckpi-card ckpi-contest" onclick="clmSwitchTab('active');filterClaimsByContestability()" title="Claims within 2-year contestability window">
+              <div class="ckpi-icon"><i class="fas fa-balance-scale"></i></div>
+              <div class="ckpi-body">
+                <div class="ckpi-val">2</div>
+                <div class="ckpi-lbl">Contestability</div>
+                <div class="ckpi-trend warn"><i class="fas fa-gavel"></i> Legal review</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

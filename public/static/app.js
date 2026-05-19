@@ -18639,6 +18639,22 @@ function openNAICFormModal(formType, claimRef, state) {
   document.body.appendChild(ov);
 }
 
+// ── Claims KPI Ribbon toggle ─────────────────────────────────────────────────
+function toggleClaimsKPIRibbon(headerEl) {
+  var ribbon = document.getElementById('ckpi-ribbon');
+  var body   = document.getElementById('ckpi-ribbon-body');
+  var hint   = ribbon ? ribbon.querySelector('.ckpi-ribbon-hint') : null;
+  if (!ribbon || !body) return;
+  var isOpen = ribbon.classList.contains('open');
+  if (isOpen) {
+    body.style.display = 'none';
+    ribbon.classList.remove('open');
+  } else {
+    body.style.display = '';
+    ribbon.classList.add('open');
+  }
+}
+
 // ── Claims Performance Analytics Panel toggle ───────────────────────────────
 function toggleCPAPanel() {
   const body = document.getElementById('cpa-body');
@@ -40155,7 +40171,7 @@ function openFraudClaimDetailModal(claimId) {
       type:'Death Benefit', amount:'$250,000', score:78, status:'FLAGGED',
       policyStart:'2024-03-15', deathDate:'2024-11-02', contestWindow:true,
       signals:[
-        { name:'Policy pending at time of death', sev:'High', icon:'fas fa-ban', color:'#dc2626', detail:'Policy was still in underwriting review when insured passed. Coverage determination required before any payout.' },
+        { name:'Contestability window active at time of claim', sev:'High', icon:'fas fa-balance-scale', color:'#dc2626', detail:'Policy issued 2024-03-15 \u2014 claim filed within the 2-year contestability window (NY Ins Law \u00a73106). Insurer has the right to contest coverage based on material misrepresentation in the application. Full underwriting re-review required before any payout determination.' },
         { name:'Beneficiary change 6 months prior', sev:'High', icon:'fas fa-user-edit', color:'#dc2626', detail:'Beneficiary changed from spouse to external party 6 months before death — flagged pattern by ML model.' },
         { name:'Medical records inconsistency', sev:'High', icon:'fas fa-file-medical', color:'#dc2626', detail:'Attending physician notes differ from application health disclosure. NLP detected 3 conflicting entries.' },
         { name:'Claim timing anomaly', sev:'High', icon:'fas fa-clock', color:'#dc2626', detail:'ML model detected claim filed within 7 days of policy issuance — highest-risk timing bracket.' },
@@ -40311,11 +40327,153 @@ function openSIUConfirmModal(claimId, clientName) {
       '</div>' +
       '<div class="p19-modal-ftr">' +
         '<button class="p19-btn ghost" onclick="p19Close(\'p19-siu-confirm-overlay\')">Cancel</button>' +
-        '<button class="p19-btn danger" onclick="p19Close(\'p19-siu-confirm-overlay\');p7Toast(\'<i class=\\\"fas fa-user-secret\\\"></i> SIU referral confirmed for ' + claimId + ' · Case SIU-2026-' + claimId.slice(-4) + ' opened · All parties notified · Payment hold active\',5000)"><i class="fas fa-user-secret"></i> Confirm SIU Referral</button>' +
+        '<button class="p19-btn danger" onclick="p19Close(\'p19-siu-confirm-overlay\');openSIUNotificationsModal(\'' + claimId + '\',\'' + clientName + '\')"><i class="fas fa-envelope"></i> Confirm SIU Referral</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(ov);
 }
+
+/* ── SIU Notifications Email Modal ── */
+function openSIUNotificationsModal(claimId, clientName) {
+  claimId    = claimId    || 'CLM-2026-0025';
+  clientName = clientName || 'Kevin Park';
+  var caseRef  = 'SIU-2026-' + claimId.slice(-4);
+  var existing = document.getElementById('siu-notify-overlay');
+  if (existing) existing.remove();
+
+  // Pre-written AI-generated email bodies per recipient role
+  var emails = {
+    adjuster: {
+      role: 'Senior Adjuster', name: 'Marcus Webb',
+      address: 'marcus.webb@nyl-claims.com', icon: 'fa-user-tie', color: '#0057c8',
+      subject: '[URGENT] SIU Referral — ' + claimId + ' · ' + clientName + ' · Payment Hold Active',
+      body: 'Dear Marcus,\n\nThis is an automated notification that claim ' + claimId + ' (' + clientName + ', Death Benefit $250,000) has been referred to the Special Investigations Unit effective immediately.\n\nCase Reference: ' + caseRef + '\nClaim ID: ' + claimId + '\nClaimant: ' + clientName + '\nPolicy Start: 2024-03-15 (Contestability window ACTIVE)\n\nACTION REQUIRED:\n• Take over as lead adjuster for this claim\n• Do NOT communicate directly with claimant or beneficiary — route all contact through SIU\n• Payment hold is in effect — no disbursements pending investigation outcome\n• Please confirm receipt and estimated first investigation contact within 24 hours\n\nFraud signals detected (5):\n1. Contestability window active at time of claim — policy issued 2024-03-15\n2. Beneficiary change 6 months prior to death\n3. Medical records inconsistency (NLP: 3 conflicting entries)\n4. Claim timing anomaly\n5. Third-party (attorney) reporter\n\nExpected investigation timeline: 60–90 days per NY Ins Law §3224-a.\n\nRegards,\nNYL Claims Automation System'
+    },
+    compliance: {
+      role: 'Legal & Compliance', name: 'Lisa Torres',
+      address: 'l.torres@nyl-legal.com', icon: 'fa-balance-scale', color: '#7c3aed',
+      subject: '[COMPLIANCE COPY] SIU Referral Initiated — ' + claimId + ' · NAIC Regulatory Log',
+      body: 'Dear Lisa,\n\nPer NAIC regulatory guidelines and NY Ins Law §3224-a, you are being copied on the following SIU referral for documentation and compliance record purposes.\n\nClaim Details:\n• Claim ID: ' + claimId + ' | Case Ref: ' + caseRef + '\n• Claimant: ' + clientName + '\n• Benefit Type: Death Benefit — $250,000\n• Policy Issued: 2024-03-15 | Contestability: ACTIVE (within 2-year window)\n\nRegulatory Actions Automatically Initiated:\n• Regulatory log entry created per NAIC guidelines\n• Medical records subpoena initiated\n• 30-day beneficiary notification clock started\n• Payment hold placed — no funds released pending SIU conclusion\n\nFraud Risk Score: 78/100 (ML Model: NYL Fraud AI v3.1 · XGBoost · AUC 0.96)\nML Anomalies Detected: 3\n\nPlease retain this record for the quarterly regulatory submission. If this claim proceeds to denial, adverse action letter preparation will be required.\n\nNYL Claims Automation System'
+    },
+    beneficiary: {
+      role: 'Beneficiary (Claimant)', name: 'Estate of Kevin Park',
+      address: 'kpark.estate@attorney-rep.com', icon: 'fa-user', color: '#64748b',
+      subject: 'Important Notice: Extended Review Required — Claim ' + claimId,
+      body: 'Dear Beneficiary Representative,\n\nWe are writing to inform you that claim ' + claimId + ' is currently subject to an extended review period.\n\nClaim Reference: ' + claimId + '\nPolicy Holder: ' + clientName + '\nBenefit Amount: $250,000\n\nAs part of our standard claims process, we conduct enhanced reviews in certain circumstances to ensure the accuracy and completeness of all claim documentation. Your claim has been placed in this review category.\n\nWhat this means:\n• Your claim is being reviewed by our specialized claims team\n• This review is expected to take up to 90 days\n• You will be contacted by a senior claims representative within 5 business days\n• You have the right to appeal any determination under NY Ins Law §3224-a\n\nDuring this period:\n• Please do not submit additional documentation without specific instructions from your assigned claims representative\n• All communications regarding this claim should go through your assigned representative\n\nIf you have questions, please contact our Claims Service Center at 1-800-NYL-CLAIM.\n\nSincerely,\nNYL Claims Department'
+    },
+    siu: {
+      role: 'SIU Team Lead', name: 'Detective R. Harmon (SIU)',
+      address: 'r.harmon@nyl-siu.internal', icon: 'fa-shield-alt', color: '#dc2626',
+      subject: '[SIU INTAKE] New Referral — ' + caseRef + ' · ' + claimId + ' · Priority: URGENT',
+      body: 'Detective Harmon,\n\nNew SIU referral has been automatically generated and requires immediate intake processing.\n\nSIU Case: ' + caseRef + '\nOriginating Claim: ' + claimId + '\nClaimant: ' + clientName + '\nCoverage: Death Benefit — $250,000\nPolicy Date: 2024-03-15 — CONTESTABILITY WINDOW ACTIVE\n\nFRAUD INTELLIGENCE BRIEF:\n┌─ Risk Score: 78/100 (FLAGGED for investigation)\n├─ SIU Referral Score: 82/100\n├─ ML Model: NYL Fraud AI v3.1 · XGBoost · AUC 0.96\n└─ ML Anomalies: 3 detected\n\nFRAUD SIGNALS (5):\n[HIGH] Contestability window active at time of claim\n[HIGH] Beneficiary change 6 months prior to death\n[HIGH] Medical records inconsistency — NLP flagged 3 conflicting entries in attending physician notes vs application disclosure\n[HIGH] Claim timing anomaly — ML risk bracket: 0–12 months from issuance\n[MED]  Third-party reporter — attorney filing, not direct beneficiary\n\nRECOMMENDED INVESTIGATION STEPS:\n1. Request complete medical records from original underwriting file\n2. Subpoena attending physician records\n3. Interview beneficiary through legal counsel\n4. Cross-reference beneficiary change documents for undue influence indicators\n5. Review insured\'s financial records for recent debt/liability events\n\nPayment hold is active. No disbursement authorized pending SIU closure.\n\nNYL Claims Intelligence System'
+    }
+  };
+
+  var recipientKeys = Object.keys(emails);
+  var activeRecip = 'adjuster';
+
+  var ov = document.createElement('div');
+  ov.id = 'siu-notify-overlay';
+  ov.className = 'p7-modal-overlay';
+  ov.style.zIndex = '9500';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  function buildModal(key) {
+    var d = emails[key];
+    var tabs = recipientKeys.map(function(k) {
+      var r = emails[k];
+      return '<button onclick="siuNotifySwitch(\'' + k + '\')" id="siu-tab-' + k + '" style="' +
+        'display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:none;border-radius:8px;' +
+        'font-size:0.72rem;font-weight:700;cursor:pointer;transition:background .15s;' +
+        (k === key
+          ? 'background:' + r.color + ';color:#fff;'
+          : 'background:#f1f5f9;color:#64748b;') +
+        '"><i class="fas ' + r.icon + '"></i>' + r.role + '</button>';
+    }).join('');
+
+    return '<div class="p7m-modal" style="max-width:700px;max-height:90vh;display:flex;flex-direction:column;" onclick="event.stopPropagation()">' +
+      /* Header */
+      '<div style="background:linear-gradient(135deg,#0f172a,#1e3a8a);padding:18px 22px;display:flex;align-items:center;gap:14px;flex-shrink:0;border-radius:16px 16px 0 0">' +
+        '<div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;flex-shrink:0"><i class="fas fa-envelope-open-text"></i></div>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:1rem;font-weight:800;color:#fff">AI-Generated SIU Notifications</div>' +
+          '<div style="font-size:0.75rem;color:rgba(255,255,255,.7);margin-top:2px">Case ' + caseRef + ' · ' + claimId + ' · ' + clientName + ' · 4 parties notified</div>' +
+        '</div>' +
+        '<div style="background:rgba(255,255,255,.12);border-radius:7px;padding:4px 10px;font-size:0.68rem;font-weight:700;color:#93c5fd"><i class="fas fa-robot" style="margin-right:4px"></i>AI-Drafted</div>' +
+        '<button onclick="document.getElementById(\'siu-notify-overlay\').remove()" style="background:rgba(255,255,255,.15);border:none;border-radius:50%;width:32px;height:32px;color:#fff;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-left:8px"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      /* Recipient tabs */
+      '<div style="padding:12px 22px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0">' +
+        tabs +
+      '</div>' +
+      /* Active recipient info bar */
+      '<div style="padding:10px 22px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;flex-shrink:0">' +
+        '<div style="width:32px;height:32px;background:' + d.color + '20;border-radius:8px;display:flex;align-items:center;justify-content:center;color:' + d.color + ';font-size:0.85rem"><i class="fas ' + d.icon + '"></i></div>' +
+        '<div>' +
+          '<div style="font-size:0.8rem;font-weight:700;color:#1e293b">' + d.name + ' — ' + d.role + '</div>' +
+          '<div style="font-size:0.72rem;color:#64748b">' + d.address + '</div>' +
+        '</div>' +
+        '<div style="margin-left:auto;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:3px 10px;font-size:0.7rem;font-weight:700;color:#059669"><i class="fas fa-robot" style="margin-right:3px"></i>AI-personalized to role</div>' +
+      '</div>' +
+      /* Subject line */
+      '<div style="padding:10px 22px 0;background:#fff;flex-shrink:0">' +
+        '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">' +
+          '<span style="font-size:0.72rem;font-weight:700;color:#64748b;white-space:nowrap">SUBJECT:</span>' +
+          '<span style="font-size:0.78rem;font-weight:600;color:#1e293b" id="siu-subject-line">' + d.subject + '</span>' +
+        '</div>' +
+      '</div>' +
+      /* Email body */
+      '<div style="padding:12px 22px;flex:1;overflow-y:auto;background:#fff">' +
+        '<textarea id="siu-email-body" style="width:100%;min-height:280px;font-size:0.78rem;color:#1e293b;line-height:1.6;border:1px solid #e2e8f0;border-radius:10px;padding:14px;resize:vertical;font-family:inherit;background:#fafafa">' + d.body + '</textarea>' +
+      '</div>' +
+      /* Footer */
+      '<div style="padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;gap:10px;flex-shrink:0;border-radius:0 0 16px 16px">' +
+        '<button onclick="siuSendAllNotifications(\'' + claimId + '\',\'' + caseRef + '\')" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:9px;color:#fff;font-size:0.82rem;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(220,38,38,.35)"><i class="fas fa-paper-plane"></i> Send All 4 Notifications</button>' +
+        '<button onclick="siuSendCurrentNotification(\'' + activeRecip + '\',\'' + claimId + '\')" id="siu-send-current-btn" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#374151;font-size:0.82rem;font-weight:600;cursor:pointer"><i class="fas fa-envelope"></i> Send to ' + d.role + ' Only</button>' +
+        '<button onclick="siuRegenEmail(\'' + key + '\')" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#7c3aed;font-size:0.78rem;font-weight:600;cursor:pointer"><i class="fas fa-sync-alt"></i> Regenerate</button>' +
+        '<button onclick="document.getElementById(\'siu-notify-overlay\').remove()" style="margin-left:auto;padding:9px 14px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#6b7280;font-size:0.78rem;cursor:pointer">Cancel</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  ov.innerHTML = buildModal(activeRecip);
+
+  // Store emails data and builder on overlay for switching
+  ov._siuEmails = emails;
+  ov._buildModal = buildModal;
+
+  document.body.appendChild(ov);
+}
+
+window.siuNotifySwitch = function(key) {
+  var ov = document.getElementById('siu-notify-overlay');
+  if (!ov || !ov._buildModal) return;
+  ov.innerHTML = ov._buildModal(key);
+  // Re-attach data since innerHTML was replaced
+  // (data is closed over in buildModal, so it's fine)
+};
+
+window.siuSendAllNotifications = function(claimId, caseRef) {
+  document.getElementById('siu-notify-overlay')?.remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Sending notifications to Senior Adjuster, Legal &amp; Compliance, Beneficiary, SIU Team…', 2500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-double"></i> All 4 notifications delivered · SIU case ' + caseRef + ' opened · Payment hold confirmed · Regulatory log updated', 5500);
+  }, 2800);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-user-secret"></i> SIU referral confirmed for ' + claimId + ' · Case ' + caseRef + ' · Investigation clock started · 60–90 day timeline', 5000);
+  }, 5500);
+};
+
+window.siuSendCurrentNotification = function(role, claimId) {
+  var roleLabels = { adjuster:'Senior Adjuster', compliance:'Legal & Compliance', beneficiary:'Beneficiary representative', siu:'SIU Team Lead' };
+  var label = roleLabels[role] || role;
+  document.getElementById('siu-notify-overlay')?.remove();
+  p7Toast('<i class="fas fa-envelope"></i> Notification sent to ' + label + ' · Re-open notifications modal to send remaining parties', 4000);
+};
+
+window.siuRegenEmail = function(key) {
+  p7Toast('<i class="fas fa-robot" style="animation:livePulse 1s infinite"></i> Regenerating AI email for ' + key + ' role with latest claim data…', 2500);
+};
 
 /* ── c3: Investigate Modal ── */
 function openInvestigateModal(claimId) {
@@ -40339,7 +40497,7 @@ function openInvestigateModal(claimId) {
           '<li><i class="fas fa-check-circle"></i> Medical records request sent to insured\'s physician</li>' +
           '<li><i class="fas fa-check-circle"></i> Death certificate authenticity verified via state database</li>' +
           '<li><i class="fas fa-check-circle"></i> Beneficiary change history reviewed (6-month flag)</li>' +
-          '<li><i class="fas fa-check-circle"></i> Policy pending status at time of death — legal review initiated</li>' +
+          '<li><i class="fas fa-check-circle"></i> Contestability window active — full underwriting review initiated</li>' +
           '<li><i class="fas fa-check-circle"></i> SIU Case assigned to Investigator J. Rodriguez</li>' +
         '</ul>' +
         '<div class="p19-section-title"><i class="fas fa-robot" style="color:#7c3aed"></i> AI-Assisted Next Steps</div>' +
@@ -40413,7 +40571,7 @@ function openIntelDetailModal(type) {
           '<span class="p19-claim-badge">FLAGGED 78</span>' +
         '</div>' +
         '<div class="p19-section-title"><i class="fas fa-info-circle" style="color:#dc2626"></i> Why Flagged?</div>' +
-        '<div class="p19-warn-box"><strong>5 fraud signals detected:</strong> Policy pending at death · Beneficiary change 6 months prior · Medical records inconsistency · Claim timing anomaly · Third-party reporter. ML anomaly score: 3/5 thresholds exceeded.</div>' +
+        '<div class="p19-warn-box"><strong>5 fraud signals detected:</strong> Contestability window active at time of claim · Beneficiary change 6 months prior · Medical records inconsistency · Claim timing anomaly · Third-party reporter. ML anomaly score: 3/5 thresholds exceeded.</div>' +
         '<div class="p19-stat-row"><span class="p19-stat-lbl">Model</span><span class="p19-stat-val">XGBoost + SHAP explainability</span></div>' +
         '<div class="p19-stat-row"><span class="p19-stat-lbl">SIU Referral Threshold</span><span class="p19-stat-val">Score ≥70 (current: 78)</span></div>' +
         '<div class="p19-stat-row"><span class="p19-stat-lbl">Payment Hold</span><span class="p19-stat-val" style="color:#dc2626;font-weight:700">ACTIVE</span></div>' +
@@ -40592,7 +40750,7 @@ function openTriageClaimDetailModal(claimId) {
       client:'Kevin Park', initials:'KP', color:'#7c3aed', type:'Death Benefit', amount:'$250,000',
       tag:'FRAUD HOLD', urgency:91, fraudScore:78, docPct:25, sla:'On Hold',
       adjuster:'Maria Santos, SIU Specialist', filed:'2026-03-22', policyId:'NYL-001-2024-0315',
-      summary:'High-risk fraud case with payment hold. Policy was in "pending" status at time of insured\'s death in Nov 2024. Contestability window active. ML detected 3 timeline anomalies and beneficiary was changed 6 months before death.',
+      summary:'High-risk fraud case with payment hold. Policy issued 2024-03-15 — claim filed within the 2-year contestability window. ML detected 3 timeline anomalies. Beneficiary changed 6 months before death. SIU referral score: 82/100.',
       actions:['Order original UW medical records from 2024 application — subpoena drafted','Refer to SIU immediately — Risk score 78 exceeds 70-point referral threshold','Notify beneficiary (attorney-represented) of 30-day contestability review notice','Assign SIU investigator with life insurance fraud experience (J. Rodriguez available)'],
       timeline:[
         { date:'Mar 22, 2026', event:'Claim filed by attorney on behalf of beneficiary', dot:'#7c3aed' },
@@ -42192,7 +42350,7 @@ function openAITriageModal() {
     },
     {
       id:'CLM-2026-0025', client:'Kevin Park', initials:'KP', color:'#7c3aed', type:'Death Benefit',
-      urgency:91, reasoning:'Policy pending at time of death — contestability window active · ML detected 3 timeline anomalies · Medical records inconsistency flagged · SIU referral score: 82/100',
+      urgency:91, reasoning:'Contestability window active at time of claim (policy issued 2024-03-15) · ML detected 3 timeline anomalies · Medical records inconsistency flagged · SIU referral score: 82/100',
       nextActions:['Order original UW medical records from 2024 application','Refer to Special Investigations Unit (SIU)','Notify beneficiary of 30-day contestability review','Assign Sr. Adjuster with fraud investigation experience'],
       sla:'On Hold', fraudScore:78, docCompletion:25, tag:'FRAUD HOLD'
     },
@@ -42341,7 +42499,7 @@ function openAITriageModal() {
    ═══════════════════════════════════════════════════════════════════ */
 function openFraudReportModal() {
   var fraudData = [
-    { id:'CLM-2026-0025', client:'Kevin Park',    amount:'$250,000',  score:78, status:'FLAGGED', signals:['Policy pending at death','Medical records inconsistency','Timeline anomaly (3)','Beneficiary change 6mo prior'], hold:true,  recommendation:'SIU referral · Contestability investigation · Senior adjuster assignment required' },
+    { id:'CLM-2026-0025', client:'Kevin Park',    amount:'$250,000',  score:78, status:'FLAGGED', signals:['Contestability window active','Medical records inconsistency','Timeline anomaly (3)','Beneficiary change 6mo prior'], hold:true,  recommendation:'SIU referral · Contestability investigation · Senior adjuster assignment required' },
     { id:'CLM-2026-0041', client:'Robert Chen',   amount:'$1,000,000',score:42, status:'WATCH',   signals:['High-value threshold','Claimant ID pending','Expedited claim filed'], hold:false, recommendation:'Enhanced monitoring · ID document verification priority · Adjuster review before payout' },
     { id:'CLM-2026-0028', client:'Maria Gonzalez',amount:'$120,000',  score:38, status:'WATCH',   signals:['Terminal cert timing','ADB filed 30 days post-diagnosis','NLP doc inconsistency'], hold:false, recommendation:'ADB eligibility verification · Oncologist direct contact · Cert authentication' },
     { id:'CLM-2026-0035', client:'Maria Gonzalez',amount:'$4,200/mo', score:18, status:'CLEAR',   signals:['Standard disability claim','APS pending (normal)'], hold:false, recommendation:'Normal processing — APS receipt required for approval' },
