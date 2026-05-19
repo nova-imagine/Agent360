@@ -6302,7 +6302,7 @@ function ClaimsPage() {
               <div class="pac-icon"><i class="fas fa-brain"></i><span class="pac-pulse"></span></div>
               <div>
                 <div class="pac-title">Proactive AI Detection Engine</div>
-                <div class="pac-sub">Monitoring obituaries, SLA compliance &amp; post-claim coverage events · Updated <span class="pac-updated">just now</span></div>
+                <div class="pac-sub">Monitoring obituaries, SLA compliance &amp; post-claim coverage events · Updated <span class="pac-updated">just now</span> · <button class="ai-how-link" onclick="showAIMethodology('proactive')"><i class="fas fa-microchip"></i> How AI determines this</button></div>
               </div>
             </div>
             <div class="pac-header-stats">
@@ -6396,7 +6396,7 @@ function ClaimsPage() {
               <div class="ai-hm-icon"><i class="fas fa-fire-alt"></i></div>
               <div>
                 <div class="ai-hm-title">AI Claims Risk Heatmap <span class="ai-hm-live">● LIVE</span></div>
-                <div class="ai-hm-sub">All active claims ranked by composite AI risk score · Fraud · SLA · Liability · Doc completeness · Updated just now</div>
+                <div class="ai-hm-sub">All active claims ranked by composite AI risk score · Fraud · SLA · Liability · Doc completeness · Updated just now · <button class="ai-how-link" onclick="showAIMethodology('heatmap')"><i class="fas fa-microchip"></i> How AI scores claims</button></div>
               </div>
             </div>
             <div class="ai-hm-header-stats">
@@ -6505,7 +6505,7 @@ function ClaimsPage() {
               <div class="ai-ins-icon"><i class="fas fa-lightbulb"></i></div>
               <div>
                 <div class="ai-ins-title">AI Predictive Insights</div>
-                <div class="ai-ins-sub">Cross-portfolio pattern analysis · Forward-looking risk signals · Generated 2 mins ago</div>
+                <div class="ai-ins-sub">Cross-portfolio pattern analysis · Forward-looking risk signals · Generated 2 mins ago · <button class="ai-how-link" onclick="showAIMethodology('insights')"><i class="fas fa-microchip"></i> How AI generates insights</button></div>
               </div>
             </div>
             <button class="ai-ins-refresh-btn" onclick="refreshAIInsights(this)"><i class="fas fa-sync-alt"></i> Refresh</button>

@@ -53565,3 +53565,36 @@ kbd {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── AI Methodology "How AI works" inline link button ── */
+.ai-how-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  color: #6366f1;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s, opacity 0.15s;
+  vertical-align: baseline;
+}
+.ai-how-link:hover {
+  color: #4f46e5;
+  opacity: 0.85;
+}
+.ai-how-link i {
+  font-size: 0.85em;
+}
+/* Dark-background variants (heatmap header) */
+.ai-hm-sub .ai-how-link {
+  color: #a5b4fc;
+}
+.ai-hm-sub .ai-how-link:hover {
+  color: #c7d2fe;
+}

@@ -41390,6 +41390,189 @@ function refreshAIInsights(btn) {
   }, 2200);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   AI METHODOLOGY MODALS — "How AI works" for 3 core panels
+   ══════════════════════════════════════════════════════════════════ */
+
+function showAIMethodology(panel) {
+  var existing = document.getElementById('ai-method-overlay');
+  if (existing) existing.remove();
+
+  /* ── Content config per panel ── */
+  var configs = {
+
+    /* ─── PROACTIVE AI DETECTION ENGINE ─── */
+    proactive: {
+      icon: 'fa-brain',
+      gradient: 'linear-gradient(135deg,#dc2626,#9f1239)',
+      accent: '#dc2626',
+      title: 'How the Proactive AI Detection Engine Works',
+      subtitle: 'Real-time life-event surveillance · Obituary cross-matching · SLA watchdog · Coverage gap detection',
+      badge: 'NYL AI Engine v3.1 · Updated every 90 seconds',
+      overview: 'The Proactive AI Detection Engine runs continuously in the background, ingesting 14 live data streams to surface actionable signals <strong>before</strong> an agent would otherwise know to act. It combines three distinct AI subsystems — Obituary Intelligence, SLA Prediction, and Coverage Gap Analysis — into a unified alert feed.',
+      pipeline: [
+        { icon: 'fa-newspaper', color: '#dc2626', title: 'Data Ingestion (14 Sources)', body: 'Every 90 seconds the engine pulls from: public obituary registries (NJ, NY, CA, FL), Social Security Death Index (SSDI), state vital records APIs, NYL internal policy database, CRM interaction logs, court filing monitors (probate/estate), NLP-parsed social media mentions, MIB cross-reference feed, and funeral home network partners.' },
+        { icon: 'fa-brain', color: '#7c3aed', title: 'Obituary Cross-Match Model (XGBoost)', body: 'A gradient-boosted classifier (NYL ObitMatch v2.3, AUC 0.97) runs fuzzy-name + DOB + geography matching against 1.2M active policies. Match candidates are scored on 11 features: name similarity (Jaro-Winkler), age proximity, state residency, policy age, beneficiary relationship type, recent policy changes, claim history, MIB flags, and cross-source corroboration count. Threshold: score ≥ 0.82 triggers an alert.' },
+        { icon: 'fa-clock', color: '#d97706', title: 'SLA Breach Prediction (Time-Series LSTM)', body: 'A recurrent neural network (LSTM, 3-layer, 128-unit hidden state) is trained on 6 years of historical claim resolution timelines. It ingests current claim age, doc completeness %, adjuster workload index, claim complexity score, state regulatory deadline, and SLA exception history. It predicts the probability of breach at 24h, 72h, and 7-day horizons. Alerts fire when P(breach within 24h) > 65%.' },
+        { icon: 'fa-seedling', color: '#059669', title: 'Coverage Gap & Opportunity Engine (Collaborative Filtering)', body: 'When a claim is resolved, a recommendation model (matrix factorization + policy graph traversal) evaluates the beneficiary\'s: age, payout size, existing NYL products, household composition, estate complexity score, and 90-day outreach receptivity window. It computes a conversion probability score and ranks applicable products. Only opportunities with score ≥ 0.72 surface as actionable alerts.' },
+        { icon: 'fa-shield-alt', color: '#0891b2', title: 'Alert Deduplication & Priority Ranking', body: 'Raw signals are passed through a deduplication layer (cosine similarity on feature vectors, threshold 0.88) to prevent alert fatigue. Surviving alerts are ranked by a composite urgency score: regulatory deadline proximity (40%), financial exposure (30%), fraud risk (20%), and coverage opportunity value (10%). Only the top-N alerts render per session.' }
+      ],
+      metrics: [
+        { label: 'Obituary Match Precision', value: '97.2%', sub: 'False positive rate < 2.8%' },
+        { label: 'SLA Prediction Accuracy', value: '94.1%', sub: '72-hour horizon' },
+        { label: 'Coverage Opp. Conversion', value: '78%', sub: 'Recommended timing' },
+        { label: 'Avg. Detection Lead Time', value: '4.2 days', sub: 'Before manual discovery' },
+        { label: 'Data Sources Monitored', value: '14', sub: 'Live feeds, 90-sec cadence' },
+        { label: 'Model Retrain Frequency', value: 'Weekly', sub: 'On 6yr claims history' }
+      ]
+    },
+
+    /* ─── AI CLAIMS RISK HEATMAP ─── */
+    heatmap: {
+      icon: 'fa-fire-alt',
+      gradient: 'linear-gradient(135deg,#1e3a5f,#0f2040)',
+      accent: '#f97316',
+      title: 'How the AI Claims Risk Heatmap Scores Every Claim',
+      subtitle: 'Composite risk scoring · 6-factor model · XGBoost + Neural Net ensemble · Live re-scoring every 4 minutes',
+      badge: 'NYL RiskScore Engine v4.2 · Ensemble Model · AUC 0.963',
+      overview: 'Every active claim in the portfolio is continuously assigned a <strong>composite AI Risk Score (0–100)</strong> by a 6-factor ensemble model. The heatmap re-ranks the entire claim portfolio every 4 minutes, ensuring adjusters always see the highest-exposure claims at the top. The score drives prioritization, resource allocation, and regulatory reserve adequacy.',
+      pipeline: [
+        { icon: 'fa-chart-bar', color: '#f97316', title: 'Factor 1 — Fraud Risk (30% weight)', body: 'The NYL Fraud AI v3.1 (XGBoost, 47 features, AUC 0.96) assigns a fraud probability score. Key signals: contestability window active, beneficiary change within 12 months, attending physician note inconsistencies (NLP-flagged), claim timing anomaly (ML bracket: 0–12 months from issuance), third-party/attorney filer, MIB flag, cross-policy link (shared beneficiary across multiple claims), and social media corroboration. Score is normalized to 0–100 and weighted at 30% of composite.' },
+        { icon: 'fa-clock', color: '#d97706', title: 'Factor 2 — SLA Compliance Risk (25% weight)', body: 'The SLA risk sub-score is derived from a regression model trained on 180,000 historical claims. Inputs: days since filing, document completeness ratio (docs received / docs required), current adjuster queue depth, claim type SLA window (Death Benefit: 30d NY, 60d federal; Disability: 45d; ADB: 15d), number of prior deadline extensions, and outstanding APS count. States with stricter regulations (NY §3420, CA §790.03) receive a +15-point regulatory multiplier.' },
+        { icon: 'fa-gavel', color: '#7c3aed', title: 'Factor 3 — Liability & Legal Exposure (20% weight)', body: 'A natural language processing model (fine-tuned BERT, 110M parameters) reads all claim notes, adjuster memos, and legal correspondence to extract liability signals: litigation intent keywords, attorney representation flags, regulatory complaint filings, policy exclusion contestations, and Bad Faith indicators. The output is a 0–100 liability severity score. Legal hold status adds a mandatory +20-point floor.' },
+        { icon: 'fa-file-alt', color: '#0891b2', title: 'Factor 4 — Document Completeness (15% weight)', body: 'A weighted document gap score is computed from the Doc Weight Matrix: Death Certificate (30%), Claimant ID (25%), Medical Records/APS (25%), Claim Form (15%), Supplemental (5%). Each missing document reduces the score proportionally. IDP (Intelligent Document Processing) also applies a confidence discount when received documents score below 85% extraction confidence, flagging potential forgery or poor quality.' },
+        { icon: 'fa-dollar-sign', color: '#059669', title: 'Factor 5 — Financial Exposure (6% weight)', body: 'Raw claim amount is normalized against portfolio mean ($287K) and weighted by contestability status, policy age, rider stack complexity, and reserve adequacy ratio. Claims with active legal holds, SIU referrals, or reserve deficiency flags receive an exposure multiplier of 1.25–1.8x. IBNR buffer (8%) is added to all reserves per actuarial standards.' },
+        { icon: 'fa-sitemap', color: '#e11d48', title: 'Factor 6 — Cross-Claim Pattern Risk (4% weight)', body: 'A graph neural network (GNN) maps relationships across the entire active claims portfolio — shared beneficiaries, shared attorneys, shared physicians, temporal clustering (multiple claims filed within 90 days). When a claim is linked to 2+ other active claims with elevated fraud scores, a cross-claim cluster penalty of +8–22 points is added to all linked claims. This is how the CLM-2026-0041 / CLM-2026-0025 fraud cluster was surfaced.' }
+      ],
+      metrics: [
+        { label: 'Composite Model AUC', value: '0.963', sub: 'Ensemble XGBoost + BERT' },
+        { label: 'Re-score Cadence', value: 'Every 4 min', sub: 'Full portfolio refresh' },
+        { label: 'Score Factors', value: '6', sub: 'Weighted composite' },
+        { label: 'Feature Inputs', value: '73', sub: 'Per-claim data points' },
+        { label: 'False Escalation Rate', value: '3.1%', sub: 'High-risk threshold' },
+        { label: 'Training Data', value: '180K claims', sub: '6-year history' }
+      ]
+    },
+
+    /* ─── AI PREDICTIVE INSIGHTS ─── */
+    insights: {
+      icon: 'fa-lightbulb',
+      gradient: 'linear-gradient(135deg,#4f46e5,#312e81)',
+      accent: '#6366f1',
+      title: 'How AI Generates Predictive Insights',
+      subtitle: 'Cross-portfolio pattern mining · 4-model ensemble · Graph analysis + NLP + Time-series + Collaborative filtering',
+      badge: 'NYL InsightEngine v2.7 · 4 concurrent AI models · Refreshed every 5 minutes',
+      overview: 'The AI Predictive Insights panel runs <strong>four distinct ML models simultaneously</strong> against the full active claims portfolio every 5 minutes. Each model is specialized for a different signal type — fraud clusters, SLA cascades, reserve deficiencies, and revenue opportunities — and generates a confidence-scored insight card only when a threshold is crossed. The result is a forward-looking view of risk and opportunity that no human adjuster could manually compute.',
+      pipeline: [
+        { icon: 'fa-project-diagram', color: '#dc2626', title: 'Fraud Pattern Model — Graph Neural Network (GNN)', body: 'A 3-layer Graph Neural Network maps every active claim as a node, with edges representing shared entities (beneficiary, attorney, physician, address, policy originator). At each refresh cycle, the GNN runs a community detection algorithm (Louvain method) to identify claim clusters exhibiting correlated fraud signals. When ≥2 claims share a subgraph with average fraud score > 68 AND temporal proximity < 8 months, a "Fraud Pattern Cluster" insight is generated. The confidence score is derived from cluster cohesion (0.84 = strong), historical staged-death ring signature match (via FBI NICB cross-reference database), and the number of corroborating independent signals. Current detection: CLM-2026-0041 / CLM-2026-0025 — both non-immediate family beneficiaries, both policies modified within 8 months, both fraud scores > 70.' },
+        { icon: 'fa-hourglass-half', color: '#d97706', title: 'SLA Cascade Model — Monte Carlo Simulation + LSTM', body: 'The SLA model runs 10,000 Monte Carlo simulations per refresh cycle, sampling from: current document velocity (docs received per day), adjuster completion rate distributions (per adjuster, per claim type), state regulatory deadline hard stops, and outstanding APS wait time distributions (mean 18 days, σ 7 days). It computes the joint probability that ≥3 claims breach simultaneously, creating a "cascade" scenario that triggers regulatory audit risk. When P(cascade within 72h) > 85%, an insight card is generated with the exact claims, regulatory exposure ($K in fines), and recommended intervention order. Current cascade: CLM-2026-0041 (NY §3420 tomorrow) + CLM-2026-0028 (5 days) + CLM-2026-0035 (45-day disability APS window).' },
+        { icon: 'fa-balance-scale', color: '#0891b2', title: 'Reserve Risk Model — Actuarial AI (IBNR Neural Net)', body: 'The reserve model combines classical actuarial chain-ladder methods with a neural network trained on claims severity distributions. For each claim, it computes: expected total liability (claim amount × liability score multiplier), IBNR buffer (8% of expected liability, per actuarial standard ASOP 43), legal exposure overlay (attorney representation adds 15–40% severity premium), and SIU investigation discount (−12% if cleared). The model then compares this AI-predicted reserve against the current booked reserve and surfaces a "Reserve Deficiency" insight when the gap exceeds $50K or 10% of face value. It also runs a portfolio-level IFRS 17 adequacy test — current result: FAIL on 3 claims, aggregate deficiency $1.08M.' },
+        { icon: 'fa-seedling', color: '#059669', title: 'Opportunity Model — Collaborative Filtering + Propensity Scoring', body: 'Triggered when a claim approaches resolution (P(resolution within 30d) > 70%), the opportunity model evaluates the beneficiary profile against a collaborative filtering matrix trained on 40K historical NYL conversions. Features: beneficiary age, payout size, household financial complexity score, existing NYL product stack, estate complexity indicators (trust/probate filing, multiple beneficiaries), and 90-day market receptivity index. The model outputs a product recommendation ranked list and a conversion probability score. Insights surface when P(conversion) ≥ 0.72. The optimal outreach timing window (14–21 days post-payout) is computed from a survival analysis model trained on 12K past outreach events, maximizing response rate while minimizing churn risk.' }
+      ],
+      metrics: [
+        { label: 'Models Running Simultaneously', value: '4', sub: 'GNN · Monte Carlo · ActuarialAI · CF' },
+        { label: 'Refresh Frequency', value: 'Every 5 min', sub: 'Full portfolio sweep' },
+        { label: 'Fraud Cluster Precision', value: '84%', sub: 'GNN confidence threshold' },
+        { label: 'SLA Cascade Accuracy', value: '97%', sub: 'Monte Carlo 10K sims' },
+        { label: 'Reserve Model Accuracy', value: '91%', sub: 'vs. actual settled amounts' },
+        { label: 'Opportunity Conversion Rate', value: '78%', sub: 'When followed within 21d' }
+      ]
+    }
+  };
+
+  var cfg = configs[panel];
+  if (!cfg) return;
+
+  /* ── Build modal HTML ── */
+  var pipelineHTML = cfg.pipeline.map(function(step) {
+    return '<div style="display:flex;gap:14px;padding:16px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;margin-bottom:10px">' +
+      '<div style="width:40px;height:40px;border-radius:10px;background:' + step.color + '18;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+        '<i class="fas ' + step.icon + '" style="color:' + step.color + ';font-size:16px"></i>' +
+      '</div>' +
+      '<div>' +
+        '<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:4px">' + step.title + '</div>' +
+        '<div style="font-size:12px;color:#475569;line-height:1.65">' + step.body + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var metricsHTML = cfg.metrics.map(function(m) {
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center">' +
+      '<div style="font-size:22px;font-weight:800;color:' + cfg.accent + '">' + m.value + '</div>' +
+      '<div style="font-size:12px;font-weight:700;color:#1e293b;margin:2px 0">' + m.label + '</div>' +
+      '<div style="font-size:11px;color:#94a3b8">' + m.sub + '</div>' +
+    '</div>';
+  }).join('');
+
+  var ov = document.createElement('div');
+  ov.id = 'ai-method-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div style="background:#f8fafc;border-radius:16px;max-width:780px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.4)">' +
+
+      /* Header */
+      '<div style="' + cfg.gradient + ';padding:22px 24px;border-radius:16px 16px 0 0;flex-shrink:0">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">' +
+          '<div style="display:flex;align-items:center;gap:14px">' +
+            '<div style="width:48px;height:48px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+              '<i class="fas ' + cfg.icon + '" style="color:#fff;font-size:22px"></i>' +
+            '</div>' +
+            '<div>' +
+              '<div style="font-weight:800;font-size:18px;color:#fff;line-height:1.2">' + cfg.title + '</div>' +
+              '<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:4px">' + cfg.subtitle + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<button onclick="document.getElementById(\'ai-method-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center">&times;</button>' +
+        '</div>' +
+        '<div style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px">' +
+          '<i class="fas fa-microchip" style="color:rgba(255,255,255,0.8);font-size:11px"></i>' +
+          '<span style="font-size:11px;color:rgba(255,255,255,0.9);font-weight:600">' + cfg.badge + '</span>' +
+        '</div>' +
+      '</div>' +
+
+      /* Scrollable body */
+      '<div style="overflow-y:auto;flex:1;padding:22px 24px">' +
+
+        /* Overview */
+        '<div style="background:linear-gradient(135deg,' + cfg.accent + '12,' + cfg.accent + '06);border:1px solid ' + cfg.accent + '30;border-left:4px solid ' + cfg.accent + ';border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#1e293b;line-height:1.65">' +
+          '<div style="font-size:11px;font-weight:700;color:' + cfg.accent + ';text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px"><i class="fas fa-info-circle"></i> Overview</div>' +
+          cfg.overview +
+        '</div>' +
+
+        /* Key Metrics */
+        '<div style="margin-bottom:20px">' +
+          '<div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px"><i class="fas fa-chart-line" style="color:' + cfg.accent + ';margin-right:6px"></i>Key Performance Metrics</div>' +
+          '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">' + metricsHTML + '</div>' +
+        '</div>' +
+
+        /* Pipeline */
+        '<div>' +
+          '<div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px"><i class="fas fa-cogs" style="color:' + cfg.accent + ';margin-right:6px"></i>AI Pipeline — Step by Step</div>' +
+          pipelineHTML +
+        '</div>' +
+
+        /* Footer note */
+        '<div style="margin-top:16px;padding:12px 14px;background:#f1f5f9;border-radius:8px;font-size:11px;color:#64748b;line-height:1.6">' +
+          '<i class="fas fa-lock" style="color:#94a3b8;margin-right:5px"></i>' +
+          '<strong>Data Privacy & Governance:</strong> All AI models operate exclusively on de-identified or permissioned data in compliance with HIPAA, NYL Privacy Policy, and applicable state insurance regulations. Model outputs are advisory — all final claim decisions require human adjuster review and authorization. Models are audited quarterly by NYL\'s AI Governance Committee and re-trained on rolling 6-year claims history.' +
+        '</div>' +
+      '</div>' +
+
+      /* Footer */
+      '<div style="padding:14px 24px;border-top:1px solid #e2e8f0;background:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:0 0 16px 16px">' +
+        '<span style="font-size:12px;color:#94a3b8"><i class="fas fa-robot" style="margin-right:5px"></i>NYL AI Intelligence Platform · Proprietary & Confidential</span>' +
+        '<div style="display:flex;gap:10px">' +
+          '<button style="padding:8px 16px;border-radius:8px;background:#f1f5f9;border:1px solid #e2e8f0;color:#374151;font-size:12px;font-weight:600;cursor:pointer" onclick="p7Toast(\'<i class=\\\'fas fa-file-pdf\\\'></i> AI methodology report downloaded\',2500)"><i class="fas fa-download"></i> Download PDF</button>' +
+          '<button style="padding:8px 16px;border-radius:8px;background:' + cfg.accent + ';border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer" onclick="document.getElementById(\'ai-method-overlay\').remove()"><i class="fas fa-times"></i> Close</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
 /* ── Portal: Generate AI Status Message ── */
 function cpGenerateAIMessage(claimId) {
   var messages = {
