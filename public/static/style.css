@@ -53559,3 +53559,9 @@ kbd {
   .pas-kpi { min-width: 50%; border-bottom: 1px solid #e2e8f0; }
   .pas-wf-strip { gap: 3px; }
 }
+
+/* ── Shared Timeline Row Fade-In Animation ── */
+@keyframes p7FadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -39473,7 +39473,7 @@ function p7BuildNotesTab(claim) {
         '<div class="p7cm-priority-btns">' +
           '<button class="p7cm-priority-btn urgent"   onclick="p7Toast(\'<i class=\\\'fas fa-fire\\\'></i> Priority changed to URGENT — adjuster notified\',3000)"><i class="fas fa-fire"></i> Set Urgent</button>' +
           '<button class="p7cm-priority-btn normal"   onclick="p7Toast(\'<i class=\\\'fas fa-flag\\\'></i> Priority set to Normal\',2500)"><i class="fas fa-flag"></i> Set Normal</button>' +
-          '<button class="p7cm-priority-btn escalate" onclick="p7Toast(\'<i class=\\\'fas fa-arrow-up\\\'></i> Escalated to Senior Adjuster — email sent\',3000)"><i class="fas fa-arrow-up"></i> Escalate to Sr. Adjuster</button>' +
+          '<button class="p7cm-priority-btn escalate" onclick="p7OpenEscalateModal(\'' + claim.id + '\')"><i class="fas fa-arrow-up"></i> Escalate to Sr. Adjuster</button>' +
         '</div>' +
       '</div>' +
     '</div>' +
@@ -39493,7 +39493,8 @@ function p7BuildNotesTab(claim) {
             '<option>SIU Referral Note</option>' +
             '<option>Compliance Flag</option>' +
           '</select>' +
-          '<button class="p7cm-act-btn primary" onclick="p7AddNote(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Save Note</button>' +
+          '<button class="p7cm-act-btn secondary" id="p7cm-ai-draft-btn" onclick="p7OpenAIDraftNote(\'' + claim.id + '\')" style="background:#7c3aed;border-color:#7c3aed;color:#fff"><i class="fas fa-robot"></i> AI Draft</button>' +
+          '<button class="p7cm-act-btn primary" onclick="p7AddNote(\'' + claim.id + '\')"><i class="fas fa-save"></i> Save Note</button>' +
           '<button class="p7cm-act-btn ghost" onclick="p7Toast(\'<i class=\\\'fas fa-file-pdf\\\'></i> Notes exported to PDF\',2500)"><i class="fas fa-file-pdf"></i> Export</button>' +
         '</div>' +
       '</div>' +
@@ -39518,23 +39519,407 @@ function p7ChangeStatus(claimId, newStatus) {
   p7Toast('<i class="fas fa-exchange-alt"></i> ' + claimId + ' status changed to <strong style="color:' + sc + '">' + newStatus + '</strong> — workflow updated', 3500);
 }
 
+function p7OpenEscalateModal(claimId) {
+  var existing = document.getElementById('p7-escalate-overlay');
+  if (existing) existing.remove();
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-escalate-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:540px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#d97706,#b45309)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-arrow-up" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Escalate to Senior Adjuster</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.85)">' + claimId + ' · ' + (p7.client||'Claimant') + ' · ' + (p7.type||'Claim') + '</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-escalate-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:22px">' +
+        /* Claim context strip */
+        '<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:#92400e;display:flex;flex-wrap:wrap;gap:12px">' +
+          '<span><i class="fas fa-fire" style="color:#d97706;margin-right:4px"></i>Priority: <strong>' + (p7.priority||'Normal') + '</strong></span>' +
+          '<span><i class="fas fa-user" style="color:#d97706;margin-right:4px"></i>Current Adjuster: <strong>' + (p7.adjuster||'Unassigned') + '</strong></span>' +
+          '<span><i class="fas fa-shield-alt" style="color:#d97706;margin-right:4px"></i>Fraud Score: <strong>' + (p7.fraudScore||'N/A') + '/100</strong></span>' +
+          '<span><i class="fas fa-clock" style="color:#d97706;margin-right:4px"></i>SLA: <strong>' + (p7.sla||'Standard') + '</strong></span>' +
+        '</div>' +
+        /* Escalate to */
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-user-tie"></i> Escalate To <span style="color:#dc2626">*</span></label>' +
+          '<select class="p7m-select" id="p7-esc-to" style="width:100%">' +
+            '<option value="">— Select Senior Adjuster —</option>' +
+            '<option>James Reyes — Sr. Adjuster, Death Claims (P&C)</option>' +
+            '<option>Sandra Okafor — Sr. Adjuster, Complex Claims</option>' +
+            '<option>Michael Torres — Sr. Adjuster, SIU Liaison</option>' +
+            '<option>Patricia Chen — VP Claims Operations</option>' +
+            '<option>David Huang — Legal & Compliance Lead</option>' +
+          '</select>' +
+        '</div>' +
+        /* Escalation reason */
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-list-alt"></i> Escalation Reason</label>' +
+          '<div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">' +
+            ['SLA breach imminent — exceeds standard timeframe','High fraud score requiring senior review','Policy complexity / contestability period','Regulatory compliance concern','Claimant dispute or attorney representation','Reserve adequacy — amount exceeds authority limit','Medical / APS discrepancy','Other (specify in notes)'].map(function(r,i) {
+              return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer"><input type="radio" name="p7-esc-reason" value="' + r + '"' + (i===0?' checked':'') + '> ' + r + '</label>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+        /* Urgency */
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-exclamation-triangle"></i> Urgency Level</label>' +
+          '<div style="display:flex;gap:8px;margin-top:6px">' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-esc-urgency" value="Routine"> Routine</label>' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-esc-urgency" value="Priority" checked> Priority</label>' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-esc-urgency" value="URGENT" style="accent-color:#dc2626"> <span style="color:#dc2626;font-weight:700">URGENT</span></label>' +
+          '</div>' +
+        '</div>' +
+        /* Notes */
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-sticky-note"></i> Additional Context (optional)</label>' +
+          '<textarea class="p7m-textarea" id="p7-esc-notes" rows="2" placeholder="Add context, prior attempts, claimant concerns, or supporting detail…" style="width:100%;box-sizing:border-box"></textarea>' +
+        '</div>' +
+        /* Options */
+        '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px;font-size:13px">' +
+          '<label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="p7-esc-hold" checked> Place claim on hold during escalation</label>' +
+          '<label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="p7-esc-email" checked> Send escalation email to Sr. Adjuster</label>' +
+          '<label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="p7-esc-crm" checked> Log to CRM audit trail</label>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-escalate-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" style="background:#d97706;border-color:#d97706" onclick="_p7SubmitEscalation(\'' + claimId + '\')"><i class="fas fa-arrow-up"></i> Confirm Escalation</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function _p7SubmitEscalation(claimId) {
+  var toEl      = document.getElementById('p7-esc-to');
+  var toVal     = toEl ? toEl.value : '';
+  if (!toVal)   { p7Toast('<i class="fas fa-exclamation-circle"></i> Please select a Senior Adjuster to escalate to', 2500); return; }
+  var reasonEl  = document.querySelector('input[name="p7-esc-reason"]:checked');
+  var reason    = reasonEl ? reasonEl.value : 'Escalation';
+  var urgEl     = document.querySelector('input[name="p7-esc-urgency"]:checked');
+  var urgency   = urgEl ? urgEl.value : 'Priority';
+  var toName    = toVal.split('—')[0].trim();
+  var doHold    = (document.getElementById('p7-esc-hold')  || {}).checked;
+  var doEmail   = (document.getElementById('p7-esc-email') || {}).checked;
+  var doCRM     = (document.getElementById('p7-esc-crm')   || {}).checked;
+
+  document.getElementById('p7-escalate-overlay').remove();
+
+  /* Inject escalation into live timeline */
+  var tlWrap = document.querySelector('.p7cm-tl-wrap');
+  if (tlWrap) {
+    var now = new Date();
+    var label = now.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ' ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    var newRow = document.createElement('div');
+    newRow.className = 'p7cm-tl-row';
+    newRow.style.cssText = 'animation:p7FadeIn 0.4s ease;';
+    newRow.innerHTML =
+      '<div class="p7cm-tl-left">' +
+        '<div class="p7cm-tl-dot" style="background:#d97706;color:#fff"><i class="fas fa-arrow-up" style="font-size:9px"></i></div>' +
+        '<div class="p7cm-tl-line"></div>' +
+      '</div>' +
+      '<div class="p7cm-tl-body">' +
+        '<div class="p7cm-tl-date">' + label + '</div>' +
+        '<div class="p7cm-tl-event"><span style="display:inline-block;background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px">' + urgency + ' ESCALATION</span>Escalated to ' + toName + ' — ' + reason + '</div>' +
+      '</div>';
+    tlWrap.insertBefore(newRow, tlWrap.firstChild);
+  }
+  /* Update priority display */
+  var prEl = document.querySelector('.p7cm-priority-current');
+  if (prEl) prEl.innerHTML = prEl.innerHTML + ' &nbsp;<span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700"><i class="fas fa-arrow-up"></i> Escalated → ' + toName + '</span>';
+
+  p7Toast('<i class="fas fa-arrow-up"></i> ' + claimId + ' escalated to <strong>' + toName + '</strong> · Urgency: ' + urgency, 4000);
+  if (doEmail) setTimeout(function(){ p7Toast('<i class="fas fa-envelope"></i> Escalation email sent to ' + toName + ' with full claim brief', 3000); }, 1200);
+  if (doHold)  setTimeout(function(){ p7Toast('<i class="fas fa-pause-circle"></i> Claim placed on hold pending Sr. Adjuster review', 2800); }, 2400);
+  if (doCRM)   setTimeout(function(){ p7Toast('<i class="fas fa-database"></i> CRM: Escalation record #ESC-' + Math.floor(Math.random()*9000+1000) + ' created', 2500); }, 3400);
+}
+
 function p7AddNote(claimId) {
   var text = (document.getElementById('p7cm-note-text') || {}).value || '';
   var type = (document.getElementById('p7cm-note-type') || {}).value || 'Adjuster Note';
-  if (!text.trim()) { p7Toast('Please enter a note before saving', 2000); return; }
-  p7Toast('<i class="fas fa-check-circle"></i> ' + type + ' saved for ' + claimId + ' — audit trail updated', 3000);
-  var el = document.getElementById('p7cm-note-text');
-  if (el) el.value = '';
+  if (!text.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter a note or use AI Draft before saving', 2500); return; }
+  /* Show AI-powered save modal with CRM simulation */
+  p7OpenSaveNoteModal(claimId, text, type);
+}
+
+function p7OpenAIDraftNote(claimId) {
+  /* AI pre-creates a draft note based on claim context */
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var btn = document.getElementById('p7cm-ai-draft-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Drafting…'; }
+  var noteType = (document.getElementById('p7cm-note-type') || {}).value || 'Adjuster Note';
+
+  /* AI note templates keyed by note type */
+  var drafts = {
+    'Adjuster Note': 'Claim review in progress for ' + claimId + '. Policy holder: ' + (p7.client || 'claimant') + '. Current status: ' + (p7.status || 'Under Review') + '. Priority: ' + (p7.priority || 'Normal') + '. SLA compliance being monitored — pending document receipt. Next action: follow up with claimant within 48 hours.',
+    'Escalation': 'ESCALATION — ' + claimId + ': Claim requires Senior Adjuster review due to ' + (p7.priority === 'Urgent' ? 'SLA breach risk and urgent priority classification' : 'complexity and elevated fraud indicators') + '. Adjuster ' + (p7.adjuster || 'assigned adjuster') + ' requesting senior review. Missing documents: ' + (p7.docsRequired ? p7.docsRequired.filter(function(d){return d.indexOf('⏳')>-1;}).length + ' outstanding' : 'under review') + '. Recommend escalation to department head.',
+    'Legal Memo': 'LEGAL MEMO — ' + claimId + ': Documenting legal considerations for claim file. Contestability status: ' + (p7.contestability ? 'ACTIVE — 2-year window applies' : 'Not applicable') + '. Legal hold: ' + (p7.legalHold ? 'Active — no document destruction' : 'Not in place') + '. Regulatory state: ' + (p7.regulatoryState || 'N/A') + '. All communications logged per compliance requirements.',
+    'Manager Review': 'MANAGER REVIEW REQUEST — ' + claimId + ': Escalating for management oversight. Reserve amount: ' + (p7.reserveAmount ? '$' + parseInt(p7.reserveAmount).toLocaleString() : 'TBD') + '. Fraud score: ' + (p7.fraudScore || 'N/A') + '/100. Claim complexity warrants manager sign-off before proceeding. Adjuster notes attached.',
+    'SIU Referral Note': 'SIU REFERRAL — ' + claimId + ': Fraud indicators identified requiring Special Investigations Unit review. Fraud score: ' + (p7.fraudScore || 'N/A') + '/100. Key signals: ' + (p7.fraudSignals ? p7.fraudSignals.slice(0,2).join('; ') : 'contestability window active; beneficiary change prior to claim') + '. Payment hold active pending SIU clearance.',
+    'Compliance Flag': 'COMPLIANCE FLAG — ' + claimId + ': Documenting compliance observation for regulatory record. State: ' + (p7.regulatoryState || 'N/A') + '. Claim amount: ' + (p7.amount || 'N/A') + '. Regulatory disclosure requirements verified. APS status: ' + (p7.apsOrders ? p7.apsOrders.length + ' orders on file' : 'no APS ordered') + '. All mandatory notices sent per state requirements.'
+  };
+
+  var draftText = drafts[noteType] || drafts['Adjuster Note'];
+
+  setTimeout(function() {
+    var el = document.getElementById('p7cm-note-text');
+    if (el) {
+      el.value = '';
+      var i = 0;
+      var interval = setInterval(function() {
+        if (i < draftText.length) {
+          el.value += draftText[i];
+          i++;
+        } else {
+          clearInterval(interval);
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-robot"></i> AI Draft'; }
+          p7Toast('<i class="fas fa-robot"></i> AI note drafted — review and save when ready', 2500);
+        }
+      }, 12);
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-robot"></i> AI Draft'; }
+    }
+  }, 900);
+}
+
+function p7OpenSaveNoteModal(claimId, noteText, noteType) {
+  var existing = document.getElementById('p7-savenote-overlay');
+  if (existing) existing.remove();
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  var timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  var typeIcons = { 'Adjuster Note':'fa-sticky-note', 'Escalation':'fa-arrow-up', 'Legal Memo':'fa-gavel',
+    'Manager Review':'fa-user-tie', 'SIU Referral Note':'fa-shield-alt', 'Compliance Flag':'fa-flag' };
+  var typeColors = { 'Adjuster Note':'#2563eb','Escalation':'#d97706','Legal Memo':'#7c3aed',
+    'Manager Review':'#0891b2','SIU Referral Note':'#dc2626','Compliance Flag':'#ea580c' };
+  var icon = typeIcons[noteType] || 'fa-sticky-note';
+  var color = typeColors[noteType] || '#2563eb';
+
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-savenote-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:560px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,' + color + ',' + color + 'dd)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas ' + icon + '" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Save ' + noteType + '</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.85)">' + claimId + ' · ' + dateStr + ' ' + timeStr + '</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-savenote-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:22px">' +
+        /* Note preview */
+        '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid ' + color + ';border-radius:8px;padding:14px;font-size:13px;color:#374151;line-height:1.6;margin-bottom:16px;max-height:120px;overflow-y:auto">' +
+          '<div style="font-size:10px;font-weight:700;color:' + color + ';text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px"><i class="fas ' + icon + '"></i> ' + noteType + ' Preview</div>' +
+          noteText.substring(0, 400) + (noteText.length > 400 ? '…' : '') +
+        '</div>' +
+        /* CRM Log simulation */
+        '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:16px">' +
+          '<div style="font-size:11px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px"><i class="fas fa-database"></i> CRM Logging Preview</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px">' +
+            '<div><span style="color:#6b7280">System:</span> <strong>NYL ClaimsIQ CRM</strong></div>' +
+            '<div><span style="color:#6b7280">Author:</span> <strong>' + (p7.adjuster || 'Current User') + '</strong></div>' +
+            '<div><span style="color:#6b7280">Claim:</span> <strong>' + claimId + '</strong></div>' +
+            '<div><span style="color:#6b7280">Timestamp:</span> <strong>' + dateStr + ' ' + timeStr + '</strong></div>' +
+            '<div><span style="color:#6b7280">Note Type:</span> <strong>' + noteType + '</strong></div>' +
+            '<div><span style="color:#6b7280">Audit Trail:</span> <strong style="color:#059669">✓ Active</strong></div>' +
+          '</div>' +
+        '</div>' +
+        /* Routing checkboxes */
+        '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">' +
+          '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-sn-timeline" checked> Add to claim timeline</label>' +
+          '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-sn-crm" checked> Log to CRM audit trail</label>' +
+          '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-sn-notify"> Notify supervisor via email</label>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-savenote-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" style="background:' + color + ';border-color:' + color + '" onclick="_p7CommitNote(\'' + claimId + '\',\'' + noteType.replace(/'/g,"\\\'") + '\',\'' + icon + '\')"><i class="fas fa-save"></i> Confirm & Save to CRM</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function _p7CommitNote(claimId, noteType, icon) {
+  var noteEl = document.getElementById('p7cm-note-text');
+  var noteText = noteEl ? noteEl.value : '';
+  var toTimeline = (document.getElementById('p7-sn-timeline') || {}).checked !== false;
+  var toCRM = (document.getElementById('p7-sn-crm') || {}).checked !== false;
+  var toNotify = (document.getElementById('p7-sn-notify') || {}).checked;
+  document.getElementById('p7-savenote-overlay').remove();
+
+  /* Inject into live timeline */
+  if (toTimeline) {
+    var tlWrap = document.querySelector('.p7cm-tl-wrap');
+    if (tlWrap) {
+      var now = new Date();
+      var label = now.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+      var newRow = document.createElement('div');
+      newRow.className = 'p7cm-tl-row';
+      newRow.style.cssText = 'animation:p7FadeIn 0.4s ease;';
+      newRow.innerHTML =
+        '<div class="p7cm-tl-left">' +
+          '<div class="p7cm-tl-dot" style="background:#2563eb;color:#fff"><i class="fas ' + icon + '" style="font-size:9px"></i></div>' +
+          '<div class="p7cm-tl-line"></div>' +
+        '</div>' +
+        '<div class="p7cm-tl-body">' +
+          '<div class="p7cm-tl-date">' + label + ' — ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) + '</div>' +
+          '<div class="p7cm-tl-event" style="color:#1e40af;font-weight:600">[' + noteType + '] ' + (noteText.substring(0,80)) + (noteText.length>80?'…':'') + '</div>' +
+        '</div>';
+      tlWrap.insertBefore(newRow, tlWrap.firstChild);
+    }
+  }
+  /* Update current note display */
+  var noteCurrent = document.querySelector('.p7cm-notes-current');
+  if (noteCurrent) noteCurrent.textContent = noteText;
+  if (noteEl) noteEl.value = '';
+
+  p7Toast('<i class="fas fa-check-circle"></i> ' + noteType + ' saved to ' + claimId + ' — CRM audit trail logged', 3500);
+  if (toCRM) {
+    setTimeout(function() { p7Toast('<i class="fas fa-database"></i> NYL ClaimsIQ CRM: Entry #' + Math.floor(Math.random()*90000+10000) + ' committed · Timestamp locked', 3000); }, 1200);
+  }
+  if (toNotify) {
+    setTimeout(function() { p7Toast('<i class="fas fa-envelope"></i> Supervisor notification sent — ' + noteType, 2500); }, 2400);
+  }
 }
 
 function p7AddTimelineEvent(claimId) {
-  var text = (document.getElementById('p7cm-tl-event') || {}).value || '';
-  if (!text.trim()) { p7Toast('Please enter an event description', 2000); return; }
-  var today = new Date();
-  var label = 'Apr ' + today.getDate();
-  p7Toast('<i class="fas fa-stream"></i> Timeline event added: ' + text.substring(0,50), 3000);
-  var el = document.getElementById('p7cm-tl-event');
-  if (el) el.value = '';
+  /* Open the rich Add Event modal — prefill description from input if typed */
+  var prefill = (document.getElementById('p7cm-tl-event') || {}).value || '';
+  p7OpenAddEventModal(claimId, prefill);
+}
+
+function p7OpenAddEventModal(claimId, prefill) {
+  var existing = document.getElementById('p7-addevent-overlay');
+  if (existing) existing.remove();
+  var now = new Date();
+  var todayVal = now.toISOString().slice(0,10);
+  var timeVal  = now.toTimeString().slice(0,5);
+
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-addevent-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:520px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#0f766e,#0d9488)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-calendar-plus" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Add Claim Timeline Event</div><div style="font-size:12px;color:rgba(255,255,255,0.85)">' + claimId + ' · Manual Entry</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-addevent-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:22px">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">' +
+          '<div class="p22-field-group">' +
+            '<label class="p22-field-label"><i class="fas fa-calendar-alt"></i> Event Date</label>' +
+            '<input class="p7m-input" id="p7-ae-date" type="date" value="' + todayVal + '" style="width:100%;box-sizing:border-box">' +
+          '</div>' +
+          '<div class="p22-field-group">' +
+            '<label class="p22-field-label"><i class="fas fa-clock"></i> Time</label>' +
+            '<input class="p7m-input" id="p7-ae-time" type="time" value="' + timeVal + '" style="width:100%;box-sizing:border-box">' +
+          '</div>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-tag"></i> Event Type</label>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px" id="p7-ae-type-group">' +
+            ['Document Received','Phone Call','Status Change','Escalation','Legal Action','Payment','Medical Update','Compliance Note','Other'].map(function(t,i) {
+              return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:5px 10px;border:1.5px solid #e2e8f0;border-radius:20px;background:#fff;white-space:nowrap"><input type="radio" name="p7-ae-type" value="' + t + '"' + (i===0?' checked':'') + '> ' + t + '</label>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-align-left"></i> Description <span style="color:#dc2626">*</span></label>' +
+          '<textarea class="p7m-textarea" id="p7-ae-desc" rows="3" placeholder="Describe the event, action taken, or outcome…" style="width:100%;box-sizing:border-box">' + (prefill||'') + '</textarea>' +
+        '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px">' +
+          '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-ae-crm" checked> Log to CRM audit trail</label>' +
+          '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-ae-notify"> Notify adjuster team</label>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-addevent-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" style="background:#0f766e;border-color:#0f766e" onclick="_p7CommitEvent(\'' + claimId + '\')"><i class="fas fa-calendar-plus"></i> Add to Timeline</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function _p7CommitEvent(claimId) {
+  var desc = (document.getElementById('p7-ae-desc') || {}).value || '';
+  if (!desc.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter an event description', 2000); return; }
+  var dateVal = (document.getElementById('p7-ae-date') || {}).value || '';
+  var timeVal = (document.getElementById('p7-ae-time') || {}).value || '';
+  var typeEl  = document.querySelector('input[name="p7-ae-type"]:checked');
+  var evType  = typeEl ? typeEl.value : 'Other';
+  var toCRM   = (document.getElementById('p7-ae-crm') || {}).checked;
+  var toNotify= (document.getElementById('p7-ae-notify') || {}).checked;
+
+  /* Format display date */
+  var d = dateVal ? new Date(dateVal + 'T12:00:00') : new Date();
+  var label = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  if (timeVal) label += ' ' + timeVal;
+
+  /* Type → icon/color map */
+  var typeMap = {
+    'Document Received':{ icon:'fa-file-alt', color:'#2563eb' },
+    'Phone Call':       { icon:'fa-phone',    color:'#0891b2' },
+    'Status Change':    { icon:'fa-exchange-alt', color:'#7c3aed' },
+    'Escalation':       { icon:'fa-arrow-up', color:'#d97706' },
+    'Legal Action':     { icon:'fa-gavel',    color:'#dc2626' },
+    'Payment':          { icon:'fa-dollar-sign', color:'#059669' },
+    'Medical Update':   { icon:'fa-heartbeat', color:'#e11d48' },
+    'Compliance Note':  { icon:'fa-flag',     color:'#ea580c' },
+    'Other':            { icon:'fa-circle',   color:'#64748b' }
+  };
+  var tm = typeMap[evType] || typeMap['Other'];
+
+  document.getElementById('p7-addevent-overlay').remove();
+  var inputEl = document.getElementById('p7cm-tl-event');
+  if (inputEl) inputEl.value = '';
+
+  /* Inject into live timeline */
+  var tlWrap = document.querySelector('.p7cm-tl-wrap');
+  if (tlWrap) {
+    /* Remove empty state if present */
+    var empty = tlWrap.querySelector('.p7cm-empty-state');
+    if (empty) empty.remove();
+    var newRow = document.createElement('div');
+    newRow.className = 'p7cm-tl-row';
+    newRow.style.cssText = 'animation:p7FadeIn 0.4s ease;';
+    newRow.innerHTML =
+      '<div class="p7cm-tl-left">' +
+        '<div class="p7cm-tl-dot" style="background:' + tm.color + ';color:#fff"><i class="fas ' + tm.icon + '" style="font-size:9px"></i></div>' +
+        '<div class="p7cm-tl-line"></div>' +
+      '</div>' +
+      '<div class="p7cm-tl-body">' +
+        '<div class="p7cm-tl-date">' + label + '</div>' +
+        '<div class="p7cm-tl-event">' +
+          '<span style="display:inline-block;background:' + tm.color + '15;color:' + tm.color + ';font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px">' + evType + '</span>' +
+          desc +
+        '</div>' +
+      '</div>';
+    tlWrap.insertBefore(newRow, tlWrap.firstChild);
+  }
+
+  p7Toast('<i class="fas fa-calendar-check"></i> Timeline event added — ' + evType + ': ' + desc.substring(0,50), 3500);
+  if (toCRM)    setTimeout(function(){ p7Toast('<i class="fas fa-database"></i> CRM audit entry logged · Entry #' + Math.floor(Math.random()*90000+10000), 2800); }, 1000);
+  if (toNotify) setTimeout(function(){ p7Toast('<i class="fas fa-bell"></i> Adjuster team notified of new timeline event', 2500); }, 2000);
 }
 
 function p7LogCall(claimId) { openLogCallModal(claimId); }
@@ -40704,11 +41089,95 @@ function p7SubmitAPS(claimId) {
   var physician = (document.getElementById('p7-aps-physician') || {}).value || '';
   if (!physician.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter the physician name', 2500); return; }
   var specialty = (document.getElementById('p7-aps-specialty') || {}).value || 'Cardiology';
+  var contact   = (document.getElementById('p7-aps-contact')   || {}).value || '';
+  var dateRange = (document.getElementById('p7-aps-dates')     || {}).value || '';
   document.getElementById('p7-aps-overlay').remove();
-  p7Toast('<i class="fas fa-heartbeat"></i> APS request sent to ' + physician + ' (' + specialty + ') for ' + claimId + ' · AI-drafted medical records request letter generated', 4500);
-  setTimeout(function() {
-    p7Toast('<i class="fas fa-clock"></i> APS tracker updated · Auto-chase scheduled in 14 days if no response received', 3000);
-  }, 1600);
+
+  /* ── Inject new row into the live APS table ── */
+  var apsTable = document.querySelector('.p7cm-med-table tbody');
+  if (apsTable) {
+    var today = new Date().toISOString().slice(0,10);
+    var newRow = document.createElement('tr');
+    newRow.style.cssText = 'animation:p7FadeIn 0.4s ease;background:#eff6ff;';
+    newRow.innerHTML =
+      '<td><strong>' + physician + '</strong></td>' +
+      '<td>' + specialty + '</td>' +
+      '<td>' + today + '</td>' +
+      '<td>—</td>' +
+      '<td><span style="color:#d97706;font-weight:600">Pending</span></td>' +
+      '<td><button class="p7cm-act-btn ghost" style="padding:4px 10px;font-size:11px" onclick="p7OrderAPS(\'' + claimId + '\')"><i class="fas fa-redo"></i> Chase</button></td>';
+    apsTable.appendChild(newRow);
+    /* Flash the row briefly */
+    setTimeout(function() { newRow.style.background = ''; }, 2500);
+  }
+
+  /* ── Update summary counters ── */
+  var statEls = document.querySelectorAll('.p7cm-med-stat-num');
+  if (statEls.length >= 1) {
+    var total = parseInt(statEls[0].textContent || '0') + 1;
+    statEls[0].textContent = total;
+  }
+  if (statEls.length >= 3) {
+    var pending = parseInt(statEls[2].textContent || '0') + 1;
+    statEls[2].textContent = pending;
+  }
+
+  /* ── Show confirmation modal ── */
+  var existing2 = document.getElementById('p7-aps-confirm-overlay');
+  if (existing2) existing2.remove();
+  var refNum = 'APS-' + new Date().getFullYear() + '-' + Math.floor(Math.random()*9000+1000);
+  var chaseDate = new Date(); chaseDate.setDate(chaseDate.getDate()+14);
+  var chaseDateStr = chaseDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  var ov2 = document.createElement('div');
+  ov2.className = 'p7-modal-overlay';
+  ov2.id = 'p7-aps-confirm-overlay';
+  ov2.onclick = function(e) { if (e.target === ov2) ov2.remove(); };
+  ov2.innerHTML =
+    '<div class="p7-modal-box" style="max-width:480px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#059669,#047857)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-check-circle" style="color:#fff;font-size:18px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">APS Request Submitted</div><div style="font-size:12px;color:rgba(255,255,255,0.85)">Ref: ' + refNum + '</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-aps-confirm-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:22px">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">' +
+            '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">Physician</div>' +
+            '<div style="font-weight:700;color:#1e293b">' + physician + '</div>' +
+            '<div style="font-size:12px;color:#64748b">' + specialty + '</div>' +
+          '</div>' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">' +
+            '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">Request Reference</div>' +
+            '<div style="font-weight:700;color:#1e293b">' + refNum + '</div>' +
+            '<div style="font-size:12px;color:#059669">✓ Logged to APS Tracker</div>' +
+          '</div>' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">' +
+            '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">Auto-Chase Date</div>' +
+            '<div style="font-weight:700;color:#d97706">' + chaseDateStr + '</div>' +
+            '<div style="font-size:12px;color:#64748b">If no response in 14 days</div>' +
+          '</div>' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">' +
+            '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">AI Letter</div>' +
+            '<div style="font-weight:700;color:#1e293b">Generated ✓</div>' +
+            '<div style="font-size:12px;color:#64748b">NYL letterhead · HIPAA compliant</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;font-size:12px;color:#14532d;margin-bottom:16px">' +
+          '<i class="fas fa-robot" style="color:#059669;margin-right:6px"></i>' +
+          '<strong>AI drafted</strong> a HIPAA-compliant medical records request letter on NYL letterhead and sent it to ' +
+          (contact ? '<strong>' + contact + '</strong>' : 'the physician\'s registered contact on file') + '. ' +
+          'Records date range: <strong>' + (dateRange || 'All available records') + '</strong>.' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-aps-confirm-overlay\').remove()"><i class="fas fa-times"></i> Close</button>' +
+          '<button class="p7cm-act-btn secondary" onclick="document.getElementById(\'p7-aps-confirm-overlay\').remove();p7Toast(\'<i class=\\\'fas fa-copy\\\'></i> APS letter copied to clipboard\',2500)"><i class="fas fa-copy"></i> Copy Letter</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov2);
 }
 
 /* ── SETTLEMENT INITIATION MODAL ── */
@@ -40770,12 +41239,107 @@ function p7SupplementClaim(claimId) {
 function p7ConfirmSettlement(claimId) {
   var amount = (document.getElementById('p7-settle-amount') || {}).value || '';
   if (!amount.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter the settlement offer amount', 2500); return; }
-  var basis = (document.getElementById('p7-settle-basis') || {}).value || 'Negotiated Settlement';
+  var basis   = (document.getElementById('p7-settle-basis')   || {}).value || 'Full Policy Benefit';
+  var notes   = (document.getElementById('p7-settle-notes')   || {}).value || '';
+  var release = (document.getElementById('p7-settle-release') || {}).checked;
+  var p7data  = (window.p7ClaimsData || {})[claimId] || {};
+  var amtNum  = parseFloat(amount.replace(/[^0-9.]/g,'')) || 0;
+  var needsLegal = amtNum > 500000;
+
   document.getElementById('p7-settle-overlay').remove();
-  p7Toast('<i class="fas fa-handshake"></i> Settlement initiated for ' + claimId + ' — Offer: ' + amount + ' · Basis: ' + basis + ' · Agreement generated for signature', 5000);
-  setTimeout(function() {
-    p7Toast('<i class="fas fa-envelope"></i> Settlement agreement sent to beneficiary · Legal review triggered · Payment authorization pending', 3500);
-  }, 1800);
+
+  /* Show agreement preview modal */
+  var existing3 = document.getElementById('p7-settle-confirm-overlay');
+  if (existing3) existing3.remove();
+
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  var refNum  = 'SA-' + claimId.replace('CLM-','') + '-' + Math.floor(Math.random()*900+100);
+  var clientName = p7data.client || 'Claimant';
+  var benefName  = (p7data.beneficiaries && p7data.beneficiaries[0] && p7data.beneficiaries[0].name) || 'Beneficiary of Record';
+
+  var ov3 = document.createElement('div');
+  ov3.className = 'p7-modal-overlay';
+  ov3.id = 'p7-settle-confirm-overlay';
+  ov3.onclick = function(e) { if (e.target === ov3) ov3.remove(); };
+
+  ov3.innerHTML =
+    '<div class="p7-modal-box" style="max-width:620px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#059669,#047857)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-file-signature" style="color:#fff;font-size:16px"></i></div>' +
+          '<div>' +
+            '<div style="font-weight:700;font-size:16px;color:#fff">Settlement Agreement Generated</div>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.85)">' + refNum + ' · ' + claimId + ' · ' + dateStr + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<span style="background:rgba(255,255,255,0.25);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:0.07em">DRAFT</span>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:0">' +
+
+        /* Agreement document */
+        '<div style="padding:20px 22px;background:#fafafa;border-bottom:1px solid #e5e7eb;max-height:280px;overflow-y:auto;font-size:12px;line-height:1.8;color:#1e293b;font-family:Georgia,serif">' +
+          '<div style="text-align:center;margin-bottom:12px">' +
+            '<div style="font-weight:700;font-size:14px;letter-spacing:0.1em;text-transform:uppercase">New York Life Insurance Company</div>' +
+            '<div style="font-size:11px;color:#64748b">51 Madison Avenue, New York, NY 10010</div>' +
+            '<div style="font-weight:700;margin-top:8px;font-size:13px;text-decoration:underline">SETTLEMENT AGREEMENT AND RELEASE</div>' +
+            '<div style="font-size:11px;color:#64748b">Reference: ' + refNum + ' · Date: ' + dateStr + '</div>' +
+          '</div>' +
+          '<p><strong>Claim Number:</strong> ' + claimId + '</p>' +
+          '<p><strong>Insured:</strong> ' + clientName + '</p>' +
+          '<p><strong>Claimant/Beneficiary:</strong> ' + benefName + '</p>' +
+          '<p><strong>Settlement Basis:</strong> ' + basis + '</p>' +
+          '<p><strong>Settlement Amount:</strong> <span style="font-size:14px;font-weight:700;color:#059669">' + amount + '</span></p>' +
+          (notes ? '<p><strong>Terms & Conditions:</strong> ' + notes + '</p>' : '') +
+          '<p>In consideration of the payment of <strong>' + amount + '</strong>, receipt of which is hereby acknowledged, the claimant(s) named above, for themselves and their heirs, executors, administrators, successors, and assigns, hereby fully, finally, and forever release, acquit, and discharge New York Life Insurance Company from any and all claims, demands, actions, and causes of action arising out of or related to the above-referenced insurance policy and claim.</p>' +
+          (release ? '<p><strong>Release Condition:</strong> This settlement is conditioned upon receipt of a fully executed Release of All Claims form prior to disbursement of funds.</p>' : '') +
+          '<p style="color:#64748b;font-size:11px">This agreement constitutes the entire agreement between the parties and supersedes all prior negotiations. This settlement does not constitute an admission of liability.</p>' +
+        '</div>' +
+
+        /* Status checklist */
+        '<div style="padding:16px 22px;border-bottom:1px solid #e5e7eb">' +
+          '<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px"><i class="fas fa-tasks"></i> Authorization Workflow</div>' +
+          '<div style="display:flex;flex-direction:column;gap:7px;font-size:12px">' +
+            '<div style="display:flex;align-items:center;gap:8px;color:#059669"><i class="fas fa-check-circle"></i> Settlement agreement document generated (' + refNum + ')</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;color:#059669"><i class="fas fa-check-circle"></i> Beneficiary notification queued</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;color:#059669"><i class="fas fa-check-circle"></i> Payment placed in pending authorization queue</div>' +
+            (needsLegal ? '<div style="display:flex;align-items:center;gap:8px;color:#d97706"><i class="fas fa-exclamation-triangle"></i> <strong>Legal review required</strong> — offer exceeds $500K threshold · Routed to Legal Dept.</div>' : '<div style="display:flex;align-items:center;gap:8px;color:#059669"><i class="fas fa-check-circle"></i> Under $500K threshold — no legal review required</div>') +
+            (release ? '<div style="display:flex;align-items:center;gap:8px;color:#0891b2"><i class="fas fa-file-signature"></i> Signed release required before disbursement</div>' : '') +
+          '</div>' +
+        '</div>' +
+
+        /* Actions */
+        '<div style="padding:16px 22px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-settle-confirm-overlay\').remove()"><i class="fas fa-times"></i> Close</button>' +
+          '<button class="p7cm-act-btn secondary" onclick="p7Toast(\'<i class=\\\'fas fa-copy\\\'></i> Agreement copied to clipboard\',2500)"><i class="fas fa-copy"></i> Copy Agreement</button>' +
+          '<button class="p7cm-act-btn secondary" style="background:#7c3aed;border-color:#7c3aed;color:#fff" onclick="p7Toast(\'<i class=\\\'fas fa-paper-plane\\\'></i> Settlement agreement sent to beneficiary via DocuSign\',3500);document.getElementById(\'p7-settle-confirm-overlay\').remove()"><i class="fas fa-paper-plane"></i> Send for e-Signature</button>' +
+          '<button class="p7cm-act-btn primary" style="background:#059669;border-color:#059669" onclick="_p7FinalizeSettlement(\'' + claimId + '\',\'' + amount.replace(/'/g,"\\'") + '\',\'' + refNum + '\')"><i class="fas fa-handshake"></i> Finalize & Authorize</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov3);
+}
+
+function _p7FinalizeSettlement(claimId, amount, refNum) {
+  document.getElementById('p7-settle-confirm-overlay').remove();
+  p7Toast('<i class="fas fa-handshake"></i> Settlement <strong>' + refNum + '</strong> finalized — ' + amount + ' · Payment authorization submitted', 5000);
+  setTimeout(function(){ p7Toast('<i class="fas fa-envelope"></i> Beneficiary notified · DocuSign package dispatched · Legal queue updated', 3500); }, 1500);
+  setTimeout(function(){ p7Toast('<i class="fas fa-shield-alt"></i> Compliance record ' + refNum + ' locked in audit trail · All regulatory notices generated', 3000); }, 3200);
+
+  /* Inject into timeline */
+  var tlWrap = document.querySelector('.p7cm-tl-wrap');
+  if (tlWrap) {
+    var now2 = new Date();
+    var label2 = now2.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + now2.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    var sr = document.createElement('div');
+    sr.className = 'p7cm-tl-row';
+    sr.style.cssText = 'animation:p7FadeIn 0.4s ease;';
+    sr.innerHTML =
+      '<div class="p7cm-tl-left"><div class="p7cm-tl-dot" style="background:#059669;color:#fff"><i class="fas fa-handshake" style="font-size:9px"></i></div><div class="p7cm-tl-line"></div></div>' +
+      '<div class="p7cm-tl-body"><div class="p7cm-tl-date">' + label2 + '</div><div class="p7cm-tl-event"><span style="display:inline-block;background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px">SETTLEMENT</span>Settlement ' + refNum + ' finalized — ' + amount + ' · Authorization pending</div></div>';
+    tlWrap.insertBefore(sr, tlWrap.firstChild);
+  }
 }
 
 /* ── P22: MODAL SHARED STYLES (injected once) ── */
