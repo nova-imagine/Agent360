@@ -6031,7 +6031,6 @@ function ClaimsPage() {
               <button class="ov-panel-btn primary" onclick="openCIReviewModal()"><i class="fas fa-search-plus"></i> Full Report</button>
               <button class="ov-panel-btn secondary" onclick="openFraudReportModal()"><i class="fas fa-shield-virus"></i> Fraud Report</button>
               <button class="ov-panel-btn secondary" onclick="openAITriageModal()"><i class="fas fa-robot"></i> AI Triage</button>
-              <button class="ov-panel-btn secondary" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Beneficiary Navigator</button>
               <button class="ov-panel-btn secondary" onclick="openPriorAuthScreener('CLM-2026-0028')"><i class="fas fa-clipboard-check"></i> Prior Auth Screener</button>
             </div>
           </div>
@@ -8217,6 +8216,73 @@ function ClaimsPage() {
                 <button class="cp-act-btn cp-act-ghost" onclick="p7Toast('Choose delivery channel first','info')"><i class="fas fa-paper-plane"></i> Send</button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* ── Beneficiary Navigator ── */}
+        <div class="cp-ai-section cp-nav-section">
+          <div class="cp-ai-section-header">
+            <div class="cp-ai-section-left">
+              <span class="cp-ai-section-icon" style="background:#d1fae5;color:#065f46"><i class="fas fa-compass"></i></span>
+              <div>
+                <div class="cp-ai-section-title">Beneficiary Navigator</div>
+                <div class="cp-ai-section-sub">Agent-facing guide — use this to walk claimants through each step of the claims process, set expectations, and ensure nothing is missed</div>
+              </div>
+            </div>
+            <button class="cp-configure-btn" style="background:#065f46;color:#fff;border-color:#065f46" onclick="openClaimsNavigator()">
+              <i class="fas fa-compass"></i> Open Full Navigator
+            </button>
+          </div>
+
+          {/* Quick-reference step cards for agents */}
+          <div class="cp-nav-steps">
+            <div class="cp-nav-step cp-nav-step-done">
+              <div class="cp-nav-step-num">1</div>
+              <div class="cp-nav-step-body">
+                <div class="cp-nav-step-title">Notify the Carrier</div>
+                <div class="cp-nav-step-desc">Claimant calls <strong>1-800-695-8654</strong> or files at <em>newyorklife.com/claims</em>. Agent tip: confirm the claimant has the policy number handy before calling.</div>
+              </div>
+              <div class="cp-nav-step-status done"><i class="fas fa-check-circle"></i></div>
+            </div>
+            <div class="cp-nav-step cp-nav-step-done">
+              <div class="cp-nav-step-num">2</div>
+              <div class="cp-nav-step-body">
+                <div class="cp-nav-step-title">Gather Required Documents</div>
+                <div class="cp-nav-step-desc">Certified death certificate · Claimant photo ID · Policy document (if available) · Bank details for electronic payment. Agent tip: advise claimant to request <em>multiple certified copies</em> — each institution may require one.</div>
+              </div>
+              <div class="cp-nav-step-status done"><i class="fas fa-check-circle"></i></div>
+            </div>
+            <div class="cp-nav-step cp-nav-step-active">
+              <div class="cp-nav-step-num">3</div>
+              <div class="cp-nav-step-body">
+                <div class="cp-nav-step-title">Complete Claim Form</div>
+                <div class="cp-nav-step-desc">AI pre-fills known fields from policy data — claimant reviews and signs. Agent tip: walk the claimant through the form on a screenshare or in person; errors here cause the most delays.</div>
+              </div>
+              <div class="cp-nav-step-status active"><i class="fas fa-dot-circle"></i> In Progress</div>
+            </div>
+            <div class="cp-nav-step cp-nav-step-pending">
+              <div class="cp-nav-step-num">4</div>
+              <div class="cp-nav-step-body">
+                <div class="cp-nav-step-title">Contestability Review <span class="cp-nav-conditional">if policy &lt; 2 years old</span></div>
+                <div class="cp-nav-step-desc">Carrier reviews original application for material misrepresentation. Typical review: 30–90 days. Agent tip: set clear expectations — this is mandatory and outside the agent's control.</div>
+              </div>
+              <div class="cp-nav-step-status pending"><i class="far fa-circle"></i> Pending</div>
+            </div>
+            <div class="cp-nav-step cp-nav-step-pending">
+              <div class="cp-nav-step-num">5</div>
+              <div class="cp-nav-step-body">
+                <div class="cp-nav-step-title">Receive Payment</div>
+                <div class="cp-nav-step-desc">Average payout: <strong>5–10 business days</strong> after approval. Options: lump sum · interest income option · fixed-period installments · life income option. Agent tip: discuss payout option preferences <em>before</em> final approval to avoid delays.</div>
+              </div>
+              <div class="cp-nav-step-status pending"><i class="far fa-circle"></i> Pending</div>
+            </div>
+          </div>
+
+          <div class="cp-nav-contacts">
+            <span class="cp-nav-contact-item"><i class="fas fa-phone"></i> <strong>1-800-695-8654</strong> <span class="cp-nav-contact-lbl">NYL Claims Hotline</span></span>
+            <span class="cp-nav-contact-item"><i class="fas fa-globe"></i> <strong>newyorklife.com/claims</strong> <span class="cp-nav-contact-lbl">Online Portal</span></span>
+            <span class="cp-nav-contact-item"><i class="fas fa-clock"></i> <strong>Mon–Fri 8AM–8PM ET</strong> <span class="cp-nav-contact-lbl">Hours</span></span>
+            <button class="cp-act-btn cp-act-primary" style="margin-left:auto" onclick="openClaimsNavigator()"><i class="fas fa-compass"></i> Open Full Step-by-Step Navigator</button>
           </div>
         </div>
 

@@ -60720,11 +60720,23 @@ function openPriorAuthScreener(claimId) {
 
   var criteria = cfg.criteria.map(function(c, i) {
     // Heuristic: pending-flagged items derive from doc completeness
-    if (c.pend) return { label: c.label, met: docsPct >= 75, pending: docsPct < 75 };
-    if (c.key === 'fraud') return { label: c.label, met: fraudOk };
-    if (c.key === 'kyc')   return { label: c.label, met: p7.benefKYC === 'Verified' };
+    if (c.pend) return { label: c.label, key: c.key, met: docsPct >= 75, pending: docsPct < 75 };
+    if (c.key === 'fraud') return { label: c.label, key: c.key, met: fraudOk };
+    if (c.key === 'kyc')   return { label: c.label, key: c.key, met: p7.benefKYC === 'Verified' };
+    // ADB-specific: benefit amount % check — use adbEligible + amount vs face value heuristic
+    if (c.key === 'pct') {
+      // Met if adbEligible is true OR if amount string is present (means it passed underwriting check)
+      var adbOk = p7.adbEligible === true || (p7.amount && p7.adbNote && p7.adbNote.indexOf('Eligible') > -1);
+      return { label: c.label, key: c.key, met: adbOk, actionable: !adbOk };
+    }
+    // ADB-specific: compassionate fast-track approval
+    if (c.key === 'track') {
+      // Met if priority contains 'Compassionate' or adjuster is set (fast-track was approved)
+      var trackOk = (p7.priority && p7.priority.indexOf('Compassionate') > -1) || (p7.adjuster && p7.adjuster.length > 0);
+      return { label: c.label, key: c.key, met: trackOk, actionable: !trackOk };
+    }
     // Default: assume met for criteria not explicitly tracked
-    return { label: c.label, met: (i < Math.ceil(cfg.criteria.length * (docsPct / 100 + 0.2))) };
+    return { label: c.label, key: c.key, met: (i < Math.ceil(cfg.criteria.length * (docsPct / 100 + 0.2))) };
   });
 
   var metCount  = criteria.filter(function(c){ return c.met; }).length;
@@ -60736,11 +60748,23 @@ function openPriorAuthScreener(claimId) {
   var statusColor = allClear ? '#059669' : (pct >= 60 ? '#d97706' : '#dc2626');
   var statusBg    = allClear ? 'linear-gradient(135deg,#ecfdf5,#d1fae5)' : (pct >= 60 ? 'linear-gradient(135deg,#fffbeb,#fef3c7)' : 'linear-gradient(135deg,#fef2f2,#fee2e2)');
 
-  // Criteria list HTML
+  // Criteria list HTML — failed rows are clickable with resolution actions
   var critHTML = criteria.map(function(c) {
     var icon  = c.met     ? 'fa-check-circle'      : (c.pending ? 'fa-clock' : 'fa-times-circle');
     var color = c.met     ? '#16a34a'              : (c.pending ? '#d97706'  : '#dc2626');
     var cls   = c.met     ? 'pas-crit-met'         : (c.pending ? 'pas-crit-pend' : 'pas-crit-fail');
+    if (!c.met && !c.pending) {
+      // Clickable red row — opens resolution modal
+      var safeLabel = c.label.replace(/'/g, '\\&#39;');
+      var safeKey   = (c.key || '').replace(/'/g, '');
+      return '<div class="pas-crit-row ' + cls + ' pas-crit-actionable" '
+        + 'onclick="_openPasResolveModal(\'' + safeKey + '\',\'' + claimId + '\')" '
+        + 'title="Click to resolve this blocker">'
+        + '<i class="fas ' + icon + '" style="color:' + color + ';width:18px;flex-shrink:0"></i>'
+        + '<span class="pas-crit-label">' + c.label + '</span>'
+        + '<span class="pas-crit-resolve-badge"><i class="fas fa-wrench"></i> Resolve</span>'
+        + '</div>';
+    }
     return '<div class="pas-crit-row ' + cls + '">'
       + '<i class="fas ' + icon + '" style="color:' + color + ';width:18px;flex-shrink:0"></i>'
       + '<span class="pas-crit-label">' + c.label + '</span>'
@@ -60844,6 +60868,172 @@ function openPriorAuthScreener(claimId) {
     + '</div></div>';
 
   document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   PAS RESOLVE MODAL — opened when agent clicks a red blocker row
+   ───────────────────────────────────────────────────────────────── */
+function _openPasResolveModal(key, claimId) {
+  var existing = document.getElementById('pas-resolve-overlay');
+  if (existing) existing.remove();
+
+  var configs = {
+    'pct': {
+      title: 'Benefit Amount Verification',
+      icon: 'fa-percentage',
+      color: '#dc2626',
+      subtitle: 'Benefit amount ≤ 80% of face value — verify and confirm',
+      body:
+        '<div class="pas-resolve-alert warn">' +
+          '<i class="fas fa-exclamation-triangle"></i>' +
+          '<div><strong>Blocker:</strong> The requested ADB benefit amount must not exceed 80% of the policy face value. ' +
+          'For CLM-2026-0028, the face value is <strong>$150,000</strong> — the 80% cap is <strong>$120,000</strong>.</div>' +
+        '</div>' +
+        '<div class="pas-resolve-fact-grid">' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Policy Face Value</div>' +
+            '<div class="pas-resolve-fact-val">$150,000</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">80% ADB Cap</div>' +
+            '<div class="pas-resolve-fact-val" style="color:#dc2626">$120,000</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Amount Requested</div>' +
+            '<div class="pas-resolve-fact-val" style="color:#d97706">$120,000</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Status</div>' +
+            '<div class="pas-resolve-fact-val" style="color:#dc2626">AT LIMIT — verification required</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pas-resolve-steps">' +
+          '<div class="pas-resolve-steps-title"><i class="fas fa-list-check"></i> Resolution Steps</div>' +
+          '<ol class="pas-resolve-ol">' +
+            '<li>Confirm policy face value with Actuarial / Policy Admin system (PA system ref: NYL-P-100340)</li>' +
+            '<li>Verify requested amount does not exceed face value × 0.80 — currently at exact limit ($120K / $150K)</li>' +
+            '<li>If face value is confirmed at $150,000: amount is <em>technically eligible</em> — mark criterion as met</li>' +
+            '<li>If face value differs: adjust benefit request accordingly and notify claimant Maria Gonzalez</li>' +
+            '<li>Document verification in claim file and update ADB Authorization Worksheet</li>' +
+          '</ol>' +
+        '</div>',
+      actions: [
+        { label: 'Confirm Amount — Mark Eligible', icon: 'fa-check-circle', color: '#059669',
+          toast: '<i class="fas fa-check-circle"></i> Benefit amount confirmed at $120,000 (80% of $150K face) — criterion marked eligible. Refreshing screener…',
+          fn: function() { p7Toast('<i class="fas fa-check-circle"></i> Benefit amount confirmed at $120,000 (80% of $150K face) — criterion marked eligible',3000); } },
+        { label: 'Request Policy Admin Verification', icon: 'fa-file-search', color: '#1d4ed8',
+          toast: '<i class="fas fa-file-search"></i> Policy Admin verification request sent for NYL-P-100340 face value — response expected within 2 hours',
+          fn: null },
+        { label: 'Escalate to Sr. Adjuster', icon: 'fa-user-tie', color: '#7c3aed',
+          toast: '<i class="fas fa-user-tie"></i> Escalated to Sr. Adjuster M. Torres for benefit amount sign-off',
+          fn: null }
+      ]
+    },
+    'track': {
+      title: 'Compassionate Fast-Track Approval',
+      icon: 'fa-heart',
+      color: '#dc2626',
+      subtitle: 'Compassionate fast-track must be approved by a Sr. Adjuster',
+      body:
+        '<div class="pas-resolve-alert warn">' +
+          '<i class="fas fa-exclamation-triangle"></i>' +
+          '<div><strong>Blocker:</strong> The compassionate fast-track processing lane requires explicit approval from a Senior Adjuster. ' +
+          'This designation bypasses the standard 30-day ADB review timeline for terminal illness cases.</div>' +
+        '</div>' +
+        '<div class="pas-resolve-fact-grid">' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Claim</div>' +
+            '<div class="pas-resolve-fact-val">CLM-2026-0028 · ADB</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Claimant</div>' +
+            '<div class="pas-resolve-fact-val">Maria Gonzalez</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Diagnosis</div>' +
+            '<div class="pas-resolve-fact-val">Stage IV Pancreatic Cancer · 6–8 mo prognosis</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Current Adjuster</div>' +
+            '<div class="pas-resolve-fact-val">Chris Davis (Claims Dept.)</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pas-resolve-steps">' +
+          '<div class="pas-resolve-steps-title"><i class="fas fa-list-check"></i> Resolution Steps</div>' +
+          '<ol class="pas-resolve-ol">' +
+            '<li>Submit compassionate fast-track designation request to Sr. Adjuster M. Torres (ext. 4421)</li>' +
+            '<li>Attach terminal illness certification (pending from Dr. Hernandez) once received</li>' +
+            '<li>Sr. Adjuster reviews and countersigns the Fast-Track Authorization Form (FT-ADB-2026)</li>' +
+            '<li>Once signed: claim is elevated to 5-day SLA and assigned to compassionate specialist</li>' +
+            '<li>Notify Maria Gonzalez that fast-track status has been requested — set expectation of reduced timeline</li>' +
+          '</ol>' +
+        '</div>' +
+        '<div class="pas-resolve-callout">' +
+          '<i class="fas fa-info-circle"></i>' +
+          '<span>Under NY Ins Law §3230(b) and carrier policy, compassionate fast-track reduces the standard 30-day ADB processing window to <strong>5 business days</strong> once all documents are received.</span>' +
+        '</div>',
+      actions: [
+        { label: 'Request Sr. Adjuster Sign-Off', icon: 'fa-user-tie', color: '#7c3aed',
+          toast: '<i class="fas fa-user-tie"></i> Fast-track sign-off request sent to Sr. Adjuster M. Torres — CLM-2026-0028 flagged as compassionate priority',
+          fn: null },
+        { label: 'Generate Fast-Track Authorization Form', icon: 'fa-file-signature', color: '#1d4ed8',
+          toast: '<i class="fas fa-file-signature"></i> Fast-Track Authorization Form (FT-ADB-2026) generated — ready for Sr. Adjuster signature',
+          fn: null },
+        { label: 'Notify Claimant of Fast-Track Request', icon: 'fa-envelope', color: '#059669',
+          toast: '<i class="fas fa-envelope"></i> Email drafted to Maria Gonzalez — compassionate fast-track requested; 5-day SLA pending Sr. Adjuster approval',
+          fn: null }
+      ]
+    }
+  };
+
+  var cfg = configs[key];
+  if (!cfg) {
+    p7Toast('No resolution workflow available for this criterion', 3000);
+    return;
+  }
+
+  var actionsHTML = cfg.actions.map(function(a, idx) {
+    return '<button class="pas-resolve-action-btn" style="background:' + a.color + '" '
+      + 'onclick="_pasResolveAction(' + idx + ',\'' + key + '\',\'' + claimId + '\')">'
+      + '<i class="fas ' + a.icon + '"></i> ' + a.label
+      + '</button>';
+  }).join('');
+
+  var html = '<div id="pas-resolve-overlay" class="pas-resolve-overlay" onclick="if(event.target===this)document.getElementById(\'pas-resolve-overlay\').remove()">'
+    + '<div class="pas-resolve-modal" onclick="event.stopPropagation()">'
+    + '<div class="pas-resolve-header" style="border-left:5px solid ' + cfg.color + '">'
+    +   '<div class="pas-resolve-header-icon" style="background:' + cfg.color + '"><i class="fas ' + cfg.icon + '"></i></div>'
+    +   '<div class="pas-resolve-header-info">'
+    +     '<div class="pas-resolve-title">' + cfg.title + '</div>'
+    +     '<div class="pas-resolve-sub">' + cfg.subtitle + '</div>'
+    +   '</div>'
+    +   '<button class="pas-close-btn" onclick="document.getElementById(\'pas-resolve-overlay\').remove()"><i class="fas fa-times"></i></button>'
+    + '</div>'
+    + '<div class="pas-resolve-body">' + cfg.body + '</div>'
+    + '<div class="pas-resolve-footer">'
+    +   '<button class="pas-close-ghost" onclick="document.getElementById(\'pas-resolve-overlay\').remove()">Cancel</button>'
+    +   actionsHTML
+    + '</div>'
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function _pasResolveAction(idx, key, claimId) {
+  var cfgMap = { 'pct': ['<i class="fas fa-check-circle"></i> Benefit amount confirmed — criterion marked eligible',
+                          '<i class="fas fa-file-search"></i> Policy Admin verification request sent',
+                          '<i class="fas fa-user-tie"></i> Escalated to Sr. Adjuster M. Torres'],
+                 'track': ['<i class="fas fa-user-tie"></i> Fast-track sign-off request sent to Sr. Adjuster M. Torres',
+                            '<i class="fas fa-file-signature"></i> Fast-Track Authorization Form generated',
+                            '<i class="fas fa-envelope"></i> Claimant notification drafted'] };
+  var toasts = cfgMap[key] || [];
+  var msg = toasts[idx] || 'Action recorded';
+  p7Toast(msg, 3200);
+  document.getElementById('pas-resolve-overlay').remove();
+  // Re-open screener after a brief delay so user sees updated state
+  if (idx === 0 && key === 'pct') {
+    setTimeout(function() { openPriorAuthScreener(claimId); }, 600);
+  }
 }
 
 console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded');
