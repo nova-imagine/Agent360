@@ -18639,6 +18639,22 @@ function openNAICFormModal(formType, claimRef, state) {
   document.body.appendChild(ov);
 }
 
+// ── Claims KPI Ribbon toggle ─────────────────────────────────────────────────
+function toggleClaimsKPIRibbon(headerEl) {
+  var ribbon = document.getElementById('ckpi-ribbon');
+  var body   = document.getElementById('ckpi-ribbon-body');
+  var hint   = ribbon ? ribbon.querySelector('.ckpi-ribbon-hint') : null;
+  if (!ribbon || !body) return;
+  var isOpen = ribbon.classList.contains('open');
+  if (isOpen) {
+    body.style.display = 'none';
+    ribbon.classList.remove('open');
+  } else {
+    body.style.display = '';
+    ribbon.classList.add('open');
+  }
+}
+
 // ── Claims Performance Analytics Panel toggle ───────────────────────────────
 function toggleCPAPanel() {
   const body = document.getElementById('cpa-body');
@@ -18647,6 +18663,346 @@ function toggleCPAPanel() {
   const collapsed = body.style.display === 'none';
   body.style.display = collapsed ? '' : 'none';
   if (btn) btn.innerHTML = collapsed ? '<i class="fas fa-chevron-down"></i>' : '<i class="fas fa-chevron-up"></i>';
+}
+
+// ── Full AI Performance Analysis Modal ──────────────────────────────────────
+function openClaimsAIPerformance() {
+  var existing = document.getElementById('clm-ai-perf-overlay');
+  if (existing) existing.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'clm-ai-perf-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9400;display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.innerHTML = `
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:780px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 28px 90px rgba(0,0,0,0.3);overflow:hidden;animation:prospModalIn 0.25s ease">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#3730a3,#6d28d9);padding:22px 26px;display:flex;align-items:center;gap:16px;flex-shrink:0">
+        <div style="width:46px;height:46px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;flex-shrink:0"><i class="fas fa-robot"></i></div>
+        <div style="flex:1">
+          <div style="font-size:1.1rem;font-weight:800;color:#fff">Full AI Performance Analysis</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.75);margin-top:3px">Q2 2026 (Apr 1 – Apr 13) · AI-powered benchmarking against team &amp; national averages</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;font-size:0.72rem;font-weight:700;color:#c4b5fd"><i class="fas fa-circle" style="color:#4ade80;font-size:8px;margin-right:5px"></i>AI LIVE</div>
+        <button onclick="document.getElementById('clm-ai-perf-overlay').remove()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:34px;height:34px;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;margin-left:8px"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- AI Scanning animation bar -->
+      <div id="cap-scan-bar" style="background:#f5f3ff;border-bottom:1px solid #ede9fe;padding:10px 26px;display:flex;align-items:center;gap:10px;font-size:0.8rem;color:#6d28d9;flex-shrink:0">
+        <i class="fas fa-brain" style="animation:livePulse 1s infinite"></i>
+        <span id="cap-scan-txt">AI scanning 47 resolved claims, 3 active claims, 18 SLA records, and team benchmark data…</span>
+      </div>
+
+      <!-- Body -->
+      <div style="flex:1;overflow-y:auto;padding:24px 26px;display:flex;flex-direction:column;gap:20px">
+
+        <!-- Overall Score -->
+        <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:20px">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6d28d9,#4f46e5);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 20px rgba(109,40,217,0.35)">
+            <div style="font-size:1.6rem;font-weight:900;color:#fff">92</div>
+            <div style="font-size:0.6rem;color:rgba(255,255,255,0.8);font-weight:700">/ 100</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:1rem;font-weight:800;color:#4c1d95">Overall Performance Score</div>
+            <div style="font-size:0.82rem;color:#6d28d9;margin-top:3px">Top 18% of all NYL claims agents · <strong style="color:#059669">↑ +6 pts vs Q1 2026</strong></div>
+            <div style="margin-top:10px;height:8px;background:rgba(109,40,217,0.15);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:92%;background:linear-gradient(90deg,#6d28d9,#818cf8);border-radius:99px;transition:width 1s ease"></div>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:0.72rem;font-weight:700;color:#7c3aed;text-transform:uppercase">Team avg</div>
+            <div style="font-size:1.3rem;font-weight:800;color:#4c1d95">78</div>
+            <div style="font-size:0.7rem;color:#7c3aed">+14 pts above avg</div>
+          </div>
+        </div>
+
+        <!-- KPI Breakdown Grid -->
+        <div>
+          <div style="font-size:0.72rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px"><i class="fas fa-chart-bar" style="color:#6d28d9;margin-right:6px"></i>KPI Breakdown vs Benchmarks</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            ${[
+              { label:'Resolution Time', val:'5.2d', bench:'6.1d', status:'good', icon:'fa-clock', note:'15% faster — ranked #3 on team', pct:85 },
+              { label:'Payout Turnaround', val:'3.1d', bench:'3.8d', status:'good', icon:'fa-money-bill-wave', note:'18% faster than team avg', pct:82 },
+              { label:'Doc Response Rate', val:'67%', bench:'75%', status:'warn', icon:'fa-file-alt', note:'8 pts below target — needs improvement', pct:67 },
+              { label:'SLA Compliance', val:'93%', bench:'88%', status:'good', icon:'fa-check-circle', note:'5 pts above team average', pct:93 },
+              { label:'SLA Breaches YTD', val:'1', bench:'2.1', status:'good', icon:'fa-exclamation-triangle', note:'52% fewer breaches than avg', pct:90 },
+              { label:'AI Triage Accuracy', val:'94%', bench:'87%', status:'good', icon:'fa-robot', note:'7 pts above team — AI adoption excellent', pct:94 },
+            ].map(k => `
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <i class="fas ${k.icon}" style="color:${k.status==='good'?'#059669':k.status==='warn'?'#d97706':'#dc2626'};font-size:0.9rem"></i>
+                  <span style="font-size:0.75rem;font-weight:700;color:#374151">${k.label}</span>
+                  <span style="margin-left:auto;font-size:0.82rem;font-weight:900;color:${k.status==='good'?'#059669':k.status==='warn'?'#d97706':'#dc2626'}">${k.val}</span>
+                </div>
+                <div style="height:5px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-bottom:6px">
+                  <div style="height:100%;width:${k.pct}%;background:${k.status==='good'?'#059669':k.status==='warn'?'#f59e0b':'#dc2626'};border-radius:99px"></div>
+                </div>
+                <div style="font-size:0.7rem;color:#64748b">${k.note} · <span style="color:#94a3b8">Team: ${k.bench}</span></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- AI Findings -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+          <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 18px;font-size:0.75rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+            <i class="fas fa-brain" style="color:#6d28d9;margin-right:6px"></i>AI Findings &amp; Recommendations
+          </div>
+          <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:12px;padding:12px;background:#f0fdf4;border-radius:10px;border-left:4px solid #059669">
+              <i class="fas fa-trophy" style="color:#059669;margin-top:2px;flex-shrink:0"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#065f46">Top Performer: Resolution Speed</div>
+                <div style="font-size:0.78rem;color:#047857;margin-top:3px">Your 5.2d average resolution is in the top 20% nationally. AI pattern analysis shows early document collection is your key differentiator — you request docs within 4h of claim receipt vs team avg of 18h.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;padding:12px;background:#fffbeb;border-radius:10px;border-left:4px solid #d97706">
+              <i class="fas fa-exclamation-circle" style="color:#d97706;margin-top:2px;flex-shrink:0"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#92400e">Priority Improvement: Doc Response Rate (67%)</div>
+                <div style="font-size:0.78rem;color:#b45309;margin-top:3px">3 of 7 active claims have outstanding doc requests &gt;72h old. AI recommends: schedule automated reminders at 24h, 48h, and 72h intervals. Projected lift to 82–85% response rate.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;padding:12px;background:#f0f9ff;border-radius:10px;border-left:4px solid #0891b2">
+              <i class="fas fa-robot" style="color:#0891b2;margin-top:2px;flex-shrink:0"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#0c4a6e">AI Triage Efficiency</div>
+                <div style="font-size:0.78rem;color:#0369a1;margin-top:3px">94% triage accuracy saved an estimated 8.4 hours of manual review this quarter. AI flagged CLM-2026-0058 (Alex Rivera DI) as complex — routing to specialist avoided a potential SLA breach.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;padding:12px;background:#fdf4ff;border-radius:10px;border-left:4px solid #9333ea">
+              <i class="fas fa-chart-line" style="color:#9333ea;margin-top:2px;flex-shrink:0"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#581c87">Q2 Trajectory Forecast</div>
+                <div style="font-size:0.78rem;color:#7e22ce;margin-top:3px">At current pace, Q2 will close with 93% SLA compliance (vs 89% Q1), 5.0d avg resolution, and 70–72% doc response rate. You are on track for <strong>Quarterly Excellence</strong> recognition if doc response improves by Apr 30.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Recommendations -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+          <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 18px;font-size:0.75rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+            <i class="fas fa-tasks" style="color:#6d28d9;margin-right:6px"></i>Recommended Actions · This Week
+          </div>
+          <div style="padding:14px 18px;display:flex;flex-direction:column;gap:8px">
+            ${[
+              { priority:'HIGH', color:'#dc2626', bg:'#fef2f2', action:'Send doc reminders for CLM-2026-0058, CLM-2026-0041, CLM-2026-0039 — all &gt;72h outstanding', icon:'fa-bell' },
+              { priority:'HIGH', color:'#d97706', bg:'#fffbeb', action:'Enable auto-reminder workflow in Claims Settings → Automation to prevent future response delays', icon:'fa-cog' },
+              { priority:'MED', color:'#0891b2', bg:'#f0f9ff', action:'Request SLA exception review for CLM-2026-0041 ($1M death benefit) — complexity warrants extended timeline', icon:'fa-file-alt' },
+              { priority:'MED', color:'#059669', bg:'#f0fdf4', action:'Submit Q2 mid-quarter report to supervisor — strong resolution metrics support performance review', icon:'fa-chart-bar' },
+              { priority:'LOW', color:'#7c3aed', bg:'#fdf4ff', action:'Explore AI auto-triage calibration for disability claims — current 94% accuracy may improve further', icon:'fa-robot' },
+            ].map(a => `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${a.bg};border-radius:9px">
+                <i class="fas ${a.icon}" style="color:${a.color};flex-shrink:0;width:16px;text-align:center"></i>
+                <span style="font-size:0.75rem;font-weight:800;color:${a.color};flex-shrink:0;min-width:34px">${a.priority}</span>
+                <span style="font-size:0.78rem;color:#374151">${a.action}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:16px 26px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <button onclick="document.getElementById('clm-ai-perf-overlay').remove();navigateTo('ai-agents')" style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:linear-gradient(135deg,#6d28d9,#4f46e5);border:none;border-radius:9px;color:#fff;font-size:0.82rem;font-weight:700;cursor:pointer"><i class="fas fa-comments"></i> Deep-Dive in AI Chat</button>
+        <button onclick="exportClaimsPerformanceReport();document.getElementById('clm-ai-perf-overlay').remove()" style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#374151;font-size:0.82rem;font-weight:600;cursor:pointer"><i class="fas fa-download"></i> Export PDF Report</button>
+        <button onclick="document.getElementById('clm-ai-perf-overlay').remove()" style="margin-left:auto;padding:9px 16px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#6b7280;font-size:0.82rem;cursor:pointer">Close</button>
+      </div>
+    </div>`;
+
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+
+  // Simulate AI scan completing
+  setTimeout(function() {
+    var bar = document.getElementById('cap-scan-bar');
+    var txt = document.getElementById('cap-scan-txt');
+    if (txt) txt.textContent = 'Analysis complete — 50 records processed · 6 KPIs benchmarked · 5 recommendations generated';
+    if (bar) { bar.style.background = '#f0fdf4'; bar.style.borderColor = '#bbf7d0'; bar.querySelector('i').style.color = '#059669'; }
+  }, 2200);
+}
+
+// ── Generate NAIC Annual Package Modal ─────────────────────────────────────
+function openNAICAnnualPackage() {
+  var existing = document.getElementById('naic-pkg-overlay');
+  if (existing) existing.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'naic-pkg-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9400;display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.innerHTML = `
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 28px 90px rgba(0,0,0,0.3);overflow:hidden;animation:prospModalIn 0.25s ease">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#003087,#0057c8);padding:22px 26px;display:flex;align-items:center;gap:16px;flex-shrink:0">
+        <div style="width:46px;height:46px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;flex-shrink:0"><i class="fas fa-file-contract"></i></div>
+        <div style="flex:1">
+          <div style="font-size:1.1rem;font-weight:800;color:#fff">Generate NAIC Annual Package</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.75);margin-top:3px">Portfolio — All 2025 Claims · NY · NJ · CA · TX · AI-compiled regulatory submission</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;font-size:0.72rem;font-weight:700;color:#93c5fd">Annual Filing</div>
+        <button onclick="document.getElementById('naic-pkg-overlay').remove()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:34px;height:34px;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;margin-left:8px"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Status bar -->
+      <div id="naic-pkg-status-bar" style="background:#eff6ff;border-bottom:1px solid #bfdbfe;padding:10px 26px;display:flex;align-items:center;gap:10px;font-size:0.8rem;color:#1d4ed8;flex-shrink:0">
+        <i class="fas fa-database" style="animation:livePulse 1s infinite"></i>
+        <span id="naic-pkg-status-txt">AI compiling 2025 portfolio claims data across 4 states…</span>
+      </div>
+
+      <!-- Body -->
+      <div style="flex:1;overflow-y:auto;padding:22px 26px;display:flex;flex-direction:column;gap:20px">
+
+        <!-- Package Summary -->
+        <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:14px;padding:18px 22px">
+          <div style="font-size:0.82rem;font-weight:800;color:#1e3a8a;margin-bottom:14px"><i class="fas fa-box-open" style="margin-right:7px"></i>Package Contents — FY 2025</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+            ${[
+              { val:'47', lbl:'Total Claims', icon:'fa-file-medical-alt', color:'#3b82f6' },
+              { val:'4', lbl:'States', icon:'fa-map-marker-alt', color:'#0891b2' },
+              { val:'12', lbl:'Forms Included', icon:'fa-file-contract', color:'#6d28d9' },
+              { val:'$4.2M', lbl:'Total Payouts', icon:'fa-dollar-sign', color:'#059669' },
+            ].map(s => `
+              <div style="background:rgba(255,255,255,0.65);border-radius:10px;padding:12px;text-align:center">
+                <i class="fas ${s.icon}" style="color:${s.color};font-size:1.2rem"></i>
+                <div style="font-size:1.3rem;font-weight:900;color:#1e3a8a;margin-top:5px">${s.val}</div>
+                <div style="font-size:0.7rem;color:#3b82f6;font-weight:600">${s.lbl}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Forms Included -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+          <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 18px;font-size:0.75rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+            <i class="fas fa-file-alt" style="color:#003087;margin-right:6px"></i>Regulatory Forms Included
+          </div>
+          <div style="padding:0">
+            ${[
+              { form:'NAIC Annual Claim Experience Report', states:'NY · NJ · CA · TX', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'47 claims · FY 2025 · AI-verified totals' },
+              { form:'Prompt Payment Compliance Summary', states:'NJ', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'Q1–Q4 2025 · 100% within 30-day window' },
+              { form:'Large Death Benefit Notifications', states:'NY', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'2 notifications (CLM-2025-0041, CLM-2025-0112) · &gt;$500K each' },
+              { form:'Claim Denial Report — Form D-3', states:'NY', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'3 denials · grounds documented · adverse action letters attached' },
+              { form:'Fraud Referral & SIU Report', states:'CA', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'2 referrals · CLM-2025-0183, CLM-2025-0167 · CADOI format' },
+              { form:'Market Conduct Compliance Attestation', states:'NY · NJ', status:'pending', icon:'fa-pen', color:'#d97706', detail:'Requires agent supervisor e-signature before submission' },
+            ].map((f,i) => `
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 18px;${i>0?'border-top:1px solid #f1f5f9':''}">
+                <i class="fas ${f.icon}" style="color:${f.color};font-size:1rem;flex-shrink:0;width:18px;text-align:center"></i>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:0.82rem;font-weight:700;color:#1e293b">${f.form}</div>
+                  <div style="font-size:0.72rem;color:#64748b;margin-top:2px">${f.detail}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;margin-bottom:3px">${f.states}</div>
+                  <span style="font-size:0.7rem;font-weight:700;color:${f.color};background:${f.status==='ready'?'#f0fdf4':'#fffbeb'};padding:2px 8px;border-radius:99px">${f.status==='ready'?'✓ Ready':'⟳ Pending Signature'}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- State Submission Portal Status -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+          <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 18px;font-size:0.75rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+            <i class="fas fa-map-marked-alt" style="color:#003087;margin-right:6px"></i>State Portal Submission Status
+          </div>
+          <div style="padding:0">
+            ${[
+              { state:'New York', dept:'NY Dept. of Financial Services (DFS)', deadline:'2026-05-31', forms:5, status:'ready', portal:'DFS Online Services', confirmation:'', color:'#059669' },
+              { state:'New Jersey', dept:'NJ Dept. of Banking & Insurance (DOBI)', deadline:'2026-05-15', forms:3, status:'ready', portal:'NJ DOBI eFiling', confirmation:'', color:'#059669' },
+              { state:'California', dept:'CA Dept. of Insurance (CDI)', deadline:'2026-06-30', forms:2, status:'ready', portal:'CDI eFiling System', confirmation:'', color:'#059669' },
+              { state:'Texas', dept:'TX Dept. of Insurance (TDI)', deadline:'2026-05-31', forms:1, status:'ready', portal:'TDI Online Portal', confirmation:'', color:'#059669' },
+            ].map(s => `
+              <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;border-top:1px solid #f1f5f9;first-child:border-top:none">
+                <div style="width:36px;height:36px;background:#eff6ff;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <i class="fas fa-landmark" style="color:#003087;font-size:0.9rem"></i>
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:0.82rem;font-weight:700;color:#1e293b">${s.state} — ${s.dept}</div>
+                  <div style="font-size:0.72rem;color:#64748b;margin-top:2px">${s.forms} forms · Deadline: <strong>${s.deadline}</strong> · Portal: ${s.portal}</div>
+                </div>
+                <button onclick="naicSubmitToState('${s.state}')" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(135deg,#003087,#0057c8);border:none;border-radius:8px;color:#fff;font-size:0.72rem;font-weight:700;cursor:pointer;flex-shrink:0"><i class="fas fa-paper-plane"></i> Submit</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- AI Compliance Check -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:16px 18px">
+          <div style="font-size:0.78rem;font-weight:800;color:#065f46;margin-bottom:12px"><i class="fas fa-shield-alt" style="margin-right:7px"></i>AI Compliance Pre-Check — All Clear</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            ${[
+              'All 47 claims verified for prompt payment compliance — 100% within statutory window',
+              'Fraud referrals cross-checked against SIU database — no duplicate filings detected',
+              'Death benefit notifications verified: all &gt;$500K claims flagged and included',
+              'Denial form D-3 data reconciled with claim records — adverse action letters attached',
+              'Market conduct attestation pending 1 supervisor signature — package 97% complete',
+            ].map(t => `
+              <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:#047857">
+                <i class="fas fa-check-circle" style="color:#059669;flex-shrink:0"></i>${t}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:16px 26px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <button onclick="naicGenerateAndDownload()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#003087,#0057c8);border:none;border-radius:10px;color:#fff;font-size:0.85rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(0,48,135,0.35)"><i class="fas fa-download"></i> Download Full Package (.zip)</button>
+        <button onclick="naicSubmitAll()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:10px;color:#fff;font-size:0.85rem;font-weight:700;cursor:pointer"><i class="fas fa-paper-plane"></i> Submit to All 4 States</button>
+        <button onclick="document.getElementById('naic-pkg-overlay').remove()" style="margin-left:auto;padding:10px 16px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#6b7280;font-size:0.82rem;cursor:pointer">Close</button>
+      </div>
+    </div>`;
+
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+
+  // Simulate AI compilation completing
+  setTimeout(function() {
+    var bar = document.getElementById('naic-pkg-status-bar');
+    var txt = document.getElementById('naic-pkg-status-txt');
+    if (txt) txt.textContent = 'Package compiled — 47 claims · 6 forms · 4 states · AI compliance pre-check: PASSED';
+    if (bar) { bar.style.background = '#f0fdf4'; bar.style.borderColor = '#bbf7d0'; if(bar.querySelector('i')) bar.querySelector('i').style.color = '#059669'; }
+  }, 2500);
+}
+
+function naicSubmitToState(state) {
+  document.getElementById('naic-pkg-overlay')?.remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Connecting to ' + state + ' regulatory portal…', 2500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> Package submitted to ' + state + ' · Confirmation number generated · Acknowledgement receipt will arrive within 24h', 5500);
+  }, 2800);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-calendar-alt"></i> Regulatory calendar updated · Next ' + state + ' filing deadline auto-calculated', 3500);
+  }, 5500);
+}
+
+function naicGenerateAndDownload() {
+  p7Toast('<i class="fas fa-cog fa-spin"></i> Assembling NAIC annual package — compiling 6 forms across 4 states…', 3000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-file-archive"></i> NAIC_Annual_Package_FY2025_NYL.zip ready · 6 forms · 4 state submissions · AI compliance verified', 5000);
+  }, 3200);
+  setTimeout(function() {
+    document.getElementById('naic-pkg-overlay')?.remove();
+    p7Toast('<i class="fas fa-download"></i> Download complete · File saved · Package reference: NAIC-PKG-2026-0515-NYL', 4000);
+  }, 5500);
+}
+
+function naicSubmitAll() {
+  document.getElementById('naic-pkg-overlay')?.remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Initiating submission to NY · NJ · CA · TX portals simultaneously…', 3000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-double"></i> Submitted to NY DFS · NJ DOBI · CA CDI · Awaiting TX TDI acknowledgement…', 4500);
+  }, 3200);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> All 4 state submissions confirmed · Confirmation numbers logged · Regulatory calendar updated', 5000);
+  }, 6500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-envelope"></i> Submission receipts sent to compliance inbox · Supervisor notified · Next annual deadline: 2027-05-31', 4500);
+  }, 9500);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -38646,7 +39002,7 @@ function p7BuildClaimTabContent(claim, tab) {
         '<div class="idp-prog-track"><div class="idp-prog-fill" style="width:' + completePct + '%;background:' + progColor + '"></div></div>' +
       '</div>' +
       // ── Drop zone ──
-      '<div class="idp-modal-dropzone" onclick="p7Toast(\'<i class=\\"fas fa-cloud-upload-alt\\"></i> Upload portal opened for ' + claim.id + '\',2500)">' +
+      '<div class="idp-modal-dropzone" onclick="p7OpenDocUpload(\'' + claim.id + '\')" style="cursor:pointer">' +
         '<i class="fas fa-cloud-upload-alt" style="font-size:22px;color:#7c3aed"></i>' +
         '<span>Drop documents here or <strong style="color:#7c3aed">click to upload</strong></span>' +
         '<span style="font-size:11px;color:#94a3b8">PDF, JPEG, PNG, TIFF accepted · Max 50MB</span>' +
@@ -38688,7 +39044,7 @@ function p7BuildClaimTabContent(claim, tab) {
         '<div class="p7cm-comms-actions">' +
           '<button class="p7cm-act-btn primary" onclick="p7LogCall(\'' + claim.id + '\')"><i class="fas fa-phone-alt"></i> Log Call</button>' +
           '<button class="p7cm-act-btn secondary" onclick="p7SendClaimEmail(\'' + claim.id + '\')"><i class="fas fa-envelope"></i> Send Email</button>' +
-          '<button class="p7cm-act-btn ghost" onclick="showToast(\'Letter template opened\',\'info\')"><i class="fas fa-file-alt"></i> Draft Letter</button>' +
+          '<button class="p7cm-act-btn ghost" onclick="p7DraftLetter(\'' + claim.id + '\')"><i class="fas fa-file-alt"></i> Draft Letter</button>' +
         '</div>' +
       '</div>' +
       '<div class="p7cm-comm-list">' + commRows + '</div>' +
@@ -38757,10 +39113,10 @@ function p7BuildClaimTabContent(claim, tab) {
         '</div>' +
       '</div>' +
       '<div class="p7cm-bene-actions">' +
-        '<button class="p7cm-act-btn primary" onclick="showToast(\'KYC verification request sent to all beneficiaries\',\'success\')"><i class="fas fa-id-card"></i> Send KYC to All</button>' +
-        '<button class="p7cm-act-btn secondary" onclick="showToast(\'Bank account verification initiated\',\'success\')"><i class="fas fa-university"></i> Verify Accounts</button>' +
+        '<button class="p7cm-act-btn primary" onclick="p7SendKYCToAll(\'' + claim.id + '\')"><i class="fas fa-id-card"></i> Send KYC to All</button>' +
+        '<button class="p7cm-act-btn secondary" onclick="p7VerifyAccounts(\'' + claim.id + '\')"><i class="fas fa-university"></i> Verify Accounts</button>' +
         '<button class="p7cm-act-btn secondary" onclick="openBeneDisputeModal(\'' + claim.id + '\')"><i class="fas fa-exclamation-triangle"></i> Flag Dispute</button>' +
-        '<button class="p7cm-act-btn ghost" onclick="showToast(\'Beneficiary designation pulled from policy record\',\'info\')"><i class="fas fa-file-contract"></i> View Designation</button>' +
+        '<button class="p7cm-act-btn ghost" onclick="p7ViewDesignation(\'' + claim.id + '\')"><i class="fas fa-file-contract"></i> View Designation</button>' +
       '</div>' +
     '</div>';
   }
@@ -38857,7 +39213,7 @@ function p7BuildClaimTabContent(claim, tab) {
             'Based on: claim amount + 8% IBNR buffer · comparable claim history · fraud score · SLA pressure' +
           '</div>' +
         '</div>' +
-        (!resAdequate ? '<button class="p7cm-act-btn secondary" style="white-space:nowrap;align-self:center" onclick="showToast(\'Reserve adjusted to AI-recommended amount: $' + aiResRec.toLocaleString() + '\',\'success\')"><i class="fas fa-edit"></i> Adjust to AI Rec</button>' : '') +
+        (!resAdequate ? '<button class="p7cm-act-btn secondary" style="white-space:nowrap;align-self:center" onclick="p7AdjustToAIRec(\'' + claim.id + '\',' + aiResRec + ')"><i class="fas fa-edit"></i> Adjust to AI Rec</button>' : '') +
       '</div>' +
 
       // Payment method selection
@@ -39182,7 +39538,197 @@ function p7AddTimelineEvent(claimId) {
 }
 
 function p7LogCall(claimId) { openLogCallModal(claimId); }
-function p7SendClaimEmail(claimId) { p7Toast('<i class="fas fa-envelope"></i> Email composer opened for ' + claimId, 2500); }
+function p7SendClaimEmail(claimId) {
+  var existing = document.getElementById('p7-email-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var client  = p7.client || 'Claimant';
+  var email   = p7.benefEmail || '';
+  var adjuster = p7.adjuster || 'Claims Department';
+  var today   = new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+
+  var templates = [
+    { label: 'Document Request',       subject: 'Action Required: Missing Documents — ' + claimId,
+      body: 'Dear ' + client + ',\n\nThank you for submitting your claim with New York Life Insurance Company (Claim: ' + claimId + ').\n\nTo continue processing your claim, we require the following outstanding documents:\n\n• [Outstanding document 1]\n• [Outstanding document 2]\n\nPlease upload the required documents via the secure claimant portal at portal.nyl-claims.com/claimant, or fax them to 1-800-695-8654.\n\nPlease submit these documents within 15 days to avoid delay in processing.\n\nIf you have any questions, please call 1-800-695-8654, Mon–Fri 8AM–8PM ET.\n\nSincerely,\n' + adjuster + '\nNew York Life Insurance Company' },
+    { label: 'Status Update',          subject: 'Claims Status Update — ' + claimId,
+      body: 'Dear ' + client + ',\n\nThis is an update on your claim (Claim: ' + claimId + ') as of ' + today + '.\n\nCurrent Status: Under Review\n\nOur claims team is actively reviewing your file. We expect to complete our review within [X business days]. You will receive a follow-up communication once a decision has been made.\n\nIf you have any questions, please contact us at 1-800-695-8654.\n\nSincerely,\n' + adjuster + '\nNew York Life Insurance Company' },
+    { label: 'Additional Info Request', subject: 'Information Needed — Claim ' + claimId,
+      body: 'Dear ' + client + ',\n\nRegarding your claim (Claim: ' + claimId + '), our review has identified a need for additional clarification.\n\nWe request the following information:\n\n• [Specific information needed]\n• [Any supporting documentation]\n\nPlease respond within 10 business days. Failure to respond may result in a delay or denial of your claim.\n\nThank you for your cooperation.\n\nSincerely,\n' + adjuster + '\nNew York Life Insurance Company' },
+    { label: 'Approval Notification',  subject: 'Claim Approved — ' + claimId,
+      body: 'Dear ' + client + ',\n\nWe are pleased to inform you that your claim (Claim: ' + claimId + ') has been approved.\n\nApproved Amount: [Amount]\nPayment Method: [Method]\nEstimated Payment Date: [Date]\n\nPayment will be processed within 5–10 business days. Please ensure your banking details on file are current.\n\nIf you have any questions, please contact 1-800-695-8654.\n\nSincerely,\n' + adjuster + '\nNew York Life Insurance Company' }
+  ];
+
+  var templateOpts = templates.map(function(t, i){ return '<option value="' + i + '">' + t.label + '</option>'; }).join('');
+
+  var html = '<div id="p7-email-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9150;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:660px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+
+    // Header
+    + '<div style="background:linear-gradient(135deg,#0ea5e9,#2563eb);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-envelope"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Send Email</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · ' + client + '</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-email-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+
+    // Body
+    + '<div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">'
+
+    // Template selector
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Template</label>'
+    +   '<div style="display:flex;gap:8px"><select id="_emailTpl" style="flex:1;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;background:#fff" onchange="_emailLoadTemplate(\'' + claimId + '\')">' + templateOpts + '</select>'
+    +   '<button onclick="_emailLoadTemplate(\'' + claimId + '\')" style="padding:9px 14px;background:#ede9fe;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;color:#7c3aed"><i class="fas fa-magic"></i> Load</button></div></div>'
+
+    // To
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">To</label>'
+    +   '<input id="_emailTo" value="' + email + '" placeholder="recipient@example.com" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box"></div>'
+
+    // Subject
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Subject</label>'
+    +   '<input id="_emailSubject" value="' + templates[0].subject + '" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box"></div>'
+
+    // Body
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Message</label>'
+    +   '<textarea id="_emailBody" rows="8" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12.5px;outline:none;box-sizing:border-box;resize:vertical;line-height:1.6">' + templates[0].body + '</textarea></div>'
+
+    // Options row
+    +   '<div style="display:flex;gap:14px;flex-wrap:wrap">'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" id="_emailCC" checked> CC: ' + adjuster + '</label>'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" id="_emailAudit" checked> Log to audit trail</label>'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" id="_emailCertified"> Mark as certified / formal</label>'
+    +   '</div>'
+
+    + '</div>'
+
+    // Footer
+    + '<div style="padding:12px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-email-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Cancel</button>'
+    +   '<button onclick="_emailSaveDraft(\'' + claimId + '\')" style="padding:9px 18px;border:1.5px solid #0ea5e9;background:#f0f9ff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:#0369a1"><i class="fas fa-save"></i> Save Draft</button>'
+    +   '<button onclick="_emailSend(\'' + claimId + '\')" style="padding:9px 18px;background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-paper-plane"></i> Send Email</button>'
+    + '</div>'
+
+    + '</div></div>';
+
+  // Store templates for load function
+  window._emailTemplates = templates;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function _emailLoadTemplate(claimId) {
+  var idx = parseInt((document.getElementById('_emailTpl') || {}).value) || 0;
+  var tpl = (window._emailTemplates || [])[idx];
+  if (!tpl) return;
+  var sub = document.getElementById('_emailSubject');
+  var bod = document.getElementById('_emailBody');
+  if (sub) sub.value = tpl.subject;
+  if (bod) bod.value = tpl.body;
+}
+
+function _emailSaveDraft(claimId) {
+  p7Toast('<i class="fas fa-save"></i> Email draft saved — ' + claimId, 2000);
+  document.getElementById('p7-email-overlay').remove();
+}
+
+function _emailSend(claimId) {
+  var to      = (document.getElementById('_emailTo')      || {}).value || '';
+  var subject = (document.getElementById('_emailSubject') || {}).value || '';
+  var body    = (document.getElementById('_emailBody')    || {}).value || '';
+  if (!to.trim())      { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter a recipient email address', 2200); return; }
+  if (!subject.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter a subject line', 2200); return; }
+  if (!body.trim())    { p7Toast('<i class="fas fa-exclamation-circle"></i> Message body cannot be empty', 2200); return; }
+  document.getElementById('p7-email-overlay').remove();
+  p7Toast('<i class="fas fa-check-circle"></i> Email sent to ' + to + ' · Subject: ' + subject.substring(0,40) + '…', 4000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-shield-check"></i> Communication logged to audit trail — ' + claimId, 2500);
+  }, 1200);
+}
+
+function p7DraftLetter(claimId) {
+  var existing = document.getElementById('p7-letter-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var client  = p7.client || 'Claimant';
+  var policy  = p7.policy || '—';
+  var adjuster = p7.adjuster || 'Claims Department';
+  var state   = p7.regulatoryState || 'NY';
+  var today   = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  var letterTypes = [
+    { id:'req',   label:'Document Request Letter',   icon:'fa-file-medical',
+      body: 'New York Life Insurance Company\n51 Madison Avenue, New York, NY 10010\n\n' + today + '\n\nRe: Request for Documentation — Claim ' + claimId + '\n\nDear ' + client + ',\n\nWe are currently processing your claim (Ref: ' + claimId + ') under Policy ' + policy + '. To complete our review, we require the following documentation:\n\n[LIST REQUIRED DOCUMENTS HERE]\n\nPlease submit the above items within 15 calendar days of this letter to avoid delays. Documents may be submitted via:\n• Secure Portal: portal.nyl-claims.com/claimant\n• Fax: 1-800-695-8654\n• Certified Mail: 51 Madison Ave, New York, NY 10010\n\nIf you have questions, contact ' + adjuster + ' at 1-800-695-8654.\n\nSincerely,\n\n' + adjuster + '\nSenior Claims Adjuster\nNew York Life Insurance Company' },
+    { id:'ack',   label:'Claim Acknowledgment Letter', icon:'fa-handshake',
+      body: 'New York Life Insurance Company\n51 Madison Avenue, New York, NY 10010\n\n' + today + '\n\nRe: Acknowledgment of Claim — ' + claimId + '\n\nDear ' + client + ',\n\nThis letter acknowledges receipt of your claim (Ref: ' + claimId + ') filed under Policy ' + policy + '. Your claim has been assigned to ' + adjuster + ' in our Claims Department for processing.\n\nEstimated Review Timeline: [X–Y business days]\nYour Claim Number: ' + claimId + '\nClaims Contact: 1-800-695-8654\n\nWe will keep you informed of any updates. Please reference your claim number in all future correspondence.\n\nSincerely,\n\n' + adjuster + '\nNew York Life Insurance Company' },
+    { id:'hold',  label:'Legal / Investigation Hold Notice', icon:'fa-gavel',
+      body: 'New York Life Insurance Company\n51 Madison Avenue, New York, NY 10010\n\n' + today + '\n\nRe: Notice of Claim Investigation Hold — ' + claimId + '\n\nDear ' + client + ',\n\nPursuant to ' + state + ' Insurance Law and applicable regulations, New York Life Insurance Company is conducting an investigation in connection with your claim (Ref: ' + claimId + ') under Policy ' + policy + '.\n\nEffective immediately, all claim processing activities are subject to an investigation hold. During this period, no payment will be issued pending completion of the investigation.\n\nYour cooperation is requested. Please contact ' + adjuster + ' at 1-800-695-8654 with any questions.\n\nSincerely,\n\n' + adjuster + '\nNew York Life Insurance Company\nLegal / Compliance Division' },
+    { id:'close', label:'Claim Closure Letter', icon:'fa-check-double',
+      body: 'New York Life Insurance Company\n51 Madison Avenue, New York, NY 10010\n\n' + today + '\n\nRe: Claim Closure Notification — ' + claimId + '\n\nDear ' + client + ',\n\nThis letter confirms that your claim (Ref: ' + claimId + ') under Policy ' + policy + ' has been resolved and closed as of ' + today + '.\n\nFinal Determination: [APPROVED / DENIED — details]\nPayment Issued: [Amount / N/A]\n\nIf you believe this determination was made in error, you have the right to appeal within 60 days. Contact our Appeals Department at 1-800-695-8654.\n\nThank you for your patience during the claims process.\n\nSincerely,\n\n' + adjuster + '\nNew York Life Insurance Company' }
+  ];
+
+  var typeCards = letterTypes.map(function(t, i) {
+    return '<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid #e5e7eb;border-radius:10px;cursor:pointer;transition:all .15s" onclick="this.style.borderColor=\'#7c3aed\';this.style.background=\'#ede9fe\';document.querySelectorAll(\'[data-letter-type]\').forEach(function(el){el.style.borderColor=\'#e5e7eb\';el.style.background=\'#fff\'});this.style.borderColor=\'#7c3aed\';this.style.background=\'#ede9fe\';_letterLoadType(\'' + t.id + '\')" data-letter-type="' + t.id + '" style="' + (i === 0 ? 'border-color:#7c3aed;background:#ede9fe;' : '') + '">'
+      + '<input type="radio" name="_letterType" value="' + t.id + '" ' + (i === 0 ? 'checked' : '') + ' style="accent-color:#7c3aed">'
+      + '<i class="fas ' + t.icon + '" style="color:#7c3aed;width:16px;text-align:center"></i>'
+      + '<span style="font-size:12.5px;font-weight:600;color:#374151">' + t.label + '</span>'
+      + '</label>';
+  }).join('');
+
+  window._letterTypes = letterTypes;
+
+  var html = '<div id="p7-letter-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9150;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:700px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+
+    + '<div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-file-alt"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Draft Formal Letter</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · ' + client + '</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-letter-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+
+    + '<div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">'
+    +   '<div><div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Letter Type</div>'
+    +   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' + typeCards + '</div></div>'
+
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Letter Content</label>'
+    +   '<textarea id="_letterBody" rows="12" style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;outline:none;box-sizing:border-box;resize:vertical;line-height:1.7;font-family:Georgia,serif">' + letterTypes[0].body + '</textarea></div>'
+
+    +   '<div style="display:flex;gap:14px;flex-wrap:wrap">'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" id="_letterCompliance" checked> Route to compliance before send</label>'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" id="_letterCertified" checked> Dispatch via certified mail</label>'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" id="_letterAudit" checked> Log to audit trail</label>'
+    +   '</div>'
+
+    + '</div>'
+
+    + '<div style="padding:12px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-letter-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Cancel</button>'
+    +   '<button onclick="p7Toast(\'<i class=\\"fas fa-save\\"></i> Letter draft saved — ' + claimId + '\',2200);document.getElementById(\'p7-letter-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #7c3aed;background:#f5f3ff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:#7c3aed"><i class="fas fa-save"></i> Save Draft</button>'
+    +   '<button onclick="_letterFinalize(\'' + claimId + '\')" style="padding:9px 18px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-paper-plane"></i> Finalize & Queue</button>'
+    + '</div>'
+
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function _letterLoadType(typeId) {
+  var tpl = (window._letterTypes || []).find(function(t){ return t.id === typeId; });
+  if (!tpl) return;
+  var bod = document.getElementById('_letterBody');
+  if (bod) bod.value = tpl.body;
+}
+
+function _letterFinalize(claimId) {
+  var body = (document.getElementById('_letterBody') || {}).value || '';
+  if (!body.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Letter body cannot be empty', 2200); return; }
+  var compliance = document.getElementById('_letterCompliance') && document.getElementById('_letterCompliance').checked;
+  var certified  = document.getElementById('_letterCertified')  && document.getElementById('_letterCertified').checked;
+  document.getElementById('p7-letter-overlay').remove();
+  p7Toast('<i class="fas fa-check-circle"></i> Letter finalized for ' + claimId + (compliance ? ' — queued for compliance review' : ' — queued for dispatch') + (certified ? ' via certified mail' : ''), 4500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-shield-check"></i> Letter logged to audit trail · Reference: ' + claimId + '-LTR-' + Date.now().toString().slice(-5), 3000);
+  }, 1400);
+}
+
 function p7AddCommLog(claimId) {
   var type = (document.getElementById('p7cm-comm-type') || {}).value || 'Phone';
   var dir = (document.getElementById('p7cm-comm-dir') || {}).value || 'Outbound';
@@ -39206,12 +39752,346 @@ function p7DenyClaim(claimId) {
   p7CloseClaimModal();
 }
 
+function p7AdjustToAIRec(claimId, aiAmount) {
+  var existing = document.getElementById('p7-reserve-adj-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var currentReserve = p7.reserveAmount || '—';
+  var claimAmount    = p7.amount || '—';
+  var aiFormatted    = '$' + (aiAmount || 0).toLocaleString();
+
+  // Parse current reserve for delta calc
+  var currentNum = parseInt((currentReserve || '').replace(/[^0-9]/g,'')) || 0;
+  var delta      = aiAmount - currentNum;
+  var deltaStr   = (delta >= 0 ? '+' : '') + '$' + Math.abs(delta).toLocaleString();
+  var deltaColor = delta >= 0 ? '#d97706' : '#059669';
+
+  var html = '<div id="p7-reserve-adj-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9150;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:520px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+
+    + '<div style="background:linear-gradient(135deg,#d97706,#b45309);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-robot"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Adjust to AI-Recommended Reserve</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · Reserve Deficiency Correction</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-reserve-adj-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+
+    + '<div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">'
+
+    // AI Analysis callout
+    +   '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:14px 16px;display:flex;gap:10px;align-items:flex-start">'
+    +     '<i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:16px;margin-top:2px;flex-shrink:0"></i>'
+    +     '<div><div style="font-weight:700;color:#92400e;font-size:13px;margin-bottom:4px">Reserve Deficiency Detected</div>'
+    +     '<div style="font-size:12px;color:#78350f;line-height:1.6">Current reserve is below AI recommendation. Adjusting ensures adequate funds are set aside based on claim amount, comparable history, fraud score, and SLA pressure.</div></div>'
+    +   '</div>'
+
+    // Before / After comparison
+    +   '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center">'
+    +     '<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1.5px solid #e5e7eb;text-align:center">'
+    +       '<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:5px">Current Reserve</div>'
+    +       '<div style="font-size:22px;font-weight:900;color:#dc2626">' + currentReserve + '</div>'
+    +     '</div>'
+    +     '<div style="text-align:center;font-size:20px;color:#d97706;font-weight:900">→</div>'
+    +     '<div style="background:#f0fdf4;border-radius:10px;padding:14px;border:2px solid #22c55e;text-align:center">'
+    +       '<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:5px">AI Recommended</div>'
+    +       '<div style="font-size:22px;font-weight:900;color:#059669">' + aiFormatted + '</div>'
+    +     '</div>'
+    +   '</div>'
+
+    // Delta
+    +   '<div style="text-align:center;font-size:13px;color:#475569">Reserve change: <strong style="color:' + deltaColor + '">' + deltaStr + '</strong> &nbsp;·&nbsp; Claim amount: <strong>' + claimAmount + '</strong></div>'
+
+    // Basis
+    +   '<div style="background:#f8fafc;border-radius:10px;padding:12px 14px;border:1px solid #e5e7eb">'
+    +     '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">AI Calculation Basis</div>'
+    +     '<div style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#374151">'
+    +       '<div style="display:flex;justify-content:space-between"><span>Base claim amount</span><strong>' + claimAmount + '</strong></div>'
+    +       '<div style="display:flex;justify-content:space-between"><span>IBNR buffer (8%)</span><strong>+ 8%</strong></div>'
+    +       '<div style="display:flex;justify-content:space-between"><span>Fraud score adjustment</span><strong>+ ' + (p7.fraudScore || 0) + ' pts</strong></div>'
+    +       '<div style="display:flex;justify-content:space-between"><span>SLA pressure factor</span><strong>' + (p7.slaStatus === 'warn' ? '+ 2%' : 'Neutral') + '</strong></div>'
+    +       '<div style="display:flex;justify-content:space-between;border-top:1px solid #e5e7eb;padding-top:5px;margin-top:3px"><span style="font-weight:700">Recommended Reserve</span><strong style="color:#059669">' + aiFormatted + '</strong></div>'
+    +     '</div>'
+    +   '</div>'
+
+    // Checkbox options
+    +   '<div style="display:flex;flex-direction:column;gap:7px">'
+    +     '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer"><input type="checkbox" checked style="accent-color:#d97706"> Notify reserve manager of adjustment</label>'
+    +     '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer"><input type="checkbox" checked style="accent-color:#d97706"> Log adjustment to audit trail</label>'
+    +     '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer"><input type="checkbox" style="accent-color:#d97706"> Generate reserve adjustment memo for file</label>'
+    +   '</div>'
+
+    + '</div>'
+
+    + '<div style="padding:12px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-reserve-adj-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Cancel</button>'
+    +   '<button onclick="document.getElementById(\'p7-reserve-adj-overlay\').remove();p7Toast(\'<i class=\\"fas fa-check-circle\\"></i> Reserve for ' + claimId + ' adjusted to AI-recommended ' + aiFormatted + '\',3500);setTimeout(function(){p7Toast(\'<i class=\\"fas fa-shield-check\\"></i> Reserve adjustment logged to audit trail · Reserve manager notified\',3000)},1200)" style="padding:9px 18px;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-check-circle"></i> Confirm Adjustment to ' + aiFormatted + '</button>'
+    + '</div>'
+
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
 function p7OpenFraudDetail(claimId) {
-  p7Toast('<i class="fas fa-shield-virus"></i> Opening full fraud investigation file for ' + claimId + '…', 2500);
+  var existing = document.getElementById('p7-fraud-review-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var ci = (window.claimAIInsights || {})[claimId] || {};
+  var fraudScore = p7.fraudScore != null ? p7.fraudScore : (ci.fraudScore || 0);
+  var fraudLabel = p7.fraudLabel || (fraudScore >= 70 ? 'Flagged' : fraudScore >= 40 ? 'Watch' : 'Clear');
+  var client     = p7.client || claimId;
+  var policy     = p7.policy || '—';
+  var amount     = p7.amount || '—';
+  var adjuster   = p7.adjuster || '—';
+
+  var scoreColor = fraudScore >= 70 ? '#dc2626' : fraudScore >= 40 ? '#d97706' : '#059669';
+  var scoreBg    = fraudScore >= 70 ? 'linear-gradient(135deg,#fef2f2,#fee2e2)' : fraudScore >= 40 ? 'linear-gradient(135deg,#fffbeb,#fef3c7)' : 'linear-gradient(135deg,#f0fdf4,#dcfce7)';
+
+  // Signals from claimAIInsights or fallback
+  var signals = (ci.fraudSignals || [
+    { level: fraudScore >= 70 ? 'flagged' : 'watch', text: 'Fraud score ' + fraudScore + '/100 — ' + fraudLabel + ' status' },
+    { level: 'watch', text: 'Document completeness requires verification' },
+    { level: 'clear', text: 'Policy in standing — premium payments current' }
+  ]);
+
+  var signalRows = signals.map(function(s) {
+    var ic = s.level === 'flagged' ? 'fa-times-circle' : s.level === 'watch' ? 'fa-exclamation-triangle' : 'fa-check-circle';
+    var sc = s.level === 'flagged' ? '#dc2626' : s.level === 'watch' ? '#d97706' : '#059669';
+    var bg = s.level === 'flagged' ? '#fef2f2' : s.level === 'watch' ? '#fffbeb' : '#f0fdf4';
+    return '<div style="display:flex;align-items:flex-start;gap:9px;padding:9px 12px;border-radius:8px;background:' + bg + ';margin-bottom:6px">' +
+      '<i class="fas ' + ic + '" style="color:' + sc + ';margin-top:1px;flex-shrink:0"></i>' +
+      '<span style="font-size:12.5px;color:#374151;line-height:1.5">' + s.text + '</span>' +
+      '</div>';
+  }).join('');
+
+  var actionButtons = [
+    { label: 'Refer to SIU', icon: 'fa-user-secret', color: '#dc2626', fn: 'openSIUCaseModal(\'' + claimId + '\');document.getElementById(\'p7-fraud-review-overlay\').remove()' },
+    { label: 'Request NLP Re-analysis', icon: 'fa-robot', color: '#7c3aed', fn: 'p7Toast(\'<i class=\\"fas fa-robot\\"></i> NLP re-analysis queued — results in ~90 seconds\',3000);document.getElementById(\'p7-fraud-review-overlay\').remove()' },
+    { label: 'Chase Missing Documents', icon: 'fa-paper-plane', color: '#1d4ed8', fn: 'p7SendAllDocRequests(\'' + claimId + '\');document.getElementById(\'p7-fraud-review-overlay\').remove()' },
+    { label: 'Flag for Compliance Review', icon: 'fa-shield-alt', color: '#059669', fn: 'p7Toast(\'<i class=\\"fas fa-shield-alt\\"></i> ' + claimId + ' flagged for compliance review — supervisor notified\',3500);document.getElementById(\'p7-fraud-review-overlay\').remove()' }
+  ];
+  var actHtml = actionButtons.map(function(a) {
+    return '<button style="padding:9px 16px;border-radius:8px;background:' + a.color + ';color:#fff;border:none;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;transition:opacity .15s" onmouseover="this.style.opacity=\'.85\'" onmouseout="this.style.opacity=\'1\'" onclick="' + a.fn + '">' +
+      '<i class="fas ' + a.icon + '"></i> ' + a.label + '</button>';
+  }).join('');
+
+  var nlpText = ci.nlp || ci.fraudDesc || 'AI NLP analysis completed — document cross-reference and timeline analysis performed. No definitive misrepresentation detected at this time. Continued monitoring active.';
+
+  var html = '<div id="p7-fraud-review-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9100;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+
+    // Header
+    + '<div style="background:linear-gradient(135deg,#dc2626,#9b1c1c);padding:20px 24px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:42px;height:42px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-shield-virus"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:16px;color:#fff">Fraud Investigation Review</div><div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">' + claimId + ' · ' + client + ' · ' + policy + '</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-fraud-review-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+
+    // Score banner
+    + '<div style="margin:20px 20px 0;padding:16px 18px;border-radius:12px;background:' + scoreBg + ';border:2px solid ' + scoreColor + '40;display:flex;align-items:center;gap:20px">'
+    +   '<div style="text-align:center;min-width:70px">'
+    +     '<div style="font-size:36px;font-weight:900;color:' + scoreColor + ';line-height:1">' + fraudScore + '</div>'
+    +     '<div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;margin-top:2px">Fraud Score</div>'
+    +   '</div>'
+    +   '<div style="width:1px;height:50px;background:#e5e7eb"></div>'
+    +   '<div style="flex:1">'
+    +     '<div style="font-size:15px;font-weight:800;color:' + scoreColor + '">' + fraudLabel.toUpperCase() + '</div>'
+    +     '<div style="font-size:12px;color:#475569;margin-top:4px;line-height:1.5">' + (ci.fraudDesc || 'ML-based fraud scoring using claim data, document analysis, timeline signals, and NLP review.') + '</div>'
+    +   '</div>'
+    + '</div>'
+
+    // Signals
+    + '<div style="padding:16px 20px 0">'
+    +   '<div style="font-size:12px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="fas fa-radar" style="color:#dc2626"></i> Fraud Signals</div>'
+    +   signalRows
+    + '</div>'
+
+    // NLP Analysis
+    + '<div style="margin:16px 20px 0;padding:14px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e5e7eb">'
+    +   '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;display:flex;align-items:center;gap:6px"><i class="fas fa-brain" style="color:#7c3aed"></i> NLP Analysis Summary</div>'
+    +   '<div style="font-size:12.5px;color:#475569;line-height:1.6">' + nlpText + '</div>'
+    + '</div>'
+
+    // Resolution factors
+    + (ci.resFactors ? '<div style="margin:14px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        ci.resFactors.map(function(f){ return '<div style="background:#f1f5f9;border-radius:8px;padding:10px 12px"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">' + f.label + '</div><div style="font-size:12.5px;font-weight:700;color:#111827">' + f.val + '</div></div>'; }).join('') +
+      '</div>' : '')
+
+    // Actions
+    + '<div style="padding:16px 20px;display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid #f1f5f9;margin-top:16px">' + actHtml + '</div>'
+
+    // Close
+    + '<div style="padding:0 20px 18px;display:flex;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-fraud-review-overlay\').remove()" style="padding:8px 20px;border:1.5px solid #d1d5db;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Close</button>'
+    + '</div>'
+
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function p7OpenDocUpload(claimId) {
+  var existing = document.getElementById('p7-doc-upload-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var client = p7.client || claimId;
+  var missingDocs = (p7.docs || []).filter(function(d){ return d.status === 'missing' || d.status === 'pending'; }).map(function(d){ return d.name; });
+  var docOpts = missingDocs.length > 0
+    ? missingDocs.map(function(d){ return '<option value="' + d + '">' + d + '</option>'; }).join('')
+    : '<option>Other Document</option>';
+
+  var docTypes = ['Death Certificate','Terminal Illness Certification','ADB Claim Form','Attending Physician Statement','Claimant ID / Photo ID','Policy Document','Notarized Claim Form','Bank Account Details','Life Expectancy Statement','Other'];
+  var typeOpts = docTypes.map(function(d){ return '<option>' + d + '</option>'; }).join('');
+
+  var html = '<div id="p7-doc-upload-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9150;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:580px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+    + '<div style="background:linear-gradient(135deg,#7c3aed,#5b21b6);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-cloud-upload-alt"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Upload Document</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · ' + client + ' · IDP scan on upload</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-doc-upload-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+    + '<div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">'
+
+    // Drop zone (simulated)
+    +   '<div id="_uploadDropzone" style="border:2.5px dashed #a78bfa;border-radius:12px;padding:32px 20px;text-align:center;background:#faf5ff;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'#7c3aed\';this.style.background=\'#ede9fe\'" onmouseout="this.style.borderColor=\'#a78bfa\';this.style.background=\'#faf5ff\'" onclick="document.getElementById(\'_uploadFileInput\').click()">'
+    +     '<i class="fas fa-cloud-upload-alt" style="font-size:32px;color:#7c3aed;margin-bottom:10px;display:block"></i>'
+    +     '<div style="font-size:14px;font-weight:700;color:#5b21b6">Drop files here or <span style="text-decoration:underline;cursor:pointer">browse</span></div>'
+    +     '<div style="font-size:11px;color:#94a3b8;margin-top:5px">PDF, JPEG, PNG, TIFF · Max 50MB per file</div>'
+    +     '<input type="file" id="_uploadFileInput" accept=".pdf,.jpg,.jpeg,.png,.tiff" multiple style="display:none" onchange="_uploadFileSelected(\'' + claimId + '\')">'
+    +   '</div>'
+
+    // Selected file display
+    +   '<div id="_uploadSelectedFile" style="display:none;background:#f5f3ff;border:1.5px solid #a78bfa;border-radius:10px;padding:12px 14px;font-size:13px;color:#5b21b6;display:flex;align-items:center;gap:8px"><i class="fas fa-file-pdf" style="color:#7c3aed"></i><span id="_uploadFileName">No file selected</span></div>'
+
+    // Document type
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Document Type <span style="color:#dc2626">*</span></label>'
+    +   '<select id="_uploadDocType" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;background:#fff;box-sizing:border-box">' + (missingDocs.length > 0 ? docOpts : typeOpts) + '</select></div>'
+
+    // Notes
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Upload Notes (optional)</label>'
+    +   '<input id="_uploadNotes" placeholder="e.g. Original certified copy — received from County Clerk April 15" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box"></div>'
+
+    // IDP notice
+    +   '<div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:10px;padding:11px 14px;font-size:12px;color:#5b21b6;display:flex;gap:8px;align-items:flex-start">'
+    +     '<i class="fas fa-robot" style="margin-top:1px;flex-shrink:0"></i>'
+    +     '<span><strong>IDP Auto-Processing:</strong> Uploaded documents will be automatically scanned by the Intelligent Document Processing engine — OCR extraction, tamper detection, NLP verification, and AI confidence scoring will run within 60 seconds of upload.</span>'
+    +   '</div>'
+
+    + '</div>'
+    + '<div style="padding:12px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-doc-upload-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Cancel</button>'
+    +   '<button onclick="_uploadSubmit(\'' + claimId + '\')" style="padding:9px 18px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-cloud-upload-alt"></i> Upload & Process</button>'
+    + '</div>'
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function _uploadFileSelected(claimId) {
+  var input = document.getElementById('_uploadFileInput');
+  var display = document.getElementById('_uploadSelectedFile');
+  var nameEl  = document.getElementById('_uploadFileName');
+  if (input && input.files && input.files.length > 0) {
+    var names = Array.from(input.files).map(function(f){ return f.name; }).join(', ');
+    if (nameEl) nameEl.textContent = names;
+    if (display) display.style.display = 'flex';
+  }
+}
+
+function _uploadSubmit(claimId) {
+  var docType = (document.getElementById('_uploadDocType') || {}).value || 'Document';
+  var input   = document.getElementById('_uploadFileInput');
+  var hasFile = input && input.files && input.files.length > 0;
+
+  // Simulate file uploaded even without real file (demo mode)
+  document.getElementById('p7-doc-upload-overlay').remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Uploading ' + docType + ' for ' + claimId + '…', 2000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> ' + docType + ' uploaded successfully · IDP scan queued', 3000);
+    setTimeout(function() {
+      p7Toast('<i class="fas fa-robot"></i> IDP extraction complete · AI Confidence: 97% · Document admitted to claim record', 3500);
+    }, 2200);
+  }, 1600);
 }
 
 function p7RequestDoc(claimId, docName) {
-  p7Toast('<i class="fas fa-paper-plane"></i> Document request sent for: ' + docName + ' — tracking added to claim timeline', 3000);
+  var existing = document.getElementById('p7-req-doc-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var client = p7.client || claimId;
+  var benefEmail = p7.benefEmail || '';
+
+  var recipients = [
+    { label: 'Claimant / Beneficiary',  email: benefEmail || 'claimant@example.com',    icon: 'fa-user', checked: true },
+    { label: 'Attending Physician',      email: 'physician@hospital.com',                icon: 'fa-user-md', checked: false },
+    { label: 'Funeral Home',             email: 'info@funeralhome.com',                  icon: 'fa-building', checked: false },
+    { label: 'Employer / HR Dept.',      email: 'hr@employer.com',                       icon: 'fa-briefcase', checked: false }
+  ];
+
+  var recpHtml = recipients.map(function(r, i) {
+    return '<label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:12.5px;color:#374151">'
+      + '<input type="checkbox" name="_reqRecipient" ' + (r.checked ? 'checked' : '') + ' style="accent-color:#1d4ed8">'
+      + '<i class="fas ' + r.icon + '" style="color:#1d4ed8;width:14px;text-align:center"></i>'
+      + '<div style="flex:1"><div style="font-weight:600">' + r.label + '</div><div style="font-size:11px;color:#9ca3af">' + r.email + '</div></div>'
+      + '</label>';
+  }).join('');
+
+  var urgencyLevels = ['Standard (15 days)', 'Priority (7 days)', 'Urgent (3 days)', 'Immediate (24 hours)'];
+  var urgencyOpts = urgencyLevels.map(function(u){ return '<option>' + u + '</option>'; }).join('');
+
+  var html = '<div id="p7-req-doc-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9200;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+    + '<div style="background:linear-gradient(135deg,#1d4ed8,#1e40af);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-paper-plane"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Request Document</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · ' + docName + '</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-req-doc-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+    + '<div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">'
+
+    // Doc name display
+    +   '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:center">'
+    +     '<i class="fas fa-file-medical" style="color:#1d4ed8;font-size:18px;flex-shrink:0"></i>'
+    +     '<div><div style="font-weight:700;font-size:13px;color:#1e40af">' + docName + '</div><div style="font-size:11.5px;color:#3b82f6">Required for claim processing — ' + claimId + '</div></div>'
+    +   '</div>'
+
+    // Recipients
+    +   '<div><div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Send Request To</div>'
+    +   '<div style="display:flex;flex-direction:column;gap:6px">' + recpHtml + '</div></div>'
+
+    // Urgency
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Response Deadline</label>'
+    +   '<select id="_reqUrgency" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;background:#fff;box-sizing:border-box">' + urgencyOpts + '</select></div>'
+
+    // Message
+    +   '<div><label style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Additional Message (optional)</label>'
+    +   '<textarea id="_reqMessage" rows="3" placeholder="e.g. Please ensure document is a certified original copy with official seal…" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;resize:vertical"></textarea></div>'
+
+    // Options
+    +   '<div style="display:flex;gap:14px;flex-wrap:wrap">'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" checked style="accent-color:#1d4ed8"> Set SLA tracking reminder</label>'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" checked style="accent-color:#1d4ed8"> Log to communications timeline</label>'
+    +   '</div>'
+
+    + '</div>'
+    + '<div style="padding:12px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-req-doc-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Cancel</button>'
+    +   '<button onclick="_reqDocSend(\'' + claimId + '\',\'' + docName.replace(/'/g,'') + '\')" style="padding:9px 18px;background:linear-gradient(135deg,#1d4ed8,#1e40af);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-paper-plane"></i> Send Request</button>'
+    + '</div>'
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function _reqDocSend(claimId, docName) {
+  var urgency = (document.getElementById('_reqUrgency') || {}).value || 'Standard (15 days)';
+  document.getElementById('p7-req-doc-overlay').remove();
+  p7Toast('<i class="fas fa-paper-plane"></i> Document request sent: <strong>' + docName + '</strong> · Deadline: ' + urgency, 4000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-bell"></i> SLA reminder set · Request tracked in claim timeline — ' + claimId, 3000);
+  }, 1200);
 }
 
 function p7ViewDoc(docName) {
@@ -39295,11 +40175,94 @@ function p7OpenDenialModal(claimId) {
 function p7ConfirmDenial(claimId) {
   var reason = (document.getElementById('p7-denial-reason') || {}).value || 'Policy Exclusion';
   var detail = (document.getElementById('p7-denial-detail') || {}).value || '';
-  document.getElementById('p7-denial-overlay').remove();
-  p7Toast('<i class="fas fa-ban"></i> Denial issued for ' + claimId + ' — Reason: ' + reason + '. Adverse action letter generated and queued for compliance review.', 5000);
+  if (!detail.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please provide a detailed explanation before confirming denial', 2500); return; }
+  var denialOverlay = document.getElementById('p7-denial-overlay');
+  if (denialOverlay) denialOverlay.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var client = p7.client || claimId;
+  var policy = p7.policy || '—';
+  var amount = p7.amount || '—';
+  var today  = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  // Show processing toast
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Generating adverse action letter for ' + claimId + '…', 2200);
+
   setTimeout(function() {
-    p7Toast('<i class="fas fa-envelope"></i> Adverse action letter sent via certified mail · Regulatory notification filed', 3500);
-  }, 1800);
+    // Build the letter preview modal
+    var existing = document.getElementById('p7-denial-letter-overlay');
+    if (existing) existing.remove();
+
+    var letterText =
+      'New York Life Insurance Company\n' +
+      '51 Madison Avenue, New York, NY 10010\n\n' +
+      today + '\n\n' +
+      'Re: Claim ' + claimId + ' — Notice of Adverse Action\n\n' +
+      'Dear ' + client + ',\n\n' +
+      'After careful review of your claim submitted under Policy ' + policy + ' in the amount of ' + amount + ', ' +
+      'New York Life Insurance Company has made the determination to deny this claim for the following reason:\n\n' +
+      'DENIAL REASON: ' + reason + '\n\n' +
+      'EXPLANATION: ' + detail + '\n\n' +
+      'POLICY PROVISION: The applicable policy provision(s) supporting this determination are on file and available upon request.\n\n' +
+      'YOUR APPEAL RIGHTS: You have the right to appeal this decision within 60 days of receipt of this notice. ' +
+      'To initiate an appeal, submit a written request to NYL Claims Appeals Department, 51 Madison Ave, New York, NY 10010, ' +
+      'or via email at claims.appeals@newyorklife.com. Include your claim number and all supporting documentation.\n\n' +
+      'REGULATORY NOTICE: This adverse action letter is being sent in accordance with applicable state insurance regulations. ' +
+      'A copy has been filed with the ' + (p7.regulatoryState || 'NY') + ' Department of Financial Services.\n\n' +
+      'If you have questions regarding this determination, please contact our Claims Department at 1-800-695-8654, ' +
+      'Monday through Friday, 8:00 AM – 8:00 PM ET.\n\n' +
+      'Sincerely,\n\n' +
+      (p7.adjuster || 'Claims Department') + '\n' +
+      'Senior Claims Adjuster\n' +
+      'New York Life Insurance Company\n' +
+      'Reference: ' + claimId + ' / ' + today;
+
+    var html = '<div id="p7-denial-letter-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9200;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+      + '<div style="background:#fff;border-radius:16px;width:680px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,.3);display:flex;flex-direction:column" onclick="event.stopPropagation()">'
+
+      // Header
+      + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+      +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-file-alt"></i></div>'
+      +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Adverse Action Letter — Generated</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · Pending Compliance Review Before Send</div></div>'
+      +   '<span style="background:rgba(255,255,255,.2);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.5px">DRAFT</span>'
+      +   '<button onclick="document.getElementById(\'p7-denial-letter-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;margin-left:10px;display:flex;align-items:center;justify-content:center">&times;</button>'
+      + '</div>'
+
+      // Status strip
+      + '<div style="background:#fef2f2;border-bottom:1px solid #fca5a5;padding:10px 22px;display:flex;align-items:center;gap:10px;font-size:12px">'
+      +   '<i class="fas fa-exclamation-triangle" style="color:#dc2626"></i>'
+      +   '<span style="color:#7f1d1d"><strong>Denial recorded</strong> — Denial reason: <strong>' + reason + '</strong>. Letter queued for compliance sign-off before certified mail dispatch.</span>'
+      + '</div>'
+
+      // Letter preview
+      + '<div style="padding:20px 24px;flex:1">'
+      +   '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="fas fa-envelope-open-text" style="color:#dc2626"></i> Adverse Action Letter Preview</div>'
+      +   '<div style="background:#fffbf7;border:1.5px solid #e5e7eb;border-radius:10px;padding:20px 24px;font-family:\'Georgia\',serif;font-size:12.5px;color:#1f2937;line-height:1.8;white-space:pre-wrap;max-height:320px;overflow-y:auto">' + letterText + '</div>'
+      + '</div>'
+
+      // Checklist
+      + '<div style="padding:0 24px 16px;display:flex;flex-direction:column;gap:6px">'
+      +   '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:4px"><i class="fas fa-tasks" style="color:#7c3aed"></i> Compliance Checklist</div>'
+      +   ['Denial reason cited with specific policy provision', 'Appeal rights included (60-day window)', 'Certified mail dispatch flag set', 'Regulatory notification prepared (' + (p7.regulatoryState || 'NY') + ' DFS)', 'SIU referral assessed — ' + (p7.fraudScore >= 60 ? 'RECOMMENDED' : 'Not required at this time')].map(function(item, i) {
+           var done = i < 4;
+           return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:' + (done ? '#374151' : '#dc2626') + '">'
+             + '<i class="fas ' + (done ? 'fa-check-circle' : 'fa-exclamation-circle') + '" style="color:' + (done ? '#059669' : '#dc2626') + '"></i>' + item + '</div>';
+         }).join('')
+      + '</div>'
+
+      // Actions
+      + '<div style="padding:14px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">'
+      +   '<button onclick="document.getElementById(\'p7-denial-letter-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Close</button>'
+      +   '<button onclick="p7Toast(\'<i class=\\"fas fa-copy\\"></i> Letter copied to clipboard\',2000)" style="padding:9px 18px;border:1.5px solid #7c3aed;background:#f5f3ff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:#7c3aed"><i class="fas fa-copy"></i> Copy Letter</button>'
+      +   '<button onclick="p7Toast(\'<i class=\\"fas fa-paper-plane\\"></i> Letter sent to Compliance for review — ' + claimId + '\',3500);document.getElementById(\'p7-denial-letter-overlay\').remove()" style="padding:9px 18px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-paper-plane"></i> Send to Compliance</button>'
+      +   '<button onclick="p7Toast(\'<i class=\\"fas fa-mail-bulk\\"></i> Letter dispatched via certified mail — tracking # ' + Math.floor(Math.random()*9000000+1000000) + '\',4000);document.getElementById(\'p7-denial-letter-overlay\').remove()" style="padding:9px 18px;background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-mail-bulk"></i> Dispatch via Certified Mail</button>'
+      + '</div>'
+
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    p7Toast('<i class="fas fa-check-circle"></i> Denial recorded · Adverse action letter generated for ' + claimId, 3500);
+  }, 1400);
 }
 
 /* ── APPEAL MODAL ── */
@@ -39429,6 +40392,182 @@ function p7SubmitDispute(claimId) {
   setTimeout(function() {
     p7Toast('<i class="fas fa-gavel"></i> Legal team alerted · Dispute logged to audit trail · All parties to be notified', 3500);
   }, 1600);
+}
+
+/* ── BENEFICIARY: SEND KYC TO ALL ── */
+function p7SendKYCToAll(claimId) {
+  var existing = document.getElementById('p7-kyc-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var benes = p7.beneficiaries || [{ name: p7.beneficiary || 'Primary Beneficiary', rel: p7.benefRel || 'Spouse', email: p7.benefEmail || '', kyc: p7.benefKYC || 'Pending' }];
+
+  var beneRows = benes.map(function(b) {
+    var kycDone = b.kyc === 'Verified';
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e5e7eb">'
+      + '<div style="width:36px;height:36px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">' + (b.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase() + '</div>'
+      + '<div style="flex:1">'
+      +   '<div style="font-weight:700;font-size:13px;color:#111827">' + b.name + ' <span style="font-weight:400;color:#64748b">(' + b.rel + ')</span></div>'
+      +   '<div style="font-size:11.5px;color:#64748b">' + (b.email || 'No email on file') + '</div>'
+      + '</div>'
+      + '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:' + (kycDone ? '#dcfce7' : '#fef3c7') + ';color:' + (kycDone ? '#166534' : '#92400e') + '">' + (kycDone ? '✓ Verified' : 'KYC Pending') + '</span>'
+      + '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" ' + (!kycDone ? 'checked' : '') + ' style="accent-color:#1d4ed8"> Send</label>'
+      + '</div>';
+  }).join('');
+
+  var html = '<div id="p7-kyc-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9150;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+    + '<div style="background:linear-gradient(135deg,#1d4ed8,#1e40af);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-id-card"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Send KYC Verification Request</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · ' + benes.length + ' beneficiar' + (benes.length === 1 ? 'y' : 'ies') + '</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-kyc-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+    + '<div style="padding:18px 22px;display:flex;flex-direction:column;gap:12px">'
+    +   '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;font-size:12px;color:#1e40af;display:flex;align-items:flex-start;gap:8px">'
+    +     '<i class="fas fa-info-circle" style="margin-top:1px;flex-shrink:0"></i>'
+    +     '<span>KYC verification requests will be sent via secure email to each selected beneficiary. They will receive a link to upload a government-issued photo ID and complete identity verification. Results are automatically logged to the claim file.</span>'
+    +   '</div>'
+    +   '<div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px">Beneficiaries</div>'
+    +   beneRows
+    +   '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" id="_kycSMSAlso" checked> Also send SMS reminder</label>'
+    +     '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer"><input type="checkbox" id="_kycAudit" checked> Log to audit trail</label>'
+    +   '</div>'
+    + '</div>'
+    + '<div style="padding:12px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-kyc-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Cancel</button>'
+    +   '<button onclick="document.getElementById(\'p7-kyc-overlay\').remove();p7Toast(\'<i class=\\"fas fa-id-card\\"></i> KYC verification requests sent to all selected beneficiaries — ' + claimId + '\',3500);setTimeout(function(){p7Toast(\'<i class=\\"fas fa-shield-check\\"></i> KYC status tracking active — results will auto-update in claim file\',3000)},1200)" style="padding:9px 18px;background:linear-gradient(135deg,#1d4ed8,#1e40af);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-paper-plane"></i> Send KYC Requests</button>'
+    + '</div>'
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/* ── BENEFICIARY: VERIFY ACCOUNTS ── */
+function p7VerifyAccounts(claimId) {
+  var existing = document.getElementById('p7-verify-acct-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var benes = p7.beneficiaries || [{ name: p7.beneficiary || 'Primary Beneficiary', rel: p7.benefRel || 'Spouse', account: p7.benefPayAccount || 'Not yet provided', kyc: p7.benefKYC || 'Pending' }];
+
+  var acctRows = benes.map(function(b) {
+    var hasAcct = b.account && b.account.indexOf('Not') < 0 && b.account.indexOf('pending') < 0;
+    var verified = hasAcct && b.kyc === 'Verified';
+    return '<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e5e7eb">'
+      + '<i class="fas ' + (verified ? 'fa-check-circle' : hasAcct ? 'fa-university' : 'fa-exclamation-circle') + '" style="color:' + (verified ? '#059669' : hasAcct ? '#1d4ed8' : '#dc2626') + ';margin-top:2px;font-size:18px;flex-shrink:0"></i>'
+      + '<div style="flex:1">'
+      +   '<div style="font-weight:700;font-size:13px;color:#111827">' + b.name + '</div>'
+      +   '<div style="font-size:12px;color:#64748b;margin-top:2px">' + (b.account || 'No account on file') + '</div>'
+      +   (!hasAcct ? '<div style="font-size:11px;color:#dc2626;margin-top:4px;font-weight:600"><i class="fas fa-exclamation-triangle"></i> Account details required before payout can be processed</div>' : '')
+      + '</div>'
+      + '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:' + (verified ? '#dcfce7' : hasAcct ? '#dbeafe' : '#fee2e2') + ';color:' + (verified ? '#166534' : hasAcct ? '#1e40af' : '#991b1b') + ';white-space:nowrap">' + (verified ? 'Verified' : hasAcct ? 'Unconfirmed' : 'Missing') + '</span>'
+      + '</div>';
+  }).join('');
+
+  var verifyOptions = [
+    { id:'micro', label:'Micro-deposit verification (1–2 business days)', icon:'fa-coins', checked:true },
+    { id:'plaid', label:'Instant verification via Plaid / bank API', icon:'fa-bolt', checked:false },
+    { id:'manual','label':'Manual review by finance team', icon:'fa-user-tie', checked:false }
+  ];
+  var optHtml = verifyOptions.map(function(o) {
+    return '<label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:12.5px;color:#374151">'
+      + '<input type="radio" name="_verifyMethod" value="' + o.id + '" ' + (o.checked ? 'checked' : '') + ' style="accent-color:#1d4ed8"> <i class="fas ' + o.icon + '" style="color:#1d4ed8;width:14px;text-align:center"></i> ' + o.label
+      + '</label>';
+  }).join('');
+
+  var html = '<div id="p7-verify-acct-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9150;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+    + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-university"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Verify Payment Accounts</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · Bank account verification for payout</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-verify-acct-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+    + '<div style="padding:18px 22px;display:flex;flex-direction:column;gap:14px">'
+    +   '<div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px">Account Status</div>'
+    +   acctRows
+    +   '<div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Verification Method</div>'
+    +   '<div style="display:flex;flex-direction:column;gap:8px">' + optHtml + '</div>'
+    + '</div>'
+    + '<div style="padding:12px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-verify-acct-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Cancel</button>'
+    +   '<button onclick="document.getElementById(\'p7-verify-acct-overlay\').remove();p7Toast(\'<i class=\\"fas fa-university\\"></i> Bank account verification initiated for ' + claimId + ' — micro-deposit process started\',3500);setTimeout(function(){p7Toast(\'<i class=\\"fas fa-check-circle\\"></i> Verification request sent · Estimated confirmation: 1–2 business days\',3000)},1200)" style="padding:9px 18px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-check-circle"></i> Initiate Verification</button>'
+    + '</div>'
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/* ── BENEFICIARY: VIEW DESIGNATION ── */
+function p7ViewDesignation(claimId) {
+  var existing = document.getElementById('p7-designation-overlay');
+  if (existing) existing.remove();
+
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var client  = p7.client || claimId;
+  var policy  = p7.policy || '—';
+  var benes   = p7.beneficiaries || [{ name: p7.beneficiary || 'Primary Beneficiary', rel: p7.benefRel || 'Spouse', pct: 100, kyc: p7.benefKYC || 'Pending', type: 'Primary' }];
+
+  var beneRows = benes.map(function(b, i) {
+    var kycColor = b.kyc === 'Verified' ? '#059669' : '#d97706';
+    var kycIcon  = b.kyc === 'Verified' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    return '<tr style="border-bottom:1px solid #f1f5f9">'
+      + '<td style="padding:10px 12px;font-size:12px"><span style="background:' + (b.type === 'Primary' ? '#dbeafe' : '#e0e7ff') + ';color:' + (b.type === 'Primary' ? '#1e40af' : '#4338ca') + ';font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px">' + (b.type || 'Primary') + '</span></td>'
+      + '<td style="padding:10px 12px;font-size:13px;font-weight:700;color:#111827">' + b.name + '</td>'
+      + '<td style="padding:10px 12px;font-size:12.5px;color:#374151">' + b.rel + '</td>'
+      + '<td style="padding:10px 12px;font-size:13px;font-weight:800;color:#111827">' + b.pct + '%</td>'
+      + '<td style="padding:10px 12px;font-size:12px"><span style="color:' + kycColor + ';font-weight:700"><i class="fas ' + kycIcon + '" style="margin-right:4px"></i>' + b.kyc + '</span></td>'
+      + '</tr>';
+  }).join('');
+
+  var today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  var html = '<div id="p7-designation-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9150;display:flex;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:16px;width:640px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28)" onclick="event.stopPropagation()">'
+    + '<div style="background:linear-gradient(135deg,#4f46e5,#3730a3);padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px">'
+    +   '<div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff"><i class="fas fa-file-contract"></i></div>'
+    +   '<div style="flex:1"><div style="font-weight:800;font-size:15px;color:#fff">Beneficiary Designation</div><div style="font-size:11px;color:rgba(255,255,255,.8)">' + claimId + ' · ' + client + ' · Policy ' + policy + '</div></div>'
+    +   '<button onclick="document.getElementById(\'p7-designation-overlay\').remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>'
+    + '</div>'
+    + '<div style="padding:18px 22px;display:flex;flex-direction:column;gap:14px">'
+
+    // Policy ref strip
+    +   '<div style="display:flex;gap:12px;flex-wrap:wrap">'
+    +     '<div style="flex:1;background:#f8fafc;border-radius:10px;padding:12px 14px;border:1px solid #e5e7eb"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">Policy Number</div><div style="font-size:14px;font-weight:800;color:#111827">' + policy + '</div></div>'
+    +     '<div style="flex:1;background:#f8fafc;border-radius:10px;padding:12px 14px;border:1px solid #e5e7eb"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">Insured / Policyholder</div><div style="font-size:14px;font-weight:800;color:#111827">' + client + '</div></div>'
+    +     '<div style="flex:1;background:#f8fafc;border-radius:10px;padding:12px 14px;border:1px solid #e5e7eb"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">Designation As Of</div><div style="font-size:14px;font-weight:800;color:#111827">' + today + '</div></div>'
+    +   '</div>'
+
+    // Designation table
+    +   '<div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px">Beneficiary Designation on Record</div>'
+    +   '<div style="border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden">'
+    +     '<table style="width:100%;border-collapse:collapse">'
+    +       '<thead style="background:#f8fafc"><tr>'
+    +         '<th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase">Type</th>'
+    +         '<th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase">Name</th>'
+    +         '<th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase">Relationship</th>'
+    +         '<th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase">Share</th>'
+    +         '<th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase">KYC</th>'
+    +       '</tr></thead>'
+    +       '<tbody>' + beneRows + '</tbody>'
+    +     '</table>'
+    +   '</div>'
+
+    // Legal notice
+    +   '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;font-size:12px;color:#92400e;display:flex;gap:8px;align-items:flex-start">'
+    +     '<i class="fas fa-exclamation-triangle" style="margin-top:1px;flex-shrink:0"></i>'
+    +     '<span>This designation is sourced from the policy administration system as of the claim filing date. Any changes to beneficiary designation made after the insured\'s death may not be valid and will be subject to legal review.</span>'
+    +   '</div>'
+
+    + '</div>'
+    + '<div style="padding:12px 22px 18px;border-top:1px solid #f1f5f9;display:flex;gap:10px;justify-content:flex-end">'
+    +   '<button onclick="document.getElementById(\'p7-designation-overlay\').remove()" style="padding:9px 18px;border:1.5px solid #d1d5db;background:#fff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:#374151">Close</button>'
+    +   '<button onclick="p7Toast(\'<i class=\\"fas fa-download\\"></i> Designation record downloaded — ' + claimId + '\',2500)" style="padding:9px 18px;border:1.5px solid #4f46e5;background:#eef2ff;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:#4f46e5"><i class="fas fa-download"></i> Download PDF</button>'
+    +   '<button onclick="p7Toast(\'<i class=\\"fas fa-search\\"></i> Designation change history opened\',2000)" style="padding:9px 18px;background:linear-gradient(135deg,#4f46e5,#3730a3);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700"><i class="fas fa-history"></i> Change History</button>'
+    + '</div>'
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
 /* ── SIU REFERRAL MODAL ── */
@@ -39815,7 +40954,7 @@ function openFraudClaimDetailModal(claimId) {
       type:'Death Benefit', amount:'$250,000', score:78, status:'FLAGGED',
       policyStart:'2024-03-15', deathDate:'2024-11-02', contestWindow:true,
       signals:[
-        { name:'Policy pending at time of death', sev:'High', icon:'fas fa-ban', color:'#dc2626', detail:'Policy was still in underwriting review when insured passed. Coverage determination required before any payout.' },
+        { name:'Contestability window active at time of claim', sev:'High', icon:'fas fa-balance-scale', color:'#dc2626', detail:'Policy issued 2024-03-15 \u2014 claim filed within the 2-year contestability window (NY Ins Law \u00a73106). Insurer has the right to contest coverage based on material misrepresentation in the application. Full underwriting re-review required before any payout determination.' },
         { name:'Beneficiary change 6 months prior', sev:'High', icon:'fas fa-user-edit', color:'#dc2626', detail:'Beneficiary changed from spouse to external party 6 months before death — flagged pattern by ML model.' },
         { name:'Medical records inconsistency', sev:'High', icon:'fas fa-file-medical', color:'#dc2626', detail:'Attending physician notes differ from application health disclosure. NLP detected 3 conflicting entries.' },
         { name:'Claim timing anomaly', sev:'High', icon:'fas fa-clock', color:'#dc2626', detail:'ML model detected claim filed within 7 days of policy issuance — highest-risk timing bracket.' },
@@ -39971,11 +41110,153 @@ function openSIUConfirmModal(claimId, clientName) {
       '</div>' +
       '<div class="p19-modal-ftr">' +
         '<button class="p19-btn ghost" onclick="p19Close(\'p19-siu-confirm-overlay\')">Cancel</button>' +
-        '<button class="p19-btn danger" onclick="p19Close(\'p19-siu-confirm-overlay\');p7Toast(\'<i class=\\\"fas fa-user-secret\\\"></i> SIU referral confirmed for ' + claimId + ' · Case SIU-2026-' + claimId.slice(-4) + ' opened · All parties notified · Payment hold active\',5000)"><i class="fas fa-user-secret"></i> Confirm SIU Referral</button>' +
+        '<button class="p19-btn danger" onclick="p19Close(\'p19-siu-confirm-overlay\');openSIUNotificationsModal(\'' + claimId + '\',\'' + clientName + '\')"><i class="fas fa-envelope"></i> Confirm SIU Referral</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(ov);
 }
+
+/* ── SIU Notifications Email Modal ── */
+function openSIUNotificationsModal(claimId, clientName) {
+  claimId    = claimId    || 'CLM-2026-0025';
+  clientName = clientName || 'Kevin Park';
+  var caseRef  = 'SIU-2026-' + claimId.slice(-4);
+  var existing = document.getElementById('siu-notify-overlay');
+  if (existing) existing.remove();
+
+  // Pre-written AI-generated email bodies per recipient role
+  var emails = {
+    adjuster: {
+      role: 'Senior Adjuster', name: 'Marcus Webb',
+      address: 'marcus.webb@nyl-claims.com', icon: 'fa-user-tie', color: '#0057c8',
+      subject: '[URGENT] SIU Referral — ' + claimId + ' · ' + clientName + ' · Payment Hold Active',
+      body: 'Dear Marcus,\n\nThis is an automated notification that claim ' + claimId + ' (' + clientName + ', Death Benefit $250,000) has been referred to the Special Investigations Unit effective immediately.\n\nCase Reference: ' + caseRef + '\nClaim ID: ' + claimId + '\nClaimant: ' + clientName + '\nPolicy Start: 2024-03-15 (Contestability window ACTIVE)\n\nACTION REQUIRED:\n• Take over as lead adjuster for this claim\n• Do NOT communicate directly with claimant or beneficiary — route all contact through SIU\n• Payment hold is in effect — no disbursements pending investigation outcome\n• Please confirm receipt and estimated first investigation contact within 24 hours\n\nFraud signals detected (5):\n1. Contestability window active at time of claim — policy issued 2024-03-15\n2. Beneficiary change 6 months prior to death\n3. Medical records inconsistency (NLP: 3 conflicting entries)\n4. Claim timing anomaly\n5. Third-party (attorney) reporter\n\nExpected investigation timeline: 60–90 days per NY Ins Law §3224-a.\n\nRegards,\nNYL Claims Automation System'
+    },
+    compliance: {
+      role: 'Legal & Compliance', name: 'Lisa Torres',
+      address: 'l.torres@nyl-legal.com', icon: 'fa-balance-scale', color: '#7c3aed',
+      subject: '[COMPLIANCE COPY] SIU Referral Initiated — ' + claimId + ' · NAIC Regulatory Log',
+      body: 'Dear Lisa,\n\nPer NAIC regulatory guidelines and NY Ins Law §3224-a, you are being copied on the following SIU referral for documentation and compliance record purposes.\n\nClaim Details:\n• Claim ID: ' + claimId + ' | Case Ref: ' + caseRef + '\n• Claimant: ' + clientName + '\n• Benefit Type: Death Benefit — $250,000\n• Policy Issued: 2024-03-15 | Contestability: ACTIVE (within 2-year window)\n\nRegulatory Actions Automatically Initiated:\n• Regulatory log entry created per NAIC guidelines\n• Medical records subpoena initiated\n• 30-day beneficiary notification clock started\n• Payment hold placed — no funds released pending SIU conclusion\n\nFraud Risk Score: 78/100 (ML Model: NYL Fraud AI v3.1 · XGBoost · AUC 0.96)\nML Anomalies Detected: 3\n\nPlease retain this record for the quarterly regulatory submission. If this claim proceeds to denial, adverse action letter preparation will be required.\n\nNYL Claims Automation System'
+    },
+    beneficiary: {
+      role: 'Beneficiary (Claimant)', name: 'Estate of Kevin Park',
+      address: 'kpark.estate@attorney-rep.com', icon: 'fa-user', color: '#64748b',
+      subject: 'Important Notice: Extended Review Required — Claim ' + claimId,
+      body: 'Dear Beneficiary Representative,\n\nWe are writing to inform you that claim ' + claimId + ' is currently subject to an extended review period.\n\nClaim Reference: ' + claimId + '\nPolicy Holder: ' + clientName + '\nBenefit Amount: $250,000\n\nAs part of our standard claims process, we conduct enhanced reviews in certain circumstances to ensure the accuracy and completeness of all claim documentation. Your claim has been placed in this review category.\n\nWhat this means:\n• Your claim is being reviewed by our specialized claims team\n• This review is expected to take up to 90 days\n• You will be contacted by a senior claims representative within 5 business days\n• You have the right to appeal any determination under NY Ins Law §3224-a\n\nDuring this period:\n• Please do not submit additional documentation without specific instructions from your assigned claims representative\n• All communications regarding this claim should go through your assigned representative\n\nIf you have questions, please contact our Claims Service Center at 1-800-NYL-CLAIM.\n\nSincerely,\nNYL Claims Department'
+    },
+    siu: {
+      role: 'SIU Team Lead', name: 'Detective R. Harmon (SIU)',
+      address: 'r.harmon@nyl-siu.internal', icon: 'fa-shield-alt', color: '#dc2626',
+      subject: '[SIU INTAKE] New Referral — ' + caseRef + ' · ' + claimId + ' · Priority: URGENT',
+      body: 'Detective Harmon,\n\nNew SIU referral has been automatically generated and requires immediate intake processing.\n\nSIU Case: ' + caseRef + '\nOriginating Claim: ' + claimId + '\nClaimant: ' + clientName + '\nCoverage: Death Benefit — $250,000\nPolicy Date: 2024-03-15 — CONTESTABILITY WINDOW ACTIVE\n\nFRAUD INTELLIGENCE BRIEF:\n┌─ Risk Score: 78/100 (FLAGGED for investigation)\n├─ SIU Referral Score: 82/100\n├─ ML Model: NYL Fraud AI v3.1 · XGBoost · AUC 0.96\n└─ ML Anomalies: 3 detected\n\nFRAUD SIGNALS (5):\n[HIGH] Contestability window active at time of claim\n[HIGH] Beneficiary change 6 months prior to death\n[HIGH] Medical records inconsistency — NLP flagged 3 conflicting entries in attending physician notes vs application disclosure\n[HIGH] Claim timing anomaly — ML risk bracket: 0–12 months from issuance\n[MED]  Third-party reporter — attorney filing, not direct beneficiary\n\nRECOMMENDED INVESTIGATION STEPS:\n1. Request complete medical records from original underwriting file\n2. Subpoena attending physician records\n3. Interview beneficiary through legal counsel\n4. Cross-reference beneficiary change documents for undue influence indicators\n5. Review insured\'s financial records for recent debt/liability events\n\nPayment hold is active. No disbursement authorized pending SIU closure.\n\nNYL Claims Intelligence System'
+    }
+  };
+
+  var recipientKeys = Object.keys(emails);
+  var activeRecip = 'adjuster';
+
+  var ov = document.createElement('div');
+  ov.id = 'siu-notify-overlay';
+  ov.className = 'p7-modal-overlay';
+  ov.style.zIndex = '9500';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  function buildModal(key) {
+    var d = emails[key];
+    var tabs = recipientKeys.map(function(k) {
+      var r = emails[k];
+      return '<button onclick="siuNotifySwitch(\'' + k + '\')" id="siu-tab-' + k + '" style="' +
+        'display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:none;border-radius:8px;' +
+        'font-size:0.72rem;font-weight:700;cursor:pointer;transition:background .15s;' +
+        (k === key
+          ? 'background:' + r.color + ';color:#fff;'
+          : 'background:#f1f5f9;color:#64748b;') +
+        '"><i class="fas ' + r.icon + '"></i>' + r.role + '</button>';
+    }).join('');
+
+    return '<div class="p7m-modal" style="max-width:700px;max-height:90vh;display:flex;flex-direction:column;" onclick="event.stopPropagation()">' +
+      /* Header */
+      '<div style="background:linear-gradient(135deg,#0f172a,#1e3a8a);padding:18px 22px;display:flex;align-items:center;gap:14px;flex-shrink:0;border-radius:16px 16px 0 0">' +
+        '<div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;flex-shrink:0"><i class="fas fa-envelope-open-text"></i></div>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:1rem;font-weight:800;color:#fff">AI-Generated SIU Notifications</div>' +
+          '<div style="font-size:0.75rem;color:rgba(255,255,255,.7);margin-top:2px">Case ' + caseRef + ' · ' + claimId + ' · ' + clientName + ' · 4 parties notified</div>' +
+        '</div>' +
+        '<div style="background:rgba(255,255,255,.12);border-radius:7px;padding:4px 10px;font-size:0.68rem;font-weight:700;color:#93c5fd"><i class="fas fa-robot" style="margin-right:4px"></i>AI-Drafted</div>' +
+        '<button onclick="document.getElementById(\'siu-notify-overlay\').remove()" style="background:rgba(255,255,255,.15);border:none;border-radius:50%;width:32px;height:32px;color:#fff;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin-left:8px"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      /* Recipient tabs */
+      '<div style="padding:12px 22px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0">' +
+        tabs +
+      '</div>' +
+      /* Active recipient info bar */
+      '<div style="padding:10px 22px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;flex-shrink:0">' +
+        '<div style="width:32px;height:32px;background:' + d.color + '20;border-radius:8px;display:flex;align-items:center;justify-content:center;color:' + d.color + ';font-size:0.85rem"><i class="fas ' + d.icon + '"></i></div>' +
+        '<div>' +
+          '<div style="font-size:0.8rem;font-weight:700;color:#1e293b">' + d.name + ' — ' + d.role + '</div>' +
+          '<div style="font-size:0.72rem;color:#64748b">' + d.address + '</div>' +
+        '</div>' +
+        '<div style="margin-left:auto;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:3px 10px;font-size:0.7rem;font-weight:700;color:#059669"><i class="fas fa-robot" style="margin-right:3px"></i>AI-personalized to role</div>' +
+      '</div>' +
+      /* Subject line */
+      '<div style="padding:10px 22px 0;background:#fff;flex-shrink:0">' +
+        '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">' +
+          '<span style="font-size:0.72rem;font-weight:700;color:#64748b;white-space:nowrap">SUBJECT:</span>' +
+          '<span style="font-size:0.78rem;font-weight:600;color:#1e293b" id="siu-subject-line">' + d.subject + '</span>' +
+        '</div>' +
+      '</div>' +
+      /* Email body */
+      '<div style="padding:12px 22px;flex:1;overflow-y:auto;background:#fff">' +
+        '<textarea id="siu-email-body" style="width:100%;min-height:280px;font-size:0.78rem;color:#1e293b;line-height:1.6;border:1px solid #e2e8f0;border-radius:10px;padding:14px;resize:vertical;font-family:inherit;background:#fafafa">' + d.body + '</textarea>' +
+      '</div>' +
+      /* Footer */
+      '<div style="padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;gap:10px;flex-shrink:0;border-radius:0 0 16px 16px">' +
+        '<button onclick="siuSendAllNotifications(\'' + claimId + '\',\'' + caseRef + '\')" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:9px;color:#fff;font-size:0.82rem;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(220,38,38,.35)"><i class="fas fa-paper-plane"></i> Send All 4 Notifications</button>' +
+        '<button onclick="siuSendCurrentNotification(\'' + activeRecip + '\',\'' + claimId + '\')" id="siu-send-current-btn" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#374151;font-size:0.82rem;font-weight:600;cursor:pointer"><i class="fas fa-envelope"></i> Send to ' + d.role + ' Only</button>' +
+        '<button onclick="siuRegenEmail(\'' + key + '\')" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#7c3aed;font-size:0.78rem;font-weight:600;cursor:pointer"><i class="fas fa-sync-alt"></i> Regenerate</button>' +
+        '<button onclick="document.getElementById(\'siu-notify-overlay\').remove()" style="margin-left:auto;padding:9px 14px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#6b7280;font-size:0.78rem;cursor:pointer">Cancel</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  ov.innerHTML = buildModal(activeRecip);
+
+  // Store emails data and builder on overlay for switching
+  ov._siuEmails = emails;
+  ov._buildModal = buildModal;
+
+  document.body.appendChild(ov);
+}
+
+window.siuNotifySwitch = function(key) {
+  var ov = document.getElementById('siu-notify-overlay');
+  if (!ov || !ov._buildModal) return;
+  ov.innerHTML = ov._buildModal(key);
+  // Re-attach data since innerHTML was replaced
+  // (data is closed over in buildModal, so it's fine)
+};
+
+window.siuSendAllNotifications = function(claimId, caseRef) {
+  document.getElementById('siu-notify-overlay')?.remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Sending notifications to Senior Adjuster, Legal &amp; Compliance, Beneficiary, SIU Team…', 2500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-double"></i> All 4 notifications delivered · SIU case ' + caseRef + ' opened · Payment hold confirmed · Regulatory log updated', 5500);
+  }, 2800);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-user-secret"></i> SIU referral confirmed for ' + claimId + ' · Case ' + caseRef + ' · Investigation clock started · 60–90 day timeline', 5000);
+  }, 5500);
+};
+
+window.siuSendCurrentNotification = function(role, claimId) {
+  var roleLabels = { adjuster:'Senior Adjuster', compliance:'Legal & Compliance', beneficiary:'Beneficiary representative', siu:'SIU Team Lead' };
+  var label = roleLabels[role] || role;
+  document.getElementById('siu-notify-overlay')?.remove();
+  p7Toast('<i class="fas fa-envelope"></i> Notification sent to ' + label + ' · Re-open notifications modal to send remaining parties', 4000);
+};
+
+window.siuRegenEmail = function(key) {
+  p7Toast('<i class="fas fa-robot" style="animation:livePulse 1s infinite"></i> Regenerating AI email for ' + key + ' role with latest claim data…', 2500);
+};
 
 /* ── c3: Investigate Modal ── */
 function openInvestigateModal(claimId) {
@@ -39999,7 +41280,7 @@ function openInvestigateModal(claimId) {
           '<li><i class="fas fa-check-circle"></i> Medical records request sent to insured\'s physician</li>' +
           '<li><i class="fas fa-check-circle"></i> Death certificate authenticity verified via state database</li>' +
           '<li><i class="fas fa-check-circle"></i> Beneficiary change history reviewed (6-month flag)</li>' +
-          '<li><i class="fas fa-check-circle"></i> Policy pending status at time of death — legal review initiated</li>' +
+          '<li><i class="fas fa-check-circle"></i> Contestability window active — full underwriting review initiated</li>' +
           '<li><i class="fas fa-check-circle"></i> SIU Case assigned to Investigator J. Rodriguez</li>' +
         '</ul>' +
         '<div class="p19-section-title"><i class="fas fa-robot" style="color:#7c3aed"></i> AI-Assisted Next Steps</div>' +
@@ -40073,7 +41354,7 @@ function openIntelDetailModal(type) {
           '<span class="p19-claim-badge">FLAGGED 78</span>' +
         '</div>' +
         '<div class="p19-section-title"><i class="fas fa-info-circle" style="color:#dc2626"></i> Why Flagged?</div>' +
-        '<div class="p19-warn-box"><strong>5 fraud signals detected:</strong> Policy pending at death · Beneficiary change 6 months prior · Medical records inconsistency · Claim timing anomaly · Third-party reporter. ML anomaly score: 3/5 thresholds exceeded.</div>' +
+        '<div class="p19-warn-box"><strong>5 fraud signals detected:</strong> Contestability window active at time of claim · Beneficiary change 6 months prior · Medical records inconsistency · Claim timing anomaly · Third-party reporter. ML anomaly score: 3/5 thresholds exceeded.</div>' +
         '<div class="p19-stat-row"><span class="p19-stat-lbl">Model</span><span class="p19-stat-val">XGBoost + SHAP explainability</span></div>' +
         '<div class="p19-stat-row"><span class="p19-stat-lbl">SIU Referral Threshold</span><span class="p19-stat-val">Score ≥70 (current: 78)</span></div>' +
         '<div class="p19-stat-row"><span class="p19-stat-lbl">Payment Hold</span><span class="p19-stat-val" style="color:#dc2626;font-weight:700">ACTIVE</span></div>' +
@@ -40252,7 +41533,7 @@ function openTriageClaimDetailModal(claimId) {
       client:'Kevin Park', initials:'KP', color:'#7c3aed', type:'Death Benefit', amount:'$250,000',
       tag:'FRAUD HOLD', urgency:91, fraudScore:78, docPct:25, sla:'On Hold',
       adjuster:'Maria Santos, SIU Specialist', filed:'2026-03-22', policyId:'NYL-001-2024-0315',
-      summary:'High-risk fraud case with payment hold. Policy was in "pending" status at time of insured\'s death in Nov 2024. Contestability window active. ML detected 3 timeline anomalies and beneficiary was changed 6 months before death.',
+      summary:'High-risk fraud case with payment hold. Policy issued 2024-03-15 — claim filed within the 2-year contestability window. ML detected 3 timeline anomalies. Beneficiary changed 6 months before death. SIU referral score: 82/100.',
       actions:['Order original UW medical records from 2024 application — subpoena drafted','Refer to SIU immediately — Risk score 78 exceeds 70-point referral threshold','Notify beneficiary (attorney-represented) of 30-day contestability review notice','Assign SIU investigator with life insurance fraud experience (J. Rodriguez available)'],
       timeline:[
         { date:'Mar 22, 2026', event:'Claim filed by attorney on behalf of beneficiary', dot:'#7c3aed' },
@@ -41852,7 +43133,7 @@ function openAITriageModal() {
     },
     {
       id:'CLM-2026-0025', client:'Kevin Park', initials:'KP', color:'#7c3aed', type:'Death Benefit',
-      urgency:91, reasoning:'Policy pending at time of death — contestability window active · ML detected 3 timeline anomalies · Medical records inconsistency flagged · SIU referral score: 82/100',
+      urgency:91, reasoning:'Contestability window active at time of claim (policy issued 2024-03-15) · ML detected 3 timeline anomalies · Medical records inconsistency flagged · SIU referral score: 82/100',
       nextActions:['Order original UW medical records from 2024 application','Refer to Special Investigations Unit (SIU)','Notify beneficiary of 30-day contestability review','Assign Sr. Adjuster with fraud investigation experience'],
       sla:'On Hold', fraudScore:78, docCompletion:25, tag:'FRAUD HOLD'
     },
@@ -42001,7 +43282,7 @@ function openAITriageModal() {
    ═══════════════════════════════════════════════════════════════════ */
 function openFraudReportModal() {
   var fraudData = [
-    { id:'CLM-2026-0025', client:'Kevin Park',    amount:'$250,000',  score:78, status:'FLAGGED', signals:['Policy pending at death','Medical records inconsistency','Timeline anomaly (3)','Beneficiary change 6mo prior'], hold:true,  recommendation:'SIU referral · Contestability investigation · Senior adjuster assignment required' },
+    { id:'CLM-2026-0025', client:'Kevin Park',    amount:'$250,000',  score:78, status:'FLAGGED', signals:['Contestability window active','Medical records inconsistency','Timeline anomaly (3)','Beneficiary change 6mo prior'], hold:true,  recommendation:'SIU referral · Contestability investigation · Senior adjuster assignment required' },
     { id:'CLM-2026-0041', client:'Robert Chen',   amount:'$1,000,000',score:42, status:'WATCH',   signals:['High-value threshold','Claimant ID pending','Expedited claim filed'], hold:false, recommendation:'Enhanced monitoring · ID document verification priority · Adjuster review before payout' },
     { id:'CLM-2026-0028', client:'Maria Gonzalez',amount:'$120,000',  score:38, status:'WATCH',   signals:['Terminal cert timing','ADB filed 30 days post-diagnosis','NLP doc inconsistency'], hold:false, recommendation:'ADB eligibility verification · Oncologist direct contact · Cert authentication' },
     { id:'CLM-2026-0035', client:'Maria Gonzalez',amount:'$4,200/mo', score:18, status:'CLEAR',   signals:['Standard disability claim','APS pending (normal)'], hold:false, recommendation:'Normal processing — APS receipt required for approval' },
@@ -60222,11 +61503,23 @@ function openPriorAuthScreener(claimId) {
 
   var criteria = cfg.criteria.map(function(c, i) {
     // Heuristic: pending-flagged items derive from doc completeness
-    if (c.pend) return { label: c.label, met: docsPct >= 75, pending: docsPct < 75 };
-    if (c.key === 'fraud') return { label: c.label, met: fraudOk };
-    if (c.key === 'kyc')   return { label: c.label, met: p7.benefKYC === 'Verified' };
+    if (c.pend) return { label: c.label, key: c.key, met: docsPct >= 75, pending: docsPct < 75 };
+    if (c.key === 'fraud') return { label: c.label, key: c.key, met: fraudOk };
+    if (c.key === 'kyc')   return { label: c.label, key: c.key, met: p7.benefKYC === 'Verified' };
+    // ADB-specific: benefit amount % check — use adbEligible + amount vs face value heuristic
+    if (c.key === 'pct') {
+      // Met if adbEligible is true OR if amount string is present (means it passed underwriting check)
+      var adbOk = p7.adbEligible === true || (p7.amount && p7.adbNote && p7.adbNote.indexOf('Eligible') > -1);
+      return { label: c.label, key: c.key, met: adbOk, actionable: !adbOk };
+    }
+    // ADB-specific: compassionate fast-track approval
+    if (c.key === 'track') {
+      // Met if priority contains 'Compassionate' or adjuster is set (fast-track was approved)
+      var trackOk = (p7.priority && p7.priority.indexOf('Compassionate') > -1) || (p7.adjuster && p7.adjuster.length > 0);
+      return { label: c.label, key: c.key, met: trackOk, actionable: !trackOk };
+    }
     // Default: assume met for criteria not explicitly tracked
-    return { label: c.label, met: (i < Math.ceil(cfg.criteria.length * (docsPct / 100 + 0.2))) };
+    return { label: c.label, key: c.key, met: (i < Math.ceil(cfg.criteria.length * (docsPct / 100 + 0.2))) };
   });
 
   var metCount  = criteria.filter(function(c){ return c.met; }).length;
@@ -60238,11 +61531,23 @@ function openPriorAuthScreener(claimId) {
   var statusColor = allClear ? '#059669' : (pct >= 60 ? '#d97706' : '#dc2626');
   var statusBg    = allClear ? 'linear-gradient(135deg,#ecfdf5,#d1fae5)' : (pct >= 60 ? 'linear-gradient(135deg,#fffbeb,#fef3c7)' : 'linear-gradient(135deg,#fef2f2,#fee2e2)');
 
-  // Criteria list HTML
+  // Criteria list HTML — failed rows are clickable with resolution actions
   var critHTML = criteria.map(function(c) {
     var icon  = c.met     ? 'fa-check-circle'      : (c.pending ? 'fa-clock' : 'fa-times-circle');
     var color = c.met     ? '#16a34a'              : (c.pending ? '#d97706'  : '#dc2626');
     var cls   = c.met     ? 'pas-crit-met'         : (c.pending ? 'pas-crit-pend' : 'pas-crit-fail');
+    if (!c.met && !c.pending) {
+      // Clickable red row — opens resolution modal
+      var safeLabel = c.label.replace(/'/g, '\\&#39;');
+      var safeKey   = (c.key || '').replace(/'/g, '');
+      return '<div class="pas-crit-row ' + cls + ' pas-crit-actionable" '
+        + 'onclick="_openPasResolveModal(\'' + safeKey + '\',\'' + claimId + '\')" '
+        + 'title="Click to resolve this blocker">'
+        + '<i class="fas ' + icon + '" style="color:' + color + ';width:18px;flex-shrink:0"></i>'
+        + '<span class="pas-crit-label">' + c.label + '</span>'
+        + '<span class="pas-crit-resolve-badge"><i class="fas fa-wrench"></i> Resolve</span>'
+        + '</div>';
+    }
     return '<div class="pas-crit-row ' + cls + '">'
       + '<i class="fas ' + icon + '" style="color:' + color + ';width:18px;flex-shrink:0"></i>'
       + '<span class="pas-crit-label">' + c.label + '</span>'
@@ -60346,6 +61651,172 @@ function openPriorAuthScreener(claimId) {
     + '</div></div>';
 
   document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   PAS RESOLVE MODAL — opened when agent clicks a red blocker row
+   ───────────────────────────────────────────────────────────────── */
+function _openPasResolveModal(key, claimId) {
+  var existing = document.getElementById('pas-resolve-overlay');
+  if (existing) existing.remove();
+
+  var configs = {
+    'pct': {
+      title: 'Benefit Amount Verification',
+      icon: 'fa-percentage',
+      color: '#dc2626',
+      subtitle: 'Benefit amount ≤ 80% of face value — verify and confirm',
+      body:
+        '<div class="pas-resolve-alert warn">' +
+          '<i class="fas fa-exclamation-triangle"></i>' +
+          '<div><strong>Blocker:</strong> The requested ADB benefit amount must not exceed 80% of the policy face value. ' +
+          'For CLM-2026-0028, the face value is <strong>$150,000</strong> — the 80% cap is <strong>$120,000</strong>.</div>' +
+        '</div>' +
+        '<div class="pas-resolve-fact-grid">' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Policy Face Value</div>' +
+            '<div class="pas-resolve-fact-val">$150,000</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">80% ADB Cap</div>' +
+            '<div class="pas-resolve-fact-val" style="color:#dc2626">$120,000</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Amount Requested</div>' +
+            '<div class="pas-resolve-fact-val" style="color:#d97706">$120,000</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Status</div>' +
+            '<div class="pas-resolve-fact-val" style="color:#dc2626">AT LIMIT — verification required</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pas-resolve-steps">' +
+          '<div class="pas-resolve-steps-title"><i class="fas fa-list-check"></i> Resolution Steps</div>' +
+          '<ol class="pas-resolve-ol">' +
+            '<li>Confirm policy face value with Actuarial / Policy Admin system (PA system ref: NYL-P-100340)</li>' +
+            '<li>Verify requested amount does not exceed face value × 0.80 — currently at exact limit ($120K / $150K)</li>' +
+            '<li>If face value is confirmed at $150,000: amount is <em>technically eligible</em> — mark criterion as met</li>' +
+            '<li>If face value differs: adjust benefit request accordingly and notify claimant Maria Gonzalez</li>' +
+            '<li>Document verification in claim file and update ADB Authorization Worksheet</li>' +
+          '</ol>' +
+        '</div>',
+      actions: [
+        { label: 'Confirm Amount — Mark Eligible', icon: 'fa-check-circle', color: '#059669',
+          toast: '<i class="fas fa-check-circle"></i> Benefit amount confirmed at $120,000 (80% of $150K face) — criterion marked eligible. Refreshing screener…',
+          fn: function() { p7Toast('<i class="fas fa-check-circle"></i> Benefit amount confirmed at $120,000 (80% of $150K face) — criterion marked eligible',3000); } },
+        { label: 'Request Policy Admin Verification', icon: 'fa-file-search', color: '#1d4ed8',
+          toast: '<i class="fas fa-file-search"></i> Policy Admin verification request sent for NYL-P-100340 face value — response expected within 2 hours',
+          fn: null },
+        { label: 'Escalate to Sr. Adjuster', icon: 'fa-user-tie', color: '#7c3aed',
+          toast: '<i class="fas fa-user-tie"></i> Escalated to Sr. Adjuster M. Torres for benefit amount sign-off',
+          fn: null }
+      ]
+    },
+    'track': {
+      title: 'Compassionate Fast-Track Approval',
+      icon: 'fa-heart',
+      color: '#dc2626',
+      subtitle: 'Compassionate fast-track must be approved by a Sr. Adjuster',
+      body:
+        '<div class="pas-resolve-alert warn">' +
+          '<i class="fas fa-exclamation-triangle"></i>' +
+          '<div><strong>Blocker:</strong> The compassionate fast-track processing lane requires explicit approval from a Senior Adjuster. ' +
+          'This designation bypasses the standard 30-day ADB review timeline for terminal illness cases.</div>' +
+        '</div>' +
+        '<div class="pas-resolve-fact-grid">' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Claim</div>' +
+            '<div class="pas-resolve-fact-val">CLM-2026-0028 · ADB</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Claimant</div>' +
+            '<div class="pas-resolve-fact-val">Maria Gonzalez</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Diagnosis</div>' +
+            '<div class="pas-resolve-fact-val">Stage IV Pancreatic Cancer · 6–8 mo prognosis</div>' +
+          '</div>' +
+          '<div class="pas-resolve-fact">' +
+            '<div class="pas-resolve-fact-lbl">Current Adjuster</div>' +
+            '<div class="pas-resolve-fact-val">Chris Davis (Claims Dept.)</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pas-resolve-steps">' +
+          '<div class="pas-resolve-steps-title"><i class="fas fa-list-check"></i> Resolution Steps</div>' +
+          '<ol class="pas-resolve-ol">' +
+            '<li>Submit compassionate fast-track designation request to Sr. Adjuster M. Torres (ext. 4421)</li>' +
+            '<li>Attach terminal illness certification (pending from Dr. Hernandez) once received</li>' +
+            '<li>Sr. Adjuster reviews and countersigns the Fast-Track Authorization Form (FT-ADB-2026)</li>' +
+            '<li>Once signed: claim is elevated to 5-day SLA and assigned to compassionate specialist</li>' +
+            '<li>Notify Maria Gonzalez that fast-track status has been requested — set expectation of reduced timeline</li>' +
+          '</ol>' +
+        '</div>' +
+        '<div class="pas-resolve-callout">' +
+          '<i class="fas fa-info-circle"></i>' +
+          '<span>Under NY Ins Law §3230(b) and carrier policy, compassionate fast-track reduces the standard 30-day ADB processing window to <strong>5 business days</strong> once all documents are received.</span>' +
+        '</div>',
+      actions: [
+        { label: 'Request Sr. Adjuster Sign-Off', icon: 'fa-user-tie', color: '#7c3aed',
+          toast: '<i class="fas fa-user-tie"></i> Fast-track sign-off request sent to Sr. Adjuster M. Torres — CLM-2026-0028 flagged as compassionate priority',
+          fn: null },
+        { label: 'Generate Fast-Track Authorization Form', icon: 'fa-file-signature', color: '#1d4ed8',
+          toast: '<i class="fas fa-file-signature"></i> Fast-Track Authorization Form (FT-ADB-2026) generated — ready for Sr. Adjuster signature',
+          fn: null },
+        { label: 'Notify Claimant of Fast-Track Request', icon: 'fa-envelope', color: '#059669',
+          toast: '<i class="fas fa-envelope"></i> Email drafted to Maria Gonzalez — compassionate fast-track requested; 5-day SLA pending Sr. Adjuster approval',
+          fn: null }
+      ]
+    }
+  };
+
+  var cfg = configs[key];
+  if (!cfg) {
+    p7Toast('No resolution workflow available for this criterion', 3000);
+    return;
+  }
+
+  var actionsHTML = cfg.actions.map(function(a, idx) {
+    return '<button class="pas-resolve-action-btn" style="background:' + a.color + '" '
+      + 'onclick="_pasResolveAction(' + idx + ',\'' + key + '\',\'' + claimId + '\')">'
+      + '<i class="fas ' + a.icon + '"></i> ' + a.label
+      + '</button>';
+  }).join('');
+
+  var html = '<div id="pas-resolve-overlay" class="pas-resolve-overlay" onclick="if(event.target===this)document.getElementById(\'pas-resolve-overlay\').remove()">'
+    + '<div class="pas-resolve-modal" onclick="event.stopPropagation()">'
+    + '<div class="pas-resolve-header" style="border-left:5px solid ' + cfg.color + '">'
+    +   '<div class="pas-resolve-header-icon" style="background:' + cfg.color + '"><i class="fas ' + cfg.icon + '"></i></div>'
+    +   '<div class="pas-resolve-header-info">'
+    +     '<div class="pas-resolve-title">' + cfg.title + '</div>'
+    +     '<div class="pas-resolve-sub">' + cfg.subtitle + '</div>'
+    +   '</div>'
+    +   '<button class="pas-close-btn" onclick="document.getElementById(\'pas-resolve-overlay\').remove()"><i class="fas fa-times"></i></button>'
+    + '</div>'
+    + '<div class="pas-resolve-body">' + cfg.body + '</div>'
+    + '<div class="pas-resolve-footer">'
+    +   '<button class="pas-close-ghost" onclick="document.getElementById(\'pas-resolve-overlay\').remove()">Cancel</button>'
+    +   actionsHTML
+    + '</div>'
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function _pasResolveAction(idx, key, claimId) {
+  var cfgMap = { 'pct': ['<i class="fas fa-check-circle"></i> Benefit amount confirmed — criterion marked eligible',
+                          '<i class="fas fa-file-search"></i> Policy Admin verification request sent',
+                          '<i class="fas fa-user-tie"></i> Escalated to Sr. Adjuster M. Torres'],
+                 'track': ['<i class="fas fa-user-tie"></i> Fast-track sign-off request sent to Sr. Adjuster M. Torres',
+                            '<i class="fas fa-file-signature"></i> Fast-Track Authorization Form generated',
+                            '<i class="fas fa-envelope"></i> Claimant notification drafted'] };
+  var toasts = cfgMap[key] || [];
+  var msg = toasts[idx] || 'Action recorded';
+  p7Toast(msg, 3200);
+  document.getElementById('pas-resolve-overlay').remove();
+  // Re-open screener after a brief delay so user sees updated state
+  if (idx === 0 && key === 'pct') {
+    setTimeout(function() { openPriorAuthScreener(claimId); }, 600);
+  }
 }
 
 console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded');
