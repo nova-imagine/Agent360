@@ -18649,6 +18649,346 @@ function toggleCPAPanel() {
   if (btn) btn.innerHTML = collapsed ? '<i class="fas fa-chevron-down"></i>' : '<i class="fas fa-chevron-up"></i>';
 }
 
+// ── Full AI Performance Analysis Modal ──────────────────────────────────────
+function openClaimsAIPerformance() {
+  var existing = document.getElementById('clm-ai-perf-overlay');
+  if (existing) existing.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'clm-ai-perf-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9400;display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.innerHTML = `
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:780px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 28px 90px rgba(0,0,0,0.3);overflow:hidden;animation:prospModalIn 0.25s ease">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#3730a3,#6d28d9);padding:22px 26px;display:flex;align-items:center;gap:16px;flex-shrink:0">
+        <div style="width:46px;height:46px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;flex-shrink:0"><i class="fas fa-robot"></i></div>
+        <div style="flex:1">
+          <div style="font-size:1.1rem;font-weight:800;color:#fff">Full AI Performance Analysis</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.75);margin-top:3px">Q2 2026 (Apr 1 – Apr 13) · AI-powered benchmarking against team &amp; national averages</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;font-size:0.72rem;font-weight:700;color:#c4b5fd"><i class="fas fa-circle" style="color:#4ade80;font-size:8px;margin-right:5px"></i>AI LIVE</div>
+        <button onclick="document.getElementById('clm-ai-perf-overlay').remove()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:34px;height:34px;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;margin-left:8px"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- AI Scanning animation bar -->
+      <div id="cap-scan-bar" style="background:#f5f3ff;border-bottom:1px solid #ede9fe;padding:10px 26px;display:flex;align-items:center;gap:10px;font-size:0.8rem;color:#6d28d9;flex-shrink:0">
+        <i class="fas fa-brain" style="animation:livePulse 1s infinite"></i>
+        <span id="cap-scan-txt">AI scanning 47 resolved claims, 3 active claims, 18 SLA records, and team benchmark data…</span>
+      </div>
+
+      <!-- Body -->
+      <div style="flex:1;overflow-y:auto;padding:24px 26px;display:flex;flex-direction:column;gap:20px">
+
+        <!-- Overall Score -->
+        <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:20px">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6d28d9,#4f46e5);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 20px rgba(109,40,217,0.35)">
+            <div style="font-size:1.6rem;font-weight:900;color:#fff">92</div>
+            <div style="font-size:0.6rem;color:rgba(255,255,255,0.8);font-weight:700">/ 100</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:1rem;font-weight:800;color:#4c1d95">Overall Performance Score</div>
+            <div style="font-size:0.82rem;color:#6d28d9;margin-top:3px">Top 18% of all NYL claims agents · <strong style="color:#059669">↑ +6 pts vs Q1 2026</strong></div>
+            <div style="margin-top:10px;height:8px;background:rgba(109,40,217,0.15);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:92%;background:linear-gradient(90deg,#6d28d9,#818cf8);border-radius:99px;transition:width 1s ease"></div>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:0.72rem;font-weight:700;color:#7c3aed;text-transform:uppercase">Team avg</div>
+            <div style="font-size:1.3rem;font-weight:800;color:#4c1d95">78</div>
+            <div style="font-size:0.7rem;color:#7c3aed">+14 pts above avg</div>
+          </div>
+        </div>
+
+        <!-- KPI Breakdown Grid -->
+        <div>
+          <div style="font-size:0.72rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px"><i class="fas fa-chart-bar" style="color:#6d28d9;margin-right:6px"></i>KPI Breakdown vs Benchmarks</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            ${[
+              { label:'Resolution Time', val:'5.2d', bench:'6.1d', status:'good', icon:'fa-clock', note:'15% faster — ranked #3 on team', pct:85 },
+              { label:'Payout Turnaround', val:'3.1d', bench:'3.8d', status:'good', icon:'fa-money-bill-wave', note:'18% faster than team avg', pct:82 },
+              { label:'Doc Response Rate', val:'67%', bench:'75%', status:'warn', icon:'fa-file-alt', note:'8 pts below target — needs improvement', pct:67 },
+              { label:'SLA Compliance', val:'93%', bench:'88%', status:'good', icon:'fa-check-circle', note:'5 pts above team average', pct:93 },
+              { label:'SLA Breaches YTD', val:'1', bench:'2.1', status:'good', icon:'fa-exclamation-triangle', note:'52% fewer breaches than avg', pct:90 },
+              { label:'AI Triage Accuracy', val:'94%', bench:'87%', status:'good', icon:'fa-robot', note:'7 pts above team — AI adoption excellent', pct:94 },
+            ].map(k => `
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <i class="fas ${k.icon}" style="color:${k.status==='good'?'#059669':k.status==='warn'?'#d97706':'#dc2626'};font-size:0.9rem"></i>
+                  <span style="font-size:0.75rem;font-weight:700;color:#374151">${k.label}</span>
+                  <span style="margin-left:auto;font-size:0.82rem;font-weight:900;color:${k.status==='good'?'#059669':k.status==='warn'?'#d97706':'#dc2626'}">${k.val}</span>
+                </div>
+                <div style="height:5px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-bottom:6px">
+                  <div style="height:100%;width:${k.pct}%;background:${k.status==='good'?'#059669':k.status==='warn'?'#f59e0b':'#dc2626'};border-radius:99px"></div>
+                </div>
+                <div style="font-size:0.7rem;color:#64748b">${k.note} · <span style="color:#94a3b8">Team: ${k.bench}</span></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- AI Findings -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+          <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 18px;font-size:0.75rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+            <i class="fas fa-brain" style="color:#6d28d9;margin-right:6px"></i>AI Findings &amp; Recommendations
+          </div>
+          <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:12px;padding:12px;background:#f0fdf4;border-radius:10px;border-left:4px solid #059669">
+              <i class="fas fa-trophy" style="color:#059669;margin-top:2px;flex-shrink:0"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#065f46">Top Performer: Resolution Speed</div>
+                <div style="font-size:0.78rem;color:#047857;margin-top:3px">Your 5.2d average resolution is in the top 20% nationally. AI pattern analysis shows early document collection is your key differentiator — you request docs within 4h of claim receipt vs team avg of 18h.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;padding:12px;background:#fffbeb;border-radius:10px;border-left:4px solid #d97706">
+              <i class="fas fa-exclamation-circle" style="color:#d97706;margin-top:2px;flex-shrink:0"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#92400e">Priority Improvement: Doc Response Rate (67%)</div>
+                <div style="font-size:0.78rem;color:#b45309;margin-top:3px">3 of 7 active claims have outstanding doc requests &gt;72h old. AI recommends: schedule automated reminders at 24h, 48h, and 72h intervals. Projected lift to 82–85% response rate.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;padding:12px;background:#f0f9ff;border-radius:10px;border-left:4px solid #0891b2">
+              <i class="fas fa-robot" style="color:#0891b2;margin-top:2px;flex-shrink:0"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#0c4a6e">AI Triage Efficiency</div>
+                <div style="font-size:0.78rem;color:#0369a1;margin-top:3px">94% triage accuracy saved an estimated 8.4 hours of manual review this quarter. AI flagged CLM-2026-0058 (Alex Rivera DI) as complex — routing to specialist avoided a potential SLA breach.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;padding:12px;background:#fdf4ff;border-radius:10px;border-left:4px solid #9333ea">
+              <i class="fas fa-chart-line" style="color:#9333ea;margin-top:2px;flex-shrink:0"></i>
+              <div>
+                <div style="font-size:0.82rem;font-weight:700;color:#581c87">Q2 Trajectory Forecast</div>
+                <div style="font-size:0.78rem;color:#7e22ce;margin-top:3px">At current pace, Q2 will close with 93% SLA compliance (vs 89% Q1), 5.0d avg resolution, and 70–72% doc response rate. You are on track for <strong>Quarterly Excellence</strong> recognition if doc response improves by Apr 30.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Recommendations -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+          <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 18px;font-size:0.75rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+            <i class="fas fa-tasks" style="color:#6d28d9;margin-right:6px"></i>Recommended Actions · This Week
+          </div>
+          <div style="padding:14px 18px;display:flex;flex-direction:column;gap:8px">
+            ${[
+              { priority:'HIGH', color:'#dc2626', bg:'#fef2f2', action:'Send doc reminders for CLM-2026-0058, CLM-2026-0041, CLM-2026-0039 — all &gt;72h outstanding', icon:'fa-bell' },
+              { priority:'HIGH', color:'#d97706', bg:'#fffbeb', action:'Enable auto-reminder workflow in Claims Settings → Automation to prevent future response delays', icon:'fa-cog' },
+              { priority:'MED', color:'#0891b2', bg:'#f0f9ff', action:'Request SLA exception review for CLM-2026-0041 ($1M death benefit) — complexity warrants extended timeline', icon:'fa-file-alt' },
+              { priority:'MED', color:'#059669', bg:'#f0fdf4', action:'Submit Q2 mid-quarter report to supervisor — strong resolution metrics support performance review', icon:'fa-chart-bar' },
+              { priority:'LOW', color:'#7c3aed', bg:'#fdf4ff', action:'Explore AI auto-triage calibration for disability claims — current 94% accuracy may improve further', icon:'fa-robot' },
+            ].map(a => `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${a.bg};border-radius:9px">
+                <i class="fas ${a.icon}" style="color:${a.color};flex-shrink:0;width:16px;text-align:center"></i>
+                <span style="font-size:0.75rem;font-weight:800;color:${a.color};flex-shrink:0;min-width:34px">${a.priority}</span>
+                <span style="font-size:0.78rem;color:#374151">${a.action}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:16px 26px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <button onclick="document.getElementById('clm-ai-perf-overlay').remove();navigateTo('ai-agents')" style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:linear-gradient(135deg,#6d28d9,#4f46e5);border:none;border-radius:9px;color:#fff;font-size:0.82rem;font-weight:700;cursor:pointer"><i class="fas fa-comments"></i> Deep-Dive in AI Chat</button>
+        <button onclick="exportClaimsPerformanceReport();document.getElementById('clm-ai-perf-overlay').remove()" style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#374151;font-size:0.82rem;font-weight:600;cursor:pointer"><i class="fas fa-download"></i> Export PDF Report</button>
+        <button onclick="document.getElementById('clm-ai-perf-overlay').remove()" style="margin-left:auto;padding:9px 16px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#6b7280;font-size:0.82rem;cursor:pointer">Close</button>
+      </div>
+    </div>`;
+
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+
+  // Simulate AI scan completing
+  setTimeout(function() {
+    var bar = document.getElementById('cap-scan-bar');
+    var txt = document.getElementById('cap-scan-txt');
+    if (txt) txt.textContent = 'Analysis complete — 50 records processed · 6 KPIs benchmarked · 5 recommendations generated';
+    if (bar) { bar.style.background = '#f0fdf4'; bar.style.borderColor = '#bbf7d0'; bar.querySelector('i').style.color = '#059669'; }
+  }, 2200);
+}
+
+// ── Generate NAIC Annual Package Modal ─────────────────────────────────────
+function openNAICAnnualPackage() {
+  var existing = document.getElementById('naic-pkg-overlay');
+  if (existing) existing.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'naic-pkg-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9400;display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.innerHTML = `
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 28px 90px rgba(0,0,0,0.3);overflow:hidden;animation:prospModalIn 0.25s ease">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#003087,#0057c8);padding:22px 26px;display:flex;align-items:center;gap:16px;flex-shrink:0">
+        <div style="width:46px;height:46px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;flex-shrink:0"><i class="fas fa-file-contract"></i></div>
+        <div style="flex:1">
+          <div style="font-size:1.1rem;font-weight:800;color:#fff">Generate NAIC Annual Package</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.75);margin-top:3px">Portfolio — All 2025 Claims · NY · NJ · CA · TX · AI-compiled regulatory submission</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:5px 12px;font-size:0.72rem;font-weight:700;color:#93c5fd">Annual Filing</div>
+        <button onclick="document.getElementById('naic-pkg-overlay').remove()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:34px;height:34px;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;margin-left:8px"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Status bar -->
+      <div id="naic-pkg-status-bar" style="background:#eff6ff;border-bottom:1px solid #bfdbfe;padding:10px 26px;display:flex;align-items:center;gap:10px;font-size:0.8rem;color:#1d4ed8;flex-shrink:0">
+        <i class="fas fa-database" style="animation:livePulse 1s infinite"></i>
+        <span id="naic-pkg-status-txt">AI compiling 2025 portfolio claims data across 4 states…</span>
+      </div>
+
+      <!-- Body -->
+      <div style="flex:1;overflow-y:auto;padding:22px 26px;display:flex;flex-direction:column;gap:20px">
+
+        <!-- Package Summary -->
+        <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:14px;padding:18px 22px">
+          <div style="font-size:0.82rem;font-weight:800;color:#1e3a8a;margin-bottom:14px"><i class="fas fa-box-open" style="margin-right:7px"></i>Package Contents — FY 2025</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+            ${[
+              { val:'47', lbl:'Total Claims', icon:'fa-file-medical-alt', color:'#3b82f6' },
+              { val:'4', lbl:'States', icon:'fa-map-marker-alt', color:'#0891b2' },
+              { val:'12', lbl:'Forms Included', icon:'fa-file-contract', color:'#6d28d9' },
+              { val:'$4.2M', lbl:'Total Payouts', icon:'fa-dollar-sign', color:'#059669' },
+            ].map(s => `
+              <div style="background:rgba(255,255,255,0.65);border-radius:10px;padding:12px;text-align:center">
+                <i class="fas ${s.icon}" style="color:${s.color};font-size:1.2rem"></i>
+                <div style="font-size:1.3rem;font-weight:900;color:#1e3a8a;margin-top:5px">${s.val}</div>
+                <div style="font-size:0.7rem;color:#3b82f6;font-weight:600">${s.lbl}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Forms Included -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+          <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 18px;font-size:0.75rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+            <i class="fas fa-file-alt" style="color:#003087;margin-right:6px"></i>Regulatory Forms Included
+          </div>
+          <div style="padding:0">
+            ${[
+              { form:'NAIC Annual Claim Experience Report', states:'NY · NJ · CA · TX', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'47 claims · FY 2025 · AI-verified totals' },
+              { form:'Prompt Payment Compliance Summary', states:'NJ', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'Q1–Q4 2025 · 100% within 30-day window' },
+              { form:'Large Death Benefit Notifications', states:'NY', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'2 notifications (CLM-2025-0041, CLM-2025-0112) · &gt;$500K each' },
+              { form:'Claim Denial Report — Form D-3', states:'NY', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'3 denials · grounds documented · adverse action letters attached' },
+              { form:'Fraud Referral & SIU Report', states:'CA', status:'ready', icon:'fa-check-circle', color:'#059669', detail:'2 referrals · CLM-2025-0183, CLM-2025-0167 · CADOI format' },
+              { form:'Market Conduct Compliance Attestation', states:'NY · NJ', status:'pending', icon:'fa-pen', color:'#d97706', detail:'Requires agent supervisor e-signature before submission' },
+            ].map((f,i) => `
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 18px;${i>0?'border-top:1px solid #f1f5f9':''}">
+                <i class="fas ${f.icon}" style="color:${f.color};font-size:1rem;flex-shrink:0;width:18px;text-align:center"></i>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:0.82rem;font-weight:700;color:#1e293b">${f.form}</div>
+                  <div style="font-size:0.72rem;color:#64748b;margin-top:2px">${f.detail}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <div style="font-size:0.7rem;font-weight:700;color:#94a3b8;margin-bottom:3px">${f.states}</div>
+                  <span style="font-size:0.7rem;font-weight:700;color:${f.color};background:${f.status==='ready'?'#f0fdf4':'#fffbeb'};padding:2px 8px;border-radius:99px">${f.status==='ready'?'✓ Ready':'⟳ Pending Signature'}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- State Submission Portal Status -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+          <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:12px 18px;font-size:0.75rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:0.05em">
+            <i class="fas fa-map-marked-alt" style="color:#003087;margin-right:6px"></i>State Portal Submission Status
+          </div>
+          <div style="padding:0">
+            ${[
+              { state:'New York', dept:'NY Dept. of Financial Services (DFS)', deadline:'2026-05-31', forms:5, status:'ready', portal:'DFS Online Services', confirmation:'', color:'#059669' },
+              { state:'New Jersey', dept:'NJ Dept. of Banking & Insurance (DOBI)', deadline:'2026-05-15', forms:3, status:'ready', portal:'NJ DOBI eFiling', confirmation:'', color:'#059669' },
+              { state:'California', dept:'CA Dept. of Insurance (CDI)', deadline:'2026-06-30', forms:2, status:'ready', portal:'CDI eFiling System', confirmation:'', color:'#059669' },
+              { state:'Texas', dept:'TX Dept. of Insurance (TDI)', deadline:'2026-05-31', forms:1, status:'ready', portal:'TDI Online Portal', confirmation:'', color:'#059669' },
+            ].map(s => `
+              <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;border-top:1px solid #f1f5f9;first-child:border-top:none">
+                <div style="width:36px;height:36px;background:#eff6ff;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <i class="fas fa-landmark" style="color:#003087;font-size:0.9rem"></i>
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:0.82rem;font-weight:700;color:#1e293b">${s.state} — ${s.dept}</div>
+                  <div style="font-size:0.72rem;color:#64748b;margin-top:2px">${s.forms} forms · Deadline: <strong>${s.deadline}</strong> · Portal: ${s.portal}</div>
+                </div>
+                <button onclick="naicSubmitToState('${s.state}')" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(135deg,#003087,#0057c8);border:none;border-radius:8px;color:#fff;font-size:0.72rem;font-weight:700;cursor:pointer;flex-shrink:0"><i class="fas fa-paper-plane"></i> Submit</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- AI Compliance Check -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:16px 18px">
+          <div style="font-size:0.78rem;font-weight:800;color:#065f46;margin-bottom:12px"><i class="fas fa-shield-alt" style="margin-right:7px"></i>AI Compliance Pre-Check — All Clear</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            ${[
+              'All 47 claims verified for prompt payment compliance — 100% within statutory window',
+              'Fraud referrals cross-checked against SIU database — no duplicate filings detected',
+              'Death benefit notifications verified: all &gt;$500K claims flagged and included',
+              'Denial form D-3 data reconciled with claim records — adverse action letters attached',
+              'Market conduct attestation pending 1 supervisor signature — package 97% complete',
+            ].map(t => `
+              <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:#047857">
+                <i class="fas fa-check-circle" style="color:#059669;flex-shrink:0"></i>${t}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:16px 26px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <button onclick="naicGenerateAndDownload()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#003087,#0057c8);border:none;border-radius:10px;color:#fff;font-size:0.85rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(0,48,135,0.35)"><i class="fas fa-download"></i> Download Full Package (.zip)</button>
+        <button onclick="naicSubmitAll()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:10px;color:#fff;font-size:0.85rem;font-weight:700;cursor:pointer"><i class="fas fa-paper-plane"></i> Submit to All 4 States</button>
+        <button onclick="document.getElementById('naic-pkg-overlay').remove()" style="margin-left:auto;padding:10px 16px;background:#fff;border:1px solid #d1d5db;border-radius:9px;color:#6b7280;font-size:0.82rem;cursor:pointer">Close</button>
+      </div>
+    </div>`;
+
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+
+  // Simulate AI compilation completing
+  setTimeout(function() {
+    var bar = document.getElementById('naic-pkg-status-bar');
+    var txt = document.getElementById('naic-pkg-status-txt');
+    if (txt) txt.textContent = 'Package compiled — 47 claims · 6 forms · 4 states · AI compliance pre-check: PASSED';
+    if (bar) { bar.style.background = '#f0fdf4'; bar.style.borderColor = '#bbf7d0'; if(bar.querySelector('i')) bar.querySelector('i').style.color = '#059669'; }
+  }, 2500);
+}
+
+function naicSubmitToState(state) {
+  document.getElementById('naic-pkg-overlay')?.remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Connecting to ' + state + ' regulatory portal…', 2500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> Package submitted to ' + state + ' · Confirmation number generated · Acknowledgement receipt will arrive within 24h', 5500);
+  }, 2800);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-calendar-alt"></i> Regulatory calendar updated · Next ' + state + ' filing deadline auto-calculated', 3500);
+  }, 5500);
+}
+
+function naicGenerateAndDownload() {
+  p7Toast('<i class="fas fa-cog fa-spin"></i> Assembling NAIC annual package — compiling 6 forms across 4 states…', 3000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-file-archive"></i> NAIC_Annual_Package_FY2025_NYL.zip ready · 6 forms · 4 state submissions · AI compliance verified', 5000);
+  }, 3200);
+  setTimeout(function() {
+    document.getElementById('naic-pkg-overlay')?.remove();
+    p7Toast('<i class="fas fa-download"></i> Download complete · File saved · Package reference: NAIC-PKG-2026-0515-NYL', 4000);
+  }, 5500);
+}
+
+function naicSubmitAll() {
+  document.getElementById('naic-pkg-overlay')?.remove();
+  p7Toast('<i class="fas fa-spinner fa-spin"></i> Initiating submission to NY · NJ · CA · TX portals simultaneously…', 3000);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-double"></i> Submitted to NY DFS · NJ DOBI · CA CDI · Awaiting TX TDI acknowledgement…', 4500);
+  }, 3200);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-check-circle"></i> All 4 state submissions confirmed · Confirmation numbers logged · Regulatory calendar updated', 5000);
+  }, 6500);
+  setTimeout(function() {
+    p7Toast('<i class="fas fa-envelope"></i> Submission receipts sent to compliance inbox · Supervisor notified · Next annual deadline: 2027-05-31', 4500);
+  }, 9500);
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  SALES PIPELINE ENHANCEMENTS
 // ═══════════════════════════════════════════════════════════════

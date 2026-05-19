@@ -7139,7 +7139,7 @@ function ClaimsPage() {
               <div class="cpa-insight info"><i class="fas fa-robot"></i> <strong>AI Tip:</strong> Enabling auto-send reminders at 48h intervals could lift response rate to ~82% based on portfolio patterns.</div>
             </div>
             <div class="cpa-footer">
-              <button class="btn btn-ai" onclick="sendContextMessage('Show my claims performance for Q2 2026 — resolution times, SLA compliance, doc response rates and recommendations','claims')"><i class="fas fa-robot"></i> Full AI Performance Analysis</button>
+              <button class="btn btn-ai" onclick="openClaimsAIPerformance()"><i class="fas fa-robot"></i> Full AI Performance Analysis</button>
               <button class="btn btn-outline-sm" onclick="exportClaimsPerformanceReport()"><i class="fas fa-download"></i> Export Report</button>
             </div>
           </div>
@@ -7210,7 +7210,7 @@ function ClaimsPage() {
               </table>
             </div>
             <div class="rr-footer">
-              <button class="rr-footer-btn primary" onclick="p7Toast('NAIC Annual Report package generated — ready for submission',3000)"><i class="fas fa-file-contract"></i> Generate NAIC Annual Package</button>
+              <button class="rr-footer-btn primary" onclick="openNAICAnnualPackage()"><i class="fas fa-file-contract"></i> Generate NAIC Annual Package</button>
               <button class="rr-footer-btn ghost" onclick="p7Toast('Regulatory calendar exported to PDF',2000)"><i class="fas fa-calendar-alt"></i> Export Filing Calendar</button>
             </div>
           </div>
