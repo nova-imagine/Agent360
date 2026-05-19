@@ -41391,6 +41391,238 @@ function refreshAIInsights(btn) {
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   CLAIMS DASHBOARD — USER HELP GUIDE
+   ══════════════════════════════════════════════════════════════════ */
+
+function openClaimsHelpGuide() {
+  var existing = document.getElementById('clm-help-overlay');
+  if (existing) existing.remove();
+
+  /* ── Section definitions ── */
+  var sections = [
+    {
+      seq: '1',
+      icon: 'fa-plus-circle',
+      color: '#1e3a5f',
+      bg: '#eff6ff',
+      border: '#bfdbfe',
+      tag: 'Action',
+      tagColor: '#1d4ed8',
+      title: 'FNOL — First Notice of Loss',
+      who: 'All Users',
+      whoIcon: 'fa-users',
+      summary: 'Your primary entry point. File a new claim or jump to the active claims list instantly.',
+      detail: 'The <strong>FNOL bar sits at the very top</strong> because every workflow on this dashboard either starts with filing a new claim or tracking an existing one. The AI-guided 5-step wizard handles policy auto-match, IDP document extraction, fraud pre-screen, and beneficiary lookup automatically — reducing claim intake time by ~70% vs. manual entry. <strong>"File New Claim"</strong> opens the wizard. <strong>"View All Claims"</strong> jumps to the Active Claims tab.',
+      tips: ['Use the FNOL wizard for every new loss — even if you already have the claim number', 'The IDP scanner accepts photos, PDFs, and faxes — no manual data entry needed', 'Fraud pre-screen runs automatically during intake — no separate step required']
+    },
+    {
+      seq: '2',
+      icon: 'fa-chart-bar',
+      color: '#0f766e',
+      bg: '#f0fdf4',
+      border: '#86efac',
+      tag: 'Monitor',
+      tagColor: '#059669',
+      title: 'Claims KPI Dashboard',
+      who: 'All Users',
+      whoIcon: 'fa-users',
+      summary: 'At-a-glance health metrics for your entire claims portfolio — fraud flags, SLA risk, financial exposure.',
+      detail: 'The <strong>collapsible KPI ribbon</strong> gives you an instant read on portfolio health: how many claims are fraud-flagged, how many are at SLA risk, total financial exposure, missing document count, and contestability cases. The <strong>KPI cards below</strong> are clickable — each drills into the specific claim subset. Collapsed by default to save screen space; expand it when you need the full breakdown.',
+      tips: ['Red numbers need same-day attention — SLA breach and fraud flags are time-sensitive', 'Click any KPI card to filter down to just those claims', 'The $1.41M exposure figure includes IBNR buffer — always review before reserve meetings']
+    },
+    {
+      seq: '3',
+      icon: 'fa-bolt',
+      color: '#d97706',
+      bg: '#fffbeb',
+      border: '#fcd34d',
+      tag: 'Action',
+      tagColor: '#d97706',
+      title: 'STP Auto-Adjudication Engine',
+      who: 'Adjusters · Supervisors',
+      whoIcon: 'fa-user-tie',
+      summary: 'Claims the AI has pre-cleared for straight-through processing — no adjuster review needed. Process these first.',
+      detail: 'The <strong>STP (Straight-Through Processing) engine</strong> uses AI to identify claims that meet all six clearance criteria simultaneously: fraud score clear, 100% documents received, no contestability window, no legal hold, SLA on track, and NLP confidence above threshold. These claims can be approved <strong>in under 8 minutes</strong> with zero adjuster review — dramatically improving cycle time. The AI ranks them by confidence score so you work the highest-certainty case first.',
+      tips: ['Always process STP-eligible claims before opening complex cases', 'AI confidence 95%+ = safe to approve immediately; 85–94% = 30-second spot-check recommended', 'STP claims disappear from this list once processed — the engine refreshes every 4 minutes']
+    },
+    {
+      seq: '4',
+      icon: 'fa-brain',
+      color: '#dc2626',
+      bg: '#fef2f2',
+      border: '#fca5a5',
+      tag: 'Alert',
+      tagColor: '#dc2626',
+      title: 'Proactive AI Detection Engine',
+      who: 'Adjusters · Supervisors',
+      whoIcon: 'fa-user-tie',
+      summary: 'Real-time alerts: obituary matches, SLA deadlines expiring today, and coverage gaps in resolved claim beneficiaries.',
+      detail: 'This engine runs 24/7 in the background, monitoring 14 live data sources to surface alerts <strong>before you would otherwise know to act</strong>. Three alert types: <strong>Death Detected</strong> (obituary cross-matched to a live policy — requires immediate coverage determination), <strong>SLA Breach Risk</strong> (claims expiring today or within 5 days under state law), and <strong>Coverage Opportunity</strong> (beneficiaries of resolved claims with no NYL coverage — ideal outreach window). Click "Take Action" on any alert to act immediately.',
+      tips: ['Death Detected alerts must be acknowledged within 24 hours per NYL protocol', 'SLA Breach Risk alerts are legally time-critical — escalate immediately if you cannot resolve today', 'Coverage Opportunity alerts have a 14–21 day window after payout — act promptly for best conversion']
+    },
+    {
+      seq: '5',
+      icon: 'fa-brain',
+      color: '#7c3aed',
+      bg: '#f5f3ff',
+      border: '#c4b5fd',
+      tag: 'AI Workbench',
+      tagColor: '#7c3aed',
+      title: 'AI Claims Intelligence',
+      who: 'Adjusters',
+      whoIcon: 'fa-user',
+      summary: 'Deep AI analysis on any individual claim — fraud score, NLP document review, resolution forecast, beneficiary guidance.',
+      detail: 'The <strong>AI Claims Intelligence panel</strong> is the adjuster\'s primary workbench for individual claim analysis. Select any claim to see: ML fraud score with signal breakdown, NLP extraction of key facts from all submitted documents, contestability risk assessment, ADB (Accidental Death Benefit) eligibility screen, Beneficiary Navigator for guiding claimants through the process, and a predictive resolution timeline. All analysis is real-time and auto-updates as new documents arrive via IDP.',
+      tips: ['Run the fraud analysis before reviewing documents — it tells you what to look for', 'The NLP Summary condenses all claim documents into 3 sentences — read it first', 'Beneficiary Navigator is for agent-facing use — open it when on the phone with a claimant']
+    },
+    {
+      seq: '6',
+      icon: 'fa-fire-alt',
+      color: '#f97316',
+      bg: '#fff7ed',
+      border: '#fed7aa',
+      tag: 'Portfolio',
+      tagColor: '#f97316',
+      title: 'AI Claims Risk Heatmap',
+      who: 'Supervisors · Team Leads',
+      whoIcon: 'fa-user-shield',
+      summary: 'Every active claim ranked by composite AI risk score (fraud + SLA + liability + docs). Your triage list.',
+      detail: 'The <strong>Risk Heatmap</strong> re-ranks all active claims every 4 minutes using a 6-factor composite AI score (0–100). It answers the question: <em>"Of all my open claims, which ones need attention most urgently?"</em> Supervisors use this for team briefings, workload assignment, and escalation decisions. The heatmap color-codes by risk tier: Critical (red, 85+), High Risk (orange, 70–84), Moderate (blue, 50–69), Low Risk (green, <50). Click any row\'s Action button to open the full claim detail.',
+      tips: ['Sort by AI Risk Score column during morning standup for daily prioritization', 'Claims with Breach SLA status AND risk score 80+ need supervisor escalation today', 'Use "Export Report" to share the heatmap in PDF during team reviews']
+    },
+    {
+      seq: '7',
+      icon: 'fa-lightbulb',
+      color: '#4f46e5',
+      bg: '#eef2ff',
+      border: '#c7d2fe',
+      tag: 'Strategic',
+      tagColor: '#4f46e5',
+      title: 'AI Predictive Insights',
+      who: 'Supervisors · Management',
+      whoIcon: 'fa-user-shield',
+      summary: 'Forward-looking intelligence: fraud clusters, SLA cascades, reserve deficiencies, and revenue opportunities.',
+      detail: 'The <strong>Predictive Insights panel</strong> is the strategic layer — it looks across the entire portfolio and identifies patterns no single adjuster could see. Four insight types: <strong>Fraud Pattern</strong> (graph AI detects clusters of linked suspicious claims), <strong>SLA Cascade</strong> (Monte Carlo simulation predicts 3+ claims breaching SLA simultaneously), <strong>Reserve Risk</strong> (actuarial AI flags under-reserved claims per IFRS 17), and <strong>Opportunity</strong> (collaborative filtering identifies post-claim revenue windows). This panel is designed for supervisor/manager review during daily or weekly planning sessions.',
+      tips: ['Review Predictive Insights at the start of each day — it summarizes overnight AI analysis', 'Fraud Pattern alerts require SIU referral coordination — do not delay', 'Reserve Risk insights must be reviewed before any actuarial reserve meeting']
+    }
+  ];
+
+  /* ── Tab navigation ── */
+  var tabsHTML = sections.map(function(s, i) {
+    return '<button class="chg-tab' + (i===0?' chg-tab-active':'') + '" data-idx="' + i + '" onclick="_chgSelectTab(' + i + ')">' +
+      '<span class="chg-tab-seq">' + s.seq + '</span>' +
+      '<i class="fas ' + s.icon + '" style="color:' + s.color + '"></i>' +
+      '<span class="chg-tab-label">' + s.title.split('—')[0].trim().split('(')[0].trim() + '</span>' +
+    '</button>';
+  }).join('');
+
+  /* ── Section detail cards ── */
+  var sectionsHTML = sections.map(function(s, i) {
+    var tipsHTML = s.tips.map(function(t) {
+      return '<li style="margin-bottom:6px">' + t + '</li>';
+    }).join('');
+    return '<div class="chg-section" id="chg-sec-' + i + '" style="display:' + (i===0?'block':'none') + '">' +
+      '<div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px">' +
+        '<div style="width:56px;height:56px;background:' + s.bg + ';border:2px solid ' + s.border + ';border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+          '<i class="fas ' + s.icon + '" style="font-size:24px;color:' + s.color + '"></i>' +
+        '</div>' +
+        '<div style="flex:1">' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">' +
+            '<span style="background:' + s.color + ';color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.06em">' + s.tag + '</span>' +
+            '<span style="background:#f1f5f9;color:#475569;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px"><i class="fas ' + s.whoIcon + '" style="margin-right:4px;font-size:10px"></i>' + s.who + '</span>' +
+            '<span style="background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px">Step ' + s.seq + ' of 7</span>' +
+          '</div>' +
+          '<div style="font-size:20px;font-weight:800;color:#0f172a;line-height:1.2;margin-bottom:8px">' + s.title + '</div>' +
+          '<div style="font-size:13px;color:#475569;font-weight:500;line-height:1.5;padding:10px 14px;background:' + s.bg + ';border-left:3px solid ' + s.color + ';border-radius:0 8px 8px 0">' + s.summary + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:13px;color:#374151;line-height:1.75;margin-bottom:18px">' + s.detail + '</div>' +
+      '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px">' +
+        '<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px"><i class="fas fa-lightbulb" style="color:#f59e0b;margin-right:5px"></i>Pro Tips</div>' +
+        '<ul style="margin:0;padding-left:18px;color:#475569;font-size:12px;line-height:1.7">' + tipsHTML + '</ul>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px">' +
+        (i > 0 ? '<button class="chg-nav-btn" onclick="_chgSelectTab(' + (i-1) + ')"><i class="fas fa-chevron-left"></i> Previous</button>' : '<span></span>') +
+        (i < sections.length-1 ? '<button class="chg-nav-btn chg-nav-btn-next" onclick="_chgSelectTab(' + (i+1) + ')">Next <i class="fas fa-chevron-right"></i></button>' : '<button class="chg-nav-btn chg-nav-btn-next" onclick="document.getElementById(\'clm-help-overlay\').remove()"><i class="fas fa-check"></i> Got it!</button>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var ov = document.createElement('div');
+  ov.id = 'clm-help-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:900px;width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.45)">' +
+
+      /* Header */
+      '<div style="background:linear-gradient(135deg,#1e3a5f,#0f2040);padding:20px 24px;border-radius:16px 16px 0 0;flex-shrink:0">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between">' +
+          '<div style="display:flex;align-items:center;gap:14px">' +
+            '<div style="width:48px;height:48px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center">' +
+              '<i class="fas fa-map-signs" style="color:#fff;font-size:22px"></i>' +
+            '</div>' +
+            '<div>' +
+              '<div style="font-weight:800;font-size:20px;color:#fff">Claims Dashboard — User Help Guide</div>' +
+              '<div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:3px">7 components · Designed for two user journeys: Supervisor and Individual Agent</div>' +
+            '</div>' +
+          '</div>' +
+          '<button onclick="document.getElementById(\'clm-help-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">&times;</button>' +
+        '</div>' +
+
+        /* Two user journey callouts */
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">' +
+          '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px">' +
+            '<div style="font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px"><i class="fas fa-user-shield" style="margin-right:5px"></i>Supervisor Journey</div>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5">Login → <strong style="color:#fbbf24">Overview</strong> (portfolio health) → <strong style="color:#fbbf24">Workload</strong> (team capacity) → drill into priority claims via Heatmap & Predictive Insights</div>' +
+          '</div>' +
+          '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px">' +
+            '<div style="font-size:11px;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px"><i class="fas fa-user" style="margin-right:5px"></i>Individual Agent Journey</div>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5">Login → <strong style="color:#fbbf24">FNOL</strong> (file/find claims) → <strong style="color:#fbbf24">Active Claims</strong> → <strong style="color:#fbbf24">Resolved</strong> → <strong style="color:#fbbf24">Subrogation</strong> → <strong style="color:#fbbf24">Client Portal</strong> (claimant access)</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      /* Body: sidebar tabs + main content */
+      '<div style="display:flex;flex:1;overflow:hidden">' +
+
+        /* Left sidebar — tab navigation */
+        '<div style="width:210px;background:#f8fafc;border-right:1px solid #e2e8f0;overflow-y:auto;flex-shrink:0;padding:12px 0" id="chg-sidebar">' +
+          tabsHTML +
+        '</div>' +
+
+        /* Main content area */
+        '<div style="flex:1;overflow-y:auto;padding:24px" id="chg-content">' +
+          sectionsHTML +
+        '</div>' +
+      '</div>' +
+
+      /* Footer */
+      '<div style="padding:12px 24px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:0 0 16px 16px">' +
+        '<span style="font-size:12px;color:#94a3b8"><i class="fas fa-info-circle" style="margin-right:4px"></i>Help Guide · NYL Agent 360 Claims Dashboard · Version 3.1</span>' +
+        '<button style="padding:8px 18px;border-radius:8px;background:#1e3a5f;border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer" onclick="document.getElementById(\'clm-help-overlay\').remove()"><i class="fas fa-times" style="margin-right:5px"></i>Close Guide</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function _chgSelectTab(idx) {
+  /* Update sidebar tab active state */
+  var tabs = document.querySelectorAll('.chg-tab');
+  tabs.forEach(function(t) { t.classList.remove('chg-tab-active'); });
+  var activeTab = document.querySelector('.chg-tab[data-idx="' + idx + '"]');
+  if (activeTab) { activeTab.classList.add('chg-tab-active'); activeTab.scrollIntoView({block:'nearest'}); }
+
+  /* Show correct section */
+  var sections = document.querySelectorAll('.chg-section');
+  sections.forEach(function(s) { s.style.display = 'none'; });
+  var sec = document.getElementById('chg-sec-' + idx);
+  if (sec) { sec.style.display = 'block'; document.getElementById('chg-content').scrollTop = 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
    AI METHODOLOGY MODALS — "How AI works" for 3 core panels
    ══════════════════════════════════════════════════════════════════ */
 

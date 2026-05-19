@@ -53598,3 +53598,101 @@ kbd {
 .ai-hm-sub .ai-how-link:hover {
   color: #c7d2fe;
 }
+
+/* ── FNOL Help Guide button ── */
+.ov-fnol-help-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  color: rgba(255,255,255,0.9);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.ov-fnol-help-link:hover {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.55);
+  color: #fff;
+}
+.ov-fnol-help-link i { font-size: 13px; }
+
+/* ── Claims Help Guide Modal sidebar tabs ── */
+.chg-tab {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.chg-tab:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+.chg-tab-active {
+  background: #eff6ff !important;
+  border-left-color: #1e3a5f !important;
+  color: #1e3a5f !important;
+  font-weight: 700;
+}
+.chg-tab-seq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #e2e8f0;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  color: #475569;
+  flex-shrink: 0;
+}
+.chg-tab-active .chg-tab-seq {
+  background: #1e3a5f;
+  color: #fff;
+}
+.chg-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+/* Navigation buttons inside each section */
+.chg-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.chg-nav-btn:hover { background: #e2e8f0; }
+.chg-nav-btn-next {
+  background: #1e3a5f;
+  border-color: #1e3a5f;
+  color: #fff;
+}
+.chg-nav-btn-next:hover { background: #0f2040; }

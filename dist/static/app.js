@@ -39473,7 +39473,7 @@ function p7BuildNotesTab(claim) {
         '<div class="p7cm-priority-btns">' +
           '<button class="p7cm-priority-btn urgent"   onclick="p7Toast(\'<i class=\\\'fas fa-fire\\\'></i> Priority changed to URGENT — adjuster notified\',3000)"><i class="fas fa-fire"></i> Set Urgent</button>' +
           '<button class="p7cm-priority-btn normal"   onclick="p7Toast(\'<i class=\\\'fas fa-flag\\\'></i> Priority set to Normal\',2500)"><i class="fas fa-flag"></i> Set Normal</button>' +
-          '<button class="p7cm-priority-btn escalate" onclick="p7Toast(\'<i class=\\\'fas fa-arrow-up\\\'></i> Escalated to Senior Adjuster — email sent\',3000)"><i class="fas fa-arrow-up"></i> Escalate to Sr. Adjuster</button>' +
+          '<button class="p7cm-priority-btn escalate" onclick="p7OpenEscalateModal(\'' + claim.id + '\')"><i class="fas fa-arrow-up"></i> Escalate to Sr. Adjuster</button>' +
         '</div>' +
       '</div>' +
     '</div>' +
@@ -39493,7 +39493,8 @@ function p7BuildNotesTab(claim) {
             '<option>SIU Referral Note</option>' +
             '<option>Compliance Flag</option>' +
           '</select>' +
-          '<button class="p7cm-act-btn primary" onclick="p7AddNote(\'' + claim.id + '\')"><i class="fas fa-plus"></i> Save Note</button>' +
+          '<button class="p7cm-act-btn secondary" id="p7cm-ai-draft-btn" onclick="p7OpenAIDraftNote(\'' + claim.id + '\')" style="background:#7c3aed;border-color:#7c3aed;color:#fff"><i class="fas fa-robot"></i> AI Draft</button>' +
+          '<button class="p7cm-act-btn primary" onclick="p7AddNote(\'' + claim.id + '\')"><i class="fas fa-save"></i> Save Note</button>' +
           '<button class="p7cm-act-btn ghost" onclick="p7Toast(\'<i class=\\\'fas fa-file-pdf\\\'></i> Notes exported to PDF\',2500)"><i class="fas fa-file-pdf"></i> Export</button>' +
         '</div>' +
       '</div>' +
@@ -39518,23 +39519,407 @@ function p7ChangeStatus(claimId, newStatus) {
   p7Toast('<i class="fas fa-exchange-alt"></i> ' + claimId + ' status changed to <strong style="color:' + sc + '">' + newStatus + '</strong> — workflow updated', 3500);
 }
 
+function p7OpenEscalateModal(claimId) {
+  var existing = document.getElementById('p7-escalate-overlay');
+  if (existing) existing.remove();
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-escalate-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:540px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#d97706,#b45309)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-arrow-up" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Escalate to Senior Adjuster</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.85)">' + claimId + ' · ' + (p7.client||'Claimant') + ' · ' + (p7.type||'Claim') + '</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-escalate-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:22px">' +
+        /* Claim context strip */
+        '<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:#92400e;display:flex;flex-wrap:wrap;gap:12px">' +
+          '<span><i class="fas fa-fire" style="color:#d97706;margin-right:4px"></i>Priority: <strong>' + (p7.priority||'Normal') + '</strong></span>' +
+          '<span><i class="fas fa-user" style="color:#d97706;margin-right:4px"></i>Current Adjuster: <strong>' + (p7.adjuster||'Unassigned') + '</strong></span>' +
+          '<span><i class="fas fa-shield-alt" style="color:#d97706;margin-right:4px"></i>Fraud Score: <strong>' + (p7.fraudScore||'N/A') + '/100</strong></span>' +
+          '<span><i class="fas fa-clock" style="color:#d97706;margin-right:4px"></i>SLA: <strong>' + (p7.sla||'Standard') + '</strong></span>' +
+        '</div>' +
+        /* Escalate to */
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-user-tie"></i> Escalate To <span style="color:#dc2626">*</span></label>' +
+          '<select class="p7m-select" id="p7-esc-to" style="width:100%">' +
+            '<option value="">— Select Senior Adjuster —</option>' +
+            '<option>James Reyes — Sr. Adjuster, Death Claims (P&C)</option>' +
+            '<option>Sandra Okafor — Sr. Adjuster, Complex Claims</option>' +
+            '<option>Michael Torres — Sr. Adjuster, SIU Liaison</option>' +
+            '<option>Patricia Chen — VP Claims Operations</option>' +
+            '<option>David Huang — Legal & Compliance Lead</option>' +
+          '</select>' +
+        '</div>' +
+        /* Escalation reason */
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-list-alt"></i> Escalation Reason</label>' +
+          '<div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">' +
+            ['SLA breach imminent — exceeds standard timeframe','High fraud score requiring senior review','Policy complexity / contestability period','Regulatory compliance concern','Claimant dispute or attorney representation','Reserve adequacy — amount exceeds authority limit','Medical / APS discrepancy','Other (specify in notes)'].map(function(r,i) {
+              return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer"><input type="radio" name="p7-esc-reason" value="' + r + '"' + (i===0?' checked':'') + '> ' + r + '</label>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+        /* Urgency */
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-exclamation-triangle"></i> Urgency Level</label>' +
+          '<div style="display:flex;gap:8px;margin-top:6px">' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-esc-urgency" value="Routine"> Routine</label>' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-esc-urgency" value="Priority" checked> Priority</label>' +
+            '<label class="p22-radio-card"><input type="radio" name="p7-esc-urgency" value="URGENT" style="accent-color:#dc2626"> <span style="color:#dc2626;font-weight:700">URGENT</span></label>' +
+          '</div>' +
+        '</div>' +
+        /* Notes */
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-sticky-note"></i> Additional Context (optional)</label>' +
+          '<textarea class="p7m-textarea" id="p7-esc-notes" rows="2" placeholder="Add context, prior attempts, claimant concerns, or supporting detail…" style="width:100%;box-sizing:border-box"></textarea>' +
+        '</div>' +
+        /* Options */
+        '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px;font-size:13px">' +
+          '<label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="p7-esc-hold" checked> Place claim on hold during escalation</label>' +
+          '<label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="p7-esc-email" checked> Send escalation email to Sr. Adjuster</label>' +
+          '<label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="p7-esc-crm" checked> Log to CRM audit trail</label>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-escalate-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" style="background:#d97706;border-color:#d97706" onclick="_p7SubmitEscalation(\'' + claimId + '\')"><i class="fas fa-arrow-up"></i> Confirm Escalation</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function _p7SubmitEscalation(claimId) {
+  var toEl      = document.getElementById('p7-esc-to');
+  var toVal     = toEl ? toEl.value : '';
+  if (!toVal)   { p7Toast('<i class="fas fa-exclamation-circle"></i> Please select a Senior Adjuster to escalate to', 2500); return; }
+  var reasonEl  = document.querySelector('input[name="p7-esc-reason"]:checked');
+  var reason    = reasonEl ? reasonEl.value : 'Escalation';
+  var urgEl     = document.querySelector('input[name="p7-esc-urgency"]:checked');
+  var urgency   = urgEl ? urgEl.value : 'Priority';
+  var toName    = toVal.split('—')[0].trim();
+  var doHold    = (document.getElementById('p7-esc-hold')  || {}).checked;
+  var doEmail   = (document.getElementById('p7-esc-email') || {}).checked;
+  var doCRM     = (document.getElementById('p7-esc-crm')   || {}).checked;
+
+  document.getElementById('p7-escalate-overlay').remove();
+
+  /* Inject escalation into live timeline */
+  var tlWrap = document.querySelector('.p7cm-tl-wrap');
+  if (tlWrap) {
+    var now = new Date();
+    var label = now.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ' ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    var newRow = document.createElement('div');
+    newRow.className = 'p7cm-tl-row';
+    newRow.style.cssText = 'animation:p7FadeIn 0.4s ease;';
+    newRow.innerHTML =
+      '<div class="p7cm-tl-left">' +
+        '<div class="p7cm-tl-dot" style="background:#d97706;color:#fff"><i class="fas fa-arrow-up" style="font-size:9px"></i></div>' +
+        '<div class="p7cm-tl-line"></div>' +
+      '</div>' +
+      '<div class="p7cm-tl-body">' +
+        '<div class="p7cm-tl-date">' + label + '</div>' +
+        '<div class="p7cm-tl-event"><span style="display:inline-block;background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px">' + urgency + ' ESCALATION</span>Escalated to ' + toName + ' — ' + reason + '</div>' +
+      '</div>';
+    tlWrap.insertBefore(newRow, tlWrap.firstChild);
+  }
+  /* Update priority display */
+  var prEl = document.querySelector('.p7cm-priority-current');
+  if (prEl) prEl.innerHTML = prEl.innerHTML + ' &nbsp;<span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700"><i class="fas fa-arrow-up"></i> Escalated → ' + toName + '</span>';
+
+  p7Toast('<i class="fas fa-arrow-up"></i> ' + claimId + ' escalated to <strong>' + toName + '</strong> · Urgency: ' + urgency, 4000);
+  if (doEmail) setTimeout(function(){ p7Toast('<i class="fas fa-envelope"></i> Escalation email sent to ' + toName + ' with full claim brief', 3000); }, 1200);
+  if (doHold)  setTimeout(function(){ p7Toast('<i class="fas fa-pause-circle"></i> Claim placed on hold pending Sr. Adjuster review', 2800); }, 2400);
+  if (doCRM)   setTimeout(function(){ p7Toast('<i class="fas fa-database"></i> CRM: Escalation record #ESC-' + Math.floor(Math.random()*9000+1000) + ' created', 2500); }, 3400);
+}
+
 function p7AddNote(claimId) {
   var text = (document.getElementById('p7cm-note-text') || {}).value || '';
   var type = (document.getElementById('p7cm-note-type') || {}).value || 'Adjuster Note';
-  if (!text.trim()) { p7Toast('Please enter a note before saving', 2000); return; }
-  p7Toast('<i class="fas fa-check-circle"></i> ' + type + ' saved for ' + claimId + ' — audit trail updated', 3000);
-  var el = document.getElementById('p7cm-note-text');
-  if (el) el.value = '';
+  if (!text.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter a note or use AI Draft before saving', 2500); return; }
+  /* Show AI-powered save modal with CRM simulation */
+  p7OpenSaveNoteModal(claimId, text, type);
+}
+
+function p7OpenAIDraftNote(claimId) {
+  /* AI pre-creates a draft note based on claim context */
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var btn = document.getElementById('p7cm-ai-draft-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Drafting…'; }
+  var noteType = (document.getElementById('p7cm-note-type') || {}).value || 'Adjuster Note';
+
+  /* AI note templates keyed by note type */
+  var drafts = {
+    'Adjuster Note': 'Claim review in progress for ' + claimId + '. Policy holder: ' + (p7.client || 'claimant') + '. Current status: ' + (p7.status || 'Under Review') + '. Priority: ' + (p7.priority || 'Normal') + '. SLA compliance being monitored — pending document receipt. Next action: follow up with claimant within 48 hours.',
+    'Escalation': 'ESCALATION — ' + claimId + ': Claim requires Senior Adjuster review due to ' + (p7.priority === 'Urgent' ? 'SLA breach risk and urgent priority classification' : 'complexity and elevated fraud indicators') + '. Adjuster ' + (p7.adjuster || 'assigned adjuster') + ' requesting senior review. Missing documents: ' + (p7.docsRequired ? p7.docsRequired.filter(function(d){return d.indexOf('⏳')>-1;}).length + ' outstanding' : 'under review') + '. Recommend escalation to department head.',
+    'Legal Memo': 'LEGAL MEMO — ' + claimId + ': Documenting legal considerations for claim file. Contestability status: ' + (p7.contestability ? 'ACTIVE — 2-year window applies' : 'Not applicable') + '. Legal hold: ' + (p7.legalHold ? 'Active — no document destruction' : 'Not in place') + '. Regulatory state: ' + (p7.regulatoryState || 'N/A') + '. All communications logged per compliance requirements.',
+    'Manager Review': 'MANAGER REVIEW REQUEST — ' + claimId + ': Escalating for management oversight. Reserve amount: ' + (p7.reserveAmount ? '$' + parseInt(p7.reserveAmount).toLocaleString() : 'TBD') + '. Fraud score: ' + (p7.fraudScore || 'N/A') + '/100. Claim complexity warrants manager sign-off before proceeding. Adjuster notes attached.',
+    'SIU Referral Note': 'SIU REFERRAL — ' + claimId + ': Fraud indicators identified requiring Special Investigations Unit review. Fraud score: ' + (p7.fraudScore || 'N/A') + '/100. Key signals: ' + (p7.fraudSignals ? p7.fraudSignals.slice(0,2).join('; ') : 'contestability window active; beneficiary change prior to claim') + '. Payment hold active pending SIU clearance.',
+    'Compliance Flag': 'COMPLIANCE FLAG — ' + claimId + ': Documenting compliance observation for regulatory record. State: ' + (p7.regulatoryState || 'N/A') + '. Claim amount: ' + (p7.amount || 'N/A') + '. Regulatory disclosure requirements verified. APS status: ' + (p7.apsOrders ? p7.apsOrders.length + ' orders on file' : 'no APS ordered') + '. All mandatory notices sent per state requirements.'
+  };
+
+  var draftText = drafts[noteType] || drafts['Adjuster Note'];
+
+  setTimeout(function() {
+    var el = document.getElementById('p7cm-note-text');
+    if (el) {
+      el.value = '';
+      var i = 0;
+      var interval = setInterval(function() {
+        if (i < draftText.length) {
+          el.value += draftText[i];
+          i++;
+        } else {
+          clearInterval(interval);
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-robot"></i> AI Draft'; }
+          p7Toast('<i class="fas fa-robot"></i> AI note drafted — review and save when ready', 2500);
+        }
+      }, 12);
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-robot"></i> AI Draft'; }
+    }
+  }, 900);
+}
+
+function p7OpenSaveNoteModal(claimId, noteText, noteType) {
+  var existing = document.getElementById('p7-savenote-overlay');
+  if (existing) existing.remove();
+  var p7 = (window.p7ClaimsData || {})[claimId] || {};
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  var timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  var typeIcons = { 'Adjuster Note':'fa-sticky-note', 'Escalation':'fa-arrow-up', 'Legal Memo':'fa-gavel',
+    'Manager Review':'fa-user-tie', 'SIU Referral Note':'fa-shield-alt', 'Compliance Flag':'fa-flag' };
+  var typeColors = { 'Adjuster Note':'#2563eb','Escalation':'#d97706','Legal Memo':'#7c3aed',
+    'Manager Review':'#0891b2','SIU Referral Note':'#dc2626','Compliance Flag':'#ea580c' };
+  var icon = typeIcons[noteType] || 'fa-sticky-note';
+  var color = typeColors[noteType] || '#2563eb';
+
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-savenote-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:560px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,' + color + ',' + color + 'dd)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas ' + icon + '" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Save ' + noteType + '</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.85)">' + claimId + ' · ' + dateStr + ' ' + timeStr + '</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-savenote-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:22px">' +
+        /* Note preview */
+        '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid ' + color + ';border-radius:8px;padding:14px;font-size:13px;color:#374151;line-height:1.6;margin-bottom:16px;max-height:120px;overflow-y:auto">' +
+          '<div style="font-size:10px;font-weight:700;color:' + color + ';text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px"><i class="fas ' + icon + '"></i> ' + noteType + ' Preview</div>' +
+          noteText.substring(0, 400) + (noteText.length > 400 ? '…' : '') +
+        '</div>' +
+        /* CRM Log simulation */
+        '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:16px">' +
+          '<div style="font-size:11px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px"><i class="fas fa-database"></i> CRM Logging Preview</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px">' +
+            '<div><span style="color:#6b7280">System:</span> <strong>NYL ClaimsIQ CRM</strong></div>' +
+            '<div><span style="color:#6b7280">Author:</span> <strong>' + (p7.adjuster || 'Current User') + '</strong></div>' +
+            '<div><span style="color:#6b7280">Claim:</span> <strong>' + claimId + '</strong></div>' +
+            '<div><span style="color:#6b7280">Timestamp:</span> <strong>' + dateStr + ' ' + timeStr + '</strong></div>' +
+            '<div><span style="color:#6b7280">Note Type:</span> <strong>' + noteType + '</strong></div>' +
+            '<div><span style="color:#6b7280">Audit Trail:</span> <strong style="color:#059669">✓ Active</strong></div>' +
+          '</div>' +
+        '</div>' +
+        /* Routing checkboxes */
+        '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">' +
+          '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-sn-timeline" checked> Add to claim timeline</label>' +
+          '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-sn-crm" checked> Log to CRM audit trail</label>' +
+          '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-sn-notify"> Notify supervisor via email</label>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-savenote-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" style="background:' + color + ';border-color:' + color + '" onclick="_p7CommitNote(\'' + claimId + '\',\'' + noteType.replace(/'/g,"\\\'") + '\',\'' + icon + '\')"><i class="fas fa-save"></i> Confirm & Save to CRM</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function _p7CommitNote(claimId, noteType, icon) {
+  var noteEl = document.getElementById('p7cm-note-text');
+  var noteText = noteEl ? noteEl.value : '';
+  var toTimeline = (document.getElementById('p7-sn-timeline') || {}).checked !== false;
+  var toCRM = (document.getElementById('p7-sn-crm') || {}).checked !== false;
+  var toNotify = (document.getElementById('p7-sn-notify') || {}).checked;
+  document.getElementById('p7-savenote-overlay').remove();
+
+  /* Inject into live timeline */
+  if (toTimeline) {
+    var tlWrap = document.querySelector('.p7cm-tl-wrap');
+    if (tlWrap) {
+      var now = new Date();
+      var label = now.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+      var newRow = document.createElement('div');
+      newRow.className = 'p7cm-tl-row';
+      newRow.style.cssText = 'animation:p7FadeIn 0.4s ease;';
+      newRow.innerHTML =
+        '<div class="p7cm-tl-left">' +
+          '<div class="p7cm-tl-dot" style="background:#2563eb;color:#fff"><i class="fas ' + icon + '" style="font-size:9px"></i></div>' +
+          '<div class="p7cm-tl-line"></div>' +
+        '</div>' +
+        '<div class="p7cm-tl-body">' +
+          '<div class="p7cm-tl-date">' + label + ' — ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) + '</div>' +
+          '<div class="p7cm-tl-event" style="color:#1e40af;font-weight:600">[' + noteType + '] ' + (noteText.substring(0,80)) + (noteText.length>80?'…':'') + '</div>' +
+        '</div>';
+      tlWrap.insertBefore(newRow, tlWrap.firstChild);
+    }
+  }
+  /* Update current note display */
+  var noteCurrent = document.querySelector('.p7cm-notes-current');
+  if (noteCurrent) noteCurrent.textContent = noteText;
+  if (noteEl) noteEl.value = '';
+
+  p7Toast('<i class="fas fa-check-circle"></i> ' + noteType + ' saved to ' + claimId + ' — CRM audit trail logged', 3500);
+  if (toCRM) {
+    setTimeout(function() { p7Toast('<i class="fas fa-database"></i> NYL ClaimsIQ CRM: Entry #' + Math.floor(Math.random()*90000+10000) + ' committed · Timestamp locked', 3000); }, 1200);
+  }
+  if (toNotify) {
+    setTimeout(function() { p7Toast('<i class="fas fa-envelope"></i> Supervisor notification sent — ' + noteType, 2500); }, 2400);
+  }
 }
 
 function p7AddTimelineEvent(claimId) {
-  var text = (document.getElementById('p7cm-tl-event') || {}).value || '';
-  if (!text.trim()) { p7Toast('Please enter an event description', 2000); return; }
-  var today = new Date();
-  var label = 'Apr ' + today.getDate();
-  p7Toast('<i class="fas fa-stream"></i> Timeline event added: ' + text.substring(0,50), 3000);
-  var el = document.getElementById('p7cm-tl-event');
-  if (el) el.value = '';
+  /* Open the rich Add Event modal — prefill description from input if typed */
+  var prefill = (document.getElementById('p7cm-tl-event') || {}).value || '';
+  p7OpenAddEventModal(claimId, prefill);
+}
+
+function p7OpenAddEventModal(claimId, prefill) {
+  var existing = document.getElementById('p7-addevent-overlay');
+  if (existing) existing.remove();
+  var now = new Date();
+  var todayVal = now.toISOString().slice(0,10);
+  var timeVal  = now.toTimeString().slice(0,5);
+
+  var ov = document.createElement('div');
+  ov.className = 'p7-modal-overlay';
+  ov.id = 'p7-addevent-overlay';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div class="p7-modal-box" style="max-width:520px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#0f766e,#0d9488)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-calendar-plus" style="color:#fff;font-size:16px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">Add Claim Timeline Event</div><div style="font-size:12px;color:rgba(255,255,255,0.85)">' + claimId + ' · Manual Entry</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-addevent-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:22px">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">' +
+          '<div class="p22-field-group">' +
+            '<label class="p22-field-label"><i class="fas fa-calendar-alt"></i> Event Date</label>' +
+            '<input class="p7m-input" id="p7-ae-date" type="date" value="' + todayVal + '" style="width:100%;box-sizing:border-box">' +
+          '</div>' +
+          '<div class="p22-field-group">' +
+            '<label class="p22-field-label"><i class="fas fa-clock"></i> Time</label>' +
+            '<input class="p7m-input" id="p7-ae-time" type="time" value="' + timeVal + '" style="width:100%;box-sizing:border-box">' +
+          '</div>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-tag"></i> Event Type</label>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px" id="p7-ae-type-group">' +
+            ['Document Received','Phone Call','Status Change','Escalation','Legal Action','Payment','Medical Update','Compliance Note','Other'].map(function(t,i) {
+              return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:5px 10px;border:1.5px solid #e2e8f0;border-radius:20px;background:#fff;white-space:nowrap"><input type="radio" name="p7-ae-type" value="' + t + '"' + (i===0?' checked':'') + '> ' + t + '</label>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="p22-field-group" style="margin-bottom:14px">' +
+          '<label class="p22-field-label"><i class="fas fa-align-left"></i> Description <span style="color:#dc2626">*</span></label>' +
+          '<textarea class="p7m-textarea" id="p7-ae-desc" rows="3" placeholder="Describe the event, action taken, or outcome…" style="width:100%;box-sizing:border-box">' + (prefill||'') + '</textarea>' +
+        '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px">' +
+          '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-ae-crm" checked> Log to CRM audit trail</label>' +
+          '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="p7-ae-notify"> Notify adjuster team</label>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-addevent-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>' +
+          '<button class="p7cm-act-btn primary" style="background:#0f766e;border-color:#0f766e" onclick="_p7CommitEvent(\'' + claimId + '\')"><i class="fas fa-calendar-plus"></i> Add to Timeline</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function _p7CommitEvent(claimId) {
+  var desc = (document.getElementById('p7-ae-desc') || {}).value || '';
+  if (!desc.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter an event description', 2000); return; }
+  var dateVal = (document.getElementById('p7-ae-date') || {}).value || '';
+  var timeVal = (document.getElementById('p7-ae-time') || {}).value || '';
+  var typeEl  = document.querySelector('input[name="p7-ae-type"]:checked');
+  var evType  = typeEl ? typeEl.value : 'Other';
+  var toCRM   = (document.getElementById('p7-ae-crm') || {}).checked;
+  var toNotify= (document.getElementById('p7-ae-notify') || {}).checked;
+
+  /* Format display date */
+  var d = dateVal ? new Date(dateVal + 'T12:00:00') : new Date();
+  var label = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  if (timeVal) label += ' ' + timeVal;
+
+  /* Type → icon/color map */
+  var typeMap = {
+    'Document Received':{ icon:'fa-file-alt', color:'#2563eb' },
+    'Phone Call':       { icon:'fa-phone',    color:'#0891b2' },
+    'Status Change':    { icon:'fa-exchange-alt', color:'#7c3aed' },
+    'Escalation':       { icon:'fa-arrow-up', color:'#d97706' },
+    'Legal Action':     { icon:'fa-gavel',    color:'#dc2626' },
+    'Payment':          { icon:'fa-dollar-sign', color:'#059669' },
+    'Medical Update':   { icon:'fa-heartbeat', color:'#e11d48' },
+    'Compliance Note':  { icon:'fa-flag',     color:'#ea580c' },
+    'Other':            { icon:'fa-circle',   color:'#64748b' }
+  };
+  var tm = typeMap[evType] || typeMap['Other'];
+
+  document.getElementById('p7-addevent-overlay').remove();
+  var inputEl = document.getElementById('p7cm-tl-event');
+  if (inputEl) inputEl.value = '';
+
+  /* Inject into live timeline */
+  var tlWrap = document.querySelector('.p7cm-tl-wrap');
+  if (tlWrap) {
+    /* Remove empty state if present */
+    var empty = tlWrap.querySelector('.p7cm-empty-state');
+    if (empty) empty.remove();
+    var newRow = document.createElement('div');
+    newRow.className = 'p7cm-tl-row';
+    newRow.style.cssText = 'animation:p7FadeIn 0.4s ease;';
+    newRow.innerHTML =
+      '<div class="p7cm-tl-left">' +
+        '<div class="p7cm-tl-dot" style="background:' + tm.color + ';color:#fff"><i class="fas ' + tm.icon + '" style="font-size:9px"></i></div>' +
+        '<div class="p7cm-tl-line"></div>' +
+      '</div>' +
+      '<div class="p7cm-tl-body">' +
+        '<div class="p7cm-tl-date">' + label + '</div>' +
+        '<div class="p7cm-tl-event">' +
+          '<span style="display:inline-block;background:' + tm.color + '15;color:' + tm.color + ';font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px">' + evType + '</span>' +
+          desc +
+        '</div>' +
+      '</div>';
+    tlWrap.insertBefore(newRow, tlWrap.firstChild);
+  }
+
+  p7Toast('<i class="fas fa-calendar-check"></i> Timeline event added — ' + evType + ': ' + desc.substring(0,50), 3500);
+  if (toCRM)    setTimeout(function(){ p7Toast('<i class="fas fa-database"></i> CRM audit entry logged · Entry #' + Math.floor(Math.random()*90000+10000), 2800); }, 1000);
+  if (toNotify) setTimeout(function(){ p7Toast('<i class="fas fa-bell"></i> Adjuster team notified of new timeline event', 2500); }, 2000);
 }
 
 function p7LogCall(claimId) { openLogCallModal(claimId); }
@@ -40704,11 +41089,95 @@ function p7SubmitAPS(claimId) {
   var physician = (document.getElementById('p7-aps-physician') || {}).value || '';
   if (!physician.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter the physician name', 2500); return; }
   var specialty = (document.getElementById('p7-aps-specialty') || {}).value || 'Cardiology';
+  var contact   = (document.getElementById('p7-aps-contact')   || {}).value || '';
+  var dateRange = (document.getElementById('p7-aps-dates')     || {}).value || '';
   document.getElementById('p7-aps-overlay').remove();
-  p7Toast('<i class="fas fa-heartbeat"></i> APS request sent to ' + physician + ' (' + specialty + ') for ' + claimId + ' · AI-drafted medical records request letter generated', 4500);
-  setTimeout(function() {
-    p7Toast('<i class="fas fa-clock"></i> APS tracker updated · Auto-chase scheduled in 14 days if no response received', 3000);
-  }, 1600);
+
+  /* ── Inject new row into the live APS table ── */
+  var apsTable = document.querySelector('.p7cm-med-table tbody');
+  if (apsTable) {
+    var today = new Date().toISOString().slice(0,10);
+    var newRow = document.createElement('tr');
+    newRow.style.cssText = 'animation:p7FadeIn 0.4s ease;background:#eff6ff;';
+    newRow.innerHTML =
+      '<td><strong>' + physician + '</strong></td>' +
+      '<td>' + specialty + '</td>' +
+      '<td>' + today + '</td>' +
+      '<td>—</td>' +
+      '<td><span style="color:#d97706;font-weight:600">Pending</span></td>' +
+      '<td><button class="p7cm-act-btn ghost" style="padding:4px 10px;font-size:11px" onclick="p7OrderAPS(\'' + claimId + '\')"><i class="fas fa-redo"></i> Chase</button></td>';
+    apsTable.appendChild(newRow);
+    /* Flash the row briefly */
+    setTimeout(function() { newRow.style.background = ''; }, 2500);
+  }
+
+  /* ── Update summary counters ── */
+  var statEls = document.querySelectorAll('.p7cm-med-stat-num');
+  if (statEls.length >= 1) {
+    var total = parseInt(statEls[0].textContent || '0') + 1;
+    statEls[0].textContent = total;
+  }
+  if (statEls.length >= 3) {
+    var pending = parseInt(statEls[2].textContent || '0') + 1;
+    statEls[2].textContent = pending;
+  }
+
+  /* ── Show confirmation modal ── */
+  var existing2 = document.getElementById('p7-aps-confirm-overlay');
+  if (existing2) existing2.remove();
+  var refNum = 'APS-' + new Date().getFullYear() + '-' + Math.floor(Math.random()*9000+1000);
+  var chaseDate = new Date(); chaseDate.setDate(chaseDate.getDate()+14);
+  var chaseDateStr = chaseDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  var ov2 = document.createElement('div');
+  ov2.className = 'p7-modal-overlay';
+  ov2.id = 'p7-aps-confirm-overlay';
+  ov2.onclick = function(e) { if (e.target === ov2) ov2.remove(); };
+  ov2.innerHTML =
+    '<div class="p7-modal-box" style="max-width:480px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#059669,#047857)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-check-circle" style="color:#fff;font-size:18px"></i></div>' +
+          '<div><div style="font-weight:700;font-size:16px;color:#fff">APS Request Submitted</div><div style="font-size:12px;color:rgba(255,255,255,0.85)">Ref: ' + refNum + '</div></div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'p7-aps-confirm-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">&times;</button>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:22px">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">' +
+            '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">Physician</div>' +
+            '<div style="font-weight:700;color:#1e293b">' + physician + '</div>' +
+            '<div style="font-size:12px;color:#64748b">' + specialty + '</div>' +
+          '</div>' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">' +
+            '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">Request Reference</div>' +
+            '<div style="font-weight:700;color:#1e293b">' + refNum + '</div>' +
+            '<div style="font-size:12px;color:#059669">✓ Logged to APS Tracker</div>' +
+          '</div>' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">' +
+            '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">Auto-Chase Date</div>' +
+            '<div style="font-weight:700;color:#d97706">' + chaseDateStr + '</div>' +
+            '<div style="font-size:12px;color:#64748b">If no response in 14 days</div>' +
+          '</div>' +
+          '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">' +
+            '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">AI Letter</div>' +
+            '<div style="font-weight:700;color:#1e293b">Generated ✓</div>' +
+            '<div style="font-size:12px;color:#64748b">NYL letterhead · HIPAA compliant</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;font-size:12px;color:#14532d;margin-bottom:16px">' +
+          '<i class="fas fa-robot" style="color:#059669;margin-right:6px"></i>' +
+          '<strong>AI drafted</strong> a HIPAA-compliant medical records request letter on NYL letterhead and sent it to ' +
+          (contact ? '<strong>' + contact + '</strong>' : 'the physician\'s registered contact on file') + '. ' +
+          'Records date range: <strong>' + (dateRange || 'All available records') + '</strong>.' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-aps-confirm-overlay\').remove()"><i class="fas fa-times"></i> Close</button>' +
+          '<button class="p7cm-act-btn secondary" onclick="document.getElementById(\'p7-aps-confirm-overlay\').remove();p7Toast(\'<i class=\\\'fas fa-copy\\\'></i> APS letter copied to clipboard\',2500)"><i class="fas fa-copy"></i> Copy Letter</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(ov2);
 }
 
 /* ── SETTLEMENT INITIATION MODAL ── */
@@ -40770,12 +41239,107 @@ function p7SupplementClaim(claimId) {
 function p7ConfirmSettlement(claimId) {
   var amount = (document.getElementById('p7-settle-amount') || {}).value || '';
   if (!amount.trim()) { p7Toast('<i class="fas fa-exclamation-circle"></i> Please enter the settlement offer amount', 2500); return; }
-  var basis = (document.getElementById('p7-settle-basis') || {}).value || 'Negotiated Settlement';
+  var basis   = (document.getElementById('p7-settle-basis')   || {}).value || 'Full Policy Benefit';
+  var notes   = (document.getElementById('p7-settle-notes')   || {}).value || '';
+  var release = (document.getElementById('p7-settle-release') || {}).checked;
+  var p7data  = (window.p7ClaimsData || {})[claimId] || {};
+  var amtNum  = parseFloat(amount.replace(/[^0-9.]/g,'')) || 0;
+  var needsLegal = amtNum > 500000;
+
   document.getElementById('p7-settle-overlay').remove();
-  p7Toast('<i class="fas fa-handshake"></i> Settlement initiated for ' + claimId + ' — Offer: ' + amount + ' · Basis: ' + basis + ' · Agreement generated for signature', 5000);
-  setTimeout(function() {
-    p7Toast('<i class="fas fa-envelope"></i> Settlement agreement sent to beneficiary · Legal review triggered · Payment authorization pending', 3500);
-  }, 1800);
+
+  /* Show agreement preview modal */
+  var existing3 = document.getElementById('p7-settle-confirm-overlay');
+  if (existing3) existing3.remove();
+
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  var refNum  = 'SA-' + claimId.replace('CLM-','') + '-' + Math.floor(Math.random()*900+100);
+  var clientName = p7data.client || 'Claimant';
+  var benefName  = (p7data.beneficiaries && p7data.beneficiaries[0] && p7data.beneficiaries[0].name) || 'Beneficiary of Record';
+
+  var ov3 = document.createElement('div');
+  ov3.className = 'p7-modal-overlay';
+  ov3.id = 'p7-settle-confirm-overlay';
+  ov3.onclick = function(e) { if (e.target === ov3) ov3.remove(); };
+
+  ov3.innerHTML =
+    '<div class="p7-modal-box" style="max-width:620px;width:95%">' +
+      '<div class="p7-modal-header" style="background:linear-gradient(135deg,#059669,#047857)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="fas fa-file-signature" style="color:#fff;font-size:16px"></i></div>' +
+          '<div>' +
+            '<div style="font-weight:700;font-size:16px;color:#fff">Settlement Agreement Generated</div>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.85)">' + refNum + ' · ' + claimId + ' · ' + dateStr + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<span style="background:rgba(255,255,255,0.25);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:0.07em">DRAFT</span>' +
+      '</div>' +
+      '<div class="p7-modal-body" style="padding:0">' +
+
+        /* Agreement document */
+        '<div style="padding:20px 22px;background:#fafafa;border-bottom:1px solid #e5e7eb;max-height:280px;overflow-y:auto;font-size:12px;line-height:1.8;color:#1e293b;font-family:Georgia,serif">' +
+          '<div style="text-align:center;margin-bottom:12px">' +
+            '<div style="font-weight:700;font-size:14px;letter-spacing:0.1em;text-transform:uppercase">New York Life Insurance Company</div>' +
+            '<div style="font-size:11px;color:#64748b">51 Madison Avenue, New York, NY 10010</div>' +
+            '<div style="font-weight:700;margin-top:8px;font-size:13px;text-decoration:underline">SETTLEMENT AGREEMENT AND RELEASE</div>' +
+            '<div style="font-size:11px;color:#64748b">Reference: ' + refNum + ' · Date: ' + dateStr + '</div>' +
+          '</div>' +
+          '<p><strong>Claim Number:</strong> ' + claimId + '</p>' +
+          '<p><strong>Insured:</strong> ' + clientName + '</p>' +
+          '<p><strong>Claimant/Beneficiary:</strong> ' + benefName + '</p>' +
+          '<p><strong>Settlement Basis:</strong> ' + basis + '</p>' +
+          '<p><strong>Settlement Amount:</strong> <span style="font-size:14px;font-weight:700;color:#059669">' + amount + '</span></p>' +
+          (notes ? '<p><strong>Terms & Conditions:</strong> ' + notes + '</p>' : '') +
+          '<p>In consideration of the payment of <strong>' + amount + '</strong>, receipt of which is hereby acknowledged, the claimant(s) named above, for themselves and their heirs, executors, administrators, successors, and assigns, hereby fully, finally, and forever release, acquit, and discharge New York Life Insurance Company from any and all claims, demands, actions, and causes of action arising out of or related to the above-referenced insurance policy and claim.</p>' +
+          (release ? '<p><strong>Release Condition:</strong> This settlement is conditioned upon receipt of a fully executed Release of All Claims form prior to disbursement of funds.</p>' : '') +
+          '<p style="color:#64748b;font-size:11px">This agreement constitutes the entire agreement between the parties and supersedes all prior negotiations. This settlement does not constitute an admission of liability.</p>' +
+        '</div>' +
+
+        /* Status checklist */
+        '<div style="padding:16px 22px;border-bottom:1px solid #e5e7eb">' +
+          '<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px"><i class="fas fa-tasks"></i> Authorization Workflow</div>' +
+          '<div style="display:flex;flex-direction:column;gap:7px;font-size:12px">' +
+            '<div style="display:flex;align-items:center;gap:8px;color:#059669"><i class="fas fa-check-circle"></i> Settlement agreement document generated (' + refNum + ')</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;color:#059669"><i class="fas fa-check-circle"></i> Beneficiary notification queued</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;color:#059669"><i class="fas fa-check-circle"></i> Payment placed in pending authorization queue</div>' +
+            (needsLegal ? '<div style="display:flex;align-items:center;gap:8px;color:#d97706"><i class="fas fa-exclamation-triangle"></i> <strong>Legal review required</strong> — offer exceeds $500K threshold · Routed to Legal Dept.</div>' : '<div style="display:flex;align-items:center;gap:8px;color:#059669"><i class="fas fa-check-circle"></i> Under $500K threshold — no legal review required</div>') +
+            (release ? '<div style="display:flex;align-items:center;gap:8px;color:#0891b2"><i class="fas fa-file-signature"></i> Signed release required before disbursement</div>' : '') +
+          '</div>' +
+        '</div>' +
+
+        /* Actions */
+        '<div style="padding:16px 22px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">' +
+          '<button class="p7cm-act-btn ghost" onclick="document.getElementById(\'p7-settle-confirm-overlay\').remove()"><i class="fas fa-times"></i> Close</button>' +
+          '<button class="p7cm-act-btn secondary" onclick="p7Toast(\'<i class=\\\'fas fa-copy\\\'></i> Agreement copied to clipboard\',2500)"><i class="fas fa-copy"></i> Copy Agreement</button>' +
+          '<button class="p7cm-act-btn secondary" style="background:#7c3aed;border-color:#7c3aed;color:#fff" onclick="p7Toast(\'<i class=\\\'fas fa-paper-plane\\\'></i> Settlement agreement sent to beneficiary via DocuSign\',3500);document.getElementById(\'p7-settle-confirm-overlay\').remove()"><i class="fas fa-paper-plane"></i> Send for e-Signature</button>' +
+          '<button class="p7cm-act-btn primary" style="background:#059669;border-color:#059669" onclick="_p7FinalizeSettlement(\'' + claimId + '\',\'' + amount.replace(/'/g,"\\'") + '\',\'' + refNum + '\')"><i class="fas fa-handshake"></i> Finalize & Authorize</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov3);
+}
+
+function _p7FinalizeSettlement(claimId, amount, refNum) {
+  document.getElementById('p7-settle-confirm-overlay').remove();
+  p7Toast('<i class="fas fa-handshake"></i> Settlement <strong>' + refNum + '</strong> finalized — ' + amount + ' · Payment authorization submitted', 5000);
+  setTimeout(function(){ p7Toast('<i class="fas fa-envelope"></i> Beneficiary notified · DocuSign package dispatched · Legal queue updated', 3500); }, 1500);
+  setTimeout(function(){ p7Toast('<i class="fas fa-shield-alt"></i> Compliance record ' + refNum + ' locked in audit trail · All regulatory notices generated', 3000); }, 3200);
+
+  /* Inject into timeline */
+  var tlWrap = document.querySelector('.p7cm-tl-wrap');
+  if (tlWrap) {
+    var now2 = new Date();
+    var label2 = now2.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + now2.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    var sr = document.createElement('div');
+    sr.className = 'p7cm-tl-row';
+    sr.style.cssText = 'animation:p7FadeIn 0.4s ease;';
+    sr.innerHTML =
+      '<div class="p7cm-tl-left"><div class="p7cm-tl-dot" style="background:#059669;color:#fff"><i class="fas fa-handshake" style="font-size:9px"></i></div><div class="p7cm-tl-line"></div></div>' +
+      '<div class="p7cm-tl-body"><div class="p7cm-tl-date">' + label2 + '</div><div class="p7cm-tl-event"><span style="display:inline-block;background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-right:6px">SETTLEMENT</span>Settlement ' + refNum + ' finalized — ' + amount + ' · Authorization pending</div></div>';
+    tlWrap.insertBefore(sr, tlWrap.firstChild);
+  }
 }
 
 /* ── P22: MODAL SHARED STYLES (injected once) ── */
@@ -40824,6 +41388,421 @@ function refreshAIInsights(btn) {
     btn.disabled = false;
     p7Toast('<i class="fas fa-robot"></i> AI Predictive Insights refreshed — 4 cross-claim signals updated', 3500);
   }, 2200);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CLAIMS DASHBOARD — USER HELP GUIDE
+   ══════════════════════════════════════════════════════════════════ */
+
+function openClaimsHelpGuide() {
+  var existing = document.getElementById('clm-help-overlay');
+  if (existing) existing.remove();
+
+  /* ── Section definitions ── */
+  var sections = [
+    {
+      seq: '1',
+      icon: 'fa-plus-circle',
+      color: '#1e3a5f',
+      bg: '#eff6ff',
+      border: '#bfdbfe',
+      tag: 'Action',
+      tagColor: '#1d4ed8',
+      title: 'FNOL — First Notice of Loss',
+      who: 'All Users',
+      whoIcon: 'fa-users',
+      summary: 'Your primary entry point. File a new claim or jump to the active claims list instantly.',
+      detail: 'The <strong>FNOL bar sits at the very top</strong> because every workflow on this dashboard either starts with filing a new claim or tracking an existing one. The AI-guided 5-step wizard handles policy auto-match, IDP document extraction, fraud pre-screen, and beneficiary lookup automatically — reducing claim intake time by ~70% vs. manual entry. <strong>"File New Claim"</strong> opens the wizard. <strong>"View All Claims"</strong> jumps to the Active Claims tab.',
+      tips: ['Use the FNOL wizard for every new loss — even if you already have the claim number', 'The IDP scanner accepts photos, PDFs, and faxes — no manual data entry needed', 'Fraud pre-screen runs automatically during intake — no separate step required']
+    },
+    {
+      seq: '2',
+      icon: 'fa-chart-bar',
+      color: '#0f766e',
+      bg: '#f0fdf4',
+      border: '#86efac',
+      tag: 'Monitor',
+      tagColor: '#059669',
+      title: 'Claims KPI Dashboard',
+      who: 'All Users',
+      whoIcon: 'fa-users',
+      summary: 'At-a-glance health metrics for your entire claims portfolio — fraud flags, SLA risk, financial exposure.',
+      detail: 'The <strong>collapsible KPI ribbon</strong> gives you an instant read on portfolio health: how many claims are fraud-flagged, how many are at SLA risk, total financial exposure, missing document count, and contestability cases. The <strong>KPI cards below</strong> are clickable — each drills into the specific claim subset. Collapsed by default to save screen space; expand it when you need the full breakdown.',
+      tips: ['Red numbers need same-day attention — SLA breach and fraud flags are time-sensitive', 'Click any KPI card to filter down to just those claims', 'The $1.41M exposure figure includes IBNR buffer — always review before reserve meetings']
+    },
+    {
+      seq: '3',
+      icon: 'fa-bolt',
+      color: '#d97706',
+      bg: '#fffbeb',
+      border: '#fcd34d',
+      tag: 'Action',
+      tagColor: '#d97706',
+      title: 'STP Auto-Adjudication Engine',
+      who: 'Adjusters · Supervisors',
+      whoIcon: 'fa-user-tie',
+      summary: 'Claims the AI has pre-cleared for straight-through processing — no adjuster review needed. Process these first.',
+      detail: 'The <strong>STP (Straight-Through Processing) engine</strong> uses AI to identify claims that meet all six clearance criteria simultaneously: fraud score clear, 100% documents received, no contestability window, no legal hold, SLA on track, and NLP confidence above threshold. These claims can be approved <strong>in under 8 minutes</strong> with zero adjuster review — dramatically improving cycle time. The AI ranks them by confidence score so you work the highest-certainty case first.',
+      tips: ['Always process STP-eligible claims before opening complex cases', 'AI confidence 95%+ = safe to approve immediately; 85–94% = 30-second spot-check recommended', 'STP claims disappear from this list once processed — the engine refreshes every 4 minutes']
+    },
+    {
+      seq: '4',
+      icon: 'fa-brain',
+      color: '#dc2626',
+      bg: '#fef2f2',
+      border: '#fca5a5',
+      tag: 'Alert',
+      tagColor: '#dc2626',
+      title: 'Proactive AI Detection Engine',
+      who: 'Adjusters · Supervisors',
+      whoIcon: 'fa-user-tie',
+      summary: 'Real-time alerts: obituary matches, SLA deadlines expiring today, and coverage gaps in resolved claim beneficiaries.',
+      detail: 'This engine runs 24/7 in the background, monitoring 14 live data sources to surface alerts <strong>before you would otherwise know to act</strong>. Three alert types: <strong>Death Detected</strong> (obituary cross-matched to a live policy — requires immediate coverage determination), <strong>SLA Breach Risk</strong> (claims expiring today or within 5 days under state law), and <strong>Coverage Opportunity</strong> (beneficiaries of resolved claims with no NYL coverage — ideal outreach window). Click "Take Action" on any alert to act immediately.',
+      tips: ['Death Detected alerts must be acknowledged within 24 hours per NYL protocol', 'SLA Breach Risk alerts are legally time-critical — escalate immediately if you cannot resolve today', 'Coverage Opportunity alerts have a 14–21 day window after payout — act promptly for best conversion']
+    },
+    {
+      seq: '5',
+      icon: 'fa-brain',
+      color: '#7c3aed',
+      bg: '#f5f3ff',
+      border: '#c4b5fd',
+      tag: 'AI Workbench',
+      tagColor: '#7c3aed',
+      title: 'AI Claims Intelligence',
+      who: 'Adjusters',
+      whoIcon: 'fa-user',
+      summary: 'Deep AI analysis on any individual claim — fraud score, NLP document review, resolution forecast, beneficiary guidance.',
+      detail: 'The <strong>AI Claims Intelligence panel</strong> is the adjuster\'s primary workbench for individual claim analysis. Select any claim to see: ML fraud score with signal breakdown, NLP extraction of key facts from all submitted documents, contestability risk assessment, ADB (Accidental Death Benefit) eligibility screen, Beneficiary Navigator for guiding claimants through the process, and a predictive resolution timeline. All analysis is real-time and auto-updates as new documents arrive via IDP.',
+      tips: ['Run the fraud analysis before reviewing documents — it tells you what to look for', 'The NLP Summary condenses all claim documents into 3 sentences — read it first', 'Beneficiary Navigator is for agent-facing use — open it when on the phone with a claimant']
+    },
+    {
+      seq: '6',
+      icon: 'fa-fire-alt',
+      color: '#f97316',
+      bg: '#fff7ed',
+      border: '#fed7aa',
+      tag: 'Portfolio',
+      tagColor: '#f97316',
+      title: 'AI Claims Risk Heatmap',
+      who: 'Supervisors · Team Leads',
+      whoIcon: 'fa-user-shield',
+      summary: 'Every active claim ranked by composite AI risk score (fraud + SLA + liability + docs). Your triage list.',
+      detail: 'The <strong>Risk Heatmap</strong> re-ranks all active claims every 4 minutes using a 6-factor composite AI score (0–100). It answers the question: <em>"Of all my open claims, which ones need attention most urgently?"</em> Supervisors use this for team briefings, workload assignment, and escalation decisions. The heatmap color-codes by risk tier: Critical (red, 85+), High Risk (orange, 70–84), Moderate (blue, 50–69), Low Risk (green, <50). Click any row\'s Action button to open the full claim detail.',
+      tips: ['Sort by AI Risk Score column during morning standup for daily prioritization', 'Claims with Breach SLA status AND risk score 80+ need supervisor escalation today', 'Use "Export Report" to share the heatmap in PDF during team reviews']
+    },
+    {
+      seq: '7',
+      icon: 'fa-lightbulb',
+      color: '#4f46e5',
+      bg: '#eef2ff',
+      border: '#c7d2fe',
+      tag: 'Strategic',
+      tagColor: '#4f46e5',
+      title: 'AI Predictive Insights',
+      who: 'Supervisors · Management',
+      whoIcon: 'fa-user-shield',
+      summary: 'Forward-looking intelligence: fraud clusters, SLA cascades, reserve deficiencies, and revenue opportunities.',
+      detail: 'The <strong>Predictive Insights panel</strong> is the strategic layer — it looks across the entire portfolio and identifies patterns no single adjuster could see. Four insight types: <strong>Fraud Pattern</strong> (graph AI detects clusters of linked suspicious claims), <strong>SLA Cascade</strong> (Monte Carlo simulation predicts 3+ claims breaching SLA simultaneously), <strong>Reserve Risk</strong> (actuarial AI flags under-reserved claims per IFRS 17), and <strong>Opportunity</strong> (collaborative filtering identifies post-claim revenue windows). This panel is designed for supervisor/manager review during daily or weekly planning sessions.',
+      tips: ['Review Predictive Insights at the start of each day — it summarizes overnight AI analysis', 'Fraud Pattern alerts require SIU referral coordination — do not delay', 'Reserve Risk insights must be reviewed before any actuarial reserve meeting']
+    }
+  ];
+
+  /* ── Tab navigation ── */
+  var tabsHTML = sections.map(function(s, i) {
+    return '<button class="chg-tab' + (i===0?' chg-tab-active':'') + '" data-idx="' + i + '" onclick="_chgSelectTab(' + i + ')">' +
+      '<span class="chg-tab-seq">' + s.seq + '</span>' +
+      '<i class="fas ' + s.icon + '" style="color:' + s.color + '"></i>' +
+      '<span class="chg-tab-label">' + s.title.split('—')[0].trim().split('(')[0].trim() + '</span>' +
+    '</button>';
+  }).join('');
+
+  /* ── Section detail cards ── */
+  var sectionsHTML = sections.map(function(s, i) {
+    var tipsHTML = s.tips.map(function(t) {
+      return '<li style="margin-bottom:6px">' + t + '</li>';
+    }).join('');
+    return '<div class="chg-section" id="chg-sec-' + i + '" style="display:' + (i===0?'block':'none') + '">' +
+      '<div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px">' +
+        '<div style="width:56px;height:56px;background:' + s.bg + ';border:2px solid ' + s.border + ';border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+          '<i class="fas ' + s.icon + '" style="font-size:24px;color:' + s.color + '"></i>' +
+        '</div>' +
+        '<div style="flex:1">' +
+          '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">' +
+            '<span style="background:' + s.color + ';color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.06em">' + s.tag + '</span>' +
+            '<span style="background:#f1f5f9;color:#475569;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px"><i class="fas ' + s.whoIcon + '" style="margin-right:4px;font-size:10px"></i>' + s.who + '</span>' +
+            '<span style="background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px">Step ' + s.seq + ' of 7</span>' +
+          '</div>' +
+          '<div style="font-size:20px;font-weight:800;color:#0f172a;line-height:1.2;margin-bottom:8px">' + s.title + '</div>' +
+          '<div style="font-size:13px;color:#475569;font-weight:500;line-height:1.5;padding:10px 14px;background:' + s.bg + ';border-left:3px solid ' + s.color + ';border-radius:0 8px 8px 0">' + s.summary + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:13px;color:#374151;line-height:1.75;margin-bottom:18px">' + s.detail + '</div>' +
+      '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px">' +
+        '<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px"><i class="fas fa-lightbulb" style="color:#f59e0b;margin-right:5px"></i>Pro Tips</div>' +
+        '<ul style="margin:0;padding-left:18px;color:#475569;font-size:12px;line-height:1.7">' + tipsHTML + '</ul>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px">' +
+        (i > 0 ? '<button class="chg-nav-btn" onclick="_chgSelectTab(' + (i-1) + ')"><i class="fas fa-chevron-left"></i> Previous</button>' : '<span></span>') +
+        (i < sections.length-1 ? '<button class="chg-nav-btn chg-nav-btn-next" onclick="_chgSelectTab(' + (i+1) + ')">Next <i class="fas fa-chevron-right"></i></button>' : '<button class="chg-nav-btn chg-nav-btn-next" onclick="document.getElementById(\'clm-help-overlay\').remove()"><i class="fas fa-check"></i> Got it!</button>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var ov = document.createElement('div');
+  ov.id = 'clm-help-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.75);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:900px;width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.45)">' +
+
+      /* Header */
+      '<div style="background:linear-gradient(135deg,#1e3a5f,#0f2040);padding:20px 24px;border-radius:16px 16px 0 0;flex-shrink:0">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between">' +
+          '<div style="display:flex;align-items:center;gap:14px">' +
+            '<div style="width:48px;height:48px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center">' +
+              '<i class="fas fa-map-signs" style="color:#fff;font-size:22px"></i>' +
+            '</div>' +
+            '<div>' +
+              '<div style="font-weight:800;font-size:20px;color:#fff">Claims Dashboard — User Help Guide</div>' +
+              '<div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:3px">7 components · Designed for two user journeys: Supervisor and Individual Agent</div>' +
+            '</div>' +
+          '</div>' +
+          '<button onclick="document.getElementById(\'clm-help-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">&times;</button>' +
+        '</div>' +
+
+        /* Two user journey callouts */
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">' +
+          '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px">' +
+            '<div style="font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px"><i class="fas fa-user-shield" style="margin-right:5px"></i>Supervisor Journey</div>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5">Login → <strong style="color:#fbbf24">Overview</strong> (portfolio health) → <strong style="color:#fbbf24">Workload</strong> (team capacity) → drill into priority claims via Heatmap & Predictive Insights</div>' +
+          '</div>' +
+          '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px">' +
+            '<div style="font-size:11px;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px"><i class="fas fa-user" style="margin-right:5px"></i>Individual Agent Journey</div>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.85);line-height:1.5">Login → <strong style="color:#fbbf24">FNOL</strong> (file/find claims) → <strong style="color:#fbbf24">Active Claims</strong> → <strong style="color:#fbbf24">Resolved</strong> → <strong style="color:#fbbf24">Subrogation</strong> → <strong style="color:#fbbf24">Client Portal</strong> (claimant access)</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      /* Body: sidebar tabs + main content */
+      '<div style="display:flex;flex:1;overflow:hidden">' +
+
+        /* Left sidebar — tab navigation */
+        '<div style="width:210px;background:#f8fafc;border-right:1px solid #e2e8f0;overflow-y:auto;flex-shrink:0;padding:12px 0" id="chg-sidebar">' +
+          tabsHTML +
+        '</div>' +
+
+        /* Main content area */
+        '<div style="flex:1;overflow-y:auto;padding:24px" id="chg-content">' +
+          sectionsHTML +
+        '</div>' +
+      '</div>' +
+
+      /* Footer */
+      '<div style="padding:12px 24px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:0 0 16px 16px">' +
+        '<span style="font-size:12px;color:#94a3b8"><i class="fas fa-info-circle" style="margin-right:4px"></i>Help Guide · NYL Agent 360 Claims Dashboard · Version 3.1</span>' +
+        '<button style="padding:8px 18px;border-radius:8px;background:#1e3a5f;border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer" onclick="document.getElementById(\'clm-help-overlay\').remove()"><i class="fas fa-times" style="margin-right:5px"></i>Close Guide</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+function _chgSelectTab(idx) {
+  /* Update sidebar tab active state */
+  var tabs = document.querySelectorAll('.chg-tab');
+  tabs.forEach(function(t) { t.classList.remove('chg-tab-active'); });
+  var activeTab = document.querySelector('.chg-tab[data-idx="' + idx + '"]');
+  if (activeTab) { activeTab.classList.add('chg-tab-active'); activeTab.scrollIntoView({block:'nearest'}); }
+
+  /* Show correct section */
+  var sections = document.querySelectorAll('.chg-section');
+  sections.forEach(function(s) { s.style.display = 'none'; });
+  var sec = document.getElementById('chg-sec-' + idx);
+  if (sec) { sec.style.display = 'block'; document.getElementById('chg-content').scrollTop = 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   AI METHODOLOGY MODALS — "How AI works" for 3 core panels
+   ══════════════════════════════════════════════════════════════════ */
+
+function showAIMethodology(panel) {
+  var existing = document.getElementById('ai-method-overlay');
+  if (existing) existing.remove();
+
+  /* ── Content config per panel ── */
+  var configs = {
+
+    /* ─── PROACTIVE AI DETECTION ENGINE ─── */
+    proactive: {
+      icon: 'fa-brain',
+      gradient: 'linear-gradient(135deg,#dc2626,#9f1239)',
+      accent: '#dc2626',
+      title: 'How the Proactive AI Detection Engine Works',
+      subtitle: 'Real-time life-event surveillance · Obituary cross-matching · SLA watchdog · Coverage gap detection',
+      badge: 'NYL AI Engine v3.1 · Updated every 90 seconds',
+      overview: 'The Proactive AI Detection Engine runs continuously in the background, ingesting 14 live data streams to surface actionable signals <strong>before</strong> an agent would otherwise know to act. It combines three distinct AI subsystems — Obituary Intelligence, SLA Prediction, and Coverage Gap Analysis — into a unified alert feed.',
+      pipeline: [
+        { icon: 'fa-newspaper', color: '#dc2626', title: 'Data Ingestion (14 Sources)', body: 'Every 90 seconds the engine pulls from: public obituary registries (NJ, NY, CA, FL), Social Security Death Index (SSDI), state vital records APIs, NYL internal policy database, CRM interaction logs, court filing monitors (probate/estate), NLP-parsed social media mentions, MIB cross-reference feed, and funeral home network partners.' },
+        { icon: 'fa-brain', color: '#7c3aed', title: 'Obituary Cross-Match Model (XGBoost)', body: 'A gradient-boosted classifier (NYL ObitMatch v2.3, AUC 0.97) runs fuzzy-name + DOB + geography matching against 1.2M active policies. Match candidates are scored on 11 features: name similarity (Jaro-Winkler), age proximity, state residency, policy age, beneficiary relationship type, recent policy changes, claim history, MIB flags, and cross-source corroboration count. Threshold: score ≥ 0.82 triggers an alert.' },
+        { icon: 'fa-clock', color: '#d97706', title: 'SLA Breach Prediction (Time-Series LSTM)', body: 'A recurrent neural network (LSTM, 3-layer, 128-unit hidden state) is trained on 6 years of historical claim resolution timelines. It ingests current claim age, doc completeness %, adjuster workload index, claim complexity score, state regulatory deadline, and SLA exception history. It predicts the probability of breach at 24h, 72h, and 7-day horizons. Alerts fire when P(breach within 24h) > 65%.' },
+        { icon: 'fa-seedling', color: '#059669', title: 'Coverage Gap & Opportunity Engine (Collaborative Filtering)', body: 'When a claim is resolved, a recommendation model (matrix factorization + policy graph traversal) evaluates the beneficiary\'s: age, payout size, existing NYL products, household composition, estate complexity score, and 90-day outreach receptivity window. It computes a conversion probability score and ranks applicable products. Only opportunities with score ≥ 0.72 surface as actionable alerts.' },
+        { icon: 'fa-shield-alt', color: '#0891b2', title: 'Alert Deduplication & Priority Ranking', body: 'Raw signals are passed through a deduplication layer (cosine similarity on feature vectors, threshold 0.88) to prevent alert fatigue. Surviving alerts are ranked by a composite urgency score: regulatory deadline proximity (40%), financial exposure (30%), fraud risk (20%), and coverage opportunity value (10%). Only the top-N alerts render per session.' }
+      ],
+      metrics: [
+        { label: 'Obituary Match Precision', value: '97.2%', sub: 'False positive rate < 2.8%' },
+        { label: 'SLA Prediction Accuracy', value: '94.1%', sub: '72-hour horizon' },
+        { label: 'Coverage Opp. Conversion', value: '78%', sub: 'Recommended timing' },
+        { label: 'Avg. Detection Lead Time', value: '4.2 days', sub: 'Before manual discovery' },
+        { label: 'Data Sources Monitored', value: '14', sub: 'Live feeds, 90-sec cadence' },
+        { label: 'Model Retrain Frequency', value: 'Weekly', sub: 'On 6yr claims history' }
+      ]
+    },
+
+    /* ─── AI CLAIMS RISK HEATMAP ─── */
+    heatmap: {
+      icon: 'fa-fire-alt',
+      gradient: 'linear-gradient(135deg,#1e3a5f,#0f2040)',
+      accent: '#f97316',
+      title: 'How the AI Claims Risk Heatmap Scores Every Claim',
+      subtitle: 'Composite risk scoring · 6-factor model · XGBoost + Neural Net ensemble · Live re-scoring every 4 minutes',
+      badge: 'NYL RiskScore Engine v4.2 · Ensemble Model · AUC 0.963',
+      overview: 'Every active claim in the portfolio is continuously assigned a <strong>composite AI Risk Score (0–100)</strong> by a 6-factor ensemble model. The heatmap re-ranks the entire claim portfolio every 4 minutes, ensuring adjusters always see the highest-exposure claims at the top. The score drives prioritization, resource allocation, and regulatory reserve adequacy.',
+      pipeline: [
+        { icon: 'fa-chart-bar', color: '#f97316', title: 'Factor 1 — Fraud Risk (30% weight)', body: 'The NYL Fraud AI v3.1 (XGBoost, 47 features, AUC 0.96) assigns a fraud probability score. Key signals: contestability window active, beneficiary change within 12 months, attending physician note inconsistencies (NLP-flagged), claim timing anomaly (ML bracket: 0–12 months from issuance), third-party/attorney filer, MIB flag, cross-policy link (shared beneficiary across multiple claims), and social media corroboration. Score is normalized to 0–100 and weighted at 30% of composite.' },
+        { icon: 'fa-clock', color: '#d97706', title: 'Factor 2 — SLA Compliance Risk (25% weight)', body: 'The SLA risk sub-score is derived from a regression model trained on 180,000 historical claims. Inputs: days since filing, document completeness ratio (docs received / docs required), current adjuster queue depth, claim type SLA window (Death Benefit: 30d NY, 60d federal; Disability: 45d; ADB: 15d), number of prior deadline extensions, and outstanding APS count. States with stricter regulations (NY §3420, CA §790.03) receive a +15-point regulatory multiplier.' },
+        { icon: 'fa-gavel', color: '#7c3aed', title: 'Factor 3 — Liability & Legal Exposure (20% weight)', body: 'A natural language processing model (fine-tuned BERT, 110M parameters) reads all claim notes, adjuster memos, and legal correspondence to extract liability signals: litigation intent keywords, attorney representation flags, regulatory complaint filings, policy exclusion contestations, and Bad Faith indicators. The output is a 0–100 liability severity score. Legal hold status adds a mandatory +20-point floor.' },
+        { icon: 'fa-file-alt', color: '#0891b2', title: 'Factor 4 — Document Completeness (15% weight)', body: 'A weighted document gap score is computed from the Doc Weight Matrix: Death Certificate (30%), Claimant ID (25%), Medical Records/APS (25%), Claim Form (15%), Supplemental (5%). Each missing document reduces the score proportionally. IDP (Intelligent Document Processing) also applies a confidence discount when received documents score below 85% extraction confidence, flagging potential forgery or poor quality.' },
+        { icon: 'fa-dollar-sign', color: '#059669', title: 'Factor 5 — Financial Exposure (6% weight)', body: 'Raw claim amount is normalized against portfolio mean ($287K) and weighted by contestability status, policy age, rider stack complexity, and reserve adequacy ratio. Claims with active legal holds, SIU referrals, or reserve deficiency flags receive an exposure multiplier of 1.25–1.8x. IBNR buffer (8%) is added to all reserves per actuarial standards.' },
+        { icon: 'fa-sitemap', color: '#e11d48', title: 'Factor 6 — Cross-Claim Pattern Risk (4% weight)', body: 'A graph neural network (GNN) maps relationships across the entire active claims portfolio — shared beneficiaries, shared attorneys, shared physicians, temporal clustering (multiple claims filed within 90 days). When a claim is linked to 2+ other active claims with elevated fraud scores, a cross-claim cluster penalty of +8–22 points is added to all linked claims. This is how the CLM-2026-0041 / CLM-2026-0025 fraud cluster was surfaced.' }
+      ],
+      metrics: [
+        { label: 'Composite Model AUC', value: '0.963', sub: 'Ensemble XGBoost + BERT' },
+        { label: 'Re-score Cadence', value: 'Every 4 min', sub: 'Full portfolio refresh' },
+        { label: 'Score Factors', value: '6', sub: 'Weighted composite' },
+        { label: 'Feature Inputs', value: '73', sub: 'Per-claim data points' },
+        { label: 'False Escalation Rate', value: '3.1%', sub: 'High-risk threshold' },
+        { label: 'Training Data', value: '180K claims', sub: '6-year history' }
+      ]
+    },
+
+    /* ─── AI PREDICTIVE INSIGHTS ─── */
+    insights: {
+      icon: 'fa-lightbulb',
+      gradient: 'linear-gradient(135deg,#4f46e5,#312e81)',
+      accent: '#6366f1',
+      title: 'How AI Generates Predictive Insights',
+      subtitle: 'Cross-portfolio pattern mining · 4-model ensemble · Graph analysis + NLP + Time-series + Collaborative filtering',
+      badge: 'NYL InsightEngine v2.7 · 4 concurrent AI models · Refreshed every 5 minutes',
+      overview: 'The AI Predictive Insights panel runs <strong>four distinct ML models simultaneously</strong> against the full active claims portfolio every 5 minutes. Each model is specialized for a different signal type — fraud clusters, SLA cascades, reserve deficiencies, and revenue opportunities — and generates a confidence-scored insight card only when a threshold is crossed. The result is a forward-looking view of risk and opportunity that no human adjuster could manually compute.',
+      pipeline: [
+        { icon: 'fa-project-diagram', color: '#dc2626', title: 'Fraud Pattern Model — Graph Neural Network (GNN)', body: 'A 3-layer Graph Neural Network maps every active claim as a node, with edges representing shared entities (beneficiary, attorney, physician, address, policy originator). At each refresh cycle, the GNN runs a community detection algorithm (Louvain method) to identify claim clusters exhibiting correlated fraud signals. When ≥2 claims share a subgraph with average fraud score > 68 AND temporal proximity < 8 months, a "Fraud Pattern Cluster" insight is generated. The confidence score is derived from cluster cohesion (0.84 = strong), historical staged-death ring signature match (via FBI NICB cross-reference database), and the number of corroborating independent signals. Current detection: CLM-2026-0041 / CLM-2026-0025 — both non-immediate family beneficiaries, both policies modified within 8 months, both fraud scores > 70.' },
+        { icon: 'fa-hourglass-half', color: '#d97706', title: 'SLA Cascade Model — Monte Carlo Simulation + LSTM', body: 'The SLA model runs 10,000 Monte Carlo simulations per refresh cycle, sampling from: current document velocity (docs received per day), adjuster completion rate distributions (per adjuster, per claim type), state regulatory deadline hard stops, and outstanding APS wait time distributions (mean 18 days, σ 7 days). It computes the joint probability that ≥3 claims breach simultaneously, creating a "cascade" scenario that triggers regulatory audit risk. When P(cascade within 72h) > 85%, an insight card is generated with the exact claims, regulatory exposure ($K in fines), and recommended intervention order. Current cascade: CLM-2026-0041 (NY §3420 tomorrow) + CLM-2026-0028 (5 days) + CLM-2026-0035 (45-day disability APS window).' },
+        { icon: 'fa-balance-scale', color: '#0891b2', title: 'Reserve Risk Model — Actuarial AI (IBNR Neural Net)', body: 'The reserve model combines classical actuarial chain-ladder methods with a neural network trained on claims severity distributions. For each claim, it computes: expected total liability (claim amount × liability score multiplier), IBNR buffer (8% of expected liability, per actuarial standard ASOP 43), legal exposure overlay (attorney representation adds 15–40% severity premium), and SIU investigation discount (−12% if cleared). The model then compares this AI-predicted reserve against the current booked reserve and surfaces a "Reserve Deficiency" insight when the gap exceeds $50K or 10% of face value. It also runs a portfolio-level IFRS 17 adequacy test — current result: FAIL on 3 claims, aggregate deficiency $1.08M.' },
+        { icon: 'fa-seedling', color: '#059669', title: 'Opportunity Model — Collaborative Filtering + Propensity Scoring', body: 'Triggered when a claim approaches resolution (P(resolution within 30d) > 70%), the opportunity model evaluates the beneficiary profile against a collaborative filtering matrix trained on 40K historical NYL conversions. Features: beneficiary age, payout size, household financial complexity score, existing NYL product stack, estate complexity indicators (trust/probate filing, multiple beneficiaries), and 90-day market receptivity index. The model outputs a product recommendation ranked list and a conversion probability score. Insights surface when P(conversion) ≥ 0.72. The optimal outreach timing window (14–21 days post-payout) is computed from a survival analysis model trained on 12K past outreach events, maximizing response rate while minimizing churn risk.' }
+      ],
+      metrics: [
+        { label: 'Models Running Simultaneously', value: '4', sub: 'GNN · Monte Carlo · ActuarialAI · CF' },
+        { label: 'Refresh Frequency', value: 'Every 5 min', sub: 'Full portfolio sweep' },
+        { label: 'Fraud Cluster Precision', value: '84%', sub: 'GNN confidence threshold' },
+        { label: 'SLA Cascade Accuracy', value: '97%', sub: 'Monte Carlo 10K sims' },
+        { label: 'Reserve Model Accuracy', value: '91%', sub: 'vs. actual settled amounts' },
+        { label: 'Opportunity Conversion Rate', value: '78%', sub: 'When followed within 21d' }
+      ]
+    }
+  };
+
+  var cfg = configs[panel];
+  if (!cfg) return;
+
+  /* ── Build modal HTML ── */
+  var pipelineHTML = cfg.pipeline.map(function(step) {
+    return '<div style="display:flex;gap:14px;padding:16px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;margin-bottom:10px">' +
+      '<div style="width:40px;height:40px;border-radius:10px;background:' + step.color + '18;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+        '<i class="fas ' + step.icon + '" style="color:' + step.color + ';font-size:16px"></i>' +
+      '</div>' +
+      '<div>' +
+        '<div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:4px">' + step.title + '</div>' +
+        '<div style="font-size:12px;color:#475569;line-height:1.65">' + step.body + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var metricsHTML = cfg.metrics.map(function(m) {
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center">' +
+      '<div style="font-size:22px;font-weight:800;color:' + cfg.accent + '">' + m.value + '</div>' +
+      '<div style="font-size:12px;font-weight:700;color:#1e293b;margin:2px 0">' + m.label + '</div>' +
+      '<div style="font-size:11px;color:#94a3b8">' + m.sub + '</div>' +
+    '</div>';
+  }).join('');
+
+  var ov = document.createElement('div');
+  ov.id = 'ai-method-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)';
+  ov.onclick = function(e) { if (e.target === ov) ov.remove(); };
+
+  ov.innerHTML =
+    '<div style="background:#f8fafc;border-radius:16px;max-width:780px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.4)">' +
+
+      /* Header */
+      '<div style="' + cfg.gradient + ';padding:22px 24px;border-radius:16px 16px 0 0;flex-shrink:0">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">' +
+          '<div style="display:flex;align-items:center;gap:14px">' +
+            '<div style="width:48px;height:48px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+              '<i class="fas ' + cfg.icon + '" style="color:#fff;font-size:22px"></i>' +
+            '</div>' +
+            '<div>' +
+              '<div style="font-weight:800;font-size:18px;color:#fff;line-height:1.2">' + cfg.title + '</div>' +
+              '<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:4px">' + cfg.subtitle + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<button onclick="document.getElementById(\'ai-method-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center">&times;</button>' +
+        '</div>' +
+        '<div style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px">' +
+          '<i class="fas fa-microchip" style="color:rgba(255,255,255,0.8);font-size:11px"></i>' +
+          '<span style="font-size:11px;color:rgba(255,255,255,0.9);font-weight:600">' + cfg.badge + '</span>' +
+        '</div>' +
+      '</div>' +
+
+      /* Scrollable body */
+      '<div style="overflow-y:auto;flex:1;padding:22px 24px">' +
+
+        /* Overview */
+        '<div style="background:linear-gradient(135deg,' + cfg.accent + '12,' + cfg.accent + '06);border:1px solid ' + cfg.accent + '30;border-left:4px solid ' + cfg.accent + ';border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#1e293b;line-height:1.65">' +
+          '<div style="font-size:11px;font-weight:700;color:' + cfg.accent + ';text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px"><i class="fas fa-info-circle"></i> Overview</div>' +
+          cfg.overview +
+        '</div>' +
+
+        /* Key Metrics */
+        '<div style="margin-bottom:20px">' +
+          '<div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px"><i class="fas fa-chart-line" style="color:' + cfg.accent + ';margin-right:6px"></i>Key Performance Metrics</div>' +
+          '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">' + metricsHTML + '</div>' +
+        '</div>' +
+
+        /* Pipeline */
+        '<div>' +
+          '<div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px"><i class="fas fa-cogs" style="color:' + cfg.accent + ';margin-right:6px"></i>AI Pipeline — Step by Step</div>' +
+          pipelineHTML +
+        '</div>' +
+
+        /* Footer note */
+        '<div style="margin-top:16px;padding:12px 14px;background:#f1f5f9;border-radius:8px;font-size:11px;color:#64748b;line-height:1.6">' +
+          '<i class="fas fa-lock" style="color:#94a3b8;margin-right:5px"></i>' +
+          '<strong>Data Privacy & Governance:</strong> All AI models operate exclusively on de-identified or permissioned data in compliance with HIPAA, NYL Privacy Policy, and applicable state insurance regulations. Model outputs are advisory — all final claim decisions require human adjuster review and authorization. Models are audited quarterly by NYL\'s AI Governance Committee and re-trained on rolling 6-year claims history.' +
+        '</div>' +
+      '</div>' +
+
+      /* Footer */
+      '<div style="padding:14px 24px;border-top:1px solid #e2e8f0;background:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;border-radius:0 0 16px 16px">' +
+        '<span style="font-size:12px;color:#94a3b8"><i class="fas fa-robot" style="margin-right:5px"></i>NYL AI Intelligence Platform · Proprietary & Confidential</span>' +
+        '<div style="display:flex;gap:10px">' +
+          '<button style="padding:8px 16px;border-radius:8px;background:#f1f5f9;border:1px solid #e2e8f0;color:#374151;font-size:12px;font-weight:600;cursor:pointer" onclick="p7Toast(\'<i class=\\\'fas fa-file-pdf\\\'></i> AI methodology report downloaded\',2500)"><i class="fas fa-download"></i> Download PDF</button>' +
+          '<button style="padding:8px 16px;border-radius:8px;background:' + cfg.accent + ';border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer" onclick="document.getElementById(\'ai-method-overlay\').remove()"><i class="fas fa-times"></i> Close</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(ov);
 }
 
 /* ── Portal: Generate AI Status Message ── */

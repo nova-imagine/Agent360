@@ -5920,11 +5920,18 @@ function ClaimsPage() {
 
       {/* ══════════════════════════════════════════════════════
           6-TAB BAR
-          tabs: overview | active | resolved | subrogation | workload | portal
+          tabs: overview | workload | active | resolved | subrogation | portal
+          New order rationale:
+          • Supervisors: Overview → Workload (team health → case queue)
+          • Agents: Overview → Active Claims → Resolved → Subrogation → Client Portal
           ══════════════════════════════════════════════════════ */}
       <div class="pol-tab-bar">
         <button class="pol-tab pol-tab-active" id="clm-tab-overview" onclick="clmSwitchTab('overview')">
           <i class="fas fa-chart-pie"></i> Overview
+        </button>
+        <button class="pol-tab" id="clm-tab-workload" onclick="clmSwitchTab('workload')">
+          <i class="fas fa-users-cog"></i> Workload
+          <span class="pol-tab-count" style="background:#e0e7ff;color:#4f46e5;">5</span>
         </button>
         <button class="pol-tab" id="clm-tab-active" onclick="clmSwitchTab('active')">
           <i class="fas fa-folder-open"></i> Active Claims
@@ -5938,12 +5945,8 @@ function ClaimsPage() {
           <i class="fas fa-undo-alt"></i> Subrogation &amp; Recovery
           <span class="pol-tab-count pol-tab-count-green">3</span>
         </button>
-        <button class="pol-tab" id="clm-tab-workload" onclick="clmSwitchTab('workload')">
-          <i class="fas fa-users-cog"></i> Workload
-          <span class="pol-tab-count" style="background:#e0e7ff;color:#4f46e5;">5</span>
-        </button>
         <button class="pol-tab" id="clm-tab-portal" onclick="clmSwitchTab('portal')">
-          <i class="fas fa-user-circle"></i> Portal
+          <i class="fas fa-user-circle"></i> Client Portal
           <span class="pol-tab-count" style="background:#d1fae5;color:#065f46;">5</span>
         </button>
       </div>
@@ -5953,6 +5956,26 @@ function ClaimsPage() {
           AI Claims Intelligence · Workbench · Type breakdown
           ════════════════════════════════════════════════════════ */}
       <div class="pol-tab-panel" id="clm-panel-overview">
+
+        {/* ── FNOL Quick-Launch Bar ── */}
+        <div class="ov-fnol-bar">
+          <div class="ov-fnol-bar-left">
+            <div class="ov-fnol-icon"><i class="fas fa-plus-circle"></i></div>
+            <div>
+              <div class="ov-fnol-title">First Notice of Loss (FNOL)</div>
+              <div class="ov-fnol-sub">AI-guided wizard · 5 steps · Policy auto-match · IDP document extraction · Fraud pre-screen</div>
+            </div>
+          </div>
+          <div class="ov-fnol-bar-right">
+            <button class="ov-fnol-help-link" onclick="openClaimsHelpGuide()" title="Help guide"><i class="fas fa-question-circle"></i> Help Guide</button>
+            <button class="ov-fnol-btn primary" onclick="openFileClaimWizard()">
+              <i class="fas fa-file-medical-alt"></i> File New Claim
+            </button>
+            <button class="ov-fnol-btn secondary" onclick="clmSwitchTab('active')">
+              <i class="fas fa-folder-open"></i> View All Claims
+            </button>
+          </div>
+        </div>
 
         {/* ── KPI Stats Row ── */}
         <div class="ov-kpi-row">
@@ -6150,25 +6173,6 @@ function ClaimsPage() {
               </div>
             </div>
 
-          </div>
-        </div>
-
-        {/* ── FNOL Quick-Launch Bar ── */}
-        <div class="ov-fnol-bar">
-          <div class="ov-fnol-bar-left">
-            <div class="ov-fnol-icon"><i class="fas fa-plus-circle"></i></div>
-            <div>
-              <div class="ov-fnol-title">First Notice of Loss (FNOL)</div>
-              <div class="ov-fnol-sub">AI-guided wizard · 5 steps · Policy auto-match · IDP document extraction · Fraud pre-screen</div>
-            </div>
-          </div>
-          <div class="ov-fnol-bar-right">
-            <button class="ov-fnol-btn primary" onclick="openFileClaimWizard()">
-              <i class="fas fa-file-medical-alt"></i> File New Claim
-            </button>
-            <button class="ov-fnol-btn secondary" onclick="clmSwitchTab('active')">
-              <i class="fas fa-folder-open"></i> View All Claims
-            </button>
           </div>
         </div>
 
