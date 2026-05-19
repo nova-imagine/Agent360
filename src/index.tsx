@@ -5776,6 +5776,21 @@ function ClaimsPage() {
     <div class="page claims-page">
 
       {/* ══════════════════════════════════════════════════════
+          CLAIMS PAGE HEADER — title + global actions
+          ══════════════════════════════════════════════════════ */}
+      <div class="clm-page-header">
+        <div class="clm-page-header-left">
+          <h2 class="clm-page-title"><i class="fas fa-file-medical-alt"></i> Claims Management</h2>
+          <p class="clm-page-sub">AI-powered claims lifecycle · FNOL · Adjudication · Settlement · Recovery</p>
+        </div>
+        <div class="clm-page-header-right">
+          <button class="clm-help-btn" onclick="openClaimsHelpGuide()" title="Claims Management Help Guide">
+            <i class="fas fa-question-circle"></i> Help Guide
+          </button>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
           COLLAPSIBLE KPI RIBBON — collapsed by default
           ══════════════════════════════════════════════════════ */}
       <div class="ckpi-ribbon" id="ckpi-ribbon">
@@ -5967,7 +5982,6 @@ function ClaimsPage() {
             </div>
           </div>
           <div class="ov-fnol-bar-right">
-            <button class="ov-fnol-help-link" onclick="openClaimsHelpGuide()" title="Help guide"><i class="fas fa-question-circle"></i> Help Guide</button>
             <button class="ov-fnol-btn primary" onclick="openFileClaimWizard()">
               <i class="fas fa-file-medical-alt"></i> File New Claim
             </button>
