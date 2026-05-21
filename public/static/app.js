@@ -63873,6 +63873,10 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + '</div></div>';
 
     document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function() {
+      var el = document.getElementById('ann-action-overlay');
+      if (el) el.classList.add('ra-nc-open');
+    });
   }
 
   function _annSendReminderConfirm() {
@@ -63948,6 +63952,10 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + '</div></div>';
 
     document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function() {
+      var el = document.getElementById('ann-action-overlay');
+      if (el) el.classList.add('ra-nc-open');
+    });
   }
 
   /* ── Complete Application modal (APP-003 · Dorothy Wilson) ──────────── */
@@ -64018,6 +64026,10 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + '</div></div>';
 
     document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function() {
+      var el = document.getElementById('ann-action-overlay');
+      if (el) el.classList.add('ra-nc-open');
+    });
   }
 
   /* ══════════════════════════════════════════════════════════════════════
