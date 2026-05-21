@@ -51476,7 +51476,7 @@ function srOpenFullReview(id) {
       '</div>' +
       '<div class="ra-ai-actions">' +
         '<button class="ra-ai-btn primary" onclick="raRunIncomeGapScan()"><i class="fas fa-search-dollar"></i> Income Gap Scan</button>' +
-        '<button class="ra-ai-btn ghost" onclick="raOpenMaturityAlert()"><i class="fas fa-calendar-exclamation"></i> Maturity Alert</button>' +
+        '<button class="ra-ai-btn ghost" onclick="raOpenMaturityModal(\'ANN-MG-001\')"><i class="fas fa-calendar-exclamation"></i> Maturity Alert</button>' +
         '<button class="ra-ai-btn ghost" onclick="raOpenRMDCalculator()"><i class="fas fa-calculator"></i> RMD Calculator</button>' +
       '</div>';
     var el = document.getElementById('ra-ai-banner');
@@ -52089,16 +52089,16 @@ function srOpenFullReview(id) {
           (c.incomeGap > 0 ? '<span style="color:' + gapColor + ';font-weight:800">Gap: $' + c.incomeGap.toLocaleString() + '/mo</span>' : '<span style="color:#059669;font-weight:700">✅ Fully covered</span>') +
         '</div>';
 
-      // Recommended action per contract
+      // Recommended action per contract — each fires a real handler
       var actionMap = {
-        'ANN-JW-001': { icon:'fa-file-pdf',           label:'Generate GLIA Illustration',           color:'#003087' },
-        'ANN-SW-001': { icon:'fa-phone',               label:'Call — LMIA Quote Expires May 30',     color:'#dc2626' },
-        'ANN-LM-001': { icon:'fa-calendar-check',      label:'Present FMIA at Apr 15 Review',        color:'#d97706' },
-        'ANN-MG-001': { icon:'fa-exclamation-circle',  label:'Contact Before Jun 15 CIAFA Maturity', color:'#dc2626' },
-        'ANN-RC-001': { icon:'fa-chart-bar',           label:'Present GFIA at Follow-up Call',       color:'#7c3aed' },
-        'ANN-DW-001': { icon:'fa-handshake',           label:'Close GPIA at Apr 16 Meeting',         color:'#059669' }
+        'ANN-JW-001': { icon:'fa-file-pdf',           label:'Generate GLIA Illustration',           color:'#003087', fn:'_raGsActJW()' },
+        'ANN-SW-001': { icon:'fa-phone',               label:'Call — LMIA Quote Expires May 30',     color:'#dc2626', fn:'_raGsActSW()' },
+        'ANN-LM-001': { icon:'fa-calendar-check',      label:'Present FMIA at Apr 15 Review',        color:'#d97706', fn:'_raGsActLM()' },
+        'ANN-MG-001': { icon:'fa-exclamation-circle',  label:'Contact Before Jun 15 Maturity',       color:'#dc2626', fn:'_raGsActMG()' },
+        'ANN-RC-001': { icon:'fa-chart-bar',           label:'Present GFIA at Follow-up Call',       color:'#7c3aed', fn:'_raGsActRC()' },
+        'ANN-DW-001': { icon:'fa-handshake',           label:'Close GPIA at Apr 16 Meeting',         color:'#059669', fn:'_raGsActDW()' }
       };
-      var act = actionMap[c.id] || { icon:'fa-arrow-right', label:'Schedule Review', color:'#003087' };
+      var act = actionMap[c.id] || { icon:'fa-arrow-right', label:'Schedule Review', color:'#003087', fn:"_raToast('Scheduling review…')" };
 
       return '<div class="ra-gs-row" onclick="raCloseGapScan();raOpenContract(\'' + c.id + '\')">' +
         '<div class="ra-gs-row-left">' +
@@ -52115,7 +52115,7 @@ function srOpenFullReview(id) {
         '</div>' +
         '<div class="ra-gs-row-right">' +
           '<div class="ra-gs-income">' + c.guaranteedIncomeFmt + '<span class="ra-gs-income-lbl"> guaranteed</span></div>' +
-          '<button class="ra-gs-act-btn" style="border-color:' + act.color + ';color:' + act.color + '" onclick="event.stopPropagation();_raToast(\'' + act.label + ' — opening…\')">' +
+          '<button class="ra-gs-act-btn" style="border-color:' + act.color + ';color:' + act.color + '" onclick="event.stopPropagation();' + act.fn + '">' +
             '<i class="fas ' + act.icon + '"></i> ' + act.label +
           '</button>' +
         '</div>' +
@@ -52162,6 +52162,210 @@ function srOpenFullReview(id) {
     requestAnimationFrame(function(){
       var el = document.getElementById('ra-gap-modal');
       if (el) el.classList.add('ra-gs-open');
+    });
+  }
+
+  /* ── Gap Scan per-row action handlers ─────────────────────────── */
+  function _raGsActJW() {
+    raCloseGapScan();
+    raOpenContract('ANN-JW-001');
+    _raToast('<i class="fas fa-file-pdf"></i> Generating GLIA income illustration for James Whitfield — $178K rider base, $1,870/mo at age 67…');
+  }
+  function _raGsActSW() {
+    raCloseGapScan();
+    _raOpenCallModal('ANN-SW-001');
+  }
+  function _raGsActLM() {
+    raCloseGapScan();
+    _raOpenMeetingPrepModal('ANN-LM-001');
+  }
+  function _raGsActMG() {
+    raCloseGapScan();
+    raOpenMaturityModal('ANN-MG-001');
+  }
+  function _raGsActRC() {
+    raCloseGapScan();
+    _raOpenCallModal('ANN-RC-001');
+  }
+  function _raGsActDW() {
+    raCloseGapScan();
+    _raOpenMeetingCloseModal('ANN-DW-001');
+  }
+
+  /* ── Call prep modal (SW, RC) ─────────────────────────────────── */
+  function _raOpenCallModal(contractId) {
+    var existing = document.getElementById('ra-call-modal');
+    if (existing) existing.remove();
+    var c = _raContracts[contractId];
+    if (!c) return;
+
+    var scriptMap = {
+      'ANN-SW-001': {
+        urgency: '⚠️ LMIA Quote Expires May 30',
+        urgencyColor: '#dc2626',
+        phone: '(718) 555-0104',
+        agenda: ['Confirm Sandra is ready to proceed with $120K LMIA placement', 'Review $1,340/mo guaranteed income vs. her $1,800/mo gap (74% covered)', 'Address Joint & Survivor option for spouse Michael', 'Lock rate before May 30 expiry — current rate 4.8%', 'Schedule e-signature appointment this week'],
+        talkingPoints: ['Sandra, your LMIA quote locks in $1,340/mo guaranteed income for life — that\'s 74% of your income gap in one contract.', 'The rate expires May 30 — after that, we\'d need to re-quote at potentially lower rates.', 'With your term life expiring September 2026, combining both conversations saves you a separate meeting.']
+      },
+      'ANN-RC-001': {
+        urgency: '📊 GFIA Follow-up Call',
+        urgencyColor: '#7c3aed',
+        phone: '(212) 555-0103',
+        agenda: ['Present GFIA illustration — $250K premium, $3,200/mo at age 65', 'Discuss 0% market floor protection vs. current portfolio risk', 'Review 1035 exchange opportunity from existing investments', 'Confirm income start age preference (65 or later for higher income)', 'Next step: full proposal meeting date'],
+        talkingPoints: ['Robert, the Guaranteed Future Income Annuity locks in $3,200/mo at age 65 regardless of market conditions.', 'With your $250K rollover assets, a GFIA eliminates sequence-of-returns risk from your retirement income.', 'The 0% floor means you never lose principal — while still participating in index growth up to the cap rate.']
+      }
+    };
+    var sc = scriptMap[contractId] || { urgency: 'Schedule Call', urgencyColor: '#003087', phone: 'N/A', agenda: [], talkingPoints: [] };
+
+    var html =
+      '<div class="ra-nc-overlay" id="ra-call-modal" onclick="if(event.target===this)document.getElementById(\'ra-call-modal\').remove()" style="z-index:10002">' +
+        '<div class="ra-nc-modal" style="max-width:620px">' +
+          '<div class="ra-nc-modal-hdr">' +
+            '<div class="ra-nc-modal-hdr-left">' +
+              '<div class="ra-nc-modal-icon" style="background:' + sc.urgencyColor + '"><i class="fas fa-phone"></i></div>' +
+              '<div>' +
+                '<div class="ra-nc-modal-title">Call Prep — ' + c.clientName + '</div>' +
+                '<div class="ra-nc-modal-sub" style="color:' + sc.urgencyColor + ';font-weight:600">' + sc.urgency + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<button class="ra-nc-close-btn" onclick="document.getElementById(\'ra-call-modal\').remove()"><i class="fas fa-times"></i></button>' +
+          '</div>' +
+          '<div style="padding:20px;display:flex;gap:20px">' +
+            '<div style="flex:1">' +
+              '<div class="ra-cd-section-hdr"><i class="fas fa-list-check"></i> Call Agenda</div>' +
+              '<ol style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.7">' +
+                sc.agenda.map(function(a){ return '<li>' + a + '</li>'; }).join('') +
+              '</ol>' +
+            '</div>' +
+            '<div style="flex:1">' +
+              '<div class="ra-cd-section-hdr"><i class="fas fa-comment-dots"></i> Talking Points</div>' +
+              sc.talkingPoints.map(function(t){ return '<div style="background:#f0f9ff;border-left:3px solid #0891b2;padding:8px 10px;margin-bottom:8px;font-size:12px;color:#0369a1;border-radius:0 6px 6px 0;line-height:1.5">"' + t + '"</div>'; }).join('') +
+            '</div>' +
+          '</div>' +
+          '<div class="ra-nc-modal-footer">' +
+            '<button class="ra-nc-footer-btn ghost" onclick="document.getElementById(\'ra-call-modal\').remove()">Close</button>' +
+            '<a class="ra-nc-footer-btn outline" href="tel:' + sc.phone + '" onclick="_raToast(\'Initiating call to ' + c.clientName + '…\')"><i class="fas fa-phone"></i> Call ' + sc.phone + '</a>' +
+            '<button class="ra-nc-footer-btn primary" onclick="document.getElementById(\'ra-call-modal\').remove();_raToast(\'CRM logged: Call with ' + c.clientName + ' — follow-up scheduled\')"><i class="fas fa-check"></i> Log Call & Follow Up</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function(){
+      var el = document.getElementById('ra-call-modal');
+      if (el) el.classList.add('ra-nc-open');
+    });
+  }
+
+  /* ── Meeting prep modal (LM — Apr 15 Review) ──────────────────── */
+  function _raOpenMeetingPrepModal(contractId) {
+    var existing = document.getElementById('ra-mtg-modal');
+    if (existing) existing.remove();
+    var c = _raContracts[contractId];
+    if (!c) return;
+
+    var html =
+      '<div class="ra-nc-overlay" id="ra-mtg-modal" onclick="if(event.target===this)document.getElementById(\'ra-mtg-modal\').remove()" style="z-index:10002">' +
+        '<div class="ra-nc-modal" style="max-width:640px">' +
+          '<div class="ra-nc-modal-hdr">' +
+            '<div class="ra-nc-modal-hdr-left">' +
+              '<div class="ra-nc-modal-icon" style="background:#d97706"><i class="fas fa-calendar-check"></i></div>' +
+              '<div>' +
+                '<div class="ra-nc-modal-title">Meeting Prep — ' + c.clientName + '</div>' +
+                '<div class="ra-nc-modal-sub" style="color:#d97706;font-weight:600">Apr 15, 2026 · Annual Review + FMIA Presentation</div>' +
+              '</div>' +
+            '</div>' +
+            '<button class="ra-nc-close-btn" onclick="document.getElementById(\'ra-mtg-modal\').remove()"><i class="fas fa-times"></i></button>' +
+          '</div>' +
+          '<div style="padding:20px">' +
+            '<div class="ra-mat-snapshot" style="margin-bottom:16px">' +
+              '<div class="ra-mat-snap-card"><div class="ra-mat-snap-val">$200,000</div><div class="ra-mat-snap-lbl">FMIA Premium Proposed</div></div>' +
+              '<div class="ra-mat-snap-card"><div class="ra-mat-snap-val" style="color:#059669">$1,840/mo</div><div class="ra-mat-snap-lbl">Guaranteed at Age 62</div></div>' +
+              '<div class="ra-mat-snap-card"><div class="ra-mat-snap-val" style="color:#003087">100%</div><div class="ra-mat-snap-lbl">Income Gap Covered</div></div>' +
+              '<div class="ra-mat-snap-card"><div class="ra-mat-snap-val" style="color:#d97706">6%</div><div class="ra-mat-snap-lbl">Annual Rollup Rate</div></div>' +
+            '</div>' +
+            '<div class="ra-cd-section-hdr"><i class="fas fa-clipboard-list"></i> Meeting Agenda</div>' +
+            '<div style="font-size:13px;color:#374151;line-height:1.8">' +
+              '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9"><span style="color:#003087;font-weight:700;min-width:20px">1.</span> Portfolio review — $5.8M net worth overview + UMA performance</div>' +
+              '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9"><span style="color:#003087;font-weight:700;min-width:20px">2.</span> Present FMIA illustration — $200K premium, 6% compound rollup, $1,840/mo at age 62</div>' +
+              '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9"><span style="color:#003087;font-weight:700;min-width:20px">3.</span> Review trust beneficiary update — Morrison Family Trust documents</div>' +
+              '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9"><span style="color:#003087;font-weight:700;min-width:20px">4.</span> LTC gap discussion — $280K Fidelity account consolidation opportunity</div>' +
+              '<div style="display:flex;gap:8px;padding:6px 0"><span style="color:#003087;font-weight:700;min-width:20px">5.</span> Close FMIA — e-signature or paper application</div>' +
+            '</div>' +
+            '<div class="ra-mat-ai-callout" style="margin-top:16px">' +
+              '<div class="ra-mat-ai-icon"><i class="fas fa-robot"></i></div>' +
+              '<div><div class="ra-mat-ai-title">AI Pre-Meeting Brief</div>' +
+              '<div class="ra-mat-ai-body">Linda is a Retired CFO with a 37% tax bracket — the FMIA\'s tax-deferred accumulation saves ~$4,680/yr vs. taxable alternatives. The 6% compound rollup grows the $200K to ~$283K rider base by age 62, generating $1,840/mo — a $440/mo surplus over her income gap. Beneficiary update required: current trust docs predate 2024 estate plan revisions.</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ra-nc-modal-footer">' +
+            '<button class="ra-nc-footer-btn ghost" onclick="document.getElementById(\'ra-mtg-modal\').remove()">Close</button>' +
+            '<button class="ra-nc-footer-btn outline" onclick="_raToast(\'FMIA illustration PDF generated and sent to printer…\')"><i class="fas fa-print"></i> Print Illustration</button>' +
+            '<button class="ra-nc-footer-btn primary" onclick="document.getElementById(\'ra-mtg-modal\').remove();_raToast(\'Meeting confirmed Apr 15 · AI brief exported to calendar event\')"><i class="fas fa-check"></i> Confirm Meeting Ready</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function(){
+      var el = document.getElementById('ra-mtg-modal');
+      if (el) el.classList.add('ra-nc-open');
+    });
+  }
+
+  /* ── Meeting close modal (DW — Apr 16 GPIA close) ─────────────── */
+  function _raOpenMeetingCloseModal(contractId) {
+    var existing = document.getElementById('ra-close-modal');
+    if (existing) existing.remove();
+    var c = _raContracts[contractId];
+    if (!c) return;
+
+    var html =
+      '<div class="ra-nc-overlay" id="ra-close-modal" onclick="if(event.target===this)document.getElementById(\'ra-close-modal\').remove()" style="z-index:10002">' +
+        '<div class="ra-nc-modal" style="max-width:580px">' +
+          '<div class="ra-nc-modal-hdr">' +
+            '<div class="ra-nc-modal-hdr-left">' +
+              '<div class="ra-nc-modal-icon" style="background:#059669"><i class="fas fa-handshake"></i></div>' +
+              '<div>' +
+                '<div class="ra-nc-modal-title">Close Checklist — ' + c.clientName + '</div>' +
+                '<div class="ra-nc-modal-sub" style="color:#059669;font-weight:600">Apr 16 Meeting · GPIA $120,000 · $1,340/mo guaranteed for life</div>' +
+              '</div>' +
+            '</div>' +
+            '<button class="ra-nc-close-btn" onclick="document.getElementById(\'ra-close-modal\').remove()"><i class="fas fa-times"></i></button>' +
+          '</div>' +
+          '<div style="padding:20px">' +
+            '<div class="ra-cd-section-hdr"><i class="fas fa-clipboard-check"></i> Pre-Close Checklist</div>' +
+            '<div style="font-size:13px;color:#374151">' +
+              [
+                { done:true,  text:'GPIA illustration reviewed and accepted — $1,340/mo confirmed' },
+                { done:true,  text:'Suitability questionnaire completed — score 85/100 ✓' },
+                { done:true,  text:'Joint & Survivor 100% rider selected — beneficiary: Estate' },
+                { done:false, text:'Cash Refund Option elected — confirm in application' },
+                { done:false, text:'Premium source confirmed — $120K from savings account' },
+                { done:false, text:'Application signed — e-signature or wet ink' },
+                { done:false, text:'Transfer / check submitted to NYL Annuity Corp.' },
+                { done:false, text:'Free-look period acknowledged (10 days, state-mandated)' }
+              ].map(function(item) {
+                return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9">' +
+                  '<i class="fas ' + (item.done ? 'fa-check-circle' : 'fa-circle') + '" style="color:' + (item.done ? '#059669' : '#d1d5db') + ';font-size:15px;flex-shrink:0"></i>' +
+                  '<span style="' + (item.done ? 'color:#6b7280;text-decoration:line-through' : 'color:#111827') + '">' + item.text + '</span>' +
+                '</div>';
+              }).join('') +
+            '</div>' +
+          '</div>' +
+          '<div class="ra-nc-modal-footer">' +
+            '<button class="ra-nc-footer-btn ghost" onclick="document.getElementById(\'ra-close-modal\').remove()">Close</button>' +
+            '<button class="ra-nc-footer-btn outline" onclick="_raToast(\'GPIA application package generated — ready for e-signature\')"><i class="fas fa-file-signature"></i> Generate E-App</button>' +
+            '<button class="ra-nc-footer-btn primary" onclick="document.getElementById(\'ra-close-modal\').remove();_raToast(\'GPIA ANN-DW-001 submitted to NYL Annuity Corp. · Status updated to In Review\')"><i class="fas fa-paper-plane"></i> Submit Application</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function(){
+      var el = document.getElementById('ra-close-modal');
+      if (el) el.classList.add('ra-nc-open');
     });
   }
 
@@ -52339,6 +52543,7 @@ function srOpenFullReview(id) {
   }
 
   /* ── 23. UTILITY BUTTONS ──────────────────────────────────────────── */
+  /* ── Passive toast (shown on page load) ─────────────────────────── */
   function raOpenMaturityAlert() {
     var existing = document.getElementById('ra-mat-toast');
     if (existing) existing.remove();
@@ -52347,23 +52552,196 @@ function srOpenFullReview(id) {
     el.innerHTML =
       '<div style="display:flex;align-items:flex-start;gap:12px">' +
         '<div style="background:#dc2626;color:#fff;border-radius:8px;padding:8px 10px;font-size:18px;flex-shrink:0"><i class="fas fa-calendar-exclamation"></i></div>' +
-        '<div>' +
+        '<div style="flex:1;min-width:0">' +
           '<div style="font-weight:700;font-size:13px;color:#1e293b">⚠️ Maturity Alert — ANN-MG-001</div>' +
           '<div style="font-size:12px;color:#374151;margin-top:2px">Maria Gonzalez · Clear Income Advantage Fixed Annuity · <strong>Matures Jun 15, 2026</strong></div>' +
           '<div style="font-size:11px;color:#6b7280;margin-top:4px">Revenue at risk: $3,750 commission on CIAFA rollover. Contact Maria this week.</div>' +
           '<div style="margin-top:8px;display:flex;gap:8px">' +
-            '<button onclick="raCloseMaturityAlert();raOpenContract(\'ANN-MG-001\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;font-weight:600"><i class="fas fa-arrow-right"></i> View Contract</button>' +
+            '<button onclick="raCloseMaturityAlert();raOpenMaturityModal(\'ANN-MG-001\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;font-weight:600"><i class="fas fa-arrow-right"></i> View Contract</button>' +
             '<button onclick="raCloseMaturityAlert()" style="background:#f1f5f9;color:#374151;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer">Dismiss</button>' +
           '</div>' +
         '</div>' +
       '</div>';
     el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#fff;border:1.5px solid #dc2626;border-radius:12px;padding:16px;width:340px;z-index:9998;box-shadow:0 8px 24px rgba(0,0,0,.15);animation:ra-slide-in .25s ease';
     document.body.appendChild(el);
-    setTimeout(function(){ raCloseMaturityAlert(); }, 8000);
+    setTimeout(function(){ raCloseMaturityAlert(); }, 10000);
   }
   function raCloseMaturityAlert() {
     var el = document.getElementById('ra-mat-toast');
     if (el) el.remove();
+  }
+
+  /* ── Full Maturity Action Modal ──────────────────────────────────── */
+  function raOpenMaturityModal(contractId) {
+    var existing = document.getElementById('ra-mat-modal');
+    if (existing) existing.remove();
+
+    var c = _raContracts[contractId || 'ANN-MG-001'];
+    if (!c) return;
+
+    // Days remaining
+    var matDate  = new Date('2026-06-15');
+    var today    = new Date();
+    var daysLeft = Math.max(0, Math.round((matDate - today) / 86400000));
+    var urgColor = daysLeft <= 30 ? '#dc2626' : daysLeft <= 60 ? '#d97706' : '#059669';
+
+    // Timeline steps
+    var timelineHtml =
+      '<div class="ra-mat-timeline">' +
+        '<div class="ra-mat-tl-step done">' +
+          '<div class="ra-mat-tl-dot done"></div>' +
+          '<div class="ra-mat-tl-body"><div class="ra-mat-tl-label">Contract Issued</div><div class="ra-mat-tl-date">Jun 15, 2021</div></div>' +
+        '</div>' +
+        '<div class="ra-mat-tl-line done"></div>' +
+        '<div class="ra-mat-tl-step done">' +
+          '<div class="ra-mat-tl-dot done"></div>' +
+          '<div class="ra-mat-tl-body"><div class="ra-mat-tl-label">Surrender Period</div><div class="ra-mat-tl-date">5 Years · Ends Jun 15, 2026</div></div>' +
+        '</div>' +
+        '<div class="ra-mat-tl-line active"></div>' +
+        '<div class="ra-mat-tl-step active">' +
+          '<div class="ra-mat-tl-dot active"></div>' +
+          '<div class="ra-mat-tl-body"><div class="ra-mat-tl-label" style="color:#dc2626;font-weight:700">⚠️ Maturity Date</div><div class="ra-mat-tl-date" style="color:#dc2626">Jun 15, 2026 · ' + daysLeft + ' days away</div></div>' +
+        '</div>' +
+        '<div class="ra-mat-tl-line"></div>' +
+        '<div class="ra-mat-tl-step">' +
+          '<div class="ra-mat-tl-dot"></div>' +
+          '<div class="ra-mat-tl-body"><div class="ra-mat-tl-label">Free-Look Window</div><div class="ra-mat-tl-date">10 days after rollover (state-mandated)</div></div>' +
+        '</div>' +
+      '</div>';
+
+    // Contract at maturity snapshot
+    var snapshotHtml =
+      '<div class="ra-mat-snapshot">' +
+        '<div class="ra-mat-snap-card"><div class="ra-mat-snap-val">$115,800</div><div class="ra-mat-snap-lbl">Contract Value at Maturity</div></div>' +
+        '<div class="ra-mat-snap-card"><div class="ra-mat-snap-val" style="color:#059669">$0</div><div class="ra-mat-snap-lbl">Surrender Charge (0% at maturity)</div></div>' +
+        '<div class="ra-mat-snap-card"><div class="ra-mat-snap-val" style="color:#d97706">4.8%</div><div class="ra-mat-snap-lbl">Guaranteed Rate · Expires Jun 15</div></div>' +
+        '<div class="ra-mat-snap-card" style="border-color:#dc262630"><div class="ra-mat-snap-val" style="color:#dc2626">$3,750</div><div class="ra-mat-snap-lbl">Revenue at Risk if Not Rolled</div></div>' +
+      '</div>';
+
+    // 4 Rollover option cards
+    var options = [
+      { icon:'fa-random',          color:'#003087', title:'1035 Exchange → FIA',         badge:'AI Recommended',  badgeColor:'#059669',
+        desc:'Tax-free rollover to a Fixed Index Annuity. Preserve gains, reset surrender period, lock new cap rate at 5.8%.',
+        detail:'Est. $115,800 × 5.8% cap = $6,717/yr credit · Floor: 0% (no downside) · New 7-yr surrender',
+        action:'Generate 1035 Paperwork', fn:'_raMat1035()' },
+      { icon:'fa-infinity',        color:'#059669', title:'Convert to Income Annuity',   badge:'Highest Income',  badgeColor:'#003087',
+        desc:'Convert to GLIA or LMIA for immediate guaranteed lifetime income stream.',
+        detail:'$115,800 → est. $620/mo guaranteed for life · Joint & Survivor option available',
+        action:'Run Income Illustration', fn:'_raMatRunIllustration()' },
+      { icon:'fa-redo',            color:'#0891b2', title:'Reinvest in New CIAFA',       badge:'Simple Rollover', badgeColor:'#0891b2',
+        desc:'Roll into a new CIAFA contract at current declared rates. Simple, familiar product.',
+        detail:'Current new-issue rate: 4.2% (vs. expiring 4.8%) · New 5-yr guarantee period',
+        action:'Quote New CIAFA', fn:"_raToast('Generating new CIAFA quote…')" },
+      { icon:'fa-hand-holding-usd',color:'#d97706', title:'Surrender & Distribute',      badge:'Tax Impact',      badgeColor:'#dc2626',
+        desc:'Full distribution. Subject to ordinary income tax on gains. Revenue lost.',
+        detail:'Taxable gain: ~$20,800 · At 24% bracket: ~$4,992 tax · Commission lost: $3,750',
+        action:'Generate Tax Impact Report', fn:"_raToast('Generating tax impact analysis…')" }
+    ];
+
+    var optionsHtml = '<div class="ra-mat-options-grid">' + options.map(function(o) {
+      return '<div class="ra-mat-option-card" style="border-top-color:' + o.color + '">' +
+        '<div class="ra-mat-opt-hdr">' +
+          '<div class="ra-mat-opt-icon" style="background:' + o.color + '18;color:' + o.color + '"><i class="fas ' + o.icon + '"></i></div>' +
+          '<div>' +
+            '<div class="ra-mat-opt-title">' + o.title + '</div>' +
+            '<span class="ra-mat-opt-badge" style="background:' + o.badgeColor + '22;color:' + o.badgeColor + '">' + o.badge + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ra-mat-opt-desc">' + o.desc + '</div>' +
+        '<div class="ra-mat-opt-detail"><i class="fas fa-info-circle" style="color:' + o.color + '"></i> ' + o.detail + '</div>' +
+        '<button class="ra-mat-opt-btn" style="border-color:' + o.color + ';color:' + o.color + '" onclick="' + o.fn + '">' +
+          '<i class="fas fa-arrow-right"></i> ' + o.action +
+        '</button>' +
+      '</div>';
+    }).join('') + '</div>';
+
+    // AI recommendation callout
+    var aiHtml =
+      '<div class="ra-mat-ai-callout">' +
+        '<div class="ra-mat-ai-icon"><i class="fas fa-robot"></i></div>' +
+        '<div>' +
+          '<div class="ra-mat-ai-title">AI Recommendation — 1035 Exchange to FIA</div>' +
+          '<div class="ra-mat-ai-body">FIA rollover is the optimal strategy for Maria Gonzalez (age 48, Moderate risk). ' +
+          '$115,800 at 5.8% S&P 500 point-to-point cap = est. $6,717/yr credit with <strong>0% downside floor</strong>. ' +
+          'This outperforms the expiring 4.8% CIAFA guaranteed rate by +100bps while preserving full liquidity at new free-withdrawal anniversary. ' +
+          'FINRA Reg BI suitability score: <strong>91/100 ✓</strong>. Act before Jun 15 to avoid default to low declared rate.</div>' +
+        '</div>' +
+      '</div>';
+
+    var html =
+      '<div class="ra-mat-overlay" id="ra-mat-modal" onclick="if(event.target===this)raCloseMaturityModal()">' +
+        '<div class="ra-mat-modal">' +
+
+          /* Header */
+          '<div class="ra-mat-modal-hdr">' +
+            '<div class="ra-mat-modal-hdr-left">' +
+              '<div class="ra-mat-modal-icon"><i class="fas fa-calendar-exclamation"></i></div>' +
+              '<div>' +
+                '<div class="ra-mat-modal-title">Maturity Alert — ANN-MG-001 · Maria Gonzalez</div>' +
+                '<div class="ra-mat-modal-sub">Clear Income Advantage Fixed Annuity · Issued Jun 15, 2021 · 5-year guaranteed period</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:12px">' +
+              '<div class="ra-mat-countdown" style="border-color:' + urgColor + ';color:' + urgColor + '">' +
+                '<div class="ra-mat-countdown-num">' + daysLeft + '</div>' +
+                '<div class="ra-mat-countdown-lbl">days remaining</div>' +
+              '</div>' +
+              '<button class="ra-mat-close-btn" onclick="raCloseMaturityModal()"><i class="fas fa-times"></i></button>' +
+            '</div>' +
+          '</div>' +
+
+          /* Body */
+          '<div class="ra-mat-modal-body">' +
+
+            /* Timeline */
+            '<div class="ra-mat-section-hdr"><i class="fas fa-stream"></i> Maturity Timeline</div>' +
+            timelineHtml +
+
+            /* Snapshot */
+            '<div class="ra-mat-section-hdr" style="margin-top:20px"><i class="fas fa-clipboard-list"></i> Contract at Maturity</div>' +
+            snapshotHtml +
+
+            /* Options */
+            '<div class="ra-mat-section-hdr" style="margin-top:20px"><i class="fas fa-exchange-alt"></i> Rollover & Action Options</div>' +
+            optionsHtml +
+
+            /* AI callout */
+            aiHtml +
+
+          '</div>' +
+
+          /* Footer */
+          '<div class="ra-mat-modal-footer">' +
+            '<button class="ra-mat-footer-btn ghost" onclick="raCloseMaturityModal()"><i class="fas fa-times"></i> Close</button>' +
+            '<button class="ra-mat-footer-btn outline" onclick="_raToast(\'Generating client alert letter for Maria Gonzalez…\')"><i class="fas fa-envelope"></i> Send Client Alert Letter</button>' +
+            '<button class="ra-mat-footer-btn outline" onclick="raCloseMaturityModal();raOpenContract(\'ANN-MG-001\')"><i class="fas fa-file-contract"></i> View Full Contract</button>' +
+            '<button class="ra-mat-footer-btn primary" onclick="_raMat1035()"><i class="fas fa-random"></i> Start 1035 Exchange</button>' +
+          '</div>' +
+
+        '</div>' +
+      '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function(){
+      var el = document.getElementById('ra-mat-modal');
+      if (el) el.classList.add('ra-mat-open');
+    });
+  }
+
+  function raCloseMaturityModal() {
+    var el = document.getElementById('ra-mat-modal');
+    if (!el) return;
+    el.classList.remove('ra-mat-open');
+    setTimeout(function(){ if (el.parentNode) el.remove(); }, 280);
+  }
+
+  function _raMat1035() {
+    raCloseMaturityModal();
+    _raToast('1035 Exchange initiated — generating NYL transfer paperwork for ANN-MG-001 → FIA rollover…');
+  }
+  function _raMatRunIllustration() {
+    raCloseMaturityModal();
+    _raToast('Running income illustration — $115,800 → GLIA · est. $620/mo guaranteed for life…');
   }
 
   function raOpenRMDCalculator() {
@@ -52463,12 +52841,25 @@ function srOpenFullReview(id) {
   window.raFilterByType      = raFilterByType;
   window.raRunIncomeGapScan  = raRunIncomeGapScan;
   window.raCloseGapScan      = raCloseGapScan;
+  window._raGsActJW          = _raGsActJW;
+  window._raGsActSW          = _raGsActSW;
+  window._raGsActLM          = _raGsActLM;
+  window._raGsActMG          = _raGsActMG;
+  window._raGsActRC          = _raGsActRC;
+  window._raGsActDW          = _raGsActDW;
+  window._raOpenCallModal    = _raOpenCallModal;
+  window._raOpenMeetingPrepModal   = _raOpenMeetingPrepModal;
+  window._raOpenMeetingCloseModal  = _raOpenMeetingCloseModal;
   window.raOpenNewContract   = raOpenNewContract;
   window.raCloseNewContract  = raCloseNewContract;
   window.raNCSelectProduct   = raNCSelectProduct;
-  window.raOpenMaturityAlert = raOpenMaturityAlert;
-  window.raCloseMaturityAlert= raCloseMaturityAlert;
-  window.raOpenRMDCalculator = raOpenRMDCalculator;
+  window.raOpenMaturityAlert  = raOpenMaturityAlert;
+  window.raCloseMaturityAlert = raCloseMaturityAlert;
+  window.raOpenMaturityModal  = raOpenMaturityModal;
+  window.raCloseMaturityModal = raCloseMaturityModal;
+  window._raMat1035           = _raMat1035;
+  window._raMatRunIllustration= _raMatRunIllustration;
+  window.raOpenRMDCalculator  = raOpenRMDCalculator;
   window.initRetAccountsPage = initRetAccountsPage;
   window._raToast            = _raToast;
 
@@ -62799,3 +63190,398 @@ function _pasResolveAction(idx, key, claimId) {
 }
 
 console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded');
+
+
+(function () {
+  'use strict';
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     RET PIPELINE PAGES — Annuity Application, Suitability Review, Contract Delivery
+     Workstream A — 3 pipeline pages parallel to Insurance E-App → UW → Delivery
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ── Data: applications in flight ──────────────────────────────────── */
+  var _annApps = [
+    {
+      id: 'APP-001',
+      client: 'Maria Gonzalez',
+      initials: 'MG',
+      product: 'CIAFA — Contingent Income Annuity with Fixed Account',
+      carrier: 'NYL Annuity Corp.',
+      premium: 115800,
+      status: 'pending-sig',
+      statusLabel: 'Pending E-Signature',
+      statusColor: '#d97706',
+      urgency: 'urgent',
+      submitted: '2026-05-12',
+      notes: '1035 Exchange from matured contract ANN-MG-001 · Free-look window opens Jun 15',
+      action: 'Send Reminder'
+    },
+    {
+      id: 'APP-002',
+      client: 'James Wilson',
+      initials: 'JW',
+      product: 'GLIA — Guaranteed Lifetime Income Annuity',
+      carrier: 'NYL Annuity Corp.',
+      premium: 98500,
+      status: 'submitted',
+      statusLabel: 'Submitted to Carrier',
+      statusColor: '#0284c7',
+      urgency: 'normal',
+      submitted: '2026-05-14',
+      notes: 'Awaiting carrier acknowledgement · Expected 2–3 business days',
+      action: 'Track Status'
+    },
+    {
+      id: 'APP-003',
+      client: 'Dorothy Wilson',
+      initials: 'DW',
+      product: 'GPIA — Guaranteed Payout Income Annuity',
+      carrier: 'NYL Annuity Corp.',
+      premium: 220000,
+      status: 'in-progress',
+      statusLabel: 'Application In Progress',
+      statusColor: '#7c3aed',
+      urgency: 'warning',
+      submitted: null,
+      notes: 'Apr 16 close meeting scheduled · Agent completing NAIC suitability worksheet',
+      action: 'Complete Application'
+    }
+  ];
+
+  /* ── Data: suitability review queue ────────────────────────────────── */
+  var _suitReviews = [
+    {
+      id: 'SUIT-001',
+      client: 'Sandra Williams',
+      initials: 'SW',
+      product: 'LMIA — Level Monthly Income Annuity',
+      appId: 'APP-004',
+      score: 91,
+      risk: 'Moderate-Conservative',
+      age: 67,
+      submitted: '2026-05-10',
+      reviewer: 'Compliance AI + M. Torres',
+      status: 'pending',
+      notes: 'FINRA Reg BI checklist 4/5 complete · Missing income verification doc'
+    },
+    {
+      id: 'SUIT-002',
+      client: 'Robert Chen',
+      initials: 'RC',
+      product: 'GFIA — Guaranteed Fixed Income Annuity',
+      appId: 'APP-005',
+      score: 97,
+      risk: 'Conservative',
+      age: 71,
+      submitted: '2026-05-08',
+      reviewer: 'Compliance AI + M. Torres',
+      status: 'approved',
+      notes: 'All criteria met · Ready for contract issuance · Forwarded to Contract Delivery'
+    }
+  ];
+
+  /* ── Data: contract delivery queue ─────────────────────────────────── */
+  var _ctdContracts = [
+    {
+      id: 'CTD-001',
+      client: 'Dorothy Wilson',
+      initials: 'DW',
+      contractId: 'ANN-DW-001',
+      product: 'GPIA — Guaranteed Payout Income Annuity',
+      premium: 220000,
+      firstPayment: '$1,340/mo · Jul 2026',
+      deliveryDate: '2026-05-20',
+      freeLookExpires: '2026-05-30',
+      checks: [
+        { done: true,    label: 'Contract document received from carrier' },
+        { done: true,    label: 'Client identity verified (CIP/KYC)' },
+        { done: true,    label: 'Beneficiary designation form signed' },
+        { done: false,   label: 'Free-look acknowledgement pending client signature' },
+        { done: 'clock', label: 'First income payment scheduled — awaiting activation' }
+      ],
+      status: 'in-delivery'
+    }
+  ];
+
+  /* ── Format helpers ─────────────────────────────────────────────────── */
+  function _fmtK(n) {
+    if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000)    return '$' + Math.round(n / 1000) + 'K';
+    return '$' + n.toLocaleString();
+  }
+
+  function _statusPill(label, color) {
+    return '<span style="background:' + color + '22;color:' + color + ';font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">' + label + '</span>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     ANNUITY APPLICATION PAGE
+     ══════════════════════════════════════════════════════════════════════ */
+  function initAnnuityAppPage() {
+    var el = document.getElementById('ann-app-body');
+    if (!el) return;
+
+    var html = '<div class="ann-section-hdr">'
+      + '<span class="ann-section-title"><i class="fas fa-file-signature" style="color:#003087;margin-right:6px;"></i>Applications In Flight</span>'
+      + '<span class="ann-section-count">' + _annApps.length + ' active</span>'
+      + '</div>'
+      + '<div class="ann-app-queue">';
+
+    _annApps.forEach(function(app) {
+      var urgClass = app.urgency === 'urgent' ? 'urgent' : (app.urgency === 'warning' ? 'warning' : 'normal');
+      html += '<div class="ann-app-card ' + urgClass + '" onclick="_annAppOpenDetail(\'' + app.id + '\')">'
+        + '<div class="ann-app-card-avatar">' + app.initials + '</div>'
+        + '<div class="ann-app-card-body">'
+        +   '<div class="ann-app-card-name">' + app.client + '</div>'
+        +   '<div class="ann-app-card-product"><i class="fas fa-umbrella-beach" style="margin-right:4px;font-size:10px;"></i>' + app.product + '</div>'
+        +   '<div class="ann-app-card-meta"><i class="fas fa-building" style="margin-right:4px;font-size:10px;color:#9ca3af;"></i>' + app.carrier
+        +     (app.submitted ? ' &nbsp;·&nbsp; <i class="fas fa-calendar-alt" style="margin-right:4px;font-size:10px;color:#9ca3af;"></i>Submitted ' + app.submitted : ' &nbsp;·&nbsp; Not yet submitted')
+        +   '</div>'
+        +   '<div class="ann-app-card-meta" style="margin-top:4px;font-size:11px;color:#6b7280;font-style:italic;">' + app.notes + '</div>'
+        + '</div>'
+        + '<div class="ann-app-card-right">'
+        +   '<div class="ann-app-card-amount">' + _fmtK(app.premium) + '</div>'
+        +   _statusPill(app.statusLabel, app.statusColor)
+        +   '<button class="ann-app-card-action" onclick="event.stopPropagation();_annAppAction(\'' + app.id + '\')">'
+        +     '<i class="fas fa-arrow-right"></i> ' + app.action
+        +   '</button>'
+        + '</div>'
+        + '</div>';
+    });
+
+    html += '</div>';
+
+    // AI summary banner
+    html += '<div style="margin-top:18px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1.5px solid #bfdbfe;border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;">'
+      + '<div style="width:34px;height:34px;background:#4f46e5;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;"><i class="fas fa-robot"></i></div>'
+      + '<div><div style="font-size:12px;font-weight:800;color:#4f46e5;margin-bottom:4px;">AI Application Summary</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;">'
+      + '3 annuity applications in progress totaling $434K premium. '
+      + '<strong>APP-001 (Maria Gonzalez)</strong> is highest priority — e-signature overdue by 3 days; '
+      + 'delay may jeopardize the 1035 exchange window before Jun 15 maturity. '
+      + '<strong>APP-003 (Dorothy Wilson)</strong> close meeting is Apr 16 — complete NAIC suitability worksheet beforehand.'
+      + '</div></div>'
+      + '</div>';
+
+    el.innerHTML = html;
+  }
+
+  function _annAppOpenDetail(appId) {
+    var app = _annApps.find(function(a) { return a.id === appId; });
+    if (!app) return;
+    // Navigate to ret-accounts and open the matching contract if exists
+    var contractMap = { 'APP-001': 'ANN-MG-001', 'APP-002': 'ANN-JW-001', 'APP-003': 'ANN-DW-001' };
+    var cid = contractMap[appId];
+    if (typeof navigateTo === 'function') navigateTo('ret-accounts');
+    if (cid && typeof raOpenContract === 'function') {
+      setTimeout(function() { raOpenContract(cid); }, 300);
+    }
+  }
+
+  function _annAppAction(appId) {
+    var msgMap = {
+      'APP-001': '<i class="fas fa-envelope"></i> E-signature reminder sent to Maria Gonzalez · SMS + Email',
+      'APP-002': '<i class="fas fa-search"></i> Carrier portal checked — ANN-JW-001 acknowledged, processing',
+      'APP-003': '<i class="fas fa-file-signature"></i> NAIC suitability worksheet opened for Dorothy Wilson'
+    };
+    var msg = msgMap[appId] || 'Action recorded';
+    if (typeof _raToast === 'function') _raToast(msg, 3500);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     SUITABILITY REVIEW PAGE
+     ══════════════════════════════════════════════════════════════════════ */
+  function initSuitabilityReviewPage() {
+    var el = document.getElementById('suit-body');
+    if (!el) return;
+
+    var html = '<div class="ann-section-hdr">'
+      + '<span class="ann-section-title"><i class="fas fa-balance-scale" style="color:#d97706;margin-right:6px;"></i>Compliance Review Queue</span>'
+      + '<span class="ann-section-count">' + _suitReviews.length + ' cases</span>'
+      + '</div>'
+      + '<div class="suit-queue">';
+
+    _suitReviews.forEach(function(rev) {
+      var scoreColor = rev.score >= 90 ? '#059669' : (rev.score >= 75 ? '#d97706' : '#dc2626');
+      var badgeClass = rev.status === 'approved' ? 'approved' : (rev.status === 'flagged' ? 'flagged' : 'pending');
+      var badgeLabel = rev.status === 'approved' ? 'Approved' : (rev.status === 'flagged' ? 'Flagged' : 'Pending Review');
+      var btnClass   = rev.status === 'approved' ? 'approve' : 'review';
+      var btnLabel   = rev.status === 'approved' ? '<i class="fas fa-check-circle"></i> View Approval' : '<i class="fas fa-search"></i> Review Now';
+
+      html += '<div class="suit-card">'
+        + '<div class="suit-card-avatar">' + rev.initials + '</div>'
+        + '<div class="suit-card-body">'
+        +   '<div class="suit-card-name">' + rev.client + ' <span style="font-size:11px;color:#9ca3af;font-weight:400;">· Age ' + rev.age + '</span></div>'
+        +   '<div class="suit-card-product">' + rev.product + '</div>'
+        +   '<div class="suit-card-meta">App <strong>' + rev.appId + '</strong> &nbsp;·&nbsp; Submitted ' + rev.submitted + ' &nbsp;·&nbsp; Reviewer: ' + rev.reviewer + '</div>'
+        +   '<div class="suit-card-meta" style="margin-top:3px;font-style:italic;">' + rev.notes + '</div>'
+        +   '<div class="suit-score-bar" style="margin-top:8px;">'
+        +     '<span style="font-size:11px;color:#6b7280;flex-shrink:0;">Suitability Score</span>'
+        +     '<div class="suit-score-track"><div class="suit-score-fill" style="width:' + rev.score + '%;background:' + scoreColor + ';"></div></div>'
+        +     '<span class="suit-score-val" style="color:' + scoreColor + ';">' + rev.score + '%</span>'
+        +   '</div>'
+        + '</div>'
+        + '<div class="suit-card-right">'
+        +   '<span class="suit-badge ' + badgeClass + '">' + badgeLabel + '</span>'
+        +   '<span style="font-size:11px;color:#6b7280;">' + rev.risk + '</span>'
+        +   '<button class="suit-action-btn ' + btnClass + '" onclick="_suitAction(\'' + rev.id + '\')">' + btnLabel + '</button>'
+        + '</div>'
+        + '</div>';
+    });
+
+    html += '</div>';
+
+    // Compliance AI summary
+    html += '<div style="margin-top:18px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fcd34d;border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;">'
+      + '<div style="width:34px;height:34px;background:#d97706;border-radius:9px;display:flex;align-items:center;justify-content:justify-content;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;"><i class="fas fa-shield-alt"></i></div>'
+      + '<div><div style="font-size:12px;font-weight:800;color:#d97706;margin-bottom:4px;">Compliance AI — FINRA Reg BI Status</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;">'
+      + '<strong>SUIT-002 (Robert Chen)</strong>: All 5 Reg BI criteria satisfied — forwarded to Contract Delivery. '
+      + '<strong>SUIT-001 (Sandra Williams)</strong>: Missing income verification. Send DocuRequest to client before May 30 LMIA quote expiry.'
+      + '</div></div>'
+      + '</div>';
+
+    el.innerHTML = html;
+  }
+
+  function _suitAction(reviewId) {
+    var rev = _suitReviews.find(function(r) { return r.id === reviewId; });
+    if (!rev) return;
+    if (rev.status === 'approved') {
+      if (typeof navigateTo === 'function') navigateTo('contract-delivery');
+    } else {
+      if (typeof _raToast === 'function')
+        _raToast('<i class="fas fa-clipboard-check"></i> Opening Reg BI compliance checklist for ' + rev.client, 3000);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     CONTRACT DELIVERY PAGE
+     ══════════════════════════════════════════════════════════════════════ */
+  function initContractDeliveryPage() {
+    var el = document.getElementById('ctd-body');
+    if (!el) return;
+
+    var html = '<div class="ann-section-hdr">'
+      + '<span class="ann-section-title"><i class="fas fa-shipping-fast" style="color:#059669;margin-right:6px;"></i>Ready for Delivery</span>'
+      + '<span class="ann-section-count">' + _ctdContracts.length + ' contract</span>'
+      + '</div>'
+      + '<div class="ctd-queue">';
+
+    _ctdContracts.forEach(function(ctd) {
+      html += '<div class="ctd-card">'
+        + '<div class="ctd-card-hdr">'
+        +   '<div class="ctd-card-avatar">' + ctd.initials + '</div>'
+        +   '<div>'
+        +     '<div class="ctd-card-name">' + ctd.client + ' <span style="font-size:11px;color:#9ca3af;font-weight:400;">· ' + ctd.contractId + '</span></div>'
+        +     '<div class="ctd-card-product">' + ctd.product + '</div>'
+        +   '</div>'
+        +   '<div class="ctd-card-amount">' + _fmtK(ctd.premium) + '</div>'
+        + '</div>';
+
+      // Contract meta
+      html += '<div style="display:flex;gap:20px;font-size:12px;color:#6b7280;margin-bottom:12px;flex-wrap:wrap;">'
+        + '<span><i class="fas fa-calendar-alt" style="color:#9ca3af;margin-right:4px;"></i>Delivered ' + ctd.deliveryDate + '</span>'
+        + '<span><i class="fas fa-hourglass-half" style="color:#d97706;margin-right:4px;"></i>Free-look expires ' + ctd.freeLookExpires + '</span>'
+        + '<span><i class="fas fa-piggy-bank" style="color:#059669;margin-right:4px;"></i>First income: ' + ctd.firstPayment + '</span>'
+        + '</div>';
+
+      // Checklist
+      html += '<div class="ctd-checklist">';
+      ctd.checks.forEach(function(chk) {
+        var icon, iconColor;
+        if (chk.done === true)      { icon = 'fa-check-circle'; iconColor = '#059669'; }
+        else if (chk.done === 'clock') { icon = 'fa-clock'; iconColor = '#d97706'; }
+        else                        { icon = 'fa-circle'; iconColor = '#d1d5db'; }
+        html += '<div class="ctd-check-item"><i class="fas ' + icon + '" style="color:' + iconColor + ';font-size:14px;flex-shrink:0;"></i>' + chk.label + '</div>';
+      });
+      html += '</div>';
+
+      // Footer actions
+      html += '<div class="ctd-card-footer">'
+        + '<button class="ctd-btn ghost" onclick="navigateTo(\'ret-accounts\')"><i class="fas fa-umbrella-beach"></i> View Contract</button>'
+        + '<button class="ctd-btn ghost" onclick="_ctdSendFreeLook(\'' + ctd.id + '\')"><i class="fas fa-envelope"></i> Send Free-Look Doc</button>'
+        + '<button class="ctd-btn primary" onclick="_ctdActivate(\'' + ctd.id + '\')"><i class="fas fa-play-circle"></i> Activate Income</button>'
+        + '</div>'
+        + '</div>';
+    });
+
+    html += '</div>';
+
+    // Delivery guide callout
+    html += '<div style="margin-top:18px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid #a7f3d0;border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;">'
+      + '<div style="width:34px;height:34px;background:#059669;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;"><i class="fas fa-hand-holding-usd"></i></div>'
+      + '<div><div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:4px;">Contract Delivery Checklist — NYL Annuity Corp.</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;">'
+      + 'Dorothy Wilson\'s free-look period expires <strong>May 30, 2026</strong>. '
+      + 'Obtain free-look acknowledgement signature and submit to carrier to activate the $1,340/mo income stream starting Jul 2026. '
+      + 'Beneficiary designation is on file — no action needed.'
+      + '</div></div>'
+      + '</div>';
+
+    el.innerHTML = html;
+  }
+
+  function _ctdSendFreeLook(ctdId) {
+    if (typeof _raToast === 'function')
+      _raToast('<i class="fas fa-envelope"></i> Free-look acknowledgement document sent to Dorothy Wilson · DocuSign', 3500);
+  }
+
+  function _ctdActivate(ctdId) {
+    if (typeof _raToast === 'function')
+      _raToast('<i class="fas fa-play-circle"></i> Income activation request submitted to NYL Annuity Corp. · First payment Jul 1, 2026', 4000);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     NAVIGATE-TO MONKEY-PATCHES — 3 new annuity pipeline routes
+     ══════════════════════════════════════════════════════════════════════ */
+  var _origNav_annPipeline = navigateTo;
+
+  navigateTo = function(page) {
+    _origNav_annPipeline(page);
+
+    if (page === 'ann-application') {
+      var titleEl = document.getElementById('page-title');
+      var bcEl    = document.getElementById('page-breadcrumb');
+      if (titleEl) titleEl.textContent = 'Annuity Application & Submission';
+      if (bcEl)    bcEl.textContent    = 'Retirement / Annuity Application';
+      requestAnimationFrame(function() {
+        setTimeout(initAnnuityAppPage, 80);
+      });
+    }
+
+    if (page === 'suitability-review') {
+      var titleEl = document.getElementById('page-title');
+      var bcEl    = document.getElementById('page-breadcrumb');
+      if (titleEl) titleEl.textContent = 'Suitability Review';
+      if (bcEl)    bcEl.textContent    = 'Retirement / Suitability Review';
+      requestAnimationFrame(function() {
+        setTimeout(initSuitabilityReviewPage, 80);
+      });
+    }
+
+    if (page === 'contract-delivery') {
+      var titleEl = document.getElementById('page-title');
+      var bcEl    = document.getElementById('page-breadcrumb');
+      if (titleEl) titleEl.textContent = 'Contract Delivery & Activation';
+      if (bcEl)    bcEl.textContent    = 'Retirement / Contract Delivery';
+      requestAnimationFrame(function() {
+        setTimeout(initContractDeliveryPage, 80);
+      });
+    }
+  };
+
+  /* ── Expose globals ─────────────────────────────────────────────────── */
+  window.initAnnuityAppPage        = initAnnuityAppPage;
+  window.initSuitabilityReviewPage = initSuitabilityReviewPage;
+  window.initContractDeliveryPage  = initContractDeliveryPage;
+  window._annAppOpenDetail         = _annAppOpenDetail;
+  window._annAppAction             = _annAppAction;
+  window._suitAction               = _suitAction;
+  window._ctdSendFreeLook          = _ctdSendFreeLook;
+  window._ctdActivate              = _ctdActivate;
+
+  console.log('RET Pipeline module loaded — Annuity Application · Suitability Review · Contract Delivery · navigateTo patched for ann-application, suitability-review, contract-delivery');
+
+})();

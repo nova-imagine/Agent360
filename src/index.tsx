@@ -325,6 +325,9 @@ function MainApp() {
         <div id="tpl-inv-accounts"><InvestmentAccountsPage /></div>
         <div id="tpl-inv-proposals"><InvestmentProposalsPage /></div>
         <div id="tpl-ret-accounts"><RetirementAccountsPage /></div>
+        <div id="tpl-ann-application"><AnnuityApplicationPage /></div>
+        <div id="tpl-suitability-review"><SuitabilityReviewPage /></div>
+        <div id="tpl-contract-delivery"><ContractDeliveryPage /></div>
         <div id="tpl-adv-wealth"></div>
         <div id="tpl-adv-accounts"><AdvisoryAccountsPage /></div>
         <div id="tpl-adv-estate">
@@ -875,6 +878,18 @@ function Sidebar() {
         <a class="nav-item ret-accounts-nav" onclick="navigateTo('ret-accounts')" href="#">
           <i class="fas fa-umbrella-beach"></i><span>Annuity Accounts</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
+        </a>
+        <a class="nav-item ann-application-nav" onclick="navigateTo('ann-application')" href="#">
+          <i class="fas fa-file-signature"></i><span>Annuity Application</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">3</span>
+        </a>
+        <a class="nav-item suitability-review-nav" onclick="navigateTo('suitability-review')" href="#">
+          <i class="fas fa-balance-scale"></i><span>Suitability Review</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">2</span>
+        </a>
+        <a class="nav-item contract-delivery-nav" onclick="navigateTo('contract-delivery')" href="#">
+          <i class="fas fa-hand-holding-usd"></i><span>Contract Delivery</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">1</span>
         </a>
 
         {/* ── ADVISORY ── */}
@@ -18023,6 +18038,151 @@ function RetirementAccountsPage() {
 
       </div>
 
+    </div>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANNUITY APPLICATION PAGE
+   Retirement equivalent of E-App & Submissions
+   ══════════════════════════════════════════════════════════════════ */
+function AnnuityApplicationPage() {
+  return (
+    <div class="page ann-app-page">
+      <div class="ann-app-header">
+        <div class="ann-app-header-left">
+          <div class="ann-app-icon"><i class="fas fa-file-signature"></i></div>
+          <div>
+            <h2 class="ann-app-title">Annuity Application &amp; Submission</h2>
+            <p class="ann-app-sub">AI-assisted annuity applications · 1035 exchanges · NAIC suitability compliance · Carrier submission · NYL Annuity Corp.</p>
+          </div>
+        </div>
+        <div class="ann-app-header-right">
+          <button class="ann-app-hdr-btn ghost" onclick="navigateTo('ret-accounts')"><i class="fas fa-umbrella-beach"></i> Annuity Accounts</button>
+          <button class="ann-app-hdr-btn ghost" onclick="navigateTo('suitability-review')"><i class="fas fa-balance-scale"></i> Suitability Review</button>
+          <button class="ann-app-hdr-btn primary" onclick="raOpenNewContract()"><i class="fas fa-plus"></i> New Application</button>
+        </div>
+      </div>
+
+      {/* ── Pipeline progress stepper ── */}
+      <div class="ann-pipe-stepper">
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Income Illustration</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Income Proposal</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step active"><div class="ann-pipe-step-dot active">3</div><div class="ann-pipe-step-label">Application &amp; Submission</div></div>
+        <div class="ann-pipe-connector"></div>
+        <div class="ann-pipe-step"><div class="ann-pipe-step-dot">4</div><div class="ann-pipe-step-label">Suitability Review</div></div>
+        <div class="ann-pipe-connector"></div>
+        <div class="ann-pipe-step"><div class="ann-pipe-step-dot">5</div><div class="ann-pipe-step-label">Contract Delivery</div></div>
+      </div>
+
+      {/* ── KPI strip ── */}
+      <div class="ann-app-kpi-strip">
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon blue"><i class="fas fa-file-contract"></i></div><div><div class="ann-app-kpi-val">3</div><div class="ann-app-kpi-lbl">Apps In Flight</div><div class="ann-app-kpi-sub">Active this month</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon amber"><i class="fas fa-clock"></i></div><div><div class="ann-app-kpi-val">1</div><div class="ann-app-kpi-lbl">Pending Signature</div><div class="ann-app-kpi-sub">E-signature awaited</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div><div><div class="ann-app-kpi-val">1</div><div class="ann-app-kpi-lbl">1035 Exchange Active</div><div class="ann-app-kpi-sub">ANN-MG-001 transfer</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon green"><i class="fas fa-check-circle"></i></div><div><div class="ann-app-kpi-val">$435K</div><div class="ann-app-kpi-lbl">Premium In Process</div><div class="ann-app-kpi-sub">Across 3 contracts</div></div></div>
+      </div>
+
+      {/* ── Application queue ── */}
+      <div class="ann-app-body" id="ann-app-body">
+        {/* Rendered by initAnnuityAppPage() */}
+      </div>
+    </div>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SUITABILITY REVIEW PAGE
+   Retirement equivalent of Underwriting
+   ══════════════════════════════════════════════════════════════════ */
+function SuitabilityReviewPage() {
+  return (
+    <div class="page suit-page">
+      <div class="ann-app-header">
+        <div class="ann-app-header-left">
+          <div class="ann-app-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)"><i class="fas fa-balance-scale"></i></div>
+          <div>
+            <h2 class="ann-app-title">Suitability Review</h2>
+            <p class="ann-app-sub">FINRA Reg BI compliance · State suitability model regulation · CIP/KYC verification · Compliance officer sign-off</p>
+          </div>
+        </div>
+        <div class="ann-app-header-right">
+          <button class="ann-app-hdr-btn ghost" onclick="navigateTo('ann-application')"><i class="fas fa-file-signature"></i> Applications</button>
+          <button class="ann-app-hdr-btn primary" onclick="navigateTo('contract-delivery')"><i class="fas fa-hand-holding-usd"></i> Contract Delivery</button>
+        </div>
+      </div>
+
+      <div class="ann-pipe-stepper">
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Income Illustration</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Income Proposal</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Application &amp; Submission</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step active"><div class="ann-pipe-step-dot active">4</div><div class="ann-pipe-step-label">Suitability Review</div></div>
+        <div class="ann-pipe-connector"></div>
+        <div class="ann-pipe-step"><div class="ann-pipe-step-dot">5</div><div class="ann-pipe-step-label">Contract Delivery</div></div>
+      </div>
+
+      <div class="ann-app-kpi-strip">
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon amber"><i class="fas fa-balance-scale"></i></div><div><div class="ann-app-kpi-val">2</div><div class="ann-app-kpi-lbl">Pending Review</div><div class="ann-app-kpi-sub">Compliance queue</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon green"><i class="fas fa-check-double"></i></div><div><div class="ann-app-kpi-val">4</div><div class="ann-app-kpi-lbl">Approved YTD</div><div class="ann-app-kpi-sub">Reg BI compliant</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon blue"><i class="fas fa-robot"></i></div><div><div class="ann-app-kpi-val">94%</div><div class="ann-app-kpi-lbl">Avg Suitability Score</div><div class="ann-app-kpi-sub">AI scored</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon red"><i class="fas fa-clock"></i></div><div><div class="ann-app-kpi-val">1.8d</div><div class="ann-app-kpi-lbl">Avg Review Time</div><div class="ann-app-kpi-sub">vs. 3d target</div></div></div>
+      </div>
+
+      <div class="suit-body" id="suit-body">
+        {/* Rendered by initSuitabilityReviewPage() */}
+      </div>
+    </div>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CONTRACT DELIVERY PAGE
+   Retirement equivalent of Policy Delivery
+   ══════════════════════════════════════════════════════════════════ */
+function ContractDeliveryPage() {
+  return (
+    <div class="page ctd-page">
+      <div class="ann-app-header">
+        <div class="ann-app-header-left">
+          <div class="ann-app-icon" style="background:linear-gradient(135deg,#059669,#34d399)"><i class="fas fa-hand-holding-usd"></i></div>
+          <div>
+            <h2 class="ann-app-title">Contract Delivery &amp; Activation</h2>
+            <p class="ann-app-sub">Free-look period · Income activation confirmation · Beneficiary enrollment · First guaranteed income payment setup</p>
+          </div>
+        </div>
+        <div class="ann-app-header-right">
+          <button class="ann-app-hdr-btn ghost" onclick="navigateTo('suitability-review')"><i class="fas fa-balance-scale"></i> Suitability Review</button>
+          <button class="ann-app-hdr-btn primary" onclick="navigateTo('ret-accounts')"><i class="fas fa-umbrella-beach"></i> View All Contracts</button>
+        </div>
+      </div>
+
+      <div class="ann-pipe-stepper">
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Income Illustration</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Income Proposal</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Application &amp; Submission</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step done"><div class="ann-pipe-step-dot done"><i class="fas fa-check"></i></div><div class="ann-pipe-step-label">Suitability Review</div></div>
+        <div class="ann-pipe-connector done"></div>
+        <div class="ann-pipe-step active"><div class="ann-pipe-step-dot active">5</div><div class="ann-pipe-step-label">Contract Delivery</div></div>
+      </div>
+
+      <div class="ann-app-kpi-strip">
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon green"><i class="fas fa-shipping-fast"></i></div><div><div class="ann-app-kpi-val">1</div><div class="ann-app-kpi-lbl">Ready for Delivery</div><div class="ann-app-kpi-sub">Suitability approved</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon blue"><i class="fas fa-calendar-check"></i></div><div><div class="ann-app-kpi-val">10d</div><div class="ann-app-kpi-lbl">Free-Look Window</div><div class="ann-app-kpi-sub">State-mandated</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon amber"><i class="fas fa-piggy-bank"></i></div><div><div class="ann-app-kpi-val">$1,340</div><div class="ann-app-kpi-lbl">First Income Payment</div><div class="ann-app-kpi-sub">ANN-DW-001 · Jul 2026</div></div></div>
+        <div class="ann-app-kpi-card"><div class="ann-app-kpi-icon green"><i class="fas fa-check-circle"></i></div><div><div class="ann-app-kpi-val">5</div><div class="ann-app-kpi-lbl">Delivered YTD</div><div class="ann-app-kpi-sub">All activated</div></div></div>
+      </div>
+
+      <div class="ctd-body" id="ctd-body">
+        {/* Rendered by initContractDeliveryPage() */}
+      </div>
     </div>
   )
 }
