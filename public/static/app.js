@@ -52525,9 +52525,413 @@ function srOpenFullReview(id) {
     setTimeout(function(){ if (el.parentNode) el.remove(); }, 280);
   }
 
+  /* ─────────────────────────────────────────────────────────────────────────
+     NEW CONTRACT WIZARD  —  3-step application creation flow
+     Step 1: Client & premium details   (pre-filled per product)
+     Step 2: Riders & options           (product-specific defaults)
+     Step 3: AI suitability review      (auto-score + submit)
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Product config: default values, riders, and field hints per code */
+  var _ncwProductConfig = {
+    GLIA:  { label:'Guaranteed Lifetime Income Annuity', code:'GLIA', color:'#059669', icon:'fa-infinity',
+              cat:'Immediate', minPremium:10000, defaultPremium:120000,
+              incomeStart:'Immediate (within 12 months)', surrenderPeriod:'N/A — SPIA',
+              defaultRiders:['Joint & Survivor 100%','Cash Refund Option'],
+              optionalRiders:['Enhanced Death Benefit','Waiver of Surrender (Nursing Home)'],
+              highlight:'Income guaranteed for life · No accumulation phase',
+              contractNumPrefix:'NYL-GLIA', suitScore:88 },
+    LMIA:  { label:'Lifetime Mutual Income Annuity', code:'LMIA', color:'#003087', icon:'fa-hands-helping',
+              cat:'Immediate', minPremium:10000, defaultPremium:120000,
+              incomeStart:'Immediate (within 12 months)', surrenderPeriod:'N/A — SPIA',
+              defaultRiders:['Joint & Survivor 100%','Dividend Participation'],
+              optionalRiders:['Cash Refund Option','Installment Refund'],
+              highlight:'Mutual dividends may increase income over time',
+              contractNumPrefix:'NYL-LMIA', suitScore:86 },
+    GPIA:  { label:'Guaranteed Period Income Annuity', code:'GPIA', color:'#0891b2', icon:'fa-calendar-check',
+              cat:'Immediate', minPremium:10000, defaultPremium:100000,
+              incomeStart:'Immediate (within 12 months)', surrenderPeriod:'N/A — SPIA',
+              defaultRiders:['Period Certain 10-Year','Cash Refund Option'],
+              optionalRiders:['Period Certain 20-Year','Period Certain 30-Year','Joint & Survivor 50%'],
+              highlight:'Income guaranteed for a chosen period (5–30 yrs)',
+              contractNumPrefix:'NYL-GPIA', suitScore:84 },
+    GFIA:  { label:'Guaranteed Future Income Annuity', code:'GFIA', color:'#003087', icon:'fa-shield-alt',
+              cat:'Deferred', minPremium:10000, defaultPremium:150000,
+              incomeStart:'Deferred (chosen future date)', surrenderPeriod:'10 years',
+              defaultRiders:['Income Rider — 6% Rollup (Compound)','Enhanced Death Benefit'],
+              optionalRiders:['Waiver of Surrender (Nursing Home)','Return of Premium on Death','LTC Extension Rider'],
+              highlight:'Lock in guaranteed income for a future date',
+              contractNumPrefix:'NYL-GFIA', suitScore:91 },
+    FMIA:  { label:'Future Mutual Income Annuity', code:'FMIA', color:'#059669', icon:'fa-chart-pie',
+              cat:'Deferred', minPremium:10000, defaultPremium:200000,
+              incomeStart:'Deferred (chosen future date)', surrenderPeriod:'10 years',
+              defaultRiders:['Income Rider — 6% Rollup (Compound)','Return of Premium on Death'],
+              optionalRiders:['Enhanced Death Benefit Step-Up','Dividend Participation Rider','Waiver of Surrender (Disability)'],
+              highlight:'Deferred income + mutual dividend participation',
+              contractNumPrefix:'NYL-FMIA', suitScore:89 },
+    CAFIA: { label:'Clear Income Advantage Fixed Annuity', code:'CAFIA', color:'#d97706', icon:'fa-lock',
+              cat:'Deferred', minPremium:20000, defaultPremium:95000,
+              incomeStart:'Deferred (chosen future date)', surrenderPeriod:'7 years',
+              defaultRiders:['Guaranteed Interest Rate (4.8%)','Income Activation Rider'],
+              optionalRiders:['Enhanced Death Benefit','Nursing Home Waiver','Return of Premium'],
+              highlight:'Guaranteed interest rate + income rider',
+              contractNumPrefix:'NYL-CAFIA', suitScore:93 }
+  };
+
+  /* Client roster for Step 1 dropdown */
+  var _ncwClients = [
+    { id:'JW', name:'James Whitfield',  age:52, risk:'Moderate-Aggressive', gap:'$2,100/mo' },
+    { id:'SW', name:'Sandra Williams',  age:61, risk:'Conservative',         gap:'$1,800/mo' },
+    { id:'LM', name:'Linda Morrison',   age:56, risk:'Moderate-Conservative',gap:'$1,400/mo' },
+    { id:'MG', name:'Maria Gonzalez',   age:63, risk:'Conservative',         gap:'$900/mo'  },
+    { id:'RC', name:'Robert Chen',      age:71, risk:'Conservative',         gap:'$1,200/mo' },
+    { id:'DW', name:'Dorothy Wilson',   age:68, risk:'Moderate-Conservative',gap:'$1,340/mo' }
+  ];
+
+  var _ncwState = { step: 1, code: null, cfg: null, client: null, premium: 0, selectedRiders: [], incomeStartAge: 0, paymentMode: 'Single Premium', notes: '' };
+
   function raNCSelectProduct(code, name) {
     raCloseNewContract();
-    _raToast('Opening E-App for ' + name + ' (' + code + ') — loading suitability checklist…');
+    var cfg = _ncwProductConfig[code];
+    if (!cfg) {
+      _raToast('<i class="fas fa-exclamation-circle"></i> Unknown product: ' + code);
+      return;
+    }
+    _ncwState = {
+      step: 1, code: code, cfg: cfg,
+      client: _ncwClients[0],
+      premium: cfg.defaultPremium,
+      selectedRiders: cfg.defaultRiders.slice(),
+      incomeStartAge: cfg.cat === 'Immediate' ? 65 : 67,
+      paymentMode: 'Single Premium', notes: ''
+    };
+    _ncwRender();
+  }
+
+  function _ncwRender() {
+    var existing = document.getElementById('ra-ncw-overlay');
+    if (existing) existing.remove();
+    var html = _ncwBuildModal();
+    document.body.insertAdjacentHTML('beforeend', html);
+    requestAnimationFrame(function() {
+      var el = document.getElementById('ra-ncw-overlay');
+      if (el) { el.style.opacity = '0'; setTimeout(function(){ el.style.opacity='1'; el.style.transition='opacity 0.22s'; }, 10); }
+    });
+  }
+
+  function _ncwBuildModal() {
+    var s = _ncwState;
+    var cfg = s.cfg;
+    var stepTitles = ['Client & Premium', 'Riders & Options', 'AI Review & Submit'];
+
+    /* Step progress bar */
+    var stepsHtml = '<div class="ra-ncw-steps">';
+    stepTitles.forEach(function(t, i) {
+      var n = i + 1;
+      var cls = n < s.step ? 'done' : (n === s.step ? 'active' : '');
+      stepsHtml += '<div class="ra-ncw-step ' + cls + '">'
+        + '<div class="ra-ncw-step-dot">' + (n < s.step ? '<i class="fas fa-check"></i>' : n) + '</div>'
+        + '<div class="ra-ncw-step-label">' + t + '</div>'
+        + '</div>';
+      if (i < 2) stepsHtml += '<div class="ra-ncw-step-bar ' + (n < s.step ? 'done' : '') + '"></div>';
+    });
+    stepsHtml += '</div>';
+
+    var bodyHtml = s.step === 1 ? _ncwStep1Html() : (s.step === 2 ? _ncwStep2Html() : _ncwStep3Html());
+
+    var footerHtml = '<div class="ra-ncw-footer">'
+      + '<button class="ra-ncw-btn ghost" onclick="raNCWClose()"><i class="fas fa-times"></i> Cancel</button>'
+      + (s.step > 1 ? '<button class="ra-ncw-btn outline" onclick="raNCWBack()"><i class="fas fa-arrow-left"></i> Back</button>' : '')
+      + (s.step < 3
+          ? '<button class="ra-ncw-btn primary" onclick="raNCWNext()">Next <i class="fas fa-arrow-right"></i></button>'
+          : '<button class="ra-ncw-btn submit" onclick="raNCWSubmit()"><i class="fas fa-paper-plane"></i> Submit Application</button>')
+      + '</div>';
+
+    return '<div class="ra-ncw-overlay" id="ra-ncw-overlay" onclick="if(event.target===this)raNCWClose()">'
+      + '<div class="ra-ncw-modal">'
+      + '<div class="ra-ncw-hdr" style="background:' + cfg.color + '">'
+        + '<div class="ra-ncw-hdr-left">'
+          + '<div class="ra-ncw-hdr-icon"><i class="fas ' + cfg.icon + '"></i></div>'
+          + '<div>'
+            + '<div class="ra-ncw-hdr-title">New ' + cfg.label + '</div>'
+            + '<div class="ra-ncw-hdr-sub">' + cfg.code + ' · ' + cfg.cat + ' Income Annuity · NYL Annuity Corp.</div>'
+          + '</div>'
+        + '</div>'
+        + '<button class="ra-ncw-close" onclick="raNCWClose()"><i class="fas fa-times"></i></button>'
+      + '</div>'
+      + stepsHtml
+      + '<div class="ra-ncw-body">' + bodyHtml + '</div>'
+      + footerHtml
+      + '</div>'
+      + '</div>';
+  }
+
+  function _ncwStep1Html() {
+    var s = _ncwState; var cfg = s.cfg;
+    var clientOpts = _ncwClients.map(function(c) {
+      return '<option value="' + c.id + '"' + (s.client && s.client.id === c.id ? ' selected' : '') + '>'
+        + c.name + ' · Age ' + c.age + ' · Gap ' + c.gap + '</option>';
+    }).join('');
+
+    var clientInfo = s.client
+      ? '<div class="ra-ncw-client-pill"><i class="fas fa-user-circle"></i> <strong>' + s.client.name + '</strong>'
+        + ' &nbsp;·&nbsp; Age ' + s.client.age
+        + ' &nbsp;·&nbsp; Risk: ' + s.client.risk
+        + ' &nbsp;·&nbsp; Income Gap: <span style="color:#dc2626;font-weight:700;">' + s.client.gap + '</span></div>'
+      : '';
+
+    var incomeStartLabel = cfg.cat === 'Immediate' ? 'Income Start Age' : 'Deferred-to Age';
+
+    return '<div class="ra-ncw-section-title"><i class="fas fa-user-tie"></i> Client & Contract Details</div>'
+
+      + '<div class="ra-ncw-highlight-pill" style="border-color:' + cfg.color + ';color:' + cfg.color + '">'
+        + '<i class="fas fa-info-circle"></i> ' + cfg.highlight
+      + '</div>'
+
+      + '<div class="ra-ncw-form-grid">'
+
+        /* Client */
+        + '<div class="ra-ncw-field-group ra-ncw-field-full">'
+          + '<label class="ra-ncw-label">Select Client</label>'
+          + '<select class="ra-ncw-select" id="ncw-client-sel" onchange="raNCWSetClient(this.value)">'
+            + clientOpts
+          + '</select>'
+          + clientInfo
+        + '</div>'
+
+        /* Premium */
+        + '<div class="ra-ncw-field-group">'
+          + '<label class="ra-ncw-label">Single Premium Amount</label>'
+          + '<div class="ra-ncw-input-wrap">'
+            + '<span class="ra-ncw-input-prefix">$</span>'
+            + '<input class="ra-ncw-input" id="ncw-premium" type="number" min="' + cfg.minPremium + '" step="1000" value="' + s.premium + '" oninput="raNCWSetPremium(this.value)" />'
+          + '</div>'
+          + '<div class="ra-ncw-field-hint">Min: $' + (cfg.minPremium/1000) + 'K &nbsp;·&nbsp; Typical single-premium placement</div>'
+        + '</div>'
+
+        /* Payment Mode */
+        + '<div class="ra-ncw-field-group">'
+          + '<label class="ra-ncw-label">Payment Mode</label>'
+          + '<select class="ra-ncw-select" id="ncw-mode" onchange="raNCWSetMode(this.value)">'
+            + '<option value="Single Premium"' + (s.paymentMode==='Single Premium' ? ' selected' : '') + '>Single Premium</option>'
+            + '<option value="Flexible Premium"' + (s.paymentMode==='Flexible Premium' ? ' selected' : '') + '>Flexible Premium</option>'
+          + '</select>'
+        + '</div>'
+
+        /* Income start age */
+        + '<div class="ra-ncw-field-group">'
+          + '<label class="ra-ncw-label">' + incomeStartLabel + '</label>'
+          + '<input class="ra-ncw-input" id="ncw-income-age" type="number" min="50" max="85" value="' + s.incomeStartAge + '" oninput="raNCWSetIncomeAge(this.value)" />'
+          + '<div class="ra-ncw-field-hint">' + cfg.incomeStart + '</div>'
+        + '</div>'
+
+      + '</div>'
+
+      /* Live income estimate */
+      + _ncwIncomeEstimate();
+  }
+
+  function _ncwIncomeEstimate() {
+    var s = _ncwState; var cfg = s.cfg;
+    var monthlyIncome = Math.round((s.premium * (cfg.cat === 'Immediate' ? 0.0112 : 0.0082)) );
+    var annualIncome  = monthlyIncome * 12;
+    var gapCover = s.client ? Math.min(100, Math.round(monthlyIncome / parseInt(s.client.gap.replace(/[^0-9]/g,'')) * 100)) : 0;
+
+    return '<div class="ra-ncw-estimate-banner">'
+      + '<div class="ra-ncw-estimate-hdr"><i class="fas fa-calculator"></i> Live Income Estimate</div>'
+      + '<div class="ra-ncw-estimate-grid">'
+        + '<div class="ra-ncw-estimate-kpi"><div class="ra-ncw-est-val">$' + monthlyIncome.toLocaleString() + '/mo</div><div class="ra-ncw-est-lbl">Est. Monthly Income</div></div>'
+        + '<div class="ra-ncw-estimate-kpi"><div class="ra-ncw-est-val">$' + annualIncome.toLocaleString() + '/yr</div><div class="ra-ncw-est-lbl">Est. Annual Income</div></div>'
+        + '<div class="ra-ncw-estimate-kpi"><div class="ra-ncw-est-val" style="color:' + (gapCover>=100?'#059669':'#d97706') + '">' + gapCover + '%</div><div class="ra-ncw-est-lbl">Gap Coverage</div></div>'
+        + '<div class="ra-ncw-estimate-kpi"><div class="ra-ncw-est-val">Age ' + s.incomeStartAge + '</div><div class="ra-ncw-est-lbl">Income Starts</div></div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _ncwStep2Html() {
+    var s = _ncwState; var cfg = s.cfg;
+    var allRiders = cfg.defaultRiders.concat(cfg.optionalRiders);
+
+    var ridersHtml = '<div class="ra-ncw-riders-grid">';
+    allRiders.forEach(function(r) {
+      var isDefault  = cfg.defaultRiders.indexOf(r) > -1;
+      var isSelected = s.selectedRiders.indexOf(r) > -1;
+      ridersHtml += '<div class="ra-ncw-rider-card' + (isSelected ? ' selected' : '') + '" onclick="raNCWToggleRider(\'' + r.replace(/'/g,"\\'") + '\')">'
+        + '<div class="ra-ncw-rider-check"><i class="fas fa-' + (isSelected ? 'check-square' : 'square') + '"></i></div>'
+        + '<div class="ra-ncw-rider-info">'
+          + '<div class="ra-ncw-rider-name">' + r + '</div>'
+          + (isDefault ? '<div class="ra-ncw-rider-tag" style="background:' + cfg.color + '22;color:' + cfg.color + '">Recommended</div>' : '<div class="ra-ncw-rider-tag" style="background:#f1f5f9;color:#64748b">Optional</div>')
+        + '</div>'
+        + '</div>';
+    });
+    ridersHtml += '</div>';
+
+    var beneficiarySel = '<div class="ra-ncw-form-grid" style="margin-top:14px">'
+      + '<div class="ra-ncw-field-group ra-ncw-field-full">'
+        + '<label class="ra-ncw-label">Primary Beneficiary</label>'
+        + '<input class="ra-ncw-input" id="ncw-bene" type="text" placeholder="Name · Relationship · % (e.g. Jane Doe · Spouse · 100%)" />'
+      + '</div>'
+      + '<div class="ra-ncw-field-group ra-ncw-field-full">'
+        + '<label class="ra-ncw-label">Special Instructions / Notes</label>'
+        + '<textarea class="ra-ncw-textarea" id="ncw-notes" rows="3" placeholder="1035 exchange details, trust beneficiary, co-owner, income start preferences…">' + (s.notes||'') + '</textarea>'
+      + '</div>'
+      + '</div>';
+
+    return '<div class="ra-ncw-section-title"><i class="fas fa-list-check"></i> Riders & Contract Options</div>'
+      + '<div class="ra-ncw-field-hint" style="margin-bottom:12px">Click to select or deselect. Recommended riders are pre-selected based on product type and suitability profile.</div>'
+      + ridersHtml
+      + '<div class="ra-ncw-section-title" style="margin-top:18px"><i class="fas fa-user-friends"></i> Beneficiary & Notes</div>'
+      + beneficiarySel;
+  }
+
+  function _ncwStep3Html() {
+    var s = _ncwState; var cfg = s.cfg;
+    var score = cfg.suitScore + (s.selectedRiders.length > 2 ? 2 : 0);
+    score = Math.min(score, 99);
+    var scoreColor = score >= 90 ? '#059669' : (score >= 75 ? '#d97706' : '#dc2626');
+    var monthlyIncome = Math.round(s.premium * (cfg.cat === 'Immediate' ? 0.0112 : 0.0082));
+    var newContractNum = cfg.contractNumPrefix + '-2026-' + String(Math.floor(10000 + Math.random()*89999));
+
+    var checkItems = [
+      { done: true,  label: 'NAIC Suitability Questionnaire — AI pre-filled from CRM data' },
+      { done: true,  label: 'FINRA Reg BI Best Interest checklist — ' + s.selectedRiders.length + ' riders reviewed' },
+      { done: true,  label: 'Client income gap analysis — ' + (s.client ? s.client.gap : 'N/A') + ' gap · ' + monthlyIncome.toLocaleString() + '/mo proposed income' },
+      { done: true,  label: 'Anti-money laundering (AML) screening — passed' },
+      { done: score >= 85, label: 'Suitability score threshold ≥ 85 — ' + score + '/100 ' + (score >= 85 ? '✓' : '⚠ Review required') },
+      { done: false, label: 'Client e-signature — pending submission' }
+    ];
+
+    var checkHtml = '<div class="ra-ncw-checklist">';
+    checkItems.forEach(function(c) {
+      checkHtml += '<div class="ra-ncw-check-item">'
+        + '<i class="fas fa-' + (c.done ? 'check-circle' : 'circle') + '" style="color:' + (c.done ? '#059669' : '#d1d5db') + ';flex-shrink:0;font-size:15px"></i>'
+        + '<span>' + c.label + '</span>'
+        + '</div>';
+    });
+    checkHtml += '</div>';
+
+    var ridersSummary = s.selectedRiders.map(function(r){ return '<span class="ra-ncw-rider-chip">' + r + '</span>'; }).join('');
+
+    return '<div class="ra-ncw-section-title"><i class="fas fa-robot"></i> AI Suitability Review</div>'
+
+      /* Suitability score */
+      + '<div class="ra-ncw-score-band">'
+        + '<div class="ra-ncw-score-left">'
+          + '<div class="ra-ncw-score-ring" style="border-color:' + scoreColor + ';color:' + scoreColor + '">' + score + '</div>'
+          + '<div><div class="ra-ncw-score-label">Suitability Score</div><div class="ra-ncw-score-sub" style="color:' + scoreColor + '">' + (score>=90?'Excellent Fit':score>=75?'Good Fit':'Review Required') + '</div></div>'
+        + '</div>'
+        + '<div class="ra-ncw-score-right">'
+          + '<div class="ra-ncw-score-row"><span>Product</span><strong>' + cfg.label + ' (' + cfg.code + ')</strong></div>'
+          + '<div class="ra-ncw-score-row"><span>Client</span><strong>' + (s.client ? s.client.name : '—') + '</strong></div>'
+          + '<div class="ra-ncw-score-row"><span>Premium</span><strong>$' + Number(s.premium).toLocaleString() + '</strong></div>'
+          + '<div class="ra-ncw-score-row"><span>Est. Income</span><strong>$' + monthlyIncome.toLocaleString() + '/mo starting age ' + s.incomeStartAge + '</strong></div>'
+          + '<div class="ra-ncw-score-row"><span>Contract #</span><strong style="color:#64748b;font-size:11px">' + newContractNum + '</strong></div>'
+        + '</div>'
+      + '</div>'
+
+      /* Checklist */
+      + '<div class="ra-ncw-section-title" style="margin-top:14px"><i class="fas fa-clipboard-check"></i> Pre-Submission Checklist</div>'
+      + checkHtml
+
+      /* Selected riders summary */
+      + '<div class="ra-ncw-section-title" style="margin-top:14px"><i class="fas fa-shield-alt"></i> Selected Riders</div>'
+      + '<div class="ra-ncw-rider-chips">' + ridersSummary + '</div>'
+
+      /* AI narrative */
+      + '<div class="ra-ncw-ai-note">'
+        + '<div class="ra-ncw-ai-note-hdr"><i class="fas fa-robot"></i> AI Application Analysis</div>'
+        + '<div class="ra-ncw-ai-note-body">Suitability score <strong>' + score + '/100</strong> — '
+          + (score >= 90 ? 'excellent fit for client profile. No compliance flags.' : score >= 85 ? 'strong fit — all Reg BI criteria met.' : 'acceptable — one criterion requires manual review before submission.')
+          + ' The $' + Number(s.premium).toLocaleString() + ' ' + cfg.code + ' placement generates approximately $' + monthlyIncome.toLocaleString() + '/mo starting at age ' + s.incomeStartAge + ', '
+          + (s.client ? 'addressing ' + s.client.name + '\'s ' + s.client.gap + ' income gap.' : 'addressing the client\'s income gap.')
+          + ' Application is pre-filled from CRM. Submission will route to Suitability Review queue for compliance sign-off.'
+        + '</div>'
+      + '</div>'
+
+      + '<div id="ra-ncw-contract-num-store" style="display:none">' + newContractNum + '</div>';
+  }
+
+  /* ── Wizard action handlers ─────────────────────────────────────────── */
+  function raNCWClose() {
+    var el = document.getElementById('ra-ncw-overlay');
+    if (!el) return;
+    el.style.opacity = '0';
+    setTimeout(function(){ if (el.parentNode) el.remove(); }, 220);
+  }
+
+  function raNCWBack() {
+    if (_ncwState.step > 1) { _ncwState.step--; _ncwRender(); }
+  }
+
+  function raNCWNext() {
+    /* Step 1 validation */
+    if (_ncwState.step === 1) {
+      var premEl = document.getElementById('ncw-premium');
+      if (premEl) _ncwState.premium = parseInt(premEl.value) || _ncwState.cfg.defaultPremium;
+      var ageEl  = document.getElementById('ncw-income-age');
+      if (ageEl)  _ncwState.incomeStartAge = parseInt(ageEl.value) || 65;
+      if (_ncwState.premium < _ncwState.cfg.minPremium) {
+        _raToast('<i class="fas fa-exclamation-triangle"></i> Minimum premium for ' + _ncwState.cfg.code + ' is $' + (_ncwState.cfg.minPremium/1000) + 'K');
+        return;
+      }
+    }
+    /* Step 2 — capture notes */
+    if (_ncwState.step === 2) {
+      var notesEl = document.getElementById('ncw-notes');
+      if (notesEl) _ncwState.notes = notesEl.value;
+    }
+    if (_ncwState.step < 3) { _ncwState.step++; _ncwRender(); }
+  }
+
+  function raNCWSubmit() {
+    var s = _ncwState;
+    var numEl = document.getElementById('ra-ncw-contract-num-store');
+    var contractNum = numEl ? numEl.textContent : (s.cfg.contractNumPrefix + '-2026-XXXXX');
+    var clientName  = s.client ? s.client.name : 'Selected Client';
+    var monthlyIncome = Math.round(s.premium * (s.cfg.cat === 'Immediate' ? 0.0112 : 0.0082));
+
+    raNCWClose();
+
+    /* Add to in-flight applications list */
+    _annApps.unshift({
+      id: 'APP-' + String(Date.now()).slice(-4),
+      client: clientName,
+      initials: (clientName.split(' ').map(function(w){ return w[0]; }).join('').substring(0,2).toUpperCase()),
+      product: s.cfg.code + ' — ' + s.cfg.label,
+      carrier: 'NYL Annuity Corp.',
+      premium: s.premium,
+      status: 'pending-sig',
+      statusLabel: 'Pending E-Signature',
+      statusColor: '#d97706',
+      urgency: 'normal',
+      submitted: new Date().toISOString().slice(0,10),
+      notes: 'Application submitted · Routing to Suitability Review · ' + contractNum,
+      action: 'Send Reminder'
+    });
+
+    _raToast('<i class="fas fa-paper-plane"></i> ' + s.cfg.code + ' application submitted for ' + clientName + ' · ' + contractNum + ' · Routing to Suitability Review…', 5000);
+
+    /* Navigate to ann-application page and refresh */
+    if (typeof navigateTo === 'function') {
+      setTimeout(function() {
+        navigateTo('ann-application');
+      }, 400);
+    }
+  }
+
+  /* ── Field setter callbacks ─────────────────────────────────────────── */
+  function raNCWSetClient(id) {
+    var c = _ncwClients.find(function(x){ return x.id === id; });
+    if (c) { _ncwState.client = c; _ncwRender(); }
+  }
+  function raNCWSetPremium(v) { _ncwState.premium = parseInt(v) || _ncwState.cfg.defaultPremium; /* live — re-render estimate only */ }
+  function raNCWSetMode(v)    { _ncwState.paymentMode = v; }
+  function raNCWSetIncomeAge(v){ _ncwState.incomeStartAge = parseInt(v) || 65; }
+  function raNCWToggleRider(r) {
+    var idx = _ncwState.selectedRiders.indexOf(r);
+    if (idx > -1) _ncwState.selectedRiders.splice(idx, 1);
+    else           _ncwState.selectedRiders.push(r);
+    _ncwRender();
   }
 
   /* ── 22. TOAST ────────────────────────────────────────────────────── */
@@ -52853,6 +53257,15 @@ function srOpenFullReview(id) {
   window.raOpenNewContract   = raOpenNewContract;
   window.raCloseNewContract  = raCloseNewContract;
   window.raNCSelectProduct   = raNCSelectProduct;
+  window.raNCWClose          = raNCWClose;
+  window.raNCWBack           = raNCWBack;
+  window.raNCWNext           = raNCWNext;
+  window.raNCWSubmit         = raNCWSubmit;
+  window.raNCWSetClient      = raNCWSetClient;
+  window.raNCWSetPremium     = raNCWSetPremium;
+  window.raNCWSetMode        = raNCWSetMode;
+  window.raNCWSetIncomeAge   = raNCWSetIncomeAge;
+  window.raNCWToggleRider    = raNCWToggleRider;
   window.raOpenMaturityAlert  = raOpenMaturityAlert;
   window.raCloseMaturityAlert = raCloseMaturityAlert;
   window.raOpenMaturityModal  = raOpenMaturityModal;
