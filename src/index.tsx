@@ -875,10 +875,6 @@ function Sidebar() {
 
         {/* ── RETIREMENT ── */}
         <div class="nav-section-label">RETIREMENT</div>
-        <a class="nav-item ret-accounts-nav" onclick="navigateTo('ret-accounts')" href="#">
-          <i class="fas fa-umbrella-beach"></i><span>Annuity Accounts</span>
-          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
-        </a>
         <a class="nav-item ann-application-nav" onclick="navigateTo('ann-application')" href="#">
           <i class="fas fa-file-signature"></i><span>Annuity Application</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">3</span>
@@ -890,6 +886,10 @@ function Sidebar() {
         <a class="nav-item contract-delivery-nav" onclick="navigateTo('contract-delivery')" href="#">
           <i class="fas fa-hand-holding-usd"></i><span>Contract Delivery</span>
           <span class="nav-badge" style="background:#059669;color:#fff">1</span>
+        </a>
+        <a class="nav-item ret-accounts-nav" onclick="navigateTo('ret-accounts')" href="#">
+          <i class="fas fa-umbrella-beach"></i><span>Annuity Accounts</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
         </a>
 
         {/* ── ADVISORY ── */}

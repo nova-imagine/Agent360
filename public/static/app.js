@@ -63807,13 +63807,217 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   }
 
   function _annAppAction(appId) {
-    var msgMap = {
-      'APP-001': '<i class="fas fa-envelope"></i> E-signature reminder sent to Maria Gonzalez · SMS + Email',
-      'APP-002': '<i class="fas fa-search"></i> Carrier portal checked — ANN-JW-001 acknowledged, processing',
-      'APP-003': '<i class="fas fa-file-signature"></i> NAIC suitability worksheet opened for Dorothy Wilson'
-    };
-    var msg = msgMap[appId] || 'Action recorded';
-    if (typeof _raToast === 'function') _raToast(msg, 3500);
+    if (appId === 'APP-001') { _annSendReminder('APP-001'); return; }
+    if (appId === 'APP-002') { _annTrackStatus('APP-002'); return; }
+    if (appId === 'APP-003') { _annCompleteApplication('APP-003'); return; }
+    /* newly submitted apps from wizard */
+    if (typeof _raToast === 'function') _raToast('<i class="fas fa-envelope"></i> E-signature reminder sent · SMS + Email', 3000);
+  }
+
+  /* ── Send Reminder modal (APP-001 · Maria Gonzalez) ────────────────── */
+  function _annSendReminder(appId) {
+    var existing = document.getElementById('ann-action-overlay');
+    if (existing) existing.remove();
+
+    var html = '<div class="ra-nc-overlay" id="ann-action-overlay" onclick="if(event.target===this)document.getElementById(\'ann-action-overlay\').remove()" style="z-index:10200">'
+      + '<div class="ra-nc-modal" style="max-width:580px">'
+      + '<div class="ra-nc-modal-hdr" style="background:#d97706">'
+        + '<div class="ra-nc-modal-hdr-left">'
+          + '<div class="ra-nc-modal-icon"><i class="fas fa-envelope"></i></div>'
+          + '<div><div class="ra-nc-modal-title">Send E-Signature Reminder</div>'
+          + '<div class="ra-nc-modal-sub">APP-001 · Maria Gonzalez · CIAFA · Pending 3 days</div></div>'
+        + '</div>'
+        + '<button class="ra-nc-close-btn" onclick="document.getElementById(\'ann-action-overlay\').remove()"><i class="fas fa-times"></i></button>'
+      + '</div>'
+      + '<div class="ra-nc-modal-body" style="padding:20px 24px">'
+
+        /* Status banner */
+        + '<div style="background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center">'
+          + '<i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:18px;flex-shrink:0"></i>'
+          + '<div><div style="font-size:13px;font-weight:700;color:#92400e">E-Signature Overdue — 3 Days</div>'
+          + '<div style="font-size:12px;color:#78350f;margin-top:2px">1035 Exchange window closes Jun 15 — delay risks losing the rollover opportunity</div></div>'
+        + '</div>'
+
+        /* Contract snapshot */
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
+          + '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px"><div style="font-size:11px;color:#6b7280">Contract</div><div style="font-size:13px;font-weight:700;color:#111827">CIAFA — ANN-MG-001</div></div>'
+          + '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px"><div style="font-size:11px;color:#6b7280">Premium</div><div style="font-size:13px;font-weight:700;color:#111827">$115,800</div></div>'
+          + '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px"><div style="font-size:11px;color:#6b7280">Client Phone</div><div style="font-size:13px;font-weight:700;color:#111827">(646) 555-0189</div></div>'
+          + '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px"><div style="font-size:11px;color:#6b7280">Client Email</div><div style="font-size:13px;font-weight:700;color:#111827">mgonzalez@email.com</div></div>'
+        + '</div>'
+
+        /* Reminder channels */
+        + '<div style="font-size:13px;font-weight:800;color:#1e3a5f;margin-bottom:10px"><i class="fas fa-paper-plane" style="margin-right:6px;opacity:.7"></i>Send Reminder Via</div>'
+        + '<div style="display:flex;flex-direction:column;gap:8px">'
+          + '<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:8px;cursor:pointer">'
+            + '<input type="checkbox" id="ann-rem-sms" checked style="width:16px;height:16px;accent-color:#d97706">'
+            + '<div><div style="font-size:13px;font-weight:600;color:#111827"><i class="fas fa-sms" style="color:#d97706;margin-right:6px"></i>SMS to (646) 555-0189</div>'
+            + '<div style="font-size:11px;color:#6b7280">Pre-written: "Hi Maria, your CIAFA application is ready for your e-signature. Link below."</div></div>'
+          + '</label>'
+          + '<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:8px;cursor:pointer">'
+            + '<input type="checkbox" id="ann-rem-email" checked style="width:16px;height:16px;accent-color:#d97706">'
+            + '<div><div style="font-size:13px;font-weight:600;color:#111827"><i class="fas fa-envelope" style="color:#d97706;margin-right:6px"></i>Email to mgonzalez@email.com</div>'
+            + '<div style="font-size:11px;color:#6b7280">DocuSign link + summary of 1035 exchange deadline</div></div>'
+          + '</label>'
+          + '<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:8px;cursor:pointer">'
+            + '<input type="checkbox" id="ann-rem-call" style="width:16px;height:16px;accent-color:#d97706">'
+            + '<div><div style="font-size:13px;font-weight:600;color:#111827"><i class="fas fa-phone" style="color:#6b7280;margin-right:6px"></i>Log a manual call note</div>'
+            + '<div style="font-size:11px;color:#6b7280">Record that you attempted contact — added to timeline</div></div>'
+          + '</label>'
+        + '</div>'
+      + '</div>'
+      + '<div class="ra-nc-modal-footer">'
+        + '<button class="ra-nc-footer-btn ghost" onclick="document.getElementById(\'ann-action-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>'
+        + '<button class="ra-nc-footer-btn primary" style="background:#d97706;border-color:#d97706" onclick="_annSendReminderConfirm()"><i class="fas fa-paper-plane"></i> Send Reminder Now</button>'
+      + '</div>'
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  function _annSendReminderConfirm() {
+    var sms   = document.getElementById('ann-rem-sms')   && document.getElementById('ann-rem-sms').checked;
+    var email = document.getElementById('ann-rem-email') && document.getElementById('ann-rem-email').checked;
+    var call  = document.getElementById('ann-rem-call')  && document.getElementById('ann-rem-call').checked;
+    var channels = [];
+    if (sms)   channels.push('SMS');
+    if (email) channels.push('Email');
+    if (call)  channels.push('Call logged');
+    var sent = channels.length ? channels.join(' + ') : 'No channels selected';
+    document.getElementById('ann-action-overlay').remove();
+    _raToast('<i class="fas fa-paper-plane"></i> Reminder sent to Maria Gonzalez via ' + sent + ' · DocuSign link re-sent', 4000);
+  }
+
+  /* ── Track Status modal (APP-002 · James Wilson) ────────────────────── */
+  function _annTrackStatus(appId) {
+    var existing = document.getElementById('ann-action-overlay');
+    if (existing) existing.remove();
+
+    var timeline = [
+      { date: 'May 14, 2026 · 9:02 AM',  icon: 'fa-paper-plane',    color: '#003087', label: 'Application submitted to NYL Annuity Corp.', done: true },
+      { date: 'May 14, 2026 · 11:30 AM', icon: 'fa-check-circle',   color: '#059669', label: 'Application received & logged by carrier', done: true },
+      { date: 'May 15, 2026 · 2:15 PM',  icon: 'fa-search',         color: '#059669', label: 'Initial review passed — no missing documents', done: true },
+      { date: 'In Progress',              icon: 'fa-clock',          color: '#d97706', label: 'Suitability & compliance review (est. 1–2 business days)', done: false },
+      { date: 'Pending',                  icon: 'fa-file-contract',  color: '#9ca3af', label: 'Contract issued & mailed to client', done: false },
+    ];
+
+    var tlHtml = timeline.map(function(t) {
+      return '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">'
+        + '<div style="width:32px;height:32px;border-radius:50%;background:' + t.color + (t.done ? '' : '22') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+          + '<i class="fas ' + t.icon + '" style="color:' + (t.done ? '#fff' : t.color) + ';font-size:13px"></i>'
+        + '</div>'
+        + '<div style="padding-top:6px">'
+          + '<div style="font-size:12px;font-weight:700;color:' + (t.done ? '#111827' : '#9ca3af') + '">' + t.label + '</div>'
+          + '<div style="font-size:11px;color:#9ca3af;margin-top:2px">' + t.date + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    var html = '<div class="ra-nc-overlay" id="ann-action-overlay" onclick="if(event.target===this)document.getElementById(\'ann-action-overlay\').remove()" style="z-index:10200">'
+      + '<div class="ra-nc-modal" style="max-width:560px">'
+      + '<div class="ra-nc-modal-hdr" style="background:#0284c7">'
+        + '<div class="ra-nc-modal-hdr-left">'
+          + '<div class="ra-nc-modal-icon"><i class="fas fa-search"></i></div>'
+          + '<div><div class="ra-nc-modal-title">Carrier Status — GLIA Application</div>'
+          + '<div class="ra-nc-modal-sub">APP-002 · James Wilson · $99K · NYL Annuity Corp.</div></div>'
+        + '</div>'
+        + '<button class="ra-nc-close-btn" onclick="document.getElementById(\'ann-action-overlay\').remove()"><i class="fas fa-times"></i></button>'
+      + '</div>'
+      + '<div class="ra-nc-modal-body" style="padding:20px 24px">'
+
+        /* Status chip */
+        + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">'
+          + '<div style="background:#0284c722;color:#0284c7;font-size:12px;font-weight:800;padding:6px 16px;border-radius:20px"><i class="fas fa-spinner fa-spin" style="margin-right:6px"></i>In Review — On Track</div>'
+          + '<div style="font-size:12px;color:#6b7280">Est. completion: May 16–17, 2026</div>'
+        + '</div>'
+
+        /* Timeline */
+        + '<div style="font-size:13px;font-weight:800;color:#1e3a5f;margin-bottom:12px"><i class="fas fa-stream" style="margin-right:6px;opacity:.7"></i>Carrier Processing Timeline</div>'
+        + tlHtml
+
+        /* Carrier contact */
+        + '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 14px;font-size:12px;color:#0369a1;margin-top:4px">'
+          + '<i class="fas fa-building" style="margin-right:6px"></i><strong>NYL Annuity Corp. Case Manager:</strong> Linda Reyes · (800) 555-0200 ext. 4412 · Cases typically close within 3 business days'
+        + '</div>'
+
+      + '</div>'
+      + '<div class="ra-nc-modal-footer">'
+        + '<button class="ra-nc-footer-btn ghost" onclick="document.getElementById(\'ann-action-overlay\').remove()"><i class="fas fa-times"></i> Close</button>'
+        + '<button class="ra-nc-footer-btn outline" onclick="document.getElementById(\'ann-action-overlay\').remove();_raToast(\'<i class=\\\"fas fa-bell\\\"></i> You will be notified when carrier status updates · Email + Dashboard\',3500)"><i class="fas fa-bell"></i> Notify Me on Update</button>'
+      + '</div>'
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  /* ── Complete Application modal (APP-003 · Dorothy Wilson) ──────────── */
+  function _annCompleteApplication(appId) {
+    var existing = document.getElementById('ann-action-overlay');
+    if (existing) existing.remove();
+
+    var checklist = [
+      { done: true,  label: 'Client information — pre-filled from CRM' },
+      { done: true,  label: 'Product selection — GPIA $220,000 confirmed' },
+      { done: true,  label: 'Beneficiary designation — Dorothy Wilson Trust' },
+      { done: false, label: 'NAIC Suitability Questionnaire — 7 of 12 questions complete' },
+      { done: false, label: 'Replacement notice (1035 exchange) — signature pending' },
+      { done: false, label: 'Agent certification — requires agent sign-off' },
+    ];
+
+    var pct = Math.round(checklist.filter(function(c){ return c.done; }).length / checklist.length * 100);
+
+    var clHtml = checklist.map(function(c) {
+      return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:12px;color:' + (c.done ? '#374151' : '#111827') + '">'
+        + '<i class="fas fa-' + (c.done ? 'check-circle' : 'circle') + '" style="color:' + (c.done ? '#059669' : '#d1d5db') + ';font-size:15px;flex-shrink:0"></i>'
+        + c.label
+        + (c.done ? '' : ' <span style="margin-left:auto;font-size:10px;font-weight:700;color:#dc2626;background:#fee2e2;padding:2px 8px;border-radius:10px">Required</span>')
+        + '</div>';
+    }).join('');
+
+    var html = '<div class="ra-nc-overlay" id="ann-action-overlay" onclick="if(event.target===this)document.getElementById(\'ann-action-overlay\').remove()" style="z-index:10200">'
+      + '<div class="ra-nc-modal" style="max-width:600px">'
+      + '<div class="ra-nc-modal-hdr" style="background:#7c3aed">'
+        + '<div class="ra-nc-modal-hdr-left">'
+          + '<div class="ra-nc-modal-icon"><i class="fas fa-file-signature"></i></div>'
+          + '<div><div class="ra-nc-modal-title">Complete Application — GPIA</div>'
+          + '<div class="ra-nc-modal-sub">APP-003 · Dorothy Wilson · $220,000 · Apr 16 Close Meeting</div></div>'
+        + '</div>'
+        + '<button class="ra-nc-close-btn" onclick="document.getElementById(\'ann-action-overlay\').remove()"><i class="fas fa-times"></i></button>'
+      + '</div>'
+      + '<div class="ra-nc-modal-body" style="padding:20px 24px">'
+
+        /* Progress */
+        + '<div style="margin-bottom:18px">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+            + '<span style="font-size:13px;font-weight:800;color:#1e3a5f">Application Completion</span>'
+            + '<span style="font-size:14px;font-weight:800;color:#7c3aed">' + pct + '%</span>'
+          + '</div>'
+          + '<div style="height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden">'
+            + '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:4px;transition:width 0.4s"></div>'
+          + '</div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-top:4px">3 of 6 sections complete · Close meeting Apr 16 — complete today</div>'
+        + '</div>'
+
+        /* Checklist */
+        + '<div style="font-size:13px;font-weight:800;color:#1e3a5f;margin-bottom:8px"><i class="fas fa-clipboard-list" style="margin-right:6px;opacity:.7"></i>Application Checklist</div>'
+        + clHtml
+
+        /* NAIC worksheet shortcut */
+        + '<div style="background:#faf5ff;border:1.5px solid #d8b4fe;border-radius:10px;padding:12px 16px;margin-top:14px;display:flex;gap:10px;align-items:flex-start">'
+          + '<i class="fas fa-robot" style="color:#7c3aed;font-size:16px;flex-shrink:0;margin-top:2px"></i>'
+          + '<div><div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:3px">AI Pre-fill Available</div>'
+          + '<div style="font-size:12px;color:#374151">AI can complete questions 8–12 of the NAIC worksheet using Dorothy\'s CRM profile (risk: Moderate-Conservative, age 68, $220K premium, income gap $1,340/mo). Review & confirm before signing.</div></div>'
+        + '</div>'
+
+      + '</div>'
+      + '<div class="ra-nc-modal-footer">'
+        + '<button class="ra-nc-footer-btn ghost" onclick="document.getElementById(\'ann-action-overlay\').remove()"><i class="fas fa-times"></i> Cancel</button>'
+        + '<button class="ra-nc-footer-btn outline" onclick="document.getElementById(\'ann-action-overlay\').remove();_raToast(\'<i class=\\\"fas fa-robot\\\"></i> AI pre-filling NAIC questions 8–12 for Dorothy Wilson — review in 30 seconds\',4000)" style="border-color:#7c3aed;color:#7c3aed"><i class="fas fa-robot"></i> AI Pre-fill Worksheet</button>'
+        + '<button class="ra-nc-footer-btn primary" style="background:#7c3aed;border-color:#7c3aed" onclick="document.getElementById(\'ann-action-overlay\').remove();navigateTo(\'suitability-review\');_raToast(\'<i class=\\\"fas fa-paper-plane\\\"></i> APP-003 submitted to Suitability Review queue · Compliance AI scoring\',4500)"><i class="fas fa-paper-plane"></i> Submit to Suitability Review</button>'
+      + '</div>'
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -63873,14 +64077,167 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   }
 
   function _suitAction(reviewId) {
-    var rev = _suitReviews.find(function(r) { return r.id === reviewId; });
-    if (!rev) return;
-    if (rev.status === 'approved') {
-      if (typeof navigateTo === 'function') navigateTo('contract-delivery');
-    } else {
-      if (typeof _raToast === 'function')
-        _raToast('<i class="fas fa-clipboard-check"></i> Opening Reg BI compliance checklist for ' + rev.client, 3000);
-    }
+    if (reviewId === 'SUIT-001') { _suitReviewNow('SUIT-001'); return; }
+    if (reviewId === 'SUIT-002') { _suitViewApproval('SUIT-002'); return; }
+    if (typeof _raToast === 'function')
+      _raToast('<i class="fas fa-clipboard-check"></i> Opening compliance checklist', 2500);
+  }
+
+  /* ── Suitability: Review Now modal (SUIT-001 Sandra Williams) ─────── */
+  function _suitReviewNow(reviewId) {
+    var checks = [
+      { label: 'Client age & risk tolerance verified (67, Moderate Conservative)', done: true },
+      { label: 'Investment objectives documented — income focus confirmed', done: true },
+      { label: 'Liquidity needs assessed — 10% annual withdrawal rider noted', done: true },
+      { label: 'Tax status confirmed — Traditional IRA rollover source', done: true },
+      { label: 'Income verification — <strong style="color:#b45309;">Missing W-2 / SSA-1099 (Required)</strong>', done: false }
+    ];
+    var checklist = checks.map(function(c) {
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #fef3c7;">'
+        + '<i class="fas ' + (c.done ? 'fa-check-circle' : 'fa-exclamation-circle') + '" style="color:' + (c.done ? '#059669' : '#d97706') + ';font-size:15px;flex-shrink:0;margin-top:2px;"></i>'
+        + '<span style="font-size:13px;color:#374151;line-height:1.5;">' + c.label + '</span>'
+        + '</div>';
+    }).join('');
+
+    var html = '<div id="ann-action-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;">'
+      + '<div class="ra-nc-modal" style="width:540px;max-width:96vw;max-height:88vh;overflow-y:auto;border-radius:16px;">'
+
+      // Header — amber
+      + '<div class="ra-nc-modal-hdr" style="background:linear-gradient(135deg,#d97706,#b45309);border-radius:16px 16px 0 0;padding:18px 20px 14px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;"><i class="fas fa-balance-scale"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#fff;">Reg BI Suitability Review</div>'
+      + '<div style="font-size:12px;color:rgba(255,255,255,0.85);">SUIT-001 · Sandra Williams, Age 67 · LMIA — Level Monthly Income Annuity</div></div>'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;border-radius:8px;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;">✕</button>'
+      + '</div></div>'
+
+      // Status banner
+      + '<div style="margin:16px 16px 0;background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-clock" style="color:#d97706;font-size:16px;"></i>'
+      + '<div><div style="font-size:12px;font-weight:700;color:#92400e;">Pending Review — Action Required</div>'
+      + '<div style="font-size:11px;color:#78350f;">Submitted 2026-05-10 · Reviewer: Compliance AI + M. Torres · Score 91% (4/5 criteria met)</div>'
+      + '</div>'
+      + '<div style="margin-left:auto;background:#d97706;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;">91%</div>'
+      + '</div>'
+
+      // Checklist
+      + '<div style="padding:14px 16px 0;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">FINRA Reg BI Checklist — 4/5 Complete</div>'
+      + checklist
+      + '</div>'
+
+      // DocuRequest callout
+      + '<div style="margin:14px 16px 0;background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:12px 14px;">'
+      + '<div style="font-size:12px;font-weight:800;color:#c2410c;margin-bottom:4px;"><i class="fas fa-file-upload" style="margin-right:6px;"></i>DocuRequest — Income Verification Required</div>'
+      + '<div style="font-size:12px;color:#7c2d12;line-height:1.6;">'
+      + 'Sandra Williams must provide <strong>W-2 (2024) or SSA-1099</strong> to confirm income level for LMIA suitability. '
+      + 'DocuSign request will be sent to <strong>swilliams@email.com</strong>. '
+      + 'Deadline: <strong style="color:#c2410c;">May 30, 2026</strong> (LMIA quote expiry).'
+      + '</div>'
+      + '<button onclick="_suitSendDocuRequest()" style="margin-top:10px;background:#c2410c;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">'
+      + '<i class="fas fa-paper-plane"></i> Send DocuRequest to Sandra Williams</button>'
+      + '</div>'
+
+      // FINRA notes
+      + '<div style="margin:14px 16px 0;background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:10px;padding:11px 14px;">'
+      + '<div style="font-size:12px;font-weight:700;color:#065f46;margin-bottom:3px;"><i class="fas fa-shield-alt" style="margin-right:6px;"></i>Compliance AI Notes</div>'
+      + '<div style="font-size:12px;color:#064e3b;line-height:1.6;">'
+      + 'All 4 verified criteria are consistent with Moderate Conservative risk profile. LMIA structured payout aligns with stated income objectives. '
+      + 'Case will auto-advance to Approved once income doc received and verified by M. Torres.'
+      + '</div>'
+      + '</div>'
+
+      // Footer
+      + '<div style="display:flex;gap:10px;padding:16px;border-top:1px solid #f3f4f6;margin-top:14px;">'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" class="ra-nc-footer-btn" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;flex:1;">Close</button>'
+      + '<button onclick="_suitSendDocuRequest()" class="ra-nc-footer-btn" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:2;">'
+      + '<i class="fas fa-file-upload" style="margin-right:6px;"></i>Send DocuRequest & Notify M. Torres</button>'
+      + '</div>'
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  function _suitSendDocuRequest() {
+    document.getElementById('ann-action-overlay').remove();
+    if (typeof _raToast === 'function')
+      _raToast('<i class="fas fa-paper-plane"></i> DocuRequest sent to Sandra Williams via DocuSign · swilliams@email.com · M. Torres notified', 4000);
+  }
+
+  /* ── Suitability: View Approval modal (SUIT-002 Robert Chen) ─────── */
+  function _suitViewApproval(reviewId) {
+    var criteria = [
+      { label: 'Client suitability — Age 71, Conservative risk profile', detail: 'GFIA fixed income aligns with low-volatility mandate' },
+      { label: 'Investment objectives — Capital preservation + income', detail: 'Guaranteed fixed rate meets stated retirement income goal' },
+      { label: 'Liquidity assessed — Adequate reserves confirmed', detail: '$85K liquid assets outside annuity; RMD schedule reviewed' },
+      { label: 'Tax status — Qualified money (IRA rollover)', detail: 'Tax-deferred treatment appropriate; RMD compliance verified' },
+      { label: 'Income verification — SSA-1099 received & reviewed', detail: '$3,240/mo Social Security income documented and confirmed' }
+    ];
+    var criteriaHtml = criteria.map(function(c) {
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #d1fae5;">'
+        + '<i class="fas fa-check-circle" style="color:#059669;font-size:15px;flex-shrink:0;margin-top:2px;"></i>'
+        + '<div><div style="font-size:13px;color:#1f2937;font-weight:600;">' + c.label + '</div>'
+        + '<div style="font-size:11px;color:#6b7280;margin-top:2px;">' + c.detail + '</div>'
+        + '</div></div>';
+    }).join('');
+
+    var html = '<div id="ann-action-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;">'
+      + '<div class="ra-nc-modal" style="width:560px;max-width:96vw;max-height:88vh;overflow-y:auto;border-radius:16px;">'
+
+      // Header — green
+      + '<div class="ra-nc-modal-hdr" style="background:linear-gradient(135deg,#059669,#047857);border-radius:16px 16px 0 0;padding:18px 20px 14px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;"><i class="fas fa-check-double"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#fff;">Suitability Approved</div>'
+      + '<div style="font-size:12px;color:rgba(255,255,255,0.85);">SUIT-002 · Robert Chen, Age 71 · GFIA — Guaranteed Fixed Income Annuity</div></div>'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;border-radius:8px;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;">✕</button>'
+      + '</div></div>'
+
+      // Approval summary banner
+      + '<div style="margin:16px 16px 0;background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:14px;">'
+      + '<div style="text-align:center;flex-shrink:0;">'
+      + '<div style="font-size:28px;font-weight:900;color:#059669;">97%</div>'
+      + '<div style="font-size:10px;color:#065f46;font-weight:600;text-transform:uppercase;">Suitability Score</div>'
+      + '</div>'
+      + '<div style="width:1px;height:48px;background:#a7f3d0;flex-shrink:0;"></div>'
+      + '<div>'
+      + '<div style="font-size:13px;font-weight:700;color:#065f46;">All 5 Reg BI Criteria Met ✓</div>'
+      + '<div style="font-size:11px;color:#374151;margin-top:2px;">Reviewed by: Compliance AI + M. Torres · Approved 2026-05-12</div>'
+      + '<div style="font-size:11px;color:#374151;">App APP-005 · Submitted 2026-05-08 · Conservative profile</div>'
+      + '</div>'
+      + '<div style="margin-left:auto;background:#059669;color:#fff;font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;flex-shrink:0;">APPROVED</div>'
+      + '</div>'
+
+      // Criteria list
+      + '<div style="padding:14px 16px 0;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">Reg BI Compliance — All Criteria Verified</div>'
+      + criteriaHtml
+      + '</div>'
+
+      // Contract details
+      + '<div style="margin:14px 16px 0;background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+      + '<div><div style="font-size:10px;color:#0369a1;font-weight:700;text-transform:uppercase;">Premium</div><div style="font-size:14px;font-weight:800;color:#0c4a6e;">$180,000</div></div>'
+      + '<div><div style="font-size:10px;color:#0369a1;font-weight:700;text-transform:uppercase;">Guaranteed Rate</div><div style="font-size:14px;font-weight:800;color:#0c4a6e;">4.85% / 5yr</div></div>'
+      + '<div><div style="font-size:10px;color:#0369a1;font-weight:700;text-transform:uppercase;">Carrier</div><div style="font-size:14px;font-weight:800;color:#0c4a6e;">NYL Annuity Corp.</div></div>'
+      + '<div><div style="font-size:10px;color:#0369a1;font-weight:700;text-transform:uppercase;">Next Step</div><div style="font-size:14px;font-weight:800;color:#059669;">Contract Delivery</div></div>'
+      + '</div>'
+
+      // Footer
+      + '<div style="display:flex;gap:10px;padding:16px;border-top:1px solid #f3f4f6;margin-top:14px;">'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" class="ra-nc-footer-btn" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;flex:1;">Close</button>'
+      + '<button onclick="_suitForwardToDelivery()" class="ra-nc-footer-btn" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:2;">'
+      + '<i class="fas fa-arrow-right" style="margin-right:6px;"></i>Forward to Contract Delivery</button>'
+      + '</div>'
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  function _suitForwardToDelivery() {
+    document.getElementById('ann-action-overlay').remove();
+    if (typeof navigateTo === 'function') navigateTo('contract-delivery');
+    if (typeof _raToast === 'function')
+      _raToast('<i class="fas fa-shipping-fast"></i> SUIT-002 Robert Chen forwarded to Contract Delivery · ANN-RC-001 ready for issuance', 4000);
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -63927,7 +64284,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
 
       // Footer actions
       html += '<div class="ctd-card-footer">'
-        + '<button class="ctd-btn ghost" onclick="navigateTo(\'ret-accounts\')"><i class="fas fa-umbrella-beach"></i> View Contract</button>'
+        + '<button class="ctd-btn ghost" onclick="_ctdViewContract(\'' + ctd.id + '\')"><i class="fas fa-umbrella-beach"></i> View Contract</button>'
         + '<button class="ctd-btn ghost" onclick="_ctdSendFreeLook(\'' + ctd.id + '\')"><i class="fas fa-envelope"></i> Send Free-Look Doc</button>'
         + '<button class="ctd-btn primary" onclick="_ctdActivate(\'' + ctd.id + '\')"><i class="fas fa-play-circle"></i> Activate Income</button>'
         + '</div>'
@@ -63950,14 +64307,204 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     el.innerHTML = html;
   }
 
-  function _ctdSendFreeLook(ctdId) {
-    if (typeof _raToast === 'function')
-      _raToast('<i class="fas fa-envelope"></i> Free-look acknowledgement document sent to Dorothy Wilson · DocuSign', 3500);
+  /* ── CTD: View Contract modal (ANN-DW-001 Dorothy Wilson) ─────────── */
+  function _ctdViewContract(ctdId) {
+    var html = '<div id="ann-action-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;">'
+      + '<div class="ra-nc-modal" style="width:560px;max-width:96vw;max-height:88vh;overflow-y:auto;border-radius:16px;">'
+
+      // Header — teal
+      + '<div class="ra-nc-modal-hdr" style="background:linear-gradient(135deg,#0891b2,#0e7490);border-radius:16px 16px 0 0;padding:18px 20px 14px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;"><i class="fas fa-file-contract"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#fff;">Contract Document</div>'
+      + '<div style="font-size:12px;color:rgba(255,255,255,0.85);">ANN-DW-001 · Dorothy Wilson · GPIA — Guaranteed Payout Income Annuity</div></div>'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;border-radius:8px;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;">✕</button>'
+      + '</div></div>'
+
+      // Contract snapshot grid
+      + '<div style="padding:16px 16px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">'
+      + '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 12px;text-align:center;">'
+      + '<div style="font-size:10px;color:#0369a1;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Contract Value</div>'
+      + '<div style="font-size:18px;font-weight:900;color:#0c4a6e;">$220K</div>'
+      + '</div>'
+      + '<div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:10px;padding:10px 12px;text-align:center;">'
+      + '<div style="font-size:10px;color:#065f46;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Monthly Income</div>'
+      + '<div style="font-size:18px;font-weight:900;color:#064e3b;">$1,340</div>'
+      + '</div>'
+      + '<div style="background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:10px 12px;text-align:center;">'
+      + '<div style="font-size:10px;color:#c2410c;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Free-Look Exp.</div>'
+      + '<div style="font-size:16px;font-weight:900;color:#9a3412;">May 30</div>'
+      + '</div>'
+      + '</div>'
+
+      // Contract details
+      + '<div style="margin:14px 16px 0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">'
+      + '<table style="width:100%;border-collapse:collapse;">'
+      + ['Carrier|NYL Annuity Corp.', 'Product|GPIA — Guaranteed Payout Income Annuity', 'Issue Date|2026-05-20', 'Delivery Date|2026-05-20', 'Payout Start|Jul 1, 2026', 'Payout Mode|Monthly — $1,340.00', 'Guarantee Period|10 years certain', 'Beneficiary|Estate of Dorothy Wilson (on file)'].map(function(row, i) {
+          var parts = row.split('|');
+          return '<tr style="border-bottom:1px solid #e2e8f0;background:' + (i % 2 === 0 ? '#f8fafc' : '#fff') + ';">'
+            + '<td style="padding:8px 12px;font-size:12px;color:#6b7280;font-weight:600;width:40%;">' + parts[0] + '</td>'
+            + '<td style="padding:8px 12px;font-size:13px;color:#1f2937;font-weight:600;">' + parts[1] + '</td></tr>';
+        }).join('')
+      + '</table></div>'
+
+      // Open in Annuity Accounts callout
+      + '<div style="margin:14px 16px 0;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-umbrella-beach" style="color:#2563eb;font-size:16px;"></i>'
+      + '<div style="font-size:12px;color:#1e3a8a;"><strong>View full contract history</strong> in Annuity Accounts — premium history, distribution schedule, and rider details.</div>'
+      + '<button onclick="_ctdOpenInAccounts()" style="margin-left:auto;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">Open in Accounts</button>'
+      + '</div>'
+
+      // Footer
+      + '<div style="display:flex;gap:10px;padding:16px;border-top:1px solid #f3f4f6;margin-top:14px;">'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" class="ra-nc-footer-btn" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;flex:1;">Close</button>'
+      + '<button onclick="_ctdOpenInAccounts()" class="ra-nc-footer-btn" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:2;">'
+      + '<i class="fas fa-external-link-alt" style="margin-right:6px;"></i>Open ANN-DW-001 in Annuity Accounts</button>'
+      + '</div>'
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
   }
 
+  function _ctdOpenInAccounts() {
+    document.getElementById('ann-action-overlay').remove();
+    if (typeof navigateTo === 'function') navigateTo('ret-accounts');
+    setTimeout(function() {
+      if (typeof raOpenContract === 'function') raOpenContract('ANN-DW-001');
+    }, 400);
+  }
+
+  /* ── CTD: Send Free-Look Doc modal ───────────────────────────────── */
+  function _ctdSendFreeLook(ctdId) {
+    var html = '<div id="ann-action-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;">'
+      + '<div class="ra-nc-modal" style="width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;border-radius:16px;">'
+
+      // Header — indigo DocuSign feel
+      + '<div class="ra-nc-modal-hdr" style="background:linear-gradient(135deg,#4f46e5,#3730a3);border-radius:16px 16px 0 0;padding:18px 20px 14px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;"><i class="fas fa-signature"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#fff;">Send Free-Look Acknowledgement</div>'
+      + '<div style="font-size:12px;color:rgba(255,255,255,0.85);">ANN-DW-001 · DocuSign · Deadline May 30, 2026</div></div>'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;border-radius:8px;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;">✕</button>'
+      + '</div></div>'
+
+      // Deadline urgency banner
+      + '<div style="margin:16px 16px 0;background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;"></i>'
+      + '<div><div style="font-size:12px;font-weight:700;color:#92400e;">Free-Look Window Expires May 30, 2026</div>'
+      + '<div style="font-size:11px;color:#78350f;">Dorothy Wilson has 10 days remaining. Client must sign before deadline or contract must be reissued.</div>'
+      + '</div>'
+      + '</div>'
+
+      // Document info
+      + '<div style="padding:14px 16px 0;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Document Details</div>'
+      + '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">'
+      + '<table style="width:100%;border-collapse:collapse;">'
+      + ['Document|Free-Look Acknowledgement & Acceptance (NAIC Form FL-2026)', 'Recipient|Dorothy Wilson', 'Send To|dwilson@email.com · (555) 847-2291', 'Method|DocuSign eSignature + PDF copy via email', 'Signed Copies To|NYL Annuity Corp. (carrier) + Agent file', 'Due|May 30, 2026 (10 days remaining)'].map(function(row, i) {
+          var parts = row.split('|');
+          return '<tr style="border-bottom:1px solid #e2e8f0;background:' + (i % 2 === 0 ? '#f8fafc' : '#fff') + ';">'
+            + '<td style="padding:8px 12px;font-size:12px;color:#6b7280;font-weight:600;width:35%;">' + parts[0] + '</td>'
+            + '<td style="padding:8px 12px;font-size:12px;color:#1f2937;">' + parts[1] + '</td></tr>';
+        }).join('')
+      + '</table></div></div>'
+
+      // Reminder options
+      + '<div style="margin:14px 16px 0;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;">Include with DocuSign</div>'
+      + '<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#374151;">'
+      + '<input type="checkbox" id="fl-reminder-3d" checked style="width:15px;height:15px;"> Automatic 3-day reminder if unsigned</label>'
+      + '<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#374151;">'
+      + '<input type="checkbox" id="fl-send-agent" checked style="width:15px;height:15px;"> Send agent copy to SR@nyl.com</label>'
+      + '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#374151;">'
+      + '<input type="checkbox" id="fl-sms-notify" style="width:15px;height:15px;"> SMS notification to (555) 847-2291</label>'
+      + '</div>'
+
+      // Footer
+      + '<div style="display:flex;gap:10px;padding:16px;border-top:1px solid #f3f4f6;margin-top:14px;">'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" class="ra-nc-footer-btn" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;flex:1;">Cancel</button>'
+      + '<button onclick="_ctdSendFreeLookConfirm()" class="ra-nc-footer-btn" style="background:#4f46e5;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:2;">'
+      + '<i class="fas fa-paper-plane" style="margin-right:6px;"></i>Send via DocuSign Now</button>'
+      + '</div>'
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  function _ctdSendFreeLookConfirm() {
+    var sms = document.getElementById('fl-sms-notify') && document.getElementById('fl-sms-notify').checked;
+    document.getElementById('ann-action-overlay').remove();
+    var msg = '<i class="fas fa-signature"></i> Free-Look doc sent to Dorothy Wilson via DocuSign · dwilson@email.com'
+      + (sms ? ' · SMS (555) 847-2291' : '') + ' · Expires May 30, 2026';
+    if (typeof _raToast === 'function') _raToast(msg, 4500);
+  }
+
+  /* ── CTD: Activate Income modal ──────────────────────────────────── */
   function _ctdActivate(ctdId) {
+    var checks = [
+      { label: 'Contract issued by NYL Annuity Corp.', done: true },
+      { label: 'Suitability review approved (SUIT-002 — 97% score)', done: true },
+      { label: 'Beneficiary designation on file', done: true },
+      { label: 'Free-look acknowledgement signature', done: false, note: 'Pending — send DocuSign above' },
+      { label: 'Income activation form submitted to carrier', done: false, note: 'Will submit on confirmation' }
+    ];
+    var checklistHtml = checks.map(function(c) {
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #f3f4f6;">'
+        + '<i class="fas ' + (c.done ? 'fa-check-circle' : 'fa-clock') + '" style="color:' + (c.done ? '#059669' : '#d97706') + ';font-size:15px;flex-shrink:0;margin-top:2px;"></i>'
+        + '<div><div style="font-size:13px;color:#1f2937;">' + c.label + '</div>'
+        + (c.note ? '<div style="font-size:11px;color:#6b7280;margin-top:2px;">' + c.note + '</div>' : '')
+        + '</div></div>';
+    }).join('');
+
+    var html = '<div id="ann-action-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;">'
+      + '<div class="ra-nc-modal" style="width:540px;max-width:96vw;max-height:88vh;overflow-y:auto;border-radius:16px;">'
+
+      // Header — green
+      + '<div class="ra-nc-modal-hdr" style="background:linear-gradient(135deg,#059669,#047857);border-radius:16px 16px 0 0;padding:18px 20px 14px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;"><i class="fas fa-play-circle"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#fff;">Activate Income Stream</div>'
+      + '<div style="font-size:12px;color:rgba(255,255,255,0.85);">ANN-DW-001 · Dorothy Wilson · $1,340/mo starting Jul 1, 2026</div></div>'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;border-radius:8px;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;">✕</button>'
+      + '</div></div>'
+
+      // Income summary
+      + '<div style="margin:16px 16px 0;background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:10px;padding:12px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">'
+      + '<div><div style="font-size:10px;color:#065f46;font-weight:700;text-transform:uppercase;">Monthly Payment</div><div style="font-size:22px;font-weight:900;color:#059669;">$1,340</div></div>'
+      + '<div><div style="font-size:10px;color:#065f46;font-weight:700;text-transform:uppercase;">First Payment</div><div style="font-size:16px;font-weight:900;color:#064e3b;">Jul 1, 2026</div></div>'
+      + '<div><div style="font-size:10px;color:#065f46;font-weight:700;text-transform:uppercase;">Guarantee Period</div><div style="font-size:16px;font-weight:900;color:#064e3b;">10 years</div></div>'
+      + '</div>'
+
+      // Pre-activation checklist
+      + '<div style="padding:14px 16px 0;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">Pre-Activation Checklist</div>'
+      + checklistHtml
+      + '</div>'
+
+      // Warning about pending free-look
+      + '<div style="margin:14px 16px 0;background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;padding:11px 14px;display:flex;align-items:flex-start;gap:10px;">'
+      + '<i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:16px;flex-shrink:0;margin-top:2px;"></i>'
+      + '<div style="font-size:12px;color:#78350f;line-height:1.6;">'
+      + '<strong>Free-look acknowledgement is still pending.</strong> Submitting activation will queue the income request. '
+      + 'NYL Annuity Corp. will begin processing upon receipt of Dorothy\'s signed free-look doc (due May 30, 2026). First payment guaranteed Jul 1, 2026.'
+      + '</div>'
+      + '</div>'
+
+      // Footer
+      + '<div style="display:flex;gap:10px;padding:16px;border-top:1px solid #f3f4f6;margin-top:14px;">'
+      + '<button onclick="document.getElementById(\'ann-action-overlay\').remove()" class="ra-nc-footer-btn" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;flex:1;">Cancel</button>'
+      + '<button onclick="_ctdActivateConfirm()" class="ra-nc-footer-btn" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:2;">'
+      + '<i class="fas fa-play-circle" style="margin-right:6px;"></i>Confirm — Submit Activation to NYL</button>'
+      + '</div>'
+      + '</div></div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  function _ctdActivateConfirm() {
+    document.getElementById('ann-action-overlay').remove();
     if (typeof _raToast === 'function')
-      _raToast('<i class="fas fa-play-circle"></i> Income activation request submitted to NYL Annuity Corp. · First payment Jul 1, 2026', 4000);
+      _raToast('<i class="fas fa-play-circle"></i> Income activation submitted to NYL Annuity Corp. · ANN-DW-001 · First payment Jul 1, 2026 · $1,340/mo', 5000);
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -64005,9 +64552,24 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window.initContractDeliveryPage  = initContractDeliveryPage;
   window._annAppOpenDetail         = _annAppOpenDetail;
   window._annAppAction             = _annAppAction;
+  // Task 1 — Annuity Application modals
+  window._annSendReminder          = _annSendReminder;
+  window._annSendReminderConfirm   = _annSendReminderConfirm;
+  window._annTrackStatus           = _annTrackStatus;
+  window._annCompleteApplication   = _annCompleteApplication;
+  // Task 2 — Suitability Review modals
   window._suitAction               = _suitAction;
+  window._suitReviewNow            = _suitReviewNow;
+  window._suitSendDocuRequest      = _suitSendDocuRequest;
+  window._suitViewApproval         = _suitViewApproval;
+  window._suitForwardToDelivery    = _suitForwardToDelivery;
+  // Task 3 — Contract Delivery modals
+  window._ctdViewContract          = _ctdViewContract;
+  window._ctdOpenInAccounts        = _ctdOpenInAccounts;
   window._ctdSendFreeLook          = _ctdSendFreeLook;
+  window._ctdSendFreeLookConfirm   = _ctdSendFreeLookConfirm;
   window._ctdActivate              = _ctdActivate;
+  window._ctdActivateConfirm       = _ctdActivateConfirm;
 
   console.log('RET Pipeline module loaded — Annuity Application · Suitability Review · Contract Delivery · navigateTo patched for ann-application, suitability-review, contract-delivery');
 
