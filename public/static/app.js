@@ -52575,7 +52575,21 @@ function srOpenFullReview(id) {
               defaultRiders:['Guaranteed Interest Rate (4.8%)','Income Activation Rider'],
               optionalRiders:['Enhanced Death Benefit','Nursing Home Waiver','Return of Premium'],
               highlight:'Guaranteed interest rate + income rider',
-              contractNumPrefix:'NYL-CAFIA', suitScore:93 }
+              contractNumPrefix:'NYL-CAFIA', suitScore:93 },
+    VA:    { label:'Variable Annuity', code:'VA', color:'#7c3aed', icon:'fa-chart-line',
+              cat:'Deferred', minPremium:25000, defaultPremium:150000,
+              incomeStart:'Deferred (chosen future date)', surrenderPeriod:'7 years',
+              defaultRiders:['Guaranteed Minimum Withdrawal Benefit (GMWB)','Enhanced Death Benefit Step-Up'],
+              optionalRiders:['Guaranteed Minimum Income Benefit (GMIB)','Waiver of Surrender (Disability)','Long-Term Care Extension Rider'],
+              highlight:'Market-linked growth + optional GMWB/GMIB rider',
+              contractNumPrefix:'NYL-VA', suitScore:87 },
+    IndexFlex: { label:'Hybrid Variable Annuity (IndexFlex)', code:'IndexFlex', color:'#0891b2', icon:'fa-balance-scale',
+              cat:'Deferred', minPremium:25000, defaultPremium:175000,
+              incomeStart:'Deferred (chosen future date)', surrenderPeriod:'7 years',
+              defaultRiders:['Index-Linked Strategy (S&P 500 · 0% floor)','Enhanced Death Benefit'],
+              optionalRiders:['Guaranteed Minimum Withdrawal Benefit (GMWB)','Fixed Account Allocation Rider','Waiver of Surrender (Nursing Home)'],
+              highlight:'Index-linked + fixed account with 0% floor protection',
+              contractNumPrefix:'NYL-IFLEX', suitScore:90 }
   };
 
   /* Client roster for Step 1 dropdown */
