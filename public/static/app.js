@@ -1,5 +1,5 @@
 /* =============================================
-   NOVA ANALYTICS AGENT 360 — Frontend JavaScript
+   WIPRO WEALTHAI AGENT 360 — Frontend JavaScript
    ============================================= */
 
 // ---- NAVIGATION ----
@@ -1748,7 +1748,7 @@ function _cmIntel(client) {
       <div class="intel-agent-callout">
         <i class="fas fa-robot"></i>
         <div class="intel-agent-text">
-          <strong>NOVA Agent Insight:</strong> Based on 3rd-party data, ${client.name} has <strong>$${_cmIntelGap(d)}</strong> in external assets not captured in NYL products. This represents a consolidation and cross-sell opportunity.
+          <strong>WealthAI Agent Insight:</strong> Based on 3rd-party data, ${client.name} has <strong>$${_cmIntelGap(d)}</strong> in external assets not captured in NYL products. This represents a consolidation and cross-sell opportunity.
           <button class="intel-ai-btn" onclick="switchClientTab('planning', document.getElementById('cm-tab-planning'))"><i class="fas fa-drafting-compass"></i> View Financial Plan</button>
         </div>
       </div>
@@ -2044,7 +2044,7 @@ function _cmPlanning(client) {
       <div class="intel-agent-callout" style="background:linear-gradient(135deg,#eff6ff,#f5f3ff)">
         <i class="fas fa-robot" style="color:#003087"></i>
         <div class="intel-agent-text">
-          <strong>NOVA Financial Planning Engine:</strong> Plan generated using ${pd.needsAnalysis.length} need categories, ${pd.suitability.riskProfile} risk profile, and ${pd.suitability.timeHorizon} horizon. All proposed products scored for suitability per FINRA Reg BI standards.
+          <strong>WealthAI Financial Planning Engine:</strong> Plan generated using ${pd.needsAnalysis.length} need categories, ${pd.suitability.riskProfile} risk profile, and ${pd.suitability.timeHorizon} horizon. All proposed products scored for suitability per FINRA Reg BI standards.
           <button class="intel-ai-btn" onclick="cmExportPlan(${client.id})"><i class="fas fa-file-pdf"></i> Export Plan PDF</button>
         </div>
       </div>
@@ -2737,7 +2737,7 @@ async function sendChatMessage() {
     errMsg.className = 'chat-msg bot';
     errMsg.innerHTML = `
       <div class="msg-avatar" style="background:#fee2e2;color:#dc2626"><i class="fas fa-exclamation-triangle"></i></div>
-      <div class="msg-bubble">⚠️ Unable to reach NOVA AI. Please check your connection and try again.</div>
+      <div class="msg-bubble">⚠️ Unable to reach Wipro WealthAI. Please check your connection and try again.</div>
     `;
     messages.appendChild(errMsg);
   }
@@ -17602,7 +17602,7 @@ function handleLogout() {
     <div class="modal-box" style="max-width:380px;text-align:center">
       <div class="modal-body" style="padding:32px 24px 20px">
         <div style="font-size:36px;margin-bottom:16px">🔒</div>
-        <div style="font-size:17px;font-weight:700;color:#1e293b;margin-bottom:8px">Sign out of NOVA Agent 360?</div>
+        <div style="font-size:17px;font-weight:700;color:#1e293b;margin-bottom:8px">Sign out of Wipro WealthAI Agent 360?</div>
         <div style="font-size:13px;color:#64748b;line-height:1.6">
           You are signed in as <strong>Sridhar Ramalingam</strong><br>
           New York · Manhattan Branch
@@ -18626,7 +18626,7 @@ function openNAICFormModal(formType, claimRef, state) {
         fieldsHtml +
         '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 14px;margin-top:6px;font-size:12px;color:#166534;line-height:1.5">' +
           '<i class="fas fa-shield-alt" style="margin-right:6px"></i>' +
-          '<strong>Digital Submission:</strong> This form will be signed with your NOVA agent credentials and transmitted to the state regulatory portal. A confirmed copy and reference number will be saved to the claim record and your regulatory log.' +
+          '<strong>Digital Submission:</strong> This form will be signed with your Wipro WealthAI agent credentials and transmitted to the state regulatory portal. A confirmed copy and reference number will be saved to the claim record and your regulatory log.' +
         '</div>' +
       '</div>' +
       /* ─ Footer ─ */
@@ -19919,11 +19919,11 @@ function settingsFontSize(size) {
    ════════════════════════════════════════════════════════════════ */
 
 const _helpArticles = {
-  'getting-started': { title: 'Getting Started with NOVA Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore Client 360 to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The Agentic AI section gives context-aware copilots, workflows and agent building for any client or deal. Use G+D/G+C/G+P shortcuts to jump between pages, and ⌘, (or Settings & Preferences from your profile) to configure notifications and AI behaviour.' },
-  'ai-guide': { title: 'AI Features Guide', body: 'NOVA Agent 360 includes 6 AI domains: Underwriting STP (73% auto-approval), Retention Intelligence (67-day lapse prediction), Claims Automation (IDP document processing, 4-tab layout), Proactive Alert Engine (obituary + NBA detection), Investment Advisory AI, and Meeting Intelligence. View your AI Scorecard in AI Insights, and launch NOVA AI directly via the Launch NOVA AI button. Growth Opportunities shows AI scores (0–100) per client.' },
+  'getting-started': { title: 'Getting Started with Wipro WealthAI Agent 360', body: 'Welcome! Start by reviewing your Dashboard KPIs, then explore Client 360 to see your book of business. Use ⌘K (Cmd+K) to search anything instantly. The Agentic AI section gives context-aware copilots, workflows and agent building for any client or deal. Use G+D/G+C/G+P shortcuts to jump between pages, and ⌘, (or Settings & Preferences from your profile) to configure notifications and AI behaviour.' },
+  'ai-guide': { title: 'AI Features Guide', body: 'Wipro WealthAI Agent 360 includes 6 AI domains: Underwriting STP (73% auto-approval), Retention Intelligence (67-day lapse prediction), Claims Automation (IDP document processing, 4-tab layout), Proactive Alert Engine (obituary + NBA detection), Investment Advisory AI, and Meeting Intelligence. View your AI Scorecard in AI Insights, and launch Wipro WealthAI directly via the Launch Wipro WealthAI button. Growth Opportunities shows AI scores (0–100) per client.' },
   'keyboard': { title: 'Keyboard Shortcuts', body: 'G+D: Dashboard · G+C: Clients · G+P: Sales Pipeline · G+A: Agentic AI · G+R: Reports · G+I: AI Insights · G+L: AI Planner · G+G: Growth Opportunities · ⌘K: Spotlight Search · Esc: Close modal · ⌘,: Settings · ?: Show Help' },
   'video-tutorials': { title: 'Video Tutorials', body: 'Video walkthroughs are available on the NYL internal portal. Topics include: Setting up your client profile, Using AI agents for underwriting, Understanding your AI Scorecard, and Configuring notifications. Contact support for access.' },
-  'release-notes': { title: 'Q2 2026 Release Notes', body: 'New: Sales Pipeline 5-tab view (Kanban/List/Focus/Analytics/Lifecycle) · Lifecycle tab merges Journey Pipeline into lead-to-growth kanban · Growth Opportunities (AI score chips 0–100 per client) · Claims 4-tab redesign · NOVA AI launch link in AI Insights · Settings Data & Privacy tab · Improved: Navigation (HOME, AI Planner, no Insurance divider) · Phase 4 Application Queue fix · Fixed: Sales Pipeline queue blank on load' },
+  'release-notes': { title: 'Q2 2026 Release Notes', body: 'New: Sales Pipeline 5-tab view (Kanban/List/Focus/Analytics/Lifecycle) · Lifecycle tab merges Journey Pipeline into lead-to-growth kanban · Growth Opportunities (AI score chips 0–100 per client) · Claims 4-tab redesign · Wipro WealthAI launch link in AI Insights · Settings Data & Privacy tab · Improved: Navigation (HOME, AI Planner, no Insurance divider) · Phase 4 Application Queue fix · Fixed: Sales Pipeline queue blank on load' },
   'uw-guide': { title: 'Underwriting Pipeline Guide', body: 'The Underwriting STP Engine auto-approves applications scoring below the risk threshold. Applications above threshold route to manual review with AI-generated risk summaries. APS orders are avoided where AI confidence is high — saving $450/case. Current STP rate: 73% (18 APS cases avoided/month).' },
   'retention-guide': { title: 'Retention Intelligence Best Practices', body: 'When a client appears in the Lapse Risk list, act within 48 hours. AI recommends: 1) Personal outreach call, 2) Policy review meeting, 3) Flexible payment options. Clients contacted within the 67-day window have a 60% retention rate vs 23% without AI-guided outreach.' },
   'claims-guide': { title: 'Claims Automation — IDP & Triage', body: 'The IDP (Intelligent Document Processing) engine extracts data from claims documents in <30 seconds with 97.3% accuracy. Claims are auto-triaged within 2 minutes. If a document gap is detected, the system flags the specific missing items and drafts a request letter automatically.' },
@@ -23279,7 +23279,7 @@ function _pmPlanning(p) {
       <div class="plan-section"><div class="plan-section-hdr"><i class="fas fa-lightbulb"></i> Proposed Products &amp; Recommendations</div><div class="plan-products-grid">${productCards}</div></div>
       <div class="intel-agent-callout" style="background:linear-gradient(135deg,#eff6ff,#f5f3ff)">
         <i class="fas fa-robot" style="color:#003087"></i>
-        <div class="intel-agent-text"><strong>NOVA Financial Planning Engine:</strong> Plan for ${p.name} generated using ${pd.needsAnalysis.length} need categories, ${pd.suitability.riskProfile} risk profile. FINRA Reg BI compliant.
+        <div class="intel-agent-text"><strong>WealthAI Financial Planning Engine:</strong> Plan for ${p.name} generated using ${pd.needsAnalysis.length} need categories, ${pd.suitability.riskProfile} risk profile. FINRA Reg BI compliant.
           <button class="intel-ai-btn" onclick="pmExportPlan('${p.id}')"><i class="fas fa-file-pdf"></i> Export Plan PDF</button>
         </div>
       </div>
@@ -23495,7 +23495,7 @@ function _pmDocuments(p) {
       <div class="pm-docs-list">${rows}</div>
       <div class="intel-agent-callout" style="margin-top:14px">
         <i class="fas fa-robot" style="color:#003087"></i>
-        <div class="intel-agent-text"><strong>NOVA Document Engine:</strong> All plan, illustration, and compliance documents are generated on-demand. Click any row to navigate to the relevant tab.
+        <div class="intel-agent-text"><strong>WealthAI Document Engine:</strong> All plan, illustration, and compliance documents are generated on-demand. Click any row to navigate to the relevant tab.
           <button class="intel-ai-btn" onclick="pmDocExportAll('${p.id}')"><i class="fas fa-file-archive"></i> Export All as ZIP</button>
         </div>
       </div>
@@ -24434,7 +24434,7 @@ function apRunEnrich(fname, lname) {
             <div style="font-size:0.78rem;color:#374151">Lead Score: <strong style="color:${scoreColor}">${aiScore}/100</strong></div>
             <div style="font-size:0.78rem;color:#374151;margin-top:4px">Best Product: <strong>${product}</strong></div>
             <div style="font-size:0.78rem;color:#374151;margin-top:4px">Priority: <strong>${aiScore>=70?'High — contact within 48h':'Medium — nurture sequence'}</strong></div>
-            <div style="font-size:0.72rem;color:#94a3b8;margin-top:6px;font-style:italic">Source: NOVA AI Engine</div>
+            <div style="font-size:0.72rem;color:#94a3b8;margin-top:6px;font-style:italic">Source: Wipro WealthAI Engine</div>
           </div>
         </div>
 
@@ -57166,11 +57166,11 @@ function _cmPortfolio(client) {
     // AI nudge
     '<div class="intel-agent-callout" style="margin-top:16px;background:linear-gradient(135deg,#eff6ff,#f0fdf4)">' +
       '<i class="fas fa-robot" style="color:#003087"></i>' +
-      '<div class="intel-agent-text"><strong>NOVA Portfolio Intelligence:</strong> ' +
+      '<div class="intel-agent-text"><strong>WealthAI Portfolio Intelligence:</strong> ' +
         (grandTotal > 500000 ?
           'High-net-worth client with significant external AUM. Consider consolidation conversation — moving assets under NYL advisory could increase AUM under management.' :
           'Review asset allocation for rebalancing opportunities aligned to risk profile and time horizon.') +
-        ' <button class="intel-ai-btn" data-suffix=" portfolio - consolidation and rebalancing opportunities" onclick="cmAskNova(client.name,this.dataset.suffix)"><i class="fas fa-robot"></i> Ask NOVA</button>' +
+        ' <button class="intel-ai-btn" data-suffix=" portfolio - consolidation and rebalancing opportunities" onclick="cmAskNova(client.name,this.dataset.suffix)"><i class="fas fa-robot"></i> Ask WealthAI</button>' +
       '</div>' +
     '</div>' +
 
@@ -57272,10 +57272,10 @@ function _cmRetirement(client) {
     // AI nudge
     '<div class="intel-agent-callout" style="margin-top:16px;background:linear-gradient(135deg,#eff6ff,#ecfdf5)">' +
       '<i class="fas fa-robot" style="color:#003087"></i>' +
-      '<div class="intel-agent-text"><strong>NOVA Retirement Planner:</strong> ' +
+      '<div class="intel-agent-text"><strong>WealthAI Retirement Planner:</strong> ' +
         (readinessScore < 70 ? 'Retirement readiness gap detected. Consider annuity income strategy to close projected shortfall. ' : 'Retirement assets are tracking well. ') +
         (ss.estimatedAtFRA ? 'Social Security at FRA: ' + ss.estimatedAtFRA + '. ' : '') +
-        '<button class="intel-ai-btn" data-suffix=" - retirement income: annuity, Social Security, RMD schedule" onclick="cmAskNova(client.name,this.dataset.suffix)"><i class="fas fa-robot"></i> Ask NOVA</button>' +
+        '<button class="intel-ai-btn" data-suffix=" - retirement income: annuity, Social Security, RMD schedule" onclick="cmAskNova(client.name,this.dataset.suffix)"><i class="fas fa-robot"></i> Ask WealthAI</button>' +
       '</div>' +
     '</div>' +
 
@@ -57413,10 +57413,10 @@ function _cmEstateProt(client) {
     // AI nudge
     '<div class="intel-agent-callout" style="margin-top:16px;background:linear-gradient(135deg,#f5f3ff,#faf5ff)">' +
       '<i class="fas fa-robot" style="color:#7c3aed"></i>' +
-      '<div class="intel-agent-text"><strong>NOVA Estate Intelligence:</strong> ' +
+      '<div class="intel-agent-text"><strong>WealthAI Estate Intelligence:</strong> ' +
         (gaps.length ? gaps.length + ' protection gap(s) identified. ' : 'Protection profile looks solid. ') +
         'Net worth: <strong>' + nwStr + '</strong>. ' +
-        '<button class="intel-ai-btn" data-suffix=" - estate and protection gaps: LTC, disability, trust, beneficiaries" onclick="cmAskNova(client.name,this.dataset.suffix)"><i class="fas fa-robot"></i> Ask NOVA</button>' +
+        '<button class="intel-ai-btn" data-suffix=" - estate and protection gaps: LTC, disability, trust, beneficiaries" onclick="cmAskNova(client.name,this.dataset.suffix)"><i class="fas fa-robot"></i> Ask WealthAI</button>' +
       '</div>' +
     '</div>' +
 
@@ -57540,10 +57540,10 @@ function _cmServiceClaims(client) {
     // AI nudge
     '<div class="intel-agent-callout" style="margin-top:16px;background:linear-gradient(135deg,#fff7ed,#fef3c7)">' +
       '<i class="fas fa-robot" style="color:#d97706"></i>' +
-      '<div class="intel-agent-text"><strong>NOVA Claims Intelligence:</strong> ' +
+      '<div class="intel-agent-text"><strong>WealthAI Claims Intelligence:</strong> ' +
         (urgentCount ? urgentCount + ' urgent claim(s) need immediate attention. ' : '') +
         (openCount ? openCount + ' open claim(s) in progress. ' : 'No open claims — good standing. ') +
-        '<button class="intel-ai-btn" data-suffix=" - current claims status and required actions" onclick="cmAskNova(client.name,this.dataset.suffix)"><i class="fas fa-robot"></i> Ask NOVA</button>' +
+        '<button class="intel-ai-btn" data-suffix=" - current claims status and required actions" onclick="cmAskNova(client.name,this.dataset.suffix)"><i class="fas fa-robot"></i> Ask WealthAI</button>' +
       '</div>' +
     '</div>' +
 
