@@ -65444,6 +65444,8 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window.initHalPipelinePage   = initHalPipelinePage;
   window.initHalMedSupPage     = initHalMedSupPage;
   window.initTpaCommandPage    = initTpaCommandPage;
+  window.ltcClaimsData         = ltcClaimsData;
+  window._ltcBuildPage         = _ltcBuildPage;
   window.ltcOpenClaimDetail    = ltcOpenClaimDetail;
   window.ltcProcessPayment     = ltcProcessPayment;
   window.ltcScheduleAssessment = ltcScheduleAssessment;
@@ -67621,7 +67623,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + carrierCards
       +'</div></div>';
 
-    _ltcBuildPage('tpl-insurance-carrier-360', html);
+    (window._ltcBuildPage||function(){})('tpl-insurance-carrier-360', html);
   }
 
   window.ltcOpenCarrier360 = function(carrierId) {
@@ -67754,7 +67756,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + providerCards
       +'</div></div>';
 
-    _ltcBuildPage('tpl-healthcare-provider-360', html);
+    (window._ltcBuildPage||function(){})('tpl-healthcare-provider-360', html);
   }
 
   window.ltcOpenProvider360 = function(providerId) {
@@ -67896,6 +67898,8 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window.ltcOpenProvider360        = ltcOpenProvider360;
   window.ltcCarrierAction          = ltcCarrierAction;
   window.ltcProviderAction         = ltcProviderAction;
+  window.ltcCarrierData360         = ltcCarrierData360;
+  window.ltcProviderData360        = ltcProviderData360;
   window.halOpenPolicyDetail       = halOpenPolicyDetail;
   window.ltcNcNext                 = ltcNcNext;
   window.ltcNcBack                 = ltcNcBack;
@@ -68840,4 +68844,3095 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window._p5toast                 = _p5toast;
 
   console.log('LTC Phase 5 loaded — System Architecture Map (16 systems) · iHub Data & Insights · Insights Engine · Core Tools & Technologies · Business-Oriented Structure · Differentiating Advantages · System badges injected across LTC Operations tabs');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 6 — FULL BUTTON INTERACTIVITY  (v2 — comprehensive rebuild)
+   LTC Claim Detail Modal (all 6 tabs) · Insurance Carrier 360 · Healthcare Provider 360
+   Every visible button produces a rich WealthAI-powered modal overlay.
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ─── SHARED OVERLAY HELPERS ──────────────────────────────────────────── */
+  function _p6ov(id, inner) {
+    var ex = document.getElementById(id);
+    if (ex) ex.remove();
+    document.body.insertAdjacentHTML('beforeend',
+      '<div id="'+id+'" style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:11000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">'+inner+'</div>');
+  }
+  function _p6close(id) { var el = document.getElementById(id); if (el) el.remove(); }
+  function _p6toast(msg, dur) {
+    var t = document.createElement('div');
+    t.innerHTML = msg;
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#1e293b,#0f172a);color:#fff;padding:13px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:99999;max-width:480px;line-height:1.5;box-shadow:0 8px 32px rgba(0,0,0,.4);';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, dur || 4000);
+  }
+  function _p6hdr(icon, title, sub, color, closeId) {
+    return '<div style="background:linear-gradient(135deg,'+color+','+color+'cc);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      +'<i class="fas '+icon+'" style="font-size:22px;opacity:.9;"></i>'
+      +'<div style="flex:1;">'
+      +'<div style="font-size:15px;font-weight:800;letter-spacing:-.3px;">'+title+'</div>'
+      +'<div style="font-size:11px;opacity:.8;margin-top:2px;">'+sub+'</div>'
+      +'</div>'
+      +'<button onclick="_p6close(\''+closeId+'\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;font-weight:700;">✕</button>'
+      +'</div>';
+  }
+  function _p6row(l, v) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;">'+l+'</div>'
+      +'<div style="font-size:13px;font-weight:600;color:#111827;margin-top:2px;">'+v+'</div>'
+      +'</div>';
+  }
+  function _p6ai(text) {
+    return '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:1.5px solid #ddd6fe;border-radius:10px;padding:14px;margin-bottom:16px;">'
+      +'<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Intelligence</div>'
+      +'<div style="font-size:12px;color:#374151;line-height:1.6;">'+text+'</div>'
+      +'</div>';
+  }
+  function _p6btn(label, icon, color, onclick) {
+    var bg = color.startsWith('linear') ? color : color;
+    var style = color.startsWith('linear')
+      ? 'background:'+color+';'
+      : 'background:'+color+';';
+    return '<button onclick="'+onclick+'" style="'+style+'color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">'
+      +'<i class="fas '+icon+'"></i> '+label+'</button>';
+  }
+  function _p6wrap(id, width, content) {
+    return '<div style="background:#fff;border-radius:16px;width:100%;max-width:'+width+';max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'+content+'</div>';
+  }
+  function _p6kpi(val, label, icon, color, sub) {
+    return '<div style="background:linear-gradient(135deg,'+color+'18,'+color+'08);border-radius:10px;padding:14px;text-align:center;">'
+      +'<div style="font-size:20px;font-weight:800;color:'+color+';">'+val+'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:#374151;margin-top:2px;">'+label+'</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin-top:1px;">'+sub+'</div>'
+      +'</div>';
+  }
+  function _p6tbl(headers, rows) {
+    var th = headers.map(function(h){ return '<th style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;padding:8px 10px;text-align:left;background:#f8fafc;">'+h+'</th>'; }).join('');
+    var tr = rows.map(function(r){
+      var tds = r.map(function(c){ return '<td style="font-size:12px;color:#374151;padding:9px 10px;border-bottom:1px solid #f3f4f6;">'+c+'</td>'; }).join('');
+      return '<tr>'+tds+'</tr>';
+    }).join('');
+    return '<table style="width:100%;border-collapse:collapse;margin-bottom:14px;"><thead><tr>'+th+'</tr></thead><tbody>'+tr+'</tbody></table>';
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     1.  LTC CLAIM DETAIL MODAL — ALL BUTTON ACTIONS (all 6 tabs)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.ltcDetailAction = function(action, claimId) {
+    var claims = window.ltcClaimsData || [];
+    var c = claims.find(function(x){ return x.id === claimId; }) || {};
+    var name = c.claimant || claimId;
+
+    if (action === 'reload') return;
+
+    /* ── OVERVIEW TAB: PROCESS PAYMENT ── */
+    if (action === 'payment') {
+      _p6ov('p6-payment-ov', _p6wrap('p6-payment-ov','580px',
+        _p6hdr('fa-dollar-sign','Process Payment — '+claimId,'ACH/EFT · STP-eligible · Carrier notification','#059669','p6-payment-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI confirms claim <strong>'+claimId+'</strong> is STP (Straight-Through Processing) eligible. ADL score <strong>'+( c.assessScore||'2')+'/5</strong>, fraud score <strong>8/100 (Clear)</strong>, care plan current as of last visit. Daily benefit of <strong>'+(c.dailyBenefit||'$180/day')+'</strong> to <strong>'+(c.provider||'provider')+'</strong>. ACH batch will execute tonight at 8 PM EST. No holds or flags detected.')
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">'
+        +_p6row('Claimant', name)
+        +_p6row('Daily Benefit', c.dailyBenefit||'$180/day')
+        +_p6row('Payment Cycle', 'Monthly — Jul 2026')
+        +_p6row('Provider', c.provider||'—')
+        +_p6row('Payment Method', 'ACH Direct Deposit')
+        +_p6row('Next Due', c.paymentDue||'Jul 15, 2026')
+        +_p6row('Carrier', c.carrier||'—')
+        +_p6row('Policy Status', '✅ In Force · No lapses')
+        +'</div>'
+        +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:16px;">'
+        +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:4px;"><i class="fas fa-check-circle" style="margin-right:5px;"></i>STP Eligible — Auto-Approved</div>'
+        +'<div style="font-size:12px;color:#166534;">Fraud score: Clear · ADL threshold met · Care plan current · No documentation holds · Elimination period satisfied</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Confirm & Process Payment','fa-paper-plane','#059669','_p6close(\'p6-payment-ov\');_p6toast(\'<i class="fas fa-check-circle"></i> Payment of '+(c.dailyBenefit||'$180/day')+' × 30 days processed for '+name+' · ACH batch queued for tonight · Carrier '+(c.carrier||'carrier')+' notified · Reference: PAY-'+claimId+'-JUL26\',5500)')
+        +_p6btn('Place Payment Hold','fa-pause-circle','#d97706','_p6close(\'p6-payment-ov\');_p6toast(\'<i class="fas fa-pause-circle"></i> Payment for '+claimId+' placed on hold · Supervisor notified · SLA paused · Reason documented\',3500)')
+        +_p6btn('Schedule Future Date','fa-calendar','#0891b2','_p6toast(\'<i class="fas fa-calendar"></i> Payment for '+claimId+' rescheduled · ACH batch adjusted · Provider and carrier notified\',3500)')
+        +'<button onclick="_p6close(\'p6-payment-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── OVERVIEW TAB: SCHEDULE ASSESSMENT ── */
+    else if (action === 'assess') {
+      _p6ov('p6-assess-ov', _p6wrap('p6-assess-ov','560px',
+        _p6hdr('fa-user-check','Schedule RN Assessment — '+claimId,'Telephonic · In-Person · Video · HIPAA','#0891b2','p6-assess-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI recommends a telephonic RN assessment for <strong>'+name+'</strong> within 5 business days. ADL score <strong>'+(c.assessScore||'2')+'/5</strong> and MMSE <strong>'+(c.cogScore||'14')+'/30</strong> indicate '+(c.type||'Nursing Home')+' care remains appropriate. AI-matched RN: <strong>Sarah Johnson</strong> (available Jul 12–15 with 96% continuity score). Reassessment confirms eligibility and catches level-of-care changes early.')
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        +_p6row('Claimant', name)
+        +_p6row('Current ADL Score', (c.assessScore||'2')+'/5')
+        +_p6row('MMSE Score', (c.cogScore||'14')+'/30')
+        +_p6row('Care Setting', c.type||'Nursing Home')
+        +'</div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assessment Date</label>'
+        +'<input type="text" value="Jul 14, 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assessment Mode</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Telephonic RN Assessment (AI-recommended)</option><option>In-Person Clinical Visit</option><option>Video Assessment (HIPAA)</option><option>Comprehensive Multidisciplinary</option></select></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assigned RN (AI-matched)</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Sarah Johnson, RN — 96% continuity match (Recommended)</option><option>Maria Castillo, MSW</option><option>James Park, RN</option><option>Auto-assign by availability</option></select></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Confirm & Schedule','fa-calendar-check','#0891b2','_p6close(\'p6-assess-ov\');_p6toast(\'<i class="fas fa-calendar-check"></i> RN Assessment scheduled for '+name+' · Jul 14, 2026 · Sarah Johnson, RN assigned · SMS + email sent to claimant and provider · EVV tracking activated · Claim updated\',5000)')
+        +_p6btn('AI Auto-Schedule','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6close(\'p6-assess-ov\');_p6toast(\'<i class="fas fa-magic"></i> WealthAI auto-scheduled optimal assessment slot · Sarah Johnson, RN · Jul 12, 10:30 AM · Claimant, provider, and carrier notified automatically\',4500)')
+        +'<button onclick="_p6close(\'p6-assess-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── OVERVIEW TAB: UPDATE CARE PLAN ── */
+    else if (action === 'careplan') {
+      _p6ov('p6-careplan-ov', _p6wrap('p6-careplan-ov','600px',
+        _p6hdr('fa-hands-helping','Update Care Plan — '+claimId,'Auto-populated · Physician countersignature · Carrier sync','#7c3aed','p6-careplan-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI has auto-populated this care plan from the most recent visit notes at <strong>'+(c.provider||'provider')+'</strong>. ADL score '+(c.assessScore||'2')+'/5 — recommend reassessing care setting if score reaches 4+/5. Next benefit period milestone in <strong>30 days</strong>. AI benchmarked against 63,000+ similar claimant outcomes — current plan is clinically optimal. Physician countersignature via secure portal takes avg 18 hours.')
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        +_p6row('Care Setting', c.type||'Nursing Home')
+        +_p6row('Provider', c.provider||'—')
+        +_p6row('Daily Benefit', c.dailyBenefit||'$180/day')
+        +_p6row('Next Review', 'Aug 14, 2026')
+        +'</div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Care Setting</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option selected>'+(c.type||'Nursing Home')+'</option><option>Home Health</option><option>Skilled Nursing Facility</option><option>Assisted Living</option><option>Memory Care</option><option>Adult Day Care</option></select></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Visit Frequency</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Daily</option><option>3x/week</option><option>Weekly</option><option selected>Bi-weekly</option><option>Monthly</option></select></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">ADL Goals (AI-optimized)</label>'
+        +'<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:70px;resize:none;">Maintain current functional level · Monitor mobility and fall risk · Medication compliance review at each visit · Goal: prevent SNF transfer 6+ months · Cognitive engagement program 3x/week.</textarea></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Physician / Care Manager Notes</label>'
+        +'<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:55px;resize:none;">Updated by WealthAI — pending physician countersignature. Dr. Thompson review requested by Jul 16.</textarea></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Save & Notify Carrier','fa-save','#7c3aed','_p6close(\'p6-careplan-ov\');_p6toast(\'<i class="fas fa-clipboard-check"></i> Care Plan saved for '+name+' · Carrier '+(c.carrier||'carrier')+' notified · Physician countersignature requested · Next review: Aug 14, 2026\',5000)')
+        +_p6btn('AI Optimize Plan','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6toast(\'<i class="fas fa-magic"></i> WealthAI optimizing care plan for '+name+' · Analyzing ADL trajectory · Benchmarking 63K+ outcomes · Recommendations will populate in 30 seconds\',4500)')
+        +_p6btn('Request Physician Sign','fa-signature','#0891b2','_p6toast(\'<i class="fas fa-signature"></i> Countersignature request sent to treating physician via secure portal · Expected: 18–24 hours\',3500)')
+        +'<button onclick="_p6close(\'p6-careplan-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── DOCUMENTS TAB: UPLOAD DOCUMENT ── */
+    else if (action === 'upload') {
+      _p6ov('p6-upload-ov', _p6wrap('p6-upload-ov','540px',
+        _p6hdr('fa-upload','Upload Document — '+claimId,'HIPAA-encrypted · WealthAI auto-index · OCR extraction','#d97706','p6-upload-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI will auto-classify this document upon upload and index it to claim <strong>'+claimId+'</strong>. For APS and Care Plans, AI extracts key fields (diagnosis codes, ADL scores, physician signature, dates) and flags any discrepancies with existing claim data. <strong>Priority missing:</strong> Care Plan (Current) — overdue 8 days. Average AI index time: 45 seconds.')
+        +'<div style="border:2px dashed #d1d5db;border-radius:12px;padding:32px;text-align:center;margin-bottom:16px;cursor:pointer;background:#fafafa;" onclick="_p6toast(\'<i class=\\\"fas fa-upload\\\"></i> File browser opened · Secure HIPAA-compliant upload channel ready · Max 25MB per file\',2500)">'
+        +'<i class="fas fa-cloud-upload-alt" style="font-size:40px;color:#9ca3af;margin-bottom:10px;display:block;"></i>'
+        +'<div style="font-size:14px;font-weight:700;color:#374151;">Drag & Drop or Click to Browse</div>'
+        +'<div style="font-size:12px;color:#9ca3af;margin-top:5px;">PDF, DOCX, JPG, PNG — Max 25MB · AES-256 encrypted at rest</div>'
+        +'<div style="margin-top:10px;font-size:11px;background:#fef3c7;color:#92400e;padding:6px 12px;border-radius:6px;display:inline-block;font-weight:600;">⚠️ Care Plan (Current) — overdue 8 days</div>'
+        +'</div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Document Type</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+        +'<option>Care Plan (Current) — Priority Missing</option>'
+        +'<option>Attending Physician Statement (APS)</option>'
+        +'<option>ADL Assessment Report</option>'
+        +'<option>Cognitive Assessment (MMSE)</option>'
+        +'<option>Provider License &amp; W-9</option>'
+        +'<option>HIPAA Authorization Form</option>'
+        +'<option>Lab Results / Medical Records</option>'
+        +'<option>Other Clinical Document</option>'
+        +'</select></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Source / Author</label>'
+        +'<input type="text" placeholder="e.g. Dr. Sarah Thompson, MD · Sunrise Manor SNF..." style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Upload & AI Index','fa-robot','#d97706','_p6close(\'p6-upload-ov\');_p6toast(\'<i class="fas fa-check-circle"></i> Document uploaded for '+claimId+' · WealthAI indexing: extracting fields · Confidence 94% · Claim record updated · Carrier '+(c.carrier||'carrier')+' auto-notified\',5500)')
+        +_p6btn('Upload Only (Manual Review)','fa-upload','#6b7280','_p6close(\'p6-upload-ov\');_p6toast(\'<i class="fas fa-file-upload"></i> Document uploaded to '+claimId+' · Manual review queue · Claims Ops notified · Review SLA: 4 business hours\',4500)')
+        +'<button onclick="_p6close(\'p6-upload-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── DOCUMENTS TAB: REQUEST MISSING DOCS ── */
+    else if (action === 'request') {
+      _p6ov('p6-request-ov', _p6wrap('p6-request-ov','560px',
+        _p6hdr('fa-envelope','Request Missing Documents — '+claimId,'WealthAI-drafted · HIPAA-compliant · Auto-follow-up','#6b7280','p6-request-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI detected <strong>1 missing document</strong> for claim <strong>'+claimId+'</strong>: Care Plan (Current) — overdue 8 days. Draft reminder pre-addressed to <strong>'+(c.provider||'the provider')+'</strong>. AI recommends CC to attending physician. If not received within 5 days, SLA escalation triggers automatically. Compliance risk: <span style="color:#d97706;font-weight:700;">Medium</span> — payment cycle at risk.')
+        +'<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:14px;">'
+        +'<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;">📋 Document Checklist</div>'
+        +'<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f3f4f6;"><input type="checkbox" checked style="accent-color:#dc2626;"> <span style="font-size:12px;color:#374151;">⚠️ Care Plan (Current) — <strong>'+(c.provider||'Provider')+'</strong> — <span style="color:#dc2626;">Overdue 8 days</span></span></div>'
+        +'<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f3f4f6;"><input type="checkbox" style="accent-color:#0891b2;"> <span style="font-size:12px;color:#374151;">APS Update — <strong>Treating Physician</strong> (optional, recommended)</span></div>'
+        +'<div style="display:flex;align-items:center;gap:8px;padding:7px 0;"><input type="checkbox" style="accent-color:#0891b2;"> <span style="font-size:12px;color:#374151;">EVV Gap Documentation — Jul 28 visit</span></div>'
+        +'</div>'
+        +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Send to</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Provider + Attending Physician (AI-recommended)</option><option>Provider Only</option><option>Attending Physician Only</option><option>Provider + Carrier</option></select></div>'
+        +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Email (AI-drafted)</label>'
+        +'<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:90px;resize:none;">Dear Care Team,\n\nThis is a reminder that the updated Care Plan for claim '+claimId+' is required for continued benefit processing. Please submit via the illumifin Provider Portal or reply to this secure message.\n\nDeadline: July 16, 2026.\n\nWarm regards,\nillumifin Claims Operations · Powered by WealthAI</textarea></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Send Request Now','fa-paper-plane','#0891b2','_p6close(\'p6-request-ov\');_p6toast(\'<i class="fas fa-paper-plane"></i> Document request sent to '+(c.provider||'provider')+' and MD · Follow-up auto-scheduled Jul 16 · SLA noted · Claim '+claimId+' updated · Escalation auto-trigger set\',5500)')
+        +_p6btn('Schedule Escalation','fa-exclamation-triangle','#d97706','_p6close(\'p6-request-ov\');_p6toast(\'<i class="fas fa-exclamation-triangle"></i> Escalation trigger set for Jul 16 · If not received, auto-escalates to Supervisor Jennifer Kim · SLA hold documented\',4000)')
+        +'<button onclick="_p6close(\'p6-request-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── DOCUMENTS TAB: VIEW DOCUMENT ── */
+    else if (action === 'view-doc') {
+      /* claimId here is actually the document name passed from _lcdDocRow */
+      var docName = claimId;
+      var isCarePlan = docName && docName.toLowerCase().indexOf('care plan') !== -1;
+      var isPending = isCarePlan;
+      var statusColor = isPending ? '#d97706' : '#059669';
+      var statusText  = isPending ? '⚠️ Review Required' : '✅ Received';
+      _p6ov('p6-viewdoc-ov', _p6wrap('p6-viewdoc-ov','620px',
+        _p6hdr('fa-file-pdf','Document Viewer','HIPAA-secure · WealthAI field extraction · Audit-logged','#d97706','p6-viewdoc-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI has parsed <strong>'+( docName||'this document')+'</strong> and extracted structured fields with <strong>96% confidence</strong>. All fields cross-referenced against claim record. '+(isPending ? '<span style="color:#d97706;font-weight:700;">⚠️ Care Plan flagged for review — update required from provider.</span>' : 'No anomalies detected. Physician signature verified. Dates match care period.')+' Document access audit-logged per HIPAA §164.312.')
+        +'<div style="background:#1e293b;border-radius:10px;padding:20px;margin-bottom:16px;">'
+        +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">'
+        +'<i class="fas fa-file-pdf" style="font-size:44px;color:#dc2626;"></i>'
+        +'<div>'
+        +'<div style="color:#f1f5f9;font-size:14px;font-weight:700;">'+(docName||'Clinical Document')+'</div>'
+        +'<div style="color:#94a3b8;font-size:11px;margin-top:3px;">4 pages · PDF · AES-256 encrypted</div>'
+        +'<div style="margin-top:6px;font-size:11px;font-weight:700;color:'+statusColor+';">'+statusText+'</div>'
+        +'</div></div>'
+        +'<div style="background:#0f172a;border-radius:8px;padding:14px;">'
+        +'<div style="color:#10b981;font-size:11px;font-family:monospace;line-height:2.0;">'
+        +'<div>Document: '+(docName||'Clinical Document')+' · Claim: '+( name||claimId)+'</div>'
+        +'<div>Provider: '+(c.provider||'Sunrise Manor SNF')+' · Carrier: '+(c.carrier||'Prudential')+'</div>'
+        +'<div>Date: Jul 1–8, 2026 · AI Confidence: 96%</div>'
+        +'<div>ADL Score extracted: '+(c.assessScore||'2')+'/5 · Cognitive: '+(c.cogScore||'14')+'/30</div>'
+        +'<div>Physician Signature: '+(isPending?'⚠️ Pending countersignature':'✅ Verified · Jun 28, 2026')+'</div>'
+        +'<div>Fraud Indicators: None detected · Clean</div>'
+        +'</div></div></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Download PDF','fa-download','#d97706','_p6toast(\'<i class="fas fa-download"></i> '+(docName||'Document')+' downloading · HIPAA-encrypted export · Access audit-logged · Ref: DOC-'+name+'-JUL26\',3500)')
+        +_p6btn('Send to Carrier','fa-paper-plane','#003087','_p6close(\'p6-viewdoc-ov\');_p6toast(\'<i class="fas fa-paper-plane"></i> Document transmitted to '+(c.carrier||'carrier')+' via EDI 837 · Acknowledgment expected in 2 hours · Claim '+name+' updated\',4500)')
+        +_p6btn('AI Extract & Validate','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6toast(\'<i class="fas fa-magic"></i> WealthAI re-extracting fields from '+(docName||'document')+' · Deep parse: ICD-10 codes · ADL scores · Physician data · Results in 20 seconds\',4000)')
+        +(isPending ? _p6btn('Request Updated Version','fa-envelope','#d97706','_p6close(\'p6-viewdoc-ov\');ltcDetailAction(\'request\',\''+( c.id||claimId)+'\')') : '')
+        +'<button onclick="_p6close(\'p6-viewdoc-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── PROVIDER TAB: CONTACT PROVIDER ── */
+    else if (action === 'contact-provider') {
+      _p6ov('p6-cprov-ov', _p6wrap('p6-cprov-ov','540px',
+        _p6hdr('fa-phone','Contact Provider — '+(c.provider||'Provider'),'HIPAA-compliant · Auto-logged · Call summary to claim','#0891b2','p6-cprov-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI recommends discussing the outstanding <strong>Care Plan update</strong> and EVV gap (Jul 28 visit) with <strong>'+(c.provider||'the provider')+'</strong>. Confirm next payment cycle Jul 15 and planned assessment date. Provider last contacted Jul 3 — care plan was discussed but not yet submitted. Suggested call duration: 12 minutes.')
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        +_p6row('Provider', c.provider||'Sunrise Manor SNF')
+        +_p6row('Contact Person', 'Patricia Wells, Administrator')
+        +_p6row('Direct Phone', '(214) 555-0198')
+        +_p6row('Secure Message', 'Provider Portal — Online')
+        +_p6row('Last Contact', 'Jul 3, 2026 — Care plan discussed')
+        +_p6row('Open Items', 'Care plan update · EVV gap Jul 28')
+        +'</div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">WealthAI Call Agenda (auto-generated)</label>'
+        +'<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:80px;resize:none;">1. Care plan update — deadline Jul 16 (CRITICAL)\n2. EVV gap on Jul 28 visit — manual log required\n3. Next payment cycle: Jul 15 — confirm readiness\n4. Resident condition check — any ADL changes?</textarea></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Initiate Phone Call','fa-phone','#0891b2','_p6close(\'p6-cprov-ov\');_p6toast(\'<i class="fas fa-phone"></i> Call to '+(c.provider||'Provider')+' initiated · HIPAA recording active · Agenda shared with provider · Notes auto-attach to claim '+( c.id||claimId)+' · Ref: CALL-'+Date.now().toString().slice(-6)+'\',5000)')
+        +_p6btn('Send Secure Message','fa-envelope','#7c3aed','_p6close(\'p6-cprov-ov\');_p6toast(\'<i class="fas fa-envelope"></i> Secure message sent to '+(c.provider||'provider')+' via Provider Portal · WealthAI agenda attached · Reply expected within 4 business hours\',4000)')
+        +_p6btn('Schedule Conference','fa-video','#059669','_p6close(\'p6-cprov-ov\');_p6toast(\'<i class="fas fa-video"></i> Video conference scheduled · HIPAA-compliant Zoom link sent to '+(c.provider||'provider')+' · Jul 11, 2:00 PM CT\',3500)')
+        +'<button onclick="_p6close(\'p6-cprov-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── PROVIDER TAB: SITE VISIT ── */
+    else if (action === 'visit') {
+      _p6ov('p6-sitevisit-ov', _p6wrap('p6-sitevisit-ov','560px',
+        _p6hdr('fa-map-marker-alt','Schedule Site Visit — '+(c.provider||'Provider'),'QA RN · CareExchange EVV · Unannounced or Routine','#7c3aed','p6-sitevisit-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI recommends an <strong>unannounced site visit</strong> to <strong>'+(c.provider||'the provider')+'</strong> within 14 days. Outstanding Care Plan update and EVV data gap (Jul 28) raise a moderate quality concern. Unannounced visits reduce overbilling risk by 34% on average. Last visit was '+(c.daysOpen||14)+' days ago. Assigned QA RN: <strong>James Park</strong> — licensed in Texas, available Jul 15–18.')
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Visit Type</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Unannounced QA Visit (AI-recommended)</option><option>Routine Scheduled Visit</option><option>Comprehensive Annual Audit Visit</option><option>Emergency Compliance Inspection</option></select></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Target Date</label>'
+        +'<input type="text" value="Jul 18, 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">AI-Generated Visit Checklist</label>'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px;color:#374151;line-height:2.2;">'
+        +'<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Verify resident care plan adherence with staff</div>'
+        +'<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Validate EVV GPS logs vs. manual records (Jul 28 gap)</div>'
+        +'<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Conduct resident interview (ADL re-assessment)</div>'
+        +'<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Review billing documentation on-site</div>'
+        +'<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Inspect facility safety conditions (AI photo analysis)</div>'
+        +'<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Collect updated care plan signature</div>'
+        +'</div></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Schedule Visit','fa-calendar-check','#7c3aed','_p6close(\'p6-sitevisit-ov\');_p6toast(\'<i class="fas fa-map-marker-alt"></i> Site visit scheduled Jul 18 at '+(c.provider||'provider')+' · James Park, RN assigned · EVV tracking active · Claim '+( c.id||claimId)+' updated · Provider NOT notified — unannounced\',5500)')
+        +_p6btn('AI Auto-Assign Visit','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6close(\'p6-sitevisit-ov\');_p6toast(\'<i class="fas fa-magic"></i> WealthAI optimized visit slot · James Park, RN · Jul 15, 9:00 AM · Closest available date · GPS route pre-calculated · Checklist sent to RN\',5000)')
+        +'<button onclick="_p6close(\'p6-sitevisit-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── CARRIER TAB: CARRIER PORTAL ── */
+    else if (action === 'carrier-portal') {
+      _p6ov('p6-carrport-ov', _p6wrap('p6-carrport-ov','580px',
+        _p6hdr('fa-external-link-alt','Carrier Portal — '+(c.carrier||'Carrier'),'illumifin TPA · SSO authenticated · Adjudication status','#003087','p6-carrport-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI has authenticated your TPA session with <strong>'+(c.carrier||'carrier')+'</strong>. Claim <strong>'+( c.id||claimId)+'</strong> is current with 0 adjudication holds. Carrier adjudication queue shows SLA 4 days remaining. <strong>AI recommendation:</strong> submit the Care Plan update as soon as received to maintain SLA standing and prevent any adjudication pause.')
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        +_p6row('Carrier', c.carrier||'Prudential')
+        +_p6row('TPA Session', 'Authenticated ✅')
+        +_p6row('Claim Status', 'Active — In Good Standing')
+        +_p6row('SLA Remaining', '4 business days')
+        +_p6row('Adjudication Hold', 'None currently')
+        +_p6row('Last Carrier Update', 'Jul 8, 2026')
+        +_p6row('Policy Status', '✅ In Force · 2029 TPA contract')
+        +_p6row('Inflation Rider', '3% Compound · Applies Jan 1, 2027')
+        +'</div>'
+        +'<div style="background:#dbeafe;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#1e3a5f;">'
+        +'<i class="fas fa-info-circle" style="margin-right:6px;color:#1d4ed8;"></i>'
+        +'Portal opens in new tab via SSO. illumifin TPA credentials auto-injected. Session valid 8 hours. All actions audit-logged.'
+        +'</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Open Carrier Portal','fa-external-link-alt','#003087','_p6close(\'p6-carrport-ov\');_p6toast(\'<i class="fas fa-external-link-alt"></i> '+(c.carrier||'Carrier')+' portal opened · TPA session authenticated · Claim pre-loaded · Session: TPA-'+Date.now().toString().slice(-6)+'\',5000)')
+        +_p6btn('Submit Documents to Carrier','fa-paper-plane','#0891b2','_p6close(\'p6-carrport-ov\');_p6toast(\'<i class="fas fa-paper-plane"></i> Document packet submitted to '+(c.carrier||'carrier')+' · EDI 837/835 format · Carrier acknowledgment expected in 2 hours\',4500)')
+        +_p6btn('View Adjudication Status','fa-search','#059669','_p6toast(\'<i class="fas fa-search"></i> Adjudication status for '+(c.id||claimId)+': ACTIVE — 0 holds · SLA 4 days remaining · All payments current · No exceptions\',4000)')
+        +'<button onclick="_p6close(\'p6-carrport-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── AI INSIGHTS TAB: EXPORT AI REPORT ── */
+    else if (action === 'ai-report') {
+      var riskScore = c.priority==='urgent'?82:c.priority==='high'?65:c.priority==='medium'?44:28;
+      _p6ov('p6-aireport-ov', _p6wrap('p6-aireport-ov','640px',
+        _p6hdr('fa-robot','WealthAI Full Claim Report — '+(c.id||claimId),'Clinical · Financial · Fraud · Compliance · Exportable','linear-gradient(135deg,#7c3aed,#6d28d9)','p6-aireport-ov')
+        +'<div style="padding:22px;">'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">'
+        +_p6kpi('94/100','AI Confidence','fa-robot','#7c3aed','Full data coverage')
+        +_p6kpi('STP','Processing Mode','fa-check-circle','#059669','Auto-approved')
+        +_p6kpi(riskScore+'/100','Risk Score','fa-exclamation-circle',riskScore>70?'#dc2626':riskScore>50?'#d97706':'#059669','Composite urgency')
+        +'</div>'
+        +_p6ai('<strong>CLAIM '+(c.id||claimId)+' — WealthAI COMPREHENSIVE ANALYSIS</strong><br><br>'
+          +'<strong>Clinical:</strong> '+name+' (Age '+(c.age||'78')+') — ADL '+(c.assessScore||'2')+'/5 · MMSE '+(c.cogScore||'14')+'/30. '+(c.type||'Nursing Home')+' care at '+(c.provider||'provider')+' clinically appropriate. Projected care duration: 6–9 months. Next care level milestone: 4+/5 ADL would trigger SNF referral assessment.<br><br>'
+          +'<strong>Financial:</strong> Daily benefit '+(c.dailyBenefit||'$180/day')+' within policy limits. Provider billing accuracy 98.2% — top quartile. ACH payment history: 0 reversals, 0 holds. Inflation rider (3% compound) effective Jan 2027.<br><br>'
+          +'<strong>Fraud &amp; Compliance:</strong> Fraud score 8/100 (Clear). EVV GPS-backed. No anomalous billing patterns. HIPAA compliant. Policy '+(c.daysOpen||14)+' days open — within SLA.<br><br>'
+          +'<strong>WealthAI Recommendation:</strong> Continue benefit payments · Resolve Care Plan overdue status · Schedule 30-day reassessment · No escalation needed at this time.')
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">'
+        +_p6btn('Export PDF Report','fa-file-pdf','#dc2626','_p6close(\'p6-aireport-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> WealthAI Report for '+(c.id||claimId)+' exported · PDF sent to your email and claim manager · Also saved to claim Documents tab · Ref: RPT-'+(c.id||claimId)+'-JUL26\',5000)')
+        +_p6btn('Email to Supervisor','fa-envelope','#003087','_p6toast(\'<i class="fas fa-envelope"></i> AI Report for '+(c.id||claimId)+' emailed to Claims Supervisor · CC: Carrier '+(c.carrier||'carrier')+' · Report ref: RPT-'+(c.id||claimId)+'\',3500)')
+        +_p6btn('Email to Carrier','fa-building','#0891b2','_p6toast(\'<i class="fas fa-building"></i> AI Report transmitted to '+(c.carrier||'carrier')+' via TPA portal · Adjudication team copied · Ref: RPT-'+(c.id||claimId)+'\',3500)')
+        +_p6btn('Mark AI-Reviewed','fa-check-double','#059669','_p6close(\'p6-aireport-ov\');_p6toast(\'<i class="fas fa-check-double"></i> Claim '+(c.id||claimId)+' marked AI-reviewed · Supervisor notified · Audit trail updated · No further action required\',3500)')
+        +'</div></div>'
+      ));
+    }
+
+    /* ── AI INSIGHTS TAB: FLAG FOR REVIEW ── */
+    else if (action === 'ai-flag') {
+      _p6ov('p6-flag-ov', _p6wrap('p6-flag-ov','540px',
+        _p6hdr('fa-flag','Flag Claim for Supervisory Review — '+(c.id||claimId),'Escalation · SLA pause · AI-assisted routing','#dc2626','p6-flag-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI will tag claim <strong>'+(c.id||claimId)+'</strong> as requiring supervisory review. Based on the overdue Care Plan update from <strong>'+(c.provider||'provider')+'</strong> and EVV gap on Jul 28, the most appropriate flag is Missing Documentation. SLA clock pauses upon flagging. WealthAI will auto-route to the correct supervisor based on claim type. Average resolution: <strong>3.2 business days</strong>.')
+        +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Flag Category</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+        +'<option>Missing Documentation — Care Plan (AI-recommended)</option>'
+        +'<option>Billing Discrepancy</option>'
+        +'<option>Fraud Suspicion — requires SIU referral</option>'
+        +'<option>Level-of-Care Change Required</option>'
+        +'<option>Provider Compliance Issue</option>'
+        +'<option>Policy Interpretation Required</option>'
+        +'<option>SLA Breach — urgent escalation</option>'
+        +'</select></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Escalation Level</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Standard — Supervisor (AI-routed)</option><option>Urgent — Senior Manager</option><option>Critical — VP Claims + Legal</option></select></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Notes for Supervisor</label>'
+        +'<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:80px;resize:none;">Claim '+(c.id||claimId)+' — Care plan overdue 8 days from '+(c.provider||'provider')+'  · EVV gap Jul 28 · SLA at risk if not resolved by Jul 16 · Provider contact attempted Jul 3 with no resolution · WealthAI flagged for supervisory review and SLA protection.</textarea></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Confirm Flag & Escalate','fa-flag','#dc2626','_p6close(\'p6-flag-ov\');_p6toast(\'<i class="fas fa-flag"></i> Claim '+(c.id||claimId)+' flagged · Ticket ESC-'+(c.id||claimId)+' created · Supervisor Jennifer Kim notified · SLA paused · Expected resolution: 3.2 days · Carrier '+(c.carrier||'carrier')+' on notice\',5500)')
+        +_p6btn('SIU Referral (Fraud)','fa-shield-alt','#7c3aed','_p6close(\'p6-flag-ov\');_p6toast(\'<i class="fas fa-shield-alt"></i> SIU referral created for '+(c.id||claimId)+' · Special Investigations Unit assigned · Claim payments suspended pending investigation · All parties notified\',5000)')
+        +'<button onclick="_p6close(\'p6-flag-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    else {
+      _p6toast('<i class="fas fa-check"></i> '+action+' action completed for '+claimId, 3000);
+    }
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     2.  INSURANCE CARRIER 360 — ALL BUTTON ACTIONS
+         contact · report · claims · escalate · ai-review
+         ai-portfolio · sla-report · add
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.ltcCarrierAction = function(action, carrierId) {
+    var carriers = window.ltcCarrierData360 || [];
+    var c = carriers.find(function(x){ return x.id === carrierId; }) || {};
+    var name = c.name || carrierId || 'Carrier';
+    var hc = { Excellent:'#059669', Good:'#0891b2', 'Needs Attention':'#d97706', Critical:'#dc2626' }[c.aiHealth || 'Good'] || '#003087';
+
+    /* ── CONTACT CARRIER ── */
+    if (action === 'contact') {
+      _p6ov('p6-car-contact-ov', _p6wrap('p6-car-contact-ov','560px',
+        _p6hdr('fa-phone','Contact — '+name,'Relationship · TPA · Escalation communications','#0891b2','p6-car-contact-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI has prepared a contact brief for <strong>'+name+'</strong>. Current SLA performance: <strong>'+(c.sla||'94%')+'</strong> ' +(c.sla && parseInt(c.sla)<95 ? '<span style="color:#d97706;font-weight:700;">⚠️ Below 95% target</span>' : '✅ On target')+'. Active claims under this carrier: <strong>'+(c.activeClaims||'N/A')+'</strong>. Recommended discussion: Q3 SLA review, pending escalations, and care plan documentation compliance across all LTC claims.')
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        +_p6row('Carrier', name)
+        +_p6row('Relationship Manager', c.contact || 'TPA Account Manager')
+        +_p6row('SLA Performance', c.sla || 'N/A')
+        +_p6row('Active Claims', c.activeClaims || 'N/A')
+        +_p6row('TPA Contract', c.tpaExp ? 'Exp. '+c.tpaExp : 'Active')
+        +_p6row('Preferred Channel', 'Email + Quarterly Review Call')
+        +'</div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">WealthAI Meeting Agenda</label>'
+        +'<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:85px;resize:none;">1. Q3 SLA performance review — target 95%+\n2. Pending adjudication holds (if any)\n3. Care plan documentation compliance — '+(c.activeClaims||'N/A')+' active claims\n4. Upcoming policy renewal / TPA contract terms\n5. AI-assisted claims dashboard access</textarea></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Initiate Call','fa-phone','#0891b2','_p6close(\'p6-car-contact-ov\');_p6toast(\'<i class="fas fa-phone"></i> Call to '+name+' TPA Manager initiated · Agenda shared · Recording active · Notes auto-logged to carrier record · Ref: CALL-'+carrierId+'-'+Date.now().toString().slice(-6)+'\',5000)')
+        +_p6btn('Send Secure Email','fa-envelope','#003087','_p6close(\'p6-car-contact-ov\');_p6toast(\'<i class="fas fa-envelope"></i> Secure email sent to '+name+' · WealthAI agenda attached · Reply expected within 2 business hours\',4000)')
+        +_p6btn('Schedule Meeting','fa-calendar','#059669','_p6close(\'p6-car-contact-ov\');_p6toast(\'<i class="fas fa-calendar-check"></i> Quarterly review meeting scheduled with '+name+' · Jul 22, 2:00 PM CT · Zoom invite sent · Agenda auto-attached\',4000)')
+        +'<button onclick="_p6close(\'p6-car-contact-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── SLA / PERFORMANCE REPORT ── */
+    else if (action === 'report') {
+      var slaNum = c.sla ? parseInt(c.sla) : 94;
+      var slaBad = slaNum < 95;
+      _p6ov('p6-car-report-ov', _p6wrap('p6-car-report-ov','640px',
+        _p6hdr('fa-chart-bar','Performance Report — '+name,'SLA · Adjudication · Payments · WealthAI narrative','#003087','p6-car-report-ov')
+        +'<div style="padding:22px;">'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+        +_p6kpi(c.sla||'94%','SLA Compliance','fa-tachometer-alt',slaBad?'#d97706':'#059669',slaBad?'⚠️ Below target':'✅ On target')
+        +_p6kpi(c.activeClaims||'—','Active Claims','fa-file-medical-alt','#003087','Under TPA management')
+        +_p6kpi(c.totalPolicies||'—','Total Policies','fa-folder','#0891b2','illumifin portfolio')
+        +_p6kpi(c.aiHealth||'Good','AI Health','fa-robot',hc,'WealthAI rating')
+        +'</div>'
+        +_p6ai('CARRIER PERFORMANCE — <strong>'+name+'</strong> Q2 2026<br><br>'
+          +'<strong>SLA Status:</strong> '+(slaBad?'⚠️ '+c.sla+' — below 95% contractual target. 3 adjudication delays noted in June 2026. Corrective action plan requested.':'✅ '+( c.sla||'94%')+' — within or at contractual target. Strong adjudication cadence maintained across all claim types.')+' <br><br>'
+          +'<strong>Claims Portfolio:</strong> '+(c.activeClaims||'N/A')+' active LTC claims under illumifin TPA management. Payment accuracy 99.1%. Zero payment reversals in Q2 2026.<br><br>'
+          +'<strong>AI Recommendation:</strong> '+(slaBad?'Schedule remediation call. Set 30-day SLA improvement plan. Monitor weekly.':'Continue existing performance cadence. Propose Preferred Carrier designation for Q3.')
+        )
+        +_p6tbl(['Metric','Q1 2026','Q2 2026','Target','Status'],
+          [['SLA Compliance', (slaNum-2)+'%', c.sla||'94%', '95%', slaBad?'⚠️ Under':'✅ Met'],
+           ['Avg Adjudication Days', '4.8', '4.2', '5.0', '✅ Met'],
+           ['Payment Accuracy', '98.9%', '99.1%', '99%', '✅ Met'],
+           ['Claims Opened', (c.activeClaims||10)-2+'', c.activeClaims+'', '—', '—']])
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Export PDF Report','fa-file-pdf','#dc2626','_p6close(\'p6-car-report-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> Performance Report exported for '+name+' · Q2 2026 · PDF sent to VP Claims and carrier contact · Ref: RPT-'+carrierId+'-Q2-2026\',5000)')
+        +_p6btn('Email to Carrier','fa-envelope','#003087','_p6toast(\'<i class="fas fa-envelope"></i> Q2 performance report emailed to '+name+' · WealthAI narrative included · Reply requested within 5 business days\',3500)')
+        +_p6btn('Schedule Review Call','fa-phone','#0891b2','_p6close(\'p6-car-report-ov\');_p6toast(\'<i class="fas fa-phone"></i> Quarterly review call scheduled with '+name+' · Jul 25, 10:00 AM CT · Agenda includes SLA remediation\',3500)')
+        +'</div></div>'
+      ));
+    }
+
+    /* ── VIEW CLAIMS ── */
+    else if (action === 'claims') {
+      var claims = window.ltcClaimsData || [];
+      var carrierClaims = claims.filter(function(x){ return x.carrier === name; });
+      if (!carrierClaims.length) {
+        /* fall back to a synthetic view when no exact match */
+        carrierClaims = [
+          { id: 'LTC-2026-0101', claimant: 'Margaret O\'Brien', type: 'Nursing Home', status: 'Active', priority: 'medium', daysOpen: 14, dailyBenefit: '$180/day' },
+          { id: 'LTC-2026-0103', claimant: 'James Whitfield', type: 'Home Health', status: 'Active', priority: 'high', daysOpen: 22, dailyBenefit: '$140/day' }
+        ];
+      }
+      var rows = carrierClaims.map(function(cl){
+        var p = cl.priority==='urgent'?'🔴':cl.priority==='high'?'🟠':cl.priority==='medium'?'🟡':'🟢';
+        return [cl.id, cl.claimant, cl.type||'LTC', cl.daysOpen+' days', cl.dailyBenefit||'—', p+' '+cl.priority,
+          '<button onclick="_p6close(\'p6-car-claims-ov\');ltcOpenClaimDetail(\''+cl.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;">Open</button>'];
+      });
+      _p6ov('p6-car-claims-ov', _p6wrap('p6-car-claims-ov','720px',
+        _p6hdr('fa-file-medical-alt','Active Claims — '+name,'All LTC claims under illumifin TPA management','#dc2626','p6-car-claims-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI triage summary for <strong>'+name+'</strong>: <strong>'+carrierClaims.length+' active claim(s)</strong> under illumifin management. '+carrierClaims.filter(function(x){return x.priority==='urgent';}).length+' urgent · '+carrierClaims.filter(function(x){return x.priority==='high';}).length+' high priority. Total daily benefit exposure: <strong>$'+carrierClaims.reduce(function(s,x){return s+parseInt((x.dailyBenefit||'$0').replace(/\D/g,''));},0).toLocaleString()+'/day</strong>. All claims within SLA. Payment accuracy 99.1% for this carrier.')
+        +_p6tbl(['Claim ID','Claimant','Type','Days Open','Benefit/Day','Priority',''],rows)
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('AI Triage All','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6toast(\'<i class="fas fa-magic"></i> WealthAI triage complete for '+carrierClaims.length+' claims under '+name+' · Priority ranking updated · SLA risks flagged · Supervisor report generated\',4500)')
+        +_p6btn('Export Claims Report','fa-file-pdf','#dc2626','_p6close(\'p6-car-claims-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> '+name+' claims roster exported · PDF sent to Claims Ops and carrier contact\',3500)')
+        +'<button onclick="_p6close(\'p6-car-claims-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── ESCALATE ── */
+    else if (action === 'escalate') {
+      _p6ov('p6-car-esc-ov', _p6wrap('p6-car-esc-ov','560px',
+        _p6hdr('fa-arrow-up','Escalate — '+name,'TPA issue · SLA breach · Contractual dispute','#d97706','p6-car-esc-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI has analyzed <strong>'+name+'</strong>\'s performance record and flagged potential triggers for escalation. Current SLA: <strong>'+(c.sla||'N/A')+'</strong>. '+(c.sla && parseInt(c.sla)<95?'SLA is below 95% contractual threshold — formal escalation warranted.':'SLA is within range — use escalation for one-off issue or proactive quality concern.')+' Escalation is auto-routed to Senior TPA Manager and VP Claims. Average resolution: 5 business days.')
+        +'<div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:14px;">'
+        +'<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;">🔺 Escalation Triggers (check all that apply)</div>'
+        +'<div style="font-size:12px;color:#374151;line-height:2.2;">'
+        +(c.sla && parseInt(c.sla)<95 ? '<div><input type="checkbox" checked style="accent-color:#d97706;margin-right:6px;"> SLA below 95% contractual target ('+c.sla+')</div>' : '<div><input type="checkbox" style="accent-color:#d97706;margin-right:6px;"> SLA performance concern</div>')
+        +'<div><input type="checkbox" style="accent-color:#d97706;margin-right:6px;"> Adjudication delay — specific claim impacted</div>'
+        +'<div><input type="checkbox" style="accent-color:#d97706;margin-right:6px;"> Payment accuracy / billing dispute</div>'
+        +'<div><input type="checkbox" style="accent-color:#d97706;margin-right:6px;"> Carrier non-responsiveness to TPA communications</div>'
+        +'<div><input type="checkbox" style="accent-color:#d97706;margin-right:6px;"> Contract interpretation / coverage dispute</div>'
+        +'</div></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Escalation Notes (AI-prefilled)</label>'
+        +'<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:80px;resize:none;">'+name+' SLA performance review initiated. Current SLA: '+(c.sla||'N/A')+'. '+(c.activeClaims||'N/A')+' active claims under management. illumifin TPA team requesting formal corrective action plan from carrier within 5 business days.</textarea></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Send Formal Escalation','fa-paper-plane','#d97706','_p6close(\'p6-car-esc-ov\');_p6toast(\'<i class="fas fa-arrow-up"></i> Formal escalation sent to '+name+' · VP Claims and Senior TPA Manager notified · Escalation ticket: ESC-'+carrierId+'-'+Date.now().toString().slice(-6)+' · Expected resolution: 5 days\',5500)')
+        +_p6btn('Schedule Remediation Call','fa-phone','#dc2626','_p6close(\'p6-car-esc-ov\');_p6toast(\'<i class="fas fa-phone"></i> Remediation call scheduled with '+name+' · Jul 18, 9:00 AM CT · VP Claims attending · WealthAI corrective action plan pre-sent\',4500)')
+        +'<button onclick="_p6close(\'p6-car-esc-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── AI DEEP REVIEW ── */
+    else if (action === 'ai-review') {
+      _p6ov('p6-car-airev-ov', _p6wrap('p6-car-airev-ov','640px',
+        _p6hdr('fa-robot','WealthAI Deep Review — '+name,'360° carrier intelligence · Claims · SLA · Risk · Compliance','linear-gradient(135deg,#7c3aed,#6d28d9)','p6-car-airev-ov')
+        +'<div style="padding:22px;">'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">'
+        +_p6kpi(c.sla||'94%','SLA Performance','fa-tachometer-alt',parseInt(c.sla||'94')<95?'#d97706':'#059669','vs 95% target')
+        +_p6kpi(c.activeClaims||'—','Active Claims','fa-file-medical-alt','#003087','Under TPA')
+        +_p6kpi(c.aiHealth||'Good','AI Health Score','fa-heart',hc,'WealthAI composite')
+        +'</div>'
+        +_p6ai('WEALTHAI DEEP REVIEW — <strong>'+name+'</strong><br><br>'
+          +'<strong>SLA Intelligence:</strong> '+(c.sla||'94%')+' compliance over trailing 90 days. '+(parseInt(c.sla||'94')<95?'Below 95% threshold — 3 adjudication delays in June attributed to staffing shortages at carrier. illumifin recommends formal 30-day improvement plan.':'Consistent with TPA agreement. Top-quartile carrier for payment accuracy.')+' <br><br>'
+          +'<strong>Claims Portfolio Analysis:</strong> '+(c.activeClaims||'N/A')+' active claims · Average days open: 18.4 · No systemic billing anomalies. Payment pattern normal. ADL-to-benefit ratio within expected range.<br><br>'
+          +'<strong>Risk Assessment:</strong> Fraud risk: Low · Litigation risk: Low · Contract risk: '+(parseInt(c.sla||'94')<95?'Medium — SLA breach clause may apply if below 95% for 90+ days':'Low')+'. TPA contract expiry: '+(c.tpaExp||'2029')+'.<br><br>'
+          +'<strong>AI Recommendation:</strong> '+(parseInt(c.sla||'94')<95?'Issue formal notice of SLA breach concern. Schedule monthly monitoring. If not resolved in 30 days, invoke contract clause §8.2.':'Maintain relationship. Propose Preferred Carrier tier for Q3. Volume allocation favorable.')
+        )
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Export AI Review','fa-file-pdf','#7c3aed','_p6close(\'p6-car-airev-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> WealthAI Deep Review for '+name+' exported · PDF sent to VP Claims and Compliance · Ref: AIREV-'+carrierId+'\',4500)')
+        +_p6btn('Escalate Based on AI','fa-arrow-up','#d97706','_p6close(\'p6-car-airev-ov\');ltcCarrierAction(\'escalate\',\''+carrierId+'\')')
+        +_p6btn('View SLA Report','fa-chart-bar','#003087','_p6close(\'p6-car-airev-ov\');ltcCarrierAction(\'report\',\''+carrierId+'\')')
+        +'<button onclick="_p6close(\'p6-car-airev-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── AI PORTFOLIO REVIEW (all carriers) ── */
+    else if (action === 'ai-portfolio') {
+      var allCarriers = window.ltcCarrierData360 || [];
+      var totalPolicies = allCarriers.reduce(function(s,x){ return s+(x.totalPolicies||0); }, 0);
+      var totalClaims   = allCarriers.reduce(function(s,x){ return s+(x.activeClaims||0); }, 0);
+      var avgSla        = allCarriers.length ? Math.round(allCarriers.reduce(function(s,x){ return s+parseInt(x.sla||'94'); },0)/allCarriers.length) : 94;
+      var redCount      = allCarriers.filter(function(x){ return x.status==='Red'; }).length;
+      _p6ov('p6-car-portfolio-ov', _p6wrap('p6-car-portfolio-ov','680px',
+        _p6hdr('fa-robot','AI Portfolio Review — All Carriers','Enterprise LTC carrier intelligence · WealthAI Q2 2026','linear-gradient(135deg,#7c3aed,#6d28d9)','p6-car-portfolio-ov')
+        +'<div style="padding:22px;">'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+        +_p6kpi(allCarriers.length||'4','Carrier Relationships','fa-building','#003087','LTC + HAL + Hybrid')
+        +_p6kpi(totalPolicies||'—','Total Policies','fa-folder','#0891b2','Across all carriers')
+        +_p6kpi(totalClaims||'—','Active Claims','fa-file-medical-alt','#dc2626','Under TPA management')
+        +_p6kpi(avgSla+'%','Portfolio Avg SLA','fa-tachometer-alt',avgSla>=95?'#059669':'#d97706','vs 95% target')
+        +'</div>'
+        +_p6ai('WEALTHAI CARRIER PORTFOLIO INTELLIGENCE — Q2 2026<br><br>'
+          +'<strong>Portfolio Health:</strong> '+(allCarriers.length||4)+' active carrier relationships. Portfolio average SLA: '+avgSla+'% '+(avgSla>=95?'✅ on target':'⚠️ below 95% target — action required')+'.<br><br>'
+          +'<strong>Top Performer:</strong> '+(allCarriers.find(function(x){return x.aiHealth==='Excellent';})||{name:'Prudential'}).name+' — Excellent AI health, consistent SLA compliance. Recommend increased volume allocation for Q3.<br><br>'
+          +'<strong>Needs Attention:</strong> '+(redCount>0?redCount+' carrier(s) flagged Red status — immediate review required.':'No carriers at critical status. ')+(allCarriers.filter(function(x){return x.sla&&parseInt(x.sla)<95;}).map(function(x){return x.name;}).join(', ')||'All carriers meeting SLA targets.')+' <br><br>'
+          +'<strong>AI Action Plan:</strong> (1) Carriers below 95% SLA → formal corrective action · (2) Preferred tier candidates → volume increase proposal · (3) Q3 contract renewals → negotiate enhanced SLA terms · (4) New carrier onboarding opportunity identified in Southeast region.')
+        +_p6tbl(['Carrier','Policies','Active Claims','SLA','AI Health','Action'],
+          (allCarriers.length?allCarriers:[{name:'Prudential',totalPolicies:1250,activeClaims:18,sla:'97%',aiHealth:'Excellent'},{name:'MassMutual',totalPolicies:980,activeClaims:14,sla:'94%',aiHealth:'Good'},{name:'Northwestern Mutual',totalPolicies:760,activeClaims:11,sla:'96%',aiHealth:'Good'}]).map(function(x){
+            var sn=parseInt(x.sla||'94');
+            return [x.name,x.totalPolicies||'—',x.activeClaims||'—',x.sla||'—',
+              '<span style="color:'+({'Excellent':'#059669','Good':'#0891b2','Needs Attention':'#d97706','Critical':'#dc2626'}[x.aiHealth||'Good']||'#003087')+';">'+( x.aiHealth||'Good')+'</span>',
+              sn<95?'<button onclick="_p6close(\'p6-car-portfolio-ov\');ltcCarrierAction(\'escalate\',\''+( x.id||x.name)+'\')" style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;">Escalate</button>':'<span style="color:#059669;font-size:11px;font-weight:700;">✅ Good</span>'];
+          })
+        )
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Export Portfolio Report','fa-file-pdf','#dc2626','_p6close(\'p6-car-portfolio-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> Carrier Portfolio Report exported · Q2 2026 · All '+( allCarriers.length||4)+' carriers · Sent to VP Claims and CFO · Ref: PORT-Q2-2026\',5000)')
+        +_p6btn('AI Rebalance Allocation','fa-balance-scale','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6toast(\'<i class="fas fa-magic"></i> WealthAI analyzing optimal carrier volume allocation · Rebalancing recommendations for Q3 ready in 45 seconds\',4000)')
+        +_p6btn('Schedule Portfolio Review','fa-calendar','#003087','_p6close(\'p6-car-portfolio-ov\');_p6toast(\'<i class="fas fa-calendar-check"></i> Portfolio review meeting scheduled · Jul 28, 9:00 AM · All carrier RMs invited · WealthAI report pre-distributed\',4000)')
+        +'</div></div>'
+      ));
+    }
+
+    /* ── SLA PORTFOLIO REPORT ── */
+    else if (action === 'sla-report') {
+      var allC = window.ltcCarrierData360 || [];
+      _p6ov('p6-car-sla-ov', _p6wrap('p6-car-sla-ov','700px',
+        _p6hdr('fa-chart-bar','SLA Portfolio Report — All Carriers','Contractual compliance · Adjudication · Payment accuracy','#003087','p6-car-sla-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI SLA analysis across all '+( allC.length||4)+' carrier relationships. Contractual SLA target: <strong>95%</strong>. Portfolio average: <strong>'+(allC.length?Math.round(allC.reduce(function(s,x){return s+parseInt(x.sla||'94');},0)/allC.length)+'%':'95%')+'</strong>. '+(allC.filter(function(x){return parseInt(x.sla||'94')<95;}).length?'⚠️ '+allC.filter(function(x){return parseInt(x.sla||'94')<95;}).length+' carrier(s) below target — action required.':'✅ All carriers meeting or exceeding SLA target.')+' Q2 adjudication speed improved 12% vs Q1 across portfolio.')
+        +_p6tbl(['Carrier','SLA %','vs Target','Adj. Days','Pay Accuracy','Trend','Action'],
+          (allC.length?allC:[
+            {name:'Prudential',sla:'97%'},{name:'MassMutual',sla:'94%'},
+            {name:'Northwestern Mutual',sla:'96%'},{name:'John Hancock',sla:'91%'}
+          ]).map(function(x,i){
+            var sn=parseInt(x.sla||'94');
+            var colors=['#059669','#d97706','#059669','#dc2626'];
+            var meets = sn>=95;
+            return [x.name||'Carrier '+i,
+              '<span style="font-weight:700;color:'+(meets?'#059669':'#dc2626')+';">'+(x.sla||'94%')+'</span>',
+              meets?'✅ Met':'⚠️ Below',
+              (4.5-i*0.3).toFixed(1)+' days','99.'+(i+1)+'%',
+              meets?'↑ Improving':'↓ Declining',
+              meets?'<span style="color:#059669;font-size:10px;font-weight:700;">On Track</span>'
+                :'<button onclick="_p6close(\'p6-car-sla-ov\');ltcCarrierAction(\'escalate\',\''+(x.id||x.name)+'\')" style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;">Escalate</button>'];
+          })
+        )
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Export SLA Report','fa-file-pdf','#003087','_p6close(\'p6-car-sla-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> SLA Portfolio Report exported · Q2 2026 · All carriers · Sent to VP Claims · Ref: SLA-Q2-2026\',4500)')
+        +_p6btn('Email to All Carriers','fa-envelope','#0891b2','_p6close(\'p6-car-sla-ov\');_p6toast(\'<i class="fas fa-envelope"></i> Q2 SLA scorecards emailed to all '+( allC.length||4)+' carriers · Individual reports with WealthAI narrative · Responses expected within 5 business days\',5000)')
+        +_p6btn('AI Improvement Plan','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6toast(\'<i class="fas fa-magic"></i> WealthAI generating SLA improvement plan for underperforming carriers · Specific action items · Timeline and accountability matrix · Ready in 60 seconds\',4500)')
+        +'</div></div>'
+      ));
+    }
+
+    /* ── ADD CARRIER ── */
+    else if (action === 'add') {
+      _p6ov('p6-car-add-ov', _p6wrap('p6-car-add-ov','560px',
+        _p6hdr('fa-plus','Onboard New Carrier','TPA Agreement · SLA Setup · Credentials · AI Due Diligence','#059669','p6-car-add-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI will run a carrier due diligence check before TPA onboarding: (1) AM Best financial rating lookup, (2) State license verification across all operating states, (3) Regulatory complaint history (NAIC database), (4) Prior TPA relationship cross-reference, (5) SLA benchmarking against current carrier portfolio. Average due diligence time: <strong>6 minutes</strong>. Network gap analysis: Southeast region carriers under-represented for LTC standalone products.')
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Carrier Name</label>'
+        +'<input type="text" placeholder="e.g. Transamerica Life Insurance..." style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Product Type</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>LTC Standalone</option><option>LTC Hybrid (Life+LTC)</option><option>LTC + Life + Annuity</option><option>Group LTC</option></select></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Primary Operating States</label>'
+        +'<input type="text" placeholder="e.g. TX, FL, NY, CA..." style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Expected Monthly Volume</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>1–25 claims</option><option>26–100 claims</option><option>100–500 claims</option><option>500+ claims</option></select></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Target SLA</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>95% (Standard TPA)</option><option>97% (Preferred)</option><option>99% (Enterprise)</option></select></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('AI Due Diligence & Onboard','fa-robot','#059669','_p6close(\'p6-car-add-ov\');_p6toast(\'<i class="fas fa-check-circle"></i> WealthAI due diligence initiated · AM Best lookup · License verification · NAIC complaint check · TPA agreement template generated · Credentialing packet sent · ETA to active: 10–15 business days\',6500)')
+        +'<button onclick="_p6close(\'p6-car-add-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    else {
+      _p6toast('<i class="fas fa-check"></i> '+action+' completed for '+name, 3000);
+    }
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     3.  HEALTHCARE PROVIDER 360 — ALL BUTTON ACTIONS
+         contact · site-visit · audit · claims · ai-review · ai-scan · add
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.ltcProviderAction = function(action, providerId) {
+    var providers = window.ltcProviderData360 || [];
+    var p = providers.find(function(x){ return x.id === providerId; }) || {};
+    var name = p.name || providerId || 'Provider';
+    var hc = { Excellent:'#059669', Good:'#0891b2', 'Needs Attention':'#d97706', Critical:'#dc2626' }[p.aiHealth || 'Good'] || '#003087';
+
+    /* ── CONTACT PROVIDER ── */
+    if (action === 'contact') {
+      _p6ov('p6-prov-contact-ov', _p6wrap('p6-prov-contact-ov','560px',
+        _p6hdr('fa-phone','Contact — '+name,'Billing · Compliance · Care coordination · EVV','#0891b2','p6-prov-contact-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI has prepared a contact brief for <strong>'+name+'</strong>. CMS Star Rating: <strong>'+(p.cms||'4.5/5')+'</strong>. Billing accuracy: <strong>'+(p.billing||'98.2%')+'</strong>. Active patients: <strong>'+(p.activePats||'N/A')+'</strong>. EVV status: <strong>'+(p.evv||'Active')+'</strong>. '+(p.aiHealth==='Needs Attention'||p.aiHealth==='Critical'?'⚠️ AI flagged concerns — prioritize compliance discussion.':'No outstanding issues. Relationship call recommended for Q3 planning.')+' AI-recommended call duration: 15 minutes.')
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        +_p6row('Provider', name)
+        +_p6row('Contact Person', p.contact || 'Facility Administrator')
+        +_p6row('CMS Star Rating', p.cms || '4.5/5')
+        +_p6row('Active Patients', p.activePats || 'N/A')
+        +_p6row('Billing Accuracy', p.billing || '98.2%')
+        +_p6row('EVV Status', p.evv || 'Active')
+        +'</div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">WealthAI Call Agenda</label>'
+        +'<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:85px;resize:none;">'+(p.aiHealth==='Needs Attention'||p.aiHealth==='Critical'?'1. Compliance concern review — billing anomalies\n2. EVV compliance status and integration timeline\n3. Care plan documentation deadlines\n4. Pending W-9 / license renewal status':'1. Q3 capacity planning — available beds/slots\n2. Billing accuracy review — maintain 98%+\n3. EVV GPS validation check\n4. Staff licensing renewal calendar')+'</textarea></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Initiate Call','fa-phone','#0891b2','_p6close(\'p6-prov-contact-ov\');_p6toast(\'<i class="fas fa-phone"></i> Call to '+name+' initiated · HIPAA recording active · WealthAI agenda shared · Notes auto-logged to provider record · Ref: CALL-'+providerId+'-'+Date.now().toString().slice(-6)+'\',5000)')
+        +_p6btn('Send Secure Message','fa-envelope','#7c3aed','_p6close(\'p6-prov-contact-ov\');_p6toast(\'<i class="fas fa-envelope"></i> Secure message sent to '+name+' via Provider Portal · WealthAI agenda attached · Reply expected within 4 hours\',4000)')
+        +_p6btn('Schedule Site Visit','fa-map-marker-alt','#003087','_p6close(\'p6-prov-contact-ov\');ltcProviderAction(\'site-visit\',\''+providerId+'\')')
+        +'<button onclick="_p6close(\'p6-prov-contact-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── SITE VISIT ── */
+    else if (action === 'site-visit') {
+      var isRisk = p.aiHealth === 'Needs Attention' || p.aiHealth === 'Critical';
+      _p6ov('p6-prov-visit-ov', _p6wrap('p6-prov-visit-ov','580px',
+        _p6hdr('fa-map-marker-alt','Schedule Site Visit — '+name,(isRisk?'Unannounced — Compliance Risk Detected':'Routine QA Visit'),'#003087','p6-prov-visit-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai((isRisk?'WealthAI has flagged <strong>'+name+'</strong> for an <strong>unannounced compliance inspection</strong>. AI health: <strong>'+p.aiHealth+'</strong>. Billing accuracy: '+(p.billing||'91%')+' — below 95% threshold. Fraud score elevated. <strong>Recommend immediate unannounced visit</strong> — notify only after arrival. QA RN with compliance authority assigned.':'WealthAI recommends a routine QA site visit to <strong>'+name+'</strong> within 30 days. AI health: <strong>'+( p.aiHealth||'Good')+'</strong>. Billing accuracy: '+(p.billing||'98.2%')+' — strong. Last visit was '+( p.lastVisit||'90 days ago')+'. Routine visits maintain provider relationship quality and verify EVV compliance.'))
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Visit Type</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+        +(isRisk?'<option>Unannounced Compliance Inspection (AI-recommended)</option><option>Routine Scheduled QA</option>':'<option>Routine Scheduled QA Visit (AI-recommended)</option><option>Unannounced Compliance Inspection</option>')
+        +'<option>Comprehensive Annual Audit Visit</option>'
+        +'<option>Emergency Inspection</option>'
+        +'</select></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Target Date</label>'
+        +'<input type="text" value="Jul '+(isRisk?'14':'22')+', 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">AI-Generated Inspection Checklist</label>'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px;color:#374151;line-height:2.2;">'
+        +'<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Verify resident care plan adherence</div>'
+        +'<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Validate EVV GPS logs vs. billing records</div>'
+        +'<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Conduct resident / family interviews</div>'
+        +(isRisk?'<div><input type="checkbox" checked style="accent-color:#dc2626;margin-right:6px;"> Pull on-site billing records — cross-reference claims</div>':'<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Review billing documentation</div>')
+        +'<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Inspect facility safety and staffing levels</div>'
+        +(isRisk?'<div><input type="checkbox" checked style="accent-color:#dc2626;margin-right:6px;"> Photograph evidence for compliance file</div>':'<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> AI photo analysis of facility conditions</div>')
+        +'</div></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Schedule Visit','fa-calendar-check',isRisk?'#dc2626':'#003087','_p6close(\'p6-prov-visit-ov\');_p6toast(\'<i class="fas fa-map-marker-alt"></i> Site visit scheduled '+(isRisk?'Jul 14':'Jul 22')+' at '+name+' · QA RN assigned · EVV tracking active · '+(isRisk?'Provider NOT notified — unannounced':'Provider notified — scheduled visit')+' · Ref: VISIT-'+providerId+'\',5500)')
+        +_p6btn('AI Optimize Schedule','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6close(\'p6-prov-visit-ov\');_p6toast(\'<i class="fas fa-magic"></i> WealthAI optimized site visit schedule · RN assigned · Earliest available slot confirmed · GPS route sent · Checklist transmitted\',4500)')
+        +'<button onclick="_p6close(\'p6-prov-visit-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── BILLING AUDIT ── */
+    else if (action === 'audit') {
+      var fraudScore = p.fraudScore || (p.aiHealth==='Critical'?31:p.aiHealth==='Needs Attention'?18:8);
+      var auditRisk  = fraudScore > 20 ? 'High' : fraudScore > 12 ? 'Medium' : 'Low';
+      var riskColor  = auditRisk==='High'?'#dc2626':auditRisk==='Medium'?'#d97706':'#059669';
+      _p6ov('p6-prov-audit-ov', _p6wrap('p6-prov-audit-ov','640px',
+        _p6hdr('fa-shield-alt','Billing Audit — '+name,'AI-powered · Fraud pattern analysis · EVV cross-reference','#d97706','p6-prov-audit-ov')
+        +'<div style="padding:22px;">'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">'
+        +_p6kpi(p.billing||'98.2%','Billing Accuracy','fa-percent',parseInt(p.billing||'98')<95?'#dc2626':'#059669','vs 95% clean threshold')
+        +_p6kpi(fraudScore+'/100','AI Fraud Score','fa-shield-alt',riskColor,auditRisk+' risk')
+        +_p6kpi(p.activePats||'—','Active Patients Audited','fa-users','#003087','All claims cross-referenced')
+        +'</div>'
+        +_p6ai('BILLING AUDIT — <strong>'+name+'</strong><br><br>'
+          +'<strong>Fraud Risk Score: '+fraudScore+'/100 — '+auditRisk+'</strong>. '
+          +(fraudScore>20
+            ?'⚠️ <span style="color:#dc2626;font-weight:700;">ELEVATED FRAUD RISK.</span> WealthAI detected: (1) Billing dates not matching EVV GPS timestamps on 3 claims, (2) Service upcoding pattern — 12% above peer benchmark, (3) Duplicate procedure codes on Claims 2026-0107 and 2026-0092. <strong>Recommendation: payment hold + immediate SIU referral.</strong>'
+            :fraudScore>12
+            ?'Moderate anomalies detected. Billing dates occasionally inconsistent with EVV records. Recommend manual review of 3 flagged claims before next payment cycle. No payment hold required at this stage.'
+            :'Billing review complete. No fraud indicators. All claims match EVV GPS logs. Billing accuracy '+( p.billing||'98.2%')+' — top quartile in network. Provider cleared for next payment cycle.')
+        )
+        +_p6tbl(['Check','Status','Detail'],
+          [['EVV vs Billing Match', fraudScore>20?'⚠️ 3 discrepancies':'✅ Clean', fraudScore>20?'Jul 3, 8, 12 visits — GPS gap':'All '+(p.activePats||14)+' visits verified'],
+           ['Procedure Codes', fraudScore>20?'⚠️ Upcoding detected':'✅ Clean', fraudScore>20?'12% above peer benchmark':'Within normal range'],
+           ['Duplicate Claims', fraudScore>20?'⚠️ 2 flagged':'✅ None', fraudScore>20?'Claims 0107 + 0092 overlap':'No duplicates found'],
+           ['Provider License', p.w9||p.aiHealth==='Critical'?'⚠️ Issue detected':'✅ Current','License valid through Dec 2026'],
+           ['W-9 / Tax Form', p.aiHealth==='Critical'?'⚠️ Missing':'✅ On file', p.aiHealth==='Critical'?'W-9 not received — payment hold risk':'W-9 verified · Expires Dec 2026']])
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +(fraudScore>20
+          ? _p6btn('Place Payment Hold','fa-pause-circle','#dc2626','_p6close(\'p6-prov-audit-ov\');_p6toast(\'<i class="fas fa-pause-circle"></i> Payment hold placed on '+name+' · SIU referral initiated · All pending claims suspended · Supervisor and Compliance notified · Ref: HOLD-'+providerId+'\',5500)')
+          : '')
+        +_p6btn('Export Audit Report','fa-file-pdf','#d97706','_p6close(\'p6-prov-audit-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> Billing Audit Report for '+name+' exported · PDF sent to Claims Ops and Compliance · Ref: AUDIT-'+providerId+'-JUL26\',4500)')
+        +_p6btn('Schedule Follow-up Audit','fa-search','#003087','_p6close(\'p6-prov-audit-ov\');_p6toast(\'<i class="fas fa-search"></i> Follow-up audit scheduled for '+name+' · 30-day interval · WealthAI monitoring enabled · Billing team notified\',4000)')
+        +_p6btn('AI Deep Dive','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6toast(\'<i class="fas fa-magic"></i> WealthAI running deep pattern analysis on '+name+' billing history · 90-day lookback · Peer benchmarking · SIU threshold assessment · Results in 2 minutes\',4500)')
+        +'</div></div>'
+      ));
+    }
+
+    /* ── VIEW CLAIMS ── */
+    else if (action === 'claims') {
+      var allClaims = window.ltcClaimsData || [];
+      var pClaims = allClaims.filter(function(x){ return x.provider === name; });
+      if (!pClaims.length) {
+        pClaims = [
+          { id: 'LTC-2026-0101', claimant: 'Margaret O\'Brien', type: 'Nursing Home', status: 'Active', priority: 'medium', daysOpen: 14, dailyBenefit: '$180/day', evv: '✅ GPS' },
+          { id: 'LTC-2026-0103', claimant: 'James Whitfield', type: 'Home Health', status: 'Active', priority: 'high', daysOpen: 22, dailyBenefit: '$140/day', evv: '✅ GPS' }
+        ];
+      }
+      var rows = pClaims.map(function(cl){
+        var pr = cl.priority==='urgent'?'🔴':cl.priority==='high'?'🟠':cl.priority==='medium'?'🟡':'🟢';
+        return [cl.id, cl.claimant, cl.type||'LTC', cl.daysOpen+' days', cl.dailyBenefit||'—',
+          cl.evv||'✅ GPS', pr+' '+cl.priority,
+          '<button onclick="_p6close(\'p6-prov-claims-ov\');ltcOpenClaimDetail(\''+cl.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;">Open</button>'];
+      });
+      _p6ov('p6-prov-claims-ov', _p6wrap('p6-prov-claims-ov','760px',
+        _p6hdr('fa-file-medical-alt','Active Claims — '+name,'All LTC claims · EVV status · AI integrity score','#dc2626','p6-prov-claims-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI claims integrity summary for <strong>'+name+'</strong>: <strong>'+pClaims.length+' active claim(s)</strong>. Total daily benefit exposure: <strong>$'+pClaims.reduce(function(s,x){return s+parseInt((x.dailyBenefit||'$0').replace(/\D/g,''));},0).toLocaleString()+'/day</strong>. EVV compliance: <strong>'+(p.evv||'Active GPS-backed')+'</strong>. Billing accuracy: <strong>'+(p.billing||'98.2%')+'</strong>. '+( p.aiHealth==='Needs Attention'||p.aiHealth==='Critical'?'⚠️ AI flagged anomalies — cross-check EVV logs against billing dates before next payment cycle.':'All claims clear — no anomalies detected in current billing cycle.'))
+        +_p6tbl(['Claim ID','Claimant','Type','Days Open','Benefit/Day','EVV','Priority',''],rows)
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('AI Claims Integrity Check','fa-robot','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6toast(\'<i class="fas fa-magic"></i> WealthAI integrity check running on all '+pClaims.length+' claims at '+name+' · EVV cross-reference · Billing validation · Fraud pattern scan · Results in 90 seconds\',4500)')
+        +_p6btn('Export Claims Roster','fa-file-pdf','#dc2626','_p6close(\'p6-prov-claims-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> Claims roster for '+name+' exported · PDF sent to Claims Ops and compliance file\',3500)')
+        +'<button onclick="_p6close(\'p6-prov-claims-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── AI DEEP REVIEW ── */
+    else if (action === 'ai-review') {
+      _p6ov('p6-prov-airev-ov', _p6wrap('p6-prov-airev-ov','660px',
+        _p6hdr('fa-robot','WealthAI Deep Review — '+name,'360° provider intelligence · Clinical · Billing · Compliance · Network','linear-gradient(135deg,#7c3aed,#6d28d9)','p6-prov-airev-ov')
+        +'<div style="padding:22px;">'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+        +_p6kpi(p.cms||'4.5/5','CMS Star Rating','fa-star','#f59e0b','vs 4.1 avg')
+        +_p6kpi(p.billing||'98.2%','Billing Accuracy','fa-percent',parseInt(p.billing||'98')<95?'#dc2626':'#059669','vs 95% threshold')
+        +_p6kpi(p.fraudScore||'8/100','Fraud Score','fa-shield-alt',( p.fraudScore&&parseInt(p.fraudScore)>20)?'#dc2626':( p.fraudScore&&parseInt(p.fraudScore)>12)?'#d97706':'#059669','WealthAI composite')
+        +_p6kpi(p.aiHealth||'Good','AI Health','fa-heart',hc,'Network classification')
+        +'</div>'
+        +_p6ai('WEALTHAI DEEP REVIEW — <strong>'+name+'</strong><br><br>'
+          +'<strong>Clinical Quality:</strong> CMS Star Rating '+(p.cms||'4.5/5')+' — '+(parseInt((p.cms||'4.5'))>=4?'above network average (4.1). Strong care quality indicators. Resident satisfaction scores in top quartile.':'below network average (4.1). Quality improvement plan warranted. Resident satisfaction concern noted.')+' <br><br>'
+          +'<strong>Billing Intelligence:</strong> Accuracy '+(p.billing||'98.2%')+'. '+(parseInt(p.billing||'98')<95?'⚠️ Below 95% threshold — billing anomalies detected. Cross-reference EVV logs urgently. Consider payment hold pending audit review.':'No anomalies. Clean billing history across 3 months. Peer benchmark: top quartile.')+' <br><br>'
+          +'<strong>Network Status:</strong> EVV: '+(p.evv||'Active GPS-backed')+'. W-9: '+(p.w9||'Verified')+'. License: valid. '+(p.aiHealth==='Needs Attention'||p.aiHealth==='Critical'?'⚠️ Network status requires attention — see recommended actions below.':'Network classification: Preferred Provider candidate.')+' <br><br>'
+          +'<strong>AI Recommendation:</strong> '+(p.aiHealth==='Critical'?'Suspend new referrals · Initiate compliance inspection · Payment hold review':'p.aiHealth'==='Needs Attention'?'Schedule unannounced visit · Billing audit · W-9 collection':'Upgrade to Preferred Provider tier · Increase referral allocation · Schedule annual QA visit')
+        )
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Export AI Review','fa-file-pdf','#7c3aed','_p6close(\'p6-prov-airev-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> WealthAI Deep Review for '+name+' exported · PDF sent to VP Claims and Network Manager · Ref: AIREV-'+providerId+'\',4500)')
+        +(p.aiHealth==='Critical'||p.aiHealth==='Needs Attention'
+          ? _p6btn('Schedule Inspection','fa-map-marker-alt','#dc2626','_p6close(\'p6-prov-airev-ov\');ltcProviderAction(\'site-visit\',\''+providerId+'\')')
+            +_p6btn('Run Billing Audit','fa-shield-alt','#d97706','_p6close(\'p6-prov-airev-ov\');ltcProviderAction(\'audit\',\''+providerId+'\')')
+          : _p6btn('Upgrade to Preferred Tier','fa-star','#059669','_p6close(\'p6-prov-airev-ov\');_p6toast(\'<i class="fas fa-star"></i> '+name+' nominated for Preferred Provider tier · Network Manager notified · Volume increase recommendation submitted · Formal letter sent\',4500)'))
+        +'<button onclick="_p6close(\'p6-prov-airev-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+        +'</div></div>'
+      ));
+    }
+
+    /* ── AI NETWORK SCAN (all providers) ── */
+    else if (action === 'ai-scan') {
+      var allProvs = window.ltcProviderData360 || [];
+      var totalActive = allProvs.reduce(function(s,x){ return s+(x.activePats||0); }, 0);
+      var critCount   = allProvs.filter(function(x){ return x.aiHealth==='Critical'; }).length;
+      var attnCount   = allProvs.filter(function(x){ return x.aiHealth==='Needs Attention'; }).length;
+      _p6ov('p6-prov-scan-ov', _p6wrap('p6-prov-scan-ov','700px',
+        _p6hdr('fa-robot','AI Network Scan — All Providers','Enterprise network intelligence · WealthAI Q2 2026','linear-gradient(135deg,#7c3aed,#6d28d9)','p6-prov-scan-ov')
+        +'<div style="padding:22px;">'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+        +_p6kpi(allProvs.length||'6','Network Providers','fa-hospital','#003087','Active + review')
+        +_p6kpi(totalActive||'47','Active Patients','fa-users','#0891b2','Across all providers')
+        +_p6kpi(critCount||'1','Critical Alerts','fa-exclamation-circle','#dc2626','Immediate action')
+        +_p6kpi(attnCount||'1','Needs Attention','fa-exclamation-triangle','#d97706','Watch list')
+        +'</div>'
+        +_p6ai('NETWORK INTELLIGENCE — Q2 2026 SUMMARY<br><br>'
+          +'<strong>Top Performers:</strong> '+(allProvs.filter(function(x){return x.aiHealth==='Excellent';}).map(function(x){return x.name;}).join(', ')||'Sunrise Manor SNF')+' — billing 98%+, recommended for Preferred Provider tier.<br><br>'
+          +'<strong>Watch List:</strong> '+(allProvs.filter(function(x){return x.aiHealth==='Needs Attention';}).map(function(x){return x.name;}).join(', ')||'Memory Lane Care')+' — billing below threshold or EVV integration pending. 60-day deadline for corrective action.<br><br>'
+          +'<strong>Critical:</strong> '+(critCount?allProvs.filter(function(x){return x.aiHealth==='Critical';}).map(function(x){return x.name;}).join(', '):'No critical providers')+'. '+(critCount?'Suspend new referrals immediately · Initiate compliance inspection.':'')+' <br><br>'
+          +'<strong>EVV Compliance:</strong> '+(allProvs.filter(function(x){return x.evv==='Active'||x.evv==='GPS-backed';}).length||5)+'/'+( allProvs.length||6)+' providers EVV-active. Non-compliant providers on integration deadline.<br><br>'
+          +'<strong>Network Action Plan:</strong> (1) Critical providers → unannounced inspection + referral suspension, (2) Needs Attention → billing audit + EVV sprint, (3) Top performers → preferred tier nomination'
+        )
+        +_p6tbl(['Provider','Patients','CMS Stars','Billing','EVV','AI Health','Action'],
+          (allProvs.length?allProvs:[
+            {name:'Sunrise Manor SNF',activePats:18,cms:'4.5',billing:'98.2%',evv:'Active',aiHealth:'Excellent'},
+            {name:'Sunrise Gardens ALF',activePats:12,cms:'4.2',billing:'97.4%',evv:'Active',aiHealth:'Good'},
+            {name:'Memory Lane Care',activePats:9,cms:'3.8',billing:'94.1%',evv:'Pending',aiHealth:'Needs Attention'},
+            {name:'Oakwood Care Center',activePats:4,cms:'3.1',billing:'91.4%',evv:'Active',aiHealth:'Critical'}
+          ]).map(function(x){
+            var col={'Excellent':'#059669','Good':'#0891b2','Needs Attention':'#d97706','Critical':'#dc2626'}[x.aiHealth||'Good']||'#003087';
+            var isBad = x.aiHealth==='Critical'||x.aiHealth==='Needs Attention';
+            return [x.name,x.activePats||'—',x.cms||'—',x.billing||'—',x.evv||'—',
+              '<span style="color:'+col+';font-weight:700;">'+( x.aiHealth||'Good')+'</span>',
+              isBad?'<button onclick="_p6close(\'p6-prov-scan-ov\');ltcProviderAction(\''+(x.aiHealth==='Critical'?'site-visit':'audit')+'\',\''+(x.id||x.name)+'\')" style="background:'+col+';color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;">'+(x.aiHealth==='Critical'?'Inspect':'Audit')+'</button>'
+                :'<span style="color:#059669;font-size:11px;font-weight:700;">✅ Good</span>'];
+          })
+        )
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('Export Network Report','fa-file-pdf','#dc2626','_p6close(\'p6-prov-scan-ov\');_p6toast(\'<i class="fas fa-file-pdf"></i> Provider Network Intelligence Report exported · Q2 2026 · All '+( allProvs.length||6)+' providers · Sent to QA Director and Claims Ops\',5000)')
+        +(critCount?_p6btn('Inspect Critical Providers','fa-search','#dc2626','_p6close(\'p6-prov-scan-ov\');_p6toast(\'<i class="fas fa-exclamation-circle"></i> Unannounced inspection orders sent for '+critCount+' critical provider(s) · QA RN team dispatched · Network Manager alerted\',5000)'):'')
+        +_p6btn('AI Rebalance Referrals','fa-balance-scale','linear-gradient(135deg,#7c3aed,#6d28d9)','_p6toast(\'<i class="fas fa-magic"></i> WealthAI rebalancing referral allocation · Shifting volume away from at-risk providers · Preferred provider capacity confirmed · Updated referral matrix ready\',4500)')
+        +_p6btn('Schedule All Reviews','fa-calendar','#003087','_p6close(\'p6-prov-scan-ov\');_p6toast(\'<i class="fas fa-calendar-check"></i> Q3 site visit schedule created for all '+( allProvs.length||6)+' providers · QA RN team notified · Calendar invites sent · WealthAI monitoring activated\',5000)')
+        +'</div></div>'
+      ));
+    }
+
+    /* ── ADD PROVIDER ── */
+    else if (action === 'add') {
+      _p6ov('p6-prov-add-ov', _p6wrap('p6-prov-add-ov','560px',
+        _p6hdr('fa-plus','Onboard New Provider','Credentialing · EVV Setup · W-9 · AI Pre-Screen','#059669','p6-prov-add-ov')
+        +'<div style="padding:22px;">'
+        +_p6ai('WealthAI will run a provider pre-screening before network onboarding: (1) CMS database lookup for star rating and violations, (2) State DOH license verification, (3) Billing history cross-reference if previously in network, (4) AI fraud pre-score based on peer provider patterns, (5) EVV integration compatibility check. Average pre-screen time: <strong>4 minutes</strong>. Network coverage gap: <strong>Memory Care facilities in the Northeast</strong> are under-represented.')
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Provider Name</label>'
+        +'<input type="text" placeholder="e.g. Meadowbrook Nursing Home..." style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Provider Type</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Skilled Nursing Facility</option><option>Home Health Agency</option><option>Assisted Living Facility</option><option>Memory Care Facility</option><option>Adult Day Care Center</option><option>Hospice</option></select></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">State</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Texas</option><option>New York</option><option>Florida</option><option>California</option><option>Illinois</option><option>Massachusetts</option><option>Other</option></select></div>'
+        +'<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Expected Monthly Patient Volume</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>1–10 patients</option><option>11–30 patients</option><option>31–100 patients</option><option>100+ patients</option></select></div>'
+        +'<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">EVV System</label>'
+        +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>CareExchange (preferred)</option><option>HHAeXchange</option><option>Sandata</option><option>Other — integration assessment required</option></select></div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        +_p6btn('AI Pre-Screen & Onboard','fa-robot','#059669','_p6close(\'p6-prov-add-ov\');_p6toast(\'<i class="fas fa-check-circle"></i> WealthAI pre-screening initiated · CMS lookup · License verification · Fraud pre-score · W-9 collection started · EVV integration assessment · Credentialing packet sent · ETA to active status: 5–10 business days\',6500)')
+        +_p6btn('Manual Credentialing','fa-clipboard-check','#003087','_p6close(\'p6-prov-add-ov\');_p6toast(\'<i class="fas fa-clipboard-check"></i> Manual credentialing packet initiated for new provider · Credentialing team assigned · ETA: 15 business days\',4500)')
+        +'<button onclick="_p6close(\'p6-prov-add-ov\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        +'</div></div>'
+      ));
+    }
+
+    else {
+      _p6toast('<i class="fas fa-check"></i> '+action+' completed for '+name, 3000);
+    }
+  };
+
+  /* ─── EXPOSE CROSS-IIFE DATA (guard — real data now on window from Phase 4 fix) ── */
+  window.ltcCarrierData360  = window.ltcCarrierData360  || [];
+  window.ltcProviderData360 = window.ltcProviderData360 || [];
+
+  /* ─── EXPOSE HELPERS NEEDED BY INLINE ONCLICK STRINGS ─────────────────── */
+  window._p6close = _p6close;
+  window._p6toast = _p6toast;
+
+  console.log('LTC Phase 6 v2 loaded — Full button interactivity: Claim Detail (all 6 tabs · payment, assess, careplan, upload, request, view-doc, contact-provider, visit, carrier-portal, ai-report, ai-flag) · Insurance Carrier 360 (contact, report, claims, escalate, ai-review, ai-portfolio, sla-report, add) · Healthcare Provider 360 (contact, site-visit, audit, claims, ai-review, ai-scan, add) · All WealthAI-powered overlays · Data export bug fixed');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LTC OPERATIONS — PHASE 7 IIFE
+   System Architecture → Operational Functionality Integration
+   Maps all 14 architecture systems to live operational panels across LTC tabs:
+
+   NEW PAGES (navigateTo routes):
+     ltc-smarts       → SMARTS Business Rules Engine (Claims adjudication rules)
+     ltc-link         → LINK Desktop Underwriting (Assessment queue, case routing)
+     ltc-celltrak     → CellTrak EVV (Mobile assessments, GPS verification)
+     ltc-connect      → CONNECT Web Portal (Client orders, nurse network)
+     ltc-fms          → FMS Financial Management (Premium billing, payment queue)
+     ltc-rpa          → RPA Automation (Kryon bot dashboard, POS queue)
+     ltc-eps          → EPS Correspondence (Document generation, letter tracking)
+     ltc-transport    → Transport Services (sFTP jobs, ActiveBatch schedules)
+     ltc-upd-ops      → UPD Provider Database Operations (provider contracting)
+     ltc-eltcas       → eLTCAS Care Administration (CQRS event log, NServiceBus)
+     ltc-ltcas-admin  → LTCAS Core Administration (Policy admin, UW support)
+
+   ENHANCED PAGES (injected panels into existing pages):
+     ltc-claims       → + LTC Claims Engine panel + SMARTS auto-adjudication band
+     ltc-care         → + eLTCAS event log panel + NServiceBus messages band
+     ltc-eligibility  → + LINK UW queue panel + LTCAS policy status band
+     data-ai          → + Snowflake operational controls + ERM/XRM analytics band
+     ltc-arch         → + System health monitor (per-system live status)
+═══════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─── shared toast & overlay helpers ────────────────────────────────── */
+  function _p7toast(msg, ms) {
+    if (typeof _p5toast === 'function') { _p5toast(msg, ms || 3200); return; }
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0f172a;color:#fff;padding:12px 18px;border-radius:10px;font-size:12px;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:420px;line-height:1.5;';
+    d.innerHTML = msg;
+    document.body.appendChild(d);
+    setTimeout(function () { d.remove(); }, ms || 3200);
+  }
+
+  function _p7overlay(id, html) {
+    document.getElementById(id) && document.getElementById(id).remove();
+    var wrap = document.createElement('div');
+    wrap.id = id;
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;';
+    wrap.innerHTML = html;
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) wrap.remove(); });
+    document.body.appendChild(wrap);
+  }
+
+  function _p7close(id) { var el = document.getElementById(id); if (el) el.remove(); }
+
+  function _p7kpi(val, lbl, icon, color) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        + '<div style="width:28px;height:28px;background:' + color + '18;border-radius:7px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas ' + icon + '" style="color:' + color + ';font-size:12px;"></i></div>'
+        + '<div style="font-size:18px;font-weight:800;color:#111827;">' + val + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;font-weight:600;color:#374151;">' + lbl + '</div>'
+    + '</div>';
+  }
+
+  function _p7hdr(icon, title, sub, color) {
+    return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+      + '<div style="width:40px;height:40px;background:linear-gradient(135deg,' + color + ',' + color + 'cc);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+        + '<i class="fas ' + icon + '" style="color:#fff;font-size:18px;"></i></div>'
+      + '<div><div style="font-size:20px;font-weight:800;color:#111827;">' + title + '</div>'
+        + '<div style="font-size:12px;color:#6b7280;">' + sub + '</div></div>'
+    + '</div>';
+  }
+
+  function _p7statusBadge(s) {
+    var map = { 'Online': '#059669', 'Healthy': '#059669', 'Active': '#059669', 'Warning': '#d97706', 'Degraded': '#d97706', 'Offline': '#dc2626', 'Maintenance': '#7c3aed', 'Running': '#059669', 'Idle': '#6b7280', 'Failed': '#dc2626', 'Processing': '#0891b2', 'Queued': '#d97706', 'Completed': '#059669', 'Pending': '#d97706', 'Error': '#dc2626' };
+    var c = map[s] || '#6b7280';
+    return '<span style="background:' + c + '15;color:' + c + ';border:1px solid ' + c + '40;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">' + s + '</span>';
+  }
+
+  function _p7chip(text, color) {
+    return '<span style="background:' + color + '15;color:' + color + ';border:1px solid ' + color + '30;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600;margin:2px;display:inline-block;">' + text + '</span>';
+  }
+
+  function _p7tblHeader(cols) {
+    return '<thead><tr style="background:#f8fafc;">'
+      + cols.map(function (c) { return '<th style="padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;white-space:nowrap;">' + c + '</th>'; }).join('')
+      + '</tr></thead>';
+  }
+
+  function _p7sectionHdr(icon, title, color, btns) {
+    return '<div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">'
+      + '<span style="font-size:13px;font-weight:700;color:#111827;"><i class="fas ' + icon + '" style="color:' + color + ';margin-right:6px;"></i>' + title + '</span>'
+      + '<div style="display:flex;gap:8px;">' + (btns || '') + '</div>'
+    + '</div>';
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 1: LTC CLAIMS ENGINE — LTC Claims Active Queue Enhancement
+     System: LTC Claims (.NET C# / SQL / IIS / SMARTS)
+     Inject: SMARTS adjudication panel + STP band into existing claims page
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p7buildClaimsEngineBand() {
+    var smartsRules = [
+      { id: 'SR-001', name: 'ADL Benefit Trigger', type: 'Eligibility', desc: '2-of-6 ADL impairment threshold determines benefit activation', status: 'Active', hits: '8,231 this month', action: 'Auto-Approve' },
+      { id: 'SR-002', name: 'Cognitive Impairment Route', type: 'Eligibility', desc: 'MMSE <24 triggers cognitive benefit pathway with physician review', status: 'Active', hits: '1,847 this month', action: 'Route-to-RN' },
+      { id: 'SR-003', name: 'Benefit Period Limit', type: 'Duration', desc: 'Maximum lifetime benefit period enforcement per policy contract', status: 'Active', hits: '312 this month', action: 'Flag-Review' },
+      { id: 'SR-004', name: 'Duplicate Claim Guard', type: 'Fraud', desc: 'Detects duplicate submissions across LTCAS/eLTCAS within 30-day window', status: 'Active', hits: '47 this month', action: 'Hold-SIU' },
+      { id: 'SR-005', name: 'STP Auto-Adjudication', type: 'Payment', desc: 'Straight-Through Processing for clean claims meeting all criteria', status: 'Active', hits: '12,094 this month', action: 'Auto-Pay' },
+      { id: 'SR-006', name: 'Daily Benefit Rate Cap', type: 'Payment', desc: 'Enforces policy daily max; calculates inflation rider adjustments', status: 'Active', hits: '63,000+ per cycle', action: 'Rate-Calc' }
+    ];
+
+    var ruleRows = smartsRules.map(function (r) {
+      var actionColor = r.action === 'Auto-Pay' || r.action === 'Auto-Approve' ? '#059669' : r.action === 'Hold-SIU' ? '#dc2626' : r.action === 'Flag-Review' ? '#d97706' : '#0891b2';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">' + r.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + r.name + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(r.type, '#7c3aed') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;max-width:260px;">' + r.desc + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(r.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + r.hits + '</td>'
+        + '<td style="padding:9px 12px;"><span style="background:' + actionColor + '15;color:' + actionColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + r.action + '</span></td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7editRule(\'' + r.id + '\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">Edit Rule</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    return '<div style="margin-top:20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-cogs', 'SMARTS Business Rules Engine — Active Adjudication Rules', '#7c3aed',
+          '<button onclick="_p7openSmartsSimulator()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-play-circle" style="margin-right:5px;"></i>Run Simulator</button>'
+          + '<button onclick="_p7openStpDashboard()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-bolt" style="margin-right:5px;"></i>STP Dashboard</button>'
+        )
+      + '<div style="padding:12px 16px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-bottom:1px solid #e5e7eb;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + _p7kpi('22,531', 'Claims This Month', 'fa-file-medical-alt', '#dc2626')
+          + _p7kpi('87.4%', 'STP Rate', 'fa-bolt', '#059669')
+          + _p7kpi('6', 'Active Rules', 'fa-cogs', '#7c3aed')
+          + _p7kpi('2.1 hrs', 'Avg Adjudication Time', 'fa-clock', '#0891b2')
+        + '</div>'
+      + '</div>'
+      + '<div style="overflow-x:auto;">'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + _p7tblHeader(['Rule ID', 'Rule Name', 'Type', 'Description', 'Status', 'Monthly Hits', 'Action', ''])
+          + '<tbody>' + ruleRows + '</tbody>'
+        + '</table>'
+      + '</div>'
+    + '</div>'
+    // LTC Claims Engine Status
+    + '<div style="margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-file-medical-alt', 'LTC Claims Engine — System Status (.NET C# / SQL Server / IIS)', '#dc2626',
+          '<button onclick="_p7openClaimsEngineDetail()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-heartbeat" style="margin-right:5px;"></i>Engine Health</button>'
+        )
+      + '<div style="padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">IIS App Pool</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">' + _p7statusBadge('Online') + '<span style="font-size:11px;color:#374151;">4 worker processes</span></div>'
+        + '</div>'
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">SQL Server</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">' + _p7statusBadge('Healthy') + '<span style="font-size:11px;color:#374151;">342ms avg query</span></div>'
+        + '</div>'
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">SMARTS Connection</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">' + _p7statusBadge('Active') + '<span style="font-size:11px;color:#374151;">Rules engine synced</span></div>'
+        + '</div>'
+        + '<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">Claims Queue</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">' + _p7statusBadge('Processing') + '<span style="font-size:11px;color:#374151;">1,247 in queue</span></div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  window._p7editRule = function (ruleId) {
+    _p7toast('<i class="fas fa-cogs"></i> SMARTS Rule ' + ruleId + ' opened in Sparkling Logic editor — changes require change control approval', 3200);
+  };
+
+  window._p7openSmartsSimulator = function () {
+    var html = '<div style="background:#fff;border-radius:16px;width:820px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;display:flex;justify-content:space-between;align-items:center;">'
+        + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:1.5px;">SMARTS · Sparkling Logic</div><div style="font-size:22px;font-weight:800;">Claims Adjudication Simulator</div></div>'
+        + '<button onclick="_p7close(\'smartsSimOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+        + '<div style="background:#f5f3ff;border-left:4px solid #7c3aed;border-radius:4px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:#374151;line-height:1.65;">'
+          + 'Simulate a claim through the SMARTS rules engine to validate adjudication outcomes before deploying rule changes to production. All simulations run against a sandbox copy of the Sparkling Logic rules repository.'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">'
+          + '<div style="background:#f8fafc;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:10px;">Claim Input Parameters</div>'
+            + ['ADL Count (2–6): <input type="number" min="2" max="6" value="3" style="border:1px solid #d1d5db;border-radius:5px;padding:3px 8px;font-size:12px;width:60px;">',
+               'Cognitive Score (MMSE): <input type="number" min="0" max="30" value="18" style="border:1px solid #d1d5db;border-radius:5px;padding:3px 8px;font-size:12px;width:60px;">',
+               'Days Open: <input type="number" value="45" style="border:1px solid #d1d5db;border-radius:5px;padding:3px 8px;font-size:12px;width:60px;">',
+               'Care Type: <select style="border:1px solid #d1d5db;border-radius:5px;padding:3px 8px;font-size:12px;"><option>Nursing Home</option><option>ALF</option><option>Memory Care</option><option>Home Health</option></select>']
+              .map(function (f) { return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:12px;color:#374151;border-bottom:1px solid #e5e7eb;">' + f + '</div>'; }).join('')
+          + '</div>'
+          + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;margin-bottom:10px;">Simulated Adjudication Result</div>'
+            + '<div style="font-size:20px;font-weight:800;color:#059669;margin-bottom:8px;"><i class="fas fa-check-circle" style="margin-right:8px;"></i>APPROVED — STP</div>'
+            + '<div style="font-size:12px;color:#374151;line-height:1.6;">Rules fired: SR-001 (ADL Trigger) → SR-002 (Cognitive Route) → SR-005 (STP)<br>'
+              + 'Benefit: $310/day · Period: Unlimited · Inflation: 3% compound<br>'
+              + 'LTCAS auto-post: Enabled · FMS payment: Queued'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p7close(\'smartsSimOvl\');_p7toast(\'<i class=\\\"fas fa-play\\\"></i> SMARTS simulation complete — SR-001, SR-002, SR-005 fired — result: APPROVED STP\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Run Simulation</button>'
+          + '<button onclick="_p7close(\'smartsSimOvl\');_p7toast(\'<i class=\\\"fas fa-upload\\\"></i> SMARTS rule set exported to sandbox for QA validation\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;flex:1;">Export Rule Set</button>'
+          + '<button onclick="_p7close(\'smartsSimOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p7overlay('smartsSimOvl', html);
+  };
+
+  window._p7openStpDashboard = function () {
+    _p7toast('<i class="fas fa-bolt"></i> STP Dashboard: 87.4% straight-through rate · 12,094 auto-adjudicated this month · 1,547 routed to RN review · 47 held for SIU', 5000);
+  };
+
+  window._p7openClaimsEngineDetail = function () {
+    _p7toast('<i class="fas fa-heartbeat"></i> LTC Claims Engine: 99.8% uptime · IIS pool healthy · SQL avg 342ms · SMARTS sync OK · 1,247 claims in queue', 4500);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 2: eLTCAS CARE ADMINISTRATION — Care Coordination Enhancement
+     System: eLTCAS (.NET / SQL / CQRS / NServiceBus / Angular SPA)
+     Inject: CQRS event log + NServiceBus message stream into Care Coordination
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p7buildEltcasBand() {
+    var cqrsEvents = [
+      { id: 'EVT-8841', command: 'UpdateCarePlan', aggregate: 'CareCase-44392', ts: '14:23:11', user: 'RN Smith', status: 'Committed', downstream: 'NServiceBus → Case360' },
+      { id: 'EVT-8840', command: 'ScheduleAssessment', aggregate: 'CareCase-44389', ts: '14:21:08', user: 'Sys-LINK', status: 'Committed', downstream: 'NServiceBus → LTCAS' },
+      { id: 'EVT-8839', command: 'ApproveBenefitChange', aggregate: 'CareCase-44380', ts: '14:18:44', user: 'MSW Jones', status: 'Committed', downstream: 'NServiceBus → FMS' },
+      { id: 'EVT-8838', command: 'FlagClaimReview', aggregate: 'CareCase-44375', ts: '14:15:22', user: 'SIU-Auto', status: 'Committed', downstream: 'NServiceBus → SMARTS' },
+      { id: 'EVT-8837', command: 'CreateServiceRequest', aggregate: 'CareCase-44370', ts: '14:11:05', user: 'RN Patel', status: 'Committed', downstream: 'NServiceBus → UPD' },
+      { id: 'EVT-8836', command: 'AssignCareCoordinator', aggregate: 'CareCase-44365', ts: '14:08:33', user: 'Sys-Auto', status: 'Committed', downstream: 'NServiceBus → EPS' },
+      { id: 'EVT-8835', command: 'RequestDocuments', aggregate: 'CareCase-44360', ts: '14:05:17', user: 'CM Davis', status: 'Processing', downstream: 'NServiceBus → EPS (pending)' }
+    ];
+
+    var eventRows = cqrsEvents.map(function (e) {
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:8px 12px;font-size:11px;font-weight:700;color:#003087;">' + e.id + '</td>'
+        + '<td style="padding:8px 12px;font-size:11px;font-weight:700;color:#111827;">' + e.command + '</td>'
+        + '<td style="padding:8px 12px;font-size:11px;color:#374151;">' + e.aggregate + '</td>'
+        + '<td style="padding:8px 12px;font-size:11px;color:#6b7280;">' + e.ts + '</td>'
+        + '<td style="padding:8px 12px;font-size:11px;color:#374151;">' + e.user + '</td>'
+        + '<td style="padding:8px 12px;">' + _p7statusBadge(e.status) + '</td>'
+        + '<td style="padding:8px 12px;font-size:10px;color:#6b7280;">' + e.downstream + '</td>'
+        + '<td style="padding:8px 12px;">'
+          + '<button onclick="_p7toast(\'<i class=\\\"fas fa-layer-group\\\"></i> Event ' + e.id + ' replayed — aggregate state rebuilt from event store\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">Replay</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    return '<div style="margin-top:20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-layer-group', 'eLTCAS — CQRS Event Store & NServiceBus Message Stream (.NET / CQRS)', '#003087',
+          '<button onclick="_p7openEventReplay()" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-redo" style="margin-right:5px;"></i>Event Replay</button>'
+          + '<button onclick="_p7openNServiceBus()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-bus" style="margin-right:5px;"></i>NServiceBus Monitor</button>'
+        )
+      + '<div style="padding:12px 16px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-bottom:1px solid #e5e7eb;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + _p7kpi('2.4M', 'Events in Store', 'fa-layer-group', '#003087')
+          + _p7kpi('99.97%', 'Event Consistency', 'fa-check-double', '#059669')
+          + _p7kpi('7', 'NServiceBus Endpoints', 'fa-bus', '#0891b2')
+          + _p7kpi('<50ms', 'Command Processing', 'fa-bolt', '#7c3aed')
+        + '</div>'
+      + '</div>'
+      + '<div style="overflow-x:auto;">'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + _p7tblHeader(['Event ID', 'Command', 'Aggregate', 'Time', 'User', 'Status', 'Downstream', ''])
+          + '<tbody>' + eventRows + '</tbody>'
+        + '</table>'
+      + '</div>'
+    + '</div>';
+  }
+
+  window._p7openEventReplay = function () {
+    _p7toast('<i class="fas fa-redo"></i> eLTCAS Event Replay: Rebuilding aggregate state from event store — 2.4M events · CQRS projection refresh initiated', 4000);
+  };
+
+  window._p7openNServiceBus = function () {
+    var html = '<div style="background:#fff;border-radius:16px;width:780px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#0052cc,#0891b2);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;display:flex;justify-content:space-between;align-items:center;">'
+        + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;">eLTCAS · NServiceBus</div><div style="font-size:22px;font-weight:800;">Message Bus Monitor</div></div>'
+        + '<button onclick="_p7close(\'nsbOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+      + '</div>'
+      + '<div style="padding:20px 24px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">'
+          + _p7kpi('7', 'Active Endpoints', 'fa-plug', '#0891b2')
+          + _p7kpi('1,842', 'Messages/hr', 'fa-envelope', '#003087')
+          + _p7kpi('0', 'Dead Letter Queue', 'fa-skull', '#059669')
+        + '</div>'
+        + '<div style="background:#f8fafc;border-radius:10px;overflow:hidden;margin-bottom:16px;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Endpoint', 'Queue', 'Status', 'Messages/hr', 'Last Msg'])
+            + '<tbody>'
+              + [['eLTCAS.CareAdmin', 'care.admin.input', 'Online', '423', '14:23:11'],
+                 ['eLTCAS.ClaimsRoute', 'claims.route.input', 'Online', '312', '14:22:58'],
+                 ['FMS.PaymentCmd', 'fms.payment.input', 'Online', '187', '14:21:44'],
+                 ['LTCAS.PolicySync', 'ltcas.sync.input', 'Online', '244', '14:20:33'],
+                 ['EPS.DocRequest', 'eps.doc.input', 'Online', '98', '14:19:22'],
+                 ['UPD.ProviderCmd', 'upd.provider.input', 'Online', '76', '14:18:11'],
+                 ['Case360.DocMgmt', 'case360.doc.input', 'Online', '502', '14:17:55']
+                ].map(function (r) {
+                  return '<tr style="border-bottom:1px solid #f3f4f6;">'
+                    + r.map(function (c, i) {
+                      if (i === 2) return '<td style="padding:8px 12px;">' + _p7statusBadge(c) + '</td>';
+                      return '<td style="padding:8px 12px;font-size:11px;color:#374151;">' + c + '</td>';
+                    }).join('') + '</tr>';
+                }).join('')
+            + '</tbody>'
+          + '</table>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p7close(\'nsbOvl\');_p7toast(\'<i class=\\\"fas fa-broom\\\"></i> NServiceBus dead letter queue purged — 0 messages in error state\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Purge DLQ</button>'
+          + '<button onclick="_p7close(\'nsbOvl\');_p7toast(\'<i class=\\\"fas fa-redo\\\"></i> NServiceBus endpoints restarted — all 7 endpoints reconnected\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;flex:1;">Restart Endpoints</button>'
+          + '<button onclick="_p7close(\'nsbOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p7overlay('nsbOvl', html);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 3: LINK DESKTOP UNDERWRITING — Eligibility & Assessment Enhancement
+     System: LINK (.NET C# / SQL / BizTalk / CONNECT / LTCAS / eLTCAS / Case360)
+     Inject: UW assessment queue + BizTalk routing into Eligibility page
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p7buildLinkBand() {
+    var uwQueue = [
+      { id: 'UW-7701', applicant: 'Gerald Hoffman', age: 71, type: 'Face-to-Face', carrier: 'Transamerica', product: 'Hybrid LTC/Ann', assessor: 'RN Patricia Lang', scheduled: 'Jul 10, 2026', status: 'In Progress', biztalkRoute: 'LINK → LTCAS' },
+      { id: 'UW-7702', applicant: 'Sandra McClellan', age: 68, type: 'Telephonic', carrier: 'MassMutual', product: 'LTC Standalone', assessor: 'RN Kevin Walsh', scheduled: 'Jul 11, 2026', status: 'Scheduled', biztalkRoute: 'LINK → eLTCAS' },
+      { id: 'UW-7703', applicant: 'Harold Zimmer', age: 74, type: 'Face-to-Face', carrier: 'Genworth', product: 'LTC Standalone', assessor: 'RN Anna Torres', scheduled: 'Jul 12, 2026', status: 'Scheduled', biztalkRoute: 'LINK → LTCAS' },
+      { id: 'UW-7704', applicant: 'Florence Nakamura', age: 65, type: 'Telephonic', carrier: 'Pacific Life', product: 'Hybrid LTC/Life', assessor: 'RN David Kim', scheduled: 'Jul 14, 2026', status: 'Pending', biztalkRoute: 'LINK → Case360' },
+      { id: 'UW-7705', applicant: 'Chester Williams', age: 79, type: 'Face-to-Face', carrier: 'Prudential', product: 'LTC Standalone', assessor: 'RN Susan Park', scheduled: 'Jul 15, 2026', status: 'Pending', biztalkRoute: 'LINK → eLTCAS' }
+    ];
+
+    var uwRows = uwQueue.map(function (u) {
+      var statusColor = u.status === 'In Progress' ? '#0891b2' : u.status === 'Scheduled' ? '#059669' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#7c3aed;">' + u.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + u.applicant + '<div style="font-size:10px;color:#6b7280;">Age ' + u.age + '</div></td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(u.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + u.carrier + '<div style="font-size:10px;color:#6b7280;">' + u.product + '</div></td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + u.assessor + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + u.scheduled + '</td>'
+        + '<td style="padding:9px 12px;"><span style="background:' + statusColor + '15;color:' + statusColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + u.status + '</span></td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + u.biztalkRoute + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7openLinkCase(\'' + u.id + '\')" style="background:#7c3aed;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">Open Case</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    return '<div style="margin-top:20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-desktop', 'LINK Desktop Underwriting — Assessment Queue & BizTalk Routing (.NET C# / SQL / BizTalk)', '#7c3aed',
+          '<button onclick="_p7openBizTalkMonitor()" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-route" style="margin-right:5px;"></i>BizTalk Monitor</button>'
+          + '<button onclick="_p7openLinkNewCase()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>New UW Case</button>'
+        )
+      + '<div style="padding:12px 16px;background:linear-gradient(135deg,#faf5ff,#ede9fe);border-bottom:1px solid #e5e7eb;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + _p7kpi('5', 'Cases in Queue', 'fa-desktop', '#7c3aed')
+          + _p7kpi('1 Active', 'In Progress', 'fa-play', '#0891b2')
+          + _p7kpi('3', 'BizTalk Routes', 'fa-route', '#003087')
+          + _p7kpi('4.2 days', 'Avg Turnaround', 'fa-clock', '#d97706')
+        + '</div>'
+      + '</div>'
+      + '<div style="overflow-x:auto;">'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + _p7tblHeader(['Case ID', 'Applicant', 'Type', 'Carrier / Product', 'Assessor', 'Scheduled', 'Status', 'BizTalk Route', ''])
+          + '<tbody>' + uwRows + '</tbody>'
+        + '</table>'
+      + '</div>'
+    + '</div>'
+    // LTCAS Policy Status Band
+    + '<div style="margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-server', 'LTCAS Core Administration — Policy Status & Underwriting Support (PowerBuilder / SQL)', '#dc2626',
+          '<button onclick="_p7openLtcasPolicyAdmin()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-cog" style="margin-right:5px;"></i>Policy Admin Console</button>'
+        )
+      + '<div style="padding:14px 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">'
+        + ['Applications Pending UW|fa-hourglass-half|247|#d97706', 'Policies in Force|fa-file-contract|63,847|#059669', 'UW Decisions Today|fa-gavel|38|#003087'].map(function (s) {
+          var p = s.split('|');
+          return '<div style="background:#f8fafc;border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;">'
+            + '<i class="fas ' + p[1] + '" style="color:' + p[3] + ';font-size:20px;"></i>'
+            + '<div><div style="font-size:18px;font-weight:800;color:#111827;">' + p[2] + '</div>'
+              + '<div style="font-size:11px;color:#6b7280;">' + p[0] + '</div></div>'
+          + '</div>';
+        }).join('')
+      + '</div>'
+    + '</div>';
+  }
+
+  window._p7openLinkCase = function (id) {
+    _p7toast('<i class="fas fa-desktop"></i> LINK Case ' + id + ' opened — assessment form loaded · assessor notified · BizTalk routing configured', 3200);
+  };
+
+  window._p7openBizTalkMonitor = function () {
+    _p7toast('<i class="fas fa-route"></i> BizTalk Monitor: 3 active routes (LINK→LTCAS, LINK→eLTCAS, LINK→Case360) · 0 routing failures · 1,247 messages routed today', 4500);
+  };
+
+  window._p7openLinkNewCase = function () {
+    _p7toast('<i class="fas fa-plus"></i> LINK New UW Case created — applicant intake form opened · self-scheduling SMS sent', 3000);
+  };
+
+  window._p7openLtcasPolicyAdmin = function () {
+    var html = '<div style="background:#fff;border-radius:16px;width:820px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#b91c1c,#dc2626);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;display:flex;justify-content:space-between;align-items:center;">'
+        + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;">LTCAS · PowerBuilder / SQL Server</div><div style="font-size:22px;font-weight:800;">Policy Administration Console</div></div>'
+        + '<button onclick="_p7close(\'ltcasOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+          + _p7kpi('63,847', 'Policies in Force', 'fa-file-contract', '#dc2626')
+          + _p7kpi('247', 'Pending UW', 'fa-hourglass-half', '#d97706')
+          + _p7kpi('$4.2B', 'Annual Claims', 'fa-dollar-sign', '#059669')
+          + _p7kpi('99.7%', 'System Uptime', 'fa-server', '#003087')
+        + '</div>'
+        + '<div style="background:#f8fafc;border-radius:10px;overflow:hidden;margin-bottom:16px;">'
+          + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #fecaca;font-size:12px;font-weight:700;color:#dc2626;"><i class="fas fa-server" style="margin-right:6px;"></i>LTCAS Module Status — PowerBuilder Client-Server</div>'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Module', 'Description', 'Status', 'Last Updated'])
+            + '<tbody>'
+              + [['Policy Administration', 'Policy lifecycle management — issue, amend, terminate', 'Online', 'Live'],
+                 ['Underwriting Support', 'Application processing, UW decision log, LINK integration', 'Online', 'Live'],
+                 ['Claims Processing', 'Claim intake, adjudication support (→ SMARTS)', 'Online', 'Live'],
+                 ['Financial Integration', 'Premium posting, FMS sync, MS Dynamics GP link', 'Online', 'Live'],
+                 ['Case360 Interface', 'Document imaging and claims document retrieval', 'Online', 'Live'],
+                 ['EPS Integration', 'Policy correspondence, EOB generation, print queue', 'Online', 'Live']
+                ].map(function (r) {
+                  return '<tr style="border-bottom:1px solid #f3f4f6;">'
+                    + '<td style="padding:8px 12px;font-size:11px;font-weight:700;color:#111827;">' + r[0] + '</td>'
+                    + '<td style="padding:8px 12px;font-size:11px;color:#374151;">' + r[1] + '</td>'
+                    + '<td style="padding:8px 12px;">' + _p7statusBadge(r[2]) + '</td>'
+                    + '<td style="padding:8px 12px;font-size:11px;color:#6b7280;">' + r[3] + '</td>'
+                  + '</tr>';
+                }).join('')
+            + '</tbody>'
+          + '</table>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p7close(\'ltcasOvl\');_p7toast(\'<i class=\\\"fas fa-robot\\\"></i> WealthAI LTCAS modernization assessment: PowerBuilder migration to .NET estimated 18 months · Strangler-fig API pattern recommended\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">AI Modernization Assessment</button>'
+          + '<button onclick="_p7close(\'ltcasOvl\');_p7toast(\'<i class=\\\"fas fa-file-export\\\"></i> LTCAS policy data export initiated — 63,847 records queued for XRM/Snowflake sync\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;flex:1;">Export Policy Data</button>'
+          + '<button onclick="_p7close(\'ltcasOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p7overlay('ltcasOvl', html);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: CellTrak EVV Management
+     System: CellTrak (AWS / HealthLink API / EVV / Mobile SDK → LINK)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initCellTrakPage = function () {
+    var evvVisits = [
+      { id: 'EVV-3301', claimant: 'Margaret O\'Brien', provider: 'Sunrise Home Health', aide: 'Maria Santos', date: 'Jul 9, 2026', checkIn: '08:14', checkOut: '12:47', gps: '40.7128° N, 74.0059° W', duration: '4h 33m', status: 'Verified', compliance: '✓ EVV' },
+      { id: 'EVV-3302', claimant: 'Harold Weissman', provider: 'Golden Years Agency', aide: 'James Rodriguez', date: 'Jul 9, 2026', checkIn: '09:02', checkOut: '13:15', gps: '34.0522° N, 118.2437° W', duration: '4h 13m', status: 'Verified', compliance: '✓ EVV' },
+      { id: 'EVV-3303', claimant: 'Ruth Blackwood', provider: 'Pacific Care Group', aide: 'Susan Kim', date: 'Jul 9, 2026', checkIn: '07:58', checkOut: '12:31', gps: '37.7749° N, 122.4194° W', duration: '4h 33m', status: 'Verified', compliance: '✓ EVV' },
+      { id: 'EVV-3304', claimant: 'Dorothy Sinclair', provider: 'Heartland Home Care', aide: 'Anna Petrov', date: 'Jul 9, 2026', checkIn: '10:15', checkOut: null, gps: '41.8781° N, 87.6298° W', duration: 'In Progress', status: 'Active', compliance: 'GPS Live' },
+      { id: 'EVV-3305', claimant: 'Frank Kazlowski', provider: 'Premier Home Health', aide: 'David Chen', date: 'Jul 9, 2026', checkIn: '08:45', checkOut: '14:00', gps: 'GPS Mismatch', duration: '5h 15m', status: 'Warning', compliance: '⚠ Investigate' },
+      { id: 'EVV-3306', claimant: 'Eleanor Chang', provider: 'Pacific Care Group', aide: 'Lisa Park', date: 'Jul 9, 2026', checkIn: null, checkOut: null, gps: 'No GPS', duration: '—', status: 'Failed', compliance: '✗ Missing' }
+    ];
+
+    var evvRows = evvVisits.map(function (v) {
+      var sc = v.status === 'Verified' ? '#059669' : v.status === 'Active' ? '#0891b2' : v.status === 'Warning' ? '#d97706' : '#dc2626';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#0891b2;">' + v.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + v.claimant + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + v.provider + '<div style="font-size:10px;color:#6b7280;">' + v.aide + '</div></td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + (v.checkIn || '—') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + (v.checkOut || '—') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + v.duration + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + v.gps + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(v.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;font-weight:700;color:' + sc + ';">' + v.compliance + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7cellTrakAction(\'' + v.id + '\',\'' + v.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (v.status === 'Active' ? 'Track Live' : v.status === 'Warning' ? 'Investigate' : v.status === 'Failed' ? 'Report' : 'View') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-mobile-alt', 'CellTrak EVV Management', 'Electronic Visit Verification · Mobile Assessments · AWS / HealthLink API · GPS Verification · Real-Time Compliance', '#0891b2')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('6', 'Visits Today', 'fa-mobile-alt', '#0891b2')
+        + _p7kpi('4', 'EVV Verified', 'fa-check-circle', '#059669')
+        + _p7kpi('1 Active', 'In Progress (GPS Live)', 'fa-map-marker-alt', '#003087')
+        + _p7kpi('1 Alert', 'GPS Mismatch / Missing', 'fa-exclamation-triangle', '#dc2626')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-map-marker-alt', 'Today\'s EVV Visit Log — Real-Time GPS Verification', '#0891b2',
+            '<button onclick="_p7celltrakExport()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-download" style="margin-right:5px;"></i>Export EVV Report</button>'
+            + '<button onclick="_p7celltrakAiScan()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Integrity Scan</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Visit ID', 'Claimant', 'Provider / Aide', 'Check-In', 'Check-Out', 'Duration', 'GPS Location', 'Status', 'EVV', ''])
+            + '<tbody>' + evvRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // EVV Compliance Summary
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-shield-alt', 'EVV Compliance Summary — State Mandate Tracking', '#059669')
+        + '<div style="padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">'
+          + ['State Compliance Rate|98.7%|fa-check-shield|#059669|Medicaid EVV mandate met for all applicable states',
+             'HealthLink API Status|Connected|fa-link|#0891b2|Real-time data exchange with state EVV aggregator',
+             'Fraud Risk Flags|3 This Month|fa-exclamation-triangle|#d97706|GPS mismatch + duplicate billing patterns detected'
+            ].map(function (s) {
+              var p = s.split('|');
+              return '<div style="background:#f8fafc;border-radius:8px;padding:12px;">'
+                + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+                  + '<i class="fas ' + p[2] + '" style="color:' + p[3] + ';font-size:16px;"></i>'
+                  + '<div style="font-size:14px;font-weight:800;color:#111827;">' + p[1] + '</div>'
+                + '</div>'
+                + '<div style="font-size:11px;font-weight:600;color:#374151;">' + p[0] + '</div>'
+                + '<div style="font-size:10px;color:#6b7280;margin-top:3px;">' + p[4] + '</div>'
+              + '</div>';
+            }).join('')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-celltrak');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7cellTrakAction = function (id, status) {
+    var msgs = {
+      Active: '<i class="fas fa-map-marker-alt"></i> CellTrak Live GPS: Visit ' + id + ' — aide location verified · real-time tracking active',
+      Warning: '<i class="fas fa-exclamation-triangle"></i> EVV Investigation opened for ' + id + ' — GPS mismatch flagged · SIU notification queued',
+      Failed: '<i class="fas fa-file-alt"></i> EVV Failure Report generated for ' + id + ' — missing visit log · carrier notified',
+      Verified: '<i class="fas fa-check-circle"></i> EVV Visit ' + id + ' details opened — GPS verified · duration validated · Medicaid compliant'
+    };
+    _p7toast(msgs[status] || msgs.Verified, 3500);
+  };
+
+  window._p7celltrakExport = function () { _p7toast('<i class="fas fa-download"></i> EVV Report exported — HIPAA-compliant visit log with GPS coordinates sent to carrier', 3200); };
+  window._p7celltrakAiScan = function () { _p7toast('<i class="fas fa-robot"></i> CellTrak AI Integrity Scan: 98.7% visit compliance · 3 GPS anomalies detected · 1 duplicate billing pattern flagged — SIU queue updated', 5000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: CONNECT Web Portal — Client Orders & Nurse Network
+     System: CONNECT (.NET / MVC 4 / WCF → LINK)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initConnectPortalPage = function () {
+    var orders = [
+      { id: 'ORD-9901', client: 'MetLife Insurance', type: 'Face-to-Face Assessment', claimant: 'Alan Greenberg', state: 'NY', requested: 'Jul 8, 2026', due: 'Jul 15, 2026', assignedRN: 'RN Patricia Lang', status: 'In Progress', portal: 'Client Portal' },
+      { id: 'ORD-9902', client: 'Transamerica', type: 'Telephonic Assessment', claimant: 'Evelyn Marchetti', state: 'FL', requested: 'Jul 8, 2026', due: 'Jul 16, 2026', assignedRN: 'Unassigned', status: 'Pending', portal: 'CONNECT API' },
+      { id: 'ORD-9903', client: 'MassMutual', type: 'Annual Reassessment', claimant: 'Nancy Kowalczyk', state: 'CA', requested: 'Jul 9, 2026', due: 'Jul 18, 2026', assignedRN: 'RN Anna Torres', status: 'Scheduled', portal: 'Client Portal' },
+      { id: 'ORD-9904', client: 'Genworth', type: 'Cognitive Assessment', claimant: 'Robert Feinstein', state: 'TX', requested: 'Jul 9, 2026', due: 'Jul 20, 2026', assignedRN: 'RN Kevin Walsh', status: 'Scheduled', portal: 'CONNECT API' },
+      { id: 'ORD-9905', client: 'Prudential', type: 'Functional Assessment', claimant: 'Carol Steinberg', state: 'OH', requested: 'Jul 9, 2026', due: 'Jul 22, 2026', assignedRN: 'Unassigned', status: 'Pending', portal: 'Client Portal' }
+    ];
+
+    var orderRows = orders.map(function (o) {
+      var sc = o.status === 'In Progress' ? '#0891b2' : o.status === 'Scheduled' ? '#059669' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#7c3aed;">' + o.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + o.client + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(o.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + o.claimant + ' <span style="color:#9ca3af;">(' + o.state + ')</span></td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + o.requested + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + (o.status === 'Pending' ? '#dc2626' : '#374151') + ';">' + o.due + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:' + (o.assignedRN === 'Unassigned' ? '#dc2626' : '#374151') + ';font-weight:' + (o.assignedRN === 'Unassigned' ? '700' : 'normal') + ';">' + o.assignedRN + '</td>'
+        + '<td style="padding:9px 12px;"><span style="background:' + sc + '15;color:' + sc + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + o.status + '</span></td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7connectOrderAction(\'' + o.id + '\',\'' + o.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (o.assignedRN === 'Unassigned' ? 'Assign RN' : 'View Order') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-globe', 'CONNECT Web Portal', 'Client Assessment Orders · Nurse Network Assignments · Order Tracking · .NET MVC 4 / WCF / LINK Integration', '#7c3aed')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('5', 'Open Orders', 'fa-clipboard-list', '#7c3aed')
+        + _p7kpi('2', 'Unassigned', 'fa-user-slash', '#dc2626')
+        + _p7kpi('3 Active', 'RNs on Assignment', 'fa-user-nurse', '#059669')
+        + _p7kpi('7.1 days', 'Avg Order Turnaround', 'fa-clock', '#d97706')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-clipboard-list', 'Client Assessment Orders — CONNECT Portal', '#7c3aed',
+            '<button onclick="_p7connectAutoAssign()" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Auto-Assign</button>'
+            + '<button onclick="_p7connectNewOrder()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>New Order</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Order ID', 'Client', 'Assessment Type', 'Claimant (State)', 'Requested', 'Due', 'Assigned RN', 'Status', ''])
+            + '<tbody>' + orderRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // Nurse Network Status
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-user-nurse', 'Nurse Network Status — 50-State RN Coverage', '#059669',
+            '<button onclick="_p7connectNurseMap()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-map" style="margin-right:5px;"></i>Coverage Map</button>'
+          )
+        + '<div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + ['1,200+|Network RNs|fa-user-nurse|#059669', '50|States + Territories|fa-map|#003087', '4.2 days|Avg Assignment SLA|fa-clock|#d97706', '98.3%|On-Time Completion|fa-chart-line|#059669'].map(function (s) {
+              var p = s.split('|');
+              return _p7kpi(p[0], p[1], p[2], p[3]);
+            }).join('')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-connect');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7connectOrderAction = function (id, status) {
+    if (status === 'Pending') {
+      _p7toast('<i class="fas fa-user-nurse"></i> CONNECT Order ' + id + ': RN assignment in progress — matching by geography and specialty via LINK integration', 3500);
+    } else {
+      _p7toast('<i class="fas fa-clipboard-list"></i> CONNECT Order ' + id + ' opened — assessment details, scheduling, and status tracking available', 3200);
+    }
+  };
+  window._p7connectAutoAssign = function () { _p7toast('<i class="fas fa-robot"></i> AI Auto-Assign: 2 unassigned orders matched to available RNs by geography · SMS notifications sent', 4000); };
+  window._p7connectNewOrder = function () { _p7toast('<i class="fas fa-plus"></i> New CONNECT Portal order created — client notified · order number generated · RN matching initiated', 3000); };
+  window._p7connectNurseMap = function () { _p7toast('<i class="fas fa-map"></i> RN Coverage Map: 1,200+ nurses across 50 states · real-time availability · geographic assignment engine active', 4000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: FMS Financial Management
+     System: FMS (SQL Server / Java / JBoss EAP / LTCAS / eLTCAS / MS Dynamics)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initFmsPage = function () {
+    var billingQueue = [
+      { id: 'INV-2201', carrier: 'Transamerica', type: 'Premium Billing', period: 'Jul 2026', amount: '$2,847,392', status: 'Processing', fmsStatus: 'JBoss EAP', due: 'Jul 31, 2026' },
+      { id: 'INV-2202', carrier: 'MassMutual', type: 'Claim Reimbursement', period: 'Jun 2026', amount: '$1,244,018', status: 'Completed', fmsStatus: 'Posted', due: 'Jul 15, 2026' },
+      { id: 'INV-2203', carrier: 'Genworth', type: 'Premium Billing', period: 'Jul 2026', amount: '$3,122,450', status: 'Queued', fmsStatus: 'SQL Queue', due: 'Jul 31, 2026' },
+      { id: 'INV-2204', carrier: 'Prudential', type: 'Admin Fee', period: 'Q2 2026', amount: '$487,200', status: 'Completed', fmsStatus: 'Posted', due: 'Jul 10, 2026' },
+      { id: 'INV-2205', carrier: 'Pacific Life', type: 'Claim Reimbursement', period: 'Jun 2026', amount: '$698,340', status: 'Error', fmsStatus: 'Reconcile', due: 'Jul 12, 2026' },
+      { id: 'INV-2206', carrier: 'Lincoln Natl', type: 'Premium Billing', period: 'Jul 2026', amount: '$1,876,500', status: 'Processing', fmsStatus: 'JBoss EAP', due: 'Jul 31, 2026' }
+    ];
+
+    var billRows = billingQueue.map(function (b) {
+      var sc = b.status === 'Completed' ? '#059669' : b.status === 'Processing' ? '#0891b2' : b.status === 'Error' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#059669;">' + b.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + b.carrier + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(b.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + b.period + '</td>'
+        + '<td style="padding:9px 12px;font-size:13px;font-weight:800;color:#059669;">' + b.amount + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(b.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + b.fmsStatus + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + b.due + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7fmsAction(\'' + b.id + '\',\'' + b.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (b.status === 'Error' ? 'Reconcile' : b.status === 'Queued' ? 'Process' : 'View') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-dollar-sign', 'FMS Financial Management', 'Premium Processing · Billing Queue · Payment Reconciliation · SQL Server / Java / JBoss EAP · MS Dynamics GP Integration', '#059669')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('$10.3M', 'Billing This Period', 'fa-dollar-sign', '#059669')
+        + _p7kpi('4', 'Invoices Processing', 'fa-hourglass-half', '#0891b2')
+        + _p7kpi('1 Error', 'Reconciliation Needed', 'fa-exclamation-triangle', '#dc2626')
+        + _p7kpi('$4.2B', 'Annual Claims Paid', 'fa-chart-line', '#003087')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-file-invoice-dollar', 'Billing & Payment Queue — JBoss EAP Processing', '#059669',
+            '<button onclick="_p7fmsRunReconcile()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-sync" style="margin-right:5px;"></i>Run Reconciliation</button>'
+            + '<button onclick="_p7fmsDynamicsSync()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-chart-line" style="margin-right:5px;"></i>MS Dynamics GP Sync</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Invoice ID', 'Carrier', 'Type', 'Period', 'Amount', 'Status', 'FMS Engine', 'Due Date', ''])
+            + '<tbody>' + billRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // MS Dynamics GP Integration Panel
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-chart-line', 'MS Dynamics GP — Client Accounting Integration', '#dc2626',
+            '<button onclick="_p7openDynamicsDetail()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-book" style="margin-right:5px;"></i>GL Transactions</button>'
+          )
+        + '<div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + ['Last Sync|5 min ago|fa-sync|#059669', 'Premium Transactions|1,247 today|fa-receipt|#003087', 'Claim Postings|842 today|fa-file-invoice|#7c3aed', 'Reconciliation|✓ Balanced|fa-balance-scale|#059669'].map(function (s) {
+              var p = s.split('|');
+              return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">'
+                + '<i class="fas ' + p[2] + '" style="color:' + p[3] + ';font-size:16px;"></i>'
+                + '<div><div style="font-size:13px;font-weight:800;color:#111827;">' + p[1] + '</div>'
+                  + '<div style="font-size:10px;color:#6b7280;">' + p[0] + '</div></div>'
+              + '</div>';
+            }).join('')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-fms');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7fmsAction = function (id, status) {
+    var msgs = {
+      Error: '<i class="fas fa-sync"></i> FMS Reconciliation initiated for ' + id + ' — Pacific Life discrepancy queued for GL review · MS Dynamics GP notified',
+      Queued: '<i class="fas fa-play"></i> FMS Invoice ' + id + ' processing started — JBoss EAP job submitted · estimated completion 4 hours',
+      Completed: '<i class="fas fa-file-invoice-dollar"></i> FMS Invoice ' + id + ' details opened — payment confirmed · Dynamics GP posting verified',
+      Processing: '<i class="fas fa-hourglass-half"></i> FMS Invoice ' + id + ' in progress — JBoss EAP processing · SSRS report queued'
+    };
+    _p7toast(msgs[status] || msgs.Processing, 3500);
+  };
+  window._p7fmsRunReconcile = function () { _p7toast('<i class="fas fa-sync"></i> FMS Reconciliation: SSIS ETL running — comparing LTCAS payments vs MS Dynamics GP GL entries · 1 discrepancy flagged', 4500); };
+  window._p7fmsDynamicsSync = function () { _p7toast('<i class="fas fa-chart-line"></i> MS Dynamics GP sync initiated — 2,089 LTCAS transactions posted to client accounting · GL balanced', 3500); };
+  window._p7openDynamicsDetail = function () { _p7toast('<i class="fas fa-book"></i> MS Dynamics GP GL: Premium Revenue $10.3M · Claims Expense $8.7M · Admin Fee $0.49M · Net Margin 9.8% — FY2026 Q3', 5000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: RPA Automation Dashboard
+     System: RPA (Kryon RPA Platform / SQL Server / LTCAS / eLTCAS)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initRpaPage = function () {
+    var bots = [
+      { id: 'BOT-K01', name: 'Policy Owner Services Auto', type: 'Policy Admin', system: 'LTCAS', tasks: 'Address change · Beneficiary update · Coverage inquiry', tasksToday: 847, status: 'Running', successRate: '99.2%', lastRun: '14:23' },
+      { id: 'BOT-K02', name: 'Premium Payment Processor', type: 'Financial', system: 'LTCAS + FMS', tasks: 'Premium posting · Late notice · Grace period calc', tasksToday: 1244, status: 'Running', successRate: '98.7%', lastRun: '14:21' },
+      { id: 'BOT-K03', name: 'Claims Status Updater', type: 'Claims', system: 'eLTCAS + SMARTS', tasks: 'Status notification · Provider portal update · STP post', tasksToday: 522, status: 'Running', successRate: '99.8%', lastRun: '14:19' },
+      { id: 'BOT-K04', name: 'Carrier Data Feed Sync', type: 'Integration', system: 'eLTCAS + Snowflake', tasks: 'XRM incremental load · Snowflake push · Error retry', tasksToday: 388, status: 'Running', successRate: '97.4%', lastRun: '14:15' },
+      { id: 'BOT-K05', name: 'Provider Roster Refresh', type: 'UPD', system: 'UPD + LTCAS', tasks: 'Provider credential check · Network status sync · EVV update', tasksToday: 214, status: 'Idle', successRate: '100%', lastRun: '12:00' },
+      { id: 'BOT-K06', name: 'EPS Correspondence Queue', type: 'Documents', system: 'EPS + LTCAS', tasks: 'Generate EOB · Policyholder letters · Print queue submit', tasksToday: 1876, status: 'Running', successRate: '99.5%', lastRun: '14:22' },
+      { id: 'BOT-K07', name: 'Appeals & Escalation Bot', type: 'Compliance', system: 'eLTCAS + Case360', tasks: 'SLA monitoring · Auto-escalation · Acknowledgment letters', tasksToday: 67, status: 'Running', successRate: '98.5%', lastRun: '14:18' }
+    ];
+
+    var botRows = bots.map(function (b) {
+      var sc = b.status === 'Running' ? '#059669' : b.status === 'Idle' ? '#6b7280' : b.status === 'Failed' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#7c3aed;">' + b.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + b.name + '<div style="font-size:10px;color:#6b7280;">System: ' + b.system + '</div></td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(b.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#374151;">' + b.tasks + '</td>'
+        + '<td style="padding:9px 12px;font-size:13px;font-weight:800;color:#111827;">' + b.tasksToday.toLocaleString() + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(b.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + b.successRate + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + b.lastRun + '</td>'
+        + '<td style="padding:9px 12px;display:flex;gap:4px;">'
+          + '<button onclick="_p7rpaBotAction(\'' + b.id + '\',\'log\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:4px 8px;font-size:10px;cursor:pointer;">Log</button>'
+          + '<button onclick="_p7rpaBotAction(\'' + b.id + '\',\'restart\')" style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:4px 8px;font-size:10px;cursor:pointer;">Restart</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var totalTasks = bots.reduce(function (s, b) { return s + b.tasksToday; }, 0);
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-robot', 'RPA Automation Dashboard', 'Kryon RPA Platform · Policy Owner Services Automation · LTCAS / eLTCAS Integration · SQL Server · Real-Time Bot Monitoring', '#7c3aed')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('7', 'Active Bots', 'fa-robot', '#7c3aed')
+        + _p7kpi(totalTasks.toLocaleString(), 'Tasks Completed Today', 'fa-check-circle', '#059669')
+        + _p7kpi('6 Running', 'Bots Online', 'fa-play-circle', '#059669')
+        + _p7kpi('98.9%', 'Avg Success Rate', 'fa-chart-line', '#003087')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-robot', 'Kryon RPA Bot Status — Policy Owner Services Automation', '#7c3aed',
+            '<button onclick="_p7rpaNewBot()" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>Deploy Bot</button>'
+            + '<button onclick="_p7rpaAiOptimize()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-brain" style="margin-right:5px;"></i>AI Optimize</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Bot ID', 'Bot Name / System', 'Type', 'Tasks Automated', 'Today\'s Volume', 'Status', 'Success Rate', 'Last Run', ''])
+            + '<tbody>' + botRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-rpa');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7rpaBotAction = function (id, action) {
+    if (action === 'log') {
+      _p7toast('<i class="fas fa-list"></i> Kryon RPA Log for ' + id + ': last 24h execution trace — all tasks completed successfully · 0 exceptions · SQL audit trail available', 4000);
+    } else {
+      _p7toast('<i class="fas fa-redo"></i> Kryon Bot ' + id + ' restarted — LTCAS/eLTCAS connection re-established · task queue resumed', 3000);
+    }
+  };
+  window._p7rpaNewBot = function () { _p7toast('<i class="fas fa-plus"></i> Kryon RPA Bot deployment wizard opened — select target system (LTCAS/eLTCAS/FMS) and task automation template', 3200); };
+  window._p7rpaAiOptimize = function () { _p7toast('<i class="fas fa-brain"></i> WealthAI RPA Optimization: BOT-K04 carrier sync success rate 97.4% → recommend retry logic enhancement · BOT-K02 premium processor can absorb 40% more volume', 5000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: EPS Correspondence Management
+     System: EPS (.NET C# / OpenText xPressions / JBoss / MS SSIS)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initEpsPage = function () {
+    var docQueue = [
+      { id: 'EPS-5501', type: 'EOB — Explanation of Benefits', recipient: 'Margaret O\'Brien', carrier: 'Transamerica', deliveryMode: 'Digital + Print', status: 'Queued', engine: 'xPressions', created: 'Jul 9, 14:00', size: '3 pages' },
+      { id: 'EPS-5502', type: 'Annual Premium Notice', recipient: 'Harold Weissman', carrier: 'MassMutual', deliveryMode: 'Print Only', status: 'Processing', engine: 'xPressions', created: 'Jul 9, 13:45', size: '2 pages' },
+      { id: 'EPS-5503', type: 'Benefit Denial Letter', recipient: 'Lois Fujimoto', carrier: 'Genworth', deliveryMode: 'Certified Mail', status: 'Completed', engine: 'xPressions', created: 'Jul 9, 12:30', size: '4 pages' },
+      { id: 'EPS-5504', type: 'Care Plan Approval', recipient: 'Ruth Blackwood', carrier: 'Pacific Life', deliveryMode: 'Digital', status: 'Completed', engine: 'xPressions', created: 'Jul 9, 12:00', size: '6 pages' },
+      { id: 'EPS-5505', type: 'Rate Increase Notice', recipient: '2,847 Policyholders', carrier: 'Multiple', deliveryMode: 'Digital + Print', status: 'Processing', engine: 'SSIS Batch', created: 'Jul 9, 11:00', size: 'Batch' },
+      { id: 'EPS-5506', type: 'Lapse Warning Notice', recipient: 'Frank Kazlowski', carrier: 'Lincoln Natl', deliveryMode: 'Priority Mail', status: 'Error', engine: 'xPressions', created: 'Jul 9, 10:15', size: '1 page' }
+    ];
+
+    var docRows = docQueue.map(function (d) {
+      var sc = d.status === 'Completed' ? '#059669' : d.status === 'Processing' ? '#0891b2' : d.status === 'Error' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#d97706;">' + d.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#111827;">' + d.type + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + d.recipient + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + d.carrier + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(d.deliveryMode, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(d.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + d.engine + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + d.created + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#374151;">' + d.size + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7epsDocAction(\'' + d.id + '\',\'' + d.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (d.status === 'Error' ? 'Retry' : d.status === 'Queued' ? 'Queue Now' : 'View') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-print', 'EPS Correspondence Management', 'Document Generation · Policyholder Letters · Print & Digital Delivery · OpenText xPressions / JBoss / SSIS · LTCAS / eLTCAS / EPS Integration', '#d97706')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('6', 'Documents Today', 'fa-print', '#d97706')
+        + _p7kpi('1,876', 'Letters via RPA Bot', 'fa-robot', '#7c3aed')
+        + _p7kpi('1 Error', 'Delivery Failed', 'fa-exclamation-triangle', '#dc2626')
+        + _p7kpi('3 Modes', 'Digital · Print · Certified', 'fa-layer-group', '#003087')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-envelope', 'Document Generation Queue — OpenText xPressions Engine', '#d97706',
+            '<button onclick="_p7epsGenerateBatch()" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-layer-group" style="margin-right:5px;"></i>Generate Batch</button>'
+            + '<button onclick="_p7epsPrintQueue()" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-print" style="margin-right:5px;"></i>Print Queue</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Doc ID', 'Document Type', 'Recipient', 'Carrier', 'Delivery Mode', 'Status', 'Engine', 'Created', 'Size', ''])
+            + '<tbody>' + docRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-eps');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7epsDocAction = function (id, status) {
+    var msgs = {
+      Error: '<i class="fas fa-redo"></i> EPS Retry: ' + id + ' resubmitted to xPressions engine — delivery failure resolved · postal service notified',
+      Queued: '<i class="fas fa-print"></i> EPS ' + id + ' prioritized in queue — xPressions processing started · 3 min ETA',
+      Completed: '<i class="fas fa-file-alt"></i> EPS Document ' + id + ' opened — delivery confirmed · audit trail available',
+      Processing: '<i class="fas fa-hourglass-half"></i> EPS ' + id + ' processing — xPressions template rendering · SSIS batch in progress'
+    };
+    _p7toast(msgs[status] || msgs.Processing, 3500);
+  };
+  window._p7epsGenerateBatch = function () { _p7toast('<i class="fas fa-layer-group"></i> EPS Batch Generation: SSIS job submitted — 2,847 rate increase notices queued in xPressions · estimated 45 min completion', 4500); };
+  window._p7epsPrintQueue = function () { _p7toast('<i class="fas fa-print"></i> EPS Print Queue: 1,247 documents in physical queue · JBoss print service active · Transport Services sFTP export scheduled 18:00', 4000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: Transport Services — ActiveBatch Orchestration & sFTP
+     System: Transport (ActiveBatch / Ipswitch sFTP / WSFTP PRO)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initTransportPage = function () {
+    var jobs = [
+      { id: 'JOB-T001', name: 'XRM Incremental Load', schedule: 'Daily 06:00', system: 'ERM/XRM → Snowflake', status: 'Completed', lastRun: 'Jul 9, 06:02', duration: '14 min', records: '48,231', engine: 'ActiveBatch' },
+      { id: 'JOB-T002', name: 'FMS Premium Export', schedule: 'Daily 18:00', system: 'FMS → Carrier sFTP', status: 'Queued', lastRun: 'Jul 8, 18:01', duration: '8 min', records: '1,247', engine: 'WSFTP PRO' },
+      { id: 'JOB-T003', name: 'EPS Print File Transfer', schedule: 'Daily 18:00', system: 'EPS → Print Vendor', status: 'Queued', lastRun: 'Jul 8, 18:05', duration: '3 min', records: '2,847 docs', engine: 'Ipswitch sFTP' },
+      { id: 'JOB-T004', name: 'Claims Data Export', schedule: 'Weekly Mon 03:00', system: 'LTCAS → XRM', status: 'Completed', lastRun: 'Jul 7, 03:04', duration: '42 min', records: '63,000+', engine: 'ActiveBatch + SSIS' },
+      { id: 'JOB-T005', name: 'Snowflake Replication', schedule: 'Near Real-Time', system: 'CLTCAS/ELTCAS → Snowflake', status: 'Running', lastRun: '14:23 (streaming)', duration: 'Continuous', records: 'Stream', engine: 'Snowflake Native' },
+      { id: 'JOB-T006', name: 'Provider Roster Import', schedule: 'Daily 04:00', system: 'External UPD → UPD', status: 'Completed', lastRun: 'Jul 9, 04:08', duration: '6 min', records: '3,847', engine: 'ActiveBatch' },
+      { id: 'JOB-T007', name: 'Carrier Data Package', schedule: 'Monthly 1st', system: 'ERM/XRM → Client sFTP', status: 'Completed', lastRun: 'Jul 1, 02:15', duration: '28 min', records: 'Client feed', engine: 'WSFTP PRO' },
+      { id: 'JOB-T008', name: 'Interface Monitoring', schedule: 'Every 15 min', system: 'All Systems → Alert', status: 'Running', lastRun: '14:15', duration: 'Continuous', records: 'Health check', engine: 'ActiveBatch' }
+    ];
+
+    var jobRows = jobs.map(function (j) {
+      var sc = j.status === 'Completed' ? '#059669' : j.status === 'Running' ? '#0891b2' : j.status === 'Error' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">' + j.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + j.name + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#374151;">' + j.system + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + j.schedule + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(j.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + j.lastRun + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + j.duration + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + j.records + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(j.engine, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7transportJobAction(\'' + j.id + '\',\'' + j.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (j.status === 'Error' ? 'Retry' : j.status === 'Running' ? 'Monitor' : j.status === 'Queued' ? 'Run Now' : 'View Log') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-exchange-alt', 'Transport Services — Enterprise Scheduler', 'ActiveBatch Orchestration · Ipswitch sFTP Server · WSFTP PRO · File Transfer Jobs · ERM/XRM · FMS · EPS · Snowflake', '#003087')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('8', 'Scheduled Jobs', 'fa-calendar-alt', '#003087')
+        + _p7kpi('2 Running', 'Active Now', 'fa-play-circle', '#0891b2')
+        + _p7kpi('5', 'Completed Today', 'fa-check-circle', '#059669')
+        + _p7kpi('2 Queued', 'Scheduled 18:00', 'fa-clock', '#d97706')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-calendar-alt', 'ActiveBatch Job Orchestration — sFTP & File Transfer Schedule', '#003087',
+            '<button onclick="_p7transportRunAll()" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-play" style="margin-right:5px;"></i>Run All Queued</button>'
+            + '<button onclick="_p7transportSftpStatus()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-server" style="margin-right:5px;"></i>sFTP Server Status</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Job ID', 'Job Name', 'Route', 'Schedule', 'Status', 'Last Run', 'Duration', 'Records', 'Engine', ''])
+            + '<tbody>' + jobRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-transport');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7transportJobAction = function (id, status) {
+    var msgs = {
+      Error: '<i class="fas fa-redo"></i> Transport Job ' + id + ' retried — ActiveBatch re-queued · sFTP connection re-established',
+      Running: '<i class="fas fa-eye"></i> Transport Job ' + id + ' monitoring active — real-time record count and throughput visible in ActiveBatch console',
+      Queued: '<i class="fas fa-play"></i> Transport Job ' + id + ' started immediately — ActiveBatch override initiated · estimated completion 15 min',
+      Completed: '<i class="fas fa-list"></i> Transport Job ' + id + ' log: completed successfully · file transfer verified · destination ACK received'
+    };
+    _p7toast(msgs[status] || msgs.Completed, 3500);
+  };
+  window._p7transportRunAll = function () { _p7toast('<i class="fas fa-play"></i> Transport Services: 2 queued jobs started now — FMS Premium Export + EPS Print File Transfer initiated · sFTP connections established', 4000); };
+  window._p7transportSftpStatus = function () { _p7toast('<i class="fas fa-server"></i> Ipswitch sFTP Server: Online · 14 active connections · WSFTP PRO: 3 sessions · All carrier sFTP endpoints responding · No transfer errors', 4500); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: ERM/XRM Analytics & UPD Operational Panel
+     (Enhances existing data-ai iHub page with additional operational bands)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initErmXrmPage = function () {
+    var reports = [
+      { id: 'RPT-X001', name: 'Monthly Portfolio Trend', carrier: 'All Carriers', type: 'Policy Trending', delivery: 'XRM → sFTP', status: 'Completed', generated: 'Jul 1, 2026', records: '63,847 policies', format: 'SSRS PDF + CSV' },
+      { id: 'RPT-X002', name: 'Premium Analysis Report', carrier: 'Transamerica', type: 'Premium Data', delivery: 'iHub API', status: 'Completed', generated: 'Jul 5, 2026', records: '18,244 policies', format: 'Power BI' },
+      { id: 'RPT-X003', name: 'Claims Trend Analysis', carrier: 'All Carriers', type: 'Claims History', delivery: 'XRM → Client sFTP', status: 'Processing', generated: 'Jul 9, 2026', records: '22,531 claims', format: 'SSIS + CSV' },
+      { id: 'RPT-X004', name: 'Rate Increase Impact', carrier: 'MassMutual', type: 'Rate History', delivery: 'iHub Portal', status: 'Completed', generated: 'Jul 7, 2026', records: '8,412 policies', format: 'Power BI + PDF' },
+      { id: 'RPT-X005', name: 'Lapse Risk Model', carrier: 'All Carriers', type: 'Client Insights', delivery: 'AI Engine', status: 'Completed', generated: 'Jul 6, 2026', records: '63,847 policies', format: 'Snowflake + AI' },
+      { id: 'RPT-X006', name: 'Avaya Call Analytics', carrier: 'Internal', type: 'Call Summary', delivery: 'Snowflake → iHub', status: 'Running', generated: 'Live / Near RT', records: 'Streaming', format: 'Snowflake Native' }
+    ];
+
+    var rptRows = reports.map(function (r) {
+      var sc = r.status === 'Completed' ? '#059669' : r.status === 'Processing' || r.status === 'Running' ? '#0891b2' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#d97706;">' + r.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + r.name + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + r.carrier + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(r.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#374151;">' + r.delivery + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(r.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + r.generated + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + r.records + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + r.format + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7ermRptAction(\'' + r.id + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (r.status === 'Processing' || r.status === 'Running' ? 'Monitor' : 'View Report') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-database', 'ERM / XRM Analytics — Reporting & Data Feeds', 'MS SSIS · MS SQL Server · MS SSRS · Power BI · Transport Services · Client Data Feeds · Snowflake Integration · 7-Day → Near Real-Time Evolution', '#d97706')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('6', 'Active Reports', 'fa-chart-bar', '#d97706')
+        + _p7kpi('63,847', 'Policies in XRM', 'fa-database', '#003087')
+        + _p7kpi('Near RT', 'Snowflake Sync', 'fa-snowflake', '#0891b2')
+        + _p7kpi('3 Outputs', 'SSRS · Power BI · iHub', 'fa-layer-group', '#7c3aed')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-chart-bar', 'ERM/XRM Report Library — SSIS + SSRS + Power BI', '#d97706',
+            '<button onclick="_p7ermNewReport()" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>New Report</button>'
+            + '<button onclick="_p7ermTransportStatus()" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-exchange-alt" style="margin-right:5px;"></i>Transport Status</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Report ID', 'Report Name', 'Carrier', 'Data Type', 'Delivery Channel', 'Status', 'Generated', 'Records', 'Format', ''])
+            + '<tbody>' + rptRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // 7-day vs Real-Time comparison
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-exchange-alt', 'Data Delivery Evolution — XRM 7-Day vs iHub Near Real-Time', '#059669')
+        + '<div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">'
+          + '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:11px;font-weight:800;color:#dc2626;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-history" style="margin-right:6px;"></i>Current State — XRM / FTP</div>'
+            + ['FTP-based flat file delivery', '7-day fulfillment cycle', 'Monthly policy file to clients', 'Premium and claims data only', 'No self-service analytics'].map(function (i) {
+                return '<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid rgba(220,38,38,.15);">' + i + '</div>';
+              }).join('')
+          + '</div>'
+          + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-rocket" style="margin-right:6px;"></i>iHub Future State — Snowflake</div>'
+            + ['Cloud-based private data share + API', 'Near real-time Snowflake replication', 'Self-service analytics portal', '7 data source types (claims + call + portal)', 'AI-powered lapse prediction + rate modeling'].map(function (i) {
+                return '<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid rgba(5,150,105,.15);">' + i + '</div>';
+              }).join('')
+          + '</div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-ermxrm');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7ermRptAction = function (id) { _p7toast('<i class="fas fa-chart-bar"></i> ERM/XRM Report ' + id + ' opened — SSRS/Power BI viewer loading · Transport Services delivery log available', 3200); };
+  window._p7ermNewReport = function () { _p7toast('<i class="fas fa-plus"></i> New ERM/XRM Report configured — select data source (LTCAS/eLTCAS/FMS/Avaya) and carrier filter · SSIS job scheduled', 3200); };
+  window._p7ermTransportStatus = function () { _p7toast('<i class="fas fa-exchange-alt"></i> Transport Services: XRM incremental load complete (14 min) · 7 carrier sFTP deliveries successful · Snowflake replication streaming', 4500); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: UPD Provider Database Operations
+     System: UPD (.NET / MVC / WCF / NServiceBus / SQL Server)
+     Enhancing Healthcare Provider 360 with UPD operational panel
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initUpdOpsPage = function () {
+    var providers = [
+      { id: 'UPD-1001', name: 'Sunrise Home Health', type: 'Home Health Agency', state: 'NY', status: 'Active', credStatus: 'Current', contractStatus: 'In Network', evvCompliance: '98.2%', claimsLtm: 247, whatCareCost: '$312/day', npiValid: '✓' },
+      { id: 'UPD-1002', name: 'Golden Years Senior Care', type: 'ALF', state: 'FL', status: 'Active', credStatus: 'Renewing', contractStatus: 'In Network', evvCompliance: '96.4%', claimsLtm: 184, whatCareCost: '$185/day', npiValid: '✓' },
+      { id: 'UPD-1003', name: 'Pacific Care Group', type: 'SNF', state: 'CA', status: 'Active', credStatus: 'Current', contractStatus: 'In Network', evvCompliance: '99.1%', claimsLtm: 512, whatCareCost: '$410/day', npiValid: '✓' },
+      { id: 'UPD-1004', name: 'Harbor Memory Care', type: 'Memory Care', state: 'TX', status: 'Active', credStatus: 'Current', contractStatus: 'Out-of-Network', evvCompliance: 'N/A', claimsLtm: 38, whatCareCost: '$380/day', npiValid: '✓' },
+      { id: 'UPD-1005', name: 'Midwest Home Health', type: 'Home Health Agency', state: 'IL', status: 'Warning', credStatus: 'Expired', contractStatus: 'Suspended', evvCompliance: '71.3%', claimsLtm: 22, whatCareCost: '$287/day', npiValid: '⚠' }
+    ];
+
+    var provRows = providers.map(function (p) {
+      var sc = p.status === 'Active' && p.credStatus === 'Current' ? '#059669' : p.status === 'Warning' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#059669;">' + p.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + p.name + '<div style="font-size:10px;color:#6b7280;">' + p.state + ' · ' + p.type + '</div></td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(p.credStatus, p.credStatus === 'Current' ? '#059669' : p.credStatus === 'Expired' ? '#dc2626' : '#d97706') + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(p.contractStatus, p.contractStatus === 'In Network' ? '#059669' : p.contractStatus === 'Suspended' ? '#dc2626' : '#d97706') + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:' + (parseFloat(p.evvCompliance) > 95 ? '#059669' : '#dc2626') + ';">' + p.evvCompliance + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + p.claimsLtm + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + p.whatCareCost + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;">' + p.npiValid + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7updProvAction(\'' + p.id + '\',\'' + p.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (p.credStatus === 'Expired' ? 'Recredential' : 'View Profile') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-hospital', 'UPD — Provider Database Operations', 'Proprietary Provider Database · 180K+ Providers · Credentialing · Contracting · What Care Costs Integration · .NET / MVC / WCF / NServiceBus', '#059669')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('180K+', 'Providers in UPD', 'fa-hospital', '#059669')
+        + _p7kpi('98.4%', 'Active & Credentialed', 'fa-check-circle', '#059669')
+        + _p7kpi('1 Alert', 'Credential Expired', 'fa-exclamation-triangle', '#dc2626')
+        + _p7kpi('What Care Costs', 'Rate Benchmark Active', 'fa-dollar-sign', '#003087')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-hospital', 'Provider Credentialing & Contract Status — UPD Database', '#059669',
+            '<button onclick="_p7updSearchProvider()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-search" style="margin-right:5px;"></i>Search 180K+</button>'
+            + '<button onclick="_p7updExtPortal()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-globe" style="margin-right:5px;"></i>External UPD Portal</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Provider ID', 'Provider Name', 'Cred Status', 'Contract', 'EVV Compliance', 'Claims (LTM)', 'What Care Costs', 'NPI', ''])
+            + '<tbody>' + provRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // External UPD Portal band
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-globe', 'External UPD Portal — Public Provider Data Warehouse (.NET / MVC / WCF)', '#0891b2',
+            '<button onclick="_p7extUpdManage()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-users-cog" style="margin-right:5px;"></i>Manage Subscribers</button>'
+          )
+        + '<div style="padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + ['Enterprise Clients|42 Subscribers|fa-building|#0891b2', 'Provider Profiles|Public Repository|fa-globe|#003087', 'Data Sync|Daily from UPD|fa-sync|#059669', 'API Access|REST / WCF|fa-plug|#7c3aed'].map(function (s) {
+              var p = s.split('|');
+              return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">'
+                + '<i class="fas ' + p[2] + '" style="color:' + p[3] + ';font-size:16px;"></i>'
+                + '<div><div style="font-size:13px;font-weight:800;color:#111827;">' + p[1] + '</div>'
+                  + '<div style="font-size:10px;color:#6b7280;">' + p[0] + '</div></div>'
+              + '</div>';
+            }).join('')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-upd-ops');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7updProvAction = function (id, status) {
+    if (status === 'Warning') {
+      _p7toast('<i class="fas fa-exclamation-triangle"></i> UPD Recredentialing initiated for ' + id + ' — expired credentials flagged · provider notified via External UPD portal · claims suspended', 4000);
+    } else {
+      _p7toast('<i class="fas fa-hospital"></i> UPD Provider ' + id + ' profile opened — credentialing history, contract terms, EVV compliance, and What Care Costs rate benchmark available', 3500);
+    }
+  };
+  window._p7updSearchProvider = function () { _p7toast('<i class="fas fa-search"></i> UPD Provider Search: 180,000+ providers indexed · search by NPI, name, specialty, state, or network status · What Care Costs rates integrated', 4000); };
+  window._p7updExtPortal = function () { _p7toast('<i class="fas fa-globe"></i> External UPD Portal: 42 enterprise subscribers · public provider profiles synced daily · REST/WCF API access · provider matching enabled', 4000); };
+  window._p7extUpdManage = function () { _p7toast('<i class="fas fa-users-cog"></i> External UPD Subscriber Management: 42 active subscribers · last sync 04:08 today · provider data package current', 3200); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NAVIGATION PATCH — Phase 7
+     Registers all new page routes + injects operational bands into
+     existing LTC Claims, Care Coordination, and Eligibility pages
+  ═══════════════════════════════════════════════════════════════════════ */
+
+  // Map tpl IDs to page init functions for new pages
+  var _p7pages = {
+    'ltc-celltrak':   { tpl: 'tpl-ltc-celltrak',   init: window.initCellTrakPage },
+    'ltc-connect':    { tpl: 'tpl-ltc-connect',     init: window.initConnectPortalPage },
+    'ltc-fms':        { tpl: 'tpl-ltc-fms',         init: window.initFmsPage },
+    'ltc-rpa':        { tpl: 'tpl-ltc-rpa',         init: window.initRpaPage },
+    'ltc-eps':        { tpl: 'tpl-ltc-eps',         init: window.initEpsPage },
+    'ltc-transport':  { tpl: 'tpl-ltc-transport',   init: window.initTransportPage },
+    'ltc-ermxrm':     { tpl: 'tpl-ltc-ermxrm',      init: window.initErmXrmPage },
+    'ltc-upd-ops':    { tpl: 'tpl-ltc-upd-ops',     init: window.initUpdOpsPage }
+  };
+
+  function _p7ensureTpl(tplId) {
+    if (!document.getElementById(tplId)) {
+      // Create a hidden template container inside the main content area
+      var main = document.getElementById('main-content') || document.querySelector('.content-area') || document.querySelector('main') || document.body;
+      var el = document.createElement('div');
+      el.id = tplId;
+      el.style.cssText = 'display:none;';
+      main.appendChild(el);
+    }
+  }
+
+  function _p7showPage(tplId) {
+    // Hide all ltc template elements
+    document.querySelectorAll('[id^="tpl-"]').forEach(function (el) {
+      el.style.display = 'none';
+    });
+    var tpl = document.getElementById(tplId);
+    if (tpl) {
+      tpl.style.display = 'block';
+      // Scroll to top
+      tpl.scrollTop = 0;
+    }
+  }
+
+  var _origNav_p7 = navigateTo;
+  navigateTo = function (page) {
+    _origNav_p7(page);
+
+    // Inject operational bands into existing pages when they load
+    if (page === 'ltc-claims') {
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          var tpl = document.getElementById('tpl-ltc-claims');
+          if (tpl && tpl.innerHTML && !tpl.querySelector('.p7-claims-engine-band')) {
+            var band = document.createElement('div');
+            band.className = 'p7-claims-engine-band';
+            band.innerHTML = _p7buildClaimsEngineBand();
+            tpl.querySelector('.ltc-claims-page') ? tpl.querySelector('.ltc-claims-page').appendChild(band) : tpl.appendChild(band);
+          }
+        }, 400);
+      });
+    }
+
+    if (page === 'ltc-care') {
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          var tpl = document.getElementById('tpl-ltc-care');
+          if (tpl && tpl.innerHTML && !tpl.querySelector('.p7-eltcas-band')) {
+            var band = document.createElement('div');
+            band.className = 'p7-eltcas-band';
+            band.innerHTML = _p7buildEltcasBand();
+            tpl.querySelector('.ltc-care-page') ? tpl.querySelector('.ltc-care-page').appendChild(band) : tpl.appendChild(band);
+          }
+        }, 400);
+      });
+    }
+
+    if (page === 'ltc-eligibility') {
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          var tpl = document.getElementById('tpl-ltc-eligibility');
+          if (tpl && tpl.innerHTML && !tpl.querySelector('.p7-link-band')) {
+            var band = document.createElement('div');
+            band.className = 'p7-link-band';
+            band.innerHTML = _p7buildLinkBand();
+            tpl.querySelector('.ltc-eligibility-page') ? tpl.querySelector('.ltc-eligibility-page').appendChild(band) : tpl.appendChild(band);
+          }
+        }, 400);
+      });
+    }
+
+    // Handle new Phase 7 pages
+    if (_p7pages[page]) {
+      var cfg = _p7pages[page];
+      _p7ensureTpl(cfg.tpl);
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          if (cfg.init) cfg.init();
+          _p7showPage(cfg.tpl);
+          var bcEl = document.getElementById('breadcrumb-title');
+          if (bcEl) {
+            var titleMap = {
+              'ltc-celltrak': 'CellTrak EVV Management — Mobile Assessments · GPS Verification',
+              'ltc-connect':  'CONNECT Web Portal — Client Orders · Nurse Network',
+              'ltc-fms':      'FMS Financial Management — Premium Billing · Payment Queue',
+              'ltc-rpa':      'RPA Automation — Kryon Bot Dashboard · Policy Owner Services',
+              'ltc-eps':      'EPS Correspondence — Document Generation · Letter Tracking',
+              'ltc-transport':'Transport Services — ActiveBatch · sFTP Orchestration',
+              'ltc-ermxrm':   'ERM/XRM Analytics — Reporting · Data Feeds · Snowflake',
+              'ltc-upd-ops':  'UPD Provider Database — Credentialing · Contracting · External Portal'
+            };
+            bcEl.textContent = titleMap[page] || page;
+          }
+          // Highlight appropriate nav
+          document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
+        }, 100);
+      });
+    }
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NAV ITEMS — Add Phase 7 pages to the LTC Operations sidebar nav
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p7injectNavItems() {
+    // Find the sidebar or nav list for LTC Operations
+    var nav = document.querySelector('.sidebar-nav') || document.querySelector('.nav-list') || document.querySelector('nav');
+    if (!nav) return;
+
+    // Look for the System Architecture nav item to insert after
+    var archNav = nav.querySelector('.ltc-arch-nav') || Array.from(nav.querySelectorAll('.nav-item')).find(function (el) { return el.textContent.includes('System Architecture') || el.textContent.includes('ltc-arch'); });
+    if (!archNav) return;
+    if (nav.querySelector('.p7-nav-group')) return; // already injected
+
+    var newItems = [
+      { page: 'ltc-celltrak',   icon: 'fa-mobile-alt',        label: 'CellTrak EVV',        color: '#0891b2' },
+      { page: 'ltc-connect',    icon: 'fa-globe',              label: 'CONNECT Portal',      color: '#7c3aed' },
+      { page: 'ltc-fms',        icon: 'fa-dollar-sign',        label: 'FMS Financial',       color: '#059669' },
+      { page: 'ltc-rpa',        icon: 'fa-robot',              label: 'RPA Automation',      color: '#7c3aed' },
+      { page: 'ltc-eps',        icon: 'fa-print',              label: 'EPS Correspondence',  color: '#d97706' },
+      { page: 'ltc-transport',  icon: 'fa-exchange-alt',       label: 'Transport Services',  color: '#003087' },
+      { page: 'ltc-ermxrm',     icon: 'fa-database',           label: 'ERM/XRM Analytics',  color: '#d97706' },
+      { page: 'ltc-upd-ops',    icon: 'fa-hospital',           label: 'UPD Operations',      color: '#059669' }
+    ];
+
+    var groupEl = document.createElement('div');
+    groupEl.className = 'p7-nav-group';
+    groupEl.style.cssText = 'border-top:1px solid rgba(255,255,255,.1);padding-top:8px;margin-top:4px;';
+
+    var groupLabel = document.createElement('div');
+    groupLabel.style.cssText = 'font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4);padding:6px 16px 4px;';
+    groupLabel.textContent = 'Systems Operations';
+    groupEl.appendChild(groupLabel);
+
+    newItems.forEach(function (item) {
+      var el = document.createElement('div');
+      el.className = 'nav-item p7-nav-item';
+      el.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;border-radius:6px;margin:1px 6px;transition:background .15s;';
+      el.innerHTML = '<i class="fas ' + item.icon + '" style="width:16px;color:' + item.color + ';font-size:13px;"></i><span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85);">' + item.label + '</span>';
+      el.addEventListener('mouseenter', function () { el.style.background = 'rgba(255,255,255,.08)'; });
+      el.addEventListener('mouseleave', function () { el.style.background = el.classList.contains('active') ? 'rgba(255,255,255,.12)' : ''; });
+      el.addEventListener('click', function () {
+        navigateTo(item.page);
+        document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); n.style.background = ''; });
+        el.classList.add('active');
+        el.style.background = 'rgba(255,255,255,.12)';
+      });
+      groupEl.appendChild(el);
+    });
+
+    archNav.parentNode.insertBefore(groupEl, archNav.nextSibling);
+  }
+
+  // Also add quick-access action buttons to the System Architecture page detail cards
+  var _origLtcArchDetail = window.ltcArchDetail;
+  window.ltcArchDetail = function (key) {
+    _origLtcArchDetail && _origLtcArchDetail(key);
+    // After overlay opens, inject "Open Operational Panel" button
+    setTimeout(function () {
+      var overlay = document.getElementById('ltcArchDetailOvl');
+      if (!overlay) return;
+      var pageMap = {
+        celltrak:   'ltc-celltrak',
+        connect:    'ltc-connect',
+        fms:        'ltc-fms',
+        msDynamics: 'ltc-fms',
+        rpa:        'ltc-rpa',
+        eps:        'ltc-eps',
+        transport:  'ltc-transport',
+        ermXrm:     'ltc-ermxrm',
+        snowflake:  'data-ai',
+        upd:        'ltc-upd-ops',
+        externalUpd:'ltc-upd-ops',
+        ltcClaims:  'ltc-claims',
+        smarts:     'ltc-claims',
+        ltcas:      'ltc-eligibility',
+        eltcas:     'ltc-care',
+        link:       'ltc-eligibility'
+      };
+      var targetPage = pageMap[key];
+      if (!targetPage) return;
+      var actionArea = overlay.querySelector('.p5-arch-actions') || overlay.querySelector('[style*="display:flex"]');
+      if (!actionArea) return;
+      if (actionArea.querySelector('.p7-ops-btn')) return;
+      var btn = document.createElement('button');
+      btn.className = 'p7-ops-btn';
+      btn.style.cssText = 'background:linear-gradient(135deg,#0891b2,#06b6d4);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;';
+      btn.innerHTML = '<i class="fas fa-external-link-alt" style="margin-right:6px;"></i>Open Operational Panel';
+      btn.addEventListener('click', function () {
+        if (typeof _p5close === 'function') _p5close('ltcArchDetailOvl');
+        navigateTo(targetPage);
+      });
+      actionArea.appendChild(btn);
+    }, 300);
+  };
+
+  // Inject nav items when DOM is ready
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(_p7injectNavItems, 600);
+  } else {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(_p7injectNavItems, 600); });
+  }
+
+  // Also try to inject after navigateTo calls (for SPA nav)
+  var _p7NavObserver = new MutationObserver(function () {
+    _p7injectNavItems();
+  });
+  _p7NavObserver.observe(document.body, { childList: true, subtree: false });
+  setTimeout(function () { _p7NavObserver.disconnect(); }, 10000);
+
+  console.log('LTC Phase 7 loaded — System Architecture → Operational Integration · SMARTS Rules Engine · eLTCAS CQRS/NServiceBus · LINK UW Queue · LTCAS Policy Admin · CellTrak EVV · CONNECT Portal · FMS Financial · RPA Automation · EPS Correspondence · Transport Services · ERM/XRM Analytics · UPD Operations · 8 new operational pages · 3 enhanced existing pages');
+
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 8 — COMPREHENSIVE BUG FIXES + FEATURE ADDITIONS
+   1. Fix _p6btn double-quote injection (action-map pattern)
+   2. Fix Overview tab navigation
+   3. Fix ltcNewClaim wizard (Claimant first → Policy)
+   4. Intelligent Document Processing (IDP) overlay
+   5. SMARTS pre-applied rules panel in Claim Detail
+   6. Edit Rule full overlay (SMARTS rule editor)
+   7. STP Dashboard full overlay
+   8. Engine Health full overlay
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─────────────────────────────────────────────────────────────────────
+     0. ACTION MAP — safe onclick delegation (no HTML injection ever)
+  ───────────────────────────────────────────────────────────────────── */
+  window._p8actions = {};
+  window._p8run = function (key) {
+    var fn = window._p8actions[key];
+    if (typeof fn === 'function') fn();
+  };
+
+  function _p8reg(key, fn) { window._p8actions[key] = fn; return key; }
+
+  /* Safe button builder — stores callback in map, uses data-p8 attribute */
+  function _p8btn(label, icon, color, fn) {
+    var key = '_p8_' + Math.random().toString(36).slice(2);
+    window._p8actions[key] = fn;
+    var isGrad = color.indexOf('gradient') !== -1;
+    var style = (isGrad ? 'background:' + color : 'background:' + color)
+      + ';color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;';
+    return '<button onclick="_p8run(\'' + key + '\')" style="' + style + '">'
+      + '<i class="fas ' + icon + '"></i> ' + label + '</button>';
+  }
+
+  /* Shared overlay helpers (mirrors _p6ov / _p6close / _p6toast) */
+  function _p8ov(id, html) {
+    var old = document.getElementById(id);
+    if (old) old.remove();
+    var wrap = document.createElement('div');
+    wrap.id = id;
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;';
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function(e){ if(e.target===wrap) { wrap.remove(); } });
+  }
+  function _p8close(id) { var el=document.getElementById(id); if(el) el.remove(); }
+  function _p8toast(msg, dur) {
+    var t=document.createElement('div');
+    t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:600px;text-align:center;line-height:1.5;';
+    t.innerHTML=msg; document.body.appendChild(t);
+    setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(function(){t.remove();},400);},dur||3000);
+  }
+
+  function _p8wrap(id, width, content) {
+    return '<div style="background:#fff;border-radius:16px;width:' + width + ';max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">' + content + '</div>';
+  }
+  function _p8hdr(icon, title, sub, color, closeId) {
+    return '<div style="background:' + color + ';padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas ' + icon + '" style="font-size:20px;"></i>'
+      + '<div><div style="font-size:15px;font-weight:800;">' + title + '</div><div style="font-size:11px;opacity:.8;">' + sub + '</div></div>'
+      + '<button onclick="_p8close(\'' + closeId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      + '</div>';
+  }
+  function _p8ai(msg) {
+    return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:16px;">'
+      + '<div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Intelligence</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.65;">' + msg + '</div></div>';
+  }
+  function _p8row(label, value) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;">'
+      + '<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">' + label + '</div>'
+      + '<div style="font-size:12px;font-weight:600;color:#111827;">' + value + '</div></div>';
+  }
+  function _p8kpi(val, label, icon, color, sub) {
+    return '<div style="background:#f8fafc;border-radius:10px;padding:14px;text-align:center;">'
+      + '<i class="fas ' + icon + '" style="color:' + color + ';font-size:20px;margin-bottom:8px;display:block;"></i>'
+      + '<div style="font-size:18px;font-weight:800;color:' + color + ';">' + val + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#374151;margin-top:2px;">' + label + '</div>'
+      + '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">' + sub + '</div></div>';
+  }
+  function _p8tbl(headers, rows) {
+    var th = headers.map(function(h){return '<th style="background:#f1f5f9;padding:8px 12px;font-size:11px;font-weight:700;color:#374151;text-align:left;border-bottom:1px solid #e5e7eb;">' + h + '</th>';}).join('');
+    var tr = rows.map(function(row){
+      return '<tr>' + row.map(function(cell,i){return '<td style="padding:8px 12px;font-size:12px;color:#374151;border-bottom:1px solid #f1f5f9;">' + cell + '</td>';}).join('') + '</tr>';
+    }).join('');
+    return '<div style="overflow-x:auto;margin-bottom:16px;"><table style="width:100%;border-collapse:collapse;"><thead><tr>' + th + '</tr></thead><tbody>' + tr + '</tbody></table></div>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     1. FIXED _p6btn REPLACEMENT — patch all Phase 6 overlays
+        Strategy: Re-implement ltcDetailAction entirely using _p8btn
+        so that ALL buttons are safe from injection.
+  ───────────────────────────────────────────────────────────────────── */
+  var _origLtcDetailAction = window.ltcDetailAction;
+  window.ltcDetailAction = function (action, claimId) {
+
+    /* Overview re-render — fixes 'reload' case from ltcClaimTab idx===0 */
+    if (action === 'reload' || action === 'overview') {
+      var c0 = window._lcdCurrentClaim;
+      if (!c0) return;
+      var body0 = document.getElementById('lcd-body');
+      if (!body0) return;
+      /* Re-render overview using existing Phase 4 helper chain */
+      /* We replicate the overview HTML inline here */
+      function _rL4row(l,v){return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">'+l+'</div><div style="font-size:12px;font-weight:600;color:#111827;">'+v+'</div></div>';}
+      function _rL4ai(m){return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:16px;"><div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Intelligence</div><div style="font-size:12px;color:#374151;line-height:1.65;">'+m+'</div></div>';}
+      var ov0html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
+        + _rL4row('Claimant Age', c0.age)
+        + _rL4row('Daily Benefit', c0.dailyBenefit)
+        + _rL4row('Status', '<span style="background:'+(c0.status==='Active'?'#05996922':c0.status==='Escalated'?'#dc262622':'#d9770622')+';color:'+(c0.status==='Active'?'#059669':c0.status==='Escalated'?'#dc2626':'#d97706')+';border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">'+c0.status+'</span>')
+        + _rL4row('Days Open', c0.daysOpen+' days')
+        + _rL4row('Care Setting', c0.type)
+        + _rL4row('Provider', c0.provider)
+        + _rL4row('ADL Assessment Score', c0.assessScore+'/5 ADLs')
+        + _rL4row('Cognitive Score', c0.cogScore+'/30 (MMSE)')
+        + _rL4row('Next Payment Due', c0.paymentDue)
+        + _rL4row('Claim Manager', 'Assigned RN / MSW')
+        + '</div>'
+        + '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:13px;margin-bottom:14px;">'
+        + '<div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:5px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>Next Required Action</div>'
+        + '<div style="font-size:13px;color:#7f1d1d;font-weight:600;">'+c0.nextAction+'</div></div>'
+        + _rL4ai('Based on '+c0.claimant+'\'s ADL profile ('+c0.assessScore+'/5) and cognitive score ('+c0.cogScore+'/30), the AI projects continued '+c0.type+' care for 6–12 months. Care manager should review benefit period utilization and coordinate with '+c0.provider+' for updated care plan documentation before next payment cycle. No fraud indicators. Payment integrity confirmed.')
+        /* SMARTS pre-applied rules band */
+        + _p8buildSmartsRulesPanel(c0)
+        + '<div style="display:flex;gap:10px;">'
+        + '<button onclick="ltcDetailAction(\'payment\',\''+c0.id+'\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-dollar-sign" style="margin-right:5px;"></i>Process Payment</button>'
+        + '<button onclick="ltcDetailAction(\'assess\',\''+c0.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-user-check" style="margin-right:5px;"></i>Schedule Assessment</button>'
+        + '<button onclick="ltcDetailAction(\'careplan\',\''+c0.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-hands-helping" style="margin-right:5px;"></i>Update Care Plan</button>'
+        + '</div>';
+      body0.innerHTML = ov0html;
+      /* Update tab highlight */
+      for(var ti=0;ti<6;ti++){var tel=document.getElementById('lcd-tab-'+ti);if(tel){tel.style.background=ti===0?'#dc2626':'transparent';tel.style.color=ti===0?'#fff':'#6b7280';}}
+      return;
+    }
+
+    /* All other actions — delegate to our fixed implementations */
+    var ltcData = window.ltcClaimsData || [];
+    var c = ltcData.find(function(x){return x.id===claimId;}) || window._lcdCurrentClaim || {};
+    if (!c.id) c.id = claimId;
+    var name = c.claimant || claimId || 'Claimant';
+
+    /* ── PAYMENT ── (use original — payment buttons were not broken) */
+    if (action === 'payment') {
+      if (_origLtcDetailAction) _origLtcDetailAction('payment', claimId);
+      return;
+    }
+
+    /* ── SCHEDULE ASSESSMENT ── */
+    if (action === 'assess') {
+      var assessId = 'p8-assess-ov';
+      _p8ov(assessId, _p8wrap(assessId, '560px',
+        _p8hdr('fa-user-check', 'Schedule RN Assessment — ' + (c.id||claimId), 'Telephonic · In-Person · Video · HIPAA', '#0891b2', assessId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI recommends a <strong>telephonic RN assessment</strong> for <strong>' + name + '</strong> within 5 business days. ADL score <strong>' + (c.assessScore||'2') + '/5</strong> and MMSE <strong>' + (c.cogScore||'14') + '/30</strong> indicates Nursing Home care remains appropriate. AI-matched RN: <strong>Sarah Johnson</strong> (available Jul 12–15 with 96% continuity score). Reassessment confirms eligibility and catches level-of-care changes early.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        + _p8row('Claimant', name)
+        + _p8row('Current ADL Score', (c.assessScore||'2')+'/5')
+        + _p8row('MMSE Score', (c.cogScore||'14')+'/30')
+        + _p8row('Care Setting', c.type||'Nursing Home')
+        + '</div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assessment Date</label>'
+        + '<input type="text" value="Jul 14, 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assessment Mode</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Telephonic RN Assessment (AI-recommended)</option><option>In-Person QA Visit</option><option>Video Assessment (HIPAA-secure)</option></select></div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assigned RN (AI-matched)</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Sarah Johnson, RN — 96% continuity match (Recommended)</option><option>James Park, RN</option><option>Angela Moore, RN</option><option>Maria Castillo, MSW</option></select></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Confirm & Schedule', 'fa-calendar-check', '#0891b2', function(){
+            _p8close(assessId);
+            _p8toast('<i class="fas fa-calendar-check"></i> RN Assessment scheduled for ' + name + ' · Jul 14, 2026 · Sarah Johnson, RN assigned · SMS + email sent to claimant and provider · EVV tracking activated · Claim updated', 4500);
+          })
+        + _p8btn('AI Auto-Schedule', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+            _p8close(assessId);
+            _p8toast('<i class="fas fa-magic"></i> WealthAI auto-scheduled optimal assessment slot · Sarah Johnson, RN · Jul 12, 10:30 AM · Claimant, provider, and carrier notified automatically', 4500);
+          })
+        + '<button onclick="_p8close(\'' + assessId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── UPDATE CARE PLAN ── */
+    if (action === 'careplan') {
+      var cpId = 'p8-careplan-ov';
+      _p8ov(cpId, _p8wrap(cpId, '600px',
+        _p8hdr('fa-hands-helping', 'Update Care Plan — ' + (c.id||claimId), 'Auto-populated · Physician countersignature · Carrier sync', '#7c3aed', cpId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI has auto-populated this care plan from the most recent visit notes at <strong>' + (c.provider||'Sunrise Manor SNF') + '</strong>. ADL score ' + (c.assessScore||'2') + '/5 — recommend reassessing care setting if score reaches 4+/5. Next benefit period milestone in <strong>30 days</strong>. AI benchmarked against 63,000+ similar claimant outcomes — current plan is clinically optimal. Physician countersignature via secure portal takes avg 18 hours.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        + _p8row('Care Setting', c.type||'Nursing Home')
+        + _p8row('Provider', c.provider||'Sunrise Manor SNF')
+        + _p8row('Daily Benefit', c.dailyBenefit||'$180/day')
+        + _p8row('Next Review', 'Aug 14, 2026')
+        + '</div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Care Setting</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Nursing Home (SNF)</option><option>Assisted Living (ALF)</option><option>Memory Care</option><option>Home Health</option></select></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Visit Frequency</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Bi-weekly</option><option>Weekly</option><option>Monthly</option><option>Daily (Acute)</option></select></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">ADL Goals (AI-optimized)</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:68px;resize:none;">Maintain current functional level · Monitor mobility and fall risk · Medication compliance review at each visit · Goal: prevent SNF transfer 6+ months · Cognitive engagement program 3x/week.</textarea></div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Physician / Care Manager Notes</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:60px;resize:none;">Updated by WealthAI — pending physician countersignature. Dr. Thompson review requested by Jul 16.</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Save & Notify Carrier', 'fa-save', '#7c3aed', function(){
+            _p8close(cpId);
+            _p8toast('<i class="fas fa-save"></i> Care Plan saved for ' + name + ' · Carrier ' + (c.carrier||'Prudential') + ' notified · Physician countersignature requested · Next review: Aug 14, 2026', 5000);
+          })
+        + _p8btn('AI Optimize Plan', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+            _p8toast('<i class="fas fa-magic"></i> WealthAI benchmarking care plan against 63,000+ outcomes · Optimization complete · No changes recommended — plan is clinically optimal', 3500);
+          })
+        + '<button onclick="_p8close(\'' + cpId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── UPLOAD DOCUMENT ── */
+    if (action === 'upload') {
+      var upId = 'p8-upload-ov';
+      _p8ov(upId, _p8wrap(upId, '540px',
+        _p8hdr('fa-upload', 'Upload Document — ' + (c.id||claimId), 'HIPAA-encrypted · AES-256 · Auto-classified by AI', '#d97706', upId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI will auto-classify uploaded documents using ICD-10 extraction and OCR. All files are AES-256 encrypted at rest and in transit. Missing: <strong>Updated Care Plan</strong> from ' + (c.provider||'provider') + ' — upload or request electronically. HIPAA chain-of-custody maintained. Audit trail auto-created.')
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Document Type</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Care Plan (Current)</option><option>Attending Physician Statement (APS)</option><option>ADL Assessment Report</option><option>Provider License</option><option>HIPAA Authorization</option><option>Lab / Clinical Results</option><option>Other</option></select></div>'
+        + '<div style="border:2px dashed #d97706;border-radius:10px;padding:28px;text-align:center;background:#fffbeb;margin-bottom:14px;cursor:pointer;">'
+        + '<i class="fas fa-cloud-upload-alt" style="font-size:32px;color:#d97706;margin-bottom:8px;display:block;"></i>'
+        + '<div style="font-size:13px;font-weight:700;color:#374151;">Drop files here or click to browse</div>'
+        + '<div style="font-size:11px;color:#9ca3af;margin-top:4px;">PDF, DOCX, JPG, PNG · Max 25MB · AES-256 encrypted</div></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Upload & AI Classify', 'fa-robot', '#d97706', function(){
+            _p8close(upId);
+            _p8toast('<i class="fas fa-check-circle"></i> Document uploaded · AI classification complete · Care Plan identified · Cross-referenced with claim · Carrier notified · HIPAA audit trail created', 5000);
+          })
+        + '<button onclick="_p8close(\'' + upId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── REQUEST MISSING DOCS ── */
+    if (action === 'request') {
+      var reqId = 'p8-request-ov';
+      _p8ov(reqId, _p8wrap(reqId, '540px',
+        _p8hdr('fa-envelope', 'Request Missing Documents — ' + (c.id||claimId), 'Secure portal · Provider email · Automated follow-up', '#6b7280', reqId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI has identified <strong>1 missing document</strong>: Updated Care Plan from <strong>' + (c.provider||'Sunrise Manor SNF') + '</strong> (overdue 8 days). Provider will receive a secure portal notification with one-click upload. Automated reminder sent if not received within 48 hours. SLA impact: care plan overdue status pauses adjudication clock.')
+        + '<div style="background:#fef3c7;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:#92400e;">'
+        + '<i class="fas fa-exclamation-triangle" style="margin-right:6px;color:#d97706;"></i>'
+        + '<strong>Missing:</strong> Updated Care Plan from ' + (c.provider||'provider') + ' · Overdue 8 days · Required for payment continuation</div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Request Message (AI-drafted)</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:80px;resize:none;">Please submit the updated care plan for ' + name + ' (Claim ' + (c.id||claimId) + ') via the Provider Portal or reply to this message. Required to maintain benefit payments. Deadline: ' + new Date(Date.now()+2*86400000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '.</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Send Request', 'fa-paper-plane', '#6b7280', function(){
+            _p8close(reqId);
+            _p8toast('<i class="fas fa-paper-plane"></i> Document request sent to ' + (c.provider||'provider') + ' · Secure portal link included · Auto-reminder set for 48 hours · SLA hold noted on claim', 5000);
+          })
+        + _p8btn('Send Urgent Escalation', 'fa-exclamation-triangle', '#dc2626', function(){
+            _p8close(reqId);
+            _p8toast('<i class="fas fa-exclamation-triangle"></i> Urgent request escalated to ' + (c.provider||'provider') + ' administrator · CC: Supervisor + Carrier · 24-hour deadline set', 4500);
+          })
+        + '<button onclick="_p8close(\'' + reqId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── VIEW DOCUMENT (IDP integrated) ── */
+    if (action === 'view-doc') {
+      var docName = claimId; /* repurposed param carries docName */
+      var c2 = window._lcdCurrentClaim || {};
+      _p8openIDP(docName, c2);
+      return;
+    }
+
+    /* ── CONTACT PROVIDER ── */
+    if (action === 'contact-provider') {
+      var cprovId = 'p8-cprov-ov';
+      _p8ov(cprovId, _p8wrap(cprovId, '540px',
+        _p8hdr('fa-phone', 'Contact Provider — ' + (c.provider||'Provider'), 'HIPAA-compliant · Auto-logged · Call summary to claim', '#0891b2', cprovId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI recommends discussing the outstanding <strong>Care Plan update</strong> and EVV gap (Jul 28 visit) with <strong>' + (c.provider||'the provider') + '</strong>. Confirm next payment cycle Jul 15 and planned assessment date. Provider last contacted Jul 3 — care plan was discussed but not yet submitted. Suggested call duration: 12 minutes.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        + _p8row('Provider', c.provider||'Sunrise Manor SNF')
+        + _p8row('Contact Person', 'Patricia Wells, Administrator')
+        + _p8row('Direct Phone', '(214) 555-0198')
+        + _p8row('Secure Message', 'Provider Portal — Online')
+        + _p8row('Last Contact', 'Jul 3, 2026 — Care plan discussed')
+        + _p8row('Open Items', 'Care plan update · EVV gap Jul 28')
+        + '</div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">WealthAI Call Agenda (auto-generated)</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:80px;resize:none;">1. Care plan update — deadline Jul 16 (CRITICAL)\n2. EVV gap on Jul 28 visit — manual log required\n3. Next payment cycle: Jul 15 — confirm readiness\n4. Resident condition check — any ADL changes?</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Initiate Phone Call', 'fa-phone', '#0891b2', function(){
+            _p8close(cprovId);
+            _p8toast('<i class="fas fa-phone"></i> Call to ' + (c.provider||'Provider') + ' initiated · HIPAA recording active · Agenda shared · Notes auto-attach to claim ' + (c.id||'') + ' · Ref: CALL-' + Date.now().toString().slice(-6), 5000);
+          })
+        + _p8btn('Send Secure Message', 'fa-envelope', '#7c3aed', function(){
+            _p8close(cprovId);
+            _p8toast('<i class="fas fa-envelope"></i> Secure message sent to ' + (c.provider||'provider') + ' via Provider Portal · WealthAI agenda attached · Reply expected within 4 business hours', 4000);
+          })
+        + _p8btn('Schedule Conference', 'fa-video', '#059669', function(){
+            _p8close(cprovId);
+            _p8toast('<i class="fas fa-video"></i> Video conference scheduled · HIPAA-compliant Zoom link sent to ' + (c.provider||'provider') + ' · Jul 11, 2:00 PM CT', 3500);
+          })
+        + '<button onclick="_p8close(\'' + cprovId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── SCHEDULE SITE VISIT ── */
+    if (action === 'visit') {
+      var svId = 'p8-sitevisit-ov';
+      _p8ov(svId, _p8wrap(svId, '560px',
+        _p8hdr('fa-map-marker-alt', 'Schedule Site Visit — ' + (c.provider||'Provider'), 'QA RN · CareExchange EVV · Unannounced or Routine', '#7c3aed', svId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI recommends an <strong>unannounced site visit</strong> to <strong>' + (c.provider||'the provider') + '</strong> within 14 days. Outstanding Care Plan update and EVV data gap (Jul 28) raise a moderate quality concern. Unannounced visits reduce overbilling risk by 34% on average. Last visit was ' + (c.daysOpen||14) + ' days ago. Assigned QA RN: <strong>James Park</strong> — licensed in Texas, available Jul 15–18.')
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Visit Type</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Unannounced QA Visit (AI-recommended)</option><option>Routine Scheduled Visit</option><option>Comprehensive Annual Audit Visit</option><option>Emergency Compliance Inspection</option></select></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Target Date</label>'
+        + '<input type="text" value="Jul 18, 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">AI-Generated Visit Checklist</label>'
+        + '<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px;color:#374151;line-height:2.2;">'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Verify resident care plan adherence with staff</div>'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Validate EVV GPS logs vs. manual records (Jul 28 gap)</div>'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Conduct resident interview (ADL re-assessment)</div>'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Review billing documentation on-site</div>'
+        + '<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Inspect facility safety conditions (AI photo analysis)</div>'
+        + '<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Collect updated care plan signature</div>'
+        + '</div></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Schedule Visit', 'fa-calendar-check', '#7c3aed', function(){
+            _p8close(svId);
+            _p8toast('<i class="fas fa-map-marker-alt"></i> Site visit scheduled Jul 18 at ' + (c.provider||'provider') + ' · James Park, RN assigned · EVV tracking active · Claim ' + (c.id||'') + ' updated · Provider NOT notified — unannounced', 5500);
+          })
+        + _p8btn('AI Auto-Assign Visit', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+            _p8close(svId);
+            _p8toast('<i class="fas fa-magic"></i> WealthAI optimized visit slot · James Park, RN · Jul 15, 9:00 AM · Closest available date · GPS route pre-calculated · Checklist sent to RN', 5000);
+          })
+        + '<button onclick="_p8close(\'' + svId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* All other actions — pass through to original */
+    if (_origLtcDetailAction) _origLtcDetailAction(action, claimId);
+  };
+
+  /* Patch ltcClaimTab idx===0 to use our fixed overview render */
+  var _origLtcClaimTab = window.ltcClaimTab;
+  window.ltcClaimTab = function(idx, claimId) {
+    if (idx === 0) {
+      /* Fix tab buttons first */
+      for (var i=0;i<6;i++){var el=document.getElementById('lcd-tab-'+i);if(el){el.style.background=i===0?'#dc2626':'transparent';el.style.color=i===0?'#fff':'#6b7280';}}
+      window.ltcDetailAction('overview', claimId || (window._lcdCurrentClaim && window._lcdCurrentClaim.id));
+      return;
+    }
+    if (_origLtcClaimTab) _origLtcClaimTab(idx, claimId);
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     2. SMARTS PRE-APPLIED RULES PANEL (shown in Overview tab)
+  ───────────────────────────────────────────────────────────────────── */
+  function _p8buildSmartsRulesPanel(c) {
+    var priority = c.priority || 'medium';
+    var rules = [
+      { id:'SR-001', name:'ADL Trigger Verification', status:'FIRED', result:'Eligible', icon:'fa-check-circle', color:'#059669', detail:'ADL '+(c.assessScore||'2')+'/5 ≥ 2 · Threshold met · Claim eligible' },
+      { id:'SR-002', name:'Cognitive Impairment Route', status:'FIRED', result:'Nursing Home Path', icon:'fa-check-circle', color:'#059669', detail:'MMSE '+(c.cogScore||'14')+'/30 < 20 · Memory Care / SNF routing applied' },
+      { id:'SR-003', name:'Elimination Period Check', status:'FIRED', result:'Satisfied', icon:'fa-check-circle', color:'#059669', detail:'90-day elimination period met · Payments authorized' },
+      { id:'SR-004', name:'Fraud Pre-Screen', status:'FIRED', result:'Clear (Score: 12/100)', icon:'fa-shield-alt', color:'#0891b2', detail:'No anomalies · EVV GPS-backed · Billing patterns normal' },
+      { id:'SR-005', name:'STP Adjudication', status: priority==='urgent'?'BYPASSED':'FIRED', result:priority==='urgent'?'Manual Review Required':'Auto-Approved STP', icon:priority==='urgent'?'fa-exclamation-circle':'fa-bolt', color:priority==='urgent'?'#d97706':'#059669', detail:priority==='urgent'?'Urgency flag triggered manual review queue':'All SR-001–004 passed · Straight-through processing applied' },
+      { id:'SR-008', name:'Provider Network Validation', status:'FIRED', result:'In-Network', icon:'fa-check-circle', color:'#059669', detail:(c.provider||'Provider')+' verified in-network · License current · W-9 on file' },
+      { id:'SR-012', name:'Benefit Period Monitor', status:'MONITORING', result:'Active — Day '+(c.daysOpen||14)+' of unlimited', icon:'fa-clock', color:'#0891b2', detail:'Lifetime benefit policy · No cap approaching · Inflation rider active (3% compound)' }
+    ];
+
+    var rows = rules.map(function(r){
+      return '<tr>'
+        + '<td style="padding:7px 10px;font-size:11px;font-weight:700;color:#6b7280;">' + r.id + '</td>'
+        + '<td style="padding:7px 10px;font-size:11px;color:#374151;font-weight:600;">' + r.name + '</td>'
+        + '<td style="padding:7px 10px;"><span style="background:' + (r.status==='FIRED'?'#f0fdf4':r.status==='MONITORING'?'#eff6ff':'#fffbeb') + ';color:' + (r.status==='FIRED'?'#059669':r.status==='MONITORING'?'#0891b2':'#d97706') + ';border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">' + r.status + '</span></td>'
+        + '<td style="padding:7px 10px;font-size:11px;font-weight:700;color:' + r.color + ';"><i class="fas ' + r.icon + '" style="margin-right:4px;"></i>' + r.result + '</td>'
+        + '<td style="padding:7px 10px;font-size:10px;color:#6b7280;">' + r.detail + '</td>'
+        + '</tr>';
+    }).join('');
+
+    return '<div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:14px;margin-bottom:16px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+      + '<div style="font-size:12px;font-weight:800;color:#7c3aed;"><i class="fas fa-cogs" style="margin-right:6px;"></i>SMARTS Business Rules Engine — Pre-Applied Rules</div>'
+      + '<span style="background:#7c3aed;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;">' + rules.filter(function(r){return r.status==='FIRED';}).length + ' Rules Fired</span>'
+      + '</div>'
+      + '<div style="overflow-x:auto;">'
+      + '<table style="width:100%;border-collapse:collapse;">'
+      + '<thead><tr>'
+      + ['Rule ID','Rule Name','Status','Result','Detail'].map(function(h){return '<th style="padding:6px 10px;font-size:10px;font-weight:700;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb;text-transform:uppercase;">'+h+'</th>';}).join('')
+      + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+      + '<div style="margin-top:10px;font-size:10px;color:#7c3aed;font-style:italic;">Powered by Sparkling Logic SMARTS · Rules evaluated at intake · 7 rules applied · 0 exceptions · Audit trail logged</div>'
+      + '</div>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     3. INTELLIGENT DOCUMENT PROCESSING (IDP) OVERLAY
+        Accessible via "View" button in Documents tab → _p8openIDP()
+        Also patched into view-doc action above
+  ───────────────────────────────────────────────────────────────────── */
+  window._p8openIDP = function(docName, claimData) {
+    var c = claimData || window._lcdCurrentClaim || {};
+    var doc = docName || 'Document';
+    var idpId = 'p8-idp-ov';
+
+    /* Confidence and anomaly vary by doc type */
+    var isCarePlan = doc.indexOf('Care Plan') !== -1;
+    var conf = isCarePlan ? 96 : 97;
+    var anomaly = isCarePlan ? '<span style="color:#d97706;font-weight:700;">⚠️ Care Plan flagged for review — update required from provider</span>' : 'None detected';
+    var sigStatus = isCarePlan ? '<span style="color:#d97706;font-weight:700;">⚠️ Pending countersignature</span>' : '<span style="color:#059669;font-weight:700;">✅ Verified — ' + new Date(Date.now()-7*86400000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</span>';
+
+    var extractedFields = [
+      { field: 'Document', value: doc + ' · Claim ' + (c.id||'LTC-2026-0101') },
+      { field: 'Provider', value: c.provider||'Sunrise Manor SNF' },
+      { field: 'Carrier', value: c.carrier||'Prudential' },
+      { field: 'Date (AI extracted)', value: 'Jul 1–8, 2026 · AI Confidence: ' + conf + '%' },
+      { field: 'ADL Score extracted', value: (c.assessScore||'2') + '/5 · Cognitive: ' + (c.cogScore||'14') + '/30' },
+      { field: 'Physician Signature', value: sigStatus },
+      { field: 'Fraud Indicators', value: '<span style="color:#059669;">None detected · Clean</span>' }
+    ];
+
+    var icd10 = isCarePlan
+      ? ['F01.51 — Vascular dementia, severe', 'W19.XXXA — Fall, initial encounter', 'Z74.01 — Bed confinement status']
+      : ['F01.50 — Vascular dementia, unspecified', 'Z74.09 — Other reduced mobility'];
+
+    var icdRows = icd10.map(function(code){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;color:#374151;border-bottom:1px solid #f1f5f9;">'
+        + '<span style="background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:2px 6px;font-weight:700;font-size:10px;">' + code.split('—')[0].trim() + '</span>'
+        + '<span>' + code.split('—')[1] + '</span></div>';
+    }).join('');
+
+    _p8ov(idpId, _p8wrap(idpId, '680px',
+      _p8hdr('fa-brain', 'Intelligent Document Processing — ' + doc, 'HIPAA-secure · WealthAI field extraction · Audit-logged', '#d97706', idpId)
+      + '<div style="padding:22px;">'
+      + _p8ai('WealthAI has parsed <strong>' + doc + '</strong> and extracted structured fields with <strong>' + conf + '% confidence</strong>. All fields cross-referenced against claim record. ' + (anomaly === 'None detected' ? 'No anomalies detected.' : anomaly) + ' Physician signature verified. Dates match care period. Document access audit-logged per HIPAA §164.312.')
+      /* Document preview card */
+      + '<div style="background:#1f2937;border-radius:12px;padding:16px;margin-bottom:16px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+      + '<div style="background:#dc2626;border-radius:8px;padding:10px;"><i class="fas fa-file-pdf" style="font-size:20px;color:#fff;"></i></div>'
+      + '<div><div style="font-size:13px;font-weight:700;color:#fff;">' + doc + '</div>'
+      + '<div style="font-size:11px;color:#9ca3af;">4 pages · PDF · AES-256 encrypted</div>'
+      + '<span style="background:#059669;color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">✅ Received</span></div></div>'
+      /* Extracted fields */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
+      + extractedFields.map(function(f){
+          return '<div style="background:#374151;border-radius:6px;padding:8px 10px;">'
+            + '<div style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">' + f.field + '</div>'
+            + '<div style="font-size:11px;font-weight:600;color:#f9fafb;">' + f.value + '</div></div>';
+        }).join('')
+      + '</div></div>'
+      /* ICD-10 codes extracted */
+      + '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      + '<div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:8px;"><i class="fas fa-code" style="margin-right:5px;"></i>ICD-10 Codes Extracted (AI)</div>'
+      + icdRows + '</div>'
+      /* Cross-reference panel */
+      + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      + '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:8px;"><i class="fas fa-link" style="margin-right:5px;"></i>Multi-Document Cross-Reference</div>'
+      + '<div style="font-size:11px;color:#374151;line-height:1.8;">'
+      + '✅ Dates consistent with APS (Jun 28, 2026)<br>'
+      + '✅ ADL scores match RN Assessment Report (Jul 3, 2026)<br>'
+      + '✅ Provider matches billing records<br>'
+      + (isCarePlan ? '⚠️ Care plan signature date does not match submission — follow up with Dr. Thompson' : '✅ Policy coverage dates align · No gaps detected')
+      + '</div></div>'
+      /* Action buttons */
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p8btn('Download PDF', 'fa-file-download', '#d97706', function(){
+          _p8toast('<i class="fas fa-file-pdf"></i> ' + doc + ' downloading · HIPAA-encrypted export · Access audit-logged · Ref: DOC-' + doc.replace(/\s+/g,'-').substring(0,20) + '-JUL26', 3500);
+        })
+      + _p8btn('Send to Carrier', 'fa-paper-plane', '#003087', function(){
+          _p8close(idpId);
+          _p8toast('<i class="fas fa-paper-plane"></i> ' + doc + ' transmitted to carrier via EDI 837 · Acknowledgment expected in 2 hours · Claim ' + (c.id||'') + ' updated', 4500);
+        })
+      + _p8btn('AI Extract & Validate', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+          _p8toast('<i class="fas fa-magic"></i> WealthAI re-extracting fields from ' + doc + ' · Deep parse: ICD-10 codes · ADL scores · Physician data · Results in 20 seconds', 4000);
+        })
+      + (isCarePlan ? _p8btn('Request Updated Version', 'fa-sync', '#dc2626', function(){
+            _p8close(idpId);
+            _p8toast('<i class="fas fa-sync"></i> Updated care plan requested from ' + (c.provider||'provider') + ' · Portal notification sent · 48-hour deadline set', 4000);
+          }) : '')
+      + '<button onclick="_p8close(\'' + idpId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div></div>'
+    ));
+  };
+
+  /* Patch the Documents tab to use IDP instead of broken view-doc */
+  var _origLtcClaimTab2 = window.ltcClaimTab;
+  window.ltcClaimTab = function(idx, claimId) {
+    if (idx === 2) {
+      /* Re-render Documents tab with IDP-enabled View buttons */
+      var c = window._lcdCurrentClaim;
+      if (!c) { if (_origLtcClaimTab2) _origLtcClaimTab2(idx, claimId); return; }
+      for (var ti=0;ti<6;ti++){var tel=document.getElementById('lcd-tab-'+ti);if(tel){tel.style.background=ti===2?'#dc2626':'transparent';tel.style.color=ti===2?'#fff':'#6b7280';}}
+      var body = document.getElementById('lcd-body');
+      if (!body) { if (_origLtcClaimTab2) _origLtcClaimTab2(idx, claimId); return; }
+
+      function _docRow(docName, source, date, status, type) {
+        var statusColor = status.indexOf('⚠️')!==-1 ? '#d97706' : '#059669';
+        var viewKey = '_p8vd_' + Math.random().toString(36).slice(2);
+        window._p8actions[viewKey] = (function(dn,cd){ return function(){ _p8openIDP(dn, cd); }; })(docName, c);
+        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f8fafc;border-radius:10px;margin-bottom:8px;">'
+          + '<div style="background:#dc2626;border-radius:6px;padding:7px;"><i class="fas fa-file-pdf" style="color:#fff;font-size:14px;"></i></div>'
+          + '<div style="flex:1;">'
+          + '<div style="font-size:12px;font-weight:700;color:#111827;">' + docName + '</div>'
+          + '<div style="font-size:11px;color:#6b7280;">' + source + ' · ' + date + '</div></div>'
+          + '<span style="font-size:11px;font-weight:700;color:' + statusColor + ';">' + status + '</span>'
+          + '<button onclick="_p8run(\'' + viewKey + '\')" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-eye" style="margin-right:4px;"></i>View</button>'
+          + '</div>';
+      }
+
+      body.innerHTML = '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:14px;"><i class="fas fa-folder-open" style="color:#d97706;margin-right:6px;"></i>Claim Documents'
+        + ' <span style="background:#7c3aed;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;margin-left:8px;"><i class="fas fa-brain" style="margin-right:4px;"></i>IDP Active</span></div>'
+        + _docRow('Attending Physician Statement (APS)', 'Dr. Sarah Thompson, MD', 'Jun 28, 2026', '✅ Received', 'PDF')
+        + _docRow('ADL Assessment Report', 'RN Sarah Johnson', 'Jul 3, 2026', '✅ Received', 'PDF')
+        + _docRow('Insurance Policy Copy', c.carrier, 'Jan 14, 2024', '✅ On File', 'PDF')
+        + _docRow('Care Plan (Current)', c.provider, 'Jul 1, 2026', '⚠️ Review Required', 'PDF')
+        + _docRow('Provider License & W-9', c.provider, 'Mar 2026', '✅ Verified', 'PDF')
+        + _docRow('HIPAA Authorization Form', 'Eleanor — Claimant', 'Jun 25, 2026', '✅ Received', 'PDF')
+        + '<div style="margin-top:14px;display:flex;gap:8px;">'
+        + '<button onclick="ltcDetailAction(\'upload\',\'' + c.id + '\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-upload" style="margin-right:5px;"></i>Upload Document</button>'
+        + '<button onclick="ltcDetailAction(\'request\',\'' + c.id + '\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-envelope" style="margin-right:5px;"></i>Request Missing Docs</button>'
+        + '<button onclick="_p8openIDP(\'Full IDP Report\',window._lcdCurrentClaim)" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-brain" style="margin-right:5px;"></i>IDP Analysis</button>'
+        + '</div>';
+      return;
+    }
+    _origLtcClaimTab2(idx, claimId);
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     4. FIXED NEW CLAIM WIZARD — Claimant Info FIRST, then Policy Info
+  ───────────────────────────────────────────────────────────────────── */
+  var _p8ncStep = 1;
+
+  function _p8ncBuild(step) {
+    /* Steps: 1=Claimant Info, 2=Policy Info, 3=Clinical Assessment, 4=Care Setting, 5=Review & Submit */
+    var steps = ['Claimant Info','Policy Info','Clinical Assessment','Care Setting','Review & Submit'];
+    var stepsHtml = steps.map(function(s,i){
+      var active=(i+1)===step, done=(i+1)<step;
+      var col=done?'#059669':active?'#dc2626':'#d1d5db';
+      return '<div style="display:flex;align-items:center;gap:5px;">'
+        +'<div style="width:24px;height:24px;border-radius:50%;background:'+col+';color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(done?'✓':(i+1))+'</div>'
+        +'<span style="font-size:10px;font-weight:'+(active?'700':'500')+';color:'+(active?'#111827':'#9ca3af');white-space:nowrap;">'+s+'</span>'
+        +(i<steps.length-1?'<div style="width:20px;height:1px;background:#e5e7eb;"></div>':'')
+      +'</div>';
+    }).join('');
+
+    var body='';
+    if (step===1) body=''
+      +'<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:4px;"><i class="fas fa-user" style="margin-right:5px;"></i>Step 1: Claimant Information</div>'
+      +'<div style="font-size:11px;color:#7f1d1d;">Enter the claimant\'s personal and contact information first. Policy will be looked up in Step 2.</div></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Full Legal Name *</label><input type="text" placeholder="e.g. Eleanor Vasquez" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="Eleanor Vasquez"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Date of Birth *</label><input type="text" placeholder="MM/DD/YYYY" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="03/12/1947"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">SSN (last 4)</label><input type="text" placeholder="XXXX" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="4401"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Phone Number</label><input type="text" placeholder="(555) 000-0000" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="(555) 729-4401"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Email Address</label><input type="text" placeholder="claimant@email.com" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="e.vasquez@email.com"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">State of Residence</label><select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Texas (TX)</option><option>Florida (FL)</option><option>California (CA)</option><option>New York (NY)</option><option>Other</option></select></div>'
+      +'</div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Primary Diagnosis / Condition</label>'
+      +'<input type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="Vascular dementia · Hip fracture recovery"></div>';
+
+    else if (step===2) body=''
+      +'<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:4px;"><i class="fas fa-file-contract" style="margin-right:5px;"></i>Step 2: Policy Information</div>'
+      +'<div style="font-size:11px;color:#1e40af;">Enter the policy number to auto-lookup coverage details. Claimant: <strong>Eleanor Vasquez</strong> (from Step 1).</div></div>'
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Policy Number *</label>'
+      +'<input type="text" placeholder="e.g. PRU-LTC-2024-88192" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="PRU-LTC-2024-88192"></div>'
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Carrier</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Prudential</option><option>MassMutual</option><option>NY Life</option><option>Genworth</option><option>Transamerica</option><option>Lincoln Natl</option><option>TIAA</option><option>Pacific Life</option></select></div>'
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Policy Lookup</div>'
+      +'<div style="font-size:12px;color:#166534;">Policy PRU-LTC-2024-88192 matched: <strong>Eleanor Vasquez</strong> · Age 79 · Daily benefit $195/day · 90-day elimination period <strong>satisfied</strong> · Policy in force · No prior claims · Coverage start: Jan 14, 2024</div></div>';
+
+    else if (step===3) body=''
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">ADL Impairments (1-5)</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      +'<option>2/5 (Bathing, Dressing)</option><option>3/5</option><option>4/5</option><option>5/5 (All ADLs)</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">MMSE / Cognitive Score</label>'
+      +'<input type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="16/30"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Fall History</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      +'<option>Yes — 2 falls past 6 months</option><option>No falls</option><option>1 fall</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Attending Physician</label>'
+      +'<input type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="Dr. Anna Kessler, MD — Geriatrics"></div>'
+      +'</div>'
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>SMARTS Eligibility Pre-Screen</div>'
+      +'<div style="font-size:12px;color:#166534;">SR-001 (ADL Trigger): <strong>✅ ELIGIBLE</strong> — 2/5 ADLs meet threshold · SR-002 (Cognitive Route): <strong>✅ SNF/Memory Care path</strong> · SR-005 (STP): <strong>✅ On track for auto-approval</strong></div></div>';
+
+    else if (step===4) body=''
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Recommended Care Setting</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      +'<option>Nursing Home (SNF)</option><option>Memory Care Facility</option><option>Assisted Living (ALF)</option><option>Home Health Care</option><option>Adult Day Care</option>'
+      +'</select></div>'
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Facility / Provider</label>'
+      +'<input type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="Sunrise Manor SNF — 220 Oak Lane, Dallas TX"></div>'
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Care Manager Assignment</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      +'<option>Auto-assign (AI recommended)</option><option>Sarah Johnson, RN</option><option>Maria Castillo, MSW</option><option>James Park, RN</option><option>Angela Moore, RN</option>'
+      +'</select></div>'
+      +'<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:5px;"><i class="fas fa-map-marker-alt" style="margin-right:5px;"></i>Provider Network Check</div>'
+      +'<div style="font-size:12px;color:#1e40af;">Sunrise Manor SNF is <strong>in-network</strong> · Licensed by TX DADS · CMS 4.5-star · EVV-compliant · W-9 on file · Rate $218/day (benefit $195/day, gap: $23/day) · Provider accepted.</div></div>';
+
+    else if (step===5) body=''
+      +'<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:16px;">'
+      +'<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-clipboard-check" style="color:#059669;margin-right:6px;"></i>Claim Summary — Ready to Submit</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Claimant</div><div style="font-size:12px;font-weight:600;color:#111827;">Eleanor Vasquez · Age 79</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Policy</div><div style="font-size:12px;font-weight:600;color:#111827;">PRU-LTC-2024-88192 · Prudential</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Daily Benefit</div><div style="font-size:12px;font-weight:600;color:#111827;">$195/day</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Care Setting</div><div style="font-size:12px;font-weight:600;color:#111827;">Nursing Home (SNF)</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Provider</div><div style="font-size:12px;font-weight:600;color:#111827;">Sunrise Manor SNF</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Eligibility</div><div style="font-size:12px;font-weight:600;color:#059669;">✅ Qualified — ADL 2/5 + Cognitive</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">SMARTS Rules</div><div style="font-size:12px;font-weight:600;color:#059669;">SR-001, SR-002, SR-003, SR-004, SR-005 — All Passed</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">First Payment Est.</div><div style="font-size:12px;font-weight:600;color:#111827;">Aug 1, 2026</div></div>'
+      +'</div></div>'
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Submission Review</div>'
+      +'<div style="font-size:12px;color:#166534;">All required fields complete. Policy in force. Eligibility confirmed. No fraud flags. SMARTS rules SR-001–005 passed. Carrier (Prudential) will be notified electronically. Approval expected within 3-5 business days. AI projects 8-month claim duration at current care level.</div></div>';
+
+    return '<div style="background:#fff;border-radius:16px;width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">'
+      +'<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;z-index:1;">'
+      +'<div style="display:flex;align-items:center;gap:12px;">'
+      +'<i class="fas fa-file-medical-alt" style="font-size:20px;"></i>'
+      +'<div><div style="font-size:16px;font-weight:800;">New LTC Claim — Step '+step+' of 5</div>'
+      +'<div style="font-size:11px;opacity:.85;">HIPAA-compliant intake · AI-assisted eligibility · SMARTS fraud pre-screen</div></div>'
+      +'<button onclick="document.getElementById(\'ltc-newclaim-overlay\')&&document.getElementById(\'ltc-newclaim-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;margin-top:14px;flex-wrap:wrap;">'+stepsHtml+'</div>'
+      +'</div>'
+      +'<div style="padding:22px;">'+body
+      +'<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid #f3f4f6;">'
+      +(step>1?'<button onclick="window._p8ncBack()" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>Back</button>':'')
+      +(step<5?'<button onclick="window._p8ncNext()" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;">Next Step <i class="fas fa-arrow-right" style="margin-left:6px;"></i></button>':'')
+      +(step===5?'<button onclick="window._p8ncSubmit()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:800;cursor:pointer;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Submit Claim</button>':'')
+      +'</div></div></div>';
+  }
+
+  window.ltcNewClaim = function() {
+    _p8ncStep = 1;
+    /* Use existing overlay mechanism — find _L4overlay or create our own */
+    var ovFn = window._L4overlay || function(id, html){
+      var old=document.getElementById(id); if(old)old.remove();
+      var d=document.createElement('div');
+      d.id=id;d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;';
+      d.innerHTML=html;document.body.appendChild(d);
+      d.addEventListener('click',function(e){if(e.target===d)d.remove();});
+    };
+    ovFn('ltc-newclaim-overlay', _p8ncBuild(1));
+  };
+
+  window._p8ncNext = function() {
+    _p8ncStep = Math.min(5, _p8ncStep+1);
+    var ov = document.getElementById('ltc-newclaim-overlay');
+    if (ov) ov.innerHTML = _p8ncBuild(_p8ncStep);
+  };
+  window._p8ncBack = function() {
+    _p8ncStep = Math.max(1, _p8ncStep-1);
+    var ov = document.getElementById('ltc-newclaim-overlay');
+    if (ov) ov.innerHTML = _p8ncBuild(_p8ncStep);
+  };
+  window._p8ncSubmit = function() {
+    var ov = document.getElementById('ltc-newclaim-overlay'); if(ov)ov.remove();
+    _p8toast('<i class="fas fa-check-circle"></i> New LTC Claim LTC-2026-0109 submitted · Eleanor Vasquez · Prudential · $195/day · AI-approved · SMARTS SR-001–005 passed · Carrier notified electronically · Care manager Sarah Johnson, RN assigned', 6000);
+  };
+  /* Also export the nav functions under ltcNcNext/Back for compatibility */
+  window.ltcNcNext = window._p8ncNext;
+  window.ltcNcBack = window._p8ncBack;
+  window.ltcNcSubmit = window._p8ncSubmit;
+
+  /* ─────────────────────────────────────────────────────────────────────
+     5. SMARTS RULE EDITOR — full overlay (replaces _p7editRule toast)
+  ───────────────────────────────────────────────────────────────────── */
+  window._p7editRule = function(ruleId) {
+    var ruleData = {
+      'SR-001': { name:'ADL Trigger Verification', category:'Eligibility', threshold:'≥ 2 ADL impairments', action:'Route to benefit evaluation', logic:'IF (adl_count >= 2) THEN eligible = true; route_to = "benefit_eval"', risk:'Low', status:'Active', lastEdit:'Jun 15, 2026', editedBy:'SMARTS Admin' },
+      'SR-002': { name:'Cognitive Impairment Route', category:'Care Setting', threshold:'MMSE < 20', action:'Route to SNF / Memory Care path', logic:'IF (mmse_score < 20) THEN care_path = "SNF_MEMORY"; benefit_multiplier = 1.0', risk:'Low', status:'Active', lastEdit:'May 28, 2026', editedBy:'Clinical Ops' },
+      'SR-003': { name:'Elimination Period Check', category:'Financial', threshold:'90 days elapsed', action:'Authorize benefit payments', logic:'IF (days_since_trigger >= 90 AND elim_satisfied = false) THEN elim_satisfied = true; payment_authorized = true', risk:'Medium', status:'Active', lastEdit:'Apr 10, 2026', editedBy:'SMARTS Admin' },
+      'SR-004': { name:'Fraud Pre-Screen', category:'Compliance', threshold:'Fraud score < 30', action:'Clear for STP; score ≥ 30 → manual review', logic:'IF (fraud_score < 30) THEN stp_eligible = true ELSE route_to = "SIU_QUEUE"', risk:'High', status:'Active', lastEdit:'Jul 1, 2026', editedBy:'Compliance Team' },
+      'SR-005': { name:'STP Adjudication', category:'Adjudication', threshold:'SR-001 to SR-004 all passed', action:'Auto-approve and post to LTCAS', logic:'IF (sr001_passed AND sr002_passed AND sr003_passed AND sr004_passed) THEN decision = "APPROVED_STP"; post_to_ltcas = true', risk:'Medium', status:'Active', lastEdit:'Jun 30, 2026', editedBy:'SMARTS Admin' },
+      'SR-008': { name:'Provider Network Validation', category:'Provider', threshold:'Provider in approved network', action:'Authorize provider billing', logic:'IF (provider_id IN network_registry AND license_valid = true AND w9_status = "on_file") THEN provider_approved = true', risk:'Medium', status:'Active', lastEdit:'Jun 20, 2026', editedBy:'Network Ops' },
+      'SR-012': { name:'Benefit Period Monitor', category:'Financial', threshold:'Benefit utilization tracking', action:'Alert at 80% and 100% of benefit period', logic:'IF (benefit_days_used / benefit_days_max >= 0.80) THEN alert_supervisor = true; notify_carrier = true', risk:'Low', status:'Active', lastEdit:'May 15, 2026', editedBy:'SMARTS Admin' }
+    };
+    var r = ruleData[ruleId] || { name: 'Rule ' + ruleId, category:'General', threshold:'N/A', action:'N/A', logic:'// Rule logic not found', risk:'Unknown', status:'Active', lastEdit:'N/A', editedBy:'N/A' };
+
+    var edId = 'p8-ruleeditor-ov';
+    _p8ov(edId, _p8wrap(edId, '780px',
+      _p8hdr('fa-cogs', 'SMARTS Rule Editor — ' + ruleId + ': ' + r.name, 'Sparkling Logic SMARTS · Change-controlled · Audit-logged', 'linear-gradient(135deg,#4c1d95,#7c3aed)', edId)
+      + '<div style="padding:22px;">'
+      + _p8ai('Editing SMARTS rule <strong>' + ruleId + '</strong> in Sparkling Logic IDE. All rule changes require <strong>change control approval</strong> before deployment to production. Changes are versioned, audit-logged, and must pass regression simulation before activation. Current rule is ACTIVE — changes will take effect after approval and SMARTS engine sync.')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">'
+      + _p8row('Rule ID', ruleId)
+      + _p8row('Category', r.category)
+      + _p8row('Status', '<span style="background:#f0fdf4;color:#059669;border-radius:20px;padding:2px 8px;font-weight:700;font-size:11px;">● Active</span>')
+      + _p8row('Risk Level', '<span style="color:' + (r.risk==='High'?'#dc2626':r.risk==='Medium'?'#d97706':'#059669') + ';font-weight:700;">' + r.risk + '</span>')
+      + _p8row('Last Edited', r.lastEdit)
+      + _p8row('Edited By', r.editedBy)
+      + '</div>'
+      + '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Rule Name</label>'
+      + '<input type="text" value="' + r.name + '" style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+      + '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Trigger Threshold</label>'
+      + '<input type="text" value="' + r.threshold + '" style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+      + '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Action on Fire</label>'
+      + '<input type="text" value="' + r.action + '" style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+      + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Rule Logic (Sparkling Logic DSL)</label>'
+      + '<textarea style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:10px 12px;font-size:12px;font-family:monospace;box-sizing:border-box;height:90px;resize:vertical;background:#1f2937;color:#a78bfa;">' + r.logic + '</textarea></div>'
+      + '<div style="background:#fef3c7;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:11px;color:#92400e;">'
+      + '<i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>'
+      + '<strong>Change Control Required:</strong> Modifications to ' + ruleId + ' must be reviewed by SMARTS Admin and Compliance before production deployment. Regression simulation will run automatically before activation.'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p8btn('Save & Submit for Approval', 'fa-paper-plane', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+          _p8close(edId);
+          _p8toast('<i class="fas fa-check-circle"></i> ' + ruleId + ' change submitted for approval · Change ticket CCT-' + ruleId + '-' + Date.now().toString().slice(-5) + ' created · SMARTS Admin + Compliance notified · Regression simulation queued · ETA: 2–4 hours', 6000);
+        })
+      + _p8btn('Run Simulation', 'fa-play', '#059669', function(){
+          _p8toast('<i class="fas fa-play"></i> SMARTS simulation running for ' + ruleId + ' · Sandbox copy executing 1,247 test claims · Regression results in 45 seconds', 4000);
+        })
+      + _p8btn('View Audit Log', 'fa-history', '#003087', function(){
+          _p8toast('<i class="fas fa-history"></i> ' + ruleId + ' audit log: 7 changes in last 90 days · Last change approved Jun 30 by SMARTS Admin · No exceptions · Full trail in Sparkling Logic portal', 4500);
+        })
+      + '<button onclick="_p8close(\'' + edId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+      + '</div></div>'
+    ));
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     6. STP DASHBOARD — full overlay (replaces _p7openStpDashboard toast)
+  ───────────────────────────────────────────────────────────────────── */
+  window._p7openStpDashboard = function() {
+    var stpId = 'p8-stp-ov';
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul'];
+    var stpRates = [82.1, 83.4, 84.7, 85.3, 86.1, 87.4, 88.2];
+
+    var trendRows = months.map(function(m,i){
+      var auto = Math.round(stpRates[i]/100*1800);
+      var manual = Math.round((1-stpRates[i]/100)*1800*0.6);
+      var siu = Math.round((1-stpRates[i]/100)*1800*0.1);
+      return [m+' 2026',
+        '<span style="font-weight:700;color:#059669;">'+stpRates[i]+'%</span>',
+        auto.toLocaleString(),
+        manual.toLocaleString(),
+        siu.toLocaleString(),
+        i===6?'<span style="color:#059669;font-weight:700;">↑ +0.8%</span>':'<span style="color:#0891b2;font-weight:700;">↑ Improving</span>'];
+    });
+
+    _p8ov(stpId, _p8wrap(stpId, '800px',
+      _p8hdr('fa-bolt', 'STP Dashboard — Straight-Through Processing', 'SMARTS Rules Engine · Adjudication Analytics · WealthAI Q3 2026', '#059669', stpId)
+      + '<div style="padding:22px;">'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">'
+      + _p8kpi('88.2%', 'STP Rate (Jul)', 'fa-bolt', '#059669', '↑ vs 87.4% Jun')
+      + _p8kpi('12,094', 'Auto-Adjudicated MTD', 'fa-check-circle', '#0891b2', 'No human touch')
+      + _p8kpi('1,547', 'RN Review Queue', 'fa-user-nurse', '#d97706', 'Avg 4.2 hrs to resolve')
+      + _p8kpi('47', 'SIU Referrals MTD', 'fa-shield-alt', '#dc2626', 'Fraud score ≥ 30')
+      + '</div>'
+      + _p8ai('STP rate improved to <strong>88.2%</strong> in July 2026 — highest in illumifin LTC portfolio history. SMARTS engine SR-005 auto-adjudication is the primary driver. <strong>Goal: 90% by Q4 2026</strong>. Top STP blockers: missing care plan documentation (38% of manual reviews) and ADL borderline cases (2/5 tie requiring RN validation). WealthAI recommendation: implement SR-015 (care plan auto-request rule) to close the documentation gap and push STP to 91%.')
+      /* Rule breakdown */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-cogs" style="color:#7c3aed;margin-right:6px;"></i>STP by Rules Fired</div>'
+      + _p8tbl(['Rule','Name','Claims Routed','STP Impact','Avg Process Time'],
+          [['SR-001','ADL Trigger','12,641','Qualifying','< 1s'],
+           ['SR-002','Cognitive Route','9,304','Care path set','< 1s'],
+           ['SR-003','Elimination Period','11,822','Payments unlocked','< 1s'],
+           ['SR-004','Fraud Pre-Screen','12,641','10.3% flagged → manual','3.2s'],
+           ['SR-005','STP Auto-Approve','12,094','<strong style="color:#059669;">88.2% STP</strong>','< 2s']])
+      /* Monthly trend */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;margin-top:4px;"><i class="fas fa-chart-line" style="color:#059669;margin-right:6px;"></i>Monthly STP Trend</div>'
+      + _p8tbl(['Month','STP Rate','Auto-Adj','RN Review','SIU','Trend'], trendRows)
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p8btn('Export STP Report', 'fa-file-pdf', '#dc2626', function(){
+          _p8close(stpId);
+          _p8toast('<i class="fas fa-file-pdf"></i> STP Dashboard Report exported · Jul 2026 · PDF sent to VP Claims and Analytics · Ref: STP-RPT-JUL2026', 4500);
+        })
+      + _p8btn('Run STP Optimization', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+          _p8toast('<i class="fas fa-magic"></i> WealthAI running STP optimization analysis · Identifying SR-015 care plan rule opportunity · Projected STP improvement: +2.8% · Report ready in 60 seconds', 5000);
+        })
+      + _p8btn('Configure SR-005 Threshold', 'fa-cogs', '#003087', function(){
+          _p8close(stpId);
+          window._p7editRule('SR-005');
+        })
+      + '<button onclick="_p8close(\'' + stpId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div></div>'
+    ));
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     7. ENGINE HEALTH — full overlay (replaces _p7openClaimsEngineDetail toast)
+  ───────────────────────────────────────────────────────────────────── */
+  window._p7openClaimsEngineDetail = function() {
+    var ehId = 'p8-enginehealth-ov';
+    _p8ov(ehId, _p8wrap(ehId, '800px',
+      _p8hdr('fa-heartbeat', 'LTC Claims Engine Health', 'IIS · SQL Server · SMARTS · Queue · FMS · eLTCAS Integration', 'linear-gradient(135deg,#dc2626,#b91c1c)', ehId)
+      + '<div style="padding:22px;">'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">'
+      + _p8kpi('99.8%', 'Engine Uptime', 'fa-heartbeat', '#059669', '30-day rolling avg')
+      + _p8kpi('342ms', 'SQL Avg Response', 'fa-database', '#0891b2', 'Target < 500ms ✅')
+      + _p8kpi('1,247', 'Claims in Queue', 'fa-layer-group', '#d97706', '94 processing now')
+      + _p8kpi('0', 'Critical Alerts', 'fa-bell', '#059669', 'All systems nominal')
+      + '</div>'
+      + _p8ai('LTC Claims Engine is operating at <strong>99.8% uptime</strong> over the trailing 30 days. All subsystems nominal. SQL Server response averaging 342ms — well within 500ms SLA. SMARTS rules engine is synchronized and processing SR-001 through SR-020. FMS payment queue is clear with 0 pending holds. eLTCAS CQRS event log processing at 98.4% throughput. WealthAI recommends no immediate action — schedule routine IIS pool recycle during off-peak hours (2:00 AM CT).')
+      /* IIS Pool Status */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-server" style="color:#003087;margin-right:6px;"></i>IIS Application Pools</div>'
+      + _p8tbl(['App Pool','Status','Worker Processes','Memory (MB)','CPU %','Requests/min'],
+          [['LTCClaims_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','2','1,024','4.2%','847'],
+           ['SMARTS_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','1','512','1.8%','312'],
+           ['eLTCAS_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','2','768','3.1%','621'],
+           ['FMS_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','1','384','0.9%','156'],
+           ['illumifinAPI_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','3','1,280','6.4%','2,041']])
+      /* SQL Server Metrics */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-database" style="color:#0891b2;margin-right:6px;"></i>SQL Server Performance</div>'
+      + _p8tbl(['Metric','Current','Target','Status'],
+          [['Avg Query Response','342ms','< 500ms','✅ Good'],
+           ['Active Connections','87','< 200','✅ Good'],
+           ['Deadlocks (24hr)','0','0','✅ None'],
+           ['Blocking Queries','2','< 5','✅ Good'],
+           ['TempDB Usage','14%','< 70%','✅ Good'],
+           ['Index Fragmentation','8.2%','< 30%','✅ Good']])
+      /* SMARTS Sync */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-cogs" style="color:#7c3aed;margin-right:6px;"></i>SMARTS Engine Sync Status</div>'
+      + _p8tbl(['Component','Status','Last Sync','Rules Loaded'],
+          [['Sparkling Logic Core','<span style="color:#059669;">● In Sync</span>','14:28:41','SR-001 to SR-020 (20 rules)'],
+           ['Rule Repository','<span style="color:#059669;">● Current</span>','14:28:41','Version 4.12.3'],
+           ['Decision Tables','<span style="color:#059669;">● Loaded</span>','14:28:40','47 tables active'],
+           ['Scorecard Engine','<span style="color:#059669;">● Active</span>','14:28:38','Fraud + ADL models']])
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p8btn('Restart IIS Pools (Off-peak)', 'fa-redo', '#d97706', function(){
+          _p8toast('<i class="fas fa-clock"></i> IIS pool restart scheduled for 2:00 AM CT · All pools will restart sequentially · Estimated downtime: 45 seconds · Ops team notified · Maintenance window: 2:00–2:02 AM CT', 5500);
+        })
+      + _p8btn('Force SMARTS Resync', 'fa-sync', '#7c3aed', function(){
+          _p8toast('<i class="fas fa-sync"></i> SMARTS engine resync initiated · 20 rules reloading · ETA: 8 seconds · Processing briefly paused · No claims lost', 4000);
+        })
+      + _p8btn('Export Health Report', 'fa-file-pdf', '#003087', function(){
+          _p8close(ehId);
+          _p8toast('<i class="fas fa-file-pdf"></i> Engine Health Report exported · PDF sent to CTO + Engineering Lead · Ref: ENG-HEALTH-JUL2026 · All systems green', 4500);
+        })
+      + _p8btn('Set Alert Thresholds', 'fa-bell', '#dc2626', function(){
+          _p8toast('<i class="fas fa-bell"></i> Alert configuration: SQL > 500ms → PagerDuty · Queue > 2,000 → Ops email · IIS CPU > 80% → Auto-scale trigger · Uptime < 99.5% → Incident ticket · All thresholds active', 5000);
+        })
+      + '<button onclick="_p8close(\'' + ehId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div></div>'
+    ));
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     8. PATCH OVERVIEW TAB in ltcOpenClaimDetail to show SMARTS panel
+        Wrap the original to inject SMARTS rules into overview on open
+  ───────────────────────────────────────────────────────────────────── */
+  var _origOpenClaimDetail = window.ltcOpenClaimDetail;
+  window.ltcOpenClaimDetail = function(claimId) {
+    if (_origOpenClaimDetail) _origOpenClaimDetail(claimId);
+    /* After original renders, inject SMARTS panel into overview */
+    setTimeout(function(){
+      var body = document.getElementById('lcd-body');
+      var c = window._lcdCurrentClaim;
+      if (!body || !c) return;
+      /* Check if SMARTS panel already present */
+      if (body.innerHTML.indexOf('SMARTS Business Rules Engine') !== -1) return;
+      /* Find the AI panel div and insert after it */
+      var smartsHtml = _p8buildSmartsRulesPanel(c);
+      /* Insert before the action buttons row (last div) */
+      var lastDiv = body.innerHTML.lastIndexOf('<div style="display:flex;gap:10px;">');
+      if (lastDiv !== -1) {
+        body.innerHTML = body.innerHTML.slice(0, lastDiv) + smartsHtml + body.innerHTML.slice(lastDiv);
+      }
+    }, 100);
+  };
+
+  console.log('[Phase 8] LTC Claims Phase 8 loaded — bugs fixed, IDP active, SMARTS rules panel live, New Claim wizard updated, Edit Rule / STP Dashboard / Engine Health fully operational');
+
 })();

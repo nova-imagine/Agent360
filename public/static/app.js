@@ -71054,3 +71054,885 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('LTC Phase 7 loaded — System Architecture → Operational Integration · SMARTS Rules Engine · eLTCAS CQRS/NServiceBus · LINK UW Queue · LTCAS Policy Admin · CellTrak EVV · CONNECT Portal · FMS Financial · RPA Automation · EPS Correspondence · Transport Services · ERM/XRM Analytics · UPD Operations · 8 new operational pages · 3 enhanced existing pages');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 8 — COMPREHENSIVE BUG FIXES + FEATURE ADDITIONS
+   1. Fix _p6btn double-quote injection (action-map pattern)
+   2. Fix Overview tab navigation
+   3. Fix ltcNewClaim wizard (Claimant first → Policy)
+   4. Intelligent Document Processing (IDP) overlay
+   5. SMARTS pre-applied rules panel in Claim Detail
+   6. Edit Rule full overlay (SMARTS rule editor)
+   7. STP Dashboard full overlay
+   8. Engine Health full overlay
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─────────────────────────────────────────────────────────────────────
+     0. ACTION MAP — safe onclick delegation (no HTML injection ever)
+  ───────────────────────────────────────────────────────────────────── */
+  window._p8actions = {};
+  window._p8run = function (key) {
+    var fn = window._p8actions[key];
+    if (typeof fn === 'function') fn();
+  };
+
+  function _p8reg(key, fn) { window._p8actions[key] = fn; return key; }
+
+  /* Safe button builder — stores callback in map, uses data-p8 attribute */
+  function _p8btn(label, icon, color, fn) {
+    var key = '_p8_' + Math.random().toString(36).slice(2);
+    window._p8actions[key] = fn;
+    var isGrad = color.indexOf('gradient') !== -1;
+    var style = (isGrad ? 'background:' + color : 'background:' + color)
+      + ';color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;';
+    return '<button onclick="_p8run(\'' + key + '\')" style="' + style + '">'
+      + '<i class="fas ' + icon + '"></i> ' + label + '</button>';
+  }
+
+  /* Shared overlay helpers (mirrors _p6ov / _p6close / _p6toast) */
+  function _p8ov(id, html) {
+    var old = document.getElementById(id);
+    if (old) old.remove();
+    var wrap = document.createElement('div');
+    wrap.id = id;
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;';
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function(e){ if(e.target===wrap) { wrap.remove(); } });
+  }
+  function _p8close(id) { var el=document.getElementById(id); if(el) el.remove(); }
+  function _p8toast(msg, dur) {
+    var t=document.createElement('div');
+    t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:600px;text-align:center;line-height:1.5;';
+    t.innerHTML=msg; document.body.appendChild(t);
+    setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(function(){t.remove();},400);},dur||3000);
+  }
+
+  function _p8wrap(id, width, content) {
+    return '<div style="background:#fff;border-radius:16px;width:' + width + ';max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">' + content + '</div>';
+  }
+  function _p8hdr(icon, title, sub, color, closeId) {
+    return '<div style="background:' + color + ';padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas ' + icon + '" style="font-size:20px;"></i>'
+      + '<div><div style="font-size:15px;font-weight:800;">' + title + '</div><div style="font-size:11px;opacity:.8;">' + sub + '</div></div>'
+      + '<button onclick="_p8close(\'' + closeId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      + '</div>';
+  }
+  function _p8ai(msg) {
+    return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:16px;">'
+      + '<div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Intelligence</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.65;">' + msg + '</div></div>';
+  }
+  function _p8row(label, value) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;">'
+      + '<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">' + label + '</div>'
+      + '<div style="font-size:12px;font-weight:600;color:#111827;">' + value + '</div></div>';
+  }
+  function _p8kpi(val, label, icon, color, sub) {
+    return '<div style="background:#f8fafc;border-radius:10px;padding:14px;text-align:center;">'
+      + '<i class="fas ' + icon + '" style="color:' + color + ';font-size:20px;margin-bottom:8px;display:block;"></i>'
+      + '<div style="font-size:18px;font-weight:800;color:' + color + ';">' + val + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#374151;margin-top:2px;">' + label + '</div>'
+      + '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">' + sub + '</div></div>';
+  }
+  function _p8tbl(headers, rows) {
+    var th = headers.map(function(h){return '<th style="background:#f1f5f9;padding:8px 12px;font-size:11px;font-weight:700;color:#374151;text-align:left;border-bottom:1px solid #e5e7eb;">' + h + '</th>';}).join('');
+    var tr = rows.map(function(row){
+      return '<tr>' + row.map(function(cell,i){return '<td style="padding:8px 12px;font-size:12px;color:#374151;border-bottom:1px solid #f1f5f9;">' + cell + '</td>';}).join('') + '</tr>';
+    }).join('');
+    return '<div style="overflow-x:auto;margin-bottom:16px;"><table style="width:100%;border-collapse:collapse;"><thead><tr>' + th + '</tr></thead><tbody>' + tr + '</tbody></table></div>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     1. FIXED _p6btn REPLACEMENT — patch all Phase 6 overlays
+        Strategy: Re-implement ltcDetailAction entirely using _p8btn
+        so that ALL buttons are safe from injection.
+  ───────────────────────────────────────────────────────────────────── */
+  var _origLtcDetailAction = window.ltcDetailAction;
+  window.ltcDetailAction = function (action, claimId) {
+
+    /* Overview re-render — fixes 'reload' case from ltcClaimTab idx===0 */
+    if (action === 'reload' || action === 'overview') {
+      var c0 = window._lcdCurrentClaim;
+      if (!c0) return;
+      var body0 = document.getElementById('lcd-body');
+      if (!body0) return;
+      /* Re-render overview using existing Phase 4 helper chain */
+      /* We replicate the overview HTML inline here */
+      function _rL4row(l,v){return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">'+l+'</div><div style="font-size:12px;font-weight:600;color:#111827;">'+v+'</div></div>';}
+      function _rL4ai(m){return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:16px;"><div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Intelligence</div><div style="font-size:12px;color:#374151;line-height:1.65;">'+m+'</div></div>';}
+      var ov0html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
+        + _rL4row('Claimant Age', c0.age)
+        + _rL4row('Daily Benefit', c0.dailyBenefit)
+        + _rL4row('Status', '<span style="background:'+(c0.status==='Active'?'#05996922':c0.status==='Escalated'?'#dc262622':'#d9770622')+';color:'+(c0.status==='Active'?'#059669':c0.status==='Escalated'?'#dc2626':'#d97706')+';border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">'+c0.status+'</span>')
+        + _rL4row('Days Open', c0.daysOpen+' days')
+        + _rL4row('Care Setting', c0.type)
+        + _rL4row('Provider', c0.provider)
+        + _rL4row('ADL Assessment Score', c0.assessScore+'/5 ADLs')
+        + _rL4row('Cognitive Score', c0.cogScore+'/30 (MMSE)')
+        + _rL4row('Next Payment Due', c0.paymentDue)
+        + _rL4row('Claim Manager', 'Assigned RN / MSW')
+        + '</div>'
+        + '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:13px;margin-bottom:14px;">'
+        + '<div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:5px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>Next Required Action</div>'
+        + '<div style="font-size:13px;color:#7f1d1d;font-weight:600;">'+c0.nextAction+'</div></div>'
+        + _rL4ai('Based on '+c0.claimant+'\'s ADL profile ('+c0.assessScore+'/5) and cognitive score ('+c0.cogScore+'/30), the AI projects continued '+c0.type+' care for 6–12 months. Care manager should review benefit period utilization and coordinate with '+c0.provider+' for updated care plan documentation before next payment cycle. No fraud indicators. Payment integrity confirmed.')
+        /* SMARTS pre-applied rules band */
+        + _p8buildSmartsRulesPanel(c0)
+        + '<div style="display:flex;gap:10px;">'
+        + '<button onclick="ltcDetailAction(\'payment\',\''+c0.id+'\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-dollar-sign" style="margin-right:5px;"></i>Process Payment</button>'
+        + '<button onclick="ltcDetailAction(\'assess\',\''+c0.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-user-check" style="margin-right:5px;"></i>Schedule Assessment</button>'
+        + '<button onclick="ltcDetailAction(\'careplan\',\''+c0.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-hands-helping" style="margin-right:5px;"></i>Update Care Plan</button>'
+        + '</div>';
+      body0.innerHTML = ov0html;
+      /* Update tab highlight */
+      for(var ti=0;ti<6;ti++){var tel=document.getElementById('lcd-tab-'+ti);if(tel){tel.style.background=ti===0?'#dc2626':'transparent';tel.style.color=ti===0?'#fff':'#6b7280';}}
+      return;
+    }
+
+    /* All other actions — delegate to our fixed implementations */
+    var ltcData = window.ltcClaimsData || [];
+    var c = ltcData.find(function(x){return x.id===claimId;}) || window._lcdCurrentClaim || {};
+    if (!c.id) c.id = claimId;
+    var name = c.claimant || claimId || 'Claimant';
+
+    /* ── PAYMENT ── (use original — payment buttons were not broken) */
+    if (action === 'payment') {
+      if (_origLtcDetailAction) _origLtcDetailAction('payment', claimId);
+      return;
+    }
+
+    /* ── SCHEDULE ASSESSMENT ── */
+    if (action === 'assess') {
+      var assessId = 'p8-assess-ov';
+      _p8ov(assessId, _p8wrap(assessId, '560px',
+        _p8hdr('fa-user-check', 'Schedule RN Assessment — ' + (c.id||claimId), 'Telephonic · In-Person · Video · HIPAA', '#0891b2', assessId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI recommends a <strong>telephonic RN assessment</strong> for <strong>' + name + '</strong> within 5 business days. ADL score <strong>' + (c.assessScore||'2') + '/5</strong> and MMSE <strong>' + (c.cogScore||'14') + '/30</strong> indicates Nursing Home care remains appropriate. AI-matched RN: <strong>Sarah Johnson</strong> (available Jul 12–15 with 96% continuity score). Reassessment confirms eligibility and catches level-of-care changes early.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        + _p8row('Claimant', name)
+        + _p8row('Current ADL Score', (c.assessScore||'2')+'/5')
+        + _p8row('MMSE Score', (c.cogScore||'14')+'/30')
+        + _p8row('Care Setting', c.type||'Nursing Home')
+        + '</div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assessment Date</label>'
+        + '<input type="text" value="Jul 14, 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assessment Mode</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Telephonic RN Assessment (AI-recommended)</option><option>In-Person QA Visit</option><option>Video Assessment (HIPAA-secure)</option></select></div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Assigned RN (AI-matched)</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Sarah Johnson, RN — 96% continuity match (Recommended)</option><option>James Park, RN</option><option>Angela Moore, RN</option><option>Maria Castillo, MSW</option></select></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Confirm & Schedule', 'fa-calendar-check', '#0891b2', function(){
+            _p8close(assessId);
+            _p8toast('<i class="fas fa-calendar-check"></i> RN Assessment scheduled for ' + name + ' · Jul 14, 2026 · Sarah Johnson, RN assigned · SMS + email sent to claimant and provider · EVV tracking activated · Claim updated', 4500);
+          })
+        + _p8btn('AI Auto-Schedule', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+            _p8close(assessId);
+            _p8toast('<i class="fas fa-magic"></i> WealthAI auto-scheduled optimal assessment slot · Sarah Johnson, RN · Jul 12, 10:30 AM · Claimant, provider, and carrier notified automatically', 4500);
+          })
+        + '<button onclick="_p8close(\'' + assessId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── UPDATE CARE PLAN ── */
+    if (action === 'careplan') {
+      var cpId = 'p8-careplan-ov';
+      _p8ov(cpId, _p8wrap(cpId, '600px',
+        _p8hdr('fa-hands-helping', 'Update Care Plan — ' + (c.id||claimId), 'Auto-populated · Physician countersignature · Carrier sync', '#7c3aed', cpId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI has auto-populated this care plan from the most recent visit notes at <strong>' + (c.provider||'Sunrise Manor SNF') + '</strong>. ADL score ' + (c.assessScore||'2') + '/5 — recommend reassessing care setting if score reaches 4+/5. Next benefit period milestone in <strong>30 days</strong>. AI benchmarked against 63,000+ similar claimant outcomes — current plan is clinically optimal. Physician countersignature via secure portal takes avg 18 hours.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        + _p8row('Care Setting', c.type||'Nursing Home')
+        + _p8row('Provider', c.provider||'Sunrise Manor SNF')
+        + _p8row('Daily Benefit', c.dailyBenefit||'$180/day')
+        + _p8row('Next Review', 'Aug 14, 2026')
+        + '</div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Care Setting</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Nursing Home (SNF)</option><option>Assisted Living (ALF)</option><option>Memory Care</option><option>Home Health</option></select></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Visit Frequency</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Bi-weekly</option><option>Weekly</option><option>Monthly</option><option>Daily (Acute)</option></select></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">ADL Goals (AI-optimized)</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:68px;resize:none;">Maintain current functional level · Monitor mobility and fall risk · Medication compliance review at each visit · Goal: prevent SNF transfer 6+ months · Cognitive engagement program 3x/week.</textarea></div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Physician / Care Manager Notes</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:60px;resize:none;">Updated by WealthAI — pending physician countersignature. Dr. Thompson review requested by Jul 16.</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Save & Notify Carrier', 'fa-save', '#7c3aed', function(){
+            _p8close(cpId);
+            _p8toast('<i class="fas fa-save"></i> Care Plan saved for ' + name + ' · Carrier ' + (c.carrier||'Prudential') + ' notified · Physician countersignature requested · Next review: Aug 14, 2026', 5000);
+          })
+        + _p8btn('AI Optimize Plan', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+            _p8toast('<i class="fas fa-magic"></i> WealthAI benchmarking care plan against 63,000+ outcomes · Optimization complete · No changes recommended — plan is clinically optimal', 3500);
+          })
+        + '<button onclick="_p8close(\'' + cpId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── UPLOAD DOCUMENT ── */
+    if (action === 'upload') {
+      var upId = 'p8-upload-ov';
+      _p8ov(upId, _p8wrap(upId, '540px',
+        _p8hdr('fa-upload', 'Upload Document — ' + (c.id||claimId), 'HIPAA-encrypted · AES-256 · Auto-classified by AI', '#d97706', upId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI will auto-classify uploaded documents using ICD-10 extraction and OCR. All files are AES-256 encrypted at rest and in transit. Missing: <strong>Updated Care Plan</strong> from ' + (c.provider||'provider') + ' — upload or request electronically. HIPAA chain-of-custody maintained. Audit trail auto-created.')
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Document Type</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Care Plan (Current)</option><option>Attending Physician Statement (APS)</option><option>ADL Assessment Report</option><option>Provider License</option><option>HIPAA Authorization</option><option>Lab / Clinical Results</option><option>Other</option></select></div>'
+        + '<div style="border:2px dashed #d97706;border-radius:10px;padding:28px;text-align:center;background:#fffbeb;margin-bottom:14px;cursor:pointer;">'
+        + '<i class="fas fa-cloud-upload-alt" style="font-size:32px;color:#d97706;margin-bottom:8px;display:block;"></i>'
+        + '<div style="font-size:13px;font-weight:700;color:#374151;">Drop files here or click to browse</div>'
+        + '<div style="font-size:11px;color:#9ca3af;margin-top:4px;">PDF, DOCX, JPG, PNG · Max 25MB · AES-256 encrypted</div></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Upload & AI Classify', 'fa-robot', '#d97706', function(){
+            _p8close(upId);
+            _p8toast('<i class="fas fa-check-circle"></i> Document uploaded · AI classification complete · Care Plan identified · Cross-referenced with claim · Carrier notified · HIPAA audit trail created', 5000);
+          })
+        + '<button onclick="_p8close(\'' + upId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── REQUEST MISSING DOCS ── */
+    if (action === 'request') {
+      var reqId = 'p8-request-ov';
+      _p8ov(reqId, _p8wrap(reqId, '540px',
+        _p8hdr('fa-envelope', 'Request Missing Documents — ' + (c.id||claimId), 'Secure portal · Provider email · Automated follow-up', '#6b7280', reqId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI has identified <strong>1 missing document</strong>: Updated Care Plan from <strong>' + (c.provider||'Sunrise Manor SNF') + '</strong> (overdue 8 days). Provider will receive a secure portal notification with one-click upload. Automated reminder sent if not received within 48 hours. SLA impact: care plan overdue status pauses adjudication clock.')
+        + '<div style="background:#fef3c7;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:#92400e;">'
+        + '<i class="fas fa-exclamation-triangle" style="margin-right:6px;color:#d97706;"></i>'
+        + '<strong>Missing:</strong> Updated Care Plan from ' + (c.provider||'provider') + ' · Overdue 8 days · Required for payment continuation</div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Request Message (AI-drafted)</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:80px;resize:none;">Please submit the updated care plan for ' + name + ' (Claim ' + (c.id||claimId) + ') via the Provider Portal or reply to this message. Required to maintain benefit payments. Deadline: ' + new Date(Date.now()+2*86400000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '.</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Send Request', 'fa-paper-plane', '#6b7280', function(){
+            _p8close(reqId);
+            _p8toast('<i class="fas fa-paper-plane"></i> Document request sent to ' + (c.provider||'provider') + ' · Secure portal link included · Auto-reminder set for 48 hours · SLA hold noted on claim', 5000);
+          })
+        + _p8btn('Send Urgent Escalation', 'fa-exclamation-triangle', '#dc2626', function(){
+            _p8close(reqId);
+            _p8toast('<i class="fas fa-exclamation-triangle"></i> Urgent request escalated to ' + (c.provider||'provider') + ' administrator · CC: Supervisor + Carrier · 24-hour deadline set', 4500);
+          })
+        + '<button onclick="_p8close(\'' + reqId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── VIEW DOCUMENT (IDP integrated) ── */
+    if (action === 'view-doc') {
+      var docName = claimId; /* repurposed param carries docName */
+      var c2 = window._lcdCurrentClaim || {};
+      _p8openIDP(docName, c2);
+      return;
+    }
+
+    /* ── CONTACT PROVIDER ── */
+    if (action === 'contact-provider') {
+      var cprovId = 'p8-cprov-ov';
+      _p8ov(cprovId, _p8wrap(cprovId, '540px',
+        _p8hdr('fa-phone', 'Contact Provider — ' + (c.provider||'Provider'), 'HIPAA-compliant · Auto-logged · Call summary to claim', '#0891b2', cprovId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI recommends discussing the outstanding <strong>Care Plan update</strong> and EVV gap (Jul 28 visit) with <strong>' + (c.provider||'the provider') + '</strong>. Confirm next payment cycle Jul 15 and planned assessment date. Provider last contacted Jul 3 — care plan was discussed but not yet submitted. Suggested call duration: 12 minutes.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        + _p8row('Provider', c.provider||'Sunrise Manor SNF')
+        + _p8row('Contact Person', 'Patricia Wells, Administrator')
+        + _p8row('Direct Phone', '(214) 555-0198')
+        + _p8row('Secure Message', 'Provider Portal — Online')
+        + _p8row('Last Contact', 'Jul 3, 2026 — Care plan discussed')
+        + _p8row('Open Items', 'Care plan update · EVV gap Jul 28')
+        + '</div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">WealthAI Call Agenda (auto-generated)</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:80px;resize:none;">1. Care plan update — deadline Jul 16 (CRITICAL)\n2. EVV gap on Jul 28 visit — manual log required\n3. Next payment cycle: Jul 15 — confirm readiness\n4. Resident condition check — any ADL changes?</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Initiate Phone Call', 'fa-phone', '#0891b2', function(){
+            _p8close(cprovId);
+            _p8toast('<i class="fas fa-phone"></i> Call to ' + (c.provider||'Provider') + ' initiated · HIPAA recording active · Agenda shared · Notes auto-attach to claim ' + (c.id||'') + ' · Ref: CALL-' + Date.now().toString().slice(-6), 5000);
+          })
+        + _p8btn('Send Secure Message', 'fa-envelope', '#7c3aed', function(){
+            _p8close(cprovId);
+            _p8toast('<i class="fas fa-envelope"></i> Secure message sent to ' + (c.provider||'provider') + ' via Provider Portal · WealthAI agenda attached · Reply expected within 4 business hours', 4000);
+          })
+        + _p8btn('Schedule Conference', 'fa-video', '#059669', function(){
+            _p8close(cprovId);
+            _p8toast('<i class="fas fa-video"></i> Video conference scheduled · HIPAA-compliant Zoom link sent to ' + (c.provider||'provider') + ' · Jul 11, 2:00 PM CT', 3500);
+          })
+        + '<button onclick="_p8close(\'' + cprovId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* ── SCHEDULE SITE VISIT ── */
+    if (action === 'visit') {
+      var svId = 'p8-sitevisit-ov';
+      _p8ov(svId, _p8wrap(svId, '560px',
+        _p8hdr('fa-map-marker-alt', 'Schedule Site Visit — ' + (c.provider||'Provider'), 'QA RN · CareExchange EVV · Unannounced or Routine', '#7c3aed', svId)
+        + '<div style="padding:22px;">'
+        + _p8ai('WealthAI recommends an <strong>unannounced site visit</strong> to <strong>' + (c.provider||'the provider') + '</strong> within 14 days. Outstanding Care Plan update and EVV data gap (Jul 28) raise a moderate quality concern. Unannounced visits reduce overbilling risk by 34% on average. Last visit was ' + (c.daysOpen||14) + ' days ago. Assigned QA RN: <strong>James Park</strong> — licensed in Texas, available Jul 15–18.')
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Visit Type</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Unannounced QA Visit (AI-recommended)</option><option>Routine Scheduled Visit</option><option>Comprehensive Annual Audit Visit</option><option>Emergency Compliance Inspection</option></select></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Target Date</label>'
+        + '<input type="text" value="Jul 18, 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">AI-Generated Visit Checklist</label>'
+        + '<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px;color:#374151;line-height:2.2;">'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Verify resident care plan adherence with staff</div>'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Validate EVV GPS logs vs. manual records (Jul 28 gap)</div>'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Conduct resident interview (ADL re-assessment)</div>'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Review billing documentation on-site</div>'
+        + '<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Inspect facility safety conditions (AI photo analysis)</div>'
+        + '<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Collect updated care plan signature</div>'
+        + '</div></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p8btn('Schedule Visit', 'fa-calendar-check', '#7c3aed', function(){
+            _p8close(svId);
+            _p8toast('<i class="fas fa-map-marker-alt"></i> Site visit scheduled Jul 18 at ' + (c.provider||'provider') + ' · James Park, RN assigned · EVV tracking active · Claim ' + (c.id||'') + ' updated · Provider NOT notified — unannounced', 5500);
+          })
+        + _p8btn('AI Auto-Assign Visit', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+            _p8close(svId);
+            _p8toast('<i class="fas fa-magic"></i> WealthAI optimized visit slot · James Park, RN · Jul 15, 9:00 AM · Closest available date · GPS route pre-calculated · Checklist sent to RN', 5000);
+          })
+        + '<button onclick="_p8close(\'' + svId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div></div>'
+      ));
+      return;
+    }
+
+    /* All other actions — pass through to original */
+    if (_origLtcDetailAction) _origLtcDetailAction(action, claimId);
+  };
+
+  /* Patch ltcClaimTab idx===0 to use our fixed overview render */
+  var _origLtcClaimTab = window.ltcClaimTab;
+  window.ltcClaimTab = function(idx, claimId) {
+    if (idx === 0) {
+      /* Fix tab buttons first */
+      for (var i=0;i<6;i++){var el=document.getElementById('lcd-tab-'+i);if(el){el.style.background=i===0?'#dc2626':'transparent';el.style.color=i===0?'#fff':'#6b7280';}}
+      window.ltcDetailAction('overview', claimId || (window._lcdCurrentClaim && window._lcdCurrentClaim.id));
+      return;
+    }
+    if (_origLtcClaimTab) _origLtcClaimTab(idx, claimId);
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     2. SMARTS PRE-APPLIED RULES PANEL (shown in Overview tab)
+  ───────────────────────────────────────────────────────────────────── */
+  function _p8buildSmartsRulesPanel(c) {
+    var priority = c.priority || 'medium';
+    var rules = [
+      { id:'SR-001', name:'ADL Trigger Verification', status:'FIRED', result:'Eligible', icon:'fa-check-circle', color:'#059669', detail:'ADL '+(c.assessScore||'2')+'/5 ≥ 2 · Threshold met · Claim eligible' },
+      { id:'SR-002', name:'Cognitive Impairment Route', status:'FIRED', result:'Nursing Home Path', icon:'fa-check-circle', color:'#059669', detail:'MMSE '+(c.cogScore||'14')+'/30 < 20 · Memory Care / SNF routing applied' },
+      { id:'SR-003', name:'Elimination Period Check', status:'FIRED', result:'Satisfied', icon:'fa-check-circle', color:'#059669', detail:'90-day elimination period met · Payments authorized' },
+      { id:'SR-004', name:'Fraud Pre-Screen', status:'FIRED', result:'Clear (Score: 12/100)', icon:'fa-shield-alt', color:'#0891b2', detail:'No anomalies · EVV GPS-backed · Billing patterns normal' },
+      { id:'SR-005', name:'STP Adjudication', status: priority==='urgent'?'BYPASSED':'FIRED', result:priority==='urgent'?'Manual Review Required':'Auto-Approved STP', icon:priority==='urgent'?'fa-exclamation-circle':'fa-bolt', color:priority==='urgent'?'#d97706':'#059669', detail:priority==='urgent'?'Urgency flag triggered manual review queue':'All SR-001–004 passed · Straight-through processing applied' },
+      { id:'SR-008', name:'Provider Network Validation', status:'FIRED', result:'In-Network', icon:'fa-check-circle', color:'#059669', detail:(c.provider||'Provider')+' verified in-network · License current · W-9 on file' },
+      { id:'SR-012', name:'Benefit Period Monitor', status:'MONITORING', result:'Active — Day '+(c.daysOpen||14)+' of unlimited', icon:'fa-clock', color:'#0891b2', detail:'Lifetime benefit policy · No cap approaching · Inflation rider active (3% compound)' }
+    ];
+
+    var rows = rules.map(function(r){
+      return '<tr>'
+        + '<td style="padding:7px 10px;font-size:11px;font-weight:700;color:#6b7280;">' + r.id + '</td>'
+        + '<td style="padding:7px 10px;font-size:11px;color:#374151;font-weight:600;">' + r.name + '</td>'
+        + '<td style="padding:7px 10px;"><span style="background:' + (r.status==='FIRED'?'#f0fdf4':r.status==='MONITORING'?'#eff6ff':'#fffbeb') + ';color:' + (r.status==='FIRED'?'#059669':r.status==='MONITORING'?'#0891b2':'#d97706') + ';border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">' + r.status + '</span></td>'
+        + '<td style="padding:7px 10px;font-size:11px;font-weight:700;color:' + r.color + ';"><i class="fas ' + r.icon + '" style="margin-right:4px;"></i>' + r.result + '</td>'
+        + '<td style="padding:7px 10px;font-size:10px;color:#6b7280;">' + r.detail + '</td>'
+        + '</tr>';
+    }).join('');
+
+    return '<div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:14px;margin-bottom:16px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+      + '<div style="font-size:12px;font-weight:800;color:#7c3aed;"><i class="fas fa-cogs" style="margin-right:6px;"></i>SMARTS Business Rules Engine — Pre-Applied Rules</div>'
+      + '<span style="background:#7c3aed;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;">' + rules.filter(function(r){return r.status==='FIRED';}).length + ' Rules Fired</span>'
+      + '</div>'
+      + '<div style="overflow-x:auto;">'
+      + '<table style="width:100%;border-collapse:collapse;">'
+      + '<thead><tr>'
+      + ['Rule ID','Rule Name','Status','Result','Detail'].map(function(h){return '<th style="padding:6px 10px;font-size:10px;font-weight:700;color:#9ca3af;text-align:left;border-bottom:1px solid #e5e7eb;text-transform:uppercase;">'+h+'</th>';}).join('')
+      + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+      + '<div style="margin-top:10px;font-size:10px;color:#7c3aed;font-style:italic;">Powered by Sparkling Logic SMARTS · Rules evaluated at intake · 7 rules applied · 0 exceptions · Audit trail logged</div>'
+      + '</div>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     3. INTELLIGENT DOCUMENT PROCESSING (IDP) OVERLAY
+        Accessible via "View" button in Documents tab → _p8openIDP()
+        Also patched into view-doc action above
+  ───────────────────────────────────────────────────────────────────── */
+  window._p8openIDP = function(docName, claimData) {
+    var c = claimData || window._lcdCurrentClaim || {};
+    var doc = docName || 'Document';
+    var idpId = 'p8-idp-ov';
+
+    /* Confidence and anomaly vary by doc type */
+    var isCarePlan = doc.indexOf('Care Plan') !== -1;
+    var conf = isCarePlan ? 96 : 97;
+    var anomaly = isCarePlan ? '<span style="color:#d97706;font-weight:700;">⚠️ Care Plan flagged for review — update required from provider</span>' : 'None detected';
+    var sigStatus = isCarePlan ? '<span style="color:#d97706;font-weight:700;">⚠️ Pending countersignature</span>' : '<span style="color:#059669;font-weight:700;">✅ Verified — ' + new Date(Date.now()-7*86400000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '</span>';
+
+    var extractedFields = [
+      { field: 'Document', value: doc + ' · Claim ' + (c.id||'LTC-2026-0101') },
+      { field: 'Provider', value: c.provider||'Sunrise Manor SNF' },
+      { field: 'Carrier', value: c.carrier||'Prudential' },
+      { field: 'Date (AI extracted)', value: 'Jul 1–8, 2026 · AI Confidence: ' + conf + '%' },
+      { field: 'ADL Score extracted', value: (c.assessScore||'2') + '/5 · Cognitive: ' + (c.cogScore||'14') + '/30' },
+      { field: 'Physician Signature', value: sigStatus },
+      { field: 'Fraud Indicators', value: '<span style="color:#059669;">None detected · Clean</span>' }
+    ];
+
+    var icd10 = isCarePlan
+      ? ['F01.51 — Vascular dementia, severe', 'W19.XXXA — Fall, initial encounter', 'Z74.01 — Bed confinement status']
+      : ['F01.50 — Vascular dementia, unspecified', 'Z74.09 — Other reduced mobility'];
+
+    var icdRows = icd10.map(function(code){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;color:#374151;border-bottom:1px solid #f1f5f9;">'
+        + '<span style="background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:2px 6px;font-weight:700;font-size:10px;">' + code.split('—')[0].trim() + '</span>'
+        + '<span>' + code.split('—')[1] + '</span></div>';
+    }).join('');
+
+    _p8ov(idpId, _p8wrap(idpId, '680px',
+      _p8hdr('fa-brain', 'Intelligent Document Processing — ' + doc, 'HIPAA-secure · WealthAI field extraction · Audit-logged', '#d97706', idpId)
+      + '<div style="padding:22px;">'
+      + _p8ai('WealthAI has parsed <strong>' + doc + '</strong> and extracted structured fields with <strong>' + conf + '% confidence</strong>. All fields cross-referenced against claim record. ' + (anomaly === 'None detected' ? 'No anomalies detected.' : anomaly) + ' Physician signature verified. Dates match care period. Document access audit-logged per HIPAA §164.312.')
+      /* Document preview card */
+      + '<div style="background:#1f2937;border-radius:12px;padding:16px;margin-bottom:16px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+      + '<div style="background:#dc2626;border-radius:8px;padding:10px;"><i class="fas fa-file-pdf" style="font-size:20px;color:#fff;"></i></div>'
+      + '<div><div style="font-size:13px;font-weight:700;color:#fff;">' + doc + '</div>'
+      + '<div style="font-size:11px;color:#9ca3af;">4 pages · PDF · AES-256 encrypted</div>'
+      + '<span style="background:#059669;color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">✅ Received</span></div></div>'
+      /* Extracted fields */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
+      + extractedFields.map(function(f){
+          return '<div style="background:#374151;border-radius:6px;padding:8px 10px;">'
+            + '<div style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">' + f.field + '</div>'
+            + '<div style="font-size:11px;font-weight:600;color:#f9fafb;">' + f.value + '</div></div>';
+        }).join('')
+      + '</div></div>'
+      /* ICD-10 codes extracted */
+      + '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      + '<div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:8px;"><i class="fas fa-code" style="margin-right:5px;"></i>ICD-10 Codes Extracted (AI)</div>'
+      + icdRows + '</div>'
+      /* Cross-reference panel */
+      + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      + '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:8px;"><i class="fas fa-link" style="margin-right:5px;"></i>Multi-Document Cross-Reference</div>'
+      + '<div style="font-size:11px;color:#374151;line-height:1.8;">'
+      + '✅ Dates consistent with APS (Jun 28, 2026)<br>'
+      + '✅ ADL scores match RN Assessment Report (Jul 3, 2026)<br>'
+      + '✅ Provider matches billing records<br>'
+      + (isCarePlan ? '⚠️ Care plan signature date does not match submission — follow up with Dr. Thompson' : '✅ Policy coverage dates align · No gaps detected')
+      + '</div></div>'
+      /* Action buttons */
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p8btn('Download PDF', 'fa-file-download', '#d97706', function(){
+          _p8toast('<i class="fas fa-file-pdf"></i> ' + doc + ' downloading · HIPAA-encrypted export · Access audit-logged · Ref: DOC-' + doc.replace(/\s+/g,'-').substring(0,20) + '-JUL26', 3500);
+        })
+      + _p8btn('Send to Carrier', 'fa-paper-plane', '#003087', function(){
+          _p8close(idpId);
+          _p8toast('<i class="fas fa-paper-plane"></i> ' + doc + ' transmitted to carrier via EDI 837 · Acknowledgment expected in 2 hours · Claim ' + (c.id||'') + ' updated', 4500);
+        })
+      + _p8btn('AI Extract & Validate', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+          _p8toast('<i class="fas fa-magic"></i> WealthAI re-extracting fields from ' + doc + ' · Deep parse: ICD-10 codes · ADL scores · Physician data · Results in 20 seconds', 4000);
+        })
+      + (isCarePlan ? _p8btn('Request Updated Version', 'fa-sync', '#dc2626', function(){
+            _p8close(idpId);
+            _p8toast('<i class="fas fa-sync"></i> Updated care plan requested from ' + (c.provider||'provider') + ' · Portal notification sent · 48-hour deadline set', 4000);
+          }) : '')
+      + '<button onclick="_p8close(\'' + idpId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div></div>'
+    ));
+  };
+
+  /* Patch the Documents tab to use IDP instead of broken view-doc */
+  var _origLtcClaimTab2 = window.ltcClaimTab;
+  window.ltcClaimTab = function(idx, claimId) {
+    if (idx === 2) {
+      /* Re-render Documents tab with IDP-enabled View buttons */
+      var c = window._lcdCurrentClaim;
+      if (!c) { if (_origLtcClaimTab2) _origLtcClaimTab2(idx, claimId); return; }
+      for (var ti=0;ti<6;ti++){var tel=document.getElementById('lcd-tab-'+ti);if(tel){tel.style.background=ti===2?'#dc2626':'transparent';tel.style.color=ti===2?'#fff':'#6b7280';}}
+      var body = document.getElementById('lcd-body');
+      if (!body) { if (_origLtcClaimTab2) _origLtcClaimTab2(idx, claimId); return; }
+
+      function _docRow(docName, source, date, status, type) {
+        var statusColor = status.indexOf('⚠️')!==-1 ? '#d97706' : '#059669';
+        var viewKey = '_p8vd_' + Math.random().toString(36).slice(2);
+        window._p8actions[viewKey] = (function(dn,cd){ return function(){ _p8openIDP(dn, cd); }; })(docName, c);
+        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f8fafc;border-radius:10px;margin-bottom:8px;">'
+          + '<div style="background:#dc2626;border-radius:6px;padding:7px;"><i class="fas fa-file-pdf" style="color:#fff;font-size:14px;"></i></div>'
+          + '<div style="flex:1;">'
+          + '<div style="font-size:12px;font-weight:700;color:#111827;">' + docName + '</div>'
+          + '<div style="font-size:11px;color:#6b7280;">' + source + ' · ' + date + '</div></div>'
+          + '<span style="font-size:11px;font-weight:700;color:' + statusColor + ';">' + status + '</span>'
+          + '<button onclick="_p8run(\'' + viewKey + '\')" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-eye" style="margin-right:4px;"></i>View</button>'
+          + '</div>';
+      }
+
+      body.innerHTML = '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:14px;"><i class="fas fa-folder-open" style="color:#d97706;margin-right:6px;"></i>Claim Documents'
+        + ' <span style="background:#7c3aed;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;margin-left:8px;"><i class="fas fa-brain" style="margin-right:4px;"></i>IDP Active</span></div>'
+        + _docRow('Attending Physician Statement (APS)', 'Dr. Sarah Thompson, MD', 'Jun 28, 2026', '✅ Received', 'PDF')
+        + _docRow('ADL Assessment Report', 'RN Sarah Johnson', 'Jul 3, 2026', '✅ Received', 'PDF')
+        + _docRow('Insurance Policy Copy', c.carrier, 'Jan 14, 2024', '✅ On File', 'PDF')
+        + _docRow('Care Plan (Current)', c.provider, 'Jul 1, 2026', '⚠️ Review Required', 'PDF')
+        + _docRow('Provider License & W-9', c.provider, 'Mar 2026', '✅ Verified', 'PDF')
+        + _docRow('HIPAA Authorization Form', 'Eleanor — Claimant', 'Jun 25, 2026', '✅ Received', 'PDF')
+        + '<div style="margin-top:14px;display:flex;gap:8px;">'
+        + '<button onclick="ltcDetailAction(\'upload\',\'' + c.id + '\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-upload" style="margin-right:5px;"></i>Upload Document</button>'
+        + '<button onclick="ltcDetailAction(\'request\',\'' + c.id + '\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-envelope" style="margin-right:5px;"></i>Request Missing Docs</button>'
+        + '<button onclick="_p8openIDP(\'Full IDP Report\',window._lcdCurrentClaim)" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-brain" style="margin-right:5px;"></i>IDP Analysis</button>'
+        + '</div>';
+      return;
+    }
+    _origLtcClaimTab2(idx, claimId);
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     4. FIXED NEW CLAIM WIZARD — Claimant Info FIRST, then Policy Info
+  ───────────────────────────────────────────────────────────────────── */
+  var _p8ncStep = 1;
+
+  function _p8ncBuild(step) {
+    /* Steps: 1=Claimant Info, 2=Policy Info, 3=Clinical Assessment, 4=Care Setting, 5=Review & Submit */
+    var steps = ['Claimant Info','Policy Info','Clinical Assessment','Care Setting','Review & Submit'];
+    var stepsHtml = steps.map(function(s,i){
+      var active=(i+1)===step, done=(i+1)<step;
+      var col=done?'#059669':active?'#dc2626':'#d1d5db';
+      return '<div style="display:flex;align-items:center;gap:5px;">'
+        +'<div style="width:24px;height:24px;border-radius:50%;background:'+col+';color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(done?'✓':(i+1))+'</div>'
+        +'<span style="font-size:10px;font-weight:'+(active?'700':'500')+';color:'+(active?'#111827':'#9ca3af');white-space:nowrap;">'+s+'</span>'
+        +(i<steps.length-1?'<div style="width:20px;height:1px;background:#e5e7eb;"></div>':'')
+      +'</div>';
+    }).join('');
+
+    var body='';
+    if (step===1) body=''
+      +'<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:4px;"><i class="fas fa-user" style="margin-right:5px;"></i>Step 1: Claimant Information</div>'
+      +'<div style="font-size:11px;color:#7f1d1d;">Enter the claimant\'s personal and contact information first. Policy will be looked up in Step 2.</div></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Full Legal Name *</label><input type="text" placeholder="e.g. Eleanor Vasquez" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="Eleanor Vasquez"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Date of Birth *</label><input type="text" placeholder="MM/DD/YYYY" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="03/12/1947"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">SSN (last 4)</label><input type="text" placeholder="XXXX" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="4401"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Phone Number</label><input type="text" placeholder="(555) 000-0000" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="(555) 729-4401"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Email Address</label><input type="text" placeholder="claimant@email.com" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="e.vasquez@email.com"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">State of Residence</label><select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Texas (TX)</option><option>Florida (FL)</option><option>California (CA)</option><option>New York (NY)</option><option>Other</option></select></div>'
+      +'</div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Primary Diagnosis / Condition</label>'
+      +'<input type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="Vascular dementia · Hip fracture recovery"></div>';
+
+    else if (step===2) body=''
+      +'<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:4px;"><i class="fas fa-file-contract" style="margin-right:5px;"></i>Step 2: Policy Information</div>'
+      +'<div style="font-size:11px;color:#1e40af;">Enter the policy number to auto-lookup coverage details. Claimant: <strong>Eleanor Vasquez</strong> (from Step 1).</div></div>'
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Policy Number *</label>'
+      +'<input type="text" placeholder="e.g. PRU-LTC-2024-88192" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="PRU-LTC-2024-88192"></div>'
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Carrier</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>Prudential</option><option>MassMutual</option><option>NY Life</option><option>Genworth</option><option>Transamerica</option><option>Lincoln Natl</option><option>TIAA</option><option>Pacific Life</option></select></div>'
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Policy Lookup</div>'
+      +'<div style="font-size:12px;color:#166534;">Policy PRU-LTC-2024-88192 matched: <strong>Eleanor Vasquez</strong> · Age 79 · Daily benefit $195/day · 90-day elimination period <strong>satisfied</strong> · Policy in force · No prior claims · Coverage start: Jan 14, 2024</div></div>';
+
+    else if (step===3) body=''
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">ADL Impairments (1-5)</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      +'<option>2/5 (Bathing, Dressing)</option><option>3/5</option><option>4/5</option><option>5/5 (All ADLs)</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">MMSE / Cognitive Score</label>'
+      +'<input type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="16/30"></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Fall History</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      +'<option>Yes — 2 falls past 6 months</option><option>No falls</option><option>1 fall</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Attending Physician</label>'
+      +'<input type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="Dr. Anna Kessler, MD — Geriatrics"></div>'
+      +'</div>'
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>SMARTS Eligibility Pre-Screen</div>'
+      +'<div style="font-size:12px;color:#166534;">SR-001 (ADL Trigger): <strong>✅ ELIGIBLE</strong> — 2/5 ADLs meet threshold · SR-002 (Cognitive Route): <strong>✅ SNF/Memory Care path</strong> · SR-005 (STP): <strong>✅ On track for auto-approval</strong></div></div>';
+
+    else if (step===4) body=''
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Recommended Care Setting</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      +'<option>Nursing Home (SNF)</option><option>Memory Care Facility</option><option>Assisted Living (ALF)</option><option>Home Health Care</option><option>Adult Day Care</option>'
+      +'</select></div>'
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Facility / Provider</label>'
+      +'<input type="text" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;" value="Sunrise Manor SNF — 220 Oak Lane, Dallas TX"></div>'
+      +'<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Care Manager Assignment</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      +'<option>Auto-assign (AI recommended)</option><option>Sarah Johnson, RN</option><option>Maria Castillo, MSW</option><option>James Park, RN</option><option>Angela Moore, RN</option>'
+      +'</select></div>'
+      +'<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:5px;"><i class="fas fa-map-marker-alt" style="margin-right:5px;"></i>Provider Network Check</div>'
+      +'<div style="font-size:12px;color:#1e40af;">Sunrise Manor SNF is <strong>in-network</strong> · Licensed by TX DADS · CMS 4.5-star · EVV-compliant · W-9 on file · Rate $218/day (benefit $195/day, gap: $23/day) · Provider accepted.</div></div>';
+
+    else if (step===5) body=''
+      +'<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:16px;">'
+      +'<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-clipboard-check" style="color:#059669;margin-right:6px;"></i>Claim Summary — Ready to Submit</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Claimant</div><div style="font-size:12px;font-weight:600;color:#111827;">Eleanor Vasquez · Age 79</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Policy</div><div style="font-size:12px;font-weight:600;color:#111827;">PRU-LTC-2024-88192 · Prudential</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Daily Benefit</div><div style="font-size:12px;font-weight:600;color:#111827;">$195/day</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Care Setting</div><div style="font-size:12px;font-weight:600;color:#111827;">Nursing Home (SNF)</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Provider</div><div style="font-size:12px;font-weight:600;color:#111827;">Sunrise Manor SNF</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">Eligibility</div><div style="font-size:12px;font-weight:600;color:#059669;">✅ Qualified — ADL 2/5 + Cognitive</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">SMARTS Rules</div><div style="font-size:12px;font-weight:600;color:#059669;">SR-001, SR-002, SR-003, SR-004, SR-005 — All Passed</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px;">First Payment Est.</div><div style="font-size:12px;font-weight:600;color:#111827;">Aug 1, 2026</div></div>'
+      +'</div></div>'
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Submission Review</div>'
+      +'<div style="font-size:12px;color:#166534;">All required fields complete. Policy in force. Eligibility confirmed. No fraud flags. SMARTS rules SR-001–005 passed. Carrier (Prudential) will be notified electronically. Approval expected within 3-5 business days. AI projects 8-month claim duration at current care level.</div></div>';
+
+    return '<div style="background:#fff;border-radius:16px;width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">'
+      +'<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;z-index:1;">'
+      +'<div style="display:flex;align-items:center;gap:12px;">'
+      +'<i class="fas fa-file-medical-alt" style="font-size:20px;"></i>'
+      +'<div><div style="font-size:16px;font-weight:800;">New LTC Claim — Step '+step+' of 5</div>'
+      +'<div style="font-size:11px;opacity:.85;">HIPAA-compliant intake · AI-assisted eligibility · SMARTS fraud pre-screen</div></div>'
+      +'<button onclick="document.getElementById(\'ltc-newclaim-overlay\')&&document.getElementById(\'ltc-newclaim-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;margin-top:14px;flex-wrap:wrap;">'+stepsHtml+'</div>'
+      +'</div>'
+      +'<div style="padding:22px;">'+body
+      +'<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid #f3f4f6;">'
+      +(step>1?'<button onclick="window._p8ncBack()" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>Back</button>':'')
+      +(step<5?'<button onclick="window._p8ncNext()" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;">Next Step <i class="fas fa-arrow-right" style="margin-left:6px;"></i></button>':'')
+      +(step===5?'<button onclick="window._p8ncSubmit()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:800;cursor:pointer;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Submit Claim</button>':'')
+      +'</div></div></div>';
+  }
+
+  window.ltcNewClaim = function() {
+    _p8ncStep = 1;
+    /* Use existing overlay mechanism — find _L4overlay or create our own */
+    var ovFn = window._L4overlay || function(id, html){
+      var old=document.getElementById(id); if(old)old.remove();
+      var d=document.createElement('div');
+      d.id=id;d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9990;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;';
+      d.innerHTML=html;document.body.appendChild(d);
+      d.addEventListener('click',function(e){if(e.target===d)d.remove();});
+    };
+    ovFn('ltc-newclaim-overlay', _p8ncBuild(1));
+  };
+
+  window._p8ncNext = function() {
+    _p8ncStep = Math.min(5, _p8ncStep+1);
+    var ov = document.getElementById('ltc-newclaim-overlay');
+    if (ov) ov.innerHTML = _p8ncBuild(_p8ncStep);
+  };
+  window._p8ncBack = function() {
+    _p8ncStep = Math.max(1, _p8ncStep-1);
+    var ov = document.getElementById('ltc-newclaim-overlay');
+    if (ov) ov.innerHTML = _p8ncBuild(_p8ncStep);
+  };
+  window._p8ncSubmit = function() {
+    var ov = document.getElementById('ltc-newclaim-overlay'); if(ov)ov.remove();
+    _p8toast('<i class="fas fa-check-circle"></i> New LTC Claim LTC-2026-0109 submitted · Eleanor Vasquez · Prudential · $195/day · AI-approved · SMARTS SR-001–005 passed · Carrier notified electronically · Care manager Sarah Johnson, RN assigned', 6000);
+  };
+  /* Also export the nav functions under ltcNcNext/Back for compatibility */
+  window.ltcNcNext = window._p8ncNext;
+  window.ltcNcBack = window._p8ncBack;
+  window.ltcNcSubmit = window._p8ncSubmit;
+
+  /* ─────────────────────────────────────────────────────────────────────
+     5. SMARTS RULE EDITOR — full overlay (replaces _p7editRule toast)
+  ───────────────────────────────────────────────────────────────────── */
+  window._p7editRule = function(ruleId) {
+    var ruleData = {
+      'SR-001': { name:'ADL Trigger Verification', category:'Eligibility', threshold:'≥ 2 ADL impairments', action:'Route to benefit evaluation', logic:'IF (adl_count >= 2) THEN eligible = true; route_to = "benefit_eval"', risk:'Low', status:'Active', lastEdit:'Jun 15, 2026', editedBy:'SMARTS Admin' },
+      'SR-002': { name:'Cognitive Impairment Route', category:'Care Setting', threshold:'MMSE < 20', action:'Route to SNF / Memory Care path', logic:'IF (mmse_score < 20) THEN care_path = "SNF_MEMORY"; benefit_multiplier = 1.0', risk:'Low', status:'Active', lastEdit:'May 28, 2026', editedBy:'Clinical Ops' },
+      'SR-003': { name:'Elimination Period Check', category:'Financial', threshold:'90 days elapsed', action:'Authorize benefit payments', logic:'IF (days_since_trigger >= 90 AND elim_satisfied = false) THEN elim_satisfied = true; payment_authorized = true', risk:'Medium', status:'Active', lastEdit:'Apr 10, 2026', editedBy:'SMARTS Admin' },
+      'SR-004': { name:'Fraud Pre-Screen', category:'Compliance', threshold:'Fraud score < 30', action:'Clear for STP; score ≥ 30 → manual review', logic:'IF (fraud_score < 30) THEN stp_eligible = true ELSE route_to = "SIU_QUEUE"', risk:'High', status:'Active', lastEdit:'Jul 1, 2026', editedBy:'Compliance Team' },
+      'SR-005': { name:'STP Adjudication', category:'Adjudication', threshold:'SR-001 to SR-004 all passed', action:'Auto-approve and post to LTCAS', logic:'IF (sr001_passed AND sr002_passed AND sr003_passed AND sr004_passed) THEN decision = "APPROVED_STP"; post_to_ltcas = true', risk:'Medium', status:'Active', lastEdit:'Jun 30, 2026', editedBy:'SMARTS Admin' },
+      'SR-008': { name:'Provider Network Validation', category:'Provider', threshold:'Provider in approved network', action:'Authorize provider billing', logic:'IF (provider_id IN network_registry AND license_valid = true AND w9_status = "on_file") THEN provider_approved = true', risk:'Medium', status:'Active', lastEdit:'Jun 20, 2026', editedBy:'Network Ops' },
+      'SR-012': { name:'Benefit Period Monitor', category:'Financial', threshold:'Benefit utilization tracking', action:'Alert at 80% and 100% of benefit period', logic:'IF (benefit_days_used / benefit_days_max >= 0.80) THEN alert_supervisor = true; notify_carrier = true', risk:'Low', status:'Active', lastEdit:'May 15, 2026', editedBy:'SMARTS Admin' }
+    };
+    var r = ruleData[ruleId] || { name: 'Rule ' + ruleId, category:'General', threshold:'N/A', action:'N/A', logic:'// Rule logic not found', risk:'Unknown', status:'Active', lastEdit:'N/A', editedBy:'N/A' };
+
+    var edId = 'p8-ruleeditor-ov';
+    _p8ov(edId, _p8wrap(edId, '780px',
+      _p8hdr('fa-cogs', 'SMARTS Rule Editor — ' + ruleId + ': ' + r.name, 'Sparkling Logic SMARTS · Change-controlled · Audit-logged', 'linear-gradient(135deg,#4c1d95,#7c3aed)', edId)
+      + '<div style="padding:22px;">'
+      + _p8ai('Editing SMARTS rule <strong>' + ruleId + '</strong> in Sparkling Logic IDE. All rule changes require <strong>change control approval</strong> before deployment to production. Changes are versioned, audit-logged, and must pass regression simulation before activation. Current rule is ACTIVE — changes will take effect after approval and SMARTS engine sync.')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">'
+      + _p8row('Rule ID', ruleId)
+      + _p8row('Category', r.category)
+      + _p8row('Status', '<span style="background:#f0fdf4;color:#059669;border-radius:20px;padding:2px 8px;font-weight:700;font-size:11px;">● Active</span>')
+      + _p8row('Risk Level', '<span style="color:' + (r.risk==='High'?'#dc2626':r.risk==='Medium'?'#d97706':'#059669') + ';font-weight:700;">' + r.risk + '</span>')
+      + _p8row('Last Edited', r.lastEdit)
+      + _p8row('Edited By', r.editedBy)
+      + '</div>'
+      + '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Rule Name</label>'
+      + '<input type="text" value="' + r.name + '" style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+      + '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Trigger Threshold</label>'
+      + '<input type="text" value="' + r.threshold + '" style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+      + '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Action on Fire</label>'
+      + '<input type="text" value="' + r.action + '" style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+      + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Rule Logic (Sparkling Logic DSL)</label>'
+      + '<textarea style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:10px 12px;font-size:12px;font-family:monospace;box-sizing:border-box;height:90px;resize:vertical;background:#1f2937;color:#a78bfa;">' + r.logic + '</textarea></div>'
+      + '<div style="background:#fef3c7;border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:11px;color:#92400e;">'
+      + '<i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>'
+      + '<strong>Change Control Required:</strong> Modifications to ' + ruleId + ' must be reviewed by SMARTS Admin and Compliance before production deployment. Regression simulation will run automatically before activation.'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p8btn('Save & Submit for Approval', 'fa-paper-plane', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+          _p8close(edId);
+          _p8toast('<i class="fas fa-check-circle"></i> ' + ruleId + ' change submitted for approval · Change ticket CCT-' + ruleId + '-' + Date.now().toString().slice(-5) + ' created · SMARTS Admin + Compliance notified · Regression simulation queued · ETA: 2–4 hours', 6000);
+        })
+      + _p8btn('Run Simulation', 'fa-play', '#059669', function(){
+          _p8toast('<i class="fas fa-play"></i> SMARTS simulation running for ' + ruleId + ' · Sandbox copy executing 1,247 test claims · Regression results in 45 seconds', 4000);
+        })
+      + _p8btn('View Audit Log', 'fa-history', '#003087', function(){
+          _p8toast('<i class="fas fa-history"></i> ' + ruleId + ' audit log: 7 changes in last 90 days · Last change approved Jun 30 by SMARTS Admin · No exceptions · Full trail in Sparkling Logic portal', 4500);
+        })
+      + '<button onclick="_p8close(\'' + edId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+      + '</div></div>'
+    ));
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     6. STP DASHBOARD — full overlay (replaces _p7openStpDashboard toast)
+  ───────────────────────────────────────────────────────────────────── */
+  window._p7openStpDashboard = function() {
+    var stpId = 'p8-stp-ov';
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul'];
+    var stpRates = [82.1, 83.4, 84.7, 85.3, 86.1, 87.4, 88.2];
+
+    var trendRows = months.map(function(m,i){
+      var auto = Math.round(stpRates[i]/100*1800);
+      var manual = Math.round((1-stpRates[i]/100)*1800*0.6);
+      var siu = Math.round((1-stpRates[i]/100)*1800*0.1);
+      return [m+' 2026',
+        '<span style="font-weight:700;color:#059669;">'+stpRates[i]+'%</span>',
+        auto.toLocaleString(),
+        manual.toLocaleString(),
+        siu.toLocaleString(),
+        i===6?'<span style="color:#059669;font-weight:700;">↑ +0.8%</span>':'<span style="color:#0891b2;font-weight:700;">↑ Improving</span>'];
+    });
+
+    _p8ov(stpId, _p8wrap(stpId, '800px',
+      _p8hdr('fa-bolt', 'STP Dashboard — Straight-Through Processing', 'SMARTS Rules Engine · Adjudication Analytics · WealthAI Q3 2026', '#059669', stpId)
+      + '<div style="padding:22px;">'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">'
+      + _p8kpi('88.2%', 'STP Rate (Jul)', 'fa-bolt', '#059669', '↑ vs 87.4% Jun')
+      + _p8kpi('12,094', 'Auto-Adjudicated MTD', 'fa-check-circle', '#0891b2', 'No human touch')
+      + _p8kpi('1,547', 'RN Review Queue', 'fa-user-nurse', '#d97706', 'Avg 4.2 hrs to resolve')
+      + _p8kpi('47', 'SIU Referrals MTD', 'fa-shield-alt', '#dc2626', 'Fraud score ≥ 30')
+      + '</div>'
+      + _p8ai('STP rate improved to <strong>88.2%</strong> in July 2026 — highest in illumifin LTC portfolio history. SMARTS engine SR-005 auto-adjudication is the primary driver. <strong>Goal: 90% by Q4 2026</strong>. Top STP blockers: missing care plan documentation (38% of manual reviews) and ADL borderline cases (2/5 tie requiring RN validation). WealthAI recommendation: implement SR-015 (care plan auto-request rule) to close the documentation gap and push STP to 91%.')
+      /* Rule breakdown */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-cogs" style="color:#7c3aed;margin-right:6px;"></i>STP by Rules Fired</div>'
+      + _p8tbl(['Rule','Name','Claims Routed','STP Impact','Avg Process Time'],
+          [['SR-001','ADL Trigger','12,641','Qualifying','< 1s'],
+           ['SR-002','Cognitive Route','9,304','Care path set','< 1s'],
+           ['SR-003','Elimination Period','11,822','Payments unlocked','< 1s'],
+           ['SR-004','Fraud Pre-Screen','12,641','10.3% flagged → manual','3.2s'],
+           ['SR-005','STP Auto-Approve','12,094','<strong style="color:#059669;">88.2% STP</strong>','< 2s']])
+      /* Monthly trend */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;margin-top:4px;"><i class="fas fa-chart-line" style="color:#059669;margin-right:6px;"></i>Monthly STP Trend</div>'
+      + _p8tbl(['Month','STP Rate','Auto-Adj','RN Review','SIU','Trend'], trendRows)
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p8btn('Export STP Report', 'fa-file-pdf', '#dc2626', function(){
+          _p8close(stpId);
+          _p8toast('<i class="fas fa-file-pdf"></i> STP Dashboard Report exported · Jul 2026 · PDF sent to VP Claims and Analytics · Ref: STP-RPT-JUL2026', 4500);
+        })
+      + _p8btn('Run STP Optimization', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){
+          _p8toast('<i class="fas fa-magic"></i> WealthAI running STP optimization analysis · Identifying SR-015 care plan rule opportunity · Projected STP improvement: +2.8% · Report ready in 60 seconds', 5000);
+        })
+      + _p8btn('Configure SR-005 Threshold', 'fa-cogs', '#003087', function(){
+          _p8close(stpId);
+          window._p7editRule('SR-005');
+        })
+      + '<button onclick="_p8close(\'' + stpId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div></div>'
+    ));
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     7. ENGINE HEALTH — full overlay (replaces _p7openClaimsEngineDetail toast)
+  ───────────────────────────────────────────────────────────────────── */
+  window._p7openClaimsEngineDetail = function() {
+    var ehId = 'p8-enginehealth-ov';
+    _p8ov(ehId, _p8wrap(ehId, '800px',
+      _p8hdr('fa-heartbeat', 'LTC Claims Engine Health', 'IIS · SQL Server · SMARTS · Queue · FMS · eLTCAS Integration', 'linear-gradient(135deg,#dc2626,#b91c1c)', ehId)
+      + '<div style="padding:22px;">'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">'
+      + _p8kpi('99.8%', 'Engine Uptime', 'fa-heartbeat', '#059669', '30-day rolling avg')
+      + _p8kpi('342ms', 'SQL Avg Response', 'fa-database', '#0891b2', 'Target < 500ms ✅')
+      + _p8kpi('1,247', 'Claims in Queue', 'fa-layer-group', '#d97706', '94 processing now')
+      + _p8kpi('0', 'Critical Alerts', 'fa-bell', '#059669', 'All systems nominal')
+      + '</div>'
+      + _p8ai('LTC Claims Engine is operating at <strong>99.8% uptime</strong> over the trailing 30 days. All subsystems nominal. SQL Server response averaging 342ms — well within 500ms SLA. SMARTS rules engine is synchronized and processing SR-001 through SR-020. FMS payment queue is clear with 0 pending holds. eLTCAS CQRS event log processing at 98.4% throughput. WealthAI recommends no immediate action — schedule routine IIS pool recycle during off-peak hours (2:00 AM CT).')
+      /* IIS Pool Status */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-server" style="color:#003087;margin-right:6px;"></i>IIS Application Pools</div>'
+      + _p8tbl(['App Pool','Status','Worker Processes','Memory (MB)','CPU %','Requests/min'],
+          [['LTCClaims_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','2','1,024','4.2%','847'],
+           ['SMARTS_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','1','512','1.8%','312'],
+           ['eLTCAS_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','2','768','3.1%','621'],
+           ['FMS_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','1','384','0.9%','156'],
+           ['illumifinAPI_AppPool','<span style="color:#059669;font-weight:700;">● Running</span>','3','1,280','6.4%','2,041']])
+      /* SQL Server Metrics */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-database" style="color:#0891b2;margin-right:6px;"></i>SQL Server Performance</div>'
+      + _p8tbl(['Metric','Current','Target','Status'],
+          [['Avg Query Response','342ms','< 500ms','✅ Good'],
+           ['Active Connections','87','< 200','✅ Good'],
+           ['Deadlocks (24hr)','0','0','✅ None'],
+           ['Blocking Queries','2','< 5','✅ Good'],
+           ['TempDB Usage','14%','< 70%','✅ Good'],
+           ['Index Fragmentation','8.2%','< 30%','✅ Good']])
+      /* SMARTS Sync */
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-cogs" style="color:#7c3aed;margin-right:6px;"></i>SMARTS Engine Sync Status</div>'
+      + _p8tbl(['Component','Status','Last Sync','Rules Loaded'],
+          [['Sparkling Logic Core','<span style="color:#059669;">● In Sync</span>','14:28:41','SR-001 to SR-020 (20 rules)'],
+           ['Rule Repository','<span style="color:#059669;">● Current</span>','14:28:41','Version 4.12.3'],
+           ['Decision Tables','<span style="color:#059669;">● Loaded</span>','14:28:40','47 tables active'],
+           ['Scorecard Engine','<span style="color:#059669;">● Active</span>','14:28:38','Fraud + ADL models']])
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p8btn('Restart IIS Pools (Off-peak)', 'fa-redo', '#d97706', function(){
+          _p8toast('<i class="fas fa-clock"></i> IIS pool restart scheduled for 2:00 AM CT · All pools will restart sequentially · Estimated downtime: 45 seconds · Ops team notified · Maintenance window: 2:00–2:02 AM CT', 5500);
+        })
+      + _p8btn('Force SMARTS Resync', 'fa-sync', '#7c3aed', function(){
+          _p8toast('<i class="fas fa-sync"></i> SMARTS engine resync initiated · 20 rules reloading · ETA: 8 seconds · Processing briefly paused · No claims lost', 4000);
+        })
+      + _p8btn('Export Health Report', 'fa-file-pdf', '#003087', function(){
+          _p8close(ehId);
+          _p8toast('<i class="fas fa-file-pdf"></i> Engine Health Report exported · PDF sent to CTO + Engineering Lead · Ref: ENG-HEALTH-JUL2026 · All systems green', 4500);
+        })
+      + _p8btn('Set Alert Thresholds', 'fa-bell', '#dc2626', function(){
+          _p8toast('<i class="fas fa-bell"></i> Alert configuration: SQL > 500ms → PagerDuty · Queue > 2,000 → Ops email · IIS CPU > 80% → Auto-scale trigger · Uptime < 99.5% → Incident ticket · All thresholds active', 5000);
+        })
+      + '<button onclick="_p8close(\'' + ehId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div></div>'
+    ));
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     8. PATCH OVERVIEW TAB in ltcOpenClaimDetail to show SMARTS panel
+        Wrap the original to inject SMARTS rules into overview on open
+  ───────────────────────────────────────────────────────────────────── */
+  var _origOpenClaimDetail = window.ltcOpenClaimDetail;
+  window.ltcOpenClaimDetail = function(claimId) {
+    if (_origOpenClaimDetail) _origOpenClaimDetail(claimId);
+    /* After original renders, inject SMARTS panel into overview */
+    setTimeout(function(){
+      var body = document.getElementById('lcd-body');
+      var c = window._lcdCurrentClaim;
+      if (!body || !c) return;
+      /* Check if SMARTS panel already present */
+      if (body.innerHTML.indexOf('SMARTS Business Rules Engine') !== -1) return;
+      /* Find the AI panel div and insert after it */
+      var smartsHtml = _p8buildSmartsRulesPanel(c);
+      /* Insert before the action buttons row (last div) */
+      var lastDiv = body.innerHTML.lastIndexOf('<div style="display:flex;gap:10px;">');
+      if (lastDiv !== -1) {
+        body.innerHTML = body.innerHTML.slice(0, lastDiv) + smartsHtml + body.innerHTML.slice(lastDiv);
+      }
+    }, 100);
+  };
+
+  console.log('[Phase 8] LTC Claims Phase 8 loaded — bugs fixed, IDP active, SMARTS rules panel live, New Claim wizard updated, Edit Rule / STP Dashboard / Engine Health fully operational');
+
+})();
