@@ -65445,6 +65445,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window.initHalMedSupPage     = initHalMedSupPage;
   window.initTpaCommandPage    = initTpaCommandPage;
   window.ltcClaimsData         = ltcClaimsData;
+  window._ltcBuildPage         = _ltcBuildPage;
   window.ltcOpenClaimDetail    = ltcOpenClaimDetail;
   window.ltcProcessPayment     = ltcProcessPayment;
   window.ltcScheduleAssessment = ltcScheduleAssessment;
@@ -67622,7 +67623,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + carrierCards
       +'</div></div>';
 
-    _ltcBuildPage('tpl-insurance-carrier-360', html);
+    (window._ltcBuildPage||function(){})('tpl-insurance-carrier-360', html);
   }
 
   window.ltcOpenCarrier360 = function(carrierId) {
@@ -67755,7 +67756,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + providerCards
       +'</div></div>';
 
-    _ltcBuildPage('tpl-healthcare-provider-360', html);
+    (window._ltcBuildPage||function(){})('tpl-healthcare-provider-360', html);
   }
 
   window.ltcOpenProvider360 = function(providerId) {
