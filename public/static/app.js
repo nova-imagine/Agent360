@@ -71603,7 +71603,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       var col=done?'#059669':active?'#dc2626':'#d1d5db';
       return '<div style="display:flex;align-items:center;gap:5px;">'
         +'<div style="width:24px;height:24px;border-radius:50%;background:'+col+';color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(done?'✓':(i+1))+'</div>'
-        +'<span style="font-size:10px;font-weight:'+(active?'700':'500')+';color:'+(active?'#111827':'#9ca3af');white-space:nowrap;">'+s+'</span>'
+        +'<span style="font-size:10px;font-weight:'+(active?'700':'500')+';color:'+(active?'#111827':'#9ca3af')+';white-space:nowrap;">'+s+'</span>'
         +(i<steps.length-1?'<div style="width:20px;height:1px;background:#e5e7eb;"></div>':'')
       +'</div>';
     }).join('');
