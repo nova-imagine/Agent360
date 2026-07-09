@@ -69737,3 +69737,1320 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
 
   console.log('LTC Phase 6 v2 loaded — Full button interactivity: Claim Detail (all 6 tabs · payment, assess, careplan, upload, request, view-doc, contact-provider, visit, carrier-portal, ai-report, ai-flag) · Insurance Carrier 360 (contact, report, claims, escalate, ai-review, ai-portfolio, sla-report, add) · Healthcare Provider 360 (contact, site-visit, audit, claims, ai-review, ai-scan, add) · All WealthAI-powered overlays · Data export bug fixed');
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LTC OPERATIONS — PHASE 7 IIFE
+   System Architecture → Operational Functionality Integration
+   Maps all 14 architecture systems to live operational panels across LTC tabs:
+
+   NEW PAGES (navigateTo routes):
+     ltc-smarts       → SMARTS Business Rules Engine (Claims adjudication rules)
+     ltc-link         → LINK Desktop Underwriting (Assessment queue, case routing)
+     ltc-celltrak     → CellTrak EVV (Mobile assessments, GPS verification)
+     ltc-connect      → CONNECT Web Portal (Client orders, nurse network)
+     ltc-fms          → FMS Financial Management (Premium billing, payment queue)
+     ltc-rpa          → RPA Automation (Kryon bot dashboard, POS queue)
+     ltc-eps          → EPS Correspondence (Document generation, letter tracking)
+     ltc-transport    → Transport Services (sFTP jobs, ActiveBatch schedules)
+     ltc-upd-ops      → UPD Provider Database Operations (provider contracting)
+     ltc-eltcas       → eLTCAS Care Administration (CQRS event log, NServiceBus)
+     ltc-ltcas-admin  → LTCAS Core Administration (Policy admin, UW support)
+
+   ENHANCED PAGES (injected panels into existing pages):
+     ltc-claims       → + LTC Claims Engine panel + SMARTS auto-adjudication band
+     ltc-care         → + eLTCAS event log panel + NServiceBus messages band
+     ltc-eligibility  → + LINK UW queue panel + LTCAS policy status band
+     data-ai          → + Snowflake operational controls + ERM/XRM analytics band
+     ltc-arch         → + System health monitor (per-system live status)
+═══════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─── shared toast & overlay helpers ────────────────────────────────── */
+  function _p7toast(msg, ms) {
+    if (typeof _p5toast === 'function') { _p5toast(msg, ms || 3200); return; }
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0f172a;color:#fff;padding:12px 18px;border-radius:10px;font-size:12px;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:420px;line-height:1.5;';
+    d.innerHTML = msg;
+    document.body.appendChild(d);
+    setTimeout(function () { d.remove(); }, ms || 3200);
+  }
+
+  function _p7overlay(id, html) {
+    document.getElementById(id) && document.getElementById(id).remove();
+    var wrap = document.createElement('div');
+    wrap.id = id;
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;';
+    wrap.innerHTML = html;
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) wrap.remove(); });
+    document.body.appendChild(wrap);
+  }
+
+  function _p7close(id) { var el = document.getElementById(id); if (el) el.remove(); }
+
+  function _p7kpi(val, lbl, icon, color) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        + '<div style="width:28px;height:28px;background:' + color + '18;border-radius:7px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas ' + icon + '" style="color:' + color + ';font-size:12px;"></i></div>'
+        + '<div style="font-size:18px;font-weight:800;color:#111827;">' + val + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;font-weight:600;color:#374151;">' + lbl + '</div>'
+    + '</div>';
+  }
+
+  function _p7hdr(icon, title, sub, color) {
+    return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+      + '<div style="width:40px;height:40px;background:linear-gradient(135deg,' + color + ',' + color + 'cc);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+        + '<i class="fas ' + icon + '" style="color:#fff;font-size:18px;"></i></div>'
+      + '<div><div style="font-size:20px;font-weight:800;color:#111827;">' + title + '</div>'
+        + '<div style="font-size:12px;color:#6b7280;">' + sub + '</div></div>'
+    + '</div>';
+  }
+
+  function _p7statusBadge(s) {
+    var map = { 'Online': '#059669', 'Healthy': '#059669', 'Active': '#059669', 'Warning': '#d97706', 'Degraded': '#d97706', 'Offline': '#dc2626', 'Maintenance': '#7c3aed', 'Running': '#059669', 'Idle': '#6b7280', 'Failed': '#dc2626', 'Processing': '#0891b2', 'Queued': '#d97706', 'Completed': '#059669', 'Pending': '#d97706', 'Error': '#dc2626' };
+    var c = map[s] || '#6b7280';
+    return '<span style="background:' + c + '15;color:' + c + ';border:1px solid ' + c + '40;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">' + s + '</span>';
+  }
+
+  function _p7chip(text, color) {
+    return '<span style="background:' + color + '15;color:' + color + ';border:1px solid ' + color + '30;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600;margin:2px;display:inline-block;">' + text + '</span>';
+  }
+
+  function _p7tblHeader(cols) {
+    return '<thead><tr style="background:#f8fafc;">'
+      + cols.map(function (c) { return '<th style="padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;white-space:nowrap;">' + c + '</th>'; }).join('')
+      + '</tr></thead>';
+  }
+
+  function _p7sectionHdr(icon, title, color, btns) {
+    return '<div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">'
+      + '<span style="font-size:13px;font-weight:700;color:#111827;"><i class="fas ' + icon + '" style="color:' + color + ';margin-right:6px;"></i>' + title + '</span>'
+      + '<div style="display:flex;gap:8px;">' + (btns || '') + '</div>'
+    + '</div>';
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 1: LTC CLAIMS ENGINE — LTC Claims Active Queue Enhancement
+     System: LTC Claims (.NET C# / SQL / IIS / SMARTS)
+     Inject: SMARTS adjudication panel + STP band into existing claims page
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p7buildClaimsEngineBand() {
+    var smartsRules = [
+      { id: 'SR-001', name: 'ADL Benefit Trigger', type: 'Eligibility', desc: '2-of-6 ADL impairment threshold determines benefit activation', status: 'Active', hits: '8,231 this month', action: 'Auto-Approve' },
+      { id: 'SR-002', name: 'Cognitive Impairment Route', type: 'Eligibility', desc: 'MMSE <24 triggers cognitive benefit pathway with physician review', status: 'Active', hits: '1,847 this month', action: 'Route-to-RN' },
+      { id: 'SR-003', name: 'Benefit Period Limit', type: 'Duration', desc: 'Maximum lifetime benefit period enforcement per policy contract', status: 'Active', hits: '312 this month', action: 'Flag-Review' },
+      { id: 'SR-004', name: 'Duplicate Claim Guard', type: 'Fraud', desc: 'Detects duplicate submissions across LTCAS/eLTCAS within 30-day window', status: 'Active', hits: '47 this month', action: 'Hold-SIU' },
+      { id: 'SR-005', name: 'STP Auto-Adjudication', type: 'Payment', desc: 'Straight-Through Processing for clean claims meeting all criteria', status: 'Active', hits: '12,094 this month', action: 'Auto-Pay' },
+      { id: 'SR-006', name: 'Daily Benefit Rate Cap', type: 'Payment', desc: 'Enforces policy daily max; calculates inflation rider adjustments', status: 'Active', hits: '63,000+ per cycle', action: 'Rate-Calc' }
+    ];
+
+    var ruleRows = smartsRules.map(function (r) {
+      var actionColor = r.action === 'Auto-Pay' || r.action === 'Auto-Approve' ? '#059669' : r.action === 'Hold-SIU' ? '#dc2626' : r.action === 'Flag-Review' ? '#d97706' : '#0891b2';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">' + r.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + r.name + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(r.type, '#7c3aed') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;max-width:260px;">' + r.desc + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(r.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + r.hits + '</td>'
+        + '<td style="padding:9px 12px;"><span style="background:' + actionColor + '15;color:' + actionColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + r.action + '</span></td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7editRule(\'' + r.id + '\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">Edit Rule</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    return '<div style="margin-top:20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-cogs', 'SMARTS Business Rules Engine — Active Adjudication Rules', '#7c3aed',
+          '<button onclick="_p7openSmartsSimulator()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-play-circle" style="margin-right:5px;"></i>Run Simulator</button>'
+          + '<button onclick="_p7openStpDashboard()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-bolt" style="margin-right:5px;"></i>STP Dashboard</button>'
+        )
+      + '<div style="padding:12px 16px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-bottom:1px solid #e5e7eb;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + _p7kpi('22,531', 'Claims This Month', 'fa-file-medical-alt', '#dc2626')
+          + _p7kpi('87.4%', 'STP Rate', 'fa-bolt', '#059669')
+          + _p7kpi('6', 'Active Rules', 'fa-cogs', '#7c3aed')
+          + _p7kpi('2.1 hrs', 'Avg Adjudication Time', 'fa-clock', '#0891b2')
+        + '</div>'
+      + '</div>'
+      + '<div style="overflow-x:auto;">'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + _p7tblHeader(['Rule ID', 'Rule Name', 'Type', 'Description', 'Status', 'Monthly Hits', 'Action', ''])
+          + '<tbody>' + ruleRows + '</tbody>'
+        + '</table>'
+      + '</div>'
+    + '</div>'
+    // LTC Claims Engine Status
+    + '<div style="margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-file-medical-alt', 'LTC Claims Engine — System Status (.NET C# / SQL Server / IIS)', '#dc2626',
+          '<button onclick="_p7openClaimsEngineDetail()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-heartbeat" style="margin-right:5px;"></i>Engine Health</button>'
+        )
+      + '<div style="padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">IIS App Pool</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">' + _p7statusBadge('Online') + '<span style="font-size:11px;color:#374151;">4 worker processes</span></div>'
+        + '</div>'
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">SQL Server</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">' + _p7statusBadge('Healthy') + '<span style="font-size:11px;color:#374151;">342ms avg query</span></div>'
+        + '</div>'
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">SMARTS Connection</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">' + _p7statusBadge('Active') + '<span style="font-size:11px;color:#374151;">Rules engine synced</span></div>'
+        + '</div>'
+        + '<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">Claims Queue</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">' + _p7statusBadge('Processing') + '<span style="font-size:11px;color:#374151;">1,247 in queue</span></div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  window._p7editRule = function (ruleId) {
+    _p7toast('<i class="fas fa-cogs"></i> SMARTS Rule ' + ruleId + ' opened in Sparkling Logic editor — changes require change control approval', 3200);
+  };
+
+  window._p7openSmartsSimulator = function () {
+    var html = '<div style="background:#fff;border-radius:16px;width:820px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;display:flex;justify-content:space-between;align-items:center;">'
+        + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:1.5px;">SMARTS · Sparkling Logic</div><div style="font-size:22px;font-weight:800;">Claims Adjudication Simulator</div></div>'
+        + '<button onclick="_p7close(\'smartsSimOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+        + '<div style="background:#f5f3ff;border-left:4px solid #7c3aed;border-radius:4px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:#374151;line-height:1.65;">'
+          + 'Simulate a claim through the SMARTS rules engine to validate adjudication outcomes before deploying rule changes to production. All simulations run against a sandbox copy of the Sparkling Logic rules repository.'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">'
+          + '<div style="background:#f8fafc;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:10px;">Claim Input Parameters</div>'
+            + ['ADL Count (2–6): <input type="number" min="2" max="6" value="3" style="border:1px solid #d1d5db;border-radius:5px;padding:3px 8px;font-size:12px;width:60px;">',
+               'Cognitive Score (MMSE): <input type="number" min="0" max="30" value="18" style="border:1px solid #d1d5db;border-radius:5px;padding:3px 8px;font-size:12px;width:60px;">',
+               'Days Open: <input type="number" value="45" style="border:1px solid #d1d5db;border-radius:5px;padding:3px 8px;font-size:12px;width:60px;">',
+               'Care Type: <select style="border:1px solid #d1d5db;border-radius:5px;padding:3px 8px;font-size:12px;"><option>Nursing Home</option><option>ALF</option><option>Memory Care</option><option>Home Health</option></select>']
+              .map(function (f) { return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:12px;color:#374151;border-bottom:1px solid #e5e7eb;">' + f + '</div>'; }).join('')
+          + '</div>'
+          + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;margin-bottom:10px;">Simulated Adjudication Result</div>'
+            + '<div style="font-size:20px;font-weight:800;color:#059669;margin-bottom:8px;"><i class="fas fa-check-circle" style="margin-right:8px;"></i>APPROVED — STP</div>'
+            + '<div style="font-size:12px;color:#374151;line-height:1.6;">Rules fired: SR-001 (ADL Trigger) → SR-002 (Cognitive Route) → SR-005 (STP)<br>'
+              + 'Benefit: $310/day · Period: Unlimited · Inflation: 3% compound<br>'
+              + 'LTCAS auto-post: Enabled · FMS payment: Queued'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p7close(\'smartsSimOvl\');_p7toast(\'<i class=\\\"fas fa-play\\\"></i> SMARTS simulation complete — SR-001, SR-002, SR-005 fired — result: APPROVED STP\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Run Simulation</button>'
+          + '<button onclick="_p7close(\'smartsSimOvl\');_p7toast(\'<i class=\\\"fas fa-upload\\\"></i> SMARTS rule set exported to sandbox for QA validation\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;flex:1;">Export Rule Set</button>'
+          + '<button onclick="_p7close(\'smartsSimOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p7overlay('smartsSimOvl', html);
+  };
+
+  window._p7openStpDashboard = function () {
+    _p7toast('<i class="fas fa-bolt"></i> STP Dashboard: 87.4% straight-through rate · 12,094 auto-adjudicated this month · 1,547 routed to RN review · 47 held for SIU', 5000);
+  };
+
+  window._p7openClaimsEngineDetail = function () {
+    _p7toast('<i class="fas fa-heartbeat"></i> LTC Claims Engine: 99.8% uptime · IIS pool healthy · SQL avg 342ms · SMARTS sync OK · 1,247 claims in queue', 4500);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 2: eLTCAS CARE ADMINISTRATION — Care Coordination Enhancement
+     System: eLTCAS (.NET / SQL / CQRS / NServiceBus / Angular SPA)
+     Inject: CQRS event log + NServiceBus message stream into Care Coordination
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p7buildEltcasBand() {
+    var cqrsEvents = [
+      { id: 'EVT-8841', command: 'UpdateCarePlan', aggregate: 'CareCase-44392', ts: '14:23:11', user: 'RN Smith', status: 'Committed', downstream: 'NServiceBus → Case360' },
+      { id: 'EVT-8840', command: 'ScheduleAssessment', aggregate: 'CareCase-44389', ts: '14:21:08', user: 'Sys-LINK', status: 'Committed', downstream: 'NServiceBus → LTCAS' },
+      { id: 'EVT-8839', command: 'ApproveBenefitChange', aggregate: 'CareCase-44380', ts: '14:18:44', user: 'MSW Jones', status: 'Committed', downstream: 'NServiceBus → FMS' },
+      { id: 'EVT-8838', command: 'FlagClaimReview', aggregate: 'CareCase-44375', ts: '14:15:22', user: 'SIU-Auto', status: 'Committed', downstream: 'NServiceBus → SMARTS' },
+      { id: 'EVT-8837', command: 'CreateServiceRequest', aggregate: 'CareCase-44370', ts: '14:11:05', user: 'RN Patel', status: 'Committed', downstream: 'NServiceBus → UPD' },
+      { id: 'EVT-8836', command: 'AssignCareCoordinator', aggregate: 'CareCase-44365', ts: '14:08:33', user: 'Sys-Auto', status: 'Committed', downstream: 'NServiceBus → EPS' },
+      { id: 'EVT-8835', command: 'RequestDocuments', aggregate: 'CareCase-44360', ts: '14:05:17', user: 'CM Davis', status: 'Processing', downstream: 'NServiceBus → EPS (pending)' }
+    ];
+
+    var eventRows = cqrsEvents.map(function (e) {
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:8px 12px;font-size:11px;font-weight:700;color:#003087;">' + e.id + '</td>'
+        + '<td style="padding:8px 12px;font-size:11px;font-weight:700;color:#111827;">' + e.command + '</td>'
+        + '<td style="padding:8px 12px;font-size:11px;color:#374151;">' + e.aggregate + '</td>'
+        + '<td style="padding:8px 12px;font-size:11px;color:#6b7280;">' + e.ts + '</td>'
+        + '<td style="padding:8px 12px;font-size:11px;color:#374151;">' + e.user + '</td>'
+        + '<td style="padding:8px 12px;">' + _p7statusBadge(e.status) + '</td>'
+        + '<td style="padding:8px 12px;font-size:10px;color:#6b7280;">' + e.downstream + '</td>'
+        + '<td style="padding:8px 12px;">'
+          + '<button onclick="_p7toast(\'<i class=\\\"fas fa-layer-group\\\"></i> Event ' + e.id + ' replayed — aggregate state rebuilt from event store\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">Replay</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    return '<div style="margin-top:20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-layer-group', 'eLTCAS — CQRS Event Store & NServiceBus Message Stream (.NET / CQRS)', '#003087',
+          '<button onclick="_p7openEventReplay()" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-redo" style="margin-right:5px;"></i>Event Replay</button>'
+          + '<button onclick="_p7openNServiceBus()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-bus" style="margin-right:5px;"></i>NServiceBus Monitor</button>'
+        )
+      + '<div style="padding:12px 16px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-bottom:1px solid #e5e7eb;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + _p7kpi('2.4M', 'Events in Store', 'fa-layer-group', '#003087')
+          + _p7kpi('99.97%', 'Event Consistency', 'fa-check-double', '#059669')
+          + _p7kpi('7', 'NServiceBus Endpoints', 'fa-bus', '#0891b2')
+          + _p7kpi('<50ms', 'Command Processing', 'fa-bolt', '#7c3aed')
+        + '</div>'
+      + '</div>'
+      + '<div style="overflow-x:auto;">'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + _p7tblHeader(['Event ID', 'Command', 'Aggregate', 'Time', 'User', 'Status', 'Downstream', ''])
+          + '<tbody>' + eventRows + '</tbody>'
+        + '</table>'
+      + '</div>'
+    + '</div>';
+  }
+
+  window._p7openEventReplay = function () {
+    _p7toast('<i class="fas fa-redo"></i> eLTCAS Event Replay: Rebuilding aggregate state from event store — 2.4M events · CQRS projection refresh initiated', 4000);
+  };
+
+  window._p7openNServiceBus = function () {
+    var html = '<div style="background:#fff;border-radius:16px;width:780px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#0052cc,#0891b2);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;display:flex;justify-content:space-between;align-items:center;">'
+        + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;">eLTCAS · NServiceBus</div><div style="font-size:22px;font-weight:800;">Message Bus Monitor</div></div>'
+        + '<button onclick="_p7close(\'nsbOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+      + '</div>'
+      + '<div style="padding:20px 24px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">'
+          + _p7kpi('7', 'Active Endpoints', 'fa-plug', '#0891b2')
+          + _p7kpi('1,842', 'Messages/hr', 'fa-envelope', '#003087')
+          + _p7kpi('0', 'Dead Letter Queue', 'fa-skull', '#059669')
+        + '</div>'
+        + '<div style="background:#f8fafc;border-radius:10px;overflow:hidden;margin-bottom:16px;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Endpoint', 'Queue', 'Status', 'Messages/hr', 'Last Msg'])
+            + '<tbody>'
+              + [['eLTCAS.CareAdmin', 'care.admin.input', 'Online', '423', '14:23:11'],
+                 ['eLTCAS.ClaimsRoute', 'claims.route.input', 'Online', '312', '14:22:58'],
+                 ['FMS.PaymentCmd', 'fms.payment.input', 'Online', '187', '14:21:44'],
+                 ['LTCAS.PolicySync', 'ltcas.sync.input', 'Online', '244', '14:20:33'],
+                 ['EPS.DocRequest', 'eps.doc.input', 'Online', '98', '14:19:22'],
+                 ['UPD.ProviderCmd', 'upd.provider.input', 'Online', '76', '14:18:11'],
+                 ['Case360.DocMgmt', 'case360.doc.input', 'Online', '502', '14:17:55']
+                ].map(function (r) {
+                  return '<tr style="border-bottom:1px solid #f3f4f6;">'
+                    + r.map(function (c, i) {
+                      if (i === 2) return '<td style="padding:8px 12px;">' + _p7statusBadge(c) + '</td>';
+                      return '<td style="padding:8px 12px;font-size:11px;color:#374151;">' + c + '</td>';
+                    }).join('') + '</tr>';
+                }).join('')
+            + '</tbody>'
+          + '</table>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p7close(\'nsbOvl\');_p7toast(\'<i class=\\\"fas fa-broom\\\"></i> NServiceBus dead letter queue purged — 0 messages in error state\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Purge DLQ</button>'
+          + '<button onclick="_p7close(\'nsbOvl\');_p7toast(\'<i class=\\\"fas fa-redo\\\"></i> NServiceBus endpoints restarted — all 7 endpoints reconnected\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;flex:1;">Restart Endpoints</button>'
+          + '<button onclick="_p7close(\'nsbOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p7overlay('nsbOvl', html);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 3: LINK DESKTOP UNDERWRITING — Eligibility & Assessment Enhancement
+     System: LINK (.NET C# / SQL / BizTalk / CONNECT / LTCAS / eLTCAS / Case360)
+     Inject: UW assessment queue + BizTalk routing into Eligibility page
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p7buildLinkBand() {
+    var uwQueue = [
+      { id: 'UW-7701', applicant: 'Gerald Hoffman', age: 71, type: 'Face-to-Face', carrier: 'Transamerica', product: 'Hybrid LTC/Ann', assessor: 'RN Patricia Lang', scheduled: 'Jul 10, 2026', status: 'In Progress', biztalkRoute: 'LINK → LTCAS' },
+      { id: 'UW-7702', applicant: 'Sandra McClellan', age: 68, type: 'Telephonic', carrier: 'MassMutual', product: 'LTC Standalone', assessor: 'RN Kevin Walsh', scheduled: 'Jul 11, 2026', status: 'Scheduled', biztalkRoute: 'LINK → eLTCAS' },
+      { id: 'UW-7703', applicant: 'Harold Zimmer', age: 74, type: 'Face-to-Face', carrier: 'Genworth', product: 'LTC Standalone', assessor: 'RN Anna Torres', scheduled: 'Jul 12, 2026', status: 'Scheduled', biztalkRoute: 'LINK → LTCAS' },
+      { id: 'UW-7704', applicant: 'Florence Nakamura', age: 65, type: 'Telephonic', carrier: 'Pacific Life', product: 'Hybrid LTC/Life', assessor: 'RN David Kim', scheduled: 'Jul 14, 2026', status: 'Pending', biztalkRoute: 'LINK → Case360' },
+      { id: 'UW-7705', applicant: 'Chester Williams', age: 79, type: 'Face-to-Face', carrier: 'Prudential', product: 'LTC Standalone', assessor: 'RN Susan Park', scheduled: 'Jul 15, 2026', status: 'Pending', biztalkRoute: 'LINK → eLTCAS' }
+    ];
+
+    var uwRows = uwQueue.map(function (u) {
+      var statusColor = u.status === 'In Progress' ? '#0891b2' : u.status === 'Scheduled' ? '#059669' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#7c3aed;">' + u.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + u.applicant + '<div style="font-size:10px;color:#6b7280;">Age ' + u.age + '</div></td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(u.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + u.carrier + '<div style="font-size:10px;color:#6b7280;">' + u.product + '</div></td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + u.assessor + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + u.scheduled + '</td>'
+        + '<td style="padding:9px 12px;"><span style="background:' + statusColor + '15;color:' + statusColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + u.status + '</span></td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + u.biztalkRoute + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7openLinkCase(\'' + u.id + '\')" style="background:#7c3aed;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">Open Case</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    return '<div style="margin-top:20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-desktop', 'LINK Desktop Underwriting — Assessment Queue & BizTalk Routing (.NET C# / SQL / BizTalk)', '#7c3aed',
+          '<button onclick="_p7openBizTalkMonitor()" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-route" style="margin-right:5px;"></i>BizTalk Monitor</button>'
+          + '<button onclick="_p7openLinkNewCase()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>New UW Case</button>'
+        )
+      + '<div style="padding:12px 16px;background:linear-gradient(135deg,#faf5ff,#ede9fe);border-bottom:1px solid #e5e7eb;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + _p7kpi('5', 'Cases in Queue', 'fa-desktop', '#7c3aed')
+          + _p7kpi('1 Active', 'In Progress', 'fa-play', '#0891b2')
+          + _p7kpi('3', 'BizTalk Routes', 'fa-route', '#003087')
+          + _p7kpi('4.2 days', 'Avg Turnaround', 'fa-clock', '#d97706')
+        + '</div>'
+      + '</div>'
+      + '<div style="overflow-x:auto;">'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + _p7tblHeader(['Case ID', 'Applicant', 'Type', 'Carrier / Product', 'Assessor', 'Scheduled', 'Status', 'BizTalk Route', ''])
+          + '<tbody>' + uwRows + '</tbody>'
+        + '</table>'
+      + '</div>'
+    + '</div>'
+    // LTCAS Policy Status Band
+    + '<div style="margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+      + _p7sectionHdr('fa-server', 'LTCAS Core Administration — Policy Status & Underwriting Support (PowerBuilder / SQL)', '#dc2626',
+          '<button onclick="_p7openLtcasPolicyAdmin()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-cog" style="margin-right:5px;"></i>Policy Admin Console</button>'
+        )
+      + '<div style="padding:14px 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">'
+        + ['Applications Pending UW|fa-hourglass-half|247|#d97706', 'Policies in Force|fa-file-contract|63,847|#059669', 'UW Decisions Today|fa-gavel|38|#003087'].map(function (s) {
+          var p = s.split('|');
+          return '<div style="background:#f8fafc;border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;">'
+            + '<i class="fas ' + p[1] + '" style="color:' + p[3] + ';font-size:20px;"></i>'
+            + '<div><div style="font-size:18px;font-weight:800;color:#111827;">' + p[2] + '</div>'
+              + '<div style="font-size:11px;color:#6b7280;">' + p[0] + '</div></div>'
+          + '</div>';
+        }).join('')
+      + '</div>'
+    + '</div>';
+  }
+
+  window._p7openLinkCase = function (id) {
+    _p7toast('<i class="fas fa-desktop"></i> LINK Case ' + id + ' opened — assessment form loaded · assessor notified · BizTalk routing configured', 3200);
+  };
+
+  window._p7openBizTalkMonitor = function () {
+    _p7toast('<i class="fas fa-route"></i> BizTalk Monitor: 3 active routes (LINK→LTCAS, LINK→eLTCAS, LINK→Case360) · 0 routing failures · 1,247 messages routed today', 4500);
+  };
+
+  window._p7openLinkNewCase = function () {
+    _p7toast('<i class="fas fa-plus"></i> LINK New UW Case created — applicant intake form opened · self-scheduling SMS sent', 3000);
+  };
+
+  window._p7openLtcasPolicyAdmin = function () {
+    var html = '<div style="background:#fff;border-radius:16px;width:820px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#b91c1c,#dc2626);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;display:flex;justify-content:space-between;align-items:center;">'
+        + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;">LTCAS · PowerBuilder / SQL Server</div><div style="font-size:22px;font-weight:800;">Policy Administration Console</div></div>'
+        + '<button onclick="_p7close(\'ltcasOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+          + _p7kpi('63,847', 'Policies in Force', 'fa-file-contract', '#dc2626')
+          + _p7kpi('247', 'Pending UW', 'fa-hourglass-half', '#d97706')
+          + _p7kpi('$4.2B', 'Annual Claims', 'fa-dollar-sign', '#059669')
+          + _p7kpi('99.7%', 'System Uptime', 'fa-server', '#003087')
+        + '</div>'
+        + '<div style="background:#f8fafc;border-radius:10px;overflow:hidden;margin-bottom:16px;">'
+          + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #fecaca;font-size:12px;font-weight:700;color:#dc2626;"><i class="fas fa-server" style="margin-right:6px;"></i>LTCAS Module Status — PowerBuilder Client-Server</div>'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Module', 'Description', 'Status', 'Last Updated'])
+            + '<tbody>'
+              + [['Policy Administration', 'Policy lifecycle management — issue, amend, terminate', 'Online', 'Live'],
+                 ['Underwriting Support', 'Application processing, UW decision log, LINK integration', 'Online', 'Live'],
+                 ['Claims Processing', 'Claim intake, adjudication support (→ SMARTS)', 'Online', 'Live'],
+                 ['Financial Integration', 'Premium posting, FMS sync, MS Dynamics GP link', 'Online', 'Live'],
+                 ['Case360 Interface', 'Document imaging and claims document retrieval', 'Online', 'Live'],
+                 ['EPS Integration', 'Policy correspondence, EOB generation, print queue', 'Online', 'Live']
+                ].map(function (r) {
+                  return '<tr style="border-bottom:1px solid #f3f4f6;">'
+                    + '<td style="padding:8px 12px;font-size:11px;font-weight:700;color:#111827;">' + r[0] + '</td>'
+                    + '<td style="padding:8px 12px;font-size:11px;color:#374151;">' + r[1] + '</td>'
+                    + '<td style="padding:8px 12px;">' + _p7statusBadge(r[2]) + '</td>'
+                    + '<td style="padding:8px 12px;font-size:11px;color:#6b7280;">' + r[3] + '</td>'
+                  + '</tr>';
+                }).join('')
+            + '</tbody>'
+          + '</table>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p7close(\'ltcasOvl\');_p7toast(\'<i class=\\\"fas fa-robot\\\"></i> WealthAI LTCAS modernization assessment: PowerBuilder migration to .NET estimated 18 months · Strangler-fig API pattern recommended\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">AI Modernization Assessment</button>'
+          + '<button onclick="_p7close(\'ltcasOvl\');_p7toast(\'<i class=\\\"fas fa-file-export\\\"></i> LTCAS policy data export initiated — 63,847 records queued for XRM/Snowflake sync\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;flex:1;">Export Policy Data</button>'
+          + '<button onclick="_p7close(\'ltcasOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p7overlay('ltcasOvl', html);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: CellTrak EVV Management
+     System: CellTrak (AWS / HealthLink API / EVV / Mobile SDK → LINK)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initCellTrakPage = function () {
+    var evvVisits = [
+      { id: 'EVV-3301', claimant: 'Margaret O\'Brien', provider: 'Sunrise Home Health', aide: 'Maria Santos', date: 'Jul 9, 2026', checkIn: '08:14', checkOut: '12:47', gps: '40.7128° N, 74.0059° W', duration: '4h 33m', status: 'Verified', compliance: '✓ EVV' },
+      { id: 'EVV-3302', claimant: 'Harold Weissman', provider: 'Golden Years Agency', aide: 'James Rodriguez', date: 'Jul 9, 2026', checkIn: '09:02', checkOut: '13:15', gps: '34.0522° N, 118.2437° W', duration: '4h 13m', status: 'Verified', compliance: '✓ EVV' },
+      { id: 'EVV-3303', claimant: 'Ruth Blackwood', provider: 'Pacific Care Group', aide: 'Susan Kim', date: 'Jul 9, 2026', checkIn: '07:58', checkOut: '12:31', gps: '37.7749° N, 122.4194° W', duration: '4h 33m', status: 'Verified', compliance: '✓ EVV' },
+      { id: 'EVV-3304', claimant: 'Dorothy Sinclair', provider: 'Heartland Home Care', aide: 'Anna Petrov', date: 'Jul 9, 2026', checkIn: '10:15', checkOut: null, gps: '41.8781° N, 87.6298° W', duration: 'In Progress', status: 'Active', compliance: 'GPS Live' },
+      { id: 'EVV-3305', claimant: 'Frank Kazlowski', provider: 'Premier Home Health', aide: 'David Chen', date: 'Jul 9, 2026', checkIn: '08:45', checkOut: '14:00', gps: 'GPS Mismatch', duration: '5h 15m', status: 'Warning', compliance: '⚠ Investigate' },
+      { id: 'EVV-3306', claimant: 'Eleanor Chang', provider: 'Pacific Care Group', aide: 'Lisa Park', date: 'Jul 9, 2026', checkIn: null, checkOut: null, gps: 'No GPS', duration: '—', status: 'Failed', compliance: '✗ Missing' }
+    ];
+
+    var evvRows = evvVisits.map(function (v) {
+      var sc = v.status === 'Verified' ? '#059669' : v.status === 'Active' ? '#0891b2' : v.status === 'Warning' ? '#d97706' : '#dc2626';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#0891b2;">' + v.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + v.claimant + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + v.provider + '<div style="font-size:10px;color:#6b7280;">' + v.aide + '</div></td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + (v.checkIn || '—') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + (v.checkOut || '—') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + v.duration + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + v.gps + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(v.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;font-weight:700;color:' + sc + ';">' + v.compliance + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7cellTrakAction(\'' + v.id + '\',\'' + v.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (v.status === 'Active' ? 'Track Live' : v.status === 'Warning' ? 'Investigate' : v.status === 'Failed' ? 'Report' : 'View') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-mobile-alt', 'CellTrak EVV Management', 'Electronic Visit Verification · Mobile Assessments · AWS / HealthLink API · GPS Verification · Real-Time Compliance', '#0891b2')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('6', 'Visits Today', 'fa-mobile-alt', '#0891b2')
+        + _p7kpi('4', 'EVV Verified', 'fa-check-circle', '#059669')
+        + _p7kpi('1 Active', 'In Progress (GPS Live)', 'fa-map-marker-alt', '#003087')
+        + _p7kpi('1 Alert', 'GPS Mismatch / Missing', 'fa-exclamation-triangle', '#dc2626')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-map-marker-alt', 'Today\'s EVV Visit Log — Real-Time GPS Verification', '#0891b2',
+            '<button onclick="_p7celltrakExport()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-download" style="margin-right:5px;"></i>Export EVV Report</button>'
+            + '<button onclick="_p7celltrakAiScan()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Integrity Scan</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Visit ID', 'Claimant', 'Provider / Aide', 'Check-In', 'Check-Out', 'Duration', 'GPS Location', 'Status', 'EVV', ''])
+            + '<tbody>' + evvRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // EVV Compliance Summary
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-shield-alt', 'EVV Compliance Summary — State Mandate Tracking', '#059669')
+        + '<div style="padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">'
+          + ['State Compliance Rate|98.7%|fa-check-shield|#059669|Medicaid EVV mandate met for all applicable states',
+             'HealthLink API Status|Connected|fa-link|#0891b2|Real-time data exchange with state EVV aggregator',
+             'Fraud Risk Flags|3 This Month|fa-exclamation-triangle|#d97706|GPS mismatch + duplicate billing patterns detected'
+            ].map(function (s) {
+              var p = s.split('|');
+              return '<div style="background:#f8fafc;border-radius:8px;padding:12px;">'
+                + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+                  + '<i class="fas ' + p[2] + '" style="color:' + p[3] + ';font-size:16px;"></i>'
+                  + '<div style="font-size:14px;font-weight:800;color:#111827;">' + p[1] + '</div>'
+                + '</div>'
+                + '<div style="font-size:11px;font-weight:600;color:#374151;">' + p[0] + '</div>'
+                + '<div style="font-size:10px;color:#6b7280;margin-top:3px;">' + p[4] + '</div>'
+              + '</div>';
+            }).join('')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-celltrak');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7cellTrakAction = function (id, status) {
+    var msgs = {
+      Active: '<i class="fas fa-map-marker-alt"></i> CellTrak Live GPS: Visit ' + id + ' — aide location verified · real-time tracking active',
+      Warning: '<i class="fas fa-exclamation-triangle"></i> EVV Investigation opened for ' + id + ' — GPS mismatch flagged · SIU notification queued',
+      Failed: '<i class="fas fa-file-alt"></i> EVV Failure Report generated for ' + id + ' — missing visit log · carrier notified',
+      Verified: '<i class="fas fa-check-circle"></i> EVV Visit ' + id + ' details opened — GPS verified · duration validated · Medicaid compliant'
+    };
+    _p7toast(msgs[status] || msgs.Verified, 3500);
+  };
+
+  window._p7celltrakExport = function () { _p7toast('<i class="fas fa-download"></i> EVV Report exported — HIPAA-compliant visit log with GPS coordinates sent to carrier', 3200); };
+  window._p7celltrakAiScan = function () { _p7toast('<i class="fas fa-robot"></i> CellTrak AI Integrity Scan: 98.7% visit compliance · 3 GPS anomalies detected · 1 duplicate billing pattern flagged — SIU queue updated', 5000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: CONNECT Web Portal — Client Orders & Nurse Network
+     System: CONNECT (.NET / MVC 4 / WCF → LINK)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initConnectPortalPage = function () {
+    var orders = [
+      { id: 'ORD-9901', client: 'MetLife Insurance', type: 'Face-to-Face Assessment', claimant: 'Alan Greenberg', state: 'NY', requested: 'Jul 8, 2026', due: 'Jul 15, 2026', assignedRN: 'RN Patricia Lang', status: 'In Progress', portal: 'Client Portal' },
+      { id: 'ORD-9902', client: 'Transamerica', type: 'Telephonic Assessment', claimant: 'Evelyn Marchetti', state: 'FL', requested: 'Jul 8, 2026', due: 'Jul 16, 2026', assignedRN: 'Unassigned', status: 'Pending', portal: 'CONNECT API' },
+      { id: 'ORD-9903', client: 'MassMutual', type: 'Annual Reassessment', claimant: 'Nancy Kowalczyk', state: 'CA', requested: 'Jul 9, 2026', due: 'Jul 18, 2026', assignedRN: 'RN Anna Torres', status: 'Scheduled', portal: 'Client Portal' },
+      { id: 'ORD-9904', client: 'Genworth', type: 'Cognitive Assessment', claimant: 'Robert Feinstein', state: 'TX', requested: 'Jul 9, 2026', due: 'Jul 20, 2026', assignedRN: 'RN Kevin Walsh', status: 'Scheduled', portal: 'CONNECT API' },
+      { id: 'ORD-9905', client: 'Prudential', type: 'Functional Assessment', claimant: 'Carol Steinberg', state: 'OH', requested: 'Jul 9, 2026', due: 'Jul 22, 2026', assignedRN: 'Unassigned', status: 'Pending', portal: 'Client Portal' }
+    ];
+
+    var orderRows = orders.map(function (o) {
+      var sc = o.status === 'In Progress' ? '#0891b2' : o.status === 'Scheduled' ? '#059669' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#7c3aed;">' + o.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + o.client + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(o.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + o.claimant + ' <span style="color:#9ca3af;">(' + o.state + ')</span></td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + o.requested + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + (o.status === 'Pending' ? '#dc2626' : '#374151') + ';">' + o.due + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:' + (o.assignedRN === 'Unassigned' ? '#dc2626' : '#374151') + ';font-weight:' + (o.assignedRN === 'Unassigned' ? '700' : 'normal') + ';">' + o.assignedRN + '</td>'
+        + '<td style="padding:9px 12px;"><span style="background:' + sc + '15;color:' + sc + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + o.status + '</span></td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7connectOrderAction(\'' + o.id + '\',\'' + o.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (o.assignedRN === 'Unassigned' ? 'Assign RN' : 'View Order') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-globe', 'CONNECT Web Portal', 'Client Assessment Orders · Nurse Network Assignments · Order Tracking · .NET MVC 4 / WCF / LINK Integration', '#7c3aed')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('5', 'Open Orders', 'fa-clipboard-list', '#7c3aed')
+        + _p7kpi('2', 'Unassigned', 'fa-user-slash', '#dc2626')
+        + _p7kpi('3 Active', 'RNs on Assignment', 'fa-user-nurse', '#059669')
+        + _p7kpi('7.1 days', 'Avg Order Turnaround', 'fa-clock', '#d97706')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-clipboard-list', 'Client Assessment Orders — CONNECT Portal', '#7c3aed',
+            '<button onclick="_p7connectAutoAssign()" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Auto-Assign</button>'
+            + '<button onclick="_p7connectNewOrder()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>New Order</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Order ID', 'Client', 'Assessment Type', 'Claimant (State)', 'Requested', 'Due', 'Assigned RN', 'Status', ''])
+            + '<tbody>' + orderRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // Nurse Network Status
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-user-nurse', 'Nurse Network Status — 50-State RN Coverage', '#059669',
+            '<button onclick="_p7connectNurseMap()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-map" style="margin-right:5px;"></i>Coverage Map</button>'
+          )
+        + '<div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + ['1,200+|Network RNs|fa-user-nurse|#059669', '50|States + Territories|fa-map|#003087', '4.2 days|Avg Assignment SLA|fa-clock|#d97706', '98.3%|On-Time Completion|fa-chart-line|#059669'].map(function (s) {
+              var p = s.split('|');
+              return _p7kpi(p[0], p[1], p[2], p[3]);
+            }).join('')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-connect');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7connectOrderAction = function (id, status) {
+    if (status === 'Pending') {
+      _p7toast('<i class="fas fa-user-nurse"></i> CONNECT Order ' + id + ': RN assignment in progress — matching by geography and specialty via LINK integration', 3500);
+    } else {
+      _p7toast('<i class="fas fa-clipboard-list"></i> CONNECT Order ' + id + ' opened — assessment details, scheduling, and status tracking available', 3200);
+    }
+  };
+  window._p7connectAutoAssign = function () { _p7toast('<i class="fas fa-robot"></i> AI Auto-Assign: 2 unassigned orders matched to available RNs by geography · SMS notifications sent', 4000); };
+  window._p7connectNewOrder = function () { _p7toast('<i class="fas fa-plus"></i> New CONNECT Portal order created — client notified · order number generated · RN matching initiated', 3000); };
+  window._p7connectNurseMap = function () { _p7toast('<i class="fas fa-map"></i> RN Coverage Map: 1,200+ nurses across 50 states · real-time availability · geographic assignment engine active', 4000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: FMS Financial Management
+     System: FMS (SQL Server / Java / JBoss EAP / LTCAS / eLTCAS / MS Dynamics)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initFmsPage = function () {
+    var billingQueue = [
+      { id: 'INV-2201', carrier: 'Transamerica', type: 'Premium Billing', period: 'Jul 2026', amount: '$2,847,392', status: 'Processing', fmsStatus: 'JBoss EAP', due: 'Jul 31, 2026' },
+      { id: 'INV-2202', carrier: 'MassMutual', type: 'Claim Reimbursement', period: 'Jun 2026', amount: '$1,244,018', status: 'Completed', fmsStatus: 'Posted', due: 'Jul 15, 2026' },
+      { id: 'INV-2203', carrier: 'Genworth', type: 'Premium Billing', period: 'Jul 2026', amount: '$3,122,450', status: 'Queued', fmsStatus: 'SQL Queue', due: 'Jul 31, 2026' },
+      { id: 'INV-2204', carrier: 'Prudential', type: 'Admin Fee', period: 'Q2 2026', amount: '$487,200', status: 'Completed', fmsStatus: 'Posted', due: 'Jul 10, 2026' },
+      { id: 'INV-2205', carrier: 'Pacific Life', type: 'Claim Reimbursement', period: 'Jun 2026', amount: '$698,340', status: 'Error', fmsStatus: 'Reconcile', due: 'Jul 12, 2026' },
+      { id: 'INV-2206', carrier: 'Lincoln Natl', type: 'Premium Billing', period: 'Jul 2026', amount: '$1,876,500', status: 'Processing', fmsStatus: 'JBoss EAP', due: 'Jul 31, 2026' }
+    ];
+
+    var billRows = billingQueue.map(function (b) {
+      var sc = b.status === 'Completed' ? '#059669' : b.status === 'Processing' ? '#0891b2' : b.status === 'Error' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#059669;">' + b.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + b.carrier + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(b.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + b.period + '</td>'
+        + '<td style="padding:9px 12px;font-size:13px;font-weight:800;color:#059669;">' + b.amount + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(b.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + b.fmsStatus + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + b.due + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7fmsAction(\'' + b.id + '\',\'' + b.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (b.status === 'Error' ? 'Reconcile' : b.status === 'Queued' ? 'Process' : 'View') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-dollar-sign', 'FMS Financial Management', 'Premium Processing · Billing Queue · Payment Reconciliation · SQL Server / Java / JBoss EAP · MS Dynamics GP Integration', '#059669')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('$10.3M', 'Billing This Period', 'fa-dollar-sign', '#059669')
+        + _p7kpi('4', 'Invoices Processing', 'fa-hourglass-half', '#0891b2')
+        + _p7kpi('1 Error', 'Reconciliation Needed', 'fa-exclamation-triangle', '#dc2626')
+        + _p7kpi('$4.2B', 'Annual Claims Paid', 'fa-chart-line', '#003087')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-file-invoice-dollar', 'Billing & Payment Queue — JBoss EAP Processing', '#059669',
+            '<button onclick="_p7fmsRunReconcile()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-sync" style="margin-right:5px;"></i>Run Reconciliation</button>'
+            + '<button onclick="_p7fmsDynamicsSync()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-chart-line" style="margin-right:5px;"></i>MS Dynamics GP Sync</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Invoice ID', 'Carrier', 'Type', 'Period', 'Amount', 'Status', 'FMS Engine', 'Due Date', ''])
+            + '<tbody>' + billRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // MS Dynamics GP Integration Panel
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-chart-line', 'MS Dynamics GP — Client Accounting Integration', '#dc2626',
+            '<button onclick="_p7openDynamicsDetail()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-book" style="margin-right:5px;"></i>GL Transactions</button>'
+          )
+        + '<div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + ['Last Sync|5 min ago|fa-sync|#059669', 'Premium Transactions|1,247 today|fa-receipt|#003087', 'Claim Postings|842 today|fa-file-invoice|#7c3aed', 'Reconciliation|✓ Balanced|fa-balance-scale|#059669'].map(function (s) {
+              var p = s.split('|');
+              return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">'
+                + '<i class="fas ' + p[2] + '" style="color:' + p[3] + ';font-size:16px;"></i>'
+                + '<div><div style="font-size:13px;font-weight:800;color:#111827;">' + p[1] + '</div>'
+                  + '<div style="font-size:10px;color:#6b7280;">' + p[0] + '</div></div>'
+              + '</div>';
+            }).join('')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-fms');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7fmsAction = function (id, status) {
+    var msgs = {
+      Error: '<i class="fas fa-sync"></i> FMS Reconciliation initiated for ' + id + ' — Pacific Life discrepancy queued for GL review · MS Dynamics GP notified',
+      Queued: '<i class="fas fa-play"></i> FMS Invoice ' + id + ' processing started — JBoss EAP job submitted · estimated completion 4 hours',
+      Completed: '<i class="fas fa-file-invoice-dollar"></i> FMS Invoice ' + id + ' details opened — payment confirmed · Dynamics GP posting verified',
+      Processing: '<i class="fas fa-hourglass-half"></i> FMS Invoice ' + id + ' in progress — JBoss EAP processing · SSRS report queued'
+    };
+    _p7toast(msgs[status] || msgs.Processing, 3500);
+  };
+  window._p7fmsRunReconcile = function () { _p7toast('<i class="fas fa-sync"></i> FMS Reconciliation: SSIS ETL running — comparing LTCAS payments vs MS Dynamics GP GL entries · 1 discrepancy flagged', 4500); };
+  window._p7fmsDynamicsSync = function () { _p7toast('<i class="fas fa-chart-line"></i> MS Dynamics GP sync initiated — 2,089 LTCAS transactions posted to client accounting · GL balanced', 3500); };
+  window._p7openDynamicsDetail = function () { _p7toast('<i class="fas fa-book"></i> MS Dynamics GP GL: Premium Revenue $10.3M · Claims Expense $8.7M · Admin Fee $0.49M · Net Margin 9.8% — FY2026 Q3', 5000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: RPA Automation Dashboard
+     System: RPA (Kryon RPA Platform / SQL Server / LTCAS / eLTCAS)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initRpaPage = function () {
+    var bots = [
+      { id: 'BOT-K01', name: 'Policy Owner Services Auto', type: 'Policy Admin', system: 'LTCAS', tasks: 'Address change · Beneficiary update · Coverage inquiry', tasksToday: 847, status: 'Running', successRate: '99.2%', lastRun: '14:23' },
+      { id: 'BOT-K02', name: 'Premium Payment Processor', type: 'Financial', system: 'LTCAS + FMS', tasks: 'Premium posting · Late notice · Grace period calc', tasksToday: 1244, status: 'Running', successRate: '98.7%', lastRun: '14:21' },
+      { id: 'BOT-K03', name: 'Claims Status Updater', type: 'Claims', system: 'eLTCAS + SMARTS', tasks: 'Status notification · Provider portal update · STP post', tasksToday: 522, status: 'Running', successRate: '99.8%', lastRun: '14:19' },
+      { id: 'BOT-K04', name: 'Carrier Data Feed Sync', type: 'Integration', system: 'eLTCAS + Snowflake', tasks: 'XRM incremental load · Snowflake push · Error retry', tasksToday: 388, status: 'Running', successRate: '97.4%', lastRun: '14:15' },
+      { id: 'BOT-K05', name: 'Provider Roster Refresh', type: 'UPD', system: 'UPD + LTCAS', tasks: 'Provider credential check · Network status sync · EVV update', tasksToday: 214, status: 'Idle', successRate: '100%', lastRun: '12:00' },
+      { id: 'BOT-K06', name: 'EPS Correspondence Queue', type: 'Documents', system: 'EPS + LTCAS', tasks: 'Generate EOB · Policyholder letters · Print queue submit', tasksToday: 1876, status: 'Running', successRate: '99.5%', lastRun: '14:22' },
+      { id: 'BOT-K07', name: 'Appeals & Escalation Bot', type: 'Compliance', system: 'eLTCAS + Case360', tasks: 'SLA monitoring · Auto-escalation · Acknowledgment letters', tasksToday: 67, status: 'Running', successRate: '98.5%', lastRun: '14:18' }
+    ];
+
+    var botRows = bots.map(function (b) {
+      var sc = b.status === 'Running' ? '#059669' : b.status === 'Idle' ? '#6b7280' : b.status === 'Failed' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#7c3aed;">' + b.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + b.name + '<div style="font-size:10px;color:#6b7280;">System: ' + b.system + '</div></td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(b.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#374151;">' + b.tasks + '</td>'
+        + '<td style="padding:9px 12px;font-size:13px;font-weight:800;color:#111827;">' + b.tasksToday.toLocaleString() + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(b.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + b.successRate + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + b.lastRun + '</td>'
+        + '<td style="padding:9px 12px;display:flex;gap:4px;">'
+          + '<button onclick="_p7rpaBotAction(\'' + b.id + '\',\'log\')" style="background:#003087;color:#fff;border:none;border-radius:5px;padding:4px 8px;font-size:10px;cursor:pointer;">Log</button>'
+          + '<button onclick="_p7rpaBotAction(\'' + b.id + '\',\'restart\')" style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:4px 8px;font-size:10px;cursor:pointer;">Restart</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var totalTasks = bots.reduce(function (s, b) { return s + b.tasksToday; }, 0);
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-robot', 'RPA Automation Dashboard', 'Kryon RPA Platform · Policy Owner Services Automation · LTCAS / eLTCAS Integration · SQL Server · Real-Time Bot Monitoring', '#7c3aed')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('7', 'Active Bots', 'fa-robot', '#7c3aed')
+        + _p7kpi(totalTasks.toLocaleString(), 'Tasks Completed Today', 'fa-check-circle', '#059669')
+        + _p7kpi('6 Running', 'Bots Online', 'fa-play-circle', '#059669')
+        + _p7kpi('98.9%', 'Avg Success Rate', 'fa-chart-line', '#003087')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-robot', 'Kryon RPA Bot Status — Policy Owner Services Automation', '#7c3aed',
+            '<button onclick="_p7rpaNewBot()" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>Deploy Bot</button>'
+            + '<button onclick="_p7rpaAiOptimize()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-brain" style="margin-right:5px;"></i>AI Optimize</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Bot ID', 'Bot Name / System', 'Type', 'Tasks Automated', 'Today\'s Volume', 'Status', 'Success Rate', 'Last Run', ''])
+            + '<tbody>' + botRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-rpa');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7rpaBotAction = function (id, action) {
+    if (action === 'log') {
+      _p7toast('<i class="fas fa-list"></i> Kryon RPA Log for ' + id + ': last 24h execution trace — all tasks completed successfully · 0 exceptions · SQL audit trail available', 4000);
+    } else {
+      _p7toast('<i class="fas fa-redo"></i> Kryon Bot ' + id + ' restarted — LTCAS/eLTCAS connection re-established · task queue resumed', 3000);
+    }
+  };
+  window._p7rpaNewBot = function () { _p7toast('<i class="fas fa-plus"></i> Kryon RPA Bot deployment wizard opened — select target system (LTCAS/eLTCAS/FMS) and task automation template', 3200); };
+  window._p7rpaAiOptimize = function () { _p7toast('<i class="fas fa-brain"></i> WealthAI RPA Optimization: BOT-K04 carrier sync success rate 97.4% → recommend retry logic enhancement · BOT-K02 premium processor can absorb 40% more volume', 5000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: EPS Correspondence Management
+     System: EPS (.NET C# / OpenText xPressions / JBoss / MS SSIS)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initEpsPage = function () {
+    var docQueue = [
+      { id: 'EPS-5501', type: 'EOB — Explanation of Benefits', recipient: 'Margaret O\'Brien', carrier: 'Transamerica', deliveryMode: 'Digital + Print', status: 'Queued', engine: 'xPressions', created: 'Jul 9, 14:00', size: '3 pages' },
+      { id: 'EPS-5502', type: 'Annual Premium Notice', recipient: 'Harold Weissman', carrier: 'MassMutual', deliveryMode: 'Print Only', status: 'Processing', engine: 'xPressions', created: 'Jul 9, 13:45', size: '2 pages' },
+      { id: 'EPS-5503', type: 'Benefit Denial Letter', recipient: 'Lois Fujimoto', carrier: 'Genworth', deliveryMode: 'Certified Mail', status: 'Completed', engine: 'xPressions', created: 'Jul 9, 12:30', size: '4 pages' },
+      { id: 'EPS-5504', type: 'Care Plan Approval', recipient: 'Ruth Blackwood', carrier: 'Pacific Life', deliveryMode: 'Digital', status: 'Completed', engine: 'xPressions', created: 'Jul 9, 12:00', size: '6 pages' },
+      { id: 'EPS-5505', type: 'Rate Increase Notice', recipient: '2,847 Policyholders', carrier: 'Multiple', deliveryMode: 'Digital + Print', status: 'Processing', engine: 'SSIS Batch', created: 'Jul 9, 11:00', size: 'Batch' },
+      { id: 'EPS-5506', type: 'Lapse Warning Notice', recipient: 'Frank Kazlowski', carrier: 'Lincoln Natl', deliveryMode: 'Priority Mail', status: 'Error', engine: 'xPressions', created: 'Jul 9, 10:15', size: '1 page' }
+    ];
+
+    var docRows = docQueue.map(function (d) {
+      var sc = d.status === 'Completed' ? '#059669' : d.status === 'Processing' ? '#0891b2' : d.status === 'Error' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#d97706;">' + d.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#111827;">' + d.type + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + d.recipient + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + d.carrier + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(d.deliveryMode, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(d.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + d.engine + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + d.created + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#374151;">' + d.size + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7epsDocAction(\'' + d.id + '\',\'' + d.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (d.status === 'Error' ? 'Retry' : d.status === 'Queued' ? 'Queue Now' : 'View') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-print', 'EPS Correspondence Management', 'Document Generation · Policyholder Letters · Print & Digital Delivery · OpenText xPressions / JBoss / SSIS · LTCAS / eLTCAS / EPS Integration', '#d97706')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('6', 'Documents Today', 'fa-print', '#d97706')
+        + _p7kpi('1,876', 'Letters via RPA Bot', 'fa-robot', '#7c3aed')
+        + _p7kpi('1 Error', 'Delivery Failed', 'fa-exclamation-triangle', '#dc2626')
+        + _p7kpi('3 Modes', 'Digital · Print · Certified', 'fa-layer-group', '#003087')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-envelope', 'Document Generation Queue — OpenText xPressions Engine', '#d97706',
+            '<button onclick="_p7epsGenerateBatch()" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-layer-group" style="margin-right:5px;"></i>Generate Batch</button>'
+            + '<button onclick="_p7epsPrintQueue()" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-print" style="margin-right:5px;"></i>Print Queue</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Doc ID', 'Document Type', 'Recipient', 'Carrier', 'Delivery Mode', 'Status', 'Engine', 'Created', 'Size', ''])
+            + '<tbody>' + docRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-eps');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7epsDocAction = function (id, status) {
+    var msgs = {
+      Error: '<i class="fas fa-redo"></i> EPS Retry: ' + id + ' resubmitted to xPressions engine — delivery failure resolved · postal service notified',
+      Queued: '<i class="fas fa-print"></i> EPS ' + id + ' prioritized in queue — xPressions processing started · 3 min ETA',
+      Completed: '<i class="fas fa-file-alt"></i> EPS Document ' + id + ' opened — delivery confirmed · audit trail available',
+      Processing: '<i class="fas fa-hourglass-half"></i> EPS ' + id + ' processing — xPressions template rendering · SSIS batch in progress'
+    };
+    _p7toast(msgs[status] || msgs.Processing, 3500);
+  };
+  window._p7epsGenerateBatch = function () { _p7toast('<i class="fas fa-layer-group"></i> EPS Batch Generation: SSIS job submitted — 2,847 rate increase notices queued in xPressions · estimated 45 min completion', 4500); };
+  window._p7epsPrintQueue = function () { _p7toast('<i class="fas fa-print"></i> EPS Print Queue: 1,247 documents in physical queue · JBoss print service active · Transport Services sFTP export scheduled 18:00', 4000); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: Transport Services — ActiveBatch Orchestration & sFTP
+     System: Transport (ActiveBatch / Ipswitch sFTP / WSFTP PRO)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initTransportPage = function () {
+    var jobs = [
+      { id: 'JOB-T001', name: 'XRM Incremental Load', schedule: 'Daily 06:00', system: 'ERM/XRM → Snowflake', status: 'Completed', lastRun: 'Jul 9, 06:02', duration: '14 min', records: '48,231', engine: 'ActiveBatch' },
+      { id: 'JOB-T002', name: 'FMS Premium Export', schedule: 'Daily 18:00', system: 'FMS → Carrier sFTP', status: 'Queued', lastRun: 'Jul 8, 18:01', duration: '8 min', records: '1,247', engine: 'WSFTP PRO' },
+      { id: 'JOB-T003', name: 'EPS Print File Transfer', schedule: 'Daily 18:00', system: 'EPS → Print Vendor', status: 'Queued', lastRun: 'Jul 8, 18:05', duration: '3 min', records: '2,847 docs', engine: 'Ipswitch sFTP' },
+      { id: 'JOB-T004', name: 'Claims Data Export', schedule: 'Weekly Mon 03:00', system: 'LTCAS → XRM', status: 'Completed', lastRun: 'Jul 7, 03:04', duration: '42 min', records: '63,000+', engine: 'ActiveBatch + SSIS' },
+      { id: 'JOB-T005', name: 'Snowflake Replication', schedule: 'Near Real-Time', system: 'CLTCAS/ELTCAS → Snowflake', status: 'Running', lastRun: '14:23 (streaming)', duration: 'Continuous', records: 'Stream', engine: 'Snowflake Native' },
+      { id: 'JOB-T006', name: 'Provider Roster Import', schedule: 'Daily 04:00', system: 'External UPD → UPD', status: 'Completed', lastRun: 'Jul 9, 04:08', duration: '6 min', records: '3,847', engine: 'ActiveBatch' },
+      { id: 'JOB-T007', name: 'Carrier Data Package', schedule: 'Monthly 1st', system: 'ERM/XRM → Client sFTP', status: 'Completed', lastRun: 'Jul 1, 02:15', duration: '28 min', records: 'Client feed', engine: 'WSFTP PRO' },
+      { id: 'JOB-T008', name: 'Interface Monitoring', schedule: 'Every 15 min', system: 'All Systems → Alert', status: 'Running', lastRun: '14:15', duration: 'Continuous', records: 'Health check', engine: 'ActiveBatch' }
+    ];
+
+    var jobRows = jobs.map(function (j) {
+      var sc = j.status === 'Completed' ? '#059669' : j.status === 'Running' ? '#0891b2' : j.status === 'Error' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">' + j.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + j.name + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#374151;">' + j.system + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + j.schedule + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(j.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + j.lastRun + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + j.duration + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + j.records + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(j.engine, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7transportJobAction(\'' + j.id + '\',\'' + j.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (j.status === 'Error' ? 'Retry' : j.status === 'Running' ? 'Monitor' : j.status === 'Queued' ? 'Run Now' : 'View Log') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-exchange-alt', 'Transport Services — Enterprise Scheduler', 'ActiveBatch Orchestration · Ipswitch sFTP Server · WSFTP PRO · File Transfer Jobs · ERM/XRM · FMS · EPS · Snowflake', '#003087')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('8', 'Scheduled Jobs', 'fa-calendar-alt', '#003087')
+        + _p7kpi('2 Running', 'Active Now', 'fa-play-circle', '#0891b2')
+        + _p7kpi('5', 'Completed Today', 'fa-check-circle', '#059669')
+        + _p7kpi('2 Queued', 'Scheduled 18:00', 'fa-clock', '#d97706')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-calendar-alt', 'ActiveBatch Job Orchestration — sFTP & File Transfer Schedule', '#003087',
+            '<button onclick="_p7transportRunAll()" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-play" style="margin-right:5px;"></i>Run All Queued</button>'
+            + '<button onclick="_p7transportSftpStatus()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-server" style="margin-right:5px;"></i>sFTP Server Status</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Job ID', 'Job Name', 'Route', 'Schedule', 'Status', 'Last Run', 'Duration', 'Records', 'Engine', ''])
+            + '<tbody>' + jobRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-transport');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7transportJobAction = function (id, status) {
+    var msgs = {
+      Error: '<i class="fas fa-redo"></i> Transport Job ' + id + ' retried — ActiveBatch re-queued · sFTP connection re-established',
+      Running: '<i class="fas fa-eye"></i> Transport Job ' + id + ' monitoring active — real-time record count and throughput visible in ActiveBatch console',
+      Queued: '<i class="fas fa-play"></i> Transport Job ' + id + ' started immediately — ActiveBatch override initiated · estimated completion 15 min',
+      Completed: '<i class="fas fa-list"></i> Transport Job ' + id + ' log: completed successfully · file transfer verified · destination ACK received'
+    };
+    _p7toast(msgs[status] || msgs.Completed, 3500);
+  };
+  window._p7transportRunAll = function () { _p7toast('<i class="fas fa-play"></i> Transport Services: 2 queued jobs started now — FMS Premium Export + EPS Print File Transfer initiated · sFTP connections established', 4000); };
+  window._p7transportSftpStatus = function () { _p7toast('<i class="fas fa-server"></i> Ipswitch sFTP Server: Online · 14 active connections · WSFTP PRO: 3 sessions · All carrier sFTP endpoints responding · No transfer errors', 4500); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: ERM/XRM Analytics & UPD Operational Panel
+     (Enhances existing data-ai iHub page with additional operational bands)
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initErmXrmPage = function () {
+    var reports = [
+      { id: 'RPT-X001', name: 'Monthly Portfolio Trend', carrier: 'All Carriers', type: 'Policy Trending', delivery: 'XRM → sFTP', status: 'Completed', generated: 'Jul 1, 2026', records: '63,847 policies', format: 'SSRS PDF + CSV' },
+      { id: 'RPT-X002', name: 'Premium Analysis Report', carrier: 'Transamerica', type: 'Premium Data', delivery: 'iHub API', status: 'Completed', generated: 'Jul 5, 2026', records: '18,244 policies', format: 'Power BI' },
+      { id: 'RPT-X003', name: 'Claims Trend Analysis', carrier: 'All Carriers', type: 'Claims History', delivery: 'XRM → Client sFTP', status: 'Processing', generated: 'Jul 9, 2026', records: '22,531 claims', format: 'SSIS + CSV' },
+      { id: 'RPT-X004', name: 'Rate Increase Impact', carrier: 'MassMutual', type: 'Rate History', delivery: 'iHub Portal', status: 'Completed', generated: 'Jul 7, 2026', records: '8,412 policies', format: 'Power BI + PDF' },
+      { id: 'RPT-X005', name: 'Lapse Risk Model', carrier: 'All Carriers', type: 'Client Insights', delivery: 'AI Engine', status: 'Completed', generated: 'Jul 6, 2026', records: '63,847 policies', format: 'Snowflake + AI' },
+      { id: 'RPT-X006', name: 'Avaya Call Analytics', carrier: 'Internal', type: 'Call Summary', delivery: 'Snowflake → iHub', status: 'Running', generated: 'Live / Near RT', records: 'Streaming', format: 'Snowflake Native' }
+    ];
+
+    var rptRows = reports.map(function (r) {
+      var sc = r.status === 'Completed' ? '#059669' : r.status === 'Processing' || r.status === 'Running' ? '#0891b2' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#d97706;">' + r.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + r.name + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + r.carrier + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(r.type, '#003087') + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#374151;">' + r.delivery + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7statusBadge(r.status) + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + r.generated + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + r.records + '</td>'
+        + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + r.format + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7ermRptAction(\'' + r.id + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (r.status === 'Processing' || r.status === 'Running' ? 'Monitor' : 'View Report') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-database', 'ERM / XRM Analytics — Reporting & Data Feeds', 'MS SSIS · MS SQL Server · MS SSRS · Power BI · Transport Services · Client Data Feeds · Snowflake Integration · 7-Day → Near Real-Time Evolution', '#d97706')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('6', 'Active Reports', 'fa-chart-bar', '#d97706')
+        + _p7kpi('63,847', 'Policies in XRM', 'fa-database', '#003087')
+        + _p7kpi('Near RT', 'Snowflake Sync', 'fa-snowflake', '#0891b2')
+        + _p7kpi('3 Outputs', 'SSRS · Power BI · iHub', 'fa-layer-group', '#7c3aed')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-chart-bar', 'ERM/XRM Report Library — SSIS + SSRS + Power BI', '#d97706',
+            '<button onclick="_p7ermNewReport()" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>New Report</button>'
+            + '<button onclick="_p7ermTransportStatus()" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-exchange-alt" style="margin-right:5px;"></i>Transport Status</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Report ID', 'Report Name', 'Carrier', 'Data Type', 'Delivery Channel', 'Status', 'Generated', 'Records', 'Format', ''])
+            + '<tbody>' + rptRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // 7-day vs Real-Time comparison
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-exchange-alt', 'Data Delivery Evolution — XRM 7-Day vs iHub Near Real-Time', '#059669')
+        + '<div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">'
+          + '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:11px;font-weight:800;color:#dc2626;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-history" style="margin-right:6px;"></i>Current State — XRM / FTP</div>'
+            + ['FTP-based flat file delivery', '7-day fulfillment cycle', 'Monthly policy file to clients', 'Premium and claims data only', 'No self-service analytics'].map(function (i) {
+                return '<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid rgba(220,38,38,.15);">' + i + '</div>';
+              }).join('')
+          + '</div>'
+          + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-rocket" style="margin-right:6px;"></i>iHub Future State — Snowflake</div>'
+            + ['Cloud-based private data share + API', 'Near real-time Snowflake replication', 'Self-service analytics portal', '7 data source types (claims + call + portal)', 'AI-powered lapse prediction + rate modeling'].map(function (i) {
+                return '<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid rgba(5,150,105,.15);">' + i + '</div>';
+              }).join('')
+          + '</div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-ermxrm');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7ermRptAction = function (id) { _p7toast('<i class="fas fa-chart-bar"></i> ERM/XRM Report ' + id + ' opened — SSRS/Power BI viewer loading · Transport Services delivery log available', 3200); };
+  window._p7ermNewReport = function () { _p7toast('<i class="fas fa-plus"></i> New ERM/XRM Report configured — select data source (LTCAS/eLTCAS/FMS/Avaya) and carrier filter · SSIS job scheduled', 3200); };
+  window._p7ermTransportStatus = function () { _p7toast('<i class="fas fa-exchange-alt"></i> Transport Services: XRM incremental load complete (14 min) · 7 carrier sFTP deliveries successful · Snowflake replication streaming', 4500); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NEW PAGE: UPD Provider Database Operations
+     System: UPD (.NET / MVC / WCF / NServiceBus / SQL Server)
+     Enhancing Healthcare Provider 360 with UPD operational panel
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.initUpdOpsPage = function () {
+    var providers = [
+      { id: 'UPD-1001', name: 'Sunrise Home Health', type: 'Home Health Agency', state: 'NY', status: 'Active', credStatus: 'Current', contractStatus: 'In Network', evvCompliance: '98.2%', claimsLtm: 247, whatCareCost: '$312/day', npiValid: '✓' },
+      { id: 'UPD-1002', name: 'Golden Years Senior Care', type: 'ALF', state: 'FL', status: 'Active', credStatus: 'Renewing', contractStatus: 'In Network', evvCompliance: '96.4%', claimsLtm: 184, whatCareCost: '$185/day', npiValid: '✓' },
+      { id: 'UPD-1003', name: 'Pacific Care Group', type: 'SNF', state: 'CA', status: 'Active', credStatus: 'Current', contractStatus: 'In Network', evvCompliance: '99.1%', claimsLtm: 512, whatCareCost: '$410/day', npiValid: '✓' },
+      { id: 'UPD-1004', name: 'Harbor Memory Care', type: 'Memory Care', state: 'TX', status: 'Active', credStatus: 'Current', contractStatus: 'Out-of-Network', evvCompliance: 'N/A', claimsLtm: 38, whatCareCost: '$380/day', npiValid: '✓' },
+      { id: 'UPD-1005', name: 'Midwest Home Health', type: 'Home Health Agency', state: 'IL', status: 'Warning', credStatus: 'Expired', contractStatus: 'Suspended', evvCompliance: '71.3%', claimsLtm: 22, whatCareCost: '$287/day', npiValid: '⚠' }
+    ];
+
+    var provRows = providers.map(function (p) {
+      var sc = p.status === 'Active' && p.credStatus === 'Current' ? '#059669' : p.status === 'Warning' ? '#dc2626' : '#d97706';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#059669;">' + p.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + p.name + '<div style="font-size:10px;color:#6b7280;">' + p.state + ' · ' + p.type + '</div></td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(p.credStatus, p.credStatus === 'Current' ? '#059669' : p.credStatus === 'Expired' ? '#dc2626' : '#d97706') + '</td>'
+        + '<td style="padding:9px 12px;">' + _p7chip(p.contractStatus, p.contractStatus === 'In Network' ? '#059669' : p.contractStatus === 'Suspended' ? '#dc2626' : '#d97706') + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:' + (parseFloat(p.evvCompliance) > 95 ? '#059669' : '#dc2626') + ';">' + p.evvCompliance + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + p.claimsLtm + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + p.whatCareCost + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;">' + p.npiValid + '</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="_p7updProvAction(\'' + p.id + '\',\'' + p.status + '\')" style="background:' + sc + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">'
+            + (p.credStatus === 'Expired' ? 'Recredential' : 'View Profile') + '</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p7hdr('fa-hospital', 'UPD — Provider Database Operations', 'Proprietary Provider Database · 180K+ Providers · Credentialing · Contracting · What Care Costs Integration · .NET / MVC / WCF / NServiceBus', '#059669')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">'
+        + _p7kpi('180K+', 'Providers in UPD', 'fa-hospital', '#059669')
+        + _p7kpi('98.4%', 'Active & Credentialed', 'fa-check-circle', '#059669')
+        + _p7kpi('1 Alert', 'Credential Expired', 'fa-exclamation-triangle', '#dc2626')
+        + _p7kpi('What Care Costs', 'Rate Benchmark Active', 'fa-dollar-sign', '#003087')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + _p7sectionHdr('fa-hospital', 'Provider Credentialing & Contract Status — UPD Database', '#059669',
+            '<button onclick="_p7updSearchProvider()" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-search" style="margin-right:5px;"></i>Search 180K+</button>'
+            + '<button onclick="_p7updExtPortal()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-globe" style="margin-right:5px;"></i>External UPD Portal</button>'
+          )
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + _p7tblHeader(['Provider ID', 'Provider Name', 'Cred Status', 'Contract', 'EVV Compliance', 'Claims (LTM)', 'What Care Costs', 'NPI', ''])
+            + '<tbody>' + provRows + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      // External UPD Portal band
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + _p7sectionHdr('fa-globe', 'External UPD Portal — Public Provider Data Warehouse (.NET / MVC / WCF)', '#0891b2',
+            '<button onclick="_p7extUpdManage()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-users-cog" style="margin-right:5px;"></i>Manage Subscribers</button>'
+          )
+        + '<div style="padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+          + ['Enterprise Clients|42 Subscribers|fa-building|#0891b2', 'Provider Profiles|Public Repository|fa-globe|#003087', 'Data Sync|Daily from UPD|fa-sync|#059669', 'API Access|REST / WCF|fa-plug|#7c3aed'].map(function (s) {
+              var p = s.split('|');
+              return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">'
+                + '<i class="fas ' + p[2] + '" style="color:' + p[3] + ';font-size:16px;"></i>'
+                + '<div><div style="font-size:13px;font-weight:800;color:#111827;">' + p[1] + '</div>'
+                  + '<div style="font-size:10px;color:#6b7280;">' + p[0] + '</div></div>'
+              + '</div>';
+            }).join('')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    var tpl = document.getElementById('tpl-ltc-upd-ops');
+    if (tpl) tpl.innerHTML = html;
+  };
+
+  window._p7updProvAction = function (id, status) {
+    if (status === 'Warning') {
+      _p7toast('<i class="fas fa-exclamation-triangle"></i> UPD Recredentialing initiated for ' + id + ' — expired credentials flagged · provider notified via External UPD portal · claims suspended', 4000);
+    } else {
+      _p7toast('<i class="fas fa-hospital"></i> UPD Provider ' + id + ' profile opened — credentialing history, contract terms, EVV compliance, and What Care Costs rate benchmark available', 3500);
+    }
+  };
+  window._p7updSearchProvider = function () { _p7toast('<i class="fas fa-search"></i> UPD Provider Search: 180,000+ providers indexed · search by NPI, name, specialty, state, or network status · What Care Costs rates integrated', 4000); };
+  window._p7updExtPortal = function () { _p7toast('<i class="fas fa-globe"></i> External UPD Portal: 42 enterprise subscribers · public provider profiles synced daily · REST/WCF API access · provider matching enabled', 4000); };
+  window._p7extUpdManage = function () { _p7toast('<i class="fas fa-users-cog"></i> External UPD Subscriber Management: 42 active subscribers · last sync 04:08 today · provider data package current', 3200); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NAVIGATION PATCH — Phase 7
+     Registers all new page routes + injects operational bands into
+     existing LTC Claims, Care Coordination, and Eligibility pages
+  ═══════════════════════════════════════════════════════════════════════ */
+
+  // Map tpl IDs to page init functions for new pages
+  var _p7pages = {
+    'ltc-celltrak':   { tpl: 'tpl-ltc-celltrak',   init: window.initCellTrakPage },
+    'ltc-connect':    { tpl: 'tpl-ltc-connect',     init: window.initConnectPortalPage },
+    'ltc-fms':        { tpl: 'tpl-ltc-fms',         init: window.initFmsPage },
+    'ltc-rpa':        { tpl: 'tpl-ltc-rpa',         init: window.initRpaPage },
+    'ltc-eps':        { tpl: 'tpl-ltc-eps',         init: window.initEpsPage },
+    'ltc-transport':  { tpl: 'tpl-ltc-transport',   init: window.initTransportPage },
+    'ltc-ermxrm':     { tpl: 'tpl-ltc-ermxrm',      init: window.initErmXrmPage },
+    'ltc-upd-ops':    { tpl: 'tpl-ltc-upd-ops',     init: window.initUpdOpsPage }
+  };
+
+  function _p7ensureTpl(tplId) {
+    if (!document.getElementById(tplId)) {
+      // Create a hidden template container inside the main content area
+      var main = document.getElementById('main-content') || document.querySelector('.content-area') || document.querySelector('main') || document.body;
+      var el = document.createElement('div');
+      el.id = tplId;
+      el.style.cssText = 'display:none;';
+      main.appendChild(el);
+    }
+  }
+
+  function _p7showPage(tplId) {
+    // Hide all ltc template elements
+    document.querySelectorAll('[id^="tpl-"]').forEach(function (el) {
+      el.style.display = 'none';
+    });
+    var tpl = document.getElementById(tplId);
+    if (tpl) {
+      tpl.style.display = 'block';
+      // Scroll to top
+      tpl.scrollTop = 0;
+    }
+  }
+
+  var _origNav_p7 = navigateTo;
+  navigateTo = function (page) {
+    _origNav_p7(page);
+
+    // Inject operational bands into existing pages when they load
+    if (page === 'ltc-claims') {
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          var tpl = document.getElementById('tpl-ltc-claims');
+          if (tpl && tpl.innerHTML && !tpl.querySelector('.p7-claims-engine-band')) {
+            var band = document.createElement('div');
+            band.className = 'p7-claims-engine-band';
+            band.innerHTML = _p7buildClaimsEngineBand();
+            tpl.querySelector('.ltc-claims-page') ? tpl.querySelector('.ltc-claims-page').appendChild(band) : tpl.appendChild(band);
+          }
+        }, 400);
+      });
+    }
+
+    if (page === 'ltc-care') {
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          var tpl = document.getElementById('tpl-ltc-care');
+          if (tpl && tpl.innerHTML && !tpl.querySelector('.p7-eltcas-band')) {
+            var band = document.createElement('div');
+            band.className = 'p7-eltcas-band';
+            band.innerHTML = _p7buildEltcasBand();
+            tpl.querySelector('.ltc-care-page') ? tpl.querySelector('.ltc-care-page').appendChild(band) : tpl.appendChild(band);
+          }
+        }, 400);
+      });
+    }
+
+    if (page === 'ltc-eligibility') {
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          var tpl = document.getElementById('tpl-ltc-eligibility');
+          if (tpl && tpl.innerHTML && !tpl.querySelector('.p7-link-band')) {
+            var band = document.createElement('div');
+            band.className = 'p7-link-band';
+            band.innerHTML = _p7buildLinkBand();
+            tpl.querySelector('.ltc-eligibility-page') ? tpl.querySelector('.ltc-eligibility-page').appendChild(band) : tpl.appendChild(band);
+          }
+        }, 400);
+      });
+    }
+
+    // Handle new Phase 7 pages
+    if (_p7pages[page]) {
+      var cfg = _p7pages[page];
+      _p7ensureTpl(cfg.tpl);
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          if (cfg.init) cfg.init();
+          _p7showPage(cfg.tpl);
+          var bcEl = document.getElementById('breadcrumb-title');
+          if (bcEl) {
+            var titleMap = {
+              'ltc-celltrak': 'CellTrak EVV Management — Mobile Assessments · GPS Verification',
+              'ltc-connect':  'CONNECT Web Portal — Client Orders · Nurse Network',
+              'ltc-fms':      'FMS Financial Management — Premium Billing · Payment Queue',
+              'ltc-rpa':      'RPA Automation — Kryon Bot Dashboard · Policy Owner Services',
+              'ltc-eps':      'EPS Correspondence — Document Generation · Letter Tracking',
+              'ltc-transport':'Transport Services — ActiveBatch · sFTP Orchestration',
+              'ltc-ermxrm':   'ERM/XRM Analytics — Reporting · Data Feeds · Snowflake',
+              'ltc-upd-ops':  'UPD Provider Database — Credentialing · Contracting · External Portal'
+            };
+            bcEl.textContent = titleMap[page] || page;
+          }
+          // Highlight appropriate nav
+          document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
+        }, 100);
+      });
+    }
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NAV ITEMS — Add Phase 7 pages to the LTC Operations sidebar nav
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p7injectNavItems() {
+    // Find the sidebar or nav list for LTC Operations
+    var nav = document.querySelector('.sidebar-nav') || document.querySelector('.nav-list') || document.querySelector('nav');
+    if (!nav) return;
+
+    // Look for the System Architecture nav item to insert after
+    var archNav = nav.querySelector('.ltc-arch-nav') || Array.from(nav.querySelectorAll('.nav-item')).find(function (el) { return el.textContent.includes('System Architecture') || el.textContent.includes('ltc-arch'); });
+    if (!archNav) return;
+    if (nav.querySelector('.p7-nav-group')) return; // already injected
+
+    var newItems = [
+      { page: 'ltc-celltrak',   icon: 'fa-mobile-alt',        label: 'CellTrak EVV',        color: '#0891b2' },
+      { page: 'ltc-connect',    icon: 'fa-globe',              label: 'CONNECT Portal',      color: '#7c3aed' },
+      { page: 'ltc-fms',        icon: 'fa-dollar-sign',        label: 'FMS Financial',       color: '#059669' },
+      { page: 'ltc-rpa',        icon: 'fa-robot',              label: 'RPA Automation',      color: '#7c3aed' },
+      { page: 'ltc-eps',        icon: 'fa-print',              label: 'EPS Correspondence',  color: '#d97706' },
+      { page: 'ltc-transport',  icon: 'fa-exchange-alt',       label: 'Transport Services',  color: '#003087' },
+      { page: 'ltc-ermxrm',     icon: 'fa-database',           label: 'ERM/XRM Analytics',  color: '#d97706' },
+      { page: 'ltc-upd-ops',    icon: 'fa-hospital',           label: 'UPD Operations',      color: '#059669' }
+    ];
+
+    var groupEl = document.createElement('div');
+    groupEl.className = 'p7-nav-group';
+    groupEl.style.cssText = 'border-top:1px solid rgba(255,255,255,.1);padding-top:8px;margin-top:4px;';
+
+    var groupLabel = document.createElement('div');
+    groupLabel.style.cssText = 'font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4);padding:6px 16px 4px;';
+    groupLabel.textContent = 'Systems Operations';
+    groupEl.appendChild(groupLabel);
+
+    newItems.forEach(function (item) {
+      var el = document.createElement('div');
+      el.className = 'nav-item p7-nav-item';
+      el.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;border-radius:6px;margin:1px 6px;transition:background .15s;';
+      el.innerHTML = '<i class="fas ' + item.icon + '" style="width:16px;color:' + item.color + ';font-size:13px;"></i><span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85);">' + item.label + '</span>';
+      el.addEventListener('mouseenter', function () { el.style.background = 'rgba(255,255,255,.08)'; });
+      el.addEventListener('mouseleave', function () { el.style.background = el.classList.contains('active') ? 'rgba(255,255,255,.12)' : ''; });
+      el.addEventListener('click', function () {
+        navigateTo(item.page);
+        document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); n.style.background = ''; });
+        el.classList.add('active');
+        el.style.background = 'rgba(255,255,255,.12)';
+      });
+      groupEl.appendChild(el);
+    });
+
+    archNav.parentNode.insertBefore(groupEl, archNav.nextSibling);
+  }
+
+  // Also add quick-access action buttons to the System Architecture page detail cards
+  var _origLtcArchDetail = window.ltcArchDetail;
+  window.ltcArchDetail = function (key) {
+    _origLtcArchDetail && _origLtcArchDetail(key);
+    // After overlay opens, inject "Open Operational Panel" button
+    setTimeout(function () {
+      var overlay = document.getElementById('ltcArchDetailOvl');
+      if (!overlay) return;
+      var pageMap = {
+        celltrak:   'ltc-celltrak',
+        connect:    'ltc-connect',
+        fms:        'ltc-fms',
+        msDynamics: 'ltc-fms',
+        rpa:        'ltc-rpa',
+        eps:        'ltc-eps',
+        transport:  'ltc-transport',
+        ermXrm:     'ltc-ermxrm',
+        snowflake:  'data-ai',
+        upd:        'ltc-upd-ops',
+        externalUpd:'ltc-upd-ops',
+        ltcClaims:  'ltc-claims',
+        smarts:     'ltc-claims',
+        ltcas:      'ltc-eligibility',
+        eltcas:     'ltc-care',
+        link:       'ltc-eligibility'
+      };
+      var targetPage = pageMap[key];
+      if (!targetPage) return;
+      var actionArea = overlay.querySelector('.p5-arch-actions') || overlay.querySelector('[style*="display:flex"]');
+      if (!actionArea) return;
+      if (actionArea.querySelector('.p7-ops-btn')) return;
+      var btn = document.createElement('button');
+      btn.className = 'p7-ops-btn';
+      btn.style.cssText = 'background:linear-gradient(135deg,#0891b2,#06b6d4);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;';
+      btn.innerHTML = '<i class="fas fa-external-link-alt" style="margin-right:6px;"></i>Open Operational Panel';
+      btn.addEventListener('click', function () {
+        if (typeof _p5close === 'function') _p5close('ltcArchDetailOvl');
+        navigateTo(targetPage);
+      });
+      actionArea.appendChild(btn);
+    }, 300);
+  };
+
+  // Inject nav items when DOM is ready
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(_p7injectNavItems, 600);
+  } else {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(_p7injectNavItems, 600); });
+  }
+
+  // Also try to inject after navigateTo calls (for SPA nav)
+  var _p7NavObserver = new MutationObserver(function () {
+    _p7injectNavItems();
+  });
+  _p7NavObserver.observe(document.body, { childList: true, subtree: false });
+  setTimeout(function () { _p7NavObserver.disconnect(); }, 10000);
+
+  console.log('LTC Phase 7 loaded — System Architecture → Operational Integration · SMARTS Rules Engine · eLTCAS CQRS/NServiceBus · LINK UW Queue · LTCAS Policy Admin · CellTrak EVV · CONNECT Portal · FMS Financial · RPA Automation · EPS Correspondence · Transport Services · ERM/XRM Analytics · UPD Operations · 8 new operational pages · 3 enhanced existing pages');
+
+})();

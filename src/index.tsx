@@ -336,6 +336,15 @@ function MainApp() {
         <div id="tpl-insurance-carrier-360"></div>
         <div id="tpl-healthcare-provider-360"></div>
         <div id="tpl-ltc-arch"></div>
+        {/* LTC Phase 7 — System Architecture Operational Panels */}
+        <div id="tpl-ltc-celltrak"></div>
+        <div id="tpl-ltc-connect"></div>
+        <div id="tpl-ltc-fms"></div>
+        <div id="tpl-ltc-rpa"></div>
+        <div id="tpl-ltc-eps"></div>
+        <div id="tpl-ltc-transport"></div>
+        <div id="tpl-ltc-ermxrm"></div>
+        <div id="tpl-ltc-upd-ops"></div>
         {/* HAL Operations templates */}
         <div id="tpl-hal-policy"></div>
         <div id="tpl-hal-pipeline"></div>
