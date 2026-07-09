@@ -67908,3 +67908,936 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('LTC Phase 4 loaded — AI Triage · New Claim Wizard · Insurance Carrier 360 · Healthcare Provider 360 · Full button interactivity across all LTC tabs');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 5 — LTC SYSTEM ARCHITECTURE INTEGRATION + ILLUMIFIN PLATFORM REFRESH
+   Sources: LTC Overall System Architecture slides (confidential)
+   Systems: CellTrak · CONNECT · eLTCAS · LTCAS · LINK · LTC Claims · UPD ·
+            External UPD · ERM/XRM · FMS · SMARTS · Transport · Snowflake ·
+            MS Dynamics GP · RPA · EPS · Core Tools & Technologies
+   Illumifin Platform: iHub Data & Insights · Insights Engine ·
+                       Business-Oriented Structure · Differentiating Advantages
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── shared utils ─────────────────────────────────────────────────────── */
+  function _p5(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+  function _p5toast(msg) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#003087;color:#fff;padding:13px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.35);max-width:420px;line-height:1.45;';
+    d.innerHTML = msg; document.body.appendChild(d);
+    setTimeout(function(){ d.remove(); }, 4000);
+  }
+
+  function _p5overlay(id, html) {
+    var old = document.getElementById(id); if (old) old.remove();
+    var bd = document.createElement('div');
+    bd.id = id;
+    bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;';
+    bd.innerHTML = html;
+    bd.onclick = function(e){ if(e.target===bd) bd.remove(); };
+    document.body.appendChild(bd);
+  }
+  function _p5close(id){ var el=document.getElementById(id); if(el) el.remove(); }
+
+  function _p5card(hdr, body, accentColor) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:16px;">'
+      + '<div style="background:'+accentColor+';padding:12px 16px;color:#fff;font-size:13px;font-weight:700;">'+hdr+'</div>'
+      + '<div style="padding:14px 16px;">'+body+'</div>'
+    + '</div>';
+  }
+
+  function _p5kpi(val, lbl, icon, color) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+        + '<div style="width:30px;height:30px;background:'+color+'15;border-radius:8px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas '+icon+'" style="color:'+color+';font-size:12px;"></i></div>'
+        + '<div style="font-size:20px;font-weight:800;color:#111827;">'+val+'</div>'
+      + '</div>'
+      + '<div style="font-size:11px;font-weight:600;color:#374151;">'+lbl+'</div>'
+    + '</div>';
+  }
+
+  function _p5sysChip(name, color) {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:'+color+'12;color:'+color+';border:1px solid '+color+'30;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;margin:2px;">'+name+'</span>';
+  }
+
+  function _p5techPill(tech) {
+    return '<span style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:600;margin:2px;display:inline-block;">'+tech+'</span>';
+  }
+
+  function _p5row(lbl, val) {
+    return '<div style="display:flex;padding:7px 0;border-bottom:1px solid #f3f4f6;">'
+      + '<div style="width:160px;font-size:11px;font-weight:700;color:#6b7280;flex-shrink:0;">'+lbl+'</div>'
+      + '<div style="font-size:12px;color:#111827;flex:1;">'+val+'</div>'
+    + '</div>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     SYSTEM ARCHITECTURE DATA — from LTC Overall System Architecture slides
+  ══════════════════════════════════════════════════════════════════════ */
+  var ltcSystemData = {
+    celltrak: {
+      name: 'CellTrak', icon: 'fa-mobile-alt', color: '#0891b2', category: 'Mobile Assessments',
+      description: 'Third party mobile application used for the management and execution of face-to-face underwriting and claims assessments. Includes electronic visit verification (EVV).',
+      bullets: [
+        'Face-to-face underwriting and claims assessments',
+        'Electronic Visit Verification (EVV) built-in',
+        'Utilizes Amazon Web Services (AWS) in the cloud',
+        'CellTrak "HealthLink" interface — integration with LINK',
+        'Secured through registering mobile devices with CellTrak system'
+      ],
+      tech: ['AWS', 'HealthLink API', 'EVV', 'Mobile SDK'],
+      integrates: ['LINK'],
+      status: 'Active', clients: '180K+', uptime: '99.7%'
+    },
+    connect: {
+      name: 'CONNECT', icon: 'fa-globe', color: '#7c3aed', category: 'Web Portal',
+      description: 'Public and proprietary web application. Portal for clients to place, track, and update orders for Assessment Services. Portal for nurse network to receive work and provide status updates.',
+      bullets: [
+        'Public and proprietary web application',
+        'Client portal: place, track, and update orders for Assessment Services',
+        'Nurse network portal: receive work and provide status updates',
+        'Integrated with LINK for data exchange',
+        '.NET Based Site with MVC 4 architecture'
+      ],
+      tech: ['.NET', 'MVC 4', 'WCF', 'SQL Server'],
+      integrates: ['LINK'],
+      status: 'Active', clients: '50+', uptime: '99.5%'
+    },
+    eltcas: {
+      name: 'eLTCAS', icon: 'fa-layer-group', color: '#003087', category: 'Care Administration',
+      description: 'Proprietary long term care administration system currently used for care management and customer service. Built primarily on .NET and SQL Server with CQRS and event sourcing architecture.',
+      bullets: [
+        'Proprietary LTC administration: care management & customer service',
+        'Domain Driven Design (DDD) + CQRS principles',
+        'Event sourcing — publish/subscribe model for system activities',
+        'Service bus via NServiceBus (async integration: UPD, LINK, EPS, Case360)',
+        'Angular SPA user interface',
+        'RESTful and SOAP web services for UI, BPM engine, other systems'
+      ],
+      tech: ['.NET', 'SQL Server', 'CQRS', 'NServiceBus', 'Angular SPA', 'REST/SOAP'],
+      integrates: ['UPD', 'LINK', 'EPS', 'Case360'],
+      status: 'Active', clients: '50+', uptime: '99.8%'
+    },
+    ltcas: {
+      name: 'LTCAS', icon: 'fa-server', color: '#dc2626', category: 'Core LTC Administration',
+      description: 'Proprietary long term care administration system — the foundational backbone of the illumifin LTC platform. Handles application processing, underwriting, policy administration, claims, and care management.',
+      bullets: [
+        'Application processing & underwriting support',
+        'Policy administration & product configuration',
+        'Customer service & care management',
+        'Claims processing with auto-adjudication support',
+        'Integrated with Case360, EPS, FMS, LINK, MS Dynamics GP',
+        'Client-Server topology — PowerBuilder + SQL Server'
+      ],
+      tech: ['PowerBuilder', 'SQL Server', 'Client-Server'],
+      integrates: ['Case360', 'EPS', 'FMS', 'LINK', 'MS Dynamics GP'],
+      status: 'Active', clients: '50+', uptime: '99.9%'
+    },
+    link: {
+      name: 'LINK', icon: 'fa-desktop', color: '#7c3aed', category: 'Desktop Underwriting',
+      description: 'Proprietary desktop application for the management and execution of face-to-face and telephonic underwriting and claims assessments.',
+      bullets: [
+        'Face-to-face and telephonic underwriting management',
+        'Claims assessment execution and routing',
+        'Integrated with CONNECT, LTCAS, eLTCAS, and Case360',
+        '.NET C# with SQL Server and BizTalk middleware'
+      ],
+      tech: ['.NET C#', 'SQL Server', 'BizTalk'],
+      integrates: ['CONNECT', 'LTCAS', 'eLTCAS', 'Case360'],
+      status: 'Active', clients: '50+', uptime: '99.6%'
+    },
+    ltcClaims: {
+      name: 'LTC Claims', icon: 'fa-file-medical-alt', color: '#dc2626', category: 'Claims Engine',
+      description: 'Claims entry and auto-adjudication engine. Integrated with SMARTS business rules engine, LTCAS, eLTCAS, and Unified Provider Database.',
+      bullets: [
+        'Claims entry and claims auto-adjudication',
+        'Integrated with SMARTS business rules engine',
+        'Connected to LTCAS, eLTCAS and Unified Provider Database',
+        '.NET (C#), SQL Server, IIS, Sparkling Logic SMARTS'
+      ],
+      tech: ['.NET C#', 'SQL Server', 'IIS', 'Sparkling Logic SMARTS'],
+      integrates: ['SMARTS', 'LTCAS', 'eLTCAS', 'UPD'],
+      status: 'Active', clients: '50+', uptime: '99.7%'
+    },
+    upd: {
+      name: 'UPD', icon: 'fa-hospital', color: '#059669', category: 'Provider Database',
+      description: 'Proprietary web application; central repository for all service provider data related to researching, referring, contracting and approvals.',
+      bullets: [
+        'Central repository for all service provider data',
+        'Provider researching, referring, contracting and approvals',
+        'Integrated with External UPD, LTC Claims, What Care Costs',
+        '.NET Based Administration Site with .NET Message Bus',
+        'NServiceBus for asynchronous messaging'
+      ],
+      tech: ['.NET', 'MVC', 'WCF', 'NServiceBus', 'SQL Server'],
+      integrates: ['External UPD', 'LTC Claims', 'What Care Costs'],
+      status: 'Active', clients: '180K', uptime: '99.5%'
+    },
+    externalUpd: {
+      name: 'External UPD', icon: 'fa-globe', color: '#0891b2', category: 'External Provider Portal',
+      description: 'Proprietary enterprise and client-specific data warehouse for provider data. Public web portal for paid subscribers to access provider data to aid with care management administration.',
+      bullets: [
+        'Public proprietary web portal for paid subscribers',
+        'Provider data access for care management administration',
+        'Integrated with Unified Provider Database (UPD)',
+        '.NET based site with MVC and WCF web services'
+      ],
+      tech: ['.NET', 'MVC', 'WCF', 'SQL Server'],
+      integrates: ['UPD'],
+      status: 'Active', clients: 'Paid Subscribers', uptime: '99.3%'
+    },
+    ermXrm: {
+      name: 'ERM / XRM', icon: 'fa-database', color: '#d97706', category: 'Reporting & Analytics',
+      description: 'Proprietary enterprise and client-specific data warehouse for analytics, client feeds and reporting sourced from LTCAS. Simplified, business-focused transactional data structure.',
+      bullets: [
+        'Enterprise & client-specific data warehouse for analytics',
+        'Analytics, client feeds and reporting sourced from LTCAS',
+        'Three views of history: Current · History · Effective History',
+        'XRM incremental load files provided to clients via Transport Services',
+        'MS SSIS and MS SQL Server infrastructure'
+      ],
+      tech: ['MS SSIS', 'MS SQL Server', 'Transport Services'],
+      integrates: ['LTCAS', 'Transport Services'],
+      status: 'Active', clients: '50+', uptime: '99.8%'
+    },
+    fms: {
+      name: 'FMS', icon: 'fa-dollar-sign', color: '#059669', category: 'Financial Management',
+      description: 'Financial, billing and collection system including premium processing and payments. Integrated with LTCAS, eLTCAS, and MS Dynamics.',
+      bullets: [
+        'Financial, billing and collection system',
+        'Premium processing and payment workflows',
+        'Integrated with LTCAS, eLTCAS, MS Dynamics',
+        'SQL Server, Java, JBoss EAP technology stack',
+        'Client data feeds, dashboards and work management',
+        'MS SQL Server, SSRS, SSIS, SSAS, PowerBI + Transport Services'
+      ],
+      tech: ['SQL Server', 'Java', 'JBoss EAP', 'MS SSRS', 'MS SSAS', 'MS PowerBI'],
+      integrates: ['LTCAS', 'eLTCAS', 'MS Dynamics'],
+      status: 'Active', clients: '50+', uptime: '99.7%'
+    },
+    smarts: {
+      name: 'SMARTS', icon: 'fa-cogs', color: '#7c3aed', category: 'Business Rules Engine',
+      description: 'Sparkling Logic SMARTS — commercialized business rules engine appliance. Integrated with LTCAS, eLTCAS, and LTC Claims for auto-adjudication.',
+      bullets: [
+        'Commercialized business rules engine appliance (Sparkling Logic)',
+        'SMARTS appliance for claims auto-adjudication',
+        'Integrated with LTCAS, eLTCAS, and LTC Claims',
+        'Configurable rule sets for benefit eligibility determinations'
+      ],
+      tech: ['Sparkling Logic SMARTS', 'Rules Engine'],
+      integrates: ['LTCAS', 'eLTCAS', 'LTC Claims'],
+      status: 'Active', clients: '50+', uptime: '99.6%'
+    },
+    transport: {
+      name: 'Transport Services', icon: 'fa-exchange-alt', color: '#003087', category: 'Enterprise Scheduler',
+      description: 'Enterprise scheduler and process orchestration with secure file transfer capabilities. Uses ActiveBatch, Ipswitch sFTP Server, and WSFTP PRO Client.',
+      bullets: [
+        'Enterprise scheduler and process orchestration',
+        'Secure File Transfer (sFTP)',
+        'ActiveBatch orchestration platform',
+        'Ipswitch sFTP Server and WSFTP PRO Client'
+      ],
+      tech: ['ActiveBatch', 'Ipswitch sFTP Server', 'WSFTP PRO Client'],
+      integrates: ['ERM/XRM', 'FMS', 'Interfaces'],
+      status: 'Active', clients: '50+', uptime: '99.9%'
+    },
+    snowflake: {
+      name: 'Snowflake', icon: 'fa-snowflake', color: '#0891b2', category: 'Cloud Data Warehouse',
+      description: 'Leading vendor of cloud computing data storage and analytics services. Data warehouse for CLTCAS/ELTCAS transactional data with near real-time replication.',
+      bullets: [
+        'Leading cloud computing data storage & analytics platform',
+        'Data warehouse for CLTCAS/ELTCAS transactional data',
+        'Additional data sources: Avaya (call center), Case360 (images)',
+        'Near real-time replication capability'
+      ],
+      tech: ['Snowflake', 'Near Real-Time Replication', 'Cloud'],
+      integrates: ['CLTCAS', 'ELTCAS', 'Avaya', 'Case360'],
+      status: 'Active', clients: '50+', uptime: '99.95%'
+    },
+    msDynamics: {
+      name: 'MS Dynamics GP', icon: 'fa-chart-line', color: '#dc2626', category: 'Client Accounting',
+      description: 'Client accounting financial system. Integrates with LTCAS for claim transactions and premium details.',
+      bullets: [
+        'Client accounting financial system',
+        'Integrates with LTCAS (claim transactions and premium details)',
+        'MS Dynamics and MS SQL Server stack'
+      ],
+      tech: ['MS Dynamics', 'MS SQL Server'],
+      integrates: ['LTCAS'],
+      status: 'Active', clients: '50+', uptime: '99.5%'
+    },
+    rpa: {
+      name: 'RPA', icon: 'fa-robot', color: '#7c3aed', category: 'Robotic Process Automation',
+      description: 'Software robotics to automate execution of core Policy Owner Services administrative processes within existing LTCG platforms to drive higher operational efficiencies.',
+      bullets: [
+        'Automates core Policy Owner Services administrative processes',
+        'Operates within existing LTCG platforms',
+        'Drives higher operational efficiencies',
+        'Kryon RPA Platform with MS SQL Server'
+      ],
+      tech: ['Kryon RPA Platform', 'MS SQL Server'],
+      integrates: ['LTCAS', 'eLTCAS'],
+      status: 'Active', clients: '50+', uptime: '99.4%'
+    },
+    eps: {
+      name: 'EPS', icon: 'fa-print', color: '#d97706', category: 'Enterprise Print Solutions',
+      description: 'Correspondence solution for requesting and generating policyholder document artifacts in both physical and digital forms.',
+      bullets: [
+        'Correspondence solution — physical and digital document artifacts',
+        'Integrated with LTCAS, eLTCAS, Case360, Transport Services',
+        '3rd-Party provider (DRC) for template development, printing, mailing',
+        '.NET (C#), OpenText xPressions, JBoss, MS SSIS, MS SQL Server, Solimar License Viewer'
+      ],
+      tech: ['.NET C#', 'OpenText xPressions', 'JBoss', 'MS SSIS', 'Solimar'],
+      integrates: ['LTCAS', 'eLTCAS', 'Case360', 'Transport Services'],
+      status: 'Active', clients: '50+', uptime: '99.6%'
+    }
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     LTC SYSTEM ARCHITECTURE — New Page: System Architecture Map
+     Added to LTC Operations section
+  ══════════════════════════════════════════════════════════════════════ */
+  window.initLtcArchPage = function() {
+    var systems = Object.values(ltcSystemData);
+
+    // Integration matrix
+    var matrixRows = systems.slice(0,8).map(function(s) {
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-weight:700;font-size:12px;color:'+s.color+';">'
+            + '<i class="fas '+s.icon+'" style="margin-right:6px;"></i>'+s.name+'</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">'+s.category+'</td>'
+        + '<td style="padding:9px 12px;">'+s.integrates.map(function(i){ return _p5sysChip(i, '#003087'); }).join('')+'</td>'
+        + '<td style="padding:9px 12px;">'+s.tech.slice(0,2).map(_p5techPill).join('')+'</td>'
+        + '<td style="padding:9px 12px;"><span style="background:#dcfce7;color:#15803d;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">'+s.status+'</span></td>'
+        + '<td style="padding:9px 12px;"><button onclick="event.stopPropagation();ltcArchDetail(\''+Object.keys(ltcSystemData)[systems.indexOf(s)]+'\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">Detail</button></td>'
+      + '</tr>';
+    }).join('');
+
+    // System cards grid
+    var cards = systems.map(function(s, i) {
+      var key = Object.keys(ltcSystemData)[i];
+      return '<div onclick="ltcArchDetail(\''+key+'\')" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:pointer;transition:box-shadow .2s;" onmouseover="this.style.boxShadow=\'0 4px 20px rgba(0,0,0,.12)\'" onmouseout="this.style.boxShadow=\'none\'">'
+        + '<div style="background:linear-gradient(135deg,'+s.color+','+s.color+'cc);padding:12px 14px;color:#fff;">'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+            + '<div><div style="font-size:14px;font-weight:800;">'+s.name+'</div>'
+              + '<div style="font-size:10px;opacity:.85;margin-top:2px;">'+s.category+'</div></div>'
+            + '<i class="fas '+s.icon+'" style="font-size:20px;opacity:.5;"></i>'
+          + '</div>'
+        + '</div>'
+        + '<div style="padding:12px 14px;">'
+          + '<div style="font-size:11px;color:#374151;line-height:1.5;margin-bottom:8px;">'+s.description.substring(0,90)+'…</div>'
+          + '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">'+s.tech.slice(0,3).map(_p5techPill).join('')+'</div>'
+          + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'+s.integrates.map(function(x){ return _p5sysChip(x, '#003087'); }).join('')+'</div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">'
+        + '<div>'
+          + '<div style="font-size:22px;font-weight:800;color:#111827;"><i class="fas fa-sitemap" style="color:#003087;margin-right:10px;"></i>LTC System Architecture</div>'
+          + '<div style="font-size:12px;color:#6b7280;margin-top:3px;">illumifin LTC Platform · 16 integrated systems · Confidential</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="ltcArchRunAI()" style="background:linear-gradient(135deg,#003087,#0052cc);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:6px;"></i>AI Architecture Review</button>'
+          + '<button onclick="ltcArchExport()" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-download" style="margin-right:6px;"></i>Export Map</button>'
+        + '</div>'
+      + '</div>'
+
+      // KPIs
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+        + _p5kpi('16', 'Integrated Systems', 'fa-sitemap', '#003087')
+        + _p5kpi('180K+', 'Providers in UPD', 'fa-hospital', '#059669')
+        + _p5kpi('99.7%', 'Avg System Uptime', 'fa-check-circle', '#059669')
+        + _p5kpi('$4B+', 'Annual Claims Processed', 'fa-dollar-sign', '#dc2626')
+      + '</div>'
+
+      // Architecture Flow Diagram
+      + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:20px;margin-bottom:20px;color:#fff;">'
+        + '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#60a5fa;margin-bottom:14px;"><i class="fas fa-project-diagram" style="margin-right:8px;"></i>System Integration Flow</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;text-align:center;">'
+          + _p5archNode('Client / Provider', 'fa-users', '#60a5fa', 'CONNECT · CellTrak · External UPD')
+          + '<div style="display:flex;align-items:center;justify-content:center;"><i class="fas fa-arrow-right" style="color:#60a5fa;font-size:18px;"></i></div>'
+          + _p5archNode('Administration Layer', 'fa-server', '#a78bfa', 'LTCAS · eLTCAS · LINK · SMARTS')
+          + '<div style="display:flex;align-items:center;justify-content:center;"><i class="fas fa-arrow-right" style="color:#60a5fa;font-size:18px;"></i></div>'
+          + _p5archNode('Data & Analytics', 'fa-database', '#34d399', 'ERM/XRM · Snowflake · FMS · EPS')
+        + '</div>'
+        + '<div style="display:flex;justify-content:center;margin-top:12px;">'
+          + '<div style="background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);border-radius:8px;padding:8px 20px;font-size:11px;font-weight:600;text-align:center;">'
+            + '<i class="fas fa-exchange-alt" style="margin-right:8px;color:#60a5fa;"></i>Transport Services · NServiceBus · BizTalk · sFTP — Enterprise Orchestration Layer'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      // System cards grid
+      + '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-th-large" style="color:#003087;margin-right:8px;"></i>All Systems — Click for Detail</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'+cards+'</div>'
+
+      // Integration matrix table
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + '<div style="background:#003087;padding:12px 16px;color:#fff;font-size:13px;font-weight:700;"><i class="fas fa-table" style="margin-right:8px;"></i>Integration Matrix — Primary Systems</div>'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + '<thead><tr style="background:#f8fafc;">'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">System</th>'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Category</th>'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Integrates With</th>'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Core Tech</th>'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Status</th>'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Action</th>'
+          + '</thead>'
+          + '<tbody>'+matrixRows+'</tbody>'
+        + '</table>'
+      + '</div>'
+
+    + '</div>';
+
+    _p5('tpl-ltc-arch', html);
+  };
+
+  function _p5archNode(title, icon, color, desc) {
+    return '<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px;text-align:center;">'
+      + '<i class="fas '+icon+'" style="color:'+color+';font-size:20px;margin-bottom:8px;display:block;"></i>'
+      + '<div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:4px;">'+title+'</div>'
+      + '<div style="font-size:10px;color:#94a3b8;line-height:1.4;">'+desc+'</div>'
+    + '</div>';
+  }
+
+  window.ltcArchDetail = function(key) {
+    var s = ltcSystemData[key]; if (!s) return;
+    var html = '<div style="background:#fff;border-radius:16px;width:680px;max-height:85vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,'+s.color+','+s.color+'cc);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+          + '<div>'
+            + '<div style="font-size:10px;font-weight:700;opacity:.75;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">'+s.category+'</div>'
+            + '<div style="font-size:22px;font-weight:800;">'+s.name+'</div>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:12px;">'
+            + '<i class="fas '+s.icon+'" style="font-size:32px;opacity:.4;"></i>'
+            + '<button onclick="_p5close(\'ltcArchOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 12px;font-size:12px;cursor:pointer;">✕ Close</button>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+
+        // Stats row
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">'
+          + _p5kpi(s.uptime, 'System Uptime', 'fa-heartbeat', s.color)
+          + _p5kpi(s.clients, 'Clients / Providers', 'fa-users', '#003087')
+          + _p5kpi(s.status, 'Operational Status', 'fa-check-circle', '#059669')
+        + '</div>'
+
+        // Description
+        + '<div style="background:#f8fafc;border-left:4px solid '+s.color+';border-radius:4px;padding:12px 16px;margin-bottom:16px;">'
+          + '<div style="font-size:12px;color:#374151;line-height:1.65;">'+s.description+'</div>'
+        + '</div>'
+
+        // Key capabilities
+        + '<div style="margin-bottom:16px;">'
+          + '<div style="font-size:12px;font-weight:800;color:#111827;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Key Capabilities</div>'
+          + s.bullets.map(function(b){ return '<div style="display:flex;gap:8px;padding:5px 0;font-size:12px;color:#374151;border-bottom:1px solid #f3f4f6;"><i class="fas fa-check-circle" style="color:'+s.color+';margin-top:2px;flex-shrink:0;"></i><span>'+b+'</span></div>'; }).join('')
+        + '</div>'
+
+        // Tech stack + Integrations
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">'
+          + '<div>'
+            + '<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px;">Technology Stack</div>'
+            + '<div style="display:flex;flex-wrap:wrap;gap:4px;">'+s.tech.map(_p5techPill).join('')+'</div>'
+          + '</div>'
+          + '<div>'
+            + '<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px;">Integrates With</div>'
+            + '<div style="display:flex;flex-wrap:wrap;gap:4px;">'+s.integrates.map(function(i){ return _p5sysChip(i, s.color); }).join('')+'</div>'
+          + '</div>'
+        + '</div>'
+
+        // Wipro AI Enhancement panel
+        + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:14px 16px;color:#fff;margin-bottom:16px;">'
+          + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:6px;"></i>WealthAI Assessment</div>'
+          + '<div style="font-size:12px;color:#e2e8f0;line-height:1.65;">'+_p5getWiproInsight(key)+'</div>'
+        + '</div>'
+
+        // Action buttons
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+          + '<button onclick="_p5close(\'ltcArchOvl\');_p5toast(\'<i class=\\\"fas fa-envelope\\\"></i> System health report sent to integration team\')" style="background:'+s.color+';color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;flex:1;">View System Health</button>'
+          + '<button onclick="_p5close(\'ltcArchOvl\');_p5toast(\'<i class=\\\"fas fa-chart-bar\\\"></i> Integration metrics dashboard opening…\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;flex:1;">Integration Metrics</button>'
+          + '<button onclick="_p5close(\'ltcArchOvl\');_p5toast(\'<i class=\\\"fas fa-robot\\\"></i> AI modernization analysis for '+s.name+' initiated…\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;flex:1;"><i class=\\\"fas fa-robot\\\"></i> AI Analysis</button>'
+        + '</div>'
+
+      + '</div>'
+    + '</div>';
+    _p5overlay('ltcArchOvl', html);
+  };
+
+  function _p5getWiproInsight(key) {
+    var insights = {
+      celltrak: 'CellTrak is a critical EVV node generating ~180K+ provider touchpoints. Wipro recommends: (1) Expand HealthLink API to REST/GraphQL for real-time claim triggering, (2) Integrate ML-based EVV anomaly detection to flag GPS/time mismatches, (3) Build mobile-first caregiver experience on Wipro Pega platform.',
+      connect: 'CONNECT serves as the assessment portal but runs legacy MVC 4. Wipro proposes migration to React/Next.js SPA on Azure App Services — improving UX, reducing assessment cycle time by 35%, and enabling real-time nurse assignment via Pega BPM.',
+      eltcas: 'eLTCAS is illumifin\'s most strategically modern system — Angular SPA + CQRS + NServiceBus. Wipro recommends: (1) Extend the event sourcing model to feed Snowflake in near-real-time, (2) Add HOLMES AI as a microservice consumer on the NServiceBus event stream for proactive care alerts.',
+      ltcas: 'LTCAS on PowerBuilder is the highest modernization risk in the portfolio. Wipro recommends a phased strangler-fig pattern: wrap LTCAS APIs in .NET facade, replace business modules with cloud-native microservices over 36 months, targeting 40% legacy reduction by Year 2.',
+      link: 'LINK\'s desktop architecture limits scalability. Wipro proposes a progressive web app (PWA) replacement on Azure — retaining BizTalk integration but adding real-time collaboration, AI-assisted assessment recommendations, and mobile-first deployment.',
+      ltcClaims: 'LTC Claims auto-adjudication with SMARTS is a differentiated capability. Wipro HOLMES AI augments SMARTS with ML-based decision scoring — increasing STP (Straight-Through Processing) rates from current ~45% toward 65%+ target by Year 2.',
+      upd: 'UPD\'s NServiceBus architecture is sound. Wipro recommends: (1) Enrich provider profiles with AI-driven quality scoring (billing accuracy, fraud risk, EVV compliance), (2) Expose UPD via GraphQL API for real-time care setting recommendations, (3) Integrate What Care Costs data for cost-effectiveness analysis.',
+      externalUpd: 'External UPD represents a monetization opportunity. Wipro proposes SaaS-ification: tiered subscription model, self-service portal rebuild on React, and AI-powered provider matching recommendations for care managers.',
+      ermXrm: 'ERM/XRM is the reporting backbone. The 7-day fulfillment cycle is the critical gap. Wipro recommends Snowflake as the real-time replacement layer, with Power BI embedded analytics reducing turnaround from 7 days to <1 hour and enabling self-service for carrier clients.',
+      fms: 'FMS on Java/JBoss EAP is stable but not cloud-native. Wipro recommends: (1) Lift-and-shift to Azure Kubernetes Service in Phase 1, (2) Replace SSRS with Power BI Embedded in Phase 2, (3) Add HOLMES AI reconciliation engine — cutting manual labor 60%.',
+      smarts: 'Sparkling Logic SMARTS is a best-in-class rules engine. Wipro integrates HOLMES AI as an ML scoring layer that feeds SMARTS rule parameters dynamically — enabling real-time rule calibration based on claims outcomes without manual rule authoring.',
+      transport: 'Transport Services (ActiveBatch/sFTP) is critical but aging. Wipro recommends migration to Azure Data Factory + Azure Service Bus — providing cloud-native orchestration, real-time event streaming, and eliminating batch processing windows.',
+      snowflake: 'Snowflake is the ideal foundation for the iHub Data & Insights strategy. Wipro recommends: (1) Expand Avaya call center data feeds, (2) Add real-time LTCAS replication via Fivetran, (3) Deploy dbt transformation layer for client-ready data products, (4) Power iHub Insights Engine directly from Snowflake.',
+      msDynamics: 'MS Dynamics GP is functionally adequate for client accounting. Wipro recommends integrating Dynamics 365 Finance to enable cloud-native AP/AR, automated reconciliation with LTCAS, and unified financial reporting across all carriers.',
+      rpa: 'Kryon RPA is delivering operational efficiency gains. Wipro recommends: (1) Migrate high-risk Kryon bots to Microsoft Power Automate for vendor diversification, (2) Add AI-driven process discovery (Celonis) to identify 15+ new automation candidates, (3) Target 120 FTE-equivalent automation by Year 2.',
+      eps: 'EPS with OpenText xPressions handles correspondence at scale. Wipro recommends: (1) Digital-first document strategy — e-delivery default with physical as opt-in, (2) Replace DRC dependency with cloud print-on-demand (Quadient), (3) Integrate AI for personalized correspondence content generation.'
+    };
+    return insights[key] || 'Wipro WealthAI analysis in progress for this system. Schedule an architecture review session for detailed recommendations.';
+  }
+
+  window.ltcArchRunAI = function() {
+    _p5toast('<i class="fas fa-robot"></i> WealthAI Architecture Review initiated — analyzing 16 systems, integration dependencies, and modernization priorities. Report ETA: 48 hours.');
+  };
+  window.ltcArchExport = function() {
+    _p5toast('<i class="fas fa-download"></i> LTC System Architecture map exported to PDF — illumifin_ltc_arch_2026.pdf sent to your email.');
+  };
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     ILLUMIFIN PLATFORM — iHub DATA & INSIGHTS PAGE (replaces/enhances data-ai)
+     Source: "Data & Insights" slide + "Data | Differentiating Advantages" slide
+  ══════════════════════════════════════════════════════════════════════ */
+  function initIhubInsightsPage() {
+    var dataInputs = [
+      { icon:'fa-file-medical-alt', lbl:'Claims / Underwriting', color:'#dc2626', desc:'Claims history, UW decisions, benefit triggers' },
+      { icon:'fa-dollar-sign', lbl:'Premium Payment', color:'#059669', desc:'Premium paid and received on each policy' },
+      { icon:'fa-history', lbl:'Rate History', color:'#d97706', desc:'Rate changes offered vs what was selected' },
+      { icon:'fa-bell', lbl:'Request for Benefit', color:'#7c3aed', desc:'Tracking of initial claims, frequency, decisions' },
+      { icon:'fa-credit-card', lbl:'Claim Payment', color:'#0891b2', desc:'Decision outcomes, care type, reimbursement, provider' },
+      { icon:'fa-headset', lbl:'Call Summary (Avaya)', color:'#003087', desc:'Customer service: reasons for call, outcomes' },
+      { icon:'fa-mouse-pointer', lbl:'Portal Engagement', color:'#059669', desc:'Customer portal interactions, activity between pages/tasks' }
+    ];
+
+    var outputCards = [
+      { icon:'fa-chart-bar', lbl:'REPORTING', color:'#003087', items:['Self-service real-time dashboards','AI-enabled trend discovery','Monthly policy snapshot reports','Rate increase analysis','Carrier performance reports'] },
+      { icon:'fa-database', lbl:'DATA FEEDS', color:'#7c3aed', items:['XRM incremental loads via Transport Services','Monthly policy file to client portals','Premium & rate history feeds','Claim payment data exports','Carrier custom data packages'] },
+      { icon:'fa-lightbulb', lbl:'CLIENT INSIGHTS', color:'#d97706', items:['Predictive lapse risk modeling','Benefit & reimbursement trends','Call & portal interaction analytics','Policy trending — portfolio status','AI-powered rate action recommendations'] }
+    ];
+
+    var diffAdvRows = [
+      { current:'FTP-based XRM delivery — 7-day fulfillment cycle', future:'Cloud-based private data share via iHub · API · Analytical portal', value:'Policy Trending: Monthly portfolio review, lapse prediction, target group analytics' },
+      { current:'Premium data: periodic flat file exports', future:'Premium Payment: Real-time premium paid and received per policy', value:'Premium Analysis: Historical rate change analysis, selection choices, comparative industry benchmarking' },
+      { current:'Policy status — historical flat files only', future:'Rate History: Track every rate change offered and selected', value:'Benefit & Reimbursement: Care type trends, decision outcomes, cost trend modeling' },
+      { current:'Basic claims data — no behavioral overlay', future:'Request for Benefit: Full tracking of initial claims, frequency, decisions in process', value:'Call & Portal Interactions: Channel behavior, frequency, duration, improvement opportunities' },
+      { current:'Policyholder demographics only', future:'Call Summary + Portal Engagement: Verbal and digital interaction data', value:'Data Access & Insights: Direct analytical portal, API, private data share with insights engine' }
+    ];
+
+    var inputGrid = dataInputs.map(function(d) {
+      return '<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 12px;text-align:center;">'
+        + '<i class="fas '+d.icon+'" style="color:'+d.color+';font-size:18px;margin-bottom:6px;display:block;"></i>'
+        + '<div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;">'+d.lbl+'</div>'
+        + '<div style="font-size:10px;color:#94a3b8;line-height:1.3;">'+d.desc+'</div>'
+      + '</div>';
+    }).join('');
+
+    var outputCols = outputCards.map(function(o) {
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + '<div style="background:'+o.color+';padding:12px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'
+          + '<i class="fas '+o.icon+'" style="font-size:18px;"></i>'
+          + '<div style="font-size:14px;font-weight:800;">'+o.lbl+'</div>'
+        + '</div>'
+        + '<div style="padding:14px 16px;">'
+          + o.items.map(function(item){ return '<div style="display:flex;gap:8px;padding:5px 0;font-size:12px;color:#374151;border-bottom:1px solid #f3f4f6;"><i class="fas fa-check-circle" style="color:'+o.color+';margin-top:2px;flex-shrink:0;font-size:10px;"></i><span>'+item+'</span></div>'; }).join('')
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var diffRows = diffAdvRows.map(function(r) {
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:10px 12px;font-size:11px;color:#6b7280;line-height:1.5;width:28%;">'+r.current+'</td>'
+        + '<td style="padding:10px 12px;text-align:center;"><i class="fas fa-arrow-right" style="color:#059669;"></i></td>'
+        + '<td style="padding:10px 12px;font-size:11px;color:#003087;font-weight:600;line-height:1.5;width:32%;">'+r.future+'</td>'
+        + '<td style="padding:10px 12px;font-size:11px;color:#374151;line-height:1.5;width:32%;">'+r.value+'</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">'
+        + '<div>'
+          + '<div style="font-size:22px;font-weight:800;color:#111827;"><i class="fas fa-brain" style="color:#7c3aed;margin-right:10px;"></i>iHub Data & Insights Platform</div>'
+          + '<div style="font-size:12px;color:#6b7280;margin-top:3px;">Illumifin · Powered by Snowflake · Advanced Analytics · Real-Time Reporting · Predictive Modeling</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="ihubRunInsightsEngine()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:6px;"></i>Insights Engine</button>'
+          + '<button onclick="ihubOpenDiffAdv()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-trophy" style="margin-right:6px;"></i>Differentiating Advantages</button>'
+        + '</div>'
+      + '</div>'
+
+      // Value proposition banner
+      + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:16px 22px;color:#fff;margin-bottom:20px;">'
+        + '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;margin-bottom:6px;">iHub Value Proposition</div>'
+        + '<div style="font-size:13px;color:#e2e8f0;line-height:1.65;">Our Data Hub service empowers modern businesses with cutting-edge capabilities for transforming raw data into actionable insights through <strong style="color:#a78bfa">advanced analytics</strong>, <strong style="color:#34d399">real-time reporting</strong>, and <strong style="color:#60a5fa">predictive modeling</strong>. Data from multiple sources provides a holistic view of your business landscape — with AI-enabled discovery of trends, patterns, and opportunities. Clean structured data for training future AI models.</div>'
+      + '</div>'
+
+      // KPIs
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+        + _p5kpi('7', 'Data Source Types', 'fa-database', '#003087')
+        + _p5kpi('Near RT', 'Snowflake Replication', 'fa-snowflake', '#0891b2')
+        + _p5kpi('<1hr', 'Report Turnaround (Target)', 'fa-clock', '#059669')
+        + _p5kpi('3', 'Output Channels', 'fa-layer-group', '#7c3aed')
+      + '</div>'
+
+      // Data Flow Architecture
+      + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:20px;margin-bottom:20px;color:#fff;">'
+        + '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#60a5fa;margin-bottom:14px;"><i class="fas fa-project-diagram" style="margin-right:8px;"></i>Data Flow: Input → Snowflake/iHub → Output</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:center;">'
+          + '<div>'
+            + '<div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;margin-bottom:10px;">Operator/Client Data Sources</div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'+inputGrid+'</div>'
+          + '</div>'
+          + '<div style="text-align:center;padding:20px;">'
+            + '<div style="background:rgba(124,58,237,.3);border:2px solid #7c3aed;border-radius:12px;padding:16px;">'
+              + '<i class="fas fa-snowflake" style="font-size:28px;color:#60a5fa;margin-bottom:8px;display:block;"></i>'
+              + '<div style="font-size:13px;font-weight:800;color:#fff;">Snowflake</div>'
+              + '<div style="font-size:11px;color:#94a3b8;margin-top:4px;">iHub Insight Engine</div>'
+              + '<div style="font-size:10px;color:#60a5fa;margin-top:6px;">Policy · Premium · Rate<br>Benefit · Claim · Call · Portal</div>'
+            + '</div>'
+            + '<div style="color:#94a3b8;font-size:10px;margin-top:8px;">Near real-time replication<br>+ CLTCAS/ELTCAS data</div>'
+          + '</div>'
+          + '<div>'
+            + '<div style="font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;margin-bottom:10px;">Output Channels</div>'
+            + '<div style="display:flex;flex-direction:column;gap:8px;">'
+              + outputCards.map(function(o){ return '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;"><i class="fas '+o.icon+'" style="color:'+o.color+';font-size:16px;"></i><span style="font-size:12px;font-weight:700;color:#fff;">'+o.lbl+'</span></div>'; }).join('')
+            + '</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      // Output detail cards
+      + '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-th-large" style="color:#7c3aed;margin-right:8px;"></i>Output Capabilities — Reporting · Data Feeds · Client Insights</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;">'+outputCols+'</div>'
+
+      // Differentiating Advantages table
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:12px 16px;color:#fff;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;">'
+          + '<span><i class="fas fa-trophy" style="margin-right:8px;"></i>Differentiating Advantages — Current State vs. iHub Future State</span>'
+          + '<button onclick="ihubOpenDiffAdv()" style="background:rgba(255,255,255,.2);border:none;border-radius:6px;color:#fff;padding:4px 12px;font-size:11px;cursor:pointer;">Expand View</button>'
+        + '</div>'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + '<thead><tr style="background:#f8fafc;">'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Current State (FTP/XRM)</th>'
+            + '<th style="padding:10px 12px;width:40px;"></th>'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">iHub Future State</th>'
+            + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Value Driver</th>'
+          + '</thead>'
+          + '<tbody>'+diffRows+'</tbody>'
+        + '</table>'
+      + '</div>'
+
+    + '</div>';
+
+    var tplEl = document.getElementById('tpl-data-ai');
+    if (tplEl) tplEl.innerHTML = html;
+  }
+
+  window.ihubRunInsightsEngine = function() {
+    var html = '<div style="background:#fff;border-radius:16px;width:780px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+          + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">Illumifin · iHub</div><div style="font-size:22px;font-weight:800;">Insights Engine</div></div>'
+          + '<button onclick="_p5close(\'ihubEngineOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+
+        + '<div style="background:#f8fafc;border-left:4px solid #7c3aed;border-radius:4px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:#374151;line-height:1.65;">'
+          + 'The Ilumifin iHub Insight Engine enhances decision making by combining key data points across the policy lifecycle and aggregated datasets. For successful model building, having the right data product is crucial — the iHub delivers precise, timely and accurate records and reliable insights. Trust Ilumifin Insights Engine to elevate your analytics and drive impactful results.'
+        + '</div>'
+
+        // 5 input dimensions
+        + '<div style="font-size:12px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">5 Core Insight Dimensions</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">'
+          + _p5insightDim('fa-history', 'Rate History', '#d97706', 'Options offered vs what was selected', 'Rate Increase Analysis → Product Analysis, Rate Action')
+          + _p5insightDim('fa-chart-line', 'Monthly Policy Trending', '#003087', 'Monthly snaps per policy for Count/Sum paid, Total premium, On claim count', 'Policy Experience → Reserving, Policyholder Self-Serve')
+          + _p5insightDim('fa-calculator', 'Premium Analysis', '#059669', 'Analysis of premium breakdown and history', 'Reimbursement Trending → Forecasting, Booking')
+          + _p5insightDim('fa-id-card', 'Policy Holder Data', '#7c3aed', 'Analytical policy state count and transaction', 'Data-Enabled Decision Making across all dimensions')
+          + _p5insightDim('fa-hand-holding-heart', 'Benefit Data', '#dc2626', 'Care status division and dynamic type of service', 'Reimbursement Trending → Cost trend analysis')
+        + '</div>'
+
+        // Output: Data-Enabled Decision Making
+        + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:16px;color:#fff;margin-bottom:18px;">'
+          + '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;margin-bottom:10px;"><i class="fas fa-brain" style="margin-right:8px;"></i>Data-Enabled Decision Making Output</div>'
+          + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+            + ['Product Analysis','Rate Action','Reserving','Policyholder Self-Serve & Booking'].map(function(d){ return '<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;font-size:11px;font-weight:700;color:#e2e8f0;">'+d+'</div>'; }).join('')
+          + '</div>'
+        + '</div>'
+
+        // Action
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p5close(\'ihubEngineOvl\');_p5toast(\'<i class=\\\"fas fa-chart-line\\\"></i> iHub Insights report generated — Product Analysis · Rate Action · Reserving summary ready\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Generate Insights Report</button>'
+          + '<button onclick="_p5close(\'ihubEngineOvl\');_p5toast(\'<i class=\\\"fas fa-snowflake\\\"></i> Snowflake query initiated — near real-time data refresh in progress\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;flex:1;">Refresh Snowflake Data</button>'
+          + '<button onclick="_p5close(\'ihubEngineOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;">Close</button>'
+        + '</div>'
+
+      + '</div>'
+    + '</div>';
+    _p5overlay('ihubEngineOvl', html);
+  };
+
+  function _p5insightDim(icon, title, color, desc, output) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        + '<div style="width:28px;height:28px;background:'+color+'15;border-radius:7px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas '+icon+'" style="color:'+color+';font-size:12px;"></i></div>'
+        + '<div style="font-size:12px;font-weight:700;color:#111827;">'+title+'</div>'
+      + '</div>'
+      + '<div style="font-size:11px;color:#374151;line-height:1.5;margin-bottom:6px;">'+desc+'</div>'
+      + '<div style="font-size:10px;color:'+color+';font-weight:600;">→ '+output+'</div>'
+    + '</div>';
+  }
+
+  window.ihubOpenDiffAdv = function() {
+    var html = '<div style="background:#fff;border-radius:16px;width:900px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#065f46,#059669);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+          + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">iHub · Illumifin</div><div style="font-size:22px;font-weight:800;">Data | Differentiating Advantages</div></div>'
+          + '<button onclick="_p5close(\'ihubDiffOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+
+        + '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:12px;color:#374151;line-height:1.65;">'
+          + '<strong style="color:#059669;">iHub goes above and beyond standard feeds or XRM</strong> currently being delivered now by providing clients with broader data access, easier and faster access to data, and integration of data across platforms — enabling self-service analytics, real-time insights, and AI-powered decision making.'
+        + '</div>'
+
+        + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px;">'
+          // Current state
+          + '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:16px;">'
+            + '<div style="font-size:11px;font-weight:800;color:#dc2626;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>Current State</div>'
+            + ['FTP-based XRM/CSV flat files','Client-level & payment data only','Premium data only','Policy status & historical data','Policyholder demographics only'].map(function(i){ return '<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid rgba(220,38,38,.15);line-height:1.4;">'+i+'</div>'; }).join('')
+          + '</div>'
+          // Future state
+          + '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;">'
+            + '<div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-rocket" style="margin-right:6px;"></i>iHub Future State</div>'
+            + ['Cloud-based private data share + API + Portal','Monthly Policy Snapshot — monitored updates','Premium Payment — real-time per policy','Rate History — every change offered & selected','Request for Benefit + Claim Payment + Call Summary + Portal Engagement'].map(function(i){ return '<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid rgba(5,150,105,.15);line-height:1.4;">'+i+'</div>'; }).join('')
+          + '</div>'
+          // Value drivers
+          + '<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:16px;">'
+            + '<div style="font-size:11px;font-weight:800;color:#003087;text-transform:uppercase;margin-bottom:10px;"><i class="fas fa-trophy" style="margin-right:6px;"></i>Value Drivers</div>'
+            + ['Policy Trending — portfolio status, lapse prediction','Premium Analysis — rate change history, comparative benchmarking','Benefit & Reimbursement — care type cost trends','Call & Portal — behavior analytics, improvement roadmap','Data Access & Insights — direct analytical portal + API'].map(function(i){ return '<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid rgba(0,48,135,.15);line-height:1.4;">'+i+'</div>'; }).join('')
+          + '</div>'
+        + '</div>'
+
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p5close(\'ihubDiffOvl\');_p5toast(\'<i class=\\\"fas fa-file-alt\\\"></i> iHub business case document prepared for carrier presentation\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Prepare Business Case</button>'
+          + '<button onclick="_p5close(\'ihubDiffOvl\');_p5toast(\'<i class=\\\"fas fa-calendar\\\"></i> iHub demo scheduled with carrier analytics team\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;flex:1;">Schedule Demo</button>'
+          + '<button onclick="_p5close(\'ihubDiffOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p5overlay('ihubDiffOvl', html);
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     ILLUMIFIN PLATFORM — CORE TOOLS & TECHNOLOGIES PAGE (new sub-page)
+     Added as an action/overlay accessible from Core Admin Systems
+  ══════════════════════════════════════════════════════════════════════ */
+  window.ltcOpenCoreTools = function() {
+    var tools = [
+      { icon:'fa-drafting-compass', name:'PowerBuilder', color:'#003087', desc:'Primary development tool for LTCAS core application' },
+      { icon:'fa-code', name:'Visual Studio + VSTS', color:'#7c3aed', desc:'Modern .NET development and CI/CD pipeline management' },
+      { icon:'fa-database', name:'SQL Server', color:'#dc2626', desc:'Primary database platform across LTCAS, eLTCAS, FMS, LINK' },
+      { icon:'fa-cloud', name:'Azure Dev/Ops', color:'#0891b2', desc:'Code management and work item management (VSTS)' },
+      { icon:'fa-cogs', name:'Sparkling Logic SMARTS', color:'#7c3aed', desc:'Commercialized business rules engine for claims adjudication' },
+      { icon:'fa-code-branch', name:'Eclipse', color:'#d97706', desc:'Java IDE for FMS and JBoss EAP development' },
+      { icon:'fa-folder-open', name:'Case360', color:'#003087', desc:'Document and imaging platform for claims management' },
+      { icon:'fa-print', name:'xPressions (OpenText)', color:'#d97706', desc:'Template and correspondence management for EPS' },
+      { icon:'fa-rocket', name:'Octopus Deploy', color:'#0891b2', desc:'Deployment automation and release management' },
+      { icon:'fa-robot', name:'Kryon RPA Platform', color:'#7c3aed', desc:'Robotic process automation for Policy Owner Services' },
+      { icon:'fa-snowflake', name:'Snowflake', color:'#0891b2', desc:'Cloud data warehouse for iHub Data & Insights platform' }
+    ];
+
+    var integrations = [
+      { icon:'fa-plug', name:'API & Web Services', desc:'REST/SOAP APIs across eLTCAS, UPD, CONNECT' },
+      { icon:'fa-file-code', name:'XML', desc:'Data exchange format for integration messaging' },
+      { icon:'fa-key', name:'SAML', desc:'Security Assertion Markup Language for SSO authentication' },
+      { icon:'fa-bus', name:'Service Bus (BizTalk + NServiceBus)', desc:'Async integration across LINK, eLTCAS, UPD, EPS, Case360' },
+      { icon:'fa-stream', name:'Event-Driven Processing + Queues', desc:'Publish/subscribe model for system activities (eLTCAS)' },
+      { icon:'fa-chart-bar', name:'SSIS and SSRS', desc:'ETL pipelines (SSIS) and reporting services (SSRS) for FMS/ERM' },
+      { icon:'fa-server', name:'SQL Server Triggers + Stored Procedures', desc:'Database-level automation for LTCAS and FMS' },
+      { icon:'fa-lock', name:'sFTP', desc:'Secure file transfer via Ipswitch/WSFTP PRO (Transport Services)' },
+      { icon:'fa-water', name:'Streaming', desc:'Near real-time Snowflake replication from CLTCAS/ELTCAS' }
+    ];
+
+    var toolGrid = tools.map(function(t) {
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">'
+        + '<div style="width:32px;height:32px;background:'+t.color+'15;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+          + '<i class="fas '+t.icon+'" style="color:'+t.color+';font-size:13px;"></i></div>'
+        + '<div><div style="font-size:12px;font-weight:700;color:#111827;">'+t.name+'</div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-top:2px;line-height:1.4;">'+t.desc+'</div></div>'
+      + '</div>';
+    }).join('');
+
+    var intGrid = integrations.map(function(i) {
+      return '<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #f3f4f6;">'
+        + '<i class="fas '+i.icon+'" style="color:#003087;margin-top:2px;font-size:12px;flex-shrink:0;"></i>'
+        + '<div><div style="font-size:12px;font-weight:700;color:#111827;">'+i.name+'</div>'
+          + '<div style="font-size:11px;color:#6b7280;line-height:1.4;">'+i.desc+'</div></div>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div style="background:#fff;border-radius:16px;width:860px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#003087,#0052cc);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+          + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">Illumifin Platform</div><div style="font-size:22px;font-weight:800;">Core Tools & Technologies</div></div>'
+          + '<button onclick="_p5close(\'coreToolsOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;">'
+          + '<div>'
+            + '<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-tools" style="color:#003087;margin-right:8px;"></i>Development & Operations Tools</div>'
+            + '<div style="display:grid;grid-template-columns:1fr;gap:8px;">'+toolGrid+'</div>'
+          + '</div>'
+          + '<div>'
+            + '<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-plug" style="color:#7c3aed;margin-right:8px;"></i>Systems Integration Patterns</div>'
+            + '<div>'+intGrid+'</div>'
+          + '</div>'
+        + '</div>'
+        + '<div style="margin-top:18px;display:flex;gap:8px;">'
+          + '<button onclick="_p5close(\'coreToolsOvl\');_p5toast(\'<i class=\\\"fas fa-robot\\\"></i> WealthAI tech stack assessment initiated — modernization roadmap generating…\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">AI Modernization Assessment</button>'
+          + '<button onclick="_p5close(\'coreToolsOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p5overlay('coreToolsOvl', html);
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     BUSINESS ORIENTED STRUCTURE — accessible from Core Admin + Claimant 360
+  ══════════════════════════════════════════════════════════════════════ */
+  window.ltcOpenBizStructure = function() {
+    var domains = [
+      { name:'Policy', color:'#003087', entities:['Coverage','Product Series Service','Policy Administration','Product Configuration'], connections:['Service Request','Agent','Coverage Change','Benefit'] },
+      { name:'Service Request', color:'#0891b2', entities:['Service Detail','Health Assessment Detail','Other Coverage','Household Condition'], connections:['Policy','Case Management','Claim'] },
+      { name:'Case Management', color:'#059669', entities:['Care Management','Case360 Integration','Care Coordinator Assignment','Clinical Assessment'], connections:['Claimant','Benefit','Service Request'] },
+      { name:'Claims', color:'#dc2626', entities:['Claim Appeal','Benefit Adjustment','Benefit Payment','LTC Claims Engine','SMARTS Auto-Adjudication'], connections:['Policy','Provider UPD','FMS','LTCAS'] },
+      { name:'Agent / Client', color:'#7c3aed', entities:['Agent Sales','Client Profile','Policy Holder Data','Agent Event (St. Event)'], connections:['Policy','Coverage','Case Management'] },
+      { name:'Financial', color:'#d97706', entities:['Benefit Payment','FMS Integration','MS Dynamics GP','Premium Processing'], connections:['Claims','Policy','Transport Services'] }
+    ];
+
+    var domainCards = domains.map(function(d) {
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="background:'+d.color+';padding:10px 14px;color:#fff;font-size:13px;font-weight:800;">'+d.name+' Domain</div>'
+        + '<div style="padding:12px 14px;">'
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px;">Core Entities</div>'
+          + d.entities.map(function(e){ return '<div style="font-size:11px;color:#374151;padding:3px 0;border-bottom:1px solid #f3f4f6;display:flex;gap:6px;"><i class="fas fa-circle" style="color:'+d.color+';font-size:6px;margin-top:5px;"></i>'+e+'</div>'; }).join('')
+          + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:8px 0 4px;">Connects To</div>'
+          + '<div style="display:flex;flex-wrap:wrap;gap:4px;">'+d.connections.map(function(c){ return _p5sysChip(c, d.color); }).join('')+'</div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div style="background:#fff;border-radius:16px;width:880px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+          + '<div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">LTCG · Enterprise Architecture</div><div style="font-size:22px;font-weight:800;">Business-Oriented Structure</div></div>'
+          + '<button onclick="_p5close(\'bizStructOvl\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:6px 14px;font-size:12px;cursor:pointer;">✕ Close</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:22px 24px;">'
+        + '<div style="background:#f8fafc;border-left:4px solid #003087;border-radius:4px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:#374151;line-height:1.65;">'
+          + 'The LTCG Business-Oriented Structure defines the domain model for the entire LTC insurance lifecycle — from Policy and Coverage through Service Requests, Case Management, Claims adjudication, and Financial settlement. Each domain contains related entities and communicates through defined integration points (LTCAS, eLTCAS, Case360, LINK, FMS, UPD).'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;">'+domainCards+'</div>'
+        + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:14px 16px;color:#fff;margin-bottom:16px;">'
+          + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;margin-bottom:8px;"><i class="fas fa-robot" style="margin-right:6px;"></i>WealthAI Domain Assessment</div>'
+          + '<div style="font-size:12px;color:#e2e8f0;line-height:1.65;">The LTCG Business-Oriented Structure represents a mature, domain-driven design that creates high switching costs and operational continuity. Key modernization opportunity: The Claims and Case Management domains should be refactored as event-driven microservices (already partially achieved in eLTCAS), while the Policy domain on PowerBuilder/LTCAS represents the highest architectural debt. Wipro recommends API-first strangler-fig pattern starting with the Financial domain (FMS → Azure) and Claims domain (SMARTS + HOLMES AI augmentation).</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+          + '<button onclick="_p5close(\'bizStructOvl\');_p5toast(\'<i class=\\\"fas fa-sitemap\\\"></i> Domain model export initiated — LTCG_Business_Structure_2026.pdf generating…\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Export Domain Model</button>'
+          + '<button onclick="_p5close(\'bizStructOvl\')" style="background:#f9fafb;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:8px 16px;font-size:12px;cursor:pointer;">Close</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _p5overlay('bizStructOvl', html);
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     INJECT SYSTEM BADGES INTO LTC OPERATIONS PAGES
+     Adds system context chips to LTC Claims, Care Coordination, Eligibility
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p5injectSystemBadges() {
+    // Add a floating "System Map" button to LTC pages
+    var pages = ['tpl-ltc-claims','tpl-ltc-care','tpl-ltc-eligibility','tpl-ltc-claimant'];
+    pages.forEach(function(tplId) {
+      var el = document.getElementById(tplId);
+      if (!el || !el.innerHTML || el.innerHTML.trim().length < 50) return;
+      if (el.querySelector('.p5-sys-banner')) return; // already injected
+      var banner = document.createElement('div');
+      banner.className = 'p5-sys-banner';
+      banner.style.cssText = 'background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;padding:8px 16px;margin:0 0 12px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;';
+      banner.innerHTML = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+        + '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;">Active Systems:</span>'
+        + _p5sysChip('LTCAS', '#dc2626') + _p5sysChip('eLTCAS', '#003087')
+        + _p5sysChip('LINK', '#7c3aed') + _p5sysChip('LTC Claims', '#dc2626')
+        + _p5sysChip('SMARTS', '#7c3aed') + _p5sysChip('UPD', '#059669')
+        + _p5sysChip('CellTrak', '#0891b2') + _p5sysChip('Case360', '#003087')
+      + '</div>'
+      + '<button onclick="navigateTo(\'ltc-arch\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="fas fa-sitemap" style="margin-right:5px;"></i>System Map</button>';
+      el.insertBefore(banner, el.firstChild);
+    });
+  }
+
+  // Patch navigateTo to inject badges whenever LTC pages load
+  var _origNav_ltcP5 = navigateTo;
+  navigateTo = function(page) {
+    _origNav_ltcP5(page);
+    var ltcPages = ['ltc-claims','ltc-care','ltc-eligibility','ltc-claimant'];
+    if (ltcPages.indexOf(page) !== -1) {
+      requestAnimationFrame(function(){ setTimeout(_p5injectSystemBadges, 200); });
+    }
+    if (page === 'ltc-arch') {
+      requestAnimationFrame(function(){ setTimeout(window.initLtcArchPage, 80); });
+      var bcEl = document.getElementById('breadcrumb-title');
+      if (bcEl) bcEl.textContent = 'LTC System Architecture — illumifin Platform · Confidential';
+      document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+      var nav = document.querySelector('.ltc-arch-nav');
+      if (nav) nav.classList.add('active');
+    }
+    if (page === 'data-ai') {
+      // Override data-ai to show iHub page
+      requestAnimationFrame(function(){ setTimeout(initIhubInsightsPage, 80); });
+    }
+    if (page === 'core-admin') {
+      // Add Core Tools button to core-admin page after it loads
+      requestAnimationFrame(function(){
+        setTimeout(function(){
+          var el = document.getElementById('tpl-core-admin');
+          if (el && el.querySelector && !el.querySelector('.p5-core-tools-btn')) {
+            var btn = document.createElement('div');
+            btn.className = 'p5-core-tools-btn';
+            btn.style.cssText = 'position:sticky;bottom:0;background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:10px 20px;display:flex;gap:8px;justify-content:flex-end;z-index:100;';
+            btn.innerHTML = '<button onclick="ltcOpenCoreTools()" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-tools" style="margin-right:6px;"></i>Core Tools & Technologies</button>'
+              + '<button onclick="ltcOpenBizStructure()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-sitemap" style="margin-right:6px;"></i>Business Structure</button>';
+            el.appendChild(btn);
+          }
+        }, 250);
+      });
+    }
+  };
+
+  // Expose globals
+  window.initIhubInsightsPage     = initIhubInsightsPage;
+  window.ihubRunInsightsEngine    = window.ihubRunInsightsEngine;
+  window.ihubOpenDiffAdv          = window.ihubOpenDiffAdv;
+  window.ltcOpenCoreTools         = window.ltcOpenCoreTools;
+  window.ltcOpenBizStructure      = window.ltcOpenBizStructure;
+  window.initLtcArchPage          = window.initLtcArchPage;
+  window.ltcArchDetail            = window.ltcArchDetail;
+  window.ltcArchRunAI             = window.ltcArchRunAI;
+  window.ltcArchExport            = window.ltcArchExport;
+  window._p5close                 = _p5close;
+  window._p5toast                 = _p5toast;
+
+  console.log('LTC Phase 5 loaded — System Architecture Map (16 systems) · iHub Data & Insights · Insights Engine · Core Tools & Technologies · Business-Oriented Structure · Differentiating Advantages · System badges injected across LTC Operations tabs');
+})();
