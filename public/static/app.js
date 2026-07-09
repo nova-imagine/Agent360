@@ -65444,6 +65444,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   window.initHalPipelinePage   = initHalPipelinePage;
   window.initHalMedSupPage     = initHalMedSupPage;
   window.initTpaCommandPage    = initTpaCommandPage;
+  window.ltcClaimsData         = ltcClaimsData;
   window.ltcOpenClaimDetail    = ltcOpenClaimDetail;
   window.ltcProcessPayment     = ltcProcessPayment;
   window.ltcScheduleAssessment = ltcScheduleAssessment;
