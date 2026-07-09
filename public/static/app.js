@@ -64586,3 +64586,1536 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('RET Pipeline module loaded — Annuity Application · Suitability Review · Contract Delivery · navigateTo patched for ann-application, suitability-review, contract-delivery');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LTC + HAL OPERATIONS MODULE — Wipro WealthAI Agent 360
+   Covers: LTC Claims · Care Coordination · Eligibility & Assessment ·
+           Claimant 360 · HAL Policy Admin · HAL Pipeline ·
+           Medicare Supplement · TPA Command Center
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     SHARED DATA
+  ───────────────────────────────────────────────────────────────────────── */
+  var ltcClaimsData = [
+    { id:'LTC-2026-0101', claimant:'Margaret O\'Brien',    age:78, carrier:'Prudential',    product:'LTC Standalone', dailyBenefit:'$180/day', status:'Active',    daysOpen:14, priority:'urgent', type:'Nursing Home',   assessScore:2, cogScore:14, nextAction:'Care Plan Review',       provider:'Sunrise Manor SNF',        paymentDue:'Jul 15, 2026' },
+    { id:'LTC-2026-0102', claimant:'Harold Simmons',       age:82, carrier:'MassMutual',    product:'Hybrid LTC/Life',dailyBenefit:'$220/day', status:'Active',    daysOpen:31, priority:'high',   type:'Home Health',    assessScore:3, cogScore:18, nextAction:'Nurse Assessment Due',   provider:'ComfortCare Home Health',  paymentDue:'Jul 10, 2026' },
+    { id:'LTC-2026-0103', claimant:'Dorothy Feldstein',    age:74, carrier:'NY Life',       product:'LTC Standalone', dailyBenefit:'$150/day', status:'Review',    daysOpen:7,  priority:'high',   type:'ALF',            assessScore:2, cogScore:22, nextAction:'Policy Interpretation',  provider:'Sunrise Gardens ALF',      paymentDue:'On Hold' },
+    { id:'LTC-2026-0104', claimant:'Arthur Kowalski',      age:86, carrier:'Genworth',      product:'LTC Standalone', dailyBenefit:'$200/day', status:'Active',    daysOpen:62, priority:'medium', type:'Memory Care',    assessScore:4, cogScore:8,  nextAction:'Monthly Billing Review', provider:'Memory Lane Care',         paymentDue:'Jul 8, 2026' },
+    { id:'LTC-2026-0105', claimant:'Evelyn Marchetti',     age:71, carrier:'Transamerica',  product:'Hybrid LTC/Ann', dailyBenefit:'$130/day', status:'Pending',   daysOpen:3,  priority:'medium', type:'Adult Day Care', assessScore:2, cogScore:26, nextAction:'Initial Assessment',     provider:'Pending Assignment',       paymentDue:'TBD' },
+    { id:'LTC-2026-0106', claimant:'Francis Delacroix',    age:80, carrier:'TIAA',          product:'LTC Standalone', dailyBenefit:'$175/day', status:'Active',    daysOpen:120,priority:'low',    type:'Home Health',    assessScore:3, cogScore:20, nextAction:'Annual Care Review',     provider:'BrightPath Homecare',      paymentDue:'Jul 20, 2026' },
+    { id:'LTC-2026-0107', claimant:'Ruth Blackwood',       age:77, carrier:'Lincoln Natl',  product:'Hybrid LTC/Life',dailyBenefit:'$240/day', status:'Escalated', daysOpen:9,  priority:'urgent', type:'Nursing Home',   assessScore:4, cogScore:11, nextAction:'Clinical Review — RN',   provider:'Oakwood Care Center',      paymentDue:'Escalated' },
+    { id:'LTC-2026-0108', claimant:'George Nakamura',      age:83, carrier:'Pacific Life',  product:'LTC Standalone', dailyBenefit:'$160/day', status:'Active',    daysOpen:45, priority:'low',    type:'ALF',            assessScore:3, cogScore:19, nextAction:'Quarterly Check-In',     provider:'Pines Assisted Living',    paymentDue:'Jul 25, 2026' }
+  ];
+
+  var ltcCarePlanData = [
+    { id:'CP-001', claimant:'Margaret O\'Brien',  careManager:'Sarah Johnson, RN',   setting:'SNF',       frequency:'Weekly',  lastVisit:'Jul 3, 2026',  nextVisit:'Jul 10, 2026', status:'On Track',  adls:['Bathing','Dressing','Toileting','Mobility'],     goals:'Maintain current functional level; prevent fall recurrence' },
+    { id:'CP-002', claimant:'Harold Simmons',     careManager:'Maria Castillo, MSW',  setting:'Home',      frequency:'Bi-weekly',lastVisit:'Jun 28, 2026', nextVisit:'Jul 12, 2026', status:'Review',    adls:['Bathing','Dressing'],                             goals:'Increase independence in meal prep; monitor medication compliance' },
+    { id:'CP-003', claimant:'Arthur Kowalski',    careManager:'James Park, RN',       setting:'Memory',    frequency:'Monthly', lastVisit:'Jul 1, 2026',  nextVisit:'Aug 1, 2026',  status:'On Track',  adls:['Bathing','Dressing','Toileting','Eating','Transfer'],goals:'Slow cognitive decline; family education' },
+    { id:'CP-004', claimant:'Ruth Blackwood',     careManager:'Angela Moore, RN',     setting:'SNF',       frequency:'Weekly',  lastVisit:'Jul 5, 2026',  nextVisit:'Jul 12, 2026', status:'Escalated', adls:['All 5 ADLs'],                                     goals:'Critical — discharge planning + family conference needed' }
+  ];
+
+  var halPoliciesData = [
+    { id:'HAL-P-001', carrier:'AmeriLife',      product:'Medicare Supplement Plan G', type:'MedSupp',  status:'Active',  policies:18400, premiumMo:'$312K',  claimsOpen:0,   renewalDate:'Jan 2027', group:'Individual' },
+    { id:'HAL-P-002', carrier:'Pacific Life',   product:'Fixed Annuity 5-yr',         type:'Annuity',  status:'Active',  policies:4200,  premiumMo:'$89K',   claimsOpen:0,   renewalDate:'Mar 2027', group:'Individual' },
+    { id:'HAL-P-003', carrier:'Lincoln Natl',   product:'Term Life 20-yr',            type:'Life',     status:'Active',  policies:31000, premiumMo:'$540K',  claimsOpen:142, renewalDate:'Ongoing',  group:'Group' },
+    { id:'HAL-P-004', carrier:'Aetna',          product:'Medicare Supplement Plan N', type:'MedSupp',  status:'Active',  policies:9800,  premiumMo:'$164K',  claimsOpen:0,   renewalDate:'Jan 2027', group:'Individual' },
+    { id:'HAL-P-005', carrier:'CUNA Mutual',    product:'Whole Life — Credit Union',  type:'Life',     status:'Active',  policies:22000, premiumMo:'$310K',  claimsOpen:87,  renewalDate:'Ongoing',  group:'Group' },
+    { id:'HAL-P-006', carrier:'Columbian Life', product:'FIA Indexed 7-yr',           type:'Annuity',  status:'Pending', policies:0,     premiumMo:'—',      claimsOpen:0,   renewalDate:'Launching Q3 2026', group:'Individual' }
+  ];
+
+  var halPipelineData = [
+    { id:'HAL-OPP-001', carrier:'Nationwide',    product:'Medicare Supplement',  stage:'Proposal Submitted', value:'$2.1M ARR',  contacts:3, nextStep:'Management presentation Jul 15',  probability:75, type:'MedSupp' },
+    { id:'HAL-OPP-002', carrier:'USAA',          product:'LTC + Life Hybrid',    stage:'Discovery',          value:'$4.8M ARR',  contacts:5, nextStep:'NDA + data room access Jul 20',    probability:40, type:'Hybrid' },
+    { id:'HAL-OPP-003', carrier:'Cigna',         product:'Group Health Supp',    stage:'RFP Response',       value:'$1.4M ARR',  contacts:2, nextStep:'Written proposal due Jul 13',       probability:60, type:'Health' },
+    { id:'HAL-OPP-004', carrier:'Protective',    product:'Annuity Admin',        stage:'Contract Review',    value:'$900K ARR',  contacts:4, nextStep:'Legal review, sign by Jul 30',      probability:90, type:'Annuity' },
+    { id:'HAL-OPP-005', carrier:'Acadian',       product:'LTC Standalone Block', stage:'Initial Contact',    value:'$3.2M ARR',  contacts:1, nextStep:'Intro meeting Jul 18',              probability:25, type:'LTC' }
+  ];
+
+  var tpaCarrierData = [
+    { id:'CRR-001', carrier:'Prudential',     lines:['LTC Standalone','Life'],      policies:320000, claimsActive:8400,  slaScore:97.2, premiumBilled:'$48M/mo',   staff:180, status:'Green',  contractExp:'2029' },
+    { id:'CRR-002', carrier:'MassMutual',     lines:['Hybrid LTC/Life','Annuity'],  policies:215000, claimsActive:5200,  slaScore:98.1, premiumBilled:'$31M/mo',   staff:140, status:'Green',  contractExp:'2028' },
+    { id:'CRR-003', carrier:'Genworth',       lines:['LTC Standalone'],             policies:480000, claimsActive:14800, slaScore:94.8, premiumBilled:'$72M/mo',   staff:290, status:'Yellow', contractExp:'2027' },
+    { id:'CRR-004', carrier:'Transamerica',   lines:['Hybrid LTC/Ann','Life'],      policies:195000, claimsActive:3900,  slaScore:96.5, premiumBilled:'$28M/mo',   staff:115, status:'Green',  contractExp:'2030' },
+    { id:'CRR-005', carrier:'Lincoln Natl',   lines:['Hybrid LTC/Life','Group'],    policies:280000, claimsActive:6700,  slaScore:95.9, premiumBilled:'$39M/mo',   staff:160, status:'Green',  contractExp:'2028' },
+    { id:'CRR-006', carrier:'Pacific Life',   lines:['LTC Standalone','Annuity'],   policies:142000, claimsActive:4100,  slaScore:92.4, premiumBilled:'$21M/mo',   staff:98,  status:'Red',    contractExp:'2026' }
+  ];
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     HELPER: STATUS BADGE
+  ───────────────────────────────────────────────────────────────────────── */
+  function _ltcBadge(status) {
+    var colors = {
+      'Active':    '#059669', 'Pending': '#d97706', 'Review': '#d97706',
+      'Escalated': '#dc2626', 'Resolved':'#6b7280', 'On Track':'#059669',
+      'Green':     '#059669', 'Yellow':  '#d97706', 'Red':     '#dc2626'
+    };
+    var color = colors[status] || '#6b7280';
+    return '<span style="background:'+color+'1a;color:'+color+';border:1px solid '+color+'44;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">'+status+'</span>';
+  }
+
+  function _halTypeBadge(type) {
+    var colors = { 'LTC':'#dc2626','Hybrid':'#7c3aed','Annuity':'#0891b2','Life':'#003087','MedSupp':'#059669','Health':'#0d9488' };
+    var color = colors[type] || '#6b7280';
+    return '<span style="background:'+color+'1a;color:'+color+';border:1px solid '+color+'44;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">'+type+'</span>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     PAGE BUILDER UTILITY
+  ───────────────────────────────────────────────────────────────────────── */
+  function _ltcBuildPage(tplId, html) {
+    var el = document.getElementById(tplId);
+    if (el) el.innerHTML = html;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LTC CLAIMS PAGE
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initLtcClaimsPage() {
+    var urgentCount  = ltcClaimsData.filter(function(c){return c.priority==='urgent';}).length;
+    var activeCount  = ltcClaimsData.filter(function(c){return c.status==='Active';}).length;
+    var reviewCount  = ltcClaimsData.filter(function(c){return c.status==='Review'||c.status==='Escalated';}).length;
+    var totalPayout  = '$4.2B';
+
+    var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+      + _ltcKpiCard('63,000+','Active Claimants','fa-users','#dc2626','Managed in real time')
+      + _ltcKpiCard(totalPayout,'Annual Claims Paid','fa-dollar-sign','#059669','Industry\'s largest LTC payer')
+      + _ltcKpiCard('1.5M+','Transactions / yr','fa-exchange-alt','#0891b2','Automated payment processing')
+      + _ltcKpiCard(urgentCount+' Urgent','Action Required Now','fa-exclamation-triangle','#d97706',reviewCount+' in review · '+activeCount+' active')
+      + '</div>';
+
+    var tableRows = ltcClaimsData.map(function(c) {
+      var priorityColor = c.priority==='urgent'?'#dc2626':c.priority==='high'?'#d97706':'#059669';
+      return '<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="ltcOpenClaimDetail(\''+c.id+'\')">'
+        + '<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#003087;">'+c.id+'</td>'
+        + '<td style="padding:10px 12px;">'
+          + '<div style="font-size:13px;font-weight:600;color:#111827;">'+c.claimant+'</div>'
+          + '<div style="font-size:11px;color:#6b7280;">Age '+c.age+' · '+c.carrier+'</div>'
+          + '</td>'
+        + '<td style="padding:10px 12px;">'+_halTypeBadge(c.type==='Nursing Home'?'LTC':c.type==='Memory Care'?'LTC':c.type==='ALF'?'LTC':'LTC')+'<div style="font-size:11px;color:#6b7280;margin-top:3px;">'+c.type+'</div></td>'
+        + '<td style="padding:10px 12px;font-size:13px;font-weight:700;color:#059669;">'+c.dailyBenefit+'</td>'
+        + '<td style="padding:10px 12px;">'+_ltcBadge(c.status)+'</td>'
+        + '<td style="padding:10px 12px;"><span style="color:'+priorityColor+';font-size:11px;font-weight:700;text-transform:uppercase;">'+c.priority+'</span></td>'
+        + '<td style="padding:10px 12px;font-size:12px;color:#374151;">'+c.daysOpen+' days</td>'
+        + '<td style="padding:10px 12px;font-size:12px;color:#374151;">'+c.nextAction+'</td>'
+        + '<td style="padding:10px 12px;">'
+          + '<button onclick="event.stopPropagation();ltcOpenClaimDetail(\''+c.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">Review</button>'
+          + '</td>'
+        + '</tr>';
+    }).join('');
+
+    var html = '<div class="page ltc-claims-page" style="padding:24px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+        + '<div style="width:40px;height:40px;background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-file-medical-alt" style="color:#fff;font-size:18px;"></i></div>'
+        + '<div>'
+          + '<div style="font-size:20px;font-weight:800;color:#111827;">LTC Claims Management</div>'
+          + '<div style="font-size:12px;color:#6b7280;">Industry-leading · 63K+ Active Claimants · $4B+ Annual Payout · Clinically Backed Decisions</div>'
+        + '</div>'
+        + '<div style="margin-left:auto;display:flex;gap:8px;">'
+          + '<button onclick="ltcRunAiTriage()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Triage</button>'
+          + '<button onclick="ltcNewClaim()" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>New Claim</button>'
+        + '</div>'
+      + '</div>'
+      + kpiHtml
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + '<div style="padding:14px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;">'
+          + '<span style="font-size:14px;font-weight:700;color:#111827;"><i class="fas fa-list-alt" style="color:#dc2626;margin-right:6px;"></i>Active Claims Queue</span>'
+          + '<select onchange="ltcFilterClaims(this.value)" style="margin-left:auto;border:1px solid #e5e7eb;border-radius:6px;padding:5px 10px;font-size:12px;">'
+            + '<option>All Priorities</option><option>Urgent</option><option>High</option><option>Medium</option>'
+          + '</select>'
+          + '<select onchange="ltcFilterStatus(this.value)" style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 10px;font-size:12px;">'
+            + '<option>All Statuses</option><option>Active</option><option>Review</option><option>Escalated</option><option>Pending</option>'
+          + '</select>'
+        + '</div>'
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + '<thead><tr style="background:#f8fafc;">'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Claim ID</th>'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Claimant</th>'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Type</th>'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Daily Benefit</th>'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Status</th>'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Priority</th>'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Days Open</th>'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Next Action</th>'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;"></th>'
+            + '</tr></thead>'
+            + '<tbody id="ltc-claims-tbody">'+tableRows+'</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+      + '</div>';
+
+    _ltcBuildPage('tpl-ltc-claims', html);
+  }
+
+  function _ltcKpiCard(val, lbl, icon, color, sub) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+        + '<div style="width:34px;height:34px;background:'+color+'1a;border-radius:8px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas '+icon+'" style="color:'+color+';font-size:15px;"></i></div>'
+        + '<div style="font-size:22px;font-weight:800;color:#111827;">'+val+'</div>'
+      + '</div>'
+      + '<div style="font-size:13px;font-weight:600;color:#374151;">'+lbl+'</div>'
+      + '<div style="font-size:11px;color:#9ca3af;margin-top:3px;">'+sub+'</div>'
+    + '</div>';
+  }
+
+  function ltcOpenClaimDetail(claimId) {
+    var c = ltcClaimsData.find(function(x){return x.id===claimId;});
+    if (!c) return;
+    var html = '<div id="ltc-claim-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;">'
+      + '<div style="background:#fff;border-radius:16px;width:680px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);">'
+        + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:20px 22px;border-radius:16px 16px 0 0;color:#fff;">'
+          + '<div style="display:flex;align-items:center;gap:12px;">'
+            + '<i class="fas fa-file-medical-alt" style="font-size:22px;"></i>'
+            + '<div>'
+              + '<div style="font-size:16px;font-weight:800;">'+c.id+' — '+c.claimant+'</div>'
+              + '<div style="font-size:12px;opacity:.85;">'+c.type+' · '+c.carrier+' · '+c.product+'</div>'
+            + '</div>'
+            + '<button onclick="document.getElementById(\'ltc-claim-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;">✕ Close</button>'
+          + '</div>'
+        + '</div>'
+        + '<div style="padding:20px 22px;">'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">'
+            + _ltcDetailRow('Claimant Age', c.age)
+            + _ltcDetailRow('Daily Benefit', c.dailyBenefit)
+            + _ltcDetailRow('Status', c.status)
+            + _ltcDetailRow('Days Open', c.daysOpen+' days')
+            + _ltcDetailRow('Care Setting', c.type)
+            + _ltcDetailRow('Provider', c.provider)
+            + _ltcDetailRow('ADL Assessment Score', c.assessScore+'/5 ADLs')
+            + _ltcDetailRow('Cognitive Score', c.cogScore+'/30 (MMSE)')
+            + _ltcDetailRow('Next Payment Due', c.paymentDue)
+            + _ltcDetailRow('Claim Manager', 'Assigned RN / MSW')
+          + '</div>'
+          + '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:14px;margin-bottom:16px;">'
+            + '<div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:6px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>Next Required Action</div>'
+            + '<div style="font-size:13px;color:#7f1d1d;">'+c.nextAction+'</div>'
+          + '</div>'
+          + '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:16px;">'
+            + '<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Clinical Insight</div>'
+            + '<div style="font-size:12px;color:#166534;line-height:1.6;">Based on '+c.claimant+'\'s ADL profile ('+c.assessScore+'/5) and cognitive score ('+c.cogScore+'/30), the AI projects continued '+c.type+' care for 6–12 months. Care manager should review benefit period utilization and coordinate with '+c.provider+' for updated care plan documentation before next payment cycle.</div>'
+          + '</div>'
+          + '<div style="display:flex;gap:10px;">'
+            + '<button onclick="ltcProcessPayment(\''+c.id+'\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-dollar-sign" style="margin-right:5px;"></i>Process Payment</button>'
+            + '<button onclick="ltcScheduleAssessment(\''+c.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-user-check" style="margin-right:5px;"></i>Schedule Assessment</button>'
+            + '<button onclick="ltcUpdateCarePlan(\''+c.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-hands-helping" style="margin-right:5px;"></i>Update Care Plan</button>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  function _ltcDetailRow(lbl, val) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;">'
+      + '<div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;margin-bottom:2px;">'+lbl+'</div>'
+      + '<div style="font-size:13px;font-weight:700;color:#111827;">'+val+'</div>'
+    + '</div>';
+  }
+
+  function ltcProcessPayment(claimId) {
+    document.getElementById('ltc-claim-overlay') && document.getElementById('ltc-claim-overlay').remove();
+    if (typeof _raToast === 'function') _raToast('<i class="fas fa-dollar-sign"></i> Payment processed for '+claimId+' · Next cycle queued automatically', 3500);
+  }
+  function ltcScheduleAssessment(claimId) {
+    document.getElementById('ltc-claim-overlay') && document.getElementById('ltc-claim-overlay').remove();
+    if (typeof _raToast === 'function') _raToast('<i class="fas fa-user-check"></i> RN Assessment scheduled for '+claimId+' · Client notified via SMS', 3500);
+  }
+  function ltcUpdateCarePlan(claimId) {
+    document.getElementById('ltc-claim-overlay') && document.getElementById('ltc-claim-overlay').remove();
+    if (typeof _raToast === 'function') _raToast('<i class="fas fa-hands-helping"></i> Care Plan updated for '+claimId+' · Care manager notified', 3500);
+  }
+  function ltcFilterClaims(val) { if (typeof _raToast==='function') _raToast('<i class="fas fa-filter"></i> Filtered by priority: '+val, 1800); }
+  function ltcFilterStatus(val) { if (typeof _raToast==='function') _raToast('<i class="fas fa-filter"></i> Filtered by status: '+val, 1800); }
+  function ltcRunAiTriage() {
+    if (typeof _raToast==='function') _raToast('<i class="fas fa-robot"></i> AI Triage running across 63,000+ claimants · 8 urgent escalations flagged · 23 payment anomalies detected', 5000);
+  }
+  function ltcNewClaim() {
+    if (typeof _raToast==='function') _raToast('<i class="fas fa-plus"></i> New LTC Claim intake form opened · HIPAA-compliant assessment scheduled', 3000);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LTC CARE COORDINATION PAGE
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initLtcCarePage() {
+    var cardsHtml = ltcCarePlanData.map(function(cp) {
+      var statusColor = cp.status==='On Track'?'#059669':cp.status==='Escalated'?'#dc2626':'#d97706';
+      var adlHtml = cp.adls.map(function(a){ return '<span style="background:#e0f2fe;color:#0369a1;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;margin:2px;">'+a+'</span>'; }).join('');
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:14px;">'
+        + '<div style="display:flex;align-items:flex-start;gap:14px;">'
+          + '<div style="width:44px;height:44px;background:linear-gradient(135deg,#0891b2,#06b6d4);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<i class="fas fa-hands-helping" style="color:#fff;font-size:18px;"></i></div>'
+          + '<div style="flex:1;">'
+            + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">'
+              + '<div style="font-size:15px;font-weight:700;color:#111827;">'+cp.claimant+'</div>'
+              + _ltcBadge(cp.status)
+            + '</div>'
+            + '<div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Care Manager: <strong>'+cp.careManager+'</strong> · Setting: <strong>'+cp.setting+'</strong> · Frequency: <strong>'+cp.frequency+'</strong></div>'
+            + '<div style="margin-bottom:10px;"><div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">ADL Impairments</div>'+adlHtml+'</div>'
+            + '<div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:12px;color:#374151;margin-bottom:12px;"><strong>Goal:</strong> '+cp.goals+'</div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'
+              + '<div style="background:#f0fdf4;border-radius:8px;padding:8px 12px;"><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Last Visit</div><div style="font-size:12px;font-weight:700;color:#166534;">'+cp.lastVisit+'</div></div>'
+              + '<div style="background:'+(cp.status==='Escalated'?'#fef2f2':'#eff6ff')+';border-radius:8px;padding:8px 12px;"><div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;">Next Visit</div><div style="font-size:12px;font-weight:700;color:'+(cp.status==='Escalated'?'#dc2626':'#1d4ed8')+';">'+cp.nextVisit+'</div></div>'
+            + '</div>'
+            + '<div style="display:flex;gap:8px;">'
+              + '<button onclick="ltcCarePlanAction(\'schedule\',\''+cp.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-calendar" style="margin-right:4px;"></i>Schedule Visit</button>'
+              + '<button onclick="ltcCarePlanAction(\'update\',\''+cp.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-edit" style="margin-right:4px;"></i>Update Plan</button>'
+              + '<button onclick="ltcCarePlanAction(\'provider\',\''+cp.id+'\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-hospital" style="margin-right:4px;"></i>Provider Hub</button>'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div class="page ltc-care-page" style="padding:24px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+        + '<div style="width:40px;height:40px;background:linear-gradient(135deg,#0891b2,#06b6d4);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-hands-helping" style="color:#fff;font-size:18px;"></i></div>'
+        + '<div>'
+          + '<div style="font-size:20px;font-weight:800;color:#111827;">Care Coordination</div>'
+          + '<div style="font-size:12px;color:#6b7280;">Active care plans · RN & MSW care managers · Multi-setting coordination · ADL & cognitive tracking</div>'
+        + '</div>'
+        + '<div style="margin-left:auto;display:flex;gap:8px;">'
+          + '<button onclick="ltcRunAiCareAlert()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Care Alerts</button>'
+          + '<button onclick="ltcNewCarePlan()" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>New Care Plan</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+        + _ltcKpiCard('4','Active Care Plans','fa-clipboard-list','#0891b2','Shown below')
+        + _ltcKpiCard('120K+','Assessments/yr','fa-user-check','#059669','Telephonic · Virtual · In-Person')
+        + _ltcKpiCard('50 States','RN Network Coverage','fa-map-marked-alt','#7c3aed','+ U.S. territories')
+        + _ltcKpiCard('1 Escalated','Requires Immediate Attention','fa-exclamation-triangle','#dc2626','Ruth Blackwood — SNF critical')
+      + '</div>'
+      + cardsHtml
+    + '</div>';
+    _ltcBuildPage('tpl-ltc-care', html);
+  }
+
+  function ltcCarePlanAction(action, id) {
+    var msgs = {
+      schedule: '<i class="fas fa-calendar"></i> Visit scheduled · Care manager notified · SMS sent to family',
+      update:   '<i class="fas fa-edit"></i> Care plan updated · Documentation saved · Carrier notified',
+      provider: '<i class="fas fa-hospital"></i> Provider Hub opened · ProviderHub portal connected'
+    };
+    if (typeof _raToast==='function') _raToast(msgs[action]||'Action completed', 3000);
+  }
+  function ltcRunAiCareAlert() { if(typeof _raToast==='function') _raToast('<i class="fas fa-robot"></i> AI Care Alerts: 1 escalation risk detected (Ruth Blackwood) · 2 overdue assessments · 3 care plan renewals needed', 5000); }
+  function ltcNewCarePlan() { if(typeof _raToast==='function') _raToast('<i class="fas fa-plus"></i> New Care Plan initiated · Assign care manager and complete initial assessment', 2800); }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LTC ELIGIBILITY & ASSESSMENT PAGE
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initLtcEligibilityPage() {
+    var assessQueue = [
+      { name:'Evelyn Marchetti',  type:'Initial',   date:'Jul 11, 2026', mode:'Telephonic', carrier:'Transamerica', product:'Hybrid LTC/Ann', status:'Scheduled' },
+      { name:'Thomas Haggerty',   type:'Annual',    date:'Jul 14, 2026', mode:'In-Person',  carrier:'Genworth',     product:'LTC Standalone', status:'Confirmed' },
+      { name:'Nancy Kowalczyk',   type:'Cognitive', date:'Jul 16, 2026', mode:'Virtual',    carrier:'MassMutual',   product:'Hybrid LTC/Life',status:'Pending RN' },
+      { name:'Robert Feinstein',  type:'Functional',date:'Jul 18, 2026', mode:'In-Person',  carrier:'Prudential',   product:'LTC Standalone', status:'Scheduled' },
+      { name:'Carol Steinberg',   type:'Initial',   date:'Jul 21, 2026', mode:'Telephonic', carrier:'Pacific Life', product:'LTC Standalone', status:'Pending RN' },
+      { name:'Vincent O\'Malley', type:'Annual',    date:'Jul 22, 2026', mode:'Virtual',    carrier:'Lincoln Natl', product:'Hybrid LTC/Life',status:'Confirmed' },
+      { name:'Patricia Drummond', type:'Cognitive', date:'Jul 25, 2026', mode:'In-Person',  carrier:'Transamerica', product:'Hybrid LTC/Ann', status:'Scheduled' }
+    ];
+
+    var queueRows = assessQueue.map(function(a){
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:10px 14px;font-size:13px;font-weight:600;color:#111827;">'+a.name+'</td>'
+        + '<td style="padding:10px 14px;">'+_halTypeBadge(a.type==='Cognitive'?'LTC':a.type==='Functional'?'LTC':'LTC')+'<div style="font-size:11px;color:#6b7280;margin-top:2px;">'+a.type+'</div></td>'
+        + '<td style="padding:10px 14px;font-size:12px;font-weight:700;color:#374151;">'+a.date+'</td>'
+        + '<td style="padding:10px 14px;"><span style="background:#e0f2fe;color:#0369a1;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;">'+a.mode+'</span></td>'
+        + '<td style="padding:10px 14px;font-size:12px;color:#6b7280;">'+a.carrier+'</td>'
+        + '<td style="padding:10px 14px;">'+_ltcBadge(a.status==='Confirmed'?'Active':a.status==='Scheduled'?'Active':'Pending')+'</td>'
+        + '<td style="padding:10px 14px;">'
+          + '<button onclick="ltcAssessAction(\''+a.name+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">Manage</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page ltc-eligibility-page" style="padding:24px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+        + '<div style="width:40px;height:40px;background:linear-gradient(135deg,#059669,#047857);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-user-check" style="color:#fff;font-size:18px;"></i></div>'
+        + '<div>'
+          + '<div style="font-size:20px;font-weight:800;color:#111827;">Eligibility & Assessment</div>'
+          + '<div style="font-size:12px;color:#6b7280;">120,000+ assessments/yr · MMSE & EMST cognitive tools · 50-state RN network · HIPAA-compliant scheduling</div>'
+        + '</div>'
+        + '<div style="margin-left:auto;display:flex;gap:8px;">'
+          + '<button onclick="ltcScheduleNew()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>Schedule Assessment</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+        + _ltcKpiCard('7','Scheduled This Week','fa-calendar-check','#059669','Across all modalities')
+        + _ltcKpiCard('120K+','Annual Volume','fa-chart-line','#0891b2','30-yr benchmark accuracy')
+        + _ltcKpiCard('3','Assessment Modes','fa-video','#7c3aed','Phone · Video · In-Person')
+        + _ltcKpiCard('16th Ed.','LTC Underwriting Guidelines','fa-book-medical','#d97706','Proprietary clinical framework')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:20px;">'
+        + '<div style="padding:14px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;">'
+          + '<span style="font-size:14px;font-weight:700;color:#111827;"><i class="fas fa-calendar-alt" style="color:#059669;margin-right:6px;"></i>Assessment Queue — Next 14 Days</span>'
+        + '</div>'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + '<thead><tr style="background:#f8fafc;">'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Claimant</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Assessment Type</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Date</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Modality</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Carrier</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Status</th>'
+            + '<th style="padding:10px 14px;"></th>'
+          + '</tr></thead>'
+          + '<tbody>'+queueRows+'</tbody>'
+        + '</table>'
+      + '</div>'
+      + '<div style="background:#fef3c7;border:1.5px solid #fcd34d;border-radius:12px;padding:16px 20px;">'
+        + '<div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;"><i class="fas fa-shield-alt" style="margin-right:6px;"></i>Clinical Quality & Compliance</div>'
+        + '<div style="font-size:12px;color:#78350f;line-height:1.7;">All assessments use scientifically validated tools: <strong>Enhanced Mental Skills Test (EMST)</strong> and <strong>Minnesota Cognitive Acuity Screen (MCAS)</strong>. illumifin is designated by the <strong>State of California as a CMPA</strong> and the <strong>State of Connecticut as a Care Access Agency (CAA)</strong>. Every assessment completed within HIPAA-compliant platform with real-time status visibility and clinical quality review.</div>'
+      + '</div>'
+    + '</div>';
+    _ltcBuildPage('tpl-ltc-eligibility', html);
+  }
+
+  function ltcAssessAction(name) { if(typeof _raToast==='function') _raToast('<i class="fas fa-user-check"></i> Assessment for '+name+' opened · RN assigned · SMS scheduling link sent', 3000); }
+  function ltcScheduleNew() { if(typeof _raToast==='function') _raToast('<i class="fas fa-calendar-plus"></i> New assessment scheduled · Self-scheduling SMS sent to applicant', 2800); }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LTC CLAIMANT 360 PAGE
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initLtcClaimantPage() {
+    var c = ltcClaimsData[0]; // default: Margaret O'Brien
+    var html = '<div class="page ltc-claimant-page" style="padding:24px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+        + '<div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-id-card-alt" style="color:#fff;font-size:18px;"></i></div>'
+        + '<div><div style="font-size:20px;font-weight:800;color:#111827;">Claimant 360°</div>'
+          + '<div style="font-size:12px;color:#6b7280;">Full-view claimant intelligence · Clinical + financial + care journey in one place</div></div>'
+        + '<select onchange="ltcLoad360(this.value)" style="margin-left:auto;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;">'
+          + ltcClaimsData.map(function(x){ return '<option value="'+x.id+'"'+(x.id===c.id?' selected':'')+'>'+x.claimant+'</option>'; }).join('')
+        + '</select>'
+      + '</div>'
+      + '<div id="ltc-360-body">'
+      + _ltc360Body(c)
+      + '</div>'
+    + '</div>';
+    _ltcBuildPage('tpl-ltc-claimant', html);
+  }
+
+  function _ltc360Body(c) {
+    return '<div style="display:grid;grid-template-columns:300px 1fr;gap:18px;">'
+      + '<div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:14px;">'
+          + '<div style="width:60px;height:60px;background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">'
+            + '<i class="fas fa-user" style="color:#fff;font-size:24px;"></i></div>'
+          + '<div style="text-align:center;font-size:16px;font-weight:800;color:#111827;margin-bottom:4px;">'+c.claimant+'</div>'
+          + '<div style="text-align:center;font-size:12px;color:#6b7280;margin-bottom:12px;">Age '+c.age+' · '+c.type+'</div>'
+          + '<div style="text-align:center;margin-bottom:14px;">'+_ltcBadge(c.status)+'</div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Carrier: <strong>'+c.carrier+'</strong></div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Product: <strong>'+c.product+'</strong></div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Daily Benefit: <strong>'+c.dailyBenefit+'</strong></div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-bottom:4px;">Provider: <strong>'+c.provider+'</strong></div>'
+          + '<div style="font-size:11px;color:#6b7280;margin-bottom:16px;">Next Payment: <strong>'+c.paymentDue+'</strong></div>'
+          + '<button onclick="ltcOpenClaimDetail(\''+c.id+'\')" style="width:100%;background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-file-medical-alt" style="margin-right:5px;"></i>Open Full Claim</button>'
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;">'
+          + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Clinical Scores</div>'
+          + _ltcScoreBar('ADL Impairment',c.assessScore,5,'#dc2626')
+          + _ltcScoreBar('Cognitive (MMSE)',30-c.cogScore,30,'#7c3aed')
+          + _ltcScoreBar('Care Complexity',Math.round((c.assessScore/5+((30-c.cogScore)/30))*50),100,'#d97706')
+        + '</div>'
+      + '</div>'
+      + '<div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:14px;">'
+          + '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-robot" style="color:#7c3aed;margin-right:6px;"></i>WealthAI 360 Intelligence Summary</div>'
+          + '<div style="background:linear-gradient(135deg,#7c3aed08,#6d28d908);border:1.5px solid #7c3aed22;border-radius:10px;padding:14px;">'
+            + '<div style="font-size:12px;color:#374151;line-height:1.8;">'
+              + '• <strong>Care Setting:</strong> '+c.type+' — appropriate for ADL score '+c.assessScore+'/5<br>'
+              + '• <strong>Benefit Utilization:</strong> '+c.daysOpen+' days open · Daily benefit '+c.dailyBenefit+' · No overbilling detected<br>'
+              + '• <strong>Clinical Risk:</strong> MMSE-equivalent score '+c.cogScore+'/30 — '+(c.cogScore<15?'severe impairment, memory care recommended':c.cogScore<21?'moderate impairment, ALF or home with support':'mild impairment, home health appropriate')+'<br>'
+              + '• <strong>Payment Integrity:</strong> No anomalies detected · Provider billing matches care plan<br>'
+              + '• <strong>Next Milestone:</strong> '+c.nextAction
+            + '</div>'
+          + '</div>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+          + _ltcTimelineCard('Jun 15','Initial Assessment','RN telephonic — ADL: 2/5','#0891b2')
+          + _ltcTimelineCard('Jun 20','Benefit Approval','$'+c.dailyBenefit.replace('/day','')+'/day approved · Policy verified','#059669')
+          + _ltcTimelineCard('Jul 1','First Payment','Processed to '+c.provider,'#059669')
+          + _ltcTimelineCard('Jul 10','Next Action',c.nextAction,'#d97706')
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;">'
+          + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;text-transform:uppercase;">Quick Actions</div>'
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+            + '<button onclick="ltcProcessPayment(\''+c.id+'\')" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-dollar-sign" style="margin-right:4px;"></i>Process Payment</button>'
+            + '<button onclick="ltcScheduleAssessment(\''+c.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-user-check" style="margin-right:4px;"></i>Schedule Assessment</button>'
+            + '<button onclick="ltcCarePlanAction(\'update\',\'CP-001\')" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-clipboard" style="margin-right:4px;"></i>Update Care Plan</button>'
+            + '<button onclick="ltcCarePlanAction(\'provider\',\'CP-001\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:7px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-hospital" style="margin-right:4px;"></i>Provider Hub</button>'
+            + '<button onclick="ltcRunAiTriage()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI Analysis</button>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _ltcScoreBar(lbl, val, max, color) {
+    var pct = Math.round((val/max)*100);
+    return '<div style="margin-bottom:12px;">'
+      + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
+        + '<span style="font-size:11px;color:#6b7280;">'+lbl+'</span>'
+        + '<span style="font-size:11px;font-weight:700;color:'+color+';">'+val+'/'+max+'</span>'
+      + '</div>'
+      + '<div style="height:6px;background:#f3f4f6;border-radius:3px;">'
+        + '<div style="height:6px;background:'+color+';border-radius:3px;width:'+pct+'%;"></div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _ltcTimelineCard(date, title, desc, color) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-left:3px solid '+color+';border-radius:8px;padding:12px;">'
+      + '<div style="font-size:10px;font-weight:700;color:'+color+';text-transform:uppercase;">'+date+'</div>'
+      + '<div style="font-size:13px;font-weight:700;color:#111827;margin:3px 0;">'+title+'</div>'
+      + '<div style="font-size:11px;color:#6b7280;">'+desc+'</div>'
+    + '</div>';
+  }
+
+  function ltcLoad360(claimId) {
+    var c = ltcClaimsData.find(function(x){return x.id===claimId;});
+    if (!c) return;
+    var body = document.getElementById('ltc-360-body');
+    if (body) body.innerHTML = _ltc360Body(c);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     HAL POLICY ADMINISTRATION PAGE
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initHalPolicyPage() {
+    var totalPolicies = halPoliciesData.reduce(function(s,p){return s+(p.policies||0);},0);
+    var totalPremium  = '$1.41B/yr';
+
+    var cardsHtml = halPoliciesData.map(function(p){
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;cursor:pointer;" onclick="halOpenPolicyDetail(\''+p.id+'\')">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">'
+          + '<div>'
+            + '<div style="font-size:14px;font-weight:800;color:#111827;">'+p.carrier+'</div>'
+            + '<div style="font-size:12px;color:#6b7280;margin-top:2px;">'+p.product+'</div>'
+          + '</div>'
+          + _halTypeBadge(p.type)
+        + '</div>'
+        + _ltcBadge(p.status)
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">'
+          + _ltcDetailRow('Policies',p.policies?p.policies.toLocaleString():'—')
+          + _ltcDetailRow('Monthly Premium',p.premiumMo)
+          + _ltcDetailRow('Open Claims',p.claimsOpen||0)
+          + _ltcDetailRow('Contract/Renewal',p.renewalDate)
+        + '</div>'
+        + '<div style="margin-top:12px;display:flex;gap:8px;">'
+          + '<button onclick="event.stopPropagation();halPolicyAction(\'admin\',\''+p.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-cogs" style="margin-right:4px;"></i>Admin</button>'
+          + '<button onclick="event.stopPropagation();halPolicyAction(\'billing\',\''+p.id+'\')" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-dollar-sign" style="margin-right:4px;"></i>Billing</button>'
+          + '<button onclick="event.stopPropagation();halPolicyAction(\'claims\',\''+p.id+'\')" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-file-medical-alt" style="margin-right:4px;"></i>Claims</button>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div class="page hal-policy-page" style="padding:24px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+        + '<div style="width:40px;height:40px;background:linear-gradient(135deg,#003087,#0891b2);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-layer-group" style="color:#fff;font-size:18px;"></i></div>'
+        + '<div><div style="font-size:20px;font-weight:800;color:#111827;">HAL Policy Administration</div>'
+          + '<div style="font-size:12px;color:#6b7280;">Health · Annuity · Life · 2.83M+ policies administered · End-to-end policy lifecycle · SaaS + TPA</div></div>'
+        + '<div style="margin-left:auto;display:flex;gap:8px;">'
+          + '<button onclick="halLaunchProduct()" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-rocket" style="margin-right:5px;"></i>Launch Product</button>'
+          + '<button onclick="halRunReconciliation()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Reconciliation</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+        + _ltcKpiCard('2.83M+','Total Policies Administered','fa-file-contract','#003087','Across all HAL product lines')
+        + _ltcKpiCard(totalPremium,'Annual Premium Collected','fa-dollar-sign','#059669','$5B+ overall TPA portfolio')
+        + _ltcKpiCard('70+','Carrier Clients','fa-handshake','#0891b2','Life · Annuity · Health · LTC')
+        + _ltcKpiCard('30K+','Policy Types Supported','fa-layer-group','#7c3aed','Open & closed books')
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">'
+      + cardsHtml
+      + '</div>'
+    + '</div>';
+    _ltcBuildPage('tpl-hal-policy', html);
+  }
+
+  function halOpenPolicyDetail(id) {
+    var p = halPoliciesData.find(function(x){return x.id===id;});
+    if (!p) return;
+    if(typeof _raToast==='function') _raToast('<i class="fas fa-layer-group"></i> '+p.carrier+' · '+p.product+' · '+( p.policies?p.policies.toLocaleString():0)+' policies · Policy detail panel opening', 3500);
+  }
+  function halPolicyAction(action, id) {
+    var p = halPoliciesData.find(function(x){return x.id===id;});
+    var msgs = {
+      admin:   '<i class="fas fa-cogs"></i> Policy Admin console opened for '+p.carrier,
+      billing: '<i class="fas fa-dollar-sign"></i> Billing & premium reconciliation opened for '+p.carrier,
+      claims:  '<i class="fas fa-file-medical-alt"></i> Claims dashboard opened for '+p.carrier
+    };
+    if(typeof _raToast==='function') _raToast(msgs[action]||'Action completed', 3000);
+  }
+  function halLaunchProduct() { if(typeof _raToast==='function') _raToast('<i class="fas fa-rocket"></i> New product launch wizard started · Product industrialization pipeline initiated', 3000); }
+  function halRunReconciliation() { if(typeof _raToast==='function') _raToast('<i class="fas fa-robot"></i> AI Reconciliation running across 2.83M policies · 4 premium discrepancies detected · Legacy data mapping complete', 5000); }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     HAL PIPELINE PAGE
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initHalPipelinePage() {
+    var totalARR = '$12.4M';
+    var stageColors = { 'Initial Contact':'#9ca3af','Discovery':'#d97706','RFP Response':'#0891b2','Proposal Submitted':'#7c3aed','Contract Review':'#059669' };
+
+    var pipelineCards = halPipelineData.map(function(opp){
+      var stageColor = stageColors[opp.stage]||'#6b7280';
+      var probColor  = opp.probability>=75?'#059669':opp.probability>=50?'#d97706':'#dc2626';
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:12px;">'
+        + '<div style="display:flex;align-items:flex-start;gap:12px;">'
+          + '<div style="width:44px;height:44px;background:'+stageColor+'1a;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<i class="fas fa-exchange-alt" style="color:'+stageColor+';font-size:17px;"></i></div>'
+          + '<div style="flex:1;">'
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+              + '<div style="font-size:15px;font-weight:800;color:#111827;">'+opp.carrier+'</div>'
+              + _halTypeBadge(opp.type)
+            + '</div>'
+            + '<div style="font-size:12px;color:#6b7280;margin-bottom:8px;">'+opp.product+'</div>'
+            + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">'
+              + _ltcDetailRow('Stage','<span style="color:'+stageColor+';">'+opp.stage+'</span>')
+              + _ltcDetailRow('ARR Value',opp.value)
+              + _ltcDetailRow('Win Probability','<span style="color:'+probColor+';">'+opp.probability+'%</span>')
+            + '</div>'
+            + '<div style="background:#f8fafc;border-radius:8px;padding:8px 12px;font-size:12px;color:#374151;margin-bottom:12px;"><strong>Next Step:</strong> '+opp.nextStep+'</div>'
+            + '<div style="height:6px;background:#f3f4f6;border-radius:3px;margin-bottom:8px;">'
+              + '<div style="height:6px;background:'+probColor+';border-radius:3px;width:'+opp.probability+'%;"></div>'
+            + '</div>'
+            + '<div style="display:flex;gap:8px;">'
+              + '<button onclick="halAdvanceStage(\''+opp.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-arrow-right" style="margin-right:4px;"></i>Advance Stage</button>'
+              + '<button onclick="halGenerateProposal(\''+opp.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI Proposal</button>'
+              + '<button onclick="halScheduleMeeting(\''+opp.id+'\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-calendar" style="margin-right:4px;"></i>Schedule</button>'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div class="page hal-pipeline-page" style="padding:24px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+        + '<div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-exchange-alt" style="color:#fff;font-size:18px;"></i></div>'
+        + '<div><div style="font-size:20px;font-weight:800;color:#111827;">HAL New Business Pipeline</div>'
+          + '<div style="font-size:12px;color:#6b7280;">LTC · Hybrid · Annuity · Life · MedSupp · Health — carrier acquisition & expansion pipeline</div></div>'
+        + '<div style="margin-left:auto;display:flex;gap:8px;">'
+          + '<button onclick="halAddOpportunity()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>Add Opportunity</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+        + _ltcKpiCard(halPipelineData.length,'Active Opportunities','fa-exchange-alt','#7c3aed','Across 5 product lines')
+        + _ltcKpiCard(totalARR,'Total Pipeline ARR','fa-dollar-sign','#059669','Weighted probability $5.8M')
+        + _ltcKpiCard('1','In Contract Review','fa-file-signature','#0891b2','Protective · $900K ARR · 90% win')
+        + _ltcKpiCard('Jul 13','Next Proposal Due','fa-calendar-alt','#d97706','Cigna Group Health Supp RFP')
+      + '</div>'
+      + pipelineCards
+    + '</div>';
+    _ltcBuildPage('tpl-hal-pipeline', html);
+  }
+
+  function halAdvanceStage(id) { if(typeof _raToast==='function') _raToast('<i class="fas fa-arrow-right"></i> Opportunity advanced to next stage · CRM updated · Stakeholders notified', 3000); }
+  function halGenerateProposal(id) { if(typeof _raToast==='function') _raToast('<i class="fas fa-robot"></i> AI generating customized RFP response · Using illumifin case studies + pricing model + transformation playbook', 4000); }
+  function halScheduleMeeting(id) { if(typeof _raToast==='function') _raToast('<i class="fas fa-calendar"></i> Meeting scheduled · Calendar invite sent to carrier contacts', 2800); }
+  function halAddOpportunity() { if(typeof _raToast==='function') _raToast('<i class="fas fa-plus"></i> New carrier opportunity added to HAL pipeline', 2500); }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     HAL MEDICARE SUPPLEMENT PAGE
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initHalMedSupPage() {
+    var medSupData = [
+      { plan:'Plan G', carrier:'AmeriLife',  policies:18400, premMo:'$312K', lossRatio:'68.2%', renewalRate:'91%', avgAge:71, state:'Multi-state', status:'Active' },
+      { plan:'Plan N', carrier:'Aetna',      policies:9800,  premMo:'$164K', lossRatio:'71.4%', renewalRate:'88%', avgAge:69, state:'Multi-state', status:'Active' },
+      { plan:'Plan F', carrier:'CIGNA',      policies:5200,  premMo:'$98K',  lossRatio:'74.1%', renewalRate:'82%', avgAge:73, state:'15 states',   status:'Review' },
+      { plan:'Plan G+',carrier:'United Amer',policies:3100,  premMo:'$61K',  lossRatio:'66.8%', renewalRate:'93%', avgAge:68, state:'8 states',    status:'Active' }
+    ];
+
+    var rows = medSupData.map(function(m){
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:10px 14px;font-size:13px;font-weight:700;color:#059669;">'+m.plan+'</td>'
+        + '<td style="padding:10px 14px;font-size:13px;font-weight:600;color:#111827;">'+m.carrier+'</td>'
+        + '<td style="padding:10px 14px;font-size:13px;font-weight:700;color:#003087;">'+m.policies.toLocaleString()+'</td>'
+        + '<td style="padding:10px 14px;font-size:13px;font-weight:700;color:#059669;">'+m.premMo+'</td>'
+        + '<td style="padding:10px 14px;font-size:12px;color:#374151;">'+m.lossRatio+'</td>'
+        + '<td style="padding:10px 14px;font-size:12px;color:#059669;font-weight:700;">'+m.renewalRate+'</td>'
+        + '<td style="padding:10px 14px;font-size:12px;color:#374151;">'+m.avgAge+'</td>'
+        + '<td style="padding:10px 14px;">'+_ltcBadge(m.status)+'</td>'
+        + '<td style="padding:10px 14px;">'
+          + '<button onclick="medSupAction(\''+m.plan+'\')" style="background:#059669;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;">Manage</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page hal-medsup-page" style="padding:24px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+        + '<div style="width:40px;height:40px;background:linear-gradient(135deg,#059669,#047857);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-heartbeat" style="color:#fff;font-size:18px;"></i></div>'
+        + '<div><div style="font-size:20px;font-weight:800;color:#111827;">Medicare Supplement Administration</div>'
+          + '<div style="font-size:12px;color:#6b7280;">Plans F · G · N · G+ · HAL TPA platform · Carrier-agnostic · Full lifecycle admin</div></div>'
+        + '<div style="margin-left:auto;display:flex;gap:8px;">'
+          + '<button onclick="medSupRenewalRun()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-sync" style="margin-right:5px;"></i>Renewal Run</button>'
+          + '<button onclick="medSupAiAnalysis()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Analysis</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+        + _ltcKpiCard('36,500','Total MedSupp Policies','fa-heartbeat','#059669','Plans F/G/N/G+')
+        + _ltcKpiCard('$635K/mo','Total Monthly Premium','fa-dollar-sign','#003087','$7.6M annually')
+        + _ltcKpiCard('89.5%','Avg Renewal Rate','fa-sync','#0891b2','Industry-leading retention')
+        + _ltcKpiCard('70.1%','Blended Loss Ratio','fa-chart-bar','#d97706','Well within target range')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+        + '<div style="padding:14px 16px;background:#f8fafc;border-bottom:1px solid #e5e7eb;">'
+          + '<span style="font-size:14px;font-weight:700;color:#111827;"><i class="fas fa-heartbeat" style="color:#059669;margin-right:6px;"></i>Medicare Supplement Portfolio</span>'
+        + '</div>'
+        + '<table style="width:100%;border-collapse:collapse;">'
+          + '<thead><tr style="background:#f8fafc;">'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Plan</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Carrier</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Policies</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Premium/Mo</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Loss Ratio</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Renewal Rate</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Avg Age</th>'
+            + '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Status</th>'
+            + '<th style="padding:10px 14px;"></th>'
+          + '</tr></thead>'
+          + '<tbody>'+rows+'</tbody>'
+        + '</table>'
+      + '</div>'
+    + '</div>';
+    _ltcBuildPage('tpl-hal-medsup', html);
+  }
+
+  function medSupAction(plan) { if(typeof _raToast==='function') _raToast('<i class="fas fa-heartbeat"></i> Medicare Supplement '+plan+' admin console opened · Billing · Claims · Renewals', 3000); }
+  function medSupRenewalRun() { if(typeof _raToast==='function') _raToast('<i class="fas fa-sync"></i> Renewal run initiated · 36,500 policies scanned · 892 renewal letters generated · 45 non-renewals flagged', 4500); }
+  function medSupAiAnalysis() { if(typeof _raToast==='function') _raToast('<i class="fas fa-robot"></i> AI Analysis: Loss ratio trending +1.4% YoY · Plan F aging risk identified · Recommend Plan G migration for 1,200 policyholders', 5000); }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TPA COMMAND CENTER PAGE
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initTpaCommandPage() {
+    var carrierCards = tpaCarrierData.map(function(c){
+      var statusColor = c.status==='Green'?'#059669':c.status==='Yellow'?'#d97706':'#dc2626';
+      var slaColor    = c.slaScore>=97?'#059669':c.slaScore>=95?'#d97706':'#dc2626';
+      var linesHtml   = c.lines.map(function(l){return '<span style="background:#e0f2fe;color:#0369a1;border-radius:20px;padding:2px 7px;font-size:10px;font-weight:600;margin:2px;">'+l+'</span>';}).join('');
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-left:4px solid '+statusColor+';border-radius:12px;padding:16px;">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+          + '<div style="font-size:14px;font-weight:800;color:#111827;">'+c.carrier+'</div>'
+          + '<div style="margin-left:auto;width:10px;height:10px;border-radius:50%;background:'+statusColor+';"></div>'
+        + '</div>'
+        + '<div style="margin-bottom:8px;">'+linesHtml+'</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">'
+          + '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;"><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;">Policies</div><div style="font-size:12px;font-weight:700;color:#111827;">'+c.policies.toLocaleString()+'</div></div>'
+          + '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;"><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;">Active Claims</div><div style="font-size:12px;font-weight:700;color:#dc2626;">'+c.claimsActive.toLocaleString()+'</div></div>'
+          + '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;"><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;">SLA Score</div><div style="font-size:12px;font-weight:700;color:'+slaColor+';">'+c.slaScore+'%</div></div>'
+          + '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;"><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;">Premium/Mo</div><div style="font-size:12px;font-weight:700;color:#059669;">'+c.premiumBilled+'</div></div>'
+        + '</div>'
+        + '<div style="font-size:11px;color:#6b7280;margin-bottom:10px;">Contract: <strong>'+c.contractExp+'</strong> · Staff: <strong>'+c.staff+'</strong></div>'
+        + '<button onclick="tpaOpenCarrier(\''+c.id+'\')" style="width:100%;background:#003087;color:#fff;border:none;border-radius:7px;padding:7px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-arrow-right" style="margin-right:4px;"></i>Open Dashboard</button>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div class="page tpa-command-page" style="padding:24px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+        + '<div style="width:40px;height:40px;background:linear-gradient(135deg,#003087,#0056b3);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas fa-tachometer-alt" style="color:#fff;font-size:18px;"></i></div>'
+        + '<div><div style="font-size:20px;font-weight:800;color:#111827;">TPA Command Center</div>'
+          + '<div style="font-size:12px;color:#6b7280;">Real-time carrier operations · SLA monitoring · 65+ TPA clients · $5B+ premiums · AI-powered automation</div></div>'
+        + '<div style="margin-left:auto;display:flex;gap:8px;">'
+          + '<button onclick="tpaRunSlaCheck()" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-chart-bar" style="margin-right:5px;"></i>SLA Report</button>'
+          + '<button onclick="tpaRunAiWorkflow()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Automation</button>'
+        + '</div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">'
+        + _ltcKpiCard('65+','TPA Carrier Clients','fa-handshake','#003087','LTC · HAL · Hybrid')
+        + _ltcKpiCard('$5B+','Annual Premiums Collected','fa-dollar-sign','#059689','Across all product lines')
+        + _ltcKpiCard('96.2%','Avg SLA Score','fa-chart-line','#059669','5 Green · 1 Yellow · 1 Red')
+        + _ltcKpiCard('2,700','Staff Deployed','fa-users','#0891b2','US + India · 6 locations')
+      + '</div>'
+      + '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">'
+        + '<i class="fas fa-exclamation-triangle" style="color:#dc2626;font-size:20px;flex-shrink:0;"></i>'
+        + '<div>'
+          + '<div style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:2px;">Action Required — Pacific Life (SLA 92.4%)</div>'
+          + '<div style="font-size:12px;color:#7f1d1d;">SLA below threshold · Contract expiry Dec 2026 · Recommend executive review · 3 open performance items</div>'
+        + '</div>'
+        + '<button onclick="tpaEscalateCarrier(\'CRR-006\')" style="margin-left:auto;background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-arrow-up" style="margin-right:5px;"></i>Escalate</button>'
+      + '</div>'
+      + '<div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:12px;">Carrier Portfolio — Live Status</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">'
+      + carrierCards
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;">'
+        + '<div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:16px;"><i class="fas fa-robot" style="color:#7c3aed;margin-right:8px;"></i>AI Automation Status — Real-Time Workflows</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+          + _tpaWorkflowCard('Straight-Through Claims Processing','Running','1,847 claims auto-processed today · $2.1M saved','#059669')
+          + _tpaWorkflowCard('Premium Reconciliation AI','Running','$487M reconciled · 23 discrepancies flagged','#059669')
+          + _tpaWorkflowCard('Regulatory Compliance Monitor','Running','HIPAA · NAIC · State dept. · SOC 2 — all passing','#059669')
+          + _tpaWorkflowCard('Policyholder Self-Service Portal','Active','18,400 portal logins today · 94% resolution rate','#059669')
+          + _tpaWorkflowCard('Pacific Life SLA Recovery','Action Needed','Performance plan initiated · exec escalation sent','#dc2626')
+          + _tpaWorkflowCard('HAL New Business Onboarding','Running','Protective (Annuity) contract finalization in progress','#0891b2')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+    _ltcBuildPage('tpl-tpa-command', html);
+  }
+
+  function _tpaWorkflowCard(title, status, desc, color) {
+    return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        + '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';"></div>'
+        + '<div style="font-size:12px;font-weight:700;color:#111827;">'+title+'</div>'
+      + '</div>'
+      + '<div style="font-size:11px;color:#6b7280;">'+desc+'</div>'
+    + '</div>';
+  }
+
+  function tpaOpenCarrier(id) {
+    var c = tpaCarrierData.find(function(x){return x.id===id;});
+    if(typeof _raToast==='function') _raToast('<i class="fas fa-tachometer-alt"></i> '+c.carrier+' TPA dashboard opened · SLA: '+c.slaScore+'% · '+c.policies.toLocaleString()+' policies · '+c.claimsActive.toLocaleString()+' active claims', 4000);
+  }
+  function tpaRunSlaCheck() { if(typeof _raToast==='function') _raToast('<i class="fas fa-chart-bar"></i> SLA Report generated · 5 carriers Green · 1 Yellow (Genworth 94.8%) · 1 Red (Pacific Life 92.4%) · Full report emailed to ops leads', 5000); }
+  function tpaRunAiWorkflow() { if(typeof _raToast==='function') _raToast('<i class="fas fa-robot"></i> AI Automation review complete · 14 workflow optimizations identified · $3.2M annual savings potential · Straight-through processing rate: 78%', 5000); }
+  function tpaEscalateCarrier(id) { if(typeof _raToast==='function') _raToast('<i class="fas fa-exclamation-triangle"></i> Pacific Life escalated to Executive Steering Committee · Performance plan initiated · 30-day recovery window set', 4000); }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     NAVIGATE-TO PATCH — LTC + HAL routes
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _origNav_ltcHal = navigateTo;
+
+  navigateTo = function(page) {
+    _origNav_ltcHal(page);
+
+    var titleEl = document.getElementById('page-title');
+    var bcEl    = document.getElementById('page-breadcrumb');
+
+    if (page === 'ltc-claims') {
+      if (titleEl) titleEl.textContent = 'LTC Claims Management';
+      if (bcEl)    bcEl.textContent    = 'LTC Operations / Claims';
+      requestAnimationFrame(function(){ setTimeout(initLtcClaimsPage, 80); });
+    }
+    if (page === 'ltc-care') {
+      if (titleEl) titleEl.textContent = 'Care Coordination';
+      if (bcEl)    bcEl.textContent    = 'LTC Operations / Care Coordination';
+      requestAnimationFrame(function(){ setTimeout(initLtcCarePage, 80); });
+    }
+    if (page === 'ltc-eligibility') {
+      if (titleEl) titleEl.textContent = 'Eligibility & Assessment';
+      if (bcEl)    bcEl.textContent    = 'LTC Operations / Eligibility';
+      requestAnimationFrame(function(){ setTimeout(initLtcEligibilityPage, 80); });
+    }
+    if (page === 'ltc-claimant') {
+      if (titleEl) titleEl.textContent = 'Claimant 360°';
+      if (bcEl)    bcEl.textContent    = 'LTC Operations / Claimant 360';
+      requestAnimationFrame(function(){ setTimeout(initLtcClaimantPage, 80); });
+    }
+    if (page === 'hal-policy') {
+      if (titleEl) titleEl.textContent = 'HAL Policy Administration';
+      if (bcEl)    bcEl.textContent    = 'HAL Operations / Policy Admin';
+      requestAnimationFrame(function(){ setTimeout(initHalPolicyPage, 80); });
+    }
+    if (page === 'hal-pipeline') {
+      if (titleEl) titleEl.textContent = 'HAL New Business Pipeline';
+      if (bcEl)    bcEl.textContent    = 'HAL Operations / Pipeline';
+      requestAnimationFrame(function(){ setTimeout(initHalPipelinePage, 80); });
+    }
+    if (page === 'hal-medsup') {
+      if (titleEl) titleEl.textContent = 'Medicare Supplement Admin';
+      if (bcEl)    bcEl.textContent    = 'HAL Operations / Medicare Supplement';
+      requestAnimationFrame(function(){ setTimeout(initHalMedSupPage, 80); });
+    }
+    if (page === 'tpa-command') {
+      if (titleEl) titleEl.textContent = 'TPA Command Center';
+      if (bcEl)    bcEl.textContent    = 'HAL Operations / TPA Command Center';
+      requestAnimationFrame(function(){ setTimeout(initTpaCommandPage, 80); });
+    }
+  };
+
+  /* ── Expose globals ─────────────────────────────────────────────────── */
+  window.initLtcClaimsPage     = initLtcClaimsPage;
+  window.initLtcCarePage       = initLtcCarePage;
+  window.initLtcEligibilityPage= initLtcEligibilityPage;
+  window.initLtcClaimantPage   = initLtcClaimantPage;
+  window.initHalPolicyPage     = initHalPolicyPage;
+  window.initHalPipelinePage   = initHalPipelinePage;
+  window.initHalMedSupPage     = initHalMedSupPage;
+  window.initTpaCommandPage    = initTpaCommandPage;
+  window.ltcOpenClaimDetail    = ltcOpenClaimDetail;
+  window.ltcProcessPayment     = ltcProcessPayment;
+  window.ltcScheduleAssessment = ltcScheduleAssessment;
+  window.ltcUpdateCarePlan     = ltcUpdateCarePlan;
+  window.ltcFilterClaims       = ltcFilterClaims;
+  window.ltcFilterStatus       = ltcFilterStatus;
+  window.ltcRunAiTriage        = ltcRunAiTriage;
+  window.ltcNewClaim           = ltcNewClaim;
+  window.ltcCarePlanAction     = ltcCarePlanAction;
+  window.ltcRunAiCareAlert     = ltcRunAiCareAlert;
+  window.ltcNewCarePlan        = ltcNewCarePlan;
+  window.ltcAssessAction       = ltcAssessAction;
+  window.ltcScheduleNew        = ltcScheduleNew;
+  window.ltcLoad360            = ltcLoad360;
+  window.halOpenPolicyDetail   = halOpenPolicyDetail;
+  window.halPolicyAction       = halPolicyAction;
+  window.halLaunchProduct      = halLaunchProduct;
+  window.halRunReconciliation  = halRunReconciliation;
+  window.halAdvanceStage       = halAdvanceStage;
+  window.halGenerateProposal   = halGenerateProposal;
+  window.halScheduleMeeting    = halScheduleMeeting;
+  window.halAddOpportunity     = halAddOpportunity;
+  window.medSupAction          = medSupAction;
+  window.medSupRenewalRun      = medSupRenewalRun;
+  window.medSupAiAnalysis      = medSupAiAnalysis;
+  window.tpaOpenCarrier        = tpaOpenCarrier;
+  window.tpaRunSlaCheck        = tpaRunSlaCheck;
+  window.tpaRunAiWorkflow      = tpaRunAiWorkflow;
+  window.tpaEscalateCarrier    = tpaEscalateCarrier;
+
+  console.log('LTC + HAL Operations module loaded — LTC Claims · Care Coordination · Eligibility · Claimant 360 · HAL Policy Admin · HAL Pipeline · Medicare Supplement · TPA Command Center');
+
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 2 — illumifin RFP DEEP ENHANCEMENT MODULE
+   Hybrid LTC+HAL Hub · AI Modernization Accelerator · RFP Response Center
+   + Enhanced overlays for LTC Claims AI Adjudication, STP metrics
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ─── SHARED UTILITIES ──────────────────────────────────────────────────── */
+  function _enh_bld(tplId, html) {
+    var el = document.getElementById(tplId);
+    if (el) el.innerHTML = html;
+  }
+
+  function _enh_kpi(val, lbl, icon, color, sub, trend) {
+    var trendHtml = trend ? '<div style="font-size:11px;margin-top:4px;color:'+(trend>0?'#059669':'#dc2626')+';font-weight:700;">'+(trend>0?'↑':'↓')+' '+Math.abs(trend)+'% vs prior yr</div>' : '';
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;">'
+      + '<div style="position:absolute;top:0;left:0;width:4px;height:100%;background:'+color+';border-radius:2px 0 0 2px;"></div>'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;padding-left:8px;">'
+        + '<div style="width:38px;height:38px;min-width:38px;background:'+color+'15;border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+          + '<i class="fas '+icon+'" style="color:'+color+';font-size:16px;"></i></div>'
+        + '<div style="flex:1;">'
+          + '<div style="font-size:22px;font-weight:800;color:#111827;line-height:1.1;">'+val+'</div>'
+          + '<div style="font-size:12px;font-weight:600;color:#374151;margin-top:2px;">'+lbl+'</div>'
+          + '<div style="font-size:11px;color:#9ca3af;margin-top:2px;">'+sub+'</div>'
+          + trendHtml
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _enh_toast(msg) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#003087,#0052cc);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.3);max-width:380px;';
+    d.innerHTML = '<i class="fas fa-check-circle" style="margin-right:8px;color:#4ade80;"></i>' + msg;
+    document.body.appendChild(d);
+    setTimeout(function(){ d.remove(); }, 3500);
+  }
+
+  function _enh_badge(txt, color) {
+    return '<span style="background:'+color+'1a;color:'+color+';border:1px solid '+color+'44;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;white-space:nowrap;">'+txt+'</span>';
+  }
+
+  function _enh_sectionHdr(icon, title, sub, color) {
+    color = color || '#003087';
+    return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+      + '<div style="width:42px;height:42px;background:linear-gradient(135deg,'+color+','+color+'cc);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        + '<i class="fas '+icon+'" style="color:#fff;font-size:18px;"></i></div>'
+      + '<div>'
+        + '<div style="font-size:20px;font-weight:800;color:#111827;">'+title+'</div>'
+        + '<div style="font-size:12px;color:#6b7280;">'+sub+'</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 1 — HYBRID LTC+HAL OPERATIONS HUB
+     The centerpiece crossover view showing unified LTC + HAL platform
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initHybridOpsPage() {
+    var html = '<div class="page" style="padding:24px;">'
+
+      /* ── Header ── */
+      + _enh_sectionHdr('fa-network-wired',
+          'Hybrid LTC + HAL Operations Hub',
+          'Unified platform serving Long-Term Care + Health · Annuity · Life — illumifin\'s integrated TPA-as-a-Service model',
+          '#7c3aed')
+
+      /* ── Platform Banner ── */
+      + '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#7c3aed 100%);border-radius:14px;padding:22px 28px;color:#fff;margin-bottom:24px;position:relative;overflow:hidden;">'
+        + '<div style="position:absolute;top:-30px;right:-30px;width:140px;height:140px;background:rgba(255,255,255,.04);border-radius:50%;"></div>'
+        + '<div style="position:absolute;bottom:-20px;right:80px;width:80px;height:80px;background:rgba(255,255,255,.03);border-radius:50%;"></div>'
+        + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#a78bfa;margin-bottom:8px;">WIPRO WEALTHAI AGENT 360 — illumifin PARTNERSHIP VISION</div>'
+        + '<div style="font-size:22px;font-weight:800;margin-bottom:12px;line-height:1.3;">One Platform. Two Business Lines. Infinite Scale.</div>'
+        + '<div style="font-size:13px;opacity:.85;max-width:680px;line-height:1.6;">illumifin operates the industry\'s largest LTC TPA serving 50+ major carriers, while expanding HAL (Health · Annuity · Life) as a SaaS + TPA hybrid. Wipro WealthAI provides the unified agentic intelligence layer across both lines — enabling shared operations, AI-driven automation, and commercialization as TPA-as-a-Service.</div>'
+        + '<div style="display:flex;gap:16px;margin-top:18px;flex-wrap:wrap;">'
+          + '<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px 18px;text-align:center;">'
+            + '<div style="font-size:20px;font-weight:800;">3.0M+</div><div style="font-size:11px;opacity:.75;">Total Policies</div></div>'
+          + '<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px 18px;text-align:center;">'
+            + '<div style="font-size:20px;font-weight:800;">$4B+</div><div style="font-size:11px;opacity:.75;">Annual Claims Paid</div></div>'
+          + '<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px 18px;text-align:center;">'
+            + '<div style="font-size:20px;font-weight:800;">65+</div><div style="font-size:11px;opacity:.75;">TPA Clients</div></div>'
+          + '<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px 18px;text-align:center;">'
+            + '<div style="font-size:20px;font-weight:800;">~3,000</div><div style="font-size:11px;opacity:.75;">Employees</div></div>'
+          + '<div style="background:rgba(220,38,38,.3);border-radius:8px;padding:10px 18px;text-align:center;border:1px solid rgba(220,38,38,.5);">'
+            + '<div style="font-size:20px;font-weight:800;">35–50%</div><div style="font-size:11px;opacity:.75;">Target Cost Reduction</div></div>'
+        + '</div>'
+      + '</div>'
+
+      /* ── KPI Grid: LTC vs HAL ── */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">'
+
+        /* LTC Side */
+        + '<div style="background:#fff;border:2px solid #dc262622;border-radius:14px;padding:20px;">'
+          + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#dc2626;margin-bottom:14px;display:flex;align-items:center;gap:8px;">'
+            + '<i class="fas fa-heartbeat"></i> LTC OPERATIONS</div>'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+            + _enh_kpi('63,000+', 'Active Claimants', 'fa-users', '#dc2626', 'Managed daily', 8)
+            + _enh_kpi('$4.2B', 'Annual Payout', 'fa-dollar-sign', '#dc2626', '2025 fiscal year', 12)
+            + _enh_kpi('50+', 'LTC Carriers', 'fa-building', '#dc2626', 'Admin clients', 0)
+            + _enh_kpi('120K+', 'Assessments/yr', 'fa-clipboard-check', '#dc2626', 'EMST · MCAS certified', 5)
+          + '</div>'
+          + '<div style="margin-top:14px;background:#fef2f2;border-radius:8px;padding:10px 14px;border-left:3px solid #dc2626;">'
+            + '<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:4px;">LTC DIFFERENTIATION</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.6;">• Largest LTC TPA in North America (post-LTCG acquisition)<br>• CA CMPA + CT CAA designated assessor<br>• 16th edition proprietary LTC underwriting guidelines<br>• Avg 9-yr TPA contracts (many 20+ yr software licenses)</div>'
+          + '</div>'
+        + '</div>'
+
+        /* HAL Side */
+        + '<div style="background:#fff;border:2px solid #7c3aed22;border-radius:14px;padding:20px;">'
+          + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#7c3aed;margin-bottom:14px;display:flex;align-items:center;gap:8px;">'
+            + '<i class="fas fa-layer-group"></i> HAL OPERATIONS (Health · Annuity · Life)</div>'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+            + _enh_kpi('2.8M+', 'HAL Policies', 'fa-file-contract', '#7c3aed', 'In administration', 22)
+            + _enh_kpi('40', 'Software Clients', 'fa-laptop-code', '#7c3aed', 'SaaS platform', 15)
+            + _enh_kpi('16', 'HAL TPA Clients', 'fa-handshake', '#7c3aed', 'Managed services', 33)
+            + _enh_kpi('$1.1B', 'HAL Premium/yr', 'fa-chart-line', '#7c3aed', 'Growing rapidly', 18)
+          + '</div>'
+          + '<div style="margin-top:14px;background:#f5f3ff;border-radius:8px;padding:10px 14px;border-left:3px solid #7c3aed;">'
+            + '<div style="font-size:11px;font-weight:700;color:#7c3aed;margin-bottom:4px;">HAL GROWTH DRIVERS</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.6;">• Acquired Admin Partners of America (AmeriLife) Jan 2024<br>• Medicare Supplement growing as aging population expands<br>• Annuity admin surging with retirement wave demographics<br>• Life block conversions reducing carrier costs 30–40%</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      /* ── Hybrid Synergy Architecture ── */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;margin-bottom:24px;">'
+        + '<div style="font-size:15px;font-weight:800;color:#111827;margin-bottom:16px;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-project-diagram" style="color:#7c3aed;"></i> Hybrid Platform Architecture — Shared Services Model</div>'
+        + '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:center;">'
+
+          /* LTC Block */
+          + '<div style="background:linear-gradient(135deg,#fef2f2,#fff5f5);border:1px solid #fecaca;border-radius:12px;padding:16px;">'
+            + '<div style="font-size:12px;font-weight:800;color:#dc2626;margin-bottom:10px;text-transform:uppercase;">LTC Core Functions</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.8;">'
+              + '✓ Eligibility & Benefit Determination<br>'
+              + '✓ Care Plan Management<br>'
+              + '✓ Nursing Home / ALF Claims<br>'
+              + '✓ Home Health Assessment<br>'
+              + '✓ Provider Network Coordination<br>'
+              + '✓ Fraud Detection & SIU<br>'
+              + '✓ EMST / MCAS Clinical Assessment<br>'
+              + '✓ Regulatory Compliance (HIPAA/NAIC)'
+            + '</div>'
+          + '</div>'
+
+          /* Shared Core */
+          + '<div style="padding:0 16px;text-align:center;">'
+            + '<div style="background:linear-gradient(135deg,#1e3a5f,#7c3aed);border-radius:12px;padding:16px 12px;color:#fff;min-width:150px;">'
+              + '<i class="fas fa-brain" style="font-size:24px;margin-bottom:8px;display:block;"></i>'
+              + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:6px;">Wipro WealthAI</div>'
+              + '<div style="font-size:10px;opacity:.85;line-height:1.6;">Agentic AI Layer<br>Shared Data Platform<br>API-First Integration<br>Cloud Microservices<br>Analytics & Reporting<br>Workflow Automation<br>Compliance Controls</div>'
+            + '</div>'
+            + '<div style="font-size:18px;color:#7c3aed;margin:4px 0;">⟵ ⟶</div>'
+          + '</div>'
+
+          /* HAL Block */
+          + '<div style="background:linear-gradient(135deg,#f5f3ff,#faf5ff);border:1px solid #ddd6fe;border-radius:12px;padding:16px;">'
+            + '<div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:10px;text-transform:uppercase;">HAL Core Functions</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.8;">'
+              + '✓ Policy Administration (Life/Annuity)<br>'
+              + '✓ Medicare Supplement Admin<br>'
+              + '✓ New Business Processing<br>'
+              + '✓ Billing & Premium Collection<br>'
+              + '✓ Life Claims Management<br>'
+              + '✓ Annuity Distribution<br>'
+              + '✓ Carrier Conversion Support<br>'
+              + '✓ TPA-as-a-Service Commercialization'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      /* ── Cross-Line AI Use Cases ── */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;margin-bottom:24px;">'
+        + '<div style="font-size:15px;font-weight:800;color:#111827;margin-bottom:16px;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-robot" style="color:#059669;"></i> AI-Powered Hybrid Use Cases — Wipro\'s Agentic Automation</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">'
+          + _hybridAIUseCase('fa-robot','Agentic Claims Triage','LTC + HAL','AI reads claim docs, determines benefit eligibility, flags ADL deficiencies, routes to appropriate clinical reviewer. 68% straight-through processing rate.','#dc2626')
+          + _hybridAIUseCase('fa-file-medical','Cross-Line Eligibility','LTC → HAL','When LTC claimant transitions to assisted living, AI automatically checks Medicare Supplement eligibility and triggers HAL enrollment workflow.','#7c3aed')
+          + _hybridAIUseCase('fa-chart-line','Predictive Analytics','Both Lines','ML models predict LTC claim duration, HAL lapse risk, and care setting transitions. Enables proactive staffing and reserve management.','#0891b2')
+          + _hybridAIUseCase('fa-comments','Conversational AI Portal','LTC + HAL','Policyholders and caregivers interact via AI-powered portal for claim status, benefit queries, payment schedules — reducing call volume 40%.','#059669')
+          + _hybridAIUseCase('fa-shield-alt','Compliance Automation','Both Lines','Automated HIPAA audit trails, state regulatory filings, SOC 1/2 evidence collection. Reduces compliance labor 55%.','#d97706')
+          + _hybridAIUseCase('fa-exchange-alt','Carrier Conversion Engine','HAL Growth','AI-driven onboarding reduces new carrier conversion from 18 months to 9 months. Automated data migration, testing, and go-live validation.','#003087')
+        + '</div>'
+      + '</div>'
+
+      /* ── Market Opportunity ── */
+      + '<div style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #86efac;border-radius:14px;padding:20px;">'
+        + '<div style="font-size:15px;font-weight:800;color:#111827;margin-bottom:14px;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-chart-pie" style="color:#059669;"></i> Market Expansion Opportunity — Why Hybrid Now?</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">'
+          + '<div style="background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid #bbf7d0;">'
+            + '<div style="font-size:24px;font-weight:800;color:#059669;">75M</div>'
+            + '<div style="font-size:12px;font-weight:600;color:#374151;margin-top:4px;">Baby Boomers entering LTC age by 2030</div>'
+          + '</div>'
+          + '<div style="background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid #bbf7d0;">'
+            + '<div style="font-size:24px;font-weight:800;color:#059669;">$1.3T</div>'
+            + '<div style="font-size:12px;font-weight:600;color:#374151;margin-top:4px;">LTC Insurance market size by 2030</div>'
+          + '</div>'
+          + '<div style="background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid #bbf7d0;">'
+            + '<div style="font-size:24px;font-weight:800;color:#059669;">60%</div>'
+            + '<div style="font-size:12px;font-weight:600;color:#374151;margin-top:4px;">Carriers seeking outsourced TPA solutions</div>'
+          + '</div>'
+          + '<div style="background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid #bbf7d0;">'
+            + '<div style="font-size:24px;font-weight:800;color:#059669;">$800M+</div>'
+            + '<div style="font-size:12px;font-weight:600;color:#374151;margin-top:4px;">illumifin platform commercialization TAM</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+    + '</div>';
+
+    _enh_bld('tpl-hybrid-ops', html);
+  }
+
+  function _hybridAIUseCase(icon, title, tag, desc, color) {
+    return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+        + '<div style="width:32px;height:32px;background:'+color+'15;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+          + '<i class="fas '+icon+'" style="color:'+color+';font-size:13px;"></i></div>'
+        + '<div>'
+          + '<div style="font-size:12px;font-weight:700;color:#111827;">'+title+'</div>'
+          + _enh_badge(tag, color)
+        + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;color:#6b7280;line-height:1.6;">'+desc+'</div>'
+    + '</div>';
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 2 — AI MODERNIZATION ACCELERATOR
+     Wipro's technology transformation answer to illumifin's tech debt
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initAiModernizationPage() {
+    var html = '<div class="page" style="padding:24px;">'
+
+      + _enh_sectionHdr('fa-microchip',
+          'AI Modernization Accelerator',
+          'Wipro\'s technology transformation roadmap for illumifin — Legacy to Cloud-Native, API-First, Agentic AI',
+          '#059669')
+
+      /* ── Modernization Journey ── */
+      + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:14px;padding:22px 28px;color:#fff;margin-bottom:24px;">'
+        + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#4ade80;margin-bottom:8px;">TRANSFORMATION TRAJECTORY</div>'
+        + '<div style="font-size:18px;font-weight:800;margin-bottom:16px;">5-Year Modernization Horizon — Front-loaded Cost Savings</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;">'
+          + _modernPhase('Y1','Assessment & Foundation','fa-search','#4ade80','Legacy inventory · Cloud baseline · API gateway · Pilot agentic flows')
+          + _modernPhase('Y2','Accelerate & Automate','fa-bolt','#60a5fa','35% cost reduction · STP claims · AI triage live · Core migration begin')
+          + _modernPhase('Y3','Scale & Differentiate','fa-rocket','#a78bfa','50%+ STP · ML predictive ops · Carrier conversion engine · SOC 2 Type II')
+          + _modernPhase('Y4','Commercialize','fa-store','#fbbf24','TPA-as-a-Service launch · New carrier onboarding · Revenue share model')
+          + _modernPhase('Y5','Optimize & Grow','fa-chart-line','#f87171','Full cloud-native · AI-first ops · 50% cost reduction achieved · Platform IPO-ready')
+        + '</div>'
+      + '</div>'
+
+      /* ── Current vs Future State ── */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">'
+
+        + '<div style="background:#fff;border:1px solid #fecaca;border-radius:12px;padding:18px;">'
+          + '<div style="font-size:12px;font-weight:800;color:#dc2626;margin-bottom:12px;display:flex;align-items:center;gap:8px;">'
+            + '<i class="fas fa-exclamation-triangle"></i> CURRENT STATE — Pain Points (illumifin RFP §3.4)</div>'
+          + '<div style="font-size:12px;color:#374151;line-height:2;">'
+            + '<span style="color:#dc2626;font-weight:700;">❌</span> Legacy monolithic codebase — long feature lead times<br>'
+            + '<span style="color:#dc2626;font-weight:700;">❌</span> On-premises infrastructure, limited cloud adoption<br>'
+            + '<span style="color:#dc2626;font-weight:700;">❌</span> Manual touchpoints in claims / eligibility workflows<br>'
+            + '<span style="color:#dc2626;font-weight:700;">❌</span> Fragmented customer portals (phone, digital, assisted)<br>'
+            + '<span style="color:#dc2626;font-weight:700;">❌</span> Limited AI/ML automation maturity<br>'
+            + '<span style="color:#dc2626;font-weight:700;">❌</span> $210M annual cost — 70% personnel-driven<br>'
+            + '<span style="color:#dc2626;font-weight:700;">❌</span> 18-month carrier conversion cycles<br>'
+            + '<span style="color:#dc2626;font-weight:700;">❌</span> Mixed APIs + legacy file-based integrations'
+          + '</div>'
+        + '</div>'
+
+        + '<div style="background:#fff;border:1px solid #86efac;border-radius:12px;padding:18px;">'
+          + '<div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:12px;display:flex;align-items:center;gap:8px;">'
+            + '<i class="fas fa-check-circle"></i> FUTURE STATE — Wipro\'s Target Architecture</div>'
+          + '<div style="font-size:12px;color:#374151;line-height:2;">'
+            + '<span style="color:#059669;font-weight:700;">✓</span> Cloud-native microservices (AWS/Azure) with CI/CD<br>'
+            + '<span style="color:#059669;font-weight:700;">✓</span> API-first event-driven architecture (rehost → refactor)<br>'
+            + '<span style="color:#059669;font-weight:700;">✓</span> Agentic AI for 65%+ straight-through claim processing<br>'
+            + '<span style="color:#059669;font-weight:700;">✓</span> Unified omnichannel portal (AI chat, web, mobile)<br>'
+            + '<span style="color:#059669;font-weight:700;">✓</span> ML-powered predictive operations and staffing<br>'
+            + '<span style="color:#059669;font-weight:700;">✓</span> $105–130M run-rate — 35–50% cost reduction<br>'
+            + '<span style="color:#059669;font-weight:700;">✓</span> 9-month carrier conversion (50% reduction)<br>'
+            + '<span style="color:#059669;font-weight:700;">✓</span> Modern REST + event streaming integrations'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      /* ── Technology Stack ── */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;margin-bottom:24px;">'
+        + '<div style="font-size:15px;font-weight:800;color:#111827;margin-bottom:16px;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-layer-group" style="color:#003087;"></i> Wipro\'s Pre-built Accelerators for Insurance TPA</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">'
+          + _techAccelerator('HOLMES AI','Wipro\'s proprietary AI/ML platform with 200+ pre-built insurance models','fa-brain','#003087','Ready Now')
+          + _techAccelerator('VisionX','Low-code app modernization factory — 4x faster refactoring','fa-code','#0891b2','Ready Now')
+          + _techAccelerator('iCORE LTC','Pre-built LTC claims processing microservices library','fa-heartbeat','#dc2626','Ready Now')
+          + _techAccelerator('Compliance AI','Automated HIPAA, NAIC, SOC 1/2 control evidence gathering','fa-shield-alt','#059669','Ready Now')
+          + _techAccelerator('CloudBridge','Hybrid cloud migration toolkit for insurance legacy systems','fa-cloud','#7c3aed','Q3 2026')
+          + _techAccelerator('PolicyIQ','API-first policy admin modernization framework','fa-file-contract','#d97706','Q3 2026')
+          + _techAccelerator('CareCoordAI','Agentic care coordination with NLP clinical note processing','fa-hands-helping','#0d9488','Q4 2026')
+          + _techAccelerator('TPA Studio','No-code carrier onboarding configurator — 50% faster','fa-store','#6d28d9','Q1 2027')
+        + '</div>'
+      + '</div>'
+
+      /* ── Cost Reduction Waterfall ── */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;">'
+        + '<div style="font-size:15px;font-weight:800;color:#111827;margin-bottom:16px;display:flex;align-items:center;gap:8px;">'
+          + '<i class="fas fa-dollar-sign" style="color:#059669;"></i> Cost Reduction Waterfall — 5-Year Projection vs $210M Baseline</div>'
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + '<thead><tr style="background:#f8fafc;">'
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Cost Driver</th>'
+              + ['Year 1','Year 2','Year 3','Year 4','Year 5'].map(function(y){ return '<th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">'+y+'</th>'; }).join('')
+              + '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Lever</th>'
+            + '</tr></thead>'
+            + '<tbody>'
+              + _costRow('Personnel Automation (70% base)','$0','−$18M','−$35M','−$42M','−$50M','AI agents + offshore mix')
+              + _costRow('Claims STP Savings','$0','−$8M','−$14M','−$18M','−$22M','65% automation by Y3')
+              + _costRow('Technology Simplification','−$5M','−$3M','$+2M','$+5M','$+8M','Cloud vs on-prem net')
+              + _costRow('Carrier Conversion Revenue','$0','$0','$+5M','$+15M','$+25M','TPA-as-a-Service fees')
+              + _costRow('Productivity / Speed','$0','−$4M','−$8M','−$10M','−$12M','Faster feature delivery')
+              + '<tr style="background:#f0fdf4;font-weight:800;">'
+                + '<td style="padding:10px 12px;font-size:13px;color:#059669;">Net Cumulative Savings</td>'
+                + '<td style="padding:10px 12px;text-align:center;font-size:13px;color:#374151;">−$5M</td>'
+                + '<td style="padding:10px 12px;text-align:center;font-size:13px;color:#059669;">+$7M</td>'
+                + '<td style="padding:10px 12px;text-align:center;font-size:13px;color:#059669;">+$50M</td>'
+                + '<td style="padding:10px 12px;text-align:center;font-size:13px;color:#059669;">+$80M</td>'
+                + '<td style="padding:10px 12px;text-align:center;font-size:13px;color:#059669;">+$107M</td>'
+                + '<td style="padding:10px 12px;font-size:12px;color:#059669;">~51% reduction by Y5</td>'
+              + '</tr>'
+            + '</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+
+    + '</div>';
+
+    _enh_bld('tpl-ai-modernization', html);
+  }
+
+  function _modernPhase(yr, title, icon, color, bullets) {
+    return '<div style="text-align:center;padding:12px 8px;position:relative;">'
+      + '<div style="width:44px;height:44px;background:'+color+'22;border:2px solid '+color+';border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">'
+        + '<i class="fas '+icon+'" style="color:'+color+';font-size:16px;"></i></div>'
+      + '<div style="font-size:13px;font-weight:800;color:'+color+';margin-bottom:4px;">'+yr+'</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:6px;">'+title+'</div>'
+      + '<div style="font-size:10px;color:#94a3b8;line-height:1.6;">'+bullets.replace(/·/g,'<br>')+'</div>'
+    + '</div>';
+  }
+
+  function _techAccelerator(name, desc, icon, color, status) {
+    return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+        + '<div style="display:flex;align-items:center;gap:8px;">'
+          + '<div style="width:30px;height:30px;background:'+color+'15;border-radius:7px;display:flex;align-items:center;justify-content:center;">'
+            + '<i class="fas '+icon+'" style="color:'+color+';font-size:12px;"></i></div>'
+          + '<div style="font-size:12px;font-weight:800;color:#111827;">'+name+'</div>'
+        + '</div>'
+        + '<span style="background:'+(status==='Ready Now'?'#059669':'#d97706')+'15;color:'+(status==='Ready Now'?'#059669':'#d97706')+';border:1px solid '+(status==='Ready Now'?'#059669':'#d97706')+'44;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;">'+status+'</span>'
+      + '</div>'
+      + '<div style="font-size:11px;color:#6b7280;line-height:1.5;">'+desc+'</div>'
+    + '</div>';
+  }
+
+  function _costRow(label, y1, y2, y3, y4, y5, lever) {
+    return '<tr style="border-bottom:1px solid #f3f4f6;">'
+      + '<td style="padding:9px 12px;font-size:12px;color:#374151;">'+label+'</td>'
+      + [y1,y2,y3,y4,y5].map(function(v){
+          var color = v.startsWith('+') ? '#059669' : v === '$0' ? '#9ca3af' : '#dc2626';
+          return '<td style="padding:9px 12px;text-align:center;font-size:12px;font-weight:700;color:'+color+';">'+v+'</td>';
+        }).join('')
+      + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">'+lever+'</td>'
+    + '</tr>';
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 3 — RFP RESPONSE CENTER
+     Wipro's specific answers mapped to each illumifin RFP requirement
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initRfpShowcasePage() {
+    var criteria = [
+      { num:'§5.1', title:'Cost Reduction 35–50%', weight:'Critical', status:'green', wipro:'Committed to 35% by Year 2 end, 50% by Year 5. Transition investment included — zero net cash out for illumifin in Year 1. Gainshare provisions aligned.', evidence:'iCORE LTC + HOLMES AI automation; offshore delivery center absorption; STP claims target 65%+' },
+      { num:'§5.2', title:'Speed & Agility', weight:'Critical', status:'green', wipro:'New feature deployment within 6 weeks (from current 6–12 months). Carrier conversion reduced to 9 months via TPA Studio. CI/CD pipeline with 99.5% uptime SLA.', evidence:'VisionX low-code modernization; DevSecOps squads; product-aligned engineering pods' },
+      { num:'§5.3', title:'Quality & CX', weight:'High', status:'green', wipro:'Claims adjudication accuracy target >98%. NPS improvement 15+ points via AI-powered policyholder portal. First-contact resolution >85%.', evidence:'Claims Review Copilot; Conversational AI portal; Prior Authorization Screener' },
+      { num:'§5.4', title:'Growth & Commercialization', weight:'Critical', status:'green', wipro:'TPA-as-a-Service commercialization roadmap ready. Go-to-market with Wipro\'s 1,200+ insurance carrier relationships globally. Revenue share model proposed.', evidence:'TPA Studio platform; Wipro carrier network; joint GTM team; platform IP licensing' },
+      { num:'§5.5', title:'Risk & Resilience', weight:'High', status:'green', wipro:'SOC 1/2/3 maintained throughout transition. Parallel run with rollback gates. HIPAA + NAIC + state insurance dept compliance never interrupted.', evidence:'Compliance AI; phased transition with go/no-go gates; 24/7 NOC; 99.9% SLA' },
+      { num:'§4.1', title:'Technology Modernization', weight:'Critical', status:'green', wipro:'Full application portfolio assessment + target architecture within 60 days. Rehost → Refactor → Re-architect per application with business case. AI/ML layer via HOLMES.', evidence:'Wipro CloudBridge; application rationalization framework; 400+ cloud migrations delivered' },
+      { num:'§4.2', title:'Operations Transformation', weight:'Critical', status:'green', wipro:'End-to-end operational diagnostic 90 days. Future state operating model with onshore/nearshore/offshore blend. Wipro absorbs 1,500 illumifin India employees via rebadging.', evidence:'Managed services experience — 15+ insurance BPO engagements; 200,000+ operations staff globally' },
+      { num:'§4.3', title:'Regulatory Compliance', weight:'High', status:'green', wipro:'HIPAA BAA executed Day 1. SOC 1/2 evidence automated via Compliance AI. State insurance dept oversight experience across 52 jurisdictions.', evidence:'Wipro Compliance AI; insurance regulatory practice; 10-yr HIPAA track record' },
+      { num:'§4.4', title:'Platform Commercialization', weight:'Required', status:'amber', wipro:'Joint venture structure proposed for TPA-as-a-Service business. Wipro brings GTM + technology; illumifin brings LTC IP + relationships. Revenue share: 30% to illumifin on new clients.', evidence:'Proposed JV term sheet; Wipro Ventures investment arm; platform IP licensing model' },
+      { num:'§9', title:'Vendor Qualifications', weight:'Critical', status:'green', wipro:'$10B+ revenue (>$2B threshold ✓). LTC operations experience via AIG, Genworth engagements. 10+ yr insurance tech/ops history. Named leadership team committed.', evidence:'SOC 1/2 attestations ✓; HIPAA program ✓; US + India delivery ✓; 1,500+ FTE insurance practice' }
+    ];
+
+    var rfpRows = criteria.map(function(c) {
+      var statusColor = c.status === 'green' ? '#059669' : '#d97706';
+      var statusText = c.status === 'green' ? 'ADDRESSED' : 'PROPOSED';
+      var weightColor = c.weight === 'Critical' ? '#dc2626' : c.weight === 'Required' ? '#d97706' : '#0891b2';
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:12px;">'
+        + '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">'
+          + '<div style="background:#003087;color:#fff;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:800;white-space:nowrap;">'+c.num+'</div>'
+          + '<div style="flex:1;">'
+            + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+              + '<span style="font-size:14px;font-weight:800;color:#111827;">'+c.title+'</span>'
+              + '<span style="background:'+weightColor+'15;color:'+weightColor+';border:1px solid '+weightColor+'44;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;">'+c.weight+'</span>'
+              + '<span style="background:'+statusColor+'15;color:'+statusColor+';border:1px solid '+statusColor+'44;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;">'+statusText+'</span>'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+          + '<div style="background:#f8fafc;border-radius:8px;padding:12px;">'
+            + '<div style="font-size:10px;font-weight:700;color:#003087;text-transform:uppercase;margin-bottom:5px;">Wipro\'s Response</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.6;">'+c.wipro+'</div>'
+          + '</div>'
+          + '<div style="background:#f0fdf4;border-radius:8px;padding:12px;">'
+            + '<div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;margin-bottom:5px;">Supporting Evidence & Assets</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.6;">'+c.evidence+'</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+
+      + _enh_sectionHdr('fa-award',
+          'RFP Response Center — illumifin Integrated Modernization & Operations Partnership',
+          'Wipro WealthAI Agent 360 · Proposal Due July 13, 2026 · Presentations Week of July 20',
+          '#d97706')
+
+      /* ── RFP Summary Banner ── */
+      + '<div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fde68a;border-radius:12px;padding:18px 22px;margin-bottom:24px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:12px;">'
+          + '<div style="text-align:center;">'
+            + '<div style="font-size:18px;font-weight:800;color:#92400e;">July 13</div>'
+            + '<div style="font-size:11px;color:#78350f;">Proposal Due</div></div>'
+          + '<div style="text-align:center;">'
+            + '<div style="font-size:18px;font-weight:800;color:#92400e;">July 20</div>'
+            + '<div style="font-size:11px;color:#78350f;">Presentations</div></div>'
+          + '<div style="text-align:center;">'
+            + '<div style="font-size:18px;font-weight:800;color:#92400e;">$210M</div>'
+            + '<div style="font-size:11px;color:#78350f;">Annual Cost Base</div></div>'
+          + '<div style="text-align:center;">'
+            + '<div style="font-size:18px;font-weight:800;color:#059669;">35–50%</div>'
+            + '<div style="font-size:11px;color:#78350f;">Target Savings</div></div>'
+          + '<div style="text-align:center;">'
+            + '<div style="font-size:18px;font-weight:800;color:#92400e;">5yr+</div>'
+            + '<div style="font-size:11px;color:#78350f;">Min Contract Term</div></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:24px;flex-wrap:wrap;font-size:12px;color:#78350f;">'
+          + '<span><strong>RFP Contacts:</strong> Will Brackenheimer (COO, Vistina) · (860) 743-1395</span>'
+          + '<span><strong>illumifin Contact:</strong> Anthony Sala (VP Ops) · anthonysala@illumifin.com · (914) 475-0474</span>'
+          + '<span><strong>Format:</strong> PDF ≤100 pages + commercial spreadsheet + 5-page exec summary</span>'
+        + '</div>'
+      + '</div>'
+
+      /* ── Evaluation Criteria Score ── */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;margin-bottom:24px;">'
+        + '<div style="font-size:15px;font-weight:800;color:#111827;margin-bottom:14px;">illumifin Evaluation Criteria — Wipro Readiness Assessment</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">'
+          + _evalCriterion('Insurance & LTC Track Record','97%','Genworth, AIG LTC ops experience + 10yr insurance practice','#dc2626')
+          + _evalCriterion('Strategic Vision & Transformation','95%','Hybrid LTC+HAL modernization thesis; platform commercialization path','#003087')
+          + _evalCriterion('Target Operating Model','93%','Onshore/offshore blend; product squads; absorbed 1,500 India staff','#0891b2')
+          + _evalCriterion('AI & Automation Strategy','96%','HOLMES AI; iCORE LTC; 65% STP target; agentic workflows live','#7c3aed')
+          + _evalCriterion('Cost Takeout & Commercial Construct','94%','35% Y2 / 50% Y5; gainshare; outcome-based pricing; JV option','#059669')
+          + _evalCriterion('Platform Commercialization Plan','89%','TPA Studio; JV structure; Wipro carrier network GTM','#d97706')
+          + _evalCriterion('Transition Approach & Risk','92%','Phased; go/no-go gates; parallel run; rollback provisions','#0d9488')
+          + _evalCriterion('Cultural Fit & Governance','91%','Embedded operations council; exec steering; weekly SLAs','#6d28d9')
+          + _evalCriterion('Team Quality & Named Leadership','95%','SVP Account Exec + Transformation Lead + Ops Lead named','#003087')
+        + '</div>'
+      + '</div>'
+
+      /* ── RFP Response Grid ── */
+      + '<div style="font-size:15px;font-weight:800;color:#111827;margin-bottom:14px;display:flex;align-items:center;gap:8px;">'
+        + '<i class="fas fa-list-check" style="color:#003087;"></i> Detailed Response Mapping — Section by Section</div>'
+      + rfpRows
+
+      /* ── CTA ── */
+      + '<div style="background:linear-gradient(135deg,#003087,#0052cc);border-radius:12px;padding:20px 24px;color:#fff;margin-top:8px;display:flex;align-items:center;gap:20px;">'
+        + '<div>'
+          + '<div style="font-size:16px;font-weight:800;margin-bottom:6px;">Ready to Submit — Wipro WealthAI Agent 360</div>'
+          + '<div style="font-size:12px;opacity:.85;">All RFP components addressed · July 13 submission ready · Live demo available</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:10px;margin-left:auto;flex-wrap:wrap;">'
+          + '<button onclick="rfpExportProposal()" style="background:#fff;color:#003087;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="fas fa-file-pdf" style="margin-right:6px;"></i>Export Proposal</button>'
+          + '<button onclick="rfpScheduleDemo()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="fas fa-calendar" style="margin-right:6px;"></i>Schedule Demo</button>'
+        + '</div>'
+      + '</div>'
+
+    + '</div>';
+
+    _enh_bld('tpl-rfp-showcase', html);
+  }
+
+  function _evalCriterion(title, score, rationale, color) {
+    var pct = parseInt(score);
+    return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#374151;">'+title+'</div>'
+        + '<div style="font-size:14px;font-weight:800;color:'+color+';">'+score+'</div>'
+      + '</div>'
+      + '<div style="background:#e5e7eb;border-radius:4px;height:6px;margin-bottom:6px;">'
+        + '<div style="background:'+color+';width:'+pct+'%;height:100%;border-radius:4px;"></div>'
+      + '</div>'
+      + '<div style="font-size:10px;color:#6b7280;line-height:1.4;">'+rationale+'</div>'
+    + '</div>';
+  }
+
+  /* ── RFP globals ── */
+  window.rfpExportProposal = function() {
+    _enh_toast('📄 Generating Wipro proposal package — Executive Summary + Technical + Commercial sections compiling…');
+  };
+  window.rfpScheduleDemo = function() {
+    _enh_toast('📅 Opening Wipro demo scheduler — 90-min live walkthrough available week of July 14–18');
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ENHANCED LTC CLAIMS — AI ADJUDICATION OVERLAY
+     Deep illumifin-specific claims intelligence panel
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.ltcShowAiAdjudication = function(claimId) {
+    var claims = [
+      { id:'LTC-2026-0101', claimant:'Margaret O\'Brien', aiScore:94, recommendation:'APPROVE', confidence:94, stpEligible:true,
+        adlFindings:'3 of 5 ADLs confirmed deficient (Bathing, Dressing, Mobility) via RN assessment Jul 3',
+        cogFindings:'MMSE score 14/30 — moderate cognitive impairment, corroborates memory care need',
+        regulatoryFlags:'CA CMPA certification required — assessor assigned ✓',
+        fraudScore:2, priorClaims:0, annualBenefitProjection:'$65,700',
+        recommendedAction:'Approve SNF claim. Process $180/day retroactive to admission Jul 1.',
+        clinicalNotes:'RN Sarah Johnson confirms inability to perform bathing, dressing, and mobility without physical assistance. Provider Sunrise Manor SNF is in-network and licensed.'
+      }
+    ];
+    var c = claims.find(function(x){ return x.id === claimId; }) || claims[0];
+    var recColor = c.recommendation === 'APPROVE' ? '#059669' : c.recommendation === 'DENY' ? '#dc2626' : '#d97706';
+
+    var html = '<div id="ltc-ai-adj-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;">'
+      + '<div style="background:#fff;border-radius:16px;width:720px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">'
+        + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:20px 22px;border-radius:16px 16px 0 0;color:#fff;">'
+          + '<div style="display:flex;align-items:center;gap:12px;">'
+            + '<i class="fas fa-robot" style="font-size:22px;"></i>'
+            + '<div>'
+              + '<div style="font-size:16px;font-weight:800;">AI Adjudication Engine — '+c.id+'</div>'
+              + '<div style="font-size:12px;opacity:.85;">HOLMES AI · Clinical + Regulatory Analysis · '+c.claimant+'</div>'
+            + '</div>'
+            + '<button onclick="document.getElementById(\'ltc-ai-adj-overlay\').remove()" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;">✕</button>'
+          + '</div>'
+        + '</div>'
+        + '<div style="padding:22px;">'
+
+          /* AI Score */
+          + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">'
+            + '<div style="background:'+recColor+'15;border:2px solid '+recColor+'44;border-radius:10px;padding:16px;text-align:center;">'
+              + '<div style="font-size:28px;font-weight:800;color:'+recColor+';">'+c.aiScore+'</div>'
+              + '<div style="font-size:11px;font-weight:700;color:'+recColor+';text-transform:uppercase;">AI Confidence Score</div>'
+            + '</div>'
+            + '<div style="background:'+recColor+'15;border:2px solid '+recColor+'44;border-radius:10px;padding:16px;text-align:center;">'
+              + '<div style="font-size:22px;font-weight:800;color:'+recColor+';">'+c.recommendation+'</div>'
+              + '<div style="font-size:11px;font-weight:700;color:'+recColor+';text-transform:uppercase;">Recommendation</div>'
+            + '</div>'
+            + '<div style="background:'+(c.stpEligible?'#059669':'#d97706')+'15;border:2px solid '+(c.stpEligible?'#059669':'#d97706')+'44;border-radius:10px;padding:16px;text-align:center;">'
+              + '<div style="font-size:22px;font-weight:800;color:'+(c.stpEligible?'#059669':'#d97706')+';">'+(c.stpEligible?'✓ STP':'Manual')+'</div>'
+              + '<div style="font-size:11px;font-weight:700;color:'+(c.stpEligible?'#059669':'#d97706')+';text-transform:uppercase;">Processing Route</div>'
+            + '</div>'
+          + '</div>'
+
+          /* Clinical Findings */
+          + '<div style="background:#f8fafc;border-radius:10px;padding:16px;margin-bottom:14px;">'
+            + '<div style="font-size:12px;font-weight:800;color:#374151;margin-bottom:10px;"><i class="fas fa-stethoscope" style="color:#dc2626;margin-right:6px;"></i>Clinical Findings</div>'
+            + '<div style="font-size:12px;color:#374151;margin-bottom:6px;"><strong>ADL Assessment:</strong> '+c.adlFindings+'</div>'
+            + '<div style="font-size:12px;color:#374151;margin-bottom:6px;"><strong>Cognitive Assessment:</strong> '+c.cogFindings+'</div>'
+            + '<div style="font-size:12px;color:#374151;"><strong>Clinical Notes:</strong> '+c.clinicalNotes+'</div>'
+          + '</div>'
+
+          /* Regulatory & Fraud */
+          + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+            + '<div style="background:#f0fdf4;border-radius:10px;padding:14px;">'
+              + '<div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:8px;"><i class="fas fa-shield-alt" style="margin-right:6px;"></i>Regulatory Status</div>'
+              + '<div style="font-size:11px;color:#374151;line-height:1.7;">'+c.regulatoryFlags+'<br>HIPAA authorization on file ✓<br>State filing current ✓<br>Provider license verified ✓</div>'
+            + '</div>'
+            + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;">'
+              + '<div style="font-size:12px;font-weight:800;color:#374151;margin-bottom:8px;"><i class="fas fa-search-dollar" style="color:#d97706;margin-right:6px;"></i>Fraud Intelligence</div>'
+              + '<div style="font-size:11px;color:#374151;line-height:1.7;">Fraud Risk Score: <strong style="color:#059669;">'+c.fraudScore+'/100 (Low)</strong><br>Prior Claims: '+c.priorClaims+'<br>Provider History: Clean<br>Duplicate Check: Passed ✓</div>'
+            + '</div>'
+          + '</div>'
+
+          /* Financial Impact */
+          + '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:16px;">'
+            + '<div style="font-size:12px;font-weight:800;color:#92400e;margin-bottom:6px;"><i class="fas fa-dollar-sign" style="margin-right:6px;"></i>Financial Projection</div>'
+            + '<div style="font-size:12px;color:#374151;"><strong>Annual Benefit Projection:</strong> '+c.annualBenefitProjection+'</div>'
+            + '<div style="font-size:12px;color:#374151;margin-top:4px;"><strong>AI Recommended Action:</strong> '+c.recommendedAction+'</div>'
+          + '</div>'
+
+          + '<div style="display:flex;gap:10px;">'
+            + '<button onclick="document.getElementById(\'ltc-ai-adj-overlay\').remove();_enh_toast(\'✓ Claim approved via AI adjudication — payment scheduled\')" style="flex:1;background:#059669;color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-check" style="margin-right:6px;"></i>Approve & Process Payment</button>'
+            + '<button onclick="document.getElementById(\'ltc-ai-adj-overlay\').remove();_enh_toast(\'→ Claim routed to clinical review queue\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer;">Send to Clinical Review</button>'
+            + '<button onclick="document.getElementById(\'ltc-ai-adj-overlay\').remove()" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+
+  /* ── navigateTo PATCH — Hybrid Ops / AI Modernization / RFP Showcase ── */
+  var _origNav_enh = navigateTo;
+  navigateTo = function(page) {
+    _origNav_enh(page);
+
+    var titleEl = document.getElementById('page-title');
+    var bcEl    = document.getElementById('breadcrumb-page');
+
+    /* deactivate previous nav */
+    document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+
+    if (page === 'hybrid-ops') {
+      if (titleEl) titleEl.textContent = 'Hybrid LTC+HAL Hub';
+      if (bcEl)    bcEl.textContent    = 'Operations / Hybrid LTC+HAL Operations Hub';
+      document.querySelector('.hybrid-ops-nav') && document.querySelector('.hybrid-ops-nav').classList.add('active');
+      requestAnimationFrame(function(){ setTimeout(initHybridOpsPage, 80); });
+    }
+    if (page === 'ai-modernization') {
+      if (titleEl) titleEl.textContent = 'AI Modernization';
+      if (bcEl)    bcEl.textContent    = 'Strategy / AI Modernization Accelerator';
+      document.querySelector('.ai-modernization-nav') && document.querySelector('.ai-modernization-nav').classList.add('active');
+      requestAnimationFrame(function(){ setTimeout(initAiModernizationPage, 80); });
+    }
+    if (page === 'rfp-showcase') {
+      if (titleEl) titleEl.textContent = 'RFP Response Center';
+      if (bcEl)    bcEl.textContent    = 'illumifin RFP / Response Center — Jul 13, 2026';
+      document.querySelector('.rfp-showcase-nav') && document.querySelector('.rfp-showcase-nav').classList.add('active');
+      requestAnimationFrame(function(){ setTimeout(initRfpShowcasePage, 80); });
+    }
+  };
+
+  /* ── Expose to window ── */
+  window.initHybridOpsPage       = initHybridOpsPage;
+  window.initAiModernizationPage = initAiModernizationPage;
+  window.initRfpShowcasePage     = initRfpShowcasePage;
+
+  console.log('Phase 2 Enhancement loaded — Hybrid LTC+HAL Hub · AI Modernization Accelerator · RFP Response Center · AI Adjudication Overlay');
+
+})();

@@ -328,6 +328,19 @@ function MainApp() {
         <div id="tpl-ann-application"><AnnuityApplicationPage /></div>
         <div id="tpl-suitability-review"><SuitabilityReviewPage /></div>
         <div id="tpl-contract-delivery"><ContractDeliveryPage /></div>
+        {/* LTC Operations templates */}
+        <div id="tpl-ltc-claims"></div>
+        <div id="tpl-ltc-care"></div>
+        <div id="tpl-ltc-eligibility"></div>
+        <div id="tpl-ltc-claimant"></div>
+        {/* HAL Operations templates */}
+        <div id="tpl-hal-policy"></div>
+        <div id="tpl-hal-pipeline"></div>
+        <div id="tpl-hal-medsup"></div>
+        <div id="tpl-tpa-command"></div>
+        <div id="tpl-hybrid-ops"></div>
+        <div id="tpl-ai-modernization"></div>
+        <div id="tpl-rfp-showcase"></div>
         <div id="tpl-adv-wealth"></div>
         <div id="tpl-adv-accounts"><AdvisoryAccountsPage /></div>
         <div id="tpl-adv-estate">
@@ -890,6 +903,55 @@ function Sidebar() {
         <a class="nav-item ret-accounts-nav" onclick="navigateTo('ret-accounts')" href="#">
           <i class="fas fa-umbrella-beach"></i><span>Annuity Accounts</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
+        </a>
+
+        {/* ── LTC OPERATIONS ── */}
+        <div class="nav-section-label">LTC OPERATIONS</div>
+        <a class="nav-item ltc-claims-nav" onclick="navigateTo('ltc-claims')" href="#">
+          <i class="fas fa-file-medical-alt"></i><span>LTC Claims</span>
+          <span class="nav-badge" style="background:#dc2626;color:#fff">63K</span>
+        </a>
+        <a class="nav-item ltc-care-nav" onclick="navigateTo('ltc-care')" href="#">
+          <i class="fas fa-hands-helping"></i><span>Care Coordination</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">18</span>
+        </a>
+        <a class="nav-item ltc-eligibility-nav" onclick="navigateTo('ltc-eligibility')" href="#">
+          <i class="fas fa-user-check"></i><span>Eligibility & Assessment</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">7</span>
+        </a>
+        <a class="nav-item ltc-claimant-nav" onclick="navigateTo('ltc-claimant')" href="#">
+          <i class="fas fa-id-card-alt"></i><span>Claimant 360</span>
+        </a>
+
+        {/* ── HAL OPERATIONS ── */}
+        <div class="nav-section-label">HAL OPERATIONS</div>
+        <a class="nav-item hal-policy-nav" onclick="navigateTo('hal-policy')" href="#">
+          <i class="fas fa-layer-group"></i><span>Policy Administration</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">2.8M</span>
+        </a>
+        <a class="nav-item hal-pipeline-nav" onclick="navigateTo('hal-pipeline')" href="#">
+          <i class="fas fa-exchange-alt"></i><span>HAL Pipeline</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">5</span>
+        </a>
+        <a class="nav-item hal-medsup-nav" onclick="navigateTo('hal-medsup')" href="#">
+          <i class="fas fa-heartbeat"></i><span>Medicare Supplement</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">40</span>
+        </a>
+        <a class="nav-item tpa-command-nav" onclick="navigateTo('tpa-command')" href="#">
+          <i class="fas fa-tachometer-alt"></i><span>TPA Command Center</span>
+          <span class="nav-badge ai-pulse">LIVE</span>
+        </a>
+        <a class="nav-item hybrid-ops-nav" onclick="navigateTo('hybrid-ops')" href="#">
+          <i class="fas fa-network-wired"></i><span>Hybrid LTC+HAL Hub</span>
+          <span class="nav-badge" style="background:linear-gradient(90deg,#dc2626,#7c3aed);color:#fff">NEW</span>
+        </a>
+        <a class="nav-item ai-modernization-nav" onclick="navigateTo('ai-modernization')" href="#">
+          <i class="fas fa-microchip"></i><span>AI Modernization</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">AI</span>
+        </a>
+        <a class="nav-item rfp-showcase-nav" onclick="navigateTo('rfp-showcase')" href="#">
+          <i class="fas fa-award"></i><span>RFP Response Center</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">RFP</span>
         </a>
 
         {/* ── ADVISORY ── */}
