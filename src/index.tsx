@@ -333,6 +333,8 @@ function MainApp() {
         <div id="tpl-ltc-care"></div>
         <div id="tpl-ltc-eligibility"></div>
         <div id="tpl-ltc-claimant"></div>
+        <div id="tpl-insurance-carrier-360"></div>
+        <div id="tpl-healthcare-provider-360"></div>
         {/* HAL Operations templates */}
         <div id="tpl-hal-policy"></div>
         <div id="tpl-hal-pipeline"></div>
@@ -926,6 +928,14 @@ function Sidebar() {
         </a>
         <a class="nav-item ltc-claimant-nav" onclick="navigateTo('ltc-claimant')" href="#">
           <i class="fas fa-id-card-alt"></i><span>Claimant 360</span>
+        </a>
+        <a class="nav-item insurance-carrier-360-nav" onclick="navigateTo('insurance-carrier-360')" href="#">
+          <i class="fas fa-building"></i><span>Insurance Carrier 360°</span>
+          <span class="nav-badge" style="background:#003087;color:#fff">6</span>
+        </a>
+        <a class="nav-item healthcare-provider-360-nav" onclick="navigateTo('healthcare-provider-360')" href="#">
+          <i class="fas fa-hospital"></i><span>Healthcare Provider 360°</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">6</span>
         </a>
 
         {/* ── HAL OPERATIONS ── */}
