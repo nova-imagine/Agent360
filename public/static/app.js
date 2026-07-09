@@ -66119,3 +66119,835 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('Phase 2 Enhancement loaded — Hybrid LTC+HAL Hub · AI Modernization Accelerator · RFP Response Center · AI Adjudication Overlay');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 3 — PROJECT INTREPID: illumifin Platform Deep-Dive Pages
+   Based on Wipro Enterprise Consulting analysis (June 2026)
+   Slides: Business Units · Core Admin · Data/AI · Digital Ecosystem ·
+           Contact Center · Current State vs Modernization
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── shared utils ─────────────────────────────────────────────────────── */
+  function _p3(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+  function _p3toast(msg, color) {
+    color = color || '#003087';
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+color+';color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.3);max-width:400px;line-height:1.4;';
+    d.innerHTML = msg; document.body.appendChild(d);
+    setTimeout(function(){ d.remove(); }, 3800);
+  }
+
+  function _p3hdr(icon, title, sub, color) {
+    return '<div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">'
+      + '<div style="width:44px;height:44px;background:linear-gradient(135deg,'+color+','+color+'cc);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        + '<i class="fas '+icon+'" style="color:#fff;font-size:19px;"></i></div>'
+      + '<div>'
+        + '<div style="font-size:21px;font-weight:800;color:#111827;">'+title+'</div>'
+        + '<div style="font-size:12px;color:#6b7280;margin-top:2px;">'+sub+'</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _p3badge(txt, color) {
+    return '<span style="background:'+color+'18;color:'+color+';border:1px solid '+color+'44;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;white-space:nowrap;">'+txt+'</span>';
+  }
+
+  function _p3kpi(val, lbl, icon, color, sub) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;">'
+      + '<div style="position:absolute;top:0;left:0;width:3px;height:100%;background:'+color+';border-radius:2px 0 0 2px;"></div>'
+      + '<div style="padding-left:6px;">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+          + '<div style="width:32px;height:32px;background:'+color+'15;border-radius:8px;display:flex;align-items:center;justify-content:center;">'
+            + '<i class="fas '+icon+'" style="color:'+color+';font-size:13px;"></i></div>'
+          + '<div style="font-size:21px;font-weight:800;color:#111827;">'+val+'</div>'
+        + '</div>'
+        + '<div style="font-size:12px;font-weight:600;color:#374151;">'+lbl+'</div>'
+        + '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">'+sub+'</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _p3strengthGap(strength, gap) {
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">'
+      + '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+          + '<i class="fas fa-check-circle" style="color:#059669;font-size:14px;"></i>'
+          + '<span style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;">Strength</span>'
+        + '</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.6;">'+strength+'</div>'
+      + '</div>'
+      + '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:14px;">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+          + '<i class="fas fa-exclamation-triangle" style="color:#dc2626;font-size:14px;"></i>'
+          + '<span style="font-size:11px;font-weight:800;color:#dc2626;text-transform:uppercase;">Gap → Opportunity</span>'
+        + '</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.6;">'+gap+'</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 1 — CORE ADMINISTRATION SYSTEMS
+     Case360 · ADAM · FMS · LINK — the LTC backbone
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initCoreAdminPage() {
+    var systems = [
+      {
+        id:'case360', name:'Case360', cat:'Claims Management', icon:'fa-file-medical-alt', color:'#dc2626',
+        desc:'Primary LTC claims management platform; orchestrates end-to-end claims lifecycle for ~50,000 active claimants.',
+        details:['End-to-end claims lifecycle orchestration','Real-time adjudication routing','Clinical decision support integration','Payment processing & benefit calculation','Carrier reporting & SLA dashboards'],
+        metric:'50K', metricLbl:'Active Claimants',
+        wipro:'Wipro iCORE LTC microservices layer wraps Case360 with API-first interfaces, enabling straight-through processing automation without ripping the core system.',
+        status:'Active'
+      },
+      {
+        id:'adam', name:'ADAM', cat:'Policy Administration', icon:'fa-file-contract', color:'#003087',
+        desc:'Drives policy administration workflows including billing, collections, and coverage changes across 1.5M+ LTC policies.',
+        details:['1.5M+ policy records in administration','Billing & premium collection workflows','Coverage change processing','Policy lifecycle management','Carrier contract configuration'],
+        metric:'1.5M+', metricLbl:'LTC Policies',
+        wipro:'Wipro PolicyIQ framework modernizes ADAM\'s billing and collections modules with cloud-native event streaming, reducing processing latency from hours to minutes.',
+        status:'Active'
+      },
+      {
+        id:'fms', name:'FMS', cat:'Financial Management', icon:'fa-dollar-sign', color:'#059669',
+        desc:'Handles financial reporting, shadow ledgers, account reconciliations, and tax administration across the LTC portfolio.',
+        details:['Shadow ledger maintenance','Account reconciliation automation','Tax administration (1099, W-2G)','Financial reporting & audit trails','Reserve calculation support'],
+        metric:'$4B+', metricLbl:'Annual Claims Paid',
+        wipro:'HOLMES AI automates FMS reconciliation with ML anomaly detection — cutting manual reconciliation labor 60% while improving accuracy.',
+        status:'Active'
+      },
+      {
+        id:'link', name:'LINK', cat:'Integration Middleware', icon:'fa-network-wired', color:'#7c3aed',
+        desc:'Integration middleware connecting core platforms; manages workflow routing and data exchange across the technology stack.',
+        details:['Cross-platform workflow routing','Real-time data exchange (Case360 ↔ ADAM ↔ FMS)','Carrier EDI integration','Event-driven messaging backbone','API gateway for external partners'],
+        metric:'3', metricLbl:'Acquisitions Integrated',
+        wipro:'Wipro CloudBridge replaces LINK\'s legacy ESB with an event-driven API gateway — eliminating fragmentation from Concentrix TPA, LTCG, and APA acquisitions.',
+        status:'Gap'
+      }
+    ];
+
+    var cards = systems.map(function(s) {
+      var statusColor = s.status === 'Active' ? '#059669' : '#dc2626';
+      var statusLabel = s.status === 'Active' ? 'Core System' : 'Modernization Priority';
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;">'
+        + '<div style="background:linear-gradient(135deg,'+s.color+','+s.color+'dd);padding:18px 20px;color:#fff;">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+            + '<div style="display:flex;align-items:center;gap:12px;">'
+              + '<div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:11px;display:flex;align-items:center;justify-content:center;">'
+                + '<i class="fas '+s.icon+'" style="font-size:20px;"></i></div>'
+              + '<div>'
+                + '<div style="font-size:20px;font-weight:800;">'+s.name+'</div>'
+                + '<div style="font-size:11px;opacity:.85;">'+s.cat+'</div>'
+              + '</div>'
+            + '</div>'
+            + '<div style="text-align:right;">'
+              + '<div style="font-size:22px;font-weight:800;">'+s.metric+'</div>'
+              + '<div style="font-size:10px;opacity:.75;">'+s.metricLbl+'</div>'
+            + '</div>'
+          + '</div>'
+          + '<div style="font-size:12px;opacity:.9;line-height:1.5;">'+s.desc+'</div>'
+        + '</div>'
+        + '<div style="padding:16px 18px;flex:1;">'
+          + '<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Core Capabilities</div>'
+          + '<ul style="margin:0;padding-left:16px;font-size:11px;color:#6b7280;line-height:2;">'
+            + s.details.map(function(d){ return '<li>'+d+'</li>'; }).join('')
+          + '</ul>'
+        + '</div>'
+        + '<div style="padding:14px 18px;background:#f8fafc;border-top:1px solid #f3f4f6;">'
+          + '<div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:4px;"></i>Wipro Modernization Approach</div>'
+          + '<div style="font-size:11px;color:#374151;line-height:1.5;">'+s.wipro+'</div>'
+        + '</div>'
+        + '<div style="padding:12px 18px;border-top:1px solid #f3f4f6;display:flex;gap:8px;">'
+          + '<button onclick="p3SystemAction(\''+s.id+'\',\'detail\')" style="flex:1;background:'+s.color+';color:#fff;border:none;border-radius:7px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-search" style="margin-right:5px;"></i>System Detail</button>'
+          + '<button onclick="p3SystemAction(\''+s.id+'\',\'migrate\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:7px;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-cloud-upload-alt"></i></button>'
+          + '<button onclick="p3SystemAction(\''+s.id+'\',\'api\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:7px;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plug"></i></button>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p3hdr('fa-server', 'Core Administration Systems',
+          'Project Intrepid · Wipro Enterprise Consulting · illumifin\'s LTC backbone: Case360 · ADAM · FMS · LINK | June 2026', '#003087')
+
+      /* Wipro assessment banner */
+      + '<div style="background:linear-gradient(135deg,#1e3a5f,#003087);border-radius:12px;padding:16px 22px;color:#fff;margin-bottom:22px;display:flex;align-items:center;gap:20px;">'
+        + '<i class="fas fa-info-circle" style="font-size:22px;opacity:.7;flex-shrink:0;"></i>'
+        + '<div>'
+          + '<div style="font-size:13px;font-weight:700;margin-bottom:4px;">Wipro Assessment — illumifin\'s LTC Administration Backbone</div>'
+          + '<div style="font-size:12px;opacity:.85;line-height:1.6;">Purpose-built platforms that power policy, claims, and financial operations at scale — but acquisition-driven fragmentation (Concentrix TPA · LTCG · APA) creates integration overhead that limits agility. Deep carrier integration creates high switching costs and operational continuity as a competitive moat.</div>'
+        + '</div>'
+      + '</div>'
+
+      /* KPI row */
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;">'
+        + _p3kpi('50K+','Active Claimants (Case360)','fa-users','#dc2626','Real-time claims management')
+        + _p3kpi('1.5M+','LTC Policies (ADAM)','fa-file-contract','#003087','Billing & coverage changes')
+        + _p3kpi('$4B+','Annual Claims (FMS)','fa-dollar-sign','#059669','Shadow ledger + reconciliation')
+        + _p3kpi('3 Acquired','Integration Points (LINK)','fa-network-wired','#dc2626','Concentrix · LTCG · APA')
+      + '</div>'
+
+      /* System cards */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;">'
+        + cards
+      + '</div>'
+
+      /* Strength / Gap */
+      + _p3strengthGap(
+          'Deep integration into carrier workflows creates high switching costs and operational continuity — illumifin\'s embedded systems are a durable competitive moat that competitors cannot easily replicate.',
+          'Platform fragmentation from three acquisition integrations (Concentrix TPA, LTCG, APA) drives legacy overhead and limits speed of change. API-first consolidation via Wipro CloudBridge + LINK modernization is the critical path.'
+        )
+    + '</div>';
+
+    _p3('tpl-core-admin', html);
+  }
+
+  window.p3SystemAction = function(sys, action) {
+    var msgs = {
+      'detail':  '🔍 Opening '+sys.toUpperCase()+' system detail — architecture, data model, integration map loading…',
+      'migrate': '☁️ Launching Wipro CloudBridge migration assessment for '+sys.toUpperCase()+' — TCO analysis in progress…',
+      'api':     '🔌 Opening API inventory for '+sys.toUpperCase()+' — REST/event endpoints, carrier schemas, latency metrics…'
+    };
+    _p3toast(msgs[action] || 'Opening '+sys+'…', '#003087');
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 2 — DATA, ANALYTICS & AI/ML PLATFORM
+     ERM/XRM · Data Warehouse · Fraud Sentry (Fraud Risk Scoring · Rules Engine · Network Analytics)
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initDataAiPage() {
+    /* Simulated fraud queue */
+    var fraudAlerts = [
+      { id:'FRD-001', claimant:'Provider Network #A-4421', score:87, type:'Coordinated Fraud', flag:'Network Analytics: 14 claimants linked to single provider billing pattern', status:'Review', amount:'$142K' },
+      { id:'FRD-002', claimant:'Dorothy F. — LTC-2026-0103', score:72, type:'Anomaly Flag', flag:'Billing pattern deviation: 3x avg daily benefit submission vs. clinical assessment', status:'Queued', amount:'$18K' },
+      { id:'FRD-003', claimant:'Home Care Agency #H-2289', score:65, type:'Rules Engine', flag:'EVV GPS data mismatch: caregiver check-ins inconsistent with visit records for 8 claimants', status:'Review', amount:'$94K' },
+      { id:'FRD-004', claimant:'SNF — Sunrise Manor', score:41, type:'Behavioral', flag:'Billing frequency spike post-contract renewal — monitoring mode', status:'Monitoring', amount:'$31K' },
+      { id:'FRD-005', claimant:'George N. — LTC-2026-0108', score:18, type:'Cleared', flag:'False positive — duplicate submission resolved via EDI correction', status:'Cleared', amount:'$0' }
+    ];
+
+    var fraudRows = fraudAlerts.map(function(f) {
+      var scoreColor = f.score >= 70 ? '#dc2626' : f.score >= 40 ? '#d97706' : '#059669';
+      var statColor = f.status === 'Review' ? '#dc2626' : f.status === 'Monitoring' ? '#d97706' : f.status === 'Cleared' ? '#059669' : '#0891b2';
+      return '<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="p3FraudDetail(\''+f.id+'\')">'
+        + '<td style="padding:10px 12px;font-size:11px;font-weight:700;color:#003087;">'+f.id+'</td>'
+        + '<td style="padding:10px 12px;font-size:12px;color:#111827;">'+f.claimant+'</td>'
+        + '<td style="padding:10px 12px;">'
+          + '<div style="display:flex;align-items:center;gap:6px;">'
+            + '<div style="width:36px;height:36px;border-radius:50%;background:'+scoreColor+'15;border:2px solid '+scoreColor+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:'+scoreColor+';">'+f.score+'</div>'
+          + '</div>'
+        + '</td>'
+        + '<td style="padding:10px 12px;">'+_p3badge(f.type, scoreColor)+'</td>'
+        + '<td style="padding:10px 12px;font-size:11px;color:#6b7280;max-width:260px;">'+f.flag+'</td>'
+        + '<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#374151;">'+f.amount+'</td>'
+        + '<td style="padding:10px 12px;">'+_p3badge(f.status, statColor)+'</td>'
+        + '<td style="padding:10px 12px;">'
+          + '<button onclick="event.stopPropagation();p3FraudAction(\''+f.id+'\')" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;">Investigate</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p3hdr('fa-brain', 'Data, Analytics & AI/ML Platform',
+          'Project Intrepid · Wipro Enterprise Consulting · ERM/XRM · Data Warehouse · Fraud Sentry AI/ML Suite | June 2026', '#7c3aed')
+
+      + '<div style="background:linear-gradient(135deg,#2d1b69,#7c3aed);border-radius:12px;padding:16px 22px;color:#fff;margin-bottom:22px;">'
+        + '<div style="font-size:13px;font-weight:700;margin-bottom:4px;">Wipro Assessment — Layered Intelligence Stack</div>'
+        + '<div style="font-size:12px;opacity:.85;line-height:1.6;">illumifin has built a layered intelligence stack — from enterprise data warehousing to a proprietary Fraud Sentry platform — that represents a differentiated market asset, yet its analytical maturity remains constrained by data access latency and siloed reporting. Wipro HOLMES AI closes this gap with real-time ML retraining and self-service analytics.</div>'
+      + '</div>'
+
+      /* KPIs */
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;">'
+        + _p3kpi('Largest','LTC Dataset (Industry)','fa-database','#7c3aed','Unmatched ML training depth')
+        + _p3kpi('3-Tier','Intelligence Architecture','fa-layer-group','#003087','ERM → DW → Fraud Sentry')
+        + _p3kpi('87%','Fraud Detection Accuracy','fa-shield-alt','#dc2626','Fraud Sentry AI/ML Suite')
+        + _p3kpi('7-Day','Avg Data Turnaround (Gap)','fa-clock','#d97706','Manual fulfillment — being automated')
+      + '</div>'
+
+      /* Three-tier architecture */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px;">'
+
+        /* Tier 1: ERM/XRM */
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+          + '<div style="background:linear-gradient(135deg,#003087,#0052cc);padding:14px 16px;color:#fff;">'
+            + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.75;margin-bottom:4px;">TIER 1</div>'
+            + '<div style="font-size:16px;font-weight:800;">ERM / XRM</div>'
+            + '<div style="font-size:11px;opacity:.85;">Risk & Relationship Management</div>'
+          + '</div>'
+          + '<div style="padding:14px 16px;">'
+            + '<div style="font-size:11px;color:#374151;line-height:1.7;">Risk and relationship management layer; captures clinical criteria, care protocols, and risk flags across the claims lifecycle. Provides the <strong>foundational data model for clinical-financial integration</strong>.</div>'
+            + '<div style="margin-top:12px;font-size:10px;font-weight:700;color:#003087;text-transform:uppercase;">Wipro Enhancement</div>'
+            + '<div style="font-size:11px;color:#6b7280;line-height:1.5;margin-top:4px;">HOLMES AI enriches ERM with real-time clinical NLP — extracting ADL, cognitive, and care setting signals from unstructured assessor notes at intake.</div>'
+          + '</div>'
+        + '</div>'
+
+        /* Tier 2: Data Warehouse */
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+          + '<div style="background:linear-gradient(135deg,#0891b2,#0284c7);padding:14px 16px;color:#fff;">'
+            + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.75;margin-bottom:4px;">TIER 2</div>'
+            + '<div style="font-size:16px;font-weight:800;">Data Warehouse</div>'
+            + '<div style="font-size:11px;opacity:.85;">Centralized Analytics Repository</div>'
+          + '</div>'
+          + '<div style="padding:14px 16px;">'
+            + '<div style="font-size:11px;color:#374151;line-height:1.7;">Centralized repository holding the <strong>largest LTC dataset in the industry</strong>; underpins client reporting, actuarial analytics, and performance benchmarking.</div>'
+            + '<div style="margin-top:12px;font-size:10px;font-weight:700;color:#0891b2;text-transform:uppercase;">Wipro Enhancement</div>'
+            + '<div style="font-size:11px;color:#6b7280;line-height:1.5;margin-top:4px;">Self-service analytics portal with Power BI embedded — eliminates manual data fulfillment cycles. Real-time warehouse access reduces turnaround from 7 days to &lt;1 hour.</div>'
+          + '</div>'
+        + '</div>'
+
+        /* Tier 3: Fraud Sentry */
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+          + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:14px 16px;color:#fff;">'
+            + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.75;margin-bottom:4px;">TIER 3</div>'
+            + '<div style="font-size:16px;font-weight:800;">Fraud Sentry</div>'
+            + '<div style="font-size:11px;opacity:.85;">Proprietary AI/ML Suite</div>'
+          + '</div>'
+          + '<div style="padding:14px 16px;">'
+            + '<div style="font-size:11px;color:#374151;line-height:1.5;margin-bottom:10px;">AI/ML-powered fraud detection with three integrated components:</div>'
+            + '<div style="display:flex;flex-direction:column;gap:6px;">'
+              + '<div style="background:#fef2f2;border-radius:8px;padding:8px 10px;">'
+                + '<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:2px;"><i class="fas fa-percentage" style="margin-right:4px;"></i>Fraud Risk Scoring</div>'
+                + '<div style="font-size:10px;color:#6b7280;">Probability scores for claimants & providers via behavioral/clinical pattern analysis</div>'
+              + '</div>'
+              + '<div style="background:#fef2f2;border-radius:8px;padding:8px 10px;">'
+                + '<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:2px;"><i class="fas fa-list-check" style="margin-right:4px;"></i>Rules Engine</div>'
+                + '<div style="font-size:10px;color:#6b7280;">Configurable rule sets surfacing waste, abuse & anomaly flags pre-payment</div>'
+              + '</div>'
+              + '<div style="background:#fef2f2;border-radius:8px;padding:8px 10px;">'
+                + '<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:2px;"><i class="fas fa-project-diagram" style="margin-right:4px;"></i>Network Analytics</div>'
+                + '<div style="font-size:10px;color:#6b7280;">Graph-based analysis of provider-claimant relationships to detect coordinated fraud</div>'
+              + '</div>'
+            + '</div>'
+            + '<div style="margin-top:10px;font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;">Wipro Enhancement</div>'
+            + '<div style="font-size:11px;color:#6b7280;line-height:1.5;margin-top:4px;">Closed-loop AI retraining on claims outcomes. Network analytics at scale via HOLMES graph engine.</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      /* Fraud Sentry Live Queue */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:22px;">'
+        + '<div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;">'
+          + '<i class="fas fa-shield-alt" style="color:#dc2626;"></i>'
+          + '<span style="font-size:14px;font-weight:700;color:#111827;">Fraud Sentry — Live Alert Queue</span>'
+          + '<span style="margin-left:auto;background:#dc262615;color:#dc2626;border:1px solid #dc262640;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700;">'+fraudAlerts.filter(function(f){return f.status==='Review';}).length+' Active Reviews</span>'
+          + '<button onclick="p3RunFraudScan()" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Re-Scan</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + '<thead><tr style="background:#f8fafc;">'
+              + ['Alert ID','Entity','Risk Score','Type','Flag Detail','Est. Amount','Status',''].map(function(h){
+                  return '<th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;white-space:nowrap;">'+h+'</th>';
+                }).join('')
+            + '</tr></thead>'
+            + '<tbody>'+fraudRows+'</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+
+      + _p3strengthGap(
+          'Industry-first fraud detection capability; largest LTC claims dataset provides unmatched model training depth. Fraud Sentry\'s three-component suite (Scoring + Rules + Network) is a proprietary asset no other LTC TPA has replicated.',
+          'Data turnaround times cited as a key client pain point; self-service analytics access is limited — client data requests require manual fulfillment cycles taking 5–7 days. Wipro\'s self-service portal eliminates this gap in Year 1.'
+        )
+    + '</div>';
+
+    _p3('tpl-data-ai', html);
+  }
+
+  window.p3FraudDetail = function(id) {
+    _p3toast('<i class="fas fa-search" style="margin-right:8px;color:#fbbf24;"></i><strong>Fraud Sentry:</strong> Loading full investigation workbook for '+id+' — evidence chain, network graph, and payment hold status…', '#dc2626');
+  };
+  window.p3FraudAction = function(id) {
+    _p3toast('<i class="fas fa-gavel" style="margin-right:8px;color:#fbbf24;"></i>Case '+id+' escalated to SIU team — payment hold applied, carrier notified, case opened in investigation workflow.', '#dc2626');
+  };
+  window.p3RunFraudScan = function() {
+    _p3toast('<i class="fas fa-robot" style="margin-right:8px;color:#4ade80;"></i><strong>Fraud Sentry AI Re-Scan running</strong> — analyzing 63,000+ claimant patterns via behavioral, clinical, and network analytics. Results in ~45 seconds.', '#7c3aed');
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 3 — DIGITAL ECOSYSTEM & PROVIDER NETWORK
+     EVV · Electronic Claims · 180K+ Provider DB · Care Exchange
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initDigitalEcoPage() {
+    /* Sample provider data */
+    var providers = [
+      { id:'PRV-001', name:'Sunrise Manor SNF', type:'Skilled Nursing', state:'CA', rating:4.8, claimants:12, status:'Active', evv:true,  w9:true,  license:'Current' },
+      { id:'PRV-002', name:'ComfortCare Home Health', type:'Home Health', state:'NY', rating:4.6, claimants:28, status:'Active', evv:true,  w9:true,  license:'Current' },
+      { id:'PRV-003', name:'Sunrise Gardens ALF', type:'Assisted Living', state:'FL', rating:4.2, claimants:7,  status:'Active', evv:false, w9:true,  license:'Current' },
+      { id:'PRV-004', name:'Memory Lane Care', type:'Memory Care', state:'TX', rating:4.7, claimants:19, status:'Active', evv:true,  w9:true,  license:'Current' },
+      { id:'PRV-005', name:'BrightPath Homecare', type:'Home Health', state:'PA', rating:3.9, claimants:34, status:'Review', evv:true,  w9:false, license:'Expiring' },
+      { id:'PRV-006', name:'Oakwood Care Center', type:'Skilled Nursing', state:'OH', rating:4.5, claimants:11, status:'Active', evv:true,  w9:true,  license:'Current' }
+    ];
+
+    var provRows = providers.map(function(p) {
+      var statColor = p.status === 'Active' ? '#059669' : '#d97706';
+      var licColor = p.license === 'Current' ? '#059669' : '#dc2626';
+      return '<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="p3ProviderDetail(\''+p.id+'\')">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">'+p.id+'</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<div style="font-size:12px;font-weight:700;color:#111827;">'+p.name+'</div>'
+          + '<div style="font-size:10px;color:#6b7280;">'+p.type+' · '+p.state+'</div>'
+        + '</td>'
+        + '<td style="padding:9px 12px;text-align:center;font-size:12px;font-weight:700;color:#f59e0b;">★ '+p.rating+'</td>'
+        + '<td style="padding:9px 12px;text-align:center;font-size:12px;font-weight:700;color:#374151;">'+p.claimants+'</td>'
+        + '<td style="padding:9px 12px;text-align:center;"><span style="font-size:14px;">'+(p.evv?'✅':'❌')+'</span></td>'
+        + '<td style="padding:9px 12px;text-align:center;"><span style="font-size:14px;">'+(p.w9?'✅':'❌')+'</span></td>'
+        + '<td style="padding:9px 12px;"><span style="background:'+licColor+'15;color:'+licColor+';border:1px solid '+licColor+'44;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;">'+p.license+'</span></td>'
+        + '<td style="padding:9px 12px;">'+_p3badge(p.status, statColor)+'</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="event.stopPropagation();p3ProviderAction(\''+p.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;">Manage</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p3hdr('fa-project-diagram', 'Digital Ecosystem & Provider Network',
+          'Project Intrepid · EVV via CareExchange · Electronic Claims Networks · 180K+ Provider Database · Care Exchange Platform', '#0891b2')
+
+      + '<div style="background:linear-gradient(135deg,#0c4a6e,#0891b2);border-radius:12px;padding:16px 22px;color:#fff;margin-bottom:22px;">'
+        + '<div style="font-size:13px;font-weight:700;margin-bottom:4px;">Wipro Assessment — Competitive Digital Moat</div>'
+        + '<div style="font-size:12px;opacity:.85;line-height:1.6;">illumifin\'s digital ecosystem — spanning EVV, electronic claims networks, a 180K+ provider database, and Care Exchange — forms a competitive moat in LTC service delivery. Integration depth and real-time connectivity remain modernization priorities that Wipro\'s API-first approach will address in Year 1–2.</div>'
+      + '</div>'
+
+      /* KPIs */
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;">'
+        + _p3kpi('180K+','Providers in Database','fa-hospital','#0891b2','Nationwide: SNF · ALF · Home · Hospice')
+        + _p3kpi('2.5M+','Policyholders Served','fa-users','#003087','LTC + HAL segments via CareExchange')
+        + _p3kpi('GPS-backed','EVV Verification','fa-map-marker-alt','#059669','Mobile-enabled visit validation')
+        + _p3kpi('80%','Digital Target (PolicyHub)','fa-mobile-alt','#d97706','2027 mobile app roadmap')
+      + '</div>'
+
+      /* Four ecosystem pillars */
+      + '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px;">'
+
+        /* EVV */
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;">'
+          + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+            + '<div style="width:38px;height:38px;background:#059669 15;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#05966915;">'
+              + '<i class="fas fa-map-marker-alt" style="color:#059669;font-size:16px;"></i></div>'
+            + '<div>'
+              + '<div style="font-size:14px;font-weight:800;color:#111827;">Electronic Visit Verification (EVV)</div>'
+              + '<div style="font-size:11px;color:#6b7280;">via CareExchange</div>'
+            + '</div>'
+          + '</div>'
+          + '<div style="font-size:12px;color:#374151;line-height:1.7;margin-bottom:10px;">Mobile-enabled, <strong>GPS-backed visit verification</strong> for home care services. Assigns risk scores to caregiver activity patterns and validates care delivery pre-payment.</div>'
+          + '<div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:11px;color:#374151;"><strong>How it works:</strong> Caregiver checks in via mobile app → GPS coordinates logged → visit duration tracked → risk score assigned → validated against care plan before claim payment released.</div>'
+          + '<button onclick="p3EvvDemo()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;width:100%;"><i class="fas fa-play" style="margin-right:6px;"></i>Live EVV Visit Tracker</button>'
+        + '</div>'
+
+        /* Electronic Claims */
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;">'
+          + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+            + '<div style="width:38px;height:38px;background:#003087 15;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#00308715;">'
+              + '<i class="fas fa-exchange-alt" style="color:#003087;font-size:16px;"></i></div>'
+            + '<div>'
+              + '<div style="font-size:14px;font-weight:800;color:#111827;">Electronic Claims Networks</div>'
+              + '<div style="font-size:11px;color:#6b7280;">Automated adjudication connectivity</div>'
+            + '</div>'
+          + '</div>'
+          + '<div style="font-size:12px;color:#374151;line-height:1.7;margin-bottom:10px;">Automates claims submission, routing, and adjudication connectivity between <strong>carriers, providers, and illumifin\'s Case360 claims engine</strong> — eliminating manual EDI touch points.</div>'
+          + '<div style="display:flex;justify-content:space-around;background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:10px;">'
+            + '<div style="text-align:center;"><div style="font-size:16px;font-weight:800;color:#003087;">98.4%</div><div style="font-size:10px;color:#6b7280;">Auto-routing rate</div></div>'
+            + '<div style="text-align:center;"><div style="font-size:16px;font-weight:800;color:#003087;">&lt;4hr</div><div style="font-size:10px;color:#6b7280;">Avg adjudication</div></div>'
+            + '<div style="text-align:center;"><div style="font-size:16px;font-weight:800;color:#003087;">65+</div><div style="font-size:10px;color:#6b7280;">Carrier connections</div></div>'
+          + '</div>'
+          + '<button onclick="p3ClaimsNetworkDemo()" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;width:100%;"><i class="fas fa-network-wired" style="margin-right:6px;"></i>View Claims Network Map</button>'
+        + '</div>'
+
+        /* Provider Database */
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;">'
+          + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+            + '<div style="width:38px;height:38px;background:#0891b215;border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+              + '<i class="fas fa-hospital" style="color:#0891b2;font-size:16px;"></i></div>'
+            + '<div>'
+              + '<div style="font-size:14px;font-weight:800;color:#111827;">Provider Database — 180K+</div>'
+              + '<div style="font-size:11px;color:#6b7280;">Unified Provider Directory</div>'
+            + '</div>'
+          + '</div>'
+          + '<div style="font-size:12px;color:#374151;line-height:1.7;margin-bottom:10px;">Centralized nationwide directory including <strong>profiles, license verification, liability certificates, and W9 details</strong> across home care, assisted living, skilled nursing, adult daycare, and hospice.</div>'
+          + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">'
+            + ['Home Care','Assisted Living','Skilled Nursing','Adult Daycare','Hospice','Memory Care'].map(function(t){
+                return '<div style="background:#e0f2fe;color:#0369a1;border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;text-align:center;">'+t+'</div>';
+              }).join('')
+          + '</div>'
+          + '<button onclick="p3ProviderSearch()" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;width:100%;"><i class="fas fa-search" style="margin-right:6px;"></i>Search Provider Network</button>'
+        + '</div>'
+
+        /* Care Exchange */
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;">'
+          + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+            + '<div style="width:38px;height:38px;background:#7c3aed15;border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+              + '<i class="fas fa-handshake" style="color:#7c3aed;font-size:16px;"></i></div>'
+            + '<div>'
+              + '<div style="font-size:14px;font-weight:800;color:#111827;">Care Exchange</div>'
+              + '<div style="font-size:11px;color:#6b7280;">Digital Care Coordination Platform</div>'
+            + '</div>'
+          + '</div>'
+          + '<div style="font-size:12px;color:#374151;line-height:1.7;margin-bottom:10px;">Digital care coordination platform enabling <strong>communication between policyholders, providers, and carriers</strong>. Supports benefit eligibility checks and care plan management.</div>'
+          + '<div style="background:#f5f3ff;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:11px;color:#374151;"><strong>Wipro adds:</strong> AI-driven care plan optimization, predictive re-assessment alerts, and automated policyholder portal for self-service eligibility queries.</div>'
+          + '<button onclick="p3CareExchangeDemo()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;width:100%;"><i class="fas fa-sync-alt" style="margin-right:6px;"></i>Open Care Exchange</button>'
+        + '</div>'
+      + '</div>'
+
+      /* Provider Table */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:22px;">'
+        + '<div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;">'
+          + '<i class="fas fa-list" style="color:#0891b2;"></i>'
+          + '<span style="font-size:14px;font-weight:700;color:#111827;">Active Provider Sample — 180K+ Network</span>'
+          + '<span style="margin-left:auto;font-size:12px;color:#6b7280;">Showing 6 of 180,000+</span>'
+          + '<button onclick="p3ProviderSearch()" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:5px;"></i>Add Provider</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + '<thead><tr style="background:#f8fafc;">'
+              + ['Provider ID','Name & Type','Rating','Active Claimants','EVV Enrolled','W9 on File','License','Status',''].map(function(h){
+                  return '<th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;white-space:nowrap;">'+h+'</th>';
+                }).join('')
+            + '</tr></thead>'
+            + '<tbody>'+provRows+'</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+
+      + _p3strengthGap(
+          'Provider database + EVV via CareExchange create an end-to-end fraud prevention layer — GPS-validated visits pre-payment, license verification on file, and network analytics applied across 180K+ provider relationships. Carriers cannot replicate this independently.',
+          'Real-time EVV-to-adjudication integration is not fully automated — manual intervention required when GPS data is ambiguous or visit records conflict. Wipro\'s API-first integration closes this gap with event-driven EVV→Case360 streaming in Year 1.'
+        )
+    + '</div>';
+
+    _p3('tpl-digital-eco', html);
+  }
+
+  window.p3EvvDemo = function() { _p3toast('<i class="fas fa-map-marker-alt" style="margin-right:8px;color:#4ade80;"></i><strong>EVV Live Tracker:</strong> Loading GPS visit map — 847 active caregiver check-ins in progress across 23 states. Risk scores updating in real-time.', '#059669'); };
+  window.p3ClaimsNetworkDemo = function() { _p3toast('<i class="fas fa-network-wired" style="margin-right:8px;color:#4ade80;"></i><strong>Claims Network:</strong> 65 carrier connections live — 1,247 claims in adjudication queue, 98.4% auto-routed, 12 manual review flags.', '#003087'); };
+  window.p3ProviderSearch = function() { _p3toast('<i class="fas fa-search" style="margin-right:8px;color:#4ade80;"></i><strong>Provider Search:</strong> Opening 180K+ provider directory — filter by type, state, EVV status, rating, and active claimant count.', '#0891b2'); };
+  window.p3CareExchangeDemo = function() { _p3toast('<i class="fas fa-sync-alt" style="margin-right:8px;color:#4ade80;"></i><strong>Care Exchange:</strong> Loading coordination portal — 63K+ policyholders, 2,847 active care plans, 180 pending eligibility queries.', '#7c3aed'); };
+  window.p3ProviderDetail = function(id) { _p3toast('📋 Loading provider profile for '+id+' — credentials, claim history, EVV analytics, and risk score…', '#003087'); };
+  window.p3ProviderAction = function(id) { _p3toast('⚙️ Opening provider management panel for '+id+' — contract terms, payment schedule, compliance status.', '#0891b2'); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 4 — CONTACT CENTER & DOCUMENT MANAGEMENT
+     Avaya · CNX Voice Analytics · Power BI · xPressions · PolicyHub
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initContactDocPage() {
+    /* Sample call queue */
+    var calls = [
+      { id:'CALL-001', ph:'Margaret O\'Brien', type:'Claim Status', channel:'Phone', wait:'2m 14s', sentiment:'Frustrated', priority:'High',   agent:'Sarah J.' },
+      { id:'CALL-002', ph:'Harold Simmons',    type:'Benefit Query', channel:'IVR',   wait:'0m 42s', sentiment:'Neutral',    priority:'Normal', agent:'Self-Serve' },
+      { id:'CALL-003', ph:'Arthur Kowalski',   type:'Provider Issue', channel:'Phone', wait:'5m 08s', sentiment:'Urgent',    priority:'High',   agent:'Maria C.' },
+      { id:'CALL-004', ph:'Evelyn Marchetti',  type:'New Claim',     channel:'Portal', wait:'—',     sentiment:'Calm',      priority:'Normal', agent:'Web Portal' },
+      { id:'CALL-005', ph:'Francis D.',        type:'Payment Delay', channel:'Phone', wait:'1m 33s', sentiment:'Frustrated', priority:'High',   agent:'James P.' }
+    ];
+
+    var callRows = calls.map(function(c) {
+      var sentColor = c.sentiment==='Frustrated'||c.sentiment==='Urgent' ? '#dc2626' : c.sentiment==='Neutral' ? '#6b7280' : '#059669';
+      var priColor = c.priority==='High' ? '#dc2626' : '#059669';
+      var chIcon = c.channel==='Phone'?'fa-phone':c.channel==='IVR'?'fa-robot':c.channel==='Portal'?'fa-globe':'fa-comment';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">'+c.id+'</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:600;color:#111827;">'+c.ph+'</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">'+c.type+'</td>'
+        + '<td style="padding:9px 12px;"><i class="fas '+chIcon+'" style="color:#0891b2;margin-right:5px;"></i><span style="font-size:11px;">'+c.channel+'</span></td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:'+(c.wait==='—'?'#059669':'#374151')+';">'+c.wait+'</td>'
+        + '<td style="padding:9px 12px;"><span style="color:'+sentColor+';font-size:11px;font-weight:700;">'+c.sentiment+'</span></td>'
+        + '<td style="padding:9px 12px;">'+_p3badge(c.priority, priColor)+'</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#374151;">'+c.agent+'</td>'
+        + '<td style="padding:9px 12px;">'
+          + '<button onclick="p3JoinCall(\''+c.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;">Join</button>'
+        + '</td>'
+      + '</tr>';
+    }).join('');
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p3hdr('fa-headset', 'Contact Center & Document Management',
+          'Project Intrepid · Avaya + CNX Voice Analytics · Power BI · xPressions · PolicyHub (80% Digital Target)', '#0d9488')
+
+      + '<div style="background:linear-gradient(135deg,#134e4a,#0d9488);border-radius:12px;padding:16px 22px;color:#fff;margin-bottom:22px;">'
+        + '<div style="font-size:13px;font-weight:700;margin-bottom:4px;">Wipro Assessment — Policyholder Experience Layer</div>'
+        + '<div style="font-size:12px;opacity:.85;line-height:1.6;">Contact center technology and document management underpin the policyholder experience layer — Avaya and Power BI provide operational stability, while xPressions and paper-heavy workflows represent the clearest near-term modernization lever. PolicyHub targets 80% digital transaction completion.</div>'
+      + '</div>'
+
+      /* KPIs */
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;">'
+        + _p3kpi('2.5M+','Policyholders Served','fa-headset','#0d9488','LTC + HAL via Avaya/CNX')
+        + _p3kpi('80%','Digital Target','fa-mobile-alt','#003087','PolicyHub 2027 roadmap')
+        + _p3kpi('AI-Assist','CNX Agent Partnership','fa-robot','#7c3aed','Voice analytics + summarization')
+        + _p3kpi('Paper-Heavy','Inbound Mail Gap','fa-exclamation-triangle','#dc2626','xPressions modernization lever')
+      + '</div>'
+
+      /* Current vs Future side by side */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">'
+
+        /* Current State */
+        + '<div style="background:#fff;border:2px solid #e5e7eb;border-radius:12px;overflow:hidden;">'
+          + '<div style="background:#1e3a5f;padding:12px 16px;color:#fff;">'
+            + '<div style="display:flex;align-items:center;gap:8px;"><i class="fas fa-server"></i><span style="font-size:13px;font-weight:700;">Current State</span></div>'
+          + '</div>'
+          + '<div style="padding:16px;">'
+            + _p3currentItem('fa-phone', 'Contact Center — Avaya', '#374151',
+                'Core telephony: call routing, IVR, and agent management for ~2.5M+ policyholders across LTC and HAL segments. Strategic CNX partnership adds voice analytics, call summarization, and agent-assist layers.')
+            + _p3currentItem('fa-chart-bar', 'Analytics — Power BI', '#374151',
+                'Operational dashboards for SLA monitoring, claims throughput, and workforce management — <strong>not yet connected to the data warehouse</strong> for predictive insights.')
+            + _p3currentItem('fa-file-alt', 'Document Management — xPressions', '#374151',
+                'Document generation, correspondence templating, and output management across claims and policy administration; <strong>reliant on paper-heavy inbound mail processes</strong>.')
+            + '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;margin-top:8px;">'
+              + '<div style="font-size:10px;font-weight:700;color:#d97706;margin-bottom:3px;"><i class="fas fa-exclamation-triangle" style="margin-right:4px;"></i>CRITICAL GAP</div>'
+              + '<div style="font-size:11px;color:#374151;">PolicyHub targets 80% digital transaction completion — current Avaya/xPressions paper dependencies slow adoption velocity.</div>'
+            + '</div>'
+          + '</div>'
+        + '</div>'
+
+        /* Modernization Opportunity */
+        + '<div style="background:#fff;border:2px solid #0d948840;border-radius:12px;overflow:hidden;">'
+          + '<div style="background:linear-gradient(135deg,#0d9488,#0891b2);padding:12px 16px;color:#fff;">'
+            + '<div style="display:flex;align-items:center;gap:8px;"><i class="fas fa-rocket"></i><span style="font-size:13px;font-weight:700;">Wipro Modernization Opportunity</span></div>'
+          + '</div>'
+          + '<div style="padding:16px;">'
+            + _p3modernItem('fa-robot', 'AI-Enhanced Contact Center', '#7c3aed',
+                'Expand CNX agent-assist and voice analytics beyond Avaya overlay — move toward AI-led self-service IVR and real-time sentiment routing to reduce handle time and improve first-contact resolution.')
+            + _p3modernItem('fa-chart-line', 'Predictive Analytics Integration', '#0891b2',
+                'Connect Power BI to the enterprise data warehouse to unlock predictive SLA alerts, workforce demand forecasting, and proactive claims triage dashboards for management visibility.')
+            + _p3modernItem('fa-file-signature', 'Digital-First Document Processing', '#059669',
+                'Replace paper-based inbound workflows with intelligent document capture and e-signature; integrate digital correspondence directly into PolicyHub to accelerate the 80% digital transaction target.')
+            + _p3modernItem('fa-mobile-alt', 'PolicyHub & Mobile App Acceleration', '#003087',
+                'Leverage 2027 mobile app roadmap and IVR self-service expansion to deepen policyholder digital engagement — reducing call volume and driving down per-interaction cost across LTC and HAL.')
+          + '</div>'
+        + '</div>'
+      + '</div>'
+
+      /* Live Call Queue */
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:22px;">'
+        + '<div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;">'
+          + '<i class="fas fa-phone-volume" style="color:#0d9488;"></i>'
+          + '<span style="font-size:14px;font-weight:700;color:#111827;">Live Contact Center Queue — Avaya + CNX AI Assist</span>'
+          + '<span style="margin-left:auto;background:#dc262615;color:#dc2626;border:1px solid #dc262640;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700;">3 Frustrated Callers</span>'
+          + '<button onclick="p3ContactAIRoute()" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Route All</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;">'
+          + '<table style="width:100%;border-collapse:collapse;">'
+            + '<thead><tr style="background:#f8fafc;">'
+              + ['Call ID','Policyholder','Issue Type','Channel','Wait Time','Sentiment','Priority','Agent',''].map(function(h){
+                  return '<th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;white-space:nowrap;">'+h+'</th>';
+                }).join('')
+            + '</tr></thead>'
+            + '<tbody>'+callRows+'</tbody>'
+          + '</table>'
+        + '</div>'
+      + '</div>'
+
+      + _p3strengthGap(
+          'Avaya + CNX strategic partnership provides voice analytics, call summarization, and agent-assist capabilities ahead of most TPAs — operational dashboards via Power BI give real-time SLA visibility across LTC and HAL segments.',
+          'Paper-heavy xPressions inbound mail workflows are slowing PolicyHub\'s 80% digital target. Power BI is not yet connected to the data warehouse for predictive insights. Wipro\'s Digital-First Document Processing and AI Contact Center transform both gaps in Year 1.'
+        )
+    + '</div>';
+
+    _p3('tpl-contact-doc', html);
+  }
+
+  function _p3currentItem(icon, title, color, desc) {
+    return '<div style="display:flex;gap:10px;margin-bottom:12px;">'
+      + '<div style="width:28px;height:28px;background:#f3f4f6;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">'
+        + '<i class="fas '+icon+'" style="color:'+color+';font-size:11px;"></i></div>'
+      + '<div>'
+        + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:2px;">'+title+'</div>'
+        + '<div style="font-size:11px;color:#6b7280;line-height:1.5;">'+desc+'</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  function _p3modernItem(icon, title, color, desc) {
+    return '<div style="display:flex;gap:10px;margin-bottom:12px;">'
+      + '<div style="width:28px;height:28px;background:'+color+'15;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">'
+        + '<i class="fas '+icon+'" style="color:'+color+';font-size:11px;"></i></div>'
+      + '<div>'
+        + '<div style="font-size:12px;font-weight:700;color:'+color+';margin-bottom:2px;">'+title+'</div>'
+        + '<div style="font-size:11px;color:#6b7280;line-height:1.5;">'+desc+'</div>'
+      + '</div>'
+    + '</div>';
+  }
+
+  window.p3JoinCall = function(id) { _p3toast('<i class="fas fa-headset" style="margin-right:8px;color:#4ade80;"></i>Joining call '+id+' — CNX AI assist active, real-time sentiment tracking, call summary generating…', '#0d9488'); };
+  window.p3ContactAIRoute = function() { _p3toast('<i class="fas fa-robot" style="margin-right:8px;color:#4ade80;"></i>AI routing all 5 contacts — 2 frustrated callers escalated, 1 IVR promoted to self-serve, sentiment alerts sent to supervisors.', '#7c3aed'); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 5 — CURRENT STATE vs MODERNIZATION ROADMAP
+     The definitive transformation matrix from Project Intrepid
+  ═══════════════════════════════════════════════════════════════════════ */
+  function initModRoadmapPage() {
+    var matrix = [
+      {
+        dim: 'Claims Processing', icon: 'fa-file-medical-alt', color: '#dc2626',
+        current: 'Seven-day avg. invoice turnaround; manual review points in adjudication; paper-heavy inbound documentation across Case360.',
+        opportunity: 'Up to 20% faster cycle time via straight-through processing and AI triage. Target: 65%+ STP rate by Year 3. Agentic AI reads clinical docs, adjudicates eligibility, routes exceptions.',
+        year: 'Y1–2', impact: 'High', savings: '$26M'
+      },
+      {
+        dim: 'Data & Analytics', icon: 'fa-database', color: '#0891b2',
+        current: 'Manual data fulfillment; limited client self-service access. Data requests to analytics team take 5–7 days. Power BI not connected to data warehouse.',
+        opportunity: 'Real-time data warehouse access; client self-service analytics portal. Predictive SLA alerts, actuarial dashboards, and workforce demand forecasting via HOLMES AI.',
+        year: 'Y1', impact: 'Medium', savings: '$8M'
+      },
+      {
+        dim: 'Fraud Detection', icon: 'fa-shield-alt', color: '#7c3aed',
+        current: 'Fraud Sentry rules engine active; limited real-time model feedback loops. Network analytics is batch-mode, not streaming. Model retraining is manual and infrequent.',
+        opportunity: 'Closed-loop AI model retraining on claims outcomes; network analytics at scale. Graph-based detection running in real-time pre-payment. HOLMES AI integration for continuous learning.',
+        year: 'Y2–3', impact: 'High', savings: '$18M'
+      },
+      {
+        dim: 'Platform Architecture', icon: 'fa-server', color: '#003087',
+        current: 'Fragmented legacy stack across three acquired entities (Concentrix TPA, LTCG, APA); high integration overhead via LINK middleware. Limited API-first interfaces.',
+        opportunity: 'Platform consolidation, API-first architecture, cloud migration to reduce TCO. Wipro CloudBridge replaces LINK. Microservices wrap Case360, ADAM, FMS. CI/CD pipeline.',
+        year: 'Y2–4', impact: 'Critical', savings: '$42M'
+      },
+      {
+        dim: 'Digital Experience', icon: 'fa-mobile-alt', color: '#059669',
+        current: 'PolicyHub targets 80% digital transaction completion — current Avaya/xPressions paper dependencies slow adoption. Mobile app on 2027 roadmap. CNO Financial contract validates go-to-market.',
+        opportunity: 'Mobile app (2027) accelerated to Y2; IVR self-service expansion; 80% digital transaction target via PolicyHub; AI-led self-service IVR; real-time sentiment routing.',
+        year: 'Y1–2', impact: 'High', savings: '$12M'
+      }
+    ];
+
+    var matrixRows = matrix.map(function(m) {
+      var impColor = m.impact === 'Critical' ? '#dc2626' : m.impact === 'High' ? '#d97706' : '#0891b2';
+      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:12px;">'
+        + '<div style="display:grid;grid-template-columns:180px 1fr 1fr 80px 80px 80px;gap:0;align-items:stretch;">'
+
+          /* Dimension */
+          + '<div style="background:'+m.color+'08;border-right:1px solid '+m.color+'22;padding:16px;display:flex;flex-direction:column;justify-content:center;">'
+            + '<div style="width:32px;height:32px;background:'+m.color+'15;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">'
+              + '<i class="fas '+m.icon+'" style="color:'+m.color+';font-size:14px;"></i></div>'
+            + '<div style="font-size:13px;font-weight:800;color:'+m.color+';">'+m.dim+'</div>'
+          + '</div>'
+
+          /* Current State */
+          + '<div style="padding:14px 16px;border-right:1px solid #f3f4f6;">'
+            + '<div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px;"><i class="fas fa-exclamation-circle" style="color:#dc2626;margin-right:4px;"></i>Current State</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.6;">'+m.current+'</div>'
+          + '</div>'
+
+          /* Modernization */
+          + '<div style="padding:14px 16px;border-right:1px solid #f3f4f6;background:#f0fdf4;">'
+            + '<div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;margin-bottom:6px;"><i class="fas fa-rocket" style="margin-right:4px;"></i>Modernization Opportunity</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.6;">'+m.opportunity+'</div>'
+          + '</div>'
+
+          /* Year */
+          + '<div style="padding:14px 8px;text-align:center;border-right:1px solid #f3f4f6;display:flex;flex-direction:column;justify-content:center;">'
+            + '<div style="font-size:10px;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">When</div>'
+            + '<div style="font-size:13px;font-weight:800;color:#003087;">'+m.year+'</div>'
+          + '</div>'
+
+          /* Impact */
+          + '<div style="padding:14px 8px;text-align:center;border-right:1px solid #f3f4f6;display:flex;flex-direction:column;justify-content:center;">'
+            + '<div style="font-size:10px;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">Impact</div>'
+            + '<div style="font-size:11px;font-weight:800;color:'+impColor+';">'+m.impact+'</div>'
+          + '</div>'
+
+          /* Savings */
+          + '<div style="padding:14px 8px;text-align:center;display:flex;flex-direction:column;justify-content:center;">'
+            + '<div style="font-size:10px;color:#6b7280;text-transform:uppercase;margin-bottom:4px;">Net Savings</div>'
+            + '<div style="font-size:13px;font-weight:800;color:#059669;">'+m.savings+'</div>'
+          + '</div>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    /* Totals */
+    var totalSavings = '$106M';
+
+    var html = '<div class="page" style="padding:24px;">'
+      + _p3hdr('fa-road', 'Current State vs. Modernization Roadmap',
+          'Project Intrepid · Wipro Enterprise Consulting · 5-dimension transformation matrix · June 2026', '#059669')
+
+      + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:18px 24px;color:#fff;margin-bottom:22px;">'
+        + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#4ade80;margin-bottom:6px;">WIPRO PROJECT INTREPID — TRANSFORMATION THESIS</div>'
+        + '<div style="font-size:18px;font-weight:800;margin-bottom:10px;">illumifin\'s technology foundation is functionally strong but architecturally fragmented</div>'
+        + '<div style="font-size:12px;opacity:.85;line-height:1.6;max-width:800px;">The modernization roadmap targets <strong style="color:#4ade80;">claims speed, data democratization, AI-led automation, and platform consolidation</strong> as the four vectors of transformation value. Wipro delivers front-loaded savings: 35% by Year 2, 50%+ by Year 5.</div>'
+        + '<div style="display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;">'
+          + '<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px 18px;text-align:center;"><div style="font-size:18px;font-weight:800;">5</div><div style="font-size:10px;opacity:.75;">Transformation Vectors</div></div>'
+          + '<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px 18px;text-align:center;"><div style="font-size:18px;font-weight:800;">$'+totalSavings.replace('$','')+'</div><div style="font-size:10px;opacity:.75;">Total 5yr Net Savings</div></div>'
+          + '<div style="background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.4);border-radius:8px;padding:10px 18px;text-align:center;"><div style="font-size:18px;font-weight:800;color:#4ade80;">35%</div><div style="font-size:10px;opacity:.75;">Cost reduction by Y2</div></div>'
+          + '<div style="background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.4);border-radius:8px;padding:10px 18px;text-align:center;"><div style="font-size:18px;font-weight:800;color:#4ade80;">50%+</div><div style="font-size:10px;opacity:.75;">Cost reduction by Y5</div></div>'
+        + '</div>'
+      + '</div>'
+
+      /* Matrix header */
+      + '<div style="display:grid;grid-template-columns:180px 1fr 1fr 80px 80px 80px;gap:0;margin-bottom:8px;padding:0 0 4px;">'
+        + '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;">Dimension</div>'
+        + '<div style="padding:6px 16px;font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;">Current State (illumifin)</div>'
+        + '<div style="padding:6px 16px;font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;">Modernization Opportunity (Wipro)</div>'
+        + '<div style="padding:6px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;text-align:center;">When</div>'
+        + '<div style="padding:6px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;text-align:center;">Impact</div>'
+        + '<div style="padding:6px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;text-align:center;">Savings</div>'
+      + '</div>'
+
+      + matrixRows
+
+      /* Bottom CTA */
+      + '<div style="background:linear-gradient(135deg,#003087,#0052cc);border-radius:12px;padding:18px 24px;color:#fff;display:flex;align-items:center;gap:20px;margin-top:8px;">'
+        + '<div><div style="font-size:15px;font-weight:800;margin-bottom:4px;">Total 5-Year Value: '+totalSavings+' net savings on $210M baseline</div>'
+          + '<div style="font-size:12px;opacity:.85;">Front-loaded delivery — 35% cost reduction by end of Year 2 per RFP requirement</div></div>'
+        + '<div style="display:flex;gap:10px;margin-left:auto;">'
+          + '<button onclick="p3ExportMatrix()" style="background:#fff;color:#003087;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="fas fa-file-excel" style="margin-right:6px;"></i>Export Matrix</button>'
+          + '<button onclick="p3BuildBusinessCase()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="fas fa-calculator" style="margin-right:6px;"></i>Build Business Case</button>'
+        + '</div>'
+      + '</div>'
+
+    + '</div>';
+
+    _p3('tpl-mod-roadmap', html);
+  }
+
+  window.p3ExportMatrix = function() { _p3toast('📊 Exporting transformation matrix to Excel — 5 dimensions, current state, opportunity, savings, timeline. File ready in 3 seconds.', '#059669'); };
+  window.p3BuildBusinessCase = function() { _p3toast('📐 Building full business case — pulling cost baseline ($210M), applying transformation levers, generating ROI model with gainshare scenarios.', '#003087'); };
+
+  /* ── NAVIGATE-TO PATCH ──────────────────────────────────────────────── */
+  var _origNav_p3 = navigateTo;
+  navigateTo = function(page) {
+    _origNav_p3(page);
+    var titleEl = document.getElementById('page-title');
+    var bcEl    = document.getElementById('breadcrumb-page');
+    document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+
+    if (page === 'core-admin') {
+      if (titleEl) titleEl.textContent = 'Core Admin Systems';
+      if (bcEl)    bcEl.textContent    = 'illumifin Platform / Core Administration Systems';
+      document.querySelector('.core-admin-nav') && document.querySelector('.core-admin-nav').classList.add('active');
+      requestAnimationFrame(function(){ setTimeout(initCoreAdminPage, 80); });
+    }
+    if (page === 'data-ai') {
+      if (titleEl) titleEl.textContent = 'Data & AI/ML Platform';
+      if (bcEl)    bcEl.textContent    = 'illumifin Platform / Data, Analytics & AI/ML';
+      document.querySelector('.data-ai-nav') && document.querySelector('.data-ai-nav').classList.add('active');
+      requestAnimationFrame(function(){ setTimeout(initDataAiPage, 80); });
+    }
+    if (page === 'digital-eco') {
+      if (titleEl) titleEl.textContent = 'Digital Ecosystem';
+      if (bcEl)    bcEl.textContent    = 'illumifin Platform / Digital Ecosystem & Provider Network';
+      document.querySelector('.digital-eco-nav') && document.querySelector('.digital-eco-nav').classList.add('active');
+      requestAnimationFrame(function(){ setTimeout(initDigitalEcoPage, 80); });
+    }
+    if (page === 'contact-doc') {
+      if (titleEl) titleEl.textContent = 'Contact & Doc Mgmt';
+      if (bcEl)    bcEl.textContent    = 'illumifin Platform / Contact Center & Document Management';
+      document.querySelector('.contact-doc-nav') && document.querySelector('.contact-doc-nav').classList.add('active');
+      requestAnimationFrame(function(){ setTimeout(initContactDocPage, 80); });
+    }
+    if (page === 'mod-roadmap') {
+      if (titleEl) titleEl.textContent = 'Modernization Roadmap';
+      if (bcEl)    bcEl.textContent    = 'Project Intrepid / Current State vs. Modernization Roadmap';
+      document.querySelector('.mod-roadmap-nav') && document.querySelector('.mod-roadmap-nav').classList.add('active');
+      requestAnimationFrame(function(){ setTimeout(initModRoadmapPage, 80); });
+    }
+  };
+
+  /* ── Expose ── */
+  window.initCoreAdminPage    = initCoreAdminPage;
+  window.initDataAiPage       = initDataAiPage;
+  window.initDigitalEcoPage   = initDigitalEcoPage;
+  window.initContactDocPage   = initContactDocPage;
+  window.initModRoadmapPage   = initModRoadmapPage;
+
+  console.log('Phase 3 — Project Intrepid loaded: Core Admin (Case360·ADAM·FMS·LINK) · Data/AI (ERM·DW·Fraud Sentry) · Digital Ecosystem (EVV·180K Providers·Care Exchange) · Contact Center · Modernization Roadmap');
+
+})();

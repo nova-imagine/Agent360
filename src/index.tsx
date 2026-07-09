@@ -341,6 +341,11 @@ function MainApp() {
         <div id="tpl-hybrid-ops"></div>
         <div id="tpl-ai-modernization"></div>
         <div id="tpl-rfp-showcase"></div>
+        <div id="tpl-core-admin"></div>
+        <div id="tpl-data-ai"></div>
+        <div id="tpl-digital-eco"></div>
+        <div id="tpl-contact-doc"></div>
+        <div id="tpl-mod-roadmap"></div>
         <div id="tpl-adv-wealth"></div>
         <div id="tpl-adv-accounts"><AdvisoryAccountsPage /></div>
         <div id="tpl-adv-estate">
@@ -952,6 +957,28 @@ function Sidebar() {
         <a class="nav-item rfp-showcase-nav" onclick="navigateTo('rfp-showcase')" href="#">
           <i class="fas fa-award"></i><span>RFP Response Center</span>
           <span class="nav-badge" style="background:#d97706;color:#fff">RFP</span>
+        </a>
+
+        {/* ── ILLUMIFIN PLATFORM ── */}
+        <div class="nav-section-label">ILLUMIFIN PLATFORM</div>
+        <a class="nav-item core-admin-nav" onclick="navigateTo('core-admin')" href="#">
+          <i class="fas fa-server"></i><span>Core Admin Systems</span>
+          <span class="nav-badge" style="background:#003087;color:#fff">4</span>
+        </a>
+        <a class="nav-item data-ai-nav" onclick="navigateTo('data-ai')" href="#">
+          <i class="fas fa-brain"></i><span>Data & AI/ML Platform</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">AI</span>
+        </a>
+        <a class="nav-item digital-eco-nav" onclick="navigateTo('digital-eco')" href="#">
+          <i class="fas fa-project-diagram"></i><span>Digital Ecosystem</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">180K</span>
+        </a>
+        <a class="nav-item contact-doc-nav" onclick="navigateTo('contact-doc')" href="#">
+          <i class="fas fa-headset"></i><span>Contact & Doc Mgmt</span>
+        </a>
+        <a class="nav-item mod-roadmap-nav" onclick="navigateTo('mod-roadmap')" href="#">
+          <i class="fas fa-road"></i><span>Modernization Roadmap</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">NEW</span>
         </a>
 
         {/* ── ADVISORY ── */}
