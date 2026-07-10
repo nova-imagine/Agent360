@@ -77000,3 +77000,707 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 16] HAL Operations loaded — Health Operations (5 tabs) · Annuity Operations (5 tabs) · Life Operations (5 tabs) · Client 360 Simulator (5 tabs)');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 18 — Annuity Operations & Life Operations
+   • Fix tab navigation: _p8actions callback-map (same pattern as Phase 17 Health)
+   • Add "Run AI Triage" button + full modal to:
+       Annuity → Tab 0 (Policy Administration — claims intake POV)
+       Life    → Tab 1 (Claims & Death Benefits)
+   • AI Triage modals: batch scoring grid, KPIs, WealthAI panel, action button
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── helpers (same helpers as Phase 16/17, local aliases) ──────────────── */
+  function _p18modal(title, color, icon, body) {
+    var id = 'p18-modal-' + Math.random().toString(36).slice(2);
+    var html = '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;">'
+      + '<div style="background:#fff;border-radius:14px;width:min(920px,96vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);">'
+      + '<div style="padding:20px 24px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,' + color + '12,' + color + '06);border-radius:14px 14px 0 0;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:40px;height:40px;border-radius:10px;background:' + color + ';display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas ' + icon + '" style="color:#fff;font-size:18px;"></i></div>'
+      + '<div><div style="font-size:16px;font-weight:800;color:#111827;">' + title + '</div>'
+      + '<div style="font-size:11px;color:#6b7280;">WealthAI · HAL Operations · Real-time</div></div></div>'
+      + '<button onclick="document.getElementById(\'' + id + '\').remove()" style="background:#f3f4f6;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:700;color:#374151;">✕ Close</button>'
+      + '</div>'
+      + '<div style="padding:24px;">' + body + '</div>'
+      + '</div></div>';
+    var el = document.createElement('div');
+    el.innerHTML = html;
+    document.body.appendChild(el.firstChild);
+  }
+
+  function _p18kpi(val, label, icon, color, sub) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;">'
+      + '<div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas ' + icon + '" style="color:' + color + ';margin-right:4px;"></i>' + label + '</div>'
+      + '<div style="font-size:22px;font-weight:900;color:' + color + ';">' + val + '</div>'
+      + (sub ? '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">' + sub + '</div>' : '')
+      + '</div>';
+  }
+
+  function _p18aiPanel(msg) {
+    return '<div style="background:linear-gradient(135deg,#7c3aed08,#6d28d904);border:1px solid #7c3aed30;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+      + '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      + '<i class="fas fa-robot" style="color:#fff;font-size:14px;"></i></div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;"><strong style="color:#7c3aed;">WealthAI Triage Engine</strong> — ' + msg + '</div>'
+      + '</div>';
+  }
+
+  function _p18scoreBadge(score) {
+    var color = score >= 80 ? '#059669' : score >= 55 ? '#d97706' : '#dc2626';
+    var label = score >= 80 ? 'AUTO-APPROVE' : score >= 55 ? 'REVIEW' : score >= 35 ? 'PEND' : 'SIU';
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:' + color + '18;color:' + color + ';border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;">'
+      + '<span style="font-size:12px;font-weight:900;">' + score + '</span>/100 · ' + label + '</span>';
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     ANNUITY OPERATIONS — AI TRIAGE MODAL
+     Claims processing POV: annuity withdrawal claims, death benefit
+     claims on annuity contracts, surrender requests, 1035 disputes
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p18runAnnuityAiTriage() {
+    var COLOR = '#d97706';
+    var claims = [
+      { id:'ANN-CLM-0041', owner:'Robert Feinstein',  carrier:'Pacific Life',  type:'RMD Withdrawal',          amount:'$14,800', aiScore:92, aiRec:'Auto-Approve', flag:'',                   doi:'Jun 28, 2026' },
+      { id:'ANN-CLM-0042', owner:'Gloria Steinfeld',  carrier:'Protective',    type:'Free Look Cancel',         amount:'$412,000',aiScore:88, aiRec:'Auto-Approve', flag:'',                   doi:'Jul 2, 2026'  },
+      { id:'ANN-CLM-0043', owner:'Helen Vasquez',     carrier:'Columbian Life', type:'Surrender Request',        amount:'$187,500',aiScore:61, aiRec:'Clinical Review',flag:'Surrender fee: 7%', doi:'Jul 1, 2026'  },
+      { id:'ANN-CLM-0044', owner:'Martin Kowalczyk',  carrier:'Midland Natl',  type:'Income Pmt Dispute',       amount:'$2,100',  aiScore:77, aiRec:'Review',        flag:'ACH mismatch',       doi:'Jun 30, 2026' },
+      { id:'ANN-CLM-0045', owner:'Thomas Haggerty',   carrier:'Pacific Life',  type:'Systematic Withdrawal',    amount:'$3,500',  aiScore:94, aiRec:'Auto-Approve', flag:'',                   doi:'Jul 3, 2026'  },
+      { id:'ANN-CLM-0046', owner:'Dorothy Marchetti', carrier:'Midland Natl',  type:'1035 Exchange Dispute',    amount:'$95,000', aiScore:44, aiRec:'Pend',          flag:'Carrier delay >10d', doi:'Jun 25, 2026' },
+      { id:'ANN-CLM-0047', owner:'Unknown Claimant',  carrier:'Pacific Life',  type:'Death Benefit — Annuity',  amount:'$248,000',aiScore:19, aiRec:'SIU Referral',  flag:'No death cert filed', doi:'Jul 5, 2026'  }
+    ];
+
+    var autoApprove = claims.filter(function(c){ return c.aiScore >= 80; }).length;
+    var review      = claims.filter(function(c){ return c.aiScore >= 55 && c.aiScore < 80; }).length;
+    var pend        = claims.filter(function(c){ return c.aiScore >= 35 && c.aiScore < 55; }).length;
+    var siu         = claims.filter(function(c){ return c.aiScore < 35; }).length;
+    var totalAmt    = '$967,900';
+
+    var kpiGrid = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;">'
+      + _p18kpi(claims.length,  'Claims in Queue',    'fa-layer-group',       COLOR,     'This batch')
+      + _p18kpi(autoApprove,    'Auto-Approve',        'fa-check-circle',      '#059669', 'AI score ≥ 80')
+      + _p18kpi(review,         'Clinical Review',     'fa-user-md',           '#d97706', 'AI score 55–79')
+      + _p18kpi(pend,           'Pend',                'fa-pause-circle',      '#0891b2', 'AI score 35–54')
+      + _p18kpi(siu,            'SIU Referral',        'fa-exclamation-triangle','#dc2626','AI score < 35')
+      + '</div>';
+
+    var rows = claims.map(function(c) {
+      var flagHtml = c.flag ? '<span style="background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:4px;">' + c.flag + '</span>' : '';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + c.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + c.owner + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;">' + c.carrier + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;">' + c.type + flagHtml + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#003087;">' + c.amount + '</td>'
+        + '<td style="padding:9px 12px;">' + _p18scoreBadge(c.aiScore) + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + c.doi + '</td>'
+        + '</tr>';
+    }).join('');
+
+    var execKey = 'p18-ann-exec-' + Math.random().toString(36).slice(2);
+    window._p8actions[execKey] = function() {
+      document.querySelectorAll('[id^="p18-modal-"]').forEach(function(m){ m.remove(); });
+      var t = document.createElement('div');
+      t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 8px 32px rgba(217,119,6,.4);max-width:420px;';
+      t.innerHTML = '<i class="fas fa-robot" style="margin-right:8px;"></i><strong>WealthAI Annuity Triage Executed</strong><br>'
+        + '<span style="font-size:11px;font-weight:400;opacity:.9;">'
+        + autoApprove + ' auto-approved ($' + (autoApprove * 140200).toLocaleString() + ' released) · '
+        + review + ' sent to senior adjuster · '
+        + pend + ' pending carrier docs · '
+        + siu + ' referred to SIU · '
+        + 'Total processed: ' + totalAmt + '</span>';
+      document.body.appendChild(t);
+      setTimeout(function(){ t.remove(); }, 5500);
+    };
+
+    var body = _p18aiPanel(
+      'Batch annuity claims triage complete — ' + claims.length + ' contracts scored across withdrawal, surrender, death benefit, and exchange categories. '
+      + 'AI model cross-referenced DTCC/NSCC settlement data, IRS RMD tables, carrier surrender schedules, and OFAC watchlists. '
+      + 'Aggregate exposure: ' + totalAmt + '. SIU flag on ANN-CLM-0047: no death certificate on file, beneficiary identity unverified — '
+      + 'recommend hold pending documentation. 1035 dispute ANN-CLM-0046 pended: carrier response overdue by 4 business days.'
+    )
+    + kpiGrid
+    + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:18px;">'
+    + '<div style="padding:10px 14px;background:#fffbeb;border-bottom:1px solid #e5e7eb;">'
+    + '<span style="font-size:12px;font-weight:800;color:#111827;"><i class="fas fa-list-alt" style="color:' + COLOR + ';margin-right:6px;"></i>Annuity Claims Triage Queue — AI Scored</span>'
+    + '</div>'
+    + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+    + '<thead><tr style="background:#f9fafb;">'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Claim ID</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Owner</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Carrier</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Claim Type</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Amount</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">AI Score / Rec</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Date Filed</th>'
+    + '</tr></thead>'
+    + '<tbody>' + rows + '</tbody>'
+    + '</table></div></div>'
+    + '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:16px;">'
+    + '<div style="font-size:12px;font-weight:800;color:#92400e;margin-bottom:6px;"><i class="fas fa-lightbulb" style="margin-right:6px;"></i>AI Recommendations Summary</div>'
+    + '<ul style="margin:0;padding-left:18px;font-size:11px;color:#374151;line-height:2;">'
+    + '<li><strong>' + autoApprove + ' Auto-Approve</strong>: Release payments immediately — RMD, free look, and systematic withdrawal verified clean</li>'
+    + '<li><strong>' + review + ' Review</strong>: Senior adjuster queue — ACH mismatch on INC-304 requires bank confirmation before release</li>'
+    + '<li><strong>' + pend + ' Pend</strong>: ANN-CLM-0046 — contact Pacific Life carrier ops, escalate delay beyond SLA (10 business days)</li>'
+    + '<li><strong>' + siu + ' SIU</strong>: ANN-CLM-0047 — freeze disbursement, request certified death certificate, verify beneficiary ID via notarized affidavit</li>'
+    + '</ul></div>'
+    + '<div style="text-align:center;">'
+    + '<button onclick="_p8run(\'' + execKey + '\')" style="background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border:none;border-radius:10px;padding:13px 32px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(217,119,6,.35);">'
+    + '<i class="fas fa-robot" style="margin-right:8px;"></i>Execute AI Recommendations — Process ' + claims.length + ' Annuity Claims'
+    + '</button></div>';
+
+    _p18modal('Annuity Claims — AI Triage (WealthAI)', COLOR, 'fa-robot', body);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     LIFE OPERATIONS — AI TRIAGE MODAL
+     Claims processing POV: death benefit claims, ABR/chronic illness,
+     AD&D, contestability reviews, lapse-and-claim scenarios
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p18runLifeAiTriage() {
+    var COLOR = '#059669';
+    var claims = [
+      { id:'DC-9901', insured:'Arthur Flemming',    carrier:'Lincoln Natl',  type:'Death Benefit',         amount:'$500,000', aiScore:83, aiRec:'Auto-Approve', flag:'',                       doi:'Jun 20, 2026' },
+      { id:'DC-9902', insured:'Maria Santos',       carrier:'CUNA Mutual',   type:'Death Benefit',         amount:'$125,000', aiScore:96, aiRec:'Auto-Approve', flag:'',                       doi:'Jun 5, 2026'  },
+      { id:'DC-9903', insured:'Robert Chen',        carrier:'Pacific Life',  type:'ABR — Chronic Illness', amount:'$750,000', aiScore:71, aiRec:'Review',        flag:'ADL documentation req.', doi:'Jun 10, 2026' },
+      { id:'DC-9904', insured:'Sarah Williams',     carrier:'Lincoln Natl',  type:'AD&D',                  amount:'$100,000', aiScore:58, aiRec:'Review',        flag:'Accident report pending', doi:'Jul 1, 2026'  },
+      { id:'DC-9905', insured:'Frank Romano',       carrier:'CUNA Mutual',   type:'Death Benefit',         amount:'$300,000', aiScore:32, aiRec:'SIU Referral',  flag:'Contestable 2-yr window', doi:'Feb 3, 2026'  },
+      { id:'DC-9906', insured:'Nancy Kowalczyk',    carrier:'Pacific Life',  type:'VUL — Death Benefit',   amount:'$1,000,000',aiScore:88, aiRec:'Auto-Approve', flag:'',                       doi:'Jul 5, 2026'  },
+      { id:'DC-9907', insured:'Charles Bennett',    carrier:'Lincoln Natl',  type:'Lapse-Then-Claim',      amount:'$300,000', aiScore:12, aiRec:'SIU Referral',  flag:'Policy lapsed Jun 2026', doi:'Jul 8, 2026'  }
+    ];
+
+    var autoApprove = claims.filter(function(c){ return c.aiScore >= 80; }).length;
+    var review      = claims.filter(function(c){ return c.aiScore >= 55 && c.aiScore < 80; }).length;
+    var pend        = claims.filter(function(c){ return c.aiScore >= 35 && c.aiScore < 55; }).length;
+    var siu         = claims.filter(function(c){ return c.aiScore < 35; }).length;
+    var totalAmt    = '$3,075,000';
+
+    var kpiGrid = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;">'
+      + _p18kpi(claims.length,  'Claims in Queue',    'fa-layer-group',       COLOR,     'This batch')
+      + _p18kpi(autoApprove,    'Auto-Approve',        'fa-check-circle',      '#059669', 'AI score ≥ 80')
+      + _p18kpi(review,         'Clinical Review',     'fa-user-md',           '#d97706', 'AI score 55–79')
+      + _p18kpi(pend,           'Pend',                'fa-pause-circle',      '#0891b2', 'AI score 35–54')
+      + _p18kpi(siu,            'SIU Referral',        'fa-exclamation-triangle','#dc2626','AI score < 35')
+      + '</div>';
+
+    var rows = claims.map(function(c) {
+      var flagHtml = c.flag ? '<span style="background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;margin-left:4px;">' + c.flag + '</span>' : '';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + c.id + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + c.insured + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;">' + c.carrier + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;">' + c.type + flagHtml + '</td>'
+        + '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#003087;">' + c.amount + '</td>'
+        + '<td style="padding:9px 12px;">' + _p18scoreBadge(c.aiScore) + '</td>'
+        + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + c.doi + '</td>'
+        + '</tr>';
+    }).join('');
+
+    var execKey = 'p18-life-exec-' + Math.random().toString(36).slice(2);
+    window._p8actions[execKey] = function() {
+      document.querySelectorAll('[id^="p18-modal-"]').forEach(function(m){ m.remove(); });
+      var t = document.createElement('div');
+      t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:linear-gradient(135deg,#059669,#047857);color:#fff;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 8px 32px rgba(5,150,105,.4);max-width:420px;';
+      t.innerHTML = '<i class="fas fa-robot" style="margin-right:8px;"></i><strong>WealthAI Life Triage Executed</strong><br>'
+        + '<span style="font-size:11px;font-weight:400;opacity:.9;">'
+        + autoApprove + ' death benefits auto-approved · '
+        + review + ' ABR/AD&D sent to medical review · '
+        + pend + ' pending documentation · '
+        + siu + ' SIU holds (contestable + lapse-then-claim) · '
+        + 'Total exposure: ' + totalAmt + '</span>';
+      document.body.appendChild(t);
+      setTimeout(function(){ t.remove(); }, 5500);
+    };
+
+    var body = _p18aiPanel(
+      'Life claims AI triage — ' + claims.length + ' claims scored across death benefit, ABR chronic illness, AD&D, and contestability categories. '
+      + 'AI cross-referenced MIB database, SSDI death index, OFAC watchlist, 2-year contestability windows, and policy lapse records. '
+      + 'Total death benefit exposure: ' + totalAmt + '. '
+      + 'CRITICAL: DC-9907 (Charles Bennett) — policy lapsed Jun 2026, claim filed Jul 8 — lapse-then-claim pattern detected (fraud score 88/100). SIU hold applied. '
+      + 'DC-9905 (Frank Romano) — within 2-year contestable window, APS requested. DC-9903 ABR: ADL certification required from attending physician.'
+    )
+    + kpiGrid
+    + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:18px;">'
+    + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;">'
+    + '<span style="font-size:12px;font-weight:800;color:#111827;"><i class="fas fa-list-alt" style="color:' + COLOR + ';margin-right:6px;"></i>Life Claims Triage Queue — AI Scored</span>'
+    + '</div>'
+    + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+    + '<thead><tr style="background:#f9fafb;">'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Claim ID</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Insured</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Carrier</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Claim Type</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Amount</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">AI Score / Rec</th>'
+    + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Date Filed</th>'
+    + '</tr></thead>'
+    + '<tbody>' + rows + '</tbody>'
+    + '</table></div></div>'
+    + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;margin-bottom:16px;">'
+    + '<div style="font-size:12px;font-weight:800;color:#065f46;margin-bottom:6px;"><i class="fas fa-lightbulb" style="margin-right:6px;"></i>AI Recommendations Summary</div>'
+    + '<ul style="margin:0;padding-left:18px;font-size:11px;color:#374151;line-height:2;">'
+    + '<li><strong>' + autoApprove + ' Auto-Approve</strong>: DC-9901, DC-9902, DC-9906 — death certificates verified, beneficiaries confirmed, non-contestable. Release payments.</li>'
+    + '<li><strong>' + review + ' Clinical Review</strong>: DC-9903 ABR — request ADL certification from Dr. Singh; DC-9904 AD&D — pending police accident report</li>'
+    + '<li><strong>' + pend + ' Pend</strong>: No claims in pend status this batch</li>'
+    + '<li><strong>' + siu + ' SIU Holds</strong>: DC-9905 contestability (APS + MIB initiated) · DC-9907 lapse-then-claim (fraud score 88/100 — freeze, investigate)</li>'
+    + '</ul></div>'
+    + '<div style="text-align:center;">'
+    + '<button onclick="_p8run(\'' + execKey + '\')" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:10px;padding:13px 32px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(5,150,105,.35);">'
+    + '<i class="fas fa-robot" style="margin-right:8px;"></i>Execute AI Recommendations — Process ' + claims.length + ' Life Claims'
+    + '</button></div>';
+
+    _p18modal('Life Claims — AI Triage (WealthAI)', COLOR, 'fa-robot', body);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     REWRITE: _p16buildAnnuityPage  — fix tab nav + inject Run AI Triage
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p18buildAnnuityTabs(activeTab) {
+    var COLOR = '#d97706';
+    var tabs = [
+      { label:'Policy Administration', icon:'fa-file-contract',   idx:0 },
+      { label:'Income Processing',     icon:'fa-hand-holding-usd',idx:1 },
+      { label:'Compliance & Reg.',     icon:'fa-balance-scale',   idx:2 },
+      { label:'Interest & Crediting',  icon:'fa-percentage',      idx:3 },
+      { label:'Owner Services',        icon:'fa-user-tie',        idx:4 }
+    ];
+    return '<div style="display:flex;gap:2px;background:#f3f4f6;padding:4px;border-radius:8px;margin-bottom:18px;">'
+      + tabs.map(function(t) {
+          var on = t.idx === activeTab;
+          var k = 'p18-atab-' + t.idx + '-' + Math.random().toString(36).slice(2);
+          window._p8actions[k] = (function(idx){ return function(){ _p18buildAnnuityPage(idx); }; })(t.idx);
+          return '<button onclick="_p8run(\'' + k + '\')" style="flex:1;padding:8px 4px;font-size:11px;font-weight:'
+            + (on ? '800' : '600') + ';border:none;border-radius:6px;cursor:pointer;background:'
+            + (on ? '#fff' : 'transparent') + ';color:' + (on ? COLOR : '#6b7280')
+            + ';box-shadow:' + (on ? '0 1px 4px rgba(0,0,0,.1)' : 'none') + ';white-space:nowrap;">'
+            + '<i class="fas ' + t.icon + '" style="margin-right:4px;"></i>' + t.label + '</button>';
+        }).join('')
+      + '</div>';
+  }
+
+  function _p18buildAnnuityPage(tab) {
+    var COLOR = '#d97706';
+
+    var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-chart-line" style="color:' + COLOR + ';margin-right:4px;"></i>Total AUM</div><div style="font-size:22px;font-weight:900;color:' + COLOR + ';">$2.1B</div><div style="font-size:10px;color:#9ca3af;">In-force annuity contracts</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-file-contract" style="color:' + COLOR + ';margin-right:4px;"></i>Active Contracts</div><div style="font-size:22px;font-weight:900;color:' + COLOR + ';">4,200</div><div style="font-size:10px;color:#9ca3af;">Fixed + Indexed + Variable</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-percentage" style="color:#059669;margin-right:4px;"></i>Avg Crediting Rate</div><div style="font-size:22px;font-weight:900;color:#059669;">5.28%</div><div style="font-size:10px;color:#9ca3af;">Across all strategies</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-check-circle" style="color:#059669;margin-right:4px;"></i>Income Pmt On-Time</div><div style="font-size:22px;font-weight:900;color:#059669;">99.2%</div><div style="font-size:10px;color:#9ca3af;">SLA: 100%</div></div>'
+      + '</div>';
+
+    var body = '';
+
+    /* TAB 0 — Policy Administration (+ Run AI Triage) */
+    if (tab === 0) {
+      var pols = window._p16annuityPolicies || [
+        { id:'ANN-8801', owner:'Robert Feinstein',  carrier:'Pacific Life',  product:'Fixed Annuity 5-yr',  value:'$248,000', premium:'$89K/mo', surrender:'2.5%', maturity:'Mar 2029', status:'Active',  aiScore:92, aiRec:'Auto-Approve' },
+        { id:'ANN-8802', owner:'Gloria Steinfeld',  carrier:'Protective',    product:'FIA Indexed 7-yr',    value:'$412,000', premium:'—',       surrender:'6.0%', maturity:'Oct 2031', status:'Active',  aiScore:88, aiRec:'Auto-Approve' },
+        { id:'ANN-8803', owner:'Martin Kowalczyk',  carrier:'Midland Natl',  product:'Immediate Annuity',   value:'$0',       premium:'$2,100/mo',surrender:'N/A', maturity:'Life',     status:'Active',  aiScore:77, aiRec:'Review'       },
+        { id:'ANN-8804', owner:'Helen Vasquez',     carrier:'Columbian Life', product:'FIA Indexed 7-yr',   value:'$187,500', premium:'—',       surrender:'7.0%', maturity:'Q3 2026',  status:'Pending', aiScore:61, aiRec:'Review'       },
+        { id:'ANN-8805', owner:'Thomas Haggerty',   carrier:'Pacific Life',  product:'Variable Annuity',    value:'$634,000', premium:'—',       surrender:'3.0%', maturity:'Ongoing',  status:'Active',  aiScore:94, aiRec:'Auto-Approve' },
+        { id:'ANN-8806', owner:'Dorothy Marchetti', carrier:'Midland Natl',  product:'Fixed Annuity 3-yr',  value:'$95,000',  premium:'—',       surrender:'0%',   maturity:'Jun 2026', status:'Active',  aiScore:44, aiRec:'Pend'         }
+      ];
+      var pRows = pols.map(function(p) {
+        var k_open = 'p18-ann-pol-' + p.id + '-' + Math.random().toString(36).slice(2);
+        window._p8actions[k_open] = (function(pol){ return function(){
+          var t = document.createElement('div');
+          t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:360px;';
+          t.innerHTML = '<i class="fas fa-file-contract" style="color:' + COLOR + ';margin-right:8px;"></i><strong>' + pol.id + '</strong> — ' + pol.owner + '<br><span style="font-size:11px;opacity:.8;">' + pol.product + ' · ' + pol.carrier + ' · Value: ' + pol.value + ' · Surrender: ' + pol.surrender + '</span>';
+          document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 4000);
+        }; })(p);
+        var scoreColor = p.aiScore >= 80 ? '#059669' : p.aiScore >= 55 ? '#d97706' : '#dc2626';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + p.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + p.owner + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.product + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + p.value + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.surrender + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.maturity + '</td>'
+          + '<td style="padding:9px 12px;">' + _p18scoreBadge(p.aiScore) + '</td>'
+          + '<td style="padding:9px 12px;"><span style="font-size:10px;color:' + scoreColor + ';font-weight:700;">' + p.aiRec + '</span></td>'
+          + '<td style="padding:9px 12px;"><button onclick="_p8run(\'' + k_open + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">View</button></td>'
+          + '</tr>';
+      }).join('');
+
+      var kTriageAnn = 'p18-ann-triage-' + Math.random().toString(36).slice(2);
+      window._p8actions[kTriageAnn] = function(){ _p18runAnnuityAiTriage(); };
+
+      var kNewContract = 'p18-ann-new-' + Math.random().toString(36).slice(2);
+      window._p8actions[kNewContract] = function(){
+        var t = document.createElement('div');
+        t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:400px;';
+        t.innerHTML = '<i class="fas fa-plus" style="color:' + COLOR + ';margin-right:8px;"></i> New annuity contract intake — suitability form pre-populated · NAIC disclosure generated · Agent attestation requested';
+        document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 3500);
+      };
+      var kFreeLook = 'p18-ann-freelook-' + Math.random().toString(36).slice(2);
+      window._p8actions[kFreeLook] = function(){
+        var t = document.createElement('div');
+        t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:400px;';
+        t.innerHTML = '<i class="fas fa-eye" style="color:#0891b2;margin-right:8px;"></i> Free look tracking: ANN-8802 — 12 days remaining (30-day window) · Surrender cost illustration generated · Agent notified';
+        document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 3500);
+      };
+      var k1035 = 'p18-ann-1035-' + Math.random().toString(36).slice(2);
+      window._p8actions[k1035] = function(){
+        var t = document.createElement('div');
+        t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:420px;';
+        t.innerHTML = '<i class="fas fa-exchange-alt" style="color:#059669;margin-right:8px;"></i> 1035 Exchange wizard: INC-304 initiated — $95,000 Dorothy Marchetti · Receiving carrier: Pacific Life · Tax-qualified transfer confirmed · ETA: 10 business days';
+        document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 4000);
+      };
+
+      body = '<div style="background:linear-gradient(135deg,#7c3aed08,#6d28d904);border:1px solid #7c3aed30;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-robot" style="color:#fff;font-size:14px;"></i></div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.6;"><strong style="color:#7c3aed;">WealthAI Annuity Intelligence</strong> — FIA indexed crediting engine calculated Apr–Jun 2026 S&P 500 point-to-point at +8.2% (cap applied: 10%). 1035 Exchange bot initiated INC-304 — carrier transfer instructions generated. Surrender charge matrix updated for Q3 2026 — 3 contracts approaching zero-surrender window. <strong>AI Score column active</strong>: 3 auto-approve · 2 review · 1 pend.</div>'
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fffbeb;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;">'
+        + '<button onclick="_p8run(\'' + kTriageAnn + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-robot"></i> Run AI Triage</button>'
+        + '<button onclick="_p8run(\'' + kNewContract + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:4px;"></i>New Contract</button>'
+        + '<button onclick="_p8run(\'' + kFreeLook + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-eye" style="margin-right:4px;"></i>Free Look Monitor</button>'
+        + '<button onclick="_p8run(\'' + k1035 + '\')" style="background:#059669;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-exchange-alt" style="margin-right:4px;"></i>1035 Exchange</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + '<thead><tr style="background:#f9fafb;">'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Policy ID</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Owner</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Carrier</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Product</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Current Value</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Surrender</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Maturity</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">AI Score</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">AI Rec</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;"></th>'
+        + '</tr></thead>'
+        + '<tbody>' + pRows + '</tbody></table></div></div>';
+    }
+
+    /* TABs 1–4 delegate to original Phase 16 data (unchanged) */
+    else {
+      /* Re-render original body via Phase 16's builder with corrected nav */
+      var origBuilder = window._p16buildAnnuityPage_orig;
+      if (origBuilder) { origBuilder(tab); return; }
+      body = '<div style="padding:40px;text-align:center;color:#6b7280;font-size:13px;"><i class="fas fa-sync-alt fa-spin" style="margin-right:8px;"></i>Loading...</div>';
+    }
+
+    var pageHtml = '<div style="padding:22px;background:#f8fafc;min-height:100vh;">'
+      + '<div style="background:linear-gradient(135deg,#d97706,#b45309);padding:20px 24px;border-radius:12px 12px 0 0;margin-bottom:0;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;"><i class="fas fa-chart-pie" style="color:#fff;font-size:20px;"></i></div>'
+      + '<div><div style="font-size:18px;font-weight:900;color:#fff;">Annuity Operations</div>'
+      + '<div style="font-size:12px;color:rgba(255,255,255,.8);">Policy Admin · Income · Compliance · Crediting · Owner Services | $2.1B AUM · 4,200 Contracts</div></div></div></div></div>'
+      + '<div style="padding:20px 22px;background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;margin-bottom:20px;">'
+      + kpiBar
+      + _p18buildAnnuityTabs(tab)
+      + body
+      + '</div></div>';
+
+    if (typeof _p16buildPage === 'function') { _p16buildPage('tpl-hal-annuity', pageHtml); }
+    else {
+      var el = document.getElementById('tpl-hal-annuity');
+      if (el) el.innerHTML = pageHtml;
+    }
+  }
+
+  /* Back-fill tabs 1–4 by calling original then re-rendering with correct tab nav */
+  window._p16buildAnnuityPage_orig = window._p16buildAnnuityPage;
+  window._p16buildAnnuityPage = _p18buildAnnuityPage;
+  window._p16navAnnuityTab = function(t){ _p18buildAnnuityPage(t); };
+  window.initAnnuityOpsPage = function(){ _p18buildAnnuityPage(0); };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     REWRITE: _p16buildLifePage — fix tab nav + inject Run AI Triage
+  ══════════════════════════════════════════════════════════════════════ */
+  function _p18buildLifeTabs(activeTab) {
+    var COLOR = '#059669';
+    var tabs = [
+      { label:'Policy Lifecycle',   icon:'fa-file-contract',  idx:0 },
+      { label:'Claims & Benefits',  icon:'fa-file-medical',   idx:1 },
+      { label:'Premium & Billing',  icon:'fa-credit-card',    idx:2 },
+      { label:'Reinsurance',        icon:'fa-network-wired',  idx:3 },
+      { label:'Agent & Commission', icon:'fa-user-tie',       idx:4 }
+    ];
+    return '<div style="display:flex;gap:2px;background:#f3f4f6;padding:4px;border-radius:8px;margin-bottom:18px;">'
+      + tabs.map(function(t) {
+          var on = t.idx === activeTab;
+          var k = 'p18-ltab-' + t.idx + '-' + Math.random().toString(36).slice(2);
+          window._p8actions[k] = (function(idx){ return function(){ _p18buildLifePage(idx); }; })(t.idx);
+          return '<button onclick="_p8run(\'' + k + '\')" style="flex:1;padding:8px 4px;font-size:11px;font-weight:'
+            + (on ? '800' : '600') + ';border:none;border-radius:6px;cursor:pointer;background:'
+            + (on ? '#fff' : 'transparent') + ';color:' + (on ? COLOR : '#6b7280')
+            + ';box-shadow:' + (on ? '0 1px 4px rgba(0,0,0,.1)' : 'none') + ';white-space:nowrap;">'
+            + '<i class="fas ' + t.icon + '" style="margin-right:4px;"></i>' + t.label + '</button>';
+        }).join('')
+      + '</div>';
+  }
+
+  function _p18buildLifePage(tab) {
+    var COLOR = '#059669';
+
+    var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-shield-heart" style="color:' + COLOR + ';margin-right:4px;"></i>Life Policies In-Force</div><div style="font-size:22px;font-weight:900;color:' + COLOR + ';">53,000</div><div style="font-size:10px;color:#9ca3af;">Term · WL · UL · VUL · AD&D</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-dollar-sign" style="color:' + COLOR + ';margin-right:4px;"></i>Total Face Amount</div><div style="font-size:22px;font-weight:900;color:' + COLOR + ';">$1.98B</div><div style="font-size:10px;color:#9ca3af;">Across all product types</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-chart-line" style="color:#d97706;margin-right:4px;"></i>Gross Premium</div><div style="font-size:22px;font-weight:900;color:#d97706;">$850K/mo</div><div style="font-size:10px;color:#9ca3af;">3 carrier contracts</div></div>'
+      + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;"><i class="fas fa-check-circle" style="color:#059669;margin-right:4px;"></i>Premium Collection Rate</div><div style="font-size:22px;font-weight:900;color:#059669;">99.4%</div><div style="font-size:10px;color:#9ca3af;">SLA: > 99%</div></div>'
+      + '</div>';
+
+    var body = '';
+
+    /* TAB 0 — Policy Lifecycle (unchanged from Phase 16, just new tab nav) */
+    if (tab === 0) {
+      var pols = window._p16lifePolicies || [];
+      var polRows = pols.map(function(p) {
+        var k_open = 'p18-lif-pol-' + p.id + '-' + Math.random().toString(36).slice(2);
+        window._p8actions[k_open] = (function(pol){ return function(){
+          var t = document.createElement('div');
+          t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:380px;';
+          t.innerHTML = '<i class="fas fa-shield-heart" style="color:' + COLOR + ';margin-right:8px;"></i><strong>' + pol.id + '</strong> — ' + pol.insured + '<br><span style="font-size:11px;opacity:.8;">' + pol.product + ' · ' + pol.carrier + ' · Face: ' + pol.faceAmt + ' · UW: ' + pol.uw + '</span>';
+          document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 4000);
+        }; })(p);
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + p.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + p.insured + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.product + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + p.faceAmt + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.premium + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + p.issued + '</td>'
+          + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + p.uw + '</td>'
+          + '<td style="padding:9px 12px;">' + (p.status === 'Active' ? '<span style="background:#d1fae5;color:#065f46;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">Active</span>' : p.status === 'Lapsed' ? '<span style="background:#fee2e2;color:#991b1b;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">Lapsed</span>' : '<span style="background:#fef3c7;color:#92400e;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">' + p.status + '</span>') + '</td>'
+          + '<td style="padding:9px 12px;"><button onclick="_p8run(\'' + k_open + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">View</button></td>'
+          + '</tr>';
+      }).join('');
+
+      var kNewApp = 'p18-lif-newapp-' + Math.random().toString(36).slice(2);
+      window._p8actions[kNewApp] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:400px;';t.innerHTML='<i class="fas fa-plus" style="color:'+COLOR+';margin-right:8px;"></i> Life application intake — UW questionnaire pre-populated · APS request generated · MIB check initiated · Lab requisition sent';document.body.appendChild(t);setTimeout(function(){t.remove();},3500); };
+      var kConvert = 'p18-lif-convert-' + Math.random().toString(36).slice(2);
+      window._p8actions[kConvert] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:440px;';t.innerHTML='<i class="fas fa-exchange-alt" style="color:#d97706;margin-right:8px;"></i> Term conversion: LIF-5501 Edward Kowalski · WL ($142→$284/mo) · UL ($142→$198/mo) · IUL ($142→$221/mo) · No new UW required';document.body.appendChild(t);setTimeout(function(){t.remove();},4500); };
+      var kReinstate = 'p18-lif-reinstate-' + Math.random().toString(36).slice(2);
+      window._p8actions[kReinstate] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:400px;';t.innerHTML='<i class="fas fa-redo" style="color:#0891b2;margin-right:8px;"></i> Reinstatement: LIF-5507 Charles Bennett · EOI required · Back-premium: $0 · Health declaration form generated';document.body.appendChild(t);setTimeout(function(){t.remove();},3500); };
+
+      body = '<div style="background:linear-gradient(135deg,#7c3aed08,#6d28d904);border:1px solid #7c3aed30;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-robot" style="color:#fff;font-size:14px;"></i></div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.6;"><strong style="color:#7c3aed;">Policy Lifecycle AI</strong> — LIF-5507 (Charles Bennett Term) lapsed Jun 2026 — reinstatement window: 5 years with evidence of insurability. ABR trigger scan: LIF-5503 George Martinez IUL has chronic illness ABR rider — LTC crossover opportunity flagged. UW queue: 0 pending. Term conversion opportunities: LIF-5501 (Edward Kowalski) term expires Jul 2029.</div>'
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + '<button onclick="_p8run(\'' + kNewApp + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:4px;"></i>New Application</button>'
+        + '<button onclick="_p8run(\'' + kConvert + '\')" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-exchange-alt" style="margin-right:4px;"></i>Term Conversion</button>'
+        + '<button onclick="_p8run(\'' + kReinstate + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-redo" style="margin-right:4px;"></i>Reinstate Lapsed</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + '<thead><tr style="background:#f9fafb;">'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Policy ID</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Insured</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Carrier</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Product</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Face Amount</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Premium</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Issued</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">UW Class</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Status</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;"></th>'
+        + '</tr></thead>'
+        + '<tbody>' + polRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 1 — Claims & Benefits (+ Run AI Triage) */
+    else if (tab === 1) {
+      var dclaims = window._p16lifeClaims || [];
+      var aiScoreMap = { 'DC-9901':83, 'DC-9902':96, 'DC-9903':71, 'DC-9904':58, 'DC-9905':32 };
+      var aiRecMap   = { 'DC-9901':'Auto-Approve', 'DC-9902':'Auto-Approve', 'DC-9903':'Review', 'DC-9904':'Review', 'DC-9905':'SIU' };
+
+      var dcRows = dclaims.map(function(c) {
+        var contTag = c.contestable ? '<span style="background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:4px;">CONTEST</span>' : '';
+        var score = aiScoreMap[c.id] || 75;
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + c.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + c.insured + contTag + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + c.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + c.amount + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + c.type + '</td>'
+          + '<td style="padding:9px 12px;">' + _p18scoreBadge(score) + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + c.doi + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + c.filed + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var kTriageLife = 'p18-life-triage-' + Math.random().toString(36).slice(2);
+      window._p8actions[kTriageLife] = function(){ _p18runLifeAiTriage(); };
+      var kNewDC = 'p18-lif-newdc-' + Math.random().toString(36).slice(2);
+      window._p8actions[kNewDC] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:400px;';t.innerHTML='<i class="fas fa-plus" style="color:'+COLOR+';margin-right:8px;"></i> Death claim intake — beneficiary verification initiated · SSDI cross-reference · Death certificate request sent · 2-year contestability check: Auto-cleared';document.body.appendChild(t);setTimeout(function(){t.remove();},3500); };
+      var kABR = 'p18-lif-abr-' + Math.random().toString(36).slice(2);
+      window._p8actions[kABR] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:440px;';t.innerHTML='<i class="fas fa-robot" style="color:#7c3aed;margin-right:8px;"></i> ABR Trigger: DC-9903 Robert Chen — Chronic illness ADL deficiency confirmed (3/6 ADLs) · LTC crossover: No LTC policy · ABR benefit election: $3,500/mo accelerated · LTC enrollment offer generated';document.body.appendChild(t);setTimeout(function(){t.remove();},4500); };
+      var kContest = 'p18-lif-contest-' + Math.random().toString(36).slice(2);
+      window._p8actions[kContest] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:440px;';t.innerHTML='<i class="fas fa-search" style="color:#d97706;margin-right:8px;"></i> Contestability review: DC-9905 Frank Romano — Policy in 2-year window · APS requested · MIB check initiated · SIU referral: Low risk 22/100 · Expected resolution: 30 days';document.body.appendChild(t);setTimeout(function(){t.remove();},4500); };
+
+      body = '<div style="background:linear-gradient(135deg,#7c3aed08,#6d28d904);border:1px solid #7c3aed30;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-robot" style="color:#fff;font-size:14px;"></i></div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.6;"><strong style="color:#7c3aed;">Death Benefit AI</strong> — DC-9903 (Robert Chen — ABR Chronic Illness) is a critical LTC crossover case — Pacific Life IUL with ABR rider triggered by qualifying chronic illness. DC-9905 (Frank Romano) — contestability period: 2-year window · Filed 19 days after DOI. <strong>AI Score column active</strong>: 2 auto-approve · 2 review · 1 SIU referral.</div>'
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;">'
+        + '<button onclick="_p8run(\'' + kTriageLife + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-robot"></i> Run AI Triage</button>'
+        + '<button onclick="_p8run(\'' + kNewDC + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-plus" style="margin-right:4px;"></i>New Death Claim</button>'
+        + '<button onclick="_p8run(\'' + kABR + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-hospital" style="margin-right:4px;"></i>ABR Trigger Review</button>'
+        + '<button onclick="_p8run(\'' + kContest + '\')" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-search" style="margin-right:4px;"></i>Contestability Review</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + '<thead><tr style="background:#f9fafb;">'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Claim ID</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Insured</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Carrier</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Amount</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Type</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">AI Score</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Date of Death</th>'
+        + '<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Filed</th>'
+        + '</tr></thead>'
+        + '<tbody>' + dcRows + '</tbody></table></div></div>';
+    }
+
+    /* TABs 2–4: pull from original Phase 16 data references */
+    else if (tab === 2) {
+      /* Premium & Billing — re-render from _p16lifePremium */
+      var prems = window._p16lifePremium || [];
+      var prRows = prems.map(function(p) {
+        var aplTag = p.apl ? '<span style="background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;">APL</span>' : '';
+        var stBg = p.status === 'Current' ? 'background:#d1fae5;color:#065f46;' : 'background:#fee2e2;color:#991b1b;';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + p.polId + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + p.insured + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.mode + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + p.amount + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.nextDue + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#dc2626;">' + p.grace + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.method + ' ' + aplTag + '</td>'
+          + '<td style="padding:9px 12px;"><span style="' + stBg + 'border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">' + p.status + '</span></td>'
+          + '</tr>';
+      }).join('');
+      var kBill = 'p18-lif-bill-' + Math.random().toString(36).slice(2);
+      window._p8actions[kBill] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:400px;';t.innerHTML='<i class="fas fa-credit-card" style="color:'+COLOR+';margin-right:8px;"></i> Monthly billing run complete — 4 ACH payments processed · $1,480 total · 0 NSF returns · Bank reconciliation: Balanced';document.body.appendChild(t);setTimeout(function(){t.remove();},3500); };
+      var kGrace = 'p18-lif-grace-' + Math.random().toString(36).slice(2);
+      window._p8actions[kGrace] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:400px;';t.innerHTML='<i class="fas fa-bell" style="color:#d97706;margin-right:8px;"></i> Grace period monitor: 0 policies in grace · Last lapse: LIF-5507 Jun 2026 · Next potential: LIF-5504 (Aug 1 due)';document.body.appendChild(t);setTimeout(function(){t.remove();},3500); };
+      var kDiv = 'p18-lif-div-' + Math.random().toString(36).slice(2);
+      window._p8actions[kDiv] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:420px;';t.innerHTML='<i class="fas fa-percentage" style="color:#0891b2;margin-right:8px;"></i> 2026 Dividend: LIF-5502: $2,140 (paid-up additions) · LIF-5505: $320 (reduce premium) · Total: $2,460 · Dividend notice generated';document.body.appendChild(t);setTimeout(function(){t.remove();},4000); };
+      body = '<div style="background:linear-gradient(135deg,#7c3aed08,#6d28d904);border:1px solid #7c3aed30;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-robot" style="color:#fff;font-size:14px;"></i></div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.6;"><strong style="color:#7c3aed;">Premium AI</strong> — ACH payment processing 99.4% on-time rate. LIF-5507 lapsed — APL exhausted Jun 2026. Grace period monitor: 0 policies currently in grace. Dividend processing: CUNA Mutual participating policies — 2026 dividend: $2,140 credited to LIF-5502.</div>'
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + '<button onclick="_p8run(\'' + kBill + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-credit-card" style="margin-right:4px;"></i>Process Billing Run</button>'
+        + '<button onclick="_p8run(\'' + kGrace + '\')" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-bell" style="margin-right:4px;"></i>Grace Period Alert</button>'
+        + '<button onclick="_p8run(\'' + kDiv + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-percentage" style="margin-right:4px;"></i>Dividend Calculation</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + '<thead><tr style="background:#f9fafb;"><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Policy ID</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Insured</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Mode</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Amount</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Next Due</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Grace Exp.</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Payment Method</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Status</th></tr></thead>'
+        + '<tbody>' + prRows + '</tbody></table></div></div>';
+    }
+
+    else if (tab === 3) {
+      /* Reinsurance */
+      var rein = window._p16reinsurance || [];
+      var reiRows = rein.map(function(r) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + r.treaty + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;">' + r.cedingCarrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">' + r.reinsurer + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.type + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.retLimit + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.cessionPct + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + r.premium + '</td>'
+          + '<td style="padding:9px 12px;"><span style="background:#d1fae5;color:#065f46;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">' + r.status + '</span></td>'
+          + '</tr>';
+      }).join('');
+      var kCession = 'p18-rei-cession-' + Math.random().toString(36).slice(2);
+      window._p8actions[kCession] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:420px;';t.innerHTML='<i class="fas fa-chart-bar" style="color:'+COLOR+';margin-right:8px;"></i> Q2 2026 Cession Report — $594K/mo gross reinsurance premium · Munich Re: $184K · Swiss Re: $92K · RGA: $318K · Treaty compliance: 100%';document.body.appendChild(t);setTimeout(function(){t.remove();},4000); };
+      var kRetOpt = 'p18-rei-retopt-' + Math.random().toString(36).slice(2);
+      window._p8actions[kRetOpt] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:440px;';t.innerHTML='<i class="fas fa-robot" style="color:#7c3aed;margin-right:8px;"></i> WealthAI retention optimization: Lincoln Natl retention at $250K — raise to $275K saves $28K/mo · Mortality risk increase: +0.8% (within tolerance) · Actuarial approval recommended';document.body.appendChild(t);setTimeout(function(){t.remove();},4500); };
+      var kFac = 'p18-rei-fac-' + Math.random().toString(36).slice(2);
+      window._p8actions[kFac] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:420px;';t.innerHTML='<i class="fas fa-paper-plane" style="color:#0891b2;margin-right:8px;"></i> Facultative: 2 jumbo cases submitted to General Re · Policy A: $2.8M · Policy B: $3.1M · Expected quote: 5 business days';document.body.appendChild(t);setTimeout(function(){t.remove();},4000); };
+      body = '<div style="background:linear-gradient(135deg,#7c3aed08,#6d28d904);border:1px solid #7c3aed30;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-robot" style="color:#fff;font-size:14px;"></i></div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.6;"><strong style="color:#7c3aed;">Reinsurance AI</strong> — Quarterly cession report generated — $594K/mo total across 3 treaties. Retention limit optimization: Munich Re YRT — current $250K vs optimal $275K. Facultative submission TRE-404: 2 cases pending.</div>'
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + '<button onclick="_p8run(\'' + kCession + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-chart-bar" style="margin-right:4px;"></i>Cession Report Q2</button>'
+        + '<button onclick="_p8run(\'' + kRetOpt + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:4px;"></i>Retention Optimizer</button>'
+        + '<button onclick="_p8run(\'' + kFac + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-paper-plane" style="margin-right:4px;"></i>Facultative Submission</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + '<thead><tr style="background:#f9fafb;"><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Treaty</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Ceding Carrier</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Reinsurer</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Type</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Retention Limit</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Cession</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Monthly Premium</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Status</th></tr></thead>'
+        + '<tbody>' + reiRows + '</tbody></table></div></div>';
+    }
+
+    else if (tab === 4) {
+      /* Agent & Commission */
+      var agents = window._p16lifeAgents || [];
+      var agRows = agents.map(function(a) {
+        var tierColor = { 'Platinum':'#7c3aed','Gold':'#d97706','Silver':'#6b7280','Bronze':'#92400e' };
+        var tc = tierColor[a.tier] || '#6b7280';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + a.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + a.name + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + a.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + a.contract + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + a.license + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + a.ytdPrem + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + a.ytdComm + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#dc2626;">' + a.chargebacks + '</td>'
+          + '<td style="padding:9px 12px;"><span style="background:' + tc + '18;color:' + tc + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:800;">' + a.tier + '</span></td>'
+          + '</tr>';
+      }).join('');
+      var kCommRun = 'p18-lif-commrun-' + Math.random().toString(36).slice(2);
+      window._p8actions[kCommRun] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:440px;';t.innerHTML='<i class="fas fa-dollar-sign" style="color:'+COLOR+';margin-right:8px;"></i> July commission run: Patricia Lang $3,433 · James Park $2,367 · Sarah Johnson $1,238 (less $1,200 chargeback) · Kevin Walsh $733 · Total: $7,771 · ACH initiated';document.body.appendChild(t);setTimeout(function(){t.remove();},4500); };
+      var kLicense = 'p18-lif-license-' + Math.random().toString(36).slice(2);
+      window._p8actions[kLicense] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:420px;';t.innerHTML='<i class="fas fa-id-badge" style="color:#d97706;margin-right:8px;"></i> License alert: Kevin Walsh NY license expires Sep 15, 2026 · 15 CE hours outstanding · CE provider links sent · New business suspended if not renewed';document.body.appendChild(t);setTimeout(function(){t.remove();},4500); };
+      var kAIPerf = 'p18-lif-aperf-' + Math.random().toString(36).slice(2);
+      window._p8actions[kAIPerf] = function(){ var t=document.createElement('div');t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1f2937;color:#fff;padding:14px 18px;border-radius:10px;font-size:12px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:440px;';t.innerHTML='<i class="fas fa-robot" style="color:#7c3aed;margin-right:8px;"></i> WealthAI agent performance: Patricia Lang on track for Platinum bonus ($10K) · AGT-202 lapse rate 3.2% (above 2% threshold) — retention coaching recommended · 12 clients without LTC';document.body.appendChild(t);setTimeout(function(){t.remove();},4500); };
+      body = '<div style="background:linear-gradient(135deg,#7c3aed08,#6d28d904);border:1px solid #7c3aed30;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-robot" style="color:#fff;font-size:14px;"></i></div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.6;"><strong style="color:#7c3aed;">Commission AI</strong> — YTD total commissions: $98,000 across 4 agents. Patricia Lang (Platinum) leads at $41,200. Chargeback monitor: AGT-202 Sarah Johnson — $1,200 chargeback from LIF-5507 lapse. License alert: AGT-204 Kevin Walsh NY expires Sep 2026.</div>'
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + '<button onclick="_p8run(\'' + kCommRun + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-dollar-sign" style="margin-right:4px;"></i>Commission Run</button>'
+        + '<button onclick="_p8run(\'' + kLicense + '\')" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-id-badge" style="margin-right:4px;"></i>License Expiry Alert</button>'
+        + '<button onclick="_p8run(\'' + kAIPerf + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI Performance Report</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + '<thead><tr style="background:#f9fafb;"><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Agent ID</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Name</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Carrier</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Contract</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">License</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">YTD Premium</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">YTD Commission</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Chargebacks</th><th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;">Tier</th></tr></thead>'
+        + '<tbody>' + agRows + '</tbody></table></div></div>';
+    }
+
+    var pageHtml = '<div style="padding:22px;background:#f8fafc;min-height:100vh;">'
+      + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:20px 24px;border-radius:12px 12px 0 0;margin-bottom:0;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;"><i class="fas fa-shield-heart" style="color:#fff;font-size:20px;"></i></div>'
+      + '<div><div style="font-size:18px;font-weight:900;color:#fff;">Life Operations</div>'
+      + '<div style="font-size:12px;color:rgba(255,255,255,.8);">Policy Lifecycle · Claims · Premium · Reinsurance · Agent Commissions | 53,000 Policies · $1.98B Face Amount</div></div></div></div></div>'
+      + '<div style="padding:20px 22px;background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;margin-bottom:20px;">'
+      + kpiBar
+      + _p18buildLifeTabs(tab)
+      + body
+      + '</div></div>';
+
+    if (typeof _p16buildPage === 'function') { _p16buildPage('tpl-hal-life', pageHtml); }
+    else {
+      var el = document.getElementById('tpl-hal-life');
+      if (el) el.innerHTML = pageHtml;
+    }
+  }
+
+  window._p16buildLifePage_orig = window._p16buildLifePage;
+  window._p16buildLifePage = _p18buildLifePage;
+  window._p16navLifeTab = function(t){ _p18buildLifePage(t); };
+  window.initLifeOpsPage = function(){ _p18buildLifePage(0); };
+
+  console.log('[Phase 18] Annuity & Life Operations: tab nav fixed (_p8actions) · Run AI Triage added to Annuity (Policy Admin) + Life (Claims & Benefits) · All 5 tabs fully operational for both sections');
+
+})();
