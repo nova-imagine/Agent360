@@ -77726,6 +77726,52 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     return '<span style="background:' + color + '18;color:' + color + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:800;">' + label + '</span>';
   }
 
+  /* ── Self-contained helpers (mirrors Phase 16, no cross-IIFE dependency) ── */
+  function _p19kpi(val, label, icon, color, sub) {
+    return '<div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:44px;height:44px;border-radius:10px;background:' + color + '18;display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas ' + icon + '" style="color:' + color + ';font-size:20px;"></i></div>'
+      + '<div><div style="font-size:22px;font-weight:800;color:#111827;">' + val + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#374151;">' + label + '</div>'
+      + (sub ? '<div style="font-size:10px;color:#6b7280;">' + sub + '</div>' : '')
+      + '</div></div>';
+  }
+
+  function _p19aiPanel(text) {
+    return '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:14px 16px;color:#fff;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:6px;"></i>WealthAI Intelligence</div>'
+      + '<div style="font-size:12px;color:#e2e8f0;line-height:1.65;">' + text + '</div></div>';
+  }
+
+  function _p19sectionHdr(icon, title, color) {
+    return '<div style="background:' + color + '12;border-left:4px solid ' + color + ';padding:10px 16px;border-radius:0 6px 6px 0;margin-bottom:12px;display:flex;align-items:center;gap:8px;">'
+      + '<i class="fas ' + icon + '" style="color:' + color + ';"></i>'
+      + '<span style="font-size:13px;font-weight:800;color:#111827;">' + title + '</span></div>';
+  }
+
+  function _p19tblHdr(cols) {
+    return '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e5e7eb;">'
+      + cols.map(function(c){ return '<th style="padding:10px 12px;font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;text-align:left;white-space:nowrap;">' + c + '</th>'; }).join('')
+      + '</tr></thead>';
+  }
+
+  function _p19buildPage_inner(tplId, html) {
+    var tpl = document.getElementById(tplId);
+    if (!tpl) return;
+    tpl.innerHTML = html;
+  }
+
+  function _p19toast(msg, dur) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:28px;right:28px;z-index:99999;'
+      + 'background:#1e293b;color:#fff;padding:13px 20px;border-radius:10px;'
+      + 'font-size:13px;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.45);'
+      + 'display:flex;align-items:center;gap:10px;';
+    d.innerHTML = msg;
+    document.body.appendChild(d);
+    setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, dur || 3200);
+  }
+
   /* ── Client roster: 5 clients, each with a different product mix ────────── */
   var _p19clients = [
     {
@@ -77987,10 +78033,10 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     }).join('');
 
     var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
-      + _p16kpi(cl.mix.length + '', 'Product Lines Active', 'fa-layer-group', COLOR, cl.mixLabel)
-      + _p16kpi(cl.totalValue, 'Total Policy Value', 'fa-dollar-sign', '#059669', 'Face + AUM + Benefits')
-      + _p16kpi(cl.totalPremium, 'Total Premium', 'fa-credit-card', '#d97706', 'Across all ' + cl.mix.length + ' lines')
-      + _p16kpi(cl.lastEvent, 'Last Cross-Event', 'fa-bolt', '#dc2626', cl.lastEventDesc)
+      + _p19kpi(cl.mix.length + '', 'Product Lines Active', 'fa-layer-group', COLOR, cl.mixLabel)
+      + _p19kpi(cl.totalValue, 'Total Policy Value', 'fa-dollar-sign', '#059669', 'Face + AUM + Benefits')
+      + _p19kpi(cl.totalPremium, 'Total Premium', 'fa-credit-card', '#d97706', 'Across all ' + cl.mix.length + ' lines')
+      + _p19kpi(cl.lastEvent, 'Last Cross-Event', 'fa-bolt', '#dc2626', cl.lastEventDesc)
       + '</div>';
 
     /* ── tabs (using _p8actions — NO raw onclick strings) ── */
@@ -78068,7 +78114,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
         grid3 = '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:14px;">' + grid2Items.join('') + '</div>';
       }
 
-      body = _p16aiPanel(aiMsg)
+      body = _p19aiPanel(aiMsg)
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">'
         + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">'
         + '<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-user-circle" style="color:' + COLOR + ';margin-right:6px;"></i>Client Profile</div>'
@@ -78087,7 +78133,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     /* TAB 1 — Cross-Product Events */
     else if (tab === 1) {
       var crossCount = cl.events.filter(function(e){ return e.type === 'Cross'; }).length;
-      body = _p16aiPanel('Cross-Product Event Engine: ' + crossCount + ' cross-product trigger event' + (crossCount > 1 ? 's' : '') + ' detected for ' + cl.name + '. '
+      body = _p19aiPanel('Cross-Product Event Engine: ' + crossCount + ' cross-product trigger event' + (crossCount > 1 ? 's' : '') + ' detected for ' + cl.name + '. '
         + 'illumifin\'s unified data model enables simultaneous automated responses across all product lines — no manual handoffs. '
         + 'Timeline shows the full lifecycle of this client\'s relationship across all carriers and product lines.')
         + '<div style="position:relative;padding-left:24px;">'
@@ -78111,19 +78157,19 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     else if (tab === 2) {
       var critCount = cl.aiOpps.filter(function(o){ return o.priority === 'Critical'; }).length;
       var highCount = cl.aiOpps.filter(function(o){ return o.priority === 'High'; }).length;
-      body = _p16aiPanel('WealthAI identified ' + cl.aiOpps.length + ' cross-product optimization opportunities for ' + cl.name
+      body = _p19aiPanel('WealthAI identified ' + cl.aiOpps.length + ' cross-product optimization opportunities for ' + cl.name
         + ' — ' + critCount + ' Critical, ' + highCount + ' High priority. '
         + 'These opportunities are ONLY visible through illumifin\'s unified cross-product platform. Siloed administrators cannot see across product lines.')
         + '<div style="display:grid;grid-template-columns:repeat(3,auto);gap:10px;margin-bottom:14px;">'
-        + _p16kpi(critCount + '', 'Critical', 'fa-exclamation-triangle', '#dc2626', 'Immediate action needed')
-        + _p16kpi(highCount + '', 'High Priority', 'fa-arrow-up', '#d97706', 'Action this month')
-        + _p16kpi((cl.aiOpps.length - critCount - highCount) + '', 'Medium/Low', 'fa-info-circle', '#6b7280', 'Monitor & plan')
+        + _p19kpi(critCount + '', 'Critical', 'fa-exclamation-triangle', '#dc2626', 'Immediate action needed')
+        + _p19kpi(highCount + '', 'High Priority', 'fa-arrow-up', '#d97706', 'Action this month')
+        + _p19kpi((cl.aiOpps.length - critCount - highCount) + '', 'Medium/Low', 'fa-info-circle', '#6b7280', 'Monitor & plan')
         + '</div>'
         + cl.aiOpps.map(function(o) {
             var prioColor = { 'Critical':'#dc2626','High':'#d97706','Medium':'#0891b2','Low':'#6b7280' };
             var pc = prioColor[o.priority] || '#6b7280';
             var kBtn = 'p19-opp-btn-' + Math.random().toString(36).slice(2);
-            window._p8actions[kBtn] = (function(oTitle, oDetail){ return function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI Action: ' + oTitle + ' — Workflow initiated. Next step recommendations sent to agent dashboard.', 3500); }; })(o.title, o.detail);
+            window._p8actions[kBtn] = (function(oTitle, oDetail){ return function(){ _p19toast('<i class="fas fa-robot"></i> WealthAI Action: ' + oTitle + ' — Workflow initiated. Next step recommendations sent to agent dashboard.', 3500); }; })(o.title, o.detail);
             return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">'
               + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
               + '<div style="width:36px;height:36px;border-radius:8px;background:' + o.color + '18;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
@@ -78154,17 +78200,17 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + '</tr>';
       }).join('');
 
-      body = _p16aiPanel('Revenue Intelligence: ' + cl.name + ' generates ' + cl.totalAdmin + ' in illumifin administration revenue across ' + cl.mix.length + ' product lines. '
+      body = _p19aiPanel('Revenue Intelligence: ' + cl.name + ' generates ' + cl.totalAdmin + ' in illumifin administration revenue across ' + cl.mix.length + ' product lines. '
         + 'Cross-product multiple: ' + cl.adminMultiple + ' vs. single-line relationship. Retention lift: ' + cl.retentionLift + 'x.')
-        + _p16sectionHdr('fa-chart-line', 'Carrier Revenue View — Administration Revenue per Client', COLOR)
+        + _p19sectionHdr('fa-chart-line', 'Carrier Revenue View — Administration Revenue per Client', COLOR)
         + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">'
-        + _p16kpi(cl.totalAdmin, 'illumifin Admin Revenue', 'fa-dollar-sign', COLOR, cl.name + ' · ' + cl.mix.length + ' lines')
-        + _p16kpi(cl.adminMultiple, 'Revenue vs. Single-Line', 'fa-chart-bar', '#059669', 'Cross-product multiplier')
-        + _p16kpi(cl.retentionLift + 'x', 'Retention Rate Lift', 'fa-shield-alt', '#003087', 'vs. single-line clients')
+        + _p19kpi(cl.totalAdmin, 'illumifin Admin Revenue', 'fa-dollar-sign', COLOR, cl.name + ' · ' + cl.mix.length + ' lines')
+        + _p19kpi(cl.adminMultiple, 'Revenue vs. Single-Line', 'fa-chart-bar', '#059669', 'Cross-product multiplier')
+        + _p19kpi(cl.retentionLift + 'x', 'Retention Rate Lift', 'fa-shield-alt', '#003087', 'vs. single-line clients')
         + '</div>'
         + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
         + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
-        + _p16tblHdr(['Product Line','Carrier','Policies','Client Premium','illumifin Admin Fee','Annual Retained Revenue','Growth Driver'])
+        + _p19tblHdr(['Product Line','Carrier','Policies','Client Premium','illumifin Admin Fee','Annual Retained Revenue','Growth Driver'])
         + '<tbody>' + revRows + '</tbody></table></div></div>'
         + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:16px;color:#fff;">'
         + '<div style="font-size:12px;font-weight:800;color:#60a5fa;margin-bottom:8px;"><i class="fas fa-lightbulb" style="margin-right:6px;"></i>CARRIER PITCH INSIGHT — ' + cl.name.toUpperCase() + '</div>'
@@ -78188,10 +78234,10 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       var kDemo   = 'p19-demo-'   + Math.random().toString(36).slice(2);
       var kModel  = 'p19-model-'  + Math.random().toString(36).slice(2);
       var kSim    = 'p19-sim-'    + Math.random().toString(36).slice(2);
-      window._p8actions[kDeck]  = function(){ _p16toast('<i class="fas fa-file-powerpoint"></i> Carrier pitch deck generated — ' + cl.name + ' scenario · 14-slide executive presentation · ROI model · Cross-product AI demo · PDF + PowerPoint ready for ' + scenarios[0].carrier + ', ' + scenarios[2].carrier + ', ' + scenarios[5].carrier, 4500); };
-      window._p8actions[kDemo]  = function(){ _p16toast('<i class="fas fa-calendar-check"></i> Live platform demo scheduled — Nationwide: Jul 15 · Cigna: Jul 22 · MassMutual: Jul 28 · WealthAI cross-product simulation with ' + cl.name + ' scenario pre-loaded · Agenda sent to carrier contacts', 4500); };
-      window._p8actions[kModel] = function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI Revenue Model: Total pipeline across 6 prospects = ' + totalDelta + ' in incremental annual admin revenue · MassMutual highest value ($31.1M incremental) · Cigna priority 1 ($46.1M full) · Priority ranking: Cigna > MassMutual > Allianz > Nationwide > Protective > USAA', 5000); };
-      window._p8actions[kSim]   = function(){ _p16toast('<i class="fas fa-users-viewfinder"></i> Switching to client simulation: Loading ' + cl.name + ' scenario into live platform demo mode — all 5 tabs active, real-time COB engine, cross-product event replay enabled.', 3500); };
+      window._p8actions[kDeck]  = function(){ _p19toast('<i class="fas fa-file-powerpoint"></i> Carrier pitch deck generated — ' + cl.name + ' scenario · 14-slide executive presentation · ROI model · Cross-product AI demo · PDF + PowerPoint ready for ' + scenarios[0].carrier + ', ' + scenarios[2].carrier + ', ' + scenarios[5].carrier, 4500); };
+      window._p8actions[kDemo]  = function(){ _p19toast('<i class="fas fa-calendar-check"></i> Live platform demo scheduled — Nationwide: Jul 15 · Cigna: Jul 22 · MassMutual: Jul 28 · WealthAI cross-product simulation with ' + cl.name + ' scenario pre-loaded · Agenda sent to carrier contacts', 4500); };
+      window._p8actions[kModel] = function(){ _p19toast('<i class="fas fa-robot"></i> WealthAI Revenue Model: Total pipeline across 6 prospects = ' + totalDelta + ' in incremental annual admin revenue · MassMutual highest value ($31.1M incremental) · Cigna priority 1 ($46.1M full) · Priority ranking: Cigna > MassMutual > Allianz > Nationwide > Protective > USAA', 5000); };
+      window._p8actions[kSim]   = function(){ _p19toast('<i class="fas fa-users-viewfinder"></i> Switching to client simulation: Loading ' + cl.name + ' scenario into live platform demo mode — all 5 tabs active, real-time COB engine, cross-product event replay enabled.', 3500); };
 
       var scRows = scenarios.map(function(s) {
         var prioColor = { 'High':'#059669','Medium':'#d97706','Low':'#6b7280' };
@@ -78221,7 +78267,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
         + '<div style="font-size:12px;color:#e2e8f0;line-height:1.7;background:rgba(255,255,255,.05);border-radius:8px;padding:14px;">'
         + cl.pitchBlurb
         + '</div></div>'
-        + _p16sectionHdr('fa-chart-bar', 'Carrier Opportunity Scenarios — Cross-Product Revenue Potential', COLOR)
+        + _p19sectionHdr('fa-chart-bar', 'Carrier Opportunity Scenarios — Cross-Product Revenue Potential', COLOR)
         + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
         + '<div style="padding:10px 14px;background:#faf5ff;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;">'
         + '<button onclick="_p8run(\'' + kDeck + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-file-powerpoint" style="margin-right:5px;"></i>Generate Carrier Deck</button>'
@@ -78230,7 +78276,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
         + '<button onclick="_p8run(\'' + kSim + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-play" style="margin-right:5px;"></i>Live Client Simulation</button>'
         + '</div>'
         + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
-        + _p16tblHdr(['Carrier','Current illumifin','Potential Scope','Eligible Clients','LTC-Only Rev.','Full HAL+LTC Rev.','Incremental Delta','Probability'])
+        + _p19tblHdr(['Carrier','Current illumifin','Potential Scope','Eligible Clients','LTC-Only Rev.','Full HAL+LTC Rev.','Incremental Delta','Probability'])
         + '<tbody>' + scRows + '</tbody></table></div></div>'
         + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">'
         + '<div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:6px;"><i class="fas fa-trophy" style="margin-right:6px;"></i>WIN SCENARIO SUMMARY</div>'
@@ -78256,7 +78302,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + body
       + '</div></div>';
 
-    _p16buildPage('tpl-hal-client360', pageHtml);
+    _p19buildPage_inner('tpl-hal-client360', pageHtml);
   }
 
   /* ── Override Phase 16 C360 entry points ────────────────────────────────── */
