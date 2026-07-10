@@ -73595,3 +73595,294 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 10v2] Modal z-index tiers set (claim-detail:10000, sub-modals:13000) · AI Extract & Validate functional with per-document field extraction · Process Payment safe buttons');
 
 })();
+
+/* ============================================================
+   PHASE 11 — Per-Claim Document Profiles (nextAction-driven)
+   Appended 2026-07-10
+   ============================================================ */
+(function() {
+  'use strict';
+
+  /* ─────────────────────────────────────────────────────────────────
+     CLAIM_DOC_PROFILES — keyed by claim ID
+     Each profile:
+       summary: "X/Y docs complete"
+       nextActionLabel: the pending action label
+       docs: [ { name, source, date, status, statusType, note } ]
+         statusType: 'ok' | 'warning' | 'missing' | 'escalated'
+  ───────────────────────────────────────────────────────────────── */
+  var CLAIM_DOC_PROFILES = {
+
+    /* LTC-2026-0101 — Margaret O'Brien — "Care Plan Review"
+       Nursing Home · Active · 14 days
+       Everything received except the Care Plan needs RN sign-off after recent room change */
+    'LTC-2026-0101': {
+      nextActionLabel: 'Care Plan Review',
+      complete: 5, total: 6,
+      docs: [
+        { name: "Attending Physician Statement (APS)",  source: "Dr. Sarah Thompson, MD",  date: "Jun 28, 2026", status: "✅ Received",       statusType: "ok",       note: "" },
+        { name: "ADL Assessment Report",                source: "RN Sarah Johnson",         date: "Jul 3, 2026",  status: "✅ Received",       statusType: "ok",       note: "" },
+        { name: "Insurance Policy Copy",                source: "Prudential",               date: "Jan 14, 2024", status: "✅ On File",         statusType: "ok",       note: "" },
+        { name: "Care Plan (Current)",                  source: "Sunrise Manor SNF",        date: "Jul 1, 2026",  status: "⚠️ Review Required", statusType: "warning",  note: "Updated after room transfer — requires RN countersignature before next billing cycle." },
+        { name: "Provider License & W-9",               source: "Sunrise Manor SNF",        date: "Mar 2026",     status: "✅ Verified",        statusType: "ok",       note: "" },
+        { name: "HIPAA Authorization Form",             source: "Margaret O'Brien",         date: "Jun 25, 2026", status: "✅ Received",        statusType: "ok",       note: "" }
+      ]
+    },
+
+    /* LTC-2026-0102 — Harold Simmons — "Nurse Assessment Due"
+       Home Health · Active · 31 days
+       ADL reassessment overdue; APS on file from initial claim; billing continues but reassessment needed */
+    'LTC-2026-0102': {
+      nextActionLabel: 'Nurse Assessment Due',
+      complete: 4, total: 6,
+      docs: [
+        { name: "Attending Physician Statement (APS)",  source: "Dr. Michael Chen, MD",     date: "Jun 2, 2026",  status: "✅ Received",        statusType: "ok",       note: "" },
+        { name: "ADL Reassessment Report",              source: "ComfortCare Home Health",   date: "— Overdue —",  status: "❌ Missing",          statusType: "missing",  note: "30-day ADL reassessment past due. Required by MassMutual policy §4.2 for continued benefit authorization. Nurse visit must be scheduled within 5 business days." },
+        { name: "Insurance Policy Copy",                source: "MassMutual",               date: "Feb 10, 2023", status: "✅ On File",          statusType: "ok",       note: "" },
+        { name: "Care Plan (Current)",                  source: "ComfortCare Home Health",  date: "Jun 3, 2026",  status: "✅ Approved",         statusType: "ok",       note: "" },
+        { name: "Provider License & W-9",               source: "ComfortCare Home Health",  date: "Jan 2026",     status: "✅ Verified",         statusType: "ok",       note: "" },
+        { name: "Homebound Certification",              source: "Dr. Michael Chen, MD",     date: "— Pending —",  status: "⚠️ Renewal Needed",  statusType: "warning",  note: "60-day homebound certification expires Jul 12, 2026. Physician recertification letter requested." }
+      ]
+    },
+
+    /* LTC-2026-0103 — Dorothy Feldstein — "Policy Interpretation"
+       ALF · Review · 7 days
+       Dispute over benefit trigger clause — policy on hold pending legal/compliance review */
+    'LTC-2026-0103': {
+      nextActionLabel: 'Policy Interpretation',
+      complete: 3, total: 6,
+      docs: [
+        { name: "Attending Physician Statement (APS)",  source: "Dr. Linda Marsh, MD",      date: "Jul 1, 2026",  status: "✅ Received",         statusType: "ok",       note: "" },
+        { name: "ADL Assessment Report",                source: "RN Patricia Cruz",          date: "Jul 2, 2026",  status: "✅ Received",         statusType: "ok",       note: "" },
+        { name: "Insurance Policy Copy",                source: "NY Life",                  date: "Mar 8, 2019",  status: "⚠️ Disputed",         statusType: "warning",  note: "Benefit trigger clause interpretation in dispute. Policy §7.1(b) language ambiguous re: 'substantial assistance' threshold. Compliance review in progress — benefit payments on hold." },
+        { name: "Care Plan (Current)",                  source: "Sunrise Gardens ALF",      date: "— Pending —",  status: "❌ Not Submitted",     statusType: "missing",  note: "Facility care plan required before claim can advance. Requested Jun 30, 2026 — no response received." },
+        { name: "Benefit Trigger Documentation",        source: "Independent Assessor",     date: "— Ordered —",  status: "❌ Awaiting Report",   statusType: "missing",  note: "Independent functional assessment ordered Jul 2 to resolve policy interpretation dispute. Expected Jul 14, 2026." },
+        { name: "HIPAA Authorization Form",             source: "Dorothy Feldstein",        date: "Jul 1, 2026",  status: "✅ Received",          statusType: "ok",       note: "" }
+      ]
+    },
+
+    /* LTC-2026-0104 — Arthur Kowalski — "Monthly Billing Review"
+       Memory Care · Active · 62 days
+       Long-running claim; billing invoice discrepancy found; otherwise well-documented */
+    'LTC-2026-0104': {
+      nextActionLabel: 'Monthly Billing Review',
+      complete: 5, total: 7,
+      docs: [
+        { name: "Attending Physician Statement (APS)",  source: "Dr. James Okafor, MD",     date: "May 14, 2026", status: "✅ Received",          statusType: "ok",       note: "" },
+        { name: "ADL Assessment Report",                source: "RN Diana Webb",             date: "Jun 10, 2026", status: "✅ Received",          statusType: "ok",       note: "" },
+        { name: "Insurance Policy Copy",                source: "Genworth",                 date: "Aug 22, 2020", status: "✅ On File",            statusType: "ok",       note: "" },
+        { name: "Care Plan (Current)",                  source: "Memory Lane Care",         date: "Jun 1, 2026",  status: "✅ Approved",           statusType: "ok",       note: "" },
+        { name: "Provider Invoice — July 2026",         source: "Memory Lane Care",         date: "Jul 1, 2026",  status: "⚠️ Discrepancy Found", statusType: "warning",  note: "Invoice claims 31 days at $200/day ($6,200). Genworth policy caps at $200/day with 90-day elimination period already satisfied. Discrepancy: 2 days billed during documented hospital stay. Requires facility adjustment." },
+        { name: "Provider License & W-9",               source: "Memory Lane Care",         date: "Nov 2025",     status: "✅ Verified",           statusType: "ok",       note: "" },
+        { name: "Cognitive Assessment (MMSE)",          source: "Dr. James Okafor, MD",     date: "Jun 10, 2026", status: "✅ Received",           statusType: "ok",       note: "" }
+      ]
+    },
+
+    /* LTC-2026-0105 — Evelyn Marchetti — "Initial Assessment"
+       Adult Day Care · Pending · 3 days
+       Brand new claim — most documents not yet collected; APS requested, ADL not scheduled */
+    'LTC-2026-0105': {
+      nextActionLabel: 'Initial Assessment',
+      complete: 1, total: 6,
+      docs: [
+        { name: "Attending Physician Statement (APS)",  source: "Dr. (Pending Assignment)", date: "— Requested —","status": "❌ Requested",       statusType: "missing",  note: "APS request sent Jul 8, 2026. Standard 10-business-day turnaround. Claim cannot advance until received. Follow-up scheduled Jul 18." },
+        { name: "ADL Assessment Report",                source: "RN (Not Yet Assigned)",    date: "— Not Started —",status: "❌ Not Scheduled",    statusType: "missing",  note: "Initial ADL assessment must be completed before adult day care benefits can be authorized. Nurse assignment pending provider selection." },
+        { name: "Insurance Policy Copy",                source: "Transamerica",             date: "Oct 5, 2021",  status: "✅ On File",            statusType: "ok",       note: "" },
+        { name: "Care Plan",                            source: "Pending Assignment",       date: "— Not Started —",status: "❌ Not Started",      statusType: "missing",  note: "Care plan cannot be developed until initial APS and ADL assessment are complete." },
+        { name: "Provider License & W-9",               source: "Pending Assignment",       date: "— Pending —",  status: "❌ Awaiting Provider",  statusType: "missing",  note: "Adult day care facility not yet selected. W-9 and license will be collected upon provider assignment." },
+        { name: "HIPAA Authorization Form",             source: "Evelyn Marchetti",         date: "Jul 7, 2026",  status: "✅ Received",           statusType: "ok",       note: "" }
+      ]
+    },
+
+    /* LTC-2026-0106 — Francis Delacroix — "Annual Care Review"
+       Home Health · Active · 120 days
+       Long-running stable claim; annual review package due; most docs current but annual assessment overdue */
+    'LTC-2026-0106': {
+      nextActionLabel: 'Annual Care Review',
+      complete: 5, total: 7,
+      docs: [
+        { name: "Attending Physician Statement (APS)",  source: "Dr. Rebecca Stone, MD",    date: "Mar 15, 2026", status: "✅ Received",           statusType: "ok",       note: "" },
+        { name: "Annual ADL Assessment",                source: "BrightPath Homecare",      date: "— Overdue —",  status: "⚠️ Due Now",            statusType: "warning",  note: "Annual functional assessment due Jul 5, 2026. TIAA policy requires annual reassessment for continued home health benefits. BrightPath RN visit scheduled Jul 12 — awaiting completion report." },
+        { name: "Insurance Policy Copy",                source: "TIAA",                     date: "Sep 12, 2018", status: "✅ On File",             statusType: "ok",       note: "" },
+        { name: "Updated Care Plan (Annual)",           source: "BrightPath Homecare",      date: "— In Progress —",status:"⚠️ Draft Submitted",   statusType: "warning",  note: "Annual care plan draft received Jul 6 — pending physician sign-off before final approval. Dr. Stone review expected Jul 11." },
+        { name: "Homebound Certification",              source: "Dr. Rebecca Stone, MD",    date: "Jun 30, 2026", status: "✅ Renewed",             statusType: "ok",       note: "" },
+        { name: "Provider License & W-9",               source: "BrightPath Homecare",      date: "Feb 2026",     status: "✅ Verified",            statusType: "ok",       note: "" },
+        { name: "HIPAA Authorization Form",             source: "Francis Delacroix",        date: "Mar 15, 2026", status: "✅ Received",            statusType: "ok",       note: "" }
+      ]
+    },
+
+    /* LTC-2026-0107 — Ruth Blackwood — "Clinical Review — RN"
+       Nursing Home · Escalated · 9 days
+       Escalated claim — RN clinical review ordered due to rapid ADL decline; high priority urgent */
+    'LTC-2026-0107': {
+      nextActionLabel: 'Clinical Review — RN',
+      complete: 3, total: 6,
+      docs: [
+        { name: "Attending Physician Statement (APS)",  source: "Dr. Howard Stein, MD",     date: "Jul 1, 2026",  status: "✅ Received",           statusType: "ok",       note: "" },
+        { name: "RN Clinical Review Report",            source: "Senior RN (Assigned)",     date: "— In Progress —",status:"❌ Escalated — Pending", statusType: "escalated", note: "RN clinical review ordered due to rapid ADL decline (score dropped from 3→4 in 9 days). Review must be completed within 48 hours per Lincoln National escalation protocol. Claim payments suspended pending outcome." },
+        { name: "ADL Assessment Report",                source: "Dr. Howard Stein, MD",     date: "Jul 2, 2026",  status: "⚠️ Disputed",           statusType: "warning",  note: "Initial ADL score of 4 contested by facility. Independent assessment ordered to verify rapid decline claim." },
+        { name: "Insurance Policy Copy",                source: "Lincoln National",          date: "Apr 3, 2021",  status: "✅ On File",             statusType: "ok",       note: "" },
+        { name: "Care Plan (Current)",                  source: "Oakwood Care Center",      date: "Jul 3, 2026",  status: "✅ Received",            statusType: "ok",       note: "" },
+        { name: "Incident Documentation",               source: "Oakwood Care Center",      date: "— Requested —","status":"❌ Not Received",       statusType: "missing",  note: "Incident report for rapid decline event requested Jul 5, 2026. Required for escalation review. Facility response overdue." }
+      ]
+    },
+
+    /* LTC-2026-0108 — George Nakamura — "Quarterly Check-In"
+       ALF · Active · 45 days
+       Stable long-term claim; quarterly check-in routine; all docs on file, minor quarterly update needed */
+    'LTC-2026-0108': {
+      nextActionLabel: 'Quarterly Check-In',
+      complete: 6, total: 7,
+      docs: [
+        { name: "Attending Physician Statement (APS)",  source: "Dr. Yuki Tanaka, MD",      date: "May 20, 2026", status: "✅ Received",            statusType: "ok",       note: "" },
+        { name: "ADL Assessment Report",                source: "RN Amanda Foster",          date: "May 22, 2026", status: "✅ Received",            statusType: "ok",       note: "" },
+        { name: "Insurance Policy Copy",                source: "Pacific Life",             date: "Jun 17, 2017", status: "✅ On File",             statusType: "ok",       note: "" },
+        { name: "Care Plan (Current)",                  source: "Pines Assisted Living",    date: "May 15, 2026", status: "✅ Approved",            statusType: "ok",       note: "" },
+        { name: "Quarterly Status Update",              source: "Pines Assisted Living",    date: "— Due Jul 15 —",status:"⚠️ Due in 5 Days",      statusType: "warning",  note: "Routine Q3 2026 status update due Jul 15, 2026. Pacific Life requires quarterly care status confirmation for benefits over 30 days. Facility coordinator notified Jul 9." },
+        { name: "Provider License & W-9",               source: "Pines Assisted Living",    date: "Apr 2026",     status: "✅ Verified",            statusType: "ok",       note: "" },
+        { name: "HIPAA Authorization Form",             source: "George Nakamura",          date: "May 20, 2026", status: "✅ Received",            statusType: "ok",       note: "" }
+      ]
+    }
+  };
+
+  /* ─────────────────────────────────────────────────────────────────
+     Override ltcClaimTab — Documents tab (idx === 2)
+     Uses CLAIM_DOC_PROFILES if available, falls back to prior IIFE
+  ───────────────────────────────────────────────────────────────── */
+  var _origLtcClaimTab11 = window.ltcClaimTab;
+
+  window.ltcClaimTab = function(idx, claimId) {
+    /* Only intercept Documents tab */
+    if (idx !== 2) {
+      if (_origLtcClaimTab11) _origLtcClaimTab11(idx, claimId);
+      return;
+    }
+
+    var c = window._lcdCurrentClaim;
+    if (!c) {
+      if (_origLtcClaimTab11) _origLtcClaimTab11(idx, claimId);
+      return;
+    }
+
+    /* Look up per-claim profile */
+    var profile = CLAIM_DOC_PROFILES[c.id];
+    if (!profile) {
+      /* Not an original claim (e.g. Phase 9 simulated claims) — fall through */
+      if (_origLtcClaimTab11) _origLtcClaimTab11(idx, claimId);
+      return;
+    }
+
+    /* Tab highlight */
+    for (var ti = 0; ti < 6; ti++) {
+      var tel = document.getElementById('lcd-tab-' + ti);
+      if (tel) {
+        tel.style.background = (ti === 2) ? '#dc2626' : 'transparent';
+        tel.style.color      = (ti === 2) ? '#fff'    : '#6b7280';
+      }
+    }
+
+    var body = document.getElementById('lcd-body');
+    if (!body) {
+      if (_origLtcClaimTab11) _origLtcClaimTab11(idx, claimId);
+      return;
+    }
+
+    /* ── Status color + icon helper ── */
+    function _statusStyle(statusType) {
+      var map = {
+        ok:        { color: '#059669', bg: '#ecfdf5', border: '#a7f3d0', icon: 'fa-check-circle' },
+        warning:   { color: '#d97706', bg: '#fffbeb', border: '#fde68a', icon: 'fa-exclamation-triangle' },
+        missing:   { color: '#dc2626', bg: '#fef2f2', border: '#fecaca', icon: 'fa-times-circle' },
+        escalated: { color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: 'fa-exclamation-circle' }
+      };
+      return map[statusType] || map['ok'];
+    }
+
+    /* ── Render a single document row ── */
+    function _p11DocRow(doc, claimObj) {
+      var st = _statusStyle(doc.statusType);
+      var isActionNeeded = (doc.statusType === 'missing' || doc.statusType === 'warning' || doc.statusType === 'escalated');
+      var rowBg = isActionNeeded ? st.bg : '#f8fafc';
+      var rowBorder = isActionNeeded ? ('2px solid ' + st.border) : '1px solid transparent';
+
+      var viewKey = '_p11vd_' + Math.random().toString(36).slice(2);
+      window._p8actions[viewKey] = (function(dn, cd) {
+        return function() { _p8openIDP(dn, cd); };
+      })(doc.name, claimObj);
+
+      var noteHtml = '';
+      if (doc.note) {
+        noteHtml = '<div style="font-size:10px;color:' + st.color + ';background:' + st.bg + ';border-left:3px solid ' + st.color + ';padding:5px 8px;margin-top:6px;border-radius:0 5px 5px 0;line-height:1.4;">'
+          + '<i class="fas ' + st.icon + '" style="margin-right:4px;"></i>' + doc.note + '</div>';
+      }
+
+      return '<div style="background:' + rowBg + ';border:' + rowBorder + ';border-radius:10px;padding:10px 12px;margin-bottom:8px;">'
+        + '<div style="display:flex;align-items:center;gap:12px;">'
+        + '<div style="background:#dc2626;border-radius:6px;padding:7px;flex-shrink:0;"><i class="fas fa-file-pdf" style="color:#fff;font-size:14px;"></i></div>'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div style="font-size:12px;font-weight:700;color:#111827;">' + doc.name + '</div>'
+        + '<div style="font-size:11px;color:#6b7280;">' + doc.source + ' · ' + doc.date + '</div>'
+        + '</div>'
+        + '<span style="font-size:10px;font-weight:700;color:' + st.color + ';white-space:nowrap;padding:3px 8px;background:' + st.bg + ';border-radius:12px;border:1px solid ' + st.border + ';">'
+        + doc.status + '</span>'
+        + '<button onclick="_p8run(\'' + viewKey + '\')" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">'
+        + '<i class="fas fa-eye" style="margin-right:4px;"></i>View</button>'
+        + '</div>'
+        + noteHtml
+        + '</div>';
+    }
+
+    /* ── Completion progress bar ── */
+    var pct = Math.round((profile.complete / profile.total) * 100);
+    var progressColor = pct >= 80 ? '#059669' : (pct >= 50 ? '#d97706' : '#dc2626');
+
+    /* ── Next Action badge ── */
+    var naHtml = '<span style="background:#7c3aed;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;margin-left:8px;">'
+      + '<i class="fas fa-brain" style="margin-right:4px;"></i>IDP Active</span>'
+      + '<span style="background:#1f2937;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;margin-left:6px;">'
+      + '<i class="fas fa-arrow-right" style="margin-right:4px;"></i>Next: ' + profile.nextActionLabel + '</span>';
+
+    /* ── Build full HTML ── */
+    var html = '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;">'
+      + '<i class="fas fa-folder-open" style="color:#d97706;margin-right:6px;"></i>Claim Documents'
+      + naHtml
+      + '</div>';
+
+    /* Progress bar */
+    html += '<div style="background:#f1f5f9;border-radius:8px;padding:10px 14px;margin-bottom:12px;border:1px solid #e2e8f0;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
+      + '<span style="font-size:11px;font-weight:700;color:#374151;">Document Checklist</span>'
+      + '<span style="font-size:11px;font-weight:700;color:' + progressColor + ';">' + profile.complete + '/' + profile.total + ' complete (' + pct + '%)</span>'
+      + '</div>'
+      + '<div style="background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden;">'
+      + '<div style="background:' + progressColor + ';width:' + pct + '%;height:100%;border-radius:4px;transition:width 0.6s ease;"></div>'
+      + '</div>'
+      + '</div>';
+
+    /* Document rows */
+    var docs = profile.docs;
+    for (var i = 0; i < docs.length; i++) {
+      html += _p11DocRow(docs[i], c);
+    }
+
+    /* Action buttons */
+    var uploadKey  = '_p11ul_' + Math.random().toString(36).slice(2);
+    var requestKey = '_p11rq_' + Math.random().toString(36).slice(2);
+    window._p8actions[uploadKey]  = function() { ltcDetailAction('upload', c.id); };
+    window._p8actions[requestKey] = function() { ltcDetailAction('request', c.id); };
+
+    html += '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">'
+      + '<button onclick="_p8run(\'' + uploadKey + '\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;">'
+      + '<i class="fas fa-upload" style="margin-right:5px;"></i>Upload Document</button>'
+      + '<button onclick="_p8run(\'' + requestKey + '\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;">'
+      + '<i class="fas fa-envelope" style="margin-right:5px;"></i>Request Missing Docs</button>'
+      + '<button onclick="_p8openIDP(\'Full IDP Report\',window._lcdCurrentClaim)" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;">'
+      + '<i class="fas fa-brain" style="margin-right:5px;"></i>IDP Analysis</button>'
+      + '</div>';
+
+    body.innerHTML = html;
+  };
+
+  console.log('[Phase 11] Per-claim document profiles active — 8 claim-specific document sets driven by nextAction field');
+
+})();
