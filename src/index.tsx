@@ -356,6 +356,13 @@ function MainApp() {
         <div id="tpl-tpa-command"></div>
         <div id="tpl-hybrid-ops"></div>
         <div id="tpl-ai-modernization"></div>
+        {/* ── Hybrid LTC+HAL Intelligence Platform — Phases 20-25 ── */}
+        <div id="tpl-hal-datalake"></div>
+        <div id="tpl-hal-semantic"></div>
+        <div id="tpl-hal-ontology"></div>
+        <div id="tpl-hal-vectorstore"></div>
+        <div id="tpl-hal-agents"></div>
+        <div id="tpl-hal-lineage"></div>
         <div id="tpl-rfp-showcase"></div>
         <div id="tpl-core-admin"></div>
         <div id="tpl-data-ai"></div>
@@ -1001,6 +1008,33 @@ function Sidebar() {
         <a class="nav-item rfp-showcase-nav" onclick="navigateTo('rfp-showcase')" href="#">
           <i class="fas fa-award"></i><span>RFP Response Center</span>
           <span class="nav-badge" style="background:#d97706;color:#fff">RFP</span>
+        </a>
+
+        {/* ── HYBRID LTC + HAL INTELLIGENCE ── */}
+        <div class="nav-section-label" style="background:linear-gradient(90deg,#0078d4,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;letter-spacing:.08em">HYBRID LTC + HAL INTELLIGENCE</div>
+        <a class="nav-item hal-datalake-nav" onclick="navigateTo('hal-datalake')" href="#">
+          <i class="fas fa-database"></i><span>Azure Data Lake</span>
+          <span class="nav-badge" style="background:#0078d4;color:#fff">FABRIC</span>
+        </a>
+        <a class="nav-item hal-semantic-nav" onclick="navigateTo('hal-semantic')" href="#">
+          <i class="fas fa-layer-group"></i><span>Semantic Layer</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">UNITY</span>
+        </a>
+        <a class="nav-item hal-ontology-nav" onclick="navigateTo('hal-ontology')" href="#">
+          <i class="fas fa-project-diagram"></i><span>Ontology &amp; Knowledge Graph</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">KG</span>
+        </a>
+        <a class="nav-item hal-vectorstore-nav" onclick="navigateTo('hal-vectorstore')" href="#">
+          <i class="fas fa-search"></i><span>Vector Store &amp; RAG</span>
+          <span class="nav-badge" style="background:#4f46e5;color:#fff">RAG</span>
+        </a>
+        <a class="nav-item hal-agents-nav" onclick="navigateTo('hal-agents')" href="#">
+          <i class="fas fa-robot"></i><span>Agentification Hub</span>
+          <span class="nav-badge ai-pulse" style="background:#059669;color:#fff">6 AGENTS</span>
+        </a>
+        <a class="nav-item hal-lineage-nav" onclick="navigateTo('hal-lineage')" href="#">
+          <i class="fas fa-sitemap"></i><span>Lineage &amp; Catalog</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">PURVIEW</span>
         </a>
 
         {/* ── ILLUMIFIN PLATFORM ── */}

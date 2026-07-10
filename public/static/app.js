@@ -78314,3 +78314,1384 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 19] Client 360 Simulator rebuilt: 5 clients (Margaret Chen H+A+L+LTC · Robert Kincaid L+LTC+A · Dorothy Harrington H+LTC · Frank & Gloria Bianchi A+L+H · Sylvia Torres A+L) · All 5 tabs operational · Tab nav fixed (_p8actions) · Client switcher · AI Opportunities with Act buttons · Carrier Revenue View · Prospect Pitch Mode with 6 carrier scenarios');
 
 })();
+
+/* ============================================================
+   PHASE 20 — AZURE DATA LAKE (Microsoft Fabric + Databricks Medallion)
+   Hybrid LTC + HAL Intelligence Platform
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var AZ = '#0078d4';
+  var BRONZE = '#b45309'; var SILVER = '#64748b'; var GOLD = '#d97706';
+  var FABRIC = '#742774';
+
+  /* ── 5 C360 Clients data ─────────────────────────────────── */
+  var _p20clients = [
+    { name:'Margaret Chen',      id:'CLT-001', domains:['LTC','HAL-Health','HAL-Annuity','HAL-Life'] },
+    { name:'Robert Kincaid',     id:'CLT-002', domains:['LTC','HAL-Life','HAL-Annuity'] },
+    { name:'Dorothy Harrington', id:'CLT-003', domains:['LTC','HAL-Health'] },
+    { name:'Frank & Gloria Bianchi', id:'CLT-004', domains:['HAL-Annuity','HAL-Life','HAL-Health'] },
+    { name:'Sylvia Torres',      id:'CLT-005', domains:['HAL-Annuity','HAL-Life'] }
+  ];
+
+  /* ── Bronze layer tables ─────────────────────────────────── */
+  var _p20bronze = [
+    { table:'ltc_claims_raw',         source:'LTCAS Policy Admin',   rows:284710, size:'4.2 GB',  dq:72, domain:'LTC',  desc:'Raw claim events, all types, unvalidated' },
+    { table:'ltc_provider_feed_raw',  source:'CellTrak EVV API',     rows:182430, size:'2.1 GB',  dq:68, domain:'LTC',  desc:'Provider visit records, EVV telemetry' },
+    { table:'ltc_eligibility_raw',    source:'LINK UW Queue',        rows: 94200, size:'890 MB',  dq:81, domain:'LTC',  desc:'Eligibility determinations, raw ADL scores' },
+    { table:'ltc_careplan_raw',       source:'CONNECT Portal',       rows: 61800, size:'760 MB',  dq:75, domain:'LTC',  desc:'Care plans, service authorizations' },
+    { table:'hal_policies_raw',       source:'HAL Policy Admin',     rows:412900, size:'5.8 GB',  dq:79, domain:'HAL',  desc:'All HAL policy records: Health, Annuity, Life' },
+    { table:'hal_premiums_raw',       source:'FMS Financial',        rows:209400, size:'2.9 GB',  dq:83, domain:'HAL',  desc:'Premium payment events, billing cycles' },
+    { table:'hal_claims_raw',         source:'HAL Claims Engine',    rows:138200, size:'1.7 GB',  dq:77, domain:'HAL',  desc:'HAL claims: health, life, annuity payouts' },
+    { table:'hal_clients_raw',        source:'CRM / Salesforce',     rows: 52100, size:'640 MB',  dq:88, domain:'HAL',  desc:'Client demographics, contact, KYC raw' },
+    { table:'shared_providers_raw',   source:'Provider Directory',   rows: 18900, size:'220 MB',  dq:91, domain:'Both', desc:'Shared care & insurance provider network' },
+    { table:'shared_agents_raw',      source:'Agent Registry',       rows:  4200, size: '48 MB',  dq:95, domain:'Both', desc:'Agent profiles, licenses, territories' }
+  ];
+
+  /* ── Silver layer tables ─────────────────────────────────── */
+  var _p20silver = [
+    { table:'ltc_claims_cleansed',    source:'ltc_claims_raw',       rows:278940, size:'3.1 GB',  dq:94, domain:'LTC',  desc:'Deduplicated, ICD-10 validated, amounts normalized' },
+    { table:'ltc_care_episodes',      source:'ltc_provider_feed_raw',rows:174210, size:'1.8 GB',  dq:92, domain:'LTC',  desc:'Visit-to-episode rolled-up, ADL linkage' },
+    { table:'ltc_eligibility',        source:'ltc_eligibility_raw',  rows: 93800, size:'820 MB',  dq:96, domain:'LTC',  desc:'Eligibility with coverage windows, benefit triggers' },
+    { table:'hal_policies',           source:'hal_policies_raw',     rows:409200, size:'4.2 GB',  dq:95, domain:'HAL',  desc:'Validated policies, lapse flags, coverage enriched' },
+    { table:'hal_client360',          source:'hal_clients_raw+hal_policies_raw', rows:52100, size:'780 MB', dq:97, domain:'HAL', desc:'Client-level join: demographics + all policies' },
+    { table:'hal_premiums',           source:'hal_premiums_raw',     rows:207800, size:'2.1 GB',  dq:96, domain:'HAL',  desc:'Reconciled premiums, payment status, arrears' },
+    { table:'shared_network',         source:'shared_providers_raw', rows: 18890, size:'198 MB',  dq:98, domain:'Both', desc:'Provider/agent network, geospatial enriched' },
+    { table:'unified_client',         source:'hal_client360+ltc_eligibility', rows:14820, size:'310 MB', dq:93, domain:'Both', desc:'Cross-domain client golden record (5 C360 clients included)' }
+  ];
+
+  /* ── Gold layer tables ─────────────────────────────────── */
+  var _p20gold = [
+    { table:'ltc_claim_analytics',    source:'ltc_claims_cleansed',  rows: 42100, size:'890 MB',  dq:99, domain:'LTC',  desc:'Claim frequency, severity, cycle time, denial rates by type' },
+    { table:'ltc_care_cost_model',    source:'ltc_care_episodes',    rows: 28400, size:'540 MB',  dq:99, domain:'LTC',  desc:'ML cost predictions per care type, provider efficiency scores' },
+    { table:'ltc_sla_metrics',        source:'ltc_claims_cleansed',  rows:  8200, size:'120 MB',  dq:99, domain:'LTC',  desc:'SLA compliance, TAT per claim type, breach forecasts' },
+    { table:'hal_lapse_predictions',  source:'hal_policies+hal_premiums', rows:52100, size:'640 MB', dq:99, domain:'HAL', desc:'ML lapse risk scores (0-100), feature importances per policy' },
+    { table:'hal_revenue_analytics',  source:'hal_premiums',         rows: 18400, size:'320 MB',  dq:99, domain:'HAL',  desc:'Revenue by product, agent, territory, trend/forecast' },
+    { table:'hal_crosssell_scores',   source:'hal_client360+ltc_eligibility', rows:14820, size:'280 MB', dq:99, domain:'Both', desc:'Propensity scores for 12 cross-sell products per client' },
+    { table:'unified_client_360_gold',source:'unified_client',       rows: 14820, size:'410 MB',  dq:99, domain:'Both', desc:'Full C360 gold: policies, claims, care episodes, scores — all 5 demo clients' },
+    { table:'regulatory_compliance',  source:'ltc_eligibility+hal_policies', rows:4100, size:'88 MB', dq:99, domain:'Both', desc:'State mandate compliance flags, violation risk scores' }
+  ];
+
+  /* ── Pipeline runs simulation ─────────────────────────────── */
+  var _p20pipelines = [
+    { name:'LTC Claims Ingestion',    layer:'Bronze', status:'success', duration:'4m 12s', lastRun:'2026-07-10 02:00', records:'1,842 new' },
+    { name:'HAL Policy Sync',         layer:'Bronze', status:'success', duration:'2m 48s', lastRun:'2026-07-10 02:05', records:'312 updated' },
+    { name:'EVV Provider Feed',       layer:'Bronze', status:'running', duration:'1m 33s', lastRun:'2026-07-10 06:00', records:'890 streaming' },
+    { name:'Silver Cleanse — LTC',    layer:'Silver', status:'success', duration:'8m 04s', lastRun:'2026-07-10 03:00', records:'278,940 rows' },
+    { name:'Unified Client Build',    layer:'Silver', status:'success', duration:'3m 21s', lastRun:'2026-07-10 03:15', records:'14,820 clients' },
+    { name:'HAL Client 360 Join',     layer:'Silver', status:'success', duration:'5m 17s', lastRun:'2026-07-10 03:20', records:'52,100 profiles' },
+    { name:'Gold ML Scoring',         layer:'Gold',   status:'success', duration:'22m 40s',lastRun:'2026-07-10 04:00', records:'52,100 scored' },
+    { name:'Lapse Prediction Model',  layer:'Gold',   status:'success', duration:'18m 55s',lastRun:'2026-07-10 04:00', records:'52,100 risk scores' },
+    { name:'Regulatory Compliance',   layer:'Gold',   status:'warning', duration:'6m 02s', lastRun:'2026-07-10 04:30', records:'41 flags raised' }
+  ];
+
+  /* ── C360 client gold records ─────────────────────────────── */
+  var _p20clientGold = [
+    { name:'Margaret Chen',      id:'CLT-001', lapseRisk:12, crossSell:94, complianceOk:true,  claims:3, careEpisodes:14, policies:4, premiumArr:'$18,400/yr' },
+    { name:'Robert Kincaid',     id:'CLT-002', lapseRisk:34, crossSell:72, complianceOk:true,  claims:1, careEpisodes: 6, policies:3, premiumArr:'$12,800/yr' },
+    { name:'Dorothy Harrington', id:'CLT-003', lapseRisk: 8, crossSell:61, complianceOk:true,  claims:7, careEpisodes:28, policies:2, premiumArr:'$ 9,200/yr' },
+    { name:'Frank & Gloria Bianchi', id:'CLT-004', lapseRisk:57, crossSell:88, complianceOk:false, claims:2, careEpisodes:0, policies:3, premiumArr:'$22,100/yr' },
+    { name:'Sylvia Torres',      id:'CLT-005', lapseRisk:23, crossSell:79, complianceOk:true,  claims:0, careEpisodes:0, policies:2, premiumArr:'$ 7,600/yr' }
+  ];
+
+  var _p20activeLayer = 'bronze';
+  var _p20activePipeline = null;
+
+  /* ── Helpers ─────────────────────────────────────────────── */
+  function _p20badge(domain) {
+    var colors = { LTC:'#dc2626', HAL:'#7c3aed', Both:'#0891b2' };
+    return '<span style="background:'+( colors[domain]||'#64748b')+';color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700">'+domain+'</span>';
+  }
+  function _p20dqBar(score) {
+    var col = score>=95?'#059669':score>=85?'#d97706':'#dc2626';
+    return '<div style="display:flex;align-items:center;gap:6px">'
+      +'<div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px"><div style="width:'+score+'%;height:6px;background:'+col+';border-radius:3px"></div></div>'
+      +'<span style="font-size:11px;font-weight:700;color:'+col+'">'+score+'%</span></div>';
+  }
+  function _p20statusDot(s) {
+    var map={success:'#059669',running:'#d97706',warning:'#f59e0b',error:'#dc2626'};
+    var anim = s==='running'?' animation:pulse 1.2s infinite':'';
+    return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(map[s]||'#64748b')+';'+anim+'"></span>';
+  }
+  function _p20svc(icon,name,color){ return '<span style="background:'+color+'18;color:'+color+';border:1px solid '+color+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;margin:2px;display:inline-block"><i class="'+icon+'" style="margin-right:4px"></i>'+name+'</span>'; }
+  function _p20kpi(val,label,color){ return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;min-width:120px;flex:1"><div style="font-size:22px;font-weight:800;color:'+color+'">'+val+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">'+label+'</div></div>'; }
+
+  function _p20layerRows(data) {
+    return data.map(function(t){
+      var domainCol = {LTC:'#dc262618',HAL:'#7c3aed18',Both:'#0891b218'}[t.domain]||'#f8fafc';
+      return '<tr style="border-bottom:1px solid #f1f5f9;background:'+domainCol+'">'
+        +'<td style="padding:10px 12px;font-size:12px;font-family:monospace;font-weight:700;color:#1e293b">'+t.table+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#64748b">'+t.source+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#0078d4">'+t.rows.toLocaleString()+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#475569">'+t.size+'</td>'
+        +'<td style="padding:10px 12px;min-width:120px">'+_p20dqBar(t.dq)+'</td>'
+        +'<td style="padding:10px 12px">'+_p20badge(t.domain)+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#64748b;max-width:220px">'+t.desc+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  function _p20pipelineRows() {
+    var cols={Bronze:BRONZE,Silver:SILVER,Gold:GOLD};
+    return _p20pipelines.map(function(p,i){
+      var k='p20-pipe-'+i;
+      window._p8actions[k]=function(){ _p20runPipeline(i); };
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:600;color:#1e293b">'+p.name+'</td>'
+        +'<td style="padding:10px 12px"><span style="background:'+(cols[p.layer]||'#64748b')+'22;color:'+(cols[p.layer]||'#64748b')+';border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">'+p.layer+'</span></td>'
+        +'<td style="padding:10px 12px">'+_p20statusDot(p.status)+' <span style="font-size:11px;text-transform:capitalize">'+p.status+'</span></td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#64748b">'+p.duration+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#64748b">'+p.lastRun+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;font-weight:600;color:#0078d4">'+p.records+'</td>'
+        +'<td style="padding:10px 12px"><button onclick="_p8run(\''+k+'\')" style="background:#0078d4;color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-weight:600">▶ Run</button></td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  function _p20runPipeline(idx) {
+    var p = _p20pipelines[idx];
+    var toast = document.createElement('div');
+    toast.style.cssText='position:fixed;bottom:28px;right:28px;z-index:99999;background:#0078d4;color:#fff;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px #0003;max-width:340px';
+    toast.innerHTML='<i class="fas fa-sync fa-spin" style="margin-right:8px"></i>Running <b>'+p.name+'</b> on Microsoft Fabric...<br><span style="font-size:11px;opacity:.85;margin-top:4px;display:block">Databricks cluster warming up · Delta Lake write in progress</span>';
+    document.body.appendChild(toast);
+    setTimeout(function(){
+      toast.style.background='#059669';
+      toast.innerHTML='<i class="fas fa-check-circle" style="margin-right:8px"></i><b>'+p.name+'</b> completed<br><span style="font-size:11px;opacity:.85">'+p.records+' processed · Unity Catalog updated · Lineage recorded</span>';
+      setTimeout(function(){ toast.remove(); }, 2800);
+    }, 2200);
+  }
+
+  function _p20clientTable() {
+    return _p20clientGold.map(function(c){
+      var lapseCol = c.lapseRisk<25?'#059669':c.lapseRisk<50?'#d97706':'#dc2626';
+      var csCol = c.crossSell>85?'#059669':c.crossSell>65?'#d97706':'#64748b';
+      return '<tr style="border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#1e293b">'+c.name+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;font-family:monospace;color:#64748b">'+c.id+'</td>'
+        +'<td style="padding:10px 12px;font-size:13px;font-weight:800;color:'+lapseCol+'">'+c.lapseRisk+'<span style="font-size:10px;font-weight:400">/100</span></td>'
+        +'<td style="padding:10px 12px;font-size:13px;font-weight:800;color:'+csCol+'">'+c.crossSell+'<span style="font-size:10px;font-weight:400">/100</span></td>'
+        +'<td style="padding:10px 12px;font-size:11px">'+c.policies+' policies</td>'
+        +'<td style="padding:10px 12px;font-size:11px">'+c.claims+' claims</td>'
+        +'<td style="padding:10px 12px;font-size:11px">'+c.careEpisodes+' episodes</td>'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:600;color:#0078d4">'+c.premiumArr+'</td>'
+        +'<td style="padding:10px 12px">'+(c.complianceOk?'<span style="color:#059669;font-size:11px;font-weight:700">✓ OK</span>':'<span style="color:#dc2626;font-size:11px;font-weight:700">⚠ Flag</span>')+'</td>'
+        +'</tr>';
+    }).join('');
+  }
+
+  function _p20buildPage() {
+    var layerData = {bronze:_p20bronze, silver:_p20silver, gold:_p20gold};
+    var layerColors = {bronze:BRONZE, silver:SILVER, gold:GOLD};
+    var layerIcons = {bronze:'fas fa-inbox', silver:'fas fa-filter', gold:'fas fa-star'};
+    var layerDescs = {
+      bronze:'Raw ingest from all source systems — LTCAS, CellTrak EVV, HAL Policy Admin, CRM. Data stored as-is in ADLS Gen2 Delta format. No transformations applied.',
+      silver:'Cleansed, validated, deduplicated and joined datasets. DQ rules applied. ICD-10 validated, amounts normalized, care episodes constructed. Unity Catalog governed.',
+      gold:'Aggregated, ML-scored, business-ready tables. Lapse predictions, cross-sell propensity, care cost models, regulatory compliance flags. Powers all agent workflows.'
+    };
+
+    var tabsHtml = ['bronze','silver','gold'].map(function(l){
+      var k='p20-layer-'+l;
+      window._p8actions[k]=function(){ _p20activeLayer=l; _p20buildPage(); };
+      var active = l===_p20activeLayer;
+      var col = layerColors[l];
+      return '<button onclick="_p8run(\''+k+'\')" style="padding:8px 22px;border:2px solid '+col+';border-radius:8px;background:'+(active?col:'#fff')+';color:'+(active?'#fff':col)+';font-weight:700;font-size:13px;cursor:pointer;transition:all .2s"><i class="'+layerIcons[l]+'" style="margin-right:6px"></i>'+l.charAt(0).toUpperCase()+l.slice(1)+' Layer</button>';
+    }).join('');
+
+    var rows = _p20layerRows(layerData[_p20activeLayer]);
+    var col = layerColors[_p20activeLayer];
+
+    var html = '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'
+
+      // Header
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'
+      +'<div><div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:40px;height:40px;background:linear-gradient(135deg,#0078d4,#742774);border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-database" style="color:#fff;font-size:18px"></i></div>'
+      +'<div><div style="font-size:20px;font-weight:800;color:#0f172a">Azure Data Lake — Medallion Architecture</div>'
+      +'<div style="font-size:12px;color:#64748b;margin-top:2px">Microsoft Fabric · Databricks Delta Lake · Unity Catalog governed · LTC + HAL unified</div></div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +_p20svc('fas fa-cube','Microsoft Fabric','#742774')
+      +_p20svc('fas fa-fire','Databricks','#e25a1c')
+      +_p20svc('fas fa-layer-group','Delta Lake','#0078d4')
+      +_p20svc('fas fa-book','Unity Catalog','#059669')
+      +'</div></div>'
+
+      // KPI bar
+      +'<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'
+      +_p20kpi('1.18 TB','Total Data Volume','#0078d4')
+      +_p20kpi('26','Delta Tables','#742774')
+      +_p20kpi('99.4%','Gold DQ Score','#059669')
+      +_p20kpi('14,820','Unified Clients','#7c3aed')
+      +_p20kpi('6','Active Pipelines','#d97706')
+      +_p20kpi('52,100','Policies Tracked','#0891b2')
+      +'</div>'
+
+      // Architecture flow
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:18px">'
+      +'<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Azure Fabric Architecture Flow</div>'
+      +'<div style="display:flex;align-items:center;gap:0;overflow-x:auto;padding:4px 0">'
+      +['Source Systems','ADLS Gen2','ADF Pipelines','Databricks ETL','Bronze Δ','Silver Δ','Gold Δ','Unity Catalog','Semantic Layer','Agents'].map(function(s,i){
+        var colors=['#475569','#0078d4','#0078d4','#e25a1c',BRONZE,SILVER,GOLD,'#059669','#0891b2','#7c3aed'];
+        return '<div style="text-align:center;min-width:88px">'
+          +'<div style="background:'+colors[i]+';color:#fff;border-radius:8px;padding:7px 10px;font-size:10px;font-weight:700;white-space:nowrap">'+s+'</div>'
+          +(i<9?'<div style="color:#cbd5e1;font-size:16px;padding:0 2px;display:inline-block">→</div>':'')
+          +'</div>';
+      }).join('')
+      +'</div></div>'
+
+      // Layer selector
+      +'<div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">'
+      +'<span style="font-size:13px;font-weight:700;color:#475569">Select Layer:</span>'
+      +tabsHtml+'</div>'
+
+      // Layer description
+      +'<div style="background:'+col+'15;border-left:4px solid '+col+';border-radius:0 8px 8px 0;padding:10px 16px;margin-bottom:14px;font-size:12px;color:#374151">'
+      +'<i class="'+layerIcons[_p20activeLayer]+'" style="margin-right:8px;color:'+col+'"></i>'
+      +layerDescs[_p20activeLayer]+'</div>'
+
+      // Tables
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:18px">'
+      +'<table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:'+col+';color:#fff">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;white-space:nowrap">Table Name</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Source</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Rows</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Size</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;min-width:130px">DQ Score</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Domain</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px">Description</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+
+      // Two-column: Pipelines + Client Gold
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">'
+
+      // Pipelines
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-play-circle" style="color:#0078d4"></i>Pipeline Monitor'
+      +'<span style="margin-left:auto;font-size:10px;background:#059669;color:#fff;padding:2px 7px;border-radius:8px">ADF + Fabric</span></div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f8fafc"><th style="padding:8px 12px;text-align:left;font-size:10px;color:#64748b">Pipeline</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Layer</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Status</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Duration</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Last Run</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Records</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Action</th></tr></thead>'
+      +'<tbody>'+_p20pipelineRows()+'</tbody></table></div></div>'
+
+      // Client Gold records
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-star" style="color:'+GOLD+'"></i>Gold Layer — C360 Client Records'
+      +'<span style="margin-left:auto;font-size:10px;background:'+GOLD+';color:#fff;padding:2px 7px;border-radius:8px">ML Scored</span></div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f8fafc"><th style="padding:8px 12px;text-align:left;font-size:10px;color:#64748b">Client</th><th style="padding:8px 12px;font-size:10px;color:#64748b">ID</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Lapse Risk</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Cross-Sell</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Policies</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Claims</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Care Episodes</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Premium</th><th style="padding:8px 12px;font-size:10px;color:#64748b">Compliance</th></tr></thead>'
+      +'<tbody>'+_p20clientTable()+'</tbody></table></div></div>'
+      +'</div>'
+
+      // Unity Catalog info
+      +'<div style="background:linear-gradient(135deg,#059669,#0891b2);border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-book" style="font-size:28px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:14px">Unity Catalog — Single Governance Pane</div>'
+      +'<div style="font-size:12px;opacity:.88;margin-top:3px">All 26 Delta tables registered · Column-level lineage tracked · Row-level security applied · 3 data stewards assigned (LTC · HAL · Shared) · GDPR masking on PII columns · Audit log: 100% pipeline events captured</div></div>'
+      +'</div>'
+
+      +'</div>'; // end outer
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  /* ── Navigation wiring ───────────────────────────────────── */
+  var _p20origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    if (page === 'hal-datalake') {
+      document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+      var navEl = document.querySelector('.hal-datalake-nav');
+      if (navEl) navEl.classList.add('active');
+      _p20buildPage();
+      return;
+    }
+    if (_p20origNav) _p20origNav(page);
+  };
+
+  console.log('[Phase 20] Azure Data Lake — Medallion Architecture loaded · Bronze(10) · Silver(8) · Gold(8) tables · 9 pipelines · Microsoft Fabric + Databricks + Unity Catalog · 5 C360 clients in Gold layer');
+})();
+
+/* ============================================================
+   PHASE 21 — SEMANTIC LAYER (Unity Catalog · dbt · Azure Synapse)
+   Hybrid LTC + HAL Intelligence Platform
+   ============================================================ */
+(function () {
+  'use strict';
+  var TEAL = '#0891b2'; var UNITY = '#059669';
+
+  var _p21activeTab = 'entities';
+
+  /* ── 12 Canonical Entities ───────────────────────────────── */
+  var _p21entities = [
+    { name:'Claimant',         domain:'LTC',   goldTable:'ltc_claims_cleansed',   attrs:['claimant_id','ssn_masked','dob','eligibility_start','adl_score','benefit_trigger','state_code'],    steward:'LTC Data Office',    dqScore:96, relations:['Policy','CareEpisode','Provider','EligibilityPeriod'] },
+    { name:'CareEpisode',      domain:'LTC',   goldTable:'ltc_care_episodes',     attrs:['episode_id','claimant_id','provider_id','start_date','end_date','care_type','daily_cost','adl_delta'],steward:'LTC Data Office',    dqScore:94, relations:['Claimant','Provider','Benefit'] },
+    { name:'EligibilityPeriod',domain:'LTC',   goldTable:'ltc_eligibility',       attrs:['eligibility_id','policy_id','start_date','end_date','adl_threshold','benefit_period','max_benefit'], steward:'LTC Data Office',    dqScore:97, relations:['Claimant','Policy'] },
+    { name:'LTCProvider',      domain:'LTC',   goldTable:'shared_network',        attrs:['provider_id','npi','name','network_status','care_types','state','visit_rate','evv_enabled'],          steward:'Shared',             dqScore:98, relations:['CareEpisode','Claimant'] },
+    { name:'PolicyHolder',     domain:'HAL',   goldTable:'hal_client360',         attrs:['client_id','first','last','dob','ssn_masked','address','advisor_id','kyc_status','since_date'],       steward:'HAL Data Office',    dqScore:97, relations:['Policy','Claim','Agent'] },
+    { name:'Policy',           domain:'Both',  goldTable:'hal_policies',          attrs:['policy_id','client_id','product_type','face_value','premium','status','lapse_risk_score','issue_date'],steward:'HAL Data Office',   dqScore:95, relations:['PolicyHolder','Claim','Premium','ContractTerm'] },
+    { name:'Claim',            domain:'Both',  goldTable:'hal_claims_raw→cleansed',attrs:['claim_id','policy_id','claim_type','amount','status','filed_date','decision_date','denial_reason'],  steward:'HAL Data Office',    dqScore:93, relations:['Policy','PolicyHolder','Agent'] },
+    { name:'Premium',          domain:'HAL',   goldTable:'hal_premiums',          attrs:['payment_id','policy_id','amount','due_date','paid_date','method','arrears_flag','grace_period_end'],  steward:'HAL Data Office',    dqScore:96, relations:['Policy','PolicyHolder'] },
+    { name:'ContractTerm',     domain:'HAL',   goldTable:'hal_policies',          attrs:['term_id','policy_id','effective_date','expiry_date','renewal_type','conversion_options','riders'],    steward:'HAL Data Office',    dqScore:95, relations:['Policy'] },
+    { name:'Agent',            domain:'Both',  goldTable:'shared_agents_raw',     attrs:['agent_id','name','license_no','states','domains','tier','ytd_premium','book_size'],                  steward:'Shared',             dqScore:98, relations:['PolicyHolder','Policy'] },
+    { name:'Benefit',          domain:'LTC',   goldTable:'ltc_claim_analytics',   attrs:['benefit_id','policy_id','benefit_type','daily_amount','max_lifetime','inflation_rider','paid_to_date'],steward:'LTC Data Office',   dqScore:97, relations:['EligibilityPeriod','CareEpisode'] },
+    { name:'UnifiedClient',    domain:'Both',  goldTable:'unified_client_360_gold',attrs:['unified_id','ltc_claimant_id','hal_client_id','name','total_premium','lapse_score','crosssell_score','compliance_flag'],steward:'Shared',dqScore:99, relations:['PolicyHolder','Claimant','Policy','CareEpisode'] }
+  ];
+
+  /* ── Business Glossary ───────────────────────────────────── */
+  var _p21glossary = [
+    { term:'ADL Score',            domain:'LTC',  def:'Activities of Daily Living score (0–6). Benefit trigger when ≥2 ADLs impaired. Sourced from clinical assessment in CONNECT portal.' },
+    { term:'Benefit Trigger',      domain:'LTC',  def:'Condition (ADL or cognitive impairment) that activates LTC benefit payments. Validated by licensed health care practitioner.' },
+    { term:'Care Episode',         domain:'LTC',  def:'Contiguous period of care services received by a claimant from one or more providers, bounded by start/end dates.' },
+    { term:'Elimination Period',   domain:'LTC',  def:'Waiting period (typically 30–180 days) before LTC benefits begin. Claimant self-pays during this period.' },
+    { term:'Daily Benefit Amount', domain:'LTC',  def:'Maximum dollar amount payable per day of qualified long-term care. Inflation riders may increase this annually.' },
+    { term:'EVV',                  domain:'LTC',  def:'Electronic Visit Verification. CellTrak-powered GPS+time verification of in-home care provider visits. Required by 21st Century CURES Act.' },
+    { term:'Policy Lapse',         domain:'HAL',  def:'Termination of policy due to non-payment of premium beyond grace period. Grace period is typically 31 days for HAL products.' },
+    { term:'Lapse Risk Score',     domain:'HAL',  def:'ML-generated score (0–100) predicting 90-day lapse probability. Inputs: payment history, arrears, life events, contact recency.' },
+    { term:'Cross-Sell Propensity',domain:'Both', def:'ML score (0–100) ranking likelihood of client purchasing an additional product. Separate models per product type.' },
+    { term:'Premium Arrears',      domain:'HAL',  def:'Outstanding unpaid premium past due date. Trigger for lapse workflow and advisor outreach escalation.' },
+    { term:'Contestability Period',domain:'HAL',  def:'First 2 years of a life policy during which insurer may contest claims. Claims investigated for material misrepresentation.' },
+    { term:'Face Value',           domain:'HAL',  def:'Death benefit or principal amount of an insurance or annuity contract. May differ from current cash value.' },
+    { term:'NPI',                  domain:'LTC',  def:'National Provider Identifier. 10-digit unique identifier for health care providers. Required for all EVV claim submissions.' },
+    { term:'SLA',                  domain:'LTC',  def:'Service Level Agreement. LTC claims: 15-day acknowledgment, 45-day decision. HAL claims: varies by product type.' },
+    { term:'Unity Catalog',        domain:'Both', def:'Microsoft Fabric/Databricks unified data governance layer. Provides column-level lineage, RBAC, row-level security, and audit logs across all Delta tables.' },
+    { term:'Golden Record',        domain:'Both', def:'Single authoritative version of a client, created by merging LTC claimant and HAL policyholder records via probabilistic matching.' },
+    { term:'Medallion Architecture',domain:'Both',def:'Data lakehouse pattern with Bronze (raw), Silver (cleansed), Gold (aggregated) layers. Enables incremental refinement and ML readiness.' },
+    { term:'Semantic Drift',       domain:'Both', def:'Divergence in business definition of a term across LTC and HAL systems. Monitored via DQ rules in Unity Catalog.' }
+  ];
+
+  /* ── DQ Rules ────────────────────────────────────────────── */
+  var _p21dqRules = [
+    { rule:'Policy ID format',      entity:'Policy',        type:'Format',      passing:409180, failing:20,    severity:'High' },
+    { rule:'SSN masked (PII)',       entity:'PolicyHolder',  type:'Privacy',     passing:52100,  failing:0,     severity:'Critical' },
+    { rule:'ADL score 0–6',          entity:'Claimant',      type:'Range',       passing:278930, failing:10,    severity:'High' },
+    { rule:'Benefit amount >0',      entity:'Benefit',       type:'Business',    passing:42100,  failing:0,     severity:'High' },
+    { rule:'Provider NPI valid',     entity:'LTCProvider',   type:'Reference',   passing:18870,  failing:20,    severity:'Medium' },
+    { rule:'Premium not null',       entity:'Premium',       type:'Completeness',passing:207800, failing:0,     severity:'High' },
+    { rule:'Care episode dates valid',entity:'CareEpisode',  type:'Temporal',    passing:174190, failing:20,    severity:'Medium' },
+    { rule:'Cross-sell score 0–100', entity:'UnifiedClient', type:'Range',       passing:14820,  failing:0,     severity:'High' },
+    { rule:'Lapse score 0–100',      entity:'Policy',        type:'Range',       passing:52100,  failing:0,     severity:'High' },
+    { rule:'Eligibility date order', entity:'EligibilityPeriod',type:'Temporal', passing:93790,  failing:10,    severity:'Medium' }
+  ];
+
+  /* ── Semantic Relationships ──────────────────────────────── */
+  var _p21rels = [
+    { from:'UnifiedClient', to:'PolicyHolder',     card:'1:1',   key:'unified_id → hal_client_id',  joinType:'Deterministic match' },
+    { from:'UnifiedClient', to:'Claimant',          card:'1:0..1',key:'unified_id → ltc_claimant_id',joinType:'Probabilistic match (SSN+DOB)' },
+    { from:'PolicyHolder',  to:'Policy',            card:'1:N',   key:'client_id → policy.client_id',joinType:'Foreign key' },
+    { from:'Policy',        to:'Claim',             card:'1:N',   key:'policy_id → claim.policy_id', joinType:'Foreign key' },
+    { from:'Policy',        to:'EligibilityPeriod', card:'1:N',   key:'policy_id → eligibility.policy_id',joinType:'Foreign key' },
+    { from:'Claimant',      to:'CareEpisode',       card:'1:N',   key:'claimant_id → episode.claimant_id',joinType:'Foreign key' },
+    { from:'CareEpisode',   to:'LTCProvider',       card:'N:1',   key:'provider_id → provider.id',   joinType:'Foreign key' },
+    { from:'Policy',        to:'Premium',           card:'1:N',   key:'policy_id → premium.policy_id',joinType:'Foreign key' },
+    { from:'PolicyHolder',  to:'Agent',             card:'N:1',   key:'advisor_id → agent.agent_id', joinType:'Foreign key' },
+    { from:'Benefit',       to:'CareEpisode',       card:'1:N',   key:'benefit_id (derived)',         joinType:'Computed join' }
+  ];
+
+  /* ── C360 entity instances ───────────────────────────────── */
+  var _p21c360 = [
+    { name:'Margaret Chen',  id:'CLT-001', unifiedId:'UNI-001', entities:['UnifiedClient','PolicyHolder','Claimant','Policy×4','CareEpisode×14','Benefit','EligibilityPeriod'], dqScore:99 },
+    { name:'Robert Kincaid', id:'CLT-002', unifiedId:'UNI-002', entities:['UnifiedClient','PolicyHolder','Claimant','Policy×3','CareEpisode×6','Benefit','EligibilityPeriod'],  dqScore:97 },
+    { name:'Dorothy Harrington',id:'CLT-003',unifiedId:'UNI-003',entities:['UnifiedClient','PolicyHolder','Claimant','Policy×2','CareEpisode×28','Benefit×2','EligibilityPeriod'],dqScore:98 },
+    { name:'Frank & Gloria Bianchi',id:'CLT-004',unifiedId:'UNI-004',entities:['UnifiedClient','PolicyHolder×2','Policy×3','Claim×2'],dqScore:95 },
+    { name:'Sylvia Torres',  id:'CLT-005', unifiedId:'UNI-005', entities:['UnifiedClient','PolicyHolder','Policy×2'],  dqScore:96 }
+  ];
+
+  /* ── Helpers ─────────────────────────────────────────────── */
+  function _p21kpi(val,label,color){ return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:110px"><div style="font-size:22px;font-weight:800;color:'+color+'">'+val+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">'+label+'</div></div>'; }
+  function _p21domBadge(d){ var c={LTC:'#dc2626',HAL:'#7c3aed',Both:'#0891b2'}; return '<span style="background:'+(c[d]||'#64748b')+'22;color:'+(c[d]||'#64748b')+';border:1px solid '+(c[d]||'#64748b')+'44;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:700">'+d+'</span>'; }
+  function _p21sev(s){ var c={Critical:'#dc2626',High:'#d97706',Medium:'#f59e0b'}; return '<span style="color:'+(c[s]||'#64748b')+';font-weight:700;font-size:11px">'+s+'</span>'; }
+
+  function _p21entitiesTab() {
+    var rows = _p21entities.map(function(e){
+      var k='p21-ent-'+e.name.replace(/\s/g,'-');
+      window._p8actions[k]=function(){ _p21showEntityDetail(e); };
+      var dqCol=e.dqScore>=97?'#059669':e.dqScore>=93?'#d97706':'#dc2626';
+      return '<tr style="border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="_p8run(\''+k+'\')">'+
+        '<td style="padding:10px 14px;font-size:13px;font-weight:700;color:#0891b2">'+e.name+'</td>'+
+        '<td style="padding:10px 14px">'+_p21domBadge(e.domain)+'</td>'+
+        '<td style="padding:10px 14px;font-size:11px;font-family:monospace;color:#64748b">'+e.goldTable+'</td>'+
+        '<td style="padding:10px 14px;font-size:11px;color:#475569">'+e.attrs.length+' attributes</td>'+
+        '<td style="padding:10px 14px;font-size:11px;color:#64748b">'+e.steward+'</td>'+
+        '<td style="padding:10px 14px;font-size:13px;font-weight:800;color:'+dqCol+'">'+e.dqScore+'%</td>'+
+        '<td style="padding:10px 14px;font-size:11px;color:#7c3aed">'+e.relations.join(' · ')+'</td>'+
+        '</tr>';
+    }).join('');
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'+
+      '<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a"><i class="fas fa-cubes" style="color:'+TEAL+';margin-right:8px"></i>Canonical Entity Model — 12 Unified Entities <span style="font-size:11px;font-weight:400;color:#64748b;margin-left:8px">Click row to inspect attributes</span></div>'+
+      '<table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="background:'+TEAL+';color:#fff"><th style="padding:10px 14px;text-align:left;font-size:11px">Entity</th><th style="padding:10px 14px;font-size:11px">Domain</th><th style="padding:10px 14px;font-size:11px">Gold Table</th><th style="padding:10px 14px;font-size:11px">Attributes</th><th style="padding:10px 14px;font-size:11px">Steward</th><th style="padding:10px 14px;font-size:11px">DQ</th><th style="padding:10px 14px;font-size:11px">Relations</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function _p21showEntityDetail(e) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:#0008;z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;max-width:560px;width:92%;box-shadow:0 20px 60px #0004">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
+      '<div style="font-size:18px;font-weight:800;color:#0891b2">'+e.name+'</div>'+
+      '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:#f1f5f9;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:700">✕ Close</button></div>'+
+      '<div style="display:flex;gap:8px;margin-bottom:14px">'+_p21domBadge(e.domain)+'<span style="font-size:12px;color:#64748b">Steward: <b>'+e.steward+'</b></span><span style="font-size:12px;color:#059669;font-weight:700">DQ: '+e.dqScore+'%</span></div>'+
+      '<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Attributes</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">'+
+      e.attrs.map(function(a){ return '<span style="background:#f0fdf4;border:1px solid #86efac;color:#166534;border-radius:6px;padding:3px 10px;font-size:11px;font-family:monospace">'+a+'</span>'; }).join('')+
+      '</div>'+
+      '<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Relationships</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">'+
+      e.relations.map(function(r){ return '<span style="background:#f5f3ff;border:1px solid #c4b5fd;color:#7c3aed;border-radius:6px;padding:3px 10px;font-size:11px">⟶ '+r+'</span>'; }).join('')+
+      '</div>'+
+      '<div style="background:#f0f9ff;border-radius:8px;padding:10px 14px;font-size:11px;color:#0369a1"><i class="fas fa-database" style="margin-right:6px"></i>Gold Table: <b>'+e.goldTable+'</b> · Unity Catalog registered · Column-level lineage active</div>'+
+      '</div>';
+    document.body.appendChild(overlay);
+  }
+
+  function _p21glossaryTab() {
+    var rows = _p21glossary.map(function(g){
+      return '<tr style="border-bottom:1px solid #f1f5f9">'+
+        '<td style="padding:10px 14px;font-size:12px;font-weight:700;color:#0891b2;white-space:nowrap">'+g.term+'</td>'+
+        '<td style="padding:10px 14px">'+_p21domBadge(g.domain)+'</td>'+
+        '<td style="padding:10px 14px;font-size:12px;color:#374151">'+g.def+'</td>'+
+        '</tr>';
+    }).join('');
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'+
+      '<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a"><i class="fas fa-book-open" style="color:'+TEAL+';margin-right:8px"></i>Business Glossary — 18 Unified Terms (Unity Catalog registered)</div>'+
+      '<table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="background:'+TEAL+';color:#fff"><th style="padding:10px 14px;text-align:left;font-size:11px">Term</th><th style="padding:10px 14px;font-size:11px">Domain</th><th style="padding:10px 14px;font-size:11px">Definition</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function _p21dqTab() {
+    var rows = _p21dqRules.map(function(r){
+      var total=r.passing+r.failing; var pct=Math.round(r.passing/total*100);
+      var col=pct>=99?'#059669':pct>=95?'#d97706':'#dc2626';
+      return '<tr style="border-bottom:1px solid #f1f5f9">'+
+        '<td style="padding:10px 14px;font-size:12px;font-weight:700;color:#1e293b">'+r.rule+'</td>'+
+        '<td style="padding:10px 14px;font-size:11px;color:#0891b2;font-weight:600">'+r.entity+'</td>'+
+        '<td style="padding:10px 14px;font-size:11px;background:#f0fdf4;color:#166534;font-weight:600">'+r.passing.toLocaleString()+'</td>'+
+        '<td style="padding:10px 14px;font-size:11px;background:'+(r.failing>0?'#fef2f2':'#f0fdf4')+';color:'+(r.failing>0?'#dc2626':'#059669')+';font-weight:600">'+r.failing+'</td>'+
+        '<td style="padding:10px 14px;min-width:120px"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px"><div style="width:'+pct+'%;height:6px;background:'+col+';border-radius:3px"></div></div><span style="font-size:11px;font-weight:700;color:'+col+'">'+pct+'%</span></div></td>'+
+        '<td style="padding:10px 14px">'+_p21sev(r.severity)+'</td>'+
+        '</tr>';
+    }).join('');
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'+
+      '<div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a"><i class="fas fa-shield-alt" style="color:'+TEAL+';margin-right:8px"></i>Data Quality Rules — 10 Active Rules across Semantic Entities</div>'+
+      '<table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="background:'+TEAL+';color:#fff"><th style="padding:10px 14px;text-align:left;font-size:11px">Rule</th><th style="padding:10px 14px;font-size:11px">Entity</th><th style="padding:10px 14px;font-size:11px">Passing</th><th style="padding:10px 14px;font-size:11px">Failing</th><th style="padding:10px 14px;font-size:11px;min-width:130px">Pass Rate</th><th style="padding:10px 14px;font-size:11px">Severity</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function _p21c360Tab() {
+    var cards = _p21c360.map(function(c){
+      var dqCol=c.dqScore>=98?'#059669':'#d97706';
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div style="font-size:14px;font-weight:800;color:#0f172a">'+c.name+'</div>'+
+        '<span style="font-size:11px;font-weight:700;color:'+dqCol+'">DQ '+c.dqScore+'%</span></div>'+
+        '<div style="font-size:10px;font-family:monospace;color:#64748b;margin-bottom:10px">'+c.id+' · Unified ID: '+c.unifiedId+'</div>'+
+        '<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px">SEMANTIC ENTITIES</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
+        c.entities.map(function(e){ return '<span style="background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;border-radius:6px;padding:2px 8px;font-size:10px">'+e+'</span>'; }).join('')+
+        '</div></div>';
+    }).join('');
+    return '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px">'+cards+'</div>';
+  }
+
+  function _p21buildPage() {
+    var tabs=['entities','glossary','dq','c360'];
+    var tabLabels={entities:'Entity Model',glossary:'Business Glossary',dq:'Data Quality',c360:'C360 Clients'};
+    var tabIcons={entities:'fas fa-cubes',glossary:'fas fa-book-open',dq:'fas fa-shield-alt',c360:'fas fa-users'};
+
+    var tabBar = tabs.map(function(t){
+      var k='p21-tab-'+t; window._p8actions[k]=function(){ _p21activeTab=t; _p21buildPage(); };
+      var active=t===_p21activeTab;
+      return '<button onclick="_p8run(\''+k+'\')" style="padding:8px 20px;border:2px solid '+(active?TEAL:'#e2e8f0')+';border-radius:8px;background:'+(active?TEAL:'#fff')+';color:'+(active?'#fff':'#64748b')+';font-weight:700;font-size:12px;cursor:pointer"><i class="'+tabIcons[t]+'" style="margin-right:6px"></i>'+tabLabels[t]+'</button>';
+    }).join('');
+
+    var body = _p21activeTab==='entities'?_p21entitiesTab():
+               _p21activeTab==='glossary'?_p21glossaryTab():
+               _p21activeTab==='dq'?_p21dqTab():_p21c360Tab();
+
+    var html='<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+      '<div style="width:40px;height:40px;background:linear-gradient(135deg,'+TEAL+','+UNITY+');border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-layer-group" style="color:#fff;font-size:18px"></i></div>'+
+      '<div><div style="font-size:20px;font-weight:800;color:#0f172a">Semantic Layer — Unity Catalog</div>'+
+      '<div style="font-size:12px;color:#64748b;margin-top:2px">12 canonical entities · 18 business glossary terms · 10 DQ rules · dbt semantic models · Azure Synapse Serverless</div></div></div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<span style="background:#05996918;color:'+UNITY+';border:1px solid '+UNITY+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-book" style="margin-right:4px"></i>Unity Catalog</span>'+
+      '<span style="background:#0078d418;color:#0078d4;border:1px solid #0078d444;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-cogs" style="margin-right:4px"></i>dbt Core</span>'+
+      '<span style="background:#742774;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-cube" style="margin-right:4px"></i>Microsoft Fabric</span>'+
+      '</div></div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'+
+      _p21kpi('12','Canonical Entities',TEAL)+_p21kpi('18','Glossary Terms',UNITY)+_p21kpi('10','DQ Rules','#d97706')+_p21kpi('99.4%','Overall DQ','#059669')+_p21kpi('5','C360 Golden Records','#7c3aed')+_p21kpi('3','Data Stewards','#0078d4')+
+      '</div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'+tabBar+'</div>'+
+      body+
+      '<div style="margin-top:16px;background:linear-gradient(135deg,'+TEAL+','+UNITY+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'+
+      '<i class="fas fa-check-circle" style="font-size:28px;opacity:.9"></i>'+
+      '<div><div style="font-weight:800;font-size:14px">dbt Semantic Models — Production Deployed</div>'+
+      '<div style="font-size:12px;opacity:.88;margin-top:3px">12 semantic models compiled · 26 metrics defined · Azure Synapse Serverless queries < 2s · Unity Catalog tags propagated · Data lineage: Bronze → Silver → Gold → Semantic</div></div></div>'+
+      '</div>';
+
+    document.getElementById('page-content').innerHTML = html;
+  }
+
+  var _p21origNav = window.navigateTo;
+  window.navigateTo = function(page) {
+    if (page==='hal-semantic') {
+      document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+      var n=document.querySelector('.hal-semantic-nav'); if(n) n.classList.add('active');
+      _p21buildPage(); return;
+    }
+    if (_p21origNav) _p21origNav(page);
+  };
+
+  console.log('[Phase 21] Semantic Layer loaded · 12 entities · 18 glossary · 10 DQ rules · Unity Catalog · dbt · Azure Synapse · 5 C360 golden records');
+})();
+
+/* ============================================================
+   PHASE 22 — ONTOLOGY & KNOWLEDGE GRAPH
+   Azure Cosmos DB Gremlin API + Microsoft Purview
+   ============================================================ */
+(function () {
+  'use strict';
+  var KG = '#7c3aed'; var PURVIEW = '#742774';
+
+  var _p22activeTab = 'ontology';
+  var _p22selectedNode = null;
+
+  /* ── Ontology Classes ─────────────────────────────────────── */
+  var _p22classes = [
+    { cls:'Person',         subclassOf:null,          properties:['personId','name','dob','ssn_masked','address'],          desc:'Root class for all natural persons in the LTC+HAL domain' },
+    { cls:'Claimant',       subclassOf:'Person',       properties:['adlScore','eligibilityStatus','benefitTriggered'],        desc:'Person receiving LTC benefits. Subclass: Claimant ⊑ Person' },
+    { cls:'PolicyHolder',   subclassOf:'Person',       properties:['advisorId','kycStatus','sinceDate'],                     desc:'Person holding one or more HAL policies. Subclass: PolicyHolder ⊑ Person' },
+    { cls:'Policy',         subclassOf:null,           properties:['policyId','productType','faceValue','lapseRiskScore'],   desc:'Insurance or annuity contract. Disjoint: LTCPolicy ⊔ HALPolicy' },
+    { cls:'LTCPolicy',      subclassOf:'Policy',       properties:['dailyBenefitAmount','eliminationPeriod','maxLifetime'],  desc:'Long-term care insurance policy. hasEligibility exactly 1 EligibilityPeriod' },
+    { cls:'HALPolicy',      subclassOf:'Policy',       properties:['productLine','premiumAmount','gracePeriod'],             desc:'Health, Annuity or Life policy. covers exactly 1 PolicyHolder' },
+    { cls:'CareEvent',      subclassOf:null,           properties:['eventId','careType','startDate','endDate','cost'],       desc:'Discrete care service event. isCoveredBy some LTCPolicy' },
+    { cls:'Provider',       subclassOf:null,           properties:['npi','networkStatus','evvEnabled','careTypes'],          desc:'Licensed care or insurance service provider' },
+    { cls:'Claim',          subclassOf:null,           properties:['claimId','claimType','amount','status','filedDate'],     desc:'Request for benefit payment. isFiledUnder exactly 1 Policy' },
+    { cls:'Benefit',        subclassOf:null,           properties:['benefitId','dailyAmount','maxLifetime','paidToDate'],    desc:'Monetary benefit entitlement. isDerivedFrom exactly 1 LTCPolicy' },
+    { cls:'Agent',          subclassOf:null,           properties:['agentId','license','states','tier'],                    desc:'Licensed insurance agent. manages some PolicyHolder' },
+    { cls:'UnifiedClient',  subclassOf:null,           properties:['unifiedId','lapseScore','crossSellScore','complianceFlag'],desc:'Golden record fusing Claimant and PolicyHolder. equivalentClass: Claimant ⊓ PolicyHolder' }
+  ];
+
+  /* ── Ontology Properties ─────────────────────────────────── */
+  var _p22props = [
+    { prop:'hasClaim',         domain:'Policy',        range:'Claim',           type:'Object',   card:'0..*', inverse:'isClaimOf' },
+    { prop:'isHeldBy',         domain:'HALPolicy',     range:'PolicyHolder',    type:'Object',   card:'1',    inverse:'holdsPolicies' },
+    { prop:'receivedCareFrom', domain:'Claimant',      range:'Provider',        type:'Object',   card:'0..*', inverse:'providedCareTo' },
+    { prop:'hasCareEvent',     domain:'Claimant',      range:'CareEvent',       type:'Object',   card:'0..*', inverse:'isEventOf' },
+    { prop:'isEligibleFor',    domain:'Claimant',      range:'Benefit',         type:'Object',   card:'0..1', inverse:'benefitEligibleFor' },
+    { prop:'managedBy',        domain:'PolicyHolder',  range:'Agent',           type:'Object',   card:'1',    inverse:'manages' },
+    { prop:'triggersLapse',    domain:'Premium',       range:'Policy',          type:'Object',   card:'0..1', inverse:'lapseTriggeredBy' },
+    { prop:'adlScore',         domain:'Claimant',      range:'xsd:integer(0-6)',type:'Datatype', card:'1',    inverse:null },
+    { prop:'lapseRiskScore',   domain:'Policy',        range:'xsd:float(0-100)',type:'Datatype', card:'1',    inverse:null },
+    { prop:'crossSellScore',   domain:'UnifiedClient', range:'xsd:float(0-100)',type:'Datatype', card:'1',    inverse:null }
+  ];
+
+  /* ── Knowledge Graph Nodes (real C360 client data) ───────── */
+  var _p22nodes = [
+    { id:'N001', label:'Margaret Chen',     type:'UnifiedClient', x:50,  y:45,  color:'#7c3aed', detail:'UNI-001 · Lapse 12 · XSell 94' },
+    { id:'N002', label:'Robert Kincaid',    type:'UnifiedClient', x:80,  y:25,  color:'#7c3aed', detail:'UNI-002 · Lapse 34 · XSell 72' },
+    { id:'N003', label:'Dorothy Harrington',type:'UnifiedClient', x:20,  y:70,  color:'#7c3aed', detail:'UNI-003 · Lapse 8 · XSell 61' },
+    { id:'N004', label:'Frank & Gloria B',  type:'UnifiedClient', x:75,  y:72,  color:'#7c3aed', detail:'UNI-004 · Lapse 57 · XSell 88 · ⚠ Compliance' },
+    { id:'N005', label:'Sylvia Torres',     type:'UnifiedClient', x:35,  y:20,  color:'#7c3aed', detail:'UNI-005 · Lapse 23 · XSell 79' },
+    { id:'N006', label:'LTC Policy P-293',  type:'LTCPolicy',     x:30,  y:55,  color:'#dc2626', detail:'$250K coverage · ADL 3 · Active' },
+    { id:'N007', label:'LTC Policy P-321',  type:'LTCPolicy',     x:65,  y:35,  color:'#dc2626', detail:'$180K coverage · ADL 2 · Active' },
+    { id:'N008', label:'HAL Life P-301',    type:'HALPolicy',     x:88,  y:50,  color:'#0891b2', detail:'$1M face value · Lapse risk 57' },
+    { id:'N009', label:'Care Provider A',   type:'Provider',      x:15,  y:45,  color:'#059669', detail:'NPI 1234567890 · In-network · EVV enabled' },
+    { id:'N010', label:'Care Provider B',   type:'Provider',      x:45,  y:80,  color:'#059669', detail:'NPI 0987654321 · In-network · Home health' },
+    { id:'N011', label:'Advisor Chen',      type:'Agent',         x:60,  y:15,  color:'#d97706', detail:'LIC-NY-4421 · Tier 1 · 142 clients' },
+    { id:'N012', label:'Claim CLM-041',     type:'Claim',         x:10,  y:30,  color:'#f59e0b', detail:'$284K life claim · Pending' },
+    { id:'N013', label:'Care Episode 14',   type:'CareEvent',     x:25,  y:82,  color:'#6366f1', detail:'In-home nursing · 28 days · $18,400' },
+    { id:'N014', label:'Benefit LTC-001',   type:'Benefit',       x:40,  y:63,  color:'#8b5cf6', detail:'$200/day · 3yr max · $18K paid' },
+    { id:'N015', label:'Annuity P-361',     type:'HALPolicy',     x:70,  y:82,  color:'#0891b2', detail:'$300K face · Annuity · 72-T' }
+  ];
+
+  /* ── Knowledge Graph Edges ───────────────────────────────── */
+  var _p22edges = [
+    { from:'N001', to:'N006', label:'isClaimantOf' },
+    { from:'N001', to:'N014', label:'isEligibleFor' },
+    { from:'N001', to:'N013', label:'hasCareEvent' },
+    { from:'N013', to:'N009', label:'providedBy' },
+    { from:'N013', to:'N006', label:'coveredBy' },
+    { from:'N002', to:'N007', label:'isClaimantOf' },
+    { from:'N004', to:'N008', label:'holdsPolicies' },
+    { from:'N004', to:'N015', label:'holdsPolicies' },
+    { from:'N004', to:'N012', label:'hasClaim' },
+    { from:'N008', to:'N012', label:'hasClaim' },
+    { from:'N003', to:'N010', label:'receivedCareFrom' },
+    { from:'N001', to:'N011', label:'managedBy' },
+    { from:'N002', to:'N011', label:'managedBy' },
+    { from:'N005', to:'N011', label:'managedBy' }
+  ];
+
+  /* ── SWRL Rules ──────────────────────────────────────────── */
+  var _p22rules = [
+    { rule:'Lapse Alert',     expr:'Policy(?p) ∧ lapseRiskScore(?p, ?s) ∧ swrlb:greaterThan(?s, 50) → triggerLapseWorkflow(?p)',    fires:['HAL Life P-301 (score 57)'] },
+    { rule:'Benefit Trigger', expr:'Claimant(?c) ∧ adlScore(?c, ?s) ∧ swrlb:greaterThanOrEqual(?s, 2) → isEligibleForBenefit(?c)',   fires:['Margaret Chen (ADL 3)','Robert Kincaid (ADL 2)','Dorothy Harrington (ADL 4)'] },
+    { rule:'Cross-Sell',      expr:'UnifiedClient(?u) ∧ crossSellScore(?u, ?s) ∧ swrlb:greaterThan(?s, 85) → prioritizeCrossSell(?u)',fires:['Margaret Chen (94)','Frank & Gloria Bianchi (88)'] },
+    { rule:'Compliance Flag', expr:'Policy(?p) ∧ stateMandate(?p, ?m) ∧ violates(?p, ?m) → flagCompliance(?p)',                      fires:['HAL Life P-301 (Frank & Gloria)'] }
+  ];
+
+  /* ── Helpers ─────────────────────────────────────────────── */
+  function _p22kpi(v,l,c){ return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:100px"><div style="font-size:22px;font-weight:800;color:'+c+'">'+v+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">'+l+'</div></div>'; }
+
+  function _p22nodeTypeColor(t){ var m={'UnifiedClient':'#7c3aed','LTCPolicy':'#dc2626','HALPolicy':'#0891b2','Provider':'#059669','Agent':'#d97706','Claim':'#f59e0b','CareEvent':'#6366f1','Benefit':'#8b5cf6'}; return m[t]||'#64748b'; }
+
+  function _p22ontologyTab() {
+    var clsRows=_p22classes.map(function(c){
+      return '<tr style="border-bottom:1px solid #f1f5f9">'+
+        '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:'+KG+'">'+c.cls+'</td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#64748b">'+(c.subclassOf?'<span style="color:#7c3aed">⊑ '+c.subclassOf+'</span>':'<span style="color:#94a3b8">Root</span>')+'</td>'+
+        '<td style="padding:9px 12px"><div style="display:flex;flex-wrap:wrap;gap:3px">'+c.properties.map(function(p){ return '<span style="background:#f5f3ff;color:#7c3aed;border-radius:4px;padding:1px 6px;font-size:10px;font-family:monospace">'+p+'</span>'; }).join('')+'</div></td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#64748b;max-width:260px">'+c.desc+'</td>'+
+        '</tr>';
+    }).join('');
+    var propRows=_p22props.map(function(p){
+      return '<tr style="border-bottom:1px solid #f1f5f9">'+
+        '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#0891b2;font-family:monospace">'+p.prop+'</td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#475569">'+p.domain+'</td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#475569">'+p.range+'</td>'+
+        '<td style="padding:9px 12px"><span style="background:'+(p.type==='Object'?'#f5f3ff':'#f0fdf4')+';color:'+(p.type==='Object'?'#7c3aed':'#059669')+';border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700">'+p.type+'</span></td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#64748b">'+p.card+'</td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#94a3b8">'+(p.inverse?'↩ '+p.inverse:'—')+'</td>'+
+        '</tr>';
+    }).join('');
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'+
+      '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'+
+      '<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a"><i class="fas fa-sitemap" style="color:'+KG+';margin-right:8px"></i>OWL Classes (12)</div>'+
+      '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:'+KG+';color:#fff"><th style="padding:9px 12px;text-align:left;font-size:10px">Class</th><th style="padding:9px 12px;font-size:10px">Subclass Of</th><th style="padding:9px 12px;font-size:10px">Properties</th><th style="padding:9px 12px;font-size:10px">Description</th></tr></thead><tbody>'+clsRows+'</tbody></table></div>'+
+      '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'+
+      '<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a"><i class="fas fa-link" style="color:#0891b2;margin-right:8px"></i>Object & Datatype Properties (10)</div>'+
+      '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#0891b2;color:#fff"><th style="padding:9px 12px;text-align:left;font-size:10px">Property</th><th style="padding:9px 12px;font-size:10px">Domain</th><th style="padding:9px 12px;font-size:10px">Range</th><th style="padding:9px 12px;font-size:10px">Type</th><th style="padding:9px 12px;font-size:10px">Card</th><th style="padding:9px 12px;font-size:10px">Inverse</th></tr></thead><tbody>'+propRows+'</tbody></table></div>'+
+      '</div>';
+  }
+
+  function _p22graphTab() {
+    var svgNodes=_p22nodes.map(function(n){
+      var col=_p22nodeTypeColor(n.type);
+      var k='p22-node-'+n.id; window._p8actions[k]=function(){ _p22selectedNode=n; _p22showNodeDetail(n); };
+      var isSelected=_p22selectedNode&&_p22selectedNode.id===n.id;
+      return '<g onclick="_p8run(\''+k+'\')" style="cursor:pointer" transform="translate('+(n.x*6.2)+','+(n.y*4.8)+')">'+
+        '<circle r="'+(isSelected?16:12)+'" fill="'+col+'" stroke="'+(isSelected?'#fff':'transparent')+'" stroke-width="3" opacity="0.9"/>'+
+        '<text text-anchor="middle" y="24" font-size="9" fill="#374151" font-weight="600" font-family="Inter,sans-serif" style="pointer-events:none">'+n.label.slice(0,14)+'</text>'+
+        '</g>';
+    }).join('');
+    var svgEdges=_p22edges.map(function(e){
+      var fn=_p22nodes.find(function(n){return n.id===e.from;}); var tn=_p22nodes.find(function(n){return n.id===e.to;});
+      if(!fn||!tn) return '';
+      var fx=fn.x*6.2, fy=fn.y*4.8, tx=tn.x*6.2, ty=tn.y*4.8;
+      var mx=(fx+tx)/2, my=(fy+ty)/2;
+      return '<line x1="'+fx+'" y1="'+fy+'" x2="'+tx+'" y2="'+ty+'" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#arrow)"/>'+
+        '<text x="'+mx+'" y="'+(my-4)+'" text-anchor="middle" font-size="8" fill="#94a3b8" font-family="Inter,sans-serif">'+e.label+'</text>';
+    }).join('');
+    var legend=['UnifiedClient','LTCPolicy','HALPolicy','Provider','Agent','Claim','CareEvent','Benefit'].map(function(t){
+      return '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#475569"><div style="width:10px;height:10px;border-radius:50%;background:'+_p22nodeTypeColor(t)+'"></div>'+t+'</div>';
+    }).join('');
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'+
+      '<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a;display:flex;align-items:center;justify-content:space-between">'+
+      '<span><i class="fas fa-project-diagram" style="color:'+KG+';margin-right:8px"></i>Knowledge Graph Explorer — 15 nodes · 14 edges · Cosmos DB Gremlin API</span>'+
+      '<span style="font-size:11px;color:#64748b;font-weight:400">Click any node to explore</span></div>'+
+      '<svg viewBox="0 0 650 500" style="width:100%;height:500px;background:#fafafa">'+
+      '<defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#cbd5e1"/></marker></defs>'+
+      svgEdges+svgNodes+
+      '</svg>'+
+      '<div style="padding:12px 16px;border-top:1px solid #f1f5f9;display:flex;gap:12px;flex-wrap:wrap">'+legend+'</div></div>';
+  }
+
+  function _p22showNodeDetail(n) {
+    var detail = document.createElement('div');
+    detail.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:9999;background:#fff;border:2px solid '+_p22nodeTypeColor(n.type)+';border-radius:12px;padding:16px 20px;min-width:300px;box-shadow:0 8px 32px #0004;font-family:Inter,sans-serif';
+    detail.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+      '<div style="font-size:14px;font-weight:800;color:'+_p22nodeTypeColor(n.type)+'">'+n.label+'</div>'+
+      '<button onclick="this.parentElement.parentElement.remove()" style="background:#f1f5f9;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px">✕</button></div>'+
+      '<div style="font-size:11px;color:#64748b">Type: <b>'+n.type+'</b></div>'+
+      '<div style="font-size:12px;color:#374151;margin-top:6px">'+n.detail+'</div>'+
+      '<div style="font-size:10px;color:#94a3b8;margin-top:6px">Cosmos DB ID: '+n.id+' · Gremlin vertex · Azure Purview catalogued</div>';
+    document.querySelectorAll('[data-p22node]').forEach(function(el){ el.remove(); });
+    detail.setAttribute('data-p22node','1');
+    document.body.appendChild(detail);
+    setTimeout(function(){ detail.remove(); }, 5000);
+  }
+
+  function _p22rulesTab() {
+    var cards=_p22rules.map(function(r){
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px">'+
+        '<div style="font-size:13px;font-weight:800;color:'+KG+';margin-bottom:8px"><i class="fas fa-gavel" style="margin-right:6px"></i>'+r.rule+'</div>'+
+        '<div style="background:#f5f3ff;border-radius:8px;padding:10px;font-size:11px;font-family:monospace;color:#4c1d95;margin-bottom:10px;line-height:1.6">'+r.expr+'</div>'+
+        '<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px">CURRENT FIRES:</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px">'+r.fires.map(function(f){ return '<span style="background:#fef3c7;color:#92400e;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600">⚡ '+f+'</span>'; }).join('')+'</div>'+
+        '</div>';
+    }).join('');
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'+cards+'</div>';
+  }
+
+  function _p22buildPage() {
+    var tabs=['ontology','graph','rules'];
+    var tabLabels={ontology:'OWL Ontology',graph:'Knowledge Graph',rules:'SWRL Rules'};
+    var tabIcons={ontology:'fas fa-sitemap',graph:'fas fa-project-diagram',rules:'fas fa-gavel'};
+    var tabBar=tabs.map(function(t){
+      var k='p22-tab-'+t; window._p8actions[k]=function(){ _p22activeTab=t; _p22buildPage(); };
+      var active=t===_p22activeTab;
+      return '<button onclick="_p8run(\''+k+'\')" style="padding:8px 20px;border:2px solid '+(active?KG:'#e2e8f0')+';border-radius:8px;background:'+(active?KG:'#fff')+';color:'+(active?'#fff':'#64748b')+';font-weight:700;font-size:12px;cursor:pointer"><i class="'+tabIcons[t]+'" style="margin-right:6px"></i>'+tabLabels[t]+'</button>';
+    }).join('');
+    var body=_p22activeTab==='ontology'?_p22ontologyTab():_p22activeTab==='graph'?_p22graphTab():_p22rulesTab();
+
+    document.getElementById('page-content').innerHTML=
+      '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+      '<div style="width:40px;height:40px;background:linear-gradient(135deg,'+KG+','+PURVIEW+');border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-project-diagram" style="color:#fff;font-size:18px"></i></div>'+
+      '<div><div style="font-size:20px;font-weight:800;color:#0f172a">Ontology & Knowledge Graph</div>'+
+      '<div style="font-size:12px;color:#64748b;margin-top:2px">OWL 2 DL ontology · Azure Cosmos DB Gremlin API · Microsoft Purview · 15 nodes · 14 edges · 4 SWRL rules</div></div></div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<span style="background:'+KG+'22;color:'+KG+';border:1px solid '+KG+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-network-wired" style="margin-right:4px"></i>Cosmos DB Gremlin</span>'+
+      '<span style="background:'+PURVIEW+'22;color:'+PURVIEW+';border:1px solid '+PURVIEW+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-eye" style="margin-right:4px"></i>Microsoft Purview</span>'+
+      '</div></div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'+
+      _p22kpi('12','OWL Classes',KG)+_p22kpi('10','Properties',PURVIEW)+_p22kpi('15','KG Nodes','#0891b2')+_p22kpi('14','KG Edges','#059669')+_p22kpi('4','SWRL Rules','#d97706')+_p22kpi('5','C360 Clients','#dc2626')+
+      '</div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px">'+tabBar+'</div>'+
+      body+
+      '<div style="margin-top:16px;background:linear-gradient(135deg,'+KG+','+PURVIEW+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'+
+      '<i class="fas fa-brain" style="font-size:28px;opacity:.9"></i>'+
+      '<div><div style="font-weight:800;font-size:14px">Cosmos DB Gremlin + Microsoft Purview — Production Active</div>'+
+      '<div style="font-size:12px;opacity:.88;margin-top:3px">15 vertex types registered · Gremlin traversal p50 < 12ms · Purview auto-discovery: 100% ontology classes mapped · SWRL reasoning runs every 15 min · 5 C360 clients fully graphed</div></div></div>'+
+      '</div>';
+  }
+
+  var _p22origNav=window.navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-ontology'){ document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');}); var n=document.querySelector('.hal-ontology-nav'); if(n)n.classList.add('active'); _p22buildPage(); return; }
+    if(_p22origNav) _p22origNav(page);
+  };
+  console.log('[Phase 22] Ontology & KG loaded · 12 OWL classes · 10 properties · 15 KG nodes · 14 edges · 4 SWRL rules · Cosmos DB Gremlin · Microsoft Purview');
+})();
+
+/* ============================================================
+   PHASE 23 — VECTOR STORE & RAG ENGINE
+   Azure AI Search + OpenAI Embeddings + Semantic Kernel
+   ============================================================ */
+(function () {
+  'use strict';
+  var VEC = '#4f46e5'; var RAG = '#7c3aed';
+
+  var _p23activeTab = 'indexes';
+  var _p23ragQuery = '';
+  var _p23ragRunning = false;
+
+  /* ── Vector Indexes ───────────────────────────────────────── */
+  var _p23indexes = [
+    { name:'ltc-claims-idx',    domain:'LTC',  docs:278940, dims:1536, metric:'cosine', size:'2.8 GB', model:'text-embedding-ada-002', freshness:'2026-07-10 03:00', desc:'Claim descriptions, clinical notes, denial reasons, ICD-10 narratives' },
+    { name:'ltc-careplan-idx',  domain:'LTC',  docs:174210, dims:1536, metric:'cosine', size:'1.7 GB', model:'text-embedding-ada-002', freshness:'2026-07-10 03:15', desc:'Care plan text, ADL assessments, provider notes, authorization narratives' },
+    { name:'hal-policies-idx',  domain:'HAL',  docs:409200, dims:1536, metric:'cosine', size:'4.1 GB', model:'text-embedding-ada-002', freshness:'2026-07-10 03:30', desc:'Policy terms, riders, contract language, product descriptions, endorsements' },
+    { name:'hal-clients-idx',   domain:'HAL',  docs: 52100, dims:1536, metric:'cosine', size:'520 MB', model:'text-embedding-ada-002', freshness:'2026-07-10 03:45', desc:'Client profiles, advisor notes, life events, CRM interactions' },
+    { name:'kg-ontology-idx',   domain:'Both', docs:  1240, dims:1536, metric:'cosine', size: '12 MB', model:'text-embedding-ada-002', freshness:'2026-07-10 04:00', desc:'OWL class descriptions, property definitions, SWRL rules, glossary terms' },
+    { name:'regulatory-idx',    domain:'Both', docs:  8400, dims:1536, metric:'cosine', size: '84 MB', model:'text-embedding-ada-002', freshness:'2026-07-10 04:15', desc:'State mandate text, compliance rules, DOI bulletins, actuarial standards' }
+  ];
+
+  /* ── RAG sample Q&A pairs keyed by keyword ───────────────── */
+  var _p23ragExamples = {
+    default: {
+      query: 'What are the LTC benefit triggers for Margaret Chen?',
+      chunks: [
+        { score:0.971, src:'ltc-claims-idx', text:'Margaret Chen (CLT-001) · ADL Score: 3 (bathing, dressing, transferring impaired) · Benefit trigger: ADL ≥2 impairments confirmed by licensed HCP on 2024-03-14 · Elimination period: 90 days (satisfied 2024-06-12) · Daily benefit: $200/day · Inflation rider: 5% compound · Maximum lifetime benefit: $250,000' },
+        { score:0.948, src:'ltc-careplan-idx', text:'Care plan approved: in-home skilled nursing 5x/week + occupational therapy 2x/week · Provider: Care Provider A (NPI 1234567890) · Authorization: AUTH-2024-1842 · Care episode start: 2024-06-13 · Current daily cost: $182/day · 14 episodes logged via CellTrak EVV' },
+        { score:0.921, src:'kg-ontology-idx', text:'Ontology rule: Claimant(?c) ∧ adlScore(?c, ?s) ∧ swrlb:greaterThanOrEqual(?s, 2) → isEligibleForBenefit(?c). Margaret Chen satisfies this axiom. Benefit object: Benefit LTC-001 · $200/day · 3-year max · $18,400 paid to date' },
+        { score:0.897, src:'hal-policies-idx', text:'LTC Policy P-293 · Face value $250,000 · Issued 2022 · Status: Active · Premium $4,400/yr · Paid current · No lapse risk · Inflation rider active · Compound 5% annually from issue date' },
+        { score:0.872, src:'regulatory-idx', text:'New York LTC regulation 11 NYCRR 52: benefit triggers require certification by licensed health care practitioner within 90 days of claim. Margaret Chen certification dated 2024-03-14 — compliant. Re-certification due: 2025-03-14.' }
+      ],
+      answer: 'Margaret Chen (CLT-001) qualifies for LTC benefits under Policy P-293 based on 3 impaired ADLs (bathing, dressing, transferring), confirmed by licensed HCP on 2024-03-14. Her 90-day elimination period was satisfied on 2024-06-12. She currently receives $200/day for in-home skilled nursing (5x/week) plus OT, provided by Care Provider A via EVV. To date, $18,400 has been paid of her $250,000 maximum lifetime benefit. Inflation rider applies 5% compound annually. Re-certification is due 2025-03-14 for ongoing compliance.'
+    },
+    lapse: {
+      query: 'Which clients have the highest lapse risk and what should I do?',
+      chunks: [
+        { score:0.984, src:'hal-clients-idx', text:'Frank & Gloria Bianchi (CLT-004) · Lapse risk score: 57/100 · Trigger: HAL Life P-301 ($1M face value) · Premium arrears: $2,100 overdue 28 days · Grace period expires: 2026-07-18 · Last advisor contact: 2026-05-31 (41 days ago) · Compliance flag active' },
+        { score:0.961, src:'hal-policies-idx', text:'Policy P-301 · Life insurance · Face $1,000,000 · Annual premium $8,400 · Status: Grace period · Arrears: $2,100 · Lapse risk model inputs: payment_history=0.62, contact_recency=0.29, arrears_flag=1, life_event=0 · Score: 57 (HIGH)' },
+        { score:0.939, src:'hal-clients-idx', text:'Robert Kincaid (CLT-002) · Lapse risk: 34/100 · Policy P-321 LTC + P-308 Life · Premium due 2026-07-22 · Auto-pay enrolled · Low lapse probability · Cross-sell score 72 — annuity ladder opportunity identified' },
+        { score:0.912, src:'kg-ontology-idx', text:'SWRL rule fired: Policy(P-301) ∧ lapseRiskScore(P-301, 57) ∧ swrlb:greaterThan(57, 50) → triggerLapseWorkflow(P-301). Lapse Prevention Agent activated 2026-07-10 06:42.' },
+        { score:0.881, src:'regulatory-idx', text:'NY DOI: failure to pay premium within grace period results in policy lapse. Reinstatement requires application + back premium + interest within 3 years. Frank & Gloria Bianchi grace period expires 2026-07-18 — 8 days remaining.' }
+      ],
+      answer: 'Critical lapse risk: Frank & Gloria Bianchi (CLT-004) with score 57/100. Their HAL Life P-301 ($1M face value) has $2,100 arrears overdue 28 days — grace period expires July 18 (8 days). Immediate action: call today, offer payment arrangement, schedule in-person review. A SWRL rule has already fired triggering the Lapse Prevention Agent. Robert Kincaid (score 34) is lower risk with auto-pay enrolled. Recommended: prioritize F&G Bianchi contact today and use cross-sell appointment to also discuss Sylvia Torres annuity opportunity (score 79).'
+    },
+    crosssell: {
+      query: 'What cross-sell opportunities exist for Margaret Chen?',
+      chunks: [
+        { score:0.978, src:'hal-clients-idx', text:'Margaret Chen (CLT-001) · Cross-sell score: 94/100 (highest in book) · Current policies: LTC P-293, Health P-102, Annuity P-115, Life P-188 · Gap identified: No disability income rider · Life coverage review: $500K face, may need increase given LTC care costs · Age 68 — Medicare supplement opportunity' },
+        { score:0.952, src:'kg-ontology-idx', text:'KG traversal: UnifiedClient(N001) → hasCareEpisode(N013) → coveredBy(LTC P-293). Care cost $182/day = $66,430/yr. Current life face $500K. Cross-sell recommendation: increase life to $750K + add DI rider + Medicare Supplement Plan G.' },
+        { score:0.931, src:'hal-policies-idx', text:'Medicare Supplement Plan G: covers Medicare Part A/B gaps including skilled nursing facility coinsurance. Particularly relevant for Margaret given active LTC care. Monthly premium estimate: $180–$220/mo for age 68 female non-smoker NY.' },
+        { score:0.908, src:'regulatory-idx', text:'Medicare Supplement guaranteed issue: if policy change within 63 days of Medicare enrollment. Margaret Chen Medicare Part B enrolled 2021-07-01. Guaranteed issue window closed — standard underwriting applies but preferred class likely given LTC qualification.' }
+      ],
+      answer: 'Margaret Chen (CLT-004, score 94/100) has 3 high-value cross-sell opportunities: 1) Medicare Supplement Plan G (~$180-220/mo) — fills skilled nursing gaps directly relevant to her active LTC care; 2) Increase Life coverage P-188 from $500K → $750K given annual LTC care cost of $66K+; 3) Disability Income rider on life policy as income protection. The Knowledge Graph shows her care episode costs are absorbing $182/day — a comprehensive review anchored to her LTC situation is the ideal conversation opener.'
+    }
+  };
+
+  var _p23ragResult = null;
+
+  /* ── Helpers ─────────────────────────────────────────────── */
+  function _p23kpi(v,l,c){ return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:100px"><div style="font-size:22px;font-weight:800;color:'+c+'">'+v+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">'+l+'</div></div>'; }
+  function _p23domBadge(d){ var c={LTC:'#dc2626',HAL:'#7c3aed',Both:'#0891b2'}; return '<span style="background:'+(c[d]||'#64748b')+'22;color:'+(c[d]||'#64748b')+';border:1px solid '+(c[d]||'#64748b')+'44;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:700">'+d+'</span>'; }
+
+  function _p23indexesTab() {
+    var cards=_p23indexes.map(function(ix){
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
+        '<div style="font-size:13px;font-weight:800;color:'+VEC+';font-family:monospace">'+ix.name+'</div>'+
+        _p23domBadge(ix.domain)+'</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">'+
+        ['docs:'+ix.docs.toLocaleString(),'dims:'+ix.dims,'metric:'+ix.metric,'size:'+ix.size].map(function(s){ return '<div style="background:#f8fafc;border-radius:6px;padding:6px 10px;font-size:11px;color:#475569"><b style="color:#0f172a">'+s.split(':')[0]+':</b> '+s.split(':')[1]+'</div>'; }).join('')+
+        '</div>'+
+        '<div style="font-size:10px;color:#64748b;margin-bottom:6px">Model: <span style="color:#4f46e5;font-weight:700">'+ix.model+'</span> · Last refresh: '+ix.freshness+'</div>'+
+        '<div style="font-size:11px;color:#64748b">'+ix.desc+'</div>'+
+        '</div>';
+    }).join('');
+    return '<div style="margin-bottom:14px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px">'+
+      '<div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Embedding Pipeline</div>'+
+      '<div style="display:flex;align-items:center;gap:0;overflow-x:auto">'+
+      ['Gold Delta Tables','Chunker (512 tok)','ada-002 Embedding','Azure AI Search','Index Upsert','Query Ready'].map(function(s,i){
+        var cols=['#475569','#d97706','#4f46e5','#0078d4','#059669','#0891b2'];
+        return '<div style="text-align:center;min-width:110px"><div style="background:'+cols[i]+';color:#fff;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:700">'+s+'</div>'+(i<5?'<span style="color:#cbd5e1;font-size:14px;margin:0 2px">→</span>':'')+'</div>';
+      }).join('')+
+      '</div></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">'+cards+'</div>';
+  }
+
+  function _p23ragTab() {
+    var exampleBtns=['default','lapse','crosssell'].map(function(k,i){
+      var labels=['LTC Benefit Triggers','Lapse Risk Analysis','Cross-Sell Opportunity']; var ek='p23-eg-'+k;
+      window._p8actions[ek]=function(){ _p23loadExample(k); };
+      return '<button onclick="_p8run(\''+ek+'\')" style="background:#4f46e518;color:#4f46e5;border:1px solid #4f46e544;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:600;cursor:pointer"><i class="fas fa-bolt" style="margin-right:4px"></i>'+labels[i]+'</button>';
+    }).join('');
+
+    var runKey='p23-rag-run'; window._p8actions[runKey]=function(){ _p23runRag(); };
+
+    var resultHtml='';
+    if(_p23ragResult) {
+      var r=_p23ragResult;
+      resultHtml='<div style="margin-top:14px">'+
+        '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Retrieved Chunks (Top '+r.chunks.length+')</div>'+
+        r.chunks.map(function(c,i){
+          return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px">'+
+            '<div style="text-align:center;min-width:54px"><div style="font-size:16px;font-weight:800;color:#4f46e5">'+(c.score*100).toFixed(1)+'%</div><div style="font-size:9px;color:#94a3b8">cosine</div></div>'+
+            '<div><div style="font-size:10px;color:#0078d4;font-weight:700;margin-bottom:4px">'+c.src+'</div><div style="font-size:11px;color:#374151;line-height:1.5">'+c.text+'</div></div></div>';
+        }).join('')+
+        '<div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:10px;padding:16px 18px;color:#fff;margin-top:10px">'+
+        '<div style="font-size:11px;opacity:.8;margin-bottom:6px"><i class="fas fa-robot" style="margin-right:6px"></i>Azure OpenAI GPT-4o · Grounded Response</div>'+
+        '<div style="font-size:13px;line-height:1.7">'+r.answer+'</div>'+
+        '</div></div>';
+    }
+
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px">'+
+      '<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:14px"><i class="fas fa-search" style="color:'+VEC+';margin-right:8px"></i>RAG Query Simulator — Azure AI Search + GPT-4o</div>'+
+      '<div style="margin-bottom:10px;font-size:11px;color:#64748b">Try an example or type your own query:</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+exampleBtns+'</div>'+
+      '<div style="display:flex;gap:8px;margin-bottom:4px">'+
+      '<input id="p23-rag-input" value="'+((_p23ragResult?_p23ragResult.query:'')||'')+'" placeholder="Ask anything about LTC claims, HAL policies, client 360, compliance..." style="flex:1;border:1px solid #cbd5e1;border-radius:8px;padding:10px 14px;font-size:13px;font-family:Inter,sans-serif" oninput="_p23ragQuery=this.value"/>'+
+      '<button onclick="_p8run(\'p23-rag-run\')" style="background:'+VEC+';color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap"><i class="fas fa-search" style="margin-right:6px"></i>Search & Generate</button></div>'+
+      '<div style="font-size:10px;color:#94a3b8;margin-bottom:4px">Indexes searched: all 6 · Retrieval: top-5 cosine similarity · Context window: 8K tokens · Model: Azure OpenAI GPT-4o</div>'+
+      resultHtml+'</div>';
+  }
+
+  function _p23loadExample(key) {
+    var ex=_p23ragExamples[key]||_p23ragExamples.default;
+    _p23ragResult={query:ex.query, chunks:ex.chunks, answer:ex.answer};
+    _p23buildPage();
+    var inp=document.getElementById('p23-rag-input'); if(inp) inp.value=ex.query;
+  }
+
+  function _p23runRag() {
+    var inp=document.getElementById('p23-rag-input');
+    var q=inp?inp.value.trim():'';
+    var key=q.toLowerCase().indexOf('lapse')>=0?'lapse':q.toLowerCase().indexOf('cross')>=0||q.toLowerCase().indexOf('sell')>=0?'crosssell':'default';
+    var toast=document.createElement('div');
+    toast.style.cssText='position:fixed;bottom:28px;right:28px;z-index:99999;background:#4f46e5;color:#fff;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px #0003;max-width:340px';
+    toast.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:8px"></i>Searching 6 vector indexes · ada-002 embedding query...<br><span style="font-size:11px;opacity:.85">Azure AI Search retrieving top-5 chunks</span>';
+    document.body.appendChild(toast);
+    setTimeout(function(){
+      toast.innerHTML='<i class="fas fa-brain" style="margin-right:8px"></i>GPT-4o generating grounded response...<br><span style="font-size:11px;opacity:.85">Context: 5 chunks · 2,840 tokens</span>';
+      setTimeout(function(){
+        toast.remove();
+        _p23ragResult=_p23ragExamples[key]||_p23ragExamples.default;
+        _p23ragResult.query=q||_p23ragResult.query;
+        _p23buildPage();
+      }, 1400);
+    }, 1800);
+  }
+
+  function _p23buildPage() {
+    var tabs=['indexes','rag']; var tabLabels={indexes:'Vector Indexes',rag:'RAG Query Simulator'};
+    var tabIcons={indexes:'fas fa-database',rag:'fas fa-search'};
+    var tabBar=tabs.map(function(t){
+      var k='p23-tab-'+t; window._p8actions[k]=function(){ _p23activeTab=t; _p23buildPage(); };
+      var active=t===_p23activeTab;
+      return '<button onclick="_p8run(\''+k+'\')" style="padding:8px 20px;border:2px solid '+(active?VEC:'#e2e8f0')+';border-radius:8px;background:'+(active?VEC:'#fff')+';color:'+(active?'#fff':'#64748b')+';font-weight:700;font-size:12px;cursor:pointer"><i class="'+tabIcons[t]+'" style="margin-right:6px"></i>'+tabLabels[t]+'</button>';
+    }).join('');
+    var body=_p23activeTab==='indexes'?_p23indexesTab():_p23ragTab();
+
+    document.getElementById('page-content').innerHTML=
+      '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+      '<div style="width:40px;height:40px;background:linear-gradient(135deg,'+VEC+','+RAG+');border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-search" style="color:#fff;font-size:18px"></i></div>'+
+      '<div><div style="font-size:20px;font-weight:800;color:#0f172a">Vector Store & RAG Engine</div>'+
+      '<div style="font-size:12px;color:#64748b;margin-top:2px">Azure AI Search · OpenAI text-embedding-ada-002 · GPT-4o · Semantic Kernel · 6 indexes · 924K+ documents</div></div></div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<span style="background:'+VEC+'22;color:'+VEC+';border:1px solid '+VEC+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-search" style="margin-right:4px"></i>Azure AI Search</span>'+
+      '<span style="background:#0078d418;color:#0078d4;border:1px solid #0078d444;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-robot" style="margin-right:4px"></i>Azure OpenAI</span>'+
+      '</div></div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'+
+      _p23kpi('6','Vector Indexes',VEC)+_p23kpi('924K+','Total Documents','#0078d4')+_p23kpi('1,536','Embedding Dims','#4f46e5')+_p23kpi('9.2 GB','Index Storage','#d97706')+_p23kpi('< 80ms','Query P95','#059669')+_p23kpi('GPT-4o','RAG Model','#7c3aed')+
+      '</div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px">'+tabBar+'</div>'+
+      body+
+      '<div style="margin-top:16px;background:linear-gradient(135deg,'+VEC+','+RAG+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'+
+      '<i class="fas fa-microchip" style="font-size:28px;opacity:.9"></i>'+
+      '<div><div style="font-weight:800;font-size:14px">Semantic Kernel Orchestration — All 6 Agents Connected</div>'+
+      '<div style="font-size:12px;opacity:.88;margin-top:3px">Vector retrieval feeds all 6 agent workflows · Hybrid search (vector + BM25 keyword) · Semantic reranking active · Azure OpenAI GPT-4o · Context window 128K · Function calling enabled for agent tool use</div></div></div>'+
+      '</div>';
+  }
+
+  var _p23origNav=window.navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-vectorstore'){ document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');}); var n=document.querySelector('.hal-vectorstore-nav'); if(n)n.classList.add('active'); _p23buildPage(); return; }
+    if(_p23origNav) _p23origNav(page);
+  };
+  console.log('[Phase 23] Vector Store & RAG loaded · 6 indexes · 924K docs · ada-002 · GPT-4o · Azure AI Search · Semantic Kernel');
+})();
+
+/* ============================================================
+   PHASE 24 — AGENTIFICATION HUB
+   6 Mission-Critical Agents · Azure AI Foundry · Semantic Kernel
+   ============================================================ */
+(function () {
+  'use strict';
+  var AG = '#059669'; var AZ = '#0078d4';
+
+  var _p24activeAgent = null;
+  var _p24runningAgent = null;
+
+  /* ── 6 Agents ─────────────────────────────────────────────── */
+  var _p24agents = [
+    {
+      id:'claim-triage', name:'Claim Triage Agent', domain:'LTC', icon:'fas fa-file-medical-alt', color:'#dc2626',
+      desc:'Reads Vector Store + KG to auto-classify LTC claim types, detect anomalies, validate ADL scores, and route to correct adjudicator queue with priority score.',
+      status:'active', lastRun:'2026-07-10 06:42', processed:'847 claims', latency:'1.2s avg',
+      tools:['ltc-claims-idx (Vector)','kg-ontology-idx (Vector)','ltc_claims_cleansed (Gold)','SWRL Benefit Trigger rule','ICD-10 Validator','Adjudicator Router'],
+      runSteps:[
+        '⟳ Retrieving claim CLM-2026-0042 from ltc_claims_cleansed (Gold)...',
+        '⟳ Embedding claim narrative → Azure AI Search (ltc-claims-idx)...',
+        '⟳ Top match: ADL impairment claim · cosine 0.962 · ICD-10 Z74.3 validated',
+        '⟳ KG traversal: Claimant → LTCPolicy P-293 → EligibilityPeriod → Benefit',
+        '⟳ SWRL rule fired: adlScore(3) ≥ 2 → isEligibleForBenefit(true)',
+        '✓ Claim classified: SKILLED_NURSING · Priority: HIGH · Auto-authorize: YES',
+        '✓ Routed to: Sr. Adjudicator Queue · Expected TAT: 3 days · SLA: on track'
+      ],
+      result:'CLM-2026-0042 (Dorothy Harrington) auto-classified as Skilled Nursing LTC claim. ADL score 4 confirmed, SWRL benefit trigger satisfied. Authorization recommended. Routed to Sr. Adjudicator — SLA 45-day target, currently at Day 3.'
+    },
+    {
+      id:'care-auth', name:'Care Authorization Agent', domain:'LTC', icon:'fas fa-user-nurse', color:'#0891b2',
+      desc:'Validates ADL scores against ontology rules, checks provider network status in KG, verifies EVV compliance, and generates care authorization decisions with full audit trail.',
+      status:'active', lastRun:'2026-07-10 05:18', processed:'312 auths', latency:'0.8s avg',
+      tools:['ltc-careplan-idx (Vector)','Cosmos DB Gremlin (KG)','ltc_care_episodes (Silver)','EVV Validator (CellTrak)','Provider Network API','Auth Decision Engine'],
+      runSteps:[
+        '⟳ Care plan request: AUTH-2026-4421 · Claimant: Margaret Chen (CLT-001)',
+        '⟳ Searching ltc-careplan-idx: ADL assessment report · cosine 0.948',
+        '⟳ KG query: g.V("N001").out("receivedCareFrom").values("networkStatus")',
+        '⟳ Provider A (NPI 1234567890): IN-NETWORK · EVV enabled · visit rate $182/day',
+        '⟳ Ontology check: CareEvent.isCoveredBy(LTCPolicy P-293) → TRUE',
+        '✓ EVV compliance: PASS · 14 prior episodes verified via CellTrak',
+        '✓ Authorization APPROVED: AUTH-2026-4421 · 30-day renewal · $200/day cap'
+      ],
+      result:'Care authorization AUTH-2026-4421 approved for Margaret Chen. In-home skilled nursing 5x/week authorized through 2026-08-10. Provider A confirmed in-network, EVV compliant. Daily benefit $200/day against $182/day cost — within cap. KG-verified coverage, ontology rules satisfied. Renewal reminder set for 2026-07-31.'
+    },
+    {
+      id:'lapse-prev', name:'Lapse Prevention Agent', domain:'HAL', icon:'fas fa-shield-alt', color:'#d97706',
+      desc:'Scores lapse risk from Gold ML model, reads client KG for contact history, drafts personalized multi-channel outreach, and books advisor call via calendar API.',
+      status:'active', lastRun:'2026-07-10 06:42', processed:'2,841 policies', latency:'2.1s avg',
+      tools:['hal_lapse_predictions (Gold)','hal-clients-idx (Vector)','Cosmos DB KG (contact history)','Email/SMS Composer','Calendar API','CRM Update API'],
+      runSteps:[
+        '⟳ Scanning hal_lapse_predictions Gold table: policies with score > 50...',
+        '⟳ HIGH RISK: Policy P-301 (Frank & Gloria Bianchi) · Score: 57 · Grace expires 07-18',
+        '⟳ Vector search hal-clients-idx: last contact notes, preferences, tone...',
+        '⟳ KG: no contact logged in 41 days · Preferred: phone · Best time: 9-11am',
+        '⟳ Drafting outreach: personalized email + SMS + advisor calendar hold',
+        '✓ Email sent: "Important: Your policy protection — action needed"',
+        '✓ SMS sent: "Hi Frank & Gloria — please call us re: your NYL policy"',
+        '✓ Advisor calendar blocked: 2026-07-11 10:00am · 45-min review scheduled'
+      ],
+      result:'Lapse prevention workflow activated for Frank & Gloria Bianchi (P-301, score 57). Email + SMS dispatched at 6:42am. Advisor call scheduled tomorrow 10am. Grace period: 8 days remaining. If no response within 24h, escalate to branch manager. Estimated policy value at risk: $1M face, $8,400/yr premium.'
+    },
+    {
+      id:'crosssell', name:'Cross-Sell Opportunity Agent', domain:'HAL', icon:'fas fa-chart-line', color:'#7c3aed',
+      desc:'Traverses KG for coverage gaps, ranks opportunities by propensity score from Gold layer, drafts personalized pitch using RAG-grounded product knowledge, and creates CRM tasks.',
+      status:'active', lastRun:'2026-07-10 04:00', processed:'14,820 clients', latency:'3.4s avg',
+      tools:['hal_crosssell_scores (Gold)','Cosmos DB Gremlin (KG)','hal-policies-idx (Vector)','kg-ontology-idx (Vector)','Product Catalog API','CRM Task Creator'],
+      runSteps:[
+        '⟳ Loading Gold cross-sell scores: top 10 clients by propensity...',
+        '⟳ #1: Margaret Chen (CLT-001) score 94 · #2: Frank & Gloria Bianchi score 88',
+        '⟳ KG traversal: Margaret → policies → coverage gaps → recommended products',
+        '⟳ Gap identified: No Medicare Supplement · Life face below LTC cost threshold',
+        '⟳ RAG query hal-policies-idx: "Medicare Supplement Plan G NY age 68 female"',
+        '⟳ Retrieved: Plan G $180-220/mo · guaranteed renewable · Part B excess coverage',
+        '✓ Pitch drafted: Anchored to active LTC care + life review + MedSup opportunity',
+        '✓ CRM task created: Advisor Chen · Due: 2026-07-12 · Est. revenue: +$4,800/yr'
+      ],
+      result:'3 cross-sell opportunities identified for Margaret Chen (score 94/100): Medicare Supplement Plan G ($180-220/mo, anchored to active care), Life increase P-188 $500K→$750K ($1,200/yr), DI rider. CRM task assigned to Advisor Chen with AI-drafted pitch. Total opportunity: +$4,800/yr. Frank & Gloria Bianchi (score 88): annuity ladder + LTC rider — $6,200/yr opportunity flagged for post-lapse-call discussion.'
+    },
+    {
+      id:'compliance', name:'Regulatory Compliance Agent', domain:'Both', icon:'fas fa-balance-scale', color:'#f59e0b',
+      desc:'Scans all policies against state mandate ontology rules, generates compliance report per DOI requirements, flags violations, and creates remediation tasks with SLA timers.',
+      status:'active', lastRun:'2026-07-10 04:30', processed:'461,300 policies', latency:'8.2s avg',
+      tools:['regulatory-idx (Vector)','kg-ontology-idx (Vector)','hal_policies (Silver)','ltc_eligibility (Silver)','regulatory_compliance (Gold)','DOI Reporting API'],
+      runSteps:[
+        '⟳ Loading state mandate rules from regulatory-idx (8,400 docs embedded)...',
+        '⟳ Scanning hal_policies (409K): checking against 47-state mandate database...',
+        '⟳ FLAG: Policy P-301 (Frank & Gloria Bianchi) · NY state: grace period non-disclosure',
+        '⟳ KG SWRL rule: Policy(P-301) ∧ stateMandate(P-301, NY-2024-LTC-02) ∧ violates → flagCompliance',
+        '⟳ LTC re-certification check: Dorothy Harrington cert due 2026-08-14 (35 days)',
+        '✓ Compliance report generated: 41 flags across 38 policies · 3 critical · 38 informational',
+        '✓ Remediation tasks created in workflow engine · SLA: critical within 5 business days'
+      ],
+      result:'Compliance scan complete: 461,300 policies scanned. 41 flags raised (3 critical, 38 informational). Critical: Frank & Gloria Bianchi P-301 grace period disclosure (8 days), 2 LTC re-certification expirations. Informational: 38 policies with upcoming state rate filing deadlines. Remediation tasks created with 5-day SLA. DOI report auto-filed via API.'
+    },
+    {
+      id:'client360-synth', name:'Client 360 Synthesis Agent', domain:'Both', icon:'fas fa-user-circle', color:'#4f46e5',
+      desc:'Pulls all data layers (Bronze→Gold + KG + Vector Store), synthesizes unified client brief with risk scores, opportunities and care status, and RAG-answers natural language questions about any client.',
+      status:'active', lastRun:'2026-07-10 07:00', processed:'5 C360 clients', latency:'4.8s avg',
+      tools:['All 6 Vector Indexes','Cosmos DB Gremlin (full KG)','unified_client_360_gold (Gold)','All 6 Delta layers','Azure OpenAI GPT-4o','Semantic Kernel Planner'],
+      runSteps:[
+        '⟳ Client synthesis request: Dorothy Harrington (CLT-003)',
+        '⟳ Gold pull: unified_client_360_gold → lapse 8, xsell 61, compliance OK',
+        '⟳ KG traversal: CLT-003 → 2 LTCPolicies → 28 CareEpisodes → Provider B → Claim×7',
+        '⟳ Vector search: ltc-claims-idx + ltc-careplan-idx + hal-policies-idx',
+        '⟳ Retrieved: 7 claim records, 28 care episodes, 2 policy documents',
+        '⟳ GPT-4o synthesizing: grounding on 12 retrieved chunks...',
+        '✓ Client brief generated: 420 words · risk summary · opportunity map · next-best-action',
+        '✓ Stored to unified_client_360_gold · Audit log: Agent run ID AX-2026-0710-0700'
+      ],
+      result:'Dorothy Harrington (CLT-003) synthesis complete. 2 active LTC policies (P-293 $250K + P-100361 $300K). 28 care episodes via Provider B — highest care utilization in C360 cohort. 7 claims filed, 5 approved, 2 pending. Lapse risk 8 (LOW). Cross-sell: 61 — LTC inflation rider upgrade opportunity ($1,800/yr). Next best action: schedule annual review to discuss care cost trajectory and inflation protection. Agent run AX-2026-0710-0700 logged to Unity Catalog audit trail.'
+    }
+  ];
+
+  /* ── Helpers ─────────────────────────────────────────────── */
+  function _p24kpi(v,l,c){ return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:100px"><div style="font-size:22px;font-weight:800;color:'+c+'">'+v+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">'+l+'</div></div>'; }
+  function _p24domBadge(d){ var c={LTC:'#dc2626',HAL:'#7c3aed',Both:'#0891b2'}; return '<span style="background:'+(c[d]||'#64748b')+'22;color:'+(c[d]||'#64748b')+';border:1px solid '+(c[d]||'#64748b')+'44;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:700">'+d+'</span>'; }
+
+  function _p24agentCard(ag) {
+    var runKey='p24-run-'+ag.id; var detKey='p24-det-'+ag.id;
+    window._p8actions[runKey]=function(){ _p24runAgent(ag); };
+    window._p8actions[detKey]=function(){ _p24activeAgent=ag; _p24buildPage(); };
+    var isRunning=_p24runningAgent===ag.id;
+    return '<div style="background:#fff;border:2px solid '+(isRunning?ag.color:'#e2e8f0')+';border-radius:14px;padding:18px 20px;transition:all .3s">'+
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'+
+      '<div style="display:flex;align-items:center;gap:10px">'+
+      '<div style="width:36px;height:36px;background:'+ag.color+'22;border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="'+ag.icon+'" style="color:'+ag.color+';font-size:16px"></i></div>'+
+      '<div><div style="font-size:13px;font-weight:800;color:#0f172a">'+ag.name+'</div>'+
+      '<div style="margin-top:2px">'+_p24domBadge(ag.domain)+'</div></div></div>'+
+      '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:#059669"></div><span style="font-size:10px;color:#059669;font-weight:700">ACTIVE</span></div></div>'+
+      '<div style="font-size:11px;color:#64748b;margin-bottom:10px;line-height:1.5">'+ag.desc+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px">'+
+      [['Last Run',ag.lastRun.split(' ')[1]],['Processed',ag.processed],['Latency',ag.latency]].map(function(m){ return '<div style="background:#f8fafc;border-radius:6px;padding:6px 8px;text-align:center"><div style="font-size:11px;font-weight:700;color:#0f172a">'+m[1]+'</div><div style="font-size:9px;color:#94a3b8">'+m[0]+'</div></div>'; }).join('')+
+      '</div>'+
+      '<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:6px">Tool Chain</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:12px">'+ag.tools.map(function(t){ return '<span style="background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;border-radius:4px;padding:1px 7px;font-size:9px">'+t+'</span>'; }).join('')+'</div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<button onclick="_p8run(\''+runKey+'\')" style="flex:1;background:'+ag.color+';color:#fff;border:none;border-radius:8px;padding:8px 0;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-play" style="margin-right:6px"></i>Run Agent</button>'+
+      '<button onclick="_p8run(\''+detKey+'\')" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;color:#475569">Details</button>'+
+      '</div></div>';
+  }
+
+  function _p24runAgent(ag) {
+    _p24runningAgent=ag.id;
+    var overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:#000c;z-index:9999;display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif';
+    var logDiv=document.createElement('div');
+    logDiv.style.cssText='background:#0f172a;border-radius:16px;padding:24px 28px;max-width:580px;width:92%;border:2px solid '+ag.color;
+    logDiv.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">'+
+      '<div style="width:32px;height:32px;background:'+ag.color+'33;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="'+ag.icon+'" style="color:'+ag.color+'"></i></div>'+
+      '<div style="font-size:14px;font-weight:800;color:#fff">'+ag.name+'</div></div>'+
+      '<div id="p24-log-body" style="font-family:monospace;font-size:12px;line-height:1.8;color:#94a3b8;min-height:180px"></div>'+
+      '<div id="p24-log-result" style="display:none;background:'+ag.color+'22;border:1px solid '+ag.color+'44;border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:#e2e8f0;line-height:1.6"></div>'+
+      '<button id="p24-close-btn" style="display:none;margin-top:14px;width:100%;background:'+ag.color+';color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer" onclick="this.closest(\'div[style*=fixed]\').remove()">✓ Close</button>';
+    overlay.appendChild(logDiv);
+    document.body.appendChild(overlay);
+
+    var logBody=logDiv.querySelector('#p24-log-body');
+    var steps=ag.runSteps; var i=0;
+    function nextStep(){
+      if(i<steps.length){
+        var line=document.createElement('div');
+        var s=steps[i]; var col=s.startsWith('✓')?'#4ade80':s.startsWith('⟳')?'#94a3b8':'#fbbf24';
+        line.style.cssText='color:'+col+';margin-bottom:2px';
+        line.textContent=s;
+        logBody.appendChild(line);
+        i++; setTimeout(nextStep, 480);
+      } else {
+        var res=logDiv.querySelector('#p24-log-result');
+        res.style.display='block'; res.innerHTML='<div style="font-size:10px;color:'+ag.color+';font-weight:700;margin-bottom:6px;font-family:sans-serif">AGENT RESULT</div>'+ag.result;
+        var closeBtn=logDiv.querySelector('#p24-close-btn'); closeBtn.style.display='block';
+        _p24runningAgent=null;
+      }
+    }
+    nextStep();
+  }
+
+  function _p24detailPanel(ag) {
+    var backKey='p24-back'; window._p8actions[backKey]=function(){ _p24activeAgent=null; _p24buildPage(); };
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:24px">'+
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'+
+      '<button onclick="_p8run(\'p24-back\')" style="background:#f1f5f9;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#475569">← Back</button>'+
+      '<div style="width:36px;height:36px;background:'+ag.color+'22;border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="'+ag.icon+'" style="color:'+ag.color+'"></i></div>'+
+      '<div><div style="font-size:18px;font-weight:800;color:#0f172a">'+ag.name+'</div>'+
+      _p24domBadge(ag.domain)+'</div></div>'+
+      '<div style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:16px">'+ag.desc+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'+
+      '<div><div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Tool Chain ('+ag.tools.length+' tools)</div><div style="display:flex;flex-direction:column;gap:4px">'+
+      ag.tools.map(function(t,i){ return '<div style="display:flex;align-items:center;gap:8px"><div style="width:20px;height:20px;background:'+ag.color+'22;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:'+ag.color+'">'+(i+1)+'</div><span style="font-size:11px;color:#374151">'+t+'</span></div>'; }).join('')+
+      '</div></div>'+
+      '<div><div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Execution Log (last run)</div>'+
+      '<div style="background:#0f172a;border-radius:8px;padding:12px;font-family:monospace;font-size:11px;line-height:1.8">'+
+      ag.runSteps.map(function(s){ var c=s.startsWith('✓')?'#4ade80':'#94a3b8'; return '<div style="color:'+c+'">'+s+'</div>'; }).join('')+
+      '</div></div></div>'+
+      '<div style="background:'+ag.color+'15;border:1px solid '+ag.color+'33;border-radius:10px;padding:14px 16px">'+
+      '<div style="font-size:11px;font-weight:700;color:'+ag.color+';margin-bottom:6px">LAST RESULT</div>'+
+      '<div style="font-size:12px;color:#374151;line-height:1.7">'+ag.result+'</div></div>'+
+      '</div>';
+  }
+
+  function _p24buildPage() {
+    var body=_p24activeAgent?_p24detailPanel(_p24activeAgent):
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">'+
+      _p24agents.map(_p24agentCard).join('')+'</div>';
+
+    document.getElementById('page-content').innerHTML=
+      '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+      '<div style="width:40px;height:40px;background:linear-gradient(135deg,'+AG+',#0078d4);border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-robot" style="color:#fff;font-size:18px"></i></div>'+
+      '<div><div style="font-size:20px;font-weight:800;color:#0f172a">Agentification Hub</div>'+
+      '<div style="font-size:12px;color:#64748b;margin-top:2px">6 mission-critical agents · Azure AI Foundry · Semantic Kernel · All data layers connected · 5 C360 clients powered</div></div></div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<span style="background:'+AG+'22;color:'+AG+';border:1px solid '+AG+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-robot" style="margin-right:4px"></i>Azure AI Foundry</span>'+
+      '<span style="background:#0078d418;color:#0078d4;border:1px solid #0078d444;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-cogs" style="margin-right:4px"></i>Semantic Kernel</span>'+
+      '</div></div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'+
+      _p24kpi('6','Active Agents',AG)+_p24kpi('16K+','Daily Ops','#0078d4')+_p24kpi('100%','Data Connected','#7c3aed')+_p24kpi('< 5s','Avg Latency','#d97706')+_p24kpi('5','C360 Clients','#dc2626')+_p24kpi('GPT-4o','LLM Engine','#4f46e5')+
+      '</div>'+
+      '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;overflow-x:auto">'+
+      '<span style="font-size:11px;font-weight:700;color:#64748b;white-space:nowrap">Data Sources:</span>'+
+      ['Bronze Δ','Silver Δ','Gold Δ','Unity Catalog','Ontology (OWL)','Knowledge Graph (Gremlin)','Vector Store (6 idx)','GPT-4o (RAG)'].map(function(s,i){
+        var cols=['#b45309','#64748b','#d97706','#059669','#7c3aed','#742774','#4f46e5','#0078d4'];
+        return '<span style="background:'+cols[i]+'22;color:'+cols[i]+';border:1px solid '+cols[i]+'44;border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;white-space:nowrap">'+s+'</span>';
+      }).join('<span style="color:#cbd5e1">→</span>')+
+      '</div>'+
+      body+
+      '<div style="margin-top:16px;background:linear-gradient(135deg,'+AG+',#0078d4);border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'+
+      '<i class="fas fa-infinity" style="font-size:28px;opacity:.9"></i>'+
+      '<div><div style="font-weight:800;font-size:14px">Azure AI Foundry — Continuous Agent Orchestration</div>'+
+      '<div style="font-size:12px;opacity:.88;margin-top:3px">All 6 agents run continuously · Semantic Kernel planner routes multi-step reasoning · Every action logged to Unity Catalog audit trail · Human-in-the-loop escalation for critical decisions · 5 C360 clients fully instrumented</div></div></div>'+
+      '</div>';
+  }
+
+  var _p24origNav=window.navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-agents'){ document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');}); var n=document.querySelector('.hal-agents-nav'); if(n)n.classList.add('active'); _p24buildPage(); return; }
+    if(_p24origNav) _p24origNav(page);
+  };
+  console.log('[Phase 24] Agentification Hub loaded · 6 agents · Claim Triage · Care Auth · Lapse Prevention · Cross-Sell · Compliance · Client 360 Synthesis · Azure AI Foundry · Semantic Kernel');
+})();
+
+/* ============================================================
+   PHASE 25 — DATA LINEAGE & CATALOG CONTROL PLANE
+   Microsoft Fabric · Unity Catalog · Microsoft Purview
+   ============================================================ */
+(function () {
+  'use strict';
+  var LIN = '#d97706'; var CAT = '#059669';
+
+  var _p25activeTab = 'lineage';
+
+  /* ── 60 catalog assets ───────────────────────────────────── */
+  var _p25assets = [
+    { name:'ltc_claims_raw',          type:'Delta Table',    layer:'Bronze',  domain:'LTC',  steward:'LTC Data Office', certified:false, freshness:'2h',  desc:'Raw LTC claim events from LTCAS' },
+    { name:'ltc_provider_feed_raw',   type:'Delta Table',    layer:'Bronze',  domain:'LTC',  steward:'LTC Data Office', certified:false, freshness:'15m', desc:'CellTrak EVV provider visits' },
+    { name:'ltc_eligibility_raw',     type:'Delta Table',    layer:'Bronze',  domain:'LTC',  steward:'LTC Data Office', certified:false, freshness:'4h',  desc:'Raw eligibility from LINK UW' },
+    { name:'hal_policies_raw',        type:'Delta Table',    layer:'Bronze',  domain:'HAL',  steward:'HAL Data Office', certified:false, freshness:'1h',  desc:'All HAL policy records raw' },
+    { name:'hal_clients_raw',         type:'Delta Table',    layer:'Bronze',  domain:'HAL',  steward:'HAL Data Office', certified:false, freshness:'2h',  desc:'Client demographics raw CRM' },
+    { name:'ltc_claims_cleansed',     type:'Delta Table',    layer:'Silver',  domain:'LTC',  steward:'LTC Data Office', certified:true,  freshness:'4h',  desc:'ICD-10 validated, deduplicated' },
+    { name:'ltc_care_episodes',       type:'Delta Table',    layer:'Silver',  domain:'LTC',  steward:'LTC Data Office', certified:true,  freshness:'4h',  desc:'Visit-to-episode rolled up' },
+    { name:'hal_policies',            type:'Delta Table',    layer:'Silver',  domain:'HAL',  steward:'HAL Data Office', certified:true,  freshness:'2h',  desc:'Validated policies + lapse flags' },
+    { name:'hal_client360',           type:'Delta Table',    layer:'Silver',  domain:'HAL',  steward:'HAL Data Office', certified:true,  freshness:'2h',  desc:'Client + policy join' },
+    { name:'unified_client',          type:'Delta Table',    layer:'Silver',  domain:'Both', steward:'Shared',          certified:true,  freshness:'4h',  desc:'Golden record cross-domain' },
+    { name:'ltc_claim_analytics',     type:'Delta Table',    layer:'Gold',    domain:'LTC',  steward:'LTC Data Office', certified:true,  freshness:'24h', desc:'Claim KPIs, frequency, severity' },
+    { name:'ltc_care_cost_model',     type:'ML Model Output',layer:'Gold',    domain:'LTC',  steward:'LTC Data Office', certified:true,  freshness:'24h', desc:'ML care cost predictions' },
+    { name:'hal_lapse_predictions',   type:'ML Model Output',layer:'Gold',    domain:'HAL',  steward:'HAL Data Office', certified:true,  freshness:'24h', desc:'Lapse risk scores 0-100' },
+    { name:'hal_crosssell_scores',    type:'ML Model Output',layer:'Gold',    domain:'Both', steward:'Shared',          certified:true,  freshness:'24h', desc:'Cross-sell propensity per client' },
+    { name:'unified_client_360_gold', type:'Delta Table',    layer:'Gold',    domain:'Both', steward:'Shared',          certified:true,  freshness:'24h', desc:'Full C360 gold — 5 demo clients' },
+    { name:'regulatory_compliance',   type:'Delta Table',    layer:'Gold',    domain:'Both', steward:'Shared',          certified:true,  freshness:'24h', desc:'Compliance flags + violation risk' },
+    { name:'Claimant',                type:'Semantic Entity',layer:'Semantic',domain:'LTC',  steward:'LTC Data Office', certified:true,  freshness:'4h',  desc:'OWL class + dbt semantic model' },
+    { name:'PolicyHolder',            type:'Semantic Entity',layer:'Semantic',domain:'HAL',  steward:'HAL Data Office', certified:true,  freshness:'2h',  desc:'OWL class + dbt semantic model' },
+    { name:'Policy',                  type:'Semantic Entity',layer:'Semantic',domain:'Both', steward:'Shared',          certified:true,  freshness:'2h',  desc:'Cross-domain policy entity' },
+    { name:'UnifiedClient',           type:'Semantic Entity',layer:'Semantic',domain:'Both', steward:'Shared',          certified:true,  freshness:'4h',  desc:'Golden record semantic entity' },
+    { name:'ltc-claims-idx',          type:'Vector Index',   layer:'Vector',  domain:'LTC',  steward:'AI Platform',     certified:true,  freshness:'24h', desc:'278K LTC claim embeddings' },
+    { name:'hal-policies-idx',        type:'Vector Index',   layer:'Vector',  domain:'HAL',  steward:'AI Platform',     certified:true,  freshness:'24h', desc:'409K HAL policy embeddings' },
+    { name:'kg-ontology-idx',         type:'Vector Index',   layer:'Vector',  domain:'Both', steward:'AI Platform',     certified:true,  freshness:'24h', desc:'OWL ontology + glossary embedded' },
+    { name:'KG_UnifiedClient',        type:'KG Vertex',      layer:'KG',      domain:'Both', steward:'AI Platform',     certified:true,  freshness:'4h',  desc:'5 C360 client vertices in Gremlin' },
+    { name:'Claim Triage Agent',      type:'AI Agent',       layer:'Agent',   domain:'LTC',  steward:'AI Platform',     certified:true,  freshness:'live',desc:'Azure AI Foundry · Semantic Kernel' },
+    { name:'Lapse Prevention Agent',  type:'AI Agent',       layer:'Agent',   domain:'HAL',  steward:'AI Platform',     certified:true,  freshness:'live',desc:'Azure AI Foundry · Semantic Kernel' }
+  ];
+
+  /* ── Lineage nodes (all layers in flow) ──────────────────── */
+  var _p25lineageStages = [
+    { stage:'Source Systems', items:['LTCAS Policy Admin','CellTrak EVV','LINK UW Queue','CONNECT Portal','HAL Policy Admin','FMS Financial','CRM / Salesforce','Agent Registry'], color:'#475569' },
+    { stage:'Bronze Δ (ADLS Gen2)', items:['ltc_claims_raw','ltc_provider_feed_raw','ltc_eligibility_raw','hal_policies_raw','hal_clients_raw','shared_providers_raw'], color:'#b45309' },
+    { stage:'Silver Δ (Databricks)', items:['ltc_claims_cleansed','ltc_care_episodes','hal_policies','hal_client360','unified_client'], color:'#64748b' },
+    { stage:'Gold Δ (ML + Agg)', items:['ltc_claim_analytics','hal_lapse_predictions','hal_crosssell_scores','unified_client_360_gold','regulatory_compliance'], color:'#d97706' },
+    { stage:'Unity Catalog', items:['Column lineage','Row security','Audit log','DQ rules','Data stewards'], color:'#059669' },
+    { stage:'Semantic Layer', items:['Claimant entity','PolicyHolder entity','Policy entity','UnifiedClient entity','18 glossary terms'], color:'#0891b2' },
+    { stage:'KG + Ontology', items:['OWL 12 classes','15 KG nodes','14 KG edges','4 SWRL rules'], color:'#7c3aed' },
+    { stage:'Vector Store', items:['6 AI Search indexes','924K embeddings','ada-002 model'], color:'#4f46e5' },
+    { stage:'Agents', items:['Claim Triage','Care Auth','Lapse Prevention','Cross-Sell','Compliance','C360 Synthesis'], color:'#059669' }
+  ];
+
+  /* ── Impact analysis ─────────────────────────────────────── */
+  var _p25impacts = {
+    'ltc_claims_raw': ['ltc_claims_cleansed','ltc_claim_analytics','ltc-claims-idx','Claim Triage Agent','Compliance Agent'],
+    'hal_policies_raw': ['hal_policies','hal_client360','hal_lapse_predictions','hal-policies-idx','Lapse Prevention Agent','Cross-Sell Agent'],
+    'unified_client': ['unified_client_360_gold','hal_crosssell_scores','KG_UnifiedClient','C360 Synthesis Agent'],
+    'hal_lapse_predictions': ['Lapse Prevention Agent','Compliance Agent']
+  };
+
+  /* ── Pipeline health ─────────────────────────────────────── */
+  var _p25health = [
+    { pipeline:'LTC Claims Bronze→Silver', status:'healthy', sla:'4h',  lastRun:'06:42', dqTrend:[92,93,94,93,94,94,94], vol:'278K rows' },
+    { pipeline:'HAL Policy Bronze→Silver', status:'healthy', sla:'2h',  lastRun:'07:00', dqTrend:[94,95,95,96,95,95,95], vol:'409K rows' },
+    { pipeline:'Gold ML Scoring',          status:'healthy', sla:'24h', lastRun:'04:00', dqTrend:[99,99,99,99,99,99,99], vol:'52K scored' },
+    { pipeline:'Vector Index Refresh',     status:'healthy', sla:'24h', lastRun:'04:15', dqTrend:[99,99,99,99,99,100,100],vol:'924K docs' },
+    { pipeline:'KG Sync',                  status:'healthy', sla:'4h',  lastRun:'05:00', dqTrend:[97,98,98,97,98,99,99], vol:'15 vertices' },
+    { pipeline:'EVV Provider Feed',        status:'running', sla:'15m', lastRun:'07:05', dqTrend:[88,89,90,91,91,91,91], vol:'Streaming' }
+  ];
+
+  /* ── Helpers ─────────────────────────────────────────────── */
+  function _p25kpi(v,l,c){ return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:100px"><div style="font-size:22px;font-weight:800;color:'+c+'">'+v+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">'+l+'</div></div>'; }
+  function _p25layerColor(l){ return {Bronze:'#b45309',Silver:'#64748b',Gold:'#d97706',Semantic:'#0891b2',Vector:'#4f46e5',KG:'#7c3aed',Agent:'#059669'}[l]||'#475569'; }
+  function _p25tinyBar(arr,col){ return '<div style="display:flex;align-items:flex-end;gap:1px;height:20px">'+arr.map(function(v){ return '<div style="width:8px;height:'+(v*0.2)+'px;background:'+col+';border-radius:1px;opacity:.8"></div>'; }).join('')+'</div>'; }
+
+  function _p25lineageTab() {
+    var cols=_p25lineageStages.map(function(stage){
+      return '<div style="min-width:150px;flex:1">'+
+        '<div style="background:'+stage.color+';color:#fff;border-radius:8px;padding:7px 10px;font-size:10px;font-weight:700;text-align:center;margin-bottom:8px">'+stage.stage+'</div>'+
+        stage.items.map(function(item){ return '<div style="background:#fff;border:1px solid '+stage.color+'44;border-radius:6px;padding:5px 8px;font-size:9px;color:#374151;margin-bottom:4px;text-align:center">'+item+'</div>'; }).join('')+
+        '</div>';
+    });
+    var arrows=_p25lineageStages.slice(0,-1).map(function(){ return '<div style="display:flex;align-items:center;padding:0 6px;color:#cbd5e1;font-size:18px;padding-top:28px">→</div>'; });
+    var merged=[]; cols.forEach(function(c,i){ merged.push(c); if(arrows[i]) merged.push(arrows[i]); });
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px">'+
+      '<div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:14px"><i class="fas fa-sitemap" style="color:'+LIN+';margin-right:8px"></i>End-to-End Data Lineage — Source Systems → Agents</div>'+
+      '<div style="display:flex;overflow-x:auto;padding-bottom:8px">'+merged.join('')+'</div>'+
+      '<div style="margin-top:14px;background:#f0fdf4;border-radius:8px;padding:10px 14px;font-size:11px;color:#166534"><i class="fas fa-check-circle" style="margin-right:6px"></i>Microsoft Purview auto-traced 100% of lineage above · Column-level lineage for all Delta tables · 9 pipeline stages · Unity Catalog governs Bronze→Gold transitions · Purview data map refreshed every 15 minutes</div>'+
+      '</div>';
+  }
+
+  function _p25catalogTab() {
+    var layerCols={Bronze:'#b4530922',Silver:'#64748b22',Gold:'#d9770622',Semantic:'#0891b222',Vector:'#4f46e522',KG:'#7c3aed22',Agent:'#05996922'};
+    var rows=_p25assets.map(function(a){
+      return '<tr style="border-bottom:1px solid #f1f5f9;background:'+(layerCols[a.layer]||'#fff')+'">'+
+        '<td style="padding:9px 12px;font-size:12px;font-weight:700;font-family:monospace;color:#1e293b">'+a.name+'</td>'+
+        '<td style="padding:9px 12px"><span style="background:'+_p25layerColor(a.layer)+'22;color:'+_p25layerColor(a.layer)+';border:1px solid '+_p25layerColor(a.layer)+'44;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700">'+a.layer+'</span></td>'+
+        '<td style="padding:9px 12px;font-size:10px;color:#64748b">'+a.type+'</td>'+
+        '<td style="padding:9px 12px"><span style="background:'+(a.domain==='LTC'?'#dc262622':a.domain==='HAL'?'#7c3aed22':'#0891b222')+';color:'+(a.domain==='LTC'?'#dc2626':a.domain==='HAL'?'#7c3aed':'#0891b2')+';border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700">'+a.domain+'</span></td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#64748b">'+a.steward+'</td>'+
+        '<td style="padding:9px 12px"><span style="color:'+(a.certified?'#059669':'#94a3b8')+';font-size:11px;font-weight:700">'+(a.certified?'✓ Certified':'—')+'</span></td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#475569">'+a.freshness+'</td>'+
+        '<td style="padding:9px 12px;font-size:11px;color:#64748b;max-width:200px">'+a.desc+'</td>'+
+        '</tr>';
+    }).join('');
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'+
+      '<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a"><i class="fas fa-book" style="color:'+CAT+';margin-right:8px"></i>Data Catalog — 26 assets shown (60+ total) · Unity Catalog + Microsoft Purview</div>'+
+      '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="background:'+CAT+';color:#fff"><th style="padding:9px 12px;text-align:left;font-size:10px">Asset Name</th><th style="padding:9px 12px;font-size:10px">Layer</th><th style="padding:9px 12px;font-size:10px">Type</th><th style="padding:9px 12px;font-size:10px">Domain</th><th style="padding:9px 12px;font-size:10px">Steward</th><th style="padding:9px 12px;font-size:10px">Certified</th><th style="padding:9px 12px;font-size:10px">Freshness</th><th style="padding:9px 12px;font-size:10px">Description</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  function _p25impactTab() {
+    var cards=Object.keys(_p25impacts).map(function(src){
+      var impacts=_p25impacts[src];
+      var ik='p25-impact-'+src.replace(/_/g,'-'); window._p8actions[ik]=function(){
+        var t=document.createElement('div'); t.style.cssText='position:fixed;bottom:28px;right:28px;z-index:9999;background:#dc2626;color:#fff;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px #0003;max-width:380px';
+        t.innerHTML='<i class="fas fa-exclamation-triangle" style="margin-right:8px"></i><b>Impact: '+src+'</b><br><span style="font-size:11px;opacity:.9">'+impacts.length+' downstream assets affected: '+impacts.join(', ')+'</span>';
+        document.body.appendChild(t); setTimeout(function(){t.remove();},4000);
+      };
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px">'+
+        '<div style="font-size:12px;font-weight:800;font-family:monospace;color:#dc2626;margin-bottom:8px"><i class="fas fa-exclamation-circle" style="margin-right:6px"></i>'+src+'</div>'+
+        '<div style="font-size:11px;color:#64748b;margin-bottom:8px">Schema change would impact <b>'+impacts.length+' downstream assets</b>:</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'+impacts.map(function(i){ return '<span style="background:#fef2f2;color:#dc2626;border-radius:5px;padding:2px 7px;font-size:10px">→ '+i+'</span>'; }).join('')+'</div>'+
+        '<button onclick="_p8run(\''+ik+'\')" style="background:#dc2626;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer">Run Impact Analysis</button>'+
+        '</div>';
+    }).join('');
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'+cards+'</div>';
+  }
+
+  function _p25healthTab() {
+    var rows=_p25health.map(function(h){
+      var col=h.status==='healthy'?'#059669':'#d97706';
+      return '<tr style="border-bottom:1px solid #f1f5f9">'+
+        '<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#1e293b">'+h.pipeline+'</td>'+
+        '<td style="padding:10px 12px"><span style="background:'+col+'22;color:'+col+';border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;text-transform:capitalize">'+h.status+'</span></td>'+
+        '<td style="padding:10px 12px;font-size:11px;color:#64748b">SLA: '+h.sla+'</td>'+
+        '<td style="padding:10px 12px;font-size:11px;color:#475569">'+h.lastRun+'</td>'+
+        '<td style="padding:10px 12px">'+_p25tinyBar(h.dqTrend,col)+'</td>'+
+        '<td style="padding:10px 12px;font-size:11px;font-weight:600;color:#0078d4">'+h.vol+'</td>'+
+        '</tr>';
+    }).join('');
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'+
+      '<div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#0f172a"><i class="fas fa-heartbeat" style="color:'+LIN+';margin-right:8px"></i>Pipeline Health Monitor — 7-Day DQ Trend</div>'+
+      '<table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="background:'+LIN+';color:#fff"><th style="padding:10px 12px;text-align:left;font-size:10px">Pipeline</th><th style="padding:10px 12px;font-size:10px">Status</th><th style="padding:10px 12px;font-size:10px">SLA</th><th style="padding:10px 12px;font-size:10px">Last Run</th><th style="padding:10px 12px;font-size:10px">7-Day DQ</th><th style="padding:10px 12px;font-size:10px">Volume</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function _p25buildPage() {
+    var tabs=['lineage','catalog','impact','health'];
+    var tabLabels={lineage:'End-to-End Lineage',catalog:'Data Catalog',impact:'Impact Analysis',health:'Pipeline Health'};
+    var tabIcons={lineage:'fas fa-sitemap',catalog:'fas fa-book',impact:'fas fa-exclamation-triangle',health:'fas fa-heartbeat'};
+    var tabBar=tabs.map(function(t){
+      var k='p25-tab-'+t; window._p8actions[k]=function(){ _p25activeTab=t; _p25buildPage(); };
+      var active=t===_p25activeTab;
+      return '<button onclick="_p8run(\''+k+'\')" style="padding:8px 20px;border:2px solid '+(active?LIN:'#e2e8f0')+';border-radius:8px;background:'+(active?LIN:'#fff')+';color:'+(active?'#fff':'#64748b')+';font-weight:700;font-size:12px;cursor:pointer"><i class="'+tabIcons[t]+'" style="margin-right:6px"></i>'+tabLabels[t]+'</button>';
+    }).join('');
+    var body=_p25activeTab==='lineage'?_p25lineageTab():_p25activeTab==='catalog'?_p25catalogTab():_p25activeTab==='impact'?_p25impactTab():_p25healthTab();
+
+    document.getElementById('page-content').innerHTML=
+      '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+      '<div style="width:40px;height:40px;background:linear-gradient(135deg,'+LIN+','+CAT+');border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-sitemap" style="color:#fff;font-size:18px"></i></div>'+
+      '<div><div style="font-size:20px;font-weight:800;color:#0f172a">Data Lineage & Catalog</div>'+
+      '<div style="font-size:12px;color:#64748b;margin-top:2px">Microsoft Fabric · Unity Catalog · Microsoft Purview · 60+ assets · End-to-end lineage · Source → Agents</div></div></div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<span style="background:'+LIN+'22;color:'+LIN+';border:1px solid '+LIN+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-eye" style="margin-right:4px"></i>Microsoft Purview</span>'+
+      '<span style="background:'+CAT+'22;color:'+CAT+';border:1px solid '+CAT+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600"><i class="fas fa-book" style="margin-right:4px"></i>Unity Catalog</span>'+
+      '</div></div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'+
+      _p25kpi('60+','Catalog Assets',CAT)+_p25kpi('9','Lineage Stages',LIN)+_p25kpi('100%','Lineage Coverage','#0078d4')+_p25kpi('21','Certified Assets','#059669')+_p25kpi('6','Pipelines','#d97706')+_p25kpi('3','Data Stewards','#7c3aed')+
+      '</div>'+
+      '<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">'+tabBar+'</div>'+
+      body+
+      '<div style="margin-top:16px;background:linear-gradient(135deg,'+LIN+','+CAT+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;gap:16px">'+
+      '<i class="fas fa-shield-alt" style="font-size:28px;opacity:.9"></i>'+
+      '<div><div style="font-weight:800;font-size:14px">Microsoft Purview + Unity Catalog — Full Governance Stack</div>'+
+      '<div style="font-size:12px;opacity:.88;margin-top:3px">Auto-lineage: 100% of Bronze→Gold→Semantic→KG→Vector→Agent chain traced · Column-level PII tagging active · RBAC: 3 domains + AI Platform team · Audit log: every pipeline run, agent action, and data access event captured · GDPR & SOC2 compliant</div></div></div>'+
+      '</div>';
+  }
+
+  var _p25origNav=window.navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-lineage'){ document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');}); var n=document.querySelector('.hal-lineage-nav'); if(n)n.classList.add('active'); _p25buildPage(); return; }
+    if(_p25origNav) _p25origNav(page);
+  };
+  console.log('[Phase 25] Data Lineage & Catalog loaded · 60+ assets · 9 lineage stages · Microsoft Purview · Unity Catalog · Impact analysis · Pipeline health · Full governance');
+})();
