@@ -73886,3 +73886,613 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 11] Per-claim document profiles active — 8 claim-specific document sets driven by nextAction field');
 
 })();
+
+/* ============================================================
+   PHASE 12 — Assessment Workflow Fixes & Open Case
+   Appended 2026-07-10
+   Fixes:
+     1. ltcAssessAction (Assessment Management) — gibberish Confirm button
+     2. ltcScheduleNew (Schedule New Assessment) — gibberish Schedule button
+     3. Comprehensive Assessment Management workflow
+     4. Open Case modal for UW assessment queue (UW-7701..7705)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ── Shared callback registry (same as Phase 8 _p8actions) ── */
+  if (!window._p8actions) window._p8actions = {};
+
+  /* ── Safe button helper ── */
+  function _p12btn(id, label, icon, bg, fn) {
+    window._p8actions[id] = fn;
+    var iconHtml = icon ? '<i class="fas ' + icon + '" style="margin-right:6px;"></i>' : '';
+    return '<button onclick="_p8run(\'' + id + '\')" style="background:' + bg + ';color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;">'
+      + iconHtml + label + '</button>';
+  }
+
+  /* ── Toast shortcut ── */
+  function _p12toast(msg, dur) {
+    if (typeof window._p8toast === 'function') { window._p8toast(msg, dur); return; }
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:13px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;max-width:440px;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.35);';
+    d.innerHTML = msg;
+    document.body.appendChild(d);
+    setTimeout(function () { d.style.opacity = '0'; d.style.transition = 'opacity .4s'; setTimeout(function () { d.remove(); }, 400); }, dur || 3500);
+  }
+
+  /* ── Sub-modal overlay (z-index 13000, above claim detail) ── */
+  function _p12ov(id, html) {
+    document.getElementById(id) && document.getElementById(id).remove();
+    document.body.insertAdjacentHTML('beforeend',
+      '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:13000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">' + html + '</div>');
+  }
+
+  function _p12close(id) { var el = document.getElementById(id); if (el) el.remove(); }
+
+  /* ── Field row ── */
+  function _p12field(label, inputHtml) {
+    return '<div style="margin-bottom:12px;">'
+      + '<label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">' + label + '</label>'
+      + inputHtml
+      + '</div>';
+  }
+  var _fldStyle = 'width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;';
+
+  /* ── AI panel ── */
+  function _p12ai(txt) {
+    return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:6px;"><i class="fas fa-brain" style="margin-right:5px;"></i>WealthAI Intelligence</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;">' + txt + '</div></div>';
+  }
+
+  /* ── Progress step indicator ── */
+  function _p12steps(steps, active) {
+    return '<div style="display:flex;gap:0;margin-bottom:18px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">'
+      + steps.map(function (s, i) {
+          var isActive = i === active;
+          var isDone   = i < active;
+          var bg = isActive ? '#059669' : isDone ? '#d1fae5' : '#f9fafb';
+          var color = isActive ? '#fff' : isDone ? '#059669' : '#9ca3af';
+          var fw = isActive ? '700' : '600';
+          return '<div style="flex:1;padding:8px 4px;text-align:center;font-size:10px;font-weight:' + fw + ';color:' + color + ';background:' + bg + ';border-right:1px solid #e5e7eb;">'
+            + (isDone ? '✓ ' : '') + s + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     1. COMPREHENSIVE ASSESSMENT MANAGEMENT (ltcAssessAction)
+     Replaces the old modal that had raw onclick gibberish
+  ════════════════════════════════════════════════════════════════ */
+  window.ltcAssessAction = function (name, claimDataObj) {
+    var c = claimDataObj || window._lcdCurrentClaim || {};
+    var cname = name || (c.claimant) || 'Claimant';
+    var ovId = 'p12-assess-ov';
+
+    /* WealthAI recommendation based on claim type */
+    var modRec = (c.type || '').indexOf('Home') !== -1 ? 'Telephonic' : 'In-Person';
+    var rnRec  = (c.type || '').indexOf('Memory') !== -1 ? 'Angela Moore, RN (Memory Care Specialist)' : 'Sarah Johnson, RN';
+    var durRec = (c.type || '').indexOf('Memory') !== -1 ? '75 minutes' : '45 minutes';
+    var typeRec = (c.daysOpen || 0) > 60 ? 'Annual' : (c.daysOpen || 0) > 0 ? 'Reassessment' : 'Initial';
+
+    /* ── Step 1: Schedule ── */
+    function showStep1() {
+      var confirmKey = 'p12-assess-confirm-' + Math.random().toString(36).slice(2);
+      window._p8actions[confirmKey] = function () { showStep2(); };
+
+      var cancelKey = 'p12-assess-cancel-' + Math.random().toString(36).slice(2);
+      window._p8actions[cancelKey] = function () { _p12close(ovId); };
+
+      var html = '<div style="background:#fff;border-radius:16px;width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1;">'
+        + '<i class="fas fa-user-check" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Assessment Management</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + cname + ' · ' + (c.id || '') + '</div></div>'
+        + '<button onclick="_p8run(\''+cancelKey+'\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;line-height:1;">✕</button>'
+        + '</div>'
+        + '<div style="padding:20px;">'
+        + _p12steps(['Schedule', 'Confirm', 'RN Notified', 'Complete'], 0)
+        + _p12ai('AI recommends <strong>' + modRec + '</strong> assessment for <strong>' + cname + '</strong>. Based on carrier protocol (' + (c.carrier||'carrier') + ') and geographic location, estimated duration: <strong>' + durRec + '</strong>. AI-matched RN: <strong>' + rnRec + '</strong> (96% continuity score). WealthAI will pre-populate the clinical questionnaire from existing policy data.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">'
+        + _p12field('Assessment Date', '<input type="text" id="p12-adate" value="Jul 16, 2026" style="' + _fldStyle + '">')
+        + _p12field('Modality', '<select id="p12-mod" style="' + _fldStyle + '"><option' + (modRec==='Telephonic'?' selected':'') + '>Telephonic</option><option' + (modRec==='Video'?' selected':'') + '>Video</option><option' + (modRec==='In-Person'?' selected':'') + '>In-Person</option></select>')
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">'
+        + _p12field('Assign RN', '<select id="p12-rn" style="' + _fldStyle + '"><option>Auto-assign (AI-matched)</option><option>Sarah Johnson, RN</option><option>James Park, RN</option><option>Angela Moore, RN</option><option>Kevin Walsh, RN</option><option>Patricia Lang, RN</option></select>')
+        + _p12field('Assessment Type', '<select id="p12-atype" style="' + _fldStyle + '"><option' + (typeRec==='Initial'?' selected':'') + '>Initial</option><option' + (typeRec==='Annual'?' selected':'') + '>Annual</option><option' + (typeRec==='Reassessment'?' selected':'') + '>Reassessment</option><option>Cognitive (MMSE)</option><option>Functional ADL Only</option></select>')
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
+        + _p12field('Preferred Time Window', '<select style="' + _fldStyle + '"><option>Morning (8 AM – 12 PM)</option><option>Afternoon (12 PM – 4 PM)</option><option>Evening (4 PM – 7 PM)</option></select>')
+        + _p12field('Language / Interpreter', '<select style="' + _fldStyle + '"><option>English</option><option>Spanish (Interpreter Required)</option><option>Mandarin (Interpreter Required)</option><option>Other</option></select>')
+        + '</div>'
+        + _p12field('Clinical Notes / Special Instructions', '<textarea placeholder="e.g. Patient uses walker, requires ground-floor access. Family member must be present..." style="' + _fldStyle + 'height:70px;resize:none;"></textarea>')
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:16px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Pre-Population Preview</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.6;">ADL Score: <strong>' + (c.assessScore||'2') + '/6</strong> · Cognitive (MMSE): <strong>' + (c.cogScore||'—') + '/30</strong> · Care Type: <strong>' + (c.type||'—') + '</strong> · Provider: <strong>' + (c.provider||'—') + '</strong> · Last Assessment: <strong>Jun 10, 2026</strong></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+        + _p12btn(confirmKey, 'Continue to Confirm', 'fa-arrow-right', '#059669', function () { showStep2(); })
+        + '<button onclick="_p8run(\'' + cancelKey + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div>'
+        + '</div></div>';
+
+      _p12ov(ovId, html);
+    }
+
+    /* ── Step 2: Confirm summary ── */
+    function showStep2() {
+      var adate = (document.getElementById('p12-adate') && document.getElementById('p12-adate').value) || 'Jul 16, 2026';
+      var mod   = (document.getElementById('p12-mod')   && document.getElementById('p12-mod').selectedOptions[0].text) || modRec;
+      var rn    = (document.getElementById('p12-rn')    && document.getElementById('p12-rn').selectedOptions[0].text) || rnRec;
+      var atype = (document.getElementById('p12-atype') && document.getElementById('p12-atype').selectedOptions[0].text) || typeRec;
+
+      var finKey  = 'p12-assess-final-' + Math.random().toString(36).slice(2);
+      var backKey = 'p12-assess-back-'  + Math.random().toString(36).slice(2);
+
+      window._p8actions[finKey] = function () { showStep3(adate, mod, rn, atype); };
+      window._p8actions[backKey] = function () { showStep1(); };
+
+      var html = '<div style="background:#fff;border-radius:16px;width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+        + '<i class="fas fa-clipboard-check" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Confirm Assessment</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + cname + '</div></div>'
+        + '<button onclick="_p12close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;">✕</button>'
+        + '</div>'
+        + '<div style="padding:20px;">'
+        + _p12steps(['Schedule', 'Confirm', 'RN Notified', 'Complete'], 1)
+        + '<div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:16px;">'
+        + '<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-clipboard-list" style="color:#059669;margin-right:6px;"></i>Assessment Summary</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        + ['Claimant|' + cname, 'Claim ID|' + (c.id||'—'), 'Date|' + adate, 'Modality|' + mod, 'Assigned RN|' + rn, 'Type|' + atype, 'Carrier|' + (c.carrier||'—'), 'Duration|' + durRec].map(function(kv){
+            var p = kv.split('|');
+            return '<div style="background:#fff;border-radius:6px;padding:8px 10px;border:1px solid #f0f0f0;">'
+              + '<div style="font-size:10px;color:#6b7280;margin-bottom:2px;">' + p[0] + '</div>'
+              + '<div style="font-size:12px;font-weight:700;color:#111827;">' + p[1] + '</div></div>';
+          }).join('')
+        + '</div></div>'
+        + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:16px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:5px;"><i class="fas fa-list-check" style="margin-right:5px;"></i>Actions upon confirmation</div>'
+        + '<ul style="margin:0;padding-left:18px;font-size:11px;color:#374151;line-height:1.8;">'
+        + '<li>SMS scheduling link sent to claimant (' + cname + ')</li>'
+        + '<li>Calendar invite sent to ' + rn + '</li>'
+        + '<li>Provider (' + (c.provider||'provider') + ') notified via secure portal</li>'
+        + '<li>EVV tracking activated for ' + adate + '</li>'
+        + '<li>Clinical questionnaire pre-populated and dispatched to RN</li>'
+        + '<li>Carrier (' + (c.carrier||'carrier') + ') notified of assessment scheduling</li>'
+        + '</ul></div>'
+        + '<div style="display:flex;gap:8px;">'
+        + _p12btn(finKey, 'Confirm Assessment', 'fa-check-circle', '#059669', function(){ showStep3(adate, mod, rn, atype); })
+        + '<button onclick="_p8run(\'' + backKey + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;">← Back</button>'
+        + '</div>'
+        + '</div></div>';
+
+      _p12ov(ovId, html);
+    }
+
+    /* ── Step 3: Confirmed / RN notified ── */
+    function showStep3(adate, mod, rn, atype) {
+      var doneKey = 'p12-assess-done-' + Math.random().toString(36).slice(2);
+      window._p8actions[doneKey] = function () {
+        _p12close(ovId);
+        _p12toast('<i class="fas fa-user-check"></i> Assessment for ' + cname + ' confirmed · ' + adate + ' · ' + rn + ' assigned · SMS scheduling link sent · EVV tracking enabled', 5000);
+      };
+
+      var html = '<div style="background:#fff;border-radius:16px;width:520px;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+        + '<i class="fas fa-check-circle" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Assessment Confirmed</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + cname + '</div></div>'
+        + '</div>'
+        + '<div style="padding:24px;">'
+        + _p12steps(['Schedule', 'Confirm', 'RN Notified', 'Complete'], 3)
+        + '<div style="text-align:center;margin-bottom:20px;">'
+        + '<div style="background:#d1fae5;border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">'
+        + '<i class="fas fa-check-circle" style="font-size:32px;color:#059669;"></i></div>'
+        + '<div style="font-size:17px;font-weight:800;color:#111827;margin-bottom:4px;">Assessment Scheduled</div>'
+        + '<div style="font-size:13px;color:#6b7280;">' + cname + ' · ' + adate + ' · ' + mod + '</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">'
+        + ['fa-sms|SMS scheduling link sent to claimant|#059669',
+           'fa-calendar-check|' + rn + ' calendar invite dispatched|#059669',
+           'fa-hospital|Provider notified via secure portal|#059669',
+           'fa-map-marker-alt|EVV tracking activated for ' + adate + '|#059669',
+           'fa-clipboard-list|Clinical questionnaire (AI pre-populated) sent to RN|#7c3aed',
+           'fa-shield-alt|Carrier (' + (c.carrier||'carrier') + ') notified of assessment scheduling|#0891b2'
+          ].map(function(s){
+            var p = s.split('|');
+            return '<div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border-radius:8px;padding:9px 12px;border:1px solid #bbf7d0;">'
+              + '<i class="fas ' + p[0] + '" style="color:' + p[2] + ';width:16px;text-align:center;"></i>'
+              + '<span style="font-size:12px;color:#374151;">' + p[1] + '</span>'
+              + '<i class="fas fa-check" style="color:#059669;margin-left:auto;"></i></div>';
+          }).join('')
+        + '</div>'
+        + _p12btn(doneKey, 'Done', 'fa-check', '#059669', function(){
+            _p12close(ovId);
+            _p12toast('<i class="fas fa-user-check"></i> Assessment for ' + cname + ' confirmed · ' + adate + ' · ' + rn + ' assigned · SMS scheduling link sent · EVV tracking enabled', 5000);
+          })
+        + '</div></div>';
+
+      _p12ov(ovId, html);
+    }
+
+    showStep1();
+  };
+
+  /* ════════════════════════════════════════════════════════════════
+     2. COMPREHENSIVE SCHEDULE NEW ASSESSMENT (ltcScheduleNew)
+     Replaces the old modal that had raw onclick gibberish
+  ════════════════════════════════════════════════════════════════ */
+  window.ltcScheduleNew = function () {
+    var ovId = 'p12-schednew-ov';
+
+    var cancelKey  = 'p12-sn-cancel-'  + Math.random().toString(36).slice(2);
+    var schedKey   = 'p12-sn-sched-'   + Math.random().toString(36).slice(2);
+    var aiKey      = 'p12-sn-ai-'      + Math.random().toString(36).slice(2);
+
+    window._p8actions[cancelKey] = function () { _p12close(ovId); };
+
+    window._p8actions[schedKey] = function () {
+      var nameEl  = document.getElementById('p12sn-name');
+      var carrEl  = document.getElementById('p12sn-carrier');
+      var dateEl  = document.getElementById('p12sn-date');
+      var modEl   = document.getElementById('p12sn-mod');
+      var rnEl    = document.getElementById('p12sn-rn');
+      var typeEl  = document.getElementById('p12sn-type');
+      var phnEl   = document.getElementById('p12sn-phone');
+      var cname   = (nameEl && nameEl.value.trim()) || 'Applicant';
+      var carr    = (carrEl && carrEl.value)  || 'Carrier';
+      var adate   = (dateEl && dateEl.value)  || 'TBD';
+      var mod     = (modEl  && modEl.selectedOptions[0].text) || 'Telephonic';
+      var rn      = (rnEl   && rnEl.selectedOptions[0].text)  || 'Auto-assigned';
+      var atype   = (typeEl && typeEl.selectedOptions[0].text) || 'Initial';
+
+      /* Step 2: confirmation view */
+      var doneKey2 = 'p12-sn-done-' + Math.random().toString(36).slice(2);
+      window._p8actions[doneKey2] = function () {
+        _p12close(ovId);
+        _p12toast('<i class="fas fa-calendar-check"></i> Assessment scheduled · ' + cname + ' · ' + adate + ' · ' + mod + ' · ' + rn + ' assigned · Self-scheduling SMS sent · RN auto-assignment in progress', 5000);
+      };
+
+      var html2 = '<div style="background:#fff;border-radius:16px;width:520px;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+        + '<i class="fas fa-calendar-check" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Assessment Scheduled</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + cname + ' · ' + carr + '</div></div>'
+        + '</div>'
+        + '<div style="padding:24px;">'
+        + _p12steps(['Details', 'Review', 'Confirmed'], 2)
+        + '<div style="text-align:center;margin-bottom:20px;">'
+        + '<div style="background:#d1fae5;border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">'
+        + '<i class="fas fa-check-circle" style="font-size:32px;color:#059669;"></i></div>'
+        + '<div style="font-size:17px;font-weight:800;color:#111827;margin-bottom:4px;">Assessment Booked</div>'
+        + '<div style="font-size:13px;color:#6b7280;">' + cname + ' · ' + carr + ' · ' + adate + '</div>'
+        + '</div>'
+        + '<div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        + ['Applicant|' + cname, 'Carrier|' + carr, 'Date|' + adate, 'Modality|' + mod, 'RN|' + rn, 'Type|' + atype].map(function(kv){
+            var p = kv.split('|');
+            return '<div><div style="font-size:10px;color:#6b7280;">' + p[0] + '</div>'
+              + '<div style="font-size:12px;font-weight:700;color:#111827;">' + p[1] + '</div></div>';
+          }).join('')
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px;">'
+        + ['fa-sms|Self-scheduling SMS sent to applicant|#059669',
+           'fa-robot|RN auto-assignment in progress|#7c3aed',
+           'fa-file-medical|Clinical intake form dispatched|#0891b2',
+           'fa-building|Carrier (' + carr + ') pre-notification sent|#059669'
+          ].map(function(s){
+            var p = s.split('|');
+            return '<div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border-radius:8px;padding:8px 12px;">'
+              + '<i class="fas ' + p[0] + '" style="color:' + p[2] + ';width:16px;"></i>'
+              + '<span style="font-size:11px;color:#374151;">' + p[1] + '</span>'
+              + '<i class="fas fa-check" style="color:#059669;margin-left:auto;"></i></div>';
+          }).join('')
+        + '</div>'
+        + _p12btn(doneKey2, 'Done', 'fa-check', '#059669', function () {
+            _p12close(ovId);
+            _p12toast('<i class="fas fa-calendar-check"></i> Assessment scheduled · ' + cname + ' · ' + adate + ' · ' + mod + ' · ' + rn + ' assigned · Self-scheduling SMS sent · RN auto-assignment in progress', 5000);
+          })
+        + '</div></div>';
+
+      _p12ov(ovId, html2);
+    };
+
+    window._p8actions[aiKey] = function () {
+      _p12toast('<i class="fas fa-brain"></i> WealthAI auto-matching optimal RN based on carrier protocol, geographic proximity, and applicant clinical profile…', 3500);
+    };
+
+    var html = '<div style="background:#fff;border-radius:16px;width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1;">'
+      + '<i class="fas fa-calendar-plus" style="font-size:20px;"></i>'
+      + '<div style="font-size:16px;font-weight:800;">Schedule New Assessment</div>'
+      + '<button onclick="_p8run(\'' + cancelKey + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + _p12steps(['Details', 'Review', 'Confirmed'], 0)
+      + _p12ai('WealthAI will match the optimal RN based on geographic proximity, carrier protocol, and applicant clinical profile. Self-scheduling SMS will be sent automatically upon submission. Clinical intake questionnaire pre-populated from policy data.')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+      + _p12field('Applicant Full Name *', '<input id="p12sn-name" type="text" placeholder="e.g. Dorothy Feldstein" style="' + _fldStyle + '">')
+      + _p12field('Date of Birth', '<input type="text" placeholder="e.g. Mar 12, 1952" style="' + _fldStyle + '">')
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+      + _p12field('Carrier *', '<select id="p12sn-carrier" style="' + _fldStyle + '"><option>Prudential</option><option>MassMutual</option><option>NY Life</option><option>Genworth</option><option>Transamerica</option><option>Pacific Life</option><option>Lincoln National</option><option>TIAA</option></select>')
+      + _p12field('Policy Number', '<input type="text" placeholder="e.g. P-100293" style="' + _fldStyle + '">')
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+      + _p12field('Preferred Date *', '<input id="p12sn-date" type="text" placeholder="e.g. Jul 20, 2026" style="' + _fldStyle + '">')
+      + _p12field('Preferred Time', '<select style="' + _fldStyle + '"><option>Morning (8–12 PM)</option><option>Afternoon (12–4 PM)</option><option>Evening (4–7 PM)</option></select>')
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+      + _p12field('Modality', '<select id="p12sn-mod" style="' + _fldStyle + '"><option>Telephonic</option><option>Video</option><option>In-Person</option></select>')
+      + _p12field('Assessment Type', '<select id="p12sn-type" style="' + _fldStyle + '"><option>Initial</option><option>Annual</option><option>Reassessment</option><option>Cognitive (MMSE)</option><option>Functional ADL Only</option></select>')
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+      + _p12field('Assign RN', '<select id="p12sn-rn" style="' + _fldStyle + '"><option>Auto-assign (AI-matched)</option><option>Sarah Johnson, RN</option><option>James Park, RN</option><option>Angela Moore, RN</option><option>Kevin Walsh, RN</option><option>Patricia Lang, RN</option><option>Anna Torres, RN</option><option>David Kim, RN</option><option>Susan Park, RN</option></select>')
+      + _p12field('Applicant Phone', '<input id="p12sn-phone" type="text" placeholder="e.g. (212) 555-0101" style="' + _fldStyle + '">')
+      + '</div>'
+      + _p12field('Special Instructions / Clinical Notes', '<textarea placeholder="e.g. Requires wheelchair access, prefers morning calls, family to be present..." style="' + _fldStyle + 'height:60px;resize:none;"></textarea>')
+      + '<div style="display:flex;gap:8px;margin-top:4px;">'
+      + _p12btn(schedKey, 'Schedule Assessment', 'fa-calendar-check', '#059669', function(){})
+      + _p12btn(aiKey, 'AI Auto-Match RN', 'fa-brain', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){})
+      + '<button onclick="_p8run(\'' + cancelKey + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>'
+      + '</div>'
+      + '</div></div>';
+
+    _p12ov(ovId, html);
+  };
+
+  /* ════════════════════════════════════════════════════════════════
+     3. OPEN CASE MODAL — Full UW assessment case detail
+     Replaces the old _p7openLinkCase toast-only stub
+  ════════════════════════════════════════════════════════════════ */
+  var UW_CASES = {
+    'UW-7701': {
+      id: 'UW-7701', applicant: 'Gerald Hoffman', age: 71,
+      dob: 'Apr 15, 1955', phone: '(203) 555-0134', email: 'g.hoffman@email.com',
+      type: 'Face-to-Face', carrier: 'Transamerica', product: 'Hybrid LTC/Ann',
+      assessor: 'RN Patricia Lang', scheduled: 'Jul 10, 2026', time: '10:00 AM',
+      status: 'In Progress', biztalkRoute: 'LINK → LTCAS', uwRef: 'LTCAS-44821',
+      location: '47 Maple Dr, Hartford, CT 06103',
+      policyNum: 'TRA-2021-887641', appDate: 'Jun 28, 2026',
+      adl: 3, mmse: 22, duration: '60 min', language: 'English',
+      carrierSLA: '5 business days', priorityFlag: 'Standard',
+      clinicalNotes: 'Patient ambulatory with assistance. Lives alone — neighbor checks daily. Daughter (Jane Hoffman) emergency contact. Prefers morning appointments.',
+      aiRec: 'Gerald presents with moderate functional decline. ADL score 3/6 — bathing, dressing, and transferring impaired. MMSE 22/30 indicates mild cognitive impairment. Recommend Face-to-Face assessment to accurately evaluate mobility and home environment. Transamerica policy §3.2 requires in-person evaluation for initial claims with ADL ≥ 3.',
+      timeline: [
+        {date:'Jun 28', event:'Application received from Transamerica'},
+        {date:'Jul 1',  event:'LINK case created — BizTalk routing configured'},
+        {date:'Jul 3',  event:'RN Patricia Lang auto-matched and notified'},
+        {date:'Jul 7',  event:'Scheduling SMS sent to Gerald Hoffman'},
+        {date:'Jul 9',  event:'Assessment confirmed for Jul 10, 10:00 AM'},
+        {date:'Jul 10', event:'Assessment In Progress — RN on-site'}
+      ],
+      biztalkLog: ['14:21:08 → LINK intake received', '14:21:09 → BizTalk routing: LINK→LTCAS', '14:22:14 → LTCAS case created (LTCAS-44821)', '14:22:16 → EVV tracking activated']
+    },
+    'UW-7702': {
+      id: 'UW-7702', applicant: 'Sandra McClellan', age: 68,
+      dob: 'Nov 3, 1957', phone: '(617) 555-0289', email: 's.mcclellan@email.com',
+      type: 'Telephonic', carrier: 'MassMutual', product: 'LTC Standalone',
+      assessor: 'RN Kevin Walsh', scheduled: 'Jul 11, 2026', time: '2:00 PM',
+      status: 'Scheduled', biztalkRoute: 'LINK → eLTCAS', uwRef: 'eLTCAS-29103',
+      location: 'Boston, MA 02101 (Telephonic)',
+      policyNum: 'MM-2019-443287', appDate: 'Jul 1, 2026',
+      adl: 2, mmse: 25, duration: '45 min', language: 'English',
+      carrierSLA: '7 business days', priorityFlag: 'Standard',
+      clinicalNotes: 'Patient recovering from hip replacement (Mar 2026). Currently uses walker. Spouse George McClellan will be present during call. Prefers afternoon appointments.',
+      aiRec: 'Sandra\'s recent hip replacement (Mar 2026) is the precipitating event for this claim. ADL score 2/6 — bathing and dressing impaired post-surgery. MMSE 25/30 normal range. Telephonic assessment appropriate per MassMutual protocol for initial ADL ≤ 2 claims. Expected outcome: LTC benefit trigger confirmed, 90-day elimination period applies.',
+      timeline: [
+        {date:'Jul 1',  event:'Application received from MassMutual'},
+        {date:'Jul 2',  event:'LINK case created — eLTCAS routing'},
+        {date:'Jul 4',  event:'RN Kevin Walsh assigned'},
+        {date:'Jul 8',  event:'Telephonic assessment confirmed Jul 11, 2:00 PM'},
+        {date:'Jul 11', event:'Assessment scheduled — pending'}
+      ],
+      biztalkLog: ['09:14:22 → LINK intake received', '09:14:23 → BizTalk routing: LINK→eLTCAS', '09:15:01 → eLTCAS case created (eLTCAS-29103)', '09:15:04 → SMS scheduling link sent to Sandra McClellan']
+    },
+    'UW-7703': {
+      id: 'UW-7703', applicant: 'Harold Zimmer', age: 74,
+      dob: 'Feb 22, 1952', phone: '(414) 555-0377', email: 'h.zimmer@email.com',
+      type: 'Face-to-Face', carrier: 'Genworth', product: 'LTC Standalone',
+      assessor: 'RN Anna Torres', scheduled: 'Jul 12, 2026', time: '9:30 AM',
+      status: 'Scheduled', biztalkRoute: 'LINK → LTCAS', uwRef: 'LTCAS-44967',
+      location: '882 Oak Street, Milwaukee, WI 53201',
+      policyNum: 'GW-2016-110934', appDate: 'Jun 30, 2026',
+      adl: 4, mmse: 19, duration: '75 min', language: 'English',
+      carrierSLA: '5 business days', priorityFlag: 'Expedite',
+      clinicalNotes: 'Patient has moderate dementia (diagnosed Jan 2025). Son Robert Zimmer (power of attorney) must be present for all assessments. Address has elevator access — ground floor not required.',
+      aiRec: 'Harold presents with significant functional and cognitive decline. ADL score 4/6 — bathing, dressing, transferring, and continence impaired. MMSE 19/30 — moderate dementia range. Genworth policy flags ADL ≥ 4 for expedited processing. Extended assessment (75 min) required. POA son Robert Zimmer must co-sign all documentation. Memory Care facility placement likely outcome.',
+      timeline: [
+        {date:'Jun 30', event:'Application received — flagged expedite (ADL 4/6)'},
+        {date:'Jul 1',  event:'LINK case created — expedite routing to LTCAS'},
+        {date:'Jul 3',  event:'RN Anna Torres assigned (Memory Care certified)'},
+        {date:'Jul 7',  event:'POA Robert Zimmer confirmed availability'},
+        {date:'Jul 9',  event:'Assessment confirmed Jul 12, 9:30 AM'},
+        {date:'Jul 12', event:'Face-to-face assessment — pending'}
+      ],
+      biztalkLog: ['16:03:11 → LINK intake received (Expedite flag)', '16:03:12 → BizTalk routing: LINK→LTCAS (Priority)', '16:04:08 → LTCAS case created (LTCAS-44967)', '16:04:10 → Expedite notification sent to RN pool']
+    },
+    'UW-7704': {
+      id: 'UW-7704', applicant: 'Florence Nakamura', age: 65,
+      dob: 'Sep 7, 1960', phone: '(503) 555-0512', email: 'f.nakamura@email.com',
+      type: 'Telephonic', carrier: 'Pacific Life', product: 'Hybrid LTC/Life',
+      assessor: 'RN David Kim', scheduled: 'Jul 14, 2026', time: '11:00 AM',
+      status: 'Pending', biztalkRoute: 'LINK → Case360', uwRef: 'C360-88241',
+      location: 'Portland, OR 97201 (Telephonic)',
+      policyNum: 'PL-2022-772019', appDate: 'Jul 3, 2026',
+      adl: 2, mmse: 27, duration: '45 min', language: 'English / Japanese (interpreter available)',
+      carrierSLA: '10 business days', priorityFlag: 'Standard',
+      clinicalNotes: 'Applicant is bilingual — English and Japanese. May request Japanese interpreter for portions of the clinical questionnaire. Daughter Yuki Nakamura (healthcare proxy) will likely join call.',
+      aiRec: 'Florence is 65 — younger LTC claimant with early-stage functional decline. ADL score 2/6 — bathing and dressing impaired following recent stroke (Apr 2026). MMSE 27/30 normal. Pacific Life Hybrid LTC/Life policy requires Case360 routing for hybrid products. Telephonic appropriate. Expected outcome: LTC rider triggered, life benefit pool protected. Elimination period 90 days.',
+      timeline: [
+        {date:'Jul 3',  event:'Application received from Pacific Life'},
+        {date:'Jul 4',  event:'LINK case created — Case360 routing (Hybrid product)'},
+        {date:'Jul 5',  event:'RN David Kim assigned'},
+        {date:'Jul 8',  event:'SMS sent — awaiting applicant confirmation'},
+        {date:'Jul 14', event:'Assessment scheduled — pending confirmation'}
+      ],
+      biztalkLog: ['10:42:55 → LINK intake received (Hybrid LTC/Life)', '10:42:56 → BizTalk routing: LINK→Case360 (Hybrid product rule)', '10:43:44 → Case360 case created (C360-88241)', '10:43:46 → Awaiting applicant scheduling confirmation']
+    },
+    'UW-7705': {
+      id: 'UW-7705', applicant: 'Chester Williams', age: 79,
+      dob: 'Jan 30, 1947', phone: '(713) 555-0688', email: 'c.williams@email.com',
+      type: 'Face-to-Face', carrier: 'Prudential', product: 'LTC Standalone',
+      assessor: 'RN Susan Park', scheduled: 'Jul 15, 2026', time: '1:00 PM',
+      status: 'Pending', biztalkRoute: 'LINK → eLTCAS', uwRef: 'eLTCAS-29217',
+      location: '1840 Travis St, Houston, TX 77002',
+      policyNum: 'PRU-2014-553812', appDate: 'Jul 5, 2026',
+      adl: 3, mmse: 21, duration: '60 min', language: 'English',
+      carrierSLA: '7 business days', priorityFlag: 'Standard',
+      clinicalNotes: 'Patient is a veteran (USMC). Possible VA benefit coordination required — flag for coordination team. Wife Martha Williams (primary caregiver) present. Policy was purchased in 2014 — benefit amounts locked at original daily maximum.',
+      aiRec: 'Chester is 79 with moderate functional decline and veteran status requiring VA benefit coordination review. ADL 3/6 — bathing, dressing, continence impaired. MMSE 21/30 — mild-to-moderate cognitive impairment. Prudential routes to eLTCAS. Face-to-Face required per Prudential protocol for claimants ≥ 75. VA coordination team should be looped in before benefit payments begin to avoid duplicate payment.',
+      timeline: [
+        {date:'Jul 5',  event:'Application received — veteran flag raised'},
+        {date:'Jul 6',  event:'LINK case created — eLTCAS routing'},
+        {date:'Jul 7',  event:'RN Susan Park assigned'},
+        {date:'Jul 8',  event:'VA coordination team notified'},
+        {date:'Jul 9',  event:'Assessment confirmed Jul 15, 1:00 PM'},
+        {date:'Jul 15', event:'Face-to-face assessment — pending'}
+      ],
+      biztalkLog: ['13:17:33 → LINK intake received (Veteran flag)', '13:17:34 → BizTalk routing: LINK→eLTCAS', '13:18:22 → eLTCAS case created (eLTCAS-29217)', '13:18:25 → VA coordination team notification sent']
+    }
+  };
+
+  window._p7openLinkCase = function (id) {
+    var u = UW_CASES[id];
+    if (!u) {
+      _p12toast('<i class="fas fa-desktop"></i> LINK Case ' + id + ' opened — assessment form loaded · BizTalk routing active', 3200);
+      return;
+    }
+
+    var ovId = 'p12-uwcase-ov-' + id;
+    var statusColor = u.status === 'In Progress' ? '#0891b2' : u.status === 'Scheduled' ? '#059669' : '#d97706';
+    var flagColor   = u.priorityFlag === 'Expedite' ? '#dc2626' : '#6b7280';
+
+    /* Action key builders */
+    var closeKey    = 'p12-uc-close-'   + id;
+    var notifyKey   = 'p12-uc-notify-'  + id;
+    var reschedKey  = 'p12-uc-resched-' + id;
+    var completeKey = 'p12-uc-complete-'+ id;
+    var exportKey   = 'p12-uc-export-'  + id;
+
+    window._p8actions[closeKey]    = function () { _p12close(ovId); };
+    window._p8actions[notifyKey]   = function () { _p12toast('<i class="fas fa-sms"></i> Reminder SMS sent to ' + u.applicant + ' · Assessment ' + u.scheduled + ' ' + u.time + ' confirmed · BizTalk update routed to ' + u.uwRef, 4000); };
+    window._p8actions[reschedKey]  = function () { _p12close(ovId); window.ltcScheduleNew && window.ltcScheduleNew(); };
+    window._p8actions[completeKey] = function () {
+      _p12close(ovId);
+      _p12toast('<i class="fas fa-check-circle"></i> Case ' + id + ' marked complete · Assessment results uploaded to ' + u.uwRef + ' · Carrier ' + u.carrier + ' notified · BizTalk route closed', 5000);
+    };
+    window._p8actions[exportKey]   = function () { _p12toast('<i class="fas fa-file-export"></i> Case ' + id + ' exported to ' + u.biztalkRoute + ' system · PDF report generated · Carrier notification queued', 3500); };
+
+    /* Timeline rows */
+    var tlHtml = u.timeline.map(function (t, i) {
+      var isLast = i === u.timeline.length - 1;
+      return '<div style="display:flex;gap:10px;margin-bottom:' + (isLast ? '0' : '10') + 'px;">'
+        + '<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">'
+        + '<div style="width:10px;height:10px;border-radius:50%;background:' + (isLast ? statusColor : '#059669') + ';margin-top:3px;"></div>'
+        + (isLast ? '' : '<div style="width:2px;flex:1;background:#e5e7eb;margin-top:2px;"></div>')
+        + '</div>'
+        + '<div style="padding-bottom:' + (isLast ? '0' : '10') + 'px;">'
+        + '<div style="font-size:10px;color:#6b7280;">' + t.date + '</div>'
+        + '<div style="font-size:11px;color:#374151;">' + t.event + '</div>'
+        + '</div></div>';
+    }).join('');
+
+    /* BizTalk log */
+    var btHtml = u.biztalkLog.map(function (l) {
+      return '<div style="font-size:10px;color:#a3e635;font-family:monospace;margin-bottom:3px;">' + l + '</div>';
+    }).join('');
+
+    var html = '<div style="background:#fff;border-radius:16px;width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+      /* Header */
+      + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:flex-start;gap:12px;position:sticky;top:0;z-index:1;">'
+      + '<i class="fas fa-desktop" style="font-size:22px;margin-top:2px;"></i>'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:16px;font-weight:800;">LINK Case — ' + u.id + '</div>'
+      + '<div style="font-size:11px;opacity:.85;">' + u.applicant + ' · Age ' + u.age + ' · ' + u.carrier + ' · ' + u.product + '</div>'
+      + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">'
+      + '<span style="background:rgba(255,255,255,.2);border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">' + u.status + '</span>'
+      + '<span style="background:rgba(255,255,255,.15);border-radius:12px;padding:2px 9px;font-size:10px;">' + u.type + '</span>'
+      + '<span style="background:rgba(255,255,255,.15);border-radius:12px;padding:2px 9px;font-size:10px;">' + u.biztalkRoute + '</span>'
+      + (u.priorityFlag === 'Expedite' ? '<span style="background:#dc2626;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">⚡ EXPEDITE</span>' : '')
+      + '</div></div>'
+      + '<button onclick="_p8run(\'' + closeKey + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;flex-shrink:0;">✕</button>'
+      + '</div>'
+
+      /* Body */
+      + '<div style="padding:20px;">'
+      + _p12ai(u.aiRec)
+
+      /* Two-column info grid */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">'
+
+      /* Left: Applicant */
+      + '<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e5e7eb;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-user" style="color:#7c3aed;margin-right:6px;"></i>Applicant</div>'
+      + [['Name', u.applicant + ', Age ' + u.age], ['DOB', u.dob], ['Phone', u.phone], ['Location', u.location], ['Language', u.language]].map(function(kv){
+          return '<div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:11px;color:#6b7280;">' + kv[0] + '</span><span style="font-size:11px;font-weight:600;color:#111827;text-align:right;max-width:55%;">' + kv[1] + '</span></div>';
+        }).join('')
+      + '</div>'
+
+      /* Right: Assessment */
+      + '<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e5e7eb;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-calendar-check" style="color:#059669;margin-right:6px;"></i>Assessment</div>'
+      + [['Date', u.scheduled + ' ' + u.time], ['Modality', u.type], ['RN Assigned', u.assessor], ['Duration', u.duration], ['Carrier SLA', u.carrierSLA]].map(function(kv){
+          return '<div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:11px;color:#6b7280;">' + kv[0] + '</span><span style="font-size:11px;font-weight:600;color:#111827;">' + kv[1] + '</span></div>';
+        }).join('')
+      + '</div>'
+
+      /* Left: Policy */
+      + '<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e5e7eb;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-file-contract" style="color:#0891b2;margin-right:6px;"></i>Policy / System</div>'
+      + [['Policy #', u.policyNum], ['Carrier', u.carrier], ['Product', u.product], ['UW Ref', u.uwRef], ['BizTalk', u.biztalkRoute]].map(function(kv){
+          return '<div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:11px;color:#6b7280;">' + kv[0] + '</span><span style="font-size:11px;font-weight:600;color:#111827;">' + kv[1] + '</span></div>';
+        }).join('')
+      + '</div>'
+
+      /* Right: Clinical */
+      + '<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e5e7eb;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;"><i class="fas fa-heartbeat" style="color:#dc2626;margin-right:6px;"></i>Clinical Snapshot</div>'
+      + [['ADL Score', u.adl + '/6 impaired'], ['MMSE Score', u.mmse + '/30'], ['Priority', u.priorityFlag], ['App Date', u.appDate], ['Status', u.status]].map(function(kv){
+          return '<div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:11px;color:#6b7280;">' + kv[0] + '</span><span style="font-size:11px;font-weight:600;color:#111827;">' + kv[1] + '</span></div>';
+        }).join('')
+      + '</div>'
+      + '</div>'
+
+      /* Clinical Notes */
+      + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:5px;"><i class="fas fa-sticky-note" style="margin-right:5px;"></i>Clinical Notes</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;">' + u.clinicalNotes + '</div>'
+      + '</div>'
+
+      /* Timeline + BizTalk log side by side */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">'
+
+      /* Timeline */
+      + '<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e5e7eb;">'
+      + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;"><i class="fas fa-history" style="color:#7c3aed;margin-right:6px;"></i>Case Timeline</div>'
+      + tlHtml
+      + '</div>'
+
+      /* BizTalk log */
+      + '<div style="background:#111827;border-radius:10px;padding:14px;">'
+      + '<div style="font-size:12px;font-weight:700;color:#a3e635;margin-bottom:10px;"><i class="fas fa-route" style="margin-right:5px;"></i>BizTalk Event Log</div>'
+      + btHtml
+      + '<div style="font-size:10px;color:#6b7280;margin-top:8px;">Route: ' + u.biztalkRoute + ' · Ref: ' + u.uwRef + '</div>'
+      + '</div>'
+      + '</div>'
+
+      /* Action buttons */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      + _p12btn(notifyKey,   'Send Reminder SMS', 'fa-sms', '#0891b2', function(){})
+      + _p12btn(reschedKey,  'Reschedule',        'fa-calendar-alt', '#d97706', function(){})
+      + _p12btn(completeKey, 'Mark Complete',      'fa-check-circle', '#059669', function(){})
+      + _p12btn(exportKey,   'Export to ' + u.biztalkRoute.replace('LINK → ',''), 'fa-file-export', '#7c3aed', function(){})
+      + '</div>'
+      + '</div></div>';
+
+    _p12ov(ovId, html);
+  };
+
+  console.log('[Phase 12] Assessment workflow fixed (gibberish resolved) · Schedule New Assessment comprehensive · Assessment Management 3-step workflow · Open Case modal for UW-7701–7705');
+
+})();
