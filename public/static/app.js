@@ -77756,9 +77756,11 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   }
 
   function _p19buildPage_inner(tplId, html) {
-    var tpl = document.getElementById(tplId);
-    if (!tpl) return;
-    tpl.innerHTML = html;
+    // HAL pages must write to #page-content (the live visible area),
+    // NOT to the hidden tpl-hal-* div sitting inside #page-templates.
+    var target = document.getElementById('page-content') || document.getElementById(tplId);
+    if (!target) return;
+    target.innerHTML = html;
   }
 
   function _p19toast(msg, dur) {
