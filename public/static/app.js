@@ -75509,72 +75509,99 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
-     PAGE 1 — HEALTH OPERATIONS
+     PAGE 1 — HEALTH OPERATIONS  (Phase 17 rewrite — callback-map tabs)
      Tabs: Claims Processing · Eligibility & Enrollment · Provider Network
            Care Management · Analytics & Reporting
   ═══════════════════════════════════════════════════════════════════════ */
   var _p16healthTab = 0;
 
   var _p16healthClaims = [
-    { id:'HC-2201', member:'Barbara Thornton',  carrier:'Aetna',        product:'Med Supp Plan G',   type:'Hospital',     amount:'$18,400', filed:'Jul 1, 2026',  status:'In Review',  doi:'Jun 28, 2026' },
-    { id:'HC-2202', member:'Leonard Shapiro',   carrier:'AmeriLife',    product:'Med Supp Plan N',   type:'Physician',    amount:'$2,850',  filed:'Jul 2, 2026',  status:'Approved',   doi:'Jun 30, 2026' },
-    { id:'HC-2203', member:'Margaret Kellner',  carrier:'Humana',       product:'Critical Illness',  type:'Critical Ill', amount:'$50,000', filed:'Jun 30, 2026', status:'In Review',  doi:'Jun 25, 2026' },
-    { id:'HC-2204', member:'Frank Deluca',      carrier:'Cigna',        product:'Group Health Supp', type:'Rx/Pharmacy',  amount:'$1,240',  filed:'Jul 3, 2026',  status:'Approved',   doi:'Jul 3, 2026'  },
-    { id:'HC-2205', member:'Carol Steinberg',   carrier:'CUNA Mutual',  product:'LTD Supplement',    type:'Disability',   amount:'$3,600',  filed:'Jun 28, 2026', status:'Pending',    doi:'Jun 15, 2026' },
-    { id:'HC-2206', member:'Raymond Ng',        carrier:'Pacific Life', product:'Med Supp Plan F',   type:'Surgical',     amount:'$9,750',  filed:'Jul 4, 2026',  status:'In Review',  doi:'Jul 2, 2026'  },
-    { id:'HC-2207', member:'Dorothy Walsh',     carrier:'Aetna',        product:'Med Supp Plan G',   type:'Durable Med.', amount:'$880',   filed:'Jul 5, 2026',  status:'Approved',   doi:'Jul 4, 2026'  }
+    { id:'HC-2201', member:'Barbara Thornton',  carrier:'Aetna',        product:'Med Supp Plan G',   type:'Hospital',     amount:'$18,400', filed:'Jul 1, 2026',  status:'In Review',  doi:'Jun 28, 2026', aiScore:94, aiRec:'Approve' },
+    { id:'HC-2202', member:'Leonard Shapiro',   carrier:'AmeriLife',    product:'Med Supp Plan N',   type:'Physician',    amount:'$2,850',  filed:'Jul 2, 2026',  status:'Approved',   doi:'Jun 30, 2026', aiScore:98, aiRec:'Approved' },
+    { id:'HC-2203', member:'Margaret Kellner',  carrier:'Humana',       product:'Critical Illness',  type:'Critical Ill', amount:'$50,000', filed:'Jun 30, 2026', status:'In Review',  doi:'Jun 25, 2026', aiScore:81, aiRec:'Clinical Review' },
+    { id:'HC-2204', member:'Frank Deluca',      carrier:'Cigna',        product:'Group Health Supp', type:'Rx/Pharmacy',  amount:'$1,240',  filed:'Jul 3, 2026',  status:'Approved',   doi:'Jul 3, 2026',  aiScore:99, aiRec:'Approved' },
+    { id:'HC-2205', member:'Carol Steinberg',   carrier:'CUNA Mutual',  product:'LTD Supplement',    type:'Disability',   amount:'$3,600',  filed:'Jun 28, 2026', status:'Pending',    doi:'Jun 15, 2026', aiScore:72, aiRec:'Pend — Missing Docs' },
+    { id:'HC-2206', member:'Raymond Ng',        carrier:'Pacific Life', product:'Med Supp Plan F',   type:'Surgical',     amount:'$9,750',  filed:'Jul 4, 2026',  status:'In Review',  doi:'Jul 2, 2026',  aiScore:61, aiRec:'Flag — Billing Anomaly' },
+    { id:'HC-2207', member:'Dorothy Walsh',     carrier:'Aetna',        product:'Med Supp Plan G',   type:'Durable Med.', amount:'$880',   filed:'Jul 5, 2026',  status:'Approved',   doi:'Jul 4, 2026',  aiScore:97, aiRec:'Approved' }
   ];
 
   var _p16healthEnroll = [
-    { id:'EN-1001', member:'Joseph Whitmore', age:67, group:'Individual', carrier:'AmeriLife',   product:'Med Supp Plan G', effective:'Aug 1, 2026',  cobra:false, status:'Active'   },
-    { id:'EN-1002', member:'Susan Hartley',   age:71, group:'Individual', carrier:'Humana',      product:'Critical Illness', effective:'Jul 15, 2026', cobra:false, status:'Pending'  },
-    { id:'EN-1003', member:'David Ortega',    age:58, group:'Group',      carrier:'Cigna',       product:'Group Health Supp',effective:'Jul 1, 2026',  cobra:false, status:'Active'   },
-    { id:'EN-1004', member:'Helen Byrne',     age:62, group:'Individual', carrier:'Aetna',       product:'Med Supp Plan N', effective:'Jul 1, 2026',  cobra:true,  status:'Pending'  },
-    { id:'EN-1005', member:'Carlos Mejia',    age:55, group:'Group',      carrier:'CUNA Mutual', product:'LTD Supplement',  effective:'Aug 1, 2026',  cobra:false, status:'Scheduled'}
+    { id:'EN-1001', member:'Joseph Whitmore', age:67, group:'Individual', carrier:'AmeriLife',   product:'Med Supp Plan G',  effective:'Aug 1, 2026',  cobra:false, status:'Active',    eligScore:'99.2%' },
+    { id:'EN-1002', member:'Susan Hartley',   age:71, group:'Individual', carrier:'Humana',      product:'Critical Illness', effective:'Jul 15, 2026', cobra:false, status:'Pending',   eligScore:'97.8%' },
+    { id:'EN-1003', member:'David Ortega',    age:58, group:'Group',      carrier:'Cigna',       product:'Group Health Supp',effective:'Jul 1, 2026',  cobra:false, status:'Active',    eligScore:'100%'  },
+    { id:'EN-1004', member:'Helen Byrne',     age:62, group:'Individual', carrier:'Aetna',       product:'Med Supp Plan N',  effective:'Jul 1, 2026',  cobra:true,  status:'Pending',   eligScore:'95.1%' },
+    { id:'EN-1005', member:'Carlos Mejia',    age:55, group:'Group',      carrier:'CUNA Mutual', product:'LTD Supplement',   effective:'Aug 1, 2026',  cobra:false, status:'Scheduled', eligScore:'98.4%' }
   ];
 
   var _p16healthProviders = [
-    { npi:'1234567890', name:'Mount Sinai Health System',    type:'Hospital System', network:'In-Network', state:'NY', tier:'Premier', claims30:847, billingAcc:'99.1%', fraud:'Low'    },
-    { npi:'2345678901', name:'NYU Langone Medical Center',   type:'Hospital System', network:'In-Network', state:'NY', tier:'Premier', claims30:612, billingAcc:'98.7%', fraud:'Low'    },
-    { npi:'3456789012', name:'Dr. Alan Schwartz MD',         type:'Physician',       network:'In-Network', state:'NJ', tier:'Standard',claims30:143, billingAcc:'97.2%', fraud:'Low'    },
-    { npi:'4567890123', name:'Riverside Home Health Agency', type:'Home Health',     network:'In-Network', state:'CT', tier:'Standard',claims30:289, billingAcc:'96.8%', fraud:'Medium' },
-    { npi:'5678901234', name:'Metro Rx Pharmacy Group',      type:'Pharmacy',        network:'In-Network', state:'NY', tier:'Standard',claims30:1204, billingAcc:'99.8%',fraud:'Low'   },
-    { npi:'6789012345', name:'Atlantic Rehab Center',        type:'Rehab',           network:'Out-Network',state:'PA', tier:'N/A',     claims30:38,  billingAcc:'95.1%', fraud:'Medium' }
+    { npi:'1234567890', name:'Mount Sinai Health System',    type:'Hospital System', network:'In-Network', state:'NY', tier:'Premier', claims30:847,  billingAcc:'99.1%', fraud:'Low',    aiRisk:8  },
+    { npi:'2345678901', name:'NYU Langone Medical Center',   type:'Hospital System', network:'In-Network', state:'NY', tier:'Premier', claims30:612,  billingAcc:'98.7%', fraud:'Low',    aiRisk:11 },
+    { npi:'3456789012', name:'Dr. Alan Schwartz MD',         type:'Physician',       network:'In-Network', state:'NJ', tier:'Standard',claims30:143,  billingAcc:'97.2%', fraud:'Low',    aiRisk:15 },
+    { npi:'4567890123', name:'Riverside Home Health Agency', type:'Home Health',     network:'In-Network', state:'CT', tier:'Standard',claims30:289,  billingAcc:'96.8%', fraud:'Medium', aiRisk:42 },
+    { npi:'5678901234', name:'Metro Rx Pharmacy Group',      type:'Pharmacy',        network:'In-Network', state:'NY', tier:'Standard',claims30:1204, billingAcc:'99.8%', fraud:'Low',    aiRisk:6  },
+    { npi:'6789012345', name:'Atlantic Rehab Center',        type:'Rehab',           network:'Out-Network',state:'PA', tier:'N/A',     claims30:38,   billingAcc:'95.1%', fraud:'Medium', aiRisk:67 }
   ];
 
   var _p16careMgmt = [
-    { id:'CM-501', member:'Barbara Thornton', type:'UR Pre-Auth',   program:'Inpatient Hospitalization', status:'Approved', rnOwner:'RN Sarah Johnson',   due:'Jul 8, 2026',  priority:'High'   },
-    { id:'CM-502', member:'Margaret Kellner', type:'Case Mgmt',     program:'Critical Illness Support',  status:'In Progress',rnOwner:'RN Angela Moore',   due:'Jul 12, 2026', priority:'High'   },
-    { id:'CM-503', member:'Carol Steinberg',  type:'DM Program',    program:'Chronic Disease Mgmt',      status:'Active',   rnOwner:'RN Kevin Walsh',      due:'Ongoing',      priority:'Medium' },
-    { id:'CM-504', member:'Raymond Ng',       type:'UR Pre-Auth',   program:'Elective Surgery',          status:'Pending',  rnOwner:'RN Patricia Lang',    due:'Jul 10, 2026', priority:'Medium' },
-    { id:'CM-505', member:'Helen Byrne',      type:'COBRA Consult', program:'Continuation Coverage',     status:'Scheduled',rnOwner:'RN Anna Torres',      due:'Jul 9, 2026',  priority:'Low'    }
+    { id:'CM-501', member:'Barbara Thornton', type:'UR Pre-Auth',   program:'Inpatient Hospitalization', status:'Approved',    rnOwner:'RN Sarah Johnson', due:'Jul 8, 2026',  priority:'High',   aiAssist:'InterQual met · Auto-approved' },
+    { id:'CM-502', member:'Margaret Kellner', type:'Case Mgmt',     program:'Critical Illness Support',  status:'In Progress', rnOwner:'RN Angela Moore',  due:'Jul 12, 2026', priority:'High',   aiAssist:'73% readmission risk · Proactive outreach triggered' },
+    { id:'CM-503', member:'Carol Steinberg',  type:'DM Program',    program:'Chronic Disease Mgmt',      status:'Active',      rnOwner:'RN Kevin Walsh',   due:'Ongoing',      priority:'Medium', aiAssist:'Chronic condition score 8.2/10 · $180K projected savings' },
+    { id:'CM-504', member:'Raymond Ng',       type:'UR Pre-Auth',   program:'Elective Surgery',          status:'Pending',     rnOwner:'RN Patricia Lang', due:'Jul 10, 2026', priority:'Medium', aiAssist:'Criteria review in progress · Decision est. 3.8 hrs' },
+    { id:'CM-505', member:'Helen Byrne',      type:'COBRA Consult', program:'Continuation Coverage',     status:'Scheduled',   rnOwner:'RN Anna Torres',   due:'Jul 9, 2026',  priority:'Low',    aiAssist:'62-day COBRA window · Notice auto-sent · Premium invoiced' }
   ];
+
+  /* ── Tab builder — uses _p8actions callback-map, NO raw onclick strings ── */
+  function _p16buildHealthTabs(activeTab) {
+    var COLOR = '#dc2626';
+    var tabs = [
+      { label:'Claims Processing',     icon:'fa-file-medical-alt', idx:0 },
+      { label:'Eligibility & Enroll',  icon:'fa-user-check',       idx:1 },
+      { label:'Provider Network',      icon:'fa-hospital',         idx:2 },
+      { label:'Care Management',       icon:'fa-heartbeat',        idx:3 },
+      { label:'Analytics & Reporting', icon:'fa-chart-bar',        idx:4 }
+    ];
+    return '<div style="display:flex;gap:2px;background:#f3f4f6;padding:4px;border-radius:8px;margin-bottom:18px;">'
+      + tabs.map(function(t) {
+          var on = t.idx === activeTab;
+          var k = 'p17-htab-' + t.idx + '-' + Math.random().toString(36).slice(2);
+          window._p8actions[k] = (function(idx){ return function(){ _p16buildHealthPage(idx); }; })(t.idx);
+          return '<button onclick="_p8run(\'' + k + '\')" style="flex:1;padding:8px 4px;font-size:11px;font-weight:'
+            + (on ? '800' : '600') + ';border:none;border-radius:6px;cursor:pointer;background:'
+            + (on ? '#fff' : 'transparent') + ';color:' + (on ? COLOR : '#6b7280')
+            + ';box-shadow:' + (on ? '0 1px 4px rgba(0,0,0,.1)' : 'none') + ';white-space:nowrap;">'
+            + '<i class="fas ' + t.icon + '" style="margin-right:4px;"></i>' + t.label + '</button>';
+        }).join('')
+      + '</div>';
+  }
 
   function _p16buildHealthPage(tab) {
     _p16healthTab = tab;
     var COLOR = '#dc2626';
-    var tabDefs = [
-      ['Claims Processing',    'fa-file-medical-alt', 'window._p16navHealthTab(0)', COLOR],
-      ['Eligibility & Enroll', 'fa-user-check',       'window._p16navHealthTab(1)', COLOR],
-      ['Provider Network',     'fa-hospital',         'window._p16navHealthTab(2)', COLOR],
-      ['Care Management',      'fa-heartbeat',        'window._p16navHealthTab(3)', COLOR],
-      ['Analytics & Reporting','fa-chart-bar',        'window._p16navHealthTab(4)', COLOR]
-    ];
 
     var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
-      + _p16kpi('28,200',  'Active Health Members', 'fa-users',           COLOR,     'Across all carriers')
-      + _p16kpi('7,841',   'Claims YTD',            'fa-file-medical-alt',COLOR,     '97.2% auto-adjudicated')
-      + _p16kpi('$142M',   'Benefits Paid YTD',     'fa-dollar-sign',     '#059669', 'Loss ratio 68.4%')
-      + _p16kpi('4 hrs',   'Avg Claim Turnaround',  'fa-clock',           '#d97706', 'SLA target: 8 hrs')
+      + _p16kpi('28,200', 'Active Health Members', 'fa-users',            COLOR,     'Across all carriers')
+      + _p16kpi('7,841',  'Claims YTD',            'fa-file-medical-alt', COLOR,     '97.2% auto-adjudicated')
+      + _p16kpi('$142M',  'Benefits Paid YTD',     'fa-dollar-sign',      '#059669', 'Loss ratio 68.4%')
+      + _p16kpi('4 hrs',  'Avg Claim Turnaround',  'fa-clock',            '#d97706', 'SLA target: 8 hrs')
       + '</div>';
 
     var body = '';
 
-    /* TAB 0 — Claims Processing */
+    /* ── TAB 0 — Claims Processing ── */
     if (tab === 0) {
+
+      /* action buttons — all pre-registered in _p8actions */
+      var k_newClaim = 'p17-newclm-' + Math.random().toString(36).slice(2);
+      var k_triage   = 'p17-triage-'  + Math.random().toString(36).slice(2);
+      var k_cobAll   = 'p17-cobAll-'  + Math.random().toString(36).slice(2);
+      window._p8actions[k_newClaim] = function() { _p16openNewClaimForm(); };
+      window._p8actions[k_triage]   = function() { _p16runAiTriage(); };
+      window._p8actions[k_cobAll]   = function() { _p16runCobCheck(); };
+
       var rows = _p16healthClaims.map(function(c) {
-        var k_open = 'p16-hclm-' + c.id + '-' + Math.random().toString(36).slice(2);
-        window._p8actions[k_open] = (function(claim) { return function() { _p16openHealthClaim(claim); }; })(c);
+        var k_open = 'p17-hclm-' + c.id + '-' + Math.random().toString(36).slice(2);
+        window._p8actions[k_open] = (function(claim){ return function(){ _p16openHealthClaim(claim); }; })(c);
+        var aiColor = c.aiScore >= 90 ? '#059669' : c.aiScore >= 70 ? '#d97706' : '#dc2626';
         return '<tr style="border-bottom:1px solid #f3f4f6;">'
           + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + c.id + '</td>'
           + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + c.member + '</td>'
@@ -75583,63 +75610,83 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + c.amount + '</td>'
           + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + c.filed + '</td>'
           + '<td style="padding:9px 12px;">' + _p16statusBadge(c.status) + '</td>'
-          + '<td style="padding:9px 12px;"><button onclick="_p8run(\'' + k_open + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">Open</button></td>'
+          + '<td style="padding:9px 12px;"><span style="background:' + aiColor + '18;color:' + aiColor + ';border-radius:4px;padding:2px 6px;font-size:9px;font-weight:800;" title="WealthAI Score">AI ' + c.aiScore + '</span></td>'
+          + '<td style="padding:9px 12px;"><button onclick="_p8run(\'' + k_open + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;font-weight:700;">Open</button></td>'
           + '</tr>';
       }).join('');
 
-      body = _p16aiPanel('WealthAI Auto-Adjudication is processing 97.2% of Health claims straight-through. '
-        + 'COB (Coordination of Benefits) engine active across 4 carriers. 3 claims flagged for clinical review — '
-        + 'ML anomaly detection identified billing pattern inconsistency on HC-2206. '
-        + 'Estimated $420K in duplicate billing prevented YTD.')
+      body = _p16aiPanel('WealthAI Auto-Adjudication processing 97.2% of Health claims straight-through — industry avg is 78%. '
+          + 'COB engine active across 4 carriers. HC-2206 flagged: ML billing anomaly (12% above peer cohort) — $420K duplicate billing prevented YTD. '
+          + 'AI Triage scoring every claim on 47 risk dimensions in real time. 5 claims recommended for auto-approval today.')
         + _p16sectionHdr('fa-file-medical-alt', 'Health Claims Queue — Active Cases', COLOR)
         + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:16px;">'
-        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;align-items:center;">'
-        + _p16btn('+ New Claim', 'fa-plus', COLOR, function(){ _p16toast('<i class="fas fa-plus"></i> Health claim intake form opened — member eligibility pre-verified via real-time eligibility API', 3500); })
-        + _p16btn('Run AI Triage', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI triage complete — 5 auto-approved, 2 flagged for clinical review, 0 denials. Average processing time: 3.2 minutes.', 4500); })
-        + _p16btn('COB Check', 'fa-exchange-alt', '#0891b2', function(){ _p16toast('<i class="fas fa-exchange-alt"></i> Coordination of Benefits check complete — no duplicate coverage detected across 7 active claims · Subrogation opportunity identified on HC-2203', 4000); })
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+        + '<button onclick="_p8run(\'' + k_newClaim + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-plus"></i> New Claim</button>'
+        + '<button onclick="_p8run(\'' + k_triage + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-robot"></i> Run AI Triage</button>'
+        + '<button onclick="_p8run(\'' + k_cobAll + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-exchange-alt"></i> COB Check</button>'
+        + '<span style="margin-left:auto;font-size:10px;color:#7c3aed;font-weight:700;"><i class="fas fa-robot" style="margin-right:4px;"></i>WealthAI scoring active — 7 claims scored</span>'
         + '</div>'
         + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
-        + _p16tblHdr(['Claim ID','Member','Carrier / Product','Type','Amount','Filed','Status',''])
+        + _p16tblHdr(['Claim ID','Member','Carrier / Product','Type','Amount','Filed','Status','AI Score',''])
         + '<tbody>' + rows + '</tbody></table></div></div>';
     }
 
-    /* TAB 1 — Eligibility & Enrollment */
+    /* ── TAB 1 — Eligibility & Enrollment ── */
     else if (tab === 1) {
+      var k_verify = 'p17-verify-' + Math.random().toString(36).slice(2);
+      var k_enroll = 'p17-enroll-' + Math.random().toString(36).slice(2);
+      var k_cobra  = 'p17-cobra-'  + Math.random().toString(36).slice(2);
+      window._p8actions[k_verify] = function(){ _p16eligVerify(); };
+      window._p8actions[k_enroll] = function(){ _p16openEnrollModal(); };
+      window._p8actions[k_cobra]  = function(){ _p16cobraAdmin(); };
+
       var eRows = _p16healthEnroll.map(function(e) {
         var cobraTag = e.cobra ? '<span style="background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:4px;">COBRA</span>' : '';
+        var eligColor = parseFloat(e.eligScore) >= 99 ? '#059669' : '#d97706';
         return '<tr style="border-bottom:1px solid #f3f4f6;">'
           + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + e.id + '</td>'
           + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + e.member + cobraTag + '<div style="font-size:10px;color:#6b7280;">Age ' + e.age + ' · ' + e.group + '</div></td>'
           + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + e.carrier + '</td>'
           + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + e.product + '</td>'
           + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + e.effective + '</td>'
+          + '<td style="padding:9px 12px;"><span style="font-size:10px;font-weight:800;color:' + eligColor + ';background:' + eligColor + '15;border-radius:4px;padding:2px 6px;"><i class="fas fa-robot" style="font-size:8px;margin-right:3px;"></i>' + e.eligScore + '</span></td>'
           + '<td style="padding:9px 12px;">' + _p16statusBadge(e.status) + '</td>'
           + '</tr>';
       }).join('');
-      body = _p16aiPanel('WealthAI Eligibility Engine processes real-time eligibility verification via 270/271 EDI transactions in < 2 seconds. '
-        + 'Open Enrollment AI assistant is pre-populating 847 member accounts for the Aug 1 effective date. '
-        + 'COBRA administration: 2 members in 60-day election window — automated notices dispatched.')
+
+      body = _p16aiPanel('WealthAI Eligibility Engine: Real-time 270/271 EDI verification in under 2 seconds — 28,200 members confirmed active as of 07:00 today. '
+          + 'AI pre-enrollment assistant pre-populating 847 member accounts for Aug 1 effective date using prior-year election data (saves avg 14 min per member). '
+          + 'COBRA AI: 2 members in election window — automated notices dispatched, premium invoices generated, CMS reporting filed.')
         + _p16sectionHdr('fa-user-check', 'Member Eligibility & Enrollment Queue', COLOR)
         + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">'
-        + _p16kpi('28,200','Active Members','fa-users',COLOR,'Real-time verified')
-        + _p16kpi('847','Open Enrollment','fa-calendar-check','#d97706','Aug 1 effective')
-        + _p16kpi('2','COBRA Members','fa-file-alt','#0891b2','60-day election window')
+        + _p16kpi('28,200','Active Members','fa-users',COLOR,'AI-verified real-time')
+        + _p16kpi('847','Open Enrollment','fa-calendar-check','#d97706','Aug 1 · AI pre-populated')
+        + _p16kpi('2','COBRA Members','fa-file-alt','#0891b2','60-day window · AI notices sent')
         + '</div>'
         + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
-        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
-        + _p16btn('Verify Eligibility', 'fa-check-circle', COLOR, function(){ _p16toast('<i class="fas fa-check-circle"></i> Real-time 270/271 EDI eligibility verification submitted — response in 1.8 seconds · All 28,200 members verified active', 4000); })
-        + _p16btn('Open Enrollment', 'fa-calendar-alt', '#d97706', function(){ _p16toast('<i class="fas fa-calendar-alt"></i> Open Enrollment workflow initiated — 847 members in queue · AI pre-populating forms from prior year elections', 3500); })
-        + _p16btn('COBRA Admin', 'fa-file-alt', '#0891b2', function(){ _p16toast('<i class="fas fa-file-alt"></i> COBRA notices sent — Helen Byrne (62 days remaining) · COBRA premium invoice generated · CMS compliance confirmed', 3500); })
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+        + '<button onclick="_p8run(\'' + k_verify + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-check-circle"></i> Verify Eligibility</button>'
+        + '<button onclick="_p8run(\'' + k_enroll + '\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-calendar-alt"></i> Open Enrollment</button>'
+        + '<button onclick="_p8run(\'' + k_cobra + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-file-alt"></i> COBRA Admin</button>'
+        + '<span style="margin-left:auto;font-size:10px;color:#7c3aed;font-weight:700;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI Eligibility Score shown per member</span>'
         + '</div>'
         + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
-        + _p16tblHdr(['Enroll ID','Member','Carrier','Product','Effective','Status'])
+        + _p16tblHdr(['Enroll ID','Member','Carrier','Product','Effective','AI Elig.','Status'])
         + '<tbody>' + eRows + '</tbody></table></div></div>';
     }
 
-    /* TAB 2 — Provider Network */
+    /* ── TAB 2 — Provider Network ── */
     else if (tab === 2) {
+      var k_netAdq  = 'p17-netadq-' + Math.random().toString(36).slice(2);
+      var k_feeUpd  = 'p17-feeupd-' + Math.random().toString(36).slice(2);
+      var k_aiScan  = 'p17-aiscan-' + Math.random().toString(36).slice(2);
+      window._p8actions[k_netAdq] = function(){ _p16networkAdequacy(); };
+      window._p8actions[k_feeUpd] = function(){ _p16feeSchedule(); };
+      window._p8actions[k_aiScan] = function(){ _p16providerFraudScan(); };
+
       var pRows = _p16healthProviders.map(function(p) {
         var fraudColor = p.fraud === 'Low' ? '#059669' : p.fraud === 'Medium' ? '#d97706' : '#dc2626';
+        var riskColor  = p.aiRisk < 20 ? '#059669' : p.aiRisk < 50 ? '#d97706' : '#dc2626';
         return '<tr style="border-bottom:1px solid #f3f4f6;">'
           + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + p.npi + '</td>'
           + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + p.name + '<div style="font-size:10px;color:#6b7280;">' + p.type + ' · ' + p.state + '</div></td>'
@@ -75648,25 +75695,35 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + p.claims30 + '</td>'
           + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + p.billingAcc + '</td>'
           + '<td style="padding:9px 12px;"><span style="background:' + fraudColor + '18;color:' + fraudColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + p.fraud + '</span></td>'
+          + '<td style="padding:9px 12px;"><span style="background:' + riskColor + '18;color:' + riskColor + ';border-radius:4px;padding:2px 6px;font-size:9px;font-weight:800;"><i class="fas fa-robot" style="font-size:8px;margin-right:2px;"></i>' + p.aiRisk + '/100</span></td>'
           + '</tr>';
       }).join('');
-      body = _p16aiPanel('Provider Network AI: WealthAI scores 6,200+ in-network providers on billing accuracy, fraud risk, and outcomes quality monthly. '
-        + 'Atlantic Rehab Center flagged Medium fraud risk — billing pattern analysis shows 12% above peer cohort. '
-        + 'Network adequacy: 100% compliance across 4 states. Fee schedule auto-updated Jan 2026.')
-        + _p16sectionHdr('fa-hospital', 'Provider Network — Credentialing & Fraud Monitoring', COLOR)
+
+      body = _p16aiPanel('WealthAI Provider Scoring: 6,200+ in-network providers scored monthly on 23 billing, fraud, and outcomes dimensions. '
+          + 'Atlantic Rehab Center (PA) — AI risk score 67/100: billing 12% above peer cohort, unusual procedure code concentration. SIU referral initiated — $38K potential recovery. '
+          + 'Network adequacy: 100% CMS compliance across NY/NJ/CT/PA. Fee schedule auto-updated to 2026 CMS rates Jan 1.')
+        + _p16sectionHdr('fa-hospital', 'Provider Network — Credentialing, Adequacy & AI Fraud Monitoring', COLOR)
         + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
-        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
-        + _p16btn('Network Adequacy Check', 'fa-map-marker-alt', COLOR, function(){ _p16toast('<i class="fas fa-map-marker-alt"></i> Network adequacy check complete — 100% compliance NY/NJ/CT/PA · 0 access gaps identified · CMS submission ready', 4000); })
-        + _p16btn('Fee Schedule Update', 'fa-dollar-sign', '#059669', function(){ _p16toast('<i class="fas fa-dollar-sign"></i> Fee schedule update queued — 6,240 provider contracts updated to 2026 CMS rates · Effective Aug 1 · EOB repricing initiated', 3500); })
-        + _p16btn('AI Fraud Scan', 'fa-shield-alt', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI fraud scan: 2 providers flagged (Medium) · Atlantic Rehab billing 12% above cohort · SIU referral initiated · $38K potential recovery', 4500); })
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+        + '<button onclick="_p8run(\'' + k_netAdq + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-map-marker-alt"></i> Network Adequacy</button>'
+        + '<button onclick="_p8run(\'' + k_feeUpd + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-dollar-sign"></i> Fee Schedule Update</button>'
+        + '<button onclick="_p8run(\'' + k_aiScan + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-robot"></i> AI Fraud Scan</button>'
+        + '<span style="margin-left:auto;font-size:10px;color:#7c3aed;font-weight:700;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI Risk Score (0=safe, 100=high risk)</span>'
         + '</div>'
         + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
-        + _p16tblHdr(['NPI','Provider / Type / State','Network','Tier','Claims (30d)','Billing Acc.','Fraud Risk'])
+        + _p16tblHdr(['NPI','Provider / Type / State','Network','Tier','Claims (30d)','Billing Acc.','Fraud','AI Risk'])
         + '<tbody>' + pRows + '</tbody></table></div></div>';
     }
 
-    /* TAB 3 — Care Management */
+    /* ── TAB 3 — Care Management ── */
     else if (tab === 3) {
+      var k_preauth = 'p17-preauth-' + Math.random().toString(36).slice(2);
+      var k_urAssist= 'p17-urassist-'+ Math.random().toString(36).slice(2);
+      var k_dmEnrol = 'p17-dmenrol-' + Math.random().toString(36).slice(2);
+      window._p8actions[k_preauth]  = function(){ _p16openPreAuthForm(); };
+      window._p8actions[k_urAssist] = function(){ _p16urAiAssist(); };
+      window._p8actions[k_dmEnrol]  = function(){ _p16dmEnrollAction(); };
+
       var cmRows = _p16careMgmt.map(function(m) {
         var prioColor = m.priority === 'High' ? '#dc2626' : m.priority === 'Medium' ? '#d97706' : '#059669';
         return '<tr style="border-bottom:1px solid #f3f4f6;">'
@@ -75678,56 +75735,72 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
           + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + m.rnOwner + '</td>'
           + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + m.due + '</td>'
           + '<td style="padding:9px 12px;"><span style="background:' + prioColor + '18;color:' + prioColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + m.priority + '</span></td>'
+          + '<td style="padding:9px 12px;font-size:10px;color:#7c3aed;max-width:180px;">'
+          + '<i class="fas fa-robot" style="font-size:9px;margin-right:3px;"></i>' + m.aiAssist + '</td>'
           + '</tr>';
       }).join('');
-      body = _p16aiPanel('Care Management AI: Utilization Review bot processes pre-auth requests in < 4 hours (industry avg: 48 hrs). '
-        + 'Predictive model flagged Margaret Kellner (Critical Illness) for proactive case management — 73% readmission risk score. '
-        + 'Disease Management program auto-enrolled 3 members with chronic conditions — projected $180K annual savings.')
+
+      body = _p16aiPanel('WealthAI Care Management: UR bot processes pre-auth in under 4 hrs (industry avg 48 hrs) — InterQual criteria checked automatically. '
+          + 'Predictive readmission model: Margaret Kellner scored 73% 30-day readmission risk — proactive outreach triggered, care coordinator assigned. '
+          + 'Disease Management AI auto-enrolled 3 chronic condition members — projected $180K annual medical cost savings.')
         + _p16sectionHdr('fa-heartbeat', 'Utilization Review · Case Management · Disease Management', COLOR)
         + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
-        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
-        + _p16btn('New Pre-Auth Request', 'fa-clipboard-check', COLOR, function(){ _p16toast('<i class="fas fa-clipboard-check"></i> Pre-authorization intake form opened — clinical criteria loaded · MDGuidelines integrated · Expected decision: 3.8 hrs', 3500); })
-        + _p16btn('AI UR Decision Assist', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-magic"></i> WealthAI UR analysis: CM-504 elective surgery — InterQual criteria met · Auto-approval recommended · Clinical notes pre-populated', 4000); })
-        + _p16btn('DM Program Enroll', 'fa-user-plus', '#059669', function(){ _p16toast('<i class="fas fa-user-plus"></i> Disease Management auto-enrollment: 3 members enrolled in Chronic Disease Mgmt · Nurse coaching schedule set · Member portal access provisioned', 3500); })
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+        + '<button onclick="_p8run(\'' + k_preauth + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-clipboard-check"></i> New Pre-Auth Request</button>'
+        + '<button onclick="_p8run(\'' + k_urAssist + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-robot"></i> AI UR Decision Assist</button>'
+        + '<button onclick="_p8run(\'' + k_dmEnrol + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-user-plus"></i> DM Program Enroll</button>'
+        + '<span style="margin-left:auto;font-size:10px;color:#7c3aed;font-weight:700;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI Assist note shown per case</span>'
         + '</div>'
         + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
-        + _p16tblHdr(['Case ID','Member','Type','Program','Status','RN Owner','Due Date','Priority'])
+        + _p16tblHdr(['Case ID','Member','Type','Program','Status','RN Owner','Due Date','Priority','AI Assist'])
         + '<tbody>' + cmRows + '</tbody></table></div></div>';
     }
 
-    /* TAB 4 — Analytics & Reporting */
+    /* ── TAB 4 — Analytics & Reporting ── */
     else if (tab === 4) {
+      var k_carrierRpt = 'p17-crpt-'  + Math.random().toString(36).slice(2);
+      var k_mlrChk     = 'p17-mlr-'   + Math.random().toString(36).slice(2);
+      var k_snowflake  = 'p17-snow-'  + Math.random().toString(36).slice(2);
+      var k_aiForcast  = 'p17-aifc-'  + Math.random().toString(36).slice(2);
+      window._p8actions[k_carrierRpt] = function(){ _p16generateCarrierReport(); };
+      window._p8actions[k_mlrChk]     = function(){ _p16mlrComplianceCheck(); };
+      window._p8actions[k_snowflake]  = function(){ _p16snowflakeDashboard(); };
+      window._p8actions[k_aiForcast]  = function(){ _p16aiQForecast(); };
+
       var metrics = [
-        { label:'Medical Loss Ratio (MLR)', val:'68.4%', target:'≤ 80% (ACA)',  trend:'↓ 2.1% vs Q1', good:true  },
-        { label:'Claim Frequency / 1,000',  val:'278',   target:'< 290',         trend:'↓ 4.2% YoY',   good:true  },
-        { label:'Avg Cost Per Member/Mo',   val:'$503',  target:'< $540 PMPM',   trend:'↓ 1.8% vs Q1', good:true  },
-        { label:'Auto-Adjudication Rate',   val:'97.2%', target:'> 95%',         trend:'↑ 1.4% vs Q1', good:true  },
-        { label:'UR Approval Rate',         val:'91.8%', target:'> 88%',         trend:'↑ 0.6% vs Q1', good:true  },
-        { label:'Network Penetration',      val:'96.1%', target:'> 94%',         trend:'Stable',        good:true  },
-        { label:'HEDIS Composite Score',    val:'87.3',  target:'> 85 (NCQA)',   trend:'↑ 1.2 pts',    good:true  },
-        { label:'Member Satisfaction (NPS)',val:'72',    target:'> 65',          trend:'↑ 3 pts vs Q4', good:true  }
+        { label:'Medical Loss Ratio (MLR)', val:'68.4%', target:'≤ 80% (ACA)',   trend:'↓ 2.1% vs Q1', good:true,  aiNote:'Well below ACA threshold — no rebate obligation' },
+        { label:'Claim Frequency / 1,000',  val:'278',   target:'< 290',          trend:'↓ 4.2% YoY',   good:true,  aiNote:'AI triage reducing unnecessary claim submissions' },
+        { label:'Avg Cost Per Member/Mo',   val:'$503',  target:'< $540 PMPM',    trend:'↓ 1.8% vs Q1', good:true,  aiNote:'DM program and preventive care driving down PMPM' },
+        { label:'Auto-Adjudication Rate',   val:'97.2%', target:'> 95%',          trend:'↑ 1.4% vs Q1', good:true,  aiNote:'AI adjudication engine performing above benchmark' },
+        { label:'UR Approval Rate',         val:'91.8%', target:'> 88%',          trend:'↑ 0.6% vs Q1', good:true,  aiNote:'InterQual AI criteria reducing manual UR burden' },
+        { label:'Network Penetration',      val:'96.1%', target:'> 94%',          trend:'Stable',        good:true,  aiNote:'In-network steering AI generating $2.1M savings YTD' },
+        { label:'HEDIS Composite Score',    val:'87.3',  target:'> 85 (NCQA)',    trend:'↑ 1.2 pts',    good:true,  aiNote:'Preventive care gap closure alerts driving improvement' },
+        { label:'Member Satisfaction (NPS)',val:'72',    target:'> 65',           trend:'↑ 3 pts vs Q4', good:true,  aiNote:'AI-personalized communications boosting satisfaction' }
       ];
       var mRows = metrics.map(function(m) {
         return '<tr style="border-bottom:1px solid #f3f4f6;">'
           + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + m.label + '</td>'
-          + '<td style="padding:9px 12px;font-size:14px;font-weight:800;color:' + (m.good ? '#059669':'#dc2626') + ';">' + m.val + '</td>'
+          + '<td style="padding:9px 12px;font-size:14px;font-weight:800;color:' + (m.good ? '#059669' : '#dc2626') + ';">' + m.val + '</td>'
           + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + m.target + '</td>'
-          + '<td style="padding:9px 12px;font-size:11px;color:' + (m.good?'#059669':'#dc2626') + ';font-weight:700;">' + m.trend + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:' + (m.good ? '#059669' : '#dc2626') + ';font-weight:700;">' + m.trend + '</td>'
+          + '<td style="padding:9px 12px;font-size:10px;color:#7c3aed;"><i class="fas fa-robot" style="font-size:9px;margin-right:3px;"></i>' + m.aiNote + '</td>'
           + '</tr>';
       }).join('');
-      body = _p16aiPanel('Analytics AI: MLR tracking at 68.4% — well below ACA 80% threshold. '
-        + 'Snowflake real-time reporting pipeline processes 180K+ claim events/day. '
-        + 'Carrier dashboards auto-generated weekly — 4 carrier clients on self-service portal. '
-        + 'Predictive model: Q3 projected loss ratio 69.1% ± 1.2% (high confidence).')
-        + _p16sectionHdr('fa-chart-bar', 'Health Operations Analytics — KPI Dashboard', COLOR)
+
+      body = _p16aiPanel('Analytics AI: MLR at 68.4% — 11.6 pts below ACA 80% threshold (no rebate obligation). Snowflake pipeline: 180K+ claim events/day, sub-second query. '
+          + 'Q3 forecast: projected MLR 69.1% ± 1.2% (high confidence, 94%). HEDIS gap-closure AI targeting 4 underperforming measures — projecting 89.1 composite by year-end. '
+          + '4 carrier self-service dashboards active — avg 340 monthly logins. AI anomaly detection saved $420K in duplicate billing YTD.')
+        + _p16sectionHdr('fa-chart-bar', 'Health Operations Analytics — AI-Powered KPI Dashboard', COLOR)
         + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
-        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
-        + _p16btn('Generate Carrier Report', 'fa-file-chart-bar', COLOR, function(){ _p16toast('<i class="fas fa-chart-bar"></i> Carrier analytics report generated — MLR 68.4% · Claims summary · Network scorecard · HEDIS measures · PDF ready for download', 4000); })
-        + _p16btn('MLR Compliance Check', 'fa-shield-check', '#059669', function(){ _p16toast('<i class="fas fa-shield-alt"></i> ACA MLR compliance confirmed — 68.4% (Individual) · 72.1% (Group) · Both below statutory thresholds · No rebate obligation', 4000); })
-        + _p16btn('Snowflake Dashboard', 'fa-snowflake', '#0891b2', function(){ _p16toast('<i class="fas fa-snowflake"></i> Snowflake real-time dashboard opened — 180K+ claim events today · 4 carrier self-service portals active · Sub-second query response', 3500); })
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
+        + '<button onclick="_p8run(\'' + k_carrierRpt + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-chart-bar"></i> Generate Carrier Report</button>'
+        + '<button onclick="_p8run(\'' + k_mlrChk + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-shield-alt"></i> MLR Compliance</button>'
+        + '<button onclick="_p8run(\'' + k_snowflake + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-snowflake"></i> Snowflake Dashboard</button>'
+        + '<button onclick="_p8run(\'' + k_aiForcast + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-robot"></i> AI Q3 Forecast</button>'
+        + '<span style="margin-left:auto;font-size:10px;color:#7c3aed;font-weight:700;"><i class="fas fa-robot" style="margin-right:4px;"></i>AI insight shown per metric</span>'
         + '</div>'
         + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
-        + _p16tblHdr(['Metric','Current Value','Target','Trend vs Prior Period'])
+        + _p16tblHdr(['Metric','Current Value','Target','Trend vs Prior Period','AI Insight'])
         + '<tbody>' + mRows + '</tbody></table></div></div>';
     }
 
@@ -75735,53 +75808,381 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       + _p16hdr('fa-heartbeat', 'Health Operations', 'Claims · Eligibility · Provider Network · Care Management · Analytics | 28,200 Members · 4 Carriers', COLOR)
       + '<div style="padding:20px 22px;background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;margin-bottom:20px;">'
       + kpiBar
-      + _p16tabs(tabDefs, tab)
+      + _p16buildHealthTabs(tab)
       + body
       + '</div></div>';
 
     _p16buildPage('tpl-hal-health', pageHtml);
   }
 
+  /* ── New Claim modal ── */
+  function _p16openNewClaimForm() {
+    var ovId = 'p17-newclm-ov';
+    var k_close  = 'p17-nc-close-'  + Math.random().toString(36).slice(2);
+    var k_submit = 'p17-nc-submit-' + Math.random().toString(36).slice(2);
+    window._p8actions[k_close]  = function(){ _p16close(ovId); };
+    window._p8actions[k_submit] = function(){
+      _p16close(ovId);
+      _p16toast('New health claim HC-2208 created — member eligibility verified via real-time 270/271 EDI · WealthAI pre-scored: 91/100 · Submitted to adjudication queue', 5000);
+    };
+    _p16ov(ovId,
+      '<div style="background:#fff;border-radius:14px;width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-plus-circle" style="font-size:20px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">New Health Claim Intake</div>'
+      + '<div style="font-size:11px;opacity:.8;">Real-time eligibility verification · WealthAI pre-scoring</div></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:16px;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + _p16aiPanel('WealthAI Intake Assistant: Member eligibility will be verified via real-time 270/271 EDI within 2 seconds of member ID entry. Duplicate detection, COB check, and billing code validation run automatically before submission.')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Member ID</label>'
+      + '<input style="' + _p16fld + '" placeholder="e.g. MBR-28847" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Member Name</label>'
+      + '<input style="' + _p16fld + '" placeholder="Last, First" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Carrier</label>'
+      + '<select style="' + _p16fld + '"><option>Aetna</option><option>AmeriLife</option><option>Humana</option><option>Cigna</option><option>CUNA Mutual</option><option>Pacific Life</option></select></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Claim Type</label>'
+      + '<select style="' + _p16fld + '"><option>Hospital</option><option>Physician</option><option>Surgical</option><option>Rx/Pharmacy</option><option>Durable Med.</option><option>Critical Illness</option><option>Disability</option></select></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Date of Injury / Service</label>'
+      + '<input type="date" style="' + _p16fld + '" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Claim Amount ($)</label>'
+      + '<input style="' + _p16fld + '" placeholder="0.00" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Provider NPI</label>'
+      + '<input style="' + _p16fld + '" placeholder="10-digit NPI" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Diagnosis Code (ICD-10)</label>'
+      + '<input style="' + _p16fld + '" placeholder="e.g. Z00.00" /></div>'
+      + '</div>'
+      + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:#166534;">'
+      + '<i class="fas fa-robot" style="margin-right:6px;color:#059669;"></i><strong>WealthAI Pre-Check:</strong> Eligibility confirmed · No prior duplicate found · COB status: Primary only · Estimated adjudication time: 3.4 hrs'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="_p8run(\'' + k_submit + '\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-paper-plane" style="margin-right:6px;"></i>Submit Claim</button>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>'
+      + '</div></div></div>'
+    );
+  }
+
+  /* ── AI Triage modal ── */
+  function _p16runAiTriage() {
+    var ovId = 'p17-triage-ov';
+    var k_close   = 'p17-tr-close-'  + Math.random().toString(36).slice(2);
+    var k_approve = 'p17-tr-approve-' + Math.random().toString(36).slice(2);
+    window._p8actions[k_close]   = function(){ _p16close(ovId); };
+    window._p8actions[k_approve] = function(){
+      _p16close(ovId);
+      _p16toast('WealthAI batch approval executed — HC-2202, HC-2204, HC-2207 approved ($5,970 total) · EOBs generated · Members notified · HC-2206 escalated to SIU', 5500);
+    };
+    var triageResults = [
+      { id:'HC-2201', member:'Barbara Thornton',  score:94, rec:'Approve',              reason:'Amount in range · No duplicate · COB clear' },
+      { id:'HC-2202', member:'Leonard Shapiro',   score:98, rec:'Auto-Approve',          reason:'Low value · Clean history · Network provider' },
+      { id:'HC-2203', member:'Margaret Kellner',  score:81, rec:'Clinical Review',       reason:'High value CI claim · Medical records needed' },
+      { id:'HC-2204', member:'Frank Deluca',      score:99, rec:'Auto-Approve',          reason:'Rx claim · Formulary match · Member eligible' },
+      { id:'HC-2205', member:'Carol Steinberg',   score:72, rec:'Pend — Missing Docs',   reason:'Disability claim · APS and attending notes required' },
+      { id:'HC-2206', member:'Raymond Ng',        score:61, rec:'Flag — SIU Referral',   reason:'Billing 12% above cohort · Unusual code pattern' },
+      { id:'HC-2207', member:'Dorothy Walsh',     score:97, rec:'Auto-Approve',          reason:'Small durable med claim · Provider Premier tier' }
+    ];
+    var tRows = triageResults.map(function(r) {
+      var sc = r.score; var c = sc >= 90 ? '#059669' : sc >= 70 ? '#d97706' : '#dc2626';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:8px 10px;font-size:11px;font-weight:700;color:#dc2626;">' + r.id + '</td>'
+        + '<td style="padding:8px 10px;font-size:11px;font-weight:700;">' + r.member + '</td>'
+        + '<td style="padding:8px 10px;"><span style="background:' + c + '18;color:' + c + ';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:800;">' + sc + '/100</span></td>'
+        + '<td style="padding:8px 10px;font-size:11px;font-weight:700;color:' + c + ';">' + r.rec + '</td>'
+        + '<td style="padding:8px 10px;font-size:10px;color:#6b7280;">' + r.reason + '</td>'
+        + '</tr>';
+    }).join('');
+    _p16ov(ovId,
+      '<div style="background:#fff;border-radius:14px;width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-robot" style="font-size:22px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">WealthAI Triage — Batch Results</div>'
+      + '<div style="font-size:11px;opacity:.8;">7 claims scored across 47 risk dimensions · Processing time: 3.2 minutes</div></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:16px;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">'
+      + _p16kpi('3','Auto-Approve','fa-check-circle','#059669','Ready to process')
+      + _p16kpi('1','Clinical Review','fa-stethoscope','#d97706','Records required')
+      + _p16kpi('1','Pend','fa-pause-circle','#d97706','Missing docs')
+      + _p16kpi('1','SIU Referral','fa-shield-alt','#dc2626','Fraud flag')
+      + '</div>'
+      + '<table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:16px;">'
+      + '<thead><tr style="background:#f3f0ff;"><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">CLAIM</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">MEMBER</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">AI SCORE</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">RECOMMENDATION</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">AI RATIONALE</th></tr></thead>'
+      + '<tbody>' + tRows + '</tbody></table>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="_p8run(\'' + k_approve + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-check-double" style="margin-right:6px;"></i>Execute AI Recommendations</button>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;">Close</button>'
+      + '</div></div></div>'
+    );
+  }
+
+  /* ── COB Check modal ── */
+  function _p16runCobCheck() {
+    var ovId = 'p17-cob-ov';
+    var k_close  = 'p17-cob-close-'  + Math.random().toString(36).slice(2);
+    var k_report = 'p17-cob-report-' + Math.random().toString(36).slice(2);
+    window._p8actions[k_close]  = function(){ _p16close(ovId); };
+    window._p8actions[k_report] = function(){
+      _p16close(ovId);
+      _p16toast('COB compliance report generated — 7 claims verified · No duplicate payments · HC-2203 subrogation opportunity flagged ($12,400) · Report filed to carriers', 5000);
+    };
+    var cobRows = [
+      { id:'HC-2201', member:'Barbara Thornton',  primary:'Aetna',        secondary:'None',         status:'Clear',          sub:'None' },
+      { id:'HC-2202', member:'Leonard Shapiro',   primary:'AmeriLife',    secondary:'None',         status:'Clear',          sub:'None' },
+      { id:'HC-2203', member:'Margaret Kellner',  primary:'Humana',       secondary:'Medicare A/B', status:'Coordination',   sub:'$12,400 opportunity' },
+      { id:'HC-2204', member:'Frank Deluca',      primary:'Cigna',        secondary:'None',         status:'Clear',          sub:'None' },
+      { id:'HC-2205', member:'Carol Steinberg',   primary:'CUNA Mutual',  secondary:'None',         status:'Clear',          sub:'None' },
+      { id:'HC-2206', member:'Raymond Ng',        primary:'Pacific Life', secondary:'None',         status:'Under Review',   sub:'Pending' },
+      { id:'HC-2207', member:'Dorothy Walsh',     primary:'Aetna',        secondary:'None',         status:'Clear',          sub:'None' }
+    ];
+    var cobTbl = cobRows.map(function(r) {
+      var stColor = r.status === 'Clear' ? '#059669' : r.status === 'Coordination' ? '#d97706' : '#0891b2';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        + '<td style="padding:8px 10px;font-size:11px;font-weight:700;color:#dc2626;">' + r.id + '</td>'
+        + '<td style="padding:8px 10px;font-size:11px;font-weight:700;">' + r.member + '</td>'
+        + '<td style="padding:8px 10px;font-size:11px;color:#374151;">' + r.primary + '</td>'
+        + '<td style="padding:8px 10px;font-size:11px;color:#374151;">' + r.secondary + '</td>'
+        + '<td style="padding:8px 10px;"><span style="background:' + stColor + '18;color:' + stColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + r.status + '</span></td>'
+        + '<td style="padding:8px 10px;font-size:10px;color:#7c3aed;font-weight:700;">' + r.sub + '</td>'
+        + '</tr>';
+    }).join('');
+    _p16ov(ovId,
+      '<div style="background:#fff;border-radius:14px;width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#0891b2,#0369a1);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-exchange-alt" style="font-size:20px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">Coordination of Benefits — Batch Check</div>'
+      + '<div style="font-size:11px;opacity:.8;">7 active claims · Real-time carrier data · WealthAI subrogation detection</div></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:16px;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + _p16aiPanel('WealthAI COB Engine: Cross-referenced 7 active claims against 4 carrier databases and CMS Medicare records. HC-2203 (Margaret Kellner, Critical Illness $50,000) has active Medicare A/B — subrogation opportunity identified at $12,400. No duplicate payments detected across all 7 claims.')
+      + '<table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:16px;">'
+      + '<thead><tr style="background:#e0f2fe;"><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">CLAIM</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">MEMBER</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">PRIMARY</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">SECONDARY</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">STATUS</th><th style="padding:8px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:800;">AI SUBROGATION</th></tr></thead>'
+      + '<tbody>' + cobTbl + '</tbody></table>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="_p8run(\'' + k_report + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-file-export" style="margin-right:6px;"></i>Export COB Report to Carriers</button>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;">Close</button>'
+      + '</div></div></div>'
+    );
+  }
+
+  /* ── Individual claim detail modal ── */
   function _p16openHealthClaim(c) {
     var ovId = 'p16-hclm-ov';
-    var k_close = 'p16-hclm-close-' + Math.random().toString(36).slice(2);
-    var k_pay   = 'p16-hclm-pay-'   + Math.random().toString(36).slice(2);
-    var k_deny  = 'p16-hclm-deny-'  + Math.random().toString(36).slice(2);
-    var k_cob   = 'p16-hclm-cob-'   + Math.random().toString(36).slice(2);
+    var k_close = 'p17-hd-close-' + Math.random().toString(36).slice(2);
+    var k_pay   = 'p17-hd-pay-'   + Math.random().toString(36).slice(2);
+    var k_deny  = 'p17-hd-deny-'  + Math.random().toString(36).slice(2);
+    var k_cob   = 'p17-hd-cob-'   + Math.random().toString(36).slice(2);
+    var k_docs  = 'p17-hd-docs-'  + Math.random().toString(36).slice(2);
     window._p8actions[k_close] = function(){ _p16close(ovId); };
-    window._p8actions[k_pay]   = function(){ _p16close(ovId); _p16toast('<i class="fas fa-check-circle"></i> Claim ' + c.id + ' approved — Payment ' + c.amount + ' queued to ' + c.carrier + ' · EOB generated · Member notified via portal', 4000); };
-    window._p8actions[k_deny]  = function(){ _p16close(ovId); _p16toast('<i class="fas fa-times-circle"></i> Claim ' + c.id + ' denied — Adverse determination letter generated · Member appeal rights notice sent · 30-day appeal window opens', 4000); };
-    window._p8actions[k_cob]   = function(){ _p16toast('<i class="fas fa-exchange-alt"></i> COB check: ' + c.member + ' — Primary: ' + c.carrier + ' · No secondary coverage detected · No overpayment risk', 3500); };
+    window._p8actions[k_pay]   = function(){ _p16close(ovId); _p16toast('Claim ' + c.id + ' approved — Payment ' + c.amount + ' queued to ' + c.carrier + ' · EOB generated and mailed · Member portal updated · Carrier notified via 835 EDI', 5000); };
+    window._p8actions[k_deny]  = function(){ _p16close(ovId); _p16toast('Claim ' + c.id + ' denied — Adverse determination letter generated · Appeal rights notice (ERISA § 503) queued · 30-day member appeal window opens · Carrier notified', 5000); };
+    window._p8actions[k_cob]   = function(){ _p16toast('COB check: ' + c.member + ' — Primary: ' + c.carrier + ' · Secondary: None detected · No overpayment risk · Medicare crossover: N/A', 4000); };
+    window._p8actions[k_docs]  = function(){ _p16toast('Claim ' + c.id + ' document request sent — Medical records (APS), billing itemization, and EOB from attending provider requested · Expected receipt: 5-7 business days', 4000); };
+    var aiColor = c.aiScore >= 90 ? '#059669' : c.aiScore >= 70 ? '#d97706' : '#dc2626';
 
     _p16ov(ovId,
-      '<div style="background:#fff;border-radius:14px;width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      '<div style="background:#fff;border-radius:14px;width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
       + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
       + '<i class="fas fa-file-medical-alt" style="font-size:20px;"></i>'
       + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">Health Claim — ' + c.id + '</div>'
       + '<div style="font-size:11px;opacity:.8;">' + c.member + ' · ' + c.carrier + ' · ' + c.product + '</div></div>'
-      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;">✕</button>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:16px;">✕</button>'
       + '</div>'
       + '<div style="padding:20px;">'
-      + _p16aiPanel('WealthAI analysis: Claim amount ' + c.amount + ' is within expected range for ' + c.type + ' claim. '
-        + 'No duplicate detected across prior 24 months. COB verification complete. '
-        + 'Auto-approval confidence: 94% — recommend approve.')
+      + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:14px 16px;color:#fff;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:6px;"></i>WealthAI Analysis</div>'
+      + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">'
+      + '<span style="font-size:28px;font-weight:900;color:' + aiColor + ';">' + c.aiScore + '<span style="font-size:14px;">/100</span></span>'
+      + '<div><div style="font-size:13px;font-weight:700;color:#e2e8f0;">AI Recommendation: <span style="color:' + aiColor + ';">' + c.aiRec + '</span></div>'
+      + '<div style="font-size:11px;color:#94a3b8;">Claim amount in expected range for ' + c.type + ' · No duplicate in 24 months · COB verified · Billing code valid</div></div>'
+      + '</div></div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">'
       + [['Claim ID',c.id],['Member',c.member],['Carrier',c.carrier],['Product',c.product],
-         ['Claim Type',c.type],['Amount',c.amount],['Date of Injury',c.doi],['Filed Date',c.filed],['Status',c.status]].map(function(kv){
+         ['Claim Type',c.type],['Claim Amount',c.amount],['Date of Injury',c.doi],['Filed Date',c.filed],['Current Status',c.status]].map(function(kv){
            return '<div style="background:#f8fafc;border-radius:8px;padding:10px;border:1px solid #e5e7eb;">'
              + '<div style="font-size:10px;color:#6b7280;margin-bottom:3px;">' + kv[0] + '</div>'
              + '<div style="font-size:12px;font-weight:700;color:#111827;">' + kv[1] + '</div></div>';
          }).join('')
       + '</div>'
-      + '<div style="display:flex;gap:8px;">'
-      + _p16btn('Approve & Pay', 'fa-check', '#059669', window._p8actions[k_pay])
-      + _p16btn('Deny', 'fa-times', '#dc2626', window._p8actions[k_deny])
-      + _p16btn('COB Check', 'fa-exchange-alt', '#0891b2', window._p8actions[k_cob])
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + '<button onclick="_p8run(\'' + k_pay + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-check"></i> Approve & Pay</button>'
+      + '<button onclick="_p8run(\'' + k_deny + '\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-times"></i> Deny</button>'
+      + '<button onclick="_p8run(\'' + k_cob + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-exchange-alt"></i> COB Check</button>'
+      + '<button onclick="_p8run(\'' + k_docs + '\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-folder-open"></i> Request Docs</button>'
       + '</div></div></div>'
     );
   }
 
-  window._p16navHealthTab = function(t) { _p16buildHealthPage(t); };
+  /* ── Eligibility tab action handlers ── */
+  function _p16eligVerify() {
+    _p16toast('WealthAI 270/271 EDI: All 28,200 members verified active as of 07:00 today · Response time: 1.8s · 0 eligibility exceptions · Carrier confirmations received from all 4 carriers', 5000);
+  }
+  function _p16openEnrollModal() {
+    var ovId = 'p17-enroll-ov';
+    var k_close  = 'p17-en-close-'  + Math.random().toString(36).slice(2);
+    var k_submit = 'p17-en-submit-' + Math.random().toString(36).slice(2);
+    window._p8actions[k_close]  = function(){ _p16close(ovId); };
+    window._p8actions[k_submit] = function(){
+      _p16close(ovId);
+      _p16toast('Enrollment initiated for new member — EN-1006 created · Eligibility pre-verified · WealthAI pre-populated plan options based on age/zip · Effective date confirmed · Welcome kit queued', 5000);
+    };
+    _p16ov(ovId,
+      '<div style="background:#fff;border-radius:14px;width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#d97706,#b45309);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-calendar-alt" style="font-size:20px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">Open Enrollment — New Member</div>'
+      + '<div style="font-size:11px;opacity:.8;">WealthAI pre-populates plan options · 270/271 eligibility check on submit</div></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:16px;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + _p16aiPanel('WealthAI Enrollment Assistant: Plan recommendations pre-populated based on age, zip code, and prior election history. AI estimates $2,340 annual savings vs. prior plan. COBRA transition detected — auto-applying COBRA credit.')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Member Name</label><input style="' + _p16fld + '" placeholder="Last, First" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Date of Birth</label><input type="date" style="' + _p16fld + '" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Carrier</label><select style="' + _p16fld + '"><option>Aetna</option><option>AmeriLife</option><option>Humana</option><option>Cigna</option><option>CUNA Mutual</option></select></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Plan Type</label><select style="' + _p16fld + '"><option>Med Supp Plan G</option><option>Med Supp Plan N</option><option>Critical Illness</option><option>Group Health Supp</option><option>LTD Supplement</option></select></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Effective Date</label><input type="date" style="' + _p16fld + '" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Enrollment Type</label><select style="' + _p16fld + '"><option>Open Enrollment</option><option>Special Enrollment</option><option>COBRA Continuation</option><option>New Group</option></select></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="_p8run(\'' + k_submit + '\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-user-plus" style="margin-right:6px;"></i>Enroll Member</button>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>'
+      + '</div></div></div>'
+    );
+  }
+  function _p16cobraAdmin() {
+    _p16toast('COBRA Admin: Helen Byrne — 62 days elapsed of 60-day election window · NOTICE: Deadline TODAY · Premium invoice $1,840/mo generated · CMS COBRA reporting filed · Carrier notified', 6000);
+  }
+
+  /* ── Provider Network tab action handlers ── */
+  function _p16networkAdequacy() {
+    _p16toast('Network Adequacy AI check complete — NY: 100% · NJ: 100% · CT: 100% · PA: 100% · 0 geographic access gaps · 6,240 active providers · CMS annual filing ready · Next review: Jan 2027', 5000);
+  }
+  function _p16feeSchedule() {
+    _p16toast('Fee Schedule Update queued — 6,240 provider contracts updated to 2026 CMS rates · Effective Aug 1, 2026 · EOB repricing initiated for all outstanding claims · Provider portals notified', 5000);
+  }
+  function _p16providerFraudScan() {
+    var ovId = 'p17-fraud-ov';
+    var k_close = 'p17-fr-close-' + Math.random().toString(36).slice(2);
+    var k_siu   = 'p17-fr-siu-'   + Math.random().toString(36).slice(2);
+    window._p8actions[k_close] = function(){ _p16close(ovId); };
+    window._p8actions[k_siu]   = function(){ _p16close(ovId); _p16toast('SIU referral submitted — Atlantic Rehab Center (NPI: 6789012345) · Billing anomaly pattern documented · Potential recovery: $38,400 · State Fraud Bureau notification filed · Provider payment hold initiated', 5500); };
+    _p16ov(ovId,
+      '<div style="background:#fff;border-radius:14px;width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-robot" style="font-size:20px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">WealthAI Provider Fraud Scan</div>'
+      + '<div style="font-size:11px;opacity:.8;">6,240 providers · 23 fraud dimensions · Monthly scoring</div></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:16px;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + _p16aiPanel('WealthAI fraud detection scored all 6,240 active providers against 23 billing and clinical dimensions. 2 providers flagged at Medium risk. Atlantic Rehab Center is the primary concern — billing pattern analysis shows 12% above peer cohort with unusual CPT code concentration in high-reimbursement codes.')
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">'
+      + _p16kpi('6,240','Providers Scanned','fa-hospital','#059669','Monthly AI scan')
+      + _p16kpi('2','Flagged','fa-exclamation-triangle','#d97706','Medium risk')
+      + _p16kpi('$38K','Potential Recovery','fa-dollar-sign','#dc2626','Atlantic Rehab')
+      + '</div>'
+      + '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px;margin-bottom:16px;">'
+      + '<div style="font-size:12px;font-weight:800;color:#dc2626;margin-bottom:8px;"><i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>HIGH PRIORITY FLAG — Atlantic Rehab Center (PA)</div>'
+      + '<div style="font-size:11px;color:#374151;line-height:1.7;">'
+      + '<strong>NPI:</strong> 6789012345 · <strong>Network:</strong> Out-of-Network · <strong>AI Risk Score:</strong> 67/100<br>'
+      + '<strong>Finding:</strong> Billing 12% above peer cohort for rehabilitation services in PA · Unusual CPT code concentration (97530, 97110) · 38 claims in 30 days vs. cohort avg of 22<br>'
+      + '<strong>Potential Recovery:</strong> $38,400 · <strong>Action Recommended:</strong> SIU Referral + Payment Hold'
+      + '</div></div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="_p8run(\'' + k_siu + '\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-shield-alt" style="margin-right:6px;"></i>Submit SIU Referral + Hold Payment</button>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;">Close</button>'
+      + '</div></div></div>'
+    );
+  }
+
+  /* ── Care Management tab action handlers ── */
+  function _p16openPreAuthForm() {
+    var ovId = 'p17-preauth-ov';
+    var k_close  = 'p17-pa-close-'  + Math.random().toString(36).slice(2);
+    var k_submit = 'p17-pa-submit-' + Math.random().toString(36).slice(2);
+    window._p8actions[k_close]  = function(){ _p16close(ovId); };
+    window._p8actions[k_submit] = function(){
+      _p16close(ovId);
+      _p16toast('Pre-Auth CM-506 submitted — WealthAI InterQual check: criteria met · Auto-approval recommended · Clinical reviewer assigned: RN Sarah Johnson · Expected decision: 3.8 hrs · Member notified', 5500);
+    };
+    _p16ov(ovId,
+      '<div style="background:#fff;border-radius:14px;width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-clipboard-check" style="font-size:20px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">New Pre-Authorization Request</div>'
+      + '<div style="font-size:11px;opacity:.8;">WealthAI checks InterQual criteria automatically · Avg decision: 3.8 hrs</div></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:16px;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + _p16aiPanel('WealthAI UR Assist: InterQual clinical criteria will be automatically checked against submitted diagnosis and procedure codes. Predictive model flags high-risk cases for proactive case management. Average UR decision time: 3.8 hrs vs. industry avg of 48 hrs.')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Member</label><input style="' + _p16fld + '" placeholder="Member name or ID" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">UR Type</label><select style="' + _p16fld + '"><option>UR Pre-Auth</option><option>Case Management</option><option>Concurrent Review</option><option>Retrospective Review</option></select></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Procedure / Program</label><input style="' + _p16fld + '" placeholder="e.g. Inpatient Surgery" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">ICD-10 Diagnosis Code</label><input style="' + _p16fld + '" placeholder="e.g. M51.16" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">CPT Procedure Code</label><input style="' + _p16fld + '" placeholder="e.g. 22612" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Requesting Provider NPI</label><input style="' + _p16fld + '" placeholder="10-digit NPI" /></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Priority</label><select style="' + _p16fld + '"><option>Routine</option><option>Urgent (72 hrs)</option><option>Emergent (24 hrs)</option></select></div>'
+      + '<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Assign RN</label><select style="' + _p16fld + '"><option>RN Sarah Johnson</option><option>RN Angela Moore</option><option>RN Kevin Walsh</option><option>RN Patricia Lang</option></select></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="_p8run(\'' + k_submit + '\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-paper-plane" style="margin-right:6px;"></i>Submit Pre-Auth Request</button>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>'
+      + '</div></div></div>'
+    );
+  }
+  function _p16urAiAssist() {
+    _p16toast('WealthAI UR Decision Assist: CM-504 (Raymond Ng, Elective Surgery) — InterQual criteria met on all 6 clinical dimensions · Auto-approval recommended · Clinical notes pre-populated from EMR · Decision package ready for RN sign-off', 6000);
+  }
+  function _p16dmEnrollAction() {
+    _p16toast('Disease Management AI enrollment: 3 members auto-enrolled in Chronic Disease Mgmt program · Nurse coaching schedule generated · Member portal access provisioned · Projected $180K medical cost savings · Care gap alerts activated', 5500);
+  }
+
+  /* ── Analytics tab action handlers ── */
+  function _p16generateCarrierReport() {
+    _p16toast('Carrier analytics report generated — MLR 68.4% · 7,841 claims YTD · $142M benefits paid · Network scorecard: 6,240 providers · HEDIS composite 87.3 · NPS 72 · PDF rendered · Sent to 4 carrier portals', 5500);
+  }
+  function _p16mlrComplianceCheck() {
+    _p16toast('ACA MLR Compliance confirmed — Individual: 68.4% (threshold ≤80%) · Group: 72.1% (threshold ≤85%) · Both compliant · No rebate obligation · CMS annual MLR report auto-filed · $0 rebate liability', 5500);
+  }
+  function _p16snowflakeDashboard() {
+    _p16toast('Snowflake real-time dashboard: 180,412 claim events today · 4 carrier self-service portals active · Sub-second query response (avg 340ms) · Last ETL sync: 4 min ago · Data freshness: 99.97%', 5000);
+  }
+  function _p16aiQForecast() {
+    var ovId = 'p17-fcst-ov';
+    var k_close = 'p17-fc-close-' + Math.random().toString(36).slice(2);
+    window._p8actions[k_close] = function(){ _p16close(ovId); };
+    _p16ov(ovId,
+      '<div style="background:#fff;border-radius:14px;width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-robot" style="font-size:20px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">WealthAI — Q3 2026 Health Forecast</div>'
+      + '<div style="font-size:11px;opacity:.8;">Predictive model · 94% confidence · Based on 180K+ claim events</div></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:16px;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
+      + _p16kpi('69.1%','Q3 Projected MLR','fa-chart-line','#059669','±1.2% · High confidence')
+      + _p16kpi('$148M','Q3 Benefits Forecast','fa-dollar-sign','#d97706','+4.2% vs Q2')
+      + _p16kpi('8,100','Q3 Claims Forecast','fa-file-medical-alt','#dc2626','+3.3% seasonal')
+      + _p16kpi('89.1','HEDIS Year-End Target','fa-star','#7c3aed','4 gap-closure measures')
+      + '</div>'
+      + '<div style="background:#f3f0ff;border-radius:10px;padding:14px;margin-bottom:14px;">'
+      + '<div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:8px;"><i class="fas fa-robot" style="margin-right:6px;"></i>WealthAI Forecast Insights</div>'
+      + '<ul style="font-size:11px;color:#374151;line-height:2;margin:0;padding-left:16px;">'
+      + '<li>Q3 MLR projected at 69.1% — seasonal uptick from summer elective procedures, still well below 80% ACA threshold</li>'
+      + '<li>Critical Illness claims expected +18% Q3 (seasonal pattern — matches 3-year trend)</li>'
+      + '<li>DM program projected to save $180K in Q3 medical costs — chronic condition members showing 22% lower utilization</li>'
+      + '<li>HEDIS gap-closure AI targeting Breast Cancer Screening, HbA1c Testing, Annual Wellness Visit, and Statin Adherence</li>'
+      + '<li>Fraud prevention model projected to block $520K in duplicate/anomalous billing by year-end (+24% vs. prior year)</li>'
+      + '</ul></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;"><i class="fas fa-check" style="margin-right:6px;"></i>Close Forecast</button>'
+      + '</div></div>'
+    );
+  }
 
   window.initHealthOpsPage = function() {
     _p16buildHealthPage(0);
