@@ -71936,3 +71936,1257 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 8] LTC Claims Phase 8 loaded — bugs fixed, IDP active, SMARTS rules panel live, New Claim wizard updated, Edit Rule / STP Dashboard / Engine Health fully operational');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 9 — LIFECYCLE-COMPLETE LTC CLAIMS
+   P1: Fixed intake wizard (ICD-10, 6-ADL checklist, no MMSE at intake,
+       NPI lookup, qualifying event date, COB, who-is-filing)
+   P2: Lifecycle status banner on claim list + detail header
+   P3: Phase-aware 7-tab claim detail (Overview/Timeline/Documents/
+       Assessment/Provider/Carrier/AI Insights)
+   P4: Dedicated RN Clinical Assessment form
+   P5: Qualifying Event Date vs Notification Date in header + timeline
+   +   5 fully-simulated claim types with distinct personas
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─────────────────────────────────────────────────────────────────────
+     CONSTANTS — ICD-10 diagnosis list, ADL list, lifecycle phases
+  ───────────────────────────────────────────────────────────────────── */
+  var ICD10_LIST = [
+    { code:'G30.9',   label:"Alzheimer's Disease",           cat:'Cognitive' },
+    { code:'F01.51',  label:'Vascular Dementia',             cat:'Cognitive' },
+    { code:'G20',     label:"Parkinson's Disease",           cat:'Functional' },
+    { code:'S72.001', label:'Hip Fracture / Recovery',       cat:'Functional' },
+    { code:'I63.9',   label:'Stroke / Cerebrovascular Accident', cat:'Both' },
+    { code:'G12.21',  label:'ALS (Amyotrophic Lateral Sclerosis)', cat:'Functional' },
+    { code:'G35',     label:'Multiple Sclerosis',            cat:'Functional' },
+    { code:'F02.80',  label:'Dementia in Other Diseases',    cat:'Cognitive' },
+    { code:'I50.9',   label:'Congestive Heart Failure (CHF)',cat:'Functional' },
+    { code:'J44.9',   label:'COPD — Severe',                 cat:'Functional' },
+    { code:'N18.5',   label:'Chronic Kidney Disease Stg 5',  cat:'Medical' },
+    { code:'C80.1',   label:'Cancer — Advanced / Metastatic',cat:'Medical' },
+    { code:'E11.65',  label:'Type 2 Diabetes w/ Complications', cat:'Medical' },
+    { code:'S09.90',  label:'Traumatic Brain Injury',        cat:'Both' },
+    { code:'M81.0',   label:'Osteoporosis w/ Fracture',      cat:'Functional' },
+    { code:'G91.9',   label:'Hydrocephalus',                 cat:'Cognitive' },
+    { code:'F03.90',  label:'Unspecified Dementia',          cat:'Cognitive' },
+    { code:'R26.89',  label:'Gait Disturbance / Fall Risk',  cat:'Functional' },
+    { code:'Z87.39',  label:'History of Stroke (residual)',  cat:'Both' },
+    { code:'Z99.89',  label:'Other Chronic Condition — Specify', cat:'Medical' }
+  ];
+
+  var ADL_LIST = [
+    { key:'bathing',     label:'Bathing',     desc:'Washing body or body parts' },
+    { key:'dressing',    label:'Dressing',    desc:'Putting on/taking off clothing & orthotics' },
+    { key:'eating',      label:'Eating',      desc:'Getting food to mouth & swallowing' },
+    { key:'transferring',label:'Transferring',desc:'Moving bed to chair, in/out of tub' },
+    { key:'toileting',   label:'Toileting',   desc:'Getting to/from toilet, personal hygiene' },
+    { key:'continence',  label:'Continence',  desc:'Controlling bowel & bladder function' }
+  ];
+
+  /* Lifecycle phases — numeric index is the phase number */
+  var LC_PHASES = [
+    'Intake',             // 0
+    'Doc Collection',     // 1
+    'Clinical Assessment',// 2
+    'Eligibility Review', // 3
+    'Care Setup',         // 4
+    'Active',             // 5
+    'Closed'              // 6
+  ];
+
+  var LC_COLORS = ['#d97706','#0891b2','#7c3aed','#dc2626','#003087','#059669','#6b7280'];
+
+  /* ─────────────────────────────────────────────────────────────────────
+     PHASE 9 ENRICHED CLAIMS DATA — 5 claim types, rich personas
+  ───────────────────────────────────────────────────────────────────── */
+  var p9Claims = [
+
+    /* ── CLAIM A: Hospital Discharge → SNF (most common LTC trigger) ── */
+    {
+      id:'LTC-2026-0201',
+      claimant:'Eleanor Vasquez',      age:79,
+      carrier:'Prudential',            product:'LTC Standalone',
+      dailyBenefit:'$195/day',         status:'Active',
+      lcPhase:5,                       priority:'urgent',
+      type:'Nursing Home (SNF)',        assessScore:4,
+      cogScore:16,                     daysOpen:22,
+      nextAction:'Monthly Billing Validation — Provider Invoice Due',
+      provider:'Sunrise Manor SNF',    paymentDue:'Jul 15, 2026',
+
+      /* NEW P9 fields */
+      qualifyingEventDate:'Jun 17, 2026',
+      notificationDate:'Jun 19, 2026',
+      eliminationEndDate:'Sep 14, 2026',
+      firstBenefitDate:'Sep 15, 2026',
+      filedBy:'Family Member',         filedByName:'Carlos Vasquez (Son)',
+      poaOnFile:true,                  poaName:'Carlos Vasquez',
+      preferredLanguage:'English',
+      medicare:'Medicare Part A + B',  medicaid:'Not enrolled',
+      cobNotes:'Medicare pays Days 1–20 at 100%; Days 21–100 at coinsurance. LTC policy kicks in Day 101.',
+      dx1Code:'F01.51', dx1Label:'Vascular Dementia',
+      dx2Code:'S72.001',dx2Label:'Hip Fracture / Recovery',
+      adlsImpaired:['bathing','dressing','transferring','toileting'],
+      attendingPhysician:'Dr. Anna Kessler, MD — Geriatrics',
+      attendingNPI:'1234567890',
+      eliminationSatisfied:false,
+      benefitPeriodDays:1825,          benefitUsedDays:22,
+      inflationRider:'5% Compound',
+      sharedCare:false,
+
+      /* Personas */
+      intakeBy:'Maria Santos — Claims Intake Specialist',
+      docSpecialist:'Kevin O\'Brien — Document Specialist',
+      assessedBy:'Sarah Johnson, RN — Telephonic Assessment',
+      benefitsAnalyst:'James Park — Senior Benefits Analyst',
+      careManager:'Angela Moore, RN — Care Manager',
+      providerContact:'Sunrise Manor SNF — Admissions: (214) 555-0192',
+
+      /* Documents */
+      docs:[
+        { name:'HIPAA Authorization',         from:'Eleanor Vasquez (POA: Carlos)',   date:'Jun 19, 2026', status:'✅ Received',       type:'PDF' },
+        { name:'Attending Physician Statement',from:'Dr. Anna Kessler, MD',           date:'Jun 25, 2026', status:'✅ Received',       type:'PDF' },
+        { name:'Hospital Discharge Summary',   from:'UT Southwestern Medical Center', date:'Jun 17, 2026', status:'✅ Received',       type:'PDF' },
+        { name:'ADL Assessment Report',        from:'Sarah Johnson, RN',              date:'Jun 26, 2026', status:'✅ Received',       type:'PDF' },
+        { name:'Insurance Policy — PRU-LTC',   from:'Prudential',                    date:'Jan 2024',     status:'✅ On File',        type:'PDF' },
+        { name:'Care Plan (Current)',           from:'Sunrise Manor SNF',             date:'Jul 1, 2026',  status:'⚠️ Review Required',type:'PDF' },
+        { name:'Provider W-9 & License',       from:'Sunrise Manor SNF',             date:'Mar 2026',     status:'✅ Verified',       type:'PDF' },
+        { name:'Medicare Coordination Form',   from:'CMS / Medicare',                date:'Jun 20, 2026', status:'✅ On File',        type:'PDF' }
+      ],
+
+      /* Timeline events */
+      timeline:[
+        { date:'Jun 17, 2026', event:'Qualifying Event',      who:'UT Southwestern Medical Center',   persona:'Discharge Planner',       detail:'Eleanor discharged from hospital after hip fracture surgery. Vascular dementia diagnosis confirmed. Discharge planner recommends SNF level care.', phase:0, color:'#d97706' },
+        { date:'Jun 19, 2026', event:'Claim Notification',    who:'Maria Santos',                     persona:'Claims Intake Specialist', detail:'Carlos Vasquez (son, POA) calls 1-800 line. Maria Santos opens claim LTC-2026-0201. Policy PRU-LTC matched. POA verification completed. Acknowledgment letter sent to Prudential within 24 hours.', phase:0, color:'#003087' },
+        { date:'Jun 19, 2026', event:'SMARTS Pre-Screen',     who:'SMARTS Engine — SR-004',           persona:'System (Automated)',       detail:'Fraud pre-screen score: 8/100 (Clear). No suspicious patterns. Claim proceeds to document collection.', phase:0, color:'#7c3aed' },
+        { date:'Jun 20, 2026', event:'HIPAA Auth Sent',       who:'Kevin O\'Brien',                   persona:'Document Specialist',     detail:'Kevin sends HIPAA authorization form via DocuSign to Carlos Vasquez (POA). APS request faxed to Dr. Anna Kessler at UT Southwestern.', phase:1, color:'#0891b2' },
+        { date:'Jun 22, 2026', event:'HIPAA Auth Received',   who:'Kevin O\'Brien',                   persona:'Document Specialist',     detail:'Carlos signs and returns HIPAA authorization. Hospital records request submitted.', phase:1, color:'#0891b2' },
+        { date:'Jun 25, 2026', event:'APS Received',          who:'Kevin O\'Brien',                   persona:'Document Specialist',     detail:'Dr. Kessler submits Attending Physician Statement confirming: Vascular Dementia (F01.51), post-op hip fracture (S72.001), 4/6 ADL impairments documented. File complete — forwarded to RN Assessment queue.', phase:1, color:'#059669' },
+        { date:'Jun 26, 2026', event:'Clinical Assessment',   who:'Sarah Johnson, RN',               persona:'Registered Nurse',        detail:'Telephonic assessment completed with Eleanor and Carlos. ADL evaluation: Bathing ✗, Dressing ✗, Eating ✓, Transferring ✗, Toileting ✗, Continence ✓. MMSE: 16/30 (Moderate Dementia). Fall history: 2 falls in past 90 days. Assessment report uploaded.', phase:2, color:'#7c3aed' },
+        { date:'Jun 27, 2026', event:'SMARTS Eligibility Run',who:'SMARTS Engine — SR-001, SR-002, SR-003', persona:'System (Automated)', detail:'SR-001 FIRED: 4/6 ADLs impaired (threshold: 2). SR-002 FIRED: MMSE 16/30 → Memory Care / SNF pathway. SR-003: Elimination period 90 days begins Jun 17. SR-005: STP bypassed — COB complexity requires analyst review.', phase:3, color:'#7c3aed' },
+        { date:'Jun 28, 2026', event:'Eligibility Approved',  who:'James Park',                      persona:'Senior Benefits Analyst', detail:'James reviews SMARTS output and APS. COB confirmed: Medicare covers Days 1-100. LTC policy triggers Day 101. Policy in force. No exclusions apply. Approval letter sent to Prudential and claimant family.', phase:3, color:'#059669' },
+        { date:'Jun 30, 2026', event:'Provider Setup',        who:'Angela Moore, RN',                persona:'Care Manager',            detail:'Angela contacts Sunrise Manor SNF. Confirms: Licensed by TX DADS, CMS 4.5-star, EVV active (CellTrak), in-network, W-9 on file. Rate: $218/day (benefit $195/day, gap $23/day). Care plan review scheduled.', phase:4, color:'#003087' },
+        { date:'Jul 1, 2026',  event:'Care Plan Established', who:'Angela Moore, RN + SNF Staff',    persona:'Care Manager + Provider', detail:'Initial care plan: SNF level care — daily bathing assist, dressing assist, PT 3x/week, OT eval, fall prevention protocol, memory care activities. Signed by Dr. Kessler. Filed in system.', phase:4, color:'#003087' },
+        { date:'Jul 8, 2026',  event:'First Payment Cycle',   who:'Payment Engine',                  persona:'System (Automated)',       detail:'Invoice validated against care plan. $195/day × 7 days = $1,365. ACH transfer to Sunrise Manor SNF. Prudential notified.', phase:5, color:'#059669' },
+        { date:'Jul 15, 2026', event:'Monthly Billing Due',   who:'Angela Moore, RN',                persona:'Care Manager',            detail:'⚠️ ACTION REQUIRED: Provider invoice for July pending validation. Care plan adherence check due.', phase:5, color:'#dc2626' }
+      ],
+
+      /* Clinical assessment (RN-filled post-intake) */
+      rnAssessment:{
+        completedBy:'Sarah Johnson, RN', date:'Jun 26, 2026',
+        adlScores:{ bathing:0, dressing:1, eating:3, transferring:1, toileting:1, continence:3 },
+        mmseScore:16, mmseDate:'Jun 26, 2026',
+        fallsLast90Days:2, fallRisk:'High',
+        medications:['Aricept 10mg', 'Lisinopril 10mg', 'Metoprolol 25mg', 'Aspirin 81mg'],
+        environmentSafe:false, environmentNotes:'Staircase in prior home — now in SNF, environment controlled.',
+        recommendation:'Skilled Nursing Facility (SNF) — 24hr care required. Memory care unit preferred.',
+        clinicalNarrative:'Claimant presents with moderate vascular dementia and post-surgical hip fracture. 4/6 ADLs impaired. MMSE 16/30 consistent with moderate cognitive impairment. High fall risk. Requires full-time skilled nursing supervision. Family is engaged and supportive. POA (Carlos Vasquez) participates in all care decisions.'
+      },
+
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'FIRED',      result:'ELIGIBLE',    detail:'4/6 ADLs impaired (threshold: 2/6 met)' },
+        { id:'SR-002', name:'Cognitive Route',       status:'FIRED',      result:'SNF/Memory',  detail:'MMSE 16/30 → SNF or Memory Care pathway' },
+        { id:'SR-003', name:'Elimination Period',    status:'MONITORING', result:'Day 8/90',    detail:'Began Jun 17 — ends Sep 14, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',      status:'PASSED',     result:'CLEAR',       detail:'Score: 8/100 — no anomalies' },
+        { id:'SR-005', name:'STP Eligibility',       status:'BYPASSED',   result:'ANALYST',     detail:'COB complexity → manual review required' },
+        { id:'SR-008', name:'Provider Network',      status:'PASSED',     result:'IN-NETWORK',  detail:'Sunrise Manor SNF verified in-network' },
+        { id:'SR-012', name:'Benefit Period Monitor',status:'MONITORING', result:'22/1825 days',detail:'5-year benefit period — 98.8% remaining' }
+      ]
+    },
+
+    /* ── CLAIM B: Home Health — COPD + CHF (agent-filed, STP eligible) ── */
+    {
+      id:'LTC-2026-0202',
+      claimant:'Harold Simmons',       age:82,
+      carrier:'MassMutual',            product:'Hybrid LTC/Life',
+      dailyBenefit:'$220/day',         status:'Active',
+      lcPhase:5,                       priority:'high',
+      type:'Home Health',              assessScore:3,
+      cogScore:24,                     daysOpen:31,
+      nextAction:'Nurse Assessment Due — 30-Day Reassessment',
+      provider:'ComfortCare Home Health', paymentDue:'Jul 10, 2026',
+
+      qualifyingEventDate:'Jun 8, 2026',
+      notificationDate:'Jun 9, 2026',
+      eliminationEndDate:'Sep 5, 2026',
+      firstBenefitDate:'Sep 6, 2026',
+      filedBy:'Insurance Agent',       filedByName:'David Reyes — MassMutual Agent',
+      poaOnFile:false,                 poaName:'N/A',
+      preferredLanguage:'English',
+      medicare:'Medicare Part B only', medicaid:'Not enrolled',
+      cobNotes:'No Part A hospitalization. Medicare Part B covers some home health (skilled nursing visits) at 100% if homebound. LTC policy supplements custodial care Medicare does NOT cover.',
+      dx1Code:'J44.9',  dx1Label:'COPD — Severe',
+      dx2Code:'I50.9',  dx2Label:'Congestive Heart Failure (CHF)',
+      adlsImpaired:['bathing','dressing','transferring'],
+      attendingPhysician:'Dr. Robert Patel, MD — Pulmonology',
+      attendingNPI:'9876543210',
+      eliminationSatisfied:false,
+      benefitPeriodDays:1095,          benefitUsedDays:31,
+      inflationRider:'CPI-Linked',
+      sharedCare:true,                 sharedCareSpouse:'Dorothy Simmons (policy pool shared)',
+
+      intakeBy:'David Reyes — Licensed MassMutual Agent (Agent-Filed)',
+      docSpecialist:'Priya Nair — Document Specialist',
+      assessedBy:'Maria Castillo, MSW — Field Assessment',
+      benefitsAnalyst:'Tom Wheeler — Benefits Analyst',
+      careManager:'Maria Castillo, MSW — Care Manager',
+      providerContact:'ComfortCare Home Health — Coordinator: (512) 555-0384',
+
+      docs:[
+        { name:'HIPAA Authorization',         from:'Harold Simmons (self)',           date:'Jun 9, 2026',  status:'✅ Received',       type:'PDF' },
+        { name:'Attending Physician Statement',from:'Dr. Robert Patel, MD',           date:'Jun 14, 2026', status:'✅ Received',       type:'PDF' },
+        { name:'Home Health Plan of Care',     from:'Dr. Patel / ComfortCare',        date:'Jun 18, 2026', status:'✅ Received',       type:'PDF' },
+        { name:'ADL Assessment Report',        from:'Maria Castillo, MSW',            date:'Jun 20, 2026', status:'✅ Received',       type:'PDF' },
+        { name:'Insurance Policy — MM-LTC',    from:'MassMutual',                    date:'Feb 2021',     status:'✅ On File',        type:'PDF' },
+        { name:'Shared Care Rider Addendum',   from:'MassMutual',                    date:'Feb 2021',     status:'✅ On File',        type:'PDF' },
+        { name:'EVV Enrollment — CellTrak',    from:'ComfortCare Home Health',        date:'Jun 16, 2026', status:'✅ Active',         type:'PDF' },
+        { name:'30-Day Reassessment Form',     from:'Pending — Maria Castillo, MSW',  date:'Due Jul 10',   status:'⚠️ Pending',       type:'PDF' }
+      ],
+
+      timeline:[
+        { date:'Jun 8, 2026',  event:'Qualifying Event',      who:'Dr. Robert Patel, MD',            persona:'Attending Physician',     detail:'Harold\'s COPD exacerbation + CHF hospitalization. Discharged home but requires daily aide for bathing, dressing, transferring. Dr. Patel certifies medical necessity for home health custodial care.', phase:0, color:'#d97706' },
+        { date:'Jun 9, 2026',  event:'Claim Notification',    who:'David Reyes (Agent)',             persona:'Insurance Agent',         detail:'Agent David Reyes files claim on Harold\'s behalf via agent portal. Policy MM-LTC-2021-44291 matched. Harold has cognitive score 24/30 — cognitively intact. SMARTS SR-004 pre-screen initiated.', phase:0, color:'#003087' },
+        { date:'Jun 9, 2026',  event:'SMARTS Pre-Screen',     who:'SMARTS Engine — SR-004',          persona:'System (Automated)',       detail:'Fraud score: 14/100 (Clear). Agent-filed claim — no suspicious patterns. Shared care rider flagged for analyst notation.', phase:0, color:'#7c3aed' },
+        { date:'Jun 10, 2026', event:'Documents Requested',   who:'Priya Nair',                      persona:'Document Specialist',     detail:'Priya sends APS request to Dr. Patel. HIPAA auth received same day (Harold self-signed). Home health plan of care requested from ComfortCare.', phase:1, color:'#0891b2' },
+        { date:'Jun 14, 2026', event:'APS Received',          who:'Priya Nair',                      persona:'Document Specialist',     detail:'Dr. Patel APS confirms: COPD Severe (J44.9), CHF (I50.9), 3/6 ADL impairments. Certifies medical necessity. All documents complete.', phase:1, color:'#059669' },
+        { date:'Jun 20, 2026', event:'Field Assessment',      who:'Maria Castillo, MSW',             persona:'Social Worker',           detail:'In-home assessment. ADL scores: Bathing 0, Dressing 1, Eating 3, Transferring 1, Toileting 3, Continence 3. MMSE: 24/30 (mild impairment, cognitively functional). Home environment assessed — stair lift installed, O2 concentrator in place.', phase:2, color:'#7c3aed' },
+        { date:'Jun 21, 2026', event:'SMARTS Eligibility',    who:'SMARTS Engine — SR-001, SR-005',  persona:'System (Automated)',       detail:'SR-001 FIRED: 3/6 ADLs impaired. SR-005 FIRED: STP ELIGIBLE — no COB complexity, agent-filed, clean record, no fraud flags. AUTO-APPROVED.', phase:3, color:'#059669' },
+        { date:'Jun 21, 2026', event:'STP Auto-Approval',     who:'Tom Wheeler (Analyst Review)',    persona:'Benefits Analyst',        detail:'STP approval confirmed by Tom Wheeler. Benefit letter sent to Harold and David Reyes. MassMutual notified electronically. Shared care rider noted: pool balance $438,000.', phase:3, color:'#059669' },
+        { date:'Jun 22, 2026', event:'Provider Setup',        who:'Maria Castillo, MSW',             persona:'Care Manager',            detail:'ComfortCare Home Health onboarded: in-network, EVV via CellTrak GPS, W-9 on file. 3 aide visits/week + 1 skilled nursing visit/week from Dr. Patel\'s order.', phase:4, color:'#003087' },
+        { date:'Jun 25, 2026', event:'First Payment',         who:'Payment Engine',                  persona:'System (Automated)',       detail:'$220/day × 4 days (Jun 21-24) = $880. ACH to ComfortCare. EVV confirms all 4 visit sessions GPS-verified.', phase:5, color:'#059669' },
+        { date:'Jul 10, 2026', event:'30-Day Reassessment Due',who:'Maria Castillo, MSW',            persona:'Care Manager',            detail:'⚠️ ACTION REQUIRED: 30-day reassessment overdue. Harold\'s condition may have stabilized — potential for care step-down. Schedule reassessment.', phase:5, color:'#dc2626' }
+      ],
+
+      rnAssessment:{
+        completedBy:'Maria Castillo, MSW', date:'Jun 20, 2026',
+        adlScores:{ bathing:0, dressing:1, eating:3, transferring:1, toileting:3, continence:3 },
+        mmseScore:24, mmseDate:'Jun 20, 2026',
+        fallsLast90Days:1, fallRisk:'Moderate',
+        medications:['Spiriva', 'Albuterol inhaler', 'Furosemide 40mg', 'Carvedilol 6.25mg', 'Warfarin 5mg'],
+        environmentSafe:true, environmentNotes:'Home modified: stair lift, grab bars, O2 concentrator, hospital bed.',
+        recommendation:'Home Health Care — 3 aide visits/week + 1 skilled nursing visit. Re-evaluate in 30 days.',
+        clinicalNarrative:'Harold is cognitively intact (MMSE 24/30) but physically limited by severe COPD and CHF. 3/6 ADLs impaired. Home environment well-adapted. Motivated claimant — wants to remain home. Shared care rider applies — spouse Dorothy enrolled separately. Monitoring O2 saturation weekly.'
+      },
+
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'FIRED',   result:'ELIGIBLE',    detail:'3/6 ADLs impaired (threshold met)' },
+        { id:'SR-002', name:'Cognitive Route',       status:'PASSED',  result:'FUNCTIONAL',  detail:'MMSE 24/30 — no cognitive pathway triggered' },
+        { id:'SR-003', name:'Elimination Period',    status:'MONITORING',result:'Day 31/90', detail:'Began Jun 8 — ends Sep 5, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',      status:'PASSED',  result:'CLEAR',       detail:'Score: 14/100 — agent-filed, no anomalies' },
+        { id:'SR-005', name:'STP Eligibility',       status:'FIRED',   result:'STP APPROVED',detail:'Straight-Through Processing — auto-approved' },
+        { id:'SR-008', name:'Provider Network',      status:'PASSED',  result:'IN-NETWORK',  detail:'ComfortCare Home Health — EVV active' },
+        { id:'SR-012', name:'Benefit Period Monitor',status:'MONITORING',result:'31/1095 days',detail:'3-year benefit period — 97.2% remaining' }
+      ]
+    },
+
+    /* ── CLAIM C: ALF — Policy Interpretation Dispute (under review) ── */
+    {
+      id:'LTC-2026-0203',
+      claimant:'Dorothy Feldstein',    age:74,
+      carrier:'NY Life',               product:'LTC Standalone',
+      dailyBenefit:'$150/day',         status:'Review',
+      lcPhase:3,                       priority:'high',
+      type:'Assisted Living (ALF)',     assessScore:2,
+      cogScore:22,                     daysOpen:7,
+      nextAction:'Policy Language Dispute — ALF Covered? Carrier Review Pending',
+      provider:'Sunrise Gardens ALF',  paymentDue:'On Hold',
+
+      qualifyingEventDate:'Jun 30, 2026',
+      notificationDate:'Jul 2, 2026',
+      eliminationEndDate:'Sep 27, 2026',
+      firstBenefitDate:'Sep 28, 2026',
+      filedBy:'Claimant',              filedByName:'Dorothy Feldstein (self)',
+      poaOnFile:false,                 poaName:'N/A — claimant cognitively intact',
+      preferredLanguage:'English',
+      medicare:'Medicare Part A + B',  medicaid:'Not enrolled',
+      cobNotes:'Medicare does NOT cover custodial ALF care. LTC policy is sole payer — pending benefit determination.',
+      dx1Code:'G35',   dx1Label:'Multiple Sclerosis',
+      dx2Code:'R26.89',dx2Label:'Gait Disturbance / Fall Risk',
+      adlsImpaired:['bathing','dressing'],
+      attendingPhysician:'Dr. Lisa Monroe, MD — Neurology',
+      attendingNPI:'5554441234',
+      eliminationSatisfied:false,
+      benefitPeriodDays:730,           benefitUsedDays:7,
+      inflationRider:'None',
+      sharedCare:false,
+
+      intakeBy:'James Park — Claims Intake Specialist',
+      docSpecialist:'Lisa Chen — Document Specialist',
+      assessedBy:'Robert Hughes, RN — Telephonic Assessment',
+      benefitsAnalyst:'Karen White — Senior Benefits Analyst (DISPUTE)',
+      careManager:'Pending — disputed claim',
+      providerContact:'Sunrise Gardens ALF — (469) 555-0771',
+
+      docs:[
+        { name:'HIPAA Authorization',         from:'Dorothy Feldstein (self)',        date:'Jul 2, 2026',  status:'✅ Received',        type:'PDF' },
+        { name:'Attending Physician Statement',from:'Dr. Lisa Monroe, MD',             date:'Jul 5, 2026',  status:'✅ Received',        type:'PDF' },
+        { name:'ADL Assessment Report',        from:'Robert Hughes, RN',              date:'Jul 6, 2026',  status:'✅ Received',        type:'PDF' },
+        { name:'Insurance Policy — NYL-LTC',   from:'NY Life',                       date:'Nov 2019',     status:'✅ On File',         type:'PDF' },
+        { name:'Policy ALF Definition Rider',  from:'NY Life (2019 policy language)', date:'Nov 2019',     status:'⚠️ Under Review',   type:'PDF' },
+        { name:'ALF State Licensure',          from:'Sunrise Gardens ALF',            date:'Jan 2026',     status:'✅ Verified',        type:'PDF' },
+        { name:'Carrier Dispute Letter',       from:'NY Life — Carrier Review Team',  date:'Jul 7, 2026',  status:'🔴 Awaiting Response',type:'PDF' }
+      ],
+
+      timeline:[
+        { date:'Jun 30, 2026', event:'Qualifying Event',     who:'Dorothy Feldstein (self)',        persona:'Claimant',                detail:'Dorothy\'s MS progression requires move to Assisted Living. She can no longer safely manage bathing and dressing independently. Neurologist Dr. Monroe certifies functional decline.', phase:0, color:'#d97706' },
+        { date:'Jul 2, 2026',  event:'Claim Notification',   who:'James Park',                      persona:'Claims Intake Specialist', detail:'Dorothy calls directly. James Park opens claim LTC-2026-0203. Policy NYL-LTC-2019-22819 matched. Dorothy is cognitively intact — no POA needed. HIPAA auth self-signed. SMARTS SR-004 initiated.', phase:0, color:'#003087' },
+        { date:'Jul 2, 2026',  event:'SMARTS Pre-Screen',    who:'SMARTS Engine — SR-004',          persona:'System (Automated)',       detail:'Fraud score: 6/100 (Clear). Clean record. However SR-008 flags: ALF "Sunrise Gardens" is licensed but not in preferred network — out-of-network review required.', phase:0, color:'#d97706' },
+        { date:'Jul 4, 2026',  event:'Documents Received',   who:'Lisa Chen',                       persona:'Document Specialist',     detail:'APS from Dr. Monroe received. HIPAA auth on file. ADL assessment scheduled. Policy document pulled — ALF benefit language flagged for legal review.', phase:1, color:'#0891b2' },
+        { date:'Jul 6, 2026',  event:'Clinical Assessment',  who:'Robert Hughes, RN',              persona:'Registered Nurse',        detail:'Telephonic assessment. ADLs: Bathing 1, Dressing 1, Eating 3, Transferring 3, Toileting 3, Continence 3. MMSE: 22/30 (mild cognitive impairment). 2/6 ADLs impaired — meets threshold. However ALF coverage ambiguous in 2019 policy language.', phase:2, color:'#7c3aed' },
+        { date:'Jul 7, 2026',  event:'Eligibility Dispute',  who:'Karen White',                    persona:'Senior Benefits Analyst', detail:'SMARTS SR-001: 2/6 ADLs met. However 2019 policy defines "qualified facility" as "licensed nursing facility OR home health agency" — ALF not explicitly named. Karen escalates to NY Life carrier legal team for interpretation. Payment placed on hold.', phase:3, color:'#dc2626' },
+        { date:'Jul 7, 2026',  event:'Carrier Dispute Letter',who:'Karen White → NY Life',         persona:'Carrier — NY Life',       detail:'⚠️ PENDING: NY Life carrier legal team reviewing 2019 policy ALF language vs. state insurance code. Expected response: 5-10 business days. If carrier denies, claimant has right to appeal under state law.', phase:3, color:'#dc2626' }
+      ],
+
+      rnAssessment:{
+        completedBy:'Robert Hughes, RN', date:'Jul 6, 2026',
+        adlScores:{ bathing:1, dressing:1, eating:3, transferring:3, toileting:3, continence:3 },
+        mmseScore:22, mmseDate:'Jul 6, 2026',
+        fallsLast90Days:3, fallRisk:'High',
+        medications:['Tecfidera 240mg', 'Baclofen 10mg', 'Vitamin D3', 'Ampyra 10mg'],
+        environmentSafe:false, environmentNotes:'Current home has steps — Dorothy has fallen 3x in 90 days. ALF environment appropriate.',
+        recommendation:'Assisted Living Facility — 2/6 ADLs impaired, fall risk high. ALF appropriate level of care.',
+        clinicalNarrative:'Dorothy is cognitively functional (MMSE 22/30) with progressive MS causing physical ADL limitations. 2/6 ADLs impaired. High fall risk — 3 falls in 90 days. ALF is the clinically appropriate setting. Policy language ambiguity (2019 contract) is the sole barrier to approval. Recommend carrier clarification and if denied, preparation of appeal citing state insurance dept guidance on ALF coverage under LTC policies.'
+      },
+
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'FIRED',   result:'ELIGIBLE',    detail:'2/6 ADLs impaired (Bathing, Dressing) — threshold met' },
+        { id:'SR-002', name:'Cognitive Route',       status:'PASSED',  result:'FUNCTIONAL',  detail:'MMSE 22/30 — functional cognitive level' },
+        { id:'SR-003', name:'Elimination Period',    status:'MONITORING',result:'Day 7/90',  detail:'Began Jun 30 — ends Sep 27, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',      status:'PASSED',  result:'CLEAR',       detail:'Score: 6/100 — clean record' },
+        { id:'SR-005', name:'STP Eligibility',       status:'BYPASSED',result:'DISPUTED',    detail:'Policy language dispute — STP bypassed, on hold' },
+        { id:'SR-008', name:'Provider Network',      status:'REVIEW',  result:'OUT-OF-NET',  detail:'Sunrise Gardens ALF not in preferred network — review pending' },
+        { id:'SR-012', name:'Benefit Period Monitor',status:'MONITORING',result:'7/730 days',detail:'2-year benefit period — 99% remaining' }
+      ]
+    },
+
+    /* ── CLAIM D: Memory Care — Escalated, SIU Fraud Flag ── */
+    {
+      id:'LTC-2026-0204',
+      claimant:'Ruth Blackwood',       age:77,
+      carrier:'Lincoln National',      product:'Hybrid LTC/Life',
+      dailyBenefit:'$240/day',         status:'Escalated',
+      lcPhase:5,                       priority:'urgent',
+      type:'Memory Care Facility',     assessScore:4,
+      cogScore:11,                     daysOpen:9,
+      nextAction:'SIU Investigation — Billing Anomaly Detected by SMARTS',
+      provider:'Oakwood Care Center',  paymentDue:'Escalated — Hold',
+
+      qualifyingEventDate:'Jun 28, 2026',
+      notificationDate:'Jun 29, 2026',
+      eliminationEndDate:'Sep 25, 2026',
+      firstBenefitDate:'Sep 26, 2026',
+      filedBy:'Care Facility',         filedByName:'Oakwood Care Center — Admissions Dept',
+      poaOnFile:true,                  poaName:'Thomas Blackwood (Husband)',
+      preferredLanguage:'English',
+      medicare:'Medicare Part A + B',  medicaid:'Not enrolled',
+      cobNotes:'Medicare covers SNF Days 1-20. Memory care billed from Day 21. LTC hybrid policy activates at elimination period end.',
+      dx1Code:'G30.9',  dx1Label:"Alzheimer's Disease",
+      dx2Code:'F03.90', dx2Label:'Unspecified Dementia (advanced)',
+      adlsImpaired:['bathing','dressing','eating','transferring'],
+      attendingPhysician:'Dr. Patricia Kim, MD — Geriatric Psychiatry',
+      attendingNPI:'7779998888',
+      eliminationSatisfied:false,
+      benefitPeriodDays:2190,          benefitUsedDays:9,
+      inflationRider:'5% Compound',
+      sharedCare:false,
+
+      intakeBy:'Angela Moore, RN — Claims Intake (facility-filed)',
+      docSpecialist:'Kevin O\'Brien — Document Specialist',
+      assessedBy:'James Park, RN — Field Assessment (SIU-observed)',
+      benefitsAnalyst:'Karen White — Senior Benefits Analyst + SIU Lead',
+      careManager:'Angela Moore, RN — Care Manager (monitoring)',
+      providerContact:'Oakwood Care Center — Admin: (817) 555-0229',
+
+      docs:[
+        { name:'HIPAA Authorization',          from:'Thomas Blackwood (POA/Husband)',  date:'Jun 29, 2026', status:'✅ Received',         type:'PDF' },
+        { name:'Attending Physician Statement', from:'Dr. Patricia Kim, MD',           date:'Jul 1, 2026',  status:'✅ Received',         type:'PDF' },
+        { name:'Memory Care Admission Records', from:'Oakwood Care Center',            date:'Jun 28, 2026', status:'✅ Received',         type:'PDF' },
+        { name:'ADL Assessment Report',         from:'James Park, RN',                date:'Jul 3, 2026',  status:'✅ Received',         type:'PDF' },
+        { name:'Insurance Policy — LNL-HYB',   from:'Lincoln National',               date:'Apr 2020',     status:'✅ On File',          type:'PDF' },
+        { name:'July Billing Invoice — Day 1-9',from:'Oakwood Care Center',            date:'Jul 7, 2026',  status:'🔴 ANOMALY FLAGGED', type:'PDF' },
+        { name:'EVV GPS Records — Jun 28–Jul 7',from:'CellTrak System',               date:'Jul 7, 2026',  status:'⚠️ Mismatch Detected',type:'PDF' },
+        { name:'SIU Investigation File',        from:'SIU Lead — Karen White',        date:'Jul 7, 2026',  status:'🔴 Active Investigation',type:'PDF' }
+      ],
+
+      timeline:[
+        { date:'Jun 28, 2026', event:'Qualifying Event + Admission',who:'Oakwood Care Center',          persona:'Care Facility',           detail:'Ruth admitted to Oakwood Memory Care. Advanced Alzheimer\'s — 4/6 ADLs impaired, MMSE 11/30. Facility files claim on behalf of family (Thomas Blackwood, husband, is POA).', phase:0, color:'#d97706' },
+        { date:'Jun 29, 2026', event:'Claim Notification',   who:'Angela Moore, RN',                   persona:'Claims Intake Specialist', detail:'Facility-filed claim received. Angela Moore opens LTC-2026-0204. Policy LNL-HYB-2020-77391 matched. Thomas Blackwood POA verified. SMARTS SR-004 fraud pre-screen initiated.', phase:0, color:'#003087' },
+        { date:'Jun 29, 2026', event:'SMARTS Pre-Screen',    who:'SMARTS Engine — SR-004',             persona:'System (Automated)',       detail:'Fraud pre-screen score: 62/100 — ELEVATED. Flag: Facility (Oakwood Care Center) has 2 prior billing disputes in system. Claim routed to SIU observation queue.', phase:0, color:'#dc2626' },
+        { date:'Jul 1, 2026',  event:'Documents Received',   who:'Kevin O\'Brien',                     persona:'Document Specialist',     detail:'APS from Dr. Kim confirms Alzheimer\'s (G30.9) and advanced dementia. 4/6 ADLs documented. File complete. SIU observation flag maintained.', phase:1, color:'#0891b2' },
+        { date:'Jul 3, 2026',  event:'Field Assessment + SIU',who:'James Park, RN (SIU observed)',    persona:'Registered Nurse + SIU',  detail:'In-person assessment at Oakwood. ADL scores confirmed: 4/6 impaired. MMSE 11/30 (severe dementia). SIU observer present — facility operations and staffing levels reviewed.', phase:2, color:'#7c3aed' },
+        { date:'Jul 5, 2026',  event:'Eligibility Confirmed',who:'Karen White',                       persona:'Senior Benefits Analyst', detail:'Clinical eligibility confirmed — 4/6 ADLs, Alzheimer\'s pathway. However SIU investigation ongoing for billing practices. Interim approval issued with billing hold.', phase:3, color:'#d97706' },
+        { date:'Jul 7, 2026',  event:'🔴 BILLING ANOMALY',  who:'SMARTS Engine — SR-008',             persona:'System (Automated)',       detail:'SR-008 ALERT: Oakwood invoice charges $310/day but contracted rate is $240/day. EVV GPS data shows 2 visits not verified (July 3 and July 5 — no GPS record). SMARTS flags as potential billing fraud. Payment placed on HOLD.', phase:5, color:'#dc2626' },
+        { date:'Jul 8, 2026',  event:'SIU Investigation',   who:'Karen White — SIU Lead',             persona:'SIU Investigator',        detail:'⚠️ ACTIVE INVESTIGATION: Karen White escalates. SIU team reviews all 9 days of billing. Provider contacted for GPS discrepancy explanation. Payment withheld pending resolution. Thomas Blackwood (POA) notified of investigation.', phase:5, color:'#dc2626' }
+      ],
+
+      rnAssessment:{
+        completedBy:'James Park, RN', date:'Jul 3, 2026',
+        adlScores:{ bathing:0, dressing:0, eating:1, transferring:0, toileting:2, continence:2 },
+        mmseScore:11, mmseDate:'Jul 3, 2026',
+        fallsLast90Days:4, fallRisk:'Very High',
+        medications:['Namenda XR 28mg', 'Aricept 23mg', 'Risperidone 0.5mg', 'Melatonin 5mg'],
+        environmentSafe:true, environmentNotes:'Memory care unit — secured, appropriate. Staffing ratio 1:4 during day shift. SIU noted 2 unscheduled gaps in EVV records.',
+        recommendation:'Memory Care Facility appropriate — severe Alzheimer\'s requires 24/7 supervised care.',
+        clinicalNarrative:'Ruth presents with advanced Alzheimer\'s disease. MMSE 11/30 — severe cognitive impairment. 4/6 ADLs fully dependent. Memory care facility is clinically appropriate. Clinical eligibility is clear. SIU investigation is billing/fraud-related, not clinical. Recommend SIU resolution before payment release.'
+      },
+
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'FIRED',   result:'ELIGIBLE',    detail:'4/6 ADLs impaired — well above threshold' },
+        { id:'SR-002', name:'Cognitive Route',       status:'FIRED',   result:'MEMORY CARE', detail:'MMSE 11/30 — severe dementia → memory care pathway' },
+        { id:'SR-003', name:'Elimination Period',    status:'MONITORING',result:'Day 9/90',  detail:'Began Jun 28 — ends Sep 25, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',      status:'ALERT',   result:'ELEVATED',    detail:'Score: 62/100 — provider history flagged' },
+        { id:'SR-005', name:'STP Eligibility',       status:'BYPASSED',result:'SIU HOLD',    detail:'Fraud investigation — payment on hold' },
+        { id:'SR-008', name:'Provider Network',      status:'ALERT',   result:'BILLING ANOMALY', detail:'Invoice $310/day vs contracted $240/day. EVV gap Day 3+5.' },
+        { id:'SR-012', name:'Benefit Period Monitor',status:'MONITORING',result:'9/2190 days',detail:'6-year benefit — 99.6% remaining' }
+      ]
+    },
+
+    /* ── CLAIM E: Closure — Benefit Maximum Exhausted ── */
+    {
+      id:'LTC-2026-0205',
+      claimant:'Francis Delacroix',    age:80,
+      carrier:'TIAA',                  product:'LTC Standalone',
+      dailyBenefit:'$175/day',         status:'Active',
+      lcPhase:5,                       priority:'low',
+      type:'Home Health',              assessScore:3,
+      cogScore:20,                     daysOpen:120,
+      nextAction:'Annual Care Review + Benefit Period Warning — 94% Used',
+      provider:'BrightPath Homecare',  paymentDue:'Jul 20, 2026',
+
+      qualifyingEventDate:'Mar 8, 2026',
+      notificationDate:'Mar 10, 2026',
+      eliminationEndDate:'Jun 5, 2026',
+      firstBenefitDate:'Jun 6, 2026',
+      filedBy:'Family Member',         filedByName:'Sophie Delacroix (Daughter)',
+      poaOnFile:true,                  poaName:'Sophie Delacroix',
+      preferredLanguage:'French / English (bilingual)',
+      medicare:'Medicare Part A + B',  medicaid:'Application Pending (spend-down approaching)',
+      cobNotes:'Medicare covers some skilled home health. LTC policy covers custodial home health. Medicaid application in progress — near spend-down threshold. Transition planning to Medicaid critical.',
+      dx1Code:'G20',    dx1Label:"Parkinson's Disease",
+      dx2Code:'Z87.39', dx2Label:'History of Stroke (residual deficits)',
+      adlsImpaired:['bathing','dressing','transferring'],
+      attendingPhysician:'Dr. Mark Osei, MD — Neurology',
+      attendingNPI:'3334445556',
+      eliminationSatisfied:true,
+      benefitPeriodDays:365,           benefitUsedDays:343,
+      inflationRider:'None',
+      sharedCare:false,
+
+      intakeBy:'Maria Santos — Claims Intake Specialist',
+      docSpecialist:'Priya Nair — Document Specialist',
+      assessedBy:'Angela Moore, RN — Field Assessment',
+      benefitsAnalyst:'Tom Wheeler — Benefits Analyst',
+      careManager:'Angela Moore, RN — Care Manager (long-term)',
+      providerContact:'BrightPath Homecare — Supervisor: (504) 555-0618',
+
+      docs:[
+        { name:'HIPAA Authorization',          from:'Francis (POA: Sophie Delacroix)', date:'Mar 10, 2026', status:'✅ Received',         type:'PDF' },
+        { name:'Attending Physician Statement', from:'Dr. Mark Osei, MD',              date:'Mar 15, 2026', status:'✅ Received',         type:'PDF' },
+        { name:'Annual Reassessment Report',    from:'Angela Moore, RN',               date:'Jun 8, 2026',  status:'✅ Received',         type:'PDF' },
+        { name:'Insurance Policy — TIA-LTC',   from:'TIAA',                           date:'Jul 2018',     status:'✅ On File',          type:'PDF' },
+        { name:'EVV Records — Mar–Jul 2026',    from:'CellTrak / BrightPath',          date:'Ongoing',      status:'✅ Active',           type:'PDF' },
+        { name:'Medicaid Application',          from:'Sophie Delacroix / DADS TX',     date:'Jul 5, 2026',  status:'⚠️ Pending Review',  type:'PDF' },
+        { name:'Benefit Exhaustion Warning',    from:'TIAA / Payment Engine',          date:'Jul 9, 2026',  status:'🔴 22 Days Remaining',type:'PDF' }
+      ],
+
+      timeline:[
+        { date:'Mar 8, 2026',  event:'Qualifying Event',     who:'Dr. Mark Osei, MD',               persona:'Attending Physician',     detail:'Francis\'s Parkinson\'s disease progresses — now requires assistance with bathing, dressing, and transferring. Post-stroke residual weakness compounds physical limitations. Home health certified.', phase:0, color:'#d97706' },
+        { date:'Mar 10, 2026', event:'Claim Notification',   who:'Maria Santos',                    persona:'Claims Intake Specialist', detail:'Sophie Delacroix (daughter, POA) files claim. Maria Santos opens LTC-2026-0205. TIAA policy TIA-LTC-2018-12094 matched. French/English preference noted. Elimination period: 90 days.', phase:0, color:'#003087' },
+        { date:'Mar 15, 2026', event:'Documents Complete',   who:'Priya Nair',                      persona:'Document Specialist',     detail:'All documents received within 5 days. APS, HIPAA auth, plan of care all on file. Expedited to assessment given complete package.', phase:1, color:'#059669' },
+        { date:'Mar 18, 2026', event:'Clinical Assessment',  who:'Angela Moore, RN',                persona:'Registered Nurse',        detail:'Field visit to Francis\'s home. ADLs: Bathing 0, Dressing 1, Eating 2, Transferring 1, Toileting 3, Continence 3. MMSE 20/30. Falls: 1 in 90 days. Environment: accessible. Parkinson\'s tremor worsening. Recommends home health 5 days/week.', phase:2, color:'#7c3aed' },
+        { date:'Mar 20, 2026', event:'STP Approval',         who:'Tom Wheeler',                     persona:'Benefits Analyst',        detail:'SMARTS SR-005 STP approved. No COB complexity. Clean record. Benefit letter sent in English and French per preference. TIAA notified.', phase:3, color:'#059669' },
+        { date:'Jun 6, 2026',  event:'First Payment (Day 90)',who:'Payment Engine',                 persona:'System (Automated)',       detail:'90-day elimination period complete. First LTC payment: $175/day × 7 days = $1,225. ACH to BrightPath Homecare.', phase:5, color:'#059669' },
+        { date:'Jun 8, 2026',  event:'Annual Reassessment',  who:'Angela Moore, RN',               persona:'Care Manager',            detail:'Annual review: Francis\'s Parkinson\'s has progressed. Now 3/6 ADLs impaired. Tremor worsened. MMSE stable at 20/30. Care plan renewed. Medicaid application recommended (spend-down in 60 days).', phase:5, color:'#7c3aed' },
+        { date:'Jul 5, 2026',  event:'Medicaid Application', who:'Angela Moore, RN + Sophie',      persona:'Care Manager + Family',   detail:'Angela assists Sophie with Medicaid application — Francis approaching asset spend-down threshold. Transition planning critical. Medicaid pending.', phase:5, color:'#d97706' },
+        { date:'Jul 9, 2026',  event:'⚠️ BENEFIT WARNING', who:'SMARTS Engine — SR-012',          persona:'System (Automated)',       detail:'SR-012 ALERT: 343 of 365 benefit days used. 22 days remaining in benefit period. Policy exhaustion projected Jul 31, 2026. Angela Moore and Sophie Delacroix notified. Medicaid transition must be activated immediately.', phase:5, color:'#dc2626' },
+        { date:'Jul 20, 2026', event:'Annual Care Review Due',who:'Angela Moore, RN',              persona:'Care Manager',            detail:'⚠️ ACTION REQUIRED: Annual care review + coordinate Medicaid transition. BrightPath must submit Medicaid billing credentials. Benefit exhaustion in 11 days.', phase:5, color:'#dc2626' }
+      ],
+
+      rnAssessment:{
+        completedBy:'Angela Moore, RN', date:'Jun 8, 2026',
+        adlScores:{ bathing:0, dressing:1, eating:2, transferring:1, toileting:3, continence:3 },
+        mmseScore:20, mmseDate:'Jun 8, 2026',
+        fallsLast90Days:1, fallRisk:'Moderate',
+        medications:['Carbidopa-Levodopa 25/100 3x/day', 'Amantadine 100mg', 'Melatonin 3mg', 'Vitamin B12'],
+        environmentSafe:true, environmentNotes:'Home fully accessible. Grab bars, roll-in shower, raised toilet. Aide visits 5x/week. Daughter Sophie visits weekends.',
+        recommendation:'Continue home health — 5 days/week aide. Urgent: initiate Medicaid transition planning. Benefit period exhaustion imminent.',
+        clinicalNarrative:'Francis has progressive Parkinson\'s disease with post-stroke deficits. 3/6 ADLs impaired. Cognitively functional (MMSE 20/30). Home setting appropriate and well-managed. CRITICAL: 1-year benefit period expires in 22 days. Medicaid application pending — must be activated before benefit exhaustion to prevent care gap. Angela Moore coordinating with daughter Sophie.'
+      },
+
+      smartsRules:[
+        { id:'SR-001', name:'ADL Trigger',          status:'FIRED',   result:'ELIGIBLE',    detail:'3/6 ADLs impaired — threshold met' },
+        { id:'SR-002', name:'Cognitive Route',       status:'PASSED',  result:'FUNCTIONAL',  detail:'MMSE 20/30 — no cognitive pathway' },
+        { id:'SR-003', name:'Elimination Period',    status:'SATISFIED',result:'COMPLETE',   detail:'90 days satisfied — Jun 6, 2026' },
+        { id:'SR-004', name:'Fraud Pre-Screen',      status:'PASSED',  result:'CLEAR',       detail:'Score: 4/100 — exemplary record' },
+        { id:'SR-005', name:'STP Eligibility',       status:'FIRED',   result:'STP APPROVED',detail:'Straight-through processed at intake' },
+        { id:'SR-008', name:'Provider Network',      status:'PASSED',  result:'IN-NETWORK',  detail:'BrightPath Homecare — EVV verified' },
+        { id:'SR-012', name:'Benefit Period Monitor',status:'CRITICAL',result:'343/365 days',detail:'⚠️ CRITICAL: 22 days remaining — exhaust Jul 31' }
+      ]
+    }
+  ];
+
+  /* ─────────────────────────────────────────────────────────────────────
+     MERGE p9Claims into window.ltcClaimsData
+  ───────────────────────────────────────────────────────────────────── */
+  if (window.ltcClaimsData) {
+    /* Remove any prior p9 claims if re-loaded */
+    window.ltcClaimsData = window.ltcClaimsData.filter(function(c){
+      return !/^LTC-2026-020/.test(c.id);
+    });
+    /* Prepend p9 claims so they appear at top */
+    window.ltcClaimsData = p9Claims.concat(window.ltcClaimsData);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     HELPER: Lifecycle Banner
+     Shows current phase in a horizontal stepper
+  ───────────────────────────────────────────────────────────────────── */
+  function _p9lcBanner(lcPhase) {
+    var html = '<div style="display:flex;align-items:center;gap:0;margin:12px 0 16px;overflow-x:auto;padding-bottom:4px;">';
+    LC_PHASES.forEach(function(ph, i) {
+      var done    = i < lcPhase;
+      var current = i === lcPhase;
+      var col     = done ? '#059669' : current ? LC_COLORS[i] : '#d1d5db';
+      var txtCol  = (done || current) ? '#fff' : '#9ca3af';
+      html += '<div style="display:flex;align-items:center;flex-shrink:0;">'
+        + '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:'+col+';color:'+txtCol+';font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid '+(current?col:'transparent')+';">'+(done?'✓':(i+1))+'</div>'
+        + '<div style="font-size:9px;font-weight:'+(current?'800':'500')+';color:'+(current?col:'#9ca3af')+';white-space:nowrap;max-width:68px;text-align:center;">'+ph+'</div>'
+        + '</div>'
+        + (i < LC_PHASES.length-1 ? '<div style="width:24px;height:2px;background:'+(done?'#059669':'#e5e7eb')+';margin-bottom:14px;flex-shrink:0;"></div>' : '')
+        + '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     HELPER: Persona badge
+  ───────────────────────────────────────────────────────────────────── */
+  function _p9persona(role, name, color) {
+    color = color || '#003087';
+    return '<div style="display:inline-flex;align-items:center;gap:6px;background:'+color+'1a;border:1px solid '+color+'33;border-radius:20px;padding:3px 10px;margin:2px;">'
+      +'<div style="width:18px;height:18px;border-radius:50%;background:'+color+';color:#fff;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;">'+name.charAt(0)+'</div>'
+      +'<div><div style="font-size:9px;font-weight:700;color:'+color+';text-transform:uppercase;">'+role+'</div>'
+      +'<div style="font-size:10px;color:#374151;font-weight:600;">'+name+'</div></div>'
+      +'</div>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     HELPER: SMARTS rules panel (used in Overview + Assessment tabs)
+  ───────────────────────────────────────────────────────────────────── */
+  function _p9smartsPanel(c) {
+    var rules = c.smartsRules || [];
+    if (!rules.length) return '';
+    var colorMap = { 'FIRED':'#059669','PASSED':'#059669','SATISFIED':'#059669','MONITORING':'#0891b2','BYPASSED':'#6b7280','ALERT':'#dc2626','REVIEW':'#d97706' };
+    var rows = rules.map(function(r){
+      var col = colorMap[r.status] || '#6b7280';
+      return '<tr>'
+        +'<td style="padding:7px 10px;font-size:11px;font-weight:700;color:#374151;">'+r.id+'</td>'
+        +'<td style="padding:7px 10px;font-size:11px;color:#374151;">'+r.name+'</td>'
+        +'<td style="padding:7px 10px;"><span style="background:'+col+'1a;color:'+col+';border:1px solid '+col+'44;border-radius:12px;padding:2px 8px;font-size:10px;font-weight:700;">'+r.status+'</span></td>'
+        +'<td style="padding:7px 10px;font-size:11px;font-weight:700;color:'+col+';">'+r.result+'</td>'
+        +'<td style="padding:7px 10px;font-size:10px;color:#6b7280;">'+r.detail+'</td>'
+        +'</tr>';
+    }).join('');
+    return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:12px;padding:14px;margin-bottom:16px;">'
+      +'<div style="font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;"><i class="fas fa-brain" style="margin-right:6px;"></i>SMARTS Business Rules Engine — Applied to This Claim</div>'
+      +'<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f1f5f9;">'
+      +'<th style="padding:6px 10px;font-size:10px;font-weight:700;color:#6b7280;text-align:left;">Rule ID</th>'
+      +'<th style="padding:6px 10px;font-size:10px;font-weight:700;color:#6b7280;text-align:left;">Rule Name</th>'
+      +'<th style="padding:6px 10px;font-size:10px;font-weight:700;color:#6b7280;text-align:left;">Status</th>'
+      +'<th style="padding:6px 10px;font-size:10px;font-weight:700;color:#6b7280;text-align:left;">Result</th>'
+      +'<th style="padding:6px 10px;font-size:10px;font-weight:700;color:#6b7280;text-align:left;">Detail</th>'
+      +'</tr></thead><tbody style="background:#fff;">'+rows+'</tbody></table></div></div>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     HELPER: personas panel (shown in Overview)
+  ───────────────────────────────────────────────────────────────────── */
+  function _p9personasPanel(c) {
+    var entries = [
+      { role:'Intake Specialist',    name: c.intakeBy || '—',         color:'#003087' },
+      { role:'Document Specialist',  name: c.docSpecialist || '—',    color:'#0891b2' },
+      { role:'RN / MSW Assessor',    name: c.assessedBy || '—',       color:'#7c3aed' },
+      { role:'Benefits Analyst',     name: c.benefitsAnalyst || '—',  color:'#059669' },
+      { role:'Care Manager',         name: c.careManager || '—',      color:'#d97706' },
+      { role:'Filed By',             name: c.filedByName || '—',      color:'#6b7280' }
+    ];
+    return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:16px;">'
+      +'<div style="font-size:11px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;"><i class="fas fa-users" style="color:#003087;margin-right:6px;"></i>Claim Personas — Who Is Involved</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px;">'
+      + entries.map(function(e){ return _p9persona(e.role, e.name, e.color); }).join('')
+      +'</div></div>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     7-TAB CLAIM DETAIL — Complete lifecycle-aware overlay
+  ───────────────────────────────────────────────────────────────────── */
+  function _p9buildOverview(c) {
+    var phaseColor = LC_COLORS[c.lcPhase] || '#6b7280';
+    return ''
+      /* Lifecycle banner */
+      + _p9lcBanner(c.lcPhase)
+      /* Key dates */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">'
+      + _p9kv('Qualifying Event Date', c.qualifyingEventDate || '—', '#d97706')
+      + _p9kv('Notification Date', c.notificationDate || '—', '#0891b2')
+      + _p9kv('Elimination Ends', c.eliminationEndDate || '—', '#7c3aed')
+      + _p9kv('First Benefit Date', c.firstBenefitDate || '—', '#059669')
+      + _p9kv('Benefit Used', (c.benefitUsedDays||0)+' / '+(c.benefitPeriodDays||'?')+' days', (c.benefitUsedDays/c.benefitPeriodDays > 0.9 ? '#dc2626' : '#374151'))
+      + _p9kv('Elimination Status', c.eliminationSatisfied ? '✅ Satisfied' : '⏳ Day '+(c.benefitUsedDays||0)+'/90', c.eliminationSatisfied ? '#059669' : '#d97706')
+      +'</div>'
+      /* Clinical summary */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      + _p9kv('Claimant Age', c.age)
+      + _p9kv('Daily Benefit', c.dailyBenefit)
+      + _p9kv('Care Setting', c.type)
+      + _p9kv('Provider', c.provider)
+      + _p9kv('ADLs Impaired', (c.adlsImpaired||[]).map(function(a){return a.charAt(0).toUpperCase()+a.slice(1);}).join(', ') || c.assessScore+'/6')
+      + _p9kv('Primary Dx', (c.dx1Code||'')+(c.dx1Label?' — '+c.dx1Label:''))
+      + _p9kv('Attending Physician', c.attendingPhysician || '—')
+      + _p9kv('Filed By', c.filedByName || c.filedBy || '—')
+      + _p9kv('COB / Medicare', c.medicare || '—')
+      + _p9kv('Preferred Language', c.preferredLanguage || 'English')
+      +'</div>'
+      /* COB note */
+      +(c.cobNotes ? '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:#1e40af;"><strong>COB Note:</strong> '+c.cobNotes+'</div>' : '')
+      /* Next action */
+      +'<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:4px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>Next Required Action</div>'
+      +'<div style="font-size:13px;color:#7f1d1d;font-weight:600;">'+c.nextAction+'</div></div>'
+      /* Personas */
+      + _p9personasPanel(c)
+      /* SMARTS */
+      + _p9smartsPanel(c)
+      /* AI insight */
+      +'<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Clinical Intelligence</div>'
+      +'<div style="font-size:12px;color:#166534;line-height:1.6;">Based on '+c.claimant+'\'s profile ('+((c.adlsImpaired||[]).length||c.assessScore)+'/6 ADLs impaired, Lifecycle Phase: <strong>'+LC_PHASES[c.lcPhase]+'</strong>), AI projects continued '+c.type+' care for 6–12 months. '
+      +(c.benefitUsedDays/c.benefitPeriodDays > 0.9 ? '<strong style="color:#dc2626;">⚠️ CRITICAL: Benefit period exhaustion imminent — initiate transition planning immediately.</strong>' : 'Benefit period adequate. Care manager should validate next payment cycle.')
+      +'</div></div>'
+      /* Action buttons */
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      +'<button onclick="ltcDetailAction(\'payment\',\''+c.id+'\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;cursor:pointer;flex:1;min-width:120px;"><i class="fas fa-dollar-sign" style="margin-right:4px;"></i>Process Payment</button>'
+      +'<button onclick="ltcDetailAction(\'assess\',\''+c.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;cursor:pointer;flex:1;min-width:120px;"><i class="fas fa-user-check" style="margin-right:4px;"></i>Schedule Assessment</button>'
+      +'<button onclick="ltcDetailAction(\'careplan\',\''+c.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;cursor:pointer;flex:1;min-width:120px;"><i class="fas fa-hands-helping" style="margin-right:4px;"></i>Update Care Plan</button>'
+      +'</div>';
+  }
+
+  function _p9kv(lbl, val, valColor) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:9px 11px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px;">'+lbl+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:'+(valColor||'#111827')+';">'+val+'</div>'
+      +'</div>';
+  }
+
+  function _p9buildTimeline(c) {
+    var events = c.timeline || [];
+    var html = '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:6px;"><i class="fas fa-history" style="color:#0891b2;margin-right:6px;"></i>Claim Lifecycle Timeline</div>'
+      + _p9lcBanner(c.lcPhase)
+      +'<div style="position:relative;padding-left:18px;">';
+    events.forEach(function(ev, idx) {
+      var isLast = idx === events.length - 1;
+      html += '<div style="position:relative;margin-bottom:16px;">'
+        +'<div style="position:absolute;left:-18px;top:2px;width:14px;height:14px;border-radius:50%;background:'+ev.color+';border:2px solid #fff;box-shadow:0 0 0 2px '+ev.color+';"></div>'
+        +(idx<events.length-1?'<div style="position:absolute;left:-12px;top:16px;width:2px;background:#e5e7eb;bottom:-16px;"></div>':'')
+        +'<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;margin-left:6px;">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:5px;">'
+        +'<div style="font-size:12px;font-weight:700;color:#111827;">'+ev.event+'</div>'
+        +'<div style="font-size:10px;color:#9ca3af;white-space:nowrap;flex-shrink:0;">'+ev.date+'</div></div>'
+        +'<div style="margin-bottom:5px;">'
+        +_p9persona(ev.persona, ev.who, ev.color)+'</div>'
+        +'<div style="font-size:11px;color:#374151;line-height:1.55;">'+ev.detail+'</div>'
+        +'<div style="margin-top:5px;">'
+        +'<span style="font-size:9px;font-weight:700;color:'+LC_COLORS[ev.phase]+';background:'+LC_COLORS[ev.phase]+'1a;border-radius:10px;padding:2px 8px;">'+LC_PHASES[ev.phase]+' Phase</span>'
+        +'</div></div></div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function _p9buildDocuments(c) {
+    var docs = c.docs || [];
+    var html = '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:14px;"><i class="fas fa-folder-open" style="color:#d97706;margin-right:6px;"></i>Claim Documents</div>';
+    docs.forEach(function(d) {
+      var statusColor = d.status.indexOf('✅')>=0?'#059669':d.status.indexOf('⚠️')>=0?'#d97706':'#dc2626';
+      var viewKey = '_p9v_'+Math.random().toString(36).slice(2);
+      window._p8actions[viewKey] = (function(doc,cl){ return function(){ _p8openIDP(doc.name, cl); }; })(d, c);
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;background:#fff;">'
+        +'<i class="fas fa-file-pdf" style="color:#dc2626;font-size:18px;flex-shrink:0;"></i>'
+        +'<div style="flex:1;">'
+        +'<div style="font-size:12px;font-weight:700;color:#111827;">'+d.name+'</div>'
+        +'<div style="font-size:11px;color:#6b7280;">From: '+d.from+' · '+d.date+'</div></div>'
+        +'<span style="font-size:10px;font-weight:700;color:'+statusColor+';background:'+statusColor+'1a;border-radius:10px;padding:2px 8px;flex-shrink:0;">'+d.status+'</span>'
+        +'<button onclick="_p8run(\''+viewKey+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-eye" style="margin-right:3px;"></i>View</button>'
+        +'</div>';
+    });
+    html += '<div style="margin-top:12px;display:flex;gap:8px;">'
+      +'<button onclick="ltcDetailAction(\'upload\',\''+c.id+'\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-upload" style="margin-right:5px;"></i>Upload Document</button>'
+      +'<button onclick="ltcDetailAction(\'request\',\''+c.id+'\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-envelope" style="margin-right:5px;"></i>Request Missing Docs</button>'
+      +'</div>';
+    return html;
+  }
+
+  function _p9buildAssessment(c) {
+    var rna = c.rnAssessment;
+    if (!rna) {
+      return '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:20px;text-align:center;">'
+        +'<i class="fas fa-clock" style="font-size:28px;color:#dc2626;margin-bottom:10px;display:block;"></i>'
+        +'<div style="font-size:14px;font-weight:700;color:#dc2626;margin-bottom:6px;">Clinical Assessment Not Yet Completed</div>'
+        +'<div style="font-size:12px;color:#7f1d1d;">A Registered Nurse or MSW must conduct the formal assessment before MMSE and ADL scores are entered into the system. This occurs 3–10 days after claim intake.</div>'
+        +'<div style="margin-top:14px;">'
+        +'<button onclick="ltcDetailAction(\'assess\',\''+c.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-calendar-check" style="margin-right:6px;"></i>Schedule RN Assessment</button>'
+        +'</div></div>';
+    }
+
+    /* ADL scoring table */
+    var adlScoreHtml = '<div style="overflow-x:auto;margin-bottom:14px;"><table style="width:100%;border-collapse:collapse;">'
+      +'<thead><tr style="background:#f1f5f9;">'
+      +'<th style="padding:8px 10px;font-size:11px;font-weight:700;color:#374151;text-align:left;">ADL</th>'
+      +'<th style="padding:8px 10px;font-size:11px;font-weight:700;color:#374151;text-align:left;">Description</th>'
+      +'<th style="padding:8px 10px;font-size:11px;font-weight:700;color:#374151;text-align:center;">Score (0–3)</th>'
+      +'<th style="padding:8px 10px;font-size:11px;font-weight:700;color:#374151;text-align:left;">Interpretation</th>'
+      +'</tr></thead><tbody>';
+
+    var scoreLabels = {0:'Fully Dependent',1:'Significant Assist',2:'Some Assist',3:'Independent'};
+    var scoreColors = {0:'#dc2626',1:'#d97706',2:'#0891b2',3:'#059669'};
+    var adlScores = rna.adlScores || {};
+    var totalImpaired = 0;
+
+    ADL_LIST.forEach(function(adl) {
+      var score = adlScores[adl.key];
+      if (score === undefined) score = 3;
+      var impaired = score <= 1;
+      if (impaired) totalImpaired++;
+      var col = scoreColors[score] || '#6b7280';
+      adlScoreHtml += '<tr style="border-bottom:1px solid #f1f5f9;background:'+(impaired?'#fef2f222':'#fff')+'">'
+        +'<td style="padding:8px 10px;font-size:12px;font-weight:700;color:#111827;">'+(impaired?'✗ ':'✓ ')+adl.label+'</td>'
+        +'<td style="padding:8px 10px;font-size:11px;color:#6b7280;">'+adl.desc+'</td>'
+        +'<td style="padding:8px 10px;text-align:center;"><span style="background:'+col+'1a;color:'+col+';border:1px solid '+col+'44;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:800;">'+score+'</span></td>'
+        +'<td style="padding:8px 10px;font-size:11px;font-weight:600;color:'+col+';">'+scoreLabels[score]+'</td>'
+        +'</tr>';
+    });
+    adlScoreHtml += '</tbody></table></div>';
+
+    /* MMSE gauge */
+    var mmse = rna.mmseScore || 0;
+    var mmseLabel = mmse >= 24 ? 'Normal' : mmse >= 18 ? 'Mild Impairment' : mmse >= 10 ? 'Moderate Impairment' : 'Severe Impairment';
+    var mmseColor = mmse >= 24 ? '#059669' : mmse >= 18 ? '#d97706' : mmse >= 10 ? '#dc2626' : '#7c3aed';
+
+    return '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:14px;"><i class="fas fa-stethoscope" style="color:#7c3aed;margin-right:6px;"></i>Clinical Assessment — Entered by RN / MSW</div>'
+      /* Assessor info */
+      +'<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#0369a1;margin-bottom:6px;"><i class="fas fa-user-nurse" style="margin-right:5px;"></i>Assessment Completed By</div>'
+      +'<div style="display:flex;gap:16px;flex-wrap:wrap;">'
+      +_p9kv('Assessor', rna.completedBy, '#0369a1')
+      +_p9kv('Assessment Date', rna.date, '#374151')
+      +_p9kv('Total ADLs Impaired', totalImpaired+'/6 (Score ≤ 1)', totalImpaired >= 2 ? '#dc2626' : '#059669')
+      +_p9kv('MMSE Score', mmse+'/30 — '+mmseLabel, mmseColor)
+      +_p9kv('Fall Risk', rna.fallRisk||'—', rna.fallRisk==='High'||rna.fallRisk==='Very High'?'#dc2626':'#d97706')
+      +_p9kv('Falls (Last 90 Days)', (rna.fallsLast90Days||0)+' falls', rna.fallsLast90Days>=2?'#dc2626':'#059669')
+      +'</div></div>'
+      /* ADL table */
+      +'<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:8px;letter-spacing:.5px;">ADL Functional Assessment (6 Standard ADLs — NAIC Standard)</div>'
+      + adlScoreHtml
+      /* MMSE note */
+      +'<div style="background:'+mmseColor+'1a;border:1px solid '+mmseColor+'44;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:'+mmseColor+';margin-bottom:4px;"><i class="fas fa-brain" style="margin-right:5px;"></i>MMSE Cognitive Assessment — '+mmseLabel+' ('+mmse+'/30)</div>'
+      +'<div style="font-size:11px;color:#374151;">Assessment date: '+rna.mmseDate+'. '+(mmse<18?'Cognitive impairment confirmed — SR-002 cognitive care pathway triggered.':'Cognitively functional — no cognitive pathway triggered.')+'</div></div>'
+      /* Medications */
+      +'<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;margin-bottom:6px;">Current Medications</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:5px;">'
+      +(rna.medications||[]).map(function(m){return '<span style="background:#e0e7ff;color:#3730a3;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;">'+m+'</span>';}).join('')
+      +'</div></div>'
+      /* Environment */
+      +'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px;"><i class="fas fa-home" style="margin-right:5px;"></i>Care Environment Assessment</div>'
+      +'<div style="font-size:11px;color:#374151;"><strong>Safe:</strong> '+(rna.environmentSafe?'✅ Yes':'❌ No — see notes')+' &nbsp;|&nbsp; <strong>Notes:</strong> '+rna.environmentNotes+'</div></div>'
+      /* Recommendation */
+      +'<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#7c3aed;margin-bottom:4px;"><i class="fas fa-clipboard-check" style="margin-right:5px;"></i>Clinical Recommendation</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#374151;">'+rna.recommendation+'</div>'
+      +'<div style="font-size:11px;color:#6b7280;margin-top:6px;line-height:1.55;">'+rna.clinicalNarrative+'</div></div>'
+      /* SMARTS */
+      + _p9smartsPanel(c);
+  }
+
+  function _p9buildProvider(c) {
+    return '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:14px;"><i class="fas fa-hospital" style="color:#0891b2;margin-right:6px;"></i>Provider Details — '+c.provider+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +_p9kv('Provider Name', c.provider)
+      +_p9kv('Care Setting', c.type)
+      +_p9kv('Network Status', '✅ In-Network')
+      +_p9kv('CMS Star Rating', '⭐⭐⭐⭐ 4.5 / 5.0')
+      +_p9kv('License Status', '✅ Licensed · Current · No violations')
+      +_p9kv('W-9 Status', '✅ On File · Current')
+      +_p9kv('EVV Compliance', '✅ CellTrak GPS · Active')
+      +_p9kv('Daily Rate', '$218/day (benefit: '+c.dailyBenefit+')')
+      +_p9kv('Billing Accuracy', '98.2% clean claims')
+      +_p9kv('Attending Physician', c.attendingPhysician || '—')
+      +'</div>'
+      +_p9kv('Provider Contact', c.providerContact || '—')
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin:14px 0;">'
+      +'<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Provider Intelligence</div>'
+      +'<div style="font-size:11px;color:#166534;">'+c.provider+' has strong performance metrics. EVV GPS-verified visits match billing records. No anomalies in current claim period. CMS 4.5-star above network average (4.1). Recommend continued partnership.</div></div>'
+      +'<div style="display:flex;gap:8px;margin-top:12px;">'
+      +'<button onclick="ltcDetailAction(\'contact-provider\',\''+c.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-phone" style="margin-right:5px;"></i>Contact Provider</button>'
+      +'<button onclick="ltcDetailAction(\'visit\',\''+c.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-map-marker-alt" style="margin-right:5px;"></i>Schedule Site Visit</button>'
+      +'<button onclick="navigateTo(\'healthcare-provider-360\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-id-badge" style="margin-right:5px;"></i>Full Provider 360°</button>'
+      +'</div>';
+  }
+
+  function _p9buildCarrier(c) {
+    return '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:14px;"><i class="fas fa-building" style="color:#003087;margin-right:6px;"></i>Carrier — '+c.carrier+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +_p9kv('Carrier', c.carrier)
+      +_p9kv('Product', c.product)
+      +_p9kv('Daily Benefit (Policy)', c.dailyBenefit)
+      +_p9kv('Inflation Rider', c.inflationRider||'None')
+      +_p9kv('Benefit Period', c.benefitPeriodDays+' days')
+      +_p9kv('Benefit Used', c.benefitUsedDays+' days')
+      +_p9kv('Shared Care Rider', c.sharedCare ? '✅ Yes — '+c.sharedCareSpouse : '❌ No')
+      +_p9kv('Carrier Notified', c.notificationDate || '—')
+      +'</div>'
+      +'<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:5px;"><i class="fas fa-info-circle" style="margin-right:5px;"></i>COB & Carrier Payment Responsibilities</div>'
+      +'<div style="font-size:11px;color:#1e40af;line-height:1.6;">'+(c.cobNotes||'No coordination of benefits noted.')+'</div></div>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button onclick="ltcDetailAction(\'carrier-portal\',\''+c.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-globe" style="margin-right:5px;"></i>Carrier Portal</button>'
+      +'<button onclick="navigateTo(\'insurance-carrier-360\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-building" style="margin-right:5px;"></i>Carrier 360°</button>'
+      +'</div>';
+  }
+
+  function _p9buildAIInsights(c) {
+    var mmse = c.rnAssessment ? c.rnAssessment.mmseScore : c.cogScore;
+    var adlCount = (c.adlsImpaired||[]).length || c.assessScore;
+    var pctUsed = c.benefitPeriodDays ? Math.round(c.benefitUsedDays/c.benefitPeriodDays*100) : 0;
+    return '<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:14px;"><i class="fas fa-robot" style="color:#7c3aed;margin-right:6px;"></i>AI Insights — '+c.claimant+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +_p9kv('Fraud Risk Score', (c.smartsRules||[]).filter(function(r){return r.id==='SR-004';})[0]?((c.smartsRules||[]).filter(function(r){return r.id==='SR-004';})[0].detail||'—'):'—', c.status==='Escalated'?'#dc2626':'#059669')
+      +_p9kv('Benefit Period Used', pctUsed+'%', pctUsed>90?'#dc2626':pctUsed>70?'#d97706':'#059669')
+      +_p9kv('Care Duration Projection', '6–12 months', '#374151')
+      +'</div>'
+      +'<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:14px;">'
+      +'<div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:8px;"><i class="fas fa-brain" style="margin-right:5px;"></i>AI Clinical Projection</div>'
+      +'<div style="font-size:12px;color:#374151;line-height:1.65;">'
+      +c.claimant+' (Age '+c.age+') presents with '+adlCount+'/6 ADL impairments and MMSE '+mmse+'/30. '
+      +'Current care setting: <strong>'+c.type+'</strong>. '
+      +'Lifecycle phase: <strong>'+LC_PHASES[c.lcPhase]+'</strong>. '
+      +(pctUsed>90?'<strong style="color:#dc2626;">BENEFIT EXHAUSTION IMMINENT — transition planning critical.</strong> ':'')
+      +'AI projects continued '+c.type+' care. Primary diagnosis: '+c.dx1Label+'. '
+      +'No payment integrity anomalies detected'+(c.status==='Escalated'?' — NOTE: Active SIU investigation on billing.':'.')+' '
+      +'Care manager should validate next payment cycle and review updated care plan.'
+      +'</div></div>'
+      + _p9smartsPanel(c)
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-lightbulb" style="margin-right:5px;"></i>Recommended Next Steps</div>'
+      +'<div style="font-size:11px;color:#166534;line-height:1.65;">'
+      +(pctUsed>90?'1. <strong>Initiate Medicaid transition immediately</strong> — benefit period expires soon.<br>':'')
+      +(c.status==='Escalated'?'1. <strong>Resolve SIU billing anomaly</strong> before releasing payment.<br>':'')
+      +'2. Validate provider billing against EVV GPS records for current cycle.<br>'
+      +'3. Schedule next clinical reassessment in 30 days.<br>'
+      +'4. Confirm care plan with '+c.provider+' and attending physician '+c.attendingPhysician+'.'
+      +'</div></div>';
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     PATCH ltcOpenClaimDetail — intercept p9 claims for 7-tab view
+  ───────────────────────────────────────────────────────────────────── */
+  var _origOpenClaimDetailP9 = window.ltcOpenClaimDetail;
+  window.ltcOpenClaimDetail = function(claimId) {
+    var c = (window.ltcClaimsData||[]).find(function(x){return x.id===claimId;});
+    /* Only handle p9 enriched claims (those with lcPhase and timeline array) */
+    if (!c || c.lcPhase === undefined || !c.timeline) {
+      return _origOpenClaimDetailP9(claimId);
+    }
+    window._lcdCurrentClaim = c;
+
+    var tabs7 = ['Overview','Timeline','Documents','Assessment','Provider','Carrier','AI Insights'];
+    var tabHtml = tabs7.map(function(t,i){
+      return '<button id="p9-tab-'+i+'" onclick="window._p9switchTab('+i+',\''+c.id+'\')" '
+        +'style="background:'+(i===0?'#dc2626':'transparent')+';color:'+(i===0?'#fff':'#9ca3af')+';'
+        +'border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">'+t+'</button>';
+    }).join('');
+
+    var headerTag = '<div style="position:sticky;top:0;z-index:2;background:linear-gradient(135deg,#dc2626,#b91c1c);padding:16px 20px;border-radius:16px 16px 0 0;color:#fff;">'
+      +'<div style="display:flex;align-items:center;gap:10px;">'
+      +'<i class="fas fa-file-medical-alt" style="font-size:20px;"></i>'
+      +'<div><div style="font-size:15px;font-weight:800;">'+c.id+' — '+c.claimant+'</div>'
+      +'<div style="font-size:11px;opacity:.85;">'+c.type+' · '+c.carrier+' · Phase: <strong>'+LC_PHASES[c.lcPhase]+'</strong></div></div>'
+      +'<button onclick="_L4close(\'ltc-p9-detail\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:5px 11px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:3px;margin-top:12px;flex-wrap:wrap;">'+tabHtml+'</div>'
+      +'</div>';
+
+    var html = '<div style="background:#fff;border-radius:16px;width:760px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">'
+      + headerTag
+      +'<div id="p9-body" style="padding:20px;">'+_p9buildOverview(c)+'</div>'
+      +'</div>';
+
+    _L4overlay('ltc-p9-detail', html);
+  };
+
+  /* Tab switcher for p9 detail */
+  window._p9switchTab = function(idx, claimId) {
+    var c = window._lcdCurrentClaim;
+    if (!c) return;
+    for (var i=0;i<7;i++){
+      var el=document.getElementById('p9-tab-'+i);
+      if(el){el.style.background=i===idx?'#dc2626':'transparent';el.style.color=i===idx?'#fff':'#9ca3af';}
+    }
+    var body = document.getElementById('p9-body');
+    if (!body) return;
+    switch(idx) {
+      case 0: body.innerHTML = _p9buildOverview(c);    break;
+      case 1: body.innerHTML = _p9buildTimeline(c);    break;
+      case 2: body.innerHTML = _p9buildDocuments(c);   break;
+      case 3: body.innerHTML = _p9buildAssessment(c);  break;
+      case 4: body.innerHTML = _p9buildProvider(c);    break;
+      case 5: body.innerHTML = _p9buildCarrier(c);     break;
+      case 6: body.innerHTML = _p9buildAIInsights(c);  break;
+    }
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     PRIORITY 1 — REWRITE INTAKE WIZARD (ltcNewClaim)
+     Step 1: Claimant Info + Who Is Filing + COB
+     Step 2: Policy Info (with AI Lookup)
+     Step 3: Clinical Impression (NO MMSE — reported symptoms only)
+     Step 4: Care Setting + Provider
+     Step 5: Review & Submit
+  ───────────────────────────────────────────────────────────────────── */
+  var _p9ncStep = 1;
+
+  /* ICD-10 dropdown HTML */
+  function _p9icd10Select(id) {
+    return '<select id="'+id+'" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;">'
+      +'<option value="">— Select Primary Diagnosis —</option>'
+      + ICD10_LIST.map(function(d){
+          return '<option value="'+d.code+'">'+d.code+' — '+d.label+' ('+d.cat+')</option>';
+        }).join('')
+      +'</select>';
+  }
+
+  /* ADL 6-checkbox HTML */
+  function _p9adlCheckboxes() {
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      + ADL_LIST.map(function(adl){
+          return '<label style="display:flex;align-items:flex-start;gap:8px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:10px;cursor:pointer;">'
+            +'<input type="checkbox" name="adl_'+adl.key+'" style="margin-top:2px;accent-color:#dc2626;">'
+            +'<div><div style="font-size:12px;font-weight:700;color:#111827;">'+adl.label+'</div>'
+            +'<div style="font-size:10px;color:#6b7280;">'+adl.desc+'</div></div>'
+            +'</label>';
+        }).join('')
+      +'</div>';
+  }
+
+  function _p9ncBuild(step) {
+    var steps = ['Claimant Info','Policy Info','Clinical Impression','Care Setting','Review & Submit'];
+    var stepsHtml = steps.map(function(s,i){
+      var active=(i+1)===step, done=(i+1)<step;
+      var col=done?'#059669':active?'#dc2626':'#d1d5db';
+      return '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">'
+        +'<div style="width:22px;height:22px;border-radius:50%;background:'+col+';color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;">'+(done?'✓':(i+1))+'</div>'
+        +'<span style="font-size:10px;font-weight:'+(active?'800':'500')+';color:'+(active?'#fff':'rgba(255,255,255,.6)')+';white-space:nowrap;">'+s+'</span>'
+        +(i<steps.length-1?'<div style="width:16px;height:1px;background:rgba(255,255,255,.3);"></div>':'')
+        +'</div>';
+    }).join('');
+
+    var body = '';
+
+    /* ── STEP 1: CLAIMANT INFO ── */
+    if (step===1) body = ''
+      +'<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:16px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:3px;"><i class="fas fa-user" style="margin-right:5px;"></i>Step 1: Claimant Information</div>'
+      +'<div style="font-size:11px;color:#7f1d1d;">Collect claimant\'s personal, contact, and insurance coordination details. Policy will be looked up in Step 2.</div></div>'
+
+      /* Who is filing */
+      +'<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#0369a1;margin-bottom:8px;"><i class="fas fa-phone" style="margin-right:5px;"></i>Who Is Filing This Claim?</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Relationship to Claimant *</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;">'
+      +'<option>Claimant (Self)</option><option selected>Family Member</option><option>POA / Legal Guardian</option><option>Care Facility</option><option>Insurance Agent</option><option>Hospital Discharge Planner</option><option>Other</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Caller Name & Relationship</label>'
+      +'<input type="text" value="Carlos Vasquez (Son)" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">POA / Legal Guardian on File?</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;">'
+      +'<option selected>Yes — POA Documentation on File</option><option>No — Claimant handles own affairs</option><option>Pending — POA in progress</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Preferred Language</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;">'
+      +'<option selected>English</option><option>Spanish</option><option>French</option><option>Mandarin</option><option>Vietnamese</option><option>Other</option>'
+      +'</select></div>'
+      +'</div></div>'
+
+      /* Claimant identity */
+      +'<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Claimant Identity</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Full Legal Name *</label><input type="text" value="Eleanor Vasquez" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Date of Birth *</label><input type="text" value="03/12/1947" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">SSN (Last 4 only)</label><input type="text" value="4401" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Phone Number</label><input type="text" value="(555) 729-4401" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Email Address</label><input type="text" value="e.vasquez@email.com" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">State of Residence</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"><option selected>Texas (TX)</option><option>Florida (FL)</option><option>California (CA)</option><option>New York (NY)</option><option>Illinois (IL)</option><option>Other</option></select></div>'
+      +'</div>'
+
+      /* Diagnoses */
+      +'<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Medical Diagnoses (ICD-10)</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Primary Diagnosis — ICD-10 *</label>'
+      + _p9icd10Select('nc-dx1')+'</div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Secondary Diagnosis — ICD-10</label>'
+      + _p9icd10Select('nc-dx2')+'</div>'
+      +'</div>'
+
+      /* Qualifying event date */
+      +'<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#c2410c;margin-bottom:8px;"><i class="fas fa-calendar-exclamation" style="margin-right:5px;"></i>Key Dates (Legally Important)</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Qualifying Event Date * <span style="font-weight:400;color:#6b7280;">(when care needs began)</span></label>'
+      +'<input type="text" value="06/17/2026" style="width:100%;border:1.5px solid #fed7aa;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Claim Notification Date <span style="font-weight:400;color:#6b7280;">(auto = today)</span></label>'
+      +'<input type="text" value="07/09/2026" style="width:100%;border:1.5px solid #fed7aa;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'</div>'
+      +'<div style="margin-top:8px;font-size:10px;color:#c2410c;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>90-day elimination period begins on the Qualifying Event Date. First benefit payment = Qualifying Event Date + 90 days.</div></div>'
+
+      /* COB */
+      +'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:8px;"><i class="fas fa-layer-group" style="margin-right:5px;"></i>Coordination of Benefits (COB)</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Medicare Status</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;">'
+      +'<option selected>Medicare Part A + Part B</option><option>Medicare Part B only</option><option>Medicare Advantage (Part C)</option><option>Not enrolled in Medicare</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Medicaid Status</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;">'
+      +'<option selected>Not enrolled in Medicaid</option><option>Enrolled — active</option><option>Application pending</option><option>Spend-down approaching</option>'
+      +'</select></div>'
+      +'</div></div>';
+
+    /* ── STEP 2: POLICY INFO ── */
+    else if (step===2) body = ''
+      +'<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:3px;"><i class="fas fa-file-contract" style="margin-right:5px;"></i>Step 2: Policy Lookup</div>'
+      +'<div style="font-size:11px;color:#1e40af;">Claimant: <strong>Eleanor Vasquez</strong> · DOB 03/12/1947 · TX. Enter policy number to retrieve full coverage details.</div></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Policy Number *</label><input type="text" value="PRU-LTC-2024-88192" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Carrier</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;">'
+      +'<option selected>Prudential</option><option>MassMutual</option><option>NY Life</option><option>Genworth</option><option>Transamerica</option><option>Lincoln Natl</option><option>TIAA</option><option>Pacific Life</option>'
+      +'</select></div>'
+      +'</div>'
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:14px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Policy Lookup — PRU-LTC-2024-88192</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;color:#166534;">'
+      +'<div><strong>Claimant Match:</strong> Eleanor Vasquez ✅</div><div><strong>Policy Status:</strong> In Force ✅</div>'
+      +'<div><strong>Daily Benefit:</strong> $195/day</div><div><strong>Benefit Period:</strong> 5 years (1,825 days)</div>'
+      +'<div><strong>Elimination Period:</strong> 90 days</div><div><strong>Inflation Rider:</strong> 5% Compound</div>'
+      +'<div><strong>Prior Claims:</strong> None</div><div><strong>Coverage Since:</strong> Jan 14, 2024</div>'
+      +'<div><strong>Shared Care Rider:</strong> No</div><div><strong>Non-Forfeiture:</strong> Reduced Paid-Up</div>'
+      +'</div></div>'
+      +'<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#c2410c;margin-bottom:5px;"><i class="fas fa-calculator" style="margin-right:5px;"></i>Elimination Period Calculation</div>'
+      +'<div style="font-size:11px;color:#374151;">Qualifying Event: <strong>Jun 17, 2026</strong> + 90 days = <strong>First Benefit: Sep 15, 2026</strong>. Claimant (or Medicare) is responsible for costs during elimination period.</div></div>';
+
+    /* ── STEP 3: CLINICAL IMPRESSION (NO MMSE) ── */
+    else if (step===3) body = ''
+      +'<div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:3px;"><i class="fas fa-stethoscope" style="margin-right:5px;"></i>Step 3: Clinical Impression (Intake)</div>'
+      +'<div style="font-size:11px;color:#5b21b6;">Record what is <strong>reported by the caller</strong> at intake. The formal ADL evaluation and MMSE cognitive score will be completed by an RN or MSW during the Clinical Assessment (scheduled after claim is opened). Do NOT enter MMSE at this step.</div></div>'
+
+      /* Reported ADL impairments */
+      +'<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Reported ADL Impairments <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">(check all reported as impaired by caller)</span></div>'
+      + _p9adlCheckboxes()
+
+      /* Cognitive symptoms */
+      +'<div style="margin-top:14px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Cognitive Symptoms Reported <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;">(check all reported)</span></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      +'<label style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:9px;cursor:pointer;"><input type="checkbox" checked style="accent-color:#7c3aed;"><span style="font-size:12px;color:#374151;font-weight:600;">Memory loss / forgetfulness</span></label>'
+      +'<label style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:9px;cursor:pointer;"><input type="checkbox" checked style="accent-color:#7c3aed;"><span style="font-size:12px;color:#374151;font-weight:600;">Confusion / disorientation</span></label>'
+      +'<label style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:9px;cursor:pointer;"><input type="checkbox" style="accent-color:#7c3aed;"><span style="font-size:12px;color:#374151;font-weight:600;">Wandering / unsafe alone</span></label>'
+      +'<label style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:9px;cursor:pointer;"><input type="checkbox" style="accent-color:#7c3aed;"><span style="font-size:12px;color:#374151;font-weight:600;">Physician-documented cognitive impairment</span></label>'
+      +'</div></div>'
+
+      /* Fall history */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Fall History (Reported)</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;">'
+      +'<option>No reported falls</option><option>1 fall in past 90 days</option><option selected>2+ falls in past 90 days</option><option>Hospitalized due to fall</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Attending Physician (NPI Lookup)</label>'
+      +'<input type="text" value="Dr. Anna Kessler, MD — NPI: 1234567890" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'</div>'
+
+      +'<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:4px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>MMSE Not Collected at Intake</div>'
+      +'<div style="font-size:11px;color:#78350f;">The formal Mini-Mental State Examination (MMSE) score <strong>cannot be entered here</strong>. It is a clinically administered test conducted by an RN or MSW during the post-intake Assessment (Day 3–7). After the claim is opened, use the <strong>Schedule Assessment</strong> button in the claim detail to initiate the clinical evaluation workflow.</div></div>'
+
+      /* SMARTS pre-screen */
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-top:14px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>SMARTS Real-Time Pre-Screen</div>'
+      +'<div style="font-size:11px;color:#166534;line-height:1.6;">SR-001 (ADL Trigger): <strong>✅ ELIGIBLE</strong> — reported ADL impairments meet 2/6 threshold · SR-002 (Cognitive Route): <strong>⚠️ PROBABLE</strong> — cognitive symptoms reported, MMSE pending RN assessment · SR-004 (Fraud Pre-Screen): <strong>✅ CLEAR</strong> · SR-005 (STP): <strong>⚠️ PENDING</strong> — COB review required before STP determination</div></div>';
+
+    /* ── STEP 4: CARE SETTING ── */
+    else if (step===4) body = ''
+      +'<div style="margin-bottom:14px;"><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Recommended Care Setting *</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:10px;font-size:12px;box-sizing:border-box;">'
+      +'<option>Nursing Home (SNF)</option><option>Memory Care Facility</option><option>Assisted Living (ALF)</option><option selected>Home Health Care</option><option>Adult Day Care</option><option>Hospice</option>'
+      +'</select></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Facility / Provider Name</label>'
+      +'<input type="text" value="Sunrise Manor SNF — 220 Oak Lane, Dallas TX" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Estimated Care Start Date</label>'
+      +'<input type="text" value="06/17/2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Care Manager Assignment</label>'
+      +'<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;">'
+      +'<option>Auto-assign (AI recommended)</option><option>Sarah Johnson, RN</option><option>Maria Castillo, MSW</option><option>James Park, RN</option><option>Angela Moore, RN</option>'
+      +'</select></div>'
+      +'<div><label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Emergency Contact</label>'
+      +'<input type="text" value="Carlos Vasquez — (555) 729-4402" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px;font-size:12px;box-sizing:border-box;"></div>'
+      +'</div>'
+      +'<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:5px;"><i class="fas fa-map-marker-alt" style="margin-right:5px;"></i>AI Provider Network Check</div>'
+      +'<div style="font-size:11px;color:#1e40af;">Sunrise Manor SNF: <strong>✅ In-Network</strong> · Licensed by TX DADS ✅ · CMS 4.5-star ✅ · EVV-compliant (CellTrak) ✅ · W-9 on file ✅ · Rate: $218/day (benefit $195/day, gap $23/day) · Provider accepted.</div></div>';
+
+    /* ── STEP 5: REVIEW & SUBMIT ── */
+    else if (step===5) body = ''
+      +'<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:16px;">'
+      +'<div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px;"><i class="fas fa-clipboard-check" style="color:#059669;margin-right:6px;"></i>Claim Summary — Ready to Submit</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+      +_p9kv('Claimant','Eleanor Vasquez · Age 79','#111827')
+      +_p9kv('Filed By','Carlos Vasquez (Son) — Family Member','#003087')
+      +_p9kv('Policy','PRU-LTC-2024-88192 · Prudential','#111827')
+      +_p9kv('Qualifying Event Date','Jun 17, 2026','#d97706')
+      +_p9kv('Notification Date','Jul 9, 2026','#0891b2')
+      +_p9kv('Elimination Period End','Sep 14, 2026 (Day 90)','#7c3aed')
+      +_p9kv('First Benefit Date','Sep 15, 2026','#059669')
+      +_p9kv('Daily Benefit','$195/day · 5-year benefit period','#059669')
+      +_p9kv('Primary Dx','F01.51 — Vascular Dementia','#374151')
+      +_p9kv('Secondary Dx','S72.001 — Hip Fracture','#374151')
+      +_p9kv('Care Setting','Nursing Home (SNF)','#374151')
+      +_p9kv('Provider','Sunrise Manor SNF (In-Network)','#374151')
+      +_p9kv('Medicare / COB','Part A + B — coordinates at Day 21','#0891b2')
+      +_p9kv('SMARTS Pre-Screen','SR-001 ✅ · SR-004 ✅ (SR-002 pending RN)','#059669')
+      +'</div></div>'
+      +'<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-tasks" style="margin-right:5px;"></i>Post-Submission Workflow (Auto-Triggered)</div>'
+      +'<div style="font-size:11px;color:#78350f;line-height:1.65;">'
+      +'1. HIPAA Authorization form sent to Carlos Vasquez via DocuSign.<br>'
+      +'2. APS (Attending Physician Statement) request faxed to Dr. Anna Kessler (NPI: 1234567890).<br>'
+      +'3. RN Assessment scheduled — assigned care manager will contact within 2 business days.<br>'
+      +'4. Acknowledgment letter sent to Prudential (carrier) within 24 hours (statutory requirement).<br>'
+      +'5. SMARTS SR-004 fraud pre-screen runs automatically.'
+      +'</div></div>'
+      +'<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Submission Review</div>'
+      +'<div style="font-size:11px;color:#166534;line-height:1.6;">All required fields complete. Policy in force. ICD-10 diagnoses captured. COB documented (Medicare Part A+B). Attending physician NPI on record. SMARTS SR-001 pre-screen passed. RN Assessment queued. Carrier (Prudential) will be notified electronically within 24 hours per statutory obligation. AI projects 8–12 month claim duration at current care level.</div></div>';
+
+    /* Wrapper */
+    return '<div style="background:#fff;border-radius:16px;width:760px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">'
+      +'<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:16px 20px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;z-index:2;">'
+      +'<div style="display:flex;align-items:center;gap:10px;">'
+      +'<i class="fas fa-file-medical-alt" style="font-size:18px;"></i>'
+      +'<div><div style="font-size:15px;font-weight:800;">New LTC Claim — Step '+step+' of 5</div>'
+      +'<div style="font-size:10px;opacity:.85;">HIPAA-compliant intake · AI-assisted eligibility · SMARTS fraud pre-screen</div></div>'
+      +'<button onclick="document.getElementById(\'ltc-p9-newclaim\')&&document.getElementById(\'ltc-p9-newclaim\').remove()" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:5px 11px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:4px;align-items:center;margin-top:12px;flex-wrap:wrap;">'+stepsHtml+'</div>'
+      +'</div>'
+      +'<div style="padding:20px;">'+body
+      +'<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid #f3f4f6;">'
+      +(step>1?'<button onclick="window._p9ncBack()" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-arrow-left" style="margin-right:5px;"></i>Back</button>':'')
+      +(step<5?'<button onclick="window._p9ncNext()" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;">Next Step <i class="fas fa-arrow-right" style="margin-left:5px;"></i></button>':'')
+      +(step===5?'<button onclick="window._p9ncSubmit()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:13px;font-weight:800;cursor:pointer;"><i class="fas fa-check-circle" style="margin-right:5px;"></i>Submit Claim</button>':'')
+      +'</div></div></div>';
+  }
+
+  /* Override ltcNewClaim to use p9 wizard */
+  window.ltcNewClaim = function() {
+    _p9ncStep = 1;
+    var old = document.getElementById('ltc-p9-newclaim');
+    if (old) old.remove();
+    var d = document.createElement('div');
+    d.id = 'ltc-p9-newclaim';
+    d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9995;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;';
+    d.innerHTML = _p9ncBuild(1);
+    document.body.appendChild(d);
+    d.addEventListener('click', function(e){ if(e.target===d) d.remove(); });
+  };
+
+  window._p9ncNext = function() {
+    _p9ncStep = Math.min(5, _p9ncStep + 1);
+    var ov = document.getElementById('ltc-p9-newclaim');
+    if (ov) ov.innerHTML = _p9ncBuild(_p9ncStep);
+  };
+  window._p9ncBack = function() {
+    _p9ncStep = Math.max(1, _p9ncStep - 1);
+    var ov = document.getElementById('ltc-p9-newclaim');
+    if (ov) ov.innerHTML = _p9ncBuild(_p9ncStep);
+  };
+  window._p9ncSubmit = function() {
+    var ov = document.getElementById('ltc-p9-newclaim');
+    if (ov) ov.remove();
+    if (typeof _L4toast === 'function') {
+      _L4toast('<i class="fas fa-check-circle"></i> Claim LTC-2026-XXXX submitted successfully · HIPAA auth sent · APS request faxed to Dr. Kessler · RN Assessment queued · Prudential notified', 6000);
+    }
+  };
+
+  /* ─────────────────────────────────────────────────────────────────────
+     PATCH claims list table to show lifecycle phase column
+  ───────────────────────────────────────────────────────────────────── */
+  var _origInitLtcClaimsPage = window.initLtcClaimsPage;
+  window.initLtcClaimsPage = function() {
+    if (typeof _origInitLtcClaimsPage === 'function') _origInitLtcClaimsPage();
+    /* After the original renders, inject a lifecycle phase column into the tbody */
+    setTimeout(function() {
+      var tbody = document.getElementById('ltc-claims-tbody');
+      if (!tbody) return;
+      /* Re-render all rows with phase badge */
+      var allClaims = window.ltcClaimsData || [];
+      var newRows = allClaims.map(function(c) {
+        var phaseIdx = c.lcPhase !== undefined ? c.lcPhase : 5;
+        var phaseColor = LC_COLORS[phaseIdx] || '#6b7280';
+        var phaseName = LC_PHASES[phaseIdx] || 'Active';
+        var priorityColor = c.priority==='urgent'?'#dc2626':c.priority==='high'?'#d97706':'#059669';
+        var statusColors = { 'Active':'#059669','Pending':'#d97706','Review':'#d97706','Escalated':'#dc2626' };
+        var sc = statusColors[c.status]||'#6b7280';
+        return '<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="ltcOpenClaimDetail(\''+c.id+'\')">'
+          +'<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#003087;">'+c.id+'</td>'
+          +'<td style="padding:10px 12px;"><div style="font-size:13px;font-weight:600;color:#111827;">'+c.claimant+'</div><div style="font-size:11px;color:#6b7280;">Age '+c.age+' · '+c.carrier+'</div></td>'
+          +'<td style="padding:10px 12px;"><span style="background:'+phaseColor+'1a;color:'+phaseColor+';border:1px solid '+phaseColor+'44;border-radius:12px;padding:2px 9px;font-size:10px;font-weight:700;">'+phaseName+'</span></td>'
+          +'<td style="padding:10px 12px;font-size:12px;color:#374151;">'+c.type+'</td>'
+          +'<td style="padding:10px 12px;font-size:13px;font-weight:700;color:#059669;">'+c.dailyBenefit+'</td>'
+          +'<td style="padding:10px 12px;"><span style="background:'+sc+'1a;color:'+sc+';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">'+c.status+'</span></td>'
+          +'<td style="padding:10px 12px;"><span style="color:'+priorityColor+';font-size:11px;font-weight:700;text-transform:uppercase;">'+c.priority+'</span></td>'
+          +'<td style="padding:10px 12px;font-size:12px;color:#374151;">'+c.daysOpen+'d</td>'
+          +'<td style="padding:10px 12px;font-size:11px;color:#374151;max-width:160px;">'+c.nextAction+'</td>'
+          +'<td style="padding:10px 12px;"><button onclick="event.stopPropagation();ltcOpenClaimDetail(\''+c.id+'\')" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">Review</button></td>'
+          +'</tr>';
+      }).join('');
+      tbody.innerHTML = newRows;
+
+      /* Update column headers if not already done */
+      var thead = tbody.closest('table') && tbody.closest('table').querySelector('thead tr');
+      if (thead && !thead.querySelector('[data-p9-phase]')) {
+        var ths = thead.querySelectorAll('th');
+        if (ths.length >= 2) {
+          var phTh = document.createElement('th');
+          phTh.setAttribute('data-p9-phase','1');
+          phTh.style.cssText = 'padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;';
+          phTh.textContent = 'Lifecycle Phase';
+          ths[2].parentNode.insertBefore(phTh, ths[2]);
+        }
+      }
+    }, 80);
+  };
+
+  console.log('[Phase 9] LTC Claims Phase 9 loaded — lifecycle-complete: 5 claim types, 7-tab detail, fixed intake wizard (ICD-10 + 6 ADLs + COB + qualifying event date), lifecycle banner, persona panels, assessment tab, priority 1-5 complete');
+
+})();
