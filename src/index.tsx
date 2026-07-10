@@ -345,7 +345,11 @@ function MainApp() {
         <div id="tpl-ltc-transport"></div>
         <div id="tpl-ltc-ermxrm"></div>
         <div id="tpl-ltc-upd-ops"></div>
-        {/* HAL Operations templates */}
+        {/* HAL Operations templates — Phase 16 */}
+        <div id="tpl-hal-health"></div>
+        <div id="tpl-hal-annuity"></div>
+        <div id="tpl-hal-life"></div>
+        <div id="tpl-hal-client360"></div>
         <div id="tpl-hal-policy"></div>
         <div id="tpl-hal-pipeline"></div>
         <div id="tpl-hal-medsup"></div>
@@ -954,6 +958,22 @@ function Sidebar() {
 
         {/* ── HAL OPERATIONS ── */}
         <div class="nav-section-label">HAL OPERATIONS</div>
+        <a class="nav-item hal-health-nav" onclick="navigateTo('hal-health')" href="#">
+          <i class="fas fa-heart-pulse"></i><span>Health Operations</span>
+          <span class="nav-badge" style="background:#dc2626;color:#fff">5</span>
+        </a>
+        <a class="nav-item hal-annuity-nav" onclick="navigateTo('hal-annuity')" href="#">
+          <i class="fas fa-chart-pie"></i><span>Annuity Operations</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">5</span>
+        </a>
+        <a class="nav-item hal-life-nav" onclick="navigateTo('hal-life')" href="#">
+          <i class="fas fa-shield-heart"></i><span>Life Operations</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">5</span>
+        </a>
+        <a class="nav-item hal-client360-nav" onclick="navigateTo('hal-client360')" href="#">
+          <i class="fas fa-users-viewfinder"></i><span>Client 360 Simulator</span>
+          <span class="nav-badge" style="background:linear-gradient(90deg,#7c3aed,#0891b2);color:#fff">NEW</span>
+        </a>
         <a class="nav-item hal-policy-nav" onclick="navigateTo('hal-policy')" href="#">
           <i class="fas fa-layer-group"></i><span>Policy Administration</span>
           <span class="nav-badge" style="background:#059669;color:#fff">2.8M</span>

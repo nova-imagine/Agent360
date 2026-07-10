@@ -75387,3 +75387,1215 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 14] Gibberish fixed: ltcCarrierAction + ltcProviderAction buttons migrated to _p8actions callback-map · No raw onclick HTML attribute strings');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 16 — HAL OPERATIONS: Health · Annuity · Life · Client 360 Simulator
+   Pages  : Health Operations (5 tabs) · Annuity Operations (5 tabs)
+            Life Operations (5 tabs)   · Client 360 Simulator (5 tabs)
+   Pattern: _p8actions callback-map — zero raw onclick HTML strings
+   Author : Agent360 Phase 16
+   Lines  : appended after Phase 14 (75,389)
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     SHARED HELPERS (Phase 16 prefix: _p16)
+  ───────────────────────────────────────────────────────────────────────── */
+  function _p16btn(label, icon, color, fn) {
+    var key = 'p16-' + Math.random().toString(36).slice(2);
+    window._p8actions[key] = fn;
+    var grad = color.indexOf('gradient') !== -1;
+    var style = 'background:' + color + ';color:#fff;border:none;border-radius:8px;'
+      + 'padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;'
+      + 'display:inline-flex;align-items:center;gap:6px;';
+    return '<button onclick="_p8run(\'' + key + '\')" style="' + style + '">'
+      + '<i class="fas ' + icon + '"></i> ' + label + '</button>';
+  }
+
+  function _p16toast(msg, dur) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:28px;right:28px;z-index:99999;'
+      + 'background:#1e293b;color:#fff;padding:13px 20px;border-radius:10px;'
+      + 'font-size:13px;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.45);'
+      + 'display:flex;align-items:center;gap:10px;animation:p16fade .3s ease;';
+    d.innerHTML = msg;
+    document.body.appendChild(d);
+    setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, dur || 3200);
+  }
+
+  function _p16ov(id, html) {
+    var old = document.getElementById(id);
+    if (old) old.parentNode.removeChild(old);
+    var wrap = document.createElement('div');
+    wrap.id = id;
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:13000;background:rgba(0,0,0,.55);'
+      + 'display:flex;align-items:center;justify-content:center;padding:20px;';
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap);
+  }
+
+  function _p16close(id) {
+    var el = document.getElementById(id);
+    if (el) el.parentNode.removeChild(el);
+  }
+
+  function _p16kpi(val, label, icon, color, sub) {
+    return '<div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;">'
+      + '<div style="width:44px;height:44px;border-radius:10px;background:' + color + '18;display:flex;align-items:center;justify-content:center;">'
+      + '<i class="fas ' + icon + '" style="color:' + color + ';font-size:20px;"></i></div>'
+      + '<div><div style="font-size:22px;font-weight:800;color:#111827;">' + val + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#374151;">' + label + '</div>'
+      + (sub ? '<div style="font-size:10px;color:#6b7280;">' + sub + '</div>' : '')
+      + '</div></div>';
+  }
+
+  function _p16hdr(icon, title, sub, color, actionHtml) {
+    return '<div style="background:linear-gradient(135deg,' + color + ','+color+'dd);padding:18px 22px;border-radius:12px 12px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas ' + icon + '" style="font-size:22px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:18px;font-weight:800;">' + title + '</div>'
+      + '<div style="font-size:11px;opacity:.82;">' + sub + '</div></div>'
+      + (actionHtml || '')
+      + '</div>';
+  }
+
+  function _p16tabs(tabs, active) {
+    return '<div style="display:flex;gap:2px;background:#f3f4f6;padding:4px;border-radius:8px;margin-bottom:18px;">'
+      + tabs.map(function(t, i) {
+          var on = i === active;
+          return '<button onclick="' + t[2] + '" style="flex:1;padding:8px 6px;font-size:11px;font-weight:' + (on?'800':'600') + ';'
+            + 'border:none;border-radius:6px;cursor:pointer;background:' + (on?'#fff':'transparent') + ';'
+            + 'color:' + (on?t[3]:'#6b7280') + ';box-shadow:' + (on?'0 1px 4px rgba(0,0,0,.1)':'none') + ';">'
+            + '<i class="fas ' + t[1] + '" style="margin-right:4px;"></i>' + t[0] + '</button>';
+        }).join('')
+      + '</div>';
+  }
+
+  function _p16sectionHdr(icon, title, color) {
+    return '<div style="background:' + color + '12;border-left:4px solid ' + color + ';padding:10px 16px;border-radius:0 6px 6px 0;margin-bottom:12px;display:flex;align-items:center;gap:8px;">'
+      + '<i class="fas ' + icon + '" style="color:' + color + ';"></i>'
+      + '<span style="font-size:13px;font-weight:800;color:#111827;">' + title + '</span></div>';
+  }
+
+  function _p16statusBadge(s) {
+    var map = { 'Active':'#059669','Pending':'#d97706','Closed':'#6b7280','Denied':'#dc2626',
+                'In Review':'#0891b2','Approved':'#059669','Lapsed':'#6b7280','Issued':'#7c3aed',
+                'In Progress':'#0891b2','Scheduled':'#059669','Suspended':'#d97706','Open':'#dc2626' };
+    var c = map[s] || '#6b7280';
+    return '<span style="background:' + c + '18;color:' + c + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">' + s + '</span>';
+  }
+
+  function _p16tblHdr(cols) {
+    return '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e5e7eb;">'
+      + cols.map(function(c){ return '<th style="padding:10px 12px;font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;text-align:left;white-space:nowrap;">' + c + '</th>'; }).join('')
+      + '</tr></thead>';
+  }
+
+  function _p16aiPanel(text) {
+    return '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:14px 16px;color:#fff;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#60a5fa;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:6px;"></i>WealthAI Intelligence</div>'
+      + '<div style="font-size:12px;color:#e2e8f0;line-height:1.65;">' + text + '</div></div>';
+  }
+
+  var _p16fld = 'width:100%;box-sizing:border-box;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:12px;outline:none;';
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     PAGE CONTAINER HELPER
+  ───────────────────────────────────────────────────────────────────────── */
+  function _p16buildPage(tplId, html) {
+    var tpl = document.getElementById(tplId);
+    if (!tpl) return;
+    tpl.innerHTML = html;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 1 — HEALTH OPERATIONS
+     Tabs: Claims Processing · Eligibility & Enrollment · Provider Network
+           Care Management · Analytics & Reporting
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _p16healthTab = 0;
+
+  var _p16healthClaims = [
+    { id:'HC-2201', member:'Barbara Thornton',  carrier:'Aetna',        product:'Med Supp Plan G',   type:'Hospital',     amount:'$18,400', filed:'Jul 1, 2026',  status:'In Review',  doi:'Jun 28, 2026' },
+    { id:'HC-2202', member:'Leonard Shapiro',   carrier:'AmeriLife',    product:'Med Supp Plan N',   type:'Physician',    amount:'$2,850',  filed:'Jul 2, 2026',  status:'Approved',   doi:'Jun 30, 2026' },
+    { id:'HC-2203', member:'Margaret Kellner',  carrier:'Humana',       product:'Critical Illness',  type:'Critical Ill', amount:'$50,000', filed:'Jun 30, 2026', status:'In Review',  doi:'Jun 25, 2026' },
+    { id:'HC-2204', member:'Frank Deluca',      carrier:'Cigna',        product:'Group Health Supp', type:'Rx/Pharmacy',  amount:'$1,240',  filed:'Jul 3, 2026',  status:'Approved',   doi:'Jul 3, 2026'  },
+    { id:'HC-2205', member:'Carol Steinberg',   carrier:'CUNA Mutual',  product:'LTD Supplement',    type:'Disability',   amount:'$3,600',  filed:'Jun 28, 2026', status:'Pending',    doi:'Jun 15, 2026' },
+    { id:'HC-2206', member:'Raymond Ng',        carrier:'Pacific Life', product:'Med Supp Plan F',   type:'Surgical',     amount:'$9,750',  filed:'Jul 4, 2026',  status:'In Review',  doi:'Jul 2, 2026'  },
+    { id:'HC-2207', member:'Dorothy Walsh',     carrier:'Aetna',        product:'Med Supp Plan G',   type:'Durable Med.', amount:'$880',   filed:'Jul 5, 2026',  status:'Approved',   doi:'Jul 4, 2026'  }
+  ];
+
+  var _p16healthEnroll = [
+    { id:'EN-1001', member:'Joseph Whitmore', age:67, group:'Individual', carrier:'AmeriLife',   product:'Med Supp Plan G', effective:'Aug 1, 2026',  cobra:false, status:'Active'   },
+    { id:'EN-1002', member:'Susan Hartley',   age:71, group:'Individual', carrier:'Humana',      product:'Critical Illness', effective:'Jul 15, 2026', cobra:false, status:'Pending'  },
+    { id:'EN-1003', member:'David Ortega',    age:58, group:'Group',      carrier:'Cigna',       product:'Group Health Supp',effective:'Jul 1, 2026',  cobra:false, status:'Active'   },
+    { id:'EN-1004', member:'Helen Byrne',     age:62, group:'Individual', carrier:'Aetna',       product:'Med Supp Plan N', effective:'Jul 1, 2026',  cobra:true,  status:'Pending'  },
+    { id:'EN-1005', member:'Carlos Mejia',    age:55, group:'Group',      carrier:'CUNA Mutual', product:'LTD Supplement',  effective:'Aug 1, 2026',  cobra:false, status:'Scheduled'}
+  ];
+
+  var _p16healthProviders = [
+    { npi:'1234567890', name:'Mount Sinai Health System',    type:'Hospital System', network:'In-Network', state:'NY', tier:'Premier', claims30:847, billingAcc:'99.1%', fraud:'Low'    },
+    { npi:'2345678901', name:'NYU Langone Medical Center',   type:'Hospital System', network:'In-Network', state:'NY', tier:'Premier', claims30:612, billingAcc:'98.7%', fraud:'Low'    },
+    { npi:'3456789012', name:'Dr. Alan Schwartz MD',         type:'Physician',       network:'In-Network', state:'NJ', tier:'Standard',claims30:143, billingAcc:'97.2%', fraud:'Low'    },
+    { npi:'4567890123', name:'Riverside Home Health Agency', type:'Home Health',     network:'In-Network', state:'CT', tier:'Standard',claims30:289, billingAcc:'96.8%', fraud:'Medium' },
+    { npi:'5678901234', name:'Metro Rx Pharmacy Group',      type:'Pharmacy',        network:'In-Network', state:'NY', tier:'Standard',claims30:1204, billingAcc:'99.8%',fraud:'Low'   },
+    { npi:'6789012345', name:'Atlantic Rehab Center',        type:'Rehab',           network:'Out-Network',state:'PA', tier:'N/A',     claims30:38,  billingAcc:'95.1%', fraud:'Medium' }
+  ];
+
+  var _p16careMgmt = [
+    { id:'CM-501', member:'Barbara Thornton', type:'UR Pre-Auth',   program:'Inpatient Hospitalization', status:'Approved', rnOwner:'RN Sarah Johnson',   due:'Jul 8, 2026',  priority:'High'   },
+    { id:'CM-502', member:'Margaret Kellner', type:'Case Mgmt',     program:'Critical Illness Support',  status:'In Progress',rnOwner:'RN Angela Moore',   due:'Jul 12, 2026', priority:'High'   },
+    { id:'CM-503', member:'Carol Steinberg',  type:'DM Program',    program:'Chronic Disease Mgmt',      status:'Active',   rnOwner:'RN Kevin Walsh',      due:'Ongoing',      priority:'Medium' },
+    { id:'CM-504', member:'Raymond Ng',       type:'UR Pre-Auth',   program:'Elective Surgery',          status:'Pending',  rnOwner:'RN Patricia Lang',    due:'Jul 10, 2026', priority:'Medium' },
+    { id:'CM-505', member:'Helen Byrne',      type:'COBRA Consult', program:'Continuation Coverage',     status:'Scheduled',rnOwner:'RN Anna Torres',      due:'Jul 9, 2026',  priority:'Low'    }
+  ];
+
+  function _p16buildHealthPage(tab) {
+    _p16healthTab = tab;
+    var COLOR = '#dc2626';
+    var tabDefs = [
+      ['Claims Processing',    'fa-file-medical-alt', 'window._p16navHealthTab(0)', COLOR],
+      ['Eligibility & Enroll', 'fa-user-check',       'window._p16navHealthTab(1)', COLOR],
+      ['Provider Network',     'fa-hospital',         'window._p16navHealthTab(2)', COLOR],
+      ['Care Management',      'fa-heartbeat',        'window._p16navHealthTab(3)', COLOR],
+      ['Analytics & Reporting','fa-chart-bar',        'window._p16navHealthTab(4)', COLOR]
+    ];
+
+    var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+      + _p16kpi('28,200',  'Active Health Members', 'fa-users',           COLOR,     'Across all carriers')
+      + _p16kpi('7,841',   'Claims YTD',            'fa-file-medical-alt',COLOR,     '97.2% auto-adjudicated')
+      + _p16kpi('$142M',   'Benefits Paid YTD',     'fa-dollar-sign',     '#059669', 'Loss ratio 68.4%')
+      + _p16kpi('4 hrs',   'Avg Claim Turnaround',  'fa-clock',           '#d97706', 'SLA target: 8 hrs')
+      + '</div>';
+
+    var body = '';
+
+    /* TAB 0 — Claims Processing */
+    if (tab === 0) {
+      var rows = _p16healthClaims.map(function(c) {
+        var k_open = 'p16-hclm-' + c.id + '-' + Math.random().toString(36).slice(2);
+        window._p8actions[k_open] = (function(claim) { return function() { _p16openHealthClaim(claim); }; })(c);
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + c.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + c.member + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + c.carrier + '<div style="font-size:10px;color:#6b7280;">' + c.product + '</div></td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + c.type + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + c.amount + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + c.filed + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(c.status) + '</td>'
+          + '<td style="padding:9px 12px;"><button onclick="_p8run(\'' + k_open + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">Open</button></td>'
+          + '</tr>';
+      }).join('');
+
+      body = _p16aiPanel('WealthAI Auto-Adjudication is processing 97.2% of Health claims straight-through. '
+        + 'COB (Coordination of Benefits) engine active across 4 carriers. 3 claims flagged for clinical review — '
+        + 'ML anomaly detection identified billing pattern inconsistency on HC-2206. '
+        + 'Estimated $420K in duplicate billing prevented YTD.')
+        + _p16sectionHdr('fa-file-medical-alt', 'Health Claims Queue — Active Cases', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:16px;">'
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;align-items:center;">'
+        + _p16btn('+ New Claim', 'fa-plus', COLOR, function(){ _p16toast('<i class="fas fa-plus"></i> Health claim intake form opened — member eligibility pre-verified via real-time eligibility API', 3500); })
+        + _p16btn('Run AI Triage', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI triage complete — 5 auto-approved, 2 flagged for clinical review, 0 denials. Average processing time: 3.2 minutes.', 4500); })
+        + _p16btn('COB Check', 'fa-exchange-alt', '#0891b2', function(){ _p16toast('<i class="fas fa-exchange-alt"></i> Coordination of Benefits check complete — no duplicate coverage detected across 7 active claims · Subrogation opportunity identified on HC-2203', 4000); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Claim ID','Member','Carrier / Product','Type','Amount','Filed','Status',''])
+        + '<tbody>' + rows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 1 — Eligibility & Enrollment */
+    else if (tab === 1) {
+      var eRows = _p16healthEnroll.map(function(e) {
+        var cobraTag = e.cobra ? '<span style="background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:4px;">COBRA</span>' : '';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + e.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + e.member + cobraTag + '<div style="font-size:10px;color:#6b7280;">Age ' + e.age + ' · ' + e.group + '</div></td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + e.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + e.product + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + e.effective + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(e.status) + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('WealthAI Eligibility Engine processes real-time eligibility verification via 270/271 EDI transactions in < 2 seconds. '
+        + 'Open Enrollment AI assistant is pre-populating 847 member accounts for the Aug 1 effective date. '
+        + 'COBRA administration: 2 members in 60-day election window — automated notices dispatched.')
+        + _p16sectionHdr('fa-user-check', 'Member Eligibility & Enrollment Queue', COLOR)
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">'
+        + _p16kpi('28,200','Active Members','fa-users',COLOR,'Real-time verified')
+        + _p16kpi('847','Open Enrollment','fa-calendar-check','#d97706','Aug 1 effective')
+        + _p16kpi('2','COBRA Members','fa-file-alt','#0891b2','60-day election window')
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Verify Eligibility', 'fa-check-circle', COLOR, function(){ _p16toast('<i class="fas fa-check-circle"></i> Real-time 270/271 EDI eligibility verification submitted — response in 1.8 seconds · All 28,200 members verified active', 4000); })
+        + _p16btn('Open Enrollment', 'fa-calendar-alt', '#d97706', function(){ _p16toast('<i class="fas fa-calendar-alt"></i> Open Enrollment workflow initiated — 847 members in queue · AI pre-populating forms from prior year elections', 3500); })
+        + _p16btn('COBRA Admin', 'fa-file-alt', '#0891b2', function(){ _p16toast('<i class="fas fa-file-alt"></i> COBRA notices sent — Helen Byrne (62 days remaining) · COBRA premium invoice generated · CMS compliance confirmed', 3500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Enroll ID','Member','Carrier','Product','Effective','Status'])
+        + '<tbody>' + eRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 2 — Provider Network */
+    else if (tab === 2) {
+      var pRows = _p16healthProviders.map(function(p) {
+        var fraudColor = p.fraud === 'Low' ? '#059669' : p.fraud === 'Medium' ? '#d97706' : '#dc2626';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + p.npi + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + p.name + '<div style="font-size:10px;color:#6b7280;">' + p.type + ' · ' + p.state + '</div></td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(p.network) + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + p.tier + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + p.claims30 + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + p.billingAcc + '</td>'
+          + '<td style="padding:9px 12px;"><span style="background:' + fraudColor + '18;color:' + fraudColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + p.fraud + '</span></td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Provider Network AI: WealthAI scores 6,200+ in-network providers on billing accuracy, fraud risk, and outcomes quality monthly. '
+        + 'Atlantic Rehab Center flagged Medium fraud risk — billing pattern analysis shows 12% above peer cohort. '
+        + 'Network adequacy: 100% compliance across 4 states. Fee schedule auto-updated Jan 2026.')
+        + _p16sectionHdr('fa-hospital', 'Provider Network — Credentialing & Fraud Monitoring', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Network Adequacy Check', 'fa-map-marker-alt', COLOR, function(){ _p16toast('<i class="fas fa-map-marker-alt"></i> Network adequacy check complete — 100% compliance NY/NJ/CT/PA · 0 access gaps identified · CMS submission ready', 4000); })
+        + _p16btn('Fee Schedule Update', 'fa-dollar-sign', '#059669', function(){ _p16toast('<i class="fas fa-dollar-sign"></i> Fee schedule update queued — 6,240 provider contracts updated to 2026 CMS rates · Effective Aug 1 · EOB repricing initiated', 3500); })
+        + _p16btn('AI Fraud Scan', 'fa-shield-alt', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI fraud scan: 2 providers flagged (Medium) · Atlantic Rehab billing 12% above cohort · SIU referral initiated · $38K potential recovery', 4500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['NPI','Provider / Type / State','Network','Tier','Claims (30d)','Billing Acc.','Fraud Risk'])
+        + '<tbody>' + pRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 3 — Care Management */
+    else if (tab === 3) {
+      var cmRows = _p16careMgmt.map(function(m) {
+        var prioColor = m.priority === 'High' ? '#dc2626' : m.priority === 'Medium' ? '#d97706' : '#059669';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + m.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + m.member + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + m.type + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + m.program + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(m.status) + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + m.rnOwner + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#374151;">' + m.due + '</td>'
+          + '<td style="padding:9px 12px;"><span style="background:' + prioColor + '18;color:' + prioColor + ';border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + m.priority + '</span></td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Care Management AI: Utilization Review bot processes pre-auth requests in < 4 hours (industry avg: 48 hrs). '
+        + 'Predictive model flagged Margaret Kellner (Critical Illness) for proactive case management — 73% readmission risk score. '
+        + 'Disease Management program auto-enrolled 3 members with chronic conditions — projected $180K annual savings.')
+        + _p16sectionHdr('fa-heartbeat', 'Utilization Review · Case Management · Disease Management', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('New Pre-Auth Request', 'fa-clipboard-check', COLOR, function(){ _p16toast('<i class="fas fa-clipboard-check"></i> Pre-authorization intake form opened — clinical criteria loaded · MDGuidelines integrated · Expected decision: 3.8 hrs', 3500); })
+        + _p16btn('AI UR Decision Assist', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-magic"></i> WealthAI UR analysis: CM-504 elective surgery — InterQual criteria met · Auto-approval recommended · Clinical notes pre-populated', 4000); })
+        + _p16btn('DM Program Enroll', 'fa-user-plus', '#059669', function(){ _p16toast('<i class="fas fa-user-plus"></i> Disease Management auto-enrollment: 3 members enrolled in Chronic Disease Mgmt · Nurse coaching schedule set · Member portal access provisioned', 3500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Case ID','Member','Type','Program','Status','RN Owner','Due Date','Priority'])
+        + '<tbody>' + cmRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 4 — Analytics & Reporting */
+    else if (tab === 4) {
+      var metrics = [
+        { label:'Medical Loss Ratio (MLR)', val:'68.4%', target:'≤ 80% (ACA)',  trend:'↓ 2.1% vs Q1', good:true  },
+        { label:'Claim Frequency / 1,000',  val:'278',   target:'< 290',         trend:'↓ 4.2% YoY',   good:true  },
+        { label:'Avg Cost Per Member/Mo',   val:'$503',  target:'< $540 PMPM',   trend:'↓ 1.8% vs Q1', good:true  },
+        { label:'Auto-Adjudication Rate',   val:'97.2%', target:'> 95%',         trend:'↑ 1.4% vs Q1', good:true  },
+        { label:'UR Approval Rate',         val:'91.8%', target:'> 88%',         trend:'↑ 0.6% vs Q1', good:true  },
+        { label:'Network Penetration',      val:'96.1%', target:'> 94%',         trend:'Stable',        good:true  },
+        { label:'HEDIS Composite Score',    val:'87.3',  target:'> 85 (NCQA)',   trend:'↑ 1.2 pts',    good:true  },
+        { label:'Member Satisfaction (NPS)',val:'72',    target:'> 65',          trend:'↑ 3 pts vs Q4', good:true  }
+      ];
+      var mRows = metrics.map(function(m) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#111827;">' + m.label + '</td>'
+          + '<td style="padding:9px 12px;font-size:14px;font-weight:800;color:' + (m.good ? '#059669':'#dc2626') + ';">' + m.val + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + m.target + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:' + (m.good?'#059669':'#dc2626') + ';font-weight:700;">' + m.trend + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Analytics AI: MLR tracking at 68.4% — well below ACA 80% threshold. '
+        + 'Snowflake real-time reporting pipeline processes 180K+ claim events/day. '
+        + 'Carrier dashboards auto-generated weekly — 4 carrier clients on self-service portal. '
+        + 'Predictive model: Q3 projected loss ratio 69.1% ± 1.2% (high confidence).')
+        + _p16sectionHdr('fa-chart-bar', 'Health Operations Analytics — KPI Dashboard', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+        + '<div style="padding:10px 14px;background:#fef2f2;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Generate Carrier Report', 'fa-file-chart-bar', COLOR, function(){ _p16toast('<i class="fas fa-chart-bar"></i> Carrier analytics report generated — MLR 68.4% · Claims summary · Network scorecard · HEDIS measures · PDF ready for download', 4000); })
+        + _p16btn('MLR Compliance Check', 'fa-shield-check', '#059669', function(){ _p16toast('<i class="fas fa-shield-alt"></i> ACA MLR compliance confirmed — 68.4% (Individual) · 72.1% (Group) · Both below statutory thresholds · No rebate obligation', 4000); })
+        + _p16btn('Snowflake Dashboard', 'fa-snowflake', '#0891b2', function(){ _p16toast('<i class="fas fa-snowflake"></i> Snowflake real-time dashboard opened — 180K+ claim events today · 4 carrier self-service portals active · Sub-second query response', 3500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Metric','Current Value','Target','Trend vs Prior Period'])
+        + '<tbody>' + mRows + '</tbody></table></div></div>';
+    }
+
+    var pageHtml = '<div style="padding:22px;background:#f8fafc;min-height:100vh;">'
+      + _p16hdr('fa-heartbeat', 'Health Operations', 'Claims · Eligibility · Provider Network · Care Management · Analytics | 28,200 Members · 4 Carriers', COLOR)
+      + '<div style="padding:20px 22px;background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;margin-bottom:20px;">'
+      + kpiBar
+      + _p16tabs(tabDefs, tab)
+      + body
+      + '</div></div>';
+
+    _p16buildPage('tpl-hal-health', pageHtml);
+  }
+
+  function _p16openHealthClaim(c) {
+    var ovId = 'p16-hclm-ov';
+    var k_close = 'p16-hclm-close-' + Math.random().toString(36).slice(2);
+    var k_pay   = 'p16-hclm-pay-'   + Math.random().toString(36).slice(2);
+    var k_deny  = 'p16-hclm-deny-'  + Math.random().toString(36).slice(2);
+    var k_cob   = 'p16-hclm-cob-'   + Math.random().toString(36).slice(2);
+    window._p8actions[k_close] = function(){ _p16close(ovId); };
+    window._p8actions[k_pay]   = function(){ _p16close(ovId); _p16toast('<i class="fas fa-check-circle"></i> Claim ' + c.id + ' approved — Payment ' + c.amount + ' queued to ' + c.carrier + ' · EOB generated · Member notified via portal', 4000); };
+    window._p8actions[k_deny]  = function(){ _p16close(ovId); _p16toast('<i class="fas fa-times-circle"></i> Claim ' + c.id + ' denied — Adverse determination letter generated · Member appeal rights notice sent · 30-day appeal window opens', 4000); };
+    window._p8actions[k_cob]   = function(){ _p16toast('<i class="fas fa-exchange-alt"></i> COB check: ' + c.member + ' — Primary: ' + c.carrier + ' · No secondary coverage detected · No overpayment risk', 3500); };
+
+    _p16ov(ovId,
+      '<div style="background:#fff;border-radius:14px;width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);">'
+      + '<div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:18px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-file-medical-alt" style="font-size:20px;"></i>'
+      + '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">Health Claim — ' + c.id + '</div>'
+      + '<div style="font-size:11px;opacity:.8;">' + c.member + ' · ' + c.carrier + ' · ' + c.product + '</div></div>'
+      + '<button onclick="_p8run(\'' + k_close + '\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;">✕</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + _p16aiPanel('WealthAI analysis: Claim amount ' + c.amount + ' is within expected range for ' + c.type + ' claim. '
+        + 'No duplicate detected across prior 24 months. COB verification complete. '
+        + 'Auto-approval confidence: 94% — recommend approve.')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">'
+      + [['Claim ID',c.id],['Member',c.member],['Carrier',c.carrier],['Product',c.product],
+         ['Claim Type',c.type],['Amount',c.amount],['Date of Injury',c.doi],['Filed Date',c.filed],['Status',c.status]].map(function(kv){
+           return '<div style="background:#f8fafc;border-radius:8px;padding:10px;border:1px solid #e5e7eb;">'
+             + '<div style="font-size:10px;color:#6b7280;margin-bottom:3px;">' + kv[0] + '</div>'
+             + '<div style="font-size:12px;font-weight:700;color:#111827;">' + kv[1] + '</div></div>';
+         }).join('')
+      + '</div>'
+      + '<div style="display:flex;gap:8px;">'
+      + _p16btn('Approve & Pay', 'fa-check', '#059669', window._p8actions[k_pay])
+      + _p16btn('Deny', 'fa-times', '#dc2626', window._p8actions[k_deny])
+      + _p16btn('COB Check', 'fa-exchange-alt', '#0891b2', window._p8actions[k_cob])
+      + '</div></div></div>'
+    );
+  }
+
+  window._p16navHealthTab = function(t) { _p16buildHealthPage(t); };
+
+  window.initHealthOpsPage = function() {
+    _p16buildHealthPage(0);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 2 — ANNUITY OPERATIONS
+     Tabs: Policy Admin · Income Processing · Compliance · Interest & Crediting · Owner Services
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _p16annuityTab = 0;
+
+  var _p16annuityPolicies = [
+    { id:'ANN-8801', owner:'Robert Feinstein',  carrier:'Pacific Life',  product:'Fixed Annuity 5-yr',    value:'$248,000', premium:'$89K/mo', surrender:'2.5%', maturity:'Mar 2029', status:'Active'  },
+    { id:'ANN-8802', owner:'Gloria Steinfeld',  carrier:'Protective',    product:'FIA Indexed 7-yr',      value:'$412,000', premium:'—',       surrender:'6.0%', maturity:'Oct 2031', status:'Active'  },
+    { id:'ANN-8803', owner:'Martin Kowalczyk',  carrier:'Midland Natl',  product:'Immediate Annuity',     value:'$0',       premium:'$2,100/mo',surrender:'N/A', maturity:'Life',     status:'Active'  },
+    { id:'ANN-8804', owner:'Helen Vasquez',     carrier:'Columbian Life','product':'FIA Indexed 7-yr',    value:'$187,500', premium:'—',       surrender:'7.0%', maturity:'Q3 2026',  status:'Pending' },
+    { id:'ANN-8805', owner:'Thomas Haggerty',   carrier:'Pacific Life',  product:'Variable Annuity',      value:'$634,000', premium:'—',       surrender:'3.0%', maturity:'Ongoing',  status:'Active'  },
+    { id:'ANN-8806', owner:'Dorothy Marchetti', carrier:'Midland Natl',  product:'Fixed Annuity 3-yr',    value:'$95,000',  premium:'—',       surrender:'0%',   maturity:'Jun 2026', status:'Active'  }
+  ];
+
+  var _p16annuityIncome = [
+    { id:'INC-301', owner:'Martin Kowalczyk',  type:'Immediate Annuity Pmt', amount:'$2,100',  freq:'Monthly',    next:'Jul 15, 2026', account:'Chase ****4821', status:'Active'   },
+    { id:'INC-302', owner:'Thomas Haggerty',   type:'Systematic Withdrawal', amount:'$3,500',  freq:'Quarterly',  next:'Oct 1, 2026',  account:'Fidelity IRA',   status:'Active'   },
+    { id:'INC-303', owner:'Robert Feinstein',  type:'RMD Distribution',      amount:'$14,800', freq:'Annual',     next:'Dec 15, 2026', account:'Chase ****7740', status:'Scheduled'},
+    { id:'INC-304', owner:'Dorothy Marchetti', type:'1035 Exchange',          amount:'$95,000', freq:'One-time',   next:'Jul 20, 2026', account:'Pacific Life',   status:'In Progress'},
+    { id:'INC-305', owner:'Gloria Steinfeld',  type:'Free Look Cancellation', amount:'$412,000',freq:'One-time',   next:'—',            account:'Return',         status:'Pending'  }
+  ];
+
+  var _p16annuityComp = [
+    { state:'NY',  product:'FIA',        requirement:'NAIC Suitability + Best Interest',  status:'Compliant', lastAudit:'May 2026', next:'Nov 2026'  },
+    { state:'CA',  product:'VA + FIA',   requirement:'DOI Suitability Form 2180',         status:'Compliant', lastAudit:'Apr 2026', next:'Oct 2026'  },
+    { state:'TX',  product:'Fixed',      requirement:'TDI Disclosure + Suitability',      status:'Compliant', lastAudit:'Mar 2026', next:'Sep 2026'  },
+    { state:'FL',  product:'All',        requirement:'OIR Anti-Twisting + Surrender',     status:'Compliant', lastAudit:'Jun 2026', next:'Dec 2026'  },
+    { state:'Federal','product':'VA',    requirement:'SEC/FINRA Reg 1.2.4 Prospectus',    status:'Compliant', lastAudit:'Jan 2026', next:'Jan 2027'  }
+  ];
+
+  var _p16annuityRates = [
+    { carrier:'Pacific Life',  product:'Fixed 5-yr',       strategy:'Declared Rate',           rate:'5.40%', floor:'0%',    cap:'N/A',  crediting:'Annual',    next:'Jan 2027' },
+    { carrier:'Protective',    product:'FIA 7-yr',         strategy:'S&P 500 Point-to-Point',  rate:'5.75%', floor:'0%',    cap:'10%',  crediting:'Annual',    next:'Jan 2027' },
+    { carrier:'Columbian Life','product':'FIA 7-yr',       strategy:'Monthly Average',          rate:'4.90%', floor:'0%',    cap:'3.5%', crediting:'Monthly',   next:'Jul 2026' },
+    { carrier:'Midland Natl',  product:'Fixed 3-yr',       strategy:'Declared Rate',           rate:'5.10%', floor:'0%',    cap:'N/A',  crediting:'Annual',    next:'Jun 2027' },
+    { carrier:'Pacific Life',  product:'VA Sub-accounts',  strategy:'Market Performance',      rate:'Var',   floor:'-∞',   cap:'∞',    crediting:'Daily NAV', next:'Daily'    }
+  ];
+
+  var _p16annuityOwner = [
+    { polId:'ANN-8801', owner:'Robert Feinstein',  bene:'Margaret Feinstein (spouse, 100%)', qualified:'IRA',      agent:'James Park', commSched:'Trail 0.25%/yr', changeDate:'—'          },
+    { polId:'ANN-8802', owner:'Gloria Steinfeld',  bene:'David Steinfeld (spouse, 50%) · Trust (50%)', qualified:'Non-Qual',  agent:'Sarah Johnson','commSched':'Trail 0.35%/yr', changeDate:'Jan 2026' },
+    { polId:'ANN-8803', owner:'Martin Kowalczyk',  bene:'Estate',                           qualified:'Non-Qual',  agent:'Anna Torres',  commSched:'N/A (immediate)',   changeDate:'—'          },
+    { polId:'ANN-8804', owner:'Helen Vasquez',     bene:'Carlos Vasquez (son, 100%)',        qualified:'IRA',       agent:'Kevin Walsh',  commSched:'Trail 0.25%/yr', changeDate:'—'          },
+    { polId:'ANN-8805', owner:'Thomas Haggerty',   bene:'Rachel Haggerty (daughter, 100%)', qualified:'403(b)',    agent:'Patricia Lang','commSched':'Trail 0.30%/yr', changeDate:'Mar 2026' }
+  ];
+
+  function _p16buildAnnuityPage(tab) {
+    _p16annuityTab = tab;
+    var COLOR = '#d97706';
+    var tabDefs = [
+      ['Policy Administration','fa-file-contract',   'window._p16navAnnuityTab(0)', COLOR],
+      ['Income Processing',    'fa-hand-holding-usd','window._p16navAnnuityTab(1)', COLOR],
+      ['Compliance & Reg.',    'fa-balance-scale',   'window._p16navAnnuityTab(2)', COLOR],
+      ['Interest & Crediting', 'fa-percentage',      'window._p16navAnnuityTab(3)', COLOR],
+      ['Owner Services',       'fa-user-tie',        'window._p16navAnnuityTab(4)', COLOR]
+    ];
+
+    var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+      + _p16kpi('$2.1B', 'Total AUM',             'fa-chart-line',      COLOR,     'In-force annuity contracts')
+      + _p16kpi('4,200', 'Active Contracts',       'fa-file-contract',   COLOR,     'Fixed + Indexed + Variable')
+      + _p16kpi('5.28%', 'Avg Crediting Rate',     'fa-percentage',      '#059669', 'Across all strategies')
+      + _p16kpi('99.2%', 'Income Pmt On-Time',     'fa-check-circle',    '#059669', 'SLA: 100%')
+      + '</div>';
+
+    var body = '';
+
+    /* TAB 0 — Policy Administration */
+    if (tab === 0) {
+      var pRows = _p16annuityPolicies.map(function(p) {
+        var k_open = 'p16-ann-pol-' + p.id + '-' + Math.random().toString(36).slice(2);
+        window._p8actions[k_open] = (function(pol){ return function(){ _p16toast('<i class="fas fa-file-contract"></i> Annuity ' + pol.id + ' opened — ' + pol.owner + ' · ' + pol.product + ' · Current value: ' + pol.value + ' · Surrender charge: ' + pol.surrender, 4000); }; })(p);
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + p.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + p.owner + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.product + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + p.value + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.surrender + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.maturity + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(p.status) + '</td>'
+          + '<td style="padding:9px 12px;"><button onclick="_p8run(\'' + k_open + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">View</button></td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('WealthAI Annuity Intelligence: FIA indexed crediting engine calculated Apr–Jun 2026 S&P 500 point-to-point at +8.2% (cap applied: 10%). '
+        + '1035 Exchange bot initiated INC-304 — carrier transfer instructions generated · COLI/BOLI suitability pre-verified. '
+        + 'Surrender charge matrix updated for Q3 2026 — 3 contracts approaching zero-surrender window.')
+        + _p16sectionHdr('fa-file-contract', 'Annuity Policy Administration — In-Force Contracts', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fffbeb;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('New Contract', 'fa-plus', COLOR, function(){ _p16toast('<i class="fas fa-plus"></i> New annuity contract intake — suitability form pre-populated · NAIC disclosure generated · Agent attestation requested', 3500); })
+        + _p16btn('Free Look Monitor', 'fa-eye', '#0891b2', function(){ _p16toast('<i class="fas fa-eye"></i> Free look tracking: ANN-8802 — 12 days remaining (30-day window) · Surrender cost illustration generated · Agent notified', 3500); })
+        + _p16btn('1035 Exchange', 'fa-exchange-alt', '#059669', function(){ _p16toast('<i class="fas fa-exchange-alt"></i> 1035 Exchange wizard: INC-304 initiated — $95,000 Dorothy Marchetti · Receiving carrier: Pacific Life · Tax-qualified transfer confirmed · ETA: 10 business days', 4000); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Policy ID','Owner','Carrier','Product','Current Value','Surrender','Maturity','Status',''])
+        + '<tbody>' + pRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 1 — Income Processing */
+    else if (tab === 1) {
+      var iRows = _p16annuityIncome.map(function(i) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + i.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + i.owner + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + i.type + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + i.amount + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + i.freq + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + i.next + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + i.account + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(i.status) + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Income Processing AI: RMD calculator auto-updated for 2026 IRS life expectancy tables. '
+        + 'Robert Feinstein RMD = $14,800 (IRA value $412K ÷ 27.8 LE factor). '
+        + 'Cross-product opportunity detected: Feinstein RMD > LTC premium — AI recommending auto-pay LTC premium from RMD distribution (tax-qualified strategy). '
+        + '1099-R generation queued for all 2026 distributions — electronic delivery Jan 31, 2027.')
+        + _p16sectionHdr('fa-hand-holding-usd', 'Income Processing — Withdrawals · RMDs · Exchanges · Annuitization', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fffbeb;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Calculate RMD', 'fa-calculator', COLOR, function(){ _p16toast('<i class="fas fa-calculator"></i> RMD Calculator: Robert Feinstein IRA — 2026 RMD: $14,800 (Dec 15 deadline) · 10% withholding pre-selected · 1099-R queued · State tax: NY 6.85%', 4500); })
+        + _p16btn('Annuitize Contract', 'fa-stream', '#059669', function(){ _p16toast('<i class="fas fa-stream"></i> Annuitization election wizard — Joint & Survivor Life-only illustration generated · Payout options: $2,840/mo (single) · $2,410/mo (J&S 100%) · Irrevocable election form generated', 4000); })
+        + _p16btn('AI Cross-Product Alert', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI: Feinstein RMD ($14,800) > LTC premium ($11,400/yr) — recommend auto-pay LTC from IRA RMD · Tax-qualified deduction eligible · Carrier notification initiated', 4500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Trans ID','Owner','Transaction Type','Amount','Frequency','Next Payment','Account','Status'])
+        + '<tbody>' + iRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 2 — Compliance & Regulatory */
+    else if (tab === 2) {
+      var cRows = _p16annuityComp.map(function(r) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + r.state + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.product + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.requirement + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(r.status) + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.lastAudit + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.next + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Compliance AI: NAIC Best Interest model regulation adopted in 4 states — suitability workflows auto-updated. '
+        + 'DOL Fiduciary Rule (2024 final rule) implemented — all qualified annuity recommendations documented with cost-benefit analysis. '
+        + 'SEC Form PF filing for Variable Annuity sub-accounts — Q2 2026 submission complete. 0 regulatory violations YTD.')
+        + _p16sectionHdr('fa-balance-scale', 'Compliance & Regulatory — State + Federal Monitoring', COLOR)
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">'
+        + _p16kpi('5','Regulatory Frameworks','fa-balance-scale',COLOR,'NAIC · SEC · DOL · State DOI')
+        + _p16kpi('0','Violations YTD','fa-shield-check','#059669','Clean record')
+        + _p16kpi('100%','Suitability Rate','fa-check-circle','#059669','All contracts reviewed')
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fffbeb;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('NAIC Suitability Review', 'fa-clipboard-check', COLOR, function(){ _p16toast('<i class="fas fa-clipboard-check"></i> NAIC Best Interest suitability review complete — 4,200 contracts reviewed · 0 deficiencies · Consumer profile forms archived · Agent attestations on file', 4000); })
+        + _p16btn('DOL Fiduciary Check', 'fa-gavel', '#003087', function(){ _p16toast('<i class="fas fa-gavel"></i> DOL Fiduciary Rule compliance: All IRA/401k annuity recommendations documented · PTE 2020-02 exemption applied · Cost-benefit analysis on file for 847 qualified contracts', 4000); })
+        + _p16btn('SEC/FINRA Filing', 'fa-file-invoice', '#0891b2', function(){ _p16toast('<i class="fas fa-file-invoice"></i> SEC Form PF Q2 2026 submitted — Variable Annuity sub-account assets: $634M · FINRA reporting complete · Prospectus updated Jul 1', 3500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['State / Jurisdiction','Product','Regulatory Requirement','Status','Last Audit','Next Audit'])
+        + '<tbody>' + cRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 3 — Interest & Crediting */
+    else if (tab === 3) {
+      var rRows = _p16annuityRates.map(function(r) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">' + r.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.product + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.strategy + '</td>'
+          + '<td style="padding:9px 12px;font-size:14px;font-weight:800;color:#059669;">' + r.rate + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.floor + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.cap + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.crediting + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.next + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Crediting Rate AI: S&P 500 point-to-point Q2 2026 return = +8.2% — cap applied at 10%, floor 0%. '
+        + 'Columbian FIA monthly average: +4.9% credited Jun 2026. '
+        + 'Rate watch: 10-yr Treasury at 4.62% — AI recommends carrier review declared rates for competitiveness. '
+        + 'Guaranteed minimum crediting: all contracts above GMCR floor — 0 negative crediting events.')
+        + _p16sectionHdr('fa-percentage', 'Interest Crediting — Declared Rates · Index Strategies · Caps & Floors', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fffbeb;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Run Crediting Calc', 'fa-calculator', COLOR, function(){ _p16toast('<i class="fas fa-calculator"></i> Annual crediting calculation complete — S&P 500 P2P: +8.2% (cap: 10%) · Monthly avg: +4.9% · All contracts credited · Policy statements generated', 4000); })
+        + _p16btn('Rate Competitiveness AI', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI rate analysis: Pacific Life 5.40% vs market avg 5.22% — competitive · Protective FIA cap 10% vs market avg 9.5% — above market · No rate action needed Q3 2026', 4500); })
+        + _p16btn('GMCR Audit', 'fa-shield-alt', '#059669', function(){ _p16toast('<i class="fas fa-shield-alt"></i> Guaranteed Minimum Crediting Rate audit complete — 4,200 contracts reviewed · All above GMCR floor · 0 deficiency events · State filing updated', 3500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Carrier','Product','Index Strategy','Current Rate','Floor','Cap','Crediting Period','Next Review'])
+        + '<tbody>' + rRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 4 — Owner Services */
+    else if (tab === 4) {
+      var oRows = _p16annuityOwner.map(function(o) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + o.polId + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + o.owner + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;max-width:220px;">' + o.bene + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + o.qualified + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + o.agent + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + o.commSched + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + o.changeDate + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Owner Services AI: Beneficiary verification bot cross-checks SSDI and DOD mortality databases monthly — 0 deceased beneficiaries on file. '
+        + 'Ownership transfer workflow: ANN-8802 (Gloria Steinfeld → Trust 50%) completed Jan 2026 — QDOT compliance verified. '
+        + '1099-R generation: 3 contracts have 2026 distributions — all queued for Jan 31, 2027 delivery.')
+        + _p16sectionHdr('fa-user-tie', 'Owner Services — Beneficiaries · Ownership · Tax Reporting · Agent Commissions', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#fffbeb;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Beneficiary Update', 'fa-user-edit', COLOR, function(){ _p16toast('<i class="fas fa-user-edit"></i> Beneficiary update workflow — wet signature or DocuSign · State-specific witness requirements auto-populated · QDOT flag for non-citizen spouses', 3500); })
+        + _p16btn('Ownership Transfer', 'fa-handshake', '#003087', function(){ _p16toast('<i class="fas fa-handshake"></i> Ownership transfer workflow — IRC §1035 / §72 analysis · Gift tax implications flagged for attorney review · Carrier notification sent', 3500); })
+        + _p16btn('Generate 1099-R', 'fa-file-invoice-dollar', '#059669', function(){ _p16toast('<i class="fas fa-file-invoice-dollar"></i> 1099-R generation queued for 3 contracts — Box 2a (taxable amount), Box 7 distribution codes assigned · E-delivery Jan 31, 2027 · IRS e-file FIRE system submission', 4000); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Policy ID','Owner','Beneficiary(ies)','Qualified Plan','Agent','Commission Schedule','Last Changed'])
+        + '<tbody>' + oRows + '</tbody></table></div></div>';
+    }
+
+    var pageHtml = '<div style="padding:22px;background:#f8fafc;min-height:100vh;">'
+      + _p16hdr('fa-chart-pie', 'Annuity Operations', 'Policy Admin · Income · Compliance · Crediting · Owner Services | $2.1B AUM · 4,200 Contracts', COLOR)
+      + '<div style="padding:20px 22px;background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;margin-bottom:20px;">'
+      + kpiBar
+      + _p16tabs(tabDefs, tab)
+      + body
+      + '</div></div>';
+
+    _p16buildPage('tpl-hal-annuity', pageHtml);
+  }
+
+  window._p16navAnnuityTab = function(t) { _p16buildAnnuityPage(t); };
+  window.initAnnuityOpsPage = function() { _p16buildAnnuityPage(0); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 3 — LIFE OPERATIONS
+     Tabs: Policy Lifecycle · Claims & Death Benefits · Premium & Billing
+           Reinsurance · Agent & Commission
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _p16lifeTab = 0;
+
+  var _p16lifePolicies = [
+    { id:'LIF-5501', insured:'Edward Kowalski',   carrier:'Lincoln Natl',  product:'Term Life 20-yr',    faceAmt:'$500,000',  premium:'$142/mo', issued:'Jul 2009',  status:'Active',  uw:'Standard Plus' },
+    { id:'LIF-5502', insured:'Patricia Dunmore',  carrier:'CUNA Mutual',   product:'Whole Life — CU',    faceAmt:'$125,000',  premium:'$88/mo',  issued:'Mar 2002',  status:'Active',  uw:'Preferred'     },
+    { id:'LIF-5503', insured:'George Martinez',   carrier:'Pacific Life',  product:'IUL — Indexed UL',   faceAmt:'$750,000',  premium:'$420/mo', issued:'Jan 2019',  status:'Active',  uw:'Preferred Plus'},
+    { id:'LIF-5504', insured:'Helen Vasquez',     carrier:'Lincoln Natl',  product:'Term Life 10-yr',    faceAmt:'$250,000',  premium:'$68/mo',  issued:'Feb 2020',  status:'Active',  uw:'Standard'      },
+    { id:'LIF-5505', insured:'James Whitmore Sr.', carrier:'CUNA Mutual',  product:'AD&D Group',         faceAmt:'$100,000',  premium:'$12/mo',  issued:'Jan 2024',  status:'Active',  uw:'Guaranteed'    },
+    { id:'LIF-5506', insured:'Nancy Kowalczyk',   carrier:'Pacific Life',  product:'VUL — Variable UL',  faceAmt:'$1,000,000',premium:'$850/mo', issued:'Aug 2015',  status:'Active',  uw:'Preferred Plus'},
+    { id:'LIF-5507', insured:'Charles Bennett',   carrier:'Lincoln Natl',  product:'Term Life 20-yr',    faceAmt:'$300,000',  premium:'$0',      issued:'Jun 2012',  status:'Lapsed',  uw:'Standard'      }
+  ];
+
+  var _p16lifeClaims = [
+    { id:'DC-9901', insured:'Arthur Flemming',    carrier:'Lincoln Natl',  amount:'$500,000', type:'Death Benefit',       doi:'Jun 14, 2026', filed:'Jun 20, 2026', status:'In Review',  contestable:false },
+    { id:'DC-9902', insured:'Maria Santos',       carrier:'CUNA Mutual',   amount:'$125,000', type:'Death Benefit',       doi:'May 30, 2026', filed:'Jun 5, 2026',  status:'Approved',   contestable:false },
+    { id:'DC-9903', insured:'Robert Chen',        carrier:'Pacific Life',  amount:'$750,000', type:'ABR — Chronic Illness',doi:'Jun 1, 2026', filed:'Jun 10, 2026', status:'In Review',  contestable:false },
+    { id:'DC-9904', insured:'Sarah Williams',     carrier:'Lincoln Natl',  amount:'$100,000', type:'AD&D',                doi:'Jun 28, 2026', filed:'Jul 1, 2026',  status:'Pending',    contestable:false },
+    { id:'DC-9905', insured:'Frank Romano',       carrier:'CUNA Mutual',   amount:'$300,000', type:'Death Benefit',       doi:'Jan 15, 2026', filed:'Feb 3, 2026',  status:'In Review',  contestable:true  }
+  ];
+
+  var _p16lifePremium = [
+    { polId:'LIF-5501', insured:'Edward Kowalski', mode:'Monthly',   amount:'$142',  nextDue:'Jul 28, 2026', grace:'Sep 28, 2026', method:'ACH ****4821', apl:false, status:'Current' },
+    { polId:'LIF-5503', insured:'George Martinez', mode:'Monthly',   amount:'$420',  nextDue:'Jul 31, 2026', grace:'Sep 30, 2026', method:'CC ****7720',  apl:false, status:'Current' },
+    { polId:'LIF-5506', insured:'Nancy Kowalczyk', mode:'Monthly',   amount:'$850',  nextDue:'Jul 15, 2026', grace:'Sep 15, 2026', method:'ACH ****3310', apl:false, status:'Current' },
+    { polId:'LIF-5507', insured:'Charles Bennett', mode:'(Lapsed)',  amount:'$0',    nextDue:'N/A',           grace:'Expired',       method:'N/A',          apl:true,  status:'Lapsed'  },
+    { polId:'LIF-5504', insured:'Helen Vasquez',   mode:'Monthly',   amount:'$68',   nextDue:'Aug 1, 2026',  grace:'Oct 1, 2026',  method:'ACH ****9901', apl:false, status:'Current' }
+  ];
+
+  var _p16reinsurance = [
+    { treaty:'TRE-401', cedingCarrier:'Lincoln Natl',  reinsurer:'Munich Re',      type:'YRT',          retLimit:'$250K',  cessionPct:'50% excess',  premium:'$184K/mo', status:'Active'   },
+    { treaty:'TRE-402', cedingCarrier:'CUNA Mutual',   reinsurer:'Swiss Re',       type:'Coinsurance',  retLimit:'$100K',  cessionPct:'70%',          premium:'$92K/mo',  status:'Active'   },
+    { treaty:'TRE-403', cedingCarrier:'Pacific Life',  reinsurer:'RGA',            type:'Modified Coin',retLimit:'$500K',  cessionPct:'60% excess',  premium:'$318K/mo', status:'Active'   },
+    { treaty:'TRE-404', cedingCarrier:'Lincoln Natl',  reinsurer:'General Re',     type:'Facultative',  retLimit:'Ad hoc', cessionPct:'Case-by-case', premium:'Varies',   status:'Active'   }
+  ];
+
+  var _p16lifeAgents = [
+    { id:'AGT-201', name:'James Park, RN/Agent', carrier:'Lincoln Natl',  contract:'Career Agent',  license:'NY/NJ/CT', ytdPrem:'$284K', ytdComm:'$28,400', chargebacks:'$0',   tier:'Gold'   },
+    { id:'AGT-202', name:'Sarah Johnson',        carrier:'CUNA Mutual',   contract:'Broker/GA',     license:'NY/NJ',    ytdPrem:'$196K', ytdComm:'$19,600', chargebacks:'$1,200',tier:'Silver' },
+    { id:'AGT-203', name:'Patricia Lang',        carrier:'Pacific Life',  contract:'Career Agent',  license:'NY/CT/MA', ytdPrem:'$412K', ytdComm:'$41,200', chargebacks:'$0',   tier:'Platinum'},
+    { id:'AGT-204', name:'Kevin Walsh',          carrier:'Lincoln Natl',  contract:'Independent',   license:'NY',       ytdPrem:'$88K',  ytdComm:'$8,800',  chargebacks:'$420', tier:'Bronze' }
+  ];
+
+  function _p16buildLifePage(tab) {
+    _p16lifeTab = tab;
+    var COLOR = '#059669';
+    var tabDefs = [
+      ['Policy Lifecycle',    'fa-file-contract',    'window._p16navLifeTab(0)', COLOR],
+      ['Claims & Benefits',   'fa-file-medical',     'window._p16navLifeTab(1)', COLOR],
+      ['Premium & Billing',   'fa-credit-card',      'window._p16navLifeTab(2)', COLOR],
+      ['Reinsurance',         'fa-network-wired',    'window._p16navLifeTab(3)', COLOR],
+      ['Agent & Commission',  'fa-user-tie',         'window._p16navLifeTab(4)', COLOR]
+    ];
+
+    var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+      + _p16kpi('53,000',  'Life Policies In-Force', 'fa-shield-heart',  COLOR,     'Term · WL · UL · VUL · AD&D')
+      + _p16kpi('$1.98B',  'Total Face Amount',      'fa-dollar-sign',   COLOR,     'Across all product types')
+      + _p16kpi('$850K/mo','Gross Premium',          'fa-chart-line',    '#d97706', '3 carrier contracts')
+      + _p16kpi('99.4%',   'Premium Collection Rate','fa-check-circle',  '#059669', 'SLA: > 99%')
+      + '</div>';
+
+    var body = '';
+
+    /* TAB 0 — Policy Lifecycle */
+    if (tab === 0) {
+      var polRows = _p16lifePolicies.map(function(p) {
+        var k_open = 'p16-lif-pol-' + p.id + '-' + Math.random().toString(36).slice(2);
+        window._p8actions[k_open] = (function(pol){ return function(){
+          _p16toast('<i class="fas fa-shield-heart"></i> Life Policy ' + pol.id + ' — ' + pol.insured + ' · ' + pol.product + ' · Face: ' + pol.faceAmt + ' · UW Class: ' + pol.uw + ' · Status: ' + pol.status, 4000);
+        }; })(p);
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + p.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + p.insured + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.product + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + p.faceAmt + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.premium + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#6b7280;">' + p.issued + '</td>'
+          + '<td style="padding:9px 12px;font-size:10px;color:#6b7280;">' + p.uw + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(p.status) + '</td>'
+          + '<td style="padding:9px 12px;"><button onclick="_p8run(\'' + k_open + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;">View</button></td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Policy Lifecycle AI: LIF-5507 (Charles Bennett Term) lapsed Jun 2026 — reinstatement window: 5 years with evidence of insurability. '
+        + 'ABR trigger scan: LIF-5503 George Martinez IUL has chronic illness ABR rider — LTC crossover opportunity flagged. '
+        + 'UW queue: 0 pending — all 7 active policies fully underwritten. '
+        + 'Term conversion opportunities: LIF-5501 (Edward Kowalski) term expires Jul 2029 — AI pre-built conversion illustration to Permanent.')
+        + _p16sectionHdr('fa-file-contract', 'Life Insurance Policy Lifecycle — In-Force & Pipeline', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('New Application', 'fa-plus', COLOR, function(){ _p16toast('<i class="fas fa-plus"></i> Life application intake — UW questionnaire pre-populated · APS request generated · MIB check initiated · Lab requisition sent', 3500); })
+        + _p16btn('Term Conversion', 'fa-exchange-alt', '#d97706', function(){ _p16toast('<i class="fas fa-exchange-alt"></i> Term conversion illustration: LIF-5501 Edward Kowalski · Permanent options: WL ($142→$284/mo) · UL ($142→$198/mo) · IUL ($142→$221/mo) · No new UW required', 4500); })
+        + _p16btn('Reinstate Lapsed', 'fa-redo', '#0891b2', function(){ _p16toast('<i class="fas fa-redo"></i> Reinstatement workflow: LIF-5507 Charles Bennett · EOI required (within 5 years) · Back-premium: $0 (lapse <60 days) · Health declaration form generated', 3500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Policy ID','Insured','Carrier','Product','Face Amount','Premium','Issued','UW Class','Status',''])
+        + '<tbody>' + polRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 1 — Claims & Death Benefits */
+    else if (tab === 1) {
+      var dcRows = _p16lifeClaims.map(function(c) {
+        var contTag = c.contestable ? '<span style="background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:4px;">CONTEST</span>' : '';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + c.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + c.insured + contTag + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + c.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + c.amount + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + c.type + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + c.doi + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + c.filed + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(c.status) + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Death Benefit AI: DC-9903 (Robert Chen — ABR Chronic Illness) is a critical LTC crossover case — '
+        + 'Pacific Life IUL with ABR rider triggered by qualifying chronic illness. '
+        + 'WealthAI cross-referencing LTC policy database: Chen has no LTC policy — AI flagging for LTC enrollment opportunity. '
+        + 'DC-9905 (Frank Romano) — contestability period: 2-year window · Filed 19 days after DOI · Claim documentation request sent.')
+        + _p16sectionHdr('fa-file-medical', 'Life Claims — Death Benefits · ABR Triggers · AD&D · Contestability', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('New Death Claim', 'fa-plus', COLOR, function(){ _p16toast('<i class="fas fa-plus"></i> Death claim intake — beneficiary verification initiated · SSDI cross-reference · Death certificate request sent · 2-year contestability check: Auto-cleared', 3500); })
+        + _p16btn('ABR Trigger Review', 'fa-hospital', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> ABR Trigger: DC-9903 Robert Chen — Chronic illness ADL deficiency confirmed (3/6 ADLs) · LTC crossover: No LTC policy on file · ABR benefit election: $3,500/mo accelerated · LTC enrollment offer generated', 4500); })
+        + _p16btn('Contestability Review', 'fa-search', '#d97706', function(){ _p16toast('<i class="fas fa-search"></i> Contestability review: DC-9905 Frank Romano — Policy in 2-year window · APS requested · MIB check initiated · SIU referral: Low risk score 22/100 · Expected resolution: 30 days', 4500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Claim ID','Insured','Carrier','Amount','Type','Date of Death','Filed','Status'])
+        + '<tbody>' + dcRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 2 — Premium & Billing */
+    else if (tab === 2) {
+      var prRows = _p16lifePremium.map(function(p) {
+        var aplTag = p.apl ? '<span style="background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;">APL</span>' : '';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + p.polId + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + p.insured + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.mode + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + p.amount + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.nextDue + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#dc2626;">' + p.grace + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + p.method + ' ' + aplTag + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(p.status) + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Premium AI: ACH payment processing 99.4% on-time rate. LIF-5507 lapsed — APL exhausted Jun 2026. '
+        + 'Grace period monitor: 0 policies currently in grace. '
+        + 'Modal premium optimizer: IUL/VUL policies re-calculated quarterly for TAMRA/MEC compliance — all within 7-pay limits. '
+        + 'Dividend processing: CUNA Mutual participating policies — 2026 dividend: $2,140 credited to LIF-5502 (paid-up additions election).')
+        + _p16sectionHdr('fa-credit-card', 'Premium & Billing — Collection · Grace Periods · APL · Dividends', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Process Billing Run', 'fa-credit-card', COLOR, function(){ _p16toast('<i class="fas fa-credit-card"></i> Monthly billing run complete — 4 ACH payments processed · $1,480 total collected · 0 NSF returns · Bank reconciliation: Balanced', 3500); })
+        + _p16btn('Grace Period Alert', 'fa-bell', '#d97706', function(){ _p16toast('<i class="fas fa-bell"></i> Grace period monitor: 0 policies in grace · Last lapse: LIF-5507 Jun 2026 · Next potential grace: LIF-5504 (Aug 1 due) — reminder sent', 3500); })
+        + _p16btn('Dividend Calculation', 'fa-percentage', '#0891b2', function(){ _p16toast('<i class="fas fa-percentage"></i> 2026 Dividend: CUNA Mutual participating policies — LIF-5502: $2,140 (paid-up additions) · LIF-5505: $320 (reduce premium) · Total: $2,460 · Dividend notice generated', 4000); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Policy ID','Insured','Mode','Amount','Next Due','Grace Exp.','Payment Method','Status'])
+        + '<tbody>' + prRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 3 — Reinsurance */
+    else if (tab === 3) {
+      var reiRows = _p16reinsurance.map(function(r) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + r.treaty + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;">' + r.cedingCarrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#003087;">' + r.reinsurer + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.type + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.retLimit + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.cessionPct + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + r.premium + '</td>'
+          + '<td style="padding:9px 12px;">' + _p16statusBadge(r.status) + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Reinsurance AI: Quarterly cession report generated — $594K/mo total reinsurance premium across 3 treaties. '
+        + 'Retention limit optimization: Munich Re YRT — current retention $250K vs optimal $275K (per WealthAI mortality model). '
+        + 'Facultative submission TRE-404: 2 cases pending — Lincoln Natl jumbo policies >$2M face. '
+        + 'SAP reserve calculation: Coinsurance treaty TRE-402 — modified coinsurance adjustment computed for Q2 statutory filing.')
+        + _p16sectionHdr('fa-network-wired', 'Reinsurance — Treaty Management · Cession Reports · Retention Limits', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Cession Report Q2', 'fa-file-chart-bar', COLOR, function(){ _p16toast('<i class="fas fa-chart-bar"></i> Q2 2026 Cession Report — $594K/mo gross reinsurance premium · Munich Re: $184K · Swiss Re: $92K · RGA: $318K · Treaty compliance: 100%', 4000); })
+        + _p16btn('Retention Optimizer', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI retention optimization: Lincoln Natl retention at $250K — raise to $275K saves $28K/mo in YRT premium · Mortality risk increase: +0.8% (within tolerance) · Actuarial approval recommended', 4500); })
+        + _p16btn('Facultative Submission', 'fa-paper-plane', '#0891b2', function(){ _p16toast('<i class="fas fa-paper-plane"></i> Facultative reinsurance: 2 jumbo cases submitted to General Re · Policy A: $2.8M face · Policy B: $3.1M face · UW info package sent · Expected quote: 5 business days', 4000); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Treaty','Ceding Carrier','Reinsurer','Type','Retention Limit','Cession','Monthly Premium','Status'])
+        + '<tbody>' + reiRows + '</tbody></table></div></div>';
+    }
+
+    /* TAB 4 — Agent & Commission */
+    else if (tab === 4) {
+      var agRows = _p16lifeAgents.map(function(a) {
+        var tierColor = { 'Platinum':'#7c3aed','Gold':'#d97706','Silver':'#6b7280','Bronze':'#92400e' };
+        var tc = tierColor[a.tier] || '#6b7280';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + a.id + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + a.name + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + a.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + a.contract + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + a.license + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + a.ytdPrem + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;">' + a.ytdComm + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#dc2626;">' + a.chargebacks + '</td>'
+          + '<td style="padding:9px 12px;"><span style="background:' + tc + '18;color:' + tc + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:800;">' + a.tier + '</span></td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Commission AI: YTD total commissions: $98,000 across 4 agents. Patricia Lang (Platinum) leads at $41,200 — on track for $80K annual bonus tier. '
+        + 'Chargeback monitor: AGT-202 Sarah Johnson — $1,200 chargeback from lapsed policy (LIF-5507) · Offset against Jul commission run. '
+        + 'License expiry alert: AGT-204 Kevin Walsh NY license expires Sep 2026 — renewal CE requirements: 15 hrs outstanding.')
+        + _p16sectionHdr('fa-user-tie', 'Agent & Commission Management — Licensing · Commission · Chargebacks', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">'
+        + '<div style="padding:10px 14px;background:#f0fdf4;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Commission Run', 'fa-dollar-sign', COLOR, function(){ _p16toast('<i class="fas fa-dollar-sign"></i> July commission run: Patricia Lang $3,433 · James Park $2,367 · Sarah Johnson $1,238 (less $1,200 chargeback) · Kevin Walsh $733 · Total: $7,771 · ACH initiated', 4500); })
+        + _p16btn('License Expiry Alert', 'fa-id-badge', '#d97706', function(){ _p16toast('<i class="fas fa-id-badge"></i> License alert: Kevin Walsh NY license expires Sep 15, 2026 · 15 CE hours outstanding · CE provider links sent · Deadline: 30 days pre-expiry · New business suspended if not renewed', 4500); })
+        + _p16btn('AI Performance Report', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI agent performance: Patricia Lang on track for Platinum bonus ($10K) · AGT-202 lapse rate 3.2% (above 2% threshold) — retention coaching recommended · Cross-sell opportunity: 12 clients without LTC coverage', 4500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Agent ID','Name','Carrier','Contract','License States','YTD Premium','YTD Commission','Chargebacks','Tier'])
+        + '<tbody>' + agRows + '</tbody></table></div></div>';
+    }
+
+    var pageHtml = '<div style="padding:22px;background:#f8fafc;min-height:100vh;">'
+      + _p16hdr('fa-shield-heart', 'Life Operations', 'Policy Lifecycle · Claims · Premium · Reinsurance · Agent Commissions | 53,000 Policies · $1.98B Face Amount', COLOR)
+      + '<div style="padding:20px 22px;background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;margin-bottom:20px;">'
+      + kpiBar
+      + _p16tabs(tabDefs, tab)
+      + body
+      + '</div></div>';
+
+    _p16buildPage('tpl-hal-life', pageHtml);
+  }
+
+  window._p16navLifeTab = function(t) { _p16buildLifePage(t); };
+  window.initLifeOpsPage = function() { _p16buildLifePage(0); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PAGE 4 — CLIENT 360 SIMULATOR
+     Tabs: Client Profile · Cross-Product Events · AI Opportunities
+           Carrier Revenue View · Prospect Pitch Mode
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _p16c360Tab = 0;
+  var _p16pitchMode = false;
+
+  /* Simulated composite client */
+  var _p16client = {
+    name: 'Margaret Chen',
+    age: 68,
+    dob: 'Mar 14, 1958',
+    ssn: '***-**-4821',
+    address: '142 Riverside Drive, New York, NY 10024',
+    phone: '(212) 555-0182',
+    email: 'margaret.chen@email.com',
+    agent: 'Patricia Lang, CLU, ChFC',
+    carrier: 'Pacific Life (Primary) + MassMutual + AmeriLife',
+    health: {
+      polId:'HLT-4401', product:'Medicare Supplement Plan G', carrier:'AmeriLife', premium:'$312/mo', effective:'Jan 2022', status:'Active'
+    },
+    annuity: {
+      polId:'ANN-4401', product:'FIA Indexed 7-yr', carrier:'Pacific Life', value:'$412,000', effective:'Apr 2019', status:'Active', strategy:'S&P 500 P2P, 10% cap'
+    },
+    life: {
+      polId:'LIF-4401', product:'IUL with Chronic Illness ABR', carrier:'Pacific Life', faceAmt:'$750,000', premium:'$420/mo', effective:'Jan 2019', status:'Active', abr:'$3,500/mo chronic illness'
+    },
+    ltc: {
+      polId:'LTC-4401', product:'LTC Traditional Policy', carrier:'MassMutual', benefit:'$8,500/mo', ep:'90 days', status:'Active', adl:'ADL threshold: 2/6'
+    }
+  };
+
+  /* Timeline events */
+  var _p16events = [
+    { date:'Jan 2022', type:'Health', icon:'fa-heartbeat',     color:'#dc2626', event:'Medicare Supplement Plan G enrolled at age 65 — illumifin administers AmeriLife block · Claims processing initiated' },
+    { date:'Apr 2019', type:'Annuity',icon:'fa-chart-pie',     color:'#d97706', event:'Pacific Life FIA 7-yr issued · $412,000 premium · illumifin administers contract · S&P 500 indexed strategy elected' },
+    { date:'Jan 2019', type:'Life',   icon:'fa-shield-heart',  color:'#059669', event:'Pacific Life IUL with Chronic Illness ABR issued · $750,000 face · illumifin administers Life + ABR rider in single platform' },
+    { date:'Sep 2018', type:'LTC',    icon:'fa-user-nurse',    color:'#003087', event:'MassMutual LTC policy issued · $8,500/mo benefit · illumifin LTC TPA · 90-day EP · 2/6 ADL trigger' },
+    { date:'Jun 2026', type:'Cross',  icon:'fa-bolt',          color:'#7c3aed', event:'⚡ CROSS-PRODUCT EVENT: Margaret diagnosed with early-stage dementia — triggers simultaneous actions across all 4 product lines (see AI Opportunities tab)' },
+    { date:'Jun 2026', type:'LTC',    icon:'fa-file-medical-alt',color:'#003087',event:'LTC claim opened — ADL assessment scheduled · MMSE score 19/30 (moderate impairment) · 90-day EP clock started' },
+    { date:'Jun 2026', type:'Life',   icon:'fa-hospital',      color:'#059669', event:'IUL ABR trigger reviewed — Chronic Illness rider: 2 ADL deficiencies confirmed · ABR benefit election: $3,500/mo accelerated · Face amount reduced accordingly' },
+    { date:'Jun 2026', type:'Annuity',icon:'fa-calculator',    color:'#d97706', event:'RMD + LTC premium cross-product AI: FIA contract value $412K · RMD 2026: $14,800 · LTC annual premium $11,400 — AI recommends RMD auto-pay to LTC · Tax-qualified strategy' },
+    { date:'Jul 2026', type:'Health', icon:'fa-stethoscope',   color:'#dc2626', event:'Med Supp COB check: Margaret entering SNF — Medicare Part A primary · Med Supp Plan G covers skilled nursing co-insurance $200/day (days 21-100)' }
+  ];
+
+  /* AI opportunity items */
+  var _p16aiOpps = [
+    { title:'Chronic Illness Early Warning',   products:'Life + LTC + Health', priority:'Critical', color:'#dc2626',
+      detail:'WealthAI detected MMSE decline signals 8 months before formal diagnosis via claim pattern analysis. '
+           + 'Triggered proactive LTC pre-qualification, ABR readiness review, and Med Supp care coordination simultaneously. '
+           + 'illumifin advantage: Single system sees all 4 product lines — no manual handoff between siloed vendors.' },
+    { title:'RMD → LTC Premium Auto-Pay',      products:'Annuity + LTC',       priority:'High',     color:'#d97706',
+      detail:'IRS Sec. 7702B qualified LTC premiums can be paid from IRA/annuity RMD distributions on a tax-advantaged basis. '
+           + 'Margaret\'s 2026 RMD ($14,800) > LTC annual premium ($11,400) — AI auto-routes RMD excess to LTC premium. '
+           + 'Result: $11,400 LTC premium effectively tax-deductible via QCD mechanism. Unique to illumifin cross-product admin.' },
+    { title:'ABR + LTC Benefit Coordination',  products:'Life + LTC',           priority:'High',     color:'#059669',
+      detail:'Margaret is receiving: LTC benefit $8,500/mo + ABR acceleration $3,500/mo = $12,000/mo total. '
+           + 'IRS offset rule: ABR reduces LTC per diem exclusion — WealthAI calculates optimal drawdown order to maximize tax exclusion. '
+           + 'illumifin administers both simultaneously — competitor vendors cannot coordinate this.' },
+    { title:'Unified COB — Med Supp + LTC',    products:'Health + LTC',         priority:'Medium',   color:'#0891b2',
+      detail:'Medicare primary, Med Supp Plan G secondary, LTC tertiary (facility benefit). '
+           + 'WealthAI COB engine calculates exact patient responsibility at each care setting transition (home → SNF → memory care). '
+           + 'Prevents $0 benefit gaps and double-dipping — compliance with Medicare as secondary payer rules.' },
+    { title:'Lapse Risk — Cross-Line Scoring',  products:'All 4 Lines',          priority:'Medium',   color:'#7c3aed',
+      detail:'ML model scores lapse probability across all 4 held policies simultaneously. '
+           + 'Margaret profile: Low lapse risk (score: 8/100) — all 4 policies with same admin platform drives retention. '
+           + 'Carrier benefit: Clients holding 4+ lines with illumifin have 4.2x lower lapse rate vs. single-line clients.' },
+    { title:'Mortality + LTC Drawdown Optimizer',products:'Life + LTC',          priority:'Low',      color:'#6b7280',
+      detail:'If LTC benefits exhaust before death, Life policy death benefit ensures estate plan intact. '
+           + 'WealthAI models optimal benefit drawdown order given care cost projections, life expectancy, and policy reserve status. '
+           + 'Projects estate value preservation of $340K–$680K depending on drawdown strategy. Output: Client-facing financial plan.' }
+  ];
+
+  function _p16buildC360Page(tab) {
+    _p16c360Tab = tab;
+    var COLOR = '#7c3aed';
+    var cl = _p16client;
+    var pitch = _p16pitchMode;
+    var tabDefs = [
+      ['Client Profile',       'fa-user-circle',     'window._p16navC360Tab(0)', COLOR],
+      ['Cross-Product Events', 'fa-bolt',            'window._p16navC360Tab(1)', COLOR],
+      ['AI Opportunities',     'fa-robot',           'window._p16navC360Tab(2)', COLOR],
+      ['Carrier Revenue View', 'fa-chart-line',      'window._p16navC360Tab(3)', COLOR],
+      ['Prospect Pitch Mode',  'fa-bullseye',        'window._p16navC360Tab(4)', COLOR]
+    ];
+
+    var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+      + _p16kpi('4', 'Product Lines Active', 'fa-layer-group', COLOR, 'H + A + L + LTC')
+      + _p16kpi('$1.65M', 'Total Policy Value', 'fa-dollar-sign', '#059669', 'Face + AUM + Benefits')
+      + _p16kpi('$1,570/mo', 'Total Premium', 'fa-credit-card', '#d97706', 'Across all 4 lines')
+      + _p16kpi('June 2026', 'Last Cross-Event', 'fa-bolt', '#dc2626', 'Dementia diagnosis → 4-line trigger')
+      + '</div>';
+
+    var body = '';
+
+    /* TAB 0 — Client Profile */
+    if (tab === 0) {
+      var productCard = function(icon, label, pol) {
+        return '<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e5e7eb;">'
+          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
+          + '<i class="fas ' + icon + '" style="color:' + COLOR + ';"></i>'
+          + '<span style="font-size:12px;font-weight:800;color:#111827;">' + label + '</span>'
+          + _p16statusBadge(pol.status) + '</div>'
+          + Object.keys(pol).filter(function(k){ return k !== 'status'; }).map(function(k){
+              var labels = { polId:'Policy ID', product:'Product', carrier:'Carrier', premium:'Premium', effective:'Effective',
+                             value:'Current Value', strategy:'Index Strategy', faceAmt:'Face Amount', abr:'ABR Rider',
+                             benefit:'Monthly Benefit', ep:'Elimination Period', adl:'ADL Trigger' };
+              return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;font-size:11px;">'
+                + '<span style="color:#6b7280;">' + (labels[k]||k) + '</span>'
+                + '<span style="font-weight:700;color:#111827;">' + pol[k] + '</span></div>';
+            }).join('')
+          + '</div>';
+      };
+
+      body = _p16aiPanel('Client 360 AI: Margaret Chen holds all 4 product lines administered by illumifin. '
+        + 'Combined relationship value: $1.65M in policies + $412K AUM + $8,500/mo LTC benefit. '
+        + 'WealthAI profile confidence: High (all 4 data feeds synchronized in real-time). '
+        + 'Next AI action: June 2026 dementia diagnosis triggers coordinated response across all 4 systems simultaneously.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">'
+        + '<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-user-circle" style="color:' + COLOR + ';margin-right:6px;"></i>Client Profile</div>'
+        + [['Name', cl.name], ['Age', cl.age + ' · DOB: ' + cl.dob], ['Address', cl.address], ['Phone', cl.phone], ['Email', cl.email], ['Agent', cl.agent], ['Carriers', cl.carrier]].map(function(kv){
+            return '<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:11px;">'
+              + '<span style="color:#6b7280;min-width:70px;">' + kv[0] + '</span>'
+              + '<span style="font-weight:700;color:#111827;">' + kv[1] + '</span></div>';
+          }).join('')
+        + '</div>'
+        + '<div>'
+        + productCard('fa-heartbeat',    'Health — Medicare Supplement',  cl.health)
+        + '</div></div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">'
+        + productCard('fa-chart-pie',    'Annuity — FIA',                 cl.annuity)
+        + productCard('fa-shield-heart', 'Life — IUL with ABR',           cl.life)
+        + productCard('fa-user-nurse',   'LTC — Traditional Policy',      cl.ltc)
+        + '</div>';
+    }
+
+    /* TAB 1 — Cross-Product Events */
+    else if (tab === 1) {
+      body = _p16aiPanel('Cross-Product Event Engine: June 2026 dementia diagnosis triggered simultaneous automated responses across 4 product lines in < 15 minutes. '
+        + 'illumifin\'s unified data model enabled: LTC claim intake + ABR trigger review + RMD cross-payment analysis + Med Supp COB — all without a single manual handoff. '
+        + 'Estimated manual coordination time with siloed vendors: 4–6 weeks. illumifin time: 15 minutes.')
+        + '<div style="position:relative;padding-left:24px;">'
+        + '<div style="position:absolute;left:7px;top:0;bottom:0;width:2px;background:#e5e7eb;"></div>'
+        + _p16events.map(function(e) {
+            return '<div style="position:relative;margin-bottom:16px;">'
+              + '<div style="position:absolute;left:-20px;top:3px;width:14px;height:14px;border-radius:50%;background:' + e.color + ';border:2px solid #fff;box-shadow:0 0 0 2px ' + e.color + ';"></div>'
+              + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;">'
+              + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+              + '<span style="background:' + e.color + '18;color:' + e.color + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">' + e.type + '</span>'
+              + '<span style="font-size:11px;color:#6b7280;">' + e.date + '</span>'
+              + '<i class="fas ' + e.icon + '" style="color:' + e.color + ';margin-left:auto;"></i>'
+              + '</div>'
+              + '<div style="font-size:12px;color:#374151;line-height:1.6;">' + e.event + '</div>'
+              + '</div></div>';
+          }).join('')
+        + '</div>';
+    }
+
+    /* TAB 2 — AI Opportunities */
+    else if (tab === 2) {
+      body = _p16aiPanel('WealthAI identified 6 cross-product optimization opportunities for Margaret Chen — projected $340K–$680K in estate value preservation, '
+        + '$11,400/yr tax savings (RMD→LTC strategy), and 4.2x higher policy retention vs. single-line clients. '
+        + 'These opportunities are ONLY available through illumifin\'s unified cross-product platform.')
+        + _p16aiOpps.map(function(o) {
+            var prioColor = { 'Critical':'#dc2626','High':'#d97706','Medium':'#0891b2','Low':'#6b7280' };
+            var pc = prioColor[o.priority] || '#6b7280';
+            return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">'
+              + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+              + '<div style="width:36px;height:36px;border-radius:8px;background:' + o.color + '18;display:flex;align-items:center;justify-content:center;">'
+              + '<i class="fas fa-robot" style="color:' + o.color + ';"></i></div>'
+              + '<div style="flex:1;">'
+              + '<div style="font-size:13px;font-weight:800;color:#111827;">' + o.title + '</div>'
+              + '<div style="font-size:11px;color:#6b7280;">' + o.products + '</div></div>'
+              + '<span style="background:' + pc + '18;color:' + pc + ';border-radius:4px;padding:3px 10px;font-size:10px;font-weight:800;">' + o.priority + '</span>'
+              + '</div>'
+              + '<div style="font-size:12px;color:#374151;line-height:1.65;background:#f8fafc;border-radius:8px;padding:10px;">' + o.detail + '</div>'
+              + '</div>';
+          }).join('');
+    }
+
+    /* TAB 3 — Carrier Revenue View */
+    else if (tab === 3) {
+      var revenueRows = [
+        { line:'Health (Med Supp Plan G)', carrier:'AmeriLife', polCount:1, premium:'$312/mo', adminFee:'$18.7/mo',  retained:'$6,740/yr',   growth:'↑ renewal' },
+        { line:'Annuity (FIA 7-yr)',       carrier:'Pacific Life', polCount:1, premium:'Trail', adminFee:'$2,060/yr', retained:'$2,060/yr',  growth:'↑ crediting yr 7' },
+        { line:'Life (IUL + ABR)',         carrier:'Pacific Life', polCount:1, premium:'$420/mo', adminFee:'$25.2/mo',retained:'$9,072/yr',  growth:'↑ UL COI' },
+        { line:'LTC (Traditional)',        carrier:'MassMutual',   polCount:1, premium:'$950/mo', adminFee:'$57/mo',  retained:'$20,520/yr', growth:'Stable' }
+      ];
+      var revRows = revenueRows.map(function(r) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + r.line + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;text-align:center;">' + r.polCount + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + r.premium + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:' + COLOR + ';">' + r.adminFee + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#059669;">' + r.retained + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#059669;">' + r.growth + '</td>'
+          + '</tr>';
+      }).join('');
+      body = _p16aiPanel('Revenue Intelligence: Margaret Chen generates $38,392/yr in illumifin administration revenue across 4 product lines. '
+        + 'Carrier value: Single client relationship worth $1.65M in policy value across 3 carriers — all retained through illumifin\'s unified platform. '
+        + 'illumifin margin: ~22% blended admin fee margin. '
+        + 'Expansion opportunity: If carriers use illumifin for all 4 lines, admin revenue per client increases 3.8x vs. LTC-only relationship.')
+        + _p16sectionHdr('fa-chart-line', 'Carrier Revenue View — Administration Revenue per Client', COLOR)
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">'
+        + _p16kpi('$38,392/yr','illumifin Admin Revenue','fa-dollar-sign',COLOR,'Margaret Chen · All 4 lines')
+        + _p16kpi('3.8x','Revenue vs. LTC-Only','fa-chart-bar','#059669','Cross-product multiplier')
+        + _p16kpi('4.2x','Retention Rate Lift','fa-shield-alt','#003087','vs. single-line clients')
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Product Line','Carrier','Policies','Premium','illumifin Admin Fee','Annual Retained Revenue','Growth Driver'])
+        + '<tbody>' + revRows + '</tbody></table></div></div>'
+        + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:16px;color:#fff;">'
+        + '<div style="font-size:12px;font-weight:800;color:#60a5fa;margin-bottom:8px;"><i class="fas fa-lightbulb" style="margin-right:6px;"></i>CARRIER PITCH INSIGHT</div>'
+        + '<div style="font-size:12px;color:#e2e8f0;line-height:1.7;">'
+        + 'A carrier currently using illumifin only for LTC earns <strong style="color:#fbbf24;">$10,100/yr</strong> in admin revenue per cross-product eligible client. '
+        + 'By migrating Health + Annuity + Life to illumifin, that grows to <strong style="color:#34d399;">$38,392/yr</strong> per client — a <strong style="color:#a78bfa;">3.8x increase</strong>. '
+        + 'For a carrier with 10,000 such clients, this represents <strong style="color:#f472b6;">$283M in incremental TPA revenue</strong> for illumifin — and for the carrier: unified reporting, AI COB, lapse reduction, and zero inter-vendor reconciliation overhead.'
+        + '</div></div>';
+    }
+
+    /* TAB 4 — Prospect Pitch Mode */
+    else if (tab === 4) {
+      var k_toggle = 'p16-c360-pitch-toggle-' + Math.random().toString(36).slice(2);
+      window._p8actions[k_toggle] = function() {
+        _p16pitchMode = !_p16pitchMode;
+        _p16buildC360Page(4);
+      };
+
+      var scenarios = [
+        { carrier:'Nationwide', current:'LTC Only', potential:'LTC + Health + Annuity', clients:8400,  ltcRev:'$8.4M', fullRev:'$32.3M', delta:'+$23.9M', probability:'High'   },
+        { carrier:'USAA',       current:'None',      potential:'All 4 Lines (Hybrid)',   clients:3200,  ltcRev:'—',     fullRev:'$12.3M', delta:'+$12.3M', probability:'Medium' },
+        { carrier:'Cigna',      current:'Health',    potential:'Health + LTC + Life',    clients:12000, ltcRev:'—',     fullRev:'$46.1M', delta:'+$46.1M', probability:'High'   },
+        { carrier:'Protective', current:'Annuity',   potential:'Annuity + LTC + Life',   clients:5600,  ltcRev:'—',     fullRev:'$21.5M', delta:'+$21.5M', probability:'High'   },
+        { carrier:'Acadian',    current:'None',      potential:'LTC Standalone',         clients:900,   ltcRev:'—',     fullRev:'$2.9M',  delta:'+$2.9M',  probability:'Low'    }
+      ];
+
+      var scRows = scenarios.map(function(s) {
+        var prioColor = { 'High':'#059669','Medium':'#d97706','Low':'#6b7280' };
+        var pc = prioColor[s.probability] || '#6b7280';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#003087;">' + s.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + s.current + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + s.potential + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;text-align:right;">' + s.clients.toLocaleString() + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#6b7280;text-align:right;">' + s.ltcRev + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;text-align:right;">' + s.fullRev + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#7c3aed;text-align:right;">' + s.delta + '</td>'
+          + '<td style="padding:9px 12px;"><span style="background:' + pc + '18;color:' + pc + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">' + s.probability + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      body = '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:20px;color:#fff;margin-bottom:20px;">'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+        + '<div style="width:48px;height:48px;border-radius:12px;background:rgba(124,58,237,.3);display:flex;align-items:center;justify-content:center;">'
+        + '<i class="fas fa-bullseye" style="font-size:24px;color:#a78bfa;"></i></div>'
+        + '<div><div style="font-size:18px;font-weight:800;">Prospect Pitch Mode</div>'
+        + '<div style="font-size:12px;opacity:.8;">Show carriers what they\'re leaving on the table by using siloed administrators</div></div>'
+        + '<button onclick="_p8run(\'' + k_toggle + '\')" style="margin-left:auto;background:' + (_p16pitchMode?'#059669':'#7c3aed') + ';border:none;color:#fff;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;">'
+        + (_p16pitchMode ? '<i class="fas fa-toggle-on" style="margin-right:6px;"></i>PITCH MODE ON' : '<i class="fas fa-toggle-off" style="margin-right:6px;"></i>PITCH MODE OFF')
+        + '</button></div>'
+        + '<div style="font-size:13px;color:#e2e8f0;line-height:1.7;background:rgba(255,255,255,.05);border-radius:8px;padding:14px;">'
+        + 'illumifin\'s HAL + LTC unified platform is the only administrator that can handle all 4 product lines on a <strong style="color:#fbbf24;">single data model</strong> — enabling cross-product AI, real-time COB, and linked-benefit product administration that no point-solution competitor can replicate. '
+        + 'The Margaret Chen scenario demonstrates: A carrier with 10,000 similar clients generates <strong style="color:#34d399;">$383M in annual admin revenue for illumifin</strong> vs. $101M if LTC-only. '
+        + 'The prospect pitch: <em>"You\'re paying 3 vendors. We\'ll give you 1 platform, AI across all lines, and 4.2x client retention."</em>'
+        + '</div></div>'
+        + _p16sectionHdr('fa-chart-bar', 'Carrier Opportunity Scenarios — Cross-Product Revenue Potential', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+        + '<div style="padding:10px 14px;background:#faf5ff;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;">'
+        + _p16btn('Generate Carrier Deck', 'fa-presentation', COLOR, function(){ _p16toast('<i class="fas fa-file-powerpoint"></i> Carrier pitch deck generated — Margaret Chen scenario · 12-slide executive presentation · ROI model · Cross-product AI demo · PDF + PowerPoint ready', 4000); })
+        + _p16btn('Schedule Demo', 'fa-calendar-check', '#059669', function(){ _p16toast('<i class="fas fa-calendar-check"></i> Live platform demo scheduled — Nationwide: Jul 15 · USAA: Jul 20 · Cigna: Jul 22 · WealthAI cross-product simulation pre-loaded · Agenda sent to carrier contacts', 4000); })
+        + _p16btn('AI Revenue Model', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI revenue model: Total pipeline opportunity across 5 prospects = $106.7M in incremental annual admin revenue for illumifin · Cigna highest value ($46.1M) · Recommend Cigna as priority 1 pursuit', 4500); })
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Carrier','Current illumifin','Potential Scope','Eligible Clients','LTC-Only Rev.','Full HAL+LTC Rev.','Incremental Delta','Probability'])
+        + '<tbody>' + scRows + '</tbody></table></div></div>';
+    }
+
+    var hdrBg = _p16pitchMode && tab === 4
+      ? 'linear-gradient(135deg,#0f172a,#1e3a5f)'
+      : 'linear-gradient(135deg,#7c3aed,#6d28d9)';
+
+    var pageHtml = '<div style="padding:22px;background:#f8fafc;min-height:100vh;">'
+      + '<div style="background:' + hdrBg + ';padding:18px 22px;border-radius:12px 12px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas fa-users-viewfinder" style="font-size:22px;"></i>'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:18px;font-weight:800;">Client 360 Simulator — Margaret Chen, Age 68</div>'
+      + '<div style="font-size:11px;opacity:.82;">Health + Annuity + Life + LTC | All 4 lines on illumifin\'s unified platform | $1.65M total policy value</div>'
+      + '</div></div>'
+      + '<div style="padding:20px 22px;background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;margin-bottom:20px;">'
+      + kpiBar
+      + _p16tabs(tabDefs, tab)
+      + body
+      + '</div></div>';
+
+    _p16buildPage('tpl-hal-client360', pageHtml);
+  }
+
+  window._p16navC360Tab = function(t) { _p16buildC360Page(t); };
+  window.initClient360Page = function() { _p16buildC360Page(0); };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ROUTING — Extend navigateTo for 4 new HAL pages
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _origNav_p16 = navigateTo;
+  navigateTo = function(page) {
+    _origNav_p16(page);
+    var titleEl = document.getElementById('page-title');
+    var bcEl    = document.getElementById('page-breadcrumb');
+
+    if (page === 'hal-health') {
+      if (titleEl) titleEl.textContent = 'Health Operations';
+      if (bcEl)    bcEl.textContent    = 'HAL Operations / Health';
+      requestAnimationFrame(function(){ setTimeout(window.initHealthOpsPage, 80); });
+    }
+    if (page === 'hal-annuity') {
+      if (titleEl) titleEl.textContent = 'Annuity Operations';
+      if (bcEl)    bcEl.textContent    = 'HAL Operations / Annuity';
+      requestAnimationFrame(function(){ setTimeout(window.initAnnuityOpsPage, 80); });
+    }
+    if (page === 'hal-life') {
+      if (titleEl) titleEl.textContent = 'Life Operations';
+      if (bcEl)    bcEl.textContent    = 'HAL Operations / Life';
+      requestAnimationFrame(function(){ setTimeout(window.initLifeOpsPage, 80); });
+    }
+    if (page === 'hal-client360') {
+      if (titleEl) titleEl.textContent = 'Client 360 Simulator';
+      if (bcEl)    bcEl.textContent    = 'HAL Operations / Client 360';
+      requestAnimationFrame(function(){ setTimeout(window.initClient360Page, 80); });
+    }
+  };
+
+  console.log('[Phase 16] HAL Operations loaded — Health Operations (5 tabs) · Annuity Operations (5 tabs) · Life Operations (5 tabs) · Client 360 Simulator (5 tabs)');
+
+})();
