@@ -81458,6 +81458,50 @@ function _p27analyticsTab(){
   }
   html+='</div></div>';
   html+='</div>';
+
+  /* ─── Adjuster Performance Metrics ─── */
+  var adjusters=[
+    {name:'Priya Nair',id:'ADJ-1041',team:'LTC Primary',openClaims:24,slaOnTime:94,aiAdoption:89,avgResolutionDays:12.4,csat:4.7,escRate:3.2,specialties:['Memory Care','Hospice']},
+    {name:'Marcus Webb',id:'ADJ-1028',team:'HAL Platform',openClaims:31,slaOnTime:87,aiAdoption:76,avgResolutionDays:15.1,csat:4.3,escRate:5.8,specialties:['Post-Acute','Rehab']},
+    {name:'Samantha Cruz',id:'ADJ-1055',team:'LTC Complex',openClaims:18,slaOnTime:97,aiAdoption:94,avgResolutionDays:9.8,csat:4.9,escRate:1.4,specialties:['Hybrid Products','Fraud']},
+    {name:'Derek Osei',id:'ADJ-1063',team:'HAL Platform',openClaims:27,slaOnTime:82,aiAdoption:68,avgResolutionDays:18.3,csat:4.1,escRate:7.2,specialties:['Home Health','DME']},
+    {name:'Linda Yamamura',id:'ADJ-1077',team:'LTC Primary',openClaims:21,slaOnTime:91,aiAdoption:83,avgResolutionDays:13.7,csat:4.5,escRate:4.1,specialties:['ALF','CCRC']},
+  ];
+  html+='<div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-top:20px;overflow:hidden">';
+  html+='<div style="background:linear-gradient(135deg,#164e63,#0891b2);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px">'
+    +'<i class="fas fa-user-tie" style="font-size:16px"></i>'
+    +'<span style="font-weight:700;font-size:14px">Adjuster Performance Metrics — CIH Impact</span>'
+    +'<span style="margin-left:auto;background:rgba(255,255,255,.18);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700">'+adjusters.length+' Adjusters</span>'
+    +'</div>';
+  html+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html+='<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0">';
+  ['Adjuster','Team','Open Claims','SLA On-Time','AI Adoption','Avg Resolution','CSAT','Escalation Rate','Specialties'].forEach(function(h2){
+    html+='<th style="padding:10px 14px;text-align:left;font-size:11px;color:#64748b;font-weight:700;white-space:nowrap">'+h2+'</th>';
+  });
+  html+='</tr></thead><tbody>';
+  adjusters.forEach(function(adj,idx2){
+    var slaColor=adj.slaOnTime>=95?'#16a34a':adj.slaOnTime>=85?'#d97706':'#dc2626';
+    var aiColor=adj.aiAdoption>=85?'#0891b2':adj.aiAdoption>=70?'#d97706':'#94a3b8';
+    var escColor=adj.escRate<=3?'#16a34a':adj.escRate<=6?'#d97706':'#dc2626';
+    html+='<tr style="border-bottom:1px solid #f1f5f9;background:'+(idx2%2===0?'#fff':'#f8fafc')+'">';
+    html+='<td style="padding:10px 14px"><div style="font-weight:700;color:#1e293b">'+adj.name+'</div><div style="font-size:10px;color:#94a3b8">'+adj.id+'</div></td>';
+    html+='<td style="padding:10px 14px"><span style="background:#e0f2fe;color:#0891b2;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600">'+adj.team+'</span></td>';
+    html+='<td style="padding:10px 14px;font-weight:600;color:#334155;text-align:center">'+adj.openClaims+'</td>';
+    html+='<td style="padding:10px 14px"><div style="background:#f1f5f9;border-radius:10px;height:6px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px"><div style="background:'+slaColor+';width:'+adj.slaOnTime+'%;height:100%;border-radius:10px"></div></div><span style="color:'+slaColor+';font-weight:700">'+adj.slaOnTime+'%</span></td>';
+    html+='<td style="padding:10px 14px"><div style="background:#f1f5f9;border-radius:10px;height:6px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px"><div style="background:'+aiColor+';width:'+adj.aiAdoption+'%;height:100%;border-radius:10px"></div></div><span style="color:'+aiColor+';font-weight:700">'+adj.aiAdoption+'%</span></td>';
+    html+='<td style="padding:10px 14px;color:#334155;text-align:center">'+adj.avgResolutionDays+' days</td>';
+    html+='<td style="padding:10px 14px"><span style="color:#d97706;font-size:13px">&#9733;</span> <span style="font-weight:700;color:#334155">'+adj.csat+'</span></td>';
+    html+='<td style="padding:10px 14px;font-weight:700;color:'+escColor+'">'+adj.escRate+'%</td>';
+    html+='<td style="padding:10px 14px">'+adj.specialties.map(function(s){return '<span style="background:#f0f9ff;color:#0369a1;font-size:10px;padding:2px 7px;border-radius:8px;margin-right:3px;font-weight:500">'+s+'</span>';}).join('')+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  html+='<div style="padding:12px 20px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:20px;flex-wrap:wrap">';
+  [['#16a34a','SLA ≥95% — Top Performer'],['#d97706','SLA 85-94% — Meets Standard'],['#dc2626','SLA <85% — Needs Coaching'],['#0891b2','AI Adoption ≥85% — Power User']].forEach(function(leg){
+    html+='<span style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+leg[0]+'"></span>'+leg[1]+'</span>';
+  });
+  html+='</div></div>';
+
   return html;
 }
 
@@ -81659,6 +81703,7 @@ var navigateTo = window.navigateTo;
       +_p28tab('fraudDetection','fa-exclamation-triangle','Fraud Detection')
       +_p28tab('siuWorkbench','fa-user-secret','SIU Workbench')
       +_p28tab('analytics','fa-chart-bar','Analytics & ROI')
+      +_p28tab('epManagement','fa-calendar-check','EP Management')
       +'</div>'
       +'<div id="p28-tab-content" style="padding:28px 32px">'
       +_p28renderTab()
@@ -81687,6 +81732,7 @@ var navigateTo = window.navigateTo;
     if(_p28activeTab==='fraudDetection') return _p28fraudDetectionTab();
     if(_p28activeTab==='siuWorkbench') return _p28siuWorkbenchTab();
     if(_p28activeTab==='analytics') return _p28analyticsTab();
+    if(_p28activeTab==='epManagement') return _p28epManagementTab();
     return '';
   }
 
@@ -82288,6 +82334,169 @@ var navigateTo = window.navigateTo;
   }
 
 
+
+  /* ─── EP Management Tab ─── */
+  var _p28epCases=[
+    {id:'EP-2024-3001',claimant:'Margaret Holloway',age:79,carrier:'MassMutual',product:'LTC Standalone',epDay:47,epLimit:90,dailyBenefit:220,coveredDays:43,pendingDays:4,diagCode:'G35',diagLabel:'Multiple Sclerosis',mcareEnrolled:true,coStatus:'Active COB',provider:'Sunrise Home Health',dispute:false,status:'Active',alert:'EP day 47 — 43 days remaining before benefit exhaustion'},
+    {id:'EP-2024-3002',claimant:'Robert Chambers',age:84,carrier:'Genworth',product:'LTC Standalone',epDay:82,epLimit:100,dailyBenefit:185,coveredDays:80,pendingDays:2,diagCode:'F01.51',diagLabel:'Vascular Dementia w/ behavioral dist.',mcareEnrolled:true,coStatus:'Active COB',provider:'Prestige Memory Care',dispute:true,status:'Dispute',alert:'EP day 82 — dispute filed on 5 covered days · Medicare COB pending reconciliation'},
+    {id:'EP-2024-3003',claimant:'Dorothy Vasquez',age:76,carrier:'Transamerica',product:'LTC/HAL Hybrid',epDay:12,epLimit:90,dailyBenefit:260,coveredDays:12,pendingDays:0,diagCode:'M19.90',diagLabel:'Osteoarthritis — hip/knee',mcareEnrolled:false,coStatus:'Not Enrolled',provider:'Harbor View Rehab',dispute:false,status:'Active',alert:'Medicare enrollment gap — assess eligibility and Part A/B retroactive enrollment'},
+    {id:'EP-2024-3004',claimant:'Harold Simmons',age:82,carrier:'MassMutual',product:'HAL Platform',epDay:31,epLimit:60,dailyBenefit:195,coveredDays:29,pendingDays:2,diagCode:'I69.351',diagLabel:'Hemiplegia — post CVA',mcareEnrolled:true,coStatus:'Secondary Payor',provider:'WellPath Nursing',dispute:false,status:'Active',alert:'Progressive condition: CVA — schedule RN reassessment for benefit level review by EP day 45'},
+    {id:'EP-2024-3005',claimant:'Eleanor Kaufman',age:88,carrier:'NYL',product:'LTC Standalone',epDay:90,epLimit:90,dailyBenefit:310,coveredDays:88,pendingDays:2,diagCode:'G30.9',diagLabel:"Alzheimer's Disease",mcareEnrolled:true,coStatus:'Primary Payor',provider:'Sunrise Memory Care',dispute:false,status:'Exhausted',alert:'EP EXHAUSTED — transition to continuation of care coordination. Last 2 days pending reconciliation.'},
+    {id:'EP-2024-3006',claimant:'James Whitmore',age:71,carrier:'Lincoln Financial',product:'HAL Platform',epDay:5,epLimit:60,dailyBenefit:230,coveredDays:5,pendingDays:0,diagCode:'S72.001A',diagLabel:'Femur fracture — acute',mcareEnrolled:true,coStatus:'Primary Payor',provider:'OrthoPlus Rehab',dispute:false,status:'Active',alert:'New EP opened — schedule initial RN assessment within 10 days per policy SLA'},
+    {id:'EP-2024-3007',claimant:'Sylvia Hartman',age:80,carrier:'Prudential',product:'LTC/HAL Hybrid',epDay:58,epLimit:90,dailyBenefit:175,coveredDays:55,pendingDays:3,diagCode:'J44.1',diagLabel:'COPD — severe exacerbation',mcareEnrolled:true,coStatus:'Active COB',provider:'RespiraCare Home Health',dispute:true,status:'Dispute',alert:'Dispute on EP days 52-54 — provider billed for non-covered respiratory therapy modality'},
+  ];
+
+  var _p28epActive=null;
+
+  window._p28epViewCase=function(id){
+    _p28epActive=(_p28epActive===id)?null:id;
+    window._p28switchTab('epManagement');
+  };
+
+  window._p28epResolveDispute=function(id){
+    _p28toast('<i class="fas fa-check-circle"></i> Dispute on '+id+' submitted for supervisor review · Expected resolution 2-3 business days · Reference: DISP-'+id+'-'+new Date().getFullYear(),4000);
+  };
+  window._p28epScheduleRN=function(id){
+    _p28toast('<i class="fas fa-user-nurse"></i> RN telephonic assessment scheduled for '+id+' · Confirmation sent to provider and claimant · Ref: RN-'+id+'-JUL26',3500);
+  };
+  window._p28epMcareCOB=function(id){
+    _p28toast('<i class="fas fa-id-card"></i> Medicare COB reconciliation initiated for '+id+' · CMS eligibility query submitted · 48-hr response window · Ref: COB-'+id,3500);
+  };
+
+  function _p28epManagementTab(){
+    var CAA=CA1;
+    var active=_p28epCases.filter(function(c){return c.status==='Active';}).length;
+    var dispute=_p28epCases.filter(function(c){return c.dispute;}).length;
+    var exhausted=_p28epCases.filter(function(c){return c.status==='Exhausted';}).length;
+    var avgEpPct=Math.round(_p28epCases.reduce(function(a,c){return a+(c.epDay/c.epLimit*100);},0)/_p28epCases.length);
+    var html='<div>';
+
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">';
+    [[active,'Active EPs','fa-calendar-check',CA1],
+     [dispute,'Open Disputes','fa-gavel','#d97706'],
+     [exhausted,'EP Exhausted','fa-calendar-times','#dc2626'],
+     [avgEpPct+'%','Avg EP Utilization','fa-chart-pie','#0891b2']
+    ].forEach(function(m){
+      html+='<div style="background:#fff;border-radius:12px;padding:16px 20px;border:1px solid #fee2e2;box-shadow:0 1px 4px rgba(0,0,0,.04)">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<i class="fas '+m[2]+'" style="color:'+m[3]+';font-size:20px"></i>'
+        +'<div>'
+        +'<div style="font-size:22px;font-weight:800;color:'+m[3]+'">'+m[0]+'</div>'
+        +'<div style="font-size:11px;color:#94a3b8;font-weight:600">'+m[1]+'</div>'
+        +'</div></div></div>';
+    });
+    html+='</div>';
+
+    html+='<div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:center">'
+      +'<i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:18px;flex-shrink:0"></i>'
+      +'<div><div style="font-weight:700;color:#92400e;font-size:13px">EP Compliance Reminders</div>'
+      +'<div style="font-size:12px;color:#78350f;margin-top:3px">NAIC Model 641 requires EP day tracking within \u00b11 day accuracy \u00b7 RN telephonic assessments must be conducted by EP day 10 for all new cases \u00b7 Disputes must be acknowledged within 5 business days \u00b7 Medicare COB must be reconciled quarterly for dual-eligible claimants</div>'
+      +'</div></div>';
+
+    html+='<div style="background:#fff;border-radius:12px;border:1px solid #fee2e2;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)">';
+    html+='<div style="padding:16px 20px;background:linear-gradient(135deg,'+CA3+',#991b1b);color:#fff;display:flex;align-items:center;gap:10px">'
+      +'<i class="fas fa-calendar-check" style="font-size:16px"></i>'
+      +'<span style="font-weight:700;font-size:14px">Elimination Period Case Register</span>'
+      +'<span style="margin-left:auto;background:rgba(255,255,255,.18);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700">'+_p28epCases.length+' Cases</span>'
+      +'</div>';
+
+    _p28epCases.forEach(function(c){
+      var pct=Math.round(c.epDay/c.epLimit*100);
+      var barColor=pct>=90?'#dc2626':pct>=70?'#d97706':'#16a34a';
+      var isOpen=_p28epActive===c.id;
+      var statusColor=c.status==='Active'?'#16a34a':c.status==='Dispute'?'#d97706':'#dc2626';
+      var statusBg=c.status==='Active'?'#f0fdf4':c.status==='Dispute'?'#fffbeb':'#fef2f2';
+
+      html+='<div style="border-bottom:1px solid #f8fafc">';
+      html+='<div onclick="window._p28epViewCase(\''
+        +c.id
+        +'\')" style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:background .15s" '
+        +'onmouseover="this.style.background=\'#fef2f2\'" onmouseout="this.style.background=\'#fff\'">';
+      html+='<div style="flex:0 0 120px">'
+        +'<div style="font-weight:700;font-size:12px;color:'+CA1+'">'+c.id+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+c.carrier+'</div>'
+        +'</div>';
+      html+='<div style="flex:1">'
+        +'<div style="font-weight:600;font-size:13px;color:#1e293b">'+c.claimant+', '+c.age+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+c.diagLabel+' &nbsp;&middot;&nbsp; '+c.provider+'</div>'
+        +'</div>';
+      html+='<div style="flex:0 0 200px">'
+        +'<div style="display:flex;justify-content:space-between;font-size:10px;color:#64748b;margin-bottom:3px">'
+        +'<span>EP Day '+c.epDay+'/'+c.epLimit+'</span><span style="color:'+barColor+';font-weight:700">'+pct+'%</span></div>'
+        +'<div style="background:#f1f5f9;border-radius:4px;height:6px;overflow:hidden">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:4px;transition:width .3s"></div>'
+        +'</div></div>';
+      html+='<span style="background:'+statusBg+';color:'+statusColor+';font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;white-space:nowrap">'+c.status+'</span>';
+      if(c.dispute) html+='<i class="fas fa-gavel" style="color:#d97706;font-size:14px" title="Open Dispute"></i>';
+      if(c.mcareEnrolled) html+='<i class="fas fa-id-card" style="color:#0891b2;font-size:14px" title="Medicare Enrolled"></i>';
+      html+='<i class="fas fa-chevron-'+( isOpen?'up':'down')+'" style="color:#94a3b8;font-size:12px"></i>';
+      html+='</div>';
+
+      if(isOpen){
+        html+='<div style="background:#f8fafc;border-top:1px solid #f1f5f9;padding:18px 24px">';
+        html+='<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">'
+          +'<i class="fas fa-bell" style="color:'+CA1+';margin-top:1px;flex-shrink:0"></i>'
+          +'<span style="font-size:12px;color:#7f1d1d;font-weight:500">'+c.alert+'</span></div>';
+        html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">';
+        [
+          ['Daily Benefit','$'+c.dailyBenefit+'/day','fa-dollar-sign'],
+          ['Covered Days',c.coveredDays+' confirmed · '+c.pendingDays+' pending','fa-calendar'],
+          ['Diagnosis',c.diagCode+' — '+c.diagLabel,'fa-stethoscope'],
+          ['Product Line',c.product,'fa-tag'],
+          ['Medicare Status',c.mcareEnrolled?'Enrolled':'Not Enrolled','fa-id-card'],
+          ['COB Status',c.coStatus,'fa-link']
+        ].forEach(function(d){
+          html+='<div style="background:#fff;border-radius:8px;padding:12px 14px;border:1px solid #e2e8f0">'
+            +'<div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">'
+            +'<i class="fas '+d[2]+'" style="margin-right:4px"></i>'+d[0]+'</div>'
+            +'<div style="font-weight:600;font-size:13px;color:#1e293b">'+d[1]+'</div>'
+            +'</div>';
+        });
+        html+='</div>';
+        html+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
+        html+='<button onclick="window._p28epScheduleRN(\''
+          +c.id+'\')" style="padding:9px 18px;background:'+CA1+';color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-user-nurse" style="margin-right:6px"></i>Schedule RN Assessment</button>';
+        if(c.mcareEnrolled){
+          html+='<button onclick="window._p28epMcareCOB(\''
+            +c.id+'\')" style="padding:9px 18px;background:#0891b2;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-id-card" style="margin-right:6px"></i>Medicare COB Reconcile</button>';
+        }
+        if(c.dispute){
+          html+='<button onclick="window._p28epResolveDispute(\''
+            +c.id+'\')" style="padding:9px 18px;background:#d97706;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-gavel" style="margin-right:6px"></i>Submit Dispute for Review</button>';
+        }
+        html+='</div>';
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+
+    html+='</div>';
+
+    html+='<div style="background:#fff;border-radius:12px;border:1px solid #fee2e2;margin-top:24px;overflow:hidden">';
+    html+='<div style="padding:14px 20px;background:'+CA1+';color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-heartbeat"></i> Progressive Condition Reassessment Queue</div>';
+    html+='<div style="padding:16px 20px">';
+    var progressive=_p28epCases.filter(function(c){return c.status==='Active'&&c.epDay>20;});
+    progressive.forEach(function(c){
+      var daysLeft=c.epLimit-c.epDay;
+      html+='<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid #f1f5f9">'
+        +'<div style="background:#fef2f2;border-radius:8px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<i class="fas fa-heartbeat" style="color:'+CA1+';font-size:18px"></i></div>'
+        +'<div style="flex:1">'
+        +'<div style="font-weight:600;font-size:13px">'+c.claimant+'  <span style="font-size:11px;color:#64748b">'+c.diagCode+' — '+c.diagLabel+'</span></div>'
+        +'<div style="font-size:11px;color:#94a3b8;margin-top:2px">EP Day '+c.epDay+' · '+daysLeft+' days remaining · '+c.provider+'</div>'
+        +'</div>'
+        +'<button onclick="window._p28epScheduleRN(\''
+        +c.id+'\')" style="padding:7px 14px;background:#fef2f2;border:1px solid #fecaca;color:'+CA1+';border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">'
+        +'<i class="fas fa-user-nurse" style="margin-right:4px"></i>Schedule Reassessment</button>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
   /* ═══════════════════════════════════════════════════════════════════
      NAV INTERCEPT
   ═══════════════════════════════════════════════════════════════════ */
@@ -82310,4 +82519,686 @@ var navigateTo = window.navigateTo;
   console.log('[HAL CAID] Phase 28 Claims Analytics Intelligence & Fraud Detection loaded — 15 claims, 8 fraud signals, 6 SIU cases, 6 ML models');
 })();
 /* P28 fix: re-expose window.navigateTo to bare global */
+var navigateTo=window.navigateTo;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 29 — HAL RATE INTELLIGENCE & RESERVE MANAGEMENT DASHBOARD (RIMD)
+   Nav: hal-rimd  |  Badge: RIMD  |  Color: #7c3aed (violet/purple)
+   Tabs: Rate Overview · State Filings · Policyholder Impact · Reserve Analytics · Reinsurance
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function(){ 'use strict';
+
+  /* ── Brand palette ── */
+  var R1='#7c3aed'; var R2='#8b5cf6'; var R3='#4c1d95';
+  var R4='#f5f3ff'; var RG='#16a34a'; var RR='#dc2626'; var RA='#d97706';
+
+  /* ── Module state ── */
+  var _p29activeTab='overview';
+  var _p29activeState=null;
+  var _p29simPrem=0;
+  var _p29simIncrease=25;
+
+  /* ══════════════════════════════════════════════════════
+     DATA: In-Force Block Portfolio
+  ══════════════════════════════════════════════════════ */
+  var _p29blocks=[
+    {id:'BLK-001',carrier:'New York Life',policyYears:'1995–2005',activePolicies:18420,avgAge:77,avgDailyBenefit:195,avgBenefitPeriod:'5yr',claimsOnBenefit:2840,lossRatio:118,premiumInForce:24600000,annualClaims:29100000,reserveBalance:412000000,reserveAdequacy:'Deficient',rateIncreaseApproved:32,rateIncreasePending:18,nextReviewDate:'2026-Q3',reinsurer:'Fortitude Re',reinsCeded:0.35,morbidityTrend:+2.1,lapseRate:1.2,mortalityImprovement:-0.8},
+    {id:'BLK-002',carrier:'John Hancock',policyYears:'1998–2008',activePolicies:14780,avgAge:74,avgDailyBenefit:220,avgBenefitPeriod:'Unlimited',claimsOnBenefit:1960,lossRatio:131,premiumInForce:19800000,annualClaims:25940000,reserveBalance:388000000,reserveAdequacy:'Severely Deficient',rateIncreaseApproved:45,rateIncreasePending:25,nextReviewDate:'2026-Q2',reinsurer:'Wilton Re',reinsCeded:0.42,morbidityTrend:+3.4,lapseRate:0.9,mortalityImprovement:-1.1},
+    {id:'BLK-003',carrier:'MetLife',policyYears:'2000–2010',activePolicies:11240,avgAge:71,avgDailyBenefit:175,avgBenefitPeriod:'3yr',claimsOnBenefit:980,lossRatio:94,premiumInForce:16100000,annualClaims:15130000,reserveBalance:276000000,reserveAdequacy:'Adequate',rateIncreaseApproved:15,rateIncreasePending:8,nextReviewDate:'2027-Q1',reinsurer:'None',reinsCeded:0,morbidityTrend:+1.2,lapseRate:1.8,mortalityImprovement:-0.5},
+    {id:'BLK-004',carrier:'Prudential',policyYears:'2001–2012',activePolicies:8960,avgAge:69,avgDailyBenefit:210,avgBenefitPeriod:'4yr',claimsOnBenefit:620,lossRatio:88,premiumInForce:13400000,annualClaims:11790000,reserveBalance:198000000,reserveAdequacy:'Adequate',rateIncreaseApproved:10,rateIncreasePending:0,nextReviewDate:'2027-Q2',reinsurer:'Swiss Re',reinsCeded:0.20,morbidityTrend:+0.8,lapseRate:2.1,mortalityImprovement:-0.3},
+    {id:'BLK-005',carrier:'Lincoln Financial',policyYears:'2003–2013',activePolicies:6180,avgAge:67,avgDailyBenefit:180,avgBenefitPeriod:'5yr',claimsOnBenefit:310,lossRatio:79,premiumInForce:9200000,annualClaims:7268000,reserveBalance:142000000,reserveAdequacy:'Well Funded',rateIncreaseApproved:0,rateIncreasePending:0,nextReviewDate:'2028-Q1',reinsurer:'None',reinsCeded:0,morbidityTrend:+0.4,lapseRate:2.6,mortalityImprovement:-0.2},
+    {id:'BLK-006',carrier:'Travelers',policyYears:'2005–2015',activePolicies:4220,avgAge:64,avgDailyBenefit:160,avgBenefitPeriod:'3yr',claimsOnBenefit:180,lossRatio:72,premiumInForce:6100000,annualClaims:4392000,reserveBalance:98000000,reserveAdequacy:'Well Funded',rateIncreaseApproved:0,rateIncreasePending:0,nextReviewDate:'2028-Q3',reinsurer:'None',reinsCeded:0,morbidityTrend:+0.2,lapseRate:3.1,mortalityImprovement:-0.1}
+  ];
+
+  /* ══════════════════════════════════════════════════════
+     DATA: State Filing Tracker
+  ══════════════════════════════════════════════════════ */
+  var _p29stateFilings=[
+    {state:'FL',stateName:'Florida',carrier:'John Hancock',block:'BLK-002',requestedIncrease:45,approvedIncrease:38,filingDate:'2025-09-12',approvalDate:'2026-01-28',status:'Approved',regulatoryContact:'FL OIR — LTC Division',notes:'Multi-state NAIC framework filing. FL approved 38% vs 45% requested. Effective 2026-04-01.',effectiveDate:'2026-04-01',policyholderCount:2140,annualPremiumImpact:1820000,daysInReview:138},
+    {state:'CA',stateName:'California',carrier:'New York Life',block:'BLK-001',requestedIncrease:32,approvedIncrease:null,filingDate:'2025-11-03',approvalDate:null,status:'Under Review',regulatoryContact:'CA CDI — Health Policy Bureau',notes:'CA historically limits increases. Initial comment period closed. Actuarial hearing scheduled 2026-Q3.',effectiveDate:null,policyholderCount:3280,annualPremiumImpact:2640000,daysInReview:249},
+    {state:'NY',stateName:'New York',carrier:'John Hancock',block:'BLK-002',requestedIncrease:45,approvedIncrease:null,filingDate:'2025-08-20',approvalDate:null,status:'Objection Filed',regulatoryContact:'NY DFS — Life Bureau',notes:'NY DFS filed formal objection citing policyholder affordability. Response brief submitted 2026-02-14. Hearing pending.',effectiveDate:null,policyholderCount:1960,annualPremiumImpact:2100000,daysInReview:323},
+    {state:'TX',stateName:'Texas',carrier:'New York Life',block:'BLK-001',requestedIncrease:32,approvedIncrease:32,filingDate:'2025-07-15',approvalDate:'2025-10-22',status:'Approved',regulatoryContact:'TX TDI — Life & Health',notes:'Full approval. Effective 2026-01-01. Policyholder notices mailed 2025-11-15.',effectiveDate:'2026-01-01',policyholderCount:1820,annualPremiumImpact:1540000,daysInReview:99},
+    {state:'IL',stateName:'Illinois',carrier:'MetLife',block:'BLK-003',requestedIncrease:18,approvedIncrease:15,filingDate:'2025-10-01',approvalDate:'2026-03-14',status:'Approved',regulatoryContact:'IL DOI — Financial Division',notes:'Partial approval. IL required 3-year phase-in. Year 1: 8%, Year 2: 4%, Year 3: 3%.',effectiveDate:'2026-07-01',policyholderCount:1340,annualPremiumImpact:840000,daysInReview:164},
+    {state:'PA',stateName:'Pennsylvania',carrier:'John Hancock',block:'BLK-002',requestedIncrease:45,approvedIncrease:null,filingDate:'2026-01-10',approvalDate:null,status:'Pending — Initial Review',regulatoryContact:'PA Insurance Department',notes:'Filing received. Initial review period 60 days. Actuarial review pending.',effectiveDate:null,policyholderCount:1120,annualPremiumImpact:1180000,daysInReview:181},
+    {state:'OH',stateName:'Ohio',carrier:'Lincoln Financial',block:'BLK-005',requestedIncrease:12,approvedIncrease:12,filingDate:'2025-06-01',approvalDate:'2025-08-28',status:'Approved',regulatoryContact:'OH Department of Insurance',notes:'Full approval. No objections. Clean filing.',effectiveDate:'2026-01-01',policyholderCount:680,annualPremiumImpact:320000,daysInReview:88},
+    {state:'WA',stateName:'Washington',carrier:'MetLife',block:'BLK-003',requestedIncrease:18,approvedIncrease:null,filingDate:'2026-02-14',approvalDate:null,status:'Withdrawn',regulatoryContact:'WA OIC — Life & Disability',notes:'Carrier withdrew filing pending actuarial experience study update. Refiling expected 2026-Q4.',effectiveDate:null,policyholderCount:480,annualPremiumImpact:260000,daysInReview:146},
+    {state:'AZ',stateName:'Arizona',carrier:'Prudential',block:'BLK-004',requestedIncrease:10,approvedIncrease:10,filingDate:'2025-05-20',approvalDate:'2025-07-31',status:'Approved',regulatoryContact:'AZ DIFI',notes:'Expedited review. Full approval.',effectiveDate:'2025-11-01',policyholderCount:420,annualPremiumImpact:198000,daysInReview:72},
+    {state:'GA',stateName:'Georgia',carrier:'New York Life',block:'BLK-001',requestedIncrease:32,approvedIncrease:28,filingDate:'2025-09-01',approvalDate:'2026-02-19',status:'Approved',regulatoryContact:'GA OCI',notes:'Partial — GA approved 28%. Phased over 2 years: 18% + 10%.',effectiveDate:'2026-05-01',policyholderCount:780,annualPremiumImpact:620000,daysInReview:171}
+  ];
+
+  /* ══════════════════════════════════════════════════════
+     DATA: Reserve & Actuarial
+  ══════════════════════════════════════════════════════ */
+  var _p29reserveTrend=[
+    {year:2020,statutory:1420,gaap:1380,required:1210,adequacy:117},
+    {year:2021,statutory:1460,gaap:1415,required:1290,adequacy:113},
+    {year:2022,statutory:1490,gaap:1440,required:1380,adequacy:108},
+    {year:2023,statutory:1514,gaap:1458,required:1460,adequacy:104},
+    {year:2024,statutory:1515,gaap:1460,required:1548,adequacy:98},
+    {year:2025,statutory:1514,gaap:1455,required:1642,adequacy:92},
+    {year:2026,statutory:1520,gaap:1461,required:1740,adequacy:87}
+  ];
+
+  var _p29claimProjection=[
+    {year:2026,paid:14.2,projected:14.8,incurred:15.6},
+    {year:2027,paid:15.8,projected:16.4,incurred:17.2},
+    {year:2028,paid:17.6,projected:18.3,incurred:19.1},
+    {year:2030,paid:21.4,projected:22.8,incurred:23.9},
+    {year:2033,paid:28.6,projected:30.4,incurred:31.8},
+    {year:2037,paid:36.2,projected:38.9,incurred:40.6},
+    {year:2041,paid:41.8,projected:44.2,incurred:46.1}
+  ];
+
+  /* ══════════════════════════════════════════════════════
+     DATA: Reinsurance Treaties
+  ══════════════════════════════════════════════════════ */
+  var _p29reinsTreaties=[
+    {id:'REIN-001',cedingCarrier:'John Hancock',reinsurer:'Fortitude Re',treatyType:'Quota Share',block:'BLK-002',effectiveDate:'2025-03-01',cedingPct:42,annualCededPremium:8316000,annualCededClaims:10895000,reservesCeded:162960000,coinsuranceFee:1.8,status:'Active',nextAuditDate:'2026-09-01',notes:'$3.4B statutory reserves ceded. Fortitude retrocedes biometric risk to global reinsurer. Comfort trust established.'},
+    {id:'REIN-002',cedingCarrier:'New York Life',reinsurer:'Fortitude Re',treatyType:'Modified Coinsurance',block:'BLK-001',effectiveDate:'2026-07-06',cedingPct:35,annualCededPremium:8610000,annualCededClaims:10185000,reservesCeded:144200000,coinsuranceFee:2.1,status:'Active — New',nextAuditDate:'2027-01-06',notes:'$3.8B transaction announced July 2026. Largest single LTC reinsurance deal this decade.'},
+    {id:'REIN-003',cedingCarrier:'MetLife',reinsurer:'Wilton Re',treatyType:'Runoff Assumption',block:'BLK-003',effectiveDate:'2024-06-01',cedingPct:0,annualCededPremium:0,annualCededClaims:0,reservesCeded:0,coinsuranceFee:0,status:'Exploring',nextAuditDate:null,notes:'MetLife in negotiations with Wilton Re for full assumption of BLK-003. Due diligence ongoing. Expected close 2026-Q4.'},
+    {id:'REIN-004',cedingCarrier:'Prudential',reinsurer:'Swiss Re',treatyType:'Excess of Loss',block:'BLK-004',effectiveDate:'2022-01-01',cedingPct:20,annualCededPremium:2680000,annualCededClaims:2358000,reservesCeded:39600000,coinsuranceFee:1.2,status:'Active',nextAuditDate:'2026-12-31',notes:'XOL cover triggers above 95% loss ratio. Swiss Re assumes biometric tail risk on unlimited-benefit policies.'}
+  ];
+
+
+  /* ══════════════════════════════════════════════════════
+     PAGE FRAMEWORK
+  ══════════════════════════════════════════════════════ */
+  function _p29buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+
+    /* Portfolio KPIs */
+    var totalActive=_p29blocks.reduce(function(a,b){return a+b.activePolicies;},0);
+    var totalPremium=_p29blocks.reduce(function(a,b){return a+b.premiumInForce;},0);
+    var totalClaims=_p29blocks.reduce(function(a,b){return a+b.annualClaims;},0);
+    var totalReserve=_p29blocks.reduce(function(a,b){return a+b.reserveBalance;},0);
+    var blendedLR=Math.round(totalClaims/totalPremium*100);
+    var pendingFilings=_p29stateFilings.filter(function(f){return f.status!=='Approved'&&f.status!=='Withdrawn';}).length;
+
+    pc.innerHTML=''
+      +'<div style="font-family:\'Segoe UI\',sans-serif;background:#faf5ff;min-height:100vh;padding:0">'
+
+      /* ── Hero Banner ── */
+      +'<div style="background:linear-gradient(135deg,'+R3+' 0%,'+R1+' 60%,'+R2+' 100%);padding:24px 28px 20px;color:#fff">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'
+      +'<div>'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 10px"><i class="fas fa-chart-area" style="font-size:22px"></i></div>'
+      +'<div>'
+      +'<div style="font-size:22px;font-weight:800;letter-spacing:-.3px">Rate Intelligence & Reserve Management</div>'
+      +'<div style="font-size:12px;opacity:.8;margin-top:1px">HAL RIMD · LTC Portfolio Actuarial Command Center</div>'
+      +'</div></div></div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800">'+totalActive.toLocaleString()+'</div><div style="font-size:10px;opacity:.8">Active Policies</div></div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800">'+blendedLR+'%</div><div style="font-size:10px;opacity:.8">Blended Loss Ratio</div></div>'
+      +'<div style="background:'+(pendingFilings>3?'rgba(220,38,38,.3)':'rgba(255,255,255,.12)')+';border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800">'+pendingFilings+'</div><div style="font-size:10px;opacity:.8">Filings Pending</div></div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800">$'+Math.round(totalReserve/1000000)+'M</div><div style="font-size:10px;opacity:.8">Total Reserves</div></div>'
+      +'</div></div></div>'
+
+      /* ── Tab Bar ── */
+      +'<div style="background:#fff;border-bottom:1px solid #e9d5ff;padding:0 28px;display:flex;gap:0;overflow-x:auto">';
+    [
+      ['overview','fa-tachometer-alt','Rate Overview'],
+      ['filings','fa-file-alt','State Filings'],
+      ['impact','fa-users','Policyholder Impact'],
+      ['reserves','fa-database','Reserve Analytics'],
+      ['reinsurance','fa-handshake','Reinsurance']
+    ].forEach(function(t){
+      var act=_p29activeTab===t[0];
+      pc.innerHTML+=
+        '<button onclick="window._p29switchTab(\''+t[0]+'\')" style="padding:14px 20px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:'+(act?700:500)+';color:'+(act?R1:'#64748b')+';border-bottom:3px solid '+(act?R1:'transparent')+';white-space:nowrap;transition:all .2s">'
+        +'<i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';
+    });
+    pc.innerHTML+='</div>'
+
+      /* ── Tab Content ── */
+      +'<div id="p29-tab-content" style="padding:24px 28px">'
+      +_p29renderTab()
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p29renderTab(){
+    if(_p29activeTab==='overview') return _p29overviewTab();
+    if(_p29activeTab==='filings') return _p29filingsTab();
+    if(_p29activeTab==='impact') return _p29impactTab();
+    if(_p29activeTab==='reserves') return _p29reservesTab();
+    if(_p29activeTab==='reinsurance') return _p29reinsuranceTab();
+    return '';
+  }
+
+  window._p29switchTab=function(t){
+    _p29activeTab=t;
+    var tc=document.getElementById('p29-tab-content');
+    if(tc) tc.innerHTML=_p29renderTab();
+  };
+
+  function _p29badge(txt,col,bg){
+    return '<span style="background:'+(bg||col+'1a')+';color:'+col+';font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700">'+txt+'</span>';
+  }
+
+  function _p29adequacyBadge(val){
+    if(val==='Well Funded') return _p29badge('Well Funded',RG);
+    if(val==='Adequate') return _p29badge('Adequate','#0891b2');
+    if(val==='Deficient') return _p29badge('Deficient',RA);
+    if(val==='Severely Deficient') return _p29badge('Severely Deficient',RR);
+    return _p29badge(val,'#64748b');
+  }
+
+  /* ══════════════════════════════════════════════════════
+     TAB 1: RATE OVERVIEW
+  ══════════════════════════════════════════════════════ */
+  function _p29overviewTab(){
+    var html='<div>';
+
+    /* Portfolio Alerts */
+    html+='<div style="background:linear-gradient(135deg,#fef2f2,#fff7ed);border:1px solid #fca5a5;border-radius:12px;padding:16px 20px;margin-bottom:20px">'
+      +'<div style="font-size:13px;font-weight:700;color:'+RR+';margin-bottom:10px"><i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>Portfolio Alerts — Actuarial Action Required</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px">';
+    [
+      {icon:'fa-arrow-up',col:RR,msg:'BLK-002 (John Hancock) loss ratio 131% — immediate rate action required'},
+      {icon:'fa-arrow-up',col:RR,msg:'BLK-001 (New York Life) loss ratio 118% — NAIC multistate review recommended'},
+      {icon:'fa-hourglass-half',col:RA,msg:'NY DFS formal objection pending — 323 days in review on JH filing'},
+      {icon:'fa-database',col:RA,msg:'System-wide reserve adequacy declining: 117% (2020) → 87% (2026)'},
+      {icon:'fa-handshake',col:'#7c3aed',msg:'$3.8B Fortitude Re treaty (NYL) effective — treaty compliance monitoring required'},
+      {icon:'fa-calendar',col:'#0891b2',msg:'SOA industry-wide experience study launching Q3 2025 — update assumptions'}
+    ].forEach(function(a){
+      html+='<div style="display:flex;align-items:flex-start;gap:8px;background:#fff;border-radius:8px;padding:10px 12px">'
+        +'<i class="fas '+a.icon+'" style="color:'+a.col+';margin-top:2px;font-size:12px;flex-shrink:0"></i>'
+        +'<span style="font-size:12px;color:#1e293b;line-height:1.4">'+a.msg+'</span></div>';
+    });
+    html+='</div></div>';
+
+    /* Block Grid */
+    html+='<div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-layer-group" style="color:'+R1+';margin-right:8px"></i>In-Force Block Portfolio</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px">';
+    _p29blocks.forEach(function(b){
+      var lrCol=b.lossRatio>=120?RR:b.lossRatio>=100?RA:b.lossRatio>=90?'#d97706':RG;
+      var lrBar=Math.min(b.lossRatio,150);
+      html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px;border-top:4px solid '+lrCol+'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+        +'<div>'
+        +'<div style="font-size:14px;font-weight:700;color:#1e293b">'+b.carrier+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+b.id+' · Policy Years '+b.policyYears+'</div>'
+        +'</div>'
+        +_p29adequacyBadge(b.reserveAdequacy)
+        +'</div>'
+
+        /* Loss Ratio Bar */
+        +'<div style="margin-bottom:14px">'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:4px">'
+        +'<span>Loss Ratio</span><span style="font-weight:700;color:'+lrCol+'">'+b.lossRatio+'%</span></div>'
+        +'<div style="background:#f1f5f9;border-radius:6px;height:10px;position:relative">'
+        +'<div style="background:'+lrCol+';border-radius:6px;height:10px;width:'+Math.min(lrBar/150*100,100)+'%"></div>'
+        +'<div style="position:absolute;left:'+(100/150*100)+'%;top:-2px;height:14px;width:2px;background:#94a3b8"></div>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;margin-top:2px"><span>0%</span><span style="margin-left:auto">Break-even 100%</span></div>'
+        +'</div>'
+
+        /* Stats Grid */
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
+      [
+        {l:'Active Policies',v:b.activePolicies.toLocaleString()},
+        {l:'On Benefit',v:b.claimsOnBenefit.toLocaleString()},
+        {l:'Avg Age',v:b.avgAge+'yr'},
+        {l:'Annual Premium',v:'$'+Math.round(b.premiumInForce/1000000)+'M'},
+        {l:'Annual Claims',v:'$'+Math.round(b.annualClaims/1000000)+'M'},
+        {l:'Reserve Balance',v:'$'+Math.round(b.reserveBalance/1000000)+'M'}
+      ].forEach(function(s){
+        html+='<div style="background:#f8fafc;border-radius:8px;padding:8px 10px">'
+          +'<div style="font-size:10px;color:#94a3b8">'+s.l+'</div>'
+          +'<div style="font-size:13px;font-weight:700;color:#334155">'+s.v+'</div>'
+          +'</div>';
+      });
+      html+='</div>'
+
+        /* Rate Increase Info */
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
+        +(b.rateIncreaseApproved>0?'<span style="background:#f0fdf4;color:'+RG+';font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600"><i class="fas fa-check" style="margin-right:3px"></i>'+b.rateIncreaseApproved+'% Approved</span>':'')
+        +(b.rateIncreasePending>0?'<span style="background:#fffbeb;color:'+RA+';font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600"><i class="fas fa-clock" style="margin-right:3px"></i>'+b.rateIncreasePending+'% Pending</span>':'')
+        +(b.reinsurer!=='None'?'<span style="background:#f5f3ff;color:'+R1+';font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600"><i class="fas fa-handshake" style="margin-right:3px"></i>'+b.reinsurer+'</span>':'')
+        +'<span style="margin-left:auto;font-size:10px;color:#94a3b8">Next review: '+b.nextReviewDate+'</span>'
+        +'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Morbidity & Lapse Trends */
+    html+='<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-heartbeat" style="color:'+RR+';margin-right:8px"></i>Morbidity Trend by Block (Annual Δ)</div>';
+    _p29blocks.forEach(function(b){
+      var col=b.morbidityTrend>2?RR:b.morbidityTrend>1?RA:RG;
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div style="font-size:12px;color:#334155;width:120px;flex-shrink:0">'+b.carrier.replace(' Financial','').replace(' Hancock','')+'</div>'
+        +'<div style="flex:1;background:#f1f5f9;border-radius:4px;height:8px">'
+        +'<div style="background:'+col+';border-radius:4px;height:8px;width:'+Math.min(b.morbidityTrend/4*100,100)+'%"></div></div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+col+';width:40px;text-align:right">+'+b.morbidityTrend+'%</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-door-open" style="color:'+RA+';margin-right:8px"></i>Voluntary Lapse Rate by Block</div>';
+    _p29blocks.forEach(function(b){
+      var col=b.lapseRate<1.5?RR:b.lapseRate<2?RA:RG;
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div style="font-size:12px;color:#334155;width:120px;flex-shrink:0">'+b.carrier.replace(' Financial','').replace(' Hancock','')+'</div>'
+        +'<div style="flex:1;background:#f1f5f9;border-radius:4px;height:8px">'
+        +'<div style="background:'+col+';border-radius:4px;height:8px;width:'+Math.min(b.lapseRate/4*100,100)+'%"></div></div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+col+';width:40px;text-align:right">'+b.lapseRate+'%</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+
+  /* ══════════════════════════════════════════════════════
+     TAB 2: STATE FILINGS TRACKER
+  ══════════════════════════════════════════════════════ */
+  function _p29filingsTab(){
+    var html='<div>';
+
+    /* Summary Metrics */
+    var approved=_p29stateFilings.filter(function(f){return f.status==='Approved';});
+    var pending=_p29stateFilings.filter(function(f){return f.status!=='Approved'&&f.status!=='Withdrawn';});
+    var withdrawn=_p29stateFilings.filter(function(f){return f.status==='Withdrawn';});
+    var totalImpact=approved.reduce(function(a,f){return a+f.annualPremiumImpact;},0);
+    var avgDays=Math.round(_p29stateFilings.reduce(function(a,f){return a+f.daysInReview;},0)/_p29stateFilings.length);
+
+    html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px">';
+    [
+      {l:'Total Filings',v:_p29stateFilings.length,c:'#1d4ed8',ic:'fa-file-alt'},
+      {l:'Approved',v:approved.length,c:RG,ic:'fa-check-circle'},
+      {l:'Pending',v:pending.length,c:RA,ic:'fa-clock'},
+      {l:'Objections / Withdrawn',v:withdrawn.length+_p29stateFilings.filter(function(f){return f.status==='Objection Filed';}).length,c:RR,ic:'fa-times-circle'},
+      {l:'Premium Impact (Approved)',v:'$'+Math.round(totalImpact/1000000*10)/10+'M',c:R1,ic:'fa-dollar-sign'}
+    ].forEach(function(s){
+      html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:12px;padding:14px;border-top:3px solid '+s.c+'">'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:6px"><i class="fas '+s.ic+'" style="color:'+s.c+';margin-right:5px"></i>'+s.l+'</div>'
+        +'<div style="font-size:22px;font-weight:800;color:'+s.c+'">'+s.v+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* NAIC Multistate Banner */
+    html+='<div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:12px;padding:14px 18px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:14px">'
+      +'<div style="font-size:28px"><i class="fas fa-landmark"></i></div>'
+      +'<div><div style="font-weight:700;font-size:13px">NAIC Long-Term Care Insurance Multistate Rate Review Framework</div>'
+      +'<div style="font-size:12px;opacity:.85;margin-top:3px">Concurrent multi-state filing capability · Avg review time reduction 40% · 2025 framework revisions adopted · 31 participating states · Coordination with WA, CA, NY regulators ongoing</div></div>'
+      +'<div style="margin-left:auto;background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center;flex-shrink:0"><div style="font-size:16px;font-weight:800">'+avgDays+'d</div><div style="font-size:10px;opacity:.8">Avg Review Time</div></div>'
+      +'</div>';
+
+    /* Filing Table */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;overflow:hidden">'
+      +'<div style="padding:14px 18px;border-bottom:1px solid #f0e9ff;display:flex;align-items:center;justify-content:space-between">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b"><i class="fas fa-map-marked-alt" style="color:'+R1+';margin-right:8px"></i>State Filing Register</div>'
+      +'<div style="font-size:11px;color:#94a3b8">'+_p29stateFilings.length+' filings across '+new Set(_p29stateFilings.map(function(f){return f.state;})).size+' states</div>'
+      +'</div>'
+      +'<div style="overflow-x:auto">'
+      +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<thead><tr style="background:#faf5ff">';
+    ['State','Carrier / Block','Requested','Approved','Filing Date','Days in Review','Status','Effective','Impact'].forEach(function(h){
+      html+='<th style="padding:10px 12px;text-align:left;font-weight:600;color:#64748b;border-bottom:1px solid #e9d5ff;white-space:nowrap">'+h+'</th>';
+    });
+    html+='</tr></thead><tbody>';
+
+    _p29stateFilings.forEach(function(f,i){
+      var statCol=f.status==='Approved'?RG:f.status==='Objection Filed'?RR:f.status==='Withdrawn'?'#94a3b8':RA;
+      var statBg=f.status==='Approved'?'#f0fdf4':f.status==='Objection Filed'?'#fef2f2':f.status==='Withdrawn'?'#f8fafc':'#fffbeb';
+      html+='<tr style="border-bottom:1px solid #f8f0ff;background:'+(i%2===0?'#fff':'#faf5ff')+'" onclick="window._p29showFiling(\''+f.state+'\',\''+f.carrier+'\')" style="cursor:pointer">'
+        +'<td style="padding:10px 12px;font-weight:700;color:#1d4ed8">'+f.state+'</td>'
+        +'<td style="padding:10px 12px"><div style="font-weight:600;color:#1e293b">'+f.carrier+'</div><div style="color:#94a3b8;font-size:10px">'+f.block+'</div></td>'
+        +'<td style="padding:10px 12px;font-weight:700;color:'+R1+'">'+f.requestedIncrease+'%</td>'
+        +'<td style="padding:10px 12px;font-weight:700;color:'+(f.approvedIncrease?RG:'#94a3b8')+'">'+(f.approvedIncrease?f.approvedIncrease+'%':'—')+'</td>'
+        +'<td style="padding:10px 12px;color:#64748b">'+f.filingDate+'</td>'
+        +'<td style="padding:10px 12px"><span style="font-weight:700;color:'+(f.daysInReview>200?RR:f.daysInReview>120?RA:'#334155')+'">'+f.daysInReview+'d</span></td>'
+        +'<td style="padding:10px 12px"><span style="background:'+statBg+';color:'+statCol+';font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700">'+f.status+'</span></td>'
+        +'<td style="padding:10px 12px;color:#64748b">'+(f.effectiveDate||'—')+'</td>'
+        +'<td style="padding:10px 12px;font-weight:700;color:#1d4ed8">'+(f.annualPremiumImpact?'$'+Math.round(f.annualPremiumImpact/1000)+'K':'—')+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div>'
+      +'<div id="p29-filing-detail" style="display:none;padding:16px 18px;border-top:1px solid #e9d5ff;background:#faf5ff"></div>'
+      +'</div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  window._p29showFiling=function(state,carrier){
+    var f=_p29stateFilings.find(function(x){return x.state===state&&x.carrier===carrier;});
+    if(!f) return;
+    var d=document.getElementById('p29-filing-detail');
+    if(!d) return;
+    var statCol=f.status==='Approved'?RG:f.status==='Objection Filed'?RR:f.status==='Withdrawn'?'#94a3b8':RA;
+    d.style.display='block';
+    d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">'
+      +'<div><div style="font-size:14px;font-weight:700;color:#1e293b">'+f.stateName+' — '+f.carrier+' Filing Detail</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+f.block+' · Filed '+f.filingDate+'</div></div>'
+      +'<span style="background:'+(f.status==='Approved'?'#f0fdf4':f.status==='Objection Filed'?'#fef2f2':'#fffbeb')+';color:'+statCol+';font-size:11px;padding:4px 12px;border-radius:10px;font-weight:700">'+f.status+'</span></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px">';
+    [
+      ['Regulatory Contact',f.regulatoryContact],
+      ['Policyholders Affected',f.policyholderCount.toLocaleString()],
+      ['Annual Premium Impact','$'+Math.round(f.annualPremiumImpact/1000)+'K'],
+      ['Days in Review',f.daysInReview+'d'],
+      ['Approved Amount',f.approvedIncrease?f.approvedIncrease+'%':'Pending'],
+      ['Effective Date',f.effectiveDate||'TBD']
+    ].forEach(function(r){
+      d.innerHTML+='<div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #e9d5ff">'
+        +'<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;margin-bottom:3px">'+r[0]+'</div>'
+        +'<div style="font-size:13px;font-weight:600;color:#334155">'+r[1]+'</div></div>';
+    });
+    d.innerHTML+='</div>'
+      +'<div style="margin-top:12px;background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid '+statCol+'">'
+      +'<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Regulator Notes</div>'
+      +'<div style="font-size:12px;color:#334155">'+f.notes+'</div></div>';
+  };
+
+  /* ══════════════════════════════════════════════════════
+     TAB 3: POLICYHOLDER IMPACT SIMULATOR
+  ══════════════════════════════════════════════════════ */
+  function _p29impactTab(){
+    var inc=_p29simIncrease;
+    var html='<div>';
+
+    /* Simulator Controls */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:20px;margin-bottom:20px">'
+      +'<div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:16px"><i class="fas fa-sliders-h" style="color:'+R1+';margin-right:8px"></i>Premium Increase Impact Simulator</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center">'
+      +'<div>'
+      +'<label style="font-size:12px;font-weight:600;color:#64748b;display:block;margin-bottom:6px">Rate Increase Scenario: <span style="color:'+R1+';font-size:14px;font-weight:800" id="p29-inc-label">'+inc+'%</span></label>'
+      +'<input type="range" min="5" max="60" value="'+inc+'" oninput="window._p29setSim(+this.value)" style="width:100%;accent-color:'+R1+'">'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8"><span>5%</span><span>30%</span><span>60%</span></div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+
+    var scenarios=[
+      {label:'Accept Increase',pct:72,col:RG,icon:'fa-check'},
+      {label:'Reduce Daily Benefit',pct:14,col:'#0891b2',icon:'fa-arrow-down'},
+      {label:'Shorten Benefit Period',pct:8,col:RA,icon:'fa-calendar-minus'},
+      {label:'Elect Paid-Up / Lapse',pct:6,col:RR,icon:'fa-door-open'}
+    ];
+    scenarios.forEach(function(s){
+      html+='<div style="background:'+s.col+'1a;border:1px solid '+s.col+'44;border-radius:10px;padding:10px 12px;text-align:center">'
+        +'<i class="fas '+s.icon+'" style="color:'+s.col+';font-size:16px;margin-bottom:4px"></i>'
+        +'<div style="font-size:18px;font-weight:800;color:'+s.col+'">'+s.pct+'%</div>'
+        +'<div style="font-size:10px;color:#64748b">'+s.label+'</div></div>';
+    });
+    html+='</div></div></div>';
+
+    /* Cohort Impact Cards */
+    html+='<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px"><i class="fas fa-users" style="color:'+R1+';margin-right:8px"></i>Policyholder Cohort Impact Analysis</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-bottom:20px">';
+
+    var cohorts=[
+      {name:'Fixed Income Seniors (70+)',size:28400,avgPrem:3800,income:'$28K–$42K/yr',affordabilityRisk:'High',riskCol:RR,icon:'fa-user-friends',notes:'Most vulnerable to increases >20%. High likelihood of benefit reduction elections.'},
+      {name:'Pre-Retirees (60–69)',size:18200,avgPrem:4200,income:'$55K–$85K/yr',affordabilityRisk:'Medium',riskCol:RA,icon:'fa-user-tie',notes:'Working age. More flexibility to absorb increases. Low lapse risk.'},
+      {name:'Younger Insureds (<60)',size:9200,avgPrem:2900,income:'$75K+/yr',affordabilityRisk:'Low',riskCol:RG,icon:'fa-user',notes:'Lowest risk cohort. Years from benefit use. Long premium runway.'},
+      {name:'Unlimited Benefit Policies',size:6800,avgPrem:6100,income:'Varies',affordabilityRisk:'Critical',riskCol:RR,icon:'fa-infinity',notes:'Infinite tail exposure. Morbidity trend most severe. Rate increases essential but hardest to approve.'}
+    ];
+    cohorts.forEach(function(c){
+      var newPrem=Math.round(c.avgPrem*(1+inc/100));
+      var delta=newPrem-c.avgPrem;
+      html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:12px;padding:16px;border-left:4px solid '+c.riskCol+'">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+        +'<i class="fas '+c.icon+'" style="color:'+c.riskCol+';font-size:18px"></i>'
+        +'<div><div style="font-size:13px;font-weight:700;color:#1e293b">'+c.name+'</div>'
+        +'<div style="font-size:11px;color:#64748b">'+c.size.toLocaleString()+' policyholders · Income: '+c.income+'</div></div>'
+        +'<div style="margin-left:auto">'+_p29badge(c.affordabilityRisk+' Risk',c.riskCol)+'</div>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:8px;text-align:center">'
+        +'<div style="font-size:10px;color:#94a3b8">Current Premium</div>'
+        +'<div style="font-size:16px;font-weight:800;color:#334155">$'+c.avgPrem.toLocaleString()+'/yr</div></div>'
+        +'<div style="background:'+R4+';border-radius:8px;padding:8px;text-align:center">'
+        +'<div style="font-size:10px;color:#94a3b8">New Premium</div>'
+        +'<div style="font-size:16px;font-weight:800;color:'+R1+'">$'+newPrem.toLocaleString()+'/yr</div></div>'
+        +'<div style="background:#fef2f2;border-radius:8px;padding:8px;text-align:center">'
+        +'<div style="font-size:10px;color:#94a3b8">Annual Increase</div>'
+        +'<div style="font-size:16px;font-weight:800;color:'+RR+'">+$'+delta.toLocaleString()+'</div></div>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#64748b;background:#f8fafc;border-radius:6px;padding:8px">'+c.notes+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Benefit Option Alternatives Table */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-exchange-alt" style="color:'+R1+';margin-right:8px"></i>Premium-Neutral Benefit Reduction Options ('+inc+'% increase scenario)</div>'
+      +'<div style="overflow-x:auto">'
+      +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<thead><tr style="background:#faf5ff">';
+    ['Option','Description','Premium Impact','Benefit Change','Coverage Retained','Regulatory Notes'].forEach(function(h){
+      html+='<th style="padding:10px 12px;text-align:left;font-weight:600;color:#64748b;border-bottom:1px solid #e9d5ff">'+h+'</th>';
+    });
+    html+='</tr></thead><tbody>';
+    [
+      ['Accept Full Increase','Pay new premium, maintain all benefits','+'+(inc)+'% ($'+Math.round(4000*inc/100)+'/yr)','No change','100%','Simplest path. Regulator preferred outcome.'],
+      ['Reduce Daily Benefit','Reduce DBR proportionally to absorb increase','0%','DBR reduced ~'+Math.round(inc*0.7)+'%','~72%','Most common election. Benefit Period unchanged.'],
+      ['Shorten Benefit Period','Reduce max benefit period (e.g., lifetime → 5yr)','0%','Period shortened','~65%','Risk of exhaustion if LTC need exceeds new period.'],
+      ['Increase Elimination Period','Extend EP (e.g., 90→180 days) for lower premium','−'+(Math.round(inc*0.6))+'%','EP extended','85%','Reduces fraud risk. Policyholder bears more early cost.'],
+      ['Remove Inflation Rider','Drop COLA protection for flat premium','−'+(Math.round(inc*0.5))+'%','No inflation adjustment','~60% at year 10','Significant long-term coverage erosion risk.'],
+      ['Reduced Paid-Up','Accept smaller paid-up benefit, stop premiums','−100%','Reduced lump benefit only','20–35%','Last resort. Protects against full lapse.']
+    ].forEach(function(r,i){
+      html+='<tr style="border-bottom:1px solid #f8f0ff;background:'+(i%2===0?'#fff':'#faf5ff')+'">';
+      r.forEach(function(c,ci){
+        var col='#334155';
+        if(ci===2) col=c.startsWith('+')?RR:c===('0%')?'#0891b2':RG;
+        html+='<td style="padding:10px 12px;color:'+col+';'+(ci===0?'font-weight:700':'')+'">'+c+'</td>';
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table></div></div>';
+    html+='</div>';
+    return html;
+  }
+
+  window._p29setSim=function(v){
+    _p29simIncrease=v;
+    var lbl=document.getElementById('p29-inc-label');
+    if(lbl) lbl.textContent=v+'%';
+    var tc=document.getElementById('p29-tab-content');
+    if(tc) tc.innerHTML=_p29impactTab();
+  };
+
+
+  /* ══════════════════════════════════════════════════════
+     TAB 4: RESERVE ANALYTICS
+  ══════════════════════════════════════════════════════ */
+  function _p29reservesTab(){
+    var html='<div>';
+
+    /* Reserve Adequacy Alert Banner */
+    var latest=_p29reserveTrend[_p29reserveTrend.length-1];
+    html+='<div style="background:linear-gradient(135deg,#7f1d1d,#dc2626);border-radius:12px;padding:16px 20px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:16px">'
+      +'<div style="font-size:32px"><i class="fas fa-exclamation-triangle"></i></div>'
+      +'<div><div style="font-weight:800;font-size:14px">System-Wide Reserve Adequacy: '+latest.adequacy+'% ('+latest.year+')</div>'
+      +'<div style="font-size:12px;opacity:.9;margin-top:3px">Below 100% threshold since 2024. Statutory reserves $'+latest.statutory+'M vs required $'+latest.required+'M. Gap: $'+(latest.required-latest.statutory)+'M. Milliman projects LTCI claims peak $42B by 2041.</div></div>'
+      +'<div style="margin-left:auto;background:rgba(255,255,255,.15);border-radius:10px;padding:12px 18px;text-align:center;flex-shrink:0">'
+      +'<div style="font-size:28px;font-weight:900">'+latest.adequacy+'%</div>'
+      +'<div style="font-size:10px;opacity:.8">Adequacy Ratio</div></div></div>';
+
+    /* Reserve Trend Table */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-chart-line" style="color:'+R1+';margin-right:8px"></i>Reserve Adequacy Trend — System Portfolio ($M)</div>'
+
+      /* Visual bar chart */
+      +'<div style="display:flex;align-items:flex-end;gap:8px;height:140px;margin-bottom:8px;padding:0 4px">';
+    var maxR=Math.max.apply(null,_p29reserveTrend.map(function(r){return r.required;}));
+    _p29reserveTrend.forEach(function(r){
+      var statH=Math.round(r.statutory/maxR*120);
+      var reqH=Math.round(r.required/maxR*120);
+      var adqCol=r.adequacy>=110?RG:r.adequacy>=100?'#0891b2':r.adequacy>=90?RA:RR;
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+        +'<div style="font-size:9px;color:'+adqCol+';font-weight:700">'+r.adequacy+'%</div>'
+        +'<div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:120px">'
+        +'<div style="flex:1;background:#8b5cf6;border-radius:4px 4px 0 0;height:'+statH+'px" title="Statutory $'+r.statutory+'M"></div>'
+        +'<div style="flex:1;background:#fca5a5;border-radius:4px 4px 0 0;height:'+reqH+'px;border:1px dashed '+RR+'" title="Required $'+r.required+'M"></div>'
+        +'</div>'
+        +'<div style="font-size:9px;color:#64748b">'+r.year+'</div>'
+        +'</div>';
+    });
+    html+='</div>'
+      +'<div style="display:flex;gap:16px;font-size:11px;color:#64748b">'
+      +'<span><span style="display:inline-block;width:12px;height:12px;background:#8b5cf6;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Statutory Reserve</span>'
+      +'<span><span style="display:inline-block;width:12px;height:12px;background:#fca5a5;border:1px dashed '+RR+';border-radius:2px;margin-right:4px;vertical-align:middle"></span>Required Reserve</span>'
+      +'</div></div>';
+
+    /* Claims Projection to 2041 */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px"><i class="fas fa-project-diagram" style="color:'+R1+';margin-right:8px"></i>LTCI Industry Claims Projection — Milliman 2025 Annual Study ($B)</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-bottom:14px">Paid claims peak projected at $42B in 2041. HAL portfolio represents ~2.3% of industry. Reserving must anticipate 15-year tail.</div>'
+      +'<div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px">';
+    var maxCP=50;
+    _p29claimProjection.forEach(function(r){
+      var pH=Math.round(r.paid/maxCP*110);
+      var prH=Math.round(r.projected/maxCP*110);
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+        +'<div style="font-size:9px;color:#334155;font-weight:600">$'+r.paid+'B</div>'
+        +'<div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:110px">'
+        +'<div style="flex:1;background:#7c3aed;border-radius:4px 4px 0 0;height:'+pH+'px"></div>'
+        +'<div style="flex:1;background:#c4b5fd;border-radius:4px 4px 0 0;height:'+prH+'px;border-top:2px dashed #7c3aed"></div>'
+        +'</div>'
+        +'<div style="font-size:9px;color:#64748b">\''+String(r.year).slice(2)+'</div>'
+        +'</div>';
+    });
+    html+='</div>'
+      +'<div style="display:flex;gap:16px;font-size:11px;color:#64748b;margin-top:6px">'
+      +'<span><span style="display:inline-block;width:12px;height:12px;background:#7c3aed;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Paid Claims</span>'
+      +'<span><span style="display:inline-block;width:12px;height:12px;background:#c4b5fd;border-top:2px dashed #7c3aed;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Projected (Incurred)</span>'
+      +'</div></div>';
+
+    /* Key Actuarial Assumptions */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-calculator" style="color:'+R1+';margin-right:8px"></i>Key Actuarial Assumptions vs. Emerging Experience</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">';
+    [
+      {assumption:'Claim Incidence Rate',original:'2.1%/yr',actual:'3.4%/yr',variance:'+62%',status:'adverse',note:'Post-pandemic care deferral reversal driving spike'},
+      {assumption:'Claim Termination Rate',original:'28%/yr',actual:'19%/yr',variance:'−32%',status:'adverse',note:'Claimants staying on benefit longer than modeled'},
+      {assumption:'Voluntary Lapse Rate',original:'3.8%/yr',actual:'1.6%/yr',variance:'−58%',status:'adverse',note:'Adverse selection — only sicker policyholders retain'},
+      {assumption:'Interest Rate (discount)',original:'6.5%',actual:'4.2%',variance:'−230bps',note:'Low rate environment crushed investment returns'},
+      {assumption:'Mortality Improvement',original:'−1.0%/yr',actual:'−0.4%/yr',variance:'+60bps',note:'Slower mortality improvement = longer claims tail'},
+      {assumption:'Average Daily Cost of Care',original:'$165/day',actual:'$310/day',variance:'+88%',status:'adverse',note:'Nursing facility costs doubled; inflation compounding'}
+    ].forEach(function(a){
+      var col=a.status==='adverse'?RR:a.variance.startsWith('+')?RA:RG;
+      html+='<div style="background:#f8fafc;border-radius:10px;padding:12px 14px;border-left:3px solid '+col+'">'
+        +'<div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:6px">'+a.assumption+'</div>'
+        +'<div style="display:flex;gap:8px;margin-bottom:6px">'
+        +'<div style="flex:1;text-align:center"><div style="font-size:9px;color:#94a3b8">Original</div><div style="font-size:13px;font-weight:700;color:#64748b">'+a.original+'</div></div>'
+        +'<div style="flex:1;text-align:center"><div style="font-size:9px;color:#94a3b8">Actual</div><div style="font-size:13px;font-weight:700;color:#1e293b">'+a.actual+'</div></div>'
+        +'<div style="flex:1;text-align:center"><div style="font-size:9px;color:#94a3b8">Variance</div><div style="font-size:13px;font-weight:700;color:'+col+'">'+a.variance+'</div></div>'
+        +'</div>'
+        +'<div style="font-size:10px;color:#64748b">'+a.note+'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+    html+='</div>';
+    return html;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     TAB 5: REINSURANCE MONITOR
+  ══════════════════════════════════════════════════════ */
+  function _p29reinsuranceTab(){
+    var html='<div>';
+
+    /* Market Context */
+    html+='<div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#fff;border-radius:14px;padding:20px 24px;margin-bottom:20px">'
+      +'<div style="font-size:15px;font-weight:800;margin-bottom:10px"><i class="fas fa-globe-americas" style="margin-right:10px"></i>LTC Reinsurance Market — 2025–2026 Context</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">';
+    [
+      {label:'Unum/Fortitude Re (Feb 2025)',val:'$3.4B statutory reserves ceded'},
+      {label:'NYL/Fortitude Re (Jul 2026)',val:'$3.8B — largest LTC reinsurance deal'},
+      {label:'Wilton Re LTC Runoff AUM',val:'$8.2B+ in-force management'},
+      {label:'Global Reinsurance Capital',val:'$648B at FY2025 (+11% YoY)'},
+      {label:'Active LTC Reinsurers',val:'Fortitude Re · Wilton Re · Swiss Re · Hannover Re'},
+      {label:'NAIC Oversight',val:'Reinsurance oversight enhanced under 2025 framework'}
+    ].forEach(function(s){
+      html+='<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px 12px">'
+        +'<div style="font-size:10px;opacity:.75;margin-bottom:3px">'+s.label+'</div>'
+        +'<div style="font-size:11px;font-weight:700">'+s.val+'</div></div>';
+    });
+    html+='</div></div>';
+
+    /* Treaty Cards */
+    html+='<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-file-contract" style="color:'+R1+';margin-right:8px"></i>Active Reinsurance Treaties</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px;margin-bottom:20px">';
+    _p29reinsTreaties.forEach(function(t){
+      var statCol=t.status==='Active'?RG:t.status==='Active — New'?R1:t.status==='Exploring'?RA:'#94a3b8';
+      html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+        +'<div>'
+        +'<div style="font-size:14px;font-weight:700;color:#1e293b">'+t.cedingCarrier+' → '+t.reinsurer+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+t.id+' · '+t.treatyType+' · Effective '+t.effectiveDate+'</div>'
+        +'</div>'
+        +'<span style="background:'+statCol+'1a;color:'+statCol+';font-size:10px;padding:3px 10px;border-radius:10px;font-weight:700">'+t.status+'</span>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
+      [
+        {l:'Ceding %',v:t.cedingPct?t.cedingPct+'%':'N/A'},
+        {l:'Ceded Premium/yr',v:t.annualCededPremium?'$'+Math.round(t.annualCededPremium/1000000*10)/10+'M':'—'},
+        {l:'Reserves Ceded',v:t.reservesCeded?'$'+Math.round(t.reservesCeded/1000000)+'M':'Exploring'},
+        {l:'Block',v:t.block},
+        {l:'Coinsurance Fee',v:t.coinsuranceFee?t.coinsuranceFee+'%':'—'},
+        {l:'Next Audit',v:t.nextAuditDate||'—'}
+      ].forEach(function(s){
+        html+='<div style="background:#f8fafc;border-radius:8px;padding:8px 10px">'
+          +'<div style="font-size:10px;color:#94a3b8">'+s.l+'</div>'
+          +'<div style="font-size:12px;font-weight:700;color:#334155">'+s.v+'</div>'
+          +'</div>';
+      });
+      html+='</div>'
+        +'<div style="font-size:11px;color:#64748b;background:#f8fafc;border-radius:8px;padding:10px 12px;border-left:3px solid '+statCol+'">'+t.notes+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Ceded Business Summary */
+    var totalCededPrem=_p29reinsTreaties.reduce(function(a,t){return a+t.annualCededPremium;},0);
+    var totalCededRes=_p29reinsTreaties.reduce(function(a,t){return a+t.reservesCeded;},0);
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-balance-scale" style="color:'+R1+';margin-right:8px"></i>Ceded Business Summary & Risk Transfer Metrics</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">';
+    [
+      {l:'Total Ceded Premium/yr',v:'$'+Math.round(totalCededPrem/1000000*10)/10+'M',c:R1},
+      {l:'Total Ceded Reserves',v:'$'+Math.round(totalCededRes/1000000)+'M',c:'#1d4ed8'},
+      {l:'Active Treaties',v:_p29reinsTreaties.filter(function(t){return t.status.includes('Active');}).length,c:RG},
+      {l:'Exploration Pipeline',v:_p29reinsTreaties.filter(function(t){return t.status==='Exploring';}).length,c:RA}
+    ].forEach(function(s){
+      html+='<div style="background:#f8fafc;border-radius:10px;padding:14px;border-top:3px solid '+s.c+'">'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:4px">'+s.l+'</div>'
+        +'<div style="font-size:20px;font-weight:800;color:'+s.c+'">'+s.v+'</div>'
+        +'</div>';
+    });
+    html+='</div>'
+      +'<div style="font-size:12px;color:#64748b;background:#faf5ff;border-radius:8px;padding:12px 14px;border-left:3px solid '+R1+'">'
+      +'<strong style="color:'+R1+'">HAL Reinsurance Strategy Note:</strong> Concentrated reinsurance exposure to Fortitude Re across two treaties ($306M+ in ceded reserves). Recommend counterparty diversification assessment and stress-testing retrocession chain. Fitch confirms life insurers will continue pairing LTC with more profitable liabilities in reinsurance transactions to reduce balance sheet exposure through 2026–2028.'
+      +'</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+
+  /* ── Nav intercept ── */
+  var _p29origNav=window.navigateTo||navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-rimd'){
+      document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');});
+      var navEl=document.querySelector('.hal-rimd-nav');
+      if(navEl) navEl.classList.add('active');
+      _p29buildPage();
+      return;
+    }
+    if(typeof _p29origNav==='function') _p29origNav(page);
+  };
+
+  console.log('[HAL RIMD] Phase 29 Rate Intelligence & Reserve Management loaded — 6 blocks, 10 state filings, 4 reinsurance treaties, Milliman 2041 projection');
+})();
+/* P29 fix: re-expose window.navigateTo to bare global */
 var navigateTo=window.navigateTo;

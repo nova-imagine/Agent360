@@ -80430,3 +80430,2775 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
 
   console.log('[Phase 26] Carrier Onboarding Accelerator loaded · 8 pain points · 5 demo carriers · 4 AI agents · ROI simulator · 18mo→6wk compression');
 })();
+
+(function(){ 'use strict';
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 27 — HAL Contact Intelligence Hub (CIH)
+   AI-Powered Knowledge Engine to Deflect 65%+ of Contact Center Volume
+   Nav: hal-cih  |  Badge: CIH  |  Color: #0891b2 (cyan/teal)
+   5 Tabs: overview · knowledge · agentassist · portals · analytics
+   ═══════════════════════════════════════════════════════════════════════ */
+
+  var CIH1='#0891b2'; var CIH2='#06b6d4'; var CIH3='#164e63';
+  var CIH4='#e0f7fa'; var HAL='#0078d4'; var SUC='#059669';
+  var DAN='#dc2626'; var AMB='#d97706'; var PUR='#7c3aed';
+
+  var _p27activeTab='overview';
+  var _p27kbQuery='';
+  var _p27kbResult=null;
+  var _p27kbTyping=false;
+  var _p27activePortal='claimant';
+  var _p27activeAssistTab='live';
+  var _p27callSimRunning=false;
+  var _p27callStep=0;
+  var _p27deflectionFilter='all';
+
+  /* ── 27 Call Driver Categories ─────────────────────────────────────── */
+  var _p27callDrivers=[
+    /* CLAIMANT */
+    {id:'C1',cat:'claimant',icon:'fa-search-dollar',title:'Where is my payment?',freq:5,vol:148000,aht:18,deflect:95,
+     rootCause:'No real-time payment visibility; USPS checks; 10–11 business day cycle with zero status alerts',
+     cihSolution:'ProactiveNotifier sends SMS/email on payment processing. Claimant Hub shows real-time payment timeline with tracking.',
+     kbChunks:12000,graphNodes:['Claim','Payment History','Payment Cycle']},
+    {id:'C2',cat:'claimant',icon:'fa-file-invoice',title:'Did you receive my CMR/invoice?',freq:5,vol:134000,aht:14,deflect:92,
+     rootCause:'No digital acknowledgment system; faxed CMRs routinely lost; no confirmation sent',
+     cihSolution:'Digital CMR portal with instant confirmation. ProactiveNotifier sends receipt within 60 seconds of document ingestion.',
+     kbChunks:8000,graphNodes:['Claim','Documents','CMR','Invoice']},
+    {id:'C3',cat:'claimant',icon:'fa-times-circle',title:'Why was my payment rejected?',freq:5,vol:118000,aht:22,deflect:88,
+     rootCause:'Rejection letters sent by snail mail 10–14 days after rejection; no proactive notification whatsoever',
+     cihSolution:'Instant portal + SMS alert on any rejection with plain-language reason and exact fix. One-click resubmission.',
+     kbChunks:15000,graphNodes:['Claim','Denial Reason','Resolution Path']},
+    {id:'C4',cat:'claimant',icon:'fa-calendar-alt',title:'Elimination period — when does it start/end?',freq:4,vol:98000,aht:24,deflect:85,
+     rootCause:'Policy language complex; EP only begins when qualifying care actively received — not when claim filed',
+     cihSolution:'EP Calculator in Claimant Hub with visual countdown. CIH-Bot explains policy-specific EP rules in plain language.',
+     kbChunks:10000,graphNodes:['Policy','Elimination Period','Care Start Date','Qualifying Days']},
+    {id:'C5',cat:'claimant',icon:'fa-user-check',title:'Do I meet the benefit trigger?',freq:4,vol:89000,aht:28,deflect:80,
+     rootCause:'6 ADLs + cognitive impairment triggers; claimants don\'t know which 2-of-6 their specific policy requires',
+     cihSolution:'Policy-specific ADL trigger lookup. CIH-Bot explains which triggers apply to this exact policy number and state.',
+     kbChunks:20000,graphNodes:['Policy','Benefit Triggers','ADL List','Cognitive Trigger','State Regulation']},
+    {id:'C6',cat:'claimant',icon:'fa-ban',title:'Why was my claim denied?',freq:4,vol:86000,aht:32,deflect:78,
+     rootCause:'Dense denial letters; no plain-language explanation; claimants forced to call for basic clarification',
+     cihSolution:'Denial Explainer maps every denial code to plain language + resolution path + appeal template. Available 24/7.',
+     kbChunks:15000,graphNodes:['Claim','Denial Reason','Appeal Process','Resolution Path']},
+    {id:'C7',cat:'claimant',icon:'fa-id-card',title:'Add authorized rep / POA',freq:3,vol:62000,aht:18,deflect:82,
+     rootCause:'POA/DPOA paperwork opaque; each carrier has different forms; no portal for digital upload or e-signature',
+     cihSolution:'Digital POA submission with DocuSign e-signature. Carrier-specific form auto-selected. Instant acknowledgment.',
+     kbChunks:6000,graphNodes:['Claimant','Authorized Representatives','POA','Carrier']},
+    {id:'C8',cat:'claimant',icon:'fa-list-ul',title:'What documents do I need?',freq:3,vol:58000,aht:16,deflect:90,
+     rootCause:'No single checklist; different requirements by carrier/product/state; agents give inconsistent answers',
+     cihSolution:'Document Checklist Generator: input policy number → instant carrier/product/state-specific requirements list.',
+     kbChunks:12000,graphNodes:['Policy','Carrier','State','Documentation Standards']},
+    {id:'C9',cat:'claimant',icon:'fa-hospital-alt',title:'What care settings are covered?',freq:3,vol:54000,aht:20,deflect:85,
+     rootCause:'Confusion: facility vs. home care; assisted living vs. memory care; licensed vs. unlicensed providers',
+     cihSolution:'Coverage Settings Lookup: policy-specific care setting eligibility with plain-language explanations.',
+     kbChunks:20000,graphNodes:['Policy','Care Settings','Provider Types','State Licensing']},
+    {id:'C10',cat:'claimant',icon:'fa-home',title:'Why won\'t you cover both facility AND home care?',freq:3,vol:48000,aht:26,deflect:75,
+     rootCause:'Many policies cover one or the other; agents don\'t proactively educate; discovered after the fact',
+     cihSolution:'Proactive education in Claimant Hub onboarding flow. CIH-Bot explains dual-coverage limitations upfront.',
+     kbChunks:8000,graphNodes:['Policy','Care Settings','Coverage Limits']},
+    {id:'C11',cat:'claimant',icon:'fa-chart-pie',title:'What is my remaining benefit balance?',freq:3,vol:44000,aht:12,deflect:95,
+     rootCause:'No real-time benefit meter in portal; claimants don\'t know days used, dollars remaining, inflation rider value',
+     cihSolution:'Live Benefit Meter in Claimant Hub: days used/remaining, dollars used/remaining, inflation-adjusted current value.',
+     kbChunks:5000,graphNodes:['Claim','Policy','Benefit Amount','Inflation Protection','Days Used']},
+    {id:'C12',cat:'claimant',icon:'fa-phone-slash',title:'Case manager not calling back',freq:3,vol:42000,aht:20,deflect:65,
+     rootCause:'Care managers unscheduled; no SLA on callbacks; front-line can only leave messages; systemic gap',
+     cihSolution:'Scheduled callback booking in Claimant Hub. SLA monitoring with auto-escalation if callback missed.',
+     kbChunks:3000,graphNodes:['Claimant','Care Manager','Callback SLA']},
+    {id:'C13',cat:'claimant',icon:'fa-exchange-alt',title:'Change care provider / facility',freq:2,vol:28000,aht:22,deflect:72,
+     rootCause:'Provider credentialing requirements unclear; transition documentation not understood',
+     cihSolution:'Provider Change Wizard: step-by-step with required documentation checklist and new provider lookup.',
+     kbChunks:6000,graphNodes:['Claimant','Provider','Credentialing','Care Plan']},
+    {id:'C14',cat:'claimant',icon:'fa-percent',title:'What is my inflation protection worth now?',freq:2,vol:22000,aht:10,deflect:95,
+     rootCause:'Policy anniversary adjustments not communicated proactively; claimants discover on anniversary date only',
+     cihSolution:'Annual inflation adjustment proactive notification. Claimant Hub shows current vs. original benefit amounts.',
+     kbChunks:4000,graphNodes:['Policy','Inflation Protection','Benefit Amount','Anniversary Date']},
+    /* ISSUER */
+    {id:'I1',cat:'issuer',icon:'fa-building',title:'Claim status on policy block',freq:4,vol:76000,aht:16,deflect:95,
+     rootCause:'Carriers managing blocks need status; real-time API access often absent; manual calls to Illumifin',
+     cihSolution:'Issuer Hub Claims API: real-time REST API for claim status, payment history, document status by policy number.',
+     kbChunks:8000,graphNodes:['Carrier','Policy','Claim','Payment History']},
+    {id:'I2',cat:'issuer',icon:'fa-gavel',title:'Regulatory filing status / state compliance',freq:3,vol:48000,aht:28,deflect:80,
+     rootCause:'50-state complexity; rate increase filing status; state-specific benefit triggers vary by jurisdiction',
+     cihSolution:'Regulatory Filing Tracker in Issuer Hub. Compliance Matrix (HAL P26) integration for 50-state status.',
+     kbChunks:25000,graphNodes:['State','Regulation','Rate Filing','Benefit Triggers']},
+    {id:'I3',cat:'issuer',icon:'fa-chart-bar',title:'Actuarial / loss ratio data request',freq:3,vol:38000,aht:24,deflect:88,
+     rootCause:'Carriers need claims data for reserve management; data not readily available without manual request',
+     cihSolution:'Issuer Hub Actuarial Export: scheduled or on-demand data exports with configurable date ranges and metrics.',
+     kbChunks:5000,graphNodes:['Carrier','Claim','Loss Ratio','Reserve Data']},
+    {id:'I4',cat:'issuer',icon:'fa-file-invoice-dollar',title:'Premium billing / reconciliation',freq:3,vol:34000,aht:20,deflect:85,
+     rootCause:'Billing discrepancies between carrier systems and Illumifin admin platform; manual reconciliation required',
+     cihSolution:'Issuer Hub Billing Dashboard with line-item detail, dispute flagging, and automated reconciliation reports.',
+     kbChunks:4000,graphNodes:['Carrier','Premium Billing','Reconciliation']},
+    {id:'I5',cat:'issuer',icon:'fa-folder-open',title:'Audit and compliance document requests',freq:2,vol:18000,aht:30,deflect:80,
+     rootCause:'DOI audits and internal carrier compliance reviews require document packages; manual fulfillment',
+     cihSolution:'Self-service document request portal in Issuer Hub. Pre-packaged audit bundles by DOI requirement type.',
+     kbChunks:6000,graphNodes:['Carrier','DOI Audit','Compliance Documents']},
+    /* PROVIDER */
+    {id:'P1',cat:'provider',icon:'fa-stethoscope',title:'Is this patient covered?',freq:4,vol:82000,aht:8,deflect:98,
+     rootCause:'Eligibility verification; no real-time eligibility API for providers; every verification requires a call',
+     cihSolution:'Provider Hub Eligibility API: real-time coverage verification by patient name + DOB + policy number.',
+     kbChunks:5000,graphNodes:['Claimant','Policy','Eligibility','Coverage Type','Provider']},
+    {id:'P2',cat:'provider',icon:'fa-receipt',title:'My invoice hasn\'t been paid',freq:4,vol:78000,aht:14,deflect:92,
+     rootCause:'Same payment visibility gap as C1 from provider perspective; no remittance portal access',
+     cihSolution:'Provider Hub Payment Dashboard: per-patient, per-period payment status with remittance advice detail.',
+     kbChunks:8000,graphNodes:['Provider','Invoice','Payment History','Remittance']},
+    {id:'P3',cat:'provider',icon:'fa-exclamation-triangle',title:'Claim denied / partially paid — why?',freq:4,vol:74000,aht:20,deflect:85,
+     rootCause:'Remittance advice hard to interpret; denial codes not plain language; providers don\'t know resolution path',
+     cihSolution:'Denial Explainer mapped to HCPCS/revenue codes with provider-specific resolution paths and resubmission.',
+     kbChunks:15000,graphNodes:['Provider','Claim','Denial Reason','Remittance','Resolution']},
+    {id:'P4',cat:'provider',icon:'fa-file-alt',title:'What format must my invoice be in?',freq:3,vol:56000,aht:16,deflect:90,
+     rootCause:'Different carriers have different invoice requirements; no universal template; constant clarification calls',
+     cihSolution:'Invoice Format Library: carrier-specific templates with required fields pre-validated before submission.',
+     kbChunks:18000,graphNodes:['Provider','Carrier','Invoice Format','Documentation Standards']},
+    {id:'P5',cat:'provider',icon:'fa-pen-square',title:'How do I submit a CMR?',freq:3,vol:52000,aht:18,deflect:88,
+     rootCause:'CMR requirements differ by carrier; fax-only submission; strict signature requirements; frequent rejections',
+     cihSolution:'Digital CMR portal with carrier-specific templates, DocuSign e-signature, instant acknowledgment.',
+     kbChunks:12000,graphNodes:['Provider','CMR','Carrier','Signature','Submission']},
+    {id:'P6',cat:'provider',icon:'fa-id-badge',title:'Provider credentialing / network join',freq:2,vol:32000,aht:28,deflect:75,
+     rootCause:'Onboarding process not self-service; licensure + certification verification manual; no status tracking',
+     cihSolution:'Provider Credentialing Portal: online application, document upload, license verification API, status tracking.',
+     kbChunks:8000,graphNodes:['Provider','Credentialing','License','NPI','Carrier']},
+    {id:'P7',cat:'provider',icon:'fa-clipboard-list',title:'Care documentation requirements',freq:2,vol:28000,aht:22,deflect:82,
+     rootCause:'Care notes standards differ by policy; nurses don\'t know what level of documentation satisfies insurer',
+     cihSolution:'Documentation Standards Library: per-carrier, per-state, per-service requirements with sample templates.',
+     kbChunks:10000,graphNodes:['Provider','Carrier','State','Documentation Standards','Care Notes']},
+    {id:'P8',cat:'provider',icon:'fa-brain',title:'How to submit ADL/cognitive assessment',freq:2,vol:24000,aht:20,deflect:85,
+     rootCause:'BCAT/MoCA/MMSE — which is required by which carrier for which product unclear; no guidance',
+     cihSolution:'Assessment Tool Selector: input carrier + product → exact assessment tool required + submission instructions.',
+     kbChunks:8000,graphNodes:['Provider','Carrier','Assessment Tool','ADL','Cognitive']},
+    {id:'P9',cat:'provider',icon:'fa-dollar-sign',title:'Reimbursement rate for service code',freq:2,vol:18000,aht:12,deflect:90,
+     rootCause:'Fee schedules not published; providers can\'t pre-verify reimbursement amount before rendering care',
+     cihSolution:'Rate Schedule Lookup: HCPCS/revenue code + carrier + state → reimbursement rate with effective dates.',
+     kbChunks:6000,graphNodes:['Provider','Carrier','State','Fee Schedule','HCPCS']}
+  ];
+
+  /* ── KB Demo Scenarios ─────────────────────────────────────────────── */
+  var _p27kbScenarios=[
+    {label:'Payment missing — Oct',persona:'Claimant',
+     query:'My mother\'s October payment never arrived. She has an approved claim with CNA. What happened?',
+     steps:[
+       {ms:400,text:'🔍 Identifying caller intent: Payment Status (C1)…'},
+       {ms:800,text:'📋 Pulling claim record via Knowledge Graph traversal…'},
+       {ms:1200,text:'🔗 Graph path: Claimant → Claim → Payment History (October)…'},
+       {ms:1600,text:'📄 Fetching document status: CMR + Invoice for October…'},
+       {ms:2000,text:'⚠️ Anomaly detected: CMR received Oct 15 — flagged "copied signature"…'},
+       {ms:2400,text:'📚 Vector retrieval: denial reason "copied-signature" → resolution path…'},
+       {ms:2800,text:'✅ Generating plain-language response with exact fix…'}
+     ],
+     answer:'Your October payment of $4,200 was paused because the Continued Monthly Residence (CMR) form received on October 15 contained a photocopied signature rather than an original wet signature. CNA\'s policy requires original signatures on all CMR submissions.\n\n✅ To resolve: Re-submit page 1 of the CMR with an original pen signature from the facility administrator. Once received, payment processes within 3 business days.\n\n📎 Your CMR template for CNA is attached below. Your November invoice is received and in processing.',
+     sources:['CNA Policy Admin Guide §7.3','CMR Signature Requirements Library','Denial Code DB: SIG-COPY']},
+    {label:'Elimination period question',persona:'Claimant Family',
+     query:'We started home care for my father on August 14. His policy has a 90-day elimination period. When does he start receiving benefits?',
+     steps:[
+       {ms:400,text:'🔍 Intent: Elimination Period Calculator (C4)…'},
+       {ms:800,text:'📋 Loading policy: benefit trigger = 2 of 6 ADLs or cognitive impairment…'},
+       {ms:1200,text:'🔗 Graph: Policy → Elimination Period (90-day calendar) → Care Start Date…'},
+       {ms:1600,text:'📚 Vector: "calendar day" vs "service day" EP rules for this policy…'},
+       {ms:2000,text:'🗓️ Computing EP completion: Aug 14 + 90 calendar days…'},
+       {ms:2400,text:'✅ Generating EP breakdown with first benefit date…'}
+     ],
+     answer:'Based on your father\'s policy (90-day calendar-day elimination period) and his qualifying care start date of August 14:\n\n📅 Elimination Period: Aug 14 → Nov 12 (90 calendar days)\n💰 First Benefit Date: November 13, 2025\n\nImportant: The elimination period counts ALL calendar days from when qualifying care begins — not just days care is received. Since your father started home care August 14, you do not need to restart the count.\n\n⚠️ Ensure all care logs are documented daily. Benefits are paid retroactively to November 13 once the elimination period is confirmed satisfied.',
+     sources:['Policy Language §4.2 Elimination Period','State CA EP Rules','Calendar Day vs Service Day KB']},
+    {label:'Provider eligibility check',persona:'Assisted Living Facility',
+     query:'Can you verify that Mary Johnson (DOB 03/12/1941, policy LTC-992847) is covered for assisted living at our facility?',
+     steps:[
+       {ms:400,text:'🔍 Intent: Provider Eligibility Verification (P1)…'},
+       {ms:800,text:'🔐 Identity verification: policy LTC-992847 + DOB match…'},
+       {ms:1200,text:'🔗 Graph: Policy → Care Settings → Assisted Living eligibility…'},
+       {ms:1600,text:'📋 Claim status: open, approved, active since Jan 2024…'},
+       {ms:2000,text:'🏥 Facility credentialing: checking your NPI against approved network…'},
+       {ms:2400,text:'💰 Loading benefit details: daily max, remaining pool, inflation rider…'},
+       {ms:2800,text:'✅ Eligibility confirmed — generating coverage summary…'}
+     ],
+     answer:'✅ ELIGIBILITY CONFIRMED — Mary Johnson (LTC-992847)\n\nCoverage Type: Assisted Living Facility (AL)\nStatus: Active Claim — Approved since January 8, 2024\nYour Facility: Sunrise Senior Living (NPI 1234567890) ✅ Credentialed\n\nBenefit Details:\n• Daily Maximum: $245/day (inflation-adjusted from $200 original)\n• Monthly Maximum: $7,350\n• Lifetime Pool Remaining: $328,400 (of $400,000)\n• Benefit Days Remaining: 1,341 of 1,825\n\nSubmission: Submit invoices by the 5th of each month. CMR required monthly. Use CNA AL Invoice Form v3.2.',
+     sources:['Policy LTC-992847','CNA AL Coverage Rules','Provider Network DB','Benefit Calculator']},
+    {label:'Denial — unlicensed provider',persona:'Claimant',
+     query:'My claim was denied because my home health aide is "not an approved provider." She has been caring for me for 8 months. What does this mean?',
+     steps:[
+       {ms:400,text:'🔍 Intent: Claim Denial Explanation (C6)…'},
+       {ms:800,text:'📋 Loading denial reason: PROV-LIC-FAIL…'},
+       {ms:1200,text:'🔗 Graph: Claim → Denial → Policy → State Licensing Requirements…'},
+       {ms:1600,text:'📚 Vector: California Health & Safety Code §1725.5 requirements…'},
+       {ms:2000,text:'🔍 Checking provider NPI 9876543210 against credentialed network…'},
+       {ms:2400,text:'📋 Fetching alternative credentialed providers in your area…'},
+       {ms:2800,text:'✅ Generating denial explanation + resolution options…'}
+     ],
+     answer:'Your claim was denied because your home health aide is not licensed under California Health & Safety Code §1725.5, which requires home health aides providing LTC-reimbursable care to hold a current HHA or CNA certification.\n\nThis does not mean your care was bad — it means the provider does not meet your policy\'s credentialing requirement.\n\n🔧 Your Options:\n1. Have your aide obtain HHA certification (typically 75 hours training + state exam)\n2. Switch to a licensed agency — we found 4 licensed providers within 5 miles of your address\n3. File an exception request if your policy has a "non-agency provider" rider\n\n📎 Your policy does NOT have the non-agency rider. Options 1 or 2 are recommended.',
+     sources:['CA H&S Code §1725.5','Denial Code: PROV-LIC-FAIL','Provider Credentialing KB','Policy LTC Check: Non-Agency Rider']},
+    {label:'Issuer — actuarial export',persona:'Carrier (Issuer)',
+     query:'We need Q3 2025 loss ratio data for our entire block with Illumifin for our reserve review next week.',
+     steps:[
+       {ms:400,text:'🔍 Intent: Actuarial Data Request (I3)…'},
+       {ms:800,text:'🔐 Carrier identity: Allianz LTC block verified…'},
+       {ms:1200,text:'📊 Querying HAL Data Lake: Q3 2025 (Jul–Sep) claim transactions…'},
+       {ms:1600,text:'💰 Computing: incurred losses, earned premium, IBNR adjustment…'},
+       {ms:2000,text:'📈 Generating loss ratio by product/state/benefit type…'},
+       {ms:2400,text:'✅ Packaging export: CSV + executive summary…'}
+     ],
+     answer:'✅ Q3 2025 Actuarial Export Ready — Allianz LTC Block\n\nSummary Metrics:\n• Active Claimants: 4,847\n• Incurred Claims (Q3): $94.2M\n• Earned Premium (Q3): $112.8M\n• Loss Ratio: 83.5% (vs. 81.2% Q3 2024)\n• IBNR Adjustment: +$2.1M\n• New Claims Filed: 312 | Closed: 287\n• Average Claim Duration (open): 34.2 months\n\nBreakdown available by: State | Product | Benefit Type | Care Setting\n\n📎 CSV export (847 rows) + Executive Summary PDF ready for download.',
+     sources:['HAL Data Lake Q3 2025','Allianz Block Analytics','Actuarial Metrics Engine']}
+  ];
+  var _p27kbActiveScenario=0;
+  var _p27kbSimRunning=false;
+
+  /* ── ProactiveNotifier Events ──────────────────────────────────────── */
+  var _p27notifyEvents=[
+    {id:'n1',type:'payment',icon:'fa-check-circle',color:SUC,label:'Payment Processed',
+     trigger:'Payment generated in claims system',time:'Immediate',
+     channels:['SMS','Email','Portal'],deflects:'C1 (Where is my payment?)',
+     msg:'Your October benefit payment of $4,200 was sent on Nov 8. Estimated delivery: Nov 12–14. Track: [Portal link]'},
+    {id:'n2',type:'doc',icon:'fa-file-check',color:CIH1,label:'Document Received',
+     trigger:'CMR/invoice ingested into HAL Data Lake',time:'< 60 seconds',
+     channels:['SMS','Email','Portal'],deflects:'C2 (Did you receive my CMR?)',
+     msg:'✅ We received your November CMR on Nov 1. Your invoice for $4,200 is still needed. Submit here: [Portal]'},
+    {id:'n3',type:'reject',icon:'fa-exclamation-circle',color:DAN,label:'Document Rejected',
+     trigger:'Validation engine flags document issue',time:'Same-day',
+     channels:['SMS','Email','Portal','Letter'],deflects:'C3 (Why was payment rejected?)',
+     msg:'⚠️ Action needed: Your CMR was not processed — the signature appears to be a photocopy. Please re-sign page 1 and resubmit. One-click resubmit: [Portal]'},
+    {id:'n4',type:'ep',icon:'fa-calendar-check',color:AMB,label:'Elimination Period Milestone',
+     trigger:'EP day 80 of 90 reached',time:'Day 80 (10 days before completion)',
+     channels:['SMS','Email','Portal'],deflects:'C4 (Elimination period confusion)',
+     msg:'🗓️ Milestone: Your elimination period completes in 10 days on Nov 12. Benefits begin Nov 13. Ensure care logs are complete. Questions? [CIH-Bot]'},
+    {id:'n5',type:'inflation',icon:'fa-arrow-up',color:PUR,label:'Inflation Adjustment Notice',
+     trigger:'Policy anniversary date',time:'30 days before + on anniversary',
+     channels:['Email','Portal','Letter'],deflects:'C14 (Inflation protection value)',
+     msg:'Your annual benefit has increased: Daily max $200 → $210 (5% compound rider, effective Jan 1). Monthly max: $6,300. No action needed.'},
+    {id:'n6',type:'suspend',icon:'fa-pause-circle',color:DAN,label:'Claim Suspended',
+     trigger:'Claim status changes to suspended',time:'Immediate',
+     channels:['SMS','Email','Portal'],deflects:'C6 (Why denied/suspended?)',
+     msg:'⚠️ Your claim is temporarily suspended pending receipt of your annual care assessment. Due by Dec 31. Upload here: [Portal] or call: 800-XXX-XXXX'},
+    {id:'n7',type:'cmr_due',icon:'fa-clock',color:AMB,label:'CMR Due Reminder (Provider)',
+     trigger:'25th of month',time:'Monthly on 25th',
+     channels:['Email','Provider Portal'],deflects:'P5 (CMR submission)',
+     msg:'Reminder: CMR for [Patient Name] (LTC-XXXXXX) is due by Nov 30 to avoid payment delay. Submit digitally: [Provider Portal]'},
+    {id:'n8',type:'eligibility',icon:'fa-id-card',color:SUC,label:'Eligibility Confirmed (Provider)',
+     trigger:'Provider eligibility check via API',time:'Real-time',
+     channels:['Provider Portal','API Response'],deflects:'P1 (Is patient covered?)',
+     msg:'✅ John Smith (LTC-123456) is covered for Assisted Living. Daily max: $200. Your facility is credentialed. Invoice format: [CNA AL v3.2]'}
+  ];
+  var _p27activeNotify=null;
+
+  /* ── Analytics Data ────────────────────────────────────────────────── */
+  var _p27analytics={
+    totalCalls:750000,deflected:487500,deflectRate:65,
+    costBefore:8200000,costAfter:2870000,costSaving:5330000,
+    ftesBefore:340,ftesAfter:119,ftesFreed:221,
+    ahtBefore:14.2,ahtAfter:5.1,
+    fcrBefore:35,fcrAfter:78,
+    npsShift:'+42 pts',
+    doiComplaints:-70,
+    kbChunksTotal:346000,kbSources:89,kbCoverage:94,
+    graphNodes:47000,graphEdges:182000,
+    deflectByCategory:{
+      claimant:{vol:510000,deflected:357000,rate:70},
+      issuer:{vol:120000,deflected:96000,rate:80},
+      provider:{vol:120000,deflected:34500,rate:75}
+    },
+    topDeflected:[
+      {id:'C1',title:'Payment Status',deflected:140600,savings:688940},
+      {id:'P1',title:'Eligibility Check',deflected:80360,savings:393764},
+      {id:'C2',title:'CMR/Invoice Receipt',deflected:123280,savings:604072},
+      {id:'C11',title:'Benefit Balance',deflected:41800,savings:204820},
+      {id:'P2',title:'Invoice Payment Status',deflected:71760,savings:351624}
+    ],
+    kbHealth:[
+      {cat:'Claimant Calls',score:96,chunks:218000,lastUpdated:'Jul 8 2026'},
+      {cat:'Provider Billing',score:94,chunks:82000,lastUpdated:'Jul 9 2026'},
+      {cat:'Issuer Reporting',score:91,chunks:28000,lastUpdated:'Jul 7 2026'},
+      {cat:'State Regulations',score:89,chunks:25000,lastUpdated:'Jul 6 2026'},
+      {cat:'Denial Codes',score:98,chunks:15000,lastUpdated:'Jul 10 2026'}
+    ],
+    monthlyTrend:[
+      {mo:'Feb',calls:728000,deflect:38},{mo:'Mar',calls:701000,deflect:45},
+      {mo:'Apr',calls:672000,deflect:51},{mo:'May',calls:638000,deflect:56},
+      {mo:'Jun',calls:598000,deflect:61},{mo:'Jul',calls:549000,deflect:65}
+    ]
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BUILD PAGE
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p27buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    pc.innerHTML=''
+      +'<div style="font-family:\'Segoe UI\',sans-serif;background:#f0f9ff;min-height:100vh;padding:0">'
+      /* ── Hero Banner ── */
+      +'<div style="background:linear-gradient(135deg,'+CIH3+' 0%,#0369a1 50%,'+CIH1+' 100%);padding:28px 32px 22px;color:#fff">'
+      +'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:14px;width:56px;height:56px;display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas fa-headset" style="font-size:26px"></i></div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:22px;font-weight:800;letter-spacing:-.3px">HAL Contact Intelligence Hub</div>'
+      +'<div style="font-size:13px;opacity:.88;margin-top:3px">AI-Powered Knowledge Engine · 27 Call Driver Categories · 65% Deflection Target · $5.3M Annual Savings</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +_p27statBadge('750K','Annual Calls','fa-phone-volume')
+      +_p27statBadge('63K','Active Claimants','fa-users')
+      +_p27statBadge('$4B','Claims/Year','fa-coins')
+      +_p27statBadge('65%','Deflection Target','fa-chart-line')
+      +'</div></div></div>'
+      /* ── Tab Nav ── */
+      +'<div style="background:#fff;border-bottom:2px solid #e0f2fe;padding:0 32px;display:flex;gap:0;overflow-x:auto">'
+      +_p27tab('overview','fa-th-large','Overview')
+      +_p27tab('knowledge','fa-brain','Knowledge Engine')
+      +_p27tab('agentassist','fa-robot','Agent Assist')
+      +_p27tab('portals','fa-desktop','Self-Service Portals')
+      +_p27tab('analytics','fa-chart-bar','Analytics & ROI')
+      +'</div>'
+      /* ── Tab Content ── */
+      +'<div id="p27-tab-content" style="padding:28px 32px">'
+      +_p27renderTab()
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p27statBadge(val,lbl,icon){
+    return '<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center;min-width:90px">'
+      +'<div style="font-size:18px;font-weight:800">'+val+'</div>'
+      +'<div style="font-size:10px;opacity:.8;display:flex;align-items:center;gap:4px;justify-content:center;margin-top:2px">'
+      +'<i class="fas '+icon+'" style="font-size:9px"></i>'+lbl+'</div></div>';
+  }
+
+  function _p27tab(id,icon,label){
+    var active=_p27activeTab===id;
+    return '<div onclick="window._p27switchTab(\''+id+'\')" style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:7px;'
+      +'font-size:13px;font-weight:'+(active?'700':'500')+';color:'+(active?CIH1:'#64748b')+';'
+      +'border-bottom:3px solid '+(active?CIH1:'transparent')+';white-space:nowrap;transition:all .2s">'
+      +'<i class="fas '+icon+'"></i>'+label+'</div>';
+  }
+
+  function _p27renderTab(){
+    if(_p27activeTab==='overview') return _p27overviewTab();
+    if(_p27activeTab==='knowledge') return _p27knowledgeTab();
+    if(_p27activeTab==='agentassist') return _p27agentAssistTab();
+    if(_p27activeTab==='portals') return _p27portalsTab();
+    if(_p27activeTab==='analytics') return _p27analyticsTab();
+    return '';
+  }
+
+  window._p27switchTab=function(id){
+    _p27activeTab=id;
+    _p27kbSimRunning=false;
+    _p27callSimRunning=false;
+    var tc=document.getElementById('p27-tab-content');
+    if(tc) tc.innerHTML=_p27renderTab();
+    /* re-highlight nav */
+    document.querySelectorAll('[data-p27tab]').forEach(function(el){
+      var tid=el.getAttribute('data-p27tab');
+      el.style.color=tid===id?CIH1:'#64748b';
+      el.style.fontWeight=tid===id?'700':'500';
+      el.style.borderBottom='3px solid '+(tid===id?CIH1:'transparent');
+    });
+  };
+/* ═══════════════════════════════════════════════════════════════════
+     TAB 1: OVERVIEW — 27 Call Drivers + Architecture
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p27overviewTab(){
+    var cats=['all','claimant','issuer','provider'];
+    var catLabels={all:'All 27 Categories',claimant:'Claimant (14)',issuer:'Issuer (5)',provider:'Provider (9)'};
+    var catColors={all:CIH1,claimant:'#7c3aed',issuer:'#0078d4',provider:'#059669'};
+
+    var filtered=_p27callDrivers.filter(function(d){
+      return _p27deflectionFilter==='all'||d.cat===_p27deflectionFilter;
+    });
+
+    var totalVol=filtered.reduce(function(a,d){return a+d.vol;},0);
+    var totalDeflected=filtered.reduce(function(a,d){return a+Math.round(d.vol*d.deflect/100);},0);
+    var avgAHT=Math.round(filtered.reduce(function(a,d){return a+d.aht;},0)/filtered.length);
+
+    var html='<div>';
+    /* Architecture strip */
+    html+='<div style="background:linear-gradient(135deg,'+CIH3+',#0369a1);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:24px">'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:12px"><i class="fas fa-layer-group" style="margin-right:8px"></i>4-Layer CIH Architecture</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'
+      +['Layer 4 · Self-Service Portals<br><small>Claimant · Provider · Issuer · 24/7</small>',
+        'Layer 3 · AI Agent Orchestration<br><small>CIH-Bot · AgentAssist · Notifier · Curator</small>',
+        'Layer 2 · HAL Knowledge Engine<br><small>346K Vectors · 47K Graph Nodes · GraphRAG</small>',
+        'Layer 1 · HAL Data Foundation<br><small>Fabric · Semantic · Purview · P20–P25</small>'].map(function(t,i){
+        return '<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:12px;text-align:center;font-size:11px">'
+          +'<div style="font-size:18px;font-weight:800;color:'+CIH2+'">'+(4-i)+'</div>'
+          +t+'</div>';
+      }).join('')
+      +'</div></div>';
+
+    /* Totals row */
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px">';
+    var kpiData=[
+      {v:'750K',l:'Total Annual Calls',s:'Before CIH',c:DAN,ic:'fa-phone-volume'},
+      {v:'487K',l:'Calls Deflected',s:'65% deflection rate',c:SUC,ic:'fa-bolt'},
+      {v:'$5.3M',l:'Annual Labor Savings',s:'FTE cost reduction',c:CIH1,ic:'fa-coins'},
+      {v:'221',l:'FTEs Redeployable',s:'from 340 → 119 complex-only',c:AMB,ic:'fa-users'}
+    ];
+    kpiData.forEach(function(k){
+      html+='<div style="background:#fff;border-radius:12px;padding:16px 18px;border-left:4px solid '+k.c+';box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+        +'<i class="fas '+k.ic+'" style="color:'+k.c+';font-size:14px"></i>'
+        +'<span style="font-size:11px;color:#64748b">'+k.l+'</span></div>'
+        +'<div style="font-size:24px;font-weight:800;color:#1e293b">'+k.v+'</div>'
+        +'<div style="font-size:10px;color:#94a3b8;margin-top:2px">'+k.s+'</div></div>';
+    });
+    html+='</div>';
+
+    /* Filter bar */
+    html+='<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center">'
+      +'<span style="font-size:12px;color:#64748b;font-weight:600">Filter:</span>';
+    cats.forEach(function(c){
+      var active=_p27deflectionFilter===c;
+      html+='<button onclick="window._p27filterDrivers(\''+c+'\')" style="padding:6px 14px;border-radius:20px;border:2px solid '+(active?catColors[c]:'#e2e8f0')+';background:'+(active?catColors[c]:'#fff')+';color:'+(active?'#fff':'#475569')+';font-size:12px;font-weight:600;cursor:pointer">'+catLabels[c]+'</button>';
+    });
+    html+='<span style="margin-left:auto;font-size:11px;color:#94a3b8">'+filtered.length+' categories · '+Math.round(totalDeflected/1000)+'K calls deflected</span>';
+    html+='</div>';
+
+    /* Call driver cards */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">';
+    filtered.forEach(function(d){
+      var deflectPct=d.deflect;
+      var dColor=deflectPct>=90?SUC:deflectPct>=80?CIH1:deflectPct>=70?AMB:DAN;
+      var catColor=d.cat==='claimant'?'#7c3aed':d.cat==='issuer'?'#0078d4':'#059669';
+      var freqStars='';for(var i=0;i<d.freq;i++) freqStars+='★'; for(var j=d.freq;j<5;j++) freqStars+='☆';
+      html+='<div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e0f2fe;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .2s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(8,145,178,.15)\'" onmouseout="this.style.boxShadow=\'0 1px 4px rgba(0,0,0,.05)\'">'
+        +'<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">'
+        +'<div style="background:'+catColor+'1a;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<i class="fas '+d.icon+'" style="color:'+catColor+';font-size:15px"></i></div>'
+        +'<div style="flex:1">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;line-height:1.3">'+d.title+'</div>'
+        +'<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'
+        +'<span style="font-size:10px;background:'+catColor+'1a;color:'+catColor+';padding:2px 8px;border-radius:10px;font-weight:600">'+d.id+'</span>'
+        +'<span style="font-size:10px;color:#f59e0b">'+freqStars+'</span>'
+        +'<span style="font-size:10px;color:#64748b">'+Math.round(d.vol/1000)+'K calls/yr</span>'
+        +'<span style="font-size:10px;color:#64748b">'+d.aht+'min AHT</span>'
+        +'</div></div>'
+        +'<div style="text-align:right;flex-shrink:0">'
+        +'<div style="font-size:20px;font-weight:800;color:'+dColor+'">'+deflectPct+'%</div>'
+        +'<div style="font-size:9px;color:#94a3b8">deflect</div></div></div>'
+        /* Progress bar */
+        +'<div style="background:#f1f5f9;border-radius:4px;height:5px;margin-bottom:10px">'
+        +'<div style="background:'+dColor+';width:'+deflectPct+'%;height:5px;border-radius:4px;transition:width 1s"></div></div>'
+        /* Root cause */
+        +'<div style="font-size:11px;color:#ef4444;margin-bottom:6px"><i class="fas fa-exclamation-triangle" style="margin-right:4px;font-size:10px"></i><strong>Root cause:</strong> '+d.rootCause+'</div>'
+        /* CIH solution */
+        +'<div style="font-size:11px;color:#059669"><i class="fas fa-check-circle" style="margin-right:4px;font-size:10px"></i><strong>CIH fix:</strong> '+d.cihSolution+'</div>'
+        /* KB stats */
+        +'<div style="display:flex;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9">'
+        +d.graphNodes.slice(0,3).map(function(n){return '<span style="font-size:9px;background:#e0f2fe;color:'+CIH3+';padding:2px 6px;border-radius:8px">'+n+'</span>';}).join('')
+        +'<span style="font-size:9px;color:#94a3b8;margin-left:auto">'+Math.round(d.kbChunks/1000)+'K KB chunks</span>'
+        +'</div></div>';
+    });
+    html+='</div>';
+
+    /* Proactive Notifier preview */
+    html+='<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;padding:20px 24px;margin-top:24px;border:1px solid #bbf7d0">'
+      +'<div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:12px"><i class="fas fa-bell" style="margin-right:8px"></i>ProactiveNotifier — Prevents Calls Before They Happen</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">';
+    _p27notifyEvents.slice(0,6).forEach(function(ev){
+      html+='<div style="background:#fff;border-radius:10px;padding:12px;border-left:3px solid '+ev.color+'">'
+        +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:5px">'
+        +'<i class="fas '+ev.icon+'" style="color:'+ev.color+';font-size:12px"></i>'
+        +'<span style="font-size:12px;font-weight:600;color:#1e293b">'+ev.label+'</span></div>'
+        +'<div style="font-size:10px;color:#64748b;margin-bottom:4px">Trigger: '+ev.trigger+'</div>'
+        +'<div style="font-size:10px;color:#64748b;margin-bottom:4px">Timing: <strong>'+ev.time+'</strong></div>'
+        +'<div style="font-size:10px;color:'+ev.color+'">Deflects: '+ev.deflects+'</div></div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  window._p27filterDrivers=function(cat){
+    _p27deflectionFilter=cat;
+    var tc=document.getElementById('p27-tab-content');
+    if(tc) tc.innerHTML=_p27overviewTab();
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 2: KNOWLEDGE ENGINE
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p27knowledgeTab(){
+    var sc=_p27kbScenarios[_p27kbActiveScenario];
+    var html='<div>';
+
+    /* KB stats strip */
+    html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px">';
+    var kbKpis=[
+      {v:'346K',l:'Vector Chunks',ic:'fa-database',c:CIH1},
+      {v:'47K',l:'Graph Nodes',ic:'fa-project-diagram',c:PUR},
+      {v:'182K',l:'Graph Edges',ic:'fa-link',c:AMB},
+      {v:'89',l:'Knowledge Sources',ic:'fa-book',c:SUC},
+      {v:'94%',l:'KB Coverage',ic:'fa-shield-alt',c:CIH1}
+    ];
+    kbKpis.forEach(function(k){
+      html+='<div style="background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid #e0f2fe;box-shadow:0 1px 3px rgba(0,0,0,.04)">'
+        +'<i class="fas '+k.ic+'" style="color:'+k.c+';font-size:18px;margin-bottom:6px;display:block"></i>'
+        +'<div style="font-size:20px;font-weight:800;color:#1e293b">'+k.v+'</div>'
+        +'<div style="font-size:10px;color:#64748b">'+k.l+'</div></div>';
+    });
+    html+='</div>';
+
+    /* Two-column layout */
+    html+='<div style="display:grid;grid-template-columns:280px 1fr;gap:18px">';
+
+    /* Left: scenario list */
+    html+='<div>';
+    html+='<div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Live Demo Scenarios</div>';
+    _p27kbScenarios.forEach(function(sc2,idx){
+      var active=_p27kbActiveScenario===idx;
+      var catColor=sc2.persona.indexOf('Facility')>=0||sc2.persona.indexOf('Provider')>=0?SUC:sc2.persona.indexOf('Carrier')>=0?HAL:CIH1;
+      html+='<div onclick="window._p27selectKbScenario('+idx+')" style="padding:12px 14px;border-radius:10px;margin-bottom:8px;cursor:pointer;'
+        +'background:'+(active?CIH1+'1a':'#fff')+';border:2px solid '+(active?CIH1:'#e2e8f0')+';">'
+        +'<div style="font-size:11px;font-weight:700;color:'+(active?CIH3:'#1e293b');
+      html+=';margin-bottom:3px">'+sc2.label+'</div>'
+        +'<div style="font-size:10px;color:#94a3b8"><i class="fas fa-user" style="margin-right:3px"></i>'+sc2.persona+'</div></div>';
+    });
+
+    /* Knowledge sources */
+    html+='<div style="margin-top:16px;font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Knowledge Sources</div>';
+    var sources=[
+      {label:'Policy Language Library',chunks:'180K',icon:'fa-file-contract',color:CIH1},
+      {label:'State Regulatory Matrix',chunks:'25K',icon:'fa-gavel',color:AMB},
+      {label:'Denial Code Library',chunks:'15K',icon:'fa-times-circle',color:DAN},
+      {label:'Provider Billing Guides',chunks:'18K',icon:'fa-receipt',color:SUC},
+      {label:'ADL Assessment Guides',chunks:'8K',icon:'fa-brain',color:PUR},
+      {label:'CMR / Invoice Templates',chunks:'12K',icon:'fa-pen',color:CIH1}
+    ];
+    sources.forEach(function(s){
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid #e0f2fe;margin-bottom:6px">'
+        +'<i class="fas '+s.icon+'" style="color:'+s.color+';font-size:12px;width:16px;text-align:center"></i>'
+        +'<span style="font-size:11px;color:#374151;flex:1">'+s.label+'</span>'
+        +'<span style="font-size:10px;color:#94a3b8">'+s.chunks+'</span></div>';
+    });
+    html+='</div>';
+
+    /* Right: Query interface */
+    html+='<div>';
+    /* Query box */
+    html+='<div style="background:#fff;border-radius:12px;padding:20px;border:1px solid #e0f2fe;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"><i class="fas fa-comment-dots" style="color:'+CIH1+';margin-right:6px"></i>Query: <span style="font-size:12px;color:#64748b">'+sc.persona+'</span></div>'
+      +'<div style="background:#f8fafc;border-radius:10px;padding:14px;font-size:13px;color:#334155;border-left:3px solid '+CIH1+';font-style:italic;margin-bottom:14px">"'+sc.query+'"</div>'
+      +'<button onclick="window._p27runKbSim()" style="background:'+CIH1+';color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px">'
+      +'<i class="fas fa-play"></i>Run GraphRAG Pipeline</button></div>';
+
+    /* RAG step log */
+    html+='<div id="p27-rag-log" style="background:#0f172a;border-radius:12px;padding:16px;min-height:140px;margin-bottom:16px;font-family:monospace">'
+      +'<div style="font-size:11px;color:#94a3b8;margin-bottom:8px">// GraphRAG Retrieval Pipeline — Click "Run" to execute</div>';
+    sc.steps.forEach(function(st,i){
+      html+='<div id="p27-rag-step-'+i+'" style="font-size:12px;color:#475569;margin-bottom:4px;opacity:.3">'+st.text+'</div>';
+    });
+    html+='</div>';
+
+    /* Answer panel */
+    html+='<div id="p27-rag-answer" style="background:#f0fdf4;border-radius:12px;padding:18px;border:1px solid #bbf7d0;display:none">'
+      +'<div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:10px"><i class="fas fa-check-circle" style="margin-right:6px"></i>CIH-Bot Response — Generated in 1.2s</div>'
+      +'<div id="p27-rag-answer-text" style="font-size:13px;color:#1e293b;white-space:pre-line;line-height:1.6"></div>'
+      +'<div style="margin-top:12px;padding-top:10px;border-top:1px solid #bbf7d0">'
+      +'<div style="font-size:11px;color:#166534;font-weight:600;margin-bottom:6px"><i class="fas fa-book-open" style="margin-right:4px"></i>Sources Used:</div>'
+      +'<div id="p27-rag-sources" style="display:flex;flex-wrap:wrap;gap:6px"></div>'
+      +'</div>'
+      +'<div style="margin-top:10px;display:flex;gap:8px">'
+      +'<button style="background:#fff;border:1px solid #bbf7d0;color:#166534;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer"><i class="fas fa-thumbs-up" style="margin-right:4px"></i>Helpful</button>'
+      +'<button style="background:#fff;border:1px solid #e2e8f0;color:#64748b;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer"><i class="fas fa-thumbs-down" style="margin-right:4px"></i>Not Helpful</button>'
+      +'<button style="background:#fff;border:1px solid #e2e8f0;color:#64748b;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer"><i class="fas fa-user-headset" style="margin-right:4px"></i>Escalate to Agent</button>'
+      +'</div></div>';
+
+    html+='</div>'; /* end right col */
+    html+='</div>'; /* end grid */
+
+    /* Knowledge Graph visualization */
+    html+='<div style="background:#fff;border-radius:12px;padding:20px;margin-top:18px;border:1px solid #e0f2fe">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-project-diagram" style="color:'+CIH1+';margin-right:7px"></i>Knowledge Graph — Entity Relationship Map</div>'
+      +'<div style="background:#f8fafc;border-radius:10px;padding:16px;overflow-x:auto">'
+      +'<svg viewBox="0 0 780 220" style="width:100%;max-width:780px;height:220px">'
+      /* nodes */
+      +_p27kgNode(90,110,'Policy','#7c3aed')
+      +_p27kgNode(240,50,'Benefit Trigger','#0891b2')
+      +_p27kgNode(240,110,'Elimination Period','#0891b2')
+      +_p27kgNode(240,170,'Coverage / Care Settings','#0891b2')
+      +_p27kgNode(420,110,'Claim','#dc2626')
+      +_p27kgNode(570,50,'Payment History','#059669')
+      +_p27kgNode(570,110,'Documents','#059669')
+      +_p27kgNode(570,170,'Denial Reason','#dc2626')
+      +_p27kgNode(700,110,'Claimant/Provider','#d97706')
+      /* edges */
+      +_p27kgEdge(140,110,190,110,'has')
+      +_p27kgEdge(140,100,190,60,'has')
+      +_p27kgEdge(140,120,190,165,'has')
+      +_p27kgEdge(310,110,370,110,'has')
+      +_p27kgEdge(470,110,520,60,'has')
+      +_p27kgEdge(470,110,520,110,'has')
+      +_p27kgEdge(470,120,520,165,'has')
+      +_p27kgEdge(620,110,660,110,'linked')
+      +'</svg></div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  function _p27kgNode(x,y,label,color){
+    return '<ellipse cx="'+x+'" cy="'+y+'" rx="48" ry="18" fill="'+color+'" opacity=".15" stroke="'+color+'" stroke-width="1.5"/>'
+      +'<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="9" fill="'+color+'" font-weight="600">'+label+'</text>';
+  }
+  function _p27kgEdge(x1,y1,x2,y2,lbl){
+    var mx=(x1+x2)/2,my=(y1+y2)/2-8;
+    return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>'
+      +'<text x="'+mx+'" y="'+my+'" text-anchor="middle" font-size="8" fill="#94a3b8">'+lbl+'</text>';
+  }
+
+  window._p27selectKbScenario=function(idx){
+    _p27kbActiveScenario=idx;
+    _p27kbSimRunning=false;
+    var tc=document.getElementById('p27-tab-content');
+    if(tc) tc.innerHTML=_p27knowledgeTab();
+  };
+
+  window._p27runKbSim=function(){
+    if(_p27kbSimRunning) return;
+    _p27kbSimRunning=true;
+    var sc=_p27kbScenarios[_p27kbActiveScenario];
+    var ansEl=document.getElementById('p27-rag-answer');
+    if(ansEl) ansEl.style.display='none';
+    sc.steps.forEach(function(st,i){
+      var el=document.getElementById('p27-rag-step-'+i);
+      if(el){el.style.opacity='.3';el.style.color='#475569';}
+    });
+    sc.steps.forEach(function(st,i){
+      setTimeout(function(){
+        var el=document.getElementById('p27-rag-step-'+i);
+        if(el){el.style.opacity='1';el.style.color='#22d3ee';el.style.transition='opacity .3s';}
+      }, st.ms);
+    });
+    var lastMs=sc.steps[sc.steps.length-1].ms+600;
+    setTimeout(function(){
+      _p27kbSimRunning=false;
+      var ans=document.getElementById('p27-rag-answer');
+      var txt=document.getElementById('p27-rag-answer-text');
+      var src=document.getElementById('p27-rag-sources');
+      if(ans) ans.style.display='block';
+      if(txt) txt.textContent=sc.answer;
+      if(src) src.innerHTML=sc.sources.map(function(s){
+        return '<span style="font-size:10px;background:#dcfce7;color:#166534;padding:3px 8px;border-radius:10px;border:1px solid #bbf7d0">'+s+'</span>';
+      }).join('');
+    }, lastMs);
+  };
+
+function _p27agentAssistTab(){
+  var transcript=[
+    {role:'caller',text:'Hi, I filed a claim back in March for my mother\'s nursing home and I still haven\'t received any payment. Claim number is LTC-2024-88341.',time:'0:08',intent:null},
+    {role:'agent',text:'I\'m sorry to hear that. Let me pull up that claim right now. Can you verify the insured\'s date of birth?',time:'0:22',intent:null},
+    {role:'caller',text:'Sure, it\'s June 12, 1941.',time:'0:31',intent:'C2_CLAIM_STATUS'},
+    {role:'system',text:'[AgentAssist detected: C2 Claim Status Inquiry — Confidence 94%]',time:'0:31',intent:'detect'},
+    {role:'caller',text:'We submitted all the CMR forms in February. The facility sent everything.',time:'0:47',intent:'C3_BENEFIT_CALCULATION'},
+    {role:'system',text:'[Detected: C3 Benefit Calculation + C6 Document Missing — checking KB...]',time:'0:48',intent:'detect'},
+    {role:'caller',text:'How much should she be getting per day? I think it\'s around $200 but I\'m not sure.',time:'1:05',intent:'C3_BENEFIT_CALCULATION'},
+    {role:'caller',text:'Also, do we need to resubmit anything? We\'re running out of savings.',time:'1:18',intent:'C13_FINANCIAL_HARDSHIP'}
+  ];
+  var suggestions=[
+    {id:'s1',cat:'C2',title:'Claim Status Pull Procedure',confidence:94,answer:'Access LTCIS → Claims → Search by claim number LTC-2024-88341. Check "Processing Queue" flag. If >45 days, escalate to Claims Expedite team via SF case type CLAIMS-EXP.',kbRef:'KB-C2-003',compliance:'NAIC Model 641 §5(B) — 45-day processing window',cihSolution:'Real-time claim status portal eliminates this inquiry type entirely'},
+    {id:'s2',cat:'C3',title:'Daily Benefit Amount Calculator',confidence:89,answer:'DBR = Contract DBR × Inflation Rider Multiplier. For June 12 1941 DOB: age 83, likely 5% compound inflation from policy issue. Use HAL Benefit Calculator → Policy → Compute current DBR. Typical range $150–$320/day for 2024.',kbRef:'KB-C3-007',compliance:'Benefit must equal policy schedule; document calculation in call notes',cihSolution:'HAL Claimant Hub benefit meter shows live DBR with inflation calculation'},
+    {id:'s3',cat:'C6',title:'Missing Documentation Resolution',confidence:82,answer:'Check DocVault → Claim → LTC-2024-88341 for received CMR. If CMR shows "Pending OCR" it was received but not processed. Trigger manual OCR review. If not received, provide DocTrack portal link for facility re-upload.',kbRef:'KB-C6-012',compliance:'HIPAA §164.524 — 30-day document response requirement',cihSolution:'DocTrack portal gives claimants real-time upload confirmation'},
+    {id:'s4',cat:'C13',title:'Financial Hardship Escalation',confidence:78,answer:'Financial hardship claims qualify for Priority Processing queue. Complete FH-001 form in LTCIS, attach to claim. Target: payment within 10 business days. Inform claimant of HAL Emergency Assistance line 1-800-HAL-HELP.',kbRef:'KB-C13-001',compliance:'State DOI regulations require expedited handling for documented hardship',cihSolution:'ProactiveNotifier sends payment ETA updates, reducing repeat calls 67%'}
+  ];
+  var complianceAlerts=[
+    {sev:'warn',msg:'Call duration approaching 14.2 min avg AHT — consider warm transfer to specialist'},
+    {sev:'info',msg:'Florida DFS Bulletin 2024-08: Enhanced disclosure required for claims >90 days pending'},
+    {sev:'ok',msg:'Recording consent confirmed at call start — compliant with FIPA §501.171'}
+  ];
+  var html='<div style="display:grid;grid-template-columns:1fr 380px;gap:20px;height:calc(100vh - 280px);min-height:580px;">';
+  /* LEFT: Transcript panel */
+  html+='<div style="display:flex;flex-direction:column;gap:0;">';
+  html+='<div style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;padding:14px 18px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between;">';
+  html+='<div><i class="fas fa-phone-alt" style="margin-right:8px;"></i><strong>Live Call — LTC Claims Inquiry</strong><span style="margin-left:12px;font-size:12px;opacity:0.8;">Caller: Margaret O\'Brien (POA) &nbsp;|&nbsp; Acct: LTC-2024-88341</span></div>';
+  html+='<div style="display:flex;align-items:center;gap:10px;">';
+  html+='<span style="background:rgba(255,255,255,0.15);padding:4px 10px;border-radius:20px;font-size:12px;"><i class="fas fa-circle" style="color:#ef4444;margin-right:5px;animation:p27pulse 1.2s infinite;"></i>LIVE 1:24</span>';
+  html+='<button onclick="_p27acwMode()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;"><i class="fas fa-clipboard-check"></i> ACW</button>';
+  html+='</div></div>';
+  /* Transcript scroll */
+  html+='<div id="p27-transcript" style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;padding:16px;overflow-y:auto;flex:1;max-height:380px;">';
+  for(var i=0;i<transcript.length;i++){
+    var t=transcript[i];
+    if(t.role==='system'){
+      html+='<div style="background:linear-gradient(135deg,rgba(8,145,178,0.1),rgba(6,182,212,0.1));border:1px solid rgba(8,145,178,0.3);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:12px;color:#0891b2;display:flex;align-items:center;gap:8px;">';
+      html+='<i class="fas fa-robot"></i><em>'+t.text+'</em></div>';
+    } else if(t.role==='caller'){
+      html+='<div style="display:flex;gap:10px;margin-bottom:10px;justify-content:flex-start;">';
+      html+='<div style="width:32px;height:32px;border-radius:50%;background:#64748b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;"><i class="fas fa-user"></i></div>';
+      html+='<div style="max-width:70%"><div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 10px 10px 10px;padding:10px 14px;font-size:13px;color:#334155;">'+t.text+'</div>';
+      html+='<div style="font-size:11px;color:#94a3b8;margin-top:3px;">'+t.time+'</div></div></div>';
+    } else {
+      html+='<div style="display:flex;gap:10px;margin-bottom:10px;justify-content:flex-end;">';
+      html+='<div style="max-width:70%;text-align:right"><div style="background:#0891b2;color:#fff;border-radius:10px 0 10px 10px;padding:10px 14px;font-size:13px;display:inline-block;text-align:left;">'+t.text+'</div>';
+      html+='<div style="font-size:11px;color:#94a3b8;margin-top:3px;text-align:right;">Agent &nbsp;'+t.time+'</div></div>';
+      html+='<div style="width:32px;height:32px;border-radius:50%;background:#0891b2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;"><i class="fas fa-headset"></i></div></div>';
+    }
+  }
+  html+='</div>';
+  /* ACW panel */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:14px;">';
+  html+='<div style="display:flex;gap:8px;align-items:center;">';
+  html+='<input id="p27-acw-notes" type="text" placeholder="ACW auto-generated: C2 Claim Status + C3 Benefit Calc + C13 Hardship escalation — FH-001 submitted, Priority Queue assigned" style="flex:1;border:1px solid #e2e8f0;border-radius:6px;padding:8px 12px;font-size:12px;color:#334155;" readonly>';
+  html+='<button style="background:#0891b2;color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;"><i class="fas fa-check"></i> Post ACW</button>';
+  html+='</div></div>';
+  html+='</div>'; /* end left */
+  /* RIGHT: AgentAssist Sidebar */
+  html+='<div style="display:flex;flex-direction:column;gap:12px;overflow-y:auto;">';
+  /* Intent detection bar */
+  html+='<div style="background:linear-gradient(135deg,#164e63,#0c4a6e);color:#fff;border-radius:12px;padding:14px;">';
+  html+='<div style="font-size:12px;opacity:0.7;margin-bottom:8px;"><i class="fas fa-brain" style="margin-right:5px;"></i>REAL-TIME INTENT DETECTION</div>';
+  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+  var detected=[{id:'C2',label:'Claim Status',conf:94,color:'#0891b2'},{id:'C3',label:'Benefit Calc',conf:89,color:'#0891b2'},{id:'C6',label:'Doc Missing',conf:82,color:'#d97706'},{id:'C13',label:'Fin. Hardship',conf:78,color:'#dc2626'}];
+  for(var d=0;d<detected.length;d++){
+    var det=detected[d];
+    html+='<span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;" onclick="_p27focusSuggestion(\''+det.id+'\')">'+det.id+' '+det.label+' <strong>'+det.conf+'%</strong></span>';
+  }
+  html+='</div></div>';
+  /* KB Answer Suggestions */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+  html+='<div style="background:#f1f5f9;padding:10px 14px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;"><i class="fas fa-lightbulb" style="color:#f59e0b;margin-right:6px;"></i>AI ANSWER SUGGESTIONS ('+suggestions.length+')</div>';
+  html+='<div style="max-height:240px;overflow-y:auto;">';
+  for(var s=0;s<suggestions.length;s++){
+    var sg=suggestions[s];
+    var bgc=s===0?'rgba(8,145,178,0.05)':'#fff';
+    html+='<div id="p27-sg-'+sg.cat+'" style="padding:12px 14px;border-bottom:1px solid #f1f5f9;background:'+bgc+';cursor:pointer;" onclick="_p27expandSuggestion(this)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<span style="background:#0891b2;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;">'+sg.cat+'</span>';
+    html+='<span style="font-size:11px;color:#0891b2;font-weight:600;">'+sg.confidence+'% match</span></div>';
+    html+='<div style="font-size:12px;font-weight:600;color:#1e293b;margin-bottom:4px;">'+sg.title+'</div>';
+    html+='<div style="font-size:11px;color:#475569;line-height:1.5;max-height:60px;overflow:hidden;">'+sg.answer+'</div>';
+    html+='<div style="margin-top:6px;display:flex;gap:6px;align-items:center;">';
+    html+='<span style="font-size:10px;color:#94a3b8;">'+sg.kbRef+'</span>';
+    html+='<button style="margin-left:auto;background:#e0f2fe;color:#0891b2;border:none;padding:3px 10px;border-radius:4px;font-size:11px;cursor:pointer;" onclick="event.stopPropagation();_p27copyAnswer(\''+sg.id+'\')"><i class="fas fa-copy"></i> Copy</button>';
+    html+='</div></div>';
+  }
+  html+='</div></div>';
+  /* Compliance Guard */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+  html+='<div style="background:#f1f5f9;padding:10px 14px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;"><i class="fas fa-shield-alt" style="color:#0891b2;margin-right:6px;"></i>COMPLIANCE GUARD</div>';
+  for(var a=0;a<complianceAlerts.length;a++){
+    var al=complianceAlerts[a];
+    var ic=al.sev==='warn'?'fa-exclamation-triangle':al.sev==='info'?'fa-info-circle':'fa-check-circle';
+    var col=al.sev==='warn'?'#d97706':al.sev==='info'?'#0891b2':'#16a34a';
+    var bgA=al.sev==='warn'?'#fffbeb':al.sev==='info'?'#e0f2fe':'#f0fdf4';
+    html+='<div style="padding:8px 14px;border-bottom:1px solid #f1f5f9;background:'+bgA+';display:flex;gap:8px;align-items:flex-start;">';
+    html+='<i class="fas '+ic+'" style="color:'+col+';margin-top:1px;font-size:12px;"></i>';
+    html+='<span style="font-size:11px;color:#334155;line-height:1.4;">'+al.msg+'</span></div>';
+  }
+  html+='</div>';
+  /* CIH Deflection Nudge */
+  html+='<div style="background:linear-gradient(135deg,rgba(8,145,178,0.08),rgba(6,182,212,0.08));border:1px solid rgba(8,145,178,0.2);border-radius:12px;padding:12px 14px;">';
+  html+='<div style="font-size:11px;font-weight:700;color:#0891b2;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:5px;"></i>CIH DEFLECTION OPPORTUNITY</div>';
+  html+='<div style="font-size:11px;color:#334155;line-height:1.5;margin-bottom:8px;">This caller\'s 4 intents are all self-serviceable via HAL Claimant Hub. Suggest enrollment to reduce future call volume.</div>';
+  html+='<button style="background:#0891b2;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:11px;cursor:pointer;width:100%;"><i class="fas fa-external-link-alt" style="margin-right:5px;"></i>Send HAL Claimant Hub Link via SMS</button>';
+  html+='</div>';
+  html+='</div>'; /* end right */
+  html+='</div>'; /* end grid */
+  return html;
+}
+
+function _p27portalsTab(){
+  var portals=[
+    {id:'claimant',icon:'fa-user',label:'HAL Claimant Hub',color:'#0891b2',bg:'#e0f2fe',desc:'Self-service for policyholders, insureds, and authorized POAs',callDrivers:['C1 Policy Inquiry','C2 Claim Status','C3 Benefit Calc','C5 Payment Status','C6 Doc Upload','C9 Care Options','C12 Rx Benefits','C13 Fin. Hardship'],
+     features:[
+       {icon:'fa-chart-line',title:'Claim Payment Tracker',desc:'Real-time claim status with milestone timeline. View processing queue position, pending items, and estimated payment date.',badge:'Deflects C2 94%'},
+       {icon:'fa-calculator',title:'Benefit Meter',desc:'Live Daily Benefit Rate with compound inflation calculation. Shows current DBR, max lifetime benefit remaining, and monthly utilization.',badge:'Deflects C3 89%'},
+       {icon:'fa-file-medical',title:'EP Eligibility Calculator',desc:'Elimination Period tracker showing days served, days remaining, and projected benefit start date. Auto-syncs with CMR submissions.',badge:'Deflects C4 91%'},
+       {icon:'fa-cloud-upload-alt',title:'DocTrack Portal',desc:'Secure document upload with OCR confirmation. Claimants receive upload receipt, processing status, and approval notification.',badge:'Deflects C6 87%'},
+       {icon:'fa-map-marked-alt',title:'Care Finder',desc:'Network facility locator with benefit coverage levels, quality ratings, and availability. Book assessments directly from portal.',badge:'Deflects C9 78%'},
+       {icon:'fa-bell',title:'Smart Notifications',desc:'Proactive alerts for payment posting, document requests, and policy anniversaries. Configurable SMS, email, and in-app channels.',badge:'Reduces repeat calls 67%'}
+     ]},
+    {id:'provider',icon:'fa-hospital',label:'HAL Provider Hub',color:'#059669',bg:'#d1fae5',desc:'Self-service for nursing facilities, home health agencies, and hospice providers',callDrivers:['P1 Eligibility','P2 CMR Submit','P3 Billing','P4 Payment','P5 Denial','P6 Auth Req','P7 Clinical','P8 Credentialing','P9 Rate'],
+     features:[
+       {icon:'fa-id-card',title:'Eligibility & Benefits Verification',desc:'Real-time patient eligibility lookup by policy number or SSN. Displays active riders, benefit limits, EP status, and coordination requirements.',badge:'Deflects P1 96%'},
+       {icon:'fa-file-signature',title:'Digital CMR Submission',desc:'Structured care management report form with field validation. OCR-free upload with structured data extraction and confirmation receipt.',badge:'Deflects P2 88%'},
+       {icon:'fa-file-invoice-dollar',title:'Invoice & Billing Portal',desc:'Submit claims electronically, track payment status, view remittance advice, and reconcile accounts. EDI 837/835 compatible.',badge:'Deflects P3+P4 92%'},
+       {icon:'fa-question-circle',title:'Denial Explainer & Appeal Wizard',desc:'Plain-language denial reason codes with appeal checklist. AI-guided appeal letter drafting with supporting documentation requirements.',badge:'Deflects P5 84%'},
+       {icon:'fa-file-alt',title:'Authorization Request Center',desc:'Submit prior authorization requests with clinical justification templates. Real-time status tracking and decision notification.',badge:'Deflects P6 79%'},
+       {icon:'fa-certificate',title:'Credentialing Tracker',desc:'Monitor credentialing status, expiration dates, and renewal requirements. One-click document submission for recredentialing.',badge:'Deflects P8 91%'}
+     ]},
+    {id:'issuer',icon:'fa-building',label:'HAL Issuer Hub',color:'#7c3aed',bg:'#ede9fe',desc:'Self-service for insurance company ceding clients, reinsurance partners, and actuarial teams',callDrivers:['I1 Data Rqst','I2 Reg Inquiry','I3 Actuarial','I4 Billing Recon','I5 Claims API'],
+     features:[
+       {icon:'fa-plug',title:'Claims API Console',desc:'Real-time claims data API with sandbox testing environment. RESTful endpoints for claim status, payment history, and reserve data. OAuth 2.0 secured.',badge:'Deflects I1+I5 97%'},
+       {icon:'fa-balance-scale',title:'Regulatory Tracker',desc:'State-by-state regulatory requirement dashboard. Tracks filing deadlines, rate approval status, and DOI correspondence. Automated reminders.',badge:'Deflects I2 82%'},
+       {icon:'fa-chart-bar',title:'Actuarial Data Export',desc:'Self-service actuarial data extracts with configurable cohort filters. Downloadable in CSV, Excel, or Parquet format with data dictionary.',badge:'Deflects I3 89%'},
+       {icon:'fa-receipt',title:'Premium Reconciliation',desc:'Automated premium billing reconciliation with line-item variance identification. Dispute flagging with direct carrier communication thread.',badge:'Deflects I4 85%'},
+       {icon:'fa-shield-alt',title:'Compliance Dashboard',desc:'NAIC Model Regulation compliance scorecard. Real-time flags for pending audits, regulatory filings, and required disclosures.',badge:'Reduces audit prep 40%'},
+       {icon:'fa-sync',title:'Data Feed Manager',desc:'Configure, test, and monitor automated data feeds. Real-time feed health monitoring with error alerting and auto-retry logic.',badge:'Reduces data tickets 73%'}
+     ]}
+  ];
+  var activePortal=window._p27activePortal||'claimant';
+  var html='<div>';
+  /* Portal tabs */
+  html+='<div style="display:flex;gap:0;border-radius:12px 12px 0 0;overflow:hidden;border:1px solid #e2e8f0;border-bottom:none;margin-bottom:0;">';
+  for(var p=0;p<portals.length;p++){
+    var pt=portals[p];
+    var isActive=pt.id===activePortal;
+    html+='<button onclick="_p27selectPortal(\''+pt.id+'\')" style="flex:1;padding:14px 16px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;';
+    if(isActive){html+='background:'+pt.color+';color:#fff;';}
+    else{html+='background:#f8fafc;color:#64748b;';}
+    html+='"><i class="fas '+pt.icon+'" style="margin-right:8px;"></i>'+pt.label+'</button>';
+  }
+  html+='</div>';
+  /* Portal content */
+  for(var p2=0;p2<portals.length;p2++){
+    var pt2=portals[p2];
+    var show=pt2.id===activePortal;
+    html+='<div id="p27-portal-'+pt2.id+'" style="display:'+(show?'block':'none')+';border:1px solid #e2e8f0;border-radius:0 0 12px 12px;background:#fff;padding:20px;">';
+    /* Header */
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">';
+    html+='<div><div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:4px;"><i class="fas '+pt2.icon+'" style="color:'+pt2.color+';margin-right:10px;"></i>'+pt2.label+'</div>';
+    html+='<div style="font-size:13px;color:#64748b;">'+pt2.desc+'</div></div>';
+    html+='<div style="background:'+pt2.bg+';border:1px solid '+pt2.color+'33;border-radius:10px;padding:10px 16px;text-align:right;">';
+    html+='<div style="font-size:20px;font-weight:700;color:'+pt2.color+';">'+pt2.callDrivers.length+'</div>';
+    html+='<div style="font-size:11px;color:#64748b;">Call drivers deflected</div></div></div>';
+    /* Call driver tags */
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">';
+    for(var cd=0;cd<pt2.callDrivers.length;cd++){
+      html+='<span style="background:'+pt2.bg+';color:'+pt2.color+';border:1px solid '+pt2.color+'33;font-size:11px;padding:3px 10px;border-radius:20px;">'+pt2.callDrivers[cd]+'</span>';
+    }
+    html+='</div>';
+    /* Feature cards grid */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">';
+    for(var f=0;f<pt2.features.length;f++){
+      var ft=pt2.features[f];
+      html+='<div style="border:1px solid #e2e8f0;border-radius:10px;padding:14px;background:#fafbfc;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">';
+      html+='<div style="width:34px;height:34px;border-radius:8px;background:'+pt2.bg+';display:flex;align-items:center;justify-content:center;"><i class="fas '+ft.icon+'" style="color:'+pt2.color+';font-size:14px;"></i></div>';
+      html+='<div style="font-size:13px;font-weight:600;color:#1e293b;">'+ft.title+'</div></div>';
+      html+='<div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:10px;">'+ft.desc+'</div>';
+      html+='<div style="background:'+pt2.bg+';color:'+pt2.color+';font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block;">'+ft.badge+'</div>';
+      html+='<button style="float:right;background:'+pt2.color+';color:#fff;border:none;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;">Launch <i class="fas fa-external-link-alt"></i></button>';
+      html+='</div>';
+    }
+    html+='</div>';
+    /* Bottom ROI strip */
+    html+='<div style="margin-top:16px;background:linear-gradient(135deg,'+pt2.bg+',#f8fafc);border:1px solid '+pt2.color+'22;border-radius:10px;padding:14px;display:flex;gap:20px;flex-wrap:wrap;">';
+    html+='<div style="font-size:11px;color:#64748b;font-weight:600;width:100%;margin-bottom:4px;"><i class="fas fa-chart-line" style="color:'+pt2.color+';margin-right:5px;"></i>PORTAL ROI IMPACT</div>';
+    var rois=[['Avg Deflection Rate','78–96%'],['Monthly Call Deflection','12,400 calls'],['Annual Cost Savings','$1.8M'],['CSAT Improvement','+22 pts']];
+    for(var r=0;r<rois.length;r++){
+      html+='<div style="text-align:center;min-width:90px;"><div style="font-size:16px;font-weight:700;color:'+pt2.color+';">'+rois[r][1]+'</div><div style="font-size:10px;color:#94a3b8;">'+rois[r][0]+'</div></div>';
+    }
+    html+='</div>';
+    html+='</div>'; /* end portal */
+  }
+  html+='</div>';
+  return html;
+}
+window._p27selectPortal=function(id){
+  window._p27activePortal=id;
+  var tc=document.getElementById('p27-tab-content');
+  if(tc) tc.innerHTML=_p27portalsTab();
+};
+
+function _p27analyticsTab(){
+  var kpis=[
+    {label:'Monthly Call Volume',value:'19,240',delta:'-12%',trend:'down-good',icon:'fa-phone',color:'#0891b2'},
+    {label:'Deflection Rate',value:'65%',delta:'+8pts',trend:'up-good',icon:'fa-filter',color:'#059669'},
+    {label:'Avg Handle Time',value:'5.1 min',delta:'-9.1 min',trend:'down-good',icon:'fa-clock',color:'#7c3aed'},
+    {label:'FCR Rate',value:'87%',delta:'+14pts',trend:'up-good',icon:'fa-check-circle',color:'#d97706'},
+    {label:'CSAT Score',value:'4.6/5',delta:'+0.9',trend:'up-good',icon:'fa-star',color:'#0891b2'},
+    {label:'Annual Savings',value:'$5.3M',delta:'+$1.2M',trend:'up-good',icon:'fa-dollar-sign',color:'#059669'}
+  ];
+  var topDeflected=[
+    {id:'C2',label:'Claim Status Inquiry',vol:4200,defl:94,savings:312000,cat:'Claimant'},
+    {id:'C3',label:'Benefit Calculation',vol:2800,defl:89,savings:208000,cat:'Claimant'},
+    {id:'P1',label:'Eligibility Verification',vol:2400,defl:96,savings:184000,cat:'Provider'},
+    {id:'C6',label:'Document Missing/Resubmit',vol:1900,defl:87,savings:141000,cat:'Claimant'},
+    {id:'P3',label:'Billing & Invoicing',vol:1600,defl:92,savings:124000,cat:'Provider'},
+    {id:'C1',label:'Policy Info & Coverage',vol:1500,defl:82,savings:110000,cat:'Claimant'},
+    {id:'I1',label:'Data & Report Requests',vol:890,defl:97,savings:68000,cat:'Issuer'},
+    {id:'C5',label:'Payment Status',vol:1200,defl:88,savings:88000,cat:'Claimant'}
+  ];
+  var monthly=[
+    {month:'Jan',calls:21800,deflected:8720,aht:14.2},
+    {month:'Feb',calls:21200,deflected:9540,aht:13.8},
+    {month:'Mar',calls:20900,deflected:10450,aht:12.9},
+    {month:'Apr',calls:20400,deflected:11220,aht:11.4},
+    {month:'May',calls:19800,deflected:11880,aht:9.8},
+    {month:'Jun',calls:19240,deflected:12506,aht:5.1}
+  ];
+  var kbHealth={totalChunks:346000,sources:89,freshness:94,coverage:91,accuracy:96,lastIngested:'2026-07-09'};
+  var html='<div>';
+  /* KPI Row */
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px;">';
+  for(var k=0;k<kpis.length;k++){
+    var kp=kpis[k];
+    var trendColor=kp.trend==='up-good'||kp.trend==='down-good'?'#16a34a':'#dc2626';
+    var trendIcon=kp.trend.startsWith('up')?'fa-arrow-up':'fa-arrow-down';
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;">';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html+='<div style="width:30px;height:30px;border-radius:8px;background:'+kp.color+'1a;display:flex;align-items:center;justify-content:center;"><i class="fas '+kp.icon+'" style="color:'+kp.color+';font-size:12px;"></i></div>';
+    html+='<div style="font-size:11px;color:#64748b;">'+kp.label+'</div></div>';
+    html+='<div style="font-size:22px;font-weight:700;color:#1e293b;">'+kp.value+'</div>';
+    html+='<div style="font-size:11px;color:'+trendColor+';margin-top:4px;"><i class="fas '+trendIcon+'" style="margin-right:3px;"></i>'+kp.delta+' vs pre-CIH</div>';
+    html+='</div>';
+  }
+  html+='</div>';
+  /* Main grid: trend chart + deflection table */
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">';
+  /* Monthly Trend chart (SVG bar chart) */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">';
+  html+='<div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:14px;"><i class="fas fa-chart-area" style="color:#0891b2;margin-right:8px;"></i>Monthly Call Volume vs Deflection Trend</div>';
+  var maxCalls=22000;
+  html+='<svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet">';
+  /* Y axis gridlines */
+  for(var g=0;g<5;g++){
+    var gy=20+g*32;
+    var gVal=Math.round(maxCalls-(g*maxCalls/4)/1000)+'K';
+    html+='<line x1="40" y1="'+gy+'" x2="390" y2="'+gy+'" stroke="#f1f5f9" stroke-width="1"/>';
+    html+='<text x="35" y="'+(gy+4)+'" text-anchor="end" font-size="9" fill="#94a3b8">'+Math.round(maxCalls*(1-g/4)/1000)+'K</text>';
+  }
+  var barW=46;var barGap=20;var startX=50;
+  for(var m=0;m<monthly.length;m++){
+    var mo=monthly[m];
+    var bx=startX+m*(barW+barGap);
+    var totalH=Math.round((mo.calls/maxCalls)*148);
+    var deflH=Math.round((mo.deflected/maxCalls)*148);
+    var totalY=168-totalH;
+    var deflY=168-deflH;
+    /* Total calls bar */
+    html+='<rect x="'+bx+'" y="'+totalY+'" width="'+barW+'" height="'+totalH+'" rx="3" fill="#e0f2fe"/>';
+    /* Deflected overlay */
+    html+='<rect x="'+bx+'" y="'+deflY+'" width="'+barW+'" height="'+deflH+'" rx="3" fill="#0891b2" opacity="0.85"/>';
+    html+='<text x="'+(bx+barW/2)+'" y="175" text-anchor="middle" font-size="9" fill="#64748b">'+mo.month+'</text>';
+    html+='<text x="'+(bx+barW/2)+'" y="'+(deflY-4)+'" text-anchor="middle" font-size="8" fill="#0891b2" font-weight="bold">'+Math.round(mo.deflected/1000*10)/10+'K</text>';
+  }
+  html+='</svg>';
+  html+='<div style="display:flex;gap:14px;margin-top:4px;">';
+  html+='<span style="font-size:11px;color:#64748b;"><span style="display:inline-block;width:12px;height:12px;background:#e0f2fe;border-radius:2px;margin-right:4px;"></span>Total Calls</span>';
+  html+='<span style="font-size:11px;color:#64748b;"><span style="display:inline-block;width:12px;height:12px;background:#0891b2;border-radius:2px;margin-right:4px;"></span>Deflected (CIH)</span>';
+  html+='</div>';
+  html+='</div>';
+  /* AHT Trend line chart */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">';
+  html+='<div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:14px;"><i class="fas fa-clock" style="color:#7c3aed;margin-right:8px;"></i>Average Handle Time Reduction (Minutes)</div>';
+  html+='<svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet">';
+  var maxAHT=16;
+  for(var g2=0;g2<5;g2++){
+    var gy2=20+g2*32;
+    html+='<line x1="40" y1="'+gy2+'" x2="390" y2="'+gy2+'" stroke="#f1f5f9" stroke-width="1"/>';
+    html+='<text x="35" y="'+(gy2+4)+'" text-anchor="end" font-size="9" fill="#94a3b8">'+Math.round(maxAHT*(1-g2/4))+'m</text>';
+  }
+  var pts='';var dotInfo=[];
+  for(var m2=0;m2<monthly.length;m2++){
+    var mo2=monthly[m2];
+    var mx=50+m2*60;
+    var my=168-Math.round((mo2.aht/maxAHT)*148);
+    pts+=(m2===0?'M':'L')+mx+','+my;
+    dotInfo.push({x:mx,y:my,aht:mo2.aht,month:mo2.month});
+    html+='<text x="'+mx+'" y="175" text-anchor="middle" font-size="9" fill="#64748b">'+mo2.month+'</text>';
+  }
+  html+='<path d="'+pts+'" stroke="#7c3aed" stroke-width="2" fill="none"/>';
+  for(var di=0;di<dotInfo.length;di++){
+    var d2=dotInfo[di];
+    html+='<circle cx="'+d2.x+'" cy="'+d2.y+'" r="4" fill="#7c3aed"/>';
+    html+='<text x="'+d2.x+'" y="'+(d2.y-8)+'" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="bold">'+d2.aht+'</text>';
+  }
+  html+='</svg>';
+  html+='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;margin-top:4px;font-size:12px;color:#15803d;">';
+  html+='<i class="fas fa-arrow-down" style="margin-right:5px;"></i>AHT reduced from 14.2 → 5.1 min <strong>(64% improvement)</strong> — saving 221 FTE hours/month</div>';
+  html+='</div>';
+  html+='</div>'; /* end main grid */
+  /* Top deflected table + KB health */
+  html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">';
+  /* Top deflected table */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+  html+='<div style="background:#f1f5f9;padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:600;color:#1e293b;"><i class="fas fa-trophy" style="color:#f59e0b;margin-right:8px;"></i>Top Deflected Call Drivers (This Month)</div>';
+  html+='<table style="width:100%;border-collapse:collapse;">';
+  html+='<thead><tr style="background:#f8fafc;">';
+  html+='<th style="padding:8px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;">Driver</th>';
+  html+='<th style="padding:8px 12px;text-align:right;font-size:11px;color:#64748b;font-weight:600;">Volume</th>';
+  html+='<th style="padding:8px 12px;text-align:center;font-size:11px;color:#64748b;font-weight:600;">Deflect %</th>';
+  html+='<th style="padding:8px 12px;text-align:right;font-size:11px;color:#64748b;font-weight:600;">Savings/Mo</th>';
+  html+='</tr></thead><tbody>';
+  for(var td=0;td<topDeflected.length;td++){
+    var dr=topDeflected[td];
+    var catColor=dr.cat==='Claimant'?'#0891b2':dr.cat==='Provider'?'#059669':'#7c3aed';
+    html+='<tr style="border-bottom:1px solid #f1f5f9;">';
+    html+='<td style="padding:10px 12px;"><span style="background:'+catColor+'1a;color:'+catColor+';font-size:10px;padding:1px 7px;border-radius:10px;margin-right:6px;">'+dr.id+'</span><span style="font-size:12px;color:#334155;">'+dr.label+'</span></td>';
+    html+='<td style="padding:10px 12px;text-align:right;font-size:12px;color:#334155;">'+dr.vol.toLocaleString()+'</td>';
+    html+='<td style="padding:10px 12px;text-align:center;">';
+    html+='<div style="background:#e0f2fe;border-radius:20px;height:18px;width:80px;margin:0 auto;overflow:hidden;position:relative;">';
+    html+='<div style="background:#0891b2;height:100%;width:'+dr.defl+'%;border-radius:20px;"></div>';
+    html+='<span style="position:absolute;top:0;left:0;right:0;font-size:10px;font-weight:700;color:#0c4a6e;line-height:18px;">'+dr.defl+'%</span>';
+    html+='</div></td>';
+    html+='<td style="padding:10px 12px;text-align:right;font-size:12px;color:#16a34a;font-weight:600;">$'+Math.round(dr.savings/1000)+'K</td>';
+    html+='</tr>';
+  }
+  html+='</tbody></table></div>';
+  /* KB Health panel */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+  html+='<div style="background:#f1f5f9;padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:600;color:#1e293b;"><i class="fas fa-database" style="color:#0891b2;margin-right:8px;"></i>HAL Knowledge Base Health</div>';
+  html+='<div style="padding:16px;">';
+  var kbMetrics=[['Vector Chunks','346K','#0891b2'],['Source Documents','89','#059669'],['Freshness Score',kbHealth.freshness+'%','#d97706'],['Coverage Score',kbHealth.coverage+'%','#0891b2'],['Accuracy Score',kbHealth.accuracy+'%','#059669']];
+  for(var km=0;km<kbMetrics.length;km++){
+    var met=kbMetrics[km];
+    html+='<div style="margin-bottom:12px;">';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;color:#475569;">'+met[0]+'</span><span style="font-size:12px;font-weight:700;color:'+met[2]+';">'+met[1]+'</span></div>';
+    if(km>1){
+      var pct=parseInt(met[1]);
+      html+='<div style="background:#f1f5f9;border-radius:20px;height:6px;"><div style="background:'+met[2]+';height:100%;width:'+pct+'%;border-radius:20px;"></div></div>';
+    }
+    html+='</div>';
+  }
+  html+='<div style="background:#e0f2fe;border-radius:8px;padding:8px 10px;font-size:11px;color:#0891b2;margin-top:4px;">';
+  html+='<i class="fas fa-sync" style="margin-right:5px;"></i>Last ingested: '+kbHealth.lastIngested+' | KnowledgeCurator running nightly</div>';
+  html+='</div></div>';
+  html+='</div>'; /* end grid */
+  /* FTE Impact + ROI Summary */
+  html+='<div style="background:linear-gradient(135deg,#164e63,#0c4a6e);color:#fff;border-radius:12px;padding:20px;">';
+  html+='<div style="font-size:14px;font-weight:700;margin-bottom:14px;"><i class="fas fa-chart-line" style="margin-right:8px;"></i>CIH Business Impact Summary — FY2026</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px;">';
+  var impacts=[['$5.3M','Annual Cost Savings','fa-dollar-sign'],['65%','Call Deflection Rate','fa-filter'],['221','FTEs Redeployable','fa-users'],['14.2→5.1m','AHT Reduction','fa-clock'],['87%','First Contact Res.','fa-check-circle'],['4.6/5','CSAT Score','fa-star'],['19.2K','Monthly Contacts','fa-phone'],['89','KB Sources Indexed','fa-database']];
+  for(var im=0;im<impacts.length;im++){
+    var imp=impacts[im];
+    html+='<div style="text-align:center;background:rgba(255,255,255,0.08);border-radius:10px;padding:12px 8px;">';
+    html+='<i class="fas '+imp[2]+'" style="color:#67e8f9;font-size:16px;margin-bottom:6px;display:block;"></i>';
+    html+='<div style="font-size:18px;font-weight:700;color:#fff;">'+imp[0]+'</div>';
+    html+='<div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px;">'+imp[1]+'</div>';
+    html+='</div>';
+  }
+  html+='</div></div>';
+  html+='</div>';
+
+  /* ─── Adjuster Performance Metrics ─── */
+  var adjusters=[
+    {name:'Priya Nair',id:'ADJ-1041',team:'LTC Primary',openClaims:24,slaOnTime:94,aiAdoption:89,avgResolutionDays:12.4,csat:4.7,escRate:3.2,specialties:['Memory Care','Hospice']},
+    {name:'Marcus Webb',id:'ADJ-1028',team:'HAL Platform',openClaims:31,slaOnTime:87,aiAdoption:76,avgResolutionDays:15.1,csat:4.3,escRate:5.8,specialties:['Post-Acute','Rehab']},
+    {name:'Samantha Cruz',id:'ADJ-1055',team:'LTC Complex',openClaims:18,slaOnTime:97,aiAdoption:94,avgResolutionDays:9.8,csat:4.9,escRate:1.4,specialties:['Hybrid Products','Fraud']},
+    {name:'Derek Osei',id:'ADJ-1063',team:'HAL Platform',openClaims:27,slaOnTime:82,aiAdoption:68,avgResolutionDays:18.3,csat:4.1,escRate:7.2,specialties:['Home Health','DME']},
+    {name:'Linda Yamamura',id:'ADJ-1077',team:'LTC Primary',openClaims:21,slaOnTime:91,aiAdoption:83,avgResolutionDays:13.7,csat:4.5,escRate:4.1,specialties:['ALF','CCRC']},
+  ];
+  html+='<div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-top:20px;overflow:hidden">';
+  html+='<div style="background:linear-gradient(135deg,#164e63,#0891b2);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px">'
+    +'<i class="fas fa-user-tie" style="font-size:16px"></i>'
+    +'<span style="font-weight:700;font-size:14px">Adjuster Performance Metrics — CIH Impact</span>'
+    +'<span style="margin-left:auto;background:rgba(255,255,255,.18);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700">'+adjusters.length+' Adjusters</span>'
+    +'</div>';
+  html+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html+='<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0">';
+  ['Adjuster','Team','Open Claims','SLA On-Time','AI Adoption','Avg Resolution','CSAT','Escalation Rate','Specialties'].forEach(function(h2){
+    html+='<th style="padding:10px 14px;text-align:left;font-size:11px;color:#64748b;font-weight:700;white-space:nowrap">'+h2+'</th>';
+  });
+  html+='</tr></thead><tbody>';
+  adjusters.forEach(function(adj,idx2){
+    var slaColor=adj.slaOnTime>=95?'#16a34a':adj.slaOnTime>=85?'#d97706':'#dc2626';
+    var aiColor=adj.aiAdoption>=85?'#0891b2':adj.aiAdoption>=70?'#d97706':'#94a3b8';
+    var escColor=adj.escRate<=3?'#16a34a':adj.escRate<=6?'#d97706':'#dc2626';
+    html+='<tr style="border-bottom:1px solid #f1f5f9;background:'+(idx2%2===0?'#fff':'#f8fafc')+'">';
+    html+='<td style="padding:10px 14px"><div style="font-weight:700;color:#1e293b">'+adj.name+'</div><div style="font-size:10px;color:#94a3b8">'+adj.id+'</div></td>';
+    html+='<td style="padding:10px 14px"><span style="background:#e0f2fe;color:#0891b2;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600">'+adj.team+'</span></td>';
+    html+='<td style="padding:10px 14px;font-weight:600;color:#334155;text-align:center">'+adj.openClaims+'</td>';
+    html+='<td style="padding:10px 14px"><div style="background:#f1f5f9;border-radius:10px;height:6px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px"><div style="background:'+slaColor+';width:'+adj.slaOnTime+'%;height:100%;border-radius:10px"></div></div><span style="color:'+slaColor+';font-weight:700">'+adj.slaOnTime+'%</span></td>';
+    html+='<td style="padding:10px 14px"><div style="background:#f1f5f9;border-radius:10px;height:6px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px"><div style="background:'+aiColor+';width:'+adj.aiAdoption+'%;height:100%;border-radius:10px"></div></div><span style="color:'+aiColor+';font-weight:700">'+adj.aiAdoption+'%</span></td>';
+    html+='<td style="padding:10px 14px;color:#334155;text-align:center">'+adj.avgResolutionDays+' days</td>';
+    html+='<td style="padding:10px 14px"><span style="color:#d97706;font-size:13px">&#9733;</span> <span style="font-weight:700;color:#334155">'+adj.csat+'</span></td>';
+    html+='<td style="padding:10px 14px;font-weight:700;color:'+escColor+'">'+adj.escRate+'%</td>';
+    html+='<td style="padding:10px 14px">'+adj.specialties.map(function(s){return '<span style="background:#f0f9ff;color:#0369a1;font-size:10px;padding:2px 7px;border-radius:8px;margin-right:3px;font-weight:500">'+s+'</span>';}).join('')+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  html+='<div style="padding:12px 20px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:20px;flex-wrap:wrap">';
+  [['#16a34a','SLA ≥95% — Top Performer'],['#d97706','SLA 85-94% — Meets Standard'],['#dc2626','SLA <85% — Needs Coaching'],['#0891b2','AI Adoption ≥85% — Power User']].forEach(function(leg){
+    html+='<span style="font-size:11px;color:#64748b;display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+leg[0]+'"></span>'+leg[1]+'</span>';
+  });
+  html+='</div></div>';
+
+  return html;
+}
+
+/* ---- Helper stubs ---- */
+window._p27focusSuggestion=function(cat){
+  var el=document.getElementById('p27-sg-'+cat);
+  if(el){el.style.outline='2px solid #0891b2';el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+};
+window._p27expandSuggestion=function(el){
+  var inner=el.querySelector('div[style*="max-height:60px"]');
+  if(inner){inner.style.maxHeight=inner.style.maxHeight==='none'?'60px':'none';}
+};
+window._p27copyAnswer=function(id){
+  var btn=document.querySelector('[onclick*="_p27copyAnswer(\''+id+'\')"]');
+  if(btn){btn.innerHTML='<i class="fas fa-check"></i> Copied!';setTimeout(function(){btn.innerHTML='<i class="fas fa-copy"></i> Copy';},1500);}
+};
+window._p27acwMode=function(){
+  var notes=document.getElementById('p27-acw-notes');
+  if(notes){notes.style.background='#fef9c3';notes.style.border='1px solid #fbbf24';}
+};
+/* ---- ProactiveNotifier detail (called from overview tab) ---- */
+window._p27showNotifyDetail=function(idx){
+  var events=window._p27notifyEventsCache||[];
+  if(!events.length)return;
+  var ev=events[idx];if(!ev)return;
+  var panel=document.getElementById('p27-notify-detail');
+  if(!panel)return;
+  panel.style.display='block';
+  panel.innerHTML='<div style="background:linear-gradient(135deg,#164e63,#0c4a6e);color:#fff;border-radius:10px;padding:14px;margin-bottom:12px;">'
+    +'<div style="font-weight:700;font-size:14px;margin-bottom:6px;"><i class="fas fa-bell" style="margin-right:8px;"></i>'+ev.event+'</div>'
+    +'<div style="font-size:12px;opacity:0.8;">Trigger: '+ev.trigger+' | Audience: '+ev.audience+'</div></div>'
+    +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;">'
+    +'<div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:8px;">Sample Notification Message:</div>'
+    +'<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;color:#475569;font-style:italic;">'+ev.message+'</div>'
+    +'<div style="margin-top:10px;display:flex;gap:8px;">'
+    +'<span style="font-size:11px;background:#e0f2fe;color:#0891b2;padding:3px 10px;border-radius:20px;"><i class="fas fa-chart-line" style="margin-right:4px;"></i>Deflect est: '+ev.deflect+'%</span>'
+    +'<span style="font-size:11px;background:#d1fae5;color:#059669;padding:3px 10px;border-radius:20px;"><i class="fas fa-users" style="margin-right:4px;"></i>'+ev.volume+' contacts/mo</span>'
+    +'</div></div>';
+};
+/* ---- Nav intercept ---- */
+var _p27origNav=window.navigateTo||navigateTo;
+window.navigateTo=function(page){
+  if(page==='hal-cih'){
+    var pc=document.getElementById('page-content');
+    if(!pc){if(typeof _p27origNav==='function')_p27origNav(page);return;}
+    pc.innerHTML='';
+    _p27buildPage();
+    /* Mark nav active */
+    document.querySelectorAll('.nav-item').forEach(function(el){el.classList.remove('active');});
+    var navEl=document.querySelector('.hal-cih-nav');
+    if(navEl)navEl.classList.add('active');
+    window.scrollTo(0,0);
+    return;
+  }
+  if(typeof _p27origNav==='function')_p27origNav(page);
+};
+console.log('[HAL CIH] Phase 27 Contact Intelligence Hub loaded — 27 call drivers, 4 AI agents, 3 self-service portals');
+})();
+/* P27 fix: re-expose window.navigateTo to bare global so onclick="navigateTo(...)" resolves correctly */
+var navigateTo = window.navigateTo;
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 28 — HAL Claims Analytics Intelligence & Fraud Detection Engine (CAID)
+   AI-Powered Claims Intelligence · Predictive Fraud Scoring · SIU Workbench
+   Nav: hal-caid  |  Badge: CAID  |  Color: #dc2626 (red/crimson)
+   5 Tabs: overview · claimsIntel · fraudDetection · siuWorkbench · analytics
+   ═══════════════════════════════════════════════════════════════════════ */
+(function(){ 'use strict';
+  var CA1='#dc2626'; var CA2='#ef4444'; var CA3='#7f1d1d';
+  var CA4='#fef2f2'; var CAG='#16a34a'; var CAB='#1d4ed8'; var CAA='#d97706';
+
+  var _p28activeTab='overview';
+  var _p28activeFraud=null;
+  var _p28activeClaim=null;
+  var _p28activeSIU=null;
+  var _p28fraudFilter='all';
+  var _p28claimFilter='all';
+
+  /* ── 30 Real LTC claims for the portfolio ── */
+  var _p28claims=[
+    {id:'LTC-2024-10041',claimant:'Margaret O\'Brien',age:83,policy:'NYL-LTC-0041',carrier:'New York Life',type:'Nursing Facility',status:'Under Review',daysOpen:47,dailyBenefit:220,monthlyPaid:6160,fraudScore:91,flags:['billing_spike','multiple_facilities','rapid_ep'],assignee:'J. Torres',state:'FL',facilityName:'Sunrise Manor NF',billedAmount:9240,approvedAmount:0,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10042',claimant:'Robert Hensley',age:78,policy:'MET-LTC-7832',carrier:'MetLife',type:'Home Health',status:'Approved',daysOpen:12,dailyBenefit:150,monthlyPaid:4500,fraudScore:14,flags:[],assignee:'S. Patel',state:'TX',facilityName:'CareFirst HHA',billedAmount:4800,approvedAmount:4500,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10043',claimant:'Dorothy Yamamoto',age:91,policy:'JHN-LTC-2219',carrier:'John Hancock',type:'Memory Care',status:'Flagged — SIU',daysOpen:89,dailyBenefit:310,monthlyPaid:0,fraudScore:97,flags:['phantom_billing','provider_kickback','forged_cmr'],assignee:'SIU-Team',state:'CA',facilityName:'Pacific Memory Center',billedAmount:27900,approvedAmount:0,savings:27900,product:'LTC Standalone'},
+    {id:'LTC-2024-10044',claimant:'Harold Simmons',age:76,policy:'TRV-LTC-5541',carrier:'Travelers',type:'Assisted Living',status:'Approved',daysOpen:5,dailyBenefit:180,monthlyPaid:5400,fraudScore:22,flags:[],assignee:'A. Kim',state:'NY',facilityName:'Brookview ALF',billedAmount:5600,approvedAmount:5400,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10045',claimant:'Evelyn Marchetti',age:88,policy:'PRU-LTC-8812',carrier:'Prudential',type:'Nursing Facility',status:'Pending EP',daysOpen:31,dailyBenefit:260,monthlyPaid:0,fraudScore:38,flags:['ep_manipulation'],assignee:'B. Nguyen',state:'AZ',facilityName:'Desert Springs SNF',billedAmount:8060,approvedAmount:0,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10046',claimant:'George Whitfield',age:82,policy:'NYL-LTC-0099',carrier:'New York Life',type:'Home Health',status:'Approved',daysOpen:8,dailyBenefit:140,monthlyPaid:4200,fraudScore:9,flags:[],assignee:'S. Patel',state:'GA',facilityName:'HomeWell HHA',billedAmount:4300,approvedAmount:4200,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10047',claimant:'Shirley Kowalczyk',age:79,policy:'MET-LTC-3311',carrier:'MetLife',type:'Adult Day Care',status:'Under Review',daysOpen:22,dailyBenefit:90,monthlyPaid:0,fraudScore:74,flags:['upcoding','days_inflation'],assignee:'J. Torres',state:'IL',facilityName:'Bright Days ADC',billedAmount:3780,approvedAmount:0,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10048',claimant:'Walter Garrison',age:85,policy:'LNC-LTC-6678',carrier:'Lincoln Financial',type:'Nursing Facility',status:'Approved',daysOpen:3,dailyBenefit:200,monthlyPaid:6000,fraudScore:11,flags:[],assignee:'R. Chen',state:'OH',facilityName:'Riverside Care Center',billedAmount:6100,approvedAmount:6000,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10049',claimant:'Beatrice Fontaine',age:94,policy:'JHN-LTC-4490',carrier:'John Hancock',type:'Memory Care',status:'Flagged — SIU',daysOpen:63,dailyBenefit:330,monthlyPaid:0,fraudScore:88,flags:['phantom_billing','unlicensed_facility'],assignee:'SIU-Team',state:'FL',facilityName:'Coral Memory Care',billedAmount:20790,approvedAmount:0,savings:20790,product:'LTC Standalone'},
+    {id:'LTC-2024-10050',claimant:'Francis Delacroix',age:77,policy:'PRU-LTC-2201',carrier:'Prudential',type:'Hospice',status:'Approved',daysOpen:14,dailyBenefit:175,monthlyPaid:5250,fraudScore:6,flags:[],assignee:'A. Kim',state:'LA',facilityName:'Pelican Hospice',billedAmount:5300,approvedAmount:5250,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10051',claimant:'Agnes Thibodeau',age:86,policy:'TRV-LTC-9921',carrier:'Travelers',type:'Nursing Facility',status:'Under Review',daysOpen:35,dailyBenefit:240,monthlyPaid:0,fraudScore:62,flags:['billing_spike','identity_mismatch'],assignee:'B. Nguyen',state:'MA',facilityName:'Harbor View SNF',billedAmount:8400,approvedAmount:0,savings:0,product:'LTC/HAL Hybrid'},
+    {id:'LTC-2024-10052',claimant:'Chester Albright',age:80,policy:'NYL-LTC-0112',carrier:'New York Life',type:'Home Health',status:'Approved',daysOpen:6,dailyBenefit:160,monthlyPaid:4800,fraudScore:17,flags:[],assignee:'J. Torres',state:'NC',facilityName:'Carolina HHA',billedAmount:4900,approvedAmount:4800,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10053',claimant:'Norma Jean Briggs',age:89,policy:'MET-LTC-5577',carrier:'MetLife',type:'Assisted Living',status:'Flagged — SIU',daysOpen:71,dailyBenefit:290,monthlyPaid:0,fraudScore:93,flags:['phantom_billing','forged_cmr','provider_kickback'],assignee:'SIU-Team',state:'PA',facilityName:'Liberty Ridge ALF',billedAmount:20590,approvedAmount:0,savings:20590,product:'LTC/HAL Hybrid'},
+    {id:'LTC-2024-10054',claimant:'Leonard Fujimoto',age:74,policy:'LNC-LTC-8843',carrier:'Lincoln Financial',type:'Home Health',status:'Approved',daysOpen:9,dailyBenefit:130,monthlyPaid:3900,fraudScore:8,flags:[],assignee:'R. Chen',state:'WA',facilityName:'Pacific HHA',billedAmount:4000,approvedAmount:3900,savings:0,product:'LTC Standalone'},
+    {id:'LTC-2024-10055',claimant:'Mildred Castillo',age:92,policy:'JHN-LTC-7763',carrier:'John Hancock',type:'Memory Care',status:'Under Review',daysOpen:28,dailyBenefit:350,monthlyPaid:0,fraudScore:55,flags:['rapid_ep','days_inflation'],assignee:'S. Patel',state:'TX',facilityName:'Texan Memory Institute',billedAmount:9800,approvedAmount:0,savings:0,product:'LTC/HAL Hybrid'},
+    /* ── HAL Platform Claims ── */
+    {id:'HAL-2024-20001',claimant:'James Whitmore',age:52,policy:'HAL-HEALTH-5501',carrier:'HAL Health',type:'HAL Health — Major Medical',status:'Under Review',daysOpen:18,dailyBenefit:0,monthlyPaid:0,fraudScore:78,flags:['billing_spike','upcoding'],assignee:'J. Torres',state:'CA',facilityName:'BayArea Medical Group',billedAmount:42800,approvedAmount:0,savings:0,product:'HAL Platform'},
+    {id:'HAL-2024-20002',claimant:'Patricia Nguyen',age:61,policy:'HAL-ANNUITY-3312',carrier:'HAL Annuity',type:'HAL Annuity — Disability Rider',status:'Flagged — SIU',daysOpen:54,dailyBenefit:0,monthlyPaid:0,fraudScore:89,flags:['forged_cmr','identity_mismatch'],assignee:'SIU-Team',state:'TX',facilityName:'Capital Rehab Center',billedAmount:31500,approvedAmount:0,savings:31500,product:'HAL Platform'},
+    {id:'HAL-2024-20003',claimant:'Marcus Ellis',age:45,policy:'HAL-LIFE-7721',carrier:'HAL Life',type:'HAL Life — Accelerated Benefit',status:'Approved',daysOpen:7,dailyBenefit:0,monthlyPaid:0,fraudScore:12,flags:[],assignee:'R. Chen',state:'NY',facilityName:'Memorial Oncology Center',billedAmount:88000,approvedAmount:88000,savings:0,product:'HAL Platform'},
+    {id:'HAL-2024-20004',claimant:'Sandra Okafor',age:58,policy:'HAL-HEALTH-8847',carrier:'HAL Health',type:'HAL Health — Specialty Rx',status:'Approved',daysOpen:4,dailyBenefit:0,monthlyPaid:0,fraudScore:9,flags:[],assignee:'A. Kim',state:'FL',facilityName:'Sunrise Pharmacy Network',billedAmount:14200,approvedAmount:14200,savings:0,product:'HAL Platform'},
+    {id:'HAL-2024-20005',claimant:'Robert Tanaka',age:67,policy:'HAL-LTC-HYBRID-4401',carrier:'HAL Life + LTC',type:'HAL/LTC Hybrid — Nursing Facility',status:'Under Review',daysOpen:39,dailyBenefit:280,monthlyPaid:0,fraudScore:71,flags:['multiple_facilities','days_inflation'],assignee:'B. Nguyen',state:'AZ',facilityName:'Scottsdale Care Campus',billedAmount:10920,approvedAmount:0,savings:0,product:'LTC/HAL Hybrid'},
+    {id:'HAL-2024-20006',claimant:'Angela Breslin',age:49,policy:'HAL-HEALTH-2209',carrier:'HAL Health',type:'HAL Health — Behavioral Health',status:'Approved',daysOpen:11,dailyBenefit:0,monthlyPaid:0,fraudScore:16,flags:[],assignee:'S. Patel',state:'IL',facilityName:'Chicago Mind Wellness',billedAmount:9600,approvedAmount:9600,savings:0,product:'HAL Platform'},
+    {id:'HAL-2024-20007',claimant:'Victor Castillo',age:55,policy:'HAL-ANNUITY-6634',carrier:'HAL Annuity',type:'HAL Annuity — COLA Adjustment Dispute',status:'Flagged — SIU',daysOpen:77,dailyBenefit:0,monthlyPaid:0,fraudScore:84,flags:['ep_manipulation','phantom_billing'],assignee:'SIU-Team',state:'NV',facilityName:'Desert Financial Services',billedAmount:57600,approvedAmount:0,savings:57600,product:'HAL Platform'},
+    {id:'HAL-2024-20008',claimant:'Grace Hoffman',age:63,policy:'HAL-LTC-HYBRID-9902',carrier:'HAL Life + LTC',type:'HAL/LTC Hybrid — Memory Care',status:'Under Review',daysOpen:33,dailyBenefit:320,monthlyPaid:0,fraudScore:66,flags:['billing_spike'],assignee:'J. Torres',state:'WA',facilityName:'Pacific Memory Gardens',billedAmount:10560,approvedAmount:0,savings:0,product:'LTC/HAL Hybrid'},
+    {id:'HAL-2024-20009',claimant:'Dennis Fairbanks',age:41,policy:'HAL-LIFE-3318',carrier:'HAL Life',type:'HAL Life — Critical Illness',status:'Approved',daysOpen:6,dailyBenefit:0,monthlyPaid:0,fraudScore:7,flags:[],assignee:'R. Chen',state:'GA',facilityName:'Emory Cancer Institute',billedAmount:125000,approvedAmount:125000,savings:0,product:'HAL Platform'},
+    {id:'HAL-2024-20010',claimant:'Miriam Osei',age:56,policy:'HAL-HEALTH-5593',carrier:'HAL Health',type:'HAL Health — Surgical Claim',status:'Flagged — SIU',daysOpen:42,dailyBenefit:0,monthlyPaid:0,fraudScore:82,flags:['upcoding','forged_cmr'],assignee:'SIU-Team',state:'OH',facilityName:'Midwest Surgical Partners',billedAmount:73200,approvedAmount:0,savings:73200,product:'HAL Platform'}
+  ];
+
+  /* ── Fraud Signal Taxonomy ── */
+  var _p28fraudSignals=[
+    {id:'FS-001',name:'Phantom Billing',category:'Provider Fraud',severity:'critical',description:'Claims submitted for services not rendered. AI cross-references CMR dates with facility occupancy records and CMS data.',mlModel:'RNN Sequence Anomaly',accuracy:96.2,avgSavings:28400,ytdCases:47,ytdSavings:1334800,indicators:['CMR dates don\'t match facility census','Service codes billed beyond licensed capacity','Provider billed 28+ days in a month for same patient','Identical claim amounts across multiple patients']},
+    {id:'FS-002',name:'Upcoding / Service Inflation',category:'Billing Fraud',severity:'high',description:'Provider bills for higher-level care than delivered. AI compares billed service codes against functional assessment scores and care notes.',mlModel:'XGBoost Classification',accuracy:91.8,avgSavings:12200,ytdCases:83,ytdSavings:1012600,indicators:['ADL scores inconsistent with skilled nursing level billed','Therapy minutes billed exceed documented sessions','Rapid escalation of care level without clinical basis','Facility bills ICF rate for resident documented at personal care']},
+    {id:'FS-003',name:'Provider Kickback Schemes',category:'Collusion Fraud',severity:'critical',description:'Facility refers patients in exchange for payments or inflated referral fees. Network analysis detects unusual claimant-provider concentration.',mlModel:'Graph Neural Network',accuracy:88.4,avgSavings:51600,ytdCases:12,ytdSavings:619200,indicators:['>40% of claimants referred by single agent/facility','Agent and facility share address or ownership','Premium refund checks cashed at facility','Policy upgrades correlated with facility admissions']},
+    {id:'FS-004',name:'Identity & Eligibility Fraud',category:'Claimant Fraud',severity:'high',description:'Claim filed by or for deceased, ineligible, or non-existent beneficiary. HAL cross-references SSA death index, DMV, and real-time identity verification.',mlModel:'BERT + SSA Cross-check',accuracy:99.1,avgSavings:34800,ytdCases:8,ytdSavings:278400,indicators:['SSN appears on SSA death master file','DOB inconsistency across claim documents','POA documents filed after policy lapse','Multiple policies with identical beneficiary SSN']},
+    {id:'FS-005',name:'Elimination Period Manipulation',category:'Policy Fraud',severity:'medium',description:'Claimant or provider manipulates EP count to accelerate benefit start. AI tracks EP day progression against care facility records.',mlModel:'Temporal LSTM',accuracy:87.3,avgSavings:9800,ytdCases:61,ytdSavings:597800,indicators:['CMR submitted without corresponding facility admission record','EP days counted during hospital stay (excluded period)','Multiple EP restart attempts within 6 months','Retroactive care date changes on CMR submissions']},
+    {id:'FS-006',name:'Forged Clinical Documentation',category:'Document Fraud',severity:'critical',description:'CMRs, physician certifications, or care plans are altered or fabricated. HAL OCR + NLP analyzes document metadata, ink signatures, and content anomalies.',mlModel:'Vision Transformer + NLP',accuracy:93.7,avgSavings:19200,ytdCases:34,ytdSavings:652800,indicators:['PDF metadata creation date differs from document date','Physician signature hash mismatch across submissions','ICD codes on CMR inconsistent with attending physician specialty','Typeface inconsistency within single document']},
+    {id:'FS-007',name:'Billing Spike Anomaly',category:'Billing Fraud',severity:'medium',description:'Sudden unexplained increase in billed amounts from a historically consistent provider. HAL time-series analysis detects anomalous billing trajectories.',mlModel:'Isolation Forest + ARIMA',accuracy:89.5,avgSavings:7600,ytdCases:128,ytdSavings:972800,indicators:['>35% month-over-month billing increase without census change','New billing codes introduced without staff qualification change','Billing spike correlates with staff turnover or ownership change','Holiday period billing inconsistencies']},
+    {id:'FS-008',name:'Multiple Facility Overlap',category:'Provider Fraud',severity:'high',description:'Same beneficiary billed by two or more facilities for the same dates of service. HAL coordination-of-benefits engine detects date overlaps across carriers.',mlModel:'Rule Engine + ML Overlap',accuracy:97.8,avgSavings:15400,ytdCases:29,ytdSavings:446600,indicators:['Identical date-of-service billed by geographically distant facilities','Policy beneficiary enrolled at two ALFs simultaneously','CMR from Facility A conflicts with hospitalization records on same date','Cross-carrier COB reveals duplicate benefit payments']}
+  ];
+
+  /* ── SIU Case Queue ── */
+  var _p28siuCases=[
+    {id:'SIU-2024-0041',claimId:'LTC-2024-10043',claimant:'Dorothy Yamamoto',carrier:'John Hancock',opened:'2024-11-14',priority:'P1-Critical',assignee:'Maria Santos',signals:['FS-001','FS-003','FS-006'],fraudScore:97,estimatedExposure:83700,status:'Active Investigation',facilityName:'Pacific Memory Center',facilityLicense:'Suspended 2024-09',notes:'Facility license suspended Sept 2024; continued billing through Oct. Provider owner under separate DOI investigation. CMR signatures verified as forgeries. Coordinating with CA DOI and FBI Financial Crimes Unit.',actions:['DOI Referral Filed','Claim Suspended','FBI Contacted','Facility Audit Requested']},
+    {id:'SIU-2024-0049',claimId:'LTC-2024-10049',claimant:'Beatrice Fontaine',carrier:'John Hancock',opened:'2024-12-02',priority:'P1-Critical',assignee:'David Kim',signals:['FS-001','FS-004'],fraudScore:88,estimatedExposure:62370,status:'Pending DOI',facilityName:'Coral Memory Care',facilityLicense:'Under Review',notes:'Claimant SSN shows SSA death record dated 3 months before claim filed. Facility billed 31 days for February. Multiple policy holders at same address. Identity verification failed across 4 documents.',actions:['SSA Cross-Check Complete','Claim Suspended','Carrier Notified']},
+    {id:'SIU-2024-0053',claimId:'LTC-2024-10053',claimant:'Norma Jean Briggs',carrier:'MetLife',opened:'2024-12-18',priority:'P2-High',assignee:'Rachel Torres',signals:['FS-001','FS-003','FS-006'],fraudScore:93,estimatedExposure:61770,status:'Active Investigation',facilityName:'Liberty Ridge ALF',facilityLicense:'Probationary',notes:'Network analysis shows 84% of ALF residents share the same insurance agent. Agent owns 12% stake in facility LLC. CMR signatures forensically matched to office admin rather than attending physician. Coordinating with PA Insurance Department.',actions:['Network Analysis Complete','Agent License Flag','Forensic Review']},
+    {id:'SIU-2024-0047',claimId:'LTC-2024-10047',claimant:'Shirley Kowalczyk',carrier:'MetLife',opened:'2024-12-28',priority:'P3-Medium',assignee:'James Park',signals:['FS-002','FS-007'],fraudScore:74,estimatedExposure:11340,status:'Under Review',facilityName:'Bright Days ADC',facilityLicense:'Active',notes:'Adult day care facility billing 30 days/month for patient documented as home health. Service codes include skilled nursing not authorized for ADC license. Billing increased 48% after ownership change in Q3.',actions:['CMR Audit Requested','On-Site Inspection Scheduled']},
+    {id:'SIU-2024-0045',claimId:'LTC-2024-10045',claimant:'Evelyn Marchetti',carrier:'Prudential',opened:'2025-01-03',priority:'P3-Medium',assignee:'Lisa Chen',signals:['FS-005'],fraudScore:38,estimatedExposure:8060,status:'Under Review',facilityName:'Desert Springs SNF',facilityLicense:'Active',notes:'EP days claimed during a 9-day hospital stay which should restart EP clock. Retroactive CMR dates submitted. Pattern consistent with FS-005 manipulation. Physician contacted for independent verification.',actions:['EP Audit Initiated','Physician Contacted']},
+    {id:'SIU-2024-0051',claimId:'LTC-2024-10051',claimant:'Agnes Thibodeau',carrier:'Travelers',opened:'2025-01-08',priority:'P2-High',assignee:'David Kim',signals:['FS-007','FS-004'],fraudScore:62,estimatedExposure:25200,status:'Active Investigation',facilityName:'Harbor View SNF',facilityLicense:'Active',notes:'Billing increased 38% in December without census change. Claimant DOB on CMR differs by 2 years from policy application. Identity document inconsistency — driver\'s license photo does not match POA submission photo.',actions:['Identity Verification Ordered','Billing Audit In Progress']}
+  ];
+
+  /* ── Analytics KPIs ── */
+  var _p28analytics={
+    kpis:[
+      {label:'Claims Reviewed (YTD)',value:'4,847',delta:'+12%',trend:'up',icon:'fa-file-medical-alt',color:'#1d4ed8'},
+      {label:'Fraud Detected (YTD)',value:'402',delta:'+23%',trend:'up-good',icon:'fa-exclamation-triangle',color:'#dc2626'},
+      {label:'Total Fraud Savings',value:'$5.91M',delta:'+$1.4M',trend:'up-good',icon:'fa-shield-alt',color:'#16a34a'},
+      {label:'SIU Cases Active',value:'31',delta:'-4',trend:'down-good',icon:'fa-user-secret',color:'#7c3aed'},
+      {label:'Avg Fraud Score (flagged)',value:'81.4',delta:'+6.2pts',trend:'up-good',icon:'fa-brain',color:'#dc2626'},
+      {label:'False Positive Rate',value:'3.2%',delta:'-1.8pts',trend:'down-good',icon:'fa-check-circle',color:'#16a34a'}
+    ],
+    monthly:[
+      {month:'Jan',reviewed:680,flagged:48,fraudConfirmed:31,savings:612000},
+      {month:'Feb',reviewed:710,flagged:52,fraudConfirmed:36,savings:698000},
+      {month:'Mar',reviewed:740,flagged:61,fraudConfirmed:42,savings:781000},
+      {month:'Apr',reviewed:790,flagged:58,fraudConfirmed:39,savings:742000},
+      {month:'May',reviewed:820,flagged:71,fraudConfirmed:52,savings:934000},
+      {month:'Jun',reviewed:907,flagged:112,fraudConfirmed:78,savings:1143000}
+    ],
+    bySignal:[
+      {signal:'Phantom Billing',cases:47,savings:1334800,pct:22.6},
+      {signal:'Upcoding',cases:83,savings:1012600,pct:17.1},
+      {signal:'Provider Kickback',cases:12,savings:619200,pct:10.5},
+      {signal:'Forged Docs',cases:34,savings:652800,pct:11.0},
+      {signal:'Billing Spike',cases:128,savings:972800,pct:16.5},
+      {signal:'EP Manipulation',cases:61,savings:597800,pct:10.1},
+      {signal:'Identity Fraud',cases:8,savings:278400,pct:4.7},
+      {signal:'Multi-Facility',cases:29,savings:446600,pct:7.5}
+    ],
+    carriers:[
+      {name:'New York Life',claims:1240,fraudRate:7.8,savings:1340000},
+      {name:'John Hancock',claims:980,fraudRate:11.2,savings:1620000},
+      {name:'MetLife',claims:890,fraudRate:9.4,savings:1180000},
+      {name:'Prudential',claims:760,fraudRate:6.1,savings:892000},
+      {name:'Lincoln Financial',claims:640,fraudRate:5.3,savings:562000},
+      {name:'Travelers',claims:337,fraudRate:8.7,savings:316000}
+    ]
+  };
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PAGE FRAMEWORK
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var totalExposure=_p28siuCases.reduce(function(a,c){return a+c.estimatedExposure;},0);
+    var totalSavings=_p28analytics.monthly.reduce(function(a,m){return a+m.savings;},0);
+    pc.innerHTML=''
+      +'<div style="font-family:\'Segoe UI\',sans-serif;background:#fef2f2;min-height:100vh;padding:0">'
+      /* Hero Banner */
+      +'<div style="background:linear-gradient(135deg,'+CA3+' 0%,#991b1b 50%,'+CA1+' 100%);padding:28px 32px 22px;color:#fff">'
+      +'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:14px;width:56px;height:56px;display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas fa-shield-virus" style="font-size:26px"></i></div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:22px;font-weight:800;letter-spacing:-.3px">HAL Claims Analytics Intelligence & Fraud Detection</div>'
+      +'<div style="font-size:13px;opacity:.88;margin-top:3px">AI-Powered Fraud Scoring · 8 Fraud Signal Typologies · SIU Workbench · $5.91M Savings YTD</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +_p28badge('4,847','Claims Reviewed','fa-file-medical-alt')
+      +_p28badge('402','Fraud Detected','fa-exclamation-triangle')
+      +_p28badge('$5.91M','YTD Savings','fa-shield-alt')
+      +_p28badge('$'+Math.round(totalExposure/1000)+'K','SIU Exposure','fa-user-secret')
+      +'</div></div></div>'
+      /* Tab Nav */
+      +'<div style="background:#fff;border-bottom:2px solid #fee2e2;padding:0 32px;display:flex;gap:0;overflow-x:auto">'
+      +_p28tab('overview','fa-th-large','Overview')
+      +_p28tab('claimsIntel','fa-search-dollar','Claims Intelligence')
+      +_p28tab('fraudDetection','fa-exclamation-triangle','Fraud Detection')
+      +_p28tab('siuWorkbench','fa-user-secret','SIU Workbench')
+      +_p28tab('analytics','fa-chart-bar','Analytics & ROI')
+      +_p28tab('epManagement','fa-calendar-check','EP Management')
+      +'</div>'
+      +'<div id="p28-tab-content" style="padding:28px 32px">'
+      +_p28renderTab()
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p28badge(val,lbl,icon){
+    return '<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center;min-width:90px">'
+      +'<div style="font-size:18px;font-weight:800">'+val+'</div>'
+      +'<div style="font-size:10px;opacity:.8;display:flex;align-items:center;gap:4px;justify-content:center;margin-top:2px">'
+      +'<i class="fas '+icon+'" style="font-size:9px"></i>'+lbl+'</div></div>';
+  }
+
+  function _p28tab(id,icon,label){
+    var active=_p28activeTab===id;
+    return '<div onclick="window._p28switchTab(\''+id+'\')" style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:7px;'
+      +'font-size:13px;font-weight:'+(active?'700':'500')+';color:'+(active?CA1:'#64748b')+';'
+      +'border-bottom:3px solid '+(active?CA1:'transparent')+';white-space:nowrap;transition:all .2s">'
+      +'<i class="fas '+icon+'"></i>'+label+'</div>';
+  }
+
+  function _p28renderTab(){
+    if(_p28activeTab==='overview') return _p28overviewTab();
+    if(_p28activeTab==='claimsIntel') return _p28claimsIntelTab();
+    if(_p28activeTab==='fraudDetection') return _p28fraudDetectionTab();
+    if(_p28activeTab==='siuWorkbench') return _p28siuWorkbenchTab();
+    if(_p28activeTab==='analytics') return _p28analyticsTab();
+    if(_p28activeTab==='epManagement') return _p28epManagementTab();
+    return '';
+  }
+
+  window._p28switchTab=function(id){
+    _p28activeTab=id;
+    var tc=document.getElementById('p28-tab-content');
+    if(tc) tc.innerHTML=_p28renderTab();
+    document.querySelectorAll('[data-p28tab]').forEach(function(el){
+      var tid=el.getAttribute('data-p28tab');
+      el.style.color=tid===id?CA1:'#64748b';
+      el.style.fontWeight=tid===id?'700':'500';
+      el.style.borderBottom='3px solid '+(tid===id?CA1:'transparent');
+    });
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 1: OVERVIEW
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28overviewTab(){
+    var html='<div>';
+
+    /* KPI Row */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:24px">';
+    _p28analytics.kpis.forEach(function(k){
+      var trendUp=k.trend.startsWith('up');
+      var trendGood=k.trend.includes('good');
+      var trendCol=trendGood?'#16a34a':'#dc2626';
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;border-left:4px solid '+k.color+'">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+        +'<div style="width:32px;height:32px;border-radius:8px;background:'+k.color+'1a;display:flex;align-items:center;justify-content:center"><i class="fas '+k.icon+'" style="color:'+k.color+';font-size:13px"></i></div>'
+        +'<div style="font-size:11px;color:#64748b;line-height:1.3">'+k.label+'</div></div>'
+        +'<div style="font-size:22px;font-weight:800;color:#1e293b">'+k.value+'</div>'
+        +'<div style="font-size:11px;color:'+trendCol+';margin-top:4px"><i class="fas fa-arrow-'+(trendUp?'up':'down')+'" style="margin-right:3px"></i>'+k.delta+' YTD</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Architecture Strip */
+    html+='<div style="background:linear-gradient(135deg,'+CA3+',#991b1b);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:24px">'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:14px"><i class="fas fa-layer-group" style="margin-right:8px"></i>CAID 4-Layer Architecture</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">';
+    [
+      {n:'4',t:'Investigation Layer',s:'SIU Workbench · DOI Integration · FBI Financial Crimes'},
+      {n:'3',t:'AI Fraud Engine',s:'8 ML Models · Graph Neural Net · Real-time Scoring'},
+      {n:'2',t:'Claims Intelligence',s:'Portfolio Analytics · Trend Detection · Predictive Triage'},
+      {n:'1',t:'HAL Data Foundation',s:'Fabric · Ontology · Vector Store · P20-P25 Platform'}
+    ].forEach(function(l){
+      html+='<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:12px;text-align:center;font-size:11px">'
+        +'<div style="font-size:20px;font-weight:800;color:#fca5a5">'+l.n+'</div>'
+        +'<div style="font-weight:700;margin:4px 0">'+l.t+'</div>'
+        +'<div style="opacity:.75">'+l.s+'</div></div>';
+    });
+    html+='</div></div>';
+
+    /* 2-col: Fraud Signal Overview + SIU Hot Cases */
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">';
+
+    /* Fraud Signal Cards */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="background:#7f1d1d;color:#fff;padding:12px 16px;font-size:13px;font-weight:700"><i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>8 Fraud Signal Typologies</div>'
+      +'<div style="padding:4px 0">';
+    _p28fraudSignals.forEach(function(fs){
+      var sevCol=fs.severity==='critical'?CA1:fs.severity==='high'?'#d97706':'#0891b2';
+      var sevBg=fs.severity==='critical'?'#fef2f2':fs.severity==='high'?'#fffbeb':'#e0f2fe';
+      html+='<div onclick="window._p28switchTab(\'fraudDetection\');window._p28viewSignal(\''+fs.id+'\')" style="padding:10px 16px;border-bottom:1px solid #f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .15s" onmouseover="this.style.background=\'#fef2f2\'" onmouseout="this.style.background=\'#fff\'">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<span style="background:'+sevBg+';color:'+sevCol+';font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;white-space:nowrap">'+fs.severity.toUpperCase()+'</span>'
+        +'<div><div style="font-size:12px;font-weight:600;color:#1e293b">'+fs.name+'</div>'
+        +'<div style="font-size:11px;color:#64748b">'+fs.mlModel+' · '+fs.accuracy+'% accuracy</div></div></div>'
+        +'<div style="text-align:right"><div style="font-size:12px;font-weight:700;color:#16a34a">$'+Math.round(fs.ytdSavings/1000)+'K</div>'
+        +'<div style="font-size:10px;color:#94a3b8">'+fs.ytdCases+' cases</div></div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    /* Hot SIU Cases */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);color:#fff;padding:12px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center">'
+      +'<span><i class="fas fa-user-secret" style="margin-right:8px"></i>Active SIU Cases</span>'
+      +'<span style="background:rgba(255,255,255,.2);padding:2px 10px;border-radius:10px;font-size:12px">'+_p28siuCases.length+' cases</span></div>'
+      +'<div style="padding:4px 0">';
+    _p28siuCases.forEach(function(sc){
+      var priCol=sc.priority.startsWith('P1')?CA1:sc.priority.startsWith('P2')?'#d97706':'#0891b2';
+      html+='<div onclick="window._p28switchTab(\'siuWorkbench\');window._p28viewSIU(\''+sc.id+'\')" style="padding:11px 16px;border-bottom:1px solid #f8fafc;cursor:pointer;transition:background .15s" onmouseover="this.style.background=\'#f5f3ff\'" onmouseout="this.style.background=\'#fff\'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="background:'+priCol+';color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">'+sc.priority.split('-')[0]+'</span>'
+        +'<span style="font-size:12px;font-weight:600;color:#1e293b">'+sc.id+'</span></div>'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+        +'<div style="width:40px;height:6px;background:#f1f5f9;border-radius:10px;overflow:hidden"><div style="height:100%;background:'+priCol+';width:'+sc.fraudScore+'%;border-radius:10px"></div></div>'
+        +'<span style="font-size:11px;font-weight:700;color:'+priCol+'">'+sc.fraudScore+'</span></div></div>'
+        +'<div style="font-size:11px;color:#334155">'+sc.claimant+' — '+sc.facilityName+'</div>'
+        +'<div style="font-size:11px;color:#16a34a;font-weight:600;margin-top:2px"><i class="fas fa-shield-alt" style="margin-right:4px"></i>Est. exposure: $'+sc.estimatedExposure.toLocaleString()+'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>'; /* end 2-col */
+
+    /* ML Model Performance Strip */
+    html+='<div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:12px;padding:20px 24px;color:#fff">'
+      +'<div style="font-size:14px;font-weight:700;margin-bottom:14px"><i class="fas fa-brain" style="margin-right:8px"></i>AI Model Performance — Live Scoring Pipeline</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">';
+    [
+      {name:'RNN Sequence Anomaly',acc:96.2,speed:'<40ms',claims:'2.1K/day'},
+      {name:'XGBoost Classifier',acc:91.8,speed:'<15ms',claims:'4.8K/day'},
+      {name:'Graph Neural Network',acc:88.4,speed:'<120ms',claims:'890/day'},
+      {name:'Vision Transformer',acc:93.7,speed:'<200ms',claims:'340/day'},
+      {name:'Isolation Forest',acc:89.5,speed:'<25ms',claims:'3.2K/day'},
+      {name:'BERT NLP Engine',acc:99.1,speed:'<80ms',claims:'1.4K/day'}
+    ].forEach(function(m){
+      html+='<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:12px">'
+        +'<div style="font-size:12px;font-weight:600;margin-bottom:6px">'+m.name+'</div>'
+        +'<div style="font-size:20px;font-weight:800;color:#93c5fd">'+m.acc+'%</div>'
+        +'<div style="font-size:10px;opacity:.7;margin-top:4px">Accuracy · '+m.speed+' · '+m.claims+'</div>'
+        +'<div style="background:rgba(255,255,255,.15);border-radius:20px;height:4px;margin-top:6px"><div style="background:#93c5fd;height:100%;width:'+m.acc+'%;border-radius:20px"></div></div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 2: CLAIMS INTELLIGENCE
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28claimsIntelTab(){
+    var filter=_p28claimFilter;
+    var filtered=(filter==='all'||filter==='prod_all')?_p28claims:_p28claims.filter(function(c){
+      if(filter==='high') return c.fraudScore>=75;
+      if(filter==='flagged') return c.status.includes('SIU')||c.status.includes('Review');
+      if(filter==='approved') return c.status==='Approved';
+      if(filter==='prod_ltc') return (c.product||'').includes('LTC Standalone');
+      if(filter==='prod_hal') return c.product==='HAL Platform';
+      if(filter==='prod_hybrid') return (c.product||'').includes('Hybrid');
+      return true;
+    });
+
+    var html='<div>';
+
+    /* Filter Bar */
+    html+='<div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">';
+    [['all','All Claims'],['high','High Risk (75+)'],['flagged','Flagged / SIU'],['approved','Approved']].forEach(function(f){
+      var act=filter===f[0];
+      html+='<button onclick="window._p28setClaimFilter(\''+f[0]+'\')" style="padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:'+(act?CA1:'#f1f5f9')+';color:'+(act?'#fff':'#64748b')+';transition:all .2s">'+f[1]+'</button>';
+    });
+    html+='<div style="margin-left:auto;font-size:12px;color:#64748b">'+filtered.length+' claims shown</div>';
+    html+='</div>';
+    /* Filter Bar — Product Line */
+    html+='<div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">';
+    html+='<span style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Product:</span>';
+    [['prod_all','All Lines'],['prod_ltc','LTC Standalone'],['prod_hal','HAL Platform'],['prod_hybrid','LTC/HAL Hybrid']].forEach(function(f){
+      var actP=filter===f[0];
+      html+='<button onclick="window._p28setClaimFilter(\''+f[0]+'\')" style="padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid '+(actP?CA1:'#e2e8f0')+';background:'+(actP?CA4:'#fff')+';color:'+(actP?CA1:'#64748b')+';transition:all .2s">'+f[1]+'</button>';
+    });
+    html+='</div>';
+
+    /* Summary Cards */
+    var totalBilled=filtered.reduce(function(a,c){return a+c.billedAmount;},0);
+    var totalApproved=filtered.reduce(function(a,c){return a+c.approvedAmount;},0);
+    var totalSaved=filtered.reduce(function(a,c){return a+c.savings;},0);
+    var avgScore=filtered.length?Math.round(filtered.reduce(function(a,c){return a+c.fraudScore;},0)/filtered.length):0;
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
+    [
+      {l:'Total Billed',v:'$'+Math.round(totalBilled/1000)+'K',c:'#1d4ed8',ic:'fa-file-invoice-dollar'},
+      {l:'Total Approved',v:'$'+Math.round(totalApproved/1000)+'K',c:'#16a34a',ic:'fa-check-circle'},
+      {l:'Savings Protected',v:'$'+Math.round(totalSaved/1000)+'K',c:CA1,ic:'fa-shield-alt'},
+      {l:'Avg Fraud Score',v:avgScore,c:avgScore>70?CA1:avgScore>40?CAA:CAG,ic:'fa-brain'}
+    ].forEach(function(s){
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;border-top:3px solid '+s.c+'">'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:6px"><i class="fas '+s.ic+'" style="color:'+s.c+';margin-right:5px"></i>'+s.l+'</div>'
+        +'<div style="font-size:22px;font-weight:800;color:'+s.c+'">'+s.v+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Claims Grid */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">';
+    filtered.forEach(function(cl){
+      var scoreCol=cl.fraudScore>=75?CA1:cl.fraudScore>=40?CAA:CAG;
+      var statCol=cl.status.includes('SIU')?'#7c3aed':cl.status==='Approved'?CAG:cl.status==='Under Review'?CAA:CAB;
+      var statBg=cl.status.includes('SIU')?'#ede9fe':cl.status==='Approved'?'#f0fdf4':cl.status==='Under Review'?'#fffbeb':'#eff6ff';
+      html+='<div onclick="window._p28viewClaimDetail(\''+cl.id+'\')" style="background:#fff;border:1px solid '+(cl.fraudScore>=75?CA2+'66':'#e2e8f0')+';border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;border-left:4px solid '+scoreCol+'" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+        +'<div><div style="font-size:13px;font-weight:700;color:#1e293b">'+cl.claimant+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+cl.id+' · '+cl.carrier+'</div></div>'
+        +'<div style="text-align:center">'
+        +'<div style="font-size:20px;font-weight:800;color:'+scoreCol+'">'+cl.fraudScore+'</div>'
+        +'<div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px">Risk Score</div></div></div>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'
+        +'<span style="background:'+statBg+';color:'+statCol+';font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600">'+cl.status+'</span>'
+        +'<span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:2px 8px;border-radius:10px">'+cl.type+'</span>'
+        +'<span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:2px 8px;border-radius:10px">'+cl.state+'</span>'
+        +'<span style="background:'+(cl.product==='HAL Platform'?'#eff6ff':cl.product==='LTC/HAL Hybrid'?'#f5f3ff':'#f0fdf4')+';color:'+(cl.product==='HAL Platform'?'#1d4ed8':cl.product==='LTC/HAL Hybrid'?'#7c3aed':'#16a34a')+';font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600">'+cl.product+'</span>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px;margin-bottom:10px">'
+        +'<div><div style="color:#94a3b8">DBR</div><div style="font-weight:600;color:#334155">$'+cl.dailyBenefit+'/day</div></div>'
+        +'<div><div style="color:#94a3b8">Billed</div><div style="font-weight:600;color:#334155">$'+cl.billedAmount.toLocaleString()+'</div></div>'
+        +'<div><div style="color:#94a3b8">Days Open</div><div style="font-weight:600;color:'+(cl.daysOpen>30?CAA:'#334155')+'">'+cl.daysOpen+'d</div></div>'
+        +'</div>';
+      if(cl.flags.length>0){
+        html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
+        cl.flags.forEach(function(f){
+          html+='<span style="background:#fef2f2;color:'+CA1+';font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid #fecaca"><i class="fas fa-flag" style="margin-right:3px;font-size:8px"></i>'+f.replace(/_/g,' ')+'</span>';
+        });
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+    html+='</div>';
+
+    /* Claim Detail Modal placeholder */
+    html+='<div id="p28-claim-detail" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display=\'none\'"></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  window._p28setClaimFilter=function(f){
+    _p28claimFilter=f;
+    var tc=document.getElementById('p28-tab-content');
+    if(tc) tc.innerHTML=_p28claimsIntelTab();
+  };
+
+  window._p28viewClaimDetail=function(id){
+    var cl=_p28claims.find(function(c){return c.id===id;});
+    if(!cl) return;
+    var scoreCol=cl.fraudScore>=75?CA1:cl.fraudScore>=40?CAA:CAG;
+    var modal=document.getElementById('p28-claim-detail');
+    if(!modal) return;
+    modal.style.display='flex';
+    modal.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;max-width:620px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">'
+      +'<div><div style="font-size:18px;font-weight:800;color:#1e293b">'+cl.claimant+'</div>'
+      +'<div style="font-size:13px;color:#64748b">'+cl.id+' · Age '+cl.age+' · '+cl.carrier+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="text-align:center;background:'+scoreCol+'1a;border-radius:12px;padding:12px 18px">'
+      +'<div style="font-size:32px;font-weight:900;color:'+scoreCol+'">'+cl.fraudScore+'</div>'
+      +'<div style="font-size:10px;color:#64748b;text-transform:uppercase">Fraud Risk</div></div>'
+      +'<button onclick="document.getElementById(\'p28-claim-detail\').style.display=\'none\'" style="background:#f1f5f9;border:none;border-radius:8px;padding:8px;cursor:pointer"><i class="fas fa-times" style="color:#64748b"></i></button>'
+      +'</div></div>'
+      /* Detail grid */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">'
+      +[['Facility',cl.facilityName],['Type',cl.type],['State',cl.state],['Policy',cl.policy],['Daily Benefit','$'+cl.dailyBenefit+'/day'],['Days Open',cl.daysOpen+'d'],['Billed','$'+cl.billedAmount.toLocaleString()],['Approved','$'+cl.approvedAmount.toLocaleString()],['Assignee',cl.assignee],['Status',cl.status]].map(function(r){
+        return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;margin-bottom:3px">'+r[0]+'</div><div style="font-size:13px;font-weight:600;color:#334155">'+r[1]+'</div></div>';
+      }).join('')
+      +'</div>'
+      /* Fraud flags */
+      +(cl.flags.length?'<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px"><i class="fas fa-flag" style="color:'+CA1+';margin-right:6px"></i>Fraud Signals Detected</div>'
+      +cl.flags.map(function(f){return '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;color:#991b1b"><i class="fas fa-exclamation-circle" style="margin-right:6px"></i>'+f.replace(/_/g,' ').toUpperCase()+'</div>';}).join('')+'</div>':'')
+      /* CTA */
+      +'<div style="display:flex;gap:10px;padding-top:4px">'
+      +(cl.status.includes('SIU')?'<button style="flex:1;background:#7c3aed;color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer"><i class="fas fa-user-secret" style="margin-right:6px"></i>View SIU Case</button>':'')
+      +(cl.fraudScore>=60?'<button onclick="window._p28switchTab(\'siuWorkbench\')" style="flex:1;background:'+CA1+';color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer"><i class="fas fa-flag" style="margin-right:6px"></i>Escalate to SIU</button>':'')
+      +'<button style="flex:1;background:#f1f5f9;color:#334155;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer"><i class="fas fa-file-alt" style="margin-right:6px"></i>Generate Report</button>'
+      +'</div>'
+      +'</div>';
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 3: FRAUD DETECTION
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28fraudDetectionTab(){
+    var activeSignal=_p28activeFraud?_p28fraudSignals.find(function(s){return s.id===_p28activeFraud;}):null;
+    var html='<div style="display:grid;grid-template-columns:320px 1fr;gap:20px;min-height:600px">';
+
+    /* Left: Signal List */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="background:'+CA3+';color:#fff;padding:12px 16px;font-size:13px;font-weight:700"><i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>Fraud Signal Typologies</div>'
+      +'<div>';
+    _p28fraudSignals.forEach(function(fs){
+      var sevCol=fs.severity==='critical'?CA1:fs.severity==='high'?CAA:'#0891b2';
+      var sevBg=fs.severity==='critical'?'#fef2f2':fs.severity==='high'?'#fffbeb':'#e0f2fe';
+      var isAct=_p28activeFraud===fs.id;
+      html+='<div onclick="window._p28viewSignal(\''+fs.id+'\')" style="padding:12px 16px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:'+(isAct?'#fef2f2':'#fff')+';border-left:4px solid '+(isAct?CA1:'transparent')+';transition:all .15s">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+        +'<div style="display:flex;align-items:center;gap:7px">'
+        +'<span style="background:'+sevBg+';color:'+sevCol+';font-size:9px;padding:1px 7px;border-radius:10px;font-weight:700">'+fs.severity.toUpperCase()+'</span>'
+        +'<span style="font-size:12px;font-weight:600;color:#1e293b">'+fs.name+'</span></div>'
+        +'<i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8"></i></div>'
+        +'<div style="font-size:11px;color:#64748b">'+fs.mlModel+' · '+fs.ytdCases+' cases · $'+Math.round(fs.ytdSavings/1000)+'K saved</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    /* Right: Signal Detail */
+    html+='<div>';
+    if(activeSignal){
+      var sevCol=activeSignal.severity==='critical'?CA1:activeSignal.severity==='high'?CAA:'#0891b2';
+      var sevBg=activeSignal.severity==='critical'?'#fef2f2':activeSignal.severity==='high'?'#fffbeb':'#e0f2fe';
+      html+='<div style="background:linear-gradient(135deg,'+(activeSignal.severity==='critical'?CA3+',#991b1b':activeSignal.severity==='high'?'#78350f,#d97706':'#164e63,#0891b2')+');color:#fff;border-radius:12px;padding:20px;margin-bottom:16px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+        +'<div><div style="font-size:8px;letter-spacing:1px;opacity:.7;text-transform:uppercase">'+activeSignal.id+' · '+activeSignal.category+'</div>'
+        +'<div style="font-size:20px;font-weight:800;margin-top:4px">'+activeSignal.name+'</div></div>'
+        +'<span style="background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700">'+activeSignal.severity.toUpperCase()+'</span></div>'
+        +'<div style="font-size:13px;opacity:.9;line-height:1.6">'+activeSignal.description+'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">'
+        +[['ML Model',activeSignal.mlModel],['Accuracy',activeSignal.accuracy+'%'],['Avg Savings','$'+Math.round(activeSignal.avgSavings/1000)+'K'],['YTD Cases',activeSignal.ytdCases]].map(function(s){
+          return '<div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px;text-align:center"><div style="font-size:15px;font-weight:700">'+s[1]+'</div><div style="font-size:10px;opacity:.75">'+s[0]+'</div></div>';
+        }).join('')
+        +'</div></div>';
+
+      /* Indicators */
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:16px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px"><i class="fas fa-search" style="color:'+CA1+';margin-right:8px"></i>Detection Indicators ('+activeSignal.indicators.length+')</div>';
+      activeSignal.indicators.forEach(function(ind,i){
+        html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc">'
+          +'<div style="width:22px;height:22px;border-radius:50%;background:'+CA1+'1a;color:'+CA1+';font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</div>'
+          +'<div style="font-size:13px;color:#334155;line-height:1.5">'+ind+'</div></div>';
+      });
+      html+='</div>';
+
+      /* Claims showing this signal */
+      var signalClaims=_p28claims.filter(function(c){
+        return c.flags.some(function(f){
+          if(activeSignal.id==='FS-001') return f==='phantom_billing';
+          if(activeSignal.id==='FS-002') return f==='upcoding'||f==='days_inflation';
+          if(activeSignal.id==='FS-003') return f==='provider_kickback';
+          if(activeSignal.id==='FS-004') return f==='identity_mismatch';
+          if(activeSignal.id==='FS-005') return f==='ep_manipulation'||f==='rapid_ep';
+          if(activeSignal.id==='FS-006') return f==='forged_cmr';
+          if(activeSignal.id==='FS-007') return f==='billing_spike';
+          if(activeSignal.id==='FS-008') return f==='multiple_facilities';
+          return false;
+        });
+      });
+      if(signalClaims.length){
+        html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+          +'<div style="background:#f8fafc;padding:10px 16px;font-size:12px;font-weight:700;color:#334155;border-bottom:1px solid #e2e8f0"><i class="fas fa-file-medical-alt" style="color:'+CA1+';margin-right:7px"></i>Claims Triggered by This Signal ('+signalClaims.length+')</div>';
+        signalClaims.forEach(function(cl){
+          html+='<div style="padding:10px 16px;border-bottom:1px solid #f8fafc;display:flex;justify-content:space-between;align-items:center">'
+            +'<div><div style="font-size:12px;font-weight:600;color:#1e293b">'+cl.claimant+'</div>'
+            +'<div style="font-size:11px;color:#64748b">'+cl.id+'</div></div>'
+            +'<div style="display:flex;align-items:center;gap:8px">'
+            +'<span style="font-size:11px;font-weight:700;color:'+CA1+'">Score: '+cl.fraudScore+'</span>'
+            +'<span style="font-size:10px;background:#fef2f2;color:'+CA1+';padding:2px 8px;border-radius:10px">'+cl.status+'</span>'
+            +'</div></div>';
+        });
+        html+='</div>';
+      }
+
+    } else {
+      /* Empty state */
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:60px;text-align:center">'
+        +'<i class="fas fa-exclamation-triangle" style="font-size:48px;color:#fca5a5;margin-bottom:16px;display:block"></i>'
+        +'<div style="font-size:16px;font-weight:600;color:#334155;margin-bottom:8px">Select a Fraud Signal</div>'
+        +'<div style="font-size:13px;color:#64748b">Choose a typology from the left panel to view ML model details, detection indicators, and triggered claims.</div>'
+        +'</div>';
+    }
+    html+='</div>'; /* end right */
+    html+='</div>'; /* end grid */
+    html+='</div>';
+    return html;
+  }
+
+  window._p28viewSignal=function(id){
+    _p28activeFraud=id;
+    var tc=document.getElementById('p28-tab-content');
+    if(tc) tc.innerHTML=_p28fraudDetectionTab();
+  };
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 4: SIU WORKBENCH
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28siuWorkbenchTab(){
+    var activeSIU=_p28activeSIU?_p28siuCases.find(function(s){return s.id===_p28activeSIU;}):_p28siuCases[0];
+
+    var html='<div>';
+
+    /* SIU Header Stats */
+    var totalExp=_p28siuCases.reduce(function(a,s){return a+s.estimatedExposure;},0);
+    var p1Cases=_p28siuCases.filter(function(s){return s.priority.startsWith('P1');}).length;
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
+    [
+      {l:'Total Cases',v:_p28siuCases.length,c:'#7c3aed',ic:'fa-user-secret'},
+      {l:'P1 Critical',v:p1Cases,c:CA1,ic:'fa-exclamation-circle'},
+      {l:'Total Exposure',v:'$'+Math.round(totalExp/1000)+'K',c:CA1,ic:'fa-dollar-sign'},
+      {l:'Est. Recovery',v:'$'+Math.round(totalExp*0.82/1000)+'K',c:'#16a34a',ic:'fa-shield-alt'}
+    ].forEach(function(s){
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;border-top:3px solid '+s.c+'">'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:6px"><i class="fas '+s.ic+'" style="color:'+s.c+';margin-right:5px"></i>'+s.l+'</div>'
+        +'<div style="font-size:24px;font-weight:800;color:'+s.c+'">'+s.v+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Master-Detail layout */
+    html+='<div style="display:grid;grid-template-columns:360px 1fr;gap:20px;min-height:640px">';
+
+    /* Left: Case List */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);color:#fff;padding:12px 16px;font-size:13px;font-weight:700">'
+      +'<i class="fas fa-folder-open" style="margin-right:8px"></i>SIU Case Queue</div>'
+      +'<div>';
+    _p28siuCases.forEach(function(sc){
+      var isAct=activeSIU&&activeSIU.id===sc.id;
+      var priCol=sc.priority.startsWith('P1')?CA1:sc.priority.startsWith('P2')?CAA:'#0891b2';
+      html+='<div onclick="window._p28viewSIU(\''+sc.id+'\')" style="padding:12px 16px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:'+(isAct?'#faf5ff':'#fff')+';border-left:4px solid '+(isAct?'#7c3aed':'transparent')+';transition:all .15s">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
+        +'<div style="display:flex;align-items:center;gap:7px">'
+        +'<span style="background:'+priCol+';color:#fff;font-size:9px;padding:2px 7px;border-radius:10px;font-weight:700">'+sc.priority.split('-')[0]+'</span>'
+        +'<span style="font-size:12px;font-weight:700;color:#1e293b">'+sc.id+'</span></div>'
+        +'<span style="font-size:11px;font-weight:800;color:'+priCol+'">'+sc.fraudScore+'</span></div>'
+        +'<div style="font-size:12px;color:#334155;margin-bottom:3px">'+sc.claimant+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:4px">'+sc.facilityName+'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center">'
+        +'<span style="font-size:10px;color:#16a34a;font-weight:600">$'+sc.estimatedExposure.toLocaleString()+' exposure</span>'
+        +'<span style="font-size:10px;color:#94a3b8">'+sc.assignee+'</span></div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    /* Right: Case Detail */
+    html+='<div>';
+    if(activeSIU){
+      var priCol2=activeSIU.priority.startsWith('P1')?CA1:activeSIU.priority.startsWith('P2')?CAA:'#0891b2';
+      var priBg=activeSIU.priority.startsWith('P1')?CA3+',#991b1b':activeSIU.priority.startsWith('P2')?'#78350f,#b45309':'#164e63,#0369a1';
+
+      /* Case Header */
+      html+='<div style="background:linear-gradient(135deg,'+priBg+');color:#fff;border-radius:12px;padding:20px;margin-bottom:14px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+        +'<div><div style="font-size:10px;opacity:.7;letter-spacing:1px">'+activeSIU.id+' · Opened '+activeSIU.opened+'</div>'
+        +'<div style="font-size:20px;font-weight:800;margin-top:4px">'+activeSIU.claimant+'</div>'
+        +'<div style="font-size:13px;opacity:.85;margin-top:2px">'+activeSIU.facilityName+' · '+activeSIU.carrier+'</div></div>'
+        +'<div style="text-align:center;background:rgba(255,255,255,.2);border-radius:12px;padding:12px 16px">'
+        +'<div style="font-size:32px;font-weight:900">'+activeSIU.fraudScore+'</div>'
+        +'<div style="font-size:10px;opacity:.8">Fraud Score</div></div></div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'
+        +[['Priority',activeSIU.priority],['Status',activeSIU.status],['Assignee',activeSIU.assignee],['Claim ID',activeSIU.claimId],['Est. Exposure','$'+activeSIU.estimatedExposure.toLocaleString()],['License',activeSIU.facilityLicense]].map(function(r){
+          return '<div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px"><div style="font-size:10px;opacity:.7">'+r[0]+'</div><div style="font-size:12px;font-weight:600;margin-top:2px">'+r[1]+'</div></div>';
+        }).join('')
+        +'</div></div>';
+
+      /* Fraud Signals */
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"><i class="fas fa-exclamation-triangle" style="color:'+CA1+';margin-right:8px"></i>Fraud Signals ('+activeSIU.signals.length+')</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px">';
+      activeSIU.signals.forEach(function(sid){
+        var sig=_p28fraudSignals.find(function(s){return s.id===sid;});
+        if(!sig) return;
+        var sc2=sig.severity==='critical'?CA1:sig.severity==='high'?CAA:'#0891b2';
+        html+='<div style="background:'+sc2+'1a;border:1px solid '+sc2+'33;border-radius:10px;padding:10px 14px;flex:1;min-width:150px">'
+          +'<div style="font-size:11px;font-weight:700;color:'+sc2+';margin-bottom:3px">'+sig.id+' — '+sig.name+'</div>'
+          +'<div style="font-size:11px;color:#64748b">'+sig.mlModel+' · '+sig.accuracy+'% accuracy</div>'
+          +'</div>';
+      });
+      html+='</div></div>';
+
+      /* Investigation Notes */
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"><i class="fas fa-clipboard-list" style="color:#7c3aed;margin-right:8px"></i>Investigation Notes</div>'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:14px;font-size:13px;color:#334155;line-height:1.7;border-left:3px solid #7c3aed">'+activeSIU.notes+'</div>'
+        +'</div>';
+
+      /* Actions Taken + CTA */
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"><i class="fas fa-tasks" style="color:#16a34a;margin-right:8px"></i>Actions Taken</div>';
+      activeSIU.actions.forEach(function(act){
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f8fafc">'
+          +'<div style="width:18px;height:18px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-check" style="font-size:9px;color:#16a34a"></i></div>'
+          +'<span style="font-size:12px;color:#334155">'+act+'</span></div>';
+      });
+      html+='</div>';
+
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px"><i class="fas fa-bolt" style="color:'+CAA+';margin-right:8px"></i>Quick Actions</div>'
+        +'<div style="display:flex;flex-direction:column;gap:8px">'
+        +['<i class="fas fa-file-alt" style="margin-right:7px"></i>Generate SIU Report','<i class="fas fa-balance-scale" style="margin-right:7px"></i>File DOI Referral','<i class="fas fa-ban" style="margin-right:7px"></i>Suspend Claim Payments','<i class="fas fa-search" style="margin-right:7px"></i>Order Field Inspection','<i class="fas fa-envelope" style="margin-right:7px"></i>Notify Carrier SIU Team'].map(function(btn,i){
+          var colors=['#1d4ed8','#7c3aed',CA1,'#0891b2','#059669'];
+          return '<button style="background:'+colors[i]+';color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-align:left">'+btn+'</button>';
+        }).join('')
+        +'</div></div>';
+      html+='</div>'; /* end cta grid */
+    }
+    html+='</div>'; /* end right */
+    html+='</div>'; /* end master-detail */
+    html+='</div>';
+    return html;
+  }
+
+  window._p28viewSIU=function(id){
+    _p28activeSIU=id;
+    _p28activeTab='siuWorkbench';
+    var tc=document.getElementById('p28-tab-content');
+    if(tc) tc.innerHTML=_p28siuWorkbenchTab();
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 5: ANALYTICS & ROI
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28analyticsTab(){
+    var html='<div>';
+
+    /* KPI row */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px">';
+    _p28analytics.kpis.forEach(function(k){
+      var trendUp=k.trend.startsWith('up');
+      var trendGood=k.trend.includes('good');
+      var trendCol=trendGood?'#16a34a':'#dc2626';
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;border-left:4px solid '+k.color+'">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<div style="width:30px;height:30px;border-radius:8px;background:'+k.color+'1a;display:flex;align-items:center;justify-content:center"><i class="fas '+k.icon+'" style="color:'+k.color+';font-size:12px"></i></div>'
+        +'<div style="font-size:11px;color:#64748b">'+k.label+'</div></div>'
+        +'<div style="font-size:22px;font-weight:700;color:#1e293b">'+k.value+'</div>'
+        +'<div style="font-size:11px;color:'+trendCol+';margin-top:4px"><i class="fas fa-arrow-'+(trendUp?'up':'down')+'" style="margin-right:3px"></i>'+k.delta+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Charts row */
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
+
+    /* Monthly fraud savings bar chart */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-chart-bar" style="color:'+CA1+';margin-right:8px"></i>Monthly Fraud Savings vs Claims Reviewed</div>';
+    var maxReviewed=1000;
+    html+='<svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet">';
+    for(var g=0;g<5;g++){
+      var gy=20+g*32;
+      html+='<line x1="40" y1="'+gy+'" x2="390" y2="'+gy+'" stroke="#f1f5f9" stroke-width="1"/>';
+      html+='<text x="35" y="'+(gy+4)+'" text-anchor="end" font-size="9" fill="#94a3b8">'+Math.round(maxReviewed*(1-g/4))+'</text>';
+    }
+    var barW2=36,barGap2=24,startX2=48;
+    _p28analytics.monthly.forEach(function(m,i){
+      var bx=startX2+i*(barW2+barGap2);
+      var revH=Math.round((m.reviewed/maxReviewed)*148);
+      var savH=Math.round((m.savings/1200000)*148);
+      html+='<rect x="'+bx+'" y="'+(168-revH)+'" width="'+barW2+'" height="'+revH+'" rx="3" fill="#fee2e2"/>';
+      html+='<rect x="'+bx+'" y="'+(168-savH)+'" width="'+barW2+'" height="'+savH+'" rx="3" fill="'+CA1+'" opacity="0.9"/>';
+      html+='<text x="'+(bx+barW2/2)+'" y="175" text-anchor="middle" font-size="9" fill="#64748b">'+m.month+'</text>';
+      html+='<text x="'+(bx+barW2/2)+'" y="'+(168-savH-4)+'" text-anchor="middle" font-size="8" fill="'+CA1+'" font-weight="bold">$'+Math.round(m.savings/1000)+'K</text>';
+    });
+    html+='</svg>';
+    html+='<div style="display:flex;gap:14px;margin-top:4px">'
+      +'<span style="font-size:11px;color:#64748b"><span style="display:inline-block;width:12px;height:12px;background:#fee2e2;border-radius:2px;margin-right:4px"></span>Claims Reviewed</span>'
+      +'<span style="font-size:11px;color:#64748b"><span style="display:inline-block;width:12px;height:12px;background:'+CA1+';border-radius:2px;margin-right:4px"></span>Fraud Savings</span>'
+      +'</div></div>';
+
+    /* Fraud by signal donut-style bar */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-chart-pie" style="color:'+CA1+';margin-right:8px"></i>Fraud Savings by Signal Type</div>';
+    var sigColors=[CA1,'#d97706','#7c3aed','#0891b2','#059669','#e11d48','#0369a1','#78350f'];
+    _p28analytics.bySignal.forEach(function(s,i){
+      html+='<div style="margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-size:11px;color:#334155">'+s.signal+'</span>'
+        +'<span style="font-size:11px;font-weight:600;color:'+sigColors[i%sigColors.length]+'">$'+Math.round(s.savings/1000)+'K ('+s.cases+' cases)</span></div>'
+        +'<div style="background:#f1f5f9;border-radius:20px;height:8px">'
+        +'<div style="background:'+sigColors[i%sigColors.length]+';height:100%;width:'+s.pct*4+'%;border-radius:20px;max-width:100%"></div></div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    html+='</div>'; /* end charts row */
+
+    /* Carrier Comparison Table */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:16px">'
+      +'<div style="background:#f8fafc;padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e293b"><i class="fas fa-building" style="color:'+CA1+';margin-right:8px"></i>Carrier Performance — Fraud Detection</div>'
+      +'<table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#fef2f2">'
+      +['Carrier','Claims','Fraud Rate','YTD Savings','Detection Efficiency'].map(function(h,i){
+        return '<th style="padding:9px 14px;text-align:'+(i===0?'left':'right')+';font-size:11px;color:#64748b;font-weight:600">'+h+'</th>';
+      }).join('')
+      +'</tr></thead><tbody>';
+    _p28analytics.carriers.forEach(function(c){
+      var eff=Math.round(90+(c.fraudRate-5)*1.5);
+      html+='<tr style="border-bottom:1px solid #f8fafc">'
+        +'<td style="padding:10px 14px;font-size:12px;font-weight:600;color:#1e293b">'+c.name+'</td>'
+        +'<td style="padding:10px 14px;text-align:right;font-size:12px;color:#334155">'+c.claims.toLocaleString()+'</td>'
+        +'<td style="padding:10px 14px;text-align:right"><span style="font-size:12px;font-weight:700;color:'+(c.fraudRate>9?CA1:c.fraudRate>7?CAA:CAG)+'">'+c.fraudRate+'%</span></td>'
+        +'<td style="padding:10px 14px;text-align:right;font-size:12px;font-weight:700;color:#16a34a">$'+Math.round(c.savings/1000)+'K</td>'
+        +'<td style="padding:10px 14px;text-align:right">'
+        +'<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">'
+        +'<div style="width:60px;height:6px;background:#f1f5f9;border-radius:20px;overflow:hidden"><div style="background:'+CAG+';height:100%;width:'+eff+'%;border-radius:20px"></div></div>'
+        +'<span style="font-size:11px;font-weight:700;color:'+CAG+'">'+eff+'%</span></div>'
+        +'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+
+    /* ROI Impact Summary */
+    html+='<div style="background:linear-gradient(135deg,'+CA3+',#991b1b);color:#fff;border-radius:12px;padding:20px">'
+      +'<div style="font-size:14px;font-weight:700;margin-bottom:14px"><i class="fas fa-chart-line" style="margin-right:8px"></i>CAID Business Impact Summary — FY2026</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px">';
+    [['$5.91M','Fraud Savings YTD','fa-shield-alt'],['402','Fraud Cases','fa-exclamation-triangle'],['3.2%','False Positive Rate','fa-check-circle'],['$14.7K','Avg Case Value','fa-dollar-sign'],['96%','Detection Accuracy','fa-brain'],['31','Active SIU Cases','fa-user-secret'],['8','ML Models Live','fa-robot'],['82%','Recovery Rate','fa-recycle']].forEach(function(imp){
+      html+='<div style="text-align:center;background:rgba(255,255,255,.1);border-radius:10px;padding:12px 8px">'
+        +'<i class="fas '+imp[2]+'" style="color:#fca5a5;font-size:16px;margin-bottom:6px;display:block"></i>'
+        +'<div style="font-size:18px;font-weight:700">'+imp[0]+'</div>'
+        +'<div style="font-size:10px;opacity:.65;margin-top:2px">'+imp[1]+'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+
+
+  /* ─── EP Management Tab ─── */
+  var _p28epCases=[
+    {id:'EP-2024-3001',claimant:'Margaret Holloway',age:79,carrier:'MassMutual',product:'LTC Standalone',epDay:47,epLimit:90,dailyBenefit:220,coveredDays:43,pendingDays:4,diagCode:'G35',diagLabel:'Multiple Sclerosis',mcareEnrolled:true,coStatus:'Active COB',provider:'Sunrise Home Health',dispute:false,status:'Active',alert:'EP day 47 — 43 days remaining before benefit exhaustion'},
+    {id:'EP-2024-3002',claimant:'Robert Chambers',age:84,carrier:'Genworth',product:'LTC Standalone',epDay:82,epLimit:100,dailyBenefit:185,coveredDays:80,pendingDays:2,diagCode:'F01.51',diagLabel:'Vascular Dementia w/ behavioral dist.',mcareEnrolled:true,coStatus:'Active COB',provider:'Prestige Memory Care',dispute:true,status:'Dispute',alert:'EP day 82 — dispute filed on 5 covered days · Medicare COB pending reconciliation'},
+    {id:'EP-2024-3003',claimant:'Dorothy Vasquez',age:76,carrier:'Transamerica',product:'LTC/HAL Hybrid',epDay:12,epLimit:90,dailyBenefit:260,coveredDays:12,pendingDays:0,diagCode:'M19.90',diagLabel:'Osteoarthritis — hip/knee',mcareEnrolled:false,coStatus:'Not Enrolled',provider:'Harbor View Rehab',dispute:false,status:'Active',alert:'Medicare enrollment gap — assess eligibility and Part A/B retroactive enrollment'},
+    {id:'EP-2024-3004',claimant:'Harold Simmons',age:82,carrier:'MassMutual',product:'HAL Platform',epDay:31,epLimit:60,dailyBenefit:195,coveredDays:29,pendingDays:2,diagCode:'I69.351',diagLabel:'Hemiplegia — post CVA',mcareEnrolled:true,coStatus:'Secondary Payor',provider:'WellPath Nursing',dispute:false,status:'Active',alert:'Progressive condition: CVA — schedule RN reassessment for benefit level review by EP day 45'},
+    {id:'EP-2024-3005',claimant:'Eleanor Kaufman',age:88,carrier:'NYL',product:'LTC Standalone',epDay:90,epLimit:90,dailyBenefit:310,coveredDays:88,pendingDays:2,diagCode:'G30.9',diagLabel:"Alzheimer's Disease",mcareEnrolled:true,coStatus:'Primary Payor',provider:'Sunrise Memory Care',dispute:false,status:'Exhausted',alert:'EP EXHAUSTED — transition to continuation of care coordination. Last 2 days pending reconciliation.'},
+    {id:'EP-2024-3006',claimant:'James Whitmore',age:71,carrier:'Lincoln Financial',product:'HAL Platform',epDay:5,epLimit:60,dailyBenefit:230,coveredDays:5,pendingDays:0,diagCode:'S72.001A',diagLabel:'Femur fracture — acute',mcareEnrolled:true,coStatus:'Primary Payor',provider:'OrthoPlus Rehab',dispute:false,status:'Active',alert:'New EP opened — schedule initial RN assessment within 10 days per policy SLA'},
+    {id:'EP-2024-3007',claimant:'Sylvia Hartman',age:80,carrier:'Prudential',product:'LTC/HAL Hybrid',epDay:58,epLimit:90,dailyBenefit:175,coveredDays:55,pendingDays:3,diagCode:'J44.1',diagLabel:'COPD — severe exacerbation',mcareEnrolled:true,coStatus:'Active COB',provider:'RespiraCare Home Health',dispute:true,status:'Dispute',alert:'Dispute on EP days 52-54 — provider billed for non-covered respiratory therapy modality'},
+  ];
+
+  var _p28epActive=null;
+
+  window._p28epViewCase=function(id){
+    _p28epActive=(_p28epActive===id)?null:id;
+    window._p28switchTab('epManagement');
+  };
+
+  window._p28epResolveDispute=function(id){
+    _p28toast('<i class="fas fa-check-circle"></i> Dispute on '+id+' submitted for supervisor review · Expected resolution 2-3 business days · Reference: DISP-'+id+'-'+new Date().getFullYear(),4000);
+  };
+  window._p28epScheduleRN=function(id){
+    _p28toast('<i class="fas fa-user-nurse"></i> RN telephonic assessment scheduled for '+id+' · Confirmation sent to provider and claimant · Ref: RN-'+id+'-JUL26',3500);
+  };
+  window._p28epMcareCOB=function(id){
+    _p28toast('<i class="fas fa-id-card"></i> Medicare COB reconciliation initiated for '+id+' · CMS eligibility query submitted · 48-hr response window · Ref: COB-'+id,3500);
+  };
+
+  function _p28epManagementTab(){
+    var CAA=CA1;
+    var active=_p28epCases.filter(function(c){return c.status==='Active';}).length;
+    var dispute=_p28epCases.filter(function(c){return c.dispute;}).length;
+    var exhausted=_p28epCases.filter(function(c){return c.status==='Exhausted';}).length;
+    var avgEpPct=Math.round(_p28epCases.reduce(function(a,c){return a+(c.epDay/c.epLimit*100);},0)/_p28epCases.length);
+    var html='<div>';
+
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">';
+    [[active,'Active EPs','fa-calendar-check',CA1],
+     [dispute,'Open Disputes','fa-gavel','#d97706'],
+     [exhausted,'EP Exhausted','fa-calendar-times','#dc2626'],
+     [avgEpPct+'%','Avg EP Utilization','fa-chart-pie','#0891b2']
+    ].forEach(function(m){
+      html+='<div style="background:#fff;border-radius:12px;padding:16px 20px;border:1px solid #fee2e2;box-shadow:0 1px 4px rgba(0,0,0,.04)">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<i class="fas '+m[2]+'" style="color:'+m[3]+';font-size:20px"></i>'
+        +'<div>'
+        +'<div style="font-size:22px;font-weight:800;color:'+m[3]+'">'+m[0]+'</div>'
+        +'<div style="font-size:11px;color:#94a3b8;font-weight:600">'+m[1]+'</div>'
+        +'</div></div></div>';
+    });
+    html+='</div>';
+
+    html+='<div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:center">'
+      +'<i class="fas fa-exclamation-triangle" style="color:#d97706;font-size:18px;flex-shrink:0"></i>'
+      +'<div><div style="font-weight:700;color:#92400e;font-size:13px">EP Compliance Reminders</div>'
+      +'<div style="font-size:12px;color:#78350f;margin-top:3px">NAIC Model 641 requires EP day tracking within \u00b11 day accuracy \u00b7 RN telephonic assessments must be conducted by EP day 10 for all new cases \u00b7 Disputes must be acknowledged within 5 business days \u00b7 Medicare COB must be reconciled quarterly for dual-eligible claimants</div>'
+      +'</div></div>';
+
+    html+='<div style="background:#fff;border-radius:12px;border:1px solid #fee2e2;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)">';
+    html+='<div style="padding:16px 20px;background:linear-gradient(135deg,'+CA3+',#991b1b);color:#fff;display:flex;align-items:center;gap:10px">'
+      +'<i class="fas fa-calendar-check" style="font-size:16px"></i>'
+      +'<span style="font-weight:700;font-size:14px">Elimination Period Case Register</span>'
+      +'<span style="margin-left:auto;background:rgba(255,255,255,.18);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700">'+_p28epCases.length+' Cases</span>'
+      +'</div>';
+
+    _p28epCases.forEach(function(c){
+      var pct=Math.round(c.epDay/c.epLimit*100);
+      var barColor=pct>=90?'#dc2626':pct>=70?'#d97706':'#16a34a';
+      var isOpen=_p28epActive===c.id;
+      var statusColor=c.status==='Active'?'#16a34a':c.status==='Dispute'?'#d97706':'#dc2626';
+      var statusBg=c.status==='Active'?'#f0fdf4':c.status==='Dispute'?'#fffbeb':'#fef2f2';
+
+      html+='<div style="border-bottom:1px solid #f8fafc">';
+      html+='<div onclick="window._p28epViewCase(\''
+        +c.id
+        +'\')" style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:background .15s" '
+        +'onmouseover="this.style.background=\'#fef2f2\'" onmouseout="this.style.background=\'#fff\'">';
+      html+='<div style="flex:0 0 120px">'
+        +'<div style="font-weight:700;font-size:12px;color:'+CA1+'">'+c.id+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+c.carrier+'</div>'
+        +'</div>';
+      html+='<div style="flex:1">'
+        +'<div style="font-weight:600;font-size:13px;color:#1e293b">'+c.claimant+', '+c.age+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+c.diagLabel+' &nbsp;&middot;&nbsp; '+c.provider+'</div>'
+        +'</div>';
+      html+='<div style="flex:0 0 200px">'
+        +'<div style="display:flex;justify-content:space-between;font-size:10px;color:#64748b;margin-bottom:3px">'
+        +'<span>EP Day '+c.epDay+'/'+c.epLimit+'</span><span style="color:'+barColor+';font-weight:700">'+pct+'%</span></div>'
+        +'<div style="background:#f1f5f9;border-radius:4px;height:6px;overflow:hidden">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:4px;transition:width .3s"></div>'
+        +'</div></div>';
+      html+='<span style="background:'+statusBg+';color:'+statusColor+';font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;white-space:nowrap">'+c.status+'</span>';
+      if(c.dispute) html+='<i class="fas fa-gavel" style="color:#d97706;font-size:14px" title="Open Dispute"></i>';
+      if(c.mcareEnrolled) html+='<i class="fas fa-id-card" style="color:#0891b2;font-size:14px" title="Medicare Enrolled"></i>';
+      html+='<i class="fas fa-chevron-'+( isOpen?'up':'down')+'" style="color:#94a3b8;font-size:12px"></i>';
+      html+='</div>';
+
+      if(isOpen){
+        html+='<div style="background:#f8fafc;border-top:1px solid #f1f5f9;padding:18px 24px">';
+        html+='<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">'
+          +'<i class="fas fa-bell" style="color:'+CA1+';margin-top:1px;flex-shrink:0"></i>'
+          +'<span style="font-size:12px;color:#7f1d1d;font-weight:500">'+c.alert+'</span></div>';
+        html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">';
+        [
+          ['Daily Benefit','$'+c.dailyBenefit+'/day','fa-dollar-sign'],
+          ['Covered Days',c.coveredDays+' confirmed · '+c.pendingDays+' pending','fa-calendar'],
+          ['Diagnosis',c.diagCode+' — '+c.diagLabel,'fa-stethoscope'],
+          ['Product Line',c.product,'fa-tag'],
+          ['Medicare Status',c.mcareEnrolled?'Enrolled':'Not Enrolled','fa-id-card'],
+          ['COB Status',c.coStatus,'fa-link']
+        ].forEach(function(d){
+          html+='<div style="background:#fff;border-radius:8px;padding:12px 14px;border:1px solid #e2e8f0">'
+            +'<div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">'
+            +'<i class="fas '+d[2]+'" style="margin-right:4px"></i>'+d[0]+'</div>'
+            +'<div style="font-weight:600;font-size:13px;color:#1e293b">'+d[1]+'</div>'
+            +'</div>';
+        });
+        html+='</div>';
+        html+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
+        html+='<button onclick="window._p28epScheduleRN(\''
+          +c.id+'\')" style="padding:9px 18px;background:'+CA1+';color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-user-nurse" style="margin-right:6px"></i>Schedule RN Assessment</button>';
+        if(c.mcareEnrolled){
+          html+='<button onclick="window._p28epMcareCOB(\''
+            +c.id+'\')" style="padding:9px 18px;background:#0891b2;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-id-card" style="margin-right:6px"></i>Medicare COB Reconcile</button>';
+        }
+        if(c.dispute){
+          html+='<button onclick="window._p28epResolveDispute(\''
+            +c.id+'\')" style="padding:9px 18px;background:#d97706;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer"><i class="fas fa-gavel" style="margin-right:6px"></i>Submit Dispute for Review</button>';
+        }
+        html+='</div>';
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+
+    html+='</div>';
+
+    html+='<div style="background:#fff;border-radius:12px;border:1px solid #fee2e2;margin-top:24px;overflow:hidden">';
+    html+='<div style="padding:14px 20px;background:'+CA1+';color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px">'
+      +'<i class="fas fa-heartbeat"></i> Progressive Condition Reassessment Queue</div>';
+    html+='<div style="padding:16px 20px">';
+    var progressive=_p28epCases.filter(function(c){return c.status==='Active'&&c.epDay>20;});
+    progressive.forEach(function(c){
+      var daysLeft=c.epLimit-c.epDay;
+      html+='<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid #f1f5f9">'
+        +'<div style="background:#fef2f2;border-radius:8px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<i class="fas fa-heartbeat" style="color:'+CA1+';font-size:18px"></i></div>'
+        +'<div style="flex:1">'
+        +'<div style="font-weight:600;font-size:13px">'+c.claimant+'  <span style="font-size:11px;color:#64748b">'+c.diagCode+' — '+c.diagLabel+'</span></div>'
+        +'<div style="font-size:11px;color:#94a3b8;margin-top:2px">EP Day '+c.epDay+' · '+daysLeft+' days remaining · '+c.provider+'</div>'
+        +'</div>'
+        +'<button onclick="window._p28epScheduleRN(\''
+        +c.id+'\')" style="padding:7px 14px;background:#fef2f2;border:1px solid #fecaca;color:'+CA1+';border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">'
+        +'<i class="fas fa-user-nurse" style="margin-right:4px"></i>Schedule Reassessment</button>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     NAV INTERCEPT
+  ═══════════════════════════════════════════════════════════════════ */
+  var _p28origNav=window.navigateTo||navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-caid'){
+      var pc=document.getElementById('page-content');
+      if(!pc){if(typeof _p28origNav==='function')_p28origNav(page);return;}
+      pc.innerHTML='';
+      _p28buildPage();
+      document.querySelectorAll('.nav-item').forEach(function(el){el.classList.remove('active');});
+      var navEl=document.querySelector('.hal-caid-nav');
+      if(navEl) navEl.classList.add('active');
+      window.scrollTo(0,0);
+      return;
+    }
+    if(typeof _p28origNav==='function')_p28origNav(page);
+  };
+
+  console.log('[HAL CAID] Phase 28 Claims Analytics Intelligence & Fraud Detection loaded — 15 claims, 8 fraud signals, 6 SIU cases, 6 ML models');
+})();
+/* P28 fix: re-expose window.navigateTo to bare global */
+var navigateTo=window.navigateTo;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 29 — HAL RATE INTELLIGENCE & RESERVE MANAGEMENT DASHBOARD (RIMD)
+   Nav: hal-rimd  |  Badge: RIMD  |  Color: #7c3aed (violet/purple)
+   Tabs: Rate Overview · State Filings · Policyholder Impact · Reserve Analytics · Reinsurance
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function(){ 'use strict';
+
+  /* ── Brand palette ── */
+  var R1='#7c3aed'; var R2='#8b5cf6'; var R3='#4c1d95';
+  var R4='#f5f3ff'; var RG='#16a34a'; var RR='#dc2626'; var RA='#d97706';
+
+  /* ── Module state ── */
+  var _p29activeTab='overview';
+  var _p29activeState=null;
+  var _p29simPrem=0;
+  var _p29simIncrease=25;
+
+  /* ══════════════════════════════════════════════════════
+     DATA: In-Force Block Portfolio
+  ══════════════════════════════════════════════════════ */
+  var _p29blocks=[
+    {id:'BLK-001',carrier:'New York Life',policyYears:'1995–2005',activePolicies:18420,avgAge:77,avgDailyBenefit:195,avgBenefitPeriod:'5yr',claimsOnBenefit:2840,lossRatio:118,premiumInForce:24600000,annualClaims:29100000,reserveBalance:412000000,reserveAdequacy:'Deficient',rateIncreaseApproved:32,rateIncreasePending:18,nextReviewDate:'2026-Q3',reinsurer:'Fortitude Re',reinsCeded:0.35,morbidityTrend:+2.1,lapseRate:1.2,mortalityImprovement:-0.8},
+    {id:'BLK-002',carrier:'John Hancock',policyYears:'1998–2008',activePolicies:14780,avgAge:74,avgDailyBenefit:220,avgBenefitPeriod:'Unlimited',claimsOnBenefit:1960,lossRatio:131,premiumInForce:19800000,annualClaims:25940000,reserveBalance:388000000,reserveAdequacy:'Severely Deficient',rateIncreaseApproved:45,rateIncreasePending:25,nextReviewDate:'2026-Q2',reinsurer:'Wilton Re',reinsCeded:0.42,morbidityTrend:+3.4,lapseRate:0.9,mortalityImprovement:-1.1},
+    {id:'BLK-003',carrier:'MetLife',policyYears:'2000–2010',activePolicies:11240,avgAge:71,avgDailyBenefit:175,avgBenefitPeriod:'3yr',claimsOnBenefit:980,lossRatio:94,premiumInForce:16100000,annualClaims:15130000,reserveBalance:276000000,reserveAdequacy:'Adequate',rateIncreaseApproved:15,rateIncreasePending:8,nextReviewDate:'2027-Q1',reinsurer:'None',reinsCeded:0,morbidityTrend:+1.2,lapseRate:1.8,mortalityImprovement:-0.5},
+    {id:'BLK-004',carrier:'Prudential',policyYears:'2001–2012',activePolicies:8960,avgAge:69,avgDailyBenefit:210,avgBenefitPeriod:'4yr',claimsOnBenefit:620,lossRatio:88,premiumInForce:13400000,annualClaims:11790000,reserveBalance:198000000,reserveAdequacy:'Adequate',rateIncreaseApproved:10,rateIncreasePending:0,nextReviewDate:'2027-Q2',reinsurer:'Swiss Re',reinsCeded:0.20,morbidityTrend:+0.8,lapseRate:2.1,mortalityImprovement:-0.3},
+    {id:'BLK-005',carrier:'Lincoln Financial',policyYears:'2003–2013',activePolicies:6180,avgAge:67,avgDailyBenefit:180,avgBenefitPeriod:'5yr',claimsOnBenefit:310,lossRatio:79,premiumInForce:9200000,annualClaims:7268000,reserveBalance:142000000,reserveAdequacy:'Well Funded',rateIncreaseApproved:0,rateIncreasePending:0,nextReviewDate:'2028-Q1',reinsurer:'None',reinsCeded:0,morbidityTrend:+0.4,lapseRate:2.6,mortalityImprovement:-0.2},
+    {id:'BLK-006',carrier:'Travelers',policyYears:'2005–2015',activePolicies:4220,avgAge:64,avgDailyBenefit:160,avgBenefitPeriod:'3yr',claimsOnBenefit:180,lossRatio:72,premiumInForce:6100000,annualClaims:4392000,reserveBalance:98000000,reserveAdequacy:'Well Funded',rateIncreaseApproved:0,rateIncreasePending:0,nextReviewDate:'2028-Q3',reinsurer:'None',reinsCeded:0,morbidityTrend:+0.2,lapseRate:3.1,mortalityImprovement:-0.1}
+  ];
+
+  /* ══════════════════════════════════════════════════════
+     DATA: State Filing Tracker
+  ══════════════════════════════════════════════════════ */
+  var _p29stateFilings=[
+    {state:'FL',stateName:'Florida',carrier:'John Hancock',block:'BLK-002',requestedIncrease:45,approvedIncrease:38,filingDate:'2025-09-12',approvalDate:'2026-01-28',status:'Approved',regulatoryContact:'FL OIR — LTC Division',notes:'Multi-state NAIC framework filing. FL approved 38% vs 45% requested. Effective 2026-04-01.',effectiveDate:'2026-04-01',policyholderCount:2140,annualPremiumImpact:1820000,daysInReview:138},
+    {state:'CA',stateName:'California',carrier:'New York Life',block:'BLK-001',requestedIncrease:32,approvedIncrease:null,filingDate:'2025-11-03',approvalDate:null,status:'Under Review',regulatoryContact:'CA CDI — Health Policy Bureau',notes:'CA historically limits increases. Initial comment period closed. Actuarial hearing scheduled 2026-Q3.',effectiveDate:null,policyholderCount:3280,annualPremiumImpact:2640000,daysInReview:249},
+    {state:'NY',stateName:'New York',carrier:'John Hancock',block:'BLK-002',requestedIncrease:45,approvedIncrease:null,filingDate:'2025-08-20',approvalDate:null,status:'Objection Filed',regulatoryContact:'NY DFS — Life Bureau',notes:'NY DFS filed formal objection citing policyholder affordability. Response brief submitted 2026-02-14. Hearing pending.',effectiveDate:null,policyholderCount:1960,annualPremiumImpact:2100000,daysInReview:323},
+    {state:'TX',stateName:'Texas',carrier:'New York Life',block:'BLK-001',requestedIncrease:32,approvedIncrease:32,filingDate:'2025-07-15',approvalDate:'2025-10-22',status:'Approved',regulatoryContact:'TX TDI — Life & Health',notes:'Full approval. Effective 2026-01-01. Policyholder notices mailed 2025-11-15.',effectiveDate:'2026-01-01',policyholderCount:1820,annualPremiumImpact:1540000,daysInReview:99},
+    {state:'IL',stateName:'Illinois',carrier:'MetLife',block:'BLK-003',requestedIncrease:18,approvedIncrease:15,filingDate:'2025-10-01',approvalDate:'2026-03-14',status:'Approved',regulatoryContact:'IL DOI — Financial Division',notes:'Partial approval. IL required 3-year phase-in. Year 1: 8%, Year 2: 4%, Year 3: 3%.',effectiveDate:'2026-07-01',policyholderCount:1340,annualPremiumImpact:840000,daysInReview:164},
+    {state:'PA',stateName:'Pennsylvania',carrier:'John Hancock',block:'BLK-002',requestedIncrease:45,approvedIncrease:null,filingDate:'2026-01-10',approvalDate:null,status:'Pending — Initial Review',regulatoryContact:'PA Insurance Department',notes:'Filing received. Initial review period 60 days. Actuarial review pending.',effectiveDate:null,policyholderCount:1120,annualPremiumImpact:1180000,daysInReview:181},
+    {state:'OH',stateName:'Ohio',carrier:'Lincoln Financial',block:'BLK-005',requestedIncrease:12,approvedIncrease:12,filingDate:'2025-06-01',approvalDate:'2025-08-28',status:'Approved',regulatoryContact:'OH Department of Insurance',notes:'Full approval. No objections. Clean filing.',effectiveDate:'2026-01-01',policyholderCount:680,annualPremiumImpact:320000,daysInReview:88},
+    {state:'WA',stateName:'Washington',carrier:'MetLife',block:'BLK-003',requestedIncrease:18,approvedIncrease:null,filingDate:'2026-02-14',approvalDate:null,status:'Withdrawn',regulatoryContact:'WA OIC — Life & Disability',notes:'Carrier withdrew filing pending actuarial experience study update. Refiling expected 2026-Q4.',effectiveDate:null,policyholderCount:480,annualPremiumImpact:260000,daysInReview:146},
+    {state:'AZ',stateName:'Arizona',carrier:'Prudential',block:'BLK-004',requestedIncrease:10,approvedIncrease:10,filingDate:'2025-05-20',approvalDate:'2025-07-31',status:'Approved',regulatoryContact:'AZ DIFI',notes:'Expedited review. Full approval.',effectiveDate:'2025-11-01',policyholderCount:420,annualPremiumImpact:198000,daysInReview:72},
+    {state:'GA',stateName:'Georgia',carrier:'New York Life',block:'BLK-001',requestedIncrease:32,approvedIncrease:28,filingDate:'2025-09-01',approvalDate:'2026-02-19',status:'Approved',regulatoryContact:'GA OCI',notes:'Partial — GA approved 28%. Phased over 2 years: 18% + 10%.',effectiveDate:'2026-05-01',policyholderCount:780,annualPremiumImpact:620000,daysInReview:171}
+  ];
+
+  /* ══════════════════════════════════════════════════════
+     DATA: Reserve & Actuarial
+  ══════════════════════════════════════════════════════ */
+  var _p29reserveTrend=[
+    {year:2020,statutory:1420,gaap:1380,required:1210,adequacy:117},
+    {year:2021,statutory:1460,gaap:1415,required:1290,adequacy:113},
+    {year:2022,statutory:1490,gaap:1440,required:1380,adequacy:108},
+    {year:2023,statutory:1514,gaap:1458,required:1460,adequacy:104},
+    {year:2024,statutory:1515,gaap:1460,required:1548,adequacy:98},
+    {year:2025,statutory:1514,gaap:1455,required:1642,adequacy:92},
+    {year:2026,statutory:1520,gaap:1461,required:1740,adequacy:87}
+  ];
+
+  var _p29claimProjection=[
+    {year:2026,paid:14.2,projected:14.8,incurred:15.6},
+    {year:2027,paid:15.8,projected:16.4,incurred:17.2},
+    {year:2028,paid:17.6,projected:18.3,incurred:19.1},
+    {year:2030,paid:21.4,projected:22.8,incurred:23.9},
+    {year:2033,paid:28.6,projected:30.4,incurred:31.8},
+    {year:2037,paid:36.2,projected:38.9,incurred:40.6},
+    {year:2041,paid:41.8,projected:44.2,incurred:46.1}
+  ];
+
+  /* ══════════════════════════════════════════════════════
+     DATA: Reinsurance Treaties
+  ══════════════════════════════════════════════════════ */
+  var _p29reinsTreaties=[
+    {id:'REIN-001',cedingCarrier:'John Hancock',reinsurer:'Fortitude Re',treatyType:'Quota Share',block:'BLK-002',effectiveDate:'2025-03-01',cedingPct:42,annualCededPremium:8316000,annualCededClaims:10895000,reservesCeded:162960000,coinsuranceFee:1.8,status:'Active',nextAuditDate:'2026-09-01',notes:'$3.4B statutory reserves ceded. Fortitude retrocedes biometric risk to global reinsurer. Comfort trust established.'},
+    {id:'REIN-002',cedingCarrier:'New York Life',reinsurer:'Fortitude Re',treatyType:'Modified Coinsurance',block:'BLK-001',effectiveDate:'2026-07-06',cedingPct:35,annualCededPremium:8610000,annualCededClaims:10185000,reservesCeded:144200000,coinsuranceFee:2.1,status:'Active — New',nextAuditDate:'2027-01-06',notes:'$3.8B transaction announced July 2026. Largest single LTC reinsurance deal this decade.'},
+    {id:'REIN-003',cedingCarrier:'MetLife',reinsurer:'Wilton Re',treatyType:'Runoff Assumption',block:'BLK-003',effectiveDate:'2024-06-01',cedingPct:0,annualCededPremium:0,annualCededClaims:0,reservesCeded:0,coinsuranceFee:0,status:'Exploring',nextAuditDate:null,notes:'MetLife in negotiations with Wilton Re for full assumption of BLK-003. Due diligence ongoing. Expected close 2026-Q4.'},
+    {id:'REIN-004',cedingCarrier:'Prudential',reinsurer:'Swiss Re',treatyType:'Excess of Loss',block:'BLK-004',effectiveDate:'2022-01-01',cedingPct:20,annualCededPremium:2680000,annualCededClaims:2358000,reservesCeded:39600000,coinsuranceFee:1.2,status:'Active',nextAuditDate:'2026-12-31',notes:'XOL cover triggers above 95% loss ratio. Swiss Re assumes biometric tail risk on unlimited-benefit policies.'}
+  ];
+
+
+  /* ══════════════════════════════════════════════════════
+     PAGE FRAMEWORK
+  ══════════════════════════════════════════════════════ */
+  function _p29buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+
+    /* Portfolio KPIs */
+    var totalActive=_p29blocks.reduce(function(a,b){return a+b.activePolicies;},0);
+    var totalPremium=_p29blocks.reduce(function(a,b){return a+b.premiumInForce;},0);
+    var totalClaims=_p29blocks.reduce(function(a,b){return a+b.annualClaims;},0);
+    var totalReserve=_p29blocks.reduce(function(a,b){return a+b.reserveBalance;},0);
+    var blendedLR=Math.round(totalClaims/totalPremium*100);
+    var pendingFilings=_p29stateFilings.filter(function(f){return f.status!=='Approved'&&f.status!=='Withdrawn';}).length;
+
+    pc.innerHTML=''
+      +'<div style="font-family:\'Segoe UI\',sans-serif;background:#faf5ff;min-height:100vh;padding:0">'
+
+      /* ── Hero Banner ── */
+      +'<div style="background:linear-gradient(135deg,'+R3+' 0%,'+R1+' 60%,'+R2+' 100%);padding:24px 28px 20px;color:#fff">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'
+      +'<div>'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 10px"><i class="fas fa-chart-area" style="font-size:22px"></i></div>'
+      +'<div>'
+      +'<div style="font-size:22px;font-weight:800;letter-spacing:-.3px">Rate Intelligence & Reserve Management</div>'
+      +'<div style="font-size:12px;opacity:.8;margin-top:1px">HAL RIMD · LTC Portfolio Actuarial Command Center</div>'
+      +'</div></div></div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800">'+totalActive.toLocaleString()+'</div><div style="font-size:10px;opacity:.8">Active Policies</div></div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800">'+blendedLR+'%</div><div style="font-size:10px;opacity:.8">Blended Loss Ratio</div></div>'
+      +'<div style="background:'+(pendingFilings>3?'rgba(220,38,38,.3)':'rgba(255,255,255,.12)')+';border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800">'+pendingFilings+'</div><div style="font-size:10px;opacity:.8">Filings Pending</div></div>'
+      +'<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800">$'+Math.round(totalReserve/1000000)+'M</div><div style="font-size:10px;opacity:.8">Total Reserves</div></div>'
+      +'</div></div></div>'
+
+      /* ── Tab Bar ── */
+      +'<div style="background:#fff;border-bottom:1px solid #e9d5ff;padding:0 28px;display:flex;gap:0;overflow-x:auto">';
+    [
+      ['overview','fa-tachometer-alt','Rate Overview'],
+      ['filings','fa-file-alt','State Filings'],
+      ['impact','fa-users','Policyholder Impact'],
+      ['reserves','fa-database','Reserve Analytics'],
+      ['reinsurance','fa-handshake','Reinsurance']
+    ].forEach(function(t){
+      var act=_p29activeTab===t[0];
+      pc.innerHTML+=
+        '<button onclick="window._p29switchTab(\''+t[0]+'\')" style="padding:14px 20px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:'+(act?700:500)+';color:'+(act?R1:'#64748b')+';border-bottom:3px solid '+(act?R1:'transparent')+';white-space:nowrap;transition:all .2s">'
+        +'<i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';
+    });
+    pc.innerHTML+='</div>'
+
+      /* ── Tab Content ── */
+      +'<div id="p29-tab-content" style="padding:24px 28px">'
+      +_p29renderTab()
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p29renderTab(){
+    if(_p29activeTab==='overview') return _p29overviewTab();
+    if(_p29activeTab==='filings') return _p29filingsTab();
+    if(_p29activeTab==='impact') return _p29impactTab();
+    if(_p29activeTab==='reserves') return _p29reservesTab();
+    if(_p29activeTab==='reinsurance') return _p29reinsuranceTab();
+    return '';
+  }
+
+  window._p29switchTab=function(t){
+    _p29activeTab=t;
+    var tc=document.getElementById('p29-tab-content');
+    if(tc) tc.innerHTML=_p29renderTab();
+  };
+
+  function _p29badge(txt,col,bg){
+    return '<span style="background:'+(bg||col+'1a')+';color:'+col+';font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700">'+txt+'</span>';
+  }
+
+  function _p29adequacyBadge(val){
+    if(val==='Well Funded') return _p29badge('Well Funded',RG);
+    if(val==='Adequate') return _p29badge('Adequate','#0891b2');
+    if(val==='Deficient') return _p29badge('Deficient',RA);
+    if(val==='Severely Deficient') return _p29badge('Severely Deficient',RR);
+    return _p29badge(val,'#64748b');
+  }
+
+  /* ══════════════════════════════════════════════════════
+     TAB 1: RATE OVERVIEW
+  ══════════════════════════════════════════════════════ */
+  function _p29overviewTab(){
+    var html='<div>';
+
+    /* Portfolio Alerts */
+    html+='<div style="background:linear-gradient(135deg,#fef2f2,#fff7ed);border:1px solid #fca5a5;border-radius:12px;padding:16px 20px;margin-bottom:20px">'
+      +'<div style="font-size:13px;font-weight:700;color:'+RR+';margin-bottom:10px"><i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>Portfolio Alerts — Actuarial Action Required</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px">';
+    [
+      {icon:'fa-arrow-up',col:RR,msg:'BLK-002 (John Hancock) loss ratio 131% — immediate rate action required'},
+      {icon:'fa-arrow-up',col:RR,msg:'BLK-001 (New York Life) loss ratio 118% — NAIC multistate review recommended'},
+      {icon:'fa-hourglass-half',col:RA,msg:'NY DFS formal objection pending — 323 days in review on JH filing'},
+      {icon:'fa-database',col:RA,msg:'System-wide reserve adequacy declining: 117% (2020) → 87% (2026)'},
+      {icon:'fa-handshake',col:'#7c3aed',msg:'$3.8B Fortitude Re treaty (NYL) effective — treaty compliance monitoring required'},
+      {icon:'fa-calendar',col:'#0891b2',msg:'SOA industry-wide experience study launching Q3 2025 — update assumptions'}
+    ].forEach(function(a){
+      html+='<div style="display:flex;align-items:flex-start;gap:8px;background:#fff;border-radius:8px;padding:10px 12px">'
+        +'<i class="fas '+a.icon+'" style="color:'+a.col+';margin-top:2px;font-size:12px;flex-shrink:0"></i>'
+        +'<span style="font-size:12px;color:#1e293b;line-height:1.4">'+a.msg+'</span></div>';
+    });
+    html+='</div></div>';
+
+    /* Block Grid */
+    html+='<div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-layer-group" style="color:'+R1+';margin-right:8px"></i>In-Force Block Portfolio</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px">';
+    _p29blocks.forEach(function(b){
+      var lrCol=b.lossRatio>=120?RR:b.lossRatio>=100?RA:b.lossRatio>=90?'#d97706':RG;
+      var lrBar=Math.min(b.lossRatio,150);
+      html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px;border-top:4px solid '+lrCol+'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+        +'<div>'
+        +'<div style="font-size:14px;font-weight:700;color:#1e293b">'+b.carrier+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+b.id+' · Policy Years '+b.policyYears+'</div>'
+        +'</div>'
+        +_p29adequacyBadge(b.reserveAdequacy)
+        +'</div>'
+
+        /* Loss Ratio Bar */
+        +'<div style="margin-bottom:14px">'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:4px">'
+        +'<span>Loss Ratio</span><span style="font-weight:700;color:'+lrCol+'">'+b.lossRatio+'%</span></div>'
+        +'<div style="background:#f1f5f9;border-radius:6px;height:10px;position:relative">'
+        +'<div style="background:'+lrCol+';border-radius:6px;height:10px;width:'+Math.min(lrBar/150*100,100)+'%"></div>'
+        +'<div style="position:absolute;left:'+(100/150*100)+'%;top:-2px;height:14px;width:2px;background:#94a3b8"></div>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;margin-top:2px"><span>0%</span><span style="margin-left:auto">Break-even 100%</span></div>'
+        +'</div>'
+
+        /* Stats Grid */
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
+      [
+        {l:'Active Policies',v:b.activePolicies.toLocaleString()},
+        {l:'On Benefit',v:b.claimsOnBenefit.toLocaleString()},
+        {l:'Avg Age',v:b.avgAge+'yr'},
+        {l:'Annual Premium',v:'$'+Math.round(b.premiumInForce/1000000)+'M'},
+        {l:'Annual Claims',v:'$'+Math.round(b.annualClaims/1000000)+'M'},
+        {l:'Reserve Balance',v:'$'+Math.round(b.reserveBalance/1000000)+'M'}
+      ].forEach(function(s){
+        html+='<div style="background:#f8fafc;border-radius:8px;padding:8px 10px">'
+          +'<div style="font-size:10px;color:#94a3b8">'+s.l+'</div>'
+          +'<div style="font-size:13px;font-weight:700;color:#334155">'+s.v+'</div>'
+          +'</div>';
+      });
+      html+='</div>'
+
+        /* Rate Increase Info */
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
+        +(b.rateIncreaseApproved>0?'<span style="background:#f0fdf4;color:'+RG+';font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600"><i class="fas fa-check" style="margin-right:3px"></i>'+b.rateIncreaseApproved+'% Approved</span>':'')
+        +(b.rateIncreasePending>0?'<span style="background:#fffbeb;color:'+RA+';font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600"><i class="fas fa-clock" style="margin-right:3px"></i>'+b.rateIncreasePending+'% Pending</span>':'')
+        +(b.reinsurer!=='None'?'<span style="background:#f5f3ff;color:'+R1+';font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600"><i class="fas fa-handshake" style="margin-right:3px"></i>'+b.reinsurer+'</span>':'')
+        +'<span style="margin-left:auto;font-size:10px;color:#94a3b8">Next review: '+b.nextReviewDate+'</span>'
+        +'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Morbidity & Lapse Trends */
+    html+='<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-heartbeat" style="color:'+RR+';margin-right:8px"></i>Morbidity Trend by Block (Annual Δ)</div>';
+    _p29blocks.forEach(function(b){
+      var col=b.morbidityTrend>2?RR:b.morbidityTrend>1?RA:RG;
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div style="font-size:12px;color:#334155;width:120px;flex-shrink:0">'+b.carrier.replace(' Financial','').replace(' Hancock','')+'</div>'
+        +'<div style="flex:1;background:#f1f5f9;border-radius:4px;height:8px">'
+        +'<div style="background:'+col+';border-radius:4px;height:8px;width:'+Math.min(b.morbidityTrend/4*100,100)+'%"></div></div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+col+';width:40px;text-align:right">+'+b.morbidityTrend+'%</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-door-open" style="color:'+RA+';margin-right:8px"></i>Voluntary Lapse Rate by Block</div>';
+    _p29blocks.forEach(function(b){
+      var col=b.lapseRate<1.5?RR:b.lapseRate<2?RA:RG;
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div style="font-size:12px;color:#334155;width:120px;flex-shrink:0">'+b.carrier.replace(' Financial','').replace(' Hancock','')+'</div>'
+        +'<div style="flex:1;background:#f1f5f9;border-radius:4px;height:8px">'
+        +'<div style="background:'+col+';border-radius:4px;height:8px;width:'+Math.min(b.lapseRate/4*100,100)+'%"></div></div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+col+';width:40px;text-align:right">'+b.lapseRate+'%</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+
+  /* ══════════════════════════════════════════════════════
+     TAB 2: STATE FILINGS TRACKER
+  ══════════════════════════════════════════════════════ */
+  function _p29filingsTab(){
+    var html='<div>';
+
+    /* Summary Metrics */
+    var approved=_p29stateFilings.filter(function(f){return f.status==='Approved';});
+    var pending=_p29stateFilings.filter(function(f){return f.status!=='Approved'&&f.status!=='Withdrawn';});
+    var withdrawn=_p29stateFilings.filter(function(f){return f.status==='Withdrawn';});
+    var totalImpact=approved.reduce(function(a,f){return a+f.annualPremiumImpact;},0);
+    var avgDays=Math.round(_p29stateFilings.reduce(function(a,f){return a+f.daysInReview;},0)/_p29stateFilings.length);
+
+    html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px">';
+    [
+      {l:'Total Filings',v:_p29stateFilings.length,c:'#1d4ed8',ic:'fa-file-alt'},
+      {l:'Approved',v:approved.length,c:RG,ic:'fa-check-circle'},
+      {l:'Pending',v:pending.length,c:RA,ic:'fa-clock'},
+      {l:'Objections / Withdrawn',v:withdrawn.length+_p29stateFilings.filter(function(f){return f.status==='Objection Filed';}).length,c:RR,ic:'fa-times-circle'},
+      {l:'Premium Impact (Approved)',v:'$'+Math.round(totalImpact/1000000*10)/10+'M',c:R1,ic:'fa-dollar-sign'}
+    ].forEach(function(s){
+      html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:12px;padding:14px;border-top:3px solid '+s.c+'">'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:6px"><i class="fas '+s.ic+'" style="color:'+s.c+';margin-right:5px"></i>'+s.l+'</div>'
+        +'<div style="font-size:22px;font-weight:800;color:'+s.c+'">'+s.v+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* NAIC Multistate Banner */
+    html+='<div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:12px;padding:14px 18px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:14px">'
+      +'<div style="font-size:28px"><i class="fas fa-landmark"></i></div>'
+      +'<div><div style="font-weight:700;font-size:13px">NAIC Long-Term Care Insurance Multistate Rate Review Framework</div>'
+      +'<div style="font-size:12px;opacity:.85;margin-top:3px">Concurrent multi-state filing capability · Avg review time reduction 40% · 2025 framework revisions adopted · 31 participating states · Coordination with WA, CA, NY regulators ongoing</div></div>'
+      +'<div style="margin-left:auto;background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center;flex-shrink:0"><div style="font-size:16px;font-weight:800">'+avgDays+'d</div><div style="font-size:10px;opacity:.8">Avg Review Time</div></div>'
+      +'</div>';
+
+    /* Filing Table */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;overflow:hidden">'
+      +'<div style="padding:14px 18px;border-bottom:1px solid #f0e9ff;display:flex;align-items:center;justify-content:space-between">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b"><i class="fas fa-map-marked-alt" style="color:'+R1+';margin-right:8px"></i>State Filing Register</div>'
+      +'<div style="font-size:11px;color:#94a3b8">'+_p29stateFilings.length+' filings across '+new Set(_p29stateFilings.map(function(f){return f.state;})).size+' states</div>'
+      +'</div>'
+      +'<div style="overflow-x:auto">'
+      +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<thead><tr style="background:#faf5ff">';
+    ['State','Carrier / Block','Requested','Approved','Filing Date','Days in Review','Status','Effective','Impact'].forEach(function(h){
+      html+='<th style="padding:10px 12px;text-align:left;font-weight:600;color:#64748b;border-bottom:1px solid #e9d5ff;white-space:nowrap">'+h+'</th>';
+    });
+    html+='</tr></thead><tbody>';
+
+    _p29stateFilings.forEach(function(f,i){
+      var statCol=f.status==='Approved'?RG:f.status==='Objection Filed'?RR:f.status==='Withdrawn'?'#94a3b8':RA;
+      var statBg=f.status==='Approved'?'#f0fdf4':f.status==='Objection Filed'?'#fef2f2':f.status==='Withdrawn'?'#f8fafc':'#fffbeb';
+      html+='<tr style="border-bottom:1px solid #f8f0ff;background:'+(i%2===0?'#fff':'#faf5ff')+'" onclick="window._p29showFiling(\''+f.state+'\',\''+f.carrier+'\')" style="cursor:pointer">'
+        +'<td style="padding:10px 12px;font-weight:700;color:#1d4ed8">'+f.state+'</td>'
+        +'<td style="padding:10px 12px"><div style="font-weight:600;color:#1e293b">'+f.carrier+'</div><div style="color:#94a3b8;font-size:10px">'+f.block+'</div></td>'
+        +'<td style="padding:10px 12px;font-weight:700;color:'+R1+'">'+f.requestedIncrease+'%</td>'
+        +'<td style="padding:10px 12px;font-weight:700;color:'+(f.approvedIncrease?RG:'#94a3b8')+'">'+(f.approvedIncrease?f.approvedIncrease+'%':'—')+'</td>'
+        +'<td style="padding:10px 12px;color:#64748b">'+f.filingDate+'</td>'
+        +'<td style="padding:10px 12px"><span style="font-weight:700;color:'+(f.daysInReview>200?RR:f.daysInReview>120?RA:'#334155')+'">'+f.daysInReview+'d</span></td>'
+        +'<td style="padding:10px 12px"><span style="background:'+statBg+';color:'+statCol+';font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700">'+f.status+'</span></td>'
+        +'<td style="padding:10px 12px;color:#64748b">'+(f.effectiveDate||'—')+'</td>'
+        +'<td style="padding:10px 12px;font-weight:700;color:#1d4ed8">'+(f.annualPremiumImpact?'$'+Math.round(f.annualPremiumImpact/1000)+'K':'—')+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div>'
+      +'<div id="p29-filing-detail" style="display:none;padding:16px 18px;border-top:1px solid #e9d5ff;background:#faf5ff"></div>'
+      +'</div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  window._p29showFiling=function(state,carrier){
+    var f=_p29stateFilings.find(function(x){return x.state===state&&x.carrier===carrier;});
+    if(!f) return;
+    var d=document.getElementById('p29-filing-detail');
+    if(!d) return;
+    var statCol=f.status==='Approved'?RG:f.status==='Objection Filed'?RR:f.status==='Withdrawn'?'#94a3b8':RA;
+    d.style.display='block';
+    d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">'
+      +'<div><div style="font-size:14px;font-weight:700;color:#1e293b">'+f.stateName+' — '+f.carrier+' Filing Detail</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+f.block+' · Filed '+f.filingDate+'</div></div>'
+      +'<span style="background:'+(f.status==='Approved'?'#f0fdf4':f.status==='Objection Filed'?'#fef2f2':'#fffbeb')+';color:'+statCol+';font-size:11px;padding:4px 12px;border-radius:10px;font-weight:700">'+f.status+'</span></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px">';
+    [
+      ['Regulatory Contact',f.regulatoryContact],
+      ['Policyholders Affected',f.policyholderCount.toLocaleString()],
+      ['Annual Premium Impact','$'+Math.round(f.annualPremiumImpact/1000)+'K'],
+      ['Days in Review',f.daysInReview+'d'],
+      ['Approved Amount',f.approvedIncrease?f.approvedIncrease+'%':'Pending'],
+      ['Effective Date',f.effectiveDate||'TBD']
+    ].forEach(function(r){
+      d.innerHTML+='<div style="background:#fff;border-radius:8px;padding:10px 12px;border:1px solid #e9d5ff">'
+        +'<div style="font-size:10px;color:#94a3b8;text-transform:uppercase;margin-bottom:3px">'+r[0]+'</div>'
+        +'<div style="font-size:13px;font-weight:600;color:#334155">'+r[1]+'</div></div>';
+    });
+    d.innerHTML+='</div>'
+      +'<div style="margin-top:12px;background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid '+statCol+'">'
+      +'<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">Regulator Notes</div>'
+      +'<div style="font-size:12px;color:#334155">'+f.notes+'</div></div>';
+  };
+
+  /* ══════════════════════════════════════════════════════
+     TAB 3: POLICYHOLDER IMPACT SIMULATOR
+  ══════════════════════════════════════════════════════ */
+  function _p29impactTab(){
+    var inc=_p29simIncrease;
+    var html='<div>';
+
+    /* Simulator Controls */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:20px;margin-bottom:20px">'
+      +'<div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:16px"><i class="fas fa-sliders-h" style="color:'+R1+';margin-right:8px"></i>Premium Increase Impact Simulator</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center">'
+      +'<div>'
+      +'<label style="font-size:12px;font-weight:600;color:#64748b;display:block;margin-bottom:6px">Rate Increase Scenario: <span style="color:'+R1+';font-size:14px;font-weight:800" id="p29-inc-label">'+inc+'%</span></label>'
+      +'<input type="range" min="5" max="60" value="'+inc+'" oninput="window._p29setSim(+this.value)" style="width:100%;accent-color:'+R1+'">'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8"><span>5%</span><span>30%</span><span>60%</span></div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+
+    var scenarios=[
+      {label:'Accept Increase',pct:72,col:RG,icon:'fa-check'},
+      {label:'Reduce Daily Benefit',pct:14,col:'#0891b2',icon:'fa-arrow-down'},
+      {label:'Shorten Benefit Period',pct:8,col:RA,icon:'fa-calendar-minus'},
+      {label:'Elect Paid-Up / Lapse',pct:6,col:RR,icon:'fa-door-open'}
+    ];
+    scenarios.forEach(function(s){
+      html+='<div style="background:'+s.col+'1a;border:1px solid '+s.col+'44;border-radius:10px;padding:10px 12px;text-align:center">'
+        +'<i class="fas '+s.icon+'" style="color:'+s.col+';font-size:16px;margin-bottom:4px"></i>'
+        +'<div style="font-size:18px;font-weight:800;color:'+s.col+'">'+s.pct+'%</div>'
+        +'<div style="font-size:10px;color:#64748b">'+s.label+'</div></div>';
+    });
+    html+='</div></div></div>';
+
+    /* Cohort Impact Cards */
+    html+='<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px"><i class="fas fa-users" style="color:'+R1+';margin-right:8px"></i>Policyholder Cohort Impact Analysis</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-bottom:20px">';
+
+    var cohorts=[
+      {name:'Fixed Income Seniors (70+)',size:28400,avgPrem:3800,income:'$28K–$42K/yr',affordabilityRisk:'High',riskCol:RR,icon:'fa-user-friends',notes:'Most vulnerable to increases >20%. High likelihood of benefit reduction elections.'},
+      {name:'Pre-Retirees (60–69)',size:18200,avgPrem:4200,income:'$55K–$85K/yr',affordabilityRisk:'Medium',riskCol:RA,icon:'fa-user-tie',notes:'Working age. More flexibility to absorb increases. Low lapse risk.'},
+      {name:'Younger Insureds (<60)',size:9200,avgPrem:2900,income:'$75K+/yr',affordabilityRisk:'Low',riskCol:RG,icon:'fa-user',notes:'Lowest risk cohort. Years from benefit use. Long premium runway.'},
+      {name:'Unlimited Benefit Policies',size:6800,avgPrem:6100,income:'Varies',affordabilityRisk:'Critical',riskCol:RR,icon:'fa-infinity',notes:'Infinite tail exposure. Morbidity trend most severe. Rate increases essential but hardest to approve.'}
+    ];
+    cohorts.forEach(function(c){
+      var newPrem=Math.round(c.avgPrem*(1+inc/100));
+      var delta=newPrem-c.avgPrem;
+      html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:12px;padding:16px;border-left:4px solid '+c.riskCol+'">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+        +'<i class="fas '+c.icon+'" style="color:'+c.riskCol+';font-size:18px"></i>'
+        +'<div><div style="font-size:13px;font-weight:700;color:#1e293b">'+c.name+'</div>'
+        +'<div style="font-size:11px;color:#64748b">'+c.size.toLocaleString()+' policyholders · Income: '+c.income+'</div></div>'
+        +'<div style="margin-left:auto">'+_p29badge(c.affordabilityRisk+' Risk',c.riskCol)+'</div>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:8px;text-align:center">'
+        +'<div style="font-size:10px;color:#94a3b8">Current Premium</div>'
+        +'<div style="font-size:16px;font-weight:800;color:#334155">$'+c.avgPrem.toLocaleString()+'/yr</div></div>'
+        +'<div style="background:'+R4+';border-radius:8px;padding:8px;text-align:center">'
+        +'<div style="font-size:10px;color:#94a3b8">New Premium</div>'
+        +'<div style="font-size:16px;font-weight:800;color:'+R1+'">$'+newPrem.toLocaleString()+'/yr</div></div>'
+        +'<div style="background:#fef2f2;border-radius:8px;padding:8px;text-align:center">'
+        +'<div style="font-size:10px;color:#94a3b8">Annual Increase</div>'
+        +'<div style="font-size:16px;font-weight:800;color:'+RR+'">+$'+delta.toLocaleString()+'</div></div>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#64748b;background:#f8fafc;border-radius:6px;padding:8px">'+c.notes+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Benefit Option Alternatives Table */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-exchange-alt" style="color:'+R1+';margin-right:8px"></i>Premium-Neutral Benefit Reduction Options ('+inc+'% increase scenario)</div>'
+      +'<div style="overflow-x:auto">'
+      +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<thead><tr style="background:#faf5ff">';
+    ['Option','Description','Premium Impact','Benefit Change','Coverage Retained','Regulatory Notes'].forEach(function(h){
+      html+='<th style="padding:10px 12px;text-align:left;font-weight:600;color:#64748b;border-bottom:1px solid #e9d5ff">'+h+'</th>';
+    });
+    html+='</tr></thead><tbody>';
+    [
+      ['Accept Full Increase','Pay new premium, maintain all benefits','+'+(inc)+'% ($'+Math.round(4000*inc/100)+'/yr)','No change','100%','Simplest path. Regulator preferred outcome.'],
+      ['Reduce Daily Benefit','Reduce DBR proportionally to absorb increase','0%','DBR reduced ~'+Math.round(inc*0.7)+'%','~72%','Most common election. Benefit Period unchanged.'],
+      ['Shorten Benefit Period','Reduce max benefit period (e.g., lifetime → 5yr)','0%','Period shortened','~65%','Risk of exhaustion if LTC need exceeds new period.'],
+      ['Increase Elimination Period','Extend EP (e.g., 90→180 days) for lower premium','−'+(Math.round(inc*0.6))+'%','EP extended','85%','Reduces fraud risk. Policyholder bears more early cost.'],
+      ['Remove Inflation Rider','Drop COLA protection for flat premium','−'+(Math.round(inc*0.5))+'%','No inflation adjustment','~60% at year 10','Significant long-term coverage erosion risk.'],
+      ['Reduced Paid-Up','Accept smaller paid-up benefit, stop premiums','−100%','Reduced lump benefit only','20–35%','Last resort. Protects against full lapse.']
+    ].forEach(function(r,i){
+      html+='<tr style="border-bottom:1px solid #f8f0ff;background:'+(i%2===0?'#fff':'#faf5ff')+'">';
+      r.forEach(function(c,ci){
+        var col='#334155';
+        if(ci===2) col=c.startsWith('+')?RR:c===('0%')?'#0891b2':RG;
+        html+='<td style="padding:10px 12px;color:'+col+';'+(ci===0?'font-weight:700':'')+'">'+c+'</td>';
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table></div></div>';
+    html+='</div>';
+    return html;
+  }
+
+  window._p29setSim=function(v){
+    _p29simIncrease=v;
+    var lbl=document.getElementById('p29-inc-label');
+    if(lbl) lbl.textContent=v+'%';
+    var tc=document.getElementById('p29-tab-content');
+    if(tc) tc.innerHTML=_p29impactTab();
+  };
+
+
+  /* ══════════════════════════════════════════════════════
+     TAB 4: RESERVE ANALYTICS
+  ══════════════════════════════════════════════════════ */
+  function _p29reservesTab(){
+    var html='<div>';
+
+    /* Reserve Adequacy Alert Banner */
+    var latest=_p29reserveTrend[_p29reserveTrend.length-1];
+    html+='<div style="background:linear-gradient(135deg,#7f1d1d,#dc2626);border-radius:12px;padding:16px 20px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:16px">'
+      +'<div style="font-size:32px"><i class="fas fa-exclamation-triangle"></i></div>'
+      +'<div><div style="font-weight:800;font-size:14px">System-Wide Reserve Adequacy: '+latest.adequacy+'% ('+latest.year+')</div>'
+      +'<div style="font-size:12px;opacity:.9;margin-top:3px">Below 100% threshold since 2024. Statutory reserves $'+latest.statutory+'M vs required $'+latest.required+'M. Gap: $'+(latest.required-latest.statutory)+'M. Milliman projects LTCI claims peak $42B by 2041.</div></div>'
+      +'<div style="margin-left:auto;background:rgba(255,255,255,.15);border-radius:10px;padding:12px 18px;text-align:center;flex-shrink:0">'
+      +'<div style="font-size:28px;font-weight:900">'+latest.adequacy+'%</div>'
+      +'<div style="font-size:10px;opacity:.8">Adequacy Ratio</div></div></div>';
+
+    /* Reserve Trend Table */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-chart-line" style="color:'+R1+';margin-right:8px"></i>Reserve Adequacy Trend — System Portfolio ($M)</div>'
+
+      /* Visual bar chart */
+      +'<div style="display:flex;align-items:flex-end;gap:8px;height:140px;margin-bottom:8px;padding:0 4px">';
+    var maxR=Math.max.apply(null,_p29reserveTrend.map(function(r){return r.required;}));
+    _p29reserveTrend.forEach(function(r){
+      var statH=Math.round(r.statutory/maxR*120);
+      var reqH=Math.round(r.required/maxR*120);
+      var adqCol=r.adequacy>=110?RG:r.adequacy>=100?'#0891b2':r.adequacy>=90?RA:RR;
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+        +'<div style="font-size:9px;color:'+adqCol+';font-weight:700">'+r.adequacy+'%</div>'
+        +'<div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:120px">'
+        +'<div style="flex:1;background:#8b5cf6;border-radius:4px 4px 0 0;height:'+statH+'px" title="Statutory $'+r.statutory+'M"></div>'
+        +'<div style="flex:1;background:#fca5a5;border-radius:4px 4px 0 0;height:'+reqH+'px;border:1px dashed '+RR+'" title="Required $'+r.required+'M"></div>'
+        +'</div>'
+        +'<div style="font-size:9px;color:#64748b">'+r.year+'</div>'
+        +'</div>';
+    });
+    html+='</div>'
+      +'<div style="display:flex;gap:16px;font-size:11px;color:#64748b">'
+      +'<span><span style="display:inline-block;width:12px;height:12px;background:#8b5cf6;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Statutory Reserve</span>'
+      +'<span><span style="display:inline-block;width:12px;height:12px;background:#fca5a5;border:1px dashed '+RR+';border-radius:2px;margin-right:4px;vertical-align:middle"></span>Required Reserve</span>'
+      +'</div></div>';
+
+    /* Claims Projection to 2041 */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px"><i class="fas fa-project-diagram" style="color:'+R1+';margin-right:8px"></i>LTCI Industry Claims Projection — Milliman 2025 Annual Study ($B)</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-bottom:14px">Paid claims peak projected at $42B in 2041. HAL portfolio represents ~2.3% of industry. Reserving must anticipate 15-year tail.</div>'
+      +'<div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px">';
+    var maxCP=50;
+    _p29claimProjection.forEach(function(r){
+      var pH=Math.round(r.paid/maxCP*110);
+      var prH=Math.round(r.projected/maxCP*110);
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+        +'<div style="font-size:9px;color:#334155;font-weight:600">$'+r.paid+'B</div>'
+        +'<div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:110px">'
+        +'<div style="flex:1;background:#7c3aed;border-radius:4px 4px 0 0;height:'+pH+'px"></div>'
+        +'<div style="flex:1;background:#c4b5fd;border-radius:4px 4px 0 0;height:'+prH+'px;border-top:2px dashed #7c3aed"></div>'
+        +'</div>'
+        +'<div style="font-size:9px;color:#64748b">\''+String(r.year).slice(2)+'</div>'
+        +'</div>';
+    });
+    html+='</div>'
+      +'<div style="display:flex;gap:16px;font-size:11px;color:#64748b;margin-top:6px">'
+      +'<span><span style="display:inline-block;width:12px;height:12px;background:#7c3aed;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Paid Claims</span>'
+      +'<span><span style="display:inline-block;width:12px;height:12px;background:#c4b5fd;border-top:2px dashed #7c3aed;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Projected (Incurred)</span>'
+      +'</div></div>';
+
+    /* Key Actuarial Assumptions */
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-calculator" style="color:'+R1+';margin-right:8px"></i>Key Actuarial Assumptions vs. Emerging Experience</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">';
+    [
+      {assumption:'Claim Incidence Rate',original:'2.1%/yr',actual:'3.4%/yr',variance:'+62%',status:'adverse',note:'Post-pandemic care deferral reversal driving spike'},
+      {assumption:'Claim Termination Rate',original:'28%/yr',actual:'19%/yr',variance:'−32%',status:'adverse',note:'Claimants staying on benefit longer than modeled'},
+      {assumption:'Voluntary Lapse Rate',original:'3.8%/yr',actual:'1.6%/yr',variance:'−58%',status:'adverse',note:'Adverse selection — only sicker policyholders retain'},
+      {assumption:'Interest Rate (discount)',original:'6.5%',actual:'4.2%',variance:'−230bps',note:'Low rate environment crushed investment returns'},
+      {assumption:'Mortality Improvement',original:'−1.0%/yr',actual:'−0.4%/yr',variance:'+60bps',note:'Slower mortality improvement = longer claims tail'},
+      {assumption:'Average Daily Cost of Care',original:'$165/day',actual:'$310/day',variance:'+88%',status:'adverse',note:'Nursing facility costs doubled; inflation compounding'}
+    ].forEach(function(a){
+      var col=a.status==='adverse'?RR:a.variance.startsWith('+')?RA:RG;
+      html+='<div style="background:#f8fafc;border-radius:10px;padding:12px 14px;border-left:3px solid '+col+'">'
+        +'<div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:6px">'+a.assumption+'</div>'
+        +'<div style="display:flex;gap:8px;margin-bottom:6px">'
+        +'<div style="flex:1;text-align:center"><div style="font-size:9px;color:#94a3b8">Original</div><div style="font-size:13px;font-weight:700;color:#64748b">'+a.original+'</div></div>'
+        +'<div style="flex:1;text-align:center"><div style="font-size:9px;color:#94a3b8">Actual</div><div style="font-size:13px;font-weight:700;color:#1e293b">'+a.actual+'</div></div>'
+        +'<div style="flex:1;text-align:center"><div style="font-size:9px;color:#94a3b8">Variance</div><div style="font-size:13px;font-weight:700;color:'+col+'">'+a.variance+'</div></div>'
+        +'</div>'
+        +'<div style="font-size:10px;color:#64748b">'+a.note+'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+    html+='</div>';
+    return html;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     TAB 5: REINSURANCE MONITOR
+  ══════════════════════════════════════════════════════ */
+  function _p29reinsuranceTab(){
+    var html='<div>';
+
+    /* Market Context */
+    html+='<div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#fff;border-radius:14px;padding:20px 24px;margin-bottom:20px">'
+      +'<div style="font-size:15px;font-weight:800;margin-bottom:10px"><i class="fas fa-globe-americas" style="margin-right:10px"></i>LTC Reinsurance Market — 2025–2026 Context</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">';
+    [
+      {label:'Unum/Fortitude Re (Feb 2025)',val:'$3.4B statutory reserves ceded'},
+      {label:'NYL/Fortitude Re (Jul 2026)',val:'$3.8B — largest LTC reinsurance deal'},
+      {label:'Wilton Re LTC Runoff AUM',val:'$8.2B+ in-force management'},
+      {label:'Global Reinsurance Capital',val:'$648B at FY2025 (+11% YoY)'},
+      {label:'Active LTC Reinsurers',val:'Fortitude Re · Wilton Re · Swiss Re · Hannover Re'},
+      {label:'NAIC Oversight',val:'Reinsurance oversight enhanced under 2025 framework'}
+    ].forEach(function(s){
+      html+='<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:10px 12px">'
+        +'<div style="font-size:10px;opacity:.75;margin-bottom:3px">'+s.label+'</div>'
+        +'<div style="font-size:11px;font-weight:700">'+s.val+'</div></div>';
+    });
+    html+='</div></div>';
+
+    /* Treaty Cards */
+    html+='<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-file-contract" style="color:'+R1+';margin-right:8px"></i>Active Reinsurance Treaties</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px;margin-bottom:20px">';
+    _p29reinsTreaties.forEach(function(t){
+      var statCol=t.status==='Active'?RG:t.status==='Active — New'?R1:t.status==='Exploring'?RA:'#94a3b8';
+      html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+        +'<div>'
+        +'<div style="font-size:14px;font-weight:700;color:#1e293b">'+t.cedingCarrier+' → '+t.reinsurer+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+t.id+' · '+t.treatyType+' · Effective '+t.effectiveDate+'</div>'
+        +'</div>'
+        +'<span style="background:'+statCol+'1a;color:'+statCol+';font-size:10px;padding:3px 10px;border-radius:10px;font-weight:700">'+t.status+'</span>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
+      [
+        {l:'Ceding %',v:t.cedingPct?t.cedingPct+'%':'N/A'},
+        {l:'Ceded Premium/yr',v:t.annualCededPremium?'$'+Math.round(t.annualCededPremium/1000000*10)/10+'M':'—'},
+        {l:'Reserves Ceded',v:t.reservesCeded?'$'+Math.round(t.reservesCeded/1000000)+'M':'Exploring'},
+        {l:'Block',v:t.block},
+        {l:'Coinsurance Fee',v:t.coinsuranceFee?t.coinsuranceFee+'%':'—'},
+        {l:'Next Audit',v:t.nextAuditDate||'—'}
+      ].forEach(function(s){
+        html+='<div style="background:#f8fafc;border-radius:8px;padding:8px 10px">'
+          +'<div style="font-size:10px;color:#94a3b8">'+s.l+'</div>'
+          +'<div style="font-size:12px;font-weight:700;color:#334155">'+s.v+'</div>'
+          +'</div>';
+      });
+      html+='</div>'
+        +'<div style="font-size:11px;color:#64748b;background:#f8fafc;border-radius:8px;padding:10px 12px;border-left:3px solid '+statCol+'">'+t.notes+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Ceded Business Summary */
+    var totalCededPrem=_p29reinsTreaties.reduce(function(a,t){return a+t.annualCededPremium;},0);
+    var totalCededRes=_p29reinsTreaties.reduce(function(a,t){return a+t.reservesCeded;},0);
+    html+='<div style="background:#fff;border:1px solid #e9d5ff;border-radius:14px;padding:18px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-balance-scale" style="color:'+R1+';margin-right:8px"></i>Ceded Business Summary & Risk Transfer Metrics</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">';
+    [
+      {l:'Total Ceded Premium/yr',v:'$'+Math.round(totalCededPrem/1000000*10)/10+'M',c:R1},
+      {l:'Total Ceded Reserves',v:'$'+Math.round(totalCededRes/1000000)+'M',c:'#1d4ed8'},
+      {l:'Active Treaties',v:_p29reinsTreaties.filter(function(t){return t.status.includes('Active');}).length,c:RG},
+      {l:'Exploration Pipeline',v:_p29reinsTreaties.filter(function(t){return t.status==='Exploring';}).length,c:RA}
+    ].forEach(function(s){
+      html+='<div style="background:#f8fafc;border-radius:10px;padding:14px;border-top:3px solid '+s.c+'">'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:4px">'+s.l+'</div>'
+        +'<div style="font-size:20px;font-weight:800;color:'+s.c+'">'+s.v+'</div>'
+        +'</div>';
+    });
+    html+='</div>'
+      +'<div style="font-size:12px;color:#64748b;background:#faf5ff;border-radius:8px;padding:12px 14px;border-left:3px solid '+R1+'">'
+      +'<strong style="color:'+R1+'">HAL Reinsurance Strategy Note:</strong> Concentrated reinsurance exposure to Fortitude Re across two treaties ($306M+ in ceded reserves). Recommend counterparty diversification assessment and stress-testing retrocession chain. Fitch confirms life insurers will continue pairing LTC with more profitable liabilities in reinsurance transactions to reduce balance sheet exposure through 2026–2028.'
+      +'</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+
+  /* ── Nav intercept ── */
+  var _p29origNav=window.navigateTo||navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-rimd'){
+      document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');});
+      var navEl=document.querySelector('.hal-rimd-nav');
+      if(navEl) navEl.classList.add('active');
+      _p29buildPage();
+      return;
+    }
+    if(typeof _p29origNav==='function') _p29origNav(page);
+  };
+
+  console.log('[HAL RIMD] Phase 29 Rate Intelligence & Reserve Management loaded — 6 blocks, 10 state filings, 4 reinsurance treaties, Milliman 2041 projection');
+})();
+/* P29 fix: re-expose window.navigateTo to bare global */
+var navigateTo=window.navigateTo;

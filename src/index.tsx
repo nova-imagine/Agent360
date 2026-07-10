@@ -366,6 +366,7 @@ function MainApp() {
         <div id="tpl-hal-coa"></div>
         <div id="tpl-hal-cih"></div>
         <div id="tpl-hal-caid"></div>
+        <div id="tpl-hal-rimd"></div>
         <div id="tpl-rfp-showcase"></div>
         <div id="tpl-core-admin"></div>
         <div id="tpl-data-ai"></div>
@@ -1050,6 +1051,10 @@ function Sidebar() {
         <a class="nav-item hal-caid-nav" onclick="navigateTo('hal-caid')" href="#">
           <i class="fas fa-shield-virus"></i><span>Claims Fraud Engine</span>
           <span class="nav-badge" style="background:#dc2626;color:#fff">CAID</span>
+        </a>
+        <a class="nav-item hal-rimd-nav" onclick="navigateTo('hal-rimd')" href="#">
+          <i class="fas fa-chart-line"></i><span>Rate Intelligence & Reserves</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">RIMD</span>
         </a>
 
         {/* ── ILLUMIFIN PLATFORM ── */}
