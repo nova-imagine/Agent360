@@ -73190,3 +73190,156 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 9] LTC Claims Phase 9 loaded — lifecycle-complete: 5 claim types, 7-tab detail, fixed intake wizard (ICD-10 + 6 ADLs + COB + qualifying event date), lifecycle banner, persona panels, assessment tab, priority 1-5 complete');
 
 })();
+
+(function () {
+  'use strict';
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     PHASE 10 — MODAL LAYER FIX
+     Fixes:
+       1. IDP "View" panel appears behind claim-detail modal  →  raise z-index
+       2. Schedule Assessment / Update Care Plan behind modal →  raise z-index
+       3. Process Payment shows raw HTML gibberish            →  rewrite with _p8btn
+       4. Close buttons on all sub-modals non-functional      →  consistent close IDs
+     Strategy:
+       - Patch _p8ov to use z-index:12000 (above _L4overlay:10000 & _p6ov:11000)
+       - Patch _L4overlay to also use z-index:12000 for any call inside claim detail
+       - Completely rewrite ltcDetailAction 'payment' using _p8btn (no raw onclick)
+       - All sub-overlay Close buttons use _p8close() via data-key callbacks
+  ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ── 1. Raise _p8ov to z-index 12000 so it sits above the claim detail modal ── */
+  var _p8ovOrig = window._p8ov || function(){};
+  window._p8ov = function (id, html) {
+    var old = document.getElementById(id);
+    if (old) old.remove();
+    var wrap = document.createElement('div');
+    wrap.id = id;
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:12000;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;';
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) wrap.remove(); });
+  };
+
+  /* ── 2. Raise _L4overlay to z-index 12000 (it was 10000, same as claim detail) ── */
+  var _L4ovOrig = window._L4overlay || function(){};
+  window._L4overlay = function (id, html) {
+    var old = document.getElementById(id);
+    if (old) old.remove();
+    document.body.insertAdjacentHTML('beforeend',
+      '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:12000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">' + html + '</div>');
+  };
+
+  /* Keep _p8close and _L4close working as before (no change needed) */
+
+  /* ── Shared safe-button builder (mirrors _p8btn exactly) ── */
+  function _p10btn(label, icon, color, fn) {
+    var key = '_p10_' + Math.random().toString(36).slice(2);
+    if (!window._p8actions) window._p8actions = {};
+    window._p8actions[key] = fn;
+    var style = (color.indexOf('gradient') !== -1 ? 'background:' + color : 'background:' + color)
+      + ';color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;';
+    return '<button onclick="_p8run(\'' + key + '\')" style="' + style + '">'
+      + '<i class="fas ' + icon + '"></i> ' + label + '</button>';
+  }
+
+  /* ── 3. Completely replace ltcDetailAction 'payment' with a clean implementation ── */
+  var _prevLtcDetailAction = window.ltcDetailAction;
+  window.ltcDetailAction = function (action, claimId) {
+
+    if (action !== 'payment') {
+      /* Delegate everything else to Phase 8/9 handler unchanged */
+      if (typeof _prevLtcDetailAction === 'function') _prevLtcDetailAction(action, claimId);
+      return;
+    }
+
+    /* ── PROCESS PAYMENT (rewritten — no raw onclick strings) ── */
+    var claims = (window.ltcClaimsData || []).concat(window.p9Claims || []);
+    var c = claims.find(function (x) { return x.id === claimId; }) || window._lcdCurrentClaim || {};
+    if (!c.id) c.id = claimId;
+    var name = c.claimant || claimId;
+    var benefit = c.dailyBenefit || '$180/day';
+    var provider = c.provider || 'Provider';
+    var carrier = c.carrier || 'Carrier';
+
+    var ovId = 'p10-payment-ov';
+
+    /* Header */
+    var hdr = '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas fa-dollar-sign" style="font-size:22px;opacity:.9;"></i>'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:15px;font-weight:800;letter-spacing:-.3px;">Process Payment — ' + claimId + '</div>'
+      + '<div style="font-size:11px;opacity:.8;margin-top:2px;">ACH/EFT · STP-eligible · Carrier notification</div>'
+      + '</div>'
+      + '<button onclick="window._p8close(\'' + ovId + '\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;font-weight:700;">✕</button>'
+      + '</div>';
+
+    /* AI bar */
+    var ai = '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:1.5px solid #ddd6fe;border-radius:10px;padding:14px;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Intelligence</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;">WealthAI confirms claim <strong>' + claimId + '</strong> is STP (Straight-Through Processing) eligible. '
+      + 'ADL score <strong>' + (c.assessScore || '2') + '/5</strong>, fraud score <strong>8/100 (Clear)</strong>, care plan current. '
+      + 'Daily benefit of <strong>' + benefit + '</strong> to <strong>' + provider + '</strong>. '
+      + 'ACH batch will execute tonight at 8 PM EST. No holds or flags detected.</div></div>';
+
+    /* KV grid */
+    function kv(l, v) {
+      return '<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;">'
+        + '<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;">' + l + '</div>'
+        + '<div style="font-size:13px;font-weight:600;color:#111827;margin-top:2px;">' + v + '</div></div>';
+    }
+    var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">'
+      + kv('Claimant', name)
+      + kv('Daily Benefit', benefit)
+      + kv('Payment Cycle', 'Monthly — Jul 2026')
+      + kv('Provider', provider)
+      + kv('Payment Method', 'ACH Direct Deposit')
+      + kv('Next Due', c.paymentDue || 'Jul 15, 2026')
+      + kv('Carrier', carrier)
+      + kv('Policy Status', '✅ In Force · No lapses')
+      + '</div>';
+
+    /* STP badge */
+    var stp = '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:16px;">'
+      + '<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:4px;"><i class="fas fa-check-circle" style="margin-right:5px;"></i>STP Eligible — Auto-Approved</div>'
+      + '<div style="font-size:12px;color:#166534;">Fraud score: Clear · ADL threshold met · Care plan current · No documentation holds · Elimination period satisfied</div></div>';
+
+    /* Action buttons (all safe via _p10btn) */
+    var btns = '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + _p10btn('Confirm & Process Payment', 'fa-paper-plane', '#059669', function () {
+          window._p8close(ovId);
+          var ref = 'PAY-' + claimId + '-JUL26-' + Math.random().toString(36).slice(2,6).toUpperCase();
+          var msg = '<i class="fas fa-check-circle"></i> Payment of <strong>' + benefit + ' × 30 days</strong> processed for <strong>'
+            + name + '</strong> · ACH batch queued for tonight · Carrier <strong>' + carrier + '</strong> notified · Ref: ' + ref;
+          (window._p8toast || window._p6toast || function(m){alert(m);})(msg, 5500);
+        })
+      + _p10btn('Place Payment Hold', 'fa-pause-circle', '#d97706', function () {
+          window._p8close(ovId);
+          var msg = '<i class="fas fa-pause-circle"></i> Payment for <strong>' + claimId + '</strong> placed on hold · Supervisor notified · SLA paused · Reason documented';
+          (window._p8toast || window._p6toast || function(m){alert(m);})(msg, 3500);
+        })
+      + _p10btn('Schedule Future Date', 'fa-calendar', '#0891b2', function () {
+          var msg = '<i class="fas fa-calendar"></i> Payment for <strong>' + claimId + '</strong> rescheduled · ACH batch adjusted · Provider and carrier notified';
+          (window._p8toast || window._p6toast || function(m){alert(m);})(msg, 3500);
+        })
+      + '<button onclick="window._p8close(\'' + ovId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
+      + '</div>';
+
+    /* Assemble and open */
+    var inner = '<div style="background:#fff;border-radius:16px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
+      + hdr
+      + '<div style="padding:22px;">' + ai + grid + stp + btns + '</div>'
+      + '</div>';
+
+    window._p8ov(ovId, inner);
+  };
+
+  /* ── 4. Expose _p8close on window so inline onclick="window._p8close(...)" works ── */
+  window._p8close = window._p8close || function (id) {
+    var el = document.getElementById(id);
+    if (el) el.remove();
+  };
+
+  console.log('[Phase 10] Modal layer fix loaded — z-index raised to 12000 for all sub-modals, Process Payment rewritten with safe _p10btn, Close buttons operational');
+
+})();
