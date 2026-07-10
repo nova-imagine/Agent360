@@ -74898,3 +74898,492 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 13] Step navigation fixed: ltcAssessAction DOM-read-before-swap · ltcScheduleNew handler-overwrite · both workflows fully navigable');
 
 })();
+
+/* ============================================================
+   PHASE 14 — Fix gibberish in Insurance Carrier 360 &
+               Healthcare Provider 360 modals
+   Root-cause: _p6btn() injects onclick-string directly into an
+   HTML attribute. Strings containing <i class="fas ..."> have
+   unescaped double-quotes that break the attribute boundary;
+   the remainder of the string renders as visible text (gibberish).
+   Fix: Replace _p6btn with a callback-map version that registers
+   a real JS function under a unique key in window._p8actions and
+   emits onclick="_p8run('key')" — no raw string in attribute.
+   Scope: all ltcCarrierAction + ltcProviderAction buttons (~33 total)
+   ============================================================ */
+(function () {
+  'use strict';
+
+  if (!window._p8actions) window._p8actions = {};
+
+  /* ─── Replacement for _p6btn (hoisted into the Phase 6 IIFE's scope
+         by overwriting the property on the global object that the
+         original Phase 6 code references via closure).
+         Because _p6btn is a local function inside a Phase 6 IIFE we
+         cannot patch it directly — instead we rebuild both action
+         functions (ltcCarrierAction + ltcProviderAction) in full,
+         using a new safe button helper. ─── */
+
+  /* Safe button helper: registers fn under a unique key, emits safe HTML */
+  function _p14btn(label, icon, color, fn) {
+    var key = 'p14-' + Math.random().toString(36).slice(2);
+    window._p8actions[key] = fn;
+    var style = 'background:' + color + ';color:#fff;border:none;border-radius:8px;'
+      + 'padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;'
+      + 'display:inline-flex;align-items:center;gap:6px;';
+    return '<button onclick="_p8run(\'' + key + '\')" style="' + style + '">'
+      + '<i class="fas ' + icon + '"></i> ' + label + '</button>';
+  }
+
+  /* Cancel/Close button — no action key needed (just closes overlay) */
+  function _p14cancel(ovId, label) {
+    label = label || 'Cancel';
+    return '<button onclick="_p6close(\'' + ovId + '\')" '
+      + 'style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;'
+      + 'padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">'
+      + label + '</button>';
+  }
+
+  /* Re-use Phase 6 helpers (they are on window via the Phase 6 IIFE) */
+  var _p6ov    = window._p6ov    || function(){};
+  var _p6close = window._p6close || function(){};
+  var _p6toast = window._p6toast || function(){};
+  var _p6wrap  = window._p6wrap  || function(id,w,c){ return c; };
+  var _p6hdr   = window._p6hdr   || function(){ return ''; };
+  var _p6ai    = window._p6ai    || function(t){ return t; };
+  var _p6row   = window._p6row   || function(){ return ''; };
+  var _p6kpi   = window._p6kpi   || function(){ return ''; };
+  var _p6tbl   = window._p6tbl   || function(){ return ''; };
+
+  /* ════════════════════════════════════════════════════════════
+     INSURANCE CARRIER 360 — full rewrite of ltcCarrierAction
+     (replaces the Phase 6 version; same logic, safe buttons)
+  ════════════════════════════════════════════════════════════ */
+  window.ltcCarrierAction = function (action, carrierId) {
+    var carriers = window.ltcCarrierData360 || [];
+    var c = carriers.find(function (x) { return x.id === carrierId; }) || {};
+    var name = c.name || carrierId || 'Carrier';
+    var hc = { Excellent: '#059669', Good: '#0891b2', 'Needs Attention': '#d97706', Critical: '#dc2626' }[c.aiHealth || 'Good'] || '#003087';
+
+    /* ── CONTACT ── */
+    if (action === 'contact') {
+      _p6ov('p6-car-contact-ov', _p6wrap('p6-car-contact-ov', '560px',
+        _p6hdr('fa-phone', 'Contact — ' + name, 'Relationship · TPA · Escalation communications', '#0891b2', 'p6-car-contact-ov')
+        + '<div style="padding:22px;">'
+        + _p6ai('WealthAI has prepared a contact brief for <strong>' + name + '</strong>. Current SLA performance: <strong>' + (c.sla || '94%') + '</strong> ' + (c.sla && parseInt(c.sla) < 95 ? '<span style="color:#d97706;font-weight:700;">⚠️ Below 95% target</span>' : '✅ On target') + '. Active claims under this carrier: <strong>' + (c.activeClaims || 'N/A') + '</strong>. Recommended discussion: Q3 SLA review, pending escalations, and care plan documentation compliance across all LTC claims.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        + _p6row('Carrier', name)
+        + _p6row('Relationship Manager', c.contact || 'TPA Account Manager')
+        + _p6row('SLA Performance', c.sla || 'N/A')
+        + _p6row('Active Claims', c.activeClaims || 'N/A')
+        + _p6row('TPA Contract', c.tpaExp ? 'Exp. ' + c.tpaExp : 'Active')
+        + _p6row('Preferred Channel', 'Email + Quarterly Review Call')
+        + '</div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">WealthAI Meeting Agenda</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:85px;resize:none;">1. Q3 SLA performance review — target 95%+\n2. Pending adjudication holds (if any)\n3. Care plan documentation compliance — ' + (c.activeClaims || 'N/A') + ' active claims\n4. Upcoming policy renewal / TPA contract terms\n5. AI-assisted claims dashboard access</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('Initiate Call', 'fa-phone', '#0891b2', function () {
+            _p6close('p6-car-contact-ov');
+            _p6toast('<i class="fas fa-phone"></i> Call to ' + name + ' TPA Manager initiated · Agenda shared · Recording active · Notes auto-logged to carrier record · Ref: CALL-' + carrierId + '-' + Date.now().toString().slice(-6), 5000);
+          })
+        + _p14btn('Send Secure Email', 'fa-envelope', '#003087', function () {
+            _p6close('p6-car-contact-ov');
+            _p6toast('<i class="fas fa-envelope"></i> Secure email sent to ' + name + ' · WealthAI agenda attached · Reply expected within 2 business hours', 4000);
+          })
+        + _p14btn('Schedule Meeting', 'fa-calendar', '#059669', function () {
+            _p6close('p6-car-contact-ov');
+            _p6toast('<i class="fas fa-calendar-check"></i> Quarterly review meeting scheduled with ' + name + ' · Jul 22, 2:00 PM CT · Zoom invite sent · Agenda auto-attached', 4000);
+          })
+        + _p14cancel('p6-car-contact-ov')
+        + '</div></div>'
+      ));
+    }
+
+    /* ── SLA / PERFORMANCE REPORT ── */
+    else if (action === 'report') {
+      var slaNum = c.sla ? parseInt(c.sla) : 94;
+      var slaBad = slaNum < 95;
+      _p6ov('p6-car-report-ov', _p6wrap('p6-car-report-ov', '640px',
+        _p6hdr('fa-chart-bar', 'Performance Report — ' + name, 'SLA · Adjudication · Payments · WealthAI narrative', '#003087', 'p6-car-report-ov')
+        + '<div style="padding:22px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+        + _p6kpi(c.sla || '94%', 'SLA Compliance', 'fa-tachometer-alt', slaBad ? '#d97706' : '#059669', slaBad ? '⚠️ Below target' : '✅ On target')
+        + _p6kpi(c.activeClaims || '—', 'Active Claims', 'fa-file-medical-alt', '#003087', 'Under TPA management')
+        + _p6kpi(c.totalPolicies || '—', 'Total Policies', 'fa-folder', '#0891b2', 'illumifin portfolio')
+        + _p6kpi(c.aiHealth || 'Good', 'AI Health', 'fa-robot', hc, 'WealthAI rating')
+        + '</div>'
+        + _p6ai('CARRIER PERFORMANCE — <strong>' + name + '</strong> Q2 2026<br><br>'
+          + '<strong>SLA Status:</strong> ' + (slaBad ? '⚠️ ' + c.sla + ' — below 95% contractual target. 3 adjudication delays noted in June 2026. Corrective action plan requested.' : '✅ ' + (c.sla || '94%') + ' — within or at contractual target. Strong adjudication cadence maintained across all claim types.') + ' <br><br>'
+          + '<strong>Claims Portfolio:</strong> ' + (c.activeClaims || 'N/A') + ' active LTC claims under illumifin TPA management. Payment accuracy 99.1%. Zero payment reversals in Q2 2026.<br><br>'
+          + '<strong>AI Recommendation:</strong> ' + (slaBad ? 'Schedule remediation call. Set 30-day SLA improvement plan. Monitor weekly.' : 'Continue existing performance cadence. Propose Preferred Carrier designation for Q3.'))
+        + _p6tbl(['Metric', 'Q1 2026', 'Q2 2026', 'Target', 'Status'],
+            [['SLA Compliance', (slaNum - 2) + '%', c.sla || '94%', '95%', slaBad ? '⚠️ Under' : '✅ Met'],
+             ['Avg Adjudication Days', '4.8', '4.2', '5.0', '✅ Met'],
+             ['Payment Accuracy', '98.9%', '99.1%', '99%', '✅ Met'],
+             ['Claims Opened', (c.activeClaims || 10) - 2 + '', c.activeClaims + '', '—', '—']])
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('Export PDF Report', 'fa-file-pdf', '#dc2626', function () {
+            _p6close('p6-car-report-ov');
+            _p6toast('<i class="fas fa-file-pdf"></i> Performance Report exported for ' + name + ' · Q2 2026 · PDF sent to VP Claims and carrier contact · Ref: RPT-' + carrierId + '-Q2-2026', 5000);
+          })
+        + _p14btn('Email to Carrier', 'fa-envelope', '#003087', function () {
+            _p6toast('<i class="fas fa-envelope"></i> Q2 performance report emailed to ' + name + ' · WealthAI narrative included · Reply requested within 5 business days', 3500);
+          })
+        + _p14btn('Schedule Review Call', 'fa-phone', '#0891b2', function () {
+            _p6close('p6-car-report-ov');
+            _p6toast('<i class="fas fa-phone"></i> Quarterly review call scheduled with ' + name + ' · Jul 25, 10:00 AM CT · Agenda includes SLA remediation', 3500);
+          })
+        + _p14cancel('p6-car-report-ov', 'Close')
+        + '</div></div>'
+      ));
+    }
+
+    /* ── VIEW ACTIVE CLAIMS ── */
+    else if (action === 'claims') {
+      var carrierClaims = (window.ltcClaimsData || []).filter(function (x) { return x.carrier === name; });
+      _p6ov('p6-car-claims-ov', _p6wrap('p6-car-claims-ov', '660px',
+        _p6hdr('fa-file-medical-alt', 'Active Claims — ' + name, 'All LTC claims under illumifin TPA management', '#003087', 'p6-car-claims-ov')
+        + '<div style="padding:22px;">'
+        + _p6ai('WealthAI triage summary for <strong>' + name + '</strong>: <strong>' + (carrierClaims.length || 2) + ' active claim(s)</strong> under illumifin management. ' + (carrierClaims.filter(function (x) { return x.priority === 'urgent'; }).length || 2) + ' urgent · ' + (carrierClaims.filter(function (x) { return x.priority === 'high'; }).length || 0) + ' high priority. Total daily benefit exposure: <strong>$' + (carrierClaims.reduce(function (s, x) { return s + (parseInt((x.dailyBenefit || '$180/day').replace(/\D/g, '')) || 180); }, 0) || 375) + '/day</strong>. All claims within SLA. Payment accuracy 99.1% for this carrier.')
+        + _p6tbl(['Claim ID', 'Claimant', 'Type', 'Days Open', 'Benefit/Day', 'Priority'],
+            (carrierClaims.length ? carrierClaims : [
+              { id: 'LTC-2026-0201', claimant: 'Eleanor Vasquez', type: 'Nursing Home (SNF)', daysOpen: 22, dailyBenefit: '$195/day', priority: 'urgent' },
+              { id: 'LTC-2026-0101', claimant: "Margaret O'Brien", type: 'Nursing Home', daysOpen: 14, dailyBenefit: '$180/day', priority: 'urgent' }
+            ]).map(function (x) {
+              return [x.id, x.claimant, x.type, x.daysOpen + ' days', x.dailyBenefit || '$180/day',
+                '<span style="background:' + (x.priority === 'urgent' ? '#dc2626' : '#d97706') + ';color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;">' + (x.priority || 'urgent') + '</span>'
+                + ' <button onclick="_p6close(\'p6-car-claims-ov\');window._lcdCurrentClaim=' + JSON.stringify(x) + ';if(window.openClaimDetail)window.openClaimDetail(\'' + x.id + '\')" style="background:#003087;color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;margin-left:4px;">Open</button>'];
+            }))
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('AI Triage All', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function () {
+            _p6toast('<i class="fas fa-magic"></i> WealthAI triage complete for ' + (carrierClaims.length || 2) + ' claims under ' + name + ' · Priority ranking updated · SLA risks flagged · Supervisor report generated', 4500);
+          })
+        + _p14btn('Export Claims Report', 'fa-file-pdf', '#dc2626', function () {
+            _p6close('p6-car-claims-ov');
+            _p6toast('<i class="fas fa-file-pdf"></i> ' + name + ' claims roster exported · PDF sent to Claims Ops and carrier contact', 3500);
+          })
+        + _p14cancel('p6-car-claims-ov', 'Close')
+        + '</div></div>'
+      ));
+    }
+
+    /* ── ESCALATE ── */
+    else if (action === 'escalate') {
+      _p6ov('p6-car-esc-ov', _p6wrap('p6-car-esc-ov', '560px',
+        _p6hdr('fa-arrow-up', 'Escalate — ' + name, 'TPA issue · SLA breach · Contractual dispute', '#d97706', 'p6-car-esc-ov')
+        + '<div style="padding:22px;">'
+        + _p6ai('WealthAI has analyzed <strong>' + name + '\'s</strong> performance record and flagged potential triggers for escalation. Current SLA: <strong>' + (c.sla || 'N/A') + '</strong>. SLA is within range — use escalation for one-off issue or proactive quality concern. Escalation is auto-routed to Senior TPA Manager and VP Claims. Average resolution: 5 business days.')
+        + '<div style="margin-bottom:14px;">'
+        + '<div style="font-size:12px;font-weight:700;color:#d97706;margin-bottom:6px;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>Escalation Triggers (check all that apply)</div>'
+        + ['SLA performance concern', 'Adjudication delay — specific claim impacted', 'Payment accuracy / billing dispute', 'Carrier non-responsiveness to TPA communications', 'Contract interpretation / coverage dispute'].map(function (t) {
+            return '<div style="margin-bottom:7px;"><label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#374151;cursor:pointer;"><input type="checkbox" style="accent-color:#d97706;"> ' + t + '</label></div>';
+          }).join('')
+        + '</div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Escalation Notes (AI-prefilled)</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:90px;resize:none;">' + name + ' SLA performance review initiated. Current SLA: ' + (c.sla || 'N/A') + '. ' + (c.activeClaims || '8,400') + ' active claims under management. illumifin TPA team requesting formal corrective action plan from carrier within 5 business days.</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('Send Formal Escalation', 'fa-paper-plane', '#d97706', function () {
+            _p6close('p6-car-esc-ov');
+            _p6toast('<i class="fas fa-arrow-up"></i> Formal escalation sent to ' + name + ' · VP Claims and Senior TPA Manager notified · Escalation ticket: ESC-' + carrierId + '-' + Date.now().toString().slice(-6) + ' · Expected resolution: 5 days', 5500);
+          })
+        + _p14btn('Schedule Remediation Call', 'fa-phone', '#dc2626', function () {
+            _p6close('p6-car-esc-ov');
+            _p6toast('<i class="fas fa-phone"></i> Remediation call scheduled with ' + name + ' · Jul 18, 9:00 AM CT · VP Claims attending · WealthAI corrective action plan pre-sent', 4500);
+          })
+        + _p14cancel('p6-car-esc-ov')
+        + '</div></div>'
+      ));
+    }
+
+    /* ── AI DEEP REVIEW ── */
+    else if (action === 'ai-review') {
+      _p6ov('p6-car-airev-ov', _p6wrap('p6-car-airev-ov', '640px',
+        _p6hdr('fa-robot', 'WealthAI Deep Review — ' + name, '360° carrier intelligence · Claims · SLA · Risk · Compliance', 'linear-gradient(135deg,#7c3aed,#6d28d9)', 'p6-car-airev-ov')
+        + '<div style="padding:22px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">'
+        + _p6kpi(c.sla || '94%', 'SLA Performance', 'fa-tachometer-alt', parseInt(c.sla || '94') < 95 ? '#d97706' : '#059669', 'vs 95% target')
+        + _p6kpi(c.activeClaims || '—', 'Active Claims', 'fa-file-medical-alt', '#003087', 'Under TPA')
+        + _p6kpi(c.aiHealth || 'Good', 'AI Health Score', 'fa-heart', hc, 'WealthAI composite')
+        + '</div>'
+        + _p6ai('WEALTHAI DEEP REVIEW — <strong>' + name + '</strong><br><br>'
+          + '<strong>SLA Intelligence:</strong> ' + (c.sla || '94%') + ' compliance over trailing 90 days. ' + (parseInt(c.sla || '94') < 95 ? 'Below 95% threshold — 3 adjudication delays in June attributed to staffing shortages at carrier. illumifin recommends formal 30-day improvement plan.' : 'Consistent with TPA agreement. Top-quartile carrier for payment accuracy.') + ' <br><br>'
+          + '<strong>Claims Portfolio Analysis:</strong> ' + (c.activeClaims || 'N/A') + ' active claims · Average days open: 18.4 · No systemic billing anomalies. Payment pattern normal. ADL-to-benefit ratio within expected range.<br><br>'
+          + '<strong>Risk Assessment:</strong> Fraud risk: Low · Litigation risk: Low · Contract risk: ' + (parseInt(c.sla || '94') < 95 ? 'Medium — SLA breach clause may apply if below 95% for 90+ days' : 'Low') + '. TPA contract expiry: ' + (c.tpaExp || '2029') + '.<br><br>'
+          + '<strong>AI Recommendation:</strong> ' + (parseInt(c.sla || '94') < 95 ? 'Issue formal notice of SLA breach concern. Schedule monthly monitoring. If not resolved in 30 days, invoke contract clause §8.2.' : 'Maintain relationship. Propose Preferred Carrier tier for Q3. Volume allocation favorable.'))
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('Export AI Review', 'fa-file-pdf', '#7c3aed', function () {
+            _p6close('p6-car-airev-ov');
+            _p6toast('<i class="fas fa-file-pdf"></i> WealthAI Deep Review for ' + name + ' exported · PDF sent to VP Claims and Compliance · Ref: AIREV-' + carrierId, 4500);
+          })
+        + _p14btn('Escalate Based on AI', 'fa-arrow-up', '#d97706', function () {
+            _p6close('p6-car-airev-ov');
+            window.ltcCarrierAction('escalate', carrierId);
+          })
+        + _p14btn('View SLA Report', 'fa-chart-bar', '#003087', function () {
+            _p6close('p6-car-airev-ov');
+            window.ltcCarrierAction('report', carrierId);
+          })
+        + _p14cancel('p6-car-airev-ov', 'Close')
+        + '</div></div>'
+      ));
+    }
+
+    /* ── AI PORTFOLIO REVIEW (all carriers) ── */
+    else if (action === 'ai-portfolio') {
+      var allCarriers = window.ltcCarrierData360 || [];
+      var totalPolicies = allCarriers.reduce(function (s, x) { return s + (x.totalPolicies || 0); }, 0);
+      var totalClaims   = allCarriers.reduce(function (s, x) { return s + (x.activeClaims || 0); }, 0);
+      var avgSla        = allCarriers.length ? Math.round(allCarriers.reduce(function (s, x) { return s + parseInt(x.sla || '94'); }, 0) / allCarriers.length) : 94;
+      var redCount      = allCarriers.filter(function (x) { return x.status === 'Red'; }).length;
+      _p6ov('p6-car-portfolio-ov', _p6wrap('p6-car-portfolio-ov', '680px',
+        _p6hdr('fa-robot', 'AI Portfolio Review — All Carriers', 'Enterprise LTC carrier intelligence · WealthAI Q2 2026', 'linear-gradient(135deg,#7c3aed,#6d28d9)', 'p6-car-portfolio-ov')
+        + '<div style="padding:22px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+        + _p6kpi(allCarriers.length || '4', 'Carrier Relationships', 'fa-building', '#003087', 'LTC + HAL + Hybrid')
+        + _p6kpi(totalPolicies || '—', 'Total Policies', 'fa-folder', '#0891b2', 'Across all carriers')
+        + _p6kpi(totalClaims || '—', 'Active Claims', 'fa-file-medical-alt', '#dc2626', 'Under TPA management')
+        + _p6kpi(avgSla + '%', 'Portfolio Avg SLA', 'fa-tachometer-alt', avgSla >= 95 ? '#059669' : '#d97706', 'vs 95% target')
+        + '</div>'
+        + _p6ai('WEALTHAI CARRIER PORTFOLIO INTELLIGENCE — Q2 2026<br><br>'
+          + '<strong>Portfolio Health:</strong> ' + (allCarriers.length || 4) + ' active carrier relationships. Portfolio average SLA: ' + avgSla + '% ' + (avgSla >= 95 ? '✅ on target' : '⚠️ below 95% target — action required') + '.<br><br>'
+          + '<strong>Top Performer:</strong> ' + ((allCarriers.find(function (x) { return x.aiHealth === 'Excellent'; }) || { name: 'Prudential' }).name) + ' — Excellent AI health, consistent SLA compliance. Recommend increased volume allocation for Q3.<br><br>'
+          + '<strong>Needs Attention:</strong> ' + (redCount > 0 ? redCount + ' carrier(s) flagged Red status — immediate review required.' : 'No carriers at critical status. ') + (allCarriers.filter(function (x) { return x.sla && parseInt(x.sla) < 95; }).map(function (x) { return x.name; }).join(', ') || 'All carriers meeting SLA targets.') + ' <br><br>'
+          + '<strong>AI Action Plan:</strong> (1) Carriers below 95% SLA → formal corrective action · (2) Preferred tier candidates → volume increase proposal · (3) Q3 contract renewals → negotiate enhanced SLA terms · (4) New carrier onboarding opportunity identified in Southeast region.')
+        + _p6tbl(['Carrier', 'Policies', 'Active Claims', 'SLA', 'AI Health', 'Action'],
+            (allCarriers.length ? allCarriers : [
+              { name: 'Prudential', totalPolicies: 1250, activeClaims: 18, sla: '97%', aiHealth: 'Excellent' },
+              { name: 'MassMutual', totalPolicies: 980, activeClaims: 14, sla: '94%', aiHealth: 'Good' },
+              { name: 'Northwestern Mutual', totalPolicies: 760, activeClaims: 11, sla: '96%', aiHealth: 'Good' }
+            ]).map(function (x) {
+              var sn = parseInt(x.sla || '94');
+              return [x.name, x.totalPolicies || '—', x.activeClaims || '—', x.sla || '—',
+                '<span style="color:' + ({ Excellent: '#059669', Good: '#0891b2', 'Needs Attention': '#d97706', Critical: '#dc2626' }[x.aiHealth || 'Good'] || '#003087') + ';">' + (x.aiHealth || 'Good') + '</span>',
+                sn < 95
+                  ? '<button onclick="_p6close(\'p6-car-portfolio-ov\');ltcCarrierAction(\'escalate\',\'' + (x.id || x.name) + '\')" style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;">Escalate</button>'
+                  : '<span style="color:#059669;font-size:11px;font-weight:700;">✅ Good</span>'];
+            }))
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('Export Portfolio Report', 'fa-file-pdf', '#dc2626', function () {
+            _p6close('p6-car-portfolio-ov');
+            _p6toast('<i class="fas fa-file-pdf"></i> Carrier Portfolio Report exported · Q2 2026 · All ' + (allCarriers.length || 4) + ' carriers · Sent to VP Claims and CFO · Ref: PORT-Q2-2026', 5000);
+          })
+        + _p14btn('AI Rebalance Allocation', 'fa-balance-scale', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function () {
+            _p6toast('<i class="fas fa-magic"></i> WealthAI analyzing optimal carrier volume allocation · Rebalancing recommendations for Q3 ready in 45 seconds', 4000);
+          })
+        + _p14btn('Schedule Portfolio Review', 'fa-calendar', '#003087', function () {
+            _p6close('p6-car-portfolio-ov');
+            _p6toast('<i class="fas fa-calendar-check"></i> Portfolio review meeting scheduled · Jul 28, 9:00 AM · All carrier RMs invited · WealthAI report pre-distributed', 4000);
+          })
+        + '</div></div>'
+      ));
+    }
+
+    /* ── SLA PORTFOLIO REPORT ── */
+    else if (action === 'sla-report') {
+      var allC = window.ltcCarrierData360 || [];
+      _p6ov('p6-car-sla-ov', _p6wrap('p6-car-sla-ov', '700px',
+        _p6hdr('fa-chart-bar', 'SLA Portfolio Report — All Carriers', 'Contractual compliance · Adjudication · Payment accuracy', '#003087', 'p6-car-sla-ov')
+        + '<div style="padding:22px;">'
+        + _p6ai('WealthAI SLA analysis across all ' + (allC.length || 4) + ' carrier relationships. Contractual SLA target: <strong>95%</strong>. Portfolio average: <strong>' + (allC.length ? Math.round(allC.reduce(function (s, x) { return s + parseInt(x.sla || '94'); }, 0) / allC.length) + '%' : '95%') + '</strong>. ' + (allC.filter(function (x) { return parseInt(x.sla || '94') < 95; }).length ? '⚠️ ' + allC.filter(function (x) { return parseInt(x.sla || '94') < 95; }).length + ' carrier(s) below target — action required.' : '✅ All carriers meeting or exceeding SLA target.') + ' Q2 adjudication speed improved 12% vs Q1 across portfolio.')
+        + _p6tbl(['Carrier', 'SLA %', 'vs Target', 'Adj. Days', 'Pay Accuracy', 'Trend', 'Action'],
+            (allC.length ? allC : [
+              { name: 'Prudential', sla: '97%' }, { name: 'MassMutual', sla: '94%' },
+              { name: 'Northwestern Mutual', sla: '96%' }, { name: 'John Hancock', sla: '91%' }
+            ]).map(function (x, i) {
+              var sn = parseInt(x.sla || '94');
+              var meets = sn >= 95;
+              return [x.name || 'Carrier ' + i,
+                '<span style="font-weight:700;color:' + (meets ? '#059669' : '#dc2626') + ';">' + (x.sla || '94%') + '</span>',
+                meets ? '✅ Met' : '⚠️ Below',
+                (4.5 - i * 0.3).toFixed(1) + ' days', '99.' + (i + 1) + '%',
+                meets ? '↑ Improving' : '↓ Declining',
+                meets
+                  ? '<span style="color:#059669;font-size:10px;font-weight:700;">On Track</span>'
+                  : '<button onclick="_p6close(\'p6-car-sla-ov\');ltcCarrierAction(\'escalate\',\'' + (x.id || x.name) + '\')" style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;">Escalate</button>'];
+            }))
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('Export SLA Report', 'fa-file-pdf', '#003087', function () {
+            _p6close('p6-car-sla-ov');
+            _p6toast('<i class="fas fa-file-pdf"></i> SLA Portfolio Report exported · Q2 2026 · All carriers · Sent to VP Claims · Ref: SLA-Q2-2026', 4500);
+          })
+        + _p14btn('Email to All Carriers', 'fa-envelope', '#0891b2', function () {
+            _p6close('p6-car-sla-ov');
+            _p6toast('<i class="fas fa-envelope"></i> Q2 SLA scorecards emailed to all ' + (allC.length || 4) + ' carriers · Individual reports with WealthAI narrative · Responses expected within 5 business days', 5000);
+          })
+        + _p14btn('AI Improvement Plan', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function () {
+            _p6toast('<i class="fas fa-magic"></i> WealthAI generating SLA improvement plan for underperforming carriers · Specific action items · Timeline and accountability matrix · Ready in 60 seconds', 4500);
+          })
+        + '</div></div>'
+      ));
+    }
+
+    /* ── ADD / ONBOARD CARRIER ── */
+    else if (action === 'add') {
+      _p6ov('p6-car-add-ov', _p6wrap('p6-car-add-ov', '560px',
+        _p6hdr('fa-plus', 'Onboard New Carrier', 'TPA Agreement · SLA Setup · Credentials · AI Due Diligence', '#059669', 'p6-car-add-ov')
+        + '<div style="padding:22px;">'
+        + _p6ai('WealthAI will run a carrier due diligence check before TPA onboarding: (1) AM Best financial rating lookup, (2) State license verification across all operating states, (3) Regulatory complaint history (NAIC database), (4) Prior TPA relationship cross-reference, (5) SLA benchmarking against current carrier portfolio. Average due diligence time: <strong>6 minutes</strong>. Network gap analysis: Southeast region carriers under-represented for LTC standalone products.')
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Carrier Name</label>'
+        + '<input type="text" placeholder="e.g. Transamerica Life Insurance..." style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Product Type</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>LTC Standalone</option><option>LTC Hybrid (Life+LTC)</option><option>LTC + Life + Annuity</option><option>Group LTC</option></select></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Primary Operating States</label>'
+        + '<input type="text" placeholder="e.g. TX, FL, NY, CA..." style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Expected Monthly Volume</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>1–25 claims</option><option>26–100 claims</option><option>100–500 claims</option><option>500+ claims</option></select></div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Target SLA</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"><option>95% (Standard TPA)</option><option>97% (Preferred)</option><option>99% (Enterprise)</option></select></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('AI Due Diligence & Onboard', 'fa-robot', '#059669', function () {
+            _p6close('p6-car-add-ov');
+            _p6toast('<i class="fas fa-check-circle"></i> WealthAI due diligence initiated · AM Best lookup · License verification · NAIC complaint check · TPA agreement template generated · Credentialing packet sent · ETA to active: 10–15 business days', 6500);
+          })
+        + _p14cancel('p6-car-add-ov')
+        + '</div></div>'
+      ));
+    }
+
+    else {
+      _p6toast('<i class="fas fa-check"></i> ' + action + ' completed for ' + name, 3000);
+    }
+  };
+
+  /* ════════════════════════════════════════════════════════════
+     HEALTHCARE PROVIDER 360 — full rewrite of ltcProviderAction
+     (replaces the Phase 6 version; same logic, safe buttons)
+  ════════════════════════════════════════════════════════════ */
+  window.ltcProviderAction = function (action, providerId) {
+    var providers = window.ltcProviderData360 || [];
+    var p = providers.find(function (x) { return x.id === providerId; }) || {};
+    var name = p.name || providerId || 'Provider';
+    var hc = { Excellent: '#059669', Good: '#0891b2', 'Needs Attention': '#d97706', Critical: '#dc2626' }[p.aiHealth || 'Good'] || '#003087';
+
+    /* ── CONTACT PROVIDER ── */
+    if (action === 'contact') {
+      _p6ov('p6-prov-contact-ov', _p6wrap('p6-prov-contact-ov', '560px',
+        _p6hdr('fa-phone', 'Contact — ' + name, 'Billing · Compliance · Care coordination · EVV', '#0891b2', 'p6-prov-contact-ov')
+        + '<div style="padding:22px;">'
+        + _p6ai('WealthAI has prepared a contact brief for <strong>' + name + '</strong>. CMS Star Rating: <strong>' + (p.cms || '4.5/5') + '</strong>. Billing accuracy: <strong>' + (p.billing || '98.2%') + '</strong>. Active patients: <strong>' + (p.activePats || 'N/A') + '</strong>. EVV status: <strong>' + (p.evv || 'Active') + '</strong>. ' + (p.aiHealth === 'Needs Attention' || p.aiHealth === 'Critical' ? '⚠️ AI flagged concerns — prioritize compliance discussion.' : 'No outstanding issues. Relationship call recommended for Q3 planning.') + ' AI-recommended call duration: 15 minutes.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">'
+        + _p6row('Provider', name)
+        + _p6row('Contact Person', p.contact || 'Facility Administrator')
+        + _p6row('CMS Star Rating', p.cms || '4.5/5')
+        + _p6row('Active Patients', p.activePats || 'N/A')
+        + _p6row('Billing Accuracy', p.billing || '98.2%')
+        + _p6row('EVV Status', p.evv || 'Active')
+        + '</div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">WealthAI Call Agenda</label>'
+        + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:85px;resize:none;">' + (p.aiHealth === 'Needs Attention' || p.aiHealth === 'Critical' ? '1. Compliance concern review — billing anomalies\n2. EVV compliance status and integration timeline\n3. Care plan documentation deadlines\n4. Pending W-9 / license renewal status' : '1. Q3 capacity planning — available beds/slots\n2. Billing accuracy review — maintain 98%+\n3. EVV GPS validation check\n4. Staff licensing renewal calendar') + '</textarea></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('Initiate Call', 'fa-phone', '#0891b2', function () {
+            _p6close('p6-prov-contact-ov');
+            _p6toast('<i class="fas fa-phone"></i> Call to ' + name + ' initiated · HIPAA recording active · WealthAI agenda shared · Notes auto-logged to provider record · Ref: CALL-' + providerId + '-' + Date.now().toString().slice(-6), 5000);
+          })
+        + _p14btn('Send Secure Message', 'fa-envelope', '#7c3aed', function () {
+            _p6close('p6-prov-contact-ov');
+            _p6toast('<i class="fas fa-envelope"></i> Secure message sent to ' + name + ' via Provider Portal · WealthAI agenda attached · Reply expected within 4 hours', 4000);
+          })
+        + _p14btn('Schedule Site Visit', 'fa-map-marker-alt', '#003087', function () {
+            _p6close('p6-prov-contact-ov');
+            window.ltcProviderAction('site-visit', providerId);
+          })
+        + _p14cancel('p6-prov-contact-ov')
+        + '</div></div>'
+      ));
+    }
+
+    /* ── SITE VISIT ── */
+    else if (action === 'site-visit') {
+      var isRisk = p.aiHealth === 'Needs Attention' || p.aiHealth === 'Critical';
+      _p6ov('p6-prov-visit-ov', _p6wrap('p6-prov-visit-ov', '580px',
+        _p6hdr('fa-map-marker-alt', 'Schedule Site Visit — ' + name, (isRisk ? 'Unannounced — Compliance Risk Detected' : 'Routine QA Visit'), '#003087', 'p6-prov-visit-ov')
+        + '<div style="padding:22px;">'
+        + _p6ai(isRisk
+          ? 'WealthAI has flagged <strong>' + name + '</strong> for an <strong>unannounced compliance inspection</strong>. AI health: <strong>' + p.aiHealth + '</strong>. Billing accuracy: ' + (p.billing || '91%') + ' — below 95% threshold. Fraud score elevated. <strong>Recommend immediate unannounced visit</strong> — notify only after arrival. QA RN with compliance authority assigned.'
+          : 'WealthAI recommends a routine QA site visit to <strong>' + name + '</strong> within 30 days. AI health: <strong>' + (p.aiHealth || 'Good') + '</strong>. Billing accuracy: ' + (p.billing || '98.2%') + ' — strong. Last visit was ' + (p.lastVisit || '90 days ago') + '. Routine visits maintain provider relationship quality and verify EVV compliance.')
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Visit Type</label>'
+        + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+        + (isRisk ? '<option>Unannounced Compliance Inspection (AI-recommended)</option><option>Routine Scheduled QA</option>' : '<option>Routine Scheduled QA Visit (AI-recommended)</option><option>Unannounced Compliance Inspection</option>')
+        + '<option>Comprehensive Annual Audit Visit</option><option>Emergency Inspection</option>'
+        + '</select></div>'
+        + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Target Date</label>'
+        + '<input type="text" value="Jul ' + (isRisk ? '14' : '22') + ', 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+        + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">AI-Generated Inspection Checklist</label>'
+        + '<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:12px;color:#374151;line-height:2.2;">'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Verify resident care plan adherence</div>'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Validate EVV GPS logs vs. billing records</div>'
+        + '<div><input type="checkbox" checked style="accent-color:#0891b2;margin-right:6px;"> Conduct resident / family interviews</div>'
+        + (isRisk ? '<div><input type="checkbox" checked style="accent-color:#dc2626;margin-right:6px;"> Pull on-site billing records — cross-reference claims</div>' : '<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Review billing documentation</div>')
+        + '<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> Inspect facility safety and staffing levels</div>'
+        + (isRisk ? '<div><input type="checkbox" checked style="accent-color:#dc2626;margin-right:6px;"> Photograph evidence for compliance file</div>' : '<div><input type="checkbox" style="accent-color:#0891b2;margin-right:6px;"> AI photo analysis of facility conditions</div>')
+        + '</div></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + _p14btn('Schedule Visit', 'fa-calendar-check', isRisk ? '#dc2626' : '#003087', function () {
+            _p6close('p6-prov-visit-ov');
+            _p6toast('<i class="fas fa-map-marker-alt"></i> Site visit scheduled ' + (isRisk ? 'Jul 14' : 'Jul 22') + ' at ' + name + ' · QA RN assigned · EVV tracking active · ' + (isRisk ? 'Provider NOT notified — unannounced' : 'Provider notified — scheduled visit') + ' · Ref: VISIT-' + providerId, 5500);
+          })
+        + _p14btn('AI Optimize Schedule', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function () {
+            _p6close('p6-prov-visit-ov');
+            _p6toast('<i class="fas fa-magic"></i> WealthAI optimized site visit schedule · RN assigned · Earliest available slot confirmed · GPS route sent · Checklist transmitted', 4500);
+          })
+        + _p14cancel('p6-prov-visit-ov')
+        + '</div></div>'
+      ));
+    }
+
+    /* ── BILLING AUDIT ── */
+    else if (action === 'audit') {
+      var fraudScore = p.fraudScore || (p.aiHealth === 'Critical' ? 31 : p.aiHealth === 'Needs Attention' ? 18 : 8);
+      var auditRisk  = fraudScore > 20 ? 'High' : fraudScore > 12 ? 'Medium' : 'Low';
+      var riskColor  = auditRisk === 'High' ? '#dc2626' : auditRisk === 'Medium' ? '#d97706' : '#059669';
+      _p6ov('p6-prov-audit-ov', _p6wrap('p6-prov-audit-ov', '640px',
+        _p6hdr('fa-shield-alt', 'Billing Audit — ' + name, 'AI-powered · Fraud pattern analysis · EVV cross-reference', '#d97706', 'p6-prov-audit-ov')
+        + '<div style="padding:22px;">'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">'
+        + _p6kpi(p.billing || '98.2%', 'Billing Accuracy', 'fa-percent', parseInt(p.billing || '98') < 95 ? '#dc2626' : '#059669', 'vs 95% clean threshold')
+        + _p6kpi(fraudScore + '/100', 'AI Fraud Score', 'fa-shield-alt', riskColor, auditRisk + ' risk')
+        + _p6kpi(p.activePats || '—', 'Active Patients Audited', 'fa-users', '#003087', 'All claims cross-referenced')
+        + '</div>'
+        + _p6ai('BILLING AUDIT — <strong>' + name + '</strong><br><br>'
+          + '<strong>Fraud Risk Score: ' + fraudScore + '/100 — ' + auditRisk + '</strong>. '
+          + (fraudScore > 20
+            ? '⚠️ <span style="color:#dc2626;font-weight:700;">ELEVATED FRAUD RISK.</span> WealthAI detected: (1) Billing dates not matching EVV GPS timestamps on 3 claims, (2) Service upcoding pattern — 12% above peer benchmark, (3) Duplicate procedure codes on Claims 2026-0107 and 2026-0092. <strong>Recommendation: payment hold + immediate SIU referral.</strong>'
+            : fraudScore > 12
+            ? 'Moderate anomalies detected. Billing dates occasionally inconsistent with EVV records. Recommend manual review of 3 flagged claims before next payment cycle. No payment hold required at this stage.'
+            : 'Billing review complete. No fraud indicators. All claims match EVV GPS logs. Billing accuracy ' + (p.billing || '98.2%') + ' — top quartile in network. Provider cleared for next payment cycle.'))
+        + _p6tbl(['Check', 'Status', 'Detail'],
+            [['EVV vs Billing Match', fraudScore > 20 ? '⚠️ 3 discrepancies' : '✅ Clean', fraudScore > 20 ? 'Jul 3, 8, 12 visits — GPS gap' : 'All ' + (p.activePats || 14) + ' visits verified'],
+             ['Procedure Codes', fraudScore > 20 ? '⚠️ Upcoding detected' : '✅ Clean', fraudScore > 20 ? '12% above peer benchmark' : 'Within normal range'],
+             ['Duplicate Claims', fraudScore > 20 ? '⚠️ 2 flagged' : '✅ None', fraudScore > 20 ? 'Claims 0107 + 0092 overlap' : 'No duplicates found'],
+             ['Provider License', (p.w9 || p.aiHealth === 'Critical') ? '⚠️ Issue detected' : '✅ Current', 'License valid through Dec 2026'],
+             ['W-9 / Tax Form', p.aiHealth === 'Critical' ? '⚠️ Missing' : '✅ On file', p.aiHealth === 'Critical' ? 'W-9 not received — payment hold risk' : 'W-9 verified · Expires Dec 2026']])
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+        + (fraudScore > 20
+            ? _p14btn('Place Payment Hold', 'fa-pause-circle', '#dc2626', function () {
+                _p6close('p6-prov-audit-ov');
+                _p6toast('<i class="fas fa-pause-circle"></i> Payment hold placed on ' + name + ' · SIU referral initiated · All pending claims suspended · Supervisor and Compliance notified · Ref: HOLD-' + providerId, 5500);
+              })
+            : '')
+        + _p14btn('Export Audit Report', 'fa-file-pdf', '#d97706', function () {
+            _p6close('p6-prov-audit-ov');
+            _p6toast('<i class="fas fa-file-pdf"></i> Billing Audit Report for ' + name + ' exported · PDF sent to Claims Ops and Compliance · Ref: AUDIT-' + providerId + '-JUL26', 4500);
+          })
+        + _p14btn('Schedule Follow-up Audit', 'fa-search', '#003087', function () {
+            _p6close('p6-prov-audit-ov');
+            _p6toast('<i class="fas fa-search"></i> Follow-up audit scheduled for ' + name + ' · 30-day interval · WealthAI monitoring enabled · Billing team notified', 4000);
+          })
+        + _p14btn('AI Deep Dive', 'fa-robot', 'linear-gradient(135deg,#7c3aed,#6d28d9)', function () {
+            _p6toast('<i class="fas fa-magic"></i> WealthAI running deep pattern analysis on ' + name + ' billing history · 90-day lookback · Peer benchmarking · SIU threshold assessment · Results in 2 minutes', 4500);
+          })
+        + '</div></div>'
+      ));
+    }
+
+    else {
+      _p6toast('<i class="fas fa-check"></i> ' + action + ' completed for ' + name, 3000);
+    }
+  };
+
+  console.log('[Phase 14] Gibberish fixed: ltcCarrierAction + ltcProviderAction buttons migrated to _p8actions callback-map · No raw onclick HTML attribute strings');
+
+})();
