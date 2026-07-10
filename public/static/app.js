@@ -73195,151 +73195,403 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   'use strict';
 
   /* ═══════════════════════════════════════════════════════════════════════
-     PHASE 10 — MODAL LAYER FIX
-     Fixes:
-       1. IDP "View" panel appears behind claim-detail modal  →  raise z-index
-       2. Schedule Assessment / Update Care Plan behind modal →  raise z-index
-       3. Process Payment shows raw HTML gibberish            →  rewrite with _p8btn
-       4. Close buttons on all sub-modals non-functional      →  consistent close IDs
-     Strategy:
-       - Patch _p8ov to use z-index:12000 (above _L4overlay:10000 & _p6ov:11000)
-       - Patch _L4overlay to also use z-index:12000 for any call inside claim detail
-       - Completely rewrite ltcDetailAction 'payment' using _p8btn (no raw onclick)
-       - All sub-overlay Close buttons use _p8close() via data-key callbacks
+     PHASE 10v2 — MODAL Z-INDEX TIER FIX + AI EXTRACT & VALIDATE
+     
+     Z-INDEX TIER SYSTEM (definitive):
+       10000  ← Claim detail main modal  (ltc-claim-detail-ov, ltc-p9-detail)
+       13000  ← Sub-modals that open FROM within claim detail
+                (IDP View, Process Payment, Schedule Assessment, Update Care Plan,
+                 Upload Doc, Request Docs, Provider/Carrier 360)
+       99999  ← Toast notifications (above everything)
+
+     KEY FIX: _L4overlay is used for BOTH the claim detail AND sub-modals.
+     We solve this by introducing window._p10SubOv() specifically for sub-modals
+     (always z-index 13000), and keeping _L4overlay at 10000 for claim detail.
+     _p8ov is patched to 13000 (it is only ever called for sub-modals).
+
+     ALSO: AI Extract & Validate in IDP modal — full per-document extraction
+     simulation with field-level results and confidence scoring.
   ═══════════════════════════════════════════════════════════════════════ */
 
-  /* ── 1. Raise _p8ov to z-index 12000 so it sits above the claim detail modal ── */
-  var _p8ovOrig = window._p8ov || function(){};
-  window._p8ov = function (id, html) {
+  /* ── CONSTANTS ── */
+  var Z_CLAIM_DETAIL = '10000';  /* main claim modal */
+  var Z_SUB_MODAL    = '13000';  /* any modal opened from within claim detail */
+  var Z_TOAST        = '99999';  /* toasts */
+
+  /* ── 1. Dedicated sub-modal opener (always sits above claim detail) ── */
+  window._p10SubOv = function (id, html) {
     var old = document.getElementById(id);
     if (old) old.remove();
     var wrap = document.createElement('div');
     wrap.id = id;
-    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:12000;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;';
+    wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:' + Z_SUB_MODAL + ';display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;';
     wrap.innerHTML = html;
     document.body.appendChild(wrap);
+    /* Click-outside-to-close */
     wrap.addEventListener('click', function (e) { if (e.target === wrap) wrap.remove(); });
   };
 
-  /* ── 2. Raise _L4overlay to z-index 12000 (it was 10000, same as claim detail) ── */
-  var _L4ovOrig = window._L4overlay || function(){};
+  /* ── 2. Patch _p8ov to use sub-modal z-index ── */
+  window._p8ov = function (id, html) { window._p10SubOv(id, html); };
+
+  /* ── 3. Patch _L4overlay — claim-detail IDs stay at 10000; everything else → 13000 ── */
+  var CLAIM_DETAIL_IDS = {
+    'ltc-claim-detail-ov': true,
+    'ltc-p9-detail': true,
+    'ltc-newclaim-overlay': true,
+    'ltc-triage-overlay': true
+  };
   window._L4overlay = function (id, html) {
     var old = document.getElementById(id);
     if (old) old.remove();
+    var z = CLAIM_DETAIL_IDS[id] ? Z_CLAIM_DETAIL : Z_SUB_MODAL;
     document.body.insertAdjacentHTML('beforeend',
-      '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:12000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">' + html + '</div>');
+      '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,' + (CLAIM_DETAIL_IDS[id] ? '.6' : '.72') + ');z-index:' + z + ';display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">' + html + '</div>');
   };
 
-  /* Keep _p8close and _L4close working as before (no change needed) */
+  /* ── 4. Expose _p8close and _L4close globally ── */
+  window._p8close = function (id) { var el = document.getElementById(id); if (el) el.remove(); };
+  window._L4close  = function (id) { var el = document.getElementById(id); if (el) el.remove(); };
 
-  /* ── Shared safe-button builder (mirrors _p8btn exactly) ── */
+  /* ── 5. Safe button builder (callback-map pattern, no raw onclick strings) ── */
   function _p10btn(label, icon, color, fn) {
     var key = '_p10_' + Math.random().toString(36).slice(2);
     if (!window._p8actions) window._p8actions = {};
     window._p8actions[key] = fn;
-    var style = (color.indexOf('gradient') !== -1 ? 'background:' + color : 'background:' + color)
-      + ';color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;';
-    return '<button onclick="_p8run(\'' + key + '\')" style="' + style + '">'
+    var bg = color.indexOf('gradient') !== -1 ? color : color;
+    return '<button onclick="_p8run(\'' + key + '\')" style="background:' + bg + ';color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">'
       + '<i class="fas ' + icon + '"></i> ' + label + '</button>';
   }
 
-  /* ── 3. Completely replace ltcDetailAction 'payment' with a clean implementation ── */
+  /* ── 6. Rewrite Process Payment — no raw onclick strings ── */
   var _prevLtcDetailAction = window.ltcDetailAction;
   window.ltcDetailAction = function (action, claimId) {
-
     if (action !== 'payment') {
-      /* Delegate everything else to Phase 8/9 handler unchanged */
       if (typeof _prevLtcDetailAction === 'function') _prevLtcDetailAction(action, claimId);
       return;
     }
-
-    /* ── PROCESS PAYMENT (rewritten — no raw onclick strings) ── */
     var claims = (window.ltcClaimsData || []).concat(window.p9Claims || []);
     var c = claims.find(function (x) { return x.id === claimId; }) || window._lcdCurrentClaim || {};
     if (!c.id) c.id = claimId;
-    var name = c.claimant || claimId;
+    var name    = c.claimant   || claimId;
     var benefit = c.dailyBenefit || '$180/day';
-    var provider = c.provider || 'Provider';
-    var carrier = c.carrier || 'Carrier';
+    var prov    = c.provider   || 'Provider';
+    var carr    = c.carrier    || 'Carrier';
+    var ovId    = 'p10-payment-ov';
 
-    var ovId = 'p10-payment-ov';
-
-    /* Header */
-    var hdr = '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
-      + '<i class="fas fa-dollar-sign" style="font-size:22px;opacity:.9;"></i>'
-      + '<div style="flex:1;">'
-      + '<div style="font-size:15px;font-weight:800;letter-spacing:-.3px;">Process Payment — ' + claimId + '</div>'
-      + '<div style="font-size:11px;opacity:.8;margin-top:2px;">ACH/EFT · STP-eligible · Carrier notification</div>'
-      + '</div>'
-      + '<button onclick="window._p8close(\'' + ovId + '\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;font-weight:700;">✕</button>'
-      + '</div>';
-
-    /* AI bar */
-    var ai = '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:1.5px solid #ddd6fe;border-radius:10px;padding:14px;margin-bottom:16px;">'
-      + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Intelligence</div>'
-      + '<div style="font-size:12px;color:#374151;line-height:1.6;">WealthAI confirms claim <strong>' + claimId + '</strong> is STP (Straight-Through Processing) eligible. '
-      + 'ADL score <strong>' + (c.assessScore || '2') + '/5</strong>, fraud score <strong>8/100 (Clear)</strong>, care plan current. '
-      + 'Daily benefit of <strong>' + benefit + '</strong> to <strong>' + provider + '</strong>. '
-      + 'ACH batch will execute tonight at 8 PM EST. No holds or flags detected.</div></div>';
-
-    /* KV grid */
     function kv(l, v) {
       return '<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;">'
         + '<div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;">' + l + '</div>'
         + '<div style="font-size:13px;font-weight:600;color:#111827;margin-top:2px;">' + v + '</div></div>';
     }
-    var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">'
-      + kv('Claimant', name)
-      + kv('Daily Benefit', benefit)
-      + kv('Payment Cycle', 'Monthly — Jul 2026')
-      + kv('Provider', provider)
-      + kv('Payment Method', 'ACH Direct Deposit')
-      + kv('Next Due', c.paymentDue || 'Jul 15, 2026')
-      + kv('Carrier', carrier)
-      + kv('Policy Status', '✅ In Force · No lapses')
-      + '</div>';
 
-    /* STP badge */
-    var stp = '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:16px;">'
+    var html = '<div style="background:#fff;border-radius:16px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.45);">'
+      /* header */
+      + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas fa-dollar-sign" style="font-size:22px;opacity:.9;"></i>'
+      + '<div style="flex:1;"><div style="font-size:15px;font-weight:800;">Process Payment — ' + claimId + '</div>'
+      + '<div style="font-size:11px;opacity:.8;margin-top:2px;">ACH/EFT · STP-eligible · Carrier notification</div></div>'
+      + '<button onclick="window._p8close(\'' + ovId + '\')" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;font-weight:700;">✕</button>'
+      + '</div>'
+      /* body */
+      + '<div style="padding:22px;">'
+      /* WealthAI panel */
+      + '<div style="background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:1.5px solid #ddd6fe;border-radius:10px;padding:14px;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Intelligence</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;">WealthAI confirms claim <strong>' + claimId + '</strong> is STP eligible. ADL score <strong>' + (c.assessScore || '2') + '/5</strong>, fraud score <strong>8/100 (Clear)</strong>. Daily benefit <strong>' + benefit + '</strong> to <strong>' + prov + '</strong>. ACH batch tonight 8 PM EST. No holds.</div></div>'
+      /* KV grid */
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">'
+      + kv('Claimant', name) + kv('Daily Benefit', benefit)
+      + kv('Payment Cycle', 'Monthly — Jul 2026') + kv('Provider', prov)
+      + kv('Payment Method', 'ACH Direct Deposit') + kv('Next Due', c.paymentDue || 'Jul 15, 2026')
+      + kv('Carrier', carr) + kv('Policy Status', '✅ In Force · No lapses')
+      + '</div>'
+      /* STP badge */
+      + '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:16px;">'
       + '<div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:4px;"><i class="fas fa-check-circle" style="margin-right:5px;"></i>STP Eligible — Auto-Approved</div>'
-      + '<div style="font-size:12px;color:#166534;">Fraud score: Clear · ADL threshold met · Care plan current · No documentation holds · Elimination period satisfied</div></div>';
-
-    /* Action buttons (all safe via _p10btn) */
-    var btns = '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      + '<div style="font-size:12px;color:#166534;">Fraud score: Clear · ADL threshold met · Care plan current · No holds · Elimination period satisfied</div></div>'
+      /* buttons */
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
       + _p10btn('Confirm & Process Payment', 'fa-paper-plane', '#059669', function () {
           window._p8close(ovId);
           var ref = 'PAY-' + claimId + '-JUL26-' + Math.random().toString(36).slice(2,6).toUpperCase();
-          var msg = '<i class="fas fa-check-circle"></i> Payment of <strong>' + benefit + ' × 30 days</strong> processed for <strong>'
-            + name + '</strong> · ACH batch queued for tonight · Carrier <strong>' + carrier + '</strong> notified · Ref: ' + ref;
-          (window._p8toast || window._p6toast || function(m){alert(m);})(msg, 5500);
+          (window._p8toast || function(m,d){})('<i class="fas fa-check-circle"></i> Payment <strong>' + benefit + ' × 30 days</strong> processed for <strong>' + name + '</strong> · ACH queued · Carrier <strong>' + carr + '</strong> notified · Ref: ' + ref, 5500);
         })
       + _p10btn('Place Payment Hold', 'fa-pause-circle', '#d97706', function () {
           window._p8close(ovId);
-          var msg = '<i class="fas fa-pause-circle"></i> Payment for <strong>' + claimId + '</strong> placed on hold · Supervisor notified · SLA paused · Reason documented';
-          (window._p8toast || window._p6toast || function(m){alert(m);})(msg, 3500);
+          (window._p8toast || function(m,d){})('<i class="fas fa-pause-circle"></i> Payment for <strong>' + claimId + '</strong> on hold · Supervisor notified · SLA paused', 3500);
         })
       + _p10btn('Schedule Future Date', 'fa-calendar', '#0891b2', function () {
-          var msg = '<i class="fas fa-calendar"></i> Payment for <strong>' + claimId + '</strong> rescheduled · ACH batch adjusted · Provider and carrier notified';
-          (window._p8toast || window._p6toast || function(m){alert(m);})(msg, 3500);
+          (window._p8toast || function(m,d){})('<i class="fas fa-calendar"></i> Payment for <strong>' + claimId + '</strong> rescheduled · ACH adjusted · Carrier notified', 3500);
         })
       + '<button onclick="window._p8close(\'' + ovId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Cancel</button>'
-      + '</div>';
+      + '</div></div></div>';
 
-    /* Assemble and open */
-    var inner = '<div style="background:#fff;border-radius:16px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.4);">'
-      + hdr
-      + '<div style="padding:22px;">' + ai + grid + stp + btns + '</div>'
-      + '</div>';
-
-    window._p8ov(ovId, inner);
+    window._p10SubOv(ovId, html);
   };
 
-  /* ── 4. Expose _p8close on window so inline onclick="window._p8close(...)" works ── */
-  window._p8close = window._p8close || function (id) {
-    var el = document.getElementById(id);
-    if (el) el.remove();
+  /* ══════════════════════════════════════════════════════════════════════
+     7. AI EXTRACT & VALIDATE — functional implementation
+        Replaces the stub in _p8openIDP with a real per-document extraction
+        simulation: shows a progress bar → then renders extracted field table
+        with confidence scores, anomaly flags, and cross-reference results.
+  ══════════════════════════════════════════════════════════════════════ */
+
+  /* Per-document extraction profiles */
+  var DOC_PROFILES = {
+    'Attending Physician Statement (APS)': {
+      conf: 97, pages: 4,
+      fields: [
+        { name: 'Physician Name',        value: 'Dr. Sarah Thompson, MD',    conf: 99, ok: true },
+        { name: 'NPI Number',            value: '1234567890',                conf: 98, ok: true },
+        { name: 'Diagnosis Code 1',      value: 'F01.51 — Vascular Dementia',conf: 97, ok: true },
+        { name: 'Diagnosis Code 2',      value: 'Z74.09 — Reduced mobility', conf: 96, ok: true },
+        { name: 'Date of Service',       value: 'Jun 28, 2026',             conf: 99, ok: true },
+        { name: 'Care Setting Rec.',     value: 'Skilled Nursing Facility',  conf: 95, ok: true },
+        { name: 'ADL Limitations',       value: '4 of 6 (Bathing, Dressing, Eating, Transferring)', conf: 94, ok: true },
+        { name: 'Physician Signature',   value: 'Verified — Jun 28, 2026',  conf: 99, ok: true },
+        { name: 'Signature Date Match',  value: 'Consistent with submission', conf: 97, ok: true }
+      ],
+      anomalies: [],
+      crossRef: ['✅ Dates match claim submission (Jun 28, 2026)','✅ ADL count consistent with RN Assessment','✅ ICD-10 codes align with clinical assessment','✅ Provider NPI verified in NPPES registry']
+    },
+    'ADL Assessment Report': {
+      conf: 95, pages: 3,
+      fields: [
+        { name: 'Assessor Name',     value: 'Sarah Johnson, RN',       conf: 98, ok: true },
+        { name: 'Assessment Date',   value: 'Jul 3, 2026',             conf: 99, ok: true },
+        { name: 'Bathing Score',     value: '0 — Fully Dependent',     conf: 97, ok: true },
+        { name: 'Dressing Score',    value: '0 — Fully Dependent',     conf: 97, ok: true },
+        { name: 'Eating Score',      value: '1 — Substantial Assist',  conf: 96, ok: true },
+        { name: 'Transferring Score',value: '0 — Fully Dependent',     conf: 97, ok: true },
+        { name: 'Toileting Score',   value: '1 — Substantial Assist',  conf: 95, ok: true },
+        { name: 'Continence Score',  value: '1 — Substantial Assist',  conf: 95, ok: true },
+        { name: 'MMSE Score',        value: '14/30 — Moderate Impairment', conf: 93, ok: true },
+        { name: 'ADL Total (NAIC)',  value: '4/6 impaired — Benefit threshold met', conf: 98, ok: true }
+      ],
+      anomalies: [],
+      crossRef: ['✅ ADL scores match APS clinical findings','✅ Assessment within 7 days of intake (per policy)','✅ RN credentials verified','✅ Assessment method: NAIC-compliant 6-ADL rubric']
+    },
+    'Insurance Policy Copy': {
+      conf: 99, pages: 12,
+      fields: [
+        { name: 'Policy Number',       value: 'PRU-LTC-2019-447821',    conf: 99, ok: true },
+        { name: 'Carrier',             value: 'Prudential',             conf: 99, ok: true },
+        { name: 'Policy Effective',    value: 'Jan 14, 2019',           conf: 99, ok: true },
+        { name: 'Daily Benefit Max',   value: '$240/day (NH/SNF)',      conf: 99, ok: true },
+        { name: 'Elimination Period',  value: '90 days',                conf: 99, ok: true },
+        { name: 'Benefit Period Max',  value: '3 years (1,095 days)',   conf: 99, ok: true },
+        { name: 'Inflation Rider',     value: '5% simple annual',       conf: 98, ok: true },
+        { name: 'Policy Status',       value: 'In Force — No lapses',   conf: 99, ok: true },
+        { name: 'Premium Current',     value: 'Paid through Dec 2026',  conf: 99, ok: true }
+      ],
+      anomalies: [],
+      crossRef: ['✅ Policy in force — no lapse in coverage','✅ Benefit amount consistent with claim submission','✅ Elimination period satisfied (90 days elapsed)','✅ Care setting covered under policy terms']
+    },
+    'Care Plan (Current)': {
+      conf: 82, pages: 6,
+      fields: [
+        { name: 'Care Plan Date',      value: 'Jul 1, 2026',           conf: 94, ok: true },
+        { name: 'Provider',            value: 'Sunrise Manor SNF',      conf: 99, ok: true },
+        { name: 'Care Setting',        value: 'Skilled Nursing Facility',conf: 99, ok: true },
+        { name: 'Visit Frequency',     value: 'Daily — 24hr care',     conf: 96, ok: true },
+        { name: 'Physician Sign Date', value: 'MISSING',               conf: 40, ok: false },
+        { name: 'Countersignature',    value: 'Pending — Not present', conf: 35, ok: false },
+        { name: 'Care Goals',          value: 'Extracted (5 goals)',    conf: 88, ok: true },
+        { name: 'Next Review Date',    value: 'Aug 1, 2026',           conf: 91, ok: true }
+      ],
+      anomalies: ['⚠️ Physician countersignature missing — required within 30 days of care plan start','⚠️ Signature date does not match submission date — follow up with Dr. Thompson'],
+      crossRef: ['✅ Care setting matches APS recommendation','✅ Provider matches billing records','⚠️ Care plan signature incomplete — document hold recommended','✅ Goals consistent with ADL assessment findings']
+    },
+    'Provider License & W-9': {
+      conf: 99, pages: 2,
+      fields: [
+        { name: 'Provider Name',   value: 'Sunrise Manor SNF',          conf: 99, ok: true },
+        { name: 'License Number',  value: 'SNF-CA-2021-004812',         conf: 99, ok: true },
+        { name: 'License Expiry',  value: 'Dec 2027 — Current',         conf: 99, ok: true },
+        { name: 'EIN (W-9)',       value: 'XX-XXXXXXX (verified)',       conf: 99, ok: true },
+        { name: 'CMS Certification','value': 'Active — No sanctions',   conf: 99, ok: true },
+        { name: 'State License',   value: 'California — Active',        conf: 99, ok: true }
+      ],
+      anomalies: [],
+      crossRef: ['✅ License current and in good standing','✅ EIN matches IRS records','✅ No OIG exclusion list matches','✅ CMS certification active']
+    },
+    'HIPAA Authorization Form': {
+      conf: 98, pages: 1,
+      fields: [
+        { name: 'Claimant Name',    value: 'Margaret O\'Brien',         conf: 99, ok: true },
+        { name: 'Authorization Date','value': 'Jun 25, 2026',           conf: 99, ok: true },
+        { name: 'Authorized Party', value: 'Sunrise Manor SNF + Prudential', conf: 98, ok: true },
+        { name: 'Scope',            value: 'Medical records · Billing · PHI', conf: 97, ok: true },
+        { name: 'Signature',        value: 'Eleanor (POA) — Verified',  conf: 98, ok: true },
+        { name: 'Expiration',       value: '1 year from signing (Jun 2027)', conf: 96, ok: true }
+      ],
+      anomalies: [],
+      crossRef: ['✅ Authorization covers all required parties','✅ Signature verified as authorized POA','✅ HIPAA §164.508 compliant','✅ Scope covers all claim processing activities']
+    }
   };
 
-  console.log('[Phase 10] Modal layer fix loaded — z-index raised to 12000 for all sub-modals, Process Payment rewritten with safe _p10btn, Close buttons operational');
+  /* Default profile for unknown docs */
+  function _getProfile(docName) {
+    for (var key in DOC_PROFILES) {
+      if (docName && docName.indexOf(key.split(' ')[0]) !== -1) return DOC_PROFILES[key];
+    }
+    /* Fallback */
+    return {
+      conf: 91, pages: 3,
+      fields: [
+        { name: 'Document Type',  value: docName,                   conf: 95, ok: true },
+        { name: 'Extract Status', value: 'Fields extracted',        conf: 91, ok: true },
+        { name: 'Date Extracted', value: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), conf: 99, ok: true }
+      ],
+      anomalies: [],
+      crossRef: ['✅ Document processed successfully','✅ No anomalies detected']
+    };
+  }
+
+  /* Render AI extraction results panel inside the open IDP overlay */
+  function _p10renderExtraction(idpId, docName, c) {
+    var panel = document.getElementById('p10-extract-panel');
+    if (!panel) return;
+
+    var profile = _getProfile(docName);
+    var hasAnomaly = profile.anomalies.length > 0;
+
+    /* Field rows */
+    var fieldRows = profile.fields.map(function (f) {
+      var confColor = f.conf >= 95 ? '#059669' : f.conf >= 80 ? '#d97706' : '#dc2626';
+      var confBg    = f.conf >= 95 ? '#f0fdf4' : f.conf >= 80 ? '#fffbeb' : '#fef2f2';
+      var icon      = f.ok ? '✅' : '⚠️';
+      return '<tr>'
+        + '<td style="padding:7px 10px;font-size:11px;font-weight:600;color:#374151;border-bottom:1px solid #f1f5f9;">' + icon + ' ' + f.name + '</td>'
+        + '<td style="padding:7px 10px;font-size:11px;color:#111827;border-bottom:1px solid #f1f5f9;">' + f.value + '</td>'
+        + '<td style="padding:7px 10px;border-bottom:1px solid #f1f5f9;text-align:center;">'
+        + '<span style="background:' + confBg + ';color:' + confColor + ';border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">' + f.conf + '%</span></td>'
+        + '</tr>';
+    }).join('');
+
+    /* Anomaly panel */
+    var anomalyHtml = '';
+    if (hasAnomaly) {
+      anomalyHtml = '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:14px;">'
+        + '<div style="font-size:11px;font-weight:800;color:#dc2626;margin-bottom:6px;text-transform:uppercase;"><i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>Anomalies Detected</div>'
+        + profile.anomalies.map(function(a){ return '<div style="font-size:11px;color:#7f1d1d;margin-bottom:3px;">' + a + '</div>'; }).join('')
+        + '</div>';
+    }
+
+    /* Cross-reference panel */
+    var xrefHtml = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:14px;">'
+      + '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:8px;"><i class="fas fa-link" style="margin-right:5px;"></i>Multi-Document Cross-Reference</div>'
+      + profile.crossRef.map(function(r){ return '<div style="font-size:11px;color:#374151;margin-bottom:3px;">' + r + '</div>'; }).join('')
+      + '</div>';
+
+    /* Overall confidence badge */
+    var confBadgeColor = profile.conf >= 95 ? '#059669' : profile.conf >= 85 ? '#d97706' : '#dc2626';
+    var verdict = hasAnomaly ? '⚠️ Review Required — ' + profile.anomalies.length + ' anomaly' + (profile.anomalies.length > 1 ? 'ies' : '') : '✅ Validated — Clean';
+
+    panel.innerHTML =
+      /* Summary bar */
+      '<div style="background:linear-gradient(135deg,#1f2937,#111827);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:16px;">'
+      + '<div style="text-align:center;">'
+      + '<div style="font-size:28px;font-weight:900;color:' + confBadgeColor + ';">' + profile.conf + '%</div>'
+      + '<div style="font-size:10px;color:#9ca3af;font-weight:600;">AI CONFIDENCE</div></div>'
+      + '<div style="border-left:1px solid #374151;height:40px;"></div>'
+      + '<div>'
+      + '<div style="font-size:13px;font-weight:700;color:#f9fafb;">' + verdict + '</div>'
+      + '<div style="font-size:11px;color:#9ca3af;margin-top:3px;">' + profile.fields.length + ' fields extracted · ' + profile.pages + ' pages · AES-256 · HIPAA §164.312</div>'
+      + '</div></div>'
+      /* Field table */
+      + '<div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:8px;"><i class="fas fa-table" style="margin-right:5px;color:#7c3aed;"></i>Extracted Fields</div>'
+      + '<div style="overflow-x:auto;margin-bottom:16px;border-radius:8px;border:1px solid #e5e7eb;">'
+      + '<table style="width:100%;border-collapse:collapse;">'
+      + '<thead><tr>'
+      + '<th style="background:#f8fafc;padding:7px 10px;font-size:10px;font-weight:700;color:#6b7280;text-align:left;border-bottom:1px solid #e5e7eb;">Field</th>'
+      + '<th style="background:#f8fafc;padding:7px 10px;font-size:10px;font-weight:700;color:#6b7280;text-align:left;border-bottom:1px solid #e5e7eb;">Extracted Value</th>'
+      + '<th style="background:#f8fafc;padding:7px 10px;font-size:10px;font-weight:700;color:#6b7280;text-align:center;border-bottom:1px solid #e5e7eb;">Conf.</th>'
+      + '</tr></thead>'
+      + '<tbody>' + fieldRows + '</tbody></table></div>'
+      + anomalyHtml
+      + xrefHtml
+      /* Action buttons after extraction */
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px;">'
+      + (hasAnomaly
+          ? '<button onclick="window._p8close(\'' + idpId + '\');window._p8toast && window._p8toast(\'<i class=\\\'fas fa-sync\\\'></i> Updated version requested from ' + (c && c.provider ? c.provider : 'provider') + ' · Portal notification sent · 48-hour deadline set\', 4000)" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-sync"></i> Request Updated Doc</button>'
+          : '<button onclick="window._p8close(\'' + idpId + '\');window._p8toast && window._p8toast(\'<i class=\\\'fas fa-check-circle\\\'></i> Document validated and approved · Claim record updated · Carrier notified\', 3500)" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-check-circle"></i> Approve Document</button>')
+      + '<button onclick="window._p8toast && window._p8toast(\'<i class=\\\'fas fa-file-pdf\\\'></i> Extraction report downloading · HIPAA-encrypted · Audit logged\', 3000)" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-file-download"></i> Export Report</button>'
+      + '<button onclick="window._p8close(\'' + idpId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div>';
+  }
+
+  /* Patch _p8openIDP to wire up the AI Extract & Validate button */
+  var _origP8openIDP = window._p8openIDP;
+  window._p8openIDP = function (docName, claimData) {
+    /* Call original to render the IDP overlay first */
+    if (typeof _origP8openIDP === 'function') _origP8openIDP(docName, claimData);
+
+    /* After original renders, inject an extraction results panel placeholder
+       and wire up the "AI Extract & Validate" button */
+    setTimeout(function () {
+      var idpId = 'p8-idp-ov';
+      var ovEl = document.getElementById(idpId);
+      if (!ovEl) return;
+
+      /* Find existing action buttons container and inject extraction panel before it */
+      var btnDiv = ovEl.querySelector('div[style*="display:flex"][style*="gap:8px"]');
+      if (!btnDiv) return;
+
+      /* Insert the results panel placeholder BEFORE the button row */
+      var placeholder = document.createElement('div');
+      placeholder.id = 'p10-extract-panel';
+      placeholder.style.cssText = 'margin-bottom:8px;';
+      btnDiv.parentNode.insertBefore(placeholder, btnDiv);
+
+      /* Find and replace the AI Extract & Validate button with a wired-up version */
+      var buttons = ovEl.querySelectorAll('button');
+      buttons.forEach(function (btn) {
+        if (btn.textContent.indexOf('AI Extract') !== -1 || btn.textContent.indexOf('Extract & Validate') !== -1) {
+          /* Replace with functional version */
+          var newBtn = document.createElement('button');
+          newBtn.style.cssText = btn.getAttribute('style') || 'background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;';
+          newBtn.innerHTML = '<i class="fas fa-robot"></i> AI Extract & Validate';
+          newBtn.addEventListener('click', function () {
+            /* Show progress animation */
+            var panel = document.getElementById('p10-extract-panel');
+            if (!panel) return;
+            var steps = ['Parsing document structure…', 'Extracting ICD-10 codes…', 'Validating field formats…', 'Cross-referencing claim records…', 'Running fraud detection…', 'Generating confidence scores…'];
+            var i = 0;
+            newBtn.disabled = true;
+            newBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Extracting…';
+
+            panel.innerHTML = '<div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:16px;margin-bottom:8px;">'
+              + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;"><i class="fas fa-robot" style="margin-right:5px;"></i>WealthAI Extracting…</div>'
+              + '<div id="p10-progress-bar" style="background:#e5e7eb;border-radius:4px;height:6px;margin-bottom:10px;"><div id="p10-bar-fill" style="background:linear-gradient(90deg,#7c3aed,#6d28d9);height:100%;border-radius:4px;width:0%;transition:width .4s ease;"></div></div>'
+              + '<div id="p10-progress-step" style="font-size:11px;color:#6b7280;">' + steps[0] + '</div>'
+              + '</div>';
+
+            var total = steps.length;
+            var iv = setInterval(function () {
+              i++;
+              var pct = Math.round((i / total) * 100);
+              var barFill = document.getElementById('p10-bar-fill');
+              var stepEl  = document.getElementById('p10-progress-step');
+              if (barFill) barFill.style.width = pct + '%';
+              if (stepEl)  stepEl.textContent = steps[Math.min(i, total - 1)];
+              if (i >= total) {
+                clearInterval(iv);
+                setTimeout(function () {
+                  newBtn.disabled = false;
+                  newBtn.innerHTML = '<i class="fas fa-check-circle"></i> Re-Extract';
+                  _p10renderExtraction(idpId, docName, claimData || window._lcdCurrentClaim);
+                }, 400);
+              }
+            }, 320);
+          });
+          btn.parentNode.replaceChild(newBtn, btn);
+        }
+      });
+    }, 80);
+  };
+
+  console.log('[Phase 10v2] Modal z-index tiers set (claim-detail:10000, sub-modals:13000) · AI Extract & Validate functional with per-document field extraction · Process Payment safe buttons');
 
 })();
