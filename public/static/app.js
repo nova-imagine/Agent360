@@ -74496,3 +74496,405 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 12] Assessment workflow fixed (gibberish resolved) · Schedule New Assessment comprehensive · Assessment Management 3-step workflow · Open Case modal for UW-7701–7705');
 
 })();
+
+/* ============================================================
+   PHASE 13 — Step navigation fixes for Assessment modals
+   Fixes:
+     1. ltcAssessAction: read form values BEFORE _p12ov destroys DOM
+     2. ltcScheduleNew: "Schedule Assessment" btn overwrites real handler
+        with empty fn — fix by not using _p12btn for schedKey
+   ============================================================ */
+(function () {
+  'use strict';
+
+  if (!window._p8actions) window._p8actions = {};
+
+  /* ── helpers (local copies so this IIFE is self-contained) ── */
+  function _p13toast(msg, dur) {
+    if (typeof window._p8toast === 'function') { window._p8toast(msg, dur); return; }
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:13px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;max-width:440px;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.35);';
+    d.innerHTML = msg;
+    document.body.appendChild(d);
+    setTimeout(function () { d.style.opacity = '0'; d.style.transition = 'opacity .4s'; setTimeout(function () { d.remove(); }, 400); }, dur || 3500);
+  }
+
+  function _p13ov(id, html) {
+    document.getElementById(id) && document.getElementById(id).remove();
+    document.body.insertAdjacentHTML('beforeend',
+      '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:13000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">' + html + '</div>');
+  }
+
+  function _p13close(id) { var el = document.getElementById(id); if (el) el.remove(); }
+
+  var _fld = 'width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;';
+
+  function _p13field(label, inputHtml) {
+    return '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">' + label + '</label>' + inputHtml + '</div>';
+  }
+
+  function _p13ai(txt) {
+    return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:6px;"><i class="fas fa-brain" style="margin-right:5px;"></i>WealthAI Intelligence</div>'
+      + '<div style="font-size:12px;color:#374151;line-height:1.6;">' + txt + '</div></div>';
+  }
+
+  /* Step bar — active=green, done=light-green with ✓, future=grey */
+  function _p13steps(steps, active) {
+    return '<div style="display:flex;margin-bottom:18px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">'
+      + steps.map(function (s, i) {
+          var isActive = i === active, isDone = i < active;
+          return '<div style="flex:1;padding:9px 4px;text-align:center;font-size:10px;font-weight:' + (isActive ? '700' : '600') + ';color:' + (isActive ? '#fff' : isDone ? '#059669' : '#9ca3af') + ';background:' + (isActive ? '#059669' : isDone ? '#d1fae5' : '#f9fafb') + ';border-right:1px solid #e5e7eb;">'
+            + (isDone ? '✓ ' : '') + s + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  /* Safe button: registers fn under id, returns button HTML */
+  function _p13btn(id, label, icon, bg, fn) {
+    window._p8actions[id] = fn;
+    return '<button onclick="_p8run(\'' + id + '\')" style="background:' + bg + ';color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;">'
+      + (icon ? '<i class="fas ' + icon + '" style="margin-right:6px;"></i>' : '') + label + '</button>';
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     FIX 1 — ltcAssessAction (Assessment Management)
+     Root-cause: showStep2() called document.getElementById() AFTER
+     _p12ov() had already replaced the DOM — values always fell back
+     to defaults. Fix: snapshot form values BEFORE calling _p12ov.
+  ════════════════════════════════════════════════════════════════ */
+  window.ltcAssessAction = function (name, claimDataObj) {
+    var c = claimDataObj || window._lcdCurrentClaim || {};
+    var cname  = name || c.claimant || 'Claimant';
+    var ovId   = 'p13-assess-ov';
+
+    /* AI recommendations driven by claim data */
+    var modRec  = (c.type || '').indexOf('Home') !== -1 ? 'Telephonic' : 'In-Person';
+    var rnRec   = (c.type || '').indexOf('Memory') !== -1 ? 'Angela Moore, RN (Memory Care Specialist)' : 'Sarah Johnson, RN';
+    var durRec  = (c.type || '').indexOf('Memory') !== -1 ? '75 minutes' : '45 minutes';
+    var typeRec = (c.daysOpen || 0) > 60 ? 'Annual' : (c.daysOpen || 0) > 0 ? 'Reassessment' : 'Initial';
+
+    /* ── STEP 1 ── */
+    function showStep1() {
+      var k_next   = 'p13a-next-'   + Math.random().toString(36).slice(2);
+      var k_cancel = 'p13a-cancel-' + Math.random().toString(36).slice(2);
+
+      window._p8actions[k_cancel] = function () { _p13close(ovId); };
+
+      /* FIX: snapshot values NOW (while step-1 DOM exists), then show step 2 */
+      window._p8actions[k_next] = function () {
+        var adate = (document.getElementById('p13-adate') && document.getElementById('p13-adate').value) || 'Jul 16, 2026';
+        var mod   = (document.getElementById('p13-mod')   && document.getElementById('p13-mod').value)   || modRec;
+        var rn    = (document.getElementById('p13-rn')    && document.getElementById('p13-rn').value)    || rnRec;
+        var atype = (document.getElementById('p13-atype') && document.getElementById('p13-atype').value) || typeRec;
+        showStep2(adate, mod, rn, atype);   /* pass values as args — no DOM read after overlay swap */
+      };
+
+      _p13ov(ovId,
+        '<div style="background:#fff;border-radius:16px;width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1;">'
+        + '<i class="fas fa-user-check" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Assessment Management</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + cname + (c.id ? ' · ' + c.id : '') + '</div></div>'
+        + '<button onclick="_p8run(\'' + k_cancel + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;">✕</button>'
+        + '</div>'
+        + '<div style="padding:20px;">'
+        + _p13steps(['Schedule', 'Confirm', 'RN Notified', 'Complete'], 0)
+        + _p13ai('AI recommends <strong>' + modRec + '</strong> assessment for <strong>' + cname + '</strong>. Carrier protocol (' + (c.carrier||'carrier') + '), estimated duration: <strong>' + durRec + '</strong>. AI-matched RN: <strong>' + rnRec + '</strong> (96% continuity score). WealthAI will pre-populate the clinical questionnaire from existing policy data.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">'
+        + _p13field('Assessment Date', '<input type="text" id="p13-adate" value="Jul 16, 2026" style="' + _fld + '">')
+        + _p13field('Modality', '<select id="p13-mod" style="' + _fld + '"><option' + (modRec==='Telephonic'?' selected':'') + '>Telephonic</option><option' + (modRec==='Video'?' selected':'') + '>Video</option><option' + (modRec==='In-Person'?' selected':'') + '>In-Person</option></select>')
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">'
+        + _p13field('Assign RN', '<select id="p13-rn" style="' + _fld + '"><option>Auto-assign (AI-matched)</option><option>Sarah Johnson, RN</option><option>James Park, RN</option><option>Angela Moore, RN</option><option>Kevin Walsh, RN</option><option>Patricia Lang, RN</option></select>')
+        + _p13field('Assessment Type', '<select id="p13-atype" style="' + _fld + '"><option' + (typeRec==='Initial'?' selected':'') + '>Initial</option><option' + (typeRec==='Annual'?' selected':'') + '>Annual</option><option' + (typeRec==='Reassessment'?' selected':'') + '>Reassessment</option><option>Cognitive (MMSE)</option><option>Functional ADL Only</option></select>')
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
+        + _p13field('Preferred Time Window', '<select style="' + _fld + '"><option>Morning (8 AM – 12 PM)</option><option>Afternoon (12 PM – 4 PM)</option><option>Evening (4 PM – 7 PM)</option></select>')
+        + _p13field('Language / Interpreter', '<select style="' + _fld + '"><option>English</option><option>Spanish (Interpreter Required)</option><option>Mandarin (Interpreter Required)</option><option>Other</option></select>')
+        + '</div>'
+        + _p13field('Clinical Notes / Special Instructions', '<textarea placeholder="e.g. Patient uses walker, requires ground-floor access. Family member must be present..." style="' + _fld + 'height:70px;resize:none;"></textarea>')
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:16px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Pre-Population Preview</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.6;">ADL Score: <strong>' + (c.assessScore||'—') + '/6</strong> · MMSE: <strong>' + (c.cogScore||'—') + '/30</strong> · Care Type: <strong>' + (c.type||'—') + '</strong> · Provider: <strong>' + (c.provider||'—') + '</strong> · Last Assessment: <strong>Jun 10, 2026</strong></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;">'
+        + '<button onclick="_p8run(\'' + k_next + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-arrow-right" style="margin-right:6px;"></i>Continue to Confirm</button>'
+        + '<button onclick="_p8run(\'' + k_cancel + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div>'
+        + '</div></div>'
+      );
+    }
+
+    /* ── STEP 2 — receives captured values as arguments ── */
+    function showStep2(adate, mod, rn, atype) {
+      var k_confirm = 'p13a-confirm-' + Math.random().toString(36).slice(2);
+      var k_back    = 'p13a-back-'    + Math.random().toString(36).slice(2);
+
+      window._p8actions[k_confirm] = function () { showStep3(adate, mod, rn, atype); };
+      window._p8actions[k_back]    = function () { showStep1(); };
+
+      _p13ov(ovId,
+        '<div style="background:#fff;border-radius:16px;width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+        + '<i class="fas fa-clipboard-check" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Confirm Assessment</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + cname + '</div></div>'
+        + '<button onclick="_p13close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;">✕</button>'
+        + '</div>'
+        + '<div style="padding:20px;">'
+        + _p13steps(['Schedule', 'Confirm', 'RN Notified', 'Complete'], 1)
+        + '<div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:16px;">'
+        + '<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-clipboard-list" style="color:#059669;margin-right:6px;"></i>Assessment Summary</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        + ['Claimant|' + cname, 'Claim ID|' + (c.id||'—'), 'Date|' + adate, 'Modality|' + mod, 'Assigned RN|' + rn, 'Type|' + atype, 'Carrier|' + (c.carrier||'—'), 'Duration|' + durRec].map(function(kv){
+            var p = kv.split('|');
+            return '<div style="background:#fff;border-radius:6px;padding:8px 10px;border:1px solid #f0f0f0;">'
+              + '<div style="font-size:10px;color:#6b7280;margin-bottom:2px;">' + p[0] + '</div>'
+              + '<div style="font-size:12px;font-weight:700;color:#111827;">' + p[1] + '</div></div>';
+          }).join('')
+        + '</div></div>'
+        + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:16px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:5px;"><i class="fas fa-list-check" style="margin-right:5px;"></i>Actions upon confirmation</div>'
+        + '<ul style="margin:0;padding-left:18px;font-size:11px;color:#374151;line-height:1.8;">'
+        + '<li>SMS scheduling link sent to claimant (' + cname + ')</li>'
+        + '<li>Calendar invite sent to ' + rn + '</li>'
+        + '<li>Provider (' + (c.provider||'provider') + ') notified via secure portal</li>'
+        + '<li>EVV tracking activated for ' + adate + '</li>'
+        + '<li>Clinical questionnaire (AI pre-populated) dispatched to RN</li>'
+        + '<li>Carrier (' + (c.carrier||'carrier') + ') notified of assessment scheduling</li>'
+        + '</ul></div>'
+        + '<div style="display:flex;gap:8px;">'
+        + '<button onclick="_p8run(\'' + k_confirm + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Confirm Assessment</button>'
+        + '<button onclick="_p8run(\'' + k_back + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;">← Back</button>'
+        + '</div>'
+        + '</div></div>'
+      );
+    }
+
+    /* ── STEP 3 — RN Notified / Complete ── */
+    function showStep3(adate, mod, rn, atype) {
+      var k_done = 'p13a-done-' + Math.random().toString(36).slice(2);
+      window._p8actions[k_done] = function () {
+        _p13close(ovId);
+        _p13toast('<i class="fas fa-user-check"></i> Assessment for ' + cname + ' confirmed · ' + adate + ' · ' + rn + ' assigned · SMS scheduling link sent · EVV tracking enabled', 5000);
+      };
+
+      _p13ov(ovId,
+        '<div style="background:#fff;border-radius:16px;width:520px;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+        + '<i class="fas fa-check-circle" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Assessment Confirmed</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + cname + '</div></div>'
+        + '</div>'
+        + '<div style="padding:24px;">'
+        + _p13steps(['Schedule', 'Confirm', 'RN Notified', 'Complete'], 3)
+        + '<div style="text-align:center;margin-bottom:20px;">'
+        + '<div style="background:#d1fae5;border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">'
+        + '<i class="fas fa-check-circle" style="font-size:32px;color:#059669;"></i></div>'
+        + '<div style="font-size:17px;font-weight:800;color:#111827;margin-bottom:4px;">Assessment Scheduled</div>'
+        + '<div style="font-size:13px;color:#6b7280;">' + cname + ' · ' + adate + ' · ' + mod + '</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">'
+        + [
+            'fa-sms|SMS scheduling link sent to claimant|#059669',
+            'fa-calendar-check|' + rn + ' calendar invite dispatched|#059669',
+            'fa-hospital|Provider notified via secure portal|#059669',
+            'fa-map-marker-alt|EVV tracking activated for ' + adate + '|#059669',
+            'fa-clipboard-list|Clinical questionnaire (AI pre-populated) sent to RN|#7c3aed',
+            'fa-shield-alt|Carrier (' + (c.carrier||'carrier') + ') notified of assessment scheduling|#0891b2'
+          ].map(function(s){
+            var p = s.split('|');
+            return '<div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border-radius:8px;padding:9px 12px;border:1px solid #bbf7d0;">'
+              + '<i class="fas ' + p[0] + '" style="color:' + p[2] + ';width:16px;text-align:center;"></i>'
+              + '<span style="font-size:12px;color:#374151;">' + p[1] + '</span>'
+              + '<i class="fas fa-check" style="color:#059669;margin-left:auto;"></i></div>';
+          }).join('')
+        + '</div>'
+        + '<button onclick="_p8run(\'' + k_done + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;"><i class="fas fa-check" style="margin-right:6px;"></i>Done</button>'
+        + '</div></div>'
+      );
+    }
+
+    showStep1();
+  };
+
+  /* ════════════════════════════════════════════════════════════════
+     FIX 2 — ltcScheduleNew (Schedule New Assessment)
+     Root-cause: _p12btn(schedKey, ..., function(){}) overwrites the
+     previously registered real handler with an empty no-op because
+     _p12btn always calls window._p8actions[id] = fn.
+     Fix: register the schedKey handler ONCE, build the button HTML
+     manually (no _p12btn call) so nothing overwrites it.
+  ════════════════════════════════════════════════════════════════ */
+  window.ltcScheduleNew = function () {
+    var ovId = 'p13-schednew-ov';
+
+    /* Step data cache — persists across inner function calls */
+    var _snap = {};
+
+    var k_cancel = 'p13sn-cancel-' + Math.random().toString(36).slice(2);
+    var k_sched  = 'p13sn-sched-'  + Math.random().toString(36).slice(2);
+    var k_ai     = 'p13sn-ai-'     + Math.random().toString(36).slice(2);
+
+    window._p8actions[k_cancel] = function () { _p13close(ovId); };
+    window._p8actions[k_ai]     = function () { _p13toast('<i class="fas fa-brain"></i> WealthAI auto-matching optimal RN based on carrier protocol, geographic proximity, and applicant clinical profile…', 3500); };
+
+    /* FIX: Register schedKey handler HERE, once — never use _p13btn for it */
+    window._p8actions[k_sched] = function () {
+      /* Snapshot all form values while step-1 DOM is still alive */
+      _snap.cname = (document.getElementById('p13sn-name')    && document.getElementById('p13sn-name').value.trim())    || 'Applicant';
+      _snap.carr  = (document.getElementById('p13sn-carrier') && document.getElementById('p13sn-carrier').value)        || 'Carrier';
+      _snap.adate = (document.getElementById('p13sn-date')    && document.getElementById('p13sn-date').value)           || 'TBD';
+      _snap.mod   = (document.getElementById('p13sn-mod')     && document.getElementById('p13sn-mod').value)            || 'Telephonic';
+      _snap.rn    = (document.getElementById('p13sn-rn')      && document.getElementById('p13sn-rn').value)             || 'Auto-assigned';
+      _snap.atype = (document.getElementById('p13sn-type')    && document.getElementById('p13sn-type').value)           || 'Initial';
+      showReview();  /* advance to step 2 */
+    };
+
+    /* ── Step 1 ── */
+    function showStep1() {
+      /* Build schedule button HTML directly — no helper that would overwrite handler */
+      var schedBtnHtml = '<button onclick="_p8run(\'' + k_sched + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;">'
+        + '<i class="fas fa-calendar-check" style="margin-right:6px;"></i>Schedule Assessment</button>';
+      var aiBtnHtml = '<button onclick="_p8run(\'' + k_ai + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;">'
+        + '<i class="fas fa-brain" style="margin-right:6px;"></i>AI Auto-Match RN</button>';
+
+      _p13ov(ovId,
+        '<div style="background:#fff;border-radius:16px;width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1;">'
+        + '<i class="fas fa-calendar-plus" style="font-size:20px;"></i>'
+        + '<div style="font-size:16px;font-weight:800;">Schedule New Assessment</div>'
+        + '<button onclick="_p8run(\'' + k_cancel + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;">✕</button>'
+        + '</div>'
+        + '<div style="padding:20px;">'
+        + _p13steps(['Details', 'Review', 'Confirmed'], 0)
+        + _p13ai('WealthAI will match the optimal RN based on geographic proximity, carrier protocol, and applicant clinical profile. Self-scheduling SMS sent automatically on submission. Clinical intake questionnaire pre-populated from policy data.')
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+        + _p13field('Applicant Full Name *', '<input id="p13sn-name" type="text" placeholder="e.g. Dorothy Feldstein" style="' + _fld + '">')
+        + _p13field('Date of Birth', '<input type="text" placeholder="e.g. Mar 12, 1952" style="' + _fld + '">')
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+        + _p13field('Carrier *', '<select id="p13sn-carrier" style="' + _fld + '"><option>Prudential</option><option>MassMutual</option><option>NY Life</option><option>Genworth</option><option>Transamerica</option><option>Pacific Life</option><option>Lincoln National</option><option>TIAA</option></select>')
+        + _p13field('Policy Number', '<input type="text" placeholder="e.g. P-100293" style="' + _fld + '">')
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+        + _p13field('Preferred Date *', '<input id="p13sn-date" type="text" placeholder="e.g. Jul 20, 2026" style="' + _fld + '">')
+        + _p13field('Preferred Time', '<select style="' + _fld + '"><option>Morning (8–12 PM)</option><option>Afternoon (12–4 PM)</option><option>Evening (4–7 PM)</option></select>')
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+        + _p13field('Modality', '<select id="p13sn-mod" style="' + _fld + '"><option>Telephonic</option><option>Video</option><option>In-Person</option></select>')
+        + _p13field('Assessment Type', '<select id="p13sn-type" style="' + _fld + '"><option>Initial</option><option>Annual</option><option>Reassessment</option><option>Cognitive (MMSE)</option><option>Functional ADL Only</option></select>')
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+        + _p13field('Assign RN', '<select id="p13sn-rn" style="' + _fld + '"><option>Auto-assign (AI-matched)</option><option>Sarah Johnson, RN</option><option>James Park, RN</option><option>Angela Moore, RN</option><option>Kevin Walsh, RN</option><option>Patricia Lang, RN</option><option>Anna Torres, RN</option><option>David Kim, RN</option><option>Susan Park, RN</option></select>')
+        + _p13field('Applicant Phone', '<input type="text" placeholder="e.g. (212) 555-0101" style="' + _fld + '">')
+        + '</div>'
+        + _p13field('Special Instructions / Clinical Notes', '<textarea placeholder="e.g. Requires wheelchair access, prefers morning calls, family to be present..." style="' + _fld + 'height:60px;resize:none;"></textarea>')
+        + '<div style="display:flex;gap:8px;margin-top:4px;">'
+        + schedBtnHtml
+        + aiBtnHtml
+        + '<button onclick="_p8run(\'' + k_cancel + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>'
+        + '</div>'
+        + '</div></div>'
+      );
+    }
+
+    /* ── Step 2: Review ── */
+    function showReview() {
+      var k_back    = 'p13sn-back-'    + Math.random().toString(36).slice(2);
+      var k_confirm = 'p13sn-confirm-' + Math.random().toString(36).slice(2);
+
+      window._p8actions[k_back]    = function () { showStep1(); };
+      window._p8actions[k_confirm] = function () { showConfirmed(); };
+
+      _p13ov(ovId,
+        '<div style="background:#fff;border-radius:16px;width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+        + '<i class="fas fa-clipboard-check" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Review Assessment</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + (_snap.cname||'Applicant') + ' · ' + (_snap.carr||'Carrier') + '</div></div>'
+        + '<button onclick="_p13close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;">✕</button>'
+        + '</div>'
+        + '<div style="padding:20px;">'
+        + _p13steps(['Details', 'Review', 'Confirmed'], 1)
+        + '<div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:16px;">'
+        + '<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-clipboard-list" style="color:#059669;margin-right:6px;"></i>Assessment Summary</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        + ['Applicant|' + _snap.cname, 'Carrier|' + _snap.carr, 'Date|' + _snap.adate, 'Modality|' + _snap.mod, 'RN Assigned|' + _snap.rn, 'Assessment Type|' + _snap.atype].map(function(kv){
+            var p = kv.split('|');
+            return '<div style="background:#fff;border-radius:6px;padding:8px 10px;border:1px solid #f0f0f0;">'
+              + '<div style="font-size:10px;color:#6b7280;margin-bottom:2px;">' + p[0] + '</div>'
+              + '<div style="font-size:12px;font-weight:700;color:#111827;">' + p[1] + '</div></div>';
+          }).join('')
+        + '</div></div>'
+        + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:16px;">'
+        + '<div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:5px;"><i class="fas fa-list-check" style="margin-right:5px;"></i>Actions upon confirmation</div>'
+        + '<ul style="margin:0;padding-left:18px;font-size:11px;color:#374151;line-height:1.8;">'
+        + '<li>SMS self-scheduling link sent to ' + (_snap.cname||'applicant') + '</li>'
+        + '<li>' + (_snap.rn||'RN') + ' calendar invite dispatched</li>'
+        + '<li>Clinical intake form pre-populated and sent to RN</li>'
+        + '<li>Carrier (' + (_snap.carr||'carrier') + ') pre-notification queued</li>'
+        + '</ul></div>'
+        + '<div style="display:flex;gap:8px;">'
+        + '<button onclick="_p8run(\'' + k_confirm + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Confirm &amp; Book</button>'
+        + '<button onclick="_p8run(\'' + k_back + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;">← Back</button>'
+        + '</div>'
+        + '</div></div>'
+      );
+    }
+
+    /* ── Step 3: Confirmed ── */
+    function showConfirmed() {
+      var k_done = 'p13sn-done-' + Math.random().toString(36).slice(2);
+      window._p8actions[k_done] = function () {
+        _p13close(ovId);
+        _p13toast('<i class="fas fa-calendar-check"></i> Assessment scheduled · ' + _snap.cname + ' · ' + _snap.adate + ' · ' + _snap.mod + ' · ' + _snap.rn + ' assigned · Self-scheduling SMS sent · RN auto-assignment in progress', 5000);
+      };
+
+      _p13ov(ovId,
+        '<div style="background:#fff;border-radius:16px;width:520px;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+        + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:18px 20px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+        + '<i class="fas fa-check-circle" style="font-size:20px;"></i>'
+        + '<div><div style="font-size:16px;font-weight:800;">Assessment Booked</div>'
+        + '<div style="font-size:11px;opacity:.85;">' + _snap.cname + ' · ' + _snap.carr + '</div></div>'
+        + '</div>'
+        + '<div style="padding:24px;">'
+        + _p13steps(['Details', 'Review', 'Confirmed'], 2)
+        + '<div style="text-align:center;margin-bottom:20px;">'
+        + '<div style="background:#d1fae5;border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">'
+        + '<i class="fas fa-check-circle" style="font-size:32px;color:#059669;"></i></div>'
+        + '<div style="font-size:17px;font-weight:800;color:#111827;margin-bottom:4px;">Assessment Booked!</div>'
+        + '<div style="font-size:13px;color:#6b7280;">' + _snap.cname + ' · ' + _snap.carr + ' · ' + _snap.adate + '</div>'
+        + '</div>'
+        + '<div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        + ['Applicant|' + _snap.cname, 'Carrier|' + _snap.carr, 'Date|' + _snap.adate, 'Modality|' + _snap.mod, 'RN|' + _snap.rn, 'Type|' + _snap.atype].map(function(kv){
+            var p = kv.split('|');
+            return '<div><div style="font-size:10px;color:#6b7280;">' + p[0] + '</div>'
+              + '<div style="font-size:12px;font-weight:700;color:#111827;">' + p[1] + '</div></div>';
+          }).join('')
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;">'
+        + ['fa-sms|Self-scheduling SMS sent to ' + _snap.cname + '|#059669',
+           'fa-robot|RN auto-assignment in progress|#7c3aed',
+           'fa-file-medical|Clinical intake form dispatched to ' + _snap.rn + '|#0891b2',
+           'fa-building|Carrier (' + _snap.carr + ') pre-notification sent|#059669'
+          ].map(function(s){
+            var p = s.split('|');
+            return '<div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border-radius:8px;padding:8px 12px;">'
+              + '<i class="fas ' + p[0] + '" style="color:' + p[2] + ';width:16px;"></i>'
+              + '<span style="font-size:11px;color:#374151;">' + p[1] + '</span>'
+              + '<i class="fas fa-check" style="color:#059669;margin-left:auto;"></i></div>';
+          }).join('')
+        + '</div>'
+        + '<button onclick="_p8run(\'' + k_done + '\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;"><i class="fas fa-check" style="margin-right:6px;"></i>Done</button>'
+        + '</div></div>'
+      );
+    }
+
+    showStep1();
+  };
+
+  console.log('[Phase 13] Step navigation fixed: ltcAssessAction DOM-read-before-swap · ltcScheduleNew handler-overwrite · both workflows fully navigable');
+
+})();
