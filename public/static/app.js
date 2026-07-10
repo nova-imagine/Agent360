@@ -81082,8 +81082,6 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   };
 
 function _p27agentAssistTab(){
-  var c=document.getElementById('p27-tab-agentassist');
-  if(!c)return;
   var transcript=[
     {role:'caller',text:'Hi, I filed a claim back in March for my mother\'s nursing home and I still haven\'t received any payment. Claim number is LTC-2024-88341.',time:'0:08',intent:null},
     {role:'agent',text:'I\'m sorry to hear that. Let me pull up that claim right now. Can you verify the insured\'s date of birth?',time:'0:22',intent:null},
@@ -81193,12 +81191,10 @@ function _p27agentAssistTab(){
   html+='</div>';
   html+='</div>'; /* end right */
   html+='</div>'; /* end grid */
-  c.innerHTML=html;
+  return html;
 }
 
 function _p27portalsTab(){
-  var c=document.getElementById('p27-tab-portals');
-  if(!c)return;
   var portals=[
     {id:'claimant',icon:'fa-user',label:'HAL Claimant Hub',color:'#0891b2',bg:'#e0f2fe',desc:'Self-service for policyholders, insureds, and authorized POAs',callDrivers:['C1 Policy Inquiry','C2 Claim Status','C3 Benefit Calc','C5 Payment Status','C6 Doc Upload','C9 Care Options','C12 Rx Benefits','C13 Fin. Hardship'],
      features:[
@@ -81284,16 +81280,15 @@ function _p27portalsTab(){
     html+='</div>'; /* end portal */
   }
   html+='</div>';
-  c.innerHTML=html;
+  return html;
 }
 window._p27selectPortal=function(id){
   window._p27activePortal=id;
-  _p27portalsTab();
+  var tc=document.getElementById('p27-tab-content');
+  if(tc) tc.innerHTML=_p27portalsTab();
 };
 
 function _p27analyticsTab(){
-  var c=document.getElementById('p27-tab-analytics');
-  if(!c)return;
   var kpis=[
     {label:'Monthly Call Volume',value:'19,240',delta:'-12%',trend:'down-good',icon:'fa-phone',color:'#0891b2'},
     {label:'Deflection Rate',value:'65%',delta:'+8pts',trend:'up-good',icon:'fa-filter',color:'#059669'},
@@ -81463,7 +81458,7 @@ function _p27analyticsTab(){
   }
   html+='</div></div>';
   html+='</div>';
-  c.innerHTML=html;
+  return html;
 }
 
 /* ---- Helper stubs ---- */
