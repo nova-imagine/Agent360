@@ -80430,3 +80430,1094 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
 
   console.log('[Phase 26] Carrier Onboarding Accelerator loaded · 8 pain points · 5 demo carriers · 4 AI agents · ROI simulator · 18mo→6wk compression');
 })();
+
+(function(){ 'use strict';
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 27 — HAL Contact Intelligence Hub (CIH)
+   AI-Powered Knowledge Engine to Deflect 65%+ of Contact Center Volume
+   Nav: hal-cih  |  Badge: CIH  |  Color: #0891b2 (cyan/teal)
+   5 Tabs: overview · knowledge · agentassist · portals · analytics
+   ═══════════════════════════════════════════════════════════════════════ */
+
+  var CIH1='#0891b2'; var CIH2='#06b6d4'; var CIH3='#164e63';
+  var CIH4='#e0f7fa'; var HAL='#0078d4'; var SUC='#059669';
+  var DAN='#dc2626'; var AMB='#d97706'; var PUR='#7c3aed';
+
+  var _p27activeTab='overview';
+  var _p27kbQuery='';
+  var _p27kbResult=null;
+  var _p27kbTyping=false;
+  var _p27activePortal='claimant';
+  var _p27activeAssistTab='live';
+  var _p27callSimRunning=false;
+  var _p27callStep=0;
+  var _p27deflectionFilter='all';
+
+  /* ── 27 Call Driver Categories ─────────────────────────────────────── */
+  var _p27callDrivers=[
+    /* CLAIMANT */
+    {id:'C1',cat:'claimant',icon:'fa-search-dollar',title:'Where is my payment?',freq:5,vol:148000,aht:18,deflect:95,
+     rootCause:'No real-time payment visibility; USPS checks; 10–11 business day cycle with zero status alerts',
+     cihSolution:'ProactiveNotifier sends SMS/email on payment processing. Claimant Hub shows real-time payment timeline with tracking.',
+     kbChunks:12000,graphNodes:['Claim','Payment History','Payment Cycle']},
+    {id:'C2',cat:'claimant',icon:'fa-file-invoice',title:'Did you receive my CMR/invoice?',freq:5,vol:134000,aht:14,deflect:92,
+     rootCause:'No digital acknowledgment system; faxed CMRs routinely lost; no confirmation sent',
+     cihSolution:'Digital CMR portal with instant confirmation. ProactiveNotifier sends receipt within 60 seconds of document ingestion.',
+     kbChunks:8000,graphNodes:['Claim','Documents','CMR','Invoice']},
+    {id:'C3',cat:'claimant',icon:'fa-times-circle',title:'Why was my payment rejected?',freq:5,vol:118000,aht:22,deflect:88,
+     rootCause:'Rejection letters sent by snail mail 10–14 days after rejection; no proactive notification whatsoever',
+     cihSolution:'Instant portal + SMS alert on any rejection with plain-language reason and exact fix. One-click resubmission.',
+     kbChunks:15000,graphNodes:['Claim','Denial Reason','Resolution Path']},
+    {id:'C4',cat:'claimant',icon:'fa-calendar-alt',title:'Elimination period — when does it start/end?',freq:4,vol:98000,aht:24,deflect:85,
+     rootCause:'Policy language complex; EP only begins when qualifying care actively received — not when claim filed',
+     cihSolution:'EP Calculator in Claimant Hub with visual countdown. CIH-Bot explains policy-specific EP rules in plain language.',
+     kbChunks:10000,graphNodes:['Policy','Elimination Period','Care Start Date','Qualifying Days']},
+    {id:'C5',cat:'claimant',icon:'fa-user-check',title:'Do I meet the benefit trigger?',freq:4,vol:89000,aht:28,deflect:80,
+     rootCause:'6 ADLs + cognitive impairment triggers; claimants don\'t know which 2-of-6 their specific policy requires',
+     cihSolution:'Policy-specific ADL trigger lookup. CIH-Bot explains which triggers apply to this exact policy number and state.',
+     kbChunks:20000,graphNodes:['Policy','Benefit Triggers','ADL List','Cognitive Trigger','State Regulation']},
+    {id:'C6',cat:'claimant',icon:'fa-ban',title:'Why was my claim denied?',freq:4,vol:86000,aht:32,deflect:78,
+     rootCause:'Dense denial letters; no plain-language explanation; claimants forced to call for basic clarification',
+     cihSolution:'Denial Explainer maps every denial code to plain language + resolution path + appeal template. Available 24/7.',
+     kbChunks:15000,graphNodes:['Claim','Denial Reason','Appeal Process','Resolution Path']},
+    {id:'C7',cat:'claimant',icon:'fa-id-card',title:'Add authorized rep / POA',freq:3,vol:62000,aht:18,deflect:82,
+     rootCause:'POA/DPOA paperwork opaque; each carrier has different forms; no portal for digital upload or e-signature',
+     cihSolution:'Digital POA submission with DocuSign e-signature. Carrier-specific form auto-selected. Instant acknowledgment.',
+     kbChunks:6000,graphNodes:['Claimant','Authorized Representatives','POA','Carrier']},
+    {id:'C8',cat:'claimant',icon:'fa-list-ul',title:'What documents do I need?',freq:3,vol:58000,aht:16,deflect:90,
+     rootCause:'No single checklist; different requirements by carrier/product/state; agents give inconsistent answers',
+     cihSolution:'Document Checklist Generator: input policy number → instant carrier/product/state-specific requirements list.',
+     kbChunks:12000,graphNodes:['Policy','Carrier','State','Documentation Standards']},
+    {id:'C9',cat:'claimant',icon:'fa-hospital-alt',title:'What care settings are covered?',freq:3,vol:54000,aht:20,deflect:85,
+     rootCause:'Confusion: facility vs. home care; assisted living vs. memory care; licensed vs. unlicensed providers',
+     cihSolution:'Coverage Settings Lookup: policy-specific care setting eligibility with plain-language explanations.',
+     kbChunks:20000,graphNodes:['Policy','Care Settings','Provider Types','State Licensing']},
+    {id:'C10',cat:'claimant',icon:'fa-home',title:'Why won\'t you cover both facility AND home care?',freq:3,vol:48000,aht:26,deflect:75,
+     rootCause:'Many policies cover one or the other; agents don\'t proactively educate; discovered after the fact',
+     cihSolution:'Proactive education in Claimant Hub onboarding flow. CIH-Bot explains dual-coverage limitations upfront.',
+     kbChunks:8000,graphNodes:['Policy','Care Settings','Coverage Limits']},
+    {id:'C11',cat:'claimant',icon:'fa-chart-pie',title:'What is my remaining benefit balance?',freq:3,vol:44000,aht:12,deflect:95,
+     rootCause:'No real-time benefit meter in portal; claimants don\'t know days used, dollars remaining, inflation rider value',
+     cihSolution:'Live Benefit Meter in Claimant Hub: days used/remaining, dollars used/remaining, inflation-adjusted current value.',
+     kbChunks:5000,graphNodes:['Claim','Policy','Benefit Amount','Inflation Protection','Days Used']},
+    {id:'C12',cat:'claimant',icon:'fa-phone-slash',title:'Case manager not calling back',freq:3,vol:42000,aht:20,deflect:65,
+     rootCause:'Care managers unscheduled; no SLA on callbacks; front-line can only leave messages; systemic gap',
+     cihSolution:'Scheduled callback booking in Claimant Hub. SLA monitoring with auto-escalation if callback missed.',
+     kbChunks:3000,graphNodes:['Claimant','Care Manager','Callback SLA']},
+    {id:'C13',cat:'claimant',icon:'fa-exchange-alt',title:'Change care provider / facility',freq:2,vol:28000,aht:22,deflect:72,
+     rootCause:'Provider credentialing requirements unclear; transition documentation not understood',
+     cihSolution:'Provider Change Wizard: step-by-step with required documentation checklist and new provider lookup.',
+     kbChunks:6000,graphNodes:['Claimant','Provider','Credentialing','Care Plan']},
+    {id:'C14',cat:'claimant',icon:'fa-percent',title:'What is my inflation protection worth now?',freq:2,vol:22000,aht:10,deflect:95,
+     rootCause:'Policy anniversary adjustments not communicated proactively; claimants discover on anniversary date only',
+     cihSolution:'Annual inflation adjustment proactive notification. Claimant Hub shows current vs. original benefit amounts.',
+     kbChunks:4000,graphNodes:['Policy','Inflation Protection','Benefit Amount','Anniversary Date']},
+    /* ISSUER */
+    {id:'I1',cat:'issuer',icon:'fa-building',title:'Claim status on policy block',freq:4,vol:76000,aht:16,deflect:95,
+     rootCause:'Carriers managing blocks need status; real-time API access often absent; manual calls to Illumifin',
+     cihSolution:'Issuer Hub Claims API: real-time REST API for claim status, payment history, document status by policy number.',
+     kbChunks:8000,graphNodes:['Carrier','Policy','Claim','Payment History']},
+    {id:'I2',cat:'issuer',icon:'fa-gavel',title:'Regulatory filing status / state compliance',freq:3,vol:48000,aht:28,deflect:80,
+     rootCause:'50-state complexity; rate increase filing status; state-specific benefit triggers vary by jurisdiction',
+     cihSolution:'Regulatory Filing Tracker in Issuer Hub. Compliance Matrix (HAL P26) integration for 50-state status.',
+     kbChunks:25000,graphNodes:['State','Regulation','Rate Filing','Benefit Triggers']},
+    {id:'I3',cat:'issuer',icon:'fa-chart-bar',title:'Actuarial / loss ratio data request',freq:3,vol:38000,aht:24,deflect:88,
+     rootCause:'Carriers need claims data for reserve management; data not readily available without manual request',
+     cihSolution:'Issuer Hub Actuarial Export: scheduled or on-demand data exports with configurable date ranges and metrics.',
+     kbChunks:5000,graphNodes:['Carrier','Claim','Loss Ratio','Reserve Data']},
+    {id:'I4',cat:'issuer',icon:'fa-file-invoice-dollar',title:'Premium billing / reconciliation',freq:3,vol:34000,aht:20,deflect:85,
+     rootCause:'Billing discrepancies between carrier systems and Illumifin admin platform; manual reconciliation required',
+     cihSolution:'Issuer Hub Billing Dashboard with line-item detail, dispute flagging, and automated reconciliation reports.',
+     kbChunks:4000,graphNodes:['Carrier','Premium Billing','Reconciliation']},
+    {id:'I5',cat:'issuer',icon:'fa-folder-open',title:'Audit and compliance document requests',freq:2,vol:18000,aht:30,deflect:80,
+     rootCause:'DOI audits and internal carrier compliance reviews require document packages; manual fulfillment',
+     cihSolution:'Self-service document request portal in Issuer Hub. Pre-packaged audit bundles by DOI requirement type.',
+     kbChunks:6000,graphNodes:['Carrier','DOI Audit','Compliance Documents']},
+    /* PROVIDER */
+    {id:'P1',cat:'provider',icon:'fa-stethoscope',title:'Is this patient covered?',freq:4,vol:82000,aht:8,deflect:98,
+     rootCause:'Eligibility verification; no real-time eligibility API for providers; every verification requires a call',
+     cihSolution:'Provider Hub Eligibility API: real-time coverage verification by patient name + DOB + policy number.',
+     kbChunks:5000,graphNodes:['Claimant','Policy','Eligibility','Coverage Type','Provider']},
+    {id:'P2',cat:'provider',icon:'fa-receipt',title:'My invoice hasn\'t been paid',freq:4,vol:78000,aht:14,deflect:92,
+     rootCause:'Same payment visibility gap as C1 from provider perspective; no remittance portal access',
+     cihSolution:'Provider Hub Payment Dashboard: per-patient, per-period payment status with remittance advice detail.',
+     kbChunks:8000,graphNodes:['Provider','Invoice','Payment History','Remittance']},
+    {id:'P3',cat:'provider',icon:'fa-exclamation-triangle',title:'Claim denied / partially paid — why?',freq:4,vol:74000,aht:20,deflect:85,
+     rootCause:'Remittance advice hard to interpret; denial codes not plain language; providers don\'t know resolution path',
+     cihSolution:'Denial Explainer mapped to HCPCS/revenue codes with provider-specific resolution paths and resubmission.',
+     kbChunks:15000,graphNodes:['Provider','Claim','Denial Reason','Remittance','Resolution']},
+    {id:'P4',cat:'provider',icon:'fa-file-alt',title:'What format must my invoice be in?',freq:3,vol:56000,aht:16,deflect:90,
+     rootCause:'Different carriers have different invoice requirements; no universal template; constant clarification calls',
+     cihSolution:'Invoice Format Library: carrier-specific templates with required fields pre-validated before submission.',
+     kbChunks:18000,graphNodes:['Provider','Carrier','Invoice Format','Documentation Standards']},
+    {id:'P5',cat:'provider',icon:'fa-pen-square',title:'How do I submit a CMR?',freq:3,vol:52000,aht:18,deflect:88,
+     rootCause:'CMR requirements differ by carrier; fax-only submission; strict signature requirements; frequent rejections',
+     cihSolution:'Digital CMR portal with carrier-specific templates, DocuSign e-signature, instant acknowledgment.',
+     kbChunks:12000,graphNodes:['Provider','CMR','Carrier','Signature','Submission']},
+    {id:'P6',cat:'provider',icon:'fa-id-badge',title:'Provider credentialing / network join',freq:2,vol:32000,aht:28,deflect:75,
+     rootCause:'Onboarding process not self-service; licensure + certification verification manual; no status tracking',
+     cihSolution:'Provider Credentialing Portal: online application, document upload, license verification API, status tracking.',
+     kbChunks:8000,graphNodes:['Provider','Credentialing','License','NPI','Carrier']},
+    {id:'P7',cat:'provider',icon:'fa-clipboard-list',title:'Care documentation requirements',freq:2,vol:28000,aht:22,deflect:82,
+     rootCause:'Care notes standards differ by policy; nurses don\'t know what level of documentation satisfies insurer',
+     cihSolution:'Documentation Standards Library: per-carrier, per-state, per-service requirements with sample templates.',
+     kbChunks:10000,graphNodes:['Provider','Carrier','State','Documentation Standards','Care Notes']},
+    {id:'P8',cat:'provider',icon:'fa-brain',title:'How to submit ADL/cognitive assessment',freq:2,vol:24000,aht:20,deflect:85,
+     rootCause:'BCAT/MoCA/MMSE — which is required by which carrier for which product unclear; no guidance',
+     cihSolution:'Assessment Tool Selector: input carrier + product → exact assessment tool required + submission instructions.',
+     kbChunks:8000,graphNodes:['Provider','Carrier','Assessment Tool','ADL','Cognitive']},
+    {id:'P9',cat:'provider',icon:'fa-dollar-sign',title:'Reimbursement rate for service code',freq:2,vol:18000,aht:12,deflect:90,
+     rootCause:'Fee schedules not published; providers can\'t pre-verify reimbursement amount before rendering care',
+     cihSolution:'Rate Schedule Lookup: HCPCS/revenue code + carrier + state → reimbursement rate with effective dates.',
+     kbChunks:6000,graphNodes:['Provider','Carrier','State','Fee Schedule','HCPCS']}
+  ];
+
+  /* ── KB Demo Scenarios ─────────────────────────────────────────────── */
+  var _p27kbScenarios=[
+    {label:'Payment missing — Oct',persona:'Claimant',
+     query:'My mother\'s October payment never arrived. She has an approved claim with CNA. What happened?',
+     steps:[
+       {ms:400,text:'🔍 Identifying caller intent: Payment Status (C1)…'},
+       {ms:800,text:'📋 Pulling claim record via Knowledge Graph traversal…'},
+       {ms:1200,text:'🔗 Graph path: Claimant → Claim → Payment History (October)…'},
+       {ms:1600,text:'📄 Fetching document status: CMR + Invoice for October…'},
+       {ms:2000,text:'⚠️ Anomaly detected: CMR received Oct 15 — flagged "copied signature"…'},
+       {ms:2400,text:'📚 Vector retrieval: denial reason "copied-signature" → resolution path…'},
+       {ms:2800,text:'✅ Generating plain-language response with exact fix…'}
+     ],
+     answer:'Your October payment of $4,200 was paused because the Continued Monthly Residence (CMR) form received on October 15 contained a photocopied signature rather than an original wet signature. CNA\'s policy requires original signatures on all CMR submissions.\n\n✅ To resolve: Re-submit page 1 of the CMR with an original pen signature from the facility administrator. Once received, payment processes within 3 business days.\n\n📎 Your CMR template for CNA is attached below. Your November invoice is received and in processing.',
+     sources:['CNA Policy Admin Guide §7.3','CMR Signature Requirements Library','Denial Code DB: SIG-COPY']},
+    {label:'Elimination period question',persona:'Claimant Family',
+     query:'We started home care for my father on August 14. His policy has a 90-day elimination period. When does he start receiving benefits?',
+     steps:[
+       {ms:400,text:'🔍 Intent: Elimination Period Calculator (C4)…'},
+       {ms:800,text:'📋 Loading policy: benefit trigger = 2 of 6 ADLs or cognitive impairment…'},
+       {ms:1200,text:'🔗 Graph: Policy → Elimination Period (90-day calendar) → Care Start Date…'},
+       {ms:1600,text:'📚 Vector: "calendar day" vs "service day" EP rules for this policy…'},
+       {ms:2000,text:'🗓️ Computing EP completion: Aug 14 + 90 calendar days…'},
+       {ms:2400,text:'✅ Generating EP breakdown with first benefit date…'}
+     ],
+     answer:'Based on your father\'s policy (90-day calendar-day elimination period) and his qualifying care start date of August 14:\n\n📅 Elimination Period: Aug 14 → Nov 12 (90 calendar days)\n💰 First Benefit Date: November 13, 2025\n\nImportant: The elimination period counts ALL calendar days from when qualifying care begins — not just days care is received. Since your father started home care August 14, you do not need to restart the count.\n\n⚠️ Ensure all care logs are documented daily. Benefits are paid retroactively to November 13 once the elimination period is confirmed satisfied.',
+     sources:['Policy Language §4.2 Elimination Period','State CA EP Rules','Calendar Day vs Service Day KB']},
+    {label:'Provider eligibility check',persona:'Assisted Living Facility',
+     query:'Can you verify that Mary Johnson (DOB 03/12/1941, policy LTC-992847) is covered for assisted living at our facility?',
+     steps:[
+       {ms:400,text:'🔍 Intent: Provider Eligibility Verification (P1)…'},
+       {ms:800,text:'🔐 Identity verification: policy LTC-992847 + DOB match…'},
+       {ms:1200,text:'🔗 Graph: Policy → Care Settings → Assisted Living eligibility…'},
+       {ms:1600,text:'📋 Claim status: open, approved, active since Jan 2024…'},
+       {ms:2000,text:'🏥 Facility credentialing: checking your NPI against approved network…'},
+       {ms:2400,text:'💰 Loading benefit details: daily max, remaining pool, inflation rider…'},
+       {ms:2800,text:'✅ Eligibility confirmed — generating coverage summary…'}
+     ],
+     answer:'✅ ELIGIBILITY CONFIRMED — Mary Johnson (LTC-992847)\n\nCoverage Type: Assisted Living Facility (AL)\nStatus: Active Claim — Approved since January 8, 2024\nYour Facility: Sunrise Senior Living (NPI 1234567890) ✅ Credentialed\n\nBenefit Details:\n• Daily Maximum: $245/day (inflation-adjusted from $200 original)\n• Monthly Maximum: $7,350\n• Lifetime Pool Remaining: $328,400 (of $400,000)\n• Benefit Days Remaining: 1,341 of 1,825\n\nSubmission: Submit invoices by the 5th of each month. CMR required monthly. Use CNA AL Invoice Form v3.2.',
+     sources:['Policy LTC-992847','CNA AL Coverage Rules','Provider Network DB','Benefit Calculator']},
+    {label:'Denial — unlicensed provider',persona:'Claimant',
+     query:'My claim was denied because my home health aide is "not an approved provider." She has been caring for me for 8 months. What does this mean?',
+     steps:[
+       {ms:400,text:'🔍 Intent: Claim Denial Explanation (C6)…'},
+       {ms:800,text:'📋 Loading denial reason: PROV-LIC-FAIL…'},
+       {ms:1200,text:'🔗 Graph: Claim → Denial → Policy → State Licensing Requirements…'},
+       {ms:1600,text:'📚 Vector: California Health & Safety Code §1725.5 requirements…'},
+       {ms:2000,text:'🔍 Checking provider NPI 9876543210 against credentialed network…'},
+       {ms:2400,text:'📋 Fetching alternative credentialed providers in your area…'},
+       {ms:2800,text:'✅ Generating denial explanation + resolution options…'}
+     ],
+     answer:'Your claim was denied because your home health aide is not licensed under California Health & Safety Code §1725.5, which requires home health aides providing LTC-reimbursable care to hold a current HHA or CNA certification.\n\nThis does not mean your care was bad — it means the provider does not meet your policy\'s credentialing requirement.\n\n🔧 Your Options:\n1. Have your aide obtain HHA certification (typically 75 hours training + state exam)\n2. Switch to a licensed agency — we found 4 licensed providers within 5 miles of your address\n3. File an exception request if your policy has a "non-agency provider" rider\n\n📎 Your policy does NOT have the non-agency rider. Options 1 or 2 are recommended.',
+     sources:['CA H&S Code §1725.5','Denial Code: PROV-LIC-FAIL','Provider Credentialing KB','Policy LTC Check: Non-Agency Rider']},
+    {label:'Issuer — actuarial export',persona:'Carrier (Issuer)',
+     query:'We need Q3 2025 loss ratio data for our entire block with Illumifin for our reserve review next week.',
+     steps:[
+       {ms:400,text:'🔍 Intent: Actuarial Data Request (I3)…'},
+       {ms:800,text:'🔐 Carrier identity: Allianz LTC block verified…'},
+       {ms:1200,text:'📊 Querying HAL Data Lake: Q3 2025 (Jul–Sep) claim transactions…'},
+       {ms:1600,text:'💰 Computing: incurred losses, earned premium, IBNR adjustment…'},
+       {ms:2000,text:'📈 Generating loss ratio by product/state/benefit type…'},
+       {ms:2400,text:'✅ Packaging export: CSV + executive summary…'}
+     ],
+     answer:'✅ Q3 2025 Actuarial Export Ready — Allianz LTC Block\n\nSummary Metrics:\n• Active Claimants: 4,847\n• Incurred Claims (Q3): $94.2M\n• Earned Premium (Q3): $112.8M\n• Loss Ratio: 83.5% (vs. 81.2% Q3 2024)\n• IBNR Adjustment: +$2.1M\n• New Claims Filed: 312 | Closed: 287\n• Average Claim Duration (open): 34.2 months\n\nBreakdown available by: State | Product | Benefit Type | Care Setting\n\n📎 CSV export (847 rows) + Executive Summary PDF ready for download.',
+     sources:['HAL Data Lake Q3 2025','Allianz Block Analytics','Actuarial Metrics Engine']}
+  ];
+  var _p27kbActiveScenario=0;
+  var _p27kbSimRunning=false;
+
+  /* ── ProactiveNotifier Events ──────────────────────────────────────── */
+  var _p27notifyEvents=[
+    {id:'n1',type:'payment',icon:'fa-check-circle',color:SUC,label:'Payment Processed',
+     trigger:'Payment generated in claims system',time:'Immediate',
+     channels:['SMS','Email','Portal'],deflects:'C1 (Where is my payment?)',
+     msg:'Your October benefit payment of $4,200 was sent on Nov 8. Estimated delivery: Nov 12–14. Track: [Portal link]'},
+    {id:'n2',type:'doc',icon:'fa-file-check',color:CIH1,label:'Document Received',
+     trigger:'CMR/invoice ingested into HAL Data Lake',time:'< 60 seconds',
+     channels:['SMS','Email','Portal'],deflects:'C2 (Did you receive my CMR?)',
+     msg:'✅ We received your November CMR on Nov 1. Your invoice for $4,200 is still needed. Submit here: [Portal]'},
+    {id:'n3',type:'reject',icon:'fa-exclamation-circle',color:DAN,label:'Document Rejected',
+     trigger:'Validation engine flags document issue',time:'Same-day',
+     channels:['SMS','Email','Portal','Letter'],deflects:'C3 (Why was payment rejected?)',
+     msg:'⚠️ Action needed: Your CMR was not processed — the signature appears to be a photocopy. Please re-sign page 1 and resubmit. One-click resubmit: [Portal]'},
+    {id:'n4',type:'ep',icon:'fa-calendar-check',color:AMB,label:'Elimination Period Milestone',
+     trigger:'EP day 80 of 90 reached',time:'Day 80 (10 days before completion)',
+     channels:['SMS','Email','Portal'],deflects:'C4 (Elimination period confusion)',
+     msg:'🗓️ Milestone: Your elimination period completes in 10 days on Nov 12. Benefits begin Nov 13. Ensure care logs are complete. Questions? [CIH-Bot]'},
+    {id:'n5',type:'inflation',icon:'fa-arrow-up',color:PUR,label:'Inflation Adjustment Notice',
+     trigger:'Policy anniversary date',time:'30 days before + on anniversary',
+     channels:['Email','Portal','Letter'],deflects:'C14 (Inflation protection value)',
+     msg:'Your annual benefit has increased: Daily max $200 → $210 (5% compound rider, effective Jan 1). Monthly max: $6,300. No action needed.'},
+    {id:'n6',type:'suspend',icon:'fa-pause-circle',color:DAN,label:'Claim Suspended',
+     trigger:'Claim status changes to suspended',time:'Immediate',
+     channels:['SMS','Email','Portal'],deflects:'C6 (Why denied/suspended?)',
+     msg:'⚠️ Your claim is temporarily suspended pending receipt of your annual care assessment. Due by Dec 31. Upload here: [Portal] or call: 800-XXX-XXXX'},
+    {id:'n7',type:'cmr_due',icon:'fa-clock',color:AMB,label:'CMR Due Reminder (Provider)',
+     trigger:'25th of month',time:'Monthly on 25th',
+     channels:['Email','Provider Portal'],deflects:'P5 (CMR submission)',
+     msg:'Reminder: CMR for [Patient Name] (LTC-XXXXXX) is due by Nov 30 to avoid payment delay. Submit digitally: [Provider Portal]'},
+    {id:'n8',type:'eligibility',icon:'fa-id-card',color:SUC,label:'Eligibility Confirmed (Provider)',
+     trigger:'Provider eligibility check via API',time:'Real-time',
+     channels:['Provider Portal','API Response'],deflects:'P1 (Is patient covered?)',
+     msg:'✅ John Smith (LTC-123456) is covered for Assisted Living. Daily max: $200. Your facility is credentialed. Invoice format: [CNA AL v3.2]'}
+  ];
+  var _p27activeNotify=null;
+
+  /* ── Analytics Data ────────────────────────────────────────────────── */
+  var _p27analytics={
+    totalCalls:750000,deflected:487500,deflectRate:65,
+    costBefore:8200000,costAfter:2870000,costSaving:5330000,
+    ftesBefore:340,ftesAfter:119,ftesFreed:221,
+    ahtBefore:14.2,ahtAfter:5.1,
+    fcrBefore:35,fcrAfter:78,
+    npsShift:'+42 pts',
+    doiComplaints:-70,
+    kbChunksTotal:346000,kbSources:89,kbCoverage:94,
+    graphNodes:47000,graphEdges:182000,
+    deflectByCategory:{
+      claimant:{vol:510000,deflected:357000,rate:70},
+      issuer:{vol:120000,deflected:96000,rate:80},
+      provider:{vol:120000,deflected:34500,rate:75}
+    },
+    topDeflected:[
+      {id:'C1',title:'Payment Status',deflected:140600,savings:688940},
+      {id:'P1',title:'Eligibility Check',deflected:80360,savings:393764},
+      {id:'C2',title:'CMR/Invoice Receipt',deflected:123280,savings:604072},
+      {id:'C11',title:'Benefit Balance',deflected:41800,savings:204820},
+      {id:'P2',title:'Invoice Payment Status',deflected:71760,savings:351624}
+    ],
+    kbHealth:[
+      {cat:'Claimant Calls',score:96,chunks:218000,lastUpdated:'Jul 8 2026'},
+      {cat:'Provider Billing',score:94,chunks:82000,lastUpdated:'Jul 9 2026'},
+      {cat:'Issuer Reporting',score:91,chunks:28000,lastUpdated:'Jul 7 2026'},
+      {cat:'State Regulations',score:89,chunks:25000,lastUpdated:'Jul 6 2026'},
+      {cat:'Denial Codes',score:98,chunks:15000,lastUpdated:'Jul 10 2026'}
+    ],
+    monthlyTrend:[
+      {mo:'Feb',calls:728000,deflect:38},{mo:'Mar',calls:701000,deflect:45},
+      {mo:'Apr',calls:672000,deflect:51},{mo:'May',calls:638000,deflect:56},
+      {mo:'Jun',calls:598000,deflect:61},{mo:'Jul',calls:549000,deflect:65}
+    ]
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     BUILD PAGE
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p27buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    pc.innerHTML=''
+      +'<div style="font-family:\'Segoe UI\',sans-serif;background:#f0f9ff;min-height:100vh;padding:0">'
+      /* ── Hero Banner ── */
+      +'<div style="background:linear-gradient(135deg,'+CIH3+' 0%,#0369a1 50%,'+CIH1+' 100%);padding:28px 32px 22px;color:#fff">'
+      +'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:14px;width:56px;height:56px;display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas fa-headset" style="font-size:26px"></i></div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:22px;font-weight:800;letter-spacing:-.3px">HAL Contact Intelligence Hub</div>'
+      +'<div style="font-size:13px;opacity:.88;margin-top:3px">AI-Powered Knowledge Engine · 27 Call Driver Categories · 65% Deflection Target · $5.3M Annual Savings</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +_p27statBadge('750K','Annual Calls','fa-phone-volume')
+      +_p27statBadge('63K','Active Claimants','fa-users')
+      +_p27statBadge('$4B','Claims/Year','fa-coins')
+      +_p27statBadge('65%','Deflection Target','fa-chart-line')
+      +'</div></div></div>'
+      /* ── Tab Nav ── */
+      +'<div style="background:#fff;border-bottom:2px solid #e0f2fe;padding:0 32px;display:flex;gap:0;overflow-x:auto">'
+      +_p27tab('overview','fa-th-large','Overview')
+      +_p27tab('knowledge','fa-brain','Knowledge Engine')
+      +_p27tab('agentassist','fa-robot','Agent Assist')
+      +_p27tab('portals','fa-desktop','Self-Service Portals')
+      +_p27tab('analytics','fa-chart-bar','Analytics & ROI')
+      +'</div>'
+      /* ── Tab Content ── */
+      +'<div id="p27-tab-content" style="padding:28px 32px">'
+      +_p27renderTab()
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p27statBadge(val,lbl,icon){
+    return '<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center;min-width:90px">'
+      +'<div style="font-size:18px;font-weight:800">'+val+'</div>'
+      +'<div style="font-size:10px;opacity:.8;display:flex;align-items:center;gap:4px;justify-content:center;margin-top:2px">'
+      +'<i class="fas '+icon+'" style="font-size:9px"></i>'+lbl+'</div></div>';
+  }
+
+  function _p27tab(id,icon,label){
+    var active=_p27activeTab===id;
+    return '<div onclick="window._p27switchTab(\''+id+'\')" style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:7px;'
+      +'font-size:13px;font-weight:'+(active?'700':'500')+';color:'+(active?CIH1:'#64748b')+';'
+      +'border-bottom:3px solid '+(active?CIH1:'transparent')+';white-space:nowrap;transition:all .2s">'
+      +'<i class="fas '+icon+'"></i>'+label+'</div>';
+  }
+
+  function _p27renderTab(){
+    if(_p27activeTab==='overview') return _p27overviewTab();
+    if(_p27activeTab==='knowledge') return _p27knowledgeTab();
+    if(_p27activeTab==='agentassist') return _p27agentAssistTab();
+    if(_p27activeTab==='portals') return _p27portalsTab();
+    if(_p27activeTab==='analytics') return _p27analyticsTab();
+    return '';
+  }
+
+  window._p27switchTab=function(id){
+    _p27activeTab=id;
+    _p27kbSimRunning=false;
+    _p27callSimRunning=false;
+    var tc=document.getElementById('p27-tab-content');
+    if(tc) tc.innerHTML=_p27renderTab();
+    /* re-highlight nav */
+    document.querySelectorAll('[data-p27tab]').forEach(function(el){
+      var tid=el.getAttribute('data-p27tab');
+      el.style.color=tid===id?CIH1:'#64748b';
+      el.style.fontWeight=tid===id?'700':'500';
+      el.style.borderBottom='3px solid '+(tid===id?CIH1:'transparent');
+    });
+  };
+/* ═══════════════════════════════════════════════════════════════════
+     TAB 1: OVERVIEW — 27 Call Drivers + Architecture
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p27overviewTab(){
+    var cats=['all','claimant','issuer','provider'];
+    var catLabels={all:'All 27 Categories',claimant:'Claimant (14)',issuer:'Issuer (5)',provider:'Provider (9)'};
+    var catColors={all:CIH1,claimant:'#7c3aed',issuer:'#0078d4',provider:'#059669'};
+
+    var filtered=_p27callDrivers.filter(function(d){
+      return _p27deflectionFilter==='all'||d.cat===_p27deflectionFilter;
+    });
+
+    var totalVol=filtered.reduce(function(a,d){return a+d.vol;},0);
+    var totalDeflected=filtered.reduce(function(a,d){return a+Math.round(d.vol*d.deflect/100);},0);
+    var avgAHT=Math.round(filtered.reduce(function(a,d){return a+d.aht;},0)/filtered.length);
+
+    var html='<div>';
+    /* Architecture strip */
+    html+='<div style="background:linear-gradient(135deg,'+CIH3+',#0369a1);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:24px">'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:12px"><i class="fas fa-layer-group" style="margin-right:8px"></i>4-Layer CIH Architecture</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'
+      +['Layer 4 · Self-Service Portals<br><small>Claimant · Provider · Issuer · 24/7</small>',
+        'Layer 3 · AI Agent Orchestration<br><small>CIH-Bot · AgentAssist · Notifier · Curator</small>',
+        'Layer 2 · HAL Knowledge Engine<br><small>346K Vectors · 47K Graph Nodes · GraphRAG</small>',
+        'Layer 1 · HAL Data Foundation<br><small>Fabric · Semantic · Purview · P20–P25</small>'].map(function(t,i){
+        return '<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:12px;text-align:center;font-size:11px">'
+          +'<div style="font-size:18px;font-weight:800;color:'+CIH2+'">'+(4-i)+'</div>'
+          +t+'</div>';
+      }).join('')
+      +'</div></div>';
+
+    /* Totals row */
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px">';
+    var kpiData=[
+      {v:'750K',l:'Total Annual Calls',s:'Before CIH',c:DAN,ic:'fa-phone-volume'},
+      {v:'487K',l:'Calls Deflected',s:'65% deflection rate',c:SUC,ic:'fa-bolt'},
+      {v:'$5.3M',l:'Annual Labor Savings',s:'FTE cost reduction',c:CIH1,ic:'fa-coins'},
+      {v:'221',l:'FTEs Redeployable',s:'from 340 → 119 complex-only',c:AMB,ic:'fa-users'}
+    ];
+    kpiData.forEach(function(k){
+      html+='<div style="background:#fff;border-radius:12px;padding:16px 18px;border-left:4px solid '+k.c+';box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+        +'<i class="fas '+k.ic+'" style="color:'+k.c+';font-size:14px"></i>'
+        +'<span style="font-size:11px;color:#64748b">'+k.l+'</span></div>'
+        +'<div style="font-size:24px;font-weight:800;color:#1e293b">'+k.v+'</div>'
+        +'<div style="font-size:10px;color:#94a3b8;margin-top:2px">'+k.s+'</div></div>';
+    });
+    html+='</div>';
+
+    /* Filter bar */
+    html+='<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center">'
+      +'<span style="font-size:12px;color:#64748b;font-weight:600">Filter:</span>';
+    cats.forEach(function(c){
+      var active=_p27deflectionFilter===c;
+      html+='<button onclick="window._p27filterDrivers(\''+c+'\')" style="padding:6px 14px;border-radius:20px;border:2px solid '+(active?catColors[c]:'#e2e8f0')+';background:'+(active?catColors[c]:'#fff')+';color:'+(active?'#fff':'#475569')+';font-size:12px;font-weight:600;cursor:pointer">'+catLabels[c]+'</button>';
+    });
+    html+='<span style="margin-left:auto;font-size:11px;color:#94a3b8">'+filtered.length+' categories · '+Math.round(totalDeflected/1000)+'K calls deflected</span>';
+    html+='</div>';
+
+    /* Call driver cards */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">';
+    filtered.forEach(function(d){
+      var deflectPct=d.deflect;
+      var dColor=deflectPct>=90?SUC:deflectPct>=80?CIH1:deflectPct>=70?AMB:DAN;
+      var catColor=d.cat==='claimant'?'#7c3aed':d.cat==='issuer'?'#0078d4':'#059669';
+      var freqStars='';for(var i=0;i<d.freq;i++) freqStars+='★'; for(var j=d.freq;j<5;j++) freqStars+='☆';
+      html+='<div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e0f2fe;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .2s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(8,145,178,.15)\'" onmouseout="this.style.boxShadow=\'0 1px 4px rgba(0,0,0,.05)\'">'
+        +'<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">'
+        +'<div style="background:'+catColor+'1a;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<i class="fas '+d.icon+'" style="color:'+catColor+';font-size:15px"></i></div>'
+        +'<div style="flex:1">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;line-height:1.3">'+d.title+'</div>'
+        +'<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'
+        +'<span style="font-size:10px;background:'+catColor+'1a;color:'+catColor+';padding:2px 8px;border-radius:10px;font-weight:600">'+d.id+'</span>'
+        +'<span style="font-size:10px;color:#f59e0b">'+freqStars+'</span>'
+        +'<span style="font-size:10px;color:#64748b">'+Math.round(d.vol/1000)+'K calls/yr</span>'
+        +'<span style="font-size:10px;color:#64748b">'+d.aht+'min AHT</span>'
+        +'</div></div>'
+        +'<div style="text-align:right;flex-shrink:0">'
+        +'<div style="font-size:20px;font-weight:800;color:'+dColor+'">'+deflectPct+'%</div>'
+        +'<div style="font-size:9px;color:#94a3b8">deflect</div></div></div>'
+        /* Progress bar */
+        +'<div style="background:#f1f5f9;border-radius:4px;height:5px;margin-bottom:10px">'
+        +'<div style="background:'+dColor+';width:'+deflectPct+'%;height:5px;border-radius:4px;transition:width 1s"></div></div>'
+        /* Root cause */
+        +'<div style="font-size:11px;color:#ef4444;margin-bottom:6px"><i class="fas fa-exclamation-triangle" style="margin-right:4px;font-size:10px"></i><strong>Root cause:</strong> '+d.rootCause+'</div>'
+        /* CIH solution */
+        +'<div style="font-size:11px;color:#059669"><i class="fas fa-check-circle" style="margin-right:4px;font-size:10px"></i><strong>CIH fix:</strong> '+d.cihSolution+'</div>'
+        /* KB stats */
+        +'<div style="display:flex;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9">'
+        +d.graphNodes.slice(0,3).map(function(n){return '<span style="font-size:9px;background:#e0f2fe;color:'+CIH3+';padding:2px 6px;border-radius:8px">'+n+'</span>';}).join('')
+        +'<span style="font-size:9px;color:#94a3b8;margin-left:auto">'+Math.round(d.kbChunks/1000)+'K KB chunks</span>'
+        +'</div></div>';
+    });
+    html+='</div>';
+
+    /* Proactive Notifier preview */
+    html+='<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;padding:20px 24px;margin-top:24px;border:1px solid #bbf7d0">'
+      +'<div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:12px"><i class="fas fa-bell" style="margin-right:8px"></i>ProactiveNotifier — Prevents Calls Before They Happen</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">';
+    _p27notifyEvents.slice(0,6).forEach(function(ev){
+      html+='<div style="background:#fff;border-radius:10px;padding:12px;border-left:3px solid '+ev.color+'">'
+        +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:5px">'
+        +'<i class="fas '+ev.icon+'" style="color:'+ev.color+';font-size:12px"></i>'
+        +'<span style="font-size:12px;font-weight:600;color:#1e293b">'+ev.label+'</span></div>'
+        +'<div style="font-size:10px;color:#64748b;margin-bottom:4px">Trigger: '+ev.trigger+'</div>'
+        +'<div style="font-size:10px;color:#64748b;margin-bottom:4px">Timing: <strong>'+ev.time+'</strong></div>'
+        +'<div style="font-size:10px;color:'+ev.color+'">Deflects: '+ev.deflects+'</div></div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  window._p27filterDrivers=function(cat){
+    _p27deflectionFilter=cat;
+    var tc=document.getElementById('p27-tab-content');
+    if(tc) tc.innerHTML=_p27overviewTab();
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 2: KNOWLEDGE ENGINE
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p27knowledgeTab(){
+    var sc=_p27kbScenarios[_p27kbActiveScenario];
+    var html='<div>';
+
+    /* KB stats strip */
+    html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px">';
+    var kbKpis=[
+      {v:'346K',l:'Vector Chunks',ic:'fa-database',c:CIH1},
+      {v:'47K',l:'Graph Nodes',ic:'fa-project-diagram',c:PUR},
+      {v:'182K',l:'Graph Edges',ic:'fa-link',c:AMB},
+      {v:'89',l:'Knowledge Sources',ic:'fa-book',c:SUC},
+      {v:'94%',l:'KB Coverage',ic:'fa-shield-alt',c:CIH1}
+    ];
+    kbKpis.forEach(function(k){
+      html+='<div style="background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid #e0f2fe;box-shadow:0 1px 3px rgba(0,0,0,.04)">'
+        +'<i class="fas '+k.ic+'" style="color:'+k.c+';font-size:18px;margin-bottom:6px;display:block"></i>'
+        +'<div style="font-size:20px;font-weight:800;color:#1e293b">'+k.v+'</div>'
+        +'<div style="font-size:10px;color:#64748b">'+k.l+'</div></div>';
+    });
+    html+='</div>';
+
+    /* Two-column layout */
+    html+='<div style="display:grid;grid-template-columns:280px 1fr;gap:18px">';
+
+    /* Left: scenario list */
+    html+='<div>';
+    html+='<div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Live Demo Scenarios</div>';
+    _p27kbScenarios.forEach(function(sc2,idx){
+      var active=_p27kbActiveScenario===idx;
+      var catColor=sc2.persona.indexOf('Facility')>=0||sc2.persona.indexOf('Provider')>=0?SUC:sc2.persona.indexOf('Carrier')>=0?HAL:CIH1;
+      html+='<div onclick="window._p27selectKbScenario('+idx+')" style="padding:12px 14px;border-radius:10px;margin-bottom:8px;cursor:pointer;'
+        +'background:'+(active?CIH1+'1a':'#fff')+';border:2px solid '+(active?CIH1:'#e2e8f0')+';">'
+        +'<div style="font-size:11px;font-weight:700;color:'+(active?CIH3:'#1e293b');
+      html+=';margin-bottom:3px">'+sc2.label+'</div>'
+        +'<div style="font-size:10px;color:#94a3b8"><i class="fas fa-user" style="margin-right:3px"></i>'+sc2.persona+'</div></div>';
+    });
+
+    /* Knowledge sources */
+    html+='<div style="margin-top:16px;font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Knowledge Sources</div>';
+    var sources=[
+      {label:'Policy Language Library',chunks:'180K',icon:'fa-file-contract',color:CIH1},
+      {label:'State Regulatory Matrix',chunks:'25K',icon:'fa-gavel',color:AMB},
+      {label:'Denial Code Library',chunks:'15K',icon:'fa-times-circle',color:DAN},
+      {label:'Provider Billing Guides',chunks:'18K',icon:'fa-receipt',color:SUC},
+      {label:'ADL Assessment Guides',chunks:'8K',icon:'fa-brain',color:PUR},
+      {label:'CMR / Invoice Templates',chunks:'12K',icon:'fa-pen',color:CIH1}
+    ];
+    sources.forEach(function(s){
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid #e0f2fe;margin-bottom:6px">'
+        +'<i class="fas '+s.icon+'" style="color:'+s.color+';font-size:12px;width:16px;text-align:center"></i>'
+        +'<span style="font-size:11px;color:#374151;flex:1">'+s.label+'</span>'
+        +'<span style="font-size:10px;color:#94a3b8">'+s.chunks+'</span></div>';
+    });
+    html+='</div>';
+
+    /* Right: Query interface */
+    html+='<div>';
+    /* Query box */
+    html+='<div style="background:#fff;border-radius:12px;padding:20px;border:1px solid #e0f2fe;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"><i class="fas fa-comment-dots" style="color:'+CIH1+';margin-right:6px"></i>Query: <span style="font-size:12px;color:#64748b">'+sc.persona+'</span></div>'
+      +'<div style="background:#f8fafc;border-radius:10px;padding:14px;font-size:13px;color:#334155;border-left:3px solid '+CIH1+';font-style:italic;margin-bottom:14px">"'+sc.query+'"</div>'
+      +'<button onclick="window._p27runKbSim()" style="background:'+CIH1+';color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px">'
+      +'<i class="fas fa-play"></i>Run GraphRAG Pipeline</button></div>';
+
+    /* RAG step log */
+    html+='<div id="p27-rag-log" style="background:#0f172a;border-radius:12px;padding:16px;min-height:140px;margin-bottom:16px;font-family:monospace">'
+      +'<div style="font-size:11px;color:#94a3b8;margin-bottom:8px">// GraphRAG Retrieval Pipeline — Click "Run" to execute</div>';
+    sc.steps.forEach(function(st,i){
+      html+='<div id="p27-rag-step-'+i+'" style="font-size:12px;color:#475569;margin-bottom:4px;opacity:.3">'+st.text+'</div>';
+    });
+    html+='</div>';
+
+    /* Answer panel */
+    html+='<div id="p27-rag-answer" style="background:#f0fdf4;border-radius:12px;padding:18px;border:1px solid #bbf7d0;display:none">'
+      +'<div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:10px"><i class="fas fa-check-circle" style="margin-right:6px"></i>CIH-Bot Response — Generated in 1.2s</div>'
+      +'<div id="p27-rag-answer-text" style="font-size:13px;color:#1e293b;white-space:pre-line;line-height:1.6"></div>'
+      +'<div style="margin-top:12px;padding-top:10px;border-top:1px solid #bbf7d0">'
+      +'<div style="font-size:11px;color:#166534;font-weight:600;margin-bottom:6px"><i class="fas fa-book-open" style="margin-right:4px"></i>Sources Used:</div>'
+      +'<div id="p27-rag-sources" style="display:flex;flex-wrap:wrap;gap:6px"></div>'
+      +'</div>'
+      +'<div style="margin-top:10px;display:flex;gap:8px">'
+      +'<button style="background:#fff;border:1px solid #bbf7d0;color:#166534;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer"><i class="fas fa-thumbs-up" style="margin-right:4px"></i>Helpful</button>'
+      +'<button style="background:#fff;border:1px solid #e2e8f0;color:#64748b;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer"><i class="fas fa-thumbs-down" style="margin-right:4px"></i>Not Helpful</button>'
+      +'<button style="background:#fff;border:1px solid #e2e8f0;color:#64748b;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer"><i class="fas fa-user-headset" style="margin-right:4px"></i>Escalate to Agent</button>'
+      +'</div></div>';
+
+    html+='</div>'; /* end right col */
+    html+='</div>'; /* end grid */
+
+    /* Knowledge Graph visualization */
+    html+='<div style="background:#fff;border-radius:12px;padding:20px;margin-top:18px;border:1px solid #e0f2fe">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-project-diagram" style="color:'+CIH1+';margin-right:7px"></i>Knowledge Graph — Entity Relationship Map</div>'
+      +'<div style="background:#f8fafc;border-radius:10px;padding:16px;overflow-x:auto">'
+      +'<svg viewBox="0 0 780 220" style="width:100%;max-width:780px;height:220px">'
+      /* nodes */
+      +_p27kgNode(90,110,'Policy','#7c3aed')
+      +_p27kgNode(240,50,'Benefit Trigger','#0891b2')
+      +_p27kgNode(240,110,'Elimination Period','#0891b2')
+      +_p27kgNode(240,170,'Coverage / Care Settings','#0891b2')
+      +_p27kgNode(420,110,'Claim','#dc2626')
+      +_p27kgNode(570,50,'Payment History','#059669')
+      +_p27kgNode(570,110,'Documents','#059669')
+      +_p27kgNode(570,170,'Denial Reason','#dc2626')
+      +_p27kgNode(700,110,'Claimant/Provider','#d97706')
+      /* edges */
+      +_p27kgEdge(140,110,190,110,'has')
+      +_p27kgEdge(140,100,190,60,'has')
+      +_p27kgEdge(140,120,190,165,'has')
+      +_p27kgEdge(310,110,370,110,'has')
+      +_p27kgEdge(470,110,520,60,'has')
+      +_p27kgEdge(470,110,520,110,'has')
+      +_p27kgEdge(470,120,520,165,'has')
+      +_p27kgEdge(620,110,660,110,'linked')
+      +'</svg></div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  function _p27kgNode(x,y,label,color){
+    return '<ellipse cx="'+x+'" cy="'+y+'" rx="48" ry="18" fill="'+color+'" opacity=".15" stroke="'+color+'" stroke-width="1.5"/>'
+      +'<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="9" fill="'+color+'" font-weight="600">'+label+'</text>';
+  }
+  function _p27kgEdge(x1,y1,x2,y2,lbl){
+    var mx=(x1+x2)/2,my=(y1+y2)/2-8;
+    return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4,3"/>'
+      +'<text x="'+mx+'" y="'+my+'" text-anchor="middle" font-size="8" fill="#94a3b8">'+lbl+'</text>';
+  }
+
+  window._p27selectKbScenario=function(idx){
+    _p27kbActiveScenario=idx;
+    _p27kbSimRunning=false;
+    var tc=document.getElementById('p27-tab-content');
+    if(tc) tc.innerHTML=_p27knowledgeTab();
+  };
+
+  window._p27runKbSim=function(){
+    if(_p27kbSimRunning) return;
+    _p27kbSimRunning=true;
+    var sc=_p27kbScenarios[_p27kbActiveScenario];
+    var ansEl=document.getElementById('p27-rag-answer');
+    if(ansEl) ansEl.style.display='none';
+    sc.steps.forEach(function(st,i){
+      var el=document.getElementById('p27-rag-step-'+i);
+      if(el){el.style.opacity='.3';el.style.color='#475569';}
+    });
+    sc.steps.forEach(function(st,i){
+      setTimeout(function(){
+        var el=document.getElementById('p27-rag-step-'+i);
+        if(el){el.style.opacity='1';el.style.color='#22d3ee';el.style.transition='opacity .3s';}
+      }, st.ms);
+    });
+    var lastMs=sc.steps[sc.steps.length-1].ms+600;
+    setTimeout(function(){
+      _p27kbSimRunning=false;
+      var ans=document.getElementById('p27-rag-answer');
+      var txt=document.getElementById('p27-rag-answer-text');
+      var src=document.getElementById('p27-rag-sources');
+      if(ans) ans.style.display='block';
+      if(txt) txt.textContent=sc.answer;
+      if(src) src.innerHTML=sc.sources.map(function(s){
+        return '<span style="font-size:10px;background:#dcfce7;color:#166534;padding:3px 8px;border-radius:10px;border:1px solid #bbf7d0">'+s+'</span>';
+      }).join('');
+    }, lastMs);
+  };
+
+function _p27agentAssistTab(){
+  var c=document.getElementById('p27-tab-agentassist');
+  if(!c)return;
+  var transcript=[
+    {role:'caller',text:'Hi, I filed a claim back in March for my mother\'s nursing home and I still haven\'t received any payment. Claim number is LTC-2024-88341.',time:'0:08',intent:null},
+    {role:'agent',text:'I\'m sorry to hear that. Let me pull up that claim right now. Can you verify the insured\'s date of birth?',time:'0:22',intent:null},
+    {role:'caller',text:'Sure, it\'s June 12, 1941.',time:'0:31',intent:'C2_CLAIM_STATUS'},
+    {role:'system',text:'[AgentAssist detected: C2 Claim Status Inquiry — Confidence 94%]',time:'0:31',intent:'detect'},
+    {role:'caller',text:'We submitted all the CMR forms in February. The facility sent everything.',time:'0:47',intent:'C3_BENEFIT_CALCULATION'},
+    {role:'system',text:'[Detected: C3 Benefit Calculation + C6 Document Missing — checking KB...]',time:'0:48',intent:'detect'},
+    {role:'caller',text:'How much should she be getting per day? I think it\'s around $200 but I\'m not sure.',time:'1:05',intent:'C3_BENEFIT_CALCULATION'},
+    {role:'caller',text:'Also, do we need to resubmit anything? We\'re running out of savings.',time:'1:18',intent:'C13_FINANCIAL_HARDSHIP'}
+  ];
+  var suggestions=[
+    {id:'s1',cat:'C2',title:'Claim Status Pull Procedure',confidence:94,answer:'Access LTCIS → Claims → Search by claim number LTC-2024-88341. Check "Processing Queue" flag. If >45 days, escalate to Claims Expedite team via SF case type CLAIMS-EXP.',kbRef:'KB-C2-003',compliance:'NAIC Model 641 §5(B) — 45-day processing window',cihSolution:'Real-time claim status portal eliminates this inquiry type entirely'},
+    {id:'s2',cat:'C3',title:'Daily Benefit Amount Calculator',confidence:89,answer:'DBR = Contract DBR × Inflation Rider Multiplier. For June 12 1941 DOB: age 83, likely 5% compound inflation from policy issue. Use HAL Benefit Calculator → Policy → Compute current DBR. Typical range $150–$320/day for 2024.',kbRef:'KB-C3-007',compliance:'Benefit must equal policy schedule; document calculation in call notes',cihSolution:'HAL Claimant Hub benefit meter shows live DBR with inflation calculation'},
+    {id:'s3',cat:'C6',title:'Missing Documentation Resolution',confidence:82,answer:'Check DocVault → Claim → LTC-2024-88341 for received CMR. If CMR shows "Pending OCR" it was received but not processed. Trigger manual OCR review. If not received, provide DocTrack portal link for facility re-upload.',kbRef:'KB-C6-012',compliance:'HIPAA §164.524 — 30-day document response requirement',cihSolution:'DocTrack portal gives claimants real-time upload confirmation'},
+    {id:'s4',cat:'C13',title:'Financial Hardship Escalation',confidence:78,answer:'Financial hardship claims qualify for Priority Processing queue. Complete FH-001 form in LTCIS, attach to claim. Target: payment within 10 business days. Inform claimant of HAL Emergency Assistance line 1-800-HAL-HELP.',kbRef:'KB-C13-001',compliance:'State DOI regulations require expedited handling for documented hardship',cihSolution:'ProactiveNotifier sends payment ETA updates, reducing repeat calls 67%'}
+  ];
+  var complianceAlerts=[
+    {sev:'warn',msg:'Call duration approaching 14.2 min avg AHT — consider warm transfer to specialist'},
+    {sev:'info',msg:'Florida DFS Bulletin 2024-08: Enhanced disclosure required for claims >90 days pending'},
+    {sev:'ok',msg:'Recording consent confirmed at call start — compliant with FIPA §501.171'}
+  ];
+  var html='<div style="display:grid;grid-template-columns:1fr 380px;gap:20px;height:calc(100vh - 280px);min-height:580px;">';
+  /* LEFT: Transcript panel */
+  html+='<div style="display:flex;flex-direction:column;gap:0;">';
+  html+='<div style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;padding:14px 18px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between;">';
+  html+='<div><i class="fas fa-phone-alt" style="margin-right:8px;"></i><strong>Live Call — LTC Claims Inquiry</strong><span style="margin-left:12px;font-size:12px;opacity:0.8;">Caller: Margaret O\'Brien (POA) &nbsp;|&nbsp; Acct: LTC-2024-88341</span></div>';
+  html+='<div style="display:flex;align-items:center;gap:10px;">';
+  html+='<span style="background:rgba(255,255,255,0.15);padding:4px 10px;border-radius:20px;font-size:12px;"><i class="fas fa-circle" style="color:#ef4444;margin-right:5px;animation:p27pulse 1.2s infinite;"></i>LIVE 1:24</span>';
+  html+='<button onclick="_p27acwMode()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;"><i class="fas fa-clipboard-check"></i> ACW</button>';
+  html+='</div></div>';
+  /* Transcript scroll */
+  html+='<div id="p27-transcript" style="background:#f8fafc;border:1px solid #e2e8f0;border-top:none;padding:16px;overflow-y:auto;flex:1;max-height:380px;">';
+  for(var i=0;i<transcript.length;i++){
+    var t=transcript[i];
+    if(t.role==='system'){
+      html+='<div style="background:linear-gradient(135deg,rgba(8,145,178,0.1),rgba(6,182,212,0.1));border:1px solid rgba(8,145,178,0.3);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:12px;color:#0891b2;display:flex;align-items:center;gap:8px;">';
+      html+='<i class="fas fa-robot"></i><em>'+t.text+'</em></div>';
+    } else if(t.role==='caller'){
+      html+='<div style="display:flex;gap:10px;margin-bottom:10px;justify-content:flex-start;">';
+      html+='<div style="width:32px;height:32px;border-radius:50%;background:#64748b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;"><i class="fas fa-user"></i></div>';
+      html+='<div style="max-width:70%"><div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 10px 10px 10px;padding:10px 14px;font-size:13px;color:#334155;">'+t.text+'</div>';
+      html+='<div style="font-size:11px;color:#94a3b8;margin-top:3px;">'+t.time+'</div></div></div>';
+    } else {
+      html+='<div style="display:flex;gap:10px;margin-bottom:10px;justify-content:flex-end;">';
+      html+='<div style="max-width:70%;text-align:right"><div style="background:#0891b2;color:#fff;border-radius:10px 0 10px 10px;padding:10px 14px;font-size:13px;display:inline-block;text-align:left;">'+t.text+'</div>';
+      html+='<div style="font-size:11px;color:#94a3b8;margin-top:3px;text-align:right;">Agent &nbsp;'+t.time+'</div></div>';
+      html+='<div style="width:32px;height:32px;border-radius:50%;background:#0891b2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;"><i class="fas fa-headset"></i></div></div>';
+    }
+  }
+  html+='</div>';
+  /* ACW panel */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:14px;">';
+  html+='<div style="display:flex;gap:8px;align-items:center;">';
+  html+='<input id="p27-acw-notes" type="text" placeholder="ACW auto-generated: C2 Claim Status + C3 Benefit Calc + C13 Hardship escalation — FH-001 submitted, Priority Queue assigned" style="flex:1;border:1px solid #e2e8f0;border-radius:6px;padding:8px 12px;font-size:12px;color:#334155;" readonly>';
+  html+='<button style="background:#0891b2;color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;"><i class="fas fa-check"></i> Post ACW</button>';
+  html+='</div></div>';
+  html+='</div>'; /* end left */
+  /* RIGHT: AgentAssist Sidebar */
+  html+='<div style="display:flex;flex-direction:column;gap:12px;overflow-y:auto;">';
+  /* Intent detection bar */
+  html+='<div style="background:linear-gradient(135deg,#164e63,#0c4a6e);color:#fff;border-radius:12px;padding:14px;">';
+  html+='<div style="font-size:12px;opacity:0.7;margin-bottom:8px;"><i class="fas fa-brain" style="margin-right:5px;"></i>REAL-TIME INTENT DETECTION</div>';
+  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+  var detected=[{id:'C2',label:'Claim Status',conf:94,color:'#0891b2'},{id:'C3',label:'Benefit Calc',conf:89,color:'#0891b2'},{id:'C6',label:'Doc Missing',conf:82,color:'#d97706'},{id:'C13',label:'Fin. Hardship',conf:78,color:'#dc2626'}];
+  for(var d=0;d<detected.length;d++){
+    var det=detected[d];
+    html+='<span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;" onclick="_p27focusSuggestion(\''+det.id+'\')">'+det.id+' '+det.label+' <strong>'+det.conf+'%</strong></span>';
+  }
+  html+='</div></div>';
+  /* KB Answer Suggestions */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+  html+='<div style="background:#f1f5f9;padding:10px 14px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;"><i class="fas fa-lightbulb" style="color:#f59e0b;margin-right:6px;"></i>AI ANSWER SUGGESTIONS ('+suggestions.length+')</div>';
+  html+='<div style="max-height:240px;overflow-y:auto;">';
+  for(var s=0;s<suggestions.length;s++){
+    var sg=suggestions[s];
+    var bgc=s===0?'rgba(8,145,178,0.05)':'#fff';
+    html+='<div id="p27-sg-'+sg.cat+'" style="padding:12px 14px;border-bottom:1px solid #f1f5f9;background:'+bgc+';cursor:pointer;" onclick="_p27expandSuggestion(this)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html+='<span style="background:#0891b2;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;">'+sg.cat+'</span>';
+    html+='<span style="font-size:11px;color:#0891b2;font-weight:600;">'+sg.confidence+'% match</span></div>';
+    html+='<div style="font-size:12px;font-weight:600;color:#1e293b;margin-bottom:4px;">'+sg.title+'</div>';
+    html+='<div style="font-size:11px;color:#475569;line-height:1.5;max-height:60px;overflow:hidden;">'+sg.answer+'</div>';
+    html+='<div style="margin-top:6px;display:flex;gap:6px;align-items:center;">';
+    html+='<span style="font-size:10px;color:#94a3b8;">'+sg.kbRef+'</span>';
+    html+='<button style="margin-left:auto;background:#e0f2fe;color:#0891b2;border:none;padding:3px 10px;border-radius:4px;font-size:11px;cursor:pointer;" onclick="event.stopPropagation();_p27copyAnswer(\''+sg.id+'\')"><i class="fas fa-copy"></i> Copy</button>';
+    html+='</div></div>';
+  }
+  html+='</div></div>';
+  /* Compliance Guard */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+  html+='<div style="background:#f1f5f9;padding:10px 14px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#334155;"><i class="fas fa-shield-alt" style="color:#0891b2;margin-right:6px;"></i>COMPLIANCE GUARD</div>';
+  for(var a=0;a<complianceAlerts.length;a++){
+    var al=complianceAlerts[a];
+    var ic=al.sev==='warn'?'fa-exclamation-triangle':al.sev==='info'?'fa-info-circle':'fa-check-circle';
+    var col=al.sev==='warn'?'#d97706':al.sev==='info'?'#0891b2':'#16a34a';
+    var bgA=al.sev==='warn'?'#fffbeb':al.sev==='info'?'#e0f2fe':'#f0fdf4';
+    html+='<div style="padding:8px 14px;border-bottom:1px solid #f1f5f9;background:'+bgA+';display:flex;gap:8px;align-items:flex-start;">';
+    html+='<i class="fas '+ic+'" style="color:'+col+';margin-top:1px;font-size:12px;"></i>';
+    html+='<span style="font-size:11px;color:#334155;line-height:1.4;">'+al.msg+'</span></div>';
+  }
+  html+='</div>';
+  /* CIH Deflection Nudge */
+  html+='<div style="background:linear-gradient(135deg,rgba(8,145,178,0.08),rgba(6,182,212,0.08));border:1px solid rgba(8,145,178,0.2);border-radius:12px;padding:12px 14px;">';
+  html+='<div style="font-size:11px;font-weight:700;color:#0891b2;margin-bottom:6px;"><i class="fas fa-robot" style="margin-right:5px;"></i>CIH DEFLECTION OPPORTUNITY</div>';
+  html+='<div style="font-size:11px;color:#334155;line-height:1.5;margin-bottom:8px;">This caller\'s 4 intents are all self-serviceable via HAL Claimant Hub. Suggest enrollment to reduce future call volume.</div>';
+  html+='<button style="background:#0891b2;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:11px;cursor:pointer;width:100%;"><i class="fas fa-external-link-alt" style="margin-right:5px;"></i>Send HAL Claimant Hub Link via SMS</button>';
+  html+='</div>';
+  html+='</div>'; /* end right */
+  html+='</div>'; /* end grid */
+  c.innerHTML=html;
+}
+
+function _p27portalsTab(){
+  var c=document.getElementById('p27-tab-portals');
+  if(!c)return;
+  var portals=[
+    {id:'claimant',icon:'fa-user',label:'HAL Claimant Hub',color:'#0891b2',bg:'#e0f2fe',desc:'Self-service for policyholders, insureds, and authorized POAs',callDrivers:['C1 Policy Inquiry','C2 Claim Status','C3 Benefit Calc','C5 Payment Status','C6 Doc Upload','C9 Care Options','C12 Rx Benefits','C13 Fin. Hardship'],
+     features:[
+       {icon:'fa-chart-line',title:'Claim Payment Tracker',desc:'Real-time claim status with milestone timeline. View processing queue position, pending items, and estimated payment date.',badge:'Deflects C2 94%'},
+       {icon:'fa-calculator',title:'Benefit Meter',desc:'Live Daily Benefit Rate with compound inflation calculation. Shows current DBR, max lifetime benefit remaining, and monthly utilization.',badge:'Deflects C3 89%'},
+       {icon:'fa-file-medical',title:'EP Eligibility Calculator',desc:'Elimination Period tracker showing days served, days remaining, and projected benefit start date. Auto-syncs with CMR submissions.',badge:'Deflects C4 91%'},
+       {icon:'fa-cloud-upload-alt',title:'DocTrack Portal',desc:'Secure document upload with OCR confirmation. Claimants receive upload receipt, processing status, and approval notification.',badge:'Deflects C6 87%'},
+       {icon:'fa-map-marked-alt',title:'Care Finder',desc:'Network facility locator with benefit coverage levels, quality ratings, and availability. Book assessments directly from portal.',badge:'Deflects C9 78%'},
+       {icon:'fa-bell',title:'Smart Notifications',desc:'Proactive alerts for payment posting, document requests, and policy anniversaries. Configurable SMS, email, and in-app channels.',badge:'Reduces repeat calls 67%'}
+     ]},
+    {id:'provider',icon:'fa-hospital',label:'HAL Provider Hub',color:'#059669',bg:'#d1fae5',desc:'Self-service for nursing facilities, home health agencies, and hospice providers',callDrivers:['P1 Eligibility','P2 CMR Submit','P3 Billing','P4 Payment','P5 Denial','P6 Auth Req','P7 Clinical','P8 Credentialing','P9 Rate'],
+     features:[
+       {icon:'fa-id-card',title:'Eligibility & Benefits Verification',desc:'Real-time patient eligibility lookup by policy number or SSN. Displays active riders, benefit limits, EP status, and coordination requirements.',badge:'Deflects P1 96%'},
+       {icon:'fa-file-signature',title:'Digital CMR Submission',desc:'Structured care management report form with field validation. OCR-free upload with structured data extraction and confirmation receipt.',badge:'Deflects P2 88%'},
+       {icon:'fa-file-invoice-dollar',title:'Invoice & Billing Portal',desc:'Submit claims electronically, track payment status, view remittance advice, and reconcile accounts. EDI 837/835 compatible.',badge:'Deflects P3+P4 92%'},
+       {icon:'fa-question-circle',title:'Denial Explainer & Appeal Wizard',desc:'Plain-language denial reason codes with appeal checklist. AI-guided appeal letter drafting with supporting documentation requirements.',badge:'Deflects P5 84%'},
+       {icon:'fa-file-alt',title:'Authorization Request Center',desc:'Submit prior authorization requests with clinical justification templates. Real-time status tracking and decision notification.',badge:'Deflects P6 79%'},
+       {icon:'fa-certificate',title:'Credentialing Tracker',desc:'Monitor credentialing status, expiration dates, and renewal requirements. One-click document submission for recredentialing.',badge:'Deflects P8 91%'}
+     ]},
+    {id:'issuer',icon:'fa-building',label:'HAL Issuer Hub',color:'#7c3aed',bg:'#ede9fe',desc:'Self-service for insurance company ceding clients, reinsurance partners, and actuarial teams',callDrivers:['I1 Data Rqst','I2 Reg Inquiry','I3 Actuarial','I4 Billing Recon','I5 Claims API'],
+     features:[
+       {icon:'fa-plug',title:'Claims API Console',desc:'Real-time claims data API with sandbox testing environment. RESTful endpoints for claim status, payment history, and reserve data. OAuth 2.0 secured.',badge:'Deflects I1+I5 97%'},
+       {icon:'fa-balance-scale',title:'Regulatory Tracker',desc:'State-by-state regulatory requirement dashboard. Tracks filing deadlines, rate approval status, and DOI correspondence. Automated reminders.',badge:'Deflects I2 82%'},
+       {icon:'fa-chart-bar',title:'Actuarial Data Export',desc:'Self-service actuarial data extracts with configurable cohort filters. Downloadable in CSV, Excel, or Parquet format with data dictionary.',badge:'Deflects I3 89%'},
+       {icon:'fa-receipt',title:'Premium Reconciliation',desc:'Automated premium billing reconciliation with line-item variance identification. Dispute flagging with direct carrier communication thread.',badge:'Deflects I4 85%'},
+       {icon:'fa-shield-alt',title:'Compliance Dashboard',desc:'NAIC Model Regulation compliance scorecard. Real-time flags for pending audits, regulatory filings, and required disclosures.',badge:'Reduces audit prep 40%'},
+       {icon:'fa-sync',title:'Data Feed Manager',desc:'Configure, test, and monitor automated data feeds. Real-time feed health monitoring with error alerting and auto-retry logic.',badge:'Reduces data tickets 73%'}
+     ]}
+  ];
+  var activePortal=window._p27activePortal||'claimant';
+  var html='<div>';
+  /* Portal tabs */
+  html+='<div style="display:flex;gap:0;border-radius:12px 12px 0 0;overflow:hidden;border:1px solid #e2e8f0;border-bottom:none;margin-bottom:0;">';
+  for(var p=0;p<portals.length;p++){
+    var pt=portals[p];
+    var isActive=pt.id===activePortal;
+    html+='<button onclick="_p27selectPortal(\''+pt.id+'\')" style="flex:1;padding:14px 16px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;';
+    if(isActive){html+='background:'+pt.color+';color:#fff;';}
+    else{html+='background:#f8fafc;color:#64748b;';}
+    html+='"><i class="fas '+pt.icon+'" style="margin-right:8px;"></i>'+pt.label+'</button>';
+  }
+  html+='</div>';
+  /* Portal content */
+  for(var p2=0;p2<portals.length;p2++){
+    var pt2=portals[p2];
+    var show=pt2.id===activePortal;
+    html+='<div id="p27-portal-'+pt2.id+'" style="display:'+(show?'block':'none')+';border:1px solid #e2e8f0;border-radius:0 0 12px 12px;background:#fff;padding:20px;">';
+    /* Header */
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">';
+    html+='<div><div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:4px;"><i class="fas '+pt2.icon+'" style="color:'+pt2.color+';margin-right:10px;"></i>'+pt2.label+'</div>';
+    html+='<div style="font-size:13px;color:#64748b;">'+pt2.desc+'</div></div>';
+    html+='<div style="background:'+pt2.bg+';border:1px solid '+pt2.color+'33;border-radius:10px;padding:10px 16px;text-align:right;">';
+    html+='<div style="font-size:20px;font-weight:700;color:'+pt2.color+';">'+pt2.callDrivers.length+'</div>';
+    html+='<div style="font-size:11px;color:#64748b;">Call drivers deflected</div></div></div>';
+    /* Call driver tags */
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">';
+    for(var cd=0;cd<pt2.callDrivers.length;cd++){
+      html+='<span style="background:'+pt2.bg+';color:'+pt2.color+';border:1px solid '+pt2.color+'33;font-size:11px;padding:3px 10px;border-radius:20px;">'+pt2.callDrivers[cd]+'</span>';
+    }
+    html+='</div>';
+    /* Feature cards grid */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">';
+    for(var f=0;f<pt2.features.length;f++){
+      var ft=pt2.features[f];
+      html+='<div style="border:1px solid #e2e8f0;border-radius:10px;padding:14px;background:#fafbfc;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">';
+      html+='<div style="width:34px;height:34px;border-radius:8px;background:'+pt2.bg+';display:flex;align-items:center;justify-content:center;"><i class="fas '+ft.icon+'" style="color:'+pt2.color+';font-size:14px;"></i></div>';
+      html+='<div style="font-size:13px;font-weight:600;color:#1e293b;">'+ft.title+'</div></div>';
+      html+='<div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:10px;">'+ft.desc+'</div>';
+      html+='<div style="background:'+pt2.bg+';color:'+pt2.color+';font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block;">'+ft.badge+'</div>';
+      html+='<button style="float:right;background:'+pt2.color+';color:#fff;border:none;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;">Launch <i class="fas fa-external-link-alt"></i></button>';
+      html+='</div>';
+    }
+    html+='</div>';
+    /* Bottom ROI strip */
+    html+='<div style="margin-top:16px;background:linear-gradient(135deg,'+pt2.bg+',#f8fafc);border:1px solid '+pt2.color+'22;border-radius:10px;padding:14px;display:flex;gap:20px;flex-wrap:wrap;">';
+    html+='<div style="font-size:11px;color:#64748b;font-weight:600;width:100%;margin-bottom:4px;"><i class="fas fa-chart-line" style="color:'+pt2.color+';margin-right:5px;"></i>PORTAL ROI IMPACT</div>';
+    var rois=[['Avg Deflection Rate','78–96%'],['Monthly Call Deflection','12,400 calls'],['Annual Cost Savings','$1.8M'],['CSAT Improvement','+22 pts']];
+    for(var r=0;r<rois.length;r++){
+      html+='<div style="text-align:center;min-width:90px;"><div style="font-size:16px;font-weight:700;color:'+pt2.color+';">'+rois[r][1]+'</div><div style="font-size:10px;color:#94a3b8;">'+rois[r][0]+'</div></div>';
+    }
+    html+='</div>';
+    html+='</div>'; /* end portal */
+  }
+  html+='</div>';
+  c.innerHTML=html;
+}
+window._p27selectPortal=function(id){
+  window._p27activePortal=id;
+  _p27portalsTab();
+};
+
+function _p27analyticsTab(){
+  var c=document.getElementById('p27-tab-analytics');
+  if(!c)return;
+  var kpis=[
+    {label:'Monthly Call Volume',value:'19,240',delta:'-12%',trend:'down-good',icon:'fa-phone',color:'#0891b2'},
+    {label:'Deflection Rate',value:'65%',delta:'+8pts',trend:'up-good',icon:'fa-filter',color:'#059669'},
+    {label:'Avg Handle Time',value:'5.1 min',delta:'-9.1 min',trend:'down-good',icon:'fa-clock',color:'#7c3aed'},
+    {label:'FCR Rate',value:'87%',delta:'+14pts',trend:'up-good',icon:'fa-check-circle',color:'#d97706'},
+    {label:'CSAT Score',value:'4.6/5',delta:'+0.9',trend:'up-good',icon:'fa-star',color:'#0891b2'},
+    {label:'Annual Savings',value:'$5.3M',delta:'+$1.2M',trend:'up-good',icon:'fa-dollar-sign',color:'#059669'}
+  ];
+  var topDeflected=[
+    {id:'C2',label:'Claim Status Inquiry',vol:4200,defl:94,savings:312000,cat:'Claimant'},
+    {id:'C3',label:'Benefit Calculation',vol:2800,defl:89,savings:208000,cat:'Claimant'},
+    {id:'P1',label:'Eligibility Verification',vol:2400,defl:96,savings:184000,cat:'Provider'},
+    {id:'C6',label:'Document Missing/Resubmit',vol:1900,defl:87,savings:141000,cat:'Claimant'},
+    {id:'P3',label:'Billing & Invoicing',vol:1600,defl:92,savings:124000,cat:'Provider'},
+    {id:'C1',label:'Policy Info & Coverage',vol:1500,defl:82,savings:110000,cat:'Claimant'},
+    {id:'I1',label:'Data & Report Requests',vol:890,defl:97,savings:68000,cat:'Issuer'},
+    {id:'C5',label:'Payment Status',vol:1200,defl:88,savings:88000,cat:'Claimant'}
+  ];
+  var monthly=[
+    {month:'Jan',calls:21800,deflected:8720,aht:14.2},
+    {month:'Feb',calls:21200,deflected:9540,aht:13.8},
+    {month:'Mar',calls:20900,deflected:10450,aht:12.9},
+    {month:'Apr',calls:20400,deflected:11220,aht:11.4},
+    {month:'May',calls:19800,deflected:11880,aht:9.8},
+    {month:'Jun',calls:19240,deflected:12506,aht:5.1}
+  ];
+  var kbHealth={totalChunks:346000,sources:89,freshness:94,coverage:91,accuracy:96,lastIngested:'2026-07-09'};
+  var html='<div>';
+  /* KPI Row */
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px;">';
+  for(var k=0;k<kpis.length;k++){
+    var kp=kpis[k];
+    var trendColor=kp.trend==='up-good'||kp.trend==='down-good'?'#16a34a':'#dc2626';
+    var trendIcon=kp.trend.startsWith('up')?'fa-arrow-up':'fa-arrow-down';
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;">';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html+='<div style="width:30px;height:30px;border-radius:8px;background:'+kp.color+'1a;display:flex;align-items:center;justify-content:center;"><i class="fas '+kp.icon+'" style="color:'+kp.color+';font-size:12px;"></i></div>';
+    html+='<div style="font-size:11px;color:#64748b;">'+kp.label+'</div></div>';
+    html+='<div style="font-size:22px;font-weight:700;color:#1e293b;">'+kp.value+'</div>';
+    html+='<div style="font-size:11px;color:'+trendColor+';margin-top:4px;"><i class="fas '+trendIcon+'" style="margin-right:3px;"></i>'+kp.delta+' vs pre-CIH</div>';
+    html+='</div>';
+  }
+  html+='</div>';
+  /* Main grid: trend chart + deflection table */
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">';
+  /* Monthly Trend chart (SVG bar chart) */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">';
+  html+='<div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:14px;"><i class="fas fa-chart-area" style="color:#0891b2;margin-right:8px;"></i>Monthly Call Volume vs Deflection Trend</div>';
+  var maxCalls=22000;
+  html+='<svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet">';
+  /* Y axis gridlines */
+  for(var g=0;g<5;g++){
+    var gy=20+g*32;
+    var gVal=Math.round(maxCalls-(g*maxCalls/4)/1000)+'K';
+    html+='<line x1="40" y1="'+gy+'" x2="390" y2="'+gy+'" stroke="#f1f5f9" stroke-width="1"/>';
+    html+='<text x="35" y="'+(gy+4)+'" text-anchor="end" font-size="9" fill="#94a3b8">'+Math.round(maxCalls*(1-g/4)/1000)+'K</text>';
+  }
+  var barW=46;var barGap=20;var startX=50;
+  for(var m=0;m<monthly.length;m++){
+    var mo=monthly[m];
+    var bx=startX+m*(barW+barGap);
+    var totalH=Math.round((mo.calls/maxCalls)*148);
+    var deflH=Math.round((mo.deflected/maxCalls)*148);
+    var totalY=168-totalH;
+    var deflY=168-deflH;
+    /* Total calls bar */
+    html+='<rect x="'+bx+'" y="'+totalY+'" width="'+barW+'" height="'+totalH+'" rx="3" fill="#e0f2fe"/>';
+    /* Deflected overlay */
+    html+='<rect x="'+bx+'" y="'+deflY+'" width="'+barW+'" height="'+deflH+'" rx="3" fill="#0891b2" opacity="0.85"/>';
+    html+='<text x="'+(bx+barW/2)+'" y="175" text-anchor="middle" font-size="9" fill="#64748b">'+mo.month+'</text>';
+    html+='<text x="'+(bx+barW/2)+'" y="'+(deflY-4)+'" text-anchor="middle" font-size="8" fill="#0891b2" font-weight="bold">'+Math.round(mo.deflected/1000*10)/10+'K</text>';
+  }
+  html+='</svg>';
+  html+='<div style="display:flex;gap:14px;margin-top:4px;">';
+  html+='<span style="font-size:11px;color:#64748b;"><span style="display:inline-block;width:12px;height:12px;background:#e0f2fe;border-radius:2px;margin-right:4px;"></span>Total Calls</span>';
+  html+='<span style="font-size:11px;color:#64748b;"><span style="display:inline-block;width:12px;height:12px;background:#0891b2;border-radius:2px;margin-right:4px;"></span>Deflected (CIH)</span>';
+  html+='</div>';
+  html+='</div>';
+  /* AHT Trend line chart */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">';
+  html+='<div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:14px;"><i class="fas fa-clock" style="color:#7c3aed;margin-right:8px;"></i>Average Handle Time Reduction (Minutes)</div>';
+  html+='<svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet">';
+  var maxAHT=16;
+  for(var g2=0;g2<5;g2++){
+    var gy2=20+g2*32;
+    html+='<line x1="40" y1="'+gy2+'" x2="390" y2="'+gy2+'" stroke="#f1f5f9" stroke-width="1"/>';
+    html+='<text x="35" y="'+(gy2+4)+'" text-anchor="end" font-size="9" fill="#94a3b8">'+Math.round(maxAHT*(1-g2/4))+'m</text>';
+  }
+  var pts='';var dotInfo=[];
+  for(var m2=0;m2<monthly.length;m2++){
+    var mo2=monthly[m2];
+    var mx=50+m2*60;
+    var my=168-Math.round((mo2.aht/maxAHT)*148);
+    pts+=(m2===0?'M':'L')+mx+','+my;
+    dotInfo.push({x:mx,y:my,aht:mo2.aht,month:mo2.month});
+    html+='<text x="'+mx+'" y="175" text-anchor="middle" font-size="9" fill="#64748b">'+mo2.month+'</text>';
+  }
+  html+='<path d="'+pts+'" stroke="#7c3aed" stroke-width="2" fill="none"/>';
+  for(var di=0;di<dotInfo.length;di++){
+    var d2=dotInfo[di];
+    html+='<circle cx="'+d2.x+'" cy="'+d2.y+'" r="4" fill="#7c3aed"/>';
+    html+='<text x="'+d2.x+'" y="'+(d2.y-8)+'" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="bold">'+d2.aht+'</text>';
+  }
+  html+='</svg>';
+  html+='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;margin-top:4px;font-size:12px;color:#15803d;">';
+  html+='<i class="fas fa-arrow-down" style="margin-right:5px;"></i>AHT reduced from 14.2 → 5.1 min <strong>(64% improvement)</strong> — saving 221 FTE hours/month</div>';
+  html+='</div>';
+  html+='</div>'; /* end main grid */
+  /* Top deflected table + KB health */
+  html+='<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">';
+  /* Top deflected table */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+  html+='<div style="background:#f1f5f9;padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:600;color:#1e293b;"><i class="fas fa-trophy" style="color:#f59e0b;margin-right:8px;"></i>Top Deflected Call Drivers (This Month)</div>';
+  html+='<table style="width:100%;border-collapse:collapse;">';
+  html+='<thead><tr style="background:#f8fafc;">';
+  html+='<th style="padding:8px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:600;">Driver</th>';
+  html+='<th style="padding:8px 12px;text-align:right;font-size:11px;color:#64748b;font-weight:600;">Volume</th>';
+  html+='<th style="padding:8px 12px;text-align:center;font-size:11px;color:#64748b;font-weight:600;">Deflect %</th>';
+  html+='<th style="padding:8px 12px;text-align:right;font-size:11px;color:#64748b;font-weight:600;">Savings/Mo</th>';
+  html+='</tr></thead><tbody>';
+  for(var td=0;td<topDeflected.length;td++){
+    var dr=topDeflected[td];
+    var catColor=dr.cat==='Claimant'?'#0891b2':dr.cat==='Provider'?'#059669':'#7c3aed';
+    html+='<tr style="border-bottom:1px solid #f1f5f9;">';
+    html+='<td style="padding:10px 12px;"><span style="background:'+catColor+'1a;color:'+catColor+';font-size:10px;padding:1px 7px;border-radius:10px;margin-right:6px;">'+dr.id+'</span><span style="font-size:12px;color:#334155;">'+dr.label+'</span></td>';
+    html+='<td style="padding:10px 12px;text-align:right;font-size:12px;color:#334155;">'+dr.vol.toLocaleString()+'</td>';
+    html+='<td style="padding:10px 12px;text-align:center;">';
+    html+='<div style="background:#e0f2fe;border-radius:20px;height:18px;width:80px;margin:0 auto;overflow:hidden;position:relative;">';
+    html+='<div style="background:#0891b2;height:100%;width:'+dr.defl+'%;border-radius:20px;"></div>';
+    html+='<span style="position:absolute;top:0;left:0;right:0;font-size:10px;font-weight:700;color:#0c4a6e;line-height:18px;">'+dr.defl+'%</span>';
+    html+='</div></td>';
+    html+='<td style="padding:10px 12px;text-align:right;font-size:12px;color:#16a34a;font-weight:600;">$'+Math.round(dr.savings/1000)+'K</td>';
+    html+='</tr>';
+  }
+  html+='</tbody></table></div>';
+  /* KB Health panel */
+  html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">';
+  html+='<div style="background:#f1f5f9;padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:600;color:#1e293b;"><i class="fas fa-database" style="color:#0891b2;margin-right:8px;"></i>HAL Knowledge Base Health</div>';
+  html+='<div style="padding:16px;">';
+  var kbMetrics=[['Vector Chunks','346K','#0891b2'],['Source Documents','89','#059669'],['Freshness Score',kbHealth.freshness+'%','#d97706'],['Coverage Score',kbHealth.coverage+'%','#0891b2'],['Accuracy Score',kbHealth.accuracy+'%','#059669']];
+  for(var km=0;km<kbMetrics.length;km++){
+    var met=kbMetrics[km];
+    html+='<div style="margin-bottom:12px;">';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;color:#475569;">'+met[0]+'</span><span style="font-size:12px;font-weight:700;color:'+met[2]+';">'+met[1]+'</span></div>';
+    if(km>1){
+      var pct=parseInt(met[1]);
+      html+='<div style="background:#f1f5f9;border-radius:20px;height:6px;"><div style="background:'+met[2]+';height:100%;width:'+pct+'%;border-radius:20px;"></div></div>';
+    }
+    html+='</div>';
+  }
+  html+='<div style="background:#e0f2fe;border-radius:8px;padding:8px 10px;font-size:11px;color:#0891b2;margin-top:4px;">';
+  html+='<i class="fas fa-sync" style="margin-right:5px;"></i>Last ingested: '+kbHealth.lastIngested+' | KnowledgeCurator running nightly</div>';
+  html+='</div></div>';
+  html+='</div>'; /* end grid */
+  /* FTE Impact + ROI Summary */
+  html+='<div style="background:linear-gradient(135deg,#164e63,#0c4a6e);color:#fff;border-radius:12px;padding:20px;">';
+  html+='<div style="font-size:14px;font-weight:700;margin-bottom:14px;"><i class="fas fa-chart-line" style="margin-right:8px;"></i>CIH Business Impact Summary — FY2026</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px;">';
+  var impacts=[['$5.3M','Annual Cost Savings','fa-dollar-sign'],['65%','Call Deflection Rate','fa-filter'],['221','FTEs Redeployable','fa-users'],['14.2→5.1m','AHT Reduction','fa-clock'],['87%','First Contact Res.','fa-check-circle'],['4.6/5','CSAT Score','fa-star'],['19.2K','Monthly Contacts','fa-phone'],['89','KB Sources Indexed','fa-database']];
+  for(var im=0;im<impacts.length;im++){
+    var imp=impacts[im];
+    html+='<div style="text-align:center;background:rgba(255,255,255,0.08);border-radius:10px;padding:12px 8px;">';
+    html+='<i class="fas '+imp[2]+'" style="color:#67e8f9;font-size:16px;margin-bottom:6px;display:block;"></i>';
+    html+='<div style="font-size:18px;font-weight:700;color:#fff;">'+imp[0]+'</div>';
+    html+='<div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px;">'+imp[1]+'</div>';
+    html+='</div>';
+  }
+  html+='</div></div>';
+  html+='</div>';
+  c.innerHTML=html;
+}
+
+/* ---- Helper stubs ---- */
+window._p27focusSuggestion=function(cat){
+  var el=document.getElementById('p27-sg-'+cat);
+  if(el){el.style.outline='2px solid #0891b2';el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+};
+window._p27expandSuggestion=function(el){
+  var inner=el.querySelector('div[style*="max-height:60px"]');
+  if(inner){inner.style.maxHeight=inner.style.maxHeight==='none'?'60px':'none';}
+};
+window._p27copyAnswer=function(id){
+  var btn=document.querySelector('[onclick*="_p27copyAnswer(\''+id+'\')"]');
+  if(btn){btn.innerHTML='<i class="fas fa-check"></i> Copied!';setTimeout(function(){btn.innerHTML='<i class="fas fa-copy"></i> Copy';},1500);}
+};
+window._p27acwMode=function(){
+  var notes=document.getElementById('p27-acw-notes');
+  if(notes){notes.style.background='#fef9c3';notes.style.border='1px solid #fbbf24';}
+};
+/* ---- ProactiveNotifier detail (called from overview tab) ---- */
+window._p27showNotifyDetail=function(idx){
+  var events=window._p27notifyEventsCache||[];
+  if(!events.length)return;
+  var ev=events[idx];if(!ev)return;
+  var panel=document.getElementById('p27-notify-detail');
+  if(!panel)return;
+  panel.style.display='block';
+  panel.innerHTML='<div style="background:linear-gradient(135deg,#164e63,#0c4a6e);color:#fff;border-radius:10px;padding:14px;margin-bottom:12px;">'
+    +'<div style="font-weight:700;font-size:14px;margin-bottom:6px;"><i class="fas fa-bell" style="margin-right:8px;"></i>'+ev.event+'</div>'
+    +'<div style="font-size:12px;opacity:0.8;">Trigger: '+ev.trigger+' | Audience: '+ev.audience+'</div></div>'
+    +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;">'
+    +'<div style="font-size:12px;font-weight:600;color:#334155;margin-bottom:8px;">Sample Notification Message:</div>'
+    +'<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;color:#475569;font-style:italic;">'+ev.message+'</div>'
+    +'<div style="margin-top:10px;display:flex;gap:8px;">'
+    +'<span style="font-size:11px;background:#e0f2fe;color:#0891b2;padding:3px 10px;border-radius:20px;"><i class="fas fa-chart-line" style="margin-right:4px;"></i>Deflect est: '+ev.deflect+'%</span>'
+    +'<span style="font-size:11px;background:#d1fae5;color:#059669;padding:3px 10px;border-radius:20px;"><i class="fas fa-users" style="margin-right:4px;"></i>'+ev.volume+' contacts/mo</span>'
+    +'</div></div>';
+};
+/* ---- Nav intercept ---- */
+var _p27origNav=window.navigateTo;
+window.navigateTo=function(page){
+  if(page==='hal-cih'){
+    var pc=document.getElementById('page-content');
+    if(!pc){if(typeof _p27origNav==='function')_p27origNav(page);return;}
+    pc.innerHTML='';
+    _p27buildPage();
+    /* Mark nav active */
+    document.querySelectorAll('.nav-item').forEach(function(el){el.classList.remove('active');});
+    var navEl=document.querySelector('.hal-cih-nav');
+    if(navEl)navEl.classList.add('active');
+    window.scrollTo(0,0);
+    return;
+  }
+  if(typeof _p27origNav==='function')_p27origNav(page);
+};
+console.log('[HAL CIH] Phase 27 Contact Intelligence Hub loaded — 27 call drivers, 4 AI agents, 3 self-service portals');
+})();

@@ -364,6 +364,7 @@ function MainApp() {
         <div id="tpl-hal-agents"></div>
         <div id="tpl-hal-lineage"></div>
         <div id="tpl-hal-coa"></div>
+        <div id="tpl-hal-cih"></div>
         <div id="tpl-rfp-showcase"></div>
         <div id="tpl-core-admin"></div>
         <div id="tpl-data-ai"></div>
@@ -1040,6 +1041,10 @@ function Sidebar() {
         <a class="nav-item hal-coa-nav" onclick="navigateTo('hal-coa')" href="#">
           <i class="fas fa-rocket"></i><span>Carrier Onboarding</span>
           <span class="nav-badge" style="background:#d97706;color:#fff">COA</span>
+        </a>
+        <a class="nav-item hal-cih-nav" onclick="navigateTo('hal-cih')" href="#">
+          <i class="fas fa-headset"></i><span>Contact Intelligence</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">CIH</span>
         </a>
 
         {/* ── ILLUMIFIN PLATFORM ── */}
