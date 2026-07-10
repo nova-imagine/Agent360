@@ -81503,7 +81503,7 @@ window._p27showNotifyDetail=function(idx){
     +'</div></div>';
 };
 /* ---- Nav intercept ---- */
-var _p27origNav=window.navigateTo;
+var _p27origNav=window.navigateTo||navigateTo;
 window.navigateTo=function(page){
   if(page==='hal-cih'){
     var pc=document.getElementById('page-content');
@@ -81521,3 +81521,5 @@ window.navigateTo=function(page){
 };
 console.log('[HAL CIH] Phase 27 Contact Intelligence Hub loaded — 27 call drivers, 4 AI agents, 3 self-service portals');
 })();
+/* P27 fix: re-expose window.navigateTo to bare global so onclick="navigateTo(...)" resolves correctly */
+var navigateTo = window.navigateTo;
