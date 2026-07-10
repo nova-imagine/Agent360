@@ -77704,3 +77704,565 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   console.log('[Phase 18] Annuity & Life Operations: tab nav fixed (_p8actions) · Run AI Triage added to Annuity (Policy Admin) + Life (Claims & Benefits) · All 5 tabs fully operational for both sections');
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 19 — Client 360 Simulator: Full Rebuild
+   • Fix tab navigation (_p8actions callback-map, no raw onclick strings)
+   • Multi-client switcher: 5 clients with different LTC/Health/Life/Annuity combos
+   • All 5 tabs fully functional:
+       Tab 0 — Client Profile (demographics + all held products)
+       Tab 1 — Cross-Product Events (enriched timeline per client)
+       Tab 2 — AI Opportunities (6+ opportunities per client)
+       Tab 3 — Carrier Revenue View (revenue breakdown + pitch insight)
+       Tab 4 — Prospect Pitch Mode (carrier scenarios + deck generator)
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var COLOR = '#7c3aed';
+
+  /* ── Local score badge ──────────────────────────────────────────────────── */
+  function _p19badge(label, color) {
+    return '<span style="background:' + color + '18;color:' + color + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:800;">' + label + '</span>';
+  }
+
+  /* ── Client roster: 5 clients, each with a different product mix ────────── */
+  var _p19clients = [
+    {
+      id: 0,
+      name: 'Margaret Chen',      age: 68, dob: 'Mar 14, 1958', ssn: '***-**-4821',
+      address: '142 Riverside Drive, New York, NY 10024',
+      phone: '(212) 555-0182', email: 'margaret.chen@email.com',
+      agent: 'Patricia Lang, CLU, ChFC',
+      mix: ['Health','Annuity','Life','LTC'],
+      mixLabel: 'Health + Annuity + Life + LTC',
+      totalValue: '$1.65M', totalPremium: '$1,682/mo', lastEvent: 'Jun 2026',
+      lastEventDesc: 'Dementia diagnosis → 4-line trigger',
+      health:   { polId:'HLT-4401', product:'Medicare Supplement Plan G', carrier:'AmeriLife',   premium:'$312/mo',  effective:'Jan 2022', status:'Active' },
+      annuity:  { polId:'ANN-4401', product:'FIA Indexed 7-yr',           carrier:'Pacific Life', value:'$412,000',   effective:'Apr 2019', status:'Active', strategy:'S&P 500 P2P, 10% cap' },
+      life:     { polId:'LIF-4401', product:'IUL with Chronic Illness ABR',carrier:'Pacific Life', faceAmt:'$750,000', premium:'$420/mo', effective:'Jan 2019', status:'Active', abr:'$3,500/mo chronic illness' },
+      ltc:      { polId:'LTC-4401', product:'LTC Traditional Policy',      carrier:'MassMutual',  benefit:'$8,500/mo',ep:'90 days', status:'Active', adl:'ADL threshold: 2/6' },
+      events: [
+        { date:'Sep 2018', type:'LTC',    icon:'fa-user-nurse',       color:'#003087', event:'MassMutual LTC policy issued · $8,500/mo benefit · illumifin LTC TPA · 90-day EP · 2/6 ADL trigger' },
+        { date:'Jan 2019', type:'Life',   icon:'fa-shield-heart',     color:'#059669', event:'Pacific Life IUL with Chronic Illness ABR issued · $750,000 face · illumifin administers Life + ABR rider in single platform' },
+        { date:'Apr 2019', type:'Annuity',icon:'fa-chart-pie',        color:'#d97706', event:'Pacific Life FIA 7-yr issued · $412,000 premium · illumifin administers contract · S&P 500 indexed strategy elected' },
+        { date:'Jan 2022', type:'Health', icon:'fa-heartbeat',        color:'#dc2626', event:'Medicare Supplement Plan G enrolled at age 65 — illumifin administers AmeriLife block · Claims processing initiated' },
+        { date:'Jun 2026', type:'Cross',  icon:'fa-bolt',             color:'#7c3aed', event:'⚡ CROSS-PRODUCT EVENT: Margaret diagnosed with early-stage dementia — triggers simultaneous actions across all 4 product lines in < 15 minutes' },
+        { date:'Jun 2026', type:'LTC',    icon:'fa-file-medical-alt', color:'#003087', event:'LTC claim opened — ADL assessment scheduled · MMSE score 19/30 · 90-day EP clock started · illumifin automated claim intake' },
+        { date:'Jun 2026', type:'Life',   icon:'fa-hospital',         color:'#059669', event:'IUL ABR trigger reviewed — Chronic Illness rider: 2 ADL deficiencies confirmed · ABR benefit election: $3,500/mo accelerated' },
+        { date:'Jun 2026', type:'Annuity',icon:'fa-calculator',       color:'#d97706', event:'RMD + LTC premium cross-product AI: FIA contract value $412K · RMD 2026: $14,800 · AI recommends RMD auto-pay to LTC ($11,400/yr)' },
+        { date:'Jul 2026', type:'Health', icon:'fa-stethoscope',      color:'#dc2626', event:'Med Supp COB check: Margaret entering SNF — Medicare Part A primary · Plan G covers skilled nursing co-insurance $200/day (days 21-100)' }
+      ],
+      aiOpps: [
+        { title:'Chronic Illness Early Warning', products:'Life + LTC + Health', priority:'Critical', color:'#dc2626',
+          detail:'WealthAI detected MMSE decline signals 8 months before formal diagnosis via claim pattern analysis. Triggered proactive LTC pre-qualification, ABR readiness review, and Med Supp care coordination simultaneously. illumifin advantage: Single system sees all 4 product lines — no manual handoff between siloed vendors.' },
+        { title:'RMD → LTC Premium Auto-Pay', products:'Annuity + LTC', priority:'High', color:'#d97706',
+          detail:'IRS Sec. 7702B qualified LTC premiums can be paid from IRA/annuity RMD distributions on a tax-advantaged basis. Margaret\'s 2026 RMD ($14,800) > LTC annual premium ($11,400) — AI auto-routes RMD excess to LTC premium. Result: $11,400 LTC premium effectively tax-deductible via QCD mechanism.' },
+        { title:'ABR + LTC Benefit Coordination', products:'Life + LTC', priority:'High', color:'#059669',
+          detail:'Margaret is receiving: LTC benefit $8,500/mo + ABR acceleration $3,500/mo = $12,000/mo total. IRS offset rule: ABR reduces LTC per diem exclusion — WealthAI calculates optimal drawdown order to maximize tax exclusion. illumifin administers both simultaneously.' },
+        { title:'Unified COB — Med Supp + LTC', products:'Health + LTC', priority:'Medium', color:'#0891b2',
+          detail:'Medicare primary, Med Supp Plan G secondary, LTC tertiary (facility benefit). WealthAI COB engine calculates exact patient responsibility at each care setting transition (home → SNF → memory care). Prevents $0 benefit gaps and double-dipping.' },
+        { title:'Lapse Risk — Cross-Line Scoring', products:'All 4 Lines', priority:'Medium', color:'#7c3aed',
+          detail:'ML model scores lapse probability across all 4 held policies simultaneously. Margaret profile: Low lapse risk (score: 8/100) — all 4 policies with same admin platform drives retention. Clients holding 4+ lines have 4.2x lower lapse rate.' },
+        { title:'Mortality + LTC Drawdown Optimizer', products:'Life + LTC', priority:'Low', color:'#6b7280',
+          detail:'If LTC benefits exhaust before death, Life policy death benefit ensures estate plan intact. WealthAI models optimal benefit drawdown order given care cost projections and life expectancy. Projects estate value preservation of $340K–$680K.' }
+      ],
+      revenue: [
+        { line:'Health (Med Supp Plan G)', carrier:'AmeriLife',   polCount:1, premium:'$312/mo',  adminFee:'$18.7/mo',  retained:'$6,740/yr',   growth:'↑ renewal' },
+        { line:'Annuity (FIA 7-yr)',       carrier:'Pacific Life', polCount:1, premium:'Trail',    adminFee:'$2,060/yr', retained:'$2,060/yr',   growth:'↑ crediting yr 7' },
+        { line:'Life (IUL + ABR)',         carrier:'Pacific Life', polCount:1, premium:'$420/mo',  adminFee:'$25.2/mo',  retained:'$9,072/yr',   growth:'↑ UL COI' },
+        { line:'LTC (Traditional)',        carrier:'MassMutual',   polCount:1, premium:'$950/mo',  adminFee:'$57/mo',    retained:'$20,520/yr',  growth:'Stable' }
+      ],
+      totalAdmin: '$38,392/yr', adminMultiple: '3.8x', retentionLift: '4.2x',
+      pitchBlurb: 'The Margaret Chen scenario demonstrates: A carrier with 10,000 similar clients generates $383M in annual admin revenue for illumifin vs. $101M if LTC-only. The pitch: "You\'re paying 3 vendors. We\'ll give you 1 platform, AI across all lines, and 4.2x client retention."'
+    },
+    {
+      id: 1,
+      name: 'Robert Kincaid',    age: 72, dob: 'Jul 2, 1953', ssn: '***-**-7734',
+      address: '88 Magnolia Court, Chicago, IL 60614',
+      phone: '(312) 555-0244', email: 'robert.kincaid@email.com',
+      agent: 'James Holloway, CFP, LUTCF',
+      mix: ['Life','LTC','Annuity'],
+      mixLabel: 'Life + LTC + Annuity (no Health)',
+      totalValue: '$2.1M', totalPremium: '$2,180/mo', lastEvent: 'Mar 2026',
+      lastEventDesc: 'LTC claim filed — hip fracture / ADL trigger',
+      health: null,
+      annuity:  { polId:'ANN-7701', product:'SPIA — Lifetime Income',       carrier:'Nationwide',  value:'$680,000',   effective:'Jan 2021', status:'Active', strategy:'Single Premium Immediate Annuity · $3,800/mo income' },
+      life:     { polId:'LIF-7701', product:'Whole Life — 20-Pay',          carrier:'MassMutual',  faceAmt:'$1,200,000', premium:'$1,380/mo', effective:'Jun 2004', status:'Active', abr:'Paid-up · Dividends $4,200/yr' },
+      ltc:      { polId:'LTC-7701', product:'LTC Hybrid (Life/LTC Rider)',   carrier:'Nationwide',  benefit:'$7,200/mo', ep:'60 days', status:'Claim Active', adl:'3/6 ADL — hip fracture' },
+      events: [
+        { date:'Jun 2004', type:'Life',   icon:'fa-shield-heart',     color:'#059669', event:'MassMutual Whole Life 20-Pay issued · $1.2M face · illumifin administers policy + dividends · Paid-up status achieved 2024' },
+        { date:'Jan 2021', type:'Annuity',icon:'fa-chart-pie',        color:'#d97706', event:'Nationwide SPIA $680K premium · $3,800/mo lifetime income · illumifin administers income payments · SPIA + LTC hybrid under one admin roof' },
+        { date:'Aug 2021', type:'LTC',    icon:'fa-user-nurse',       color:'#003087', event:'Nationwide Hybrid Life/LTC rider added to SPIA block · $7,200/mo LTC benefit · 60-day EP · illumifin administers cross-product rider linkage' },
+        { date:'Mar 2026', type:'Cross',  icon:'fa-bolt',             color:'#7c3aed', event:'⚡ CROSS-PRODUCT EVENT: Robert suffers hip fracture at home — 3/6 ADL trigger — illumifin files LTC claim and adjusts SPIA income offset simultaneously' },
+        { date:'Mar 2026', type:'LTC',    icon:'fa-file-medical-alt', color:'#003087', event:'LTC Hybrid claim filed — 3 ADL deficiencies (bathing, dressing, transferring) · 60-day EP · Home health care provider contracted · illumifin care coordination active' },
+        { date:'May 2026', type:'Annuity',icon:'fa-calculator',       color:'#d97706', event:'SPIA income continues ($3,800/mo) + LTC hybrid benefit activates ($7,200/mo) = $11,000/mo total income. illumifin reconciles both streams monthly' },
+        { date:'Jun 2026', type:'Life',   icon:'fa-hospital',         color:'#059669', event:'WL paid-up dividends redirected by WealthAI: $4,200/yr dividend → LTC out-of-pocket gap coverage. No lapse risk — all 3 lines synced by illumifin' }
+      ],
+      aiOpps: [
+        { title:'Hip Fracture ADL — LTC Hybrid Activation', products:'LTC + Annuity', priority:'Critical', color:'#dc2626',
+          detail:'Robert\'s 3 ADL deficiencies (hip fracture) triggered Nationwide Hybrid LTC rider activation. illumifin cross-product engine simultaneously confirmed SPIA income continuity ($3,800/mo) + activated LTC benefit ($7,200/mo) = $11,000/mo total. No manual coordination required.' },
+        { title:'SPIA + LTC Income Stack Optimization', products:'Annuity + LTC', priority:'High', color:'#d97706',
+          detail:'WealthAI calculates SPIA income ($3,800/mo) + LTC benefit ($7,200/mo) = $11,000/mo. IRS per diem LTC exclusion: $400/day (2026). Robert\'s daily benefit $240 is fully excludable. AI tax report auto-generated for Robert\'s CPA. Unique to illumifin unified admin.' },
+        { title:'WL Dividend → LTC Gap Coverage', products:'Life + LTC', priority:'High', color:'#059669',
+          detail:'MassMutual WL 20-Pay dividends ($4,200/yr) reallocated by WealthAI to cover home health care co-pays not covered by LTC benefit. Estate plan preserves $1.2M death benefit intact. illumifin sees all 3 product lines simultaneously.' },
+        { title:'Care Transition Planning', products:'LTC + Annuity + Life', priority:'Medium', color:'#7c3aed',
+          detail:'WealthAI models Robert\'s care trajectory: Home health (est. 18 months) → ALF (est. 24 months). LTC benefit projected exhaustion at month 42. WL death benefit ($1.2M) + SPIA lifetime income ensure estate preservation at any care level.' },
+        { title:'Carrier Revenue Retention — No Health Gap', products:'Life + LTC + Annuity', priority:'Medium', color:'#0891b2',
+          detail:'Robert has no health/Med Supp coverage — Medicare Advantage gap risk. WealthAI alerts agent: Adding Med Supp Plan N would complete the 4-line relationship, increase admin revenue 28%, and improve Medicare coordination for care facility billing.' },
+        { title:'Paid-Up Life — Reduced Paid-Up Election', products:'Life', priority:'Low', color:'#6b7280',
+          detail:'WL policy is fully paid-up. WealthAI models Reduced Paid-Up election: reduces face amount but eliminates any future premium obligations. Given LTC claim active status, AI recommends maintaining current death benefit — estate plan value $1.2M intact.' }
+      ],
+      revenue: [
+        { line:'Annuity (SPIA)',         carrier:'Nationwide',  polCount:1, premium:'$3,800/mo income', adminFee:'$2,720/yr', retained:'$2,720/yr',  growth:'Stable lifetime' },
+        { line:'Life (WL 20-Pay)',       carrier:'MassMutual',  polCount:1, premium:'Paid-up',          adminFee:'$1,200/yr', retained:'$1,200/yr',  growth:'Dividend admin' },
+        { line:'LTC Hybrid (Rider)',     carrier:'Nationwide',  polCount:1, premium:'Included in SPIA', adminFee:'$3,600/yr', retained:'$3,600/yr',  growth:'↑ claim active' }
+      ],
+      totalAdmin: '$7,520/yr', adminMultiple: '2.1x', retentionLift: '3.7x',
+      pitchBlurb: 'Robert Kincaid (Life + LTC + Annuity) shows how hybrid product blocks benefit from illumifin unified admin. A carrier with 8,000 similar hybrid clients generates $60.2M in admin revenue vs. $22.4M single-line. Pitch: "Your hybrid clients are your most complex — and illumifin is the only administrator who can see across all three simultaneously."'
+    },
+    {
+      id: 2,
+      name: 'Dorothy Harrington', age: 75, dob: 'Nov 22, 1950', ssn: '***-**-3319',
+      address: '214 Sycamore Lane, Scottsdale, AZ 85251',
+      phone: '(480) 555-0371', email: 'dorothy.harrington@email.com',
+      agent: 'Sandra Reyes, CLU',
+      mix: ['Health','LTC'],
+      mixLabel: 'Health + LTC (LTC-heavy, claim in progress)',
+      totalValue: '$380K benefit reserve', totalPremium: '$1,240/mo', lastEvent: 'Jan 2026',
+      lastEventDesc: 'Memory care facility placement — LTC + Med Supp COB',
+      health:  { polId:'HLT-3301', product:'Medicare Supplement Plan F (Legacy)', carrier:'Mutual of Omaha', premium:'$328/mo', effective:'Nov 2015', status:'Active' },
+      annuity: null, life: null,
+      ltc:     { polId:'LTC-3301', product:'LTC Partnership Policy', carrier:'Mutual of Omaha', benefit:'$9,200/mo', ep:'90 days', status:'Claim Active — Day 248', adl:'4/6 ADL — Alzheimer\'s Stage 4' },
+      events: [
+        { date:'Nov 2015', type:'Health', icon:'fa-heartbeat',        color:'#dc2626', event:'Medicare Supplement Plan F enrolled · Mutual of Omaha · illumifin administers Med Supp block · Grandfathered Plan F (no longer available to new enrollees)' },
+        { date:'Nov 2015', type:'LTC',    icon:'fa-user-nurse',       color:'#003087', event:'LTC Partnership Policy issued · $9,200/mo benefit · Mutual of Omaha · illumifin LTC TPA from inception · 90-day EP · 4/6 ADL trigger' },
+        { date:'Mar 2025', type:'Cross',  icon:'fa-bolt',             color:'#7c3aed', event:'⚡ CROSS-PRODUCT EVENT: Dorothy diagnosed with Alzheimer\'s Stage 3 — illumifin simultaneously pre-authorizes LTC claim and activates Med Supp care coordination' },
+        { date:'Mar 2025', type:'LTC',    icon:'fa-file-medical-alt', color:'#003087', event:'LTC claim filed — ADL assessment: 4/6 deficiencies · MMSE 12/30 (severe) · 90-day EP begins · illumifin automated intake, care manager assigned' },
+        { date:'Jun 2025', type:'LTC',    icon:'fa-hospital',         color:'#003087', event:'LTC benefit activation: $9,200/mo paid to licensed home health agency · illumifin provider payment network active · EP satisfied Day 90' },
+        { date:'Jan 2026', type:'Health', icon:'fa-stethoscope',      color:'#dc2626', event:'Dorothy transitions to memory care facility · Med Supp Plan F covers SNF co-insurance Days 21-100 · illumifin COB engine routes Medicare → Plan F → LTC facility benefit' },
+        { date:'Jan 2026', type:'Cross',  icon:'fa-bolt',             color:'#7c3aed', event:'⚡ CROSS-PRODUCT: Partnership Policy asset protection kicks in — Medicaid spend-down protects $224,000 in assets (AZ Partnership dollar-for-dollar). illumifin files Medicaid coordination report.' },
+        { date:'Jul 2026', type:'LTC',    icon:'fa-calculator',       color:'#003087', event:'Day 248 in claim — Benefit reserve: $225,600 remaining · WealthAI projects benefit exhaustion ~Month 28 · Medicaid transition planning initiated · illumifin care transition manager activated' }
+      ],
+      aiOpps: [
+        { title:'LTC Partnership — Medicaid Asset Protection', products:'LTC', priority:'Critical', color:'#dc2626',
+          detail:'Dorothy\'s LTC Partnership Policy provides dollar-for-dollar Medicaid asset protection. After paying $224,000 in LTC benefits (Day 248), Arizona Medicaid protects $224,000 of Dorothy\'s estate from spend-down. WealthAI filed the partnership certification automatically. illumifin administers AZ Partnership coordination in-house.' },
+        { title:'Med Supp + LTC COB — Memory Care Facility', products:'Health + LTC', priority:'Critical', color:'#0891b2',
+          detail:'Memory care facility billing: Medicare Part A primary (skilled days), Plan F secondary (co-insurance), LTC facility benefit tertiary ($9,200/mo). WealthAI COB engine routes claims across all 3 payers with zero manual intervention. Prevents overpayment and duplicate claim errors.' },
+        { title:'Benefit Exhaustion — Medicaid Transition', products:'LTC + Health', priority:'High', color:'#d97706',
+          detail:'WealthAI projects LTC benefit exhaustion at Month 28 (Sep 2027). Medicaid eligibility review initiated automatically. Med Supp Plan F continues post-Medicaid. illumifin Medicaid transition team coordinates facility billing change from LTC → Medicaid rate 60 days pre-exhaustion.' },
+        { title:'Care Level Escalation Monitoring', products:'LTC', priority:'High', color:'#7c3aed',
+          detail:'Alzheimer\'s Stage 4 progression monitored via facility care reports. WealthAI models Stage 4→5 transition (estimated 6-18 months). ADL score now 4/6 — approaching 6/6. illumifin triggers benefit increase review: some carriers allow benefit pool expansion at Stage 5.' },
+        { title:'Plan F Legacy — Grandfathered Value', products:'Health', priority:'Medium', color:'#059669',
+          detail:'Dorothy holds a legacy Plan F (grandfathered, unavailable since Jan 2020). illumifin administers the Mutual of Omaha Plan F block. This represents significant carrier retention value: losing Dorothy as a Plan F member cannot be replaced. illumifin advocates for Plan F block retention above standard market rates.' },
+        { title:'Opportunity: Life Policy Gap', products:'Health + LTC', priority:'Low', color:'#6b7280',
+          detail:'Dorothy holds no life insurance. Agent alert: If Dorothy passes before Medicaid exhaustion, estate protected by Partnership ($224K) but no additional death benefit for heirs. WealthAI notes this gap in client profile — recommend Medicaid-compliant burial trust or FE policy review with family.' }
+      ],
+      revenue: [
+        { line:'Health (Med Supp Plan F)', carrier:'Mutual of Omaha', polCount:1, premium:'$328/mo', adminFee:'$19.7/mo',  retained:'$7,092/yr',  growth:'Renewal risk — age 75' },
+        { line:'LTC Partnership',          carrier:'Mutual of Omaha', polCount:1, premium:'$912/mo', adminFee:'$54.7/mo',  retained:'$19,692/yr', growth:'↑ claim active — high touch' }
+      ],
+      totalAdmin: '$26,784/yr', adminMultiple: '2.6x', retentionLift: '3.1x',
+      pitchBlurb: 'Dorothy Harrington (Health + LTC claim active) shows illumifin\'s highest-complexity admin scenario: active LTC claim + Med Supp COB + Partnership Medicaid coordination, all in one platform. A carrier with 5,000 active LTC claimants on illumifin eliminates 3–4 FTEs in manual COB reconciliation per 1,000 claimants.'
+    },
+    {
+      id: 3,
+      name: 'Frank & Gloria Bianchi', age: 69, dob: 'Apr 8, 1956 / Jun 17, 1957', ssn: '***-**-6601',
+      address: '55 Vineyard Drive, Napa, CA 94559',
+      phone: '(707) 555-0512', email: 'frank.bianchi@email.com',
+      agent: 'Thomas Gallagher, CLU, CLTC',
+      mix: ['Annuity','Life','Health'],
+      mixLabel: 'Annuity + Life + Health (couple — joint admin)',
+      totalValue: '$1.28M', totalPremium: '$2,460/mo', lastEvent: 'Feb 2026',
+      lastEventDesc: 'QLAC election — deferred income annuity + joint life review',
+      health:  { polId:'HLT-6601', product:'Medicare Supplement Plan G (Joint Admin)', carrier:'Cigna', premium:'$296/mo + $288/mo', effective:'Apr 2021', status:'Active (2 lives)' },
+      annuity: { polId:'ANN-6601', product:'QLAC — Qualifying Longevity Annuity Contract', carrier:'Pacific Life', value:'$135,000 premium', effective:'Feb 2026', status:'Active — Deferral to age 80', strategy:'IRS Sec. 401(a)(9)(B) QLAC · Income begins 2036 at $2,100/mo' },
+      life:    { polId:'LIF-6601', product:'Joint Survivorship WL (Second-to-Die)', carrier:'Nationwide', faceAmt:'$1,000,000', premium:'$1,580/mo', effective:'Mar 2008', status:'Active', abr:'Estate equalization · Trust beneficiary' },
+      ltc: null,
+      events: [
+        { date:'Mar 2008', type:'Life',   icon:'fa-shield-heart',     color:'#059669', event:'Nationwide Joint Survivorship WL issued · $1M face · Second-to-die structure · Trust beneficiary for estate equalization · illumifin administers joint life admin' },
+        { date:'Apr 2021', type:'Health', icon:'fa-heartbeat',        color:'#dc2626', event:'Both Frank & Gloria enroll in Med Supp Plan G at ages 65/64 · Cigna · illumifin administers couple under single client record — unique joint admin capability' },
+        { date:'Feb 2026', type:'Annuity',icon:'fa-chart-pie',        color:'#d97706', event:'QLAC election: $135K premium → Qualifying Longevity Annuity · IRS Sec. 401(a)(9)(B) · Removes $135K from RMD calculation until age 80 · illumifin cross-product RMD optimizer' },
+        { date:'Feb 2026', type:'Cross',  icon:'fa-bolt',             color:'#7c3aed', event:'⚡ CROSS-PRODUCT: WealthAI coordinates QLAC election + joint Med Supp review + joint survivorship WL beneficiary update — all triggered by QLAC enrollment event in one workflow' },
+        { date:'Apr 2026', type:'Health', icon:'fa-stethoscope',      color:'#dc2626', event:'Gloria\'s annual wellness claim processed — Plan G covers excess charges + Part B deductible · illumifin joint admin: both claims processed under same client number with separate benefit tracking' },
+        { date:'May 2026', type:'Life',   icon:'fa-file-signature',   color:'#059669', event:'WealthAI trust beneficiary audit: Second-to-die WL trust beneficiary last updated 2019 — illumifin alerts agent · Trust document update initiated · Estate plan refreshed with $1M benefit confirmation' }
+      ],
+      aiOpps: [
+        { title:'QLAC RMD Offset Strategy', products:'Annuity', priority:'High', color:'#d97706',
+          detail:'Frank\'s $135K QLAC election removes $135,000 from his IRA RMD calculation base until age 80. In 2026 this reduces his required RMD by $4,920/yr (3.65% factor). Income begins 2036: $2,100/mo guaranteed lifetime. WealthAI calculates total QLAC tax-deferral benefit: $39,360 over 10 years. illumifin administers QLAC reporting and IRS basis tracking.' },
+        { title:'Joint Med Supp — Couple COB Optimization', products:'Health', priority:'High', color:'#dc2626',
+          detail:'Frank & Gloria hold Plan G under joint illumifin admin. WealthAI tracks each spouse\'s claims separately, applies cross-over billing when both visit same facility, and reconciles annual deductibles for both lives simultaneously. Unique to illumifin\'s joint-life admin architecture — no competitor can process couple records under one TPA.' },
+        { title:'Second-to-Die WL — Estate Tax Planning', products:'Life', priority:'High', color:'#059669',
+          detail:'$1M second-to-die WL pays at death of the surviving spouse. With 2026 estate tax exemption at $13.6M (individual), trust beneficiary structure ensures $1M passes income-tax-free to heirs. WealthAI models 5 estate scenarios based on care cost projections and asset drawdown. illumifin alerts agent when trust needs updating.' },
+        { title:'LTC Gap Alert — No LTC Coverage', products:'Health + Life', priority:'High', color:'#7c3aed',
+          detail:'Neither Frank nor Gloria has LTC coverage. WealthAI calculates LTC risk: at age 69/68, 70% probability one spouse will need LTC within 15 years. Without LTC, $1M joint WL death benefit could be consumed by care costs. AI recommends: Hybrid Life/LTC rider on existing WL, or standalone LTC for both lives. illumifin can administer LTC rider if carrier adds it.' },
+        { title:'QLAC + Second-to-Die Drawdown Model', products:'Annuity + Life', priority:'Medium', color:'#0891b2',
+          detail:'WealthAI models income layers at age 80: SS ($4,800/mo combined) + QLAC ($2,100/mo Frank) + WL dividend income ($3,200/yr). Total: $6,900+/mo. Second-to-die WL ($1M) remains estate reserve. At second death, $1M + any remaining IRA passed to trust. AI financial plan auto-generated with 4 scenarios.' },
+        { title:'Med Supp Plan G — Annual Premium Review', products:'Health', priority:'Low', color:'#6b7280',
+          detail:'Frank age 70 / Gloria age 69 — Plan G premiums increasing 4.2%/yr with Cigna. WealthAI cross-carrier comparison: switching to a community-rated Plan G carrier could save $840/yr for the couple. illumifin retention alert: agent should contact couple before open enrollment to discuss value of staying with current carrier vs. switching.' }
+      ],
+      revenue: [
+        { line:'Health (Med Supp Plan G — 2 lives)', carrier:'Cigna',        polCount:2, premium:'$584/mo', adminFee:'$35/mo',    retained:'$12,600/yr', growth:'Couple renewal' },
+        { line:'Annuity (QLAC)',                     carrier:'Pacific Life', polCount:1, premium:'$135K single', adminFee:'$540/yr',   retained:'$540/yr',    growth:'Deferral phase' },
+        { line:'Life (Joint Survivorship WL)',        carrier:'Nationwide',  polCount:1, premium:'$1,580/mo', adminFee:'$94.8/mo',  retained:'$34,128/yr', growth:'↑ joint life COI' }
+      ],
+      totalAdmin: '$47,268/yr', adminMultiple: '4.1x', retentionLift: '4.8x',
+      pitchBlurb: 'Frank & Gloria Bianchi (couple — Annuity + Life + Health) show illumifin\'s joint-life admin capability: no competitor TPA can administer a couple\'s multi-line relationship under one client record. A carrier with 6,000 joint-life clients on illumifin generates $283M in admin revenue vs. $74M single-line. Pitch: "Joint life is our competitive moat. No one else does it."'
+    },
+    {
+      id: 4,
+      name: 'Sylvia Torres',       age: 58, dob: 'Sep 3, 1967', ssn: '***-**-9902',
+      address: '30 Oak Hill Terrace, Dallas, TX 75205',
+      phone: '(214) 555-0634', email: 'sylvia.torres@email.com',
+      agent: 'Brian Whitmore, CLU, ChFC',
+      mix: ['Annuity','Life'],
+      mixLabel: 'Annuity + Life (Pre-retirement, accumulation phase)',
+      totalValue: '$1.04M', totalPremium: '$1,480/mo', lastEvent: 'Apr 2026',
+      lastEventDesc: 'FIA contract renewal + IUL policy review',
+      health: null, ltc: null,
+      annuity: { polId:'ANN-9901', product:'FIA with Guaranteed Income Rider (GLIB)', carrier:'Allianz Life', value:'$310,000', effective:'Apr 2017', status:'Active — Year 9', strategy:'BNP Paribas Multi-Asset Index · 3.5% guaranteed floor · GLIB: $1,800/mo income from age 65' },
+      life:    { polId:'LIF-9901', product:'IUL — Maximum Accumulation Design', carrier:'North American', faceAmt:'$750,000', premium:'$1,480/mo', effective:'Oct 2016', status:'Active', abr:'Indexed: S&P 500 PTP · 12% cap · CV: $187,000' },
+      events: [
+        { date:'Oct 2016', type:'Life',   icon:'fa-shield-heart',     color:'#059669', event:'North American IUL Max-Acc issued · $750K face · Overfunded design · illumifin administers policy: COI tracking, index credits, CSV reporting' },
+        { date:'Apr 2017', type:'Annuity',icon:'fa-chart-pie',        color:'#d97706', event:'Allianz FIA with GLIB rider issued · $310K single premium · illumifin administers FIA: index crediting, GLIB roll-up tracking (5% simple annually until income start)' },
+        { date:'Mar 2022', type:'Annuity',icon:'fa-calculator',       color:'#d97706', event:'FIA Year 5 — GLIB income base roll-up: $310K → $387,500 (5% x 5 yrs) · WealthAI income projection updated: $2,100/mo estimated at age 65 · Allianz confirmed via illumifin API' },
+        { date:'Jan 2024', type:'Life',   icon:'fa-robot',            color:'#059669', event:'IUL Year 8 — Cash value $187K · S&P 500 +24.2% YTD · illumifin index crediting engine applies 12% cap · WealthAI tax-free loan projection: $1,600/mo accessible tax-free from age 65' },
+        { date:'Apr 2026', type:'Cross',  icon:'fa-bolt',             color:'#7c3aed', event:'⚡ CROSS-PRODUCT EVENT: FIA Year 9 renewal review + IUL Year 10 policy review triggered simultaneously by illumifin annual review engine · WealthAI cross-product income projection updated' },
+        { date:'Apr 2026', type:'Annuity',icon:'fa-chart-pie',        color:'#d97706', event:'FIA GLIB income base now $387,500 + 2 more years at 5% = $426,250 by age 65 → $1,800/mo guaranteed lifetime income · surrender charge period ends 2026' },
+        { date:'Apr 2026', type:'Life',   icon:'fa-shield-heart',     color:'#059669', event:'IUL Year 10 review: CSV $187K growing · Max-acc funding $1,480/mo on track · WealthAI income layer at 65: FIA $1,800/mo + IUL tax-free $1,600/mo + SS $2,400/mo = $5,800/mo total income' }
+      ],
+      aiOpps: [
+        { title:'Retirement Income Layer — FIA + IUL + SS', products:'Annuity + Life', priority:'High', color:'#d97706',
+          detail:'WealthAI retirement income model at Sylvia\'s age 65 (2032): FIA GLIB $1,800/mo guaranteed + IUL tax-free loan $1,600/mo + SS estimated $2,400/mo = $5,800/mo total. illumifin administers both FIA and IUL under one platform — cross-product income coordination eliminates sequencing risk. Unique capability.' },
+        { title:'IUL CSV Tax-Free Loan Strategy', products:'Life', priority:'High', color:'#059669',
+          detail:'IUL cash value $187K growing at 12% cap rate. By age 65, projected CSV: $340K–$480K (conservative–optimistic). WealthAI models tax-free loan strategy: withdraw $1,600/mo without triggering income tax. Loan interest credited back to indexed account. illumifin administers IUL loan requests with same-day processing.' },
+        { title:'FIA Surrender Charge Expiry — Rollover Decision', products:'Annuity', priority:'High', color:'#d97706',
+          detail:'FIA Year 9 — surrender charges expiring 2026. WealthAI evaluates 3 options: (1) Keep with Allianz GLIB (best if Sylvia needs income at 65), (2) 1035 exchange to higher-cap FIA (best for accumulation), (3) Transfer to MYGA at 6.1% (best for safety). Recommendation: Keep Allianz GLIB — income guarantee value $127,000 above account value.' },
+        { title:'LTC Gap Risk — Pre-Retirement', products:'Annuity + Life', priority:'High', color:'#7c3aed',
+          detail:'Sylvia has no LTC coverage at age 58 — optimal LTC purchase window closing. WealthAI calculates: Hybrid Life/LTC rider on North American IUL would add $6,000/mo LTC benefit for $180/mo additional premium. Alternatively, standalone LTC now vs. at 65 saves 40% in premium. illumifin can administer LTC rider if carrier adds it.' },
+        { title:'Health Coverage Gap — Pre-Medicare', products:'Annuity + Life', priority:'Medium', color:'#dc2626',
+          detail:'Sylvia is 7 years from Medicare (age 65). Currently no employer health coverage post-age 60 planned. WealthAI models ACA Marketplace premium at age 60: ~$1,100/mo (TX, Silver plan). Agent alert: Add Med Supp planning to retirement income model. illumifin can administer Med Supp at 65 — completing all 4 product lines.' },
+        { title:'Maximum Accumulation — IUL Overfunding Check', products:'Life', priority:'Low', color:'#6b7280',
+          detail:'IUL Max-Acc design is on track: $1,480/mo at 12% cap with $187K CV in Year 10. WealthAI MEC test: Current funding is at 92% of TAMRA corridor — safe, not a MEC. illumifin administers annual 7-pay test automatically. No action needed unless Sylvia adds lump-sum contribution > $18,400 in 2026.' }
+      ],
+      revenue: [
+        { line:'Annuity (FIA + GLIB)',            carrier:'Allianz Life',    polCount:1, premium:'$310K single', adminFee:'$1,550/yr', retained:'$1,550/yr',  growth:'↑ income base roll-up' },
+        { line:'Life (IUL Max-Acc)',               carrier:'North American', polCount:1, premium:'$1,480/mo',   adminFee:'$88.8/mo',  retained:'$31,968/yr', growth:'↑ CSV accumulation' }
+      ],
+      totalAdmin: '$33,518/yr', adminMultiple: '3.2x', retentionLift: '4.0x',
+      pitchBlurb: 'Sylvia Torres (Annuity + Life, accumulation phase) represents illumifin\'s fastest-growing segment: pre-retirees with FIA + IUL combinations. A carrier with 12,000 accumulation-phase clients on illumifin generates $402M in admin revenue. Pitch: "Your accumulation clients are tomorrow\'s income clients — illumifin keeps them on your platform through every life stage."'
+    }
+  ];
+
+  var _p19activeClientIdx = 0;
+  var _p19tab = 0;
+
+  /* ── Build the entire C360 page ──────────────────────────────────────────── */
+  function _p19buildPage(clientIdx, tab) {
+    _p19activeClientIdx = clientIdx;
+    _p19tab = tab;
+    var cl = _p19clients[clientIdx];
+
+    /* ── client switcher bar ── */
+    var switcher = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">'
+      + _p19clients.map(function(c, i) {
+          var k = 'p19-sw-' + c.id + '-' + Math.random().toString(36).slice(2);
+          window._p8actions[k] = (function(ci){ return function(){ _p19buildPage(ci, 0); }; })(i);
+          var active = i === clientIdx;
+          var hasBadge = function(m){ return c.mix.indexOf(m) !== -1; };
+          return '<button onclick="_p8run(\'' + k + '\')" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:2px solid ' + (active ? COLOR : '#e5e7eb') + ';background:' + (active ? COLOR + '12' : '#fff') + ';cursor:pointer;font-size:11px;font-weight:' + (active ? '800' : '600') + ';color:' + (active ? COLOR : '#374151') + ';">'
+            + '<span style="width:28px;height:28px;border-radius:50%;background:' + (active ? COLOR : '#e5e7eb') + ';color:' + (active ? '#fff' : '#6b7280') + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;">' + c.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2) + '</span>'
+            + '<div style="text-align:left;">'
+            + '<div>' + c.name.split(' ')[0] + ' ' + (c.name.split(' ').slice(-1)[0] || '') + '</div>'
+            + '<div style="font-size:9px;color:#9ca3af;font-weight:500;">' + c.mixLabel.split(' (')[0] + '</div>'
+            + '</div></button>';
+        }).join('')
+      + '</div>';
+
+    /* ── KPI bar ── */
+    var productsHTML = cl.mix.map(function(m){
+      var icons = { Health:'fa-heartbeat', Annuity:'fa-chart-pie', Life:'fa-shield-heart', LTC:'fa-user-nurse' };
+      var colors = { Health:'#dc2626', Annuity:'#d97706', Life:'#059669', LTC:'#003087' };
+      return '<span style="background:' + colors[m] + '18;color:' + colors[m] + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;"><i class="fas ' + (icons[m]||'fa-circle') + '" style="margin-right:3px;"></i>' + m + '</span>';
+    }).join('');
+
+    var kpiBar = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">'
+      + _p16kpi(cl.mix.length + '', 'Product Lines Active', 'fa-layer-group', COLOR, cl.mixLabel)
+      + _p16kpi(cl.totalValue, 'Total Policy Value', 'fa-dollar-sign', '#059669', 'Face + AUM + Benefits')
+      + _p16kpi(cl.totalPremium, 'Total Premium', 'fa-credit-card', '#d97706', 'Across all ' + cl.mix.length + ' lines')
+      + _p16kpi(cl.lastEvent, 'Last Cross-Event', 'fa-bolt', '#dc2626', cl.lastEventDesc)
+      + '</div>';
+
+    /* ── tabs (using _p8actions — NO raw onclick strings) ── */
+    var tabDefs = [
+      { label:'Client Profile',       icon:'fa-user-circle'  },
+      { label:'Cross-Product Events', icon:'fa-bolt'         },
+      { label:'AI Opportunities',     icon:'fa-robot'        },
+      { label:'Carrier Revenue View', icon:'fa-chart-line'   },
+      { label:'Prospect Pitch Mode',  icon:'fa-bullseye'     }
+    ];
+    var tabsHtml = '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:20px;border-bottom:2px solid #e5e7eb;padding-bottom:0;">';
+    tabDefs.forEach(function(td, ti) {
+      var k = 'p19-tab-' + ti + '-' + clientIdx + '-' + Math.random().toString(36).slice(2);
+      window._p8actions[k] = (function(tIdx){ return function(){ _p19buildPage(clientIdx, tIdx); }; })(ti);
+      var isActive = ti === tab;
+      tabsHtml += '<button onclick="_p8run(\'' + k + '\')" style="display:flex;align-items:center;gap:6px;padding:9px 14px;border:none;border-bottom:3px solid ' + (isActive ? COLOR : 'transparent') + ';background:transparent;cursor:pointer;font-size:11px;font-weight:' + (isActive ? '800' : '600') + ';color:' + (isActive ? COLOR : '#6b7280') + ';white-space:nowrap;">'
+        + '<i class="fas ' + td.icon + '"></i>' + td.label + '</button>';
+    });
+    tabsHtml += '</div>';
+
+    /* ── tab bodies ── */
+    var body = '';
+
+    /* TAB 0 — Client Profile */
+    if (tab === 0) {
+      var productCard = function(icon, label, color, pol) {
+        if (!pol) return '';
+        return '<div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e5e7eb;">'
+          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
+          + '<i class="fas ' + icon + '" style="color:' + color + ';"></i>'
+          + '<span style="font-size:12px;font-weight:800;color:#111827;">' + label + '</span>'
+          + '<span style="margin-left:auto;background:' + (pol.status && pol.status.toLowerCase().includes('active') ? '#05966918' : '#dc262618') + ';color:' + (pol.status && pol.status.toLowerCase().includes('active') ? '#059669' : '#dc2626') + ';border-radius:4px;padding:2px 8px;font-size:9px;font-weight:700;">' + (pol.status || 'Active') + '</span>'
+          + '</div>'
+          + Object.keys(pol).filter(function(k){ return k !== 'status'; }).map(function(k){
+              var labels = { polId:'Policy ID', product:'Product', carrier:'Carrier', premium:'Premium', effective:'Effective',
+                             value:'Current Value', strategy:'Index Strategy / Income', faceAmt:'Face Amount', abr:'ABR / Dividend / Notes',
+                             benefit:'Monthly Benefit', ep:'Elimination Period', adl:'ADL Trigger / Stage' };
+              return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;font-size:11px;">'
+                + '<span style="color:#6b7280;">' + (labels[k]||k) + '</span>'
+                + '<span style="font-weight:700;color:#111827;max-width:60%;text-align:right;">' + pol[k] + '</span></div>';
+            }).join('')
+          + '</div>';
+      };
+
+      var noProduct = function(lines) {
+        return '<div style="background:#fff8f0;border:1px dashed #e5e7eb;border-radius:10px;padding:14px;text-align:center;color:#9ca3af;font-size:11px;">'
+          + '<i class="fas fa-plus-circle" style="margin-bottom:6px;font-size:18px;display:block;color:#e5e7eb;"></i>'
+          + '<span style="font-weight:700;">No ' + lines + ' Coverage</span><br>'
+          + '<span style="font-size:10px;">AI opportunity flagged — see AI Opportunities tab</span>'
+          + '</div>';
+      };
+
+      var aiMsg = 'Client 360 AI: ' + cl.name + ' holds ' + cl.mix.length + ' product line' + (cl.mix.length > 1 ? 's' : '') + ' on illumifin\'s unified platform ('+ cl.mix.join(' + ') + '). '
+        + 'Total relationship value: ' + cl.totalValue + ' · Total premium: ' + cl.totalPremium + '. '
+        + 'WealthAI profile confidence: High. '
+        + 'Last cross-product event: ' + cl.lastEvent + ' — ' + cl.lastEventDesc + '.';
+
+      var grid3 = '';
+      var hasAll4 = cl.health && cl.annuity && cl.life && cl.ltc;
+      if (hasAll4) {
+        grid3 = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">'
+          + productCard('fa-chart-pie',    'Annuity — ' + (cl.annuity.product || 'FIA'), '#d97706', cl.annuity)
+          + productCard('fa-shield-heart', 'Life — ' + (cl.life.product || 'IUL'), '#059669', cl.life)
+          + productCard('fa-user-nurse',   'LTC — ' + (cl.ltc.product || 'LTC'), '#003087', cl.ltc)
+          + '</div>';
+      } else {
+        var grid2Items = [];
+        if (cl.annuity) grid2Items.push(productCard('fa-chart-pie',    'Annuity — ' + cl.annuity.product, '#d97706', cl.annuity));
+        else grid2Items.push(noProduct('Annuity'));
+        if (cl.life)    grid2Items.push(productCard('fa-shield-heart', 'Life — ' + cl.life.product,    '#059669', cl.life));
+        else grid2Items.push(noProduct('Life'));
+        if (cl.ltc)     grid2Items.push(productCard('fa-user-nurse',   'LTC — ' + cl.ltc.product,     '#003087', cl.ltc));
+        else grid2Items.push(noProduct('LTC'));
+        var cols = Math.min(3, grid2Items.filter(Boolean).length);
+        grid3 = '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:14px;">' + grid2Items.join('') + '</div>';
+      }
+
+      body = _p16aiPanel(aiMsg)
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;">'
+        + '<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:12px;"><i class="fas fa-user-circle" style="color:' + COLOR + ';margin-right:6px;"></i>Client Profile</div>'
+        + [['Name', cl.name], ['Age', cl.age + ' · DOB: ' + cl.dob], ['Address', cl.address], ['Phone', cl.phone], ['Email', cl.email], ['Agent', cl.agent], ['Products', cl.mixLabel]].map(function(kv){
+            return '<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:11px;">'
+              + '<span style="color:#6b7280;min-width:70px;">' + kv[0] + '</span>'
+              + '<span style="font-weight:700;color:#111827;">' + kv[1] + '</span></div>';
+          }).join('')
+        + '<div style="margin-top:12px;">' + productsHTML + '</div>'
+        + '</div>'
+        + '<div>' + (cl.health ? productCard('fa-heartbeat', 'Health — ' + cl.health.product, '#dc2626', cl.health) : noProduct('Health')) + '</div>'
+        + '</div>'
+        + grid3;
+    }
+
+    /* TAB 1 — Cross-Product Events */
+    else if (tab === 1) {
+      var crossCount = cl.events.filter(function(e){ return e.type === 'Cross'; }).length;
+      body = _p16aiPanel('Cross-Product Event Engine: ' + crossCount + ' cross-product trigger event' + (crossCount > 1 ? 's' : '') + ' detected for ' + cl.name + '. '
+        + 'illumifin\'s unified data model enables simultaneous automated responses across all product lines — no manual handoffs. '
+        + 'Timeline shows the full lifecycle of this client\'s relationship across all carriers and product lines.')
+        + '<div style="position:relative;padding-left:24px;">'
+        + '<div style="position:absolute;left:7px;top:0;bottom:0;width:2px;background:#e5e7eb;"></div>'
+        + cl.events.map(function(e) {
+            return '<div style="position:relative;margin-bottom:16px;">'
+              + '<div style="position:absolute;left:-20px;top:3px;width:14px;height:14px;border-radius:50%;background:' + e.color + ';border:2px solid #fff;box-shadow:0 0 0 2px ' + e.color + ';"></div>'
+              + '<div style="background:#fff;border:1px solid ' + (e.type==='Cross' ? e.color : '#e5e7eb') + ';border-radius:10px;padding:12px 14px;' + (e.type==='Cross' ? 'background:' + e.color + '08;' : '') + '">'
+              + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+              + '<span style="background:' + e.color + '18;color:' + e.color + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">' + e.type + '</span>'
+              + '<span style="font-size:11px;color:#6b7280;">' + e.date + '</span>'
+              + '<i class="fas ' + e.icon + '" style="color:' + e.color + ';margin-left:auto;"></i>'
+              + '</div>'
+              + '<div style="font-size:12px;color:#374151;line-height:1.6;">' + e.event + '</div>'
+              + '</div></div>';
+          }).join('')
+        + '</div>';
+    }
+
+    /* TAB 2 — AI Opportunities */
+    else if (tab === 2) {
+      var critCount = cl.aiOpps.filter(function(o){ return o.priority === 'Critical'; }).length;
+      var highCount = cl.aiOpps.filter(function(o){ return o.priority === 'High'; }).length;
+      body = _p16aiPanel('WealthAI identified ' + cl.aiOpps.length + ' cross-product optimization opportunities for ' + cl.name
+        + ' — ' + critCount + ' Critical, ' + highCount + ' High priority. '
+        + 'These opportunities are ONLY visible through illumifin\'s unified cross-product platform. Siloed administrators cannot see across product lines.')
+        + '<div style="display:grid;grid-template-columns:repeat(3,auto);gap:10px;margin-bottom:14px;">'
+        + _p16kpi(critCount + '', 'Critical', 'fa-exclamation-triangle', '#dc2626', 'Immediate action needed')
+        + _p16kpi(highCount + '', 'High Priority', 'fa-arrow-up', '#d97706', 'Action this month')
+        + _p16kpi((cl.aiOpps.length - critCount - highCount) + '', 'Medium/Low', 'fa-info-circle', '#6b7280', 'Monitor & plan')
+        + '</div>'
+        + cl.aiOpps.map(function(o) {
+            var prioColor = { 'Critical':'#dc2626','High':'#d97706','Medium':'#0891b2','Low':'#6b7280' };
+            var pc = prioColor[o.priority] || '#6b7280';
+            var kBtn = 'p19-opp-btn-' + Math.random().toString(36).slice(2);
+            window._p8actions[kBtn] = (function(oTitle, oDetail){ return function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI Action: ' + oTitle + ' — Workflow initiated. Next step recommendations sent to agent dashboard.', 3500); }; })(o.title, o.detail);
+            return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">'
+              + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+              + '<div style="width:36px;height:36px;border-radius:8px;background:' + o.color + '18;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+              + '<i class="fas fa-robot" style="color:' + o.color + ';"></i></div>'
+              + '<div style="flex:1;">'
+              + '<div style="font-size:13px;font-weight:800;color:#111827;">' + o.title + '</div>'
+              + '<div style="font-size:11px;color:#6b7280;">' + o.products + '</div></div>'
+              + '<span style="background:' + pc + '18;color:' + pc + ';border-radius:4px;padding:3px 10px;font-size:10px;font-weight:800;white-space:nowrap;">' + o.priority + '</span>'
+              + '</div>'
+              + '<div style="font-size:12px;color:#374151;line-height:1.65;background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:8px;">' + o.detail + '</div>'
+              + '<button onclick="_p8run(\'' + kBtn + '\')" style="background:' + o.color + ';color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">'
+              + '<i class="fas fa-bolt" style="margin-right:4px;"></i>Act on This</button>'
+              + '</div>';
+          }).join('');
+    }
+
+    /* TAB 3 — Carrier Revenue View */
+    else if (tab === 3) {
+      var revRows = cl.revenue.map(function(r) {
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;">' + r.line + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + r.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;text-align:center;">' + r.polCount + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#003087;">' + r.premium + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:' + COLOR + ';">' + (typeof r.adminFee === 'string' ? r.adminFee : r.adminFee) + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#059669;">' + r.retained + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;color:#059669;">' + r.growth + '</td>'
+          + '</tr>';
+      }).join('');
+
+      body = _p16aiPanel('Revenue Intelligence: ' + cl.name + ' generates ' + cl.totalAdmin + ' in illumifin administration revenue across ' + cl.mix.length + ' product lines. '
+        + 'Cross-product multiple: ' + cl.adminMultiple + ' vs. single-line relationship. Retention lift: ' + cl.retentionLift + 'x.')
+        + _p16sectionHdr('fa-chart-line', 'Carrier Revenue View — Administration Revenue per Client', COLOR)
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">'
+        + _p16kpi(cl.totalAdmin, 'illumifin Admin Revenue', 'fa-dollar-sign', COLOR, cl.name + ' · ' + cl.mix.length + ' lines')
+        + _p16kpi(cl.adminMultiple, 'Revenue vs. Single-Line', 'fa-chart-bar', '#059669', 'Cross-product multiplier')
+        + _p16kpi(cl.retentionLift + 'x', 'Retention Rate Lift', 'fa-shield-alt', '#003087', 'vs. single-line clients')
+        + '</div>'
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Product Line','Carrier','Policies','Client Premium','illumifin Admin Fee','Annual Retained Revenue','Growth Driver'])
+        + '<tbody>' + revRows + '</tbody></table></div></div>'
+        + '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:10px;padding:16px;color:#fff;">'
+        + '<div style="font-size:12px;font-weight:800;color:#60a5fa;margin-bottom:8px;"><i class="fas fa-lightbulb" style="margin-right:6px;"></i>CARRIER PITCH INSIGHT — ' + cl.name.toUpperCase() + '</div>'
+        + '<div style="font-size:12px;color:#e2e8f0;line-height:1.7;">' + cl.pitchBlurb + '</div>'
+        + '</div>';
+    }
+
+    /* TAB 4 — Prospect Pitch Mode */
+    else if (tab === 4) {
+      var scenarios = [
+        { carrier:'Nationwide', current:'LTC Only',    potential:'LTC + Health + Annuity', clients:8400,  ltcRev:'$8.4M',  fullRev:'$32.3M', delta:'+$23.9M', probability:'High'   },
+        { carrier:'USAA',       current:'None',         potential:'All 4 Lines (Hybrid)',   clients:3200,  ltcRev:'—',      fullRev:'$12.3M', delta:'+$12.3M', probability:'Medium' },
+        { carrier:'Cigna',      current:'Health',       potential:'Health + LTC + Life',    clients:12000, ltcRev:'—',      fullRev:'$46.1M', delta:'+$46.1M', probability:'High'   },
+        { carrier:'Protective', current:'Annuity',      potential:'Annuity + LTC + Life',   clients:5600,  ltcRev:'—',      fullRev:'$21.5M', delta:'+$21.5M', probability:'High'   },
+        { carrier:'Allianz',    current:'Annuity (FIA)','potential':'Annuity + Life + LTC', clients:9200,  ltcRev:'—',      fullRev:'$35.4M', delta:'+$35.4M', probability:'High'   },
+        { carrier:'MassMutual', current:'Life + LTC',   potential:'All 4 Lines',            clients:7800,  ltcRev:'$18.7M', fullRev:'$49.8M', delta:'+$31.1M', probability:'High'   }
+      ];
+      var totalDelta = '$169.3M';
+
+      var kDeck   = 'p19-deck-'   + Math.random().toString(36).slice(2);
+      var kDemo   = 'p19-demo-'   + Math.random().toString(36).slice(2);
+      var kModel  = 'p19-model-'  + Math.random().toString(36).slice(2);
+      var kSim    = 'p19-sim-'    + Math.random().toString(36).slice(2);
+      window._p8actions[kDeck]  = function(){ _p16toast('<i class="fas fa-file-powerpoint"></i> Carrier pitch deck generated — ' + cl.name + ' scenario · 14-slide executive presentation · ROI model · Cross-product AI demo · PDF + PowerPoint ready for ' + scenarios[0].carrier + ', ' + scenarios[2].carrier + ', ' + scenarios[5].carrier, 4500); };
+      window._p8actions[kDemo]  = function(){ _p16toast('<i class="fas fa-calendar-check"></i> Live platform demo scheduled — Nationwide: Jul 15 · Cigna: Jul 22 · MassMutual: Jul 28 · WealthAI cross-product simulation with ' + cl.name + ' scenario pre-loaded · Agenda sent to carrier contacts', 4500); };
+      window._p8actions[kModel] = function(){ _p16toast('<i class="fas fa-robot"></i> WealthAI Revenue Model: Total pipeline across 6 prospects = ' + totalDelta + ' in incremental annual admin revenue · MassMutual highest value ($31.1M incremental) · Cigna priority 1 ($46.1M full) · Priority ranking: Cigna > MassMutual > Allianz > Nationwide > Protective > USAA', 5000); };
+      window._p8actions[kSim]   = function(){ _p16toast('<i class="fas fa-users-viewfinder"></i> Switching to client simulation: Loading ' + cl.name + ' scenario into live platform demo mode — all 5 tabs active, real-time COB engine, cross-product event replay enabled.', 3500); };
+
+      var scRows = scenarios.map(function(s) {
+        var prioColor = { 'High':'#059669','Medium':'#d97706','Low':'#6b7280' };
+        var pc = prioColor[s.probability] || '#6b7280';
+        return '<tr style="border-bottom:1px solid #f3f4f6;">'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#003087;">' + s.carrier + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;">' + s.current + '</td>'
+          + '<td style="padding:9px 12px;font-size:11px;font-weight:700;color:' + COLOR + ';">' + s.potential + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;text-align:right;">' + s.clients.toLocaleString() + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#6b7280;text-align:right;">' + s.ltcRev + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:700;color:#059669;text-align:right;">' + s.fullRev + '</td>'
+          + '<td style="padding:9px 12px;font-size:12px;font-weight:800;color:#7c3aed;text-align:right;">' + s.delta + '</td>'
+          + '<td style="padding:9px 12px;"><span style="background:' + pc + '18;color:' + pc + ';border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">' + s.probability + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      body = '<div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:20px;color:#fff;margin-bottom:20px;">'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+        + '<div style="width:48px;height:48px;border-radius:12px;background:rgba(124,58,237,.3);display:flex;align-items:center;justify-content:center;">'
+        + '<i class="fas fa-bullseye" style="font-size:24px;color:#a78bfa;"></i></div>'
+        + '<div><div style="font-size:18px;font-weight:800;">Prospect Pitch Mode</div>'
+        + '<div style="font-size:12px;opacity:.8;">Show carriers what they\'re leaving on the table — client scenario: ' + cl.name + '</div></div>'
+        + '<div style="margin-left:auto;text-align:right;">'
+        + '<div style="font-size:22px;font-weight:900;color:#34d399;">' + totalDelta + '</div>'
+        + '<div style="font-size:10px;opacity:.7;">Total incremental pipeline across 6 carriers</div>'
+        + '</div></div>'
+        + '<div style="font-size:12px;color:#e2e8f0;line-height:1.7;background:rgba(255,255,255,.05);border-radius:8px;padding:14px;">'
+        + cl.pitchBlurb
+        + '</div></div>'
+        + _p16sectionHdr('fa-chart-bar', 'Carrier Opportunity Scenarios — Cross-Product Revenue Potential', COLOR)
+        + '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+        + '<div style="padding:10px 14px;background:#faf5ff;border-bottom:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;">'
+        + '<button onclick="_p8run(\'' + kDeck + '\')" style="background:' + COLOR + ';color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-file-powerpoint" style="margin-right:5px;"></i>Generate Carrier Deck</button>'
+        + '<button onclick="_p8run(\'' + kDemo + '\')" style="background:#059669;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-calendar-check" style="margin-right:5px;"></i>Schedule Demo</button>'
+        + '<button onclick="_p8run(\'' + kModel + '\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Revenue Model</button>'
+        + '<button onclick="_p8run(\'' + kSim + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-play" style="margin-right:5px;"></i>Live Client Simulation</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+        + _p16tblHdr(['Carrier','Current illumifin','Potential Scope','Eligible Clients','LTC-Only Rev.','Full HAL+LTC Rev.','Incremental Delta','Probability'])
+        + '<tbody>' + scRows + '</tbody></table></div></div>'
+        + '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">'
+        + '<div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:6px;"><i class="fas fa-trophy" style="margin-right:6px;"></i>WIN SCENARIO SUMMARY</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:11px;">'
+        + '<div><div style="font-weight:800;font-size:16px;color:#059669;">' + totalDelta + '</div><div style="color:#6b7280;">Total Pipeline</div></div>'
+        + '<div><div style="font-weight:800;font-size:16px;color:#7c3aed;">46,200</div><div style="color:#6b7280;">Total Eligible Clients</div></div>'
+        + '<div><div style="font-weight:800;font-size:16px;color:#003087;">4 of 6</div><div style="color:#6b7280;">High Probability Pursuits</div></div>'
+        + '</div></div>';
+    }
+
+    /* ── page wrapper ── */
+    var pageHtml = '<div style="padding:22px;background:#f8fafc;min-height:100vh;">'
+      + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 22px;border-radius:12px 12px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas fa-users-viewfinder" style="font-size:22px;"></i>'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:18px;font-weight:800;">Client 360 Simulator — ' + cl.name + ', Age ' + cl.age + '</div>'
+      + '<div style="font-size:11px;opacity:.82;">' + cl.mixLabel + ' | All lines on illumifin\'s unified platform | ' + cl.totalValue + ' total value</div>'
+      + '</div></div>'
+      + '<div style="padding:20px 22px;background:#fff;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;margin-bottom:20px;">'
+      + switcher
+      + kpiBar
+      + tabsHtml
+      + body
+      + '</div></div>';
+
+    _p16buildPage('tpl-hal-client360', pageHtml);
+  }
+
+  /* ── Override Phase 16 C360 entry points ────────────────────────────────── */
+  window._p16navC360Tab   = function(t){ _p19buildPage(_p19activeClientIdx, t); };
+  window.initClient360Page = function(){ _p19buildPage(0, 0); };
+
+  console.log('[Phase 19] Client 360 Simulator rebuilt: 5 clients (Margaret Chen H+A+L+LTC · Robert Kincaid L+LTC+A · Dorothy Harrington H+LTC · Frank & Gloria Bianchi A+L+H · Sylvia Torres A+L) · All 5 tabs operational · Tab nav fixed (_p8actions) · Client switcher · AI Opportunities with Act buttons · Carrier Revenue View · Prospect Pitch Mode with 6 carrier scenarios');
+
+})();
