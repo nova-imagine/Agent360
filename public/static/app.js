@@ -81518,3 +81518,773 @@ console.log('[HAL CIH] Phase 27 Contact Intelligence Hub loaded — 27 call driv
 })();
 /* P27 fix: re-expose window.navigateTo to bare global so onclick="navigateTo(...)" resolves correctly */
 var navigateTo = window.navigateTo;
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 28 — HAL Claims Analytics Intelligence & Fraud Detection Engine (CAID)
+   AI-Powered Claims Intelligence · Predictive Fraud Scoring · SIU Workbench
+   Nav: hal-caid  |  Badge: CAID  |  Color: #dc2626 (red/crimson)
+   5 Tabs: overview · claimsIntel · fraudDetection · siuWorkbench · analytics
+   ═══════════════════════════════════════════════════════════════════════ */
+(function(){ 'use strict';
+  var CA1='#dc2626'; var CA2='#ef4444'; var CA3='#7f1d1d';
+  var CA4='#fef2f2'; var CAG='#16a34a'; var CAB='#1d4ed8'; var CAA='#d97706';
+
+  var _p28activeTab='overview';
+  var _p28activeFraud=null;
+  var _p28activeClaim=null;
+  var _p28activeSIU=null;
+  var _p28fraudFilter='all';
+  var _p28claimFilter='all';
+
+  /* ── 30 Real LTC claims for the portfolio ── */
+  var _p28claims=[
+    {id:'LTC-2024-10041',claimant:'Margaret O\'Brien',age:83,policy:'NYL-LTC-0041',carrier:'New York Life',type:'Nursing Facility',status:'Under Review',daysOpen:47,dailyBenefit:220,monthlyPaid:6160,fraudScore:91,flags:['billing_spike','multiple_facilities','rapid_ep'],assignee:'J. Torres',state:'FL',facilityName:'Sunrise Manor NF',billedAmount:9240,approvedAmount:0,savings:0},
+    {id:'LTC-2024-10042',claimant:'Robert Hensley',age:78,policy:'MET-LTC-7832',carrier:'MetLife',type:'Home Health',status:'Approved',daysOpen:12,dailyBenefit:150,monthlyPaid:4500,fraudScore:14,flags:[],assignee:'S. Patel',state:'TX',facilityName:'CareFirst HHA',billedAmount:4800,approvedAmount:4500,savings:0},
+    {id:'LTC-2024-10043',claimant:'Dorothy Yamamoto',age:91,policy:'JHN-LTC-2219',carrier:'John Hancock',type:'Memory Care',status:'Flagged — SIU',daysOpen:89,dailyBenefit:310,monthlyPaid:0,fraudScore:97,flags:['phantom_billing','provider_kickback','forged_cmr'],assignee:'SIU-Team',state:'CA',facilityName:'Pacific Memory Center',billedAmount:27900,approvedAmount:0,savings:27900},
+    {id:'LTC-2024-10044',claimant:'Harold Simmons',age:76,policy:'TRV-LTC-5541',carrier:'Travelers',type:'Assisted Living',status:'Approved',daysOpen:5,dailyBenefit:180,monthlyPaid:5400,fraudScore:22,flags:[],assignee:'A. Kim',state:'NY',facilityName:'Brookview ALF',billedAmount:5600,approvedAmount:5400,savings:0},
+    {id:'LTC-2024-10045',claimant:'Evelyn Marchetti',age:88,policy:'PRU-LTC-8812',carrier:'Prudential',type:'Nursing Facility',status:'Pending EP',daysOpen:31,dailyBenefit:260,monthlyPaid:0,fraudScore:38,flags:['ep_manipulation'],assignee:'B. Nguyen',state:'AZ',facilityName:'Desert Springs SNF',billedAmount:8060,approvedAmount:0,savings:0},
+    {id:'LTC-2024-10046',claimant:'George Whitfield',age:82,policy:'NYL-LTC-0099',carrier:'New York Life',type:'Home Health',status:'Approved',daysOpen:8,dailyBenefit:140,monthlyPaid:4200,fraudScore:9,flags:[],assignee:'S. Patel',state:'GA',facilityName:'HomeWell HHA',billedAmount:4300,approvedAmount:4200,savings:0},
+    {id:'LTC-2024-10047',claimant:'Shirley Kowalczyk',age:79,policy:'MET-LTC-3311',carrier:'MetLife',type:'Adult Day Care',status:'Under Review',daysOpen:22,dailyBenefit:90,monthlyPaid:0,fraudScore:74,flags:['upcoding','days_inflation'],assignee:'J. Torres',state:'IL',facilityName:'Bright Days ADC',billedAmount:3780,approvedAmount:0,savings:0},
+    {id:'LTC-2024-10048',claimant:'Walter Garrison',age:85,policy:'LNC-LTC-6678',carrier:'Lincoln Financial',type:'Nursing Facility',status:'Approved',daysOpen:3,dailyBenefit:200,monthlyPaid:6000,fraudScore:11,flags:[],assignee:'R. Chen',state:'OH',facilityName:'Riverside Care Center',billedAmount:6100,approvedAmount:6000,savings:0},
+    {id:'LTC-2024-10049',claimant:'Beatrice Fontaine',age:94,policy:'JHN-LTC-4490',carrier:'John Hancock',type:'Memory Care',status:'Flagged — SIU',daysOpen:63,dailyBenefit:330,monthlyPaid:0,fraudScore:88,flags:['phantom_billing','unlicensed_facility'],assignee:'SIU-Team',state:'FL',facilityName:'Coral Memory Care',billedAmount:20790,approvedAmount:0,savings:20790},
+    {id:'LTC-2024-10050',claimant:'Francis Delacroix',age:77,policy:'PRU-LTC-2201',carrier:'Prudential',type:'Hospice',status:'Approved',daysOpen:14,dailyBenefit:175,monthlyPaid:5250,fraudScore:6,flags:[],assignee:'A. Kim',state:'LA',facilityName:'Pelican Hospice',billedAmount:5300,approvedAmount:5250,savings:0},
+    {id:'LTC-2024-10051',claimant:'Agnes Thibodeau',age:86,policy:'TRV-LTC-9921',carrier:'Travelers',type:'Nursing Facility',status:'Under Review',daysOpen:35,dailyBenefit:240,monthlyPaid:0,fraudScore:62,flags:['billing_spike','identity_mismatch'],assignee:'B. Nguyen',state:'MA',facilityName:'Harbor View SNF',billedAmount:8400,approvedAmount:0,savings:0},
+    {id:'LTC-2024-10052',claimant:'Chester Albright',age:80,policy:'NYL-LTC-0112',carrier:'New York Life',type:'Home Health',status:'Approved',daysOpen:6,dailyBenefit:160,monthlyPaid:4800,fraudScore:17,flags:[],assignee:'J. Torres',state:'NC',facilityName:'Carolina HHA',billedAmount:4900,approvedAmount:4800,savings:0},
+    {id:'LTC-2024-10053',claimant:'Norma Jean Briggs',age:89,policy:'MET-LTC-5577',carrier:'MetLife',type:'Assisted Living',status:'Flagged — SIU',daysOpen:71,dailyBenefit:290,monthlyPaid:0,fraudScore:93,flags:['phantom_billing','forged_cmr','provider_kickback'],assignee:'SIU-Team',state:'PA',facilityName:'Liberty Ridge ALF',billedAmount:20590,approvedAmount:0,savings:20590},
+    {id:'LTC-2024-10054',claimant:'Leonard Fujimoto',age:74,policy:'LNC-LTC-8843',carrier:'Lincoln Financial',type:'Home Health',status:'Approved',daysOpen:9,dailyBenefit:130,monthlyPaid:3900,fraudScore:8,flags:[],assignee:'R. Chen',state:'WA',facilityName:'Pacific HHA',billedAmount:4000,approvedAmount:3900,savings:0},
+    {id:'LTC-2024-10055',claimant:'Mildred Castillo',age:92,policy:'JHN-LTC-7763',carrier:'John Hancock',type:'Memory Care',status:'Under Review',daysOpen:28,dailyBenefit:350,monthlyPaid:0,fraudScore:55,flags:['rapid_ep','days_inflation'],assignee:'S. Patel',state:'TX',facilityName:'Texan Memory Institute',billedAmount:9800,approvedAmount:0,savings:0}
+  ];
+
+  /* ── Fraud Signal Taxonomy ── */
+  var _p28fraudSignals=[
+    {id:'FS-001',name:'Phantom Billing',category:'Provider Fraud',severity:'critical',description:'Claims submitted for services not rendered. AI cross-references CMR dates with facility occupancy records and CMS data.',mlModel:'RNN Sequence Anomaly',accuracy:96.2,avgSavings:28400,ytdCases:47,ytdSavings:1334800,indicators:['CMR dates don\'t match facility census','Service codes billed beyond licensed capacity','Provider billed 28+ days in a month for same patient','Identical claim amounts across multiple patients']},
+    {id:'FS-002',name:'Upcoding / Service Inflation',category:'Billing Fraud',severity:'high',description:'Provider bills for higher-level care than delivered. AI compares billed service codes against functional assessment scores and care notes.',mlModel:'XGBoost Classification',accuracy:91.8,avgSavings:12200,ytdCases:83,ytdSavings:1012600,indicators:['ADL scores inconsistent with skilled nursing level billed','Therapy minutes billed exceed documented sessions','Rapid escalation of care level without clinical basis','Facility bills ICF rate for resident documented at personal care']},
+    {id:'FS-003',name:'Provider Kickback Schemes',category:'Collusion Fraud',severity:'critical',description:'Facility refers patients in exchange for payments or inflated referral fees. Network analysis detects unusual claimant-provider concentration.',mlModel:'Graph Neural Network',accuracy:88.4,avgSavings:51600,ytdCases:12,ytdSavings:619200,indicators:['>40% of claimants referred by single agent/facility','Agent and facility share address or ownership','Premium refund checks cashed at facility','Policy upgrades correlated with facility admissions']},
+    {id:'FS-004',name:'Identity & Eligibility Fraud',category:'Claimant Fraud',severity:'high',description:'Claim filed by or for deceased, ineligible, or non-existent beneficiary. HAL cross-references SSA death index, DMV, and real-time identity verification.',mlModel:'BERT + SSA Cross-check',accuracy:99.1,avgSavings:34800,ytdCases:8,ytdSavings:278400,indicators:['SSN appears on SSA death master file','DOB inconsistency across claim documents','POA documents filed after policy lapse','Multiple policies with identical beneficiary SSN']},
+    {id:'FS-005',name:'Elimination Period Manipulation',category:'Policy Fraud',severity:'medium',description:'Claimant or provider manipulates EP count to accelerate benefit start. AI tracks EP day progression against care facility records.',mlModel:'Temporal LSTM',accuracy:87.3,avgSavings:9800,ytdCases:61,ytdSavings:597800,indicators:['CMR submitted without corresponding facility admission record','EP days counted during hospital stay (excluded period)','Multiple EP restart attempts within 6 months','Retroactive care date changes on CMR submissions']},
+    {id:'FS-006',name:'Forged Clinical Documentation',category:'Document Fraud',severity:'critical',description:'CMRs, physician certifications, or care plans are altered or fabricated. HAL OCR + NLP analyzes document metadata, ink signatures, and content anomalies.',mlModel:'Vision Transformer + NLP',accuracy:93.7,avgSavings:19200,ytdCases:34,ytdSavings:652800,indicators:['PDF metadata creation date differs from document date','Physician signature hash mismatch across submissions','ICD codes on CMR inconsistent with attending physician specialty','Typeface inconsistency within single document']},
+    {id:'FS-007',name:'Billing Spike Anomaly',category:'Billing Fraud',severity:'medium',description:'Sudden unexplained increase in billed amounts from a historically consistent provider. HAL time-series analysis detects anomalous billing trajectories.',mlModel:'Isolation Forest + ARIMA',accuracy:89.5,avgSavings:7600,ytdCases:128,ytdSavings:972800,indicators:['>35% month-over-month billing increase without census change','New billing codes introduced without staff qualification change','Billing spike correlates with staff turnover or ownership change','Holiday period billing inconsistencies']},
+    {id:'FS-008',name:'Multiple Facility Overlap',category:'Provider Fraud',severity:'high',description:'Same beneficiary billed by two or more facilities for the same dates of service. HAL coordination-of-benefits engine detects date overlaps across carriers.',mlModel:'Rule Engine + ML Overlap',accuracy:97.8,avgSavings:15400,ytdCases:29,ytdSavings:446600,indicators:['Identical date-of-service billed by geographically distant facilities','Policy beneficiary enrolled at two ALFs simultaneously','CMR from Facility A conflicts with hospitalization records on same date','Cross-carrier COB reveals duplicate benefit payments']}
+  ];
+
+  /* ── SIU Case Queue ── */
+  var _p28siuCases=[
+    {id:'SIU-2024-0041',claimId:'LTC-2024-10043',claimant:'Dorothy Yamamoto',carrier:'John Hancock',opened:'2024-11-14',priority:'P1-Critical',assignee:'Maria Santos',signals:['FS-001','FS-003','FS-006'],fraudScore:97,estimatedExposure:83700,status:'Active Investigation',facilityName:'Pacific Memory Center',facilityLicense:'Suspended 2024-09',notes:'Facility license suspended Sept 2024; continued billing through Oct. Provider owner under separate DOI investigation. CMR signatures verified as forgeries. Coordinating with CA DOI and FBI Financial Crimes Unit.',actions:['DOI Referral Filed','Claim Suspended','FBI Contacted','Facility Audit Requested']},
+    {id:'SIU-2024-0049',claimId:'LTC-2024-10049',claimant:'Beatrice Fontaine',carrier:'John Hancock',opened:'2024-12-02',priority:'P1-Critical',assignee:'David Kim',signals:['FS-001','FS-004'],fraudScore:88,estimatedExposure:62370,status:'Pending DOI',facilityName:'Coral Memory Care',facilityLicense:'Under Review',notes:'Claimant SSN shows SSA death record dated 3 months before claim filed. Facility billed 31 days for February. Multiple policy holders at same address. Identity verification failed across 4 documents.',actions:['SSA Cross-Check Complete','Claim Suspended','Carrier Notified']},
+    {id:'SIU-2024-0053',claimId:'LTC-2024-10053',claimant:'Norma Jean Briggs',carrier:'MetLife',opened:'2024-12-18',priority:'P2-High',assignee:'Rachel Torres',signals:['FS-001','FS-003','FS-006'],fraudScore:93,estimatedExposure:61770,status:'Active Investigation',facilityName:'Liberty Ridge ALF',facilityLicense:'Probationary',notes:'Network analysis shows 84% of ALF residents share the same insurance agent. Agent owns 12% stake in facility LLC. CMR signatures forensically matched to office admin rather than attending physician. Coordinating with PA Insurance Department.',actions:['Network Analysis Complete','Agent License Flag','Forensic Review']},
+    {id:'SIU-2024-0047',claimId:'LTC-2024-10047',claimant:'Shirley Kowalczyk',carrier:'MetLife',opened:'2024-12-28',priority:'P3-Medium',assignee:'James Park',signals:['FS-002','FS-007'],fraudScore:74,estimatedExposure:11340,status:'Under Review',facilityName:'Bright Days ADC',facilityLicense:'Active',notes:'Adult day care facility billing 30 days/month for patient documented as home health. Service codes include skilled nursing not authorized for ADC license. Billing increased 48% after ownership change in Q3.',actions:['CMR Audit Requested','On-Site Inspection Scheduled']},
+    {id:'SIU-2024-0045',claimId:'LTC-2024-10045',claimant:'Evelyn Marchetti',carrier:'Prudential',opened:'2025-01-03',priority:'P3-Medium',assignee:'Lisa Chen',signals:['FS-005'],fraudScore:38,estimatedExposure:8060,status:'Under Review',facilityName:'Desert Springs SNF',facilityLicense:'Active',notes:'EP days claimed during a 9-day hospital stay which should restart EP clock. Retroactive CMR dates submitted. Pattern consistent with FS-005 manipulation. Physician contacted for independent verification.',actions:['EP Audit Initiated','Physician Contacted']},
+    {id:'SIU-2024-0051',claimId:'LTC-2024-10051',claimant:'Agnes Thibodeau',carrier:'Travelers',opened:'2025-01-08',priority:'P2-High',assignee:'David Kim',signals:['FS-007','FS-004'],fraudScore:62,estimatedExposure:25200,status:'Active Investigation',facilityName:'Harbor View SNF',facilityLicense:'Active',notes:'Billing increased 38% in December without census change. Claimant DOB on CMR differs by 2 years from policy application. Identity document inconsistency — driver\'s license photo does not match POA submission photo.',actions:['Identity Verification Ordered','Billing Audit In Progress']}
+  ];
+
+  /* ── Analytics KPIs ── */
+  var _p28analytics={
+    kpis:[
+      {label:'Claims Reviewed (YTD)',value:'4,847',delta:'+12%',trend:'up',icon:'fa-file-medical-alt',color:'#1d4ed8'},
+      {label:'Fraud Detected (YTD)',value:'402',delta:'+23%',trend:'up-good',icon:'fa-exclamation-triangle',color:'#dc2626'},
+      {label:'Total Fraud Savings',value:'$5.91M',delta:'+$1.4M',trend:'up-good',icon:'fa-shield-alt',color:'#16a34a'},
+      {label:'SIU Cases Active',value:'31',delta:'-4',trend:'down-good',icon:'fa-user-secret',color:'#7c3aed'},
+      {label:'Avg Fraud Score (flagged)',value:'81.4',delta:'+6.2pts',trend:'up-good',icon:'fa-brain',color:'#dc2626'},
+      {label:'False Positive Rate',value:'3.2%',delta:'-1.8pts',trend:'down-good',icon:'fa-check-circle',color:'#16a34a'}
+    ],
+    monthly:[
+      {month:'Jan',reviewed:680,flagged:48,fraudConfirmed:31,savings:612000},
+      {month:'Feb',reviewed:710,flagged:52,fraudConfirmed:36,savings:698000},
+      {month:'Mar',reviewed:740,flagged:61,fraudConfirmed:42,savings:781000},
+      {month:'Apr',reviewed:790,flagged:58,fraudConfirmed:39,savings:742000},
+      {month:'May',reviewed:820,flagged:71,fraudConfirmed:52,savings:934000},
+      {month:'Jun',reviewed:907,flagged:112,fraudConfirmed:78,savings:1143000}
+    ],
+    bySignal:[
+      {signal:'Phantom Billing',cases:47,savings:1334800,pct:22.6},
+      {signal:'Upcoding',cases:83,savings:1012600,pct:17.1},
+      {signal:'Provider Kickback',cases:12,savings:619200,pct:10.5},
+      {signal:'Forged Docs',cases:34,savings:652800,pct:11.0},
+      {signal:'Billing Spike',cases:128,savings:972800,pct:16.5},
+      {signal:'EP Manipulation',cases:61,savings:597800,pct:10.1},
+      {signal:'Identity Fraud',cases:8,savings:278400,pct:4.7},
+      {signal:'Multi-Facility',cases:29,savings:446600,pct:7.5}
+    ],
+    carriers:[
+      {name:'New York Life',claims:1240,fraudRate:7.8,savings:1340000},
+      {name:'John Hancock',claims:980,fraudRate:11.2,savings:1620000},
+      {name:'MetLife',claims:890,fraudRate:9.4,savings:1180000},
+      {name:'Prudential',claims:760,fraudRate:6.1,savings:892000},
+      {name:'Lincoln Financial',claims:640,fraudRate:5.3,savings:562000},
+      {name:'Travelers',claims:337,fraudRate:8.7,savings:316000}
+    ]
+  };
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PAGE FRAMEWORK
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var totalExposure=_p28siuCases.reduce(function(a,c){return a+c.estimatedExposure;},0);
+    var totalSavings=_p28analytics.monthly.reduce(function(a,m){return a+m.savings;},0);
+    pc.innerHTML=''
+      +'<div style="font-family:\'Segoe UI\',sans-serif;background:#fef2f2;min-height:100vh;padding:0">'
+      /* Hero Banner */
+      +'<div style="background:linear-gradient(135deg,'+CA3+' 0%,#991b1b 50%,'+CA1+' 100%);padding:28px 32px 22px;color:#fff">'
+      +'<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'
+      +'<div style="background:rgba(255,255,255,.15);border-radius:14px;width:56px;height:56px;display:flex;align-items:center;justify-content:center">'
+      +'<i class="fas fa-shield-virus" style="font-size:26px"></i></div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:22px;font-weight:800;letter-spacing:-.3px">HAL Claims Analytics Intelligence & Fraud Detection</div>'
+      +'<div style="font-size:13px;opacity:.88;margin-top:3px">AI-Powered Fraud Scoring · 8 Fraud Signal Typologies · SIU Workbench · $5.91M Savings YTD</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+      +_p28badge('4,847','Claims Reviewed','fa-file-medical-alt')
+      +_p28badge('402','Fraud Detected','fa-exclamation-triangle')
+      +_p28badge('$5.91M','YTD Savings','fa-shield-alt')
+      +_p28badge('$'+Math.round(totalExposure/1000)+'K','SIU Exposure','fa-user-secret')
+      +'</div></div></div>'
+      /* Tab Nav */
+      +'<div style="background:#fff;border-bottom:2px solid #fee2e2;padding:0 32px;display:flex;gap:0;overflow-x:auto">'
+      +_p28tab('overview','fa-th-large','Overview')
+      +_p28tab('claimsIntel','fa-search-dollar','Claims Intelligence')
+      +_p28tab('fraudDetection','fa-exclamation-triangle','Fraud Detection')
+      +_p28tab('siuWorkbench','fa-user-secret','SIU Workbench')
+      +_p28tab('analytics','fa-chart-bar','Analytics & ROI')
+      +'</div>'
+      +'<div id="p28-tab-content" style="padding:28px 32px">'
+      +_p28renderTab()
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p28badge(val,lbl,icon){
+    return '<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 16px;text-align:center;min-width:90px">'
+      +'<div style="font-size:18px;font-weight:800">'+val+'</div>'
+      +'<div style="font-size:10px;opacity:.8;display:flex;align-items:center;gap:4px;justify-content:center;margin-top:2px">'
+      +'<i class="fas '+icon+'" style="font-size:9px"></i>'+lbl+'</div></div>';
+  }
+
+  function _p28tab(id,icon,label){
+    var active=_p28activeTab===id;
+    return '<div onclick="window._p28switchTab(\''+id+'\')" style="padding:14px 20px;cursor:pointer;display:flex;align-items:center;gap:7px;'
+      +'font-size:13px;font-weight:'+(active?'700':'500')+';color:'+(active?CA1:'#64748b')+';'
+      +'border-bottom:3px solid '+(active?CA1:'transparent')+';white-space:nowrap;transition:all .2s">'
+      +'<i class="fas '+icon+'"></i>'+label+'</div>';
+  }
+
+  function _p28renderTab(){
+    if(_p28activeTab==='overview') return _p28overviewTab();
+    if(_p28activeTab==='claimsIntel') return _p28claimsIntelTab();
+    if(_p28activeTab==='fraudDetection') return _p28fraudDetectionTab();
+    if(_p28activeTab==='siuWorkbench') return _p28siuWorkbenchTab();
+    if(_p28activeTab==='analytics') return _p28analyticsTab();
+    return '';
+  }
+
+  window._p28switchTab=function(id){
+    _p28activeTab=id;
+    var tc=document.getElementById('p28-tab-content');
+    if(tc) tc.innerHTML=_p28renderTab();
+    document.querySelectorAll('[data-p28tab]').forEach(function(el){
+      var tid=el.getAttribute('data-p28tab');
+      el.style.color=tid===id?CA1:'#64748b';
+      el.style.fontWeight=tid===id?'700':'500';
+      el.style.borderBottom='3px solid '+(tid===id?CA1:'transparent');
+    });
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 1: OVERVIEW
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28overviewTab(){
+    var html='<div>';
+
+    /* KPI Row */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:24px">';
+    _p28analytics.kpis.forEach(function(k){
+      var trendUp=k.trend.startsWith('up');
+      var trendGood=k.trend.includes('good');
+      var trendCol=trendGood?'#16a34a':'#dc2626';
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;border-left:4px solid '+k.color+'">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+        +'<div style="width:32px;height:32px;border-radius:8px;background:'+k.color+'1a;display:flex;align-items:center;justify-content:center"><i class="fas '+k.icon+'" style="color:'+k.color+';font-size:13px"></i></div>'
+        +'<div style="font-size:11px;color:#64748b;line-height:1.3">'+k.label+'</div></div>'
+        +'<div style="font-size:22px;font-weight:800;color:#1e293b">'+k.value+'</div>'
+        +'<div style="font-size:11px;color:'+trendCol+';margin-top:4px"><i class="fas fa-arrow-'+(trendUp?'up':'down')+'" style="margin-right:3px"></i>'+k.delta+' YTD</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Architecture Strip */
+    html+='<div style="background:linear-gradient(135deg,'+CA3+',#991b1b);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:24px">'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:14px"><i class="fas fa-layer-group" style="margin-right:8px"></i>CAID 4-Layer Architecture</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">';
+    [
+      {n:'4',t:'Investigation Layer',s:'SIU Workbench · DOI Integration · FBI Financial Crimes'},
+      {n:'3',t:'AI Fraud Engine',s:'8 ML Models · Graph Neural Net · Real-time Scoring'},
+      {n:'2',t:'Claims Intelligence',s:'Portfolio Analytics · Trend Detection · Predictive Triage'},
+      {n:'1',t:'HAL Data Foundation',s:'Fabric · Ontology · Vector Store · P20-P25 Platform'}
+    ].forEach(function(l){
+      html+='<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:12px;text-align:center;font-size:11px">'
+        +'<div style="font-size:20px;font-weight:800;color:#fca5a5">'+l.n+'</div>'
+        +'<div style="font-weight:700;margin:4px 0">'+l.t+'</div>'
+        +'<div style="opacity:.75">'+l.s+'</div></div>';
+    });
+    html+='</div></div>';
+
+    /* 2-col: Fraud Signal Overview + SIU Hot Cases */
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">';
+
+    /* Fraud Signal Cards */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="background:#7f1d1d;color:#fff;padding:12px 16px;font-size:13px;font-weight:700"><i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>8 Fraud Signal Typologies</div>'
+      +'<div style="padding:4px 0">';
+    _p28fraudSignals.forEach(function(fs){
+      var sevCol=fs.severity==='critical'?CA1:fs.severity==='high'?'#d97706':'#0891b2';
+      var sevBg=fs.severity==='critical'?'#fef2f2':fs.severity==='high'?'#fffbeb':'#e0f2fe';
+      html+='<div onclick="window._p28switchTab(\'fraudDetection\');window._p28viewSignal(\''+fs.id+'\')" style="padding:10px 16px;border-bottom:1px solid #f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .15s" onmouseover="this.style.background=\'#fef2f2\'" onmouseout="this.style.background=\'#fff\'">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<span style="background:'+sevBg+';color:'+sevCol+';font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;white-space:nowrap">'+fs.severity.toUpperCase()+'</span>'
+        +'<div><div style="font-size:12px;font-weight:600;color:#1e293b">'+fs.name+'</div>'
+        +'<div style="font-size:11px;color:#64748b">'+fs.mlModel+' · '+fs.accuracy+'% accuracy</div></div></div>'
+        +'<div style="text-align:right"><div style="font-size:12px;font-weight:700;color:#16a34a">$'+Math.round(fs.ytdSavings/1000)+'K</div>'
+        +'<div style="font-size:10px;color:#94a3b8">'+fs.ytdCases+' cases</div></div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    /* Hot SIU Cases */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);color:#fff;padding:12px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center">'
+      +'<span><i class="fas fa-user-secret" style="margin-right:8px"></i>Active SIU Cases</span>'
+      +'<span style="background:rgba(255,255,255,.2);padding:2px 10px;border-radius:10px;font-size:12px">'+_p28siuCases.length+' cases</span></div>'
+      +'<div style="padding:4px 0">';
+    _p28siuCases.forEach(function(sc){
+      var priCol=sc.priority.startsWith('P1')?CA1:sc.priority.startsWith('P2')?'#d97706':'#0891b2';
+      html+='<div onclick="window._p28switchTab(\'siuWorkbench\');window._p28viewSIU(\''+sc.id+'\')" style="padding:11px 16px;border-bottom:1px solid #f8fafc;cursor:pointer;transition:background .15s" onmouseover="this.style.background=\'#f5f3ff\'" onmouseout="this.style.background=\'#fff\'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="background:'+priCol+';color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">'+sc.priority.split('-')[0]+'</span>'
+        +'<span style="font-size:12px;font-weight:600;color:#1e293b">'+sc.id+'</span></div>'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+        +'<div style="width:40px;height:6px;background:#f1f5f9;border-radius:10px;overflow:hidden"><div style="height:100%;background:'+priCol+';width:'+sc.fraudScore+'%;border-radius:10px"></div></div>'
+        +'<span style="font-size:11px;font-weight:700;color:'+priCol+'">'+sc.fraudScore+'</span></div></div>'
+        +'<div style="font-size:11px;color:#334155">'+sc.claimant+' — '+sc.facilityName+'</div>'
+        +'<div style="font-size:11px;color:#16a34a;font-weight:600;margin-top:2px"><i class="fas fa-shield-alt" style="margin-right:4px"></i>Est. exposure: $'+sc.estimatedExposure.toLocaleString()+'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>'; /* end 2-col */
+
+    /* ML Model Performance Strip */
+    html+='<div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:12px;padding:20px 24px;color:#fff">'
+      +'<div style="font-size:14px;font-weight:700;margin-bottom:14px"><i class="fas fa-brain" style="margin-right:8px"></i>AI Model Performance — Live Scoring Pipeline</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">';
+    [
+      {name:'RNN Sequence Anomaly',acc:96.2,speed:'<40ms',claims:'2.1K/day'},
+      {name:'XGBoost Classifier',acc:91.8,speed:'<15ms',claims:'4.8K/day'},
+      {name:'Graph Neural Network',acc:88.4,speed:'<120ms',claims:'890/day'},
+      {name:'Vision Transformer',acc:93.7,speed:'<200ms',claims:'340/day'},
+      {name:'Isolation Forest',acc:89.5,speed:'<25ms',claims:'3.2K/day'},
+      {name:'BERT NLP Engine',acc:99.1,speed:'<80ms',claims:'1.4K/day'}
+    ].forEach(function(m){
+      html+='<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:12px">'
+        +'<div style="font-size:12px;font-weight:600;margin-bottom:6px">'+m.name+'</div>'
+        +'<div style="font-size:20px;font-weight:800;color:#93c5fd">'+m.acc+'%</div>'
+        +'<div style="font-size:10px;opacity:.7;margin-top:4px">Accuracy · '+m.speed+' · '+m.claims+'</div>'
+        +'<div style="background:rgba(255,255,255,.15);border-radius:20px;height:4px;margin-top:6px"><div style="background:#93c5fd;height:100%;width:'+m.acc+'%;border-radius:20px"></div></div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 2: CLAIMS INTELLIGENCE
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28claimsIntelTab(){
+    var filter=_p28claimFilter;
+    var filtered=filter==='all'?_p28claims:_p28claims.filter(function(c){
+      if(filter==='high') return c.fraudScore>=75;
+      if(filter==='flagged') return c.status.includes('SIU')||c.status.includes('Review');
+      if(filter==='approved') return c.status==='Approved';
+      return true;
+    });
+
+    var html='<div>';
+
+    /* Filter Bar */
+    html+='<div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap">';
+    [['all','All Claims'],['high','High Risk (75+)'],['flagged','Flagged / SIU'],['approved','Approved']].forEach(function(f){
+      var act=filter===f[0];
+      html+='<button onclick="window._p28setClaimFilter(\''+f[0]+'\')" style="padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:'+(act?CA1:'#f1f5f9')+';color:'+(act?'#fff':'#64748b')+';transition:all .2s">'+f[1]+'</button>';
+    });
+    html+='<div style="margin-left:auto;font-size:12px;color:#64748b">'+filtered.length+' claims shown</div>';
+    html+='</div>';
+
+    /* Summary Cards */
+    var totalBilled=filtered.reduce(function(a,c){return a+c.billedAmount;},0);
+    var totalApproved=filtered.reduce(function(a,c){return a+c.approvedAmount;},0);
+    var totalSaved=filtered.reduce(function(a,c){return a+c.savings;},0);
+    var avgScore=filtered.length?Math.round(filtered.reduce(function(a,c){return a+c.fraudScore;},0)/filtered.length):0;
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
+    [
+      {l:'Total Billed',v:'$'+Math.round(totalBilled/1000)+'K',c:'#1d4ed8',ic:'fa-file-invoice-dollar'},
+      {l:'Total Approved',v:'$'+Math.round(totalApproved/1000)+'K',c:'#16a34a',ic:'fa-check-circle'},
+      {l:'Savings Protected',v:'$'+Math.round(totalSaved/1000)+'K',c:CA1,ic:'fa-shield-alt'},
+      {l:'Avg Fraud Score',v:avgScore,c:avgScore>70?CA1:avgScore>40?CAA:CAG,ic:'fa-brain'}
+    ].forEach(function(s){
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;border-top:3px solid '+s.c+'">'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:6px"><i class="fas '+s.ic+'" style="color:'+s.c+';margin-right:5px"></i>'+s.l+'</div>'
+        +'<div style="font-size:22px;font-weight:800;color:'+s.c+'">'+s.v+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Claims Grid */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">';
+    filtered.forEach(function(cl){
+      var scoreCol=cl.fraudScore>=75?CA1:cl.fraudScore>=40?CAA:CAG;
+      var statCol=cl.status.includes('SIU')?'#7c3aed':cl.status==='Approved'?CAG:cl.status==='Under Review'?CAA:CAB;
+      var statBg=cl.status.includes('SIU')?'#ede9fe':cl.status==='Approved'?'#f0fdf4':cl.status==='Under Review'?'#fffbeb':'#eff6ff';
+      html+='<div onclick="window._p28viewClaimDetail(\''+cl.id+'\')" style="background:#fff;border:1px solid '+(cl.fraudScore>=75?CA2+'66':'#e2e8f0')+';border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;border-left:4px solid '+scoreCol+'" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+        +'<div><div style="font-size:13px;font-weight:700;color:#1e293b">'+cl.claimant+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+cl.id+' · '+cl.carrier+'</div></div>'
+        +'<div style="text-align:center">'
+        +'<div style="font-size:20px;font-weight:800;color:'+scoreCol+'">'+cl.fraudScore+'</div>'
+        +'<div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px">Risk Score</div></div></div>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'
+        +'<span style="background:'+statBg+';color:'+statCol+';font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600">'+cl.status+'</span>'
+        +'<span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:2px 8px;border-radius:10px">'+cl.type+'</span>'
+        +'<span style="background:#f1f5f9;color:#64748b;font-size:10px;padding:2px 8px;border-radius:10px">'+cl.state+'</span>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px;margin-bottom:10px">'
+        +'<div><div style="color:#94a3b8">DBR</div><div style="font-weight:600;color:#334155">$'+cl.dailyBenefit+'/day</div></div>'
+        +'<div><div style="color:#94a3b8">Billed</div><div style="font-weight:600;color:#334155">$'+cl.billedAmount.toLocaleString()+'</div></div>'
+        +'<div><div style="color:#94a3b8">Days Open</div><div style="font-weight:600;color:'+cl.daysOpen>30?CAA:'#334155'+'">'+cl.daysOpen+'d</div></div>'
+        +'</div>';
+      if(cl.flags.length>0){
+        html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
+        cl.flags.forEach(function(f){
+          html+='<span style="background:#fef2f2;color:'+CA1+';font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid #fecaca"><i class="fas fa-flag" style="margin-right:3px;font-size:8px"></i>'+f.replace(/_/g,' ')+'</span>';
+        });
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+    html+='</div>';
+
+    /* Claim Detail Modal placeholder */
+    html+='<div id="p28-claim-detail" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display=\'none\'"></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+  window._p28setClaimFilter=function(f){
+    _p28claimFilter=f;
+    var tc=document.getElementById('p28-tab-content');
+    if(tc) tc.innerHTML=_p28claimsIntelTab();
+  };
+
+  window._p28viewClaimDetail=function(id){
+    var cl=_p28claims.find(function(c){return c.id===id;});
+    if(!cl) return;
+    var scoreCol=cl.fraudScore>=75?CA1:cl.fraudScore>=40?CAA:CAG;
+    var modal=document.getElementById('p28-claim-detail');
+    if(!modal) return;
+    modal.style.display='flex';
+    modal.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;max-width:620px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">'
+      +'<div><div style="font-size:18px;font-weight:800;color:#1e293b">'+cl.claimant+'</div>'
+      +'<div style="font-size:13px;color:#64748b">'+cl.id+' · Age '+cl.age+' · '+cl.carrier+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="text-align:center;background:'+scoreCol+'1a;border-radius:12px;padding:12px 18px">'
+      +'<div style="font-size:32px;font-weight:900;color:'+scoreCol+'">'+cl.fraudScore+'</div>'
+      +'<div style="font-size:10px;color:#64748b;text-transform:uppercase">Fraud Risk</div></div>'
+      +'<button onclick="document.getElementById(\'p28-claim-detail\').style.display=\'none\'" style="background:#f1f5f9;border:none;border-radius:8px;padding:8px;cursor:pointer"><i class="fas fa-times" style="color:#64748b"></i></button>'
+      +'</div></div>'
+      /* Detail grid */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">'
+      +[['Facility',cl.facilityName],['Type',cl.type],['State',cl.state],['Policy',cl.policy],['Daily Benefit','$'+cl.dailyBenefit+'/day'],['Days Open',cl.daysOpen+'d'],['Billed','$'+cl.billedAmount.toLocaleString()],['Approved','$'+cl.approvedAmount.toLocaleString()],['Assignee',cl.assignee],['Status',cl.status]].map(function(r){
+        return '<div style="background:#f8fafc;border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;margin-bottom:3px">'+r[0]+'</div><div style="font-size:13px;font-weight:600;color:#334155">'+r[1]+'</div></div>';
+      }).join('')
+      +'</div>'
+      /* Fraud flags */
+      +(cl.flags.length?'<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px"><i class="fas fa-flag" style="color:'+CA1+';margin-right:6px"></i>Fraud Signals Detected</div>'
+      +cl.flags.map(function(f){return '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;color:#991b1b"><i class="fas fa-exclamation-circle" style="margin-right:6px"></i>'+f.replace(/_/g,' ').toUpperCase()+'</div>';}).join('')+'</div>':'')
+      /* CTA */
+      +'<div style="display:flex;gap:10px;padding-top:4px">'
+      +(cl.status.includes('SIU')?'<button style="flex:1;background:#7c3aed;color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer"><i class="fas fa-user-secret" style="margin-right:6px"></i>View SIU Case</button>':'')
+      +(cl.fraudScore>=60?'<button onclick="window._p28switchTab(\'siuWorkbench\')" style="flex:1;background:'+CA1+';color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer"><i class="fas fa-flag" style="margin-right:6px"></i>Escalate to SIU</button>':'')
+      +'<button style="flex:1;background:#f1f5f9;color:#334155;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer"><i class="fas fa-file-alt" style="margin-right:6px"></i>Generate Report</button>'
+      +'</div>'
+      +'</div>';
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 3: FRAUD DETECTION
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28fraudDetectionTab(){
+    var activeSignal=_p28activeFraud?_p28fraudSignals.find(function(s){return s.id===_p28activeFraud;}):null;
+    var html='<div style="display:grid;grid-template-columns:320px 1fr;gap:20px;min-height:600px">';
+
+    /* Left: Signal List */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="background:'+CA3+';color:#fff;padding:12px 16px;font-size:13px;font-weight:700"><i class="fas fa-exclamation-triangle" style="margin-right:8px"></i>Fraud Signal Typologies</div>'
+      +'<div>';
+    _p28fraudSignals.forEach(function(fs){
+      var sevCol=fs.severity==='critical'?CA1:fs.severity==='high'?CAA:'#0891b2';
+      var sevBg=fs.severity==='critical'?'#fef2f2':fs.severity==='high'?'#fffbeb':'#e0f2fe';
+      var isAct=_p28activeFraud===fs.id;
+      html+='<div onclick="window._p28viewSignal(\''+fs.id+'\')" style="padding:12px 16px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:'+(isAct?'#fef2f2':'#fff')+';border-left:4px solid '+(isAct?CA1:'transparent')+';transition:all .15s">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+        +'<div style="display:flex;align-items:center;gap:7px">'
+        +'<span style="background:'+sevBg+';color:'+sevCol+';font-size:9px;padding:1px 7px;border-radius:10px;font-weight:700">'+fs.severity.toUpperCase()+'</span>'
+        +'<span style="font-size:12px;font-weight:600;color:#1e293b">'+fs.name+'</span></div>'
+        +'<i class="fas fa-chevron-right" style="font-size:10px;color:#94a3b8"></i></div>'
+        +'<div style="font-size:11px;color:#64748b">'+fs.mlModel+' · '+fs.ytdCases+' cases · $'+Math.round(fs.ytdSavings/1000)+'K saved</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    /* Right: Signal Detail */
+    html+='<div>';
+    if(activeSignal){
+      var sevCol=activeSignal.severity==='critical'?CA1:activeSignal.severity==='high'?CAA:'#0891b2';
+      var sevBg=activeSignal.severity==='critical'?'#fef2f2':activeSignal.severity==='high'?'#fffbeb':'#e0f2fe';
+      html+='<div style="background:linear-gradient(135deg,'+(activeSignal.severity==='critical'?CA3+',#991b1b':activeSignal.severity==='high'?'#78350f,#d97706':'#164e63,#0891b2')+');color:#fff;border-radius:12px;padding:20px;margin-bottom:16px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+        +'<div><div style="font-size:8px;letter-spacing:1px;opacity:.7;text-transform:uppercase">'+activeSignal.id+' · '+activeSignal.category+'</div>'
+        +'<div style="font-size:20px;font-weight:800;margin-top:4px">'+activeSignal.name+'</div></div>'
+        +'<span style="background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700">'+activeSignal.severity.toUpperCase()+'</span></div>'
+        +'<div style="font-size:13px;opacity:.9;line-height:1.6">'+activeSignal.description+'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">'
+        +[['ML Model',activeSignal.mlModel],['Accuracy',activeSignal.accuracy+'%'],['Avg Savings','$'+Math.round(activeSignal.avgSavings/1000)+'K'],['YTD Cases',activeSignal.ytdCases]].map(function(s){
+          return '<div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px;text-align:center"><div style="font-size:15px;font-weight:700">'+s[1]+'</div><div style="font-size:10px;opacity:.75">'+s[0]+'</div></div>';
+        }).join('')
+        +'</div></div>';
+
+      /* Indicators */
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:16px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px"><i class="fas fa-search" style="color:'+CA1+';margin-right:8px"></i>Detection Indicators ('+activeSignal.indicators.length+')</div>';
+      activeSignal.indicators.forEach(function(ind,i){
+        html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc">'
+          +'<div style="width:22px;height:22px;border-radius:50%;background:'+CA1+'1a;color:'+CA1+';font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</div>'
+          +'<div style="font-size:13px;color:#334155;line-height:1.5">'+ind+'</div></div>';
+      });
+      html+='</div>';
+
+      /* Claims showing this signal */
+      var signalClaims=_p28claims.filter(function(c){
+        return c.flags.some(function(f){
+          if(activeSignal.id==='FS-001') return f==='phantom_billing';
+          if(activeSignal.id==='FS-002') return f==='upcoding'||f==='days_inflation';
+          if(activeSignal.id==='FS-003') return f==='provider_kickback';
+          if(activeSignal.id==='FS-004') return f==='identity_mismatch';
+          if(activeSignal.id==='FS-005') return f==='ep_manipulation'||f==='rapid_ep';
+          if(activeSignal.id==='FS-006') return f==='forged_cmr';
+          if(activeSignal.id==='FS-007') return f==='billing_spike';
+          if(activeSignal.id==='FS-008') return f==='multiple_facilities';
+          return false;
+        });
+      });
+      if(signalClaims.length){
+        html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+          +'<div style="background:#f8fafc;padding:10px 16px;font-size:12px;font-weight:700;color:#334155;border-bottom:1px solid #e2e8f0"><i class="fas fa-file-medical-alt" style="color:'+CA1+';margin-right:7px"></i>Claims Triggered by This Signal ('+signalClaims.length+')</div>';
+        signalClaims.forEach(function(cl){
+          html+='<div style="padding:10px 16px;border-bottom:1px solid #f8fafc;display:flex;justify-content:space-between;align-items:center">'
+            +'<div><div style="font-size:12px;font-weight:600;color:#1e293b">'+cl.claimant+'</div>'
+            +'<div style="font-size:11px;color:#64748b">'+cl.id+'</div></div>'
+            +'<div style="display:flex;align-items:center;gap:8px">'
+            +'<span style="font-size:11px;font-weight:700;color:'+CA1+'">Score: '+cl.fraudScore+'</span>'
+            +'<span style="font-size:10px;background:#fef2f2;color:'+CA1+';padding:2px 8px;border-radius:10px">'+cl.status+'</span>'
+            +'</div></div>';
+        });
+        html+='</div>';
+      }
+
+    } else {
+      /* Empty state */
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:60px;text-align:center">'
+        +'<i class="fas fa-exclamation-triangle" style="font-size:48px;color:#fca5a5;margin-bottom:16px;display:block"></i>'
+        +'<div style="font-size:16px;font-weight:600;color:#334155;margin-bottom:8px">Select a Fraud Signal</div>'
+        +'<div style="font-size:13px;color:#64748b">Choose a typology from the left panel to view ML model details, detection indicators, and triggered claims.</div>'
+        +'</div>';
+    }
+    html+='</div>'; /* end right */
+    html+='</div>'; /* end grid */
+    html+='</div>';
+    return html;
+  }
+
+  window._p28viewSignal=function(id){
+    _p28activeFraud=id;
+    var tc=document.getElementById('p28-tab-content');
+    if(tc) tc.innerHTML=_p28fraudDetectionTab();
+  };
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 4: SIU WORKBENCH
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28siuWorkbenchTab(){
+    var activeSIU=_p28activeSIU?_p28siuCases.find(function(s){return s.id===_p28activeSIU;}):_p28siuCases[0];
+
+    var html='<div>';
+
+    /* SIU Header Stats */
+    var totalExp=_p28siuCases.reduce(function(a,s){return a+s.estimatedExposure;},0);
+    var p1Cases=_p28siuCases.filter(function(s){return s.priority.startsWith('P1');}).length;
+    html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
+    [
+      {l:'Total Cases',v:_p28siuCases.length,c:'#7c3aed',ic:'fa-user-secret'},
+      {l:'P1 Critical',v:p1Cases,c:CA1,ic:'fa-exclamation-circle'},
+      {l:'Total Exposure',v:'$'+Math.round(totalExp/1000)+'K',c:CA1,ic:'fa-dollar-sign'},
+      {l:'Est. Recovery',v:'$'+Math.round(totalExp*0.82/1000)+'K',c:'#16a34a',ic:'fa-shield-alt'}
+    ].forEach(function(s){
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;border-top:3px solid '+s.c+'">'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:6px"><i class="fas '+s.ic+'" style="color:'+s.c+';margin-right:5px"></i>'+s.l+'</div>'
+        +'<div style="font-size:24px;font-weight:800;color:'+s.c+'">'+s.v+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Master-Detail layout */
+    html+='<div style="display:grid;grid-template-columns:360px 1fr;gap:20px;min-height:640px">';
+
+    /* Left: Case List */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+      +'<div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);color:#fff;padding:12px 16px;font-size:13px;font-weight:700">'
+      +'<i class="fas fa-folder-open" style="margin-right:8px"></i>SIU Case Queue</div>'
+      +'<div>';
+    _p28siuCases.forEach(function(sc){
+      var isAct=activeSIU&&activeSIU.id===sc.id;
+      var priCol=sc.priority.startsWith('P1')?CA1:sc.priority.startsWith('P2')?CAA:'#0891b2';
+      html+='<div onclick="window._p28viewSIU(\''+sc.id+'\')" style="padding:12px 16px;border-bottom:1px solid #f1f5f9;cursor:pointer;background:'+(isAct?'#faf5ff':'#fff')+';border-left:4px solid '+(isAct?'#7c3aed':'transparent')+';transition:all .15s">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
+        +'<div style="display:flex;align-items:center;gap:7px">'
+        +'<span style="background:'+priCol+';color:#fff;font-size:9px;padding:2px 7px;border-radius:10px;font-weight:700">'+sc.priority.split('-')[0]+'</span>'
+        +'<span style="font-size:12px;font-weight:700;color:#1e293b">'+sc.id+'</span></div>'
+        +'<span style="font-size:11px;font-weight:800;color:'+priCol+'">'+sc.fraudScore+'</span></div>'
+        +'<div style="font-size:12px;color:#334155;margin-bottom:3px">'+sc.claimant+'</div>'
+        +'<div style="font-size:11px;color:#64748b;margin-bottom:4px">'+sc.facilityName+'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center">'
+        +'<span style="font-size:10px;color:#16a34a;font-weight:600">$'+sc.estimatedExposure.toLocaleString()+' exposure</span>'
+        +'<span style="font-size:10px;color:#94a3b8">'+sc.assignee+'</span></div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    /* Right: Case Detail */
+    html+='<div>';
+    if(activeSIU){
+      var priCol2=activeSIU.priority.startsWith('P1')?CA1:activeSIU.priority.startsWith('P2')?CAA:'#0891b2';
+      var priBg=activeSIU.priority.startsWith('P1')?CA3+',#991b1b':activeSIU.priority.startsWith('P2')?'#78350f,#b45309':'#164e63,#0369a1';
+
+      /* Case Header */
+      html+='<div style="background:linear-gradient(135deg,'+priBg+');color:#fff;border-radius:12px;padding:20px;margin-bottom:14px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+        +'<div><div style="font-size:10px;opacity:.7;letter-spacing:1px">'+activeSIU.id+' · Opened '+activeSIU.opened+'</div>'
+        +'<div style="font-size:20px;font-weight:800;margin-top:4px">'+activeSIU.claimant+'</div>'
+        +'<div style="font-size:13px;opacity:.85;margin-top:2px">'+activeSIU.facilityName+' · '+activeSIU.carrier+'</div></div>'
+        +'<div style="text-align:center;background:rgba(255,255,255,.2);border-radius:12px;padding:12px 16px">'
+        +'<div style="font-size:32px;font-weight:900">'+activeSIU.fraudScore+'</div>'
+        +'<div style="font-size:10px;opacity:.8">Fraud Score</div></div></div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'
+        +[['Priority',activeSIU.priority],['Status',activeSIU.status],['Assignee',activeSIU.assignee],['Claim ID',activeSIU.claimId],['Est. Exposure','$'+activeSIU.estimatedExposure.toLocaleString()],['License',activeSIU.facilityLicense]].map(function(r){
+          return '<div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px"><div style="font-size:10px;opacity:.7">'+r[0]+'</div><div style="font-size:12px;font-weight:600;margin-top:2px">'+r[1]+'</div></div>';
+        }).join('')
+        +'</div></div>';
+
+      /* Fraud Signals */
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"><i class="fas fa-exclamation-triangle" style="color:'+CA1+';margin-right:8px"></i>Fraud Signals ('+activeSIU.signals.length+')</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px">';
+      activeSIU.signals.forEach(function(sid){
+        var sig=_p28fraudSignals.find(function(s){return s.id===sid;});
+        if(!sig) return;
+        var sc2=sig.severity==='critical'?CA1:sig.severity==='high'?CAA:'#0891b2';
+        html+='<div style="background:'+sc2+'1a;border:1px solid '+sc2+'33;border-radius:10px;padding:10px 14px;flex:1;min-width:150px">'
+          +'<div style="font-size:11px;font-weight:700;color:'+sc2+';margin-bottom:3px">'+sig.id+' — '+sig.name+'</div>'
+          +'<div style="font-size:11px;color:#64748b">'+sig.mlModel+' · '+sig.accuracy+'% accuracy</div>'
+          +'</div>';
+      });
+      html+='</div></div>';
+
+      /* Investigation Notes */
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"><i class="fas fa-clipboard-list" style="color:#7c3aed;margin-right:8px"></i>Investigation Notes</div>'
+        +'<div style="background:#f8fafc;border-radius:8px;padding:14px;font-size:13px;color:#334155;line-height:1.7;border-left:3px solid #7c3aed">'+activeSIU.notes+'</div>'
+        +'</div>';
+
+      /* Actions Taken + CTA */
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px"><i class="fas fa-tasks" style="color:#16a34a;margin-right:8px"></i>Actions Taken</div>';
+      activeSIU.actions.forEach(function(act){
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f8fafc">'
+          +'<div style="width:18px;height:18px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-check" style="font-size:9px;color:#16a34a"></i></div>'
+          +'<span style="font-size:12px;color:#334155">'+act+'</span></div>';
+      });
+      html+='</div>';
+
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+        +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px"><i class="fas fa-bolt" style="color:'+CAA+';margin-right:8px"></i>Quick Actions</div>'
+        +'<div style="display:flex;flex-direction:column;gap:8px">'
+        +['<i class="fas fa-file-alt" style="margin-right:7px"></i>Generate SIU Report','<i class="fas fa-balance-scale" style="margin-right:7px"></i>File DOI Referral','<i class="fas fa-ban" style="margin-right:7px"></i>Suspend Claim Payments','<i class="fas fa-search" style="margin-right:7px"></i>Order Field Inspection','<i class="fas fa-envelope" style="margin-right:7px"></i>Notify Carrier SIU Team'].map(function(btn,i){
+          var colors=['#1d4ed8','#7c3aed',CA1,'#0891b2','#059669'];
+          return '<button style="background:'+colors[i]+';color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-align:left">'+btn+'</button>';
+        }).join('')
+        +'</div></div>';
+      html+='</div>'; /* end cta grid */
+    }
+    html+='</div>'; /* end right */
+    html+='</div>'; /* end master-detail */
+    html+='</div>';
+    return html;
+  }
+
+  window._p28viewSIU=function(id){
+    _p28activeSIU=id;
+    _p28activeTab='siuWorkbench';
+    var tc=document.getElementById('p28-tab-content');
+    if(tc) tc.innerHTML=_p28siuWorkbenchTab();
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════
+     TAB 5: ANALYTICS & ROI
+  ═══════════════════════════════════════════════════════════════════ */
+  function _p28analyticsTab(){
+    var html='<div>';
+
+    /* KPI row */
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px">';
+    _p28analytics.kpis.forEach(function(k){
+      var trendUp=k.trend.startsWith('up');
+      var trendGood=k.trend.includes('good');
+      var trendCol=trendGood?'#16a34a':'#dc2626';
+      html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;border-left:4px solid '+k.color+'">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<div style="width:30px;height:30px;border-radius:8px;background:'+k.color+'1a;display:flex;align-items:center;justify-content:center"><i class="fas '+k.icon+'" style="color:'+k.color+';font-size:12px"></i></div>'
+        +'<div style="font-size:11px;color:#64748b">'+k.label+'</div></div>'
+        +'<div style="font-size:22px;font-weight:700;color:#1e293b">'+k.value+'</div>'
+        +'<div style="font-size:11px;color:'+trendCol+';margin-top:4px"><i class="fas fa-arrow-'+(trendUp?'up':'down')+'" style="margin-right:3px"></i>'+k.delta+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    /* Charts row */
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
+
+    /* Monthly fraud savings bar chart */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-chart-bar" style="color:'+CA1+';margin-right:8px"></i>Monthly Fraud Savings vs Claims Reviewed</div>';
+    var maxReviewed=1000;
+    html+='<svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid meet">';
+    for(var g=0;g<5;g++){
+      var gy=20+g*32;
+      html+='<line x1="40" y1="'+gy+'" x2="390" y2="'+gy+'" stroke="#f1f5f9" stroke-width="1"/>';
+      html+='<text x="35" y="'+(gy+4)+'" text-anchor="end" font-size="9" fill="#94a3b8">'+Math.round(maxReviewed*(1-g/4))+'</text>';
+    }
+    var barW2=36,barGap2=24,startX2=48;
+    _p28analytics.monthly.forEach(function(m,i){
+      var bx=startX2+i*(barW2+barGap2);
+      var revH=Math.round((m.reviewed/maxReviewed)*148);
+      var savH=Math.round((m.savings/1200000)*148);
+      html+='<rect x="'+bx+'" y="'+(168-revH)+'" width="'+barW2+'" height="'+revH+'" rx="3" fill="#fee2e2"/>';
+      html+='<rect x="'+bx+'" y="'+(168-savH)+'" width="'+barW2+'" height="'+savH+'" rx="3" fill="'+CA1+'" opacity="0.9"/>';
+      html+='<text x="'+(bx+barW2/2)+'" y="175" text-anchor="middle" font-size="9" fill="#64748b">'+m.month+'</text>';
+      html+='<text x="'+(bx+barW2/2)+'" y="'+(168-savH-4)+'" text-anchor="middle" font-size="8" fill="'+CA1+'" font-weight="bold">$'+Math.round(m.savings/1000)+'K</text>';
+    });
+    html+='</svg>';
+    html+='<div style="display:flex;gap:14px;margin-top:4px">'
+      +'<span style="font-size:11px;color:#64748b"><span style="display:inline-block;width:12px;height:12px;background:#fee2e2;border-radius:2px;margin-right:4px"></span>Claims Reviewed</span>'
+      +'<span style="font-size:11px;color:#64748b"><span style="display:inline-block;width:12px;height:12px;background:'+CA1+';border-radius:2px;margin-right:4px"></span>Fraud Savings</span>'
+      +'</div></div>';
+
+    /* Fraud by signal donut-style bar */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px"><i class="fas fa-chart-pie" style="color:'+CA1+';margin-right:8px"></i>Fraud Savings by Signal Type</div>';
+    var sigColors=[CA1,'#d97706','#7c3aed','#0891b2','#059669','#e11d48','#0369a1','#78350f'];
+    _p28analytics.bySignal.forEach(function(s,i){
+      html+='<div style="margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-size:11px;color:#334155">'+s.signal+'</span>'
+        +'<span style="font-size:11px;font-weight:600;color:'+sigColors[i%sigColors.length]+'">$'+Math.round(s.savings/1000)+'K ('+s.cases+' cases)</span></div>'
+        +'<div style="background:#f1f5f9;border-radius:20px;height:8px">'
+        +'<div style="background:'+sigColors[i%sigColors.length]+';height:100%;width:'+s.pct*4+'%;border-radius:20px;max-width:100%"></div></div>'
+        +'</div>';
+    });
+    html+='</div>';
+
+    html+='</div>'; /* end charts row */
+
+    /* Carrier Comparison Table */
+    html+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:16px">'
+      +'<div style="background:#f8fafc;padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e293b"><i class="fas fa-building" style="color:'+CA1+';margin-right:8px"></i>Carrier Performance — Fraud Detection</div>'
+      +'<table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#fef2f2">'
+      +['Carrier','Claims','Fraud Rate','YTD Savings','Detection Efficiency'].map(function(h,i){
+        return '<th style="padding:9px 14px;text-align:'+(i===0?'left':'right')+';font-size:11px;color:#64748b;font-weight:600">'+h+'</th>';
+      }).join('')
+      +'</tr></thead><tbody>';
+    _p28analytics.carriers.forEach(function(c){
+      var eff=Math.round(90+(c.fraudRate-5)*1.5);
+      html+='<tr style="border-bottom:1px solid #f8fafc">'
+        +'<td style="padding:10px 14px;font-size:12px;font-weight:600;color:#1e293b">'+c.name+'</td>'
+        +'<td style="padding:10px 14px;text-align:right;font-size:12px;color:#334155">'+c.claims.toLocaleString()+'</td>'
+        +'<td style="padding:10px 14px;text-align:right"><span style="font-size:12px;font-weight:700;color:'+(c.fraudRate>9?CA1:c.fraudRate>7?CAA:CAG)+'">'+c.fraudRate+'%</span></td>'
+        +'<td style="padding:10px 14px;text-align:right;font-size:12px;font-weight:700;color:#16a34a">$'+Math.round(c.savings/1000)+'K</td>'
+        +'<td style="padding:10px 14px;text-align:right">'
+        +'<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">'
+        +'<div style="width:60px;height:6px;background:#f1f5f9;border-radius:20px;overflow:hidden"><div style="background:'+CAG+';height:100%;width:'+eff+'%;border-radius:20px"></div></div>'
+        +'<span style="font-size:11px;font-weight:700;color:'+CAG+'">'+eff+'%</span></div>'
+        +'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+
+    /* ROI Impact Summary */
+    html+='<div style="background:linear-gradient(135deg,'+CA3+',#991b1b);color:#fff;border-radius:12px;padding:20px">'
+      +'<div style="font-size:14px;font-weight:700;margin-bottom:14px"><i class="fas fa-chart-line" style="margin-right:8px"></i>CAID Business Impact Summary — FY2026</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px">';
+    [['$5.91M','Fraud Savings YTD','fa-shield-alt'],['402','Fraud Cases','fa-exclamation-triangle'],['3.2%','False Positive Rate','fa-check-circle'],['$14.7K','Avg Case Value','fa-dollar-sign'],['96%','Detection Accuracy','fa-brain'],['31','Active SIU Cases','fa-user-secret'],['8','ML Models Live','fa-robot'],['82%','Recovery Rate','fa-recycle']].forEach(function(imp){
+      html+='<div style="text-align:center;background:rgba(255,255,255,.1);border-radius:10px;padding:12px 8px">'
+        +'<i class="fas '+imp[2]+'" style="color:#fca5a5;font-size:16px;margin-bottom:6px;display:block"></i>'
+        +'<div style="font-size:18px;font-weight:700">'+imp[0]+'</div>'
+        +'<div style="font-size:10px;opacity:.65;margin-top:2px">'+imp[1]+'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+
+    html+='</div>';
+    return html;
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     NAV INTERCEPT
+  ═══════════════════════════════════════════════════════════════════ */
+  var _p28origNav=window.navigateTo||navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-caid'){
+      var pc=document.getElementById('page-content');
+      if(!pc){if(typeof _p28origNav==='function')_p28origNav(page);return;}
+      pc.innerHTML='';
+      _p28buildPage();
+      document.querySelectorAll('.nav-item').forEach(function(el){el.classList.remove('active');});
+      var navEl=document.querySelector('.hal-caid-nav');
+      if(navEl) navEl.classList.add('active');
+      window.scrollTo(0,0);
+      return;
+    }
+    if(typeof _p28origNav==='function')_p28origNav(page);
+  };
+
+  console.log('[HAL CAID] Phase 28 Claims Analytics Intelligence & Fraud Detection loaded — 15 claims, 8 fraud signals, 6 SIU cases, 6 ML models');
+})();
+/* P28 fix: re-expose window.navigateTo to bare global */
+var navigateTo=window.navigateTo;
