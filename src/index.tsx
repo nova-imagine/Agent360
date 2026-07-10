@@ -363,6 +363,7 @@ function MainApp() {
         <div id="tpl-hal-vectorstore"></div>
         <div id="tpl-hal-agents"></div>
         <div id="tpl-hal-lineage"></div>
+        <div id="tpl-hal-coa"></div>
         <div id="tpl-rfp-showcase"></div>
         <div id="tpl-core-admin"></div>
         <div id="tpl-data-ai"></div>
@@ -1035,6 +1036,10 @@ function Sidebar() {
         <a class="nav-item hal-lineage-nav" onclick="navigateTo('hal-lineage')" href="#">
           <i class="fas fa-sitemap"></i><span>Lineage &amp; Catalog</span>
           <span class="nav-badge" style="background:#d97706;color:#fff">PURVIEW</span>
+        </a>
+        <a class="nav-item hal-coa-nav" onclick="navigateTo('hal-coa')" href="#">
+          <i class="fas fa-rocket"></i><span>Carrier Onboarding</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">COA</span>
         </a>
 
         {/* ── ILLUMIFIN PLATFORM ── */}

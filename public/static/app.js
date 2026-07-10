@@ -79695,3 +79695,738 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
   };
   console.log('[Phase 25] Data Lineage & Catalog loaded · 60+ assets · 9 lineage stages · Microsoft Purview · Unity Catalog · Impact analysis · Pipeline health · Full governance');
 })();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PHASE 26 — Carrier Onboarding Accelerator (COA)
+// "From 18 months to 6 weeks — powered by HAL"
+// ─────────────────────────────────────────────────────────────────────────────
+(function(){ 'use strict';
+
+  // ── Brand colors ──────────────────────────────────────────────────────────
+  var COA='#d97706'; var COA2='#f59e0b'; var COA3='#92400e';
+  var HAL='#0078d4'; var SUC='#059669'; var DAN='#dc2626'; var PUR='#7c3aed';
+
+  // ── Active tab state ──────────────────────────────────────────────────────
+  var _p26activeTab='overview';
+  var _p26simCarrier=null;
+  var _p26agentRunning=false;
+
+  // ── 8 Pain Points (before) ────────────────────────────────────────────────
+  var _p26pains=[
+    {id:'p1',icon:'fa-search',title:'Legacy Data Archaeology',
+     before:'4–8 months · 3–6 person team · $800K–$1.4M',
+     after:'3–5 days · SchemaMapper Agent · 94% auto-mapped',
+     reduction:96, wks:0.7,
+     hal:'Phase 20 Data Lake + Phase 23 RAG',
+     detail:'AI scans legacy COBOL/AS400 schema, auto-maps 800–2,000 LTC-specific fields (elimination periods, benefit triggers, inflation riders, COB rules) to Illumifin\'s target model using ada-002 embeddings + KG pattern matching. No more reverse-engineering by retired SMEs.'},
+    {id:'p2',icon:'fa-cogs',title:'Policy Product Configuration',
+     before:'2–4 months · manual BA configuration · $400K–$700K',
+     after:'4–7 days · PolicyForm Configurator Agent · auto-reads DOI filings',
+     reduction:94, wks:1,
+     hal:'Phase 21 Semantic Layer + Phase 22 KG',
+     detail:'50–200+ policy form variants auto-configured from carrier DOI filings via the OWL ontology. Benefit schedules, elimination periods (0/30/60/90/180 day), inflation riders (5% compound, CPI, shared benefit), state-specific triggers — all templated from the semantic layer.'},
+    {id:'p3',icon:'fa-database',title:'Data Quality Remediation',
+     before:'3–6 months · manual data cleansing · $600K–$1.2M',
+     after:'5–8 days · Bronze→Silver DQ pipeline · 99.2% accuracy',
+     reduction:95, wks:1.2,
+     hal:'Phase 20 Medallion Architecture · Bronze→Silver DQ rules',
+     detail:'Automated DQ pipeline profiles source data, detects nulls/duplicates/orphans/format errors, applies 10 carrier-specific DQ rules, flags exceptions for human review only. 30% data inaccuracy rate reduced to <0.8% before Silver layer promotion.'},
+    {id:'p4',icon:'fa-balance-scale',title:'State Regulatory Compliance',
+     before:'2–4 months · compliance analysts · $350K–$600K',
+     after:'2–3 days · ComplianceMatrix Agent · all 50 states auto-applied',
+     reduction:97, wks:0.5,
+     hal:'Phase 22 Knowledge Graph · 50-state regulatory ontology',
+     detail:'KG holds the full 50-state LTC regulatory matrix: benefit trigger definitions, lapse notice windows (10–45 days), rate increase approval workflows, non-forfeiture election periods, NAIC model regulation compliance. ComplianceMatrix Agent applies carrier\'s approved DOI forms against the KG and auto-generates state configs.'},
+    {id:'p5',icon:'fa-plug',title:'Integration & API Plumbing',
+     before:'2–4 months · custom dev per integration · $500K–$900K',
+     after:'3–5 days · Integration Agent · pre-built connector library',
+     reduction:93, wks:0.7,
+     hal:'Phase 24 Agentification Hub · pre-built connectors',
+     detail:'Pre-built connectors for CellTrak, NaviSite, EFT/ACH processors, Munich Re/Swiss Re reinsurance feeds, premium billing vendors, 1099/tax reporting, agent portals. Integration Agent configures and certifies all connections autonomously — no custom dev required.'},
+    {id:'p6',icon:'fa-file-medical',title:'Claims History Migration',
+     before:'2–6 months · manual reconciliation · $700K–$1.5M',
+     after:'5–10 days · Claims Reconciliation Engine · zero payment gaps',
+     reduction:92, wks:1.5,
+     hal:'Phase 25 Lineage + Phase 23 RAG · active claim safeguard',
+     detail:'Active claimants (receiving ongoing benefit payments) migrated with zero interruption. Per-claimant benefit tracking, care plan re-certifications, elimination period carryover, lifetime max tracking, COB with Medicare/Medicaid — all reconciled against the lineage graph. Parallel-run validation ensures $0 payment gaps before cutover.'},
+    {id:'p7',icon:'fa-vial',title:'UAT & Parallel Run Validation',
+     before:'2–4 months · manual testers · $400K–$700K',
+     after:'2–3 days · UAT Orchestrator Agent · 10,000+ scenarios overnight',
+     reduction:96, wks:0.5,
+     hal:'Phase 24 UAT Agent · automated test matrix',
+     detail:'UAT Orchestrator runs combinatorial test matrix: 200 policy forms × 50 states × 12 claim scenarios × 8 billing cycles = 960,000+ test permutations. AI compares output to expected values from legacy system. Sign-off report generated automatically. Humans review only flagged exceptions (<0.3%).'},
+    {id:'p8',icon:'fa-graduation-cap',title:'Training & Go-Live Cutover',
+     before:'1–3 months · in-person training · $200K–$400K',
+     after:'3–5 days · AI-guided training · zero-downtime cutover',
+     reduction:88, wks:0.6,
+     hal:'Phase 23 RAG Copilot · Phase 24 Cutover Agent',
+     detail:'RAG-powered training copilot answers any carrier staff question in real time using Illumifin\'s full documentation corpus. Cutover Agent orchestrates the go-live sequence: pre-freeze → delta sync → parallel validation → traffic switch → legacy retirement. Zero-downtime guaranteed for active LTC claimants.'}
+  ];
+
+  // ── Demo Carriers ─────────────────────────────────────────────────────────
+  var _p26carriers=[
+    {id:'nylife',name:'New York Life',short:'NYL',
+     system:'IBM AS/400 + homegrown PAS (1994)',
+     policies:320000, forms:187, states:48, claimants:42000,
+     reinsurers:['Munich Re','Swiss Re'],
+     legacyMonths:28, coaWeeks:8,
+     stage:6, stageLabel:'UAT & Parallel Run',
+     color:'#003087',
+     portfolio:'Run-off LTC block — Traditional & Partnership policies',
+     savings:14200000},
+    {id:'principal',name:'Principal Financial',short:'PFG',
+     system:'UNISYS COBOL mainframe (1988)',
+     policies:180000, forms:124, states:42, claimants:21000,
+     reinsurers:['RGA','Hannover Re'],
+     legacyMonths:22, coaWeeks:6,
+     stage:4, stageLabel:'Regulatory Config',
+     color:'#0055a4',
+     portfolio:'Group LTC + Individual — Employer-sponsored block',
+     savings:9800000},
+    {id:'cna',name:'CNA Financial',short:'CNA',
+     system:'Duck Creek on-premise + COBOL legacy (2001)',
+     policies:95000, forms:89, states:38, claimants:12500,
+     reinsurers:['Munich Re'],
+     legacyMonths:18, coaWeeks:5,
+     stage:7, stageLabel:'Go-Live Prep',
+     color:'#cc0000',
+     portfolio:'LTC run-off block — individual traditional policies',
+     savings:6200000},
+    {id:'metlife',name:'MetLife',short:'MET',
+     system:'LifePRO legacy + custom middleware (1997)',
+     policies:510000, forms:231, states:50, claimants:68000,
+     reinsurers:['Swiss Re','Munich Re','General Re'],
+     legacyMonths:36, coaWeeks:11,
+     stage:2, stageLabel:'Data Quality & Schema Map',
+     color:'#0066cc',
+     portfolio:'Largest run-off LTC block — all 50 states + DC',
+     savings:22500000},
+    {id:'genworth',name:'Genworth Financial',short:'GNW',
+     system:'VPAS + homegrown claims engine (1999)',
+     policies:1100000, forms:312, states:50, claimants:115000,
+     reinsurers:['Munich Re','Swiss Re','RGA','Hannover Re'],
+     legacyMonths:42, coaWeeks:14,
+     stage:3, stageLabel:'Product Config',
+     color:'#006341',
+     portfolio:'Largest standalone LTC carrier — full scope migration',
+     savings:38000000}
+  ];
+
+  // ── 4 COA Agents ──────────────────────────────────────────────────────────
+  var _p26agents=[
+    {id:'schema',icon:'fa-sitemap',name:'SchemaMapper Agent',
+     color:'#0078d4',
+     tagline:'Maps 800–2,000 legacy fields to Illumifin target model in hours',
+     tools:['Azure AI Search (ada-002)','Unity Catalog','KG pattern matching','ACORD schema library','LTC field ontology'],
+     steps:[
+       '► Connecting to carrier legacy system (IBM AS/400)…',
+       '► Extracting full schema: 1,847 tables · 24,312 fields…',
+       '► Running ada-002 embedding on all field names + sample values…',
+       '► Matching against Illumifin LTC ontology (OWL 2 DL)…',
+       '► Auto-mapped: 1,739 / 1,847 fields (94.1%) — no human needed',
+       '► Flagged for review: 108 fields (elimination period edge cases)',
+       '► Generating ACORD reconciliation report…',
+       '► SchemaMapper complete · Saved: 5.2 months · Cost avoided: $940K'
+     ],
+     result:'1,739 fields auto-mapped (94.1%) · 108 exceptions queued · ACORD delta report generated · Est. time saved: 5.2 months'},
+    {id:'policy',icon:'fa-file-contract',name:'PolicyForm Configurator',
+     color:'#7c3aed',
+     tagline:'Reads DOI filings, auto-configures all policy forms in Illumifin',
+     tools:['Azure AI Search','Microsoft Purview','Semantic Layer API','DOI filing parser','State form library (50 states)'],
+     steps:[
+       '► Ingesting carrier DOI approved form filings (all 50 states)…',
+       '► Parsing 187 policy form variants via GPT-4o structured extraction…',
+       '► Mapping elimination periods: 0/30/60/90/180 day configurations…',
+       '► Configuring inflation riders: 5% compound · CPI-linked · Shared…',
+       '► Applying benefit triggers: 2-of-6 ADL · Cognitive impairment…',
+       '► Loading non-forfeiture options: Shortened Benefit · Return of Premium…',
+       '► Auto-generating 187 product configs in Illumifin rules engine…',
+       '► PolicyForm Configurator complete · Saved: 3.1 months · Cost avoided: $620K'
+     ],
+     result:'187 policy forms configured · 50-state benefit rules applied · 0 manual BA entries · Est. time saved: 3.1 months'},
+    {id:'compliance',icon:'fa-balance-scale',name:'ComplianceMatrix Agent',
+     color:'#059669',
+     tagline:'Applies all 50-state LTC regulations automatically from the KG',
+     tools:['LTC Regulatory KG (OWL)','Cosmos DB Gremlin','NAIC model regulation library','State DOI API feeds','Purview compliance scanner'],
+     steps:[
+       '► Loading 50-state LTC regulatory matrix from Knowledge Graph…',
+       '► Cross-referencing carrier DOI approvals against KG nodes…',
+       '► Configuring lapse notice windows: 10–45 days per state…',
+       '► Applying rate increase approval workflows (California, NY, FL priority)…',
+       '► Configuring non-forfeiture election periods by state…',
+       '► Validating NAIC Model Regulation §§ 6-15 compliance…',
+       '► Generating state-by-state regulatory sign-off package…',
+       '► ComplianceMatrix complete · Saved: 2.8 months · Cost avoided: $510K'
+     ],
+     result:'50 states configured · NAIC compliance validated · Rate increase workflows live · Regulatory package generated · Est. time saved: 2.8 months'},
+    {id:'uat',icon:'fa-vial',name:'UAT Orchestrator Agent',
+     color:'#d97706',
+     tagline:'Runs 10,000+ test scenarios overnight — humans review exceptions only',
+     tools:['Azure AI Foundry','Semantic Kernel','Test scenario library','Legacy output comparator','GPT-4o anomaly detector'],
+     steps:[
+       '► Building combinatorial test matrix…',
+       '► 187 forms × 50 states × 12 claim scenarios × 8 billing cycles = 897,600 permutations',
+       '► Launching parallel test execution (Azure AI Foundry — 256 workers)…',
+       '► Running claim adjudication tests: benefit trigger validation…',
+       '► Running billing tests: premium, waiver of premium, grace periods…',
+       '► Running lapse & reinstatement scenario battery…',
+       '► Comparing outputs vs legacy system baseline (GPT-4o diff engine)…',
+       '► 897,412 PASS · 188 EXCEPTION (0.02%) — queued for human review',
+       '► UAT Orchestrator complete · Saved: 3.4 months · Cost avoided: $680K'
+     ],
+     result:'897,600 test permutations · 897,412 PASS (99.98%) · 188 exceptions queued · Sign-off report generated · Est. time saved: 3.4 months'}
+  ];
+  var _p26activeAgent=null;
+  var _p26agentTimer=null;
+
+  // ── Simulator carriers for timeline tool ──────────────────────────────────
+  var _p26simConfig={
+    legacySystem:'as400',
+    policyForms:150,
+    stateCount:45,
+    claimants:30000,
+    reinsurers:2
+  };
+
+  // ── KPI helper ────────────────────────────────────────────────────────────
+  function _p26kpi(val,lbl,col,sub){
+    return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:110px;flex:1">'+
+      '<div style="font-size:22px;font-weight:800;color:'+(col||COA)+'">'+val+'</div>'+
+      '<div style="font-size:11px;color:#64748b;margin-top:2px;font-weight:600">'+lbl+'</div>'+
+      (sub?'<div style="font-size:10px;color:#94a3b8;margin-top:1px">'+sub+'</div>':'')+'</div>';
+  }
+
+  // ── Tab bar helper ─────────────────────────────────────────────────────────
+  function _p26tabBtn(id,label,icon){
+    var active=(_p26activeTab===id);
+    return '<button onclick="_p26switchTab(\''+id+'\')" style="padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;transition:all .2s;background:'+(active?COA:'#f1f5f9')+';color:'+(active?'#fff':'#64748b')+'"><i class="fas '+icon+'"></i>'+label+'</button>';
+  }
+  window._p26switchTab=function(id){
+    _p26activeTab=id;
+    _p26buildPage();
+  };
+
+  // ── Progress bar helper ───────────────────────────────────────────────────
+  function _p26prog(pct,col){
+    return '<div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;overflow:hidden">'+
+      '<div style="width:'+pct+'%;background:'+(col||COA)+';height:8px;border-radius:4px;transition:width .6s"></div></div>';
+  }
+
+  // ── Stage badge ───────────────────────────────────────────────────────────
+  function _p26stageBadge(n,label,active,done){
+    var bg=done?SUC:active?COA:'#e2e8f0';
+    var col=done||active?'#fff':'#94a3b8';
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px">'+
+      '<div style="width:28px;height:28px;border-radius:50%;background:'+bg+';color:'+col+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">'+
+      (done?'<i class="fas fa-check"></i>':n)+'</div>'+
+      '<div style="font-size:9px;color:#64748b;text-align:center;max-width:60px;line-height:1.2">'+label+'</div></div>';
+  }
+
+  // ── Format money ─────────────────────────────────────────────────────────
+  function _p26money(n){
+    if(n>=1000000) return '$'+(n/1000000).toFixed(1)+'M';
+    if(n>=1000) return '$'+(n/1000).toFixed(0)+'K';
+    return '$'+n;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 1 — OVERVIEW  (Problem → Solution narrative)
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p26overviewTab(){
+    // Pain point cards
+    var pCards='';
+    _p26pains.forEach(function(p,i){
+      pCards+='<div style="background:#fff;border:1px solid #fde68a;border-left:4px solid '+COA+';border-radius:10px;padding:14px 16px;cursor:pointer" onclick="_p26switchTab(\'playbook\')">';
+      pCards+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
+      pCards+='<div style="width:34px;height:34px;background:'+COA+'22;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas '+p.icon+'" style="color:'+COA+';font-size:15px"></i></div>';
+      pCards+='<div><div style="font-size:13px;font-weight:700;color:#0f172a">P'+(i+1)+'. '+p.title+'</div>';
+      pCards+='<div style="font-size:11px;color:'+DAN+'"><i class="fas fa-clock" style="margin-right:4px"></i>'+p.before+'</div></div></div>';
+      pCards+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">';
+      pCards+='<div style="font-size:10px;font-weight:700;color:'+SUC+'"><i class="fas fa-bolt" style="margin-right:3px"></i>HAL: '+p.after+'</div></div>';
+      pCards+=_p26prog(p.reduction,SUC);
+      pCards+='<div style="font-size:10px;color:#64748b;margin-top:3px;text-align:right">'+p.reduction+'% reduction</div>';
+      pCards+='</div>';
+    });
+
+    // HAL capability map
+    var halMap='';
+    var halItems=[
+      {phase:'P20',label:'Data Lake',icon:'fa-database',col:'#0078d4',solves:'Pain 1, 3'},
+      {phase:'P21',label:'Semantic Layer',icon:'fa-layer-group',col:'#0891b2',solves:'Pain 2, 4'},
+      {phase:'P22',label:'KG + Ontology',icon:'fa-project-diagram',col:'#7c3aed',solves:'Pain 4, 5'},
+      {phase:'P23',label:'Vector RAG',icon:'fa-search',col:'#4f46e5',solves:'Pain 1, 6, 8'},
+      {phase:'P24',label:'Agent Hub',icon:'fa-robot',col:'#059669',solves:'Pain 2, 5, 7, 8'},
+      {phase:'P25',label:'Lineage',icon:'fa-sitemap',col:'#d97706',solves:'Pain 3, 6'}
+    ];
+    halItems.forEach(function(h){
+      halMap+='<div style="background:#fff;border:1px solid '+h.col+'44;border-radius:10px;padding:12px;text-align:center">';
+      halMap+='<div style="width:36px;height:36px;background:'+h.col+';border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px">';
+      halMap+='<i class="fas '+h.icon+'" style="color:#fff;font-size:14px"></i></div>';
+      halMap+='<div style="font-size:11px;font-weight:800;color:#0f172a">'+h.phase+' '+h.label+'</div>';
+      halMap+='<div style="font-size:10px;color:'+h.col+';margin-top:3px;font-weight:600">Solves '+h.solves+'</div>';
+      halMap+='</div>';
+    });
+
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">'
+      // LEFT — problem side
+      +'<div>'
+      +'<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fbbf24;border-radius:12px;padding:16px 18px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:800;color:'+COA3+';margin-bottom:8px"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Current State — The Onboarding Crisis</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+DAN+'">18–36</div><div style="font-size:10px;color:#64748b;font-weight:600">months avg timeline</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+DAN+'">$8–22M</div><div style="font-size:10px;color:#64748b;font-weight:600">avg onboarding cost</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+DAN+'">67%</div><div style="font-size:10px;color:#64748b;font-weight:600">projects run over time</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+DAN+'">84%</div><div style="font-size:10px;color:#64748b;font-weight:600">miss expectations</div></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:#92400e">Sources: Gartner · Bloor Research · Decerto 2026 · Industry benchmarks</div>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:10px"><i class="fas fa-list-ul" style="color:'+COA+';margin-right:6px"></i>The 8 Root-Cause Bottlenecks</div>'
+      +'<div style="display:flex;flex-direction:column;gap:8px">'+pCards+'</div>'
+      +'</div>'
+      // RIGHT — solution side
+      +'<div>'
+      +'<div style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:1px solid #6ee7b7;border-radius:12px;padding:16px 18px;margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:800;color:#065f46;margin-bottom:8px"><i class="fas fa-rocket" style="margin-right:6px"></i>COA Target State — HAL-Powered</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+SUC+'">6–12</div><div style="font-size:10px;color:#64748b;font-weight:600">weeks target timeline</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+SUC+'">$900K–$2M</div><div style="font-size:10px;color:#64748b;font-weight:600">total cost (88% reduction)</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+SUC+'">94%</div><div style="font-size:10px;color:#64748b;font-weight:600">auto-mapped avg fields</div></div>'
+      +'<div style="background:#fff;border-radius:8px;padding:10px;text-align:center"><div style="font-size:26px;font-weight:900;color:'+SUC+'">99.98%</div><div style="font-size:10px;color:#64748b;font-weight:600">UAT pass rate (AI)</div></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:#065f46">Zero payment gaps for active LTC claimants · Fully automated compliance · 10,000+ test scenarios overnight</div>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:10px"><i class="fas fa-cubes" style="color:'+HAL+';margin-right:6px"></i>HAL Platform — 6 Capabilities Unlocked</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">'+halMap+'</div>'
+      // Timeline comparison bar
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px">'
+      +'<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-clock" style="color:'+COA+';margin-right:6px"></i>Timeline Compression — Before vs After</div>'
+      +'<div style="display:flex;flex-direction:column;gap:10px">'
+      +_p26timelineRow('Legacy Data Archaeology','4–8 months','3–5 days',96,'#0078d4')
+      +_p26timelineRow('Product Configuration','2–4 months','4–7 days',94,'#7c3aed')
+      +_p26timelineRow('Data Quality','3–6 months','5–8 days',95,'#059669')
+      +_p26timelineRow('Regulatory Setup','2–4 months','2–3 days',97,'#0891b2')
+      +_p26timelineRow('Integration Build','2–4 months','3–5 days',93,'#d97706')
+      +_p26timelineRow('Claims Migration','2–6 months','5–10 days',92,'#dc2626')
+      +_p26timelineRow('UAT & Validation','2–4 months','2–3 days',96,'#4f46e5')
+      +_p26timelineRow('Training & Go-Live','1–3 months','3–5 days',88,'#0078d4')
+      +'</div></div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  function _p26timelineRow(label,before,after,pct,col){
+    return '<div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+      +'<span style="font-size:11px;font-weight:600;color:#374151">'+label+'</span>'
+      +'<span style="font-size:11px"><span style="color:'+DAN+';text-decoration:line-through;margin-right:6px">'+before+'</span><span style="color:'+SUC+';font-weight:700">'+after+'</span></span>'
+      +'</div>'
+      +_p26prog(pct,col)
+      +'<div style="font-size:10px;color:#94a3b8;text-align:right;margin-top:1px">'+pct+'% time reduction</div>'
+      +'</div>';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 2 — COMMAND CENTER  (5 demo carrier pipelines)
+  // ══════════════════════════════════════════════════════════════════════════
+  var _p26stages=['Data Profile','Schema Map','Product Config','Reg Setup','Integration','UAT','Go-Live','Live ✓'];
+
+  function _p26commandTab(){
+    var cards='';
+    _p26carriers.forEach(function(c){
+      var pct=Math.round((c.stage/8)*100);
+      var stageDots='<div style="display:flex;gap:4px;align-items:center;overflow-x:auto;padding-bottom:2px">';
+      _p26stages.forEach(function(s,i){
+        var done=i<c.stage; var active=i===c.stage-1;
+        stageDots+=_p26stageBadge(i+1,s,active,done);
+        if(i<7) stageDots+='<div style="height:2px;width:12px;background:'+(done?SUC:'#e2e8f0')+';margin-bottom:12px;flex-shrink:0"></div>';
+      });
+      stageDots+='</div>';
+
+      cards+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;cursor:pointer;transition:box-shadow .2s" onmouseenter="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.1)\'" onmouseleave="this.style.boxShadow=\'none\'" onclick="_p26selectCarrier(\''+c.id+'\')">'+
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'+
+        '<div style="display:flex;align-items:center;gap:10px">'+
+        '<div style="width:40px;height:40px;border-radius:10px;background:'+c.color+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+c.short+'</div>'+
+        '<div><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.name+'</div>'+
+        '<div style="font-size:11px;color:#64748b">'+c.portfolio+'</div></div></div>'+
+        '<div style="text-align:right"><div style="font-size:11px;font-weight:700;color:'+SUC+'">HAL: '+c.coaWeeks+'w</div>'+
+        '<div style="font-size:10px;color:'+DAN+';text-decoration:line-through">Legacy: '+c.legacyMonths+'mo</div></div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px">'+
+        '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.policies.toLocaleString()+'</div><div style="font-size:10px;color:#64748b">Policies</div></div>'+
+        '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.forms+'</div><div style="font-size:10px;color:#64748b">Policy Forms</div></div>'+
+        '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.states+'</div><div style="font-size:10px;color:#64748b">States</div></div>'+
+        '<div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#0f172a">'+c.claimants.toLocaleString()+'</div><div style="font-size:10px;color:#64748b">Active Claimants</div></div>'+
+        '</div>'+
+        '<div style="margin-bottom:8px">'+_p26prog(pct,c.color)+'</div>'+
+        '<div style="font-size:10px;color:#64748b;margin-bottom:10px;display:flex;justify-content:space-between">'+
+        '<span>Stage '+c.stage+'/8 · <strong style="color:'+c.color+'">'+c.stageLabel+'</strong></span>'+
+        '<span style="color:'+SUC+';font-weight:700">Cost savings: '+_p26money(c.savings)+'</span></div>'+
+        stageDots+
+        '</div>';
+    });
+
+    // Detail panel if carrier selected
+    var detail='';
+    if(_p26simCarrier){
+      var c=_p26carriers.filter(function(x){return x.id===_p26simCarrier;})[0];
+      if(c){
+        detail='<div style="background:#fff;border:2px solid '+c.color+';border-radius:12px;padding:18px;margin-top:16px">';
+        detail+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
+        detail+='<div style="display:flex;align-items:center;gap:10px"><div style="width:44px;height:44px;border-radius:10px;background:'+c.color+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff">'+c.short+'</div>';
+        detail+='<div><div style="font-size:16px;font-weight:800;color:#0f172a">'+c.name+' — Full Onboarding View</div>';
+        detail+='<div style="font-size:12px;color:#64748b">'+c.system+'</div></div></div>';
+        detail+='<button onclick="_p26simCarrier=null;_p26buildPage()" style="background:#f1f5f9;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:#64748b">✕ Close</button></div>';
+
+        detail+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">';
+        detail+=_p26kpi(c.policies.toLocaleString(),'Policies',c.color);
+        detail+=_p26kpi(c.forms,'Policy Forms',PUR);
+        detail+=_p26kpi(c.states,'States',HAL);
+        detail+=_p26kpi(c.claimants.toLocaleString(),'Active Claimants',DAN,'zero-gap guarantee');
+        detail+=_p26kpi(_p26money(c.savings),'Cost Savings',SUC,'vs legacy onboarding');
+        detail+='</div>';
+
+        detail+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+        // Timeline table
+        detail+='<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Phase-by-Phase Timeline</div>';
+        detail+='<table style="width:100%;border-collapse:collapse;font-size:11px">';
+        detail+='<tr style="background:#f8fafc"><th style="padding:5px 8px;text-align:left;color:#64748b">Phase</th><th style="color:#dc2626;padding:5px">Legacy</th><th style="color:'+SUC+';padding:5px">HAL</th></tr>';
+        _p26pains.forEach(function(p,i){
+          var bw=p.before.split('·')[0].trim(); var aw=p.after.split('·')[0].trim();
+          detail+='<tr style="border-top:1px solid #f1f5f9"><td style="padding:4px 8px;color:#374151">P'+(i+1)+'. '+p.title+'</td>';
+          detail+='<td style="padding:4px 5px;text-align:center;color:#dc2626;text-decoration:line-through">'+bw+'</td>';
+          detail+='<td style="padding:4px 5px;text-align:center;color:'+SUC+';font-weight:700">'+aw.replace('days','d')+'</td></tr>';
+        });
+        detail+='<tr style="background:#f0fdf4;font-weight:800"><td style="padding:5px 8px">TOTAL</td><td style="padding:5px;text-align:center;color:#dc2626">'+c.legacyMonths+' months</td><td style="padding:5px;text-align:center;color:'+SUC+'">'+c.coaWeeks+' weeks</td></tr>';
+        detail+='</table></div>';
+
+        // Reinsurance + legacy system info
+        detail+='<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">System Profile</div>';
+        detail+='<div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:11px;display:flex;flex-direction:column;gap:6px">';
+        detail+='<div><span style="color:#64748b;font-weight:600">Legacy System: </span><span style="color:#0f172a">'+c.system+'</span></div>';
+        detail+='<div><span style="color:#64748b;font-weight:600">Reinsurers: </span><span style="color:#0f172a">'+c.reinsurers.join(', ')+'</span></div>';
+        detail+='<div><span style="color:#64748b;font-weight:600">Portfolio: </span><span style="color:#0f172a">'+c.portfolio+'</span></div>';
+        detail+='<div><span style="color:#64748b;font-weight:600">Current Stage: </span><span style="color:'+c.color+';font-weight:700">'+c.stageLabel+'</span></div>';
+        detail+='</div>';
+        detail+='<div style="margin-top:10px;background:linear-gradient(135deg,'+COA+','+COA2+');border-radius:8px;padding:12px;color:#fff">';
+        detail+='<div style="font-size:12px;font-weight:800;margin-bottom:4px"><i class="fas fa-chart-line" style="margin-right:6px"></i>ROI Summary</div>';
+        detail+='<div style="font-size:11px;opacity:.92">Legacy cost: ~'+_p26money(c.savings*6/5)+'<br>COA cost: ~'+_p26money(c.savings/5)+'<br>';
+        detail+='<strong>Net savings: '+_p26money(c.savings)+'</strong><br>Time saved: '+(c.legacyMonths-Math.round(c.coaWeeks/4.3))+' months</div></div>';
+        detail+='</div></div></div>';
+      }
+    }
+
+    return '<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-tower-control" style="color:'+COA+';margin-right:6px"></i>5 Carrier Onboardings — Live Pipeline Status</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+cards+'</div>'
+      +detail;
+  }
+
+  window._p26selectCarrier=function(id){
+    _p26simCarrier=(_p26simCarrier===id)?null:id;
+    _p26buildPage();
+  };
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 3 — PLAYBOOK  (8 pain points detail)
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p26playbookTab(){
+    var rows='';
+    _p26pains.forEach(function(p,i){
+      rows+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">';
+      // Header
+      rows+='<div style="background:linear-gradient(135deg,#fef3c7,#fffbeb);padding:14px 16px;border-bottom:1px solid #fde68a;display:flex;align-items:center;gap:12px">';
+      rows+='<div style="width:38px;height:38px;background:'+COA+';border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas '+p.icon+'" style="color:#fff;font-size:15px"></i></div>';
+      rows+='<div style="flex:1"><div style="font-size:13px;font-weight:800;color:#92400e">Pain Point '+(i+1)+': '+p.title+'</div>';
+      rows+='<div style="font-size:11px;color:#64748b;margin-top:2px">HAL Solution: <strong style="color:'+HAL+'">'+p.hal+'</strong></div></div>';
+      rows+='<div style="text-align:right;flex-shrink:0"><div style="font-size:20px;font-weight:900;color:'+SUC+'">'+p.reduction+'%</div><div style="font-size:10px;color:#64748b">reduction</div></div>';
+      rows+='</div>';
+      // Body
+      rows+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">';
+      // Before
+      rows+='<div style="padding:12px 14px;border-right:1px solid #fee2e2;background:#fff5f5">';
+      rows+='<div style="font-size:10px;font-weight:700;color:'+DAN+';margin-bottom:6px;text-transform:uppercase">❌ Today</div>';
+      rows+='<div style="font-size:11px;color:#374151">'+p.before+'</div></div>';
+      // After
+      rows+='<div style="padding:12px 14px;border-right:1px solid #d1fae5;background:#f0fdf4">';
+      rows+='<div style="font-size:10px;font-weight:700;color:'+SUC+';margin-bottom:6px;text-transform:uppercase">✅ With HAL</div>';
+      rows+='<div style="font-size:11px;color:#374151">'+p.after+'</div></div>';
+      // How it works
+      rows+='<div style="padding:12px 14px;background:#f8fafc">';
+      rows+='<div style="font-size:10px;font-weight:700;color:'+HAL+';margin-bottom:6px;text-transform:uppercase">⚙ How It Works</div>';
+      rows+='<div style="font-size:11px;color:#374151;line-height:1.5">'+p.detail+'</div></div>';
+      rows+='</div>';
+      // Progress bar
+      rows+='<div style="padding:8px 14px;background:#fafafa;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:10px">';
+      rows+='<div style="flex:1">'+_p26prog(p.reduction,SUC)+'</div>';
+      rows+='<div style="font-size:11px;font-weight:700;color:'+SUC+';white-space:nowrap">'+p.reduction+'% faster</div>';
+      rows+='</div>';
+      rows+='</div>';
+    });
+
+    // Summary strip
+    var totalBefore=0,totalAfter=0;
+    _p26pains.forEach(function(p){totalBefore+=p.wks*4.3; totalAfter+=p.wks;});
+    var totalMo=Math.round(totalBefore);
+
+    return '<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-book-open" style="color:'+COA+';margin-right:6px"></i>8-Phase Acceleration Playbook — Before vs After</div>'
+      +'<div style="display:flex;flex-direction:column;gap:10px">'+rows+'</div>'
+      +'<div style="margin-top:16px;background:linear-gradient(135deg,'+COA+','+COA2+');border-radius:12px;padding:16px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between">'
+      +'<div><div style="font-size:14px;font-weight:800">Total: '+totalMo+' months → ~8 weeks (mid-tier carrier)</div>'
+      +'<div style="font-size:12px;opacity:.9;margin-top:2px">Avg cost: $8–22M → $900K–$2M · 88% cost reduction · 100% active claimant continuity</div></div>'
+      +'<div style="text-align:center"><div style="font-size:28px;font-weight:900">~94%</div><div style="font-size:11px;opacity:.9">avg time reduction</div></div>'
+      +'</div>';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 4 — AI AGENTS  (4 COA agents with live execution)
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p26agentsTab(){
+    if(_p26activeAgent){
+      return _p26agentDetail(_p26activeAgent);
+    }
+    var cards='';
+    _p26agents.forEach(function(ag){
+      cards+='<div style="background:#fff;border:1px solid '+ag.color+'33;border-radius:12px;padding:16px">';
+      cards+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+      cards+='<div style="width:42px;height:42px;background:'+ag.color+';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas '+ag.icon+'" style="color:#fff;font-size:17px"></i></div>';
+      cards+='<div><div style="font-size:13px;font-weight:800;color:#0f172a">'+ag.name+'</div>';
+      cards+='<div style="font-size:11px;color:#64748b">'+ag.tagline+'</div></div></div>';
+      cards+='<div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px">Tool Chain:</div>';
+      cards+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">';
+      ag.tools.forEach(function(t){
+        cards+='<span style="background:'+ag.color+'15;color:'+ag.color+';border:1px solid '+ag.color+'33;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600">'+t+'</span>';
+      });
+      cards+='</div>';
+      cards+='<div style="display:flex;gap:8px">';
+      cards+='<button onclick="_p26runAgent(\''+ag.id+'\')" style="flex:1;background:'+ag.color+';color:#fff;border:none;border-radius:8px;padding:8px;cursor:pointer;font-weight:700;font-size:12px"><i class="fas fa-play" style="margin-right:5px"></i>Run Agent</button>';
+      cards+='<button onclick="_p26showAgentDetail(\''+ag.id+'\')" style="background:#f1f5f9;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:12px;color:#64748b">Details</button>';
+      cards+='</div></div>';
+    });
+    return '<div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-robot" style="color:'+COA+';margin-right:6px"></i>4 COA AI Agents — Illumifin Onboarding Automation</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+cards+'</div>';
+  }
+
+  function _p26agentDetail(agId){
+    var ag=_p26agents.filter(function(x){return x.id===agId;})[0];
+    if(!ag) return '';
+    return '<div style="background:#fff;border:2px solid '+ag.color+';border-radius:12px;padding:18px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<div style="width:44px;height:44px;background:'+ag.color+';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas '+ag.icon+'" style="color:#fff;font-size:18px"></i></div>'
+      +'<div><div style="font-size:15px;font-weight:800;color:#0f172a">'+ag.name+'</div>'
+      +'<div style="font-size:11px;color:#64748b">'+ag.tagline+'</div></div></div>'
+      +'<button onclick="_p26activeAgent=null;_p26buildPage()" style="background:#f1f5f9;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:#64748b">← Back</button></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+      +'<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Tool Chain</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px">'
+      +ag.tools.map(function(t,i){return '<div style="display:flex;align-items:center;gap:6px;background:'+ag.color+'10;border-radius:6px;padding:6px 10px"><span style="background:'+ag.color+';color:#fff;border-radius:4px;width:18px;height:18px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</span><span style="font-size:11px;color:#374151">'+t+'</span></div>';}).join('')
+      +'</div>'
+      +'<div style="margin-top:12px"><button onclick="_p26runAgent(\''+ag.id+'\')" style="width:100%;background:'+ag.color+';color:#fff;border:none;border-radius:8px;padding:10px;cursor:pointer;font-weight:800;font-size:13px"><i class="fas fa-play" style="margin-right:6px"></i>Run '+ag.name+'</button></div></div>'
+      +'<div><div style="font-size:11px;font-weight:700;color:#0f172a;margin-bottom:8px">Execution Log</div>'
+      +'<div id="p26-agent-log-'+ag.id+'" style="background:#0f172a;border-radius:8px;padding:12px;min-height:180px;font-family:monospace;font-size:11px;color:#94a3b8;line-height:1.7">'
+      +'<span style="color:#64748b">// Click Run Agent to execute…</span></div>'
+      +'<div id="p26-agent-result-'+ag.id+'" style="display:none;margin-top:10px;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:8px;padding:12px;font-size:11px;color:#065f46"><i class="fas fa-check-circle" style="margin-right:6px"></i>'+ag.result+'</div>'
+      +'</div></div></div>';
+  }
+
+  window._p26showAgentDetail=function(id){
+    _p26activeAgent=id;
+    _p26buildPage();
+  };
+
+  window._p26runAgent=function(agId){
+    var ag=_p26agents.filter(function(x){return x.id===agId;})[0];
+    if(!ag) return;
+    // Show detail view first
+    _p26activeAgent=agId;
+    _p26buildPage();
+    var logEl=document.getElementById('p26-agent-log-'+agId);
+    var resEl=document.getElementById('p26-agent-result-'+agId);
+    if(!logEl) return;
+    logEl.innerHTML='';
+    if(resEl) resEl.style.display='none';
+    // Animate steps
+    var steps=ag.steps;
+    var idx=0;
+    function showStep(){
+      if(idx>=steps.length){
+        if(resEl) resEl.style.display='block';
+        return;
+      }
+      var line=document.createElement('div');
+      var col=steps[idx].indexOf('complete')>=0?'#6ee7b7':
+              steps[idx].indexOf('►')>=0?'#60a5fa':
+              steps[idx].indexOf('⚠')>=0?'#fbbf24':'#94a3b8';
+      line.style.color=col;
+      line.textContent=steps[idx];
+      logEl.appendChild(line);
+      logEl.scrollTop=logEl.scrollHeight;
+      idx++;
+      setTimeout(showStep,520);
+    }
+    showStep();
+  };
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB 5 — ROI SIMULATOR
+  // ══════════════════════════════════════════════════════════════════════════
+  var _p26roi={legacy:'as400',forms:150,states:45,claimants:30000,reinsurors:2};
+
+  function _p26simulatorTab(){
+    var f=_p26roi;
+    // Compute estimates
+    var legacyBase={as400:24,cobol:30,lifepro:20,duckcreek:18,custom:36};
+    var legacyMo=(legacyBase[f.legacy]||22)
+      + Math.round((f.forms-100)/100*3)
+      + Math.round((f.states-40)/10*1.5)
+      + Math.round(f.claimants/10000*2)
+      + f.reinsurors*1.5;
+    legacyMo=Math.max(12,Math.round(legacyMo));
+    var coaWks=Math.round(legacyMo*0.45);
+    coaWks=Math.max(4,Math.min(16,coaWks));
+    var legacyCost=Math.round(legacyMo*420000);
+    var coaCost=Math.round(coaWks*95000);
+    var savings=legacyCost-coaCost;
+    var savPct=Math.round(savings/legacyCost*100);
+    var schemaFields=Math.round(800+f.forms*4.2);
+    var testCount=Math.round(f.forms*f.states*12*8);
+    var reduction=Math.round(((legacyMo*4.3-coaWks)/(legacyMo*4.3))*100);
+
+    var sysLabels={as400:'IBM AS/400',cobol:'UNISYS COBOL Mainframe',lifepro:'LifePRO Legacy',duckcreek:'Duck Creek On-Premise',custom:'Custom/Homegrown PAS'};
+
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">'
+      // LEFT — inputs
+      +'<div><div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-sliders-h" style="color:'+COA+';margin-right:6px"></i>Configure Your Carrier Profile</div>'
+      +'<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px">'
+      // Legacy system
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Legacy System Type</label>'
+      +'<select onchange="_p26roi.legacy=this.value;_p26buildPage()" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;color:#0f172a">'
+      +Object.keys(sysLabels).map(function(k){return '<option value="'+k+'"'+(f.legacy===k?' selected':'')+'>'+sysLabels[k]+'</option>';}).join('')
+      +'</select></div>'
+      // Policy forms
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Number of Policy Forms: <strong style="color:'+COA+'">'+f.forms+'</strong></label>'
+      +'<input type="range" min="20" max="350" value="'+f.forms+'" oninput="_p26roi.forms=+this.value;_p26buildPage()" style="width:100%"></div>'
+      // States
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">States of Operation: <strong style="color:'+COA+'">'+f.states+'</strong></label>'
+      +'<input type="range" min="1" max="50" value="'+f.states+'" oninput="_p26roi.states=+this.value;_p26buildPage()" style="width:100%"></div>'
+      // Active claimants
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Active Claimants: <strong style="color:'+COA+'">'+f.claimants.toLocaleString()+'</strong></label>'
+      +'<input type="range" min="500" max="120000" step="500" value="'+f.claimants+'" oninput="_p26roi.claimants=+this.value;_p26buildPage()" style="width:100%"></div>'
+      // Reinsurers
+      +'<div>'
+      +'<label style="font-size:11px;font-weight:700;color:#374151;display:block;margin-bottom:6px">Reinsurance Relationships: <strong style="color:'+COA+'">'+f.reinsurors+'</strong></label>'
+      +'<input type="range" min="0" max="6" value="'+f.reinsurors+'" oninput="_p26roi.reinsurors=+this.value;_p26buildPage()" style="width:100%"></div>'
+      +'</div></div>'
+      // RIGHT — results
+      +'<div><div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:12px"><i class="fas fa-chart-bar" style="color:'+SUC+';margin-right:6px"></i>COA Impact Estimate</div>'
+      +'<div style="display:flex;flex-direction:column;gap:10px">'
+      // Timeline card
+      +'<div style="background:linear-gradient(135deg,#fef3c7,#fffbeb);border:1px solid #fbbf24;border-radius:12px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:8px"><i class="fas fa-clock" style="margin-right:4px"></i>Timeline</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:10px"><div style="font-size:28px;font-weight:900;color:'+DAN+'">'+legacyMo+'</div><div style="font-size:11px;color:#64748b;font-weight:600">months (legacy)</div></div>'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:10px"><div style="font-size:28px;font-weight:900;color:'+SUC+'">'+coaWks+'</div><div style="font-size:11px;color:#64748b;font-weight:600">weeks (COA)</div></div>'
+      +'</div>'
+      +'<div style="margin-top:8px;text-align:center;font-size:12px;font-weight:800;color:'+COA3+'">'+reduction+'% time reduction</div></div>'
+      // Cost card
+      +'<div style="background:linear-gradient(135deg,#d1fae5,#ecfdf5);border:1px solid #6ee7b7;border-radius:12px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:#065f46;margin-bottom:8px"><i class="fas fa-dollar-sign" style="margin-right:4px"></i>Cost Analysis</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:900;color:'+DAN+'">'+_p26money(legacyCost)+'</div><div style="font-size:10px;color:#64748b">Legacy cost</div></div>'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:900;color:'+SUC+'">'+_p26money(coaCost)+'</div><div style="font-size:10px;color:#64748b">COA cost</div></div>'
+      +'<div style="text-align:center;background:#fff;border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:900;color:'+COA+'">'+_p26money(savings)+'</div><div style="font-size:10px;color:#64748b">Savings ('+savPct+'%)</div></div>'
+      +'</div></div>'
+      // AI metrics card
+      +'<div style="background:#fff;border:1px solid #e0e7ff;border-radius:12px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:700;color:'+PUR+';margin-bottom:8px"><i class="fas fa-robot" style="margin-right:4px"></i>AI Automation Metrics</div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px;font-size:11px">'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">Schema fields to map</span><span style="font-weight:700;color:#0f172a">~'+schemaFields.toLocaleString()+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">Auto-mapped (SchemaMapper)</span><span style="font-weight:700;color:'+SUC+'">~'+Math.round(schemaFields*0.94).toLocaleString()+' (94%)</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">UAT test permutations</span><span style="font-weight:700;color:#0f172a">'+testCount.toLocaleString()+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">UAT pass rate (AI)</span><span style="font-weight:700;color:'+SUC+'">99.98%</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">Active claimant gaps</span><span style="font-weight:700;color:'+SUC+'">Zero guaranteed</span></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#64748b">States auto-configured</span><span style="font-weight:700;color:'+HAL+'">'+f.states+' / '+f.states+'</span></div>'
+      +'</div></div>'
+      // CTA banner
+      +'<div style="background:linear-gradient(135deg,'+COA+','+COA2+');border-radius:12px;padding:14px;color:#fff;text-align:center">'
+      +'<div style="font-size:13px;font-weight:900;margin-bottom:4px">Ready to onboard in '+coaWks+' weeks?</div>'
+      +'<div style="font-size:11px;opacity:.92">HAL-powered COA can save your carrier '+_p26money(savings)+' vs. traditional onboarding</div>'
+      +'</div>'
+      +'</div></div>';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MAIN BUILD  
+  // ══════════════════════════════════════════════════════════════════════════
+  function _p26buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+
+    var tabs=['overview','command','playbook','agents','simulator'];
+    var tabCfg={
+      overview:  {label:'Overview',      icon:'fa-home'},
+      command:   {label:'Command Center',icon:'fa-tower-control'},
+      playbook:  {label:'8-Phase Playbook',icon:'fa-book-open'},
+      agents:    {label:'AI Agents',     icon:'fa-robot'},
+      simulator: {label:'ROI Simulator', icon:'fa-chart-bar'}
+    };
+    var tabBar=tabs.map(function(t){return _p26tabBtn(t,tabCfg[t].label,tabCfg[t].icon);}).join('');
+
+    var body='';
+    if(_p26activeTab==='overview')   body=_p26overviewTab();
+    else if(_p26activeTab==='command') body=_p26commandTab();
+    else if(_p26activeTab==='playbook') body=_p26playbookTab();
+    else if(_p26activeTab==='agents')  body=_p26agentsTab();
+    else if(_p26activeTab==='simulator') body=_p26simulatorTab();
+
+    pc.innerHTML=
+      '<div style="padding:20px 24px;background:#f8fafc;min-height:100vh;font-family:Inter,sans-serif">'
+      // Header
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:42px;height:42px;background:linear-gradient(135deg,'+COA+','+COA2+');border-radius:11px;display:flex;align-items:center;justify-content:center"><i class="fas fa-rocket" style="color:#fff;font-size:18px"></i></div>'
+      +'<div><div style="font-size:20px;font-weight:800;color:#0f172a">Carrier Onboarding Accelerator</div>'
+      +'<div style="font-size:12px;color:#64748b;margin-top:2px">Illumifin LTC + HAL Platform · From <strong style="color:'+DAN+'">18 months</strong> to <strong style="color:'+SUC+'">6 weeks</strong> · Powered by Microsoft Fabric · Azure AI · Semantic Kernel</div></div></div>'
+      +'<div style="display:flex;gap:8px">'
+      +'<span style="background:'+COA+'22;color:'+COA+';border:1px solid '+COA+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700"><i class="fas fa-bolt" style="margin-right:4px"></i>COA Engine</span>'
+      +'<span style="background:'+SUC+'22;color:'+SUC+';border:1px solid '+SUC+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700"><i class="fas fa-shield-alt" style="margin-right:4px"></i>Zero Claimant Gap</span>'
+      +'<span style="background:'+HAL+'22;color:'+HAL+';border:1px solid '+HAL+'44;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700"><i class="fas fa-robot" style="margin-right:4px"></i>4 AI Agents</span>'
+      +'</div></div>'
+      // KPI bar
+      +'<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">'
+      +_p26kpi('18mo→6wk','Timeline Compression',COA,'avg mid-tier carrier')
+      +_p26kpi('88%','Cost Reduction',SUC,'$8M → $900K avg')
+      +_p26kpi('94%','Fields Auto-Mapped',HAL,'SchemaMapper Agent')
+      +_p26kpi('99.98%','UAT Pass Rate',PUR,'10K+ scenarios')
+      +_p26kpi('Zero','Claimant Payment Gaps',SUC,'active LTC guarantee')
+      +_p26kpi('5','Demo Carriers',COA,'NYL·PFG·CNA·MET·GNW')
+      +'</div>'
+      // Tab bar
+      +'<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">'+tabBar+'</div>'
+      // Body
+      +body
+      // Footer
+      +'<div style="margin-top:16px;background:linear-gradient(135deg,'+COA+','+COA2+');border-radius:12px;padding:14px 20px;color:#fff;display:flex;align-items:center;gap:16px">'
+      +'<i class="fas fa-rocket" style="font-size:24px;opacity:.9"></i>'
+      +'<div><div style="font-weight:800;font-size:13px">Carrier Onboarding Accelerator — Powered by Hybrid LTC + HAL Intelligence Platform</div>'
+      +'<div style="font-size:11px;opacity:.9;margin-top:2px">SchemaMapper · PolicyForm Configurator · ComplianceMatrix · UAT Orchestrator · All 6 HAL phases (P20–P25) working in concert · Microsoft Fabric + Azure AI Foundry + Semantic Kernel + Microsoft Purview · From contract signature to go-live in 6–12 weeks · Zero active claimant payment gaps guaranteed</div></div>'
+      +'</div></div>';
+  }
+
+  // ── Nav intercept ─────────────────────────────────────────────────────────
+  var _p26origNav=window.navigateTo;
+  window.navigateTo=function(page){
+    if(page==='hal-coa'){
+      document.querySelectorAll('.nav-item').forEach(function(e){e.classList.remove('active');});
+      var n=document.querySelector('.hal-coa-nav'); if(n)n.classList.add('active');
+      _p26activeTab='overview'; _p26activeAgent=null; _p26simCarrier=null;
+      _p26buildPage(); return;
+    }
+    if(_p26origNav) _p26origNav(page);
+  };
+
+  console.log('[Phase 26] Carrier Onboarding Accelerator loaded · 8 pain points · 5 demo carriers · 4 AI agents · ROI simulator · 18mo→6wk compression');
+})();
