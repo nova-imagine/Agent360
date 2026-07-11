@@ -82636,20 +82636,23 @@ var navigateTo=window.navigateTo;
       +'</div></div></div>'
 
       /* ── Tab Bar ── */
-      +'<div style="background:#fff;border-bottom:1px solid #e9d5ff;padding:0 28px;display:flex;gap:0;overflow-x:auto">';
-    [
-      ['overview','fa-tachometer-alt','Rate Overview'],
-      ['filings','fa-file-alt','State Filings'],
-      ['impact','fa-users','Policyholder Impact'],
-      ['reserves','fa-database','Reserve Analytics'],
-      ['reinsurance','fa-handshake','Reinsurance']
-    ].forEach(function(t){
-      var act=_p29activeTab===t[0];
-      pc.innerHTML+=
-        '<button onclick="window._p29switchTab(\''+t[0]+'\')" style="padding:14px 20px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:'+(act?700:500)+';color:'+(act?R1:'#64748b')+';border-bottom:3px solid '+(act?R1:'transparent')+';white-space:nowrap;transition:all .2s">'
-        +'<i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';
-    });
-    pc.innerHTML+='</div>'
+      +'<div style="background:#fff;border-bottom:1px solid #e9d5ff;padding:0 28px;display:flex;gap:0;overflow-x:auto">'
+      +(function(){
+        var tabHtml='';
+        [
+          ['overview','fa-tachometer-alt','Rate Overview'],
+          ['filings','fa-file-alt','State Filings'],
+          ['impact','fa-users','Policyholder Impact'],
+          ['reserves','fa-database','Reserve Analytics'],
+          ['reinsurance','fa-handshake','Reinsurance']
+        ].forEach(function(t){
+          var act=_p29activeTab===t[0];
+          tabHtml+='<button onclick="window._p29switchTab(\''+t[0]+'\')" style="padding:14px 20px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:'+(act?700:500)+';color:'+(act?R1:'#64748b')+';border-bottom:3px solid '+(act?R1:'transparent')+';white-space:nowrap;transition:all .2s">'
+            +'<i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';
+        });
+        return tabHtml;
+      })()
+      +'</div>'
 
       /* ── Tab Content ── */
       +'<div id="p29-tab-content" style="padding:24px 28px">'
