@@ -67018,15 +67018,262 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
      AI TRIAGE MODAL — Full interactive panel
   ═══════════════════════════════════════════════════════════════════════ */
   var ltcTriageData = [
-    { id:'LTC-2026-0101', claimant:'Margaret O\'Brien',   age:78, priority:'CRITICAL', score:94, carrier:'Prudential',   type:'Nursing Home',   days:14, flag:'Care Plan overdue · Next payment Jul 15',       action:'Expedite care plan · Coordinate with Sunrise Manor SNF', aiRec:'Approve continued SNF care · 6-9 months projected · Schedule RN visit within 48h' },
-    { id:'LTC-2026-0107', claimant:'Ruth Blackwood',      age:77, priority:'CRITICAL', score:91, carrier:'Lincoln Natl', type:'Nursing Home',   days:9,  flag:'Clinical escalation · All 5 ADLs impaired',    action:'RN clinical review required today · Family conference', aiRec:'Maximum benefit level warranted · Discharge planning needed · Hospice consult recommended' },
-    { id:'LTC-2026-0102', claimant:'Harold Simmons',      age:82, priority:'HIGH',     score:78, carrier:'MassMutual',  type:'Home Health',    days:31, flag:'Nurse assessment overdue · 31 days open',       action:'Schedule telephonic RN assessment within 5 days',       aiRec:'Home health appropriate · ADL 3/5 stable · Monitor for SNF transition risk' },
-    { id:'LTC-2026-0103', claimant:'Dorothy Feldstein',   age:74, priority:'HIGH',     score:72, carrier:'NY Life',     type:'ALF',            days:7,  flag:'Policy interpretation dispute · On hold',       action:'Legal review of elimination period clause · Expedite',  aiRec:'Policy language favors approval · Recommend coverage confirmation to avoid bad-faith risk' },
-    { id:'LTC-2026-0104', claimant:'Arthur Kowalski',     age:86, priority:'MEDIUM',   score:55, carrier:'Genworth',    type:'Memory Care',    days:62, flag:'Monthly billing review due · Long-running',    action:'Billing audit · Care plan annual renewal',              aiRec:'Cognitive score 8/30 — memory care level appropriate · No fraud indicators · Stable' },
-    { id:'LTC-2026-0105', claimant:'Evelyn Marchetti',    age:71, priority:'MEDIUM',   score:48, carrier:'Transamerica',type:'Adult Day Care',  days:3,  flag:'Initial assessment not yet scheduled',         action:'Schedule initial assessment · Assign RN',               aiRec:'Early-stage claim · Low complexity · Expedite initial assessment to avoid SLA breach' },
-    { id:'LTC-2026-0106', claimant:'Francis Delacroix',   age:80, priority:'LOW',      score:32, carrier:'TIAA',        type:'Home Health',    days:120,flag:'Annual care review upcoming',                  action:'Schedule annual review · Reassess ADL baseline',        aiRec:'Stable long-running claim · No anomalies · Annual review aligns with benefit period milestone' },
-    { id:'LTC-2026-0108', claimant:'George Nakamura',     age:83, priority:'LOW',      score:28, carrier:'Pacific Life', type:'ALF',           days:45, flag:'Quarterly check-in due next week',             action:'Routine quarterly check-in · No urgent action',         aiRec:'ADL 3/5 stable · Cognitively intact (19/30) · ALF setting appropriate · No change needed' }
+    { id:'LTC-2026-0101', claimant:'Margaret O\'Brien',   age:78, priority:'CRITICAL', score:94, carrier:'Prudential',   type:'Nursing Home',   days:14, flag:'Care Plan overdue · Next payment Jul 15',       action:'Expedite care plan · Coordinate with Sunrise Manor SNF', aiRec:'Approve continued SNF care · 6-9 months projected · Schedule RN visit within 48h',
+      scoreReason: { sla:38, clinical:32, fraud:12, payment:12, signals:['Care plan 14 days overdue (SLA breach imminent)','SNF invoice submitted but care plan missing','Age 78 + Nursing Home = elevated complexity weight','Payment cycle Jul 15 — zero buffer','ADL 4/5 documented — high acuity tier','No fraud flags — clean payment history'], model:'Composite Urgency Index v3.1 · XGBoost (SLA risk 38pt) + ClinicalBERT (acuity 32pt) + IsoForest anomaly (payment 12pt) + rules engine (fraud 12pt)', caseManager:'Sarah Johnson, RN', nextPayment:'Jul 15, 2026 · $195/day', facility:'Sunrise Manor SNF, Dallas TX' },
+      resolveSteps:['Verify care plan received from Sunrise Manor SNF','Confirm ADL assessment matches SNF admission notes','Approve benefit continuation for 90 days','Notify Prudential carrier of approval decision','Update SLA clock — 0 days remaining buffer'],
+      escalateSteps:['Page RN Supervisor Angela Moore immediately','Flag for Clinical Director review within 2 hours','Send emergency alert to Prudential carrier liaison','Lock claim for concurrent editing — single reviewer only','Auto-draft family notification letter'],
+      scheduleSteps:['Block RN Sarah Johnson — Jul 12, 2026 10:00 AM CT','Send SMS to Margaret O\'Brien: (555) 401-2290','Email Sunrise Manor SNF care coordinator','Calendar hold: 45-min telephonic + 30-min documentation','Auto-reminder 24h before visit'],
+    },
+    { id:'LTC-2026-0107', claimant:'Ruth Blackwood',      age:77, priority:'CRITICAL', score:91, carrier:'Lincoln Natl', type:'Nursing Home',   days:9,  flag:'Clinical escalation · All 5 ADLs impaired',    action:'RN clinical review required today · Family conference', aiRec:'Maximum benefit level warranted · Discharge planning needed · Hospice consult recommended',
+      scoreReason: { sla:34, clinical:36, fraud:9, payment:12, signals:['All 5 ADLs impaired — maximum clinical acuity','Hospice trajectory detected by ClinicalBERT (87% confidence)','Age 77 + full ADL loss = highest complexity tier','Lincoln Natl policy approaching daily benefit cap','9 days open — discharge planning urgency elevated','Family conference request logged by SNF 3 days ago'], model:'Composite Urgency Index v3.1 · XGBoost (SLA risk 34pt) + ClinicalBERT (acuity 36pt) + IsoForest anomaly (payment 9pt) + rules engine (fraud 12pt)', caseManager:'Angela Moore, RN', nextPayment:'Jul 14, 2026 · $240/day', facility:'Pinecrest Nursing & Rehab, Austin TX' },
+      resolveSteps:['Confirm maximum benefit level authorization with Lincoln Natl','Document all 5 ADL impairments in clinical system','Initiate discharge planning workflow','Coordinate hospice consult referral (Compassus preferred network)','Update family portal with status and next steps'],
+      escalateSteps:['Activate Clinical Director hotline — Level 1 escalation','Notify Lincoln Natl medical director within 1 hour','Engage illumifin Hospice Transition Team','Family conference call — schedule within 24 hours','Legal review: end-of-life benefit provisions'],
+      scheduleSteps:['Book Clinical Director Dr. Kim — Today 2:00 PM CT','Schedule family conference: Jul 12 11:00 AM CT','Hospice liaison Compassus — initial consult Jul 13','SNF care team briefing — Jul 12 9:00 AM CT','All invites sent via secure portal + SMS'],
+    },
+    { id:'LTC-2026-0102', claimant:'Harold Simmons',      age:82, priority:'HIGH',     score:78, carrier:'MassMutual',  type:'Home Health',    days:31, flag:'Nurse assessment overdue · 31 days open',       action:'Schedule telephonic RN assessment within 5 days',       aiRec:'Home health appropriate · ADL 3/5 stable · Monitor for SNF transition risk',
+      scoreReason: { sla:28, clinical:24, fraud:14, payment:12, signals:['RN assessment 31 days overdue — SLA policy: 30 days max','Age 82 home health — SNF transition probability 34% (6-month model)','ADL 3/5 stable but trending toward 4/5','MassMutual requires quarterly RN sign-off','No fraud signals — CelltTrak GPS EVV matches claim dates','Payment anomaly: 2 days late in prior cycle (minor)'], model:'Composite Urgency Index v3.1 · XGBoost (SLA risk 28pt) + ClinicalBERT (acuity 24pt) + IsoForest anomaly (payment 12pt) + rules engine (fraud 14pt)', caseManager:'James Park, RN', nextPayment:'Jul 18, 2026 · $165/day', facility:'Home — 4412 Maple Ave, Houston TX' },
+      resolveSteps:['Schedule telephonic RN assessment within 5 business days','Pull CellTrak EVV logs — verify 30-day service continuity','Confirm ADL status with home health aide agency','Update MassMutual claim record with assessment date','Monitor for SNF transition indicators monthly'],
+      escalateSteps:['Flag for RN Supervisor — SLA breach (31 days, limit 30)','Alert MassMutual carrier of delayed assessment','Create corrective action note in claim file','Assign priority queue status — complete assessment in 48h','Auto-notify compliance team of SLA exception'],
+      scheduleSteps:['Book RN James Park — telephonic — Jul 14, 2026 2:00 PM CT','SMS Harold Simmons: (555) 829-4401','Email home health aide agency (BrightSpring)','30-min assessment + 20-min documentation block','Follow-up reminder auto-set for Aug 14'],
+    },
+    { id:'LTC-2026-0103', claimant:'Dorothy Feldstein',   age:74, priority:'HIGH',     score:72, carrier:'NY Life',     type:'ALF',            days:7,  flag:'Policy interpretation dispute · On hold',       action:'Legal review of elimination period clause · Expedite',  aiRec:'Policy language favors approval · Recommend coverage confirmation to avoid bad-faith risk',
+      scoreReason: { sla:26, clinical:18, fraud:16, payment:12, signals:['Policy on hold — elimination period dispute (90 vs 60 days)','NLP policy parser: §3.4 language 78% likely supports claimant','Bad-faith risk score: 62/100 (elevated — legal review mandatory)','NY Life carrier SLA: dispute resolution within 10 days','Age 74 ALF — clinical acuity moderate','No fraud indicators — clean submission'], model:'Composite Urgency Index v3.1 · XGBoost (SLA risk 26pt) + PolicyNLP (dispute 18pt) + IsoForest anomaly (fraud 16pt) + rules engine (payment 12pt)', caseManager:'Maria Castillo, MSW', nextPayment:'Pending dispute resolution', facility:'Brookdale Assisted Living, Phoenix AZ' },
+      resolveSteps:['Legal team review policy §3.4 elimination period language','NLP parser output: forward to NY Life dispute resolution team','Confirm elimination period start date (admission records)','Issue coverage determination letter within 10 days','Notify claimant of decision via certified mail'],
+      escalateSteps:['Engage illumifin Legal Counsel — bad-faith threshold exceeded','Notify NY Life VP of Claims — dispute escalation','Document all communications for regulatory file','Explore settlement option — avoid litigation risk','State DOI notification if unresolved within 14 days'],
+      scheduleSteps:['Legal review meeting — Jul 12, 2026 3:00 PM CT','NY Life dispute call — Jul 13 10:00 AM CT','Dorothy Feldstein notification — Jul 14 (certified)','Brookdale ALF administrator briefing — Jul 13 2:00 PM','All scheduled — calendar invites sent'],
+    },
+    { id:'LTC-2026-0104', claimant:'Arthur Kowalski',     age:86, priority:'MEDIUM',   score:55, carrier:'Genworth',    type:'Memory Care',    days:62, flag:'Monthly billing review due · Long-running',    action:'Billing audit · Care plan annual renewal',              aiRec:'Cognitive score 8/30 — memory care level appropriate · No fraud indicators · Stable',
+      scoreReason: { sla:18, clinical:20, fraud:10, payment:7, signals:['62-day claim — annual care plan renewal due','MMSE 8/30 — severe cognitive impairment (memory care appropriate)','Genworth billing audit threshold: 60 days (triggered)','No fraud signals — EVV 100% compliant','Stable trajectory — no acuity change in 30 days','Monthly billing within expected range'], model:'Composite Urgency Index v3.1 · XGBoost (SLA risk 18pt) + ClinicalBERT (acuity 20pt) + IsoForest anomaly (payment 7pt) + rules engine (fraud 10pt)', caseManager:'Sarah Johnson, RN', nextPayment:'Jul 20, 2026 · $210/day', facility:'Memory Care of Scottsdale, AZ' },
+      resolveSteps:['Complete billing audit — verify 62 days of invoices','Obtain updated care plan from Memory Care of Scottsdale','Confirm MMSE re-assessment on file','Renew authorization for next 90-day period','Update Genworth carrier with billing audit results'],
+      escalateSteps:['Flag billing discrepancy to Genworth fraud unit (if found)','Escalate care plan delay to facility administrator','Notify RN Supervisor of overdue annual renewal','Auto-draft demand letter to facility for documentation','Set 5-day deadline for care plan submission'],
+      scheduleSteps:['Billing audit review — Jul 13, 2026 internal','Annual care plan: facility due date Jul 16','RN Sarah Johnson — care review call Jul 15 11:00 AM','Arthur Kowalski family update — Jul 17 (portal)','Next billing review auto-set: Aug 20'],
+    },
+    { id:'LTC-2026-0105', claimant:'Evelyn Marchetti',    age:71, priority:'MEDIUM',   score:48, carrier:'Transamerica',type:'Adult Day Care',  days:3,  flag:'Initial assessment not yet scheduled',         action:'Schedule initial assessment · Assign RN',               aiRec:'Early-stage claim · Low complexity · Expedite initial assessment to avoid SLA breach',
+      scoreReason: { sla:20, clinical:12, fraud:10, payment:6, signals:['Initial assessment not scheduled — SLA breach risk at day 7','New claim (3 days) — Transamerica SLA: assessment within 7 days','Age 71 adult day care — lower acuity tier','No prior claim history — clean underwriting file','Fraud score 8/100 — clear','Early intervention reduces long-term claim cost 23% (model prediction)'], model:'Composite Urgency Index v3.1 · XGBoost (SLA risk 20pt) + ClinicalBERT (acuity 12pt) + IsoForest anomaly (payment 6pt) + rules engine (fraud 10pt)', caseManager:'Unassigned — auto-assign pending', nextPayment:'First payment pending assessment', facility:'Sunrise Adult Day Center, Tampa FL' },
+      resolveSteps:['Auto-assign RN from available roster (James Park recommended)','Schedule initial assessment — must complete by Jul 15','Contact Evelyn Marchetti: (555) 203-7781','Verify Transamerica policy in force + elimination period','Set SLA tracking — 4 days remaining'],
+      escalateSteps:['If assessment not scheduled by Jul 13 — escalate to supervisor','Alert Transamerica carrier of intake delay','Assign temporary case manager until RN confirmed','Priority queue — SLA breach prevention mode','Auto-notification: 72-hour warning sent to team'],
+      scheduleSteps:['Auto-assigned: RN James Park','Assessment date: Jul 14, 2026 10:00 AM CT','SMS Evelyn Marchetti: (555) 203-7781','Sunrise Adult Day Center notified of RN visit','SLA clock: 4 days remaining — on track'],
+    },
+    { id:'LTC-2026-0106', claimant:'Francis Delacroix',   age:80, priority:'LOW',      score:32, carrier:'TIAA',        type:'Home Health',    days:120,flag:'Annual care review upcoming',                  action:'Schedule annual review · Reassess ADL baseline',        aiRec:'Stable long-running claim · No anomalies · Annual review aligns with benefit period milestone',
+      scoreReason: { sla:10, clinical:12, fraud:6, payment:4, signals:['120-day stable claim — annual review due at day 130','No billing anomalies in 4-month history','ADL 2/5 stable — home health appropriate','EVV 100% compliant — all visits verified','TIAA annual review SLA: 10 days advance notice required','Fraud score 4/100 — exemplary record'], model:'Composite Urgency Index v3.1 · XGBoost (SLA risk 10pt) + ClinicalBERT (acuity 12pt) + IsoForest anomaly (payment 4pt) + rules engine (fraud 6pt)', caseManager:'Maria Castillo, MSW', nextPayment:'Jul 22, 2026 · $145/day', facility:'Home — 892 Birchwood Dr, Chicago IL' },
+      resolveSteps:['Schedule annual review — 10 days before day-130 milestone','Pull 4-month EVV compliance report from CellTrak','Confirm ADL baseline with home health agency','Obtain physician attestation for annual renewal','TIAA carrier notification — annual review initiated'],
+      escalateSteps:['No escalation needed — LOW priority','Preventive: notify if ADL status changes to 3/5','Auto-alert set for any billing anomaly detection','Annual review reminder auto-set for Jul 20','Supervisor review: only if claim complexity increases'],
+      scheduleSteps:['Annual review: Jul 20, 2026 — Maria Castillo, MSW','Francis Delacroix call: Jul 20 1:00 PM CT','Home health agency report due: Jul 19','Physician attestation request sent: Jul 12','All scheduling complete — low urgency track'],
+    },
+    { id:'LTC-2026-0108', claimant:'George Nakamura',     age:83, priority:'LOW',      score:28, carrier:'Pacific Life', type:'ALF',           days:45, flag:'Quarterly check-in due next week',             action:'Routine quarterly check-in · No urgent action',         aiRec:'ADL 3/5 stable · Cognitively intact (19/30) · ALF setting appropriate · No change needed',
+      scoreReason: { sla:8, clinical:10, fraud:6, payment:4, signals:['Quarterly check-in due in 6 days — routine milestone','ADL 3/5 stable for 45 days — no acuity progression','MMSE 19/30 — mild cognitive impairment, ALF appropriate','Pacific Life SLA: quarterly touch within 7 days of due date','EVV 100% — no billing issues','Fraud score 3/100 — lowest risk tier'], model:'Composite Urgency Index v3.1 · XGBoost (SLA risk 8pt) + ClinicalBERT (acuity 10pt) + IsoForest anomaly (payment 4pt) + rules engine (fraud 6pt)', caseManager:'James Park, RN', nextPayment:'Jul 25, 2026 · $195/day', facility:'Pacific Gardens ALF, San Jose CA' },
+      resolveSteps:['Complete quarterly check-in — 6 days until due date','Confirm ADL 3/5 status with ALF care coordinator','Verify MMSE stability with attending physician','Submit Pacific Life quarterly status report','No changes recommended — continue current care plan'],
+      escalateSteps:['No escalation needed — LOW priority stable claim','Trigger only if ADL progresses to 4/5 or 5/5','Auto-alert set for cognitive decline (MMSE < 15)','Pacific Life notified of stable status','Next escalation review: Oct 2026 quarterly'],
+      scheduleSteps:['Quarterly check-in: Jul 16, 2026 — James Park, RN','George Nakamura call: Jul 16 11:00 AM PT','Pacific Gardens ALF coordinator: Jul 15 (pre-brief)','Pacific Life status report due: Jul 17','All scheduling complete — routine track'],
+    }
   ];
+
+  /* ── AI Score Reasoning Modal ─────────────────────────────────────────── */
+  window.ltcShowScoreReason = function(claimId) {
+    var t = ltcTriageData.find(function(x){ return x.id === claimId; });
+    if (!t) return;
+    var sr = t.scoreReason;
+    var pColors = { 'CRITICAL':'#dc2626','HIGH':'#d97706','MEDIUM':'#0891b2','LOW':'#059669' };
+    var pc = pColors[t.priority]||'#6b7280';
+
+    var signalRows = sr.signals.map(function(s, i){
+      return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;">'
+        +'<div style="width:18px;height:18px;background:#7c3aed22;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800;color:#7c3aed;">'+(i+1)+'</div>'
+        +'<div style="font-size:12px;color:#374151;line-height:1.5;">'+s+'</div>'
+        +'</div>';
+    }).join('');
+
+    var barSeg = function(label, val, color){
+      return '<div style="margin-bottom:10px;">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
+        +'<span style="font-size:11px;font-weight:700;color:#374151;">'+label+'</span>'
+        +'<span style="font-size:11px;font-weight:800;color:'+color+';">'+val+' pts</span>'
+        +'</div>'
+        +'<div style="height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;">'
+        +'<div style="height:8px;background:'+color+';border-radius:4px;width:'+(val/40*100)+'%;transition:width .4s;"></div>'
+        +'</div></div>';
+    };
+
+    var html = '<div style="background:#fff;border-radius:16px;width:640px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+      /* ── header ── */
+      +'<div style="background:linear-gradient(135deg,#1e293b,#0f172a);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;z-index:2;">'
+      +'<div style="display:flex;align-items:center;gap:10px;">'
+      +'<i class="fas fa-brain" style="font-size:20px;color:#a78bfa;"></i>'
+      +'<div><div style="font-size:15px;font-weight:800;">AI Score Reasoning</div>'
+      +'<div style="font-size:11px;opacity:.75;">'+t.claimant+' · '+t.id+' · '+t.carrier+'</div></div>'
+      +'<button onclick="_L4close(\'ltc-score-reason-overlay\')" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:5px 13px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      +'</div></div>'
+      /* ── score hero ── */
+      +'<div style="padding:20px 22px 0;">'
+      +'<div style="display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,'+pc+'0d,'+pc+'18);border:1.5px solid '+pc+'33;border-radius:12px;padding:16px;margin-bottom:18px;">'
+      +'<div style="text-align:center;flex-shrink:0;">'
+      +'<div style="font-size:42px;font-weight:900;color:'+pc+';line-height:1;">'+t.score+'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:'+pc+';opacity:.8;">/ 100</div>'
+      +'<div style="font-size:10px;font-weight:700;background:'+pc+'22;color:'+pc+';border:1px solid '+pc+'44;border-radius:20px;padding:2px 8px;margin-top:4px;">'+t.priority+'</div>'
+      +'</div>'
+      +'<div style="flex:1;">'
+      +'<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px;">Composite Score Breakdown</div>'
+      + barSeg('SLA Risk Index', sr.sla, '#dc2626')
+      + barSeg('Clinical Acuity', sr.clinical, '#7c3aed')
+      + barSeg('Payment Anomaly', sr.payment, '#d97706')
+      + barSeg('Fraud Signal', sr.fraud, '#0891b2')
+      +'</div></div>'
+      /* ── model info ── */
+      +'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:16px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;"><i class="fas fa-microchip" style="margin-right:5px;"></i>AI/ML Model Stack</div>'
+      +'<div style="font-size:11px;color:#475569;line-height:1.6;">'+sr.model+'</div>'
+      +'</div>'
+      /* ── signals ── */
+      +'<div style="margin-bottom:16px;">'
+      +'<div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:8px;"><i class="fas fa-signal" style="color:#7c3aed;margin-right:6px;"></i>Top Signals Driving This Score ('+sr.signals.length+' of 47 active)</div>'
+      + signalRows
+      +'</div>'
+      /* ── claim context ── */
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">'
+      +'<div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;color:#059669;font-weight:700;text-transform:uppercase;">Case Manager</div><div style="font-size:12px;font-weight:700;color:#111827;margin-top:2px;">'+sr.caseManager+'</div></div>'
+      +'<div style="background:#eff6ff;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;color:#1d4ed8;font-weight:700;text-transform:uppercase;">Next Payment</div><div style="font-size:12px;font-weight:700;color:#111827;margin-top:2px;">'+sr.nextPayment+'</div></div>'
+      +'<div style="background:#fdf4ff;border-radius:8px;padding:10px 12px;grid-column:span 2;"><div style="font-size:10px;color:#7c3aed;font-weight:700;text-transform:uppercase;">Care Facility / Setting</div><div style="font-size:12px;font-weight:700;color:#111827;margin-top:2px;">'+sr.facility+'</div></div>'
+      +'</div>'
+      +'</div>'
+      /* ── footer disclaimer ── */
+      +'<div style="padding:0 22px 20px;">'
+      +'<div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:10px;color:#92400e;line-height:1.5;">'
+      +'<i class="fas fa-info-circle" style="margin-right:5px;"></i>'
+      +'Score refreshed every 4 hours. This is an AI-generated recommendation — final clinical decisions require licensed RN or physician review. All signals sourced from 47 validated clinical, financial, and fraud indicators per CMS guidelines.'
+      +'</div></div>'
+      +'</div>';
+
+    _L4overlay('ltc-score-reason-overlay', html);
+  };
+
+  /* ── Operational Action Modal (AI Agent Simulation) ──────────────────── */
+  window.ltcTriageActionModal = function(action, claimId) {
+    var t = ltcTriageData.find(function(x){ return x.id === claimId; });
+    if (!t) return;
+    var pColors = { 'CRITICAL':'#dc2626','HIGH':'#d97706','MEDIUM':'#0891b2','LOW':'#059669' };
+    var pc = pColors[t.priority]||'#6b7280';
+
+    var configs = {
+      resolve: {
+        title:'Resolve Claim', icon:'fa-check-circle', color:'#059669',
+        agentName:'Resolution Agent',
+        agentDesc:'I am analyzing '+t.id+' and preparing a resolution workflow. All steps below are pre-validated against policy §4.2 and carrier SLA requirements.',
+        steps: t.resolveSteps,
+        confirmLabel:'Confirm Resolution',
+        successMsg:'<i class="fas fa-check-circle"></i> '+t.id+' — Resolution workflow initiated · Carrier notified · Team updated · SLA clock stopped'
+      },
+      escalate: {
+        title:'Escalate Claim', icon:'fa-arrow-circle-up', color:'#dc2626',
+        agentName:'Escalation Agent',
+        agentDesc:'Critical path detected for '+t.id+'. I am activating the escalation protocol. The following actions will execute simultaneously upon confirmation.',
+        steps: t.escalateSteps,
+        confirmLabel:'Confirm Escalation',
+        successMsg:'<i class="fas fa-arrow-up"></i> '+t.id+' — Escalation activated · RN Supervisor paged · Carrier alerted · Emergency review within 2 hours'
+      },
+      schedule: {
+        title:'Schedule Assessment', icon:'fa-calendar-check', color:'#7c3aed',
+        agentName:'Scheduling Agent',
+        agentDesc:'I have identified optimal scheduling windows for '+t.id+' based on RN availability, claimant time zone, and carrier SLA deadlines.',
+        steps: t.scheduleSteps,
+        confirmLabel:'Confirm Schedule',
+        successMsg:'<i class="fas fa-calendar-check"></i> '+t.id+' — Assessment scheduled · RN notified · SMS sent to claimant · Calendar holds placed'
+      }
+    };
+
+    var cfg = configs[action];
+    if (!cfg) return;
+
+    var stepsHtml = cfg.steps.map(function(s, i){
+      return '<div class="ltc-agent-step" id="ltc-step-'+claimId+'-'+i+'" style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:6px;">'
+        +'<div class="ltc-step-icon" style="width:22px;height:22px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:#64748b;">'+(i+1)+'</div>'
+        +'<div style="font-size:12px;color:#374151;line-height:1.5;flex:1;">'+s+'</div>'
+        +'<div class="ltc-step-status" id="ltc-stepst-'+claimId+'-'+i+'" style="font-size:10px;color:#9ca3af;flex-shrink:0;margin-top:2px;">Pending</div>'
+        +'</div>';
+    }).join('');
+
+    var html = '<div style="background:#fff;border-radius:16px;width:620px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.35);">'
+      +'<div style="background:linear-gradient(135deg,'+cfg.color+','+cfg.color+'cc);padding:18px 22px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;z-index:2;">'
+      +'<div style="display:flex;align-items:center;gap:10px;">'
+      +'<i class="fas '+cfg.icon+'" style="font-size:20px;"></i>'
+      +'<div><div style="font-size:15px;font-weight:800;">'+cfg.title+'</div>'
+      +'<div style="font-size:11px;opacity:.8;">'+t.claimant+' · '+t.id+' · Priority: '+t.priority+'</div></div>'
+      +'<button onclick="_L4close(\'ltc-action-modal-overlay\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:5px 13px;cursor:pointer;font-size:12px;">✕ Close</button>'
+      +'</div></div>'
+      +'<div style="padding:20px 22px;">'
+      /* AI Agent panel */
+      +'<div style="background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+      +'<div style="width:36px;height:36px;background:#7c3aed;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      +'<i class="fas fa-robot" style="color:#fff;font-size:16px;"></i></div>'
+      +'<div><div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:4px;">'+cfg.agentName+' · illumifin HAL</div>'
+      +'<div style="font-size:11px;color:#cbd5e1;line-height:1.6;">'+cfg.agentDesc+'</div></div>'
+      +'</div>'
+      /* steps */
+      +'<div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:10px;"><i class="fas fa-list-check" style="color:'+cfg.color+';margin-right:6px;"></i>Action Plan ('+cfg.steps.length+' steps)</div>'
+      + stepsHtml
+      /* claim context strip */
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;">'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Priority</div><div style="font-size:12px;font-weight:800;color:'+pc+';margin-top:2px;">'+t.priority+' · '+t.score+'/100</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Days Open</div><div style="font-size:12px;font-weight:800;color:#111827;margin-top:2px;">'+t.days+' days</div></div>'
+      +'<div style="background:#f8fafc;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;">Carrier</div><div style="font-size:12px;font-weight:800;color:#111827;margin-top:2px;">'+t.carrier+'</div></div>'
+      +'</div>'
+      /* action buttons */
+      +'<div id="ltc-action-btn-area-'+claimId+'" style="display:flex;gap:8px;margin-top:4px;">'
+      +'<button onclick="ltcRunAgentSteps(\''+claimId+'\',\''+action+'\')" id="ltc-run-btn-'+claimId+'" style="background:'+cfg.color+';color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:12px;font-weight:700;cursor:pointer;flex:1;"><i class="fas fa-play" style="margin-right:6px;"></i>Run AI Agent · '+cfg.confirmLabel+'</button>'
+      +'<button onclick="_L4close(\'ltc-action-modal-overlay\')" style="background:#f1f5f9;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;">Cancel</button>'
+      +'</div>'
+      +'</div></div>';
+
+    _L4overlay('ltc-action-modal-overlay', html);
+  };
+
+  /* ── AI Agent Step Runner (animated simulation) ──────────────────────── */
+  window.ltcRunAgentSteps = function(claimId, action) {
+    var t = ltcTriageData.find(function(x){ return x.id === claimId; });
+    if (!t) return;
+    var stepCount = (action==='resolve'?t.resolveSteps:action==='escalate'?t.escalateSteps:t.scheduleSteps).length;
+    var pColors = { 'CRITICAL':'#dc2626','HIGH':'#d97706','MEDIUM':'#0891b2','LOW':'#059669' };
+    var aColors = { resolve:'#059669', escalate:'#dc2626', schedule:'#7c3aed' };
+    var ac = aColors[action]||'#7c3aed';
+
+    var runBtn = document.getElementById('ltc-run-btn-'+claimId);
+    if (runBtn) { runBtn.disabled=true; runBtn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Agent Running…'; }
+
+    var successMsgs = {
+      resolve:'<i class="fas fa-check-circle"></i> '+t.id+' — Resolution workflow complete · Carrier notified · SLA clock stopped · Team updated',
+      escalate:'<i class="fas fa-arrow-up"></i> '+t.id+' — Escalation activated · RN Supervisor paged · Emergency review within 2 hours',
+      schedule:'<i class="fas fa-calendar-check"></i> '+t.id+' — Assessment scheduled · RN notified · SMS sent to claimant'
+    };
+
+    var i = 0;
+    function runStep() {
+      if (i >= stepCount) {
+        /* all steps done */
+        var btnArea = document.getElementById('ltc-action-btn-area-'+claimId);
+        if (btnArea) {
+          btnArea.innerHTML = '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;width:100%;font-size:12px;font-weight:700;color:#059669;">'
+            +'<i class="fas fa-check-double" style="margin-right:8px;"></i>Agent workflow complete — all '+stepCount+' steps executed successfully'
+            +'</div>'
+            +'<button onclick="_L4close(\'ltc-action-modal-overlay\')" style="background:'+ac+';color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;">Done</button>';
+        }
+        _L4toast(successMsgs[action]||'Action completed', 4500);
+        return;
+      }
+      var stepEl = document.getElementById('ltc-step-'+claimId+'-'+i);
+      var stEl   = document.getElementById('ltc-stepst-'+claimId+'-'+i);
+      if (stepEl) { stepEl.style.background='#fffbeb'; stepEl.style.borderColor='#fde68a'; }
+      if (stEl)  { stEl.style.color='#d97706'; stEl.textContent='Running…'; }
+      var icon = stepEl ? stepEl.querySelector('.ltc-step-icon') : null;
+      if (icon) { icon.style.background=ac; icon.style.color='#fff'; icon.innerHTML='<i class="fas fa-spinner fa-spin" style="font-size:8px;"></i>'; }
+      setTimeout(function(){
+        if (stepEl) { stepEl.style.background='#f0fdf4'; stepEl.style.borderColor='#bbf7d0'; }
+        if (stEl)  { stEl.style.color='#059669'; stEl.textContent='Done ✓'; }
+        if (icon)  { icon.innerHTML='✓'; icon.style.background='#059669'; }
+        i++;
+        setTimeout(runStep, 320);
+      }, 700 + Math.random()*400);
+    }
+    setTimeout(runStep, 300);
+  };
 
   window.ltcRunAiTriage = function() {
     var pColors = { 'CRITICAL':'#dc2626','HIGH':'#d97706','MEDIUM':'#0891b2','LOW':'#059669' };
@@ -67041,16 +67288,19 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
         +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'
         +'<span style="font-size:14px;font-weight:800;color:#111827;">'+t.claimant+'</span>'
         +'<span style="font-size:10px;font-weight:700;background:'+pc+'22;color:'+pc+';border:1px solid '+pc+'44;border-radius:20px;padding:2px 8px;">'+t.priority+'</span>'
-        +'<span style="font-size:10px;color:#9ca3af;margin-left:auto;">Score: '+t.score+'/100 '+scoreBar+'</span>'
+        +'<span style="font-size:10px;color:#9ca3af;margin-left:auto;display:flex;align-items:center;gap:8px;">'
+        +'Score: '+t.score+'/100 '+scoreBar
+        +'<button onclick="event.stopPropagation();ltcShowScoreReason(\''+t.id+'\')" title="View AI Score Reasoning" style="background:linear-gradient(135deg,#1e293b,#0f172a);color:#a78bfa;border:none;border-radius:6px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><i class="fas fa-brain" style="font-size:9px;"></i>Why this score?</button>'
+        +'</span>'
         +'</div>'
         +'<div style="font-size:11px;color:#6b7280;margin-bottom:6px;">'+t.id+' · '+t.carrier+' · '+t.type+' · Age '+t.age+' · '+t.days+' days open</div>'
         +'<div style="background:#fef2f2;border-radius:7px;padding:8px 10px;font-size:11px;color:#7f1d1d;margin-bottom:6px;"><i class="fas fa-flag" style="margin-right:5px;color:#dc2626;"></i>'+t.flag+'</div>'
         +'<div style="background:#f0fdf4;border-radius:7px;padding:8px 10px;font-size:11px;color:#166534;margin-bottom:8px;"><i class="fas fa-robot" style="margin-right:5px;color:#059669;"></i>'+t.aiRec+'</div>'
-        +'<div style="display:flex;gap:6px;">'
-        +'<button onclick="ltcTriageAction(\'resolve\',\''+t.id+'\')" style="background:#059669;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-check" style="margin-right:4px;"></i>Resolve</button>'
-        +'<button onclick="ltcTriageAction(\'escalate\',\''+t.id+'\')" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-arrow-up" style="margin-right:4px;"></i>Escalate</button>'
-        +'<button onclick="ltcTriageAction(\'detail\',\''+t.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-eye" style="margin-right:4px;"></i>Open Claim</button>'
-        +'<button onclick="ltcTriageAction(\'schedule\',\''+t.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-calendar" style="margin-right:4px;"></i>Schedule</button>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+        +'<button onclick="event.stopPropagation();ltcTriageActionModal(\'resolve\',\''+t.id+'\')" style="background:#059669;color:#fff;border:none;border-radius:6px;padding:6px 13px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-check-circle"></i>Resolve</button>'
+        +'<button onclick="event.stopPropagation();ltcTriageActionModal(\'escalate\',\''+t.id+'\')" style="background:#dc2626;color:#fff;border:none;border-radius:6px;padding:6px 13px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-arrow-circle-up"></i>Escalate</button>'
+        +'<button onclick="event.stopPropagation();_L4close(\'ltc-triage-overlay\');ltcOpenClaimDetail(\''+t.id+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:6px;padding:6px 13px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-file-medical-alt"></i>Open Claim</button>'
+        +'<button onclick="event.stopPropagation();ltcTriageActionModal(\'schedule\',\''+t.id+'\')" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:6px 13px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-calendar-check"></i>Schedule</button>'
         +'</div></div></div></div>';
     }).join('');
 
@@ -67062,7 +67312,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       +'</div>';
 
     _L4overlay('ltc-triage-overlay',
-      '<div style="background:#fff;border-radius:16px;width:860px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">'
+      '<div style="background:#fff;border-radius:16px;width:880px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);">'
       +'<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:20px 24px;border-radius:16px 16px 0 0;color:#fff;position:sticky;top:0;z-index:1;">'
       +'<div style="display:flex;align-items:center;gap:12px;">'
       +'<i class="fas fa-robot" style="font-size:22px;"></i>'
@@ -67073,7 +67323,7 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
       +'<div style="padding:22px;">'
       + summaryHtml
       +'<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#1e40af;"><i class="fas fa-info-circle" style="margin-right:6px;"></i>'
-      +'AI scanned all active claimants using 47 clinical, financial, and fraud signals. Priority scores are updated every 4 hours. Cases sorted by urgency index (composite of SLA risk, clinical acuity, and payment anomaly probability).</div>'
+      +'AI scanned all active claimants using 47 clinical, financial, and fraud signals. Priority scores are updated every 4 hours. Cases sorted by urgency index (composite of SLA risk, clinical acuity, and payment anomaly probability). Click <strong><i class="fas fa-brain"></i> Why this score?</strong> on any claim to see the full AI reasoning.</div>'
       + rows
       +'</div></div>'
     );
