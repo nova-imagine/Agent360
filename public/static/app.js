@@ -88321,3 +88321,459 @@ var navigateTo=window.navigateTo;
 
   console.log('[P30] Rich Claimant 360° modal active · 8 tabs · Sidebar + product strips + 1st/2nd/3rd party data · SDOH + What Care Costs + CMS Star + HIE + Pharmacy · Safe _p8run callbacks');
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P31 — CLAIMANT 360: AI OPPORTUNITIES TAB + AI COMMUNICATION TAB
+         + REMOVE "Open Full Claim" SIDEBAR BUTTON
+   Patches P30's ltcOpenClaimDetail to:
+   1. Remove "Open Full Claim" button from left sidebar
+   2. Add tab 8: "AI Opportunities" — eLTCAS cross-product intelligence
+      (inspired by WealthAI Opportunities panel from Client 360 Simulator)
+   3. Add tab 9: "AI Communication" — simulated AI-generated emails, chat,
+      and outbound call scripts + claimant/family response simulation
+   Safe callbacks: _p8run / window._p8actions throughout.
+═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── capture P30's ltcOpenClaimDetail before we wrap it ─────────────── */
+  var _p31origOpenDetail = window.ltcOpenClaimDetail;
+
+  window.ltcOpenClaimDetail = function(claimId) {
+
+    /* run P30 first to render the base modal */
+    _p31origOpenDetail(claimId);
+
+    /* ── 1. Remove "Open Full Claim" sidebar button ────────────────────── */
+    /* We patch the sidebar right after P30 renders the overlay */
+    setTimeout(function() {
+      /* find the "Open Full Claim" button in the sidebar and hide it */
+      var allBtns = document.querySelectorAll('#ltc-claim-detail-ov button');
+      allBtns.forEach(function(btn) {
+        if (btn.textContent.trim().indexOf('Open Full Claim') > -1) {
+          btn.style.display = 'none';
+        }
+      });
+
+      /* ── 2. Inject 2 new tab buttons into the tab bar ─────────────── */
+      var tabBar = document.querySelector('#ltc-claim-detail-ov .p30-tabbar-container');
+      /* fallback: find the div containing #p30-tab-0 */
+      var tab0 = document.getElementById('p30-tab-0');
+      if (tab0 && tab0.parentNode) {
+        var tabContainer = tab0.parentNode;
+
+        /* AI Opportunities — tab 8 */
+        if (!document.getElementById('p30-tab-8')) {
+          var btnOpp = document.createElement('button');
+          btnOpp.id = 'p30-tab-8';
+          btnOpp.innerHTML = '<i class="fas fa-lightbulb" style="font-size:10px;"></i> AI Opportunities';
+          btnOpp.style.cssText = 'display:flex;align-items:center;gap:5px;background:transparent;color:#6b7280;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;';
+          btnOpp.onclick = function() { ltcClaimTab(8, claimId); };
+          tabContainer.appendChild(btnOpp);
+        }
+
+        /* AI Communication — tab 9 */
+        if (!document.getElementById('p30-tab-9')) {
+          var btnComm = document.createElement('button');
+          btnComm.id = 'p30-tab-9';
+          btnComm.innerHTML = '<i class="fas fa-comments" style="font-size:10px;"></i> AI Communication';
+          btnComm.style.cssText = 'display:flex;align-items:center;gap:5px;background:transparent;color:#6b7280;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;';
+          btnComm.onclick = function() { ltcClaimTab(9, claimId); };
+          tabContainer.appendChild(btnComm);
+        }
+      }
+    }, 50);
+
+    /* ── 3. Extend ltcClaimTab to handle idx 8 and 9 ──────────────────── */
+    var _p31origClaimTab = window.ltcClaimTab;
+
+    var ltcData = (typeof ltcClaimsData !== 'undefined') ? ltcClaimsData : [];
+    var c = ltcData.find(function(x) { return x.id === claimId; });
+    if (!c) return;
+
+    var riskScore = c.priority === 'urgent' ? 82 : c.priority === 'high' ? 65 : c.priority === 'medium' ? 44 : 28;
+    var dailyAmt = parseInt(c.dailyBenefit.replace(/\D/g,''), 10) || 180;
+    var adlColor = c.assessScore >= 4 ? '#dc2626' : c.assessScore === 3 ? '#d97706' : '#0891b2';
+
+    /* ── register safe callbacks ─────────────────────────────────────── */
+    if (!window._p8actions) window._p8actions = {};
+    window._p8actions['p31-act-chronic']  = function(){ _L4toast('<i class="fas fa-bolt"></i> LTC pre-qualification initiated · ABR readiness review scheduled · Med Supp care coordination flagged', 3500); };
+    window._p8actions['p31-act-rmd']      = function(){ _L4toast('<i class="fas fa-dollar-sign"></i> RMD-LTC premium auto-pay workflow initiated · IRS 7702B compliance verified · Family POA notified', 3500); };
+    window._p8actions['p31-act-cob']      = function(){ _L4toast('<i class="fas fa-exchange-alt"></i> COB optimization applied · Medicare + LTC coordination updated · $892/mo savings activated', 3500); };
+    window._p8actions['p31-act-care']     = function(){ _L4toast('<i class="fas fa-heart"></i> Care level escalation assessment scheduled · RN supervisor assigned · Family conference call booked', 3500); };
+    window._p8actions['p31-act-sdoh']     = function(){ _L4toast('<i class="fas fa-hands-helping"></i> SDOH social worker referral sent · Community resource packet emailed to POA', 3200); };
+    window._p8actions['p31-act-renewal']  = function(){ _L4toast('<i class="fas fa-file-contract"></i> Policy renewal review initiated · Carrier notified · Rate lock analysis queued', 3200); };
+    window._p8actions['p31-send-email']   = function(){ _L4toast('<i class="fas fa-paper-plane"></i> AI-drafted email sent to Margaret O\'Brien · HIPAA-compliant delivery logged', 3200); };
+    window._p8actions['p31-send-chat']    = function(){ _L4toast('<i class="fas fa-comment-dots"></i> AI chat message sent via secure portal · Read receipt tracking enabled', 3000); };
+    window._p8actions['p31-start-call']   = function(){ _L4toast('<i class="fas fa-phone-volume"></i> AI-assisted outbound call initiated · Script loaded · Call recording active · HIPAA compliant', 3500); };
+    window._p8actions['p31-send-sms']     = function(){ _L4toast('<i class="fas fa-sms"></i> AI-drafted SMS sent to Patrick O\'Brien (POA) · Opt-in verified', 3000); };
+    window._p8actions['p31-approve-draft']= function(){ _L4toast('<i class="fas fa-check-circle"></i> Communication approved · Queued for delivery · Supervisor sign-off logged', 3000); };
+    window._p8actions['p31-edit-draft']   = function(){ _L4toast('<i class="fas fa-edit"></i> Draft editor opened · AI suggestions preserved · Make edits and re-approve', 3000); };
+
+    /* ── helper: opportunity card ────────────────────────────────────── */
+    function _oppCard(priority, title, tags, body, actionKey, actionLabel) {
+      var pc = priority === 'Critical' ? '#dc2626' : priority === 'High' ? '#d97706' : '#0891b2';
+      var tagHtml = tags.map(function(t) {
+        var tc = t === 'LTC' ? '#dc2626' : t === 'Health' ? '#0d9488' : t === 'Annuity' ? '#0891b2' : t === 'Life' ? '#003087' : '#6b7280';
+        return '<span style="background:' + tc + '1a;color:' + tc + ';border:1px solid ' + tc + '33;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;">' + t + '</span>';
+      }).join(' ');
+      return '<div style="background:#fff;border:1.5px solid ' + pc + '22;border-left:4px solid ' + pc + ';border-radius:10px;padding:14px 16px;margin-bottom:12px;">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">'
+        + '<div>'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'
+        + '<span style="background:' + pc + ';color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:800;">' + priority + '</span>'
+        + tagHtml
+        + '</div>'
+        + '<div style="font-size:13px;font-weight:800;color:#111827;">' + title + '</div>'
+        + '</div>'
+        + '</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.65;margin-bottom:12px;">' + body + '</div>'
+        + '<button onclick="_p8run(\'' + actionKey + '\')" style="background:' + pc + ';color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:11px;font-weight:700;cursor:pointer;">'
+        + '<i class="fas fa-bolt" style="margin-right:5px;"></i>' + actionLabel + '</button>'
+        + '</div>';
+    }
+
+    /* ── helper: chat bubble ─────────────────────────────────────────── */
+    function _chatBubble(sender, text, time, isAI) {
+      var align = isAI ? 'flex-start' : 'flex-end';
+      var bg = isAI ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' : '#f1f5f9';
+      var color = isAI ? '#fff' : '#374151';
+      var avatar = isAI
+        ? '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-robot" style="color:#fff;font-size:11px;"></i></div>'
+        : '<div style="width:28px;height:28px;border-radius:50%;background:#dc2626;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:#fff;">MO</div>';
+      return '<div style="display:flex;align-items:flex-end;gap:8px;justify-content:' + align + ';margin-bottom:12px;">'
+        + (isAI ? avatar : '')
+        + '<div>'
+        + '<div style="font-size:9px;color:#9ca3af;margin-bottom:3px;' + (isAI ? '' : 'text-align:right;') + '">' + sender + ' · ' + time + '</div>'
+        + '<div style="background:' + bg + ';color:' + color + ';border-radius:' + (isAI ? '4px 12px 12px 12px' : '12px 4px 12px 12px') + ';padding:10px 14px;font-size:11px;line-height:1.6;max-width:380px;">' + text + '</div>'
+        + '</div>'
+        + (isAI ? '' : avatar)
+        + '</div>';
+    }
+
+    /* ── helper: email panel ─────────────────────────────────────────── */
+    function _emailPanel(subject, from, to, time, body, isReply) {
+      var accent = isReply ? '#059669' : '#7c3aed';
+      var label = isReply ? 'CLAIMANT REPLY' : 'AI-DRAFTED EMAIL';
+      return '<div style="background:#fff;border:1.5px solid ' + accent + '22;border-left:4px solid ' + accent + ';border-radius:10px;padding:14px 16px;margin-bottom:12px;">'
+        + '<div style="font-size:9px;font-weight:800;color:' + accent + ';text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">'
+        + '<i class="fas fa-' + (isReply ? 'reply' : 'robot') + '" style="margin-right:4px;"></i>' + label + '</div>'
+        + '<div style="font-size:10px;color:#6b7280;margin-bottom:6px;line-height:1.7;">'
+        + '<strong style="color:#374151;">From:</strong> ' + from + '&nbsp;&nbsp;'
+        + '<strong style="color:#374151;">To:</strong> ' + to + '&nbsp;&nbsp;'
+        + '<strong style="color:#374151;">Sent:</strong> ' + time + '</div>'
+        + '<div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9;">' + subject + '</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.75;white-space:pre-line;">' + body + '</div>'
+        + '</div>';
+    }
+
+    /* ── BUILD: AI OPPORTUNITIES TAB ─────────────────────────────────── */
+    function buildAIOpportunities() {
+      return ''
+        /* intelligence banner */
+        + '<div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;padding:14px 18px;margin-bottom:16px;color:#fff;">'
+        + '<div style="font-size:10px;font-weight:800;color:#a5b4fc;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">'
+        + '<i class="fas fa-brain" style="margin-right:5px;"></i>eLTCAS AI INTELLIGENCE — CROSS-PRODUCT OPPORTUNITY ENGINE</div>'
+        + '<div style="font-size:12px;color:#e0e7ff;line-height:1.65;">'
+        + 'eLTCAS identified <strong style="color:#fbbf24;">6 cross-product optimization opportunities</strong> for Margaret O\'Brien — '
+        + '1 Critical · 2 High · 3 Medium/Low. These opportunities are <strong style="color:#fbbf24;">ONLY visible</strong> through '
+        + 'illumifin\'s unified LTC + HAL platform. Siloed administrators cannot see across product lines. '
+        + 'Estimated combined value: <strong style="color:#6ee7b7;">$892/mo savings + $14,800 tax benefit.</strong>'
+        + '</div>'
+        + '</div>'
+
+        /* KPI summary row */
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">'
+        + '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px;text-align:center;">'
+        + '<div style="font-size:10px;color:#dc2626;"><i class="fas fa-exclamation-triangle" style="font-size:16px;"></i></div>'
+        + '<div style="font-size:28px;font-weight:900;color:#dc2626;margin:4px 0;">1</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#dc2626;">Critical</div>'
+        + '<div style="font-size:9px;color:#9ca3af;">Immediate action needed</div>'
+        + '</div>'
+        + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px 14px;text-align:center;">'
+        + '<div style="font-size:10px;color:#d97706;"><i class="fas fa-arrow-up" style="font-size:16px;"></i></div>'
+        + '<div style="font-size:28px;font-weight:900;color:#d97706;margin:4px 0;">2</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#d97706;">High Priority</div>'
+        + '<div style="font-size:9px;color:#9ca3af;">Action this month</div>'
+        + '</div>'
+        + '<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px 14px;text-align:center;">'
+        + '<div style="font-size:10px;color:#0891b2;"><i class="fas fa-info-circle" style="font-size:16px;"></i></div>'
+        + '<div style="font-size:28px;font-weight:900;color:#0891b2;margin:4px 0;">3</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#0891b2;">Medium / Low</div>'
+        + '<div style="font-size:9px;color:#9ca3af;">Monitor &amp; plan</div>'
+        + '</div>'
+        + '</div>'
+
+        /* ── CRITICAL ── */
+        + _oppCard('Critical',
+            '<i class="fas fa-exclamation-circle" style="color:#dc2626;margin-right:6px;"></i>Chronic Illness Early Warning — LTC Escalation Risk',
+            ['Life','LTC','Health'],
+            'eLTCAS detected MMSE decline signals (14→ projected 10 within 6 months) via claim pattern analysis — '
+            + '<strong>8 months before a typical formal diagnosis</strong>. This triggers proactive actions: '
+            + 'LTC benefit period review, care-setting escalation assessment (SNF → Memory Care), '
+            + 'ABR readiness review, and Med Supp care coordination simultaneously. '
+            + '<strong style="color:#dc2626;">illumifin advantage:</strong> Single system sees LTC + Health + Life — '
+            + 'siloed vendors cannot detect this cross-product signal. Estimated cost avoidance: $12,400/yr.',
+            'p31-act-chronic', 'Act on This Now')
+
+        /* ── HIGH PRIORITY ── */
+        + _oppCard('High',
+            '<i class="fas fa-dollar-sign" style="color:#d97706;margin-right:6px;"></i>COB Optimization — Medicare + LTC Coordination Gap',
+            ['LTC','Health'],
+            'eLTCAS COB analysis detected a $892/mo coordination gap. Margaret\'s Medicare Part A SNF benefit '
+            + 'expired Feb 2026. LTC activated Day 101+. However, Medicare Part B physician services are not '
+            + 'being correctly coordinated with LTC daily benefit calculations. '
+            + '<strong>Correcting COB will recover $892/mo</strong> in overpayment risk and ensure regulatory compliance. '
+            + 'IRS coordination rules apply. Action: eLTCAS automated COB reconciliation + carrier notification.',
+            'p31-act-cob', 'Fix COB Now')
+
+        + _oppCard('High',
+            '<i class="fas fa-chart-line" style="color:#d97706;margin-right:6px;"></i>Care Level Escalation — Memory Care Transition Planning',
+            ['LTC'],
+            'AI functional trajectory analysis projects Margaret\'s MMSE will fall below 10 (severe) by Q2 2027 '
+            + 'and ADL impairment will reach 4/5 within 4 months based on current decline rate. '
+            + '<strong>Memory Care transition planning should begin now</strong> — average SNF-to-Memory Care wait list: 3–5 months. '
+            + 'Proactive family conference + social worker referral recommended. '
+            + 'Daily benefit difference: Memory Care avg $245/day vs current SNF $218/day — '
+            + 'policy rider review needed. Estimated timeline: Aug–Sep 2026.',
+            'p31-act-care', 'Start Transition Planning')
+
+        /* ── MEDIUM / LOW ── */
+        + _oppCard('Medium',
+            '<i class="fas fa-heartbeat" style="color:#0891b2;margin-right:6px;"></i>SDOH Intervention — Social Isolation & Economic Strain',
+            ['Health','LTC'],
+            'SDOH scoring (ADI percentile: 68) shows moderate social isolation risk and fixed-income economic strain. '
+            + 'Family POA engagement is active but son Patrick lives 45 miles away. '
+            + 'Intervention: community volunteer visitor program referral + virtual family care conference monthly. '
+            + 'SDOH interventions are proven to reduce ER visit frequency by 23% (source: CMS AHEAD model). '
+            + 'Current ER visit rate: 3 visits in 18 months — above SNF average (1.2/yr).',
+            'p31-act-sdoh', 'Refer to Social Worker')
+
+        + _oppCard('Low',
+            '<i class="fas fa-file-contract" style="color:#0891b2;margin-right:6px;"></i>Carrier Contract — Policy Renewal Review (2027)',
+            ['LTC'],
+            'Prudential TPA contract expires 2029 but the 3% compound inflation rider activates Jan 1, 2027, '
+            + 'increasing daily benefit from $180 → $185.40/day. '
+            + 'Recommend proactive carrier negotiation to lock rate and confirm benefit period terms before inflation event. '
+            + 'illumifin SLA with Prudential: 97.2% — strong leverage for renewal terms.',
+            'p31-act-renewal', 'Queue Renewal Review')
+
+        + _oppCard('Low',
+            '<i class="fas fa-pills" style="color:#0891b2;margin-right:6px;"></i>Pharmacy — Donepezil Dose Review Opportunity',
+            ['Health','LTC'],
+            'CVS Caremark pharmacy data shows Donepezil 10mg prescribed Jan 2026. '
+            + 'Clinical guidelines (AAN 2023) recommend reassessment at 6 months for dose optimization '
+            + 'in moderate-stage Alzheimer\'s. Last review: none on record. '
+            + 'Recommend physician medication review scheduled in conjunction with next RN assessment visit (Jul 10, 2026). '
+            + 'Optimized pharmacotherapy may slow MMSE decline trajectory by 10–15%.',
+            'p31-act-chronic', 'Schedule Med Review');
+    }
+
+    /* ── BUILD: AI COMMUNICATION TAB ─────────────────────────────────── */
+    function buildAICommunication() {
+      return ''
+        /* header panel */
+        + '<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:14px 18px;margin-bottom:16px;color:#fff;">'
+        + '<div style="font-size:10px;font-weight:800;color:#67e8f9;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">'
+        + '<i class="fas fa-robot" style="margin-right:5px;"></i>eLTCAS AI COMMUNICATION ENGINE — OPERATIONAL AUTOMATION</div>'
+        + '<div style="font-size:12px;color:#cbd5e1;line-height:1.65;">'
+        + 'AI auto-generates all routine communications for LTC &amp; HAL Operations staff — '
+        + 'emails, secure chat messages, outbound call scripts, and SMS alerts. '
+        + '<strong style="color:#fbbf24;">Saves 2.5 hrs/day per ops specialist.</strong> '
+        + 'All communications are HIPAA-compliant, logged, and include simulated claimant/family responses '
+        + 'to show the full conversation lifecycle.'
+        + '</div>'
+        + '</div>'
+
+        /* time saved KPIs */
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">'
+        + '<div style="text-align:center;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px;">'
+        + '<div style="font-size:20px;font-weight:800;color:#059669;">2.5h</div><div style="font-size:9px;font-weight:700;color:#6b7280;">Saved/day per staff</div></div>'
+        + '<div style="text-align:center;background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:10px;">'
+        + '<div style="font-size:20px;font-weight:800;color:#7c3aed;">94%</div><div style="font-size:9px;font-weight:700;color:#6b7280;">First-draft accuracy</div></div>'
+        + '<div style="text-align:center;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:10px;">'
+        + '<div style="font-size:20px;font-weight:800;color:#003087;">8 min</div><div style="font-size:9px;font-weight:700;color:#6b7280;">vs 45 min manual</div></div>'
+        + '<div style="text-align:center;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:10px;">'
+        + '<div style="font-size:20px;font-weight:800;color:#dc2626;">100%</div><div style="font-size:9px;font-weight:700;color:#6b7280;">HIPAA audit-logged</div></div>'
+        + '</div>'
+
+        /* ═══ SECTION 1: EMAIL ═══ */
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid #7c3aed22;">'
+        + '<div style="display:flex;align-items:center;gap:7px;">'
+        + '<i class="fas fa-envelope" style="color:#7c3aed;font-size:14px;"></i>'
+        + '<span style="font-size:12px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.4px;">Email Communication</span>'
+        + '</div>'
+        + '<button onclick="_p8run(\'p31-send-email\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:10px;font-weight:700;cursor:pointer;">'
+        + '<i class="fas fa-paper-plane" style="margin-right:4px;"></i>Send Email</button>'
+        + '</div>'
+
+        /* AI outbound email */
+        + _emailPanel(
+            'Care Plan Review — Action Required: ' + (new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})),
+            'illumifin Care Management <caremanager@illumifin.com>',
+            'Patrick O\'Brien (POA) <patrickobrien@email.com>',
+            'Jul 9, 2026 · 9:14 AM',
+            'Dear Mr. O\'Brien,\n\nI hope this message finds you well. I am writing on behalf of the illumifin LTC care management team regarding your mother, Margaret O\'Brien (Claim LTC-2026-0101).\n\nOur eLTCAS system has identified that Margaret\'s next care plan review is due on Jul 10, 2026 at Sunrise Manor SNF. Based on our AI clinical analysis, we have noted the following:\n\n  • ADL Score: 2/5 (Moderate) — stable over last 30 days\n  • Cognitive Score (MMSE): 14/30 — mild decline from 16 in January\n  • Next Benefit Payment: $180/day · Due Jul 15, 2026\n  • Provider EVV: All visits verified ✅\n\nWe would like to schedule a family care conference call on Jul 11, 2026 at 2:00 PM ET with RN Sarah Johnson to discuss Margaret\'s care trajectory and memory care transition planning.\n\nPlease reply to this email to confirm or suggest an alternate time.\n\nWarm regards,\nSarah Johnson, RN | Care Manager\nillumifin LTC Operations · (617) 800-4400',
+            false)
+
+        /* Claimant/family reply simulation */
+        + _emailPanel(
+            'RE: Care Plan Review — Action Required: Jul 9, 2026',
+            'Patrick O\'Brien <patrickobrien@email.com>',
+            'illumifin Care Management <caremanager@illumifin.com>',
+            'Jul 9, 2026 · 11:43 AM',
+            'Hi Sarah,\n\nThank you for reaching out. The Jul 11th at 2:00 PM call works well for me.\n\nI did want to mention that Mom has been having more difficulty recognizing staff at Sunrise Manor over the past two weeks — more than usual. She also had one episode where she became quite distressed in the evening. Should we be thinking about a different setting?\n\nAlso, can you explain what the memory care transition planning means in practical terms — timeline, costs, what it means for her LTC benefit?\n\nLooking forward to the call.\n\nBest,\nPatrick O\'Brien',
+            true)
+
+        /* AI follow-up email */
+        + _emailPanel(
+            'RE: Care Plan Review — Memory Care Information + Jul 11 Confirmed',
+            'illumifin Care Management <caremanager@illumifin.com>',
+            'Patrick O\'Brien (POA) <patrickobrien@email.com>',
+            'Jul 9, 2026 · 1:05 PM',
+            'Dear Patrick,\n\nThank you for confirming — Jul 11 at 2:00 PM is confirmed ✅. A calendar invite has been sent.\n\nRegarding memory care transition — here is a brief summary:\n\n  📋 TIMELINE: Average SNF-to-Memory Care transition: 3–5 months. We recommend beginning facility search now given current wait lists in the Boston metro area.\n\n  💰 COST IMPACT: Memory Care facilities average $245/day vs Margaret\'s current $218/day. Her LTC policy (Prudential, Lifetime Benefit) covers both settings. We will review the inflation rider (3% compound, activates Jan 2027) on our call.\n\n  📞 NEXT STEPS: Our social worker, Angela Moore, will also join the Jul 11 call to discuss the transition process and SDOH support resources.\n\nAI has pre-identified 3 memory care facilities within 10 miles of Boston with CMS 4+ star ratings. We will share the shortlist on our call.\n\nWarm regards,\nSarah Johnson, RN | illumifin LTC Operations',
+            false)
+
+        + '<div style="display:flex;gap:8px;margin-bottom:16px;">'
+        + '<button onclick="_p8run(\'p31-approve-draft\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-check" style="margin-right:4px;"></i>Approve &amp; Send</button>'
+        + '<button onclick="_p8run(\'p31-edit-draft\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-edit" style="margin-right:4px;"></i>Edit Draft</button>'
+        + '</div>'
+
+        /* ═══ SECTION 2: SECURE CHAT ═══ */
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px;padding-bottom:6px;border-bottom:2px solid #0891b222;">'
+        + '<div style="display:flex;align-items:center;gap:7px;">'
+        + '<i class="fas fa-comment-dots" style="color:#0891b2;font-size:14px;"></i>'
+        + '<span style="font-size:12px;font-weight:800;color:#0891b2;text-transform:uppercase;letter-spacing:.4px;">Secure Chat — illumifin Portal</span>'
+        + '</div>'
+        + '<button onclick="_p8run(\'p31-send-chat\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:10px;font-weight:700;cursor:pointer;">'
+        + '<i class="fas fa-comment" style="margin-right:4px;"></i>Send Chat</button>'
+        + '</div>'
+
+        + '<div style="background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:12px;border:1.5px solid #e5e7eb;">'
+        + '<div style="font-size:10px;font-weight:700;color:#9ca3af;text-align:center;margin-bottom:12px;">Today, Jul 9, 2026 · illumifin Secure Claimant Portal</div>'
+
+        /* AI care manager opens chat */
+        + _chatBubble('eLTCAS Care AI · Sarah Johnson, RN', 'Hi Margaret 👋 This is your illumifin care team. Your next benefit payment of $2,520 (14 days × $180/day) is scheduled for Jul 15. Just checking in — how are you feeling today?', '9:00 AM', true)
+
+        /* Claimant response */
+        + _chatBubble('Margaret O\'Brien', 'Hello dear. I\'m doing okay, a little tired today. The staff here are very kind. Will my payment go directly to Sunrise Manor?', '9:34 AM', false)
+
+        /* AI response */
+        + _chatBubble('eLTCAS Care AI · Sarah Johnson, RN', 'Yes Margaret, payments go directly to Sunrise Manor via ACH transfer ✅ — you don\'t need to do anything. Your next payment covers Jul 1–14. Is there anything about your care you\'d like me to pass along to the nursing team?', '9:35 AM', true)
+
+        /* Claimant response */
+        + _chatBubble('Margaret O\'Brien', 'Yes — I\'ve been having trouble sleeping the past week. And my son Patrick mentioned something about memory care — I\'m a bit worried about what that means.', '9:52 AM', false)
+
+        /* AI response */
+        + _chatBubble('eLTCAS Care AI · Sarah Johnson, RN', 'Thank you for sharing that, Margaret. I\'ve made a note about the sleep difficulties — RN Sarah Johnson will discuss this with the Sunrise Manor team before your Jul 10 visit 📋. Regarding memory care, Patrick will join a call with us on Jul 11 at 2 PM to discuss everything together. There\'s no need to worry — we\'ll walk through it step by step. You\'re in great hands 💙', '9:53 AM', true)
+
+        /* Claimant final message */
+        + _chatBubble('Margaret O\'Brien', 'That\'s very reassuring. Thank you. I look forward to the call.', '10:05 AM', false)
+
+        + '<div style="text-align:center;font-size:10px;color:#9ca3af;margin-top:8px;">'
+        + '<i class="fas fa-lock" style="margin-right:4px;"></i>HIPAA-encrypted · All messages logged · Audit trail active</div>'
+        + '</div>'
+
+        + '<div style="display:flex;gap:8px;margin-bottom:16px;">'
+        + '<button onclick="_p8run(\'p31-approve-draft\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-check" style="margin-right:4px;"></i>Approve &amp; Send Responses</button>'
+        + '<button onclick="_p8run(\'p31-send-sms\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-sms" style="margin-right:4px;"></i>SMS Summary to POA</button>'
+        + '</div>'
+
+        /* ═══ SECTION 3: AI PHONE CALL SCRIPT ═══ */
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px;padding-bottom:6px;border-bottom:2px solid #05996922;">'
+        + '<div style="display:flex;align-items:center;gap:7px;">'
+        + '<i class="fas fa-phone-volume" style="color:#059669;font-size:14px;"></i>'
+        + '<span style="font-size:12px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:.4px;">Outbound Call — AI-Assisted Script</span>'
+        + '</div>'
+        + '<button onclick="_p8run(\'p31-start-call\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:10px;font-weight:700;cursor:pointer;">'
+        + '<i class="fas fa-phone" style="margin-right:4px;"></i>Start Call</button>'
+        + '</div>'
+
+        + '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin-bottom:12px;">'
+        + '<div style="font-size:10px;font-weight:800;color:#059669;margin-bottom:10px;">'
+        + '<i class="fas fa-file-alt" style="margin-right:4px;"></i>AI-GENERATED CALL SCRIPT · Jul 9, 2026 · Claimant: Margaret O\'Brien · Call Type: Monthly Check-in + Care Plan Review</div>'
+
+        + '<div style="font-size:11px;color:#374151;line-height:1.9;">'
+
+        /* Opening */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #059669;">'
+        + '<div style="font-size:10px;font-weight:800;color:#059669;margin-bottom:4px;">📞 OPENING</div>'
+        + '"Hello, may I please speak with Margaret O\'Brien? ... Hi Margaret, this is Sarah Johnson calling from illumifin — your LTC care management team. I hope I\'m catching you at a good time. This call is regarding your care plan and your upcoming benefit payment. Do you have a few minutes? [PAUSE FOR RESPONSE]"'
+        + '</div>'
+
+        /* Claims update */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #0891b2;">'
+        + '<div style="font-size:10px;font-weight:800;color:#0891b2;margin-bottom:4px;">📋 CLAIM STATUS UPDATE</div>'
+        + '"I wanted to let you know that your LTC benefit payment of $2,520 is confirmed for July 15th — that\'s 14 days at $180 per day going directly to Sunrise Manor. Everything looks great on our end. [PAUSE] Is Sunrise Manor continuing to meet your needs? [LISTEN — NOTE RESPONSE IN LTCAS]"'
+        + '</div>'
+
+        /* Care check */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #7c3aed;">'
+        + '<div style="font-size:10px;font-weight:800;color:#7c3aed;margin-bottom:4px;">🩺 CLINICAL CHECK-IN</div>'
+        + '"Our nursing team will be visiting you on July 10th for your care plan review. Before that, I just wanted to check on a few things: [1] How has your sleep been? [PAUSE] [2] Are you having any pain or discomfort? [PAUSE] [3] Are the staff helping you with your daily needs — bathing, dressing? [PAUSE — DOCUMENT ADL CHANGES IN LTCAS]"'
+        + '</div>'
+
+        /* Memory care */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #d97706;">'
+        + '<div style="font-size:10px;font-weight:800;color:#d97706;margin-bottom:4px;">💬 MEMORY CARE TRANSITION</div>'
+        + '"Margaret, your son Patrick will be joining us on a call this Friday, July 11th at 2 PM. We\'ll all talk together about your care and some options that may be coming up in the next few months. It\'s nothing to worry about — we just want to make sure you have the best care possible. Is there anything you\'d like me to share with Patrick before the call? [PAUSE — DOCUMENT IN LTCAS NOTES]"'
+        + '</div>'
+
+        /* Closing */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #059669;">'
+        + '<div style="font-size:10px;font-weight:800;color:#059669;margin-bottom:4px;">✅ CLOSING</div>'
+        + '"Wonderful, Margaret. I\'ll let you go — thank you so much for your time. If you ever have questions or need anything before our next call, you can reach us at 1-800-ILLUMIFIN, or reply to a message in your secure portal. Take care, and we\'ll speak with you and Patrick on Friday. Goodbye!"'
+        + '</div>'
+
+        + '</div>'
+
+        /* simulated call outcome */
+        + '<div style="margin-top:12px;padding:10px 14px;background:#dcfce7;border-radius:8px;font-size:11px;color:#166534;">'
+        + '<strong>📝 AI Call Outcome Summary (auto-logged to LTCAS):</strong> '
+        + 'Claimant responsive and cooperative. Reports sleep difficulties — referred to SNF nursing for evening care protocol adjustment. '
+        + 'Confirmed family conference Jul 11 at 2 PM. No immediate clinical concern escalation needed. '
+        + 'ADL: no change reported. Next call: Jul 23, 2026 (scheduled).'
+        + '</div>'
+        + '</div>'
+
+        + '<div style="display:flex;gap:8px;margin-bottom:16px;">'
+        + '<button onclick="_p8run(\'p31-start-call\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-phone" style="margin-right:4px;"></i>Start AI-Assisted Call</button>'
+        + '<button onclick="_p8run(\'p31-approve-draft\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-check" style="margin-right:4px;"></i>Log Call Complete</button>'
+        + '</div>'
+
+        /* bottom note */
+        + '<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;font-size:10px;color:#6b7280;line-height:1.6;">'
+        + '<i class="fas fa-info-circle" style="color:#0891b2;margin-right:4px;"></i>'
+        + '<strong>How AI Communication saves time:</strong> Without eLTCAS, each ops specialist spends ~45 min per claimant per week drafting emails, writing call notes, and composing chat responses manually. '
+        + 'With eLTCAS AI Communication Engine: drafting takes &lt;8 min, call scripts are auto-generated from claim data, '
+        + 'chat responses are context-aware, and all interactions are auto-logged — saving <strong>2.5 hrs/day per specialist</strong> across LTC and HAL operations.'
+        + '</div>';
+    }
+
+    /* ── EXTENDED TAB HANDLER (adds idx 8 and 9 to P30's switch) ─────── */
+    window.ltcClaimTab = function(idx, claimId2) {
+      /* update active tab highlight for all 10 tabs */
+      for (var ti = 0; ti < 10; ti++) {
+        var tel = document.getElementById('p30-tab-' + ti);
+        if (tel) {
+          tel.style.background = ti === idx ? '#dc2626' : 'transparent';
+          tel.style.color = ti === idx ? '#fff' : '#6b7280';
+        }
+      }
+      var body3 = document.getElementById('lcd-body');
+      if (!body3) return;
+
+      if (idx === 8) {
+        body3.innerHTML = buildAIOpportunities();
+      } else if (idx === 9) {
+        body3.innerHTML = buildAICommunication();
+      } else {
+        /* delegate tabs 0-7 back to P30's handler */
+        _p31origClaimTab(idx, claimId2);
+      }
+    };
+
+  }; /* end ltcOpenClaimDetail wrapper */
+
+  console.log('[P31] AI Opportunities tab (idx 8) + AI Communication tab (idx 9) added · Open Full Claim button hidden · 6 cross-product opportunity cards · Email/Chat/Call simulation with claimant responses');
+})();
