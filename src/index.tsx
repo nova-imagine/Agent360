@@ -332,6 +332,7 @@ function MainApp() {
         <div id="tpl-ltc-claims"></div>
         <div id="tpl-ltc-care"></div>
         <div id="tpl-ltc-eligibility"></div>
+        <div id="tpl-ltc-ai-agents"></div>
         <div id="tpl-ltc-claimant"></div>
         <div id="tpl-insurance-carrier-360"></div>
         <div id="tpl-healthcare-provider-360"></div>
@@ -1003,6 +1004,10 @@ function Sidebar() {
         <a class="nav-item ltc-arch-nav nav-grp-tpa" onclick="navigateTo('ltc-arch')" href="#">
           <i class="fas fa-sitemap"></i><span>System Architecture</span>
           <span class="nav-badge" style="background:#475569;color:#fff">16</span>
+        </a>
+        <a class="nav-item ltc-ai-agents-nav nav-grp-tpa" onclick="navigateTo('ltc-ai-agents')" href="#">
+          <i class="fas fa-robot"></i><span>AI Agents</span>
+          <span class="nav-badge" style="background:linear-gradient(135deg,#7c3aed,#0891b2);color:#fff">12</span>
         </a>
 
         {/* ── HAL OPERATIONS ── */}
