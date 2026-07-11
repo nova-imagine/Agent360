@@ -87279,3 +87279,284 @@ var navigateTo=window.navigateTo;
   console.log('[P28] Eligibility: LINK band suppressed · ltcScheduleNew Done → HAL modal · ltcAssessAction Done → HAL modal · 5 new AGT-AS agents registered');
 })();
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   P29 — UI REFINEMENTS
+   1. Rename "Eligibility & Assessment" → "Assessments" in nav + page header
+   2. Rename "AI Care Alerts" button label → "AI Powered Assessments"
+      & modal title → "AI Powered Assessments — Real-Time Monitoring"
+   3. Fix gibberish buttons in Care Coordination modals (Acknowledge All,
+      Create Care Plan, Confirm Schedule) using safe _p8run key callbacks
+   4. Remove eLTCAS CQRS Event Store band from Care Coordination page
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── Helpers ──────────────────────────────────────────────────────────── */
+  function _p29ensureActions() {
+    if (!window._p8actions) window._p8actions = {};
+  }
+  function _p29run(key) {
+    _p29ensureActions();
+    if (typeof window._p8actions[key] === 'function') window._p8actions[key]();
+  }
+  window._p29run = _p29run;
+
+  /* ── 0. Expose _L4close / _L4toast safely for P29 wrappers ──────────── */
+  function _p29close(id) {
+    var el = document.getElementById(id);
+    if (el) el.remove();
+  }
+  function _p29toast(msg, dur) {
+    if (typeof window._L4toast === 'function') { window._L4toast(msg, dur || 3500); return; }
+    if (typeof window._raToast === 'function')  { window._raToast(msg, dur || 3500); return; }
+    /* fallback */
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:12px;z-index:999999;max-width:600px;text-align:center;';
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, dur || 3500);
+  }
+
+  /* ── 1. Rename "Eligibility & Assessment" → "Assessments" ───────────────
+     a) Nav item span text (DOM — runs when nav renders)
+     b) Page header h1/title text (DOM — runs on navigation)
+     c) Patch initLtcEligibilityPage so new renders use correct title
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  /* Live DOM rename — runs immediately for already-rendered nav */
+  function _p29renameEligibility() {
+    /* nav item */
+    var navSpan = document.querySelector('.ltc-eligibility-nav span');
+    if (navSpan && navSpan.textContent.indexOf('Eligibility') > -1) {
+      navSpan.textContent = 'Assessments';
+    }
+    /* page header inside tpl-ltc-eligibility */
+    var tpl = document.getElementById('tpl-ltc-eligibility');
+    if (tpl) {
+      tpl.querySelectorAll('*').forEach(function (el) {
+        if (el.children.length === 0 && el.textContent.trim() === 'Eligibility & Assessment') {
+          el.textContent = 'Assessments';
+        }
+      });
+    }
+  }
+  setTimeout(_p29renameEligibility, 600);
+
+  /* Wrap navigateTo (piggyback on P28's wrapper) */
+  var _p29origNav = window.navigateTo;
+  window.navigateTo = function (page) {
+    if (typeof _p29origNav === 'function') _p29origNav(page);
+    if (page === 'ltc-eligibility') {
+      setTimeout(_p29renameEligibility, 350);
+    }
+    if (page === 'ltc-care') {
+      /* ── 4. Suppress eLTCAS CQRS band ─────────────────────────────────
+         Same sentinel trick as P28: pre-inject a zero-height .p7-eltcas-band
+         so P7's guard (!querySelector('.p7-eltcas-band')) skips injection */
+      setTimeout(function () {
+        var tpl = document.getElementById('tpl-ltc-care');
+        if (!tpl) return;
+        var existing = tpl.querySelector('.p7-eltcas-band');
+        if (existing && !existing.getAttribute('data-p29-sentinel')) { existing.remove(); existing = null; }
+        if (!existing) {
+          var sentinel = document.createElement('div');
+          sentinel.className = 'p7-eltcas-band';
+          sentinel.style.cssText = 'display:none;height:0;overflow:hidden;';
+          sentinel.setAttribute('data-p29-sentinel', 'true');
+          tpl.appendChild(sentinel);
+        }
+      }, 100);
+      /* safety net */
+      setTimeout(function () {
+        var tpl = document.getElementById('tpl-ltc-care');
+        if (!tpl) return;
+        tpl.querySelectorAll('.p7-eltcas-band').forEach(function (b) {
+          if (!b.getAttribute('data-p29-sentinel')) b.remove();
+        });
+      }, 700);
+    }
+  };
+
+  /* Also suppress any already-rendered eLTCAS band on page load */
+  setTimeout(function () {
+    document.querySelectorAll('.p7-eltcas-band').forEach(function (b) {
+      if (!b.getAttribute('data-p29-sentinel')) b.remove();
+    });
+  }, 800);
+
+  /* ── 2. Rename "AI Care Alerts" button + modal title ────────────────────
+     The button in Care Coordination page header calls ltcRunAiCareAlert().
+     We patch the rendered button text via MutationObserver on tpl-ltc-care,
+     and wrap ltcRunAiCareAlert to change the modal title on render.
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  function _p29renameCareAlertBtn() {
+    var tpl = document.getElementById('tpl-ltc-care');
+    if (!tpl) return;
+    tpl.querySelectorAll('button').forEach(function (btn) {
+      if (btn.textContent.indexOf('AI Care Alerts') > -1) {
+        /* keep icon, update label */
+        var icon = btn.querySelector('i');
+        btn.innerHTML = '';
+        if (icon) btn.appendChild(icon);
+        var span = document.createTextNode('\u00a0AI Powered Assessments');
+        btn.appendChild(span);
+      }
+    });
+  }
+
+  var _p29origCareNav = window.navigateTo; /* already updated above — use mutation observer instead */
+  var _p29careObs = new MutationObserver(function () {
+    _p29renameCareAlertBtn();
+  });
+  _p29careObs.observe(document.body, { childList: true, subtree: true });
+
+  /* ── 3. Fix gibberish buttons — wrap all three Care Coordination modals ──
+     Root cause: the onclick="..._L4toast(\'<i class=\\\"...
+     The escaped double-quotes inside the HTML onclick attribute break the
+     HTML parser — the attribute terminates at the first unescaped " and the
+     rest becomes visible text inside the button.
+     Fix: replace the three window functions so their confirm/action buttons
+     use a keyed _p8run() callback with no inline HTML in the onclick attr.
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  /* 3a. AI Powered Assessments modal — "Acknowledge All" button */
+  var _p29origAiAlert = window.ltcRunAiCareAlert;
+  window.ltcRunAiCareAlert = function () {
+    var ovId = 'ltc-care-ai-ov';
+    var ackKey = 'p29-ack-' + Math.random().toString(36).slice(2);
+    _p29ensureActions();
+    window._p8actions[ackKey] = function () {
+      _p29close(ovId);
+      _p29toast('<i class="fas fa-bell"></i> All AI care alerts acknowledged \u00b7 Team notified \u00b7 Calendar entries created', 3000);
+    };
+
+    var ovFn = window._L4overlay || function (id, html) {
+      document.getElementById(id) && document.getElementById(id).remove();
+      document.body.insertAdjacentHTML('beforeend',
+        '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;">' + html + '</div>');
+    };
+    var cardFn = window._L4card || function (title, body, color) {
+      return '<div style="border:1.5px solid ' + color + '33;border-radius:10px;padding:13px 15px;margin-bottom:10px;">'
+        + '<div style="font-size:12px;font-weight:700;margin-bottom:5px;">' + title + '</div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.5;">' + body + '</div></div>';
+    };
+
+    ovFn(ovId,
+      '<div style="background:#fff;border-radius:14px;width:620px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
+      + '<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:18px 22px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:12px;">'
+      + '<i class="fas fa-robot" style="font-size:20px;"></i>'
+      + '<div><div style="font-size:15px;font-weight:800;">AI Powered Assessments \u2014 Real-Time Monitoring</div>'
+      + '<div style="font-size:11px;opacity:.85;">4 active care plans \u00b7 Analyzed across 18 clinical signals</div></div>'
+      + '<button onclick="_p29close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;">\u2715</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + cardFn('<span style="color:#dc2626;font-weight:800;">\ud83d\udea8 CRITICAL \u2014 Ruth Blackwood</span>',
+          'All 5 ADLs impaired \u00b7 Cognitive score 11/30 (severe) \u00b7 SNF escalation risk HIGH \u00b7 Family conference not yet scheduled \u00b7 Recommend hospice consult within 72h \u00b7 Care manager Angela Moore, RN notified.', '#dc2626')
+      + cardFn('<span style="color:#d97706;font-weight:800;">\u26a0\ufe0f HIGH \u2014 Harold Simmons</span>',
+          'Nurse assessment overdue 8 days \u00b7 Home health setting may be insufficient given ADL trajectory \u00b7 Consider SNF transition planning \u00b7 Bi-weekly visits should increase to weekly during assessment period.', '#d97706')
+      + cardFn('<span style="color:#d97706;font-weight:800;">\u26a0\ufe0f ATTENTION \u2014 Care Plan Renewals</span>',
+          '3 care plans due for annual renewal in next 30 days: Margaret O\'Brien (Jul 31), Harold Simmons (Aug 5), Arthur Kowalski (Aug 12). Proactive scheduling recommended to avoid lapses.', '#d97706')
+      + cardFn('<span style="color:#059669;font-weight:800;">\u2705 STABLE \u2014 Arthur Kowalski, Francis Delacroix, George Nakamura</span>',
+          'Memory care and home health settings appropriate. No immediate action required. Quarterly reviews on schedule. Provider billing verified clean.', '#059669')
+      + '<div style="margin-top:12px;display:flex;gap:8px;">'
+      + '<button onclick="_p29run(\'' + ackKey + '\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;">Acknowledge All</button>'
+      + '<button onclick="_p29close(\'' + ovId + '\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      + '</div></div></div>'
+    );
+  };
+
+  /* 3b. New Care Plan modal — "Create Care Plan" button */
+  var _p29origNewCp = window.ltcNewCarePlan;
+  window.ltcNewCarePlan = function () {
+    var ovId = 'ltc-newcp-ov';
+    var createKey = 'p29-cp-' + Math.random().toString(36).slice(2);
+    _p29ensureActions();
+    window._p8actions[createKey] = function () {
+      _p29close(ovId);
+      _p29toast('<i class="fas fa-plus-circle"></i> New Care Plan CP-005 created \u00b7 Care manager assigned \u00b7 Initial assessment scheduled \u00b7 Carrier notified', 3500);
+    };
+
+    var ovFn = window._L4overlay || function (id, html) {
+      document.getElementById(id) && document.getElementById(id).remove();
+      document.body.insertAdjacentHTML('beforeend',
+        '<div id="' + id + '" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;">' + html + '</div>');
+    };
+
+    ovFn(ovId,
+      '<div style="background:#fff;border-radius:14px;width:520px;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
+      + '<div style="background:linear-gradient(135deg,#0891b2,#06b6d4);padding:16px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-plus-circle" style="font-size:18px;"></i>'
+      + '<div style="font-size:15px;font-weight:800;">New Care Plan</div>'
+      + '<button onclick="_p29close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;">\u2715</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Claimant (Claim ID)</label>'
+      + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      + '<option>LTC-2026-0105 \u2014 Evelyn Marchetti</option><option>LTC-2026-0101 \u2014 Margaret O\'Brien</option><option>LTC-2026-0102 \u2014 Harold Simmons</option>'
+      + '</select></div>'
+      + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Assign Care Manager</label>'
+      + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      + '<option>Auto-assign (AI recommended)</option><option>Sarah Johnson, RN</option><option>Maria Castillo, MSW</option><option>James Park, RN</option><option>Angela Moore, RN</option>'
+      + '</select></div>'
+      + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Initial Goals</label>'
+      + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:70px;"></textarea></div>'
+      + '<button onclick="_p29run(\'' + createKey + '\')" style="width:100%;background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">Create Care Plan</button>'
+      + '</div></div>'
+    );
+  };
+
+  /* 3c. Schedule Care Visit modal — "Confirm Schedule" button */
+  var _p29origCarePlanAction = window.ltcCarePlanAction;
+  window.ltcCarePlanAction = function (action, id) {
+    if (action !== 'schedule') {
+      /* Pass all non-schedule actions to original */
+      if (typeof _p29origCarePlanAction === 'function') _p29origCarePlanAction(action, id);
+      return;
+    }
+    /* Rebuild schedule modal with safe button */
+    var ovId = 'ltc-schedule-ov';
+    var schedKey = 'p29-sched-' + Math.random().toString(36).slice(2);
+    _p29ensureActions();
+    window._p8actions[schedKey] = function () {
+      _p29close(ovId);
+      _p29toast('<i class="fas fa-calendar-check"></i> Visit scheduled Jul 15 \u00b7 Care manager notified \u00b7 SMS sent to family \u00b7 EVV tracking activated', 3500);
+    };
+
+    var ovFn = window._L4overlay || function (oid, html) {
+      document.getElementById(oid) && document.getElementById(oid).remove();
+      document.body.insertAdjacentHTML('beforeend',
+        '<div id="' + oid + '" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;">' + html + '</div>');
+    };
+    var aiPanelFn = window._L4aiPanel || function (txt) {
+      return '<div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:12px 14px;margin-bottom:14px;">'
+        + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:5px;"><i class="fas fa-brain" style="margin-right:5px;"></i>AI Insight</div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.6;">' + txt + '</div></div>';
+    };
+
+    ovFn(ovId,
+      '<div style="background:#fff;border-radius:14px;width:480px;box-shadow:0 20px 50px rgba(0,0,0,.3);">'
+      + '<div style="background:linear-gradient(135deg,#0891b2,#06b6d4);padding:16px 20px;border-radius:14px 14px 0 0;color:#fff;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-calendar-plus" style="font-size:18px;"></i>'
+      + '<div style="font-size:15px;font-weight:800;">Schedule Care Visit</div>'
+      + '<button onclick="_p29close(\'' + ovId + '\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;">\u2715</button>'
+      + '</div>'
+      + '<div style="padding:20px;">'
+      + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Visit Date</label>'
+      + '<input type="text" value="Jul 15, 2026" style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;"></div>'
+      + '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Visit Mode</label>'
+      + '<select style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13px;box-sizing:border-box;">'
+      + '<option>In-Person</option><option>Telephonic</option><option>Video Call</option>'
+      + '</select></div>'
+      + '<div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Notes</label>'
+      + '<textarea style="width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:12px;box-sizing:border-box;height:70px;">Review care plan adherence and assess need for level-of-care change.</textarea></div>'
+      + aiPanelFn('AI suggests: visit timing aligns with care plan milestone. RN Sarah Johnson available. SMS reminder will be sent to family.')
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="_p29run(\'' + schedKey + '\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;flex:1;">Confirm Schedule</button>'
+      + '</div></div></div>'
+    );
+  };
+
+  console.log('[P29] Eligibility renamed to Assessments \u00b7 AI Care Alerts renamed to AI Powered Assessments \u00b7 3 gibberish buttons fixed \u00b7 eLTCAS CQRS band suppressed');
+})();
+

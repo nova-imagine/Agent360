@@ -998,7 +998,7 @@ function Sidebar() {
           <span class="nav-badge" style="background:#d97706;color:#fff">18</span>
         </a>
         <a class="nav-item ltc-eligibility-nav nav-grp-tpa" onclick="navigateTo('ltc-eligibility')" href="#">
-          <i class="fas fa-user-check"></i><span>Eligibility &amp; Assessment</span>
+          <i class="fas fa-user-check"></i><span>Assessments</span>
           <span class="nav-badge" style="background:#0891b2;color:#fff">7</span>
         </a>
         <a class="nav-item ltc-ai-agents-nav nav-grp-tpa" onclick="navigateTo('ltc-ai-agents')" href="#">
