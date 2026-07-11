@@ -83205,3 +83205,2080 @@ var navigateTo=window.navigateTo;
 })();
 /* P29 fix: re-expose window.navigateTo to bare global */
 var navigateTo=window.navigateTo;
+
+/* ============================================================
+   P30 — Policyholder Self-Service Portal (hal-policyholder)
+   Color: Emerald green #059669 / #10b981 / #064e3b
+   Badge: PSP
+   ============================================================ */
+(function(){ 'use strict';
+  var PS1='#059669', PS2='#10b981', PS3='#064e3b';
+
+  /* ---- Mock policyholder data ---- */
+  var _p30policyholders = [
+    { id:'POL-2019-00142', name:'Eleanor Vasquez', age:74, product:'HAL Platinum Plus',
+      status:'Active - Benefit Qualifying', epPhase:'Phase 2 - 60-Day EP', epProgress:68,
+      monthlyBenefit:8500, ltdBenefit:612000, usedToDate:204800, remainingBenefit:407200,
+      provider:'Sunrise Home Care Agency', carePlan:'Personal Care & Skilled Nursing',
+      documentsQueued:3, lastActivity:'2026-07-08', nextAssessment:'2026-08-15',
+      cogScore:14, adlScore:3, covState:'Florida' },
+    { id:'POL-2021-00389', name:'Harold Nguyen', age:81, product:'LTC Standalone Premier',
+      status:'Active - Claim In Payment', epPhase:'EP Complete',epProgress:100,
+      monthlyBenefit:6200, ltdBenefit:446400, usedToDate:118600, remainingBenefit:327800,
+      provider:'MedEx Skilled Nursing', carePlan:'Skilled Nursing Facility',
+      documentsQueued:1, lastActivity:'2026-07-09', nextAssessment:'2026-10-01',
+      cogScore:21, adlScore:5, covState:'Arizona' },
+    { id:'POL-2020-00561', name:'Dorothy Chen', age:69, product:'LTC/HAL Hybrid Select',
+      status:'Active - Benefit Qualifying', epPhase:'Phase 1 - 30-Day EP', epProgress:34,
+      monthlyBenefit:7100, ltdBenefit:511200, usedToDate:71800, remainingBenefit:439400,
+      provider:'Pacific Care Solutions', carePlan:'Assisted Living & Memory Care',
+      documentsQueued:5, lastActivity:'2026-07-07', nextAssessment:'2026-07-22',
+      cogScore:18, adlScore:4, covState:'California' },
+    { id:'POL-2018-00834', name:'Robert Kaminski', age:78, product:'HAL Core',
+      status:'Active - Claim In Payment', epPhase:'EP Complete', epProgress:100,
+      monthlyBenefit:5400, ltdBenefit:388800, usedToDate:256700, remainingBenefit:132100,
+      provider:'Heartland Home Health', carePlan:'Home Health & Respite',
+      documentsQueued:0, lastActivity:'2026-07-05', nextAssessment:'2026-09-10',
+      cogScore:23, adlScore:5, covState:'Illinois' },
+    { id:'POL-2022-00177', name:'Margaret Oduya', age:72, product:'HAL Platinum Plus',
+      status:'Pending - Assessment Scheduled', epPhase:'Pre-EP', epProgress:0,
+      monthlyBenefit:9200, ltdBenefit:662400, usedToDate:0, remainingBenefit:662400,
+      provider:'TBD', carePlan:'Pending Initial Assessment',
+      documentsQueued:7, lastActivity:'2026-07-10', nextAssessment:'2026-07-18',
+      cogScore:null, adlScore:null, covState:'Texas' },
+    { id:'POL-2023-00045', name:'James Thornton', age:65, product:'LTC/HAL Hybrid Select',
+      status:'Policy In Force - Not Claiming', epPhase:'N/A', epProgress:0,
+      monthlyBenefit:6800, ltdBenefit:489600, usedToDate:0, remainingBenefit:489600,
+      provider:'N/A', carePlan:'N/A',
+      documentsQueued:0, lastActivity:'2026-06-01', nextAssessment:'N/A',
+      cogScore:null, adlScore:null, covState:'New York' }
+  ];
+
+  var _p30docQueue = [
+    { id:'DOC-2026-1042', policy:'POL-2019-00142', type:'Physician Certification Form',
+      submitted:'2026-07-01', status:'Under Review', daysWaiting:9, priority:'High' },
+    { id:'DOC-2026-1078', policy:'POL-2019-00142', type:'Care Plan Update - Q3 2026',
+      submitted:'2026-07-05', status:'Awaiting Supervisor Sign-off', daysWaiting:5, priority:'Medium' },
+    { id:'DOC-2026-1091', policy:'POL-2019-00142', type:'Provider Invoice - June 2026',
+      submitted:'2026-07-08', status:'Processing', daysWaiting:2, priority:'Low' },
+    { id:'DOC-2026-1033', policy:'POL-2021-00389', type:'SNF Admission Records',
+      submitted:'2026-07-03', status:'Approved', daysWaiting:7, priority:'Medium' },
+    { id:'DOC-2026-1019', policy:'POL-2020-00561', type:'ADL Assessment - Physician Statement',
+      submitted:'2026-06-28', status:'Under Review', daysWaiting:12, priority:'High' },
+    { id:'DOC-2026-1021', policy:'POL-2020-00561', type:'Memory Care Facility Agreement',
+      submitted:'2026-06-30', status:'Awaiting Policyholder Signature', daysWaiting:10, priority:'High' },
+    { id:'DOC-2026-1055', policy:'POL-2020-00561', type:'HIPAA Authorization Renewal',
+      submitted:'2026-07-02', status:'Pending Notarization', daysWaiting:8, priority:'Medium' },
+    { id:'DOC-2026-0998', policy:'POL-2022-00177', type:'Initial Claim Application',
+      submitted:'2026-06-25', status:'Pending Assessment', daysWaiting:15, priority:'High' },
+    { id:'DOC-2026-0999', policy:'POL-2022-00177', type:'Medical Records Authorization',
+      submitted:'2026-06-25', status:'Received', daysWaiting:15, priority:'High' }
+  ];
+
+  var _p30activeTab = 'dashboard';
+  var _p30selectedPolicy = null;
+
+  /* ---- Helpers ---- */
+  function _p30statusBadge(s){
+    var map={
+      'Active - Claim In Payment':['#059669','#d1fae5'],
+      'Active - Benefit Qualifying':['#d97706','#fef3c7'],
+      'Pending - Assessment Scheduled':['#7c3aed','#ede9fe'],
+      'Policy In Force - Not Claiming':['#0891b2','#cffafe']
+    };
+    var c=map[s]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+c[1]+';color:'+c[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+s+'</span>';
+  }
+  function _p30docStatusBadge(s){
+    var map={
+      'Under Review':['#d97706','#fef3c7'],
+      'Approved':['#059669','#d1fae5'],
+      'Processing':['#0891b2','#cffafe'],
+      'Awaiting Supervisor Sign-off':['#7c3aed','#ede9fe'],
+      'Awaiting Policyholder Signature':['#dc2626','#fee2e2'],
+      'Pending Notarization':['#9a3412','#ffedd5'],
+      'Received':['#6b7280','#f3f4f6'],
+      'Pending Assessment':['#7c3aed','#ede9fe']
+    };
+    var c=map[s]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+c[1]+';color:'+c[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+s+'</span>';
+  }
+  function _p30priorityBadge(p){
+    var map={High:['#dc2626','#fee2e2'],Medium:['#d97706','#fef3c7'],Low:['#059669','#d1fae5']};
+    var c=map[p]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+c[1]+';color:'+c[0]+';padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700">'+p+'</span>';
+  }
+  function _p30bar(pct,color){
+    return '<div style="background:#e5e7eb;border-radius:4px;height:8px;width:100%;overflow:hidden"><div style="width:'+pct+'%;background:'+color+';height:8px;border-radius:4px;transition:width .4s"></div></div>';
+  }
+  function _p30fmt(n){return '$'+n.toLocaleString();}
+
+  /* ---- Tab: Dashboard Overview ---- */
+  function _p30dashboardTab(){
+    var activeClaims = _p30policyholders.filter(function(p){return p.status.indexOf('Claim')>-1||p.status.indexOf('Qualifying')>-1;});
+    var pendingDocs = _p30docQueue.filter(function(d){return d.status!=='Approved';}).length;
+    var totalBenefitUsed = _p30policyholders.reduce(function(a,p){return a+p.usedToDate;},0);
+    var upcomingAssessments = _p30policyholders.filter(function(p){return p.nextAssessment!=='N/A'&&p.nextAssessment>='2026-07-10'&&p.nextAssessment<='2026-08-31';}).length;
+
+    var kpis='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid '+PS1+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Active Claims</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+PS1+'">'+activeClaims.length+'</div>'
+      +'<div style="font-size:12px;color:#374151">Benefit Qualifying or In Payment</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #d97706;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Pending Documents</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#d97706">'+pendingDocs+'</div>'
+      +'<div style="font-size:12px;color:#374151">Awaiting Review or Action</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #0891b2;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Total Benefits Paid</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#0891b2">'+_p30fmt(totalBenefitUsed)+'</div>'
+      +'<div style="font-size:12px;color:#374151">All Active Policies YTD</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #7c3aed;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Upcoming Assessments</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#7c3aed">'+upcomingAssessments+'</div>'
+      +'<div style="font-size:12px;color:#374151">Next 60 Days</div></div>'
+      +'</div>';
+
+    var rows='';
+    _p30policyholders.forEach(function(p){
+      var pct=p.ltdBenefit>0?Math.round((p.usedToDate/p.ltdBenefit)*100):0;
+      rows+='<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer" onclick="window._p30selectPolicy(\''+p.id+'\')" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\'\'">'
+        +'<td style="padding:10px 12px;font-weight:600;color:'+PS1+'">'+p.id+'</td>'
+        +'<td style="padding:10px 12px">'+p.name+'</td>'
+        +'<td style="padding:10px 12px">'+p.age+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px">'+p.product+'</td>'
+        +'<td style="padding:10px 12px">'+_p30statusBadge(p.status)+'</td>'
+        +'<td style="padding:10px 12px"><div style="min-width:120px">'+_p30bar(pct,PS1)+'<div style="font-size:11px;color:#6b7280;margin-top:2px">'+pct+'% of LTD used</div></div></td>'
+        +'<td style="padding:10px 12px;text-align:center"><span style="background:'+(p.documentsQueued>0?'#fee2e2':'#d1fae5')+';color:'+(p.documentsQueued>0?'#dc2626':'#059669')+';padding:2px 8px;border-radius:9px;font-size:12px;font-weight:600">'+p.documentsQueued+'</span></td>'
+        +'<td style="padding:10px 12px;font-size:12px;color:#6b7280">'+p.nextAssessment+'</td>'
+        +'</tr>';
+    });
+
+    return kpis
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+PS3+'"><i class="fas fa-users" style="color:'+PS1+';margin-right:8px"></i>Policyholder Portfolio — 6 Active Accounts</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Policy ID</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Name</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Age</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Product</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Benefit Utilization</th>'
+      +'<th style="padding:10px 12px;text-align:center;font-size:11px;color:#6b7280;font-weight:600">Docs Queued</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Next Assessment</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  /* ---- Policy Detail Modal (inline) ---- */
+  window._p30selectPolicy = function(id){
+    _p30selectedPolicy = id;
+    var p = _p30policyholders.filter(function(x){return x.id===id;})[0];
+    if(!p) return;
+    var pct=p.ltdBenefit>0?Math.round((p.usedToDate/p.ltdBenefit)*100):0;
+    var modal='<div id="p30-detail-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center" onclick="if(event.target.id===\'p30-detail-modal\')window._p30closeModal()">'
+      +'<div style="background:#fff;border-radius:14px;width:680px;max-height:88vh;overflow-y:auto;padding:28px;position:relative">'
+      +'<button onclick="window._p30closeModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:#6b7280;cursor:pointer">&times;</button>'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">'
+      +'<div style="background:'+PS1+';color:#fff;border-radius:10px;padding:10px 16px;font-weight:800;font-size:14px">PSP</div>'
+      +'<div><div style="font-size:18px;font-weight:800;color:'+PS3+'">'+p.name+'</div>'
+      +'<div style="font-size:13px;color:#6b7280">'+p.id+' &bull; Age '+p.age+' &bull; '+p.covState+' &bull; '+p.product+'</div></div></div>'
+      +'<div style="margin-bottom:16px">'+_p30statusBadge(p.status)+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">'
+      +'<div style="background:#f0fdf4;border-radius:8px;padding:14px">'
+      +'<div style="font-size:11px;color:#6b7280;font-weight:600;margin-bottom:6px">BENEFIT UTILIZATION</div>'
+      +'<div style="font-size:22px;font-weight:800;color:'+PS1+'">'+pct+'%</div>'
+      +_p30bar(pct,PS1)
+      +'<div style="font-size:12px;color:#374151;margin-top:6px">Used: '+_p30fmt(p.usedToDate)+' / LTD: '+_p30fmt(p.ltdBenefit)+'</div>'
+      +'<div style="font-size:12px;color:'+PS1+';font-weight:600">Remaining: '+_p30fmt(p.remainingBenefit)+'</div></div>'
+      +'<div style="background:#f0fdf4;border-radius:8px;padding:14px">'
+      +'<div style="font-size:11px;color:#6b7280;font-weight:600;margin-bottom:8px">EP STATUS</div>'
+      +'<div style="font-size:14px;font-weight:700;color:'+PS3+'">'+p.epPhase+'</div>'
+      +(p.epProgress>0?_p30bar(p.epProgress,PS1)+'<div style="font-size:11px;color:#6b7280;margin-top:4px">Progress: '+p.epProgress+'%</div>':'')
+      +'<div style="font-size:12px;color:#374151;margin-top:8px">Monthly Benefit: '+_p30fmt(p.monthlyBenefit)+'</div>'
+      +'<div style="font-size:12px;color:#374151">Next Assessment: '+p.nextAssessment+'</div></div></div>'
+      +'<div style="background:#f9fafb;border-radius:8px;padding:14px;margin-bottom:16px">'
+      +'<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:6px">CURRENT CARE ARRANGEMENT</div>'
+      +'<div style="font-size:13px;color:#374151">Provider: <strong>'+p.provider+'</strong></div>'
+      +'<div style="font-size:13px;color:#374151">Plan: '+p.carePlan+'</div>'
+      +(p.cogScore!==null?'<div style="font-size:12px;color:#6b7280;margin-top:6px">Cognitive Score: '+p.cogScore+'/30 (MMSE) &bull; ADL Deficiencies: '+p.adlScore+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right"><button onclick="window._p30closeModal()" style="background:'+PS1+';color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer">Close Detail View</button></div>'
+      +'</div></div>';
+    document.body.insertAdjacentHTML('beforeend',modal);
+  };
+  window._p30closeModal = function(){ var m=document.getElementById('p30-detail-modal'); if(m) m.remove(); };
+
+  /* ---- Tab: Document Center ---- */
+  function _p30documentsTab(){
+    var summary='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
+    var statuses=['Under Review','Awaiting Supervisor Sign-off','Awaiting Policyholder Signature','Approved'];
+    var colors=[['#d97706','#fef3c7'],['#7c3aed','#ede9fe'],['#dc2626','#fee2e2'],['#059669','#d1fae5']];
+    statuses.forEach(function(s,i){
+      var cnt=_p30docQueue.filter(function(d){return d.status===s;}).length;
+      summary+='<div style="background:'+colors[i][1]+';border-radius:8px;padding:14px;text-align:center">'
+        +'<div style="font-size:22px;font-weight:800;color:'+colors[i][0]+'">'+cnt+'</div>'
+        +'<div style="font-size:11px;color:#374151;font-weight:600">'+s+'</div></div>';
+    });
+    summary+='</div>';
+
+    var rows='';
+    _p30docQueue.forEach(function(d){
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 12px;font-weight:600;color:'+PS1+'">'+d.id+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;color:#374151">'+d.policy+'</td>'
+        +'<td style="padding:10px 12px;font-size:13px">'+d.type+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;color:#6b7280">'+d.submitted+'</td>'
+        +'<td style="padding:10px 12px">'+_p30docStatusBadge(d.status)+'</td>'
+        +'<td style="padding:10px 12px;text-align:center"><span style="color:'+(d.daysWaiting>10?'#dc2626':d.daysWaiting>5?'#d97706':'#059669')+';font-weight:700">'+d.daysWaiting+'d</span></td>'
+        +'<td style="padding:10px 12px">'+_p30priorityBadge(d.priority)+'</td>'
+        +'</tr>';
+    });
+
+    return summary
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+PS3+'"><i class="fas fa-file-alt" style="color:'+PS1+';margin-right:8px"></i>Document Submission Queue — '+_p30docQueue.length+' Items</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Doc ID</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Policy</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Document Type</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Submitted</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'<th style="padding:10px 12px;text-align:center;font-size:11px;color:#6b7280;font-weight:600">Wait</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Priority</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  /* ---- Tab: Benefit Tracker ---- */
+  function _p30benefitTab(){
+    var cards='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">';
+    var activePols = _p30policyholders.filter(function(p){return p.usedToDate>0;});
+    activePols.forEach(function(p){
+      var pct=Math.round((p.usedToDate/p.ltdBenefit)*100);
+      var barColor = pct>75?'#dc2626':pct>50?'#d97706':PS1;
+      cards+='<div style="background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:3px solid '+barColor+'">'
+        +'<div style="font-size:13px;font-weight:700;color:'+PS3+'">'+p.name+'</div>'
+        +'<div style="font-size:11px;color:#6b7280;margin-bottom:10px">'+p.id+' &bull; '+p.product+'</div>'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-size:12px;color:#374151">Monthly Benefit</span>'
+        +'<span style="font-size:12px;font-weight:700;color:'+PS1+'">'+_p30fmt(p.monthlyBenefit)+'/mo</span></div>'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:8px">'
+        +'<span style="font-size:12px;color:#374151">Paid to Date</span>'
+        +'<span style="font-size:12px;font-weight:700;color:#374151">'+_p30fmt(p.usedToDate)+'</span></div>'
+        +_p30bar(pct,barColor)
+        +'<div style="display:flex;justify-content:space-between;margin-top:6px">'
+        +'<span style="font-size:11px;color:#6b7280">'+pct+'% of LTD used</span>'
+        +'<span style="font-size:11px;color:'+barColor+';font-weight:700">'+_p30fmt(p.remainingBenefit)+' remaining</span></div>'
+        +'<div style="margin-top:10px;font-size:11px;color:#6b7280">Provider: '+p.provider+'</div>'
+        +'</div>';
+    });
+    cards+='</div>';
+
+    var timeline='<div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-weight:700;font-size:15px;color:'+PS3+';margin-bottom:16px"><i class="fas fa-chart-bar" style="color:'+PS1+';margin-right:8px"></i>Monthly Benefit Payment Summary — Q2 2026</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">';
+    var months=['Jan','Feb','Mar','Apr','May','Jun'];
+    var vals=[38200,41500,39800,43200,42700,45100];
+    var maxV=Math.max.apply(null,vals);
+    months.forEach(function(m,i){
+      var h=Math.round((vals[i]/maxV)*120);
+      timeline+='<div style="text-align:center">'
+        +'<div style="font-size:12px;font-weight:700;color:'+PS1+';margin-bottom:4px">'+_p30fmt(vals[i])+'</div>'
+        +'<div style="display:flex;align-items:flex-end;justify-content:center;height:130px">'
+        +'<div style="width:32px;background:'+PS1+';border-radius:4px 4px 0 0;height:'+h+'px"></div></div>'
+        +'<div style="font-size:11px;color:#6b7280;margin-top:4px">'+m+'</div></div>';
+    });
+    timeline+='</div></div>';
+    return cards+timeline;
+  }
+
+  /* ---- Tab: Care Plan & Assessments ---- */
+  function _p30carePlanTab(){
+    var rows='';
+    _p30policyholders.forEach(function(p){
+      var nextA=p.nextAssessment;
+      var urgColor = nextA==='N/A'?'#6b7280':nextA<'2026-07-25'?'#dc2626':nextA<'2026-08-15'?'#d97706':PS1;
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 12px;font-weight:600;color:'+PS1+'">'+p.name+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px">'+p.id+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px">'+p.carePlan+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px">'+p.provider+'</td>'
+        +'<td style="padding:10px 12px;font-size:13px;font-weight:600">'+p.epPhase+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;color:'+urgColor+';font-weight:700">'+nextA+'</td>'
+        +(p.cogScore!==null?'<td style="padding:10px 12px;font-size:12px">MMSE: '+p.cogScore+'/30 &bull; ADL: '+p.adlScore+'</td>':'<td style="padding:10px 12px;font-size:12px;color:#9ca3af">Pending</td>')
+        +'</tr>';
+    });
+
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:20px">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+PS3+'"><i class="fas fa-heartbeat" style="color:'+PS1+';margin-right:8px"></i>Care Plan & Assessment Tracker</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Policyholder</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Policy ID</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Care Plan Type</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Provider</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">EP Phase</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Next Assessment</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Clinical Scores</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>'
+      +'<div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:10px;padding:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:'+PS3+';margin-bottom:8px"><i class="fas fa-bell" style="margin-right:6px"></i>Assessment Request Queue</div>'
+      +'<div style="font-size:13px;color:#374151">3 policyholders have assessments scheduled within the next 30 days. 1 new assessment request (POL-2022-00177 — Margaret Oduya) is pending physician coordination.</div>'
+      +'<button style="margin-top:12px;background:'+PS1+';color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer"><i class="fas fa-plus" style="margin-right:4px"></i>Request New Assessment</button></div>';
+  }
+
+  /* ---- Build Page ---- */
+  function _p30buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var tabs=[['dashboard','fa-tachometer-alt','Dashboard'],['documents','fa-file-alt','Document Center'],['benefits','fa-dollar-sign','Benefit Tracker'],['careplan','fa-heartbeat','Care Plan & Assessments']];
+    pc.innerHTML='<div style="font-family:\'Inter\',sans-serif;background:#f0fdf4;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,'+PS3+' 0%,'+PS1+' 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">PSP</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">Policyholder Self-Service Portal</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">EP Status &bull; Document Center &bull; Benefit Tracking &bull; Care Plan Management &bull; Assessment Requests</p>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      +'<div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +(function(){var h='';tabs.forEach(function(t){var a=_p30activeTab===t[0];h+='<button onclick="window._p30switchTab(\''+t[0]+'\')" style="flex:1;padding:10px 12px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:'+(a?PS1:'transparent')+';color:'+(a?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';});return h;})()
+      +'</div>'
+      +'<div id="p30-tab-content">'+_p30renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  function _p30renderTab(){
+    if(_p30activeTab==='dashboard') return _p30dashboardTab();
+    if(_p30activeTab==='documents') return _p30documentsTab();
+    if(_p30activeTab==='benefits') return _p30benefitTab();
+    if(_p30activeTab==='careplan') return _p30carePlanTab();
+    return '';
+  }
+
+  window._p30switchTab = function(tab){
+    _p30activeTab=tab;
+    var el=document.getElementById('p30-tab-content');
+    if(el) el.innerHTML=_p30renderTab();
+    /* re-style tab buttons */
+    var tabs=[['dashboard','fa-tachometer-alt','Dashboard'],['documents','fa-file-alt','Document Center'],['benefits','fa-dollar-sign','Benefit Tracker'],['careplan','fa-heartbeat','Care Plan & Assessments']];
+    var btns=document.querySelectorAll('#page-content button[onclick*="_p30switchTab"]');
+    btns.forEach(function(btn,i){
+      var active=tabs[i]&&tabs[i][0]===tab;
+      btn.style.background=active?PS1:'transparent';
+      btn.style.color=active?'#fff':'#6b7280';
+    });
+  };
+
+  /* ---- Nav intercept ---- */
+  var _p30origNav=window.navigateTo;
+  window.navigateTo=function(route,params){
+    if(route==='hal-policyholder'){ _p30activeTab='dashboard'; _p30buildPage(); return; }
+    if(typeof _p30origNav==='function') _p30origNav(route,params);
+  };
+
+  console.log('[HAL PSP] Phase 30 Policyholder Self-Service Portal loaded — 6 policies, 9 documents, 4 tabs');
+})();
+/* P30: re-expose navigateTo */
+var navigateTo=window.navigateTo;
+
+
+/* ============================================================
+   P31 — Provider Network Intelligence (hal-provider-net)
+   Color: Teal #0891b2 / #06b6d4 / #164e63
+   Badge: PNI
+   ============================================================ */
+(function(){ 'use strict';
+  var PN1='#0891b2', PN2='#06b6d4', PN3='#164e63';
+
+  /* ---- Provider Network Data ---- */
+  var _p31providers = [
+    { id:'PRV-001', name:'Sunrise Home Care Agency', type:'Home Health', state:'FL',
+      tier:'Preferred', adequacyScore:94, evvCompliance:97.2, qualityScore:4.6,
+      activeClients:34, capacity:40, avgResponseHrs:2.1, badFaithRisk:'Low',
+      specialties:['Personal Care','Skilled Nursing','Occupational Therapy'],
+      networkStatus:'In-Network', ratePer8Hr:1240, contract:'Active' },
+    { id:'PRV-002', name:'MedEx Skilled Nursing', type:'SNF', state:'AZ',
+      tier:'Preferred', adequacyScore:88, evvCompliance:91.5, qualityScore:4.3,
+      activeClients:142, capacity:180, avgResponseHrs:24, badFaithRisk:'Low',
+      specialties:['Skilled Nursing','Physical Therapy','Memory Care'],
+      networkStatus:'In-Network', ratePer8Hr:2100, contract:'Active' },
+    { id:'PRV-003', name:'Pacific Care Solutions', type:'Assisted Living', state:'CA',
+      tier:'Preferred', adequacyScore:91, evvCompliance:89.3, qualityScore:4.4,
+      activeClients:67, capacity:80, avgResponseHrs:48, badFaithRisk:'Low',
+      specialties:['Assisted Living','Memory Care','Respite'],
+      networkStatus:'In-Network', ratePer8Hr:1850, contract:'Active' },
+    { id:'PRV-004', name:'Heartland Home Health', type:'Home Health', state:'IL',
+      tier:'Preferred', adequacyScore:82, evvCompliance:94.1, qualityScore:4.1,
+      activeClients:28, capacity:35, avgResponseHrs:3.5, badFaithRisk:'Low',
+      specialties:['Personal Care','Companion Care','Medication Management'],
+      networkStatus:'In-Network', ratePer8Hr:980, contract:'Active' },
+    { id:'PRV-005', name:'TexasCare Professional Services', type:'Home Health', state:'TX',
+      tier:'Non-Preferred', adequacyScore:67, evvCompliance:73.8, qualityScore:3.2,
+      activeClients:19, capacity:30, avgResponseHrs:6.2, badFaithRisk:'Medium',
+      specialties:['Personal Care','Homemaker Services'],
+      networkStatus:'In-Network', ratePer8Hr:1150, contract:'Pending Renewal' },
+    { id:'PRV-006', name:'Empire Senior Care LLC', type:'Home Health', state:'NY',
+      tier:'Non-Preferred', adequacyScore:54, evvCompliance:61.2, qualityScore:2.8,
+      activeClients:11, capacity:25, avgResponseHrs:9.8, badFaithRisk:'High',
+      specialties:['Personal Care'],
+      networkStatus:'Under Review', ratePer8Hr:1380, contract:'On Probation' },
+    { id:'PRV-007', name:'Great Plains Rehab Group', type:'Outpatient Rehab', state:'KS',
+      tier:'Preferred', adequacyScore:89, evvCompliance:96.4, qualityScore:4.5,
+      activeClients:22, capacity:30, avgResponseHrs:4.0, badFaithRisk:'Low',
+      specialties:['Physical Therapy','Occupational Therapy','Speech Therapy'],
+      networkStatus:'In-Network', ratePer8Hr:1420, contract:'Active' },
+    { id:'PRV-008', name:'BlueSky Memory Care Center', type:'Memory Care', state:'CO',
+      tier:'Preferred', adequacyScore:93, evvCompliance:98.1, qualityScore:4.8,
+      activeClients:48, capacity:55, avgResponseHrs:72, badFaithRisk:'Low',
+      specialties:['Memory Care','Dementia Program','Behavioral Health'],
+      networkStatus:'In-Network', ratePer8Hr:2450, contract:'Active' }
+  ];
+
+  var _p31networkGaps = [
+    { state:'NV', gapType:'Home Health Shortage', severity:'Critical', insuredCount:23, nearestProvider:'218 miles', remediation:'Recruiting 3 agencies Q3 2026' },
+    { state:'MT', gapType:'SNF Coverage Gap', severity:'High', insuredCount:8, nearestProvider:'145 miles', remediation:'Telehealth bridge — contract Q4 2026' },
+    { state:'WY', gapType:'Memory Care Deficit', severity:'High', insuredCount:5, nearestProvider:'312 miles', remediation:'Partnership with BlueSky expansion' },
+    { state:'ND', gapType:'Full Network Gap', severity:'Critical', insuredCount:3, nearestProvider:'189 miles', remediation:'Referral arrangement with MN network' },
+    { state:'MS', gapType:'EVV Non-Compliant Area', severity:'Medium', insuredCount:14, nearestProvider:'41 miles', remediation:'EVV training program Q3 2026' },
+    { state:'WV', gapType:'Specialty Care Shortage', severity:'Medium', insuredCount:9, nearestProvider:'67 miles', remediation:'Outpatient rehab outreach underway' }
+  ];
+
+  var _p31activeTab='overview';
+
+  /* ---- Helpers ---- */
+  function _p31tierBadge(t){
+    var c=t==='Preferred'?[PN1,'#cffafe']:['#d97706','#fef3c7'];
+    return '<span style="background:'+c[1]+';color:'+c[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+t+'</span>';
+  }
+  function _p31riskBadge(r){
+    var c={Low:[PN1,'#cffafe'],Medium:['#d97706','#fef3c7'],High:['#dc2626','#fee2e2']};
+    var cv=c[r]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+r+'</span>';
+  }
+  function _p31sevBadge(s){
+    var c={Critical:['#dc2626','#fee2e2'],High:['#d97706','#fef3c7'],Medium:['#7c3aed','#ede9fe']};
+    var cv=c[s]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+s+'</span>';
+  }
+  function _p31bar(pct,color){
+    return '<div style="background:#e5e7eb;border-radius:4px;height:8px;width:100%;overflow:hidden"><div style="width:'+pct+'%;background:'+color+';height:8px;border-radius:4px"></div></div>';
+  }
+  function _p31scoreColor(s){ return s>=90?PN1:s>=75?'#059669':s>=60?'#d97706':'#dc2626'; }
+
+  /* ---- Tab: Network Overview ---- */
+  function _p31overviewTab(){
+    var preferred=_p31providers.filter(function(p){return p.tier==='Preferred';}).length;
+    var avgAdequacy=Math.round(_p31providers.reduce(function(a,p){return a+p.adequacyScore;},0)/_p31providers.length);
+    var avgEVV=(_p31providers.reduce(function(a,p){return a+p.evvCompliance;},0)/_p31providers.length).toFixed(1);
+    var critGaps=_p31networkGaps.filter(function(g){return g.severity==='Critical';}).length;
+
+    var kpis='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid '+PN1+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Total Providers</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+PN1+'">'+_p31providers.length+'</div>'
+      +'<div style="font-size:12px;color:#374151">'+preferred+' Preferred / '+(8-preferred)+' Non-Preferred</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #059669;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Avg Adequacy Score</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#059669">'+avgAdequacy+'</div>'
+      +'<div style="font-size:12px;color:#374151">Network-wide composite</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #d97706;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">EVV Compliance Rate</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#d97706">'+avgEVV+'%</div>'
+      +'<div style="font-size:12px;color:#374151">Electronic Visit Verification</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #dc2626;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Critical Gaps</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#dc2626">'+critGaps+'</div>'
+      +'<div style="font-size:12px;color:#374151">States w/ no in-network coverage</div></div>'
+      +'</div>';
+
+    var rows='';
+    _p31providers.forEach(function(p){
+      var capPct=Math.round((p.activeClients/p.capacity)*100);
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 12px;font-weight:600;color:'+PN1+'">'+p.id+'</td>'
+        +'<td style="padding:10px 12px;font-weight:600">'+p.name+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px">'+p.type+'</td>'
+        +'<td style="padding:10px 12px">'+p.state+'</td>'
+        +'<td style="padding:10px 12px">'+_p31tierBadge(p.tier)+'</td>'
+        +'<td style="padding:10px 12px"><span style="font-weight:700;color:'+_p31scoreColor(p.adequacyScore)+'">'+p.adequacyScore+'</span></td>'
+        +'<td style="padding:10px 12px"><span style="font-weight:700;color:'+_p31scoreColor(p.evvCompliance)+'">'+p.evvCompliance+'%</span></td>'
+        +'<td style="padding:10px 12px"><div style="min-width:100px">'+_p31bar(capPct,capPct>85?'#dc2626':PN1)+'<div style="font-size:10px;color:#6b7280;margin-top:2px">'+p.activeClients+'/'+p.capacity+'</div></div></td>'
+        +'<td style="padding:10px 12px">'+_p31riskBadge(p.badFaithRisk)+'</td>'
+        +'</tr>';
+    });
+
+    return kpis
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+PN3+'"><i class="fas fa-hospital" style="color:'+PN1+';margin-right:8px"></i>Provider Directory — 8 Active Providers</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">ID</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Provider</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Type</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">State</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Tier</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Adequacy</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">EVV Compliance</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Capacity Util.</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Bad Faith Risk</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  /* ---- Tab: Network Gap Analysis ---- */
+  function _p31gapTab(){
+    var critRows='',highRows='',medRows='';
+    _p31networkGaps.forEach(function(g){
+      var row='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:700;font-size:15px">'+g.state+'</td>'
+        +'<td style="padding:10px 14px">'+_p31sevBadge(g.severity)+'</td>'
+        +'<td style="padding:10px 14px;font-size:13px">'+g.gapType+'</td>'
+        +'<td style="padding:10px 14px;font-size:13px;font-weight:600">'+g.insuredCount+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:#6b7280">'+g.nearestProvider+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:#374151">'+g.remediation+'</td>'
+        +'</tr>';
+      if(g.severity==='Critical') critRows+=row;
+      else if(g.severity==='High') highRows+=row;
+      else medRows+=row;
+    });
+
+    function table(title,rows,borderColor){
+      return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:20px">'
+        +'<div style="padding:14px 20px;border-bottom:1px solid #e5e7eb;border-left:4px solid '+borderColor+';font-weight:700;font-size:14px;color:'+PN3+'">'+title+'</div>'
+        +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+        +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">State</th>'
+        +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Severity</th>'
+        +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Gap Type</th>'
+        +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Insureds Affected</th>'
+        +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Nearest Provider</th>'
+        +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Remediation Plan</th>'
+        +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    }
+    return table('Critical Coverage Gaps (2 States)',critRows,'#dc2626')
+      +table('High Severity Gaps (2 States)',highRows,'#d97706')
+      +table('Medium Severity Gaps (2 States)',medRows,'#7c3aed');
+  }
+
+  /* ---- Tab: EVV Compliance ---- */
+  function _p31evvTab(){
+    var rows='';
+    _p31providers.filter(function(p){return p.type==='Home Health'||p.type==='Assisted Living';}).forEach(function(p){
+      var evvColor=p.evvCompliance>=95?PN1:p.evvCompliance>=80?'#d97706':'#dc2626';
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:600">'+p.name+'</td>'
+        +'<td style="padding:10px 14px">'+p.state+'</td>'
+        +'<td style="padding:10px 14px">'+_p31tierBadge(p.tier)+'</td>'
+        +'<td style="padding:10px 14px"><div style="min-width:140px">'
+        +_p31bar(p.evvCompliance,evvColor)
+        +'<div style="font-size:11px;font-weight:700;color:'+evvColor+';margin-top:2px">'+p.evvCompliance+'%</div></div></td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+p.contract+'</td>'
+        +'<td style="padding:10px 14px">'+_p31riskBadge(p.badFaithRisk)+'</td>'
+        +'</tr>';
+    });
+
+    return '<div style="background:#cffafe;border:1px solid #a5f3fc;border-radius:10px;padding:16px;margin-bottom:20px">'
+      +'<div style="font-size:13px;font-weight:700;color:'+PN3+';margin-bottom:4px"><i class="fas fa-shield-alt" style="margin-right:6px"></i>EVV State Mandate Compliance — CMS 21st Century Cures Act</div>'
+      +'<div style="font-size:13px;color:#374151">All home health and personal care providers servicing Medicaid-eligible policyholders must comply with Electronic Visit Verification (EVV) per 42 U.S.C. §1396b(l). Non-compliance triggers withholding of federal matching funds.</div></div>'
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+PN3+'"><i class="fas fa-mobile-alt" style="color:'+PN1+';margin-right:8px"></i>EVV Compliance by Provider</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Provider</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">State</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Tier</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">EVV Compliance Rate</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Contract Status</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Bad Faith Risk</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---- Tab: Quality Scoring ---- */
+  function _p31qualityTab(){
+    var sorted=_p31providers.slice().sort(function(a,b){return b.qualityScore-a.qualityScore;});
+    var rows='';
+    sorted.forEach(function(p,i){
+      var stars='';
+      for(var s=1;s<=5;s++) stars+='<i class="fas fa-star" style="color:'+(s<=Math.floor(p.qualityScore)?'#fbbf24':'#e5e7eb')+';font-size:12px"></i>';
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:700;color:'+(i<3?PN1:'#374151')+'">#'+(i+1)+'</td>'
+        +'<td style="padding:10px 14px;font-weight:600">'+p.name+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+p.type+'</td>'
+        +'<td style="padding:10px 14px">'+p.state+'</td>'
+        +'<td style="padding:10px 14px">'+stars+' <span style="font-weight:700;color:#374151;margin-left:4px">'+p.qualityScore.toFixed(1)+'</span></td>'
+        +'<td style="padding:10px 14px"><span style="font-weight:700;color:'+_p31scoreColor(p.adequacyScore)+'">'+p.adequacyScore+'</span></td>'
+        +'<td style="padding:10px 14px">'+_p31tierBadge(p.tier)+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+p.specialties.slice(0,2).join(', ')+'</td>'
+        +'</tr>';
+    });
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+PN3+'"><i class="fas fa-star" style="color:#fbbf24;margin-right:8px"></i>Provider Quality Scorecard — Ranked by Quality Score</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Rank</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Provider</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Type</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">State</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Quality Rating</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Adequacy Score</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Tier</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Specialties</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---- Build Page ---- */
+  function _p31buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var tabs=[['overview','fa-hospital','Network Overview'],['gaps','fa-exclamation-triangle','Gap Analysis'],['evv','fa-mobile-alt','EVV Compliance'],['quality','fa-star','Quality Scoring']];
+    pc.innerHTML='<div style="font-family:\'Inter\',sans-serif;background:#ecfeff;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,'+PN3+' 0%,'+PN1+' 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">PNI</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">Provider Network Intelligence</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">Network Adequacy &bull; Gap Analysis &bull; EVV Compliance &bull; Quality Scoring &bull; Preferred Routing</p>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      +'<div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +(function(){var h='';tabs.forEach(function(t){var a=_p31activeTab===t[0];h+='<button onclick="window._p31switchTab(\''+t[0]+'\')" style="flex:1;padding:10px 12px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:'+(a?PN1:'transparent')+';color:'+(a?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';});return h;})()
+      +'</div>'
+      +'<div id="p31-tab-content">'+_p31renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  function _p31renderTab(){
+    if(_p31activeTab==='overview') return _p31overviewTab();
+    if(_p31activeTab==='gaps') return _p31gapTab();
+    if(_p31activeTab==='evv') return _p31evvTab();
+    if(_p31activeTab==='quality') return _p31qualityTab();
+    return '';
+  }
+
+  window._p31switchTab = function(tab){
+    _p31activeTab=tab;
+    var el=document.getElementById('p31-tab-content');
+    if(el) el.innerHTML=_p31renderTab();
+    var tabs=[['overview'],['gaps'],['evv'],['quality']];
+    var btns=document.querySelectorAll('#page-content button[onclick*="_p31switchTab"]');
+    btns.forEach(function(btn,i){
+      var active=tabs[i]&&tabs[i][0]===tab;
+      btn.style.background=active?PN1:'transparent';
+      btn.style.color=active?'#fff':'#6b7280';
+    });
+  };
+
+  var _p31origNav=window.navigateTo;
+  window.navigateTo=function(route,params){
+    if(route==='hal-provider-net'){ _p31activeTab='overview'; _p31buildPage(); return; }
+    if(typeof _p31origNav==='function') _p31origNav(route,params);
+  };
+
+  console.log('[HAL PNI] Phase 31 Provider Network Intelligence loaded — 8 providers, 6 network gaps, 4 tabs');
+})();
+var navigateTo=window.navigateTo;
+
+
+/* ============================================================
+   P32 — LTC Workforce & Staffing Analytics (hal-workforce)
+   Color: Amber #d97706 / #f59e0b / #78350f
+   Badge: WFA
+   ============================================================ */
+(function(){ 'use strict';
+  var WA1='#d97706', WA2='#f59e0b', WA3='#78350f';
+
+  /* ---- Data ---- */
+  var _p32adjusters = [
+    { id:'ADJ-001', name:'Carla Meyers', region:'Southeast', product:'HAL Platform',
+      caseload:42, maxCaseload:45, burnoutScore:72, performanceScore:91,
+      avgDaysToDecision:12.4, openCases:42, pendingDocs:18, trainingGapScore:15,
+      certifications:['LTC Specialist','HAL Platform Expert','MMSE Certified'],
+      yearsExp:11, successionReady:true, riskLevel:'Medium' },
+    { id:'ADJ-002', name:'Marcus Thompson', region:'Southwest', product:'LTC Standalone',
+      caseload:38, maxCaseload:40, burnoutScore:58, performanceScore:87,
+      avgDaysToDecision:14.1, openCases:38, pendingDocs:12, trainingGapScore:22,
+      certifications:['LTC Specialist','ADL Assessment'],
+      yearsExp:7, successionReady:false, riskLevel:'Low' },
+    { id:'ADJ-003', name:'Priya Ramaswamy', region:'Northeast', product:'Hybrid Products',
+      caseload:51, maxCaseload:45, burnoutScore:88, performanceScore:79,
+      avgDaysToDecision:18.7, openCases:51, pendingDocs:31, trainingGapScore:41,
+      certifications:['LTC Specialist'],
+      yearsExp:4, successionReady:false, riskLevel:'High' },
+    { id:'ADJ-004', name:'James Okafor', region:'Midwest', product:'HAL Platform',
+      caseload:29, maxCaseload:45, burnoutScore:34, performanceScore:96,
+      avgDaysToDecision:9.2, openCases:29, pendingDocs:7, trainingGapScore:8,
+      certifications:['LTC Specialist','HAL Platform Expert','MMSE Certified','Geriatric Care'],
+      yearsExp:15, successionReady:true, riskLevel:'Low' },
+    { id:'ADJ-005', name:'Sandra Kovacs', region:'Northwest', product:'LTC Standalone',
+      caseload:44, maxCaseload:45, burnoutScore:64, performanceScore:83,
+      avgDaysToDecision:15.8, openCases:44, pendingDocs:22, trainingGapScore:29,
+      certifications:['LTC Specialist','ADL Assessment','Geriatric Care'],
+      yearsExp:9, successionReady:false, riskLevel:'Medium' },
+    { id:'ADJ-006', name:'Roberto Delgado', region:'Southeast', product:'Hybrid Products',
+      caseload:33, maxCaseload:40, burnoutScore:45, performanceScore:89,
+      avgDaysToDecision:11.3, openCases:33, pendingDocs:9, trainingGapScore:18,
+      certifications:['LTC Specialist','HAL Platform Expert'],
+      yearsExp:6, successionReady:false, riskLevel:'Low' },
+    { id:'ADJ-007', name:'Diana Walsh', region:'Northeast', product:'HAL Platform',
+      caseload:47, maxCaseload:45, burnoutScore:81, performanceScore:75,
+      avgDaysToDecision:21.4, openCases:47, pendingDocs:28, trainingGapScore:53,
+      certifications:['LTC Specialist'],
+      yearsExp:3, successionReady:false, riskLevel:'High' }
+  ];
+
+  var _p32trainingGaps = [
+    { skill:'HAL Platform Claims Navigation', gap:'34%', adjCount:5, priority:'Critical', timeToClose:'4 weeks' },
+    { skill:'MMSE / Cognitive Assessment Administration', gap:'41%', adjCount:4, priority:'High', timeToClose:'3 days (CBT)' },
+    { skill:'Medicare COB Coordination', gap:'28%', adjCount:3, priority:'High', timeToClose:'2 weeks' },
+    { skill:'ADL Functional Assessment Standards', gap:'19%', adjCount:2, priority:'Medium', timeToClose:'1 week' },
+    { skill:'EP Phase Documentation Requirements', gap:'45%', adjCount:6, priority:'Critical', timeToClose:'5 weeks' },
+    { skill:'Reinsurance Treaty Reporting', gap:'62%', adjCount:7, priority:'High', timeToClose:'3 weeks' }
+  ];
+
+  var _p32activeTab='capacity';
+
+  /* ---- Helpers ---- */
+  function _p32bar(pct,color,height){
+    height=height||8;
+    return '<div style="background:#e5e7eb;border-radius:4px;height:'+height+'px;width:100%;overflow:hidden"><div style="width:'+Math.min(pct,100)+'%;background:'+color+';height:'+height+'px;border-radius:4px"></div></div>';
+  }
+  function _p32burnoutColor(s){ return s>=80?'#dc2626':s>=60?'#d97706':s>=40?'#059669':'#0891b2'; }
+  function _p32riskBadge(r){
+    var c={High:['#dc2626','#fee2e2'],Medium:['#d97706','#fef3c7'],Low:['#059669','#d1fae5']};
+    var cv=c[r]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+r+' Risk</span>';
+  }
+  function _p32priBadge(p){
+    var c={Critical:['#dc2626','#fee2e2'],High:['#d97706','#fef3c7'],Medium:['#7c3aed','#ede9fe']};
+    var cv=c[p]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+p+'</span>';
+  }
+
+  /* ---- Tab: Capacity Modeling ---- */
+  function _p32capacityTab(){
+    var totalCases=_p32adjusters.reduce(function(a,x){return a+x.caseload;},0);
+    var totalCap=_p32adjusters.reduce(function(a,x){return a+x.maxCaseload;},0);
+    var overloaded=_p32adjusters.filter(function(x){return x.caseload>x.maxCaseload;}).length;
+    var avgDays=(_p32adjusters.reduce(function(a,x){return a+x.avgDaysToDecision;},0)/_p32adjusters.length).toFixed(1);
+
+    var kpis='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid '+WA1+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Total Open Cases</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+WA1+'">'+totalCases+'</div>'
+      +'<div style="font-size:12px;color:#374151">Across 7 Adjusters</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #dc2626;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Overloaded Adjusters</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#dc2626">'+overloaded+'</div>'
+      +'<div style="font-size:12px;color:#374151">Above Max Caseload Threshold</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #059669;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Dept Capacity Util.</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#059669">'+Math.round((totalCases/totalCap)*100)+'%</div>'
+      +'<div style="font-size:12px;color:#374151">'+totalCases+' / '+totalCap+' cases</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #7c3aed;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Avg Days to Decision</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#7c3aed">'+avgDays+'</div>'
+      +'<div style="font-size:12px;color:#374151">Dept Average (goal: &lt;12d)</div></div>'
+      +'</div>';
+
+    var rows='';
+    _p32adjusters.forEach(function(a){
+      var capPct=Math.round((a.caseload/a.maxCaseload)*100);
+      var capColor=capPct>100?'#dc2626':capPct>85?WA1:'#059669';
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 12px;font-weight:600;color:'+WA1+'">'+a.id+'</td>'
+        +'<td style="padding:10px 12px;font-weight:600">'+a.name+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px">'+a.region+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px">'+a.product+'</td>'
+        +'<td style="padding:10px 12px"><div style="min-width:120px">'
+        +_p32bar(capPct,capColor)
+        +'<div style="font-size:10px;margin-top:2px"><span style="font-weight:700;color:'+capColor+'">'+a.caseload+'</span>/'+a.maxCaseload+' ('+capPct+'%)</div></div></td>'
+        +'<td style="padding:10px 12px;font-size:13px;font-weight:600;color:'+(a.avgDaysToDecision>18?'#dc2626':a.avgDaysToDecision>14?WA1:'#059669')+'">'+a.avgDaysToDecision+'d</td>'
+        +'<td style="padding:10px 12px">'+a.yearsExp+' yrs</td>'
+        +'<td style="padding:10px 12px">'+_p32riskBadge(a.riskLevel)+'</td>'
+        +'</tr>';
+    });
+
+    return kpis
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+WA3+'"><i class="fas fa-briefcase" style="color:'+WA1+';margin-right:8px"></i>Adjuster Capacity Model — 7 Adjusters</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">ID</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Adjuster</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Region</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Product Line</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Caseload Util.</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Avg Days/Decision</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Experience</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Risk Level</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  /* ---- Tab: Burnout Risk Scoring ---- */
+  function _p32burnoutTab(){
+    var sorted=_p32adjusters.slice().sort(function(a,b){return b.burnoutScore-a.burnoutScore;});
+    var cards='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px">';
+    sorted.forEach(function(a){
+      var bc=_p32burnoutColor(a.burnoutScore);
+      var label=a.burnoutScore>=80?'Critical Risk':a.burnoutScore>=60?'Elevated Risk':a.burnoutScore>=40?'Manageable':'Low Risk';
+      cards+='<div style="background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid '+bc+'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
+        +'<div><div style="font-weight:700;color:'+WA3+'">'+a.name+'</div>'
+        +'<div style="font-size:11px;color:#6b7280">'+a.region+' &bull; '+a.product+'</div></div>'
+        +'<span style="background:'+(a.burnoutScore>=80?'#fee2e2':a.burnoutScore>=60?'#fef3c7':a.burnoutScore>=40?'#d1fae5':'#cffafe')+';color:'+bc+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+label+'</span>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-size:13px;font-weight:700;color:'+bc+'">'+a.burnoutScore+' / 100</span>'
+        +'<span style="font-size:12px;color:#6b7280">Caseload '+a.caseload+'/'+a.maxCaseload+' &bull; '+a.pendingDocs+' pending docs</span></div>'
+        +_p32bar(a.burnoutScore,bc,10)
+        +'</div>';
+    });
+    cards+='</div>';
+
+    return cards
+      +'<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:'+WA3+';margin-bottom:6px"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Burnout Intervention Alerts</div>'
+      +'<div style="font-size:13px;color:#374151">2 adjusters (Priya Ramaswamy and Diana Walsh) are in the Critical Risk zone. Immediate caseload redistribution recommended. Consider cross-training James Okafor on Hybrid Products to absorb overflow from Northeast region.</div></div>';
+  }
+
+  /* ---- Tab: Training Gaps ---- */
+  function _p32trainingTab(){
+    var rows='';
+    _p32trainingGaps.forEach(function(g){
+      var gapPct=parseInt(g.gap);
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:600;font-size:13px">'+g.skill+'</td>'
+        +'<td style="padding:10px 14px">'+_p32priBadge(g.priority)+'</td>'
+        +'<td style="padding:10px 14px"><div style="min-width:140px">'
+        +_p32bar(gapPct,gapPct>45?'#dc2626':gapPct>30?WA1:'#059669')
+        +'<div style="font-size:11px;font-weight:700;color:'+(gapPct>45?'#dc2626':gapPct>30?WA1:'#059669')+';margin-top:2px">'+g.gap+' gap</div></div></td>'
+        +'<td style="padding:10px 14px;font-size:13px;font-weight:600">'+g.adjCount+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:#374151">'+g.timeToClose+'</td>'
+        +'</tr>';
+    });
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+WA3+'"><i class="fas fa-graduation-cap" style="color:'+WA1+';margin-right:8px"></i>Training Gap Identification — 6 Critical Skills</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Skill / Competency</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Priority</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Proficiency Gap</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Adjusters Affected</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Time to Close Gap</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---- Tab: Succession Planning ---- */
+  function _p32successionTab(){
+    var ready=_p32adjusters.filter(function(a){return a.successionReady;});
+    var notReady=_p32adjusters.filter(function(a){return !a.successionReady;});
+    var readyRows='', notReadyRows='';
+    function buildRow(a,color){
+      return '<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:600;color:'+color+'">'+a.name+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+a.region+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+a.product+'</td>'
+        +'<td style="padding:10px 14px">'+a.yearsExp+' yrs</td>'
+        +'<td style="padding:10px 14px;font-size:11px">'+a.certifications.join(' &bull; ')+'</td>'
+        +'<td style="padding:10px 14px"><span style="font-weight:700;color:'+(a.performanceScore>=90?'#059669':a.performanceScore>=80?WA1:'#dc2626')+'">'+a.performanceScore+'/100</span></td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:#374151">'+a.trainingGapScore+'% gap</td>'
+        +'</tr>';
+    }
+    ready.forEach(function(a){ readyRows+=buildRow(a,'#059669'); });
+    notReady.forEach(function(a){ notReadyRows+=buildRow(a,WA1); });
+
+    var header='<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Adjuster</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Region</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Product</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Experience</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Certifications</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Performance</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Training Gap</th>'
+      +'</tr></thead>';
+
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:20px">'
+      +'<div style="padding:14px 20px;border-bottom:1px solid #e5e7eb;border-left:4px solid #059669;font-weight:700;font-size:14px;color:'+WA3+'"><i class="fas fa-check-circle" style="color:#059669;margin-right:8px"></i>Succession-Ready ('+ready.length+' Adjusters)</div>'
+      +'<table style="width:100%;border-collapse:collapse">'+header+'<tbody>'+readyRows+'</tbody></table></div>'
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:14px 20px;border-bottom:1px solid #e5e7eb;border-left:4px solid '+WA1+';font-weight:700;font-size:14px;color:'+WA3+'"><i class="fas fa-clock" style="color:'+WA1+';margin-right:8px"></i>Development Pipeline ('+notReady.length+' Adjusters)</div>'
+      +'<table style="width:100%;border-collapse:collapse">'+header+'<tbody>'+notReadyRows+'</tbody></table></div>';
+  }
+
+  /* ---- Build Page ---- */
+  function _p32buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var tabs=[['capacity','fa-briefcase','Capacity Model'],['burnout','fa-fire','Burnout Risk'],['training','fa-graduation-cap','Training Gaps'],['succession','fa-sitemap','Succession Planning']];
+    pc.innerHTML='<div style="font-family:\'Inter\',sans-serif;background:#fffbeb;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,'+WA3+' 0%,'+WA1+' 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">WFA</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">LTC Workforce & Staffing Analytics</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">Capacity Modeling &bull; Burnout Risk &bull; Training Gaps &bull; Succession Planning &bull; Caseload Distribution</p>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      +'<div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +(function(){var h='';tabs.forEach(function(t){var a=_p32activeTab===t[0];h+='<button onclick="window._p32switchTab(\''+t[0]+'\')" style="flex:1;padding:10px 12px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:'+(a?WA1:'transparent')+';color:'+(a?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';});return h;})()
+      +'</div>'
+      +'<div id="p32-tab-content">'+_p32renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  function _p32renderTab(){
+    if(_p32activeTab==='capacity') return _p32capacityTab();
+    if(_p32activeTab==='burnout') return _p32burnoutTab();
+    if(_p32activeTab==='training') return _p32trainingTab();
+    if(_p32activeTab==='succession') return _p32successionTab();
+    return '';
+  }
+
+  window._p32switchTab = function(tab){
+    _p32activeTab=tab;
+    var el=document.getElementById('p32-tab-content');
+    if(el) el.innerHTML=_p32renderTab();
+    var tabs=[['capacity'],['burnout'],['training'],['succession']];
+    var btns=document.querySelectorAll('#page-content button[onclick*="_p32switchTab"]');
+    btns.forEach(function(btn,i){
+      var active=tabs[i]&&tabs[i][0]===tab;
+      btn.style.background=active?WA1:'transparent';
+      btn.style.color=active?'#fff':'#6b7280';
+    });
+  };
+
+  var _p32origNav=window.navigateTo;
+  window.navigateTo=function(route,params){
+    if(route==='hal-workforce'){ _p32activeTab='capacity'; _p32buildPage(); return; }
+    if(typeof _p32origNav==='function') _p32origNav(route,params);
+  };
+
+  console.log('[HAL WFA] Phase 32 LTC Workforce & Staffing Analytics loaded — 7 adjusters, 6 training gaps, 4 tabs');
+})();
+var navigateTo=window.navigateTo;
+
+
+/* ============================================================
+   P33 — AI Governance & Model Risk Dashboard (hal-ai-gov)
+   Color: Indigo #4f46e5 / #6366f1 / #1e1b4b
+   Badge: AIG
+   ============================================================ */
+(function(){ 'use strict';
+  var AI1='#4f46e5', AI2='#6366f1', AI3='#1e1b4b';
+
+  /* ---- AI Model Inventory ---- */
+  var _p33models = [
+    { id:'MDL-001', name:'Claims Triage Classifier', version:'v3.2.1', type:'Classification',
+      purpose:'Prioritize incoming claims by complexity and urgency',
+      status:'Production', accuracy:94.2, driftScore:2.1, lastRetrain:'2026-04-12',
+      biasAudit:'Pass', explainability:'SHAP', naicCompliant:true, dataPoints:142000,
+      falsePositiveRate:3.8, falseNegativeRate:1.9, regulatoryRisk:'Low' },
+    { id:'MDL-002', name:'Fraud & SIU Detection Engine', version:'v5.1.0', type:'Anomaly Detection',
+      purpose:'Flag suspicious claims patterns for SIU referral',
+      status:'Production', accuracy:87.6, driftScore:8.4, lastRetrain:'2026-02-20',
+      biasAudit:'Conditional Pass', explainability:'LIME', naicCompliant:true, dataPoints:89000,
+      falsePositiveRate:9.2, falseNegativeRate:4.1, regulatoryRisk:'Medium' },
+    { id:'MDL-003', name:'EP Duration Predictor', version:'v2.0.3', type:'Regression',
+      purpose:'Estimate elimination period completion date from ADL/cognitive inputs',
+      status:'Production', accuracy:91.1, driftScore:4.7, lastRetrain:'2026-05-30',
+      biasAudit:'Pass', explainability:'SHAP', naicCompliant:true, dataPoints:34500,
+      falsePositiveRate:null, falseNegativeRate:null, regulatoryRisk:'Low' },
+    { id:'MDL-004', name:'Reserve Adequacy Model', version:'v4.3.0', type:'Actuarial ML',
+      purpose:'Predict IBNR reserve needs using claims development patterns',
+      status:'Validation', accuracy:89.3, driftScore:12.8, lastRetrain:'2026-01-15',
+      biasAudit:'Pending', explainability:'Partial (linear terms only)', naicCompliant:false, dataPoints:210000,
+      falsePositiveRate:null, falseNegativeRate:null, regulatoryRisk:'High' },
+    { id:'MDL-005', name:'Provider Quality Scorer', version:'v1.8.2', type:'Scoring',
+      purpose:'Composite quality score for network provider tiering decisions',
+      status:'Production', accuracy:88.9, driftScore:3.2, lastRetrain:'2026-06-01',
+      biasAudit:'Pass', explainability:'Feature Importance', naicCompliant:true, dataPoints:18000,
+      falsePositiveRate:5.1, falseNegativeRate:6.3, regulatoryRisk:'Low' },
+    { id:'MDL-006', name:'Morbidity Trend Forecaster', version:'v2.1.0', type:'Time Series',
+      purpose:'30/60/90-day claims volume forecasting for staffing optimization',
+      status:'Pilot', accuracy:82.4, driftScore:18.3, lastRetrain:'2026-03-08',
+      biasAudit:'Not Required', explainability:'Decomposition', naicCompliant:true, dataPoints:67000,
+      falsePositiveRate:null, falseNegativeRate:null, regulatoryRisk:'Medium' }
+  ];
+
+  var _p33biasAudits = [
+    { model:'Claims Triage Classifier', dimension:'Age (65-74 vs 75+)', score:0.97, threshold:0.95, status:'Pass', finding:'No statistically significant disparity detected' },
+    { model:'Claims Triage Classifier', dimension:'Geographic (Urban vs Rural)', score:0.93, threshold:0.90, status:'Pass', finding:'Minor rural delay (avg +1.2 days) within tolerance' },
+    { model:'Fraud & SIU Detection Engine', dimension:'Age (65-74 vs 85+)', score:0.91, threshold:0.95, status:'Flag', finding:'85+ cohort flagged 23% more frequently — monitoring required' },
+    { model:'Fraud & SIU Detection Engine', dimension:'State of Residence', score:0.89, threshold:0.90, status:'Flag', finding:'NY/CA over-indexed; out-of-state provider pattern may be legitimate' },
+    { model:'Provider Quality Scorer', dimension:'Provider Type (Home vs SNF)', score:0.96, threshold:0.90, status:'Pass', finding:'Methodological difference accounted for by care-setting adjustment' }
+  ];
+
+  var _p33naicItems = [
+    { id:'NAIC-ML-01', standard:'Model Risk Management Guidance (Dec 2023)', status:'Compliant', lastReview:'2026-03-15', nextReview:'2026-09-15', gap:'None' },
+    { id:'NAIC-ML-02', standard:'AI/ML Regulatory Framework — Use Cases', status:'Compliant', lastReview:'2026-04-01', nextReview:'2026-10-01', gap:'None' },
+    { id:'NAIC-ML-03', standard:'Algorithmic Bias Documentation Requirement', status:'Partial', lastReview:'2026-05-20', nextReview:'2026-08-20', gap:'MDL-004 bias audit not complete; 6 weeks to remediate' },
+    { id:'NAIC-ML-04', standard:'Adverse Action Explainability (Model Output)', status:'Compliant', lastReview:'2026-06-10', nextReview:'2026-12-10', gap:'None' },
+    { id:'NAIC-ML-05', standard:'Model Inventory Disclosure to State DOIs', status:'Pending', lastReview:'N/A', nextReview:'2026-07-31', gap:'Annual disclosure filing due July 31 — 20 days remaining' }
+  ];
+
+  var _p33activeTab='inventory';
+
+  /* ---- Helpers ---- */
+  function _p33statusBadge(s){
+    var c={Production:['#059669','#d1fae5'],Validation:['#d97706','#fef3c7'],Pilot:['#0891b2','#cffafe'],Retired:['#6b7280','#f3f4f6']};
+    var cv=c[s]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+s+'</span>';
+  }
+  function _p33riskBadge(r){
+    var c={Low:['#059669','#d1fae5'],Medium:['#d97706','#fef3c7'],High:['#dc2626','#fee2e2']};
+    var cv=c[r]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+r+'</span>';
+  }
+  function _p33compBadge(s){
+    var c={Compliant:['#059669','#d1fae5'],Partial:['#d97706','#fef3c7'],Pending:['#7c3aed','#ede9fe']};
+    var cv=c[s]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+s+'</span>';
+  }
+  function _p33bar(v,color){
+    return '<div style="background:#e5e7eb;border-radius:4px;height:8px;width:100%;overflow:hidden"><div style="width:'+v+'%;background:'+color+';height:8px;border-radius:4px"></div></div>';
+  }
+  function _p33driftColor(d){ return d>12?'#dc2626':d>6?'#d97706':'#059669'; }
+
+  /* ---- Tab: Model Inventory ---- */
+  function _p33inventoryTab(){
+    var prod=_p33models.filter(function(m){return m.status==='Production';}).length;
+    var highRisk=_p33models.filter(function(m){return m.regulatoryRisk==='High';}).length;
+    var avgAcc=(_p33models.reduce(function(a,m){return a+m.accuracy;},0)/_p33models.length).toFixed(1);
+    var driftAlert=_p33models.filter(function(m){return m.driftScore>10;}).length;
+
+    var kpis='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid '+AI1+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Models in Production</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+AI1+'">'+prod+'</div>'
+      +'<div style="font-size:12px;color:#374151">'+_p33models.length+' total in inventory</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #059669;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Avg Model Accuracy</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#059669">'+avgAcc+'%</div>'
+      +'<div style="font-size:12px;color:#374151">Portfolio weighted average</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #dc2626;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Drift Alerts</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#dc2626">'+driftAlert+'</div>'
+      +'<div style="font-size:12px;color:#374151">Models exceeding drift threshold</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #d97706;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">High Regulatory Risk</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#d97706">'+highRisk+'</div>'
+      +'<div style="font-size:12px;color:#374151">Requires immediate governance review</div></div>'
+      +'</div>';
+
+    var rows='';
+    _p33models.forEach(function(m){
+      var dc=_p33driftColor(m.driftScore);
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 12px;font-weight:600;color:'+AI1+'">'+m.id+'</td>'
+        +'<td style="padding:10px 12px"><div style="font-weight:600">'+m.name+'</div>'
+        +'<div style="font-size:11px;color:#6b7280">'+m.version+' &bull; '+m.type+'</div></td>'
+        +'<td style="padding:10px 12px">'+_p33statusBadge(m.status)+'</td>'
+        +'<td style="padding:10px 12px"><span style="font-weight:700;color:'+(m.accuracy>=90?'#059669':m.accuracy>=85?'#d97706':'#dc2626')+'">'+m.accuracy+'%</span></td>'
+        +'<td style="padding:10px 12px"><div style="min-width:100px">'
+        +_p33bar(Math.min(m.driftScore*5,100),dc)
+        +'<div style="font-size:10px;color:'+dc+';font-weight:700;margin-top:2px">'+m.driftScore+'% drift</div></div></td>'
+        +'<td style="padding:10px 12px"><span style="background:'+(m.biasAudit==='Pass'?'#d1fae5':m.biasAudit==='Conditional Pass'?'#fef3c7':'#fee2e2')+';color:'+(m.biasAudit==='Pass'?'#059669':m.biasAudit==='Conditional Pass'?'#d97706':'#dc2626')+';padding:2px 6px;border-radius:6px;font-size:10px;font-weight:600">'+m.biasAudit+'</span></td>'
+        +'<td style="padding:10px 12px"><span style="background:'+(m.naicCompliant?'#d1fae5':'#fee2e2')+';color:'+(m.naicCompliant?'#059669':'#dc2626')+';padding:2px 6px;border-radius:6px;font-size:10px;font-weight:600">'+(m.naicCompliant?'✓ NAIC':'✗ Gap')+'</span></td>'
+        +'<td style="padding:10px 12px">'+_p33riskBadge(m.regulatoryRisk)+'</td>'
+        +'</tr>';
+    });
+
+    return kpis
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+AI3+'"><i class="fas fa-robot" style="color:'+AI1+';margin-right:8px"></i>AI/ML Model Inventory — '+_p33models.length+' Models</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">ID</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Model Name</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Accuracy</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Performance Drift</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Bias Audit</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">NAIC Compliance</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Reg. Risk</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  /* ---- Tab: Bias Audits ---- */
+  function _p33biasTab(){
+    var rows='';
+    _p33biasAudits.forEach(function(b){
+      var passed=b.status==='Pass';
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:600;font-size:13px">'+b.model+'</td>'
+        +'<td style="padding:10px 14px;font-size:13px">'+b.dimension+'</td>'
+        +'<td style="padding:10px 14px"><span style="font-weight:700;color:'+(b.score>=b.threshold?'#059669':'#dc2626')+'">'+b.score.toFixed(2)+'</span>'
+        +' <span style="font-size:11px;color:#9ca3af">(threshold: '+b.threshold.toFixed(2)+')</span></td>'
+        +'<td style="padding:10px 14px"><span style="background:'+(passed?'#d1fae5':'#fef3c7')+';color:'+(passed?'#059669':'#d97706')+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+b.status+'</span></td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:#374151">'+b.finding+'</td>'
+        +'</tr>';
+    });
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:20px">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+AI3+'"><i class="fas fa-balance-scale" style="color:'+AI1+';margin-right:8px"></i>Algorithmic Bias Audit Results</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Model</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Bias Dimension</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Equity Score</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Audit Status</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Key Finding</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+      +'<div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:10px;padding:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:'+AI3+';margin-bottom:6px"><i class="fas fa-info-circle" style="margin-right:6px"></i>NAIC Bias Audit Methodology</div>'
+      +'<div style="font-size:13px;color:#374151">All models assessed using the Disparate Impact Ratio methodology per NAIC\'s AI/ML Model Risk Guidance. Equity scores below 0.90 require Conditional Use Plan with state DOI notification within 60 days.</div></div>';
+  }
+
+  /* ---- Tab: NAIC Compliance ---- */
+  function _p33naicTab(){
+    var rows='';
+    _p33naicItems.forEach(function(n){
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:600;color:'+AI1+'">'+n.id+'</td>'
+        +'<td style="padding:10px 14px;font-size:13px">'+n.standard+'</td>'
+        +'<td style="padding:10px 14px">'+_p33compBadge(n.status)+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:#6b7280">'+n.lastReview+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;font-weight:600;color:'+(n.nextReview<'2026-08-01'?'#dc2626':'#374151')+'">'+n.nextReview+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:'+(n.gap==='None'?'#059669':'#dc2626')+';font-weight:'+(n.gap==='None'?'400':'600')+'">'+n.gap+'</td>'
+        +'</tr>';
+    });
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+AI3+'"><i class="fas fa-landmark" style="color:'+AI1+';margin-right:8px"></i>NAIC Model Risk Compliance Tracker</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Standard ID</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">NAIC Standard</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Last Review</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Next Review</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Gap / Action Required</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---- Build Page ---- */
+  function _p33buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var tabs=[['inventory','fa-robot','Model Inventory'],['bias','fa-balance-scale','Bias Audits'],['naic','fa-landmark','NAIC Compliance']];
+    pc.innerHTML='<div style="font-family:\'Inter\',sans-serif;background:#eef2ff;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,'+AI3+' 0%,'+AI1+' 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">AIG</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">AI Governance & Model Risk Dashboard</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">Model Inventory &bull; Performance Drift &bull; Bias Audits &bull; Explainability &bull; NAIC Compliance</p>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      +'<div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +(function(){var h='';tabs.forEach(function(t){var a=_p33activeTab===t[0];h+='<button onclick="window._p33switchTab(\''+t[0]+'\')" style="flex:1;padding:10px 12px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:'+(a?AI1:'transparent')+';color:'+(a?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';});return h;})()
+      +'</div>'
+      +'<div id="p33-tab-content">'+_p33renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  function _p33renderTab(){
+    if(_p33activeTab==='inventory') return _p33inventoryTab();
+    if(_p33activeTab==='bias') return _p33biasTab();
+    if(_p33activeTab==='naic') return _p33naicTab();
+    return '';
+  }
+
+  window._p33switchTab = function(tab){
+    _p33activeTab=tab;
+    var el=document.getElementById('p33-tab-content');
+    if(el) el.innerHTML=_p33renderTab();
+    var tabs=[['inventory'],['bias'],['naic']];
+    var btns=document.querySelectorAll('#page-content button[onclick*="_p33switchTab"]');
+    btns.forEach(function(btn,i){
+      var active=tabs[i]&&tabs[i][0]===tab;
+      btn.style.background=active?AI1:'transparent';
+      btn.style.color=active?'#fff':'#6b7280';
+    });
+  };
+
+  var _p33origNav=window.navigateTo;
+  window.navigateTo=function(route,params){
+    if(route==='hal-ai-gov'){ _p33activeTab='inventory'; _p33buildPage(); return; }
+    if(typeof _p33origNav==='function') _p33origNav(route,params);
+  };
+
+  console.log('[HAL AIG] Phase 33 AI Governance & Model Risk Dashboard loaded — 6 models, 5 bias audits, 5 NAIC standards, 3 tabs');
+})();
+var navigateTo=window.navigateTo;
+
+
+/* ============================================================
+   QW1 — Litigation Risk Heatmap (hal-litigation)
+   Color: Rose/Red #dc2626 / #ef4444 / #7f1d1d
+   Badge: LIT
+   ============================================================ */
+(function(){ 'use strict';
+  var LT1='#dc2626', LT2='#ef4444', LT3='#7f1d1d';
+
+  /* ---- State Litigation Data ---- */
+  var _qw1states = [
+    { state:'CA', name:'California', litigationRisk:92, badFaithScore:88, reserveAdequacy:74,
+      openLitigation:14, pendingDemands:8, avgSettlement:284000, attorneyInvolvement:67,
+      keyRisk:'Brandt fee exposure on EP disputes; DWC coordination claims', trend:'Increasing' },
+    { state:'FL', name:'Florida', litigationRisk:78, badFaithScore:72, reserveAdequacy:81,
+      openLitigation:9, pendingDemands:5, avgSettlement:198000, attorneyInvolvement:54,
+      keyRisk:'Hurricane-related LTC displacement claims; SIU fraud exposure', trend:'Stable' },
+    { state:'NY', name:'New York', litigationRisk:85, badFaithScore:79, reserveAdequacy:77,
+      openLitigation:11, pendingDemands:6, avgSettlement:312000, attorneyInvolvement:71,
+      keyRisk:'Superintendent circular demands; 11-month EP disputes; DNH mandates', trend:'Increasing' },
+    { state:'TX', name:'Texas', litigationRisk:58, badFaithScore:51, reserveAdequacy:87,
+      openLitigation:5, pendingDemands:3, avgSettlement:143000, attorneyInvolvement:38,
+      keyRisk:'Provider rate disputes; out-of-network balance billing', trend:'Stable' },
+    { state:'IL', name:'Illinois', litigationRisk:65, badFaithScore:61, reserveAdequacy:83,
+      openLitigation:6, pendingDemands:4, avgSettlement:167000, attorneyInvolvement:43,
+      keyRisk:'Long-term disability crossover claims; EP documentation', trend:'Decreasing' },
+    { state:'AZ', name:'Arizona', litigationRisk:52, badFaithScore:48, reserveAdequacy:89,
+      openLitigation:3, pendingDemands:2, avgSettlement:121000, attorneyInvolvement:31,
+      keyRisk:'SNF admission disputes; memory care qualification', trend:'Stable' },
+    { state:'PA', name:'Pennsylvania', litigationRisk:71, badFaithScore:66, reserveAdequacy:79,
+      openLitigation:7, pendingDemands:4, avgSettlement:189000, attorneyInvolvement:49,
+      keyRisk:'Home modification benefit disputes; EP tolling', trend:'Increasing' },
+    { state:'OH', name:'Ohio', litigationRisk:44, badFaithScore:39, reserveAdequacy:91,
+      openLitigation:2, pendingDemands:1, avgSettlement:98000, attorneyInvolvement:24,
+      keyRisk:'Minimal active litigation; rate increase disputes only', trend:'Stable' },
+    { state:'WA', name:'Washington', litigationRisk:63, badFaithScore:58, reserveAdequacy:84,
+      openLitigation:5, pendingDemands:3, avgSettlement:154000, attorneyInvolvement:41,
+      keyRisk:'WA Cares Fund coordination; parallel claim disputes', trend:'Increasing' },
+    { state:'NJ', name:'New Jersey', litigationRisk:76, badFaithScore:71, reserveAdequacy:78,
+      openLitigation:8, pendingDemands:5, avgSettlement:221000, attorneyInvolvement:58,
+      keyRisk:'DOBI enforcement; premium dispute class actions pending', trend:'Stable' }
+  ];
+
+  var _qw1triggers = [
+    { trigger:'Attorney Representation at EP Start', riskMultiplier:3.4, frequency:28, mitigation:'Proactive EP communication package at Day 1' },
+    { trigger:'Provider Billing Dispute > 90 Days', riskMultiplier:2.8, frequency:19, mitigation:'Automated billing escalation at 30/60/90-day marks' },
+    { trigger:'Cognitive Assessment Score Dispute', riskMultiplier:2.2, frequency:14, mitigation:'Second-opinion MMSE protocol with independent neurologist' },
+    { trigger:'EP Duration Extension Request Denied', riskMultiplier:4.1, frequency:9, mitigation:'Internal appeal process with 15-day SLA; supervisor review' },
+    { trigger:'Home Modification Benefit Denial', riskMultiplier:1.9, frequency:11, mitigation:'Pre-authorization checklist; OT recommendation letter' },
+    { trigger:'Caregiver Substitution Rejected', riskMultiplier:2.5, frequency:7, mitigation:'Provider substitution policy; 48-hr expedited review' }
+  ];
+
+  var _qw1activeTab='heatmap';
+
+  /* ---- Helpers ---- */
+  function _qw1riskColor(r){ return r>=80?LT1:r>=65?'#d97706':r>=50?'#d97706':'#059669'; }
+  function _qw1riskLabel(r){ return r>=80?'Critical':r>=65?'High':r>=50?'Medium':'Low'; }
+  function _qw1bar(v,color,height){
+    height=height||8;
+    return '<div style="background:#e5e7eb;border-radius:4px;height:'+height+'px;width:100%;overflow:hidden"><div style="width:'+v+'%;background:'+color+';height:'+height+'px;border-radius:4px"></div></div>';
+  }
+  function _qw1trendIcon(t){
+    if(t==='Increasing') return '<i class="fas fa-arrow-trend-up" style="color:#dc2626"></i>';
+    if(t==='Decreasing') return '<i class="fas fa-arrow-trend-down" style="color:#059669"></i>';
+    return '<i class="fas fa-minus" style="color:#6b7280"></i>';
+  }
+
+  /* ---- Tab: Heatmap ---- */
+  function _qw1heatmapTab(){
+    var totalOpen=_qw1states.reduce(function(a,s){return a+s.openLitigation;},0);
+    var totalSettl=_qw1states.reduce(function(a,s){return a+s.openLitigation*s.avgSettlement;},0);
+    var avgRisk=Math.round(_qw1states.reduce(function(a,s){return a+s.litigationRisk;},0)/_qw1states.length);
+    var critStates=_qw1states.filter(function(s){return s.litigationRisk>=80;}).length;
+
+    var kpis='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid '+LT1+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Open Litigation Files</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+LT1+'">'+totalOpen+'</div>'
+      +'<div style="font-size:12px;color:#374151">Across 10 States</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #d97706;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Avg Portfolio Risk</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#d97706">'+avgRisk+'</div>'
+      +'<div style="font-size:12px;color:#374151">Out of 100 (weighted)</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #7c3aed;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Est. Reserve Exposure</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#7c3aed">$'+Math.round(totalSettl/1000000)+'M</div>'
+      +'<div style="font-size:12px;color:#374151">Potential settlement liability</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid '+LT1+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Critical Risk States</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+LT1+'">'+critStates+'</div>'
+      +'<div style="font-size:12px;color:#374151">Risk Score ≥ 80</div></div>'
+      +'</div>';
+
+    var sorted=_qw1states.slice().sort(function(a,b){return b.litigationRisk-a.litigationRisk;});
+    var rows='';
+    sorted.forEach(function(s){
+      var rc=_qw1riskColor(s.litigationRisk);
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 12px"><div style="width:40px;height:40px;border-radius:8px;background:'+rc+';color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center">'+s.state+'</div></td>'
+        +'<td style="padding:10px 12px;font-weight:600">'+s.name+'</td>'
+        +'<td style="padding:10px 12px"><div style="min-width:140px">'
+        +_qw1bar(s.litigationRisk,rc)
+        +'<div style="font-size:10px;margin-top:2px"><span style="font-weight:700;color:'+rc+'">'+s.litigationRisk+'</span> — '+_qw1riskLabel(s.litigationRisk)+'</div></div></td>'
+        +'<td style="padding:10px 12px;font-weight:700;color:'+LT1+'">'+s.openLitigation+'</td>'
+        +'<td style="padding:10px 12px;font-size:13px">$'+s.avgSettlement.toLocaleString()+'</td>'
+        +'<td style="padding:10px 12px;font-size:13px;font-weight:600">'+s.attorneyInvolvement+'%</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#374151;max-width:200px">'+s.keyRisk+'</td>'
+        +'<td style="padding:10px 12px">'+_qw1trendIcon(s.trend)+'</td>'
+        +'</tr>';
+    });
+
+    return kpis
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+LT3+'"><i class="fas fa-map-marked-alt" style="color:'+LT1+';margin-right:8px"></i>State Litigation Risk Heatmap — Ranked by Risk Score</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">State</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Name</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Litigation Risk Score</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Open Files</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Avg Settlement</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Attorney Invol.</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Key Risk Factor</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Trend</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  /* ---- Tab: Trigger Analysis ---- */
+  function _qw1triggerTab(){
+    var rows='';
+    _qw1triggers.slice().sort(function(a,b){return b.riskMultiplier-a.riskMultiplier;}).forEach(function(t){
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:12px 14px;font-weight:600;font-size:13px">'+t.trigger+'</td>'
+        +'<td style="padding:12px 14px"><span style="font-size:18px;font-weight:800;color:'+(t.riskMultiplier>=3.5?LT1:t.riskMultiplier>=2.5?'#d97706':'#059669')+'">'+t.riskMultiplier+'x</span></td>'
+        +'<td style="padding:12px 14px;font-size:13px;font-weight:600">'+t.frequency+' claims</td>'
+        +'<td style="padding:12px 14px;font-size:12px;color:#374151">'+t.mitigation+'</td>'
+        +'</tr>';
+    });
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+LT3+'"><i class="fas fa-bolt" style="color:'+LT1+';margin-right:8px"></i>Attorney Involvement Trigger Analysis — 6 High-Risk Patterns</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Trigger Event</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Litigation Risk Multiplier</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Frequency (YTD)</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Mitigation Strategy</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---- Build Page ---- */
+  function _qw1buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var tabs=[['heatmap','fa-map-marked-alt','Risk Heatmap'],['triggers','fa-bolt','Trigger Analysis']];
+    pc.innerHTML='<div style="font-family:\'Inter\',sans-serif;background:#fff5f5;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,'+LT3+' 0%,'+LT1+' 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">LIT</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">Litigation Risk Heatmap</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">State Bad Faith Probability &bull; Reserve Adequacy Correlation &bull; Attorney Involvement Triggers &bull; Settlement Exposure</p>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      +'<div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +(function(){var h='';tabs.forEach(function(t){var a=_qw1activeTab===t[0];h+='<button onclick="window._qw1switchTab(\''+t[0]+'\')" style="flex:1;padding:10px 12px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:'+(a?LT1:'transparent')+';color:'+(a?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';});return h;})()
+      +'</div>'
+      +'<div id="qw1-tab-content">'+_qw1renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  function _qw1renderTab(){
+    if(_qw1activeTab==='heatmap') return _qw1heatmapTab();
+    if(_qw1activeTab==='triggers') return _qw1triggerTab();
+    return '';
+  }
+
+  window._qw1switchTab = function(tab){
+    _qw1activeTab=tab;
+    var el=document.getElementById('qw1-tab-content');
+    if(el) el.innerHTML=_qw1renderTab();
+    var tabs=[['heatmap'],['triggers']];
+    var btns=document.querySelectorAll('#page-content button[onclick*="_qw1switchTab"]');
+    btns.forEach(function(btn,i){
+      var active=tabs[i]&&tabs[i][0]===tab;
+      btn.style.background=active?LT1:'transparent';
+      btn.style.color=active?'#fff':'#6b7280';
+    });
+  };
+
+  var _qw1origNav=window.navigateTo;
+  window.navigateTo=function(route,params){
+    if(route==='hal-litigation'){ _qw1activeTab='heatmap'; _qw1buildPage(); return; }
+    if(typeof _qw1origNav==='function') _qw1origNav(route,params);
+  };
+
+  console.log('[HAL LIT] QW1 Litigation Risk Heatmap loaded — 10 states, 6 triggers, 2 tabs');
+})();
+var navigateTo=window.navigateTo;
+
+
+/* ============================================================
+   QW2 — Interoperability Hub (hal-interop)
+   Color: Slate/Purple #7c3aed / #8b5cf6 / #2e1065
+   Badge: IOP
+   ============================================================ */
+(function(){ 'use strict';
+  var IO1='#7c3aed', IO2='#8b5cf6', IO3='#2e1065';
+
+  /* ---- FHIR Integration Status ---- */
+  var _qw2fhirEndpoints = [
+    { id:'FHIR-001', name:'Sunrise Home Care Agency', resource:'Patient / Condition / CarePlan',
+      version:'R4', status:'Active', lastSync:'2026-07-10 06:12', syncFrequency:'Every 4h',
+      recordsExchanged:4820, errorRate:0.3, latencyMs:142, authMethod:'SMART on FHIR' },
+    { id:'FHIR-002', name:'MedEx Skilled Nursing', resource:'Patient / Encounter / Observation',
+      version:'R4', status:'Active', lastSync:'2026-07-10 04:30', syncFrequency:'Every 8h',
+      recordsExchanged:12450, errorRate:1.1, latencyMs:228, authMethod:'SMART on FHIR' },
+    { id:'FHIR-003', name:'Pacific Care Solutions', resource:'Patient / CarePlan / DiagnosticReport',
+      version:'R4', status:'Degraded', lastSync:'2026-07-09 14:00', syncFrequency:'Every 6h',
+      recordsExchanged:3210, errorRate:8.4, latencyMs:892, authMethod:'Basic (Upgrade Pending)' },
+    { id:'FHIR-004', name:'State DOI — Florida', resource:'CoverageEligibilityRequest / Claim',
+      version:'R4', status:'Active', lastSync:'2026-07-10 00:00', syncFrequency:'Daily',
+      recordsExchanged:1840, errorRate:0.1, latencyMs:61, authMethod:'OAuth 2.0' },
+    { id:'FHIR-005', name:'CMS Blue Button 2.0', resource:'Patient / ExplanationOfBenefit',
+      version:'R4', status:'Active', lastSync:'2026-07-10 01:00', syncFrequency:'Daily',
+      recordsExchanged:9120, errorRate:0.4, latencyMs:204, authMethod:'SMART on FHIR' },
+    { id:'FHIR-006', name:'BlueSky Memory Care', resource:'Patient / Condition / MedicationRequest',
+      version:'STU3', status:'Pending Migration', lastSync:'2026-07-08 12:00', syncFrequency:'Every 12h',
+      recordsExchanged:2880, errorRate:3.2, latencyMs:334, authMethod:'API Key (Legacy)' }
+  ];
+
+  /* ---- EDI Transaction Monitor ---- */
+  var _qw2ediTxns = [
+    { type:'837P', description:'Professional Claim Submission', volumeDaily:284, successRate:98.7, rejectionRate:1.3, avgProcessMs:812, slaTarget:95, status:'Green' },
+    { type:'837I', description:'Institutional Claim Submission', volumeDaily:142, successRate:97.2, rejectionRate:2.8, avgProcessMs:1240, slaTarget:95, status:'Green' },
+    { type:'835', description:'Electronic Remittance Advice', volumeDaily:218, successRate:99.1, rejectionRate:0.9, avgProcessMs:445, slaTarget:98, status:'Green' },
+    { type:'270/271', description:'Eligibility Inquiry / Response', volumeDaily:892, successRate:94.3, rejectionRate:5.7, avgProcessMs:189, slaTarget:98, status:'Yellow' },
+    { type:'276/277', description:'Claim Status Inquiry / Response', volumeDaily:341, successRate:91.8, rejectionRate:8.2, avgProcessMs:623, slaTarget:95, status:'Red' },
+    { type:'278', description:'Prior Authorization Request', volumeDaily:67, successRate:88.4, rejectionRate:11.6, avgProcessMs:2100, slaTarget:90, status:'Red' }
+  ];
+
+  /* ---- CareExchange Connectivity ---- */
+  var _qw2careExchange = [
+    { partner:'Optum / UnitedHealth', connectType:'Direct API', status:'Connected', dataShared:'Claims COB, Member Eligibility', sla:'99.5% uptime', incidents30d:0 },
+    { partner:'Change Healthcare', connectType:'SFTP + API', status:'Connected', dataShared:'EDI 837/835, Remittance', sla:'99.2% uptime', incidents30d:1 },
+    { partner:'Availity', connectType:'EDI Gateway', status:'Connected', dataShared:'270/271 Eligibility', sla:'98.8% uptime', incidents30d:2 },
+    { partner:'CommonWell Health Alliance', connectType:'FHIR R4', status:'Pilot', dataShared:'Patient Demographics, ADL Records', sla:'97.5% uptime', incidents30d:4 },
+    { partner:'eHealth Exchange (Carequality)', connectType:'FHIR R4', status:'In Progress', dataShared:'Care Coordination Documents', sla:'Target 99%', incidents30d:0 },
+    { partner:'Social Security Administration', connectType:'Direct SSA Gateway', status:'Connected', dataShared:'Disability Status, DOD Verification', sla:'99.9% uptime', incidents30d:0 }
+  ];
+
+  var _qw2activeTab='fhir';
+
+  /* ---- Helpers ---- */
+  function _qw2statusBadge(s){
+    var c={Active:['#059669','#d1fae5'],Degraded:['#d97706','#fef3c7'],'Pending Migration':['#7c3aed','#ede9fe'],Connected:['#059669','#d1fae5'],Pilot:['#0891b2','#cffafe'],'In Progress':['#d97706','#fef3c7']};
+    var cv=c[s]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+s+'</span>';
+  }
+  function _qw2trafficLight(s){
+    var c={Green:'#059669',Yellow:'#d97706',Red:'#dc2626'};
+    return '<div style="width:14px;height:14px;border-radius:50%;background:'+(c[s]||'#6b7280')+';display:inline-block;margin-right:6px"></div><span style="font-weight:600;color:'+(c[s]||'#6b7280')+'">'+s+'</span>';
+  }
+  function _qw2bar(v,color,height){
+    height=height||8;
+    return '<div style="background:#e5e7eb;border-radius:4px;height:'+height+'px;width:100%;overflow:hidden"><div style="width:'+v+'%;background:'+color+';height:'+height+'px;border-radius:4px"></div></div>';
+  }
+
+  /* ---- Tab: FHIR Status ---- */
+  function _qw2fhirTab(){
+    var active=_qw2fhirEndpoints.filter(function(e){return e.status==='Active';}).length;
+    var totalRec=_qw2fhirEndpoints.reduce(function(a,e){return a+e.recordsExchanged;},0);
+    var avgLatency=Math.round(_qw2fhirEndpoints.reduce(function(a,e){return a+e.latencyMs;},0)/_qw2fhirEndpoints.length);
+
+    var kpis='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid '+IO1+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">FHIR Endpoints</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+IO1+'">'+_qw2fhirEndpoints.length+'</div>'
+      +'<div style="font-size:12px;color:#374151">'+active+' Active</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #059669;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Records Exchanged</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#059669">'+totalRec.toLocaleString()+'</div>'
+      +'<div style="font-size:12px;color:#374151">FHIR Resources YTD</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #d97706;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Avg Latency</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#d97706">'+avgLatency+'ms</div>'
+      +'<div style="font-size:12px;color:#374151">Across all endpoints</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #0891b2;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">FHIR Version</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#0891b2">R4</div>'
+      +'<div style="font-size:12px;color:#374151">Primary standard; 1 STU3 legacy</div></div>'
+      +'</div>';
+
+    var rows='';
+    _qw2fhirEndpoints.forEach(function(e){
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 12px;font-weight:600;color:'+IO1+'">'+e.id+'</td>'
+        +'<td style="padding:10px 12px;font-weight:600">'+e.name+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#6b7280">'+e.resource+'</td>'
+        +'<td style="padding:10px 12px">'+e.version+'</td>'
+        +'<td style="padding:10px 12px">'+_qw2statusBadge(e.status)+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;color:#6b7280">'+e.lastSync+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:600;color:'+(e.errorRate>5?'#dc2626':e.errorRate>2?'#d97706':'#059669')+'">'+e.errorRate+'%</td>'
+        +'<td style="padding:10px 12px;font-size:12px">'+e.latencyMs+'ms</td>'
+        +'<td style="padding:10px 12px;font-size:11px">'+e.authMethod+'</td>'
+        +'</tr>';
+    });
+
+    return kpis
+      +'<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+IO3+'"><i class="fas fa-exchange-alt" style="color:'+IO1+';margin-right:8px"></i>HL7 FHIR Integration Status — '+_qw2fhirEndpoints.length+' Endpoints</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">ID</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Partner / System</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">FHIR Resources</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Version</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Last Sync</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Error Rate</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Latency</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Auth Method</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
+
+  /* ---- Tab: EDI Monitor ---- */
+  function _qw2ediTab(){
+    var rows='';
+    _qw2ediTxns.forEach(function(t){
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:12px 14px;font-weight:800;font-size:14px;color:'+IO1+'">'+t.type+'</td>'
+        +'<td style="padding:12px 14px;font-size:13px">'+t.description+'</td>'
+        +'<td style="padding:12px 14px;font-size:13px;font-weight:600">'+t.volumeDaily+'/day</td>'
+        +'<td style="padding:12px 14px"><div style="min-width:120px">'
+        +_qw2bar(t.successRate,t.status==='Green'?'#059669':t.status==='Yellow'?'#d97706':'#dc2626')
+        +'<div style="font-size:10px;font-weight:700;color:'+(t.status==='Green'?'#059669':t.status==='Yellow'?'#d97706':'#dc2626')+';margin-top:2px">'+t.successRate+'% success</div></div></td>'
+        +'<td style="padding:12px 14px;font-size:12px;color:#dc2626;font-weight:600">'+t.rejectionRate+'%</td>'
+        +'<td style="padding:12px 14px;font-size:12px">'+t.avgProcessMs+'ms</td>'
+        +'<td style="padding:12px 14px;font-size:12px">SLA: '+t.slaTarget+'%</td>'
+        +'<td style="padding:12px 14px">'+_qw2trafficLight(t.status)+'</td>'
+        +'</tr>';
+    });
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:20px">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+IO3+'"><i class="fas fa-network-wired" style="color:'+IO1+';margin-right:8px"></i>HIPAA EDI Transaction Monitor — X12 837/835 + Supporting Transactions</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">TX Type</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Description</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Daily Volume</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Success Rate</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Rejection Rate</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Avg Process Time</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">SLA Target</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+      +'<div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:10px;padding:14px">'
+      +'<div style="font-size:13px;font-weight:700;color:'+IO3+';margin-bottom:4px"><i class="fas fa-exclamation-triangle" style="margin-right:6px;color:#dc2626"></i>SLA Alerts: 276/277 Claim Status (91.8%) and 278 PA (88.4%) below SLA threshold</div>'
+      +'<div style="font-size:12px;color:#374151">Remediating with clearinghouse partner — target restoration by 2026-07-15</div></div>';
+  }
+
+  /* ---- Tab: CareExchange ---- */
+  function _qw2careTab(){
+    var rows='';
+    _qw2careExchange.forEach(function(c){
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:600">'+c.partner+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+c.connectType+'</td>'
+        +'<td style="padding:10px 14px">'+_qw2statusBadge(c.status)+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:#374151">'+c.dataShared+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+c.sla+'</td>'
+        +'<td style="padding:10px 14px;text-align:center"><span style="background:'+(c.incidents30d>3?'#fee2e2':c.incidents30d>0?'#fef3c7':'#d1fae5')+';color:'+(c.incidents30d>3?'#dc2626':c.incidents30d>0?'#d97706':'#059669')+';padding:2px 8px;border-radius:9px;font-size:12px;font-weight:600">'+c.incidents30d+'</span></td>'
+        +'</tr>';
+    });
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+IO3+'"><i class="fas fa-plug" style="color:'+IO1+';margin-right:8px"></i>CareExchange Connectivity Metrics — '+_qw2careExchange.length+' Partners</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Partner</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Connection Type</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Data Shared</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">SLA</th>'
+      +'<th style="padding:10px 14px;text-align:center;font-size:11px;color:#6b7280;font-weight:600">Incidents (30d)</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---- Build Page ---- */
+  function _qw2buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var tabs=[['fhir','fa-exchange-alt','FHIR Integration'],['edi','fa-network-wired','EDI Monitor'],['care','fa-plug','CareExchange']];
+    pc.innerHTML='<div style="font-family:\'Inter\',sans-serif;background:#f5f3ff;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,'+IO3+' 0%,'+IO1+' 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">IOP</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">Interoperability Hub</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">HL7 FHIR Integration &bull; HIPAA EDI 837/835 &bull; CareExchange Connectivity &bull; X12 Transaction Monitoring</p>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      +'<div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +(function(){var h='';tabs.forEach(function(t){var a=_qw2activeTab===t[0];h+='<button onclick="window._qw2switchTab(\''+t[0]+'\')" style="flex:1;padding:10px 12px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:'+(a?IO1:'transparent')+';color:'+(a?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';});return h;})()
+      +'</div>'
+      +'<div id="qw2-tab-content">'+_qw2renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  function _qw2renderTab(){
+    if(_qw2activeTab==='fhir') return _qw2fhirTab();
+    if(_qw2activeTab==='edi') return _qw2ediTab();
+    if(_qw2activeTab==='care') return _qw2careTab();
+    return '';
+  }
+
+  window._qw2switchTab = function(tab){
+    _qw2activeTab=tab;
+    var el=document.getElementById('qw2-tab-content');
+    if(el) el.innerHTML=_qw2renderTab();
+    var tabs=[['fhir'],['edi'],['care']];
+    var btns=document.querySelectorAll('#page-content button[onclick*="_qw2switchTab"]');
+    btns.forEach(function(btn,i){
+      var active=tabs[i]&&tabs[i][0]===tab;
+      btn.style.background=active?IO1:'transparent';
+      btn.style.color=active?'#fff':'#6b7280';
+    });
+  };
+
+  var _qw2origNav=window.navigateTo;
+  window.navigateTo=function(route,params){
+    if(route==='hal-interop'){ _qw2activeTab='fhir'; _qw2buildPage(); return; }
+    if(typeof _qw2origNav==='function') _qw2origNav(route,params);
+  };
+
+  console.log('[HAL IOP] QW2 Interoperability Hub loaded — 6 FHIR endpoints, 6 EDI types, 6 CareExchange partners, 3 tabs');
+})();
+var navigateTo=window.navigateTo;
+
+
+/* ============================================================
+   QW3 — Hybrid Product Comparison Engine (hal-hybrid-compare)
+   Color: Teal-Green #0f766e / #14b8a6 / #134e4a
+   Badge: HCE
+   ============================================================ */
+(function(){ 'use strict';
+  var HC1='#0f766e', HC2='#14b8a6', HC3='#134e4a';
+
+  /* ---- Product Definitions ---- */
+  var _qw3products = {
+    ltcStandalone: {
+      name:'LTC Standalone Premier', shortName:'LTC Standalone',
+      color:'#0891b2', bgColor:'#cffafe',
+      monthlyBenefit:6200, ltdBenefit:446400, eliminationPeriod:90,
+      premiumMonthly:418, inflationProtection:'3% Compound', waivableEP:true,
+      coveredServices:['Home Health','Assisted Living','SNF','Memory Care','Adult Day','Respite'],
+      excludedServices:['Purely Custodial (no ADL trigger)'],
+      taxAdvantaged:true, returnOfPremium:false, deathBenefit:false,
+      portability:true, spousalDiscount:15, issueAgeRange:'40-75',
+      claimsApprovalAvg:28, underwritingClass:'Standard LTC',
+      bestFor:'Clients seeking maximum LTC coverage with lowest premium per dollar of benefit',
+      keyRisk:'Premium increase exposure; benefit exhaustion risk at extreme longevity'
+    },
+    halPlatform: {
+      name:'HAL Platinum Plus', shortName:'HAL Platform',
+      color:'#7c3aed', bgColor:'#ede9fe',
+      monthlyBenefit:8500, ltdBenefit:612000, eliminationPeriod:60,
+      premiumMonthly:712, inflationProtection:'5% Compound', waivableEP:true,
+      coveredServices:['Home Health','Assisted Living','SNF','Memory Care','Adult Day','Respite','Hospice','Caregiver Training'],
+      excludedServices:[],
+      taxAdvantaged:true, returnOfPremium:true, deathBenefit:true,
+      portability:true, spousalDiscount:20, issueAgeRange:'35-75',
+      claimsApprovalAvg:21, underwritingClass:'HAL Simplified Issue',
+      bestFor:'Clients wanting LTC + life/annuity integration with guaranteed death benefit',
+      keyRisk:'Higher premium; annuity component performance risk'
+    },
+    halHybrid: {
+      name:'LTC/HAL Hybrid Select', shortName:'LTC/HAL Hybrid',
+      color:'#059669', bgColor:'#d1fae5',
+      monthlyBenefit:7100, ltdBenefit:511200, eliminationPeriod:75,
+      premiumMonthly:581, inflationProtection:'4% Compound', waivableEP:true,
+      coveredServices:['Home Health','Assisted Living','SNF','Memory Care','Adult Day','Respite','Hospice'],
+      excludedServices:['Caregiver Training (optional rider)'],
+      taxAdvantaged:true, returnOfPremium:true, deathBenefit:true,
+      portability:true, spousalDiscount:18, issueAgeRange:'40-75',
+      claimsApprovalAvg:24, underwritingClass:'Hybrid Underwriting',
+      bestFor:'Clients wanting balanced LTC coverage plus asset protection if benefits unused',
+      keyRisk:'Linked-benefit complexity; separate EP tracking for LTC vs HAL triggers'
+    }
+  };
+
+  /* ---- Scenario Modeling ---- */
+  var _qw3scenarios = [
+    { id:'S1', label:'3-Year Home Care + 2-Year ALF', duration:5, servicesMonths:{homeHealth:36,assistedLiving:24} },
+    { id:'S2', label:'5-Year SNF Admission', duration:5, servicesMonths:{snf:60} },
+    { id:'S3', label:'8-Year Progressive Dementia (Full Benefits)', duration:8, servicesMonths:{homeHealth:24,memoryCare:72} },
+    { id:'S4', label:'No Claim (Policy In Force)', duration:0, servicesMonths:{} }
+  ];
+
+  var _qw3activeScenario='S1';
+
+  /* ---- Helpers ---- */
+  function _qw3fmt(n){return '$'+n.toLocaleString();}
+  function _qw3bar(v,color,height){
+    height=height||8;
+    return '<div style="background:#e5e7eb;border-radius:4px;height:'+height+'px;width:100%;overflow:hidden"><div style="width:'+Math.min(v,100)+'%;background:'+color+';height:'+height+'px;border-radius:4px"></div></div>';
+  }
+  function _qw3check(v,color){ return '<i class="fas fa-'+(v?'check-circle':'times-circle')+'" style="color:'+(v?'#059669':'#dc2626')+';font-size:16px"></i>'; }
+
+  /* ---- Comparison Table ---- */
+  function _qw3compareTab(){
+    var prods=[_qw3products.ltcStandalone, _qw3products.halPlatform, _qw3products.halHybrid];
+    var colW='33.33%';
+
+    function row(label, fn){
+      return '<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 16px;font-size:12px;font-weight:600;color:#374151;width:22%;background:#fafafa">'+label+'</td>'
+        +prods.map(function(p){return '<td style="padding:10px 16px;font-size:13px;text-align:center">'+fn(p)+'</td>';}).join('')
+        +'</tr>';
+    }
+
+    var headers='<tr style="background:#f9fafb">'
+      +'<th style="padding:14px 16px;text-align:left;font-size:11px;color:#6b7280;font-weight:600;width:22%">Feature</th>'
+      +prods.map(function(p){return '<th style="padding:14px 16px;text-align:center;width:'+colW+'">'
+        +'<div style="background:'+p.bgColor+';color:'+p.color+';border-radius:8px;padding:10px;display:inline-block;min-width:140px">'
+        +'<div style="font-weight:800;font-size:15px">'+p.shortName+'</div>'
+        +'<div style="font-size:11px;opacity:.8">'+p.name+'</div>'
+        +'</div></th>';}).join('')
+      +'</tr>';
+
+    var tableBody=''
+      +row('Monthly Benefit',function(p){return '<span style="font-weight:800;color:'+p.color+';font-size:15px">'+_qw3fmt(p.monthlyBenefit)+'</span>';})
+      +row('Lifetime Maximum',function(p){return '<span style="font-weight:700">'+_qw3fmt(p.ltdBenefit)+'</span>';})
+      +row('Elimination Period',function(p){return p.eliminationPeriod+' days';})
+      +row('Monthly Premium',function(p){return '<span style="font-weight:700;color:#374151">'+_qw3fmt(p.premiumMonthly)+'/mo</span>';})
+      +row('Inflation Protection',function(p){return p.inflationProtection;})
+      +row('Return of Premium',function(p){return _qw3check(p.returnOfPremium);})
+      +row('Death Benefit',function(p){return _qw3check(p.deathBenefit);})
+      +row('Tax Advantaged',function(p){return _qw3check(p.taxAdvantaged);})
+      +row('Spousal Discount',function(p){return p.spousalDiscount+'%';})
+      +row('Issue Age Range',function(p){return p.issueAgeRange;})
+      +row('Avg Claims Approval',function(p){return p.claimsApprovalAvg+' days';})
+      +row('Covered Services',function(p){return p.coveredServices.length+' services';})
+      +row('Best For',function(p){return '<span style="font-size:11px;color:#374151">'+p.bestFor+'</span>';})
+      +row('Key Risk',function(p){return '<span style="font-size:11px;color:#dc2626">'+p.keyRisk+'</span>';});
+
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+HC3+'"><i class="fas fa-columns" style="color:'+HC1+';margin-right:8px"></i>Product Feature Comparison — Side-by-Side</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'
+      +'<thead>'+headers+'</thead><tbody>'+tableBody+'</tbody></table></div></div>';
+  }
+
+  /* ---- Scenario Modeling ---- */
+  function _qw3scenarioTab(){
+    var prods=[_qw3products.ltcStandalone, _qw3products.halPlatform, _qw3products.halHybrid];
+    var sc=_qw3scenarios.filter(function(s){return s.id===_qw3activeScenario;})[0]||_qw3scenarios[0];
+
+    var scenBtns='<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">';
+    _qw3scenarios.forEach(function(s){
+      var active=s.id===_qw3activeScenario;
+      scenBtns+='<button onclick="window._qw3setScenario(\''+s.id+'\')" style="padding:8px 14px;border:2px solid '+(active?HC1:'#e5e7eb')+';border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;background:'+(active?HC1:'#fff')+';color:'+(active?'#fff':'#374151')+'">'+s.label+'</button>';
+    });
+    scenBtns+='</div>';
+
+    var cards='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">';
+    prods.forEach(function(p){
+      var totalBenefitUsed = sc.duration * p.monthlyBenefit;
+      var totalPremiumPaid = sc.duration * 12 * p.premiumMonthly;
+      var netValue = totalBenefitUsed - totalPremiumPaid;
+      var benefitExhausted = totalBenefitUsed >= p.ltdBenefit;
+      var pct=Math.min(Math.round((totalBenefitUsed/p.ltdBenefit)*100),100);
+
+      cards+='<div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:4px solid '+p.color+'">'
+        +'<div style="font-weight:800;font-size:15px;color:'+p.color+';margin-bottom:4px">'+p.shortName+'</div>'
+        +'<div style="font-size:11px;color:#6b7280;margin-bottom:14px">Scenario: '+sc.label+'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'
+        +'<div style="background:#f9fafb;border-radius:6px;padding:10px;text-align:center">'
+        +'<div style="font-size:11px;color:#6b7280">Benefits Received</div>'
+        +'<div style="font-size:16px;font-weight:800;color:'+p.color+'">'+_qw3fmt(totalBenefitUsed)+'</div></div>'
+        +'<div style="background:#f9fafb;border-radius:6px;padding:10px;text-align:center">'
+        +'<div style="font-size:11px;color:#6b7280">Premiums Paid</div>'
+        +'<div style="font-size:16px;font-weight:800;color:#374151">'+_qw3fmt(totalPremiumPaid)+'</div></div>'
+        +'</div>'
+        +_qw3bar(pct,p.color,12)
+        +'<div style="font-size:11px;color:#6b7280;margin-top:4px;margin-bottom:12px">'+pct+'% of LTD benefit used'+(benefitExhausted?' — EXHAUSTED':'')+'</div>'
+        +'<div style="background:'+(netValue>0?'#d1fae5':'#fee2e2')+';border-radius:6px;padding:10px;text-align:center">'
+        +'<div style="font-size:11px;color:#6b7280;font-weight:600">Net Value to Policyholder</div>'
+        +'<div style="font-size:18px;font-weight:800;color:'+(netValue>0?'#059669':'#dc2626')+'">'+(netValue>0?'+':'')+_qw3fmt(netValue)+'</div></div>'
+        +(p.returnOfPremium&&sc.duration===0?'<div style="margin-top:10px;font-size:12px;color:#059669;font-weight:600"><i class="fas fa-shield-alt" style="margin-right:4px"></i>Return of Premium: '+_qw3fmt(p.ltdBenefit*0.1)+' guaranteed to estate</div>':'')
+        +'</div>';
+    });
+    cards+='</div>';
+
+    return scenBtns+cards;
+  }
+
+  window._qw3setScenario = function(id){
+    _qw3activeScenario=id;
+    var el=document.getElementById('qw3-tab-content');
+    if(el) el.innerHTML=_qw3scenarioTab();
+  };
+
+  var _qw3activeTab='compare';
+
+  function _qw3renderTab(){
+    if(_qw3activeTab==='compare') return _qw3compareTab();
+    if(_qw3activeTab==='scenario') return _qw3scenarioTab();
+    return '';
+  }
+
+  function _qw3buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var tabs=[['compare','fa-columns','Feature Comparison'],['scenario','fa-calculator','Scenario Modeling']];
+    pc.innerHTML='<div style="font-family:\'Inter\',sans-serif;background:#f0fdfa;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,'+HC3+' 0%,'+HC1+' 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">HCE</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">Hybrid Product Comparison Engine</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">LTC Standalone vs LTC/HAL Hybrid vs HAL Platform &bull; Feature Grid &bull; Scenario Benefit Modeling</p>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      +'<div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +(function(){var h='';tabs.forEach(function(t){var a=_qw3activeTab===t[0];h+='<button onclick="window._qw3switchTab(\''+t[0]+'\')" style="flex:1;padding:10px 12px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:'+(a?HC1:'transparent')+';color:'+(a?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';});return h;})()
+      +'</div>'
+      +'<div id="qw3-tab-content">'+_qw3renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  window._qw3switchTab = function(tab){
+    _qw3activeTab=tab;
+    var el=document.getElementById('qw3-tab-content');
+    if(el) el.innerHTML=_qw3renderTab();
+    var tabs=[['compare'],['scenario']];
+    var btns=document.querySelectorAll('#page-content button[onclick*="_qw3switchTab"]');
+    btns.forEach(function(btn,i){
+      var active=tabs[i]&&tabs[i][0]===tab;
+      btn.style.background=active?HC1:'transparent';
+      btn.style.color=active?'#fff':'#6b7280';
+    });
+  };
+
+  var _qw3origNav=window.navigateTo;
+  window.navigateTo=function(route,params){
+    if(route==='hal-hybrid-compare'){ _qw3activeTab='compare'; _qw3buildPage(); return; }
+    if(typeof _qw3origNav==='function') _qw3origNav(route,params);
+  };
+
+  console.log('[HAL HCE] QW3 Hybrid Product Comparison Engine loaded — 3 products, 4 scenarios, 2 tabs');
+})();
+var navigateTo=window.navigateTo;
+
+
+/* ============================================================
+   QW4 — Regulatory Change Tracker (hal-reg-tracker)
+   Color: Stone/Slate #475569 / #64748b / #0f172a
+   Badge: RCT
+   ============================================================ */
+(function(){ 'use strict';
+  var RC1='#475569', RC2='#64748b', RC3='#0f172a';
+
+  /* ---- State DOI Bulletin Feed ---- */
+  var _qw4bulletins = [
+    { id:'DOI-FL-2026-041', state:'FL', date:'2026-07-02', category:'Rate Filing',
+      title:'Mandatory LTC Rate Stabilization Disclosure Requirements',
+      summary:'Carriers must provide policyholders with standardized rate stabilization disclosure 90 days before any rate increase filing. Form LTC-1147 required.',
+      impact:'High', status:'Action Required', deadline:'2026-09-01',
+      naicRef:'NAIC LTC Model Reg §19', affectedProducts:['LTC Standalone','LTC/HAL Hybrid'] },
+    { id:'DOI-CA-2026-029', state:'CA', date:'2026-06-28', category:'Market Conduct',
+      title:'AB 2094 — AI-Assisted Claims Decision Explainability Mandate',
+      summary:'Effective Jan 1 2027, all AI/ML-assisted adverse claims decisions must include plain-language explanation. Written notices must cite specific MMSE/ADL thresholds used.',
+      impact:'Critical', status:'In Progress', deadline:'2027-01-01',
+      naicRef:'NAIC AI Model Law §7(c)', affectedProducts:['All Products'] },
+    { id:'DOI-NY-2026-018', state:'NY', date:'2026-06-15', category:'Consumer Protection',
+      title:'DFS Circular Letter 2026-7: EP Tolling for Hospitalization',
+      summary:'Elimination period must be tolled (paused) for any insured hospitalization exceeding 3 days. Retroactive adjustment required for policies issued after 2018.',
+      impact:'High', status:'Compliant', deadline:'2026-08-15',
+      naicRef:'NY Ins §3221(n)', affectedProducts:['LTC Standalone','HAL Platform'] },
+    { id:'DOI-TX-2026-014', state:'TX', date:'2026-06-10', category:'Rate Filing',
+      title:'HAL Platform Premium Rate Filing — 5.2% Approval',
+      summary:'Texas DOI approved 5.2% premium rate increase for HAL Platform policies issued 2018-2021. Policyholder notification required within 60 days.',
+      impact:'Medium', status:'Action Required', deadline:'2026-08-10',
+      naicRef:'TX Ins Code §1652.007', affectedProducts:['HAL Platform'] },
+    { id:'DOI-WA-2026-009', state:'WA', date:'2026-05-30', category:'Benefits',
+      title:'WA Cares Fund — LTC Integration Guidance Update',
+      summary:'Updated guidance on coordinating private LTC benefits with Washington Cares Fund payments. Carriers must document coordination method in policy file.',
+      impact:'Medium', status:'In Progress', deadline:'2026-07-30',
+      naicRef:'RCW 50B.04.080', affectedProducts:['LTC Standalone','LTC/HAL Hybrid'] },
+    { id:'NAIC-2026-003', state:'NAIC', date:'2026-07-01', category:'Model Law',
+      title:'NAIC LTC Insurance Model Regulation §29 Revision — Benefit Trigger Clarity',
+      summary:'Revised ADL trigger language clarifies that 2-of-6 ADL deficit standard applies at time of each monthly benefit determination, not solely at initial claim.',
+      impact:'High', status:'Monitoring', deadline:'2027-01-01',
+      naicRef:'NAIC Model Reg #640', affectedProducts:['All Products'] }
+  ];
+
+  /* ---- NAIC Model Law Adoption Status ---- */
+  var _qw4naicModels = [
+    { model:'NAIC LTC Insurance Model Regulation (#640)', topic:'Core LTC Standards',
+      states:{adopted:['CA','FL','NY','TX','IL','PA','OH','AZ','WA','NJ'],pending:['MT','WY','ND'],notAdopted:['NV','MS']},
+      relevance:'Critical', lastUpdate:'2026-03 §29 revision pending' },
+    { model:'NAIC AI/ML Model Bulletin (2023)', topic:'Artificial Intelligence Use in Insurance',
+      states:{adopted:['CA','NY','CO','WA'],pending:['FL','TX','IL','PA'],notAdopted:['OH','AZ','NJ']},
+      relevance:'High', lastUpdate:'2026-06-15 Implementation guidance' },
+    { model:'NAIC Market Conduct Annual Statement', topic:'Market Conduct Reporting',
+      states:{adopted:['CA','FL','NY','TX','IL','PA','OH','AZ','WA','NJ','MT','WY','ND','NV','MS'],pending:[],notAdopted:[]},
+      relevance:'Medium', lastUpdate:'Annual filing due Jan 31' },
+    { model:'NAIC Consumer Information Disclosure Model (#690)', topic:'Policyholder Communication',
+      states:{adopted:['CA','FL','NY','TX','IL'],pending:['PA','OH','AZ'],notAdopted:['WA','NJ','NV']},
+      relevance:'Medium', lastUpdate:'No change since 2024' }
+  ];
+
+  /* ---- Rate Filing Calendar ---- */
+  var _qw4filingCalendar = [
+    { state:'FL', product:'LTC Standalone', filingType:'Rate Increase', dueDate:'2026-09-01', status:'Pending', amount:'+7.2%', notes:'DOI Bulletin DOI-FL-2026-041 disclosure required' },
+    { state:'TX', product:'HAL Platform', filingType:'Rate Notification', dueDate:'2026-08-10', status:'Action Required', amount:'+5.2% (Approved)', notes:'Policyholder letters must be mailed by this date' },
+    { state:'CA', product:'All Products', filingType:'Market Conduct Report', dueDate:'2026-08-31', status:'In Progress', amount:'N/A', notes:'AI explainability audit documentation required' },
+    { state:'NY', product:'LTC Standalone / HAL Platform', filingType:'EP Tolling Compliance', dueDate:'2026-08-15', status:'Compliant', amount:'N/A', notes:'Retroactive policy amendments filed' },
+    { state:'WA', product:'LTC Standalone / Hybrid', filingType:'WA Cares Coordination', dueDate:'2026-07-30', status:'In Progress', amount:'N/A', notes:'Policy file documentation updating' },
+    { state:'NAIC', product:'All Products', filingType:'Annual State Filing Disclosure', dueDate:'2026-07-31', status:'Pending', amount:'N/A', notes:'Model inventory disclosure to all 50 DOIs' }
+  ];
+
+  var _qw4activeTab='bulletins';
+
+  /* ---- Helpers ---- */
+  function _qw4impactBadge(i){
+    var c={Critical:['#dc2626','#fee2e2'],High:['#d97706','#fef3c7'],Medium:['#7c3aed','#ede9fe'],Low:['#059669','#d1fae5']};
+    var cv=c[i]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+i+'</span>';
+  }
+  function _qw4statusBadge(s){
+    var c={'Action Required':['#dc2626','#fee2e2'],'In Progress':['#d97706','#fef3c7'],Compliant:['#059669','#d1fae5'],Monitoring:['#7c3aed','#ede9fe'],Pending:['#6b7280','#f3f4f6']};
+    var cv=c[s]||['#6b7280','#f3f4f6'];
+    return '<span style="background:'+cv[1]+';color:'+cv[0]+';padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600">'+s+'</span>';
+  }
+  function _qw4urgColor(d){ return d<'2026-08-01'?'#dc2626':d<'2026-09-01'?'#d97706':'#374151'; }
+
+  /* ---- Tab: Bulletins ---- */
+  function _qw4bulletinsTab(){
+    var actionCount=_qw4bulletins.filter(function(b){return b.status==='Action Required';}).length;
+    var critCount=_qw4bulletins.filter(function(b){return b.impact==='Critical';}).length;
+
+    var kpis='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid '+RC1+';box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Active Bulletins</div>'
+      +'<div style="font-size:28px;font-weight:800;color:'+RC1+'">'+_qw4bulletins.length+'</div>'
+      +'<div style="font-size:12px;color:#374151">Across 5 States + NAIC</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #dc2626;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Action Required</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#dc2626">'+actionCount+'</div>'
+      +'<div style="font-size:12px;color:#374151">Immediate Response Needed</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #d97706;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Critical Impact</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#d97706">'+critCount+'</div>'
+      +'<div style="font-size:12px;color:#374151">High Compliance Exposure</div></div>'
+      +'<div style="background:#fff;border-radius:10px;padding:18px;border-left:4px solid #059669;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +'<div style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600">Products Affected</div>'
+      +'<div style="font-size:28px;font-weight:800;color:#059669">3</div>'
+      +'<div style="font-size:12px;color:#374151">LTC, HAL, Hybrid Lines</div></div>'
+      +'</div>';
+
+    var cards='';
+    _qw4bulletins.forEach(function(b){
+      cards+='<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:14px;border-left:4px solid '+(b.impact==='Critical'?'#dc2626':b.impact==='High'?'#d97706':RC1)+'">'
+        +'<div style="padding:14px 20px;display:flex;align-items:flex-start;justify-content:space-between">'
+        +'<div style="flex:1">'
+        +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">'
+        +'<span style="font-weight:800;color:'+RC1+';font-size:12px">'+b.id+'</span>'
+        +'<span style="background:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;font-size:11px">'+b.state+'</span>'
+        +'<span style="background:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;font-size:11px">'+b.category+'</span>'
+        +'<span style="font-size:11px;color:#9ca3af">'+b.date+'</span>'
+        +'</div>'
+        +'<div style="font-weight:700;font-size:14px;color:'+RC3+';margin-bottom:6px">'+b.title+'</div>'
+        +'<div style="font-size:12px;color:#374151;margin-bottom:8px">'+b.summary+'</div>'
+        +'<div style="font-size:11px;color:#6b7280">Products: '+b.affectedProducts.join(', ')+' &bull; Ref: '+b.naicRef+'</div>'
+        +'</div>'
+        +'<div style="margin-left:16px;text-align:right;min-width:140px">'
+        +_qw4impactBadge(b.impact)+'<br><div style="margin-top:6px">'+_qw4statusBadge(b.status)+'</div>'
+        +'<div style="font-size:11px;font-weight:700;color:'+_qw4urgColor(b.deadline)+';margin-top:8px"><i class="fas fa-calendar-alt" style="margin-right:3px"></i>Due: '+b.deadline+'</div>'
+        +'</div></div></div>';
+    });
+
+    return kpis+cards;
+  }
+
+  /* ---- Tab: NAIC Model Law ---- */
+  function _qw4naicTab(){
+    var cards='';
+    _qw4naicModels.forEach(function(m){
+      cards+='<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:14px;padding:18px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+        +'<div><div style="font-weight:700;font-size:14px;color:'+RC3+'">'+m.model+'</div>'
+        +'<div style="font-size:12px;color:#6b7280;margin-top:2px">'+m.topic+' &bull; '+m.lastUpdate+'</div></div>'
+        +_qw4impactBadge(m.relevance)
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'
+        +'<div style="background:#d1fae5;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:600;color:#059669;margin-bottom:4px">ADOPTED ('+m.states.adopted.length+' states)</div>'
+        +'<div style="font-size:12px;color:#374151">'+m.states.adopted.join(', ')+'</div></div>'
+        +'<div style="background:#fef3c7;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:600;color:#d97706;margin-bottom:4px">PENDING ('+m.states.pending.length+' states)</div>'
+        +'<div style="font-size:12px;color:#374151">'+(m.states.pending.length?m.states.pending.join(', '):'None')+'</div></div>'
+        +'<div style="background:#fee2e2;border-radius:8px;padding:10px">'
+        +'<div style="font-size:10px;font-weight:600;color:#dc2626;margin-bottom:4px">NOT ADOPTED ('+m.states.notAdopted.length+' states)</div>'
+        +'<div style="font-size:12px;color:#374151">'+(m.states.notAdopted.length?m.states.notAdopted.join(', '):'None')+'</div></div>'
+        +'</div></div>';
+    });
+    return cards;
+  }
+
+  /* ---- Tab: Filing Calendar ---- */
+  function _qw4calendarTab(){
+    var rows='';
+    _qw4filingCalendar.slice().sort(function(a,b){return a.dueDate>b.dueDate?1:-1;}).forEach(function(f){
+      rows+='<tr style="border-bottom:1px solid #f3f4f6">'
+        +'<td style="padding:10px 14px;font-weight:700;font-size:15px">'+f.state+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+f.product+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px">'+f.filingType+'</td>'
+        +'<td style="padding:10px 14px;font-size:13px;font-weight:700;color:'+_qw4urgColor(f.dueDate)+'">'+f.dueDate+'</td>'
+        +'<td style="padding:10px 14px">'+_qw4statusBadge(f.status)+'</td>'
+        +'<td style="padding:10px 14px;font-size:13px;font-weight:600">'+f.amount+'</td>'
+        +'<td style="padding:10px 14px;font-size:12px;color:#374151">'+f.notes+'</td>'
+        +'</tr>';
+    });
+    return '<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden">'
+      +'<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;font-weight:700;font-size:15px;color:'+RC3+'"><i class="fas fa-calendar-check" style="color:'+RC1+';margin-right:8px"></i>Rate Filing Deadline Calendar — Next 90 Days</div>'
+      +'<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f9fafb">'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">State</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Product</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Filing Type</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Due Date</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Status</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Amount/Impact</th>'
+      +'<th style="padding:10px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:600">Notes</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  /* ---- Build Page ---- */
+  function _qw4buildPage(){
+    var pc=document.getElementById('page-content');
+    if(!pc) return;
+    var tabs=[['bulletins','fa-newspaper','DOI Bulletin Feed'],['naic','fa-landmark','NAIC Model Law'],['calendar','fa-calendar-check','Filing Calendar']];
+    pc.innerHTML='<div style="font-family:\'Inter\',sans-serif;background:#f8fafc;min-height:100vh;padding:0">'
+      +'<div style="background:linear-gradient(135deg,'+RC3+' 0%,'+RC1+' 100%);color:#fff;padding:28px 32px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'
+      +'<div style="background:rgba(255,255,255,.18);border-radius:10px;padding:10px 16px;font-weight:800;font-size:16px">RCT</div>'
+      +'<div>'
+      +'<h1 style="font-size:22px;font-weight:800;margin:0">Regulatory Change Tracker</h1>'
+      +'<p style="font-size:13px;opacity:.85;margin:4px 0 0">State DOI Bulletin Feed &bull; NAIC Model Law Adoption &bull; Rate Filing Deadline Calendar</p>'
+      +'</div></div></div>'
+      +'<div style="padding:24px 32px">'
+      +'<div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)">'
+      +(function(){var h='';tabs.forEach(function(t){var a=_qw4activeTab===t[0];h+='<button onclick="window._qw4switchTab(\''+t[0]+'\')" style="flex:1;padding:10px 12px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:'+(a?RC1:'transparent')+';color:'+(a?'#fff':'#6b7280')+';transition:all .2s"><i class="fas '+t[1]+'" style="margin-right:6px"></i>'+t[2]+'</button>';});return h;})()
+      +'</div>'
+      +'<div id="qw4-tab-content">'+_qw4renderTab()+'</div>'
+      +'</div></div>';
+  }
+
+  function _qw4renderTab(){
+    if(_qw4activeTab==='bulletins') return _qw4bulletinsTab();
+    if(_qw4activeTab==='naic') return _qw4naicTab();
+    if(_qw4activeTab==='calendar') return _qw4calendarTab();
+    return '';
+  }
+
+  window._qw4switchTab = function(tab){
+    _qw4activeTab=tab;
+    var el=document.getElementById('qw4-tab-content');
+    if(el) el.innerHTML=_qw4renderTab();
+    var tabs=[['bulletins'],['naic'],['calendar']];
+    var btns=document.querySelectorAll('#page-content button[onclick*="_qw4switchTab"]');
+    btns.forEach(function(btn,i){
+      var active=tabs[i]&&tabs[i][0]===tab;
+      btn.style.background=active?RC1:'transparent';
+      btn.style.color=active?'#fff':'#6b7280';
+    });
+  };
+
+  var _qw4origNav=window.navigateTo;
+  window.navigateTo=function(route,params){
+    if(route==='hal-reg-tracker'){ _qw4activeTab='bulletins'; _qw4buildPage(); return; }
+    if(typeof _qw4origNav==='function') _qw4origNav(route,params);
+  };
+
+  console.log('[HAL RCT] QW4 Regulatory Change Tracker loaded — 6 bulletins, 4 NAIC models, 6 filing deadlines, 3 tabs');
+})();
+var navigateTo=window.navigateTo;
+

@@ -367,6 +367,14 @@ function MainApp() {
         <div id="tpl-hal-cih"></div>
         <div id="tpl-hal-caid"></div>
         <div id="tpl-hal-rimd"></div>
+        <div id="tpl-hal-policyholder"></div>
+        <div id="tpl-hal-provider-net"></div>
+        <div id="tpl-hal-workforce"></div>
+        <div id="tpl-hal-ai-gov"></div>
+        <div id="tpl-hal-litigation"></div>
+        <div id="tpl-hal-interop"></div>
+        <div id="tpl-hal-hybrid-compare"></div>
+        <div id="tpl-hal-reg-tracker"></div>
         <div id="tpl-rfp-showcase"></div>
         <div id="tpl-core-admin"></div>
         <div id="tpl-data-ai"></div>
@@ -1055,6 +1063,38 @@ function Sidebar() {
         <a class="nav-item hal-rimd-nav" onclick="navigateTo('hal-rimd')" href="#">
           <i class="fas fa-chart-line"></i><span>Rate Intelligence & Reserves</span>
           <span class="nav-badge" style="background:#7c3aed;color:#fff">RIMD</span>
+        </a>
+        <a class="nav-item hal-policyholder-nav" onclick="navigateTo('hal-policyholder')" href="#">
+          <i class="fas fa-user-shield"></i><span>Policyholder Portal</span>
+          <span class="nav-badge" style="background:#059669;color:#fff">PSP</span>
+        </a>
+        <a class="nav-item hal-provider-net-nav" onclick="navigateTo('hal-provider-net')" href="#">
+          <i class="fas fa-hospital"></i><span>Provider Network Intel</span>
+          <span class="nav-badge" style="background:#0891b2;color:#fff">PNI</span>
+        </a>
+        <a class="nav-item hal-workforce-nav" onclick="navigateTo('hal-workforce')" href="#">
+          <i class="fas fa-users-cog"></i><span>Workforce Analytics</span>
+          <span class="nav-badge" style="background:#d97706;color:#fff">WFA</span>
+        </a>
+        <a class="nav-item hal-ai-gov-nav" onclick="navigateTo('hal-ai-gov')" href="#">
+          <i class="fas fa-robot"></i><span>AI Governance</span>
+          <span class="nav-badge" style="background:#4f46e5;color:#fff">AIG</span>
+        </a>
+        <a class="nav-item hal-litigation-nav" onclick="navigateTo('hal-litigation')" href="#">
+          <i class="fas fa-gavel"></i><span>Litigation Risk</span>
+          <span class="nav-badge" style="background:#dc2626;color:#fff">LIT</span>
+        </a>
+        <a class="nav-item hal-interop-nav" onclick="navigateTo('hal-interop')" href="#">
+          <i class="fas fa-exchange-alt"></i><span>Interoperability Hub</span>
+          <span class="nav-badge" style="background:#7c3aed;color:#fff">IOP</span>
+        </a>
+        <a class="nav-item hal-hybrid-compare-nav" onclick="navigateTo('hal-hybrid-compare')" href="#">
+          <i class="fas fa-columns"></i><span>Hybrid Comparison</span>
+          <span class="nav-badge" style="background:#0f766e;color:#fff">HCE</span>
+        </a>
+        <a class="nav-item hal-reg-tracker-nav" onclick="navigateTo('hal-reg-tracker')" href="#">
+          <i class="fas fa-landmark"></i><span>Regulatory Tracker</span>
+          <span class="nav-badge" style="background:#475569;color:#fff">RCT</span>
         </a>
 
         {/* ── ILLUMIFIN PLATFORM ── */}
