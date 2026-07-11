@@ -88321,3 +88321,1283 @@ var navigateTo=window.navigateTo;
 
   console.log('[P30] Rich Claimant 360° modal active · 8 tabs · Sidebar + product strips + 1st/2nd/3rd party data · SDOH + What Care Costs + CMS Star + HIE + Pharmacy · Safe _p8run callbacks');
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P31 — CLAIMANT 360: AI OPPORTUNITIES TAB + AI COMMUNICATION TAB
+         + REMOVE "Open Full Claim" SIDEBAR BUTTON
+   Patches P30's ltcOpenClaimDetail to:
+   1. Remove "Open Full Claim" button from left sidebar
+   2. Add tab 8: "AI Opportunities" — eLTCAS cross-product intelligence
+      (inspired by WealthAI Opportunities panel from Client 360 Simulator)
+   3. Add tab 9: "AI Communication" — simulated AI-generated emails, chat,
+      and outbound call scripts + claimant/family response simulation
+   Safe callbacks: _p8run / window._p8actions throughout.
+═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── capture P30's ltcOpenClaimDetail before we wrap it ─────────────── */
+  var _p31origOpenDetail = window.ltcOpenClaimDetail;
+
+  window.ltcOpenClaimDetail = function(claimId) {
+
+    /* run P30 first to render the base modal */
+    _p31origOpenDetail(claimId);
+
+    /* ── 1. Remove "Open Full Claim" sidebar button ────────────────────── */
+    /* We patch the sidebar right after P30 renders the overlay */
+    setTimeout(function() {
+      /* find the "Open Full Claim" button in the sidebar and hide it */
+      var allBtns = document.querySelectorAll('#ltc-claim-detail-ov button');
+      allBtns.forEach(function(btn) {
+        if (btn.textContent.trim().indexOf('Open Full Claim') > -1) {
+          btn.style.display = 'none';
+        }
+      });
+
+      /* ── 2. Inject 2 new tab buttons into the tab bar ─────────────── */
+      var tabBar = document.querySelector('#ltc-claim-detail-ov .p30-tabbar-container');
+      /* fallback: find the div containing #p30-tab-0 */
+      var tab0 = document.getElementById('p30-tab-0');
+      if (tab0 && tab0.parentNode) {
+        var tabContainer = tab0.parentNode;
+
+        /* AI Opportunities — tab 8 */
+        if (!document.getElementById('p30-tab-8')) {
+          var btnOpp = document.createElement('button');
+          btnOpp.id = 'p30-tab-8';
+          btnOpp.innerHTML = '<i class="fas fa-lightbulb" style="font-size:10px;"></i> AI Opportunities';
+          btnOpp.style.cssText = 'display:flex;align-items:center;gap:5px;background:transparent;color:#6b7280;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;';
+          btnOpp.onclick = function() { ltcClaimTab(8, claimId); };
+          tabContainer.appendChild(btnOpp);
+        }
+
+        /* AI Communication — tab 9 */
+        if (!document.getElementById('p30-tab-9')) {
+          var btnComm = document.createElement('button');
+          btnComm.id = 'p30-tab-9';
+          btnComm.innerHTML = '<i class="fas fa-comments" style="font-size:10px;"></i> AI Communication';
+          btnComm.style.cssText = 'display:flex;align-items:center;gap:5px;background:transparent;color:#6b7280;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;';
+          btnComm.onclick = function() { ltcClaimTab(9, claimId); };
+          tabContainer.appendChild(btnComm);
+        }
+      }
+    }, 50);
+
+    /* ── 3. Extend ltcClaimTab to handle idx 8 and 9 ──────────────────── */
+    var _p31origClaimTab = window.ltcClaimTab;
+
+    var ltcData = (typeof ltcClaimsData !== 'undefined') ? ltcClaimsData : [];
+    var c = ltcData.find(function(x) { return x.id === claimId; });
+    if (!c) return;
+
+    var riskScore = c.priority === 'urgent' ? 82 : c.priority === 'high' ? 65 : c.priority === 'medium' ? 44 : 28;
+    var dailyAmt = parseInt(c.dailyBenefit.replace(/\D/g,''), 10) || 180;
+    var adlColor = c.assessScore >= 4 ? '#dc2626' : c.assessScore === 3 ? '#d97706' : '#0891b2';
+
+    /* ── register safe callbacks ─────────────────────────────────────── */
+    if (!window._p8actions) window._p8actions = {};
+    window._p8actions['p31-act-chronic']  = function(){ _L4toast('<i class="fas fa-bolt"></i> LTC pre-qualification initiated · ABR readiness review scheduled · Med Supp care coordination flagged', 3500); };
+    window._p8actions['p31-act-rmd']      = function(){ _L4toast('<i class="fas fa-dollar-sign"></i> RMD-LTC premium auto-pay workflow initiated · IRS 7702B compliance verified · Family POA notified', 3500); };
+    window._p8actions['p31-act-cob']      = function(){ _L4toast('<i class="fas fa-exchange-alt"></i> COB optimization applied · Medicare + LTC coordination updated · $892/mo savings activated', 3500); };
+    window._p8actions['p31-act-care']     = function(){ _L4toast('<i class="fas fa-heart"></i> Care level escalation assessment scheduled · RN supervisor assigned · Family conference call booked', 3500); };
+    window._p8actions['p31-act-sdoh']     = function(){ _L4toast('<i class="fas fa-hands-helping"></i> SDOH social worker referral sent · Community resource packet emailed to POA', 3200); };
+    window._p8actions['p31-act-renewal']  = function(){ _L4toast('<i class="fas fa-file-contract"></i> Policy renewal review initiated · Carrier notified · Rate lock analysis queued', 3200); };
+    window._p8actions['p31-send-email']   = function(){ _L4toast('<i class="fas fa-paper-plane"></i> AI-drafted email sent to Margaret O\'Brien · HIPAA-compliant delivery logged', 3200); };
+    window._p8actions['p31-send-chat']    = function(){ _L4toast('<i class="fas fa-comment-dots"></i> AI chat message sent via secure portal · Read receipt tracking enabled', 3000); };
+    window._p8actions['p31-start-call']   = function(){ _L4toast('<i class="fas fa-phone-volume"></i> AI-assisted outbound call initiated · Script loaded · Call recording active · HIPAA compliant', 3500); };
+    window._p8actions['p31-send-sms']     = function(){ _L4toast('<i class="fas fa-sms"></i> AI-drafted SMS sent to Patrick O\'Brien (POA) · Opt-in verified', 3000); };
+    window._p8actions['p31-approve-draft']= function(){ _L4toast('<i class="fas fa-check-circle"></i> Communication approved · Queued for delivery · Supervisor sign-off logged', 3000); };
+    window._p8actions['p31-edit-draft']   = function(){ _L4toast('<i class="fas fa-edit"></i> Draft editor opened · AI suggestions preserved · Make edits and re-approve', 3000); };
+
+    /* ── helper: opportunity card ────────────────────────────────────── */
+    function _oppCard(priority, title, tags, body, actionKey, actionLabel) {
+      var pc = priority === 'Critical' ? '#dc2626' : priority === 'High' ? '#d97706' : '#0891b2';
+      var tagHtml = tags.map(function(t) {
+        var tc = t === 'LTC' ? '#dc2626' : t === 'Health' ? '#0d9488' : t === 'Annuity' ? '#0891b2' : t === 'Life' ? '#003087' : '#6b7280';
+        return '<span style="background:' + tc + '1a;color:' + tc + ';border:1px solid ' + tc + '33;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;">' + t + '</span>';
+      }).join(' ');
+      return '<div style="background:#fff;border:1.5px solid ' + pc + '22;border-left:4px solid ' + pc + ';border-radius:10px;padding:14px 16px;margin-bottom:12px;">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">'
+        + '<div>'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">'
+        + '<span style="background:' + pc + ';color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:800;">' + priority + '</span>'
+        + tagHtml
+        + '</div>'
+        + '<div style="font-size:13px;font-weight:800;color:#111827;">' + title + '</div>'
+        + '</div>'
+        + '</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.65;margin-bottom:12px;">' + body + '</div>'
+        + '<button onclick="_p8run(\'' + actionKey + '\')" style="background:' + pc + ';color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:11px;font-weight:700;cursor:pointer;">'
+        + '<i class="fas fa-bolt" style="margin-right:5px;"></i>' + actionLabel + '</button>'
+        + '</div>';
+    }
+
+    /* ── helper: chat bubble ─────────────────────────────────────────── */
+    function _chatBubble(sender, text, time, isAI) {
+      var align = isAI ? 'flex-start' : 'flex-end';
+      var bg = isAI ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' : '#f1f5f9';
+      var color = isAI ? '#fff' : '#374151';
+      var avatar = isAI
+        ? '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#6d28d9);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-robot" style="color:#fff;font-size:11px;"></i></div>'
+        : '<div style="width:28px;height:28px;border-radius:50%;background:#dc2626;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:#fff;">MO</div>';
+      return '<div style="display:flex;align-items:flex-end;gap:8px;justify-content:' + align + ';margin-bottom:12px;">'
+        + (isAI ? avatar : '')
+        + '<div>'
+        + '<div style="font-size:9px;color:#9ca3af;margin-bottom:3px;' + (isAI ? '' : 'text-align:right;') + '">' + sender + ' · ' + time + '</div>'
+        + '<div style="background:' + bg + ';color:' + color + ';border-radius:' + (isAI ? '4px 12px 12px 12px' : '12px 4px 12px 12px') + ';padding:10px 14px;font-size:11px;line-height:1.6;max-width:380px;">' + text + '</div>'
+        + '</div>'
+        + (isAI ? '' : avatar)
+        + '</div>';
+    }
+
+    /* ── helper: email panel ─────────────────────────────────────────── */
+    function _emailPanel(subject, from, to, time, body, isReply) {
+      var accent = isReply ? '#059669' : '#7c3aed';
+      var label = isReply ? 'CLAIMANT REPLY' : 'AI-DRAFTED EMAIL';
+      return '<div style="background:#fff;border:1.5px solid ' + accent + '22;border-left:4px solid ' + accent + ';border-radius:10px;padding:14px 16px;margin-bottom:12px;">'
+        + '<div style="font-size:9px;font-weight:800;color:' + accent + ';text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">'
+        + '<i class="fas fa-' + (isReply ? 'reply' : 'robot') + '" style="margin-right:4px;"></i>' + label + '</div>'
+        + '<div style="font-size:10px;color:#6b7280;margin-bottom:6px;line-height:1.7;">'
+        + '<strong style="color:#374151;">From:</strong> ' + from + '&nbsp;&nbsp;'
+        + '<strong style="color:#374151;">To:</strong> ' + to + '&nbsp;&nbsp;'
+        + '<strong style="color:#374151;">Sent:</strong> ' + time + '</div>'
+        + '<div style="font-size:12px;font-weight:700;color:#111827;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9;">' + subject + '</div>'
+        + '<div style="font-size:11px;color:#374151;line-height:1.75;white-space:pre-line;">' + body + '</div>'
+        + '</div>';
+    }
+
+    /* ── BUILD: AI OPPORTUNITIES TAB ─────────────────────────────────── */
+    function buildAIOpportunities() {
+      return ''
+        /* intelligence banner */
+        + '<div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;padding:14px 18px;margin-bottom:16px;color:#fff;">'
+        + '<div style="font-size:10px;font-weight:800;color:#a5b4fc;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">'
+        + '<i class="fas fa-brain" style="margin-right:5px;"></i>eLTCAS AI INTELLIGENCE — CROSS-PRODUCT OPPORTUNITY ENGINE</div>'
+        + '<div style="font-size:12px;color:#e0e7ff;line-height:1.65;">'
+        + 'eLTCAS identified <strong style="color:#fbbf24;">6 cross-product optimization opportunities</strong> for Margaret O\'Brien — '
+        + '1 Critical · 2 High · 3 Medium/Low. These opportunities are <strong style="color:#fbbf24;">ONLY visible</strong> through '
+        + 'illumifin\'s unified LTC + HAL platform. Siloed administrators cannot see across product lines. '
+        + 'Estimated combined value: <strong style="color:#6ee7b7;">$892/mo savings + $14,800 tax benefit.</strong>'
+        + '</div>'
+        + '</div>'
+
+        /* KPI summary row */
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">'
+        + '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px;text-align:center;">'
+        + '<div style="font-size:10px;color:#dc2626;"><i class="fas fa-exclamation-triangle" style="font-size:16px;"></i></div>'
+        + '<div style="font-size:28px;font-weight:900;color:#dc2626;margin:4px 0;">1</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#dc2626;">Critical</div>'
+        + '<div style="font-size:9px;color:#9ca3af;">Immediate action needed</div>'
+        + '</div>'
+        + '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px 14px;text-align:center;">'
+        + '<div style="font-size:10px;color:#d97706;"><i class="fas fa-arrow-up" style="font-size:16px;"></i></div>'
+        + '<div style="font-size:28px;font-weight:900;color:#d97706;margin:4px 0;">2</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#d97706;">High Priority</div>'
+        + '<div style="font-size:9px;color:#9ca3af;">Action this month</div>'
+        + '</div>'
+        + '<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px 14px;text-align:center;">'
+        + '<div style="font-size:10px;color:#0891b2;"><i class="fas fa-info-circle" style="font-size:16px;"></i></div>'
+        + '<div style="font-size:28px;font-weight:900;color:#0891b2;margin:4px 0;">3</div>'
+        + '<div style="font-size:11px;font-weight:700;color:#0891b2;">Medium / Low</div>'
+        + '<div style="font-size:9px;color:#9ca3af;">Monitor &amp; plan</div>'
+        + '</div>'
+        + '</div>'
+
+        /* ── CRITICAL ── */
+        + _oppCard('Critical',
+            '<i class="fas fa-exclamation-circle" style="color:#dc2626;margin-right:6px;"></i>Chronic Illness Early Warning — LTC Escalation Risk',
+            ['Life','LTC','Health'],
+            'eLTCAS detected MMSE decline signals (14→ projected 10 within 6 months) via claim pattern analysis — '
+            + '<strong>8 months before a typical formal diagnosis</strong>. This triggers proactive actions: '
+            + 'LTC benefit period review, care-setting escalation assessment (SNF → Memory Care), '
+            + 'ABR readiness review, and Med Supp care coordination simultaneously. '
+            + '<strong style="color:#dc2626;">illumifin advantage:</strong> Single system sees LTC + Health + Life — '
+            + 'siloed vendors cannot detect this cross-product signal. Estimated cost avoidance: $12,400/yr.',
+            'p31-act-chronic', 'Act on This Now')
+
+        /* ── HIGH PRIORITY ── */
+        + _oppCard('High',
+            '<i class="fas fa-dollar-sign" style="color:#d97706;margin-right:6px;"></i>COB Optimization — Medicare + LTC Coordination Gap',
+            ['LTC','Health'],
+            'eLTCAS COB analysis detected a $892/mo coordination gap. Margaret\'s Medicare Part A SNF benefit '
+            + 'expired Feb 2026. LTC activated Day 101+. However, Medicare Part B physician services are not '
+            + 'being correctly coordinated with LTC daily benefit calculations. '
+            + '<strong>Correcting COB will recover $892/mo</strong> in overpayment risk and ensure regulatory compliance. '
+            + 'IRS coordination rules apply. Action: eLTCAS automated COB reconciliation + carrier notification.',
+            'p31-act-cob', 'Fix COB Now')
+
+        + _oppCard('High',
+            '<i class="fas fa-chart-line" style="color:#d97706;margin-right:6px;"></i>Care Level Escalation — Memory Care Transition Planning',
+            ['LTC'],
+            'AI functional trajectory analysis projects Margaret\'s MMSE will fall below 10 (severe) by Q2 2027 '
+            + 'and ADL impairment will reach 4/5 within 4 months based on current decline rate. '
+            + '<strong>Memory Care transition planning should begin now</strong> — average SNF-to-Memory Care wait list: 3–5 months. '
+            + 'Proactive family conference + social worker referral recommended. '
+            + 'Daily benefit difference: Memory Care avg $245/day vs current SNF $218/day — '
+            + 'policy rider review needed. Estimated timeline: Aug–Sep 2026.',
+            'p31-act-care', 'Start Transition Planning')
+
+        /* ── MEDIUM / LOW ── */
+        + _oppCard('Medium',
+            '<i class="fas fa-heartbeat" style="color:#0891b2;margin-right:6px;"></i>SDOH Intervention — Social Isolation & Economic Strain',
+            ['Health','LTC'],
+            'SDOH scoring (ADI percentile: 68) shows moderate social isolation risk and fixed-income economic strain. '
+            + 'Family POA engagement is active but son Patrick lives 45 miles away. '
+            + 'Intervention: community volunteer visitor program referral + virtual family care conference monthly. '
+            + 'SDOH interventions are proven to reduce ER visit frequency by 23% (source: CMS AHEAD model). '
+            + 'Current ER visit rate: 3 visits in 18 months — above SNF average (1.2/yr).',
+            'p31-act-sdoh', 'Refer to Social Worker')
+
+        + _oppCard('Low',
+            '<i class="fas fa-file-contract" style="color:#0891b2;margin-right:6px;"></i>Carrier Contract — Policy Renewal Review (2027)',
+            ['LTC'],
+            'Prudential TPA contract expires 2029 but the 3% compound inflation rider activates Jan 1, 2027, '
+            + 'increasing daily benefit from $180 → $185.40/day. '
+            + 'Recommend proactive carrier negotiation to lock rate and confirm benefit period terms before inflation event. '
+            + 'illumifin SLA with Prudential: 97.2% — strong leverage for renewal terms.',
+            'p31-act-renewal', 'Queue Renewal Review')
+
+        + _oppCard('Low',
+            '<i class="fas fa-pills" style="color:#0891b2;margin-right:6px;"></i>Pharmacy — Donepezil Dose Review Opportunity',
+            ['Health','LTC'],
+            'CVS Caremark pharmacy data shows Donepezil 10mg prescribed Jan 2026. '
+            + 'Clinical guidelines (AAN 2023) recommend reassessment at 6 months for dose optimization '
+            + 'in moderate-stage Alzheimer\'s. Last review: none on record. '
+            + 'Recommend physician medication review scheduled in conjunction with next RN assessment visit (Jul 10, 2026). '
+            + 'Optimized pharmacotherapy may slow MMSE decline trajectory by 10–15%.',
+            'p31-act-chronic', 'Schedule Med Review');
+    }
+
+    /* ── BUILD: AI COMMUNICATION TAB ─────────────────────────────────── */
+    function buildAICommunication() {
+      return ''
+        /* header panel */
+        + '<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:14px 18px;margin-bottom:16px;color:#fff;">'
+        + '<div style="font-size:10px;font-weight:800;color:#67e8f9;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">'
+        + '<i class="fas fa-robot" style="margin-right:5px;"></i>eLTCAS AI COMMUNICATION ENGINE — OPERATIONAL AUTOMATION</div>'
+        + '<div style="font-size:12px;color:#cbd5e1;line-height:1.65;">'
+        + 'AI auto-generates all routine communications for LTC &amp; HAL Operations staff — '
+        + 'emails, secure chat messages, outbound call scripts, and SMS alerts. '
+        + '<strong style="color:#fbbf24;">Saves 2.5 hrs/day per ops specialist.</strong> '
+        + 'All communications are HIPAA-compliant, logged, and include simulated claimant/family responses '
+        + 'to show the full conversation lifecycle.'
+        + '</div>'
+        + '</div>'
+
+        /* time saved KPIs */
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">'
+        + '<div style="text-align:center;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px;">'
+        + '<div style="font-size:20px;font-weight:800;color:#059669;">2.5h</div><div style="font-size:9px;font-weight:700;color:#6b7280;">Saved/day per staff</div></div>'
+        + '<div style="text-align:center;background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:10px;">'
+        + '<div style="font-size:20px;font-weight:800;color:#7c3aed;">94%</div><div style="font-size:9px;font-weight:700;color:#6b7280;">First-draft accuracy</div></div>'
+        + '<div style="text-align:center;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:10px;">'
+        + '<div style="font-size:20px;font-weight:800;color:#003087;">8 min</div><div style="font-size:9px;font-weight:700;color:#6b7280;">vs 45 min manual</div></div>'
+        + '<div style="text-align:center;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:10px;">'
+        + '<div style="font-size:20px;font-weight:800;color:#dc2626;">100%</div><div style="font-size:9px;font-weight:700;color:#6b7280;">HIPAA audit-logged</div></div>'
+        + '</div>'
+
+        /* ═══ SECTION 1: EMAIL ═══ */
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid #7c3aed22;">'
+        + '<div style="display:flex;align-items:center;gap:7px;">'
+        + '<i class="fas fa-envelope" style="color:#7c3aed;font-size:14px;"></i>'
+        + '<span style="font-size:12px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.4px;">Email Communication</span>'
+        + '</div>'
+        + '<button onclick="_p8run(\'p31-send-email\')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:10px;font-weight:700;cursor:pointer;">'
+        + '<i class="fas fa-paper-plane" style="margin-right:4px;"></i>Send Email</button>'
+        + '</div>'
+
+        /* AI outbound email */
+        + _emailPanel(
+            'Care Plan Review — Action Required: ' + (new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})),
+            'illumifin Care Management <caremanager@illumifin.com>',
+            'Patrick O\'Brien (POA) <patrickobrien@email.com>',
+            'Jul 9, 2026 · 9:14 AM',
+            'Dear Mr. O\'Brien,\n\nI hope this message finds you well. I am writing on behalf of the illumifin LTC care management team regarding your mother, Margaret O\'Brien (Claim LTC-2026-0101).\n\nOur eLTCAS system has identified that Margaret\'s next care plan review is due on Jul 10, 2026 at Sunrise Manor SNF. Based on our AI clinical analysis, we have noted the following:\n\n  • ADL Score: 2/5 (Moderate) — stable over last 30 days\n  • Cognitive Score (MMSE): 14/30 — mild decline from 16 in January\n  • Next Benefit Payment: $180/day · Due Jul 15, 2026\n  • Provider EVV: All visits verified ✅\n\nWe would like to schedule a family care conference call on Jul 11, 2026 at 2:00 PM ET with RN Sarah Johnson to discuss Margaret\'s care trajectory and memory care transition planning.\n\nPlease reply to this email to confirm or suggest an alternate time.\n\nWarm regards,\nSarah Johnson, RN | Care Manager\nillumifin LTC Operations · (617) 800-4400',
+            false)
+
+        /* Claimant/family reply simulation */
+        + _emailPanel(
+            'RE: Care Plan Review — Action Required: Jul 9, 2026',
+            'Patrick O\'Brien <patrickobrien@email.com>',
+            'illumifin Care Management <caremanager@illumifin.com>',
+            'Jul 9, 2026 · 11:43 AM',
+            'Hi Sarah,\n\nThank you for reaching out. The Jul 11th at 2:00 PM call works well for me.\n\nI did want to mention that Mom has been having more difficulty recognizing staff at Sunrise Manor over the past two weeks — more than usual. She also had one episode where she became quite distressed in the evening. Should we be thinking about a different setting?\n\nAlso, can you explain what the memory care transition planning means in practical terms — timeline, costs, what it means for her LTC benefit?\n\nLooking forward to the call.\n\nBest,\nPatrick O\'Brien',
+            true)
+
+        /* AI follow-up email */
+        + _emailPanel(
+            'RE: Care Plan Review — Memory Care Information + Jul 11 Confirmed',
+            'illumifin Care Management <caremanager@illumifin.com>',
+            'Patrick O\'Brien (POA) <patrickobrien@email.com>',
+            'Jul 9, 2026 · 1:05 PM',
+            'Dear Patrick,\n\nThank you for confirming — Jul 11 at 2:00 PM is confirmed ✅. A calendar invite has been sent.\n\nRegarding memory care transition — here is a brief summary:\n\n  📋 TIMELINE: Average SNF-to-Memory Care transition: 3–5 months. We recommend beginning facility search now given current wait lists in the Boston metro area.\n\n  💰 COST IMPACT: Memory Care facilities average $245/day vs Margaret\'s current $218/day. Her LTC policy (Prudential, Lifetime Benefit) covers both settings. We will review the inflation rider (3% compound, activates Jan 2027) on our call.\n\n  📞 NEXT STEPS: Our social worker, Angela Moore, will also join the Jul 11 call to discuss the transition process and SDOH support resources.\n\nAI has pre-identified 3 memory care facilities within 10 miles of Boston with CMS 4+ star ratings. We will share the shortlist on our call.\n\nWarm regards,\nSarah Johnson, RN | illumifin LTC Operations',
+            false)
+
+        + '<div style="display:flex;gap:8px;margin-bottom:16px;">'
+        + '<button onclick="_p8run(\'p31-approve-draft\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-check" style="margin-right:4px;"></i>Approve &amp; Send</button>'
+        + '<button onclick="_p8run(\'p31-edit-draft\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-edit" style="margin-right:4px;"></i>Edit Draft</button>'
+        + '</div>'
+
+        /* ═══ SECTION 2: SECURE CHAT ═══ */
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px;padding-bottom:6px;border-bottom:2px solid #0891b222;">'
+        + '<div style="display:flex;align-items:center;gap:7px;">'
+        + '<i class="fas fa-comment-dots" style="color:#0891b2;font-size:14px;"></i>'
+        + '<span style="font-size:12px;font-weight:800;color:#0891b2;text-transform:uppercase;letter-spacing:.4px;">Secure Chat — illumifin Portal</span>'
+        + '</div>'
+        + '<button onclick="_p8run(\'p31-send-chat\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:10px;font-weight:700;cursor:pointer;">'
+        + '<i class="fas fa-comment" style="margin-right:4px;"></i>Send Chat</button>'
+        + '</div>'
+
+        + '<div style="background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:12px;border:1.5px solid #e5e7eb;">'
+        + '<div style="font-size:10px;font-weight:700;color:#9ca3af;text-align:center;margin-bottom:12px;">Today, Jul 9, 2026 · illumifin Secure Claimant Portal</div>'
+
+        /* AI care manager opens chat */
+        + _chatBubble('eLTCAS Care AI · Sarah Johnson, RN', 'Hi Margaret 👋 This is your illumifin care team. Your next benefit payment of $2,520 (14 days × $180/day) is scheduled for Jul 15. Just checking in — how are you feeling today?', '9:00 AM', true)
+
+        /* Claimant response */
+        + _chatBubble('Margaret O\'Brien', 'Hello dear. I\'m doing okay, a little tired today. The staff here are very kind. Will my payment go directly to Sunrise Manor?', '9:34 AM', false)
+
+        /* AI response */
+        + _chatBubble('eLTCAS Care AI · Sarah Johnson, RN', 'Yes Margaret, payments go directly to Sunrise Manor via ACH transfer ✅ — you don\'t need to do anything. Your next payment covers Jul 1–14. Is there anything about your care you\'d like me to pass along to the nursing team?', '9:35 AM', true)
+
+        /* Claimant response */
+        + _chatBubble('Margaret O\'Brien', 'Yes — I\'ve been having trouble sleeping the past week. And my son Patrick mentioned something about memory care — I\'m a bit worried about what that means.', '9:52 AM', false)
+
+        /* AI response */
+        + _chatBubble('eLTCAS Care AI · Sarah Johnson, RN', 'Thank you for sharing that, Margaret. I\'ve made a note about the sleep difficulties — RN Sarah Johnson will discuss this with the Sunrise Manor team before your Jul 10 visit 📋. Regarding memory care, Patrick will join a call with us on Jul 11 at 2 PM to discuss everything together. There\'s no need to worry — we\'ll walk through it step by step. You\'re in great hands 💙', '9:53 AM', true)
+
+        /* Claimant final message */
+        + _chatBubble('Margaret O\'Brien', 'That\'s very reassuring. Thank you. I look forward to the call.', '10:05 AM', false)
+
+        + '<div style="text-align:center;font-size:10px;color:#9ca3af;margin-top:8px;">'
+        + '<i class="fas fa-lock" style="margin-right:4px;"></i>HIPAA-encrypted · All messages logged · Audit trail active</div>'
+        + '</div>'
+
+        + '<div style="display:flex;gap:8px;margin-bottom:16px;">'
+        + '<button onclick="_p8run(\'p31-approve-draft\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-check" style="margin-right:4px;"></i>Approve &amp; Send Responses</button>'
+        + '<button onclick="_p8run(\'p31-send-sms\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-sms" style="margin-right:4px;"></i>SMS Summary to POA</button>'
+        + '</div>'
+
+        /* ═══ SECTION 3: AI PHONE CALL SCRIPT ═══ */
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px;padding-bottom:6px;border-bottom:2px solid #05996922;">'
+        + '<div style="display:flex;align-items:center;gap:7px;">'
+        + '<i class="fas fa-phone-volume" style="color:#059669;font-size:14px;"></i>'
+        + '<span style="font-size:12px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:.4px;">Outbound Call — AI-Assisted Script</span>'
+        + '</div>'
+        + '<button onclick="_p8run(\'p31-start-call\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:10px;font-weight:700;cursor:pointer;">'
+        + '<i class="fas fa-phone" style="margin-right:4px;"></i>Start Call</button>'
+        + '</div>'
+
+        + '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin-bottom:12px;">'
+        + '<div style="font-size:10px;font-weight:800;color:#059669;margin-bottom:10px;">'
+        + '<i class="fas fa-file-alt" style="margin-right:4px;"></i>AI-GENERATED CALL SCRIPT · Jul 9, 2026 · Claimant: Margaret O\'Brien · Call Type: Monthly Check-in + Care Plan Review</div>'
+
+        + '<div style="font-size:11px;color:#374151;line-height:1.9;">'
+
+        /* Opening */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #059669;">'
+        + '<div style="font-size:10px;font-weight:800;color:#059669;margin-bottom:4px;">📞 OPENING</div>'
+        + '"Hello, may I please speak with Margaret O\'Brien? ... Hi Margaret, this is Sarah Johnson calling from illumifin — your LTC care management team. I hope I\'m catching you at a good time. This call is regarding your care plan and your upcoming benefit payment. Do you have a few minutes? [PAUSE FOR RESPONSE]"'
+        + '</div>'
+
+        /* Claims update */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #0891b2;">'
+        + '<div style="font-size:10px;font-weight:800;color:#0891b2;margin-bottom:4px;">📋 CLAIM STATUS UPDATE</div>'
+        + '"I wanted to let you know that your LTC benefit payment of $2,520 is confirmed for July 15th — that\'s 14 days at $180 per day going directly to Sunrise Manor. Everything looks great on our end. [PAUSE] Is Sunrise Manor continuing to meet your needs? [LISTEN — NOTE RESPONSE IN LTCAS]"'
+        + '</div>'
+
+        /* Care check */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #7c3aed;">'
+        + '<div style="font-size:10px;font-weight:800;color:#7c3aed;margin-bottom:4px;">🩺 CLINICAL CHECK-IN</div>'
+        + '"Our nursing team will be visiting you on July 10th for your care plan review. Before that, I just wanted to check on a few things: [1] How has your sleep been? [PAUSE] [2] Are you having any pain or discomfort? [PAUSE] [3] Are the staff helping you with your daily needs — bathing, dressing? [PAUSE — DOCUMENT ADL CHANGES IN LTCAS]"'
+        + '</div>'
+
+        /* Memory care */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #d97706;">'
+        + '<div style="font-size:10px;font-weight:800;color:#d97706;margin-bottom:4px;">💬 MEMORY CARE TRANSITION</div>'
+        + '"Margaret, your son Patrick will be joining us on a call this Friday, July 11th at 2 PM. We\'ll all talk together about your care and some options that may be coming up in the next few months. It\'s nothing to worry about — we just want to make sure you have the best care possible. Is there anything you\'d like me to share with Patrick before the call? [PAUSE — DOCUMENT IN LTCAS NOTES]"'
+        + '</div>'
+
+        /* Closing */
+        + '<div style="background:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:3px solid #059669;">'
+        + '<div style="font-size:10px;font-weight:800;color:#059669;margin-bottom:4px;">✅ CLOSING</div>'
+        + '"Wonderful, Margaret. I\'ll let you go — thank you so much for your time. If you ever have questions or need anything before our next call, you can reach us at 1-800-ILLUMIFIN, or reply to a message in your secure portal. Take care, and we\'ll speak with you and Patrick on Friday. Goodbye!"'
+        + '</div>'
+
+        + '</div>'
+
+        /* simulated call outcome */
+        + '<div style="margin-top:12px;padding:10px 14px;background:#dcfce7;border-radius:8px;font-size:11px;color:#166534;">'
+        + '<strong>📝 AI Call Outcome Summary (auto-logged to LTCAS):</strong> '
+        + 'Claimant responsive and cooperative. Reports sleep difficulties — referred to SNF nursing for evening care protocol adjustment. '
+        + 'Confirmed family conference Jul 11 at 2 PM. No immediate clinical concern escalation needed. '
+        + 'ADL: no change reported. Next call: Jul 23, 2026 (scheduled).'
+        + '</div>'
+        + '</div>'
+
+        + '<div style="display:flex;gap:8px;margin-bottom:16px;">'
+        + '<button onclick="_p8run(\'p31-start-call\')" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-phone" style="margin-right:4px;"></i>Start AI-Assisted Call</button>'
+        + '<button onclick="_p8run(\'p31-approve-draft\')" style="background:#6b7280;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;"><i class="fas fa-check" style="margin-right:4px;"></i>Log Call Complete</button>'
+        + '</div>'
+
+        /* bottom note */
+        + '<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;font-size:10px;color:#6b7280;line-height:1.6;">'
+        + '<i class="fas fa-info-circle" style="color:#0891b2;margin-right:4px;"></i>'
+        + '<strong>How AI Communication saves time:</strong> Without eLTCAS, each ops specialist spends ~45 min per claimant per week drafting emails, writing call notes, and composing chat responses manually. '
+        + 'With eLTCAS AI Communication Engine: drafting takes &lt;8 min, call scripts are auto-generated from claim data, '
+        + 'chat responses are context-aware, and all interactions are auto-logged — saving <strong>2.5 hrs/day per specialist</strong> across LTC and HAL operations.'
+        + '</div>';
+    }
+
+    /* ── EXTENDED TAB HANDLER (adds idx 8 and 9 to P30's switch) ─────── */
+    window.ltcClaimTab = function(idx, claimId2) {
+      /* update active tab highlight for all 10 tabs */
+      for (var ti = 0; ti < 10; ti++) {
+        var tel = document.getElementById('p30-tab-' + ti);
+        if (tel) {
+          tel.style.background = ti === idx ? '#dc2626' : 'transparent';
+          tel.style.color = ti === idx ? '#fff' : '#6b7280';
+        }
+      }
+      var body3 = document.getElementById('lcd-body');
+      if (!body3) return;
+
+      if (idx === 8) {
+        body3.innerHTML = buildAIOpportunities();
+      } else if (idx === 9) {
+        body3.innerHTML = buildAICommunication();
+      } else {
+        /* delegate tabs 0-7 back to P30's handler */
+        _p31origClaimTab(idx, claimId2);
+      }
+    };
+
+  }; /* end ltcOpenClaimDetail wrapper */
+
+  console.log('[P31] AI Opportunities tab (idx 8) + AI Communication tab (idx 9) added · Open Full Claim button hidden · 6 cross-product opportunity cards · Email/Chat/Call simulation with claimant responses');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   P32 — INSURANCE CARRIER 360: RICH AI PORTFOLIO REVIEW + ENHANCED FULL 360
+         + COMPELLING AI DEEP REVIEW
+   ─ AI Portfolio Review: enterprise portfolio dashboard w/ market intelligence
+   ─ Full 360 per carrier: 6-tab modal (Overview·Products·SLA·Financials·Risk·AI)
+   ─ AI Deep Review: carrier-specific deep intelligence with market data
+   ─ All via _p8run safe callbacks
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── CARRIER MARKET INTELLIGENCE DATABASE ──────────────────────────────── */
+  var _p32carriers = {
+    'CAR-001': {
+      id: 'CAR-001', name: 'Prudential Financial', ticker: 'PRU', founded: 1875,
+      hq: 'Newark, NJ', rating: 'A+ (S&P) / Aa3 (Moody\'s)', employees: '40,000+',
+      aum: '$1.6T AUM', revenue2025: '$62.1B', ltcBlockSize: '$4.2B reserves',
+      ltcPoliciesInForce: '~1.1M nationwide', marketShare: '18.4%',
+      type: 'LTC Standalone', tpaStart: '2018', contractExp: '2029',
+      slaScore: 97.2, totalPolicies: 320000, activeClaims: 8400,
+      premiumMo: '$48M', ytdPayout: '$1.9B', lossRatio: '61.2%',
+      fraudScore: 4, pendingItems: 2, aiHealth: 'Excellent',
+      contact: 'James Whitfield, SVP', email: 'j.whitfield@prudential.com',
+      products: [
+        { name: 'PruCare LTC Traditional', type: 'LTC Standalone', volume: '195K policies', premium: '$2,800/yr avg', benefit: 'Up to $500/day · 3yr benefit period', status: 'Active' },
+        { name: 'PruFlexCare Hybrid', type: 'LTC + Life Hybrid', volume: '88K policies', premium: '$4,200/yr avg', benefit: '$300/day + $250K life', status: 'Active' },
+        { name: 'PruSecure Partnership', type: 'State Partnership LTC', volume: '37K policies', premium: '$3,100/yr avg', benefit: 'Dollar-for-dollar Medicaid asset protection', status: 'Active' }
+      ],
+      marketInsights: [
+        'Prudential leads the LTC standalone market with $4.2B in active reserves — largest in industry.',
+        'PRU expanded LTC claims operations by 14% in 2025, investing in AI-assisted adjudication technology (PAIC™).',
+        'Prudential\'s LTC loss ratios improving steadily — 2023: 68.4% → 2024: 63.1% → 2025: 61.2% (on target).',
+        'Partnership with IllumiFin (our TPA) cited in Prudential\'s 2025 Annual Report as a key operational efficiency driver.',
+        'PRU is piloting predictive care management AI for LTC claimants — expected to reduce avg claim duration 8%.',
+        'S&P reaffirmed A+ rating in March 2026 with "Stable" outlook, citing strong reserve adequacy for LTC block.'
+      ],
+      tpaValue: [
+        { metric: 'Annual TPA Fees Managed', value: '$18.4M', trend: '+6% YoY' },
+        { metric: 'Cost-per-Claim (TPA vs Direct)', value: '$412 vs $780', trend: '47% savings' },
+        { metric: 'SLA-Driven Incentive Earned', value: '$2.1M', trend: 'Q2 2026' },
+        { metric: 'Fraud Savings (AI Sentry)', value: '$890K', trend: 'YTD 2026' }
+      ],
+      contractRisks: 'Low. Contract expires 2029. No SLA breaches. 2 minor open items resolving. Recommend proactive renegotiation in Q1 2027 to lock extended 7-yr term.',
+      aiOpportunities: [
+        { title: 'AI Care Coordination Upsell', value: '$420K ARR', description: 'Prudential has expressed interest in expanding AI care plan generation across all 320K TPA policies.' },
+        { title: 'Predictive Claims Forecasting', value: '$280K ARR', description: 'Offer WealthAI predictive reserve model to Prudential CFO — PRU has $4.2B LTC reserves to optimize.' },
+        { title: 'EVV Analytics Module', value: '$185K ARR', description: 'Prudential Home Health book (38K policies) lacks EVV analytics — direct upsell opportunity.' }
+      ],
+      regulatoryWatch: 'TX DOI rate filing approved Mar 2026. CA rate action pending (est. Q4 2026). NY DFS audit scheduled Aug 2026 — no known issues.',
+      deepInsight: 'Prudential represents IllumiFin\'s highest-value LTC TPA relationship at $48M monthly premium under administration. The carrier\'s sustained SLA excellence (97.2%) reflects a mature, collaborative TPA partnership established in 2018. With Prudential\'s PAIC™ AI adjudication rollout in H2 2026, our TPA workflow integration must be validated for API compatibility. The $4.2B LTC reserve block is well-capitalized (129% of NAIC minimum), insulating against adverse claim trends. Key risk: PRU\'s 2025 10-K cited "increasing LTC claim severity" as a macro headwind — monitor benefit utilization rates quarterly. Recommended Q3 action: Submit formal Preferred TPA Partner proposal to secure volume commitments for 2027-2034 contract period.'
+    },
+    'CAR-002': {
+      id: 'CAR-002', name: 'MassMutual', ticker: 'Mutual (NYL peer)', founded: 1851,
+      hq: 'Springfield, MA', rating: 'A++ (AM Best) / Aaa (Moody\'s)', employees: '9,500+',
+      aum: '$283B AUM', revenue2025: '$10.7B', ltcBlockSize: '$1.8B reserves',
+      ltcPoliciesInForce: '~420K nationwide', marketShare: '8.9%',
+      type: 'Hybrid LTC/Life', tpaStart: '2015', contractExp: '2028',
+      slaScore: 98.1, totalPolicies: 215000, activeClaims: 5200,
+      premiumMo: '$31M', ytdPayout: '$870M', lossRatio: '58.7%',
+      fraudScore: 2, pendingItems: 0, aiHealth: 'Excellent',
+      contact: 'Diane Chow, VP Operations', email: 'd.chow@massmutual.com',
+      products: [
+        { name: 'CareChoice One', type: 'LTC Standalone', volume: '102K policies', premium: '$2,600/yr avg', benefit: '$200-350/day · 2-5yr benefit', status: 'Active' },
+        { name: 'LifeCare Advantage', type: 'Hybrid LTC/Life', volume: '78K policies', premium: '$5,100/yr avg', benefit: '$250/day LTC + $350K death benefit', status: 'Active' },
+        { name: 'FlexCare II', type: 'Short-Term LTC', volume: '35K policies', premium: '$1,400/yr avg', benefit: '90-day benefit · Bridge care', status: 'Active' }
+      ],
+      marketInsights: [
+        'MassMutual carries the highest financial strength rating in our portfolio — Aaa from Moody\'s, reflecting pristine claims-paying capacity.',
+        'MassMutual\'s LTC loss ratio of 58.7% is best in class — significantly below industry average of 74%. Strong underwriting discipline.',
+        'MM launched LifeCare Advantage hybrid product in 2024, growing 12% YoY — we\'re TPA for the entire book.',
+        'MassMutual is the only mutual carrier in our portfolio — no shareholder pressure; long-term relationship orientation.',
+        'MM invested $120M in digital claims infrastructure in 2025; IllumiFin TPA API integration is fully compatible.',
+        'Zero open performance items — our longest clean TPA record. Relationship since 2015 (longest in portfolio).'
+      ],
+      tpaValue: [
+        { metric: 'Annual TPA Fees Managed', value: '$11.2M', trend: '+12% YoY' },
+        { metric: 'Cost-per-Claim (TPA vs Direct)', value: '$398 vs $720', trend: '45% savings' },
+        { metric: 'SLA-Driven Incentive Earned', value: '$1.6M', trend: 'Q2 2026' },
+        { metric: 'AI Care Mgmt Savings', value: '$640K', trend: 'YTD 2026' }
+      ],
+      contractRisks: 'Very Low. Strongest performing carrier. Contract through 2028. Recommend early renewal negotiation in Q2 2027 for 8-year extension.',
+      aiOpportunities: [
+        { title: 'Hybrid Product Analytics Dashboard', value: '$310K ARR', description: 'MassMutual\'s LifeCare hybrid book is growing rapidly — offer dedicated analytics dashboard for both LTC and life triggers.' },
+        { title: 'AI Underwriting Risk Feed', value: '$240K ARR', description: 'Provide IllumiFin\'s AI underwriting insights to MM actuarial team — a competitive differentiator and data monetization opportunity.' },
+        { title: 'Short-Term LTC Triage Module', value: '$95K ARR', description: 'FlexCare II 90-day bridge claims require rapid triage — propose WealthAI express module for sub-14-day case resolution.' }
+      ],
+      regulatoryWatch: 'Clean regulatory record across all 50 states. No pending DOI actions. MA DOI annual exam completed Jan 2026 — no findings.',
+      deepInsight: 'MassMutual is IllumiFin\'s gold standard carrier partner. The 11-year relationship (since 2015) has produced zero SLA breaches, zero fraud escalations, and consistent performance above target. MM\'s Aaa credit rating and 58.7% loss ratio reflect disciplined LTC underwriting — a sharp contrast to sector peers facing rate shock. The LifeCare Advantage hybrid product is strategically important: as traditional LTC demand softens, hybrid products are capturing 61% of new LTC premium nationwide (LIMRA 2025). IllumiFin should position this relationship as the benchmark in all carrier RFPs. The 12% premium book growth YoY creates meaningful TPA fee upside for 2027. Recommended action: Nominate MassMutual for "Preferred Carrier Tier 1" designation and propose joint marketing of hybrid LTC/Life TPA capability to attract new carrier clients.'
+    },
+    'CAR-003': {
+      id: 'CAR-003', name: 'Genworth Financial', ticker: 'GNW', founded: 2004,
+      hq: 'Richmond, VA', rating: 'BB+ (S&P) / Ba1 (Moody\'s)', employees: '3,200+',
+      aum: '$N/A (run-off specialist)', revenue2025: '$7.4B', ltcBlockSize: '$38.7B reserves',
+      ltcPoliciesInForce: '~1.1M nationwide', marketShare: '22.1% (legacy leader)',
+      type: 'LTC Standalone', tpaStart: '2012', contractExp: '2027',
+      slaScore: 94.8, totalPolicies: 480000, activeClaims: 14800,
+      premiumMo: '$72M', ytdPayout: '$3.1B', lossRatio: '73.4%',
+      fraudScore: 12, pendingItems: 5, aiHealth: 'Needs Attention',
+      contact: 'Robert Stern, COO', email: 'r.stern@genworth.com',
+      products: [
+        { name: 'Total Living Coverage', type: 'LTC Standalone', volume: '310K policies', premium: '$3,400/yr avg', benefit: 'Up to $400/day · 3-5yr benefit', status: 'Active (rate actions in progress)' },
+        { name: 'Privileged Choice Flex', type: 'LTC Standalone', volume: '128K policies', premium: '$4,800/yr avg', benefit: '$500/day · Unlimited benefit', status: 'Closed to new sales 2022' },
+        { name: 'CA Partnership Plan', type: 'State Partnership', volume: '42K policies', premium: '$5,200/yr avg', benefit: 'Medicaid asset protection', status: 'Active' }
+      ],
+      marketInsights: [
+        'Genworth is the largest legacy LTC block in the U.S. ($38.7B reserves) — but faces ongoing rate pressure due to adverse claim experience.',
+        'GNW received rate approvals averaging +47% across 32 states since 2020. More increases likely in 2026-27 (CA, NY, FL pending).',
+        'Genworth\'s LTC loss ratio of 73.4% is above industry average — driven by aging claimant block and rising care costs.',
+        'China Oceanwide acquisition failed (2020-2022). GNW now operates independently with a strategic focus on LTC run-off management.',
+        'GNW Q1 2026 earnings: LTC segment posted $210M pre-tax income, up 8% vs Q1 2025 — rate actions taking hold.',
+        'IllumiFin TPA manages the largest single carrier book in portfolio: 480K policies, $72M/mo premium.'
+      ],
+      tpaValue: [
+        { metric: 'Annual TPA Fees Managed', value: '$26.8M', trend: '-2% YoY (claim complexity ↑)' },
+        { metric: 'Cost-per-Claim (TPA vs Direct)', value: '$445 vs $910', trend: '51% savings' },
+        { metric: 'SLA Recovery Impact', value: '$3.2M at risk', trend: 'If SLA < 95% for 90 days' },
+        { metric: 'Rate Action Admin Support', value: '$1.8M', trend: 'YTD 2026 (regulatory filings)' }
+      ],
+      contractRisks: 'ELEVATED. SLA 94.8% — 0.2pts below 95% floor. Contract up for renewal 2027 — 5 open performance items. 30-day staffing plan due. If SLA not recovered, contract clause §8.2 (remediation) may be triggered.',
+      aiOpportunities: [
+        { title: 'SLA Recovery Operations Suite', value: '$680K ARR', description: 'Deploy WealthAI SLA monitoring + auto-escalation for the 480K Genworth book — critical to prevent contract clause activation.' },
+        { title: 'Rate Action Administration', value: '$520K ARR', description: 'Genworth\'s ongoing state rate filings generate high-volume policyholder communication — offer dedicated WealthAI outreach module.' },
+        { title: 'Claims Complexity Triage', value: '$390K ARR', description: 'Genworth\'s aging book has disproportionate ADL 4-5 claimants — offer advanced clinical triage AI to reduce nurse review costs.' }
+      ],
+      regulatoryWatch: 'ACTIVE: CA rate filing for +18% pending (DOI review, est. Q3 2026). NY +22% filing submitted. VA regulatory examination scheduled Sep 2026. TX premium reconciliation overdue — IllumiFin action item.',
+      deepInsight: 'Genworth represents IllumiFin\'s highest-risk and highest-volume carrier relationship simultaneously. At 480K policies and $72M/month premium, it is our single largest TPA book — generating $26.8M in annual fees. However, the carrier faces structural headwinds: a legacy LTC block underwritten at artificially low rates in the 1990s-2000s is maturing into a high-cost claims population. The 73.4% loss ratio and 94.8% SLA both signal operational strain that must be addressed urgently. The contract renewal in 2027 is a pivotal moment — Genworth will scrutinize our SLA recovery trajectory closely. If IllumiFin can demonstrate a staffing-backed SLA improvement plan (target: 96%+ by Q4 2026), we position strongly to renew and potentially expand the TPA scope to include rate-action administration and Medicaid transition support. Failure to recover SLA risks losing a $26.8M annual fee relationship. Immediate action: Deploy 4 additional claims processors from reserve pool and activate WealthAI SLA sentinel by Aug 1.'
+    },
+    'CAR-004': {
+      id: 'CAR-004', name: 'Transamerica (Aegon)', ticker: 'AEGN (parent)', founded: 1928,
+      hq: 'Cedar Rapids, IA', rating: 'A (S&P) / A2 (Moody\'s)', employees: '11,200+',
+      aum: '$330B AUM (Aegon Americas)', revenue2025: '$8.9B', ltcBlockSize: '$3.1B reserves',
+      ltcPoliciesInForce: '~340K nationwide', marketShare: '7.2%',
+      type: 'Hybrid LTC/Ann', tpaStart: '2020', contractExp: '2030',
+      slaScore: 96.5, totalPolicies: 195000, activeClaims: 3900,
+      premiumMo: '$28M', ytdPayout: '$680M', lossRatio: '62.1%',
+      fraudScore: 3, pendingItems: 1, aiHealth: 'Good',
+      contact: 'Lisa Park, Director', email: 'l.park@transamerica.com',
+      products: [
+        { name: 'TransCare III LTC', type: 'LTC Standalone', volume: '98K policies', premium: '$3,100/yr avg', benefit: '$250/day · 4yr benefit period', status: 'Active' },
+        { name: 'Landmark Hybrid', type: 'LTC + Life Hybrid', volume: '62K policies', premium: '$6,200/yr avg', benefit: '$350/day LTC + $500K life + return of premium', status: 'Active · Growing' },
+        { name: 'Fixed Index Annuity LTC Rider', type: 'Annuity + LTC Rider', volume: '35K contracts', premium: '$4,800/yr avg', benefit: '2x annuity value for LTC care trigger', status: 'Active' }
+      ],
+      marketInsights: [
+        'Transamerica\'s parent Aegon Americas reported 12% LTC/Annuity hybrid growth in FY2025 — Landmark product driving expansion.',
+        'Transamerica\'s A-rated financial strength and $3.1B LTC reserves provide stable claims-paying capacity through 2030+.',
+        'Annuity+LTC rider strategy is winning market share from traditional LTC — 28% of new business in 2025 was annuity-linked.',
+        'Transamerica invested $85M in digital transformation in 2025 — EVV integration upgrade is the 1 open item with us (Q3 deadline).',
+        'Relationship since 2020 (youngest in portfolio) but growing fastest — 8% book growth YoY, longest contract (through 2030).',
+        'Loss ratio 62.1% compares favorably to industry median 74% — strong claims management outcomes.'
+      ],
+      tpaValue: [
+        { metric: 'Annual TPA Fees Managed', value: '$10.2M', trend: '+8% YoY' },
+        { metric: 'Cost-per-Claim (TPA vs Direct)', value: '$421 vs $800', trend: '47% savings' },
+        { metric: 'EVV Integration Value', value: '$720K', trend: 'Annual fraud reduction' },
+        { metric: 'Annuity-LTC Trigger Admin', value: '$1.4M', trend: 'New service line 2025' }
+      ],
+      contractRisks: 'Low. Longest contract in portfolio (2030). Good SLA performance. 1 open item (EVV upgrade) due Q3 2026 — on track.',
+      aiOpportunities: [
+        { title: 'Annuity-LTC Trigger Intelligence', value: '$350K ARR', description: 'Transamerica\'s unique annuity-linked LTC product requires specialized trigger assessment — WealthAI can automate 80% of qualification determinations.' },
+        { title: 'Fraud Sentry AI Module', value: '$190K ARR', description: 'Current fraud score 3 — low but the annuity-LTC product is a new fraud vector. Propose proactive monitoring suite.' },
+        { title: 'Care Cost Predictive Model', value: '$220K ARR', description: 'Transamerica\'s hybrid book growth creates reserve planning needs — offer WealthAI actuarial-grade care cost forecasting.' }
+      ],
+      regulatoryWatch: 'No pending regulatory actions. Iowa DOI annual exam completed clean Feb 2026. TX and CA in good standing.',
+      deepInsight: 'Transamerica is IllumiFin\'s highest-growth carrier partner and the strategic "future anchor" of our LTC TPA portfolio. The 2030 contract lock (longest in portfolio) provides fee certainty, while the 8% annual book growth projects significant fee uplift through the contract term. The annuity-linked LTC product (Landmark Hybrid + Fixed Index Annuity with LTC rider) represents the industry\'s leading edge — hybrid products now capture 61% of new LTC premium (LIMRA 2025), and Transamerica is positioned as a category leader. For IllumiFin, this creates a new TPA competency requirement: annuity-trigger administration. Our team successfully launched this service line in 2025 ($1.4M new fees). Recommended Q3 action: Propose Preferred Growth Partner designation, targeting a 2026 scope expansion to include the Aegon Netherlands LTC portfolio (≈$12M potential TPA fees). The EVV API upgrade must be completed by Sep 30 to protect this relationship.'
+    },
+    'CAR-005': {
+      id: 'CAR-005', name: 'Lincoln Financial Group', ticker: 'LNC', founded: 1905,
+      hq: 'Radnor, PA', rating: 'A- (S&P) / A2 (Moody\'s)', employees: '10,500+',
+      aum: '$290B AUM', revenue2025: '$17.2B', ltcBlockSize: '$2.8B reserves',
+      ltcPoliciesInForce: '~580K nationwide (LTC + Life + Annuity riders)',
+      marketShare: '6.1%',
+      type: 'Hybrid LTC/Life', tpaStart: '2016', contractExp: '2028',
+      slaScore: 95.9, totalPolicies: 280000, activeClaims: 6700,
+      premiumMo: '$39M', ytdPayout: '$1.2B', lossRatio: '65.3%',
+      fraudScore: 6, pendingItems: 3, aiHealth: 'Good',
+      contact: 'Mark Gunderson, VP', email: 'm.gunderson@lincolnnational.com',
+      products: [
+        { name: 'MoneyGuard Market Advantage', type: 'LTC + Universal Life Hybrid', volume: '145K policies', premium: '$5,800/yr avg', benefit: '$300/day LTC + UL death benefit + return-of-premium', status: 'Active · Top seller' },
+        { name: 'Lincoln LTC II', type: 'LTC Standalone', volume: '92K policies', premium: '$3,200/yr avg', benefit: '$275/day · 3yr benefit', status: 'Active' },
+        { name: 'Group LTC (New 2026)', type: 'Group/Worksite LTC', volume: '43K certificates', premium: '$1,800/yr avg', benefit: '$180/day · Employee benefit', status: 'Onboarding (60 days)' }
+      ],
+      marketInsights: [
+        'Lincoln\'s MoneyGuard suite is the #1 selling LTC/Life hybrid in the U.S. in 2024-2025 — driving consistent TPA volume growth.',
+        'LNC Q1 2026 earnings: LTC segment up 9% YoY; Group LTC new business up 34% following employer-sponsored LTC trend.',
+        'Lincoln is pivoting to Group/Worksite LTC — the "Group LTC" product we\'re onboarding is potentially the highest-growth product in our portfolio.',
+        'LNC\'s fraud score of 6 reflects 2 contested claims under SIU investigation — standard for a 280K-policy book. Not systemic.',
+        'Rate stability: Lincoln has not filed for LTC rate increases in 12 of its 15 key states — strong actuarial reserve position.',
+        'Annual audit and premium reconciliation open items are administrative in nature — no contractual risk.'
+      ],
+      tpaValue: [
+        { metric: 'Annual TPA Fees Managed', value: '$14.2M', trend: '+9% YoY' },
+        { metric: 'Group LTC Onboarding Value', value: '$3.8M', trend: 'New book 2026' },
+        { metric: 'MoneyGuard Trigger Admin', value: '$2.1M', trend: 'Hybrid trigger service' },
+        { metric: 'SIU Referral Support', value: '$180K', trend: 'YTD 2026' }
+      ],
+      contractRisks: 'Low-Moderate. 3 open items (audit, reconciliation, Group LTC onboarding). SLA 95.9% — healthy margin above floor. Contract 2028 renewal should include Group LTC scope expansion.',
+      aiOpportunities: [
+        { title: 'Group LTC TPA Platform Launch', value: '$1.2M ARR', description: 'Lincoln\'s new Group/Worksite LTC product requires employer portal, enrollment, and claims administration — WealthAI Group platform is ideal.' },
+        { title: 'MoneyGuard Analytics Suite', value: '$380K ARR', description: 'Lincoln\'s #1 hybrid product deserves dedicated analytics — we can provide lapse prediction, trigger forecasting, and benefit utilization modeling.' },
+        { title: 'SIU AI Fraud Intelligence', value: '$210K ARR', description: 'Expand fraud monitoring to address the elevated score — position WealthAI Fraud Sentry as a proactive risk management tool.' }
+      ],
+      regulatoryWatch: 'WATCH: NY Group LTC filing pending (est. Q4 2026). CA premium reconciliation — minor ($22K). SIU investigation of 2 contested claims (non-material, normal course).',
+      deepInsight: 'Lincoln Financial is IllumiFin\'s "strategic growth catalyst" carrier for 2026-2028. The MoneyGuard suite is the bestselling LTC/Life hybrid product in the U.S., and we TPA the full 280K-policy book. More importantly, Lincoln\'s Group LTC pivot represents the largest potential new business development opportunity in our portfolio: employer-sponsored LTC is projected to grow from $3.2B to $8.9B in premium by 2030 (McKinsey 2025). The 43K new Group LTC certificates we\'re currently onboarding are just the beginning — Lincoln has expressed interest in expanding the Group program to all 14,000 employer clients. This single product line could double our Lincoln fee relationship by 2028. The 3 open items (audit, reconciliation, Group onboarding) must be resolved by Sep 30 to demonstrate operational readiness for scaled Group expansion. Recommended Q3 action: Propose dedicated Group LTC TPA practice at IllumiFin, with Lincoln as the anchor client and case study.'
+    },
+    'CAR-006': {
+      id: 'CAR-006', name: 'Pacific Life Insurance', ticker: 'Mutual (private)', founded: 1868,
+      hq: 'Omaha, NE', rating: 'A+ (S&P) / A1 (Moody\'s)', employees: '3,100+',
+      aum: '$130B AUM', revenue2025: '$5.2B', ltcBlockSize: '$1.2B reserves',
+      ltcPoliciesInForce: '~190K nationwide (LTC block)',
+      marketShare: '4.2%',
+      type: 'LTC Standalone', tpaStart: '2019', contractExp: '2026',
+      slaScore: 92.4, totalPolicies: 142000, activeClaims: 4100,
+      premiumMo: '$21M', ytdPayout: '$580M', lossRatio: '76.8%',
+      fraudScore: 18, pendingItems: 8, aiHealth: 'Critical',
+      contact: 'Sandra Kim, CTO', email: 's.kim@pacificlife.com',
+      products: [
+        { name: 'Pacific PremierCare Choice Max', type: 'LTC + Whole Life Hybrid', volume: '72K policies', premium: '$6,800/yr avg', benefit: '$400/day · Unlimited benefit period', status: 'Active (under review)' },
+        { name: 'Pacific PremierCare Essential', type: 'LTC Standalone', volume: '48K policies', premium: '$3,200/yr avg', benefit: '$200/day · 3yr benefit', status: 'Active' },
+        { name: 'Legacy LTC Block (pre-2015)', type: 'LTC Standalone (run-off)', volume: '22K policies', premium: '$1,900/yr avg', benefit: 'Variable · original policy terms', status: 'Run-off management' }
+      ],
+      marketInsights: [
+        'CRITICAL: Pacific Life\'s LTC block SLA of 92.4% is 2.6pts below our contractual floor of 95% — triggering remediation clause review.',
+        'Pacific Life maintains A+ S&P rating for its broader insurance operations, but the LTC run-off block carries distinct financial risk.',
+        'PacLife\'s legacy pre-2015 LTC block has 76.8% loss ratio — driven by original policy underpricing and increasing claim severity.',
+        'Contract expires December 2026 — only 5 months away. Non-renewal risk is ELEVATED without SLA recovery evidence.',
+        'Pacific Life\'s executive team has changed significantly in 2024-2025 — new COO is actively evaluating TPA alternatives.',
+        'Fraud score of 18 reflects 2 contested claims under SIU investigation and 3 duplicate billing incidents identified in Q1 2026.'
+      ],
+      tpaValue: [
+        { metric: 'Annual TPA Fees Managed', value: '$7.6M', trend: '-5% YoY (volume pressure)' },
+        { metric: 'SLA Breach Penalty Risk', value: '$1.8M', trend: 'If below 95% for 90 days' },
+        { metric: 'Fraud Recovery (AI Sentry)', value: '$340K', trend: 'YTD 2026' },
+        { metric: 'Contract Non-Renewal Risk', value: '$7.6M annual', trend: 'HIGH risk by Dec 2026' }
+      ],
+      contractRisks: 'CRITICAL. Contract expires Dec 2026. SLA below contractual minimum. 8 open performance items. 76.8% loss ratio. New executive team evaluating TPA alternatives. IllumiFin must present 30-day recovery plan immediately or risk losing the relationship.',
+      aiOpportunities: [
+        { title: 'SLA Emergency Recovery Deployment', value: 'Contract retention $7.6M', description: 'Deploy emergency WealthAI SLA monitoring + overflow processing immediately to recover SLA from 92.4% to 95%+.' },
+        { title: 'Fraud Investigation Support', value: 'Claim savings $820K', description: 'Leverage WealthAI Fraud Sentry to resolve the 5 fraud-adjacent items — demonstrating TPA value ahead of contract renewal.' },
+        { title: 'Run-Off Block Optimization', value: '$420K ARR', description: 'Propose dedicated run-off management service for Pacific Life\'s legacy pre-2015 LTC block — a specialized capability few TPA firms offer.' }
+      ],
+      regulatoryWatch: 'URGENT: TX DOI regulatory filing overdue. CA DOI rate action pending. SIU active on 2 contested claims. IllumiFin is responsible for TX filing — must be submitted within 15 days.',
+      deepInsight: 'Pacific Life is IllumiFin\'s highest-urgency carrier relationship. The SLA breach (92.4% vs 95% contractual floor), 8 open performance items, Dec 2026 contract expiry, and new executive team evaluating alternatives create a perfect storm of retention risk. However, losing this relationship would represent a $7.6M annual fee loss — significant but manageable. The strategic question is whether IllumiFin can credibly commit to SLA recovery in the remaining 5 months. The primary driver of underperformance is staffing: 8 vacancies in the Pacific Life claims team, compounded by the complexity of the pre-2015 run-off block (22K policies with non-standard benefit structures). WealthAI automation can recover approximately 1.2-1.8 SLA points within 45-60 days if deployed immediately to the Pacific Life queue. Recommended immediate actions: (1) Emergency 30-day recovery plan presented to Sandra Kim by Jul 18; (2) Assign 3 senior claims processors exclusively to PacLife queue; (3) Resolve TX DOI filing overdue TODAY; (4) Submit formal contract renewal proposal with SLA commitment and remediation guarantee by Jul 25. If recovery is not achievable, begin managed transition planning — do not allow contract to lapse without a structured wind-down to protect reputation.'
+    }
+  };
+
+  /* ── LOCAL HELPERS ────────────────────────────────────────────────────── */
+  function _p32ov(id, html) {
+    document.getElementById(id) && document.getElementById(id).remove();
+    document.body.insertAdjacentHTML('beforeend',
+      '<div id="'+id+'" style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:10001;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;">'
+      +'<div style="position:relative;min-height:100%;">'+html+'</div></div>');
+    document.getElementById(id).addEventListener('click', function(e){ if(e.target===this) _p32close(id); });
+  }
+
+  function _p32close(id) { var el = document.getElementById(id); if(el) el.remove(); }
+
+  function _p32toast(msg, dur) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:13px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;max-width:440px;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.35);';
+    d.innerHTML = msg;
+    document.body.appendChild(d);
+    setTimeout(function(){ d.style.opacity='0'; d.style.transition='opacity .4s'; setTimeout(function(){d.remove();},400); }, dur||4000);
+  }
+
+  function _p32kpi(val, lbl, icon, color, sub) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;">'
+      +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:5px;">'
+      +'<div style="width:30px;height:30px;background:'+color+'1a;border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fas '+icon+'" style="color:'+color+';font-size:13px;"></i></div>'
+      +'<div style="font-size:19px;font-weight:800;color:#111827;">'+val+'</div></div>'
+      +'<div style="font-size:11px;font-weight:700;color:#374151;">'+lbl+'</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin-top:2px;">'+sub+'</div>'
+      +'</div>';
+  }
+
+  function _p32row(lbl, val) {
+    return '<div style="background:#f8fafc;border-radius:8px;padding:9px 12px;">'
+      +'<div style="font-size:10px;color:#9ca3af;font-weight:700;text-transform:uppercase;margin-bottom:2px;">'+lbl+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:#111827;line-height:1.5;">'+val+'</div>'
+      +'</div>';
+  }
+
+  function _p32ai(html, color) {
+    var c = color || 'linear-gradient(135deg,#7c3aed,#6d28d9)';
+    return '<div style="background:linear-gradient(135deg,rgba(124,58,237,.07),rgba(109,40,217,.07));border:1.5px solid #7c3aed33;border-radius:12px;padding:16px;margin-bottom:16px;">'
+      +'<div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:8px;display:flex;align-items:center;gap:7px;"><div style="width:22px;height:22px;background:'+c+';border-radius:6px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-robot" style="color:#fff;font-size:10px;"></i></div> WealthAI Intelligence</div>'
+      +'<div style="font-size:12px;color:#374151;line-height:1.75;">'+html+'</div>'
+      +'</div>';
+  }
+
+  function _p32badge(txt, color, bg) {
+    return '<span style="background:'+(bg||color+'22')+';color:'+color+';border:1px solid '+color+'44;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;">'+txt+'</span>';
+  }
+
+  function _p32section(title, icon, color) {
+    return '<div style="font-size:13px;font-weight:800;color:#111827;margin:18px 0 10px;display:flex;align-items:center;gap:8px;">'
+      +'<div style="width:26px;height:26px;background:'+color+'1a;border-radius:7px;display:flex;align-items:center;justify-content:center;"><i class="fas '+icon+'" style="color:'+color+';font-size:11px;"></i></div>'
+      + title+'</div>';
+  }
+
+  function _p32prodRow(p) {
+    var sc = p.status.indexOf('Active') > -1 ? '#059669' : p.status.indexOf('Closed') > -1 ? '#dc2626' : '#d97706';
+    return '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:8px;align-items:center;margin-bottom:8px;">'
+      +'<div><div style="font-size:12px;font-weight:800;color:#111827;">'+p.name+'</div><div style="font-size:10px;color:#6b7280;">'+p.type+'</div></div>'
+      +'<div style="font-size:11px;font-weight:700;color:#374151;">'+p.volume+'</div>'
+      +'<div style="font-size:11px;color:#6b7280;">'+p.benefit+'</div>'
+      +'<span style="background:'+sc+'1a;color:'+sc+';border:1px solid '+sc+'44;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;text-align:center;">'+p.status.split('(')[0].trim()+'</span>'
+      +'</div>';
+  }
+
+  function _p32oppCard(o, hc) {
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-left:3px solid '+(hc||'#7c3aed')+';border-radius:10px;padding:12px 14px;margin-bottom:8px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">'
+      +'<div style="font-size:12px;font-weight:800;color:#111827;">'+o.title+'</div>'
+      +'<span style="background:#059669;color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;white-space:nowrap;margin-left:8px;">'+o.value+'</span>'
+      +'</div>'
+      +'<div style="font-size:11px;color:#6b7280;line-height:1.6;">'+o.description+'</div>'
+      +'</div>';
+  }
+
+  function _p32insightBullet(txt) {
+    return '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:7px;font-size:12px;color:#374151;line-height:1.6;">'
+      +'<i class="fas fa-circle-dot" style="color:#7c3aed;font-size:8px;margin-top:5px;flex-shrink:0;"></i>'
+      +'<span>'+txt+'</span></div>';
+  }
+
+  /* ─── TAB SYSTEM ─────────────────────────────────────────────────────── */
+  function _p32tab(idx, id, label, icon) {
+    return '<button id="p32t-'+id+'-'+idx+'" onclick="_p32switchTab(\''+id+'\','+idx+')" style="display:flex;align-items:center;gap:6px;padding:9px 14px;border:none;border-bottom:3px solid transparent;background:transparent;font-size:12px;font-weight:600;color:#6b7280;cursor:pointer;white-space:nowrap;">'
+      +'<i class="fas '+icon+'" style="font-size:11px;"></i>'+label+'</button>';
+  }
+
+  window._p32switchTab = function(id, idx) {
+    var panels = document.querySelectorAll('[id^="p32pan-'+id+'-"]');
+    var tabs   = document.querySelectorAll('[id^="p32t-'+id+'-"]');
+    panels.forEach(function(p,i){
+      p.style.display = i===idx ? 'block' : 'none';
+    });
+    tabs.forEach(function(t,i){
+      t.style.color        = i===idx ? '#7c3aed' : '#6b7280';
+      t.style.borderBottom = i===idx ? '3px solid #7c3aed' : '3px solid transparent';
+      t.style.fontWeight   = i===idx ? '700' : '600';
+    });
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ENHANCED FULL 360 MODAL — 6 TABS PER CARRIER
+  ═══════════════════════════════════════════════════════════════════════ */
+  window.ltcOpenCarrier360 = function(carrierId) {
+    var d = _p32carriers[carrierId];
+    if (!d) {
+      // Fall back to base handler if no P32 data
+      var allC = window.ltcCarrierData360 || [];
+      var c = allC.find(function(x){ return x.id === carrierId; });
+      if (c) _p32toast('<i class="fas fa-building"></i> Opening '+c.name+' 360° — Loading carrier data', 3000);
+      return;
+    }
+    var hc = { Excellent:'#059669', Good:'#0891b2', 'Needs Attention':'#d97706', Critical:'#dc2626' }[d.aiHealth] || '#6b7280';
+    var sc = d.slaScore >= 97 ? '#059669' : d.slaScore >= 95 ? '#d97706' : '#dc2626';
+    var uid = 'c360-'+carrierId;
+
+    var tabs = [
+      { label:'Overview',    icon:'fa-th-large'    },
+      { label:'Products',    icon:'fa-layer-group'  },
+      { label:'SLA & Ops',   icon:'fa-tachometer-alt'},
+      { label:'Financials',  icon:'fa-dollar-sign'  },
+      { label:'Risk & Reg',  icon:'fa-shield-alt'   },
+      { label:'AI Insights', icon:'fa-robot'        }
+    ];
+
+    /* ── Build tab HTML panels ── */
+
+    // Panel 0: Overview
+    var pan0 = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">'
+      + _p32kpi(d.totalPolicies.toLocaleString(), 'Total Policies', 'fa-file-contract', '#003087', 'In TPA administration')
+      + _p32kpi(d.activeClaims.toLocaleString(), 'Active Claims', 'fa-file-medical-alt', '#dc2626', 'Real-time monitoring')
+      + _p32kpi(d.slaScore+'%', 'SLA Score', 'fa-tachometer-alt', sc, 'Contractual min: 95%')
+      + _p32kpi(d.premiumMo, 'Monthly Premium', 'fa-dollar-sign', '#059669', 'YTD: '+d.ytdPayout)
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">'
+      + _p32row('Company Founded', d.founded)
+      + _p32row('Headquarters', d.hq)
+      + _p32row('Financial Rating', d.rating)
+      + _p32row('AUM / Revenue', d.aum + ' · ' + d.revenue2025)
+      + _p32row('LTC Reserve Block', d.ltcBlockSize)
+      + _p32row('Nationwide LTC Policies', d.ltcPoliciesInForce)
+      + _p32row('Market Share (LTC)', d.marketShare)
+      + _p32row('Employees', d.employees)
+      + _p32row('Carrier Contact', d.contact)
+      + _p32row('Email', d.email)
+      + _p32row('TPA Relationship Since', d.tpaStart)
+      + _p32row('Contract Expiry', d.contractExp)
+      +'</div>'
+      + _p32ai('<strong>AI Portfolio Context:</strong> '+d.aiInsight||d.deepInsight.substring(0,280)+'...', 'linear-gradient(135deg,#7c3aed,#6d28d9)');
+
+    // Panel 1: Products
+    var pan1 = _p32section('LTC Product Portfolio', 'fa-layer-group', '#003087')
+      +'<div style="background:#f0f4ff;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:#374151;line-height:1.7;">'
+      +'<div style="display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr;gap:8px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:6px;padding:0 14px;">'
+      +'<span>Product Name</span><span>Volume</span><span>Benefit Structure</span><span>Status</span></div>'
+      + d.products.map(function(p){ return _p32prodRow(p); }).join('')
+      +'</div>'
+      + _p32section('TPA Value Generated', 'fa-chart-line', '#059669')
+      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px;">'
+      + d.tpaValue.map(function(t){
+        return '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;">'
+          +'<div style="font-size:15px;font-weight:800;color:#059669;">'+t.value+'</div>'
+          +'<div style="font-size:11px;font-weight:700;color:#374151;margin-top:2px;">'+t.metric+'</div>'
+          +'<div style="font-size:10px;color:#6b7280;">'+t.trend+'</div></div>';
+      }).join('')
+      +'</div>';
+
+    // Panel 2: SLA & Operations
+    var slaColor = d.slaScore >= 97 ? '#059669' : d.slaScore >= 95 ? '#d97706' : '#dc2626';
+    var slaBar = Math.round((d.slaScore/100)*100);
+    var pan2 = _p32section('SLA Performance Dashboard', 'fa-tachometer-alt', slaColor)
+      +'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:14px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
+      +'<div><div style="font-size:28px;font-weight:900;color:'+slaColor+';">'+d.slaScore+'%</div>'
+      +'<div style="font-size:11px;color:#6b7280;">Current SLA · Contractual minimum: 95%</div></div>'
+      + _p32badge(d.aiHealth, hc)
+      +'</div>'
+      +'<div style="background:#f3f4f6;border-radius:20px;height:10px;margin-bottom:14px;">'
+      +'<div style="height:10px;border-radius:20px;background:'+slaColor+';width:'+slaBar+'%;transition:width 1s;"></div></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">'
+      + _p32kpi('4.2d', 'Avg Adj. Days', 'fa-calendar-check', '#003087', 'Target: ≤5.0 days')
+      + _p32kpi('99.1%', 'Payment Accuracy', 'fa-check-circle', '#059669', 'Target: 99%+')
+      + _p32kpi(d.pendingItems+' item'+(d.pendingItems===1?'':'s'), 'Open Items', 'fa-tasks', d.pendingItems>3?'#dc2626':d.pendingItems>0?'#d97706':'#059669', 'Performance items')
+      +'</div></div>'
+      + (d.pendingItems > 0 ? '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:14px;margin-bottom:14px;">'
+        +'<div style="font-size:12px;font-weight:800;color:#dc2626;margin-bottom:8px;"><i class="fas fa-tasks" style="margin-right:6px;"></i>Open Performance Items ('+d.pendingItems+')</div>'
+        +'<div style="font-size:11px;color:#7f1d1d;line-height:2;">'
+        +(d.id==='CAR-003'?'<div>① SLA recovery staffing plan required within 30 days</div><div>② 12 open RN/Claims specialist positions unfilled</div><div>③ Annual operational audit due Aug 1, 2026</div><div>④ Premium reconciliation discrepancy ($148K) — pending resolution</div><div>⑤ EVV upgrade to CareExchange API v3.2 — 45 days overdue</div>':'')
+        +(d.id==='CAR-006'?'<div>① CRITICAL: SLA 2.6pts below contractual minimum — formal remediation required</div><div>② Executive escalation in progress — COO meeting Jul 18</div><div>③ Contract renewal risk HIGH — 5 months to expiry</div><div>④ SIU investigation active — 2 contested claims</div><div>⑤ 8 vacancies in claims processing team</div><div>⑥ Loss ratio remediation plan requested by carrier</div><div>⑦ Premium billing errors — 3 accounts flagged</div><div>⑧ TX DOI regulatory filing OVERDUE — immediate action required</div>':'')
+        +(d.id==='CAR-005'?'<div>① Annual audit scheduling — pending confirmation with Lincoln</div><div>② Premium reconciliation ($22K) — processing this week</div><div>③ Group LTC product onboarding — 60-day timeline in progress</div>':'')
+        +(d.id==='CAR-004'?'<div>① EVV API upgrade to CareExchange v3.2 — due Sep 30, 2026 · On track</div>':'')
+        +(d.id==='CAR-001'?'<div>① Billing format update — minor · In progress</div><div>② Annual audit — scheduled Aug 15, 2026 · Prepared</div>':'')
+        +'</div></div>' : '')
+      + _p32ai('<strong>SLA Intelligence:</strong> '
+        +(d.slaScore>=97?'Performing in the top tier of the carrier portfolio. SLA has been consistently above 97% for the past 3 quarters. Payment accuracy 99.1% is best in class. Recommend Preferred Carrier designation for Q3.'
+        :d.slaScore>=95?'SLA within contractual bounds but monitoring is warranted. Recent adjudication pattern shows minor delays in complex clinical cases. WealthAI recommends proactive staffing review for Q3 volume.'
+        :'⚠️ SLA below 95% contractual threshold. WealthAI has flagged this as a priority recovery situation. Emergency staffing reallocation and AI-assisted claims routing can recover approximately 1.5 SLA points within 45 days. Immediate action required to protect contract relationship.'));
+
+    // Panel 3: Financials
+    var pan3 = _p32section('Financial Profile', 'fa-dollar-sign', '#059669')
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">'
+      + _p32kpi(d.premiumMo, 'Monthly Premium Managed', 'fa-dollar-sign', '#059669', 'YTD: '+d.ytdPayout)
+      + _p32kpi(d.lossRatio, 'Loss Ratio', 'fa-percentage', parseFloat(d.lossRatio)>70?'#dc2626':parseFloat(d.lossRatio)>65?'#d97706':'#059669', 'Industry avg: 74%')
+      + _p32kpi(d.ltcBlockSize, 'LTC Reserve Block', 'fa-piggy-bank', '#003087', 'Carrier-held reserves')
+      +'</div>'
+      + _p32section('TPA Revenue Impact', 'fa-chart-bar', '#003087')
+      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">'
+      + d.tpaValue.map(function(t){
+        return _p32row(t.metric, '<span style="color:#059669;font-weight:800;">'+t.value+'</span> <span style="font-size:10px;color:#6b7280;">'+t.trend+'</span>');
+      }).join('')
+      +'</div>'
+      + _p32ai('<strong>Financial Intelligence:</strong> '
+        +'<strong>Revenue:</strong> '+d.revenue2025+' (carrier). <strong>IllumiFin TPA Revenue:</strong> '+d.tpaValue[0].value+'/yr from this relationship. '
+        +'<strong>Loss Ratio Benchmark:</strong> Carrier loss ratio of '+d.lossRatio+' compares to industry median of 74%. '
+        +(parseFloat(d.lossRatio)<65?'Well below benchmark — strong underwriting and active claims management. TPA value is clear in maintaining this performance level.':parseFloat(d.lossRatio)<70?'Near industry median — monitoring recommended. WealthAI care management tools can reduce claim duration 8-12% based on portfolio models.':'Above industry benchmark — elevated claim severity signals aging block or prior underpricing. WealthAI actuarial reporting module recommended.')
+        +'<br><br><strong>Reserve Adequacy:</strong> '+d.ltcBlockSize+' in active reserves. '+(parseFloat(d.ltcBlockSize)>3?'Well-capitalized — minimal insolvency risk over TPA contract horizon.':'Moderate reserve level — continue monitoring quarterly. NAIC minimum coverage appears adequate.'));
+
+    // Panel 4: Risk & Regulatory
+    var pan4 = _p32section('Risk Assessment', 'fa-shield-alt', '#d97706')
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">'
+      + _p32kpi(d.fraudScore+'/100', 'Fraud Risk Score', 'fa-shield-alt', d.fraudScore<8?'#059669':d.fraudScore<15?'#d97706':'#dc2626', d.fraudScore<8?'Clear':'Elevated — Monitor')
+      + _p32kpi(d.rating.split('/')[0].trim(), 'Financial Rating', 'fa-star', '#003087', 'S&P · '+d.rating.split('/')[1]||'AM Best')
+      + _p32kpi(d.contractExp, 'Contract Expiry', 'fa-calendar-times', parseInt(d.contractExp)<2027?'#dc2626':parseInt(d.contractExp)<2029?'#d97706':'#059669', 'Renewal planning needed')
+      +'</div>'
+      + _p32section('Contract Risk Summary', 'fa-file-contract', '#dc2626')
+      +'<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:#374151;line-height:1.8;">'
+      + d.contractRisks
+      +'</div>'
+      + _p32section('Regulatory Watch', 'fa-gavel', '#7c3aed')
+      +'<div style="background:#faf5ff;border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:#4c1d95;line-height:1.8;">'
+      +'<i class="fas fa-gavel" style="margin-right:6px;"></i>'+ d.regulatoryWatch
+      +'</div>'
+      + _p32ai('<strong>Risk Intelligence:</strong> Fraud risk score: <strong>'+d.fraudScore+'/100</strong> ('+(d.fraudScore<8?'Clear — no material concerns':d.fraudScore<15?'Low-elevated — 2 SIU-adjacent items being monitored':'Elevated — active SIU investigation and billing anomalies')+'). Contract risk: '+(parseInt(d.contractExp)<2027?'HIGH — contract expires in under 6 months':'LOW-MODERATE — sufficient runway for structured renewal strategy')+'. WealthAI recommendation: '+(parseInt(d.contractExp)<2027?'Immediately initiate 30-day recovery plan and formal renewal proposal to carrier executive team.':'Begin renewal preparation 18 months prior to expiry. Current performance supports strong negotiating position.'));
+
+    // Panel 5: AI Insights
+    var pan5 = _p32section('WealthAI Deep Carrier Intelligence', 'fa-robot', '#7c3aed')
+      + _p32ai('<strong>Strategic Analysis — '+d.name+'</strong><br><br>'+d.deepInsight, 'linear-gradient(135deg,#7c3aed,#6d28d9)')
+      + _p32section('Market Intelligence', 'fa-globe', '#003087')
+      +'<div style="margin-bottom:16px;">'
+      + d.marketInsights.map(function(ins){ return _p32insightBullet(ins); }).join('')
+      +'</div>'
+      + _p32section('AI Revenue Opportunities', 'fa-lightbulb', '#059669')
+      + d.aiOpportunities.map(function(o){ return _p32oppCard(o, hc); }).join('');
+
+    /* ── Assemble modal ── */
+    var tabBar = '<div style="display:flex;overflow-x:auto;border-bottom:1px solid #e5e7eb;background:#fafafa;padding:0 22px;">'
+      + tabs.map(function(t,i){ return _p32tab(i, uid, t.label, t.icon); }).join('')
+      +'</div>';
+
+    var panels = [pan0, pan1, pan2, pan3, pan4, pan5].map(function(p,i){
+      return '<div id="p32pan-'+uid+'-'+i+'" style="display:'+(i===0?'block':'none')+';">'+p+'</div>';
+    }).join('');
+
+    var html = '<div style="background:#fff;border-radius:16px;width:860px;max-width:96vw;max-height:92vh;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35);display:flex;flex-direction:column;">'
+      +'<div style="background:linear-gradient(135deg,#003087,#0056b3);padding:18px 24px;border-radius:16px 16px 0 0;color:#fff;display:flex;align-items:center;gap:12px;flex-shrink:0;">'
+      +'<div style="width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-building" style="font-size:20px;"></i></div>'
+      +'<div>'
+      +'<div style="font-size:18px;font-weight:900;">'+d.name+' — Carrier 360°</div>'
+      +'<div style="font-size:12px;opacity:.85;">'+d.type+' · TPA since '+d.tpaStart+' · Contract expires '+d.contractExp+' · '+d.rating.split('/')[0].trim()+'</div>'
+      +'</div>'
+      +'<div style="margin-left:auto;display:flex;gap:8px;align-items:center;">'
+      + _p32badge(d.aiHealth, hc)
+      +'<button onclick="_p32close(\'p32-full-'+carrierId+'\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:700;">✕ Close</button>'
+      +'</div></div>'
+      + tabBar
+      +'<div style="flex:1;overflow-y:auto;padding:22px;">'
+      + panels
+      +'</div>'
+      +'<div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;gap:8px;flex-wrap:wrap;background:#f9fafb;flex-shrink:0;">'
+      +'<button onclick="ltcCarrierAction(\'contact\',\''+carrierId+'\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-phone" style="margin-right:5px;"></i>Contact '+d.contact.split(',')[0]+'</button>'
+      +'<button onclick="ltcCarrierAction(\'report\',\''+carrierId+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-chart-bar" style="margin-right:5px;"></i>Performance Report</button>'
+      +'<button onclick="ltcCarrierAction(\'claims\',\''+carrierId+'\')" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-file-medical-alt" style="margin-right:5px;"></i>View Claims</button>'
+      +(d.slaScore<95 || d.pendingItems>3 ? '<button onclick="ltcCarrierAction(\'escalate\',\''+carrierId+'\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-arrow-up" style="margin-right:5px;"></i>Escalate</button>' : '')
+      +'<button onclick="_p32close(\'p32-full-'+carrierId+'\');_p32openDeepReview(\''+carrierId+'\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-robot" style="margin-right:5px;"></i>AI Deep Review</button>'
+      +'</div></div>';
+
+    _p32ov('p32-full-'+carrierId, html);
+    // Activate tab 0 highlight
+    setTimeout(function(){ window._p32switchTab(uid, 0); }, 50);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     AI PORTFOLIO REVIEW — ENTERPRISE PORTFOLIO DASHBOARD
+  ═══════════════════════════════════════════════════════════════════════ */
+  function _p32openPortfolioReview() {
+    var allD   = Object.values(_p32carriers);
+    var allC   = window.ltcCarrierData360 || [];
+    var total  = allD.reduce(function(s,x){ return s + x.totalPolicies; }, 0);
+    var claims = allD.reduce(function(s,x){ return s + x.activeClaims;  }, 0);
+    var premium= allD.reduce(function(s,x){
+      return s + parseFloat((x.premiumMo||'$0').replace(/[^0-9.]/g,''));
+    }, 0);
+    var avgSla = (allD.reduce(function(s,x){ return s+x.slaScore; },0) / allD.length).toFixed(1);
+    var hcMap  = { Excellent:'#059669', Good:'#0891b2', 'Needs Attention':'#d97706', Critical:'#dc2626' };
+
+    // Portfolio health distribution
+    var healthDist = { Excellent:0, Good:0, 'Needs Attention':0, Critical:0 };
+    allD.forEach(function(x){ healthDist[x.aiHealth] = (healthDist[x.aiHealth]||0)+1; });
+
+    // Carrier table rows
+    var carrierRows = allD.map(function(x) {
+      var sc = x.slaScore>=97?'#059669':x.slaScore>=95?'#d97706':'#dc2626';
+      var hc = hcMap[x.aiHealth]||'#6b7280';
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:800;color:#111827;"><i class="fas fa-building" style="color:#003087;margin-right:7px;"></i>'+x.name+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:#6b7280;">'+x.type+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#374151;">'+x.totalPolicies.toLocaleString()+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#374151;">'+x.activeClaims.toLocaleString()+'</td>'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:800;color:'+sc+';">'+x.slaScore+'%</td>'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:700;color:'+hc+';"><span style="background:'+hc+'1a;padding:2px 9px;border-radius:20px;border:1px solid '+hc+'44;">'+x.aiHealth+'</span></td>'
+        +'<td style="padding:10px 12px;font-size:12px;font-weight:700;color:#059669;">'+x.premiumMo+'</td>'
+        +'<td style="padding:10px 12px;font-size:11px;color:'+(parseInt(x.contractExp)<2027?'#dc2626':parseInt(x.contractExp)<2029?'#d97706':'#374151')+';">'+x.contractExp+'</td>'
+        +'<td style="padding:10px 12px;">'
+        +'<button onclick="_p32close(\'p32-portfolio-ov\');ltcOpenCarrier360(\''+x.id+'\')" style="background:#003087;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;margin-right:4px;">Full 360</button>'
+        +'<button onclick="_p32close(\'p32-portfolio-ov\');_p32openDeepReview(\''+x.id+'\')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;">AI Review</button>'
+        +'</td>'
+        +'</tr>';
+    }).join('');
+
+    // Market Intelligence bullets (portfolio-level)
+    var portfolioInsights = [
+      'Portfolio LTC premium under TPA administration: <strong>$'+premium.toFixed(0)+'M/month ($'+(premium*12).toFixed(0)+'M ARR)</strong> — robust and diversified.',
+      'Hybrid LTC/Life products (MassMutual, Transamerica, Lincoln) represent <strong>45%</strong> of policy count and <strong>58%</strong> of premium — aligned with the industry trend toward linked-benefit products.',
+      'Portfolio SLA average: <strong>'+avgSla+'%</strong>. Five of six carriers meeting contractual SLA floors. Pacific Life is the only breach — remediation plan in progress.',
+      'Loss ratio range: <strong>58.7% (MassMutual) to 76.8% (Pacific Life)</strong>. Portfolio blended loss ratio ~67% vs industry benchmark 74% — indicating strong TPA clinical management value.',
+      'Combined nationwide LTC policy exposure: <strong>'+total.toLocaleString()+'</strong> policies under IllumiFin TPA administration — one of the largest consolidated LTC TPA portfolios in the U.S.',
+      'Largest revenue concentration: <strong>Genworth ('+Math.round(72/premium*100)+'%)</strong> and <strong>Prudential ('+Math.round(48/premium*100)+'%)</strong> account for '+(Math.round(72/premium*100)+Math.round(48/premium*100))+'% of monthly premium managed.',
+      'Contract expiry risk: Pacific Life (Dec 2026) requires immediate action. Genworth (2027) and MassMutual (2028) renewals should begin 18 months prior.',
+      'AI Opportunity pipeline across all carriers: <strong>$4.4M+ in incremental ARR</strong> identified — including Group LTC platform (Lincoln), AI Care Coordination (Prudential), and Portfolio Analytics Suite.'
+    ];
+
+    // Action Plan
+    var actionPlan = [
+      { priority:'🔴 IMMEDIATE', action:'Pacific Life 30-day SLA recovery plan', owner:'VP Claims + Account Mgr', due:'Jul 18, 2026' },
+      { priority:'🔴 IMMEDIATE', action:'TX DOI filing submission (Pacific Life)', owner:'Compliance Team', due:'Jul 12, 2026' },
+      { priority:'🟠 HIGH', action:'Genworth staffing plan — 12 open positions', owner:'Operations Director', due:'Aug 1, 2026' },
+      { priority:'🟠 HIGH', action:'Transamerica EVV API upgrade completion', owner:'Tech Integration', due:'Sep 30, 2026' },
+      { priority:'🟡 MEDIUM', action:'Lincoln Group LTC onboarding (60-day milestone)', owner:'Onboarding Team', due:'Sep 15, 2026' },
+      { priority:'🟡 MEDIUM', action:'Prudential contract renewal prep (Q1 2027)', owner:'Account Management', due:'Nov 30, 2026' },
+      { priority:'🟢 STRATEGIC', action:'MassMutual Preferred Tier 1 designation proposal', owner:'EVP Carrier Relations', due:'Aug 15, 2026' },
+      { priority:'🟢 STRATEGIC', action:'Portfolio AI Revenue Opportunity presentation to CFO', owner:'Growth + Finance', due:'Jul 31, 2026' }
+    ];
+
+    var actionRows = actionPlan.map(function(a){
+      return '<tr style="border-bottom:1px solid #f3f4f6;">'
+        +'<td style="padding:9px 12px;font-size:11px;font-weight:700;">'+a.priority+'</td>'
+        +'<td style="padding:9px 12px;font-size:12px;color:#111827;font-weight:600;">'+a.action+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;color:#6b7280;">'+a.owner+'</td>'
+        +'<td style="padding:9px 12px;font-size:11px;font-weight:700;color:#374151;">'+a.due+'</td>'
+        +'</tr>';
+    }).join('');
+
+    var html = '<div style="background:#fff;border-radius:16px;width:980px;max-width:96vw;box-shadow:0 24px 80px rgba(0,0,0,.35);overflow:hidden;">'
+      // Header
+      +'<div style="background:linear-gradient(135deg,#7c3aed,#4c1d95);padding:22px 28px;color:#fff;display:flex;align-items:center;gap:14px;">'
+      +'<div style="width:50px;height:50px;background:rgba(255,255,255,.15);border-radius:14px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-robot" style="font-size:24px;"></i></div>'
+      +'<div><div style="font-size:20px;font-weight:900;">AI Portfolio Review — All Carriers</div>'
+      +'<div style="font-size:12px;opacity:.85;">Enterprise LTC &amp; HAL TPA carrier intelligence · IllumiFin WealthAI · Q2-Q3 2026</div></div>'
+      +'<button onclick="_p32close(\'p32-portfolio-ov\')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:12px;font-weight:700;">✕ Close</button>'
+      +'</div>'
+      +'<div style="padding:24px;max-height:82vh;overflow-y:auto;">'
+
+      // Portfolio KPIs
+      +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px;">'
+      + _p32kpi(allD.length+'', 'Carrier Relationships', 'fa-building', '#003087', 'LTC · HAL · Hybrid')
+      + _p32kpi(total.toLocaleString(), 'Total Policies', 'fa-file-contract', '#0891b2', 'Across all TPA books')
+      + _p32kpi(claims.toLocaleString(), 'Active Claims', 'fa-file-medical-alt', '#dc2626', 'Real-time monitoring')
+      + _p32kpi('$'+premium.toFixed(0)+'M/mo', 'Premium Managed', 'fa-dollar-sign', '#059669', 'YTD ~$'+(premium*7).toFixed(0)+'M')
+      + _p32kpi(avgSla+'%', 'Portfolio SLA Avg', 'fa-tachometer-alt', parseFloat(avgSla)>=95?'#059669':'#d97706', 'vs 95% floor')
+      +'</div>'
+
+      // Health Distribution
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px;">'
+      + Object.entries(healthDist).map(function(e){
+        var hc2 = hcMap[e[0]]||'#6b7280';
+        return '<div style="background:'+hc2+'0f;border:1.5px solid '+hc2+'33;border-radius:12px;padding:14px;text-align:center;">'
+          +'<div style="font-size:28px;font-weight:900;color:'+hc2+';">'+e[1]+'</div>'
+          +'<div style="font-size:11px;font-weight:700;color:'+hc2+';margin-top:4px;">'+e[0]+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+
+      // WealthAI Portfolio Analysis
+      + _p32ai('<strong>WEALTHAI PORTFOLIO INTELLIGENCE BRIEF — Q3 2026</strong><br><br>'
+        +'<strong>Portfolio Health:</strong> 6 active carrier relationships. 2 Excellent (Prudential, MassMutual) · 2 Good (Transamerica, Lincoln) · 1 Needs Attention (Genworth) · 1 Critical (Pacific Life). Portfolio SLA average '+avgSla+'% — '+(parseFloat(avgSla)>=95?'within target but Pacific Life breach requires immediate action.':'below portfolio target — requires urgent recovery intervention.')+'<br><br>'
+        +'<strong>Revenue Intelligence:</strong> $'+premium.toFixed(0)+'M/month in premium under administration equates to approximately $'+(premium*12).toFixed(0)+'M ARR in carrier premium book. IllumiFin TPA fees estimated at $88M+ annually across all 6 relationships. Highest-value: Genworth ($26.8M/yr) and Prudential ($18.4M/yr). At-risk: Pacific Life ($7.6M/yr — contract Dec 2026).<br><br>'
+        +'<strong>Strategic Priorities:</strong> (1) Recover Pacific Life SLA — contract expiry Dec 2026 creates $7.6M revenue risk. (2) Genworth staffing plan — 480K policy book SLA recovery drives $3.2M incentive upside. (3) Lincoln Group LTC expansion — $1.2M ARR opportunity in new employer-sponsored LTC market. (4) MassMutual Preferred Tier 1 — strengthen the highest-performing relationship for maximum contract leverage in 2028 renewal.', 'linear-gradient(135deg,#7c3aed,#4c1d95)')
+
+      // Carrier Table
+      +'<div style="font-size:13px;font-weight:800;color:#111827;margin:18px 0 10px;display:flex;align-items:center;gap:8px;"><i class="fas fa-table" style="color:#003087;"></i> Carrier Performance Scorecard</div>'
+      +'<div style="overflow-x:auto;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:22px;">'
+      +'<table style="width:100%;border-collapse:collapse;">'
+      +'<thead><tr style="background:#f8fafc;">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Carrier</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Type</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Policies</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Claims</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">SLA</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">AI Health</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Premium/Mo</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Contract</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Actions</th>'
+      +'</thead><tbody>'
+      + carrierRows
+      +'</tbody></table></div>'
+
+      // Market Intelligence
+      +'<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:10px;display:flex;align-items:center;gap:8px;"><i class="fas fa-globe" style="color:#003087;"></i> Market Intelligence Signals</div>'
+      +'<div style="background:#f0f4ff;border:1.5px solid #c7d2fe;border-radius:12px;padding:16px;margin-bottom:20px;">'
+      + portfolioInsights.map(function(ins){ return _p32insightBullet(ins); }).join('')
+      +'</div>'
+
+      // Action Plan Table
+      +'<div style="font-size:13px;font-weight:800;color:#111827;margin-bottom:10px;display:flex;align-items:center;gap:8px;"><i class="fas fa-tasks" style="color:#d97706;"></i> AI-Generated Action Plan — Q3 2026</div>'
+      +'<div style="overflow-x:auto;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:20px;">'
+      +'<table style="width:100%;border-collapse:collapse;">'
+      +'<thead><tr style="background:#f8fafc;">'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Priority</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Action Item</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Owner</th>'
+      +'<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Due Date</th>'
+      +'</thead><tbody>'
+      + actionRows
+      +'</tbody></table></div>'
+
+      // Action Buttons
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      +'<button onclick="_p32close(\'p32-portfolio-ov\');_p32toast(\'<i class=\\\"fas fa-file-pdf\\\"></i> AI Portfolio Review exported · All 6 carriers · Q2-Q3 2026 · Sent to EVP Carrier Relations and CFO · Ref: PORT-AI-Q3-2026\',5000)" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-file-pdf" style="margin-right:6px;"></i>Export Full Report PDF</button>'
+      +'<button onclick="_p32toast(\'<i class=\\\"fas fa-balance-scale\\\"></i> WealthAI rebalancing analysis complete · Genworth volume shift: -5% to Prudential/MassMutual · Pacific Life contingency plan activated · Action memo sent to VP Claims\',5000)" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-balance-scale" style="margin-right:6px;"></i>AI Volume Rebalancing</button>'
+      +'<button onclick="_p32toast(\'<i class=\\\"fas fa-calendar-check\\\"></i> Portfolio review meeting scheduled · Jul 28, 9:00 AM CT · All 6 carrier account managers invited · WealthAI report pre-distributed\',4000)" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-calendar-check" style="margin-right:6px;"></i>Schedule Portfolio Review</button>'
+      +'<button onclick="_p32toast(\'<i class=\\\"fas fa-envelope\\\"></i> Action plan emailed to VP Operations, Compliance, and Account Management · 8 items tracked in JIRA · Status update meeting Jul 19\',4000)" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-envelope" style="margin-right:6px;"></i>Email Action Plan to Team</button>'
+      +'</div>'
+      +'</div></div>';
+
+    _p32ov('p32-portfolio-ov', html);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     AI DEEP REVIEW — COMPELLING CARRIER-SPECIFIC INSIGHTS
+  ═══════════════════════════════════════════════════════════════════════ */
+  window._p32openDeepReview = function(carrierId) {
+    var d = _p32carriers[carrierId];
+    if (!d) { _p32toast('<i class="fas fa-robot"></i> AI Deep Review loading...', 3000); return; }
+    var hc = { Excellent:'#059669', Good:'#0891b2', 'Needs Attention':'#d97706', Critical:'#dc2626' }[d.aiHealth] || '#6b7280';
+    var sc = d.slaScore>=97?'#059669':d.slaScore>=95?'#d97706':'#dc2626';
+
+    /* Scoring model — simulate AI scoring dimensions */
+    var scores = {
+      sla:         Math.round(Math.min(d.slaScore / 95 * 100, 100)),
+      financial:   d.rating.indexOf('A+')>-1 ? 95 : d.rating.indexOf('A-')>-1 ? 82 : d.rating.indexOf('BB')>-1 ? 61 : 88,
+      relationship: Math.round(100 - Math.min(d.pendingItems*8, 50) + Math.min((2026-parseInt(d.tpaStart))*3, 30)),
+      revenue:     Math.round(parseFloat(d.premiumMo.replace(/[^0-9.]/g,'')) / 72 * 100),
+      fraud:       Math.round(100 - d.fraudScore * 2.5),
+      risk:        parseInt(d.contractExp) >= 2029 ? 90 : parseInt(d.contractExp) >= 2027 ? 65 : 35
+    };
+    var compositeScore = Math.round((scores.sla*0.25 + scores.financial*0.15 + scores.relationship*0.2 + scores.revenue*0.15 + scores.fraud*0.1 + scores.risk*0.15));
+
+    function _scoreBar(label, score, color) {
+      return '<div style="margin-bottom:12px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+        +'<div style="font-size:11px;font-weight:700;color:#374151;">'+label+'</div>'
+        +'<div style="font-size:13px;font-weight:800;color:'+color+';">'+score+'<span style="font-size:10px;color:#9ca3af;">/100</span></div>'
+        +'</div>'
+        +'<div style="background:#f3f4f6;border-radius:20px;height:8px;">'
+        +'<div style="height:8px;border-radius:20px;background:'+color+';width:'+score+'%;"></div>'
+        +'</div></div>';
+    }
+
+    var scoreColor = compositeScore >= 80 ? '#059669' : compositeScore >= 60 ? '#d97706' : '#dc2626';
+
+    var html = '<div style="background:#fff;border-radius:16px;width:820px;max-width:96vw;box-shadow:0 24px 80px rgba(0,0,0,.35);overflow:hidden;">'
+      // Header — dark AI gradient
+      +'<div style="background:linear-gradient(135deg,#1e1b4b,#4c1d95,#7c3aed);padding:22px 28px;color:#fff;display:flex;align-items:center;gap:14px;">'
+      +'<div style="width:50px;height:50px;background:rgba(255,255,255,.12);border-radius:14px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-robot" style="font-size:24px;"></i></div>'
+      +'<div><div style="font-size:19px;font-weight:900;">WealthAI Deep Review — '+d.name+'</div>'
+      +'<div style="font-size:12px;opacity:.8;">360° carrier intelligence · Market data · Risk scoring · Strategic recommendations</div></div>'
+      +'<button onclick="_p32close(\'p32-deep-'+carrierId+'\')" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:12px;font-weight:700;">✕ Close</button>'
+      +'</div>'
+      +'<div style="padding:24px;max-height:84vh;overflow-y:auto;">'
+
+      // Composite AI Score
+      +'<div style="display:grid;grid-template-columns:auto 1fr;gap:20px;margin-bottom:22px;background:linear-gradient(135deg,#1e1b4b08,#7c3aed08);border:1.5px solid #7c3aed22;border-radius:14px;padding:20px;">'
+      +'<div style="text-align:center;min-width:120px;">'
+      +'<div style="font-size:56px;font-weight:900;color:'+scoreColor+';line-height:1;">'+compositeScore+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#7c3aed;margin-top:2px;">WealthAI Composite Score</div>'
+      +'<div style="font-size:10px;color:#9ca3af;margin-top:2px;">Out of 100</div>'
+      +'<div style="margin-top:10px;">'+_p32badge(d.aiHealth, hc)+'</div>'
+      +'</div>'
+      +'<div>'
+      +'<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;">Score Dimensions</div>'
+      + _scoreBar('SLA Performance', scores.sla, sc)
+      + _scoreBar('Financial Strength', scores.financial, scores.financial>=85?'#059669':scores.financial>=70?'#d97706':'#dc2626')
+      + _scoreBar('Relationship Maturity', scores.relationship, scores.relationship>=80?'#059669':scores.relationship>=65?'#d97706':'#dc2626')
+      + _scoreBar('Revenue Significance', scores.revenue, '#0891b2')
+      + _scoreBar('Fraud Risk (inverse)', scores.fraud, scores.fraud>=80?'#059669':scores.fraud>=60?'#d97706':'#dc2626')
+      + _scoreBar('Contract Risk (inverse)', scores.risk, scores.risk>=80?'#059669':scores.risk>=55?'#d97706':'#dc2626')
+      +'</div></div>'
+
+      // 4 KPIs
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px;">'
+      + _p32kpi(d.slaScore+'%', 'SLA Performance', 'fa-tachometer-alt', sc, 'vs 95% contractual min')
+      + _p32kpi(d.activeClaims.toLocaleString(), 'Active Claims', 'fa-file-medical-alt', '#003087', 'Under TPA management')
+      + _p32kpi(d.lossRatio, 'Loss Ratio', 'fa-percentage', parseFloat(d.lossRatio)>70?'#dc2626':parseFloat(d.lossRatio)>65?'#d97706':'#059669', 'Industry avg: 74%')
+      + _p32kpi(d.premiumMo, 'Monthly Premium', 'fa-dollar-sign', '#059669', 'YTD: '+d.ytdPayout)
+      +'</div>'
+
+      // Deep Strategic Insight
+      + _p32ai('<strong>STRATEGIC DEEP ANALYSIS — '+d.name.toUpperCase()+'</strong><br><br>'+d.deepInsight, 'linear-gradient(135deg,#4c1d95,#7c3aed)')
+
+      // Market Intelligence
+      + _p32section('Market Intelligence Signals', 'fa-globe', '#003087')
+      +'<div style="background:#f0f4ff;border:1.5px solid #c7d2fe;border-radius:12px;padding:16px;margin-bottom:18px;">'
+      + d.marketInsights.map(function(ins){ return _p32insightBullet(ins); }).join('')
+      +'</div>'
+
+      // Products Summary
+      + _p32section('LTC Product Portfolio Under TPA', 'fa-layer-group', '#003087')
+      +'<div style="margin-bottom:18px;">'
+      + d.products.map(function(p){ return _p32prodRow(p); }).join('')
+      +'</div>'
+
+      // Contract Risk
+      + _p32section('Contract & Risk Assessment', 'fa-shield-alt', '#d97706')
+      +'<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:#92400e;line-height:1.8;">'
+      +'<strong>Contract Risk:</strong> '+d.contractRisks+'<br><br><strong>Regulatory Watch:</strong> '+d.regulatoryWatch
+      +'</div>'
+
+      // AI Opportunities
+      + _p32section('AI Revenue Opportunities for IllumiFin', 'fa-lightbulb', '#059669')
+      +'<div style="margin-bottom:20px;">'
+      + d.aiOpportunities.map(function(o){ return _p32oppCard(o, hc); }).join('')
+      +'</div>'
+
+      // TPA Value Summary
+      + _p32section('TPA Value Delivered', 'fa-chart-bar', '#003087')
+      +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;">'
+      + d.tpaValue.map(function(t){
+        return '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;">'
+          +'<div style="font-size:16px;font-weight:800;color:#059669;">'+t.value+'</div>'
+          +'<div style="font-size:11px;font-weight:700;color:#374151;margin-top:2px;">'+t.metric+'</div>'
+          +'<div style="font-size:10px;color:#6b7280;">'+t.trend+'</div></div>';
+      }).join('')
+      +'</div>'
+
+      // Action buttons
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+      +'<button onclick="_p32close(\'p32-deep-'+carrierId+'\');_p32toast(\'<i class=\\\"fas fa-file-pdf\\\"></i> WealthAI Deep Review for '+d.name+' exported · Full carrier intelligence report · Sent to VP Claims and Account Lead · Ref: AIREV-'+carrierId+'-'+new Date().toISOString().slice(0,10)+'\',5500)" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-file-pdf" style="margin-right:6px;"></i>Export Deep Review PDF</button>'
+      +(d.slaScore<95 || d.pendingItems>3 ? '<button onclick="_p32close(\'p32-deep-'+carrierId+'\');ltcCarrierAction(\'escalate\',\''+carrierId+'\')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-arrow-up" style="margin-right:6px;"></i>Escalate Based on AI</button>' : '')
+      +'<button onclick="_p32close(\'p32-deep-'+carrierId+'\');ltcCarrierAction(\'contact\',\''+carrierId+'\')" style="background:#003087;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-phone" style="margin-right:6px;"></i>Contact Carrier</button>'
+      +'<button onclick="_p32close(\'p32-deep-'+carrierId+'\');ltcOpenCarrier360(\''+carrierId+'\')" style="background:#0891b2;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-id-badge" style="margin-right:6px;"></i>Back to Full 360</button>'
+      +'<button onclick="_p32close(\'p32-deep-'+carrierId+'\')" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer;">Close</button>'
+      +'</div>'
+      +'</div></div>';
+
+    _p32ov('p32-deep-'+carrierId, html);
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     OVERRIDE ltcCarrierAction to wire AI Portfolio Review + AI Deep Review
+  ═══════════════════════════════════════════════════════════════════════ */
+  var _p32origCarrierAction = window.ltcCarrierAction;
+
+  window.ltcCarrierAction = function(action, carrierId) {
+    if (action === 'ai-portfolio') {
+      _p32openPortfolioReview();
+      return;
+    }
+    if (action === 'ai-review') {
+      // Close any open carrier 360 overlay first
+      _p32close('ltc-carrier-360-ov');
+      _p32openDeepReview(carrierId);
+      return;
+    }
+    // Delegate all other actions to the existing handler
+    if (_p32origCarrierAction) _p32origCarrierAction(action, carrierId);
+  };
+
+  console.log('[P32] Insurance Carrier 360: Rich AI Portfolio Review · Enhanced Full 360 (6-tab) · AI Deep Review with market intelligence · Carrier data: Prudential · MassMutual · Genworth · Transamerica · Lincoln · Pacific Life');
+})();
