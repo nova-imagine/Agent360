@@ -237,6 +237,116 @@ body {
 .ai-nav { background: rgba(102,126,234,0.1); }
 .ai-nav.active, .ai-nav:hover { background: rgba(102,126,234,0.2); }
 
+/* ============ PERSONA DIVIDERS ============ */
+.nav-persona-divider {
+  margin: 10px 0 4px;
+  padding: 0 10px;
+}
+.nav-persona-divider-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  margin-bottom: 8px;
+}
+.nav-persona-divider-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.9);
+  padding: 4px 6px 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-persona-divider-label i { font-size: 11px; opacity: 0.8; }
+.nav-persona-divider-sub {
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.8px;
+  padding: 2px 6px 6px;
+}
+
+/* Insurance Carrier divider — gold accent */
+#carrier-divider .nav-persona-divider-label {
+  color: var(--nyl-gold-light);
+}
+#carrier-divider .nav-persona-divider-line {
+  background: linear-gradient(90deg, transparent, rgba(200,151,42,0.5), transparent);
+}
+
+/* TPA divider — cyan accent */
+#tpa-divider .nav-persona-divider-label {
+  color: #67e8f9;
+}
+#tpa-divider .nav-persona-divider-line {
+  background: linear-gradient(90deg, transparent, rgba(8,145,178,0.5), transparent);
+}
+
+/* ============ PERSONA MODE SHOW/HIDE ============ */
+/* By default both groups are visible (mode: all / no filter) */
+.nav-grp-carrier,
+.nav-grp-tpa { }
+
+/* When body has data-persona="carrier", hide TPA-only items */
+body[data-persona="carrier"] .nav-grp-tpa:not(.nav-grp-carrier) { display: none !important; }
+
+/* When body has data-persona="tpa", hide carrier-only items */
+body[data-persona="tpa"] .nav-grp-carrier:not(.nav-grp-tpa) { display: none !important; }
+
+/* ============ PERSONA SWITCHER (TopBar) ============ */
+.persona-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--gray-100);
+  border-radius: 20px;
+  padding: 3px;
+  border: 1px solid var(--gray-200);
+  flex-shrink: 0;
+}
+.persona-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--gray-500);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.persona-btn i { font-size: 11px; }
+.persona-btn.active {
+  background: var(--nyl-navy);
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+.persona-btn.active.carrier { background: linear-gradient(135deg, #1a2744, #003087); }
+.persona-btn.active.tpa { background: linear-gradient(135deg, #0e7490, #0891b2); }
+/* "All" mode active */
+.persona-btn.active.all-mode { background: linear-gradient(135deg, #334155, #475569); }
+
+/* Topbar persona indicator chip */
+.persona-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.persona-chip.carrier { background: rgba(26,39,68,0.12); color: #003087; border: 1px solid rgba(0,48,135,0.25); }
+.persona-chip.tpa { background: rgba(8,145,178,0.12); color: #0891b2; border: 1px solid rgba(8,145,178,0.3); }
+.persona-chip.all { background: rgba(51,65,85,0.10); color: #475569; border: 1px solid rgba(51,65,85,0.2); }
+
 .sidebar-footer {
   padding: 12px 0;
   border-top: 1px solid rgba(255,255,255,0.08);

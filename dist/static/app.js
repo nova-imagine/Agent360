@@ -70967,17 +70967,17 @@ console.log('Pass 32 — Prior Authorization Screener (all claim types) loaded')
     ];
 
     var groupEl = document.createElement('div');
-    groupEl.className = 'p7-nav-group';
+    groupEl.className = 'p7-nav-group nav-grp-tpa';
     groupEl.style.cssText = 'border-top:1px solid rgba(255,255,255,.1);padding-top:8px;margin-top:4px;';
 
     var groupLabel = document.createElement('div');
-    groupLabel.style.cssText = 'font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4);padding:6px 16px 4px;';
-    groupLabel.textContent = 'Systems Operations';
+    groupLabel.style.cssText = 'font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#f59e0b;padding:6px 16px 4px;opacity:0.85;';
+    groupLabel.textContent = 'Illumifin Platform — Systems Ops';
     groupEl.appendChild(groupLabel);
 
     newItems.forEach(function (item) {
       var el = document.createElement('div');
-      el.className = 'nav-item p7-nav-item';
+      el.className = 'nav-item p7-nav-item nav-grp-tpa';
       el.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;border-radius:6px;margin:1px 6px;transition:background .15s;';
       el.innerHTML = '<i class="fas ' + item.icon + '" style="width:16px;color:' + item.color + ';font-size:13px;"></i><span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85);">' + item.label + '</span>';
       el.addEventListener('mouseenter', function () { el.style.background = 'rgba(255,255,255,.08)'; });
@@ -85687,4 +85687,84 @@ var navigateTo=window.navigateTo;
   console.log('[HAL RCT] QW4 Regulatory Change Tracker loaded — 6 bulletins, 4 NAIC models, 6 filing deadlines, 3 tabs');
 })();
 var navigateTo=window.navigateTo;
+
+/* ============================================================
+   PERSONA SWITCHER — P26
+   Toggles Insurance Carrier vs TPA / Illumifin nav visibility
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'nyl_persona_mode'; // 'all' | 'carrier' | 'tpa'
+
+  /* ---------- core setter ---------- */
+  function applyPersonaMode(mode) {
+    if (!mode || !['all','carrier','tpa'].includes(mode)) mode = 'all';
+
+    // 1. Set data attribute on body (CSS handles show/hide)
+    var body = document.body;
+    if (mode === 'all') {
+      body.removeAttribute('data-persona');
+    } else {
+      body.setAttribute('data-persona', mode);
+    }
+
+    // 2. Highlight the active button in the switcher
+    ['all','carrier','tpa'].forEach(function (m) {
+      var btn = document.getElementById('persona-btn-' + m);
+      if (!btn) return;
+      btn.classList.toggle('active', m === mode);
+    });
+
+    // 3. Persist
+    try { localStorage.setItem(STORAGE_KEY, mode); } catch(e) {}
+
+    // 4. Update page title bar chip (optional visual indicator)
+    _p26updateChip(mode);
+
+    console.log('[P26 Persona] mode →', mode);
+  }
+
+  /* ---------- topbar chip ---------- */
+  function _p26updateChip(mode) {
+    var chipId = 'persona-topbar-chip';
+    var existing = document.getElementById(chipId);
+    if (mode === 'all') {
+      if (existing) existing.remove();
+      return;
+    }
+    var label = mode === 'carrier' ? 'Insurance Carrier' : 'TPA / Illumifin';
+    var cls   = mode === 'carrier' ? 'carrier' : 'tpa';
+    var icon  = mode === 'carrier' ? 'fas fa-building' : 'fas fa-hospital-user';
+    if (!existing) {
+      existing = document.createElement('span');
+      existing.id = chipId;
+      var switcher = document.getElementById('persona-switcher');
+      if (switcher && switcher.parentNode) {
+        switcher.parentNode.insertBefore(existing, switcher);
+      }
+    }
+    existing.className = 'persona-chip ' + cls;
+    existing.innerHTML = '<i class="' + icon + '" style="font-size:9px"></i>' + label;
+  }
+
+  /* ---------- expose globally ---------- */
+  window.setPersonaMode = applyPersonaMode;
+
+  /* ---------- init on DOM ready ---------- */
+  function _p26init() {
+    var saved = 'all';
+    try { saved = localStorage.getItem(STORAGE_KEY) || 'all'; } catch(e) {}
+    applyPersonaMode(saved);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _p26init);
+  } else {
+    // DOM already ready — slight defer so React/Hono render finishes
+    setTimeout(_p26init, 200);
+  }
+
+  console.log('[P26 Persona] Switcher loaded — modes: all / carrier / tpa');
+})();
 
