@@ -86435,67 +86435,185 @@ var navigateTo=window.navigateTo;
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   P27 — SUBMIT CLAIM MODAL RESTORE (canonical ltcNcSubmit, immune to overrides)
-   Nav restructure handled via JSX rebuild (src/index.tsx):
-     - AI Agents moved to 4th slot in LTC OPERATIONS (after Eligibility & Assessment)
-     - System Architecture moved to ILLUMIFIN PLATFORM section
+   P27 — SUBMIT CLAIM → HAL ORCHESTRATION MODAL
+   Patches ALL submit entry-points: ltcNcSubmit + _p9ncSubmit (P9 wizard)
+   Self-contained — no dependency on prior aliases. Runs last, wins all.
 ═══════════════════════════════════════════════════════════════════════════ */
 (function() {
   'use strict';
 
-  /* ─────────────────────────────────────────────────────────────────────────
-     Canonical Submit Claim → HAL Orchestration modal (5 AI agents animated)
-     Self-contained: no dependency on _p8ncSubmit or any prior alias.
-  ───────────────────────────────────────────────────────────────────────── */
-  window.ltcNcSubmit = function() {
-    // Close the intake wizard overlay
-    var ov = document.getElementById('ltc-newclaim-overlay');
-    if (ov) ov.remove();
+  /* ── Shared agent data matching the Step-5 Post-Submission Workflow box ── */
+  var _p27Agents = [
+    {
+      id:    'AGT-NC-001',
+      name:  'HIPAA Auth Agent',
+      icon:  'fa-file-signature',
+      color: '#7c3aed',
+      task:  'HIPAA Authorization form sent to Carlos Vasquez via DocuSign',
+      detail:'DocuSign envelope #ENV-2026-4419 generated · recipient: carlos.vasquez@gmail.com · expires Jul 18, 2026'
+    },
+    {
+      id:    'AGT-NC-002',
+      name:  'APS Request Agent',
+      icon:  'fa-fax',
+      color: '#0891b2',
+      task:  'APS request faxed to Dr. Anna Kessler (NPI: 1234567890)',
+      detail:'Fax #FAX-2026-0711-0047 transmitted to (512) 555-0192 · APS form attached · response SLA: 10 business days'
+    },
+    {
+      id:    'AGT-NC-003',
+      name:  'RN Assessment Agent',
+      icon:  'fa-user-nurse',
+      color: '#059669',
+      task:  'RN Assessment scheduled — care manager will contact within 2 business days',
+      detail:'Assessment ref #RNA-2026-0711 · care manager: Sarah Johnson, RN · Sunrise Manor SNF · window: Jul 14–15, 2026'
+    },
+    {
+      id:    'AGT-NC-004',
+      name:  'Carrier Notify Agent',
+      icon:  'fa-building-columns',
+      color: '#dc2626',
+      task:  'Acknowledgment letter sent to Prudential within 24 hours (statutory requirement)',
+      detail:'EDI 834 acknowledgment dispatched · Prudential TPA portal updated · ref #ACK-PRU-2026-0711 · statutory SLA met'
+    },
+    {
+      id:    'AGT-NC-005',
+      name:  'SMARTS Fraud Agent',
+      icon:  'fa-shield-halved',
+      color: '#d97706',
+      task:  'SMARTS SR-004 fraud pre-screen runs automatically',
+      detail:'SR-004 executed · OIG/SAM check ✅ · provider sanction list ✅ · EVV eligibility ✅ · no flags raised · case cleared'
+    }
+  ];
 
-    // Remove any stale post-submit overlay from a prior run
+  /* ── Core modal renderer + animator ────────────────────────────────────── */
+  function _p27RunModal(claimId, claimantName, carrier, benefit) {
+    claimId      = claimId      || 'LTC-2026-0109';
+    claimantName = claimantName || 'Eleanor Vasquez';
+    carrier      = carrier      || 'Prudential';
+    benefit      = benefit      || '$195/day';
+
+    // Clean up any stale overlay
     var old = document.getElementById('p27-postsubmit-ov');
     if (old) old.remove();
 
-    var agents = [
-      { id:'AGT-NC-001', name:'HIPAA Auth Agent',      icon:'fa-shield-halved',   color:'#7c3aed', desc:'Generates & routes HIPAA Authorization form via DocuSign to Eleanor Vasquez' },
-      { id:'AGT-NC-002', name:'APS Request Agent',     icon:'fa-file-medical',    color:'#0891b2', desc:'Faxes Attending Physician Statement request to Dr. Anna Kessler (NPI 1234567890)' },
-      { id:'AGT-NC-003', name:'RN Assessment Agent',   icon:'fa-user-nurse',      color:'#059669', desc:'Schedules in-home RN Assessment · assigns care manager Sarah Johnson within 2 days' },
-      { id:'AGT-NC-004', name:'Carrier Notify Agent',  icon:'fa-building-columns',color:'#dc2626', desc:'Sends statutory acknowledgment letter to Prudential within 24 hours' },
-      { id:'AGT-NC-005', name:'SMARTS Fraud Agent',    icon:'fa-shield-virus',    color:'#d97706', desc:'Executes SMARTS SR-004 fraud pre-screen · checks EVV eligibility & provider sanction list' }
-    ];
+    /* ── progress row for each agent ── */
+    var rowsHtml = _p27Agents.map(function(a, i) {
+      return ''
+        +'<div id="p27-row-'+i+'" style="'
+        +'display:flex;align-items:flex-start;gap:12px;padding:12px 14px;'
+        +'border-radius:10px;background:#f8fafc;border:1.5px solid #e2e8f0;'
+        +'margin-bottom:8px;transition:background .35s,border-color .35s;">'
 
-    var stepsHtml = agents.map(function(a, i) {
-      return '<div id="p27-step-'+i+'" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:8px;transition:all .3s;">'
-        +'<div style="width:38px;height:38px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+        /* icon bubble */
+        +'<div id="p27-bubble-'+i+'" style="'
+        +'width:40px;height:40px;border-radius:50%;background:'+a.color+';'
+        +'display:flex;align-items:center;justify-content:center;flex-shrink:0;'
+        +'transition:transform .3s;margin-top:1px;">'
         +'<i class="fas '+a.icon+'" style="color:#fff;font-size:15px;"></i></div>'
+
+        /* text */
         +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:2px;">'+a.id+' · '+a.name+'</div>'
-        +'<div style="font-size:11px;color:#64748b;line-height:1.4;">'+a.desc+'</div></div>'
-        +'<div id="p27-status-'+i+'" style="font-size:10px;font-weight:800;color:#94a3b8;white-space:nowrap;letter-spacing:.5px;">QUEUED</div>'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">'
+        +'<span style="font-size:10px;font-weight:800;color:'+a.color+';letter-spacing:.5px;">'+a.id+'</span>'
+        +'<span style="font-size:12px;font-weight:700;color:#1e293b;">'+a.name+'</span>'
+        +'</div>'
+        +'<div style="font-size:11px;color:#374151;line-height:1.45;font-weight:600;">'+a.task+'</div>'
+        +'<div id="p27-detail-'+i+'" style="font-size:10.5px;color:#64748b;line-height:1.4;margin-top:4px;display:none;">'+a.detail+'</div>'
+        +'</div>'
+
+        /* status pill */
+        +'<div id="p27-pill-'+i+'" style="'
+        +'font-size:9.5px;font-weight:800;letter-spacing:.6px;padding:3px 8px;'
+        +'border-radius:20px;background:#f1f5f9;color:#94a3b8;'
+        +'white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:2px;'
+        +'border:1px solid #e2e8f0;">QUEUED</div>'
+
         +'</div>';
     }).join('');
 
-    var html = '<div style="position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;">'
-      +'<div style="background:#fff;border-radius:16px;padding:28px;width:min(620px,100%);max-height:90vh;overflow-y:auto;box-shadow:0 30px 70px rgba(0,0,0,0.45);">'
-      +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">'
-      +'<div style="width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#0891b2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
-      +'<i class="fas fa-robot" style="color:#fff;font-size:22px;"></i></div>'
+    /* ── modal shell ── */
+    var html = ''
+      +'<div style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99999;'
+      +'display:flex;align-items:center;justify-content:center;padding:16px;">'
+      +'<div style="background:#fff;border-radius:18px;width:min(660px,100%);'
+      +'max-height:92vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.48);'
+      +'display:flex;flex-direction:column;">'
+
+      /* ── header ── */
+      +'<div style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95);'
+      +'border-radius:18px 18px 0 0;padding:20px 22px 16px;position:sticky;top:0;z-index:2;">'
+      +'<div style="display:flex;align-items:center;gap:14px;">'
+      +'<div style="width:48px;height:48px;border-radius:13px;'
+      +'background:linear-gradient(135deg,#7c3aed,#0891b2);'
+      +'display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      +'<i class="fas fa-robot" style="color:#fff;font-size:20px;"></i></div>'
       +'<div style="flex:1;">'
-      +'<div style="font-size:16px;font-weight:800;color:#1e293b;">HAL Orchestration Engine</div>'
-      +'<div style="font-size:12px;color:#7c3aed;font-weight:600;margin-top:2px;">Post-Submission AI Workflow · LTC-2026-0109 · Eleanor Vasquez</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#fff;">HAL Orchestration Engine</div>'
+      +'<div style="font-size:11px;color:#c4b5fd;font-weight:600;margin-top:2px;">'
+      +'illumifin HAL · Post-Submission AI Workflow · Auto-Triggered</div>'
       +'</div>'
       +'<button onclick="document.getElementById(\'p27-postsubmit-ov\').remove()" '
-      +'style="background:#f1f5f9;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;color:#64748b;flex-shrink:0;">&times;</button>'
+      +'style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;'
+      +'width:30px;height:30px;cursor:pointer;font-size:16px;flex-shrink:0;">&times;</button>'
       +'</div>'
-      +'<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:18px;">'
-      +'<div style="font-size:12px;color:#166534;font-weight:700;">'
-      +'<i class="fas fa-check-circle" style="margin-right:6px;"></i>'
-      +'Claim LTC-2026-0109 submitted successfully · Prudential · $195/day · Eleanor Vasquez</div>'
-      +'<div style="font-size:11px;color:#15803d;margin-top:4px;">5 AI agents executing post-submission workflow steps automatically</div>'
+      /* claim badge row */
+      +'<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">'
+      +'<span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;font-weight:700;'
+      +'padding:3px 10px;border-radius:20px;letter-spacing:.4px;">'+claimId+'</span>'
+      +'<span style="background:rgba(255,255,255,.12);color:#e0f2fe;font-size:10px;font-weight:600;'
+      +'padding:3px 10px;border-radius:20px;">'+claimantName+'</span>'
+      +'<span style="background:rgba(255,255,255,.12);color:#fde68a;font-size:10px;font-weight:600;'
+      +'padding:3px 10px;border-radius:20px;">'+carrier+' · '+benefit+'</span>'
+      +'<span style="background:rgba(5,150,105,.35);color:#6ee7b7;font-size:10px;font-weight:700;'
+      +'padding:3px 10px;border-radius:20px;">✓ Submitted</span>'
       +'</div>'
-      +'<div id="p27-agent-steps">'+stepsHtml+'</div>'
-      +'<div id="p27-done-bar" style="display:none;margin-top:16px;padding:14px 18px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#0891b2);color:#fff;font-size:13px;font-weight:700;text-align:center;">'
-      +'<i class="fas fa-check-double" style="margin-right:8px;"></i>All 5 agents completed — LTC-2026-0109 is fully in-flight!</div>'
+      +'</div>'/* /header */
+
+      /* ── body ── */
+      +'<div style="padding:20px 22px;">'
+
+      /* success banner */
+      +'<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;'
+      +'border-radius:10px;padding:11px 15px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">'
+      +'<i class="fas fa-check-circle" style="color:#059669;font-size:18px;flex-shrink:0;"></i>'
+      +'<div>'
+      +'<div style="font-size:12px;font-weight:800;color:#065f46;">Claim submitted successfully — workflow executing</div>'
+      +'<div style="font-size:11px;color:#047857;margin-top:2px;">5 AI agents are autonomously completing the Post-Submission Workflow tasks</div>'
+      +'</div></div>'
+
+      /* section label */
+      +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;'
+      +'color:#6b7280;margin-bottom:10px;">'
+      +'<i class="fas fa-tasks" style="margin-right:5px;color:#d97706;"></i>'
+      +'Post-Submission Workflow (Auto-Triggered)</div>'
+
+      /* agent rows */
+      +'<div id="p27-rows">'+rowsHtml+'</div>'
+
+      /* completion banner (hidden initially) */
+      +'<div id="p27-done-bar" style="display:none;margin-top:14px;border-radius:12px;overflow:hidden;">'
+      +'<div style="background:linear-gradient(135deg,#059669,#047857);padding:14px 18px;">'
+      +'<div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:6px;">'
+      +'<i class="fas fa-check-double" style="margin-right:8px;"></i>'
+      +'All 5 agents completed — '+claimId+' is fully in-flight!</div>'
+      +'<div style="font-size:11px;color:#a7f3d0;line-height:1.5;">'
+      +'First benefit payment estimated Sep 15, 2026 · '
+      +'Care manager Sarah Johnson, RN assigned · '
+      +'Claim status: <strong style="color:#fff;">ACTIVE — Elimination Period</strong></div>'
+      +'</div>'
+      +'<div style="background:#f0fdf4;padding:10px 18px;display:flex;gap:10px;justify-content:flex-end;align-items:center;">'
+      +'<button onclick="navigateTo(\'ltc-ai-agents\');document.getElementById(\'p27-postsubmit-ov\').remove()" '
+      +'style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 16px;'
+      +'font-size:11px;font-weight:700;cursor:pointer;">'
+      +'<i class="fas fa-robot" style="margin-right:5px;"></i>View AI Agents</button>'
+      +'<button onclick="navigateTo(\'ltc-claims\');document.getElementById(\'p27-postsubmit-ov\').remove()" '
+      +'style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;'
+      +'font-size:11px;font-weight:700;cursor:pointer;">'
+      +'<i class="fas fa-list" style="margin-right:5px;"></i>View Claims</button>'
+      +'</div></div>'
+
+      +'</div>'/* /body */
       +'</div></div>';
 
     var wrapper = document.createElement('div');
@@ -86503,36 +86621,72 @@ var navigateTo=window.navigateTo;
     wrapper.innerHTML = html;
     document.body.appendChild(wrapper);
 
-    // Staggered animation: QUEUED → RUNNING → ✓ DONE
-    var delays = [500, 1350, 2350, 3450, 4600];
-    agents.forEach(function(a, i) {
-      var getStatus = function() { return document.getElementById('p27-status-'+i); };
-      var getStep   = function() { return document.getElementById('p27-step-'+i); };
+    /* ── Staggered QUEUED → RUNNING → ✓ DONE ── */
+    // Each agent: start-run delay, then done delay (+900ms later)
+    var runDelays  = [400,  1300, 2350, 3500, 4750];
+    var doneDelays = [1250, 2150, 3200, 4350, 5600];
 
+    _p27Agents.forEach(function(a, i) {
+      /* → RUNNING */
       setTimeout(function() {
-        var s = getStatus(), el = getStep();
-        if (!s || !el) return;
-        s.textContent = 'RUNNING…';
-        s.style.color = '#0891b2';
-        el.style.border     = '1px solid #bae6fd';
-        el.style.background = '#f0f9ff';
-      }, delays[i]);
+        var pill   = document.getElementById('p27-pill-'+i);
+        var row    = document.getElementById('p27-row-'+i);
+        var bubble = document.getElementById('p27-bubble-'+i);
+        if (!pill || !row) return;
+        pill.textContent   = 'RUNNING…';
+        pill.style.background = '#eff6ff';
+        pill.style.color      = '#1d4ed8';
+        pill.style.borderColor= '#bfdbfe';
+        row.style.background  = '#f0f9ff';
+        row.style.borderColor = '#bae6fd';
+        if (bubble) bubble.style.transform = 'scale(1.1)';
+        // show detail text
+        var det = document.getElementById('p27-detail-'+i);
+        if (det) det.style.display = 'block';
+      }, runDelays[i]);
 
+      /* → DONE */
       setTimeout(function() {
-        var s = getStatus(), el = getStep();
-        if (!s || !el) return;
-        s.innerHTML = '<i class="fas fa-check-circle" style="color:#059669;margin-right:3px;font-size:12px;"></i>DONE';
-        s.style.color = '#059669';
-        el.style.border     = '1px solid #bbf7d0';
-        el.style.background = '#f0fdf4';
-        if (i === agents.length - 1) {
+        var pill   = document.getElementById('p27-pill-'+i);
+        var row    = document.getElementById('p27-row-'+i);
+        var bubble = document.getElementById('p27-bubble-'+i);
+        if (!pill || !row) return;
+        pill.innerHTML     = '<i class="fas fa-check" style="margin-right:3px;font-size:9px;"></i>DONE';
+        pill.style.background = '#f0fdf4';
+        pill.style.color      = '#059669';
+        pill.style.borderColor= '#86efac';
+        row.style.background  = '#f0fdf4';
+        row.style.borderColor = '#86efac';
+        if (bubble) bubble.style.transform = 'scale(1)';
+
+        /* show completion banner after last agent */
+        if (i === _p27Agents.length - 1) {
           var bar = document.getElementById('p27-done-bar');
-          if (bar) { bar.style.display = 'block'; }
+          if (bar) bar.style.display = 'block';
         }
-      }, delays[i] + 750);
+      }, doneDelays[i]);
     });
+  }
+
+  /* ── Patch ALL submit entry-points ──────────────────────────────────────── */
+
+  // Entry point 1: P9 wizard (the red-header 5-step wizard shown in screenshot)
+  window._p9ncSubmit = function() {
+    var ov = document.getElementById('ltc-p9-newclaim');
+    if (ov) ov.remove();
+    _p27RunModal('LTC-2026-0109', 'Eleanor Vasquez', 'Prudential', '$195/day');
   };
 
-  console.log('[P27] ltcNcSubmit → HAL orchestration modal (5-agent animated workflow) installed');
+  // Entry point 2: older ltcNcSubmit used by earlier wizard versions
+  window.ltcNcSubmit = function() {
+    var ov = document.getElementById('ltc-newclaim-overlay');
+    if (ov) ov.remove();
+    _p27RunModal('LTC-2026-0109', 'Eleanor Vasquez', 'Prudential', '$195/day');
+  };
+
+  // Entry point 3: P8 alias (safe to patch)
+  window._p8ncSubmit = window._p9ncSubmit;
+
+  console.log('[P27] Submit Claim → HAL orchestration modal patched on _p9ncSubmit + ltcNcSubmit');
 })();
 
