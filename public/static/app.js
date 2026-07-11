@@ -86690,3 +86690,592 @@ var navigateTo=window.navigateTo;
   console.log('[P27] Submit Claim → HAL orchestration modal patched on _p9ncSubmit + ltcNcSubmit');
 })();
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   P28 — ELIGIBILITY & ASSESSMENT ENHANCEMENTS
+   1. Remove LINK UW / LTCAS band from Eligibility page (suppress P7 injection)
+   2. ltcScheduleNew Done → HAL agent animation (Assessment Booked — 4 steps)
+   3. ltcAssessAction Done → HAL agent animation (Assessment Scheduled — 6 steps)
+   4. Add AGT-AS-001/002/003 to _ltcAgentCatalog (Assessment Scheduling group)
+═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ── 0. Suppress Phase 7's LINK UW band on Eligibility page ─────────────
+     P7 appends a `.p7-link-band` div to `.ltc-eligibility-page` 400ms after
+     navigation. We override the function that builds it to return '' and also
+     strip any already-injected band on page visits.
+  ─────────────────────────────────────────────────────────────────────────── */
+  // Neutralise the band builder so P7's setTimeout writes nothing
+  if (typeof window._p7buildLinkBand === 'function') {
+    window._p7buildLinkBand = function () { return ''; };
+  }
+  // Belt-and-suspenders: pre-inject a zero-height .p7-link-band sentinel
+  // BEFORE P7's 400ms timer fires, so P7's guard (!querySelector('.p7-link-band'))
+  // evaluates false and the real band is never appended.
+  // Also strip any previously injected real band for good measure.
+  var _p28origNav = window.navigateTo;
+  window.navigateTo = function (page) {
+    if (typeof _p28origNav === 'function') _p28origNav(page);
+    if (page === 'ltc-eligibility') {
+      // Run at ~100ms — well before P7's 400ms timeout
+      setTimeout(function () {
+        var tpl = document.getElementById('tpl-ltc-eligibility');
+        if (!tpl) return;
+        // Remove any real band that may have slipped through
+        var existing = tpl.querySelector('.p7-link-band');
+        if (existing) { existing.remove(); }
+        // Inject sentinel: P7 checks !querySelector('.p7-link-band') so
+        // once this sentinel exists, P7's band will not be appended.
+        var sentinel = document.createElement('div');
+        sentinel.className = 'p7-link-band';
+        sentinel.style.cssText = 'display:none;height:0;overflow:hidden;';
+        sentinel.setAttribute('data-p28-sentinel', 'true');
+        tpl.appendChild(sentinel);
+      }, 100);
+      // Safety net at 700ms in case template wasn't ready at 100ms
+      setTimeout(function () {
+        var tpl = document.getElementById('tpl-ltc-eligibility');
+        if (!tpl) return;
+        var bands = tpl.querySelectorAll('.p7-link-band');
+        bands.forEach(function (b) {
+          if (!b.getAttribute('data-p28-sentinel')) b.remove();
+        });
+      }, 700);
+    }
+  };
+
+  /* ── Shared HAL modal runner (reusable for both workflows) ───────────────
+     agentRows: array of { icon, color, name, task, detail }
+     onDone: called when user clicks Done (optional)
+  ─────────────────────────────────────────────────────────────────────────── */
+  function _p28RunHALModal(opts) {
+    var title    = opts.title    || 'HAL Orchestration Engine';
+    var subtitle = opts.subtitle || 'AI Agent Workflow';
+    var badge1   = opts.badge1   || '';
+    var badge2   = opts.badge2   || '';
+    var agents   = opts.agents   || [];
+    var ovId     = 'p28-hal-ov';
+    var onDone   = opts.onDone   || function () {};
+
+    // Clean stale
+    var old = document.getElementById(ovId);
+    if (old) old.remove();
+
+    /* agent rows HTML */
+    var rowsHtml = agents.map(function (a, i) {
+      return ''
+        + '<div id="p28-row-' + i + '" style="'
+        + 'display:flex;align-items:flex-start;gap:12px;padding:11px 14px;'
+        + 'border-radius:10px;background:#f8fafc;border:1.5px solid #e2e8f0;'
+        + 'margin-bottom:8px;transition:background .35s,border-color .35s;">'
+        + '<div id="p28-bubble-' + i + '" style="'
+        + 'width:38px;height:38px;border-radius:50%;background:' + a.color + ';'
+        + 'display:flex;align-items:center;justify-content:center;flex-shrink:0;'
+        + 'margin-top:1px;transition:transform .3s;">'
+        + '<i class="fas ' + a.icon + '" style="color:#fff;font-size:14px;"></i></div>'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">'
+        + '<span style="font-size:10px;font-weight:800;color:' + a.color + ';letter-spacing:.4px;">' + a.id + '</span>'
+        + '<span style="font-size:12px;font-weight:700;color:#1e293b;">' + a.name + '</span>'
+        + '</div>'
+        + '<div style="font-size:11px;color:#374151;font-weight:600;line-height:1.4;">' + a.task + '</div>'
+        + '<div id="p28-detail-' + i + '" style="font-size:10.5px;color:#64748b;line-height:1.4;margin-top:4px;display:none;">' + a.detail + '</div>'
+        + '</div>'
+        + '<div id="p28-pill-' + i + '" style="'
+        + 'font-size:9.5px;font-weight:800;letter-spacing:.5px;padding:3px 8px;'
+        + 'border-radius:20px;background:#f1f5f9;color:#94a3b8;'
+        + 'white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:2px;'
+        + 'border:1px solid #e2e8f0;">QUEUED</div>'
+        + '</div>';
+    }).join('');
+
+    var html = ''
+      + '<div style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:99999;'
+      + 'display:flex;align-items:center;justify-content:center;padding:16px;">'
+      + '<div style="background:#fff;border-radius:18px;width:min(640px,100%);'
+      + 'max-height:92vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.45);">'
+
+      /* header */
+      + '<div style="background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95);'
+      + 'border-radius:18px 18px 0 0;padding:20px 22px 16px;position:sticky;top:0;z-index:2;">'
+      + '<div style="display:flex;align-items:center;gap:14px;">'
+      + '<div style="width:46px;height:46px;border-radius:12px;'
+      + 'background:linear-gradient(135deg,#7c3aed,#0891b2);'
+      + 'display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      + '<i class="fas fa-robot" style="color:#fff;font-size:19px;"></i></div>'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:15px;font-weight:800;color:#fff;">' + title + '</div>'
+      + '<div style="font-size:11px;color:#c4b5fd;font-weight:600;margin-top:2px;">' + subtitle + '</div>'
+      + '</div>'
+      + '<button onclick="document.getElementById(\'' + ovId + '\').remove()" '
+      + 'style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;'
+      + 'width:30px;height:30px;cursor:pointer;font-size:16px;flex-shrink:0;">&times;</button>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'
+      + (badge1 ? '<span style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">' + badge1 + '</span>' : '')
+      + (badge2 ? '<span style="background:rgba(255,255,255,.12);color:#e0f2fe;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;">' + badge2 + '</span>' : '')
+      + '<span style="background:rgba(5,150,105,.35);color:#6ee7b7;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">✓ Confirmed</span>'
+      + '</div></div>'/* /header */
+
+      /* body */
+      + '<div style="padding:20px 22px;">'
+      + '<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;'
+      + 'border-radius:10px;padding:11px 15px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">'
+      + '<i class="fas fa-check-circle" style="color:#059669;font-size:18px;flex-shrink:0;"></i>'
+      + '<div>'
+      + '<div style="font-size:12px;font-weight:800;color:#065f46;">Workflow executing — AI agents running</div>'
+      + '<div style="font-size:11px;color:#047857;margin-top:2px;">' + agents.length + ' AI agents are autonomously completing all workflow tasks</div>'
+      + '</div></div>'
+      + '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;'
+      + 'color:#6b7280;margin-bottom:10px;">'
+      + '<i class="fas fa-tasks" style="margin-right:5px;color:#7c3aed;"></i>Agent Execution Queue</div>'
+      + '<div id="p28-rows">' + rowsHtml + '</div>'
+
+      /* completion banner */
+      + '<div id="p28-done-bar" style="display:none;margin-top:14px;border-radius:12px;overflow:hidden;">'
+      + '<div style="background:linear-gradient(135deg,#059669,#047857);padding:14px 18px;">'
+      + '<div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:5px;">'
+      + '<i class="fas fa-check-double" style="margin-right:8px;"></i>All ' + agents.length + ' agents completed successfully!</div>'
+      + '<div style="font-size:11px;color:#a7f3d0;">Workflow is fully automated — no manual action required</div>'
+      + '</div>'
+      + '<div style="background:#f0fdf4;padding:10px 18px;display:flex;gap:10px;justify-content:flex-end;">'
+      + '<button onclick="navigateTo(\'ltc-ai-agents\');document.getElementById(\'' + ovId + '\').remove()" '
+      + 'style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;">'
+      + '<i class="fas fa-robot" style="margin-right:5px;"></i>View AI Agents</button>'
+      + '<button id="p28-done-btn" '
+      + 'style="background:#059669;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;">'
+      + '<i class="fas fa-check" style="margin-right:5px;"></i>Done</button>'
+      + '</div></div>'
+      + '</div></div></div>';
+
+    var wrapper = document.createElement('div');
+    wrapper.id = ovId;
+    wrapper.innerHTML = html;
+    document.body.appendChild(wrapper);
+
+    // Wire Done button callback after DOM insertion
+    var doneBtn = document.getElementById('p28-done-btn');
+    if (doneBtn) {
+      doneBtn.addEventListener('click', function () {
+        document.getElementById(ovId) && document.getElementById(ovId).remove();
+        onDone();
+      });
+    }
+
+    /* Staggered QUEUED → RUNNING → DONE animation */
+    var baseRun  = 350;
+    var gap      = 950;
+    var doneGap  = 800;
+
+    agents.forEach(function (a, i) {
+      var runAt  = baseRun + i * gap;
+      var doneAt = runAt + doneGap;
+
+      setTimeout(function () {
+        var pill   = document.getElementById('p28-pill-' + i);
+        var row    = document.getElementById('p28-row-' + i);
+        var bubble = document.getElementById('p28-bubble-' + i);
+        var det    = document.getElementById('p28-detail-' + i);
+        if (!pill || !row) return;
+        pill.textContent      = 'RUNNING\u2026';
+        pill.style.background = '#eff6ff';
+        pill.style.color      = '#1d4ed8';
+        pill.style.borderColor= '#bfdbfe';
+        row.style.background  = '#f0f9ff';
+        row.style.borderColor = '#bae6fd';
+        if (bubble) bubble.style.transform = 'scale(1.12)';
+        if (det) det.style.display = 'block';
+      }, runAt);
+
+      setTimeout(function () {
+        var pill   = document.getElementById('p28-pill-' + i);
+        var row    = document.getElementById('p28-row-' + i);
+        var bubble = document.getElementById('p28-bubble-' + i);
+        if (!pill || !row) return;
+        pill.innerHTML        = '<i class="fas fa-check" style="margin-right:3px;font-size:9px;"></i>DONE';
+        pill.style.background = '#f0fdf4';
+        pill.style.color      = '#059669';
+        pill.style.borderColor= '#86efac';
+        row.style.background  = '#f0fdf4';
+        row.style.borderColor = '#86efac';
+        if (bubble) bubble.style.transform = 'scale(1)';
+        if (i === agents.length - 1) {
+          var bar = document.getElementById('p28-done-bar');
+          if (bar) bar.style.display = 'block';
+        }
+      }, doneAt);
+    });
+  }
+
+  /* ── 1. ltcScheduleNew Done → HAL modal (Assessment Booked — picture 3) ──
+     Agents match the 4 items shown in the confirmed step:
+       • Self-scheduling SMS sent to Applicant
+       • RN auto-assignment in progress
+       • Clinical intake form dispatched to Auto-assign (AI-matched)
+       • Carrier pre-notification sent
+  ─────────────────────────────────────────────────────────────────────────── */
+  var _p28origScheduleNew = window.ltcScheduleNew;
+  window.ltcScheduleNew = function () {
+    /* Call original to show the 3-step booking wizard */
+    if (typeof _p28origScheduleNew === 'function') _p28origScheduleNew();
+
+    /* Intercept the k_done handler inside showConfirmed() by observing
+       DOM mutation — wait for the Done button in the confirmed step,
+       then wrap its onclick to add our HAL modal after the overlay closes. */
+    var _observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          /* Look for the "Assessment Booked!" heading = we're on step 3 */
+          var isConfirmed = node.querySelector && (
+            node.querySelector('[style*="Assessment Booked"]') ||
+            (node.textContent && node.textContent.indexOf('Assessment Booked') > -1)
+          );
+          if (!isConfirmed) return;
+
+          /* Find the Done button — it's the full-width green button at bottom */
+          var doneBtn = node.querySelector('button[style*="width:100%"]') ||
+                        Array.from(node.querySelectorAll('button')).find(function (b) {
+                          return b.textContent.trim().indexOf('Done') > -1;
+                        });
+          if (!doneBtn) return;
+
+          /* Snapshot displayed data from the confirmed card */
+          var txt = node.textContent || '';
+          var snap = {
+            cname: (function () {
+              var m2 = txt.match(/Assessment Booked!\s*([^\n·]+)/);
+              return m2 ? m2[1].trim() : 'Applicant';
+            })(),
+            carr: (function () {
+              var rows = node.querySelectorAll('div > div');
+              for (var i = 0; i < rows.length; i++) {
+                if (rows[i].textContent.trim() === 'Carrier' && rows[i + 1])
+                  return rows[i + 1].textContent.trim();
+              }
+              return 'Carrier';
+            })()
+          };
+
+          /* Remove the HTML onclick attribute so _p8run() does NOT fire.
+             Setting .onclick=null only clears the JS property — the HTML
+             attribute onclick="_p8run(...)" fires independently. */
+          doneBtn.removeAttribute('onclick');
+          doneBtn.onclick = null;
+          doneBtn.addEventListener('click', function () {
+            /* Close the booking wizard */
+            var ov = document.getElementById('p13-schednew-ov');
+            if (ov) ov.remove();
+            /* Run HAL agents */
+            _p28RunHALModal({
+              title:    'HAL Orchestration Engine',
+              subtitle: 'illumifin HAL · Assessment Booking Workflow · Auto-Triggered',
+              badge1:   snap.cname,
+              badge2:   snap.carr,
+              agents: [
+                {
+                  id:     'AGT-AS-001',
+                  name:   'SMS Scheduling Agent',
+                  icon:   'fa-comment-sms',
+                  color:  '#059669',
+                  task:   'Self-scheduling SMS sent to ' + snap.cname,
+                  detail: 'Twilio SMS dispatched · scheduling link valid 48 hours · read-receipt tracking enabled · reminder at T-24h'
+                },
+                {
+                  id:     'AGT-AS-002',
+                  name:   'RN Auto-Assignment Agent',
+                  icon:   'fa-user-nurse',
+                  color:  '#7c3aed',
+                  task:   'RN auto-assignment in progress (AI-matched)',
+                  detail: 'WealthAI scoring: specialty fit 94% · caseload 82% · proximity 91% · top match: Sarah Johnson, RN · portal + email notification sent'
+                },
+                {
+                  id:     'AGT-AS-003',
+                  name:   'Clinical Intake Agent',
+                  icon:   'fa-file-medical',
+                  color:  '#0891b2',
+                  task:   'Clinical intake form dispatched to Auto-assign (AI-matched) RN',
+                  detail: 'Intake form pre-populated from policy data · ADL fields auto-filled · MMSE baseline pre-loaded · dispatched to RN secure portal'
+                },
+                {
+                  id:     'AGT-NC-004',
+                  name:   'Carrier Notify Agent',
+                  icon:   'fa-building-columns',
+                  color:  '#dc2626',
+                  task:   snap.carr + ' pre-notification sent',
+                  detail: 'Assessment scheduling notice transmitted to ' + snap.carr + ' carrier portal · EDI 834 acknowledgment queued · regulatory log updated'
+                }
+              ]
+            });
+          });
+
+          _observer.disconnect();
+        });
+      });
+    });
+
+    _observer.observe(document.body, { childList: true, subtree: true });
+    /* Auto-disconnect after 60s to avoid memory leak */
+    setTimeout(function () { _observer.disconnect(); }, 60000);
+  };
+
+  /* ── 2. ltcAssessAction Done → HAL modal (Assessment Scheduled — picture 4) ──
+     Agents match the 6 items shown in the "Assessment Scheduled" step:
+       • SMS scheduling link sent to claimant
+       • Auto-assign (AI-matched) calendar invite dispatched
+       • Provider notified via secure portal
+       • EVV tracking activated for [date]
+       • Clinical questionnaire (AI pre-populated) sent to RN
+       • Carrier (carrier) notified of assessment scheduling
+  ─────────────────────────────────────────────────────────────────────────── */
+  var _p28origAssessAction = window.ltcAssessAction;
+  window.ltcAssessAction = function (name, claimDataObj) {
+    /* Call original wizard */
+    if (typeof _p28origAssessAction === 'function') _p28origAssessAction(name, claimDataObj);
+
+    var _obs2 = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          var isComplete = node.querySelector && (
+            node.querySelector('[style*="Assessment Scheduled"]') ||
+            (node.textContent && node.textContent.indexOf('Assessment Scheduled') > -1)
+          );
+          if (!isComplete) return;
+
+          var doneBtn = node.querySelector('button[style*="width:100%"]') ||
+                        Array.from(node.querySelectorAll('button')).find(function (b) {
+                          return b.textContent.trim().indexOf('Done') > -1;
+                        });
+          if (!doneBtn) return;
+
+          /* Extract displayed values */
+          var txt = node.textContent || '';
+          var cname2  = name || 'Claimant';
+          var carrier2 = (claimDataObj && claimDataObj.carrier) || 'carrier';
+          var provider2= (claimDataObj && claimDataObj.provider) || 'provider';
+          /* Try to pull date from displayed subtitle */
+          var dateMatch = txt.match(/·\s*(Jul|Aug|Sep|Oct|Nov|Dec|Jan|Feb|Mar|Apr|May|Jun)\s+\d{1,2},?\s*\d{4}/);
+          var adate2  = dateMatch ? dateMatch[0].replace('·','').trim() : 'scheduled date';
+
+          /* Same fix: remove HTML onclick attr before adding our listener */
+          doneBtn.removeAttribute('onclick');
+          doneBtn.onclick = null;
+          doneBtn.addEventListener('click', function () {
+            var ov = document.getElementById('p13-assess-ov');
+            if (ov) ov.remove();
+            _p28RunHALModal({
+              title:    'HAL Orchestration Engine',
+              subtitle: 'illumifin HAL · Assessment Confirmation Workflow · Auto-Triggered',
+              badge1:   cname2,
+              badge2:   adate2,
+              agents: [
+                {
+                  id:     'AGT-AS-001',
+                  name:   'SMS Scheduling Agent',
+                  icon:   'fa-comment-sms',
+                  color:  '#059669',
+                  task:   'SMS scheduling link sent to claimant (' + cname2 + ')',
+                  detail: 'Twilio SMS dispatched to claimant mobile · assessment date/time/RN info included · confirmation code: SMS-' + Math.floor(Math.random()*90000+10000)
+                },
+                {
+                  id:     'AGT-AS-002',
+                  name:   'RN Auto-Assignment Agent',
+                  icon:   'fa-calendar-check',
+                  color:  '#7c3aed',
+                  task:   'Auto-assign (AI-matched) calendar invite dispatched',
+                  detail: 'iCal invite sent to RN + facility coordinator · 30-min documentation buffer added · calendar sync confirmed'
+                },
+                {
+                  id:     'AGT-AS-004',
+                  name:   'Provider Portal Agent',
+                  icon:   'fa-hospital',
+                  color:  '#0891b2',
+                  task:   'Provider notified via secure portal',
+                  detail: 'Secure message sent to ' + provider2 + ' provider portal · assessment details + RN contact attached · read-receipt requested'
+                },
+                {
+                  id:     'AGT-AS-005',
+                  name:   'EVV Activation Agent',
+                  icon:   'fa-map-location-dot',
+                  color:  '#d97706',
+                  task:   'EVV tracking activated for ' + adate2,
+                  detail: 'CellTrak EVV session pre-configured · GPS boundary set for provider address · check-in/check-out alerts enabled · compliance log ready'
+                },
+                {
+                  id:     'AGT-AS-003',
+                  name:   'Clinical Intake Agent',
+                  icon:   'fa-file-medical',
+                  color:  '#dc2626',
+                  task:   'Clinical questionnaire (AI pre-populated) sent to RN',
+                  detail: 'MMSE + ADL questionnaire pre-filled from existing policy data · dispatched to RN secure portal · auto-save enabled during assessment'
+                },
+                {
+                  id:     'AGT-NC-004',
+                  name:   'Carrier Notify Agent',
+                  icon:   'fa-building-columns',
+                  color:  '#6366f1',
+                  task:   'Carrier (' + carrier2 + ') notified of assessment scheduling',
+                  detail: 'Assessment scheduling notice sent to ' + carrier2 + ' · statutory notification requirement met · carrier portal updated · confirmation ref: ASN-' + Math.floor(Math.random()*90000+10000)
+                }
+              ]
+            });
+          });
+
+          _obs2.disconnect();
+        });
+      });
+    });
+
+    _obs2.observe(document.body, { childList: true, subtree: true });
+    setTimeout(function () { _obs2.disconnect(); }, 60000);
+  };
+
+  /* ── 3. Add new Assessment Scheduling agents to _ltcAgentCatalog ─────────
+     AGT-AS-001 SMS Scheduling Agent
+     AGT-AS-002 RN Auto-Assignment Agent
+     AGT-AS-003 Clinical Intake Agent
+     AGT-AS-004 Provider Portal Agent
+     AGT-AS-005 EVV Activation Agent
+  ─────────────────────────────────────────────────────────────────────────── */
+  var _p28newAgents = [
+    {
+      id:'AGT-AS-001', group:'Assessment Scheduling', groupColor:'#7c3aed', groupIcon:'fa-calendar-check',
+      name:'SMS Scheduling Agent',
+      desc:'Dispatches self-scheduling SMS to claimants and applicants via Twilio at the moment an assessment is booked. Includes date, time, RN name, and a confirmation link. Sends automated reminders at T-24h and T-2h.',
+      model:'Twilio SMS + Scheduling API', triggers:['Schedule Assessment (Eligibility & Assessment)', 'Assessment Booked (Done)'], status:'Active',
+      avgTime:'< 15 sec', successRate:'99.8%', runsToday:18,
+      steps:['Pull claimant/applicant mobile number from policy record','Compose SMS with assessment date, time, RN, and confirmation link','Transmit via Twilio HIPAA-compliant SMS gateway','Schedule reminder at T-24h and T-2h before assessment','Log delivery receipt and link-click status to claim record'],
+      lastRun:'Jul 11 10:31am', tags:['SMS','Twilio','Scheduling','Claimant']
+    },
+    {
+      id:'AGT-AS-002', group:'Assessment Scheduling', groupColor:'#7c3aed', groupIcon:'fa-calendar-check',
+      name:'RN Auto-Assignment Agent',
+      desc:'AI-matches the optimal RN from the available roster using WealthAI scoring across specialty fit, geographic proximity, current caseload, carrier protocol compliance, and language requirements.',
+      model:'WealthAI Matching Engine + Calendar API', triggers:['Schedule Assessment (Eligibility & Assessment)', 'Assessment Booked (Done)'], status:'Active',
+      avgTime:'< 30 sec', successRate:'99.4%', runsToday:18,
+      steps:['Query available RN roster with real-time caseload data','Score each RN: specialty(40%) + proximity(30%) + caseload(20%) + language(10%)','Auto-assign top-scored RN · dispatch calendar invite (iCal)','Send assignment notification to RN via secure portal + email','Log assignment + 30-min documentation buffer to scheduling system'],
+      lastRun:'Jul 11 10:31am', tags:['RN','AI-Match','WealthAI','Calendar']
+    },
+    {
+      id:'AGT-AS-003', group:'Assessment Scheduling', groupColor:'#7c3aed', groupIcon:'fa-calendar-check',
+      name:'Clinical Intake Agent',
+      desc:'Pre-populates and dispatches the clinical intake questionnaire to the assigned RN. Pulls ADL scores, MMSE baseline, care type, and provider details from existing policy data. Supports MMSE, EMST, and functional ADL tools.',
+      model:'Clinical NLP + Policy Data Extractor', triggers:['Assessment Booked (Done)', 'Assessment Confirmed (Done)'], status:'Active',
+      avgTime:'< 45 sec', successRate:'98.7%', runsToday:18,
+      steps:['Extract ADL score, MMSE, care type, provider from policy record','Pre-fill clinical questionnaire fields (MMSE/EMST/ADL)','Attach LTC Underwriting Guidelines (16th Ed.) reference','Dispatch to RN secure portal with auto-save enabled during assessment','Archive completed questionnaire to claim record on submission'],
+      lastRun:'Jul 11 10:31am', tags:['Clinical','MMSE','NLP','RN']
+    },
+    {
+      id:'AGT-AS-004', group:'Assessment Scheduling', groupColor:'#7c3aed', groupIcon:'fa-calendar-check',
+      name:'Provider Portal Agent',
+      desc:'Sends assessment scheduling notification to the care provider via secure portal messaging. Includes RN contact details, expected assessment date/time, and HIPAA consent requirements.',
+      model:'Secure Messaging API + Provider Network', triggers:['Assessment Confirmed (Done)'], status:'Active',
+      avgTime:'< 20 sec', successRate:'99.1%', runsToday:11,
+      steps:['Identify provider from claim record (facility / home health agency)','Compose secure portal message with assessment details + RN contact','Transmit via HIPAA-compliant provider portal (CareExchange)','Request read-receipt and provider acknowledgment','Log notification to claim record; escalate if unacknowledged within 4h'],
+      lastRun:'Jul 11 10:31am', tags:['Provider','Portal','Secure Messaging','HIPAA']
+    },
+    {
+      id:'AGT-AS-005', group:'Assessment Scheduling', groupColor:'#7c3aed', groupIcon:'fa-calendar-check',
+      name:'EVV Activation Agent',
+      desc:'Pre-configures CellTrak EVV tracking for the scheduled assessment. Sets GPS geo-fence around the provider address, enables check-in/check-out alerts, and prepares the compliance audit log.',
+      model:'CellTrak EVV API + GPS Geofencing', triggers:['Assessment Confirmed (Done)'], status:'Active',
+      avgTime:'< 25 sec', successRate:'99.6%', runsToday:11,
+      steps:['Pull provider address from claim record (SNF / home address)','Create CellTrak EVV session for assessment date and time','Configure GPS geo-fence (50m radius around provider address)','Enable check-in/check-out SMS alerts for RN and supervisor','Initialize compliance audit log; link to claim record for state reporting'],
+      lastRun:'Jul 11 10:31am', tags:['EVV','CellTrak','GPS','Compliance']
+    }
+  ];
+
+  /* Inject into existing catalog (safe — appends, never mutates existing entries) */
+  if (typeof window._ltcAgentCatalogPush === 'function') {
+    _p28newAgents.forEach(function (a) { window._ltcAgentCatalogPush(a); });
+  } else {
+    /* Direct catalog patch — find the array via a scan of navigateTo scope */
+    /* The catalog lives inside the Phase 4 IIFE, not on window.
+       Export a push helper at page load time from Phase 4's scope is impossible here.
+       Instead we patch initLtcAiAgentsPage to prepend our agents. */
+    var _p28origAiPage = window.initLtcAiAgentsPage;
+    window.initLtcAiAgentsPage = function () {
+      /* Inject agents into catalog array via a global we set now */
+      if (!window.__p28AgentsInjected) {
+        window.__p28AgentsInjected = true;
+        /* _ltcAgentCatalog is closure-private, but initLtcAiAgentsPage reads it.
+           We wrap the function: before calling original, temporarily override
+           the groups it builds by monkey-patching the catalog reference. */
+      }
+      if (typeof _p28origAiPage === 'function') _p28origAiPage();
+
+      /* After the page renders, inject our extra agent cards */
+      setTimeout(function () {
+        var tpl = document.getElementById('tpl-ltc-ai-agents');
+        if (!tpl) return;
+
+        /* Check if already injected */
+        if (tpl.querySelector('.p28-extra-agents')) return;
+
+        /* Find the last agent group section and append after it */
+        var groups = tpl.querySelectorAll('.ltc-agent-group, [id^="ltc-agent-group"]');
+        var lastGroup = groups[groups.length - 1] || tpl.lastElementChild;
+
+        /* Build a new group card */
+        var groupDiv = document.createElement('div');
+        groupDiv.className = 'p28-extra-agents';
+        groupDiv.style.cssText = 'margin-top:20px;';
+
+        var groupHtml = ''
+          + '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;'
+          + 'background:linear-gradient(135deg,#f5f3ff,#ede9fe);'
+          + 'border-radius:12px 12px 0 0;border:1px solid #ddd6fe;">'
+          + '<i class="fas fa-calendar-check" style="color:#7c3aed;font-size:16px;"></i>'
+          + '<div style="font-size:14px;font-weight:800;color:#4c1d95;">Assessment Scheduling</div>'
+          + '<span style="background:#7c3aed;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto;">5 agents</span>'
+          + '</div>';
+
+        _p28newAgents.forEach(function (a) {
+          groupHtml += ''
+            + '<div style="border:1px solid #e5e7eb;border-top:none;padding:14px 16px;background:#fff;'
+            + 'display:flex;align-items:flex-start;gap:12px;">'
+            + '<div style="width:40px;height:40px;border-radius:10px;background:#7c3aed22;'
+            + 'display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            + '<i class="fas ' + (a.id==='AGT-AS-001'?'fa-comment-sms':a.id==='AGT-AS-002'?'fa-user-nurse':a.id==='AGT-AS-003'?'fa-file-medical':a.id==='AGT-AS-004'?'fa-hospital':'fa-map-location-dot') + '" style="color:#7c3aed;font-size:16px;"></i></div>'
+            + '<div style="flex:1;">'
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+            + '<span style="font-size:10px;font-weight:800;color:#7c3aed;">' + a.id + '</span>'
+            + '<span style="font-size:13px;font-weight:700;color:#111827;">' + a.name + '</span>'
+            + '<span style="background:#f0fdf4;color:#059669;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid #bbf7d0;margin-left:auto;">Active</span>'
+            + '</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.5;margin-bottom:6px;">' + a.desc + '</div>'
+            + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
+            + a.tags.map(function(t){ return '<span style="background:#f3f4f6;color:#6b7280;font-size:10px;padding:2px 7px;border-radius:10px;">' + t + '</span>'; }).join('')
+            + '</div>'
+            + '<div style="font-size:10px;color:#9ca3af;margin-top:5px;">'
+            + '<i class="fas fa-clock" style="margin-right:4px;"></i>' + a.avgTime
+            + ' &nbsp;·&nbsp; <i class="fas fa-check-circle" style="margin-right:4px;color:#059669;"></i>' + a.successRate + ' success'
+            + ' &nbsp;·&nbsp; <strong>' + a.runsToday + '</strong> runs today'
+            + '</div></div></div>';
+        });
+
+        groupDiv.innerHTML = groupHtml;
+
+        var page = tpl.querySelector('.ltc-eligibility-page, [style*="padding:24px"]') || tpl;
+        page.appendChild(groupDiv);
+
+        /* Update the total agent count badge in the header */
+        var countBadge = tpl.querySelector('[style*="font-size:28px"]');
+        if (countBadge) {
+          var cur = parseInt(countBadge.textContent) || 0;
+          if (cur < 17) countBadge.textContent = cur + _p28newAgents.length;
+        }
+      }, 300);
+    };
+  }
+
+  /* Also update the nav badge from "12" to "17" */
+  setTimeout(function () {
+    var aiNav = document.querySelector('.ltc-ai-agents-nav .nav-badge');
+    if (aiNav) aiNav.textContent = '17';
+  }, 800);
+
+  console.log('[P28] Eligibility: LINK band suppressed · ltcScheduleNew Done → HAL modal · ltcAssessAction Done → HAL modal · 5 new AGT-AS agents registered');
+})();
+
